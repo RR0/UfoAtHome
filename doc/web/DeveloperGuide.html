@@ -1,0 +1,77 @@
+<h1>Developer's guide</h1>
+<table border="0" align="center" cellpadding="5" cellspacing="0">
+  <tr>
+    <td valign="top"><ul>
+        <li> <strong><a href="#Introduction">Introduction</a></strong>
+            <ul>
+              <li><a href="#Objectif">Purpose</a></li>
+              <li> <a href="#Perimetre">Scope</a></li>
+              <li><a href="#DefinitionsAcronymsAndAbbreviations">Definitions, acronyms and
+abbreviations</a></li>
+              <li><a href="#References">References</a></li>
+              <li><a href="#VueDEnsemble">Overview</a></li>
+            </ul>
+        </li>
+        <li><strong><a href="#Definitions">Client modules</a></strong>
+          <ul>
+              <li><a href="#Platform">Platform constraints</a></li>
+              <li><a href="#Projet">Visual testimonial applet</a></li>
+          </ul>
+        </li>
+        <li><a href="#CodingConventions"><strong>Coding conventions</strong></a></li>
+    </ul>
+    </td>
+  </tr>
+</table>
+<h2><a name="Introduction"></a>Introduction</h2>
+<h3><a name="Objectif"></a>Purpose</h3>
+<p>This document aims to help the developer to implement, make evolve and/or
+modify the UFO@home system.</p>
+<h3><a name="Scope"></a>Scope</h3>
+<p>This document target software developers,
+  engineers and designers working on the technical aspects on a UFO@home system.
+It affects the overall development of the UFO@home systeme.</p>
+<h3><a name="DefinitionsAcronymsAndAbbreviations"></a>Definitions, acronyms and
+abbreviations</h3>
+<ul>
+  <li>AWT &#8212; Abstract Windowing Toolkit. A Java API to build GUI that can
+    run on Java applets on the Web or on a J2ME CDC.</li>
+  <li>CDC &#8212; Connected Device Configuration. A J2ME configuration that supports
+    AWT.</li>
+  <li>GUI &#8212; Graphical User Interface.</li>
+  <li>J2ME &#8212; Java 2 Micro Edition. A Java platform specification for embedded
+    or mobiles devices.</li>
+  <li>HTML &#8212; HyperText Markup Language.</li>
+  <li>HTTP &#8212; HyperText Transfer Protocol.</li>
+  <li>RR0 IM &#8212; UFO@home Information Model</li>
+</ul>
+<p>See also the project's <a href="https://sourceforge.net/docman/display_doc.php?docid=17415&group_id=70060">Glossary</a>.</p>
+<h3><a name="References"></a>References</h3>
+<ol><li><a href="http://javarome.net">Javarome.net</a> (french, translatable) &#8212; An
+    amateur website that contains various definitions and documentation about
+    Java software development.</li>
+</ol>
+<h3><a name="VueDEnsemble"></a>Overview </h3>
+<p>This document describes the various extensions points in a UFO@home, and the
+  way to exploit them. It follows the system organisation by modules.</p>
+<h2><a name="Definitions"></a>Client modules</h2>
+<h3><a name="Platform"></a>Platform constraints</h3>
+<p>Client modules are restricted on the following  platforms :</p>
+<ul>
+  <li>HTML 4.01</li>
+  <li>Java 1.1.8 applets (i.e., not above), to ensure compatibility with Microsoft
+    Internet Explorer (i.e. without requiring additional components to download)
+    and the Personal Profile (PP, formerly known as PersonalJava) of the J2ME
+    CDC configuration (which
+    allows to run on sophisticated handeld devices and PDAs such as Palm/PalmPilots,
+  PocketPCs, etc.).</li>
+</ul>
+<h3><a name="Projet"></a>Visual testimonial applet</h3>
+<h4>UFO Shapes</h4>
+<p>Each UFO shape is a JavaBean. It has customizable properties, and complies
+  with a specific interface.</p>
+<p>To create a new UFO Shape, just define a new class that implement the UFOShape
+  interface.</p>
+<h2><a name="CodingConventions"></a>Coding conventions</h2>
+<p>..</p>
+<h4>&nbsp;</h4>

@@ -1,0 +1,249 @@
+<html>
+
+<head>
+<title>Ufomatics</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link href="rr0.css" rel="stylesheet" type="text/css">
+<script language="JavaScript">
+<!--
+function sendMail() {
+address = "rr0";
+domain = "rr0.org";
+window.location="mailto:" + address + "@" + domain;
+return true;
+}
+-->
+</script>
+</head>
+<body>
+<table border="0" cellspacing="0" cellpadding="0" class="noborder">
+  <tr>
+    <td class="noborder"><center>
+<img src="images/ufomatics.png" width="468" height="82"><br>
+<em>Java <a href="http://www.opensource.org">open source software</a> tools for ufology</em>
+</center></td>
+    <td class="noborder"><ul>
+      <li><a href="#" onClick="sendMail();">Contact</a></li>
+      <li><a href="index_fr.html">Traduction fran&ccedil;aise</a></li>
+      <li><a href="http://translate.google.com/translate?u=http://rr0.sourceforge.net&langpair=en|de&hl=en&ie=UTF8&oe=UTF8">Deutsche &Uuml;bersetzung<br>
+</a><a href="http://sourceforge.net/projects/rr0" target="_top"><img src="http://sourceforge.net/sflogo.php?group_id=70060&type=1" alt="SourceForge.net Logo" width="88" height="31" hspace="20" vspace="20" border="0" align="right"></a></li>
+    </ul>
+    </td>
+  </tr>
+</table>
+<h2>Ufomatics projects</h2>
+<ul>
+<li><strong><a href="#Meta">Achipelago</a> </strong>- A meta-framework to aggregate existing ufological databases </li>
+<li><strong><a href="#ufoathome">UFO@home</a> </strong>- A tool for reporting UFO sightings visually</li>
+<li><strong><a href="http://rr0.org/StatistiquesApplet.html">Statistics applet</a></strong> - A small program that computes and display statistics </li>
+</ul>
+<h2>Other ufology-related software</h2>
+<p>Thoses projets aim to build <a href="http://www.opensource.org">Open Source Software</a> tools for ufology.</p>
+<h2><a name="Meta"></a>Archipelago<em> </em></h2>
+<table border="0" align="left" cellpadding="0" cellspacing="0" class="leftImage">
+<tr>
+<td><span class="noborder"><img src="archipelago/images/Archipelago.png" alt="UFO@home" width="380" height="374" align="left"></span></td>
+</tr>
+</table>
+<p><em>For many years, a lot of ufological databases ufologiques has been developed. As their mutual incompatibilities prevented any data exchange, their proliferation has constituted an archipelago where the lack of naviguable paths prevent every communication required for the research and knowledge access in </em> general<em>. The replacement of such data islands by larger islands, from unifications, concurs only to increase the problem, without stopping proliferation. But here is the question: should it be stopped or leveraged? </em></p>
+<p> In ufology as in any other domain, the goal of a database is to structure information to apply automated processes on it. Find a case in a wink, a sighting place for a given date, sort out the trends on a given time range, are only a few examples of a multitude of operations that are offered by ufological databases today. </p>
+<p> However they are all affected by the same paradox: while each of them aims to study the same phenomenon, none work on the same data. As a result, each of those data islands is a world as itself, in autarky, with its own consistency auto-developed: its own data selection, its own processes, and its own results, that always don&rsquo;t fit those of its neighbors. You don&rsquo;t need more to crystallize ufology as many doctrines. </p>
+<p> However the problem is less about working on your data than not having access to other&rsquo;s. Just like if you had specific glasses for each book you may want to read. Databases are our glasses, but are quite useless if they allow us to read a single book. Even if data from databases are talking about the same thing, they don&rsquo;t tell the same story. Their cases, more or less numerous, their details, their sources, even their subjective evaluations are as much features that add a new perspective to the topic we study. We have to read all those books, the existing ones as much as the ones to come, to complete, compare, and enrich our viewpoints.</p>
+<table border="0" align="right" cellpadding="0" cellspacing="0" class="rightImage">
+<caption>
+Ufology information today
+</caption>
+<tr>
+<td><img src="archipelago/images/UFOAtHome.png" width="613" height="292"></td>
+</tr>
+</table>
+<p>One idea to solve this problem has been to unify existing databases. To build a big book that would gather data from the smaller ones. However it seems that it is a cure worst than the problem. Not only this big book remains a book, one more book, with the same autarkical and full-with-inertia vision of the topic, but it adds new weaknesses: an implementation with exponential difficulty &ndash; to build the sum of books, then the sum of the sums, etc. while new databases are appearing &ndash; but also a compromise about data dilution: at one location where only one unified data can be put only, you can&rsquo;t leverage the differences which constitute, as themselves, valuable information. Even if you consider that such a database ought to store a single (ideally objective, without any error) truth only, you&rsquo;ll have to pray for the good data to be selected. Indeed, unifying is selecting. As itself, it can only disagree with a part of the users. Because it will only contain data it give some credit, because it will not fit the structure they expect, because the processes they expect will miss, because, even if it would not be illusory, it would be at best the host for a unique thought, and the barrier to any innovation. </p>
+<p> If we can&rsquo;t go against the very archipelago nature of the knowledge base, we have to leverage it. Instead of building a big unified book, let&rsquo;s the keep the data where they lie, using the structure they require, and let&rsquo;s look at them using big, big meta-glasses. </p>
+<p> A meta-base doesn&rsquo;t contain data. More accurately, it contains very special data, data that describe data: Where are the databases that contain data about a given case? What type of data this database stores? What is the meaning of the X&nbsp;field? Has it the same meaning of the Y field from such another database? This is the type of information that is stored in a meta-base. Each time a new database appears, its description is recorded into.</p>
+<table border="0" align="left" cellpadding="0" cellspacing="0" class="leftImage">
+<caption>
+The Archipelago vision
+</caption>
+<tr>
+<td><img src="archipelago/images/UFOAtHome_2.png" width="709" height="369"></td>
+</tr>
+</table>
+<p>Thanks to such information, a meta-base, even if it does not contain the actual data, becomes able to retrieve them: to connect through the Internet to a first online database, invoke the search form a second one, aspire the pages of the third one. Indeed, data are not limited to databases in the strict sense: they are any accessible information, whose structure can be described. </p>
+<p> But, by the way, what could be the benefit for such a data source to be linked to a meta-base? Before talking about benefit, this is a matter of conviction&nbsp;first: data must be shared par everyone, for the sake of efficient research. Furthermore, linking your database to a meta-base is plugging into a network where information flows, and so where you can provide as much as you can receive. Information is virtually no longer here or anywhere else, likely to be lost, but now able to migrate, toward fellows, towards other backup places, or toward other technical structures that constitute the next generation of your own database. How much data are today stuck into an existing database, likely to disappear along with a software that would be to costly and complicated to make evolve? </p>
+<p> But a meta-base would remain quite limited if it wouldn&rsquo;t be more than a database index or network. What about seeing all databases at the same time? This seems impossible, or at least not very practicable. How could a user benefit from all these different data and structure at the same time? </p>
+<p> Indeed, such a &laquo;&nbsp;global&nbsp;&raquo; vision, even if becoming possible, is not practicable as is. Applying processes imply a common data model which, we know, doesn&rsquo;t exist: it is specific to the databases that store data, and we known that we cannot enforce an universal model, as everyone can have its own view. </p>
+<p> But isn&rsquo;t a view what we are willing to provide? Just like a pattern applied on the global data, on which would be drawn links between common concepts? Such a virtual data model is conceivable. Being potentially different for each of us, existing at the metal level only, it is a <a href="http://rr0.sourceforge.net/JavaDoc/org/rr0/im/business/doc-files/index.html">meta-model</a>. </p>
+<p> Such a <a href="http://rr0.sourceforge.net/JavaDoc/org/rr0/im/business/doc-files/index.html">meta-model</a> is independent from the databases. As a result, each of the processes applying to it, while leveraging heterogeneous data through the meta-model, are also kept independent from them. Here is a fundamental separation: the working model and its associated processes are no longer condemned to die with the database they applied onto. We then can start capitalizing on them. </p>
+<p> As one have understood, introducing of a meta level above databases is not unification. Actually, this is indeed the very philosophy of the idea: to allow a shared leveraging of data, without erasing differences. There is no doubt that a number of different meta-models will coexist, and be incompatibles one with another (but nothing would prevent them to be accessible again at an even upper metal level, according to the same principle). There is no doubt also that a number of databases will choose to stay away from meta-bases. But, more important that effectively gathering all existing and future databases, the crucial point is to make it <em>possible</em>. Tomorrow, the technical excuse for not sharing data and information compartimentization will no longer be valid, and one will have to assume such a choice. </p>
+<p><strong>R&eacute;f&eacute;rence</strong> : </p>
+<h2><a name="ufoathome"></a>UFO@home</h2>
+<p><span class="noborder"><img src="ufoathome/UFOAtHome.png" alt="UFO@home" width="441" height="96" hspace="20" vspace="20" align="left"></span>For many years sightings have been filled as textual accounts or/and report forms. </p>
+<p>UFO@home aims to provide a standardized and efficient way to <strong>report</strong> and <strong>replay</strong> UFO sightings.</p>
+<ul><li><strong>Process</strong> : provide a way to apply processing (statistics, checking) on data manageable by UFO@home servers</li>
+  <li><strong>Investigation</strong> : provide tools for organization and real-time follow-up of UFO investigations all over the world.</li>
+</ul>
+<table border="1" align="center" cellpadding="7" cellspacing="0">
+  <tr>
+    <th rowspan="11">Project</th>
+    <th>Disciplines</th>
+    <th>Project artifacts</th>
+    <th>Resources</th>
+  </tr>
+  <tr>
+    <td><strong>Business modeling</strong> &#8212; The modeling of concepts
+      of the ufology domain.</td>
+    <td><ul>
+      <li><a href="http://rr0.sourceforge.net/JavaDoc/org/rr0/im/business/doc-files/index.html">Business
+          objects model</a></li>
+    </ul>
+    </td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td><strong>Requirements </strong>&#8212; What is expected from the 
+      product, with which constraints.</td>
+    <td><ul>
+        <li><a href="https://sourceforge.net/docman/display_doc.php?docid=17408&group_id=70060">Vision</a></li>
+        <li><a href="https://sourceforge.net/docman/display_doc.php?docid=17415&group_id=70060">Glossary</a></li>
+        <li><a href="UseCases.html">Use cases</a></li>
+        <li><a href="Mockup/index.html">User interface prototype</a></li>
+        <li><a href="https://sourceforge.net/docman/display_doc.php?docid=17413&group_id=70060">Supplementary specifications</a></li>
+    </ul>
+    </td>
+    <td><ul>
+      <li><a href="http://lists.sourceforge.net/lists/listinfo/rr0-domain">Business
+          domain mailing list</a>
+        <ul>
+          <li><a href="http://sourceforge.net/mailarchive/forum.php?forum=rr0-domain">Archives</a></li>
+        </ul>
+      </li>
+      <li><a href="http://articles.liste-aleph.org/art/jbeau_is.php">Aleph interview</a> (french)</li>
+      <li><a href="http://ovniland.com/article.php3?id_article=3">The UFO@Home project</a> (Ovniland, french)</li>
+<li>UFO Updates threads (<a href="http://www.virtuallystrange.net/ufo/updates/2003/jun/m16-004.shtml">1</a>, <a href="http://www.virtuallystrange.net/ufo/updates/2003/jul/m04-014.shtml">2</a>, <a href="http://www.virtuallystrange.net/ufo/updates/2003/jul/m07-018.shtml">3</a>, <a href="http://www.virtuallystrange.net/ufo/updates/2003/jul/m06-006.shtml">4</a>, <a href="http://www.virtuallystrange.net/ufo/updates/2003/jul/m07-019.shtml">5</a>, <a href="http://www.virtuallystrange.net/ufo/updates/2005/feb/m09-045.shtml">6</a>, <a href="http://www.virtuallystrange.net/ufo/updates/2005/feb/m09-062.shtml">7</a>, <a href="http://www.virtuallystrange.net/ufo/updates/2005/feb/m13-001.shtml">8</a>)</li>
+<li>Slides (<a href="archipelago/Archipelago.ppt">UFO@home</a>, <a href="ufoathome/Applet.ppt">Visual Reporting Applet</a>) </li>
+</ul>
+    </td>
+  </tr>
+  <tr>
+    <td><strong>Analysis </strong>&#8212; A modeling of the information system
+      which fulfills the requirements.</td>
+    <td><ul>
+      <li><a href="JavaDoc/org/rr0/im/doc-files/index.html">Analysis model</a></li>
+    </ul>
+    </td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td><a href="Design.html"><strong>Design</strong></a> &#8212; How the 
+    information system will be assembled.</td>
+    <td><ul>
+      <li><a href="https://sourceforge.net/docman/display_doc.php?docid=17409&group_id=70060">Software architecture document</a></li>
+      <li>Design model</li>
+    </ul>
+    </td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td><strong>Implementation</strong> &#8212; The source code of the information
+      System.</td>
+    <td><ul>
+        <li>Sources<ul>
+          <li><a href="http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/rr0/">CVS
+              repository</a></li>
+            <li><a href="JavaDoc/index.html">JavaDoc</a></li>
+          </ul>
+        </li>
+        </ul>
+    </td>
+    <td><ul>
+      <li><a href="https://lists.sourceforge.net/lists/listinfo/rr0-developers" target="_top">Developers
+          mailing list</a>
+        <ul>
+          <li><a href="http://sourceforge.net/mailarchive/forum.php?forum=rr0-developers">Archives</a></li>
+        </ul>
+      </li>
+      </ul>
+    </td>
+  </tr>
+  <tr>
+    <td><strong>Test</strong> &#8212; The tests to check the conformity of the
+      system to meet the requirements</td>
+    <td><ul>
+      <li><a href="https://sourceforge.net/docman/display_doc.php?docid=17417&group_id=70060">Test plan</a></li>
+    </ul>
+    </td>
+    <td><ul>
+      <li><a href="http://sourceforge.net/tracker/?atid=527431&group_id=70060&func=browse">Bugs</a></li>
+    </ul>
+    </td>
+  </tr>
+  <tr>
+    <td><strong>Deployment</strong> &#8212; The installation of the software
+      on various platforms and servers.</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td><strong>Configuration and change
+    management</strong> &#8212; Management of workgroup and various versions
+    of the software.</td>
+    <td>&nbsp;</td>
+    <td><ul>
+      <li><a href="http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/rr0">CVS tree</a> </li>
+    </ul>
+    </td>
+  </tr>
+  <tr>
+    <td><strong>Project management</strong> &#8212; How the project is managed
+    and organized.</td>
+    <td><ul>
+<li><a href="https://sourceforge.net/docman/display_doc.php?docid=23713&group_id=70060">Software Development Plan </a></li>
+</ul></td>
+    <td><ul>
+      <li><a href="http://sourceforge.net/projects/rr0">SourceForge project page</a>        
+        <ul>
+          <li><a href="http://sourceforge.net/news/?group_id=70060">News</a></li>
+          <li><a href="http://sourceforge.net/pm/?group_id=70060" target="_top">To
+              do</a></li>
+        </ul>
+      </li>
+      <li><a href="FAQ.html">FAQ</a>
+          <ul>
+            <li><a href="FAQ.html#CommentParticiper">How to contribute&nbsp;?</a></li>
+          </ul>
+      </li>
+    </ul></td>
+  </tr>
+  <tr>
+    <td><strong>Environment</strong> &#8212; Which processes and tooling for
+      the project.</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <th>Product</th>
+    <td>&nbsp;</td>
+    <td><ul>
+      <li>User's manual</li>
+      <li><a href="DeveloperGuide.html">Developer's manual</a></li>
+      <li>Administrator's manual</li>
+    </ul>
+    </td>
+    <td><ul>
+      <li><a href="http://sourceforge.net/project/showfiles.php?group_id=70060" target="_top">Download</a></li>
+      <li><a href="https://lists.sourceforge.net/lists/listinfo/rr0-announce" target="_top">Announcements
+          mailing list</a>
+        <ul>
+          <li><a href="http://sourceforge.net/mailarchive/forum.php?forum=rr0-announce">Archives</a></li>
+        </ul>
+      </li>
+      <li><a href="https://lists.sourceforge.net/lists/listinfo/rr0-users">End
+        users mailing list</a></li>
+    </ul>
+    </td>
+  </tr>
+</table>
+</body>
+
+</html>
+

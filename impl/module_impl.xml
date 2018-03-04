@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project name="module_impl" default="compile.module.impl">
+  <dirname property="module.impl.basedir" file="${ant.file.module_impl}"/>
+  
+  <property name="module.jdk.home.impl" value="${project.jdk.home}"/>
+  <property name="module.jdk.classpath.impl" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.impl" value="${compiler.args}"/>
+  
+  <property name="impl.output.dir" value="${module.impl.basedir}/classes"/>
+  <property name="impl.testoutput.dir" value="${module.impl.basedir}/tests_classes"/>
+  
+  <path id="impl.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="impl.module.classpath">
+    <path refid="${module.jdk.classpath.impl}"/>
+    <pathelement location="${api.output.dir}"/>
+    <pathelement location="${module.impl.basedir}/lib/jdo.jar"/>
+    <pathelement location="${module.impl.basedir}/lib/j2ee_connector-1_5-pfd2-classes.zip"/>
+    <pathelement location="${module.impl.basedir}/lib/commons-digester.jar"/>
+    <pathelement location="${module.impl.basedir}/lib/commons-cli-1.0.jar"/>
+    <pathelement location="${module.impl.basedir}/lib/log4j-1.2.8.jar"/>
+    <pathelement location="${module.impl.basedir}/lib/junit.jar"/>
+    <pathelement location="${module.impl.basedir}/../../../Archive/Product/jcckit/JCCKit/jcckit.jar"/>
+    <path refid="library.commons_math_1.0.classpath"/>
+    <path refid="library.ojb.classpath"/>
+    <path refid="library.jdo_1.0.1.classpath"/>
+  </path>
+  
+  
+  
+  <path id="impl.module.sourcepath">
+    <dirset dir="${module.impl.basedir}">
+      <include name="src"/>
+    </dirset>
+  </path>
+  
+  <path id="impl.module.test.sourcepath">
+    <dirset dir="${module.impl.basedir}">
+      <include name="test"/>
+    </dirset>
+  </path>
+  
+  
+  <target name="compile.module.impl" depends="compile.module.impl.production,compile.module.impl.tests" description="compile module(s) impl"/>
+  
+  <target name="compile.module.impl.production" depends="compile.module.api" description="compile module(s) impl production classes">
+    <mkdir dir="${impl.output.dir}"/>
+    <javac destdir="${impl.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memoryMaximumSize="${compiler.max.memory}" fork="true" executable="${module.jdk.home.impl}/bin/javac">
+      <compilerarg line="${compiler.args.impl}"/>
+      <bootclasspath refid="impl.module.bootclasspath"/>
+      <classpath refid="impl.module.classpath"/>
+      <src refid="impl.module.sourcepath"/>
+    </javac>
+    <copy todir="${impl.output.dir}">
+      <fileset dir="${module.impl.basedir}/src">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+    </copy>
+  </target>
+
+  <target name="enhance">
+    <java classname="com.sun.jdori.enhancer.EnhancerMain"/>
+  </target>
+
+    <target name="compile.module.impl.tests" depends="compile.module.impl.production" description="compile module(s) impl test classes" unless="skip.tests">
+    <mkdir dir="${impl.testoutput.dir}"/>
+    <javac destdir="${impl.testoutput.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memoryMaximumSize="${compiler.max.memory}" fork="true" executable="${module.jdk.home.impl}/bin/javac">
+      <compilerarg line="${compiler.args.impl}"/>
+      <classpath refid="impl.module.classpath"/>
+      <classpath location="${impl.output.dir}"/>
+      <src refid="impl.module.test.sourcepath"/>
+    </javac>
+    <copy todir="${impl.testoutput.dir}">
+      <fileset dir="${module.impl.basedir}/test">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="clean.module.impl" description="cleanup module">
+    <delete dir="${impl.output.dir}"/>
+    <delete dir="${impl.testoutput.dir}"/>
+  </target>
+</project>

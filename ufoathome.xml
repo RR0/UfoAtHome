@@ -1,0 +1,446 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project name="ufoathome" default="all">
+  
+  
+  <property file="ufoathome.properties"/>
+  <!-- Uncomment the following property if no tests compilation is needed -->
+  <!-- 
+  <property name="skip.tests" value="true"/>
+   -->
+  
+  <!-- Compiler options -->
+  
+  <property name="compiler.debug" value="on"/>
+  <property name="compiler.generate.no.warnings" value="off"/>
+  <property name="compiler.args" value=""/>
+  <property name="compiler.max.memory" value="128m"/>
+  <patternset id="ignored.files">
+    <exclude name="**/CVS/**"/>
+    <exclude name="**/SCCS/**"/>
+    <exclude name="**/RCS/**"/>
+    <exclude name="**/rcs/**"/>
+    <exclude name="**/.DS_Store/**"/>
+    <exclude name="**/.svn/**"/>
+  </patternset>
+  <patternset id="compiler.excluded">
+    <exclude name="C:/Project/ufoathome/applets/test/org/rr0/is/presentation/view/draw/TestPlotApplet.java"/>
+  </patternset>
+  <patternset id="compiler.resources">
+    <include name="**/?*.properties"/>
+    <include name="**/?*.xml"/>
+    <include name="**/?*.gif"/>
+    <include name="**/?*.png"/>
+    <include name="**/?*.jpeg"/>
+    <include name="**/?*.jpg"/>
+    <include name="**/?*.html"/>
+    <include name="**/?*.dtd"/>
+    <include name="**/?*.tld"/>
+    <include name="**/*.csv"/>
+  </patternset>
+  
+  <!-- JDK definitions -->
+  <path id="jdk.classpath.1.4">
+    <fileset dir="${jdk.home.1.4}">
+      <include name="jre/lib/charsets.jar"/>
+      <include name="jre/lib/jce.jar"/>
+      <include name="jre/lib/jsse.jar"/>
+      <include name="jre/lib/plugin.jar"/>
+      <include name="jre/lib/rt.jar"/>
+      <include name="jre/lib/sunrsasign.jar"/>
+      <include name="jre/lib/ext/dnsns.jar"/>
+      <include name="jre/lib/ext/j3daudio.jar"/>
+      <include name="jre/lib/ext/j3dcore.jar"/>
+      <include name="jre/lib/ext/j3dutils.jar"/>
+      <include name="jre/lib/ext/ldapsec.jar"/>
+      <include name="jre/lib/ext/localedata.jar"/>
+      <include name="jre/lib/ext/sunjce_provider.jar"/>
+      <include name="jre/lib/ext/vecmath.jar"/>
+    </fileset>
+  </path>
+  
+  <property name="project.jdk.home" value="${jdk.home.1.4}"/>
+  <property name="project.jdk.classpath" value="jdk.classpath.1.4"/>
+  
+  
+  <!-- Global Libraries -->
+  
+  <path id="library.html_parser.classpath">
+    <pathelement location="C:/Archive/Product/htmlparser1_5_20050313/htmlparser1_5/lib/checkstyle-all-3.1.jar"/>
+    <pathelement location="C:/Archive/Product/htmlparser1_5_20050313/htmlparser1_5/lib/filterbuilder.jar"/>
+    <pathelement location="C:/Archive/Product/htmlparser1_5_20050313/htmlparser1_5/lib/fit.jar"/>
+    <pathelement location="C:/Archive/Product/htmlparser1_5_20050313/htmlparser1_5/lib/htmllexer.jar"/>
+    <pathelement location="C:/Archive/Product/htmlparser1_5_20050313/htmlparser1_5/lib/htmlparser.jar"/>
+    <pathelement location="C:/Archive/Product/htmlparser1_5_20050313/htmlparser1_5/lib/junit.jar"/>
+    <pathelement location="C:/Archive/Product/htmlparser1_5_20050313/htmlparser1_5/lib/sax2.jar"/>
+    <pathelement location="C:/Archive/Product/htmlparser1_5_20050313/htmlparser1_5/lib/thumbelina.jar"/>
+  </path>
+  
+  <path id="library.struts.classpath">
+    <pathelement location="C:/Archive/Product/Apache/struts-1.2.7/struts-1.2.7/lib/antlr.jar"/>
+    <pathelement location="C:/Archive/Product/Apache/struts-1.2.7/struts-1.2.7/lib/commons-beanutils.jar"/>
+    <pathelement location="C:/Archive/Product/Apache/struts-1.2.7/struts-1.2.7/lib/commons-digester.jar"/>
+    <pathelement location="C:/Archive/Product/Apache/struts-1.2.7/struts-1.2.7/lib/commons-fileupload.jar"/>
+    <pathelement location="C:/Archive/Product/Apache/struts-1.2.7/struts-1.2.7/lib/commons-logging.jar"/>
+    <pathelement location="C:/Archive/Product/Apache/struts-1.2.7/struts-1.2.7/lib/commons-validator.jar"/>
+    <pathelement location="C:/Archive/Product/Apache/struts-1.2.7/struts-1.2.7/lib/jakarta-oro.jar"/>
+    <pathelement location="C:/Archive/Product/Apache/struts-1.2.7/struts-1.2.7/lib/struts.jar"/>
+  </path>
+  
+  <path id="library.commons-validator-1.1.4.classpath">
+    <pathelement location="C:/Archive/Product/Apache/commons-validator-1.1.4/commons-validator-1.1.4/commons-validator-1.1.4.jar"/>
+  </path>
+  
+  <path id="library.commons-beanutils.classpath">
+    <pathelement location="C:/Archive/Product/Apache/commons-beanutils-1.7.0/commons-beanutils-1.7.0/commons-beanutils.jar"/>
+    <pathelement location="C:/Archive/Product/Apache/commons-beanutils-1.7.0/commons-beanutils-1.7.0/commons-beanutils-bean-collections.jar"/>
+    <pathelement location="C:/Archive/Product/Apache/commons-beanutils-1.7.0/commons-beanutils-1.7.0/commons-beanutils-core.jar"/>
+  </path>
+  
+  <path id="library.commons_math_1.0.classpath">
+    <pathelement location="C:/Archive/Product/Apache/commons-math-1.0/commons-math-1.0/commons-math-1.0.jar"/>
+  </path>
+  
+  <path id="library.servlet_2.3.classpath">
+    <pathelement location="C:/Archive/Standard/JavaSoft/J2EE/Servlet/JSP/servlet.jar"/>
+  </path>
+  
+  <path id="library.csv_parser.classpath">
+    <pathelement location="C:/Archive/Product/ostermillerutils_1_04_03_for_java_1_4"/>
+  </path>
+  
+  <!-- Modules -->
+  
+  
+  <!-- Module JCCKit -->
+  
+  <dirname property="module.jcckit.basedir" file="${ant.file}"/>
+  
+  
+  <property name="module.jdk.home.jcckit" value="${project.jdk.home}"/>
+  <property name="module.jdk.classpath.jcckit" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.jcckit" value="${compiler.args}"/>
+  
+  <property name="jcckit.output.dir" value="${module.jcckit.basedir}/JCCKit/classes"/>
+  <property name="jcckit.testoutput.dir" value="${module.jcckit.basedir}/JCCKit/classes"/>
+  
+  <path id="jcckit.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="jcckit.module.classpath">
+    <path refid="${module.jdk.classpath.jcckit}"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.jcckit">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.jcckit">
+    <patternset refid="compiler.excluded"/>
+    <patternset refid="excluded.from.module.jcckit"/>
+  </patternset>
+  
+  <path id="jcckit.module.sourcepath">
+    <dirset dir="${module.jcckit.basedir}/JCCKit">
+      <include name="src"/>
+    </dirset>
+  </path>
+  
+  
+  <target name="compile.module.jcckit" depends="compile.module.jcckit.production,compile.module.jcckit.tests" description="compile module(s) JCCKit"/>
+  
+  <target name="compile.module.jcckit.production" description="compile module(s) JCCKit production classes">
+    <mkdir dir="${jcckit.output.dir}"/>
+    <javac destdir="${jcckit.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memoryMaximumSize="${compiler.max.memory}" fork="true" executable="${module.jdk.home.jcckit}/bin/javac">
+      <compilerarg line="${compiler.args.jcckit}"/>
+      <bootclasspath refid="jcckit.module.bootclasspath"/>
+      <classpath refid="jcckit.module.classpath"/>
+      <src refid="jcckit.module.sourcepath"/>
+      <patternset refid="excluded.from.compilation.jcckit"/>
+    </javac>
+    <copy todir="${jcckit.output.dir}">
+      <fileset dir="${module.jcckit.basedir}/JCCKit/src">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+        <patternset refid="excluded.from.compilation.jcckit"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="compile.module.jcckit.tests" depends="compile.module.jcckit.production" description="compile module(s) JCCKit test classes" unless="skip.tests"/>
+  
+  <target name="clean.module.jcckit" description="cleanup module">
+    <delete dir="${jcckit.output.dir}"/>
+    <delete dir="${jcckit.testoutput.dir}"/>
+  </target>
+  
+  
+  <!-- Module applets -->
+  
+  <dirname property="module.applets.basedir" file="${ant.file}"/>
+  
+  
+  <property name="module.jdk.home.applets" value="${project.jdk.home}"/>
+  <property name="module.jdk.classpath.applets" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.applets" value="${compiler.args}"/>
+  
+  <property name="applets.output.dir" value="${module.applets.basedir}/applets/classes"/>
+  <property name="applets.testoutput.dir" value="${module.applets.basedir}/applets/classes"/>
+  
+  <path id="applets.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="applets.module.classpath">
+    <path refid="${module.jdk.classpath.applets}"/>
+    <pathelement location="${jcckit.output.dir}"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.applets">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.applets">
+    <patternset refid="compiler.excluded"/>
+    <patternset refid="excluded.from.module.applets"/>
+  </patternset>
+  
+  <path id="applets.module.sourcepath">
+    <dirset dir="${module.applets.basedir}/applets">
+      <include name="src"/>
+    </dirset>
+  </path>
+  
+  <path id="applets.module.test.sourcepath">
+    <dirset dir="${module.applets.basedir}/applets">
+      <include name="test"/>
+    </dirset>
+  </path>
+  
+  
+  <target name="compile.module.applets" depends="compile.module.applets.production,compile.module.applets.tests" description="compile module(s) applets"/>
+  
+  <target name="compile.module.applets.production" depends="compile.module.jcckit" description="compile module(s) applets production classes">
+    <mkdir dir="${applets.output.dir}"/>
+    <javac destdir="${applets.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memoryMaximumSize="${compiler.max.memory}" fork="true" executable="${module.jdk.home.applets}/bin/javac">
+      <compilerarg line="${compiler.args.applets}"/>
+      <bootclasspath refid="applets.module.bootclasspath"/>
+      <classpath refid="applets.module.classpath"/>
+      <src refid="applets.module.sourcepath"/>
+      <patternset refid="excluded.from.compilation.applets"/>
+    </javac>
+    <copy todir="${applets.output.dir}">
+      <fileset dir="${module.applets.basedir}/applets/src">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+        <patternset refid="excluded.from.compilation.applets"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="compile.module.applets.tests" depends="compile.module.applets.production" description="compile module(s) applets test classes" unless="skip.tests">
+    <mkdir dir="${applets.testoutput.dir}"/>
+    <javac destdir="${applets.testoutput.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memoryMaximumSize="${compiler.max.memory}" fork="true" executable="${module.jdk.home.applets}/bin/javac">
+      <compilerarg line="${compiler.args.applets}"/>
+      <classpath refid="applets.module.classpath"/>
+      <classpath location="${applets.output.dir}"/>
+      <src refid="applets.module.test.sourcepath"/>
+      <patternset refid="excluded.from.compilation.applets"/>
+    </javac>
+    <copy todir="${applets.testoutput.dir}">
+      <fileset dir="${module.applets.basedir}/applets/test">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+        <patternset refid="excluded.from.compilation.applets"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="clean.module.applets" description="cleanup module">
+    <delete dir="${applets.output.dir}"/>
+    <delete dir="${applets.testoutput.dir}"/>
+  </target>
+  
+  
+  <!-- Module api -->
+  
+  <dirname property="module.api.basedir" file="${ant.file}"/>
+  
+  
+  <property name="module.jdk.home.api" value="${project.jdk.home}"/>
+  <property name="module.jdk.classpath.api" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.api" value="${compiler.args}"/>
+  
+  <property name="api.output.dir" value="${module.api.basedir}/api/classes"/>
+  <property name="api.testoutput.dir" value="${module.api.basedir}/api/classes"/>
+  
+  <path id="api.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="api.module.classpath">
+    <path refid="${module.jdk.classpath.api}"/>
+    <path refid="library.commons-beanutils.classpath"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.api">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.api">
+    <patternset refid="compiler.excluded"/>
+    <patternset refid="excluded.from.module.api"/>
+  </patternset>
+  
+  <path id="api.module.sourcepath">
+    <dirset dir="${module.api.basedir}/api">
+      <include name="src"/>
+    </dirset>
+  </path>
+  
+  
+  <target name="compile.module.api" depends="compile.module.api.production,compile.module.api.tests" description="compile module(s) api"/>
+  
+  <target name="compile.module.api.production" description="compile module(s) api production classes">
+    <mkdir dir="${api.output.dir}"/>
+    <javac destdir="${api.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memoryMaximumSize="${compiler.max.memory}" fork="true" executable="${module.jdk.home.api}/bin/javac">
+      <compilerarg line="${compiler.args.api}"/>
+      <bootclasspath refid="api.module.bootclasspath"/>
+      <classpath refid="api.module.classpath"/>
+      <src refid="api.module.sourcepath"/>
+      <patternset refid="excluded.from.compilation.api"/>
+    </javac>
+    <copy todir="${api.output.dir}">
+      <fileset dir="${module.api.basedir}/api/src">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+        <patternset refid="excluded.from.compilation.api"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="compile.module.api.tests" depends="compile.module.api.production" description="compile module(s) api test classes" unless="skip.tests"/>
+  
+  <target name="clean.module.api" description="cleanup module">
+    <delete dir="${api.output.dir}"/>
+    <delete dir="${api.testoutput.dir}"/>
+  </target>
+  
+  
+  <!-- Module impl -->
+  
+  <dirname property="module.impl.basedir" file="${ant.file}"/>
+  
+  
+  <property name="module.jdk.home.impl" value="${project.jdk.home}"/>
+  <property name="module.jdk.classpath.impl" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.impl" value="${compiler.args}"/>
+  
+  <property name="impl.output.dir" value="${module.impl.basedir}/impl/classes"/>
+  <property name="impl.testoutput.dir" value="${module.impl.basedir}/impl/tests_classes"/>
+  
+  <path id="impl.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="impl.module.classpath">
+    <path refid="${module.jdk.classpath.impl}"/>
+    <pathelement location="${api.output.dir}"/>
+    <path refid="library.commons-beanutils.classpath"/>
+    <path refid="library.commons-validator-1.1.4.classpath"/>
+    <path refid="library.commons_math_1.0.classpath"/>
+    <pathelement location="${module.impl.basedir}/impl/lib/jdo.jar"/>
+    <pathelement location="${module.impl.basedir}/impl/lib/j2ee_connector-1_5-pfd2-classes.zip"/>
+    <pathelement location="${module.impl.basedir}/impl/lib/commons-digester.jar"/>
+    <pathelement location="${module.impl.basedir}/impl/lib/commons-cli-1.0.jar"/>
+    <pathelement location="${module.impl.basedir}/impl/lib/log4j-1.2.8.jar"/>
+    <pathelement location="${module.impl.basedir}/impl/lib/junit.jar"/>
+    <pathelement location="${module.impl.basedir}/../../Archive/Product/jcckit/JCCKit/jcckit.jar"/>
+    <path refid="library.html_parser.classpath"/>
+    <path refid="library.struts.classpath"/>
+    <path refid="library.csv_parser.classpath"/>
+    <path refid="library.servlet_2.3.classpath"/>
+    <pathelement location="${applets.output.dir}"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.impl">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.impl">
+    <patternset refid="compiler.excluded"/>
+    <patternset refid="excluded.from.module.impl"/>
+  </patternset>
+  
+  <path id="impl.module.sourcepath">
+    <dirset dir="${module.impl.basedir}/impl">
+      <include name="src"/>
+    </dirset>
+  </path>
+  
+  <path id="impl.module.test.sourcepath">
+    <dirset dir="${module.impl.basedir}/impl">
+      <include name="test"/>
+    </dirset>
+  </path>
+  
+  
+  <target name="compile.module.impl" depends="compile.module.impl.production,compile.module.impl.tests" description="compile module(s) impl"/>
+  
+  <target name="compile.module.impl.production" depends="compile.module.api,compile.module.applets" description="compile module(s) impl production classes">
+    <mkdir dir="${impl.output.dir}"/>
+    <javac destdir="${impl.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memoryMaximumSize="${compiler.max.memory}" fork="true" executable="${module.jdk.home.impl}/bin/javac">
+      <compilerarg line="${compiler.args.impl}"/>
+      <bootclasspath refid="impl.module.bootclasspath"/>
+      <classpath refid="impl.module.classpath"/>
+      <src refid="impl.module.sourcepath"/>
+      <patternset refid="excluded.from.compilation.impl"/>
+    </javac>
+    <copy todir="${impl.output.dir}">
+      <fileset dir="${module.impl.basedir}/impl/src">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+        <patternset refid="excluded.from.compilation.impl"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="compile.module.impl.tests" depends="compile.module.impl.production" description="compile module(s) impl test classes" unless="skip.tests">
+    <mkdir dir="${impl.testoutput.dir}"/>
+    <javac destdir="${impl.testoutput.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memoryMaximumSize="${compiler.max.memory}" fork="true" executable="${module.jdk.home.impl}/bin/javac">
+      <compilerarg line="${compiler.args.impl}"/>
+      <classpath refid="impl.module.classpath"/>
+      <classpath location="${impl.output.dir}"/>
+      <src refid="impl.module.test.sourcepath"/>
+      <patternset refid="excluded.from.compilation.impl"/>
+    </javac>
+    <copy todir="${impl.testoutput.dir}">
+      <fileset dir="${module.impl.basedir}/impl/test">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+        <patternset refid="excluded.from.compilation.impl"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="clean.module.impl" description="cleanup module">
+    <delete dir="${impl.output.dir}"/>
+    <delete dir="${impl.testoutput.dir}"/>
+  </target>
+  
+  <target name="init" description="Build initialization">
+    <!-- Perform any build initialization in this target -->
+  </target>
+  
+  <target name="clean" depends="clean.module.jcckit, clean.module.applets, clean.module.api, clean.module.impl" description="cleanup all"/>
+  
+  <target name="all" depends="init, clean, compile.module.jcckit, compile.module.applets, compile.module.api, compile.module.impl" description="build all"/>
+</project>

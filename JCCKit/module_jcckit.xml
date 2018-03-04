@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project name="module_jcckit" default="compile.module.jcckit">
+  <dirname property="module.jcckit.basedir" file="${ant.file.module_jcckit}"/>
+  
+  <property name="module.jdk.home.jcckit" value="${project.jdk.home}"/>
+  <property name="module.jdk.classpath.jcckit" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.jcckit" value="${compiler.args}"/>
+  
+  <property name="jcckit.output.dir" value="${module.jcckit.basedir}/classes"/>
+  <property name="jcckit.testoutput.dir" value="${module.jcckit.basedir}/classes"/>
+  
+  <path id="jcckit.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="jcckit.module.classpath">
+    <path refid="${module.jdk.classpath.jcckit}"/>
+  </path>
+  
+  
+  
+  <path id="jcckit.module.sourcepath">
+    <dirset dir="${module.jcckit.basedir}">
+      <include name="src"/>
+    </dirset>
+  </path>
+  
+  
+  <target name="compile.module.jcckit" depends="compile.module.jcckit.production,compile.module.jcckit.tests" description="compile module(s) JCCKit"/>
+  
+  <target name="compile.module.jcckit.production" description="compile module(s) JCCKit production classes">
+    <mkdir dir="${jcckit.output.dir}"/>
+    <javac destdir="${jcckit.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memoryMaximumSize="${compiler.max.memory}" fork="true" executable="${module.jdk.home.jcckit}/bin/javac">
+      <compilerarg line="${compiler.args.jcckit}"/>
+      <bootclasspath refid="jcckit.module.bootclasspath"/>
+      <classpath refid="jcckit.module.classpath"/>
+      <src refid="jcckit.module.sourcepath"/>
+    </javac>
+    <copy todir="${jcckit.output.dir}">
+      <fileset dir="${module.jcckit.basedir}/src">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="compile.module.jcckit.tests" depends="compile.module.jcckit.production" description="compile module(s) JCCKit test classes" unless="skip.tests"/>
+  
+  <target name="clean.module.jcckit" description="cleanup module">
+    <delete dir="${jcckit.output.dir}"/>
+    <delete dir="${jcckit.testoutput.dir}"/>
+  </target>
+</project>

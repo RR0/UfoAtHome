@@ -1,0 +1,969 @@
+<p>UFO@home</p> 
+<h1>Plan de D&eacute;veloppement Logiciel </h1> 
+<table border=1 align="center" cellpadding=5 cellspacing=0> 
+<caption>Historique</caption>
+<tbody> 
+<tr> 
+<td 
+    valign=top class="Normal"> <p class=tabletext style="TEXT-ALIGN: center" 
+    align=center><b>Date</b></p></td> 
+<td 
+    valign=top class="Normal"> <p class=tabletext style="TEXT-ALIGN: center" 
+      align=center><b>Version</b></p></td> 
+<td 
+    valign=top class="Normal"> <p class=tabletext style="TEXT-ALIGN: center" 
+      align=center><b>Description</b></p></td> 
+<td 
+    valign=top class="Normal"> <p class=tabletext style="TEXT-ALIGN: center" 
+      align=center><b>Auteur</b></p></td> 
+</tr> 
+<tr> 
+<td 
+    valign=top class="Normal"> <p class=tabletext>9 Juillet 2004</p></td> 
+<td 
+    valign=top class="Normal"> <p class=tabletext>0.1</p></td> 
+<td 
+    valign=top class="Normal"> <p class=tabletext> Version initiale</p></td> 
+<td 
+    valign=top class="Normal"> <p class=tabletext>J&eacute;r&ocirc;me Beau </p></td> 
+</tr> 
+</tbody> 
+</table> 
+<br>
+<table border="0" align="center" cellpadding="5" cellspacing="0">
+<tr valign="top">
+<td align="left" scope="col"><ul>
+<li><a 
+href="#1.__________________Introduction"><strong>Introduction</strong></a>
+<ul>
+<li><a 
+href="#1.1_______________Purpose"> Objectif </a></li>
+<li><a 
+href="#1.2_______________Scope"> P&eacute;rim&egrave;tre </a></li>
+<li><a 
+href="#1.3_______________Definitions,_Acronyms_"> D&eacute;finitions, acronymes et abbr&eacute;viations</a></li>
+<li><a 
+href="#1.4_______________References"> R&eacute;f&eacute;rences</a></li>
+<li><a 
+href="#1.5_______________Overview"> Vue d'ensemble</a></li>
+</ul>
+</li>
+<li><a 
+href="#2.__________________Project_Overview"><strong>Vue d'ensemble du project</strong></a>
+<ul>
+<li><a 
+href="#2.1_______________Project_Purpose,_Scope"> But, p&eacute;rim&egrave;tre et objectifs du project</a></li>
+<li><a 
+href="#2.2_______________Assumptions_and_Constr"> Suppositions et constraints</a></li>
+<li><a 
+href="#2.3_______________Project_Deliverables"> Livres du projet</a></li>
+<li><a 
+href="#2.4_______________Evolution_of_the_Softw">Evolution du Plan de D&eacute;veloppement Logiciel </a></li>
+</ul>
+</li>
+<li><a 
+href="#3.__________________Project_Organization"><strong> Organisation du project</strong></a>&nbsp;&nbsp;
+<ul>
+<li><a 
+href="#3.1_______________Organizational_Structu"> Structure organisationnelle</a></li>
+<li><a 
+href="#3.2_______________External_Interfaces"> Interfaces externes</a></li>
+<li><a 
+href="#3.3_______________Roles_and_Responsibili"> R&ocirc;les et responsabilit&eacute;s</a></li>
+</ul>
+</li>
+<li><a 
+href="#4.__________________Management_Process"><strong> Processus de gestion</strong></a>
+<ul>
+<li><a 
+href="#4.1_______________Project_Estimates"> Estimations du projet</a></li>
+<li><a 
+href="#ProjectPlan"> Planification du projet</a>
+<ul>
+<li><a 
+href="#4.2.1__________Phase_Plan"> Planification des phases</a></li>
+<li><a 
+href="#4.2.2__________Iteration_Objectives">Objectifs des it&eacute;rations</a></li>
+<li><a 
+href="#4.2.3__________Releases"> Versions</a></li>
+<li><a 
+href="#4.2.4__________Project_Schedule"> Agenda du projet</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul></td>
+<td align="left" ><ul>
+<ul>
+<ul>
+<li><a 
+href="#4.2.5__________Project_Resourcing">Gestion des ressources du projet </a>
+<ul>
+<li><a 
+href="#4.2.5.1_____Staffing_Plan">Planification de l'&eacute;quipe</a></li>
+<li><a 
+href="#4.2.5.2_____Resource_Acquisition_Plan"> Plan d'acquisition de ressources</a></li>
+<li><a 
+href="#4.2.5.3_____Training_Plan"> Plan de formation</a></li>
+</ul>
+</li>
+<li><a 
+href="#4.2.6__________Budget"> Budget</a></li>
+</ul>
+<li><a 
+href="#4.3_______________Iteration_Plans"> Planifications des it&eacute;rations</a></li>
+<li><a 
+href="#4.4_______________Project_Monitoring_and"> Suivi et contr&ocirc;le du project </a>
+<ul>
+<li><a 
+href="#4.4.1__________Requirements_Management_P"> Requirements Management Plan</a></li>
+<li><a 
+href="#4.4.2__________Schedule_Control_Plan"> Schedule Control Plan</a></li>
+<li><a 
+href="#4.4.3__________Budget_Control_Plan"> Budget Control Plan</a></li>
+<li><a 
+href="#4.4.4__________Quality_Control_Plan">Quality Control Plan</a></li>
+<li><a 
+href="#4.4.5__________Reporting_Plan"> Reporting Plan</a></li>
+<li><a 
+href="#4.4.6__________Measurement_Plan"> Measurement Plan</a></li>
+</ul>
+</li>
+<li><a 
+href="#4.5_______________Risk_Management_plan"> Plan de gestion des risques</a></li>
+<li><a 
+href="#4.6_______________Close-out_Plan"> Close-out Plan</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</li>
+</ul>
+<li><a 
+href="#5.__________________Technical_Process_Pl"><strong> Technical process plans</strong></a>
+<ul>
+<li><a 
+href="#5.1_______________Development_Case"> Cas de d&eacute;veloppement</a></li>
+<li><a 
+href="#5.2_______________Methods,_tools_and_tec"> M&eacute;thodes, outils et techniques</a></li>
+<li><a 
+href="#5.3_______________Infrastructure_Plan"> Plan d'infrastructure</a></li>
+<li><a 
+href="#5.4               Product Acceptance Plan"> Plan d'acceptation du produit</a></li>
+</ul>
+</li>
+<li><span class="style1"><a 
+href="#6.__________________Supporting_Process_P">Supporting Process Plans</a></span></li>
+<li><strong><a 
+href="#7.__________________Additional_plans"> Plans suppl&eacute;mentaires</a></strong></li>
+<li><strong><a 
+href="#8.__________________Annexes"> Annexes</a></strong></li>
+<li><strong><a 
+href="#9.__________________Index"> Index</a></strong></li>
+</ul></td>
+</tr>
+</table>
+<h2><a name=1.__________________Introduction>Introduction</a></h2> 
+<h3><a name=1.1_______________Purpose>Objectif</a></h3> 
+<p>L'objectif de ce Plan de D&eacute;veloppement Logiciel est de d&eacute;finir les activit&eacute;s de d&eacute;veloppement en terme de  phases et it&eacute;rations n&eacute;cessaires &agrave; l'implementation du syst&egrave;me d'information ufologique UFO@home.</p> 
+<h3><a name=1.2_______________Scope>P&eacute;rim&egrave;tre</a></h3> 
+<p>Ce Plan de D&eacute;veloppement Logiciel d&eacute;crit le plan global &agrave; utiliser par l'&eacute;quipe de d&eacute;veloppement de UFO@home pour d&eacute;velopper le syst&egrave;me UFO@home pour les chercheurs &eacute;tudiant les ovnis. Les d&eacute;tails de chaque it&eacute;ration seront d&eacute;crits dans les Plans d'It&eacute;rations.</p>
+<p> Les plans tels que d&eacute;crits dans ce document sont bas&eacute;s sur l'expression des besoins du produit tels que d&eacute;finis dans le <a href="https://sourceforge.net/docman/display_doc.php?docid=17410&group_id=70060">Document de Vision</a> [1].</p>
+<h3><a name=1.3_______________Definitions,_Acronyms_>D&eacute;finitions, acronymes et abbr&eacute;viations</a></h3> 
+<p>Voir le <a href="https://sourceforge.net/docman/display_doc.php?docid=17535&group_id=70060">Glossaire</a> [4].</p> 
+<h3><a name=1.4_______________References>R&eacute;f&eacute;rences</a></h3> 
+<p>Des r&eacute;f&eacute;rences applicables sont :</p> 
+<ol type=1> 
+<li><a href="https://sourceforge.net/docman/display_doc.php?docid=17410&group_id=70060">Vision du syst&egrave;me UFO@home</a>.
+<li>System Business Case for the UFO@home.
+<li>Stakeholder Requests Document for the UFO@home.
+<li><a href="https://sourceforge.net/docman/display_doc.php?docid=17415&group_id=70060">Glossary for the UFO@home System</a>.
+<li>UFO@home High Level Project Schedule, V1.0, 2004.
+<li>Rational Unified Process, 1999, Rational Software Corp.
+<li>UFO@home Cost Model and Analysis Report.
+<li>UFO@home Risk List.
+<li>UFO@home Development Case.
+<li>UFO@home Software Process Website 
+<li>UFO@home E1 Iteration Plan.</li> 
+</ol> 
+<h3><a name=1.5_______________Overview>Vue d'ensemble</a></h3> 
+<p>Ce Plan de D&eacute;veloppement Logiciel contient les informations suivantes :</p> 
+<ul>
+<li><strong>Vue d'ensemble du projet </strong> - fournit une description des but, p&eacute;rim&egrave;tre et objectifs du projet. Elle d&eacute;finit &eacute;galement les livrables que le projet doit d&eacute;livrer.</li>
+<li><strong>Organisation du projet </strong> - d&eacute;crit la structure organizationnelle de l'&eacute;quipe du projet.</li>
+<li><strong>Processus de gestion </strong> - explique les co&ucirc;t et planification estim&eacute;s, d&eacute;finit les principales phases et jalons pour le projet, et d&eacute;crit comme le projet sera suivi.</li>
+<li><strong>Plans de processus technique </strong> - fournit une vue d'ensemble du processus de d&eacute;veloppement logiciel, y compris les m&eacute;thodes, outils et techniques &agrave; adopter.</li>
+<li><strong>Plans de processus de support </strong> - ceci inclut le plan de gestion de configuration.&nbsp;</li>
+</ul>
+<h2><a name=2.__________________Project_Overview></a>Vue d'ensemble du projet</h2> 
+<h3><a name=2.1_______________Project_Purpose,_Scope>But, p&eacute;rim&egrave;tre et objectifs du projet</a></h3> 
+<p>Ce Plan de D&eacute;veloppement Logiciel d&eacute;crit le plan global &agrave; utiliser par l'&eacute;quipe de d&eacute;veloppement de UFO@home pour d&eacute;velopper le syst&egrave;me UFO@home pour les chercheurs &eacute;tudiant les ovnis. Les d&eacute;tails de chaque it&eacute;ration seront d&eacute;crits dans les Plans d'Iterations.</p> 
+<p>Les plans tels que d&eacute;crits dans ce document sont bas&eacute;s sur l'expression des besoin du projet telle que d&eacute;finie dans la <a href="https://sourceforge.net/docman/display_doc.php?docid=17410&group_id=70060">Vision</a> [1].</p> 
+<h3><a name=2.2_______________Assumptions_and_Constr>Suppositions et contraintes</a></h3> 
+<p>Le syst&egrave;me est suppos&eacute; &ecirc;tre le moyen principal de la recherche sur les ovnis au terme 2010. </p> 
+<h3><a name=2.3_______________Project_Deliverables>Livrables du projet</a></h3> 
+<p>Les livrables suivants seront produits durant le projet : </p> 
+<ul type=disc> 
+<li>Plan de D&eacute;veloppement Logiciel (ce document) 
+<li>Vision 
+<li>Cas d'Utilisation
+<li>Glossaire
+<li>Sp&eacute;cifications Suppl&eacute;mentaires
+<li>Document d'Architecture Logicielle
+<li>Mod&egrave;le de Conception
+<li>Sous-syst&egrave;me d'Implementation
+<li>Build
+<li>Package de Test
+<li>Demandes de Changement
+<li>R&eacute;sultat des Tests
+<li>Release Notes </li> 
+</ul> 
+<h3><a name=2.4_______________Evolution_of_the_Softw>Evolution du Plan de D&eacute;veloppement Logiciel</a></h3> 
+<p>Le Plan de D&eacute;veloppement Logiciel sera r&eacute;vis&eacute; avant le d&eacute;but de chaque phase d'Iterations.</p> 
+<h2><a name=3.__________________Project_Organization>Organisation du projet</a></h2> 
+<h3><a name=3.1_______________Organizational_Structu>Structure organisationnelle</a></h3>
+<ul>
+<li>J&eacute;r&ocirc;me Beau - Chef de projet et d&eacute;veloppeur principal
+<ul>
+<li>Terry Groff - Superviseur/correcteur des documents anglophones</li>
+<li>Jean-Fran&ccedil;ois Baurre - Principal contributeur du sous-projet de traitement de donne&eacute;s</li>
+</ul>
+</li>
+</ul>
+<h3><a name=3.2_______________External_Interfaces>Interfaces externes</a></h3> 
+<p>Le chef de projet fournira un Statut, comme pr&eacute;vu dans ce plan, aux repr&eacute;sentants (voir <a href="https://sourceforge.net/docman/display_doc.php?docid=17410&group_id=70060">Vision</a> [1]).</p> 
+<p>L'&eacute;quipe du projet interagira &eacute;galement avec les repr&eacute;sentants pour soliciter des entr&eacute;es et reverra les artefacts associ&eacute;s.</p> 
+<h3><a name=3.3_______________Roles_and_Responsibili>R&ocirc;les et responsabilit&eacute;s</a></h3> 
+<p>Le tableau suivant identifie les unit&eacute;s organisationnelles qui seront responsables de chacune des disciplines, d&eacute;tails de workflow, et processus de support.</p> 
+<table border=1 align="center" cellpadding=5 cellspacing=0> 
+<tbody> 
+<tr> 
+<td 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal"><b>R&ocirc;le</b></p></td> 
+<td 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal"><b>Responsabilit&eacute;</b></p></td> 
+</tr> 
+<tr> 
+<td 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal">Chef de projet </p></td> 
+<td 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal">Comme d&eacute;crit dans le Rational Unified Process [6].&nbsp;Responsable de la discipline de gestion globale du projet.&nbsp;Dirige l'ensemble de l'&eacute;quipe de gestion du projet.</p></td> 
+</tr> 
+<tr> 
+<td 
+    valign=top class="Normal">Ing&eacute;nieur processus</td> 
+<td 
+    valign=top class="Normal">Responsable de l'environnement du projet, and providing process related support for the teams in the project as defined in the Environment discipline in Rational Unified Process. Fait partie d'une &eacute;quipe de gestion de projet.</td> 
+</tr> 
+<tr> 
+<td 
+    valign=top class="Normal">Responsable de configuration / Responsable de contr&ocirc;le des changements</td> 
+<td 
+    valign=top class="Normal">Responsable du Contr&ocirc;le de Configuration sur le projet, et pour exercer le processus de demandes de changement de UFO@home dans le projet.&nbsp;Fait partie d'une &eacute;quipe de gestion de projet.</td> 
+</tr> 
+<tr> 
+<td 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal">Chef de l'&eacute;quipe d'ing&eacute;ni&eacute;rie des syst&egrave;mes</p></td> 
+<td 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal">Diriger l'&eacute;quipe principalement responsable pour la gestion des disciplines de Mod&eacute;lisation M&eacute;tier et des Besoins. Fait partie d'une &eacute;quipe de gestion de projet.</p></td> 
+</tr> 
+<tr> 
+<td 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal">Chef de l'&eacute;quipe d'ing&eacute;ni&eacute;rie logicielle</p></td> 
+<td 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal">Principalement responsable des disciplines d'Analyse &amp; Conception et  d'Impl&eacute;mentation. Fait partie d'une &eacute;quipe de gestion de projet.</p></td> 
+</tr> 
+<tr> 
+<td 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal">Chef de l'&eacute;quipe de test</p></td> 
+<td 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal">Dirigeant l'&eacute;quipe responsable de la gestion de la discipline de Test. Fait partie d'une &eacute;quipe de gestion de projet.&nbsp;</p></td> 
+</tr> 
+<tr> 
+<td 
+    valign=top class="Normal">Chef de l'&eacute;quipe de d&eacute;ploiement</td> 
+<td 
+    valign=top class="Normal">Leading the team responsible for installation activities and infrastructure in the end-user environment.&nbsp; Fait partie d'une &eacute;quipe de gestion de projet.</td> 
+</tr> 
+</tbody> 
+</table> 
+<h2><a name=4.__________________Management_Process>Processus de gestion</a></h2> 
+<h3><a name=4.1_______________Project_Estimates>Estimations projet</a></h3> 
+<p>Project estimates are based on the UFO@home Cost Model and Analysis Report [7].</p> 
+<p>Le syst&egrave;me UFO@home a une complexit&eacute; et une architecture comparable &agrave; ceux d'un serveur applicatif tel J2EE-RI, Jonas, etc.  Les estimations de temps et d'effort de ce rapport sont &agrave; la base du budget et du planning du projet.</p> 
+<h3><a name=ProjectPlan>Project Plan</a></h3> 
+<h4><a name=4.2.1__________Phase_Plan>Phase Plan</a></h4> 
+<p>Une Structure Work Breakdown est en pr&eacute;paration, et sera fournie dans la prochaine version de ce document.</p> 
+<p>Le d&eacute;veloppement de UFO@home sera men&eacute; en utilisant une approche par phases o&ugrave; plusieurs it&eacute;rations interviennent au sein d'une phase. Les phases et la chronologie relative sont pr&eacute;sent&eacute;es dans la table ci-dessous :</p> 
+<table border=1 align="center" cellpadding=5 cellspacing=0> 
+<tbody> 
+<tr> 
+<td 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal"><b>Phase</b></p></td> 
+<td 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal"><b>Nombre d'it&eacute;rations</b></p></td> 
+<td 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal"><b>D&eacute;but</b></p></td> 
+<td 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal"><b>Fin</b></p></td> 
+</tr> 
+<tr> 
+<td 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal">Phase de cr&eacute;ation </p></td> 
+<td 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal">1</p></td> 
+<td 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal">Week 1</p></td> 
+<td 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal">Week 8</p></td> 
+</tr> 
+<tr> 
+<td 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal">Phase d'&eacute;laboration</p></td> 
+<td 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal">1</p></td> 
+<td 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal">Week 8</p></td> 
+<td 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal">Week 15</p></td> 
+</tr> 
+<tr> 
+<td 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal">Phase de construction</p></td> 
+<td 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal">3</p></td> 
+<td 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal">Week 15</p></td> 
+<td 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal">Week 31</p></td> 
+</tr> 
+<tr> 
+<td 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal">Phase de transition</p></td> 
+<td 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal">2</p></td> 
+<td 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal">Week 25</p></td> 
+<td 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal">Week 32</p></td> 
+</tr> 
+</tbody> 
+</table>
+<p>Le tableau 4.2.1 d&eacute;crit chaque phase et le jalon principal marquant l'ach&egrave;vement de la phase. </p>
+<table border=1 align="center" cellpadding=5 cellspacing=0> 
+<tbody> 
+<tr> 
+<td width="22%" 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal"><b>Phase</b></p></td> 
+<td width="51%" 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal"><b>Description</b></p></td> 
+<td width="27%" 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal"><b>Jalon</b></p></td> 
+</tr> 
+<tr> 
+<td width="22%" 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal">Phase de cr&eacute;ation</p></td> 
+<td width="51%" 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal">La phase de cr&eacute;ation d&eacute;veloppera l'expression des besoins adress&eacute;s par le produit et &eacute;tablira le cas m&eacute;tier pour UFO@home. Les principaux cas d'utilisation seront d&eacute;velopp&eacute;s ainsi que le Plan de D&eacute;veloppement Logiciel de haut niveau. A la fin de la phase de cr&eacute;ation l'&eacute;quipe de d&eacute;veloppement de UFO@home d&eacute;cidera de poursuivre ou non le projet sur la base du cas m&eacute;tier.</p></td> 
+<td width="27%" 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal">Le<b> jalon de revue du cas m&eacute;tier</b> au terme de la phase marque la d&eacute;cision Go/No Go pour le projet.</p></td> 
+</tr> 
+<tr> 
+<td width="22%" 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal">Phase d'&eacute;laboration</p></td> 
+<td width="51%" 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal">La phase d'&eacute;laboration analysera l'expression des besoins et d&eacute;veloppera le prototype architectural. Au terme de la phase d'&eacute;laboration l'ensemble des cas d'utilisation s&eacute;lectionn&eacute;s pour la Release 1.0 auront leur analyse et conception achev&eacute;es. De plus, les cas d'utilisation &agrave; haut risque pour la Release 2.0 auront &eacute;t&eacute; analys&eacute;s et con&ccedil;us. Le protoype architectural testera la faisabilit&eacute; et la performance de l'architecture require pour la Release 1.0.</p></td> 
+<td width="27%" 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal">Le <b>jalon de prototype architectural </b> marque la fin de la phase d'&eacute;laboration. Ce prototype repr&eacute;sente une v&eacute;rification des principaux composants architecturaux constituant la Release R1.0.</p></td> 
+</tr> 
+<tr> 
+<td width="22%" 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal">Phase de construction</p></td> 
+<td width="51%" 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal">Durant la phase de construction, les cas d'utilisation restants seront analys&eacute;s et con&ccedil;us. La version Beta de la Release 1.0 sera d&eacute;velopp&eacute;e et distribut&eacute;e pour &eacute;valuation. Les activit&eacute;s d'impl&eacute;mentation et de test pour  supporter les releases R1.0 et R2.0 seront achev&eacute;es.</p></td> 
+<td width="27%" 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal">Le <b>jalon de capacit&eacute; op&eacute;rationnelle R2.0 </b>marque la fin de la phase de construction. Le logiciel de Release 2.0 est pr&ecirc;t pour packaging.</p></td> 
+</tr> 
+<tr> 
+<td width="22%" 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal">Phase de transition</p></td> 
+<td width="51%" 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal">La phase de transition pr&eacute;parera les releases R1.0 e R2.0 pour distribution. Elle fournit le support n&eacute;cessaire pour assurer une installation  ais&eacute;e y compris la formation des utilisateurs.</p></td> 
+<td width="27%" 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal">Le <b>jalon de Release R2.0 </b> marque la fin de la phase de transition. A ce point l'ensemble des capacit&eacute;s, telles que d&eacute;finies dans le <a href="https://sourceforge.net/docman/display_doc.php?docid=17410&group_id=70060">Document de Vision</a> [1], sont install&eacute;es et accessibles aux utilisateurs.</p></td> 
+</tr> 
+</tbody> 
+</table>
+<p style="TEXT-ALIGN: center" align=center><b>Table 4.2.1 Phases du projet et principaux jalons</b></p> 
+<p>Chaque phase est d&eacute;coup&eacute;e en it&eacute;rations de d&eacute;veloppement telles que d&eacute;crit dans la Section 4.3.</p> 
+<p>La Section 4.2.4 illustre la planification haut-niveau du projet en montrant les phases, it&eacute;rations, et principaux jalons. La dur&eacute;e du projet est estim&eacute;e &agrave; 4 ou 5 ans.</p> 
+<h4><a name=4.2.2__________Iteration_Objectives>Objectifs des it&eacute;rations</a></h4> 
+<p>Chaque phase consiste en des it&eacute;rations de  d&eacute;veloppement dans lesquelles un sous-ensemble du syst&egrave;me est d&eacute;velopp&eacute;. En g&eacute;n&eacute;ral, ces it&eacute;rations :</p> 
+<ul>
+<li>r&eacute;duisent le risque technique</li>
+<li>fournissent des versions pr&eacute;liminaires d'un syst&egrave;me fonctionnel</li>
+<li>permettent une souplesse maximale dans la planification des fonctionnalit&eacute;s pour chaque version, et </li>
+<li>permettent de prendre en charge efficacement des changements de p&eacute;rim&egrave;tre dans un cycle d'it&eacute;rations. </li>
+</ul>
+<p>Le tableau suivant d&eacute;crit les it&eacute;rations avec leurs jalons associ&eacute;s, et les risques adress&eacute;s.</p> 
+<div align=center> 
+<table border=1 align="center" cellpadding=5 cellspacing=0> 
+<tbody> 
+<tr> 
+<td 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal"><b>Phase</b></p></td> 
+<td 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal"><b>It&eacute;ration</b></p></td> 
+<td 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal"><b>Description</b></p></td> 
+<td 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal"><b>Jalons associ&eacute;s</b></p></td> 
+<td 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal"><b>Risques adress&eacute;s</b></p></td> 
+</tr> 
+<tr> 
+<td 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal">Phase de cr&eacute;ation</p></td> 
+<td 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal">It&eacute;ration pr&eacute;liminaire</p></td> 
+<td 
+    valign=top class="Normal"> <ul>
+<li>D&eacute;finit le mod&egrave;le m&eacute;tier, les besoins du produit, le plan de d&eacute;veloppement logiciel, et le cas m&eacute;tier.</li>
+</ul></td> 
+<td 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal">Revue du cas m&eacute;tier </p></td> 
+<td 
+    valign=top class="Normal"> <ul>
+<li>Clarifie les besoins des utilisateurs. </li>
+<li>D&eacute;veloppe des Plans de D&eacute;veloppement Logiciels et p&eacute;rimi&egrave;tres r&eacute;alistes.</li>
+<li>D&eacute;termine la faisabilit&eacute; d'un projet d'un point de vue m&eacute;tier.</li>
+</ul></td> 
+</tr> 
+<tr> 
+<td 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal">Phase d'&eacute;laboration</p></td> 
+<td 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal">It&eacute;ration E1 – D&eacute;velopper prototype architectural</p></td> 
+<td 
+    valign=top class="Normal"><ul>
+<li>Complete l'analyse et la conception pour l'ensemble des cas d'utilisation de la R1. </li>
+<li>D&eacute;veloppe prototype architectural pour la R1. </li>
+<li>Compl&egrave;te l'analyse et la conception pour l'ensemble des cas d'utilisation &agrave; haut risque de la R2.</li>
+</ul></td> 
+<td 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal">Prototype architectural</p></td> 
+<td 
+    valign=top class="Normal"> <ul>
+<li>Questions architecturales clarifi&eacute;es.</li>
+<li>Risques techniques att&eacute;nu&eacute;s.</li>
+<li>Premier prototype pour retours des utilisateurs.</li>
+</ul></td> 
+</tr> 
+<tr> 
+<td rowspan="3" 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal">Phase de construction</p><pre>&nbsp;</pre><pre>&nbsp;</pre></td> 
+<td 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal">It&eacute;ration C1 – D&eacute;velopper la R1 Beta</p></td> 
+<td 
+    valign=top class="Normal"> <ul>
+<li>Impl&eacute;mente et teste les cas d'utilisation de la R1 pour fournir une version beta de la R1.</li>
+</ul></td> 
+<td 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal">R1 Beta</p></td> 
+<td 
+    valign=top class="Normal"> <ul>
+<li>Ensemble des fonctionnalit&eacute;s cl&eacute;s du point de vue utilisateur et architectural impl&eacute;ment&eacute;es dans la Beta. </li>
+<li>Retours utilisateurs avant la sortie de la R1.</li>
+</ul></td> 
+</tr> 
+<tr> 
+<td 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal">It&eacute;ration C2 – Developper la version R1</p></td> 
+<td 
+    valign=top class="Normal"> <ul>
+<li>Implemente et test les cas d'utilisation restants de la R1, corrige les d&eacute;fauts de la Beta, et incorpore les retours de la Beta. </li>
+<li>D&eacute;veloppe le syst&egrave;me de la R1.</li>
+</ul></td> 
+<td 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal">Logiciel R1</p></td> 
+<td 
+    valign=top class="Normal"> <ul>
+<li>R1 enti&egrave;rement pass&eacute; en revue par la communaut&eacute; des utilisateurs. </li>
+<li>La qualit&eacute; produit devrait &ecirc;tre &eacute;lev&eacute;e.</li>
+<li>D&eacute;fauts minimis&eacute;s.</li>
+<li>Co&ucirc;t de la qualit&eacute; r&eacute;duit.</li>
+</ul></td> 
+</tr> 
+<tr> 
+<td 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal">It&eacute;ration C3 – Developper la version R2</p></td> 
+<td 
+    valign=top class="Normal"> <ul>
+<li>Con&ccedil;oit, impl&eacute;mente et teste les cas d'utilisation de la R2. </li>
+<li>Incorpore les am&eacute;liorations et d&eacute;faut de la R1.</li>
+<li>D&eacute;veloppe le syst&egrave;me de la R2.</li>
+</ul></td> 
+<td 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal">Logiciel R2</p></td> 
+<td 
+    valign=top class="Normal"> <ul>
+<li>Une diffusion rapide de la R2 addresse la satisfaction client. </li>
+<li>Ensemble des fonctionalit&eacute;s-cl&eacute;s fournies dans la version R2 du syst&egrave;me.</li>
+</ul></td> 
+</tr> 
+<tr> 
+<td rowspan="2" 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal">Phase de transition</p><pre>&nbsp;</pre></td> 
+<td 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal">It&eacute;ration T1 – Diffusion R1</p></td> 
+<td 
+    valign=top class="Normal"> <ul>
+<li>Package, distribue, et installe la version R1.</li>
+</ul></td> 
+<td 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal">R1 diffus&eacute;e</p></td> 
+<td 
+    valign=top class="Normal"> <ul>
+<li>Une livraison en 2 &eacute;tapes minimuse les d&eacute;fauts. </li>
+<li>Une livraison en 2 &eacute;tapes fournit une transition plus facile pour les utilisateurs.</li>
+</ul></td> 
+</tr> 
+<tr> 
+<td 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal">It&eacute;ration T2 – Diffusion R2</p></td> 
+<td 
+    valign=top class="Normal"> <ul>
+<li>Package, distribue, et installe la version R2.</li>
+</ul></td> 
+<td 
+    valign=top class="Normal"> <p style="LINE-HEIGHT: normal">R2 diffus&eacute;e </p></td> 
+<td 
+    valign=top class="Normal"> <ul>
+<li>Une livraison en 2 &eacute;tapes minimuse les d&eacute;fauts. </li>
+<li>Une livraison en 2 &eacute;tapes fournit une transition plus facile pour les utilisateurs.</li>
+</ul></td> 
+</tr> 
+</tbody> 
+</table> 
+</div> 
+<h4><a name=4.2.3__________Releases>Releases</a></h4> 
+<p>Ce Plan de D&eacute;veloppement Logiciel adresse les 2 premi&egrave;res versions de UFO@home. Les fonctionnalit&eacute;s-cl&eacute;s telles que d&eacute;finies dans le <a href="https://sourceforge.net/docman/display_doc.php?docid=17408&group_id=70060">Document de Vision</a> [1] sont vis&eacute;es pour les 2 premi&egrave;res versions. L'ensemble des fonctionnalit&eacute;s critiques pour les chercheurs en ufologie sont planifi&eacute;es pour la 1&egrave;re version (R1.0).</p> 
+<p>On s'attend &agrave; ce que le contenu pr&eacute;vu pour les versions change &agrave; mesure que le projet progresse. Ceci peut &ecirc;tre du &agrave; un certain nombre de facteurs m&eacute;tier et techniques. En particulier, les attributs de b&eacute;n&eacute;fice, effort et risque sont utilis&eacute;s pour d&eacute;terminer la priorit&eacute; des besoins du produit et donc la version vis&eacute;e.</p> 
+<p>Il est pr&eacute;vu que UFO@home soit diffus&eacute; pour usage g&eacute;n&eacute;ral sur Internet lors des principales versions 2 &agrave; 4.</p> 
+<p>La Release 1 doit contenir comme minimum les fonctionnalit&eacute;s basiques list&eacute;es ci-dessous : </p> 
+<ul> 
+<li>Connexion/identification
+<li>Signalement visuel d'observation
+<li>Interface avec la base de catalogue d'observations
+<li>Maintenace de l'information utilisateur
+<li>Recherche d'une observation/d'un cas
+</ul> 
+<p>La Release 2 devrait inclure :</p> 
+<ul> 
+<li>Traitements d&eacute;finis par l'utilisateur
+</ul> 
+<p>Les fonctionnalit&eacute;s pour la Release 3 n'ont pas encore &eacute;t&eacute; d&eacute;termin&eacute;es. On s'attend &agrave; ce que cette release contienne des am&eacute;liorations des fonctionnalti&eacute;s existantes.</p> 
+<p>De plus, une version Beta pr&eacute;c&egrave;dera la release 1.0 du produit.</p> 
+<h4><a name=4.2.4__________Project_Schedule>Planification projet </a></h4> 
+<p>La planification haut niveau montrant les phases, it&eacute;rations et jalons du projet est contenue dans le UFO@home High Level Project Schedule [5] tel que montr&eacute; ci-dessous.</p> 
+<table border=1 align="center" cellpadding=5 cellspacing="0">
+<tbody>
+<tr>
+<td class="Normal">
+<p style="LINE-HEIGHT: normal"><b><nobr>Nom de t&acirc;che</nobr></b></p></td>
+<td class="Normal">
+<p style="LINE-HEIGHT: normal; TEXT-ALIGN: center" 
+            align=center><b><nobr>D&eacute;but</nobr></b></p></td>
+<td class="Normal">
+<p style="LINE-HEIGHT: normal; TEXT-ALIGN: center" 
+            align=center><b><nobr>Fin</nobr></b></p></td>
+</tr>
+<tr>
+<td class="Normal">
+<p 
+            style="MARGIN-LEFT: 3pt; LINE-HEIGHT: normal"><b>Jalons</b></p></td>
+<td class="Normal">&nbsp;</td>
+<td class="Normal">&nbsp;</td>
+</tr>
+<tr>
+<td class="Normal">
+<p 
+            style="MARGIN-LEFT: 12pt; LINE-HEIGHT: normal">D&eacute;but</p></td>
+<td class="Normal">&nbsp;</td>
+<td class="Normal">&nbsp;</td>
+</tr>
+<tr>
+<td class="Normal">
+<p 
+            style="MARGIN-LEFT: 12pt; LINE-HEIGHT: normal">Business Case Review Milestone (end Inception Phase)</p></td>
+<td class="Normal">&nbsp;</td>
+<td class="Normal">&nbsp;</td>
+</tr>
+<tr>
+<td class="Normal">
+<p 
+            style="MARGIN-LEFT: 12pt; LINE-HEIGHT: normal">Architectural Prototype Milestone (end Elaboration Phase)</p></td>
+<td class="Normal">&nbsp;</td>
+<td class="Normal">&nbsp;</td>
+</tr>
+<tr>
+<td class="Normal">
+<p 
+            style="MARGIN-LEFT: 12pt; LINE-HEIGHT: normal">Beta Milestone (Beta Version Ready)</p></td>
+<td class="Normal">&nbsp;</td>
+<td class="Normal">&nbsp;</td>
+</tr>
+<tr>
+<td class="Normal">
+<p 
+            style="MARGIN-LEFT: 12pt; LINE-HEIGHT: normal">Initial Operational Capability Milestone (Release 1.0)</p></td>
+<td class="Normal">&nbsp;</td>
+<td class="Normal">&nbsp;</td>
+</tr>
+<tr>
+<td class="Normal">
+<p 
+            style="MARGIN-LEFT: 12pt; LINE-HEIGHT: normal">Product Release R1.0 Milestone</p></td>
+<td class="Normal">&nbsp;</td>
+<td class="Normal">&nbsp;</td>
+</tr>
+<tr>
+<td class="Normal">
+<p 
+            style="MARGIN-LEFT: 12pt; LINE-HEIGHT: normal">Second Operational Capability Milestone (Release 2.0)</p></td>
+<td class="Normal">&nbsp;</td>
+<td class="Normal">&nbsp;</td>
+</tr>
+<tr>
+<td class="Normal">
+<p 
+            style="MARGIN-LEFT: 12pt; LINE-HEIGHT: normal">Product Release R2.0 Milestone</p></td>
+<td class="Normal">&nbsp;</td>
+<td class="Normal">&nbsp;</td>
+</tr>
+<tr>
+<td class="Normal"><pre style="TEXT-ALIGN: right">&nbsp;</pre></td>
+<td class="Normal">&nbsp;</td>
+<td class="Normal">&nbsp;</td>
+</tr>
+<tr>
+<td class="Normal">
+<p 
+            style="MARGIN-LEFT: 3pt; LINE-HEIGHT: normal"><b>Phase de cr&eacute;ation</b></p></td>
+<td class="Normal">&nbsp;</td>
+<td class="Normal">&nbsp;</td>
+</tr>
+<tr>
+<td class="Normal">
+<p 
+            style="MARGIN-LEFT: 12pt; LINE-HEIGHT: normal"><b>It&eacute;ration pr&eacute;liminaire</b></p></td>
+<td class="Normal">&nbsp;</td>
+<td class="Normal">&nbsp;</td>
+</tr>
+<tr>
+<td class="Normal">
+<p 
+            style="MARGIN-LEFT: 21pt; LINE-HEIGHT: normal">Mod&eacute;lisation m&eacute;tier </p></td>
+<td class="Normal">&nbsp;</td>
+<td class="Normal">&nbsp;</td>
+</tr>
+<tr>
+<td class="Normal">
+<p 
+            style="MARGIN-LEFT: 21pt; LINE-HEIGHT: normal">Expression des besoins </p></td>
+<td class="Normal">&nbsp;</td>
+<td class="Normal">&nbsp;</td>
+</tr>
+<tr>
+<td class="Normal">
+<p 
+            style="MARGIN-LEFT: 21pt; LINE-HEIGHT: normal">Gestion de configuration </p></td>
+<td class="Normal">&nbsp;</td>
+<td class="Normal">&nbsp;</td>
+</tr>
+<tr>
+<td class="Normal">
+<p 
+            style="MARGIN-LEFT: 21pt; LINE-HEIGHT: normal">Gestion de projet </p></td>
+<td class="Normal">&nbsp;</td>
+<td class="Normal">&nbsp;</td>
+</tr>
+<tr>
+<td class="Normal"><pre style="TEXT-ALIGN: right">&nbsp;</pre></td>
+<td class="Normal">&nbsp;</td>
+<td class="Normal">&nbsp;</td>
+</tr>
+<tr>
+<td class="Normal">
+<p 
+            style="MARGIN-LEFT: 3pt; LINE-HEIGHT: normal"><b>Phase d'&eacute;laboration </b></p></td>
+<td class="Normal">&nbsp;</td>
+<td class="Normal">&nbsp;</td>
+</tr>
+<tr>
+<td class="Normal">
+<p 
+            style="MARGIN-LEFT: 12pt; LINE-HEIGHT: normal"><b>It&eacute;ration E1 - D&eacute;velopper un prototype architectural</b></p></td>
+<td class="Normal">&nbsp;</td>
+<td class="Normal">&nbsp;</td>
+</tr>
+<tr>
+<td class="Normal">
+<p 
+            style="MARGIN-LEFT: 21pt; LINE-HEIGHT: normal">Mod&eacute;lisation m&eacute;tier</p></td>
+<td class="Normal">&nbsp;</td>
+<td class="Normal">&nbsp;</td>
+</tr>
+<tr>
+<td class="Normal">
+<p 
+            style="MARGIN-LEFT: 21pt; LINE-HEIGHT: normal">Expression des besoins</p></td>
+<td class="Normal">&nbsp;</td>
+<td class="Normal">&nbsp;</td>
+</tr>
+<tr>
+<td class="Normal">
+<p 
+            style="MARGIN-LEFT: 21pt; LINE-HEIGHT: normal">Analyse et conception (architecture &amp; risques majeurs)</p></td>
+<td class="Normal">&nbsp;</td>
+<td class="Normal">&nbsp;</td>
+</tr>
+<tr>
+<td class="Normal">
+<p 
+            style="MARGIN-LEFT: 21pt; LINE-HEIGHT: normal">Impl&eacute;mentation (architecture &amp; risques majeurs)</p></td>
+<td class="Normal">&nbsp;</td>
+<td class="Normal">&nbsp;</td>
+</tr>
+<tr>
+<td class="Normal">
+<p 
+            style="MARGIN-LEFT: 21pt; LINE-HEIGHT: normal">Tests (architecture &amp; risques majeurs)</p></td>
+<td class="Normal">&nbsp;</td>
+<td class="Normal">&nbsp;</td>
+</tr>
+<tr>
+<td class="Normal">
+<p 
+            style="MARGIN-LEFT: 21pt; LINE-HEIGHT: normal">Gestion de projet</p></td>
+<td class="Normal">&nbsp;</td>
+<td class="Normal">&nbsp;</td>
+</tr>
+<tr>
+<td class="Normal"><pre style="TEXT-ALIGN: right">&nbsp;</pre></td>
+<td class="Normal">&nbsp;</td>
+<td class="Normal">&nbsp;</td>
+</tr>
+<tr>
+<td class="Normal">
+<p 
+            style="MARGIN-LEFT: 3pt; LINE-HEIGHT: normal"><b>Phase de construction</b></p></td>
+<td class="Normal">&nbsp;</td>
+<td class="Normal">&nbsp;</td>
+</tr>
+<tr>
+<td class="Normal">
+<p 
+            style="MARGIN-LEFT: 12pt; LINE-HEIGHT: normal"><b>It&eacute;ration C1 - D&eacute;velopper Release 1 Beta</b></p></td>
+<td class="Normal">&nbsp;</td>
+<td class="Normal">&nbsp;</td>
+</tr>
+<tr>
+<td class="Normal">
+<p 
+            style="MARGIN-LEFT: 21pt; LINE-HEIGHT: normal">Impl&eacute;mentation (beta)</p></td>
+<td class="Normal">&nbsp;</td>
+<td class="Normal">&nbsp;</td>
+</tr>
+<tr>
+<td class="Normal">
+<p 
+            style="MARGIN-LEFT: 21pt; LINE-HEIGHT: normal">Tests (interfaces et function int&eacute;gr&eacute;e)</p></td>
+<td class="Normal">&nbsp;</td>
+<td class="Normal">&nbsp;</td>
+</tr>
+<tr>
+<td class="Normal">
+<p 
+            style="MARGIN-LEFT: 21pt; LINE-HEIGHT: normal">Gestion de projet</p></td>
+<td class="Normal">&nbsp;</td>
+<td class="Normal">&nbsp;</td>
+</tr>
+<tr>
+<td class="Normal">
+<p 
+            style="MARGIN-LEFT: 12pt; LINE-HEIGHT: normal"><b>It&eacute;ration C2 - D&eacute;velopper Release 1</b></p></td>
+<td class="Normal">&nbsp;</td>
+<td class="Normal">&nbsp;</td>
+</tr>
+<tr>
+<td class="Normal">
+<p 
+            style="MARGIN-LEFT: 21pt; LINE-HEIGHT: normal">Analyse et conception (rafiner)</p></td>
+<td class="Normal">&nbsp;</td>
+<td class="Normal">&nbsp;</td>
+</tr>
+<tr>
+<td class="Normal">
+<p 
+            style="MARGIN-LEFT: 21pt; LINE-HEIGHT: normal">Impl&eacute;mentation (production effective)</p></td>
+<td class="Normal">&nbsp;</td>
+<td class="Normal">&nbsp;</td>
+</tr>
+<tr>
+<td class="Normal">
+<p 
+            style="MARGIN-LEFT: 21pt; LINE-HEIGHT: normal">Test (interfaces et function int&eacute;gr&eacute;e)</p></td>
+<td class="Normal">&nbsp;</td>
+<td class="Normal">&nbsp;</td>
+</tr>
+<tr>
+<td class="Normal">
+<p 
+            style="MARGIN-LEFT: 21pt; LINE-HEIGHT: normal">Gestion de projet</p></td>
+<td class="Normal">&nbsp;</td>
+<td class="Normal">&nbsp;</td>
+</tr>
+<tr>
+<td class="Normal">
+<p 
+            style="MARGIN-LEFT: 12pt; LINE-HEIGHT: normal"><b>It&eacute;ration C3 - D&eacute;velopper Release 2.0</b></p></td>
+<td class="Normal">&nbsp;</td>
+<td class="Normal">&nbsp;</td>
+</tr>
+<tr>
+<td class="Normal">
+<p 
+            style="MARGIN-LEFT: 21pt; LINE-HEIGHT: normal">Analyse et conception (rafiner)</p></td>
+<td class="Normal">&nbsp;</td>
+<td class="Normal">&nbsp;</td>
+</tr>
+<tr>
+<td class="Normal">
+<p 
+            style="MARGIN-LEFT: 21pt; LINE-HEIGHT: normal">Impl&eacute;mentation (production effective)</p></td>
+<td class="Normal">&nbsp;</td>
+<td class="Normal">&nbsp;</td>
+</tr>
+<tr>
+<td class="Normal">
+<p 
+            style="MARGIN-LEFT: 21pt; LINE-HEIGHT: normal">Test (interfaces et function int&eacute;gr&eacute;e)</p></td>
+<td class="Normal">&nbsp;</td>
+<td class="Normal">&nbsp;</td>
+</tr>
+<tr>
+<td class="Normal">
+<p 
+            style="MARGIN-LEFT: 21pt; LINE-HEIGHT: normal">Gestion de projet</p></td>
+<td class="Normal">&nbsp;</td>
+<td class="Normal">&nbsp;</td>
+</tr>
+<tr>
+<td class="Normal"><pre style="TEXT-ALIGN: right">&nbsp;</pre></td>
+<td class="Normal">&nbsp;</td>
+<td class="Normal">&nbsp;</td>
+</tr>
+<tr>
+<td class="Normal">
+<p 
+            style="MARGIN-LEFT: 3pt; LINE-HEIGHT: normal"><b>Phase de transition</b></p></td>
+<td class="Normal">&nbsp;</td>
+<td class="Normal">&nbsp;</td>
+</tr>
+<tr>
+<td class="Normal">
+<p 
+            style="MARGIN-LEFT: 12pt; LINE-HEIGHT: normal"><b>It&eacute;ration T1 - Release 1</b></p></td>
+<td class="Normal">&nbsp;</td>
+<td class="Normal">&nbsp;</td>
+</tr>
+<tr>
+<td class="Normal">
+<p 
+            style="MARGIN-LEFT: 21pt; LINE-HEIGHT: normal">D&eacute;ploiement</p></td>
+<td class="Normal">&nbsp;</td>
+<td class="Normal">&nbsp;</td>
+</tr>
+<tr>
+<td class="Normal">
+<p 
+            style="MARGIN-LEFT: 12pt; LINE-HEIGHT: normal"><b>It&eacute;ration T2 - Release 2</b></p></td>
+<td class="Normal">&nbsp;</td>
+<td class="Normal">&nbsp;</td>
+</tr>
+<tr>
+<td class="Normal">
+<p 
+            style="MARGIN-LEFT: 21pt; LINE-HEIGHT: normal">D&eacute;ploiement</p></td>
+<td class="Normal">&nbsp;</td>
+<td class="Normal">&nbsp;</td>
+</tr>
+<tr>
+<td class="Normal"><pre style="TEXT-ALIGN: right">&nbsp;</pre></td>
+<td class="Normal">&nbsp;</td>
+<td class="Normal">&nbsp;</td>
+</tr>
+<tr>
+<td class="Normal">
+<p 
+            style="MARGIN-LEFT: 3pt; LINE-HEIGHT: normal">Environment</p></td>
+<td class="Normal">&nbsp;</td>
+<td class="Normal">&nbsp;</td>
+</tr>
+</tbody>
+</table>
+<h4><a name=4.2.5__________Project_Resourcing>Ressources project</a></h4> 
+<h5><a name=4.2.5.1_____Staffing_Plan>Plan d'affectation</a></h5> 
+<p>Les personnes comp&eacute;tentes en Technologie de l'Information (TI) identifi&eacute;es dans le graphe organisationnel en  Section 8.1 sont allou&eacute;es au projet. Aucune resource suppl&eacute;mentaire ne sera affect&eacute;e avant que le cas m&eacute;tier ne soit revu &agrave; la fin de la Phase de Cr&eacute;ation et qu'une d&eacute;cision  Go/No Go decision ne soit prise sur le projet.</p> 
+<p>L'organisation des tests reposera sur le soutien de l'organisation d'ing&eacute;ni&eacute;rie logicielle, telle que montr&eacute;e par la ligne pointill&eacute;e dans le graphe d'organisation.</p> 
+<h5><a name=4.2.5.2_____Resource_Acquisition_Plan>Plan d'aquisition de resources</a></h5> 
+<p>L'&eacute;quipe de d&eacute;veloppement de UFO@home est compos&eacute;e de volontaires int&eacute;ress&eacute;s par le d&eacute;veloppement d'un syst&egrave;me d'information ufologique et/ou d'un syst&egrave;me d'information innovant. L'&eacute;quipe de d&eacute;veloppement de UFO@home est pr&eacute;par&eacute;e &agrave; recruter un d&eacute;veloppeur s&eacute;nior avec plusieurs ann&eacute;es d'exp&eacute;rience en Java, et un int&eacute;grateur de syst&egrave;mes exp&eacute;riment&eacute;, et 2 impl&eacute;menteurs/testeurs (niveau junior), avec au moins 1 an d'exp&eacute;rience en Java.</p> 
+<h5><a name=4.2.5.3_____Training_Plan>Plan de formation</a></h5> 
+<p>Une formation sur les comp&eacute;tences suivantes sera men&eacute;e pour l'&eacute;quipe projet avant le d&eacute;marrage des activit&eacute;s de conception :</p> 
+<ul>
+<li>Analyse et conception orient&eacute;e objet</li>
+<li>Introduction au Rational Unified Process </li>
+<li>Caract&eacute;ristiques avanc&eacute;es de Java</li>
+</ul>
+<h4><a name=4.2.6__________Budget>Budget</a></h4>
+<p>Le projet &eacute;tant un effort de volontaires, aucun budget n'est d&eacute;fini.</p>
+<h3><a name=4.3_______________Iteration_Plans>Plans d'it&eacute;rations</a></h3> 
+<p>Voir le Plan d'Iteration E1 de UFO@home E1 [11].</p> 
+<h3><a name=4.4_______________Project_Monitoring_and>Suivi et contr&ocirc;le du projet</a></h3> 
+<h4><a name=4.4.1__________Requirements_Management_P>Requirements Management Plan</a></h4> 
+<p>The requirements for this system are captured in the <a href="https://sourceforge.net/docman/display_doc.php?docid=17408&group_id=70060">Vision</a> [1] and Stakeholder Requests [3] documents.</p> 
+<h4><a name=4.4.2__________Schedule_Control_Plan>Schedule Control Plan</a></h4> 
+<p>The project manager maintains a summary schedule showing the expected date of each milestone, and is part of the Status Assessment Report, as described in the reporting plan.&nbsp; The Status Assessment Report is provided to the IT Executive, who may use this to set new priorities or to recommend corrective action.</p> 
+<p>The summary schedule is derived from a detailed schedule maintained by the team managers.&nbsp; The line items in the detailed schedule are work packages assigned to individuals.&nbsp; Each individual who is assigned a work package provides %completion information to his/her team manager on a weekly basis.</p> 
+<h4><a name=4.4.3__________Budget_Control_Plan>Budget Control Plan</a></h4> 
+<p>Expenses are monitored by the project manager, and reported and assessed via the Status Assessment Report.</p> 
+<h4><a name=4.4.4__________Quality_Control_Plan>Quality Control Plan</a></h4> 
+<p>All deliverables are required to go through the appropriate review process.&nbsp; The review is required to ensure that each deliverable is of acceptable quality, using guidelines described in the Rational Unified Process [6] review guidelines and checklists.</p> 
+<p>In addition, defects will be recorded and tracked, and defect metrics gathered as described on the UFO@home Website [10].</p> 
+<h4><a name=4.4.5__________Reporting_Plan>Reporting Plan</a></h4> 
+<p>The Status Assessment report will be prepared by the Project Manager at least once per month.&nbsp; This includes:</p> 
+<ul>
+<li>updated cost and schedule estimates</li>
+<li> summary of metrics</li>
+</ul>
+<h4><a name=4.4.6__________Measurement_Plan>Measurement Plan</a></h4> 
+<p>Standard project metrics, as described in UFO@home Website [10], will be gathered and included in the Status Assessment Report.</p> 
+<h3><a name=4.5_______________Risk_Management_plan>Plan de gestion des risques</a></h3> 
+<p>Voir liste des risques de UFO@home [8].</p> 
+<h3><a name=4.6_______________Close-out_Plan>Plan de close-out</a></h3> 
+<p>The schedule will show a gradual roll-off of staff onto other projects. At least one developer will be retained part time by the IT Department after delivery to provide maintenance of the system.</p> 
+<p>A Post Mortem Report will be submitted to the IT Executive summarizing lessons learned, including an assessment of actual cost and schedule vs. predicted.</p> 
+<h2><a name=5.__________________Technical_Process_Pl>Plans de processus technique</a></h2> 
+<h3><a name=5.1_______________Development_Case>Cas de d&eacute;veloppement</a></h3> 
+<p>Voir le cas de d&eacute;veloppement UFO@home [9].</p> 
+<h3><a name=5.2_______________Methods,_tools_and_tec>M&eacute;thodes, outils et techniques</a></h3> 
+<p>RUP</p>
+<p>IDEA, CVS + SSH</p>
+<h3><a name=5.3_______________Infrastructure_Plan>Plan d'infrastructure</a></h3> 
+<p>N/A</p> 
+<h3><a name=5.4_______________Product_Acceptance_Pla>Plan d'acceptation produit</a></h3> 
+<p>N/A</p> 
+<h2><a name=6.__________________Supporting_Process_P>Supporting Process Plans</a></h2> 
+<p>Voir le site Web UFO@home [10].</p> 
+<h2><a name=7.__________________Additional_plans>Plans suppl&eacute;mentaires</a></h2> 
+<p>N/A.</p> 
+<h2><a name=8.__________________Annexes>Annexes</a></h2> 
+<p>N/A.</p> 
+<h2><a name=9.__________________Index>Index</a></h2> 
+<p>N/A.</p>

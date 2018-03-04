@@ -1,0 +1,162 @@
+<h1>Supplementary specifications</h1>
+<ul>
+  <table border="0" align="center" cellpadding="5" cellspacing="0">
+    <tr>
+      <td valign="top"><ul>
+        <li> <strong><a href="#Introduction">Introduction</a></strong>            
+          <ul>
+              <li> <a href="#Purpose">Purpose</a> </li>
+              <li><a href="#Scope">Scope</a> </li>
+              <li><a href="#DefinitionsAcronymsAndAbbreviations">Definitions,
+                  acronyms and abbreviations</a> </li>
+              <li><a href="#References">References</a></li>
+            </ul>
+        </li>
+        <li><strong><a href="#Functionality">Functionality</a></strong></li>
+        <li> <strong><a href="#Usability">Usability</a></strong></li>
+        <li> <strong><a href="#Reliability">Reliability</a></strong></li>
+        <li><strong><a href="#Performance">Performance</a></strong></li>
+        <li><strong><a href="#Supportability">Supportability</a></strong></li>
+      </ul></td>
+      <td><ul>
+        <li> <strong><a href="#DesignConstraints">Design constraints</a></strong></li>
+        <li> <strong><a href="#OnlineUserDocumentationAndHelpSystemRequirements">Online user documentation and help system requirements</a></strong></li>
+        <li> <strong><a href="#PurchasedComponents">Purchased components</a> </strong></li>
+        <li><strong> <a href="#Interfaces">Interfaces</a>        </strong>          
+          <ul>
+              <li> <a href="#UserInterfaces">User interfaces</a></li>
+              <li><a href="#HardwareInterfaces">Hardware interfaces</a> </li>
+              <li><a href="#SoftwareInterfaces">Software interfaces</a> </li>
+              <li><a href="#CommunicationsInterfaces">Communications interfaces</a></li>
+            </ul>
+        </li>
+        <li> <strong><a href="#LicensingRequirements">Licensing requirements</a> </strong></li>
+        <li><strong> <a href="#LegalCopyrightAndOtherNotices">Legal, copyright and other notices</a> </strong></li>
+        <li><strong><a href="#ApplicableStandards">Applicable standards</a></strong> </li>
+      </ul></td>
+    </tr>
+  </table>
+</ul>
+<h2>   <a name="Introduction"></a>Introduction</h2>
+<h3> <a name="Purpose"></a>Purpose</h3>
+<p>This document describes the system requirements that are not readily described
+  in the
+use cases of the use-case model.</p>
+<h3> <a name="Scope"></a>Scope</h3>
+<p>This document applies to the UFO@home project. It affects the overall requirements
+  and design of the RR0 Information System.</p>
+<h3> <a name="DefinitionsAcronymsAndAbbreviations"></a>Definitions, acronyms and abbreviations</h3>
+<ul>
+  <li><a href="https://sourceforge.net/docman/display_doc.php?docid=17415&group_id=70060#API">API</a> &#8212; Application Programming Interface.</li>
+  <li>Gb &#8212; Giga byte.</li>
+  <li><a href="https://sourceforge.net/docman/display_doc.php?docid=17415&group_id=70060#HTML">HTML</a> &#8212; HyperText
+  Markup Language.</li>
+  <li>J2EE &#8212; Java 2 Enterprise Edition.</li>
+  <li><a href="https://sourceforge.net/docman/display_doc.php?docid=17415&group_id=70060#J2SE">J2SE</a> &#8212; Java 2 Standard Edition.</li>
+  <li><a href="https://sourceforge.net/docman/display_doc.php?docid=17415&group_id=70060#JDO">JDO</a> &#8212; Java Data Objects.</li>
+  <li>RAM &#8212; Random Access Memory.</li>
+  <li><a href="https://sourceforge.net/docman/display_doc.php?docid=17415&group_id=70060#UML">UML</a> &#8212; Unified Modeling Language.</li>
+</ul>
+<h3>   <a name="References"></a>References</h3>
+<ol>
+  <li><a href="Vision.html">Vision</a></li>
+</ol>
+<h2> <a name="Functionality"></a>Functionality</h2>
+<ol>
+  <li>The system shall allow users to remain anonymous</li>
+  <li>The system shall support (allow to provide, process) on unprecise data
+    (unprecise or releative distance, time, etc.) because their commonness in
+    ufological data</li>
+</ol>
+<h2> <a name="Usability"></a>Usability</h2>
+<ol>
+  <li>Users willing to report a sighting shall not require any special
+        training other than basic web browsing ability.</li>
+  <li>Internationalization : Users willing to report a sighting shall be able
+    to read and enter information in their own language.</li>
+  <li>Users willing to report a sighting shall not spent a time longer than
+    they would by reporting by hand.</li>
+  <li>Users willing to report a sighting shall not require any other equipment
+  or configuration than standard and basic web browsing equipment and configuration</li>
+</ol>
+<h2> <a name="Reliability"></a>Reliability</h2>
+<ol>
+  <li>The system shall be available 7 days per week, 24 hours per day.</li>
+</ol>
+<h2> <a name="Performance"></a>Performance</h2>
+<ol>
+  <li> Response time for a transaction shall be less than 5 seconds.</li>
+  <li>The system shall accommodate up to 500 concurrent users.</li>
+</ol>
+<h2> <a name="Supportability"></a>Supportability</h2>
+<ol>
+  <li>The system shall use standard Java APIs only.</li>
+</ol>
+<h2> <a name="DesignConstraints"></a>Design constraints</h2>
+<ol>
+  <li>The system shall be described using the UML formalism.</li>
+  <li>The system shall be implemented using the Java programming language.</li>
+  <li>The reference implementation of the system shall implement its persistence
+    using JDO.</li>
+  <li>The system shall
+      be J2EE compatible.</li>
+</ol>
+<h2> <a name="OnlineUserDocumentationAndHelpSystemRequirements"></a>Online user documentation and help system requirements</h2>
+<ol>
+  <li>On-line user help shall be available for all tasks.</li>
+</ol>
+<h2> <a name="PurchasedComponents"></a>Purchased components</h2>
+<ol>
+  <li>A JDO implementation shall be acquired for the reference implementation.
+    Depending on available funds/pricing, an free implementation shall be used
+    or not.</li>
+</ol>
+<h2> <a name="Interfaces"></a>Interfaces</h2>
+<p>This section defines the interfaces that must be supported by the application.
+  It should contain adequate specificity, protocols, ports and logical addresses,
+  etc., so that the software can be developed and verified against the interface
+  requirements.</p>
+<h3> <a name="UserInterfaces"></a>User interfaces</h3>
+<ol>
+  <li>The user interface shall be Web-based (HTML).</li>
+</ol>
+<h3> <a name="HardwareInterfaces"></a>Hardware interfaces</h3>
+<ol>
+  <li>A server with at least 1 Gb of RAM shall be provided.</li>
+</ol>
+<h3> <a name="SoftwareInterfaces"></a>Software interfaces</h3>
+<ol>
+  <li>The system shall provide import/export interface for exchanging data with
+    other UFO@home-compatible servers through any connected TCP-IP network, including
+    the Internet.</li>
+</ol>
+<h3><a name="CommunicationsInterfaces"></a>Communications interfaces</h3>
+<ol>
+  <li>An Internet network connection with sufficient bandwidth shall be provided.</li>
+</ol>
+<h2> <a name="LicensingRequirements"></a>Licensing requirements</h2>
+<p>Because of its worldwide audience and its unification goal, the project has
+  been put into the <a href="http://javarome.net/OpenSource.html" target="_top">Open
+  Source</a> community since December 2002. The project contents are made available
+  on <a
+href="http://sourceforge.net/projects/rr0" target="_top">SourceForge.net</a> under
+  the <a
+href="http://apache.org">Apache</a> 1.1 license, which allows everyone to view,
+  use, modify and redistribute its code, as long as the product is shipped with
+its <a
+href="License.html">license</a>.</p>
+<h2> <a name="LegalCopyrightAndOtherNotices"></a>Legal, copyright and other notices</h2>
+<ul><li>  Java, J2EE, J2SE, J2ME, and all Java-based marks are trademarks or registered
+      trademarks of Sun Microsystems, Inc. in the United States and other countries.</li>
+  <li> This product includes software developed by the Apache Software
+      Foundation (http://www.apache.org/). The names &quot;Apache&quot; and &quot;Apache
+      Software Foundation&quot; must
+    not be used to endorse or promote products derived from this software without
+  prior written permission. For written permission, please contact apache@apache.org.</li>
+</ul>
+<h2>   <a name="ApplicableStandards"></a>Applicable standards</h2>
+<p>This section describes by reference any applicable standards and the specific
+  sections of any such standards that apply to the system being described. For
+  example, this could include legal, quality and regulatory standards, industry
+  standards for usability, interoperability, internationalization, operating
+  system compliance, etc.</p>

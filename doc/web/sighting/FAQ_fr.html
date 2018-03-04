@@ -1,0 +1,54 @@
+<html>
+
+<head>
+
+<title>FAQ</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link rel="stylesheet" href="rr0.css" type="text/css">
+<script language="JavaScript">
+<!--
+function sendMail() {
+address = "rr0";
+domain = "rr0.org";
+window.location="mailto:" + address + "@" + domain;
+return true;
+}
+-->
+</script>
+</head>
+
+
+
+<body>
+<table border="0" cellspacing="0" cellpadding="0" class="noborder">
+  <tr>
+    <td class="noborder"><h1>Foire aux Questions</h1>
+    </td>
+    <td class="noborder"><ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="#" onClick="sendMail();">Contact</a></li>
+        <li><a href="FAQ.html">English translation</a></li>
+      </ul>
+    </td>
+  </tr>
+</table>
+<p>Cette FAQ est d&eacute;di&eacute;e au sous-projet UFO@home <strong>Sighting</strong>. Voir la <a href="../FAQ.html">FAQ du projet UFO@home </a> pour des r&eacute;ponses &agrave; des questions plus g&eacute;n&eacute;rales.</p>
+<ul>
+  <li><a href="#HowToContribute">Pourquoi une repr&eacute;sentation 2D ?</a></li>
+  <li><a href="#WhyJava">Pourquoi une applet Java ?
+  </a>  
+    <ul>
+    <li>Pourquoi ne pas utiliser des API Java allant au-del&agrave; d'AWT (Java 2D, etc.) ?</li>
+    </ul>
+</li>
+</ul>
+<h2><a name="Why2D" id="Why2D"></a>Pourquoi une repr&eacute;sentation 2D ?</h2>
+<p>L'applet de t&eacute;moignage visuel vise &agrave; repr&eacute;senter ce que le t&eacute;moin a vu. C'est litt&eacute;ralement une reconstitution visuelle de l'image qu'a re&ccedil;ue le t&eacute;moin, qui est en 2 dimensions par nature. Le ou les objets observ&eacute;s peuvent &ecirc;tre tridimisionels, mais ce type d'interpr&eacute;tation reste le travail des chercheurs, et ne fait pas partie des objectifs de l'outils.</p>
+<p>De plsu, notez que l'applet vise &eacute;galement &agrave; repr&eacute;senter en 3 dimensions ce qu'elle sait &ecirc;tre en 3 dimensions avec certitude, c'est-&agrave;-dire la sph&egrave;re c&eacute;leste compos&eacute;e des &eacute;toiles, plan&egrave;tes et de la Lune, ainsi que l'environnement direct connu du t&eacute;moin (routes, b&acirc;timents, etc.).</p>
+<h2><a name="WhyJava"></a>Pourquoi une applet Java ?</h2>
+<p>Java est un langage de programmation mais aussi une plate-forme d'ex&eacute;cution logicielle disponible sur de nombreuses machines ((PC, assistants personnels, gros syst&egrave;mes, etc.), et syst&egrave;mes d'exploitation (Windows, Unix, etc.). Une applet un est programme Java c&ocirc;t&eacute; client capable de s'ex&eacute;cuter dans des navigateurs supportant Java, tels que Microsoft Internet Explorer, Netscape Navigator, Mozilla, Opera, etc. </p>
+<p>Limiter le code de l'applet de t&eacute;moignage visuel &agrave; Java 1.1 lui permet de s'ex&eacute;cuter dans les navigateurs les plus populaires du march&eacute; (dont Microsoft Internet Explorer) sans n&eacute;cessiter de t&eacute;l&eacute;chager d'autre programmes ou plugins. C'est l&agrave; un avantage critique r&eacute;pondant au besoin du projet de toucher le public le plus large possible. Se limiter &agrave; Java 1.1 (c&ocirc;t&eacute; client) permet &eacute;galement au code d'&ecirc;tre compatible avec des applications Java s'ex&eacute;cutant sur des appareils portables tels que les assistants personnels ou PocketPCs (i.e. J2ME CDC Personal Profile).</p>
+</body>
+
+</html>
+

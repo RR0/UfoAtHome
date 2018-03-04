@@ -1,0 +1,180 @@
+<html>
+
+<head>
+
+<title>Conception - RR0-IS</title>
+
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+
+<link rel="stylesheet" href="rr0.css" type="text/css">
+
+</head>
+
+
+
+<body>
+<h1>Technical architecture</h1>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+  <tr> 
+    <th colspan="4"><a href="index_fr.html">Home</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="mailto:rr0@rr0.org">Contact</a></th>
+  </tr>
+</table>
+<p>UFO@home is built on a 3-tier architecture, separating cleanly presentation,
+  business and integration/data access layers. This will allow to support multiple
+  client types, such as Web browsers, heavyweight GUI clients, and even other
+  informations systems through Web services.</p>
+<ol>
+  <li>un client Web (navigateur)</li>
+  <li>un serveur applicatif, herbergeant une application divis&eacute;e en couches 
+    de : 
+    <ul>
+      <li>pr&eacute;sentation : contr&ocirc;le de la logique de navigation Web, 
+        construction dynamique des pages</li>
+      <li>services : actions sur des objets m&eacute;tiers</li>
+      <li>m&eacute;tier : objets du domaine, persistants ou non</li>
+      <li>integration : glue entre donn&eacute;es en m&eacute;moire et donn&eacute;es 
+        persistant dans le r&eacute;f&eacute;rentiel UFO@home </li>
+    </ul>
+  </li>
+  <li> le r&eacute;f&eacute;rentiel UFO@home (base de donn&eacute;es ou autre)</li>
+</ol>
+<h3>Mod&egrave;les et m&eacute;canismes d'architecture</h3>
+<table border=1 cellspacing=0 cellpadding=5>
+  <thead>
+    <tr> 
+      <td colspan=2 rowspan=2> Mod&egrave;les et m&eacute;canismes d'architecture 
+        RRO-IS</td>
+      <th valign=top> Version</th>
+      <th> Alpha</th>
+      <th rowspan=3> Commentaire</th>
+    </tr>
+    <tr> 
+      <th valign=top> Release</th>
+      <th> 1</th>
+    </tr>
+    <tr> 
+      <th>Domaine </th>
+      <th> El&eacute;ment</th>
+      <th valign=top> FixPack</th>
+      <th>&nbsp; </th>
+    </tr>
+    <tr> 
+      <th valign=top>Plate-forme</th>
+      <th valign=top><a href="http://javarome.net/J2EE.html">J2EE</a></th>
+      <th valign=top>&nbsp;</th>
+      <td>1.3</td>
+      <td>&nbsp;</td>
+    </tr>
+    <tr> 
+      <th rowspan="2" valign=top><a href="http://javarome.net/Persistance.html">Persistance</a></th>
+      <th rowspan="2" valign=top>&nbsp;</th>
+      <th valign=top><a href="http://javarome.net/JDBC.html">JDBC</a></th>
+      <td>2.0</td>
+      <td>Java DataBase Connectivity incluant DataSource</td>
+    </tr>
+    <tr> 
+      <th valign=top><a href="http://javarome.net/JDO.html">JDO</a></th>
+      <td>1.0</td>
+      <td>Java Data Objects standard</td>
+    </tr>
+    <tr> 
+      <th valign=top>Transactions</th>
+      <th valign=top>&nbsp;</th>
+      <th valign=top>JTA</th>
+      <td>1.0</td>
+      <td>UserTransaction</td>
+    </tr>
+    <tr> 
+      <th rowspan="2" valign=top>Infrastructure Web</th>
+      <th valign=top>&nbsp;</th>
+      <th valign=top>Servlet</th>
+      <td>2.3</td>
+      <td>&nbsp;</td>
+    </tr>
+    <tr> 
+      <th valign=top>Struts</th>
+      <th valign=top>&nbsp;</th>
+      <td>1.1</td>
+      <td>&nbsp;</td>
+    </tr>
+    <tr> 
+      <th valign=top>Administration</th>
+      <th valign=top>&nbsp;</th>
+      <th valign=top>JMX</th>
+      <td>1.1</td>
+      <td>&nbsp;</td>
+    </tr>
+  </thead>
+</table>
+<h3>Int&eacute;gration</h3>
+<h3>Autres API, composants et frameworks utilis&eacute;s</h3>
+<table border=1 cellspacing=0 cellpadding=5>
+  <thead>
+    <tr> 
+      <td colspan=2 rowspan=3> API, composants et framework UFO@home</td>
+      <th valign=top> Version</th>
+      <th> Alpha</th>
+      <th rowspan=4> Commentaire</th>
+    </tr>
+    <tr> 
+      <th valign=top> Release</th>
+      <th> 1</th>
+    </tr>
+    <tr> 
+      <th valign=top> Fixpack</th>
+      <th>&nbsp; </th>
+    </tr>
+    <tr> 
+      <th>Domaine </th>
+      <th> Composant</th>
+      <th valign=top> Maintenance</th>
+      <th>&nbsp; </th>
+    </tr>
+    <tr> 
+      <th valign=top>Visualiseur de ciel</th>
+      <th valign=top>&nbsp;</th>
+      <th valign=top>&nbsp;</th>
+      <td>&nbsp;</td>
+      <td>Fonction du lieu et date/heure, pouvant fonctionner en applet Java.</td>
+    </tr>
+    <tr> 
+      <th valign=top>visualiseur de carte g&eacute;ographique </th>
+      <th valign=top>&nbsp;</th>
+      <th valign=top>&nbsp;</th>
+      <td>&nbsp;</td>
+      <td>2D, avec possibilit&eacute; de navigation et zoom, pouvant fonctionner 
+        en applet Java et envoyer des coordonn&eacute;es latitude/longitude &agrave; 
+        un serveur.</td>
+    </tr>
+    <tr> 
+      <th valign=top>Module de dessin</th>
+      <th valign=top>&nbsp;</th>
+      <th valign=top>&nbsp;</th>
+      <td>&nbsp;</td>
+      <td>Supportant formes g&eacute;om&eacute;triques, couleurs, effets de luminosit&eacute;, 
+        de texture, mouvement de formes, fond param&eacute;trable avec une image, 
+        pouvant fonctionner en applet Java et pouvant envoyer l'image/animation 
+        r&eacute;sultante &agrave; un serveur.</td>
+    </tr>
+  </thead>
+</table>
+<h2>Architecture applicative</h2>
+<h3>Vue par cas d'utilisation</h3>
+<p>Cette section d&eacute;crit les r&eacute;alisations de cas d'utilisation.</p>
+<h3>Vue logique</h3>
+<h4>Sous-syst&egrave;mes</h4>
+<h4>Presentation</h4>
+<h4>Services</h4>
+<h4>M&eacute;tier</h4>
+<h4>Integration</h4>
+<p>Import/export : Un format d'&eacute;change XML est pr&eacute;vu, v&eacute;hicul&eacute; 
+  via des Web Services.</p>
+<h3>Couche commune</h3>
+<h2>Vue processus</h2>
+<h2>Vue r&eacute;alisation</h2>
+<h2>Vue d&eacute;ploiement</h2>
+<h2>Vue donn&eacute;es</h2>
+</body>
+
+</html>
+

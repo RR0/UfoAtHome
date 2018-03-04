@@ -1,0 +1,199 @@
+<style type="text/css">
+
+
+.mainTitle {  font-family: Verdana, Arial, Helvetica, sans-serif; font-size: larger}
+h1 {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 36px;
+	font-style: normal;
+	font-weight: normal;
+	font-variant: normal;
+	text-transform: none;
+	word-spacing: normal;
+	letter-spacing: 1px;
+	color: #666666;
+}
+.abstract {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-weight: bold;
+	letter-spacing: 1px;
+	border-top-color: #CCCCCC;
+	border-right-color: #CCCCCC;
+	border-bottom-color: #CCCCCC;
+	border-left-color: #CCCCCC;
+	background-color: #EEEEEE;
+	padding: 10px;
+}
+
+p {  font-size: 16px; font-style: normal; line-height: normal; font-weight: normal; font-variant: normal; text-transform: Aucune; text-align: justify; color: #000000; font-family: Verdana, Arial, Helvetica, sans-serif; clip:   rect(   ); text-indent: 20pt}
+
+ul {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 16px;
+	list-style-position: outside;
+	list-style-type: disc;
+	text-align: justify;
+}
+
+address {  font-family: "Courier New", Courier, mono; font-size: 16px; margin-left: 1cm}
+
+ol { font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 16px; list-style-position: outside; list-style-type: decimal; text-align: justify}
+
+h2 {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 24px;
+	font-style: normal;
+	line-height: normal;
+	font-weight: normal;
+	font-variant: normal;
+	text-transform: none;
+	margin-top: 25px;
+	margin-right: 0px;
+	margin-left: 0px;
+	color: #666666;
+	border-bottom: thin solid #CCCCCC;
+	padding-bottom: 5px;
+	letter-spacing: 1px;
+	width: 50%;
+}
+
+</style>
+h3 { font-family: Tahoma, sans-serif; font-size: medium; font-style: normal; line-height: normal; font-weight: bold; font-variant: normal; text-transform: none; height: auto; width: 100%; margin-top: 10px; margin-right: 0px; border-color: black ; margin-bottom: 0px; margin-left: 0px; padding-top: 0px; padding-right: 0px; padding-bottom: 0px; padding-left: 0px; border: black groove; border-width: 0px 0px thin }
+h3 {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 18px;
+	font-style: normal;
+	line-height: normal;
+	font-weight: normal;
+	font-variant: normal;
+	text-transform: none;
+	margin-top: 10px;
+	margin-right: 0px;
+	margin-bottom: 0px;
+	margin-left: 0px;
+	clip:  rect(   );
+	color: #666666;
+	letter-spacing: 1px;
+	border-bottom-style: dotted;
+	padding: 5px;
+	border-bottom-width: thin;
+	border-bottom-color: #DBDBDB;
+	width: 33%;
+}
+
+cite {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-weight: normal;
+	border: none;
+	background-color: #FFFEF0;
+	background-repeat: repeat-x;
+	text-indent: 0pt;
+	text-align: justify;
+	vertical-align: top;
+	font-style: normal;
+}
+
+th {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 16px;
+	font-style: normal;
+	line-height: normal;
+	font-weight: normal;
+	font-variant: normal;
+	background-color: #F2F3F7;
+	color: #666666;
+}
+
+td {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 16px;
+	font-style: normal;
+	line-height: normal;
+	font-weight: normal;
+	font-variant: normal;
+	text-align: justify;
+}
+blockquote { font-family: Tahoma, sans-serif; font-size: 16px; font-style: normal; line-height: normal; font-weight: normal; font-variant: normal; text-transform: none; text-align: left}
+.source { font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 8pt; font-style: normal; line-height: normal; font-weight: normal; font-variant: normal; text-transform: none; color: #666666}
+.exergue {  font-family: "Times New Roman", Times, serif; font-style: italic; text-align: right; font-size: 18px}
+body {
+	background-color: #FFFFFF;
+	margin: 20px 30px;
+}
+a {  color: #006699; text-decoration: none; filter: FlipV; }
+a:hover { text-decoration : underline; }
+.caviar {
+font-family: "Courier New", Courier, mono; font-size: 16px; background-color: #333333; font-style: normal; color: #333333
+}
+caption {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 16px;
+	font-weight: bold;
+	text-align: justify;
+	vertical-align: bottom;
+	padding: 0px;
+	margin-top: 10px;
+	margin-bottom: 10px;
+	margin-right: 0px;
+	margin-left: 0px;
+}
+table {
+}
+.leftImage {
+	margin-top: 20px;
+	margin-right: 20px;
+	margin-bottom: 20px;
+	margin-left: 0px;
+
+}
+.rightImage {
+	margin-top: 20px;
+	margin-right: 0px;
+	margin-bottom: 20px;
+	margin-left: 20px;
+
+}
+
+form {
+	margin: 0px;
+	padding: 0px;
+}
+
+h4 {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 16px;
+	font-style: normal;
+	line-height: normal;
+	font-weight: normal;
+	font-variant: normal;
+	text-transform: none;
+	margin-top: 10px;
+	margin-right: 0px;
+	margin-bottom: 0px;
+	margin-left: 0px;
+	clip:  rect(   );
+	color: #666666;
+	letter-spacing: 1px;
+	border-bottom-style: dotted;
+	padding: 5px;
+	border-bottom-width: thin;
+	border-bottom-color: #DBDBDB;
+	width: 25%;
+}
+.dialog {
+	list-style-type: dash;
+}
+.objection {
+	color: #FF5E5E;
+}
+.note {
+font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 8pt; font-style: normal; line-height: normal; font-weight: normal; font-variant: normal; text-transform: none; color: #666666
+}
+code {
+	font-family: "Courier New", Courier, mono;
+	font-size: 18px;
+}
+li {
+	padding-top: 4px;
+	padding-bottom: 4px;
+}

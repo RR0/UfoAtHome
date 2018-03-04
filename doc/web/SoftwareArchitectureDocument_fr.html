@@ -1,0 +1,564 @@
+<h1>Document d'Architecture Logicielle</h1>
+<table border=1 align="center" cellpadding=5 cellspacing=0>
+<caption>
+Historique
+</caption>
+<tbody>
+<tr>
+<td 
+    valign=top class="Normal">
+<p class=tabletext style="TEXT-ALIGN: center" 
+    align=center><b>Date</b></p></td>
+<td 
+    valign=top class="Normal">
+<p class=tabletext style="TEXT-ALIGN: center" 
+      align=center><b>Version</b></p></td>
+<td 
+    valign=top class="Normal">
+<p class=tabletext style="TEXT-ALIGN: center" 
+      align=center><b>Description</b></p></td>
+<td 
+    valign=top class="Normal">
+<p class=tabletext style="TEXT-ALIGN: center" 
+      align=center><b>Auteur</b></p></td>
+</tr>
+<tr>
+<td 
+    valign=top class="Normal">
+<p class=tabletext>1er Janvier 2004</p></td>
+<td 
+    valign=top class="Normal">
+<p class=tabletext>0.2</p></td>
+<td 
+    valign=top class="Normal">&nbsp;</td>
+<td 
+    valign=top class="Normal">J&eacute;r&ocirc;me Beau </td>
+</tr>
+</tbody>
+</table>
+<br>
+<table border="0" align="center" cellpadding="5" cellspacing="0">
+  <tr>
+    <td valign="top"><ul>
+      <li> <strong><a href="#Introduction">Introduction</a></strong>
+        <ul>
+          <li><a href="#Objectif">Objectif</a></li>
+          <li> <a href="#Perimetre">P&eacute;rim&egrave;tre</a></li>
+          <li><a href="#DefinitionsAcronymesEtAbbreviations">D&eacute;finitions,
+              acronymes, et abbr&eacute;viations</a> </li>
+          <li><a href="#References">R&eacute;f&eacute;rences</a> </li>
+      </ul>
+      </li>
+      <li>        <strong><a href="#ArchitecturalRepresentation">Repr&eacute;sentation
+            architecturale</a></strong></li>
+      <li><strong>        <a href="#ArchitecturalGoalsAndConstraints">Objectifs
+            et contraintes d'architecture</a></strong></li>
+      <li> <strong><a href="#UseCaseView">Vue par cas d'utilisation</a></strong>
+        <ul>
+          <li> <a href="#RealisationDesCasDUtilisation">R&eacute;alisation de cas d'utilisation</a></li>
+        </ul>
+      </li>
+    </ul></td>
+    <td><ul>
+      <li><strong><a href="#LogicalView">Vue logique</a></strong>
+        <ul>
+            <li> <a href="#VueLogiqueVueDEnsemble">Vue d'ensemble</a></li>
+            <li> Packages de conceptions significatifs pour l'architecture</li>
+        </ul>
+      </li>
+      <li> <strong><a href="#ProcessView">Vue des processus</a></strong></li>
+      <li><strong> <a href="#VueDeploiement">Vue du d&eacute;ploiement</a></strong></li>
+      <li><strong> Vue de l'impl&eacute;mentation</strong>
+        <ul>
+          <li> Vue d'ensemble</li>
+          <li> Couches</li>
+        </ul>
+      </li>
+      <li> <strong>Vue des donn&eacute;es</strong></li>
+      <li><strong> Taille et performance</strong></li>
+      <li><strong> Qualit&eacute;</strong></li>
+    </ul></td>
+  </tr>
+</table>
+<h2><a name="Introduction"></a>Introduction</h2>
+<h3><a name="Objectif" id="Objectif"></a>Objectif</h3>
+<p>Ce document fournit une vue d'ensemble de l'architecture compl&egrave;te du syst&egrave;me,
+  au travers d'une s&eacute;rie de vues architecturales diff&eacute;rentes d&eacute;peignant
+  les diff&eacute;rents aspects du syst&egrave;me. Il vise &agrave; capturer et transmettre les d&eacute;cisions
+architecturales significatives qui sont prises pour le syst&egrave;me.</p>
+<h3><a name="Perimetre"></a>P&eacute;rim&egrave;tre</h3>
+<p>Ce document s'applique au projet de Syst&egrave;me d'Information
+RR0 (<em>RR0 Information System</em> ou <em>UFO@home</em>). Il affecte l'ensemble
+des besoins et de la conception de UFO@home.</p>
+<h3><a name="DefinitionsAcronymesEtAbbreviations"></a>Definitions, acronymes
+et abbr&eacute;viations</h3>
+<ul>
+  <li>IA&#8212; Intelligence artificielle.</li>
+  <li>API &#8212; Application Programming Interface : interface de programmation.</li>
+  <li>HTTP &#8212; Hyper-Text Transfer Protocol. Protocole de communication
+    entre des navigateurs Web et des serveurs Web.</li>
+  <li>J2EE &#8212; Java 2 Enterprise Edition. Architecture Java de r&eacute;f&eacute;rence
+    pour les applications serveur.</li>
+  <li>JDO &#8212; Java Data Objects. API Java standard pour g&eacute;rer la persistance
+    d'objets de mani&egrave;re transparente.</li>
+  <li>JTA &#8212; Java Transaction API : API Java pour les transactions.</li>
+  <li>RR0 IM&#8212; mod&egrave;le d'information RR0 UFO@home.</li>
+  <li>Servlet &#8212; Java server process handling client (usually HTTP) requests.</li>
+  <li>UUDF &#8212; Unified Ufological Data Format : format de donn&eacute;es ufologiques
+    unifi&eacute;.</li>
+  <li>UML &#8212; Unified Modeling Language.</li>
+</ul>
+<p>See also the project's <a href="https://sourceforge.net/docman/display_doc.php?docid=17415&group_id=70060">Glossary</a>.</p>
+<h3><a name="References"></a>R&eacute;f&eacute;rences</h3>
+<ul>
+  <li><a href="https://sourceforge.net/docman/display_doc.php?docid=17410&group_id=70060">Vision</a></li>
+  <li><a href="https://sourceforge.net/docman/display_doc.php?docid=17414&group_id=70060">Sp&eacute;cifications
+      suppl&eacute;mentaires</a></li>
+</ul>
+<h3><a name="VueDEnsemble"></a>Vue d'ensemble</h3>
+<h2><a name="ArchitecturalRepresentation"></a>Repr&eacute;sentation architecturale</h2>
+<p>Ce document pr&eacute;sente l'architecture comme une s&eacute;rie de vues; vue par cas d'utilisation,
+  vue logique, vue des processus et vue du d&eacute;ploiement. Ce sont des vues d'un
+mod&egrave;le UML sous-jacent.</p>
+<h2><a name="ArchitecturalGoalsAndConstraints"></a>Objectifs et contraintes d'architecture</h2>
+<p>Certains besoins-cl&eacute;s et contraintes syst&egrave;me ont un impact significatif sur
+l'architecture. Il s'agit du fait que :</p>
+<ul>
+  <li> un site Web UFO@home fournit un affichage de la plupart de son contenu.
+    Une interface pour ce syst&egrave;me doit &ecirc;tre capable de supporter de grands volumes
+    de trafic.</li>
+  <li> plusieurs serveurs UFO@home doivent &ecirc;tre capables de communiquer via Internet
+    pour &eacute;changer des donn&eacute;es ou permettre un traitement distribu&eacute;.</li>
+  <li>toute personne ou organisation doit pouvoir impl&eacute;menter sa propre version
+    d'un serveur compatible UFO@home, lui permettant ainsi de communiquer (&eacute;changer
+    des donn&eacute;es, etc.) avec d'autres serveurs compatibles UFO@home au travers d'Internet.</li>
+  <li> toutes les fonctions doivent &ecirc;tre accessibles &agrave; l'aide des trois navigateurs
+    Web les plus utilis&eacute;s.</li>
+  <li> touts les imp&eacute;ratifs de performance et de charge, tels qu'ils sont stipul&eacute;s
+    dans le <a href="https://sourceforge.net/docman/display_doc.php?docid=17410&group_id=70060">document
+    de Vision</a> [1] et dans les <a href="https://sourceforge.net/docman/display_doc.php?docid=17414&group_id=70060">Sp&eacute;cifications
+    suppl&eacute;mentaires </a> [2], doivent &ecirc;tre pris en consideration lors
+    du d&eacute;veloppement de l'architecture.</li>
+</ul>
+<h2><a name="UseCaseView"></a>Vue par cas d'utilisation</h2>
+<p>Cette section d&eacute;crit la vue par cas d'utilisation de l'architecture logicielle.
+  Cette vue fournit des informations importantes pour s&eacute;lectionner l'ensemble
+  de sc&eacute;narios et/ou cas d'utilisation vis&eacute;s par une it&eacute;ration. Elle d&eacute;crit l'ensemble
+  de sc&eacute;narios et/ou cas d'utilisation repr&eacute;sentant une fonctionnalit&eacute; significative/centrale.
+  Elle d&eacute;crit aussi l'ensemble de sc&eacute;narios et/ou de cas d'utilisation impliquant
+  une couverture substantielle de l'architecture (exploitant de nombreux &eacute;l&eacute;ment
+  de l'architecture) ou stressant ou illustant un point sp&eacute;cifique et d&eacute;licat
+de l'architecture.</p>
+<p>Les cas d'utilisation de ce syst&egrave;me sont list&eacute;s ci-dessous. Les cas d'utilisation
+  en gras sont significatifs pour l'architecture. Une description
+de ces cas d'utilisation peut &ecirc;tre trouv&eacute;e plus loin dans cette section.</p>
+<ul>
+  <li><strong> D&eacute;poser un t&eacute;moignage - </strong>Cela peut n&eacute;cessiter
+    une interface utilisateur complexe c&ocirc;t&eacute; client</li>
+  <li>Rechercher une observation - Recherche multi-crit&egrave;res</li>
+  <li>Cr&eacute;ation d'une fonction - Telle qu'un calcul, ou une fonction de classification</li>
+  <li><strong>Traiter des donn&eacute;es - </strong>Cela peut inclure une ex&eacute;cution
+    distribu&eacute;e de fonction  ou le traitement de donn&eacute;es distribu&eacute;es
+    sur plusieurs serveurs
+    (statistiques, etc)</li>
+  <li><strong>Synchronisation de donn&eacute;es - </strong>V&eacute;rification du besoin
+    de mettre &agrave; jour/r&eacute;cup&eacute;ration de donn&eacute;e vers/depuis d'autres serveurs.</li>
+</ul>
+<p>Les diagrammes suivantes d&eacute;peignent les cas d'utilisation du syst&egrave;me.</p>
+<p><img src="http://rr0.sourceforge.net/images/Actors.gif" width="582" height="358"></p>
+<h3><a name="RealisationDesCasDUtilisation"></a>R&eacute;alisation des cas d'utilisation</h3>
+<p>Cette section d&eacute;crit la r&eacute;alisation des cas d'utilisation.</p>
+<h2><a name="LogicalView"></a>Vue logique</h2>
+<p>Cette section d&eacute;crit les parties du mod&egrave;le de conceptions significatives pour
+  l'architecture, telles que sa d&eacute;composition en sous-syst&egrave;mes et packages.
+  Pour chaque package significatif, sa d&eacute;composition en classes et utilitaires
+  de classes. Elle introduit les classes significatives pour l'architecture et
+  d&eacute;crit leurs responsibilit&eacute;s, ainsi que quelques relations, op&eacute;rations et attributs
+tr&egrave;s importants.</p>
+<h3><a name="VueLogiqueVueDEnsemble"></a>Vue d'ensemble</h3>
+<p>Cette sous-section d&eacute;crit la d&eacute;composition de l'ensemble du mod&egrave;le de conception
+en termes de hi&eacute;rarchie et packages et de couches.</p>
+<p>En r&eacute;sum&eacute;, UFO@home peut &ecirc;tre vu comme l'empilage de 3 sous-syst&egrave;mes :</p>
+<ol>
+  <li>le <strong>Syst&egrave;me d'Information </strong>(IS),
+    qui est l'application accessible aux utilisateurs finaux du public. Elle
+    g&egrave;re les interactions avec les utilisateurs, leurs contextes de travail,
+    et fournit des services sp&eacute;cifiques &agrave; cette application tels que le calcul
+    de statistiques, etc.</li>
+  <li>le <strong>Mod&egrave;le d'Information </strong> (IM), qui mod&eacute;lise
+    les concepts du domaine ufologique, qu'ils soient de haut (cas,
+    t&eacute;moignanges, classifications) ou de bas (&eacute;v&eacute;nements, 
+    moments) niveau.</li>
+  <li>le moteur <strong>Prosper</strong> (peut-&ecirc;tre), qui ne fait pas partie
+    du projet UFO@home, mais est un projet ind&eacute;pendant visant &agrave; offrir
+    des capacit&eacute;s
+    d'intelligence artificielle (AI) &agrave; toute application, permettant de
+    pr&eacute;dire des faits futurs sur la base de faits pass&eacute;s, d'identifier des motifs
+    d'&eacute;v&eacute;nements, etc. 
+    UFO@home &eacute;tant un bon candidat pour exp&eacute;rimenter
+    Prosper, ce dernier a &eacute;t&eacute; identifi&eacute; comme un composant pluggable et
+    int&eacute;ressant pour UFO@home.</li>
+</ol>
+<p>UFO@home est construit sur une architecture 3 couches s&eacute;parant les pr&eacute;occupation
+  de pr&eacute;sentation, m&eacute;tier et d'int&eacute;gration/acc&egrave;s aux donn&eacute;es. Ceci permet de
+  supporte plusieurs types de clients, tels que des navigateurs Web, des clients
+  graphiques &quot;lourds&quot;, et m&ecirc;me d'autres syst&egrave;mes d'informations &agrave; l'aide de services
+  Web.</p>
+<p>La vue logique de UFO@home comprend les sous-syst&egrave;mes int&eacute;gr&eacute;s suivants :</p>
+<table border="1" cellspacing="0" cellpadding="5">
+  <tr>
+    <td>UFO@home</td>
+    <th colspan="6">Couches logicielles</th>
+  </tr>
+  <tr>
+    <th rowspan="2">Sous-syst&egrave;me</th>
+    <th colspan="2">Pr&eacute;sentation</th>
+    <th colspan="2">M&eacute;tier</th>
+    <th colspan="2">Int&eacute;gration</th>
+  </tr>
+  <tr>
+    <th>Package</th>
+    <th>Composants</th>
+    <th>Package</th>
+    <th>Composants</th>
+    <th>Package</th>
+    <th>Composants</th>
+  </tr>
+  <tr>
+    <td>IS</td>
+    <td><code>org.rr0.is. presentation</code></td>
+    <td>AccountBean, SightingBean</td>
+    <td><code>org.rr0.is. business</code></td>
+    <td>User account, Working session</td>
+    <td><code>org.rr0.is. integration</code></td>
+    <td>UserDAO</td>
+  </tr>
+  <tr>
+    <td> IM</td>
+    <td colspan="2">N/A</td>
+    <td><code>org.rr0. business</code></td>
+    <td>Case, Account, Sighting, Classfication, Evidence<br>
+      Event, Moment, Location</td>
+    <td><code>org.rr0. integration</code></td>
+    <td>EventDAO, etc.</td>
+  </tr>
+  <tr>
+    <td>Prosper</td>
+    <td colspan="2">N/A</td>
+    <td><code>org. javarome. prosper. business</code></td>
+    <td>Event, Memory</td>
+    <td><code>org.javarome. prosper. integration</code></td>
+    <td>MemoryDAO, etc.</td>
+  </tr>
+</table>
+<h3><a name="PackagesConceptionSignificatifsPourLArchitecture"></a>Packages de
+  conception significatifs pour l'architecture</h3>
+<p>Les packages significatifs de UFO@home sont :</p>
+<blockquote>
+  <table border="0" cellspacing="0" cellpadding="0">
+    <tr>
+      <td><code>org</code></td>
+      <td>Convention de nommage pour les logiciels &agrave; but non lucratif et/ou Open
+        Source</td>
+    </tr>
+    <tr>
+      <td><blockquote><code>rr0</code></blockquote>
+      </td>
+      <td>Logiciels d&eacute;velopp&eacute;s par RR0</td>
+    </tr>
+    <tr>
+      <td>
+        <blockquote>
+          <blockquote> <code>im</code></blockquote>
+        </blockquote>
+      </td>
+      <td>Mod&egrave;le d'Information</td>
+    </tr>
+    <tr>
+      <td>
+        <blockquote>
+          <blockquote>
+            <blockquote> <code><strong>service</strong></code></blockquote>
+          </blockquote>
+        </blockquote>
+      </td>
+      <td>Processus du domaine ufologique (recherche,
+        etc.)</td>
+    </tr>
+    <tr>
+      <td>
+        <blockquote>
+          <blockquote>
+            <blockquote> <code><strong>business</strong></code></blockquote>
+          </blockquote>
+        </blockquote>
+      </td>
+      <td>Objets m&eacute;tier du domaine ufologique (&eacute;v&eacute;nements/observations,
+        circonstances, enqu&ecirc;tes, t&eacute;moignages, etc.)</td>
+    </tr>
+    <tr>
+      <td>
+        <blockquote>
+          <blockquote>
+            <blockquote> <code><strong>integration</strong></code></blockquote>
+          </blockquote>
+        </blockquote>
+      </td>
+      <td>Persistance et &eacute;change d'objets m&eacute;tier du domaine ufologique</td>
+    </tr>
+    <tr>
+      <td>
+        <blockquote>
+          <blockquote> <code>is</code></blockquote>
+        </blockquote>
+      </td>
+      <td>Syst&egrave;me d'Information : application pour les utilisateurs finaux</td>
+    </tr>
+    <tr>
+      <td>
+        <blockquote>
+          <blockquote>
+            <blockquote> <code><strong>presentation</strong></code></blockquote>
+          </blockquote>
+        </blockquote>
+      </td>
+      <td>Interface utilisateur (Web, graphique)</td>
+    </tr>
+    <tr>
+      <td>
+        <blockquote>
+          <blockquote>
+            <blockquote> <code><strong>service</strong></code></blockquote>
+          </blockquote>
+        </blockquote>
+      </td>
+      <td>Processus sp&eacute;cifiques &agrave; l'application (login, etc.)</td>
+    </tr>
+    <tr>
+      <td>
+        <blockquote>
+          <blockquote>
+            <blockquote> <code><strong>business</strong></code></blockquote>
+          </blockquote>
+        </blockquote>
+      </td>
+      <td>Objets m&eacute;tier sp&eacute;cifiques &agrave; l'application (utilisateurs, pr&eacute;ferences,
+        etc.)</td>
+    </tr>
+    <tr>
+      <td>
+        <blockquote>
+          <blockquote>
+            <blockquote> <code><strong>integration</strong></code></blockquote>
+          </blockquote>
+        </blockquote>
+      </td>
+      <td>Persistance et exchange d'objets m&eacute;tiers sp&eacute;cifiques &agrave; l'application</td>
+    </tr>
+    <tr>
+      <td><blockquote> <code>javarome</code></blockquote>
+      </td>
+      <td>Projets Open source d&eacute;velopp&eacute;s par J&eacute;r&ocirc;me
+      Beau</td>
+    </tr>
+    <tr>
+      <td>
+        <blockquote>
+          <blockquote> <code>prosper</code></blockquote>
+        </blockquote>
+      </td>
+      <td>Moteur d'IA</td>
+    </tr>
+  </table>
+</blockquote>
+<p>L'ensemble des packages list&eacute;s ne d&eacute;finissent que des interfaces.
+  D'autres personnes et organisations sont libres d'impl&eacute;menter ces interfaces
+  pour r&eacute;aliser des serveurs compatibles avec le mod&egrave;le RR0 IM
+  ou le logiciel UFO@home. </p>
+<p>Egalement, une Impl&eacute;mentation de R&eacute;f&eacute;rence (UFO@home
+  RI) de ces interfaces sera fournie pour permettre :</p>
+<ul>
+  <li> d'&eacute;valuer le produit (son int&eacute;r&ecirc;t, corriger ses d&eacute;fauts, le compl&eacute;ter,
+    etc.)</li>
+  <li>utiliser une version du produit gratuite et accessible &agrave; tous</li>
+</ul>
+<h4>org.rr0.im.business</h4>
+<h5>event</h5>
+<h5>circumstances</h5>
+<p>WeatherConditions (Temperature, Precipitations, Clouds)</p>
+<h5>classification</h5>
+<p><img src="JavaDoc/org/rr0/im/business/classification/doc-files/Classifications.cl.gif" width="621" height="528" align="right">Le
+  sous-package de classification d&eacute;finit un ensemble r&eacute;duit de classes
+  permettant de d&eacute;finir n'importe quelle classification de donne&eacute;s. Il permet
+  de classer des Cas,
+  Observations (RR1,
+  RR2...), mais aussi d'autres objets m&eacute;tier tels que des Nuages, Temp&eacute;ratures
+  (Froid, Chaud...), etc.
+  Un avantage important
+  de ce syst&egrave;me de classification
+  est de ne pas se baser sur une classification pr&eacute;d&eacute;finie, permettant ainsi
+  &agrave; tout utilisateur de b&acirc;tir son propre syst&egrave;me de classification de tout type
+  de donn&eacute;es.</p>
+<h4>org.rr0.im.integration</h4>
+<p>Interfaces permettant &agrave; tout objet m&eacute;tier d'&ecirc;tre sauv&eacute;/restaur&eacute;. L'impl&eacute;mentation
+  de r&eacute;f&eacute;rence utilise JDO.</p>
+<table border=1 cellspacing=0 cellpadding=5>
+  <thead>
+    <tr>
+      <td rowspan=2> Mod&egrave;les et m&eacute;canismes d'architecture
+        UFO@home</td>
+      <td>Version</td>
+<th colspan="3"> 0   </th>
+<th rowspan=3> Commentaire</th>
+    </tr>
+    <tr>
+<td>Release</td>
+      <th> 1</th>
+<th> 2 </th>
+<th> 3 </th>
+    </tr>
+    <tr>
+      <th>Domaine </th>
+      <th> El&eacute;ment</th>
+      <th>&nbsp; </th>
+<th>&nbsp; </th>
+<th>&nbsp; </th>
+    </tr>
+    <tr>
+      <th valign=top>Plate-forme</th>
+      <th valign=top><a href="http://javarome.net/J2EE.html">J2EE</a></th>
+      <td>1.3</td>
+<td>1.3</td>
+<td>1.3</td>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <th rowspan="2" valign=top><a href="http://javarome.net/Persistance.html">Persistance</a></th>
+      <th valign=top><a href="http://javarome.net/JDBC.html">JDBC</a></th>
+      <td>2.0</td>
+<td>2.0</td>
+<td>2.0</td>
+      <td>Java DataBase Connectivity incluant DataSource</td>
+    </tr>
+    <tr>
+<th valign=top><a href="http://javarome.net/JDO.html">JDO</a></th>
+      <td>1.0</td>
+<td>1.0</td>
+<td>1.0</td>
+      <td>Java Data Objects standard</td>
+    </tr>
+    <tr>
+      <th valign=top>Transactions</th>
+      <th valign=top>JTA</th>
+      <td>1.0</td>
+<td>1.0</td>
+<td>1.0</td>
+      <td>UserTransaction</td>
+    </tr>
+    <tr>
+      <th rowspan="2" valign=top>Infrastructure Web</th>
+      <th valign=top>Servlet</th>
+      <td>2.3</td>
+<td>2.3</td>
+<td>2.3</td>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <th valign=top>Struts</th>
+      <td>1.1</td>
+<td>1.1</td>
+<td>1.1</td>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <th valign=top>Administration</th>
+      <th valign=top>JMX</th>
+      <td>1.1</td>
+<td>1.1</td>
+<td>1.1</td>
+      <td>&nbsp;</td>
+    </tr>
+  </thead>
+</table>
+<h3>Autres API, composants et frameworks utilis&eacute;s</h3>
+<table border=1 cellspacing=0 cellpadding=5>
+  <thead>
+    <tr>
+      <td colspan=2 rowspan=3> API, composants et framework UFO@home</td>
+      <th valign=top> Version</th>
+      <th> Alpha</th>
+      <th rowspan=4> Commentaire</th>
+    </tr>
+    <tr>
+      <th valign=top> Release</th>
+      <th> 1</th>
+    </tr>
+    <tr>
+      <th valign=top> Fixpack</th>
+      <th>&nbsp; </th>
+    </tr>
+    <tr>
+      <th>Domaine </th>
+      <th> Composant</th>
+      <th valign=top> Maintenance</th>
+      <th>&nbsp; </th>
+    </tr>
+    <tr>
+      <th valign=top>Visualiseur de ciel</th>
+      <th valign=top>org.rr0.is.presentation.sky</th>
+      <th valign=top>&nbsp;</th>
+      <td>&nbsp;</td>
+      <td>Fonction du lieu et date/heure, pouvant fonctionner en applet Java.</td>
+    </tr>
+    <tr>
+      <th valign=top>visualiseur de carte g&eacute;ographique </th>
+      <th valign=top>&nbsp;</th>
+      <th valign=top>&nbsp;</th>
+      <td>&nbsp;</td>
+      <td>2D, avec possibilit&eacute; de navigation et zoom, pouvant fonctionner
+        en applet Java et envoyer des coordonn&eacute;es latitude/longitude &agrave; un
+        serveur.</td>
+    </tr>
+    <tr>
+      <th valign=top>Module de dessin</th>
+      <th valign=top>org.rr0.is.presentation.draw</th>
+      <th valign=top>&nbsp;</th>
+      <td>&nbsp;</td>
+      <td>Supportant formes g&eacute;om&eacute;triques, couleurs, effets de luminosit&eacute;,
+        de texture, mouvement de formes, fond param&eacute;trable avec une image,
+        pouvant fonctionner en applet Java et pouvant envoyer l'image/animation
+        r&eacute;sultante &agrave; un serveur. Dessins <a href="http://www.w3.org/TR/SVG/index.html#minitoc">SVG</a>.</td>
+    </tr>
+<tr>
+<th valign=top>Graphiques</th>
+<th valign=top>JFreeChart</th>
+<th valign=top>&nbsp;</th>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+  </thead>
+</table>
+<h2>Vue par les processus</h2>
+<h2><a name="VueDeploiement"></a>Vue du d&eacute;ploiement</h2>
+<p>Cette section d&eacute;crit une ou plusieurs configurations r&eacute;seau (mat&eacute;rielles)
+  sur laquelle le logiciel est d&eacute;ploy&eacute; et s'ex&eacute;cute. Pour chaque configuration
+  elle indique quels noeuds physiques (ordinateurs, processeurs) ex&eacute;cutent le
+  logiciel, ainsi que leurs interconnections
+  (bus, r&eacute;seau local, point-&agrave;-point, etc.).
+  Elle inclut &eacute;galement une correspondance de la Vue des Processus sur les noeuds
+physiques.</p>
+<p>Un serveur UFO@home peut s'ex&eacute;cuter sur toute plate-forme compatible Java (i.e.
+  Windows, Unix, et d'autres). Une machine cliente est tout appareil capable
+  d'ex&eacute;cuter un navigateur Web (tr&egrave;s probablement un PC, mais pas n&eacute;cessairement)
+  et de se connecter &agrave; un serveur UFO@home via Internet. </p>
+<p><img src="http://rr0.sourceforge.net/images/Deployment.gif" width="1191" height="222"></p>
+<p>Plusieurs serveurs UFO@home peuvent communiquer via Internet
+  en utilisant des services Web. De telles communications peuvent intervenir
+  lors d'&eacute;changes de donn&eacute;es (exploitant UUDF),
+  traitements/calculs distribu&eacute;s, etc..</p>
+<h2>Vue par l'impl&eacute;mentation</h2>
+<h3>Vue d'ensemble</h3>
+<h3>Couches</h3>
+<h2>Vue par les donn&eacute;es</h2>
+<h2>Taille et performance</h2>
+<h2>Qualit&eacute;</h2>

@@ -1,0 +1,62 @@
+<html>
+<head>
+<title>Architecture - Archipelago</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link href="../rr0.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+<h1>Architecture</h1>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<th nowrap colspan="4"><a href="/">Home</a>&nbsp;&nbsp;&gt; &nbsp;<a href="index_fr.html">Archipelago</a> &nbsp;|&nbsp;&nbsp;<a href="Architecture.html">English translation</a> </th>
+</tr>
+</table>
+<table border="0" align="right" cellpadding="0" cellspacing="0" class="rightImage">
+<caption>
+ Architecture d'un serveur Archipelago 
+</caption>
+<tr>
+<td><img src="images/Archi-1.png" width="891" height="337"></td>
+</tr>
+</table>
+<p>Tout comme les bases de donn&eacute;es classiques, Archipelago est un serveur. Comme les meilleures d'entre elles, il est plus que cela, permettant d'appliquer des traitements sur les donn&eacute;es qu'il fournit. Comme peu d'entre elles, il propose une vision de donn&eacute;es sous forme d'objets repr&eacute;sentant les concepts ufologiques de l'utilisateur ind&eacute;pendamment des contraintes techniques. Comme aucune d'entre elles, il ne stocke pas v&eacute;ritablement mais virtuellement les donn&eacute;es, se bornant &agrave; permettre d'y acc&eacute;der.</p>
+<p>Dans tout serveur Archipelago se trouve donc 2 grands blocs principaux : </p>
+<ul>
+<li>la <strong>plate-forme</strong>, identique &agrave; tous les serveurs, qui fournit les services techniques (manipulation des donn&eacute;es, interface graphique) et de base (gestion des utilisateurs)</li>
+<li>le <strong>mod&egrave;le </strong>de donn&eacute;es et traitements mis en place par l'utilisateur. En fait, un serveur peut h&eacute;berger plusieurs mod&egrave;les qui peuvent &ecirc;tre utilis&eacute;s, voire m&ecirc;me partag&eacute;s par les utilisateurs. </li>
+</ul>
+<h2>Int&eacute;gration</h2>
+<table border="0" align="left" cellpadding="0" cellspacing="0" class="leftImage">
+<caption>
+Architecture d'integration 
+</caption>
+<tr>
+<td><img src="images/Archi-2.png" alt="Integration architecture" width="827" height="413"></td>
+</tr>
+</table>
+<p>Une base de donn&eacute;es existante peut s'int&eacute;grer avec un serveur  Archipelago de 2 mani&egrave;res :</p>
+<ul>
+<li><strong>passive </strong>: c'est le serveur Archipelago qui va chercher les donn&eacute;es (<em>pull</em>). Cette strat&eacute;gie peut &ecirc;tre motiv&eacute;e par diverses raisons :
+<ul>
+<li>pas de logique du c&ocirc;t&eacute; base de donn&eacute;es (juste un fichier ou une page web, typiquement) </li>
+<li>pas de temps, ressources ou de volont&eacute; de d&eacute;velopper un adaptateur Archipelago.</li>
+</ul>
+</li>
+<li><strong>active</strong> : c'est la base qui envoie (<em>push</em>) ses donn&eacute;es au serveur Archipelago. Cette strat&eacute;gie peut &eacute;galement &ecirc;tre motivi&eacute;e par diverses raisons :
+<ul>
+<li>volont&eacute; de promouvoir le partage des donn&eacute;es</li>
+<li>volont&eacute; de collecter des donn&eacute;es d'autres bases, &agrave; travers la couche meta de Archipelago</li>
+<li>volont&eacute; de migrer ou sauvegarder les donn&eacute;es vers une autre base de donn&eacute;es</li>
+<li>volont&eacute; d'utiliser les processus h&eacute;berg&eacute;s par le serveur Archipelago.</li>
+</ul>
+</li>
+</ul>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<th nowrap colspan="4"><a href="/">Home</a>&nbsp;&nbsp;&gt; &nbsp;<a href="index_fr.html">Archipelago</a> &nbsp;|&nbsp;&nbsp;<a href="Architecture.html">English translation</a> </th>
+</tr>
+</table>
+</body>
+
+</html>
+

@@ -1,0 +1,164 @@
+<h1>Sp&eacute;cifications supplementaires</h1>
+<ul>
+  <table border="0" align="center" cellpadding="5" cellspacing="0">
+    <tr>
+      <td valign="top"><ul>
+        <li> <strong><a href="#Introduction">Introduction</a></strong>
+          <ul>
+            <li><a href="#Objectif">Objectif</a></li>
+            <li> <a href="#Perimetre">P&eacute;rim&egrave;tre</a></li>
+            <li><a href="#DefinitionsAcronymesEtAbbreviations">D&eacute;finitions,
+                acronymes, et abbr&eacute;viations</a> </li>
+            <li><a href="#References">R&eacute;f&eacute;rences</a> </li>
+            </ul>
+        </li>
+        <li><strong><a href="#Fonctionalite">Fonctionalit&eacute;</a></strong></li>
+        <li> <strong><a href="#Utilisabilite">Utilisabilit&eacute;</a></strong></li>
+        <li> <strong><a href="#Fiabilite">Fiabilit&eacute;</a></strong></li>
+        <li><strong><a href="#Performance">Performance</a></strong></li>
+        <li><strong><a href="#Supportabilite">Supportabilit&eacute;</a></strong></li>
+      </ul></td>
+      <td><ul>
+        <li> <strong><a href="#DesignConstraints">Contraintes de conception</a></strong></li>
+        <li> <strong><a href="#BesoinsPourLaDocumentationEtLeSystemDAideEnLigne">Besoins
+              pour la documentation et le syst&egrave;me
+            d'aide en ligne</a></strong></li>
+        <li> <strong><a href="#ComposantsAchetes">Composants achet&eacute;s</a></strong></li>
+        <li><strong> <a href="#Interfaces">Interfaces</a>        </strong>          
+          <ul>
+              <li> <a href="#InterfacesUtilisateur">Interfaces utilisateur</a></li>
+              <li><a href="#InterfacesMaterielles">Interfaces mat&eacute;rielles</a></li>
+              <li><a href="#InterfacesLogicielles">Interfaces logicielles</a></li>
+              <li><a href="#InterfacesDeCommunication">Interfaces de communication</a></li>
+            </ul>
+        </li>
+        <li> <strong><a href="#BesoinsDeLicence">Besoins en licences</a></strong></li>
+        <li><strong> <a href="#NoticesLegalesCopyrightEtAutres">Notices l&eacute;gales,
+          copyright et autres</a></strong></li>
+        <li><strong><a href="#StandardsApplicables">Standards applicables</a></strong></li>
+      </ul></td>
+    </tr>
+  </table>
+</ul>
+<h2>   <a name="Introduction"></a>Introduction</h2>
+<h3> <a name="Objectif"></a>Objectif</h3>
+<p>Ce document capture les besoins pour le syst&egrave;me qui ne sont pas ais&eacute;ment exprimables
+au travers des cas d'utilisation du mod&egrave;le de cas d'utilisation.</p>
+<h3> <a name="Perimetre"></a>P&eacute;rim&egrave;tre</h3>
+<p>Ce document s'applique au projet UFO@home. Il affecte l'ensemble
+des besoins et de la conception de UFO@home.</p>
+<h3> <a name="DefinitionsAcronymesEtAbbreviations"></a>Definitions, acronymes
+et abbr&eacute;viations</h3>
+<ul>
+  <li>API &#8212; Application Programming Interface.</li>
+  <li>Go &#8212; Giga Octet.</li>
+  <li>J2EE &#8212; Java 2 Enterprise Edition.</li>
+  <li>J2SE &#8212; Java 2 Standard Edition.</li>
+  <li>JDO &#8212; Java Data Objects.</li>
+  <li>RAM &#8212; Random Access Memory. M&eacute;moire vive.</li>
+  <li>UML &#8212; Unified Modeling Language.</li>
+</ul>
+<h3>   <a name="References"></a>R&eacute;f&eacute;rences</h3>
+<ol>
+  <li><a href="https://sourceforge.net/docman/display_doc.php?docid=17410&group_id=70060">Vision</a></li>
+</ol>
+<h2> <a name="Fonctionalite" id="Fonctionalite"></a>Fonctionalit&eacute;</h2>
+<ul>
+  <li>Le syst&egrave;me devra permettre aux utilisateurs de conserver leur anonymat.</li>
+  <li>Le syst&egrave;me devra supporter (permettre de fournir, traiter) des donn&eacute;es
+    impr&eacute;cises (distance ou temps impr&eacute;cis ou relatifs, etc.) en raison de leur
+    fr&eacute;quence dans les donn&eacute;es ufologiques.</li>
+</ul>
+<h2> <a name="Utilisabilite" id="Utilisabilite"></a>Utilisabilit&eacute;</h2>
+<ol>
+  <li>Les utilisateurs souhaitant signaler une observation ne devront pas n&eacute;cessiter
+    d'autre formation sp&eacute;ciale que de savoir surfer sur
+    le Web.</li>
+  <li>Internationalisation : les utilisateurs souhaitant signaler une observation
+    devront pour lire et saisir de l'information dans leur propre langue.</li>
+  <li>Les utilisateurs souhaitant signaler une observation ne devront pas y passer
+    plus de temps que s'ils le faisaient &agrave; la main.</li>
+  <li>Les utilisateurs souhaitant signaler une observation ne devront pas n&eacute;cessiter
+    d'autre &eacute;quipement ou configuration que l'&eacute;quipement et la configuration
+    standard pour surfer sur le Web.</li>
+</ol>
+<h2> <a name="Fiabilite" id="Fiabilite"></a>Fiabilit&eacute;</h2>
+<ol>
+  <li>Le syst&egrave;me devra &ecirc;tre disponible 7 jours par semaine, 24 heures par jour.</li>
+</ol>
+<h2> <a name="Performance"></a>Performance</h2>
+<ol>
+  <li> Le temps de r&eacute;ponse pour une  transaction devra &ecirc;tre inf&eacute;rieur &agrave; 5 secondes.</li>
+  <li>Le syst&egrave;me devra supporter jusqu'&agrave; 500
+    utilisateurs simultan&eacute;s.</li>
+</ol>
+<h2> <a name="Supportability"></a>Supportabilit&eacute;</h2>
+<ol>
+  <li>Le syst&egrave;me ne devra utiliser que les API Java standard.</li>
+</ol>
+<h2> <a name="DesignConstraints"></a>Contraintes de conception</h2>
+<ol>
+  <li>Le syst&egrave;me devra &ecirc;tre d&eacute;crit en utilisant le formalisme UML.</li>
+  <li>Le syst&egrave;me devra &ecirc;tre impl&eacute;ment&eacute; avec le langage de programmation Java.</li>
+  <li>L'impl&eacute;mentation de r&eacute;f&eacute;rence devra impl&eacute;menter sa persistance en utilisant
+    JDO.</li>
+  <li>Le syst&egrave;me devra &ecirc;tre compatible J2EE.</li>
+</ol>
+<h2> <strong><a name="BesoinsPourLaDocumentationEtLeSystemDAideEnLigne"></a>Besoins pour la documentation et le syst&egrave;me d'aide en ligne</strong></h2>
+<ol>
+  <li>Une aide en ligne devra &ecirc;tre accessible pour l'ensemble des t&acirc;ches.</li>
+</ol>
+<h2> <strong><a name="ComposantsAchetes"></a>Composants achet&eacute;s</strong></h2>
+<ol>
+  <li>Une impl&eacute;mentation  JDO devra &ecirc;tre acquise pour l'impl&eacute;mentation de r&eacute;f&eacute;rence.
+    En fonction des tarifs et des fonds disponibles, une impl&eacute;mentation gratuite
+    pour &ecirc;tre utilis&eacute;e ou non.</li>
+</ol>
+<h2> <a name="Interfaces"></a>Interfaces</h2>
+<p>Cette section d&eacute;crit les interfaces qui devront &ecirc;tre support&eacute;es par l'application.
+  Elle doit contenir les sp&eacute;cificit&eacute;s, protocoles, ports et adresses logiques,
+  etc. ad&eacute;quats pour que le logiciel puisse &ecirc;tre d&eacute;velopp&eacute; et que l'on puisse
+  v&eacute;rifier sa confirmit&eacute; aux besoins d'interfaces.</p>
+<h3> <a name="InterfacesUtilisateur"></a>Interfaces utilisateur</h3>
+<ol>
+  <li>L'interface utilisateur devra &ecirc;tre une interface Web (HTML).</li>
+</ol>
+<h3> <a name="InterfacesMaterielles"></a>Interfaces mat&eacute;rielles</h3>
+<ol>
+  <li>Une serveur avec au moins 1 Go de RAM devra &ecirc;tre fourni.</li>
+</ol>
+<h3> <a name="InterfacesLogicielles"></a>Interfaces logicielles</h3>
+<ol>
+  <li>Le syst&egrave;me devra fournir une interface d'import/export
+    pour &eacute;changer des donner avec d'autres serveurs compatibles UFO@home via une
+    connection TCP-IP, y compris Internet.</li>
+</ol>
+<h3><a name="InterfacesDeCommunication"></a>Interfaces de communication</h3>
+<ol>
+  <li>Une connection Internet avec une bande passante suffisante devra &ecirc;tre fournie.</li>
+</ol>
+<h2> <a name="BesoinsDeLicence"></a>Besoins de licence</h2>
+<p>En raison du public vis&eacute; &agrave; travers le monde et de son but d'unification,
+  le projet a &eacute;t&eacute; plac&eacute; dans la communaut&eacute; <a href="http://javarome.net/OpenSource.html" target="_top">Open
+  Source</a> en D&eacute;cembre 2002. Le contenu du projet est en permanence
+  disponible sur <a href="http://sourceforge.net/projects/rr0" target="_top">SourceForge.net</a> sous
+  licence <a href="http://apache.org">Apache</a> 1.1, permettant &agrave; tous
+  de visualiser, utiliser, modifier et redistribuer son code, moyennant qu'il
+soit toujours livr&eacute; avec sa <a href="License_fr.html">licence</a>.</p>
+<h2> <a name="NoticesLegalesCopyrightEtAutres"></a>Notices l&eacute;gales, copyright et autres</h2>
+<ul>
+<li>  Java, J2EE, J2SE, J2ME, et toutes les marques bas&eacute;es sur Java sont des
+  marques d&eacute;pos&eacute;es ou enregistr&eacute;es de Sun Microsystems, Inc. aux Etats-Unis et
+  dans d'autres pays.</li>
+  <li> Ce produit inclut du logiciel d&eacute;velopp&eacute; par la Fondation Logicielle Apache
+    (http://www.apache.org). Les noms &quot;Apache&quot; et &quot;Apache
+      Software Foundation&quot; ne doivent pas &ecirc;tre utilis&eacute;s pour repr&eacute;senter
+      ou promouvoir des produits d&eacute;riv&eacute;s de ce logiciel sans autorisation &eacute;crite
+  pr&eacute;alable. Pour une autorisation &eacute;crite, veuillez contacter apache@apache.org.</li>
+</ul>
+<h2>   <a name="StandardsApplicables"></a>Standards applicables</h2>
+<p>Cette section d&eacute;crit par r&eacute;f&eacute;rences tous les standard applicables et les sections
+  sp&eacute;cifiques de tous standards s'appliquant au syst&egrave;me d&eacute;crit. Par exemple,
+  elle peut inclure des standards l&eacute;gaux, de qualit&eacute; et de r&eacute;gulation, des standards
+  de l'industrie pour l'utilisabilit&eacute;, l'interoperabilit&eacute;, l'internationalisation,
+la conformit&eacute; &agrave; un syst&egrave;me d'exploitation, etc.</p>

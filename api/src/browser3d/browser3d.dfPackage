@@ -1,0 +1,28 @@
+package idriloe6v0ev4ne6v0lbfi;
+
+/**
+@version 2.0
+@physicalPackage
+@__modelType diagram 
+*/
+class diagram {
+/**
+@__ref <oiref:design#Class#id4i40se6v0ev4ne6v0lbfx.diagram:oiref><oihard>
+@__modelType reference
+@__fqn <oiref:#Package#org.rr0.browser3d.samples:oiref> 
+*/
+class reference {
+}}/**
+@__tags
+@shapeType ClassDiagram 
+*/
+class __tags {
+}/**
+@__options 
+*/
+class __options {
+}/**
+@__positions 
+*/
+class __positions {
+}

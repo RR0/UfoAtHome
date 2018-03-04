@@ -1,0 +1,62 @@
+<html>
+<head>
+<title>Architecture - Archipelago</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link href="../rr0.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+<h1>Architecture</h1>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<th nowrap colspan="4"><a href="/">Home</a>&nbsp;&nbsp;&gt; &nbsp;<a href="index_fr.html">Archipelago</a> &nbsp;|&nbsp;&nbsp;<a href="Architecture_fr.html">Traduction fran&ccedil;aise </a> </th>
+</tr>
+</table>
+<table border="0" align="right" cellpadding="0" cellspacing="0" class="rightImage">
+<caption>
+Server architecture
+</caption>
+<tr>
+<td><img src="images/Archi-1.png" alt="Server architecture" width="891" height="337"></td>
+</tr>
+</table>
+<p>Like classical databases, Archipelago is a server. Like the better of them, it is more than that, allowing to apply processes on the data it provides. Like a few of them, it offers a vision of the data as objects, representing the user ufological concepts independently of technical constraints. Like none of them, it doesn't store data actually but rather  virtually, and just focuses on allowing access to them.</p>
+<p>As a result, each Archipelago server is composed of 2 main blocks : </p>
+<ul>
+<li>the<strong> plateform</strong>, the same in every server, which provides technical (data manipulation, graphical interface) et basic (user management) services </li>
+<li>the data and processing <strong>model </strong>set up by the user. Actually a server can host several models, which can be used and even shared by users. </li>
+</ul>
+<h2>Integration</h2>
+<table border="0" align="left" cellpadding="0" cellspacing="0" class="leftImage">
+<caption>
+Integration architecture
+</caption>
+<tr>
+<td><img src="images/Archi-2.png" alt="Integration architecture" width="827" height="413"></td>
+</tr>
+</table>
+<p>An existing database can integrate with an Archipelago server in 2 ways :</p>
+<ul>
+<li><strong>passive </strong>: the Archipelago server retrieves (<em>pull</em>) the data from the database. This strategy can be motivated by various reasons :
+<ul>
+<li>no logic on the database side (just a file or a web page, typically) </li>
+<li>no time, resources or will to develop an Archipelago adapter</li>
+</ul>
+</li>
+<li><strong>active</strong> : the database sends (<em>push</em>) its data to the Archipelago server. This strategy can also be motivated by various reasons :
+<ul>
+<li>will to promote data sharing</li>
+<li>will to gather data from other databases though the Archipelago meta layer</li>
+<li>will to migrate or backup data to another database</li>
+<li>will to use processes hosted by the Archipelago server </li>
+</ul>
+</li>
+</ul>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<th nowrap colspan="4"><a href="/">Home</a>&nbsp;&nbsp;&gt; &nbsp;<a href="index_fr.html">Archipelago</a> &nbsp;|&nbsp;&nbsp;<a href="Architecture_fr.html">Traduction fran&ccedil;aise </a> </th>
+</tr>
+</table>
+</body>
+
+</html>
+

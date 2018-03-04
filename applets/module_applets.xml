@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project name="module_applets" default="compile.module.applets">
+  <dirname property="module.applets.basedir" file="${ant.file.module_applets}"/>
+  
+  <property name="module.jdk.home.applets" value="${project.jdk.home}"/>
+  <property name="module.jdk.classpath.applets" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.applets" value="${compiler.args}"/>
+  
+  <property name="applets.output.dir" value="${module.applets.basedir}/classes"/>
+  <property name="applets.testoutput.dir" value="${module.applets.basedir}/classes"/>
+  
+  <path id="applets.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="applets.module.classpath">
+    <path refid="${module.jdk.classpath.applets}"/>
+    <pathelement location="${jcckit.output.dir}"/>
+    <pathelement location="${impl.output.dir}"/>
+    <pathelement location="${impl.testoutput.dir}"/>
+    <pathelement location="${api.output.dir}"/>
+  </path>
+  
+  
+  
+  <path id="applets.module.sourcepath">
+    <dirset dir="${module.applets.basedir}">
+      <include name="src"/>
+    </dirset>
+  </path>
+  
+  <path id="applets.module.test.sourcepath">
+    <dirset dir="${module.applets.basedir}">
+      <include name="test"/>
+    </dirset>
+  </path>
+  
+  
+  <target name="compile.module.applets" depends="compile.module.applets.production,compile.module.applets.tests" description="compile module(s) applets"/>
+  
+  <target name="compile.module.applets.production" depends="compile.module.jcckit,compile.module.impl" description="compile module(s) applets production classes">
+    <mkdir dir="${applets.output.dir}"/>
+    <javac destdir="${applets.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memoryMaximumSize="${compiler.max.memory}" fork="true" executable="${module.jdk.home.applets}/bin/javac">
+      <compilerarg line="${compiler.args.applets}"/>
+      <bootclasspath refid="applets.module.bootclasspath"/>
+      <classpath refid="applets.module.classpath"/>
+      <src refid="applets.module.sourcepath"/>
+    </javac>
+    <copy todir="${applets.output.dir}">
+      <fileset dir="${module.applets.basedir}/src">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="compile.module.applets.tests" depends="compile.module.applets.production" description="compile module(s) applets test classes" unless="skip.tests">
+    <mkdir dir="${applets.testoutput.dir}"/>
+    <javac destdir="${applets.testoutput.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memoryMaximumSize="${compiler.max.memory}" fork="true" executable="${module.jdk.home.applets}/bin/javac">
+      <compilerarg line="${compiler.args.applets}"/>
+      <classpath refid="applets.module.classpath"/>
+      <classpath location="${applets.output.dir}"/>
+      <src refid="applets.module.test.sourcepath"/>
+    </javac>
+    <copy todir="${applets.testoutput.dir}">
+      <fileset dir="${module.applets.basedir}/test">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="clean.module.applets" description="cleanup module">
+    <delete dir="${applets.output.dir}"/>
+    <delete dir="${applets.testoutput.dir}"/>
+  </target>
+</project>

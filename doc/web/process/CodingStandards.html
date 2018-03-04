@@ -1,0 +1,168 @@
+<html>
+
+<head>
+
+<title>Standards de codage - Implementation - RR0-IS</title>
+
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+
+<link rel="stylesheet" href="rr0.css" type="text/css">
+
+</head>
+
+
+
+<body>
+<h1>Standards de codage</h1>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+  <tr> 
+    <th colspan="4"><a href="index_fr.html">UFO@home</a>&nbsp;&gt;&nbsp;<a href="Implementation.html">Impl&eacute;mentation</a></th>
+  </tr>
+</table>
+<h3>Nommage</h3>
+<p>Voici un ensemble de r&egrave;gles de nommage inspir&eacute;es de <em>SmallTalk 
+  with Style</em>.</p>
+<p>La directive g&eacute;n&eacute;rale est l'intuitivit&eacute; :<strong> </strong>s&eacute;mantique 
+  plut&ocirc;t que type, langage naturel, non redondance (ne pas exprimer une 
+  s&eacute;mantique qui peut &ecirc;tre induite).</p>
+<table border=1 cellspacing=0 cellpadding=5>
+  <thead>
+    <tr> 
+      <th> Domaine</th>
+      <th> Description</th>
+      <th>Bon</th>
+      <th>Mauvais</th>
+    </tr>
+    <tr> 
+      <th valign=top>Classe</th>
+      <td>Indique le but de la classe, pas trio g&eacute;n&eacute;rique pour avoir 
+        un sens minimum, ni trop sp&eacute;cifique pour permettre la r&eacute;utilisation. 
+        Ajouter des pr&eacute;fixes quand risque de collisions d'espace de nommages 
+        (m&ecirc;mes noms dans packages ou projets diff&eacute;rents). Le plus 
+        simple et proche du langage naturel possible, mais sans abbr&eacute;viations.</td>
+      <td><code>ProblemReport<br>
+        TreeWalker<br>
+        ProperName<br>
+        Terminal<br>
+        RemoteControl<br>
+        RandomNumberGenerator<br>
+        Road<br>
+        </code></td>
+      <td><code>Application<br>
+        TreeWalkerForBinaryTrees<br>
+        ProperNameString<br>
+        UserCommunicationInterface<br>
+        RemControl<br>
+        NumGen<br>
+        AutomotiveTransportMedium</code></td>
+    </tr>
+    <tr> 
+      <th valign=top>Interface</th>
+      <td>Idem que pour les classes, avec une pr&eacute;f&eacute;r&eacute;able 
+        pour les indications de comportement (suffixe &quot;able&quot;)</td>
+      <td><code>Cloneable<br>
+        Editable<br>
+        Skill </code></td>
+      <td><code></code></td>
+    </tr>
+    <tr> 
+      <th valign=top>Param&egrave;tre</th>
+      <td>someSkill</td>
+      <td><code>someAaaBbb</code></td>
+      <td><code>someAaaBbb</code></td>
+    </tr>
+    <tr> 
+      <th valign=top>Variable</th>
+      <td>Exprimer la s&eacute;mantique plut&ocirc;t que le type. </td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+    </tr>
+    <tr> 
+      <th valign=top>Attribut</th>
+      <td>Idem &agrave; variable. Ne pas ajouter de s&eacute;mantique d&eacute;j&agrave; 
+        induite par la classe de l'attribut. Utiliser des pr&eacute;dicats pour 
+        les bool&eacute;ens.</td>
+      <td><code>PhoneBook::<strong>phoneNumber</strong><br>
+        PhoneBook::<strong>name</strong><br>
+        VideoGame::<strong>player</strong><br>
+        VideoGame::<strong>enemies</strong><br>
+        VideoGame::<strong>score</strong></code></td>
+      <td><code>PhoneBook::<strong></strong>Number<br>
+        PhoneBook::<strong></strong>labelForPerson<br>
+        VideoGame::<strong></strong>boardMan<br>
+        VideoGame::<strong></strong>badGuyList<br>
+        VideoGame::<strong></strong>value<br>
+        </code></td>
+    </tr>
+    <tr> 
+      <th valign=top>M&eacute;thode</th>
+      <td>Lecture comme verbes ou phrases &agrave; l'imp&eacute;ratif. Commencer 
+        par <code>is</code> ou <code>has</code> quand un bool&eacute;en est retourn&eacute;. 
+        Ne pas inclure d'indications fournies par les param&egrave;tres. Utiliser 
+        des pr&eacute;positions (<code>on</code>, <code>by</code>) quand la m&eacute;thode 
+        op&egrave;re sur un autre objet. </td>
+      <td><code>FileDescriptor::<strong>seekTo</strong>(n)<br>
+        aReadStream.<strong>peekWord</strong>()<br>
+        aFace.<strong>lookSurprised</strong>()<br>
+        aPerson.<strong>isHungry</strong>()<br>
+        aVehicle.<strong>hasFourWheels</strong>()<br>
+        aFace.<strong>changeTo</strong>(Expression)<br>
+        aFile.<strong>openOn</strong>(Stream)</code></td>
+      <td><code>FileDescriptor::lseek(n)<br>
+        aReadStream.word()<br>
+        aFace.surprised()<br>
+        aPerson.hungry()<br>
+        aVehicle.fourWheels()<br>
+        aFace.changeExpressionTo(Expression)<br>
+        aFile.with(Stream)</code></td>
+    </tr>
+    <tr> 
+      <th valign=top>Constante</th>
+      <td>DATASOURCE_NAME</td>
+      <td><code>XXX_YY</code></td>
+      <td><code>XXX_YY</code></td>
+    </tr>
+    <tr> 
+      <th valign=top>Forward Struts</th>
+      <td>UPDATED_FORWARD</td>
+      <td><code>XXX_FORWARD</code></td>
+      <td><code>XXX_FORWARD</code></td>
+    </tr>
+  </thead>
+</table>
+<h3>Formattage</h3>
+<blockquote> <code>/**<br>
+  &nbsp;* Description<br>
+  &nbsp;* <br>
+  &nbsp;* $Revision$<br>
+  &nbsp;*/<br>
+  class MyClass implements MyInterface1, MyInterface2<br>
+  {<br>
+  &nbsp;&nbsp;/**<br>
+  &nbsp;&nbsp;&nbsp;* Try to put public members a beginning of source<br>
+  &nbsp;&nbsp;&nbsp;*/ <br>
+  &nbsp;&nbsp;public static final int MY_CONSTANT = 0;<br>
+  <br>
+  &nbsp;&nbsp;public void setProperty (int someAttribute)<br>
+  &nbsp;&nbsp;{<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;attribute = someAttribute;<br>
+  &nbsp;&nbsp;}<br>
+  <br>
+  &nbsp;&nbsp;public int getProperty()<br>
+  &nbsp;&nbsp;{<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;return attribute1;<br>
+  &nbsp;&nbsp;}<br>
+  <br>
+  &nbsp;&nbsp;private int attribute1;<br>
+  }</code></blockquote>
+<h3>Assemblage</h3>
+<p>WAR, EAR, build.xml (Ant)</p>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+  <tr> 
+    <th colspan="4"><a href="index_fr.html">UFO@home</a>&nbsp;&gt;&nbsp;<a href="Implementation.html">Impl&eacute;mentation</a></th>
+  </tr>
+</table>
+</body>
+
+</html>
+

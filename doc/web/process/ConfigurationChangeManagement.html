@@ -1,0 +1,113 @@
+<html>
+<head>
+<title>Gestion de configuration et du changement - RR0-IS</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link rel="stylesheet" href="rr0.css" type="text/css">
+</head>
+
+
+
+<body>
+<h1>Gestion de configuration et du changement</h1>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+  <tr> 
+    <th colspan="4"><a href="javascript:history.go(-1)">Retour</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="index_fr.html">Home</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="mailto:rr0@rr0.org">Contact</a></th>
+  </tr>
+</table>
+<h2><font class="seize">Versions</font></h2>
+<p>Voir la page des <a href="http://sourceforge.net/project/showfiles.php?group_id=70060">fichiers 
+  &agrave; t&eacute;l&eacute;charger</a>.</p>
+<h2><font class="seize">Sources</font></h2>
+<p>Les fichiers sources sont centralis&eacute;s dans le r&eacute;f&eacute;rentiel 
+  <code>/cvsroot/rr0</code> du serveur <code>cvs.rr0.sourceforge.net</code>.</p>
+<p>Les modules suivants sont disponibles :</p>
+<ul>
+  <li><strong><a href="http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/rr0/Java/">Java</a></strong>, 
+    qui contient le code source Java, comprenant : 
+    <ul>
+      <li>le code applicatif (<code>org.rr0.si.*</code>)</li>
+      <li>le code des tests unitaires <a href="http://javarome.net/JUnit.html">JUnit</a> 
+        (<code>test.org.rr0.si.*</code>)</li>
+    </ul>
+  </li>
+  <li><strong><a href="http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/rr0WebApp/">WebApp</a></strong>, 
+    qui contient les fichiers de la WebApp (<a href="http://javarome.net/JSP.html">JSP</a>, 
+    images, fichiers de configuration), sans les classes compil&eacute;es ni les 
+    librairies (vous pouvez les construire &agrave; partir des sources ou les 
+    obtenir &agrave; partir des <a href="http://sourceforge.net/project/showfiles.php?group_id=70060">versions 
+    &agrave; t&eacute;l&eacute;charger</a>).</li>
+</ul>
+<h3>Acc&egrave;s public</h3>
+<p>En tant que projet <a href="http://javarome.net/OSS.html">OSS</a>, le r&eacute;f&eacute;rentiel 
+  de code source de UFO@home peut &ecirc;tre extrait de mani&egrave;re anonyme (pserver).</p>
+<h4>Ligne de commande</h4>
+<p>Vous pouvez utiliser les lignes de commande CVS suivantes :</p>
+<blockquote> 
+  <p><code>cvs -d:pserver:<strong>anonymous@cvs.rr0.sourceforge.net:/cvsroot/rr0</strong> 
+    login</code></p>
+</blockquote>
+<p>When prompted for a password for anonymous, simply press the Enter key, then 
+  enter&nbsp;:</p>
+<blockquote> 
+  <p><code>cvs -z3 -d:pserver:<strong>anonymous@cvs.rr0.sourceforge.net</strong>:<strong>/cvsroot/rr0</strong> 
+    co <strong>Java</strong></code></p>
+</blockquote>
+<p>Replace Java by <code>WebApp</code> if you want to checkout (co) the other 
+  module.</p>
+<p>As the checkout operation remember the CVSROOT in the <code>Root</code> file 
+  of the generated <code>CVS</code> subdirectories, you will no longer need to 
+  specify the <cite>-d</cite> parameter after the first checkout.</p>
+<h4>jCVS</h4>
+<p><img src="images/JCVS_Anonymous.png" width="393" height="401" hspace="20" vspace="20" align="right">Using 
+  <a href="http://www.jcvs.org">jCVS</a>, just specify the same parameters on 
+  the <em>Checkout </em>tab (you might test your connection parameters before 
+  by using the <em>Test </em>tab).</p>
+<h4>ViewCVS</h4>
+<p>You can also simply browse the <a href="http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/rr0">UFO@home 
+  CVS Web interface</a>.</p>
+<h3>Acc&egrave;s d&eacute;veloppeur</h3>
+<p>Only project developers can access the <a href="http://javarome.net/CVS.html">CVS</a> 
+  tree via this method. <a href="http://javarome.net/SSH.html">SSH</a> 1 or <a href="http://javarome.net/SSH.html">SSH</a> 
+  2 must be used. </p>
+<h4>Command line</h4>
+<p>If you use a native <a href="http://javarome.net/CVS.html">CVS</a> client you 
+  might want to inform it to use <a href="http://javarome.net/SSH.html">SSH</a> 
+  by setting the <code>CVS_RSH</code> environment variable. </p>
+<p>For example :</p>
+<p> <code>export CVS_RSH=<strong>ssh</strong></code> on <a href="http://javarome.net/Unix.html">Unix</a></p>
+<p><code>set CVS_RSH=</code><strong><code>ssh</code></strong> on <a href="http://javarome.net/Windows.html">Windows</a></p>
+<p>Depending on your <a href="http://javarome.net/SSH.html">SSH</a> implementation, 
+  you might have to replace <code><strong>ssh</strong></code> by another <a href="http://javarome.net/SSH.html">SSH</a> 
+  executable name, such as <code>ssh2</code> or <code>plink</code> (Putty link) 
+  for instance.</p>
+<p>You can use the following CVS command line, providing your SourceForge UFO@home 
+  project's developer name :</p>
+<p><code>cvs -z3 -d:ext:<strong><em>yourdevelopername</em>@cvs.rr0.sourceforge.net:/cvsroot/rr0</strong> 
+  co <strong>Java</strong></code></p>
+<p>Replace <strong><code>Java</code></strong> by <code><strong>WebApp</strong></code> 
+  if you want to work on the other module. Enter your SourceForge site password 
+  when prompted.</p>
+<h4>jCVS</h4>
+<p><img src="images/JCVS_SSH.png" width="393" height="401" hspace="20" vspace="20" align="right">As 
+  <a href="http://www.jcvs.org">jCVS</a> provides an integrated support for SSH, 
+  you don't need to install a SSH suite. Just specify that you're using SSH as 
+  the protocol, and provide your SourceForge KiCsa project's developer name and 
+  password.</p>
+<p>Note that this works fine with <a href="http://javarome.net/J2SE.html">J2SE</a> 
+  1.3, but throws a security exception if you use <a href="http://javarome.net/J2SE.html">J2SE</a> 
+  1.4.1 (maybe a security policy issue to solve by parameterization).</p>
+<h4>WinCVS</h4>
+<p>GNU <a href="http://www.wincvs.org/">WinCVS</a> provides a command line cvs 
+  executable (see instructions above) but also a GUI.</p>
+<p>To configure WinCVS through GUI, choose <em>Admin/Preferences</em>, then on 
+  the <em>General</em> tab set <code><em>yourdevelopername</em>@cvs.sourceforge.net:/cvsroot/rr0</code> 
+  as the <em>CVSROOT </em>and select <em>SSH Server</em> for <em>Authentication</em>.</p>
+<p>To specify a different RSH executable, go to the <em>Ports </em>tab, check 
+  <em>Check for an alternate rsh name</em> and fill it with your SSH executable 
+  (<code>C:\Putty\plink.exe</code> if you're using Putty for instance). </p>
+<p>As a developper, we also recommend that you uncheck the <em>Checkout read-only 
+  </em>option of the <em>Globals </em>tab.</p>
+</body>
+
+</html>
+

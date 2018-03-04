@@ -1,0 +1,117 @@
+<style type="text/css">
+
+
+.mainTitle {  font-family: Verdana, Arial, Helvetica, sans-serif; font-size: larger}
+h1 {
+	font-family: Georgia, "Times New Roman", Times, serif;
+	font-size: x-large;
+	font-style: normal;
+	font-weight: normal;
+	font-variant: normal;
+	text-transform: none;
+	text-align: left;
+	word-spacing: normal;
+	letter-spacing: 0mm;
+	color: #5157A2;
+}
+p {  font-size: small; font-style: normal; line-height: normal; font-weight: normal; font-variant: normal; text-transform: none; text-align: justify; color: #000000; font-family: Georgia, "Times New Roman", Times, serif; clip:   rect(   ); text-indent: 20pt}
+ul {  font-family: Georgia, "Times New Roman", Times, serif; font-size: small; list-style-position: outside; list-style-type: disc; text-align: justify}
+address {  font-family: "Courier New", Courier, mono; font-size: small; margin-left: 1cm}
+ol { font-family: Georgia, "Times New Roman", Times, serif; font-size: small; list-style-position: outside; list-style-type: decimal; text-align: justify}
+h2 {
+	font-family: Georgia, "Times New Roman", Times, serif;
+	font-size: large;
+	font-style: normal;
+	line-height: normal;
+	font-weight: normal;
+	font-variant: normal;
+	text-transform: none;
+	height: auto;
+	margin-top: 25px;
+	margin-right: 0px;
+	margin-left: 0px;
+	padding-top: 0px;
+	padding-bottom: 0px;
+	padding-left: 0px;
+	border: 0px black groove;
+	clip:   rect(   );
+	color: #355F91;
+}
+
+</style>
+h3 { font-family: Tahoma, sans-serif; font-size: medium; font-style: normal; line-height: normal; font-weight: bold; font-variant: normal; text-transform: none; height: auto; width: 100%; margin-top: 10px; margin-right: 0px; border-color: black ; margin-bottom: 0px; margin-left: 0px; padding-top: 0px; padding-right: 0px; padding-bottom: 0px; padding-left: 0px; border: black groove; border-width: 0px 0px thin }
+h3 {
+	font-family: "Bookman Old Style";
+	font-size: medium;
+	font-style: normal;
+	line-height: normal;
+	font-weight: normal;
+	font-variant: normal;
+	text-transform: none;
+	margin-top: 10px;
+	margin-right: 0px;
+	margin-bottom: 0px;
+	margin-left: 0px;
+	padding-top: 0px;
+	padding-right: 0px;
+	padding-bottom: 0px;
+	padding-left: 0px;
+	border: 0px black groove;
+	clip:  rect(   );
+	color: #3A6C9E;
+}
+cite {
+	font-family: "Times New Roman", Times, serif;
+	font-size: medium;
+	font-style: italic;
+	text-align: left;
+	font-weight: normal;
+	border: none;
+	margin: 10px;
+	background-color: #FFFEF0;
+
+
+}
+th {
+	font-family: Georgia, "Times New Roman", Times, serif;
+	font-size: small;
+	font-style: normal;
+	line-height: normal;
+	font-weight: normal;
+	font-variant: normal;
+	text-transform: none;
+	text-align: center;
+	background-color: #F2F3F7;
+	letter-spacing: 0.2em;
+}
+td {
+	font-family: Georgia, "Times New Roman", Times, serif;
+	font-size: small;
+	font-style: normal;
+	line-height: normal;
+	font-weight: normal;
+	font-variant: normal;
+	text-transform: none;
+	text-align: justify;
+	vertical-align: top;
+}
+blockquote { font-family: Tahoma, sans-serif; font-size: small; font-style: normal; line-height: normal; font-weight: normal; font-variant: normal; text-transform: none; text-align: left}
+.source { font-family: Georgia, "Times New Roman", Times, serif; font-size: x-small; font-style: normal; line-height: normal; font-weight: normal; font-variant: normal; text-transform: none; color: #666666}
+.exergue {  font-family: "Times New Roman", Times, serif; font-style: italic; text-align: right; font-size: medium}
+body {  background-color: #FFFFFF; margin-right: 20px; margin-left: 20px}
+a {  color: #006699; text-decoration: none; filter: FlipV; }
+a:hover { text-decoration : underline; }
+.caviar {
+font-family: "Courier New", Courier, mono; font-size: small; background-color: #333333; font-style: normal; color: #333333
+}
+code {
+
+	font-family: monospace;
+	font-size: medium;
+	font-style: normal;
+	text-align: left;
+	font-weight: normal;
+	border: none;
+	margin: 10px;
+	background-color: #F7F7F7;
+}

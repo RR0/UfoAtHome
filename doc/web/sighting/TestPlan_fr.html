@@ -1,0 +1,2349 @@
+<h1>Plan de Test</h1>
+<table border="0" align="center" cellpadding="5" cellspacing="0">
+  <tr valign="top">
+    <td><ul>
+        <li> <a href="#1.     Introduction"><strong>Introduction</strong></a>
+          <ul>
+              <li><a href="#1.1     Purpose"">Objectif</a></li>
+              <li> <a href="#1.2     Scope"">P&eacute;rim&egrave;tre</a></li>
+              <li><a href="#1.3     Intended Audience"">Public vis&eacute;</a></li>
+              <li><a href="#1.4     Document Terminology and Acronyms"">Terminologie
+                  et accronymes du document</a></li>
+              <li><a href="#1.5     References"">R&eacute;f&eacute;rences</a></li>
+              <li><a href="#1.6     Document Structure"">Structure du document</a></li>
+          </ul>
+        </li>
+        <li><a href="#2.%20%20%20%20%20Evaluation%20Mission%20and%20Test%20Motivation""><strong>Mission
+              d'&eacute;valuation et motivation des tests</strong></a>
+          <ul>
+            <li><a href="#2.1     Background"">Contexte</a></li>
+            <li><a href="#2.2     Evaluation Mission"">Mission d'&eacute;valuation</a></li>
+            <li><a href="#2.3     Test Motivators"">Motivateurs de test</a></li>
+          </ul>
+        </li>
+        <li><a href="#3.     Target Test Items""><strong>El&eacute;ments vis&eacute;s
+              par les tests</strong></a></li>
+        <li><strong><a href="#4.     Outline of Planned Tests"">Description des
+              tests pr&eacute;vus</a></strong>
+          <ul>
+            <li><a href="#4.1     Outline of Test Inclusions"">Descriptions des
+                tests inclus</a></li>
+            <li><a href="#4.2     Outline of Other Candidates for Potential Inclusion"">Description
+                des autres candidates pour une inclusion potentielle</a></li>
+            <li><a href="#4.3     Outline of Test Exclusions"">Description des
+                tests exclus</a></li>
+          </ul>
+        </li>
+        <li><a href="#5.     Test Approach""><strong>Approche des tests</strong></a>
+          <ul>
+            <li><a href="#5.1     Initial Test-Idea Catalogs and Other Reference Sources"">Catalogues
+                initiaux d'id&eacute;es de tests et autres sources de r&eacute;f&eacute;rence</a></li>
+            <li><a href="#5.2     Testing Techniques and Types"">Techniques et
+                types de test</a>
+              <ul>
+                  <li><a href="#5.2.1     Data and Database Integrity Testing"">Test
+                      d'int&eacute;grit&eacute; et donn&eacute;es et des bases</a></li>
+                  <li><a href="#5.2.2     Function Testing"">Tests de fonctionnalit&eacute;s</a></li>
+                  <li><a href="#5.2.3     Business Cycle Testing"">Tests de cycles
+                      m&eacute;tier</a></li>
+                  <li><a href="#5.2.4     User Interface Testing"">Tests d'interface
+                      utilisateur</a></li>
+                  <li><a href="#5.2.5     Performance Profiling"">Analyse des
+                      performances</a></li>
+                  <li><a href="#5.2.6     Load Testing"">Test de charge</a></li>
+                  <li><a href="#5.2.7     Stress Testing"">Test de stress</a></li>
+                  <li><a href="#5.2.8     Volume Testing"">Test de volume</a></li>
+                  <li><a href="#5.2.9     Security and Access Control Testing"">Test
+                      de s&eacute;curit&eacute; et de contr&ocirc;le d'acc&egrave;s</a>
+                    <ul>
+                        <li><a href="#5.2.10     Failover and Recovery Testing"">Test
+                            de tol&eacute;rance aux pannes et r&eacute;cup&eacute;ration</a></li>
+                        <li><a href="#5.2.11     Configuration Testing"">Test
+                            de configuration</a></li>
+                        <li><a href="#5.2.12     Installation Testing"">Test
+                            d'installation</a></li>
+                    </ul>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        </ul>
+    </td>
+    <td><ul>
+      <li><a href="#6.     Entry and Exit Criteria""><strong>Crit&egrave;res d'entr&eacute;e
+            et de sortie</strong></a>
+        <ul>
+            <li><a href="#6.1     Test Plan"">Plan de tests</a>
+              <ul>
+                  <li><a href="#6.1.1     Test Plan Entry Criteria"">Crit&egrave;res
+                      d'entr&eacute;e dans le plan de test</a></li>
+                  <li><a href="#6.1.2     Test Plan Exit Criteria"">Crit&egrave;res
+                      de sortie du plan de test</a></li>
+                  <li><a href="#6.1.3     Suspension and Resumption Criteria"">Crit&egrave;res
+                      de suspension et ed reprise</a></li>
+              </ul>
+            </li>
+            <li><a href="#6.2     &nbsp;Test Cycles"">Cycles de test</a>
+              <ul>
+                  <li><a href="#6.2.1     Test Cycle Entry Criteria"">Crit&egrave;res
+                      d'entr&eacute;e de cycle de test</a></li>
+                  <li><a href="#6.2.2     Test Cycle Exit Criteria"">Crit&egrave;res
+                      de sortie de cycle de test</a></li>
+                  <li><a href="#6.2.3     Test Cycle Abnormal Termination"">Terminaison
+                      anormale de cycle de test</a></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li><a href="#7.     Deliverables""><strong>Livrables</strong></a>
+          <ul>
+            <li><a href="#7.1     Test Evaluation Summaries"">R&eacute;sum&eacute; des &eacute;valuations
+                des tests</a></li>
+            <li><a href="#7.2     Reporting on Test Coverage"">Rapport de la
+                couverture des tests</a></li>
+            <li><a href="#7.3     Perceived Quality Reports"">Rapports de la
+                qualit&eacute; per&ccedil;ue</a></li>
+            <li><a href="#7.4     Incident Logs and Change Requests"">Journaux
+                d'incidents et demandes de changement</a></li>
+            <li><a href="#7.5     Smoke Test Suite and Supporting Test Scripts"">Smoke
+              test suite and supporting test scripts</a></li>
+            <li><a href="#7.6     &nbsp;Additional Work Products"">Produits de
+                travaux suppl&eacute;mentaires</a>
+              <ul>
+                <li><a href="#7.6.1     Detailed Test Results"">R&eacute;sultats d&eacute;taill&eacute;s
+                    des tests</a></li>
+                <li><a href="#7.6.2     Additional Automated Functional Test Scripts"">Scripts
+                    suppl&eacute;mentaires de tests fonctionnels automatis&eacute;s </a></li>
+                <li><a href="#7.6.3     Test Guidelines"">Recommandations pour
+                    les tests</a></li>
+                <li><a href="#7.6.4     Traceability Matrices"">Matrices de tracabilit&eacute;</a></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        </ul>
+    </td>
+    <td>          <ul>
+      <li><a href="#8.     Testing Workflow""><strong>Flux des tests</strong></a></li>
+      <li><strong><a href="#9.     Environmental Needs"">Besoins d'environnement</a></strong>
+        <ul>
+          <li><a href="#9.1     Base System Hardware"">Mat&eacute;riel syst&egrave;me de base</a></li>
+          <li><a href="#9.2     Base Software Elements in the Test Environment"">El&eacute;ments
+              logiciels de base dans l'environnement de test</a></li>
+          <li><a href="#9.3     Productivity and Support Tools"">Outils de productivit&eacute;
+              et de support</a></li>
+          <li><a href="#9.4     Test Environment Configurations"">Configurations
+              des environments de test</a></li>
+          </ul>
+      </li>
+      <li><a href="#10.     Responsibilities, Staffing, and Training Needs""><strong>Responsabilit&eacute;s,
+            affectations, et besoins en formation</strong></a>
+        <ul>
+          <li><a href="#10.1     People and Roles"">Personnes et r&ocirc;les</a></li>
+          <li><a href="#10.2     Staffing and Training Needs"">Affectations et
+              besoin en formation</a></li>
+          </ul>
+      </li>
+      <li><a href="#11.     Iteration Milestones""><strong>Iteration milestones</strong></a></li>
+      <li><strong><a href="#12.     Risks, Dependencies, Assumptions, and Constraints"">Risques,
+            d&eacute;pendances, hypoth&egrave;ses et contraintes</a></strong></li>
+      <li><a href="#13.     Management Process and Procedures""><strong>Processus
+            et proc&eacute;dures de management</strong></a>
+        <ul>
+          <li><a href="#13.1     Measuring and Assessing the Extent of Testing"">Mesurer
+              et assessing l'&eacute;tendue des tests</a></li>
+          <li><a href="#13.2     Assessing the Deliverables of this Test Plan"">Assessing
+              the deliverables of this test plan</a></li>
+          <li><a href="#13.3     Problem Reporting, Escalation, and Issue Resolution"">Signalement
+              de probl&egrave;me, escalade et r&eacute;solution de questions</a></li>
+          <li><a href="#13.4     Managing Test Cycles"">G&eacute;rer les cycles de test</a></li>
+          <li><a href="#13.5     Traceability Strategies"">Strat&eacute;gies de tra&ccedil;abilit&eacute;</a></li>
+          <li><a href="#13.6     &nbsp;Approval and Signoff"">Approbation et
+              validation</a></li>
+        </ul>
+      </li>
+      </ul>
+    </td>
+  </tr>
+</table>
+<div class=Section2>
+  <h2>
+    <a name="1.     Introduction">Introduction</a></h2>
+  <h3><a name="1.1     Purpose">Objectif</a></h3>
+  <p class=MsoBodyText>Le but du Plan de Test est de rassembler toute l'information
+    n&eacute;cessaire &agrave; planifier et contr&ocirc;ler les efforts de test. Il d&eacute;crit l'approche
+    du test du logiciel et est le plan de plus haut niveau g&eacute;n&eacute;r&eacute; et utilis&eacute;
+    par les responsables pour diriger l'effort de test.</p>
+  <p class=MsoBodyText>Ce document ed <i>Plan de Test </i>pour UFO@home poursuit
+    les buts suivants :</p>
+</div>
+<ul>
+  <li>Identifier les &eacute;lements qui devraient &ecirc;tre vis&eacute;s par les tests</li>
+  <li>
+    <div class=InfoBlue>Identifier la motivation pour et les id&eacute;es derri&egrave;re les
+      domaines de tests &agrave; couvrir</div>
+  </li>
+  <li>
+    <div class=InfoBlue>D&eacute;gager l'approche de test qui va &ecirc;tre utilis&eacute;e</div>
+  </li>
+  <li>
+    <div class=InfoBlue>Identifier les ressources n&eacute;cessaires et fournir une
+      estimation des efforts de test</div>
+  </li>
+  <li>
+    <div class=InfoBlue>Lister les &eacute;l&eacute;ments livrables du projet de test</div>
+  </li>
+</ul>
+<div class=Section2>
+  <h3><a name="1.2     Scope">P&eacute;rim&egrave;tre</a></h3>
+  <p>Ce plan de Test adresse les niveaux de test suivants :</p>
+</div>
+<ul>
+  <li>
+    <div class=InfoBlue>Tests unitaires</div>
+  </li>
+  <li>Test d'int&eacute;gration</li>
+  <li>Tests syst&egrave;me</li>
+</ul>
+<div class=Section2>
+  <p>Types de test :</p>
+</div>
+<ul>
+  <li>
+    <div class=InfoBlue>Functionalit&eacute;</div>
+  </li>
+  <li>
+    <div class=InfoBlue>Utilisabilit&eacute;</div>
+  </li>
+  <li>
+    <div class=InfoBlue>Fiabilit&eacute;</div>
+  </li>
+  <li>
+    <div class=InfoBlue>Performance</div>
+  </li>
+  <li>
+    <div class=InfoBlue>Supportabilit&eacute;</div>
+  </li>
+</ul>
+<div class=InfoBlue>
+  <p>Sont exclus du p&eacute;rim&egrave;tres les secteurs suivants :</p>
+</div>
+<ul>
+  <li>
+    <div class=InfoBlue>...</div>
+  </li>
+</ul>
+<div class=Section2>
+  <h3><a name="1.3     Intended Audience">Public vis&eacute;</a></h3>
+  <p>Ce Plan de Test est destin&eacute; &agrave; l'&eacute;quipe de d&eacute;veloppement de UFO@home, mais
+    &eacute;galement aux repr&eacute;sentants du projet souhaitant v&eacute;rifier si les tests sont
+    correctement con&ccedil;us et repr&eacute;sente une couverture suffisante.</p>
+  <h3><a name="1.4     Document Terminology and Acronyms">Terminologie et accronymes
+      du document</a></h3>
+</div>
+<ul><li>
+    <div class=InfoBlue>J2SE &#8212; Java 2 Standard Edition</div>
+  </li>
+  <li>
+    <div class=InfoBlue>JDO &#8212; Java Data Objects</div>
+  </li>
+  <li>TBD &#8212; To Be Done.</li>
+</ul>
+  <h3><a name="1.5     References">R&eacute;f&eacute;rences</a></h3>
+  <ol>
+    <li>
+      <div class=InfoBlue>JDO Specification 1.0.1, date, JavaSoft, Graig Russel</div>
+    </li>
+  </ol>
+  <div class=Section2>
+  <h3><a name="1.6     Document Structure">Structure du document</a></h3>
+  <p>Le reste de ce Plan de Test contient :</p>
+</div>
+<ul>
+  <li>
+    <div class=Section2><b>quels </b> &eacute;lements vont &ecirc;tre test&eacute;s et <b>quels</b> types
+      de  tests pourraient &ecirc;tre r&eacute;alis&eacute;s (Sections 3, &eacute;lements vis&eacute;s par les
+      tests, et 4, Description des tests pr&eacute;vus)</div>
+  </li>
+  <li>
+    <div class=Section2><strong>comment</strong> ces tests
+          vont &ecirc;tre r&eacute;alis&eacute;s (section 5)</div>
+  </li>
+</ul>
+<div class=Section2>
+  <h2><a name="2.     Evaluation Mission and Test Motivation">Mission d'&eacute;valuation
+      et motivation des tests</a></h2>
+  <p>Ce chapitre fournit une vue d'ensemble de la mission et de la motivation
+    pour les tests qui vont &ecirc;tre men&eacute;s.</p>
+  <h3><a name="2.1     Background">Contexte</a></h3>
+  <p>UFO@home est un projet <a href="http://javarome.net/OpenSource.html">OSS</a> visant &agrave; fournir
+    un syst&egrave;me d'information complet pour standardiser/unifier l'<strong>&eacute;change</strong>,
+    le <strong>traitement</strong> et le <strong>format</strong> des donn&eacute;es
+  ufologiques, ainsi que la mani&egrave;re d'y acc&eacute;der.</p>
+  <p> UFO@home est d&eacute;velopp&eacute; par des volontaires de la communaut&eacute; <a href="http://javarome.net/OpenSource.html">Open
+      Source</a>.
+  Ces volontaires d&eacute;veloppent ce syst&egrave;me d'information pour permettre aux t&eacute;moins,
+      chercheurs et euqu&ecirc;teurs sur le ph&eacute;nom&egrave;ne OVNI de s'interfacer avec une
+  base de donn&eacute;es OVNI existante, partag&eacute;e et unifi&eacute;e.</p>
+  <p>Le projet UFO@home a commenc&eacute; son d&eacute;veloppement en Janvier 2003.</p>
+  <h3><a name="2.2     Evaluation Mission">Mission d'&eacute;valuation</a></h3>
+  <p>L'effort d'&eacute;valuation vise &agrave; 
+    :</p>
+</div>
+<ul>
+  <li>
+    <div class=InfoBlue> trouver autant que bugs que possible </div>
+  </li>
+  <li>
+    <div class=InfoBlue>trouver les probl&egrave;mes importants</div>
+  </li>
+  <li>
+    <div class=InfoBlue>&eacute;valuer les risques de qualit&eacute; per&ccedil;us</div>
+  </li>
+  <li>
+    <div class=InfoBlue> conseiller sur les risques projet per&ccedil;us</div>
+  </li>
+  <li>
+    <div class=InfoBlue>se conformer aux standards Java tels que J2EE et 
+      JDO</div>
+  </li>
+  <li>
+    <div class=InfoBlue>conseiller sur la qualit&eacute; du produit</div>
+  </li>
+  <li>
+    <div class=InfoBlue>satisfaires les repr&eacute;sentants/utilisateurs</div>
+  </li>
+  <li>
+    <div class=InfoBlue>conseiller sur les tests</div>
+  </li>
+  <li>
+    <div class=InfoBlue>remplir les mandats des processus</div>
+  </li>
+</ul>
+<div class=Section2>
+  <p>Chacune de ces missions offre un contexte diff&eacute;rent pour l'effort de test
+    et change la mani&egrave;re dont le test peut &ecirc;tre approch&eacute;.</p>
+  <h3><a name="2.3     Test Motivators">Motivateurs de test</a></h3>
+  <p>Le test peut &ecirc;tre motiv&eacute; par de nombreuses choses : risques quant &agrave; la qualit&eacute;,
+    risques techniques, risque projet, cas d'utilisation, besoins fonctionnels,
+    besoins non-fonctionnels, &eacute;lements de conception, &eacute;checs ou failles suspect&eacute;s,
+    requ&ecirc;te de changement, etc.</p>
+  <h2><a name="3.     Target Test Items">El&eacute;ments vis&eacute;s par les tests</a></h2>
+</div>
+<div class=Section2>
+  <p>La liste qui suit identifie les &eacute;l&eacute;ments de test logiciels, mat&eacute;riels et
+    associ&eacute;s  identifi&eacute;s comme cible de tests. Cette liste repr&eacute;sente les &eacute;l&eacute;ments
+  qui vont &ecirc;tre test&eacute;s.</p>
+  <table border="1" cellspacing="0" cellpadding="5">
+    <tr>
+      <td>El&eacute;ments de test</td>
+      <th>Cat&eacute;gorie</th>
+      <th>El&eacute;ment</th>
+      <th>Importance</th>
+    </tr>
+    <tr>
+      <th rowspan="4">Produit</th>
+      <td>Rapport utilisateur (d'observation)</td>
+        <td>&nbsp;</td>
+        <td>Haute</td>
+    </tr>
+    <tr>
+      <td>Traitement des donn&eacute;es</td>
+      <td>Support des classifications connues (Hynek, Vall&eacute;e, Haines,
+        etc.)</td>
+      <td>Moyenne</td>
+    </tr>
+    <tr>
+      <td>Interop&eacute;rabilit&eacute; entre serveurs/ &eacute;change de donn&eacute;es</td>
+      <td>&nbsp;</td>
+      <td>Moyenne</td>
+    </tr>
+    <tr>
+      <td>Autre impl&eacute;mentation (autre que la RI)</td>
+      <td>&nbsp;</td>
+      <td>Moyenne</td>
+    </tr>
+    <tr>
+      <th rowspan="5">Ti&egrave;re partie</th>
+      <td>Client environment</td>
+      <td>Navigateur Web</td>
+      <td>Haute</td>
+    </tr>
+    <tr>
+      <td rowspan="4">Environnement serveur</td>
+      <td>J2SE</td>
+      <td>Moyenne</td>
+    </tr>
+    <tr>
+      <td>SGBDR</td>
+      <td>Moyenne</td>
+    </tr>
+    <tr>
+      <td>SGBDO</td>
+      <td>Faible</td>
+    </tr>
+    <tr>
+      <td>OS</td>
+      <td>Failble</td>
+    </tr>
+  </table>
+</div>
+<div class=Section2>
+  <h2><a name="4.     Outline of Planned Tests">Description des tests pr&eacute;vus</a></h2>
+  <p>Cette section pr&eacute;sente les ressources recommand&eacute;es pour le projet UFO@home,
+    leurs principales responsabilit&eacute;s, et leur connaissances ou ensemble de comp&eacute;tences.</p>
+  <h3><a name="4.1     Outline of Test Inclusions">Enumeration des tests inclus</a></h3>
+  <p>Seront ex&eacute;cut&eacute;s les :</p>
+</div>
+<ul>
+  <li>
+    <div class=Section2>Tests unitaires</div>
+  </li>
+  <li>Les tests de performance</li>
+</ul>
+<div class=Section2>
+  <p>Ne seront pas ex&eacute;cut&eacute;s : </p>
+</div>
+<ul>
+  <li>
+    <div class=Section2>...</div>
+  </li>
+</ul>
+<div class=Section2>
+  <h3><a name="4.2     Outline of Other Candidates for Potential Inclusion">Enumeration
+      des autres candidats pour une inclusion potentielle</a></h3>
+  <p>The following test areas might be useful
+        to investigate and evaluate, but that have not been sufficiently researched
+    to know if they are important to pursue :</p>
+</div>
+<ul><li>Security-related tests</li>
+</ul>
+<div class=Section2>
+  <h3><a name="4.3     Outline of Test Exclusions">Enum&eacute;ration des tests exclus</a></h3>
+  <p>Les tests potentiels suivants pourraient &ecirc;tre men&eacute;s, mais ont &eacute;t&eacute; <b>explicitement
+    exclus</b> de ce plan : </p>
+</div>
+<ul>
+  <li>
+    <div class=Section2>tests de performance, par manque de temps</div>
+  </li>
+  <li>
+    <div class=Section2>conformit&eacute; produit/documentation, par manque de temps</div>
+  </li>
+  <li>
+    <div class=Section2>all RDBMS tests, because there are insufficient resources
+    to conduct these tests</div>
+  </li>
+  <li>Deployment tests, because of complexity</li>
+  <li>OS tests, because we do not own the relevant OS</li>
+</ul>
+<div class=Section2>
+  <h2><a name="5.     Test Approach">Approche des tests</a></h2>
+  <p>Ce chapitre pr&eacute;sente la strat&eacute;gie recommand&eacute;e pour concevoir et impl&eacute;menter
+    les tests n&eacute;cessaires.</p>
+  <p>Plusieurs techniques vont &ecirc;tre utilis&eacute;es pour r&eacute;aliser les tests :</p>
+</div>
+<ul>
+  <li>
+    <div class=Section2>tests automatis&eacute;s de type JUnit, produisant un rapport
+      des r&eacute;ussites/&eacute;checs. Ces tests visent avant tout les &eacute;l&eacute;ments internes
+      (objets m&eacute;tiers ou techniques) du logiciel et assurent leur fiabilit&eacute;.
+      Un &eacute;chec d'un de ces tests (technique ou fonctionnel) entra&icirc;ne l'&eacute;chec
+      de la suite de test dans sa totalit&eacute;.</div>
+  </li>
+  <li>sc&eacute;narios jou&eacute;s manuellement et valid&eacute;s ou non par des utilisateurs. Ces
+    tests visent avant tout les &eacute;l&eacute;ment d'interface utilisateur qui ne peuvent
+    &ecirc;tre test&eacute;s automatiquement et n&eacute;cessitent une appr&eacute;ciation (de facilit&eacute;
+    d'utilisation, d'ad&eacute;quation au besoin, de qualit&eacute;) de la part de l'utilisateur
+    final. Ces utilisateurs devront &ecirc;tre form&eacute;s, non pas au logiciel, mais &agrave;
+    l'&eacute;valuation et la validation de tels tests. Ces tests pourront aboutir &agrave;
+    un succ&egrave;s, un &eacute;chec ou une appr&eacute;ciation
+    relative (qualitative typiquement) qui devra atteindre un seuil minima.</li>
+</ul>
+<div class=Section2>
+  <h3><a name="5.1     Initial Test-Idea Catalogs and Other Reference Sources">Catalogues
+      initiaux d'id&eacute;es de test et autres sources de r&eacute;f&eacute;rence</a></h3>
+  <p>Existing resources are referenced
+              to stimulate the identification and selection of specific tests to
+    be conducted :</p>
+</div>
+<ul>
+  <li>
+    <div class=Section2>Test-ideas catalog</div>
+  </li>
+</ul>
+<div class=Section2>
+  <h3><a name="5.2     Testing Techniques and Types">Techniques et types de tests</a></h3>
+  <h4><a name="5.2.1     Data and Database Integrity Testing">Test d'int&eacute;grit&eacute;
+      de donn&eacute;es et de base</a></h4>
+  <p>[The databases and the database processes should be tested
+              as an independent subsystem. This testing should test the subsystems without
+              the target-of-test's User Interface as the interface to the data. Additional
+              research into the DataBase Management System (DBMS) needs to be performed
+              to identify the tools and techniques that may exist to support the testing
+    identified in the following table.]</p>
+  <table border="1" cellpadding="5" cellspacing="0">
+    <tr>
+      <th width="31%">Objectif de la technique</th>
+      <td width="69%">
+        <ul>
+          <li>[Exercise database access methods and processes independent
+                      of the UI so you can observe and log incorrectly functioning target
+            behavior or data corruption.] </li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <th width="31%">Technique</th>
+      <td width="69%">
+        <li>          [Invoke each database access method and process,
+          seeding each with valid and invalid data or requests for data.        </li>
+        <li>          Inspect the database to ensure the data has been
+                      populated as intended and all database events have occurred properly,
+                      or review the returned data to ensure that the correct data was retrieved
+        for the correct reasons.]        </li>
+      </td>
+    </tr>
+    <tr>
+      <th width="31%">Oracles</th>
+      <td width="69%">
+        <p>[Outline one or more strategies that can be used by
+                    the technique to accurately observe the outcomes of the test. The oracle
+                    combines elements of both the method by which the observation can be
+                    made and the characteristics of specific outcome that indicate probable
+                    success or failure. Ideally, oracles will be self-verifying, allowing
+                    automated tests to make an initial assessment of test pass or failure,
+                    however, be careful to mitigate the risks inherent in automated results
+          determination.] </td>
+    </tr>
+    <tr>
+      <th width="31%">Outils requis</th>
+      <td width="69%">
+        <p>[The technique requires the following tools:
+        </p>        <li>          Test Script Automation Tool        </li>
+        <li>          base configuration imager and restorer        </li>
+        <li>          backup and recovery tools        </li>
+        <li>          installation-monitoring tools (registry, hard disk,
+        CPU, memory, and so on)        </li>
+        <li>          database SQL utilities and tools        </li>
+        <li>          data-generation tools]        </li>
+      </td>
+    </tr>
+    <tr>
+      <th width="31%">Crit&egrave;re de r&eacute;ussite</th>
+      <td width="69%">
+        <p>[The technique supports the testing of all key database
+          access methods and processes.] </td>
+    </tr>
+    <tr>
+      <th width="31%">Consid&eacute;rations sp&eacute;ciales</th>
+      <td width="69%"><li>          [Testing may require a DBMS development environment
+          or drivers to enter or modify data directly in the database.        </li>
+        <li>          Processes should be invoked manually.        </li>
+        <li>          Small or minimally sized databases (with a limited
+                      number of records) should be used to increase the visibility of any
+        non-acceptable events.]</td>
+    </tr>
+  </table>
+  <h4><a name="5.2.2     Function Testing">Function
+      testing</a></h4>
+  <p>[Function testing of the target-of-test should focus on any
+              requirements for test that can be traced directly to use cases or business
+              functions and business rules. The goals of these tests are to verify proper
+              data acceptance, processing, and retrieval, and the appropriate implementation
+              of the business rules. This type of testing is based upon black box techniques;
+              that is, verifying the application and its internal processes by interacting
+              with the application via the Graphical User Interface (GUI) and analyzing
+              the output or results. The following table identifies an outline of the testing
+    recommended for each application.]</p>
+  <table border="1" cellpadding="5" cellspacing="0">
+    <tr>
+      <th width="31%">Technique Objective</th>
+      <td width="69%">
+        <p>[Exercise target-of-test functionality, including navigation,
+          data entry, processing, and retrieval to observe and log target behavior.] </td>
+    </tr>
+    <tr>
+      <th width="31%">Technique</th>
+      <td width="69%">
+        <p>[Exercise each use-case scenario's individual use-cases
+                    flows or functions and features, using valid and invalid data, to verify
+                    that:
+        </p>        <li>          the expected results occur when valid data is used        </li>
+        <li>          the appropriate error or warning messages are displayed
+        when invalid data is used        </li>
+        <li>          each business rule is properly applied]        </li>
+      </td>
+    </tr>
+    <tr>
+      <th width="31%">Oracles</th>
+      <td width="69%">
+        <p>[Outline one or more strategies that can be used by
+                    the technique to accurately observe the outcomes of the test. The oracle
+                    combines elements of both the method by which the observation can be
+                    mad, and the characteristics of specific outcome that indicate probable
+                    success or failure. Ideally, oracles will be self-verifying, allowing
+                    automated tests to make an initial assessment of test pass or failure,
+                    however, be careful to mitigate the risks inherent in automated results
+          determination.] </td>
+    </tr>
+    <tr>
+      <th width="31%">Required Tools</th>
+      <td width="69%">
+        <p>[The technique requires the following tools:
+        </p>        <li>          Test Script Automation Tool        </li>
+        <li>          base configuration imager and restorer        </li>
+        <li>          backup and recovery tools        </li>
+        <li>          installation-monitoring tools (registry, hard disk,
+        CPU, memory, and so on)        </li>
+        <li>          data-generation tools]        </li>
+      </td>
+    </tr>
+    <tr>
+      <th width="31%">Success Criteria</th>
+      <td width="69%">
+        <p>[The technique supports the testing of:
+        </p>        <li>          all key use-case scenarios        </li>
+        <li>          all key features        </li>
+      </td>
+    </tr>
+    <tr>
+      <th width="31%">Special Considerations</th>
+      <td width="69%">
+        <p> [Identify or describe those items or issues (internal
+                    or external) that impact the implementation and execution of function
+          test.]</p>
+      </td>
+    </tr>
+  </table>
+  <h3><a name="5.2.3     Business Cycle Testing">Business
+      cycle testing</a></h3>
+  <p>Business Cycle Testing should emulate the activities performed
+              on the UFO@home project over time. A period should be identified,
+    such as one year, and transactions and activities that would occur during
+    a year's period should be executed. This includes all daily, weekly, and
+    monthly cycles,
+    and events that are date-sensitive, such as ticklers.</p>
+  <table border="1" cellpadding="5" cellspacing="0">
+    <tr>
+      <th width="31%">Objectif de la technique</th>
+      <td width="69%">
+        <p>[Exercise target-of-test and background processes according
+                    to required business models and schedules to observe and log target
+          behavior.] </td>
+    </tr>
+    <tr>
+      <th width="31%">Technique</th>
+      <td width="69%">
+        <p>[Testing will simulate several business cycles by performing
+                    the following:
+        </p>        <li>          The tests used for target-of-test's function testing
+                      will be modified or enhanced to increase the number of times each
+                      function is executed to simulate several different users over a specified
+        period.        </li>
+        <li>          All time or date-sensitive functions will be executed
+        using valid and invalid dates or time periods.        </li>
+        <li>          All functions that occur on a periodic schedule
+        will be executed or launched at the appropriate time.        </li>
+        <li>          Testing will include using valid and invalid data
+                      to verify the following:
+          <ul>
+            <li>              The expected results occur when valid data is
+              used.            </li>
+            <li>              The appropriate error or warning messages are
+              displayed when invalid data is used.            </li>
+            <li>              Each business rule is properly applied.]            </li>
+          </ul>
+        </li>
+      </td>
+    </tr>
+    <tr>
+      <th width="31%">Oracles</th>
+      <td width="69%">
+        <p>[Outline one or more strategies that can be used by
+                    the technique to accurately observe the outcomes of the test. The oracle
+                    combines elements of both the method by which the observation can be
+                    made, and the characteristics of specific outcome that indicate probable
+                    success or failure. Ideally, oracles will be self-verifying, allowing
+                    automated tests to make an initial assessment of test pass or failure,
+                    however, be careful to mitigate the risks inherent in automated results
+          determination.] </td>
+    </tr>
+    <tr>
+      <th width="31%">Outils requis</th>
+      <td width="69%">
+        <p>[The technique requires the following tools:
+        </p>        <li>          Test Script Automation Tool        </li>
+        <li>          base configuration imager and restorer        </li>
+        <li>          backup and recovery tools        </li>
+        <li>          data-generation tools]        </li>
+      </td>
+    </tr>
+    <tr>
+      <th width="31%">Crit&egrave;re de r&eacute;ussite</th>
+      <td width="69%">
+        <p>[The technique supports the testing of all critical
+          business cycles.] </td>
+    </tr>
+    <tr>
+      <th width="31%">Consid&eacute;rations sp&eacute;ciales</th>
+      <td width="69%"><li>          [System dates and events may require special support
+          activities.        </li>
+        <li>          A business model is required to identify appropriate
+        test requirements and procedures.]</td>
+    </tr>
+  </table>
+  <h4><a name="5.2.4     User Interface Testing">User
+      interface testing</a></h4>
+  <p>User Interface (UI) testing verifies a user's interaction
+              with the software. The goal of UI testing is to ensure that the
+    UI provides the user with the appropriate access and navigation through the
+    functions
+              of the target-of-test. In addition, UI testing ensures that the
+    objects within the UI function as expected and conform to corporate, or industry,
+    standards.</p>
+  <table border="1" cellpadding="5" cellspacing="0">
+    <tr>
+      <th width="31%">Objectif de la technique</th>
+      <td width="69%">
+        <p>[Exercise the following to observe and log standards
+                    conformance and target behavior:
+        </p>        <li>          Navigation through the target-of-test reflecting
+                      business functions and requirements, including window-to-window,
+                      field-to- field, and use of access methods (tab keys, mouse movements,
+        accelerator keys).        </li>
+        <li>          Window objects and characteristics can be exercised-such
+        as menus, size, position, state, and focus.]        </li>
+      </td>
+    </tr>
+    <tr>
+      <th width="31%">Technique</th>
+      <td width="69%">
+        <p>[Create or modify tests for each window to verify proper
+          navigation and object states for each application window and object.] </td>
+    </tr>
+    <tr>
+      <th width="31%">Oracles</th>
+      <td width="69%">
+        <p>[Outline one or more strategies that can be used by
+                    the technique to accurately observe the outcomes of the test. The oracle
+                    combines elements of both the method by which the observation can be
+                    made and the characteristics of specific outcome that indicate probable
+                    success or failure. Ideally, oracles will be self-verifying, allowing
+                    automated tests to make an initial assessment of test pass or failure,
+                    however, be careful to mitigate the risks inherent in automated results
+          determination.] </td>
+    </tr>
+    <tr>
+      <th width="31%">Outils requis</th>
+      <td width="69%">
+        <p>[The technique requires the Test Script Automation
+          Tool.] </td>
+    </tr>
+    <tr>
+      <th width="31%">Crit&egrave;re de r&eacute;ussite</th>
+      <td width="69%">
+        <p>[The technique supports the testing of each major screen
+          or window that will be used extensively by the end user.] </td>
+    </tr>
+    <tr>
+      <th width="31%">Consid&eacute;rations sp&eacute;ciales</th>
+      <td width="69%">
+        <p>[Not all properties for custom and third party objects
+          can be accessed.] </p>
+      </td>
+    </tr>
+  </table>
+  <h4><a name="5.2.5     Performance Profiling">Performance
+      profiling</a></h4>
+  <p>Performance profiling is a performance test in which response
+              times, transaction rates, and other time-sensitive requirements
+    are measured and evaluated. The goal of Performance Profiling is to verify
+    performance
+              requirements have been achieved. Performance profiling is implemented
+    and executed to profile and tune a target-of-test's performance behaviors
+    as
+    a function of conditions, such as workload or hardware configurations.</p>
+  <p> <b>Note</b>: Transactions in the following table refer to &quot;logical
+              business transactions&quot;. These transactions are defined as specific use
+              cases that an actor of the system is expected to perform using the target-of-test,
+    such as add or modify a given contract.]</p>
+  <table border="1" cellpadding="5" cellspacing="0">
+    <tr>
+      <th width="31%">Objectif de la technique</th>
+      <td width="69%">
+        <p>[Exercise behaviors for designated functional transactions
+                    or business functions under the following conditions to observe and
+                    log target behavior and application performance data:
+        </p>        <li>          normal anticipated workload        </li>
+        <li>          anticipated worst-case workload]        </li>
+      </td>
+    </tr>
+    <tr>
+      <th width="31%">Technique</th>
+      <td width="69%">
+        <li>          [Use Test Procedures developed for Function or Business
+                      Cycle Testing.
+        <li>          Modify data files to increase the number of transactions
+                      or the scripts to increase the number of iterations that occur in
+        each transaction.        </li>
+        <li>          Scripts should be run on one machine (best case is
+                      to benchmark single user, single transaction) and should be repeated
+                      with multiple clients (virtual or actual, see Special Considerations
+        below).]        </li>
+      </td>
+    </tr>
+    <tr>
+      <th width="31%">Oracles</th>
+      <td width="69%">
+        <p>[Outline one or more strategies that can be used by
+                    the technique to accurately observe the outcomes of the test. The oracle
+                    combines elements of both the method by which the observation can be
+                    made and the characteristics of specific outcome that indicate probable
+                    success or failure. Ideally, oracles will be self-verifying, allowing
+                    automated tests to make an initial assessment of test pass or failure,
+                    however, be careful to mitigate the risks inherent in automated results
+          determination.] </td>
+    </tr>
+    <tr>
+      <th width="31%">Outils requis</th>
+      <td width="69%">
+        <p>[The technique requires the following tools:
+        </p>        <li>          Test Script Automation Tool        </li>
+        <li>          an application performance profiling tool, such
+        as Rational Quantify        </li>
+        <li>          installation-monitoring tools (registry, hard disk,
+          CPU, memory, and so on        </li>
+        <li>          resourse-constraining tools; for example, Canned
+        Heat]        </li>
+      </td>
+    </tr>
+    <tr>
+      <th width="31%">Crit&egrave;re de r&eacute;ussite</th>
+      <td width="69%">
+        <p>[The technique supports testing:
+        </p>        <li>          Single Transaction or single user: Successful emulation
+                      of the transaction scripts without any failures due to test implementation
+        problems.        </li>
+        <li>          Multiple transactions or multiple users: Successful
+                      emulation of the workload without any failures due to test implementation
+        problems.]        </li>
+      </td>
+    </tr>
+    <tr>
+      <th width="31%">Consid&eacute;rations sp&eacute;ciales</th>
+      <td width="69%">
+        <p>[Comprehensive performance testing includes having
+          a background workload on the server.</p>
+        <p>There are several methods that can be used to perform
+                    this, including:
+        <li>          &quot;Drive transactions&quot; directly to the server,
+        usually in the form of Structured Query Language (SQL) calls. </li>
+        <li>          Create &quot;virtual&quot; user load to simulate
+                      many clients, usually several hundred. Remote Terminal Emulation
+                      tools are used to accomplish this load. This technique can also be
+        used to load the network with &quot;traffic&quot;. </li>
+        <li>          Use multiple physical clients, each running test
+        scripts, to place a load on the system.</li>
+        <p> Performance testing should be performed on a dedicated
+                    machine or at a dedicated time. This permits full control and accurate
+          measurement.</p>
+        <p> The databases used for Performance Testing should
+          be either actual size or scaled equally.]</p>
+      </td>
+    </tr>
+  </table>
+  <h4><a name="5.2.6     Load Testing">Load testing</a></h4>
+  <p>Load testing is a performance test that subjects the target-of-test
+              to varying workloads to measure and evaluate the performance behaviors
+    and abilities of the target-of-test to continue to function properly under
+    these
+              different workloads. The goal of load testing is to determine and
+    ensure that the system functions properly beyond the expected maximum workload.
+              Additionally, load testing evaluates the performance characteristics,
+    such
+    as response times, transaction rates, and other time-sensitive issues.</p>
+  <p>[<b>Note</b>: Transactions in the following table refer to &quot;logical
+              business transactions&quot;. These transactions are defined as specific functions
+              that an end user of the system is expected to perform using the application,
+    such as add or modify a given contract.]</p>
+  <table border="1" cellpadding="5" cellspacing="0">
+    <tr>
+      <th width="31%">Objectif de la technique</th>
+      <td width="69%">
+        <p>[Exercise designated transactions or business cases
+                    under varying workload conditions to observe and log target behavior
+          and system performance data.] </td>
+    </tr>
+    <tr>
+      <th width="31%">Technique</th>
+      <td width="69%">
+        <li>          [Use Transaction Test Scripts developed for Function
+                      or Business Cycle Testing as a basis, but remember to remove unnecessary
+          interactions and delays.        </li>
+        <li>          Modify data files to increase the number of transactions
+        or the tests to increase the number of times each transaction occurs.        </li>
+        <li>          Workloads should include&#151;for example, daily,
+        weekly, and monthly&#151;peak loads. </li>
+        <li>          Workloads should represent both average as well as
+          peak loads.        </li>
+        <li>          Workloads should represent both instantaneous and
+        sustained peaks.        </li>
+        <li>          The workloads should be executed under different
+        Test Environment Configurations.]        </li>
+      </td>
+    </tr>
+    <tr>
+      <th width="31%">Oracles</th>
+      <td width="69%">
+        <p>[Outline one or more strategies that can be used by
+                    the technique to accurately observe the outcomes of the test. The oracle
+                    combines elements of both the method by which the observation can be
+                    made and the characteristics of specific outcome that indicate probable
+                    success or failure. Ideally, oracles will be self-verifying, allowing
+                    automated tests to make an initial assessment of test pass or failure,
+                    however, be careful to mitigate the risks inherent in automated results
+          determination.] </td>
+    </tr>
+    <tr>
+      <th width="31%">Outils requis</th>
+      <td width="69%">
+        <p>[The technique requires the following tools:
+        </p>        <li>          Test Script Automation Tool        </li>
+        <li>          Transaction load scheduling and control tool        </li>
+        <li>          installation-monitoring tools (registry, hard disk,
+        CPU, memory, and so on)        </li>
+        <li>          resource-constraining tools; for example, Canned
+        Heat        </li>
+        <li>          data-generation tools]        </li>
+      </td>
+    </tr>
+    <tr>
+      <th width="31%">Crit&egrave;re de r&eacute;ussite</th>
+      <td width="69%">
+        <p>[The technique supports the testing of Workload Emulation,
+                    which is the successful emulation of the workload without any failures
+          due to test implementation problems.] </td>
+    </tr>
+    <tr>
+      <th width="31%">Consid&eacute;rations sp&eacute;ciales</th>
+      <td width="69%">
+        <li>          [Load testing should be performed on a dedicated
+                      machine or at a dedicated time. This permits full control and accurate
+          measurement.        </li>
+        <li>          The databases used for load testing should be either
+        actual size or scaled equally.]</td>
+    </tr>
+  </table>
+  <h4><a name="5.2.7     Stress Testing">Stress
+      testing</a></h4>
+  <p>[Stress testing is a type of performance test implemented
+              and executed to understand how a system fails due to conditions at the boundary,
+              or outside of, the expected tolerances. This typically involves low resources
+              or competition for resources. Low resource conditions reveal how the target-of-test
+              fails that is not apparent under normal conditions. Other defects might result
+              from competition for shared resources, like database locks or network bandwidth,
+              although some of these tests are usually addressed under functional and load
+    testing.</p>
+  <p><b>Note</b>: References to transactions in the following
+    table refer to logical business transactions.]</p>
+  <table border="1" cellpadding="5" cellspacing="0">
+    <tr>
+      <th width="31%">Objectif de la technique</th>
+      <td width="69%">
+        <p>[Exercise the target-of-test functions under the following
+                    stress conditions to observe and log target behavior that identifies
+                    and documents the conditions under which the system <b>fails</b> to
+                    continue functioning properly:
+        </p>        <li>          little or no memory available on the server (RAM
+        and persistent storage space)        </li>
+        <li>          maximum actual or physically capable number of clients
+        connected or simulated        </li>
+        <li>          multiple users performing the same transactions against
+        the same data or accounts        </li>
+        <li>          &quot;overload&quot; transaction volume or mix (see
+        Performance Profiling above)] </li>
+      </td>
+    </tr>
+    <tr>
+      <th width="31%">Technique</th>
+      <td width="69%">
+        <li>          [Use tests developed for Performance Profiling or
+        Load Testing.        </li>
+        <li>          To test limited resources, tests should be run on
+                      a single machine, and RAM and persistent storage space on the server
+        should be reduced or limited.        </li>
+        <li>          For remaining stress tests, multiple clients should
+                      be used, either running the same tests or complementary tests to
+        produce the worst-case transaction volume or mix.]        </li>
+      </td>
+    </tr>
+    <tr>
+      <th width="31%">Oracles</th>
+      <td width="69%">
+        <p>[Outline one or more strategies that can be used by
+                    the technique to accurately observe the outcomes of the test. The oracle
+                    combines elements of both the method by which the observation can be
+                    made and the characteristics of specific outcome that indicate probable
+                    success or failure. Ideally, oracles will be self-verifying, allowing
+                    automated tests to make an initial assessment of test pass or failure,
+                    however, be careful to mitigate the risks inherent in automated results
+          determination.] </td>
+    </tr>
+    <tr>
+      <th width="31%">Outils requis</th>
+      <td width="69%">
+        <p>[The technique requires the following tools:
+        </p>        <li>          Test Script Automation Tool        </li>
+        <li>          Transaction load scheduling and control tool        </li>
+        <li>          installation-monitoring tools (registry, hard disk,
+        CPU, memory, and so on        </li>
+        <li>          resource-constraining tools; for example, Canned
+        Heat        </li>
+        <li>          data-generation tools]        </li>
+      </td>
+    </tr>
+    <tr>
+      <th width="31%">Crit&egrave;re de r&eacute;ussite</th>
+      <td width="69%">
+        <p>[The technique supports the testing of Stress Emulation.
+                    The system can be emulated successfully in one or more conditions defined
+                    as stress conditions, and an observation of the resulting system state,
+          during and after the condition has been emulated, can be captured.] </td>
+    </tr>
+    <tr>
+      <th width="31%">Consid&eacute;rations sp&eacute;ciales</th>
+      <td width="69%">
+        <li>          [Stressing the network may require network tools
+        to load the network with messages or packets.        </li>
+        <li>          The persistent storage used for the system should
+                      temporarily be reduced to restrict the available space for the database
+        to grow.        </li>
+        <li>          Synchronize the simultaneous clients accessing of
+        the same records or data accounts.]</td>
+    </tr>
+  </table>
+  <h4><a name="5.2.8     Volume Testing">Volume
+      testing</a></h4>
+  <p>[Volume testing subjects the target-of-test to large amounts
+              of data to determine if limits are reached that cause the software to fail.
+              Volume testing also identifies the continuous maximum load or volume the
+              target-of-test can handle for a given period. For example, if the target-of-test
+              is processing a set of database records to generate a report, a Volume Test
+              would use a large test database, and would check that the software behaved
+    normally and produced the correct report.]</p>
+  <table border="1" cellpadding="5" cellspacing="0">
+    <tr>
+      <th width="31%">Objectif de la technique</th>
+      <td width="69%">
+        <p>[Exercise the target-of-test functions under the following
+                    high volume scenarios to observe and log target behavior:
+        </p>        <li>          Maximum (actual or physically-capable) number of
+                      clients connected, or simulated, all performing the same, worst case
+        (performance) business function for an extended period.        </li>
+        <li>          Maximum database size has been reached (actual or
+                      scaled) and multiple queries or report transactions are executed
+        simultaneously.]        </li>
+      </td>
+    </tr>
+    <tr>
+      <th width="31%">Technique</th>
+      <td width="69%">
+        <li>          [Use tests developed for Performance Profiling or
+        Load Testing.        </li>
+        <li>          Multiple clients should be used, either running the
+                      same tests or complementary tests to produce the worst-case transaction
+        volume or mix (see Stress Testing) for an extended period.        </li>
+        <li>          Maximum database size is created (actual, scaled,
+                      or filled with representative data), and multiple clients
+          are used to run queries and report transactions simultaneously for
+          extended
+        periods.]</li>
+      </td>
+    </tr>
+    <tr>
+      <th width="31%">Oracles</th>
+      <td width="69%">
+        <p>[Outline one or more strategies that can be used by
+                    the technique to accurately observe the outcomes of the test. The oracle
+                    combines elements of both the method by which the observation can be
+                    made and the characteristics of specific outcome that indicate probable
+                    success or failure. Ideally, oracles will be self-verifying, allowing
+                    automated tests to make an initial assessment of test pass or failure,
+                    however, be careful to mitigate the risks inherent in automated results
+          determination.] </td>
+    </tr>
+    <tr>
+      <th width="31%">Outils requis</th>
+      <td width="69%">
+        <p>[The technique requires the following tools:
+        </p>        <li>          Test Script Automation Tool        </li>
+        <li>          Transaction load scheduling and control tool        </li>
+        <li>          installation-monitoring tools (registry, hard disk,
+        CPU, memory, and so on        </li>
+        <li>          resource-constraining tools; for example, Canned
+        Heat        </li>
+        <li>          data-generation tools]        </li>
+      </td>
+    </tr>
+    <tr>
+      <th width="31%">Crit&egrave;re de r&eacute;ussite</th>
+      <td width="69%">
+        <p>[The technique supports the testing of Volume Emulation.
+                    Large quantities of users, data, transactions, or other aspects of
+                    the system use under volume can be successfully emulated and an observation
+                    of the system state changes over the duration of the volume test can
+          be captured.] </td>
+    </tr>
+    <tr>
+      <th width="31%">Consid&eacute;rations sp&eacute;ciales</th>
+      <td width="69%">
+        <p>[What period of time would be considered an acceptable
+          time for high volume conditions, as noted above?]</p>
+      </td>
+    </tr>
+  </table>
+  <h4><a name="5.2.9     Security and Access Control Testing">Security
+      and access control testing</a></h4>
+  <p>[Security and Access Control Testing focuses on two key areas
+    of security:</p>
+  <li>
+    <p> Application-level security, including access to the Data
+      or Business Functions</p>
+  </li>
+  <li>
+    <p> System-level Security, including logging into or remotely
+      accessing to the system</p>
+  </li>
+  <p>Based on the security you want, application-level security
+              ensures that actors are restricted to specific functions or use cases, or
+              they are limited in the data that is available to them. For example, everyone
+              may be permitted to enter data and create new accounts, but only managers
+              can delete them. If there is security at the data level, testing ensures
+              that &quot;user type one&quot; can see all customer information, including
+              financial data, however, &quot;user type two&quot; only sees the demographic
+    data for the same client.</p>
+  <p>System-level security ensures that only those users granted
+              access to the system are capable of accessing the applications and only through
+    the appropriate gateways.]</p>
+  <table border="1" cellpadding="5" cellspacing="0">
+    <tr>
+      <th width="31%">Objectif de la technique</th>
+      <td width="69%">
+        <p>[Exercise the target-of-test under the following conditions
+                    to observe and log target behavior:
+        </p>        <li>          Application-level Security: an actor can access only
+        those functions or data for which their user type is provided permissions.        </li>
+        <li>          System-level Security: only those actors with access
+        to the system and applications are permitted to access them].        </li>
+      </td>
+    </tr>
+    <tr>
+      <th width="31%">Technique</th>
+      <td width="69%">
+        <li>          [Application-level Security: Identify and list each
+        user type and the functions or data for which each type has permissions.        </li>
+        <ul>
+          <li>            Create tests for each user type and verify each
+          permission by creating transactions specific to each user type.          </li>
+        </ul>
+        <ul>
+          <li>            Modify user type and rerun tests for same users.
+                        In each case, verify those additional functions or data are correctly
+          available or denied.          </li>
+        </ul>
+        <li>          System-level Access: See Special Considerations below.]        </li>
+      </td>
+    </tr>
+    <tr>
+      <th width="31%">Oracles</th>
+      <td width="69%">
+        <p>[Outline one or more strategies that can be used by
+                    the technique to accurately observe the outcomes of the test. The oracle
+                    combines elements of both the method by which the observation can be
+                    made and the characteristics of specific outcome that indicate probable
+                    success or failure. Ideally, oracles will be self-verifying, allowing
+                    automated tests to make an initial assessment of test pass or failure,
+                    however, be careful to mitigate the risks inherent in automated results
+          determination.] </td>
+    </tr>
+    <tr>
+      <th width="31%">Outils requis</th>
+      <td width="69%">
+        <p>[The technique requires the following tools:
+        </p>        <li>          Test Script Automation Tool        </li>
+        <li>          &quot;Hacker&quot; security breach and probing tools </li>
+        <li>          OS Security Administration tools]        </li>
+      </td>
+    </tr>
+    <tr>
+      <th width="31%">Crit&egrave;re de r&eacute;ussite</th>
+      <td width="69%">
+        <p>[The technique supports the testing of the appropriate
+                    functions or data affected by security settings can be tested for each
+          known actor type.] </td>
+    </tr>
+    <tr>
+      <th width="31%">Consid&eacute;rations sp&eacute;ciales</th>
+      <td width="69%">
+        <p> [Access to the system must be reviewed or discussed
+                    with the appropriate network or systems administrator. This testing
+          may not be required as it may be a function of network or systems administration.]</p>
+      </td>
+    </tr>
+  </table>
+  <h4><a name="5.2.10     Failover and Recovery Testing">Failover
+      and recovery testing</a></h4>
+  <p>[Failover and recovery testing ensures that the target-of-test
+              can successfully failover and recover from a variety of hardware, software,
+    or network malfunctions with undue loss of data or data integrity.</p>
+  <p>For those systems that must be kept running, failover testing
+              ensures that when a failover condition occurs, the alternate or backup systems
+              properly &quot;take over&quot; for the failed system without any loss of
+    data or transactions.</p>
+  <p>Recovery testing is an antagonistic test process in which
+              the application or system is exposed to extreme conditions, or simulated
+              conditions, to cause a failure, such as device Input/Output (I/O) failures,
+              or invalid database pointers and keys. Recovery processes are invoked, and
+              the application or system is monitored and inspected to verify proper application,
+    or system, and data recovery has been achieved.]</p>
+  <table border="1" cellpadding="5" cellspacing="0">
+    <tr>
+      <th width="31%">Objectif de la technique</th>
+      <td width="69%">
+        <p>[Simulate the failure conditions and exercise the recovery
+                    processes (manual and automated) to restore the database, applications,
+                    and system to a desired, known state. The following types of conditions
+                    are included in the testing to observe and log behavior after recovery:
+        </p>        <li>          power interruption to the client        </li>
+        <li>          power interruption to the server        </li>
+        <li>          communication interruption via network servers        </li>
+        <li>          interruption, communication, or power loss to DASD
+        (Dynamic Access Storage Devices) and DASD controllers        </li>
+        <li>          incomplete cycles (data filter processes interrupted,
+        data synchronization processes interrupted)        </li>
+        <li>          invalid database pointers or keys        </li>
+        <li>          invalid or corrupted data elements in database]        </li>
+      </td>
+    </tr>
+    <tr>
+      <th width="31%">Technique</th>
+      <td width="69%">
+        <p>[The tests already created for Function and Business
+                    Cycle testing can be used as a basis for creating a series of transactions
+                    to support failover and recovery testing, primarily to define the tests
+                    to be run to test that recovery was successful.
+        </p>        <li>          Power interruption to the client: power down the
+        PC.        </li>
+        <li>          Power interruption to the server: simulate or initiate
+        power down procedures for the server.        </li>
+        <li>          Interruption via network servers: simulate or initiate
+                      communication loss with the network (physically disconnect communication
+        wires or power down network servers or routers).        </li>
+        <p>Interruption, communication, or power loss to DASD
+                    and DASD controllers: simulate or physically eliminate communication
+          with one or more DASDs or DASD controllers.</p>
+        <p>Once the above conditions or simulated conditions are
+                    achieved, additional transactions should be executed and upon reaching
+                    this second test point state, recovery procedures should be invoked.
+        <p>Testing for incomplete cycles utilizes the same technique
+                    as described above except that the database processes themselves should
+          be aborted or prematurely terminated.</p>
+        <p>Testing for the following conditions requires that
+                    a known database state be achieved. Several database fields, pointers,
+                    and keys should be corrupted manually and directly within the database
+                    (via database tools). Additional transactions should be executed using
+                    the tests from Application Function and Business Cycle Testing and
+          full cycles executed.] </td>
+    </tr>
+    <tr>
+      <th width="31%">Oracles</th>
+      <td width="69%">
+        <p>[Outline one or more strategies that can be used by
+                    the technique to accurately observe the outcomes of the test. The oracle
+                    combines elements of both the method by which the observation can be
+                    made and the characteristics of specific outcome that indicate probable
+                    success or failure. Ideally, oracles will be self-verifying, allowing
+                    automated tests to make an initial assessment of test pass or failure,
+                    however, be careful to mitigate the risks inherent in automated results
+          determination.] </td>
+    </tr>
+    <tr>
+      <th width="31%">Outils requis</th>
+      <td width="69%">
+        <p>[The technique requires the following tools:
+        </p>        <li>          base configuration imager and restorer        </li>
+        <li>          installation-monitoring tools (registry, hard disk,
+        CPU, memory, and so on        </li>
+        <li>          backup and recovery tools] </td>
+    </tr>
+    <tr>
+      <th width="31%">Crit&egrave;re de r&eacute;ussite</th>
+      <td width="69%">
+        <p>[The technique supports the testing of:</p>
+        <li>          One of more simulated disasters involving one or
+        more combinations of the application, database, and system.</li>
+        <li>          One or more simulated recoveries involving one or
+                      more combinations of the application, database, and system to a known
+        desired state.</li>
+      </td>
+    </tr>
+    <tr>
+      <th width="31%">Consid&eacute;rations sp&eacute;ciales</th>
+      <td width="69%">
+        <li>          [Recovery testing is highly intrusive. Procedures
+                      to disconnect cabling (simulating power or communication loss) may
+                      not be desirable or feasible. Alternative methods, such as diagnostic
+        software tools may be required.        </li>
+        <li>          Resources from the Systems (or Computer Operations),
+        Database, and Networking groups are required.        </li>
+        <li>          These tests should be run after hours or on an isolated
+        machine.]</td>
+    </tr>
+  </table>
+  <h4><a name="5.2.11     Configuration Testing">Configuration
+      testing</a></h4>
+  <p>[Configuration testing verifies the operation of the target-of-test
+              on different software and hardware configurations. In most production environments,
+              the particular hardware specifications for the client workstations, network
+              connections, and database servers vary. Client workstations may have different
+              software loaded (for example, applications, drivers, and so on) and, at any
+    one time, many different combinations may be active using different resources.]</p>
+  <table border="1" cellpadding="5" cellspacing="0">
+    <tr>
+      <th width="31%">Objectif de la technique</th>
+      <td width="69%">
+        <p>[Exercise the target-of-test on the required hardware
+                    and software configurations to observe and log target behavior under
+          different configurations and identify changes in configuration state.] </td>
+    </tr>
+    <tr>
+      <th width="31%">Technique</th>
+      <td width="69%">
+        <li>          [Use Function Test scripts.        </li>
+        <li>          Open and close various non-target-of-test related
+                      software, such as the Microsoft Excel and Word applications, either
+        as part of the test or prior to the start of the test.        </li>
+        <li>          Execute selected transactions to simulate actors
+        interacting with the target-of-test and the non-target-of-test software.        </li>
+        <li>          Repeat the above process, minimizing the available
+        conventional memory on the client workstation.]        </li>
+      </td>
+    </tr>
+    <tr>
+      <th width="31%">Oracles</th>
+      <td width="69%">
+        <p>[Outline one or more strategies that can be used by
+                    the technique to accurately observe the outcomes of the test. The oracle
+                    combines elements of both the method by which the observation can be
+                    made and the characteristics of specific outcome that indicate probable
+                    success or failure. Ideally, oracles will be self-verifying, allowing
+                    automated tests to make an initial assessment of test pass or failure,
+                    however, be careful to mitigate the risks inherent in automated results
+          determination.] </td>
+    </tr>
+    <tr>
+      <th width="31%">Outils requis</th>
+      <td width="69%">
+        <p>[The technique requires the following tools:
+        </p>        <li>          base configuration imager and restorer        </li>
+        <li>          installation-monitoring tools (registry, hard disk,
+        CPU, memory, and so on        </li>
+      </td>
+    </tr>
+    <tr>
+      <th width="31%">Crit&egrave;re de r&eacute;ussite</th>
+      <td width="69%">
+        <p>[The technique supports the testing of one or more
+                    combinations of the target test items running in expected, supported
+          deployment environments.] </td>
+    </tr>
+    <tr>
+      <th width="31%">Consid&eacute;rations sp&eacute;ciales</th>
+      <td width="69%">
+        <li>          [What non-target-of-test software is needed, is
+        available, and is accessible on the desktop?        </li>
+        <li>          What applications are typically used?        </li>
+        <li>          What data are the applications running; for example,
+        a large spreadsheet opened in Excel or a 100-page document in Word?        </li>
+        <li>          The entire systems' netware, network servers, databases,
+        and so on, also need to be documented as part of this test.]</td>
+    </tr>
+  </table>
+  <h4><a name="5.2.12     Installation Testing">Installation
+      testing</a></h4>
+  <p>[Installation testing has two purposes. The first is to ensure
+              that the software can be installed under different conditions (such as a
+              new installation, an upgrade, and a complete or custom installation) under
+              normal and abnormal conditions. Abnormal conditions include insufficient
+              disk space, lack of privilege to create directories, and so on. The second
+              purpose is to verify that, once installed, the software operates correctly.
+              This usually means running a number of tests that were developed for Function
+  Testing.]</p>
+  <table border="1" cellpadding="5" cellspacing="0">
+    <tr>
+      <th width="31%">Objectif de la technique</th>
+      <td width="69%">
+        <p>[Exercise the installation of the target-of-test onto
+                    each required hardware configuration under the following conditions
+                    to observe and log installation behavior and configuration state changes:
+        </p>        <li>          new installation: a new machine, never installed
+        previously with UFO@home</li>
+        <li>          update: a machine previously installed UFO@home, same version        </li>
+        <li>          update: a machine previously installed UFO@home, older version]        </li>
+      </td>
+    </tr>
+    <tr>
+      <th width="31%">Technique</th>
+      <td width="69%">
+        <li>          [Develop automated or manual scripts to validate
+        the condition of the target machine.        </li>
+        <ul>
+          <li>            new: <project name> never installed</li>
+        </ul>
+        <ul>
+          <li>            <project name> same or older version already installed</li>
+        </ul>
+        <li>          Launch or perform installation..        </li>
+        <li>          Using a predetermined subset of Function Test scripts,
+        run the transactions.]        </li>
+      </td>
+    </tr>
+    <tr>
+      <th width="31%">Oracles</th>
+      <td width="69%">
+        <p>[Outline one or more strategies that can be used by
+                    the technique to accurately observe the outcomes of the test. The oracle
+                    combines elements of both the method by which the observation can be
+                    made and the characteristics of specific outcome that indicate probable
+                    success or failure. Ideally, oracles will be self-verifying, allowing
+                    automated tests to make an initial assessment of test pass or failure,
+                    however, be careful to mitigate the risks inherent in automated results
+          determination.] </td>
+    </tr>
+    <tr>
+      <th width="31%">Outils requis</th>
+      <td width="69%">
+        <p>[The technique requires the following tools:
+        </p>        <li>          base configuration imager and restorer        </li>
+        <li>          installation-monitoring tools (registry, hard disk,
+        CPU, memory, and so on        </li>
+      </td>
+    </tr>
+    <tr>
+      <th width="31%">Crit&egrave;re de r&eacute;ussite</th>
+      <td width="69%">
+        <p>[The technique supports the testing of the installation
+          of the developed product in one or more installation configurations.] </td>
+    </tr>
+    <tr>
+      <th width="31%">Consid&eacute;rations sp&eacute;ciales</th>
+      <td width="69%">
+        <p> [What <project name> transactions should be selected
+                    to comprise a confidence test that <project name> application has been
+          successfully installed and no major software components are missing?]</p>
+      </td>
+    </tr>
+  </table>
+  <h2><a name="6.     Entry and Exit Criteria">Entry
+      and exit criteria</a></h2>
+  <h3><a name="6.1     Test Plan">Test plan</a></h3>
+  <h4><a name="6.1.1     Test Plan Entry Criteria">Test
+      plan entry criteria</a></h4>
+  <p>The criteria that will be used to determine whether
+    the execution of the <b>Test Plan</b> can begin is :</p>
+</div>
+<ul>
+  <li>
+    <div class=Section2>release of the website</div>
+  </li>
+  <li>all developpers ok</li>
+</ul>
+  <h4><a name="6.1.2     Test Plan Exit Criteria">Test
+      plan exit criteria</a></h4>
+  <p>The criteria that will be used to determine whether
+                the execution of the <b>Test Plan </b>is complete or that continued
+                execution provides no further benefit is :</p>
+  <ul>
+    <li>same or less failures/errors than previous test plan execution.</li>
+  </ul>
+  <h4><a name="6.1.3     Suspension and Resumption Criteria">Suspension
+      and resumption criteria</a></h4>
+  <p>The criteria that will be used to determine whether
+                testing should be prematurely suspended or ended before the plan
+    has been completely executed is :</p>
+  <ul>
+    <li>no criteria</li>
+  </ul>
+  <p>The criteria that will be used to determine tha testing can be resumed is
+    :</p>
+  <ul>
+    <li>no criteria</li>
+  </ul>
+  <h3><a name="6.2     &nbsp;Test Cycles">Test
+      cycles</a></h3>
+  <h4><a name="6.2.1     Test Cycle Entry Criteria">Test
+      cycle entry criteria</a></h4>
+  <p>The criteria that will be used to determine whether
+    the effort for the next Test Cycle of this <b>Test Plan</b> can begin.</p>
+  <h4><a name="6.2.2     Test Cycle Exit Criteria">Test
+      cycle exit criteria</a></h4>
+  <p>The criteria that will be used to determine whether
+                the test effort for the current Test Cycle of this <b>Test</b> <b>Plan </b>is
+    deemed sufficient.</p>
+  <h4><a name="6.2.3     Test Cycle Abnormal Termination">Test
+      cycle abnormal termination</a></h4>
+  <p>The criteria that will be used to determine whether
+                testing should be prematurely suspended or ended for the current
+    test cycle, or whether the intended build candidate to be tested must be
+    altered.</p>
+  <h2><a name="7.     Deliverables">Deliverables</a></h2>
+  <p>This chapter lists the various artifacts that will be
+                created by the test effort that are useful deliverables to the
+    various stakeholders of the test effort.
+  <h3><a name="7.1     Test Evaluation Summaries">Test
+      evaluation summaries </a></h3>
+  <p>The form and content of
+    the test evaluation summaries will looked as :</p>
+  <ul>
+    <li>failures count</li>
+    <li>errors count</li>
+  </ul>
+  <p>They will be produced at each test suite execution.</p>
+  <h3><a name="7.2     Reporting on Test Coverage">Reporting
+      on test coverage </a></h3>
+  <p>The form and content of the extent of testing will looked as :
+  <ul>
+    <li>number of executed tests</li>
+    <li>number of assertions</li>
+  </ul>
+  <p>They will be produced at each test suite execution.
+  <h3><a name="7.3     Perceived Quality Reports">Perceived
+      quality reports</a></h3>
+  <p>[Provide a brief outline of both the form and content of
+                the reports used to measure the perceived quality of the product, and indicate
+                how frequently they will be produced. Give an indication about the method
+                and tools used to record, measure, and report on the perceived product quality.
+                You might include some analysis of Incidents and Change Request over Test
+                Coverage.]
+  <h3><a name="7.4     Incident Logs and Change Requests">Incident
+      logs and change requests </a></h3>
+  <p>[Provide a brief outline of both the method and tools used
+                to record, track, and manage test incidents, associated change requests,
+                and their status.]
+  <h3><a name="7.5     Smoke Test Suite and Supporting Test Scripts">Smoke
+      test suite and supporting test scripts</a></h3>
+  <p>[Provide a brief outline of the test assets that will be
+                delivered to allow ongoing regression testing of subsequent product builds
+                to help detect regressions in the product quality.]
+  <h3><a name="7.6     &nbsp;Additional Work Products">Additional
+      work products</a></h3>
+  <p>This section identifies the work products that are optional
+                deliverables or those that should not be used to measure or assess
+    the successful execution of the Test Plan.
+  <h4><a name="7.6.1     Detailed Test Results">Detailed
+      test results</a></h4>
+  <p>[This denotes either a collection of Microsoft Excel spreadsheets
+                listing the results determined for each test case, or the repository of both
+    test logs and determined results maintained by a specialized test product.]</p>
+  <h4><a name="7.6.2     Additional Automated Functional Test Scripts">Additional
+      automated functional test scripts</a></h4>
+  <p>[These will be either a collection of the source code files
+                for automated test scripts, or the repository of both source code and compiled
+    executables for test scripts maintained by the test automation product.]</p>
+  <h4><a name="7.6.3     Test Guidelines">Test
+      guidelines</a></h4>
+  <p>[Test Guidelines cover a broad set of categories including
+                Test-Idea catalogs, Good Practice Guidance, Test patterns, Fault and Failure
+    Models, Automation Design Standards, and so forth.]</p>
+  <h4><a name="7.6.4     Traceability Matrices">Traceability
+      matrices</a></h4>
+  <p>[Using a tool such as Rational RequisistePro or Microsoft
+                Excel, provides one or more matrices of traceability relationships between
+                the traced items.]
+  <h2><a name="8.     Testing Workflow">Testing workflow</a></h2>
+  <p>[Provide an outline of the workflow to be followed by the
+    test team in the development and execution of this <b>Test Plan</b>.</p>
+  <p>The specific testing workflow that you will use should be
+                documented separately in the project's Development Case. It should explain
+                how the project has customized the base RUP test workflow (typically on a
+                phase-by-phase basis). In most cases, we recommend you place a reference
+                in this section of the <b>Test Plan</b> to the relevant section of the Development
+                Case. It might be both useful and sufficient to simply include a diagram
+    or image depicting your test workflow.</p>
+  <p>More specific details of the individual testing tasks are
+                defined in a number of different ways, depending on project culture; for
+    example:</p>
+  <li>
+    <p> defined as a list of tasks in this section of the <b>Test
+        Plan</b>, or in an accompanying appendix  </li>
+  <li>
+    <p> defined in a central project schedule (often in a scheduling
+  tool such as Microsoft Project)  </li>
+  <li>
+    <p> documented in individual, "dynamic" to-do lists for each
+                  team member, which are usually too detailed to be placed in the <b>Test
+      Plan</b>  </li>
+  <li>
+    <p> documented on a centrally located whiteboard and updated
+    dynamically  </li>
+  <li>
+    <p> not formally documented at all</p>
+</li>
+  <p>Based on your project culture, you should either list your
+                specific testing tasks here or provide some descriptive text explaining the
+                process your team uses to handle detailed task planning and provide a reference
+    to where the details are stored, if appropriate.</p>
+  <p>For Master Test Plans, we recommend avoiding detailed task
+                planning, which is often an unproductive effort if done as a front-loaded
+                activity at the beginning of the project. A Master Test Plan might usefully
+                describe the phases and the number of iterations, and give an indication
+    of what types of testing are generally planned for each Phase or Iteration.</p>
+  <p><b>Note</b>: Where process and detailed planning information
+                is recorded centrally and separately from this Test Plan, you will have to
+                manage the issues that will arise from having duplicate copies of the same
+                information. To avoid team members referencing out-of-date information, we
+                suggest that in this situation you place the minimum amount of process and
+                planning information within the Test Plan to make ongoing maintenance easier
+                and simply reference the "Master" source material.]
+  <h2><a name="9.     Environmental Needs">Environmental
+      needs</a></h2>
+  <p>This section presents the non-human resources required for
+                the <b>Test Plan</b>.
+  <h3><a name="9.1     Base System Hardware">Base
+      system hardware</a></h3>
+  <p class=MsoBodyText>The following table sets forth the system resources for
+    the test effort presented in this <i>Test Plan</i>.</p>
+  <p>[The specific elements of the test system may not be fully
+                understood in early iterations, so expect this section to be completed over
+                time. We recommend that the system simulates the production environment,
+    scaling down the concurrent access and database size, if and where appropriate.]</p>
+  <p>[<b>Note</b>: Add or delete items as appropriate.]</p>
+  <table border="1" cellpadding="5" cellspacing="0">
+    <tr>
+      <th width="32%">
+        <div align="center">Resource</div>
+      </th>
+      <th>
+        <div align="center">Quantity</div>
+      </th>
+      <th>
+        <div align="center">Name and Type</div>
+      </th>
+    </tr>
+    <tr>
+      <td rowspan="4">
+        <p>Database Server</p>
+        <blockquote>
+          <p> Network or Subnet</p>
+          <p> Server Name</p>
+          <p>Database Name</p>
+        </blockquote>
+      </td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <td>&nbsp;</td>
+      <td>TBD</td>
+    </tr>
+    <tr>
+      <td>&nbsp;</td>
+      <td>TBD</td>
+    </tr>
+    <tr>
+      <td>&nbsp;</td>
+      <td>TBD</td>
+    </tr>
+    <tr>
+      <td rowspan="2">
+        <p>Client Test PCs</p>
+        <blockquote>
+          <p>Include special configuration requirements</p>
+        </blockquote>
+      </td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <td>&nbsp;</td>
+      <td>TBD</td>
+    </tr>
+    <tr>
+      <td rowspan="3">
+        <p>Test Repository</p>
+        <blockquote>
+          <p>Network or Subnet</p>
+          <p>Server Name</p>
+        </blockquote>
+      </td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <td>&nbsp;</td>
+      <td>TBD</td>
+    </tr>
+    <tr>
+      <td>&nbsp;</td>
+      <td>TBD</td>
+    </tr>
+    <tr>
+      <td width="32%">Test Development PCs</td>
+      <td>&nbsp;</td>
+      <td>TBD</td>
+    </tr>
+</table>
+  <h2><a name="9.2     Base Software Elements in the Test Environment">Base
+      software elements in the test environment</a></h2>
+  <p class=MsoBodyText>The following base software elements are required in the
+    test environment for this <i>Test Plan</i>.</p>
+  <p>[Note: Add or delete items as appropriate.]</p>
+  <table border="1" cellpadding="5" cellspacing="0">
+    <tr>
+      <th>
+        <div align="center">Software Element Name</div>
+      </th>
+      <th>
+        <div align="center">Version</div>
+      </th>
+      <th>
+        <div align="center">Type and Other Notes</div>
+      </th>
+    </tr>
+    <tr>
+      <td>NT Workstation</td>
+      <td width="25%">&nbsp;</td>
+      <td>Operating System</td>
+    </tr>
+    <tr>
+      <td>Windows 2000</td>
+      <td width="25%">&nbsp;</td>
+      <td>Operating System</td>
+    </tr>
+    <tr>
+      <td>Internet Explorer</td>
+      <td width="25%">&nbsp;</td>
+      <td>Internet Browser</td>
+    </tr>
+    <tr>
+      <td>Netscape Navigator</td>
+      <td width="25%">&nbsp;</td>
+      <td>Internet Browser</td>
+    </tr>
+    <tr>
+      <td>Microsoft Outlook</td>
+      <td width="25%">&nbsp;</td>
+      <td>eMail Client software</td>
+    </tr>
+    <tr>
+      <td>Network Associates McAffee Virus Checker</td>
+      <td width="25%">&nbsp;</td>
+      <td>Virus Detection and Recovery software</td>
+    </tr>
+</table>
+  <h2><a name="9.3     Productivity and Support Tools">Productivity
+      and support tools</a></h2>
+  <p class=MsoBodyText>The following will be employed to support the test process
+    for this <i>Test Plan</i>.</p>
+  <p>[Note: Add or delete items as appropriate.]</p>
+  <table border="1" cellpadding="5" cellspacing="0">
+    <tr>
+      <th>
+        <div align="center">Tool Category or Type</div>
+      </th>
+      <th>
+        <div align="center">Tool Brand Name</div>
+      </th>
+      <th>
+        <div align="center">Vendor or In-house</div>
+      </th>
+      <th>
+        <div align="center">Version</div>
+      </th>
+    </tr>
+    <tr>
+      <td>Test Management</td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <td>Defect Tracking</td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <td>ASQ Tool for functional testing</td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <td>ASQ Tool for performance testing</td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <td>Test Coverate Monitor or Profiler</td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <td>Project Management</td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <td>DBMS tools</td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+    </tr>
+</table>
+  <h2><a name="9.4     Test Environment Configurations">Test
+      environment configurations</a></h2>
+  <p class=MsoBodyText>The following Test Environment Configurations need to
+  be provided and supported for this project.</p>
+  <table border="1" cellpadding="5" cellspacing="0">
+    <tr>
+      <th>
+        <div align="center">Configuration Name </div>
+      </th>
+      <th>
+        <div align="center">Description</div>
+      </th>
+      <th>
+        <div align="center">Implemented in Physical Configuration</div>
+      </th>
+    </tr>
+    <tr>
+      <td>Average user configuration</td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <td>Minimal configuration supported</td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <td>Visually and mobility challenged</td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <td>International Double Byte OS</td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <td>Network installation (not client)</td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+    </tr>
+</table>
+  <h2><a name="10.     Responsibilities, Staffing, and Training Needs">Responsibilities,
+      staffing, and training beeds</a></h2>
+  <p>This chapter presents the required resoureses to address
+                the test effort in the <b>Test Plan</b>; the main responsibilities,
+                and the knowledge or skill sets required of those resources.</p>
+  <h3><a name="10.1     People and Roles">People
+      and roles</a></h3>
+  <p class=MsoBodyText>This table shows the staffing assumptions for the test
+    effort.</p>
+  <p>[<b>Note</b>: Add or delete items as appropriate.]</p>
+  <table border="1" cellpadding="5" cellspacing="0">
+    <tr>
+      <th colspan="3">
+        <div align="center">Human Resources</div>
+      </th>
+    </tr>
+    <tr>
+      <th>
+        <div align="center">Role</div>
+      </th>
+      <th> Minimum Resources Recommended
+      (number of full-time roles allocated)</th>
+      <th>
+        <div align="center"> Specific Responsbilities or Comments</div>
+      </th>
+    </tr>
+    <tr>
+      <td >Test Manager</td>
+      <td>&nbsp;</td>
+      <td >
+        <p>Provides management oversight.</p>
+        <p>Responsibilities include:</p>
+        <ul>
+          <li>planning and logistics</li>
+          <li>agree mission</li>
+          <li>identify motivators</li>
+          <li>acquire appropriate resources</li>
+          <li>present management reporting</li>
+          <li>advocate the interests of test</li>
+          <li>evaluate effectiveness of test effort</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td >Test Analyst</td>
+      <td>&nbsp;</td>
+      <td >
+        <p>Identifies and defines the specific tests to be conducted.</p>
+        <p>Responsibilities include:</p>
+        <ul>
+          <li>identify test ideas</li>
+          <li>define test details</li>
+          <li>determine test results</li>
+          <li>document change requests</li>
+          <li>evaluate product quality</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td >Test Designer</td>
+      <td>&nbsp;</td>
+      <td >
+        <p>Defines the technical approach to the implementation of the test effort.</p>
+        <p>Responsibilities include:</p>
+        <ul>
+          <li>define test approace</li>
+          <li>define test automation architecture</li>
+          <li>verify test techniques</li>
+          <li>define testability elements</li>
+          <li>structure test implementation</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td >Tester</td>
+      <td>&nbsp;</td>
+      <td >
+        <p>Implements and executes the tests.</p>
+        <p>Responsibilities include:</p>
+        <ul>
+          <li>implement tests and test suites</li>
+          <li>execute test suites</li>
+          <li>log results</li>
+          <li>analyze and recover from test failures</li>
+          <li>document incidents</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td >Test System Administrator</td>
+      <td>&nbsp;</td>
+      <td >
+        <p>Ensurs test environment and assets are managed and maintained.</p>
+        <p>Responsibilities include:</p>
+        <ul>
+          <li>administer test management system</li>
+          <li>install and support access to, and recovery of, test environment
+            configurations and test labs</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td >Database Administrator, Database Manager</td>
+      <td>&nbsp;</td>
+      <td >
+        <p>Ensures test data (database) environment and assets are managed andmaintained.</p>
+        <p>Responsibilities include:</p>
+        <ul>
+          <li>support the administration of test data and test beds (database)</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td >Designer</td>
+      <td>&nbsp;</td>
+      <td >
+        <p>Identifies and defines the operations, attributes, and associations
+          of the test classes.</p>
+        <p>Responsibilities include:</p>
+        <ul>
+          <li>defines the test classes required to support testability requirements
+            as defined by the test team</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td >Implementer</td>
+      <td>&nbsp;</td>
+      <td >
+        <p>Implements and unit tests the test classes and test packages.</p>
+        <p>Responsibilities include:</p>
+        <ul>
+          <li>creates the test components required to support testability requirements
+            as defined by the designer</li>
+        </ul>
+      </td>
+    </tr>
+</table>
+  <h3><a name="10.2     Staffing and Training Needs">Staffing
+      and training needs</a></h3>
+  <p class=MsoBodyText>This section outlines how to approach staffing and training
+    the test roles for the project.</p>
+  <p>[The way to approach staffing and training will vary from
+                project to project. If this section is part of a Master Test Plan, you should
+                indicate at what points in the project lifecycle different skills and numbers
+                of staff are needed. If this is an Iteration Test Plan, you should focus
+    mainly on where and what training might occur during the Iteration.</p>
+  <p>Give thought to your training needs, and plan to schedule
+                this based on a Just-In-Time (JIT) approach&#151;there is often a temptation
+                to attend training too far in advance of its usage when the test team has
+                apparent slack. Doing this introduces the risk of the training being forgotten
+    by the time it's needed.</p>
+  <p>Look for opportunities to combine the purchase of productivity
+                tools with training on those tools, and arrange with the vendor to delay
+                delivery of the training until just before you need it. If you have enough
+                headcount, consider having training delivered in a customized manner for
+    you, possibly at your own site.</p>
+  <p>The test team often requires the support and skills of other
+                team members not directly part of the test team. Make sure you arrange in
+                your plan for appropriate availability of System Administrators, Database
+  Administrators, and Developers who are required to enable the test effort.]</p>
+  <h2><a name="11.     Iteration Milestones">Iteration
+      milestones</a></h2>
+  <p>Key schedule milestones that set the context
+                for the Testing effort. Avoid repeating too much detail that
+  is documented elsewhere in plans that address the entire project.</p>
+  <table border="1" cellpadding="5" cellspacing="0">
+    <tr>
+      <td width="44%">
+        <div align="center"><b>Milestone</b></div>
+      </td>
+      <td width="14%">
+        <div align="center"><b>Planned <br>
+          Start Date</b></div>
+      </td>
+      <td width="14%">
+        <div align="center"><b>Actual<br>
+          Start Date</b></div>
+      </td>
+      <td width="14%">
+        <div align="center"><b>Planned<br>
+          End Date</b></div>
+      </td>
+      <td width="14%">
+        <div align="center"><b>Actual<br>
+          End Date</b></div>
+      </td>
+    </tr>
+    <tr>
+      <td width="44%">Iteration Plan agreed</td>
+      <td width="14%">&nbsp;</td>
+      <td width="14%">&nbsp;</td>
+      <td width="14%">&nbsp;</td>
+      <td width="14%">&nbsp;</td>
+    </tr>
+    <tr>
+      <td width="44%">Iteration starts</td>
+      <td width="14%">&nbsp;</td>
+      <td width="14%">&nbsp;</td>
+      <td width="14%">&nbsp;</td>
+      <td width="14%">&nbsp;</td>
+    </tr>
+    <tr>
+      <td width="44%">Reqirements baselined</td>
+      <td width="14%">&nbsp;</td>
+      <td width="14%">&nbsp;</td>
+      <td width="14%">&nbsp;</td>
+      <td width="14%">&nbsp;</td>
+    </tr>
+    <tr>
+      <td width="44%">Architecture baselined</td>
+      <td width="14%">&nbsp;</td>
+      <td width="14%">&nbsp;</td>
+      <td width="14%">&nbsp;</td>
+      <td width="14%">&nbsp;</td>
+    </tr>
+    <tr>
+      <td width="44%">User Interface baselined</td>
+      <td width="14%">&nbsp;</td>
+      <td width="14%">&nbsp;</td>
+      <td width="14%">&nbsp;</td>
+      <td width="14%">&nbsp;</td>
+    </tr>
+    <tr>
+      <td width="44%">First Build delivered to test</td>
+      <td width="14%">&nbsp;</td>
+      <td width="14%">&nbsp;</td>
+      <td width="14%">&nbsp;</td>
+      <td width="14%">&nbsp;</td>
+    </tr>
+    <tr>
+      <td width="44%">First Build accepted into test</td>
+      <td width="14%">&nbsp;</td>
+      <td width="14%">&nbsp;</td>
+      <td width="14%">&nbsp;</td>
+      <td width="14%">&nbsp;</td>
+    </tr>
+    <tr>
+      <td width="44%">First Build test cycle finishes</td>
+      <td width="14%">&nbsp;</td>
+      <td width="14%">&nbsp;</td>
+      <td width="14%">&nbsp;</td>
+      <td width="14%">&nbsp;</td>
+    </tr>
+    <tr>
+      <td width="44%">[Build Two will not be tested]</td>
+      <td width="14%">&nbsp;</td>
+      <td width="14%">&nbsp;</td>
+      <td width="14%">&nbsp;</td>
+      <td width="14%">&nbsp;</td>
+    </tr>
+    <tr>
+      <td width="44%">Third Build delivered to test</td>
+      <td width="14%">&nbsp;</td>
+      <td width="14%">&nbsp;</td>
+      <td width="14%">&nbsp;</td>
+      <td width="14%">&nbsp;</td>
+    </tr>
+    <tr>
+      <td width="44%">Third Build accepted into test</td>
+      <td width="14%">&nbsp;</td>
+      <td width="14%">&nbsp;</td>
+      <td width="14%">&nbsp;</td>
+      <td width="14%">&nbsp;</td>
+    </tr>
+    <tr>
+      <td width="44%">Third Build test cycle finishes</td>
+      <td width="14%">&nbsp;</td>
+      <td width="14%">&nbsp;</td>
+      <td width="14%">&nbsp;</td>
+      <td width="14%">&nbsp;</td>
+    </tr>
+    <tr>
+      <td width="44%">Fourth Build delivered to test</td>
+      <td width="14%">&nbsp;</td>
+      <td width="14%">&nbsp;</td>
+      <td width="14%">&nbsp;</td>
+      <td width="14%">&nbsp;</td>
+    </tr>
+    <tr>
+      <td width="44%">Fourth Build accepted into test</td>
+      <td width="14%">&nbsp;</td>
+      <td width="14%">&nbsp;</td>
+      <td width="14%">&nbsp;</td>
+      <td width="14%">&nbsp;</td>
+    </tr>
+    <tr>
+      <td width="44%">Iteration Assessment review</td>
+      <td width="14%">&nbsp;</td>
+      <td width="14%">&nbsp;</td>
+      <td width="14%">&nbsp;</td>
+      <td width="14%">&nbsp;</td>
+    </tr>
+    <tr>
+      <td width="44%">Iteration ends</td>
+      <td width="14%">&nbsp;</td>
+      <td width="14%">&nbsp;</td>
+      <td width="14%">&nbsp;</td>
+      <td width="14%">&nbsp;</td>
+    </tr>
+</table>
+  <h2><a name="12.     Risks, Dependencies, Assumptions, and Constraints">Risks,
+      dependencies, assumptions, and constraints</a></h2>
+  <p>List any risks that may affect the successful execution
+                of this <b>Test Plan</b>, and identify mitigation and contingency
+                strategies for each risk. Also indicate a relative ranking for
+                both the likelihood of
+occurrence and the impact if the risk is realized.  
+  <table border="1" cellpadding="5" cellspacing="0">
+    <tr>
+      <th>
+        <div align="center">Risk</div>
+      </th>
+      <th>
+        <div align="center">Mitigation Strategy </div>
+      </th>
+      <th>
+        <div align="center">Contingency <br>
+          (Risk is realized)</div>
+      </th>
+    </tr>
+    <tr>
+      <td>Prerequisite Entry Criteria is not met.</td>
+      <td>
+        <p>&lt;Tester&gt; will define the prerequisites that must be met before
+          Load Testing can start.</p>
+        <p>&lt;Customer&gt; will endeavor to meet prerequisites indicated by &lt;Tester&gt;.</p>
+      </td>
+      <td>
+        <ul>
+          <li>meet outstanding prerequisites</li>
+          <li>consider Load Test Failure</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>Test data proves to be inadequate.</td>
+      <td>
+        <p>&lt;Customer&gt; will ensure a full set of suitable and protected
+          test data is available.</p>
+        <p>&lt;Tester&gt; will indicate what is required and will verify suitability
+          of test data.</p>
+      </td>
+      <td>
+        <ul>
+          <li>redefine test data</li>
+          <li>review Test Plan and modify Components (that is, scripts)</li>
+          <li>consider Load Test Failure</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>Database requires a refresh.</td>
+      <td>&lt;System Administrator&gt; will endeavor to ensure that
+        the Database is regularly refreshed as required by the &lt;Tester&gt;. </td>
+      <td>
+        <ul>
+          <li>restore data and restart</li>
+          <li>clear Database</li>
+        </ul>
+      </td>
+    </tr>
+</table>
+  <p>[List any dependencies identified during the development
+                of this <b>Test Plan </b>that may affect its successful execution if those
+                dependencies are not honored. Typically these dependencies relate to activities
+                on the critical path that are pre-requisites or post-requisites to one or
+                more preceding (or subsequent) activities You should consider responsibilities
+                you are relying on other teams or staff members external to the test effort
+                completing, timing and dependencies of other planned tasks, the reliance
+                on certain work products being produced.]
+  <table border="1" cellpadding="5" cellspacing="0">
+    <tr>
+      <th>
+        <div align="center">Dependency between </div>
+      </th>
+      <th>
+        <div align="center">Potential Impact of Dependency</div>
+      </th>
+      <th>
+        <div align="center">Owners</div>
+      </th>
+    </tr>
+    <tr>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+    </tr>
+</table>
+  <p>List any assumptions made during the development of this <b>Test
+                  Plan </b>that may affect its successful execution if those
+                  assumptions are proven incorrect. Assumptions might relate
+                  to work you assume other
+                  teams are doing, expectations that certain aspects of the product
+                  or environment are stable, and so forth.
+  <table border="1" cellpadding="5" cellspacing="0">
+    <tr>
+      <th>
+        <div align="center">Assumption to be proven</div>
+      </th>
+      <th>
+        <div align="center">Impact of Assumption being incorrect</div>
+      </th>
+      <th>
+        <div align="center">Owners</div>
+      </th>
+    </tr>
+    <tr>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+    </tr>
+</table>
+  <p>List any constraints placed on the test effort that have
+                had a negative effect on the way in which this <b>Test Plan </b>has
+                been approached.
+  <table border="1" cellpadding="5" cellspacing="0">
+    <tr>
+      <th>
+        <div align="center">Constraint on </div>
+      </th>
+      <th>
+        <div align="center">Impact Constraint has on test effort</div>
+      </th>
+      <th>
+        <div align="center">Owners</div>
+      </th>
+    </tr>
+    <tr>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+    </tr>
+</table>
+  <h2><a name="13.     Management Process and Procedures">Management
+      process and procedures</a></h2>
+  <p>The processes and procedures to be used when
+                issues arise with the Test Plan and its enactment.<h3><a name="13.1     Measuring and Assessing the Extent of Testing">Measuring
+                    and assessing the extent of testing</a></h3>
+  <p>[Outline the measurement and assessment process to be used
+    to track the extent of testing.]</p>
+  <h3><a name="13.2     Assessing the Deliverables of this Test Plan">Reporting
+      on test coverage </a></h3>
+  <p>[Outline the assessment process for reviewing and accepting
+                the deliverables of this <b>Test Plan</b>.]
+  <h3><a name="13.3     Problem Reporting, Escalation, and Issue Resolution">Problem
+      reporting, escalation, and issue resolution</a></h3>
+  <p>[Define how process problems will be reported and escalated,
+                and the process to be followed to achieve resolution.]
+  <h3><a name="13.4     Managing Test Cycles">G&eacute;rer les cycles de test</a></h3>
+  <p>[Outline the management control process for a test cycle.]
+  <h3><a name="13.5     Traceability Strategies">Strat&eacute;gies de tra&ccedil;abilit&eacute;</a></h3>
+  <p>Appropriate traceability strategies required for :</p>
+  <ul>
+    <li> Coverage of testing against specifications &#151; enables
+    measurement the extent of testing </li>
+    <li>Motivations for testing &#151; enables assessment
+    of relevance of tests to help determine whether to maintain or retire tests    </li>
+    <li>Software design elements &#151; enables tracking of subsequent
+    design changes that would necessitate rerunning tests or retiring them </li>
+    <li>Resulting
+      change requests &#151; enables the tests that
+                  discovered the need for the change to be identified and re-run
+to verify the change request has been completed successfully]</li>
+  </ul>
+  <h3><a name="13.6     &nbsp;Approval and Signoff">Approbation et validation</a></h3>
+  <p>[Outline the approval process and list the job titles (and
+                names of current incumbents) that must initially approve the plan, and sign
+off on the plan's satisfactory execution.]  

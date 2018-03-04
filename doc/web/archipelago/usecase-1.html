@@ -1,0 +1,52 @@
+<html>
+<head>
+<title>Archipelago - Ufomatics</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link href="../rr0.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+<h1>Integration from 2 databases using Archipelago</h1>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<th nowrap colspan="4"><a href="/">Home</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="Rationale_fr.html">Traduction fran&ccedil;aise</a> </th>
+</tr>
+</table>
+<p>This sample show how data from 2 online databases can be integrated into a single meta model.</p>
+<h2><a name="BottomUp"></a>Scenario 1 : build the meta-model from the available data</h2>
+<p>This scenario is about the automatic building of a meta-model from the structure of data found in available databases. </p>
+<ol>
+<li>Define the UUDF schema for each database 
+<ol>
+<li>base 1 : <br>
+&lt;schema&gt;<br>
+&nbsp;&nbsp;&lt;class name=&quot;Sighting&quot;&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;field name=&quot;year&quot;/&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;webpage url=&quot;http://rr0.org/{fieldValue}.html&quot;/&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/field&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;field name=&quot;month&quot;&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;in-field name=&quot;year&quot; &gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/in-field&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/field&gt;<br>
+&nbsp;&nbsp;&lt;/class&gt;<br>
+&nbsp;&nbsp;&lt;sighting&gt;<br>
+&lt;/schema&gt;</li>
+</ol>
+</li>
+<li>Define the UUDF mapping from each database to the meta-model</li>
+</ol>
+<h2><a name="MeetInTheMiddle"></a>Scenario 2 : map to a predefined meta model </h2>
+<p>This &quot;meet-in-the-middle&quot; scenario illustrates the case where a meta model has been pre-defined by the user. This is likely to be the most common case, as it is not practicable to maintain processes on a continously-varying meta-model. Hence, even if such a use case could have started as a &quot;<a href="#BottomUp">bottom-up</a>&quot; case, it will more likely evolve in the present meet-in-the-middle case, where we have to map to static models.</p>
+<ol>
+<li>Define the UUDF schema for the meta model </li>
+<li>Define the UUDF schema for each database </li>
+<li>Define the UUDF mapping from each database to the meta-model</li>
+</ol>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<th nowrap colspan="4"><a href="/">Home</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="Rationale_fr.html">Traduction fran&ccedil;aise</a> </th>
+</tr>
+</table>
+</body>
+
+</html>
+

@@ -1,0 +1,1344 @@
+<h1>Vision</h1>
+<ul>
+  <table border="0" align="center" cellpadding="5" cellspacing="0">
+    <tr>
+      <td valign="top"><ul>
+        <li> <strong><a href="#Introduction">Introduction</a></strong>            
+          <ul>
+              <li><a href="#Purpose">Purpose</a></li>
+              <li> <a href="#Scope">Scope</a> </li>
+              <li><a href="#DefinitionsAcronymsAndAbbreviations">Definitions, acronyms, and abbreviations</a> </li>
+              <li><a href="#References">References</a> </li>
+            </ul>
+        </li>
+        <li><strong><a href="#Positioning">Positioning</a></strong>            
+          <ul>
+              <li><a href="#BusinessOpportunity">Business opportunity</a> </li>
+              <li><a href="#ProblemStatement">Problem statement</a> </li>
+              <li><a href="#ProductPositionStatement">Product position statement</a></li>
+            </ul>
+        </li>
+        <li><strong><a href="#StakeholderUser">Stakeholder and user descriptions</a></strong>            
+          <ul>
+              <li> <a href="#MarketDemographics">Market demographics</a> </li>
+              <li> <a href="#Stakeholders">Stakeholder summary</a> </li>
+              <li><a href="#Users">User summary</a></li>
+              <li><a href="#UserEnvironment">User environment</a> </li>
+              <li><a href="#Stakeholders">Stakeholder profiles</a></li>
+              <li><a href="#Users">User profiles</a></li>
+              <li><a href="#KeyStakeholderUserNeeds">Key stakeholder or user needs</a> </li>
+              <li><a href="#AlternativesAndCompetition">Alternatives and competition</a></li>
+            </ul>
+        </li>
+      </ul></td>
+      <td valign="top"><ul>
+        <li><strong><a href="#ProductOverview">Product overview</a></strong>            
+          <ul>
+              <li> <a href="#ProductPerspective">Product perspective</a></li>
+                <li><a href="#SummaryOfCapabilities">Summary of capabilities</a> </li>
+                <li><a href="#AssumptionsAndDependencies">Assumptions and dependencies</a> </li>
+                <li><a href="#CostAndPricing">Cost and pricing</a> </li>
+                <li><a href="#LicensingAndInstallation">Licensing and installation</a> </li>
+            </ul>
+        </li>
+        <li> <strong><a href="#FeatureAttributes">Feature attributes</a></strong></li>
+        <li><strong><a href="#ProductFeatures">Product features</a></strong></li>
+        <li><strong><a href="#Constraints">Constraints</a></strong></li>
+        <li><strong><a href="#QualityRanges">Quality ranges</a></strong></li>
+        <li><strong><a href="#PrecedenceAndPriority">Precedence and priority</a></strong></li>
+        <li><strong><a href="#OtherProductRequirements">Other product requirements</a></strong>            
+          <ul>
+              <li> <a href="#ApplicableStandards">Applicable standards</a></li>
+                <li><a href="#SystemRequirements">System requirements</a> </li>
+                <li><a href="#PerformanceRequirements">Performance requirements</a> </li>
+                <li> <a href="#EnvironmentalRequirements">Environmental requirements</a> </li>
+            </ul>
+        </li>
+        <li><strong><a href="#DocumentationRequirements">Documentation requirements</a></strong>
+            <ul>
+              <li> <a href="#UserManual">User manual</a> </li>
+              <li> <a href="#OnLineHelp">Online help</a> </li>
+              <li> <a href="#InstallationGuidesConfigurationReadMeFile">Installation
+                  guides, configuration, and Read Me file</a> </li>
+              <li> <a href="#LabelingAndPackaging">Labeling and packaging</a> </li>
+            </ul>
+        </li>
+      </ul></td>
+    </tr>
+  </table>
+</ul>
+<h2> <a name="Introduction"></a>Introduction</h2>
+<h3><a name="Purpose"></a>Purpose</h3>
+<p>The purpose of this document is to collect, analyze and define high-level
+  needs and features of UFO@home. It focuses on the
+  capabilities needed by the stakeholders, the
+  target users,
+  and why
+  these
+  needs exist. The details of how the UFO@home fulfils
+these needs are detailed in the use-case and <a href="https://sourceforge.net/docman/display_doc.php?docid=17413&group_id=70060">supplementary
+specifications</a>.</p>
+<h3><a name="Scope"></a>Scope</h3>
+<p>This Vision Document applies to the UFO@home project,
+  developed by volunteers of the Open
+  Source community.
+  These volunters will develop this information system to allow witnesses, researchers
+  and investigators on the UFO phenomenon to interface with an existing, shared
+  and centralized UFO database.</p>
+<h3><a name="DefinitionsAcronymsAndAbbreviations"></a>Definitions, acronyms and abbreviations</h3>
+<ul>
+  <li><a href="http://rr0.free.fr/AIAA.html">AIAA</a> &#8212; American Institute 
+    of Aeronautics and Astronautics. </li>
+  <li>Case &#8212; A major ufological (sighting, abduction, etc.) event that requires 
+    or required some investigation</li>
+  <li>CRUD &#8212; Create, Retrieve, Update, Delete. Basic database operations.</li>
+  <li>HTML &#8212; HyperText Markup Language.</li>
+  <li>HTTP &#8212; HyperText Transfer Protocol.</li>
+  <li>RR0 &#8212; <em>Rencontre Rapproch&eacute;e 0</em>. French acronym for Close 
+    Encounter of the kind 0 (CE0), which means that nothing was sighted at all. 
+    Historical name of a <a href="http://rr0.org">static ufological website</a> 
+    that launched the UFO@home project.</li>
+  <li>RR0 IM &#8212; RR0 Information Model</li>
+  <li>Stakeholder &#8212; A representative of users that would be affected by 
+    the use of UFO@home (including UFO@home users).</li>
+  <li>UFO &#8212; Unidentified Flying Object. Some unexplained aerial phenomena, 
+    sometimes with a high level of strangeness.</li>
+  <li>UFO phenomenon &#8212; The whole set of unexplained and maybe interelated 
+    events involving UFOs.</li>
+  <li>Ufology &#8212; Study of the UFO phenomenon.</li>
+  <li>Ufological &#8212; Related to ufology.</li>
+  <li>User &#8212; People that will use the UFO@home product, once completed.</li>
+  <li>UUDF &#8212; Uniform Ufological Data Format.</li>
+  <li>W3C &#8212; Word Wide Web Consortium.</li>
+</ul>
+<p>See also the project's <a href="https://sourceforge.net/docman/display_doc.php?docid=17415&group_id=70060">Glossary</a>.</p>
+<h3>  <a name="References"></a>References</h3>
+<p>Applicable references are:</p>
+<ol>
+  <li><em><a href="http://rr0.free.fr/1970-11_AeronauticsAndAstronautics.html">UFO: An Appraisal of the Problem</a></em> by
+    Joachim P. Kuettner and the
+      <a href="http://rr0.free.fr/AIAA.html">AIAA</a> UFO subcomittee (<em>Aeronautics
+      and Astronautics</em>, Vol. 8. No. 11, November
+    1970, P. 49-51).</li>
+  <li><em><a href="http://www.conspire.com/val.html">Heretic Among Heretic</a></em>,
+  interview of Jacques Vall&eacute;e</li>
+  <li><em>Observing UFOs:
+      An Investigative Handbook</em> by Richard F. Haines (Nelson-Hall Publishers,
+      Chicago 1980, ISBN 0-88229-725-2) &#8212; <cite>A comprehensive, scholarly
+      presentation of the perceptual problems involved in separating UFO fact
+      from fancy.
+  Highly recommended for the serious UFO investigator </cite><span class="source">[<a href="HynekJosephAllen.html">Hynek</a> quote]</span>.</li>
+  <li> <em>The UFO Handbook</em> by Allan Hendry (Doubleday, New York 1979) &#8212; A
+    guide to investigating, evaluating and reporting UFO sightingsUn guide pour
+    enqu&ecirc;ter, &eacute;valuer
+  et rapporter les observations d'ovnis.</li>
+</ol>
+<h2><a name="Positioning"></a>Positioning</h2>
+<h3> <a name="BusinessOpportunity"></a>Business opportunity</h3>
+<p>After 50 years of its modern era, ufology has produced several  ufological
+  databases, each of these managing their own data set,
+  either public
+  or private,
+  according to <em>ad hoc</em> business  (data structure, classification) and
+  technological (storage, import/export formats, running platform) rules. The
+  same schema can be found among static Web amateur websites devoted to the UFO
+  subject.</p>
+<p>UFO@home aims to be a <strong>tool</strong> for a long-running study of the
+  UFO phenomenon, available to the whole ufological community. As stated in
+  [1], <cite>there
+    is little doubt that the short-time, one-shot
+  approach
+  of an ad hoc team is neither promising nor economical. This is especially true
+  if the study team decides (...) to concentrate on current rather than past
+  observations. As the UFO statistics show, this
+  results in the devotion of precious time to investigating the noise, rather
+  than the signal. (...).
+  There is also little hope to expect a solution of the extremely complex problem
+by the efforts of a single individual.</cite></p>
+<h3><a name="ProblemStatement"></a>Problem statement</h3>
+<blockquote><table border="1" cellspacing="0" cellpadding="5">
+  <tr>
+    <th>The problem of</th>
+    <td>disparity in UFO knowledge management.</td>
+  </tr>
+  <tr>
+    <th>affects</th>
+      <td>investigators,  scientists, witnesses</td>
+  </tr>
+  <tr>
+    <th>The impact of which is</th>
+    <td><ul>
+          <li><strong>difficulty in sharing information </strong>: there is not 
+            existing ufological data exchange format between researchers. Since 
+            the amount of relevant data is enormous, each research effort has 
+            to build from scratch its own database to process it as its will. 
+          </li>
+          <li><strong>difficulty in consolidating data </strong>: disparity in 
+            ufological data contents and formats (missing or additional information, 
+            different classifications, etc.) lead to differents research results, 
+            depending on the data sources used.</li>
+          <li><strong>credibility issues</strong> : multiplying databases (with 
+            differents quality, organization) gives a unorganized and immature 
+            image of the ufological community which discourage serious and scientific 
+            researchers. As Vallee states in [2], <cite>The best UFO data has 
+            never been published. I think a great deal of the misunderstanding 
+            about UFOs among scientists is that the scientists have never had 
+            access to the best data.</cite></li>
+          <li><strong>difficulty in accessing to the information</strong> because 
+            of the spreading of varying databases and the required technological 
+            means (installing a local database, online database). Private or commercial 
+            databases also limit the ability to study the phenomenon.</li>
+        </ul></td>
+  </tr>
+  <tr>
+    <th>A successful solution would</th>
+    <td>standardize/unify exchange, processing and formats of ufological
+      data<strong>.</strong></td>
+  </tr>
+</table></blockquote>
+<h3><a name="ProductPositionStatement"></a>Product position statement</h3>
+<blockquote>
+  <table border="1" cellspacing="0" cellpadding="5">
+    <tr>
+      <th>For</th>
+      <td>witnesses, investigators, scientists</td>
+    </tr>
+    <tr>
+      <th>who</th>
+      <td>want to report or study the UFO phenomenon</td>
+    </tr>
+    <tr>
+      <th>UFO@home</th>
+      <td>is a tool</td>
+    </tr>
+    <tr>
+      <th>that</th>
+      <td>enables a user to insert/consult/process uniform ufological data</td>
+    </tr>
+    <tr>
+      <th>unlike</th>
+      <td>different private, commercial or unaccessible databasases</td>
+    </tr>
+    <tr>
+      <th>our product</th>
+      <td>would allow users to add data accessible by anybody (including other 
+        compatibles servers from any organization) and analyze it (credibility 
+        factors, statistics, etc.)</td>
+    </tr>
+  </table>
+</blockquote>
+<h2>
+  <a name="StakeholderUser"></a>Stakeholder and user descriptions</h2>
+<p>This section describes the users of  UFO@home. There are
+  several types of users of the UFO@home; the Witnesses,
+  the Researchers, and the Administrators.</p>
+<h3> <a name="MarketDemographics"></a>Market demographics</h3>
+<p>To effectively provide a product and services that meet the stakeholders&#8217; and
+  users' real needs, it is necessary to identify and involve all of the stakeholders
+  as part of the Requirements Modeling process. We must also identify the
+  users of the system and ensure that the stakeholder community adequately represents
+  them. This section provides a profile of the stakeholders and users involved
+  in the project, and the key problems that they perceive to be addressed by
+  the proposed solution. It does not describe their specific requests or requirements
+  as these are captured in a separate stakeholder requests artifact. Instead,
+  it provides the background and justification for why the requirements are needed.</p>
+<p>The ufological community is large and very heterogeneous. It includes journalists, 
+  writers, military people, scientists, editors and producers, and UFO amateurs. 
+  Some of these people that actively lead research about UFOs sometimes call themselves 
+  &quot;ufologists&quot;.</p>
+<p>Journalists interested in ufology represent a small portion of the whole journalism 
+  professionals community. In this small population can be found active and passive 
+  people. While the former regularly participate in the ufology chronicle and 
+  so knows the phenomenon very well, the latter consider the UFO subject either 
+  as triggering an interesting sociological phenomenon or as a sensational subject 
+  that can bring up some readers when other exciting news can be found. However 
+  those people usually follow a method, and have some rigour and objectivity that 
+  can help in studying the phenomenon. </p>
+<p>Writers representing a tiny but valuable portion of the UFO community. are 
+  more often dependent on the ufological chronicle to live. They used to be &quot;professional&quot; 
+  researchers in the subject, and so have a very comprehensive knowledge of the 
+  UFO phenomenon and can be among the better &quot;specialists&quot; of some UFO 
+  cases. Conversely, producers, editors and some journalists, can be accused of 
+  promoting sensationalism, using topics like UFOs.</p>
+<p>Scientists represent a tiny population in the UFO community. They can be divided 
+  between a minority of people with their minds opened to the subject, and people 
+  that don't intend to pursue any research in the area, mostly because of lack 
+  of funding, and/or the fear of ridicule. They can however be very valuable to 
+  UFO research because of their methodology and so recognized credibility.</p>
+<p>Military people represent a tiny population of the UFO community. People from 
+  this population often shows interest in ufology publicly only at the end of 
+  their career, providing an inside, but often outdated view of the phenomenon 
+  from a military point of view. Some military people are interested in the UFO 
+  phenomenon because of its psychological warfare aspects, but also to &quot;tell 
+  the truth&quot; about past unidentified aerial phenomena.</p>
+<p>Producers and editors are usually interested in the commercial aspect of the
+  UFO hype. Because of this they can cause some damage to the field's credibility
+  but have also the ability and some talent to spread information to a wide audience
+  and occasionally fund some research underlying a commercial product. Examples
+  are
+  the Sci-Fi
+  Channel, Ray Santili, Jaime Shandera, etc.</p>
+<p>UFO amateurs represent the large majority of the UFO community. They are heterogeneous 
+  in field experience, rigor and education, but clearly the most active ones. 
+  They are quite unorganized. </p>
+<p>All of these The users can be educated, computer literate, and often own
+  personal computers in their homes. The ability to report a sighting via personal
+  computers and to review existing cases would greatly streamline
+  the ufological information system.</p>
+<p>To meet the potential amount of demands, UFO@home servers will have to be hosted
+  by  professionnal service providers. Funds
+  may
+  be
+  needed to
+  do
+  so.</p>
+<h3> <a name="Stakeholders" id="Stakeholders"></a>Stakeholder summary</h3>
+<blockquote>
+  <table border="1" cellspacing="0" cellpadding="5">
+    <tr>
+      <th>Name</th>
+      <th>Represents</th>
+      <th>Role</th>
+    </tr>
+    <tr>
+      <td>Witness</td>
+      <td>People that sighted UFOs and can report their sighting.</td>
+      <td>Ensures that the sighting report user interface meets the witnesses
+        requirements.</td>
+    </tr>
+    <tr>
+      <td>Ufologist</td>
+      <td>People that study or investigate the UFO phenomenon.</td>
+      <td>Ensures that the system meets ufology research needs, such as data
+        processing (statistics, search for similarities or other criteria, classification,
+        etc.).</td>
+    </tr>
+    <tr>
+      <td>Scientist</td>
+      <td>People that have a scientific background and work in that field
+        (astronomers,
+        physicians,
+        etc.)</td>
+      <td>Ensures that there is a scientific interest in the tool (for instance
+        an astronomer will ensure that there is an interest in accounting and
+        identifying unknown celestial phenomena).</td>
+    </tr>
+    <tr>
+      <td>Database owners</td>
+      <td>People that maintains a ufological database.</td>
+      <td>Ensures that its database can interface/become compatible with the
+        UFO@home standards.</td>
+    </tr>
+    <tr>
+      <td>Journalist</td>
+      <td>People that write articles or books about society, science and/or unexplained
+      phenomena (includes sociologists).</td>
+      <td>Ensures that the system allows to provide required information and
+      constitutes some evolution in the UFO study field.</td>
+    </tr>
+    <tr>
+      <td>Military people</td>
+      <td>People from the military community that are concerned by unidentified
+        flying aircrafts flying over the territory, as well as people or mass
+        manipulation (include
+        intelligence services, patrolmen).</td>
+      <td>Ensures that the system provides valuable information about unidentified
+        phenomena reported over the territory.</td>
+    </tr>
+  </table>
+</blockquote>
+<h3>
+<a name="Users" id="Users"></a>User summary</h3>
+<blockquote>
+  <table border="1" cellspacing="0" cellpadding="5">
+    <tr>
+      <th>Name</th>
+      <th>Represents</th>
+      <th>Role</th>
+    </tr>
+    <tr>
+      <td>Witness</td>
+      <td>A person that sights an unusual aerial phenomena that (s)he could not 
+        understand.</td>
+      <td>Describe its sighting. Confidentialit&eacute; de
+        son t&eacute;moignage.</td>
+    </tr>
+    <tr>
+      <td>Visitor</td>
+      <td>Any people connected to the UFO@home.</td>
+      <td>Consult the cases  catalog, perform operations
+        (statistics, etc.) </td>
+    </tr>
+    <tr>
+      <td>Editor</td>
+      <td>&nbsp;</td>
+      <td>Validate creations/updates to the catalog.</td>
+    </tr>
+    <tr>
+      <td>Referrer</td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <td>Administrator</td>
+      <td>&nbsp;</td>
+      <td>Administer the system (technical)</td>
+    </tr>
+  </table>
+</blockquote>
+<h3> <a name="UserEnvironment"></a>User environment</h3>
+<p>Users will likely be at home or at work, using a personal computer.</p>
+<h3><a name="StakeholderProfiles"></a>Stakeholder profiles </h3>
+<h4>Journalists and writers</h4>
+<blockquote>
+  <table border="1" cellspacing="0" cellpadding="5">
+    <tr>
+      <th>Representative</th>
+      <td>&lt;Candidates are welcome&gt;</td>
+    </tr>
+    <tr>
+      <th>Description</th>
+      <td>Writes papers and books on the UFO topic.</td>
+    </tr>
+    <tr>
+      <th>Type</th>
+      <td>Expert.</td>
+    </tr>
+    <tr>
+      <th>Responsibilities</th>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <th>Success criteria</th>
+      <td>Ability to provide credible and factual data.</td>
+    </tr>
+    <tr>
+      <th>Involvement</th>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <th>Deliverables</th>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <th>Comments/issues</th>
+      <td>&nbsp;</td>
+    </tr>
+  </table>
+</blockquote>
+<h4>Military people</h4>
+<blockquote>
+  <table border="1" cellspacing="0" cellpadding="5">
+    <tr>
+      <th>Representative</th>
+      <td>&lt;Candidates are welcome&gt;</td>
+    </tr>
+    <tr>
+      <th>Description</th>
+      <td>Acts for the defense of their country. Interested in psychological warfare, 
+        foreign technology and potential intrusions into its country's territory.</td>
+    </tr>
+    <tr>
+      <th>Type</th>
+      <td>Novice.</td>
+    </tr>
+    <tr>
+      <th>Responsibilities</th>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <th>Success criteria</th>
+      <td>Ability to provide geographical and behavioral data.</td>
+    </tr>
+    <tr>
+      <th>Involvement</th>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <th>Deliverables</th>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <th>Comments/issues</th>
+      <td>&nbsp;</td>
+    </tr>
+  </table>
+</blockquote>
+<h4>Scientist</h4>
+<blockquote>
+  <table border="1" cellspacing="0" cellpadding="5">
+    <tr>
+      <th>Representative</th>
+      <td>&lt;Candidates are welcome&gt;</td>
+    </tr>
+    <tr>
+      <th>Description</th>
+      <td>Apply and search for knowlege in various disciplines, using a rigourous
+      methodology.</td>
+    </tr>
+    <tr>
+      <th>Type</th>
+      <td>Novice.</td>
+    </tr>
+    <tr>
+      <th>Responsibilities</th>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <th>Success criteria</th>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <th>Involvement</th>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <th>Deliverables</th>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <th>Comments/issues</th>
+      <td>&nbsp;</td>
+    </tr>
+  </table>
+</blockquote>
+<h4>Producer</h4>
+<blockquote>
+  <table border="1" cellspacing="0" cellpadding="5">
+    <tr>
+      <th>Representative</th>
+      <td>&lt;Candidates are welcome&gt;</td>
+    </tr>
+    <tr>
+      <th>Description</th>
+      <td>Release fictional and/or documentary material using various media (films,
+      books, etc.)</td>
+    </tr>
+    <tr>
+      <th>Type</th>
+      <td>Novice.</td>
+    </tr>
+    <tr>
+      <th>Responsibilities</th>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <th>Success criteria</th>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <th>Involvement</th>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <th>Deliverables</th>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <th>Comments/issues</th>
+      <td>&nbsp;</td>
+    </tr>
+  </table>
+</blockquote>
+<h4>UFO Amateur</h4>
+<blockquote>
+  <table border="1" cellspacing="0" cellpadding="5">
+    <tr>
+      <th>Representative</th>
+      <td>&lt;Candidates are welcome&gt;</td>
+    </tr>
+    <tr>
+      <th>Description</th>
+      <td>Release fictional and/or documentary material using various media (films,
+        books, etc.)</td>
+    </tr>
+    <tr>
+      <th>Type</th>
+      <td>Interested.</td>
+    </tr>
+    <tr>
+      <th>Responsibilities</th>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <th>Success criteria</th>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <th>Involvement</th>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <th>Deliverables</th>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <th>Comments/issues</th>
+      <td>&nbsp;</td>
+    </tr>
+  </table>
+</blockquote>
+<h4>UFO Organization</h4>
+<blockquote>
+  <table border="1" cellspacing="0" cellpadding="5">
+    <tr>
+      <th>Representative</th>
+      <td>&lt;Candidates are welcome&gt;</td>
+    </tr>
+    <tr>
+      <th>Description</th>
+      <td>Investigate and maintain its own UFO cases database.</td>
+    </tr>
+    <tr>
+      <th>Type</th>
+      <td>Expert.</td>
+    </tr>
+    <tr>
+      <th>Responsibilities</th>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <th>Success criteria</th>
+      <td>Ability to share (update/read) UFO data</td>
+    </tr>
+    <tr>
+      <th>Involvement</th>
+      <td>Provide their own data format experience</td>
+    </tr>
+    <tr>
+      <th>Deliverables</th>
+      <td>Converters for import/export, own server tests</td>
+    </tr>
+    <tr>
+      <th>Comments/issues</th>
+      <td>&nbsp;</td>
+    </tr>
+  </table>
+</blockquote>
+<h3><a name="UserProfiles"></a>User profiles</h3>
+<h4>Visitor</h4>
+<blockquote>
+  <table border="1" cellspacing="0" cellpadding="5">
+    <tr>
+      <th>Representative</th>
+      <td>Represents</td>
+    </tr>
+    <tr>
+      <th>Description</th>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <th>Type</th>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <th>Responsibilities</th>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <th>Success criteria</th>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <th>Involvement</th>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <th>Deliverables</th>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <th>Comments/issues</th>
+      <td>&nbsp;</td>
+    </tr>
+  </table>
+</blockquote>
+<h4>Editor</h4>
+<blockquote>
+  <table border="1" cellspacing="0" cellpadding="5">
+    <tr>
+      <th>Representative</th>
+      <td>Represents</td>
+    </tr>
+    <tr>
+      <th>Description</th>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <th>Type</th>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <th>Responsibilities</th>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <th>Success criteria</th>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <th>Involvement</th>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <th>Deliverables</th>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <th>Comments/issues</th>
+      <td>&nbsp;</td>
+    </tr>
+  </table>
+</blockquote>
+<h3> <a name="KeyStakeholderUserNeeds"></a>Key stakeholder/user needs</h3>
+<blockquote>
+  <table border="1" cellspacing="0" cellpadding="5">
+    <tr>
+      <th>Need</th>
+      <th>Priority</th>
+      <th>Concerns</th>
+      <th>Current solution</th>
+      <th>Proposed solution</th>
+    </tr>
+    <tr>
+      <td>Sighting reporting</td>
+      <td>High</td>
+      <td>Confidentiality, Sorting, study workflow, complexity vs. simplicity</td>
+      <td>Mail, simple form or contact some association.</td>
+      <td>Centralized on-line sighting report center</td>
+    </tr>
+    <tr>
+      <td>Data processing (statistics, search for patterns, classifications, etc.)</td>
+      <td>Medium</td>
+      <td>Amount and credibility of data, processing power</td>
+      <td>A few private solutions.</td>
+      <td>On-line tooling.</td>
+    </tr>
+    <tr>
+      <td>Consultation</td>
+      <td>Medium</td>
+      <td>Credibility/cross verification</td>
+      <td>Heterogeneous and static websites, books.</td>
+      <td>Centralized on-line sightings catalog</td>
+    </tr>
+    <tr>
+      <td>Servers interoperability and data standardization</td>
+      <td>Low</td>
+      <td>Exchangeability/sharing, support for various media</td>
+      <td>None.</td>
+      <td><a href="UUDF.html"><strong>Unified Ufological Data Format</strong></a> XML
+        Schema</td>
+    </tr>
+    <tr>
+      <td>Search for identification</td>
+      <td>High</td>
+      <td>&nbsp;</td>
+      <td>Work from investigators and experts.</td>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <td> credibility ratio computation</td>
+      <td>Low</td>
+      <td>&nbsp;</td>
+      <td>Work from investigators and experts.</td>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <td>Pattern recognition and event prediction based on such patterns</td>
+      <td>Medium</td>
+      <td>&nbsp;</td>
+      <td>None.</td>
+      <td>&nbsp;</td>
+    </tr>
+  </table>
+</blockquote>
+<h3><a name="AlternativesAndCompetition"></a>Alternatives and competition</h3>
+<p>Several UFO databases exist in the world. Some of them are really dynamic,
+   that is allow to perform criteria-based searches. Below is a summary of the
+  main alternatives  :</p>
+<table border="1" cellspacing="0" cellpadding="5">
+  <tr>
+    <th width="132">&nbsp;</th>
+    <th width="92">&nbsp;</th>
+    <th colspan="4">Availability</th>
+    <th colspan="3">Data</th>
+    <th colspan="2">Functions</th>
+  </tr>
+  <tr>
+    <th>Alternative</th>
+    <th>Author</th>
+    <th width="93">Platform</th>
+    <th width="92">Access</th>
+    <th width="62">Cost</th>
+    <th width="83">Language</th>
+    <th width="124">Input</th>
+    <th width="66">Amount</th>
+    <th width="177">Model</th>
+    <th width="149">Query</th>
+    <th width="112">Other</th>
+  </tr>
+  <tr>
+    <td>B&eacute;cassine</td>
+    <td>Denis Breysse</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>French</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>CE3</td>
+    <td>Topic search.</td>
+    <td>Statistics.</td>
+  </tr>
+  <tr>
+    <td><a href="http://www.geocities.com/Area51/Rampart/2653/sixthkind.html">Close
+        encounters of the 6th kind</a></td>
+    <td>Geoff Dittman</td>
+    <td>Web browser</td>
+    <td>Online</td>
+    <td>Free</td>
+    <td>English</td>
+    <td>No</td>
+    <td>From 1873 to 1997</td>
+    <td>Witness (name), type (injury, disapearance, death), effects (burn, uncounciousness,
+      sickness...), location/r&eacute;gion/country, date (day, month, year), time, 2
+      lines-description</td>
+    <td>No</td>
+    <td>Static statistics (by continent, country, date, injury type, language)</td>
+  </tr>
+  <tr>
+    <td><a href="http://www.fufor.com/reportinfo.htm">FUFOR reports forms</a></td>
+    <td>FUFOR</td>
+    <td>&nbsp;</td>
+    <td>Online</td>
+    <td>Free</td>
+    <td>English</td>
+    <td>15 <a href="http://www.fufor.com/reportsighting.htm">sighting</a> &amp; <a href="http://www.fufor.com/reportabduction.htm">abduction</a> fields.</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>No.</td>
+    <td>No.</td>
+  </tr>
+  <tr>
+    <td><a href="http://www.ldi5.net/ovni/sepra/nt1.php">GEPAN</a> (CNES)</td>
+    <td>Alain Esterle, Jacques Duval, Paul Legendre, Manuel Jimenez, Jean-Pierre
+      Rospars, Michel Marcus</td>
+    <td>ForTran perfored cards</td>
+    <td>Private</td>
+    <td>Public</td>
+    <td>Fran&ccedil;ais</td>
+    <td>Patrolmen reports (from &quot;D&quot; GEPAN category) transcribed
+      on coded cards</td>
+    <td>&nbsp;</td>
+    <td><p>N&deg; cas, source (gendarmerie, police de l'air, journaux sp&eacute;cialis&eacute;s
+        /non sp&eacute;cialis&eacute;s, groupement priv&eacute;), observation
+        (type (A, B, C, D (LN, DD, RV, RR1, RR2, RR3)), dur&eacute;e, m&eacute;thode),
+        cr&eacute;dibilit&eacute; (non connue, faible, moyenne, forte), int&eacute;r&ecirc;t
+        (idem), enqu&ecirc;teur, t&eacute;moins (n&deg;, nombre, profession, &acirc;ge,
+        sexe), m&eacute;t&eacute;o, date+heure (pr&eacute;cise ou estimation
+        (matin, vers midi, apr&egrave;s-midi, soir&eacute;e, cr&eacute;puscule,
+        d&eacute;but de la nuit, vers minuit, fin de la nuit, aurore)), lieu
+        (type (d&eacute;sert/haute montagne/mer, habitation isol&eacute;e, hameau
+        /petit village, bourgage /banlieue, ville, vue d'avion, autre, inconnu),
+        d&eacute;partement, longtitude, latitude), fourchette magnitude, azimut
+        (+pas) et site (+pas, max), champ de vision, &eacute;toiles (les plus
+        brillantes, brillantes visibles du lieu) /plan&egrave;tes, mentionn&eacute;/d&eacute;duit,
+        ovnis (nombre, forme, taille, luminosit&eacute;, couleur, trajectoire,
+        vitesse, acc&eacute;l&eacute;ration, bruit, hauteur angulaire, direction
+        azimutale, distance min)</p>
+    </td>
+    <td>&nbsp;</td>
+    <td>Statistics.</td>
+  </tr>
+  <tr>
+    <td><a href="http://www.ufodb.net">JTC (<em>Just
+          the Case</em>) <em>UFO Database</em></a></td>
+    <td>Daniel Guenther</td>
+    <td>&nbsp;</td>
+    <td>Online</td>
+    <td>Free</td>
+    <td>English</td>
+    <td>&nbsp;</td>
+    <td>1500+</td>
+    <td>&nbsp;</td>
+    <td>20+ fixed criteria.</td>
+    <td>No.</td>
+  </tr>
+  <tr>
+    <td>Licorne</td>
+    <td>Jean-Pierre Calmel, Denis Alarcon</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>French</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>Magonia</td>
+    <td>Thierry Pinvidic</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>French</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td><a href="http://www.ufoinfo.com/magonia/index.shtml">Magonia</a></td>
+    <td>Jacques Vall&eacute;e</td>
+    <td>N/A</td>
+    <td>Public</td>
+    <td>Free</td>
+    <td>English</td>
+    <td>No</td>
+    <td> From 1868 to 1968</td>
+    <td>RR3 with Id, date, time, 5 to 10
+      lines of description</td>
+    <td>No.</td>
+    <td>No.</td>
+  </tr>
+  <tr>
+    <td><a href="http://www.nuforc.org/webreports.html">NUFORC On-line database</a></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>English</td>
+    <td><a href="http://www.ufocenter.com/reportform.html">40 sighting form fields</a></td>
+    <td>&nbsp;</td>
+    <td>Multi-Indexed (date/state/shape/post date). Each case is a 7-criteria
+      row.</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td><a href="http://www.project1947.com/">Project 1947</a></td>
+    <td>Jan Aldrich</td>
+    <td>&nbsp;</td>
+    <td>Online</td>
+    <td>Free</td>
+    <td>English</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>Newspapers data, links between people</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>UFO@home</td>
+    <td>&nbsp;</td>
+    <td>Any Java platform (Windows, Unix, MacOS, etc.)</td>
+    <td>Online</td>
+    <td>Free</td>
+    <td>French, english, other possible</td>
+    <td>Public, comprehensive (witness drawings, etc.). </td>
+    <td>Not yet.</td>
+    <td>Cases, sightings, investigations, actors (people, organisations). Not
+      yet populated but virtually unlimited by navigating the linked ufological
+      data (model).</td>
+    <td>Any criteria of the ufological model.</td>
+    <td> User-defined. Functions are virtually unlimited are user-definable.
+      They can compute on both form input and existing UFO data recorded in the
+      system.</td>
+  </tr>
+  <tr>
+    <td>SimOvni</td>
+    <td>GEPAN</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>Private</td>
+    <td>French</td>
+    <td>Visual testimonial optical appartus.</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td><a href="http://www.temporaldoorway.com/ufo/catalog/database/query.htm"><em>Temporal
+          Doorway </em>UFO catalog database</a></td>
+    <td>Mark Cashman</td>
+    <td>Windows?</td>
+    <td>Online</td>
+    <td>Free</td>
+    <td>English</td>
+    <td>No.</td>
+    <td>2000</td>
+    <td> (Project 1947 EM Effects Catalog + Vallee's Magonia catalog). Each
+      case as a date, location, short description (10 lines), Hynek and Vallee
+      classifications, minimum distance, object appearance and behavior, physical
+      and medical effects, comments and footnotes.</td>
+    <td>Predicate language.</td>
+    <td>No.</td>
+  </tr>
+  <tr>
+    <td><a href="http://www.larryhatch.net/">*U* <em>UFO Database</em></a> </td>
+    <td>Larry Hatch</td>
+    <td>Windows 3.1, W-95, W-98 and Windows-ME, plus DOS</td>
+    <td>Standalone</td>
+    <td>$59.50</td>
+    <td>Multiple</td>
+    <td>&nbsp;</td>
+    <td>18000+ </td>
+    <td>worldwide. 85  data fields.</td>
+    <td>90+ filters.</td>
+    <td>Maps. Astronomical clock. 25+ Predefined statistics. </td>
+  </tr>
+  <tr>
+    <td><a href="http://www.ufodatabase.com/">ufodatabase.com</a></td>
+    <td>&nbsp;</td>
+    <td>?</td>
+    <td>Online</td>
+    <td>Free</td>
+    <td>English</td>
+    <td>25+ sighting form fields.</td>
+    <td>&nbsp;</td>
+    <td>A few cases.</td>
+    <td>State + Province.</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td><a href="http://www.aliensonearth.com/area51/">Ufomind (AliensOnEarth)</a></td>
+    <td>&nbsp;</td>
+    <td>?</td>
+    <td>Online</td>
+    <td>Free</td>
+    <td>English</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>People, organisations, places. Links and forums</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td><a href="http://ufocat.com">UFOCAT </a></td>
+    <td>Saunders, Vallee, Fred Merritt (CUFOS), Donald Johnson</td>
+    <td>Windows 95/98</td>
+    <td>Standalone (CD-ROM)</td>
+    <td>$40</td>
+    <td>English</td>
+    <td>&nbsp;</td>
+    <td>172000 (1967-1982, 1990-2003). </td>
+    <td>raw reports</td>
+    <td>&nbsp;</td>
+    <td>Sightings hotspots and density map</td>
+  </tr>
+  <tr>
+    <td><a href="http://terrygroff.com/ufotools">UFO Tools</a> </td>
+    <td>Terry Groff</td>
+    <td>JavaScript-enabled browsers.</td>
+    <td>Online</td>
+    <td>Free</td>
+    <td>English</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>No.</td>
+    <td>N/A.</td>
+    <td>Two JavaScript functions (credibility evaluation, object size computation)
+      with form input.</td>
+  </tr>
+  <tr>
+    <td><a href="http://www.waterufo.net">Water UFO</a></td>
+    <td>Carl Feindt</td>
+    <td>Web browser</td>
+    <td>Online</td>
+    <td>Free</td>
+    <td>English</td>
+    <td>No</td>
+    <td>687 (from 1067 to January 11, 2002)</td>
+    <td>Date, location, reference article, source type (original, secondary,
+      unknown), status (controversy, doubt, wrong date, hoax, misidentification),
+      case type (rain, radar/sonar, underwater, water wheels...), Id, long
+      (article-like)
+      description + variable data (UFOCAT
+      ref,
+      biblio ref...)</td>
+    <td>No</td>
+    <td>No.</td>
+  </tr>
+  <tr>
+    <td> <a href="http://www.project1947.com/acufoe.htm">Weinstein sighting catalog</a></td>
+    <td>Dominique Weinstein</td>
+    <td>&nbsp;</td>
+    <td>File</td>
+    <td>Free</td>
+    <td>English</td>
+    <td>No</td>
+    <td> Since 1916.</td>
+    <td>Pilots sightings. Each case is 11-criteria row.</td>
+    <td>No.</td>
+    <td>No.</td>
+  </tr>
+  <tr>
+    <td><a href="http://ohiomufon.services4all.com/siteform.html">WUFOD (<em>Wordwide
+          UFO Database</em>)</a></td>
+    <td>MUFON</td>
+    <td>?</td>
+    <td>Online</td>
+    <td>Private.</td>
+    <td>English</td>
+    <td>85+ sighting form fields.</td>
+    <td>&nbsp;</td>
+    <td>&nbsp; </td>
+    <td>Private. <a href="http://ohiomufon.services4all.com/wufrptlinks.html">Statistics</a> (structural/surface
+      features and shapes)</td>
+    <td>Predefined statistics</td>
+  </tr>
+</table>
+<p>As we can see the main UFO@home differenciators are that :</p>
+<ul>
+  <li>it intends to provide services beyond database-level (CRUD) services : data 
+    processing such as statistics, search for identification, credibility ratio 
+    computation, pattern recognition and event prediction based on such patterns.</li>
+  <li>it intends to be standard/universal, by defining standard data formats (such 
+    as UUDF) and by defining an information system that can be distributed and 
+    implemented by various people in the world. A UFO@home server is designed to 
+    interface with another UFO@home server.</li>
+</ul>
+<h2><a name="ProductOverview" id="ProductOverview"></a>Product overview</h2>
+<p>This section provides a high level view of the UFO@home capabilities, interfaces
+  to ... ,
+  and the system configuration.</p>
+<h3> <a name="ProductPerspective"></a>Product perspective</h3>
+<p>Les utilisateurs se connectent au site Web de UFO@home. Il peuvent alors effectuer
+  diverses recherches et traitements. Certaines des op&eacute;rations (cr&eacute;ations,
+  mises &agrave; jour) induisent un processus m&eacute;tier (workflow) de validation
+(referrers typiquement).</p>
+<p>D'autres syst&egrave;mes se connectents au site de UFO@home pour y effectuer
+  des t&acirc;ches similaires mais de mani&egrave;re automatis&eacute;es, comme
+  l'import/export de donn&eacute;es au moyen de protocoles et formats standardis&eacute;s.</p>
+<h3>  <a name="SummaryOfCapabilities"></a>Summary of capabilities</h3>
+<p>The table in this section identifies the main capabilities of UFO@home in
+  terms of benefits and features. The features are further described
+  in a section  of this document. Refer to the <a href="https://sourceforge.net/docman/display_doc.php?docid=17415&group_id=70060">Glossary</a> for a description
+  of terms.</p>
+<table border="1" cellspacing="0" cellpadding="5">
+  <tr>
+    <th>User benefit</th>
+    <th>Supporting features</th>
+  </tr>
+  <tr valign="top">
+    <td>User can report a sighting</td>
+    <td>Sighting report form</td>
+  </tr>
+  <tr valign="top">
+    <td>User can identify a sighting</td>
+    <td>Sighting report trigger a recognition process, which may lead to an quick
+    answer w/ probability </td>
+  </tr>
+  <tr valign="top">
+    <td>Investigator can find case information</td>
+    <td>Multi-criteria search</td>
+  </tr>
+  <tr valign="top">
+    <td>User can find most credible data</td>
+    <td>Multi-criteria search can include customizable filtering functions, such 
+      as credibility formulas. Referees can also &quot;vote as credible&quot; 
+      data.</td>
+  </tr>
+  <tr valign="top">
+    <td>Users can define their own classification</td>
+    <td>Classification is a function to be processed on data.</td>
+  </tr>
+  <tr valign="top">
+    <td>UFO organizations are always up to date</td>
+    <td>Data synchronization between UFO@home-compatible servers can be customized 
+      to be performed regularly.</td>
+  </tr>
+  <tr valign="top">
+    <td>UFO data is available to everyone</td>
+    <td>At least a Reference Implementation server will be running to be accessible
+      freely by the public</td>
+  </tr>
+  <tr valign="top">
+    <td>UFO data cannot be lost</td>
+    <td>Data synchronization between UFO@home-compatible servers ensure data replication.</td>
+  </tr>
+  <tr valign="top">
+    <td>Statistics are available</td>
+    <td>They are user-defined or predefined functions applied to available data.</td>
+  </tr>
+  <tr valign="top">
+    <td>Bogus and inconsistent data is filtered</td>
+    <td>User-defined ou predefined consistency/credibility functions can be applied
+      to data.</td>
+  </tr>
+</table>
+<h3><a name="AssumptionsAndDependencies"></a>Assumptions and dependencies</h3>
+<p>The following assumptions and dependencies relate to the capabilities of the
+  RR0-Information System as outlined in this Vision Document:</p>
+<ul>
+  <li>Funds will be found to host the final UFO@home to make it
+    available for a large number of concurrent users.</li>
+</ul>
+<h3><a name="CostAndPricing"></a>Cost and pricing</h3>
+<p>Due to the Open Source nature of the product, the development cost is absorbed
+  by the work of each of the contributors. Some funds may be required to host
+  at least one instance of the Reference Implementation to be available publicly.</p>
+<p>There is no pricing associated to the project, as UFO@home standard will be freely 
+  licensable. Besides, a Reference Implementation will be made available for free.</p>
+<h3> <a name="LicensingAndInstallation"></a>Licensing and installation</h3>
+<ol>
+  <li>All persons or organization may use, distribute some UFO@home-compatible
+    server(s)  provided that the licensee is applied and made available to all
+    (including end-) users. 
+  </li>
+  <li>All persons or organization shall implement UFO@home software interfaces
+    (one shall provide a different implementation than the Reference Implementation).</li>
+  <li>All persons or organization may modify or make evolve the UFO@home source 
+    code.</li>
+  <li>Installation of the client component shall require no specific training 
+    nor specific hardware or software configuration other than basic web browsing 
+    capabilities.</li>
+</ol>
+<h2> <a name="FeatureAttributes" id="FeatureAttributes"></a>Feature attributes</h2>
+<ol>
+  <li>benefit</li>
+  <li>effort</li>
+  <li>risk </li>
+</ol>
+<h2><a name="ProductFeatures"></a>Product features</h2>
+<p>This section defines and describes the features of UFO@home. 
+  These features are the high-level capabilities of the system that are necessary
+  to deliver benefits to the users.</p>
+<h3> Logon</h3>
+<ul>
+  <li>Visitors or witnesses shall access to browsing/search and sighting report
+    features respectively, without requiring authentication.</li>
+  <li>Any user shall be able to provide an ID and password to access UFO@home in a customized environment. </li>
+  <li>A valid authentication with a valid password shall be required to access
+    some sensible features (administration typically).</li>
+  <li>The system shall enable a user to change their password.</li>
+</ul>
+<h3>Add a sighting report</h3>
+<p>...</p>
+<h3>Add a classification</h3>
+<p>...</p>
+<h2>   <a name="Constraints"></a>Constraints</h2>
+<p>In addition to the listed <a href="#AssumptionsAndDependencies">assumptions
+    and dependencies</a>, the following
+  constraints apply to UFO@home :</p>
+<ol>
+  <li>  The
+       information available is limited to the type of data supported by
+  the existing RR0 IM.</li>
+</ol>
+<h2> <a name="QualityRanges"></a>Quality ranges</h2>
+<p>This section defines the quality ranges for performance, robustness, fault
+  tolerance, usability, and similar characteristics for UFO@home.</p>
+<ul>
+  <li><strong>Availability </strong>: The System shall be available 24 hours
+  a day, 7 days a week.</li>
+  <li><strong>Usability</strong> : The System shall be easy-to-use and shall
+  be appropriate for the target audience. The System shall include online help
+    for the user. Users should not require the use
+    of a hardcopy Manual to use the
+  System.</li>
+</ul>
+<h2> <a name="PrecedenceAndPriority"></a>Precedence and priority</h2>
+<p>This section provides some direction on the relative importance of the proposed
+  system features. The features defined in this Vision Document should be included
+  in the first 2 releases of the system. All features critical to sighting reporting
+  are planned for the first release.</p>
+<p>As development progresses on this system, the feature attributes will be used
+  to weight the relative importance of the features and to plan the release content.
+  The benefit, effort, and risk
+  attributes are used to determine priority of a feature and target release.</p>
+<p>It is anticipated that the UFO@home Information System will be released for
+  general use through 2-4 main releases.</p>
+<p>Release 1 must contain as a minimum the basic functionality as listed below
+  :</p>
+<ul>
+  <li>  Logon</li>
+  <li>Report a sighting</li>
+  <li>Adding/updating a case</li>
+  <li> Searching for a case</li>
+</ul>
+<p>Release 2 should include :</p>
+<ul>
+  <li>  Data processing (statistics, classification functions, etc.)</li>
+</ul>
+<p>Release 3 should include :</p>
+<ul>
+  <li> <a href="UUDF.html">UUDF</a> import/export</li>
+  <li>Interactions between multiple UFO@home-compatibles servers.</li>
+</ul>
+<p>The functionality for Release 4 has not yet been determined. It is anticipated
+  that this release will contain enhancements to the existing functionality.</p>
+<h2><a name="OtherProductRequirements"></a>Other product requirements</h2>
+<h3> <a name="ApplicableStandards"></a>Applicable standards</h3>
+<ol>
+  <li>The UFO@home user interface shall be W3C HTML 4.0 compliant.</li>
+  <li>The UFO@home network protocols shall run over HTTP (to allow interoperability
+    through Internet)</li>
+  <li>The UFO@home application shall be compatible with the Java 2 Enterprise
+    Edition (J2EE) platform.</li>
+</ol>
+<h3> <a name="SystemRequirements"></a>System requirements</h3>
+<ul>
+  <li>The system shall interface with other UFO@home servers. </li>
+  <li>The client component of the system shall operate on any personal computer
+    with a Pentium Microprocessor or better.</li>
+  <li>The client component of the system shall not require more than 256 MB RAM
+    and 20 MB Disk Space.</li>
+  <li>The client component of the system shall run on Microsoft Windows 95, Windows
+    98, Windows NT, Windows 2000 and Windows XP, Linux (non restrictive list).</li>
+</ul>
+<h3> <a name="PerformanceRequirements"></a>Performance requirements</h3>
+<ul>
+  <li>The system shall support up to 500 simultaneous users against the central
+    database at any given time.</li>
+  <li>The system shall provide access to the legacy UFO@home database (except functions)
+    with no more than a 5 second latency.</li>
+  <li>The system shall complete 80% of all transactions within 2 minutes.</li>
+</ul>
+<h3> <a name="EnvironmentalRequirements"></a>Environmental requirements</h3>
+<p>None specified.</p>
+<h2><a name="DocumentationRequirements"></a>Documentation requirements</h2>
+<p>This section describes the documentation requirements of UFO@home.</p>
+<h3> <a name="UserManual"></a>User manual</h3>
+<p>The User Manual shall describe use of the system from users' view point. The
+  User Manual shall include :</p>
+<ul>
+  <li> Minimum System Requirements</li>
+  <li> Installation of client components</li>
+  <li> Logging On</li>
+  <li> Logging Off</li>
+  <li> All System Features</li>
+  <li> Customer Support Information</li>
+</ul>
+<p>The User Manual should range from 50-100 pages. The User Manual page dimensions
+  shall be 7 by 9 inches. The User Manual shall be available as hardcopy and
+  through the online help.</p>
+<h3> <a name="OnLineHelp"></a>On-line help</h3>
+<p>Online Help shall be available to the user for each system function. Each
+  topic covered in the User Manual shall also be available through the online
+  help.</p>
+<h3> <a name="InstallationGuidesConfigurationReadMeFile"></a>Installation guides,
+  configuration, Read Me file</h3>
+<p>The Installation Guide for the server portion shall include :</p>
+<ul>
+  <li> Minimum system requirements</li>
+  <li> Installation instructions</li>
+  <li> Customer Support Information</li>
+  <li> How to Order Upgrades</li>
+</ul>
+<p>The Read Me File shall be available for display following installation. The
+  Read Me file will also reside on disk and be available for viewing at any time
+  by the administrators. The Read Me file shall include :</p>
+<ul>
+  <li> New release features</li>
+  <li> Known bugs and limitations and associated workarounds.</li>
+</ul>
+<h3> <a name="LabelingAndPackaging"></a>Labeling and packaging</h3>
+<p>The UFO@home logo shall be prominent on the documentation and splash screens.</p>
+<p>As the initial releases are strictly for the UFO community and not the general
+  market, product marketing literature, product packaging, and promotional materials
+  will not be developed.</p>

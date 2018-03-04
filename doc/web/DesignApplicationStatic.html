@@ -1,0 +1,92 @@
+<html>
+
+<head>
+
+<title>Static view - Application design - RR0-IS</title>
+
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+
+<link rel="stylesheet" href="rr0.css" type="text/css">
+
+</head>
+
+
+
+<body>
+<h1>Static view - Application design</h1>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+  <tr> 
+    <th colspan="4"><a href="index_fr.html">Home</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="mailto:rr0@rr0.org">Contact</a></th>
+  </tr>
+</table>
+<p>Basically UFO@home can be viewed as the stacking of three layers :</p>
+<ol>
+  <li><strong>UFO@home</strong>,  which is the application accessible to the public.
+  It manages user interactions issues, user contexts, specific features such
+    as statistics computing, etc.</li>
+  <li>the <strong>RR0 model</strong>, which modelize the UFO domain, at high
+    (cases, accounts, classifications) and low-level (events, moments).</li>
+  <li>the <strong>Prosper</strong> engine (maybe), which is not part of the UFO@home
+    project, but a standalone project intended to provide artificial
+    intelligence capabilities to any application, allowing to predict facts depending
+    of ancien facts, identify events patterns, etc. As UFO@home is a good candidate
+    to experiment Prosper, Prosper has been identified as a pluggable and valuable
+    component of the UFO@home.</li>
+</ol>
+<h2>Subsystems</h2>
+<p>Here is a more detailled view of the UFO@home integrated subsystems :</p>
+<table border="1" cellspacing="0" cellpadding="5">
+  <tr>
+    <td>UFO@home</td>
+    <th colspan="6">Software tiers</th>
+  </tr>
+  <tr>
+    <th rowspan="2">Subsystem</th>
+    <th colspan="2">Presentation</th>
+    <th colspan="2">Business</th>
+    <th colspan="2">Integration</th>
+  </tr>
+  <tr>
+    <th>Package</th>
+    <th>Components</th>
+    <th>Package</th>
+    <th>Components</th>
+    <th>Package</th>
+    <th>Components</th>
+  </tr>
+  <tr>
+    <td>UFO@home</td>
+    <td><code>org.rr0.is. presentation</code></td>
+    <td>AccountBean, SightingBean</td>
+    <td><code>org.rr0.is. business</code></td>
+    <td>User account, Working session</td>
+    <td><code>org.rr0.is. integration</code></td>
+    <td>UserDAO</td>
+  </tr>
+  <tr>
+    <td>RR0</td>
+    <td colspan="2">Not used in UFO@home</td>
+    <td><code>org.rr0. business</code></td>
+    <td>Case, Account, Sighting, Classfication, Evidence<br>
+    Event, Moment, Location</td>
+    <td><code>org.rr0. integration</code></td>
+    <td>EventDAO, etc.</td>
+  </tr>
+  <tr>
+    <td>Prosper</td>
+    <td colspan="2">Not used in UFO@home</td>
+    <td><code>org. javarome. prosper. business</code></td>
+    <td>Event, Memory</td>
+    <td><code>org.javarome. prosper. integration</code></td>
+    <td>MemoryDAO, etc.</td>
+  </tr>
+</table>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+  <tr>
+    <th colspan="4"><a href="index_fr.html">Home</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="mailto:rr0@rr0.org">Contact</a></th>
+  </tr>
+</table>
+</body>
+
+</html>
+

@@ -1,0 +1,32 @@
+package id26p4me8qbvpide8qbwh5l;
+
+/**
+@version 2.0
+@physicalPackage
+@__modelType diagram 
+*/
+class diagram {
+/**
+@__ref <oiref:java#Class#org.rr0.im.business.event.sighting.UFOShape:oiref><oihard>
+@__modelType reference 
+*/
+class reference {
+}/**
+@__ref <oiref:java#Class#org.rr0.im.business.event.sighting.UFO:oiref><oihard>
+@__modelType reference 
+*/
+class reference41 {
+}}/**
+@__tags
+@shapeType ClassDiagram 
+*/
+class __tags {
+}/**
+@__options 
+*/
+class __options {
+}/**
+@__positions 
+*/
+class __positions {
+}

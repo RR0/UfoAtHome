@@ -1,0 +1,18 @@
+<!DOCTYPE form-validation PUBLIC
+        "-//Apache Software Foundation//DTD Commons Validator Rules Configuration 1.1//EN"
+        "http://jakarta.apache.org/commons/dtds/validator_1_1.dtd">
+<form-validation>    
+    <formset>
+
+        <form name="Sighting">
+            <field property="moment" depends="date">
+                <var>
+                    <var-name>datePattern</var-name>
+                    <var-value>dd/MM/yyyy</var-value>
+                </var>
+            </field>
+
+        </form>
+
+    </formset>
+</form-validation>

@@ -1,0 +1,84 @@
+<h1>Guide du d&eacute;veloppeur</h1>
+<table border="0" align="center" cellpadding="5" cellspacing="0">
+  <tr>
+    <td valign="top"><ul>
+        <li> <strong><a href="#Introduction">Introduction</a></strong>
+            <ul>
+              <li><a href="#Objectif">Purpose</a></li>
+              <li> <a href="#Perimetre">Scope</a></li>
+              <li><a href="#DefinitionsAcronymsAndAbbreviations">D&eacute;finitions,
+                  acronymes et
+abbr&eacute;viations</a></li>
+              <li><a href="#References">R&eacute;f&eacute;rences</a></li>
+              <li><a href="#VueDEnsemble">Vue d'ensemble</a></li>
+            </ul>
+        </li>
+        <li><strong><a href="#Definitions">Modules clients</a></strong>
+          <ul>
+            <li><a href="#Platform">Contraintes de plate-forme</a></li>
+          </ul>
+        </li>
+        <ul>
+          <li><a href="#Projet">Applet de t&eacute;moignage visuel</a></li>
+        </ul>
+        <li><a href="#CodingConventions"><strong>Conventions de codage</strong></a></li>
+    </ul>
+    </td>
+  </tr>
+</table>
+<h2><a name="Introduction"></a>Introduction</h2>
+<h3><a name="Objectif"></a>Objectif</h3>
+<p>Ce document vise &agrave; aider le d&eacute;veloppeur &agrave; impl&eacute;menter, &eacute;tendre et/ou modifier
+le syst&egrave;me UFO@home.</p>
+<h3><a name="Scope"></a>P&eacute;rim&egrave;tre</h3>
+<p>Ce document s'adresse aux informaticiens (d&eacute;veloppeurs, ing&eacute;nieurs,
+  concepteurs)
+participant &agrave; l'&eacute;laboration technique d'un syst&egrave;me UFO@home.
+Il concerne l'ensemble du d&eacute;veloppement du syst&egrave;me UFO@home.</p>
+<h3><a name="DefinitionsAcronymsAndAbbreviations"></a>D&eacute;finitions, acronymes
+et abbreviations</h3>
+<ul>
+  <li>AWT &#8212; Abstract Windowing Toolkit. Une API Java pour construire une
+    IHM qui puisse s'ex&eacute;cuter sur des applets Java sur le Web
+    ou sur une CDC J2ME.</li>
+  <li>CDC &#8212; Connected Device Configuration. Une configuration J2ME supportant
+    AWT.</li>
+  <li>GUI &#8212; Graphical User Interface.</li>
+  <li>IHM &#8212; Interface Homme Machine.</li>
+  <li>J2ME &#8212; Java 2 Micro Edition. Une sp&eacute;cification de plate-forme Java
+    pour les appareils embarqu&eacute;s ou mobiles.</li>
+  <li>HTML &#8212; HyperText Markup Language.</li>
+  <li>HTTP &#8212; HyperText Transfer Protocol.</li>
+  <li>RR0 IM &#8212; UFO@home Information Model</li>
+</ul>
+<p>Voir &eacute;galement le <a href="https://sourceforge.net/docman/display_doc.php?docid=17535&group_id=70060">Glossaire</a> du
+projet.</p>
+<h3><a name="References"></a>R&eacute;f&eacute;rences</h3>
+<ol>
+  <li><a href="http://javarome.net">Javarome.net</a> &#8212; Un site Web 
+    amateur contenant diverses d&eacute;finitions et documentation sur le d&eacute;veloppement
+    Java.</li>
+</ol>
+<h3><a name="VueDEnsemble"></a>Vue d'ensemble</h3>
+<p>Ce document d&eacute;crit les divers point d'extension d'un syst&egrave;me UFO@home, et la
+mani&egrave;re de les exploiter. Il est organis&eacute; selons les diff&eacute;rents modules du syst&egrave;me.</p>
+<h2><a name="Definitions"></a>Modules clients</h2>
+<h3><a name="Platform"></a>Contraintes de platforme</h3>
+<p>Les modules client sont restreints aux plates-formes suivantes  :</p>
+<ul>
+  <li>HTML 4.01</li>
+  <li>applets Java 1.1.8 (i.e., pas au-del&agrave;), pour garantir la compatibilit&eacute;
+    avec Microsoft Internet Explorer (i.e. sans n&eacute;cessiter d'autres composants
+    &agrave; t&eacute;l&eacute;charger)
+    et le Personal Profile (PP, anciennement appel&eacute; PersonalJava)
+    de la configuration CDC de J2ME (ce qui permet de s'ex&eacute;cuter sur des appareils
+    portables et PDAs such tels que des Palm/PalmPilots, PocketPCs, etc.).</li>
+</ul>
+<h3><a name="Projet"></a>Applet de t&eacute;moignage visuel</h3>
+<h4>Formes d'ovni</h4>
+<p>Chaque forme d'ovni est un JavaBean. Elle dispose de propri&eacute;t&eacute;s personnalisables,
+  et se conforme &agrave; une interface particuli&egrave;re.</p>
+<p>Pour cr&eacute;er une nouvelle forme d'ovni, cr&eacute;ez simplement une nouvelle classe
+  impl&eacute;mentant l'interface UFOShape.</p>
+<h2><a name="CodingConventions"></a>Conventions de codage</h2>
+<p>...</p>
