@@ -1,0 +1,6 @@
+/**
+ * @deprecated
+ */
+export class Image {
+
+}

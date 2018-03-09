@@ -3,12 +3,9 @@
   <component name="FacetManager">
     <facet type="gwt" name="GWT">
       <configuration>
-        <setting name="additionalCompilerParameters" value="" />
         <setting name="compilerMaxHeapSize" value="128" />
-        <setting name="compilerOutputPath" value="" />
         <setting name="gwtScriptOutputStyle" value="DETAILED" />
-        <setting name="gwtSdkUrl" value="" />
-        <setting name="runGwtCompilerOnMake" value="true" />
+        <setting name="gwtSdkUrl" value="file://" />
       </configuration>
     </facet>
   </component>
@@ -129,4 +126,3 @@
     </Base>
   </component>
 </module>
-

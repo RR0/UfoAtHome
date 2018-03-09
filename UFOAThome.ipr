@@ -77,7 +77,6 @@
     <option name="USE_PER_PROJECT_SETTINGS" value="true" />
   </component>
   <component name="CompilerConfiguration">
-    <option name="DEFAULT_COMPILER" value="Javac" />
     <excludeFromCompile>
       <file url="file://$PROJECT_DIR$/applets/test/org/rr0/ufoathome/view/draw/TestPlotApplet.java" />
     </excludeFromCompile>
@@ -98,11 +97,8 @@
       <entry name="*.csv" />
       <entry name="*.bin" />
     </wildcardResourcePatterns>
-    <annotationProcessing enabled="false" useClasspath="true" />
   </component>
-  <component name="CopyrightManager" default="">
-    <module2copyright />
-  </component>
+  <component name="CopyrightManager" default="" />
   <component name="DependenciesAnalyzeManager">
     <option name="myForwardDirection" value="false" />
   </component>
@@ -120,9 +116,10 @@
     <option name="ADDITIONAL_OPTIONS_STRING" value="" />
     <option name="MAXIMUM_HEAP_SIZE" value="128" />
   </component>
-  <component name="Encoding" useUTFGuessing="true" native2AsciiForPropertiesFiles="false" />
-  <component name="EntryPointsManager">
-    <entry_points version="2.0" />
+  <component name="Encoding" useUTFGuessing="true" native2AsciiForPropertiesFiles="false">
+    <file url="file://$PROJECT_DIR$/doc/web/index.html" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/doc/web/ufoathome/index.html" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/impl/src/org/rr0/is/service/AccountServiceImpl.java" charset="UTF-8" />
   </component>
   <component name="ExportToHTMLSettings">
     <option name="PRINT_LINE_NUMBERS" value="false" />
@@ -131,23 +128,18 @@
   </component>
   <component name="IdProvider" IDEtalkID="0D400A8AF1DCB19EC83E4B80D1E78B1B" />
   <component name="InspectionProjectProfileManager">
-    <profiles>
-      <profile version="1.0" is_locked="false">
-        <option name="myName" value="Project Default" />
-        <option name="myLocal" value="false" />
-        <inspection_tool class="LoopStatementsThatDontLoop" enabled="false" level="WARNING" enabled_by_default="false" />
-        <inspection_tool class="LossyEncoding" enabled="true" level="WARNING" enabled_by_default="true" />
-      </profile>
-    </profiles>
-    <option name="PROJECT_PROFILE" value="Project Default" />
-    <option name="USE_PROJECT_PROFILE" value="true" />
+    <profile version="1.0">
+      <option name="myName" value="Project Default" />
+    </profile>
     <version value="1.0" />
-    <list size="5">
-      <item index="0" class="java.lang.String" itemvalue="SERVER PROBLEM" />
-      <item index="1" class="java.lang.String" itemvalue="INFO" />
-      <item index="2" class="java.lang.String" itemvalue="TYPO" />
-      <item index="3" class="java.lang.String" itemvalue="WARNING" />
-      <item index="4" class="java.lang.String" itemvalue="ERROR" />
+    <list size="7">
+      <item index="0" class="java.lang.String" itemvalue="INFORMATION" />
+      <item index="1" class="java.lang.String" itemvalue="SERVER PROBLEM" />
+      <item index="2" class="java.lang.String" itemvalue="WEAK WARNING" />
+      <item index="3" class="java.lang.String" itemvalue="INFO" />
+      <item index="4" class="java.lang.String" itemvalue="TYPO" />
+      <item index="5" class="java.lang.String" itemvalue="WARNING" />
+      <item index="6" class="java.lang.String" itemvalue="ERROR" />
     </list>
   </component>
   <component name="JavacSettings">
@@ -298,6 +290,9 @@
     </group>
     <group name="tst" />
   </component>
+  <component name="ProjectCodeStyleConfiguration">
+    <option name="PREFERRED_PROJECT_CODE_STYLE" value="Default" />
+  </component>
   <component name="ProjectDetails">
     <option name="projectName" value="UFOAThome" />
   </component>
@@ -305,6 +300,7 @@
     <dictionary name="javarome">
       <words>
         <w>timeable</w>
+        <w>ufological</w>
       </words>
     </dictionary>
   </component>
@@ -313,10 +309,11 @@
       <module fileurl="file://$PROJECT_DIR$/JCCKit/JCCKit.iml" filepath="$PROJECT_DIR$/JCCKit/JCCKit.iml" />
       <module fileurl="file://$PROJECT_DIR$/api/api.iml" filepath="$PROJECT_DIR$/api/api.iml" />
       <module fileurl="file://$PROJECT_DIR$/applets/applets.iml" filepath="$PROJECT_DIR$/applets/applets.iml" />
+      <module fileurl="file://$PROJECT_DIR$/doc/doc.iml" filepath="$PROJECT_DIR$/doc/doc.iml" />
       <module fileurl="file://$PROJECT_DIR$/impl/impl.iml" filepath="$PROJECT_DIR$/impl/impl.iml" />
     </modules>
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_5" assert-keyword="true" jdk-15="true" project-jdk-name="1.6" project-jdk-type="JavaSDK" />
+  <component name="ProjectRootManager" version="2" project-jdk-name="9.0" project-jdk-type="JavaSDK" />
   <component name="ResourceManagerContainer">
     <option name="myResourceBundles">
       <value>
@@ -328,7 +325,7 @@
     <option name="mySupportsUserInfoFilter" value="true" />
   </component>
   <component name="VcsDirectoryMappings">
-    <mapping directory="" vcs="CVS" />
+    <mapping directory="" vcs="Git" />
   </component>
   <component name="WebServicesPlugin" addRequiredLibraries="true" />
   <component name="com.intellij.jsf.UserDefinedFacesConfigs">
@@ -347,4 +344,3 @@
     <option name="INSTRUMENT_CLASSES" value="false" />
   </component>
 </project>
-
