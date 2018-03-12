@@ -4,9 +4,18 @@ import {DrawSelection} from "./DrawSelection";
 import {DrawShape} from "./DrawShape";
 import {DrawEvent} from "./DrawEvent";
 import {AbstractView} from "../AbstractView";
-import {KeyEvent} from "../../control/KeyEvent";
+import {KeyEvent} from "../gui/KeyEvent";
 import {MessageEditable} from "../gui/MessageEditable";
 import {DrawModel} from "./DrawModel";
+import {MessageProducer} from "../../model/ufo/MessageProducer";
+import {DateFormat} from "../../DateFormat";
+import {ActionListener} from "../gui/ActionListener";
+import {Locale} from "../../../util/Locale";
+import {GregorianCalendar} from "../../GregorianCalendar";
+import {TimeZone} from "../../TimeZone";
+import {Calendar} from "../../Calendar";
+import {Rectangle} from "../gui/Rectangle";
+import {ActionEvent} from "../gui/ActionEvent";
 
 /**
  * Handles drawing events to update a DrawView and a DrawModel accordingly.
@@ -56,6 +65,7 @@ export class DrawController extends AbstractController {
   //    private Thread dragRecordThread;
 
   constructor(view: DrawView, model: DrawModel, samplingRate: number, locale: Locale, messageProducer: MessageProducer) {
+    super();
     this.setView(view);
     this.messageProducer = messageProducer;
     view.setMessageBundle(this.messagesBundle);
@@ -65,7 +75,7 @@ export class DrawController extends AbstractController {
 
     this.BACKGROUND_LAYER = this.newLayer();
     this.SHAPES_LAYER = this.newLayer();
-    this.lastLayersStartBit = layersStartBit;
+    this.lastLayersStartBit = this.layersStartBit;
     this.setTime(GregorianCalendar.getInstance());
     this.modified(this.SHAPES_LAYER);
   }
@@ -195,7 +205,7 @@ export class DrawController extends AbstractController {
   }
 
   protected fireEventSelected(currentEvent: DrawEvent) {
-    for (let i = 0; i < this.drawListeners.size(); i++) {
+    for (let i = 0; i < this.drawListeners.length; i++) {
       const drawListener = this.drawListeners[i];
       drawListener.eventSelected(currentEvent);
     }
@@ -207,8 +217,8 @@ export class DrawController extends AbstractController {
    * @param e The mouse click event
    */
   public mouseClicked(e: MouseEvent) {
-    const mouseX = e.getX();
-    const mouseY = e.getY();
+    const mouseX = e.x;
+    const mouseY = e.y;
     if (this.isShapePrototypeAvailable()) {
       createNewShape(mouseX, mouseY, e.getSource());
       this.modified(this.SHAPES_LAYER);
@@ -244,7 +254,7 @@ export class DrawController extends AbstractController {
   public backgroundClicked(e: MouseEvent) {
     this.selection.clear();
     this.modified(this.SHAPES_LAYER);
-    for (const i = 0; i < this.drawListeners.size(); i++) {
+    for (const i = 0; i < this.drawListeners.length; i++) {
       const drawListener = this.drawListeners[i];
       drawListener.backgroundClicked();
     }
@@ -290,10 +300,7 @@ export class DrawController extends AbstractController {
       }
 
       this.view.setCursor(DrawView.DEFAULT_CURSOR);
-    } catch (Exception
-    e1
-  )
-    {
+    } catch (e1: Exception) {
       throw new RuntimeException("Could not clone " + this.topShapePrototype + ": " + e1.getClass().getName() + ": " + e1.getMessage());
     }
   }
@@ -332,8 +339,8 @@ export class DrawController extends AbstractController {
   }
 
   public mouseMoved(mouseEvent: MouseEvent) {
-    const mouseX = mouseEvent.getX();
-    const mouseY = mouseEvent.getY();
+    const mouseX = mouseEvent.x;
+    const mouseY = mouseEvent.y;
     const currentEvent = this.model.getEvent(this.timeKey, mouseX, mouseY);
     if (currentEvent != null) {
       const source: MessageEditable = currentEvent.getSource();
@@ -373,8 +380,8 @@ export class DrawController extends AbstractController {
   }
 
   private moveOverShape(selectedShape: DrawShape, mouseX: number, mouseY: number) {
-    const ufoX = selectedShape.getX();
-    const ufoY = selectedShape.getY();
+    const ufoX = selectedShape.x;
+    const ufoY = selectedShape.y;
     const moveDeltaX = mouseX - ufoX;
     const moveDeltaY = mouseY - ufoY;
     const ufoWidth = selectedShape.getBounds().width;
@@ -428,7 +435,7 @@ export class DrawController extends AbstractController {
   }
 
   protected fireEventRecorded(drawEvent: DrawEvent) {
-    for (let i = 0; i < this.drawListeners.size(); i++) {
+    for (let i = 0; i < this.drawListeners.length; i++) {
       const drawListener = this.drawListeners[i];
       drawListener.eventRecorded(drawEvent);
     }
@@ -444,42 +451,42 @@ export class DrawController extends AbstractController {
     if (this.isResizingWidth()) {
       const shape = this.currentEvent.getShape();
       const shapeBounds = shape.getBounds();
-      setNewWidth(shapeBounds, e.getX());
+      this.setNewWidth(shapeBounds, e.x);
       this.modified(this.SHAPES_LAYER);
       e.consume();
     } else if (this.isResizingCorner()) {
       const shape = this.currentEvent.getShape();
       const shapeBounds = shape.getBounds();
-      setNewWidth(shapeBounds, e.getX());
-      setNewHeight(shapeBounds, e.getY());
+      this.setNewWidth(shapeBounds, e.x);
+      this.setNewHeight(shapeBounds, e.y);
       this.modified(this.SHAPES_LAYER);
       e.consume();
     } else if (this.isResizingHeight()) {
       const shape = this.currentEvent.getShape();
       const shapeBounds = shape.getBounds();
-      setNewHeight(shapeBounds, e.getY());
+      this.setNewHeight(shapeBounds, e.y);
       this.modified(this.SHAPES_LAYER);
       e.consume();
     } else if (this.isMoving()) {
-      const newX = e.getX() - moveDeltaX;
-      const newY = e.getY() - moveDeltaY;
+      const newX = e.x - this.moveDeltaX;
+      const newY = e.y - this.moveDeltaY;
       const shape = this.currentEvent.getShape();
-      const deltaX = newX - shape.getX();
-      const deltaY = newY - shape.getY();
+      const deltaX = newX - shape.x;
+      const deltaY = newY - shape.y;
       this.selection.translate(deltaX, deltaY);
       this.modified(this.SHAPES_LAYER);
       e.consume();
     } else if (this.isShapePrototypeAvailable()) {
-      createNewShape(e.getX(), e.getY(), e.getSource());
-      this.currentEvent = this.model.getEvent(timeKey, e.getX(), e.getX());
+      createNewShape(e.x, e.y, e.getSource());
+      this.currentEvent = this.model.getEvent(timeKey, e.x, e.x);
       if (this.currentEvent != null) {
-        moveOverShape(this.currentEvent.getShape(), e.getX(), e.getY());
+        this.moveOverShape(this.currentEvent.getShape(), e.x, e.y);
         e.consume();
       }
       this.modified(this.SHAPES_LAYER);
     }
-    this.lastX = e.getX();
-    this.lastY = e.getY();
+    this.lastX = e.x;
+    this.lastY = e.y;
     this.draw();
   }
 
@@ -499,10 +506,7 @@ export class DrawController extends AbstractController {
       deltaHeight = shapeBounds.y - newY;
       this.selection.translate(0, -deltaHeight);
     }
-    const factor = ((double)(shapeBounds.height + deltaHeight)) / ((double)
-    shapeBounds.height
-  )
-    ;
+    const factor = ((shapeBounds.height + deltaHeight)) / (shapeBounds.height);
     this.selection.scaleHeight(factor);
   }
 
@@ -522,13 +526,7 @@ export class DrawController extends AbstractController {
       deltaWidth = shapeBounds.x - newX;
       this.selection.translate(-deltaWidth, 0);
     }
-    const factor = (((double)
-    shapeBounds.width + deltaWidth
-  )) /
-    ((double)
-    shapeBounds.width
-  )
-    ;
+    const factor = ((shapeBounds.width + deltaWidth)) / (shapeBounds.width);
     this.selection.scaleWidth(factor);
   }
 
@@ -548,15 +546,15 @@ export class DrawController extends AbstractController {
 
   /*
       private record(MouseEvent e, DrawSelection selection) {
-          int newX = e.getX() - selection.getWidth() / 2;
-          int newY = e.getY() - selection.getHeight();
-          int deltaX = newX - selection.getX();
-          int deltaY = newY - selection.getY();
-          for (int i = 0; i < selection.size(); i++) {
+          int newX = e.x - selection.getWidth() / 2;
+          int newY = e.y - selection.getHeight();
+          int deltaX = newX - selection.x;
+          int deltaY = newY - selection.y;
+          for (int i = 0; i < selection.length; i++) {
               DrawEvent event = (DrawEvent) selection.elementAt(i);
               DrawShape shape = event.getShape();
-              int xNew = shape.getX() + deltaX;
-              int yNew = shape.getY() + deltaY;
+              int xNew = shape.x + deltaX;
+              int yNew = shape.y + deltaY;
               record(xNew, yNew, event.getSource(), shape);
           }
           Rectangle bounds = selection.getBounds();
@@ -585,7 +583,7 @@ export class DrawController extends AbstractController {
   public paintShapes() {
     const ufoEvents = this.model.getEvents(this.timeKey);
     if (ufoEvents != null) {
-      for (let layer = 0; layer < ufoEvents.size(); layer++) {
+      for (let layer = 0; layer < ufoEvents.length; layer++) {
         const ufoEvent = (DrawEvent)
         ufoEvents.elementAt(layer);
         const ufoShape = ufoEvent.getShape();
@@ -596,7 +594,7 @@ export class DrawController extends AbstractController {
 
   public paintBackground() {
     this.view.setForeground(Color.blue);
-    this.view.getBufferedGraphics().fillRect(0, 0, this.view.getSize().width, this.view.getSize().height);
+    this.view.getBufferedGraphics().fillRect(0, 0, this.view.getlength.width, this.view.getlength.height);
   }
 
   public addSelection(selection: DrawEvent) {
@@ -695,18 +693,12 @@ export class DrawController extends AbstractController {
     this.dateFormat = dateFormat;
   }
 
-  public class
-  ShapeMenuListener
-  implements
-  ActionListener {
+  public class ShapeMenuListener implements ActionListener {
   public actionPerformed(actionEvent: ActionEvent) {
     if (actionEvent.getActionCommand().equals(DrawView.REMOVE_SELECTION_ACTION_COMMAND)) {
       this.deleteSelection();
     } else if (actionEvent.getActionCommand().equals(DrawView.DELETE_SOURCE_ACTION_COMMAND)) {
-      const sourceName = ((MenuItem)
-      actionEvent.getSource()
-    ).
-      getName();
+      const sourceName = <MenuItem> actionEvent.getSource()).getName();
       this.model.removeSource(sourceName);
       this.modified(this.SHAPES_LAYER);
     }

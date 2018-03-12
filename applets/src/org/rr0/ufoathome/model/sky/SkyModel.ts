@@ -1,8 +1,9 @@
+import {DrawModel} from "../../view/draw/DrawModel";
+import {GregorianCalendar} from "../../GregorianCalendar";
+
 /**
  * Model of a sky at a given date, location (latitude+longitude), azimut and altitude.
  */
-import {DrawModel} from "../../view/draw/DrawModel";
-
 export class SkyModel extends DrawModel {
     public static DEGREES_TO_RADIANS = 0.017453292519943295;
     private static TWO_PI = 6.2831853071795862;
@@ -41,20 +42,20 @@ export class SkyModel extends DrawModel {
       const d1 = Math.sin(this.phi);
       const d2 = Math.cos(this.theta);
       const d3 = Math.sin(this.theta);
-        const z = new number[3];
+        const z = [];
         z[0] = d * d2;
         z[1] = d * d3;
         z[2] = d1;
-        w = new double[3];
+        w = [];
         w[0] = d3;
         w[1] = -d2;
-        w[2] = 0.0D;
-        s = new double[3];
+        w[2] = 0.0;
+        s = [];
         s[0] = d1 * d2;
         s[1] = d1 * d3;
         s[2] = -d;
-        m = new double[3];
-        for (int i = 0; i < 3; i++) {
+        m = [];
+        for (let i = 0; i < 3; i++) {
             m[i] = Math.cos(altitude) * (Math.cos(azimut) * s[i] + Math.sin(azimut) * w[i]) + Math.sin(altitude) * z[i];
         }
 
@@ -1024,27 +1025,27 @@ export class SkyModel extends DrawModel {
                         new CelestialBody("Eta Aql", 19D, 51D, 44.100000000000001D, 1, 0.0D, 58D, 4D, 3.8999999999999999D, 3.8999999999999999D),
                         new CelestialBody("Iota Sgr", 19D, 54D, 15.800000000000001D, -1, 41D, 54D, 27D, 4.1299999999999999D, 4.1299999999999999D),
                         new CelestialBody("Beta Aql", 19D, 54D, 36.100000000000001D, 1, 6D, 22D, 12D, 3.71D, 3.71D),
-                        new CelestialBody("Eta Cyg", 19D, 55D, 45.700000000000003D, 1, 35D, 2D, 40D, 3.8900000000000001D, 3.8900000000000001D),
-                        new CelestialBody("Gamma Sge", 19D, 58D, 6.7000000000000002D, 1, 19D, 27D, 8D, 3.4700000000000002D, 3.4700000000000002D),
-                        new CelestialBody("Theta1 Sgr", 19D, 58D, 47.700000000000003D, -1, 35D, 18D, 59D, 4.3700000000000001D, 4.3700000000000001D),
-                        new CelestialBody("Epsilon Pav", 19D, 58D, 56.100000000000001D, -1, 72D, 57D, 1.0D, 3.96D, 3.96D),
-                        new CelestialBody("Delta Pav", 20D, 7D, 18.800000000000001D, -1, 66D, 13D, 13D, 3.5600000000000001D, 3.5600000000000001D),
-                        new CelestialBody("Kappa Cep", 20D, 9D, 23.800000000000001D, 1, 77D, 40D, 6D, 4.3899999999999997D, 4.3899999999999997D),
-                        new CelestialBody("Theta Aql", 20D, 10D, 33.399999999999999D, -1, 0.0D, 51D, 54D, 3.23D, 3.23D),
-                        new CelestialBody("33 Cyg", 20D, 13D, 3.7000000000000002D, 1, 56D, 31D, 23D, 4.2999999999999998D, 4.2999999999999998D),
-                        new CelestialBody("Omikron1 Cyg", 20D, 13D, 10.5D, 1, 46D, 41D, 49D, 3.79D, 3.79D),
-                        new CelestialBody("Omikron2 Cyg", 20D, 15D, 1.3999999999999999D, 1, 47D, 40D, 10D, 3.98D, 3.98D),
-                        new CelestialBody("Alpha1 Cap", 20D, 16D, 50.700000000000003D, -1, 12D, 33D, 13D, 4.2400000000000002D, 4.2400000000000002D),
-                        new CelestialBody("Alpha2 Cap", 20D, 17D, 15D, -1, 12D, 35D, 26D, 3.5600000000000001D, 3.5600000000000001D),
-                        new CelestialBody("Beta Cap", 20D, 20D, 11.800000000000001D, -1, 14D, 49D, 40D, 3.0800000000000001D, 3.0800000000000001D),
-                        new CelestialBody("Gamma Cyg", 20D, 21D, 42.5D, 1, 40D, 12D, 35D, 2.2000000000000002D, 2.2000000000000002D),
-                        new CelestialBody("39 Cyg", 20D, 23D, 16.800000000000001D, 1, 32D, 8D, 35D, 4.4299999999999997D, 4.4299999999999997D),
-                        new CelestialBody("Alpha Pav", 20D, 24D, 30.5D, -1, 56D, 46D, 57D, 1.9399999999999999D, 1.9399999999999999D),
-                        new CelestialBody("41 Cyg", 20D, 28D, 48.200000000000003D, 1, 30D, 19D, 11D, 4.0099999999999998D, 4.0099999999999998D),
-                        new CelestialBody("Theta Cep", 20D, 29D, 20.399999999999999D, 1, 62D, 56D, 43D, 4.2199999999999998D, 4.2199999999999998D),
-                        new CelestialBody("Epsilon Del", 20D, 32D, 31.199999999999999D, 1, 11D, 15D, 12D, 4.0300000000000002D, 4.0300000000000002D),
-                        new CelestialBody("Alpha Ind", 20D, 36D, 33.100000000000001D, -1, 47D, 20D, 34D, 3.1099999999999999D, 3.1099999999999999D),
-                        new CelestialBody("Beta Del", 20D, 36D, 52.200000000000003D, 1, 14D, 32D, 39D, 3.6299999999999999;D, 3.6299999999999999;D;),
+                        new CelestialBody("Eta Cyg", 19D, 55D, 45.700000000000003D, 1, 35D, 2;D, 40;D, 3.8900000000000001;D, 3.8900000000000001;D;),
+                        new CelestialBody("Gamma Sge", 19;D, 58;D, 6.7000000000000002;D, 1, 19;D, 27;D, 8;D, 3.4700000000000002;D, 3.4700000000000002;D;),
+                        new CelestialBody("Theta1 Sgr", 19;D, 58;D, 47.700000000000003;D, -1, 35;D, 18;D, 59;D, 4.3700000000000001;D, 4.3700000000000001;D;),
+                        new CelestialBody("Epsilon Pav", 19;D, 58;D, 56.100000000000001;D, -1, 72;D, 57;D, 1.0;D, 3.96;D, 3.96;D;),
+                        new CelestialBody("Delta Pav", 20;D, 7;D, 18.800000000000001;D, -1, 66;D, 13;D, 13;D, 3.5600000000000001;D, 3.5600000000000001;D;),
+                        new CelestialBody("Kappa Cep", 20;D, 9;D, 23.800000000000001;D, 1, 77;D, 40;D, 6;D, 4.3899999999999997;D, 4.3899999999999997;D;),
+                        new CelestialBody("Theta Aql", 20;D, 10;D, 33.399999999999999;D, -1, 0.0;D, 51;D, 54;D, 3.23;D, 3.23;D;),
+                        new CelestialBody("33 Cyg", 20;D, 13;D, 3.7000000000000002;D, 1, 56;D, 31;D, 23;D, 4.2999999999999998;D, 4.2999999999999998;D;),
+                        new CelestialBody("Omikron1 Cyg", 20;D, 13;D, 10.5;D, 1, 46;D, 41;D, 49;D, 3.79;D, 3.79;D;),
+                        new CelestialBody("Omikron2 Cyg", 20;D, 15;D, 1.3999999999999999;D, 1, 47;D, 40;D, 10;D, 3.98;D, 3.98;D;),
+                        new CelestialBody("Alpha1 Cap", 20;D, 16;D, 50.700000000000003;D, -1, 12;D, 33;D, 13;D, 4.2400000000000002;D, 4.2400000000000002;D;),
+                        new CelestialBody("Alpha2 Cap", 20;D, 17;D, 15;D, -1, 12;D, 35;D, 26;D, 3.5600000000000001;D, 3.5600000000000001;D;),
+                        new CelestialBody("Beta Cap", 20;D, 20;D, 11.800000000000001;D, -1, 14;D, 49;D, 40;D, 3.0800000000000001;D, 3.0800000000000001;D;),
+                        new CelestialBody("Gamma Cyg", 20;D, 21;D, 42.5;D, 1, 40;D, 12;D, 35;D, 2.2000000000000002;D, 2.2000000000000002;D;),
+                        new CelestialBody("39 Cyg", 20;D, 23;D, 16.800000000000001;D, 1, 32;D, 8;D, 35;D, 4.4299999999999997;D, 4.4299999999999997;D;),
+                        new CelestialBody("Alpha Pav", 20;D, 24;D, 30.5;D, -1, 56;D, 46;D, 57;D, 1.9399999999999999;D, 1.9399999999999999;D;),
+                        new CelestialBody("41 Cyg", 20;D, 28;D, 48.200000000000003;D, 1, 30;D, 19;D, 11;D, 4.0099999999999998;D, 4.0099999999999998;D;),
+                        new CelestialBody("Theta Cep", 20;D, 29;D, 20.399999999999999;D, 1, 62;D, 56;D, 43;D, 4.2199999999999998;D, 4.2199999999999998;D;),
+                        new CelestialBody("Epsilon Del", 20;D, 32;D, 31.199999999999999;D, 1, 11;D, 15;D, 12;D, 4.0300000000000002;D, 4.0300000000000002;D;),
+                        new CelestialBody("Alpha Ind", 20;D, 36;D, 33.100000000000001;D, -1, 47;D, 20;D, 34;D, 3.1099999999999999;D, 3.1099999999999999;D;),
+                        new CelestialBody("Beta Del", 20;D, 36;D, 52.200000000000003;D, 1, 14;D, 32;D, 39;D, 3.6299999999999999;D, 3.6299999999999999;D;),
                         new CelestialBody("71 Aql", 20;D, 37;D, 35.399999999999999;D, -1, 1.0;D, 9;D, 23;D, 4.3200000000000003;D, 4.3200000000000003;D;),
                         new CelestialBody("Alpha Del", 20;D, 38;D, 57.899999999999999;D, 1, 15;D, 51;D, 37;D, 3.77;D, 3.77;D;),
                         new CelestialBody("Alpha Cyg (Deneb)", 20;D, 40;D, 56.200000000000003;D, 1, 45;D, 13;D, 41;D, 1.25;D, 1.25;D;),

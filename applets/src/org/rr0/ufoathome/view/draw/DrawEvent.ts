@@ -19,10 +19,6 @@ export class DrawEvent extends EventObject {
     return this.shape;
   }
 
-  public setSource(newSource: Object): void {
-    this.source = newSource;
-  }
-
   public toString(): string {
     return `\t${this.source}\n\t${this.shape}`;
   }

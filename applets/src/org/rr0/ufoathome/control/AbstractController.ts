@@ -6,20 +6,26 @@ import {ResourceBundle} from "../ResourceBundle";
 import {Hashtable} from "../Hashtable";
 import {Image} from "../view/gui/Image";
 import {Component} from "../view/gui/Component";
+import {AnimationListener} from "../view/draw/AnimationListener";
+import {AnimationEvent} from "../view/draw/AnimationEvent";
+import {ImageObserver} from "../view/gui/ImageObserver";
+import {KeyEvent} from "../view/gui/KeyEvent";
+import {MouseAdapter} from "../view/gui/MouseAdapter";
 
-export class AbstractController extends MouseAdapter implements MouseMotionListener, KeyListener, MessageProducer {
+export abstract class AbstractController extends MouseAdapter implements MouseMotionListener, KeyListener, MessageProducer {
   private imageCache = new Hashtable();
   protected lastX = -1;
   protected lastY = -1;
   protected currentTime: GregorianCalendar;
   protected messagesBundle: ResourceBundle;
   protected animationListeners = [];
-  protected static lastLayersStartBit = 0;
-  protected layersStartBit: number = AbstractController.lastLayersStartBit;
+  protected lastLayersStartBit = 0;
+  protected layersStartBit: number = this.lastLayersStartBit;
   public ALL_LAYERS = new BitSet();
   public layersToDraw = new BitSet();
 
-  public AbstractController() {
+  constructor() {
+    super();
     this.messagesBundle = ResourceBundle.getBundle("org.rr0.is.presentation.view.report.applet.StarSkyLabels");
   }
 
@@ -42,30 +48,12 @@ export class AbstractController extends MouseAdapter implements MouseMotionListe
       if (o instanceof Image) {
         img = <Image> o;
       } else {
-        const imageProducer = (ImageProducer);o;
+        const imageProducer = <ImageProducer>o;
         img = creator.createImage(imageProducer);
-        creator.prepareImage(img, new ImageObserver();{
-        private boolean;
+        creator.prepareImage(img, new class implements ImageObserver {
+          private boolean;
 
-        public
-          imageUpdate(
-            img;
-        :
-          Image,
-            infoflags;
-        :
-          number, x;
-        :
-          number, y;
-        :
-          number, w;
-        :
-          number, h;
-        :
-          number;
-        ):
-          boolean;
-          {
+          imageUpdate(img:Image, infoflags: number, x: number, y: number, w: number, h: number): boolean {
             if ((infoflags & ImageObserver.ALLBITS) != 0) {
               loading = false;
             } else if (!loading && (infoflags & ImageObserver.SOMEBITS) != 0) {
@@ -73,13 +61,12 @@ export class AbstractController extends MouseAdapter implements MouseMotionListe
               //                            fireMessage(message);
               loading = true;
             } else if ((infoflags & ImageObserver.ERROR) != 0) {
-              System.err.println("Error while loading " + img);
+              console.error("Error while loading " + img);
             }
             const b = creator.imageUpdate(img, infoflags, x, y, w, h);
             return b;
           }
-        }
-      )
+        });
       }
 
       this.imageCache.put(url, img);
@@ -125,8 +112,7 @@ export class AbstractController extends MouseAdapter implements MouseMotionListe
 
   protected fireTimeChanged(currentTime: GregorianCalendar) {
     for (let i = 0; i < this.animationListeners.length; i++) {
-      const animationListener = (AnimationListener);
-      this.animationListeners.elementAt(i);
+      const animationListener = <AnimationListener>this.animationListeners[i];
       const animationEvent = new AnimationEvent(this, currentTime);
       animationListener.timeChanged(animationEvent);
     }

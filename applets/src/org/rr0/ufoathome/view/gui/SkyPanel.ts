@@ -1,3 +1,4 @@
+import {Component, Input} from "@angular/core";
 import {SkyEvent} from "../../model/sky/SkyEvent";
 import {UFOController} from "../../model/ufo/UFOController";
 
@@ -9,21 +10,21 @@ export class SkyPanel {
   @Input() controller;
 
   constructor() {
-      this.controller.addSkyListener(new SkyListener(); {
-      public azimutChanged(skyEvent;: SkyEvent;): void {
+    this.controller.addSkyListener(new class implements SkyListener() {
+        public azimutChanged(skyEvent: SkyEvent): void {
         };
 
-      public altitudeChanged(skyEvent;: SkyEvent;): void {
+        public altitudeChanged(skyEvent: SkyEvent): void {
         };
 
-      public longitudeChanged(skyEvent;: SkyEvent;): void {
+        public longitudeChanged(skyEvent: SkyEvent): void {
           this.tabbedPanel.setEnabled(UFOController.ASPECT_TAB, true);
-      }
+        }
 
-      public latitudeChanged(skyEvent;: SkyEvent;): void {
+        public latitudeChanged(skyEvent: SkyEvent): void {
           this.tabbedPanel.setEnabled(UFOController.ASPECT_TAB, true);
+        }
       }
-    }
-  )
+    )
   }
 }

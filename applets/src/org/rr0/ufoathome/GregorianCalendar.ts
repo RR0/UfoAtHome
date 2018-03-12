@@ -1,6 +1,8 @@
+import {Calendar} from "./Calendar";
+
 /**
  * @deprecated
  */
-export class GregorianCalendar {
+export class GregorianCalendar extends Calendar {
 
 }

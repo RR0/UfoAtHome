@@ -1,15 +1,25 @@
+import {Component} from "./Component";
+
 /**
  * @deprecated
  */
-export class TextField {
+export class TextField extends Component {
   private enabled: boolean;
   private text: string;
 
-  protected setEnabled(b: boolean) {
+  constructor(size?: number) {
+    super();
+  }
+
+  setEnabled(b: boolean) {
     this.enabled = b;
   }
 
-  protected getText() {
+  getText() {
     return this.text;
+  }
+
+  setText(text: string) {
+
   }
 }

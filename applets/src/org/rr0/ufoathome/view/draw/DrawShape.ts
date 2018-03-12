@@ -1,4 +1,11 @@
 import {MessageEditable} from "../gui/MessageEditable";
+import {Rectangle} from "../gui/Rectangle";
+import {Color} from "../gui/Color";
+import {Component} from "../gui/Component";
+import {Image} from "../gui/Image";
+import {Dimension} from "../gui/Dimension";
+import {Graphics} from "../gui/Graphics";
+import {ImageObserver} from "../gui/ImageObserver";
 
 /**
  * A shape that can be manipulated in a DrawView.
@@ -11,7 +18,7 @@ export /*abstract */ class DrawShape implements Cloneable, MessageEditable {
   protected component: Component;
   private transparency: number;
   public CORNER_SIZE: number = 6;
-  public HALF_CORNER_SIZE: number = CORNER_SIZE / 2;
+  public HALF_CORNER_SIZE: number = this.CORNER_SIZE / 2;
   private colorModel: DirectColorModel;
   private colorMask: number;
   private haloScale: number;
@@ -163,48 +170,15 @@ export /*abstract */ class DrawShape implements Cloneable, MessageEditable {
   }
 
   private paintHalo(g: Graphics, bounds: Rectangle): void {
-    const width: number = this.haloImage.getWidth(component);
-    const height: number = this.haloImage.getHeight(component);
+    const width: number = this.haloImage.getWidth(this.component);
+    const height: number = this.haloImage.getHeight(this.component);
     const x: number = this.getX() - ((width - bounds.width) / 2);
     const y: number = this.getY() - ((height - bounds.height) / 2);
     const pixels: number[] = new int[width * height];
     const memImg: MemoryImageSource = new MemoryImageSource(width, height, pixels, 0, width);
     const pixelGrabber: PixelGrabber = new PixelGrabber(this.haloImage, 0, 0, width, height, pixels, 0, width);
-    paint(this.haloImage.getGraphics(), this.getColor(), new Rectangle(0, 0, width, height));
+    this.paint(this.haloImage.getGraphics(), this.getColor(), new Rectangle(0, 0, width, height));
     const newAlpha: number = (0xFF - this.transparency) << 24;
-    try {
-      pixelGrabber.grabPixels();
-      if ((pixelGrabber.getStatus() & ImageObserver.ABORT) != 0) {
-        console.error("image data fetch aborted or errored");
-      }
-      for (let i = 0; i < pixels.length; i++) {
-        const pixelPresent: boolean = pixels[i] != -1053730 && pixels[i] != -1250856 && pixels[i] != -16777200 && pixels[i] != -15658735;
-        if (pixelPresent) {
-          pixels[i] &= colorMask;
-          pixels[i] |= newAlpha;
-        } else {
-          pixels[i] = 0;
-        }
-      }
-
-      const imageToDraw: Image = component.createImage(memImg);
-      memImg.newPixels();
-      g.drawImage(imageToDraw, x, y, component);
-    } catch (InterruptedException
-    e;
-  )
-    {
-      e.printStackTrace();
-    }
-  }
-
-  private paintTransparent(g: Graphics, bounds: Rectangle, transparency: number): void {
-    const pixels: int[] = new number[bounds.width * bounds.height];
-    const memImg: MemoryImageSource = new MemoryImageSource(bounds.width, bounds.height, pixels, 0, bounds.width);
-    const image: Image = this.component.createImage(bounds.width, bounds.height);
-    const pixelGrabber: PixelGrabber = new PixelGrabber(image, 0, 0, bounds.width, bounds.height, pixels, 0, bounds.width);
-    paint(image.getGraphics(), this.getColor(), new Rectangle(0, 0, bounds.width, bounds.height));
-    let newAlpha: number = (0xFF - transparency) << 24;
     try {
       pixelGrabber.grabPixels();
       if ((pixelGrabber.getStatus() & ImageObserver.ABORT) != 0) {
@@ -222,7 +196,37 @@ export /*abstract */ class DrawShape implements Cloneable, MessageEditable {
 
       const imageToDraw: Image = component.createImage(memImg);
       memImg.newPixels();
-      g.drawImage(imageToDraw, bounds.x, bounds.y, this.component);
+      g.drawImage(imageToDraw, x, y, component, this.horizonY, this);
+    } catch (e: InterruptedException) {
+      e.printStackTrace();
+    }
+  }
+
+  private paintTransparent(g: Graphics, bounds: Rectangle, transparency: number): void {
+    const pixels = [];
+    const memImg: MemoryImageSource = new MemoryImageSource(bounds.width, bounds.height, pixels, 0, bounds.width);
+    const image: Image = this.component.createImage(bounds.width, bounds.height);
+    const pixelGrabber: PixelGrabber = new PixelGrabber(image, 0, 0, bounds.width, bounds.height, pixels, 0, bounds.width);
+    this.paint(image.getGraphics(), this.getColor(), new Rectangle(0, 0, bounds.width, bounds.height));
+    let newAlpha: number = (0xFF - transparency) << 24;
+    try {
+      pixelGrabber.grabPixels();
+      if ((pixelGrabber.getStatus() & ImageObserver.ABORT) != 0) {
+        console.error("image data fetch aborted or errored");
+      }
+      for (let i = 0; i < pixels.length; i++) {
+        const pixelPresent: boolean = pixels[i] != -1053730 && pixels[i] != -1250856 && pixels[i] != -16777200 && pixels[i] != -15658735;
+        if (pixelPresent) {
+          pixels[i] &= this.colorMask;
+          pixels[i] |= newAlpha;
+        } else {
+          pixels[i] = 0;
+        }
+      }
+
+      const imageToDraw: Image = this.component.createImage(memImg);
+      memImg.newPixels();
+      g.drawImage(imageToDraw, bounds.x, bounds.y, this.component, this.horizonY, this);
     } catch (InterruptedException
     e;
   )

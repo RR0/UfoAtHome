@@ -3,6 +3,21 @@ import {TextField} from "./TextField";
 import {ResourceBundle} from "../../ResourceBundle";
 import {UFOController} from "../../model/ufo/UFOController";
 import {GregorianCalendar} from "../../GregorianCalendar";
+import {PolygonButton} from "./PolygonButton";
+import {Scrollbar} from "./Scrollbar";
+import {Label} from "./Label";
+import {ActionListener} from "./ActionListener";
+import {ActionEvent} from "./ActionEvent";
+import {Polygon} from "../../../../../../../JCCKit/src/jcckit/graphic/Polygon";
+import {ShapeButtonGroup} from "./ShapeButtonGroup";
+import {Calendar} from "../../Calendar";
+import {DrawShapeButton} from "./DrawShapeButton";
+import {CircleShape} from "../draw/CircleShape";
+import {SystemColor} from "./SystemColor";
+import {Color} from "./Color";
+import {Dimension} from "./Dimension";
+import {AnimationListener} from "../draw/AnimationListener";
+import {AnimationEvent} from "../draw/AnimationEvent";
 
 export class BehaviorPanel extends Panel {
   //    private static final int TIME_TRACK_REFRESH_RATE = 1000;
@@ -43,86 +58,70 @@ export class BehaviorPanel extends Panel {
 
     const buttonGroup = new ShapeButtonGroup();
     this.playShape = this.getPlayShape();
-    this.runButton = new PolygonButton(playShape);
+    this.runButton = new PolygonButton(this.playShape);
     buttonGroup.add(this.runButton);
     this.stopShape = this.getStopShape();
     this.stopButton = new PolygonButton(this.stopShape);
     buttonGroup.add(this.stopButton);
 
-    const actionListener = new ActionListener();
-    {
-      actionPerformed(actionEvent;
-    :
-      ActionEvent;
-    )
-      {
+    const outerThis = this;
+    const actionListener = new class implements ActionListener {
+      actionPerformed(actionEvent: ActionEvent) {
         const obj = actionEvent.getSource();
         const currentTime = controller.getTime();
         if (obj instanceof TextField) {
-          const day = this.inputTextField(dayTextField, 1, 31);
+          const day = outerThis.inputTextField(outerThis.dayTextField, 1, 31);
           currentTime.set(Calendar.DATE, day);
-          const month = this.inputTextField(monthTextField, 1, 12);
+          const month = outerThis.inputTextField(outerThis.monthTextField, 1, 12);
           currentTime.set(Calendar.MONTH, month - 1);
-          const year = this.inputTextField(yearTextField, 1900, maxYear);
+          const year = outerThis.inputTextField(outerThis.yearTextField, 1900, maxYear);
           currentTime.set(Calendar.YEAR, year);
-          const hour = this.inputTextField(hourTextField, 0, 23);
+          const hour = outerThis.inputTextField(outerThis.hourTextField, 0, 23);
           currentTime.set(Calendar.HOUR_OF_DAY, hour);
-          const minute = this.inputTextField(minutesTextField, 0, 59);
+          const minute = outerThis.inputTextField(outerThis.minutesTextField, 0, 59);
           currentTime.set(Calendar.MINUTE, minute);
-          const seconds = this.inputTextField(secondsTextField, 0, 59);
+          const seconds = outerThis.inputTextField(outerThis.secondsTextField, 0, 59);
           currentTime.set(Calendar.SECOND, seconds);
 
-          this.setTime(currentTime, true);
+          outerThis.setTime(currentTime, true);
           controller.draw();
-        } else if (obj == this.runButton) {
-          this.play(true);
-        } else if (obj == this.stopButton) {
-          this.play(false);
+        } else if (obj == outerThis.runButton) {
+          outerThis.play(true);
+        } else if (obj == outerThis.stopButton) {
+          outerThis.play(false);
           controller.setMode(UFOController.ASPECT_TAB);
         }
       }
-    }
+    };
     this.runButton.addActionListener(actionListener);
     this.stopButton.addActionListener(actionListener);
 
-    controller.addAnimationListener(new AnimationListener();
-    {
-      timeChanged(timeEvent;
-    :
-      AnimationEvent;
-    )
-      {
-        const currentTime = (GregorianCalendar);
-        timeEvent.getTime();
-        this.setTime(currentTime, false);
+    controller.addAnimationListener(new class implements AnimationListener {
+      timeChanged(timeEvent: AnimationEvent) {
+        const currentTime = <GregorianCalendar>timeEvent.getTime();
+        outerThis.setTime(currentTime, false);
       }
 
-      animationStarted();
-      {
-        this.enableToSetTime(false);
+      animationStarted() {
+        outerThis.enableToSetTime(false);
         controller.fireMessage("Playing...", null);
       }
 
-      animationStopped();
-      {
-        this.enableToSetTime(true);
+      animationStopped() {
+        outerThis.enableToSetTime(true);
         controller.fireMessage("Edit", null);
-        this.stopButton.pushed();
+        outerThis.stopButton.pushed();
       }
 
-    public
-      modeChanged(String;
-      mode;
-    )
-      {
+      modeChanged(mode: String) {
         //                if (mode.equals(UFOController.BEHAVIOR_TAB)) {
         //                    recordButton.pushed();
         //                } else {
         //                    recordButton.released();
         //                }
       }
-    }
-  )
+    });
+
     this.dayOfWeekLabel = new Label();
     this.dayTextField = new TextField(2);
     this.monthTextField = new TextField(2);
@@ -183,89 +182,61 @@ export class BehaviorPanel extends Panel {
     this.recordShape.setWidth(10);
     this.recordShape.setHeight(10);
     this.recordButton = new DrawShapeButton(this.recordShape);
-    this.recordButton.addActionListener(new ActionListener();
-    {
-      actionPerformed(e;
-    :
-      ActionEvent;
-    )
-      {
-        if (this.recordButton.isPushed()) {
+    this.recordButton.addActionListener(new class implements ActionListener {
+      actionPerformed(e: ActionEvent) {
+        if (outerThis.recordButton.isPushed()) {
           controller.setMode(UFOController.BEHAVIOR_TAB);
         } else {
           controller.setMode(UFOController.ASPECT_TAB);
         }
       }
-
-    }
-  )
+    });
     buttonGroup.add(this.recordButton);
     this.add(this.recordButton);
     this.add(this.stopButton);
     this.add(this.runButton);
 
     const samplingRate = controller.getSamplingRate();
-    this.timeCursor = new Scrollbar(Scrollbar.HORIZONTAL, 0, samplingRate, 0, samplingRate);
-    {
-    public
-      getPreferredSize();
-    :
-      Dimension;
-      {
+    this.timeCursor = new class extends Scrollbar {
+      getPreferredSize(): Dimension {
         return new Dimension(150, 20);
       }
-    }
-    this.timeCursor.setBlockIncrement(samplingRate);
-    this.timeCursor.addAdjustmentListener(new AdjustmentListener();
-    {
-      /**
-       * Invoked when the value of the adjustable has changed.
-       */
-    public
-      adjustmentValueChanged(e;
-    :
-      AdjustmentEvent;
-    )
-      {
-        const timeCursorMillis = controller.getStartTime().getTime() + e.getValue();
-        const currentTime = controller.getTime();
-        currentTime.setTime(new Date(timeCursorMillis));
-        this.setTime(currentTime, true);
-      }
+    }(Scrollbar.HORIZONTAL, 0, samplingRate, 0, samplingRate);
 
-    }
-  )
+    this.timeCursor.setBlockIncrement(samplingRate);
+    this.timeCursor.addAdjustmentListener(new class implements AdjustmentListener {
+        /**
+         * Invoked when the value of the adjustable has changed.
+         */
+        adjustmentValueChanged(e: AdjustmentEvent) {
+          const timeCursorMillis = this.controller.getStartTime().getTime() + e.getValue();
+          const currentTime = this.controller.getTime();
+          currentTime.setTime(new Date(timeCursorMillis));
+          this.setTime(currentTime, true);
+        }
+      }
+    );
     this.add(this.timeCursor);
 
-    const okButton = new Button(messagesBundle.getString("ValidateTestimonial"));
-    okButton.addActionListener(new ActionListener();
-    {
-    public
-      void actionPerformed(ActionEvent;
-      e;
-    )
-      {
-        const outFrame = new Frame(messagesBundle.getString("UUDFDescription"));
-        outFrame.addWindowListener(new WindowAdapter();
-        {
-        public
-          void windowClosing(WindowEvent;
-          e;
-        )
-          {
+    const okButton = new Button(this.messagesBundle.getString("ValidateTestimonial"));
+    okButton.addActionListener(new class implements ActionListener {
+      actionPerformed(e: ActionEvent) {
+        const outFrame = new Frame(outerThis.messagesBundle.getString("UUDFDescription"));
+        outFrame.addWindowListener(new class extends WindowAdapter {
+          windowClosing(e: WindowEvent) {
             outFrame.setVisible(false);
             outFrame.dispose();
           }
-        }
-      )
+        });
+
         const uudfTextArea = new TextArea();
         outFrame.add(uudfTextArea, BorderLayout.CENTER);
         uudfTextArea.setText(controller.getUUDF());
         //                outFrame.setSize(800, 600);
         outFrame.setVisible(true);
       }
-    }
-  )
+    });
+
     this.add(okButton);
   }
 
@@ -287,12 +258,12 @@ export class BehaviorPanel extends Panel {
   }
 
   private displayTime(currentTime: Calendar) {
-    const time = this.currentTime.getTime();
+    const time = currentTime.getTime();
     //        Date startTime = controller.getStartTime();
     //        int cursorTimeMillis = (int) (time.getTime() - startTime.getTime());
     //        timeCursor.setValue(cursorTimeMillis);
 
-    const millis = this.currentTime.get(Calendar.MILLISECOND) / controller.getSamplingRate();
+    const millis = currentTime.get(Calendar.MILLISECOND) / this.controller.getSamplingRate();
     this.fullDate = this.controller.getDateFormat().format(time) + millis;
     const dayOfWeek = this.fullDate.substring(0, this.fullDate.indexOf(' '));
     this.dayOfWeekLabel.setText(dayOfWeek);
@@ -301,13 +272,13 @@ export class BehaviorPanel extends Panel {
     this.dayTextField.setText(String.valueOf(currentTime.get(Calendar.DATE)));
     this.hourTextField.setText(String.valueOf(currentTime.get(Calendar.HOUR_OF_DAY)));
 
-    let minuteString = String.valueOf(this.currentTime.get(Calendar.MINUTE));
-    if (minuteString.length() == 1) {
+    let minuteString = currentTime.get(Calendar.MINUTE).toString();
+    if (minuteString.length == 1) {
       minuteString = "0" + minuteString;
     }
     this.minutesTextField.setText(minuteString);
 
-    let secondsString = String.valueOf(this.currentTime.get(Calendar.SECOND));
+    let secondsString = currentTime.get(Calendar.SECOND).toString();
     if (secondsString.length() == 1) {
       secondsString = "0" + secondsString;
     }
@@ -324,8 +295,8 @@ export class BehaviorPanel extends Panel {
     } else if (newMillis < startTime.getTime()) {
       this.controller.setStartTime(newTime);
     }
-    const timeSpan = (int)(this.controller.getEndTime().getTime() - this.controller.getStartTime().getTime());
-    const timeSinceStart = (int)(newTime.getTime() - startTime.getTime());
+    const timeSpan = this.controller.getEndTime().getTime() - this.controller.getStartTime().getTime();
+    const timeSinceStart = newTime.getTime() - startTime.getTime();
     this.timeCursor.setValues(timeSinceStart, this.controller.getSamplingRate(), 0, timeSpan);
 
     if (this.updateController) {
@@ -346,9 +317,9 @@ export class BehaviorPanel extends Panel {
 
   private play(on: boolean) {
     if (on) {
-      const startTime = controller.getTime();
-      if (startTime.getTime().getTime() >= controller.getEndTime().getTime()) {
-        startTime.setTime(controller.getStartTime());
+      const startTime = this.controller.getTime();
+      if (startTime.getTime().getTime() >= this.controller.getEndTime().getTime()) {
+        startTime.setTime(this.controller.getStartTime());
       }
       this.controller.setTime(startTime);
     }
@@ -356,12 +327,12 @@ export class BehaviorPanel extends Panel {
   }
 
   private inputTextField(textfield: TextField, min: number, max: number): number {
-    let value = Integer.parseInt(textfield.getText());
+    let value = parseInt(textfield.getText());
     if (value < min)
       value = min;
     if (value > max)
       value = max;
-    textfield.setText(String.valueOf(value));
+    textfield.setText(value.toString());
     return value;
   }
 }

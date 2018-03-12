@@ -1,3 +1,5 @@
+import {GregorianCalendar} from "../../GregorianCalendar";
+
 export class WitnessModel {
   private lastName: String;
   private firstName: String;
@@ -86,17 +88,17 @@ export class WitnessModel {
   }
 
   public toString(): String {
-    const uudfBuffer = new StringBuffer();
-    uudfBuffer.append("<witness");
-    uudfBuffer.append(" firstname=\"").append(this.firstName).append("\"");
-    uudfBuffer.append(" lastname=\"").append(this.lastName).append("\"");
-    uudfBuffer.append(" email=\"").append(this.email).append("\"");
-    uudfBuffer.append(" address=\"").append(this.address).append("\"");
-    uudfBuffer.append(" zipcode=\"").append(this.zipCode).append("\"");
-    uudfBuffer.append(" phone-number=\"").append(this.phoneNumber).append("\"");
-    uudfBuffer.append(" birthdate=\"").append(this.birthDate).append("\"");
-    uudfBuffer.append("/>");
-    uudfBuffer.append("\n");
+    let uudfBuffer = '';
+    uudfBuffer+="<witness";
+    uudfBuffer+=" firstname=\""+this.firstName+"\"";
+    uudfBuffer+=" lastname=\""+this.lastName+"\"";
+    uudfBuffer+=" email=\""+this.email+"\"";
+    uudfBuffer+=" address=\""+this.address+"\"";
+    uudfBuffer+=" zipcode=\""+this.zipCode+"\"";
+    uudfBuffer+=" phone-number=\""+this.phoneNumber+"\"";
+    uudfBuffer+=" birthdate=\""+this.birthDate+"\"";
+    uudfBuffer+="/>";
+    uudfBuffer+="\n";
     return uudfBuffer.toString();
   }
 }

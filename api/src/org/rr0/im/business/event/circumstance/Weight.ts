@@ -1,3 +1,5 @@
+import {Locale} from "../../../../../../../../applets/src/org/rr0/util/Locale";
+
 /**
  * A weigth.
  */

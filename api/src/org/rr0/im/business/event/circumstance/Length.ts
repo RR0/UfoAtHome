@@ -1,5 +1,7 @@
+import {Locale} from "../../../../../../../../applets/src/org/rr0/util/Locale";
+
 /**
- * A length between two locations.
+ * A distance between two locations.
  */
 export interface Length {
   /**

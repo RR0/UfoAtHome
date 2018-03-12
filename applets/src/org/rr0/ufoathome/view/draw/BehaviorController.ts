@@ -7,6 +7,20 @@ import {DrawEvent} from "./DrawEvent";
 import {AbstractView} from "../AbstractView";
 import {MessageListener} from "../gui/MessageListener";
 import {MessageEditable} from "../gui/MessageEditable";
+import {BitSet} from "../../BitSet";
+import {ResourceBundle} from "../../ResourceBundle";
+import {DrawListener} from "./DrawListener";
+import {AnimationListener} from "./AnimationListener";
+import {MessageProducer} from "../../model/ufo/MessageProducer";
+import {Locale} from "../../../util/Locale";
+import {DateFormat} from "../../DateFormat";
+import {TimeZone} from "../../TimeZone";
+import {GregorianCalendar} from "../../GregorianCalendar";
+import {Calendar} from "../../Calendar";
+import {UFO} from "../../model/ufo/UFO";
+import {Thread} from "../../Thread";
+import {Runnable} from "../../model/ufo/Runnable";
+import {Color} from "../gui/Color";
 
 /**
  * Handles drawing events to update a DrawView and a DrawModel accordingly.
@@ -55,14 +69,14 @@ export class BehaviorController extends AbstractController {
   private dragRecordThread: Thread;
   private messageProducer: MessageProducer;
 
-  public SHAPES_LAYER: number = layersStartBit + 1;
+  public SHAPES_LAYER: number = this.layersStartBit + 1;
 
   constructor(view: DrawView, model: DrawModel, samplingRate: number, locale: Locale, messageProducer: MessageProducer) {
     super();
     this.messageProducer = messageProducer;
     this.messagesBundle = ResourceBundle.getBundle("org.rr0.is.presentation.view.report.applet.StarSkyLabels");
     this.view = view;
-    view.setMessageBundle(messagesBundle);
+    view.setMessageBundle(this.messagesBundle);
     this.model = model;
     this.samplingRate = samplingRate;
     this.locale = locale;
@@ -144,7 +158,7 @@ export class BehaviorController extends AbstractController {
   }
 
   private fireEventSelected(currentEvent: DrawEvent) {
-    for (let i = 0; i < this.drawListeners.size(); i++) {
+    for (let i = 0; i < this.drawListeners.length; i++) {
       const drawListener = this.drawListeners.elementAt(i);
       drawListener.eventSelected(currentEvent);
     }
@@ -182,7 +196,7 @@ export class BehaviorController extends AbstractController {
   }
 
   public showShapeMenu(mouseX: number, mouseY: number) {
-    const selectedShapesCount = this.selection.size();
+    const selectedShapesCount = this.selection.length;
     if (selectedShapesCount > 0) {
       const currentUfo = <UFO> (<DrawEvent>this.selection[0]).getSource();
       const menu = this.view.getShapeMenu(this.selection, this.selection, mouseX, mouseY, currentUfo);
@@ -210,8 +224,8 @@ export class BehaviorController extends AbstractController {
   }
 
   public mouseMoved(mouseEvent: MouseEvent) {
-    const mouseX = mouseEvent.getX() - this.selection.getWidth() / 2;
-    const mouseY = mouseEvent.getY() - this.selection.getHeight();
+    const mouseX = mouseEvent.x - this.selection.getWidth() / 2;
+    const mouseY = mouseEvent.y - this.selection.getHeight();
     this.selection.setLocation(mouseX, mouseY);
     this.draw(this.ALL_LAYERS);
   }
@@ -219,14 +233,10 @@ export class BehaviorController extends AbstractController {
   public mouseExited(e: MouseEvent) {
     const currentEvents: [] = this.model.getEvents(this.timeKey);
     if (currentEvents != null) {
-      for (let i = 0; i < currentEvents.size(); i++) {
-        const currentEvent = (DrawEvent);
-        currentEvents[i];
+      for (let i = 0; i < currentEvents.length; i++) {
+        const currentEvent = <DrawEvent>currentEvents[i];
         const currentEventShape = currentEvent.getShape();
-        const enumeration = selection.elements();
-        while (enumeration.hasMoreElements()) {
-          const selectionEvent = (DrawEvent);
-          enumeration.nextElement();
+        for (let selectionEvent: DrawEvent of this.selection) {
           const selectionShape = selectionEvent.getShape();
           if (currentEventShape == selectionShape) {
             currentEvents.removeElement(currentEvent);
@@ -255,7 +265,7 @@ export class BehaviorController extends AbstractController {
   }
 
   private fireEventRecorded(drawEvent: DrawEvent) {
-    for (let i = 0; i < this.drawListeners.size(); i++) {
+    for (let i = 0; i < this.drawListeners.length; i++) {
       const drawListener = this.drawListeners[i];
       drawListener.eventRecorded(drawEvent);
     }
@@ -272,28 +282,26 @@ export class BehaviorController extends AbstractController {
 
   public mouseDragged(e: MouseEvent) {
     this.eventToRecord = e;
+    const outerThis = this;
     if (this.dragRecordThread == null) {
-      this.dragRecordThread = new Thread();
-      {
-      public
-        run();
-        {
-          while (this.eventToRecord != null) {
-            const recordTime = System.currentTimeMillis();
-            if (this.lastRecordEnd != 0) {
-              const deltaMillis = (int)(recordTime - this.lastRecordEnd);
-              if (deltaMillis >= this.samplingRate) {
-                this.record(this.eventToRecord, this.selection);
-                this.draw(this.ALL_LAYERS);
-                const someCurrentTime = this.getCurrentTime();
+      this.dragRecordThread = new Thread(new class implements Runnable {
+        run(){
+          while (outerThis.eventToRecord != null) {
+            const recordTime = Date.now();
+            if (outerThis.lastRecordEnd != 0) {
+              const deltaMillis = recordTime - outerThis.lastRecordEnd;
+              if (deltaMillis >= outerThis.samplingRate) {
+                outerThis.record(outerThis.eventToRecord, outerThis.selection);
+                outerThis.draw(outerThis.ALL_LAYERS);
+                const someCurrentTime = outerThis.getCurrentTime();
                 someCurrentTime.add(Calendar.MILLISECOND, deltaMillis);
-                this.setTime(someCurrentTime);
+                outerThis.setTime(someCurrentTime);
               }
             }
-            this.lastRecordEnd = recordTime;
+            outerThis.lastRecordEnd = recordTime;
           }
         }
-      }
+      });
       this.dragRecordThread.start();
     }
   }
@@ -307,13 +315,12 @@ export class BehaviorController extends AbstractController {
   }
 
   private record(e: MouseEvent, selection: DrawSelection) {
-    const newX = e.getX() - selection.getWidth() / 2;
-    const newY = e.getY() - selection.getHeight();
+    const newX = e.x - selection.getWidth() / 2;
+    const newY = e.y - selection.getHeight();
     const deltaX = newX - selection.getX();
     const deltaY = newY - selection.getY();
-    for (let i = 0; i < selection.size(); i++) {
-      const event = (DrawEvent);
-      selection[i];
+    for (let i = 0; i < selection.length; i++) {
+      const event = <DrawEvent>selection[i];
       const shape = event.getShape();
       const xNew = shape.getX() + deltaX;
       const yNew = shape.getY() + deltaY;
@@ -327,9 +334,8 @@ export class BehaviorController extends AbstractController {
   public paintShapes() {
     const ufoEvents = this.model.getEvents(this.timeKey);
     if (ufoEvents != null) {
-      for (let layer = 0; layer < ufoEvents.size(); layer++) {
-        const ufoEvent = (DrawEvent);
-        ufoEvents.elementAt(layer);
+      for (let layer = 0; layer < ufoEvents.length; layer++) {
+        const ufoEvent = <DrawEvent>ufoEvents[layer];
         const ufoShape = ufoEvent.getShape();
         this.view.paintShape(ufoShape);
       }
@@ -366,7 +372,7 @@ export class BehaviorController extends AbstractController {
 
   public setAs(x: number) {
     this.as = x;
-    this.model.setZoomFactor(as);
+    this.model.setZoomFactor(this.as);
   }
 
   public addDrawListener(drawListener: DrawListener) {

@@ -14,11 +14,6 @@ export interface Classification extends Function {
 
   getName(): String;
 
-  /**
-   * @associates <{org.rr0.im.service.function.classification.Category}>
-   * @supplierCardinality 1..*
-   * @link aggregation
-   */
   getCategories(): Category[];
 
   /**
@@ -28,7 +23,4 @@ export interface Classification extends Function {
    * @return The object Category in this Classification
    */
   getCategory(classifiable: Object): Category;
-
-  /** @link dependency */
-  /*# Classifiable lnkClassifiable; */
 }

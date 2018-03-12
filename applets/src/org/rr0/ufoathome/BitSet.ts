@@ -12,4 +12,12 @@ export class BitSet {
   set(bit: number) {
     this.value |= bit;
   }
+
+  or(ALL_LAYERS: BitSet) {
+
+  }
+
+  clear(RUNNABLE_WEATHER: number) {
+
+  }
 }

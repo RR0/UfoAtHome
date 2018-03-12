@@ -1,0 +1,5 @@
+/**
+ * @deprecated
+ */
+export class TimeZone {
+}

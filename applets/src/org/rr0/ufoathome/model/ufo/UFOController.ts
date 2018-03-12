@@ -19,6 +19,16 @@ import {MessageProducer} from "./MessageProducer";
 import {MapElement} from "../../view/gui/MapElement";
 import {WitnessModel} from "./WitnessModel";
 import {DrawListener} from "../../view/draw/DrawListener";
+import {BitSet} from "../../BitSet";
+import {Thread} from "../../Thread";
+import {Locale} from "../../../util/Locale";
+import {ActionEvent} from "../../view/gui/ActionEvent";
+import {SystemColor} from "../../view/gui/SystemColor";
+import {Hashtable} from "../../Hashtable";
+import {GregorianCalendar} from "../../GregorianCalendar";
+import {TimeZone} from "../../TimeZone";
+import {DateFormat} from "../../DateFormat";
+import {Calendar} from "../../Calendar";
 
 /**
  * The controller for processing UFO reporting events.
@@ -44,7 +54,7 @@ export class UFOController extends AbstractController implements MessageProducer
    * The inner, replaceable controller
    */
   private controller: AbstractController;
-  private skyController: SkyController;
+  skyController: SkyController;
   private aspectController: DrawController;
   private behaviorController: BehaviorController;
   private mapController: DrawController;
@@ -74,14 +84,8 @@ export class UFOController extends AbstractController implements MessageProducer
   }
 
   private createMapController(samplingRate: number, locale: Locale): DrawController {
-    const mapController = new DrawController(this.view, this.mapModel, samplingRate, locale, this);
-    {
-    public
-      selectObject(objectName;
-    :
-      String;
-    )
-      {
+    const mapController = new class extends DrawController {
+      public selectObject(objectName: String) {
         const currentMapElement = UFOController.this.model.getBuidling(objectName);
         const selection = getSelection();
         selection.clear();
@@ -96,14 +100,7 @@ export class UFOController extends AbstractController implements MessageProducer
         this.draw();
       }
 
-    public
-      select(multiple;
-    :
-      boolean, currentEvent;
-    :
-      DrawEvent;
-    )
-      {
+      public select(multiple: boolean, currentEvent: DrawEvent) {
         const mapElement = (MapElement);
         currentEvent.getSource();
         if (mapElement != currentMapElement) {
@@ -111,7 +108,7 @@ export class UFOController extends AbstractController implements MessageProducer
         }
         super.select(multiple, currentEvent);
       }
-    }
+    }(this.view, this.mapModel, samplingRate, locale, this);
     return mapController;
   }
 
@@ -119,17 +116,11 @@ export class UFOController extends AbstractController implements MessageProducer
     this.view = this.createView();
     this.view.addMouseListener(this);
     this.view.addMouseMotionListener(this);
-    this.getView().addKeyListener(new KeyAdapter();
-    {
-      publickeyPressed(e;
-    :
-      KeyEvent;
-    )
-      {
+    this.getView().addKeyListener(new class extends KeyAdapter {
+      public keyPressed(e: KeyEvent) {
         this.controller.keyPressed(e);
       }
-    }
-  )
+    });
   }
 
   private initModels() {
@@ -150,75 +141,48 @@ export class UFOController extends AbstractController implements MessageProducer
   }
 
   private createBehaviorController(samplingRate: number, locale: Locale): BehaviorController {
-    this.behaviorController = new BehaviorController(this.view, this.model, samplingRate, locale, this);
-    {
-    public
-      mouseDragged(e;
-    :
-      MouseEvent;
-    )
-      {
+    const outerThis = this;
+    this.behaviorController = new class extends BehaviorController {
+      public mouseDragged(e: MouseEvent) {
         super.mouseDragged(e);
         if (!e.isConsumed()) {
-          this.skyController.mouseDragged(e);
+          outerThis.skyController.mouseDragged(e);
         }
       }
 
-    public
-      mouseMoved(mouseEvent;
-    :
-      MouseEvent;
-    )
-      {
+      public mouseMoved(mouseEvent: MouseEvent) {
         super.mouseMoved(mouseEvent);
         if (!mouseEvent.isConsumed()) {
-          this.skyController.mouseMoved(mouseEvent);
+          outerThis.skyController.mouseMoved(mouseEvent);
         }
       }
 
-    public
-      draw(layers;
-    :
-      BitSet;
-    )
-      {
-        this.skyController.draw();
+      public draw(layers: BitSet) {
+        outerThis.skyController.draw();
         super.draw(this.layers);
       }
-    }
+    }(this.view, this.model, samplingRate, locale, this);
     return this.behaviorController;
   }
 
   private createDrawController(samplingRate: number, locale: Locale, ALL_LAYERS_BUT_RUNNABLE_WEATHER: BitSet, RUNNABLE_WEATHER_LAYER: BitSet): DrawController {
-    const aspectController = new DrawController(this.view, this.model, samplingRate, locale, this);
-    {
-      publicmouseDragged(e;
-    :
-      MouseEvent;
-    )
-      {
+
+    const aspectController = new class extends DrawController {
+      public mouseDragged(e: MouseEvent) {
         super.mouseDragged(e);
         if (!e.isConsumed()) {
           this.skyController.mouseDragged(e);
         }
       }
 
-      publicmouseClicked(e;
-    :
-      MouseEvent;
-    )
-      {
+      mouseClicked(e: MouseEvent) {
         super.mouseClicked(e);
         if (!e.isConsumed()) {
           this.skyController.mouseClicked(e);
         }
       }
 
-      publicselectObject(objectName;
-    :
-      string;
-    )
-      {
+      public selectObject(objectName: string) {
         const currentUFO = (UFO);
         this.model.getSource(objectName);
         const selection = getSelection();
@@ -235,20 +199,12 @@ export class UFOController extends AbstractController implements MessageProducer
         this.draw();
       }
 
-      publicshowShapeMenu(mouseX;
-    :
-      number, mouseY;
-    :
-      number, currentEvent;
-    :
-      DrawEvent;
-    )
-      {
+      public showShapeMenu(mouseX: number, mouseY: number, currentEvent: DrawEvent) {
         //                int selectedShapesCount = aspectController.getSelection().length;
         //                if (selectedShapesCount > 0) {
         const currentUfo = (UFO);
         currentEvent.getSource();
-        const popupMenu = this.view.getShapeMenu(getSelection(), getSelection(), mouseX, mouseY, currentUfo);
+        const popupMenu = this.view.getShapeMenu(this.getSelection(), this.getSelection(), mouseX, mouseY, currentUfo);
         const ufos = UFOController.this.model.getSources();
         const timeKey = this.getTimeKey();
         if (ufos.length > 1) {
@@ -264,14 +220,8 @@ export class UFOController extends AbstractController implements MessageProducer
               moveToUfoMenuItem.setActionCommand(MOVETO_ACTION_COMMAND);
               const behindMenuItem = new MenuItem(ufoKey);
               const inFrontOfMenuItem = new MenuItem(ufoKey);
-              const moveToUfoListenener = new ShapeMenuListener();
-              {
-              public
-                actionPerformed(actionEvent;
-              :
-                ActionEvent;
-              )
-                {
+              const moveToUfoListenener = new class implements ShapeMenuListener() {
+                actionPerformed(actionEvent: ActionEvent) {
                   super.actionPerformed(actionEvent);
                   if (actionEvent.getActionCommand().equals(this.MOVETO_ACTION_COMMAND)) {
                     const selectedUfo = (UFO);
@@ -287,7 +237,7 @@ export class UFOController extends AbstractController implements MessageProducer
                     this.selectObject(selectedUfo.getName());
                   }
                 }
-              }
+              };
               moveToUfoMenuItem.addActionListener(moveToUfoListenener);
               moveToMenu.add(moveToUfoMenuItem);
               //                        behindMenuItem.addActionListener(behindUfoListenener);
@@ -305,52 +255,28 @@ export class UFOController extends AbstractController implements MessageProducer
         //                }
       }
 
-    public
-      mouseMoved(mouseEvent;
-    :
-      MouseEvent;
-    )
-      {
+      public mouseMoved(mouseEvent: MouseEvent) {
         super.mouseMoved(mouseEvent);
         if (!mouseEvent.isConsumed()) {
           this.skyController.mouseMoved(mouseEvent);
         }
       }
 
-    public
-      mouseReleased(mouseEvent;
-    :
-      MouseEvent;
-    )
-      {
+      public mouseReleased(mouseEvent: MouseEvent) {
         super.mouseReleased(mouseEvent);
         if (!mouseEvent.isConsumed()) {
           this.skyController.mouseReleased(mouseEvent);
         }
       }
 
-    public
-      draw();
-      {
+      public draw() {
         this.skyController.draw(UFOController.this.ALL_LAYERS_BUT_RUNNABLE_WEATHER);
         super.draw();
         this.skyController.draw(RUNNABLE_WEATHER_LAYER);
         this.display();
       }
 
-    public
-      record(x;
-    :
-      number, y;
-    :
-      number, source;
-    :
-      Object , shape;
-    :
-      DrawShape;
-    ):
-      DrawEvent;
-      {
+      public record(x: number, y: number, source: Object, shape: DrawShape): DrawEvent {
         if (source instanceof UFO) {
           this.currentUFO = <UFO>source;
         } else if (this.currentUFO == null) {
@@ -360,14 +286,7 @@ export class UFOController extends AbstractController implements MessageProducer
         return event;
       }
 
-    public
-      select(multiple;
-    :
-      boolean, currentEvent;
-    :
-      DrawEvent;
-    )
-      {
+      public select(multiple: boolean, currentEvent: DrawEvent) {
         let ufo = currentEvent.getSource();
         if (ufo != this.currentUFO) {
           this.selectObject(ufo.getName());
@@ -375,56 +294,40 @@ export class UFOController extends AbstractController implements MessageProducer
         super.select(multiple, currentEvent);
       }
 
-    public
-      keyPressed(e;
-    :
-      KeyEvent;
-    )
-      {
+      public keyPressed(e: KeyEvent) {
         super.keyPressed(e);
         if (!e.isConsumed()) {
           this.skyController.keyPressed(e);
         }
       }
-    }
+    }(this.view, this.model, samplingRate, locale, this);
+
     return aspectController;
   }
 
   private createView(): UFOView {
     const view = new UFOView();
-    view.addFocusListener(new FocusListener();
-    {
-    public
-      focusGained(FocusEvent;
-      e;
-    )
-      {
-        this.focused = true;
-        this.draw();
-      }
+    view.addFocusListener(new class implements FocusListener {
+        public focusGained(e: FocusEvent) {
+          this.focused = true;
+          this.draw();
+        }
 
-    public
-      focusLost(FocusEvent;
-      e;
-    )
-      {
-        this.focused = false;
-        this.draw();
+        public focusLost(e: FocusEvent) {
+          this.focused = false;
+          this.draw();
+        }
       }
-    }
-  )
+    );
     return view;
   }
 
   private createSkyController(): SkyController {
-    return new SkyController(this.model, this.view, this);
-    {
-    public
-      display();
-      {
+    return new class extends SkyController {
+      public display() {
         // Do nothing: subclasses will display instead
       }
-    }
+    }(this.model, this.view, this);
   }
 
   public addMessageListener(messageListener: MessageListener) {
@@ -481,7 +384,7 @@ export class UFOController extends AbstractController implements MessageProducer
   }
 
   public createUFO(): UFO {
-    const newUfoName = this.getMessagesBundle().getString("UFO") + '-' + (this.getUFOs().length + 1);
+    const newUfoName = this.getMessagesBundle().getString("UFO") + '-' + (this.getUFOs().size() + 1);
     const createdUFO = this.createUFO(newUfoName);
     return createdUFO;
   }
@@ -853,7 +756,7 @@ export class UFOController extends AbstractController implements MessageProducer
   public play(on: boolean) {
     this.playing = on;
     if (this.playing) {
-      this.animationThread = new Thread(animationRunner);
+      this.animationThread = new Thread(this.animationRunner);
       this.animationThread.start();
       this.fireAnimationStarted();
     }
@@ -876,31 +779,30 @@ export class UFOController extends AbstractController implements MessageProducer
   private animationRunner: Runnable;
 
   private createAnimationRunner(samplingRate: number): Runnable {
-    return new Runnable();
-    {
-      publicrun();
-      {
-        const endTime = this.getEndTime();
+    const outerThis = this;
+    return new class implements Runnable {
+      run() {
+        const endTime = outerThis.getEndTime();
         do {
-          const someCurrentTime = this.getCurrentTime();
-          this.setTime(someCurrentTime);
+          const someCurrentTime = outerThis.getCurrentTime();
+          outerThis.setTime(someCurrentTime);
           try {
-            const interval = this.samplingRate;
+            const interval = outerThis.samplingRate;
             Thread.sleep(interval);
             someCurrentTime.add(Calendar.MILLISECOND, interval);
             if (someCurrentTime.getTime().after(endTime)) {
               someCurrentTime.setTime(endTime);
-              this.setTime(someCurrentTime);
-              this.play(false);
+              outerThis.setTime(someCurrentTime);
+              outerThis.play(false);
             }
-            this.draw();
+            outerThis.draw();
           } catch (e: InterruptedException) {
-            System.err.println("Play interrupted: " + e);
+            console.error("Play interrupted: " + e);
           }
-        } while (this.playing);
-        this.fireAnimationStopped();
+        } while (outerThis.playing);
+        outerThis.fireAnimationStopped();
       }
-    }
+    };
   }
 
   public getEndTime(): Date {

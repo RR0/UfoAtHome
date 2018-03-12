@@ -1,4 +1,5 @@
 import {Runnable} from "./Runnable";
+import {Graphics} from "../../view/gui/Graphics";
 
 export interface Precipitations extends Runnable {
   start(): void;
@@ -7,7 +8,9 @@ export interface Precipitations extends Runnable {
 
   init(): void;
 
-  //paint(g: Graphics): void;
+  paint(g: Graphics): void;
 
   setWindFactor(windFactor: number): void;
+
+  paint(bufferedGraphics: Graphics): void;
 }

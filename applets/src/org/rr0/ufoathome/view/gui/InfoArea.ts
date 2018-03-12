@@ -8,7 +8,7 @@ import {TextField} from "./TextField";
   selector: 'info-area',
   template: `d`
 })
-class InfoArea extends TextField {
+export class InfoArea extends TextField {
   @Input() controller: AbstractController;
 
   private editable: MessageEditable;

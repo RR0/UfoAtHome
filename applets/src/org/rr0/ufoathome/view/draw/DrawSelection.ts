@@ -1,12 +1,13 @@
 import {DrawEvent} from "./DrawEvent";
 import {DrawShape} from "./DrawShape";
+import {Rectangle} from "../gui/Rectangle";
+import {Color} from "../gui/Color";
 
 /**
  * A selection of DrawEvents.
  */
 export class DrawSelection extends Array {
-  private Rectangle;
-  bounds = new Rectangle();
+  private bounds = new Rectangle();
 
   constructor() {
     super();
@@ -27,8 +28,8 @@ export class DrawSelection extends Array {
    * @param selected
    */
   public select(selected: boolean): void {
-    for (let i = 0; i < this.size(); i++) {
-      const event: DrawEvent = <DrawEvent> this.elementAt(i);
+    for (let i = 0; i < this.length; i++) {
+      const event: DrawEvent = <DrawEvent> this[i];
       event.getShape().setSelected(selected);
     }
   }
@@ -40,7 +41,7 @@ export class DrawSelection extends Array {
    */
   public add(currentEvent: DrawEvent): void {
     const shape: DrawShape = currentEvent.getShape();
-    if (this.size() > 0) {
+    if (this.length > 0) {
       if (shape.getX() < this.bounds.x) {
         this.bounds.x = shape.getX();
         this.bounds.width += this.bounds.x - shape.getX();
@@ -64,8 +65,8 @@ export class DrawSelection extends Array {
    * @param color The Color to set.
    */
   public setColor(color: Color): void {
-    for (let i = 0; i < this.size(); i++) {
-      const event: DrawEvent = <DrawEvent>this.elementAt(i);
+    for (let i = 0; i < this.length; i++) {
+      const event: DrawEvent = <DrawEvent>this[i];
       event.getShape().setColor(color);
     }
   }
@@ -91,8 +92,8 @@ export class DrawSelection extends Array {
     super.removeElement(currentEvent);
     this.bounds.x = Integer.MAX_VALUE;
     this.bounds.y = Integer.MAX_VALUE;
-    for (let i = 0; i < this.size(); i++) {
-      const event: DrawEvent = <DrawEvent>this.elementAt(i);
+    for (let i = 0; i < this.length; i++) {
+      const event: DrawEvent = <DrawEvent>this[i];
       const shape: DrawShape = event.getShape();
       if (shape.getX() < this.bounds.x) {
         this.bounds.x = shape.getX();
@@ -114,8 +115,8 @@ export class DrawSelection extends Array {
   }
 
   public translate(deltaX: number, deltaY: number): void {
-    for (let i = 0; i < this.size(); i++) {
-      const event: DrawEvent = <DrawEvent>this.elementAt(i);
+    for (let i = 0; i < this.length; i++) {
+      const event: DrawEvent = <DrawEvent>this[i];
       const shape: DrawShape = event.getShape();
       const xNew: number = shape.getX() + deltaX;
       const yNew: number = shape.getY() + deltaY;
@@ -126,8 +127,8 @@ export class DrawSelection extends Array {
   }
 
   public scaleWidth(widthFactor: number): void {
-    if (this.size() > 1) {
-      for (let i = 0; i < this.size(); i++) {
+    if (this.length > 1) {
+      for (let i = 0; i < this.length; i++) {
         const selectedShape: DrawShape = this.scaleEventWidth(i, widthFactor);
         this.scaleEventX(selectedShape, widthFactor);
       }
@@ -143,15 +144,15 @@ export class DrawSelection extends Array {
   }
 
   private scaleEventWidth(i: number, widthFactor: number): DrawShape {
-    const event: DrawEvent = <DrawEvent>elementAt(i);
+    const event: DrawEvent = <DrawEvent>this[i];
     const selectedShape: DrawShape = event.getShape();
     selectedShape.scaleWidth(widthFactor);
     return selectedShape;
   }
 
   public scaleHeight(heightFactor: number): void {
-    if (this.size() > 1) {
-      for (let i = 0; i < this.size(); i++) {
+    if (this.length > 1) {
+      for (let i = 0; i < this.length; i++) {
         const selectedShape: DrawShape = this.scaleEventHeight(i, heightFactor);
         this.scaleEventY(selectedShape, heightFactor);
       }
@@ -161,13 +162,13 @@ export class DrawSelection extends Array {
   }
 
   private scaleEventY(selectedShape: DrawShape, heightFactor: number): void {
-    const yDelta: number = this.tselectedShape.getY() - this.getY();
+    const yDelta: number = selectedShape.getY() - this.getY();
     const deltaY = Math.round(yDelta * heightFactor);
     selectedShape.setY(this.getY() + deltaY);
   }
 
   private scaleEventHeight(i: number, heightFactor: number): DrawShape {
-    const event: DrawEvent = <DrawEvent>elementAt(i);
+    const event: DrawEvent = <DrawEvent>[i];
     const selectedShape: DrawShape = event.getShape();
     selectedShape.scaleHeight(heightFactor);
     return selectedShape;
@@ -182,10 +183,13 @@ export class DrawSelection extends Array {
   }
 
   public setTranparency(alpha: number): void {
-    for (let i = 0; i < this.size(); i++) {
-      const event: DrawEvent = <DrawEvent>this.elementAt(i);
+    for (let i = 0; i < this.length; i++) {
+      const event: DrawEvent = <DrawEvent>this[i];
       const selectedShape: DrawShape = event.getShape();
       selectedShape.setTransparency(alpha);
     }
+  }
+  public isEmpty(): boolean {
+    return this.length <= 0;
   }
 }
