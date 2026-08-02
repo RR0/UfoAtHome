@@ -75,3 +75,45 @@ describe("UfoRecorderElement appearance toolbar", () => {
     expect(element.appearance).toEqual({ presetId: "oval", color: "#0000ff", transparency: 0, haloScale: 1.5 })
   })
 })
+
+describe("UfoRecorderElement src attribute (embed loading)", () => {
+  afterEach(() => {
+    document.body.innerHTML = ""
+    vi.unstubAllGlobals()
+  })
+
+  const sampleJson = {
+    version: 1 as const,
+    time: { year: 1948, month: 7, day: 24 },
+    place: [{ lat: 32.3792, lng: -86.3077 }],
+    witnessId: "ChilesWhitted",
+    timeline: {
+      keyframes: [{ t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval" as const, bounds: { x: 0, y: 0, width: 10, height: 10 }, color: "#163a8f", angle: 0, transparency: 0, haloScale: 1, selected: false } }] }]
+    }
+  }
+
+  it("fetches and loads the sighting referenced by the src attribute on connect", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ json: () => Promise.resolve(sampleJson) })
+    vi.stubGlobal("fetch", fetchMock)
+
+    const element = document.createElement(ELEMENT_NAME) as UfoRecorderElement
+    element.setAttribute("src", "sighting.json")
+    document.body.appendChild(element)
+    await new Promise(resolve => setTimeout(resolve, 0))
+
+    expect(fetchMock).toHaveBeenCalledWith("sighting.json")
+    expect(element.sightingData.witnessId).toBe("ChilesWhitted")
+    expect(element.sightingData.timeline.keyframes).toHaveLength(1)
+  })
+
+  it("re-fetches when the src attribute changes after connect", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ json: () => Promise.resolve(sampleJson) })
+    vi.stubGlobal("fetch", fetchMock)
+
+    const element = mount()
+    element.setAttribute("src", "other-sighting.json")
+    await new Promise(resolve => setTimeout(resolve, 0))
+
+    expect(fetchMock).toHaveBeenCalledWith("other-sighting.json")
+  })
+})

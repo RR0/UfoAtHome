@@ -24,7 +24,7 @@ export type UfoRecorderMode = "record" | "playback"
  */
 export class UfoRecorderElement extends HTMLElement {
   static get observedAttributes(): string[] {
-    return ["mode", "sampling-rate"]
+    return ["mode", "sampling-rate", "src"]
   }
 
   private readonly shadow: ShadowRoot
@@ -93,10 +93,25 @@ export class UfoRecorderElement extends HTMLElement {
     this.player = new Player(this.sighting.timeline, (t, shapesBySource) => this.onFrame(t, shapesBySource))
     this.updatePresetButtons()
     this.paintCurrentFrame()
+
+    const src = this.getAttribute("src")
+    if (src) {
+      void this.loadFromSrc(src)
+    }
   }
 
-  attributeChangedCallback(_name: string, _oldValue: string, _newValue: string): void {
-    // "mode" and "sampling-rate" are read on demand (toggleRecording/play), nothing to react to eagerly.
+  attributeChangedCallback(name: string, oldValue: string, newValue: string): void {
+    // "mode" is purely CSS-driven (see :host([mode="viewer"]) in template.ts); "sampling-rate"
+    // is read on demand by the `samplingRate` getter. Only "src" needs JS reaction here.
+    if (name === "src" && newValue && newValue !== oldValue && this.isConnected) {
+      void this.loadFromSrc(newValue)
+    }
+  }
+
+  /** Fetches a SightingRecordingJson from `url` and loads it — what the `src` attribute uses. */
+  async loadFromSrc(url: string): Promise<void> {
+    const response = await fetch(url)
+    this.sightingData = (await response.json()) as SightingRecordingJson
   }
 
   get sightingData(): SightingRecordingJson {
