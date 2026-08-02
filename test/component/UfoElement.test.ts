@@ -148,6 +148,28 @@ describe("UfoElement", () => {
     expect(button.title).toBe("Play")
   })
 
+  it("clicking the canvas also toggles play/pause", () => {
+    const element = mount()
+    const button = element.shadowRoot!.getElementById("play-pause") as HTMLButtonElement
+    expect(button.title).toBe("Play")
+
+    element.canvasElement.click()
+    expect(button.title).toBe("Pause")
+
+    element.canvasElement.click()
+    expect(button.title).toBe("Play")
+  })
+
+  it("canvas click-to-play can be disabled (e.g. by UfoRecorderElement, which uses the canvas for drag-to-record)", () => {
+    const element = mount()
+    element.enableClickToPlay = false
+    const button = element.shadowRoot!.getElementById("play-pause") as HTMLButtonElement
+    expect(button.title).toBe("Play")
+
+    element.canvasElement.click()
+    expect(button.title).toBe("Play")
+  })
+
   it("loads French labels when navigator.languages prefers fr, with no language picker", async () => {
     const spy = vi.spyOn(navigator, "languages", "get").mockReturnValue(["fr-FR", "fr"])
     const element = mount()

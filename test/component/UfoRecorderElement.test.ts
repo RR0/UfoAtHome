@@ -90,6 +90,12 @@ describe("UfoRecorderElement composes a nested rr0-ufo", () => {
     expect((ufo as unknown as { canvasElement: unknown }).canvasElement).toBeDefined()
   })
 
+  it("disables the nested ufo element's click-to-play (the canvas is used for drag-to-record instead)", () => {
+    const element = mount()
+    const ufo = element.shadowRoot!.querySelector("rr0-ufo") as unknown as { enableClickToPlay: boolean }
+    expect(ufo.enableClickToPlay).toBe(false)
+  })
+
   it("sightingData get/set delegates to the nested ufo element", () => {
     const element = mount()
     const json = {

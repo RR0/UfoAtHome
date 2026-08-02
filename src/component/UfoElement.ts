@@ -52,6 +52,11 @@ export class UfoElement extends HTMLElement {
   private currentSighting: Sighting = Sighting.create()
   private player: Player
   private loopEnabled = true
+
+  /** Set to false by composing elements that need the canvas's own click for something else
+   * instead of toggling playback — see UfoRecorderElement, which uses pointerdown/pointermove on
+   * this same canvas to place shapes while recording. */
+  enableClickToPlay = true
   /** Matches the template's baked-in English defaults until (if ever) loadLocaleMessages()
    * resolves a better match — see its doc comment. */
   private messages: UfoMessages = ufoMessages_en
@@ -81,6 +86,9 @@ export class UfoElement extends HTMLElement {
     this.playPauseButton.addEventListener("click", () => this.togglePlayPause())
     this.loopButton.addEventListener("click", () => this.toggleLoop())
     this.seekInput.addEventListener("input", () => this.player.seek(Number(this.seekInput.value)))
+    this.canvas.addEventListener("click", () => {
+      if (this.enableClickToPlay) this.togglePlayPause()
+    })
 
     this.player = this.createPlayer()
     this.updateTimeLabels()

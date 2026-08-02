@@ -57,6 +57,9 @@ export class UfoRecorderElement extends HTMLElement {
     // happens later (when this recorder itself is inserted), so canvasElement/renderer/sighting
     // would still be undefined here.
     this.ufoElement = document.createElement(UFO_ELEMENT_NAME) as UfoElement
+    // This canvas is used for drag-to-record shape placement instead — a plain click shouldn't
+    // also toggle the nested player's playback (every recording drag ends in a native "click").
+    this.ufoElement.enableClickToPlay = false
     this.shadow.getElementById("ufo-slot")!.replaceWith(this.ufoElement)
 
     this.recordButton = this.shadow.getElementById("record") as HTMLButtonElement
