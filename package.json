@@ -18,6 +18,8 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "build:embed": "tsc --noEmit && vite build --config vite.embed.config.ts",
+    "build:embed-player": "tsc --noEmit && vite build --config vite.embed-player.config.ts",
+    "build:all": "npm run build && npm run build:embed && npm run build:embed-player",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest"

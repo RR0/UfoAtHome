@@ -1,6 +1,7 @@
 node_modules/
 dist/
 dist-embed/
+dist-embed-player/
 *.log
 *.ipr
 *.iws

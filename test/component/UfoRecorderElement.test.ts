@@ -76,44 +76,52 @@ describe("UfoRecorderElement appearance toolbar", () => {
   })
 })
 
-describe("UfoRecorderElement src attribute (embed loading)", () => {
+describe("UfoRecorderElement composes a nested rr0-ufo-player", () => {
   afterEach(() => {
     document.body.innerHTML = ""
-    vi.unstubAllGlobals()
   })
 
-  const sampleJson = {
-    version: 1 as const,
-    time: { year: 1948, month: 7, day: 24 },
-    place: [{ lat: 32.3792, lng: -86.3077 }],
-    witnessId: "ChilesWhitted",
-    timeline: {
-      keyframes: [{ t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval" as const, bounds: { x: 0, y: 0, width: 10, height: 10 }, color: "#163a8f", angle: 0, transparency: 0, haloScale: 1, selected: false } }] }]
-    }
-  }
-
-  it("fetches and loads the sighting referenced by the src attribute on connect", async () => {
-    const fetchMock = vi.fn().mockResolvedValue({ json: () => Promise.resolve(sampleJson) })
-    vi.stubGlobal("fetch", fetchMock)
-
-    const element = document.createElement(ELEMENT_NAME) as UfoRecorderElement
-    element.setAttribute("src", "sighting.json")
-    document.body.appendChild(element)
-    await new Promise(resolve => setTimeout(resolve, 0))
-
-    expect(fetchMock).toHaveBeenCalledWith("sighting.json")
-    expect(element.sightingData.witnessId).toBe("ChilesWhitted")
-    expect(element.sightingData.timeline.keyframes).toHaveLength(1)
-  })
-
-  it("re-fetches when the src attribute changes after connect", async () => {
-    const fetchMock = vi.fn().mockResolvedValue({ json: () => Promise.resolve(sampleJson) })
-    vi.stubGlobal("fetch", fetchMock)
-
+  it("nests a real, upgraded UfoPlayerElement instance", () => {
     const element = mount()
-    element.setAttribute("src", "other-sighting.json")
-    await new Promise(resolve => setTimeout(resolve, 0))
+    const player = element.shadowRoot!.querySelector("rr0-ufo-player")
+    expect(player).not.toBeNull()
+    // Would be undefined on a not-yet-upgraded element (see the constructor's
+    // document.createElement comment) — asserting it's present proves the fix.
+    expect((player as unknown as { canvasElement: unknown }).canvasElement).toBeDefined()
+  })
 
-    expect(fetchMock).toHaveBeenCalledWith("other-sighting.json")
+  it("sightingData get/set delegates to the nested player", () => {
+    const element = mount()
+    const json = {
+      version: 1 as const,
+      timeline: {
+        keyframes: [
+          { t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval" as const, bounds: { x: 1, y: 2, width: 3, height: 4 }, color: "#fff", angle: 0, transparency: 0, haloScale: 0, selected: false } }] }
+        ]
+      }
+    }
+    element.sightingData = json
+    expect(element.sightingData).toEqual(json)
+  })
+
+  it("recording appends a keyframe to the nested player's timeline", async () => {
+    // Uses real timers deliberately: RafSamplingClock drives recording via the real
+    // requestAnimationFrame/performance.now (jsdom's own rAF polyfill, not a sinon-fake-timer
+    // concept — see engine/record/SamplingClock.ts's IntervalSamplingClock, which is the
+    // fake-timer-friendly variant already covered by test/engine/Recorder.test.ts).
+    const element = mount()
+    const shadow = element.shadowRoot!
+    const recordButton = shadow.getElementById("record") as HTMLButtonElement
+    const canvas = shadow.querySelector("rr0-ufo-player")!.shadowRoot!.getElementById("canvas") as HTMLCanvasElement
+    vi.spyOn(canvas, "getBoundingClientRect").mockReturnValue({ left: 0, top: 0 } as DOMRect)
+
+    recordButton.click()
+    // jsdom has no global PointerEvent; onPointerMove only reads clientX/clientY, so a
+    // plain MouseEvent dispatched as "pointermove" exercises the same handler.
+    canvas.dispatchEvent(new MouseEvent("pointermove", { clientX: 50, clientY: 60 }))
+    await new Promise(resolve => setTimeout(resolve, 150))
+    recordButton.click()
+
+    expect(element.sightingData.timeline.keyframes.length).toBeGreaterThan(0)
   })
 })

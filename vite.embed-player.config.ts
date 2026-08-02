@@ -1,0 +1,21 @@
+import { defineConfig } from "vite"
+
+/**
+ * Builds the standalone, self-registering rr0-ufo-player.mjs — the
+ * lightweight, playback-only bundle for site pages that just need to
+ * *play* a sighting (the common case). See vite.embed.config.ts for the
+ * heavier authoring bundle (rr0-ufo-recorder.mjs). Run via `npm run
+ * build:embed-player`.
+ */
+export default defineConfig({
+  build: {
+    outDir: "dist-embed-player",
+    emptyOutDir: true,
+    target: "es2022",
+    lib: {
+      entry: "src/embed-player.ts",
+      formats: ["es"],
+      fileName: () => "rr0-ufo-player.mjs"
+    }
+  }
+})
