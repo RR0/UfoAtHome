@@ -41,14 +41,15 @@ canvas {
   background: rgba(0, 0, 0, 0.55);
   transition: opacity 0.15s ease;
 }
-/* While playing, the toolbar auto-hides and only reappears on hover (or keyboard focus) — kept
-   always visible while paused/stopped, since that's when the user is most likely to want it. */
+/* While playing, the toolbar auto-hides and only reappears on hover — kept always visible while
+   paused/stopped, since that's when the user is most likely to want it. Deliberately hover-only,
+   not :focus-within: a clicked button/range input keeps keyboard focus after the pointer moves
+   away, which would otherwise keep the toolbar stuck visible indefinitely after any interaction. */
 .toolbar.auto-hide {
   opacity: 0;
   pointer-events: none;
 }
-.stage:hover .toolbar.auto-hide,
-.toolbar.auto-hide:focus-within {
+.stage:hover .toolbar.auto-hide {
   opacity: 1;
   pointer-events: auto;
 }
