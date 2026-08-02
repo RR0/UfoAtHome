@@ -1,8 +1,7 @@
 {
-  "name": "@rr0/ufo-at-home",
+  "name": "@rr0/ufoathome",
   "type": "module",
   "version": "0.1.0",
-  "private": true,
   "description": "UFO@home — record and replay a UFO sighting's shape, movement and appearance",
   "author": "Jérôme Beau <rr0@rr0.org> (https://rr0.org)",
   "license": "MIT",
@@ -14,12 +13,21 @@
   "engines": {
     "node": ">=20"
   },
+  "exports": {
+    "./player": "./dist-embed-player/rr0-ufo-player.mjs",
+    "./recorder": "./dist-embed/rr0-ufo-recorder.mjs"
+  },
+  "files": [
+    "dist-embed",
+    "dist-embed-player"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "build:embed": "tsc --noEmit && vite build --config vite.embed.config.ts",
     "build:embed-player": "tsc --noEmit && vite build --config vite.embed-player.config.ts",
     "build:all": "npm run build && npm run build:embed && npm run build:embed-player",
+    "prepublishOnly": "npm run build:embed && npm run build:embed-player && npm test",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest"
@@ -34,5 +42,14 @@
     "typescript": "^5.9.2",
     "vite": "^6.3.5",
     "vitest": "^3.0.0"
+  },
+  "keywords": [
+    "ufo",
+    "sighting",
+    "web-component",
+    "rr0"
+  ],
+  "publishConfig": {
+    "access": "public"
   }
 }
