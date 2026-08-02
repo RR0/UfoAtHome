@@ -35,8 +35,8 @@ export interface SceneLighting {
 
 /**
  * Renders the "decor" (sky, horizon, stars) behind a sighting's 2D shape
- * layer — see UfoSceneElement, which composites this underneath a
- * transparent-background <rr0-ufo-player>. Deliberately minimal for this
+ * layer — see SceneElement, which composites this underneath a
+ * transparent-background <rr0-ufo>. Deliberately minimal for this
  * first pass: a vertex-colored sky dome, a flat haze-blended ground plane
  * (an aeronautical horizon, not a literal terrain), and a starfield when
  * dark enough. No camera movement/animation loop yet — render() is called

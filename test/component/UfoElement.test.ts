@@ -1,8 +1,8 @@
 import { describe, expect, it, afterEach, beforeAll, vi } from "vitest"
-import { registerPlayer, PLAYER_ELEMENT_NAME } from "../../src/component/UfoPlayerElement.js"
-import type { UfoPlayerElement } from "../../src/component/UfoPlayerElement.js"
+import { registerUfo, UFO_ELEMENT_NAME } from "../../src/component/UfoElement.js"
+import type { UfoElement } from "../../src/component/UfoElement.js"
 
-registerPlayer()
+registerUfo()
 
 // jsdom's <canvas> has no real 2D context (getContext("2d") returns null without the
 // native `canvas` package) — stub it, same as test/render/CanvasRenderer.test.ts's mock.
@@ -24,8 +24,8 @@ beforeAll(() => {
   } as unknown as CanvasRenderingContext2D)
 })
 
-function mount(): UfoPlayerElement {
-  const element = document.createElement(PLAYER_ELEMENT_NAME) as UfoPlayerElement
+function mount(): UfoElement {
+  const element = document.createElement(UFO_ELEMENT_NAME) as UfoElement
   document.body.appendChild(element)
   return element
 }
@@ -42,14 +42,14 @@ const sampleJson = {
   }
 }
 
-describe("UfoPlayerElement", () => {
+describe("UfoElement", () => {
   afterEach(() => {
     document.body.innerHTML = ""
     vi.unstubAllGlobals()
   })
 
   it("is ready (canvasElement/renderer/sighting available) immediately after construction", () => {
-    const element = document.createElement(PLAYER_ELEMENT_NAME) as UfoPlayerElement
+    const element = document.createElement(UFO_ELEMENT_NAME) as UfoElement
     expect(element.canvasElement).toBeInstanceOf(HTMLCanvasElement)
     expect(element.renderer).toBeDefined()
     expect(element.sighting).toBeDefined()
@@ -65,7 +65,7 @@ describe("UfoPlayerElement", () => {
     const fetchMock = vi.fn().mockResolvedValue({ json: () => Promise.resolve(sampleJson) })
     vi.stubGlobal("fetch", fetchMock)
 
-    const element = document.createElement(PLAYER_ELEMENT_NAME) as UfoPlayerElement
+    const element = document.createElement(UFO_ELEMENT_NAME) as UfoElement
     element.setAttribute("src", "sighting.json")
     document.body.appendChild(element)
     await new Promise(resolve => setTimeout(resolve, 0))

@@ -76,21 +76,21 @@ describe("UfoRecorderElement appearance toolbar", () => {
   })
 })
 
-describe("UfoRecorderElement composes a nested rr0-ufo-player", () => {
+describe("UfoRecorderElement composes a nested rr0-ufo", () => {
   afterEach(() => {
     document.body.innerHTML = ""
   })
 
-  it("nests a real, upgraded UfoPlayerElement instance", () => {
+  it("nests a real, upgraded UfoElement instance", () => {
     const element = mount()
-    const player = element.shadowRoot!.querySelector("rr0-ufo-player")
-    expect(player).not.toBeNull()
+    const ufo = element.shadowRoot!.querySelector("rr0-ufo")
+    expect(ufo).not.toBeNull()
     // Would be undefined on a not-yet-upgraded element (see the constructor's
     // document.createElement comment) — asserting it's present proves the fix.
-    expect((player as unknown as { canvasElement: unknown }).canvasElement).toBeDefined()
+    expect((ufo as unknown as { canvasElement: unknown }).canvasElement).toBeDefined()
   })
 
-  it("sightingData get/set delegates to the nested player", () => {
+  it("sightingData get/set delegates to the nested ufo element", () => {
     const element = mount()
     const json = {
       version: 1 as const,
@@ -104,7 +104,7 @@ describe("UfoRecorderElement composes a nested rr0-ufo-player", () => {
     expect(element.sightingData).toEqual(json)
   })
 
-  it("recording appends a keyframe to the nested player's timeline", async () => {
+  it("recording appends a keyframe to the nested ufo element's timeline", async () => {
     // Uses real timers deliberately: RafSamplingClock drives recording via the real
     // requestAnimationFrame/performance.now (jsdom's own rAF polyfill, not a sinon-fake-timer
     // concept — see engine/record/SamplingClock.ts's IntervalSamplingClock, which is the
@@ -112,7 +112,7 @@ describe("UfoRecorderElement composes a nested rr0-ufo-player", () => {
     const element = mount()
     const shadow = element.shadowRoot!
     const recordButton = shadow.getElementById("record") as HTMLButtonElement
-    const canvas = shadow.querySelector("rr0-ufo-player")!.shadowRoot!.getElementById("canvas") as HTMLCanvasElement
+    const canvas = shadow.querySelector("rr0-ufo")!.shadowRoot!.getElementById("canvas") as HTMLCanvasElement
     vi.spyOn(canvas, "getBoundingClientRect").mockReturnValue({ left: 0, top: 0 } as DOMRect)
 
     recordButton.click()

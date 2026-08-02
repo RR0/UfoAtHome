@@ -1,12 +1,12 @@
 import { html, css } from "./template.js"
-import { UfoPlayerElement, registerPlayer, PLAYER_ELEMENT_NAME } from "./UfoPlayerElement.js"
+import { UfoElement, registerUfo, UFO_ELEMENT_NAME } from "./UfoElement.js"
 import { Recorder } from "../engine/record/Recorder.js"
 import { RafSamplingClock } from "../engine/record/SamplingClock.js"
 import { createShape, moveShapeTo } from "../engine/shape/Shape.js"
 import type { Appearance, ShapeBounds, ShapePresetId } from "../engine/shape/Shape.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
 
-registerPlayer()
+registerUfo()
 
 const DEFAULT_SHAPE_SIZE = { width: 48, height: 28 }
 const DEFAULT_SOURCE_ID = "ufo-1"
@@ -16,21 +16,21 @@ const DEFAULT_APPEARANCE: Appearance = { presetId: "oval", color: "#39ff14", tra
 /**
  * Vanilla Web Component (no framework/library) for authoring a sighting
  * recording: shape/appearance toolbar + drag-to-record, composing a nested
- * `<rr0-ufo-player>` (see UfoPlayerElement) for the actual canvas/playback
- * instead of duplicating it — a page that only needs to *play* a sighting
- * (the common case: an rr0.org case dossier) should embed
- * `<rr0-ufo-player>` directly and never download this authoring-only code
- * (Recorder engine, SamplingClock, appearance toolbar).
+ * `<rr0-ufo>` (see UfoElement) for the actual canvas/playback instead of
+ * duplicating it — a page that only needs to *play* a sighting (the common
+ * case: an rr0.org case dossier) should embed `<rr0-ufo>` directly and
+ * never download this authoring-only code (Recorder engine, SamplingClock,
+ * appearance toolbar).
  *
  * All wiring happens in the constructor (this element has no attribute/
- * connection dependency). The nested player is created via
+ * connection dependency). The nested ufo element is created via
  * `document.createElement` rather than left inline in the template markup —
  * see the comment at that call site for why an inline tag wouldn't be
  * upgraded yet at construction time.
  */
 export class UfoRecorderElement extends HTMLElement {
   private readonly shadow: ShadowRoot
-  private readonly playerElement: UfoPlayerElement
+  private readonly ufoElement: UfoElement
   private readonly recordButton: HTMLButtonElement
   private readonly samplingRateInput: HTMLInputElement
   private readonly presetButtons: Record<ShapePresetId, HTMLButtonElement>
@@ -51,13 +51,13 @@ export class UfoRecorderElement extends HTMLElement {
 
     // Created imperatively (not left inline in the template markup) and inserted via
     // document.createElement, which — for an already-defined custom element — synchronously
-    // runs its constructor and returns a fully-upgraded instance. An inline <rr0-ufo-player>
-    // tag parsed from `template.content.cloneNode(true)` would NOT be upgraded yet at this
-    // point: elements from an inert <template> only upgrade once connected to a live document,
-    // which happens later (when this recorder itself is inserted), so canvasElement/renderer/
-    // sighting would still be undefined here.
-    this.playerElement = document.createElement(PLAYER_ELEMENT_NAME) as UfoPlayerElement
-    this.shadow.getElementById("player-slot")!.replaceWith(this.playerElement)
+    // runs its constructor and returns a fully-upgraded instance. An inline <rr0-ufo> tag
+    // parsed from `template.content.cloneNode(true)` would NOT be upgraded yet at this point:
+    // elements from an inert <template> only upgrade once connected to a live document, which
+    // happens later (when this recorder itself is inserted), so canvasElement/renderer/sighting
+    // would still be undefined here.
+    this.ufoElement = document.createElement(UFO_ELEMENT_NAME) as UfoElement
+    this.shadow.getElementById("ufo-slot")!.replaceWith(this.ufoElement)
 
     this.recordButton = this.shadow.getElementById("record") as HTMLButtonElement
     this.samplingRateInput = this.shadow.getElementById("samplingRate") as HTMLInputElement
@@ -70,8 +70,8 @@ export class UfoRecorderElement extends HTMLElement {
     this.transparencyInput = this.shadow.getElementById("transparency") as HTMLInputElement
     this.haloScaleInput = this.shadow.getElementById("haloScale") as HTMLInputElement
 
-    this.playerElement.canvasElement.addEventListener("pointerdown", event => this.onPointerDown(event))
-    this.playerElement.canvasElement.addEventListener("pointermove", event => this.onPointerMove(event))
+    this.ufoElement.canvasElement.addEventListener("pointerdown", event => this.onPointerDown(event))
+    this.ufoElement.canvasElement.addEventListener("pointermove", event => this.onPointerMove(event))
     this.recordButton.addEventListener("click", () => this.toggleRecording())
 
     for (const presetId of PRESET_IDS) {
@@ -90,11 +90,11 @@ export class UfoRecorderElement extends HTMLElement {
   }
 
   get sightingData(): SightingRecordingJson {
-    return this.playerElement.sightingData
+    return this.ufoElement.sightingData
   }
 
   set sightingData(json: SightingRecordingJson) {
-    this.playerElement.sightingData = json
+    this.ufoElement.sightingData = json
   }
 
   /** The UFO's appearance (shape preset, color, transparency, halo) used for the next recording. */
@@ -132,7 +132,7 @@ export class UfoRecorderElement extends HTMLElement {
   }
 
   private defaultBounds(): ShapeBounds {
-    const canvas = this.playerElement.canvasElement
+    const canvas = this.ufoElement.canvasElement
     return {
       x: canvas.width / 2 - DEFAULT_SHAPE_SIZE.width / 2,
       y: canvas.height / 2 - DEFAULT_SHAPE_SIZE.height / 2,
@@ -142,22 +142,22 @@ export class UfoRecorderElement extends HTMLElement {
   }
 
   private renderPreview(): void {
-    const canvas = this.playerElement.canvasElement
-    this.playerElement.renderer.clear(canvas.width, canvas.height)
-    this.playerElement.renderer.paintShape(this.buildPrototype())
+    const canvas = this.ufoElement.canvasElement
+    this.ufoElement.renderer.clear(canvas.width, canvas.height)
+    this.ufoElement.renderer.paintShape(this.buildPrototype())
   }
 
   private toggleRecording(): void {
-    const canvas = this.playerElement.canvasElement
+    const canvas = this.ufoElement.canvasElement
     if (this.isRecording) {
       this.recorder?.stop()
       this.isRecording = false
       this.recordButton.textContent = "Record"
       canvas.style.cursor = ""
       canvas.style.touchAction = ""
-      this.playerElement.refresh()
+      this.ufoElement.refresh()
     } else {
-      this.recorder = new Recorder(this.playerElement.sighting.timeline, new RafSamplingClock(this.samplingRate))
+      this.recorder = new Recorder(this.ufoElement.sighting.timeline, new RafSamplingClock(this.samplingRate))
       this.recorder.start(DEFAULT_SOURCE_ID, this.buildPrototype())
       this.isRecording = true
       this.recordButton.textContent = "Stop"
@@ -173,13 +173,13 @@ export class UfoRecorderElement extends HTMLElement {
 
   private onPointerMove(event: PointerEvent): void {
     if (!this.isRecording) return
-    const canvas = this.playerElement.canvasElement
+    const canvas = this.ufoElement.canvasElement
     const rect = canvas.getBoundingClientRect()
     const x = event.clientX - rect.left
     const y = event.clientY - rect.top
     this.recorder?.onPointerMove(x, y)
-    this.playerElement.renderer.clear(canvas.width, canvas.height)
-    this.playerElement.renderer.paintShape(
+    this.ufoElement.renderer.clear(canvas.width, canvas.height)
+    this.ufoElement.renderer.paintShape(
       moveShapeTo(this.buildPrototype({ x: 0, y: 0, width: DEFAULT_SHAPE_SIZE.width, height: DEFAULT_SHAPE_SIZE.height }), x, y)
     )
   }
@@ -188,7 +188,7 @@ export class UfoRecorderElement extends HTMLElement {
 export const ELEMENT_NAME = "rr0-ufo-recorder"
 
 export function register(): void {
-  registerPlayer()
+  registerUfo()
   if (!customElements.get(ELEMENT_NAME)) {
     customElements.define(ELEMENT_NAME, UfoRecorderElement)
   }

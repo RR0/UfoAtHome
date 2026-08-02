@@ -1,7 +1,7 @@
 node_modules/
 dist/
 dist-embed/
-dist-embed-player/
+dist-embed-ufo/
 dist-embed-scene/
 *.log
 *.ipr

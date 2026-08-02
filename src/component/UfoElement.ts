@@ -1,4 +1,4 @@
-import { html, css } from "./playerTemplate.js"
+import { html, css } from "./ufoTemplate.js"
 import { Sighting } from "../engine/model/Sighting.js"
 import { Player } from "../engine/playback/Player.js"
 import { CanvasRenderer } from "../render/CanvasRenderer.js"
@@ -13,21 +13,22 @@ import type { Shape } from "../engine/shape/Shape.js"
  * in real site pages (e.g. an rr0.org case dossier): a page that only needs
  * to *play* a sighting shouldn't have to download the Recorder engine,
  * SamplingClock, or appearance toolbar — see UfoRecorderElement, which
- * composes this element (as a nested `<rr0-ufo-player>` in its own shadow
- * DOM) for the authoring/editing experience instead of duplicating the
- * canvas/playback machinery.
+ * composes this element (as a nested `<rr0-ufo>` in its own shadow DOM) for
+ * the authoring/editing experience instead of duplicating the canvas/
+ * playback machinery. SceneElement (`<rr0-scene>`) composes it too, for the
+ * 3D-decor variant.
  *
  * All wiring happens in the constructor rather than connectedCallback: this
  * element only needs its own shadow DOM to exist (not to be connected to a
- * live document), which is exactly what lets UfoRecorderElement rely on
- * `document.createElement(PLAYER_ELEMENT_NAME)` — synchronous construction
- * for an already-defined custom element — to get a fully-usable instance
- * (`canvasElement`/`renderer`/`sighting` all ready) immediately, with no
- * dependency on connection/upgrade timing. Only the `src` attribute's
- * auto-fetch is inherently attribute/connection dependent, so that alone
- * stays in connectedCallback/attributeChangedCallback.
+ * live document), which is exactly what lets UfoRecorderElement/SceneElement
+ * rely on `document.createElement(UFO_ELEMENT_NAME)` — synchronous
+ * construction for an already-defined custom element — to get a
+ * fully-usable instance (`canvasElement`/`renderer`/`sighting` all ready)
+ * immediately, with no dependency on connection/upgrade timing. Only the
+ * `src` attribute's auto-fetch is inherently attribute/connection
+ * dependent, so that alone stays in connectedCallback/attributeChangedCallback.
  */
-export class UfoPlayerElement extends HTMLElement {
+export class UfoElement extends HTMLElement {
   static get observedAttributes(): string[] {
     return ["src"]
   }
@@ -93,8 +94,9 @@ export class UfoPlayerElement extends HTMLElement {
   }
 
   /**
-   * The live Sighting/Timeline, exposed so UfoRecorderElement (which composes
-   * this element) can add keyframes to it directly as it records.
+   * The live Sighting/Timeline, exposed so UfoRecorderElement/SceneElement
+   * (which compose this element) can add keyframes to it directly as it
+   * records, or read its time/place for lighting.
    */
   get sighting(): Sighting {
     return this.currentSighting
@@ -128,10 +130,10 @@ export class UfoPlayerElement extends HTMLElement {
   }
 }
 
-export const PLAYER_ELEMENT_NAME = "rr0-ufo-player"
+export const UFO_ELEMENT_NAME = "rr0-ufo"
 
-export function registerPlayer(): void {
-  if (!customElements.get(PLAYER_ELEMENT_NAME)) {
-    customElements.define(PLAYER_ELEMENT_NAME, UfoPlayerElement)
+export function registerUfo(): void {
+  if (!customElements.get(UFO_ELEMENT_NAME)) {
+    customElements.define(UFO_ELEMENT_NAME, UfoElement)
   }
 }

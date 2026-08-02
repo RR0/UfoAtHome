@@ -13,7 +13,7 @@ export const html = `
   <button id="record" type="button">Record</button>
   <label>Sampling rate (ms) <input id="samplingRate" type="number" min="16" step="16" value="100"/></label>
 </div>
-<div id="player-slot"></div>
+<div id="ufo-slot"></div>
 `
 
 export const css = `

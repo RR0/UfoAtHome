@@ -1,7 +1,7 @@
 export const html = `
 <div class="stage">
   <canvas id="scene-canvas"></canvas>
-  <div id="player-slot"></div>
+  <div id="ufo-slot"></div>
 </div>
 `
 
@@ -22,7 +22,7 @@ export const css = `
   height: 100%;
   display: block;
 }
-.player-overlay {
+.ufo-overlay {
   position: absolute;
   inset: 0;
 }

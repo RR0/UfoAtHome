@@ -14,23 +14,23 @@
     "node": ">=20"
   },
   "exports": {
-    "./player": "./dist-embed-player/rr0-ufo-player.mjs",
+    "./ufo": "./dist-embed-ufo/rr0-ufo.mjs",
     "./recorder": "./dist-embed/rr0-ufo-recorder.mjs",
-    "./scene": "./dist-embed-scene/rr0-ufo-scene.mjs"
+    "./scene": "./dist-embed-scene/rr0-scene.mjs"
   },
   "files": [
     "dist-embed",
-    "dist-embed-player",
+    "dist-embed-ufo",
     "dist-embed-scene"
   ],
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "build:embed": "tsc --noEmit && vite build --config vite.embed.config.ts",
-    "build:embed-player": "tsc --noEmit && vite build --config vite.embed-player.config.ts",
+    "build:embed-ufo": "tsc --noEmit && vite build --config vite.embed-ufo.config.ts",
     "build:embed-scene": "tsc --noEmit && vite build --config vite.embed-scene.config.ts",
-    "build:all": "npm run build && npm run build:embed && npm run build:embed-player && npm run build:embed-scene",
-    "prepublishOnly": "npm run build:embed && npm run build:embed-player && npm run build:embed-scene && npm test",
+    "build:all": "npm run build && npm run build:embed && npm run build:embed-ufo && npm run build:embed-scene",
+    "prepublishOnly": "npm run build:embed && npm run build:embed-ufo && npm run build:embed-scene && npm test",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest"
