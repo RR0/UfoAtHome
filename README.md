@@ -73,6 +73,7 @@ The lightweight component (~9KB): a canvas plus Play/Pause/Loop/seek controls. U
 | `renderer` | property (readonly) | The `CanvasRenderer` instance painting onto that canvas |
 | `refresh()` | method | Re-reads the timeline's duration into the seek slider and repaints the current frame — call after externally mutating `sighting.timeline` |
 | `loadFromSrc(url)` | method (async) | What the `src` attribute triggers internally; can be called directly too |
+| `enableClickToPlay` | property (get/set, default `true`) | Whether clicking the canvas toggles Play/Pause (see below). Composing elements that need the canvas's own click for something else set this to `false` — see `<rr0-ufo-recorder>`. |
 
 Playback matches the observation's *real reported duration* when it's known: set `time`/`endTime`, or `time`/
 `durationSeconds`, in the [data format](#data-format) (`durationSeconds` takes precedence over `endTime` if both are
@@ -81,6 +82,12 @@ author (e.g. a quick mouse drag) — drag the seek bar directly to skip ahead. T
 bar show real clock times when `time` has an hour (e.g. `02:45` → `02:50`); otherwise they show `0:00` → the
 duration actually available (the declared one if known, else the recording's own length). Playback loops by
 default — click the loop button (pressed = looping) to play once and stop instead.
+
+Clicking anywhere on the canvas also toggles Play/Pause (not just the button), matching common video-player UX.
+While playing, the toolbar auto-hides and only reappears on hover — always shown while paused/stopped.
+
+Labels (Play/Pause, Auto-replay, Current position, Duration) are translated (English/French) based on the visitor's
+`navigator.languages`, falling back to English — there's no language-picker UI, this is the only mechanism.
 
 ## `<rr0-ufo-recorder>` — full editor
 
@@ -93,7 +100,8 @@ than duplicating the canvas/playback code — see [Architecture](#architecture).
 ```
 
 Usage: click **Record**, move the pointer over the canvas to draw the UFO's path, click **Stop**, then **Play** to
-replay it.
+replay it. The nested `<rr0-ufo>`'s `enableClickToPlay` is set to `false` here — a completed recording drag also
+fires a native "click" on the canvas, which would otherwise spuriously toggle playback right after recording.
 
 | Member | Kind | Description |
 |---|---|---|
@@ -105,7 +113,8 @@ replay it.
 The environmental variant (~180KB gzip, dominated by [Three.js](https://threejs.org/) — this is by far the heaviest
 of the three bundles, load it only on pages that want it): everything `<rr0-ufo>` has, composited over a 3D
 sky/horizon/starfield backdrop instead of a plain background. Same markup and members as `<rr0-ufo>` (`src`,
-`sightingData`, `loadFromSrc`) — it's a drop-in upgrade.
+`sightingData`, `loadFromSrc`, `enableClickToPlay`) — it's a drop-in upgrade, including click-to-play/pause
+anywhere on the scene (the nested `<rr0-ufo>`'s transparent canvas covers the whole stage).
 
 ```html
 <rr0-scene src="sighting.json"></rr0-scene>
