@@ -30,6 +30,14 @@ function mount(): UfoElement {
   return element
 }
 
+async function waitFor(check: () => boolean, timeoutMs = 500): Promise<void> {
+  const start = Date.now()
+  while (!check()) {
+    if (Date.now() - start > timeoutMs) throw new Error("waitFor timed out")
+    await new Promise(resolve => setTimeout(resolve, 5))
+  }
+}
+
 const sampleJson = {
   version: 1 as const,
   time: { year: 1948, month: 7, day: 24 },
@@ -138,6 +146,40 @@ describe("UfoElement", () => {
 
     button.click()
     expect(button.title).toBe("Play")
+  })
+
+  it("loads French labels when navigator.languages prefers fr, with no language picker", async () => {
+    const spy = vi.spyOn(navigator, "languages", "get").mockReturnValue(["fr-FR", "fr"])
+    const element = mount()
+    const button = element.shadowRoot!.getElementById("play-pause") as HTMLButtonElement
+    // The dynamic import() of the fr messages module resolves over more than one tick under
+    // Vitest's transform pipeline — poll rather than assume a single setTimeout(0) is enough.
+    await waitFor(() => button.title === "Lecture")
+    const loopButton = element.shadowRoot!.getElementById("loop") as HTMLButtonElement
+    expect(loopButton.title).toBe("Lecture automatique")
+    spy.mockRestore()
+  })
+
+  it("falls back to the English defaults when navigator.languages has no supported match", async () => {
+    const spy = vi.spyOn(navigator, "languages", "get").mockReturnValue(["de-DE", "de"])
+    const element = mount()
+    await new Promise(resolve => setTimeout(resolve, 20)) // no fr/en module load is triggered; just let any microtasks settle
+    const button = element.shadowRoot!.getElementById("play-pause") as HTMLButtonElement
+    expect(button.title).toBe("Play")
+    spy.mockRestore()
+  })
+
+  it("the toolbar auto-hides while playing and stays shown while paused/stopped", () => {
+    const element = mount()
+    const button = element.shadowRoot!.getElementById("play-pause") as HTMLButtonElement
+    const toolbar = element.shadowRoot!.getElementById("toolbar") as HTMLElement
+    expect(toolbar.classList.contains("auto-hide")).toBe(false)
+
+    button.click() // play
+    expect(toolbar.classList.contains("auto-hide")).toBe(true)
+
+    button.click() // pause
+    expect(toolbar.classList.contains("auto-hide")).toBe(false)
   })
 
   it("loop button starts pressed (loop enabled by default) and toggles on click", () => {

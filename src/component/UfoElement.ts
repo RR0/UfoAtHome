@@ -6,6 +6,11 @@ import { CanvasRenderer } from "../render/CanvasRenderer.js"
 import { fromSightingJson, toSightingJson } from "../engine/persistence/sightingJson.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
 import type { Shape } from "../engine/shape/Shape.js"
+import { selectLocale } from "../i18n/locale.js"
+import { loadUfoMessages, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
+import type { UfoLanguage } from "./messages/index.js"
+import { ufoMessages_en } from "./messages/UfoMessages_en.js"
+import type { UfoMessages } from "./messages/UfoMessages.js"
 
 /**
  * Vanilla Web Component (no framework/library) for read-only playback of a
@@ -37,6 +42,7 @@ export class UfoElement extends HTMLElement {
   private readonly shadow: ShadowRoot
   private readonly canvas: HTMLCanvasElement
   private readonly canvasRenderer: CanvasRenderer
+  private readonly toolbar: HTMLElement
   private readonly playPauseButton: HTMLButtonElement
   private readonly loopButton: HTMLButtonElement
   private readonly seekInput: HTMLInputElement
@@ -46,6 +52,9 @@ export class UfoElement extends HTMLElement {
   private currentSighting: Sighting = Sighting.create()
   private player: Player
   private loopEnabled = true
+  /** Matches the template's baked-in English defaults until (if ever) loadLocaleMessages()
+   * resolves a better match — see its doc comment. */
+  private messages: UfoMessages = ufoMessages_en
 
   /** The sighting's real reported duration/start, cached by updateTimeLabels() so onFrame doesn't
    * recompute them every animation frame — see formatPosition, which turns a `Timeline` position
@@ -62,6 +71,7 @@ export class UfoElement extends HTMLElement {
 
     this.canvas = this.shadow.getElementById("canvas") as HTMLCanvasElement
     this.canvasRenderer = new CanvasRenderer(this.canvas.getContext("2d")!)
+    this.toolbar = this.shadow.getElementById("toolbar")!
     this.playPauseButton = this.shadow.getElementById("play-pause") as HTMLButtonElement
     this.loopButton = this.shadow.getElementById("loop") as HTMLButtonElement
     this.seekInput = this.shadow.getElementById("seek") as HTMLInputElement
@@ -76,6 +86,7 @@ export class UfoElement extends HTMLElement {
     this.updateTimeLabels()
     this.updatePlayPauseButton()
     this.refresh()
+    void this.loadLocaleMessages()
   }
 
   connectedCallback(): void {
@@ -167,14 +178,38 @@ export class UfoElement extends HTMLElement {
   private updatePlayPauseButton(): void {
     const isPlaying = this.player.playbackState === "playing"
     this.playPauseButton.textContent = isPlaying ? "⏸" : "▶"
-    this.playPauseButton.title = isPlaying ? "Pause" : "Play"
-    this.playPauseButton.setAttribute("aria-label", isPlaying ? "Pause" : "Play")
+    this.playPauseButton.title = isPlaying ? this.messages.pause : this.messages.play
+    this.playPauseButton.setAttribute("aria-label", isPlaying ? this.messages.pause : this.messages.play)
+    // Auto-hides the toolbar while playing (reappears on hover/focus — see the CSS) so it doesn't
+    // sit over the scene the whole time; always shown while paused/stopped, since that's when the
+    // user is most likely to want it (e.g. right after it stopped, or to scrub before playing).
+    this.toolbar.classList.toggle("auto-hide", isPlaying)
   }
 
   private toggleLoop(): void {
     this.loopEnabled = !this.loopEnabled
     this.loopButton.setAttribute("aria-pressed", String(this.loopEnabled))
     this.player.loop = this.loopEnabled
+  }
+
+  /**
+   * Auto-detects the visitor's preferred UI language from `navigator.languages`, falling back to
+   * English (already baked into the template) when none of their preferences are supported —
+   * see selectLocale. There is deliberately no language-picker UI: this is the only mechanism.
+   */
+  private async loadLocaleMessages(): Promise<void> {
+    const language = selectLocale(navigator.languages, UFO_SUPPORTED_LANGUAGES) as UfoLanguage
+    if (language === "en") return
+    this.applyMessages(await loadUfoMessages(language))
+  }
+
+  private applyMessages(messages: UfoMessages): void {
+    this.messages = messages
+    this.timeStartLabel.title = messages.currentPosition
+    this.timeEndLabel.title = messages.duration
+    this.loopButton.title = messages.autoReplay
+    this.loopButton.setAttribute("aria-label", messages.autoReplay)
+    this.updatePlayPauseButton()
   }
 
   /**

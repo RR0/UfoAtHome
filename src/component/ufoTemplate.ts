@@ -1,12 +1,12 @@
 export const html = `
 <div class="stage">
   <canvas id="canvas" width="640" height="360"></canvas>
-  <div class="toolbar">
+  <div class="toolbar" id="toolbar">
     <button id="play-pause" type="button" title="Play" aria-label="Play">▶</button>
-    <span id="time-start" class="time-label">0:00</span>
+    <span id="time-start" class="time-label" title="Current position">0:00</span>
     <input id="seek" type="range" min="0" max="0" value="0" step="1"/>
-    <span id="time-end" class="time-label">0:00</span>
-    <button id="loop" type="button" title="Loop" aria-label="Loop" aria-pressed="true">↻</button>
+    <span id="time-end" class="time-label" title="Duration">0:00</span>
+    <button id="loop" type="button" title="Auto-replay" aria-label="Auto-replay" aria-pressed="true">↻</button>
   </div>
 </div>
 `
@@ -39,6 +39,18 @@ canvas {
   gap: 0.5em;
   padding: 0.4em 0.6em;
   background: rgba(0, 0, 0, 0.55);
+  transition: opacity 0.15s ease;
+}
+/* While playing, the toolbar auto-hides and only reappears on hover (or keyboard focus) — kept
+   always visible while paused/stopped, since that's when the user is most likely to want it. */
+.toolbar.auto-hide {
+  opacity: 0;
+  pointer-events: none;
+}
+.stage:hover .toolbar.auto-hide,
+.toolbar.auto-hide:focus-within {
+  opacity: 1;
+  pointer-events: auto;
 }
 input[type=range] {
   flex: 1;
