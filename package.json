@@ -15,19 +15,22 @@
   },
   "exports": {
     "./player": "./dist-embed-player/rr0-ufo-player.mjs",
-    "./recorder": "./dist-embed/rr0-ufo-recorder.mjs"
+    "./recorder": "./dist-embed/rr0-ufo-recorder.mjs",
+    "./scene": "./dist-embed-scene/rr0-ufo-scene.mjs"
   },
   "files": [
     "dist-embed",
-    "dist-embed-player"
+    "dist-embed-player",
+    "dist-embed-scene"
   ],
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "build:embed": "tsc --noEmit && vite build --config vite.embed.config.ts",
     "build:embed-player": "tsc --noEmit && vite build --config vite.embed-player.config.ts",
-    "build:all": "npm run build && npm run build:embed && npm run build:embed-player",
-    "prepublishOnly": "npm run build:embed && npm run build:embed-player && npm test",
+    "build:embed-scene": "tsc --noEmit && vite build --config vite.embed-scene.config.ts",
+    "build:all": "npm run build && npm run build:embed && npm run build:embed-player && npm run build:embed-scene",
+    "prepublishOnly": "npm run build:embed && npm run build:embed-player && npm run build:embed-scene && npm test",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest"
@@ -35,9 +38,11 @@
   "dependencies": {
     "@rr0/data": "^0.3.40",
     "@rr0/place": "^0.5.3",
-    "@rr0/time": "^0.11.2"
+    "@rr0/time": "^0.11.2",
+    "three": "^0.185.1"
   },
   "devDependencies": {
+    "@types/three": "^0.185.3",
     "jsdom": "^25.0.0",
     "typescript": "^5.9.2",
     "vite": "^6.3.5",

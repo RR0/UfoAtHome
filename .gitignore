@@ -2,6 +2,7 @@ node_modules/
 dist/
 dist-embed/
 dist-embed-player/
+dist-embed-scene/
 *.log
 *.ipr
 *.iws
