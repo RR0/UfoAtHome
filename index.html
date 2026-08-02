@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>UFO@home — engine demo</title>
+  <style>
+    body {
+      background: #111;
+      color: #eee;
+      font-family: sans-serif;
+      max-width: 720px;
+      margin: 2em auto;
+    }
+    button {
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+<h1>UFO@home — record &amp; replay demo</h1>
+<p>
+  Click <b>Record</b>, move the pointer over the canvas to draw the UFO's path, then <b>Stop</b> and hit
+  <b>Play</b>. Or load the bundled sample recording below.
+</p>
+<button id="load-sample" type="button">Load sample recording</button>
+<rr0-ufo-recorder id="recorder"></rr0-ufo-recorder>
+<script type="module" src="/src/demo/main.ts"></script>
+</body>
+</html>

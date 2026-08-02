@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "time": { "year": 1987, "month": 6, "day": 12 },
+  "place": [{ "lat": 45.188529, "lng": 5.724524 }],
+  "witnessId": "demo-witness-1",
+  "timeline": {
+    "keyframes": [
+      { "t": 0, "shapes": [{ "sourceId": "ufo-1", "shape": { "kind": "oval", "bounds": { "x": 56, "y": 166, "width": 48, "height": 28 }, "color": "#39ff14", "angle": 0, "transparency": 0, "haloScale": 1.5, "selected": false } }] },
+      { "t": 300, "shapes": [{ "sourceId": "ufo-1", "shape": { "kind": "oval", "bounds": { "x": 116, "y": 126, "width": 48, "height": 28 }, "color": "#39ff14", "angle": 0.1, "transparency": 0, "haloScale": 1.5, "selected": false } }] },
+      { "t": 600, "shapes": [{ "sourceId": "ufo-1", "shape": { "kind": "oval", "bounds": { "x": 176, "y": 96, "width": 48, "height": 28 }, "color": "#39ff14", "angle": 0.2, "transparency": 0, "haloScale": 1.7, "selected": false } }] },
+      { "t": 900, "shapes": [{ "sourceId": "ufo-1", "shape": { "kind": "oval", "bounds": { "x": 236, "y": 86, "width": 48, "height": 28 }, "color": "#39ff14", "angle": 0.3, "transparency": 0, "haloScale": 1.9, "selected": false } }] },
+      { "t": 1200, "shapes": [{ "sourceId": "ufo-1", "shape": { "kind": "oval", "bounds": { "x": 296, "y": 96, "width": 48, "height": 28 }, "color": "#39ff14", "angle": 0.2, "transparency": 0, "haloScale": 1.7, "selected": false } }] },
+      { "t": 1500, "shapes": [{ "sourceId": "ufo-1", "shape": { "kind": "oval", "bounds": { "x": 356, "y": 126, "width": 48, "height": 28 }, "color": "#39ff14", "angle": 0.1, "transparency": 0, "haloScale": 1.5, "selected": false } }] },
+      { "t": 1800, "shapes": [{ "sourceId": "ufo-1", "shape": { "kind": "oval", "bounds": { "x": 416, "y": 166, "width": 48, "height": 28 }, "color": "#39ff14", "angle": 0, "transparency": 0.1, "haloScale": 1.3, "selected": false } }] },
+      { "t": 2100, "shapes": [{ "sourceId": "ufo-1", "shape": { "kind": "oval", "bounds": { "x": 476, "y": 196, "width": 48, "height": 28 }, "color": "#39ff14", "angle": 0, "transparency": 0.4, "haloScale": 1, "selected": false } }] }
+    ]
+  }
+}
