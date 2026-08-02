@@ -6,11 +6,13 @@ import { Player } from "../engine/playback/Player.js"
 import { CanvasRenderer } from "../render/CanvasRenderer.js"
 import { fromSightingJson, toSightingJson } from "../engine/persistence/sightingJson.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
-import { createOval, moveShapeTo } from "../engine/shape/Shape.js"
-import type { Shape } from "../engine/shape/Shape.js"
+import { createShape, moveShapeTo } from "../engine/shape/Shape.js"
+import type { Appearance, Shape, ShapePresetId } from "../engine/shape/Shape.js"
 
 const DEFAULT_SHAPE_SIZE = { width: 48, height: 28 }
 const DEFAULT_SOURCE_ID = "ufo-1"
+const PRESET_IDS: ShapePresetId[] = ["oval", "saucer", "triangle"]
+const DEFAULT_APPEARANCE: Appearance = { presetId: "oval", color: "#39ff14", transparency: 0, haloScale: 1.5 }
 
 export type UfoRecorderMode = "record" | "playback"
 
@@ -33,11 +35,16 @@ export class UfoRecorderElement extends HTMLElement {
   private pauseButton!: HTMLButtonElement
   private samplingRateInput!: HTMLInputElement
   private seekInput!: HTMLInputElement
+  private presetButtons!: Record<ShapePresetId, HTMLButtonElement>
+  private colorInput!: HTMLInputElement
+  private transparencyInput!: HTMLInputElement
+  private haloScaleInput!: HTMLInputElement
 
   private sighting: Sighting = Sighting.create()
   private recorder?: Recorder
   private player?: Player
   private isRecording = false
+  private currentAppearance: Appearance = { ...DEFAULT_APPEARANCE }
 
   constructor() {
     super()
@@ -55,6 +62,14 @@ export class UfoRecorderElement extends HTMLElement {
     this.pauseButton = this.shadow.getElementById("pause") as HTMLButtonElement
     this.samplingRateInput = this.shadow.getElementById("samplingRate") as HTMLInputElement
     this.seekInput = this.shadow.getElementById("seek") as HTMLInputElement
+    this.presetButtons = {
+      oval: this.shadow.getElementById("preset-oval") as HTMLButtonElement,
+      saucer: this.shadow.getElementById("preset-saucer") as HTMLButtonElement,
+      triangle: this.shadow.getElementById("preset-triangle") as HTMLButtonElement
+    }
+    this.colorInput = this.shadow.getElementById("color") as HTMLInputElement
+    this.transparencyInput = this.shadow.getElementById("transparency") as HTMLInputElement
+    this.haloScaleInput = this.shadow.getElementById("haloScale") as HTMLInputElement
 
     this.canvas.addEventListener("pointerdown", event => this.onPointerDown(event))
     this.canvas.addEventListener("pointermove", event => this.onPointerMove(event))
@@ -64,7 +79,19 @@ export class UfoRecorderElement extends HTMLElement {
     this.pauseButton.addEventListener("click", () => this.player?.pause())
     this.seekInput.addEventListener("input", () => this.player?.seek(Number(this.seekInput.value)))
 
+    for (const presetId of PRESET_IDS) {
+      this.presetButtons[presetId].addEventListener("click", () => this.setAppearance({ presetId }))
+    }
+    this.colorInput.addEventListener("input", () => this.setAppearance({ color: this.colorInput.value }))
+    this.transparencyInput.addEventListener("input", () =>
+      this.setAppearance({ transparency: Number(this.transparencyInput.value) })
+    )
+    this.haloScaleInput.addEventListener("input", () =>
+      this.setAppearance({ haloScale: Number(this.haloScaleInput.value) })
+    )
+
     this.player = new Player(this.sighting.timeline, (t, shapesBySource) => this.onFrame(t, shapesBySource))
+    this.updatePresetButtons()
     this.paintCurrentFrame()
   }
 
@@ -83,8 +110,52 @@ export class UfoRecorderElement extends HTMLElement {
     this.paintCurrentFrame()
   }
 
+  /** The UFO's appearance (shape preset, color, transparency, halo) used for the next recording. */
+  get appearance(): Appearance {
+    return { ...this.currentAppearance }
+  }
+
+  set appearance(appearance: Partial<Appearance>) {
+    this.setAppearance(appearance)
+  }
+
+  private setAppearance(appearance: Partial<Appearance>): void {
+    this.currentAppearance = { ...this.currentAppearance, ...appearance }
+    this.updatePresetButtons()
+    if (!this.isRecording) {
+      this.renderPreview()
+    }
+  }
+
+  private updatePresetButtons(): void {
+    for (const presetId of PRESET_IDS) {
+      this.presetButtons[presetId]?.setAttribute(
+        "aria-pressed",
+        String(presetId === this.currentAppearance.presetId)
+      )
+    }
+  }
+
   private get samplingRate(): number {
     return Number(this.samplingRateInput?.value ?? this.getAttribute("sampling-rate") ?? 100)
+  }
+
+  private buildPrototype(bounds = this.defaultBounds()): Shape {
+    return createShape(bounds, this.currentAppearance)
+  }
+
+  private defaultBounds() {
+    return {
+      x: this.canvas.width / 2 - DEFAULT_SHAPE_SIZE.width / 2,
+      y: this.canvas.height / 2 - DEFAULT_SHAPE_SIZE.height / 2,
+      width: DEFAULT_SHAPE_SIZE.width,
+      height: DEFAULT_SHAPE_SIZE.height
+    }
+  }
+
+  private renderPreview(): void {
+    this.renderer.clear(this.canvas.width, this.canvas.height)
+    this.renderer.paintShape(this.buildPrototype())
   }
 
   private toggleRecording(): void {
@@ -95,13 +166,7 @@ export class UfoRecorderElement extends HTMLElement {
       this.seekInput.max = String(this.sighting.timeline.duration)
     } else {
       this.recorder = new Recorder(this.sighting.timeline, new RafSamplingClock(this.samplingRate))
-      const prototype = createOval({
-        x: this.canvas.width / 2 - DEFAULT_SHAPE_SIZE.width / 2,
-        y: this.canvas.height / 2 - DEFAULT_SHAPE_SIZE.height / 2,
-        width: DEFAULT_SHAPE_SIZE.width,
-        height: DEFAULT_SHAPE_SIZE.height
-      })
-      this.recorder.start(DEFAULT_SOURCE_ID, prototype)
+      this.recorder.start(DEFAULT_SOURCE_ID, this.buildPrototype())
       this.isRecording = true
       this.recordButton.textContent = "Stop"
     }
@@ -124,11 +189,7 @@ export class UfoRecorderElement extends HTMLElement {
     this.recorder?.onPointerMove(x, y)
     this.renderer.clear(this.canvas.width, this.canvas.height)
     this.renderer.paintShape(
-      moveShapeTo(
-        createOval({ x: 0, y: 0, width: DEFAULT_SHAPE_SIZE.width, height: DEFAULT_SHAPE_SIZE.height }),
-        x,
-        y
-      )
+      moveShapeTo(this.buildPrototype({ x: 0, y: 0, width: DEFAULT_SHAPE_SIZE.width, height: DEFAULT_SHAPE_SIZE.height }), x, y)
     )
   }
 
@@ -147,7 +208,11 @@ export class UfoRecorderElement extends HTMLElement {
 
   private paintCurrentFrame(): void {
     this.seekInput.max = String(this.sighting.timeline.duration)
-    this.player?.seek(0)
+    if (this.sighting.timeline.duration > 0 || this.sighting.timeline.sourceIds.length > 0) {
+      this.player?.seek(0)
+    } else {
+      this.renderPreview()
+    }
   }
 }
 
