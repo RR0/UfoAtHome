@@ -1,8 +1,0 @@
-<?xml version="1.0"?>
-<!DOCTYPE jdo SYSTEM "jdo.dtd">
-<jdo>
-    <package name="org.rr0.im.service.function.classification.impl">
-        <class name="CategoryImpl" />
-        <class name="ClassificationImpl"/>
-    </package>
-</jdo>

@@ -1,5 +1,0 @@
-<project name="knownphenomenonmatrix">
-    <target name="compile">
-        <javac
-    </target>
-</project>
