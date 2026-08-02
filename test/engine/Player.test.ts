@@ -103,5 +103,21 @@ describe("Player", () => {
       expect(player.time).toBe(100)
       expect(player.playbackState).toBe("stopped")
     })
+
+    it("play() after reaching the end (no loop) restarts from 0 instead of doing nothing", () => {
+      const timeline = buildTimeline() // duration 100
+      const player = new Player(timeline, vi.fn())
+
+      player.play()
+      now += 130 // reach the end -> auto-stop
+      frame?.(now)
+      expect(player.time).toBe(100)
+      expect(player.playbackState).toBe("stopped")
+
+      player.play()
+
+      expect(player.time).toBe(0)
+      expect(player.playbackState).toBe("playing")
+    })
   })
 })

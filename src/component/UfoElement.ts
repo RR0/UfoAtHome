@@ -37,8 +37,7 @@ export class UfoElement extends HTMLElement {
   private readonly shadow: ShadowRoot
   private readonly canvas: HTMLCanvasElement
   private readonly canvasRenderer: CanvasRenderer
-  private readonly playButton: HTMLButtonElement
-  private readonly pauseButton: HTMLButtonElement
+  private readonly playPauseButton: HTMLButtonElement
   private readonly loopButton: HTMLButtonElement
   private readonly seekInput: HTMLInputElement
   private readonly timeStartLabel: HTMLElement
@@ -47,6 +46,12 @@ export class UfoElement extends HTMLElement {
   private currentSighting: Sighting = Sighting.create()
   private player: Player
   private loopEnabled = true
+
+  /** The sighting's real reported duration/start, cached by updateTimeLabels() so onFrame doesn't
+   * recompute them every animation frame — see formatPosition, which turns a `Timeline` position
+   * (ms since recording start) into what's actually displayed. */
+  private realDurationMs: number | undefined
+  private realStartMs: number | undefined
 
   constructor() {
     super()
@@ -57,20 +62,19 @@ export class UfoElement extends HTMLElement {
 
     this.canvas = this.shadow.getElementById("canvas") as HTMLCanvasElement
     this.canvasRenderer = new CanvasRenderer(this.canvas.getContext("2d")!)
-    this.playButton = this.shadow.getElementById("play") as HTMLButtonElement
-    this.pauseButton = this.shadow.getElementById("pause") as HTMLButtonElement
+    this.playPauseButton = this.shadow.getElementById("play-pause") as HTMLButtonElement
     this.loopButton = this.shadow.getElementById("loop") as HTMLButtonElement
     this.seekInput = this.shadow.getElementById("seek") as HTMLInputElement
     this.timeStartLabel = this.shadow.getElementById("time-start")!
     this.timeEndLabel = this.shadow.getElementById("time-end")!
 
-    this.playButton.addEventListener("click", () => this.player.play())
-    this.pauseButton.addEventListener("click", () => this.player.pause())
+    this.playPauseButton.addEventListener("click", () => this.togglePlayPause())
     this.loopButton.addEventListener("click", () => this.toggleLoop())
     this.seekInput.addEventListener("input", () => this.player.seek(Number(this.seekInput.value)))
 
     this.player = this.createPlayer()
     this.updateTimeLabels()
+    this.updatePlayPauseButton()
     this.refresh()
   }
 
@@ -101,6 +105,7 @@ export class UfoElement extends HTMLElement {
     this.currentSighting = fromSightingJson(json)
     this.player = this.createPlayer()
     this.updateTimeLabels()
+    this.updatePlayPauseButton()
     this.refresh()
   }
 
@@ -138,12 +143,32 @@ export class UfoElement extends HTMLElement {
       this.canvasRenderer.paintShape(shape)
     }
     this.seekInput.value = String(t)
+    this.timeStartLabel.textContent = this.formatPosition(t)
+    // Catches the player stopping on its own (reaching the end without loop), not just clicks —
+    // safe to read playbackState here since Player.play() flips it before painting the last frame.
+    this.updatePlayPauseButton()
   }
 
   private createPlayer(): Player {
     const player = new Player(this.currentSighting.timeline, (t, shapesBySource) => this.onFrame(t, shapesBySource))
     player.loop = this.loopEnabled
     return player
+  }
+
+  private togglePlayPause(): void {
+    if (this.player.playbackState === "playing") {
+      this.player.pause()
+    } else {
+      this.player.play()
+    }
+    this.updatePlayPauseButton()
+  }
+
+  private updatePlayPauseButton(): void {
+    const isPlaying = this.player.playbackState === "playing"
+    this.playPauseButton.textContent = isPlaying ? "⏸" : "▶"
+    this.playPauseButton.title = isPlaying ? "Pause" : "Play"
+    this.playPauseButton.setAttribute("aria-label", isPlaying ? "Pause" : "Play")
   }
 
   private toggleLoop(): void {
@@ -153,27 +178,49 @@ export class UfoElement extends HTMLElement {
   }
 
   /**
-   * Sets the seek bar's start/end labels and the player's playback rate from the sighting's
-   * real-world reported duration (see sightingDurationMs) rather than `timeline.duration` (how
-   * long the recording itself took to author). With a known start clock time, the labels show
-   * real times (e.g. "02:45" → "02:50"); with only a duration/no anchor, they show "0:00" →
-   * the real duration; with neither, they fall back to "0:00" → the recording's own length.
+   * Caches the sighting's real-world reported duration/start (see sightingDurationMs) and sets
+   * the player's playback rate and the seek bar's end label from them, rather than from
+   * `timeline.duration` (how long the recording itself took to author).
    */
   private updateTimeLabels(): void {
     const event = this.currentSighting.event
     const durationMs = sightingDurationMs(event)
-    const startMs = event.time ? sightingTimeToMs(event.time) : undefined
+    this.realDurationMs = durationMs !== undefined && durationMs > 0 ? durationMs : undefined
+    this.realStartMs = event.time ? sightingTimeToMs(event.time) : undefined
 
     this.player.playbackRate =
-      durationMs !== undefined && durationMs > 0 ? this.currentSighting.timeline.duration / durationMs : 1
+      this.realDurationMs !== undefined ? this.currentSighting.timeline.duration / this.realDurationMs : 1
 
-    if (startMs !== undefined && durationMs !== undefined) {
-      this.timeStartLabel.textContent = formatClockTime(event.time!)
-      this.timeEndLabel.textContent = formatClockTime(msToTimeOfDay(startMs + durationMs))
-    } else {
-      this.timeStartLabel.textContent = "0:00"
-      this.timeEndLabel.textContent = formatElapsed(durationMs ?? this.currentSighting.timeline.duration)
-    }
+    this.timeEndLabel.textContent = this.formatEndOfTimeline()
+    this.timeStartLabel.textContent = this.formatPosition(this.player.time)
+  }
+
+  /**
+   * Turns a `Timeline` position (ms since recording start, i.e. what Player deals in) into what's
+   * actually displayed: a real clock time (e.g. "02:47") when a real start/duration are both
+   * known, an elapsed real duration ("0:00" based) when only the duration is known, or the
+   * recording's own elapsed time when neither is known — see updateTimeLabels.
+   */
+  private formatPosition(t: number): string {
+    if (this.realDurationMs === undefined) return formatElapsed(t)
+    const timelineDuration = this.currentSighting.timeline.duration
+    const realElapsedMs = timelineDuration > 0 ? (t / timelineDuration) * this.realDurationMs : 0
+    return this.realStartMs !== undefined
+      ? formatClockTime(msToTimeOfDay(this.realStartMs + realElapsedMs))
+      : formatElapsed(realElapsedMs)
+  }
+
+  /**
+   * The fixed end-of-timeline label — always the *full* real declared duration (clock time or
+   * elapsed), or the recording's own length when no real duration is known. Unlike
+   * formatPosition, doesn't scale by `timeline.duration`: a single-keyframe/static recording
+   * (timeline.duration === 0) still has a full declared real duration to show as its end.
+   */
+  private formatEndOfTimeline(): string {
+    if (this.realDurationMs === undefined) return formatElapsed(this.currentSighting.timeline.duration)
+    return this.realStartMs !== undefined
+      ? formatClockTime(msToTimeOfDay(this.realStartMs + this.realDurationMs))
+      : formatElapsed(this.realDurationMs)
   }
 }
 

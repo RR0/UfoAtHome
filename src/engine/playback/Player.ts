@@ -38,6 +38,13 @@ export class Player {
 
   play(): void {
     if (this.state === "playing") return
+    // Replaying after reaching the end (non-looping) restarts from 0, matching standard media
+    // player behavior — otherwise the next tick would immediately re-trigger the end-of-timeline
+    // branch below and stop again with no visible effect.
+    if (this.currentT >= this.timeline.duration) {
+      this.currentT = 0
+      this.resolveFrame(0)
+    }
     this.state = "playing"
     this.lastWallTime = performance.now()
     const tick = () => {
@@ -53,8 +60,10 @@ export class Player {
           return
         }
         this.currentT = this.timeline.duration
-        this.resolveFrame(this.currentT)
+        // stop() before resolveFrame(): callers reading `playbackState` from within onFrame (e.g.
+        // to sync a Play/Pause button) see the final "stopped" state, not a stale "playing" one.
         this.stop()
+        this.resolveFrame(this.currentT)
         return
       }
       this.resolveFrame(this.currentT)

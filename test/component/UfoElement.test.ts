@@ -128,6 +128,18 @@ describe("UfoElement", () => {
     expect(end.textContent).toBe("02:50")
   })
 
+  it("the single play/pause button toggles its icon and title on click", () => {
+    const element = mount()
+    const button = element.shadowRoot!.getElementById("play-pause") as HTMLButtonElement
+    expect(button.title).toBe("Play")
+
+    button.click()
+    expect(button.title).toBe("Pause")
+
+    button.click()
+    expect(button.title).toBe("Play")
+  })
+
   it("loop button starts pressed (loop enabled by default) and toggles on click", () => {
     const element = mount()
     const loopButton = element.shadowRoot!.getElementById("loop") as HTMLButtonElement

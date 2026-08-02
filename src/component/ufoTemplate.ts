@@ -2,12 +2,11 @@ export const html = `
 <div class="stage">
   <canvas id="canvas" width="640" height="360"></canvas>
   <div class="toolbar">
-    <button id="play" type="button" title="Play" aria-label="Play">▶</button>
-    <button id="pause" type="button" title="Pause" aria-label="Pause">⏸</button>
-    <button id="loop" type="button" title="Loop" aria-label="Loop" aria-pressed="true">↻</button>
+    <button id="play-pause" type="button" title="Play" aria-label="Play">▶</button>
     <span id="time-start" class="time-label">0:00</span>
     <input id="seek" type="range" min="0" max="0" value="0" step="1"/>
     <span id="time-end" class="time-label">0:00</span>
+    <button id="loop" type="button" title="Loop" aria-label="Loop" aria-pressed="true">↻</button>
   </div>
 </div>
 `
