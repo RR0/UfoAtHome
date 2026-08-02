@@ -11,6 +11,10 @@ import type { TimelineJson } from "../model/Timeline.js"
 export interface SightingRecordingJson {
   version: 1
   time?: SightingTime
+  /** See SightingEvent.endTime. */
+  endTime?: SightingTime
+  /** See SightingEvent.durationSeconds. */
+  durationSeconds?: number
   place?: SightingLocation[]
   witnessId?: string
   timeline: TimelineJson
@@ -20,6 +24,8 @@ export function toSightingJson(sighting: Sighting): SightingRecordingJson {
   return {
     version: 1,
     time: sighting.event.time,
+    endTime: sighting.event.endTime,
+    durationSeconds: sighting.event.durationSeconds,
     place: sighting.event.place,
     witnessId: sighting.witnessId,
     timeline: sighting.timeline.toJSON()
@@ -28,7 +34,13 @@ export function toSightingJson(sighting: Sighting): SightingRecordingJson {
 
 export function fromSightingJson(json: SightingRecordingJson): Sighting {
   return new Sighting(
-    { eventType: "sighting", time: json.time, place: json.place },
+    {
+      eventType: "sighting",
+      time: json.time,
+      endTime: json.endTime,
+      durationSeconds: json.durationSeconds,
+      place: json.place
+    },
     Timeline.fromJSON(json.timeline),
     json.witnessId
   )

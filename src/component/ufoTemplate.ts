@@ -2,9 +2,12 @@ export const html = `
 <div class="stage">
   <canvas id="canvas" width="640" height="360"></canvas>
   <div class="toolbar">
-    <button id="play" type="button">Play</button>
-    <button id="pause" type="button">Pause</button>
+    <button id="play" type="button" title="Play" aria-label="Play">▶</button>
+    <button id="pause" type="button" title="Pause" aria-label="Pause">⏸</button>
+    <button id="loop" type="button" title="Loop" aria-label="Loop" aria-pressed="true">↻</button>
+    <span id="time-start" class="time-label">0:00</span>
     <input id="seek" type="range" min="0" max="0" value="0" step="1"/>
+    <span id="time-end" class="time-label">0:00</span>
   </div>
 </div>
 `
@@ -40,5 +43,27 @@ canvas {
 }
 input[type=range] {
   flex: 1;
+}
+.toolbar button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.8em;
+  height: 1.8em;
+  padding: 0;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 1em;
+  line-height: 1;
+}
+.toolbar button[aria-pressed="true"] {
+  outline: 2px solid #39f;
+}
+.time-label {
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.85em;
+  min-width: 3em;
+  text-align: center;
 }
 `

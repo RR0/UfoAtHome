@@ -97,4 +97,46 @@ describe("UfoElement", () => {
     // A single-keyframe timeline has duration 0; seeking shouldn't throw.
     expect(seekInput.value).toBe("0")
   })
+
+  it("time labels default to 0:00/0:00 before any sighting is loaded", () => {
+    const element = mount()
+    const start = element.shadowRoot!.getElementById("time-start") as HTMLElement
+    const end = element.shadowRoot!.getElementById("time-end") as HTMLElement
+    expect(start.textContent).toBe("0:00")
+    expect(end.textContent).toBe("0:00")
+  })
+
+  it("time labels fall back to the recording's own elapsed duration without a known real duration", () => {
+    const element = mount()
+    element.sightingData = sampleJson // has a start date but no endTime/durationSeconds
+    const start = element.shadowRoot!.getElementById("time-start") as HTMLElement
+    const end = element.shadowRoot!.getElementById("time-end") as HTMLElement
+    expect(start.textContent).toBe("0:00")
+    expect(end.textContent).toBe("0:00") // single-keyframe timeline: recorded duration is 0
+  })
+
+  it("time labels show real clock start/end when time and durationSeconds are both known", () => {
+    const element = mount()
+    element.sightingData = {
+      ...sampleJson,
+      time: { year: 1948, month: 7, day: 24, hour: 2, minute: 45 },
+      durationSeconds: 300
+    }
+    const start = element.shadowRoot!.getElementById("time-start") as HTMLElement
+    const end = element.shadowRoot!.getElementById("time-end") as HTMLElement
+    expect(start.textContent).toBe("02:45")
+    expect(end.textContent).toBe("02:50")
+  })
+
+  it("loop button starts pressed (loop enabled by default) and toggles on click", () => {
+    const element = mount()
+    const loopButton = element.shadowRoot!.getElementById("loop") as HTMLButtonElement
+    expect(loopButton.getAttribute("aria-pressed")).toBe("true")
+
+    loopButton.click()
+    expect(loopButton.getAttribute("aria-pressed")).toBe("false")
+
+    loopButton.click()
+    expect(loopButton.getAttribute("aria-pressed")).toBe("true")
+  })
 })

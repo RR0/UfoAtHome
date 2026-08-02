@@ -57,7 +57,7 @@ heavier than the other two (see its section below), so pages that just need play
 
 ## `<rr0-ufo>` — read-only playback
 
-The lightweight component (~9KB): a canvas plus Play/Pause/seek controls. Use it wherever a page only needs to
+The lightweight component (~9KB): a canvas plus Play/Pause/Loop/seek controls. Use it wherever a page only needs to
 *replay* an already-recorded sighting — this is the one to embed in content pages.
 
 ```html
@@ -73,6 +73,14 @@ The lightweight component (~9KB): a canvas plus Play/Pause/seek controls. Use it
 | `renderer` | property (readonly) | The `CanvasRenderer` instance painting onto that canvas |
 | `refresh()` | method | Re-reads the timeline's duration into the seek slider and repaints the current frame — call after externally mutating `sighting.timeline` |
 | `loadFromSrc(url)` | method (async) | What the `src` attribute triggers internally; can be called directly too |
+
+Playback matches the observation's *real reported duration* when it's known: set `time`/`endTime`, or `time`/
+`durationSeconds`, in the [data format](#data-format) (`durationSeconds` takes precedence over `endTime` if both are
+given). Watching a 5-minute sighting then takes 5 real minutes, not however long the recording itself took to
+author (e.g. a quick mouse drag) — drag the seek bar directly to skip ahead. The start/end labels around the seek
+bar show real clock times when `time` has an hour (e.g. `02:45` → `02:50`); otherwise they show `0:00` → the
+duration actually available (the declared one if known, else the recording's own length). Playback loops by
+default — click the loop button (pressed = looping) to play once and stop instead.
 
 ## `<rr0-ufo-recorder>` — full editor
 
@@ -122,6 +130,8 @@ Both components read/write a plain, JSON-serializable `SightingRecordingJson`:
 interface SightingRecordingJson {
   version: 1
   time?: { year?: number, month?: number, day?: number, hour?: number, minute?: number, second?: number }
+  endTime?: { year?: number, month?: number, day?: number, hour?: number, minute?: number, second?: number } // alternative to durationSeconds
+  durationSeconds?: number // alternative to endTime; takes precedence if both are set
   place?: { lat: number, lng: number }[]
   witnessId?: string
   timeline: {

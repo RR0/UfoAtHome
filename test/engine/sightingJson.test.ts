@@ -27,4 +27,16 @@ describe("sightingJson", () => {
     expect(restored.event.time).toBeUndefined()
     expect(restored.event.place).toBeUndefined()
   })
+
+  it("round-trips endTime and durationSeconds", () => {
+    const restored = fromSightingJson({
+      version: 1,
+      time: { year: 1948, month: 7, day: 24, hour: 2, minute: 45 },
+      endTime: { year: 1948, month: 7, day: 24, hour: 2, minute: 50 },
+      durationSeconds: 300,
+      timeline: { keyframes: [] }
+    })
+    expect(restored.event.endTime).toEqual({ year: 1948, month: 7, day: 24, hour: 2, minute: 50 })
+    expect(restored.event.durationSeconds).toBe(300)
+  })
 })

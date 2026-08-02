@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest"
+import { describe, expect, it, vi, beforeEach, afterEach } from "vitest"
 import { Timeline } from "../../src/engine/model/Timeline.js"
 import { Player } from "../../src/engine/playback/Player.js"
 import { createOval } from "../../src/engine/shape/Shape.js"
@@ -45,5 +45,63 @@ describe("Player", () => {
     expect(player.playbackState).toBe("paused")
     player.stop()
     expect(player.playbackState).toBe("stopped")
+  })
+
+  describe("with a controllable requestAnimationFrame", () => {
+    let now: number
+    let frame: FrameRequestCallback | undefined
+
+    beforeEach(() => {
+      now = 1000
+      frame = undefined
+      vi.spyOn(performance, "now").mockImplementation(() => now)
+      vi.stubGlobal("requestAnimationFrame", (cb: FrameRequestCallback) => {
+        frame = cb
+        return 1
+      })
+      vi.stubGlobal("cancelAnimationFrame", () => {})
+    })
+
+    afterEach(() => {
+      vi.unstubAllGlobals()
+      vi.restoreAllMocks()
+    })
+
+    it("playbackRate scales how fast currentT advances relative to wall-clock time", () => {
+      const timeline = buildTimeline() // duration 100
+      const player = new Player(timeline, vi.fn())
+      player.playbackRate = 0.5
+
+      player.play()
+      now += 100
+      frame?.(now)
+
+      expect(player.time).toBe(50)
+    })
+
+    it("loop restarts from 0 (carrying over any overshoot) instead of stopping at the end", () => {
+      const timeline = buildTimeline() // duration 100
+      const player = new Player(timeline, vi.fn())
+      player.loop = true
+
+      player.play()
+      now += 130 // overshoots duration by 30
+      frame?.(now)
+
+      expect(player.time).toBe(30)
+      expect(player.playbackState).toBe("playing")
+    })
+
+    it("without loop, stops exactly at duration once wall-clock time overshoots it", () => {
+      const timeline = buildTimeline() // duration 100
+      const player = new Player(timeline, vi.fn())
+
+      player.play()
+      now += 130
+      frame?.(now)
+
+      expect(player.time).toBe(100)
+      expect(player.playbackState).toBe("stopped")
+    })
   })
 })

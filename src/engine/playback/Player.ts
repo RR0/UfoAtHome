@@ -17,6 +17,19 @@ export class Player {
   private currentT = 0
   private lastWallTime = 0
 
+  /**
+   * Multiplies elapsed wall-clock time before advancing currentT. 1 (default) means playback
+   * takes as long as `timeline.duration` itself; UfoElement sets this to
+   * `timeline.duration / sightingDurationMs(event)` when the sighting's real declared duration
+   * is known, so watching it takes as long as the observation was actually reported to last,
+   * rather than however long the recording itself took to author (e.g. a quick mouse drag).
+   * Manually dragging the seek bar always jumps directly regardless of this rate.
+   */
+  playbackRate = 1
+
+  /** When true, playback restarts from 0 instead of stopping once it reaches the end. */
+  loop = false
+
   constructor(
     private readonly timeline: Timeline,
     private readonly onFrame: (t: number, shapesBySource: Map<string, Shape>) => void
@@ -27,21 +40,27 @@ export class Player {
     if (this.state === "playing") return
     this.state = "playing"
     this.lastWallTime = performance.now()
-    const loop = () => {
+    const tick = () => {
       if (this.state !== "playing") return
       const now = performance.now()
-      this.currentT += now - this.lastWallTime
+      this.currentT += (now - this.lastWallTime) * this.playbackRate
       this.lastWallTime = now
       if (this.currentT >= this.timeline.duration) {
+        if (this.loop && this.timeline.duration > 0) {
+          this.currentT %= this.timeline.duration
+          this.resolveFrame(this.currentT)
+          this.rafId = requestAnimationFrame(tick)
+          return
+        }
         this.currentT = this.timeline.duration
         this.resolveFrame(this.currentT)
         this.stop()
         return
       }
       this.resolveFrame(this.currentT)
-      this.rafId = requestAnimationFrame(loop)
+      this.rafId = requestAnimationFrame(tick)
     }
-    this.rafId = requestAnimationFrame(loop)
+    this.rafId = requestAnimationFrame(tick)
   }
 
   pause(): void {

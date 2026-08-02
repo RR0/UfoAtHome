@@ -1,5 +1,6 @@
 import { html, css } from "./ufoTemplate.js"
-import { Sighting } from "../engine/model/Sighting.js"
+import { Sighting, sightingDurationMs, sightingTimeToMs } from "../engine/model/Sighting.js"
+import type { SightingTime } from "../engine/model/Sighting.js"
 import { Player } from "../engine/playback/Player.js"
 import { CanvasRenderer } from "../render/CanvasRenderer.js"
 import { fromSightingJson, toSightingJson } from "../engine/persistence/sightingJson.js"
@@ -38,10 +39,14 @@ export class UfoElement extends HTMLElement {
   private readonly canvasRenderer: CanvasRenderer
   private readonly playButton: HTMLButtonElement
   private readonly pauseButton: HTMLButtonElement
+  private readonly loopButton: HTMLButtonElement
   private readonly seekInput: HTMLInputElement
+  private readonly timeStartLabel: HTMLElement
+  private readonly timeEndLabel: HTMLElement
 
   private currentSighting: Sighting = Sighting.create()
   private player: Player
+  private loopEnabled = true
 
   constructor() {
     super()
@@ -54,13 +59,18 @@ export class UfoElement extends HTMLElement {
     this.canvasRenderer = new CanvasRenderer(this.canvas.getContext("2d")!)
     this.playButton = this.shadow.getElementById("play") as HTMLButtonElement
     this.pauseButton = this.shadow.getElementById("pause") as HTMLButtonElement
+    this.loopButton = this.shadow.getElementById("loop") as HTMLButtonElement
     this.seekInput = this.shadow.getElementById("seek") as HTMLInputElement
+    this.timeStartLabel = this.shadow.getElementById("time-start")!
+    this.timeEndLabel = this.shadow.getElementById("time-end")!
 
     this.playButton.addEventListener("click", () => this.player.play())
     this.pauseButton.addEventListener("click", () => this.player.pause())
+    this.loopButton.addEventListener("click", () => this.toggleLoop())
     this.seekInput.addEventListener("input", () => this.player.seek(Number(this.seekInput.value)))
 
-    this.player = new Player(this.currentSighting.timeline, (t, shapesBySource) => this.onFrame(t, shapesBySource))
+    this.player = this.createPlayer()
+    this.updateTimeLabels()
     this.refresh()
   }
 
@@ -89,7 +99,8 @@ export class UfoElement extends HTMLElement {
 
   set sightingData(json: SightingRecordingJson) {
     this.currentSighting = fromSightingJson(json)
-    this.player = new Player(this.currentSighting.timeline, (t, shapesBySource) => this.onFrame(t, shapesBySource))
+    this.player = this.createPlayer()
+    this.updateTimeLabels()
     this.refresh()
   }
 
@@ -128,6 +139,65 @@ export class UfoElement extends HTMLElement {
     }
     this.seekInput.value = String(t)
   }
+
+  private createPlayer(): Player {
+    const player = new Player(this.currentSighting.timeline, (t, shapesBySource) => this.onFrame(t, shapesBySource))
+    player.loop = this.loopEnabled
+    return player
+  }
+
+  private toggleLoop(): void {
+    this.loopEnabled = !this.loopEnabled
+    this.loopButton.setAttribute("aria-pressed", String(this.loopEnabled))
+    this.player.loop = this.loopEnabled
+  }
+
+  /**
+   * Sets the seek bar's start/end labels and the player's playback rate from the sighting's
+   * real-world reported duration (see sightingDurationMs) rather than `timeline.duration` (how
+   * long the recording itself took to author). With a known start clock time, the labels show
+   * real times (e.g. "02:45" → "02:50"); with only a duration/no anchor, they show "0:00" →
+   * the real duration; with neither, they fall back to "0:00" → the recording's own length.
+   */
+  private updateTimeLabels(): void {
+    const event = this.currentSighting.event
+    const durationMs = sightingDurationMs(event)
+    const startMs = event.time ? sightingTimeToMs(event.time) : undefined
+
+    this.player.playbackRate =
+      durationMs !== undefined && durationMs > 0 ? this.currentSighting.timeline.duration / durationMs : 1
+
+    if (startMs !== undefined && durationMs !== undefined) {
+      this.timeStartLabel.textContent = formatClockTime(event.time!)
+      this.timeEndLabel.textContent = formatClockTime(msToTimeOfDay(startMs + durationMs))
+    } else {
+      this.timeStartLabel.textContent = "0:00"
+      this.timeEndLabel.textContent = formatElapsed(durationMs ?? this.currentSighting.timeline.duration)
+    }
+  }
+}
+
+function msToTimeOfDay(ms: number): SightingTime {
+  const date = new Date(ms)
+  return { hour: date.getUTCHours(), minute: date.getUTCMinutes(), second: date.getUTCSeconds() }
+}
+
+function formatClockTime(time: SightingTime): string {
+  if (time.hour === undefined) return "0:00"
+  const pad = (n: number) => String(n).padStart(2, "0")
+  // A truthy check (not `!== undefined`): a computed end time always has a `second` field (even
+  // when it's exactly 0, e.g. a whole-minute duration), which shouldn't force ":00" onto a
+  // display otherwise matching the source data's minute-level precision.
+  return time.second
+    ? `${pad(time.hour)}:${pad(time.minute ?? 0)}:${pad(time.second)}`
+    : `${pad(time.hour)}:${pad(time.minute ?? 0)}`
+}
+
+function formatElapsed(ms: number): string {
+  const totalSeconds = Math.round(ms / 1000)
+  const minutes = Math.floor(totalSeconds / 60)
+  const seconds = totalSeconds % 60
+  return `${minutes}:${String(seconds).padStart(2, "0")}`
 }
 
 export const UFO_ELEMENT_NAME = "rr0-ufo"
