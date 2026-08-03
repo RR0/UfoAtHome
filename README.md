@@ -74,6 +74,7 @@ The lightweight component (~9KB): a canvas plus Play/Pause/Loop/seek controls. U
 | `refresh()` | method | Re-reads the timeline's duration into the seek slider and repaints the current frame — call after externally mutating `sighting.timeline` |
 | `loadFromSrc(url)` | method (async) | What the `src` attribute triggers internally; can be called directly too |
 | `enableClickToPlay` | property (get/set, default `true`) | Whether clicking the canvas toggles Play/Pause (see below). Composing elements that need the canvas's own click for something else set this to `false` — see `<rr0-ufo-recorder>`. |
+| `fullscreenTarget` | property (get/set, default: the component's own stage) | The element the fullscreen button requests fullscreen on. Composing elements that need a *different* element fullscreened set this — see `<rr0-scene>`. |
 
 Playback matches the observation's *real reported duration* when it's known: set `time`/`endTime`, or `time`/
 `durationSeconds`, in the [data format](#data-format) (`durationSeconds` takes precedence over `endTime` if both are
@@ -84,10 +85,13 @@ duration actually available (the declared one if known, else the recording's own
 default — click the loop button (pressed = looping) to play once and stop instead.
 
 Clicking anywhere on the canvas also toggles Play/Pause (not just the button), matching common video-player UX.
-While playing, the toolbar auto-hides and only reappears on hover — always shown while paused/stopped.
+While playing, the toolbar and the fullscreen button (top-right, semi-transparent over the content) auto-hide and
+only reappear on hover — always shown while paused/stopped. The fullscreen button uses the standard Fullscreen API
+(`requestFullscreen`/`exitFullscreen`); exiting with Escape is native browser behavior, nothing custom.
 
-Labels (Play/Pause, Auto-replay, Current position, Duration) are translated (English/French) based on the visitor's
-`navigator.languages`, falling back to English — there's no language-picker UI, this is the only mechanism.
+Labels (Play/Pause, Auto-replay, Current position, Duration, Fullscreen) are translated (English/French) based on
+the visitor's `navigator.languages`, falling back to English — there's no language-picker UI, this is the only
+mechanism.
 
 ## `<rr0-ufo-recorder>` — full editor
 
@@ -114,7 +118,9 @@ The environmental variant (~180KB gzip, dominated by [Three.js](https://threejs.
 of the three bundles, load it only on pages that want it): everything `<rr0-ufo>` has, composited over a 3D
 sky/horizon/starfield backdrop instead of a plain background. Same markup and members as `<rr0-ufo>` (`src`,
 `sightingData`, `loadFromSrc`, `enableClickToPlay`) — it's a drop-in upgrade, including click-to-play/pause
-anywhere on the scene (the nested `<rr0-ufo>`'s transparent canvas covers the whole stage).
+anywhere on the scene (the nested `<rr0-ufo>`'s transparent canvas covers the whole stage). The fullscreen button
+fullscreens the *whole* scene (3D backdrop included), not just the nested `<rr0-ufo>`'s own overlay — it sets the
+nested element's `fullscreenTarget` to its own outer stage for this.
 
 ```html
 <rr0-scene src="sighting.json"></rr0-scene>
