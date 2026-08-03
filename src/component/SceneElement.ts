@@ -37,10 +37,15 @@ export class SceneElement extends HTMLElement {
   }
 
   private readonly shadow: ShadowRoot
+  private readonly stageElement: HTMLElement
+  private readonly frameElement: HTMLElement
   private readonly sceneCanvas: HTMLCanvasElement
   private readonly ufoElement: UfoElement
   private readonly sceneRenderer: SceneRenderer
   private resizeObserver?: ResizeObserver
+
+  /** Bound once so document.removeEventListener (disconnectedCallback) can actually find it. */
+  private readonly handleFullscreenChange = () => this.resizeToStage()
 
   constructor() {
     super()
@@ -49,6 +54,12 @@ export class SceneElement extends HTMLElement {
     template.innerHTML = `<style>${css}</style>${html}`
     this.shadow.appendChild(template.content.cloneNode(true))
 
+    this.stageElement = this.shadow.getElementById("stage")!
+    // The aspect-ratio-constrained box that actually gets rendered into — distinct from #stage,
+    // which is what goes browser-fullscreen and gets forced to fill the whole viewport
+    // regardless of aspect ratio (see sceneTemplate.ts's `.stage:fullscreen .frame` rule).
+    // Resizing must track *this* element's box, not #stage's or the host's own.
+    this.frameElement = this.shadow.getElementById("frame")!
     this.sceneCanvas = this.shadow.getElementById("scene-canvas") as HTMLCanvasElement
     this.sceneRenderer = new SceneRenderer(this.sceneCanvas)
 
@@ -61,7 +72,7 @@ export class SceneElement extends HTMLElement {
     this.ufoElement.style.setProperty("--ufo-canvas-border", "none")
     // Otherwise the nested <rr0-ufo>'s own fullscreen button would fullscreen just its own stage
     // (its transparent overlay canvas + toolbar), hiding the 3D backdrop — a sibling outside it.
-    this.ufoElement.fullscreenTarget = this.shadow.getElementById("stage")!
+    this.ufoElement.fullscreenTarget = this.stageElement
     this.shadow.getElementById("ufo-slot")!.replaceWith(this.ufoElement)
   }
 
@@ -70,9 +81,16 @@ export class SceneElement extends HTMLElement {
     this.updateLighting()
 
     // Keeps the 3D canvas' backing resolution matched to its actual displayed size (e.g. a
-    // responsive page width change), since it has no fixed width/height attributes of its own.
+    // responsive page width change, or entering/exiting fullscreen) — observing #frame (not the
+    // host element) is what actually changes size in both cases; the host's own layout box
+    // doesn't necessarily change just because a shadow-DOM-nested descendant goes fullscreen.
     this.resizeObserver = new ResizeObserver(() => this.resizeToStage())
-    this.resizeObserver.observe(this)
+    this.resizeObserver.observe(this.frameElement)
+    // Belt-and-suspenders: ResizeObserver timing around fullscreen transitions is inconsistent
+    // across browsers (some fire a frame late, or with an intermediate size mid-transition) —
+    // explicitly reacting to fullscreenchange too removes any doubt. Same event UfoElement
+    // already listens to for its own button icon sync.
+    document.addEventListener("fullscreenchange", this.handleFullscreenChange)
 
     const src = this.getAttribute("src")
     if (src) {
@@ -82,6 +100,7 @@ export class SceneElement extends HTMLElement {
 
   disconnectedCallback(): void {
     this.resizeObserver?.disconnect()
+    document.removeEventListener("fullscreenchange", this.handleFullscreenChange)
   }
 
   attributeChangedCallback(name: string, oldValue: string, newValue: string): void {
@@ -106,7 +125,7 @@ export class SceneElement extends HTMLElement {
   }
 
   private resizeToStage(): void {
-    const rect = this.getBoundingClientRect()
+    const rect = this.frameElement.getBoundingClientRect()
     const width = Math.max(1, Math.round(rect.width))
     const height = Math.max(1, Math.round(rect.height))
     this.sceneCanvas.width = width
