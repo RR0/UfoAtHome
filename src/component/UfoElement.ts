@@ -224,7 +224,12 @@ export class UfoElement extends HTMLElement {
     if (document.fullscreenElement) {
       void document.exitFullscreen()
     } else {
-      this.fullscreenTarget.requestFullscreen().catch(() => {})
+      // Logged (not silently swallowed): the most common real-world rejection reasons — an
+      // embedding <iframe> missing allow="fullscreen", or a Permissions-Policy header disabling
+      // it — give no other visible symptom otherwise.
+      this.fullscreenTarget.requestFullscreen().catch(err => {
+        console.error("<rr0-ufo>: requestFullscreen() failed —", err)
+      })
     }
   }
 
