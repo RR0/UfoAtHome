@@ -98,9 +98,15 @@ mechanism.
 
 ## `<rr0-ufo-recorder>` — full editor
 
-The authoring component (~17KB): everything `<rr0-ufo>` has, plus a shape/appearance toolbar (oval/saucer/
-triangle presets, color, transparency, halo) and drag-to-record. It composes a `<rr0-ufo>` internally rather
-than duplicating the canvas/playback code — see [Architecture](#architecture).
+The authoring component (~540KB gzip — see below for why): everything `<rr0-ufo>` has, plus a shape/appearance
+toolbar (oval/saucer/triangle presets, color, transparency, halo) and drag-to-record. It composes a nested
+`<rr0-scene>` internally — not a bare `<rr0-ufo>` — so the shape being drawn is always seen against the
+sighting's own real sky, computed live from whatever latitude/longitude/heading/orientation/observation-time
+fields the toolbar currently holds (see [Architecture](#architecture)). This absorbs `<rr0-scene>`'s own
+Three.js/`astronomy-engine` weight on top of the authoring-only code this element already carried (Recorder
+engine, SamplingClock, appearance toolbar) — a page that only needs to *play* a sighting (the common case: an
+rr0.org case dossier) should still embed the much lighter `<rr0-ufo>` (or `<rr0-scene>` alone) directly, never
+this heavier authoring component.
 
 ```html
 <rr0-ufo-recorder></rr0-ufo-recorder>
@@ -121,7 +127,9 @@ Duration) are translated (English/French) the same way `<rr0-ufo>`'s own labels 
 
 ## `<rr0-scene>` — 3D decor
 
-The environmental variant (~180KB gzip, dominated by [Three.js](https://threejs.org/) — this is by far the heaviest
+The environmental variant (~530KB gzip — [Three.js](https://threejs.org/) plus
+[`astronomy-engine`](https://github.com/cosinekitty/astronomy)'s planetary/lunar position tables, which don't
+tree-shake since they're one shared data table used internally for every body — this is by far the heaviest
 of the four bundles, load it only on pages that want it): everything `<rr0-ufo>` has, composited over a 3D
 sky/horizon/starfield backdrop instead of a plain background. Same markup and members as `<rr0-ufo>` (`src`,
 `sightingData`, `loadFromSrc`, `enableClickToPlay`) — it's a drop-in upgrade, including click-to-play/pause
@@ -133,31 +141,46 @@ nested element's `fullscreenTarget` to its own outer stage for this.
 <rr0-scene src="sighting.json"></rr0-scene>
 ```
 
-Lighting (sky darkness/color, star visibility) is computed from the sighting's own recorded `time`/`place` via
-`src/engine/astronomy/SunPosition.ts` — a vanilla (no dependency) implementation of the standard NOAA/Spencer
-low-precision solar position approximation. Deliberately scoped down for this first pass: only the sun's *altitude*
-drives the sky, not azimuth — positioning a sun/moon disc (or anything else) at a specific compass direction needs
-the witness's viewing heading, which isn't part of the data model yet. Star positions are randomized (not a real
-catalog) and brightness follows a stylized statistical distribution, not real magnitudes — see
-`src/render3d/skyColors.ts`.
+**Real astronomy for misidentification spotting.** A recurring cause of UFO reports is a mundane astronomical
+object or atmospheric optical effect — Venus (by far the most commonly misreported "UFO"), other planets, the
+Moon, lens flare, or halo phenomena like sun dogs/moon dogs. `<rr0-scene>` renders the sky astronomically: real
+Sun/Moon/Venus/Mars/Jupiter/Saturn positions and the Moon's phase via
+[`astronomy-engine`](https://github.com/cosinekitty/astronomy) (see `src/engine/astronomy/CelestialPositions.ts`),
+and a real star catalog (see below) instead of a randomized field, filtered to naked-eye visibility
+(magnitude ≤ 7.5) since these are human eyewitness observations, not instrument-assisted ones. The sky's
+darkness/color follows the sun's altitude (day/twilight bands/night), and its dawn/dusk glow is anchored on the
+sun's real compass direction, not spread uniformly around the horizon — see `src/render3d/skyColors.ts`.
 
-**Planned: real astronomy for misidentification spotting.** A recurring cause of UFO reports is a mundane
-astronomical object or atmospheric optical effect — Venus (by far the most commonly misreported "UFO"), other
-planets, the Moon (including its phase), lens flare, or halo phenomena like sun dogs/moon dogs (22° halo, often
-mistaken for a second light source or "controlled" object). Rendering these accurately enough to flag a likely
-misidentification needs:
-- Witness viewing heading/azimuth (and field of view) added to the data model — the current altitude-only lighting
-  model can't place anything at a specific compass position, only judge overall sky darkness.
-- Real star catalog positions + magnitudes (e.g. Yale Bright Star Catalog) instead of the current randomized field —
-  filtered to naked-eye visibility (magnitude < 7.5) since these are human eyewitness observations, not
-  instrument-assisted ones; no point carrying catalog entries no witness could ever have seen.
-- Planetary position ephemeris (at least Venus/Mars/Jupiter/Saturn) and lunar position/phase — both computable
-  without an external dependency the same way `SunPosition.ts` is, or via a small vetted library.
-- Sun dog / moon dog / halo rendering, conditioned on the sun or moon's altitude and (loosely) on real halo
-  formation conditions (cirrus/ice-crystal cloud, sun-observer angle).
+The witness's own pose — geographic position, elevation, and viewing heading/pitch/field of view — can vary over
+the sighting's timeline via `observerTrack` in the sighting JSON (a keyframe array alongside `timeline`, same
+hold-last/interpolated-lookup shape — see `src/engine/model/ObserverTrack.ts`), driving both the camera's own
+orientation and which real-world instant the astronomy is computed for as playback advances. Older recordings
+with no `observerTrack` fall back to the legacy static `place[0]` (see `resolveObserverPoseAt` in
+`src/engine/model/Sighting.ts`) — usable for sky darkness/color and camera pitch/fov, but with no compass heading
+to orient the camera by.
 
-Not started yet; see `src/render3d/SceneRenderer.ts`. Precipitation and other optical effects (lens flare, mirage)
-remain future work too.
+`src/engine/astronomy/SunPosition.ts` (the original vanilla, dependency-free NOAA/Spencer solar position
+approximation) stays in the repo, tested, and still backs `skyBrightness()`'s twilight-band classification — but
+the live rendering path now uses `astronomy-engine` for the Sun too, for a single source of truth and to get the
+Sun's azimuth from the same call used for the sky's directional glow.
+
+`<rr0-ufo-recorder>` has editor fields for the witness's latitude/longitude/heading and the observation's start
+date/time (all optional) — filling in lat+lng writes both the legacy `place` and a single t=0 `observerTrack`
+keyframe (elevation/pitch/field of view stay at neutral defaults; there's no UI yet for authoring the observer
+*moving* over time, only a single static pose per recording).
+
+Not yet done: sun dog/moon dog/halo rendering, a real (non-flat) ground/terrain, precipitation and other optical
+effects (lens flare, mirage), and a multi-keyframe `observerTrack` authoring UI (today the recorder can only set
+one static pose; an observer that moves/re-orients mid-recording still needs hand-authored or scripted JSON). The
+Moon's phase currently only dims/brightens its disc's overall
+color rather than rendering a geometrically accurate crescent shape — a natural follow-up.
+
+**Regenerating the star catalog.** `src/assets/stars-mag7.5.bin` (a compact binary asset, four concatenated
+`Float32Array` sections: ra/dec/mag/ci — see `src/render3d/StarCatalog.ts` for the exact layout) is generated
+from the [HYG Database v4.1](https://github.com/astronexus/HYG-Database) (CC BY-SA), filtered to magnitude ≤ 7.5.
+To regenerate it: download `hyg/CURRENT/hygdata_v41.csv` from that repo into `scripts/data/hygdata_v41.csv`
+(gitignored — not checked in, ~34MB), then run `npm run build:stars`. The generated `.bin`/`.json` pair *is*
+checked in (~400KB) since it's small and doesn't need regenerating on every install.
 
 The UFO shape itself deliberately stays a 2D overlay on top of the 3D decor, never "upgraded" to a 3D object: it's
 what the witness reported — possibly a misidentification or optical effect — not something to interpret as a real
@@ -251,10 +274,13 @@ case's `sighting.json` from its `RR0Event`).
 - `src/render/CanvasRenderer.ts` — paints shapes onto a `<canvas>` 2D context.
 - `src/render3d/` — the Three.js decor renderer (`SceneRenderer`) and its pure, dependency-free color logic
   (`skyColors.ts`), kept separate so the latter is unit-testable without a WebGL context.
-- `src/component/` — the four Web Components. `UfoElement` (`<rr0-ufo>`) owns the canvas/playback; `UfoRecorderElement`,
-  `SceneElement` (`<rr0-scene>`) and `WitnessSelectorElement` (`<rr0-ufo-witnesses>`) all compose it (via
+- `src/component/` — the four Web Components. `UfoElement` (`<rr0-ufo>`) owns the canvas/playback; `SceneElement`
+  (`<rr0-scene>`) and `WitnessSelectorElement` (`<rr0-ufo-witnesses>`) compose it directly (via
   `document.createElement`, not an inline template tag — see the comment at that call site) rather than duplicating
-  it, adding recording/appearance-editing, the 3D decor, or the multi-witness selector on top, respectively.
+  it, adding the 3D decor or the multi-witness selector on top, respectively. `UfoRecorderElement` composes a
+  `SceneElement` (not `UfoElement` directly) and reaches through to its public `ufoElement` property for the
+  actual canvas/timeline/appearance work — the toolbar edits the exact same `Sighting` instance the nested scene
+  renders from, so an observer/time/appearance change needs no separate sync step to reach the sky.
 - Playback linearly interpolates shapes between a source's surrounding keyframes for smooth motion
   (`Timeline.getInterpolatedShapeAt`/`Shape.lerpShape`), holding at the ends of its recorded range.
 - Recording samples the pointer position at a configurable rate via `requestAnimationFrame`, not on every

@@ -9,3 +9,9 @@ dist-embed-witnesses/
 *.iws
 *.iml
 .idea/
+
+# Raw HYG star catalog CSV (~120k rows, ~34MB) — only the filtered/converted output in
+# src/assets/stars-mag7.5.bin is checked in. Download from astronexus/HYG-Database's
+# hyg/CURRENT/hygdata_v41.csv (see README.md) before running `npm run build:stars`.
+scripts/data/
+

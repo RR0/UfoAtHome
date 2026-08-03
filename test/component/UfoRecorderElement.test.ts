@@ -4,6 +4,28 @@ import type { UfoRecorderElement } from "../../src/component/UfoRecorderElement.
 
 register()
 
+// UfoRecorderElement now nests a <rr0-scene> (see its own class doc comment) instead of a bare
+// <rr0-ufo>, so mounting it also constructs a SceneRenderer — which jsdom's <canvas> can't back
+// with a real WebGL context (no native `canvas` package here, same reason as the 2D mock below).
+// Stubbed out entirely: these tests exercise the 2D shape/appearance/observer/time editing logic,
+// not 3D rendering, which has no unit tests of its own for the same jsdom-has-no-WebGL reason
+// (see SceneRenderer.ts's own lack of a dedicated test file).
+vi.mock("../../src/render3d/SceneRenderer.js", () => ({
+  SceneRenderer: class {
+    resize(): void {}
+    setObserverPose(): void {}
+    setAstronomy(): void {}
+    setShowCompass(): void {}
+    pickBodyAt(): undefined {
+      return undefined
+    }
+    render(): void {}
+    dispose(): void {}
+    startTwinkle(): void {}
+    stopTwinkle(): void {}
+  }
+}))
+
 // jsdom's <canvas> has no real 2D context (getContext("2d") returns null without the
 // native `canvas` package) — stub it, same as test/render/CanvasRenderer.test.ts's mock,
 // so mounting the component doesn't throw when it paints its initial preview.
@@ -24,12 +46,33 @@ beforeAll(() => {
     stroke: vi.fn(),
     fillRect: vi.fn()
   } as unknown as CanvasRenderingContext2D)
+  // The nested <rr0-scene> lazily fetches the star catalog on connect — stub a tiny valid
+  // response so that fire-and-forget fetch resolves instead of rejecting (jsdom's fetch can't
+  // resolve a relative URL against a real page origin anyway). Plain assignment, not
+  // vi.stubGlobal: the "export button" describe block below calls vi.unstubAllGlobals() in its
+  // own afterEach to clean up its own Blob/URL stubs, which would otherwise also wipe these two
+  // needed by every other describe block's mount().
+  globalThis.fetch = vi.fn().mockResolvedValue({ arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)) }) as typeof fetch
+  // jsdom has no ResizeObserver — SceneElement.connectedCallback() (also nested now) uses one to
+  // track its canvas size.
+  globalThis.ResizeObserver = class {
+    observe(): void {}
+    unobserve(): void {}
+    disconnect(): void {}
+  } as unknown as typeof ResizeObserver
 })
 
 function mount(): UfoRecorderElement {
   const element = document.createElement(ELEMENT_NAME) as UfoRecorderElement
   document.body.appendChild(element)
   return element
+}
+
+/** The nested <rr0-ufo> now lives inside the recorder's own nested <rr0-scene> (see
+ * UfoRecorderElement's class doc comment) instead of being a direct shadow child — this centralizes
+ * the extra hop so test call sites don't all need to know that. */
+function nestedUfo(element: UfoRecorderElement): Element {
+  return element.shadowRoot!.querySelector("rr0-scene")!.shadowRoot!.querySelector("rr0-ufo")!
 }
 
 async function waitFor(check: () => boolean, timeoutMs = 500): Promise<void> {
@@ -85,6 +128,115 @@ describe("UfoRecorderElement appearance toolbar", () => {
   })
 })
 
+describe("UfoRecorderElement observer/time fields", () => {
+  afterEach(() => {
+    document.body.innerHTML = ""
+  })
+
+  function setInput(shadow: ShadowRoot, id: string, value: string): void {
+    const input = shadow.getElementById(id) as HTMLInputElement
+    input.value = value
+    input.dispatchEvent(new Event("input"))
+  }
+
+  it("writes lat/lng/heading into both place and a t=0 observerTrack keyframe", () => {
+    const element = mount()
+    const shadow = element.shadowRoot!
+    setInput(shadow, "lat", "43.837")
+    setInput(shadow, "lng", "5.993")
+    setInput(shadow, "heading", "270")
+
+    expect(element.sightingData.place).toEqual([{ lat: 43.837, lng: 5.993 }])
+    expect(element.sightingData.observerTrack?.keyframes).toEqual([
+      { t: 0, pose: { lat: 43.837, lng: 5.993, elevationM: 0, headingDeg: 270, pitchDeg: 0, fovDeg: 60 } }
+    ])
+  })
+
+  it("leaves heading undefined (not defaulted to north) when left blank", () => {
+    const element = mount()
+    const shadow = element.shadowRoot!
+    setInput(shadow, "lat", "43.837")
+    setInput(shadow, "lng", "5.993")
+
+    expect(element.sightingData.observerTrack?.keyframes[0].pose.headingDeg).toBeUndefined()
+  })
+
+  it("clearing every field removes both place and the observerTrack keyframe", () => {
+    const element = mount()
+    const shadow = element.shadowRoot!
+    setInput(shadow, "lat", "43.837")
+    setInput(shadow, "lng", "5.993")
+    setInput(shadow, "lat", "")
+    setInput(shadow, "lng", "")
+
+    expect(element.sightingData.place).toBeUndefined()
+    expect(element.sightingData.observerTrack?.keyframes).toEqual([])
+  })
+
+  it("clearing only lat drops place (needs both) but keeps a partial observerTrack pose (lng alone is still meaningful)", () => {
+    const element = mount()
+    const shadow = element.shadowRoot!
+    setInput(shadow, "lat", "43.837")
+    setInput(shadow, "lng", "5.993")
+    setInput(shadow, "lat", "")
+
+    expect(element.sightingData.place).toBeUndefined()
+    expect(element.sightingData.observerTrack?.keyframes).toEqual([
+      { t: 0, pose: { lat: undefined, lng: 5.993, elevationM: 0, headingDeg: undefined, pitchDeg: 0, fovDeg: 60 } }
+    ])
+  })
+
+  it("setting only heading (no lat/lng at all) still writes an observerTrack keyframe, not silently discarded", () => {
+    const element = mount()
+    const shadow = element.shadowRoot!
+    setInput(shadow, "heading", "270")
+
+    expect(element.sightingData.place).toBeUndefined()
+    expect(element.sightingData.observerTrack?.keyframes).toEqual([
+      { t: 0, pose: { lat: undefined, lng: undefined, elevationM: 0, headingDeg: 270, pitchDeg: 0, fovDeg: 60 } }
+    ])
+  })
+
+  it("writes the observation-start date/time fields into event.time", () => {
+    const element = mount()
+    const shadow = element.shadowRoot!
+    setInput(shadow, "obs-year", "1965")
+    setInput(shadow, "obs-month", "7")
+    setInput(shadow, "obs-day", "1")
+    setInput(shadow, "obs-hour", "5")
+    setInput(shadow, "obs-minute", "0")
+
+    expect(element.sightingData.time).toEqual({ year: 1965, month: 7, day: 1, hour: 5, minute: 0 })
+  })
+
+  it("clears event.time entirely once every date/time field is emptied", () => {
+    const element = mount()
+    const shadow = element.shadowRoot!
+    setInput(shadow, "obs-year", "1965")
+    setInput(shadow, "obs-year", "")
+
+    expect(element.sightingData.time).toBeUndefined()
+  })
+
+  it("loading sightingData re-populates the observer/time fields", () => {
+    const element = mount()
+    element.sightingData = {
+      version: 1,
+      time: { year: 1948, month: 7, day: 24, hour: 2, minute: 45 },
+      place: [{ lat: 32.3792, lng: -86.3077 }],
+      observerTrack: { keyframes: [{ t: 0, pose: { lat: 32.3792, lng: -86.3077, elevationM: 0, headingDeg: 45, pitchDeg: 0, fovDeg: 60 } }] },
+      timeline: { keyframes: [] }
+    }
+
+    const shadow = element.shadowRoot!
+    expect((shadow.getElementById("lat") as HTMLInputElement).value).toBe("32.3792")
+    expect((shadow.getElementById("lng") as HTMLInputElement).value).toBe("-86.3077")
+    expect((shadow.getElementById("heading") as HTMLInputElement).value).toBe("45")
+    expect((shadow.getElementById("obs-year") as HTMLInputElement).value).toBe("1948")
+    expect((shadow.getElementById("obs-hour") as HTMLInputElement).value).toBe("2")
+  })
+})
+
 describe("UfoRecorderElement composes a nested rr0-ufo", () => {
   afterEach(() => {
     document.body.innerHTML = ""
@@ -92,7 +244,7 @@ describe("UfoRecorderElement composes a nested rr0-ufo", () => {
 
   it("nests a real, upgraded UfoElement instance", () => {
     const element = mount()
-    const ufo = element.shadowRoot!.querySelector("rr0-ufo")
+    const ufo = nestedUfo(element)
     expect(ufo).not.toBeNull()
     // Would be undefined on a not-yet-upgraded element (see the constructor's
     // document.createElement comment) — asserting it's present proves the fix.
@@ -101,7 +253,7 @@ describe("UfoRecorderElement composes a nested rr0-ufo", () => {
 
   it("disables the nested ufo element's click-to-play (the canvas is used for drag-to-record instead)", () => {
     const element = mount()
-    const ufo = element.shadowRoot!.querySelector("rr0-ufo") as unknown as { enableClickToPlay: boolean }
+    const ufo = nestedUfo(element) as unknown as { enableClickToPlay: boolean }
     expect(ufo.enableClickToPlay).toBe(false)
   })
 
@@ -113,7 +265,8 @@ describe("UfoRecorderElement composes a nested rr0-ufo", () => {
         keyframes: [
           { t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval" as const, bounds: { x: 1, y: 2, width: 3, height: 4 }, color: "#fff", angle: 0, transparency: 0, haloScale: 0, selected: false } }] }
         ]
-      }
+      },
+      observerTrack: { keyframes: [] }
     }
     element.sightingData = json
     expect(element.sightingData).toEqual(json)
@@ -127,7 +280,7 @@ describe("UfoRecorderElement composes a nested rr0-ufo", () => {
     const element = mount()
     const shadow = element.shadowRoot!
     const recordButton = shadow.getElementById("record") as HTMLButtonElement
-    const canvas = shadow.querySelector("rr0-ufo")!.shadowRoot!.getElementById("canvas") as HTMLCanvasElement
+    const canvas = nestedUfo(element).shadowRoot!.getElementById("canvas") as HTMLCanvasElement
     vi.spyOn(canvas, "getBoundingClientRect").mockReturnValue({ left: 0, top: 0 } as DOMRect)
 
     recordButton.click()
@@ -147,7 +300,7 @@ describe("UfoRecorderElement post-hoc appearance editing + multi-shape authoring
   })
 
   function seekNestedUfoTo(element: UfoRecorderElement, t: number): void {
-    const seekInput = element.shadowRoot!.querySelector("rr0-ufo")!.shadowRoot!.getElementById("seek") as HTMLInputElement
+    const seekInput = nestedUfo(element)!.shadowRoot!.getElementById("seek") as HTMLInputElement
     seekInput.value = String(t)
     seekInput.dispatchEvent(new Event("input"))
   }
@@ -221,8 +374,8 @@ describe("UfoRecorderElement post-hoc appearance editing + multi-shape authoring
         ]
       }
     }
-    const ufo = element.shadowRoot!.querySelector("rr0-ufo") as unknown as { playbackState: string }
-    const playButton = element.shadowRoot!.querySelector("rr0-ufo")!.shadowRoot!.getElementById("play-pause") as HTMLButtonElement
+    const ufo = nestedUfo(element) as unknown as { playbackState: string }
+    const playButton = nestedUfo(element)!.shadowRoot!.getElementById("play-pause") as HTMLButtonElement
     playButton.click()
     expect(ufo.playbackState).toBe("playing")
 
@@ -345,7 +498,7 @@ describe("UfoRecorderElement click-to-select", () => {
   })
 
   function nestedCanvas(element: UfoRecorderElement): HTMLCanvasElement {
-    const canvas = element.shadowRoot!.querySelector("rr0-ufo")!.shadowRoot!.getElementById("canvas") as HTMLCanvasElement
+    const canvas = nestedUfo(element)!.shadowRoot!.getElementById("canvas") as HTMLCanvasElement
     // 1:1 scale (matches the canvas's own 640x360 drawing buffer) so click coordinates map
     // directly onto Shape.bounds without needing to account for scaling in the test itself.
     vi.spyOn(canvas, "getBoundingClientRect").mockReturnValue({ left: 0, top: 0, width: 640, height: 360 } as DOMRect)
@@ -385,7 +538,7 @@ describe("UfoRecorderElement click-to-select", () => {
 
     clickAt(canvas, centerX, centerY)
 
-    const ufo = element.shadowRoot!.querySelector("rr0-ufo") as unknown as { selectedSourceId: string }
+    const ufo = nestedUfo(element) as unknown as { selectedSourceId: string }
     expect(ufo.selectedSourceId).toBe("ufo-1")
   })
 
@@ -398,7 +551,7 @@ describe("UfoRecorderElement click-to-select", () => {
 
     const sourceSelect = element.shadowRoot!.getElementById("source") as HTMLSelectElement
     expect(sourceSelect.value).toBe("ufo-2")
-    const ufo = element.shadowRoot!.querySelector("rr0-ufo") as unknown as { selectedSourceId: string }
+    const ufo = nestedUfo(element) as unknown as { selectedSourceId: string }
     expect(ufo.selectedSourceId).toBe("ufo-2")
   })
 
@@ -459,7 +612,7 @@ describe("UfoRecorderElement click-to-select", () => {
     sourceSelect.value = "ufo-2"
     sourceSelect.dispatchEvent(new Event("change"))
 
-    const ufo = element.shadowRoot!.querySelector("rr0-ufo") as unknown as { selectedSourceId: string }
+    const ufo = nestedUfo(element) as unknown as { selectedSourceId: string }
     expect(ufo.selectedSourceId).toBe("ufo-2")
   })
 
@@ -468,7 +621,7 @@ describe("UfoRecorderElement click-to-select", () => {
     const addShapeButton = element.shadowRoot!.getElementById("add-shape") as HTMLButtonElement
     addShapeButton.click()
 
-    const ufo = element.shadowRoot!.querySelector("rr0-ufo") as unknown as { selectedSourceId: string }
+    const ufo = nestedUfo(element) as unknown as { selectedSourceId: string }
     expect(ufo.selectedSourceId).toBe("ufo-2")
   })
 })
@@ -479,7 +632,7 @@ describe("UfoRecorderElement drag-to-move/resize/rotate", () => {
   })
 
   function nestedCanvas(element: UfoRecorderElement): HTMLCanvasElement {
-    const canvas = element.shadowRoot!.querySelector("rr0-ufo")!.shadowRoot!.getElementById("canvas") as HTMLCanvasElement
+    const canvas = nestedUfo(element)!.shadowRoot!.getElementById("canvas") as HTMLCanvasElement
     vi.spyOn(canvas, "getBoundingClientRect").mockReturnValue({ left: 0, top: 0, width: 640, height: 360 } as DOMRect)
     return canvas
   }
@@ -610,7 +763,7 @@ describe("UfoRecorderElement drag-to-move/resize/rotate", () => {
     const element = mount()
     element.sightingData = oneShapeJson()
     const canvas = nestedCanvas(element)
-    const playButton = element.shadowRoot!.querySelector("rr0-ufo")!.shadowRoot!.getElementById("play-pause") as HTMLButtonElement
+    const playButton = nestedUfo(element)!.shadowRoot!.getElementById("play-pause") as HTMLButtonElement
     playButton.click()
 
     dragFromTo(canvas, { x: 110, y: 110 }, { x: 300, y: 300 })

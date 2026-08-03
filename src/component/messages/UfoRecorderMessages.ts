@@ -16,4 +16,15 @@ export interface UfoRecorderMessages {
   export: string
   record: string
   stop: string
+  latitude: string
+  longitude: string
+  heading: string
+  headingPlaceholder: string
+  pitch: string
+  observationTime: string
+  yearPlaceholder: string
+  monthPlaceholder: string
+  dayPlaceholder: string
+  hourPlaceholder: string
+  minutePlaceholder: string
 }

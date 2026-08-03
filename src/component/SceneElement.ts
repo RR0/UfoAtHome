@@ -1,13 +1,56 @@
 import { html, css } from "./sceneTemplate.js"
 import { UfoElement, registerUfo, UFO_ELEMENT_NAME } from "./UfoElement.js"
 import { SceneRenderer } from "../render3d/SceneRenderer.js"
-import { computeSunPosition } from "../engine/astronomy/SunPosition.js"
+import type { SceneAstronomy } from "../render3d/SceneRenderer.js"
+import { loadStarCatalog } from "../render3d/StarCatalog.js"
+import type { StarCatalog } from "../render3d/StarCatalog.js"
+import {
+  computeBodyMagnitude,
+  computeBodyPosition,
+  computeMoonPhase,
+  sightingTimeToDate,
+  TRACKED_PLANETS
+} from "../engine/astronomy/CelestialPositions.js"
+import type { ObserverGeo } from "../engine/astronomy/CelestialPositions.js"
+import { resolveObserverPoseAt } from "../engine/model/Sighting.js"
+import type { ObserverPose } from "../engine/model/ObserverTrack.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
+import { selectLocale } from "../i18n/locale.js"
 
 registerUfo()
 
-/** A neutral dusk-ish sky used when a sighting has no recorded date/place to compute real lighting from. */
-const DEFAULT_ALTITUDE_DEG = -3
+/** Display names for pickBodyAt's return keys — note "sun"/"moon" are lowercase (SceneRenderer's
+ * own internal keys for those two) while planets are capitalized (CelestialBody values, used
+ * verbatim as their own key) — deliberately not unified, since unifying casing would mean
+ * SceneRenderer inventing a display-string convention it otherwise has no reason to know about. */
+const BODY_NAMES: Record<string, { en: string; fr: string }> = {
+  sun: { en: "Sun", fr: "Soleil" },
+  moon: { en: "Moon", fr: "Lune" },
+  Venus: { en: "Venus", fr: "Vénus" },
+  Mars: { en: "Mars", fr: "Mars" },
+  Jupiter: { en: "Jupiter", fr: "Jupiter" },
+  Saturn: { en: "Saturn", fr: "Saturne" }
+}
+const BODY_TOOLTIP_SUPPORTED_LANGUAGES = ["en", "fr"]
+
+/** Where the star catalog asset (see scripts/build-star-catalog.ts) is fetched from by default —
+ * resolved relative to this module's own URL so it works both from this package's own demo and
+ * once bundled/consumed by another site, without hardcoding a site-relative path. Overridable via
+ * the star-catalog-src attribute for a consuming site that hosts its own copy. */
+const DEFAULT_STAR_CATALOG_URL = new URL("../assets/stars-mag7.5.bin", import.meta.url).href
+
+/** A neutral dusk-ish sky with no Moon/planets/stars, used when a sighting has no recorded
+ * date+place to compute real astronomy from. */
+const DEFAULT_ASTRONOMY: SceneAstronomy = {
+  sun: { altitudeDeg: -3, azimuthDeg: 180, magnitude: -26.7 },
+  moon: { altitudeDeg: -90, azimuthDeg: 0, phase: { phaseFraction: 0, illuminatedFraction: 0 }, magnitude: -12.7 },
+  planets: []
+}
+
+/** Applied to the camera when a sighting has no resolvable observer pose at all (no
+ * observerTrack and no place[0]) — leaves heading undefined so setObserverPose doesn't snap the
+ * camera to a default compass direction. */
+const DEFAULT_OBSERVER_POSE: ObserverPose = { lat: 0, lng: 0, elevationM: 0, headingDeg: undefined, pitchDeg: 0, fovDeg: 60 }
 
 /**
  * Vanilla Web Component rendering a 3D "decor" (sky/horizon/stars, see
@@ -25,27 +68,77 @@ const DEFAULT_ALTITUDE_DEG = -3
  * This is the heaviest of the three bundles (pulls in Three.js) — pages
  * that only need playback should use `<rr0-ufo>` directly instead.
  *
- * Lighting is derived from the sighting's own `time`/`place` — see
- * engine/astronomy/SunPosition.ts. Only the sun's altitude is used for now
- * (sky darkness/color, star visibility), not azimuth: positioning where on
- * the horizon a sun/moon glow should sit would need the witness's viewing
- * direction, which isn't part of the data model yet.
+ * Astronomy (Sun/Moon/planet positions, real star catalog, sky color) is derived from the
+ * sighting's own `time` plus the observer's pose at the current playback instant — see
+ * engine/astronomy/CelestialPositions.ts and resolveObserverPoseAt (engine/model/Sighting.ts),
+ * which prefers the sighting's `observerTrack` and falls back to the legacy static `place[0]`.
+ * Recomputed on every playback tick/seek (via the nested `<rr0-ufo>`'s own `timeupdate` event,
+ * not a separate animation loop of its own), so the sky, and the camera's own heading/pitch/fov,
+ * both follow the observer as they change over the sighting's timeline.
  */
 export class SceneElement extends HTMLElement {
   static get observedAttributes(): string[] {
-    return ["src"]
+    return ["src", "star-catalog-src", "show-compass"]
   }
 
   private readonly shadow: ShadowRoot
   private readonly stageElement: HTMLElement
   private readonly frameElement: HTMLElement
   private readonly sceneCanvas: HTMLCanvasElement
-  private readonly ufoElement: UfoElement
+  /** Exposed (not private) so a composing wrapper — e.g. UfoRecorderElement, which nests a
+   * `<rr0-scene>` instead of a bare `<rr0-ufo>` so the sky renders live behind the shape being
+   * authored — can reach through to the same UfoElement instance this element already drives,
+   * rather than needing a separate sightingData-relay to keep two copies in sync. Same
+   * "expose the nested element to a composing wrapper" precedent as UfoElement's own
+   * sighting/canvasElement/renderer getters. */
+  readonly ufoElement: UfoElement
   private readonly sceneRenderer: SceneRenderer
+  private readonly bodyTooltip: HTMLElement
   private resizeObserver?: ResizeObserver
+  private lastTimeMs = 0
+  private starCatalog?: StarCatalog
 
   /** Bound once so document.removeEventListener (disconnectedCallback) can actually find it. */
   private readonly handleFullscreenChange = () => this.resizeToStage()
+
+  /** Identifies whatever celestial body (if any) is under the pointer and shows/moves/hides a
+   * text label next to it — an on-demand identification aid, not a rendering change (see
+   * pickBodyAt's own doc comment on why hit-testing uses a bigger invisible area than the real,
+   * true-to-scale visible disc). Listens on the nested `<rr0-ufo>`'s own canvas (not the 3D
+   * scene-canvas directly) since that transparent overlay always sits on top and would otherwise
+   * swallow every pointer event before the 3D layer ever saw them. */
+  private readonly handlePointerMove = (event: PointerEvent) => {
+    const canvas = this.ufoElement.canvasElement
+    const rect = canvas.getBoundingClientRect()
+    if (rect.width === 0 || rect.height === 0) return
+    const ndcX = ((event.clientX - rect.left) / rect.width) * 2 - 1
+    const ndcY = -(((event.clientY - rect.top) / rect.height) * 2 - 1)
+    const bodyKey = this.sceneRenderer.pickBodyAt(ndcX, ndcY)
+    if (!bodyKey) {
+      this.bodyTooltip.hidden = true
+      return
+    }
+    const language = selectLocale(navigator.languages, BODY_TOOLTIP_SUPPORTED_LANGUAGES) as "en" | "fr"
+    this.bodyTooltip.textContent = BODY_NAMES[bodyKey]?.[language] ?? bodyKey
+    this.bodyTooltip.hidden = false
+    // Positioned relative to #stage (the tooltip's own offsetParent), not the page — clientX/Y are
+    // page-relative, so subtracting the stage's own origin converts them to that local frame.
+    const stageRect = this.stageElement.getBoundingClientRect()
+    this.bodyTooltip.style.left = `${event.clientX - stageRect.left + 12}px`
+    this.bodyTooltip.style.top = `${event.clientY - stageRect.top + 12}px`
+  }
+
+  private readonly handlePointerLeave = () => {
+    this.bodyTooltip.hidden = true
+  }
+
+  /** Reuses the nested <rr0-ufo>'s own playback clock (it already dispatches this on every
+   * Player tick and every seek, mirroring <video>'s timeupdate) instead of running a second,
+   * separate animation loop just for astronomy. */
+  private readonly handleTimeUpdate = (event: Event) => {
+    this.lastTimeMs = (event as CustomEvent<{ time: number }>).detail.time
+    this.updateAstronomy(this.lastTimeMs)
+  }
 
   constructor() {
     super()
@@ -62,6 +155,7 @@ export class SceneElement extends HTMLElement {
     this.frameElement = this.shadow.getElementById("frame")!
     this.sceneCanvas = this.shadow.getElementById("scene-canvas") as HTMLCanvasElement
     this.sceneRenderer = new SceneRenderer(this.sceneCanvas)
+    this.bodyTooltip = this.shadow.getElementById("body-tooltip")!
 
     // Created imperatively rather than left inline in the template markup — see
     // UfoRecorderElement's constructor for why (an inline tag parsed from
@@ -74,11 +168,15 @@ export class SceneElement extends HTMLElement {
     // (its transparent overlay canvas + toolbar), hiding the 3D backdrop — a sibling outside it.
     this.ufoElement.fullscreenTarget = this.stageElement
     this.shadow.getElementById("ufo-slot")!.replaceWith(this.ufoElement)
+    this.ufoElement.addEventListener("timeupdate", this.handleTimeUpdate)
+    this.ufoElement.canvasElement.addEventListener("pointermove", this.handlePointerMove)
+    this.ufoElement.canvasElement.addEventListener("pointerleave", this.handlePointerLeave)
   }
 
   connectedCallback(): void {
     this.resizeToStage()
-    this.updateLighting()
+    this.updateAstronomy(this.lastTimeMs)
+    void this.loadStars()
 
     // Keeps the 3D canvas' backing resolution matched to its actual displayed size (e.g. a
     // responsive page width change, or entering/exiting fullscreen) — observing #frame (not the
@@ -110,6 +208,12 @@ export class SceneElement extends HTMLElement {
     if (name === "src" && newValue && newValue !== oldValue && this.isConnected) {
       void this.loadFromSrc(newValue)
     }
+    if (name === "star-catalog-src" && newValue !== oldValue && this.isConnected) {
+      void this.loadStars()
+    }
+    if (name === "show-compass" && newValue !== oldValue) {
+      this.sceneRenderer.setShowCompass(this.hasAttribute("show-compass"))
+    }
   }
 
   /** Fetches a SightingRecordingJson from `url` and loads it — what the `src` attribute uses. */
@@ -124,7 +228,8 @@ export class SceneElement extends HTMLElement {
 
   set sightingData(json: SightingRecordingJson) {
     this.ufoElement.sightingData = json
-    this.updateLighting()
+    this.lastTimeMs = 0
+    this.updateAstronomy(0)
   }
 
   private resizeToStage(): void {
@@ -136,24 +241,60 @@ export class SceneElement extends HTMLElement {
     this.sceneRenderer.resize(width, height)
   }
 
-  private updateLighting(): void {
-    const { time, place } = this.ufoElement.sighting.event
-    const location = place?.[0]
-    if (!time || !location || time.year === undefined || time.month === undefined || time.day === undefined) {
-      this.sceneRenderer.setLighting({ altitudeDeg: DEFAULT_ALTITUDE_DEG })
+  /** Fetches the star catalog asset once (or again, if star-catalog-src changes) — rendering
+   * proceeds without stars until this resolves, then repaints at the current playback position. */
+  private async loadStars(): Promise<void> {
+    const url = this.getAttribute("star-catalog-src") ?? DEFAULT_STAR_CATALOG_URL
+    this.starCatalog = await loadStarCatalog(url)
+    this.updateAstronomy(this.lastTimeMs)
+  }
+
+  /** Resolves the observer's pose and, whenever *any* date/time information is known (even just an
+   * hour, with no date at all — see sightingTimeToDate's own reference-date fallback), real Sun/
+   * Moon/planet/star positions at playback instant `t` (milliseconds since the recording started —
+   * added on top of the sighting's own recorded start time, so a multi-minute sighting's sky can
+   * itself advance during playback). Falls back to a neutral DEFAULT_ASTRONOMY sky only when
+   * there's nothing at all to compute from. Partial information renders a "good enough" preview
+   * rather than nothing: a known time but no real lat/lng yet (e.g. mid-authoring in
+   * `<rr0-ufo-recorder>`, where the witness's heading/time might be set before their location is)
+   * still renders real astronomy, using DEFAULT_OBSERVER_POSE's lat/lng (0,0) purely as a
+   * *rendering* fallback — this is never written back into the sighting's own data, it just means
+   * a date/time or heading edit gives live visual feedback before a location is entered. The
+   * observer's own heading/pitch/fov always applies to the camera regardless, since that part
+   * doesn't need a date or a location either. */
+  private updateAstronomy(t: number): void {
+    const sighting = this.ufoElement.sighting
+    const pose = resolveObserverPoseAt(sighting, t)
+    this.sceneRenderer.setObserverPose(pose ?? DEFAULT_OBSERVER_POSE)
+
+    const lat = pose?.lat ?? DEFAULT_OBSERVER_POSE.lat!
+    const lng = pose?.lng ?? DEFAULT_OBSERVER_POSE.lng!
+    const startDate = sightingTimeToDate(sighting.event.time ?? {}, lng)
+    if (!startDate) {
+      this.sceneRenderer.setAstronomy(DEFAULT_ASTRONOMY)
       return
     }
-    const sunPosition = computeSunPosition({
-      lat: location.lat,
-      lng: location.lng,
-      year: time.year,
-      month: time.month,
-      day: time.day,
-      hour: time.hour ?? 12,
-      minute: time.minute ?? 0,
-      second: time.second
+
+    const date = new Date(startDate.getTime() + t)
+    const observer: ObserverGeo = { lat, lng, elevationM: pose?.elevationM ?? 0 }
+    const sun = { ...computeBodyPosition("Sun", date, observer), magnitude: computeBodyMagnitude("Sun", date) }
+    const moon = {
+      ...computeBodyPosition("Moon", date, observer),
+      phase: computeMoonPhase(date),
+      magnitude: computeBodyMagnitude("Moon", date)
+    }
+    const planets = TRACKED_PLANETS.map(body => ({
+      body,
+      position: computeBodyPosition(body, date, observer),
+      magnitude: computeBodyMagnitude(body, date)
+    }))
+
+    this.sceneRenderer.setAstronomy({
+      sun,
+      moon,
+      planets,
+      stars: this.starCatalog ? { catalog: this.starCatalog, date, observer } : undefined
     })
-    this.sceneRenderer.setLighting({ altitudeDeg: sunPosition.altitudeDeg })
   }
 }
 

@@ -20,7 +20,9 @@
 <h1>UFO@home — record &amp; replay demo</h1>
 <p>
   Click <b>Record</b>, move the pointer over the canvas to draw the UFO's path, then <b>Stop</b> and hit
-  <b>Play</b>. Or load the bundled sample recording below.
+  <b>Play</b>. Or load the bundled sample recording below. The backdrop is a live sky, computed from this
+  recording's own latitude/longitude/heading/orientation and observation date/time fields further down the
+  toolbar — edit any of them and it updates.
 </p>
 <button id="load-sample" type="button">Load sample recording</button>
 <rr0-ufo-recorder id="recorder"></rr0-ufo-recorder>
@@ -33,8 +35,16 @@
 
 <h2>3D decor (rr0-scene)</h2>
 <p>
-  The same Chiles sighting, with a sky/horizon/starfield backdrop computed from its real reported time and place.
+  A sky/horizon/starfield backdrop computed from each sighting's real reported time and place — four real,
+  documented cases spanning night, dawn, midday and dusk. Astronomically accurate: Sun/Moon/planet positions,
+  the Moon's phase, and a real star catalog (magnitude ≤ 7.5) for the given instant and location.
 </p>
+<select id="scene-case">
+  <option value="/demo-data/witness-chiles.json">Chiles-Whitted, 1948-07-24 02:45 — Montgomery AL (night)</option>
+  <option value="/demo-data/witness-valensole.json">Valensole, 1965-07-01 ~05:00 — France (dawn)</option>
+  <option value="/demo-data/witness-wilcox.json">Wilcox, 1964-04-24 10:00 — Newark Valley NY (day)</option>
+  <option value="/demo-data/witness-socorro.json">Socorro, 1964-04-24 17:50 — New Mexico (dusk)</option>
+</select>
 <rr0-scene id="scene" src="/demo-data/witness-chiles.json"></rr0-scene>
 
 <script type="module" src="/src/demo/main.ts"></script>

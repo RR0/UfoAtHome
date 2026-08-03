@@ -1,4 +1,6 @@
 import { Timeline } from "./Timeline.js"
+import { ObserverTrack } from "./ObserverTrack.js"
+import type { ObserverPose } from "./ObserverTrack.js"
 
 /**
  * A fuzzy date, structurally aligned with @rr0/time's Level2Date fields
@@ -91,6 +93,7 @@ export class Sighting {
   constructor(
     readonly event: SightingEvent,
     readonly timeline: Timeline,
+    readonly observerTrack: ObserverTrack,
     readonly witnessId?: string,
     readonly witnessName?: string,
     readonly caseId?: string
@@ -98,6 +101,30 @@ export class Sighting {
   }
 
   static create(time?: SightingTime, place?: SightingLocation[], witnessId?: string): Sighting {
-    return new Sighting({ eventType: "sighting", time, place }, new Timeline(), witnessId)
+    return new Sighting({ eventType: "sighting", time, place }, new Timeline(), new ObserverTrack(), witnessId)
+  }
+}
+
+/** Fallback pose used when a sighting has no observerTrack entry at t — the legacy static
+ * place[0] (lat/lng only), with no known heading (renderers must treat this as azimuth-agnostic,
+ * not "facing north"). Mirrors DEFAULT_ALTITUDE_DEG's role as SceneElement's existing fallback. */
+const DEFAULT_ELEVATION_M = 0
+const DEFAULT_PITCH_DEG = 0
+const DEFAULT_FOV_DEG = 60
+
+/** Resolves the observer's pose at t: prefers observerTrack (interpolated), falls back to the
+ * legacy static place[0] when the track has no keyframes. undefined only when neither exists. */
+export function resolveObserverPoseAt(sighting: Sighting, t: number): ObserverPose | undefined {
+  const trackPose = sighting.observerTrack.getInterpolatedPoseAt(t)
+  if (trackPose) return trackPose
+  const location = sighting.event.place?.[0]
+  if (!location) return undefined
+  return {
+    lat: location.lat,
+    lng: location.lng,
+    elevationM: DEFAULT_ELEVATION_M,
+    headingDeg: undefined,
+    pitchDeg: DEFAULT_PITCH_DEG,
+    fovDeg: DEFAULT_FOV_DEG
   }
 }

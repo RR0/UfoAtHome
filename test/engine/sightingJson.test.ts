@@ -34,7 +34,8 @@ describe("sightingJson", () => {
       witnessId: "chiles",
       witnessName: "Clarence Chiles",
       caseId: "chiles-whitted",
-      timeline: { keyframes: [] }
+      timeline: { keyframes: [] },
+      observerTrack: { keyframes: [] }
     }
 
     const restored = fromSightingJson(json)
@@ -43,6 +44,34 @@ describe("sightingJson", () => {
     expect(restored.witnessName).toBe("Clarence Chiles")
     expect(restored.caseId).toBe("chiles-whitted")
     expect(toSightingJson(restored)).toEqual(json)
+  })
+
+  it("round-trips an observerTrack", () => {
+    const sighting = Sighting.create({ year: 1948, month: 7, day: 24 }, [{ lat: 35.0, lng: -90.0 }])
+    sighting.observerTrack.addKeyframe(0, {
+      lat: 35.0,
+      lng: -90.0,
+      elevationM: 1500,
+      headingDeg: 270,
+      pitchDeg: 5,
+      fovDeg: 50
+    })
+
+    const restored = fromSightingJson(toSightingJson(sighting))
+
+    expect(restored.observerTrack.getLatestPoseAt(0)).toEqual({
+      lat: 35.0,
+      lng: -90.0,
+      elevationM: 1500,
+      headingDeg: 270,
+      pitchDeg: 5,
+      fovDeg: 50
+    })
+  })
+
+  it("defaults to an empty observerTrack when absent from JSON", () => {
+    const restored = fromSightingJson({ version: 1, timeline: { keyframes: [] } })
+    expect(restored.observerTrack.allKeyframes).toEqual([])
   })
 
   it("round-trips endTime and durationSeconds", () => {

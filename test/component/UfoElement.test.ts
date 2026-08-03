@@ -63,7 +63,8 @@ const sampleJson = {
     keyframes: [
       { t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval" as const, bounds: { x: 0, y: 0, width: 10, height: 10 }, color: "#163a8f", angle: 0, transparency: 0, haloScale: 1, selected: false } }] }
     ]
-  }
+  },
+  observerTrack: { keyframes: [] }
 }
 
 describe("UfoElement", () => {

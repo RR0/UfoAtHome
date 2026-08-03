@@ -17,6 +17,18 @@ export const html = `
   <label><span id="label-duration">Duration (s)</span> <input id="durationSeconds" type="number" min="0" step="0.1" placeholder="recording length"/></label>
   <button id="export" type="button">Export JSON</button>
 </div>
+<div class="toolbar">
+  <label><span id="label-lat">Latitude</span> <input id="lat" type="number" min="-90" max="90" step="0.0001" placeholder="lat"/></label>
+  <label><span id="label-lng">Longitude</span> <input id="lng" type="number" min="-180" max="180" step="0.0001" placeholder="lng"/></label>
+  <label><span id="label-heading">Heading (&deg;)</span> <input id="heading" type="number" min="0" max="359" step="1" placeholder="unknown"/></label>
+  <label><span id="label-pitch">Tilt (&deg;)</span> <input id="pitch" type="number" min="-90" max="90" step="1" value="0"/></label>
+  <span id="label-observation-time">Observation start (optional)</span>
+  <input id="obs-year" type="number" step="1" placeholder="year"/>
+  <input id="obs-month" type="number" min="1" max="12" step="1" placeholder="month"/>
+  <input id="obs-day" type="number" min="1" max="31" step="1" placeholder="day"/>
+  <input id="obs-hour" type="number" min="0" max="23" step="1" placeholder="hour"/>
+  <input id="obs-minute" type="number" min="0" max="59" step="1" placeholder="min"/>
+</div>
 <div id="ufo-slot"></div>
 `
 
@@ -42,6 +54,15 @@ button.preset {
 button.preset[aria-pressed="true"] {
   outline: 2px solid #39f;
   font-weight: bold;
+}
+#lat, #lng, #heading, #pitch {
+  width: 6em;
+}
+#obs-year {
+  width: 4.5em;
+}
+#obs-month, #obs-day, #obs-hour, #obs-minute {
+  width: 3.5em;
 }
 .record-btn {
   display: inline-flex;

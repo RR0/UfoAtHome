@@ -36,17 +36,20 @@
     "prepublishOnly": "npm run build:embed && npm run build:embed-ufo && npm run build:embed-scene && npm run build:embed-witnesses && npm test",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "build:stars": "tsx scripts/build-star-catalog.ts"
   },
   "dependencies": {
     "@rr0/data": "^0.3.40",
     "@rr0/place": "^0.5.3",
     "@rr0/time": "^0.11.2",
+    "astronomy-engine": "^2.1.19",
     "three": "^0.185.1"
   },
   "devDependencies": {
     "@types/three": "^0.185.3",
     "jsdom": "^25.0.0",
+    "tsx": "^4.23.5",
     "typescript": "^5.9.2",
     "vite": "^6.3.5",
     "vitest": "^3.0.0"

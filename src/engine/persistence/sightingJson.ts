@@ -2,6 +2,8 @@ import { Sighting } from "../model/Sighting.js"
 import type { SightingLocation, SightingTime } from "../model/Sighting.js"
 import { Timeline } from "../model/Timeline.js"
 import type { TimelineJson } from "../model/Timeline.js"
+import { ObserverTrack } from "../model/ObserverTrack.js"
+import type { ObserverTrackJson } from "../model/ObserverTrack.js"
 
 /**
  * Standalone "one JSON file per case" format (e.g. a future sighting.json
@@ -24,6 +26,9 @@ export interface SightingRecordingJson {
    * duplicating names that could drift out of sync with the actual files. */
   caseId?: string
   timeline: TimelineJson
+  /** The witness's position/elevation/orientation over time — absent for older recordings, which
+   * fall back to the legacy static place[0] (see Sighting.ts's resolveObserverPoseAt). */
+  observerTrack?: ObserverTrackJson
 }
 
 export function toSightingJson(sighting: Sighting): SightingRecordingJson {
@@ -36,7 +41,8 @@ export function toSightingJson(sighting: Sighting): SightingRecordingJson {
     witnessId: sighting.witnessId,
     witnessName: sighting.witnessName,
     caseId: sighting.caseId,
-    timeline: sighting.timeline.toJSON()
+    timeline: sighting.timeline.toJSON(),
+    observerTrack: sighting.observerTrack.toJSON()
   }
 }
 
@@ -50,6 +56,7 @@ export function fromSightingJson(json: SightingRecordingJson): Sighting {
       place: json.place
     },
     Timeline.fromJSON(json.timeline),
+    json.observerTrack ? ObserverTrack.fromJSON(json.observerTrack) : new ObserverTrack(),
     json.witnessId,
     json.witnessName,
     json.caseId

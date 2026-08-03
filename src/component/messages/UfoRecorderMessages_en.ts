@@ -14,5 +14,16 @@ export const ufoRecorderMessages_en: UfoRecorderMessages = {
   durationPlaceholder: "recording length",
   export: "Export JSON",
   record: "Record",
-  stop: "Stop"
+  stop: "Stop",
+  latitude: "Latitude",
+  longitude: "Longitude",
+  heading: "Heading (°)",
+  headingPlaceholder: "unknown",
+  pitch: "Tilt (°)",
+  observationTime: "Observation start (optional)",
+  yearPlaceholder: "year",
+  monthPlaceholder: "month",
+  dayPlaceholder: "day",
+  hourPlaceholder: "hour",
+  minutePlaceholder: "min"
 }
