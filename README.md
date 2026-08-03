@@ -148,7 +148,9 @@ mistaken for a second light source or "controlled" object). Rendering these accu
 misidentification needs:
 - Witness viewing heading/azimuth (and field of view) added to the data model — the current altitude-only lighting
   model can't place anything at a specific compass position, only judge overall sky darkness.
-- Real star catalog positions + magnitudes (e.g. Yale Bright Star Catalog) instead of the current randomized field.
+- Real star catalog positions + magnitudes (e.g. Yale Bright Star Catalog) instead of the current randomized field —
+  filtered to naked-eye visibility (magnitude < 7.5) since these are human eyewitness observations, not
+  instrument-assisted ones; no point carrying catalog entries no witness could ever have seen.
 - Planetary position ephemeris (at least Venus/Mars/Jupiter/Saturn) and lunar position/phase — both computable
   without an external dependency the same way `SunPosition.ts` is, or via a small vetted library.
 - Sun dog / moon dog / halo rendering, conditioned on the sun or moon's altitude and (loosely) on real halo
