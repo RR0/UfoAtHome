@@ -5,17 +5,28 @@ import { defineConfig } from "vite"
  * to rr0.org (or any other page) — a fixed filename (not content-hashed),
  * separate from the default `vite build` which produces the local demo
  * (index.html + hashed assets). Run via `npm run build:embed`.
+ *
+ * Uses rollupOptions.input (not build.lib) — Vite's library mode silently
+ * skips full minification (comments/identifiers survive) and its default
+ * asset-URL rewriting for these entries, which made rr0-scene.mjs alone
+ * ~3.3x heavier than it needed to be (542KB -> 166KB gzip once fixed) and
+ * left its star-catalog asset unemitted entirely. `base: "./"` keeps any
+ * emitted `new URL(asset, import.meta.url)` reference portable (relative
+ * to wherever the .mjs is actually deployed) instead of domain-root-absolute.
  */
 export default defineConfig({
+  base: "./",
   build: {
     outDir: "dist-embed",
     emptyOutDir: true,
     copyPublicDir: false, // public/ holds only the local demo's sample JSON, irrelevant to this bundle
     target: "es2022",
-    lib: {
-      entry: "src/embed.ts",
-      formats: ["es"],
-      fileName: () => "rr0-ufo-recorder.mjs"
+    rollupOptions: {
+      input: "src/embed.ts",
+      output: {
+        format: "es",
+        entryFileNames: "rr0-ufo-recorder.mjs"
+      }
     }
   }
 })

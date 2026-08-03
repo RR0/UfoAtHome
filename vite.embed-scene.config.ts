@@ -5,17 +5,30 @@ import { defineConfig } from "vite"
  * bundle (pulls in Three.js), separate from the lightweight
  * rr0-ufo.mjs so pages that only need playback never pay for it.
  * Run via `npm run build:embed-scene`.
+ *
+ * Uses rollupOptions.input (not build.lib) — Vite's library mode silently
+ * skips full minification here (comments/identifiers survive intact) and
+ * its default asset-URL handling, which together made this bundle ~3.3x
+ * heavier than it needed to be (542KB -> 166KB gzip once fixed) and left
+ * the star-catalog binary asset unemitted entirely (a real, previously
+ * undiscovered bug — the published rr0-scene.mjs never actually shipped
+ * with stars). `base: "./"` keeps the emitted `new URL(asset,
+ * import.meta.url)` reference portable (relative to wherever the .mjs is
+ * actually deployed) instead of domain-root-absolute.
  */
 export default defineConfig({
+  base: "./",
   build: {
     outDir: "dist-embed-scene",
     emptyOutDir: true,
     copyPublicDir: false,
     target: "es2022",
-    lib: {
-      entry: "src/embed-scene.ts",
-      formats: ["es"],
-      fileName: () => "rr0-scene.mjs"
+    rollupOptions: {
+      input: "src/embed-scene.ts",
+      output: {
+        format: "es",
+        entryFileNames: "rr0-scene.mjs"
+      }
     }
   }
 })
