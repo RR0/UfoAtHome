@@ -6,4 +6,6 @@ export interface UfoMessages {
   autoReplay: string
   currentPosition: string
   duration: string
+  fullscreen: string
+  exitFullscreen: string
 }

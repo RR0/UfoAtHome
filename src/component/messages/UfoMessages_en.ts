@@ -5,5 +5,7 @@ export const ufoMessages_en: UfoMessages = {
   pause: "Pause",
   autoReplay: "Auto-replay",
   currentPosition: "Current position",
-  duration: "Duration"
+  duration: "Duration",
+  fullscreen: "Fullscreen",
+  exitFullscreen: "Exit fullscreen"
 }

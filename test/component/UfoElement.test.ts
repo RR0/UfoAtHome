@@ -24,6 +24,21 @@ beforeAll(() => {
   } as unknown as CanvasRenderingContext2D)
 })
 
+// jsdom doesn't implement the Fullscreen API at all — stub it as configurable so tests can
+// vi.spyOn() document.exitFullscreen/fullscreenElement (spyOn needs the property to already exist).
+beforeAll(() => {
+  if (!("exitFullscreen" in document)) {
+    Object.defineProperty(document, "exitFullscreen", {
+      value: () => Promise.resolve(),
+      writable: true,
+      configurable: true
+    })
+  }
+  if (!("fullscreenElement" in document)) {
+    Object.defineProperty(document, "fullscreenElement", { value: null, writable: true, configurable: true })
+  }
+})
+
 function mount(): UfoElement {
   const element = document.createElement(UFO_ELEMENT_NAME) as UfoElement
   document.body.appendChild(element)
@@ -214,5 +229,70 @@ describe("UfoElement", () => {
 
     loopButton.click()
     expect(loopButton.getAttribute("aria-pressed")).toBe("true")
+  })
+
+  it("the fullscreen button auto-hides alongside the toolbar", () => {
+    const element = mount()
+    const playPause = element.shadowRoot!.getElementById("play-pause") as HTMLButtonElement
+    const fullscreenButton = element.shadowRoot!.getElementById("fullscreen") as HTMLButtonElement
+    expect(fullscreenButton.classList.contains("auto-hide")).toBe(false)
+
+    playPause.click() // play
+    expect(fullscreenButton.classList.contains("auto-hide")).toBe(true)
+
+    playPause.click() // pause
+    expect(fullscreenButton.classList.contains("auto-hide")).toBe(false)
+  })
+
+  it("defaults fullscreenTarget to the component's own stage", () => {
+    const element = mount()
+    expect(element.fullscreenTarget).toBe(element.shadowRoot!.getElementById("stage"))
+  })
+
+  it("clicking fullscreen requests fullscreen on fullscreenTarget when not already fullscreen", () => {
+    const element = mount()
+    const requestFullscreen = vi.fn().mockResolvedValue(undefined)
+    element.fullscreenTarget.requestFullscreen = requestFullscreen
+    const button = element.shadowRoot!.getElementById("fullscreen") as HTMLButtonElement
+
+    button.click()
+
+    expect(requestFullscreen).toHaveBeenCalledOnce()
+  })
+
+  it("clicking fullscreen while already fullscreen exits instead of re-requesting", () => {
+    const element = mount()
+    const requestFullscreen = vi.fn().mockResolvedValue(undefined)
+    element.fullscreenTarget.requestFullscreen = requestFullscreen
+    const exitFullscreenSpy = vi.spyOn(document, "exitFullscreen").mockResolvedValue(undefined)
+    const fullscreenElementSpy = vi
+      .spyOn(document, "fullscreenElement", "get")
+      .mockReturnValue(element.fullscreenTarget)
+
+    const button = element.shadowRoot!.getElementById("fullscreen") as HTMLButtonElement
+    button.click()
+
+    expect(exitFullscreenSpy).toHaveBeenCalledOnce()
+    expect(requestFullscreen).not.toHaveBeenCalled()
+    // Restore only these two spies (not vi.restoreAllMocks(), which would also undo the shared
+    // HTMLCanvasElement.getContext mock from the top-level beforeAll and break later tests' mount()).
+    exitFullscreenSpy.mockRestore()
+    fullscreenElementSpy.mockRestore()
+  })
+
+  it("fullscreenchange updates the button's title between Fullscreen and Exit fullscreen", () => {
+    const element = mount()
+    const button = element.shadowRoot!.getElementById("fullscreen") as HTMLButtonElement
+    expect(button.title).toBe("Fullscreen")
+
+    const spy = vi.spyOn(document, "fullscreenElement", "get").mockReturnValue(element.fullscreenTarget)
+    document.dispatchEvent(new Event("fullscreenchange"))
+    expect(button.title).toBe("Exit fullscreen")
+
+    spy.mockReturnValue(null)
+    document.dispatchEvent(new Event("fullscreenchange"))
+    expect(button.title).toBe("Fullscreen")
+
+    spy.mockRestore()
   })
 })

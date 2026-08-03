@@ -40,11 +40,13 @@ export class UfoElement extends HTMLElement {
   }
 
   private readonly shadow: ShadowRoot
+  private readonly stageElement: HTMLElement
   private readonly canvas: HTMLCanvasElement
   private readonly canvasRenderer: CanvasRenderer
   private readonly toolbar: HTMLElement
   private readonly playPauseButton: HTMLButtonElement
   private readonly loopButton: HTMLButtonElement
+  private readonly fullscreenButton: HTMLButtonElement
   private readonly seekInput: HTMLInputElement
   private readonly timeStartLabel: HTMLElement
   private readonly timeEndLabel: HTMLElement
@@ -57,6 +59,10 @@ export class UfoElement extends HTMLElement {
    * instead of toggling playback — see UfoRecorderElement, which uses pointerdown/pointermove on
    * this same canvas to place shapes while recording. */
   enableClickToPlay = true
+  /** The element the fullscreen button requests fullscreen on — defaults to this component's own
+   * stage. SceneElement overrides this to its own (outer) stage, since fullscreening just the
+   * nested <rr0-ufo>'s stage would hide the 3D backdrop canvas (a sibling outside it). */
+  fullscreenTarget: HTMLElement
   /** Matches the template's baked-in English defaults until (if ever) loadLocaleMessages()
    * resolves a better match — see its doc comment. */
   private messages: UfoMessages = ufoMessages_en
@@ -67,6 +73,9 @@ export class UfoElement extends HTMLElement {
   private realDurationMs: number | undefined
   private realStartMs: number | undefined
 
+  /** Bound once so document.removeEventListener (disconnectedCallback) can actually find it. */
+  private readonly handleFullscreenChange = () => this.updateFullscreenButton()
+
   constructor() {
     super()
     this.shadow = this.attachShadow({ mode: "open" })
@@ -74,25 +83,31 @@ export class UfoElement extends HTMLElement {
     template.innerHTML = `<style>${css}</style>${html}`
     this.shadow.appendChild(template.content.cloneNode(true))
 
+    this.stageElement = this.shadow.getElementById("stage")!
     this.canvas = this.shadow.getElementById("canvas") as HTMLCanvasElement
     this.canvasRenderer = new CanvasRenderer(this.canvas.getContext("2d")!)
     this.toolbar = this.shadow.getElementById("toolbar")!
     this.playPauseButton = this.shadow.getElementById("play-pause") as HTMLButtonElement
     this.loopButton = this.shadow.getElementById("loop") as HTMLButtonElement
+    this.fullscreenButton = this.shadow.getElementById("fullscreen") as HTMLButtonElement
     this.seekInput = this.shadow.getElementById("seek") as HTMLInputElement
     this.timeStartLabel = this.shadow.getElementById("time-start")!
     this.timeEndLabel = this.shadow.getElementById("time-end")!
+    this.fullscreenTarget = this.stageElement
 
     this.playPauseButton.addEventListener("click", () => this.togglePlayPause())
     this.loopButton.addEventListener("click", () => this.toggleLoop())
+    this.fullscreenButton.addEventListener("click", () => this.toggleFullscreen())
     this.seekInput.addEventListener("input", () => this.player.seek(Number(this.seekInput.value)))
     this.canvas.addEventListener("click", () => {
       if (this.enableClickToPlay) this.togglePlayPause()
     })
+    document.addEventListener("fullscreenchange", this.handleFullscreenChange)
 
     this.player = this.createPlayer()
     this.updateTimeLabels()
     this.updatePlayPauseButton()
+    this.updateFullscreenButton()
     this.refresh()
     void this.loadLocaleMessages()
   }
@@ -102,6 +117,10 @@ export class UfoElement extends HTMLElement {
     if (src) {
       void this.loadFromSrc(src)
     }
+  }
+
+  disconnectedCallback(): void {
+    document.removeEventListener("fullscreenchange", this.handleFullscreenChange)
   }
 
   attributeChangedCallback(name: string, oldValue: string, newValue: string): void {
@@ -192,12 +211,27 @@ export class UfoElement extends HTMLElement {
     // sit over the scene the whole time; always shown while paused/stopped, since that's when the
     // user is most likely to want it (e.g. right after it stopped, or to scrub before playing).
     this.toolbar.classList.toggle("auto-hide", isPlaying)
+    this.fullscreenButton.classList.toggle("auto-hide", isPlaying)
   }
 
   private toggleLoop(): void {
     this.loopEnabled = !this.loopEnabled
     this.loopButton.setAttribute("aria-pressed", String(this.loopEnabled))
     this.player.loop = this.loopEnabled
+  }
+
+  private toggleFullscreen(): void {
+    if (document.fullscreenElement) {
+      void document.exitFullscreen()
+    } else {
+      this.fullscreenTarget.requestFullscreen().catch(() => {})
+    }
+  }
+
+  private updateFullscreenButton(): void {
+    const isFullscreen = document.fullscreenElement === this.fullscreenTarget
+    this.fullscreenButton.title = isFullscreen ? this.messages.exitFullscreen : this.messages.fullscreen
+    this.fullscreenButton.setAttribute("aria-label", this.fullscreenButton.title)
   }
 
   /**
@@ -218,6 +252,7 @@ export class UfoElement extends HTMLElement {
     this.loopButton.title = messages.autoReplay
     this.loopButton.setAttribute("aria-label", messages.autoReplay)
     this.updatePlayPauseButton()
+    this.updateFullscreenButton()
   }
 
   /**

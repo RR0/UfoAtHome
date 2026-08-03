@@ -1,6 +1,7 @@
 export const html = `
-<div class="stage">
+<div class="stage" id="stage">
   <canvas id="canvas" width="640" height="360"></canvas>
+  <button id="fullscreen" class="fullscreen-btn" type="button" title="Fullscreen" aria-label="Fullscreen">⛶</button>
   <div class="toolbar" id="toolbar">
     <button id="play-pause" type="button" title="Play" aria-label="Play">▶</button>
     <span id="time-start" class="time-label" title="Current position">0:00</span>
@@ -41,17 +42,37 @@ canvas {
   background: rgba(0, 0, 0, 0.55);
   transition: opacity 0.15s ease;
 }
-/* While playing, the toolbar auto-hides and only reappears on hover — kept always visible while
-   paused/stopped, since that's when the user is most likely to want it. Deliberately hover-only,
-   not :focus-within: a clicked button/range input keeps keyboard focus after the pointer moves
-   away, which would otherwise keep the toolbar stuck visible indefinitely after any interaction. */
-.toolbar.auto-hide {
+/* While playing, the toolbar and fullscreen button auto-hide and only reappear on hover — kept
+   always visible while paused/stopped, since that's when the user is most likely to want them.
+   Deliberately hover-only, not :focus-within: a clicked button/range input keeps keyboard focus
+   after the pointer moves away, which would otherwise keep them stuck visible indefinitely after
+   any interaction. */
+.auto-hide {
   opacity: 0;
   pointer-events: none;
 }
-.stage:hover .toolbar.auto-hide {
+.stage:hover .auto-hide {
   opacity: 1;
   pointer-events: auto;
+}
+.fullscreen-btn {
+  position: absolute;
+  top: 0.4em;
+  right: 0.4em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.8em;
+  height: 1.8em;
+  padding: 0;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 1em;
+  line-height: 1;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  transition: opacity 0.15s ease;
 }
 input[type=range] {
   flex: 1;

@@ -59,6 +59,9 @@ export class SceneElement extends HTMLElement {
     this.ufoElement.classList.add("ufo-overlay")
     this.ufoElement.style.setProperty("--ufo-canvas-background", "transparent")
     this.ufoElement.style.setProperty("--ufo-canvas-border", "none")
+    // Otherwise the nested <rr0-ufo>'s own fullscreen button would fullscreen just its own stage
+    // (its transparent overlay canvas + toolbar), hiding the 3D backdrop — a sibling outside it.
+    this.ufoElement.fullscreenTarget = this.shadow.getElementById("stage")!
     this.shadow.getElementById("ufo-slot")!.replaceWith(this.ufoElement)
   }
 

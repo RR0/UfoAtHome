@@ -1,5 +1,5 @@
 export const html = `
-<div class="stage">
+<div class="stage" id="stage">
   <canvas id="scene-canvas"></canvas>
   <div id="ufo-slot"></div>
 </div>
