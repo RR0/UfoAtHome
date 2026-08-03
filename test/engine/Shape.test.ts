@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { createShape, createSaucer, createTriangle } from "../../src/engine/shape/Shape.js"
+import { createOval, createShape, createSaucer, createTriangle, lerpShape } from "../../src/engine/shape/Shape.js"
 
 describe("shape presets", () => {
   it("createSaucer produces a closed polygon spanning the given bounds", () => {
@@ -29,5 +29,67 @@ describe("shape presets", () => {
     expect(shape.color).toBe("#ff0000")
     expect(shape.transparency).toBe(0.4)
     expect(shape.haloScale).toBe(2)
+  })
+})
+
+describe("lerpShape", () => {
+  it("blends bounds/angle/transparency/haloScale linearly", () => {
+    const from = { ...createOval({ x: 0, y: 0, width: 10, height: 10 }), angle: 0, transparency: 0, haloScale: 0 }
+    const to = { ...createOval({ x: 10, y: 20, width: 20, height: 30 }), angle: Math.PI, transparency: 1, haloScale: 2 }
+
+    const mid = lerpShape(from, to, 0.5)
+
+    expect(mid.bounds).toEqual({ x: 5, y: 10, width: 15, height: 20 })
+    expect(mid.angle).toBeCloseTo(Math.PI / 2)
+    expect(mid.transparency).toBeCloseTo(0.5)
+    expect(mid.haloScale).toBeCloseTo(1)
+  })
+
+  it("blends hex colors channel-by-channel", () => {
+    const from = createOval({ x: 0, y: 0, width: 10, height: 10 }, "#ff0000")
+    const to = createOval({ x: 10, y: 10, width: 10, height: 10 }, "#0000ff")
+
+    expect(lerpShape(from, to, 0.5).color).toBe("#800080")
+  })
+
+  it("falls back to holding from's color when it isn't a #rrggbb hex value", () => {
+    const from = createOval({ x: 0, y: 0, width: 10, height: 10 }, "red")
+    const to = createOval({ x: 10, y: 10, width: 10, height: 10 }, "#0000ff")
+
+    expect(lerpShape(from, to, 0.5).color).toBe("red")
+  })
+
+  it("blends polygon points vertex-by-vertex when both shapes have the same point count", () => {
+    const from = createTriangle({ x: 0, y: 0, width: 10, height: 10 })
+    const to = createTriangle({ x: 0, y: 0, width: 20, height: 20 })
+
+    const mid = lerpShape(from, to, 0.5)
+
+    expect(mid.kind).toBe("polygon")
+    expect((mid as typeof from).points).toEqual([
+      { x: 0, y: 0 },
+      { x: 15, y: 7.5 },
+      { x: 0, y: 15 }
+    ])
+  })
+
+  it("holds from's outline when shape kinds differ, still blending shared fields", () => {
+    const from = createOval({ x: 0, y: 0, width: 10, height: 10 })
+    const to = createSaucer({ x: 0, y: 0, width: 10, height: 10 })
+
+    const mid = lerpShape(from, to, 0.5)
+
+    expect(mid.kind).toBe("oval")
+    expect(mid.bounds).toEqual({ x: 0, y: 0, width: 10, height: 10 })
+  })
+
+  it("holds from's outline when polygons have a different point count", () => {
+    const from = createTriangle({ x: 0, y: 0, width: 10, height: 10 })
+    const to = createSaucer({ x: 0, y: 0, width: 10, height: 10 })
+
+    const mid = lerpShape(from, to, 0.5)
+
+    expect(mid.kind).toBe("polygon")
+    expect((mid as typeof from).points).toEqual(from.points)
   })
 })

@@ -8,9 +8,9 @@ recommendation](https://rr0.org/time/1/9/6/8/07/29/Symposium/Shepard/index_fr.ht
 testimony is more faithful than an oral or written one.
 
 Originally a Java applet (2003), the project has been rewritten from scratch in TypeScript: a small,
-dependency-light engine (keyframe timeline, recording, playback, Canvas2D rendering) wrapped in three vanilla
+dependency-light engine (keyframe timeline, recording, playback, Canvas2D rendering) wrapped in four vanilla
 [Web Components](https://developer.mozilla.org/en-US/docs/Web/API/Web_components) — no UI framework, no build step
-required by the consuming page. One of the three (`<rr0-scene>`) does pull in [Three.js](https://threejs.org/)
+required by the consuming page. One of the four (`<rr0-scene>`) does pull in [Three.js](https://threejs.org/)
 for an optional 3D backdrop — see [`<rr0-scene>`](#rr0-scene--3d-decor) below for why that's an isolated,
 opt-in bundle rather than a project-wide dependency.
 
@@ -22,7 +22,9 @@ its default behavior and `<rr0-ufo-recorder>` is the one that needs a qualifier 
 real-world time and place, with no UFO-specific logic of its own — today it composes a nested `<rr0-ufo>` for the
 common case (see its section below), but the decor itself could back other kinds of reconstructions later. A fully
 generic version (accepting arbitrary overlay content instead of always creating its own `<rr0-ufo>`) is a natural
-follow-up, not implemented yet.
+follow-up, not implemented yet. `<rr0-ufo-witnesses>` follows the same "adds a qualifier" logic as the recorder:
+it *adds* a multi-witness selector on top of `<rr0-ufo>`, for cases that have more than one witness's own
+recording of the same sighting.
 
 See the [Wiki](https://github.com/RR0/UfoAtHome/wiki) for the project's history, and a live example embedded in
 [rr0.org's UFO@home page](https://rr0.org/science/crypto/ufo/enquete/projet/UfoAtHome.html) and in its
@@ -34,26 +36,27 @@ See the [Wiki](https://github.com/RR0/UfoAtHome/wiki) for the project's history,
 npm install @rr0/ufoathome
 ```
 
-Three self-contained, pre-built ES modules are published — each self-registers its custom element as soon as it's
+Four self-contained, pre-built ES modules are published — each self-registers its custom element as soon as it's
 imported, no explicit setup call needed:
 
 ```html
 <script type="module" src="/node_modules/@rr0/ufoathome/dist-embed-ufo/rr0-ufo.mjs"></script>
 <script type="module" src="/node_modules/@rr0/ufoathome/dist-embed/rr0-ufo-recorder.mjs"></script>
 <script type="module" src="/node_modules/@rr0/ufoathome/dist-embed-scene/rr0-scene.mjs"></script>
+<script type="module" src="/node_modules/@rr0/ufoathome/dist-embed-witnesses/rr0-ufo-witnesses.mjs"></script>
 ```
 
 or, from a bundler:
 
 ```ts
-import "@rr0/ufoathome/ufo"      // registers <rr0-ufo>
-import "@rr0/ufoathome/recorder" // registers <rr0-ufo-recorder> (and <rr0-ufo>, which it composes)
-import "@rr0/ufoathome/scene"    // registers <rr0-scene> (and <rr0-ufo>, which it composes)
+import "@rr0/ufoathome/ufo"       // registers <rr0-ufo>
+import "@rr0/ufoathome/recorder"  // registers <rr0-ufo-recorder> (and <rr0-ufo>, which it composes)
+import "@rr0/ufoathome/scene"     // registers <rr0-scene> (and <rr0-ufo>, which it composes)
+import "@rr0/ufoathome/witnesses" // registers <rr0-ufo-witnesses> (and <rr0-ufo>, which it composes)
 ```
 
 Only load the one(s) a given page actually needs — `rr0-scene.mjs` in particular pulls in Three.js and is far
-heavier than the other two (see its section below), so pages that just need playback should stick to
-`rr0-ufo.mjs`.
+heavier than the others (see its section below), so pages that just need playback should stick to `rr0-ufo.mjs`.
 
 ## `<rr0-ufo>` — read-only playback
 
@@ -107,6 +110,10 @@ Usage: click **Record**, move the pointer over the canvas to draw the UFO's path
 replay it. The nested `<rr0-ufo>`'s `enableClickToPlay` is set to `false` here — a completed recording drag also
 fires a native "click" on the canvas, which would otherwise spuriously toggle playback right after recording.
 
+All of the toolbar's own labels (shape presets, Color/Transparency/Halo, Add shape, Record/Stop, Export JSON,
+Duration) are translated (English/French) the same way `<rr0-ufo>`'s own labels are — based on
+`navigator.languages`, no picker UI.
+
 | Member | Kind | Description |
 |---|---|---|
 | `sightingData` | property (get/set) | Delegates to the nested `<rr0-ufo>`'s `sightingData` |
@@ -115,7 +122,7 @@ fires a native "click" on the canvas, which would otherwise spuriously toggle pl
 ## `<rr0-scene>` — 3D decor
 
 The environmental variant (~180KB gzip, dominated by [Three.js](https://threejs.org/) — this is by far the heaviest
-of the three bundles, load it only on pages that want it): everything `<rr0-ufo>` has, composited over a 3D
+of the four bundles, load it only on pages that want it): everything `<rr0-ufo>` has, composited over a 3D
 sky/horizon/starfield backdrop instead of a plain background. Same markup and members as `<rr0-ufo>` (`src`,
 `sightingData`, `loadFromSrc`, `enableClickToPlay`) — it's a drop-in upgrade, including click-to-play/pause
 anywhere on the scene (the nested `<rr0-ufo>`'s transparent canvas covers the whole stage). The fullscreen button
@@ -137,6 +144,45 @@ The UFO shape itself deliberately stays a 2D overlay on top of the 3D decor, nev
 what the witness reported — possibly a misidentification or optical effect — not something to interpret as a real
 3D shape. Only the surrounding environment, independently computable from real astronomy, is rendered in 3D.
 
+## `<rr0-ufo-witnesses>` — multi-witness selector
+
+A case can have more than one witness, each with their own recording (their own `sighting.json`) of the same
+event. This component lets a page switch between them instead of only ever embedding one fixed `<rr0-ufo>` — it
+composes a nested `<rr0-ufo>` the same way `<rr0-scene>` does, and is otherwise just as lightweight.
+
+```html
+<rr0-ufo-witnesses src="witnesses.json"></rr0-ufo-witnesses>
+```
+
+`src` points not at a `sighting.json` directly, but at a small manifest — a plain JSON array of each witness's own
+`SightingRecordingJson` URL (typically relative to the case's own page, same as `<rr0-ufo>`'s own `src`):
+
+```json
+["chiles-sighting.json", "whitted-sighting.json"]
+```
+
+No labels or ids are duplicated in the manifest itself — each witness's display name and the shared case id
+grouping them together are read from that witness's *own* file (`witnessName`/`caseId`, see
+[Data format](#data-format)), so there's a single source of truth and nothing to drift out of sync. This means
+every listed witness's recording is fetched upfront (to read its name), not lazily on selection — fine at the
+scale a case's witness list actually has. If a witness has no `witnessName`, its `witnessId` is shown instead, or
+the URL itself as a last resort. A mismatched `caseId` across the listed witnesses logs a console warning (doesn't
+block) — likely means unrelated recordings got listed together by mistake.
+
+| Member | Kind | Description |
+|---|---|---|
+| `src` | attribute | URL of a witness manifest (above), fetched automatically on connect and whenever the attribute changes |
+| `witnessUrls` | property (get/set) | The manifest as a plain array of URLs, for programmatic use instead of `src` |
+| `loadFromSrc(url)` | method (async) | What the `src` attribute triggers internally; can be called directly too |
+
+The selector (a plain `<select>` of witness labels) is hidden entirely when there are 0 or 1 witnesses — no point
+showing a dropdown with nothing to actually choose between. The first witness loads automatically once the list is
+known; switching the selector loads that witness's already-fetched recording into the nested `<rr0-ufo>` (no
+re-fetch). Setting `witnessUrls` again (e.g. a manifest refresh) keeps the current selection if that witness is
+still present, instead of resetting back to the first.
+
+The "Witness" label itself is translated (English/French) the same way as `<rr0-ufo>`'s own labels.
+
 ## Data format
 
 Both components read/write a plain, JSON-serializable `SightingRecordingJson`:
@@ -148,7 +194,9 @@ interface SightingRecordingJson {
   endTime?: { year?: number, month?: number, day?: number, hour?: number, minute?: number, second?: number } // alternative to durationSeconds
   durationSeconds?: number // alternative to endTime; takes precedence if both are set
   place?: { lat: number, lng: number }[]
-  witnessId?: string
+  witnessId?: string // opaque internal reference — no PII beyond a display name (see witnessName)
+  witnessName?: string // for cases where the witness is already publicly named in the published material (e.g. Chiles-Whitted) — omit for anonymous witnesses
+  caseId?: string // shared by every witness's own sighting.json for the same case — see <rr0-ufo-witnesses>
   timeline: {
     keyframes: Array<{
       t: number // milliseconds since recording start
@@ -184,11 +232,12 @@ case's `sighting.json` from its `RR0Event`).
 - `src/render/CanvasRenderer.ts` — paints shapes onto a `<canvas>` 2D context.
 - `src/render3d/` — the Three.js decor renderer (`SceneRenderer`) and its pure, dependency-free color logic
   (`skyColors.ts`), kept separate so the latter is unit-testable without a WebGL context.
-- `src/component/` — the three Web Components. `UfoElement` (`<rr0-ufo>`) owns the canvas/playback; `UfoRecorderElement`
-  and `SceneElement` (`<rr0-scene>`) both compose it (via `document.createElement`, not an inline template tag — see
-  the comment at that call site) rather than duplicating it, adding recording/appearance-editing or the 3D decor on
-  top, respectively.
-- Playback is deliberately discrete (hold-last-keyframe, no interpolation), matching the original applet's behavior.
+- `src/component/` — the four Web Components. `UfoElement` (`<rr0-ufo>`) owns the canvas/playback; `UfoRecorderElement`,
+  `SceneElement` (`<rr0-scene>`) and `WitnessSelectorElement` (`<rr0-ufo-witnesses>`) all compose it (via
+  `document.createElement`, not an inline template tag — see the comment at that call site) rather than duplicating
+  it, adding recording/appearance-editing, the 3D decor, or the multi-witness selector on top, respectively.
+- Playback linearly interpolates shapes between a source's surrounding keyframes for smooth motion
+  (`Timeline.getInterpolatedShapeAt`/`Shape.lerpShape`), holding at the ends of its recorded range.
 - Recording samples the pointer position at a configurable rate via `requestAnimationFrame`, not on every
   `pointermove` event.
 

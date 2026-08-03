@@ -46,11 +46,78 @@ describe("Timeline", () => {
     expect(timeline.getLatestShapeAt(100, "a")).toBeUndefined()
   })
 
+  it("addKeyframe at an existing t merges by sourceId instead of replacing the whole keyframe", () => {
+    const timeline = new Timeline()
+    timeline.addKeyframe(100, [
+      { sourceId: "a", shape: shapeAt(1) },
+      { sourceId: "b", shape: shapeAt(2) }
+    ])
+    timeline.addKeyframe(100, [{ sourceId: "a", shape: shapeAt(9) }])
+
+    expect(timeline.getShapeAt(100, "a")?.bounds.x).toBe(9)
+    expect(timeline.getShapeAt(100, "b")?.bounds.x).toBe(2)
+  })
+
+  it("getInterpolatedShapeAt blends between the surrounding keyframes", () => {
+    const timeline = new Timeline()
+    timeline.addKeyframe(0, [{ sourceId: "a", shape: shapeAt(0) }])
+    timeline.addKeyframe(200, [{ sourceId: "a", shape: shapeAt(2) }])
+    expect(timeline.getInterpolatedShapeAt(0, "a")?.bounds.x).toBe(0)
+    expect(timeline.getInterpolatedShapeAt(50, "a")?.bounds.x).toBeCloseTo(0.5)
+    expect(timeline.getInterpolatedShapeAt(150, "a")?.bounds.x).toBeCloseTo(1.5)
+    expect(timeline.getInterpolatedShapeAt(200, "a")?.bounds.x).toBe(2)
+  })
+
+  it("getInterpolatedShapeAt holds the nearest value outside the source's recorded range", () => {
+    const timeline = new Timeline()
+    timeline.addKeyframe(100, [{ sourceId: "a", shape: shapeAt(1) }])
+    timeline.addKeyframe(200, [{ sourceId: "a", shape: shapeAt(2) }])
+    expect(timeline.getInterpolatedShapeAt(0, "a")?.bounds.x).toBe(1)
+    expect(timeline.getInterpolatedShapeAt(1000, "a")?.bounds.x).toBe(2)
+  })
+
+  it("getInterpolatedShapeAt interpolates each source independently on its own keyframe schedule", () => {
+    const timeline = new Timeline()
+    // "a" has keyframes spanning the full timeline; "b" only has one, recorded partway through.
+    timeline.addKeyframe(0, [{ sourceId: "a", shape: shapeAt(0) }])
+    timeline.addKeyframe(50, [{ sourceId: "b", shape: shapeAt(5) }])
+    timeline.addKeyframe(100, [{ sourceId: "a", shape: shapeAt(10) }])
+
+    expect(timeline.getInterpolatedShapeAt(50, "a")?.bounds.x).toBeCloseTo(5)
+    // "b" has no later keyframe of its own, so it holds instead of interpolating toward "a"'s.
+    expect(timeline.getInterpolatedShapeAt(75, "b")?.bounds.x).toBe(5)
+    expect(timeline.getInterpolatedShapeAt(75, "a")?.bounds.x).toBeCloseTo(7.5)
+  })
+
+  it("getInterpolatedShapeAt returns undefined when the source has no keyframes", () => {
+    const timeline = new Timeline()
+    timeline.addKeyframe(0, [{ sourceId: "b", shape: shapeAt(0) }])
+    expect(timeline.getInterpolatedShapeAt(0, "a")).toBeUndefined()
+  })
+
   it("hitTest finds a shape containing the point at that instant", () => {
     const timeline = new Timeline()
     timeline.addKeyframe(0, [{ sourceId: "a", shape: createOval({ x: 0, y: 0, width: 10, height: 10 }) }])
     expect(timeline.hitTest(0, 5, 5)?.sourceId).toBe("a")
     expect(timeline.hitTest(0, 50, 50)).toBeUndefined()
+  })
+
+  it("hitTest works against an interpolated instant, not just a literal keyframe", () => {
+    const timeline = new Timeline()
+    timeline.addKeyframe(0, [{ sourceId: "a", shape: createOval({ x: 0, y: 0, width: 10, height: 10 }) }])
+    timeline.addKeyframe(100, [{ sourceId: "a", shape: createOval({ x: 100, y: 0, width: 10, height: 10 }) }])
+    // At t=50 the shape is interpolated to x=50 — no literal keyframe exists there.
+    expect(timeline.hitTest(50, 55, 5)?.sourceId).toBe("a")
+    expect(timeline.hitTest(50, 5, 5)).toBeUndefined()
+  })
+
+  it("hitTest picks the topmost (most-recently-added) source when shapes overlap", () => {
+    const timeline = new Timeline()
+    timeline.addKeyframe(0, [
+      { sourceId: "a", shape: createOval({ x: 0, y: 0, width: 20, height: 20 }) },
+      { sourceId: "b", shape: createOval({ x: 5, y: 5, width: 20, height: 20 }) }
+    ])
+    expect(timeline.hitTest(0, 10, 10)?.sourceId).toBe("b")
   })
 
   it("reports duration and sourceIds", () => {

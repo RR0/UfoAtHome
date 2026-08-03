@@ -2,6 +2,7 @@ import { html, css } from "./ufoTemplate.js"
 import { Sighting, sightingDurationMs, sightingTimeToMs } from "../engine/model/Sighting.js"
 import type { SightingTime } from "../engine/model/Sighting.js"
 import { Player } from "../engine/playback/Player.js"
+import type { PlaybackState } from "../engine/playback/Player.js"
 import { CanvasRenderer } from "../render/CanvasRenderer.js"
 import { fromSightingJson, toSightingJson } from "../engine/persistence/sightingJson.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
@@ -54,6 +55,7 @@ export class UfoElement extends HTMLElement {
   private currentSighting: Sighting = Sighting.create()
   private player: Player
   private loopEnabled = true
+  private highlightedSourceId?: string
 
   /** Set to false by composing elements that need the canvas's own click for something else
    * instead of toggling playback — see UfoRecorderElement, which uses pointerdown/pointermove on
@@ -165,26 +167,77 @@ export class UfoElement extends HTMLElement {
     return this.canvasRenderer
   }
 
+  /** Exposed so UfoRecorderElement can write an appearance edit at the exact instant the
+   * (already-visible) seek bar is currently scrubbed to. */
+  get currentTime(): number {
+    return this.player.time
+  }
+
+  /** Exposed so UfoRecorderElement can avoid editing/resyncing appearance while actively
+   * playing, when the playhead is a moving target rather than a specific instant. */
+  get playbackState(): PlaybackState {
+    return this.player.playbackState
+  }
+
+  get selectedSourceId(): string | undefined {
+    return this.highlightedSourceId
+  }
+
+  /** The sighting's reported real-world duration in seconds (event.durationSeconds) — takes
+   * precedence over endTime/time when computing playback speed (see sightingDurationMs).
+   * Exposed so UfoRecorderElement can offer a duration input in its own editor UI, patching
+   * just this field rather than reconstructing the whole Sighting/Timeline via sightingData. */
+  get durationSeconds(): number | undefined {
+    return this.currentSighting.event.durationSeconds
+  }
+
+  set durationSeconds(seconds: number | undefined) {
+    this.currentSighting.event.durationSeconds = seconds
+    this.updateTimeLabels()
+    // updateTimeLabels() alone doesn't touch the seek bar's own range — without this, the
+    // slider stayed capped at timeline.duration (e.g. 0 on a still-empty recording) even
+    // though a longer real duration is now known and seekable (see Player.seekableDuration).
+    this.refresh()
+  }
+
+  /** Exposed so UfoRecorderElement can visually flag the shape currently selected in its own
+   * editor UI, reusing CanvasRenderer's existing selection-handle rendering — purely a
+   * paint-time hint, never persisted (Shape.selected is never written by any Timeline/JSON
+   * code path, so this can't leak into a saved sighting). */
+  set selectedSourceId(sourceId: string | undefined) {
+    if (sourceId === this.highlightedSourceId) return
+    this.highlightedSourceId = sourceId
+    this.refresh()
+  }
+
   /**
    * Re-reads the timeline's duration into the seek slider and repaints the
    * current frame — call after externally mutating `sighting.timeline`
    * (e.g. UfoRecorderElement adding keyframes while recording).
    */
   refresh(): void {
-    this.seekInput.max = String(this.currentSighting.timeline.duration)
+    this.seekInput.max = String(this.player.seekableDuration)
     this.player.seek(this.player.time)
   }
 
   private onFrame(t: number, shapesBySource: Map<string, Shape>): void {
     this.canvasRenderer.clear(this.canvas.width, this.canvas.height)
-    for (const shape of shapesBySource.values()) {
-      this.canvasRenderer.paintShape(shape)
+    // Selection handles are an editing affordance — hidden while actively playing, matching
+    // the toolbar's own auto-hide-while-playing convention.
+    const showHighlight = this.playbackState !== "playing"
+    for (const [sourceId, shape] of shapesBySource) {
+      const highlighted = showHighlight && sourceId === this.highlightedSourceId
+      this.canvasRenderer.paintShape(highlighted ? { ...shape, selected: true } : shape)
     }
     this.seekInput.value = String(t)
     this.timeStartLabel.textContent = this.formatPosition(t)
     // Catches the player stopping on its own (reaching the end without loop), not just clicks —
     // safe to read playbackState here since Player.play() flips it before painting the last frame.
     this.updatePlayPauseButton()
+    // Mirrors <video>'s own timeupdate event/semantics — fires on every playback tick AND every
+    // seek, since both funnel through this one onFrame sink. Lets UfoRecorderElement know when
+    // to resync its appearance toolbar to whatever's at the current playhead.
+    this.dispatchEvent(new CustomEvent("timeupdate", { detail: { time: t } }))
   }
 
   private createPlayer(): Player {
@@ -196,6 +249,10 @@ export class UfoElement extends HTMLElement {
   private togglePlayPause(): void {
     if (this.player.playbackState === "playing") {
       this.player.pause()
+      // pause() doesn't itself trigger a repaint — force one so the selection highlight
+      // (hidden while playing) reappears immediately instead of staying hidden until some
+      // unrelated repaint happens to occur.
+      this.refresh()
     } else {
       this.player.play()
     }
@@ -271,8 +328,18 @@ export class UfoElement extends HTMLElement {
     this.realDurationMs = durationMs !== undefined && durationMs > 0 ? durationMs : undefined
     this.realStartMs = event.time ? sightingTimeToMs(event.time) : undefined
 
+    const timelineDuration = this.currentSighting.timeline.duration
+    // Only stretches when there's actually some raw recorded motion to stretch (preserves the
+    // original "quick drag, auto-stretched" behavior exactly). When timelineDuration is 0 —
+    // nothing recorded yet, e.g. a duration was just declared before any motion was placed —
+    // dividing by realDurationMs would give playbackRate 0, freezing Play the instant it's
+    // pressed; falling back to 1 (real-time pace) instead lets it actually advance.
     this.player.playbackRate =
-      this.realDurationMs !== undefined ? this.currentSighting.timeline.duration / this.realDurationMs : 1
+      this.realDurationMs !== undefined && timelineDuration > 0 ? timelineDuration / this.realDurationMs : 1
+    // Lets an editor scrub to and place a keyframe anywhere across the full real declared
+    // duration, even before anything's actually been recorded there yet (see
+    // Player.seekableDuration's own doc comment).
+    this.player.durationOverrideMs = this.realDurationMs ?? 0
 
     this.timeEndLabel.textContent = this.formatEndOfTimeline()
     this.timeStartLabel.textContent = this.formatPosition(this.player.time)
@@ -287,7 +354,12 @@ export class UfoElement extends HTMLElement {
   private formatPosition(t: number): string {
     if (this.realDurationMs === undefined) return formatElapsed(t)
     const timelineDuration = this.currentSighting.timeline.duration
-    const realElapsedMs = timelineDuration > 0 ? (t / timelineDuration) * this.realDurationMs : 0
+    // Only rescales within what's actually been recorded so far (the original "stretch a
+    // finished recording to match its real reported length" behavior). Beyond that — scrubbed
+    // into not-yet-recorded territory, made reachable by Player.durationOverrideMs — there's no
+    // recorded pacing to stretch, so t is already a real-ms position (1 timeline-ms == 1 real-ms
+    // is the natural default until real recorded data establishes a different scale).
+    const realElapsedMs = timelineDuration > 0 && t <= timelineDuration ? (t / timelineDuration) * this.realDurationMs : t
     return this.realStartMs !== undefined
       ? formatClockTime(msToTimeOfDay(this.realStartMs + realElapsedMs))
       : formatElapsed(realElapsedMs)

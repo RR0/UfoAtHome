@@ -11,15 +11,33 @@ function buildTimeline(): Timeline {
 }
 
 describe("Player", () => {
-  it("seek resolves the hold-last-keyframe shape at that instant", () => {
+  it("seek resolves the interpolated shape at that instant", () => {
     const timeline = buildTimeline()
     const onFrame = vi.fn()
     const player = new Player(timeline, onFrame)
 
     player.seek(50)
 
-    expect(onFrame).toHaveBeenCalledWith(50, new Map([["a", timeline.getLatestShapeAt(50, "a")]]))
-    expect(onFrame.mock.calls[0][1].get("a")?.bounds.x).toBe(0)
+    expect(onFrame).toHaveBeenCalledWith(50, new Map([["a", timeline.getInterpolatedShapeAt(50, "a")]]))
+    expect(onFrame.mock.calls[0][1].get("a")?.bounds.x).toBe(50)
+  })
+
+  it("seek interpolates multiple simultaneous sources independently", () => {
+    const timeline = new Timeline()
+    timeline.addKeyframe(0, [
+      { sourceId: "ufo", shape: createOval({ x: 0, y: 0, width: 10, height: 10 }) },
+      { sourceId: "landmark", shape: createOval({ x: 50, y: 50, width: 10, height: 10 }) }
+    ])
+    timeline.addKeyframe(100, [{ sourceId: "ufo", shape: createOval({ x: 100, y: 0, width: 10, height: 10 }) }])
+    const onFrame = vi.fn()
+    const player = new Player(timeline, onFrame)
+
+    player.seek(50)
+
+    const shapes = onFrame.mock.calls[0][1] as Map<string, ReturnType<typeof createOval>>
+    expect(shapes.get("ufo")?.bounds.x).toBe(50)
+    // "landmark" never moves, so it holds its only recorded position.
+    expect(shapes.get("landmark")?.bounds.x).toBe(50)
   })
 
   it("seek clamps to [0, duration]", () => {
@@ -32,6 +50,34 @@ describe("Player", () => {
 
     player.seek(10_000)
     expect(player.time).toBe(timeline.duration)
+  })
+
+  it("seekableDuration falls back to timeline.duration when durationOverrideMs is unset (0)", () => {
+    const timeline = buildTimeline() // duration 100
+    const player = new Player(timeline, vi.fn())
+    expect(player.seekableDuration).toBe(100)
+  })
+
+  it("durationOverrideMs extends seek() beyond an empty/short timeline instead of clamping back to it", () => {
+    const timeline = new Timeline() // duration 0 — nothing recorded yet
+    const onFrame = vi.fn()
+    const player = new Player(timeline, onFrame)
+    player.durationOverrideMs = 10_000
+
+    player.seek(4000)
+
+    expect(player.time).toBe(4000)
+    expect(player.seekableDuration).toBe(10_000)
+  })
+
+  it("durationOverrideMs doesn't shrink the seekable range below the actual recorded timeline", () => {
+    const timeline = buildTimeline() // duration 100
+    const player = new Player(timeline, vi.fn())
+    player.durationOverrideMs = 10 // shorter than what's already recorded
+
+    expect(player.seekableDuration).toBe(100)
+    player.seek(100)
+    expect(player.time).toBe(100)
   })
 
   it("play/pause/stop transition playbackState synchronously", () => {
@@ -102,6 +148,19 @@ describe("Player", () => {
 
       expect(player.time).toBe(100)
       expect(player.playbackState).toBe("stopped")
+    })
+
+    it("play() holds the last recorded shape and keeps advancing through durationOverrideMs's extended range", () => {
+      const timeline = buildTimeline() // recorded duration 100
+      const player = new Player(timeline, vi.fn())
+      player.durationOverrideMs = 200 // real declared duration is longer than what's recorded
+
+      player.play()
+      now += 150 // well past the recorded 100, but still within the extended 200
+      frame?.(now)
+
+      expect(player.time).toBe(150)
+      expect(player.playbackState).toBe("playing") // not auto-stopped yet — still within range
     })
 
     it("play() after reaching the end (no loop) restarts from 0 instead of doing nothing", () => {

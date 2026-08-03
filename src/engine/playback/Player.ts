@@ -5,10 +5,9 @@ export type PlaybackState = "stopped" | "playing" | "paused"
 
 /**
  * Replays a Timeline, replacing UFOController's animation-runner loop.
- * Preserves the original's discrete/hold-last-keyframe behavior (no
- * interpolation between keyframes) — that's what the applet actually did,
- * and it's the simpler, more predictable baseline for this milestone.
- * Driven by requestAnimationFrame advancing real wall-clock time, decoupling
+ * Shapes are linearly interpolated between a source's surrounding keyframes for smooth
+ * motion (see Timeline.getInterpolatedShapeAt/Shape.lerpShape), holding at the ends of its
+ * recorded range. Driven by requestAnimationFrame advancing real wall-clock time, decoupling
  * playback frame rate from whatever samplingRate the recording used.
  */
 export class Player {
@@ -30,10 +29,25 @@ export class Player {
   /** When true, playback restarts from 0 instead of stopping once it reaches the end. */
   loop = false
 
+  /**
+   * Extends the seekable/playable range beyond timeline.duration (the last recorded
+   * keyframe) when the sighting's real declared duration is longer — UfoElement sets this
+   * from sightingDurationMs(event). Without it, an editor couldn't scrub to and place the
+   * very first keyframe past wherever the last one currently sits (seek()/play() would clamp
+   * right back), and pure playback would stop at the last recorded position instead of
+   * holding it for the remainder of a longer real observation. 0 (default) means "no
+   * extension" — seekableDuration then falls back to plain timeline.duration.
+   */
+  durationOverrideMs = 0
+
   constructor(
     private readonly timeline: Timeline,
     private readonly onFrame: (t: number, shapesBySource: Map<string, Shape>) => void
   ) {
+  }
+
+  get seekableDuration(): number {
+    return Math.max(this.timeline.duration, this.durationOverrideMs)
   }
 
   play(): void {
@@ -41,7 +55,7 @@ export class Player {
     // Replaying after reaching the end (non-looping) restarts from 0, matching standard media
     // player behavior — otherwise the next tick would immediately re-trigger the end-of-timeline
     // branch below and stop again with no visible effect.
-    if (this.currentT >= this.timeline.duration) {
+    if (this.currentT >= this.seekableDuration) {
       this.currentT = 0
       this.resolveFrame(0)
     }
@@ -52,14 +66,14 @@ export class Player {
       const now = performance.now()
       this.currentT += (now - this.lastWallTime) * this.playbackRate
       this.lastWallTime = now
-      if (this.currentT >= this.timeline.duration) {
-        if (this.loop && this.timeline.duration > 0) {
-          this.currentT %= this.timeline.duration
+      if (this.currentT >= this.seekableDuration) {
+        if (this.loop && this.seekableDuration > 0) {
+          this.currentT %= this.seekableDuration
           this.resolveFrame(this.currentT)
           this.rafId = requestAnimationFrame(tick)
           return
         }
-        this.currentT = this.timeline.duration
+        this.currentT = this.seekableDuration
         // stop() before resolveFrame(): callers reading `playbackState` from within onFrame (e.g.
         // to sync a Play/Pause button) see the final "stopped" state, not a stale "playing" one.
         this.stop()
@@ -90,7 +104,7 @@ export class Player {
   }
 
   seek(t: number): void {
-    this.currentT = Math.max(0, Math.min(t, this.timeline.duration))
+    this.currentT = Math.max(0, Math.min(t, this.seekableDuration))
     this.resolveFrame(this.currentT)
   }
 
@@ -105,7 +119,7 @@ export class Player {
   private resolveFrame(t: number): void {
     const shapesBySource = new Map<string, Shape>()
     for (const sourceId of this.timeline.sourceIds) {
-      const shape = this.timeline.getLatestShapeAt(t, sourceId)
+      const shape = this.timeline.getInterpolatedShapeAt(t, sourceId)
       if (shape) shapesBySource.set(sourceId, shape)
     }
     this.onFrame(t, shapesBySource)

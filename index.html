@@ -24,6 +24,19 @@
 </p>
 <button id="load-sample" type="button">Load sample recording</button>
 <rr0-ufo-recorder id="recorder"></rr0-ufo-recorder>
+
+<h2>Multi-witness selector</h2>
+<p>
+  The Chiles-Whitted case has two witnesses, each with their own recording — pick one below.
+</p>
+<rr0-ufo-witnesses id="witnesses" src="/demo-data/witnesses-manifest.json"></rr0-ufo-witnesses>
+
+<h2>3D decor (rr0-scene)</h2>
+<p>
+  The same Chiles sighting, with a sky/horizon/starfield backdrop computed from its real reported time and place.
+</p>
+<rr0-scene id="scene" src="/demo-data/witness-chiles.json"></rr0-scene>
+
 <script type="module" src="/src/demo/main.ts"></script>
 </body>
 </html>

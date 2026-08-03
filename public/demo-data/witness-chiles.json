@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "time": { "year": 1948, "month": 7, "day": 24, "hour": 2, "minute": 45 },
+  "durationSeconds": 20,
+  "place": [{ "lat": 33.9, "lng": -85.0 }],
+  "witnessId": "chiles",
+  "witnessName": "Clarence Chiles",
+  "caseId": "chiles-whitted",
+  "timeline": {
+    "keyframes": [
+      { "t": 0, "shapes": [{ "sourceId": "ufo-1", "shape": { "kind": "oval", "bounds": { "x": 40, "y": 200, "width": 60, "height": 30 }, "color": "#39ff14", "angle": 0, "transparency": 0, "haloScale": 1.5, "selected": false } }] },
+      { "t": 2000, "shapes": [{ "sourceId": "ufo-1", "shape": { "kind": "oval", "bounds": { "x": 300, "y": 140, "width": 60, "height": 30 }, "color": "#39ff14", "angle": 0.1, "transparency": 0, "haloScale": 1.6, "selected": false } }] },
+      { "t": 4000, "shapes": [{ "sourceId": "ufo-1", "shape": { "kind": "oval", "bounds": { "x": 560, "y": 200, "width": 60, "height": 30 }, "color": "#39ff14", "angle": 0, "transparency": 0.2, "haloScale": 1.4, "selected": false } }] }
+    ]
+  }
+}

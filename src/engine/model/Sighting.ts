@@ -74,18 +74,26 @@ export function sightingDurationMs(event: SightingEvent): number | undefined {
 
 /**
  * A recorded UFO sighting: the real-world metadata (time/place) plus a
- * Timeline (the recording's own internal millisecond clock) and an opaque
- * witness reference.
+ * Timeline (the recording's own internal millisecond clock), an opaque
+ * witness reference, and — for cases with several witnesses, each with
+ * their own recording — a human-readable witness name and a shared case id
+ * so a page can group and label them (see WitnessSelectorElement).
  *
- * Deliberately holds no witness PII (name/email/phone/address) — see
+ * `witnessId` stays an opaque internal reference (deliberately no PII beyond
+ * a display name — no email/phone/address; see
  * cms/src/people/witness/WitnessReplacer.ts for the site's existing
- * anonymization pattern, to be reused at integration time instead.
+ * anonymization pattern for anything more sensitive). `witnessName` is
+ * meant for cases where the witness is already publicly named in the
+ * published case material (e.g. Chiles-Whitted) — omit it for anonymous
+ * witnesses.
  */
 export class Sighting {
   constructor(
     readonly event: SightingEvent,
     readonly timeline: Timeline,
-    readonly witnessId?: string
+    readonly witnessId?: string,
+    readonly witnessName?: string,
+    readonly caseId?: string
   ) {
   }
 

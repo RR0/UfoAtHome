@@ -1,6 +1,6 @@
 import type { Keyframe, ShapeState } from "./Keyframe.js"
 import type { Shape } from "../shape/Shape.js"
-import { shapeContains } from "../shape/Shape.js"
+import { lerpShape, shapeContains } from "../shape/Shape.js"
 
 export interface TimelineJson {
   keyframes: Keyframe[]
@@ -14,12 +14,24 @@ export interface TimelineJson {
 export class Timeline {
   private readonly keyframes: Keyframe[] = []
 
+  /**
+   * Merges `shapes` into any existing keyframe at `t` by sourceId — untouched sources keep
+   * their prior entry, incoming ones replace/add theirs — rather than replacing the whole
+   * keyframe wholesale. This matters once more than one source can be recorded/edited
+   * independently: two takes recorded separately very likely sample the same elapsed `t`
+   * (both start at 0), and a naive full-replace would silently wipe one source's data
+   * whenever the other's write landed on the same instant.
+   */
   addKeyframe(t: number, shapes: ShapeState[]): void {
     const index = this.findInsertIndex(t)
     if (this.keyframes[index]?.t === t) {
-      this.keyframes[index] = { t, shapes }
+      const incomingIds = new Set(shapes.map(s => s.sourceId))
+      this.keyframes[index] = {
+        t,
+        shapes: [...this.keyframes[index].shapes.filter(s => !incomingIds.has(s.sourceId)), ...shapes]
+      }
     } else {
-      this.keyframes.splice(index, 0, { t, shapes })
+      this.keyframes.splice(index, 0, { t, shapes: [...shapes] })
     }
   }
 
@@ -63,12 +75,52 @@ export class Timeline {
     return undefined
   }
 
+  /**
+   * Like getLatestShapeAt, but blends toward the source's next keyframe instead of holding the
+   * last one — this is what Player uses for smooth motion. Falls back to hold-last-value at the
+   * ends of the source's recorded range (before its first keyframe, or after its last).
+   */
+  getInterpolatedShapeAt(t: number, sourceId: string): Shape | undefined {
+    const from = this.findShapeAtOrBefore(t, sourceId)
+    if (from?.t === t) return from.shape
+    const to = this.findShapeAtOrAfter(t, sourceId)
+    if (!from) return to?.shape
+    if (!to) return from.shape
+    return lerpShape(from.shape, to.shape, (t - from.t) / (to.t - from.t))
+  }
+
+  private findShapeAtOrBefore(t: number, sourceId: string): { t: number; shape: Shape } | undefined {
+    let index = this.findInsertIndex(t)
+    if (this.keyframes[index]?.t !== t) {
+      index -= 1
+    }
+    for (; index >= 0; index--) {
+      const found = this.keyframes[index].shapes.find(s => s.sourceId === sourceId)
+      if (found) return { t: this.keyframes[index].t, shape: found.shape }
+    }
+    return undefined
+  }
+
+  private findShapeAtOrAfter(t: number, sourceId: string): { t: number; shape: Shape } | undefined {
+    for (let index = this.findInsertIndex(t); index < this.keyframes.length; index++) {
+      const found = this.keyframes[index].shapes.find(s => s.sourceId === sourceId)
+      if (found) return { t: this.keyframes[index].t, shape: found.shape }
+    }
+    return undefined
+  }
+
+  /**
+   * Hit-tests against each source's INTERPOLATED shape at `t`, not just a literal keyframe —
+   * otherwise clicking a shape at any scrubbed instant that isn't an exact keyframe (the
+   * normal case) would find nothing. Iterates sourceIds in reverse so the most-recently-added
+   * source — painted last/on top by Player/onFrame — wins when shapes overlap.
+   */
   hitTest(t: number, x: number, y: number): ShapeState | undefined {
-    const keyframe = this.getKeyframeAt(t)
-    if (!keyframe) return undefined
-    for (let i = keyframe.shapes.length - 1; i >= 0; i--) {
-      if (shapeContains(keyframe.shapes[i].shape, x, y)) {
-        return keyframe.shapes[i]
+    const ids = this.sourceIds
+    for (let i = ids.length - 1; i >= 0; i--) {
+      const shape = this.getInterpolatedShapeAt(t, ids[i])
+      if (shape && shapeContains(shape, x, y)) {
+        return { sourceId: ids[i], shape }
       }
     }
     return undefined

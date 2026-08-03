@@ -28,6 +28,23 @@ describe("sightingJson", () => {
     expect(restored.event.place).toBeUndefined()
   })
 
+  it("round-trips witnessName and caseId", () => {
+    const json = {
+      version: 1 as const,
+      witnessId: "chiles",
+      witnessName: "Clarence Chiles",
+      caseId: "chiles-whitted",
+      timeline: { keyframes: [] }
+    }
+
+    const restored = fromSightingJson(json)
+
+    expect(restored.witnessId).toBe("chiles")
+    expect(restored.witnessName).toBe("Clarence Chiles")
+    expect(restored.caseId).toBe("chiles-whitted")
+    expect(toSightingJson(restored)).toEqual(json)
+  })
+
   it("round-trips endTime and durationSeconds", () => {
     const restored = fromSightingJson({
       version: 1,

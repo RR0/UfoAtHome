@@ -16,12 +16,14 @@
   "exports": {
     "./ufo": "./dist-embed-ufo/rr0-ufo.mjs",
     "./recorder": "./dist-embed/rr0-ufo-recorder.mjs",
-    "./scene": "./dist-embed-scene/rr0-scene.mjs"
+    "./scene": "./dist-embed-scene/rr0-scene.mjs",
+    "./witnesses": "./dist-embed-witnesses/rr0-ufo-witnesses.mjs"
   },
   "files": [
     "dist-embed",
     "dist-embed-ufo",
-    "dist-embed-scene"
+    "dist-embed-scene",
+    "dist-embed-witnesses"
   ],
   "scripts": {
     "dev": "vite",
@@ -29,8 +31,9 @@
     "build:embed": "tsc --noEmit && vite build --config vite.embed.config.ts",
     "build:embed-ufo": "tsc --noEmit && vite build --config vite.embed-ufo.config.ts",
     "build:embed-scene": "tsc --noEmit && vite build --config vite.embed-scene.config.ts",
-    "build:all": "npm run build && npm run build:embed && npm run build:embed-ufo && npm run build:embed-scene",
-    "prepublishOnly": "npm run build:embed && npm run build:embed-ufo && npm run build:embed-scene && npm test",
+    "build:embed-witnesses": "tsc --noEmit && vite build --config vite.embed-witnesses.config.ts",
+    "build:all": "npm run build && npm run build:embed && npm run build:embed-ufo && npm run build:embed-scene && npm run build:embed-witnesses",
+    "prepublishOnly": "npm run build:embed && npm run build:embed-ufo && npm run build:embed-scene && npm run build:embed-witnesses && npm test",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest"

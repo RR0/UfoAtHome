@@ -3,6 +3,7 @@ dist/
 dist-embed/
 dist-embed-ufo/
 dist-embed-scene/
+dist-embed-witnesses/
 *.log
 *.ipr
 *.iws

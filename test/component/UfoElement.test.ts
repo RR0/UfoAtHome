@@ -20,6 +20,7 @@ beforeAll(() => {
     rotate: vi.fn(),
     clearRect: vi.fn(),
     strokeRect: vi.fn(),
+    stroke: vi.fn(),
     fillRect: vi.fn()
   } as unknown as CanvasRenderingContext2D)
 })
@@ -109,7 +110,7 @@ describe("UfoElement", () => {
     expect(fetchMock).toHaveBeenCalledWith("other-sighting.json")
   })
 
-  it("seek updates the reported frame via the hold-last-keyframe timeline lookup", () => {
+  it("seek updates the reported frame via the timeline's interpolated lookup", () => {
     const element = mount()
     element.sightingData = sampleJson
     const seekInput = element.shadowRoot!.getElementById("seek") as HTMLInputElement
@@ -119,6 +120,54 @@ describe("UfoElement", () => {
     seekInput.dispatchEvent(new Event("input"))
     // A single-keyframe timeline has duration 0; seeking shouldn't throw.
     expect(seekInput.value).toBe("0")
+  })
+
+  it("currentTime/playbackState reflect seek() and play/pause/stop", () => {
+    const element = mount()
+    element.sightingData = {
+      version: 1,
+      timeline: {
+        keyframes: [
+          { t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 0, y: 0, width: 10, height: 10 }, color: "#fff", angle: 0, transparency: 0, haloScale: 0, selected: false } }] },
+          { t: 1000, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 10, y: 0, width: 10, height: 10 }, color: "#fff", angle: 0, transparency: 0, haloScale: 0, selected: false } }] }
+        ]
+      }
+    }
+    expect(element.playbackState).toBe("stopped")
+
+    const seekInput = element.shadowRoot!.getElementById("seek") as HTMLInputElement
+    seekInput.value = "400"
+    seekInput.dispatchEvent(new Event("input"))
+    expect(element.currentTime).toBe(400)
+
+    const playPauseButton = element.shadowRoot!.getElementById("play-pause") as HTMLButtonElement
+    playPauseButton.click()
+    expect(element.playbackState).toBe("playing")
+    playPauseButton.click()
+    expect(element.playbackState).toBe("paused")
+  })
+
+  it("dispatches timeupdate with the current time on seek", () => {
+    const element = mount()
+    element.sightingData = {
+      version: 1,
+      timeline: {
+        keyframes: [
+          { t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 0, y: 0, width: 10, height: 10 }, color: "#fff", angle: 0, transparency: 0, haloScale: 0, selected: false } }] },
+          { t: 1000, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 10, y: 0, width: 10, height: 10 }, color: "#fff", angle: 0, transparency: 0, haloScale: 0, selected: false } }] }
+        ]
+      }
+    }
+    const onTimeUpdate = vi.fn()
+    element.addEventListener("timeupdate", onTimeUpdate)
+
+    const seekInput = element.shadowRoot!.getElementById("seek") as HTMLInputElement
+    seekInput.value = "250"
+    seekInput.dispatchEvent(new Event("input"))
+
+    expect(onTimeUpdate).toHaveBeenCalled()
+    const lastCall = onTimeUpdate.mock.calls[onTimeUpdate.mock.calls.length - 1][0] as CustomEvent
+    expect(lastCall.detail.time).toBe(250)
   })
 
   it("time labels default to 0:00/0:00 before any sighting is loaded", () => {
@@ -149,6 +198,69 @@ describe("UfoElement", () => {
     const end = element.shadowRoot!.getElementById("time-end") as HTMLElement
     expect(start.textContent).toBe("02:45")
     expect(end.textContent).toBe("02:50")
+  })
+
+  it("durationSeconds getter/setter patches the sighting's event and rescales the end label, without rebuilding the timeline", () => {
+    const element = mount()
+    element.sightingData = { ...sampleJson, time: { year: 1948, month: 7, day: 24, hour: 2, minute: 45 } }
+    expect(element.durationSeconds).toBeUndefined()
+    const end = element.shadowRoot!.getElementById("time-end") as HTMLElement
+    expect(end.textContent).toBe("0:00") // single-keyframe timeline: recorded duration is 0
+
+    element.durationSeconds = 300
+
+    expect(element.durationSeconds).toBe(300)
+    expect(element.sightingData.durationSeconds).toBe(300)
+    expect(end.textContent).toBe("02:50") // now scaled by the real reported duration
+    expect(element.sightingData.timeline.keyframes).toEqual(sampleJson.timeline.keyframes) // untouched
+
+    element.durationSeconds = undefined // clearing falls back to the recording's own length
+    expect(end.textContent).toBe("0:00")
+  })
+
+  it("setting durationSeconds extends the seek bar's own range, not just the end label", () => {
+    const element = mount() // fresh, empty timeline — duration 0, nothing recorded yet
+    const seekInput = element.shadowRoot!.getElementById("seek") as HTMLInputElement
+    expect(Number(seekInput.max)).toBe(0)
+
+    element.durationSeconds = 10 // 10s declared duration, still nothing actually recorded
+
+    expect(Number(seekInput.max)).toBe(10_000)
+    // Previously the seek bar stayed capped at timeline.duration (still 0 here) even after
+    // declaring a real duration — dragging it (or calling seek() directly) would silently
+    // clamp right back to 0, i.e. "the cursor stays stuck."
+    seekInput.value = "4000"
+    seekInput.dispatchEvent(new Event("input"))
+    expect(element.currentTime).toBe(4000)
+
+    const start = element.shadowRoot!.getElementById("time-start") as HTMLElement
+    expect(start.textContent).toBe("0:04") // reflects the actual scrub position, not stuck at 0:00
+  })
+
+  it("play actually advances once a duration is set on a not-yet-recorded (duration 0) timeline", () => {
+    // Regression: playbackRate used to be timeline.duration/realDurationMs unconditionally,
+    // i.e. 0/10000 = 0 here — Play would never advance at all.
+    let now = 1000
+    let frame: FrameRequestCallback | undefined
+    const nowSpy = vi.spyOn(performance, "now").mockImplementation(() => now)
+    vi.stubGlobal("requestAnimationFrame", (cb: FrameRequestCallback) => {
+      frame = cb
+      return 1
+    })
+    vi.stubGlobal("cancelAnimationFrame", () => {})
+
+    const element = mount() // duration 0 — nothing recorded yet
+    element.durationSeconds = 10
+
+    const playPauseButton = element.shadowRoot!.getElementById("play-pause") as HTMLButtonElement
+    playPauseButton.click()
+    now += 3000
+    frame?.(now)
+
+    expect(element.currentTime).toBe(3000)
+
+    vi.unstubAllGlobals()
+    nowSpy.mockRestore()
   })
 
   it("the single play/pause button toggles its icon and title on click", () => {
@@ -294,5 +406,90 @@ describe("UfoElement", () => {
     expect(button.title).toBe("Fullscreen")
 
     spy.mockRestore()
+  })
+
+  it("selectedSourceId flags that source's shape as selected on the next paint, only", () => {
+    const element = mount()
+    element.sightingData = {
+      version: 1,
+      timeline: {
+        keyframes: [
+          {
+            t: 0,
+            shapes: [
+              { sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 0, y: 0, width: 10, height: 10 }, color: "#fff", angle: 0, transparency: 0, haloScale: 0, selected: false } },
+              { sourceId: "ufo-2", shape: { kind: "oval", bounds: { x: 20, y: 0, width: 10, height: 10 }, color: "#fff", angle: 0, transparency: 0, haloScale: 0, selected: false } }
+            ]
+          }
+        ]
+      }
+    }
+    const paintShape = vi.spyOn(element.renderer, "paintShape")
+
+    element.selectedSourceId = "ufo-2"
+
+    const paintedSelected = paintShape.mock.calls
+      .map(([shape]) => shape as { selected: boolean; bounds: { x: number } })
+      .filter(shape => shape.selected)
+    expect(paintedSelected).toHaveLength(1)
+    expect(paintedSelected[0].bounds.x).toBe(20)
+    expect(element.selectedSourceId).toBe("ufo-2")
+  })
+
+  it("setting the same selectedSourceId again doesn't trigger a redundant repaint", () => {
+    const element = mount()
+    element.selectedSourceId = "ufo-1"
+    const onTimeUpdate = vi.fn()
+    element.addEventListener("timeupdate", onTimeUpdate)
+
+    element.selectedSourceId = "ufo-1"
+
+    expect(onTimeUpdate).not.toHaveBeenCalled()
+  })
+
+  function twoKeyframeSighting() {
+    return {
+      version: 1 as const,
+      timeline: {
+        keyframes: [
+          { t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval" as const, bounds: { x: 0, y: 0, width: 10, height: 10 }, color: "#fff", angle: 0, transparency: 0, haloScale: 0, selected: false } }] },
+          { t: 1000, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval" as const, bounds: { x: 100, y: 0, width: 10, height: 10 }, color: "#fff", angle: 0, transparency: 0, haloScale: 0, selected: false } }] }
+        ]
+      }
+    }
+  }
+
+  it("suppresses the selection highlight while playing", () => {
+    const element = mount()
+    element.sightingData = twoKeyframeSighting()
+    const playPauseButton = element.shadowRoot!.getElementById("play-pause") as HTMLButtonElement
+    playPauseButton.click()
+    expect(element.playbackState).toBe("playing")
+
+    const paintShape = vi.spyOn(element.renderer, "paintShape")
+    element.selectedSourceId = "ufo-1" // forces a synchronous repaint via refresh()
+
+    const paintedSelected = paintShape.mock.calls
+      .map(([shape]) => shape as { selected: boolean })
+      .filter(shape => shape.selected)
+    expect(paintedSelected).toHaveLength(0)
+  })
+
+  it("pausing immediately repaints with the highlight restored, not just eventually", () => {
+    const element = mount()
+    element.sightingData = twoKeyframeSighting()
+    element.selectedSourceId = "ufo-1"
+    const playPauseButton = element.shadowRoot!.getElementById("play-pause") as HTMLButtonElement
+    playPauseButton.click()
+    expect(element.playbackState).toBe("playing")
+
+    const paintShape = vi.spyOn(element.renderer, "paintShape")
+    playPauseButton.click()
+    expect(element.playbackState).toBe("paused")
+
+    const paintedSelected = paintShape.mock.calls
+      .map(([shape]) => shape as { selected: boolean })
+      .filter(shape => shape.selected)
+    expect(paintedSelected).toHaveLength(1)
   })
 })

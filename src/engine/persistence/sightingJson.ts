@@ -17,6 +17,12 @@ export interface SightingRecordingJson {
   durationSeconds?: number
   place?: SightingLocation[]
   witnessId?: string
+  /** See Sighting.witnessName. */
+  witnessName?: string
+  /** See Sighting.caseId — shared by every witness's own sighting.json for the same case, so
+   * a page (e.g. WitnessSelectorElement) can group and label them without a separate manifest
+   * duplicating names that could drift out of sync with the actual files. */
+  caseId?: string
   timeline: TimelineJson
 }
 
@@ -28,6 +34,8 @@ export function toSightingJson(sighting: Sighting): SightingRecordingJson {
     durationSeconds: sighting.event.durationSeconds,
     place: sighting.event.place,
     witnessId: sighting.witnessId,
+    witnessName: sighting.witnessName,
+    caseId: sighting.caseId,
     timeline: sighting.timeline.toJSON()
   }
 }
@@ -42,6 +50,8 @@ export function fromSightingJson(json: SightingRecordingJson): Sighting {
       place: json.place
     },
     Timeline.fromJSON(json.timeline),
-    json.witnessId
+    json.witnessId,
+    json.witnessName,
+    json.caseId
   )
 }
