@@ -137,8 +137,25 @@ Lighting (sky darkness/color, star visibility) is computed from the sighting's o
 `src/engine/astronomy/SunPosition.ts` — a vanilla (no dependency) implementation of the standard NOAA/Spencer
 low-precision solar position approximation. Deliberately scoped down for this first pass: only the sun's *altitude*
 drives the sky, not azimuth — positioning a sun/moon disc (or anything else) at a specific compass direction needs
-the witness's viewing heading, which isn't part of the data model yet. Precipitation and optical effects (lens
-flare, halos, mirage) are future work; see `src/render3d/SceneRenderer.ts`.
+the witness's viewing heading, which isn't part of the data model yet. Star positions are randomized (not a real
+catalog) and brightness follows a stylized statistical distribution, not real magnitudes — see
+`src/render3d/skyColors.ts`.
+
+**Planned: real astronomy for misidentification spotting.** A recurring cause of UFO reports is a mundane
+astronomical object or atmospheric optical effect — Venus (by far the most commonly misreported "UFO"), other
+planets, the Moon (including its phase), lens flare, or halo phenomena like sun dogs/moon dogs (22° halo, often
+mistaken for a second light source or "controlled" object). Rendering these accurately enough to flag a likely
+misidentification needs:
+- Witness viewing heading/azimuth (and field of view) added to the data model — the current altitude-only lighting
+  model can't place anything at a specific compass position, only judge overall sky darkness.
+- Real star catalog positions + magnitudes (e.g. Yale Bright Star Catalog) instead of the current randomized field.
+- Planetary position ephemeris (at least Venus/Mars/Jupiter/Saturn) and lunar position/phase — both computable
+  without an external dependency the same way `SunPosition.ts` is, or via a small vetted library.
+- Sun dog / moon dog / halo rendering, conditioned on the sun or moon's altitude and (loosely) on real halo
+  formation conditions (cirrus/ice-crystal cloud, sun-observer angle).
+
+Not started yet; see `src/render3d/SceneRenderer.ts`. Precipitation and other optical effects (lens flare, mirage)
+remain future work too.
 
 The UFO shape itself deliberately stays a 2D overlay on top of the 3D decor, never "upgraded" to a 3D object: it's
 what the witness reported — possibly a misidentification or optical effect — not something to interpret as a real
