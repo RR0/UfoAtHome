@@ -101,6 +101,9 @@ export class SceneElement extends HTMLElement {
   disconnectedCallback(): void {
     this.resizeObserver?.disconnect()
     document.removeEventListener("fullscreenchange", this.handleFullscreenChange)
+    // Otherwise the twinkle animation loop (a continuous requestAnimationFrame chain, unlike the
+    // one-shot renders before it) keeps running forever into a detached canvas after unmount.
+    this.sceneRenderer.stopTwinkle()
   }
 
   attributeChangedCallback(name: string, oldValue: string, newValue: string): void {
