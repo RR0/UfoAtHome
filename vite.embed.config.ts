@@ -13,6 +13,9 @@ import { defineConfig } from "vite"
  * left its star-catalog asset unemitted entirely. `base: "./"` keeps any
  * emitted `new URL(asset, import.meta.url)` reference portable (relative
  * to wherever the .mjs is actually deployed) instead of domain-root-absolute.
+ * `assetsDir: ""` keeps assets flat alongside the .mjs (Vite's default nests
+ * them under `assets/`) — rr0.org's own copy step only picks up flat
+ * `science/crypto/ufo/*.mjs`/`*.js`/`*.bin`, not a nested directory.
  */
 export default defineConfig({
   base: "./",
@@ -20,6 +23,7 @@ export default defineConfig({
     outDir: "dist-embed",
     emptyOutDir: true,
     copyPublicDir: false, // public/ holds only the local demo's sample JSON, irrelevant to this bundle
+    assetsDir: "",
     target: "es2022",
     rollupOptions: {
       input: "src/embed.ts",

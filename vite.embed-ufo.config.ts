@@ -8,9 +8,9 @@ import { defineConfig } from "vite"
  * build:embed-ufo`.
  *
  * See vite.embed.config.ts's own comment for why rollupOptions.input (not
- * build.lib) + base: "./" are used here too, for consistency, even though
- * this particular bundle is small enough that the lib-mode minification
- * gap barely matters in practice.
+ * build.lib) + base: "./" + assetsDir: "" are used here too, for
+ * consistency, even though this particular bundle is small enough that the
+ * lib-mode minification gap barely matters in practice.
  */
 export default defineConfig({
   base: "./",
@@ -18,6 +18,7 @@ export default defineConfig({
     outDir: "dist-embed-ufo",
     emptyOutDir: true,
     copyPublicDir: false, // public/ holds only the local demo's sample JSON, irrelevant to this bundle
+    assetsDir: "",
     target: "es2022",
     rollupOptions: {
       input: "src/embed-ufo.ts",

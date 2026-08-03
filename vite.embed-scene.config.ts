@@ -14,7 +14,11 @@ import { defineConfig } from "vite"
  * undiscovered bug — the published rr0-scene.mjs never actually shipped
  * with stars). `base: "./"` keeps the emitted `new URL(asset,
  * import.meta.url)` reference portable (relative to wherever the .mjs is
- * actually deployed) instead of domain-root-absolute.
+ * actually deployed) instead of domain-root-absolute. `assetsDir: ""` keeps
+ * emitted assets flat alongside the .mjs (Vite's default nests them under
+ * an `assets/` subfolder) — rr0.org's own copy step (build.ts's `copies`
+ * globs) only picks up flat `science/crypto/ufo/*.mjs`/`*.js`/`*.bin`, not
+ * a nested directory, so a non-flat layout here would 404 once deployed.
  */
 export default defineConfig({
   base: "./",
@@ -22,6 +26,7 @@ export default defineConfig({
     outDir: "dist-embed-scene",
     emptyOutDir: true,
     copyPublicDir: false,
+    assetsDir: "",
     target: "es2022",
     rollupOptions: {
       input: "src/embed-scene.ts",
