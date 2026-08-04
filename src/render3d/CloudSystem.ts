@@ -390,14 +390,33 @@ void main() {
   float t = CLOUD_LAYER_HEIGHT / max(dir.y, 0.04);
   vec3 planePos = dir * t;
 
+  // Domain warp: distorts the position each noise layer below actually samples, using a slower,
+  // broader noise field of its own. Without this, Worley cells (shapeCell) come out as too-regular,
+  // too-round, near-identical-sized ovals — visually indistinguishable from a UFO's own saucer
+  // silhouette in this app, which is exactly the wrong thing for a cloud layer to look like. Warping
+  // the sample position stretches/bends those cell boundaries into irregular, organic shapes instead.
+  vec3 warpPos = planePos * 0.006;
+  vec3 warp = vec3(fbm(warpPos + 12.3), fbm(warpPos + 47.1), fbm(warpPos + 91.7)) * 40.0;
+  vec3 warpedPos = planePos + warp;
+
   // Frequencies tuned so a 45deg-elevation fragment samples roughly the same effective noise scale
   // the previous dir-space version did at that same elevation (where planePos's own magnitude ~=
   // CLOUD_LAYER_HEIGHT by construction) — keeps the "how big does one cloud formation look overhead"
   // read consistent with earlier tuning, while now varying correctly with viewing angle.
-  float shapeFbm = fbm(planePos * 0.014) * 0.5 + 0.5;
-  float shapeCell = 1.0 - worley(planePos * 0.011);
-  float shape = mix(shapeFbm, shapeCell, 0.55);
-  float detail = fbm(planePos * 0.031 + 41.0) * 0.5 + 0.5;
+  float shapeFbm = fbm(warpedPos * 0.014) * 0.5 + 0.5;
+  float shapeCell = 1.0 - worley(warpedPos * 0.011);
+  // Weighted toward fbm now (was 0.55 toward the cellular field) — cellular structure still adds
+  // billowy definition, but no longer dominates into a field of same-sized ovals.
+  float shape = mix(shapeFbm, shapeCell, 0.4);
+  float detail = fbm(warpedPos * 0.031 + 41.0) * 0.5 + 0.5;
+
+  // Leaves a real, unclouded gap near the horizon (see buildOvercastGeometry's own thetaLength —
+  // the geometry itself stops short of the true horizon) — a soft fade across that same last few
+  // degrees so the shell's own edge doesn't read as a hard-edged rim floating in the sky. Real
+  // terrain relief near the observer can rise above the flat y=0 horizon plane in screen space, and
+  // this shell (depthTest off, same reasoning as the puff clusters) would otherwise paint straight
+  // over it regardless of which is really closer — see OVERCAST_MIN_ALTITUDE_DEG's own comment.
+  float horizonFade = smoothstep(0.139, 0.276, dir.y); // sin(8deg)..sin(16deg), matches buildOvercastGeometry's own cutoff
 
   // Below coverage's own noise threshold: a broken/patchy ceiling with real sky-colored gaps,
   // exactly like a real transition from scattered to overcast. remap-by-threshold, same technique
@@ -410,7 +429,7 @@ void main() {
   // local value rather than merely biasing it (a pure threshold shift would still leave the
   // occasional fragment below threshold even at coverage=1, since fbm's own range rarely spans a
   // full 0..1).
-  alpha = mix(alpha, 1.0, smoothstep(0.82, 1.0, coverage));
+  alpha = mix(alpha, 1.0, smoothstep(0.82, 1.0, coverage)) * horizonFade;
   if (alpha < 0.02) discard;
 
   float diff = dot(dir, L) * 0.5 + 0.5;
@@ -452,21 +471,31 @@ export function buildOvercastMaterial(baseColor: Color, coverage: number): { mat
   return { material, uniforms }
 }
 
+/** Below this altitude, the shell has no geometry at all (see buildOvercastGeometry) — a flat ground
+ * disc never rises above the true horizon, but real terrain *relief* near the observer can, into
+ * screen space the shell would otherwise claim. depthTest is off (see buildOvercastMaterial), so
+ * without this gap the shell would paint straight over a terrain silhouette poking up into it,
+ * regardless of the terrain being genuinely closer — the same class of bug as the ground bleed this
+ * shell's geometry was already restricted to fix, just for relief instead of the flat disc. Matched
+ * by OVERCAST_FRAGMENT_SHADER's own horizonFade (sin(8deg)=0.139, sin(16deg)=0.276), which tapers the
+ * shell's visible bottom edge across the same band rather than a hard-edged rim. */
+const OVERCAST_MIN_ALTITUDE_DEG = 8
+
 /** Fresh SphereGeometry each call (not module-cached like getCloudSphereGeometry) — this mirrors
  * buildSky/buildGround's own "rebuild from scratch, no dirty tracking" style since it's cheap
  * (one sphere, no per-instance data) and, unlike the cluster base sphere, isn't cloned per caller
  * so there's no sharing benefit to cache. `radius` is CLOUD_RADIUS, passed in rather than imported
  * since that constant lives in SceneRenderer.ts.
  *
- * thetaStart=0/thetaLength=PI/2 builds ONLY the upper hemisphere (three.js measures theta from the
- * +Y pole, so this spans from straight up down to the horizon/equator, y>=0) — a full sphere here
- * was the actual bug behind an earlier "looks like ground fog" report: with depthTest off (see
- * buildOvercastMaterial), a full-sphere shell painted over EVERY direction including downward-
- * looking rays toward the ground, since it ignores what's really closer and just overpaints in draw
- * order. Real clouds never exist below the horizon; the geometry now enforces that directly instead
- * of relying on a fragment-shader discard that would still waste the fill-rate on those fragments. */
+ * three.js measures theta from the +Y pole (0=zenith, PI/2=horizon), so thetaLength stops
+ * OVERCAST_MIN_ALTITUDE_DEG short of the true horizon instead of reaching all the way to PI/2 — see
+ * that constant's own comment. A full sphere down to the literal horizon was the actual bug behind
+ * an earlier "looks like ground fog" report: with depthTest off, a full-sphere shell painted over
+ * EVERY direction including downward-looking rays toward the ground, since it ignores what's really
+ * closer and just overpaints in draw order. */
 export function buildOvercastGeometry(radius: number): SphereGeometry {
-  return new SphereGeometry(radius, 48, 24, 0, Math.PI * 2, 0, Math.PI / 2)
+  const thetaLength = Math.PI / 2 - (OVERCAST_MIN_ALTITUDE_DEG * Math.PI) / 180
+  return new SphereGeometry(radius, 48, 24, 0, Math.PI * 2, 0, thetaLength)
 }
 
 /** Builds the one shared ShaderMaterial every cluster's InstancedMesh in a given buildClouds() call
