@@ -1,11 +1,11 @@
 import { html, css } from "./witnessesTemplate.js"
-import { UfoElement, registerUfo, UFO_ELEMENT_NAME } from "./UfoElement.js"
+import { SceneElement, registerScene, SCENE_ELEMENT_NAME } from "./SceneElement.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
 import { selectLocale } from "../i18n/locale.js"
 import { loadWitnessSelectorMessages, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
 import type { UfoLanguage } from "./messages/index.js"
 
-registerUfo()
+registerScene()
 
 interface WitnessEntry {
   src: string
@@ -15,9 +15,11 @@ interface WitnessEntry {
 /**
  * Vanilla Web Component letting a page switch between several witnesses' recordings of the
  * same sighting (a case can have more than one `sighting.json`, one per witness) — composes a
- * nested `<rr0-ufo>` for the actual canvas/playback instead of duplicating it, same pattern as
- * `<rr0-scene>`. Read-only playback only, no recording/editing UI, matching `<rr0-ufo>`'s own
- * "lightweight, embeddable in a content page" intent.
+ * nested `<rr0-scene>` for the actual canvas/playback instead of duplicating it, the same way
+ * `<rr0-ufo-recorder>` does. A witness recording is always a real sighting (real date/time/
+ * location), so it always needs the real sky/ground backdrop `<rr0-scene>` provides — a bare
+ * `<rr0-ufo>` (just the recorded shape, no astronomy) would misrepresent what the witness
+ * actually reported seeing. Read-only playback only, no recording/editing UI.
  *
  * The `src` attribute (or `witnessUrls` property) is just a plain list of each witness's own
  * `sighting.json` URL — no separately-maintained labels, since a witness's display name
@@ -35,7 +37,7 @@ export class WitnessSelectorElement extends HTMLElement {
   }
 
   private readonly shadow: ShadowRoot
-  private readonly ufoElement: UfoElement
+  private readonly sceneElement: SceneElement
   private readonly selectorContainer: HTMLElement
   private readonly witnessSelect: HTMLSelectElement
   private readonly labelWitness: HTMLElement
@@ -53,8 +55,8 @@ export class WitnessSelectorElement extends HTMLElement {
     // Created imperatively rather than left inline in the template markup — see
     // UfoRecorderElement's constructor for why (an inline tag parsed from
     // template.content.cloneNode(true) isn't upgraded to its class instance yet at this point).
-    this.ufoElement = document.createElement(UFO_ELEMENT_NAME) as UfoElement
-    this.shadow.getElementById("ufo-slot")!.replaceWith(this.ufoElement)
+    this.sceneElement = document.createElement(SCENE_ELEMENT_NAME) as SceneElement
+    this.shadow.getElementById("ufo-slot")!.replaceWith(this.sceneElement)
 
     this.selectorContainer = this.shadow.getElementById("witness-selector")!
     this.witnessSelect = this.shadow.getElementById("witness") as HTMLSelectElement
@@ -151,14 +153,15 @@ export class WitnessSelectorElement extends HTMLElement {
     this.currentSrc = src
     this.witnessSelect.value = src
     // Already fetched by loadWitnessUrls — no need to re-fetch on every selection change.
-    this.ufoElement.sightingData = entry.sighting
+    // SceneElement's own setter updates astronomy/weather/terrain for the new sighting too.
+    this.sceneElement.sightingData = entry.sighting
   }
 }
 
 export const WITNESS_SELECTOR_ELEMENT_NAME = "rr0-ufo-witnesses"
 
 export function registerWitnessSelector(): void {
-  registerUfo()
+  registerScene()
   if (!customElements.get(WITNESS_SELECTOR_ELEMENT_NAME)) {
     customElements.define(WITNESS_SELECTOR_ELEMENT_NAME, WitnessSelectorElement)
   }

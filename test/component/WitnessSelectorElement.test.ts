@@ -4,6 +4,33 @@ import type { WitnessSelectorElement } from "../../src/component/WitnessSelector
 
 registerWitnessSelector()
 
+// WitnessSelectorElement now nests a <rr0-scene> (see its own class doc comment) instead of a
+// bare <rr0-ufo>, so mounting it also constructs a SceneRenderer — which jsdom's <canvas> can't
+// back with a real WebGL context (no native `canvas` package here, same reason as the 2D mock
+// below). Stubbed out entirely, same as test/component/UfoRecorderElement.test.ts's identical mock.
+vi.mock("../../src/render3d/SceneRenderer.js", () => ({
+  SceneRenderer: class {
+    resize(): void {}
+    setObserverPose(): void {}
+    setTerrainOrigin(): void {}
+    get currentTerrainAttribution(): undefined {
+      return undefined
+    }
+    setAstronomy(): void {}
+    setShowCompass(): void {}
+    setCompassHovered(): void {}
+    setCompassForced(): void {}
+    setWeather(): void {}
+    pickBodyAt(): undefined {
+      return undefined
+    }
+    render(): void {}
+    dispose(): void {}
+    startTwinkle(): void {}
+    stopTwinkle(): void {}
+  }
+}))
+
 // jsdom's <canvas> has no real 2D context — stub it, same as test/component/UfoElement.test.ts's mock (the
 // nested <rr0-ufo> needs this to paint its initial frame without throwing).
 beforeAll(() => {
@@ -23,12 +50,35 @@ beforeAll(() => {
     stroke: vi.fn(),
     fillRect: vi.fn()
   } as unknown as CanvasRenderingContext2D)
+  // The nested <rr0-scene> lazily fetches the star catalog on connect — a safe default so that
+  // fire-and-forget fetch resolves instead of rejecting whenever a test's own stubFetch() (below)
+  // isn't active yet/covers other URLs. Plain assignment, not vi.stubGlobal, so per-test
+  // vi.stubGlobal("fetch", ...) calls (via stubFetch) restore back to *this* on their own
+  // afterEach's vi.unstubAllGlobals(), same reasoning as UfoRecorderElement.test.ts's identical stub.
+  globalThis.fetch = vi.fn().mockResolvedValue({ arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)) }) as typeof fetch
+  // jsdom has no ResizeObserver — SceneElement.connectedCallback() (also nested now) uses one to
+  // track its canvas size.
+  globalThis.ResizeObserver = class {
+    observe(): void {}
+    unobserve(): void {}
+    disconnect(): void {}
+  } as unknown as typeof ResizeObserver
 })
 
 function mount(): WitnessSelectorElement {
   const element = document.createElement(WITNESS_SELECTOR_ELEMENT_NAME) as WitnessSelectorElement
   document.body.appendChild(element)
   return element
+}
+
+/** The nested <rr0-ufo> now lives inside the selector's own nested <rr0-scene> (see
+ * WitnessSelectorElement's class doc comment) — SceneElement exposes it via its own public
+ * `ufoElement` field, no need to query the shadow DOM a second level down. */
+function nestedScene(element: WitnessSelectorElement): { ufoElement: { canvasElement: unknown }; sightingData: unknown } {
+  return element.shadowRoot!.querySelector("rr0-scene") as unknown as {
+    ufoElement: { canvasElement: unknown }
+    sightingData: unknown
+  }
 }
 
 async function waitFor(check: () => boolean, timeoutMs = 500): Promise<void> {
@@ -55,7 +105,15 @@ const janeSighting = {
 }
 
 function stubFetch(bySrc: Record<string, unknown>): ReturnType<typeof vi.fn> {
-  const fetchMock = vi.fn().mockImplementation((url: string) => Promise.resolve({ json: () => Promise.resolve(bySrc[url]) }))
+  // arrayBuffer() too, not just json() — the nested <rr0-scene>'s own star-catalog fetch (an
+  // unrelated URL not present in bySrc) calls response.arrayBuffer(), not .json(); a real fetch
+  // handled via this same mock still needs a well-formed response to resolve instead of throwing.
+  const fetchMock = vi.fn().mockImplementation((url: string) =>
+    Promise.resolve({
+      json: () => Promise.resolve(bySrc[url]),
+      arrayBuffer: () => Promise.resolve(new ArrayBuffer(0))
+    })
+  )
   vi.stubGlobal("fetch", fetchMock)
   return fetchMock
 }
@@ -73,11 +131,11 @@ describe("WitnessSelectorElement", () => {
     vi.unstubAllGlobals()
   })
 
-  it("is ready (nests a real, upgraded rr0-ufo) immediately after construction", () => {
+  it("is ready (nests a real, upgraded rr0-scene) immediately after construction", () => {
     const element = mount()
-    const ufo = element.shadowRoot!.querySelector("rr0-ufo")
-    expect(ufo).not.toBeNull()
-    expect((ufo as unknown as { canvasElement: unknown }).canvasElement).toBeDefined()
+    const scene = element.shadowRoot!.querySelector("rr0-scene")
+    expect(scene).not.toBeNull()
+    expect(nestedScene(element).ufoElement.canvasElement).toBeDefined()
   })
 
   it("hides the selector when there are 0 or 1 witnesses", async () => {
@@ -126,8 +184,8 @@ describe("WitnessSelectorElement", () => {
     element.witnessUrls = ["john.json", "jane.json"]
     await new Promise(resolve => setTimeout(resolve, 0))
 
-    const ufo = element.shadowRoot!.querySelector("rr0-ufo") as unknown as { sightingData: typeof johnSighting }
-    expect(ufo.sightingData.witnessId).toBe("john")
+    const scene = nestedScene(element) as unknown as { sightingData: typeof johnSighting }
+    expect(scene.sightingData.witnessId).toBe("john")
   })
 
   it("switching the select loads the chosen witness's already-fetched sighting, without re-fetching", async () => {
@@ -141,8 +199,8 @@ describe("WitnessSelectorElement", () => {
     select.value = "jane.json"
     select.dispatchEvent(new Event("change"))
 
-    const ufo = element.shadowRoot!.querySelector("rr0-ufo") as unknown as { sightingData: typeof janeSighting }
-    expect(ufo.sightingData.witnessId).toBe("jane")
+    const scene = nestedScene(element) as unknown as { sightingData: typeof janeSighting }
+    expect(scene.sightingData.witnessId).toBe("jane")
     expect(fetchMock.mock.calls.length).toBe(callsAfterLoad) // no new fetch on selection
   })
 
