@@ -78,11 +78,17 @@ export const css = `
 }
 /* Bottom-right credit line required by the active terrain imagery provider's license (see
    SceneRenderer.currentTerrainAttribution) — a fixed corner, unlike .body-tooltip's JS-driven
-   follow-the-pointer position, since this isn't tied to any one point on screen. */
+   follow-the-pointer position, since this isn't tied to any one point on screen.
+   bottom:2.8em (not the flush-corner 4px this used to sit at) clears the nested <rr0-ufo>'s own
+   .toolbar — a separate shadow tree with no visibility into this one, so the two can't coordinate
+   their layout directly. .toolbar is ~2.6em tall (0.4em top+bottom padding + 1.8em-tall buttons,
+   see ufoTemplate.ts's own .toolbar/.toolbar button rules) and, like this element, is anchored to
+   the shared #stage box's bottom edge — without this offset the two paint on top of each other,
+   the credit text winning only because of its own z-index:1 against the toolbar's z-index:auto. */
 .terrain-attribution {
   position: absolute;
   right: 4px;
-  bottom: 4px;
+  bottom: 2.8em;
   z-index: 1;
   padding: 1px 4px;
   background: rgba(0, 0, 0, 0.4);
