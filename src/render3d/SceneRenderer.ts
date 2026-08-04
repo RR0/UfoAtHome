@@ -57,7 +57,7 @@ import { DEFAULT_WEATHER } from "../engine/model/Weather.js"
 import type { PrecipitationType, Weather } from "../engine/model/Weather.js"
 import { buildRainSystem } from "./RainSystem.js"
 import type { RainSystem } from "./RainSystem.js"
-import { buildCloudClusterLayouts, buildCloudMaterial, cloudGenusForWeather, getCloudSphereGeometry } from "./CloudSystem.js"
+import { buildCloudClusterLayouts, buildCloudInstanceGeometry, buildCloudMaterial, cloudGenusForWeather } from "./CloudSystem.js"
 import type { CloudUniforms } from "./CloudSystem.js"
 
 const SKY_RADIUS = 900
@@ -1103,9 +1103,11 @@ export class SceneRenderer {
       seed: 4242,
       clusterScale: CLOUD_CLUSTER_SCALE
     })
-    const geometry = getCloudSphereGeometry()
     const dummy = new Object3D()
     for (const layout of layouts) {
+      // Per-cluster clone (not the shared base sphere) — carries this cluster's own aSeed
+      // instanced attribute, see buildCloudInstanceGeometry's own doc comment.
+      const geometry = buildCloudInstanceGeometry(layout)
       const mesh = new InstancedMesh(geometry, material, layout.particles.length)
       layout.particles.forEach((particle, i) => {
         dummy.position.set(particle.x, particle.y, particle.z)
@@ -1141,12 +1143,15 @@ export class SceneRenderer {
   }
 
   /** cloudMaterial is ONE shared ShaderMaterial referenced by every cluster's InstancedMesh —
-   * disposed once here, not once per cluster. The shared unit-sphere geometry
-   * (getCloudSphereGeometry) is module-cached and reused across every future rebuild, same
-   * convention as the old getCloudPuffTexture — never disposed here. */
+   * disposed once here, not once per cluster. Each cluster's own geometry IS disposed per-cluster
+   * though: buildCloudInstanceGeometry clones the module-cached base sphere per cluster (to carry
+   * its own aSeed instanced attribute), so unlike the shared base sphere itself (never disposed,
+   * same convention as the old getCloudPuffTexture), those clones are this system's own to clean
+   * up — skipping this would leak one GPU buffer set per cluster on every rebuild. */
   private disposeCloudSystem(): void {
     for (const cluster of this.cloudClusters) {
       this.scene.remove(cluster.mesh)
+      cluster.mesh.geometry.dispose()
     }
     this.cloudMaterial?.dispose()
     this.cloudMaterial = undefined

@@ -1,4 +1,4 @@
-import { Color, FrontSide, ShaderMaterial, SphereGeometry, Vector3 } from "three"
+import { Color, FrontSide, InstancedBufferAttribute, ShaderMaterial, SphereGeometry, Vector3 } from "three"
 
 /**
  * Layout/material factories for volumetric-looking clouds — mirrors RainSystem.ts's split of
@@ -59,6 +59,11 @@ export interface CloudParticleOffset {
   sx: number
   sy: number
   sz: number
+  /** Per-particle noise-domain offset (see MESH_CLOUD_FRAGMENT_SHADER) — without this every
+   * instance sampled the exact same 3D noise field in its own local unit-sphere space and looked
+   * like identical repeated puffs; this decorrelates them cheaply (one scalar, not a full 3D
+   * offset) while staying in the same deterministic mulberry32 stream as the rest of the layout. */
+  seed: number
 }
 
 export interface CloudClusterLayout {
@@ -105,7 +110,8 @@ function placeParticle(profile: CloudGenusProfile, index: number, random: () => 
   const sx = profile.scaleRange[0] + random() * (profile.scaleRange[1] - profile.scaleRange[0])
   const sy = (profile.scaleRange[0] + random() * (profile.scaleRange[1] - profile.scaleRange[0])) * centerBias
   const sz = profile.scaleRange[0] + random() * (profile.scaleRange[1] - profile.scaleRange[0])
-  return { x: Math.cos(angle) * radius, y, z: Math.sin(angle) * radius, sx, sy, sz }
+  const seed = random() * 100
+  return { x: Math.cos(angle) * radius, y, z: Math.sin(angle) * radius, sx, sy, sz, seed }
 }
 
 /** Same "consume the RNG stream for every pool slot, only emit the leading visibleCount" discipline
@@ -127,7 +133,8 @@ export function buildCloudClusterLayouts(config: CloudLayoutConfig): CloudCluste
         z: local.z * config.clusterScale,
         sx: local.sx * config.clusterScale,
         sy: local.sy * config.clusterScale,
-        sz: local.sz * config.clusterScale
+        sz: local.sz * config.clusterScale,
+        seed: local.seed
       })
     }
     if (i < config.visibleCount) layouts.push({ baseAltitudeDeg, baseAzimuthDeg, particles })
@@ -137,13 +144,29 @@ export function buildCloudClusterLayouts(config: CloudLayoutConfig): CloudCluste
 
 let sharedCloudSphereGeometry: SphereGeometry | undefined
 
-/** One shared low-poly unit sphere (module-scope cached, same convention as RainSystem's own
- * getRainStreakTexture) — every cluster's InstancedMesh reuses it, only each instance's own matrix
- * (position + non-uniform scale) differs. */
+/** One shared unit sphere (module-scope cached, same convention as RainSystem's own
+ * getRainStreakTexture) — cloned per cluster by buildCloudInstanceGeometry (an InstancedMesh's
+ * per-instance aSeed attribute can't live on a geometry shared across meshes with different
+ * instance counts), so only the base vertex/index buffers are actually shared. 16x12 (up from an
+ * earlier 12x8) for smoother base normals feeding the fragment shader's noise erosion — a coarser
+ * sphere's own facets showed through as visible flat-shaded bands. */
 export function getCloudSphereGeometry(): SphereGeometry {
   if (sharedCloudSphereGeometry) return sharedCloudSphereGeometry
-  sharedCloudSphereGeometry = new SphereGeometry(1, 12, 8)
+  sharedCloudSphereGeometry = new SphereGeometry(1, 16, 12)
   return sharedCloudSphereGeometry
+}
+
+/** Clones the shared base sphere and attaches this cluster's own per-instance aSeed attribute (see
+ * CloudParticleOffset.seed) — must be a clone, not the shared geometry itself, since two clusters
+ * with different instance counts can't share one InstancedBufferAttribute. */
+export function buildCloudInstanceGeometry(layout: CloudClusterLayout): SphereGeometry {
+  const geometry = getCloudSphereGeometry().clone()
+  const seeds = new Float32Array(layout.particles.length)
+  layout.particles.forEach((particle, i) => {
+    seeds[i] = particle.seed
+  })
+  geometry.setAttribute("aSeed", new InstancedBufferAttribute(seeds, 1))
+  return geometry
 }
 
 export interface CloudUniforms {
@@ -158,10 +181,15 @@ export interface CloudUniforms {
 }
 
 const MESH_CLOUD_VERTEX_SHADER = `
+attribute float aSeed;
 varying vec3 vNormal;
 varying float vRimFade;
+varying vec3 vLocalPos;
+varying float vSeed;
 
 void main() {
+  vLocalPos = position; // pre-instance-transform, unit-sphere-local — see fragment shader's own noise
+  vSeed = aSeed;
   // Instance rotation/scale applied to the normal directly, without the inverse-transpose
   // correction a non-uniformly-scaled normal strictly needs — an accepted simplification for
   // these soft, stylized puffs (the reference skill's own shader skips this entirely too).
@@ -187,18 +215,74 @@ uniform vec3 baseColor;
 uniform float opacity;
 varying vec3 vNormal;
 varying float vRimFade;
+varying vec3 vLocalPos;
+varying float vSeed;
+
+// Cheap 3D value noise + fbm — a single-sample-per-fragment impostor, not a real raymarched
+// density field (see the reference skill's own volumetric path for that, ~80 steps/pixel). Used
+// to erode the sphere's clean geometric silhouette and break up its flat-shaded lighting bands,
+// which otherwise read as a smooth-shaded "toon" ball rather than a fluffy billow.
+vec3 hash3(vec3 p) {
+  p = vec3(dot(p, vec3(127.1, 311.7, 74.7)), dot(p, vec3(269.5, 183.3, 246.1)), dot(p, vec3(113.5, 271.9, 124.6)));
+  return fract(sin(p) * 43758.5453) * 2.0 - 1.0;
+}
+float noise3D(vec3 p) {
+  vec3 i = floor(p);
+  vec3 f = fract(p);
+  vec3 u = f * f * (3.0 - 2.0 * f);
+  return mix(
+    mix(mix(dot(hash3(i + vec3(0.0, 0.0, 0.0)), f - vec3(0.0, 0.0, 0.0)),
+            dot(hash3(i + vec3(1.0, 0.0, 0.0)), f - vec3(1.0, 0.0, 0.0)), u.x),
+        mix(dot(hash3(i + vec3(0.0, 1.0, 0.0)), f - vec3(0.0, 1.0, 0.0)),
+            dot(hash3(i + vec3(1.0, 1.0, 0.0)), f - vec3(1.0, 1.0, 0.0)), u.x), u.y),
+    mix(mix(dot(hash3(i + vec3(0.0, 0.0, 1.0)), f - vec3(0.0, 0.0, 1.0)),
+            dot(hash3(i + vec3(1.0, 0.0, 1.0)), f - vec3(1.0, 0.0, 1.0)), u.x),
+        mix(dot(hash3(i + vec3(0.0, 1.0, 1.0)), f - vec3(0.0, 1.0, 1.0)),
+            dot(hash3(i + vec3(1.0, 1.0, 1.0)), f - vec3(1.0, 1.0, 1.0)), u.x), u.y),
+    u.z);
+}
+float fbm(vec3 p) {
+  float sum = 0.0;
+  float amp = 0.55;
+  for (int i = 0; i < 4; i++) {
+    sum += noise3D(p) * amp;
+    p *= 2.03;
+    amp *= 0.55;
+  }
+  return sum; // roughly -1..1
+}
 
 void main() {
   vec3 N = normalize(vNormal);
   vec3 L = normalize(sunDir); // points from the cloud toward the sun, matching horizontalToCartesian's own convention
-  float diff = dot(N, L) * 0.5 + 0.5;                   // wrap diffuse — softer than a hard lit/unlit split
+
+  vec3 noiseP = vLocalPos * 2.2 + vec3(vSeed * 13.1, vSeed * 7.7, vSeed * 19.3);
+  float shape = fbm(noiseP) * 0.5 + 0.5; // 0..1, per-fragment billow density
+
+  // Erodes the sphere's silhouette with noise instead of a clean geometric edge — a real cumulus
+  // puff doesn't end in a perfect circle. depthTest is already off (see buildCloudMaterial), so an
+  // eroded gap just reveals whatever's behind (sky, or another instance), reading as the frilly,
+  // layered edge real cloud photography shows rather than a hole.
+  float density = vRimFade * mix(0.5, 1.0, shape) - 0.4 * (1.0 - shape);
+  if (density < 0.02) discard;
+
+  // Pseudo self-shadow: one extra noise sample offset toward the sun stands in for a real light
+  // march (see the raymarching reference's own lightMarch) — a fragment whose sunward neighborhood
+  // reads as denser billow gets darkened, breaking up the single flat N.L lighting band that on its
+  // own read as "toon shaded".
+  float shadowSample = fbm(noiseP + L * 1.6) * 0.5 + 0.5;
+  float selfShadow = mix(1.0, 0.5, clamp(shadowSample * 1.4 - 0.2, 0.0, 1.0));
+
+  float diff = dot(N, L) * 0.5 + 0.5;                    // wrap diffuse — softer than a hard lit/unlit split
   float sss = pow(max(dot(-N, L), 0.0), 2.0) * 0.4;      // subsurface approximation: thin edges lit from behind
   float topBias = smoothstep(-0.2, 0.5, N.y) * 0.3;      // real clouds are brighter on top, sun-facing or not
-  vec3 color = baseColor * (sunColor * diff + ambientColor * 0.4 + sunColor * sss);
+  vec3 color = baseColor * (sunColor * diff * selfShadow + ambientColor * 0.4 + sunColor * sss);
   color += sunColor * topBias;
   float baseDarken = smoothstep(0.3, -0.3, N.y) * 0.3;   // darker underside
   color *= 1.0 - baseDarken;
-  gl_FragColor = vec4(color, opacity * vRimFade);
+  color *= mix(0.82, 1.12, shape);                        // surface variegation — denser billows read brighter
+
+  gl_FragColor = vec4(color, opacity * density);
 }
 `
 
