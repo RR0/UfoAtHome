@@ -313,6 +313,12 @@ uniform vec3 baseColor;
 uniform float coverage;
 varying vec3 vDir;
 
+// Implied altitude (world units) of the flat plane cloud noise is projected onto — see main()'s own
+// comment for why. Picked to roughly match where the InstancedMesh puff clusters actually sit
+// (altitude 15-70deg at CLOUD_RADIUS=700, i.e. y in [181, 658]): a mid-low value so the horizon
+// compression effect is clearly visible without being so low it reads as unrealistically close fog.
+const float CLOUD_LAYER_HEIGHT = 250.0;
+
 // Duplicated from MESH_CLOUD_FRAGMENT_SHADER rather than shared — this project keeps each
 // ShaderMaterial's GLSL self-contained (see RainSystem.ts's own doc comment on why: no external
 // .glsl files, no onBeforeCompile chunk injection).
@@ -369,17 +375,29 @@ void main() {
   vec3 dir = normalize(vDir);
   vec3 L = normalize(sunDir);
 
-  // dir has unit magnitude, so a frequency near 1 (the first version of this shader used 1.4) puts
-  // only 2-3 noise cells across the ENTIRE sky dome — every fragment sampled nearly the same smooth
-  // gradient, which is exactly what read as a flat, low-contrast haze rather than individual cloud
-  // formations. 5.0 gives roughly a dozen+ distinct cells across the visible hemisphere, matching a
-  // real scattered-to-overcast cloud field's actual scale. Blended with cellular (Worley) noise for
-  // genuinely billowy, sharp-edged masses — fbm alone stays soft/blurry at any frequency, since
-  // interpolated value noise has no real edges, only gradients.
-  float shapeFbm = fbm(dir * 5.0) * 0.5 + 0.5;
-  float shapeCell = 1.0 - worley(dir * 4.0);
+  // Sampling noise directly by angular direction (the first version of this shader) put clouds at
+  // a CONSTANT apparent size regardless of where you look — real clouds sit at a real, roughly flat
+  // altitude, so ones near the horizon are seen through a much longer, grazing slant path and
+  // compress/stretch dramatically (the same reason floor tiles or a flat ceiling look compressed
+  // toward a vanishing point), while ones overhead look comparatively large. A uniform-on-the-sphere
+  // texture has no such compression, which is exactly what read as "obviously a sphere" rather than
+  // a real sky. Projecting the view ray onto a flat plane at a fixed height and sampling noise in
+  // THAT position (not the raw direction) reproduces the effect for free: near zenith the projected
+  // point stays close to the origin (small coordinates, large apparent cloud features); near the
+  // horizon dir.y shrinks toward 0 and the projected point races toward infinity (huge, fast-varying
+  // coordinates between neighboring pixels = visual compression). dir.y is floored, not left to hit
+  // exactly 0, to avoid an infinite/NaN blowup right at the horizon edge.
+  float t = CLOUD_LAYER_HEIGHT / max(dir.y, 0.04);
+  vec3 planePos = dir * t;
+
+  // Frequencies tuned so a 45deg-elevation fragment samples roughly the same effective noise scale
+  // the previous dir-space version did at that same elevation (where planePos's own magnitude ~=
+  // CLOUD_LAYER_HEIGHT by construction) — keeps the "how big does one cloud formation look overhead"
+  // read consistent with earlier tuning, while now varying correctly with viewing angle.
+  float shapeFbm = fbm(planePos * 0.014) * 0.5 + 0.5;
+  float shapeCell = 1.0 - worley(planePos * 0.011);
   float shape = mix(shapeFbm, shapeCell, 0.55);
-  float detail = fbm(dir * 11.0 + 41.0) * 0.5 + 0.5;
+  float detail = fbm(planePos * 0.031 + 41.0) * 0.5 + 0.5;
 
   // Below coverage's own noise threshold: a broken/patchy ceiling with real sky-colored gaps,
   // exactly like a real transition from scattered to overcast. remap-by-threshold, same technique
