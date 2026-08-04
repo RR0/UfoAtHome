@@ -350,13 +350,20 @@ void main() {
   vec3 dir = normalize(vDir);
   vec3 L = normalize(sunDir);
 
-  float n = fbm(dir * 3.0) * 0.5 + 0.5; // 0..1 continuous coverage field across the whole dome
+  // Two scales, not one: a coarse field picks where distinct cloud formations sit (a handful of
+  // large connected shapes, not fine speckle), a finer one textures their surface. A single-octave
+  // field at a uniform frequency (the first version of this shader) covered the whole dome in an
+  // even, low-contrast wash that read as ground fog/haze rather than as individual cloud masses —
+  // real overcast still has visible denser/thinner billows within it, not a flat grey screen.
+  float shape = fbm(dir * 1.4) * 0.5 + 0.5;
+  float detail = fbm(dir * 6.0 + 41.0) * 0.5 + 0.5;
 
   // Below coverage's own noise threshold: a broken/patchy ceiling with real sky-colored gaps,
   // exactly like a real transition from scattered to overcast. remap-by-threshold, same technique
-  // as the reference skill's own cloudDensity coverage control.
+  // as the reference skill's own cloudDensity coverage control. A tighter transition band than the
+  // first version (0.10 vs 0.18) gives cloud formations a defined edge instead of a soft haze fade.
   float threshold = 1.0 - coverage;
-  float alpha = smoothstep(threshold - 0.18, threshold + 0.18, n);
+  float alpha = smoothstep(threshold - 0.10, threshold + 0.10, shape);
   // The puff clusters alone can never promise zero sky gaps (see SceneRenderer's buildClouds doc
   // comment) — this is what actually guarantees "total overcast, no sky visible" at cloudCover=1:
   // force full opacity everywhere as coverage approaches its max, overriding the noise field's own
@@ -369,7 +376,10 @@ void main() {
   float diff = dot(dir, L) * 0.5 + 0.5;
   float sunGlow = pow(max(dot(dir, L), 0.0), 6.0) * 0.6; // diffuse bright patch toward the sun, like light through an overcast layer
   vec3 color = baseColor * (sunColor * diff * 0.7 + ambientColor * 0.5) + sunColor * sunGlow;
-  color *= mix(0.85, 1.05, n); // keeps a fully-opaque ceiling from reading as one flat, uniform color
+  // Wider contrast range than the first version (0.6..1.3 vs 0.85..1.05) — a fully-opaque ceiling
+  // still needs visible billow texture (denser = darker/greyer, thinner = brighter) to read as
+  // "made of clouds" rather than a single flat painted color.
+  color *= mix(0.6, 1.3, detail) * mix(0.85, 1.1, shape);
 
   gl_FragColor = vec4(color, alpha);
 }
@@ -406,9 +416,17 @@ export function buildOvercastMaterial(baseColor: Color, coverage: number): { mat
  * buildSky/buildGround's own "rebuild from scratch, no dirty tracking" style since it's cheap
  * (one sphere, no per-instance data) and, unlike the cluster base sphere, isn't cloned per caller
  * so there's no sharing benefit to cache. `radius` is CLOUD_RADIUS, passed in rather than imported
- * since that constant lives in SceneRenderer.ts. */
+ * since that constant lives in SceneRenderer.ts.
+ *
+ * thetaStart=0/thetaLength=PI/2 builds ONLY the upper hemisphere (three.js measures theta from the
+ * +Y pole, so this spans from straight up down to the horizon/equator, y>=0) — a full sphere here
+ * was the actual bug behind an earlier "looks like ground fog" report: with depthTest off (see
+ * buildOvercastMaterial), a full-sphere shell painted over EVERY direction including downward-
+ * looking rays toward the ground, since it ignores what's really closer and just overpaints in draw
+ * order. Real clouds never exist below the horizon; the geometry now enforces that directly instead
+ * of relying on a fragment-shader discard that would still waste the fill-rate on those fragments. */
 export function buildOvercastGeometry(radius: number): SphereGeometry {
-  return new SphereGeometry(radius, 32, 16)
+  return new SphereGeometry(radius, 48, 24, 0, Math.PI * 2, 0, Math.PI / 2)
 }
 
 /** Builds the one shared ShaderMaterial every cluster's InstancedMesh in a given buildClouds() call
