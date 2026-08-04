@@ -11,10 +11,8 @@ import {
   Color,
   Fog,
   Float32BufferAttribute,
-  InstancedMesh,
   Mesh,
   MeshBasicMaterial,
-  Object3D,
   PerspectiveCamera,
   Points,
   PointsMaterial,
@@ -57,15 +55,8 @@ import { DEFAULT_WEATHER } from "../engine/model/Weather.js"
 import type { PrecipitationType, Weather } from "../engine/model/Weather.js"
 import { buildRainSystem } from "./RainSystem.js"
 import type { RainSystem } from "./RainSystem.js"
-import {
-  buildCloudClusterLayouts,
-  buildCloudInstanceGeometry,
-  buildCloudMaterial,
-  buildOvercastGeometry,
-  buildOvercastMaterial,
-  cloudGenusForWeather
-} from "./CloudSystem.js"
-import type { CloudUniforms, OvercastUniforms } from "./CloudSystem.js"
+import { buildCloudGeometry, buildCloudMaterial } from "./CloudSystem.js"
+import type { CloudUniforms } from "./CloudSystem.js"
 
 const SKY_RADIUS = 900
 const GROUND_RADIUS = 900
@@ -125,38 +116,13 @@ const TERRAIN_RENDER_ORDER = 1
  * while after a rebuild, rather than needing to be pixel-perfect the instant they've moved at all. */
 const TERRAIN_REBUILD_DISTANCE_M = 150
 
-/** A fixed pool of cloud "puff" sprites — cloudCover reveals a stable-ordered subset of it (see
- * buildClouds) rather than spawning/despawning a variable count, so lowering cover never makes a
- * *different* random subset appear, just fewer of the same deterministic set. */
-const CLOUD_POOL_SIZE = 24
 const CLOUD_RADIUS = 700 // inside STAR_RADIUS/BODY_PLACEMENT_RADIUS (850) so clouds occlude stars/bodies, matching real sky layering
 /** Between TERRAIN_RENDER_ORDER (1) and COMPASS_RENDER_ORDER (10) — clouds are part of the
- * astronomically-positioned scene (unlike the compass HUD) so they use normal depthTest, but must
- * never be hidden behind the ground/terrain (irrelevant since they're always above it) and must
- * stay under the compass labels. */
+ * astronomically-positioned scene (unlike the compass HUD), but must never be hidden behind the
+ * ground/terrain (irrelevant since they're always above it) and must stay under the compass labels. */
 const CLOUD_RENDER_ORDER = 5
-/** Strictly above CLOUD_RENDER_ORDER — three.js sorts transparent objects by renderOrder first, so
- * this guarantees the overcast shell (see buildOvercastMaterial) always draws after every puff
- * cluster regardless of camera-distance tiebreaking, letting it visually seal over them once fully
- * opaque at max cloudCover rather than risking an unstable draw order at nearly-equal distances. */
-const CLOUD_OVERCAST_RENDER_ORDER = CLOUD_RENDER_ORDER + 1
 const CLOUD_LIGHT_COLOR: [number, number, number] = [0.92, 0.92, 0.95]
 const CLOUD_DARK_COLOR: [number, number, number] = [0.15, 0.15, 0.19]
-/** Uniform multiplier applied to every CloudGenusProfile offset/scale number — see
- * CloudLayoutConfig.clusterScale's own comment for why: the reference skill's numbers assume a much
- * smaller flight scene than this dome's CLOUD_RADIUS=700. Chosen so a cumulus cluster's average
- * footprint (~294 units) lands close to the old sprite system's own CLOUD_SPRITE_SIZE=260 average. */
-const CLOUD_CLUSTER_SCALE = 7
-/** Single shared opacity for every cluster's material — replaces the old per-sprite random opacity
- * (0.4-0.85); an accepted v1 simplification since a 20-50-sphere overlapping cluster already creates
- * density variation through overlap, unlike a single flat sprite. */
-const CLOUD_OPACITY = 0.85
-/** Deg/s of azimuthal cloud-layer rotation at weather.windSpeed=1 — deliberately NOT
- * WIND_DRIFT_M_PER_S (that's a flat-translation rate for RainSystem/CPU precipitation's own small,
- * ground-hugging volumes; translating a cluster at CLOUD_RADIUS=700 by even a modest per-second rate
- * would drift it off its dome radius within seconds — see updateClouds). Tuned by eye for a
- * visible-but-not-frantic drift over a typical sighting's playback length. */
-const CLOUD_DRIFT_DEG_PER_SECOND_AT_MAX_WIND = 3
 
 /** Rain is not in this map — it's rendered by the GPU shader-based RainSystem (see RainSystem.ts
  * and buildRain/updateRain below), not this CPU/PointsMaterial path. Real snowflakes/hailstones are
@@ -460,19 +426,10 @@ export class SceneRenderer {
   private readonly raycaster = new Raycaster()
 
   private weather: Weather = DEFAULT_WEATHER
-  /** One shared ShaderMaterial for every current cluster — see disposeCloudSystem for why disposal
-   * is single, not per-cluster. */
+  /** The cloud-layer shell (see buildCloudMaterial) — undefined whenever weather.cloudCover is 0. */
+  private cloudMesh?: Mesh
   private cloudMaterial?: ShaderMaterial
   private cloudUniforms?: CloudUniforms
-  private cloudClusters: Array<{ mesh: InstancedMesh; baseAltitudeDeg: number; baseAzimuthDeg: number }> = []
-  /** Accumulated azimuthal drift (deg) applied on top of every cluster's own baseAzimuthDeg — see
-   * updateClouds. Reset on rebuild so a fresh pool doesn't inherit stale drift from the old one. */
-  private cloudDriftDeg = 0
-  /** The continuous overcast shell (see buildOvercastMaterial) that guarantees a true, gap-free
-   * ceiling at max cloudCover — undefined whenever cloudClusters is empty (no clouds at all). */
-  private overcastMesh?: Mesh
-  private overcastMaterial?: ShaderMaterial
-  private overcastUniforms?: OvercastUniforms
   private precipitationPoints?: Points
   /** Direct reference into precipitationPoints' own position BufferAttribute array — mutated in
    * place every frame (see updatePrecipitation), never reallocated, matching the star field's own
@@ -806,7 +763,6 @@ export class SceneRenderer {
       const dtSeconds = lastTimeMs === undefined ? 0 : Math.min((timeMs - lastTimeMs) / 1000, MAX_ANIMATION_DT_SECONDS)
       lastTimeMs = timeMs
       this.updateTwinkle(timeMs / 1000)
-      this.updateClouds(dtSeconds)
       this.updatePrecipitation(timeMs / 1000, dtSeconds)
       this.updateRain(dtSeconds)
       this.updateLightning(timeMs / 1000, dtSeconds)
@@ -826,7 +782,6 @@ export class SceneRenderer {
   private needsAnimationLoop(): boolean {
     return (
       this.starTiers.length > 0 ||
-      this.cloudClusters.length > 0 ||
       this.precipitationPoints !== undefined ||
       this.rainSystem !== undefined ||
       this.lightningArmed
@@ -1089,130 +1044,54 @@ export class SceneRenderer {
     }
   }
 
-  /** Rebuilds the cloud cluster pool from scratch on every call (same "full rebuild, no dirty
-   * tracking" style as buildSky/buildGround/buildStars) — cheap at CLOUD_POOL_SIZE=24 clusters.
-   * Picks a genus (see cloudGenusForWeather) and a static base color — the old CLOUD_LIGHT_COLOR/
-   * CLOUD_DARK_COLOR lerp by cloudDarkness, now computed once here since darkness doesn't change
-   * without a new weather object (see setWeather's own doc comment). Sun-driven lighting is applied
-   * separately and continuously by updateCloudLighting, called every setAstronomy tick. */
+  /** Rebuilds the cloud shell from scratch on every call (same "full rebuild, no dirty tracking"
+   * style as buildSky/buildGround/buildStars) — cheap, one mesh. Picks a static base color — the
+   * CLOUD_LIGHT_COLOR/CLOUD_DARK_COLOR lerp by cloudDarkness, computed once here since darkness
+   * doesn't change without a new weather object (see setWeather's own doc comment). Sun-driven
+   * lighting is applied separately and continuously by updateCloudLighting, called every
+   * setAstronomy tick. */
   private buildClouds(): void {
     this.disposeCloudSystem()
-    const visibleCount = Math.round(this.weather.cloudCover * CLOUD_POOL_SIZE)
-    if (visibleCount === 0) return
-    const genus = cloudGenusForWeather(this.weather.cloudCover, this.weather.cloudDarkness)
+    if (this.weather.cloudCover <= 0) return
     const darkness = this.weather.cloudDarkness
     const baseColor = new Color(
       CLOUD_LIGHT_COLOR[0] + (CLOUD_DARK_COLOR[0] - CLOUD_LIGHT_COLOR[0]) * darkness,
       CLOUD_LIGHT_COLOR[1] + (CLOUD_DARK_COLOR[1] - CLOUD_LIGHT_COLOR[1]) * darkness,
       CLOUD_LIGHT_COLOR[2] + (CLOUD_DARK_COLOR[2] - CLOUD_LIGHT_COLOR[2]) * darkness
     )
-    const { material, uniforms } = buildCloudMaterial(baseColor, CLOUD_OPACITY)
+    const { material, uniforms } = buildCloudMaterial(baseColor, this.weather.cloudCover)
     this.cloudMaterial = material
     this.cloudUniforms = uniforms
-    const overcast = buildOvercastMaterial(baseColor, this.weather.cloudCover)
-    this.overcastMaterial = overcast.material
-    this.overcastUniforms = overcast.uniforms
     // Seeds real lighting immediately from the last known sun position — see lastSunPosition's own
-    // comment for why this can't just wait for the next setAstronomy tick the way the old sprite
-    // system's equivalent gap harmlessly could.
+    // comment for why this can't just wait for the next setAstronomy tick.
     if (this.lastSunPosition) this.updateCloudLighting(this.lastSunPosition, this.baseFogColor)
-    const overcastGeometry = buildOvercastGeometry(CLOUD_RADIUS)
-    this.overcastMesh = new Mesh(overcastGeometry, overcast.material)
-    this.overcastMesh.renderOrder = CLOUD_OVERCAST_RENDER_ORDER
-    this.scene.add(this.overcastMesh)
-    const layouts = buildCloudClusterLayouts({
-      poolSize: CLOUD_POOL_SIZE,
-      visibleCount,
-      genus,
-      seed: 4242,
-      clusterScale: CLOUD_CLUSTER_SCALE
-    })
-    const dummy = new Object3D()
-    for (const layout of layouts) {
-      // Per-cluster clone (not the shared base sphere) — carries this cluster's own aSeed
-      // instanced attribute, see buildCloudInstanceGeometry's own doc comment.
-      const geometry = buildCloudInstanceGeometry(layout)
-      const mesh = new InstancedMesh(geometry, material, layout.particles.length)
-      layout.particles.forEach((particle, i) => {
-        dummy.position.set(particle.x, particle.y, particle.z)
-        dummy.scale.set(particle.sx, particle.sy, particle.sz)
-        dummy.updateMatrix()
-        mesh.setMatrixAt(i, dummy.matrix)
-      })
-      mesh.instanceMatrix.needsUpdate = true
-      const { x, y, z } = horizontalToCartesian(layout.baseAltitudeDeg, layout.baseAzimuthDeg, CLOUD_RADIUS)
-      mesh.position.set(x, y, z)
-      // Same depthTest:false/renderOrder layering reasoning as the old sprite system — see
-      // buildCloudMaterial's own comment: at CLOUD_RADIUS=700 against a far plane of
-      // SKY_RADIUS*1.2=1080, the depth buffer can't reliably beat the sky dome at 900, so draw
-      // order does the layering instead.
-      mesh.renderOrder = CLOUD_RENDER_ORDER
-      this.scene.add(mesh)
-      this.cloudClusters.push({ mesh, baseAltitudeDeg: layout.baseAltitudeDeg, baseAzimuthDeg: layout.baseAzimuthDeg })
-    }
+    const geometry = buildCloudGeometry(CLOUD_RADIUS)
+    this.cloudMesh = new Mesh(geometry, material)
+    this.cloudMesh.renderOrder = CLOUD_RENDER_ORDER
+    this.scene.add(this.cloudMesh)
   }
 
   /** Cheap per-tick uniform refresh (no geometry rebuild) — updates only the time-varying lighting
-   * terms (sun direction/color, ambient) on the one shared cloudMaterial, driven by the app's real
-   * current sun position/atmosphericTint instead of a hardcoded time-of-day color table. Replaces
-   * the old retintClouds' per-sprite color mutation — cheaper too, since every cluster now shares
-   * one material (3 uniform writes total vs. up to 24 per-sprite color mutations). */
+   * terms (sun direction/color, ambient) on cloudUniforms, driven by the app's real current sun
+   * position/atmosphericTint instead of a hardcoded time-of-day color table. */
   private updateCloudLighting(sun: HorizontalPosition, groundColor: [number, number, number]): void {
-    if (!this.cloudUniforms && !this.overcastUniforms) return
+    if (!this.cloudUniforms) return
     const { x, y, z } = horizontalToCartesian(sun.altitudeDeg, sun.azimuthDeg, 1)
     const tint = atmosphericTint(sun.altitudeDeg)
-    if (this.cloudUniforms) {
-      this.cloudUniforms.sunDir.value.set(x, y, z)
-      this.cloudUniforms.sunColor.value.setRGB(tint[0], 0.96 * tint[1], 0.88 * tint[2])
-      this.cloudUniforms.ambientColor.value.setRGB(groundColor[0], groundColor[1], groundColor[2])
-    }
-    if (this.overcastUniforms) {
-      this.overcastUniforms.sunDir.value.set(x, y, z)
-      this.overcastUniforms.sunColor.value.setRGB(tint[0], 0.96 * tint[1], 0.88 * tint[2])
-      this.overcastUniforms.ambientColor.value.setRGB(groundColor[0], groundColor[1], groundColor[2])
-    }
+    this.cloudUniforms.sunDir.value.set(x, y, z)
+    this.cloudUniforms.sunColor.value.setRGB(tint[0], 0.96 * tint[1], 0.88 * tint[2])
+    this.cloudUniforms.ambientColor.value.setRGB(groundColor[0], groundColor[1], groundColor[2])
   }
 
-  /** cloudMaterial is ONE shared ShaderMaterial referenced by every cluster's InstancedMesh —
-   * disposed once here, not once per cluster. Each cluster's own geometry IS disposed per-cluster
-   * though: buildCloudInstanceGeometry clones the module-cached base sphere per cluster (to carry
-   * its own aSeed instanced attribute), so unlike the shared base sphere itself (never disposed,
-   * same convention as the old getCloudPuffTexture), those clones are this system's own to clean
-   * up — skipping this would leak one GPU buffer set per cluster on every rebuild. */
   private disposeCloudSystem(): void {
-    for (const cluster of this.cloudClusters) {
-      this.scene.remove(cluster.mesh)
-      cluster.mesh.geometry.dispose()
+    if (this.cloudMesh) {
+      this.scene.remove(this.cloudMesh)
+      this.cloudMesh.geometry.dispose()
     }
     this.cloudMaterial?.dispose()
+    this.cloudMesh = undefined
     this.cloudMaterial = undefined
     this.cloudUniforms = undefined
-    this.cloudClusters = []
-    this.cloudDriftDeg = 0
-    if (this.overcastMesh) {
-      this.scene.remove(this.overcastMesh)
-      this.overcastMesh.geometry.dispose()
-    }
-    this.overcastMaterial?.dispose()
-    this.overcastMesh = undefined
-    this.overcastMaterial = undefined
-    this.overcastUniforms = undefined
-  }
-
-  /** CPU Euler integration on an accumulated angle (not a GPU uTime accumulator like updateRain) —
-   * needs the same MAX_ANIMATION_DT_SECONDS clamp as updatePrecipitation (see startTwinkle's own
-   * comment). Rotates every cluster's root position azimuthally around the fixed CLOUD_RADIUS dome
-   * rather than translating it — a flat translation (like WIND_DRIFT_M_PER_S) would carry a cluster
-   * off its assigned radius within seconds at this scale, breaking both the "clouds stay inside
-   * STAR_RADIUS/BODY_PLACEMENT_RADIUS" occlusion invariant and its own apparent size. */
-  private updateClouds(dtSeconds: number): void {
-    if (this.cloudClusters.length === 0) return
-    const windRad = this.weather.windDirectionDeg * DEG_TO_RAD
-    this.cloudDriftDeg += Math.sin(windRad) * this.weather.windSpeed * CLOUD_DRIFT_DEG_PER_SECOND_AT_MAX_WIND * dtSeconds
-    for (const cluster of this.cloudClusters) {
-      const { x, y, z } = horizontalToCartesian(cluster.baseAltitudeDeg, cluster.baseAzimuthDeg + this.cloudDriftDeg, CLOUD_RADIUS)
-      cluster.mesh.position.set(x, y, z)
-    }
   }
 
   /** Removes+disposes the current precipitation Points/geometry/material. Unlike disposeMesh, this
