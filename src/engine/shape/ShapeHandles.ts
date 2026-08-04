@@ -11,7 +11,7 @@ export type HandleId = "nw" | "n" | "ne" | "e" | "se" | "s" | "sw" | "w" | "rota
 export const RESIZE_HANDLE_IDS: HandleId[] = ["nw", "n", "ne", "e", "se", "s", "sw", "w"]
 
 const ROTATE_HANDLE_OFFSET = 24 // px above the top edge, in the shape's local (unrotated) frame
-const MIN_SHAPE_SIZE = 8 // px resize floor — avoids degenerate/inverted bounds
+export const MIN_SHAPE_SIZE = 8 // px resize floor — avoids degenerate/inverted bounds — shared with UfoRecorderElement's arrow-key resize
 
 function rotateAround(
   point: { x: number; y: number },

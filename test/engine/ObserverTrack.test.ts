@@ -69,6 +69,22 @@ describe("ObserverTrack", () => {
     expect(track.getLatestPoseAt(500)).toBeUndefined()
   })
 
+  it("removeKeyframeAt() removes only the keyframe at that exact t, leaving others intact", () => {
+    const track = new ObserverTrack()
+    track.addKeyframe(0, poseAt(1))
+    track.addKeyframe(500, poseAt(2))
+    track.removeKeyframeAt(500)
+    expect(track.allKeyframes.map(k => k.t)).toEqual([0])
+    expect(track.getLatestPoseAt(0)?.lat).toBe(1)
+  })
+
+  it("removeKeyframeAt() is a no-op when there's no keyframe at that t", () => {
+    const track = new ObserverTrack()
+    track.addKeyframe(0, poseAt(1))
+    track.removeKeyframeAt(250)
+    expect(track.allKeyframes).toHaveLength(1)
+  })
+
   it("round-trips through JSON", () => {
     const track = new ObserverTrack()
     track.addKeyframe(0, poseAt(1, 90))

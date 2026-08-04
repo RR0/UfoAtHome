@@ -4,6 +4,7 @@ import { Timeline } from "../model/Timeline.js"
 import type { TimelineJson } from "../model/Timeline.js"
 import { ObserverTrack } from "../model/ObserverTrack.js"
 import type { ObserverTrackJson } from "../model/ObserverTrack.js"
+import type { Weather } from "../model/Weather.js"
 
 /**
  * Standalone "one JSON file per case" format (e.g. a future sighting.json
@@ -29,6 +30,9 @@ export interface SightingRecordingJson {
   /** The witness's position/elevation/orientation over time — absent for older recordings, which
    * fall back to the legacy static place[0] (see Sighting.ts's resolveObserverPoseAt). */
   observerTrack?: ObserverTrackJson
+  /** The observation's reported weather condition — absent means "unknown/not recorded", not
+   * "clear skies" (renderers default to DEFAULT_WEATHER, see Weather.ts). */
+  weather?: Weather
 }
 
 export function toSightingJson(sighting: Sighting): SightingRecordingJson {
@@ -42,7 +46,8 @@ export function toSightingJson(sighting: Sighting): SightingRecordingJson {
     witnessName: sighting.witnessName,
     caseId: sighting.caseId,
     timeline: sighting.timeline.toJSON(),
-    observerTrack: sighting.observerTrack.toJSON()
+    observerTrack: sighting.observerTrack.toJSON(),
+    weather: sighting.weather
   }
 }
 
@@ -59,6 +64,7 @@ export function fromSightingJson(json: SightingRecordingJson): Sighting {
     json.observerTrack ? ObserverTrack.fromJSON(json.observerTrack) : new ObserverTrack(),
     json.witnessId,
     json.witnessName,
-    json.caseId
+    json.caseId,
+    json.weather
   )
 }

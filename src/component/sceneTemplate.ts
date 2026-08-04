@@ -5,6 +5,7 @@ export const html = `
   </div>
   <div id="ufo-slot"></div>
   <div id="body-tooltip" class="body-tooltip" hidden></div>
+  <div id="terrain-attribution" class="terrain-attribution" hidden></div>
 </div>
 `
 
@@ -74,5 +75,20 @@ export const css = `
   border-radius: 3px;
   pointer-events: none;
   white-space: nowrap;
+}
+/* Bottom-right credit line required by the active terrain imagery provider's license (see
+   SceneRenderer.currentTerrainAttribution) — a fixed corner, unlike .body-tooltip's JS-driven
+   follow-the-pointer position, since this isn't tied to any one point on screen. */
+.terrain-attribution {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  z-index: 1;
+  padding: 1px 4px;
+  background: rgba(0, 0, 0, 0.4);
+  color: rgba(255, 255, 255, 0.7);
+  font-family: sans-serif;
+  font-size: 0.65em;
+  pointer-events: none;
 }
 `

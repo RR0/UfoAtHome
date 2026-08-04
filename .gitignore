@@ -9,6 +9,8 @@ dist-embed-witnesses/
 *.iws
 *.iml
 .idea/
+.vite/
+.ai/
 
 # Raw HYG star catalog CSV (~120k rows, ~34MB) — only the filtered/converted output in
 # src/assets/stars-mag7.5.bin is checked in. Download from astronexus/HYG-Database's

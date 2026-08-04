@@ -84,10 +84,20 @@ export class ObserverTrack {
     }
   }
 
-  /** Removes every keyframe — e.g. when an editor's lat/lng fields are cleared, so the exported
-   * JSON doesn't keep a stale pose the UI no longer shows any trace of. */
+  /** Removes every keyframe. */
   clear(): void {
     this.keyframes.length = 0
+  }
+
+  /** Removes the keyframe at exactly time t, if one exists — leaves keyframes at every other time
+   * untouched, unlike clear(). E.g. an editor's lat/lng/heading/pitch fields blanked out at a
+   * specific point on the timeline should un-record just that instant, not erase the observer's
+   * whole recorded path. */
+  removeKeyframeAt(t: number): void {
+    const index = this.findInsertIndex(t)
+    if (this.keyframes[index]?.t === t) {
+      this.keyframes.splice(index, 1)
+    }
   }
 
   private findInsertIndex(t: number): number {

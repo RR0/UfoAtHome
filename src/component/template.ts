@@ -20,7 +20,7 @@ export const html = `
 <div class="toolbar">
   <label><span id="label-lat">Latitude</span> <input id="lat" type="number" min="-90" max="90" step="0.0001" placeholder="lat"/></label>
   <label><span id="label-lng">Longitude</span> <input id="lng" type="number" min="-180" max="180" step="0.0001" placeholder="lng"/></label>
-  <label><span id="label-heading">Heading (&deg;)</span> <input id="heading" type="number" min="0" max="359" step="1" placeholder="unknown"/></label>
+  <label><span id="label-heading">Heading (&deg;)</span> <input id="heading" type="number" min="0" max="360" step="1" placeholder="unknown"/></label>
   <label><span id="label-pitch">Tilt (&deg;)</span> <input id="pitch" type="number" min="-90" max="90" step="1" value="0"/></label>
   <span id="label-observation-time">Observation start (optional)</span>
   <input id="obs-year" type="number" step="1" placeholder="year"/>
@@ -28,6 +28,23 @@ export const html = `
   <input id="obs-day" type="number" min="1" max="31" step="1" placeholder="day"/>
   <input id="obs-hour" type="number" min="0" max="23" step="1" placeholder="hour"/>
   <input id="obs-minute" type="number" min="0" max="59" step="1" placeholder="min"/>
+</div>
+<div class="toolbar">
+  <span id="label-weather">Weather</span>
+  <label><span id="label-cloud-cover">Cloud cover</span> <input id="cloudCover" type="range" min="0" max="1" step="0.05" value="0"/></label>
+  <label><span id="label-cloud-darkness">Cloud darkness</span> <input id="cloudDarkness" type="range" min="0" max="1" step="0.05" value="0"/></label>
+  <label><span id="label-precipitation-type">Precipitation</span>
+    <select id="precipitationType">
+      <option id="option-precipitation-none" value="none">None</option>
+      <option id="option-precipitation-rain" value="rain">Rain</option>
+      <option id="option-precipitation-snow" value="snow">Snow</option>
+      <option id="option-precipitation-hail" value="hail">Hail</option>
+    </select>
+  </label>
+  <label><span id="label-precipitation-intensity">Intensity</span> <input id="precipitationIntensity" type="range" min="0" max="1" step="0.05" value="0"/></label>
+  <label><span id="label-wind-direction">Wind direction (&deg;)</span> <input id="windDirection" type="number" min="0" max="360" step="1" value="0"/></label>
+  <label><span id="label-wind-speed">Wind speed</span> <input id="windSpeed" type="range" min="0" max="1" step="0.05" value="0"/></label>
+  <label><span id="label-lightning">Lightning</span> <input id="lightning" type="checkbox"/></label>
 </div>
 <div id="ufo-slot"></div>
 `
@@ -55,7 +72,7 @@ button.preset[aria-pressed="true"] {
   outline: 2px solid #39f;
   font-weight: bold;
 }
-#lat, #lng, #heading, #pitch {
+#lat, #lng, #heading, #pitch, #windDirection {
   width: 6em;
 }
 #obs-year {

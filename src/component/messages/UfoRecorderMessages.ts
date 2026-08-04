@@ -27,4 +27,16 @@ export interface UfoRecorderMessages {
   dayPlaceholder: string
   hourPlaceholder: string
   minutePlaceholder: string
+  weather: string
+  cloudCover: string
+  cloudDarkness: string
+  precipitationType: string
+  precipitationNone: string
+  precipitationRain: string
+  precipitationSnow: string
+  precipitationHail: string
+  precipitationIntensity: string
+  windDirection: string
+  windSpeed: string
+  lightning: string
 }

@@ -25,5 +25,17 @@ export const ufoRecorderMessages_fr: UfoRecorderMessages = {
   monthPlaceholder: "mois",
   dayPlaceholder: "jour",
   hourPlaceholder: "heure",
-  minutePlaceholder: "min"
+  minutePlaceholder: "min",
+  weather: "Météo",
+  cloudCover: "Couverture nuageuse",
+  cloudDarkness: "Obscurité des nuages",
+  precipitationType: "Précipitations",
+  precipitationNone: "Aucune",
+  precipitationRain: "Pluie",
+  precipitationSnow: "Neige",
+  precipitationHail: "Grêle",
+  precipitationIntensity: "Intensité",
+  windDirection: "Direction du vent (°)",
+  windSpeed: "Force du vent",
+  lightning: "Éclairs"
 }

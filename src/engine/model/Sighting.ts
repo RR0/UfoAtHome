@@ -1,6 +1,7 @@
 import { Timeline } from "./Timeline.js"
 import { ObserverTrack } from "./ObserverTrack.js"
 import type { ObserverPose } from "./ObserverTrack.js"
+import type { Weather } from "./Weather.js"
 
 /**
  * A fuzzy date, structurally aligned with @rr0/time's Level2Date fields
@@ -96,7 +97,12 @@ export class Sighting {
     readonly observerTrack: ObserverTrack,
     readonly witnessId?: string,
     readonly witnessName?: string,
-    readonly caseId?: string
+    readonly caseId?: string,
+    /** Not readonly, unlike the other fields above — a weather edit reassigns this whole object
+     * wholesale (see UfoRecorderElement.updateWeather), it's never mutated field-by-field the way
+     * event.place/event.time are. Static for the whole sighting, unlike observerTrack — see
+     * Weather.ts's own doc comment for why this isn't a keyframed track. */
+    public weather?: Weather
   ) {
   }
 

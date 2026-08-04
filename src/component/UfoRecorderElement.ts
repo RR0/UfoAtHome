@@ -5,9 +5,11 @@ import { Recorder } from "../engine/record/Recorder.js"
 import { RafSamplingClock } from "../engine/record/SamplingClock.js"
 import { createShape, moveShapeTo } from "../engine/shape/Shape.js"
 import type { Appearance, Shape, ShapeBounds, ShapePresetId } from "../engine/shape/Shape.js"
-import { hitTestHandle, resizeShape, rotateShape } from "../engine/shape/ShapeHandles.js"
+import { hitTestHandle, resizeShape, rotateShape, MIN_SHAPE_SIZE } from "../engine/shape/ShapeHandles.js"
 import type { HandleId } from "../engine/shape/ShapeHandles.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
+import { DEFAULT_WEATHER } from "../engine/model/Weather.js"
+import type { PrecipitationType, Weather } from "../engine/model/Weather.js"
 import { selectLocale } from "../i18n/locale.js"
 import { loadUfoRecorderMessages, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
 import type { UfoLanguage } from "./messages/index.js"
@@ -18,6 +20,15 @@ registerUfo()
 registerScene()
 
 const DEFAULT_SHAPE_SIZE = { width: 48, height: 28 }
+/** Mouse-drag-to-look sensitivity for the "landscape drag" — see beginCameraDrag. A full drag
+ * across the canvas's own 640px internal width is ~130deg, a reasonable full sweep without being
+ * so twitchy that fine-tuning a heading/pitch by hand becomes fiddly. */
+const CAMERA_DRAG_DEG_PER_PX = 0.2
+
+const ARROW_KEYS = new Set(["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"])
+/** Px per arrow-key press, for both moving and resizing the selected shape — see
+ * moveOrResizeSelectedShape. Small enough for fine nudges, still visible in one press. */
+const ARROW_KEY_STEP_PX = 4
 const DEFAULT_SOURCE_ID = "ufo-1"
 const PRESET_IDS: ShapePresetId[] = ["oval", "saucer", "triangle"]
 const DEFAULT_APPEARANCE: Appearance = { presetId: "oval", color: "#39ff14", transparency: 0, haloScale: 1.5 }
@@ -83,6 +94,13 @@ export class UfoRecorderElement extends HTMLElement {
   private readonly obsDayInput: HTMLInputElement
   private readonly obsHourInput: HTMLInputElement
   private readonly obsMinuteInput: HTMLInputElement
+  private readonly cloudCoverInput: HTMLInputElement
+  private readonly cloudDarknessInput: HTMLInputElement
+  private readonly precipitationTypeSelect: HTMLSelectElement
+  private readonly precipitationIntensityInput: HTMLInputElement
+  private readonly windDirectionInput: HTMLInputElement
+  private readonly windSpeedInput: HTMLInputElement
+  private readonly lightningInput: HTMLInputElement
   private readonly labelColor: HTMLElement
   private readonly labelTransparency: HTMLElement
   private readonly labelHalo: HTMLElement
@@ -94,6 +112,18 @@ export class UfoRecorderElement extends HTMLElement {
   private readonly labelHeading: HTMLElement
   private readonly labelPitch: HTMLElement
   private readonly labelObservationTime: HTMLElement
+  private readonly labelWeather: HTMLElement
+  private readonly labelCloudCover: HTMLElement
+  private readonly labelCloudDarkness: HTMLElement
+  private readonly labelPrecipitationType: HTMLElement
+  private readonly labelPrecipitationIntensity: HTMLElement
+  private readonly labelWindDirection: HTMLElement
+  private readonly labelWindSpeed: HTMLElement
+  private readonly labelLightning: HTMLElement
+  private readonly optionPrecipitationNone: HTMLElement
+  private readonly optionPrecipitationRain: HTMLElement
+  private readonly optionPrecipitationSnow: HTMLElement
+  private readonly optionPrecipitationHail: HTMLElement
 
   private recorder?: Recorder
   private isRecording = false
@@ -105,7 +135,9 @@ export class UfoRecorderElement extends HTMLElement {
   private currentSourceId: string = DEFAULT_SOURCE_ID
 
   /** Set while the user is dragging the selected shape's body (move) or one of its handles
-   * (resize/rotate) — see beginDrag/onDragPointerMove/endDrag. */
+   * (resize/rotate) — see beginDrag/onDragPointerMove/endDrag. Mutually exclusive with
+   * cameraDragState (a pointerdown either hits a shape or it doesn't), so both share the same
+   * document-level pointermove/pointerup listeners. */
   private dragState?: {
     kind: "move" | "resize" | "rotate"
     sourceId: string
@@ -113,6 +145,19 @@ export class UfoRecorderElement extends HTMLElement {
     handle?: HandleId
     startPointer: { x: number; y: number } // only used by "move"; resize/rotate recompute
     // directly from the current pointer each time, so they have no drift/hysteresis
+  }
+
+  /** Set while the user drags empty canvas (no shape under the pointer) — the "landscape" itself
+   * becomes the drag target, changing the observer's own heading/pitch instead of a shape's
+   * bounds. See beginCameraDrag/onCameraDragPointerMove/endDrag. startHeadingDeg/startPitchDeg are
+   * captured once at drag start (not recomputed incrementally frame-to-frame) so the total
+   * pointer displacement from startPointer always maps to the same absolute heading/pitch — an
+   * incremental approach would compound floating-point drift and, worse, misbehave right at the
+   * heading's own 360->0 wrap point. */
+  private cameraDragState?: {
+    startPointer: { x: number; y: number }
+    startHeadingDeg: number
+    startPitchDeg: number
   }
 
   /** Bound once so document.removeEventListener (disconnectedCallback/endDrag) can actually
@@ -123,6 +168,17 @@ export class UfoRecorderElement extends HTMLElement {
       // recording samples the latest pointer position at every tick, that walk itself gets
       // recorded as trailing motion toward the button. Escape stops in place, no side trip.
       this.toggleRecording()
+    }
+    if (ARROW_KEYS.has(event.key)) {
+      // event.composedPath()[0] (not event.target, which retargets across shadow boundaries, and
+      // not document.activeElement, which doesn't resolve into open shadow roots consistently
+      // enough to trust here) is always the true originating element regardless of shadow
+      // nesting — arrow keys must reach a focused lat/lng/heading/pitch/duration/source-select
+      // control untouched (moving the text cursor, nudging a number input's own value, or
+      // navigating the dropdown), not get hijacked into moving the selected shape.
+      const target = event.composedPath()[0]
+      if (target instanceof HTMLInputElement || target instanceof HTMLSelectElement || target instanceof HTMLTextAreaElement) return
+      this.moveOrResizeSelectedShape(event)
     }
   }
   private readonly handleDragPointerMove = (event: PointerEvent) => this.onDragPointerMove(event)
@@ -175,6 +231,13 @@ export class UfoRecorderElement extends HTMLElement {
     this.obsDayInput = this.shadow.getElementById("obs-day") as HTMLInputElement
     this.obsHourInput = this.shadow.getElementById("obs-hour") as HTMLInputElement
     this.obsMinuteInput = this.shadow.getElementById("obs-minute") as HTMLInputElement
+    this.cloudCoverInput = this.shadow.getElementById("cloudCover") as HTMLInputElement
+    this.cloudDarknessInput = this.shadow.getElementById("cloudDarkness") as HTMLInputElement
+    this.precipitationTypeSelect = this.shadow.getElementById("precipitationType") as HTMLSelectElement
+    this.precipitationIntensityInput = this.shadow.getElementById("precipitationIntensity") as HTMLInputElement
+    this.windDirectionInput = this.shadow.getElementById("windDirection") as HTMLInputElement
+    this.windSpeedInput = this.shadow.getElementById("windSpeed") as HTMLInputElement
+    this.lightningInput = this.shadow.getElementById("lightning") as HTMLInputElement
     this.labelColor = this.shadow.getElementById("label-color")!
     this.labelTransparency = this.shadow.getElementById("label-transparency")!
     this.labelHalo = this.shadow.getElementById("label-halo")!
@@ -186,6 +249,18 @@ export class UfoRecorderElement extends HTMLElement {
     this.labelHeading = this.shadow.getElementById("label-heading")!
     this.labelPitch = this.shadow.getElementById("label-pitch")!
     this.labelObservationTime = this.shadow.getElementById("label-observation-time")!
+    this.labelWeather = this.shadow.getElementById("label-weather")!
+    this.labelCloudCover = this.shadow.getElementById("label-cloud-cover")!
+    this.labelCloudDarkness = this.shadow.getElementById("label-cloud-darkness")!
+    this.labelPrecipitationType = this.shadow.getElementById("label-precipitation-type")!
+    this.labelPrecipitationIntensity = this.shadow.getElementById("label-precipitation-intensity")!
+    this.labelWindDirection = this.shadow.getElementById("label-wind-direction")!
+    this.labelWindSpeed = this.shadow.getElementById("label-wind-speed")!
+    this.labelLightning = this.shadow.getElementById("label-lightning")!
+    this.optionPrecipitationNone = this.shadow.getElementById("option-precipitation-none")!
+    this.optionPrecipitationRain = this.shadow.getElementById("option-precipitation-rain")!
+    this.optionPrecipitationSnow = this.shadow.getElementById("option-precipitation-snow")!
+    this.optionPrecipitationHail = this.shadow.getElementById("option-precipitation-hail")!
 
     this.ufoElement.canvasElement.addEventListener("pointerdown", event => this.onPointerDown(event))
     this.ufoElement.canvasElement.addEventListener("pointermove", event => this.onPointerMove(event))
@@ -226,8 +301,25 @@ export class UfoRecorderElement extends HTMLElement {
     for (const input of [this.latInput, this.lngInput, this.headingInput, this.pitchInput]) {
       input.addEventListener("input", () => this.updateObserver())
     }
+    // Reading the heading off the compass is the whole point of editing this field — showing the
+    // labels only requires the mouse to *also* be hovering the canvas (see SceneRenderer's own
+    // hover-only default) would make the one moment they're most needed the one moment they're
+    // easiest to miss. Independent of hover, see SceneElement.setCompassForced's own doc comment.
+    this.headingInput.addEventListener("focus", () => this.sceneElement.setCompassForced(true))
+    this.headingInput.addEventListener("blur", () => this.sceneElement.setCompassForced(false))
     for (const input of [this.obsYearInput, this.obsMonthInput, this.obsDayInput, this.obsHourInput, this.obsMinuteInput]) {
       input.addEventListener("input", () => this.updateObservationTime())
+    }
+    for (const input of [
+      this.cloudCoverInput,
+      this.cloudDarknessInput,
+      this.precipitationTypeSelect,
+      this.precipitationIntensityInput,
+      this.windDirectionInput,
+      this.windSpeedInput,
+      this.lightningInput
+    ]) {
+      input.addEventListener("input", () => this.updateWeather())
     }
 
     this.updatePresetButtons()
@@ -262,7 +354,9 @@ export class UfoRecorderElement extends HTMLElement {
     this.refreshSourceList()
     this.onSelectionOrTimeChanged()
     this.durationInput.value = this.ufoElement.durationSeconds !== undefined ? String(this.ufoElement.durationSeconds) : ""
-    this.syncObserverAndTimeFields()
+    this.syncObservationTimeFields()
+    this.syncWeatherFromSighting()
+    this.sceneElement.setWeather(this.ufoElement.sighting.weather)
   }
 
   /** Downloads the current recording as a standalone SightingRecordingJson file — a plain
@@ -284,35 +378,61 @@ export class UfoRecorderElement extends HTMLElement {
     return value === "" ? undefined : Number(value)
   }
 
+  /** A compass direction loops rather than clamps — reaching 360 (via the spinner's own max, or by
+   * typing) is the same direction as 0, not an out-of-range value to get stuck at. Normalizes into
+   * [0, 360) and reflects the wrapped value back into `input` itself (so typing/spinning past 360
+   * visibly resets to 0, not silently storing 0 while still displaying 360). Shared by the heading
+   * and wind-direction fields — both are plain compass directions with identical wrap behavior. */
+  private wrapDegrees(degrees: number | undefined, input: HTMLInputElement): number | undefined {
+    if (degrees === undefined) return undefined
+    const wrapped = ((degrees % 360) + 360) % 360
+    if (String(wrapped) !== input.value) {
+      input.value = String(wrapped)
+    }
+    return wrapped
+  }
+
   /** Writes the witness's lat/lng into the legacy `event.place` (kept in sync for any consumer
-   * that only reads that field, e.g. an older `<rr0-scene>` build) — but writes a single t=0
-   * `observerTrack` keyframe (what the current renderer actually prefers — see
-   * resolveObserverPoseAt) as soon as *any* of lat/lng/heading/pitch is set, not only once lat and
-   * lng are both filled in. Heading/pitch/date-time are meant to be tweakable independently while
-   * authoring — gating the whole pose behind "lat and lng both present" silently discarded a
-   * heading/pitch edit made before a location was entered, which looked like those fields simply
-   * didn't work. `resolveObserverPoseAt`'s consumers (SceneElement) already know how to render a
-   * pose with lat/lng left undefined — see its own fallback for astronomy without a location yet.
-   * Clearing every field removes the keyframe entirely, rather than leaving a stale, all-default
-   * pose around with no trace of it left in the UI. */
+   * that only reads that field, e.g. an older `<rr0-scene>` build, always mirroring whichever edit
+   * happened most recently regardless of when on the timeline it landed) — but records the real
+   * pose as an `observerTrack` keyframe **at the current playhead position**, exactly like
+   * applyAppearanceAtPlayhead()/onDragPointerMove() already do for the UFO's own shape. This is
+   * what lets an observer move/re-orient over the course of a recording (position, pitch, heading
+   * all independently keyframed over time) instead of only ever describing one fixed vantage
+   * point — see ObserverTrack.getInterpolatedPoseAt, already consumed live during playback by
+   * SceneElement.updateAstronomy on every timeupdate tick, so a second+ keyframe here starts
+   * animating the scene immediately, no separate "enable" step needed.
+   *
+   * Heading/pitch/date-time are meant to be tweakable independently while authoring — gating the
+   * whole pose behind "lat and lng both present" would silently discard a heading/pitch edit made
+   * before a location was entered, which looked like those fields simply didn't work.
+   * `resolveObserverPoseAt`'s consumers already know how to render a pose with lat/lng left
+   * undefined — see its own fallback for astronomy without a location yet.
+   *
+   * Blanking every field removes just the keyframe at *this* instant (removeKeyframeAt), not the
+   * observer's whole recorded path — mirrors "no edit recorded here", not "erase everything ever
+   * entered". Bails out while playing, same reasoning as setAppearance's identical guard: the
+   * playhead is a moving target during Play, not a specific instant to keyframe. */
   private updateObserver(): void {
+    if (this.ufoElement.playbackState === "playing") return
     const lat = this.numberOrUndefined(this.latInput.value)
     const lng = this.numberOrUndefined(this.lngInput.value)
-    const headingDeg = this.numberOrUndefined(this.headingInput.value)
+    const headingDeg = this.wrapDegrees(this.numberOrUndefined(this.headingInput.value), this.headingInput)
     // pitchDeg (unlike headingDeg) is never "unknown" — it's a required field on ObserverPose, so
     // an empty/invalid input just falls back to 0 (looking straight at the horizon) rather than
     // propagating NaN into the pose.
     const pitchDeg = this.numberOrUndefined(this.pitchInput.value) ?? 0
     const event = this.ufoElement.sighting.event
     const observerTrack = this.ufoElement.sighting.observerTrack
+    const t = this.ufoElement.currentTime
 
     event.place = lat !== undefined && lng !== undefined ? [{ lat, lng }] : undefined
 
     const nothingSet = lat === undefined && lng === undefined && headingDeg === undefined && pitchDeg === 0
     if (nothingSet) {
-      observerTrack.clear()
+      observerTrack.removeKeyframeAt(t)
     } else {
-      observerTrack.addKeyframe(0, { lat, lng, elevationM: 0, headingDeg, pitchDeg, fovDeg: 60 })
+      observerTrack.addKeyframe(t, { lat, lng, elevationM: 0, headingDeg, pitchDeg, fovDeg: 60 })
     }
     // Neither field affects the 2D shape canvas, so this refresh() is only for its side effect —
     // it's what makes this edit surface as a "timeupdate" (see the constructor's listener), the
@@ -337,21 +457,96 @@ export class UfoRecorderElement extends HTMLElement {
     this.ufoElement.refresh() // see updateObserver()'s comment — this is what surfaces the edit as a timeupdate
   }
 
-  /** Resyncs the observer/time fields from a freshly loaded sighting (sightingData setter) —
-   * same role durationInput's own sync line already plays just above this call site. */
-  private syncObserverAndTimeFields(): void {
+  /** Writes the sighting's reported weather condition — unlike updateObserver()/
+   * updateObservationTime(), this is a single flat object reassigned wholesale on every edit
+   * (see Weather.ts/Sighting.ts's own doc comments on why weather is static per-sighting, not
+   * keyframed), and every field always has a real default (0/none/false — a checkbox/select/range
+   * never has an "empty" state the way a number input does), so there's no "blank everything to
+   * clear it" case to handle the way updateObservationTime()/updateObserver() have.
+   * `sceneElement.setWeather()` is called explicitly (not left to refresh()'s own timeupdate,
+   * unlike observer pose) since weather isn't read from within SceneElement.updateAstronomy()'s own
+   * per-tick path — see SceneElement.setWeather's own doc comment. */
+  private updateWeather(): void {
+    // Unlocks weather audio right here — this input event IS a real user gesture, exactly what
+    // AudioContext.resume() requires (see SceneElement.resumeWeatherAudio/WeatherAudio.resume).
+    this.sceneElement.resumeWeatherAudio()
+    const sighting = this.ufoElement.sighting
+    const weather: Weather = {
+      cloudCover: Number(this.cloudCoverInput.value),
+      cloudDarkness: Number(this.cloudDarknessInput.value),
+      precipitationType: this.precipitationTypeSelect.value as PrecipitationType,
+      precipitationIntensity: Number(this.precipitationIntensityInput.value),
+      windDirectionDeg: this.wrapDegrees(this.numberOrUndefined(this.windDirectionInput.value), this.windDirectionInput) ?? 0,
+      windSpeed: Number(this.windSpeedInput.value),
+      lightning: this.lightningInput.checked
+    }
+    sighting.weather = weather
+    this.sceneElement.setWeather(weather)
+  }
+
+  /** Resyncs the observation date/time fields from a freshly loaded sighting (sightingData
+   * setter) — same role durationInput's own sync line already plays just above this call site.
+   * event.time is sighting-wide metadata, not a per-instant keyframe like the observer's own pose
+   * (see syncObserverFromTimeline for that), so this only needs to run once on load. */
+  private syncObservationTimeFields(): void {
     const event = this.ufoElement.sighting.event
-    const location = event.place?.[0]
-    this.latInput.value = location ? String(location.lat) : ""
-    this.lngInput.value = location ? String(location.lng) : ""
-    const pose = this.ufoElement.sighting.observerTrack.getLatestPoseAt(0)
-    this.headingInput.value = pose?.headingDeg !== undefined ? String(pose.headingDeg) : ""
-    this.pitchInput.value = String(pose?.pitchDeg ?? 0)
     this.obsYearInput.value = event.time?.year !== undefined ? String(event.time.year) : ""
     this.obsMonthInput.value = event.time?.month !== undefined ? String(event.time.month) : ""
     this.obsDayInput.value = event.time?.day !== undefined ? String(event.time.day) : ""
     this.obsHourInput.value = event.time?.hour !== undefined ? String(event.time.hour) : ""
     this.obsMinuteInput.value = event.time?.minute !== undefined ? String(event.time.minute) : ""
+  }
+
+  /** Resyncs the weather toolbar from a freshly loaded sighting — same role
+   * syncObservationTimeFields plays for the observation-time fields, and for the same reason:
+   * weather is static per-sighting, not a per-instant keyframe, so this only needs to run once on
+   * load, never on every tick. Absent weather (older recordings, or one never edited) resets every
+   * field to DEFAULT_WEATHER's own values rather than leaving stale values from whatever was
+   * previously loaded. */
+  private syncWeatherFromSighting(): void {
+    const weather = this.ufoElement.sighting.weather ?? DEFAULT_WEATHER
+    this.cloudCoverInput.value = String(weather.cloudCover)
+    this.cloudDarknessInput.value = String(weather.cloudDarkness)
+    this.precipitationTypeSelect.value = weather.precipitationType
+    this.precipitationIntensityInput.value = String(weather.precipitationIntensity)
+    this.windDirectionInput.value = String(weather.windDirectionDeg)
+    this.windSpeedInput.value = String(weather.windSpeed)
+    this.lightningInput.checked = weather.lightning
+  }
+
+  /** Keeps the lat/lng/heading/pitch fields honest as the playhead moves or a different keyframe
+   * region is scrubbed to — same role and the same playing-state bailout as
+   * syncAppearanceFromTimeline (merely scrubbing must never itself write a keyframe). Reads
+   * getInterpolatedPoseAt (not hold-last) so the fields reflect what a witness would see *between*
+   * two observer keyframes, matching what SceneElement itself renders at that instant. Falls back
+   * to the legacy static event.place when the track has no keyframes at all yet (e.g. a sighting
+   * loaded from older data, or before the very first observer edit), mirroring
+   * resolveObserverPoseAt's own precedence.
+   *
+   * Skips whichever field currently has focus: updateObserver() itself triggers this same resync
+   * synchronously on every keystroke (input -> addKeyframe -> refresh() -> timeupdate), and
+   * overwriting the field being typed into with its own just-parsed round-tripped value (e.g.
+   * "43." -> Number -> 43 -> "43") silently ate the decimal point on every keystroke, making it
+   * impossible to ever type a fractional lat/lng. The field the user is actively editing is always
+   * exactly what they typed; only the *other*, not-currently-focused fields need resyncing here. */
+  private syncObserverFromTimeline(): void {
+    if (this.ufoElement.playbackState === "playing") return
+    const sighting = this.ufoElement.sighting
+    const pose = sighting.observerTrack.getInterpolatedPoseAt(this.ufoElement.currentTime)
+    const location = sighting.event.place?.[0]
+    const active = this.shadow.activeElement
+    if (active !== this.latInput) {
+      this.latInput.value = pose?.lat !== undefined ? String(pose.lat) : location ? String(location.lat) : ""
+    }
+    if (active !== this.lngInput) {
+      this.lngInput.value = pose?.lng !== undefined ? String(pose.lng) : location ? String(location.lng) : ""
+    }
+    if (active !== this.headingInput) {
+      this.headingInput.value = pose?.headingDeg !== undefined ? String(pose.headingDeg) : ""
+    }
+    if (active !== this.pitchInput) {
+      this.pitchInput.value = String(pose?.pitchDeg ?? 0)
+    }
   }
 
   /** The UFO's appearance (shape preset, color, transparency, halo) used for the next recording. */
@@ -400,6 +595,7 @@ export class UfoRecorderElement extends HTMLElement {
    * toolbar and drives the canvas-native selection highlight on the nested ufo element. */
   private onSelectionOrTimeChanged(): void {
     this.syncAppearanceFromTimeline()
+    this.syncObserverFromTimeline()
     this.ufoElement.selectedSourceId = this.currentSourceId
   }
 
@@ -558,6 +754,18 @@ export class UfoRecorderElement extends HTMLElement {
     this.obsDayInput.placeholder = messages.dayPlaceholder
     this.obsHourInput.placeholder = messages.hourPlaceholder
     this.obsMinuteInput.placeholder = messages.minutePlaceholder
+    this.labelWeather.textContent = messages.weather
+    this.labelCloudCover.textContent = messages.cloudCover
+    this.labelCloudDarkness.textContent = messages.cloudDarkness
+    this.labelPrecipitationType.textContent = messages.precipitationType
+    this.optionPrecipitationNone.textContent = messages.precipitationNone
+    this.optionPrecipitationRain.textContent = messages.precipitationRain
+    this.optionPrecipitationSnow.textContent = messages.precipitationSnow
+    this.optionPrecipitationHail.textContent = messages.precipitationHail
+    this.labelPrecipitationIntensity.textContent = messages.precipitationIntensity
+    this.labelWindDirection.textContent = messages.windDirection
+    this.labelWindSpeed.textContent = messages.windSpeed
+    this.labelLightning.textContent = messages.lightning
     this.setRecordButtonLabel(this.isRecording)
   }
 
@@ -579,7 +787,13 @@ export class UfoRecorderElement extends HTMLElement {
       return
     }
     const hit = timeline.hitTest(t, point.x, point.y)
-    if (!hit) return // clicking empty canvas is a no-op — keeps the previous selection
+    if (!hit) {
+      // Nothing under the pointer to select/move — the "landscape" itself becomes the drag
+      // target instead of this being a no-op, letting a witness set their own heading/pitch by
+      // dragging the sky/ground the same way they'd drag a shape.
+      if (!playing) this.beginCameraDrag(point)
+      return
+    }
     if (hit.sourceId !== this.currentSourceId) {
       this.currentSourceId = hit.sourceId
       this.refreshSourceList()
@@ -600,14 +814,39 @@ export class UfoRecorderElement extends HTMLElement {
     handle?: HandleId
   ): void {
     this.dragState = { kind, sourceId, original, handle, startPointer }
-    // Document-level (not canvas-level, and not Element.setPointerCapture) so the drag ends
-    // correctly even if the pointer leaves the canvas or window before release, without
-    // depending on setPointerCapture's availability.
+    this.startDragListening()
+  }
+
+  /** Starts dragging the "landscape" (empty canvas, no shape under the pointer) to set the
+   * observer's own heading/pitch — the mouse-drag equivalent of typing into the Orientation/Tilt
+   * fields, so it goes through the exact same wrap/write/guard logic as those (updateObserver),
+   * just fed computed values instead of parsing input.value strings. Also forces the compass
+   * visible for the duration, same reasoning as the heading input's own focus/blur (see
+   * SceneElement.setCompassForced): reading the heading off the compass is the point of dragging
+   * to set it. */
+  private beginCameraDrag(startPointer: { x: number; y: number }): void {
+    this.cameraDragState = {
+      startPointer,
+      startHeadingDeg: this.numberOrUndefined(this.headingInput.value) ?? 0,
+      startPitchDeg: this.numberOrUndefined(this.pitchInput.value) ?? 0
+    }
+    this.sceneElement.setCompassForced(true)
+    this.startDragListening()
+  }
+
+  /** Shared by beginDrag/beginCameraDrag — document-level (not canvas-level, and not
+   * Element.setPointerCapture) so a drag ends correctly even if the pointer leaves the canvas or
+   * window before release, without depending on setPointerCapture's availability. */
+  private startDragListening(): void {
     document.addEventListener("pointermove", this.handleDragPointerMove)
     document.addEventListener("pointerup", this.handleDragPointerUp)
   }
 
   private onDragPointerMove(event: PointerEvent): void {
+    if (this.cameraDragState) {
+      this.onCameraDragPointerMove(event)
+      return
+    }
     if (!this.dragState) return
     const point = this.canvasPointFromEvent(event)
     if (!point) return
@@ -632,11 +871,87 @@ export class UfoRecorderElement extends HTMLElement {
     this.ufoElement.refresh()
   }
 
+  private onCameraDragPointerMove(event: PointerEvent): void {
+    if (!this.cameraDragState) return
+    const point = this.canvasPointFromEvent(event)
+    if (!point) return
+    const { startPointer, startHeadingDeg, startPitchDeg } = this.cameraDragState
+    // Computed from the fixed drag-start reference every time, not incrementally frame-to-frame —
+    // see cameraDragState's own doc comment on why (avoids drift and misbehaving at the 360->0
+    // heading wrap). Left/right drags the view right/left (a "grab the sky and pan it" feel);
+    // up/down looks up/down, matching pitchDeg's own "positive = above horizontal" convention.
+    const headingDeg = startHeadingDeg + (point.x - startPointer.x) * CAMERA_DRAG_DEG_PER_PX
+    const pitchDeg = Math.max(-90, Math.min(90, startPitchDeg - (point.y - startPointer.y) * CAMERA_DRAG_DEG_PER_PX))
+    // Feeds the same field-parsing path updateObserver() already uses for typed input —
+    // wrapDegrees() (called from within updateObserver) both normalizes headingDeg into [0,360)
+    // and reflects that back into headingInput.value, so an unwrapped/out-of-range intermediate
+    // value here (e.g. 372, or -15) is exactly as valid an input as anything a user could type.
+    this.headingInput.value = String(headingDeg)
+    this.pitchInput.value = String(pitchDeg)
+    this.updateObserver()
+  }
+
   private endDrag(): void {
-    if (!this.dragState) return
+    if (!this.dragState && !this.cameraDragState) return
+    if (this.cameraDragState) this.sceneElement.setCompassForced(false)
     this.dragState = undefined
+    this.cameraDragState = undefined
     document.removeEventListener("pointermove", this.handleDragPointerMove)
     document.removeEventListener("pointerup", this.handleDragPointerUp)
+  }
+
+  /** Arrow keys nudge the selected shape's position; Shift+arrow resizes it instead — the
+   * keyboard equivalent of dragging the body vs. a resize handle. Resize is center-anchored (grows/
+   * shrinks both edges equally) rather than keeping one edge fixed: with no handle actually being
+   * dragged there's no natural "which edge stays put" to mirror, and growing from the center reads
+   * as the more predictable default for a symmetric shape. Same guards as every other shape edit
+   * (no-op while recording or playing) and writes through addKeyframe at the current playhead,
+   * exactly like a pointer drag would. */
+  private moveOrResizeSelectedShape(event: KeyboardEvent): void {
+    if (this.isRecording || this.ufoElement.playbackState === "playing") return
+    const timeline = this.ufoElement.sighting.timeline
+    const t = this.ufoElement.currentTime
+    const shape = timeline.getInterpolatedShapeAt(t, this.currentSourceId)
+    if (!shape) return
+    const bounds: ShapeBounds = { ...shape.bounds }
+    if (event.shiftKey) {
+      switch (event.key) {
+        case "ArrowLeft":
+          bounds.width = Math.max(MIN_SHAPE_SIZE, bounds.width - ARROW_KEY_STEP_PX)
+          break
+        case "ArrowRight":
+          bounds.width += ARROW_KEY_STEP_PX
+          break
+        case "ArrowUp":
+          bounds.height = Math.max(MIN_SHAPE_SIZE, bounds.height - ARROW_KEY_STEP_PX)
+          break
+        case "ArrowDown":
+          bounds.height += ARROW_KEY_STEP_PX
+          break
+      }
+      bounds.x -= (bounds.width - shape.bounds.width) / 2
+      bounds.y -= (bounds.height - shape.bounds.height) / 2
+    } else {
+      switch (event.key) {
+        case "ArrowLeft":
+          bounds.x -= ARROW_KEY_STEP_PX
+          break
+        case "ArrowRight":
+          bounds.x += ARROW_KEY_STEP_PX
+          break
+        case "ArrowUp":
+          bounds.y -= ARROW_KEY_STEP_PX
+          break
+        case "ArrowDown":
+          bounds.y += ARROW_KEY_STEP_PX
+          break
+      }
+    }
+    event.preventDefault() // arrow keys otherwise scroll the page
+    // Writes straight through, spreading the original shape's appearance fields unchanged — same
+    // reasoning as onDragPointerMove's own identical comment.
+    timeline.addKeyframe(t, [{ sourceId: this.currentSourceId, shape: { ...shape, bounds } }])
+    this.ufoElement.refresh()
   }
 
   private onPointerMove(event: PointerEvent): void {

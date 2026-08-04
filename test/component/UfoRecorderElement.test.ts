@@ -14,8 +14,15 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
   SceneRenderer: class {
     resize(): void {}
     setObserverPose(): void {}
+    setTerrainOrigin(): void {}
+    get currentTerrainAttribution(): undefined {
+      return undefined
+    }
     setAstronomy(): void {}
     setShowCompass(): void {}
+    setCompassHovered(): void {}
+    setCompassForced(): void {}
+    setWeather(): void {}
     pickBodyAt(): undefined {
       return undefined
     }
@@ -234,6 +241,153 @@ describe("UfoRecorderElement observer/time fields", () => {
     expect((shadow.getElementById("heading") as HTMLInputElement).value).toBe("45")
     expect((shadow.getElementById("obs-year") as HTMLInputElement).value).toBe("1948")
     expect((shadow.getElementById("obs-hour") as HTMLInputElement).value).toBe("2")
+  })
+})
+
+describe("UfoRecorderElement observer keyframes over time", () => {
+  afterEach(() => {
+    document.body.innerHTML = ""
+  })
+
+  function setInput(shadow: ShadowRoot, id: string, value: string): void {
+    const input = shadow.getElementById(id) as HTMLInputElement
+    input.value = value
+    input.dispatchEvent(new Event("input"))
+  }
+
+  function seekNestedUfoTo(element: UfoRecorderElement, t: number): void {
+    const seekInput = nestedUfo(element)!.shadowRoot!.getElementById("seek") as HTMLInputElement
+    seekInput.value = String(t)
+    seekInput.dispatchEvent(new Event("input"))
+  }
+
+  it("records a keyframe at the scrubbed-to instant, not always at t=0", () => {
+    const element = mount()
+    element.sightingData = {
+      version: 1,
+      observerTrack: { keyframes: [{ t: 0, pose: { lat: 43.837, lng: 5.993, elevationM: 0, headingDeg: undefined, pitchDeg: 0, fovDeg: 60 } }] },
+      timeline: { keyframes: [] },
+      durationSeconds: 5
+    }
+    const shadow = element.shadowRoot!
+    seekNestedUfoTo(element, 2000)
+    setInput(shadow, "lat", "44.0")
+    setInput(shadow, "lng", "6.5")
+
+    expect(element.sightingData.observerTrack?.keyframes).toEqual([
+      { t: 0, pose: { lat: 43.837, lng: 5.993, elevationM: 0, headingDeg: undefined, pitchDeg: 0, fovDeg: 60 } },
+      { t: 2000, pose: { lat: 44.0, lng: 6.5, elevationM: 0, headingDeg: undefined, pitchDeg: 0, fovDeg: 60 } }
+    ])
+  })
+
+  it("editing at two different scrubbed instants produces two independent keyframes", () => {
+    const element = mount()
+    element.sightingData = { version: 1, timeline: { keyframes: [] }, durationSeconds: 5 }
+    const shadow = element.shadowRoot!
+
+    seekNestedUfoTo(element, 0)
+    setInput(shadow, "lat", "43.837")
+    setInput(shadow, "lng", "5.993")
+    seekNestedUfoTo(element, 3000)
+    setInput(shadow, "lat", "43.9")
+    setInput(shadow, "lng", "6.1")
+
+    expect(element.sightingData.observerTrack?.keyframes.map(k => k.t)).toEqual([0, 3000])
+  })
+
+  it("blanking fields at a scrubbed instant removes just that keyframe, leaving others intact", () => {
+    const element = mount()
+    element.sightingData = { version: 1, timeline: { keyframes: [] }, durationSeconds: 5 }
+    const shadow = element.shadowRoot!
+
+    seekNestedUfoTo(element, 0)
+    setInput(shadow, "lat", "43.837")
+    setInput(shadow, "lng", "5.993")
+    seekNestedUfoTo(element, 3000)
+    setInput(shadow, "lat", "43.9")
+    setInput(shadow, "lng", "6.1")
+    setInput(shadow, "lat", "")
+    setInput(shadow, "lng", "")
+
+    expect(element.sightingData.observerTrack?.keyframes).toEqual([
+      { t: 0, pose: { lat: 43.837, lng: 5.993, elevationM: 0, headingDeg: undefined, pitchDeg: 0, fovDeg: 60 } }
+    ])
+  })
+
+  it("scrubbing between two observer keyframes repopulates the fields with the interpolated pose", () => {
+    const element = mount()
+    element.sightingData = {
+      version: 1,
+      observerTrack: {
+        keyframes: [
+          { t: 0, pose: { lat: 40, lng: 0, elevationM: 0, headingDeg: 0, pitchDeg: 0, fovDeg: 60 } },
+          { t: 1000, pose: { lat: 42, lng: 2, elevationM: 0, headingDeg: 90, pitchDeg: 0, fovDeg: 60 } }
+        ]
+      },
+      timeline: { keyframes: [] },
+      durationSeconds: 5
+    }
+    seekNestedUfoTo(element, 500)
+
+    const shadow = element.shadowRoot!
+    expect((shadow.getElementById("lat") as HTMLInputElement).value).toBe("41")
+    expect((shadow.getElementById("lng") as HTMLInputElement).value).toBe("1")
+    expect((shadow.getElementById("heading") as HTMLInputElement).value).toBe("45")
+  })
+
+  it("does not write or resync observer fields while the nested player is playing", () => {
+    const element = mount()
+    element.sightingData = {
+      version: 1,
+      observerTrack: { keyframes: [{ t: 0, pose: { lat: 43.837, lng: 5.993, elevationM: 0, headingDeg: undefined, pitchDeg: 0, fovDeg: 60 } }] },
+      timeline: {
+        keyframes: [
+          { t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 0, y: 0, width: 10, height: 10 }, color: "#39ff14", angle: 0, transparency: 0, haloScale: 1.5, selected: false } }] },
+          { t: 1000, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 100, y: 0, width: 10, height: 10 }, color: "#39ff14", angle: 0, transparency: 0, haloScale: 1.5, selected: false } }] }
+        ]
+      }
+    }
+    const ufo = nestedUfo(element) as unknown as { playbackState: string }
+    const playButton = nestedUfo(element)!.shadowRoot!.getElementById("play-pause") as HTMLButtonElement
+    playButton.click()
+    expect(ufo.playbackState).toBe("playing")
+
+    const before = JSON.stringify(element.sightingData)
+    const shadow = element.shadowRoot!
+    setInput(shadow, "lat", "0")
+    setInput(shadow, "lng", "0")
+
+    expect(JSON.stringify(element.sightingData)).toBe(before)
+  })
+
+  it("does not clobber a field's in-progress value while it's focused (regression: typing a decimal lat/lng)", () => {
+    const element = mount()
+    element.sightingData = {
+      version: 1,
+      observerTrack: { keyframes: [{ t: 0, pose: { lat: 40, lng: 0, elevationM: 0, headingDeg: undefined, pitchDeg: 0, fovDeg: 60 } }] },
+      timeline: { keyframes: [] }
+    }
+    const shadow = element.shadowRoot!
+    const latInput = shadow.getElementById("lat") as HTMLInputElement
+    latInput.focus()
+    // "43.50" round-trips through Number()/String() as "43.5" (its trailing zero dropped) — every
+    // keystroke used to trigger a full resync from the just-parsed (and therefore reformatted)
+    // stored pose, silently stripping whatever the user had typed past the significant digits on
+    // every single character, making it impossible to ever finish typing a value like this.
+    latInput.value = "43.50"
+    latInput.dispatchEvent(new Event("input"))
+
+    expect(latInput.value).toBe("43.50")
+  })
+
+  it("wraps orientation to 0 once it reaches 360, both in the field and the stored pose", () => {
+    const element = mount()
+    const shadow = element.shadowRoot!
+    setInput(shadow, "heading", "360")
+
+    const headingInput = shadow.getElementById("heading") as HTMLInputElement
+    expect(headingInput.value).toBe("0")
+    expect(element.sightingData.observerTrack?.keyframes[0].pose.headingDeg).toBe(0)
   })
 })
 
@@ -816,6 +970,145 @@ describe("UfoRecorderElement drag-to-move/resize/rotate", () => {
       width: 20,
       height: 20
     })
+  })
+
+  it("dragging empty canvas (the 'landscape') sets heading/pitch instead of moving a shape", () => {
+    const element = mount()
+    element.sightingData = oneShapeJson() // shape sits at (100,100)-(120,120) — well away from the drag below
+    const canvas = nestedCanvas(element)
+
+    dragFromTo(canvas, { x: 300, y: 300 }, { x: 400, y: 250 }) // dx=+100 (right), dy=-50 (up)
+
+    expect(element.sightingData.observerTrack?.keyframes).toEqual([{ t: 0, pose: { lat: undefined, lng: undefined, elevationM: 0, headingDeg: 20, pitchDeg: 10, fovDeg: 60 } }])
+    // The shape itself must be untouched — this was a landscape drag, not a shape drag.
+    expect(element.sightingData.timeline.keyframes[0].shapes[0].shape.bounds).toEqual({ x: 100, y: 100, width: 20, height: 20 })
+  })
+
+  it("a landscape drag wraps heading past 360 back to 0, same as typing it", () => {
+    const element = mount()
+    element.sightingData = {
+      version: 1,
+      observerTrack: { keyframes: [{ t: 0, pose: { lat: undefined, lng: undefined, elevationM: 0, headingDeg: 350, pitchDeg: 0, fovDeg: 60 } }] },
+      timeline: { keyframes: [] }
+    }
+    const canvas = nestedCanvas(element)
+
+    dragFromTo(canvas, { x: 300, y: 300 }, { x: 400, y: 300 }) // +100px right = +20deg: 350 -> 370 -> wraps to 10
+
+    expect(element.sightingData.observerTrack?.keyframes[0].pose.headingDeg).toBe(10)
+  })
+
+  it("a landscape drag clamps pitch to [-90, 90]", () => {
+    const element = mount()
+    const canvas = nestedCanvas(element)
+
+    dragFromTo(canvas, { x: 300, y: 300 }, { x: 300, y: -300 }) // dy=-600 (far up) = +120deg, clamped to 90
+
+    expect(element.sightingData.observerTrack?.keyframes[0].pose.pitchDeg).toBe(90)
+  })
+
+  it("does not start a landscape drag while playing", () => {
+    const element = mount()
+    element.sightingData = {
+      version: 1,
+      observerTrack: { keyframes: [{ t: 0, pose: { lat: undefined, lng: undefined, elevationM: 0, headingDeg: 0, pitchDeg: 0, fovDeg: 60 } }] },
+      timeline: {
+        keyframes: [
+          { t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 0, y: 0, width: 10, height: 10 }, color: "#39ff14", angle: 0, transparency: 0, haloScale: 1.5, selected: false } }] },
+          { t: 1000, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 100, y: 0, width: 10, height: 10 }, color: "#39ff14", angle: 0, transparency: 0, haloScale: 1.5, selected: false } }] }
+        ]
+      }
+    }
+    const ufo = nestedUfo(element) as unknown as { playbackState: string }
+    const playButton = nestedUfo(element)!.shadowRoot!.getElementById("play-pause") as HTMLButtonElement
+    playButton.click()
+    expect(ufo.playbackState).toBe("playing")
+
+    const canvas = nestedCanvas(element)
+    dragFromTo(canvas, { x: 300, y: 300 }, { x: 400, y: 250 })
+
+    expect(element.sightingData.observerTrack?.keyframes[0].pose.headingDeg).toBe(0)
+  })
+})
+
+describe("UfoRecorderElement arrow-key move/resize", () => {
+  afterEach(() => {
+    document.body.innerHTML = ""
+  })
+
+  function oneShapeJson() {
+    return {
+      version: 1 as const,
+      timeline: {
+        keyframes: [
+          {
+            t: 0,
+            shapes: [
+              { sourceId: "ufo-1", shape: { kind: "oval" as const, bounds: { x: 100, y: 100, width: 20, height: 20 }, color: "#39ff14", angle: 0, transparency: 0, haloScale: 1.5, selected: false } }
+            ]
+          }
+        ]
+      }
+    }
+  }
+
+  function pressKey(key: string, options: { shiftKey?: boolean; target?: EventTarget } = {}): void {
+    document.dispatchEvent(new KeyboardEvent("keydown", { key, shiftKey: options.shiftKey ?? false, bubbles: true, composed: true }))
+  }
+
+  it("arrow keys move the selected shape by a fixed step", () => {
+    const element = mount()
+    element.sightingData = oneShapeJson()
+    pressKey("ArrowRight")
+    pressKey("ArrowDown")
+
+    expect(element.sightingData.timeline.keyframes[0].shapes[0].shape.bounds).toEqual({ x: 104, y: 104, width: 20, height: 20 })
+  })
+
+  it("Shift+arrow resizes the selected shape instead, growing/shrinking around its center", () => {
+    const element = mount()
+    element.sightingData = oneShapeJson()
+    pressKey("ArrowRight", { shiftKey: true }) // widen
+    pressKey("ArrowUp", { shiftKey: true }) // shrink height
+
+    expect(element.sightingData.timeline.keyframes[0].shapes[0].shape.bounds).toEqual({ x: 98, y: 102, width: 24, height: 16 })
+  })
+
+  it("Shift+arrow never shrinks a shape below MIN_SHAPE_SIZE", () => {
+    const element = mount()
+    element.sightingData = {
+      version: 1,
+      timeline: {
+        keyframes: [{ t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 100, y: 100, width: 10, height: 10 }, color: "#39ff14", angle: 0, transparency: 0, haloScale: 1.5, selected: false } }] }]
+      }
+    }
+    pressKey("ArrowLeft", { shiftKey: true })
+    pressKey("ArrowUp", { shiftKey: true })
+
+    expect(element.sightingData.timeline.keyframes[0].shapes[0].shape.bounds.width).toBe(8)
+    expect(element.sightingData.timeline.keyframes[0].shapes[0].shape.bounds.height).toBe(8)
+  })
+
+  it("does not move the shape when an arrow key originates from a text input (e.g. editing lat/lng)", () => {
+    const element = mount()
+    element.sightingData = oneShapeJson()
+    const latInput = element.shadowRoot!.getElementById("lat") as HTMLInputElement
+    latInput.focus()
+    latInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true, composed: true }))
+
+    expect(element.sightingData.timeline.keyframes[0].shapes[0].shape.bounds).toEqual({ x: 100, y: 100, width: 20, height: 20 })
+  })
+
+  it("does nothing while recording or playing", () => {
+    const element = mount()
+    element.sightingData = oneShapeJson()
+
+    const recordButton = element.shadowRoot!.getElementById("record") as HTMLButtonElement
+    recordButton.click()
+    pressKey("ArrowRight")
+    recordButton.click()
+
+    expect(element.sightingData.timeline.keyframes[0].shapes[0].shape.bounds).toEqual({ x: 100, y: 100, width: 20, height: 20 })
   })
 })
 

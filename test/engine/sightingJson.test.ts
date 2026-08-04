@@ -85,4 +85,30 @@ describe("sightingJson", () => {
     expect(restored.event.endTime).toEqual({ year: 1948, month: 7, day: 24, hour: 2, minute: 50 })
     expect(restored.event.durationSeconds).toBe(300)
   })
+
+  it("round-trips weather", () => {
+    const json = {
+      version: 1 as const,
+      timeline: { keyframes: [] },
+      weather: {
+        cloudCover: 0.8,
+        cloudDarkness: 0.9,
+        precipitationType: "rain" as const,
+        precipitationIntensity: 0.6,
+        windDirectionDeg: 270,
+        windSpeed: 0.5,
+        lightning: true
+      }
+    }
+
+    const restored = fromSightingJson(json)
+
+    expect(restored.weather).toEqual(json.weather)
+    expect(toSightingJson(restored).weather).toEqual(json.weather)
+  })
+
+  it("leaves weather undefined when absent from JSON", () => {
+    const restored = fromSightingJson({ version: 1, timeline: { keyframes: [] } })
+    expect(restored.weather).toBeUndefined()
+  })
 })

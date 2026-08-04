@@ -14,8 +14,11 @@ import {
 import type { ObserverGeo } from "../engine/astronomy/CelestialPositions.js"
 import { resolveObserverPoseAt } from "../engine/model/Sighting.js"
 import type { ObserverPose } from "../engine/model/ObserverTrack.js"
+import { DEFAULT_WEATHER } from "../engine/model/Weather.js"
+import type { Weather } from "../engine/model/Weather.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
 import { selectLocale } from "../i18n/locale.js"
+import { WeatherAudio } from "../render3d/WeatherAudio.js"
 
 registerUfo()
 
@@ -94,9 +97,16 @@ export class SceneElement extends HTMLElement {
   readonly ufoElement: UfoElement
   private readonly sceneRenderer: SceneRenderer
   private readonly bodyTooltip: HTMLElement
+  private readonly terrainAttributionElement: HTMLElement
+  private shownTerrainAttribution?: string
   private resizeObserver?: ResizeObserver
   private lastTimeMs = 0
   private starCatalog?: StarCatalog
+  /** Owned here, not by SceneRenderer — the renderer stays audio-agnostic (see its own
+   * onLightningFlash callback param), this is the one place that already orchestrates a non-
+   * rendering side effect alongside pure rendering (see the terrain-attribution label above). */
+  private readonly weatherAudio = new WeatherAudio()
+  private thunderTimeoutId?: number
 
   /** Bound once so document.removeEventListener (disconnectedCallback) can actually find it. */
   private readonly handleFullscreenChange = () => this.resizeToStage()
@@ -104,10 +114,13 @@ export class SceneElement extends HTMLElement {
   /** Identifies whatever celestial body (if any) is under the pointer and shows/moves/hides a
    * text label next to it — an on-demand identification aid, not a rendering change (see
    * pickBodyAt's own doc comment on why hit-testing uses a bigger invisible area than the real,
-   * true-to-scale visible disc). Listens on the nested `<rr0-ufo>`'s own canvas (not the 3D
-   * scene-canvas directly) since that transparent overlay always sits on top and would otherwise
-   * swallow every pointer event before the 3D layer ever saw them. */
+   * true-to-scale visible disc). Also reveals the compass labels (see setCompassHovered) for as
+   * long as the pointer stays over the canvas — same on-demand spirit, so neither overlay competes
+   * for attention with the scene itself the rest of the time. Listens on the nested `<rr0-ufo>`'s
+   * own canvas (not the 3D scene-canvas directly) since that transparent overlay always sits on top
+   * and would otherwise swallow every pointer event before the 3D layer ever saw them. */
   private readonly handlePointerMove = (event: PointerEvent) => {
+    this.sceneRenderer.setCompassHovered(true)
     const canvas = this.ufoElement.canvasElement
     const rect = canvas.getBoundingClientRect()
     if (rect.width === 0 || rect.height === 0) return
@@ -130,6 +143,31 @@ export class SceneElement extends HTMLElement {
 
   private readonly handlePointerLeave = () => {
     this.bodyTooltip.hidden = true
+    this.sceneRenderer.setCompassHovered(false)
+  }
+
+  /** SceneRenderer's onLightningFlash fires the instant the visual flash starts — the thunder
+   * delay (simulating distance: sound travels far slower than light) is applied here, not in the
+   * renderer or WeatherAudio itself, keeping that timing decision at the one layer that already
+   * owns both the flash event and the audio object. A plain setTimeout (not the renderer's own RAF
+   * loop) is fine here: this is a one-off real-world delay, not per-frame animation state. */
+  private readonly handleLightningFlash = () => {
+    clearTimeout(this.thunderTimeoutId)
+    const delayMs = (0.5 + Math.random() * 3.5) * 1000
+    this.thunderTimeoutId = window.setTimeout(() => this.weatherAudio.playThunder(), delayMs)
+  }
+
+  /** Unlocks weather audio on the very first interaction with the scene — needed even for a
+   * read-only `<rr0-scene>` embed with no editing UI at all (e.g. a published case page whose
+   * sighting.json already sets rain/wind), which has no "weather control" to hang resume() off of
+   * the way UfoRecorderElement's own updateWeather() does. Re-applies the current weather right
+   * after resuming, since any setWeather() call made *before* this (e.g. from the sightingData
+   * setter at load) was itself a no-op audio-wise while the context didn't exist yet — otherwise a
+   * scene loaded with rain already set would render visible rain but never actually start the
+   * sound until weather changed again, which it might never do. */
+  private readonly handleFirstInteraction = () => {
+    this.weatherAudio.resume()
+    this.setWeather(this.ufoElement.sighting.weather)
   }
 
   /** Reuses the nested <rr0-ufo>'s own playback clock (it already dispatches this on every
@@ -154,8 +192,9 @@ export class SceneElement extends HTMLElement {
     // Resizing must track *this* element's box, not #stage's or the host's own.
     this.frameElement = this.shadow.getElementById("frame")!
     this.sceneCanvas = this.shadow.getElementById("scene-canvas") as HTMLCanvasElement
-    this.sceneRenderer = new SceneRenderer(this.sceneCanvas)
+    this.sceneRenderer = new SceneRenderer(this.sceneCanvas, undefined, this.handleLightningFlash)
     this.bodyTooltip = this.shadow.getElementById("body-tooltip")!
+    this.terrainAttributionElement = this.shadow.getElementById("terrain-attribution")!
 
     // Created imperatively rather than left inline in the template markup — see
     // UfoRecorderElement's constructor for why (an inline tag parsed from
@@ -171,6 +210,7 @@ export class SceneElement extends HTMLElement {
     this.ufoElement.addEventListener("timeupdate", this.handleTimeUpdate)
     this.ufoElement.canvasElement.addEventListener("pointermove", this.handlePointerMove)
     this.ufoElement.canvasElement.addEventListener("pointerleave", this.handlePointerLeave)
+    this.ufoElement.canvasElement.addEventListener("pointerdown", this.handleFirstInteraction, { once: true })
   }
 
   connectedCallback(): void {
@@ -202,6 +242,8 @@ export class SceneElement extends HTMLElement {
     // Otherwise the twinkle animation loop (a continuous requestAnimationFrame chain, unlike the
     // one-shot renders before it) keeps running forever into a detached canvas after unmount.
     this.sceneRenderer.stopTwinkle()
+    clearTimeout(this.thunderTimeoutId)
+    this.weatherAudio.dispose()
   }
 
   attributeChangedCallback(name: string, oldValue: string, newValue: string): void {
@@ -214,6 +256,35 @@ export class SceneElement extends HTMLElement {
     if (name === "show-compass" && newValue !== oldValue) {
       this.sceneRenderer.setShowCompass(this.hasAttribute("show-compass"))
     }
+  }
+
+  /** Forces the compass labels visible independent of pointer hover — see
+   * SceneRenderer.setCompassForced's own doc comment. `UfoRecorderElement` calls this from the
+   * heading input's own focus/blur, a direct method rather than another observed attribute since
+   * it's meant to change far more often (every focus/blur) than `show-compass`'s one-time setup. */
+  setCompassForced(forced: boolean): void {
+    this.sceneRenderer.setCompassForced(forced)
+  }
+
+  /** Applies a (static, per-sighting) weather condition to both the visual renderer and the
+   * ambient/wind audio — called once on load (sightingData setter) and explicitly by
+   * UfoRecorderElement.updateWeather() after it mutates sighting.weather (weather isn't read from
+   * within updateAstronomy()'s own per-tick path the way observer pose is, so it needs this
+   * explicit nudge on edit, unlike e.g. heading). `undefined` (a sighting with no recorded weather,
+   * including every recording made before this feature existed) resolves to DEFAULT_WEATHER —
+   * absent means "unknown/not recorded", not an all-defaults weather object living in the data
+   * itself. */
+  setWeather(weather?: Weather): void {
+    const resolved = weather ?? DEFAULT_WEATHER
+    this.sceneRenderer.setWeather(resolved)
+    this.weatherAudio.setAmbient(resolved.precipitationType, resolved.precipitationIntensity, resolved.windSpeed)
+  }
+
+  /** Unlocks weather audio — see WeatherAudio.resume's own doc comment on why this needs a real
+   * user gesture. UfoRecorderElement calls this from its own weather toolbar's first interaction
+   * (handleFirstInteraction covers the other case: a read-only embed with no editing UI at all). */
+  resumeWeatherAudio(): void {
+    this.weatherAudio.resume()
   }
 
   /** Fetches a SightingRecordingJson from `url` and loads it — what the `src` attribute uses. */
@@ -230,6 +301,7 @@ export class SceneElement extends HTMLElement {
     this.ufoElement.sightingData = json
     this.lastTimeMs = 0
     this.updateAstronomy(0)
+    this.setWeather(this.ufoElement.sighting.weather)
   }
 
   private resizeToStage(): void {
@@ -266,6 +338,10 @@ export class SceneElement extends HTMLElement {
     const sighting = this.ufoElement.sighting
     const pose = resolveObserverPoseAt(sighting, t)
     this.sceneRenderer.setObserverPose(pose ?? DEFAULT_OBSERVER_POSE)
+    // Raw pose's own lat/lng (possibly undefined), never the astronomy fallback below — a real
+    // terrain patch must only ever build from a real recorded location, never (0,0).
+    this.sceneRenderer.setTerrainOrigin(pose?.lat, pose?.lng, () => this.updateTerrainAttribution())
+    this.updateTerrainAttribution()
 
     const lat = pose?.lat ?? DEFAULT_OBSERVER_POSE.lat!
     const lng = pose?.lng ?? DEFAULT_OBSERVER_POSE.lng!
@@ -295,6 +371,21 @@ export class SceneElement extends HTMLElement {
       planets,
       stars: this.starCatalog ? { catalog: this.starCatalog, date, observer } : undefined
     })
+  }
+
+  /** Reflects sceneRenderer.currentTerrainAttribution (undefined until a real terrain patch
+   * finishes its async build — see SceneRenderer.setTerrainOrigin) into the visible corner label
+   * its provider's license requires. Called both per-tick from updateAstronomy() (cheap getter
+   * read, catches the common case) and from setTerrainOrigin's own onSettled callback — the
+   * per-tick call alone would miss the update whenever playback sits idle right when the async
+   * build resolves (e.g. a scene shown at a fixed t=0, never ticking again after its one initial
+   * updateAstronomy() call). */
+  private updateTerrainAttribution(): void {
+    const attribution = this.sceneRenderer.currentTerrainAttribution
+    if (attribution === this.shownTerrainAttribution) return
+    this.shownTerrainAttribution = attribution
+    this.terrainAttributionElement.textContent = attribution ?? ""
+    this.terrainAttributionElement.hidden = !attribution
   }
 }
 
