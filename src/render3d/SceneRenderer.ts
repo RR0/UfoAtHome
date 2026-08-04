@@ -57,8 +57,15 @@ import { DEFAULT_WEATHER } from "../engine/model/Weather.js"
 import type { PrecipitationType, Weather } from "../engine/model/Weather.js"
 import { buildRainSystem } from "./RainSystem.js"
 import type { RainSystem } from "./RainSystem.js"
-import { buildCloudClusterLayouts, buildCloudInstanceGeometry, buildCloudMaterial, cloudGenusForWeather } from "./CloudSystem.js"
-import type { CloudUniforms } from "./CloudSystem.js"
+import {
+  buildCloudClusterLayouts,
+  buildCloudInstanceGeometry,
+  buildCloudMaterial,
+  buildOvercastGeometry,
+  buildOvercastMaterial,
+  cloudGenusForWeather
+} from "./CloudSystem.js"
+import type { CloudUniforms, OvercastUniforms } from "./CloudSystem.js"
 
 const SKY_RADIUS = 900
 const GROUND_RADIUS = 900
@@ -128,6 +135,11 @@ const CLOUD_RADIUS = 700 // inside STAR_RADIUS/BODY_PLACEMENT_RADIUS (850) so cl
  * never be hidden behind the ground/terrain (irrelevant since they're always above it) and must
  * stay under the compass labels. */
 const CLOUD_RENDER_ORDER = 5
+/** Strictly above CLOUD_RENDER_ORDER — three.js sorts transparent objects by renderOrder first, so
+ * this guarantees the overcast shell (see buildOvercastMaterial) always draws after every puff
+ * cluster regardless of camera-distance tiebreaking, letting it visually seal over them once fully
+ * opaque at max cloudCover rather than risking an unstable draw order at nearly-equal distances. */
+const CLOUD_OVERCAST_RENDER_ORDER = CLOUD_RENDER_ORDER + 1
 const CLOUD_LIGHT_COLOR: [number, number, number] = [0.92, 0.92, 0.95]
 const CLOUD_DARK_COLOR: [number, number, number] = [0.15, 0.15, 0.19]
 /** Uniform multiplier applied to every CloudGenusProfile offset/scale number — see
@@ -456,6 +468,11 @@ export class SceneRenderer {
   /** Accumulated azimuthal drift (deg) applied on top of every cluster's own baseAzimuthDeg — see
    * updateClouds. Reset on rebuild so a fresh pool doesn't inherit stale drift from the old one. */
   private cloudDriftDeg = 0
+  /** The continuous overcast shell (see buildOvercastMaterial) that guarantees a true, gap-free
+   * ceiling at max cloudCover — undefined whenever cloudClusters is empty (no clouds at all). */
+  private overcastMesh?: Mesh
+  private overcastMaterial?: ShaderMaterial
+  private overcastUniforms?: OvercastUniforms
   private precipitationPoints?: Points
   /** Direct reference into precipitationPoints' own position BufferAttribute array — mutated in
    * place every frame (see updatePrecipitation), never reallocated, matching the star field's own
@@ -1092,10 +1109,17 @@ export class SceneRenderer {
     const { material, uniforms } = buildCloudMaterial(baseColor, CLOUD_OPACITY)
     this.cloudMaterial = material
     this.cloudUniforms = uniforms
+    const overcast = buildOvercastMaterial(baseColor, this.weather.cloudCover)
+    this.overcastMaterial = overcast.material
+    this.overcastUniforms = overcast.uniforms
     // Seeds real lighting immediately from the last known sun position — see lastSunPosition's own
     // comment for why this can't just wait for the next setAstronomy tick the way the old sprite
     // system's equivalent gap harmlessly could.
     if (this.lastSunPosition) this.updateCloudLighting(this.lastSunPosition, this.baseFogColor)
+    const overcastGeometry = buildOvercastGeometry(CLOUD_RADIUS)
+    this.overcastMesh = new Mesh(overcastGeometry, overcast.material)
+    this.overcastMesh.renderOrder = CLOUD_OVERCAST_RENDER_ORDER
+    this.scene.add(this.overcastMesh)
     const layouts = buildCloudClusterLayouts({
       poolSize: CLOUD_POOL_SIZE,
       visibleCount,
@@ -1134,12 +1158,19 @@ export class SceneRenderer {
    * the old retintClouds' per-sprite color mutation — cheaper too, since every cluster now shares
    * one material (3 uniform writes total vs. up to 24 per-sprite color mutations). */
   private updateCloudLighting(sun: HorizontalPosition, groundColor: [number, number, number]): void {
-    if (!this.cloudUniforms) return
+    if (!this.cloudUniforms && !this.overcastUniforms) return
     const { x, y, z } = horizontalToCartesian(sun.altitudeDeg, sun.azimuthDeg, 1)
-    this.cloudUniforms.sunDir.value.set(x, y, z)
     const tint = atmosphericTint(sun.altitudeDeg)
-    this.cloudUniforms.sunColor.value.setRGB(tint[0], 0.96 * tint[1], 0.88 * tint[2])
-    this.cloudUniforms.ambientColor.value.setRGB(groundColor[0], groundColor[1], groundColor[2])
+    if (this.cloudUniforms) {
+      this.cloudUniforms.sunDir.value.set(x, y, z)
+      this.cloudUniforms.sunColor.value.setRGB(tint[0], 0.96 * tint[1], 0.88 * tint[2])
+      this.cloudUniforms.ambientColor.value.setRGB(groundColor[0], groundColor[1], groundColor[2])
+    }
+    if (this.overcastUniforms) {
+      this.overcastUniforms.sunDir.value.set(x, y, z)
+      this.overcastUniforms.sunColor.value.setRGB(tint[0], 0.96 * tint[1], 0.88 * tint[2])
+      this.overcastUniforms.ambientColor.value.setRGB(groundColor[0], groundColor[1], groundColor[2])
+    }
   }
 
   /** cloudMaterial is ONE shared ShaderMaterial referenced by every cluster's InstancedMesh —
@@ -1158,6 +1189,14 @@ export class SceneRenderer {
     this.cloudUniforms = undefined
     this.cloudClusters = []
     this.cloudDriftDeg = 0
+    if (this.overcastMesh) {
+      this.scene.remove(this.overcastMesh)
+      this.overcastMesh.geometry.dispose()
+    }
+    this.overcastMaterial?.dispose()
+    this.overcastMesh = undefined
+    this.overcastMaterial = undefined
+    this.overcastUniforms = undefined
   }
 
   /** CPU Euler integration on an accumulated angle (not a GPU uTime accumulator like updateRain) —

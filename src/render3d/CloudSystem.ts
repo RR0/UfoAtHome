@@ -1,4 +1,4 @@
-import { Color, FrontSide, InstancedBufferAttribute, ShaderMaterial, SphereGeometry, Vector3 } from "three"
+import { BackSide, Color, FrontSide, InstancedBufferAttribute, ShaderMaterial, SphereGeometry, Vector3 } from "three"
 
 /**
  * Layout/material factories for volumetric-looking clouds — mirrors RainSystem.ts's split of
@@ -285,6 +285,131 @@ void main() {
   gl_FragColor = vec4(color, opacity * density);
 }
 `
+
+export interface OvercastUniforms {
+  [uniform: string]: { value: unknown }
+  sunDir: { value: Vector3 }
+  sunColor: { value: Color }
+  ambientColor: { value: Color }
+  baseColor: { value: Color }
+  coverage: { value: number }
+}
+
+const OVERCAST_VERTEX_SHADER = `
+varying vec3 vDir;
+
+void main() {
+  vDir = normalize(position);
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+}
+`
+
+const OVERCAST_FRAGMENT_SHADER = `
+precision highp float;
+uniform vec3 sunDir;
+uniform vec3 sunColor;
+uniform vec3 ambientColor;
+uniform vec3 baseColor;
+uniform float coverage;
+varying vec3 vDir;
+
+// Duplicated from MESH_CLOUD_FRAGMENT_SHADER rather than shared — this project keeps each
+// ShaderMaterial's GLSL self-contained (see RainSystem.ts's own doc comment on why: no external
+// .glsl files, no onBeforeCompile chunk injection).
+vec3 hash3(vec3 p) {
+  p = vec3(dot(p, vec3(127.1, 311.7, 74.7)), dot(p, vec3(269.5, 183.3, 246.1)), dot(p, vec3(113.5, 271.9, 124.6)));
+  return fract(sin(p) * 43758.5453) * 2.0 - 1.0;
+}
+float noise3D(vec3 p) {
+  vec3 i = floor(p);
+  vec3 f = fract(p);
+  vec3 u = f * f * (3.0 - 2.0 * f);
+  return mix(
+    mix(mix(dot(hash3(i + vec3(0.0, 0.0, 0.0)), f - vec3(0.0, 0.0, 0.0)),
+            dot(hash3(i + vec3(1.0, 0.0, 0.0)), f - vec3(1.0, 0.0, 0.0)), u.x),
+        mix(dot(hash3(i + vec3(0.0, 1.0, 0.0)), f - vec3(0.0, 1.0, 0.0)),
+            dot(hash3(i + vec3(1.0, 1.0, 0.0)), f - vec3(1.0, 1.0, 0.0)), u.x), u.y),
+    mix(mix(dot(hash3(i + vec3(0.0, 0.0, 1.0)), f - vec3(0.0, 0.0, 1.0)),
+            dot(hash3(i + vec3(1.0, 0.0, 1.0)), f - vec3(1.0, 0.0, 1.0)), u.x),
+        mix(dot(hash3(i + vec3(0.0, 1.0, 1.0)), f - vec3(0.0, 1.0, 1.0)),
+            dot(hash3(i + vec3(1.0, 1.0, 1.0)), f - vec3(1.0, 1.0, 1.0)), u.x), u.y),
+    u.z);
+}
+float fbm(vec3 p) {
+  float sum = 0.0;
+  float amp = 0.55;
+  for (int i = 0; i < 4; i++) {
+    sum += noise3D(p) * amp;
+    p *= 2.03;
+    amp *= 0.55;
+  }
+  return sum;
+}
+
+void main() {
+  vec3 dir = normalize(vDir);
+  vec3 L = normalize(sunDir);
+
+  float n = fbm(dir * 3.0) * 0.5 + 0.5; // 0..1 continuous coverage field across the whole dome
+
+  // Below coverage's own noise threshold: a broken/patchy ceiling with real sky-colored gaps,
+  // exactly like a real transition from scattered to overcast. remap-by-threshold, same technique
+  // as the reference skill's own cloudDensity coverage control.
+  float threshold = 1.0 - coverage;
+  float alpha = smoothstep(threshold - 0.18, threshold + 0.18, n);
+  // The puff clusters alone can never promise zero sky gaps (see SceneRenderer's buildClouds doc
+  // comment) — this is what actually guarantees "total overcast, no sky visible" at cloudCover=1:
+  // force full opacity everywhere as coverage approaches its max, overriding the noise field's own
+  // local value rather than merely biasing it (a pure threshold shift would still leave the
+  // occasional fragment below threshold even at coverage=1, since fbm's own range rarely spans a
+  // full 0..1).
+  alpha = mix(alpha, 1.0, smoothstep(0.82, 1.0, coverage));
+  if (alpha < 0.02) discard;
+
+  float diff = dot(dir, L) * 0.5 + 0.5;
+  float sunGlow = pow(max(dot(dir, L), 0.0), 6.0) * 0.6; // diffuse bright patch toward the sun, like light through an overcast layer
+  vec3 color = baseColor * (sunColor * diff * 0.7 + ambientColor * 0.5) + sunColor * sunGlow;
+  color *= mix(0.85, 1.05, n); // keeps a fully-opaque ceiling from reading as one flat, uniform color
+
+  gl_FragColor = vec4(color, alpha);
+}
+`
+
+/** A continuous sphere shell (BackSide — the camera sits inside it, like buildSky's own dome) that
+ * guarantees genuine total overcast at cloudCover=1: the InstancedMesh puff clusters (see
+ * buildCloudMaterial) are placed at scattered, discrete altitude/azimuth slots and can never
+ * promise zero sky-colored gaps between them no matter how many are visible. This shell fades in
+ * as coverage rises and is forced fully opaque at coverage's own max — see the fragment shader's
+ * own comment. `coverage` is weather.cloudCover directly, baked in at build time (weather is
+ * static per sighting, same reasoning as buildCloudMaterial's baseColor). */
+export function buildOvercastMaterial(baseColor: Color, coverage: number): { material: ShaderMaterial; uniforms: OvercastUniforms } {
+  const uniforms: OvercastUniforms = {
+    sunDir: { value: new Vector3(0, 1, 0) },
+    sunColor: { value: new Color(1, 1, 1) },
+    ambientColor: { value: new Color(0.5, 0.5, 0.5) },
+    baseColor: { value: baseColor },
+    coverage: { value: coverage }
+  }
+  const material = new ShaderMaterial({
+    uniforms,
+    vertexShader: OVERCAST_VERTEX_SHADER,
+    fragmentShader: OVERCAST_FRAGMENT_SHADER,
+    transparent: true,
+    depthWrite: false,
+    depthTest: false, // same reasoning as buildCloudMaterial — CLOUD_RADIUS is unreliable against the far plane
+    side: BackSide
+  })
+  return { material, uniforms }
+}
+
+/** Fresh SphereGeometry each call (not module-cached like getCloudSphereGeometry) — this mirrors
+ * buildSky/buildGround's own "rebuild from scratch, no dirty tracking" style since it's cheap
+ * (one sphere, no per-instance data) and, unlike the cluster base sphere, isn't cloned per caller
+ * so there's no sharing benefit to cache. `radius` is CLOUD_RADIUS, passed in rather than imported
+ * since that constant lives in SceneRenderer.ts. */
+export function buildOvercastGeometry(radius: number): SphereGeometry {
+  return new SphereGeometry(radius, 32, 16)
+}
 
 /** Builds the one shared ShaderMaterial every cluster's InstancedMesh in a given buildClouds() call
  * references — see SceneRenderer's disposeCloudSystem for why disposal is single, not per-cluster.
