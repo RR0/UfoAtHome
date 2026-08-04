@@ -11,8 +11,10 @@ import {
   Color,
   Fog,
   Float32BufferAttribute,
+  InstancedMesh,
   Mesh,
   MeshBasicMaterial,
+  Object3D,
   PerspectiveCamera,
   Points,
   PointsMaterial,
@@ -55,6 +57,8 @@ import { DEFAULT_WEATHER } from "../engine/model/Weather.js"
 import type { PrecipitationType, Weather } from "../engine/model/Weather.js"
 import { buildRainSystem } from "./RainSystem.js"
 import type { RainSystem } from "./RainSystem.js"
+import { buildCloudClusterLayouts, buildCloudInstanceGeometry, buildCloudMaterial, cloudGenusForWeather } from "./CloudSystem.js"
+import type { CloudUniforms } from "./CloudSystem.js"
 
 const SKY_RADIUS = 900
 const GROUND_RADIUS = 900
@@ -119,7 +123,6 @@ const TERRAIN_REBUILD_DISTANCE_M = 150
  * *different* random subset appear, just fewer of the same deterministic set. */
 const CLOUD_POOL_SIZE = 24
 const CLOUD_RADIUS = 700 // inside STAR_RADIUS/BODY_PLACEMENT_RADIUS (850) so clouds occlude stars/bodies, matching real sky layering
-const CLOUD_SPRITE_SIZE = 260
 /** Between TERRAIN_RENDER_ORDER (1) and COMPASS_RENDER_ORDER (10) — clouds are part of the
  * astronomically-positioned scene (unlike the compass HUD) so they use normal depthTest, but must
  * never be hidden behind the ground/terrain (irrelevant since they're always above it) and must
@@ -127,6 +130,21 @@ const CLOUD_SPRITE_SIZE = 260
 const CLOUD_RENDER_ORDER = 5
 const CLOUD_LIGHT_COLOR: [number, number, number] = [0.92, 0.92, 0.95]
 const CLOUD_DARK_COLOR: [number, number, number] = [0.15, 0.15, 0.19]
+/** Uniform multiplier applied to every CloudGenusProfile offset/scale number — see
+ * CloudLayoutConfig.clusterScale's own comment for why: the reference skill's numbers assume a much
+ * smaller flight scene than this dome's CLOUD_RADIUS=700. Chosen so a cumulus cluster's average
+ * footprint (~294 units) lands close to the old sprite system's own CLOUD_SPRITE_SIZE=260 average. */
+const CLOUD_CLUSTER_SCALE = 7
+/** Single shared opacity for every cluster's material — replaces the old per-sprite random opacity
+ * (0.4-0.85); an accepted v1 simplification since a 20-50-sphere overlapping cluster already creates
+ * density variation through overlap, unlike a single flat sprite. */
+const CLOUD_OPACITY = 0.85
+/** Deg/s of azimuthal cloud-layer rotation at weather.windSpeed=1 — deliberately NOT
+ * WIND_DRIFT_M_PER_S (that's a flat-translation rate for RainSystem/CPU precipitation's own small,
+ * ground-hugging volumes; translating a cluster at CLOUD_RADIUS=700 by even a modest per-second rate
+ * would drift it off its dome radius within seconds — see updateClouds). Tuned by eye for a
+ * visible-but-not-frantic drift over a typical sighting's playback length. */
+const CLOUD_DRIFT_DEG_PER_SECOND_AT_MAX_WIND = 3
 
 /** Rain is not in this map — it's rendered by the GPU shader-based RainSystem (see RainSystem.ts
  * and buildRain/updateRain below), not this CPU/PointsMaterial path. Real snowflakes/hailstones are
@@ -430,7 +448,14 @@ export class SceneRenderer {
   private readonly raycaster = new Raycaster()
 
   private weather: Weather = DEFAULT_WEATHER
-  private cloudSprites: Sprite[] = []
+  /** One shared ShaderMaterial for every current cluster — see disposeCloudSystem for why disposal
+   * is single, not per-cluster. */
+  private cloudMaterial?: ShaderMaterial
+  private cloudUniforms?: CloudUniforms
+  private cloudClusters: Array<{ mesh: InstancedMesh; baseAltitudeDeg: number; baseAzimuthDeg: number }> = []
+  /** Accumulated azimuthal drift (deg) applied on top of every cluster's own baseAzimuthDeg — see
+   * updateClouds. Reset on rebuild so a fresh pool doesn't inherit stale drift from the old one. */
+  private cloudDriftDeg = 0
   private precipitationPoints?: Points
   /** Direct reference into precipitationPoints' own position BufferAttribute array — mutated in
    * place every frame (see updatePrecipitation), never reallocated, matching the star field's own
@@ -498,6 +523,13 @@ export class SceneRenderer {
    * the sky actually looks like right now", not a hardcoded color, and the RAF loop driving the
    * flash runs independently of (usually faster than) setAstronomy's own per-playback-tick calls. */
   private baseFogColor: [number, number, number] = [0, 0, 0]
+  /** Last real sun position from setAstronomy — lets a freshly rebuilt cloud pool (buildClouds,
+   * triggered by setWeather, which setAstronomy is NOT called from) seed its lighting uniforms
+   * immediately instead of sitting at buildCloudMaterial's arbitrary construction defaults (sunlight
+   * from straight up) until the next real setAstronomy tick. The old flat-tinted sprites didn't need
+   * this — their construction default (plain white) was already close to CLOUD_LIGHT_COLOR — but a
+   * real directional-lit material looks visibly wrong from an arbitrary default. */
+  private lastSunPosition?: HorizontalPosition
   private readonly onLightningFlash?: () => void
 
   constructor(
@@ -583,6 +615,15 @@ export class SceneRenderer {
         // depthTest:false comment on why depth alone can't be trusted to layer them correctly at
         // these distances) but still under the compass HUD.
         mesh.renderOrder = TERRAIN_RENDER_ORDER
+        // Applied immediately, not left for the next setAstronomy() tick: the tile fetch behind
+        // buildTerrainMesh is async and typically resolves AFTER setAstronomy has already run once
+        // (page just loaded, playback sitting idle at t=0) — without this, the mesh sits at its raw,
+        // untinted photo-texture color (reading as daylit regardless of actual time of night) until
+        // something re-triggers setAstronomy, e.g. pressing Play. baseFogColor is the same
+        // undarkened groundColor setAstronomy's own per-tick retint uses (see its own comment above)
+        // — using it here keeps a freshly-built mesh visually consistent with the sky/fog the very
+        // first frame it appears in, not just from the next astronomy update onward.
+        ;(mesh.material as MeshBasicMaterial).color.setRGB(...this.baseFogColor)
         this.terrainMesh = mesh
         this.terrainAttribution = attribution
         this.scene.add(mesh)
@@ -643,9 +684,9 @@ export class SceneRenderer {
    * doesn't move over the course of a sighting the way the sun/observer/terrain do (see Weather.ts's
    * own doc comment). Dedupes on reference equality — SceneElement/UfoRecorderElement always
    * reassign `sighting.weather` wholesale on edit (never mutate it field-by-field), so this is safe.
-   * Cloud/precipitation geometry rebuilds here; cloud *color* still needs the sun's current altitude
-   * every tick (see retintClouds, called from setAstronomy) since it must keep darkening at
-   * dusk/night independent of this method being called again.
+   * Cloud/precipitation geometry rebuilds here; cloud *lighting* still needs the sun's current
+   * position every tick (see updateCloudLighting, called from setAstronomy) since it must keep
+   * reacting to sunrise/sunset independent of this method being called again.
    */
   setWeather(weather: Weather): void {
     if (this.weather === weather) return
@@ -665,9 +706,10 @@ export class SceneRenderer {
   setAstronomy(astronomy: SceneAstronomy): void {
     const groundColor = skyColorsForAltitude(astronomy.sun.altitudeDeg).horizon
     this.baseFogColor = groundColor
+    this.lastSunPosition = astronomy.sun
     this.buildSky(astronomy.sun)
     this.buildGround(groundColor)
-    this.retintClouds(groundColor)
+    this.updateCloudLighting(astronomy.sun, groundColor)
     // Cheap per-frame retint only — never rebuilds the mesh/refetches tiles, see setTerrainOrigin.
     // Unlike buildGround's flat disc (which darkens groundColor by *0.35 since a solid color plane
     // needs extra contrast to read as "ground" rather than "sky"), the terrain's own photo texture
@@ -708,7 +750,7 @@ export class SceneRenderer {
     this.disposeMesh(this.skyMesh)
     this.disposeMesh(this.groundMesh)
     this.disposeMesh(this.terrainMesh)
-    this.disposeCloudSprites()
+    this.disposeCloudSystem()
     this.disposePrecipitationPoints()
     this.disposeRain()
     this.disposeStarTiers()
@@ -747,6 +789,7 @@ export class SceneRenderer {
       const dtSeconds = lastTimeMs === undefined ? 0 : Math.min((timeMs - lastTimeMs) / 1000, MAX_ANIMATION_DT_SECONDS)
       lastTimeMs = timeMs
       this.updateTwinkle(timeMs / 1000)
+      this.updateClouds(dtSeconds)
       this.updatePrecipitation(timeMs / 1000, dtSeconds)
       this.updateRain(dtSeconds)
       this.updateLightning(timeMs / 1000, dtSeconds)
@@ -766,6 +809,7 @@ export class SceneRenderer {
   private needsAnimationLoop(): boolean {
     return (
       this.starTiers.length > 0 ||
+      this.cloudClusters.length > 0 ||
       this.precipitationPoints !== undefined ||
       this.rainSystem !== undefined ||
       this.lightningArmed
@@ -1028,82 +1072,108 @@ export class SceneRenderer {
     }
   }
 
-  /** Rebuilds the cloud sprite pool from scratch on every call (same "full rebuild, no dirty
-   * tracking" style as buildSky/buildGround/buildStars) — cheap at CLOUD_POOL_SIZE=24. A fixed seed
-   * means the *layout* (which altitude/azimuth/size each pool slot gets) never changes between
-   * calls, only how many of the leading `visibleCount` slots are actually instantiated — so
-   * lowering cloudCover always removes the same clouds first, rather than a different random
-   * subset each edit. Color is intentionally left neutral white here — see retintClouds, called
-   * separately every setAstronomy tick, for the darkness/time-of-day-driven tint. */
+  /** Rebuilds the cloud cluster pool from scratch on every call (same "full rebuild, no dirty
+   * tracking" style as buildSky/buildGround/buildStars) — cheap at CLOUD_POOL_SIZE=24 clusters.
+   * Picks a genus (see cloudGenusForWeather) and a static base color — the old CLOUD_LIGHT_COLOR/
+   * CLOUD_DARK_COLOR lerp by cloudDarkness, now computed once here since darkness doesn't change
+   * without a new weather object (see setWeather's own doc comment). Sun-driven lighting is applied
+   * separately and continuously by updateCloudLighting, called every setAstronomy tick. */
   private buildClouds(): void {
-    this.disposeCloudSprites()
+    this.disposeCloudSystem()
     const visibleCount = Math.round(this.weather.cloudCover * CLOUD_POOL_SIZE)
     if (visibleCount === 0) return
-    const random = mulberry32(4242)
-    const texture = getCloudPuffTexture()
-    for (let i = 0; i < CLOUD_POOL_SIZE; i++) {
-      const altitudeDeg = 15 + random() * 55
-      const azimuthDeg = random() * 360
-      const baseOpacity = 0.4 + random() * 0.45
-      const scale = CLOUD_SPRITE_SIZE * (0.7 + random() * 0.6)
-      if (i >= visibleCount) continue // still consumes the RNG stream above so later slots keep their same layout regardless of visibleCount
-      const { x, y, z } = horizontalToCartesian(altitudeDeg, azimuthDeg, CLOUD_RADIUS)
-      // fog:false, like the sky dome/stars/sun/moon/planets — clouds sit at a *sky* radius
-      // (CLOUD_RADIUS=700), squarely inside scene.fog's own near/far range (180-900, tuned for
-      // ground-level haze), so fog:true was quietly blending them almost invisibly into the very
-      // horizon color they're meant to read against. Only ground-level things (buildGround,
-      // terrain) actually want that haze treatment.
-      // depthTest:false — same fix, same root cause as the terrain patch's own identical comment
-      // (see TERRAIN_RENDER_ORDER): at CLOUD_RADIUS=700 against a far plane of SKY_RADIUS*1.2=1080,
-      // the depth buffer's precision (skewed toward the near plane) isn't reliable enough to trust
-      // clouds to consistently win the depth test against the sky dome at 900 — they'd otherwise
-      // randomly lose and vanish. renderOrder (below) is what actually keeps them layered correctly
-      // instead: draws after the opaque sky dome, always wins since depth testing is off.
-      const material = new SpriteMaterial({
-        map: texture,
-        color: new Color(1, 1, 1),
-        transparent: true,
-        opacity: baseOpacity,
-        fog: false,
-        depthTest: false
-      })
-      const sprite = new Sprite(material)
-      sprite.position.set(x, y, z)
-      sprite.scale.set(scale, scale * 0.6, 1)
-      sprite.renderOrder = CLOUD_RENDER_ORDER
-      this.scene.add(sprite)
-      this.cloudSprites.push(sprite)
-    }
-  }
-
-  /** Cheap per-tick retint (no geometry rebuild) — cloudDarkness blends light<->dark storm gray,
-   * then multiplied by the sky's own current ambient brightness (the same groundColor already
-   * driving the ground/fog tint) so clouds keep darkening through dusk/night on top of the user's
-   * own darkness setting, exactly like the terrain patch's own per-tick retint. */
-  private retintClouds(groundColor: [number, number, number]): void {
-    if (this.cloudSprites.length === 0) return
+    const genus = cloudGenusForWeather(this.weather.cloudCover, this.weather.cloudDarkness)
     const darkness = this.weather.cloudDarkness
-    const r = CLOUD_LIGHT_COLOR[0] + (CLOUD_DARK_COLOR[0] - CLOUD_LIGHT_COLOR[0]) * darkness
-    const g = CLOUD_LIGHT_COLOR[1] + (CLOUD_DARK_COLOR[1] - CLOUD_LIGHT_COLOR[1]) * darkness
-    const b = CLOUD_LIGHT_COLOR[2] + (CLOUD_DARK_COLOR[2] - CLOUD_LIGHT_COLOR[2]) * darkness
-    const ambientBrightness = (groundColor[0] + groundColor[1] + groundColor[2]) / 3
-    // Floored at 0.15 (not 0) — even a moonless night keeps clouds *faintly* readable as silhouettes
-    // against the stars, rather than going fully invisible-black, which would just look broken.
-    const factor = clamp(ambientBrightness * 1.8, 0.15, 1)
-    for (const sprite of this.cloudSprites) {
-      ;(sprite.material as SpriteMaterial).color.setRGB(r * factor, g * factor, b * factor)
+    const baseColor = new Color(
+      CLOUD_LIGHT_COLOR[0] + (CLOUD_DARK_COLOR[0] - CLOUD_LIGHT_COLOR[0]) * darkness,
+      CLOUD_LIGHT_COLOR[1] + (CLOUD_DARK_COLOR[1] - CLOUD_LIGHT_COLOR[1]) * darkness,
+      CLOUD_LIGHT_COLOR[2] + (CLOUD_DARK_COLOR[2] - CLOUD_LIGHT_COLOR[2]) * darkness
+    )
+    const { material, uniforms } = buildCloudMaterial(baseColor, CLOUD_OPACITY)
+    this.cloudMaterial = material
+    this.cloudUniforms = uniforms
+    // Seeds real lighting immediately from the last known sun position — see lastSunPosition's own
+    // comment for why this can't just wait for the next setAstronomy tick the way the old sprite
+    // system's equivalent gap harmlessly could.
+    if (this.lastSunPosition) this.updateCloudLighting(this.lastSunPosition, this.baseFogColor)
+    const layouts = buildCloudClusterLayouts({
+      poolSize: CLOUD_POOL_SIZE,
+      visibleCount,
+      genus,
+      seed: 4242,
+      clusterScale: CLOUD_CLUSTER_SCALE
+    })
+    const dummy = new Object3D()
+    for (const layout of layouts) {
+      // Per-cluster clone (not the shared base sphere) — carries this cluster's own aSeed
+      // instanced attribute, see buildCloudInstanceGeometry's own doc comment.
+      const geometry = buildCloudInstanceGeometry(layout)
+      const mesh = new InstancedMesh(geometry, material, layout.particles.length)
+      layout.particles.forEach((particle, i) => {
+        dummy.position.set(particle.x, particle.y, particle.z)
+        dummy.scale.set(particle.sx, particle.sy, particle.sz)
+        dummy.updateMatrix()
+        mesh.setMatrixAt(i, dummy.matrix)
+      })
+      mesh.instanceMatrix.needsUpdate = true
+      const { x, y, z } = horizontalToCartesian(layout.baseAltitudeDeg, layout.baseAzimuthDeg, CLOUD_RADIUS)
+      mesh.position.set(x, y, z)
+      // Same depthTest:false/renderOrder layering reasoning as the old sprite system — see
+      // buildCloudMaterial's own comment: at CLOUD_RADIUS=700 against a far plane of
+      // SKY_RADIUS*1.2=1080, the depth buffer can't reliably beat the sky dome at 900, so draw
+      // order does the layering instead.
+      mesh.renderOrder = CLOUD_RENDER_ORDER
+      this.scene.add(mesh)
+      this.cloudClusters.push({ mesh, baseAltitudeDeg: layout.baseAltitudeDeg, baseAzimuthDeg: layout.baseAzimuthDeg })
     }
   }
 
-  private disposeCloudSprites(): void {
-    for (const sprite of this.cloudSprites) {
-      this.scene.remove(sprite)
-      // No .map.dispose() here, unlike disposeMesh — the cloud texture is one shared/cached
-      // CanvasTexture (see getCloudPuffTexture), not per-sprite like the compass labels' own
-      // textures; disposing it here would break every other still-live cloud sprite.
-      sprite.material.dispose()
+  /** Cheap per-tick uniform refresh (no geometry rebuild) — updates only the time-varying lighting
+   * terms (sun direction/color, ambient) on the one shared cloudMaterial, driven by the app's real
+   * current sun position/atmosphericTint instead of a hardcoded time-of-day color table. Replaces
+   * the old retintClouds' per-sprite color mutation — cheaper too, since every cluster now shares
+   * one material (3 uniform writes total vs. up to 24 per-sprite color mutations). */
+  private updateCloudLighting(sun: HorizontalPosition, groundColor: [number, number, number]): void {
+    if (!this.cloudUniforms) return
+    const { x, y, z } = horizontalToCartesian(sun.altitudeDeg, sun.azimuthDeg, 1)
+    this.cloudUniforms.sunDir.value.set(x, y, z)
+    const tint = atmosphericTint(sun.altitudeDeg)
+    this.cloudUniforms.sunColor.value.setRGB(tint[0], 0.96 * tint[1], 0.88 * tint[2])
+    this.cloudUniforms.ambientColor.value.setRGB(groundColor[0], groundColor[1], groundColor[2])
+  }
+
+  /** cloudMaterial is ONE shared ShaderMaterial referenced by every cluster's InstancedMesh —
+   * disposed once here, not once per cluster. Each cluster's own geometry IS disposed per-cluster
+   * though: buildCloudInstanceGeometry clones the module-cached base sphere per cluster (to carry
+   * its own aSeed instanced attribute), so unlike the shared base sphere itself (never disposed,
+   * same convention as the old getCloudPuffTexture), those clones are this system's own to clean
+   * up — skipping this would leak one GPU buffer set per cluster on every rebuild. */
+  private disposeCloudSystem(): void {
+    for (const cluster of this.cloudClusters) {
+      this.scene.remove(cluster.mesh)
+      cluster.mesh.geometry.dispose()
     }
-    this.cloudSprites = []
+    this.cloudMaterial?.dispose()
+    this.cloudMaterial = undefined
+    this.cloudUniforms = undefined
+    this.cloudClusters = []
+    this.cloudDriftDeg = 0
+  }
+
+  /** CPU Euler integration on an accumulated angle (not a GPU uTime accumulator like updateRain) —
+   * needs the same MAX_ANIMATION_DT_SECONDS clamp as updatePrecipitation (see startTwinkle's own
+   * comment). Rotates every cluster's root position azimuthally around the fixed CLOUD_RADIUS dome
+   * rather than translating it — a flat translation (like WIND_DRIFT_M_PER_S) would carry a cluster
+   * off its assigned radius within seconds at this scale, breaking both the "clouds stay inside
+   * STAR_RADIUS/BODY_PLACEMENT_RADIUS" occlusion invariant and its own apparent size. */
+  private updateClouds(dtSeconds: number): void {
+    if (this.cloudClusters.length === 0) return
+    const windRad = this.weather.windDirectionDeg * DEG_TO_RAD
+    this.cloudDriftDeg += Math.sin(windRad) * this.weather.windSpeed * CLOUD_DRIFT_DEG_PER_SECOND_AT_MAX_WIND * dtSeconds
+    for (const cluster of this.cloudClusters) {
+      const { x, y, z } = horizontalToCartesian(cluster.baseAltitudeDeg, cluster.baseAzimuthDeg + this.cloudDriftDeg, CLOUD_RADIUS)
+      cluster.mesh.position.set(x, y, z)
+    }
   }
 
   /** Removes+disposes the current precipitation Points/geometry/material. Unlike disposeMesh, this
@@ -1634,38 +1704,6 @@ function randomBetween(min: number, max: number): number {
  * it in the same loop. */
 function wrapPrecipitationAxis(value: number, halfWidth: number): number {
   return ((value % (halfWidth * 2)) + halfWidth * 3) % (halfWidth * 2) - halfWidth
-}
-
-let sharedCloudTexture: CanvasTexture | undefined
-
-/** One shared procedural cloud-puff texture (see buildClouds) — several overlapping soft
- * radial-gradient circles at fixed-but-randomized offsets, so it reads as an irregular puff rather
- * than a single uniform disc, without needing an image asset (same "draw it, don't load it"
- * approach as every other texture in this file). Generated once and cached, like getGlareTexture —
- * only material.color/opacity/scale differ per cloud sprite. */
-function getCloudPuffTexture(): CanvasTexture {
-  if (sharedCloudTexture) return sharedCloudTexture
-  const size = 256
-  const canvas = document.createElement("canvas")
-  canvas.width = size
-  canvas.height = size
-  const context = canvas.getContext("2d")!
-  const random = mulberry32(77)
-  for (let i = 0; i < 6; i++) {
-    const cx = size * (0.3 + random() * 0.4)
-    const cy = size * (0.35 + random() * 0.3)
-    const r = size * (0.18 + random() * 0.14)
-    const gradient = context.createRadialGradient(cx, cy, 0, cx, cy, r)
-    gradient.addColorStop(0, "rgba(255,255,255,0.9)")
-    gradient.addColorStop(0.6, "rgba(255,255,255,0.5)")
-    gradient.addColorStop(1, "rgba(255,255,255,0)")
-    context.fillStyle = gradient
-    context.beginPath()
-    context.arc(cx, cy, r, 0, Math.PI * 2)
-    context.fill()
-  }
-  sharedCloudTexture = new CanvasTexture(canvas)
-  return sharedCloudTexture
 }
 
 let sharedSnowflakeTexture: CanvasTexture | undefined
