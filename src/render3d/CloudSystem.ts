@@ -262,8 +262,14 @@ void main() {
   // Erodes the sphere's silhouette with noise instead of a clean geometric edge — a real cumulus
   // puff doesn't end in a perfect circle. depthTest is already off (see buildCloudMaterial), so an
   // eroded gap just reveals whatever's behind (sky, or another instance), reading as the frilly,
-  // layered edge real cloud photography shows rather than a hole.
-  float density = vRimFade * mix(0.5, 1.0, shape) - 0.4 * (1.0 - shape);
+  // layered edge real cloud photography shows rather than a hole. edgeWeight (0 at the dead center,
+  // 1 at the silhouette, squared to concentrate the effect even closer to the rim) scales the
+  // erosion term, so a patch of low-shape noise mid-sphere just softens slightly rather than
+  // carving a visible chunk out of the core — an earlier version scaled erosion directly off
+  // vRimFade everywhere, which could erode broad swaths of a puff's face into thin, partial
+  // crescents instead of frilly-edged but otherwise solid billows.
+  float edgeWeight = 1.0 - vRimFade;
+  float density = vRimFade - edgeWeight * edgeWeight * (1.0 - shape) * 0.9;
   if (density < 0.02) discard;
 
   // Pseudo self-shadow: one extra noise sample offset toward the sun stands in for a real light
@@ -416,7 +422,7 @@ void main() {
   // terrain relief near the observer can rise above the flat y=0 horizon plane in screen space, and
   // this shell (depthTest off, same reasoning as the puff clusters) would otherwise paint straight
   // over it regardless of which is really closer — see OVERCAST_MIN_ALTITUDE_DEG's own comment.
-  float horizonFade = smoothstep(0.139, 0.276, dir.y); // sin(8deg)..sin(16deg), matches buildOvercastGeometry's own cutoff
+  float horizonFade = smoothstep(0.052, 0.105, dir.y); // sin(3deg)..sin(6deg), matches buildOvercastGeometry's own cutoff
 
   // Below coverage's own noise threshold: a broken/patchy ceiling with real sky-colored gaps,
   // exactly like a real transition from scattered to overcast. remap-by-threshold, same technique
@@ -476,10 +482,12 @@ export function buildOvercastMaterial(baseColor: Color, coverage: number): { mat
  * screen space the shell would otherwise claim. depthTest is off (see buildOvercastMaterial), so
  * without this gap the shell would paint straight over a terrain silhouette poking up into it,
  * regardless of the terrain being genuinely closer — the same class of bug as the ground bleed this
- * shell's geometry was already restricted to fix, just for relief instead of the flat disc. Matched
- * by OVERCAST_FRAGMENT_SHADER's own horizonFade (sin(8deg)=0.139, sin(16deg)=0.276), which tapers the
- * shell's visible bottom edge across the same band rather than a hard-edged rim. */
-const OVERCAST_MIN_ALTITUDE_DEG = 8
+ * shell's geometry was already restricted to fix, just for relief instead of the flat disc. Kept
+ * small (3deg, down from an initial 8deg that read as an oversized, conspicuously empty band of sky)
+ * — just enough to clear typical nearby relief, not a wide gap. Matched by OVERCAST_FRAGMENT_SHADER's
+ * own horizonFade (sin(3deg)=0.052, sin(6deg)=0.105), which tapers the shell's visible bottom edge
+ * across the same band rather than a hard-edged rim. */
+const OVERCAST_MIN_ALTITUDE_DEG = 3
 
 /** Fresh SphereGeometry each call (not module-cached like getCloudSphereGeometry) — this mirrors
  * buildSky/buildGround's own "rebuild from scratch, no dirty tracking" style since it's cheap
