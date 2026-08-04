@@ -345,25 +345,47 @@ float fbm(vec3 p) {
   }
   return sum;
 }
+// Cellular (Worley) noise — distance to the nearest of 27 randomly-jittered cell points. Unlike
+// fbm's smooth interpolated blobs, this has genuinely sharp valleys between cells, reading as
+// distinct billowy cloud masses with real gaps/shadows between them rather than one soft gradient.
+float worley(vec3 p) {
+  vec3 i = floor(p);
+  vec3 f = fract(p);
+  float minDist = 1.0;
+  for (int x = -1; x <= 1; x++) {
+    for (int y = -1; y <= 1; y++) {
+      for (int z = -1; z <= 1; z++) {
+        vec3 neighbor = vec3(float(x), float(y), float(z));
+        vec3 point = hash3(i + neighbor) * 0.5 + 0.5;
+        vec3 diff = neighbor + point - f;
+        minDist = min(minDist, dot(diff, diff));
+      }
+    }
+  }
+  return sqrt(minDist);
+}
 
 void main() {
   vec3 dir = normalize(vDir);
   vec3 L = normalize(sunDir);
 
-  // Two scales, not one: a coarse field picks where distinct cloud formations sit (a handful of
-  // large connected shapes, not fine speckle), a finer one textures their surface. A single-octave
-  // field at a uniform frequency (the first version of this shader) covered the whole dome in an
-  // even, low-contrast wash that read as ground fog/haze rather than as individual cloud masses —
-  // real overcast still has visible denser/thinner billows within it, not a flat grey screen.
-  float shape = fbm(dir * 1.4) * 0.5 + 0.5;
-  float detail = fbm(dir * 6.0 + 41.0) * 0.5 + 0.5;
+  // dir has unit magnitude, so a frequency near 1 (the first version of this shader used 1.4) puts
+  // only 2-3 noise cells across the ENTIRE sky dome — every fragment sampled nearly the same smooth
+  // gradient, which is exactly what read as a flat, low-contrast haze rather than individual cloud
+  // formations. 5.0 gives roughly a dozen+ distinct cells across the visible hemisphere, matching a
+  // real scattered-to-overcast cloud field's actual scale. Blended with cellular (Worley) noise for
+  // genuinely billowy, sharp-edged masses — fbm alone stays soft/blurry at any frequency, since
+  // interpolated value noise has no real edges, only gradients.
+  float shapeFbm = fbm(dir * 5.0) * 0.5 + 0.5;
+  float shapeCell = 1.0 - worley(dir * 4.0);
+  float shape = mix(shapeFbm, shapeCell, 0.55);
+  float detail = fbm(dir * 11.0 + 41.0) * 0.5 + 0.5;
 
   // Below coverage's own noise threshold: a broken/patchy ceiling with real sky-colored gaps,
   // exactly like a real transition from scattered to overcast. remap-by-threshold, same technique
-  // as the reference skill's own cloudDensity coverage control. A tighter transition band than the
-  // first version (0.10 vs 0.18) gives cloud formations a defined edge instead of a soft haze fade.
+  // as the reference skill's own cloudDensity coverage control.
   float threshold = 1.0 - coverage;
-  float alpha = smoothstep(threshold - 0.10, threshold + 0.10, shape);
+  float alpha = smoothstep(threshold - 0.08, threshold + 0.08, shape);
   // The puff clusters alone can never promise zero sky gaps (see SceneRenderer's buildClouds doc
   // comment) — this is what actually guarantees "total overcast, no sky visible" at cloudCover=1:
   // force full opacity everywhere as coverage approaches its max, overriding the noise field's own
@@ -376,10 +398,10 @@ void main() {
   float diff = dot(dir, L) * 0.5 + 0.5;
   float sunGlow = pow(max(dot(dir, L), 0.0), 6.0) * 0.6; // diffuse bright patch toward the sun, like light through an overcast layer
   vec3 color = baseColor * (sunColor * diff * 0.7 + ambientColor * 0.5) + sunColor * sunGlow;
-  // Wider contrast range than the first version (0.6..1.3 vs 0.85..1.05) — a fully-opaque ceiling
-  // still needs visible billow texture (denser = darker/greyer, thinner = brighter) to read as
-  // "made of clouds" rather than a single flat painted color.
-  color *= mix(0.6, 1.3, detail) * mix(0.85, 1.1, shape);
+  // Strong contrast that survives even where alpha is forced fully opaque (high coverage) — shape's
+  // own cell structure must stay visible as darker valleys / brighter billow tops, or a "fully
+  // overcast" sky degenerates back into one flat painted color with no visible cloud structure.
+  color *= mix(0.45, 1.4, shape) * mix(0.8, 1.15, detail);
 
   gl_FragColor = vec4(color, alpha);
 }
