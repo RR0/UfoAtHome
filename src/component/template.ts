@@ -134,6 +134,14 @@ button.preset[aria-pressed="true"] {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
   font-size: 0.9em;
 }
+/* The [hidden] attribute's own display:none (from the browser's UA stylesheet) loses to the
+   plain .context-menu rule above — a class selector outweighs an attribute selector at equal
+   specificity-position, so display:flex won every time regardless of the hidden attribute,
+   and the menu could never actually disappear no matter what toggled it (Escape, outside
+   click, ...). This higher-specificity override is what actually lets [hidden] win. */
+.context-menu[hidden] {
+  display: none;
+}
 .context-menu button {
   display: block;
   width: 100%;
