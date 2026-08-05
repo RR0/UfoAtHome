@@ -51,11 +51,16 @@ export const css = `
    always fills .stage's *current* box exactly: .frame's own letterboxed box in normal mode
    (where .stage's box equals .frame's, same as before), but the *full* fullscreen viewport when
    .stage is fullscreen. That's what lets the nested <rr0-ufo>'s own toolbar (anchored to *its*
-   own .stage, which now spans this full box) reach the true screen edges too — its :fullscreen
-   CSS never actually applies here (only this outer #stage is ever the real browser-fullscreen
-   element), but it doesn't need to: its .stage{height:100%} plus .frame's own aspect-ratio/max-*
-   constraints do the same "contain, centered" fit unconditionally, driven purely by this host's
-   now-definite size, not by :fullscreen matching inside its own shadow root. */
+   own .stage, which now spans this full box) reach the true screen edges too — its own
+   :fullscreen CSS never actually applies here (only this outer #stage is ever the real
+   browser-fullscreen element). Its .frame still needs to end up centered within that now
+   oversized box, matching *this* outer .frame's own centered position exactly, or its canvas
+   coordinates visibly misalign against this backdrop the instant .stage's height exceeds
+   .frame's (every shape shifted by however far off-center .frame landed). aspect-ratio/max-*
+   alone does NOT do that — they size .frame correctly but leave it at .stage's default
+   top-left, block-flow position; ufoTemplate.ts's own .stage makes display:flex + centering
+   unconditional (not gated on :fullscreen matching) specifically so this nested case gets the
+   same centering this outer .stage only gets from :fullscreen. */
 .ufo-overlay {
   position: absolute;
   inset: 0;

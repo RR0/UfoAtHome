@@ -24,11 +24,23 @@ export const css = `
    .frame's content, unchanged) — but it matters when this element is embedded with a definite
    host size from outside (e.g. <rr0-scene>'s .ufo-overlay sizing this element to fill its own
    #stage while THAT is fullscreen): it lets .toolbar/.fullscreen-btn, anchored to .stage below,
-   actually reach that outer element's true edges instead of only .frame's letterboxed ones. */
+   actually reach that outer element's true edges instead of only .frame's letterboxed ones.
+   display:flex + centering is unconditional (not just under :fullscreen below) for the same
+   nested-embedding case: this .stage is never itself the real fullscreen element when nested
+   inside <rr0-scene>'s .ufo-overlay (only the *outer* stage is, so :fullscreen never matches
+   here even while genuinely full-viewport-sized) — without this, .frame just sat at .stage's
+   top-left in that oversized box instead of centered, misaligning every shape's canvas
+   coordinates against the outer 3D scene's own (correctly centered) letterboxed content the
+   instant .stage's height actually exceeds .frame's. Harmless in the normal standalone case:
+   .stage's height already matches .frame's exactly there (see above), so there's no extra
+   space to center within regardless. */
 .stage {
   position: relative;
   width: 100%;
   height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 /* The browser's own fullscreen UA styles force the fullscreened element (.stage) to fill the
    whole viewport (100vw/100vh) regardless of its content's aspect ratio. .toolbar/.fullscreen-btn
@@ -36,9 +48,6 @@ export const css = `
    edges, full width, like a normal video player's controls — not stuck to the letterboxed
    content's own (possibly smaller, centered) box above/around them. */
 .stage:fullscreen {
-  display: flex;
-  align-items: center;
-  justify-content: center;
   width: 100vw;
   height: 100vh;
   background: #000;
