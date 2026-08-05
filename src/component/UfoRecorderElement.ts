@@ -911,19 +911,24 @@ export class UfoRecorderElement extends HTMLElement {
     this.contextMenu.style.top = `${clientY}px`
     this.contextMenu.hidden = false
     // Front/back reordering is meaningless with nothing else to reorder against — disabled for a
-    // single shape. Delete mirrors the toolbar button's own disabled state (see
-    // onSelectionOrTimeChanged) — recording/playing already block the menu from opening at all
-    // (see onContextMenu), so "only one shape left" is the only case that matters for all three
-    // here; otherwise clicking a disabled-in-spirit item would silently do nothing (each handler
-    // still refuses either way) with no visible explanation why.
-    const onlyOneShape = this.ufoElement.sighting.timeline.sourceIds.length <= 1
-    this.contextBringToFrontButton.disabled = onlyOneShape
-    this.contextSendToBackButton.disabled = onlyOneShape
+    // single shape (checked first: with exactly one shape it's trivially both frontmost and
+    // backmost, but "there's only one shape" is the more useful explanation than "already at the
+    // front"). Otherwise, each is disabled specifically when the selected shape is already at
+    // that end of the z-order — a no-op reorder, same reasoning as the single-shape case. Delete
+    // mirrors the toolbar button's own disabled state (see onSelectionOrTimeChanged) —
+    // recording/playing already block the menu from opening at all (see onContextMenu), so these
+    // are the only cases that matter here; otherwise clicking a disabled-in-spirit item would
+    // silently do nothing (each handler still refuses either way) with no visible explanation why.
+    const sourceIds = this.ufoElement.sighting.timeline.sourceIds
+    const onlyOneShape = sourceIds.length <= 1
+    const isFrontmost = sourceIds[sourceIds.length - 1] === this.currentSourceId
+    const isBackmost = sourceIds[0] === this.currentSourceId
+    this.contextBringToFrontButton.disabled = onlyOneShape || isFrontmost
+    this.contextSendToBackButton.disabled = onlyOneShape || isBackmost
     this.contextDeleteButton.disabled = this.deleteShapeButton.disabled
-    const disabledTitle = onlyOneShape ? this.messages.onlyOneShape : ""
-    this.contextBringToFrontButton.title = disabledTitle
-    this.contextSendToBackButton.title = disabledTitle
-    this.contextDeleteButton.title = disabledTitle
+    this.contextBringToFrontButton.title = onlyOneShape ? this.messages.onlyOneShape : isFrontmost ? this.messages.alreadyAtFront : ""
+    this.contextSendToBackButton.title = onlyOneShape ? this.messages.onlyOneShape : isBackmost ? this.messages.alreadyAtBack : ""
+    this.contextDeleteButton.title = onlyOneShape ? this.messages.onlyOneShape : ""
     document.addEventListener("click", this.handleOutsideContextMenuClick)
   }
 

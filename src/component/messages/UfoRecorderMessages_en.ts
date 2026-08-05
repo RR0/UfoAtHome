@@ -15,6 +15,8 @@ export const ufoRecorderMessages_en: UfoRecorderMessages = {
   contextMenuDelete: "Delete",
   confirmDeleteShape: "Delete {name}? This can't be undone.",
   onlyOneShape: "There is only one shape",
+  alreadyAtFront: "This shape is already at the front",
+  alreadyAtBack: "This shape is already at the back",
   samplingRate: "Sampling rate (ms)",
   duration: "Duration (s)",
   durationPlaceholder: "recording length",

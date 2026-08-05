@@ -1019,15 +1019,56 @@ describe("UfoRecorderElement right-click context menu", () => {
     expect(contextDelete.title).toBe("There is only one shape")
   })
 
-  it("all three items are enabled once there's more than one shape, with no leftover disabled title", () => {
+  it("Bring to front is disabled (with a title) for a shape that's already frontmost", () => {
     const element = mount()
-    element.sightingData = twoShapesJson()
+    element.sightingData = twoShapesJson() // z-order: ufo-1 (back), ufo-2 (front)
+    const canvas = nestedCanvas(element)
+    const frontButton = element.shadowRoot!.getElementById("context-bring-to-front") as HTMLButtonElement
+    const backButton = element.shadowRoot!.getElementById("context-send-to-back") as HTMLButtonElement
+
+    rightClickAt(canvas, 105, 105) // selects ufo-2, already frontmost
+
+    expect(frontButton.disabled).toBe(true)
+    expect(frontButton.title).toBe("This shape is already at the front")
+    expect(backButton.disabled).toBe(false) // not backmost — still a real reorder
+    expect(backButton.title).toBe("")
+  })
+
+  it("Send to back is disabled (with a title) for a shape that's already backmost", () => {
+    const element = mount()
+    element.sightingData = twoShapesJson() // z-order: ufo-1 (back), ufo-2 (front)
+    const canvas = nestedCanvas(element)
+    const frontButton = element.shadowRoot!.getElementById("context-bring-to-front") as HTMLButtonElement
+    const backButton = element.shadowRoot!.getElementById("context-send-to-back") as HTMLButtonElement
+
+    rightClickAt(canvas, 5, 5) // selects ufo-1, already backmost
+
+    expect(backButton.disabled).toBe(true)
+    expect(backButton.title).toBe("This shape is already at the back")
+    expect(frontButton.disabled).toBe(false) // not frontmost — still a real reorder
+    expect(frontButton.title).toBe("")
+  })
+
+  it("both are enabled, with no leftover title, for a shape in the middle of the z-order", () => {
+    const element = mount()
+    element.sightingData = {
+      version: 1,
+      timeline: {
+        keyframes: [
+          { t: 0, shapes: [
+            { sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 0, y: 0, width: 20, height: 20 }, color: "#39ff14", angle: 0, transparency: 0, haloScale: 0, selected: false } },
+            { sourceId: "ufo-2", shape: { kind: "oval", bounds: { x: 40, y: 40, width: 20, height: 20 }, color: "#ff0000", angle: 0, transparency: 0, haloScale: 0, selected: false } },
+            { sourceId: "ufo-3", shape: { kind: "oval", bounds: { x: 80, y: 80, width: 20, height: 20 }, color: "#0000ff", angle: 0, transparency: 0, haloScale: 0, selected: false } }
+          ] }
+        ]
+      }
+    } // z-order: ufo-1 (back), ufo-2 (middle), ufo-3 (front)
     const canvas = nestedCanvas(element)
     const frontButton = element.shadowRoot!.getElementById("context-bring-to-front") as HTMLButtonElement
     const backButton = element.shadowRoot!.getElementById("context-send-to-back") as HTMLButtonElement
     const contextDelete = element.shadowRoot!.getElementById("context-delete") as HTMLButtonElement
 
-    rightClickAt(canvas, 105, 105) // selects ufo-2
+    rightClickAt(canvas, 45, 45) // selects ufo-2, the middle one
 
     expect(frontButton.disabled).toBe(false)
     expect(backButton.disabled).toBe(false)

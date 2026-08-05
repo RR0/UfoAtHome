@@ -19,6 +19,10 @@ export interface UfoRecorderMessages {
   /** Explains, via the disabled context-menu items' own title, why front/back/delete are all
    * disabled together — see showContextMenu(). */
   onlyOneShape: string
+  /** Bring to front's own disabled title when the selected shape is already frontmost. */
+  alreadyAtFront: string
+  /** Send to back's own disabled title when the selected shape is already backmost. */
+  alreadyAtBack: string
   samplingRate: string
   duration: string
   durationPlaceholder: string
