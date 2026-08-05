@@ -125,6 +125,10 @@ input[type=range] {
 .toolbar button[aria-pressed="true"] {
   outline: 2px solid #39f;
 }
+.toolbar button:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
 .time-label {
   color: #fff;
   font-variant-numeric: tabular-nums;

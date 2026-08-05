@@ -266,6 +266,7 @@ describe("UfoElement", () => {
 
   it("the single play/pause button toggles its icon and title on click", () => {
     const element = mount()
+    element.sightingData = twoKeyframeSighting() // needs a real duration — see "disables Play..." below
     const button = element.shadowRoot!.getElementById("play-pause") as HTMLButtonElement
     expect(button.title).toBe("Play")
 
@@ -278,6 +279,7 @@ describe("UfoElement", () => {
 
   it("clicking the canvas also toggles play/pause", () => {
     const element = mount()
+    element.sightingData = twoKeyframeSighting()
     const button = element.shadowRoot!.getElementById("play-pause") as HTMLButtonElement
     expect(button.title).toBe("Play")
 
@@ -286,6 +288,18 @@ describe("UfoElement", () => {
 
     element.canvasElement.click()
     expect(button.title).toBe("Play")
+  })
+
+  it("disables Play (button and canvas click) when the observation has zero duration — nothing to play", () => {
+    const element = mount() // default sighting: empty timeline, no durationSeconds → duration 0
+    const button = element.shadowRoot!.getElementById("play-pause") as HTMLButtonElement
+    expect(button.disabled).toBe(true)
+
+    element.canvasElement.click() // guarded the same way as the button — should stay stopped
+    expect(element.playbackState).toBe("stopped")
+
+    element.sightingData = twoKeyframeSighting() // now has a real duration
+    expect(button.disabled).toBe(false)
   })
 
   it("canvas click-to-play can be disabled (e.g. by UfoRecorderElement, which uses the canvas for drag-to-record)", () => {
@@ -321,6 +335,7 @@ describe("UfoElement", () => {
 
   it("the toolbar auto-hides while playing and stays shown while paused/stopped", () => {
     const element = mount()
+    element.sightingData = twoKeyframeSighting()
     const button = element.shadowRoot!.getElementById("play-pause") as HTMLButtonElement
     const toolbar = element.shadowRoot!.getElementById("toolbar") as HTMLElement
     expect(toolbar.classList.contains("auto-hide")).toBe(false)
@@ -346,6 +361,7 @@ describe("UfoElement", () => {
 
   it("the fullscreen button auto-hides alongside the toolbar", () => {
     const element = mount()
+    element.sightingData = twoKeyframeSighting()
     const playPause = element.shadowRoot!.getElementById("play-pause") as HTMLButtonElement
     const fullscreenButton = element.shadowRoot!.getElementById("fullscreen") as HTMLButtonElement
     expect(fullscreenButton.classList.contains("auto-hide")).toBe(false)

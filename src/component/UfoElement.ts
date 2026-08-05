@@ -206,6 +206,10 @@ export class UfoElement extends HTMLElement {
     // slider stayed capped at timeline.duration (e.g. 0 on a still-empty recording) even
     // though a longer real duration is now known and seekable (see Player.seekableDuration).
     this.refresh()
+    // Declaring a real duration (or clearing one back to nothing recorded) changes
+    // seekableDuration, which is what decides whether Play is even enabled — see
+    // updatePlayPauseButton().
+    this.updatePlayPauseButton()
   }
 
   /** Exposed so UfoRecorderElement can visually flag the shape currently selected in its own
@@ -255,6 +259,10 @@ export class UfoElement extends HTMLElement {
   }
 
   private togglePlayPause(): void {
+    // Nothing to play — the button is already disabled for this case, but the canvas's own
+    // click-to-play (enableClickToPlay) has no native "disabled" state of its own, so this guard
+    // is what actually stops it there.
+    if (this.player.seekableDuration <= 0) return
     if (this.player.playbackState === "playing") {
       this.player.pause()
       // pause() doesn't itself trigger a repaint — force one so the selection highlight
@@ -272,6 +280,11 @@ export class UfoElement extends HTMLElement {
     this.playPauseButton.textContent = isPlaying ? "⏸" : "▶"
     this.playPauseButton.title = isPlaying ? this.messages.pause : this.messages.play
     this.playPauseButton.setAttribute("aria-label", isPlaying ? this.messages.pause : this.messages.play)
+    // Nothing to play with zero observation duration (no declared duration and nothing recorded
+    // yet) — disabled rather than silently doing nothing on click, which otherwise briefly
+    // flickers into "playing" and straight back out again every time (see Player.play()'s
+    // immediate-stop branch when seekableDuration is 0).
+    this.playPauseButton.disabled = this.player.seekableDuration <= 0
     // Auto-hides the toolbar while playing (reappears on hover/focus — see the CSS) so it doesn't
     // sit over the scene the whole time; always shown while paused/stopped, since that's when the
     // user is most likely to want it (e.g. right after it stopped, or to scrub before playing).

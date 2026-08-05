@@ -917,6 +917,11 @@ describe("UfoRecorderElement drag-to-move/resize/rotate", () => {
     const element = mount()
     element.sightingData = oneShapeJson()
     const canvas = nestedCanvas(element)
+    // Play is disabled for a genuinely zero-duration recording (see UfoElement's own "disables
+    // Play..." test) — oneShapeJson() has just the one keyframe, so a real duration has to be
+    // declared for the click below to actually start playback at all.
+    const ufo = nestedUfo(element) as unknown as { durationSeconds: number }
+    ufo.durationSeconds = 5
     const playButton = nestedUfo(element)!.shadowRoot!.getElementById("play-pause") as HTMLButtonElement
     playButton.click()
 
