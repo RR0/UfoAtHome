@@ -314,6 +314,28 @@ describe("EyewitnessElement", () => {
     expect(infoPanel.hidden).toBe(true)
   })
 
+  it("closes the info panel on a click outside it, but not on a click inside it", async () => {
+    const element = mount()
+    element.witnessUrls = ["john.json"]
+    await new Promise(resolve => setTimeout(resolve, 0))
+
+    const infoButton = element.shadowRoot!.getElementById("info-button") as HTMLButtonElement
+    const infoPanel = element.shadowRoot!.getElementById("info-panel") as HTMLElement
+    const observationList = element.shadowRoot!.getElementById("info-observation-list") as HTMLElement
+    infoButton.click()
+    expect(infoPanel.hidden).toBe(false)
+
+    observationList.click() // inside the panel — stays open
+    expect(infoPanel.hidden).toBe(false)
+
+    document.body.click() // outside the component entirely — closes it
+    expect(infoPanel.hidden).toBe(true)
+
+    // Re-opens cleanly afterwards — the outside-click listener wasn't left in some stuck state.
+    infoButton.click()
+    expect(infoPanel.hidden).toBe(false)
+  })
+
   it("keeps the credits list collapsed until the credits link is clicked, and re-collapses when the panel closes", async () => {
     const element = mount()
     element.witnessUrls = ["john.json"]

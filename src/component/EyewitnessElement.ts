@@ -137,6 +137,13 @@ export class EyewitnessElement extends HTMLElement {
     }
   }
 
+  /** Only matters if this element gets removed while the info panel is still open — otherwise
+   * toggleInfoPanel() already removes handleOutsideClick itself on close. Without this, that
+   * document-level listener would outlive the element, referencing now-detached nodes forever. */
+  disconnectedCallback(): void {
+    document.removeEventListener("click", this.handleOutsideClick)
+  }
+
   attributeChangedCallback(name: string, oldValue: string, newValue: string): void {
     if (name === "src" && newValue && newValue !== oldValue && this.isConnected) {
       void this.loadFromSrc(newValue)
@@ -252,10 +259,29 @@ export class EyewitnessElement extends HTMLElement {
     this.infoButton.setAttribute("aria-expanded", String(this.infoOpen))
     if (this.infoOpen) {
       this.populateInfoPanel()
+      // Registered only while actually open, not for the component's whole lifetime — a global
+      // listener that's a no-op almost all the time would be pure overhead. Safe to add from
+      // inside this same click handler: the click that opened the panel (on infoButton) is still
+      // bubbling when this listener gets attached, so it *will* see that same event once it
+      // reaches document — handleOutsideClick's own composedPath() check is what stops that from
+      // immediately closing the panel it just opened.
+      document.addEventListener("click", this.handleOutsideClick)
     } else {
       this.creditsOpen = false
       this.infoCreditsList.hidden = true
       this.infoCreditsToggle.setAttribute("aria-expanded", "false")
+      document.removeEventListener("click", this.handleOutsideClick)
+    }
+  }
+
+  /** Closes the panel on any click outside it (and outside the "?" button itself, which has its
+   * own toggle already). composedPath() — not event.target — is what makes this work correctly
+   * across this element's own shadow boundary: a click's target gets retargeted to the shadow
+   * host from outside, losing exactly the distinction (inside the panel vs. not) this needs. */
+  private readonly handleOutsideClick = (event: MouseEvent): void => {
+    const path = event.composedPath()
+    if (!path.includes(this.infoPanel) && !path.includes(this.infoButton)) {
+      this.toggleInfoPanel()
     }
   }
 
