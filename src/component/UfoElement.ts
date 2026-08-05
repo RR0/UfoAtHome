@@ -142,6 +142,14 @@ export class UfoElement extends HTMLElement {
   }
 
   set sightingData(json: SightingRecordingJson) {
+    // Without this, switching sightings mid-playback (e.g. EyewitnessElement's witness picker)
+    // orphans the old Player: its requestAnimationFrame loop was never cancelled, so it keeps
+    // ticking in the background — calling this same onFrame with the *old* timeline's positions
+    // and fighting the new player for the canvas/seek bar/labels. Symptom: after switching
+    // witnesses mid-play, clicking to pause only pauses the new player while the old one keeps
+    // looping underneath it, which looks exactly like "pause resets to the start" since the old
+    // player's loop keeps repainting frame 0 onward.
+    this.player.stop()
     this.currentSighting = fromSightingJson(json)
     this.player = this.createPlayer()
     this.updateTimeLabels()

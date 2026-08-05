@@ -493,4 +493,34 @@ describe("UfoElement", () => {
       .filter(shape => shape.selected)
     expect(paintedSelected).toHaveLength(1)
   })
+
+  it("switching sightingData mid-playback cancels the old player's animation loop instead of leaking it", () => {
+    // Regression: EyewitnessElement assigns a new sightingData when the visitor switches
+    // witnesses. Doing that mid-playback used to leave the *old* Player's requestAnimationFrame
+    // loop running — nothing had ever paused/stopped it, so it kept ticking in the background,
+    // calling this same onFrame with the *old* timeline's positions and fighting the new player
+    // for the canvas/seek bar. Symptom: after switching witnesses mid-play, clicking to pause
+    // only paused the *new* player while the old one kept looping underneath it — which looked
+    // exactly like "pause resets to the start," since the old player's loop kept repainting
+    // frame 0 onward once the new player's own (correct) pause had gone still.
+    let now = 1000
+    let frame: FrameRequestCallback | undefined
+    const cancelSpy = vi.fn()
+    vi.spyOn(performance, "now").mockImplementation(() => now)
+    vi.stubGlobal("requestAnimationFrame", (cb: FrameRequestCallback) => {
+      frame = cb
+      return 1
+    })
+    vi.stubGlobal("cancelAnimationFrame", cancelSpy)
+
+    const element = mount()
+    element.sightingData = twoKeyframeSighting()
+    element.canvasElement.click() // start playing
+    now += 300
+    frame?.(now) // one tick — schedules the next pending frame
+
+    element.sightingData = twoKeyframeSighting() // simulates switching witnesses mid-play
+
+    expect(cancelSpy).toHaveBeenCalled() // the old player's pending frame was actually cancelled
+  })
 })
