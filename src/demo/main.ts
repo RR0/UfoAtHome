@@ -1,12 +1,12 @@
 import { register } from "../component/UfoRecorderElement.js"
 import type { UfoRecorderElement } from "../component/UfoRecorderElement.js"
-import { registerWitnessSelector } from "../component/WitnessSelectorElement.js"
+import { registerEyewitness } from "../component/EyewitnessElement.js"
 import { registerScene } from "../component/SceneElement.js"
 import type { SceneElement } from "../component/SceneElement.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
 
 register()
-registerWitnessSelector()
+registerEyewitness()
 registerScene()
 
 const recorder = document.getElementById("recorder") as UfoRecorderElement

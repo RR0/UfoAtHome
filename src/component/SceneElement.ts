@@ -97,8 +97,6 @@ export class SceneElement extends HTMLElement {
   readonly ufoElement: UfoElement
   private readonly sceneRenderer: SceneRenderer
   private readonly bodyTooltip: HTMLElement
-  private readonly terrainAttributionElement: HTMLElement
-  private shownTerrainAttribution?: string
   private resizeObserver?: ResizeObserver
   private lastTimeMs = 0
   private starCatalog?: StarCatalog
@@ -194,7 +192,6 @@ export class SceneElement extends HTMLElement {
     this.sceneCanvas = this.shadow.getElementById("scene-canvas") as HTMLCanvasElement
     this.sceneRenderer = new SceneRenderer(this.sceneCanvas, undefined, this.handleLightningFlash)
     this.bodyTooltip = this.shadow.getElementById("body-tooltip")!
-    this.terrainAttributionElement = this.shadow.getElementById("terrain-attribution")!
 
     // Created imperatively rather than left inline in the template markup — see
     // UfoRecorderElement's constructor for why (an inline tag parsed from
@@ -304,6 +301,14 @@ export class SceneElement extends HTMLElement {
     this.setWeather(this.ufoElement.sighting.weather)
   }
 
+  /** Undefined until a real, location-accurate terrain relief patch has finished its async build
+   * (see SceneRenderer.setTerrainOrigin) — exposed for a composing wrapper's own on-demand credit
+   * display (see EyewitnessElement's info panel) rather than this element painting a permanent
+   * corner label itself; a real-time pull (not push/cached) since it can resolve at any time. */
+  get currentTerrainAttribution(): string | undefined {
+    return this.sceneRenderer.currentTerrainAttribution
+  }
+
   private resizeToStage(): void {
     const rect = this.frameElement.getBoundingClientRect()
     const width = Math.max(1, Math.round(rect.width))
@@ -340,8 +345,7 @@ export class SceneElement extends HTMLElement {
     this.sceneRenderer.setObserverPose(pose ?? DEFAULT_OBSERVER_POSE)
     // Raw pose's own lat/lng (possibly undefined), never the astronomy fallback below — a real
     // terrain patch must only ever build from a real recorded location, never (0,0).
-    this.sceneRenderer.setTerrainOrigin(pose?.lat, pose?.lng, () => this.updateTerrainAttribution())
-    this.updateTerrainAttribution()
+    this.sceneRenderer.setTerrainOrigin(pose?.lat, pose?.lng)
 
     const lat = pose?.lat ?? DEFAULT_OBSERVER_POSE.lat!
     const lng = pose?.lng ?? DEFAULT_OBSERVER_POSE.lng!
@@ -373,20 +377,6 @@ export class SceneElement extends HTMLElement {
     })
   }
 
-  /** Reflects sceneRenderer.currentTerrainAttribution (undefined until a real terrain patch
-   * finishes its async build — see SceneRenderer.setTerrainOrigin) into the visible corner label
-   * its provider's license requires. Called both per-tick from updateAstronomy() (cheap getter
-   * read, catches the common case) and from setTerrainOrigin's own onSettled callback — the
-   * per-tick call alone would miss the update whenever playback sits idle right when the async
-   * build resolves (e.g. a scene shown at a fixed t=0, never ticking again after its one initial
-   * updateAstronomy() call). */
-  private updateTerrainAttribution(): void {
-    const attribution = this.sceneRenderer.currentTerrainAttribution
-    if (attribution === this.shownTerrainAttribution) return
-    this.shownTerrainAttribution = attribution
-    this.terrainAttributionElement.textContent = attribution ?? ""
-    this.terrainAttributionElement.hidden = !attribution
-  }
 }
 
 export const SCENE_ELEMENT_NAME = "rr0-scene"

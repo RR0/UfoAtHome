@@ -80,7 +80,7 @@ export function sightingDurationMs(event: SightingEvent): number | undefined {
  * Timeline (the recording's own internal millisecond clock), an opaque
  * witness reference, and — for cases with several witnesses, each with
  * their own recording — a human-readable witness name and a shared case id
- * so a page can group and label them (see WitnessSelectorElement).
+ * so a page can group and label them (see EyewitnessElement).
  *
  * `witnessId` stays an opaque internal reference (deliberately no PII beyond
  * a display name — no email/phone/address; see

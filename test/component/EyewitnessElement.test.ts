@@ -1,13 +1,13 @@
 import { describe, expect, it, afterEach, beforeAll, beforeEach, vi } from "vitest"
-import { registerWitnessSelector, WITNESS_SELECTOR_ELEMENT_NAME } from "../../src/component/WitnessSelectorElement.js"
-import type { WitnessSelectorElement } from "../../src/component/WitnessSelectorElement.js"
+import { registerEyewitness, EYEWITNESS_ELEMENT_NAME } from "../../src/component/EyewitnessElement.js"
+import type { EyewitnessElement } from "../../src/component/EyewitnessElement.js"
 
-registerWitnessSelector()
+registerEyewitness()
 
-// WitnessSelectorElement now nests a <rr0-scene> (see its own class doc comment) instead of a
-// bare <rr0-ufo>, so mounting it also constructs a SceneRenderer — which jsdom's <canvas> can't
-// back with a real WebGL context (no native `canvas` package here, same reason as the 2D mock
-// below). Stubbed out entirely, same as test/component/UfoRecorderElement.test.ts's identical mock.
+// EyewitnessElement nests a <rr0-scene> (see its own class doc comment), so mounting it also
+// constructs a SceneRenderer — which jsdom's <canvas> can't back with a real WebGL context (no
+// native `canvas` package here, same reason as the 2D mock below). Stubbed out entirely, same as
+// test/component/UfoRecorderElement.test.ts's identical mock.
 vi.mock("../../src/render3d/SceneRenderer.js", () => ({
   SceneRenderer: class {
     resize(): void {}
@@ -65,16 +65,16 @@ beforeAll(() => {
   } as unknown as typeof ResizeObserver
 })
 
-function mount(): WitnessSelectorElement {
-  const element = document.createElement(WITNESS_SELECTOR_ELEMENT_NAME) as WitnessSelectorElement
+function mount(): EyewitnessElement {
+  const element = document.createElement(EYEWITNESS_ELEMENT_NAME) as EyewitnessElement
   document.body.appendChild(element)
   return element
 }
 
-/** The nested <rr0-ufo> now lives inside the selector's own nested <rr0-scene> (see
- * WitnessSelectorElement's class doc comment) — SceneElement exposes it via its own public
- * `ufoElement` field, no need to query the shadow DOM a second level down. */
-function nestedScene(element: WitnessSelectorElement): { ufoElement: { canvasElement: unknown }; sightingData: unknown } {
+/** The nested <rr0-ufo> lives inside the element's own nested <rr0-scene> (see EyewitnessElement's
+ * class doc comment) — SceneElement exposes it via its own public `ufoElement` field, no need to
+ * query the shadow DOM a second level down. */
+function nestedScene(element: EyewitnessElement): { ufoElement: { canvasElement: unknown }; sightingData: unknown } {
   return element.shadowRoot!.querySelector("rr0-scene") as unknown as {
     ufoElement: { canvasElement: unknown }
     sightingData: unknown
@@ -118,10 +118,10 @@ function stubFetch(bySrc: Record<string, unknown>): ReturnType<typeof vi.fn> {
   return fetchMock
 }
 
-describe("WitnessSelectorElement", () => {
+describe("EyewitnessElement", () => {
   beforeEach(() => {
     // Default stub so tests that don't care about the resulting fetch (just about the
-    // selector's own DOM state) don't leave an unhandled rejection from a real jsdom fetch
+    // element's own DOM state) don't leave an unhandled rejection from a real jsdom fetch
     // to a relative URL with no document base — tests that DO care override this themselves.
     stubFetch({ "john.json": johnSighting })
   })
@@ -138,26 +138,35 @@ describe("WitnessSelectorElement", () => {
     expect(nestedScene(element).ufoElement.canvasElement).toBeDefined()
   })
 
-  it("hides the selector when there are 0 or 1 witnesses", async () => {
+  it("hides the whole toolbar when nothing has loaded yet", () => {
     const element = mount()
-    const selector = element.shadowRoot!.getElementById("witness-selector") as HTMLElement
-    expect(selector.hidden).toBe(true)
-
-    element.witnessUrls = ["john.json"]
-    await new Promise(resolve => setTimeout(resolve, 0))
-    expect(selector.hidden).toBe(true)
+    const toolbar = element.shadowRoot!.getElementById("toolbar") as HTMLElement
+    expect(toolbar.hidden).toBe(true)
   })
 
-  it("fetches every witness's own sighting.json and labels the selector from witnessName, not an external manifest", async () => {
+  it("shows the toolbar but hides the witness picker for a single witness, so the info button stays reachable", async () => {
+    const element = mount()
+    element.witnessUrls = ["john.json"]
+    await new Promise(resolve => setTimeout(resolve, 0))
+
+    const toolbar = element.shadowRoot!.getElementById("toolbar") as HTMLElement
+    const picker = element.shadowRoot!.getElementById("witness-picker") as HTMLElement
+    expect(toolbar.hidden).toBe(false)
+    expect(picker.hidden).toBe(true)
+  })
+
+  it("shows both the toolbar and the witness picker once there's more than one witness", async () => {
     stubFetch({ "chiles.json": johnSighting, "whitted.json": janeSighting })
     const element = mount()
 
     element.witnessUrls = ["chiles.json", "whitted.json"]
     await new Promise(resolve => setTimeout(resolve, 0))
 
-    const selector = element.shadowRoot!.getElementById("witness-selector") as HTMLElement
+    const toolbar = element.shadowRoot!.getElementById("toolbar") as HTMLElement
+    const picker = element.shadowRoot!.getElementById("witness-picker") as HTMLElement
     const select = element.shadowRoot!.getElementById("witness") as HTMLSelectElement
-    expect(selector.hidden).toBe(false)
+    expect(toolbar.hidden).toBe(false)
+    expect(picker.hidden).toBe(false)
     expect([...select.options].map(o => ({ value: o.value, label: o.textContent }))).toEqual([
       { value: "chiles.json", label: "Clarence Chiles" },
       { value: "whitted.json", label: "John Whitted" }
@@ -239,7 +248,7 @@ describe("WitnessSelectorElement", () => {
     const manifest = ["john.json"]
     stubFetch({ "witnesses.json": manifest, "john.json": johnSighting })
 
-    const element = document.createElement(WITNESS_SELECTOR_ELEMENT_NAME) as WitnessSelectorElement
+    const element = document.createElement(EYEWITNESS_ELEMENT_NAME) as EyewitnessElement
     element.setAttribute("src", "witnesses.json")
     document.body.appendChild(element)
     await new Promise(resolve => setTimeout(resolve, 0))
@@ -247,9 +256,63 @@ describe("WitnessSelectorElement", () => {
 
     expect(element.witnessUrls).toEqual(["john.json"])
   })
+
+  it("accepts src pointing directly at a single sighting.json, with no manifest file needed", async () => {
+    stubFetch({ "sighting.json": johnSighting })
+
+    const element = document.createElement(EYEWITNESS_ELEMENT_NAME) as EyewitnessElement
+    element.setAttribute("src", "sighting.json")
+    document.body.appendChild(element)
+    await new Promise(resolve => setTimeout(resolve, 0))
+    await new Promise(resolve => setTimeout(resolve, 0))
+
+    expect(element.witnessUrls).toEqual(["sighting.json"])
+    const scene = nestedScene(element) as unknown as { sightingData: typeof johnSighting }
+    expect(scene.sightingData.witnessId).toBe("john")
+    const toolbar = element.shadowRoot!.getElementById("toolbar") as HTMLElement
+    const picker = element.shadowRoot!.getElementById("witness-picker") as HTMLElement
+    expect(toolbar.hidden).toBe(false) // info button still reachable
+    expect(picker.hidden).toBe(true) // nothing to pick between
+  })
+
+  it("opens the info panel on click, showing the app version link and the selected witness's observation metadata", async () => {
+    stubFetch({ "john.json": { ...johnSighting, time: { year: 1948, month: 7, day: 24, hour: 2, minute: 45 }, place: [{ lat: 32.4, lng: -86.3 }] } })
+    const element = mount()
+    element.witnessUrls = ["john.json"]
+    await new Promise(resolve => setTimeout(resolve, 0))
+
+    const infoButton = element.shadowRoot!.getElementById("info-button") as HTMLButtonElement
+    const infoPanel = element.shadowRoot!.getElementById("info-panel") as HTMLElement
+    expect(infoPanel.hidden).toBe(true)
+
+    infoButton.click()
+
+    expect(infoPanel.hidden).toBe(false)
+    const appLink = element.shadowRoot!.getElementById("info-app-link") as HTMLAnchorElement
+    expect(appLink.href).toBe("https://ufoathome.org/")
+    expect(appLink.textContent).toMatch(/^UFO@home v\d+\.\d+\.\d+$/)
+    const observationList = element.shadowRoot!.getElementById("info-observation-list") as HTMLElement
+    expect(observationList.textContent).toContain("Clarence Chiles")
+    expect(observationList.textContent).toContain("chiles-whitted")
+
+    infoButton.click()
+    expect(infoPanel.hidden).toBe(true)
+  })
+
+  it("always lists the thunder sound credit, regardless of weather", async () => {
+    const element = mount()
+    element.witnessUrls = ["john.json"]
+    await new Promise(resolve => setTimeout(resolve, 0))
+
+    const infoButton = element.shadowRoot!.getElementById("info-button") as HTMLButtonElement
+    infoButton.click()
+
+    const creditsList = element.shadowRoot!.getElementById("info-credits-list") as HTMLElement
+    expect(creditsList.textContent).toContain("Thunder")
+  })
 })
 
-describe("WitnessSelectorElement i18n", () => {
+describe("EyewitnessElement i18n", () => {
   afterEach(() => {
     document.body.innerHTML = ""
     vi.unstubAllGlobals()

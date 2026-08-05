@@ -1,7 +1,7 @@
 {
   "name": "@rr0/ufoathome",
   "type": "module",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "UFO@home — record and replay a UFO sighting's shape, movement and appearance",
   "author": "Jérôme Beau <rr0@rr0.org> (https://rr0.org)",
   "license": "MIT",
@@ -17,13 +17,13 @@
     "./ufo": "./dist-embed-ufo/rr0-ufo.mjs",
     "./recorder": "./dist-embed/rr0-ufo-recorder.mjs",
     "./scene": "./dist-embed-scene/rr0-scene.mjs",
-    "./witnesses": "./dist-embed-witnesses/rr0-ufo-witnesses.mjs"
+    "./eyewitness": "./dist-embed-eyewitness/rr0-eyewitness.mjs"
   },
   "files": [
     "dist-embed",
     "dist-embed-ufo",
     "dist-embed-scene",
-    "dist-embed-witnesses"
+    "dist-embed-eyewitness"
   ],
   "scripts": {
     "dev": "vite",
@@ -31,9 +31,9 @@
     "build:embed": "tsc --noEmit && vite build --config vite.embed.config.ts",
     "build:embed-ufo": "tsc --noEmit && vite build --config vite.embed-ufo.config.ts",
     "build:embed-scene": "tsc --noEmit && vite build --config vite.embed-scene.config.ts",
-    "build:embed-witnesses": "tsc --noEmit && vite build --config vite.embed-witnesses.config.ts",
-    "build:all": "npm run build && npm run build:embed && npm run build:embed-ufo && npm run build:embed-scene && npm run build:embed-witnesses",
-    "prepublishOnly": "npm run build:embed && npm run build:embed-ufo && npm run build:embed-scene && npm run build:embed-witnesses && npm test",
+    "build:embed-eyewitness": "tsc --noEmit && vite build --config vite.embed-eyewitness.config.ts",
+    "build:all": "npm run build && npm run build:embed && npm run build:embed-ufo && npm run build:embed-scene && npm run build:embed-eyewitness",
+    "prepublishOnly": "npm run build:embed && npm run build:embed-ufo && npm run build:embed-scene && npm run build:embed-eyewitness && npm test",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",

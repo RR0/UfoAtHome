@@ -1,6 +1,6 @@
 import type { UfoMessages } from "./UfoMessages.js"
 import type { UfoRecorderMessages } from "./UfoRecorderMessages.js"
-import type { WitnessSelectorMessages } from "./WitnessSelectorMessages.js"
+import type { EyewitnessMessages } from "./EyewitnessMessages.js"
 
 export const UFO_SUPPORTED_LANGUAGES = ["en", "fr"] as const
 export type UfoLanguage = (typeof UFO_SUPPORTED_LANGUAGES)[number]
@@ -25,11 +25,11 @@ export function loadUfoRecorderMessages(language: UfoLanguage): Promise<UfoRecor
   return recorderLoaders[language]()
 }
 
-const witnessSelectorLoaders: Record<UfoLanguage, () => Promise<WitnessSelectorMessages>> = {
-  en: () => import("./WitnessSelectorMessages_en.js").then(m => m.witnessSelectorMessages_en),
-  fr: () => import("./WitnessSelectorMessages_fr.js").then(m => m.witnessSelectorMessages_fr)
+const eyewitnessLoaders: Record<UfoLanguage, () => Promise<EyewitnessMessages>> = {
+  en: () => import("./EyewitnessMessages_en.js").then(m => m.eyewitnessMessages_en),
+  fr: () => import("./EyewitnessMessages_fr.js").then(m => m.eyewitnessMessages_fr)
 }
 
-export function loadWitnessSelectorMessages(language: UfoLanguage): Promise<WitnessSelectorMessages> {
-  return witnessSelectorLoaders[language]()
+export function loadEyewitnessMessages(language: UfoLanguage): Promise<EyewitnessMessages> {
+  return eyewitnessLoaders[language]()
 }

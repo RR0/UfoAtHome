@@ -1,4 +1,5 @@
 import { defineConfig } from "vite"
+import pkg from "./package.json"
 
 /**
  * Builds the standalone, self-registering rr0-ufo.mjs — the
@@ -14,6 +15,9 @@ import { defineConfig } from "vite"
  */
 export default defineConfig({
   base: "./",
+  define: {
+    __APP_VERSION__: JSON.stringify(pkg.version)
+  },
   build: {
     outDir: "dist-embed-ufo",
     emptyOutDir: true,
