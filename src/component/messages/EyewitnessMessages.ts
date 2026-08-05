@@ -2,7 +2,6 @@
  * under this directory (`EyewitnessMessages_en.ts`, `EyewitnessMessages_fr.ts`) and loaded via
  * `loadEyewitnessMessages`. */
 export interface EyewitnessMessages {
-  witness: string
   testimonyBy: string
   about: string
   close: string

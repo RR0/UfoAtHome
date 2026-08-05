@@ -2,7 +2,7 @@ export const html = `
 <div class="toolbar" id="toolbar" hidden>
   <span id="testimony" class="testimony">
     <span id="testimony-prefix">Testimony by</span>
-    <span id="witness-text"></span><select id="witness" hidden></select><span id="testimony-meta"></span>
+    <span id="witness-text"></span><select id="witness" hidden></select>
   </span>
   <button id="info-button" class="info-btn" type="button" title="About" aria-label="About" aria-expanded="false">?</button>
   <div id="info-panel" class="info-panel" hidden>

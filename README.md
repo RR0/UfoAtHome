@@ -221,23 +221,24 @@ block) — likely means unrelated recordings got listed together by mistake.
 | `witnessUrls` | property (get/set) | The manifest as a plain array of URLs, for programmatic use instead of `src` |
 | `loadFromSrc(url)` | method (async) | What the `src` attribute triggers internally; can be called directly too |
 
-A toolbar row sits above the scene: a "Testimony by &lt;witness&gt;, &lt;date&gt;, &lt;location&gt;" sentence on the
-left, and a round "?" info button on the right. The witness portion is plain text for a single witness (a
-one-option `<select>` would be pointless); once there's more than one, it becomes the live `<select>` instead — but
-the sentence itself, and the info button, stay visible either way. The first witness loads automatically once the
-list is known; switching the selector loads that witness's already-fetched recording into the nested `<rr0-scene>`
-(no re-fetch). Setting `witnessUrls` again (e.g. a manifest refresh) keeps the current selection if that witness is
-still present, instead of resetting back to the first.
+A toolbar row sits above the scene: a "Testimony by &lt;witness&gt;" sentence on the left, and a round "?" info
+button on the right. The witness portion is plain text for a single witness (a one-option `<select>` would be
+pointless); once there's more than one, it becomes the live `<select>` instead — but the sentence itself, and the
+info button, stay visible either way. The first witness loads automatically once the list is known; switching the
+selector loads that witness's already-fetched recording into the nested `<rr0-scene>` (no re-fetch). Setting
+`witnessUrls` again (e.g. a manifest refresh) keeps the current selection if that witness is still present, instead
+of resetting back to the first.
 
 Clicking "?" opens a panel, anchored to the button as a floating overlay (it never shifts the canvas below it).
-Its main content is the currently-selected witness's observation metadata (date, location, witness name, case id —
-whichever are actually present in that witness's own `sighting.json`). Below that, a smaller footer row holds the
-app's own name/version on the left, linking to [ufoathome.org](https://ufoathome.org), and a "Credits" link on the
-right that reveals third-party credits on click (the live terrain imagery attribution, once a real relief patch has
-resolved, plus the bundled thunder sound's own required attribution — see [`CREDITS.md`](CREDITS.md)).
+Its main content is the currently-selected witness's observation metadata (date, location, case id — whichever are
+actually present in that witness's own `sighting.json`; the witness's own name isn't repeated here, since it's
+already in the toolbar's testimony line). Below that, a smaller footer row holds the app's own name/version on the
+left, linking to [ufoathome.org](https://ufoathome.org), and a "Credits" link on the right that reveals third-party
+credits on click (the live terrain imagery attribution, once a real relief patch has resolved, plus the bundled
+thunder sound's own required attribution — see [`CREDITS.md`](CREDITS.md)).
 
-All of this component's own labels (Witness, Testimony by, About, Close, Observation/Date/Location/Case, Credits)
-are translated (English/French) the same way as `<rr0-ufo>`'s own labels.
+All of this component's own labels (Testimony by, About, Close, Observation/Date/Location/Case, Credits) are
+translated (English/French) the same way as `<rr0-ufo>`'s own labels.
 
 ## Data format
 

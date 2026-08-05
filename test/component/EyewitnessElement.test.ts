@@ -177,10 +177,7 @@ describe("EyewitnessElement", () => {
     ])
   })
 
-  it("always shows the testimony sentence with date and location, even for a single witness", async () => {
-    stubFetch({
-      "john.json": { ...johnSighting, time: { year: 1948, month: 7, day: 24, hour: 2, minute: 45 }, place: [{ lat: 32.3792, lng: -86.3077 }] }
-    })
+  it("always shows the testimony sentence, even for a single witness — just the witness, no date/location duplicated from the info panel", async () => {
     const element = mount()
     element.witnessUrls = ["john.json"]
     await new Promise(resolve => setTimeout(resolve, 0))
@@ -188,7 +185,6 @@ describe("EyewitnessElement", () => {
     const testimony = element.shadowRoot!.getElementById("testimony") as HTMLElement
     expect(testimony.textContent).toContain("Testimony by")
     expect(testimony.textContent).toContain("Clarence Chiles")
-    expect(testimony.textContent).toContain("32.3792")
   })
 
   it("falls back to witnessId, then the URL itself, when witnessName is missing", async () => {
@@ -293,7 +289,7 @@ describe("EyewitnessElement", () => {
     expect(select.hidden).toBe(true) // nothing to pick between, plain text instead
   })
 
-  it("opens the info panel on click, showing the app version link and the selected witness's observation metadata", async () => {
+  it("opens the info panel on click, showing the app version link and the selected witness's observation metadata (date/location/case, not the witness name — already in the toolbar's testimony line)", async () => {
     stubFetch({ "john.json": { ...johnSighting, time: { year: 1948, month: 7, day: 24, hour: 2, minute: 45 }, place: [{ lat: 32.4, lng: -86.3 }] } })
     const element = mount()
     element.witnessUrls = ["john.json"]
@@ -310,8 +306,9 @@ describe("EyewitnessElement", () => {
     expect(appLink.href).toBe("https://ufoathome.org/")
     expect(appLink.textContent).toMatch(/^UFO@home v\d+\.\d+\.\d+$/)
     const observationList = element.shadowRoot!.getElementById("info-observation-list") as HTMLElement
-    expect(observationList.textContent).toContain("Clarence Chiles")
+    expect(observationList.textContent).toContain("32.4000, -86.3000")
     expect(observationList.textContent).toContain("chiles-whitted")
+    expect(observationList.textContent).not.toContain("Clarence Chiles") // already in the testimony line, not repeated here
 
     infoButton.click()
     expect(infoPanel.hidden).toBe(true)

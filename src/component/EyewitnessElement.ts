@@ -45,11 +45,11 @@ const APP_HOME_URL = "https://ufoathome.org"
  * witness list actually has (a handful of small JSON files).
  *
  * The toolbar (testimony line + the "about" info button) is hidden only when nothing has loaded
- * yet. The testimony line itself — "Testimony by <witness>, <date>, <location>" — is always shown
- * once something has loaded, even for a single witness: the `<select>` only replaces the plain
- * witness name once there's actually more than one to choose between (a one-option dropdown would
- * be pointless), but the sentence around it never disappears — a visitor should always be able to
- * see whose account, and when/where, without opening the info panel.
+ * yet. The testimony line itself — "Testimony by <witness>" — is always shown once something has
+ * loaded, even for a single witness: the `<select>` only replaces the plain witness name once
+ * there's actually more than one to choose between (a one-option dropdown would be pointless), but
+ * the sentence around it never disappears. Date/location/case live only in the info panel's own
+ * Observation section, not duplicated here.
  */
 export class EyewitnessElement extends HTMLElement {
   static get observedAttributes(): string[] {
@@ -62,7 +62,6 @@ export class EyewitnessElement extends HTMLElement {
   private readonly testimonyPrefix: HTMLElement
   private readonly witnessText: HTMLElement
   private readonly witnessSelect: HTMLSelectElement
-  private readonly testimonyMeta: HTMLElement
   private readonly infoButton: HTMLButtonElement
   private readonly infoPanel: HTMLElement
   private readonly infoAppLink: HTMLAnchorElement
@@ -96,7 +95,6 @@ export class EyewitnessElement extends HTMLElement {
     this.testimonyPrefix = this.shadow.getElementById("testimony-prefix")!
     this.witnessText = this.shadow.getElementById("witness-text")!
     this.witnessSelect = this.shadow.getElementById("witness") as HTMLSelectElement
-    this.testimonyMeta = this.shadow.getElementById("testimony-meta")!
     this.infoButton = this.shadow.getElementById("info-button") as HTMLButtonElement
     this.infoPanel = this.shadow.getElementById("info-panel")!
     this.infoAppLink = this.shadow.getElementById("info-app-link") as HTMLAnchorElement
@@ -225,25 +223,14 @@ export class EyewitnessElement extends HTMLElement {
     if (this.infoOpen) this.populateInfoPanel()
   }
 
-  /** Keeps the toolbar's "Testimony by <witness>, <date>, <location>" line in sync with the
-   * currently selected entry — the witness portion is plain text for a single witness (the
-   * `<select>` would be pointless with nothing to choose between) or the live `<select>` once
-   * there's more than one, but the sentence itself is always shown, even for one witness: this is
-   * the one place a visitor sees whose account they're looking at, and when and where it
-   * happened, without having to open the info panel. */
+  /** Keeps the toolbar's "Testimony by <witness>" line in sync with the currently selected
+   * entry — plain text for a single witness (the `<select>` would be pointless with nothing to
+   * choose between), the live `<select>`'s own display once there's more than one. */
   private updateTestimonyLine(): void {
     const entry = this.entries.find(e => e.src === this.currentSrc)
     if (entry) {
       this.witnessText.textContent = entry.sighting.witnessName ?? entry.sighting.witnessId ?? entry.src
     }
-    const parts: string[] = []
-    if (entry) {
-      const date = this.formatDate(entry.sighting)
-      if (date) parts.push(date)
-      const location = this.formatLocation(entry.sighting)
-      if (location) parts.push(location)
-    }
-    this.testimonyMeta.textContent = parts.length > 0 ? `, ${parts.join(", ")}` : ""
   }
 
   private formatDate(sighting: SightingRecordingJson): string | undefined {
@@ -297,9 +284,6 @@ export class EyewitnessElement extends HTMLElement {
       const location = this.formatLocation(entry.sighting)
       if (location) {
         this.appendInfoRow(this.infoObservationList, this.messages.location, location)
-      }
-      if (entry.sighting.witnessName) {
-        this.appendInfoRow(this.infoObservationList, this.messages.witness, entry.sighting.witnessName)
       }
       if (entry.sighting.caseId) {
         this.appendInfoRow(this.infoObservationList, this.messages.case, entry.sighting.caseId)
