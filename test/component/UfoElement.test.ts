@@ -304,6 +304,7 @@ describe("UfoElement", () => {
 
   it("canvas click-to-play can be disabled (e.g. by UfoRecorderElement, which uses the canvas for drag-to-record)", () => {
     const element = mount()
+    element.sightingData = twoKeyframeSighting() // a real duration — otherwise Play is disabled regardless, see above
     element.enableClickToPlay = false
     const button = element.shadowRoot!.getElementById("play-pause") as HTMLButtonElement
     expect(button.title).toBe("Play")
@@ -315,6 +316,7 @@ describe("UfoElement", () => {
   it("loads French labels when navigator.languages prefers fr, with no language picker", async () => {
     const spy = vi.spyOn(navigator, "languages", "get").mockReturnValue(["fr-FR", "fr"])
     const element = mount()
+    element.sightingData = twoKeyframeSighting() // a real duration, so the label is "Lecture" and not the disabled one
     const button = element.shadowRoot!.getElementById("play-pause") as HTMLButtonElement
     // The dynamic import() of the fr messages module resolves over more than one tick under
     // Vitest's transform pipeline — poll rather than assume a single setTimeout(0) is enough.
@@ -327,10 +329,21 @@ describe("UfoElement", () => {
   it("falls back to the English defaults when navigator.languages has no supported match", async () => {
     const spy = vi.spyOn(navigator, "languages", "get").mockReturnValue(["de-DE", "de"])
     const element = mount()
+    element.sightingData = twoKeyframeSighting()
     await new Promise(resolve => setTimeout(resolve, 20)) // no fr/en module load is triggered; just let any microtasks settle
     const button = element.shadowRoot!.getElementById("play-pause") as HTMLButtonElement
     expect(button.title).toBe("Play")
     spy.mockRestore()
+  })
+
+  it("explains why Play is disabled instead of leaving a stale label", () => {
+    const element = mount()
+    const button = element.shadowRoot!.getElementById("play-pause") as HTMLButtonElement
+    expect(button.title).toBe("No observation duration")
+    expect(button.getAttribute("aria-label")).toBe("No observation duration")
+
+    element.sightingData = twoKeyframeSighting()
+    expect(button.title).toBe("Play")
   })
 
   it("the toolbar auto-hides while playing and stays shown while paused/stopped", () => {

@@ -278,13 +278,16 @@ export class UfoElement extends HTMLElement {
   private updatePlayPauseButton(): void {
     const isPlaying = this.player.playbackState === "playing"
     this.playPauseButton.textContent = isPlaying ? "⏸" : "▶"
-    this.playPauseButton.title = isPlaying ? this.messages.pause : this.messages.play
-    this.playPauseButton.setAttribute("aria-label", isPlaying ? this.messages.pause : this.messages.play)
     // Nothing to play with zero observation duration (no declared duration and nothing recorded
     // yet) — disabled rather than silently doing nothing on click, which otherwise briefly
     // flickers into "playing" and straight back out again every time (see Player.play()'s
-    // immediate-stop branch when seekableDuration is 0).
-    this.playPauseButton.disabled = this.player.seekableDuration <= 0
+    // immediate-stop branch when seekableDuration is 0). The title/label explain *why* it's
+    // disabled instead of just showing a stale "Play" that gives no hint anything's wrong.
+    const hasDuration = this.player.seekableDuration > 0
+    this.playPauseButton.disabled = !hasDuration
+    const label = !hasDuration ? this.messages.noDuration : isPlaying ? this.messages.pause : this.messages.play
+    this.playPauseButton.title = label
+    this.playPauseButton.setAttribute("aria-label", label)
     // Auto-hides the toolbar while playing (reappears on hover/focus — see the CSS) so it doesn't
     // sit over the scene the whole time; always shown while paused/stopped, since that's when the
     // user is most likely to want it (e.g. right after it stopped, or to scrub before playing).

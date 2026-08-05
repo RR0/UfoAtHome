@@ -3,6 +3,7 @@
 export interface UfoMessages {
   play: string
   pause: string
+  noDuration: string
   autoReplay: string
   currentPosition: string
   duration: string
