@@ -128,6 +128,39 @@ describe("Timeline", () => {
     expect(timeline.sourceIds.sort()).toEqual(["a", "b"])
   })
 
+  it("removeSource strips only that source, leaving others' data untouched", () => {
+    const timeline = new Timeline()
+    timeline.addKeyframe(0, [{ sourceId: "a", shape: shapeAt(0) }, { sourceId: "b", shape: shapeAt(10) }])
+    timeline.addKeyframe(100, [{ sourceId: "a", shape: shapeAt(1) }])
+
+    timeline.removeSource("a")
+
+    expect(timeline.sourceIds).toEqual(["b"])
+    expect(timeline.getShapeAt(0, "b")?.bounds.x).toBe(10)
+    expect(timeline.getShapeAt(0, "a")).toBeUndefined()
+    expect(timeline.getShapeAt(100, "a")).toBeUndefined()
+  })
+
+  it("removeSource drops a keyframe entirely once it has no shapes left", () => {
+    const timeline = new Timeline()
+    timeline.addKeyframe(0, [{ sourceId: "a", shape: shapeAt(0) }])
+    timeline.addKeyframe(100, [{ sourceId: "a", shape: shapeAt(1) }, { sourceId: "b", shape: shapeAt(2) }])
+
+    timeline.removeSource("a")
+
+    expect(timeline.allKeyframes.map(k => k.t)).toEqual([100]) // the now-empty t=0 keyframe is gone
+  })
+
+  it("removeSource on an unknown source id is a no-op", () => {
+    const timeline = new Timeline()
+    timeline.addKeyframe(0, [{ sourceId: "a", shape: shapeAt(0) }])
+
+    timeline.removeSource("nonexistent")
+
+    expect(timeline.sourceIds).toEqual(["a"])
+    expect(timeline.allKeyframes).toHaveLength(1)
+  })
+
   it("round-trips through toJSON/fromJSON", () => {
     const timeline = new Timeline()
     timeline.addKeyframe(0, [{ sourceId: "a", shape: shapeAt(0) }])

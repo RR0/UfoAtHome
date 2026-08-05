@@ -126,6 +126,23 @@ export class Timeline {
     return undefined
   }
 
+  /**
+   * Strips one source out of every keyframe it appears in — the counterpart to addKeyframe's
+   * own per-source merge, so deleting a shape can't touch any other source's data. Keyframes
+   * left with no shapes at all are dropped entirely rather than kept as empty entries, matching
+   * addKeyframe never producing one in the first place.
+   */
+  removeSource(sourceId: string): void {
+    for (let i = this.keyframes.length - 1; i >= 0; i--) {
+      const shapes = this.keyframes[i].shapes.filter(s => s.sourceId !== sourceId)
+      if (shapes.length === 0) {
+        this.keyframes.splice(i, 1)
+      } else if (shapes.length !== this.keyframes[i].shapes.length) {
+        this.keyframes[i] = { t: this.keyframes[i].t, shapes }
+      }
+    }
+  }
+
   get duration(): number {
     return this.keyframes.length === 0 ? 0 : this.keyframes[this.keyframes.length - 1].t
   }

@@ -10,6 +10,7 @@ export interface UfoRecorderMessages {
   halo: string
   shape: string
   addShape: string
+  deleteShape: string
   samplingRate: string
   duration: string
   durationPlaceholder: string

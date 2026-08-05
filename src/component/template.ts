@@ -12,7 +12,8 @@ export const html = `
 <div class="toolbar">
   <button id="record" type="button" class="record-btn"></button>
   <label><span id="label-shape">Shape</span> <select id="source"></select></label>
-  <button id="add-shape" type="button">Add shape</button>
+  <button id="add-shape" type="button" class="icon-btn" title="Add shape" aria-label="Add shape">+</button>
+  <button id="delete-shape" type="button" class="icon-btn" title="Delete shape" aria-label="Delete shape">🗑</button>
   <label><span id="label-sampling-rate">Sampling rate (ms)</span> <input id="samplingRate" type="number" min="16" step="16" value="100"/></label>
   <label><span id="label-duration">Duration (s)</span> <input id="durationSeconds" type="number" min="0" step="0.1" placeholder="recording length"/></label>
   <button id="export" type="button">Export JSON</button>
@@ -93,5 +94,21 @@ button.preset[aria-pressed="true"] {
   font-size: 1em;
   line-height: 1;
   color: #e33;
+}
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.8em;
+  height: 1.8em;
+  padding: 0;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 1em;
+  line-height: 1;
+}
+.icon-btn:disabled {
+  cursor: default;
+  opacity: 0.4;
 }
 `

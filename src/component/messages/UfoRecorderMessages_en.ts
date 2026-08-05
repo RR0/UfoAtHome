@@ -9,6 +9,7 @@ export const ufoRecorderMessages_en: UfoRecorderMessages = {
   halo: "Halo",
   shape: "Shape",
   addShape: "Add shape",
+  deleteShape: "Delete shape",
   samplingRate: "Sampling rate (ms)",
   duration: "Duration (s)",
   durationPlaceholder: "recording length",

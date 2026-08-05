@@ -83,6 +83,7 @@ export class UfoRecorderElement extends HTMLElement {
   private readonly haloScaleInput: HTMLInputElement
   private readonly sourceSelect: HTMLSelectElement
   private readonly addShapeButton: HTMLButtonElement
+  private readonly deleteShapeButton: HTMLButtonElement
   private readonly durationInput: HTMLInputElement
   private readonly exportButton: HTMLButtonElement
   private readonly latInput: HTMLInputElement
@@ -220,6 +221,7 @@ export class UfoRecorderElement extends HTMLElement {
     this.haloScaleInput = this.shadow.getElementById("haloScale") as HTMLInputElement
     this.sourceSelect = this.shadow.getElementById("source") as HTMLSelectElement
     this.addShapeButton = this.shadow.getElementById("add-shape") as HTMLButtonElement
+    this.deleteShapeButton = this.shadow.getElementById("delete-shape") as HTMLButtonElement
     this.durationInput = this.shadow.getElementById("durationSeconds") as HTMLInputElement
     this.exportButton = this.shadow.getElementById("export") as HTMLButtonElement
     this.latInput = this.shadow.getElementById("lat") as HTMLInputElement
@@ -266,6 +268,7 @@ export class UfoRecorderElement extends HTMLElement {
     this.ufoElement.canvasElement.addEventListener("pointermove", event => this.onPointerMove(event))
     this.recordButton.addEventListener("click", () => this.toggleRecording())
     this.addShapeButton.addEventListener("click", () => this.addShape())
+    this.deleteShapeButton.addEventListener("click", () => this.deleteShape())
     this.exportButton.addEventListener("click", () => this.exportJson())
     this.durationInput.addEventListener("input", () => {
       this.ufoElement.durationSeconds = this.durationInput.value === "" ? undefined : Number(this.durationInput.value)
@@ -597,6 +600,14 @@ export class UfoRecorderElement extends HTMLElement {
     this.syncAppearanceFromTimeline()
     this.syncObserverFromTimeline()
     this.ufoElement.selectedSourceId = this.currentSourceId
+    // Disabled for a source that's only a not-yet-drawn placeholder (see addShape's own
+    // fallback), or once it's the very last real shape (a recording always needs at least one —
+    // see deleteShape()'s own doc comment) — and never re-enabled mid-recording even if this
+    // happens to run then (the isRecording branch of toggleRecording() already disables it, this
+    // is just a second guard so that branch's own disabling can never get silently overridden
+    // here).
+    const sourceIds = this.ufoElement.sighting.timeline.sourceIds
+    this.deleteShapeButton.disabled = this.isRecording || sourceIds.length <= 1 || !sourceIds.includes(this.currentSourceId)
   }
 
   /** Keeps the toolbar honest when the playhead or selected source changes, so touching one
@@ -633,6 +644,30 @@ export class UfoRecorderElement extends HTMLElement {
     this.currentSourceId = `ufo-${n}`
     this.applyAppearanceAtPlayhead(this.offsetDefaultBounds(timeline.sourceIds.length))
     this.refreshSourceList()
+  }
+
+  /** Removes the selected shape/source entirely — every keyframe it appears in across the
+   * whole recording, not just at the playhead — then falls back to the next remaining source
+   * (mirrors addShape()'s own "pick the next one" logic). Refuses to remove the last shape: a
+   * recording always needs at least one, and emptying it out would fall back to the same
+   * not-yet-drawn placeholder state as a brand-new recording, which nothing else in this element
+   * is built to re-enter once construction's own initial keyframe (see the constructor) has
+   * already been written. Disabled while recording (deleteShapeButton.disabled, set in
+   * toggleRecording()) for the same reason addShapeButton is: deleting the very source the
+   * recorder is actively writing keyframes into would be pulling the rug out from under it. */
+  private deleteShape(): void {
+    if (this.isRecording) return
+    const timeline = this.ufoElement.sighting.timeline
+    if (timeline.sourceIds.length <= 1) return // always keep at least one shape
+    if (!timeline.sourceIds.includes(this.currentSourceId)) return // nothing real to delete
+    timeline.removeSource(this.currentSourceId)
+    this.currentSourceId = timeline.sourceIds[0]
+    this.refreshSourceList()
+    // Triggers a timeupdate on the nested ufo, which onSelectionOrTimeChanged() (its listener,
+    // wired in the constructor) uses to resync the appearance toolbar/canvas selection/delete
+    // button state to the new currentSourceId — same idiom addShape() and every drag path use,
+    // rather than duplicating that resync here.
+    this.ufoElement.refresh()
   }
 
   /** Staggers each successive new shape diagonally by `index` (the count of shapes that
@@ -707,6 +742,7 @@ export class UfoRecorderElement extends HTMLElement {
       // different shape than the one actually being recorded into.
       this.sourceSelect.disabled = true
       this.addShapeButton.disabled = true
+      this.deleteShapeButton.disabled = true
     }
   }
 
@@ -741,7 +777,10 @@ export class UfoRecorderElement extends HTMLElement {
     this.labelSamplingRate.textContent = messages.samplingRate
     this.labelDuration.textContent = messages.duration
     this.durationInput.placeholder = messages.durationPlaceholder
-    this.addShapeButton.textContent = messages.addShape
+    this.addShapeButton.title = messages.addShape
+    this.addShapeButton.setAttribute("aria-label", messages.addShape)
+    this.deleteShapeButton.title = messages.deleteShape
+    this.deleteShapeButton.setAttribute("aria-label", messages.deleteShape)
     this.exportButton.textContent = messages.export
     this.labelLatitude.textContent = messages.latitude
     this.labelLongitude.textContent = messages.longitude

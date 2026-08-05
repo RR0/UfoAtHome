@@ -541,19 +541,23 @@ describe("UfoRecorderElement post-hoc appearance editing + multi-shape authoring
     expect(JSON.stringify(element.sightingData)).toBe(before)
   })
 
-  it("disables the source select and add-shape button while recording", () => {
+  it("disables the source select, add-shape and delete-shape buttons while recording", () => {
     const element = mount()
-    const sourceSelect = element.shadowRoot!.getElementById("source") as HTMLSelectElement
     const addShapeButton = element.shadowRoot!.getElementById("add-shape") as HTMLButtonElement
+    addShapeButton.click() // a 2nd shape, so delete-shape isn't disabled for an unrelated reason below
+    const sourceSelect = element.shadowRoot!.getElementById("source") as HTMLSelectElement
+    const deleteShapeButton = element.shadowRoot!.getElementById("delete-shape") as HTMLButtonElement
     const recordButton = element.shadowRoot!.getElementById("record") as HTMLButtonElement
 
     recordButton.click()
     expect(sourceSelect.disabled).toBe(true)
     expect(addShapeButton.disabled).toBe(true)
+    expect(deleteShapeButton.disabled).toBe(true)
 
     recordButton.click()
     expect(sourceSelect.disabled).toBe(false)
     expect(addShapeButton.disabled).toBe(false)
+    expect(deleteShapeButton.disabled).toBe(false)
   })
 
   it("Escape stops an in-progress recording, same as clicking Stop", () => {
@@ -586,6 +590,69 @@ describe("UfoRecorderElement post-hoc appearance editing + multi-shape authoring
     // with or replace it.
     const sourceIds = element.sightingData.timeline.keyframes.flatMap(k => k.shapes.map(s => s.sourceId))
     expect(sourceIds).toEqual(["ufo-1", "ufo-2"])
+  })
+
+  it("Delete shape removes the selected source from every keyframe it appears in", () => {
+    const element = mount()
+    const addShapeButton = element.shadowRoot!.getElementById("add-shape") as HTMLButtonElement
+    addShapeButton.click() // now "ufo-1" (construction default) + "ufo-2"
+    const sourceSelect = element.shadowRoot!.getElementById("source") as HTMLSelectElement
+    sourceSelect.value = "ufo-1"
+    sourceSelect.dispatchEvent(new Event("change"))
+
+    const deleteShapeButton = element.shadowRoot!.getElementById("delete-shape") as HTMLButtonElement
+    deleteShapeButton.click()
+
+    const sourceIds = element.sightingData.timeline.keyframes.flatMap(k => k.shapes.map(s => s.sourceId))
+    expect(sourceIds).toEqual(["ufo-2"])
+  })
+
+  it("Delete shape falls back to the next remaining source and resyncs the toolbar to it", () => {
+    const element = mount()
+    element.sightingData = {
+      version: 1,
+      timeline: {
+        keyframes: [
+          { t: 0, shapes: [
+            { sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 0, y: 0, width: 10, height: 10 }, color: "#39ff14", angle: 0, transparency: 0, haloScale: 1.5, selected: false } },
+            { sourceId: "ufo-2", shape: { kind: "oval", bounds: { x: 50, y: 0, width: 10, height: 10 }, color: "#ff8800", angle: 0, transparency: 0.5, haloScale: 2, selected: false } }
+          ] }
+        ]
+      }
+    }
+    const sourceSelect = element.shadowRoot!.getElementById("source") as HTMLSelectElement
+    expect(sourceSelect.value).toBe("ufo-1")
+
+    const deleteShapeButton = element.shadowRoot!.getElementById("delete-shape") as HTMLButtonElement
+    deleteShapeButton.click()
+
+    expect(sourceSelect.value).toBe("ufo-2")
+    expect(element.appearance).toEqual({ presetId: "oval", color: "#ff8800", transparency: 0.5, haloScale: 2 })
+  })
+
+  it("Delete shape is disabled for the only remaining shape — a recording always needs at least one", () => {
+    const element = mount() // just the construction default, "ufo-1" — nothing else to fall back to
+    const deleteShapeButton = element.shadowRoot!.getElementById("delete-shape") as HTMLButtonElement
+    expect(deleteShapeButton.disabled).toBe(true)
+
+    deleteShapeButton.click() // a stray click/event must be a no-op, not empty the recording out
+
+    const sourceIds = element.sightingData.timeline.keyframes.flatMap(k => k.shapes.map(s => s.sourceId))
+    expect(sourceIds).toEqual(["ufo-1"])
+  })
+
+  it("Delete shape re-disables itself once deletion brings the count back down to one", () => {
+    const element = mount()
+    const addShapeButton = element.shadowRoot!.getElementById("add-shape") as HTMLButtonElement
+    addShapeButton.click() // "ufo-1" + "ufo-2"
+    const deleteShapeButton = element.shadowRoot!.getElementById("delete-shape") as HTMLButtonElement
+    expect(deleteShapeButton.disabled).toBe(false)
+
+    deleteShapeButton.click() // back down to just "ufo-1"
+
+    expect(deleteShapeButton.disabled).toBe(true)
+    const sourceIds = element.sightingData.timeline.keyframes.flatMap(k => k.shapes.map(s => s.sourceId))
+    expect(sourceIds).toEqual(["ufo-1"])
   })
 
   it("loading sightingData with different source ids resets the editing target instead of using the stale default", () => {
@@ -1245,7 +1312,7 @@ describe("UfoRecorderElement i18n", () => {
     const addShapeButton = element.shadowRoot!.getElementById("add-shape") as HTMLButtonElement
     // The dynamic import() of the fr messages module resolves over more than one tick under
     // Vitest's transform pipeline — poll rather than assume a single setTimeout(0) is enough.
-    await waitFor(() => addShapeButton.textContent === "Ajouter une forme")
+    await waitFor(() => addShapeButton.title === "Ajouter une forme")
 
     expect(element.shadowRoot!.getElementById("label-color")!.textContent).toBe("Couleur")
     expect(element.shadowRoot!.getElementById("label-duration")!.textContent).toBe("Durée (s)")
@@ -1255,6 +1322,8 @@ describe("UfoRecorderElement i18n", () => {
     expect(durationInput.placeholder).toBe("durée de l'enregistrement")
     const recordButton = element.shadowRoot!.getElementById("record") as HTMLButtonElement
     expect(recordButton.title).toBe("Enregistrer")
+    const deleteShapeButton = element.shadowRoot!.getElementById("delete-shape") as HTMLButtonElement
+    expect(deleteShapeButton.title).toBe("Supprimer la forme")
 
     spy.mockRestore()
   })
@@ -1264,7 +1333,8 @@ describe("UfoRecorderElement i18n", () => {
     const element = mount()
     await new Promise(resolve => setTimeout(resolve, 20)) // no fr/en module load is triggered; just let any microtasks settle
 
-    expect(element.shadowRoot!.getElementById("add-shape")!.textContent).toBe("Add shape")
+    expect(element.shadowRoot!.getElementById("add-shape")!.title).toBe("Add shape")
+    expect(element.shadowRoot!.getElementById("delete-shape")!.title).toBe("Delete shape")
     spy.mockRestore()
   })
 })
