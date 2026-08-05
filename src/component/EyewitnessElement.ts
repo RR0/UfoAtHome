@@ -44,10 +44,12 @@ const APP_HOME_URL = "https://ufoathome.org"
  * is fetched upfront (to read its name), not lazily on selection — fine at the scale a case's
  * witness list actually has (a handful of small JSON files).
  *
- * The toolbar (witness picker + the "about" info button) is hidden only when nothing has loaded
- * yet; the witness `<select>` itself stays hidden when there's nothing to actually choose between
- * (0 or 1 witness), independent of the toolbar's own visibility — the info button must stay
- * reachable even for a single-witness sighting.
+ * The toolbar (testimony line + the "about" info button) is hidden only when nothing has loaded
+ * yet. The testimony line itself — "Testimony by <witness>, <date>, <location>" — is always shown
+ * once something has loaded, even for a single witness: the `<select>` only replaces the plain
+ * witness name once there's actually more than one to choose between (a one-option dropdown would
+ * be pointless), but the sentence around it never disappears — a visitor should always be able to
+ * see whose account, and when/where, without opening the info panel.
  */
 export class EyewitnessElement extends HTMLElement {
   static get observedAttributes(): string[] {
@@ -57,21 +59,23 @@ export class EyewitnessElement extends HTMLElement {
   private readonly shadow: ShadowRoot
   private readonly sceneElement: SceneElement
   private readonly toolbarElement: HTMLElement
-  private readonly witnessPicker: HTMLElement
+  private readonly testimonyPrefix: HTMLElement
+  private readonly witnessText: HTMLElement
   private readonly witnessSelect: HTMLSelectElement
-  private readonly labelWitness: HTMLElement
+  private readonly testimonyMeta: HTMLElement
   private readonly infoButton: HTMLButtonElement
   private readonly infoPanel: HTMLElement
   private readonly infoAppLink: HTMLAnchorElement
   private readonly infoObservationHeading: HTMLElement
   private readonly infoObservationList: HTMLElement
-  private readonly infoCreditsHeading: HTMLElement
+  private readonly infoCreditsToggle: HTMLButtonElement
   private readonly infoCreditsList: HTMLElement
   private readonly infoCloseButton: HTMLButtonElement
 
   private entries: WitnessEntry[] = []
   private currentSrc?: string
   private infoOpen = false
+  private creditsOpen = false
   private language: UfoLanguage = "en"
   private messages: EyewitnessMessages = eyewitnessMessages_en
 
@@ -89,21 +93,23 @@ export class EyewitnessElement extends HTMLElement {
     this.shadow.getElementById("ufo-slot")!.replaceWith(this.sceneElement)
 
     this.toolbarElement = this.shadow.getElementById("toolbar")!
-    this.witnessPicker = this.shadow.getElementById("witness-picker")!
+    this.testimonyPrefix = this.shadow.getElementById("testimony-prefix")!
+    this.witnessText = this.shadow.getElementById("witness-text")!
     this.witnessSelect = this.shadow.getElementById("witness") as HTMLSelectElement
-    this.labelWitness = this.shadow.getElementById("label-witness")!
+    this.testimonyMeta = this.shadow.getElementById("testimony-meta")!
     this.infoButton = this.shadow.getElementById("info-button") as HTMLButtonElement
     this.infoPanel = this.shadow.getElementById("info-panel")!
     this.infoAppLink = this.shadow.getElementById("info-app-link") as HTMLAnchorElement
     this.infoObservationHeading = this.shadow.getElementById("info-observation-heading")!
     this.infoObservationList = this.shadow.getElementById("info-observation-list")!
-    this.infoCreditsHeading = this.shadow.getElementById("info-credits-heading")!
+    this.infoCreditsToggle = this.shadow.getElementById("info-credits-toggle") as HTMLButtonElement
     this.infoCreditsList = this.shadow.getElementById("info-credits-list")!
     this.infoCloseButton = this.shadow.getElementById("info-close") as HTMLButtonElement
 
     this.witnessSelect.addEventListener("change", () => this.selectWitness(this.witnessSelect.value))
     this.infoButton.addEventListener("click", () => this.toggleInfoPanel())
     this.infoCloseButton.addEventListener("click", () => this.toggleInfoPanel())
+    this.infoCreditsToggle.addEventListener("click", () => this.toggleCredits())
 
     void this.loadLocaleMessages()
   }
@@ -116,13 +122,14 @@ export class EyewitnessElement extends HTMLElement {
     this.language = selectLocale(navigator.languages, UFO_SUPPORTED_LANGUAGES) as UfoLanguage
     if (this.language === "en") return
     this.messages = await loadEyewitnessMessages(this.language)
-    this.labelWitness.textContent = this.messages.witness
+    this.testimonyPrefix.textContent = this.messages.testimonyBy
     this.infoButton.title = this.messages.about
     this.infoButton.setAttribute("aria-label", this.messages.about)
     this.infoCloseButton.setAttribute("aria-label", this.messages.close)
     this.infoObservationHeading.textContent = this.messages.observation
-    this.infoCreditsHeading.textContent = this.messages.credits
+    this.infoCreditsToggle.textContent = this.messages.credits
     if (this.infoOpen) this.populateInfoPanel()
+    this.updateTestimonyLine()
   }
 
   connectedCallback(): void {
@@ -175,8 +182,9 @@ export class EyewitnessElement extends HTMLElement {
     this.warnOnMismatchedCaseIds(entries)
 
     this.toolbarElement.hidden = entries.length === 0
-    const showPicker = entries.length > 1
-    this.witnessPicker.hidden = !showPicker
+    const showSelect = entries.length > 1
+    this.witnessSelect.hidden = !showSelect
+    this.witnessText.hidden = showSelect
     this.witnessSelect.innerHTML = ""
     for (const entry of entries) {
       const option = document.createElement("option")
@@ -190,6 +198,8 @@ export class EyewitnessElement extends HTMLElement {
     const next = entries.find(entry => entry.src === this.currentSrc) ?? entries[0]
     if (next) {
       this.selectWitness(next.src)
+    } else {
+      this.updateTestimonyLine()
     }
   }
 
@@ -211,40 +221,82 @@ export class EyewitnessElement extends HTMLElement {
     // Already fetched by loadWitnessUrls — no need to re-fetch on every selection change.
     // SceneElement's own setter updates astronomy/weather/terrain for the new sighting too.
     this.sceneElement.sightingData = entry.sighting
+    this.updateTestimonyLine()
     if (this.infoOpen) this.populateInfoPanel()
+  }
+
+  /** Keeps the toolbar's "Testimony by <witness>, <date>, <location>" line in sync with the
+   * currently selected entry — the witness portion is plain text for a single witness (the
+   * `<select>` would be pointless with nothing to choose between) or the live `<select>` once
+   * there's more than one, but the sentence itself is always shown, even for one witness: this is
+   * the one place a visitor sees whose account they're looking at, and when and where it
+   * happened, without having to open the info panel. */
+  private updateTestimonyLine(): void {
+    const entry = this.entries.find(e => e.src === this.currentSrc)
+    if (entry) {
+      this.witnessText.textContent = entry.sighting.witnessName ?? entry.sighting.witnessId ?? entry.src
+    }
+    const parts: string[] = []
+    if (entry) {
+      const date = this.formatDate(entry.sighting)
+      if (date) parts.push(date)
+      const location = this.formatLocation(entry.sighting)
+      if (location) parts.push(location)
+    }
+    this.testimonyMeta.textContent = parts.length > 0 ? `, ${parts.join(", ")}` : ""
+  }
+
+  private formatDate(sighting: SightingRecordingJson): string | undefined {
+    const place = sighting.place?.[0]
+    const date = sightingTimeToDate(sighting.time ?? {}, place?.lng ?? 0)
+    if (!date) return undefined
+    return new Intl.DateTimeFormat(this.language === "fr" ? "fr-FR" : "en-US", { dateStyle: "long", timeStyle: "short" }).format(date)
+  }
+
+  private formatLocation(sighting: SightingRecordingJson): string | undefined {
+    const place = sighting.place?.[0]
+    if (!place) return undefined
+    return `${place.lat.toFixed(4)}, ${place.lng.toFixed(4)}`
   }
 
   private toggleInfoPanel(): void {
     this.infoOpen = !this.infoOpen
     this.infoPanel.hidden = !this.infoOpen
     this.infoButton.setAttribute("aria-expanded", String(this.infoOpen))
-    if (this.infoOpen) this.populateInfoPanel()
+    if (this.infoOpen) {
+      this.populateInfoPanel()
+    } else {
+      this.creditsOpen = false
+      this.infoCreditsList.hidden = true
+      this.infoCreditsToggle.setAttribute("aria-expanded", "false")
+    }
   }
 
-  /** Fills the info panel's three sections in one pass: app identity/version (linking to the
-   * tool's own home, not this specific recording), the currently-selected witness's observation
-   * metadata, and third-party credits (live terrain imagery attribution once a real patch has
-   * resolved, plus the always-bundled thunder sound credit). Re-run on open and whenever the
-   * selected witness changes while the panel is already open — cheap enough not to bother with a
-   * more granular per-section update path. */
-  private populateInfoPanel(): void {
-    this.infoAppLink.href = APP_HOME_URL
-    this.infoAppLink.textContent = `UFO@home v${__APP_VERSION__}`
+  private toggleCredits(): void {
+    this.creditsOpen = !this.creditsOpen
+    this.infoCreditsList.hidden = !this.creditsOpen
+    this.infoCreditsToggle.setAttribute("aria-expanded", String(this.creditsOpen))
+  }
 
+  /** Fills the info panel in one pass: the currently-selected witness's observation metadata
+   * (the primary content, shown first), then the smaller footer row below it — app identity
+   * (linking to the tool's own home, not this specific recording) and the credits toggle. The
+   * credits list itself (live terrain imagery attribution once a real patch has resolved, plus
+   * the always-bundled thunder sound credit) is populated here too but stays collapsed until
+   * toggleCredits() reveals it — no point building visible DOM for content nobody asked to see
+   * yet. Re-run on open and whenever the selected witness changes while the panel is already
+   * open — cheap enough not to bother with a more granular per-section update path. */
+  private populateInfoPanel(): void {
     const entry = this.entries.find(e => e.src === this.currentSrc)
     this.infoObservationList.innerHTML = ""
     if (entry) {
-      const place = entry.sighting.place?.[0]
-      const date = sightingTimeToDate(entry.sighting.time ?? {}, place?.lng ?? 0)
+      const date = this.formatDate(entry.sighting)
       if (date) {
-        this.appendInfoRow(
-          this.infoObservationList,
-          this.messages.date,
-          new Intl.DateTimeFormat(this.language === "fr" ? "fr-FR" : "en-US", { dateStyle: "long", timeStyle: "short" }).format(date)
-        )
+        this.appendInfoRow(this.infoObservationList, this.messages.date, date)
       }
-      if (place) {
-        this.appendInfoRow(this.infoObservationList, this.messages.location, `${place.lat.toFixed(4)}, ${place.lng.toFixed(4)}`)
+      const location = this.formatLocation(entry.sighting)
+      if (location) {
+        this.appendInfoRow(this.infoObservationList, this.messages.location, location)
       }
       if (entry.sighting.witnessName) {
         this.appendInfoRow(this.infoObservationList, this.messages.witness, entry.sighting.witnessName)
@@ -253,6 +305,9 @@ export class EyewitnessElement extends HTMLElement {
         this.appendInfoRow(this.infoObservationList, this.messages.case, entry.sighting.caseId)
       }
     }
+
+    this.infoAppLink.href = APP_HOME_URL
+    this.infoAppLink.textContent = `UFO@home v${__APP_VERSION__}`
 
     this.infoCreditsList.innerHTML = ""
     const terrainAttribution = this.sceneElement.currentTerrainAttribution

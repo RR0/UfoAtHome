@@ -3,6 +3,7 @@
  * `loadEyewitnessMessages`. */
 export interface EyewitnessMessages {
   witness: string
+  testimonyBy: string
   about: string
   close: string
   observation: string

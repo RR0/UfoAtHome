@@ -1,18 +1,21 @@
 export const html = `
 <div class="toolbar" id="toolbar" hidden>
-  <label id="witness-picker"><span id="label-witness">Witness</span> <select id="witness"></select></label>
+  <span id="testimony" class="testimony">
+    <span id="testimony-prefix">Testimony by</span>
+    <span id="witness-text"></span><select id="witness" hidden></select><span id="testimony-meta"></span>
+  </span>
   <button id="info-button" class="info-btn" type="button" title="About" aria-label="About" aria-expanded="false">?</button>
   <div id="info-panel" class="info-panel" hidden>
     <button id="info-close" class="info-close" type="button" aria-label="Close">×</button>
-    <p class="info-app"><a id="info-app-link" href="https://ufoathome.org" target="_blank" rel="noopener"></a></p>
     <section>
       <h3 id="info-observation-heading">Observation</h3>
       <dl id="info-observation-list" class="info-dl"></dl>
     </section>
-    <section>
-      <h3 id="info-credits-heading">Credits</h3>
-      <ul id="info-credits-list" class="info-ul"></ul>
-    </section>
+    <div class="info-footer">
+      <a id="info-app-link" href="https://ufoathome.org" target="_blank" rel="noopener"></a>
+      <button id="info-credits-toggle" class="info-credits-toggle" type="button" aria-expanded="false">Credits</button>
+    </div>
+    <ul id="info-credits-list" class="info-ul" hidden></ul>
   </div>
 </div>
 <div id="ufo-slot"></div>
@@ -34,6 +37,15 @@ export const css = `
   align-items: center;
   gap: 0.5em;
   margin-bottom: 0.5em;
+}
+.testimony {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.testimony select {
+  max-width: 12em;
 }
 .info-btn {
   margin-left: auto;
@@ -78,12 +90,8 @@ export const css = `
   line-height: 1;
   padding: 0;
 }
-.info-app {
-  margin: 0 1.6em 0.5em 0;
-  font-weight: bold;
-}
 .info-panel h3 {
-  margin: 0.6em 0 0.2em;
+  margin: 0 0 0.2em;
   font-size: 0.95em;
 }
 .info-dl {
@@ -98,8 +106,33 @@ export const css = `
 .info-dl dd {
   margin: 0;
 }
+/* The smaller, secondary row below the observation details — app identity on the left, the
+   credits reveal on the right, matching the reduced visual weight of "fine print" rather than
+   competing with the sighting's own metadata for attention. */
+.info-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8em;
+  margin-top: 0.6em;
+  padding-top: 0.4em;
+  border-top: 1px solid #eee;
+  font-size: 0.8em;
+}
+#info-app-link {
+  color: #555;
+}
+.info-credits-toggle {
+  border: none;
+  background: none;
+  padding: 0;
+  color: #06c;
+  cursor: pointer;
+  font-size: 1em;
+  text-decoration: underline;
+}
 .info-ul {
-  margin: 0;
+  margin: 0.4em 0 0;
   padding-left: 1.2em;
 }
 `

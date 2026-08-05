@@ -144,18 +144,21 @@ describe("EyewitnessElement", () => {
     expect(toolbar.hidden).toBe(true)
   })
 
-  it("shows the toolbar but hides the witness picker for a single witness, so the info button stays reachable", async () => {
+  it("shows the toolbar with a plain-text witness name for a single witness, so the info button stays reachable", async () => {
     const element = mount()
     element.witnessUrls = ["john.json"]
     await new Promise(resolve => setTimeout(resolve, 0))
 
     const toolbar = element.shadowRoot!.getElementById("toolbar") as HTMLElement
-    const picker = element.shadowRoot!.getElementById("witness-picker") as HTMLElement
+    const witnessText = element.shadowRoot!.getElementById("witness-text") as HTMLElement
+    const select = element.shadowRoot!.getElementById("witness") as HTMLSelectElement
     expect(toolbar.hidden).toBe(false)
-    expect(picker.hidden).toBe(true)
+    expect(witnessText.hidden).toBe(false)
+    expect(witnessText.textContent).toBe("Clarence Chiles")
+    expect(select.hidden).toBe(true)
   })
 
-  it("shows both the toolbar and the witness picker once there's more than one witness", async () => {
+  it("shows the live select, not plain text, once there's more than one witness", async () => {
     stubFetch({ "chiles.json": johnSighting, "whitted.json": janeSighting })
     const element = mount()
 
@@ -163,14 +166,29 @@ describe("EyewitnessElement", () => {
     await new Promise(resolve => setTimeout(resolve, 0))
 
     const toolbar = element.shadowRoot!.getElementById("toolbar") as HTMLElement
-    const picker = element.shadowRoot!.getElementById("witness-picker") as HTMLElement
+    const witnessText = element.shadowRoot!.getElementById("witness-text") as HTMLElement
     const select = element.shadowRoot!.getElementById("witness") as HTMLSelectElement
     expect(toolbar.hidden).toBe(false)
-    expect(picker.hidden).toBe(false)
+    expect(witnessText.hidden).toBe(true)
+    expect(select.hidden).toBe(false)
     expect([...select.options].map(o => ({ value: o.value, label: o.textContent }))).toEqual([
       { value: "chiles.json", label: "Clarence Chiles" },
       { value: "whitted.json", label: "John Whitted" }
     ])
+  })
+
+  it("always shows the testimony sentence with date and location, even for a single witness", async () => {
+    stubFetch({
+      "john.json": { ...johnSighting, time: { year: 1948, month: 7, day: 24, hour: 2, minute: 45 }, place: [{ lat: 32.3792, lng: -86.3077 }] }
+    })
+    const element = mount()
+    element.witnessUrls = ["john.json"]
+    await new Promise(resolve => setTimeout(resolve, 0))
+
+    const testimony = element.shadowRoot!.getElementById("testimony") as HTMLElement
+    expect(testimony.textContent).toContain("Testimony by")
+    expect(testimony.textContent).toContain("Clarence Chiles")
+    expect(testimony.textContent).toContain("32.3792")
   })
 
   it("falls back to witnessId, then the URL itself, when witnessName is missing", async () => {
@@ -270,9 +288,9 @@ describe("EyewitnessElement", () => {
     const scene = nestedScene(element) as unknown as { sightingData: typeof johnSighting }
     expect(scene.sightingData.witnessId).toBe("john")
     const toolbar = element.shadowRoot!.getElementById("toolbar") as HTMLElement
-    const picker = element.shadowRoot!.getElementById("witness-picker") as HTMLElement
+    const select = element.shadowRoot!.getElementById("witness") as HTMLSelectElement
     expect(toolbar.hidden).toBe(false) // info button still reachable
-    expect(picker.hidden).toBe(true) // nothing to pick between
+    expect(select.hidden).toBe(true) // nothing to pick between, plain text instead
   })
 
   it("opens the info panel on click, showing the app version link and the selected witness's observation metadata", async () => {
@@ -299,6 +317,25 @@ describe("EyewitnessElement", () => {
     expect(infoPanel.hidden).toBe(true)
   })
 
+  it("keeps the credits list collapsed until the credits link is clicked, and re-collapses when the panel closes", async () => {
+    const element = mount()
+    element.witnessUrls = ["john.json"]
+    await new Promise(resolve => setTimeout(resolve, 0))
+
+    const infoButton = element.shadowRoot!.getElementById("info-button") as HTMLButtonElement
+    const creditsToggle = element.shadowRoot!.getElementById("info-credits-toggle") as HTMLButtonElement
+    const creditsList = element.shadowRoot!.getElementById("info-credits-list") as HTMLElement
+    infoButton.click()
+    expect(creditsList.hidden).toBe(true)
+
+    creditsToggle.click()
+    expect(creditsList.hidden).toBe(false)
+
+    infoButton.click() // close the panel
+    infoButton.click() // reopen it
+    expect(creditsList.hidden).toBe(true) // collapsed again, not left open from before
+  })
+
   it("always lists the thunder sound credit, regardless of weather", async () => {
     const element = mount()
     element.witnessUrls = ["john.json"]
@@ -318,21 +355,21 @@ describe("EyewitnessElement i18n", () => {
     vi.unstubAllGlobals()
   })
 
-  it("loads the French 'Témoin' label when navigator.languages prefers fr", async () => {
+  it("loads the French 'Témoignage de' prefix when navigator.languages prefers fr", async () => {
     const spy = vi.spyOn(navigator, "languages", "get").mockReturnValue(["fr-FR", "fr"])
     const element = mount()
 
-    await waitFor(() => element.shadowRoot!.getElementById("label-witness")!.textContent === "Témoin")
+    await waitFor(() => element.shadowRoot!.getElementById("testimony-prefix")!.textContent === "Témoignage de")
 
     spy.mockRestore()
   })
 
-  it("falls back to the English 'Witness' label when navigator.languages has no supported match", async () => {
+  it("falls back to the English 'Testimony by' prefix when navigator.languages has no supported match", async () => {
     const spy = vi.spyOn(navigator, "languages", "get").mockReturnValue(["de-DE", "de"])
     const element = mount()
     await new Promise(resolve => setTimeout(resolve, 20))
 
-    expect(element.shadowRoot!.getElementById("label-witness")!.textContent).toBe("Witness")
+    expect(element.shadowRoot!.getElementById("testimony-prefix")!.textContent).toBe("Testimony by")
     spy.mockRestore()
   })
 })
