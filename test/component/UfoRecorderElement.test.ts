@@ -423,7 +423,9 @@ describe("UfoRecorderElement composes a nested rr0-ufo", () => {
       observerTrack: { keyframes: [] }
     }
     element.sightingData = json
-    expect(element.sightingData).toEqual(json)
+    // timeline.order is new (Timeline's own z-order support) — always present on the way out,
+    // even though the hand-written fixture above predates it and omits it.
+    expect(element.sightingData).toEqual({ ...json, timeline: { ...json.timeline, order: ["ufo-1"] } })
   })
 
   it("recording appends a keyframe to the nested ufo element's timeline", async () => {

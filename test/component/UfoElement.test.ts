@@ -83,7 +83,9 @@ describe("UfoElement", () => {
   it("sightingData round-trips through the setter/getter", () => {
     const element = mount()
     element.sightingData = sampleJson
-    expect(element.sightingData).toEqual(sampleJson)
+    // timeline.order is new (Timeline's own z-order support) — always present on the way out,
+    // even though the hand-written fixture above predates it and omits it.
+    expect(element.sightingData).toEqual({ ...sampleJson, timeline: { ...sampleJson.timeline, order: ["ufo-1"] } })
   })
 
   it("fetches and loads the sighting referenced by the src attribute on connect", async () => {

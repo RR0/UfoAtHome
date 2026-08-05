@@ -161,6 +161,80 @@ describe("Timeline", () => {
     expect(timeline.allKeyframes).toHaveLength(1)
   })
 
+  it("bringToFront moves a source to the end of sourceIds (painted/hit-tested last)", () => {
+    const timeline = new Timeline()
+    timeline.addKeyframe(0, [{ sourceId: "a", shape: shapeAt(0) }])
+    timeline.addKeyframe(0, [{ sourceId: "b", shape: shapeAt(1) }])
+    timeline.addKeyframe(0, [{ sourceId: "c", shape: shapeAt(2) }])
+    expect(timeline.sourceIds).toEqual(["a", "b", "c"])
+
+    timeline.bringToFront("a")
+
+    expect(timeline.sourceIds).toEqual(["b", "c", "a"])
+  })
+
+  it("sendToBack moves a source to the start of sourceIds (painted/hit-tested first)", () => {
+    const timeline = new Timeline()
+    timeline.addKeyframe(0, [{ sourceId: "a", shape: shapeAt(0) }])
+    timeline.addKeyframe(0, [{ sourceId: "b", shape: shapeAt(1) }])
+    timeline.addKeyframe(0, [{ sourceId: "c", shape: shapeAt(2) }])
+
+    timeline.sendToBack("c")
+
+    expect(timeline.sourceIds).toEqual(["c", "a", "b"])
+  })
+
+  it("bringToFront/sendToBack on an unknown source id is a no-op", () => {
+    const timeline = new Timeline()
+    timeline.addKeyframe(0, [{ sourceId: "a", shape: shapeAt(0) }])
+
+    timeline.bringToFront("nonexistent")
+    timeline.sendToBack("nonexistent")
+
+    expect(timeline.sourceIds).toEqual(["a"])
+  })
+
+  it("hitTest picks whichever source is actually on top after a z-order change, not just insertion order", () => {
+    const timeline = new Timeline()
+    // "a" and "b" overlap at the same point; "a" was added first, so it'd normally lose to "b".
+    timeline.addKeyframe(0, [{ sourceId: "a", shape: shapeAt(0) }])
+    timeline.addKeyframe(0, [{ sourceId: "b", shape: shapeAt(0) }])
+    expect(timeline.hitTest(0, 0, 0)?.sourceId).toBe("b")
+
+    timeline.bringToFront("a")
+
+    expect(timeline.hitTest(0, 0, 0)?.sourceId).toBe("a")
+  })
+
+  it("removeSource also removes the id from the z-order", () => {
+    const timeline = new Timeline()
+    timeline.addKeyframe(0, [{ sourceId: "a", shape: shapeAt(0) }, { sourceId: "b", shape: shapeAt(1) }])
+
+    timeline.removeSource("a")
+
+    expect(timeline.sourceIds).toEqual(["b"])
+  })
+
+  it("fromJSON without a saved order falls back to first-appearance order (old-format compatibility)", () => {
+    const timeline = Timeline.fromJSON({
+      keyframes: [
+        { t: 0, shapes: [{ sourceId: "b", shape: shapeAt(0) }] },
+        { t: 100, shapes: [{ sourceId: "a", shape: shapeAt(1) }] }
+      ]
+    })
+    expect(timeline.sourceIds).toEqual(["b", "a"])
+  })
+
+  it("fromJSON with a saved order respects it, appending any keyframe source it omitted", () => {
+    const timeline = Timeline.fromJSON({
+      keyframes: [
+        { t: 0, shapes: [{ sourceId: "a", shape: shapeAt(0) }, { sourceId: "b", shape: shapeAt(1) }, { sourceId: "c", shape: shapeAt(2) }] }
+      ],
+      order: ["c", "a"] // deliberately omits "b"
+    })
+    expect(timeline.sourceIds).toEqual(["c", "a", "b"])
+  })
+
   it("round-trips through toJSON/fromJSON", () => {
     const timeline = new Timeline()
     timeline.addKeyframe(0, [{ sourceId: "a", shape: shapeAt(0) }])

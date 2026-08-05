@@ -43,7 +43,9 @@ describe("sightingJson", () => {
     expect(restored.witnessId).toBe("chiles")
     expect(restored.witnessName).toBe("Clarence Chiles")
     expect(restored.caseId).toBe("chiles-whitted")
-    expect(toSightingJson(restored)).toEqual(json)
+    // timeline.order is new (see Timeline's own z-order support) — empty here since there are no
+    // shapes/sources at all, but always present now, unlike the hand-written input above.
+    expect(toSightingJson(restored)).toEqual({ ...json, timeline: { ...json.timeline, order: [] } })
   })
 
   it("round-trips an observerTrack", () => {

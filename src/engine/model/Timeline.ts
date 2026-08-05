@@ -4,6 +4,10 @@ import { lerpShape, shapeContains } from "../shape/Shape.js"
 
 export interface TimelineJson {
   keyframes: Keyframe[]
+  /** Back-to-front paint/hit-test order — see Timeline's own `order` field. Optional: absent on
+   * anything saved before z-order control existed, or hand-written JSON; fromJSON() then falls
+   * back to first-appearance order (the old implicit behavior), same as if this were `[]`. */
+  order?: string[]
 }
 
 /**
@@ -13,6 +17,14 @@ export interface TimelineJson {
  */
 export class Timeline {
   private readonly keyframes: Keyframe[] = []
+  /** Explicit back-to-front paint/hit-test order (index 0 = bottommost/backmost, last = topmost/
+   * frontmost) — see sourceIds, bringToFront, sendToBack. A source joins at the front (pushed to
+   * the end) the first time it's ever written, matching the old implicit "most recently added
+   * paints on top" behavior; from then on this array, not keyframe insertion order, is the
+   * single source of truth for both painting (Player) and click hit-testing (below) — the two
+   * MUST agree, or a click could hit a shape while its own paint order shows something else on
+   * top of it. */
+  private order: string[] = []
 
   /**
    * Merges `shapes` into any existing keyframe at `t` by sourceId — untouched sources keep
@@ -32,6 +44,9 @@ export class Timeline {
       }
     } else {
       this.keyframes.splice(index, 0, { t, shapes: [...shapes] })
+    }
+    for (const shape of shapes) {
+      if (!this.order.includes(shape.sourceId)) this.order.push(shape.sourceId)
     }
   }
 
@@ -141,20 +156,35 @@ export class Timeline {
         this.keyframes[i] = { t: this.keyframes[i].t, shapes }
       }
     }
+    this.order = this.order.filter(id => id !== sourceId)
+  }
+
+  /** Moves a source to the front (painted/hit-tested last, i.e. on top of everything else) — a
+   * no-op for an unknown sourceId, same as removeSource. */
+  bringToFront(sourceId: string): void {
+    const index = this.order.indexOf(sourceId)
+    if (index === -1) return
+    this.order.splice(index, 1)
+    this.order.push(sourceId)
+  }
+
+  /** Moves a source to the back (painted/hit-tested first, i.e. behind everything else). */
+  sendToBack(sourceId: string): void {
+    const index = this.order.indexOf(sourceId)
+    if (index === -1) return
+    this.order.splice(index, 1)
+    this.order.unshift(sourceId)
   }
 
   get duration(): number {
     return this.keyframes.length === 0 ? 0 : this.keyframes[this.keyframes.length - 1].t
   }
 
+  /** Back-to-front: index 0 is bottommost/backmost, the last entry is topmost/frontmost — see
+   * the `order` field's own doc comment. Player paints in this order (later = on top); hitTest
+   * (above) walks it in reverse so the topmost shape wins a click. */
   get sourceIds(): string[] {
-    const ids = new Set<string>()
-    for (const keyframe of this.keyframes) {
-      for (const shape of keyframe.shapes) {
-        ids.add(shape.sourceId)
-      }
-    }
-    return [...ids]
+    return [...this.order]
   }
 
   get allKeyframes(): ReadonlyArray<Keyframe> {
@@ -162,13 +192,20 @@ export class Timeline {
   }
 
   toJSON(): TimelineJson {
-    return { keyframes: this.keyframes }
+    return { keyframes: this.keyframes, order: this.order }
   }
 
   static fromJSON(json: TimelineJson): Timeline {
     const timeline = new Timeline()
     for (const keyframe of json.keyframes) {
       timeline.addKeyframe(keyframe.t, keyframe.shapes)
+    }
+    if (json.order) {
+      // Respects a saved custom arrangement, but never silently drops a source the keyframes
+      // actually contain just because an incomplete/stale `order` list omitted it — appended at
+      // the end (arbitrary but safe) rather than left unpaintable.
+      const missing = timeline.order.filter(id => !json.order!.includes(id))
+      timeline.order = [...json.order, ...missing]
     }
     return timeline
   }
