@@ -14,6 +14,7 @@ export const ufoRecorderMessages_fr: UfoRecorderMessages = {
   sendToBack: "Placer derrière",
   contextMenuDelete: "Supprimer",
   confirmDeleteShape: "Supprimer {name} ? Cette action est irréversible.",
+  onlyOneShape: "Il n'y a qu'une seule forme",
   samplingRate: "Fréquence d'échantillonnage (ms)",
   duration: "Durée (s)",
   durationPlaceholder: "durée de l'enregistrement",

@@ -148,6 +148,13 @@ button.preset[aria-pressed="true"] {
 .context-menu button:hover {
   background: #eef;
 }
+.context-menu button:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+.context-menu button:disabled:hover {
+  background: none;
+}
 .context-menu hr {
   width: 100%;
   margin: 0.3em 0;

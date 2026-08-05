@@ -16,6 +16,9 @@ export interface UfoRecorderMessages {
   contextMenuDelete: string
   /** `{name}` gets replaced with the shape's own sourceId (e.g. "ufo-1") — see deleteShape(). */
   confirmDeleteShape: string
+  /** Explains, via the disabled context-menu items' own title, why front/back/delete are all
+   * disabled together — see showContextMenu(). */
+  onlyOneShape: string
   samplingRate: string
   duration: string
   durationPlaceholder: string

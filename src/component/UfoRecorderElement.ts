@@ -910,10 +910,20 @@ export class UfoRecorderElement extends HTMLElement {
     this.contextMenu.style.left = `${clientX}px`
     this.contextMenu.style.top = `${clientY}px`
     this.contextMenu.hidden = false
-    // Mirrors the toolbar delete button's own disabled state (see onSelectionOrTimeChanged) —
-    // otherwise clicking Delete here for the last remaining shape would silently do nothing
-    // (deleteShape() itself still refuses either way), with no visible explanation why.
+    // Front/back reordering is meaningless with nothing else to reorder against — disabled for a
+    // single shape. Delete mirrors the toolbar button's own disabled state (see
+    // onSelectionOrTimeChanged) — recording/playing already block the menu from opening at all
+    // (see onContextMenu), so "only one shape left" is the only case that matters for all three
+    // here; otherwise clicking a disabled-in-spirit item would silently do nothing (each handler
+    // still refuses either way) with no visible explanation why.
+    const onlyOneShape = this.ufoElement.sighting.timeline.sourceIds.length <= 1
+    this.contextBringToFrontButton.disabled = onlyOneShape
+    this.contextSendToBackButton.disabled = onlyOneShape
     this.contextDeleteButton.disabled = this.deleteShapeButton.disabled
+    const disabledTitle = onlyOneShape ? this.messages.onlyOneShape : ""
+    this.contextBringToFrontButton.title = disabledTitle
+    this.contextSendToBackButton.title = disabledTitle
+    this.contextDeleteButton.title = disabledTitle
     document.addEventListener("click", this.handleOutsideContextMenuClick)
   }
 

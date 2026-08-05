@@ -1002,14 +1002,39 @@ describe("UfoRecorderElement right-click context menu", () => {
     expect(menu.hidden).toBe(true)
   })
 
-  it("the menu's own Delete item is disabled for the only remaining shape, mirroring the toolbar button", () => {
+  it("all three items are disabled for the only remaining shape, with a title explaining why", () => {
     const element = mount() // just "ufo-1"
     const canvas = nestedCanvas(element)
+    const frontButton = element.shadowRoot!.getElementById("context-bring-to-front") as HTMLButtonElement
+    const backButton = element.shadowRoot!.getElementById("context-send-to-back") as HTMLButtonElement
     const contextDelete = element.shadowRoot!.getElementById("context-delete") as HTMLButtonElement
 
     rightClickAt(canvas, 320, 180) // hits the default centered shape
 
+    expect(frontButton.disabled).toBe(true)
+    expect(backButton.disabled).toBe(true)
     expect(contextDelete.disabled).toBe(true)
+    expect(frontButton.title).toBe("There is only one shape")
+    expect(backButton.title).toBe("There is only one shape")
+    expect(contextDelete.title).toBe("There is only one shape")
+  })
+
+  it("all three items are enabled once there's more than one shape, with no leftover disabled title", () => {
+    const element = mount()
+    element.sightingData = twoShapesJson()
+    const canvas = nestedCanvas(element)
+    const frontButton = element.shadowRoot!.getElementById("context-bring-to-front") as HTMLButtonElement
+    const backButton = element.shadowRoot!.getElementById("context-send-to-back") as HTMLButtonElement
+    const contextDelete = element.shadowRoot!.getElementById("context-delete") as HTMLButtonElement
+
+    rightClickAt(canvas, 105, 105) // selects ufo-2
+
+    expect(frontButton.disabled).toBe(false)
+    expect(backButton.disabled).toBe(false)
+    expect(contextDelete.disabled).toBe(false)
+    expect(frontButton.title).toBe("")
+    expect(backButton.title).toBe("")
+    expect(contextDelete.title).toBe("")
   })
 
   it("does not open while recording or playing", () => {
