@@ -11,6 +11,11 @@ export interface UfoRecorderMessages {
   shape: string
   addShape: string
   deleteShape: string
+  bringToFront: string
+  sendToBack: string
+  contextMenuDelete: string
+  /** `{name}` gets replaced with the shape's own sourceId (e.g. "ufo-1") — see deleteShape(). */
+  confirmDeleteShape: string
   samplingRate: string
   duration: string
   durationPlaceholder: string

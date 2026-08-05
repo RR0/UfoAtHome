@@ -48,6 +48,12 @@ export const html = `
   <label><span id="label-lightning">Lightning</span> <input id="lightning" type="checkbox"/></label>
 </div>
 <div id="ufo-slot"></div>
+<div id="context-menu" class="context-menu" hidden role="menu">
+  <button id="context-bring-to-front" type="button" role="menuitem">Bring to front</button>
+  <button id="context-send-to-back" type="button" role="menuitem">Send to back</button>
+  <hr/>
+  <button id="context-delete" type="button" role="menuitem" class="context-delete">Delete</button>
+</div>
 `
 
 export const css = `
@@ -110,5 +116,45 @@ button.preset[aria-pressed="true"] {
 .icon-btn:disabled {
   cursor: default;
   opacity: 0.4;
+}
+/* position:fixed (viewport-relative), left/top set from the triggering pointer event's own
+   clientX/clientY in JS — works the same regardless of which shadow tree this menu lives in or
+   how the page has scrolled, unlike an absolutely-positioned element nested under this host. */
+.context-menu {
+  position: fixed;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  min-width: 9em;
+  padding: 0.3em 0;
+  background: #fff;
+  color: #222;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  font-size: 0.9em;
+}
+.context-menu button {
+  display: block;
+  width: 100%;
+  padding: 0.4em 0.8em;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+}
+.context-menu button:hover {
+  background: #eef;
+}
+.context-menu hr {
+  width: 100%;
+  margin: 0.3em 0;
+  border: none;
+  border-top: 1px solid #eee;
+}
+.context-delete {
+  color: #c33;
 }
 `

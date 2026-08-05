@@ -84,6 +84,10 @@ export class UfoRecorderElement extends HTMLElement {
   private readonly sourceSelect: HTMLSelectElement
   private readonly addShapeButton: HTMLButtonElement
   private readonly deleteShapeButton: HTMLButtonElement
+  private readonly contextMenu: HTMLElement
+  private readonly contextBringToFrontButton: HTMLButtonElement
+  private readonly contextSendToBackButton: HTMLButtonElement
+  private readonly contextDeleteButton: HTMLButtonElement
   private readonly durationInput: HTMLInputElement
   private readonly exportButton: HTMLButtonElement
   private readonly latInput: HTMLInputElement
@@ -164,22 +168,33 @@ export class UfoRecorderElement extends HTMLElement {
   /** Bound once so document.removeEventListener (disconnectedCallback/endDrag) can actually
    * find them. */
   private readonly handleKeyDown = (event: KeyboardEvent) => {
-    if (event.key === "Escape" && this.isRecording) {
-      // Otherwise the only way to stop is moving the pointer to the Stop button — and since
-      // recording samples the latest pointer position at every tick, that walk itself gets
-      // recorded as trailing motion toward the button. Escape stops in place, no side trip.
-      this.toggleRecording()
+    if (event.key === "Escape") {
+      if (this.isRecording) {
+        // Otherwise the only way to stop is moving the pointer to the Stop button — and since
+        // recording samples the latest pointer position at every tick, that walk itself gets
+        // recorded as trailing motion toward the button. Escape stops in place, no side trip.
+        this.toggleRecording()
+      }
+      if (!this.contextMenu.hidden) this.hideContextMenu()
     }
-    if (ARROW_KEYS.has(event.key)) {
+    if (ARROW_KEYS.has(event.key) || event.key === "Delete" || event.key === "Backspace") {
       // event.composedPath()[0] (not event.target, which retargets across shadow boundaries, and
       // not document.activeElement, which doesn't resolve into open shadow roots consistently
       // enough to trust here) is always the true originating element regardless of shadow
-      // nesting — arrow keys must reach a focused lat/lng/heading/pitch/duration/source-select
-      // control untouched (moving the text cursor, nudging a number input's own value, or
-      // navigating the dropdown), not get hijacked into moving the selected shape.
+      // nesting — arrow/delete keys must reach a focused lat/lng/heading/pitch/duration/
+      // source-select control untouched (moving the text cursor, nudging a number input's own
+      // value, deleting a character, navigating the dropdown), not get hijacked into
+      // moving/deleting the selected shape.
       const target = event.composedPath()[0]
       if (target instanceof HTMLInputElement || target instanceof HTMLSelectElement || target instanceof HTMLTextAreaElement) return
-      this.moveOrResizeSelectedShape(event)
+      if (ARROW_KEYS.has(event.key)) {
+        this.moveOrResizeSelectedShape(event)
+      } else {
+        // deleteShape() itself is the single confirm()-gated entry point every deletion path
+        // (this key, the toolbar button, the context menu) funnels through — see its own doc
+        // comment for why that matters.
+        this.deleteShape()
+      }
     }
   }
   private readonly handleDragPointerMove = (event: PointerEvent) => this.onDragPointerMove(event)
@@ -222,6 +237,10 @@ export class UfoRecorderElement extends HTMLElement {
     this.sourceSelect = this.shadow.getElementById("source") as HTMLSelectElement
     this.addShapeButton = this.shadow.getElementById("add-shape") as HTMLButtonElement
     this.deleteShapeButton = this.shadow.getElementById("delete-shape") as HTMLButtonElement
+    this.contextMenu = this.shadow.getElementById("context-menu")!
+    this.contextBringToFrontButton = this.shadow.getElementById("context-bring-to-front") as HTMLButtonElement
+    this.contextSendToBackButton = this.shadow.getElementById("context-send-to-back") as HTMLButtonElement
+    this.contextDeleteButton = this.shadow.getElementById("context-delete") as HTMLButtonElement
     this.durationInput = this.shadow.getElementById("durationSeconds") as HTMLInputElement
     this.exportButton = this.shadow.getElementById("export") as HTMLButtonElement
     this.latInput = this.shadow.getElementById("lat") as HTMLInputElement
@@ -266,6 +285,13 @@ export class UfoRecorderElement extends HTMLElement {
 
     this.ufoElement.canvasElement.addEventListener("pointerdown", event => this.onPointerDown(event))
     this.ufoElement.canvasElement.addEventListener("pointermove", event => this.onPointerMove(event))
+    this.ufoElement.canvasElement.addEventListener("contextmenu", event => this.onContextMenu(event))
+    this.contextBringToFrontButton.addEventListener("click", () => this.bringSelectedToFront())
+    this.contextSendToBackButton.addEventListener("click", () => this.sendSelectedToBack())
+    this.contextDeleteButton.addEventListener("click", () => {
+      this.hideContextMenu()
+      this.deleteShape()
+    })
     this.recordButton.addEventListener("click", () => this.toggleRecording())
     this.addShapeButton.addEventListener("click", () => this.addShape())
     this.deleteShapeButton.addEventListener("click", () => this.deleteShape())
@@ -338,6 +364,7 @@ export class UfoRecorderElement extends HTMLElement {
 
   disconnectedCallback(): void {
     document.removeEventListener("keydown", this.handleKeyDown)
+    document.removeEventListener("click", this.handleOutsideContextMenuClick)
     this.endDrag()
   }
 
@@ -601,13 +628,18 @@ export class UfoRecorderElement extends HTMLElement {
     this.syncObserverFromTimeline()
     this.ufoElement.selectedSourceId = this.currentSourceId
     // Disabled for a source that's only a not-yet-drawn placeholder (see addShape's own
-    // fallback), or once it's the very last real shape (a recording always needs at least one —
-    // see deleteShape()'s own doc comment) — and never re-enabled mid-recording even if this
-    // happens to run then (the isRecording branch of toggleRecording() already disables it, this
-    // is just a second guard so that branch's own disabling can never get silently overridden
-    // here).
+    // fallback), once it's the very last real shape (a recording always needs at least one —
+    // see deleteShape()'s own doc comment), or while playing (the playhead is a moving target,
+    // same reason every other edit path is blocked then) — and never re-enabled mid-recording
+    // even if this happens to run then (the isRecording branch of toggleRecording() already
+    // disables it, this is just a second guard so that branch's own disabling can never get
+    // silently overridden here).
     const sourceIds = this.ufoElement.sighting.timeline.sourceIds
-    this.deleteShapeButton.disabled = this.isRecording || sourceIds.length <= 1 || !sourceIds.includes(this.currentSourceId)
+    this.deleteShapeButton.disabled =
+      this.isRecording ||
+      this.ufoElement.playbackState === "playing" ||
+      sourceIds.length <= 1 ||
+      !sourceIds.includes(this.currentSourceId)
   }
 
   /** Keeps the toolbar honest when the playhead or selected source changes, so touching one
@@ -654,12 +686,17 @@ export class UfoRecorderElement extends HTMLElement {
    * is built to re-enter once construction's own initial keyframe (see the constructor) has
    * already been written. Disabled while recording (deleteShapeButton.disabled, set in
    * toggleRecording()) for the same reason addShapeButton is: deleting the very source the
-   * recorder is actively writing keyframes into would be pulling the rug out from under it. */
+   * recorder is actively writing keyframes into would be pulling the rug out from under it.
+   *
+   * The single entry point for every way to delete a shape — the toolbar button, the context
+   * menu's own Delete item, and the Delete/Backspace key — precisely so the confirmation below
+   * can't drift into being asked for some paths and not others. */
   private deleteShape(): void {
-    if (this.isRecording) return
+    if (this.isRecording || this.ufoElement.playbackState === "playing") return
     const timeline = this.ufoElement.sighting.timeline
     if (timeline.sourceIds.length <= 1) return // always keep at least one shape
     if (!timeline.sourceIds.includes(this.currentSourceId)) return // nothing real to delete
+    if (!window.confirm(this.messages.confirmDeleteShape.replace("{name}", this.currentSourceId))) return
     timeline.removeSource(this.currentSourceId)
     this.currentSourceId = timeline.sourceIds[0]
     this.refreshSourceList()
@@ -781,6 +818,9 @@ export class UfoRecorderElement extends HTMLElement {
     this.addShapeButton.setAttribute("aria-label", messages.addShape)
     this.deleteShapeButton.title = messages.deleteShape
     this.deleteShapeButton.setAttribute("aria-label", messages.deleteShape)
+    this.contextBringToFrontButton.textContent = messages.bringToFront
+    this.contextSendToBackButton.textContent = messages.sendToBack
+    this.contextDeleteButton.textContent = messages.contextMenuDelete
     this.exportButton.textContent = messages.export
     this.labelLatitude.textContent = messages.latitude
     this.labelLongitude.textContent = messages.longitude
@@ -833,16 +873,74 @@ export class UfoRecorderElement extends HTMLElement {
       if (!playing) this.beginCameraDrag(point)
       return
     }
-    if (hit.sourceId !== this.currentSourceId) {
-      this.currentSourceId = hit.sourceId
-      this.refreshSourceList()
-      this.onSelectionOrTimeChanged()
-    }
+    this.selectSource(hit.sourceId)
     if (playing) return
     // Covers both "just click" (a zero-delta move below, harmlessly rewriting identical
     // bounds) and click-and-drag-to-move in one gesture — clicking any shape (not just the
     // already-selected one) selects it above, then this starts moving it immediately.
     this.beginDrag("move", hit.sourceId, hit.shape, point)
+  }
+
+  private selectSource(sourceId: string): void {
+    if (sourceId === this.currentSourceId) return
+    this.currentSourceId = sourceId
+    this.refreshSourceList()
+    this.onSelectionOrTimeChanged()
+  }
+
+  /** Right-click brings up a small menu (front/back/delete) for whichever shape is under the
+   * pointer — selecting it first, same as a left click would, so all 3 actions below act on
+   * the shape the menu was actually opened for rather than some unrelated prior selection.
+   * Suppresses the browser's own native context menu unconditionally (even over empty canvas —
+   * a witness right-clicking the sky shouldn't see the page's ordinary menu either), but only
+   * shows ours when there's an actual shape to act on. */
+  private onContextMenu(event: MouseEvent): void {
+    event.preventDefault()
+    if (this.isRecording || this.ufoElement.playbackState === "playing") return
+    const point = this.canvasPointFromEvent(event)
+    if (!point) return
+    const timeline = this.ufoElement.sighting.timeline
+    const hit = timeline.hitTest(this.ufoElement.currentTime, point.x, point.y)
+    if (!hit) return
+    this.selectSource(hit.sourceId)
+    this.showContextMenu(event.clientX, event.clientY)
+  }
+
+  private showContextMenu(clientX: number, clientY: number): void {
+    this.contextMenu.style.left = `${clientX}px`
+    this.contextMenu.style.top = `${clientY}px`
+    this.contextMenu.hidden = false
+    // Mirrors the toolbar delete button's own disabled state (see onSelectionOrTimeChanged) —
+    // otherwise clicking Delete here for the last remaining shape would silently do nothing
+    // (deleteShape() itself still refuses either way), with no visible explanation why.
+    this.contextDeleteButton.disabled = this.deleteShapeButton.disabled
+    document.addEventListener("click", this.handleOutsideContextMenuClick)
+  }
+
+  private hideContextMenu(): void {
+    this.contextMenu.hidden = true
+    document.removeEventListener("click", this.handleOutsideContextMenuClick)
+  }
+
+  /** composedPath(), not event.target, for the same reason EyewitnessElement's own info-panel
+   * outside-click handler uses it: target gets retargeted to the shadow host from outside this
+   * element's own shadow boundary, losing the inside/outside distinction this needs. Registered
+   * only while the menu is actually open (showContextMenu/hideContextMenu), not for this
+   * element's whole lifetime. */
+  private readonly handleOutsideContextMenuClick = (event: MouseEvent): void => {
+    if (!event.composedPath().includes(this.contextMenu)) this.hideContextMenu()
+  }
+
+  private bringSelectedToFront(): void {
+    this.ufoElement.sighting.timeline.bringToFront(this.currentSourceId)
+    this.hideContextMenu()
+    this.ufoElement.refresh()
+  }
+
+  private sendSelectedToBack(): void {
+    this.ufoElement.sighting.timeline.sendToBack(this.currentSourceId)
+    this.hideContextMenu()
+    this.ufoElement.refresh()
   }
 
   private beginDrag(

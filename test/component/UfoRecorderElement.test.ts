@@ -595,6 +595,7 @@ describe("UfoRecorderElement post-hoc appearance editing + multi-shape authoring
   })
 
   it("Delete shape removes the selected source from every keyframe it appears in", () => {
+    const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(true)
     const element = mount()
     const addShapeButton = element.shadowRoot!.getElementById("add-shape") as HTMLButtonElement
     addShapeButton.click() // now "ufo-1" (construction default) + "ufo-2"
@@ -607,9 +608,39 @@ describe("UfoRecorderElement post-hoc appearance editing + multi-shape authoring
 
     const sourceIds = element.sightingData.timeline.keyframes.flatMap(k => k.shapes.map(s => s.sourceId))
     expect(sourceIds).toEqual(["ufo-2"])
+    confirmSpy.mockRestore()
+  })
+
+  it("Delete shape asks for confirmation first, and does nothing if it's declined", () => {
+    const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(false)
+    const element = mount()
+    const addShapeButton = element.shadowRoot!.getElementById("add-shape") as HTMLButtonElement
+    addShapeButton.click() // "ufo-1" + "ufo-2"
+
+    const deleteShapeButton = element.shadowRoot!.getElementById("delete-shape") as HTMLButtonElement
+    deleteShapeButton.click()
+
+    expect(confirmSpy).toHaveBeenCalled()
+    const sourceIds = element.sightingData.timeline.keyframes.flatMap(k => k.shapes.map(s => s.sourceId))
+    expect(sourceIds).toEqual(["ufo-1", "ufo-2"])
+    confirmSpy.mockRestore()
+  })
+
+  it("names the actual shape being deleted in the confirmation prompt, not a generic message", () => {
+    const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(false)
+    const element = mount()
+    const addShapeButton = element.shadowRoot!.getElementById("add-shape") as HTMLButtonElement
+    addShapeButton.click() // "ufo-1" + "ufo-2", "ufo-2" selected
+
+    const deleteShapeButton = element.shadowRoot!.getElementById("delete-shape") as HTMLButtonElement
+    deleteShapeButton.click()
+
+    expect(confirmSpy).toHaveBeenCalledWith(expect.stringContaining("ufo-2"))
+    confirmSpy.mockRestore()
   })
 
   it("Delete shape falls back to the next remaining source and resyncs the toolbar to it", () => {
+    const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(true)
     const element = mount()
     element.sightingData = {
       version: 1,
@@ -630,9 +661,11 @@ describe("UfoRecorderElement post-hoc appearance editing + multi-shape authoring
 
     expect(sourceSelect.value).toBe("ufo-2")
     expect(element.appearance).toEqual({ presetId: "oval", color: "#ff8800", transparency: 0.5, haloScale: 2 })
+    confirmSpy.mockRestore()
   })
 
   it("Delete shape is disabled for the only remaining shape — a recording always needs at least one", () => {
+    const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(true)
     const element = mount() // just the construction default, "ufo-1" — nothing else to fall back to
     const deleteShapeButton = element.shadowRoot!.getElementById("delete-shape") as HTMLButtonElement
     expect(deleteShapeButton.disabled).toBe(true)
@@ -641,9 +674,11 @@ describe("UfoRecorderElement post-hoc appearance editing + multi-shape authoring
 
     const sourceIds = element.sightingData.timeline.keyframes.flatMap(k => k.shapes.map(s => s.sourceId))
     expect(sourceIds).toEqual(["ufo-1"])
+    confirmSpy.mockRestore()
   })
 
   it("Delete shape re-disables itself once deletion brings the count back down to one", () => {
+    const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(true)
     const element = mount()
     const addShapeButton = element.shadowRoot!.getElementById("add-shape") as HTMLButtonElement
     addShapeButton.click() // "ufo-1" + "ufo-2"
@@ -655,6 +690,7 @@ describe("UfoRecorderElement post-hoc appearance editing + multi-shape authoring
     expect(deleteShapeButton.disabled).toBe(true)
     const sourceIds = element.sightingData.timeline.keyframes.flatMap(k => k.shapes.map(s => s.sourceId))
     expect(sourceIds).toEqual(["ufo-1"])
+    confirmSpy.mockRestore()
   })
 
   it("loading sightingData with different source ids resets the editing target instead of using the stale default", () => {
@@ -846,6 +882,229 @@ describe("UfoRecorderElement click-to-select", () => {
 
     const ufo = nestedUfo(element) as unknown as { selectedSourceId: string }
     expect(ufo.selectedSourceId).toBe("ufo-2")
+  })
+})
+
+describe("UfoRecorderElement right-click context menu", () => {
+  afterEach(() => {
+    document.body.innerHTML = ""
+  })
+
+  function nestedCanvas(element: UfoRecorderElement): HTMLCanvasElement {
+    const canvas = nestedUfo(element)!.shadowRoot!.getElementById("canvas") as HTMLCanvasElement
+    vi.spyOn(canvas, "getBoundingClientRect").mockReturnValue({ left: 0, top: 0, width: 640, height: 360 } as DOMRect)
+    return canvas
+  }
+
+  function rightClickAt(canvas: HTMLCanvasElement, x: number, y: number): void {
+    canvas.dispatchEvent(new MouseEvent("contextmenu", { clientX: x, clientY: y, bubbles: true, cancelable: true, composed: true }))
+  }
+
+  function twoShapesJson() {
+    return {
+      version: 1 as const,
+      timeline: {
+        keyframes: [
+          {
+            t: 0,
+            shapes: [
+              { sourceId: "ufo-1", shape: { kind: "oval" as const, bounds: { x: 0, y: 0, width: 20, height: 20 }, color: "#39ff14", angle: 0, transparency: 0, haloScale: 0, selected: false } },
+              { sourceId: "ufo-2", shape: { kind: "oval" as const, bounds: { x: 100, y: 100, width: 20, height: 20 }, color: "#ff0000", angle: 0, transparency: 0, haloScale: 0, selected: false } }
+            ]
+          }
+        ]
+      }
+    }
+  }
+
+  it("right-clicking a shape opens the menu and selects that shape, suppressing the native menu", () => {
+    const element = mount()
+    element.sightingData = twoShapesJson()
+    const canvas = nestedCanvas(element)
+    const menu = element.shadowRoot!.getElementById("context-menu") as HTMLElement
+
+    const event = new MouseEvent("contextmenu", { clientX: 105, clientY: 105, bubbles: true, cancelable: true, composed: true })
+    const preventDefault = vi.spyOn(event, "preventDefault")
+    canvas.dispatchEvent(event)
+
+    expect(preventDefault).toHaveBeenCalled()
+    expect(menu.hidden).toBe(false)
+    const sourceSelect = element.shadowRoot!.getElementById("source") as HTMLSelectElement
+    expect(sourceSelect.value).toBe("ufo-2") // the shape actually under the cursor, not whatever was selected before
+  })
+
+  it("right-clicking empty canvas suppresses the native menu but doesn't open ours", () => {
+    const element = mount()
+    const canvas = nestedCanvas(element)
+    const menu = element.shadowRoot!.getElementById("context-menu") as HTMLElement
+
+    rightClickAt(canvas, 600, 340) // well outside the default centered shape
+    expect(menu.hidden).toBe(true)
+  })
+
+  it("Bring to front / Send to back reorder the timeline, and repaint immediately", () => {
+    const element = mount()
+    element.sightingData = twoShapesJson() // order: ufo-1, ufo-2 (ufo-2 in front)
+    const canvas = nestedCanvas(element)
+    const frontButton = element.shadowRoot!.getElementById("context-bring-to-front") as HTMLButtonElement
+    const backButton = element.shadowRoot!.getElementById("context-send-to-back") as HTMLButtonElement
+
+    rightClickAt(canvas, 5, 5) // selects ufo-1 (only ufo-1 covers this point)
+    frontButton.click()
+
+    expect(element.sightingData.timeline.order).toEqual(["ufo-2", "ufo-1"])
+    const menu = element.shadowRoot!.getElementById("context-menu") as HTMLElement
+    expect(menu.hidden).toBe(true) // clicking an item closes the menu
+
+    rightClickAt(canvas, 5, 5) // ufo-1 is now on top at this point too
+    backButton.click()
+
+    expect(element.sightingData.timeline.order).toEqual(["ufo-1", "ufo-2"])
+  })
+
+  it("Delete in the context menu asks for confirmation, same as the toolbar button", () => {
+    const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(true)
+    const element = mount()
+    element.sightingData = twoShapesJson()
+    const canvas = nestedCanvas(element)
+    const contextDelete = element.shadowRoot!.getElementById("context-delete") as HTMLButtonElement
+
+    rightClickAt(canvas, 105, 105) // selects ufo-2
+    contextDelete.click()
+
+    expect(confirmSpy).toHaveBeenCalled()
+    const sourceIds = element.sightingData.timeline.keyframes.flatMap(k => k.shapes.map(s => s.sourceId))
+    expect(sourceIds).toEqual(["ufo-1"])
+    confirmSpy.mockRestore()
+  })
+
+  it("Escape closes the context menu", () => {
+    const element = mount()
+    const canvas = nestedCanvas(element)
+    const menu = element.shadowRoot!.getElementById("context-menu") as HTMLElement
+    rightClickAt(canvas, 320, 180) // hits the default centered shape
+    expect(menu.hidden).toBe(false)
+
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }))
+
+    expect(menu.hidden).toBe(true)
+  })
+
+  it("a click outside the menu closes it", () => {
+    const element = mount()
+    const canvas = nestedCanvas(element)
+    const menu = element.shadowRoot!.getElementById("context-menu") as HTMLElement
+    rightClickAt(canvas, 320, 180)
+    expect(menu.hidden).toBe(false)
+
+    document.body.dispatchEvent(new MouseEvent("click", { bubbles: true, composed: true }))
+
+    expect(menu.hidden).toBe(true)
+  })
+
+  it("the menu's own Delete item is disabled for the only remaining shape, mirroring the toolbar button", () => {
+    const element = mount() // just "ufo-1"
+    const canvas = nestedCanvas(element)
+    const contextDelete = element.shadowRoot!.getElementById("context-delete") as HTMLButtonElement
+
+    rightClickAt(canvas, 320, 180) // hits the default centered shape
+
+    expect(contextDelete.disabled).toBe(true)
+  })
+
+  it("does not open while recording or playing", () => {
+    const element = mount()
+    const canvas = nestedCanvas(element)
+    const menu = element.shadowRoot!.getElementById("context-menu") as HTMLElement
+    const recordButton = element.shadowRoot!.getElementById("record") as HTMLButtonElement
+
+    recordButton.click()
+    rightClickAt(canvas, 320, 180)
+    expect(menu.hidden).toBe(true)
+    recordButton.click() // stop
+
+    const playButton = nestedUfo(element)!.shadowRoot!.getElementById("play-pause") as HTMLButtonElement
+    const ufo = nestedUfo(element)! as unknown as { durationSeconds: number }
+    ufo.durationSeconds = 5 // Play is disabled for a zero-duration recording — see UfoElement's own test
+    playButton.click()
+    rightClickAt(canvas, 320, 180)
+    expect(menu.hidden).toBe(true)
+  })
+})
+
+describe("UfoRecorderElement Delete/Backspace key", () => {
+  afterEach(() => {
+    document.body.innerHTML = ""
+  })
+
+  function pressKey(key: string): void {
+    document.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true, composed: true }))
+  }
+
+  it("deletes the selected shape, with the same confirmation as the toolbar button", () => {
+    const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(true)
+    const element = mount()
+    const addShapeButton = element.shadowRoot!.getElementById("add-shape") as HTMLButtonElement
+    addShapeButton.click() // "ufo-1" + "ufo-2", "ufo-2" selected
+
+    pressKey("Delete")
+
+    expect(confirmSpy).toHaveBeenCalled()
+    const sourceIds = element.sightingData.timeline.keyframes.flatMap(k => k.shapes.map(s => s.sourceId))
+    expect(sourceIds).toEqual(["ufo-1"])
+    confirmSpy.mockRestore()
+  })
+
+  it("Backspace works the same as Delete", () => {
+    const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(true)
+    const element = mount()
+    const addShapeButton = element.shadowRoot!.getElementById("add-shape") as HTMLButtonElement
+    addShapeButton.click()
+
+    pressKey("Backspace")
+
+    const sourceIds = element.sightingData.timeline.keyframes.flatMap(k => k.shapes.map(s => s.sourceId))
+    expect(sourceIds).toEqual(["ufo-1"])
+    confirmSpy.mockRestore()
+  })
+
+  it("declining the confirmation leaves the shape in place", () => {
+    const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(false)
+    const element = mount()
+    const addShapeButton = element.shadowRoot!.getElementById("add-shape") as HTMLButtonElement
+    addShapeButton.click()
+
+    pressKey("Delete")
+
+    const sourceIds = element.sightingData.timeline.keyframes.flatMap(k => k.shapes.map(s => s.sourceId))
+    expect(sourceIds).toEqual(["ufo-1", "ufo-2"])
+    confirmSpy.mockRestore()
+  })
+
+  it("refuses to delete the only remaining shape, even via the confirmed keyboard path", () => {
+    const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(true)
+    const element = mount() // just "ufo-1"
+
+    pressKey("Delete")
+
+    const sourceIds = element.sightingData.timeline.keyframes.flatMap(k => k.shapes.map(s => s.sourceId))
+    expect(sourceIds).toEqual(["ufo-1"])
+    confirmSpy.mockRestore()
+  })
+
+  it("does nothing when Delete/Backspace originates from a focused text input", () => {
+    const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(true)
+    const element = mount()
+    const addShapeButton = element.shadowRoot!.getElementById("add-shape") as HTMLButtonElement
+    addShapeButton.click()
+    const latInput = element.shadowRoot!.getElementById("lat") as HTMLInputElement
+    latInput.focus()
+    latInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Delete", bubbles: true, composed: true }))
+
+    expect(confirmSpy).not.toHaveBeenCalled()
+    const sourceIds = element.sightingData.timeline.keyframes.flatMap(k => k.shapes.map(s => s.sourceId))
+    expect(sourceIds).toEqual(["ufo-1", "ufo-2"])
+    confirmSpy.mockRestore()
   })
 })
 
