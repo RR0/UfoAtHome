@@ -4,6 +4,8 @@ import { Timeline } from "../model/Timeline.js"
 import type { TimelineJson } from "../model/Timeline.js"
 import { ObserverTrack } from "../model/ObserverTrack.js"
 import type { ObserverTrackJson } from "../model/ObserverTrack.js"
+import { WeatherTrack } from "../model/WeatherTrack.js"
+import type { WeatherTrackJson } from "../model/WeatherTrack.js"
 import type { Weather } from "../model/Weather.js"
 import type { People } from "../model/People.js"
 
@@ -34,8 +36,12 @@ export interface SightingRecordingJson {
   /** The witness's position/elevation/orientation over time — absent for older recordings, which
    * fall back to the legacy static place[0] (see Sighting.ts's resolveObserverPoseAt). */
   witnessTrack?: ObserverTrackJson
-  /** The observation's reported weather condition — absent means "unknown/not recorded", not
-   * "clear skies" (renderers default to DEFAULT_WEATHER, see Weather.ts). */
+  /** Weather over time — absent for older recordings, which fall back to the legacy static
+   * `weather` field below (see Sighting.ts's resolveWeatherAt). */
+  weatherTrack?: WeatherTrackJson
+  /** Legacy static weather condition, kept only as weatherTrack's own fallback for recordings
+   * made before it existed — absent means "unknown/not recorded", not "clear skies" (renderers
+   * default to DEFAULT_WEATHER, see Weather.ts). New recordings write weatherTrack instead. */
   weather?: Weather
 }
 
@@ -52,6 +58,7 @@ export function toSightingJson(sighting: Sighting): SightingRecordingJson {
     tags: sighting.event.tags,
     timeline: sighting.timeline.toJSON(),
     witnessTrack: sighting.witnessTrack.toJSON(),
+    weatherTrack: sighting.weatherTrack.toJSON(),
     weather: sighting.weather
   }
 }
@@ -69,6 +76,7 @@ export function fromSightingJson(json: SightingRecordingJson): Sighting {
     },
     Timeline.fromJSON(json.timeline),
     json.witnessTrack ? ObserverTrack.fromJSON(json.witnessTrack) : new ObserverTrack(),
+    json.weatherTrack ? WeatherTrack.fromJSON(json.weatherTrack) : new WeatherTrack(),
     json.witness,
     json.caseId,
     json.weather

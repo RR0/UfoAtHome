@@ -12,9 +12,8 @@ import {
   TRACKED_PLANETS
 } from "../engine/astronomy/CelestialPositions.js"
 import type { ObserverGeo } from "../engine/astronomy/CelestialPositions.js"
-import { resolveObserverPoseAt } from "../engine/model/Sighting.js"
+import { resolveObserverPoseAt, resolveWeatherAt } from "../engine/model/Sighting.js"
 import type { ObserverPose } from "../engine/model/ObserverTrack.js"
-import { DEFAULT_WEATHER } from "../engine/model/Weather.js"
 import type { Weather } from "../engine/model/Weather.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
 import { selectLocale } from "../i18n/locale.js"
@@ -81,7 +80,7 @@ const DEFAULT_OBSERVER_POSE: ObserverPose = { lat: 0, lng: 0, elevationM: 0, hea
  */
 export class SceneElement extends HTMLElement {
   static get observedAttributes(): string[] {
-    return ["src", "star-catalog-src", "show-compass"]
+    return ["src", "star-catalog-src", "show-compass", "lens-flare-intensity", "lens-flare-brightness"]
   }
 
   private readonly shadow: ShadowRoot
@@ -165,7 +164,7 @@ export class SceneElement extends HTMLElement {
    * sound until weather changed again, which it might never do. */
   private readonly handleFirstInteraction = () => {
     this.weatherAudio.resume()
-    this.setWeather(this.ufoElement.sighting.weather)
+    this.setWeather(resolveWeatherAt(this.ufoElement.sighting, this.lastTimeMs))
   }
 
   /** Reuses the nested <rr0-ufo>'s own playback clock (it already dispatches this on every
@@ -253,6 +252,24 @@ export class SceneElement extends HTMLElement {
     if (name === "show-compass" && newValue !== oldValue) {
       this.sceneRenderer.setShowCompass(this.hasAttribute("show-compass"))
     }
+    if (name === "lens-flare-intensity" && newValue !== oldValue) {
+      // How strongly the camera-lens artifacts show around the Sun's always-on dazzle — see
+      // SceneRenderer.setLensFlareArtifactIntensity's own doc comment on why this is independent
+      // of lens-flare-brightness (comparing the same reported brightness naked-eye vs. as a camera
+      // would have captured it). Absent/unparseable defaults to 0 — no artifacts, matching the
+      // slider's own default.
+      const parsed = newValue === null ? NaN : parseFloat(newValue)
+      this.sceneRenderer.setLensFlareArtifactIntensity(Number.isFinite(parsed) ? parsed : 0)
+    }
+    if (name === "lens-flare-brightness" && newValue !== oldValue) {
+      // Absent/unparseable defaults to 1 — SceneRenderer's own tuned baseline look. `|| 1` here
+      // would be wrong: parseFloat("0") is the legitimate number 0, which is falsy, so `0 || 1`
+      // silently becomes 1 — exactly the reported bug (dragging the slider to 0 still showed the
+      // default brightness). Number.isFinite is what actually distinguishes "genuinely 0" from
+      // "absent/NaN".
+      const parsed = newValue === null ? NaN : parseFloat(newValue)
+      this.sceneRenderer.setDazzleIntensity(Number.isFinite(parsed) ? parsed : 1)
+    }
   }
 
   /** Forces the compass labels visible independent of pointer hover — see
@@ -263,18 +280,16 @@ export class SceneElement extends HTMLElement {
     this.sceneRenderer.setCompassForced(forced)
   }
 
-  /** Applies a (static, per-sighting) weather condition to both the visual renderer and the
-   * ambient/wind audio — called once on load (sightingData setter) and explicitly by
-   * UfoRecorderElement.updateWeather() after it mutates sighting.weather (weather isn't read from
-   * within updateAstronomy()'s own per-tick path the way observer pose is, so it needs this
-   * explicit nudge on edit, unlike e.g. heading). `undefined` (a sighting with no recorded weather,
-   * including every recording made before this feature existed) resolves to DEFAULT_WEATHER —
-   * absent means "unknown/not recorded", not an all-defaults weather object living in the data
-   * itself. */
-  setWeather(weather?: Weather): void {
-    const resolved = weather ?? DEFAULT_WEATHER
-    this.sceneRenderer.setWeather(resolved)
-    this.weatherAudio.setAmbient(resolved.precipitationType, resolved.precipitationIntensity, resolved.windSpeed)
+  /** Applies a weather condition to both the visual renderer and the ambient/wind audio — called
+   * every tick from updateAstronomy() (weather is now itself resolved per-instant from a keyframe
+   * track, see Sighting.resolveWeatherAt, same as observer pose) as well as once explicitly from
+   * handleFirstInteraction (to re-apply whatever's current the moment audio unlocks). Callers
+   * always pass an already-resolved Weather — resolveWeatherAt itself never returns undefined, it
+   * falls all the way through to DEFAULT_WEATHER — so this takes a required Weather, not an
+   * optional one to default here. */
+  setWeather(weather: Weather): void {
+    this.sceneRenderer.setWeather(weather)
+    this.weatherAudio.setAmbient(weather.precipitationType, weather.precipitationIntensity, weather.windSpeed)
   }
 
   /** Unlocks weather audio — see WeatherAudio.resume's own doc comment on why this needs a real
@@ -297,8 +312,8 @@ export class SceneElement extends HTMLElement {
   set sightingData(json: SightingRecordingJson) {
     this.ufoElement.sightingData = json
     this.lastTimeMs = 0
+    // Also resolves+applies weather at t=0 — see updateAstronomy's own doc comment.
     this.updateAstronomy(0)
-    this.setWeather(this.ufoElement.sighting.weather)
   }
 
   /** Undefined until a real, location-accurate terrain relief patch has finished its async build
@@ -341,6 +356,11 @@ export class SceneElement extends HTMLElement {
    * doesn't need a date or a location either. */
   private updateAstronomy(t: number): void {
     const sighting = this.ufoElement.sighting
+    // Resolved here (not left to the sightingData setter's one-time call, or an explicit nudge on
+    // edit) since weather is now itself keyframed over time — see Sighting.resolveWeatherAt. Cheap
+    // even every tick: setWeather/SceneRenderer.setWeather both dedupe on actual field values, not
+    // just call frequency (see SceneRenderer.setWeather's own doc comment).
+    this.setWeather(resolveWeatherAt(sighting, t))
     const pose = resolveObserverPoseAt(sighting, t)
     this.sceneRenderer.setObserverPose(pose ?? DEFAULT_OBSERVER_POSE)
     // Raw pose's own lat/lng (possibly undefined), never the astronomy fallback below — a real

@@ -81,6 +81,7 @@ export interface UfoRecorderMessages {
   shapeGroup: string
   temporalGroup: string
   locationGroup: string
+  observationGroup: string
   witnessGroup: string
   circumstancesGroup: string
   cloudCover: string
@@ -94,4 +95,14 @@ export interface UfoRecorderMessages {
   windDirection: string
   windSpeed: string
   storm: string
+  /** How bright the Sun's dazzle reads, independent of whether the lens-flare artifacts (below)
+   * are shown — see SceneRenderer.setDazzleIntensity's own doc comment. A view preference, not
+   * sighting weather data (see UfoRecorderElement's lensFlareBrightnessInput field). */
+  lensFlareBrightness: string
+  /** Sets how strongly the optional procedural sun lens-flare artifacts show, framed as "how much
+   * was the witness looking through a camera/video device" since that's physically what produces
+   * them (a naked eye never sees lens-flare artifacts) — see LensFlareEffect.ts's own doc comment
+   * on why it's opt-in. A view preference, not sighting weather data (see UfoRecorderElement's
+   * cameraDeviceInput field). */
+  cameraDevice: string
 }

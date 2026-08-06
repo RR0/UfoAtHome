@@ -34,7 +34,8 @@ describe("sightingJson", () => {
       witness: { id: "chiles", title: "Clarence Chiles" },
       caseId: "chiles-whitted",
       timeline: { keyframes: [] },
-      witnessTrack: { keyframes: [] }
+      witnessTrack: { keyframes: [] },
+      weatherTrack: { keyframes: [] }
     }
 
     const restored = fromSightingJson(json)
@@ -84,6 +85,39 @@ describe("sightingJson", () => {
   it("defaults to an empty witnessTrack when absent from JSON", () => {
     const restored = fromSightingJson({ version: 1, timeline: { keyframes: [] } })
     expect(restored.witnessTrack.allKeyframes).toEqual([])
+  })
+
+  it("round-trips a weatherTrack", () => {
+    const sighting = Sighting.create({ year: 1948, month: 7, day: 24 })
+    sighting.weatherTrack.addKeyframe(0, {
+      cloudCover: 0.2,
+      cloudDarkness: 0.1,
+      precipitationType: "none",
+      precipitationIntensity: 0,
+      windDirectionDeg: 90,
+      windSpeed: 2,
+      storm: false
+    })
+    sighting.weatherTrack.addKeyframe(5000, {
+      cloudCover: 1,
+      cloudDarkness: 0.9,
+      precipitationType: "rain",
+      precipitationIntensity: 0.8,
+      windDirectionDeg: 270,
+      windSpeed: 14,
+      storm: true
+    })
+
+    const restored = fromSightingJson(toSightingJson(sighting))
+
+    expect(restored.weatherTrack.getLatestWeatherAt(0)?.precipitationType).toBe("none")
+    expect(restored.weatherTrack.getLatestWeatherAt(5000)?.precipitationType).toBe("rain")
+    expect(restored.weatherTrack.getLatestWeatherAt(5000)?.storm).toBe(true)
+  })
+
+  it("defaults to an empty weatherTrack when absent from JSON", () => {
+    const restored = fromSightingJson({ version: 1, timeline: { keyframes: [] } })
+    expect(restored.weatherTrack.allKeyframes).toEqual([])
   })
 
   it("round-trips endTime and durationSeconds", () => {

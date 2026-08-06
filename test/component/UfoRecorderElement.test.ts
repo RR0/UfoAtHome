@@ -581,6 +581,113 @@ describe("UfoRecorderElement observer keyframes over time", () => {
   })
 })
 
+describe("UfoRecorderElement weather keyframes over time", () => {
+  afterEach(() => {
+    document.body.innerHTML = ""
+  })
+
+  function setInput(shadow: ShadowRoot, id: string, value: string): void {
+    const input = shadow.getElementById(id) as HTMLInputElement
+    input.value = value
+    input.dispatchEvent(new Event("input"))
+  }
+
+  function seekNestedUfoTo(element: UfoRecorderElement, t: number): void {
+    const seekInput = nestedUfo(element)!.shadowRoot!.getElementById("seek") as HTMLInputElement
+    seekInput.value = String(t)
+    seekInput.dispatchEvent(new Event("input"))
+  }
+
+  it("records a weather keyframe at the scrubbed-to instant, not always at t=0", () => {
+    const element = mount()
+    element.sightingData = { version: 1, timeline: { keyframes: [] }, durationSeconds: 5 }
+    const shadow = element.shadowRoot!
+    seekNestedUfoTo(element, 2000)
+    setInput(shadow, "precipitationType", "rain")
+    setInput(shadow, "precipitationIntensity", "0.6")
+
+    const keyframes = element.sightingData.weatherTrack?.keyframes
+    expect(keyframes).toHaveLength(1)
+    expect(keyframes?.[0].t).toBe(2000)
+    expect(keyframes?.[0].weather.precipitationType).toBe("rain")
+  })
+
+  it("it starts raining then stops: editing weather at two different scrubbed instants produces two independent keyframes", () => {
+    const element = mount()
+    element.sightingData = { version: 1, timeline: { keyframes: [] }, durationSeconds: 5 }
+    const shadow = element.shadowRoot!
+
+    seekNestedUfoTo(element, 0)
+    setInput(shadow, "precipitationType", "rain")
+    setInput(shadow, "precipitationIntensity", "0.7")
+    seekNestedUfoTo(element, 3000)
+    setInput(shadow, "precipitationType", "none")
+    setInput(shadow, "precipitationIntensity", "0")
+
+    const keyframes = element.sightingData.weatherTrack?.keyframes
+    expect(keyframes?.map(k => k.t)).toEqual([0, 3000])
+    expect(keyframes?.[0].weather.precipitationType).toBe("rain")
+    expect(keyframes?.[1].weather.precipitationType).toBe("none")
+  })
+
+  it("scrubbing between two weather keyframes blends continuous fields but holds precipitationType", () => {
+    const element = mount()
+    element.sightingData = {
+      version: 1,
+      weatherTrack: {
+        keyframes: [
+          { t: 0, weather: { cloudCover: 0, cloudDarkness: 0, precipitationType: "none", precipitationIntensity: 0, windDirectionDeg: 0, windSpeed: 0, storm: false } },
+          { t: 1000, weather: { cloudCover: 1, cloudDarkness: 0, precipitationType: "rain", precipitationIntensity: 1, windDirectionDeg: 0, windSpeed: 10, storm: false } }
+        ]
+      },
+      timeline: { keyframes: [] },
+      durationSeconds: 5
+    }
+    seekNestedUfoTo(element, 500)
+
+    const shadow = element.shadowRoot!
+    expect((shadow.getElementById("cloudCover") as HTMLInputElement).value).toBe("0.5")
+    expect((shadow.getElementById("windSpeed") as HTMLInputElement).value).toBe("5")
+    // Held, not blended — there's no meaningful halfway point between "none" and "rain" (see
+    // WeatherTrack.test.ts's own coverage of this at the model layer).
+    expect((shadow.getElementById("precipitationType") as HTMLSelectElement).value).toBe("none")
+  })
+
+  it("does not write or resync weather fields while the nested player is playing", () => {
+    const element = mount()
+    element.sightingData = {
+      version: 1,
+      weatherTrack: { keyframes: [{ t: 0, weather: { cloudCover: 0, cloudDarkness: 0, precipitationType: "none", precipitationIntensity: 0, windDirectionDeg: 0, windSpeed: 0, storm: false } }] },
+      timeline: {
+        keyframes: [
+          { t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 0, y: 0, width: 10, height: 10 }, color: "#39ff14", angle: 0, transparency: 0, haloScale: 1.5, selected: false } }] },
+          { t: 1000, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 100, y: 0, width: 10, height: 10 }, color: "#39ff14", angle: 0, transparency: 0, haloScale: 1.5, selected: false } }] }
+        ]
+      }
+    }
+    const ufo = nestedUfo(element) as unknown as { playbackState: string }
+    const playButton = nestedUfo(element)!.shadowRoot!.getElementById("play-pause") as HTMLButtonElement
+    playButton.click()
+    expect(ufo.playbackState).toBe("playing")
+
+    const before = JSON.stringify(element.sightingData)
+    const shadow = element.shadowRoot!
+    setInput(shadow, "precipitationType", "hail")
+
+    expect(JSON.stringify(element.sightingData)).toBe(before)
+  })
+
+  it("wraps wind direction to 0 once it reaches 360, both in the field and the stored weather", () => {
+    const element = mount()
+    const shadow = element.shadowRoot!
+    setInput(shadow, "windDirection", "360")
+
+    const windDirectionInput = shadow.getElementById("windDirection") as HTMLInputElement
+    expect(windDirectionInput.value).toBe("0")
+    expect(element.sightingData.weatherTrack?.keyframes[0].weather.windDirectionDeg).toBe(0)
+  })
+})
+
 describe("UfoRecorderElement composes a nested rr0-ufo", () => {
   afterEach(() => {
     document.body.innerHTML = ""
@@ -610,7 +717,8 @@ describe("UfoRecorderElement composes a nested rr0-ufo", () => {
           { t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval" as const, bounds: { x: 1, y: 2, width: 3, height: 4 }, color: "#fff", angle: 0, transparency: 0, haloScale: 0, selected: false } }] }
         ]
       },
-      witnessTrack: { keyframes: [] }
+      witnessTrack: { keyframes: [] },
+      weatherTrack: { keyframes: [] }
     }
     element.sightingData = json
     // timeline.order/groups are always present on the way out (order: z-order support, groups:
@@ -2042,16 +2150,17 @@ describe("UfoRecorderElement toolbar groups", () => {
   it("renders each field group as a collapsible <details>, open by default", () => {
     const element = mount()
     const groups = element.shadowRoot!.querySelectorAll("details")
-    expect(groups.length).toBe(5)
+    expect(groups.length).toBe(6)
     for (const group of groups) {
       expect(group.hasAttribute("open")).toBe(true)
     }
   })
 
-  it("orders groups witness, location, temporal, circumstances, shape — closest to the render last, recording merged into shape", () => {
+  it("orders groups observation, witness, location, temporal, circumstances, shape — closest to the render last, recording merged into shape", () => {
     const element = mount()
     const summaries = [...element.shadowRoot!.querySelectorAll("details summary")].map(s => s.id)
     expect(summaries).toEqual([
+      "label-observation-group",
       "label-witness-group",
       "label-location-group",
       "label-temporal-group",

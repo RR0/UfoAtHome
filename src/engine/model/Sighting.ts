@@ -1,6 +1,8 @@
 import { Timeline } from "./Timeline.js"
 import { ObserverTrack } from "./ObserverTrack.js"
 import type { ObserverPose } from "./ObserverTrack.js"
+import { WeatherTrack } from "./WeatherTrack.js"
+import { DEFAULT_WEATHER } from "./Weather.js"
 import type { Weather } from "./Weather.js"
 import type { People } from "./People.js"
 
@@ -36,7 +38,7 @@ export interface SightingTime {
  * date it was — sightingTimeOffsetMs already treats a year-less SightingTime as "compare
  * hour/minute/second only" for duration purposes, so this needs no changes downstream. */
 const EDTF_TIME_PATTERN =
-  /^(?:(?<year>\d{4}|\d{3}X|\d{2}XX)(-(?<month>0[1-9]|1[0-2]))?(-(?<day>0[1-9]|[12]\d|3[01]))?(?:[T ](?<hour>[01]\d|2[0-3]):(?<minute>[0-5]\d)(?::(?<second>[0-5]\d))?)?|(?<timeOnlyHour>[01]\d|2[0-3]):(?<timeOnlyMinute>[0-5]\d)(?::(?<timeOnlySecond>[0-5]\d))?)[?~%]?$/
+  /^(?:(?<year>\d{4}|\d{3}X|\d{2}XX)(-(?<month>0[1-9]|1[0-2]))?(-(?<day>0[1-9]|[12]\d|3[01]))?(?:[T ](?<hour>[01]?\d|2[0-3]):(?<minute>[0-5]\d)(?::(?<second>[0-5]\d))?)?|(?<timeOnlyHour>[01]?\d|2[0-3]):(?<timeOnlyMinute>[0-5]\d)(?::(?<timeOnlySecond>[0-5]\d))?)[?~%]?$/
 
 /** Best-effort EDTF text -> SightingTime, or undefined if `raw` doesn't match EDTF_TIME_PATTERN at
  * all (the caller shows a custom-validity error and leaves the previous value alone rather than
@@ -221,18 +223,20 @@ export class Sighting {
     readonly event: SightingEvent,
     readonly timeline: Timeline,
     readonly witnessTrack: ObserverTrack,
+    readonly weatherTrack: WeatherTrack,
     public witness?: People,
     public caseId?: string,
-    /** Not readonly, unlike the other fields above — a weather edit reassigns this whole object
-     * wholesale (see UfoRecorderElement.updateWeather), it's never mutated field-by-field the way
-     * event.place/event.time are. Static for the whole sighting, unlike witnessTrack — see
-     * Weather.ts's own doc comment for why this isn't a keyframed track. */
+    /** Legacy fallback only, kept for old recordings made before weatherTrack existed — see
+     * resolveWeatherAt, which prefers weatherTrack (interpolated) and only falls back to this
+     * static field when the track has no keyframes at all. Not readonly, same "reassigned
+     * wholesale, never mutated field-by-field" reasoning WeatherTrack keyframes themselves now
+     * carry instead (see UfoRecorderElement.applyWeatherAtPlayhead). */
     public weather?: Weather
   ) {
   }
 
   static create(time?: SightingTime, place?: SightingLocation[], witness?: People): Sighting {
-    return new Sighting({ eventType: "sighting", time, place }, new Timeline(), new ObserverTrack(), witness)
+    return new Sighting({ eventType: "sighting", time, place }, new Timeline(), new ObserverTrack(), new WeatherTrack(), witness)
   }
 }
 
@@ -258,4 +262,12 @@ export function resolveObserverPoseAt(sighting: Sighting, t: number): ObserverPo
     pitchDeg: DEFAULT_PITCH_DEG,
     fovDeg: DEFAULT_FOV_DEG
   }
+}
+
+/** Resolves weather at t: prefers weatherTrack (interpolated), falls back to the legacy static
+ * `weather` field (old recordings made before weatherTrack existed) when the track has no
+ * keyframes, then DEFAULT_WEATHER — unlike resolveObserverPoseAt, never undefined, since Weather
+ * (unlike ObserverPose) has a real default for every field, not just some. */
+export function resolveWeatherAt(sighting: Sighting, t: number): Weather {
+  return sighting.weatherTrack.getInterpolatedWeatherAt(t) ?? sighting.weather ?? DEFAULT_WEATHER
 }

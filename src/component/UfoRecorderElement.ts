@@ -8,10 +8,15 @@ import type { Appearance, Shape, ShapeBounds, ShapePresetId } from "../engine/sh
 import { ShapeHandles, ShapeGroup, MIN_SHAPE_SIZE } from "../engine/shape/ShapeHandles.js"
 import type { HandleId } from "../engine/shape/ShapeHandles.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
-import { DEFAULT_WEATHER } from "../engine/model/Weather.js"
 import type { PrecipitationType, Weather } from "../engine/model/Weather.js"
 import type { People } from "../engine/model/People.js"
-import { sightingDurationMs, sightingDurationBlockedReason, parseEdtfTime, formatEdtfTime } from "../engine/model/Sighting.js"
+import {
+  sightingDurationMs,
+  sightingDurationBlockedReason,
+  parseEdtfTime,
+  formatEdtfTime,
+  resolveWeatherAt
+} from "../engine/model/Sighting.js"
 import type { SightingTime } from "../engine/model/Sighting.js"
 import { selectLocale } from "../i18n/locale.js"
 import { loadUfoRecorderMessages, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
@@ -127,6 +132,18 @@ export class UfoRecorderElement extends HTMLElement {
   private readonly windDirectionInput: HTMLInputElement
   private readonly windSpeedInput: HTMLInputElement
   private readonly stormInput: HTMLInputElement
+  // View preferences, not sighting data — unlike stormInput/weather's other fields, neither is
+  // read by getWeather()/restored from a loaded sighting; they just directly set SceneElement's
+  // own lens-flare-brightness/lens-flare-intensity attributes. Kept as two independent continuous
+  // dials (brightness in Circumstances, camera/video-device artifact strength in Witness — whether
+  // and how strongly the witness happened to be looking through a camera/video device, which is
+  // what actually produces lens-flare artifacts) rather than one — see SceneRenderer.
+  // setDazzleIntensity/setLensFlareArtifactIntensity's own doc comments on why: comparing the
+  // *same* reported brightness naked-eye (cameraDeviceInput at 0) against how a camera would have
+  // captured it (above 0) only works if brightness itself doesn't also change when the artifact
+  // strength changes.
+  private readonly lensFlareBrightnessInput: HTMLInputElement
+  private readonly cameraDeviceInput: HTMLInputElement
   private readonly labelColor: HTMLElement
   private readonly labelTransparency: HTMLElement
   private readonly labelHalo: HTMLElement
@@ -154,6 +171,7 @@ export class UfoRecorderElement extends HTMLElement {
   private readonly labelShapeGroup: HTMLElement
   private readonly labelTemporalGroup: HTMLElement
   private readonly labelLocationGroup: HTMLElement
+  private readonly labelObservationGroup: HTMLElement
   private readonly labelWitnessGroup: HTMLElement
   private readonly labelCircumstancesGroup: HTMLElement
   private readonly labelCloudCover: HTMLElement
@@ -163,6 +181,8 @@ export class UfoRecorderElement extends HTMLElement {
   private readonly labelWindDirection: HTMLElement
   private readonly labelWindSpeed: HTMLElement
   private readonly labelStorm: HTMLElement
+  private readonly labelLensFlareBrightness: HTMLElement
+  private readonly labelCameraDevice: HTMLElement
   private readonly optionPrecipitationNone: HTMLElement
   private readonly optionPrecipitationRain: HTMLElement
   private readonly optionPrecipitationSnow: HTMLElement
@@ -325,6 +345,8 @@ export class UfoRecorderElement extends HTMLElement {
     this.windDirectionInput = this.shadow.getElementById("windDirection") as HTMLInputElement
     this.windSpeedInput = this.shadow.getElementById("windSpeed") as HTMLInputElement
     this.stormInput = this.shadow.getElementById("storm") as HTMLInputElement
+    this.lensFlareBrightnessInput = this.shadow.getElementById("lensFlareBrightness") as HTMLInputElement
+    this.cameraDeviceInput = this.shadow.getElementById("cameraDevice") as HTMLInputElement
     this.labelColor = this.shadow.getElementById("label-color")!
     this.labelTransparency = this.shadow.getElementById("label-transparency")!
     this.labelHalo = this.shadow.getElementById("label-halo")!
@@ -352,6 +374,7 @@ export class UfoRecorderElement extends HTMLElement {
     this.labelShapeGroup = this.shadow.getElementById("label-shape-group")!
     this.labelTemporalGroup = this.shadow.getElementById("label-temporal-group")!
     this.labelLocationGroup = this.shadow.getElementById("label-location-group")!
+    this.labelObservationGroup = this.shadow.getElementById("label-observation-group")!
     this.labelWitnessGroup = this.shadow.getElementById("label-witness-group")!
     this.labelCircumstancesGroup = this.shadow.getElementById("label-circumstances-group")!
     this.labelCloudCover = this.shadow.getElementById("label-cloud-cover")!
@@ -361,6 +384,8 @@ export class UfoRecorderElement extends HTMLElement {
     this.labelWindDirection = this.shadow.getElementById("label-wind-direction")!
     this.labelWindSpeed = this.shadow.getElementById("label-wind-speed")!
     this.labelStorm = this.shadow.getElementById("label-storm")!
+    this.labelLensFlareBrightness = this.shadow.getElementById("label-lens-flare-brightness")!
+    this.labelCameraDevice = this.shadow.getElementById("label-camera-device")!
     this.optionPrecipitationNone = this.shadow.getElementById("option-precipitation-none")!
     this.optionPrecipitationRain = this.shadow.getElementById("option-precipitation-rain")!
     this.optionPrecipitationSnow = this.shadow.getElementById("option-precipitation-snow")!
@@ -440,6 +465,12 @@ export class UfoRecorderElement extends HTMLElement {
     // easiest to miss. Independent of hover, see SceneElement.setCompassForced's own doc comment.
     this.headingInput.addEventListener("focus", () => this.sceneElement.setCompassForced(true))
     this.headingInput.addEventListener("blur", () => this.sceneElement.setCompassForced(false))
+    this.lensFlareBrightnessInput.addEventListener("input", () =>
+      this.sceneElement.setAttribute("lens-flare-brightness", this.lensFlareBrightnessInput.value)
+    )
+    this.cameraDeviceInput.addEventListener("input", () =>
+      this.sceneElement.setAttribute("lens-flare-intensity", this.cameraDeviceInput.value)
+    )
     this.obsTimeInput.addEventListener("input", () => this.updateObservationTime())
     this.obsEndTimeInput.addEventListener("input", () => this.updateObservationEndTime())
     this.obsTimeInput.addEventListener("blur", () => this.validateEdtfTimeInput(this.obsTimeInput))
@@ -465,7 +496,7 @@ export class UfoRecorderElement extends HTMLElement {
       this.windSpeedInput,
       this.stormInput
     ]) {
-      input.addEventListener("input", () => this.updateWeather())
+      input.addEventListener("input", () => this.applyWeatherAtPlayhead())
     }
 
     this.updatePresetButtons()
@@ -510,8 +541,10 @@ export class UfoRecorderElement extends HTMLElement {
     this.syncObservationTimeFields()
     this.syncObservationEndTimeFields()
     this.syncWitnessMetadataFields()
-    this.syncWeatherFromSighting()
-    this.sceneElement.setWeather(this.ufoElement.sighting.weather)
+    // Weather itself is resynced by onSelectionOrTimeChanged() above (syncWeatherFromTimeline) —
+    // and SceneElement's own updateAstronomy() (driven by the sightingData assignment above,
+    // which surfaces as a timeupdate) already resolves+applies it, unlike before this was a
+    // keyframed track.
   }
 
   /** Downloads the current recording as a standalone SightingRecordingJson file — a plain
@@ -732,20 +765,21 @@ export class UfoRecorderElement extends HTMLElement {
     this.ufoElement.refresh()
   }
 
-  /** Writes the sighting's reported weather condition — unlike updateObserver()/
-   * updateObservationTime(), this is a single flat object reassigned wholesale on every edit
-   * (see Weather.ts/Sighting.ts's own doc comments on why weather is static per-sighting, not
-   * keyframed), and every field always has a real default (0/none/false — a checkbox/select/range
-   * never has an "empty" state the way a number input does), so there's no "blank everything to
-   * clear it" case to handle the way updateObservationTime()/updateObserver() have.
-   * `sceneElement.setWeather()` is called explicitly (not left to refresh()'s own timeupdate,
-   * unlike observer pose) since weather isn't read from within SceneElement.updateAstronomy()'s own
-   * per-tick path — see SceneElement.setWeather's own doc comment. */
-  private updateWeather(): void {
+  /** Writes the sighting's reported weather condition at the current playhead as a keyframe — same
+   * keyframed-track pattern as updateObserver() now that weather is itself a track (see
+   * WeatherTrack.ts/Sighting.resolveWeatherAt), replacing the flat whole-sighting reassignment this
+   * used to be. Unlike updateObserver(), there's no "nothing set, remove the keyframe instead"
+   * case: every weather field always has a real default (0/none/false — none of these inputs has
+   * an "empty" state the way a number input does), so every edit is a real keyframe. Bails out
+   * while playing, same reasoning as updateObserver's identical guard. `sceneElement.setWeather()`
+   * is no longer called explicitly here (unlike before) — refresh()'s own timeupdate now resolves
+   * and applies weather at this instant the same way it already does for observer pose, see
+   * SceneElement.updateAstronomy. */
+  private applyWeatherAtPlayhead(): void {
+    if (this.ufoElement.playbackState === "playing") return
     // Unlocks weather audio right here — this input event IS a real user gesture, exactly what
     // AudioContext.resume() requires (see SceneElement.resumeWeatherAudio/WeatherAudio.resume).
     this.sceneElement.resumeWeatherAudio()
-    const sighting = this.ufoElement.sighting
     const weather: Weather = {
       cloudCover: Number(this.cloudCoverInput.value),
       cloudDarkness: Number(this.cloudDarknessInput.value),
@@ -755,8 +789,10 @@ export class UfoRecorderElement extends HTMLElement {
       windSpeed: Number(this.windSpeedInput.value),
       storm: this.stormInput.checked
     }
-    sighting.weather = weather
-    this.sceneElement.setWeather(weather)
+    this.ufoElement.sighting.weatherTrack.addKeyframe(this.ufoElement.currentTime, weather)
+    // Surfaces the edit as a timeupdate (see updateObserver()'s identical comment) — what makes
+    // SceneElement.updateAstronomy() re-resolve and apply weather at this instant.
+    this.ufoElement.refresh()
   }
 
   /** Auto-fills Duration from the observation's start/end dates when no explicit duration has
@@ -853,21 +889,30 @@ export class UfoRecorderElement extends HTMLElement {
     this.tagsInput.value = sighting.event.tags?.join(", ") ?? ""
   }
 
-  /** Resyncs the weather toolbar from a freshly loaded sighting — same role
-   * syncObservationTimeFields plays for the observation-time fields, and for the same reason:
-   * weather is static per-sighting, not a per-instant keyframe, so this only needs to run once on
-   * load, never on every tick. Absent weather (older recordings, or one never edited) resets every
-   * field to DEFAULT_WEATHER's own values rather than leaving stale values from whatever was
-   * previously loaded. */
-  private syncWeatherFromSighting(): void {
-    const weather = this.ufoElement.sighting.weather ?? DEFAULT_WEATHER
-    this.cloudCoverInput.value = String(weather.cloudCover)
-    this.cloudDarknessInput.value = String(weather.cloudDarkness)
-    this.precipitationTypeSelect.value = weather.precipitationType
-    this.precipitationIntensityInput.value = String(weather.precipitationIntensity)
-    this.windDirectionInput.value = String(weather.windDirectionDeg)
-    this.windSpeedInput.value = String(weather.windSpeed)
-    this.stormInput.checked = weather.storm
+  /** Keeps the weather toolbar honest as the playhead moves or a different keyframe region is
+   * scrubbed to — same role/timing and the same playing-state bailout as syncObserverFromTimeline
+   * (merely scrubbing must never itself write a keyframe). Reads resolveWeatherAt (interpolated,
+   * not hold-last) so the fields reflect what a witness would actually have reported *between* two
+   * weather keyframes, matching what SceneElement itself renders at that instant — it already
+   * falls back through the legacy static sighting.weather, then DEFAULT_WEATHER, when the track
+   * has no keyframes at all yet (e.g. a sighting loaded from older data, or before the very first
+   * weather edit).
+   *
+   * Skips whichever field currently has focus — same "don't fight active typing/dragging"
+   * reasoning as syncObserverFromTimeline's own doc comment. */
+  private syncWeatherFromTimeline(): void {
+    if (this.ufoElement.playbackState === "playing") return
+    const weather = resolveWeatherAt(this.ufoElement.sighting, this.ufoElement.currentTime)
+    const active = this.shadow.activeElement
+    if (active !== this.cloudCoverInput) this.cloudCoverInput.value = String(weather.cloudCover)
+    if (active !== this.cloudDarknessInput) this.cloudDarknessInput.value = String(weather.cloudDarkness)
+    if (active !== this.precipitationTypeSelect) this.precipitationTypeSelect.value = weather.precipitationType
+    if (active !== this.precipitationIntensityInput) {
+      this.precipitationIntensityInput.value = String(weather.precipitationIntensity)
+    }
+    if (active !== this.windDirectionInput) this.windDirectionInput.value = String(weather.windDirectionDeg)
+    if (active !== this.windSpeedInput) this.windSpeedInput.value = String(weather.windSpeed)
+    if (active !== this.stormInput) this.stormInput.checked = weather.storm
   }
 
   /** Keeps the lat/lng/heading/pitch fields honest as the playhead moves or a different keyframe
@@ -952,6 +997,7 @@ export class UfoRecorderElement extends HTMLElement {
   private onSelectionOrTimeChanged(): void {
     this.syncAppearanceFromTimeline()
     this.syncObserverFromTimeline()
+    this.syncWeatherFromTimeline()
     this.updateAppearanceFieldsDisabledState()
     this.ufoElement.selectedSourceIds = this.selectedSourceIds
     // Disabled once deleting the whole selection would leave nothing behind (a recording always
@@ -1238,6 +1284,7 @@ export class UfoRecorderElement extends HTMLElement {
     this.labelShapeGroup.textContent = messages.shapeGroup
     this.labelTemporalGroup.textContent = messages.temporalGroup
     this.labelLocationGroup.textContent = messages.locationGroup
+    this.labelObservationGroup.textContent = messages.observationGroup
     this.labelWitnessGroup.textContent = messages.witnessGroup
     this.labelCircumstancesGroup.textContent = messages.circumstancesGroup
     this.labelCloudCover.textContent = messages.cloudCover
@@ -1251,6 +1298,8 @@ export class UfoRecorderElement extends HTMLElement {
     this.labelWindDirection.textContent = messages.windDirection
     this.labelWindSpeed.textContent = messages.windSpeed
     this.labelStorm.textContent = messages.storm
+    this.labelLensFlareBrightness.textContent = messages.lensFlareBrightness
+    this.labelCameraDevice.textContent = messages.cameraDevice
     this.loopButton.title = messages.autoReplay
     this.loopButton.setAttribute("aria-label", messages.autoReplay)
     this.setRecordButtonLabel(this.isRecording)

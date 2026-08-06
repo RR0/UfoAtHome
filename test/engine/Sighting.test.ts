@@ -187,6 +187,14 @@ describe("parseEdtfTime", () => {
     expect(parseEdtfTime("25:00")).toBeUndefined() // hour 25
     expect(parseEdtfTime("22:60")).toBeUndefined() // minute 60
   })
+
+  it("accepts a single-digit hour with no leading zero, date-less", () => {
+    expect(parseEdtfTime("5:30")).toMatchObject({ hour: 5, minute: 30, year: undefined })
+  })
+
+  it("accepts a single-digit hour with no leading zero, with a date", () => {
+    expect(parseEdtfTime("1948-07-24T5:30")).toMatchObject({ year: 1948, month: 7, day: 24, hour: 5, minute: 30 })
+  })
 })
 
 describe("formatEdtfTime", () => {

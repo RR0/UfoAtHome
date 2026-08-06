@@ -61,6 +61,7 @@ export const ufoRecorderMessages_en: UfoRecorderMessages = {
   shapeGroup: "Shape",
   temporalGroup: "Temporal",
   locationGroup: "Location",
+  observationGroup: "Observation",
   witnessGroup: "Witness",
   circumstancesGroup: "Circumstances",
   cloudCover: "Cloud cover",
@@ -73,5 +74,7 @@ export const ufoRecorderMessages_en: UfoRecorderMessages = {
   precipitationIntensity: "Intensity",
   windDirection: "Wind direction",
   windSpeed: "Wind speed",
-  storm: "Storm"
+  storm: "Storm",
+  lensFlareBrightness: "Light intensity",
+  cameraDevice: "Camera/video device"
 }

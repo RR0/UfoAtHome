@@ -1,9 +1,14 @@
 export const html = `
-<div class="toolbar">
-  <label><span id="label-import-file">Load JSON file</span> <input id="import-file" type="file" accept="application/json,.json"/></label>
-  <label><span id="label-import-url">Or load from URL</span> <input id="import-url" type="url" placeholder="https://…/sighting.json"/></label>
-  <button id="import-url-button" type="button">Load</button>
-</div>
+<details open>
+  <summary id="label-observation-group">Observation</summary>
+  <div class="toolbar">
+    <label><span id="label-import-file">Load JSON file</span> <input id="import-file" type="file" accept="application/json,.json"/></label>
+    <label><span id="label-import-url">Or load from URL</span> <input id="import-url" type="url" placeholder="https://…/sighting.json"/></label>
+    <button id="import-url-button" type="button">Load</button>
+    <label><span id="label-description">Description</span> <textarea id="description" rows="2"></textarea></label>
+    <label><span id="label-tags">Tags</span> <input id="tags" type="text" placeholder="comma-separated"/></label>
+  </div>
+</details>
 <details open>
   <summary id="label-witness-group">Witness</summary>
   <div class="toolbar">
@@ -13,6 +18,7 @@ export const html = `
     <label><span id="label-witness-last-name">Witness last name</span> <input id="witnessLastName" type="text"/></label>
     <label><span id="label-witness-first-names">Witness first names</span> <input id="witnessFirstNames" type="text" placeholder="comma-separated"/></label>
     <label><span id="label-case-id">Case ID</span> <input id="caseId" type="text"/></label>
+    <label><span id="label-camera-device">Camera/video device</span> <input id="cameraDevice" type="range" min="0" max="2" step="0.1" value="0"/></label>
   </div>
 </details>
 <details open>
@@ -37,8 +43,6 @@ export const html = `
 <details open>
   <summary id="label-circumstances-group">Circumstances</summary>
   <div class="toolbar">
-    <label><span id="label-description">Description</span> <textarea id="description" rows="2"></textarea></label>
-    <label><span id="label-tags">Tags</span> <input id="tags" type="text" placeholder="comma-separated"/></label>
     <span id="label-weather">Weather</span>
     <label><span id="label-cloud-cover">Cloud cover</span> <input id="cloudCover" type="range" min="0" max="1" step="0.05" value="0"/></label>
     <label><span id="label-cloud-darkness">Cloud darkness</span> <input id="cloudDarkness" type="range" min="0" max="1" step="0.05" value="0"/></label>
@@ -54,6 +58,7 @@ export const html = `
     <label><span id="label-wind-direction">Wind direction</span> <input id="windDirection" type="number" min="0" max="360" step="1" value="0"/> &deg;</label>
     <label><span id="label-wind-speed">Wind speed</span> <input id="windSpeed" type="number" min="0" max="30" step="0.5" value="0"/> m/s</label>
     <label><span id="label-storm">Storm</span> <input id="storm" type="checkbox"/></label>
+    <label><span id="label-lens-flare-brightness">Light intensity</span> <input id="lensFlareBrightness" type="range" min="0" max="3" step="0.1" value="1"/></label>
   </div>
 </details>
 <details open>

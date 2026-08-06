@@ -43,6 +43,7 @@ import {
   visibleMagnitudeLimit,
   STAR_BRIGHTNESS_TIERS
 } from "./skyColors.js"
+import type { RgbColor } from "./skyColors.js"
 import { equatorialToHorizontal } from "../engine/astronomy/CelestialPositions.js"
 import type { CelestialBody, HorizontalPosition, MoonPhase, ObserverGeo } from "../engine/astronomy/CelestialPositions.js"
 import type { ObserverPose } from "../engine/model/ObserverTrack.js"
@@ -57,6 +58,23 @@ import { buildRainSystem } from "./RainSystem.js"
 import type { RainSystem } from "./RainSystem.js"
 import { buildCloudGeometry, buildCloudMaterial } from "./CloudSystem.js"
 import type { CloudUniforms } from "./CloudSystem.js"
+import { buildLensFlare } from "./LensFlareEffect.js"
+import type { LensFlareSystem } from "./LensFlareEffect.js"
+
+/** Plain field-by-field comparison — see setWeather's own doc comment on why reference equality
+ * stopped being enough once weather started being resolved fresh every tick from a keyframe
+ * track. */
+function weatherEquals(a: Weather, b: Weather): boolean {
+  return (
+    a.cloudCover === b.cloudCover &&
+    a.cloudDarkness === b.cloudDarkness &&
+    a.precipitationType === b.precipitationType &&
+    a.precipitationIntensity === b.precipitationIntensity &&
+    a.windDirectionDeg === b.windDirectionDeg &&
+    a.windSpeed === b.windSpeed &&
+    a.storm === b.storm
+  )
+}
 
 const SKY_RADIUS = 900
 const GROUND_RADIUS = 900
@@ -115,6 +133,18 @@ const TERRAIN_RENDER_ORDER = 1
  * patch's own 900m radius, so the old patch still visibly covers the observer's surroundings for a
  * while after a rebuild, rather than needing to be pixel-perfect the instant they've moved at all. */
 const TERRAIN_REBUILD_DISTANCE_M = 150
+
+/** Base (zenith, unwarmed, dazzleIntensity 1) magnitude for the always-on lens-flare dazzle's
+ * uColorGain uniform — see applyLensFlareTint, which scales this by both atmosphericTint per
+ * channel and the user-set dazzleIntensity. The shader itself divides uColorGain by 256 (ported
+ * as-is from the reference — see LensFlareEffect.ts), so this is on that same raw-0-255-ish scale,
+ * not a normal [0,1] color. Tuned together with LENS_FLARE_BASE_OPACITY (see LensFlareEffect.ts's
+ * own doc comment on why) — don't change one without re-checking the other via a real render
+ * (gl.readPixels diff, not a screenshot — see this project's own lens-flare memory for why
+ * screenshots of this canvas are unreliable). */
+const LENS_FLARE_BASE_GAIN = 55
+/** uOpacity at dazzleIntensity 1 — see setDazzleIntensity. */
+const LENS_FLARE_BASE_OPACITY = 0.5
 
 const CLOUD_RADIUS = 700 // inside STAR_RADIUS/BODY_PLACEMENT_RADIUS (850) so clouds occlude stars/bodies, matching real sky layering
 /** Between TERRAIN_RENDER_ORDER (1) and COMPASS_RENDER_ORDER (10) — clouds are part of the
@@ -500,6 +530,32 @@ export class SceneRenderer {
    * this — their construction default (plain white) was already close to CLOUD_LIGHT_COLOR — but a
    * real directional-lit material looks visibly wrong from an arbitrary default. */
   private lastSunPosition?: HorizontalPosition
+  /** Built lazily by setBodyMesh("sun", ...) the first time the Sun is actually visible — same
+   * always-on spirit as setGlare's own halo (see LensFlareEffect.ts's own doc comment on why only
+   * the lensFlareArtifactIntensity artifacts, not this mesh's existence, are opt-in). Once built,
+   * stays built (just hidden via updateLensFlarePosition whenever the Sun isn't visible) rather
+   * than being torn down and rebuilt on every horizon crossing. */
+  private lensFlare?: LensFlareSystem
+  /** How bright the Sun's dazzle (and, if lensFlareArtifactIntensity > 0, the lens-flare artifacts
+   * riding on the same light) reads — a real "how intense was it" dial, independent of whether the
+   * artifacts are shown at all. 1 is the tuned default look — see setDazzleIntensity/
+   * LENS_FLARE_BASE_GAIN/LENS_FLARE_BASE_OPACITY, which this multiplies. */
+  private dazzleIntensity = 1
+  /** How strongly the optional lens-flare artifacts (star rays, ghost trail, hex ghosts, streaks,
+   * starburst) show on top of the Sun's always-on dazzle core — see setLensFlareArtifactIntensity.
+   * 0 means off. The point of keeping this independent of dazzleIntensity: comparing the *same*
+   * reported brightness as seen with the naked eye (this at 0) against how a camera would have
+   * captured it (this above 0) — see LensFlareEffect.ts's own doc comment. */
+  private lensFlareArtifactIntensity = 0
+  /** The Sun's current world position/visibility, as last set by setBodyMesh("sun", ...) — what
+   * updateLensFlarePosition projects to screen space every render(). Kept separately from
+   * bodyMeshes.get("sun") since the flare only needs the position, not the mesh itself. */
+  private readonly sunWorldPosition = new Vector3()
+  private sunVisible = false
+  /** Scratch vector reused every updateLensFlarePosition call (avoids a per-frame allocation) —
+   * first holds the Sun's camera-space position (to test it's in front of the camera), then gets
+   * overwritten with its projected NDC screen position once that test passes. */
+  private readonly lensFlareScratch = new Vector3()
   private readonly onLightningFlash?: () => void
 
   constructor(
@@ -618,6 +674,46 @@ export class SceneRenderer {
     this.render()
   }
 
+  /** Sets how bright the Sun's dazzle (and, if enabled, the lens-flare artifacts riding on the same
+   * light) reads — see dazzleIntensity's own doc comment for why this is independent of
+   * lensFlareArtifactIntensity. A no-op on the mesh/uniforms until the Sun has actually been
+   * visible at least once (setBodyMesh builds it) — harmless: the stored value still applies the
+   * moment it is. */
+  setDazzleIntensity(intensity: number): void {
+    if (this.dazzleIntensity === intensity) return
+    this.dazzleIntensity = intensity
+    if (this.lensFlare) {
+      this.lensFlare.uniforms.uOpacity.value = LENS_FLARE_BASE_OPACITY * intensity
+      if (this.lastSunPosition) this.applyLensFlareTint(atmosphericTint(this.lastSunPosition.altitudeDeg))
+    }
+    this.render()
+  }
+
+  /** Sets how strongly the optional lens-flare *artifacts* (star rays, ghost trail, hex ghosts,
+   * streaks, starburst) show around the Sun's always-on dazzle core — see LensFlareEffect.ts's own
+   * doc comment for why only these artifacts are opt-in while the dazzle itself isn't. A no-op on
+   * the mesh/uniforms until the Sun has actually been visible at least once (setBodyMesh builds
+   * it) — harmless: the stored value still applies the moment it is. */
+  setLensFlareArtifactIntensity(intensity: number): void {
+    if (this.lensFlareArtifactIntensity === intensity) return
+    this.lensFlareArtifactIntensity = intensity
+    if (this.lensFlare) this.lensFlare.uniforms.uFlareIntensity.value = intensity
+    this.render()
+  }
+
+  /** Retints the lens flare's uColorGain from a real atmospheric tint (see atmosphericTint's own
+   * doc comment) scaled by dazzleIntensity — called from setBodyMesh's "sun" branch every time the
+   * Sun's altitude (and so its tint) changes, and from setDazzleIntensity when the dial itself
+   * changes. A no-op if the flare hasn't been built yet. */
+  private applyLensFlareTint(tint: RgbColor): void {
+    if (!this.lensFlare) return
+    this.lensFlare.uniforms.uColorGain.value.setRGB(
+      LENS_FLARE_BASE_GAIN * this.dazzleIntensity * tint[0],
+      LENS_FLARE_BASE_GAIN * this.dazzleIntensity * tint[1],
+      LENS_FLARE_BASE_GAIN * this.dazzleIntensity * tint[2]
+    )
+  }
+
   /** Shows/hides the compass labels built by setShowCompass — cheap visibility toggle, never
    * rebuilds the sprites. A witness's heading matters while actively pointing at the canvas to set
    * it, not as a permanent overlay competing with the scene the rest of the time — so the labels
@@ -649,17 +745,19 @@ export class SceneRenderer {
   }
 
   /**
-   * Applies a (static, per-sighting) weather condition — unlike setAstronomy/setObserverPose/
-   * setTerrainOrigin, this is meant to be called once per actual change, not every tick: weather
-   * doesn't move over the course of a sighting the way the sun/observer/terrain do (see Weather.ts's
-   * own doc comment). Dedupes on reference equality — SceneElement/UfoRecorderElement always
-   * reassign `sighting.weather` wholesale on edit (never mutate it field-by-field), so this is safe.
-   * Cloud/precipitation geometry rebuilds here; cloud *lighting* still needs the sun's current
-   * position every tick (see updateCloudLighting, called from setAstronomy) since it must keep
-   * reacting to sunrise/sunset independent of this method being called again.
+   * Applies the weather condition at the current playhead — unlike the static single condition
+   * this used to always be, weather is now itself resolved per-tick from a keyframe track (see
+   * Sighting.resolveWeatherAt), so this method is now called every tick from setAstronomy just
+   * like setObserverPose/setTerrainOrigin are. That means it can no longer dedupe on reference
+   * equality (resolveWeatherAt/getInterpolatedWeatherAt allocate a fresh object every call, even
+   * when every field is unchanged) — see weatherEquals, a plain field-by-field comparison, which
+   * is what actually gates the expensive part below (cloud/precipitation geometry rebuilds) so a
+   * per-tick call while weather is holding steady stays a cheap no-op. Cloud *lighting* still
+   * needs the sun's current position every tick regardless (see updateCloudLighting, also called
+   * from setAstronomy) since it must keep reacting to sunrise/sunset independent of this.
    */
   setWeather(weather: Weather): void {
-    if (this.weather === weather) return
+    if (weatherEquals(this.weather, weather)) return
     this.weather = weather
     this.buildClouds()
     this.buildPrecipitation()
@@ -693,11 +791,45 @@ export class SceneRenderer {
     this.setMoonMesh(astronomy.moon)
     this.buildPlanets(astronomy.planets)
     this.scene.fog = new Fog(new Color(...groundColor), SKY_RADIUS * 0.2, SKY_RADIUS)
+    // buildStars() above already called syncAnimationLoop(), but that ran before setBodyMesh("sun",
+    // ...) updated sunVisible — needsAnimationLoop() needs re-checking now that it's current, so the
+    // loop actually starts/stops the instant the Sun crosses the horizon during pure-daylight
+    // scrubbing (no stars/precipitation/lightning to otherwise keep it alive).
+    this.syncAnimationLoop()
     this.render()
   }
 
   render(): void {
+    this.updateLensFlarePosition()
     this.renderer.render(this.scene, this.camera)
+  }
+
+  /** Projects the Sun's real world position (see setBodyMesh's "sun" branch) to screen space for
+   * the lens flare, every render() call — not just on setAstronomy ticks, since the camera itself
+   * can turn independent of astronomy (see setObserverPose) and the flare must track wherever the
+   * Sun actually sits on screen right now. A no-op whenever the flare hasn't been built yet
+   * (this.lensFlare undefined, i.e. the Sun has never been visible this session). Explicitly
+   * refreshes the camera's own world matrices first: they're otherwise only guaranteed current
+   * *during* renderer.render() itself, which runs after this. */
+  private updateLensFlarePosition(): void {
+    const flare = this.lensFlare
+    if (!flare) return
+    if (!this.sunVisible) {
+      flare.mesh.visible = false
+      return
+    }
+    this.camera.updateMatrixWorld()
+    this.lensFlareScratch.copy(this.sunWorldPosition).applyMatrix4(this.camera.matrixWorldInverse)
+    if (this.lensFlareScratch.z > 0) {
+      // Behind the camera (a perspective camera looks down its own local -Z) — projecting would
+      // give a meaningless mirrored screen position.
+      flare.mesh.visible = false
+      return
+    }
+    flare.mesh.visible = true
+    const projected = this.lensFlareScratch.copy(this.sunWorldPosition).project(this.camera)
+    flare.uniforms.uLensPosition.value.set(projected.x, projected.y)
+    flare.uniforms.uResolution.value.set(this.renderer.domElement.width, this.renderer.domElement.height)
   }
 
   /** Finds which celestial body (if any) sits under normalized device coordinates (each in
@@ -735,6 +867,12 @@ export class SceneRenderer {
       this.disposeGlare(key)
     }
     this.disposeCompassLabels()
+    if (this.lensFlare) {
+      this.scene.remove(this.lensFlare.mesh)
+      this.lensFlare.mesh.geometry.dispose()
+      ;(this.lensFlare.mesh.material as ShaderMaterial).dispose()
+      this.lensFlare = undefined
+    }
     this.renderer.dispose()
   }
 
@@ -762,6 +900,7 @@ export class SceneRenderer {
       this.updatePrecipitation(timeMs / 1000, dtSeconds)
       this.updateRain(dtSeconds)
       this.updateLightning(timeMs / 1000, dtSeconds)
+      if (this.lensFlare) this.lensFlare.uniforms.uTime.value = timeMs / 1000
       this.render()
       this.animationFrameId = requestAnimationFrame(tick)
     }
@@ -780,7 +919,8 @@ export class SceneRenderer {
       this.starTiers.length > 0 ||
       this.precipitationPoints !== undefined ||
       this.rainSystem !== undefined ||
-      this.lightningArmed
+      this.lightningArmed ||
+      (this.lensFlare !== undefined && this.sunVisible)
     )
   }
 
@@ -837,6 +977,7 @@ export class SceneRenderer {
       // Well below the horizon: skip building a mesh at all rather than pay for geometry that
       // the opaque ground plane would occlude anyway.
       this.bodyMeshes.delete(key)
+      if (key === "sun") this.sunVisible = false
       return
     }
     const { x, y, z } = horizontalToCartesian(position.altitudeDeg, position.azimuthDeg, BODY_PLACEMENT_RADIUS)
@@ -849,7 +990,30 @@ export class SceneRenderer {
     this.scene.add(mesh)
     this.bodyMeshes.set(key, mesh)
     this.setHitArea(key, x, y, z, visualRadius)
-    this.setGlare(key, x, y, z, magnitude, tintedColor)
+    // The Sun's own dazzle comes entirely from the lens-flare mesh below (its always-on glareOut
+    // term — see LensFlareEffect.ts's own doc comment), not this sprite-based halo: setGlare's
+    // opacity is a fixed function of real magnitude, so calling it for "sun" too would leave a
+    // constant halo showing even at dazzleIntensity 0, when the whole point of that dial is to go
+    // genuinely down to "no extra dazzle, just the plain disc". Every other tracked body (Moon,
+    // Venus, ...) still gets the ordinary always-on sprite halo exactly as before.
+    if (key !== "sun") this.setGlare(key, x, y, z, magnitude, tintedColor)
+    if (key === "sun") {
+      this.sunVisible = true
+      this.sunWorldPosition.set(x, y, z)
+      if (!this.lensFlare) {
+        // Built here, unconditionally, the same way setGlare's own halo already was above for
+        // every other body — see LensFlareEffect.ts's own doc comment on why the dazzle core isn't
+        // gated by lensFlareArtifactIntensity, only the surrounding artifacts are.
+        this.lensFlare = buildLensFlare()
+        this.lensFlare.uniforms.uOpacity.value = LENS_FLARE_BASE_OPACITY * this.dazzleIntensity
+        this.lensFlare.uniforms.uFlareIntensity.value = this.lensFlareArtifactIntensity
+        this.scene.add(this.lensFlare.mesh)
+      }
+      // Same real atmospheric-reddening tint as the disc/glare halo above (see atmosphericTint's
+      // own doc comment) — LENS_FLARE_BASE_GAIN is a neutral near-white base so the flare only
+      // warms near the horizon instead of carrying a fixed stylized tint of its own.
+      this.applyLensFlareTint(tint)
+    }
   }
 
   /** The Moon needs a real crescent/gibbous *shape*, not just a dimmed flat color — a sphere lit
