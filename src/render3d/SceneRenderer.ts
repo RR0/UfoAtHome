@@ -190,10 +190,6 @@ const PRECIPITATION_CONFIG: Record<CpuPrecipitationType, PrecipitationTypeConfig
  * every precipitation type (rain, snow, hail alike) — ground level doesn't vary by weather type,
  * unlike radiusM/topYM/fallSpeedMPerS which do. */
 const PRECIPITATION_RESPAWN_Y_MIN = -0.5
-/** Scales weather.windSpeed (0-1) into a world-units-per-second horizontal drift — tuned so
- * windSpeed=1 visibly sweeps precipitation sideways without it reading as a hurricane. */
-const WIND_DRIFT_M_PER_S = 6
-
 /** RainSystem tuning — see RainSystem.ts's own doc comment for why rain gets a completely separate,
  * much tighter volume than the old shared 150m-radius CPU pool: a small, camera-hugging volume is
  * what actually reads as a dense downpour (parallax — see PrecipitationTypeConfig.radiusM's own
@@ -316,7 +312,7 @@ const RAIN_MIN_ANGLE_UV_SQUASH = 0.05
  * precipitationWobbleFreqJitter/AmpJitter (see their own comment), not applied directly. Amplitude
  * lowered 1.4->0.7 after user feedback that the wobble read as an exaggerated zigzag with no wind
  * to compete against; frequency/amplitude picked by eye, same as every other "real effect, tuned
- * for legibility" constant in this file (e.g. WIND_DRIFT_M_PER_S itself). Only snow uses this — see
+ * for legibility" constant in this file. Only snow uses this — see
  * updatePrecipitation. */
 const SNOW_WOBBLE_FREQUENCY_HZ = 0.6
 const SNOW_WOBBLE_AMPLITUDE_M_PER_S = 0.7
@@ -667,7 +663,7 @@ export class SceneRenderer {
     this.weather = weather
     this.buildClouds()
     this.buildPrecipitation()
-    this.lightningArmed = weather.lightning && weather.cloudDarkness >= LIGHTNING_MIN_DARKNESS
+    this.lightningArmed = weather.storm && weather.cloudDarkness >= LIGHTNING_MIN_DARKNESS
     if (!this.lightningArmed) {
       this.nextLightningAtS = null
       this.lightningFlashRemainingS = 0
@@ -1220,7 +1216,9 @@ export class SceneRenderer {
   }
 
   /** Falls each particle by its type's real terminal velocity and drifts it horizontally by wind —
-   * see PRECIPITATION_CONFIG/WIND_DRIFT_M_PER_S. Respawns (not destroys/recreates) any particle that
+   * see PRECIPITATION_CONFIG; weather.windSpeed is already real m/s, so it drives drift directly,
+   * scaled only by driftSensitivity (how much this precipitation type gets blown around). Respawns
+   * (not destroys/recreates) any particle that
    * reaches ground level or drifts outside the precipitation volume's radius, picking a fresh random
    * top-of-volume position — plain Math.random() here (unlike buildPrecipitation's seeded initial
    * layout) since respawn timing is already effectively random/non-reproducible unless the whole
@@ -1237,8 +1235,8 @@ export class SceneRenderer {
     if (type === "none" || type === "rain") return
     const config = PRECIPITATION_CONFIG[type]
     const windRad = this.weather.windDirectionDeg * DEG_TO_RAD
-    const driftX = Math.sin(windRad) * this.weather.windSpeed * config.driftSensitivity * WIND_DRIFT_M_PER_S
-    const driftZ = -Math.cos(windRad) * this.weather.windSpeed * config.driftSensitivity * WIND_DRIFT_M_PER_S
+    const driftX = Math.sin(windRad) * this.weather.windSpeed * config.driftSensitivity
+    const driftZ = -Math.cos(windRad) * this.weather.windSpeed * config.driftSensitivity
     const positions = this.precipitationPositions
     const phase = this.precipitationPhase
     const speedJitter = this.precipitationSpeedJitter
@@ -1476,8 +1474,8 @@ export class SceneRenderer {
     rain.uniforms.uHazeColor.value.setRGB(...this.baseFogColor)
 
     const windRad = this.weather.windDirectionDeg * DEG_TO_RAD
-    const driftX = Math.sin(windRad) * this.weather.windSpeed * WIND_DRIFT_M_PER_S
-    const driftZ = -Math.cos(windRad) * this.weather.windSpeed * WIND_DRIFT_M_PER_S
+    const driftX = Math.sin(windRad) * this.weather.windSpeed
+    const driftZ = -Math.cos(windRad) * this.weather.windSpeed
     const halfWidth = RAIN_RADIUS_M
     const wrap = (value: number): number => (((value % (halfWidth * 2)) + halfWidth * 3) % (halfWidth * 2)) - halfWidth
     rain.uniforms.uWindOffset.value.set(wrap(rain.uniforms.uWindOffset.value.x + driftX * dtSeconds), wrap(rain.uniforms.uWindOffset.value.y + driftZ * dtSeconds))

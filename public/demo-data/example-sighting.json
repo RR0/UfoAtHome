@@ -2,7 +2,7 @@
   "version": 1,
   "time": { "year": 1987, "month": 6, "day": 12 },
   "place": [{ "lat": 45.188529, "lng": 5.724524 }],
-  "witnessId": "demo-witness-1",
+  "witness": { "id": "demo-witness-1" },
   "timeline": {
     "keyframes": [
       { "t": 0, "shapes": [{ "sourceId": "ufo-1", "shape": { "kind": "oval", "bounds": { "x": 56, "y": 166, "width": 48, "height": 28 }, "color": "#39ff14", "angle": 0, "transparency": 0, "haloScale": 1.5, "selected": false } }] },

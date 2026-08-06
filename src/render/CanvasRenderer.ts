@@ -1,5 +1,5 @@
-import type { Shape } from "../engine/shape/Shape.js"
-import { RESIZE_HANDLE_IDS, handlePointsFor } from "../engine/shape/ShapeHandles.js"
+import type { Shape, ShapeBounds } from "../engine/shape/Shape.js"
+import { RESIZE_HANDLE_IDS, ShapeHandles, type HandleId } from "../engine/shape/ShapeHandles.js"
 
 const CORNER_SIZE = 6
 const HALF_CORNER_SIZE = CORNER_SIZE / 2
@@ -76,13 +76,29 @@ export class CanvasRenderer {
     this.ctx.restore()
   }
 
-  /** Draws from handlePointsFor's canvas-space (already-rotated) points — the same source of
-   * truth ShapeHandles.hitTestHandle uses — so rendering and hit-testing can never disagree.
-   * No ctx.rotate needed here: the outline is a path through the 4 (already-rotated) corner
-   * points, and handle squares stay upright at their (rotated) position, matching
+  /** Draws from ShapeHandles.handlePointsFor's canvas-space (already-rotated) points — the same
+   * source of truth ShapeHandles.hitTestHandle uses — so rendering and hit-testing can never
+   * disagree. No ctx.rotate needed here: the outline is a path through the 4 (already-rotated)
+   * corner points, and handle squares stay upright at their (rotated) position, matching
    * Figma/PowerPoint-style resize handles rather than rotating into diamonds. */
   private paintSelectionHandles(shape: Shape): void {
-    const points = handlePointsFor(shape)
+    this.paintHandleFrame(ShapeHandles.handlePointsFor(shape), { includeRotate: true })
+  }
+
+  /** Thin outline only (no handle squares) — drawn for each individually-selected shape when a
+   * multi-selection/group of >1 is active, so the user can see which shapes are included, while
+   * the actual resize handles live on the shared group bbox instead (see paintGroupHandles). */
+  paintMemberOutline(shape: Shape): void {
+    this.paintOutline(ShapeHandles.handlePointsFor(shape))
+  }
+
+  /** The shared 8 resize-corner handles + rotate stem/circle + outline for a multi-shape
+   * selection's bounding box — see ShapeGroup.resize/rotate for what dragging each does. */
+  paintGroupHandles(bounds: ShapeBounds): void {
+    this.paintHandleFrame(ShapeHandles.handlePointsFor({ bounds, angle: 0 }), { includeRotate: true })
+  }
+
+  private paintOutline(points: Record<HandleId, { x: number; y: number }>): void {
     this.ctx.strokeStyle = "lightgray"
     this.ctx.beginPath()
     this.ctx.moveTo(points.nw.x, points.nw.y)
@@ -91,11 +107,16 @@ export class CanvasRenderer {
     this.ctx.lineTo(points.sw.x, points.sw.y)
     this.ctx.closePath()
     this.ctx.stroke()
+  }
+
+  private paintHandleFrame(points: Record<HandleId, { x: number; y: number }>, { includeRotate }: { includeRotate: boolean }): void {
+    this.paintOutline(points)
     this.ctx.fillStyle = "lightgray"
     for (const id of RESIZE_HANDLE_IDS) {
       const p = points[id]
       this.ctx.fillRect(p.x - HALF_CORNER_SIZE, p.y - HALF_CORNER_SIZE, CORNER_SIZE, CORNER_SIZE)
     }
+    if (!includeRotate) return
     this.ctx.beginPath()
     this.ctx.moveTo(points.n.x, points.n.y)
     this.ctx.lineTo(points.rotate.x, points.rotate.y)

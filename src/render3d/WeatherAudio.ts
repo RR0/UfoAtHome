@@ -25,6 +25,13 @@ const WIND_URL = new URL("../assets/audio/wind.ogg", import.meta.url).href
 // extension, so this doesn't affect playback — it's purely so the filename itself isn't a lie.
 const THUNDER_URL = new URL("../assets/audio/thunder.wav", import.meta.url).href
 
+/** Weather.windSpeed is real m/s — normalized here into the ~0-1 range a Web Audio GainNode
+ * expects. windSpeed reaching MAX_WIND_FOR_FULL_VOLUME_MS (a strong gale) already sounds as loud
+ * as this loop gets; MIN_AUDIBLE_WIND_MS is a near-calm threshold below which the wind loop simply
+ * doesn't start, replacing the old normalized-scale "0.03" threshold. */
+const MAX_WIND_FOR_FULL_VOLUME_MS = 20
+const MIN_AUDIBLE_WIND_MS = 1
+
 interface LoopHandle {
   source: AudioBufferSourceNode
   gain: GainNode
@@ -123,8 +130,8 @@ export class WeatherAudio {
       this.ambientGain.gain.value = this.ambientVolume
     }
 
-    this.windVolume = windSpeed
-    const shouldWind = windSpeed > 0.03
+    this.windVolume = Math.min(windSpeed / MAX_WIND_FOR_FULL_VOLUME_MS, 1)
+    const shouldWind = windSpeed > MIN_AUDIBLE_WIND_MS
     if (shouldWind !== this.windActive) {
       this.windActive = shouldWind
       // Same fix, same reasoning as ambientToken above.

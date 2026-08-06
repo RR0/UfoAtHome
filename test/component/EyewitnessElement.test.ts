@@ -91,15 +91,13 @@ async function waitFor(check: () => boolean, timeoutMs = 500): Promise<void> {
 
 const johnSighting = {
   version: 1 as const,
-  witnessId: "john",
-  witnessName: "Clarence Chiles",
+  witness: { id: "john", title: "Clarence Chiles" },
   caseId: "chiles-whitted",
   timeline: { keyframes: [{ t: 0, shapes: [] }] }
 }
 const janeSighting = {
   version: 1 as const,
-  witnessId: "jane",
-  witnessName: "John Whitted",
+  witness: { id: "jane", title: "John Whitted" },
   caseId: "chiles-whitted",
   timeline: { keyframes: [{ t: 100, shapes: [] }] }
 }
@@ -187,8 +185,8 @@ describe("EyewitnessElement", () => {
     expect(testimony.textContent).toContain("Clarence Chiles")
   })
 
-  it("falls back to witnessId, then the URL itself, when witnessName is missing", async () => {
-    const anonymousById = { version: 1 as const, witnessId: "w2", timeline: { keyframes: [] } }
+  it("falls back to witness.id, then the URL itself, when witness.title/name is missing", async () => {
+    const anonymousById = { version: 1 as const, witness: { id: "w2" }, timeline: { keyframes: [] } }
     const anonymousNoId = { version: 1 as const, timeline: { keyframes: [] } }
     stubFetch({ "a.json": johnSighting, "b.json": anonymousById, "c.json": anonymousNoId })
     const element = mount()
@@ -208,7 +206,7 @@ describe("EyewitnessElement", () => {
     await new Promise(resolve => setTimeout(resolve, 0))
 
     const scene = nestedScene(element) as unknown as { sightingData: typeof johnSighting }
-    expect(scene.sightingData.witnessId).toBe("john")
+    expect(scene.sightingData.witness?.id).toBe("john")
   })
 
   it("switching the select loads the chosen witness's already-fetched sighting, without re-fetching", async () => {
@@ -223,7 +221,7 @@ describe("EyewitnessElement", () => {
     select.dispatchEvent(new Event("change"))
 
     const scene = nestedScene(element) as unknown as { sightingData: typeof janeSighting }
-    expect(scene.sightingData.witnessId).toBe("jane")
+    expect(scene.sightingData.witness?.id).toBe("jane")
     expect(fetchMock.mock.calls.length).toBe(callsAfterLoad) // no new fetch on selection
   })
 
@@ -282,7 +280,7 @@ describe("EyewitnessElement", () => {
 
     expect(element.witnessUrls).toEqual(["sighting.json"])
     const scene = nestedScene(element) as unknown as { sightingData: typeof johnSighting }
-    expect(scene.sightingData.witnessId).toBe("john")
+    expect(scene.sightingData.witness?.id).toBe("john")
     const toolbar = element.shadowRoot!.getElementById("toolbar") as HTMLElement
     const select = element.shadowRoot!.getElementById("witness") as HTMLSelectElement
     expect(toolbar.hidden).toBe(false) // info button still reachable
@@ -312,6 +310,33 @@ describe("EyewitnessElement", () => {
 
     infoButton.click()
     expect(infoPanel.hidden).toBe(true)
+  })
+
+  it("shows description and tags in the info panel when present, omits both when absent", async () => {
+    stubFetch({ "john.json": { ...johnSighting, description: "Bright light hovering over the field.", tags: ["hovering", "night"] } })
+    const element = mount()
+    element.witnessUrls = ["john.json"]
+    await new Promise(resolve => setTimeout(resolve, 0))
+
+    const infoButton = element.shadowRoot!.getElementById("info-button") as HTMLButtonElement
+    infoButton.click()
+
+    const observationList = element.shadowRoot!.getElementById("info-observation-list") as HTMLElement
+    expect(observationList.textContent).toContain("Bright light hovering over the field.")
+    expect(observationList.textContent).toContain("hovering, night")
+  })
+
+  it("shows neither description nor tags rows when the sighting has none", async () => {
+    const element = mount()
+    element.witnessUrls = ["john.json"]
+    await new Promise(resolve => setTimeout(resolve, 0))
+
+    const infoButton = element.shadowRoot!.getElementById("info-button") as HTMLButtonElement
+    infoButton.click()
+
+    const observationList = element.shadowRoot!.getElementById("info-observation-list") as HTMLElement
+    expect(observationList.textContent).not.toContain("Description")
+    expect(observationList.textContent).not.toContain("Tags")
   })
 
   it("closes the info panel on a click outside it, but not on a click inside it", async () => {

@@ -9,5 +9,7 @@ export interface EyewitnessMessages {
   date: string
   location: string
   case: string
+  description: string
+  tags: string
   credits: string
 }

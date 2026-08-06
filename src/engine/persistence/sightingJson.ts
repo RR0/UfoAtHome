@@ -5,6 +5,7 @@ import type { TimelineJson } from "../model/Timeline.js"
 import { ObserverTrack } from "../model/ObserverTrack.js"
 import type { ObserverTrackJson } from "../model/ObserverTrack.js"
 import type { Weather } from "../model/Weather.js"
+import type { People } from "../model/People.js"
 
 /**
  * Standalone "one JSON file per case" format (e.g. a future sighting.json
@@ -19,17 +20,20 @@ export interface SightingRecordingJson {
   /** See SightingEvent.durationSeconds. */
   durationSeconds?: number
   place?: SightingLocation[]
-  witnessId?: string
-  /** See Sighting.witnessName. */
-  witnessName?: string
+  /** See Sighting.witness. */
+  witness?: People
   /** See Sighting.caseId — shared by every witness's own sighting.json for the same case, so
    * a page (e.g. EyewitnessElement) can group and label them without a separate manifest
    * duplicating names that could drift out of sync with the actual files. */
   caseId?: string
+  /** See SightingEvent.description. */
+  description?: string
+  /** See SightingEvent.tags. */
+  tags?: string[]
   timeline: TimelineJson
   /** The witness's position/elevation/orientation over time — absent for older recordings, which
    * fall back to the legacy static place[0] (see Sighting.ts's resolveObserverPoseAt). */
-  observerTrack?: ObserverTrackJson
+  witnessTrack?: ObserverTrackJson
   /** The observation's reported weather condition — absent means "unknown/not recorded", not
    * "clear skies" (renderers default to DEFAULT_WEATHER, see Weather.ts). */
   weather?: Weather
@@ -42,11 +46,12 @@ export function toSightingJson(sighting: Sighting): SightingRecordingJson {
     endTime: sighting.event.endTime,
     durationSeconds: sighting.event.durationSeconds,
     place: sighting.event.place,
-    witnessId: sighting.witnessId,
-    witnessName: sighting.witnessName,
+    witness: sighting.witness,
     caseId: sighting.caseId,
+    description: sighting.event.description,
+    tags: sighting.event.tags,
     timeline: sighting.timeline.toJSON(),
-    observerTrack: sighting.observerTrack.toJSON(),
+    witnessTrack: sighting.witnessTrack.toJSON(),
     weather: sighting.weather
   }
 }
@@ -58,12 +63,13 @@ export function fromSightingJson(json: SightingRecordingJson): Sighting {
       time: json.time,
       endTime: json.endTime,
       durationSeconds: json.durationSeconds,
-      place: json.place
+      place: json.place,
+      description: json.description,
+      tags: json.tags
     },
     Timeline.fromJSON(json.timeline),
-    json.observerTrack ? ObserverTrack.fromJSON(json.observerTrack) : new ObserverTrack(),
-    json.witnessId,
-    json.witnessName,
+    json.witnessTrack ? ObserverTrack.fromJSON(json.witnessTrack) : new ObserverTrack(),
+    json.witness,
     json.caseId,
     json.weather
   )

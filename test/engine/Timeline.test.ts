@@ -242,4 +242,88 @@ describe("Timeline", () => {
     const restored = Timeline.fromJSON(timeline.toJSON())
     expect(restored.allKeyframes).toEqual(timeline.allKeyframes)
   })
+
+  describe("groups", () => {
+    function threeSourceTimeline(): Timeline {
+      const timeline = new Timeline()
+      timeline.addKeyframe(0, [
+        { sourceId: "a", shape: shapeAt(0) },
+        { sourceId: "b", shape: shapeAt(1) },
+        { sourceId: "c", shape: shapeAt(2) }
+      ])
+      return timeline
+    }
+
+    it("group() makes every member retrievable via groupMembers", () => {
+      const timeline = threeSourceTimeline()
+      timeline.group(["a", "b"])
+      expect(timeline.groupMembers("a")).toEqual(["a", "b"])
+      expect(timeline.groupMembers("b")).toEqual(["a", "b"])
+      expect(timeline.groupMembers("c")).toBeUndefined()
+    })
+
+    it("group() with fewer than 2 ids is a no-op", () => {
+      const timeline = threeSourceTimeline()
+      timeline.group(["a"])
+      expect(timeline.groupMembers("a")).toBeUndefined()
+    })
+
+    it("group() re-grouping a member shrinks its old group, dissolving it if <2 would remain", () => {
+      const timeline = threeSourceTimeline()
+      timeline.group(["a", "b"])
+      timeline.group(["a", "c"]) // detaches "a" from ["a","b"], which then has only "b" left -> dissolved
+      expect(timeline.groupMembers("a")).toEqual(["a", "c"])
+      expect(timeline.groupMembers("c")).toEqual(["a", "c"])
+      expect(timeline.groupMembers("b")).toBeUndefined()
+    })
+
+    it("ungroup() dissolves the whole group, not just the called member", () => {
+      const timeline = threeSourceTimeline()
+      timeline.group(["a", "b"])
+      timeline.ungroup("a")
+      expect(timeline.groupMembers("a")).toBeUndefined()
+      expect(timeline.groupMembers("b")).toBeUndefined()
+    })
+
+    it("ungroup() on an ungrouped source is a no-op", () => {
+      const timeline = threeSourceTimeline()
+      timeline.ungroup("a")
+      expect(timeline.groupMembers("a")).toBeUndefined()
+    })
+
+    it("removeSource shrinks the group, dissolving it if <2 members would remain", () => {
+      const timeline = threeSourceTimeline()
+      timeline.group(["a", "b", "c"])
+      timeline.removeSource("a")
+      expect(timeline.groupMembers("b")).toEqual(["b", "c"])
+
+      timeline.removeSource("b")
+      expect(timeline.groupMembers("c")).toBeUndefined()
+    })
+
+    it("round-trips groups through toJSON/fromJSON", () => {
+      const timeline = threeSourceTimeline()
+      timeline.group(["a", "b"])
+      const restored = Timeline.fromJSON(timeline.toJSON())
+      expect(restored.groupMembers("a")).toEqual(["a", "b"])
+    })
+
+    it("fromJSON without a saved groups field defaults to no groups (old-format compatibility)", () => {
+      const timeline = Timeline.fromJSON({
+        keyframes: [{ t: 0, shapes: [{ sourceId: "a", shape: shapeAt(0) }, { sourceId: "b", shape: shapeAt(1) }] }]
+      })
+      expect(timeline.groupMembers("a")).toBeUndefined()
+    })
+
+    it("fromJSON drops a group referencing an unknown source, or left with <2 known members", () => {
+      const timeline = Timeline.fromJSON({
+        keyframes: [{ t: 0, shapes: [{ sourceId: "a", shape: shapeAt(0) }, { sourceId: "b", shape: shapeAt(1) }] }],
+        groups: [
+          ["a", "b"],
+          ["a", "ghost"] // "ghost" isn't a real source -> shrinks to just ["a"] -> dropped entirely
+        ]
+      })
+      expect(timeline.groupMembers("a")).toEqual(["a", "b"])
+    })
+  })
 })

@@ -1,6 +1,7 @@
 import { html, css } from "./eyewitnessTemplate.js"
 import { SceneElement, registerScene, SCENE_ELEMENT_NAME } from "./SceneElement.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
+import type { People } from "../engine/model/People.js"
 import { selectLocale } from "../i18n/locale.js"
 import { sightingTimeToDate } from "../engine/astronomy/CelestialPositions.js"
 import { loadEyewitnessMessages, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
@@ -38,7 +39,7 @@ const APP_HOME_URL = "https://ufoathome.org"
  * JSON array of each witness's own `sighting.json` URL) or, for the common single-witness case,
  * a `sighting.json` URL directly — no manifest file needs to exist just to describe one entry.
  * No separately-maintained labels either way, since a witness's display name
- * (`SightingRecordingJson.witnessName`) and the shared `caseId` linking them together already
+ * (`SightingRecordingJson.witness`) and the shared `caseId` linking them together already
  * live inside each witness's own file (single source of truth: an external manifest duplicating
  * those would risk drifting out of sync with the actual data). Every listed witness's recording
  * is fetched upfront (to read its name), not lazily on selection — fine at the scale a case's
@@ -194,7 +195,7 @@ export class EyewitnessElement extends HTMLElement {
     for (const entry of entries) {
       const option = document.createElement("option")
       option.value = entry.src
-      option.textContent = entry.sighting.witnessName ?? entry.sighting.witnessId ?? entry.src
+      option.textContent = this.witnessDisplayName(entry.sighting.witness) ?? entry.src
       this.witnessSelect.appendChild(option)
     }
 
@@ -236,8 +237,21 @@ export class EyewitnessElement extends HTMLElement {
   private updateTestimonyLine(): void {
     const entry = this.entries.find(e => e.src === this.currentSrc)
     if (entry) {
-      this.witnessText.textContent = entry.sighting.witnessName ?? entry.sighting.witnessId ?? entry.src
+      this.witnessText.textContent = this.witnessDisplayName(entry.sighting.witness) ?? entry.src
     }
+  }
+
+  /** Picks the best available display string out of a People reference — a full name (built from
+   * firstNames+lastName) reads more naturally than a raw title in the common case, but `title` is
+   * honored first since it's the field a caller sets when they explicitly want a specific display
+   * string (e.g. a name that doesn't decompose cleanly into first/last). `id`/`dirName` are
+   * last-resort, machine-oriented fallbacks — better than nothing, not meant to be end-user
+   * copy. Returns undefined (letting the caller fall back to entry.src) only when witness itself
+   * is undefined or empty. */
+  private witnessDisplayName(witness?: People): string | undefined {
+    if (!witness) return undefined
+    const fullName = [...(witness.firstNames ?? []), witness.lastName].filter(Boolean).join(" ")
+    return witness.title || fullName || witness.id || witness.dirName
   }
 
   private formatDate(sighting: SightingRecordingJson): string | undefined {
@@ -313,6 +327,12 @@ export class EyewitnessElement extends HTMLElement {
       }
       if (entry.sighting.caseId) {
         this.appendInfoRow(this.infoObservationList, this.messages.case, entry.sighting.caseId)
+      }
+      if (entry.sighting.description) {
+        this.appendInfoRow(this.infoObservationList, this.messages.description, entry.sighting.description)
+      }
+      if (entry.sighting.tags && entry.sighting.tags.length > 0) {
+        this.appendInfoRow(this.infoObservationList, this.messages.tags, entry.sighting.tags.join(", "))
       }
     }
 

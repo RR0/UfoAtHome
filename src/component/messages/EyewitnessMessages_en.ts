@@ -8,5 +8,7 @@ export const eyewitnessMessages_en: EyewitnessMessages = {
   date: "Date",
   location: "Location",
   case: "Case",
+  description: "Description",
+  tags: "Tags",
   credits: "Credits"
 }

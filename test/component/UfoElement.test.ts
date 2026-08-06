@@ -58,13 +58,13 @@ const sampleJson = {
   version: 1 as const,
   time: { year: 1948, month: 7, day: 24 },
   place: [{ lat: 32.3792, lng: -86.3077 }],
-  witnessId: "ChilesWhitted",
+  witness: { id: "ChilesWhitted" },
   timeline: {
     keyframes: [
       { t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval" as const, bounds: { x: 0, y: 0, width: 10, height: 10 }, color: "#163a8f", angle: 0, transparency: 0, haloScale: 1, selected: false } }] }
     ]
   },
-  observerTrack: { keyframes: [] }
+  witnessTrack: { keyframes: [] }
 }
 
 describe("UfoElement", () => {
@@ -83,9 +83,12 @@ describe("UfoElement", () => {
   it("sightingData round-trips through the setter/getter", () => {
     const element = mount()
     element.sightingData = sampleJson
-    // timeline.order is new (Timeline's own z-order support) — always present on the way out,
-    // even though the hand-written fixture above predates it and omits it.
-    expect(element.sightingData).toEqual({ ...sampleJson, timeline: { ...sampleJson.timeline, order: ["ufo-1"] } })
+    // timeline.order/groups are always present on the way out (order: z-order support, groups:
+    // multi-select grouping), even though the hand-written fixture above predates both and omits them.
+    expect(element.sightingData).toEqual({
+      ...sampleJson,
+      timeline: { ...sampleJson.timeline, order: ["ufo-1"], groups: [] }
+    })
   })
 
   it("fetches and loads the sighting referenced by the src attribute on connect", async () => {
@@ -98,7 +101,7 @@ describe("UfoElement", () => {
     await new Promise(resolve => setTimeout(resolve, 0))
 
     expect(fetchMock).toHaveBeenCalledWith("sighting.json")
-    expect(element.sightingData.witnessId).toBe("ChilesWhitted")
+    expect(element.sightingData.witness?.id).toBe("ChilesWhitted")
     expect(element.sightingData.timeline.keyframes).toHaveLength(1)
   })
 
@@ -374,6 +377,63 @@ describe("UfoElement", () => {
     expect(loopButton.getAttribute("aria-pressed")).toBe("true")
   })
 
+  it("showToolbar hides the overlay toolbar for a composing element with its own external controls", () => {
+    const element = mount()
+    const toolbar = element.shadowRoot!.getElementById("toolbar") as HTMLElement
+    expect(toolbar.classList.contains("hidden")).toBe(false)
+
+    element.showToolbar = false
+
+    expect(toolbar.classList.contains("hidden")).toBe(true)
+
+    element.showToolbar = true
+
+    expect(toolbar.classList.contains("hidden")).toBe(false)
+  })
+
+  it("seekableDuration mirrors the seek input's own max (0 with nothing recorded, real duration once known)", () => {
+    const element = mount()
+    expect(element.seekableDuration).toBe(0)
+
+    element.durationSeconds = 10
+
+    expect(element.seekableDuration).toBe(10_000)
+  })
+
+  it("currentTime setter seeks the player, moving the seek input's value", () => {
+    const element = mount()
+    element.sightingData = twoKeyframeSighting()
+    const seekInput = element.shadowRoot!.getElementById("seek") as HTMLInputElement
+
+    element.currentTime = 400
+
+    expect(element.currentTime).toBe(400)
+    expect(seekInput.value).toBe("400")
+  })
+
+  it("autoReplayEnabled mirrors the loop button's own pressed state", () => {
+    const element = mount()
+    const loopButton = element.shadowRoot!.getElementById("loop") as HTMLButtonElement
+    expect(element.autoReplayEnabled).toBe(true)
+
+    loopButton.click()
+
+    expect(element.autoReplayEnabled).toBe(false)
+  })
+
+  it("togglePlayPause/toggleLoop are callable directly (public), same effect as clicking the buttons", () => {
+    const element = mount()
+    element.sightingData = twoKeyframeSighting()
+
+    element.togglePlayPause()
+    expect(element.playbackState).toBe("playing")
+    element.togglePlayPause()
+    expect(element.playbackState).toBe("paused")
+
+    element.toggleLoop()
+    expect(element.autoReplayEnabled).toBe(false)
+  })
+
   it("the fullscreen button auto-hides alongside the toolbar", () => {
     const element = mount()
     element.sightingData = twoKeyframeSighting()
@@ -440,7 +500,7 @@ describe("UfoElement", () => {
     spy.mockRestore()
   })
 
-  it("selectedSourceId flags that source's shape as selected on the next paint, only", () => {
+  it("selectedSourceIds flags that source's shape as selected on the next paint, only", () => {
     const element = mount()
     element.sightingData = {
       version: 1,
@@ -458,25 +518,54 @@ describe("UfoElement", () => {
     }
     const paintShape = vi.spyOn(element.renderer, "paintShape")
 
-    element.selectedSourceId = "ufo-2"
+    element.selectedSourceIds = new Set(["ufo-2"])
 
     const paintedSelected = paintShape.mock.calls
       .map(([shape]) => shape as { selected: boolean; bounds: { x: number } })
       .filter(shape => shape.selected)
     expect(paintedSelected).toHaveLength(1)
     expect(paintedSelected[0].bounds.x).toBe(20)
-    expect(element.selectedSourceId).toBe("ufo-2")
+    expect([...element.selectedSourceIds]).toEqual(["ufo-2"])
   })
 
-  it("setting the same selectedSourceId again doesn't trigger a redundant repaint", () => {
+  it("setting the same selectedSourceIds again doesn't trigger a redundant repaint", () => {
     const element = mount()
-    element.selectedSourceId = "ufo-1"
+    element.selectedSourceIds = new Set(["ufo-1"])
     const onTimeUpdate = vi.fn()
     element.addEventListener("timeupdate", onTimeUpdate)
 
-    element.selectedSourceId = "ufo-1"
+    element.selectedSourceIds = new Set(["ufo-1"])
 
     expect(onTimeUpdate).not.toHaveBeenCalled()
+  })
+
+  it("selecting multiple sources paints individual outlines plus one shared group-handle overlay", () => {
+    const element = mount()
+    element.sightingData = {
+      version: 1,
+      timeline: {
+        keyframes: [
+          {
+            t: 0,
+            shapes: [
+              { sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 0, y: 0, width: 10, height: 10 }, color: "#fff", angle: 0, transparency: 0, haloScale: 0, selected: false } },
+              { sourceId: "ufo-2", shape: { kind: "oval", bounds: { x: 20, y: 0, width: 10, height: 10 }, color: "#fff", angle: 0, transparency: 0, haloScale: 0, selected: false } }
+            ]
+          }
+        ]
+      }
+    }
+    const paintShape = vi.spyOn(element.renderer, "paintShape")
+    const paintMemberOutline = vi.spyOn(element.renderer, "paintMemberOutline")
+    const paintGroupHandles = vi.spyOn(element.renderer, "paintGroupHandles")
+
+    element.selectedSourceIds = new Set(["ufo-1", "ufo-2"])
+
+    // Neither shape gets the single-shape `selected: true` treatment when >1 is selected.
+    expect(paintShape.mock.calls.map(([shape]) => (shape as { selected: boolean }).selected)).toEqual([false, false])
+    expect(paintMemberOutline).toHaveBeenCalledTimes(2)
+    expect(paintGroupHandles).toHaveBeenCalledTimes(1)
+    expect(paintGroupHandles).toHaveBeenCalledWith({ x: 0, y: 0, width: 30, height: 10 })
   })
 
   function twoKeyframeSighting() {
@@ -499,7 +588,7 @@ describe("UfoElement", () => {
     expect(element.playbackState).toBe("playing")
 
     const paintShape = vi.spyOn(element.renderer, "paintShape")
-    element.selectedSourceId = "ufo-1" // forces a synchronous repaint via refresh()
+    element.selectedSourceIds = new Set(["ufo-1"]) // forces a synchronous repaint via refresh()
 
     const paintedSelected = paintShape.mock.calls
       .map(([shape]) => shape as { selected: boolean })
@@ -510,7 +599,7 @@ describe("UfoElement", () => {
   it("pausing immediately repaints with the highlight restored, not just eventually", () => {
     const element = mount()
     element.sightingData = twoKeyframeSighting()
-    element.selectedSourceId = "ufo-1"
+    element.selectedSourceIds = new Set(["ufo-1"])
     const playPauseButton = element.shadowRoot!.getElementById("play-pause") as HTMLButtonElement
     playPauseButton.click()
     expect(element.playbackState).toBe("playing")
@@ -553,5 +642,92 @@ describe("UfoElement", () => {
     element.sightingData = twoKeyframeSighting() // simulates switching witnesses mid-play
 
     expect(cancelSpy).toHaveBeenCalled() // the old player's pending frame was actually cancelled
+  })
+})
+
+describe("UfoElement hover tooltip", () => {
+  afterEach(() => {
+    document.body.innerHTML = ""
+  })
+
+  // 1:1 scale (matches the canvas's own 640x360 drawing buffer) so pointer coordinates map
+  // directly onto Shape.bounds — same trick as UfoRecorderElement.test.ts's nestedCanvas().
+  function canvasSized(element: UfoElement): HTMLCanvasElement {
+    const canvas = element.shadowRoot!.getElementById("canvas") as HTMLCanvasElement
+    vi.spyOn(canvas, "getBoundingClientRect").mockReturnValue({ left: 0, top: 0, width: 640, height: 360 } as DOMRect)
+    return canvas
+  }
+
+  // jsdom has no global PointerEvent — a plain MouseEvent dispatched as "pointermove"/
+  // "pointerleave" exercises the same handlers, which only read clientX/clientY.
+  function moveTo(canvas: HTMLCanvasElement, x: number, y: number): void {
+    canvas.dispatchEvent(new MouseEvent("pointermove", { clientX: x, clientY: y }))
+  }
+
+  it("shows a tooltip with the shape's title when hovering it", () => {
+    const element = mount()
+    element.sightingData = {
+      version: 1,
+      timeline: {
+        keyframes: [
+          { t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 0, y: 0, width: 10, height: 10 }, color: "#39ff14", angle: 0, transparency: 0, haloScale: 1, selected: false, title: "Vaisseau principal" } }] }
+        ]
+      }
+    }
+    const canvas = canvasSized(element)
+    const tooltip = element.shadowRoot!.getElementById("tooltip") as HTMLElement
+
+    moveTo(canvas, 5, 5)
+
+    expect(tooltip.hidden).toBe(false)
+    expect(tooltip.textContent).toBe("Vaisseau principal")
+  })
+
+  it("keeps the tooltip hidden when hovering an untitled shape", () => {
+    const element = mount()
+    element.sightingData = {
+      version: 1,
+      timeline: {
+        keyframes: [
+          { t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 0, y: 0, width: 10, height: 10 }, color: "#39ff14", angle: 0, transparency: 0, haloScale: 1, selected: false } }] }
+        ]
+      }
+    }
+    const canvas = canvasSized(element)
+    const tooltip = element.shadowRoot!.getElementById("tooltip") as HTMLElement
+
+    moveTo(canvas, 5, 5)
+
+    expect(tooltip.hidden).toBe(true)
+  })
+
+  it("keeps the tooltip hidden when hovering empty canvas", () => {
+    const element = mount()
+    const canvas = canvasSized(element)
+    const tooltip = element.shadowRoot!.getElementById("tooltip") as HTMLElement
+
+    moveTo(canvas, 300, 300)
+
+    expect(tooltip.hidden).toBe(true)
+  })
+
+  it("hides the tooltip on pointerleave", () => {
+    const element = mount()
+    element.sightingData = {
+      version: 1,
+      timeline: {
+        keyframes: [
+          { t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 0, y: 0, width: 10, height: 10 }, color: "#39ff14", angle: 0, transparency: 0, haloScale: 1, selected: false, title: "Vaisseau principal" } }] }
+        ]
+      }
+    }
+    const canvas = canvasSized(element)
+    const tooltip = element.shadowRoot!.getElementById("tooltip") as HTMLElement
+    moveTo(canvas, 5, 5)
+    expect(tooltip.hidden).toBe(false)
+
+    canvas.dispatchEvent(new MouseEvent("pointerleave"))
+
+    expect(tooltip.hidden).toBe(true)
   })
 })

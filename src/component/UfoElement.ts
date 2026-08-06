@@ -7,6 +7,7 @@ import { CanvasRenderer } from "../render/CanvasRenderer.js"
 import { fromSightingJson, toSightingJson } from "../engine/persistence/sightingJson.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
 import type { Shape } from "../engine/shape/Shape.js"
+import { ShapeHandles } from "../engine/shape/ShapeHandles.js"
 import { selectLocale } from "../i18n/locale.js"
 import { loadUfoMessages, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
 import type { UfoLanguage } from "./messages/index.js"
@@ -35,6 +36,8 @@ import type { UfoMessages } from "./messages/UfoMessages.js"
  * `src` attribute's auto-fetch is inherently attribute/connection
  * dependent, so that alone stays in connectedCallback/attributeChangedCallback.
  */
+const EMPTY_SELECTION: ReadonlySet<string> = new Set()
+
 export class UfoElement extends HTMLElement {
   static get observedAttributes(): string[] {
     return ["src"]
@@ -44,6 +47,7 @@ export class UfoElement extends HTMLElement {
   private readonly stageElement: HTMLElement
   private readonly canvas: HTMLCanvasElement
   private readonly canvasRenderer: CanvasRenderer
+  private readonly tooltip: HTMLElement
   private readonly toolbar: HTMLElement
   private readonly playPauseButton: HTMLButtonElement
   private readonly loopButton: HTMLButtonElement
@@ -55,7 +59,7 @@ export class UfoElement extends HTMLElement {
   private currentSighting: Sighting = Sighting.create()
   private player: Player
   private loopEnabled = true
-  private highlightedSourceId?: string
+  private highlightedSourceIds: Set<string> = new Set()
 
   /** Set to false by composing elements that need the canvas's own click for something else
    * instead of toggling playback — see UfoRecorderElement, which uses pointerdown/pointermove on
@@ -78,6 +82,32 @@ export class UfoElement extends HTMLElement {
   /** Bound once so document.removeEventListener (disconnectedCallback) can actually find it. */
   private readonly handleFullscreenChange = () => this.updateFullscreenButton()
 
+  /** Identifies whatever shape (if any) is under the pointer and shows/moves/hides a text label
+   * next to it, but only when that shape actually has a title — an untitled shape's raw sourceId
+   * (e.g. "ufo-2") is an internal authoring detail, not something an end-user-facing tooltip
+   * should ever surface (contrast UfoRecorderElement's own shapeLabel(), which deliberately does
+   * fall back to the sourceId for its own source-picker dropdown). Mirrors SceneElement's
+   * near-identical bodyTooltip/handlePointerMove for celestial bodies. */
+  private readonly handlePointerMove = (event: PointerEvent): void => {
+    const point = this.canvasPointFromEvent(event)
+    const hit = point && this.currentSighting.timeline.hitTest(this.currentTime, point.x, point.y)
+    if (!hit?.shape.title) {
+      this.tooltip.hidden = true
+      return
+    }
+    this.tooltip.textContent = hit.shape.title
+    this.tooltip.hidden = false
+    // Positioned relative to #stage (the tooltip's own offsetParent), not the page — clientX/Y
+    // are page-relative, so subtracting the stage's own origin converts them to that local frame.
+    const stageRect = this.stageElement.getBoundingClientRect()
+    this.tooltip.style.left = `${event.clientX - stageRect.left + 12}px`
+    this.tooltip.style.top = `${event.clientY - stageRect.top + 12}px`
+  }
+
+  private readonly handlePointerLeave = (): void => {
+    this.tooltip.hidden = true
+  }
+
   constructor() {
     super()
     this.shadow = this.attachShadow({ mode: "open" })
@@ -88,6 +118,7 @@ export class UfoElement extends HTMLElement {
     this.stageElement = this.shadow.getElementById("stage")!
     this.canvas = this.shadow.getElementById("canvas") as HTMLCanvasElement
     this.canvasRenderer = new CanvasRenderer(this.canvas.getContext("2d")!)
+    this.tooltip = this.shadow.getElementById("tooltip")!
     this.toolbar = this.shadow.getElementById("toolbar")!
     this.playPauseButton = this.shadow.getElementById("play-pause") as HTMLButtonElement
     this.loopButton = this.shadow.getElementById("loop") as HTMLButtonElement
@@ -104,6 +135,8 @@ export class UfoElement extends HTMLElement {
     this.canvas.addEventListener("click", () => {
       if (this.enableClickToPlay) this.togglePlayPause()
     })
+    this.canvas.addEventListener("pointermove", this.handlePointerMove)
+    this.canvas.addEventListener("pointerleave", this.handlePointerLeave)
     document.addEventListener("fullscreenchange", this.handleFullscreenChange)
 
     this.player = this.createPlayer()
@@ -181,14 +214,62 @@ export class UfoElement extends HTMLElement {
     return this.player.time
   }
 
+  /** Exposed so a composing element with its own external scrub control (see UfoRecorderElement,
+   * which hides this element's own overlay toolbar and drives an external one instead) can seek
+   * without reaching into the private `player`. */
+  set currentTime(t: number) {
+    this.player.seek(t)
+  }
+
+  /** Exposed for the same reason as the `currentTime` setter — an external seek control needs the
+   * same range (`0..seekableDuration`) the internal seek `<input>` itself uses (see `refresh()`). */
+  get seekableDuration(): number {
+    return this.player.seekableDuration
+  }
+
+  /** Exposed for the same reason as the `currentTime` setter — an external Auto-replay button
+   * needs to read/reflect the current loop state. Named to avoid colliding with the private
+   * `loopEnabled` field this mirrors. */
+  get autoReplayEnabled(): boolean {
+    return this.loopEnabled
+  }
+
+  /** The already-computed, human-readable elapsed-position/total-duration text this element's own
+   * (possibly hidden, see showToolbar) time labels show — exposed so a composing element's
+   * external playback row (see UfoRecorderElement) can display the same text instead of re-
+   * deriving it. This is NOT just a convenience: `currentTime`/`seekableDuration` are `Player`'s
+   * own TIMELINE-position units, which advance at `playbackRate`× real wall-clock speed — that
+   * rate is exactly `timelineDuration / realDurationMs` (see updateTimeLabels), so it's almost
+   * never 1. Formatting those raw values directly as if they were real milliseconds shows a
+   * duration that doesn't match the declared real observation length and ticks at the wrong
+   * real-time speed. `formatPosition`/`formatEndOfTimeline` already do this scaling correctly;
+   * reading their last-computed output is simpler and safer than duplicating that math
+   * externally. */
+  get positionLabel(): string {
+    return this.timeStartLabel.textContent ?? ""
+  }
+
+  get durationLabel(): string {
+    return this.timeEndLabel.textContent ?? ""
+  }
+
+  /** Hides this element's own overlaid play/seek/loop bar — set by a composing element that
+   * drives an external playback UI of its own instead (see UfoRecorderElement, which needs the
+   * bottom of the canvas free for dragging/resizing shapes; the overlay's seek `<input>` is
+   * `flex: 1` and would otherwise intercept nearly the full width of that area). Only `.toolbar`
+   * is affected — the fullscreen button (top-right corner) is unrelated and stays as-is. */
+  set showToolbar(show: boolean) {
+    this.toolbar.classList.toggle("hidden", !show)
+  }
+
   /** Exposed so UfoRecorderElement can avoid editing/resyncing appearance while actively
    * playing, when the playhead is a moving target rather than a specific instant. */
   get playbackState(): PlaybackState {
     return this.player.playbackState
   }
 
-  get selectedSourceId(): string | undefined {
-    return this.highlightedSourceId
+  get selectedSourceIds(): ReadonlySet<string> {
+    return this.highlightedSourceIds
   }
 
   /** The sighting's reported real-world duration in seconds (event.durationSeconds) — takes
@@ -212,13 +293,18 @@ export class UfoElement extends HTMLElement {
     this.updatePlayPauseButton()
   }
 
-  /** Exposed so UfoRecorderElement can visually flag the shape currently selected in its own
+  /** Exposed so UfoRecorderElement can visually flag the shape(s) currently selected in its own
    * editor UI, reusing CanvasRenderer's existing selection-handle rendering — purely a
    * paint-time hint, never persisted (Shape.selected is never written by any Timeline/JSON
-   * code path, so this can't leak into a saved sighting). */
-  set selectedSourceId(sourceId: string | undefined) {
-    if (sourceId === this.highlightedSourceId) return
-    this.highlightedSourceId = sourceId
+   * code path, so this can't leak into a saved sighting). A single selected id gets the same
+   * per-shape handle treatment as before; multiple ids get individual outlines plus one shared
+   * group-bbox handle overlay — see onFrame. */
+  set selectedSourceIds(ids: ReadonlySet<string> | Iterable<string>) {
+    const next = new Set(ids)
+    const unchanged =
+      next.size === this.highlightedSourceIds.size && [...next].every(id => this.highlightedSourceIds.has(id))
+    if (unchanged) return
+    this.highlightedSourceIds = next
     this.refresh()
   }
 
@@ -232,14 +318,38 @@ export class UfoElement extends HTMLElement {
     this.player.seek(this.player.time)
   }
 
+  /** Converts a pointer event's CSS-pixel position into the canvas's fixed internal 640x360
+   * drawing space (where Shape.bounds/Timeline.hitTest operate), correcting for the canvas being
+   * displayed responsively at a different CSS size. Mirrors UfoRecorderElement's own identical
+   * (but private-to-that-class) canvasPointFromEvent — this is the only other call site. */
+  private canvasPointFromEvent(event: PointerEvent): { x: number; y: number } | undefined {
+    const rect = this.canvas.getBoundingClientRect()
+    if (rect.width === 0 || rect.height === 0) return undefined
+    return {
+      x: ((event.clientX - rect.left) / rect.width) * this.canvas.width,
+      y: ((event.clientY - rect.top) / rect.height) * this.canvas.height
+    }
+  }
+
   private onFrame(t: number, shapesBySource: Map<string, Shape>): void {
     this.canvasRenderer.clear(this.canvas.width, this.canvas.height)
     // Selection handles are an editing affordance — hidden while actively playing, matching
     // the toolbar's own auto-hide-while-playing convention.
-    const showHighlight = this.playbackState !== "playing"
+    const selectedIds = this.playbackState !== "playing" ? this.highlightedSourceIds : EMPTY_SELECTION
     for (const [sourceId, shape] of shapesBySource) {
-      const highlighted = showHighlight && sourceId === this.highlightedSourceId
-      this.canvasRenderer.paintShape(highlighted ? { ...shape, selected: true } : shape)
+      const isSelected = selectedIds.has(sourceId)
+      if (isSelected && selectedIds.size === 1) {
+        this.canvasRenderer.paintShape({ ...shape, selected: true })
+      } else {
+        this.canvasRenderer.paintShape(shape)
+        if (isSelected) this.canvasRenderer.paintMemberOutline(shape)
+      }
+    }
+    if (selectedIds.size > 1) {
+      const bounds = ShapeHandles.groupBoundsFor(
+        [...shapesBySource].filter(([sourceId]) => selectedIds.has(sourceId)).map(([, shape]) => shape.bounds)
+      )
+      this.canvasRenderer.paintGroupHandles(bounds)
     }
     this.seekInput.value = String(t)
     this.timeStartLabel.textContent = this.formatPosition(t)
@@ -258,7 +368,10 @@ export class UfoElement extends HTMLElement {
     return player
   }
 
-  private togglePlayPause(): void {
+  /** Public (not just used by this element's own overlay button) so a composing element's
+   * external Play/Pause control — see UfoRecorderElement/showToolbar — can trigger exactly this
+   * same guarded behavior instead of reimplementing it. */
+  togglePlayPause(): void {
     // Nothing to play — the button is already disabled for this case, but the canvas's own
     // click-to-play (enableClickToPlay) has no native "disabled" state of its own, so this guard
     // is what actually stops it there.
@@ -295,7 +408,8 @@ export class UfoElement extends HTMLElement {
     this.fullscreenButton.classList.toggle("auto-hide", isPlaying)
   }
 
-  private toggleLoop(): void {
+  /** Public for the same reason as togglePlayPause — see its own doc comment. */
+  toggleLoop(): void {
     this.loopEnabled = !this.loopEnabled
     this.loopButton.setAttribute("aria-pressed", String(this.loopEnabled))
     this.player.loop = this.loopEnabled

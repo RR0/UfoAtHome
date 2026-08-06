@@ -8,6 +8,9 @@ export interface TimelineJson {
    * anything saved before z-order control existed, or hand-written JSON; fromJSON() then falls
    * back to first-appearance order (the old implicit behavior), same as if this were `[]`. */
   order?: string[]
+  /** Each inner array is one group's member sourceIds (always >= 2 members) — see Timeline's own
+   * `groups` field. Optional/back-compat, same reasoning as `order`. */
+  groups?: string[][]
 }
 
 /**
@@ -25,6 +28,10 @@ export class Timeline {
    * MUST agree, or a click could hit a shape while its own paint order shows something else on
    * top of it. */
   private order: string[] = []
+  /** Each inner array is one group's member sourceIds (always >= 2 members) — a persisted, named
+   * multi-selection: clicking any one member later re-selects the whole group. Unlike `order`
+   * (per-source), a source belongs to at most one group at a time — see group()/ungroup(). */
+  private groups: string[][] = []
 
   /**
    * Merges `shapes` into any existing keyframe at `t` by sourceId — untouched sources keep
@@ -157,6 +164,45 @@ export class Timeline {
       }
     }
     this.order = this.order.filter(id => id !== sourceId)
+    this.removeFromGroup(sourceId)
+  }
+
+  /** Groups the given sources into one named group: each is first detached from any group it was
+   * already in (shrinking it, or dissolving it entirely if that would drop it below 2 members —
+   * a source can belong to at most one group at a time, so re-grouping across existing groups
+   * collapses them into the new one). No-op if fewer than 2 sourceIds are given. */
+  group(sourceIds: string[]): void {
+    if (sourceIds.length < 2) return
+    for (const id of sourceIds) this.removeFromGroup(id)
+    this.groups.push([...sourceIds])
+  }
+
+  /** Dissolves the whole group containing sourceId (every member becomes ungrouped, not just that
+   * one) — standard vector-editor "Ungroup" semantics, deliberately different from removeFromGroup's
+   * shrink-if-possible behavior. No-op if sourceId isn't grouped. */
+  ungroup(sourceId: string): void {
+    const index = this.groups.findIndex(group => group.includes(sourceId))
+    if (index !== -1) this.groups.splice(index, 1)
+  }
+
+  /** Full member list of the group containing sourceId, else undefined. */
+  groupMembers(sourceId: string): string[] | undefined {
+    return this.groups.find(group => group.includes(sourceId))
+  }
+
+  /** Detaches sourceId from whichever group (if any) currently contains it, shrinking that group
+   * in place — or dropping it entirely if that would leave fewer than 2 members. Used by
+   * removeSource (a deleted shape can't remain a group member, but its former groupmates should
+   * stay grouped if enough remain) and by group() (to detach a member being re-grouped elsewhere). */
+  private removeFromGroup(sourceId: string): void {
+    const index = this.groups.findIndex(group => group.includes(sourceId))
+    if (index === -1) return
+    const remaining = this.groups[index].filter(id => id !== sourceId)
+    if (remaining.length < 2) {
+      this.groups.splice(index, 1)
+    } else {
+      this.groups[index] = remaining
+    }
   }
 
   /** Moves a source to the front (painted/hit-tested last, i.e. on top of everything else) — a
@@ -192,7 +238,7 @@ export class Timeline {
   }
 
   toJSON(): TimelineJson {
-    return { keyframes: this.keyframes, order: this.order }
+    return { keyframes: this.keyframes, order: this.order, groups: this.groups }
   }
 
   static fromJSON(json: TimelineJson): Timeline {
@@ -206,6 +252,14 @@ export class Timeline {
       // the end (arbitrary but safe) rather than left unpaintable.
       const missing = timeline.order.filter(id => !json.order!.includes(id))
       timeline.order = [...json.order, ...missing]
+    }
+    if (json.groups) {
+      // Defensively drops any group referencing an unknown/removed sourceId, and any group left
+      // with fewer than 2 known members as a result — the opposite defensive direction from
+      // `order` above (never invent phantom membership for a source that doesn't actually exist).
+      timeline.groups = json.groups
+        .map(group => group.filter(id => timeline.order.includes(id)))
+        .filter(group => group.length >= 2)
     }
     return timeline
   }

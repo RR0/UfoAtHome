@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest"
-import { handlePointsFor, hitTestHandle, resizeShape, rotateShape } from "../../src/engine/shape/ShapeHandles.js"
+import { ShapeHandles, ShapeGroup } from "../../src/engine/shape/ShapeHandles.js"
 import { createOval, createPolygon } from "../../src/engine/shape/Shape.js"
 
 describe("handlePointsFor", () => {
   it("computes the 9 handle positions at angle 0 directly from bounds", () => {
     const shape = createOval({ x: 0, y: 0, width: 100, height: 50 })
-    const points = handlePointsFor(shape)
+    const points = ShapeHandles.handlePointsFor(shape)
 
     expect(points.nw).toEqual({ x: 0, y: 0 })
     expect(points.n).toEqual({ x: 50, y: 0 })
@@ -20,7 +20,7 @@ describe("handlePointsFor", () => {
 
   it("rotates handle positions around the shape's center at a non-zero angle", () => {
     const shape = { ...createOval({ x: 0, y: 0, width: 100, height: 50 }), angle: Math.PI / 2 }
-    const points = handlePointsFor(shape)
+    const points = ShapeHandles.handlePointsFor(shape)
 
     // A 90deg rotation around center (50,25): "rotate" (50,-24, i.e. 24px above center's y)
     // swings to 90deg clockwise from center, landing 24px to the right of center at the
@@ -35,23 +35,23 @@ describe("handlePointsFor", () => {
 describe("hitTestHandle", () => {
   it("hits each of the 9 handles at angle 0, within tolerance", () => {
     const shape = createOval({ x: 0, y: 0, width: 100, height: 50 })
-    const points = handlePointsFor(shape)
+    const points = ShapeHandles.handlePointsFor(shape)
     for (const id of Object.keys(points) as (keyof typeof points)[]) {
-      expect(hitTestHandle(shape, points[id])).toBe(id)
+      expect(ShapeHandles.hitTestHandle(shape, points[id])).toBe(id)
     }
   })
 
   it("hits the correct (rotated) handle position at a non-zero angle", () => {
     const shape = { ...createOval({ x: 0, y: 0, width: 100, height: 50 }), angle: Math.PI / 2 }
-    const points = handlePointsFor(shape)
-    expect(hitTestHandle(shape, points.rotate)).toBe("rotate")
-    expect(hitTestHandle(shape, points.e)).toBe("e")
+    const points = ShapeHandles.handlePointsFor(shape)
+    expect(ShapeHandles.hitTestHandle(shape, points.rotate)).toBe("rotate")
+    expect(ShapeHandles.hitTestHandle(shape, points.e)).toBe("e")
   })
 
   it("misses just outside tolerance and inside the shape's interior", () => {
     const shape = createOval({ x: 0, y: 0, width: 100, height: 50 })
-    expect(hitTestHandle(shape, { x: 0, y: 9 })).toBeUndefined() // 9px from nw (0,0) — just past tolerance 8
-    expect(hitTestHandle(shape, { x: 50, y: 25 })).toBeUndefined() // shape center, not a handle
+    expect(ShapeHandles.hitTestHandle(shape, { x: 0, y: 9 })).toBeUndefined() // 9px from nw (0,0) — just past tolerance 8
+    expect(ShapeHandles.hitTestHandle(shape, { x: 50, y: 25 })).toBeUndefined() // shape center, not a handle
   })
 })
 
@@ -60,12 +60,12 @@ describe("resizeShape", () => {
 
   it("drags each handle to move only the expected edge(s), anchoring the opposite side", () => {
     const shape = createOval(bounds)
-    expect(resizeShape(shape, "e", { x: 180, y: 110 }).bounds).toEqual({ x: 100, y: 100, width: 80, height: 20 })
-    expect(resizeShape(shape, "w", { x: 60, y: 110 }).bounds).toEqual({ x: 60, y: 100, width: 80, height: 20 })
-    expect(resizeShape(shape, "s", { x: 120, y: 160 }).bounds).toEqual({ x: 100, y: 100, width: 40, height: 60 })
-    expect(resizeShape(shape, "n", { x: 120, y: 60 }).bounds).toEqual({ x: 100, y: 60, width: 40, height: 60 })
-    expect(resizeShape(shape, "se", { x: 180, y: 160 }).bounds).toEqual({ x: 100, y: 100, width: 80, height: 60 })
-    expect(resizeShape(shape, "nw", { x: 60, y: 60 }).bounds).toEqual({ x: 60, y: 60, width: 80, height: 60 })
+    expect(ShapeHandles.resizeShape(shape, "e", { x: 180, y: 110 }).bounds).toEqual({ x: 100, y: 100, width: 80, height: 20 })
+    expect(ShapeHandles.resizeShape(shape, "w", { x: 60, y: 110 }).bounds).toEqual({ x: 60, y: 100, width: 80, height: 20 })
+    expect(ShapeHandles.resizeShape(shape, "s", { x: 120, y: 160 }).bounds).toEqual({ x: 100, y: 100, width: 40, height: 60 })
+    expect(ShapeHandles.resizeShape(shape, "n", { x: 120, y: 60 }).bounds).toEqual({ x: 100, y: 60, width: 40, height: 60 })
+    expect(ShapeHandles.resizeShape(shape, "se", { x: 180, y: 160 }).bounds).toEqual({ x: 100, y: 100, width: 80, height: 60 })
+    expect(ShapeHandles.resizeShape(shape, "nw", { x: 60, y: 60 }).bounds).toEqual({ x: 60, y: 60, width: 80, height: 60 })
   })
 
   it("resizes correctly on an already-rotated shape by working in its local (unrotated) frame", () => {
@@ -73,14 +73,14 @@ describe("resizeShape", () => {
     // canvas space. Dragging it further down (canvas point (120,150), 40px below center)
     // should extend the (local/unrotated) right edge by 40px, not move top/left/bottom.
     const rotated = { ...createOval(bounds), angle: Math.PI / 2 }
-    const resized = resizeShape(rotated, "e", { x: 120, y: 150 })
+    const resized = ShapeHandles.resizeShape(rotated, "e", { x: 120, y: 150 })
     expect(resized.bounds).toEqual({ x: 100, y: 100, width: 60, height: 20 })
     expect(resized.angle).toBeCloseTo(Math.PI / 2)
   })
 
   it("clamps to a minimum size instead of inverting when dragged past the opposite edge", () => {
     const shape = createOval(bounds)
-    const resized = resizeShape(shape, "e", { x: 50, y: 110 }) // dragged past the left edge
+    const resized = ShapeHandles.resizeShape(shape, "e", { x: 50, y: 110 }) // dragged past the left edge
     expect(resized.bounds.width).toBeGreaterThanOrEqual(8)
     expect(resized.bounds.x).toBe(100) // left edge (anchor) unchanged
   })
@@ -91,7 +91,7 @@ describe("resizeShape", () => {
       { x: 40, y: 0 },
       { x: 20, y: 20 }
     ])
-    const resized = resizeShape(shape, "e", { x: 180, y: 110 }) // width 40 -> 80, i.e. scaleX=2
+    const resized = ShapeHandles.resizeShape(shape, "e", { x: 180, y: 110 }) // width 40 -> 80, i.e. scaleX=2
     expect(resized.kind).toBe("polygon")
     expect((resized as typeof shape).points).toEqual([
       { x: 0, y: 0 },
@@ -102,7 +102,7 @@ describe("resizeShape", () => {
 
   it("does not accept the rotate handle", () => {
     const shape = createOval(bounds)
-    expect(() => resizeShape(shape, "rotate", { x: 0, y: 0 })).toThrow()
+    expect(() => ShapeHandles.resizeShape(shape, "rotate", { x: 0, y: 0 })).toThrow()
   })
 })
 
@@ -110,20 +110,127 @@ describe("rotateShape", () => {
   const shape = createOval({ x: 100, y: 100, width: 40, height: 20 }) // center (120,110)
 
   it("yields angle 0 when the pointer is directly above center (the handle's rest position)", () => {
-    expect(rotateShape(shape, { x: 120, y: 40 }).angle).toBeCloseTo(0)
+    expect(ShapeHandles.rotateShape(shape, { x: 120, y: 40 }).angle).toBeCloseTo(0)
   })
 
   it("yields the expected angle for the other three cardinal directions", () => {
-    expect(rotateShape(shape, { x: 190, y: 110 }).angle).toBeCloseTo(Math.PI / 2) // right of center
-    expect(rotateShape(shape, { x: 120, y: 180 }).angle).toBeCloseTo(Math.PI) // below center
+    expect(ShapeHandles.rotateShape(shape, { x: 190, y: 110 }).angle).toBeCloseTo(Math.PI / 2) // right of center
+    expect(ShapeHandles.rotateShape(shape, { x: 120, y: 180 }).angle).toBeCloseTo(Math.PI) // below center
     // Left of center: atan2(0,-70)=PI, +PI/2 = 3PI/2 — equivalent to -PI/2 mod 2*PI, but
     // rotateShape doesn't normalize (Shape.angle is just a canvas rotation parameter, which
     // is periodic regardless), so assert the actual unnormalized value.
-    expect(rotateShape(shape, { x: 50, y: 110 }).angle).toBeCloseTo((3 * Math.PI) / 2)
+    expect(ShapeHandles.rotateShape(shape, { x: 50, y: 110 }).angle).toBeCloseTo((3 * Math.PI) / 2)
   })
 
   it("is a direct function of pointer position, independent of the shape's prior angle", () => {
     const alreadyRotated = { ...shape, angle: Math.PI / 3 }
-    expect(rotateShape(alreadyRotated, { x: 120, y: 40 }).angle).toBeCloseTo(0)
+    expect(ShapeHandles.rotateShape(alreadyRotated, { x: 120, y: 40 }).angle).toBeCloseTo(0)
+  })
+})
+
+describe("ShapeHandles.groupBoundsFor", () => {
+  it("returns the axis-aligned union of several boxes", () => {
+    expect(
+      ShapeHandles.groupBoundsFor([
+        { x: 0, y: 0, width: 10, height: 10 },
+        { x: 20, y: 5, width: 10, height: 30 }
+      ])
+    ).toEqual({ x: 0, y: 0, width: 30, height: 35 })
+  })
+
+  it("matches the single box exactly when given only one", () => {
+    const bounds = { x: 5, y: 5, width: 40, height: 20 }
+    expect(ShapeHandles.groupBoundsFor([bounds])).toEqual(bounds)
+  })
+})
+
+describe("ShapeGroup", () => {
+  it("bounds() reports the union bbox of its members", () => {
+    const group = new ShapeGroup([
+      { sourceId: "a", shape: createOval({ x: 0, y: 0, width: 10, height: 10 }) },
+      { sourceId: "b", shape: createOval({ x: 20, y: 10, width: 10, height: 10 }) }
+    ])
+    expect(group.bounds()).toEqual({ x: 0, y: 0, width: 30, height: 20 })
+  })
+
+  it("scaleTo() scales each member proportionally to the target bbox", () => {
+    // Members span x=[0,20] within the from-bbox x=[0,20]; scaling that bbox to twice the width
+    // should double each member's own width and x-offset-from-origin.
+    const group = new ShapeGroup([
+      { sourceId: "a", shape: createOval({ x: 0, y: 0, width: 10, height: 10 }) },
+      { sourceId: "b", shape: createOval({ x: 10, y: 0, width: 10, height: 10 }) }
+    ])
+    const scaled = group.scaleTo({ x: 0, y: 0, width: 40, height: 10 })
+    expect(scaled.find(m => m.sourceId === "a")?.shape.bounds).toEqual({ x: 0, y: 0, width: 20, height: 10 })
+    expect(scaled.find(m => m.sourceId === "b")?.shape.bounds).toEqual({ x: 20, y: 0, width: 20, height: 10 })
+  })
+
+  it("scaleTo() rescales polygon points proportionally, same technique as resizeShape", () => {
+    const group = new ShapeGroup([
+      { sourceId: "a", shape: createPolygon({ x: 0, y: 0, width: 10, height: 10 }, [{ x: 0, y: 0 }, { x: 10, y: 10 }]) }
+    ])
+    const scaled = group.scaleTo({ x: 0, y: 0, width: 20, height: 10 })
+    const shape = scaled[0].shape as ReturnType<typeof createPolygon>
+    expect(shape.points).toEqual([{ x: 0, y: 0 }, { x: 20, y: 10 }])
+  })
+
+  it("scaleTo() clamps a shrinking member's size to MIN_SHAPE_SIZE rather than collapsing it", () => {
+    const group = new ShapeGroup([
+      { sourceId: "a", shape: createOval({ x: 0, y: 0, width: 100, height: 100 }) },
+      { sourceId: "b", shape: createOval({ x: 0, y: 0, width: 4, height: 4 }) } // already tiny
+    ])
+    const scaled = group.scaleTo({ x: 0, y: 0, width: 10, height: 10 }) // shrink the group 10x
+    const tiny = scaled.find(m => m.sourceId === "b")!.shape.bounds
+    expect(tiny.width).toBeGreaterThanOrEqual(8)
+    expect(tiny.height).toBeGreaterThanOrEqual(8)
+  })
+
+  it("scaleTo() leaves each member's own angle untouched — group-rotate is out of scope", () => {
+    const group = new ShapeGroup([{ sourceId: "a", shape: { ...createOval({ x: 0, y: 0, width: 10, height: 10 }), angle: 1.2 } }])
+    const scaled = group.scaleTo({ x: 0, y: 0, width: 20, height: 20 })
+    expect(scaled[0].shape.angle).toBeCloseTo(1.2)
+  })
+
+  it("resize() drags a shared corner handle and scales both members together", () => {
+    const group = new ShapeGroup([
+      { sourceId: "a", shape: createOval({ x: 0, y: 0, width: 10, height: 10 }) },
+      { sourceId: "b", shape: createOval({ x: 10, y: 0, width: 10, height: 10 }) }
+    ])
+    // Group bbox is (0,0,20,10); drag "e" out to x=40 -> new bbox width 40, scaleX=2.
+    const resized = group.resize("e", { x: 40, y: 5 })
+    expect(resized.find(m => m.sourceId === "a")?.shape.bounds).toEqual({ x: 0, y: 0, width: 20, height: 10 })
+    expect(resized.find(m => m.sourceId === "b")?.shape.bounds).toEqual({ x: 20, y: 0, width: 20, height: 10 })
+  })
+
+  it("rotate() revolves each member around the group's center AND spins its own angle by the same delta", () => {
+    // a center (10,10), b center (30,10); group bbox (0,0,40,20), center (20,10).
+    const group = new ShapeGroup([
+      { sourceId: "a", shape: createOval({ x: 0, y: 0, width: 20, height: 20 }) },
+      { sourceId: "b", shape: createOval({ x: 20, y: 0, width: 20, height: 20 }) }
+    ])
+    // startPointer straight right of center (angle 0); pointer straight above center (angle
+    // -PI/2 in screen coords) -> delta = -PI/2, a quarter-turn.
+    const rotated = group.rotate({ x: 20, y: 0 }, { x: 30, y: 10 })
+
+    const a = rotated.find(m => m.sourceId === "a")!.shape
+    const b = rotated.find(m => m.sourceId === "b")!.shape
+    // a's center (10,10) is 10px left of the group center (20,10) -> swings to 10px below it (20,20).
+    expect(a.bounds.x).toBeCloseTo(10)
+    expect(a.bounds.y).toBeCloseTo(10)
+    // b's center (30,10) is 10px right of the group center -> swings to 10px above it (20,0).
+    expect(b.bounds.x).toBeCloseTo(10)
+    expect(b.bounds.y).toBeCloseTo(-10)
+    // Widths/heights untouched — rotate revolves position and spins angle, never scales.
+    expect(a.bounds.width).toBe(20)
+    expect(a.bounds.height).toBe(20)
+    // Each member's own angle advances by the same delta.
+    expect(a.angle).toBeCloseTo(-Math.PI / 2)
+    expect(b.angle).toBeCloseTo(-Math.PI / 2)
+  })
+
+  it("rotate() is a pure delta from startPointer to pointer, independent of members' prior angle", () => {
+    const group = new ShapeGroup([{ sourceId: "a", shape: { ...createOval({ x: 0, y: 0, width: 10, height: 10 }), angle: 1.2 } }])
+    const rotated = group.rotate({ x: 5, y: -5 }, { x: 15, y: 5 }) // same delta as above (-PI/2)
+    expect(rotated[0].shape.angle).toBeCloseTo(1.2 - Math.PI / 2)
   })
 })

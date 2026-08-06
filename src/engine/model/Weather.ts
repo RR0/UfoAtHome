@@ -1,6 +1,6 @@
 /**
  * The sighting's reported weather condition — a static, single value for the whole observation
- * (unlike `observerTrack`, weather isn't keyframed: a witness reports "it was raining, stormy sky"
+ * (unlike `witnessTrack`, weather isn't keyframed: a witness reports "it was raining, stormy sky"
  * as a general condition, not something that changes second-to-second during a sighting). Kept as
  * a plain flat interface, not a class — there's no keyframe store or interpolation to encapsulate,
  * so a class would just be ceremony (compare to SightingLocation/ObserverPose, also plain).
@@ -17,9 +17,13 @@ export interface Weather {
   precipitationIntensity: number
   /** Degrees clockwise from true north — same convention as ObserverPose.headingDeg. */
   windDirectionDeg: number
-  /** 0-1. */
+  /** Real-world wind speed in m/s (0 = calm, ~30 = violent storm/hurricane-force) — drives both
+   * visual precipitation drift and wind audio volume directly, see SceneRenderer/WeatherAudio. */
   windSpeed: number
-  lightning: boolean
+  /** Whether a thunderstorm was reported — drives both a scene-fog lightning flash and a delayed
+   * thunderclap (see SceneRenderer's lightning-flash scheduling, named for the visual mechanism
+   * it implements internally, not for this field). */
+  storm: boolean
 }
 
 export const DEFAULT_WEATHER: Weather = {
@@ -29,5 +33,5 @@ export const DEFAULT_WEATHER: Weather = {
   precipitationIntensity: 0,
   windDirectionDeg: 0,
   windSpeed: 0,
-  lightning: false
+  storm: false
 }

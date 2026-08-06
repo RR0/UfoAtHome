@@ -3,6 +3,7 @@ export const html = `
   <div class="frame" id="frame">
     <canvas id="canvas" width="640" height="360"></canvas>
   </div>
+  <div id="tooltip" class="tooltip" hidden></div>
   <button id="fullscreen" class="fullscreen-btn" type="button" title="Fullscreen" aria-label="Fullscreen">⛶</button>
   <div class="toolbar" id="toolbar">
     <button id="play-pause" type="button" title="Play" aria-label="Play">▶</button>
@@ -93,6 +94,14 @@ canvas {
   opacity: 0;
   pointer-events: none;
 }
+/* A compound class selector (0,2,0) so this reliably beats the plain .toolbar rule above (0,1,0)
+   regardless of declaration order — set via UfoElement's showToolbar setter by a composing
+   element (see UfoRecorderElement) that drives its own external playback controls instead, since
+   this overlay's flex:1 seek bar would otherwise intercept nearly the full width of the canvas's
+   bottom edge, blocking shape drag/resize there. */
+.toolbar.hidden {
+  display: none;
+}
 .stage:hover .auto-hide {
   opacity: 1;
   pointer-events: auto;
@@ -144,5 +153,17 @@ input[type=range] {
   font-size: 0.85em;
   min-width: 3em;
   text-align: center;
+}
+.tooltip {
+  position: absolute;
+  z-index: 1;
+  padding: 0.2em 0.5em;
+  background: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  font-family: sans-serif;
+  font-size: 0.85em;
+  border-radius: 3px;
+  pointer-events: none;
+  white-space: nowrap;
 }
 `

@@ -51,7 +51,7 @@ const DEFAULT_ASTRONOMY: SceneAstronomy = {
 }
 
 /** Applied to the camera when a sighting has no resolvable observer pose at all (no
- * observerTrack and no place[0]) — leaves heading undefined so setObserverPose doesn't snap the
+ * witnessTrack and no place[0]) — leaves heading undefined so setObserverPose doesn't snap the
  * camera to a default compass direction. */
 const DEFAULT_OBSERVER_POSE: ObserverPose = { lat: 0, lng: 0, elevationM: 0, headingDeg: undefined, pitchDeg: 0, fovDeg: 60 }
 
@@ -74,7 +74,7 @@ const DEFAULT_OBSERVER_POSE: ObserverPose = { lat: 0, lng: 0, elevationM: 0, hea
  * Astronomy (Sun/Moon/planet positions, real star catalog, sky color) is derived from the
  * sighting's own `time` plus the observer's pose at the current playback instant — see
  * engine/astronomy/CelestialPositions.ts and resolveObserverPoseAt (engine/model/Sighting.ts),
- * which prefers the sighting's `observerTrack` and falls back to the legacy static `place[0]`.
+ * which prefers the sighting's `witnessTrack` and falls back to the legacy static `place[0]`.
  * Recomputed on every playback tick/seek (via the nested `<rr0-ufo>`'s own `timeupdate` event,
  * not a separate animation loop of its own), so the sky, and the camera's own heading/pitch/fov,
  * both follow the observer as they change over the sighting's timeline.

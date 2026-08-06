@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest"
 import { CanvasRenderer } from "../../src/render/CanvasRenderer.js"
 import { createOval, createPolygon } from "../../src/engine/shape/Shape.js"
-import { handlePointsFor } from "../../src/engine/shape/ShapeHandles.js"
+import { ShapeHandles } from "../../src/engine/shape/ShapeHandles.js"
 
 function createMockContext(): CanvasRenderingContext2D {
   return {
@@ -87,7 +87,7 @@ describe("CanvasRenderer", () => {
 
     renderer.paintShape(shape)
 
-    const points = handlePointsFor(shape)
+    const points = ShapeHandles.handlePointsFor(shape)
     expect(ctx.moveTo).toHaveBeenCalledWith(points.nw.x, points.nw.y)
     expect(ctx.lineTo).toHaveBeenCalledWith(points.se.x, points.se.y)
     expect(ctx.fillRect).toHaveBeenCalledWith(points.n.x - 3, points.n.y - 3, 6, 6)
@@ -120,5 +120,26 @@ describe("CanvasRenderer", () => {
 
     expect(alphaAtStroke.every(alpha => alpha === 1)).toBe(true)
     expect(alphaAtFillRect.every(alpha => alpha === 1)).toBe(true)
+  })
+
+  it("paintMemberOutline draws only the outline, no resize-handle squares", () => {
+    const ctx = createMockContext()
+    const renderer = new CanvasRenderer(ctx)
+
+    renderer.paintMemberOutline(createOval({ x: 0, y: 0, width: 10, height: 10 }))
+
+    expect(ctx.stroke).toHaveBeenCalledTimes(1) // outline only
+    expect(ctx.fillRect).not.toHaveBeenCalled()
+  })
+
+  it("paintGroupHandles draws the 8 corner handles + outline + rotate stem/circle", () => {
+    const ctx = createMockContext()
+    const renderer = new CanvasRenderer(ctx)
+
+    renderer.paintGroupHandles({ x: 0, y: 0, width: 20, height: 10 })
+
+    expect(ctx.fillRect).toHaveBeenCalledTimes(8)
+    expect(ctx.stroke).toHaveBeenCalledTimes(2) // outline + rotate-handle connector line
+    expect(ctx.ellipse).toHaveBeenCalledTimes(1) // rotate-handle glyph
   })
 })
