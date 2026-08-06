@@ -28,9 +28,9 @@ export const html = `
   <summary id="label-temporal-group">Temporal</summary>
   <div class="toolbar">
     <label><span id="label-observation-time">Observation start</span>
-      <input id="obs-time" type="text" placeholder="YYYY-MM-DDThh:mm[?~%]" title="EDTF — e.g. 1965-07-01T05:00, 2025-06? (uncertain), 2025~ (approximate)"/></label>
+      <input id="obs-time" type="text" placeholder="YYYY-MM-DDThh:mm[?~%] or hh:mm" title="EDTF — e.g. 1965-07-01T05:00, 2025-06? (uncertain), 2025~ (approximate), or just 05:00 if the date isn't known"/></label>
     <label><span id="label-observation-end-time">Observation end</span>
-      <input id="obs-end-time" type="text" placeholder="YYYY-MM-DDThh:mm[?~%]" title="EDTF — e.g. 1965-07-01T05:10, 2025-06? (uncertain), 2025~ (approximate)"/></label>
+      <input id="obs-end-time" type="text" placeholder="YYYY-MM-DDThh:mm[?~%] or hh:mm" title="EDTF — e.g. 1965-07-01T05:10, 2025-06? (uncertain), 2025~ (approximate), or just 05:10 if the date isn't known"/></label>
     <label><span id="label-duration">Duration</span> <input id="durationSeconds" type="number" min="0" step="0.1" placeholder="observation length" aria-required="true"/> s</label>
   </div>
 </details>
@@ -132,11 +132,24 @@ button.preset[aria-pressed="true"] {
 /* Shared by Duration (no sane default — real playback pacing needs some notion of the
    observation's length, so an empty value is flagged rather than just left blank) and the two
    EDTF date fields (rejected text that doesn't parse as EDTF — see UfoRecorderElement.
-   applyEdtfTimeInput). Cleared automatically once the field holds a valid/derivable value. */
+   applyEdtfTimeInput). Cleared automatically once the field holds a valid/derivable value.
+   Light-mode colors by default (this widget has no fixed background of its own — every other
+   input just inherits the host page's own light/dark styling — so a hardcoded dark fill here
+   read as a stray dark box on a light host page); the dark-mode pair below is what was actually
+   tuned for legibility earlier (white text on dark red), unchanged, just now gated correctly
+   instead of always-on. Mirrors rr0.org's own site-wide theming convention — a light-mode
+   default overridden inside a prefers-color-scheme:dark media query, not a manual toggle (see
+   e.g. rr0.org's own link.css/rr0.css). */
 input.invalid {
   border-color: #c33;
-  background: #3a1414;
-  color: #fff;
+  background: #fde8e8;
+  color: #611;
+}
+@media (prefers-color-scheme: dark) {
+  input.invalid {
+    background: #3a1414;
+    color: #fff;
+  }
 }
 #description {
   width: 16em;

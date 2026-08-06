@@ -67,6 +67,15 @@ describe("sightingDurationMs", () => {
     expect(sightingDurationMs(event)).toBeUndefined()
   })
 
+  it("computes a duration from date-less EDTF times typed directly as hh:mm (no date known at all)", () => {
+    const event = {
+      eventType: "sighting" as const,
+      time: parseEdtfTime("22:00"),
+      endTime: parseEdtfTime("22:30")
+    }
+    expect(sightingDurationMs(event)).toBe(30 * 60 * 1000)
+  })
+
   it("treats a missing second as :00 rather than blocking — a witness typing seconds on only one side shouldn't lose the duration", () => {
     const event = {
       eventType: "sighting" as const,
@@ -153,6 +162,31 @@ describe("parseEdtfTime", () => {
     expect(parseEdtfTime("1948-13-01")).toBeUndefined() // month 13
     expect(parseEdtfTime("1948-07-24T25:00")).toBeUndefined() // hour 25
   })
+
+  it("parses a bare hh:mm with no date at all — year/month/day stay undefined", () => {
+    expect(parseEdtfTime("22:30")).toEqual({
+      year: undefined,
+      month: undefined,
+      day: undefined,
+      hour: 22,
+      minute: 30,
+      second: undefined,
+      raw: "22:30"
+    })
+  })
+
+  it("parses a bare hh:mm:ss with no date", () => {
+    expect(parseEdtfTime("22:30:15")).toMatchObject({ hour: 22, minute: 30, second: 15, year: undefined })
+  })
+
+  it("accepts a qualifier suffix on a date-less time too", () => {
+    expect(parseEdtfTime("22:30?")).toMatchObject({ hour: 22, minute: 30, raw: "22:30?" })
+  })
+
+  it("rejects an out-of-range date-less time", () => {
+    expect(parseEdtfTime("25:00")).toBeUndefined() // hour 25
+    expect(parseEdtfTime("22:60")).toBeUndefined() // minute 60
+  })
 })
 
 describe("formatEdtfTime", () => {
@@ -168,5 +202,14 @@ describe("formatEdtfTime", () => {
   it("round-trips through parseEdtfTime", () => {
     const raw = "1965-07-01T05:10:30"
     expect(formatEdtfTime(parseEdtfTime(raw)!)).toBe(raw)
+  })
+
+  it("formats a year-less time (hour set, year absent) as a bare hh:mm, even with no raw", () => {
+    expect(formatEdtfTime({ hour: 22, minute: 30 })).toBe("22:30")
+    expect(formatEdtfTime({ hour: 22, minute: 30, second: 15 })).toBe("22:30:15")
+  })
+
+  it("round-trips a date-less time through parseEdtfTime", () => {
+    expect(formatEdtfTime(parseEdtfTime("22:30")!)).toBe("22:30")
   })
 })

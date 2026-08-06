@@ -30,36 +30,50 @@ export interface SightingTime {
  * ("?"=uncertain, "~"=approximate, "%"=both) and basic year-masking ("199X"/"19XX") — not a real
  * EDTF parser (no seasons, no per-component qualifiers, no intervals), just enough to (a) reject
  * obvious garbage in the recorder's date fields and (b) recover the numeric components
- * SightingTime's other consumers need. */
+ * SightingTime's other consumers need. The second alternative (own group names, to avoid relying
+ * on duplicate-named-group support) is a deliberate departure from real EDTF: a bare hh:mm[:ss]
+ * with no date at all, for a witness who remembers a time of day but not (or not precisely) which
+ * date it was — sightingTimeOffsetMs already treats a year-less SightingTime as "compare
+ * hour/minute/second only" for duration purposes, so this needs no changes downstream. */
 const EDTF_TIME_PATTERN =
-  /^(?<year>\d{4}|\d{3}X|\d{2}XX)(-(?<month>0[1-9]|1[0-2]))?(-(?<day>0[1-9]|[12]\d|3[01]))?(?:[T ](?<hour>[01]\d|2[0-3]):(?<minute>[0-5]\d)(?::(?<second>[0-5]\d))?)?[?~%]?$/
+  /^(?:(?<year>\d{4}|\d{3}X|\d{2}XX)(-(?<month>0[1-9]|1[0-2]))?(-(?<day>0[1-9]|[12]\d|3[01]))?(?:[T ](?<hour>[01]\d|2[0-3]):(?<minute>[0-5]\d)(?::(?<second>[0-5]\d))?)?|(?<timeOnlyHour>[01]\d|2[0-3]):(?<timeOnlyMinute>[0-5]\d)(?::(?<timeOnlySecond>[0-5]\d))?)[?~%]?$/
 
 /** Best-effort EDTF text -> SightingTime, or undefined if `raw` doesn't match EDTF_TIME_PATTERN at
  * all (the caller shows a custom-validity error and leaves the previous value alone rather than
  * overwriting it with garbage — see UfoRecorderElement.applyEdtfTimeInput). A masked year
  * component ("199X"/"19XX") parses to `year: undefined` — genuinely unknown for duration/astronomy
- * purposes, not a real number to guess at. */
+ * purposes, not a real number to guess at. Likewise a bare "hh:mm[:ss]" (no date at all) parses to
+ * year/month/day all undefined, hour/minute/second set. */
 export function parseEdtfTime(raw: string): SightingTime | undefined {
   const match = EDTF_TIME_PATTERN.exec(raw.trim())
   if (!match?.groups) return undefined
-  const { year, month, day, hour, minute, second } = match.groups
+  const { year, month, day, hour, minute, second, timeOnlyHour, timeOnlyMinute, timeOnlySecond } = match.groups
+  const resolvedHour = hour ?? timeOnlyHour
+  const resolvedMinute = minute ?? timeOnlyMinute
+  const resolvedSecond = second ?? timeOnlySecond
   return {
-    year: year.includes("X") ? undefined : Number(year),
+    year: year && !year.includes("X") ? Number(year) : undefined,
     month: month ? Number(month) : undefined,
     day: day ? Number(day) : undefined,
-    hour: hour ? Number(hour) : undefined,
-    minute: minute ? Number(minute) : undefined,
-    second: second ? Number(second) : undefined,
+    hour: resolvedHour ? Number(resolvedHour) : undefined,
+    minute: resolvedMinute ? Number(resolvedMinute) : undefined,
+    second: resolvedSecond ? Number(resolvedSecond) : undefined,
     raw: raw.trim()
   }
 }
 
 /** Reverse of parseEdtfTime, for display — `raw` verbatim when present (preserves whatever
  * qualifiers/masking were typed), otherwise a plain ISO-ish string built from the numeric fields
- * (legacy/hand-authored data with no `raw` at all). */
+ * (legacy/hand-authored data with no `raw` at all). A year-less time (see parseEdtfTime) formats
+ * as a bare "hh:mm[:ss]", matching what would need to be typed to reproduce it. */
 export function formatEdtfTime(time: SightingTime): string {
   if (time.raw !== undefined) return time.raw
-  if (time.year === undefined) return ""
+  if (time.year === undefined) {
+    if (time.hour === undefined) return ""
+    let s = `${String(time.hour).padStart(2, "0")}:${String(time.minute ?? 0).padStart(2, "0")}`
+    if (time.second !== undefined) s += `:${String(time.second).padStart(2, "0")}`
+    return s
+  }
   let s = String(time.year).padStart(4, "0")
   if (time.month === undefined) return s
   s += `-${String(time.month).padStart(2, "0")}`
