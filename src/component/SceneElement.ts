@@ -376,6 +376,9 @@ export class SceneElement extends HTMLElement {
     // witness — see SceneRenderer.updateDecorAnchoring's own doc comment. The reference pose is
     // always the recording's own t=0, regardless of what t is being rendered right now.
     this.sceneRenderer.updateDecorAnchoring(resolveObserverPoseAt(sighting, 0), pose)
+    // A streetlight/vehicle's own lit state can change mid-recording (a photocell at dusk, a
+    // driver's headlights) — see Decor.ts's own resolveDecorLitAt.
+    this.sceneRenderer.updateDecorLitState(t)
     // Raw pose's own lat/lng (possibly undefined), never the astronomy fallback below — a real
     // terrain patch must only ever build from a real recorded location, never (0,0).
     this.sceneRenderer.setTerrainOrigin(pose?.lat, pose?.lng)

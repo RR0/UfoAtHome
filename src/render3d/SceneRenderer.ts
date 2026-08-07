@@ -70,6 +70,7 @@ import { buildLensFlare } from "./LensFlareEffect.js"
 import type { LensFlareSystem } from "./LensFlareEffect.js"
 import { DecorSystem } from "./DecorSystem.js"
 import type { DecorObject } from "../engine/model/Decor.js"
+import { resolveDecorLitAt } from "../engine/model/Decor.js"
 
 /** Plain field-by-field comparison — see setWeather's own doc comment on why reference equality
  * stopped being enough once weather started being resolved fresh every tick from a keyframe
@@ -885,7 +886,11 @@ export class SceneRenderer {
       const group = DecorSystem.build(object.kind, object.lit ?? false, object.headingDeg)
       this.scene.add(group)
       this.decorGroups.set(object.id, group)
-      if (object.kind === "streetlight" && object.lit) this.addStreetlightLight(object.id, group)
+      // Built regardless of the object's own *initial* lit state (unlike before this session) —
+      // lit can now change mid-recording (see Decor.ts's own resolveDecorLitAt), so a streetlight
+      // that starts off but switches on later still needs a real light waiting to be revealed,
+      // not one that was never created at all. updateDecorLitState toggles light.visible per tick.
+      if (object.kind === "streetlight") this.addStreetlightLight(object.id, group)
     }
     // Toggled here too (not just in updateCelestialLight, which only runs on the next
     // setAstronomy tick): adding the sighting's first-ever decor object shouldn't have to wait an
@@ -919,6 +924,25 @@ export class SceneRenderer {
       const group = this.decorGroups.get(object.id)
       if (!group) continue
       group.position.set(object.eastM + offset.x, DECOR_GROUND_Y, -object.northM + offset.z)
+    }
+  }
+
+  /** Resolves and applies each decor object's current lit state at time t — see Decor.ts's own
+   * resolveDecorLitAt for the hold-last-keyframe semantics (mirrors setWeather/setObserverPose:
+   * called every tick, cheap enough not to need its own dedup check given how few decor objects
+   * a sighting ever has). Retints the emissive parts in place (DecorSystem.setLit) rather than
+   * rebuilding the group, and toggles a streetlight's own real PointLight (built once, up front,
+   * in setDecor) visible/invisible to match — never disposed/recreated, since the light itself
+   * doesn't change, only whether it's currently switched on. */
+  updateDecorLitState(t: number): void {
+    for (const object of this.decorObjects) {
+      if (object.kind !== "streetlight" && object.kind !== "vehicle") continue
+      const group = this.decorGroups.get(object.id)
+      if (!group) continue
+      const lit = resolveDecorLitAt(object, t)
+      DecorSystem.setLit(group, object.kind, lit)
+      const light = this.streetlightLights.get(object.id)
+      if (light) light.visible = lit
     }
   }
 

@@ -52,7 +52,13 @@ function buildTree(): Group {
 function buildStreetlight(lit: boolean): Group {
   const group = new Group()
   addPart(group, new CylinderGeometry(0.05, 0.08, 5, 8), [0.28, 0.28, 0.3], 2.5)
-  addPart(group, new SphereGeometry(0.25, 12, 8), lit ? LIT_LAMP_COLOR : UNLIT_LAMP_COLOR, 5.1, lit)
+  // The lamp head is ALWAYS emissive (true, not `lit`) — lit can now change mid-recording (see
+  // Decor.ts's own resolveDecorLitAt/DecorSystem.setLit), and a mesh built non-emissive here
+  // (MeshLambertMaterial, receiving real scene lighting) could never later be toggled to read as
+  // a genuine light source in place — only its *color* changes at runtime, never its material
+  // class. Building it emissive from the start, in whichever color matches this initial `lit`,
+  // is what setLit's own later re-tints actually assume.
+  addPart(group, new SphereGeometry(0.25, 12, 8), lit ? LIT_LAMP_COLOR : UNLIT_LAMP_COLOR, 5.1, true)
   return group
 }
 
@@ -84,7 +90,10 @@ function buildVehicle(lit: boolean): Group {
   const headlightColor = lit ? LIT_HEADLIGHT_COLOR : UNLIT_HEADLIGHT_COLOR
   for (const sideX of [-0.7, 0.7]) {
     // The front, -length/2 along Z (see the body's own comment above on why Z is the facing axis).
-    const headlight = addPart(group, new SphereGeometry(0.15, 8, 6), headlightColor, 0.7, lit)
+    // Always emissive (true, not `lit`) — see buildStreetlight's own doc comment on why: lit can
+    // change mid-recording, and only a mesh already built emissive can be re-tinted in place later
+    // by DecorSystem.setLit.
+    const headlight = addPart(group, new SphereGeometry(0.15, 8, 6), headlightColor, 0.7, true)
     headlight.position.set(sideX, 0.7, -2.1)
   }
   return group
@@ -130,6 +139,20 @@ export class DecorSystem {
               : buildWitness()
     if (headingDeg !== undefined) group.rotation.y = -headingDeg * DEG_TO_RAD
     return group
+  }
+
+  /** Re-tints a streetlight's lamp head / vehicle's headlights in place when their lit state
+   * changes mid-recording (see Decor.ts's own resolveDecorLitAt) — every emissive part in the
+   * group gets the same on/off color, which is correct today (a streetlight has one lamp, a
+   * vehicle's two headlights always switch together) without needing to track parts individually.
+   * A no-op for building/tree/witness: they have no emissive children (see addPart's own
+   * `emissive` flag), so the loop below simply finds nothing to retint. */
+  static setLit(group: Group, kind: DecorKind, lit: boolean): void {
+    const color = kind === "streetlight" ? (lit ? LIT_LAMP_COLOR : UNLIT_LAMP_COLOR) : lit ? LIT_HEADLIGHT_COLOR : UNLIT_HEADLIGHT_COLOR
+    for (const child of group.children) {
+      if (!(child instanceof Mesh) || !(child.userData as DecorMeshUserData).emissive) continue
+      ;(child.material as MeshBasicMaterial).color.setRGB(...color)
+    }
   }
 
   /** Disposes every mesh's geometry/material — Group itself owns no GPU resource of its own. */

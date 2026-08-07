@@ -11,6 +11,7 @@ import type { SightingRecordingJson } from "../engine/persistence/sightingJson.j
 import type { PrecipitationType, Weather } from "../engine/model/Weather.js"
 import type { People } from "../engine/model/People.js"
 import type { DecorObject } from "../engine/model/Decor.js"
+import { resolveDecorLitAt } from "../engine/model/Decor.js"
 import {
   sightingDurationMs,
   sightingDurationBlockedReason,
@@ -506,9 +507,14 @@ export class UfoRecorderElement extends HTMLElement {
     this.addDecorBuildingButton.addEventListener("click", () => this.addDecor("building"))
     this.deleteDecorButton.addEventListener("click", () => this.deleteDecor())
     this.decorSelect.addEventListener("change", () => this.selectDecor(this.decorSelect.value))
-    for (const input of [this.decorTitleInput, this.decorEastInput, this.decorNorthInput, this.decorHeadingInput, this.decorLitInput, this.decorSightingUrlInput]) {
+    for (const input of [this.decorTitleInput, this.decorEastInput, this.decorNorthInput, this.decorHeadingInput, this.decorSightingUrlInput]) {
       input.addEventListener("input", () => this.updateDecor())
     }
+    // Lit is keyframed over time (see Decor.ts's own resolveDecorLitAt/litKeyframes), unlike the
+    // rest of a decor object's fields — a distinct write path (updateDecorLit) is what actually
+    // records it at the current playhead, same "at the current instant" idiom as
+    // applyWeatherAtPlayhead/updateObserver.
+    this.decorLitInput.addEventListener("input", () => this.updateDecorLit())
     // The single funnel for "the recording changed, a consumer composing this element (e.g. a
     // live <rr0-scene> preview) should resync" — refresh() (called after every mutation: shape
     // edits, drag, observer/time edits, duration) always ends in a timeupdate on the *nested*
@@ -1080,6 +1086,7 @@ export class UfoRecorderElement extends HTMLElement {
     this.syncAppearanceFromTimeline()
     this.syncObserverFromTimeline()
     this.syncWeatherFromTimeline()
+    this.syncDecorLitFromTimeline()
     this.updateAppearanceFieldsDisabledState()
     this.ufoElement.selectedSourceIds = this.selectedSourceIds
     // Disabled once deleting the whole selection would leave nothing behind (a recording always
@@ -1308,10 +1315,12 @@ export class UfoRecorderElement extends HTMLElement {
     this.syncDecorFields()
   }
 
-  /** Writes the East/North/Heading/Lit fields back onto the currently selected decor object —
+  /** Writes the East/North/Heading/Name/URL fields back onto the currently selected decor object —
    * "spread and overwrite one field" style, same as onDragPointerMove's shape-bounds edits (see
    * that method's own doc comment) — replacing the whole decor array with a new one (not mutating
-   * the existing entry in place) for the same setDecor reference-equality reason as addDecor. */
+   * the existing entry in place) for the same setDecor reference-equality reason as addDecor.
+   * `lit` is deliberately NOT touched here — see updateDecorLit, its own dedicated write path now
+   * that it's keyframed over time rather than a plain static field. */
   private updateDecor(): void {
     if (this.currentDecorId === undefined) return
     const sighting = this.ufoElement.sighting
@@ -1324,12 +1333,32 @@ export class UfoRecorderElement extends HTMLElement {
             eastM: Number(this.decorEastInput.value),
             northM: Number(this.decorNorthInput.value),
             headingDeg,
-            lit: this.decorLitInput.checked,
             sightingUrl: this.stringOrUndefined(this.decorSightingUrlInput.value)
           }
         : d
     )
     this.decorSelect.options[this.decorSelect.selectedIndex]!.textContent = this.decorLabel(sighting.decor.find(d => d.id === this.currentDecorId)!)
+    this.ufoElement.refresh()
+  }
+
+  /** Records the Lit checkbox at the current playhead as a litKeyframes entry — same "at the
+   * current instant" idiom as applyWeatherAtPlayhead/updateObserver, and the same playing-state
+   * bailout (merely scrubbing/playing must never itself write a keyframe). Replaces any existing
+   * keyframe at exactly this instant rather than accumulating duplicates (same "re-recording the
+   * same instant overwrites, doesn't pile up" behavior ObserverTrack.addKeyframe gives for free —
+   * this is the plain-array equivalent, since a single boolean doesn't warrant a full Track
+   * class, see litKeyframes' own doc comment). */
+  private updateDecorLit(): void {
+    if (this.currentDecorId === undefined) return
+    if (this.ufoElement.playbackState === "playing") return
+    const sighting = this.ufoElement.sighting
+    const t = this.ufoElement.currentTime
+    const lit = this.decorLitInput.checked
+    sighting.decor = sighting.decor.map(d => {
+      if (d.id !== this.currentDecorId) return d
+      const litKeyframes = [...(d.litKeyframes ?? []).filter(k => k.t !== t), { t, lit }].sort((a, b) => a.t - b.t)
+      return { ...d, litKeyframes }
+    })
     this.ufoElement.refresh()
   }
 
@@ -1369,8 +1398,21 @@ export class UfoRecorderElement extends HTMLElement {
     this.decorEastInput.value = String(decor?.eastM ?? 0)
     this.decorNorthInput.value = String(decor?.northM ?? 0)
     this.decorHeadingInput.value = String(decor?.headingDeg ?? 0)
-    this.decorLitInput.checked = decor?.lit ?? false
+    this.decorLitInput.checked = decor ? resolveDecorLitAt(decor, this.ufoElement.currentTime) : false
     this.decorSightingUrlInput.value = decor?.sightingUrl ?? ""
+  }
+
+  /** Keeps the Lit checkbox honest as the playhead moves or a different keyframe region is
+   * scrubbed to — same role/timing and the same playing-state bailout as
+   * syncWeatherFromTimeline/syncObserverFromTimeline. Skips while focused, same "don't fight
+   * active interaction" reasoning (a checkbox doesn't have in-progress typed text to clobber, but
+   * an active toggle mid-click could otherwise flicker back to its pre-click state here). */
+  private syncDecorLitFromTimeline(): void {
+    if (this.ufoElement.playbackState === "playing") return
+    if (this.shadow.activeElement === this.decorLitInput) return
+    const decor = this.ufoElement.sighting.decor.find(d => d.id === this.currentDecorId)
+    if (!decor) return
+    this.decorLitInput.checked = resolveDecorLitAt(decor, this.ufoElement.currentTime)
   }
 
   private updatePresetButtons(): void {

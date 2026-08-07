@@ -25,6 +25,7 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     setWeather(): void {}
     setDecor(): void {}
     updateDecorAnchoring(): void {}
+    updateDecorLitState(): void {}
     pickBodyAt(): undefined {
       return undefined
     }
@@ -2762,7 +2763,7 @@ describe("UfoRecorderElement decor group", () => {
     expect((shadow.getElementById("decorEast") as HTMLInputElement).disabled).toBe(false)
   })
 
-  it("writes East/North/Heading/Lit edits back onto the selected decor object", () => {
+  it("writes East/North/Heading edits back onto the selected decor object", () => {
     const element = mount()
     const shadow = element.shadowRoot!
     ;(shadow.getElementById("add-decor") as HTMLButtonElement).click()
@@ -2770,7 +2771,6 @@ describe("UfoRecorderElement decor group", () => {
     const eastInput = shadow.getElementById("decorEast") as HTMLInputElement
     const northInput = shadow.getElementById("decorNorth") as HTMLInputElement
     const headingInput = shadow.getElementById("decorHeading") as HTMLInputElement
-    const litInput = shadow.getElementById("decorLit") as HTMLInputElement
 
     eastInput.value = "12.5"
     eastInput.dispatchEvent(new Event("input"))
@@ -2778,11 +2778,54 @@ describe("UfoRecorderElement decor group", () => {
     northInput.dispatchEvent(new Event("input"))
     headingInput.value = "90"
     headingInput.dispatchEvent(new Event("input"))
+
+    const [decor] = element.sightingData.decor!
+    expect(decor).toMatchObject({ eastM: 12.5, northM: -4, headingDeg: 90 })
+  })
+
+  it("records the Lit checkbox as a keyframe at the current playhead, not a plain static field", () => {
+    const element = mount()
+    const shadow = element.shadowRoot!
+    const durationInput = shadow.getElementById("durationSeconds") as HTMLInputElement
+    durationInput.value = "10"
+    durationInput.dispatchEvent(new Event("input"))
+    ;(shadow.getElementById("add-decor") as HTMLButtonElement).click()
+    const litInput = shadow.getElementById("decorLit") as HTMLInputElement
+
     litInput.checked = true
     litInput.dispatchEvent(new Event("input"))
 
     const [decor] = element.sightingData.decor!
-    expect(decor).toMatchObject({ eastM: 12.5, northM: -4, headingDeg: 90, lit: true })
+    expect(decor.litKeyframes).toEqual([{ t: 0, lit: true }])
+  })
+
+  it("resyncs the Lit checkbox from the resolved value as the playhead moves", () => {
+    const element = mount()
+    const shadow = element.shadowRoot!
+    const durationInput = shadow.getElementById("durationSeconds") as HTMLInputElement
+    durationInput.value = "10"
+    durationInput.dispatchEvent(new Event("input"))
+    ;(shadow.getElementById("add-decor") as HTMLButtonElement).click()
+    const litInput = shadow.getElementById("decorLit") as HTMLInputElement
+    litInput.checked = true
+    litInput.dispatchEvent(new Event("input"))
+
+    const seekInput = shadow.getElementById("seek") as HTMLInputElement
+    seekInput.value = "5000"
+    seekInput.dispatchEvent(new Event("input"))
+    litInput.checked = false
+    litInput.dispatchEvent(new Event("input"))
+
+    expect(litInput.checked).toBe(false)
+    seekInput.value = "0"
+    seekInput.dispatchEvent(new Event("input"))
+    expect(litInput.checked).toBe(true)
+
+    const [decor] = element.sightingData.decor!
+    expect(decor.litKeyframes).toEqual([
+      { t: 0, lit: true },
+      { t: 5000, lit: false }
+    ])
   })
 
   it("deletes the selected decor object and falls back to whichever one remains, or none", () => {

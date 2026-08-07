@@ -23,6 +23,7 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     setWeather(): void {}
     setDecor(): void {}
     updateDecorAnchoring(): void {}
+    updateDecorLitState(): void {}
     pickBodyAt(): undefined {
       return undefined
     }
