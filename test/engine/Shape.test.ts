@@ -1,29 +1,22 @@
 import { describe, expect, it } from "vitest"
-import { createOval, createShape, createSaucer, createTriangle, lerpShape } from "../../src/engine/shape/Shape.js"
+import { createCustomPolygon, createOval, createPolygon, createShape, lerpShape } from "../../src/engine/shape/Shape.js"
 
 describe("shape presets", () => {
-  it("createSaucer produces a closed polygon spanning the given bounds", () => {
-    const shape = createSaucer({ x: 0, y: 0, width: 40, height: 20 }, "#fff")
+  it("createCustomPolygon produces an editable 4-point quad spanning the given bounds", () => {
+    const shape = createCustomPolygon({ x: 0, y: 0, width: 40, height: 20 }, "#fff")
     expect(shape.kind).toBe("polygon")
-    expect(shape.points.length).toBeGreaterThanOrEqual(6)
-    const xs = shape.points.map(p => p.x)
-    const ys = shape.points.map(p => p.y)
-    expect(Math.min(...xs)).toBe(0)
-    expect(Math.max(...xs)).toBe(40)
-    expect(Math.min(...ys)).toBe(0)
-    expect(Math.max(...ys)).toBe(20)
-  })
-
-  it("createTriangle produces a 3-point polygon", () => {
-    const shape = createTriangle({ x: 0, y: 0, width: 30, height: 10 }, "#fff")
-    expect(shape.kind).toBe("polygon")
-    expect(shape.points).toHaveLength(3)
+    expect(shape.points).toEqual([
+      { x: 0, y: 0 },
+      { x: 40, y: 0 },
+      { x: 40, y: 20 },
+      { x: 0, y: 20 }
+    ])
   })
 
   it("createShape applies the requested appearance on top of the preset geometry", () => {
     const shape = createShape(
       { x: 5, y: 5, width: 10, height: 10 },
-      { presetId: "triangle", color: "#ff0000", transparency: 0.4, haloScale: 2 }
+      { presetId: "polygon", color: "#ff0000", transparency: 0.4, haloScale: 2 }
     )
     expect(shape.kind).toBe("polygon")
     expect(shape.color).toBe("#ff0000")
@@ -60,8 +53,16 @@ describe("lerpShape", () => {
   })
 
   it("blends polygon points vertex-by-vertex when both shapes have the same point count", () => {
-    const from = createTriangle({ x: 0, y: 0, width: 10, height: 10 })
-    const to = createTriangle({ x: 0, y: 0, width: 20, height: 20 })
+    const trianglePoints = [
+      { x: 0, y: 0 },
+      { x: 10, y: 5 },
+      { x: 0, y: 10 }
+    ]
+    const from = createPolygon({ x: 0, y: 0, width: 10, height: 10 }, trianglePoints)
+    const to = createPolygon(
+      { x: 0, y: 0, width: 20, height: 20 },
+      trianglePoints.map(p => ({ x: p.x * 2, y: p.y * 2 }))
+    )
 
     const mid = lerpShape(from, to, 0.5)
 
@@ -75,7 +76,14 @@ describe("lerpShape", () => {
 
   it("holds from's outline when shape kinds differ, still blending shared fields", () => {
     const from = createOval({ x: 0, y: 0, width: 10, height: 10 })
-    const to = createSaucer({ x: 0, y: 0, width: 10, height: 10 })
+    const to = createPolygon({ x: 0, y: 0, width: 10, height: 10 }, [
+      { x: 0, y: 0 },
+      { x: 10, y: 0 },
+      { x: 10, y: 10 },
+      { x: 0, y: 10 },
+      { x: 5, y: 12 },
+      { x: 0, y: 10 }
+    ])
 
     const mid = lerpShape(from, to, 0.5)
 
@@ -84,8 +92,21 @@ describe("lerpShape", () => {
   })
 
   it("holds from's outline when polygons have a different point count", () => {
-    const from = createTriangle({ x: 0, y: 0, width: 10, height: 10 })
-    const to = createSaucer({ x: 0, y: 0, width: 10, height: 10 })
+    const from = createPolygon({ x: 0, y: 0, width: 10, height: 10 }, [
+      { x: 0, y: 0 },
+      { x: 10, y: 5 },
+      { x: 0, y: 10 }
+    ])
+    const to = createPolygon({ x: 0, y: 0, width: 10, height: 10 }, [
+      { x: 0, y: 0 },
+      { x: 10, y: 0 },
+      { x: 10, y: 10 },
+      { x: 0, y: 10 },
+      { x: 5, y: 12 },
+      { x: 0, y: 10 },
+      { x: 2, y: 2 },
+      { x: 8, y: 2 }
+    ])
 
     const mid = lerpShape(from, to, 0.5)
 

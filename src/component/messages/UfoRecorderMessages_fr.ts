@@ -2,8 +2,11 @@ import type { UfoRecorderMessages } from "./UfoRecorderMessages.js"
 
 export const ufoRecorderMessages_fr: UfoRecorderMessages = {
   oval: "Ovale",
-  saucer: "Soucoupe",
-  triangle: "Triangle",
+  polygon: "Polygone",
+  addVertex: "Ajouter un sommet",
+  deleteVertex: "Supprimer le sommet",
+  notAPolygon: "Sélectionnez une seule forme polygonale",
+  tooFewVertices: "Une forme a besoin d'au moins 3 points",
   color: "Couleur",
   transparency: "Transparence",
   halo: "Halo",

@@ -234,3 +234,158 @@ describe("ShapeGroup", () => {
     expect(rotated[0].shape.angle).toBeCloseTo(1.2 - Math.PI / 2)
   })
 })
+
+describe("vertexPointsFor / hitTestVertex", () => {
+  it("places vertices at bounds-origin + point, unrotated", () => {
+    const shape = createPolygon({ x: 10, y: 20, width: 100, height: 50 }, [
+      { x: 0, y: 0 },
+      { x: 100, y: 0 },
+      { x: 50, y: 50 }
+    ])
+    const points = ShapeHandles.vertexPointsFor(shape)
+    expect(points).toEqual([
+      { x: 10, y: 20 },
+      { x: 110, y: 20 },
+      { x: 60, y: 70 }
+    ])
+  })
+
+  it("rotates vertex positions around the shape's center at a non-zero angle", () => {
+    const shape = {
+      ...createPolygon({ x: 0, y: 0, width: 100, height: 50 }, [
+        { x: 0, y: 0 },
+        { x: 100, y: 0 },
+        { x: 50, y: 50 }
+      ]),
+      angle: Math.PI / 2
+    }
+    // Center is (50,25); same rotateAround formula the already-verified "e" handle case above
+    // uses (x' = cx - dy, y' = cy + dx at angle=PI/2) — the first vertex (0,0), dx=-50/dy=-25,
+    // lands at (75,-25).
+    const points = ShapeHandles.vertexPointsFor(shape)
+    expect(points[0].x).toBeCloseTo(75)
+    expect(points[0].y).toBeCloseTo(-25)
+  })
+
+  it("hits the nearest vertex within tolerance", () => {
+    const shape = createPolygon({ x: 0, y: 0, width: 100, height: 50 }, [
+      { x: 0, y: 0 },
+      { x: 100, y: 0 },
+      { x: 50, y: 50 }
+    ])
+    expect(ShapeHandles.hitTestVertex(shape, { x: 2, y: 1 })).toBe(0)
+    expect(ShapeHandles.hitTestVertex(shape, { x: 99, y: 2 })).toBe(1)
+    expect(ShapeHandles.hitTestVertex(shape, { x: 51, y: 49 })).toBe(2)
+  })
+
+  it("misses when the point is outside every vertex's tolerance", () => {
+    const shape = createPolygon({ x: 0, y: 0, width: 100, height: 50 }, [
+      { x: 0, y: 0 },
+      { x: 100, y: 0 },
+      { x: 50, y: 50 }
+    ])
+    expect(ShapeHandles.hitTestVertex(shape, { x: 50, y: 25 })).toBeUndefined()
+  })
+})
+
+describe("moveVertex", () => {
+  it("re-fits bounds tightly around the new point set and rebases every point onto it, keeping each point's real (absolute) position unchanged", () => {
+    const shape = createPolygon({ x: 0, y: 0, width: 100, height: 50 }, [
+      { x: 0, y: 0 },
+      { x: 100, y: 0 },
+      { x: 50, y: 50 }
+    ])
+    // Vertex 0 moves from local (0,0) to local (10,5) (still canvas (10,5), since bounds start at
+    // the origin) — the tightest box around {(10,5),(100,0),(50,50)} is x:[10,100], y:[0,50].
+    const moved = ShapeHandles.moveVertex(shape, 0, { x: 10, y: 5 })
+    expect(moved.bounds).toEqual({ x: 10, y: 0, width: 90, height: 50 })
+    // Rebased onto the new bounds origin (10,0) — same real canvas positions as before/the drag target.
+    expect(moved.points[0]).toEqual({ x: 0, y: 5 })
+    expect(moved.points[1]).toEqual({ x: 90, y: 0 })
+    expect(moved.points[2]).toEqual({ x: 40, y: 50 })
+  })
+
+  it("grows bounds when a vertex is dragged outside the shape's original box — the real bug this fixes: the selection outline/handles must track the actual outline, not a stale box", () => {
+    const shape = createPolygon({ x: 100, y: 100, width: 100, height: 50 }, [
+      { x: 0, y: 0 },
+      { x: 100, y: 0 },
+      { x: 100, y: 50 },
+      { x: 0, y: 50 }
+    ])
+    // Drag the top-left corner (canvas (100,100)) further up-left, to canvas (70, 80) — 30/20px
+    // outside the shape's own original bounding box.
+    const moved = ShapeHandles.moveVertex(shape, 0, { x: 70, y: 80 })
+    expect(moved.bounds).toEqual({ x: 70, y: 80, width: 130, height: 70 })
+    // The dragged vertex itself now sits exactly at the new bounds' own origin.
+    expect(moved.points[0]).toEqual({ x: 0, y: 0 })
+    // Every other vertex's real canvas position is unchanged — only rebased onto the new origin.
+    const canvasPoints = ShapeHandles.vertexPointsFor(moved)
+    expect(canvasPoints[1]).toEqual({ x: 200, y: 100 })
+    expect(canvasPoints[2]).toEqual({ x: 200, y: 150 })
+    expect(canvasPoints[3]).toEqual({ x: 100, y: 150 })
+  })
+
+  it("accounts for the shape's own rotation when converting the pointer to local space", () => {
+    const shape = { ...createPolygon({ x: 0, y: 0, width: 100, height: 50 }, [{ x: 0, y: 0 }]), angle: Math.PI / 2 }
+    // Dragging vertex 0 to its own current canvas position should round-trip back to (0,0).
+    const canvasPoint = ShapeHandles.vertexPointsFor(shape)[0]
+    const moved = ShapeHandles.moveVertex(shape, 0, canvasPoint)
+    expect(moved.points[0].x).toBeCloseTo(0)
+    expect(moved.points[0].y).toBeCloseTo(0)
+  })
+})
+
+describe("insertVertexNear", () => {
+  it("splits the nearest edge, inserting the new point right after its start index", () => {
+    const shape = createPolygon({ x: 0, y: 0, width: 100, height: 50 }, [
+      { x: 0, y: 0 },
+      { x: 100, y: 0 },
+      { x: 50, y: 50 }
+    ])
+    // Midpoint of the top edge (points 0->1).
+    const updated = ShapeHandles.insertVertexNear(shape, { x: 50, y: 0 })
+    expect(updated.points).toHaveLength(4)
+    expect(updated.points[1]).toEqual({ x: 50, y: 0 })
+    expect(updated.points[0]).toEqual({ x: 0, y: 0 })
+    expect(updated.points[2]).toEqual({ x: 100, y: 0 })
+  })
+
+  it("wraps around: a point nearest the closing edge (last point back to first) inserts at the end", () => {
+    const shape = createPolygon({ x: 0, y: 0, width: 100, height: 50 }, [
+      { x: 0, y: 0 },
+      { x: 100, y: 0 },
+      { x: 50, y: 50 }
+    ])
+    // Midpoint of the closing edge (points 2->0).
+    const updated = ShapeHandles.insertVertexNear(shape, { x: 25, y: 25 })
+    expect(updated.points).toHaveLength(4)
+    expect(updated.points[3]).toEqual({ x: 25, y: 25 })
+  })
+})
+
+describe("deleteVertex", () => {
+  it("removes the targeted vertex", () => {
+    const shape = createPolygon({ x: 0, y: 0, width: 100, height: 50 }, [
+      { x: 0, y: 0 },
+      { x: 100, y: 0 },
+      { x: 50, y: 50 },
+      { x: 0, y: 50 }
+    ])
+    const updated = ShapeHandles.deleteVertex(shape, 1)
+    expect(updated.points).toEqual([
+      { x: 0, y: 0 },
+      { x: 50, y: 50 },
+      { x: 0, y: 50 }
+    ])
+  })
+
+  it("refuses to drop below MIN_POLYGON_VERTICES, returning the shape unchanged", () => {
+    const shape = createPolygon({ x: 0, y: 0, width: 100, height: 50 }, [
+      { x: 0, y: 0 },
+      { x: 100, y: 0 },
+      { x: 50, y: 50 }
+    ])
+    const updated = ShapeHandles.deleteVertex(shape, 0)
+    expect(updated).toBe(shape)
+  })
+})

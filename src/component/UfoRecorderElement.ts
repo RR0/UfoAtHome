@@ -4,8 +4,8 @@ import { SceneElement, registerScene, SCENE_ELEMENT_NAME } from "./SceneElement.
 import { Recorder } from "../engine/record/Recorder.js"
 import { RafSamplingClock } from "../engine/record/SamplingClock.js"
 import { createShape, moveShapeTo } from "../engine/shape/Shape.js"
-import type { Appearance, Shape, ShapeBounds, ShapePresetId } from "../engine/shape/Shape.js"
-import { ShapeHandles, ShapeGroup, MIN_SHAPE_SIZE } from "../engine/shape/ShapeHandles.js"
+import type { Appearance, PolygonShape, Shape, ShapeBounds, ShapePresetId } from "../engine/shape/Shape.js"
+import { ShapeHandles, ShapeGroup, MIN_SHAPE_SIZE, MIN_POLYGON_VERTICES } from "../engine/shape/ShapeHandles.js"
 import type { HandleId } from "../engine/shape/ShapeHandles.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
 import type { PrecipitationType, Weather } from "../engine/model/Weather.js"
@@ -40,18 +40,17 @@ const ARROW_KEYS = new Set(["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"])
  * moveOrResizeSelectedShape. Small enough for fine nudges, still visible in one press. */
 const ARROW_KEY_STEP_PX = 4
 const DEFAULT_SOURCE_ID = "ufo-1"
-const PRESET_IDS: ShapePresetId[] = ["oval", "saucer", "triangle"]
+const PRESET_IDS: ShapePresetId[] = ["oval", "polygon"]
 const DEFAULT_APPEARANCE: Appearance = { presetId: "oval", color: "#39ff14", transparency: 0, haloScale: 1.5 }
 
 /** Best-effort reverse mapping from a recorded/loaded shape back to a preset id, so the preset
- * buttons' pressed-state stays honest after scrubbing to or selecting a shape. Cosmetic only —
- * an unrecognized polygon (neither 3 nor 8 points) just leaves the current selection alone;
- * this never affects color/transparency/haloScale syncing. */
-function presetIdForShape(shape: Shape): ShapePresetId | undefined {
-  if (shape.kind === "oval") return "oval"
-  if (shape.points.length === 3) return "triangle"
-  if (shape.points.length === 8) return "saucer"
-  return undefined
+ * buttons' pressed-state stays honest after scrubbing to or selecting a shape. Every polygon —
+ * whether freshly created from the "Polygon" preset, reshaped via vertex editing, or loaded from
+ * older data that still has the former fixed "Saucer"/"Triangle" presets' own 8/3-point geometry
+ * — maps to "polygon" now that those presets are gone; this never affects color/transparency/
+ * haloScale syncing, only which preset button highlights. */
+function presetIdForShape(shape: Shape): ShapePresetId {
+  return shape.kind === "oval" ? "oval" : "polygon"
 }
 
 /**
@@ -102,6 +101,8 @@ export class UfoRecorderElement extends HTMLElement {
   private readonly contextBringToFrontButton: HTMLButtonElement
   private readonly contextSendToBackButton: HTMLButtonElement
   private readonly contextDeleteButton: HTMLButtonElement
+  private readonly contextAddVertexButton: HTMLButtonElement
+  private readonly contextDeleteVertexButton: HTMLButtonElement
   private readonly decorContextMenu: HTMLElement
   private readonly contextViewTestimonyButton: HTMLButtonElement
   // External playback row — see the constructor's ufoElement.showToolbar comment for why this
@@ -244,9 +245,16 @@ export class UfoRecorderElement extends HTMLElement {
    * SHAPE context menu's own currentSourceId) currently targets — set by onContextMenu, read by
    * viewWitnessTestimony(). Only ever set while decorContextMenu is actually open. */
   private contextMenuDecorId?: string
+  /** The canvas-space point the SHAPE context menu was opened at — read by
+   * addVertexAtContextMenu/deleteVertexAtContextMenu (both take canvas-space points, same as
+   * every other ShapeHandles vertex method, and convert to the shape's own local frame
+   * internally). Only meaningful while contextMenu is actually open on a single polygon
+   * selection. */
+  private contextMenuPoint?: { x: number; y: number }
 
   /** Set while the user is dragging the selection's body (move), a single shape's own handle
-   * (resize/rotate — only reachable when exactly one shape is selected), or the shared bounding
+   * (resize/rotate/vertex — only reachable when exactly one shape is selected; "vertex" further
+   * only when that shape is a polygon, see ShapeHandles.hitTestVertex), or the shared bounding
    * box of a multi-selection ("group-resize"/"group-rotate", both handled via a ShapeGroup
    * instance so the member list doesn't need re-passing on every pointermove) — see
    * beginDrag/onDragPointerMove/endDrag. Mutually exclusive with cameraDragState (a pointerdown
@@ -255,6 +263,7 @@ export class UfoRecorderElement extends HTMLElement {
   private dragState?:
     | { kind: "move"; sources: Array<{ sourceId: string; original: Shape }>; startPointer: { x: number; y: number } }
     | { kind: "resize" | "rotate"; sourceId: string; original: Shape; handle: HandleId; startPointer: { x: number; y: number } }
+    | { kind: "vertex"; sourceId: string; original: PolygonShape; vertexIndex: number }
     | { kind: "group-resize"; group: ShapeGroup; handle: Exclude<HandleId, "rotate"> }
     | { kind: "group-rotate"; group: ShapeGroup; startPointer: { x: number; y: number } }
 
@@ -340,8 +349,7 @@ export class UfoRecorderElement extends HTMLElement {
     this.presetsGroup = this.shadow.getElementById("presets-group")!
     this.presetButtons = {
       oval: this.shadow.getElementById("preset-oval") as HTMLButtonElement,
-      saucer: this.shadow.getElementById("preset-saucer") as HTMLButtonElement,
-      triangle: this.shadow.getElementById("preset-triangle") as HTMLButtonElement
+      polygon: this.shadow.getElementById("preset-polygon") as HTMLButtonElement
     }
     this.colorInput = this.shadow.getElementById("color") as HTMLInputElement
     this.transparencyInput = this.shadow.getElementById("transparency") as HTMLInputElement
@@ -356,6 +364,8 @@ export class UfoRecorderElement extends HTMLElement {
     this.contextBringToFrontButton = this.shadow.getElementById("context-bring-to-front") as HTMLButtonElement
     this.contextSendToBackButton = this.shadow.getElementById("context-send-to-back") as HTMLButtonElement
     this.contextDeleteButton = this.shadow.getElementById("context-delete") as HTMLButtonElement
+    this.contextAddVertexButton = this.shadow.getElementById("context-add-vertex") as HTMLButtonElement
+    this.contextDeleteVertexButton = this.shadow.getElementById("context-delete-vertex") as HTMLButtonElement
     this.decorContextMenu = this.shadow.getElementById("decor-context-menu")!
     this.contextViewTestimonyButton = this.shadow.getElementById("context-view-testimony") as HTMLButtonElement
     this.playPauseButton = this.shadow.getElementById("play-pause") as HTMLButtonElement
@@ -471,6 +481,8 @@ export class UfoRecorderElement extends HTMLElement {
       this.hideContextMenu()
       this.deleteShape()
     })
+    this.contextAddVertexButton.addEventListener("click", () => this.addVertexAtContextMenu())
+    this.contextDeleteVertexButton.addEventListener("click", () => this.deleteVertexAtContextMenu())
     this.contextViewTestimonyButton.addEventListener("click", () => this.viewWitnessTestimony())
     // Syncs synchronously right after each call rather than waiting for the next "timeupdate" —
     // play()/toggleLoop() take effect immediately but the first actual frame/tick (what
@@ -1048,6 +1060,9 @@ export class UfoRecorderElement extends HTMLElement {
   }
 
   private setAppearance(appearance: Partial<Appearance>): void {
+    // A preset button click sets `presetId` — that's the one case actually meant to swap the
+    // shape's own kind/geometry (see buildAppearanceShape's own doc comment on why this matters).
+    const changingPreset = "presetId" in appearance
     this.currentAppearance = { ...this.currentAppearance, ...appearance }
     this.updatePresetButtons()
     // While actively recording, a toolbar change only seeds the *next* take (unchanged,
@@ -1055,27 +1070,39 @@ export class UfoRecorderElement extends HTMLElement {
     // duration. While playing, the playhead is a moving target, not a specific instant to
     // edit — editing here would just get stomped by the next timeupdate-driven resync.
     if (this.isRecording || this.ufoElement.playbackState === "playing") return
-    this.applyAppearanceAtPlayhead()
+    this.applyAppearanceAtPlayhead(undefined, changingPreset)
   }
 
   /** Writes (or updates) a keyframe for the current source at the exact instant the seek bar
    * is scrubbed to, so a post-hoc appearance edit — not just a live recording sample —
    * actually persists into the timeline. `bounds` lets addShape() stagger a brand-new
-   * shape's starting position instead of stacking it on an existing one. */
-  private applyAppearanceAtPlayhead(bounds?: ShapeBounds): void {
+   * shape's starting position instead of stacking it on an existing one. `changingPreset`
+   * defaults to true (full rebuild) since every other caller (initial keyframe, addShape) has no
+   * existing shape to preserve geometry from anyway — see buildAppearanceShape. */
+  private applyAppearanceAtPlayhead(bounds?: ShapeBounds, changingPreset = true): void {
     const timeline = this.ufoElement.sighting.timeline
     const t = this.ufoElement.currentTime
     const existing = timeline.getInterpolatedShapeAt(t, this.currentSourceId)
-    const shape = this.buildAppearanceShape(bounds ?? existing?.bounds ?? this.defaultBounds(), existing)
+    const shape = this.buildAppearanceShape(bounds ?? existing?.bounds ?? this.defaultBounds(), existing, changingPreset)
     timeline.addKeyframe(t, [{ sourceId: this.currentSourceId, shape }])
     this.ufoElement.refresh()
   }
 
-  /** Rebuilds via createShape (not by patching `preserve` in place) so a preset-button change
-   * correctly swaps kind/points too, not just color/transparency/haloScale — while still
-   * carrying forward angle/title/selected from whatever shape was already there, so an
-   * appearance-only edit can't silently erase an existing rotation or title. */
-  private buildAppearanceShape(bounds: ShapeBounds, preserve?: Shape): Shape {
+  /** `changingPreset` (only ever false from setAppearance's own color/transparency/haloScale
+   * inputs, never a preset-button click) skips createShape entirely and just overlays the new
+   * appearance fields onto `preserve` as-is — real bug this fixes: createShape ALWAYS rebuilds
+   * kind/points fresh from SHAPE_PRESETS[presetId], so a plain color edit on a polygon that had
+   * been custom-reshaped (vertices dragged/added/deleted via ShapeHandles, see
+   * UfoRecorderElement.addVertexAtContextMenu/deleteVertexAtContextMenu/onDragPointerMove's
+   * "vertex" case) silently snapped it back to that preset's own default starting geometry every
+   * time, discarding the edit. A real preset-button click (changingPreset=true) still rebuilds via
+   * createShape as before — that IS meant to replace kind/points — carrying forward angle/title/
+   * selected from whatever shape was already there either way, so switching presets can't
+   * silently erase an existing rotation or title. */
+  private buildAppearanceShape(bounds: ShapeBounds, preserve?: Shape, changingPreset = true): Shape {
+    if (preserve && !changingPreset) {
+      return { ...preserve, color: this.currentAppearance.color, transparency: this.currentAppearance.transparency, haloScale: this.currentAppearance.haloScale }
+    }
     const shape = createShape(bounds, this.currentAppearance)
     return preserve ? { ...shape, angle: preserve.angle, title: preserve.title, selected: preserve.selected } : shape
   }
@@ -1141,7 +1168,7 @@ export class UfoRecorderElement extends HTMLElement {
     )
     if (!shape) return
     this.currentAppearance = {
-      presetId: presetIdForShape(shape) ?? this.currentAppearance.presetId,
+      presetId: presetIdForShape(shape),
       color: shape.color,
       transparency: shape.transparency,
       haloScale: shape.haloScale
@@ -1492,8 +1519,9 @@ export class UfoRecorderElement extends HTMLElement {
   private applyMessages(messages: UfoRecorderMessages): void {
     this.messages = messages
     this.presetButtons.oval.textContent = messages.oval
-    this.presetButtons.saucer.textContent = messages.saucer
-    this.presetButtons.triangle.textContent = messages.triangle
+    this.presetButtons.polygon.textContent = messages.polygon
+    this.contextAddVertexButton.textContent = messages.addVertex
+    this.contextDeleteVertexButton.textContent = messages.deleteVertex
     this.labelColor.textContent = messages.color
     this.labelTransparency.textContent = messages.transparency
     this.labelHalo.textContent = messages.halo
@@ -1617,6 +1645,17 @@ export class UfoRecorderElement extends HTMLElement {
       }
     } else {
       const selected = timeline.getInterpolatedShapeAt(t, this.currentSourceId)
+      // Vertex handles are checked before the bbox ones: they're drawn on top (see
+      // CanvasRenderer.paintSelectionHandles) and a polygon corner can sit close enough to a bbox
+      // handle (e.g. a rectangle-derived "Polygon" preset, whose corners start exactly ON the bbox
+      // corners) that whichever is checked first would otherwise always win.
+      const vertexIndex = selected?.kind === "polygon" ? ShapeHandles.hitTestVertex(selected, point) : undefined
+      if (selected?.kind === "polygon" && vertexIndex !== undefined) {
+        if (playing) return // don't fight the player's per-frame repaint
+        this.dragState = { kind: "vertex", sourceId: this.currentSourceId, original: selected, vertexIndex }
+        this.startDragListening()
+        return
+      }
       const handle = selected && ShapeHandles.hitTestHandle(selected, point)
       if (selected && handle) {
         if (playing) return // don't fight the player's per-frame repaint
@@ -1717,12 +1756,24 @@ export class UfoRecorderElement extends HTMLElement {
     const point = this.canvasPointFromEvent(event)
     if (!point) return
     const timeline = this.ufoElement.sighting.timeline
-    const hit = timeline.hitTest(this.ufoElement.currentTime, point.x, point.y)
+    const t = this.ufoElement.currentTime
+    // Checked before the plain bounds-based hitTest below: a polygon vertex often sits exactly ON
+    // (or, after real display/canvas-scale rounding, a hair outside) the shape's own bounding box
+    // — e.g. every corner of the default "Polygon" preset — where hitTest's box-inclusion check
+    // has zero margin for error. hitTestVertex's own generous circular tolerance is what makes
+    // right-clicking a vertex to delete it actually work reliably at the shape's own edges/
+    // corners, not just its interior. Only checked against the current single selection, same
+    // scope onPointerDown's own vertex-hit-testing already has (you select a polygon before you
+    // can grab one of its handles, vertex or otherwise).
+    const selectedShape = this.selectedSourceIds.size === 1 ? timeline.getInterpolatedShapeAt(t, this.currentSourceId) : undefined
+    const hitVertex = selectedShape?.kind === "polygon" && ShapeHandles.hitTestVertex(selectedShape, point) !== undefined
+    const hit = hitVertex ? { sourceId: this.currentSourceId, shape: selectedShape! } : timeline.hitTest(t, point.x, point.y)
     if (hit) {
       // Same "don't collapse an already-selected member" rule as onPointerDown, so right-clicking
       // a shape that's part of the current multi-selection opens the menu for the whole selection.
       if (!this.selectedSourceIds.has(hit.sourceId)) this.selectUnit(hit.sourceId)
       this.currentSourceId = hit.sourceId
+      this.contextMenuPoint = point
       this.showContextMenu(event.clientX, event.clientY)
       return
     }
@@ -1776,11 +1827,27 @@ export class UfoRecorderElement extends HTMLElement {
 
     this.contextDeleteButton.disabled = this.deleteShapeButton.disabled
     this.contextDeleteButton.title = this.contextDeleteButton.disabled ? this.messages.onlyOneShape : ""
+
+    // Add/delete vertex only ever make sense for a single polygon selection — an oval has no
+    // points at all, and a multi-selection has no single outline to edit. Delete further needs
+    // the right-click to have actually landed near a real vertex (see contextMenuPoint's own doc
+    // comment) and enough points left that removing one wouldn't drop below MIN_POLYGON_VERTICES.
+    const currentShape = this.ufoElement.sighting.timeline.getInterpolatedShapeAt(this.ufoElement.currentTime, this.currentSourceId)
+    const isSinglePolygon = this.selectedSourceIds.size === 1 && currentShape?.kind === "polygon"
+    this.contextAddVertexButton.disabled = !isSinglePolygon
+    this.contextAddVertexButton.title = isSinglePolygon ? "" : this.messages.notAPolygon
+    const nearestVertex =
+      isSinglePolygon && this.contextMenuPoint ? ShapeHandles.hitTestVertex(currentShape, this.contextMenuPoint) : undefined
+    const tooFewVertices = isSinglePolygon && currentShape.points.length <= MIN_POLYGON_VERTICES
+    this.contextDeleteVertexButton.disabled = !isSinglePolygon || nearestVertex === undefined || tooFewVertices
+    this.contextDeleteVertexButton.title = !isSinglePolygon ? this.messages.notAPolygon : tooFewVertices ? this.messages.tooFewVertices : ""
+
     document.addEventListener("click", this.handleOutsideContextMenuClick)
   }
 
   private hideContextMenu(): void {
     this.contextMenu.hidden = true
+    this.contextMenuPoint = undefined
     document.removeEventListener("click", this.handleOutsideContextMenuClick)
   }
 
@@ -1821,6 +1888,39 @@ export class UfoRecorderElement extends HTMLElement {
     const decor = this.ufoElement.sighting.decor.find(d => d.id === this.contextMenuDecorId)
     this.hideDecorContextMenu()
     if (decor?.sightingUrl) void this.importFromUrl(decor.sightingUrl)
+  }
+
+  /** Right-click "Add vertex" — inserts a new point on whichever edge of the current single
+   * polygon selection is nearest to where the menu was opened (see ShapeHandles.insertVertexNear),
+   * splitting the outline at that spot. Reads contextMenuPoint before hideContextMenu() clears it. */
+  private addVertexAtContextMenu(): void {
+    const point = this.contextMenuPoint
+    this.hideContextMenu()
+    if (!point) return
+    const t = this.ufoElement.currentTime
+    const shape = this.ufoElement.sighting.timeline.getInterpolatedShapeAt(t, this.currentSourceId)
+    if (shape?.kind !== "polygon") return
+    const updated = ShapeHandles.insertVertexNear(shape, point)
+    this.ufoElement.sighting.timeline.addKeyframe(t, [{ sourceId: this.currentSourceId, shape: updated }])
+    this.ufoElement.refresh()
+  }
+
+  /** Right-click "Delete vertex" — removes whichever vertex the menu was opened nearest to.
+   * Re-derives the hit here (rather than caching an index found by showContextMenu) since that's
+   * cheap and keeps a single source of truth; the menu's own disabled state already guarantees a
+   * real hit existed when this became clickable at all. */
+  private deleteVertexAtContextMenu(): void {
+    const point = this.contextMenuPoint
+    this.hideContextMenu()
+    if (!point) return
+    const t = this.ufoElement.currentTime
+    const shape = this.ufoElement.sighting.timeline.getInterpolatedShapeAt(t, this.currentSourceId)
+    if (shape?.kind !== "polygon") return
+    const vertexIndex = ShapeHandles.hitTestVertex(shape, point)
+    if (vertexIndex === undefined) return
+    const updated = ShapeHandles.deleteVertex(shape, vertexIndex)
+    this.ufoElement.sighting.timeline.addKeyframe(t, [{ sourceId: this.currentSourceId, shape: updated }])
+    this.ufoElement.refresh()
   }
 
   /** Brings the whole selection to the front as a block, preserving the selected shapes' own
@@ -1924,6 +2024,10 @@ export class UfoRecorderElement extends HTMLElement {
     } else if (this.dragState.kind === "group-rotate") {
       const { group, startPointer } = this.dragState
       this.ufoElement.sighting.timeline.addKeyframe(t, group.rotate(point, startPointer))
+    } else if (this.dragState.kind === "vertex") {
+      const { sourceId, original, vertexIndex } = this.dragState
+      const shape = ShapeHandles.moveVertex(original, vertexIndex, point)
+      this.ufoElement.sighting.timeline.addKeyframe(t, [{ sourceId, shape }])
     } else {
       const { kind, sourceId, original, handle } = this.dragState
       const shape = kind === "resize" ? ShapeHandles.resizeShape(original, handle, point) : ShapeHandles.rotateShape(original, point)

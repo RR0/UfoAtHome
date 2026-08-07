@@ -4,6 +4,7 @@ import { RESIZE_HANDLE_IDS, ShapeHandles, type HandleId } from "../engine/shape/
 const CORNER_SIZE = 6
 const HALF_CORNER_SIZE = CORNER_SIZE / 2
 const HALO_BLUR_UNIT = 20
+const VERTEX_HANDLE_RADIUS = 4
 
 /**
  * Paints shapes onto a Canvas2D context, replacing DrawShape/OvalShape/
@@ -83,6 +84,21 @@ export class CanvasRenderer {
    * Figma/PowerPoint-style resize handles rather than rotating into diamonds. */
   private paintSelectionHandles(shape: Shape): void {
     this.paintHandleFrame(ShapeHandles.handlePointsFor(shape), { includeRotate: true })
+    // Vertex handles are drawn ON TOP of (in addition to, not instead of) the bbox resize/rotate
+    // handles above — the two are functionally distinct (bbox = scale the whole shape, vertex =
+    // reshape one corner) and Figma/Illustrator-style editors commonly show both kinds of handle
+    // at once, so there's no need to pick one over the other. A round marker (not the bbox
+    // handles' own square) keeps the two visually distinguishable at a glance.
+    if (shape.kind === "polygon") this.paintVertexHandles(shape)
+  }
+
+  private paintVertexHandles(shape: Shape & { kind: "polygon" }): void {
+    this.ctx.fillStyle = "#39f"
+    for (const point of ShapeHandles.vertexPointsFor(shape)) {
+      this.ctx.beginPath()
+      this.ctx.ellipse(point.x, point.y, VERTEX_HANDLE_RADIUS, VERTEX_HANDLE_RADIUS, 0, 0, 2 * Math.PI)
+      this.ctx.fill()
+    }
   }
 
   /** Thin outline only (no handle squares) — drawn for each individually-selected shape when a

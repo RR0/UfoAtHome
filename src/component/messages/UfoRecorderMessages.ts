@@ -3,8 +3,22 @@
  * via `loadUfoRecorderMessages`. */
 export interface UfoRecorderMessages {
   oval: string
-  saucer: string
-  triangle: string
+  /** The "Polygon" preset button — a plain quad, the starting point for a freeform shape (see
+   * Shape.ts's own createCustomPolygon doc comment). */
+  polygon: string
+  /** Right-click menu item, only enabled for a single polygon selection — see
+   * UfoRecorderElement.addVertexAtContextMenu. */
+  addVertex: string
+  /** Right-click menu item, only enabled when the click landed on a real vertex of a single
+   * polygon selection with more than MIN_POLYGON_VERTICES points — see
+   * UfoRecorderElement.deleteVertexAtContextMenu. */
+  deleteVertex: string
+  /** addVertex/deleteVertex's own disabled title when the selection isn't a single polygon shape
+   * (an oval, a multi-selection, or nothing selected at all). */
+  notAPolygon: string
+  /** deleteVertex's own disabled title when the polygon is already down to MIN_POLYGON_VERTICES
+   * points — removing one more would stop being a real shape. */
+  tooFewVertices: string
   color: string
   transparency: string
   halo: string
@@ -74,7 +88,7 @@ export interface UfoRecorderMessages {
   observationTimeHint: string
   /** Same as observationTimeHint but for the observation-end field (its own example time). */
   observationEndTimeHint: string
-  /** aria-label on the Oval/Saucer/Triangle preset button group. */
+  /** aria-label on the Oval/Polygon preset button group. */
   presetsGroupLabel: string
   witnessId: string
   witnessDirName: string

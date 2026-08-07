@@ -46,45 +46,31 @@ export function createPolygon(
   return { kind: "polygon", bounds, points, color, angle: 0, transparency: 0, haloScale: 0, selected: false }
 }
 
-/**
- * A lens/disc silhouette (classic "flying saucer" top-view outline), as a
- * fraction-of-bounds polygon — replaces AspectPanel's 3-layer dome+body+dome
- * shape compositing (ArcShape top/bottom + RectangleShape mid) with a single
- * preset shape, avoiding a Timeline/Recorder change to support multi-part
- * grouped shapes for this milestone.
- */
-export function createSaucer(bounds: ShapeBounds, color = "#39ff14"): PolygonShape {
-  const { width: w, height: h } = bounds
-  const points = [
-    { x: 0.5 * w, y: 0 },
-    { x: 0.8 * w, y: 0.25 * h },
-    { x: w, y: 0.5 * h },
-    { x: 0.8 * w, y: 0.75 * h },
-    { x: 0.5 * w, y: h },
-    { x: 0.2 * w, y: 0.75 * h },
-    { x: 0, y: 0.5 * h },
-    { x: 0.2 * w, y: 0.25 * h }
-  ]
-  return createPolygon(bounds, points, color)
-}
-
-/** Matches the original (unused in the applet's actual UI) createTriangleShape preset. */
-export function createTriangle(bounds: ShapeBounds, color = "#39ff14"): PolygonShape {
+/** A plain quad — the starting point for a freeform, arbitrary-vertex shape (a "cigare" or any
+ * other outline a fixed preset wouldn't cover) rather than a shape in its own right. Its 4
+ * corners are just as editable via ShapeHandles.moveVertex as any other polygon's points — vertex
+ * editing is a capability of every `kind: "polygon"` shape, not something special-cased to shapes
+ * created via this one preset; starting from a plain quad just gives more room to reshape from
+ * than a triangle would, with no other consequence — see ShapeHandles.insertVertexNear/
+ * deleteVertex for growing/shrinking the point count from there. (The project's own former fixed
+ * "Saucer"/"Triangle" presets were removed once this made them redundant — either shape, or any
+ * other outline, is now just a Polygon reshaped by hand.) */
+export function createCustomPolygon(bounds: ShapeBounds, color = "#39ff14"): PolygonShape {
   const { width: w, height: h } = bounds
   const points = [
     { x: 0, y: 0 },
-    { x: w, y: h / 2 },
+    { x: w, y: 0 },
+    { x: w, y: h },
     { x: 0, y: h }
   ]
   return createPolygon(bounds, points, color)
 }
 
-export type ShapePresetId = "oval" | "saucer" | "triangle"
+export type ShapePresetId = "oval" | "polygon"
 
 export const SHAPE_PRESETS: Record<ShapePresetId, (bounds: ShapeBounds, color?: string) => Shape> = {
   oval: createOval,
-  saucer: createSaucer,
-  triangle: createTriangle
+  polygon: createCustomPolygon
 }
 
 export interface Appearance {

@@ -90,8 +90,7 @@ export const html = `
   <div class="toolbar">
     <div class="presets" id="presets-group" role="group" aria-label="UFO shape">
       <button class="preset" id="preset-oval" type="button" data-preset="oval">Oval</button>
-      <button class="preset" id="preset-saucer" type="button" data-preset="saucer">Saucer</button>
-      <button class="preset" id="preset-triangle" type="button" data-preset="triangle">Triangle</button>
+      <button class="preset" id="preset-polygon" type="button" data-preset="polygon">Polygon</button>
     </div>
     <label><span id="label-color">Color</span> <input id="color" type="color" value="#39ff14"/></label>
     <label><span id="label-transparency">Transparency</span> <input id="transparency" type="range" min="0" max="1" step="0.05" value="0"/></label>
@@ -121,6 +120,9 @@ export const html = `
   <hr/>
   <button id="context-bring-to-front" type="button" role="menuitem">Bring to front</button>
   <button id="context-send-to-back" type="button" role="menuitem">Send to back</button>
+  <hr/>
+  <button id="context-add-vertex" type="button" role="menuitem">Add vertex</button>
+  <button id="context-delete-vertex" type="button" role="menuitem">Delete vertex</button>
   <hr/>
   <button id="context-delete" type="button" role="menuitem" class="context-delete">Delete</button>
 </div>

@@ -1,6 +1,7 @@
 import { describe, expect, it, afterEach, beforeAll, vi } from "vitest"
 import { register, ELEMENT_NAME } from "../../src/component/UfoRecorderElement.js"
 import type { UfoRecorderElement } from "../../src/component/UfoRecorderElement.js"
+import type { PolygonShape } from "../../src/engine/shape/Shape.js"
 
 register()
 
@@ -108,11 +109,11 @@ describe("UfoRecorderElement appearance toolbar", () => {
 
   it("clicking a preset button updates the appearance and its pressed state", () => {
     const element = mount()
-    const saucerButton = element.shadowRoot!.getElementById("preset-saucer") as HTMLButtonElement
-    saucerButton.click()
+    const polygonButton = element.shadowRoot!.getElementById("preset-polygon") as HTMLButtonElement
+    polygonButton.click()
 
-    expect(element.appearance.presetId).toBe("saucer")
-    expect(saucerButton.getAttribute("aria-pressed")).toBe("true")
+    expect(element.appearance.presetId).toBe("polygon")
+    expect(polygonButton.getAttribute("aria-pressed")).toBe("true")
     const ovalButton = element.shadowRoot!.getElementById("preset-oval") as HTMLButtonElement
     expect(ovalButton.getAttribute("aria-pressed")).toBe("false")
   })
@@ -138,6 +139,49 @@ describe("UfoRecorderElement appearance toolbar", () => {
     const element = mount()
     element.appearance = { color: "#0000ff" }
     expect(element.appearance).toEqual({ presetId: "oval", color: "#0000ff", transparency: 0, haloScale: 1.5 })
+  })
+
+  it("changing color/transparency/halo preserves a custom-edited polygon's own points — the real bug this fixes: appearance edits used to always rebuild geometry from the preset's default shape, silently discarding vertex edits", () => {
+    const element = mount()
+    const shadow = element.shadowRoot!
+    ;(shadow.getElementById("preset-polygon") as HTMLButtonElement).click()
+
+    // Reshape it: drag a vertex handle to a custom position (see the "polygon vertex editing"
+    // describe block for the same drag mechanics, reused inline here since this test cares about
+    // what happens to the RESULT after that edit, not the drag itself).
+    const canvas = nestedUfo(element)!.shadowRoot!.getElementById("canvas") as HTMLCanvasElement
+    vi.spyOn(canvas, "getBoundingClientRect").mockReturnValue({ left: 0, top: 0, width: 640, height: 360 } as DOMRect)
+    const shapeBefore = element.sightingData.timeline.keyframes[0].shapes[0].shape as { bounds: { x: number; y: number } }
+    canvas.dispatchEvent(new MouseEvent("pointerdown", { clientX: shapeBefore.bounds.x, clientY: shapeBefore.bounds.y }))
+    document.dispatchEvent(new MouseEvent("pointermove", { clientX: shapeBefore.bounds.x - 15, clientY: shapeBefore.bounds.y - 10 }))
+    document.dispatchEvent(new MouseEvent("pointerup", { clientX: shapeBefore.bounds.x - 15, clientY: shapeBefore.bounds.y - 10 }))
+    const reshaped = element.sightingData.timeline.keyframes[0].shapes[0].shape as { points: unknown; bounds: unknown }
+    expect(reshaped.points).not.toEqual([
+      { x: 0, y: 0 },
+      { x: 48, y: 0 },
+      { x: 48, y: 28 },
+      { x: 0, y: 28 }
+    ]) // sanity check the drag actually reshaped it before testing the color-edit path
+
+    const colorInput = shadow.getElementById("color") as HTMLInputElement
+    colorInput.value = "#ff8800"
+    colorInput.dispatchEvent(new Event("input"))
+
+    const afterColorChange = element.sightingData.timeline.keyframes[0].shapes[0].shape as { kind: string; points: unknown; bounds: unknown; color: string }
+    expect(afterColorChange.color).toBe("#ff8800")
+    expect(afterColorChange.kind).toBe("polygon")
+    expect(afterColorChange.points).toEqual(reshaped.points)
+    expect(afterColorChange.bounds).toEqual(reshaped.bounds)
+  })
+
+  it("clicking a preset button still rebuilds geometry as before (only appearance-only edits preserve it)", () => {
+    const element = mount() // default oval
+    const shadow = element.shadowRoot!
+    ;(shadow.getElementById("preset-polygon") as HTMLButtonElement).click()
+
+    const shape = element.sightingData.timeline.keyframes[0].shapes[0].shape as { kind: string; points?: unknown[] }
+    expect(shape.kind).toBe("polygon")
+    expect(shape.points).toHaveLength(4)
   })
 })
 
@@ -1113,7 +1157,7 @@ describe("UfoRecorderElement post-hoc appearance editing + multi-shape authoring
     sourceSelect.value = "ufo-2"
     sourceSelect.dispatchEvent(new Event("change"))
 
-    expect(element.appearance).toEqual({ presetId: "triangle", color: "#ff8800", transparency: 0.5, haloScale: 2 })
+    expect(element.appearance).toEqual({ presetId: "polygon", color: "#ff8800", transparency: 0.5, haloScale: 2 })
   })
 })
 
@@ -2962,5 +3006,182 @@ describe("UfoRecorderElement decor context menu", () => {
     expect(element.sightingData.witness).toEqual({ id: "other-witness" })
     expect((element.shadowRoot!.getElementById("decor-context-menu") as HTMLElement).hidden).toBe(true)
     fetchSpy.mockRestore()
+  })
+})
+
+describe("UfoRecorderElement polygon vertex editing", () => {
+  afterEach(() => {
+    document.body.innerHTML = ""
+  })
+
+  function nestedCanvas(element: UfoRecorderElement): HTMLCanvasElement {
+    const canvas = nestedUfo(element)!.shadowRoot!.getElementById("canvas") as HTMLCanvasElement
+    vi.spyOn(canvas, "getBoundingClientRect").mockReturnValue({ left: 0, top: 0, width: 640, height: 360 } as DOMRect)
+    return canvas
+  }
+
+  function dragFromTo(canvas: HTMLCanvasElement, from: { x: number; y: number }, to: { x: number; y: number }): void {
+    canvas.dispatchEvent(new MouseEvent("pointerdown", { clientX: from.x, clientY: from.y }))
+    document.dispatchEvent(new MouseEvent("pointermove", { clientX: to.x, clientY: to.y }))
+    document.dispatchEvent(new MouseEvent("pointerup", { clientX: to.x, clientY: to.y }))
+  }
+
+  function rightClickAt(canvas: HTMLCanvasElement, x: number, y: number): void {
+    canvas.dispatchEvent(new MouseEvent("contextmenu", { clientX: x, clientY: y, bubbles: true, cancelable: true, composed: true }))
+  }
+
+  function polygonShapeJson(points = [{ x: 0, y: 0 }, { x: 100, y: 0 }, { x: 100, y: 50 }, { x: 0, y: 50 }]) {
+    return {
+      version: 1 as const,
+      timeline: {
+        keyframes: [
+          {
+            t: 0,
+            shapes: [
+              {
+                sourceId: "ufo-1",
+                shape: {
+                  kind: "polygon" as const,
+                  bounds: { x: 100, y: 100, width: 100, height: 50 },
+                  points,
+                  color: "#39ff14",
+                  angle: 0,
+                  transparency: 0,
+                  haloScale: 0,
+                  selected: false
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+
+  function ovalShapeJson() {
+    return {
+      version: 1 as const,
+      timeline: {
+        keyframes: [
+          {
+            t: 0,
+            shapes: [
+              { sourceId: "ufo-1", shape: { kind: "oval" as const, bounds: { x: 100, y: 100, width: 20, height: 20 }, color: "#39ff14", angle: 0, transparency: 0, haloScale: 0, selected: false } }
+            ]
+          }
+        ]
+      }
+    }
+  }
+
+  it("selecting the Polygon preset creates an editable 4-point quad", () => {
+    const element = mount()
+    ;(element.shadowRoot!.getElementById("preset-polygon") as HTMLButtonElement).click()
+
+    const shape = element.sightingData.timeline.keyframes[0].shapes[0].shape as { kind: string; points?: unknown[] }
+    expect(shape.kind).toBe("polygon")
+    expect(shape.points).toHaveLength(4)
+  })
+
+  it("dragging a vertex handle moves only that vertex, leaving bounds and other points alone", () => {
+    const element = mount()
+    element.sightingData = polygonShapeJson()
+    const canvas = nestedCanvas(element)
+
+    dragFromTo(canvas, { x: 100, y: 100 }, { x: 120, y: 110 }) // vertex 0, at the bounds origin
+
+    const shape = element.sightingData.timeline.keyframes[0].shapes[0].shape as PolygonShape
+    expect(shape.points[0].x).toBeCloseTo(20)
+    expect(shape.points[0].y).toBeCloseTo(10)
+    expect(shape.points[1]).toEqual({ x: 100, y: 0 })
+    expect(shape.bounds).toEqual({ x: 100, y: 100, width: 100, height: 50 })
+  })
+
+  it("enables Delete vertex only when the right-click landed on a real vertex", () => {
+    const element = mount()
+    element.sightingData = polygonShapeJson()
+    const canvas = nestedCanvas(element)
+    const deleteVertexButton = element.shadowRoot!.getElementById("context-delete-vertex") as HTMLButtonElement
+
+    rightClickAt(canvas, 100, 100) // vertex 0
+    expect(deleteVertexButton.disabled).toBe(false)
+
+    rightClickAt(canvas, 150, 125) // well inside the body, not near any vertex
+    expect(deleteVertexButton.disabled).toBe(true)
+  })
+
+  it("opens the menu for a vertex right outside the shape's own bounding box — the real bug this fixes: hitTest's box-inclusion check has zero margin exactly at a corner vertex, where real display/canvas-scale rounding can easily place a click a pixel or two outside it", () => {
+    const element = mount()
+    element.sightingData = polygonShapeJson() // vertex 0 sits exactly at bounds (100,100), its own corner
+    const canvas = nestedCanvas(element)
+    const menu = element.shadowRoot!.getElementById("context-menu") as HTMLElement
+    const deleteVertexButton = element.shadowRoot!.getElementById("context-delete-vertex") as HTMLButtonElement
+
+    // 3px outside the bounding box on both axes (bounds start at x:100,y:100) — a plain
+    // timeline.hitTest (bounds-only) would miss this; hitTestVertex's own generous circular
+    // tolerance (8px default) still catches it.
+    rightClickAt(canvas, 97, 97)
+
+    expect(menu.hidden).toBe(false)
+    expect(deleteVertexButton.disabled).toBe(false)
+  })
+
+  it("Delete vertex removes the vertex the menu was opened nearest to", () => {
+    const element = mount()
+    element.sightingData = polygonShapeJson()
+    const canvas = nestedCanvas(element)
+    const deleteVertexButton = element.shadowRoot!.getElementById("context-delete-vertex") as HTMLButtonElement
+
+    rightClickAt(canvas, 100, 100) // vertex 0
+    deleteVertexButton.click()
+
+    const shape = element.sightingData.timeline.keyframes[0].shapes[0].shape as PolygonShape
+    expect(shape.points).toEqual([
+      { x: 100, y: 0 },
+      { x: 100, y: 50 },
+      { x: 0, y: 50 }
+    ])
+  })
+
+  it("refuses to delete a vertex once only MIN_POLYGON_VERTICES (3) remain", () => {
+    const element = mount()
+    element.sightingData = polygonShapeJson([
+      { x: 0, y: 0 },
+      { x: 100, y: 0 },
+      { x: 50, y: 50 }
+    ])
+    const canvas = nestedCanvas(element)
+    const deleteVertexButton = element.shadowRoot!.getElementById("context-delete-vertex") as HTMLButtonElement
+
+    rightClickAt(canvas, 100, 100) // vertex 0
+    expect(deleteVertexButton.disabled).toBe(true)
+  })
+
+  it("Add vertex inserts a point on the edge nearest to where the menu was opened", () => {
+    const element = mount()
+    element.sightingData = polygonShapeJson()
+    const canvas = nestedCanvas(element)
+    const addVertexButton = element.shadowRoot!.getElementById("context-add-vertex") as HTMLButtonElement
+
+    rightClickAt(canvas, 150, 100) // midpoint of the top edge (points 0->1)
+    expect(addVertexButton.disabled).toBe(false)
+    addVertexButton.click()
+
+    const shape = element.sightingData.timeline.keyframes[0].shapes[0].shape as PolygonShape
+    expect(shape.points).toHaveLength(5)
+    expect(shape.points[1]).toEqual({ x: 50, y: 0 })
+  })
+
+  it("disables Add/Delete vertex for an oval — it has no points at all", () => {
+    const element = mount()
+    element.sightingData = ovalShapeJson()
+    const canvas = nestedCanvas(element)
+    const addVertexButton = element.shadowRoot!.getElementById("context-add-vertex") as HTMLButtonElement
+    const deleteVertexButton = element.shadowRoot!.getElementById("context-delete-vertex") as HTMLButtonElement
+
+    rightClickAt(canvas, 110, 110)
+
+    expect(addVertexButton.disabled).toBe(true)
+    expect(deleteVertexButton.disabled).toBe(true)
   })
 })

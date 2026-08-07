@@ -1,4 +1,4 @@
-import type { Shape, ShapeBounds } from "./Shape.js"
+import type { PolygonShape, Shape, ShapeBounds } from "./Shape.js"
 
 /**
  * Interactive-editing geometry for a selected shape's handles — 8 resize handles (corners/
@@ -12,6 +12,11 @@ export const RESIZE_HANDLE_IDS: HandleId[] = ["nw", "n", "ne", "e", "se", "s", "
 
 const ROTATE_HANDLE_OFFSET = 24 // px above the top edge, in the shape's local (unrotated) frame
 export const MIN_SHAPE_SIZE = 8 // px resize floor — avoids degenerate/inverted bounds — shared with UfoRecorderElement's arrow-key resize
+/** A polygon needs at least 3 points to remain a real shape — deleteVertex refuses to go below
+ * this, the same "always keep a minimum" precedent as MIN_SHAPE_SIZE above (and deleteShape's own
+ * "always keep at least one shape" rule in UfoRecorderElement). */
+export const MIN_POLYGON_VERTICES = 3
+export const VERTEX_HANDLE_TOLERANCE = 8 // px — same as hitTestHandle's own default
 
 function rotateAround(
   point: { x: number; y: number },
@@ -153,6 +158,112 @@ export class ShapeHandles {
     const right = Math.max(...boundsList.map(b => b.x + b.width))
     const bottom = Math.max(...boundsList.map(b => b.y + b.height))
     return { x: left, y: top, width: right - left, height: bottom - top }
+  }
+
+  /** A polygon's own vertex positions in CANVAS space (bounds-relative `points` translated by
+   * `bounds` origin, then rotated by `angle` around the shape's center) — the exact same
+   * transform CanvasRenderer.paintBase applies via ctx.translate/ctx.rotate before stroking the
+   * outline, so vertex handles always land exactly on the painted corners regardless of rotation.
+   * Single source of truth for both painting (CanvasRenderer.paintVertexHandles) and hit-testing
+   * (hitTestVertex) below, same "rendering and interaction can never disagree" reasoning as
+   * handlePointsFor. */
+  static vertexPointsFor(shape: PolygonShape): ReadonlyArray<{ x: number; y: number }> {
+    const center = shapeCenter(shape.bounds)
+    return shape.points.map(point => rotateAround({ x: shape.bounds.x + point.x, y: shape.bounds.y + point.y }, center, shape.angle))
+  }
+
+  static hitTestVertex(shape: PolygonShape, point: { x: number; y: number }, tolerance = VERTEX_HANDLE_TOLERANCE): number | undefined {
+    const canvasPoints = ShapeHandles.vertexPointsFor(shape)
+    let nearestIndex: number | undefined
+    let nearestDistance = tolerance
+    canvasPoints.forEach((candidate, index) => {
+      const distance = Math.hypot(point.x - candidate.x, point.y - candidate.y)
+      if (distance <= nearestDistance) {
+        nearestDistance = distance
+        nearestIndex = index
+      }
+    })
+    return nearestIndex
+  }
+
+  /** Inverse of vertexPointsFor's own transform — a canvas-space point (e.g. the live pointer
+   * position) back into the shape's local, bounds-relative, unrotated frame that `points` are
+   * stored in. Shared by moveVertex/insertVertexNear, both of which need to write into `points`
+   * using the same convention the shape itself already uses. */
+  private static toLocalPoint(shape: PolygonShape, point: { x: number; y: number }): { x: number; y: number } {
+    const center = shapeCenter(shape.bounds)
+    const local = rotateAround(point, center, -shape.angle)
+    return { x: local.x - shape.bounds.x, y: local.y - shape.bounds.y }
+  }
+
+  /** Drags vertex `index` to `pointer` (canvas space) — every other vertex keeps its own position
+   * (in the shape's real, absolute local frame) and `angle` is untouched; only that one point
+   * moves. Unlike resizeShape (which scales every point together to match a new bounding box),
+   * this is what actually makes a polygon's outline freely reshapeable rather than just uniformly
+   * scalable.
+   *
+   * `bounds` is re-fit to the new point set (tight axis-aligned box around every point,
+   * `points` themselves) — points are stored relative to `bounds`'s own origin, so leaving
+   * `bounds` at its old value the moment a vertex is dragged outside it would desync the
+   * selection outline/handles (still drawn from the stale `bounds`) from what the shape actually
+   * looks like now. Every point (not just the moved one) is rebased onto the new origin so their
+   * own absolute positions — and the shape's silhouette — stay exactly where they were. */
+  static moveVertex(original: PolygonShape, index: number, pointer: { x: number; y: number }): PolygonShape {
+    const moved = original.points.map((p, i) => (i === index ? ShapeHandles.toLocalPoint(original, pointer) : p))
+    const minX = Math.min(...moved.map(p => p.x))
+    const minY = Math.min(...moved.map(p => p.y))
+    const maxX = Math.max(...moved.map(p => p.x))
+    const maxY = Math.max(...moved.map(p => p.y))
+    const bounds: ShapeBounds = { x: original.bounds.x + minX, y: original.bounds.y + minY, width: maxX - minX, height: maxY - minY }
+    const points = moved.map(p => ({ x: p.x - minX, y: p.y - minY }))
+    return { ...original, bounds, points }
+  }
+
+  /**
+   * Inserts a new vertex at `pointer`, splitting whichever edge it's closest to (point-to-segment
+   * distance, in the shape's own local frame) — the standard "click on an outline to add a point
+   * there" behavior vector editors use. Always succeeds (a polygon can always grow), unlike
+   * deleteVertex's own floor.
+   */
+  static insertVertexNear(original: PolygonShape, pointer: { x: number; y: number }): PolygonShape {
+    const target = ShapeHandles.toLocalPoint(original, pointer)
+    const { points } = original
+    let bestIndex = points.length - 1
+    let bestDistance = Infinity
+    for (let i = 0; i < points.length; i++) {
+      const a = points[i]
+      const b = points[(i + 1) % points.length]
+      const distance = ShapeHandles.distanceToSegment(target, a, b)
+      if (distance < bestDistance) {
+        bestDistance = distance
+        bestIndex = i
+      }
+    }
+    const newPoints = [...points.slice(0, bestIndex + 1), target, ...points.slice(bestIndex + 1)]
+    return { ...original, points: newPoints }
+  }
+
+  /** Perpendicular distance from `point` to the segment a-b, clamped to the segment itself (not
+   * the infinite line through it) — standard point-to-segment formula, projecting `point` onto
+   * the segment and clamping the projection parameter to [0, 1]. */
+  private static distanceToSegment(point: { x: number; y: number }, a: { x: number; y: number }, b: { x: number; y: number }): number {
+    const dx = b.x - a.x
+    const dy = b.y - a.y
+    const lengthSquared = dx * dx + dy * dy
+    const t = lengthSquared === 0 ? 0 : Math.max(0, Math.min(1, ((point.x - a.x) * dx + (point.y - a.y) * dy) / lengthSquared))
+    const closestX = a.x + t * dx
+    const closestY = a.y + t * dy
+    return Math.hypot(point.x - closestX, point.y - closestY)
+  }
+
+  /** Removes vertex `index` — refuses (returns `original` unchanged) rather than dropping below
+   * MIN_POLYGON_VERTICES, the same "always keep a real shape" floor MIN_SHAPE_SIZE enforces for
+   * bounds. Callers wanting to explain *why* nothing happened (e.g. disabling a menu item) should
+   * check `original.points.length > MIN_POLYGON_VERTICES` themselves rather than infer it from a
+   * no-op return. */
+  static deleteVertex(original: PolygonShape, index: number): PolygonShape {
+    if (original.points.length <= MIN_POLYGON_VERTICES) return original
+    return { ...original, points: original.points.filter((_, i) => i !== index) }
   }
 }
 
