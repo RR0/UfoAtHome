@@ -88,6 +88,9 @@ function weatherEquals(a: Weather, b: Weather): boolean {
 }
 
 const SKY_RADIUS = 900
+/** See isScreenPointOccluded's own doc comment — filters out a spurious near-camera
+ * self-intersection with terrain geometry built close to the observer. */
+const UFO_OCCLUSION_MIN_DISTANCE_M = 0.5
 const GROUND_RADIUS = 900
 const GROUND_ALBEDO = 0.5
 const STAR_RADIUS = 850
@@ -629,6 +632,9 @@ export class SceneRenderer {
   /** Scratch vector reused every isSunOccluded call — the camera->Sun ray direction, avoiding a
    * per-frame allocation (same discipline as lensFlareScratch). */
   private readonly sunOcclusionDirectionScratch = new Vector3()
+  /** Dedicated raycaster for isScreenPointOccluded — same "don't share a raycaster across
+   * independent purposes" reasoning as sunOcclusionRaycaster above. */
+  private readonly ufoOcclusionRaycaster = new Raycaster()
   private readonly onLightningFlash?: () => void
 
   constructor(
@@ -1135,6 +1141,45 @@ export class SceneRenderer {
     this.sunOcclusionRaycaster.set(this.camera.position, direction)
     const hit = this.sunOcclusionRaycaster.intersectObjects(occluders, true)[0]
     return hit !== undefined && hit.distance < distanceToSun
+  }
+
+  /** True when a decor object explicitly flagged to occlude shape `sourceId` sits between the
+   * camera and whatever's drawn at this screen point — used by SceneElement to hide a UFO shape
+   * exactly where that object would occlude it. The shape itself lives entirely outside this 3D
+   * scene (a separate 2D canvas overlay, see UfoElement/CanvasRenderer), so the GPU's own z-buffer
+   * has no idea it exists and can't hide it behind anything here — same underlying problem, and
+   * same manual-raycast fix, as isSunOccluded. Unlike isSunOccluded there's no real recorded
+   * distance for the shape to compare a hit against (its position is authored in flat screen space,
+   * not 3D world space) — so this treats it as though it's always beyond every occluder (same
+   * convention as a star), meaning ANY hit along this screen ray counts as occluded.
+   *
+   * Deliberately NOT ground/terrain, even though they're real physical surfaces with no testimony
+   * ambiguity the way a building is (see DecorObject.occludesSourceIds's own doc comment) — found
+   * by testing that the flat ground disc extends to the horizon in every direction, so a shape a
+   * witness drew low in frame (legitimately far away, near/at the horizon, the ordinary way to
+   * depict a distant object — never literally underground) can have its screen ray dip just enough
+   * below horizontal to clip the disc, wrongly reading as occluded. There's no principled distance
+   * to test that hit against either (same root cause as decor: the shape has no real 3D position at
+   * all), so ground/terrain are simply excluded from the occluder set entirely — only a decor object
+   * a witness/recorder has explicitly opted in via occludesSourceIds can ever occlude a shape here.
+   *
+   * `raycaster.near` is set to UFO_OCCLUSION_MIN_DISTANCE_M rather than left at Raycaster's own
+   * default of 0 — decor placed close to the camera could otherwise self-intersect at a few
+   * centimeters' distance (well inside the camera's own 0.1 near-clip plane, so that geometry isn't
+   * even visibly rendered), reading as permanently occluded regardless of where the shape actually
+   * is. No real decor a UFO could meaningfully vanish behind sits this close to the observer, so
+   * filtering it out only removes that artifact, never a legitimate close occlusion. */
+  isScreenPointOccluded(ndcX: number, ndcY: number, sourceId: string): boolean {
+    const occluders: Object3D[] = []
+    for (const object of this.decorObjects) {
+      if (!object.occludesSourceIds?.includes(sourceId)) continue
+      const group = this.decorGroups.get(object.id)
+      if (group) occluders.push(group)
+    }
+    if (occluders.length === 0) return false
+    this.ufoOcclusionRaycaster.setFromCamera(new Vector2(ndcX, ndcY), this.camera)
+    this.ufoOcclusionRaycaster.near = UFO_OCCLUSION_MIN_DISTANCE_M
+    return this.ufoOcclusionRaycaster.intersectObjects(occluders, true).length > 0
   }
 
   /** Finds which celestial body (if any) sits under normalized device coordinates (each in

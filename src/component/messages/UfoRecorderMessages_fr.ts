@@ -102,6 +102,7 @@ export const ufoRecorderMessages_fr: UfoRecorderMessages = {
   decorSightingUrl: "URL de l'enregistrement du témoin",
   viewTestimony: "Voir le témoignage",
   noWitnessRecording: "Aucune URL d'enregistrement définie pour ce témoin",
+  masks: "Masque",
   addWitness: "Ajouter un témoin",
   decorFloors: "Étages",
   decorOccupiedFloor: "Étage occupé",

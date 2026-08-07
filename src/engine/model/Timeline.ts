@@ -136,10 +136,19 @@ export class Timeline {
    * otherwise clicking a shape at any scrubbed instant that isn't an exact keyframe (the
    * normal case) would find nothing. Iterates sourceIds in reverse so the most-recently-added
    * source — painted last/on top by Player/onFrame — wins when shapes overlap.
+   *
+   * `excludeSourceIds` skips whichever sources it names as though they weren't there at all —
+   * used by UfoElement's own hover tooltip to hit-test only against currently-VISIBLE shapes
+   * (excluding ones a composing SceneElement has occluded behind decor, see
+   * SceneRenderer.isScreenPointOccluded), so hovering an invisible shape's former screen position
+   * doesn't surface its name. Editing hit-tests (selecting/dragging/right-clicking a shape) call
+   * this with no 3rd argument and deliberately keep finding an occluded shape — you still need to
+   * be able to select and move something you can't currently see.
    */
-  hitTest(t: number, x: number, y: number): ShapeState | undefined {
+  hitTest(t: number, x: number, y: number, excludeSourceIds?: ReadonlySet<string>): ShapeState | undefined {
     const ids = this.sourceIds
     for (let i = ids.length - 1; i >= 0; i--) {
+      if (excludeSourceIds?.has(ids[i])) continue
       const shape = this.getInterpolatedShapeAt(t, ids[i])
       if (shape && shapeContains(shape, x, y)) {
         return { sourceId: ids[i], shape }

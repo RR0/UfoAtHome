@@ -4,7 +4,7 @@ export const html = `
     <canvas id="scene-canvas"></canvas>
   </div>
   <div id="ufo-slot"></div>
-  <div id="body-tooltip" class="body-tooltip" hidden></div>
+  <div id="hover-tooltip" class="hover-tooltip" hidden></div>
 </div>
 `
 
@@ -66,9 +66,10 @@ export const css = `
   inset: 0;
 }
 /* Positioned via left/top (set in JS, following the pointer) relative to .stage — an on-demand
-   identification label, not part of the rendered sky itself, so it sits above everything else and
+   identification label (celestial body or decor object name — see SceneElement.
+   handlePointerMove), not part of the rendered sky itself, so it sits above everything else and
    ignores pointer events (it must never itself be what a hover/click lands on). */
-.body-tooltip {
+.hover-tooltip {
   position: absolute;
   z-index: 1;
   padding: 0.2em 0.5em;

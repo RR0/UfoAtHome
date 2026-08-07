@@ -15,6 +15,7 @@ import type { ObserverGeo } from "../engine/astronomy/CelestialPositions.js"
 import { resolveObserverPoseAt, resolveWeatherAt } from "../engine/model/Sighting.js"
 import type { ObserverPose } from "../engine/model/ObserverTrack.js"
 import type { Weather } from "../engine/model/Weather.js"
+import type { DecorKind } from "../engine/model/Decor.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
 import { selectLocale } from "../i18n/locale.js"
 import { WeatherAudio } from "../render3d/WeatherAudio.js"
@@ -34,6 +35,22 @@ const BODY_NAMES: Record<string, { en: string; fr: string }> = {
   Saturn: { en: "Saturn", fr: "Saturne" }
 }
 const BODY_TOOLTIP_SUPPORTED_LANGUAGES = ["en", "fr"]
+
+/** Fallback hover-tooltip label for an untitled decor object — a coarse "what is this" (unlike an
+ * untitled SHAPE's tooltip, which shows nothing at all — see UfoElement.handlePointerMove's own
+ * doc comment on why a raw sourceId is too internal to surface) is still genuinely useful here: a
+ * building/tree/streetlight/vehicle's kind is meaningful, human-facing information on its own,
+ * not an authoring-only implementation detail. decor.title wins when given (same precedence as
+ * UfoRecorderElement's own decorLabel, which additionally numbers same-kind objects for its
+ * editing dropdown — this tooltip has no such numbering need, standalone `<rr0-scene>` has no
+ * dropdown to number against anyway). */
+const DECOR_KIND_NAMES: Record<DecorKind, { en: string; fr: string }> = {
+  building: { en: "Building", fr: "Bâtiment" },
+  tree: { en: "Tree", fr: "Arbre" },
+  streetlight: { en: "Streetlight", fr: "Lampadaire" },
+  vehicle: { en: "Vehicle", fr: "Véhicule" },
+  witness: { en: "Witness", fr: "Témoin" }
+}
 
 /** Where the star catalog asset (see scripts/build-star-catalog.ts) is fetched from by default —
  * resolved relative to this module's own URL so it works both from this package's own demo and
@@ -95,7 +112,7 @@ export class SceneElement extends HTMLElement {
    * sighting/canvasElement/renderer getters. */
   readonly ufoElement: UfoElement
   private readonly sceneRenderer: SceneRenderer
-  private readonly bodyTooltip: HTMLElement
+  private readonly hoverTooltip: HTMLElement
   private resizeObserver?: ResizeObserver
   private lastTimeMs = 0
   private starCatalog?: StarCatalog
@@ -108,38 +125,61 @@ export class SceneElement extends HTMLElement {
   /** Bound once so document.removeEventListener (disconnectedCallback) can actually find it. */
   private readonly handleFullscreenChange = () => this.resizeToStage()
 
-  /** Identifies whatever celestial body (if any) is under the pointer and shows/moves/hides a
-   * text label next to it — an on-demand identification aid, not a rendering change (see
-   * pickBodyAt's own doc comment on why hit-testing uses a bigger invisible area than the real,
-   * true-to-scale visible disc). Also reveals the compass labels (see setCompassHovered) for as
-   * long as the pointer stays over the canvas — same on-demand spirit, so neither overlay competes
-   * for attention with the scene itself the rest of the time. Listens on the nested `<rr0-ufo>`'s
-   * own canvas (not the 3D scene-canvas directly) since that transparent overlay always sits on top
-   * and would otherwise swallow every pointer event before the 3D layer ever saw them. */
+  /** Identifies whatever's under the pointer — a celestial body, a decor object, or (checked
+   * first) a visible UFO shape — and shows/moves/hides a text label next to it — an on-demand
+   * identification aid, not a rendering change (see pickBodyAt's own doc comment on why body
+   * hit-testing uses a bigger invisible area than the real, true-to-scale visible disc). Also
+   * reveals the compass labels (see setCompassHovered) for as long as the pointer stays over the
+   * canvas — same on-demand spirit, so neither overlay competes for attention with the scene
+   * itself the rest of the time. Listens on the nested `<rr0-ufo>`'s own canvas (not the 3D
+   * scene-canvas directly) since that transparent overlay always sits on top and would otherwise
+   * swallow every pointer event before the 3D layer ever saw them.
+   *
+   * A visible (non-occluded) shape, if the pointer is over one, wins over both a body and decor —
+   * it's painted on top of everything else here (same visual stacking the occlusion feature
+   * relies on), so whatever's behind it isn't what the pointer is actually hovering. That shape's
+   * own name (if it has one) is UfoElement's own tooltip's job, not this one's — this method just
+   * steps aside (hides its own tooltip) rather than duplicating that lookup. */
   private readonly handlePointerMove = (event: PointerEvent) => {
     this.sceneRenderer.setCompassHovered(true)
     const canvas = this.ufoElement.canvasElement
     const rect = canvas.getBoundingClientRect()
     if (rect.width === 0 || rect.height === 0) return
-    const ndcX = ((event.clientX - rect.left) / rect.width) * 2 - 1
-    const ndcY = -(((event.clientY - rect.top) / rect.height) * 2 - 1)
-    const bodyKey = this.sceneRenderer.pickBodyAt(ndcX, ndcY)
-    if (!bodyKey) {
-      this.bodyTooltip.hidden = true
+    const canvasX = ((event.clientX - rect.left) / rect.width) * canvas.width
+    const canvasY = ((event.clientY - rect.top) / rect.height) * canvas.height
+    if (this.ufoElement.hasVisibleShapeAt(canvasX, canvasY)) {
+      this.hoverTooltip.hidden = true
       return
     }
+    const ndcX = ((event.clientX - rect.left) / rect.width) * 2 - 1
+    const ndcY = -(((event.clientY - rect.top) / rect.height) * 2 - 1)
     const language = selectLocale(navigator.languages, BODY_TOOLTIP_SUPPORTED_LANGUAGES) as "en" | "fr"
-    this.bodyTooltip.textContent = BODY_NAMES[bodyKey]?.[language] ?? bodyKey
-    this.bodyTooltip.hidden = false
+    const bodyKey = this.sceneRenderer.pickBodyAt(ndcX, ndcY)
+    if (bodyKey) {
+      this.showHoverTooltip(event, BODY_NAMES[bodyKey]?.[language] ?? bodyKey)
+      return
+    }
+    const decorId = this.sceneRenderer.pickDecorAt(ndcX, ndcY)
+    const decor = decorId ? this.ufoElement.sighting.decor.find(d => d.id === decorId) : undefined
+    if (decor) {
+      this.showHoverTooltip(event, decor.title || DECOR_KIND_NAMES[decor.kind][language])
+      return
+    }
+    this.hoverTooltip.hidden = true
+  }
+
+  private showHoverTooltip(event: PointerEvent, text: string): void {
+    this.hoverTooltip.textContent = text
+    this.hoverTooltip.hidden = false
     // Positioned relative to #stage (the tooltip's own offsetParent), not the page — clientX/Y are
     // page-relative, so subtracting the stage's own origin converts them to that local frame.
     const stageRect = this.stageElement.getBoundingClientRect()
-    this.bodyTooltip.style.left = `${event.clientX - stageRect.left + 12}px`
-    this.bodyTooltip.style.top = `${event.clientY - stageRect.top + 12}px`
+    this.hoverTooltip.style.left = `${event.clientX - stageRect.left + 12}px`
+    this.hoverTooltip.style.top = `${event.clientY - stageRect.top + 12}px`
   }
 
   private readonly handlePointerLeave = () => {
-    this.bodyTooltip.hidden = true
+    this.hoverTooltip.hidden = true
     this.sceneRenderer.setCompassHovered(false)
   }
 
@@ -173,6 +213,7 @@ export class SceneElement extends HTMLElement {
   private readonly handleTimeUpdate = (event: Event) => {
     this.lastTimeMs = (event as CustomEvent<{ time: number }>).detail.time
     this.updateAstronomy(this.lastTimeMs)
+    this.updateUfoOcclusion(this.lastTimeMs)
   }
 
   constructor() {
@@ -190,7 +231,7 @@ export class SceneElement extends HTMLElement {
     this.frameElement = this.shadow.getElementById("frame")!
     this.sceneCanvas = this.shadow.getElementById("scene-canvas") as HTMLCanvasElement
     this.sceneRenderer = new SceneRenderer(this.sceneCanvas, undefined, this.handleLightningFlash)
-    this.bodyTooltip = this.shadow.getElementById("body-tooltip")!
+    this.hoverTooltip = this.shadow.getElementById("hover-tooltip")!
 
     // Created imperatively rather than left inline in the template markup — see
     // UfoRecorderElement's constructor for why (an inline tag parsed from
@@ -418,6 +459,29 @@ export class SceneElement extends HTMLElement {
       planets,
       stars: this.starCatalog ? { catalog: this.starCatalog, date, observer } : undefined
     })
+  }
+
+  /** Hides a UFO shape exactly where a decor object (building, tree...) sits directly between
+   * the camera and it — the shape is painted on the nested `<rr0-ufo>`'s own 2D canvas overlay,
+   * entirely outside this element's 3D scene, so the GPU depth buffer that occludes decor against
+   * itself has no way to occlude a shape it doesn't know exists (see SceneRenderer.
+   * isScreenPointOccluded's own doc comment for the full reasoning, and the near-identical
+   * problem/fix for the Sun's own lens-flare overlay, isSunOccluded). Reads each currently-visible
+   * shape straight off the timeline — the same interpolated position the nested `<rr0-ufo>` is
+   * about to paint — converts its bounds center from the fixed 640x360 canvas drawing space to
+   * NDC, and raycasts. */
+  private updateUfoOcclusion(t: number): void {
+    const timeline = this.ufoElement.sighting.timeline
+    const canvas = this.ufoElement.canvasElement
+    const occluded = new Set<string>()
+    for (const sourceId of timeline.sourceIds) {
+      const shape = timeline.getInterpolatedShapeAt(t, sourceId)
+      if (!shape) continue
+      const ndcX = ((shape.bounds.x + shape.bounds.width / 2) / canvas.width) * 2 - 1
+      const ndcY = -(((shape.bounds.y + shape.bounds.height / 2) / canvas.height) * 2 - 1)
+      if (this.sceneRenderer.isScreenPointOccluded(ndcX, ndcY, sourceId)) occluded.add(sourceId)
+    }
+    this.ufoElement.setOccludedSourceIds(occluded)
   }
 
 }

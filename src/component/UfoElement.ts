@@ -60,6 +60,12 @@ export class UfoElement extends HTMLElement {
   private player: Player
   private loopEnabled = true
   private highlightedSourceIds: Set<string> = new Set()
+  /** Sources a composing SceneElement has determined sit directly behind a decor object right
+   * now (see SceneRenderer.isScreenPointOccluded) — skipped entirely on the next paint, not
+   * faded, matching how a real object disappearing behind a building looks. Stays empty (no
+   * effect) for a bare `<rr0-ufo>`/`<rr0-ufo-recorder>` embed with no 3D decor to occlude
+   * against. */
+  private occludedSourceIds: ReadonlySet<string> = EMPTY_SELECTION
 
   /** Set to false by composing elements that need the canvas's own click for something else
    * instead of toggling playback — see UfoRecorderElement, which uses pointerdown/pointermove on
@@ -82,15 +88,19 @@ export class UfoElement extends HTMLElement {
   /** Bound once so document.removeEventListener (disconnectedCallback) can actually find it. */
   private readonly handleFullscreenChange = () => this.updateFullscreenButton()
 
-  /** Identifies whatever shape (if any) is under the pointer and shows/moves/hides a text label
-   * next to it, but only when that shape actually has a title — an untitled shape's raw sourceId
-   * (e.g. "ufo-2") is an internal authoring detail, not something an end-user-facing tooltip
-   * should ever surface (contrast UfoRecorderElement's own shapeLabel(), which deliberately does
-   * fall back to the sourceId for its own source-picker dropdown). Mirrors SceneElement's
-   * near-identical bodyTooltip/handlePointerMove for celestial bodies. */
+  /** Identifies whatever VISIBLE shape (if any) is under the pointer and shows/moves/hides a text
+   * label next to it, but only when that shape actually has a title — an untitled shape's raw
+   * sourceId (e.g. "ufo-2") is an internal authoring detail, not something an end-user-facing
+   * tooltip should ever surface (contrast UfoRecorderElement's own shapeLabel(), which deliberately
+   * does fall back to the sourceId for its own source-picker dropdown). Mirrors SceneElement's
+   * near-identical hoverTooltip/handlePointerMove for celestial bodies/decor. Excludes
+   * occludedSourceIds from the hit test (see Timeline.hitTest's own doc comment) — a shape hidden
+   * behind decor isn't visually there for the pointer to be hovering, so its name shouldn't surface
+   * either; SceneElement's own handlePointerMove instead shows whatever decor actually occludes it
+   * there (see its hasVisibleShapeAt check). */
   private readonly handlePointerMove = (event: PointerEvent): void => {
     const point = this.canvasPointFromEvent(event)
-    const hit = point && this.currentSighting.timeline.hitTest(this.currentTime, point.x, point.y)
+    const hit = point && this.currentSighting.timeline.hitTest(this.currentTime, point.x, point.y, this.occludedSourceIds)
     if (!hit?.shape.title) {
       this.tooltip.hidden = true
       return
@@ -308,6 +318,29 @@ export class UfoElement extends HTMLElement {
     this.refresh()
   }
 
+  /** Called by a composing SceneElement on every playback tick/seek with whichever sources are
+   * currently occluded by decor — see its own updateUfoOcclusion. Deduped the same way as
+   * selectedSourceIds above so a steady "still occluded"/"still visible" state doesn't force a
+   * repaint every single frame. */
+  setOccludedSourceIds(ids: ReadonlySet<string>): void {
+    const unchanged =
+      ids.size === this.occludedSourceIds.size && [...ids].every(id => this.occludedSourceIds.has(id))
+    if (unchanged) return
+    this.occludedSourceIds = ids
+    this.refresh()
+  }
+
+  /** True when a currently-visible (non-occluded) shape — titled or not — sits at (x, y) in this
+   * element's own fixed 640x360 canvas drawing space, at the current playhead. Exposed so a
+   * composing SceneElement's own hover tooltip (handlePointerMove) can check this first before
+   * falling through to a celestial body or decor object's name — the shape overlay sits visually
+   * on top of the 3D scene, so whenever a visible shape is there, it (not whatever's behind it) is
+   * what the pointer is actually hovering; this element's own tooltip already handles that case
+   * (title-only, see handlePointerMove's own doc comment). */
+  hasVisibleShapeAt(x: number, y: number): boolean {
+    return this.currentSighting.timeline.hitTest(this.currentTime, x, y, this.occludedSourceIds) !== undefined
+  }
+
   /**
    * Re-reads the timeline's duration into the seek slider and repaints the
    * current frame — call after externally mutating `sighting.timeline`
@@ -337,6 +370,7 @@ export class UfoElement extends HTMLElement {
     // the toolbar's own auto-hide-while-playing convention.
     const selectedIds = this.playbackState !== "playing" ? this.highlightedSourceIds : EMPTY_SELECTION
     for (const [sourceId, shape] of shapesBySource) {
+      if (this.occludedSourceIds.has(sourceId)) continue
       const isSelected = selectedIds.has(sourceId)
       if (isSelected && selectedIds.size === 1) {
         this.canvasRenderer.paintShape({ ...shape, selected: true })

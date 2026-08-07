@@ -542,6 +542,41 @@ describe("UfoElement", () => {
     expect(onTimeUpdate).not.toHaveBeenCalled()
   })
 
+  it("setOccludedSourceIds skips painting that source's shape entirely, leaving others untouched", () => {
+    const element = mount()
+    element.sightingData = {
+      version: 1,
+      timeline: {
+        keyframes: [
+          {
+            t: 0,
+            shapes: [
+              { sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 0, y: 0, width: 10, height: 10 }, color: "#fff", angle: 0, transparency: 0, haloScale: 0, selected: false } },
+              { sourceId: "ufo-2", shape: { kind: "oval", bounds: { x: 20, y: 0, width: 10, height: 10 }, color: "#fff", angle: 0, transparency: 0, haloScale: 0, selected: false } }
+            ]
+          }
+        ]
+      }
+    }
+    const paintShape = vi.spyOn(element.renderer, "paintShape")
+
+    element.setOccludedSourceIds(new Set(["ufo-1"]))
+
+    const paintedBoundsX = paintShape.mock.calls.map(([shape]) => (shape as { bounds: { x: number } }).bounds.x)
+    expect(paintedBoundsX).toEqual([20])
+  })
+
+  it("setting the same occludedSourceIds again doesn't trigger a redundant repaint", () => {
+    const element = mount()
+    element.setOccludedSourceIds(new Set(["ufo-1"]))
+    const onTimeUpdate = vi.fn()
+    element.addEventListener("timeupdate", onTimeUpdate)
+
+    element.setOccludedSourceIds(new Set(["ufo-1"]))
+
+    expect(onTimeUpdate).not.toHaveBeenCalled()
+  })
+
   it("selecting multiple sources paints individual outlines plus one shared group-handle overlay", () => {
     const element = mount()
     element.sightingData = {
@@ -702,6 +737,43 @@ describe("UfoElement hover tooltip", () => {
     moveTo(canvas, 5, 5)
 
     expect(tooltip.hidden).toBe(true)
+  })
+
+  it("keeps the tooltip hidden when hovering an occluded shape's former position", () => {
+    const element = mount()
+    element.sightingData = {
+      version: 1,
+      timeline: {
+        keyframes: [
+          { t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 0, y: 0, width: 10, height: 10 }, color: "#39ff14", angle: 0, transparency: 0, haloScale: 1, selected: false, title: "Vaisseau principal" } }] }
+        ]
+      }
+    }
+    element.setOccludedSourceIds(new Set(["ufo-1"]))
+    const canvas = canvasSized(element)
+    const tooltip = element.shadowRoot!.getElementById("tooltip") as HTMLElement
+
+    moveTo(canvas, 5, 5)
+
+    expect(tooltip.hidden).toBe(true)
+  })
+
+  it("hasVisibleShapeAt is false for an occluded shape, true for a visible one", () => {
+    const element = mount()
+    element.sightingData = {
+      version: 1,
+      timeline: {
+        keyframes: [
+          { t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 0, y: 0, width: 10, height: 10 }, color: "#39ff14", angle: 0, transparency: 0, haloScale: 1, selected: false } }] }
+        ]
+      }
+    }
+
+    expect(element.hasVisibleShapeAt(5, 5)).toBe(true)
+
+    element.setOccludedSourceIds(new Set(["ufo-1"]))
+
+    expect(element.hasVisibleShapeAt(5, 5)).toBe(false)
   })
 
   it("keeps the tooltip hidden when hovering empty canvas", () => {

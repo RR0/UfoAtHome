@@ -144,6 +144,18 @@ export interface DecorObject {
   /** Kind "building" only, meaningful once witnessSide is set: which floor the witness is on, 0
    * (ground floor) up to floors. Ignored for every other kind, and while witnessSide is absent. */
   occupiedFloor?: number
+  /** Shape sourceIds (see Timeline.sourceIds/Shape) this decor object sits in front of, from the
+   * witness's own reported viewpoint — occluding that shape wherever their screen positions line
+   * up (see SceneRenderer.isScreenPointOccluded). Absent/empty (what every new decor object starts
+   * at) means this decor object never occludes anything: every shape stays visible in front of it,
+   * the same as before this field existed. Per-shape, not a single "in front of the UFO" flag,
+   * because a recording can have more than one shape (see Timeline.sourceIds) and the same building
+   * might genuinely pass in front of one and behind another — e.g. two independently moving lights
+   * reported by the same witness. There's also no way to derive this from geometry alone: the same
+   * testimony could equally report either physical relationship for a given shape, a judgment call
+   * that isn't recorded anywhere else in the data model — so it's a deliberate per-shape choice set
+   * by hand (see UfoRecorderElement's own "masks" checkbox list) rather than an automatic rule. */
+  occludesSourceIds?: string[]
 }
 
 /** Hold-last-value resolution of a decor object's current lit state at time t — same semantics as

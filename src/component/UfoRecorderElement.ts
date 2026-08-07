@@ -114,6 +114,10 @@ export class UfoRecorderElement extends HTMLElement {
   private readonly contextDeleteVertexButton: HTMLButtonElement
   private readonly decorContextMenu: HTMLElement
   private readonly contextViewTestimonyButton: HTMLButtonElement
+  /** The "Masks ▸" flyout's own container — rebuilt fresh (refreshContextMasksSubmenu) every time
+   * the decor context menu opens, see DecorObject.occludesSourceIds's own doc comment. */
+  private readonly contextMasksSubmenu: HTMLElement
+  private readonly labelContextMasks: HTMLElement
   // External playback row — see the constructor's ufoElement.showToolbar comment for why this
   // recorder drives its own controls instead of the nested ufo's overlaid ones.
   private readonly playPauseButton: HTMLButtonElement
@@ -419,6 +423,8 @@ export class UfoRecorderElement extends HTMLElement {
     this.contextDeleteVertexButton = this.shadow.getElementById("context-delete-vertex") as HTMLButtonElement
     this.decorContextMenu = this.shadow.getElementById("decor-context-menu")!
     this.contextViewTestimonyButton = this.shadow.getElementById("context-view-testimony") as HTMLButtonElement
+    this.contextMasksSubmenu = this.shadow.getElementById("context-masks-submenu")!
+    this.labelContextMasks = this.shadow.getElementById("label-context-masks")!
     this.playPauseButton = this.shadow.getElementById("play-pause") as HTMLButtonElement
     this.seekInput = this.shadow.getElementById("seek") as HTMLInputElement
     this.timeStartLabel = this.shadow.getElementById("time-start")!
@@ -687,7 +693,12 @@ export class UfoRecorderElement extends HTMLElement {
     // disconnected canvas-only preview) — otherwise the very first shape shown couldn't be
     // clicked/selected, since click-to-select hit-tests against the Timeline, not the canvas.
     this.applyAppearanceAtPlayhead()
-    this.refreshSourceList()
+    // Named right away too, same as every shape addShape() creates afterward (see its own doc
+    // comment) — this very first one is the one case that doesn't go through addShape() at all,
+    // so it needs the same fill done explicitly here. updateShapeTitle() refreshes the source
+    // list itself, so no separate call is needed right after.
+    this.shapeTitleInput.value = this.shapeLabel(this.currentSourceId)
+    this.updateShapeTitle()
     this.currentDecorId = this.ufoElement.sighting.decor[0]?.id
     this.refreshDecorList()
     this.onSelectionOrTimeChanged()
@@ -1203,6 +1214,11 @@ export class UfoRecorderElement extends HTMLElement {
     this.syncDecorLitFromTimeline()
     this.syncIndoorLookReset()
     this.updateAppearanceFieldsDisabledState()
+    // Called unconditionally (not nested inside syncAppearanceFromTimeline's own early-return
+    // branches) so switching to a multi-selection or away from any selection always re-evaluates
+    // — its own missing/selectedSourceIds.size===1 guard is what actually clears a stale red
+    // border left over from whatever single shape was selected before.
+    this.updateShapeTitleValidity()
     this.ufoElement.selectedSourceIds = this.selectedSourceIds
     // Disabled once deleting the whole selection would leave nothing behind (a recording always
     // needs at least one shape — see deleteShape()'s own doc comment), for a source that's only a
@@ -1284,15 +1300,46 @@ export class UfoRecorderElement extends HTMLElement {
     timeline.addKeyframe(t, [{ sourceId: this.currentSourceId, shape: { ...shape, title: this.stringOrUndefined(this.shapeTitleInput.value) } }])
     this.ufoElement.refresh()
     this.refreshSourceList() // keeps the dropdown's own label live as the user types
+    this.updateShapeTitleValidity()
+  }
+
+  /** Name is mandatory for a shape too, same reasoning and same "flagged, not blocked"
+   * convention as DecorObject's own updateDecorTitleValidity — addShape() always fills it with a
+   * real generated label from the start (see shapeLabel), so an empty field here only ever means
+   * it was cleared afterward. shapeLabel()'s own fallback then derives a display label back from
+   * the sourceId for the dropdown/delete-confirmation, but UfoElement's own on-canvas tooltip
+   * shows nothing at all for an untitled shape (deliberately — see its own doc comment on why no
+   * generated label is surfaced there), which is exactly the silently-degraded state this flag
+   * steers away from. Not raised at all while multiple shapes are selected — the field is already
+   * disabled then (see updateAppearanceFieldsDisabledState), showing blank because
+   * there's no single value to display, not because anything's actually missing. */
+  private updateShapeTitleValidity(): void {
+    const missing = this.selectedSourceIds.size === 1 && this.shapeTitleInput.value === ""
+    this.shapeTitleInput.classList.toggle("invalid", missing)
+    this.shapeTitleInput.setAttribute("aria-invalid", String(missing))
   }
 
   /** A shape/source's display label — its title if one's been given (at the current playhead),
-   * falling back to the raw sourceId (e.g. "ufo-2") otherwise. Used for the source dropdown and
-   * the delete-confirmation prompt; NOT used for the on-canvas hover tooltip (UfoElement.ts),
-   * which deliberately shows nothing rather than a meaningless internal id for untitled shapes. */
+   * else derived straight from its own sourceId ("ufo-3" -> "Shape 3") rather than showing that
+   * raw id. This is the exact same label addShape() auto-fills a fresh shape's title with (see
+   * its own doc comment) — one formula, not two independently-tracked numbering schemes, so a
+   * cleared title falls back to reading the identical text it started with instead of visibly
+   * jumping to a different-looking generated name. Using the sourceId's own number (not a
+   * recount of how many shapes currently exist) also means deleting an earlier shape can never
+   * shift a later, unrelated one's label — a plain count would drift the moment sourceIds and
+   * display numbers disagree after any deletion. Only a sourceId that doesn't follow this
+   * project's own "ufo-N" convention (hand-written data, an older import predating it) falls back
+   * to the raw sourceId itself, same as before. Used for the source dropdown and the
+   * delete-confirmation prompt; NOT used for the on-canvas hover tooltip (UfoElement.ts), which
+   * deliberately shows nothing rather than any generated label for a genuinely title-less shape —
+   * that surface is end-user-facing (a real rr0.org sighting page), where a witness who never
+   * named a shape shouldn't have one invented for them; this method's own generated fallback is
+   * only ever shown inside this recorder's own authoring UI. */
   private shapeLabel(sourceId: string): string {
     const shape = this.ufoElement.sighting.timeline.getInterpolatedShapeAt(this.ufoElement.currentTime, sourceId)
-    return shape?.title || sourceId
+    if (shape?.title) return shape.title
+    const match = /^ufo-(\d+)$/.exec(sourceId)
+    return match ? `${this.messages.shape} ${match[1]}` : sourceId
   }
 
   /** Creates a genuinely new, independent shape/source, staggered diagonally away from
@@ -1307,7 +1354,17 @@ export class UfoRecorderElement extends HTMLElement {
     this.currentSourceId = `ufo-${n}`
     this.selectedSourceIds = new Set([this.currentSourceId])
     this.applyAppearanceAtPlayhead(this.offsetDefaultBounds(timeline.sourceIds.length))
-    this.refreshSourceList()
+    // Filled with a real generated name from the start — same "never leave Name empty by
+    // default" fix as DecorObject's addDecor(), and for the same reason: an untitled shape left
+    // UfoElement's own on-canvas hover tooltip showing nothing at all, and the dropdown/delete-
+    // confirmation prompt falling back to an internal-looking sourceId ("ufo-2") instead of a
+    // real name. shapeLabel() itself derives this from currentSourceId (title is still unset at
+    // this point, so it falls straight through to the "ufo-N" -> "Shape N" branch) — the same
+    // formula shapeLabel() falls back to later if the title is ever cleared again, see its own
+    // doc comment on why that matters. updateShapeTitle() both writes it and refreshes the
+    // dropdown, so no separate refreshSourceList() call is needed here.
+    this.shapeTitleInput.value = this.shapeLabel(this.currentSourceId)
+    this.updateShapeTitle()
   }
 
   /** Removes the selected shape/source entirely — every keyframe it appears in across the
@@ -1402,6 +1459,15 @@ export class UfoRecorderElement extends HTMLElement {
     const decor: DecorObject = {
       id: `decor-${n}`,
       kind,
+      // Filled with the same "{kind} {n}" label decorLabel() would otherwise only ever compute
+      // on demand for display — see this field's own doc comment on why an empty title is no
+      // longer treated as a normal, silently-defaulted state (Name is mandatory now, flagged
+      // invalid if cleared — see updateDecorTitleValidity). Writing a real value here means the
+      // recorder dropdown, the decor context menu's "Masks" flyout, and SceneElement's own hover
+      // tooltip all read the exact same persisted name from day one, instead of three separate
+      // fallback computations that could drift (the tooltip's own fallback never included the
+      // number, which is what prompted this).
+      title: this.nextDecorLabel(kind),
       eastM: 8 * sighting.decor.length,
       northM: 15,
       headingDeg: 0,
@@ -1415,6 +1481,17 @@ export class UfoRecorderElement extends HTMLElement {
     this.currentDecorId = decor.id
     this.refreshDecorList()
     this.ufoElement.refresh()
+  }
+
+  /** The "{kind} {n}" label a freshly added decor object of this kind starts with — same
+   * numbering decorLabel() computes for display (n = how many same-kind objects already exist,
+   * +1), just computed BEFORE insertion here since decorLabel() itself locates the object by
+   * indexOf within the already-updated array. Shares decorKindSelect's own translated option text
+   * with decorLabel so the two can never disagree. */
+  private nextDecorLabel(kind: DecorObject["kind"]): string {
+    const sameKindCount = this.ufoElement.sighting.decor.filter(d => d.kind === kind).length
+    const kindLabel = this.decorKindSelect.querySelector<HTMLOptionElement>(`option[value="${kind}"]`)?.textContent ?? kind
+    return `${kindLabel} ${sameKindCount + 1}`
   }
 
   /** Removes the currently selected decor object, then falls back to whichever one is now first
@@ -1480,7 +1557,22 @@ export class UfoRecorderElement extends HTMLElement {
     })
     this.decorSelect.options[this.decorSelect.selectedIndex]!.textContent = this.decorLabel(sighting.decor.find(d => d.id === this.currentDecorId)!)
     this.syncDecorVisibility()
+    this.updateDecorTitleValidity()
     this.ufoElement.refresh()
+  }
+
+  /** Name is mandatory once a decor object exists — addDecor() always fills it with a real
+   * generated label from the start (see its own doc comment), so an empty field here only ever
+   * means the witness/recorder cleared it afterward, which decorLabel()'s own fallback then
+   * papers back over with a plain, unnumbered kind name wherever it's displayed (the dropdown,
+   * the "Masks" flyout, SceneElement's own hover tooltip) — exactly the ambiguous "Lampadaire"
+   * vs. "Lampadaire 1" mismatch this flag exists to steer away from. Same "flagged, not blocked"
+   * convention as Duration (see updateDurationValidity) — nothing here prevents saving/exporting
+   * with a blank title, it's just made visibly wrong so it doesn't happen by accident. */
+  private updateDecorTitleValidity(): void {
+    const missing = this.currentDecorId !== undefined && this.decorTitleInput.value === ""
+    this.decorTitleInput.classList.toggle("invalid", missing)
+    this.decorTitleInput.setAttribute("aria-invalid", String(missing))
   }
 
   /** Writes the 4 per-side opacity inputs back onto the currently selected decor object's windows
@@ -1586,6 +1678,7 @@ export class UfoRecorderElement extends HTMLElement {
       this.decorWindowInputs[side].value = opacity === undefined ? "" : String(opacity)
     }
     this.syncDecorVisibility()
+    this.updateDecorTitleValidity()
   }
 
   /** Hides `field`'s whole row (its wrapping `<label>`, so its text goes with it — falls back to
@@ -1723,7 +1816,23 @@ export class UfoRecorderElement extends HTMLElement {
   }
 
   private applyMessages(messages: UfoRecorderMessages): void {
-    this.messages = messages
+    // The constructor's very first shape gets its auto-generated title (see shapeLabel/
+    // shapeTitleInput's own doc comments) synchronously, before this async locale load can ever
+    // resolve — English's baked-in default, same as every other label here, EXCEPT this one gets
+    // written straight into persisted shape data rather than just a DOM label's own .textContent,
+    // so it can't be corrected the same simple way everything else below is. Detected by
+    // comparing against what the OLD (pre-switch) messages.shape would have produced — not by
+    // reusing shapeLabel() itself, which would just read the already-stale stored title right
+    // back rather than recomputing a fresh default — and only ever touches DEFAULT_SOURCE_ID's
+    // own title, exactly right after construction: any shape added later goes through addShape(),
+    // which only ever runs from a real user click, long after this locale load has settled.
+    if (this.currentSourceId === DEFAULT_SOURCE_ID && this.shapeTitleInput.value === `${this.messages.shape} 1`) {
+      this.messages = messages
+      this.shapeTitleInput.value = `${this.messages.shape} 1`
+      this.updateShapeTitle()
+    } else {
+      this.messages = messages
+    }
     this.presetButtons.oval.textContent = messages.oval
     this.presetButtons.polygon.textContent = messages.polygon
     this.contextAddVertexButton.textContent = messages.addVertex
@@ -1778,6 +1887,9 @@ export class UfoRecorderElement extends HTMLElement {
     this.labelDecorLit.textContent = messages.decorLit
     this.labelDecorSightingUrl.textContent = messages.decorSightingUrl
     this.contextViewTestimonyButton.textContent = messages.viewTestimony
+    // The arrow is appended here, not part of the translated string — see UfoRecorderMessages.
+    // masks's own doc comment.
+    this.labelContextMasks.textContent = `${messages.masks} ▸`
     this.addDecorWitnessButton.textContent = messages.addWitness
     // Reuses the same "Add decor" text as the generic addDecor label above — see this button's
     // own field doc comment on why it's no longer building-specific.
@@ -2000,7 +2112,10 @@ export class UfoRecorderElement extends HTMLElement {
     }
     const decorId = this.pickDecorAt(event)
     const decor = decorId ? this.ufoElement.sighting.decor.find(d => d.id === decorId) : undefined
-    if (decor?.kind === "witness") this.showDecorContextMenu(event.clientX, event.clientY, decor)
+    // Every kind, not just "witness" (this menu's original and, until now, only reason to open —
+    // see showDecorContextMenu's own doc comment) — the "Masks" flyout applies just as much to a
+    // building/tree/streetlight/vehicle as to another witness marker.
+    if (decor) this.showDecorContextMenu(event.clientX, event.clientY, decor)
   }
 
   /** Converts a pointer event's page position to normalized device coordinates (each in [-1,1],
@@ -2093,6 +2208,7 @@ export class UfoRecorderElement extends HTMLElement {
     this.decorContextMenu.hidden = false
     this.contextViewTestimonyButton.disabled = !decor.sightingUrl
     this.contextViewTestimonyButton.title = decor.sightingUrl ? "" : this.messages.noWitnessRecording
+    this.refreshContextMasksSubmenu(decor)
     document.addEventListener("click", this.handleOutsideContextMenuClick)
   }
 
@@ -2100,6 +2216,43 @@ export class UfoRecorderElement extends HTMLElement {
     this.decorContextMenu.hidden = true
     this.contextMenuDecorId = undefined
     document.removeEventListener("click", this.handleOutsideContextMenuClick)
+  }
+
+  /** Rebuilds the "Masks" flyout with one checkbox per shape/source currently in the recording
+   * (see Timeline.sourceIds), checked for whichever this decor object already occludes (see
+   * DecorObject.occludesSourceIds's own doc comment for why this is per-shape rather than a single
+   * flag). Rebuilt fresh on every menu open rather than kept incrementally in sync — the shape list
+   * can change (add/delete/rename) between one open and the next, and this menu is only ever open
+   * a moment at a time, so there's nothing to gain from a more incremental update. */
+  private refreshContextMasksSubmenu(decor: DecorObject): void {
+    this.contextMasksSubmenu.innerHTML = ""
+    for (const sourceId of this.ufoElement.sighting.timeline.sourceIds) {
+      const label = document.createElement("label")
+      const checkbox = document.createElement("input")
+      checkbox.type = "checkbox"
+      checkbox.checked = decor.occludesSourceIds?.includes(sourceId) ?? false
+      checkbox.addEventListener("change", () => this.updateDecorOccludesShape(decor.id, sourceId, checkbox.checked))
+      label.appendChild(checkbox)
+      label.appendChild(document.createTextNode(this.shapeLabel(sourceId)))
+      this.contextMasksSubmenu.appendChild(label)
+    }
+  }
+
+  /** Toggles whether decor object `decorId` occludes shape `sourceId` — see
+   * DecorObject.occludesSourceIds's own doc comment. Reached only from the decor context menu's
+   * "Masks" flyout (refreshContextMasksSubmenu); deliberately does NOT hide the menu afterward
+   * (unlike every other decor-context-menu item), so more than one shape can be toggled in a
+   * single open without the menu closing and having to be reopened between each click. */
+  private updateDecorOccludesShape(decorId: string, sourceId: string, occludes: boolean): void {
+    const sighting = this.ufoElement.sighting
+    sighting.decor = sighting.decor.map(d => {
+      if (d.id !== decorId) return d
+      const next = occludes
+        ? [...new Set([...(d.occludesSourceIds ?? []), sourceId])]
+        : (d.occludesSourceIds ?? []).filter(id => id !== sourceId)
+      return { ...d, occludesSourceIds: next.length > 0 ? next : undefined }
+    })
+    this.ufoElement.refresh()
   }
 
   /** Loads the right-clicked witness's own sighting.json — replacing this recording entirely,

@@ -30,6 +30,9 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     pickDecorAt(): undefined {
       return undefined
     }
+    isScreenPointOccluded(): boolean {
+      return false
+    }
     render(): void {}
     dispose(): void {}
     startTwinkle(): void {}

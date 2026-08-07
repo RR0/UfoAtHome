@@ -152,6 +152,11 @@ export interface UfoRecorderMessages {
   viewTestimony: string
   /** viewTestimony's own disabled title when the right-clicked witness has no sightingUrl set. */
   noWitnessRecording: string
+  /** Decor context menu's "Masks ▸" flyout trigger — the arrow itself is appended in code, not
+   * part of this translated string (see UfoRecorderElement.applyMessages). Its submenu lists every
+   * shape/source as a checkbox (see DecorObject.occludesSourceIds), which needs no translation of
+   * its own since each entry is just that shape's own name/sourceId. */
+  masks: string
   /** Button in the Witness group that adds a new "other witness" decor object (see
    * UfoRecorderElement's addDecorWitnessButton) — distinct from decorWitness, that dropdown
    * option's own (now-hidden) label. */

@@ -34,6 +34,9 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     pickDecorAt(): undefined {
       return undefined
     }
+    isScreenPointOccluded(): boolean {
+      return false
+    }
     render(): void {}
     dispose(): void {}
     startTwinkle(): void {}
@@ -879,16 +882,57 @@ describe("UfoRecorderElement post-hoc appearance editing + multi-shape authoring
     expect(element.sightingData.timeline.keyframes[0].shapes[0].shape.title).toBeUndefined()
   })
 
-  it("shows the shape's title in the source dropdown once set, falling back to the raw sourceId otherwise", () => {
+  it("shows the shape's title in the source dropdown, starting from its own auto-generated one", () => {
     const element = mount()
     const sourceSelect = element.shadowRoot!.getElementById("source") as HTMLSelectElement
-    expect(sourceSelect.options[0].textContent).toBe("ufo-1")
+    // Auto-filled from the start (see addShape's own nextShapeLabel) — no separate naming step
+    // needed before the dropdown shows something real instead of the raw internal sourceId.
+    expect(sourceSelect.options[0].textContent).toBe("Shape 1")
 
     const titleInput = element.shadowRoot!.getElementById("shapeTitle") as HTMLInputElement
     titleInput.value = "Vaisseau principal"
     titleInput.dispatchEvent(new Event("input"))
 
     expect(sourceSelect.options[0].textContent).toBe("Vaisseau principal")
+  })
+
+  it("derives the same 'Shape N' label from a standard sourceId loaded with no title, not the raw id — same formula addShape() itself fills in with, so clearing a title never jumps to different-looking text", () => {
+    const element = mount()
+    element.sightingData = {
+      version: 1,
+      timeline: {
+        keyframes: [{ t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 0, y: 0, width: 10, height: 10 }, color: "#39ff14", angle: 0, transparency: 0, haloScale: 0, selected: false } }] }]
+      }
+    }
+    const sourceSelect = element.shadowRoot!.getElementById("source") as HTMLSelectElement
+    expect(sourceSelect.options[0].textContent).toBe("Shape 1")
+  })
+
+  it("falls back to the raw sourceId only when it doesn't follow the ufo-N convention at all (hand-written/older data)", () => {
+    const element = mount()
+    element.sightingData = {
+      version: 1,
+      timeline: {
+        keyframes: [{ t: 0, shapes: [{ sourceId: "witness-drawing", shape: { kind: "oval", bounds: { x: 0, y: 0, width: 10, height: 10 }, color: "#39ff14", angle: 0, transparency: 0, haloScale: 0, selected: false } }] }]
+      }
+    }
+    const sourceSelect = element.shadowRoot!.getElementById("source") as HTMLSelectElement
+    expect(sourceSelect.options[0].textContent).toBe("witness-drawing")
+  })
+
+  it("keeps the exact same dropdown label after clearing an auto-filled title — no jarring jump to the raw sourceId", () => {
+    const element = mount()
+    const shadow = element.shadowRoot!
+    ;(shadow.getElementById("add-shape") as HTMLButtonElement).click() // "ufo-2", auto-titled "Shape 2"
+    const sourceSelect = shadow.getElementById("source") as HTMLSelectElement
+    expect(sourceSelect.options[1].textContent).toBe("Shape 2")
+
+    const titleInput = shadow.getElementById("shapeTitle") as HTMLInputElement
+    titleInput.value = ""
+    titleInput.dispatchEvent(new Event("input"))
+
+    expect(sourceSelect.options[1].textContent).toBe("Shape 2")
+    expect(element.sightingData.timeline.keyframes[0].shapes.find(s => s.sourceId === "ufo-2")?.shape.title).toBeUndefined()
   })
 
   it("names the shape in the delete-confirmation prompt once it has a title", () => {
@@ -1041,13 +1085,44 @@ describe("UfoRecorderElement post-hoc appearance editing + multi-shape authoring
     const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(false)
     const element = mount()
     const addShapeButton = element.shadowRoot!.getElementById("add-shape") as HTMLButtonElement
-    addShapeButton.click() // "ufo-1" + "ufo-2", "ufo-2" selected
+    addShapeButton.click() // "ufo-1" + "ufo-2", "ufo-2" selected — auto-named "Shape 2" (see addShape's own nextShapeLabel)
 
     const deleteShapeButton = element.shadowRoot!.getElementById("delete-shape") as HTMLButtonElement
     deleteShapeButton.click()
 
-    expect(confirmSpy).toHaveBeenCalledWith(expect.stringContaining("ufo-2"))
+    expect(confirmSpy).toHaveBeenCalledWith(expect.stringContaining("Shape 2"))
     confirmSpy.mockRestore()
+  })
+
+  it("auto-names a freshly added shape, matching the dropdown/tooltip label, instead of leaving it untitled", () => {
+    const element = mount()
+    const addShapeButton = element.shadowRoot!.getElementById("add-shape") as HTMLButtonElement
+
+    addShapeButton.click()
+    addShapeButton.click()
+
+    const sourceIds = element.sightingData.timeline.keyframes[0].shapes.map(s => s.sourceId)
+    const titles = element.sightingData.timeline.keyframes[0].shapes.map(s => s.shape.title)
+    expect(sourceIds).toEqual(["ufo-1", "ufo-2", "ufo-3"])
+    expect(titles).toEqual(["Shape 1", "Shape 2", "Shape 3"])
+    const shapeTitleInput = element.shadowRoot!.getElementById("shapeTitle") as HTMLInputElement
+    expect(shapeTitleInput.value).toBe("Shape 3") // the just-added, now-selected one
+  })
+
+  it("flags the shape Name field invalid when cleared, clears the flag once it's non-empty again", () => {
+    const element = mount()
+    const titleInput = element.shadowRoot!.getElementById("shapeTitle") as HTMLInputElement
+    expect(titleInput.classList.contains("invalid")).toBe(false)
+
+    titleInput.value = ""
+    titleInput.dispatchEvent(new Event("input"))
+    expect(titleInput.classList.contains("invalid")).toBe(true)
+    expect(titleInput.getAttribute("aria-invalid")).toBe("true")
+
+    titleInput.value = "Renamed"
+    titleInput.dispatchEvent(new Event("input"))
+    expect(titleInput.classList.contains("invalid")).toBe(false)
+    expect(titleInput.getAttribute("aria-invalid")).toBe("false")
   })
 
   it("Delete shape falls back to the next remaining source and resyncs the toolbar to it", () => {
@@ -2811,6 +2886,42 @@ describe("UfoRecorderElement decor group", () => {
     expect((shadow.getElementById("decorEast") as HTMLInputElement).disabled).toBe(false)
   })
 
+  it("fills the Name field with the same numbered label the dropdown shows, so an untouched decor object is never nameless", () => {
+    const element = mount()
+    const shadow = element.shadowRoot!
+    const kindSelect = shadow.getElementById("decorKind") as HTMLSelectElement
+    const addButton = shadow.getElementById("add-decor-building") as HTMLButtonElement
+    kindSelect.value = "streetlight"
+
+    addButton.click()
+    addButton.click()
+
+    const decor = element.sightingData.decor!
+    expect(decor.map(d => d.title)).toEqual(["Streetlight 1", "Streetlight 2"])
+    const decorSelect = shadow.getElementById("decor") as HTMLSelectElement
+    expect(decorSelect.options[1].textContent).toBe("Streetlight 2")
+    const titleInput = shadow.getElementById("decorTitle") as HTMLInputElement
+    expect(titleInput.value).toBe("Streetlight 2") // the just-added, now-selected one
+  })
+
+  it("flags the Name field invalid when cleared, clears the flag once it's non-empty again", () => {
+    const element = mount()
+    const shadow = element.shadowRoot!
+    ;(shadow.getElementById("add-decor-building") as HTMLButtonElement).click()
+    const titleInput = shadow.getElementById("decorTitle") as HTMLInputElement
+    expect(titleInput.classList.contains("invalid")).toBe(false)
+
+    titleInput.value = ""
+    titleInput.dispatchEvent(new Event("input"))
+    expect(titleInput.classList.contains("invalid")).toBe(true)
+    expect(titleInput.getAttribute("aria-invalid")).toBe("true")
+
+    titleInput.value = "Renamed"
+    titleInput.dispatchEvent(new Event("input"))
+    expect(titleInput.classList.contains("invalid")).toBe(false)
+    expect(titleInput.getAttribute("aria-invalid")).toBe("false")
+  })
+
   it("writes East/North/Heading edits back onto the selected decor object", () => {
     const element = mount()
     const shadow = element.shadowRoot!
@@ -3080,7 +3191,7 @@ describe("UfoRecorderElement decor context menu", () => {
     expect(viewButton.title).not.toBe("")
   })
 
-  it("does not open the decor menu for a non-witness decor kind", () => {
+  it("opens the decor menu for a non-witness decor kind too, but disables 'view testimony'", () => {
     const element = mount()
     element.sightingData = {
       version: 1,
@@ -3092,7 +3203,58 @@ describe("UfoRecorderElement decor context menu", () => {
 
     rightClickCanvas(element)
 
-    expect((element.shadowRoot!.getElementById("decor-context-menu") as HTMLElement).hidden).toBe(true)
+    expect((element.shadowRoot!.getElementById("decor-context-menu") as HTMLElement).hidden).toBe(false)
+    const viewButton = element.shadowRoot!.getElementById("context-view-testimony") as HTMLButtonElement
+    expect(viewButton.disabled).toBe(true)
+  })
+
+  it("Masks flyout lists every shape as a checkbox, checked per DecorObject.occludesSourceIds", () => {
+    const element = mount()
+    element.sightingData = {
+      version: 1,
+      timeline: {
+        keyframes: [
+          {
+            t: 0,
+            shapes: [
+              { sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 0, y: 0, width: 10, height: 10 }, color: "#fff", angle: 0, transparency: 0, haloScale: 0, selected: false } },
+              { sourceId: "ufo-2", shape: { kind: "oval", bounds: { x: 20, y: 0, width: 10, height: 10 }, color: "#fff", angle: 0, transparency: 0, haloScale: 0, selected: false } }
+            ]
+          }
+        ]
+      },
+      decor: [{ id: "decor-1", kind: "tree", eastM: 0, northM: 10, occludesSourceIds: ["ufo-2"] }]
+    }
+    const sceneEl = element.shadowRoot!.querySelector("rr0-scene") as unknown as { pickDecorAt: () => string }
+    sceneEl.pickDecorAt = () => "decor-1"
+
+    rightClickCanvas(element)
+
+    const checkboxes = [...element.shadowRoot!.getElementById("context-masks-submenu")!.querySelectorAll("input[type=checkbox]")] as HTMLInputElement[]
+    expect(checkboxes.map(c => c.checked)).toEqual([false, true])
+  })
+
+  it("toggling a Masks checkbox writes DecorObject.occludesSourceIds without closing the menu", () => {
+    const element = mount()
+    element.sightingData = {
+      version: 1,
+      timeline: {
+        keyframes: [
+          { t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 0, y: 0, width: 10, height: 10 }, color: "#fff", angle: 0, transparency: 0, haloScale: 0, selected: false } }] }
+        ]
+      },
+      decor: [{ id: "decor-1", kind: "tree", eastM: 0, northM: 10 }]
+    }
+    const sceneEl = element.shadowRoot!.querySelector("rr0-scene") as unknown as { pickDecorAt: () => string }
+    sceneEl.pickDecorAt = () => "decor-1"
+
+    rightClickCanvas(element)
+    const checkbox = element.shadowRoot!.querySelector("#context-masks-submenu input[type=checkbox]") as HTMLInputElement
+    checkbox.checked = true
+    checkbox.dispatchEvent(new Event("change", { bubbles: true }))
+
+    expect(element.sightingData.decor?.[0].occludesSourceIds).toEqual(["ufo-1"])
+    expect((element.shadowRoot!.getElementById("decor-context-menu") as HTMLElement).hidden).toBe(false)
   })
 
   it("loads the witness's own recording when 'view testimony' is clicked", async () => {

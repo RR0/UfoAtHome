@@ -150,6 +150,10 @@ export const html = `
 </div>
 <div id="decor-context-menu" class="context-menu" hidden role="menu">
   <button id="context-view-testimony" type="button" role="menuitem">View testimony</button>
+  <div class="submenu-trigger">
+    <span id="label-context-masks" class="submenu-label" role="menuitem" aria-haspopup="true">Masks &#9656;</span>
+    <div id="context-masks-submenu" class="submenu" role="menu"></div>
+  </div>
 </div>
 `
 
@@ -355,5 +359,56 @@ fieldset.decor-fieldset legend {
 }
 .context-delete {
   color: #c33;
+}
+/* "Masks ▸" — a CSS-only hover/focus flyout (no JS show/hide state machine needed) listing every
+   shape/source currently in the recording as a checkbox, for DecorObject.occludesSourceIds (see
+   its own doc comment: which shapes, if any, this decor object sits in front of — a per-shape
+   choice since a recording can have more than one). :focus-within (not hover-only, unlike the
+   playback toolbar's own deliberately hover-only auto-hide — see UfoElement's template) is exactly
+   right here: keeping it open while a checkbox inside has keyboard focus is what makes toggling
+   more than one checkbox by keyboard actually usable, and this menu doesn't auto-hide on any other
+   trigger the way the toolbar does. */
+.submenu-trigger {
+  position: relative;
+}
+.submenu-trigger > .submenu-label {
+  display: block;
+  padding: 0.4em 0.8em;
+  cursor: default;
+}
+.submenu-trigger:hover > .submenu-label,
+.submenu-trigger:focus-within > .submenu-label {
+  background: #eef;
+}
+.submenu {
+  display: none;
+  position: absolute;
+  left: 100%;
+  top: 0;
+  min-width: 9em;
+  max-height: 16em;
+  overflow-y: auto;
+  padding: 0.3em 0;
+  background: #fff;
+  color: #222;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  font-size: 0.9em;
+}
+.submenu-trigger:hover > .submenu,
+.submenu-trigger:focus-within > .submenu {
+  display: block;
+}
+.submenu label {
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  padding: 0.3em 0.8em;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.submenu label:hover {
+  background: #eef;
 }
 `
