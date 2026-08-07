@@ -292,6 +292,14 @@ export class SceneElement extends HTMLElement {
     this.weatherAudio.setAmbient(weather.precipitationType, weather.precipitationIntensity, weather.windSpeed)
   }
 
+  /** Finds which decor object (if any) sits under normalized device coordinates — a thin
+   * passthrough to SceneRenderer.pickDecorAt, same "expose one method, not the whole renderer"
+   * convention as setWeather/currentTerrainAttribution above. Used by UfoRecorderElement's own
+   * right-click handler (see its onContextMenu) to offer "view this witness's testimony". */
+  pickDecorAt(ndcX: number, ndcY: number): string | undefined {
+    return this.sceneRenderer.pickDecorAt(ndcX, ndcY)
+  }
+
   /** Unlocks weather audio — see WeatherAudio.resume's own doc comment on why this needs a real
    * user gesture. UfoRecorderElement calls this from its own weather toolbar's first interaction
    * (handleFirstInteraction covers the other case: a read-only embed with no editing UI at all). */
@@ -361,8 +369,13 @@ export class SceneElement extends HTMLElement {
     // even every tick: setWeather/SceneRenderer.setWeather both dedupe on actual field values, not
     // just call frequency (see SceneRenderer.setWeather's own doc comment).
     this.setWeather(resolveWeatherAt(sighting, t))
+    this.sceneRenderer.setDecor(sighting.decor)
     const pose = resolveObserverPoseAt(sighting, t)
     this.sceneRenderer.setObserverPose(pose ?? DEFAULT_OBSERVER_POSE)
+    // Keeps decor anchored to its own real-world spot rather than sliding along with a moving
+    // witness — see SceneRenderer.updateDecorAnchoring's own doc comment. The reference pose is
+    // always the recording's own t=0, regardless of what t is being rendered right now.
+    this.sceneRenderer.updateDecorAnchoring(resolveObserverPoseAt(sighting, 0), pose)
     // Raw pose's own lat/lng (possibly undefined), never the astronomy fallback below — a real
     // terrain patch must only ever build from a real recorded location, never (0,0).
     this.sceneRenderer.setTerrainOrigin(pose?.lat, pose?.lng)

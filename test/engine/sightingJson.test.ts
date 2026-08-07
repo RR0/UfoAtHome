@@ -22,6 +22,23 @@ describe("sightingJson", () => {
     expect(restored.timeline.getShapeAt(0, "ufo-1")?.bounds).toEqual({ x: 10, y: 20, width: 40, height: 24 })
   })
 
+  it("round-trips decor", () => {
+    const sighting = Sighting.create()
+    sighting.decor = [
+      { id: "decor-1", kind: "tree", eastM: 8, northM: -12 },
+      { id: "decor-2", kind: "vehicle", eastM: -3, northM: -6, headingDeg: 45, lit: true }
+    ]
+
+    const restored = fromSightingJson(toSightingJson(sighting))
+
+    expect(restored.decor).toEqual(sighting.decor)
+  })
+
+  it("defaults decor to [] for older JSON that predates it", () => {
+    const restored = fromSightingJson({ version: 1, timeline: { keyframes: [] } })
+    expect(restored.decor).toEqual([])
+  })
+
   it("tolerates a sighting with no time/place", () => {
     const restored = fromSightingJson(toSightingJson(Sighting.create()))
     expect(restored.event.time).toBeUndefined()
@@ -43,8 +60,9 @@ describe("sightingJson", () => {
     expect(restored.witness).toEqual({ id: "chiles", title: "Clarence Chiles" })
     expect(restored.caseId).toBe("chiles-whitted")
     // timeline.order/groups are new (z-order support, multi-select grouping) — empty here since
-    // there are no shapes/sources at all, but always present now, unlike the hand-written input above.
-    expect(toSightingJson(restored)).toEqual({ ...json, timeline: { ...json.timeline, order: [], groups: [] } })
+    // there are no shapes/sources at all, but always present now, unlike the hand-written input
+    // above. decor is likewise new (see Decor.ts) and always present, empty here since none was set.
+    expect(toSightingJson(restored)).toEqual({ ...json, timeline: { ...json.timeline, order: [], groups: [] }, decor: [] })
   })
 
   it("round-trips witness (lastName+firstNames)", () => {

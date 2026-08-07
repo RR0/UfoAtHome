@@ -10,6 +10,7 @@ import type { HandleId } from "../engine/shape/ShapeHandles.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
 import type { PrecipitationType, Weather } from "../engine/model/Weather.js"
 import type { People } from "../engine/model/People.js"
+import type { DecorObject } from "../engine/model/Decor.js"
 import {
   sightingDurationMs,
   sightingDurationBlockedReason,
@@ -86,6 +87,7 @@ export class UfoRecorderElement extends HTMLElement {
   private readonly recordButton: HTMLButtonElement
   private readonly samplingRateInput: HTMLInputElement
   private readonly presetButtons: Record<ShapePresetId, HTMLButtonElement>
+  private readonly presetsGroup: HTMLElement
   private readonly colorInput: HTMLInputElement
   private readonly transparencyInput: HTMLInputElement
   private readonly haloScaleInput: HTMLInputElement
@@ -99,6 +101,8 @@ export class UfoRecorderElement extends HTMLElement {
   private readonly contextBringToFrontButton: HTMLButtonElement
   private readonly contextSendToBackButton: HTMLButtonElement
   private readonly contextDeleteButton: HTMLButtonElement
+  private readonly decorContextMenu: HTMLElement
+  private readonly contextViewTestimonyButton: HTMLButtonElement
   // External playback row — see the constructor's ufoElement.showToolbar comment for why this
   // recorder drives its own controls instead of the nested ufo's overlaid ones.
   private readonly playPauseButton: HTMLButtonElement
@@ -187,6 +191,32 @@ export class UfoRecorderElement extends HTMLElement {
   private readonly optionPrecipitationRain: HTMLElement
   private readonly optionPrecipitationSnow: HTMLElement
   private readonly optionPrecipitationHail: HTMLElement
+  private readonly decorKindSelect: HTMLSelectElement
+  private readonly addDecorButton: HTMLButtonElement
+  private readonly addDecorWitnessButton: HTMLButtonElement
+  private readonly addDecorBuildingButton: HTMLButtonElement
+  private readonly deleteDecorButton: HTMLButtonElement
+  private readonly decorSelect: HTMLSelectElement
+  private readonly decorTitleInput: HTMLInputElement
+  private readonly decorEastInput: HTMLInputElement
+  private readonly decorNorthInput: HTMLInputElement
+  private readonly decorHeadingInput: HTMLInputElement
+  private readonly decorLitInput: HTMLInputElement
+  private readonly decorSightingUrlInput: HTMLInputElement
+  private readonly labelDecorGroup: HTMLElement
+  private readonly labelDecorKind: HTMLElement
+  private readonly labelDecor: HTMLElement
+  private readonly labelDecorTitle: HTMLElement
+  private readonly labelDecorEast: HTMLElement
+  private readonly labelDecorNorth: HTMLElement
+  private readonly labelDecorHeading: HTMLElement
+  private readonly labelDecorLit: HTMLElement
+  private readonly labelDecorSightingUrl: HTMLElement
+  private readonly optionDecorBuilding: HTMLElement
+  private readonly optionDecorTree: HTMLElement
+  private readonly optionDecorStreetlight: HTMLElement
+  private readonly optionDecorVehicle: HTMLElement
+  private readonly optionDecorWitness: HTMLElement
 
   private recorder?: Recorder
   private isRecording = false
@@ -204,6 +234,16 @@ export class UfoRecorderElement extends HTMLElement {
    * size of 1 is the plain single-shape case every pre-existing code path already handled;
    * size > 1 is what selectUnit/toggleUnitSelection below add. */
   private selectedSourceIds: Set<string> = new Set([DEFAULT_SOURCE_ID])
+  /** Which decor object the Decor group's East/North/Heading/Lit fields currently target —
+   * undefined whenever the sighting has no decor at all yet. Unlike currentSourceId, this is
+   * allowed to be empty: a recording with zero decor objects is the common case (decor is opt-in
+   * scenery, not something every sighting needs), unlike currentSourceId which always has at
+   * least one shape. */
+  private currentDecorId?: string
+  /** Which decor object the DECOR context menu (right-click on the 3D canvas, distinct from the
+   * SHAPE context menu's own currentSourceId) currently targets — set by onContextMenu, read by
+   * viewWitnessTestimony(). Only ever set while decorContextMenu is actually open. */
+  private contextMenuDecorId?: string
 
   /** Set while the user is dragging the selection's body (move), a single shape's own handle
    * (resize/rotate — only reachable when exactly one shape is selected), or the shared bounding
@@ -242,6 +282,7 @@ export class UfoRecorderElement extends HTMLElement {
         this.toggleRecording()
       }
       if (!this.contextMenu.hidden) this.hideContextMenu()
+      if (!this.decorContextMenu.hidden) this.hideDecorContextMenu()
     }
     if (ARROW_KEYS.has(event.key) || event.key === "Delete" || event.key === "Backspace") {
       // event.composedPath()[0] (not event.target, which retargets across shadow boundaries, and
@@ -296,6 +337,7 @@ export class UfoRecorderElement extends HTMLElement {
 
     this.recordButton = this.shadow.getElementById("record") as HTMLButtonElement
     this.samplingRateInput = this.shadow.getElementById("samplingRate") as HTMLInputElement
+    this.presetsGroup = this.shadow.getElementById("presets-group")!
     this.presetButtons = {
       oval: this.shadow.getElementById("preset-oval") as HTMLButtonElement,
       saucer: this.shadow.getElementById("preset-saucer") as HTMLButtonElement,
@@ -314,6 +356,8 @@ export class UfoRecorderElement extends HTMLElement {
     this.contextBringToFrontButton = this.shadow.getElementById("context-bring-to-front") as HTMLButtonElement
     this.contextSendToBackButton = this.shadow.getElementById("context-send-to-back") as HTMLButtonElement
     this.contextDeleteButton = this.shadow.getElementById("context-delete") as HTMLButtonElement
+    this.decorContextMenu = this.shadow.getElementById("decor-context-menu")!
+    this.contextViewTestimonyButton = this.shadow.getElementById("context-view-testimony") as HTMLButtonElement
     this.playPauseButton = this.shadow.getElementById("play-pause") as HTMLButtonElement
     this.seekInput = this.shadow.getElementById("seek") as HTMLInputElement
     this.timeStartLabel = this.shadow.getElementById("time-start")!
@@ -390,6 +434,32 @@ export class UfoRecorderElement extends HTMLElement {
     this.optionPrecipitationRain = this.shadow.getElementById("option-precipitation-rain")!
     this.optionPrecipitationSnow = this.shadow.getElementById("option-precipitation-snow")!
     this.optionPrecipitationHail = this.shadow.getElementById("option-precipitation-hail")!
+    this.decorKindSelect = this.shadow.getElementById("decorKind") as HTMLSelectElement
+    this.addDecorButton = this.shadow.getElementById("add-decor") as HTMLButtonElement
+    this.addDecorWitnessButton = this.shadow.getElementById("add-decor-witness") as HTMLButtonElement
+    this.addDecorBuildingButton = this.shadow.getElementById("add-decor-building") as HTMLButtonElement
+    this.deleteDecorButton = this.shadow.getElementById("delete-decor") as HTMLButtonElement
+    this.decorSelect = this.shadow.getElementById("decor") as HTMLSelectElement
+    this.decorTitleInput = this.shadow.getElementById("decorTitle") as HTMLInputElement
+    this.decorEastInput = this.shadow.getElementById("decorEast") as HTMLInputElement
+    this.decorNorthInput = this.shadow.getElementById("decorNorth") as HTMLInputElement
+    this.decorHeadingInput = this.shadow.getElementById("decorHeading") as HTMLInputElement
+    this.decorLitInput = this.shadow.getElementById("decorLit") as HTMLInputElement
+    this.decorSightingUrlInput = this.shadow.getElementById("decorSightingUrl") as HTMLInputElement
+    this.labelDecorGroup = this.shadow.getElementById("label-decor-group")!
+    this.labelDecorKind = this.shadow.getElementById("label-decor-kind")!
+    this.labelDecor = this.shadow.getElementById("label-decor")!
+    this.labelDecorTitle = this.shadow.getElementById("label-decor-title")!
+    this.labelDecorEast = this.shadow.getElementById("label-decor-east")!
+    this.labelDecorNorth = this.shadow.getElementById("label-decor-north")!
+    this.labelDecorHeading = this.shadow.getElementById("label-decor-heading")!
+    this.labelDecorLit = this.shadow.getElementById("label-decor-lit")!
+    this.labelDecorSightingUrl = this.shadow.getElementById("label-decor-sighting-url")!
+    this.optionDecorBuilding = this.shadow.getElementById("option-decor-building")!
+    this.optionDecorTree = this.shadow.getElementById("option-decor-tree")!
+    this.optionDecorStreetlight = this.shadow.getElementById("option-decor-streetlight")!
+    this.optionDecorVehicle = this.shadow.getElementById("option-decor-vehicle")!
+    this.optionDecorWitness = this.shadow.getElementById("option-decor-witness")!
 
     this.ufoElement.canvasElement.addEventListener("pointerdown", event => this.onPointerDown(event))
     this.ufoElement.canvasElement.addEventListener("pointermove", event => this.onPointerMove(event))
@@ -402,6 +472,7 @@ export class UfoRecorderElement extends HTMLElement {
       this.hideContextMenu()
       this.deleteShape()
     })
+    this.contextViewTestimonyButton.addEventListener("click", () => this.viewWitnessTestimony())
     // Syncs synchronously right after each call rather than waiting for the next "timeupdate" —
     // play()/toggleLoop() take effect immediately but the first actual frame/tick (what
     // "timeupdate" fires on) is scheduled via requestAnimationFrame, so without this the button's
@@ -432,6 +503,14 @@ export class UfoRecorderElement extends HTMLElement {
     // itself already resyncs the toolbar, no separate onSelectionOrTimeChanged() call needed).
     this.sourceSelect.addEventListener("change", () => this.selectUnit(this.sourceSelect.value))
     this.shapeTitleInput.addEventListener("input", () => this.updateShapeTitle())
+    this.addDecorButton.addEventListener("click", () => this.addDecor())
+    this.addDecorWitnessButton.addEventListener("click", () => this.addDecor("witness"))
+    this.addDecorBuildingButton.addEventListener("click", () => this.addDecor("building"))
+    this.deleteDecorButton.addEventListener("click", () => this.deleteDecor())
+    this.decorSelect.addEventListener("change", () => this.selectDecor(this.decorSelect.value))
+    for (const input of [this.decorTitleInput, this.decorEastInput, this.decorNorthInput, this.decorHeadingInput, this.decorLitInput, this.decorSightingUrlInput]) {
+      input.addEventListener("input", () => this.updateDecor())
+    }
     // The single funnel for "the recording changed, a consumer composing this element (e.g. a
     // live <rr0-scene> preview) should resync" — refresh() (called after every mutation: shape
     // edits, drag, observer/time edits, duration) always ends in a timeupdate on the *nested*
@@ -506,6 +585,8 @@ export class UfoRecorderElement extends HTMLElement {
     // clicked/selected, since click-to-select hit-tests against the Timeline, not the canvas.
     this.applyAppearanceAtPlayhead()
     this.refreshSourceList()
+    this.currentDecorId = this.ufoElement.sighting.decor[0]?.id
+    this.refreshDecorList()
     this.onSelectionOrTimeChanged()
     // A brand-new recording starts with no duration at all — flags it as missing right away
     // rather than only once the user first touches a date/duration field.
@@ -536,6 +617,8 @@ export class UfoRecorderElement extends HTMLElement {
     this.currentSourceId = this.ufoElement.sighting.timeline.sourceIds[0] ?? DEFAULT_SOURCE_ID
     this.selectedSourceIds = new Set([this.currentSourceId])
     this.refreshSourceList()
+    this.currentDecorId = this.ufoElement.sighting.decor[0]?.id
+    this.refreshDecorList()
     this.onSelectionOrTimeChanged()
     this.syncDurationField()
     this.syncObservationTimeFields()
@@ -589,8 +672,9 @@ export class UfoRecorderElement extends HTMLElement {
   /** Loads a SightingRecordingJson fetched from a user-entered URL — same failure handling as
    * importFromFile(). Does nothing on an empty URL rather than firing a request at the page's own
    * origin. */
-  private async importFromUrl(): Promise<void> {
-    const url = this.importUrlInput.value.trim()
+  /** `url` defaults to the Observation group's own "load from URL" field — explicit callers
+   * (viewWitnessTestimony) pass a witness decor object's own sightingUrl instead. */
+  private async importFromUrl(url: string = this.importUrlInput.value.trim()): Promise<void> {
     if (!url) return
     try {
       const response = await fetch(url)
@@ -1162,6 +1246,135 @@ export class UfoRecorderElement extends HTMLElement {
     this.sourceSelect.value = this.currentSourceId
   }
 
+  /** Human-readable label for the decor dropdown — a capitalized kind plus its 1-based position
+   * among decor of the same kind (e.g. "Building 1", "Tree 2"), since decor objects have no
+   * name/title field of their own (unlike shapeLabel's shape.title, decor is scenery, not
+   * individually identified). */
+  /** decor.title wins when given (same "shape?.title || sourceId" precedence as shapeLabel) —
+   * falls back to a generic "{kind} {n}" label, since decor has no name of its own until the
+   * witness types one into the Name field. */
+  private decorLabel(decor: DecorObject): string {
+    if (decor.title) return decor.title
+    const sameKind = this.ufoElement.sighting.decor.filter(d => d.kind === decor.kind)
+    const index = sameKind.indexOf(decor) + 1
+    const kindLabel = this.decorKindSelect.querySelector<HTMLOptionElement>(`option[value="${decor.kind}"]`)?.textContent ?? decor.kind
+    return `${kindLabel} ${index}`
+  }
+
+  /** Creates a new decor object, staggered along the east axis by how many decor objects already
+   * exist so a run of "Add" clicks doesn't stack everything at the same spot — same "immediately
+   * visible/distinguishable" reasoning as addShape's own diagonal offset. `kind` defaults to
+   * whatever's picked in decorKindSelect (the Decor group's own generic Add button, now offering
+   * only tree/streetlight/vehicle — see the template's own comment on why building/witness are
+   * hidden from that dropdown); addDecorWitnessButton/addDecorBuildingButton (in the Witness/
+   * Location groups respectively) instead call this with an explicit kind, skipping the dropdown
+   * entirely since there's nothing to pick. northM is positive (north, +15) rather than negative:
+   * a fresh recording's camera starts at rotation.y=0, looking toward -Z — the same direction
+   * heading 0 ("facing north") points, per this project's own azimuth convention (see
+   * GeoProjection.ts) — so a newly added decor object should land in front of that default view,
+   * not behind it where the witness would have to turn around just to see what they just added.
+   * Always reassigns sighting.decor to a new array (never mutates the existing one in place) —
+   * see SceneRenderer.setDecor's own doc comment on why that reference-equality check depends on
+   * it. */
+  private addDecor(kind: DecorObject["kind"] = this.decorKindSelect.value as DecorObject["kind"]): void {
+    const sighting = this.ufoElement.sighting
+    const n = sighting.decor.length + 1
+    const decor: DecorObject = {
+      id: `decor-${n}`,
+      kind,
+      eastM: 8 * sighting.decor.length,
+      northM: 15,
+      headingDeg: 0,
+      lit: false
+    }
+    sighting.decor = [...sighting.decor, decor]
+    this.currentDecorId = decor.id
+    this.refreshDecorList()
+    this.ufoElement.refresh()
+  }
+
+  /** Removes the currently selected decor object, then falls back to whichever one is now first
+   * (or none at all — unlike deleteShape, a sighting with zero decor is the normal, common case,
+   * not a state nothing else is built to handle). */
+  private deleteDecor(): void {
+    if (this.currentDecorId === undefined) return
+    const sighting = this.ufoElement.sighting
+    sighting.decor = sighting.decor.filter(d => d.id !== this.currentDecorId)
+    this.currentDecorId = sighting.decor[0]?.id
+    this.refreshDecorList()
+    this.ufoElement.refresh()
+  }
+
+  private selectDecor(id: string): void {
+    this.currentDecorId = id
+    this.syncDecorFields()
+  }
+
+  /** Writes the East/North/Heading/Lit fields back onto the currently selected decor object —
+   * "spread and overwrite one field" style, same as onDragPointerMove's shape-bounds edits (see
+   * that method's own doc comment) — replacing the whole decor array with a new one (not mutating
+   * the existing entry in place) for the same setDecor reference-equality reason as addDecor. */
+  private updateDecor(): void {
+    if (this.currentDecorId === undefined) return
+    const sighting = this.ufoElement.sighting
+    const headingDeg = this.wrapDegrees(Number(this.decorHeadingInput.value), this.decorHeadingInput) ?? 0
+    sighting.decor = sighting.decor.map(d =>
+      d.id === this.currentDecorId
+        ? {
+            ...d,
+            title: this.stringOrUndefined(this.decorTitleInput.value),
+            eastM: Number(this.decorEastInput.value),
+            northM: Number(this.decorNorthInput.value),
+            headingDeg,
+            lit: this.decorLitInput.checked,
+            sightingUrl: this.stringOrUndefined(this.decorSightingUrlInput.value)
+          }
+        : d
+    )
+    this.decorSelect.options[this.decorSelect.selectedIndex]!.textContent = this.decorLabel(sighting.decor.find(d => d.id === this.currentDecorId)!)
+    this.ufoElement.refresh()
+  }
+
+  /** Rebuilds the decor dropdown's own option list and resyncs the East/North/Heading/Lit fields
+   * from whichever decor object is now selected — called after add/delete/load, mirroring
+   * refreshSourceList()'s role for shapes. Disables the field row entirely (rather than leaving
+   * stale values editable) whenever there's no decor to edit at all. */
+  private refreshDecorList(): void {
+    const decor = this.ufoElement.sighting.decor
+    this.decorSelect.innerHTML = ""
+    for (const object of decor) {
+      const option = document.createElement("option")
+      option.value = object.id
+      option.textContent = this.decorLabel(object)
+      this.decorSelect.appendChild(option)
+    }
+    if (this.currentDecorId !== undefined) this.decorSelect.value = this.currentDecorId
+    this.syncDecorFields()
+  }
+
+  private syncDecorFields(): void {
+    const decor = this.ufoElement.sighting.decor.find(d => d.id === this.currentDecorId)
+    const hasSelection = decor !== undefined
+    this.deleteDecorButton.disabled = !hasSelection
+    for (const input of [
+      this.decorSelect,
+      this.decorTitleInput,
+      this.decorEastInput,
+      this.decorNorthInput,
+      this.decorHeadingInput,
+      this.decorLitInput,
+      this.decorSightingUrlInput
+    ]) {
+      input.disabled = !hasSelection
+    }
+    this.decorTitleInput.value = decor?.title ?? ""
+    this.decorEastInput.value = String(decor?.eastM ?? 0)
+    this.decorNorthInput.value = String(decor?.northM ?? 0)
+    this.decorHeadingInput.value = String(decor?.headingDeg ?? 0)
+    this.decorLitInput.checked = decor?.lit ?? false
+    this.decorSightingUrlInput.value = decor?.sightingUrl ?? ""
+  }
+
   private updatePresetButtons(): void {
     for (const presetId of PRESET_IDS) {
       this.presetButtons[presetId]?.setAttribute(
@@ -1270,6 +1483,33 @@ export class UfoRecorderElement extends HTMLElement {
     this.labelPitch.textContent = messages.pitch
     this.labelObservationTime.textContent = messages.observationTime
     this.labelObservationEndTime.textContent = messages.observationEndTime
+    this.obsTimeInput.placeholder = messages.edtfPlaceholder
+    this.obsTimeInput.title = messages.observationTimeHint
+    this.obsEndTimeInput.placeholder = messages.edtfPlaceholder
+    this.obsEndTimeInput.title = messages.observationEndTimeHint
+    this.presetsGroup.setAttribute("aria-label", messages.presetsGroupLabel)
+    this.labelDecorGroup.textContent = messages.decorGroup
+    this.labelDecorKind.textContent = messages.decorKind
+    this.labelDecor.textContent = messages.decor
+    this.optionDecorBuilding.textContent = messages.decorBuilding
+    this.optionDecorTree.textContent = messages.decorTree
+    this.optionDecorStreetlight.textContent = messages.decorStreetlight
+    this.optionDecorVehicle.textContent = messages.decorVehicle
+    this.optionDecorWitness.textContent = messages.decorWitness
+    this.addDecorButton.title = messages.addDecor
+    this.addDecorButton.setAttribute("aria-label", messages.addDecor)
+    this.deleteDecorButton.title = messages.deleteDecor
+    this.deleteDecorButton.setAttribute("aria-label", messages.deleteDecor)
+    this.labelDecorTitle.textContent = messages.decorTitle
+    this.labelDecorEast.textContent = messages.decorEast
+    this.labelDecorNorth.textContent = messages.decorNorth
+    this.labelDecorHeading.textContent = messages.decorHeading
+    this.labelDecorLit.textContent = messages.decorLit
+    this.labelDecorSightingUrl.textContent = messages.decorSightingUrl
+    this.contextViewTestimonyButton.textContent = messages.viewTestimony
+    this.addDecorWitnessButton.textContent = messages.addWitness
+    this.addDecorBuildingButton.textContent = messages.addBuilding
+    this.refreshDecorList() // decor option labels embed decorKindSelect's own text, just updated above
     this.labelWitnessId.textContent = messages.witnessId
     this.labelWitnessDirName.textContent = messages.witnessDirName
     this.labelWitnessTitle.textContent = messages.witnessTitle
@@ -1422,19 +1662,47 @@ export class UfoRecorderElement extends HTMLElement {
    * Suppresses the browser's own native context menu unconditionally (even over empty canvas —
    * a witness right-clicking the sky shouldn't see the page's ordinary menu either), but only
    * shows ours when there's an actual shape to act on. */
+  /** Right-clicking a 2D shape opens the SHAPE menu (group/ungroup/reorder/delete); right-clicking
+   * a witness decor object — which lives in the 3D scene BEHIND the 2D canvas, not on it — opens
+   * the separate DECOR menu instead (currently just "view testimony"). Both start from the same
+   * contextmenu event on the 2D canvas since that transparent overlay always sits on top and
+   * would otherwise swallow the event before the 3D layer underneath ever saw it (same reasoning
+   * as SceneElement's own handlePointerMove). Neither menu can ever be open at the same time as
+   * the other's own picked target, so closing both up front (harmless no-op if already hidden)
+   * keeps a fast second right-click from ever showing two menus at once. */
   private onContextMenu(event: MouseEvent): void {
     event.preventDefault()
     if (this.isRecording || this.ufoElement.playbackState === "playing") return
+    this.hideContextMenu()
+    this.hideDecorContextMenu()
     const point = this.canvasPointFromEvent(event)
     if (!point) return
     const timeline = this.ufoElement.sighting.timeline
     const hit = timeline.hitTest(this.ufoElement.currentTime, point.x, point.y)
-    if (!hit) return
-    // Same "don't collapse an already-selected member" rule as onPointerDown, so right-clicking a
-    // shape that's part of the current multi-selection opens the menu for the whole selection.
-    if (!this.selectedSourceIds.has(hit.sourceId)) this.selectUnit(hit.sourceId)
-    this.currentSourceId = hit.sourceId
-    this.showContextMenu(event.clientX, event.clientY)
+    if (hit) {
+      // Same "don't collapse an already-selected member" rule as onPointerDown, so right-clicking
+      // a shape that's part of the current multi-selection opens the menu for the whole selection.
+      if (!this.selectedSourceIds.has(hit.sourceId)) this.selectUnit(hit.sourceId)
+      this.currentSourceId = hit.sourceId
+      this.showContextMenu(event.clientX, event.clientY)
+      return
+    }
+    const decorId = this.pickDecorAt(event)
+    const decor = decorId ? this.ufoElement.sighting.decor.find(d => d.id === decorId) : undefined
+    if (decor?.kind === "witness") this.showDecorContextMenu(event.clientX, event.clientY, decor)
+  }
+
+  /** Converts a pointer event's page position to normalized device coordinates (each in [-1,1],
+   * as SceneRenderer.pickDecorAt expects) and picks against the 3D scene — same conversion
+   * SceneElement's own handlePointerMove uses for pickBodyAt, duplicated rather than shared since
+   * that one lives on a different element (SceneElement, not this one) reading its own canvas. */
+  private pickDecorAt(event: MouseEvent): string | undefined {
+    const canvas = this.ufoElement.canvasElement
+    const rect = canvas.getBoundingClientRect()
+    if (rect.width === 0 || rect.height === 0) return undefined
+    const ndcX = ((event.clientX - rect.left) / rect.width) * 2 - 1
+    const ndcY = -(((event.clientY - rect.top) / rect.height) * 2 - 1)
+    return this.sceneElement.pickDecorAt(ndcX, ndcY)
   }
 
   private showContextMenu(clientX: number, clientY: number): void {
@@ -1480,10 +1748,40 @@ export class UfoRecorderElement extends HTMLElement {
   /** composedPath(), not event.target, for the same reason EyewitnessElement's own info-panel
    * outside-click handler uses it: target gets retargeted to the shadow host from outside this
    * element's own shadow boundary, losing the inside/outside distinction this needs. Registered
-   * only while the menu is actually open (showContextMenu/hideContextMenu), not for this
-   * element's whole lifetime. */
+   * only while a menu is actually open (showContextMenu/showDecorContextMenu/hideContextMenu/
+   * hideDecorContextMenu) — shared by both menus since only one is ever open at once (see
+   * onContextMenu's own doc comment), so there's nothing to gain from two separate listeners. */
   private readonly handleOutsideContextMenuClick = (event: MouseEvent): void => {
-    if (!event.composedPath().includes(this.contextMenu)) this.hideContextMenu()
+    if (event.composedPath().includes(this.contextMenu) || event.composedPath().includes(this.decorContextMenu)) return
+    this.hideContextMenu()
+    this.hideDecorContextMenu()
+  }
+
+  /** The DECOR menu's own show/hide — see onContextMenu's own doc comment for why this is a
+   * separate menu from the SHAPE one rather than folding a witness-only item into it. */
+  private showDecorContextMenu(clientX: number, clientY: number, decor: DecorObject): void {
+    this.contextMenuDecorId = decor.id
+    this.decorContextMenu.style.left = `${clientX}px`
+    this.decorContextMenu.style.top = `${clientY}px`
+    this.decorContextMenu.hidden = false
+    this.contextViewTestimonyButton.disabled = !decor.sightingUrl
+    this.contextViewTestimonyButton.title = decor.sightingUrl ? "" : this.messages.noWitnessRecording
+    document.addEventListener("click", this.handleOutsideContextMenuClick)
+  }
+
+  private hideDecorContextMenu(): void {
+    this.decorContextMenu.hidden = true
+    this.contextMenuDecorId = undefined
+    document.removeEventListener("click", this.handleOutsideContextMenuClick)
+  }
+
+  /** Loads the right-clicked witness's own sighting.json — replacing this recording entirely,
+   * same as typing its URL into the Observation group's "load from URL" field and clicking Load
+   * (see importFromUrl, reused here with an explicit url rather than reading importUrlInput). */
+  private viewWitnessTestimony(): void {
+    const decor = this.ufoElement.sighting.decor.find(d => d.id === this.contextMenuDecorId)
+    this.hideDecorContextMenu()
+    if (decor?.sightingUrl) void this.importFromUrl(decor.sightingUrl)
   }
 
   /** Brings the whole selection to the front as a block, preserving the selected shapes' own

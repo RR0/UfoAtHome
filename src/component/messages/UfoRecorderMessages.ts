@@ -68,6 +68,14 @@ export interface UfoRecorderMessages {
   /** Custom-validity message shown when an observation start/end field's text doesn't match
    * EDTF_TIME_PATTERN — see UfoRecorderElement.applyEdtfTimeInput. */
   edtfInvalid: string
+  /** Shared placeholder for both the start and end EDTF text fields. */
+  edtfPlaceholder: string
+  /** `title` tooltip spelling out EDTF syntax by example, shown on the observation-start field. */
+  observationTimeHint: string
+  /** Same as observationTimeHint but for the observation-end field (its own example time). */
+  observationEndTimeHint: string
+  /** aria-label on the Oval/Saucer/Triangle preset button group. */
+  presetsGroupLabel: string
   witnessId: string
   witnessDirName: string
   witnessTitle: string
@@ -105,4 +113,34 @@ export interface UfoRecorderMessages {
    * on why it's opt-in. A view preference, not sighting weather data (see UfoRecorderElement's
    * cameraDeviceInput field). */
   cameraDevice: string
+  decorGroup: string
+  decorKind: string
+  /** Label on the dropdown listing the sighting's own decor objects — distinct from decorGroup
+   * (the whole fieldset's own summary/heading). */
+  decor: string
+  decorBuilding: string
+  decorTree: string
+  decorStreetlight: string
+  decorVehicle: string
+  decorWitness: string
+  addDecor: string
+  deleteDecor: string
+  decorEast: string
+  decorNorth: string
+  decorHeading: string
+  decorLit: string
+  decorTitle: string
+  decorSightingUrl: string
+  /** Right-click menu item on a witness decor object that has a sightingUrl — loads that
+   * recording (see UfoRecorderElement.viewWitnessTestimony). */
+  viewTestimony: string
+  /** viewTestimony's own disabled title when the right-clicked witness has no sightingUrl set. */
+  noWitnessRecording: string
+  /** Button in the Witness group that adds a new "other witness" decor object (see
+   * UfoRecorderElement's addDecorWitnessButton) — distinct from decorWitness, that dropdown
+   * option's own (now-hidden) label. */
+  addWitness: string
+  /** Button in the Location group that adds a new building decor object — see addWitness's own
+   * doc comment for why this is a separate key from decorBuilding. */
+  addBuilding: string
 }

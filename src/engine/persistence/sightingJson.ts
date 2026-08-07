@@ -8,6 +8,7 @@ import { WeatherTrack } from "../model/WeatherTrack.js"
 import type { WeatherTrackJson } from "../model/WeatherTrack.js"
 import type { Weather } from "../model/Weather.js"
 import type { People } from "../model/People.js"
+import type { DecorObject } from "../model/Decor.js"
 
 /**
  * Standalone "one JSON file per case" format (e.g. a future sighting.json
@@ -43,6 +44,8 @@ export interface SightingRecordingJson {
    * made before it existed — absent means "unknown/not recorded", not "clear skies" (renderers
    * default to DEFAULT_WEATHER, see Weather.ts). New recordings write weatherTrack instead. */
   weather?: Weather
+  /** See Sighting.decor. Absent/omitted means no decor — older recordings default to []. */
+  decor?: DecorObject[]
 }
 
 export function toSightingJson(sighting: Sighting): SightingRecordingJson {
@@ -59,7 +62,8 @@ export function toSightingJson(sighting: Sighting): SightingRecordingJson {
     timeline: sighting.timeline.toJSON(),
     witnessTrack: sighting.witnessTrack.toJSON(),
     weatherTrack: sighting.weatherTrack.toJSON(),
-    weather: sighting.weather
+    weather: sighting.weather,
+    decor: sighting.decor
   }
 }
 
@@ -79,6 +83,7 @@ export function fromSightingJson(json: SightingRecordingJson): Sighting {
     json.weatherTrack ? WeatherTrack.fromJSON(json.weatherTrack) : new WeatherTrack(),
     json.witness,
     json.caseId,
-    json.weather
+    json.weather,
+    json.decor ?? []
   )
 }

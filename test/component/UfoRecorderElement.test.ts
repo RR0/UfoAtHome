@@ -23,7 +23,12 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     setCompassHovered(): void {}
     setCompassForced(): void {}
     setWeather(): void {}
+    setDecor(): void {}
+    updateDecorAnchoring(): void {}
     pickBodyAt(): undefined {
+      return undefined
+    }
+    pickDecorAt(): undefined {
       return undefined
     }
     render(): void {}
@@ -722,10 +727,12 @@ describe("UfoRecorderElement composes a nested rr0-ufo", () => {
     }
     element.sightingData = json
     // timeline.order/groups are always present on the way out (order: z-order support, groups:
-    // multi-select grouping), even though the hand-written fixture above predates both and omits them.
+    // multi-select grouping), even though the hand-written fixture above predates both and omits
+    // them. decor is likewise always present (see Decor.ts), empty here since none was set.
     expect(element.sightingData).toEqual({
       ...json,
-      timeline: { ...json.timeline, order: ["ufo-1"], groups: [] }
+      timeline: { ...json.timeline, order: ["ufo-1"], groups: [] },
+      decor: []
     })
   })
 
@@ -2150,13 +2157,13 @@ describe("UfoRecorderElement toolbar groups", () => {
   it("renders each field group as a collapsible <details>, open by default", () => {
     const element = mount()
     const groups = element.shadowRoot!.querySelectorAll("details")
-    expect(groups.length).toBe(6)
+    expect(groups.length).toBe(7)
     for (const group of groups) {
       expect(group.hasAttribute("open")).toBe(true)
     }
   })
 
-  it("orders groups observation, witness, location, temporal, circumstances, shape — closest to the render last, recording merged into shape", () => {
+  it("orders groups observation, witness, location, temporal, circumstances, decor, shape — closest to the render last, recording merged into shape", () => {
     const element = mount()
     const summaries = [...element.shadowRoot!.querySelectorAll("details summary")].map(s => s.id)
     expect(summaries).toEqual([
@@ -2165,6 +2172,7 @@ describe("UfoRecorderElement toolbar groups", () => {
       "label-location-group",
       "label-temporal-group",
       "label-circumstances-group",
+      "label-decor-group",
       "label-shape-group"
     ])
   })
@@ -2689,5 +2697,228 @@ describe("UfoRecorderElement playback controls", () => {
     addShapeButton.click() // an unrelated edit — should still refresh the playback row
 
     expect(Number(seekInput.max)).toBe(5000)
+  })
+})
+
+describe("UfoRecorderElement decor group", () => {
+  afterEach(() => {
+    document.body.innerHTML = ""
+  })
+
+  it("starts with no decor and a disabled field row", () => {
+    const element = mount()
+    expect(element.sightingData.decor).toEqual([])
+    const shadow = element.shadowRoot!
+    expect((shadow.getElementById("delete-decor") as HTMLButtonElement).disabled).toBe(true)
+    expect((shadow.getElementById("decorEast") as HTMLInputElement).disabled).toBe(true)
+  })
+
+  it("hides building/witness from the generic Decor group's own kind dropdown", () => {
+    const element = mount()
+    const shadow = element.shadowRoot!
+    expect((shadow.getElementById("option-decor-building") as HTMLOptionElement).hidden).toBe(true)
+    expect((shadow.getElementById("option-decor-witness") as HTMLOptionElement).hidden).toBe(true)
+    expect((shadow.getElementById("option-decor-tree") as HTMLOptionElement).hidden).toBe(false)
+  })
+
+  it("adds a witness decor object from the Witness group's own button, not the generic dropdown", () => {
+    const element = mount()
+    const shadow = element.shadowRoot!
+    ;(shadow.getElementById("add-decor-witness") as HTMLButtonElement).click()
+
+    const decor = element.sightingData.decor!
+    expect(decor).toHaveLength(1)
+    expect(decor[0].kind).toBe("witness")
+  })
+
+  it("adds a building decor object from the Location group's own button, not the generic dropdown", () => {
+    const element = mount()
+    const shadow = element.shadowRoot!
+    ;(shadow.getElementById("add-decor-building") as HTMLButtonElement).click()
+
+    const decor = element.sightingData.decor!
+    expect(decor).toHaveLength(1)
+    expect(decor[0].kind).toBe("building")
+  })
+
+  it("adds a decor object of the picked kind, offset from previously added ones", () => {
+    const element = mount()
+    const shadow = element.shadowRoot!
+    const kindSelect = shadow.getElementById("decorKind") as HTMLSelectElement
+    const addButton = shadow.getElementById("add-decor") as HTMLButtonElement
+
+    kindSelect.value = "tree"
+    addButton.click()
+    kindSelect.value = "streetlight"
+    addButton.click()
+
+    const decor = element.sightingData.decor!
+    expect(decor).toHaveLength(2)
+    expect(decor[0].kind).toBe("tree")
+    expect(decor[1].kind).toBe("streetlight")
+    expect(decor[1].eastM).not.toBe(decor[0].eastM) // staggered, not stacked on the same spot
+
+    const decorSelect = shadow.getElementById("decor") as HTMLSelectElement
+    expect(decorSelect.options[1].value).toBe(decor[1].id)
+    expect((shadow.getElementById("decorEast") as HTMLInputElement).disabled).toBe(false)
+  })
+
+  it("writes East/North/Heading/Lit edits back onto the selected decor object", () => {
+    const element = mount()
+    const shadow = element.shadowRoot!
+    ;(shadow.getElementById("add-decor") as HTMLButtonElement).click()
+
+    const eastInput = shadow.getElementById("decorEast") as HTMLInputElement
+    const northInput = shadow.getElementById("decorNorth") as HTMLInputElement
+    const headingInput = shadow.getElementById("decorHeading") as HTMLInputElement
+    const litInput = shadow.getElementById("decorLit") as HTMLInputElement
+
+    eastInput.value = "12.5"
+    eastInput.dispatchEvent(new Event("input"))
+    northInput.value = "-4"
+    northInput.dispatchEvent(new Event("input"))
+    headingInput.value = "90"
+    headingInput.dispatchEvent(new Event("input"))
+    litInput.checked = true
+    litInput.dispatchEvent(new Event("input"))
+
+    const [decor] = element.sightingData.decor!
+    expect(decor).toMatchObject({ eastM: 12.5, northM: -4, headingDeg: 90, lit: true })
+  })
+
+  it("deletes the selected decor object and falls back to whichever one remains, or none", () => {
+    const element = mount()
+    const shadow = element.shadowRoot!
+    const addButton = shadow.getElementById("add-decor") as HTMLButtonElement
+    const deleteButton = shadow.getElementById("delete-decor") as HTMLButtonElement
+    addButton.click()
+    addButton.click()
+    expect(element.sightingData.decor).toHaveLength(2)
+
+    deleteButton.click()
+    expect(element.sightingData.decor).toHaveLength(1)
+    deleteButton.click()
+    expect(element.sightingData.decor).toEqual([])
+    expect(deleteButton.disabled).toBe(true)
+  })
+
+  it("round-trips decor through the sightingData setter/getter", () => {
+    const element = mount()
+    element.sightingData = {
+      version: 1,
+      timeline: { keyframes: [] },
+      decor: [{ id: "decor-1", kind: "streetlight", eastM: 5, northM: -8, lit: true }]
+    }
+    expect(element.sightingData.decor).toEqual([{ id: "decor-1", kind: "streetlight", eastM: 5, northM: -8, lit: true }])
+  })
+
+  it("names a decor object via the Name field, updating both the data and the dropdown label", () => {
+    const element = mount()
+    const shadow = element.shadowRoot!
+    ;(shadow.getElementById("add-decor") as HTMLButtonElement).click()
+
+    const titleInput = shadow.getElementById("decorTitle") as HTMLInputElement
+    titleInput.value = "Streetlight on Elm St"
+    titleInput.dispatchEvent(new Event("input"))
+
+    expect(element.sightingData.decor![0].title).toBe("Streetlight on Elm St")
+    const decorSelect = shadow.getElementById("decor") as HTMLSelectElement
+    expect(decorSelect.options[0].textContent).toBe("Streetlight on Elm St")
+  })
+
+  it("round-trips a witness's own sightingUrl via the Decor group's URL field", () => {
+    const element = mount()
+    const shadow = element.shadowRoot!
+    ;(shadow.getElementById("add-decor-witness") as HTMLButtonElement).click()
+
+    const urlInput = shadow.getElementById("decorSightingUrl") as HTMLInputElement
+    urlInput.value = "https://example.org/witness-2/sighting.json"
+    urlInput.dispatchEvent(new Event("input"))
+
+    expect(element.sightingData.decor![0].sightingUrl).toBe("https://example.org/witness-2/sighting.json")
+  })
+})
+
+describe("UfoRecorderElement decor context menu", () => {
+  afterEach(() => {
+    document.body.innerHTML = ""
+  })
+
+  function rightClickCanvas(element: UfoRecorderElement): void {
+    const canvas = nestedUfo(element).shadowRoot!.querySelector("canvas")!
+    canvas.getBoundingClientRect = () => ({ left: 0, top: 0, width: 800, height: 600 }) as DOMRect
+    canvas.dispatchEvent(new MouseEvent("contextmenu", { bubbles: true, composed: true, clientX: 400, clientY: 300 }))
+  }
+
+  it("opens the decor menu (not the shape one) when the 3D pick hits a witness", () => {
+    const element = mount()
+    element.sightingData = {
+      version: 1,
+      timeline: { keyframes: [] },
+      decor: [{ id: "decor-1", kind: "witness", eastM: 0, northM: 10, sightingUrl: "https://example.org/w.json" }]
+    }
+    const sceneEl = element.shadowRoot!.querySelector("rr0-scene") as unknown as { pickDecorAt: () => string }
+    sceneEl.pickDecorAt = () => "decor-1"
+
+    rightClickCanvas(element)
+
+    expect((element.shadowRoot!.getElementById("decor-context-menu") as HTMLElement).hidden).toBe(false)
+    expect((element.shadowRoot!.getElementById("context-menu") as HTMLElement).hidden).toBe(true)
+    const viewButton = element.shadowRoot!.getElementById("context-view-testimony") as HTMLButtonElement
+    expect(viewButton.disabled).toBe(false)
+  })
+
+  it("disables 'view testimony' (with an explanatory title) for a witness with no sightingUrl", () => {
+    const element = mount()
+    element.sightingData = {
+      version: 1,
+      timeline: { keyframes: [] },
+      decor: [{ id: "decor-1", kind: "witness", eastM: 0, northM: 10 }]
+    }
+    const sceneEl = element.shadowRoot!.querySelector("rr0-scene") as unknown as { pickDecorAt: () => string }
+    sceneEl.pickDecorAt = () => "decor-1"
+
+    rightClickCanvas(element)
+
+    const viewButton = element.shadowRoot!.getElementById("context-view-testimony") as HTMLButtonElement
+    expect(viewButton.disabled).toBe(true)
+    expect(viewButton.title).not.toBe("")
+  })
+
+  it("does not open the decor menu for a non-witness decor kind", () => {
+    const element = mount()
+    element.sightingData = {
+      version: 1,
+      timeline: { keyframes: [] },
+      decor: [{ id: "decor-1", kind: "tree", eastM: 0, northM: 10 }]
+    }
+    const sceneEl = element.shadowRoot!.querySelector("rr0-scene") as unknown as { pickDecorAt: () => string }
+    sceneEl.pickDecorAt = () => "decor-1"
+
+    rightClickCanvas(element)
+
+    expect((element.shadowRoot!.getElementById("decor-context-menu") as HTMLElement).hidden).toBe(true)
+  })
+
+  it("loads the witness's own recording when 'view testimony' is clicked", async () => {
+    const element = mount()
+    element.sightingData = {
+      version: 1,
+      timeline: { keyframes: [] },
+      decor: [{ id: "decor-1", kind: "witness", eastM: 0, northM: 10, sightingUrl: "https://example.org/w.json" }]
+    }
+    const sceneEl = element.shadowRoot!.querySelector("rr0-scene") as unknown as { pickDecorAt: () => string }
+    sceneEl.pickDecorAt = () => "decor-1"
+    const witnessJson = { version: 1 as const, witness: { id: "other-witness" }, timeline: { keyframes: [] } }
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue({ ok: true, json: async () => witnessJson } as Response)
+
+    rightClickCanvas(element)
+    ;(element.shadowRoot!.getElementById("context-view-testimony") as HTMLButtonElement).click()
+    await new Promise(resolve => setTimeout(resolve, 0))
+
+    expect(fetchSpy).toHaveBeenCalledWith("https://example.org/w.json")
+    expect(element.sightingData.witness).toEqual({ id: "other-witness" })
+    expect((element.shadowRoot!.getElementById("decor-context-menu") as HTMLElement).hidden).toBe(true)
+    fetchSpy.mockRestore()
   })
 })

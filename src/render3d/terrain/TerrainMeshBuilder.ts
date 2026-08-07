@@ -1,5 +1,5 @@
 // Named imports only — see SceneRenderer.ts's own top-of-file comment on why (tree-shaking).
-import { BufferAttribute, BufferGeometry, CanvasTexture, Color, Mesh, MeshBasicMaterial } from "three"
+import { BufferAttribute, BufferGeometry, CanvasTexture, Color, Mesh, MeshLambertMaterial } from "three"
 import type { ElevationProvider } from "./ElevationProvider.js"
 import type { ImageryProvider } from "./ImageryProvider.js"
 import type { GeoBounds } from "./GeoBounds.js"
@@ -22,10 +22,11 @@ const IMAGERY_RESOLUTION = 512
 const FULL_OPACITY_RADIUS_M = 700
 const FADE_END_RADIUS_M = 900
 
-/** Must match SceneRenderer's own flat groundMesh.position.y, so the terrain patch meets the
- * existing disc at the same height right where they overlap (at the observer's own position, where
- * the patch's own elevation offset is exactly 0 — see the `y = TERRAIN_BASE_Y + ...` below). */
-const TERRAIN_BASE_Y = -0.5
+/** Must match SceneRenderer's own flat groundMesh.position.y — real ground level, world y=0 (see
+ * buildGround's own doc comment) — so the terrain patch meets the existing disc at the same height
+ * right where they overlap (at the observer's own position, where the patch's own elevation offset
+ * is exactly 0 — see the `y = TERRAIN_BASE_Y + ...` below). */
+const TERRAIN_BASE_Y = 0
 /** A small nudge above the flat disc — purely conceptual/cosmetic now that the material's own
  * depthTest:false (see below) is what actually keeps the two from z-fighting; kept mainly so the
  * patch is never numerically exactly coplanar with the disc even in a future where something re-
@@ -126,12 +127,22 @@ export async function buildTerrainMesh(
   geometry.setAttribute("uv", new BufferAttribute(uvs, 2))
   geometry.setAttribute("color", new BufferAttribute(colors, 4))
   geometry.setIndex(new BufferAttribute(indices, 1))
+  // A hand-built BufferGeometry carries no normal attribute unless asked — unlike every Three.js
+  // primitive geometry elsewhere in this renderer, which already includes one. Required for real
+  // per-pixel shading/shadows now that this is lit (see the material below), and a nice side
+  // effect for free: the real relief now visibly self-shades (a slope facing the Sun reads
+  // brighter than one facing away), not just flat-colored by its own photo texture.
+  geometry.computeVertexNormals()
 
   const texture = new CanvasTexture(imageryTexture.source)
   texture.flipY = false // our uv.v=0 is already the raster's own top (north) row — see the loop above
 
-  const material = new MeshBasicMaterial({
+  const material = new MeshLambertMaterial({
     map: texture,
+    // Neutral (not day/night-tinted) — color grading now comes entirely from SceneRenderer's real
+    // lights actually lighting this material, see updateCelestialLight's own doc comment on why
+    // baking the same tint into both the material and the light would double-darken every night
+    // scene.
     color: new Color(1, 1, 1),
     vertexColors: true,
     transparent: true,
@@ -144,10 +155,14 @@ export async function buildTerrainMesh(
     // clean-edged patches wherever local relief happened to sit close to the disc's own flat plane
     // — not a data or fetch problem, a depth-precision one. See renderOrder below for the other half
     // of the fix (SceneRenderer sets it higher than groundMesh's default so this draws afterward).
+    // Unrelated to (and doesn't interfere with) real-time shadow mapping — that's a separate depth
+    // pass from each light's own point of view, not the main camera depth test this disables.
     depthTest: false
   })
 
   const mesh = new Mesh(geometry, material)
+  mesh.receiveShadow = true
+  mesh.castShadow = true
   return { mesh, attribution: providers.imagery.attribution }
 }
 

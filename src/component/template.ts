@@ -19,6 +19,8 @@ export const html = `
     <label><span id="label-witness-first-names">Witness first names</span> <input id="witnessFirstNames" type="text" placeholder="comma-separated"/></label>
     <label><span id="label-case-id">Case ID</span> <input id="caseId" type="text"/></label>
     <label><span id="label-camera-device">Camera/video device</span> <input id="cameraDevice" type="range" min="0" max="2" step="0.1" value="0"/></label>
+    <button id="add-decor-witness" type="button">Add witness</button>
+    <label><span id="label-decor-sighting-url">Witness's own recording URL</span> <input id="decorSightingUrl" type="url" placeholder="https://…/sighting.json"/></label>
   </div>
 </details>
 <details open>
@@ -28,6 +30,7 @@ export const html = `
     <label><span id="label-lng">Longitude</span> <input id="lng" type="number" min="-180" max="180" step="0.0001" placeholder="lng"/></label>
     <label><span id="label-heading">Heading</span> <input id="heading" type="number" min="0" max="360" step="1" placeholder="unknown"/> &deg;</label>
     <label><span id="label-pitch">Tilt</span> <input id="pitch" type="number" min="-90" max="90" step="1" value="0"/> &deg;</label>
+    <button id="add-decor-building" type="button">Add building</button>
   </div>
 </details>
 <details open>
@@ -62,9 +65,34 @@ export const html = `
   </div>
 </details>
 <details open>
+  <summary id="label-decor-group">Decor</summary>
+  <div class="toolbar">
+    <label><span id="label-decor-kind">Kind</span>
+      <select id="decorKind">
+        <!-- Building/witness are added from their own dedicated buttons instead (Location/Witness
+             groups) — hidden (not removed) so decorLabel() can still look up their translated
+             kind name by id for the fallback "{kind} {n}" label, see UfoRecorderElement.decorLabel. -->
+        <option id="option-decor-building" value="building" hidden>Building</option>
+        <option id="option-decor-tree" value="tree">Tree</option>
+        <option id="option-decor-streetlight" value="streetlight">Streetlight</option>
+        <option id="option-decor-vehicle" value="vehicle">Vehicle</option>
+        <option id="option-decor-witness" value="witness" hidden>Other witness</option>
+      </select>
+    </label>
+    <button id="add-decor" type="button" class="icon-btn" title="Add decor" aria-label="Add decor">+</button>
+    <button id="delete-decor" type="button" class="icon-btn" title="Delete decor" aria-label="Delete decor">🗑</button>
+    <label><span id="label-decor">Decor</span> <select id="decor"></select></label>
+    <label><span id="label-decor-title">Name</span> <input id="decorTitle" type="text"/></label>
+    <label><span id="label-decor-east">Distance east</span> <input id="decorEast" type="number" step="0.5" value="0"/> m</label>
+    <label><span id="label-decor-north">Distance north</span> <input id="decorNorth" type="number" step="0.5" value="0"/> m</label>
+    <label><span id="label-decor-heading">Heading</span> <input id="decorHeading" type="number" min="0" max="360" step="1" value="0"/> &deg;</label>
+    <label><span id="label-decor-lit">Lit</span> <input id="decorLit" type="checkbox"/></label>
+  </div>
+</details>
+<details open>
   <summary id="label-shape-group">Shape</summary>
   <div class="toolbar">
-    <div class="presets" role="group" aria-label="UFO shape">
+    <div class="presets" id="presets-group" role="group" aria-label="UFO shape">
       <button class="preset" id="preset-oval" type="button" data-preset="oval">Oval</button>
       <button class="preset" id="preset-saucer" type="button" data-preset="saucer">Saucer</button>
       <button class="preset" id="preset-triangle" type="button" data-preset="triangle">Triangle</button>
@@ -100,6 +128,9 @@ export const html = `
   <hr/>
   <button id="context-delete" type="button" role="menuitem" class="context-delete">Delete</button>
 </div>
+<div id="decor-context-menu" class="context-menu" hidden role="menu">
+  <button id="context-view-testimony" type="button" role="menuitem">View testimony</button>
+</div>
 `
 
 export const css = `
@@ -125,14 +156,17 @@ button.preset[aria-pressed="true"] {
   outline: 2px solid #39f;
   font-weight: bold;
 }
-#lat, #lng, #heading, #pitch, #windDirection, #windSpeed {
+#lat, #lng, #heading, #pitch, #windDirection, #windSpeed, #decorEast, #decorNorth, #decorHeading {
   width: 6em;
 }
 #obs-time, #obs-end-time {
   width: 12em;
 }
-#witnessId, #witnessDirName, #witnessTitle, #witnessLastName, #witnessFirstNames, #caseId, #tags, #shapeTitle {
+#witnessId, #witnessDirName, #witnessTitle, #witnessLastName, #witnessFirstNames, #caseId, #tags, #shapeTitle, #decorTitle {
   width: 10em;
+}
+#decorSightingUrl {
+  width: 16em;
 }
 /* Shared by Duration (no sane default — real playback pacing needs some notion of the
    observation's length, so an empty value is flagged rather than just left blank) and the two

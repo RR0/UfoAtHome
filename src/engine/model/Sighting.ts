@@ -5,6 +5,7 @@ import { WeatherTrack } from "./WeatherTrack.js"
 import { DEFAULT_WEATHER } from "./Weather.js"
 import type { Weather } from "./Weather.js"
 import type { People } from "./People.js"
+import type { DecorObject } from "./Decor.js"
 
 /**
  * A fuzzy date, structurally aligned with @rr0/time's Level2Date fields
@@ -231,7 +232,11 @@ export class Sighting {
      * static field when the track has no keyframes at all. Not readonly, same "reassigned
      * wholesale, never mutated field-by-field" reasoning WeatherTrack keyframes themselves now
      * carry instead (see UfoRecorderElement.applyWeatherAtPlayhead). */
-    public weather?: Weather
+    public weather?: Weather,
+    /** Static scenery (buildings/trees/streetlights/vehicles/other witnesses) — see Decor.ts.
+     * Not readonly, same "reassigned wholesale on edit" reasoning as witness/caseId above:
+     * UfoRecorderElement's Decor group adds/removes/edits entries by replacing this array. */
+    public decor: DecorObject[] = []
   ) {
   }
 

@@ -9,11 +9,18 @@ import {
   CanvasTexture,
   CircleGeometry,
   Color,
+  DirectionalLight,
   Fog,
   Float32BufferAttribute,
+  Group,
+  HemisphereLight,
   Mesh,
   MeshBasicMaterial,
+  MeshLambertMaterial,
+  Object3D,
+  PCFSoftShadowMap,
   PerspectiveCamera,
+  PointLight,
   Points,
   PointsMaterial,
   Raycaster,
@@ -45,6 +52,7 @@ import {
 } from "./skyColors.js"
 import type { RgbColor } from "./skyColors.js"
 import { equatorialToHorizontal } from "../engine/astronomy/CelestialPositions.js"
+import { selectLocale } from "../i18n/locale.js"
 import type { CelestialBody, HorizontalPosition, MoonPhase, ObserverGeo } from "../engine/astronomy/CelestialPositions.js"
 import type { ObserverPose } from "../engine/model/ObserverTrack.js"
 import type { StarCatalog } from "./StarCatalog.js"
@@ -60,6 +68,8 @@ import { buildCloudGeometry, buildCloudMaterial } from "./CloudSystem.js"
 import type { CloudUniforms } from "./CloudSystem.js"
 import { buildLensFlare } from "./LensFlareEffect.js"
 import type { LensFlareSystem } from "./LensFlareEffect.js"
+import { DecorSystem } from "./DecorSystem.js"
+import type { DecorObject } from "../engine/model/Decor.js"
 
 /** Plain field-by-field comparison — see setWeather's own doc comment on why reference equality
  * stopped being enough once weather started being resolved fresh every tick from a keyframe
@@ -78,6 +88,7 @@ function weatherEquals(a: Weather, b: Weather): boolean {
 
 const SKY_RADIUS = 900
 const GROUND_RADIUS = 900
+const GROUND_ALBEDO = 0.5
 const STAR_RADIUS = 850
 const BODY_PLACEMENT_RADIUS = 850
 /** Sized to match the Sun/Moon's real ~0.53deg angular diameter at BODY_PLACEMENT_RADIUS
@@ -98,21 +109,39 @@ const HOVER_HIT_RADIUS_SCALE = 6
 /** Sun/Moon/planet meshes stop being built once this far below the horizon — well past the point
  * the opaque ground plane would occlude them anyway, so there's no point paying for the geometry. */
 const BODY_HIDE_BELOW_DEG = -4
+/** Same threshold as BODY_HIDE_BELOW_DEG, named separately for updateCelestialLight's own use —
+ * a body that isn't even rendered shouldn't be lighting anything either. */
+const CELESTIAL_LIGHT_MIN_ALTITUDE_DEG = BODY_HIDE_BELOW_DEG
+/** Tuned by eye (see the shadow-mapping session's own verification via gl.readPixels, not real
+ * photometric units — modern three.js's light intensities are physically-scaled, but "physically
+ * correct" only matters when trying to match a real-world lux reading, not for a stylized scene
+ * that was already using hand-tuned fake colors everywhere else, see skyColors.ts). Sun is bright
+ * enough to cast a crisp, high-contrast shadow; Moon is a faint, barely-there secondary light —
+ * real moonlight shadows are famously subtle, not a rendering bug if they're hard to spot. */
+const SUN_LIGHT_INTENSITY = 3
+const MOON_LIGHT_INTENSITY = 0.15
+/** The HemisphereLight's own intensity — deliberately modest relative to SUN_LIGHT_INTENSITY so
+ * the shadow side of an object still reads as visibly darker (real contrast, not just a faint
+ * variation) while never going fully black. */
+const SKY_LIGHT_INTENSITY = 0.6
+/** A single streetlight lamp, tuned by eye — bright enough nearby to cast a real shadow off
+ * decor/terrain, falling off to nothing well before the edge of a typical decor layout (see
+ * PointLight's own distance/decay: modern three.js always uses real inverse-square falloff,
+ * `distance` just caps it rather than computing contributions past a point no one would see). */
+const STREETLIGHT_LIGHT_INTENSITY = 40
+const STREETLIGHT_LIGHT_DISTANCE = 30
 
-/** French abbreviations, clockwise from north — matches this project's own azimuth convention
- * (0deg = north, increasing clockwise). Shown on the horizon in "edit mode" (see
- * SceneElement's show-compass attribute, set by UfoRecorderElement) so a witness's heading can be
- * set/checked against a real compass reference instead of a bare number. */
-const COMPASS_DIRECTIONS: ReadonlyArray<{ azimuthDeg: number; label: string }> = [
-  { azimuthDeg: 0, label: "N" },
-  { azimuthDeg: 45, label: "NE" },
-  { azimuthDeg: 90, label: "E" },
-  { azimuthDeg: 135, label: "SE" },
-  { azimuthDeg: 180, label: "S" },
-  { azimuthDeg: 225, label: "SO" },
-  { azimuthDeg: 270, label: "O" },
-  { azimuthDeg: 315, label: "NO" }
-]
+/** Clockwise from north, matching this project's own azimuth convention (0deg = north, increasing
+ * clockwise). Shown on the horizon in "edit mode" (see SceneElement's show-compass attribute, set
+ * by UfoRecorderElement) so a witness's heading can be set/checked against a real compass
+ * reference instead of a bare number. Localized the same way as SceneElement's own body-name
+ * tooltip (small inline en/fr dict via selectLocale, not a full Messages file — too few strings). */
+const COMPASS_AZIMUTHS: readonly number[] = [0, 45, 90, 135, 180, 225, 270, 315]
+const COMPASS_LABELS: Record<"en" | "fr", readonly string[]> = {
+  en: ["N", "NE", "E", "SE", "S", "SW", "W", "NW"],
+  fr: ["N", "NE", "E", "SE", "S", "SO", "O", "NO"]
+}
+const COMPASS_SUPPORTED_LANGUAGES = ["en", "fr"]
 const COMPASS_PLACEMENT_RADIUS = 880 // just inside the sky dome, reading as "on the horizon"
 const COMPASS_SPRITE_SIZE = 40
 /** Higher than every other mesh's default renderOrder (0) — combined with the sprite material's
@@ -216,10 +245,17 @@ const PRECIPITATION_CONFIG: Record<CpuPrecipitationType, PrecipitationTypeConfig
   // 0.65 for the same real-physical reason: solid ice is less translucent than soft, airy crystals.
   hail: { fallSpeedMPerS: 14, size: 0.5, color: new Color(0.95, 0.98, 1), driftSensitivity: 0.25, radiusM: 25, topYM: 10, opacity: 0.95, poolSize: 1200 }
 }
-/** Matches groundMesh.position.y — a particle reaching real ground height respawns. Shared across
- * every precipitation type (rain, snow, hail alike) — ground level doesn't vary by weather type,
- * unlike radiusM/topYM/fallSpeedMPerS which do. */
-const PRECIPITATION_RESPAWN_Y_MIN = -0.5
+/** Matches groundMesh.position.y (real ground level, world y=0 — see buildGround's own doc
+ * comment) — a particle reaching real ground height respawns. Shared across every precipitation
+ * type (rain, snow, hail alike) — ground level doesn't vary by weather type, unlike radiusM/
+ * topYM/fallSpeedMPerS which do. */
+const PRECIPITATION_RESPAWN_Y_MIN = 0
+/** Matches groundMesh.position.y (real ground level, world y=0 — see buildGround's own doc
+ * comment) — decor's own parts are all built resting on y=0 within their own group (see
+ * DecorSystem's addPart calls), so the group itself must sit at real ground height too, or every
+ * object floats visibly above the ground with its own cast shadow (correctly projected onto the
+ * real ground plane) reading as detached from its base. */
+const DECOR_GROUND_Y = 0
 /** RainSystem tuning — see RainSystem.ts's own doc comment for why rain gets a completely separate,
  * much tighter volume than the old shared 150m-radius CPU pool: a small, camera-hugging volume is
  * what actually reads as a dense downpour (parallax — see PrecipitationTypeConfig.radiusM's own
@@ -443,6 +479,34 @@ export class SceneRenderer {
    * a bright-enough Moon, or Venus at its historical brightest — everything else's glareStrength
    * is 0, so no sprite is built for it at all. */
   private readonly glareSprites = new Map<string, Sprite>()
+  /** The last decor list actually built — reference-checked in setDecor to skip a needless rebuild
+   * (SceneElement calls setDecor every setAstronomy tick, same as setWeather/setTerrainOrigin,
+   * but unlike weather's per-tick-resolved keyframe track, decor is a static list: the recorder
+   * always writes a fresh array on add/remove/edit, so reference equality alone is enough — no
+   * per-tick allocation, unlike weatherEquals' field-by-field compare). */
+  private decorObjects: DecorObject[] = []
+  private readonly decorGroups = new Map<string, Group>()
+  /** The real shadow-casting light standing in for whichever of the Sun/Moon is actually up (see
+   * updateCelestialLight) — only one at a time, matching how real moonlight is only ever visible
+   * when the (far brighter) Sun isn't: no real scene needs both casting shadows simultaneously.
+   * `castShadow` is toggled off whenever there's no decor at all (nothing to receive/cast a real
+   * shadow), so a plain sighting with no decor pays no shadow-map render cost. */
+  private readonly celestialLight = new DirectionalLight(0xffffff, 0)
+  /** DirectionalLight.target must itself be in the scene graph for Three.js to keep its
+   * matrixWorld current — see updateCelestialLight, which points the light at the observer's own
+   * position (this target sits fixed at the origin) from whichever direction the Sun/Moon
+   * currently sits at, mirroring how setBodyMesh places the body meshes themselves. */
+  private readonly celestialLightTarget = new Object3D()
+  /** Soft, non-shadow-casting ambient fill (sky color above / ground-reflected color below) so
+   * decor's shadowed side doesn't read as pure black — real skylight does exactly this job for a
+   * real witness. Color/intensity driven by the same sky/ground colors setAstronomy already
+   * computes for the sky dome and flat ground disc (see updateCelestialLight). */
+  private readonly skyLight = new HemisphereLight(0xffffff, 0x000000, 0)
+  /** One real PointLight per currently-lit streetlight decor object, keyed by DecorObject.id —
+   * see setDecor's own streetlight branch. Vehicle headlights deliberately do NOT get a real
+   * light of their own (only "artificiels: lampadaires" was asked for) — they stay a purely
+   * visual emissive color, same as before. */
+  private readonly streetlightLights = new Map<string, PointLight>()
   private compassSprites: Sprite[] = []
   private showCompass = false
   private compassHovered = false
@@ -556,6 +620,14 @@ export class SceneRenderer {
    * first holds the Sun's camera-space position (to test it's in front of the camera), then gets
    * overwritten with its projected NDC screen position once that test passes. */
   private readonly lensFlareScratch = new Vector3()
+  /** Dedicated raycaster for isSunOccluded — separate from the hover/click `raycaster` above
+   * (pickBodyAt) since both could in principle be mid-use the same render() call, and reusing one
+   * instance across two independent purposes would just invite a subtle future bug for no real
+   * gain (raycasters are cheap to own one of each). */
+  private readonly sunOcclusionRaycaster = new Raycaster()
+  /** Scratch vector reused every isSunOccluded call — the camera->Sun ray direction, avoiding a
+   * per-frame allocation (same discipline as lensFlareScratch). */
+  private readonly sunOcclusionDirectionScratch = new Vector3()
   private readonly onLightningFlash?: () => void
 
   constructor(
@@ -565,10 +637,32 @@ export class SceneRenderer {
   ) {
     this.renderer = new WebGLRenderer({ canvas, antialias: true })
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2))
+    this.renderer.shadowMap.enabled = true
+    this.renderer.shadowMap.type = PCFSoftShadowMap
     this.camera = new PerspectiveCamera(60, canvas.width / Math.max(canvas.height, 1), 0.1, SKY_RADIUS * 1.2)
     this.camera.position.set(0, 1.6, 0)
     this.terrainProviders = terrainProviders
     this.onLightningFlash = onLightningFlash
+
+    // Shadow camera frustum sized around where decor/terrain relief actually sit (a sighting's
+    // own local area, at most a couple hundred meters out — see DecorObject.eastM/northM's own
+    // doc comment), not the full ~900-unit sky radius: a tighter box means more shadow-map texels
+    // per real meter, i.e. crisper shadow edges for the same mapSize. near/far instead DO need to
+    // span the light's own placement distance (up to BODY_PLACEMENT_RADIUS, ~850) down to just
+    // past the origin, since celestialLight.position sits at the real Sun/Moon distance away.
+    this.celestialLight.shadow.mapSize.set(1024, 1024)
+    this.celestialLight.shadow.camera.left = -120
+    this.celestialLight.shadow.camera.right = 120
+    this.celestialLight.shadow.camera.top = 120
+    this.celestialLight.shadow.camera.bottom = -120
+    this.celestialLight.shadow.camera.near = 1
+    this.celestialLight.shadow.camera.far = 1000
+    // Slight negative bias to fight shadow acne (a surface incorrectly self-shadowing in a
+    // moire/striped pattern from its own depth-map quantization) without introducing visible
+    // peter-panning (a shadow visibly detached from its own caster) at this scene's scale.
+    this.celestialLight.shadow.bias = -0.0015
+    this.celestialLight.target = this.celestialLightTarget
+    this.scene.add(this.celestialLight, this.celestialLightTarget, this.skyLight)
   }
 
   /** Verbatim attribution text required by the currently active imagery provider's license, once a
@@ -641,15 +735,11 @@ export class SceneRenderer {
         // depthTest:false comment on why depth alone can't be trusted to layer them correctly at
         // these distances) but still under the compass HUD.
         mesh.renderOrder = TERRAIN_RENDER_ORDER
-        // Applied immediately, not left for the next setAstronomy() tick: the tile fetch behind
-        // buildTerrainMesh is async and typically resolves AFTER setAstronomy has already run once
-        // (page just loaded, playback sitting idle at t=0) — without this, the mesh sits at its raw,
-        // untinted photo-texture color (reading as daylit regardless of actual time of night) until
-        // something re-triggers setAstronomy, e.g. pressing Play. baseFogColor is the same
-        // undarkened groundColor setAstronomy's own per-tick retint uses (see its own comment above)
-        // — using it here keeps a freshly-built mesh visually consistent with the sky/fog the very
-        // first frame it appears in, not just from the next astronomy update onward.
-        ;(mesh.material as MeshBasicMaterial).color.setRGB(...this.baseFogColor)
+        // No manual color.setRGB(...this.baseFogColor) tint here anymore (unlike before this
+        // session) — the mesh is real-lit now (see TerrainMeshBuilder's own material doc comment),
+        // so celestialLight/skyLight (already current from the last setAstronomy tick, since those
+        // don't depend on this async fetch resolving) light it correctly the instant it's added,
+        // day or night, with no risk of a stale/wrong color needing a later re-tint.
         this.terrainMesh = mesh
         this.terrainAttribution = attribution
         this.scene.add(mesh)
@@ -771,21 +861,101 @@ export class SceneRenderer {
     this.render()
   }
 
+  /** Rebuilds the decor scenery (buildings/trees/streetlights/vehicles/other witnesses) whenever
+   * the list itself changes — see decorObjects' own doc comment on why reference equality is
+   * enough here, unlike setWeather. Full rebuild rather than diffing add/remove/edit individually:
+   * decor lists are small (a handful of objects at most) and this is only called when the list
+   * actually changed, so the simplicity is worth it — see [[rr0-code-style-no-free-functions]] on
+   * preferring the simple approach until a real perf need shows up.
+   *
+   * Deliberately does NOT set group.position here (unlike before this session) — see
+   * updateDecorAnchoring, called separately every tick right after this, which is now the single
+   * place decor group positions are ever set. Building at (0,0,0) here is just a harmless default
+   * until that runs moments later in the same tick, before the next real render(). */
+  setDecor(decor: DecorObject[]): void {
+    if (this.decorObjects === decor) return
+    this.decorObjects = decor
+    for (const group of this.decorGroups.values()) {
+      this.scene.remove(group)
+      DecorSystem.dispose(group)
+    }
+    this.decorGroups.clear()
+    this.streetlightLights.clear()
+    for (const object of decor) {
+      const group = DecorSystem.build(object.kind, object.lit ?? false, object.headingDeg)
+      this.scene.add(group)
+      this.decorGroups.set(object.id, group)
+      if (object.kind === "streetlight" && object.lit) this.addStreetlightLight(object.id, group)
+    }
+    // Toggled here too (not just in updateCelestialLight, which only runs on the next
+    // setAstronomy tick): adding the sighting's first-ever decor object shouldn't have to wait an
+    // extra tick before it starts actually casting a shadow.
+    this.celestialLight.castShadow = this.decorGroups.size > 0
+  }
+
+  /** Keeps every decor object anchored to its own fixed real-world spot as the witness moves,
+   * instead of sliding along with them — the bug this fixes: every other part of this renderer
+   * treats the *camera* as sitting permanently at local (0, elevation, 0), re-centering the whole
+   * 3D world on the observer's CURRENT position each tick (see setObserverPose's own doc comment
+   * and setTerrainOrigin's rebuild-on-drift logic) — decor's own (eastM, northM), if applied
+   * as a raw fixed local offset the way it used to be, would then implicitly move WITH that
+   * re-centering too, i.e. visibly follow the witness around like scenery glued to the camera
+   * instead of a real building would.
+   *
+   * The fix: eastM/northM are authored relative to the witness's pose at the *start* of the
+   * recording (t=0), not the origin of "wherever the camera happens to sit right now". Every
+   * tick, this re-derives how far the current pose has drifted from that t=0 reference — in real
+   * local meters via geoToLocalMeters, only possible when BOTH poses have a real lat/lng — and
+   * offsets every decor group by exactly that drift, canceling out the world's own re-centering.
+   * A sighting with no real lat/lng at all gets offset {x:0, z:0} (no-op): the camera itself never
+   * translates in that case either (setObserverPose only ever touches rotation/elevation), so
+   * decor staying at its raw authored offset is already correct, not a fallback approximation. */
+  updateDecorAnchoring(referencePose: ObserverPose | undefined, currentPose: ObserverPose | undefined): void {
+    const offset =
+      referencePose?.lat !== undefined && referencePose.lng !== undefined && currentPose?.lat !== undefined && currentPose?.lng !== undefined
+        ? geoToLocalMeters(referencePose.lat, referencePose.lng, currentPose.lat, currentPose.lng)
+        : { x: 0, z: 0 }
+    for (const object of this.decorObjects) {
+      const group = this.decorGroups.get(object.id)
+      if (!group) continue
+      group.position.set(object.eastM + offset.x, DECOR_GROUND_Y, -object.northM + offset.z)
+    }
+  }
+
+  /** Places a real PointLight at a lit streetlight's own lamp-head position, as a CHILD of the
+   * decor group rather than a direct scene child at a one-time-computed world position — parented
+   * this way, it automatically tracks the group's own position every time updateDecorAnchoring
+   * moves it (a plain world-space snapshot would otherwise go stale the moment the witness moves
+   * away from their t=0 reference position). local position, not world: `light.position` is
+   * interpreted relative to whichever object it's added to, so copying the lamp mesh's own
+   * (already-local) position is correct without any conversion. */
+  private addStreetlightLight(id: string, group: Group): void {
+    const lampHead = group.children.find(child => child.userData.emissive)
+    if (!lampHead) return
+    const light = new PointLight(0xffcc66, STREETLIGHT_LIGHT_INTENSITY, STREETLIGHT_LIGHT_DISTANCE)
+    light.position.copy(lampHead.position)
+    light.castShadow = true
+    light.shadow.mapSize.set(512, 512)
+    light.shadow.bias = -0.002
+    group.add(light)
+    this.streetlightLights.set(id, light)
+  }
+
   setAstronomy(astronomy: SceneAstronomy): void {
-    const groundColor = skyColorsForAltitude(astronomy.sun.altitudeDeg).horizon
+    const skyColors = skyColorsForAltitude(astronomy.sun.altitudeDeg)
+    const groundColor = skyColors.horizon
     this.baseFogColor = groundColor
     this.lastSunPosition = astronomy.sun
     this.buildSky(astronomy.sun)
-    this.buildGround(groundColor)
+    this.buildGround()
     this.updateCloudLighting(astronomy.sun, groundColor)
-    // Cheap per-frame retint only — never rebuilds the mesh/refetches tiles, see setTerrainOrigin.
-    // Unlike buildGround's flat disc (which darkens groundColor by *0.35 since a solid color plane
-    // needs extra contrast to read as "ground" rather than "sky"), the terrain's own photo texture
-    // and relief shading already read as ground — using groundColor undarkened just modulates the
-    // real photo brighter by day / darker by night, matching the sky's own light level.
-    if (this.terrainMesh) {
-      ;(this.terrainMesh.material as MeshBasicMaterial).color.setRGB(groundColor[0], groundColor[1], groundColor[2])
-    }
+    // Real lights (celestialLight/skyLight, see updateCelestialLight) now carry ground/terrain/
+    // decor's day-night color grading via normal Lambertian shading — unlike before this session,
+    // groundMesh/terrainMesh/decor materials no longer need their own per-frame color.setRGB
+    // retint, since they're no longer self-illuminated MeshBasicMaterial (see buildGround/
+    // DecorSystem.build's own doc comments on why this changed: a manually multiplied flat color
+    // can never receive a real shadow, since there's no actual light for something to block).
+    this.updateCelestialLight(astronomy, skyColors.zenith, groundColor)
     this.buildStars(astronomy.stars, astronomy.sun.altitudeDeg)
     this.setBodyMesh("sun", astronomy.sun, SUN_MOON_VISUAL_RADIUS, new Color(1, 0.96, 0.88), astronomy.sun.magnitude)
     this.setMoonMesh(astronomy.moon)
@@ -797,6 +967,38 @@ export class SceneRenderer {
     // scrubbing (no stars/precipitation/lightning to otherwise keep it alive).
     this.syncAnimationLoop()
     this.render()
+  }
+
+  /** Points the one real shadow-casting light at whichever of the Sun/Moon is currently above
+   * CELESTIAL_LIGHT_MIN_ALTITUDE_DEG (same threshold setBodyMesh already hides the body mesh
+   * below), preferring the Sun — real moonlight only ever matters once the (vastly brighter) Sun
+   * has set. `skyZenith`/`groundColor` (the same colors the sky dome/flat ground disc are built
+   * from) feed the non-shadow-casting HemisphereLight, so a decor object's shadowed side reads as
+   * ambient-lit sky/ground bounce instead of pure black — real skylight does exactly this for a
+   * real witness. `castShadow` is gated on there being any decor at all: an empty sighting has
+   * nothing to receive or cast a real shadow, so it costs nothing extra. */
+  private updateCelestialLight(astronomy: SceneAstronomy, skyZenith: RgbColor, groundColor: RgbColor): void {
+    this.skyLight.color.setRGB(skyZenith[0], skyZenith[1], skyZenith[2])
+    this.skyLight.groundColor.setRGB(groundColor[0], groundColor[1], groundColor[2])
+    this.skyLight.intensity = SKY_LIGHT_INTENSITY
+
+    const useSun = astronomy.sun.altitudeDeg >= CELESTIAL_LIGHT_MIN_ALTITUDE_DEG
+    const useMoon = !useSun && astronomy.moon.altitudeDeg >= CELESTIAL_LIGHT_MIN_ALTITUDE_DEG
+    if (!useSun && !useMoon) {
+      this.celestialLight.intensity = 0
+      return
+    }
+    const body = useSun ? astronomy.sun : astronomy.moon
+    const { x, y, z } = horizontalToCartesian(body.altitudeDeg, body.azimuthDeg, BODY_PLACEMENT_RADIUS)
+    this.celestialLight.position.set(x, y, z)
+    const tint = atmosphericTint(body.altitudeDeg)
+    this.celestialLight.color.setRGB(tint[0], tint[1], tint[2])
+    // Grazing-angle light is both dimmer in reality (more atmosphere to pass through) and, more
+    // importantly here, would cast absurdly long/noisy shadows right at the shadow camera's own
+    // frustum edges — fading it out approaching the horizon sidesteps both at once.
+    const altitudeFactor = Math.max(0, Math.sin(Math.max(body.altitudeDeg, 0) * DEG_TO_RAD))
+    this.celestialLight.intensity = (useSun ? SUN_LIGHT_INTENSITY : MOON_LIGHT_INTENSITY) * altitudeFactor
+    this.celestialLight.castShadow = this.decorGroups.size > 0
   }
 
   render(): void {
@@ -826,10 +1028,38 @@ export class SceneRenderer {
       flare.mesh.visible = false
       return
     }
+    if (this.isSunOccluded()) {
+      // The flare mesh is a screen-space overlay (depthTest:false, see LensFlareEffect.ts's own
+      // doc comment on why — its geometry has no meaningful 3D depth of its own) so the GPU's own
+      // z-buffer can never hide it behind the ground/terrain/decor the way it does for the Sun's
+      // small disc mesh above. This manual raycast against the same occluders is what makes the
+      // dazzle actually disappear behind the horizon or a building instead of always bleeding
+      // through them.
+      flare.mesh.visible = false
+      return
+    }
     flare.mesh.visible = true
     const projected = this.lensFlareScratch.copy(this.sunWorldPosition).project(this.camera)
     flare.uniforms.uLensPosition.value.set(projected.x, projected.y)
     flare.uniforms.uResolution.value.set(this.renderer.domElement.width, this.renderer.domElement.height)
+  }
+
+  /** True when the ground/terrain/decor sits between the camera and the Sun's real world
+   * position — see updateLensFlarePosition's own doc comment for why this manual check exists at
+   * all (the flare mesh it gates skips the z-buffer entirely). Cheap: a handful of occluder
+   * objects (groundMesh always, terrainMesh once loaded, a few decor groups at most), one ray. */
+  private isSunOccluded(): boolean {
+    const occluders: Object3D[] = []
+    if (this.groundMesh) occluders.push(this.groundMesh)
+    if (this.terrainMesh) occluders.push(this.terrainMesh)
+    for (const group of this.decorGroups.values()) occluders.push(group)
+    if (occluders.length === 0) return false
+    const direction = this.sunOcclusionDirectionScratch.copy(this.sunWorldPosition).sub(this.camera.position)
+    const distanceToSun = direction.length()
+    direction.normalize()
+    this.sunOcclusionRaycaster.set(this.camera.position, direction)
+    const hit = this.sunOcclusionRaycaster.intersectObjects(occluders, true)[0]
+    return hit !== undefined && hit.distance < distanceToSun
   }
 
   /** Finds which celestial body (if any) sits under normalized device coordinates (each in
@@ -844,6 +1074,26 @@ export class SceneRenderer {
     const intersection = this.raycaster.intersectObjects(entries.map(([, sprite]) => sprite))[0]
     if (!intersection) return undefined
     return entries.find(([, sprite]) => sprite === intersection.object)?.[0]
+  }
+
+  /** Finds which decor object (if any) sits under normalized device coordinates — same NDC
+   * convention as pickBodyAt, for the recorder's own right-click "view this witness's testimony"
+   * menu (see UfoRecorderElement.onContextMenu). Tests every real mesh recursively (decor has no
+   * separate oversized hit-area sprite the way bodies do — its parts are already human-sized, not
+   * a tiny true-to-scale astronomical disc needing a more forgiving target) and walks back up from
+   * whichever part was actually hit (e.g. a building's own wall mesh) to the top-level group
+   * stored in decorGroups, since that's what carries the DecorObject's own id. */
+  pickDecorAt(ndcX: number, ndcY: number): string | undefined {
+    this.raycaster.setFromCamera(new Vector2(ndcX, ndcY), this.camera)
+    const entries = [...this.decorGroups.entries()]
+    const intersection = this.raycaster.intersectObjects(
+      entries.map(([, group]) => group),
+      true
+    )[0]
+    if (!intersection) return undefined
+    let object: Object3D | null = intersection.object
+    while (object && !entries.some(([, group]) => group === object)) object = object.parent
+    return entries.find(([, group]) => group === object)?.[0]
   }
 
   dispose(): void {
@@ -867,6 +1117,11 @@ export class SceneRenderer {
       this.disposeGlare(key)
     }
     this.disposeCompassLabels()
+    for (const group of this.decorGroups.values()) {
+      DecorSystem.dispose(group)
+    }
+    this.decorGroups.clear()
+    this.streetlightLights.clear()
     if (this.lensFlare) {
       this.scene.remove(this.lensFlare.mesh)
       this.lensFlare.mesh.geometry.dispose()
@@ -950,14 +1205,28 @@ export class SceneRenderer {
     this.scene.add(this.skyMesh)
   }
 
-  private buildGround(horizon: [number, number, number]): void {
+  /** A neutral (not sky/horizon-tinted) base color, unlike before this session — day/night color
+   * grading now comes entirely from celestialLight/skyLight actually lighting this material (see
+   * updateCelestialLight), not from a manual per-frame color.setRGB. Baking the same horizon tint
+   * into *both* the material and the light color/intensity would double-darken every night scene
+   * (two already-dim multipliers compounding), so the material only ever needs one fixed neutral
+   * albedo — GROUND_ALBEDO's own 0.5 keeps a plain-gray "unremarkable ground" reading whether it's
+   * lit by full daylight or the Moon's own dim glow. */
+  private buildGround(): void {
     this.disposeMesh(this.groundMesh)
     const geometry = new CircleGeometry(GROUND_RADIUS, 48)
-    const groundColor = new Color(horizon[0] * 0.35, horizon[1] * 0.35, horizon[2] * 0.35)
-    const material = new MeshBasicMaterial({ color: groundColor, fog: true })
+    const material = new MeshLambertMaterial({ color: new Color(GROUND_ALBEDO, GROUND_ALBEDO, GROUND_ALBEDO), fog: true })
     this.groundMesh = new Mesh(geometry, material)
     this.groundMesh.rotation.x = -Math.PI / 2
-    this.groundMesh.position.y = -0.5
+    // World y=0 is real ground level — the camera's own y=1.6 (see the constructor/
+    // setObserverPose) is what actually represents eye height above it, not an arbitrary offset
+    // baked in here. Ground previously sat at y=-0.5 with no documented reason (an unexplained
+    // leftover from this scene's very first commit) — that quietly made true eye height 1.6-(-0.5)
+    // = 2.1m instead of the realistic 1.6m the camera's own constant was clearly meant to express,
+    // and left every decor object floating 0.5 units above the ground it visually cast a shadow
+    // onto. y=0 is the real, physically-meaningful ground plane; nothing needs an offset anymore.
+    this.groundMesh.position.y = 0
+    this.groundMesh.receiveShadow = true
     this.scene.add(this.groundMesh)
   }
 
@@ -1715,7 +1984,10 @@ export class SceneRenderer {
   }
 
   private buildCompassLabels(): void {
-    this.compassSprites = COMPASS_DIRECTIONS.map(({ azimuthDeg, label }) => {
+    const language = selectLocale(navigator.languages, COMPASS_SUPPORTED_LANGUAGES) as "en" | "fr"
+    const labels = COMPASS_LABELS[language]
+    this.compassSprites = COMPASS_AZIMUTHS.map((azimuthDeg, index) => {
+      const label = labels[index]
       // depthTest/fog off: these are a fixed HUD-like reference, not part of the astronomically
       // positioned scene — they should read clearly against the sky/fog regardless of altitude.
       const material = new SpriteMaterial({ map: createCompassLabelTexture(label), depthTest: false, fog: false })

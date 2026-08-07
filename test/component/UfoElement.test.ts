@@ -85,10 +85,12 @@ describe("UfoElement", () => {
     const element = mount()
     element.sightingData = sampleJson
     // timeline.order/groups are always present on the way out (order: z-order support, groups:
-    // multi-select grouping), even though the hand-written fixture above predates both and omits them.
+    // multi-select grouping), even though the hand-written fixture above predates both and omits
+    // them. decor is likewise always present (see Decor.ts), empty here since none was set.
     expect(element.sightingData).toEqual({
       ...sampleJson,
-      timeline: { ...sampleJson.timeline, order: ["ufo-1"], groups: [] }
+      timeline: { ...sampleJson.timeline, order: ["ufo-1"], groups: [] },
+      decor: []
     })
   })
 
