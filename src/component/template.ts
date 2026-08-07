@@ -30,28 +30,50 @@ export const html = `
     <label><span id="label-lng">Longitude</span> <input id="lng" type="number" min="-180" max="180" step="0.0001" placeholder="lng"/></label>
     <label><span id="label-heading">Heading</span> <input id="heading" type="number" min="0" max="360" step="1" placeholder="unknown"/> &deg;</label>
     <label><span id="label-pitch">Tilt</span> <input id="pitch" type="number" min="-90" max="90" step="1" value="0"/> &deg;</label>
-    <button id="add-decor-building" type="button">Add building</button>
-    <label><span id="label-decor-kind">Kind</span>
+    <fieldset class="decor-fieldset">
+      <legend id="label-decor-fieldset">Decor</legend>
+      <button id="add-decor-building" type="button">Add</button>
       <select id="decorKind">
-        <!-- Building/witness are added from their own dedicated buttons instead (this group's own
-             "Add building" above, Witness's own "Add witness") — hidden (not removed) so
-             decorLabel() can still look up their translated kind name by id for the fallback
-             "{kind} {n}" label, see UfoRecorderElement.decorLabel. -->
-        <option id="option-decor-building" value="building" hidden>Building</option>
+        <option id="option-decor-building" value="building">Building</option>
         <option id="option-decor-tree" value="tree">Tree</option>
         <option id="option-decor-streetlight" value="streetlight">Streetlight</option>
         <option id="option-decor-vehicle" value="vehicle">Vehicle</option>
+        <!-- Other witness is added from its own dedicated button instead (Witness group's own
+             "Add witness" — nothing else to configure beforehand) — hidden (not removed) so
+             decorLabel() can still look up its translated kind name by id for the fallback
+             "{kind} {n}" label, see UfoRecorderElement.decorLabel. -->
         <option id="option-decor-witness" value="witness" hidden>Other witness</option>
       </select>
-    </label>
-    <button id="add-decor" type="button" class="icon-btn" title="Add decor" aria-label="Add decor">+</button>
-    <button id="delete-decor" type="button" class="icon-btn" title="Delete decor" aria-label="Delete decor">🗑</button>
-    <label><span id="label-decor">Decor</span> <select id="decor"></select></label>
-    <label><span id="label-decor-title">Name</span> <input id="decorTitle" type="text"/></label>
-    <label><span id="label-decor-east">Distance east</span> <input id="decorEast" type="number" step="0.5" value="0"/> m</label>
-    <label><span id="label-decor-north">Distance north</span> <input id="decorNorth" type="number" step="0.5" value="0"/> m</label>
-    <label><span id="label-decor-heading">Heading</span> <input id="decorHeading" type="number" min="0" max="360" step="1" value="0"/> &deg;</label>
-    <label><span id="label-decor-lit">Lit</span> <input id="decorLit" type="checkbox"/></label>
+      <button id="delete-decor" type="button" class="icon-btn" title="Delete decor" aria-label="Delete decor">🗑</button>
+      <label><span id="label-decor">Decor</span> <select id="decor"></select></label>
+      <label><span id="label-decor-title">Name</span> <input id="decorTitle" type="text"/></label>
+      <label><span id="label-decor-east">Distance east</span> <input id="decorEast" type="number" step="0.5" value="0"/> m</label>
+      <label><span id="label-decor-north">Distance north</span> <input id="decorNorth" type="number" step="0.5" value="0"/> m</label>
+      <label><span id="label-decor-heading">Heading</span> <input id="decorHeading" type="number" min="0" max="360" step="1" value="0"/> &deg;</label>
+      <label><span id="label-decor-lit">Lit</span> <input id="decorLit" type="checkbox"/></label>
+      <label><span id="label-decor-floors">Floors</span> <input id="decorFloors" type="number" min="0" max="20" step="1" value="2"/></label>
+      <span id="label-decor-windows">Windows</span>
+      <!-- autocomplete="off" on all 4: without it, browsers reliably re-suggest/autofill whatever
+           value was last typed into a field with this exact id from earlier in the same session
+           (e.g. "50", typed while testing a completely different decor object) — since
+           syncDecorFields already leaves an empty field for "no window recorded" (see its own doc
+           comment), an autofilled value here isn't a leftover the app itself wrote, but the field
+           visually shows one anyway, misleadingly reading as "windows default to 50%". -->
+      <label><span id="label-decor-window-front">Front</span> <input id="decorWindowFront" type="number" min="0" max="100" step="5" placeholder="none" autocomplete="off"/> %</label>
+      <label><span id="label-decor-window-behind">Behind</span> <input id="decorWindowBehind" type="number" min="0" max="100" step="5" placeholder="none" autocomplete="off"/> %</label>
+      <label><span id="label-decor-window-left">Left</span> <input id="decorWindowLeft" type="number" min="0" max="100" step="5" placeholder="none" autocomplete="off"/> %</label>
+      <label><span id="label-decor-window-right">Right</span> <input id="decorWindowRight" type="number" min="0" max="100" step="5" placeholder="none" autocomplete="off"/> %</label>
+      <label><span id="label-decor-witness-side">Witness location</span>
+        <select id="decorWitnessSide">
+          <option id="option-witness-side-none" value="">Not present</option>
+          <option id="option-witness-side-front" value="front">Front</option>
+          <option id="option-witness-side-behind" value="behind">Behind</option>
+          <option id="option-witness-side-left" value="left">Left</option>
+          <option id="option-witness-side-right" value="right">Right</option>
+        </select>
+      </label>
+      <label><span id="label-decor-occupied-floor">Occupied floor</span> <input id="decorOccupiedFloor" type="number" min="0" step="1" value="0"/></label>
+    </fieldset>
   </div>
 </details>
 <details open>
@@ -154,7 +176,7 @@ button.preset[aria-pressed="true"] {
   outline: 2px solid #39f;
   font-weight: bold;
 }
-#lat, #lng, #heading, #pitch, #windDirection, #windSpeed, #decorEast, #decorNorth, #decorHeading {
+#lat, #lng, #heading, #pitch, #windDirection, #windSpeed, #decorEast, #decorNorth, #decorHeading, #decorFloors, #decorOccupiedFloor, #decorWindowFront, #decorWindowBehind, #decorWindowLeft, #decorWindowRight {
   width: 6em;
 }
 #obs-time, #obs-end-time {
@@ -210,6 +232,25 @@ details[open] summary {
 }
 details > .toolbar {
   margin-bottom: 0;
+}
+/* Groups every decor-object field (Add through Occupied floor) apart from the Location group's
+   own observer-pose fields (Latitude/Longitude/Heading/Tilt) above it — same flex-wrap layout as
+   .toolbar itself (a plain block-level fieldset would otherwise stack its own children instead of
+   flowing them inline like every other field in this toolbar) and matching border/radius as the
+   surrounding <details> groups for visual consistency. */
+fieldset.decor-fieldset {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5em;
+  border: 1px solid #444;
+  border-radius: 4px;
+  padding: 0.5em 0.75em;
+  margin: 0;
+}
+fieldset.decor-fieldset legend {
+  font-weight: 600;
+  padding: 0 0.25em;
 }
 #import-url {
   flex: 1 1 16em;

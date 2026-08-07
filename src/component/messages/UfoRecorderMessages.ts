@@ -127,7 +127,6 @@ export interface UfoRecorderMessages {
    * on why it's opt-in. A view preference, not sighting weather data (see UfoRecorderElement's
    * cameraDeviceInput field). */
   cameraDevice: string
-  decorKind: string
   /** Label on the dropdown listing the sighting's own decor objects — the Decor group itself no
    * longer has its own summary/heading (its fields now live inside Location/Witness instead, see
    * UfoRecorderElement's addDecorWitnessButton/addDecorBuildingButton doc comments). */
@@ -137,6 +136,9 @@ export interface UfoRecorderMessages {
   decorStreetlight: string
   decorVehicle: string
   decorWitness: string
+  /** Button that adds a new decor object of whichever kind decorKindSelect currently shows —
+   * placed right before that dropdown ("[Add] [Kind ▾]"), so it's deliberately just "Add", not
+   * "Add decor" — the adjacent dropdown already says what's being added. */
   addDecor: string
   deleteDecor: string
   decorEast: string
@@ -154,7 +156,24 @@ export interface UfoRecorderMessages {
    * UfoRecorderElement's addDecorWitnessButton) — distinct from decorWitness, that dropdown
    * option's own (now-hidden) label. */
   addWitness: string
-  /** Button in the Location group that adds a new building decor object — see addWitness's own
-   * doc comment for why this is a separate key from decorBuilding. */
-  addBuilding: string
+  /** Number of upper stories a building decor object has (see DecorObject.floors) — shown only
+   * for kind "building". */
+  decorFloors: string
+  /** Which floor of a building the recording witness is on (see DecorObject.occupiedFloor) —
+   * shown only for kind "building" once decorWitnessSide is set. */
+  decorOccupiedFloor: string
+  /** Which side of the selected decor object the recording witness is positioned at, if inside it
+   * at all — the select field's own label (see DecorObject.witnessSide). */
+  decorWitnessSide: string
+  /** decorWitnessSide's own "not inside this object" option — the field's default/empty value. */
+  decorWitnessSideNone: string
+  /** Heading above the 4 per-side window-opacity inputs (see DecorObject.windows). */
+  decorWindows: string
+  /** Shared by the 4 window-opacity input labels AND decorWitnessSide's own 4 non-empty options —
+   * both are the same DecorSide concept ("front"/"behind"/"left"/"right", relative to the
+   * object's own heading, not a compass direction), so one set of labels covers both. */
+  decorSideFront: string
+  decorSideBehind: string
+  decorSideLeft: string
+  decorSideRight: string
 }

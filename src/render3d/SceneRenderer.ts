@@ -70,7 +70,7 @@ import { buildLensFlare } from "./LensFlareEffect.js"
 import type { LensFlareSystem } from "./LensFlareEffect.js"
 import { DecorSystem } from "./DecorSystem.js"
 import type { DecorObject } from "../engine/model/Decor.js"
-import { resolveDecorLitAt } from "../engine/model/Decor.js"
+import { resolveDecorLitAt, canHoldWitness } from "../engine/model/Decor.js"
 
 /** Plain field-by-field comparison — see setWeather's own doc comment on why reference equality
  * stopped being enough once weather started being resolved fresh every tick from a keyframe
@@ -883,7 +883,7 @@ export class SceneRenderer {
     this.decorGroups.clear()
     this.streetlightLights.clear()
     for (const object of decor) {
-      const group = DecorSystem.build(object.kind, object.lit ?? false, object.headingDeg)
+      const group = DecorSystem.build(object, object.lit ?? false)
       this.scene.add(group)
       this.decorGroups.set(object.id, group)
       // Built regardless of the object's own *initial* lit state (unlike before this session) —
@@ -914,17 +914,68 @@ export class SceneRenderer {
    * offsets every decor group by exactly that drift, canceling out the world's own re-centering.
    * A sighting with no real lat/lng at all gets offset {x:0, z:0} (no-op): the camera itself never
    * translates in that case either (setObserverPose only ever touches rotation/elevation), so
-   * decor staying at its raw authored offset is already correct, not a fallback approximation. */
+   * decor staying at its raw authored offset is already correct, not a fallback approximation.
+   *
+   * Also handles "being inside a decor object" (a decor object with witnessSide set — see
+   * Decor.ts's own doc comment): the SAME anchoring trick that keeps decor fixed under a drifting
+   * witness also lets the witness's own viewpoint move INTO a decor object, without the camera
+   * itself ever moving off its permanently-fixed local (0, elevation, 0) — see setObserverPose's
+   * own doc comment on why camera x/z never move. Instead, once the inhabited object's own exact
+   * standing spot (DecorSystem.occupantView, world-rotated by the object's headingDeg) is known,
+   * an EXTRA uniform shift is added on top of the usual drift offset — for every decor group,
+   * itself included — that lands that exact spot at world (0, z=0), i.e. exactly where the camera
+   * already permanently sits. The camera's own heading/pitch/height are overridden to match
+   * (overwriting whatever setObserverPose, called just before this each tick, set from the
+   * witness's own OUTSIDE pose) — view.eyeY is set directly (not "1.6 + something", the OUTSIDE
+   * convention setObserverPose itself uses — see occupantView's own doc comment on why building/
+   * vehicle can't share that formula); view.headingDeg/0 pitch is only the CENTERED look direction
+   * (straight out through the chosen window); indoorLookYawDeg/indoorLookPitchDeg (see
+   * setIndoorLook) are added on top so the witness can still turn their head to see the room's
+   * other walls/floor/ceiling, not just whatever's directly ahead through that one window. */
   updateDecorAnchoring(referencePose: ObserverPose | undefined, currentPose: ObserverPose | undefined): void {
     const offset =
       referencePose?.lat !== undefined && referencePose.lng !== undefined && currentPose?.lat !== undefined && currentPose?.lng !== undefined
         ? geoToLocalMeters(referencePose.lat, referencePose.lng, currentPose.lat, currentPose.lng)
         : { x: 0, z: 0 }
+    const inhabited = this.decorObjects.find(object => object.witnessSide !== undefined && canHoldWitness(object.kind))
+    const shift = { x: 0, z: 0 }
+    if (inhabited) {
+      const view = DecorSystem.occupantView(inhabited)
+      // Rotates the occupant's own LOCAL (x,z) by the inhabited object's world rotation (same
+      // "-headingDeg, clockwise from north" convention DecorSystem.build applies to the whole
+      // group) to get the world-space delta from that object's own anchor point to its exact
+      // standing spot — same rotation math setObserverPose/DecorSystem.build both already use.
+      const rotationRad = -(inhabited.headingDeg ?? 0) * DEG_TO_RAD
+      const worldDx = view.x * Math.cos(rotationRad) + view.z * Math.sin(rotationRad)
+      const worldDz = -view.x * Math.sin(rotationRad) + view.z * Math.cos(rotationRad)
+      const anchorX = inhabited.eastM + offset.x
+      const anchorZ = -inhabited.northM + offset.z
+      shift.x = -(anchorX + worldDx)
+      shift.z = -(anchorZ + worldDz)
+      this.camera.position.y = view.eyeY
+      this.camera.rotation.set(this.indoorLookPitchDeg * DEG_TO_RAD, -(view.headingDeg + this.indoorLookYawDeg) * DEG_TO_RAD, 0, "YXZ")
+    }
     for (const object of this.decorObjects) {
       const group = this.decorGroups.get(object.id)
       if (!group) continue
-      group.position.set(object.eastM + offset.x, DECOR_GROUND_Y, -object.northM + offset.z)
+      group.position.set(object.eastM + offset.x + shift.x, DECOR_GROUND_Y, -object.northM + offset.z + shift.z)
     }
+  }
+
+  /** How far the witness has turned their head away from "straight out through the chosen
+   * window" while inside a decor object — transient, in-memory only (never written into the
+   * sighting's own witnessTrack, which represents the witness's real OUTSIDE recorded gaze, a
+   * different reference frame entirely). Set by UfoRecorderElement's own camera-drag handling
+   * when it detects the witness is currently inside a decor object (see its own cameraDragState
+   * doc comment) — reset to {0,0} whenever the inhabited object/side changes, so looking through
+   * a newly picked window always starts centered. Applied in updateDecorAnchoring, on top of
+   * (not instead of) the object/side's own base look direction. */
+  private indoorLookYawDeg = 0
+  private indoorLookPitchDeg = 0
+
+  setIndoorLook(yawDeg: number, pitchDeg: number): void {
+    this.indoorLookYawDeg = yawDeg
+    this.indoorLookPitchDeg = pitchDeg
   }
 
   /** Resolves and applies each decor object's current lit state at time t — see Decor.ts's own

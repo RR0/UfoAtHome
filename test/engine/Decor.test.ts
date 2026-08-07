@@ -1,6 +1,15 @@
 import { describe, expect, it } from "vitest"
-import { resolveDecorLitAt } from "../../src/engine/model/Decor.js"
-import type { DecorObject } from "../../src/engine/model/Decor.js"
+import {
+  resolveDecorLitAt,
+  hasWindows,
+  isWindowOpenable,
+  canHoldWitness,
+  defaultWindows,
+  DECOR_SIDES,
+  DEFAULT_WINDOW_OPACITY_PERCENT,
+  FIXED_WINDOW_MIN_OPACITY_PERCENT
+} from "../../src/engine/model/Decor.js"
+import type { DecorObject, DecorKind } from "../../src/engine/model/Decor.js"
 
 function streetlight(overrides: Partial<DecorObject> = {}): DecorObject {
   return { id: "decor-1", kind: "streetlight", eastM: 0, northM: 0, ...overrides }
@@ -47,5 +56,66 @@ describe("resolveDecorLitAt", () => {
       ].sort((a, b) => a.t - b.t)
     })
     expect(resolveDecorLitAt(decor, 6000)).toBe(true)
+  })
+})
+
+const NON_WINDOWED_KINDS: DecorKind[] = ["tree", "streetlight", "witness"]
+
+describe("hasWindows", () => {
+  it("is true only for building and vehicle", () => {
+    expect(hasWindows("building")).toBe(true)
+    expect(hasWindows("vehicle")).toBe(true)
+    for (const kind of NON_WINDOWED_KINDS) expect(hasWindows(kind)).toBe(false)
+  })
+})
+
+describe("isWindowOpenable", () => {
+  it("every side is openable for a building", () => {
+    for (const side of DECOR_SIDES) expect(isWindowOpenable("building", side)).toBe(true)
+  })
+
+  it("only left/right are openable for a vehicle — front/behind (windshield/rear window) are fixed", () => {
+    expect(isWindowOpenable("vehicle", "front")).toBe(false)
+    expect(isWindowOpenable("vehicle", "behind")).toBe(false)
+    expect(isWindowOpenable("vehicle", "left")).toBe(true)
+    expect(isWindowOpenable("vehicle", "right")).toBe(true)
+  })
+
+  it("no side is openable for a kind with no windows at all", () => {
+    for (const kind of NON_WINDOWED_KINDS) {
+      for (const side of DECOR_SIDES) expect(isWindowOpenable(kind, side)).toBe(false)
+    }
+  })
+})
+
+describe("canHoldWitness", () => {
+  it("is true only for building and vehicle", () => {
+    expect(canHoldWitness("building")).toBe(true)
+    expect(canHoldWitness("vehicle")).toBe(true)
+    for (const kind of NON_WINDOWED_KINDS) expect(canHoldWitness(kind)).toBe(false)
+  })
+})
+
+describe("defaultWindows", () => {
+  it("gives a building every side at DEFAULT_WINDOW_OPACITY_PERCENT — all 4 are openable", () => {
+    expect(defaultWindows("building")).toEqual({
+      front: DEFAULT_WINDOW_OPACITY_PERCENT,
+      behind: DEFAULT_WINDOW_OPACITY_PERCENT,
+      left: DEFAULT_WINDOW_OPACITY_PERCENT,
+      right: DEFAULT_WINDOW_OPACITY_PERCENT
+    })
+  })
+
+  it("gives a vehicle's fixed front/behind FIXED_WINDOW_MIN_OPACITY_PERCENT instead, since they can never open", () => {
+    expect(defaultWindows("vehicle")).toEqual({
+      front: FIXED_WINDOW_MIN_OPACITY_PERCENT,
+      behind: FIXED_WINDOW_MIN_OPACITY_PERCENT,
+      left: DEFAULT_WINDOW_OPACITY_PERCENT,
+      right: DEFAULT_WINDOW_OPACITY_PERCENT
+    })
+  })
+
+  it("is undefined for a kind with no windows at all", () => {
+    for (const kind of NON_WINDOWED_KINDS) expect(defaultWindows(kind)).toBeUndefined()
   })
 })

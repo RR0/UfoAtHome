@@ -280,6 +280,13 @@ export class SceneElement extends HTMLElement {
     this.sceneRenderer.setCompassForced(forced)
   }
 
+  /** Passthrough to SceneRenderer.setIndoorLook — see its own doc comment. `UfoRecorderElement`
+   * calls this from its camera-drag handling instead of updateObserver()/witnessTrack whenever
+   * the witness is currently inside a decor object. */
+  setIndoorLook(yawDeg: number, pitchDeg: number): void {
+    this.sceneRenderer.setIndoorLook(yawDeg, pitchDeg)
+  }
+
   /** Applies a weather condition to both the visual renderer and the ambient/wind audio — called
    * every tick from updateAstronomy() (weather is now itself resolved per-instant from a keyframe
    * track, see Sighting.resolveWeatherAt, same as observer pose) as well as once explicitly from

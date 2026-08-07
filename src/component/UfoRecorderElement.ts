@@ -10,8 +10,17 @@ import type { HandleId } from "../engine/shape/ShapeHandles.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
 import type { PrecipitationType, Weather } from "../engine/model/Weather.js"
 import type { People } from "../engine/model/People.js"
-import type { DecorObject } from "../engine/model/Decor.js"
-import { resolveDecorLitAt } from "../engine/model/Decor.js"
+import type { DecorObject, DecorSide } from "../engine/model/Decor.js"
+import {
+  resolveDecorLitAt,
+  DECOR_SIDES,
+  DEFAULT_BUILDING_FLOORS,
+  FIXED_WINDOW_MIN_OPACITY_PERCENT,
+  defaultWindows,
+  hasWindows,
+  isWindowOpenable,
+  canHoldWitness
+} from "../engine/model/Decor.js"
 import {
   sightingDurationMs,
   sightingDurationBlockedReason,
@@ -194,8 +203,12 @@ export class UfoRecorderElement extends HTMLElement {
   private readonly optionPrecipitationSnow: HTMLElement
   private readonly optionPrecipitationHail: HTMLElement
   private readonly decorKindSelect: HTMLSelectElement
-  private readonly addDecorButton: HTMLButtonElement
   private readonly addDecorWitnessButton: HTMLButtonElement
+  /** Labeled "Add decor" (not "Add building" — see template's own comment on this rename) and
+   * adds whatever kind decorKindSelect currently shows, building included now that it's no longer
+   * hidden from that dropdown — the ONLY way to add a building/tree/streetlight/vehicle. Only
+   * "other witness" still gets its own dedicated button (addDecorWitnessButton) and stays hidden
+   * from the dropdown, since a witness has no other fields to configure via it beforehand. */
   private readonly addDecorBuildingButton: HTMLButtonElement
   private readonly deleteDecorButton: HTMLButtonElement
   private readonly decorSelect: HTMLSelectElement
@@ -205,14 +218,33 @@ export class UfoRecorderElement extends HTMLElement {
   private readonly decorHeadingInput: HTMLInputElement
   private readonly decorLitInput: HTMLInputElement
   private readonly decorSightingUrlInput: HTMLInputElement
-  private readonly labelDecorKind: HTMLElement
+  private readonly decorFloorsInput: HTMLInputElement
+  private readonly decorOccupiedFloorInput: HTMLInputElement
+  private readonly decorWitnessSideSelect: HTMLSelectElement
+  /** One 0-100 opacity number input per DecorSide (empty = no window at all on that side), keyed
+   * the same way as DecorObject.windows itself — see syncDecorFields/updateDecorWindows, which
+   * iterate DECOR_SIDES rather than one branch per side. Each input's own `min` is raised to
+   * FIXED_WINDOW_MIN_OPACITY_PERCENT per isWindowOpenable (e.g. a vehicle's front/behind windshield/
+   * rear window are fixed — see syncDecorVisibility). */
+  private readonly decorWindowInputs: Record<DecorSide, HTMLInputElement>
+  private readonly labelDecorSide: Record<DecorSide, HTMLElement>
+  private readonly optionWitnessSide: Record<DecorSide, HTMLOptionElement>
   private readonly labelDecor: HTMLElement
+  /** The <legend> of the fieldset wrapping every decor-object field (Add through Occupied floor)
+   * inside the Location group — reuses the same "Decor" text as labelDecor (the object-picker's
+   * own label), just on a different element, so no separate message key is needed. */
+  private readonly labelDecorFieldset: HTMLElement
   private readonly labelDecorTitle: HTMLElement
   private readonly labelDecorEast: HTMLElement
   private readonly labelDecorNorth: HTMLElement
   private readonly labelDecorHeading: HTMLElement
   private readonly labelDecorLit: HTMLElement
   private readonly labelDecorSightingUrl: HTMLElement
+  private readonly labelDecorFloors: HTMLElement
+  private readonly labelDecorOccupiedFloor: HTMLElement
+  private readonly labelDecorWitnessSide: HTMLElement
+  private readonly labelDecorWindows: HTMLElement
+  private readonly optionWitnessSideNone: HTMLOptionElement
   private readonly optionDecorBuilding: HTMLElement
   private readonly optionDecorTree: HTMLElement
   private readonly optionDecorStreetlight: HTMLElement
@@ -278,7 +310,26 @@ export class UfoRecorderElement extends HTMLElement {
     startPointer: { x: number; y: number }
     startHeadingDeg: number
     startPitchDeg: number
+    /** Whether this drag started while the witness is inside a decor object (see
+     * isWitnessInsideDecor) — routes the drag into indoorLookYawDeg/PitchDeg + SceneElement.
+     * setIndoorLook instead of witnessTrack/updateObserver, since the outside witnessTrack pose
+     * is a different reference frame entirely (see SceneRenderer.setIndoorLook's own doc
+     * comment) — checked once at drag-start rather than every pointermove so a drag that happens
+     * to cross the moment witnessSide gets cleared mid-drag doesn't switch targets partway. */
+    insideDecor: boolean
   }
+
+  /** How far the witness has turned their head from center while looking through a decor
+   * object's window — mirrors cameraDragState's own startHeadingDeg/startPitchDeg role, just for
+   * the indoor-look case (see SceneRenderer.setIndoorLook). Reset to 0 by syncIndoorLookReset
+   * whenever the inhabited object/side changes. */
+  private indoorLookYawDeg = 0
+  private indoorLookPitchDeg = 0
+  /** `${decor.id}:${witnessSide}` of whichever decor object is currently inhabited, or undefined
+   * — compared against on every syncIndoorLookReset tick purely to detect a CHANGE (a different
+   * object, a different side, or no longer inhabited at all) worth resetting indoorLookYawDeg/
+   * PitchDeg for; the value itself is never read for anything else. */
+  private lastInhabitedKey?: string
 
   /** Bound once so document.removeEventListener (disconnectedCallback/endDrag) can actually
    * find them. */
@@ -445,7 +496,6 @@ export class UfoRecorderElement extends HTMLElement {
     this.optionPrecipitationSnow = this.shadow.getElementById("option-precipitation-snow")!
     this.optionPrecipitationHail = this.shadow.getElementById("option-precipitation-hail")!
     this.decorKindSelect = this.shadow.getElementById("decorKind") as HTMLSelectElement
-    this.addDecorButton = this.shadow.getElementById("add-decor") as HTMLButtonElement
     this.addDecorWitnessButton = this.shadow.getElementById("add-decor-witness") as HTMLButtonElement
     this.addDecorBuildingButton = this.shadow.getElementById("add-decor-building") as HTMLButtonElement
     this.deleteDecorButton = this.shadow.getElementById("delete-decor") as HTMLButtonElement
@@ -456,14 +506,40 @@ export class UfoRecorderElement extends HTMLElement {
     this.decorHeadingInput = this.shadow.getElementById("decorHeading") as HTMLInputElement
     this.decorLitInput = this.shadow.getElementById("decorLit") as HTMLInputElement
     this.decorSightingUrlInput = this.shadow.getElementById("decorSightingUrl") as HTMLInputElement
-    this.labelDecorKind = this.shadow.getElementById("label-decor-kind")!
+    this.decorFloorsInput = this.shadow.getElementById("decorFloors") as HTMLInputElement
+    this.decorOccupiedFloorInput = this.shadow.getElementById("decorOccupiedFloor") as HTMLInputElement
+    this.decorWitnessSideSelect = this.shadow.getElementById("decorWitnessSide") as HTMLSelectElement
+    this.decorWindowInputs = {
+      front: this.shadow.getElementById("decorWindowFront") as HTMLInputElement,
+      behind: this.shadow.getElementById("decorWindowBehind") as HTMLInputElement,
+      left: this.shadow.getElementById("decorWindowLeft") as HTMLInputElement,
+      right: this.shadow.getElementById("decorWindowRight") as HTMLInputElement
+    }
+    this.labelDecorSide = {
+      front: this.shadow.getElementById("label-decor-window-front")!,
+      behind: this.shadow.getElementById("label-decor-window-behind")!,
+      left: this.shadow.getElementById("label-decor-window-left")!,
+      right: this.shadow.getElementById("label-decor-window-right")!
+    }
+    this.optionWitnessSide = {
+      front: this.shadow.getElementById("option-witness-side-front") as HTMLOptionElement,
+      behind: this.shadow.getElementById("option-witness-side-behind") as HTMLOptionElement,
+      left: this.shadow.getElementById("option-witness-side-left") as HTMLOptionElement,
+      right: this.shadow.getElementById("option-witness-side-right") as HTMLOptionElement
+    }
+    this.optionWitnessSideNone = this.shadow.getElementById("option-witness-side-none") as HTMLOptionElement
     this.labelDecor = this.shadow.getElementById("label-decor")!
+    this.labelDecorFieldset = this.shadow.getElementById("label-decor-fieldset")!
     this.labelDecorTitle = this.shadow.getElementById("label-decor-title")!
     this.labelDecorEast = this.shadow.getElementById("label-decor-east")!
     this.labelDecorNorth = this.shadow.getElementById("label-decor-north")!
     this.labelDecorHeading = this.shadow.getElementById("label-decor-heading")!
     this.labelDecorLit = this.shadow.getElementById("label-decor-lit")!
     this.labelDecorSightingUrl = this.shadow.getElementById("label-decor-sighting-url")!
+    this.labelDecorFloors = this.shadow.getElementById("label-decor-floors")!
+    this.labelDecorOccupiedFloor = this.shadow.getElementById("label-decor-occupied-floor")!
+    this.labelDecorWitnessSide = this.shadow.getElementById("label-decor-witness-side")!
+    this.labelDecorWindows = this.shadow.getElementById("label-decor-windows")!
     this.optionDecorBuilding = this.shadow.getElementById("option-decor-building")!
     this.optionDecorTree = this.shadow.getElementById("option-decor-tree")!
     this.optionDecorStreetlight = this.shadow.getElementById("option-decor-streetlight")!
@@ -514,13 +590,24 @@ export class UfoRecorderElement extends HTMLElement {
     // itself already resyncs the toolbar, no separate onSelectionOrTimeChanged() call needed).
     this.sourceSelect.addEventListener("change", () => this.selectUnit(this.sourceSelect.value))
     this.shapeTitleInput.addEventListener("input", () => this.updateShapeTitle())
-    this.addDecorButton.addEventListener("click", () => this.addDecor())
     this.addDecorWitnessButton.addEventListener("click", () => this.addDecor("witness"))
-    this.addDecorBuildingButton.addEventListener("click", () => this.addDecor("building"))
+    this.addDecorBuildingButton.addEventListener("click", () => this.addDecor())
     this.deleteDecorButton.addEventListener("click", () => this.deleteDecor())
     this.decorSelect.addEventListener("change", () => this.selectDecor(this.decorSelect.value))
-    for (const input of [this.decorTitleInput, this.decorEastInput, this.decorNorthInput, this.decorHeadingInput, this.decorSightingUrlInput]) {
+    for (const input of [
+      this.decorTitleInput,
+      this.decorEastInput,
+      this.decorNorthInput,
+      this.decorHeadingInput,
+      this.decorSightingUrlInput,
+      this.decorFloorsInput,
+      this.decorOccupiedFloorInput
+    ]) {
       input.addEventListener("input", () => this.updateDecor())
+    }
+    this.decorWitnessSideSelect.addEventListener("change", () => this.updateDecor())
+    for (const side of DECOR_SIDES) {
+      this.decorWindowInputs[side].addEventListener("input", () => this.updateDecorWindows())
     }
     // Lit is keyframed over time (see Decor.ts's own resolveDecorLitAt/litKeyframes), unlike the
     // rest of a decor object's fields — a distinct write path (updateDecorLit) is what actually
@@ -1114,6 +1201,7 @@ export class UfoRecorderElement extends HTMLElement {
     this.syncObserverFromTimeline()
     this.syncWeatherFromTimeline()
     this.syncDecorLitFromTimeline()
+    this.syncIndoorLookReset()
     this.updateAppearanceFieldsDisabledState()
     this.ufoElement.selectedSourceIds = this.selectedSourceIds
     // Disabled once deleting the whole selection would leave nothing behind (a recording always
@@ -1296,11 +1384,11 @@ export class UfoRecorderElement extends HTMLElement {
   /** Creates a new decor object, staggered along the east axis by how many decor objects already
    * exist so a run of "Add" clicks doesn't stack everything at the same spot — same "immediately
    * visible/distinguishable" reasoning as addShape's own diagonal offset. `kind` defaults to
-   * whatever's picked in decorKindSelect (the Decor group's own generic Add button, now offering
-   * only tree/streetlight/vehicle — see the template's own comment on why building/witness are
-   * hidden from that dropdown); addDecorWitnessButton/addDecorBuildingButton (in the Witness/
-   * Location groups respectively) instead call this with an explicit kind, skipping the dropdown
-   * entirely since there's nothing to pick. northM is positive (north, +15) rather than negative:
+   * whatever's picked in decorKindSelect (addDecorBuildingButton, the Location group's "Add
+   * decor" button — every kind but "other witness" is added this way now that building is no
+   * longer hidden from that dropdown); addDecorWitnessButton (in the Witness group) instead calls
+   * this with an explicit "witness" kind, skipping the dropdown entirely since a witness has
+   * nothing else to pick beforehand. northM is positive (north, +15) rather than negative:
    * a fresh recording's camera starts at rotation.y=0, looking toward -Z — the same direction
    * heading 0 ("facing north") points, per this project's own azimuth convention (see
    * GeoProjection.ts) — so a newly added decor object should land in front of that default view,
@@ -1317,7 +1405,11 @@ export class UfoRecorderElement extends HTMLElement {
       eastM: 8 * sighting.decor.length,
       northM: 15,
       headingDeg: 0,
-      lit: false
+      lit: false,
+      // Only a building has floors at all — see DecorObject.floors's own doc comment.
+      ...(kind === "building" ? { floors: DEFAULT_BUILDING_FLOORS } : {}),
+      // undefined (spread as a no-op) for a kind with no windows at all — see defaultWindows.
+      windows: defaultWindows(kind)
     }
     sighting.decor = [...sighting.decor, decor]
     this.currentDecorId = decor.id
@@ -1342,29 +1434,85 @@ export class UfoRecorderElement extends HTMLElement {
     this.syncDecorFields()
   }
 
-  /** Writes the East/North/Heading/Name/URL fields back onto the currently selected decor object —
-   * "spread and overwrite one field" style, same as onDragPointerMove's shape-bounds edits (see
-   * that method's own doc comment) — replacing the whole decor array with a new one (not mutating
-   * the existing entry in place) for the same setDecor reference-equality reason as addDecor.
-   * `lit` is deliberately NOT touched here — see updateDecorLit, its own dedicated write path now
-   * that it's keyframed over time rather than a plain static field. */
+  /** Writes the East/North/Heading/Name/URL/Floors/Occupied-floor/Witness-location fields back
+   * onto the currently selected decor object — "spread and overwrite one field" style, same as
+   * onDragPointerMove's shape-bounds edits (see that method's own doc comment) — replacing the
+   * whole decor array with a new one (not mutating the existing entry in place) for the same
+   * setDecor reference-equality reason as addDecor. `lit` is deliberately NOT touched here — see
+   * updateDecorLit, its own dedicated write path now that it's keyframed over time rather than a
+   * plain static field; `windowsOpen` isn't touched here either — see updateDecorWindows, its own
+   * dedicated write path for that nested record. Resyncs visibility (not values — see
+   * syncDecorVisibility's own doc comment on why not the fuller syncDecorFields) since a
+   * floors/witness-location edit can change which rows apply.
+   *
+   * witnessSide/floors/occupiedFloor are only ever WRITTEN when the current object's own kind
+   * actually supports them (canHoldWitness/kind==="building") — never just whatever the shared
+   * input elements happen to currently display. Those inputs are reused across every decor object
+   * (there's one <select>/<input> in the toolbar, not one per object), and syncDecorFields fills
+   * them with a fallback value (e.g. floors defaults to DEFAULT_BUILDING_FLOORS) purely for
+   * DISPLAY even when the selected object has no such field at all — a real bug this comment
+   * replaced: editing e.g. a vehicle's heading right after a building was selected silently wrote
+   * that building's leftover `floors` value onto the vehicle too, since the input's .value hadn't
+   * changed even though it no longer applied. */
   private updateDecor(): void {
     if (this.currentDecorId === undefined) return
     const sighting = this.ufoElement.sighting
     const headingDeg = this.wrapDegrees(Number(this.decorHeadingInput.value), this.decorHeadingInput) ?? 0
-    sighting.decor = sighting.decor.map(d =>
-      d.id === this.currentDecorId
-        ? {
-            ...d,
-            title: this.stringOrUndefined(this.decorTitleInput.value),
-            eastM: Number(this.decorEastInput.value),
-            northM: Number(this.decorNorthInput.value),
-            headingDeg,
-            sightingUrl: this.stringOrUndefined(this.decorSightingUrlInput.value)
-          }
-        : d
-    )
+    const witnessSideValue = this.decorWitnessSideSelect.value
+    sighting.decor = sighting.decor.map(d => {
+      if (d.id !== this.currentDecorId) return d
+      const witnessSide = canHoldWitness(d.kind) && witnessSideValue !== "" ? (witnessSideValue as DecorSide) : undefined
+      return {
+        ...d,
+        title: this.stringOrUndefined(this.decorTitleInput.value),
+        eastM: Number(this.decorEastInput.value),
+        northM: Number(this.decorNorthInput.value),
+        headingDeg,
+        sightingUrl: this.stringOrUndefined(this.decorSightingUrlInput.value),
+        witnessSide,
+        floors: d.kind === "building" ? Number(this.decorFloorsInput.value) : undefined,
+        // Written whenever it's a building, not gated on witnessSide too (unlike witnessSide
+        // itself) — see syncDecorVisibility's own doc comment on why the field is shown that
+        // early: picking a floor is part of configuring the building, before or after a location
+        // is chosen, not locked behind having picked one first.
+        occupiedFloor: d.kind === "building" ? Number(this.decorOccupiedFloorInput.value) : undefined
+      }
+    })
     this.decorSelect.options[this.decorSelect.selectedIndex]!.textContent = this.decorLabel(sighting.decor.find(d => d.id === this.currentDecorId)!)
+    this.syncDecorVisibility()
+    this.ufoElement.refresh()
+  }
+
+  /** Writes the 4 per-side opacity inputs back onto the currently selected decor object's windows
+   * record — its own write path (not folded into updateDecor) for the same reason lit has its own
+   * updateDecorLit: a nested record, not a set of flat fields, and each side maps 1:1 to a
+   * DecorSide key rather than a named property. Not keyframed (unlike lit) — see
+   * DecorObject.windows's own doc comment on why. An empty input means no window at all on that
+   * side (omitted from the record — JSON.stringify already drops an explicit `undefined` value,
+   * so no extra filtering is needed here). A non-openable side's value is clamped up to
+   * FIXED_WINDOW_MIN_OPACITY_PERCENT regardless of what's typed — the input's own `min` attribute
+   * (set in syncDecorVisibility) already steers native spinner/slider interaction there, this is
+   * the belt-and-suspenders guarantee for direct typing/paste. */
+  private updateDecorWindows(): void {
+    if (this.currentDecorId === undefined) return
+    const sighting = this.ufoElement.sighting
+    sighting.decor = sighting.decor.map(d => {
+      if (d.id !== this.currentDecorId) return d
+      const windows: Partial<Record<DecorSide, number>> = {}
+      for (const side of DECOR_SIDES) {
+        const input = this.decorWindowInputs[side]
+        if (input.value === "") continue
+        const min = isWindowOpenable(d.kind, side) ? 0 : FIXED_WINDOW_MIN_OPACITY_PERCENT
+        const clamped = Math.max(min, Math.min(100, Number(input.value)))
+        windows[side] = clamped
+        // Reflects the clamp back into the field itself — leaving it showing whatever was typed
+        // (e.g. "50" on a fixed vehicle windshield) while the actual stored value silently became
+        // 90 read as a real bug during testing: the spinner's own up/down arrows then jumped
+        // around a value the field wasn't even displaying.
+        if (String(clamped) !== input.value) input.value = String(clamped)
+      }
+      return { ...d, windows }
+    })
     this.ufoElement.refresh()
   }
 
@@ -1417,7 +1565,10 @@ export class UfoRecorderElement extends HTMLElement {
       this.decorNorthInput,
       this.decorHeadingInput,
       this.decorLitInput,
-      this.decorSightingUrlInput
+      this.decorSightingUrlInput,
+      this.decorFloorsInput,
+      this.decorOccupiedFloorInput,
+      this.decorWitnessSideSelect
     ]) {
       input.disabled = !hasSelection
     }
@@ -1427,6 +1578,61 @@ export class UfoRecorderElement extends HTMLElement {
     this.decorHeadingInput.value = String(decor?.headingDeg ?? 0)
     this.decorLitInput.checked = decor ? resolveDecorLitAt(decor, this.ufoElement.currentTime) : false
     this.decorSightingUrlInput.value = decor?.sightingUrl ?? ""
+    this.decorFloorsInput.value = String(decor?.floors ?? DEFAULT_BUILDING_FLOORS)
+    this.decorOccupiedFloorInput.value = String(decor?.occupiedFloor ?? 0)
+    this.decorWitnessSideSelect.value = decor?.witnessSide ?? ""
+    for (const side of DECOR_SIDES) {
+      const opacity = decor?.windows?.[side]
+      this.decorWindowInputs[side].value = opacity === undefined ? "" : String(opacity)
+    }
+    this.syncDecorVisibility()
+  }
+
+  /** Hides `field`'s whole row (its wrapping `<label>`, so its text goes with it — falls back to
+   * `field` itself for the one row that isn't wrapped in a `<label>`, the "Windows" group
+   * heading) rather than just disabling it — a building's Occupied floor row, or a tree's whole
+   * Windows group, isn't merely irrelevant right now, it's a field that doesn't apply to this
+   * kind at all and would be confusing left visible-but-grayed-out. */
+  private setRowVisible(field: HTMLElement, visible: boolean): void {
+    const row = field.closest("label") ?? field
+    ;(row as HTMLElement).hidden = !visible
+  }
+
+  /** Shows/hides/enables the kind-dependent decor rows (Windows, Witness location, Floors,
+   * Occupied floor) per hasWindows/isWindowOpenable/canHoldWitness — deliberately never touches
+   * any input's own .value/.checked, only .hidden/.disabled/.max, so it's safe to call after
+   * every keystroke from updateDecor/updateDecorWindows without the same bug lat/lng's own live
+   * resync once hit (overwriting a field the user is actively typing into on every input event —
+   * see this project's own memory notes). syncDecorFields (the fuller value-resync, only ever
+   * called on an actual selection change, never mid-typing) calls this too rather than
+   * duplicating the gating logic. */
+  private syncDecorVisibility(): void {
+    const decor = this.ufoElement.sighting.decor.find(d => d.id === this.currentDecorId)
+    const hasSelection = decor !== undefined
+    const kind = decor?.kind
+    const showWindows = hasSelection && kind !== undefined && hasWindows(kind)
+    this.setRowVisible(this.labelDecorWindows, showWindows)
+    for (const side of DECOR_SIDES) {
+      // Empty (no window at all) is always valid regardless of kind; only how far the opacity can
+      // go toward 0 (fully open) needs a per-side, per-kind gate (a vehicle's front/behind
+      // windshield/rear window are fixed — see isWindowOpenable's own doc comment) — raising the
+      // input's own `min` rather than disabling it outright, so a fixed side can still be set to
+      // "closed" (100) or left empty (no window), just never opened.
+      this.decorWindowInputs[side].disabled = !hasSelection
+      this.decorWindowInputs[side].min = String(kind !== undefined && isWindowOpenable(kind, side) ? 0 : FIXED_WINDOW_MIN_OPACITY_PERCENT)
+      this.setRowVisible(this.decorWindowInputs[side], showWindows)
+    }
+    const showWitnessSide = hasSelection && kind !== undefined && canHoldWitness(kind)
+    this.setRowVisible(this.decorWitnessSideSelect, showWitnessSide)
+    // Shown together, both as soon as the decor object is a building — occupiedFloor doesn't wait
+    // on witnessSide being set first (a building's own floor count is part of specifying it, same
+    // as picking which floor the witness would be on if/when they're placed inside), even though
+    // DecorSystem only actually USES occupiedFloor once witnessSide is also set (see its own doc
+    // comment) — pre-setting it here just means it's already right the moment a location IS set.
+    const showFloors = hasSelection && kind === "building"
+    this.setRowVisible(this.decorFloorsInput, showFloors)
+    this.setRowVisible(this.decorOccupiedFloorInput, showFloors)
+    this.decorOccupiedFloorInput.max = String(decor?.floors ?? DEFAULT_BUILDING_FLOORS)
   }
 
   /** Keeps the Lit checkbox honest as the playhead moves or a different keyframe region is
@@ -1556,15 +1762,13 @@ export class UfoRecorderElement extends HTMLElement {
     this.obsEndTimeInput.placeholder = messages.edtfPlaceholder
     this.obsEndTimeInput.title = messages.observationEndTimeHint
     this.presetsGroup.setAttribute("aria-label", messages.presetsGroupLabel)
-    this.labelDecorKind.textContent = messages.decorKind
     this.labelDecor.textContent = messages.decor
+    this.labelDecorFieldset.textContent = messages.decor
     this.optionDecorBuilding.textContent = messages.decorBuilding
     this.optionDecorTree.textContent = messages.decorTree
     this.optionDecorStreetlight.textContent = messages.decorStreetlight
     this.optionDecorVehicle.textContent = messages.decorVehicle
     this.optionDecorWitness.textContent = messages.decorWitness
-    this.addDecorButton.title = messages.addDecor
-    this.addDecorButton.setAttribute("aria-label", messages.addDecor)
     this.deleteDecorButton.title = messages.deleteDecor
     this.deleteDecorButton.setAttribute("aria-label", messages.deleteDecor)
     this.labelDecorTitle.textContent = messages.decorTitle
@@ -1575,7 +1779,24 @@ export class UfoRecorderElement extends HTMLElement {
     this.labelDecorSightingUrl.textContent = messages.decorSightingUrl
     this.contextViewTestimonyButton.textContent = messages.viewTestimony
     this.addDecorWitnessButton.textContent = messages.addWitness
-    this.addDecorBuildingButton.textContent = messages.addBuilding
+    // Reuses the same "Add decor" text as the generic addDecor label above — see this button's
+    // own field doc comment on why it's no longer building-specific.
+    this.addDecorBuildingButton.textContent = messages.addDecor
+    this.labelDecorFloors.textContent = messages.decorFloors
+    this.labelDecorOccupiedFloor.textContent = messages.decorOccupiedFloor
+    this.labelDecorWitnessSide.textContent = messages.decorWitnessSide
+    this.labelDecorWindows.textContent = messages.decorWindows
+    this.optionWitnessSideNone.textContent = messages.decorWitnessSideNone
+    const decorSideMessages: Record<DecorSide, string> = {
+      front: messages.decorSideFront,
+      behind: messages.decorSideBehind,
+      left: messages.decorSideLeft,
+      right: messages.decorSideRight
+    }
+    for (const side of DECOR_SIDES) {
+      this.labelDecorSide[side].textContent = decorSideMessages[side]
+      this.optionWitnessSide[side].textContent = decorSideMessages[side]
+    }
     this.refreshDecorList() // decor option labels embed decorKindSelect's own text, just updated above
     this.labelWitnessId.textContent = messages.witnessId
     this.labelWitnessDirName.textContent = messages.witnessDirName
@@ -1980,13 +2201,42 @@ export class UfoRecorderElement extends HTMLElement {
    * SceneElement.setCompassForced): reading the heading off the compass is the point of dragging
    * to set it. */
   private beginCameraDrag(startPointer: { x: number; y: number }): void {
+    const insideDecor = this.isWitnessInsideDecor()
     this.cameraDragState = {
       startPointer,
-      startHeadingDeg: this.numberOrUndefined(this.headingInput.value) ?? 0,
-      startPitchDeg: this.numberOrUndefined(this.pitchInput.value) ?? 0
+      startHeadingDeg: insideDecor ? this.indoorLookYawDeg : (this.numberOrUndefined(this.headingInput.value) ?? 0),
+      startPitchDeg: insideDecor ? this.indoorLookPitchDeg : (this.numberOrUndefined(this.pitchInput.value) ?? 0),
+      insideDecor
     }
-    this.sceneElement.setCompassForced(true)
+    // The compass reads the OUTSIDE witnessTrack heading — meaningless while looking around
+    // inside a decor object (a different reference frame, see SceneRenderer.setIndoorLook), so
+    // it's only forced visible for an outside drag.
+    if (!insideDecor) this.sceneElement.setCompassForced(true)
     this.startDragListening()
+  }
+
+  /** Whether the recording witness is currently positioned inside a decor object — see
+   * DecorObject.witnessSide's own doc comment. Mirrors SceneRenderer.updateDecorAnchoring's own
+   * `inhabited` lookup exactly (same canHoldWitness gate) so this always agrees with which view
+   * is actually being rendered. */
+  private isWitnessInsideDecor(): boolean {
+    return this.ufoElement.sighting.decor.some(d => d.witnessSide !== undefined && canHoldWitness(d.kind))
+  }
+
+  /** Resets indoorLookYawDeg/PitchDeg (and pushes the reset into SceneRenderer) whenever which
+   * decor object/side is inhabited changes — a different window, or no longer inside one at all,
+   * should always start centered rather than carrying over wherever the witness last happened to
+   * be looking through a DIFFERENT window. Called every tick from onSelectionOrTimeChanged, same
+   * "cheap enough not to need a dedicated dedup trigger" reasoning as syncDecorLitFromTimeline —
+   * the string comparison below is what actually dedupes, so most ticks are a no-op. */
+  private syncIndoorLookReset(): void {
+    const inhabited = this.ufoElement.sighting.decor.find(d => d.witnessSide !== undefined && canHoldWitness(d.kind))
+    const key = inhabited ? `${inhabited.id}:${inhabited.witnessSide}` : undefined
+    if (key === this.lastInhabitedKey) return
+    this.lastInhabitedKey = key
+    this.indoorLookYawDeg = 0
+    this.indoorLookPitchDeg = 0
+    this.sceneElement.setIndoorLook(0, 0)
   }
 
   /** Shared by beginDrag/beginCameraDrag — document-level (not canvas-level, and not
@@ -2040,13 +2290,28 @@ export class UfoRecorderElement extends HTMLElement {
     if (!this.cameraDragState) return
     const point = this.canvasPointFromEvent(event)
     if (!point) return
-    const { startPointer, startHeadingDeg, startPitchDeg } = this.cameraDragState
+    const { startPointer, startHeadingDeg, startPitchDeg, insideDecor } = this.cameraDragState
     // Computed from the fixed drag-start reference every time, not incrementally frame-to-frame —
     // see cameraDragState's own doc comment on why (avoids drift and misbehaving at the 360->0
     // heading wrap). Left/right drags the view right/left (a "grab the sky and pan it" feel);
     // up/down looks up/down, matching pitchDeg's own "positive = above horizontal" convention.
     const headingDeg = startHeadingDeg + (point.x - startPointer.x) * CAMERA_DRAG_DEG_PER_PX
     const pitchDeg = Math.max(-90, Math.min(90, startPitchDeg - (point.y - startPointer.y) * CAMERA_DRAG_DEG_PER_PX))
+    if (insideDecor) {
+      // Never touches witnessTrack/updateObserver — a different reference frame entirely (the
+      // witness's real OUTSIDE recorded gaze), see SceneRenderer.setIndoorLook's own doc comment.
+      this.indoorLookYawDeg = headingDeg
+      this.indoorLookPitchDeg = pitchDeg
+      this.sceneElement.setIndoorLook(headingDeg, pitchDeg)
+      // setIndoorLook only stores the new offset — SceneRenderer.updateDecorAnchoring is what
+      // actually applies it to camera.rotation, and that only runs from the next tick
+      // (SceneElement.updateAstronomy, via this same refresh()). Without this call the drag would
+      // silently update indoorLookYawDeg/PitchDeg but the camera itself would never visibly turn
+      // until some UNRELATED tick happened to fire later — the real bug this fixes (found by
+      // testing the drag end-to-end rather than just setIndoorLook in isolation).
+      this.ufoElement.refresh()
+      return
+    }
     // Feeds the same field-parsing path updateObserver() already uses for typed input —
     // wrapDegrees() (called from within updateObserver) both normalizes headingDeg into [0,360)
     // and reflects that back into headingInput.value, so an unwrapped/out-of-range intermediate
@@ -2058,7 +2323,7 @@ export class UfoRecorderElement extends HTMLElement {
 
   private endDrag(): void {
     if (!this.dragState && !this.cameraDragState) return
-    if (this.cameraDragState) this.sceneElement.setCompassForced(false)
+    if (this.cameraDragState && !this.cameraDragState.insideDecor) this.sceneElement.setCompassForced(false)
     this.dragState = undefined
     this.cameraDragState = undefined
     document.removeEventListener("pointermove", this.handleDragPointerMove)

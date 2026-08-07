@@ -23,6 +23,7 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     setShowCompass(): void {}
     setCompassHovered(): void {}
     setCompassForced(): void {}
+    setIndoorLook(): void {}
     setWeather(): void {}
     setDecor(): void {}
     updateDecorAnchoring(): void {}
@@ -2757,10 +2758,10 @@ describe("UfoRecorderElement decor group", () => {
     expect((shadow.getElementById("decorEast") as HTMLInputElement).disabled).toBe(true)
   })
 
-  it("hides building/witness from the generic Decor group's own kind dropdown", () => {
+  it("hides only 'other witness' from the generic Decor group's own kind dropdown", () => {
     const element = mount()
     const shadow = element.shadowRoot!
-    expect((shadow.getElementById("option-decor-building") as HTMLOptionElement).hidden).toBe(true)
+    expect((shadow.getElementById("option-decor-building") as HTMLOptionElement).hidden).toBe(false)
     expect((shadow.getElementById("option-decor-witness") as HTMLOptionElement).hidden).toBe(true)
     expect((shadow.getElementById("option-decor-tree") as HTMLOptionElement).hidden).toBe(false)
   })
@@ -2775,21 +2776,24 @@ describe("UfoRecorderElement decor group", () => {
     expect(decor[0].kind).toBe("witness")
   })
 
-  it("adds a building decor object from the Location group's own button, not the generic dropdown", () => {
+  it("adds a building decor object (with its default floor count) when Building is picked in the Kind dropdown", () => {
     const element = mount()
     const shadow = element.shadowRoot!
+    const kindSelect = shadow.getElementById("decorKind") as HTMLSelectElement
+    kindSelect.value = "building"
     ;(shadow.getElementById("add-decor-building") as HTMLButtonElement).click()
 
     const decor = element.sightingData.decor!
     expect(decor).toHaveLength(1)
     expect(decor[0].kind).toBe("building")
+    expect(decor[0].floors).toBe(2)
   })
 
   it("adds a decor object of the picked kind, offset from previously added ones", () => {
     const element = mount()
     const shadow = element.shadowRoot!
     const kindSelect = shadow.getElementById("decorKind") as HTMLSelectElement
-    const addButton = shadow.getElementById("add-decor") as HTMLButtonElement
+    const addButton = shadow.getElementById("add-decor-building") as HTMLButtonElement
 
     kindSelect.value = "tree"
     addButton.click()
@@ -2810,7 +2814,7 @@ describe("UfoRecorderElement decor group", () => {
   it("writes East/North/Heading edits back onto the selected decor object", () => {
     const element = mount()
     const shadow = element.shadowRoot!
-    ;(shadow.getElementById("add-decor") as HTMLButtonElement).click()
+    ;(shadow.getElementById("add-decor-building") as HTMLButtonElement).click()
 
     const eastInput = shadow.getElementById("decorEast") as HTMLInputElement
     const northInput = shadow.getElementById("decorNorth") as HTMLInputElement
@@ -2833,7 +2837,7 @@ describe("UfoRecorderElement decor group", () => {
     const durationInput = shadow.getElementById("durationSeconds") as HTMLInputElement
     durationInput.value = "10"
     durationInput.dispatchEvent(new Event("input"))
-    ;(shadow.getElementById("add-decor") as HTMLButtonElement).click()
+    ;(shadow.getElementById("add-decor-building") as HTMLButtonElement).click()
     const litInput = shadow.getElementById("decorLit") as HTMLInputElement
 
     litInput.checked = true
@@ -2849,7 +2853,7 @@ describe("UfoRecorderElement decor group", () => {
     const durationInput = shadow.getElementById("durationSeconds") as HTMLInputElement
     durationInput.value = "10"
     durationInput.dispatchEvent(new Event("input"))
-    ;(shadow.getElementById("add-decor") as HTMLButtonElement).click()
+    ;(shadow.getElementById("add-decor-building") as HTMLButtonElement).click()
     const litInput = shadow.getElementById("decorLit") as HTMLInputElement
     litInput.checked = true
     litInput.dispatchEvent(new Event("input"))
@@ -2875,7 +2879,7 @@ describe("UfoRecorderElement decor group", () => {
   it("deletes the selected decor object and falls back to whichever one remains, or none", () => {
     const element = mount()
     const shadow = element.shadowRoot!
-    const addButton = shadow.getElementById("add-decor") as HTMLButtonElement
+    const addButton = shadow.getElementById("add-decor-building") as HTMLButtonElement
     const deleteButton = shadow.getElementById("delete-decor") as HTMLButtonElement
     addButton.click()
     addButton.click()
@@ -2901,7 +2905,7 @@ describe("UfoRecorderElement decor group", () => {
   it("names a decor object via the Name field, updating both the data and the dropdown label", () => {
     const element = mount()
     const shadow = element.shadowRoot!
-    ;(shadow.getElementById("add-decor") as HTMLButtonElement).click()
+    ;(shadow.getElementById("add-decor-building") as HTMLButtonElement).click()
 
     const titleInput = shadow.getElementById("decorTitle") as HTMLInputElement
     titleInput.value = "Streetlight on Elm St"
@@ -2922,6 +2926,111 @@ describe("UfoRecorderElement decor group", () => {
     urlInput.dispatchEvent(new Event("input"))
 
     expect(element.sightingData.decor![0].sightingUrl).toBe("https://example.org/witness-2/sighting.json")
+  })
+
+  it("gives a freshly created building/vehicle real windows on every side by default (50%, or FIXED_WINDOW_MIN_OPACITY_PERCENT on a fixed side) instead of starting as a windowless box", () => {
+    const element = mount()
+    const shadow = element.shadowRoot!
+    const kindSelect = shadow.getElementById("decorKind") as HTMLSelectElement
+    kindSelect.value = "building"
+    ;(shadow.getElementById("add-decor-building") as HTMLButtonElement).click()
+    expect(element.sightingData.decor![0].windows).toEqual({ front: 50, behind: 50, left: 50, right: 50 })
+
+    kindSelect.value = "vehicle"
+    ;(shadow.getElementById("add-decor-building") as HTMLButtonElement).click()
+    expect(element.sightingData.decor![1].windows).toEqual({ front: 90, behind: 90, left: 50, right: 50 })
+  })
+
+  it("writes the 4 window opacity inputs back onto the selected decor object's windows record, leaving the other (already-defaulted) sides alone — empty means no window at all", () => {
+    const element = mount()
+    const shadow = element.shadowRoot!
+    const kindSelect = shadow.getElementById("decorKind") as HTMLSelectElement
+    kindSelect.value = "building"
+    ;(shadow.getElementById("add-decor-building") as HTMLButtonElement).click()
+
+    const frontInput = shadow.getElementById("decorWindowFront") as HTMLInputElement
+    frontInput.value = "0"
+    frontInput.dispatchEvent(new Event("input"))
+    const leftInput = shadow.getElementById("decorWindowLeft") as HTMLInputElement
+    leftInput.value = "80"
+    leftInput.dispatchEvent(new Event("input"))
+
+    expect(element.sightingData.decor![0].windows).toEqual({ front: 0, behind: 50, left: 80, right: 50 })
+  })
+
+  it("clamps a fixed (non-openable) side's opacity up to FIXED_WINDOW_MIN_OPACITY_PERCENT even if a lower value is typed, but leaves an openable side free down to 0", () => {
+    const element = mount()
+    const shadow = element.shadowRoot!
+    const kindSelect = shadow.getElementById("decorKind") as HTMLSelectElement
+    kindSelect.value = "vehicle"
+    ;(shadow.getElementById("add-decor-building") as HTMLButtonElement).click()
+
+    expect((shadow.getElementById("decorWindowFront") as HTMLInputElement).min).toBe("90")
+    expect((shadow.getElementById("decorWindowBehind") as HTMLInputElement).min).toBe("90")
+    expect((shadow.getElementById("decorWindowLeft") as HTMLInputElement).min).toBe("0")
+    expect((shadow.getElementById("decorWindowRight") as HTMLInputElement).min).toBe("0")
+
+    const frontInput = shadow.getElementById("decorWindowFront") as HTMLInputElement
+    frontInput.value = "10"
+    frontInput.dispatchEvent(new Event("input"))
+    const leftInput = shadow.getElementById("decorWindowLeft") as HTMLInputElement
+    leftInput.value = "10"
+    leftInput.dispatchEvent(new Event("input"))
+
+    expect(element.sightingData.decor![0].windows).toEqual({ front: 90, behind: 90, left: 10, right: 50 })
+  })
+
+  it("shows the Occupied floor row alongside Floors as soon as it's a building, even before a witness location is picked", () => {
+    const element = mount()
+    const shadow = element.shadowRoot!
+    const kindSelect = shadow.getElementById("decorKind") as HTMLSelectElement
+    kindSelect.value = "building"
+    ;(shadow.getElementById("add-decor-building") as HTMLButtonElement).click()
+
+    const occupiedFloorInput = shadow.getElementById("decorOccupiedFloor") as HTMLInputElement
+    expect(occupiedFloorInput.closest("label")!.hidden).toBe(false)
+
+    occupiedFloorInput.value = "1"
+    occupiedFloorInput.dispatchEvent(new Event("input"))
+    expect(element.sightingData.decor![0].occupiedFloor).toBe(1)
+
+    const witnessSideSelect = shadow.getElementById("decorWitnessSide") as HTMLSelectElement
+    witnessSideSelect.value = "front"
+    witnessSideSelect.dispatchEvent(new Event("change"))
+
+    expect(occupiedFloorInput.closest("label")!.hidden).toBe(false)
+    expect(element.sightingData.decor![0].witnessSide).toBe("front")
+    expect(element.sightingData.decor![0].occupiedFloor).toBe(1) // the pre-set floor survives picking a location
+  })
+
+  it("never writes floors/occupiedFloor/witnessSide onto a non-building/non-witness-holding kind, even if the shared inputs still display a leftover value from a previously selected building", () => {
+    // Regression test: editing an unrelated field (heading) on a freshly added vehicle right
+    // after a building was selected used to silently write the building's own leftover `floors`
+    // value onto the vehicle too, since decorFloorsInput/decorOccupiedFloorInput are single shared
+    // elements reused across every decor object, and syncDecorFields fills them with a display
+    // fallback (e.g. DEFAULT_BUILDING_FLOORS) even when the newly selected object has no such
+    // field at all.
+    const element = mount()
+    const shadow = element.shadowRoot!
+    const kindSelect = shadow.getElementById("decorKind") as HTMLSelectElement
+    kindSelect.value = "building"
+    ;(shadow.getElementById("add-decor-building") as HTMLButtonElement).click()
+
+    kindSelect.value = "vehicle"
+    ;(shadow.getElementById("add-decor-building") as HTMLButtonElement).click()
+
+    const decorSelect = shadow.getElementById("decor") as HTMLSelectElement
+    const vehicle = element.sightingData.decor!.find(d => d.kind === "vehicle")!
+    decorSelect.value = vehicle.id
+    decorSelect.dispatchEvent(new Event("change"))
+
+    const headingInput = shadow.getElementById("decorHeading") as HTMLInputElement
+    headingInput.value = "15"
+    headingInput.dispatchEvent(new Event("input"))
+
+    const updatedVehicle = element.sightingData.decor!.find(d => d.kind === "vehicle")!
+    expect(updatedVehicle.floors).toBeUndefined()
+    expect(updatedVehicle.occupiedFloor).toBeUndefined()
   })
 })
 
