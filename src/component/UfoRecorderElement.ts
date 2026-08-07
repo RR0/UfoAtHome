@@ -203,7 +203,6 @@ export class UfoRecorderElement extends HTMLElement {
   private readonly decorHeadingInput: HTMLInputElement
   private readonly decorLitInput: HTMLInputElement
   private readonly decorSightingUrlInput: HTMLInputElement
-  private readonly labelDecorGroup: HTMLElement
   private readonly labelDecorKind: HTMLElement
   private readonly labelDecor: HTMLElement
   private readonly labelDecorTitle: HTMLElement
@@ -446,7 +445,6 @@ export class UfoRecorderElement extends HTMLElement {
     this.decorHeadingInput = this.shadow.getElementById("decorHeading") as HTMLInputElement
     this.decorLitInput = this.shadow.getElementById("decorLit") as HTMLInputElement
     this.decorSightingUrlInput = this.shadow.getElementById("decorSightingUrl") as HTMLInputElement
-    this.labelDecorGroup = this.shadow.getElementById("label-decor-group")!
     this.labelDecorKind = this.shadow.getElementById("label-decor-kind")!
     this.labelDecor = this.shadow.getElementById("label-decor")!
     this.labelDecorTitle = this.shadow.getElementById("label-decor-title")!
@@ -1488,7 +1486,6 @@ export class UfoRecorderElement extends HTMLElement {
     this.obsEndTimeInput.placeholder = messages.edtfPlaceholder
     this.obsEndTimeInput.title = messages.observationEndTimeHint
     this.presetsGroup.setAttribute("aria-label", messages.presetsGroupLabel)
-    this.labelDecorGroup.textContent = messages.decorGroup
     this.labelDecorKind.textContent = messages.decorKind
     this.labelDecor.textContent = messages.decor
     this.optionDecorBuilding.textContent = messages.decorBuilding

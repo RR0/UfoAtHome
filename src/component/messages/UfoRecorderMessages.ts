@@ -113,10 +113,10 @@ export interface UfoRecorderMessages {
    * on why it's opt-in. A view preference, not sighting weather data (see UfoRecorderElement's
    * cameraDeviceInput field). */
   cameraDevice: string
-  decorGroup: string
   decorKind: string
-  /** Label on the dropdown listing the sighting's own decor objects — distinct from decorGroup
-   * (the whole fieldset's own summary/heading). */
+  /** Label on the dropdown listing the sighting's own decor objects — the Decor group itself no
+   * longer has its own summary/heading (its fields now live inside Location/Witness instead, see
+   * UfoRecorderElement's addDecorWitnessButton/addDecorBuildingButton doc comments). */
   decor: string
   decorBuilding: string
   decorTree: string

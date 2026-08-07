@@ -31,6 +31,27 @@ export const html = `
     <label><span id="label-heading">Heading</span> <input id="heading" type="number" min="0" max="360" step="1" placeholder="unknown"/> &deg;</label>
     <label><span id="label-pitch">Tilt</span> <input id="pitch" type="number" min="-90" max="90" step="1" value="0"/> &deg;</label>
     <button id="add-decor-building" type="button">Add building</button>
+    <label><span id="label-decor-kind">Kind</span>
+      <select id="decorKind">
+        <!-- Building/witness are added from their own dedicated buttons instead (this group's own
+             "Add building" above, Witness's own "Add witness") — hidden (not removed) so
+             decorLabel() can still look up their translated kind name by id for the fallback
+             "{kind} {n}" label, see UfoRecorderElement.decorLabel. -->
+        <option id="option-decor-building" value="building" hidden>Building</option>
+        <option id="option-decor-tree" value="tree">Tree</option>
+        <option id="option-decor-streetlight" value="streetlight">Streetlight</option>
+        <option id="option-decor-vehicle" value="vehicle">Vehicle</option>
+        <option id="option-decor-witness" value="witness" hidden>Other witness</option>
+      </select>
+    </label>
+    <button id="add-decor" type="button" class="icon-btn" title="Add decor" aria-label="Add decor">+</button>
+    <button id="delete-decor" type="button" class="icon-btn" title="Delete decor" aria-label="Delete decor">🗑</button>
+    <label><span id="label-decor">Decor</span> <select id="decor"></select></label>
+    <label><span id="label-decor-title">Name</span> <input id="decorTitle" type="text"/></label>
+    <label><span id="label-decor-east">Distance east</span> <input id="decorEast" type="number" step="0.5" value="0"/> m</label>
+    <label><span id="label-decor-north">Distance north</span> <input id="decorNorth" type="number" step="0.5" value="0"/> m</label>
+    <label><span id="label-decor-heading">Heading</span> <input id="decorHeading" type="number" min="0" max="360" step="1" value="0"/> &deg;</label>
+    <label><span id="label-decor-lit">Lit</span> <input id="decorLit" type="checkbox"/></label>
   </div>
 </details>
 <details open>
@@ -62,31 +83,6 @@ export const html = `
     <label><span id="label-wind-speed">Wind speed</span> <input id="windSpeed" type="number" min="0" max="30" step="0.5" value="0"/> m/s</label>
     <label><span id="label-storm">Storm</span> <input id="storm" type="checkbox"/></label>
     <label><span id="label-lens-flare-brightness">Light intensity</span> <input id="lensFlareBrightness" type="range" min="0" max="3" step="0.1" value="1"/></label>
-  </div>
-</details>
-<details open>
-  <summary id="label-decor-group">Decor</summary>
-  <div class="toolbar">
-    <label><span id="label-decor-kind">Kind</span>
-      <select id="decorKind">
-        <!-- Building/witness are added from their own dedicated buttons instead (Location/Witness
-             groups) — hidden (not removed) so decorLabel() can still look up their translated
-             kind name by id for the fallback "{kind} {n}" label, see UfoRecorderElement.decorLabel. -->
-        <option id="option-decor-building" value="building" hidden>Building</option>
-        <option id="option-decor-tree" value="tree">Tree</option>
-        <option id="option-decor-streetlight" value="streetlight">Streetlight</option>
-        <option id="option-decor-vehicle" value="vehicle">Vehicle</option>
-        <option id="option-decor-witness" value="witness" hidden>Other witness</option>
-      </select>
-    </label>
-    <button id="add-decor" type="button" class="icon-btn" title="Add decor" aria-label="Add decor">+</button>
-    <button id="delete-decor" type="button" class="icon-btn" title="Delete decor" aria-label="Delete decor">🗑</button>
-    <label><span id="label-decor">Decor</span> <select id="decor"></select></label>
-    <label><span id="label-decor-title">Name</span> <input id="decorTitle" type="text"/></label>
-    <label><span id="label-decor-east">Distance east</span> <input id="decorEast" type="number" step="0.5" value="0"/> m</label>
-    <label><span id="label-decor-north">Distance north</span> <input id="decorNorth" type="number" step="0.5" value="0"/> m</label>
-    <label><span id="label-decor-heading">Heading</span> <input id="decorHeading" type="number" min="0" max="360" step="1" value="0"/> &deg;</label>
-    <label><span id="label-decor-lit">Lit</span> <input id="decorLit" type="checkbox"/></label>
   </div>
 </details>
 <details open>

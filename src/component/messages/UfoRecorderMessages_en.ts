@@ -83,7 +83,6 @@ export const ufoRecorderMessages_en: UfoRecorderMessages = {
   storm: "Storm",
   lensFlareBrightness: "Light intensity",
   cameraDevice: "Camera/video device",
-  decorGroup: "Decor",
   decorKind: "Kind",
   decor: "Decor",
   decorBuilding: "Building",

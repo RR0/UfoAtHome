@@ -2157,13 +2157,13 @@ describe("UfoRecorderElement toolbar groups", () => {
   it("renders each field group as a collapsible <details>, open by default", () => {
     const element = mount()
     const groups = element.shadowRoot!.querySelectorAll("details")
-    expect(groups.length).toBe(7)
+    expect(groups.length).toBe(6)
     for (const group of groups) {
       expect(group.hasAttribute("open")).toBe(true)
     }
   })
 
-  it("orders groups observation, witness, location, temporal, circumstances, decor, shape — closest to the render last, recording merged into shape", () => {
+  it("orders groups observation, witness, location, temporal, circumstances, shape — closest to the render last, recording merged into shape, decor's own fields folded into location/witness", () => {
     const element = mount()
     const summaries = [...element.shadowRoot!.querySelectorAll("details summary")].map(s => s.id)
     expect(summaries).toEqual([
@@ -2172,7 +2172,6 @@ describe("UfoRecorderElement toolbar groups", () => {
       "label-location-group",
       "label-temporal-group",
       "label-circumstances-group",
-      "label-decor-group",
       "label-shape-group"
     ])
   })
@@ -2826,7 +2825,7 @@ describe("UfoRecorderElement decor group", () => {
     expect(decorSelect.options[0].textContent).toBe("Streetlight on Elm St")
   })
 
-  it("round-trips a witness's own sightingUrl via the Decor group's URL field", () => {
+  it("round-trips a witness's own sightingUrl via the Witness group's URL field", () => {
     const element = mount()
     const shadow = element.shadowRoot!
     ;(shadow.getElementById("add-decor-witness") as HTMLButtonElement).click()
