@@ -32,20 +32,13 @@ export const html = `
     <label><span id="label-pitch">Tilt</span> <input id="pitch" type="number" min="-90" max="90" step="1" value="0"/> &deg;</label>
     <fieldset class="decor-fieldset">
       <legend id="label-decor-fieldset">Decor</legend>
-      <button id="add-decor-building" type="button">Add</button>
-      <select id="decorKind">
-        <option id="option-decor-building" value="building">Building</option>
-        <option id="option-decor-tree" value="tree">Tree</option>
-        <option id="option-decor-streetlight" value="streetlight">Streetlight</option>
-        <option id="option-decor-vehicle" value="vehicle">Vehicle</option>
-        <!-- Other witness is added from its own dedicated button instead (Witness group's own
-             "Add witness" — nothing else to configure beforehand) — hidden (not removed) so
-             decorLabel() can still look up its translated kind name by id for the fallback
-             "{kind} {n}" label, see UfoRecorderElement.decorLabel. -->
-        <option id="option-decor-witness" value="witness" hidden>Other witness</option>
-      </select>
-      <button id="delete-decor" type="button" class="icon-btn" title="Delete decor" aria-label="Delete decor">🗑</button>
+      <!-- This whole block (picker through Occupied floor) is hidden entirely — not just
+           disabled — while there's no decor at all (see UfoRecorderElement.syncDecorVisibility):
+           an empty recording shows nothing here but the Add controls below. Shown first, above
+           the Add row, once at least one decor object exists — see that row's own comment for why
+           it's forced onto its own line after this block instead of just flowing after it. -->
       <label><span id="label-decor">Decor</span> <select id="decor"></select></label>
+      <button id="delete-decor" type="button" class="icon-btn" title="Delete decor" aria-label="Delete decor">🗑</button>
       <label><span id="label-decor-title">Name</span> <input id="decorTitle" type="text"/></label>
       <label><span id="label-decor-east">Distance east</span> <input id="decorEast" type="number" step="0.5" value="0"/> m</label>
       <label><span id="label-decor-north">Distance north</span> <input id="decorNorth" type="number" step="0.5" value="0"/> m</label>
@@ -63,6 +56,13 @@ export const html = `
       <label><span id="label-decor-window-behind">Behind</span> <input id="decorWindowBehind" type="number" min="0" max="100" step="5" placeholder="none" autocomplete="off"/> %</label>
       <label><span id="label-decor-window-left">Left</span> <input id="decorWindowLeft" type="number" min="0" max="100" step="5" placeholder="none" autocomplete="off"/> %</label>
       <label><span id="label-decor-window-right">Right</span> <input id="decorWindowRight" type="number" min="0" max="100" step="5" placeholder="none" autocomplete="off"/> %</label>
+      <!-- Vehicle only (see DecorSide's own doc comment: a car's left/right side has 2 windows
+           each, front-door and rear-door, not 1) — shown instead of the plain Left/Right rows
+           above for that kind, hidden otherwise (see UfoRecorderElement.syncDecorVisibility). -->
+      <label><span id="label-decor-window-front-left">Front-left</span> <input id="decorWindowFrontLeft" type="number" min="0" max="100" step="5" placeholder="none" autocomplete="off"/> %</label>
+      <label><span id="label-decor-window-front-right">Front-right</span> <input id="decorWindowFrontRight" type="number" min="0" max="100" step="5" placeholder="none" autocomplete="off"/> %</label>
+      <label><span id="label-decor-window-behind-left">Behind-left</span> <input id="decorWindowBehindLeft" type="number" min="0" max="100" step="5" placeholder="none" autocomplete="off"/> %</label>
+      <label><span id="label-decor-window-behind-right">Behind-right</span> <input id="decorWindowBehindRight" type="number" min="0" max="100" step="5" placeholder="none" autocomplete="off"/> %</label>
       <label><span id="label-decor-witness-side">Witness location</span>
         <select id="decorWitnessSide">
           <option id="option-witness-side-none" value="">Not present</option>
@@ -70,9 +70,34 @@ export const html = `
           <option id="option-witness-side-behind" value="behind">Behind</option>
           <option id="option-witness-side-left" value="left">Left</option>
           <option id="option-witness-side-right" value="right">Right</option>
+          <!-- Vehicle only — the 4 seat/door positions replace front/behind/left/right above for
+               that kind (see witnessSidesFor's own doc comment: you sit AT a door, never "at the
+               windshield"). Hidden by default, same technique as decorKind's own hidden "witness"
+               option — toggled per kind in syncDecorVisibility. -->
+          <option id="option-witness-side-front-left" value="front-left" hidden>Front-left</option>
+          <option id="option-witness-side-front-right" value="front-right" hidden>Front-right</option>
+          <option id="option-witness-side-behind-left" value="behind-left" hidden>Behind-left</option>
+          <option id="option-witness-side-behind-right" value="behind-right" hidden>Behind-right</option>
         </select>
       </label>
       <label><span id="label-decor-occupied-floor">Occupied floor</span> <input id="decorOccupiedFloor" type="number" min="0" step="1" value="0"/></label>
+      <!-- flex-basis:100% (see the CSS rule below) forces this row onto its own line, after
+           whatever decor properties are showing above — the only thing shown at all when there's
+           no decor yet (see the block above's own comment). -->
+      <div class="decor-add-row">
+        <button id="add-decor-building" type="button" class="icon-btn" title="Add" aria-label="Add">+</button>
+        <select id="decorKind">
+          <option id="option-decor-building" value="building">Building</option>
+          <option id="option-decor-tree" value="tree">Tree</option>
+          <option id="option-decor-streetlight" value="streetlight">Streetlight</option>
+          <option id="option-decor-vehicle" value="vehicle">Vehicle</option>
+          <!-- Other witness is added from its own dedicated button instead (Witness group's own
+               "Add witness" — nothing else to configure beforehand) — hidden (not removed) so
+               decorLabel() can still look up its translated kind name by id for the fallback
+               "{kind} {n}" label, see UfoRecorderElement.decorLabel. -->
+          <option id="option-decor-witness" value="witness" hidden>Other witness</option>
+        </select>
+      </div>
     </fieldset>
   </div>
 </details>
@@ -180,7 +205,7 @@ button.preset[aria-pressed="true"] {
   outline: 2px solid #39f;
   font-weight: bold;
 }
-#lat, #lng, #heading, #pitch, #windDirection, #windSpeed, #decorEast, #decorNorth, #decorHeading, #decorFloors, #decorOccupiedFloor, #decorWindowFront, #decorWindowBehind, #decorWindowLeft, #decorWindowRight {
+#lat, #lng, #heading, #pitch, #windDirection, #windSpeed, #decorEast, #decorNorth, #decorHeading, #decorFloors, #decorOccupiedFloor, #decorWindowFront, #decorWindowBehind, #decorWindowLeft, #decorWindowRight, #decorWindowFrontLeft, #decorWindowFrontRight, #decorWindowBehindLeft, #decorWindowBehindRight {
   width: 6em;
 }
 #obs-time, #obs-end-time {
@@ -256,6 +281,17 @@ fieldset.decor-fieldset legend {
   font-weight: 600;
   padding: 0 0.25em;
 }
+/* flex-basis:100% on a flex-wrap:wrap container's own child forces it onto a fresh line — nothing
+   else fits beside a 100%-wide item — which is what puts the Add controls below whatever decor
+   properties are currently showing (see UfoRecorderElement.syncDecorVisibility), rather than just
+   trailing after them on whatever horizontal space happens to be left. */
+.decor-add-row {
+  display: flex;
+  flex-basis: 100%;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5em;
+}
 #import-url {
   flex: 1 1 16em;
 }
@@ -304,6 +340,15 @@ fieldset.decor-fieldset legend {
 .icon-btn:disabled {
   cursor: default;
   opacity: 0.4;
+}
+/* The [hidden] attribute's own display:none (from the browser's UA stylesheet) loses to the
+   plain .icon-btn rule above — a class selector outweighs an attribute selector at equal
+   specificity-position — same fix, same reason, as .context-menu[hidden] below (see its own
+   comment): needed once delete-decor (an .icon-btn) started being hidden entirely rather than
+   just disabled when there's no decor object to delete (see UfoRecorderElement.
+   syncDecorVisibility). */
+.icon-btn[hidden] {
+  display: none;
 }
 /* position:fixed (viewport-relative), left/top set from the triggering pointer event's own
    clientX/clientY in JS — works the same regardless of which shadow tree this menu lives in or

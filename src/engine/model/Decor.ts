@@ -13,10 +13,43 @@ export type DecorKind = "building" | "tree" | "streetlight" | "vehicle" | "witne
  * itself faces) rather than a compass direction — a decor object can be rotated, so "north"
  * wouldn't stay meaningful. Used both for which side a window sits on and which side the recording
  * witness is positioned at inside the object — see hasWindows/isWindowOpenable/canHoldWitness
- * below for which kinds each concept applies to. */
-export type DecorSide = "front" | "behind" | "left" | "right"
+ * below for which kinds each concept applies to.
+ *
+ * The 4 "front-X"/"behind-X" corners exist because a vehicle's LEFT (or right) side actually has
+ * TWO windows in real life — a front-door window and a rear-door window, one per seat — not one:
+ * "left" alone couldn't say which of the two a witness sitting inside was actually looking
+ * through. A building has no such split (see decorSidesFor/witnessSidesFor below) — a wall is a
+ * wall, its own left/right side isn't naturally divided into two separately-seated positions the
+ * way a car's is. */
+export type DecorSide = "front" | "behind" | "left" | "right" | "front-left" | "front-right" | "behind-left" | "behind-right"
 
-export const DECOR_SIDES: DecorSide[] = ["front", "behind", "left", "right"]
+/** Every DecorSide value, kind-agnostic — used where a field (e.g. DecorObject.windows,
+ * DecorObject.witnessSide) needs to be resynced/cleared regardless of which of them the current
+ * kind actually uses; a side outside decorSidesFor(kind) is simply unused/hidden for that kind,
+ * not invalid to iterate. See decorSidesFor for which subset is actually meaningful per kind. */
+export const DECOR_SIDES: DecorSide[] = ["front", "behind", "left", "right", "front-left", "front-right", "behind-left", "behind-right"]
+
+/** Which DecorSide values a window can meaningfully sit at for this kind — a building's 4 flat
+ * walls (front/behind/left/right), or a vehicle's own 6 openings: a fixed windshield/rear window
+ * (front/behind — see isWindowOpenable) plus its 2 pairs of door windows (front-left/front-right/
+ * behind-left/behind-right) instead of a single left/right — see DecorSide's own doc comment on
+ * why. Every other kind has no windows at all (hasWindows already gates that), so the exact list
+ * returned for them doesn't matter; front/behind/left/right is returned as a harmless default. */
+export function decorSidesFor(kind: DecorKind): DecorSide[] {
+  return kind === "vehicle"
+    ? ["front", "behind", "front-left", "front-right", "behind-left", "behind-right"]
+    : ["front", "behind", "left", "right"]
+}
+
+/** Which DecorSide values the recording witness can actually be positioned AT for this kind — a
+ * subset of decorSidesFor: a vehicle's occupant sits in one of its 4 door/seat positions
+ * (front-left/front-right/behind-left/behind-right), never "at the windshield" or "at the rear
+ * window" the way decorSidesFor's own front/behind entries name a fixed pane, not a seat. Every
+ * other kind (today: building) has no such distinction — every side decorSidesFor returns for it
+ * is equally "a wall you could stand next to" — so this is identical to decorSidesFor there. */
+export function witnessSidesFor(kind: DecorKind): DecorSide[] {
+  return kind === "vehicle" ? ["front-left", "front-right", "behind-left", "behind-right"] : decorSidesFor(kind)
+}
 
 /** Minimum window opacity for a side that isWindowOpenable says can't be opened (e.g. a vehicle's
  * fixed windshield/rear window) — clamped to at write time (see UfoRecorderElement.
@@ -42,7 +75,7 @@ export const DEFAULT_WINDOW_OPACITY_PERCENT = 50
 export function defaultWindows(kind: DecorKind): Partial<Record<DecorSide, number>> | undefined {
   if (!hasWindows(kind)) return undefined
   const windows: Partial<Record<DecorSide, number>> = {}
-  for (const side of DECOR_SIDES) {
+  for (const side of decorSidesFor(kind)) {
     windows[side] = isWindowOpenable(kind, side) ? DEFAULT_WINDOW_OPACITY_PERCENT : FIXED_WINDOW_MIN_OPACITY_PERCENT
   }
   return windows
@@ -63,12 +96,12 @@ export function hasWindows(kind: DecorKind): boolean {
 
 /** Whether the given side's window opacity can go all the way down to 0 (fully open) for this
  * kind — a building's windows all can; a vehicle's front/behind (windshield/rear window) are
- * fixed, only its left/right (doors) open (see FIXED_WINDOW_MIN_OPACITY_PERCENT for the floor a
- * non-openable side is clamped to instead). Meaningless (returns false) for a kind with no
- * windows at all. */
+ * fixed, only its 4 door windows (front-left/front-right/behind-left/behind-right) open (see
+ * FIXED_WINDOW_MIN_OPACITY_PERCENT for the floor a non-openable side is clamped to instead).
+ * Meaningless (returns false) for a kind with no windows at all. */
 export function isWindowOpenable(kind: DecorKind, side: DecorSide): boolean {
   if (kind === "building") return true
-  if (kind === "vehicle") return side === "left" || side === "right"
+  if (kind === "vehicle") return side !== "front" && side !== "behind"
   return false
 }
 
@@ -131,10 +164,12 @@ export interface DecorObject {
   windows?: Partial<Record<DecorSide, number>>
   /** Which side of this object the recording witness is positioned at, looking outward through
    * that side, if they're inside this object at all — see canHoldWitness above for which kinds
-   * this applies to (building/vehicle; a tree/streetlight/other-witness can't be "inside"). Absent
-   * means the witness isn't inside this object. At most one decor object in a sighting is expected
-   * to have this set at a time — the recording witness can only be in one place — but that's a UI
-   * convention, not enforced here. */
+   * this applies to (building/vehicle; a tree/streetlight/other-witness can't be "inside"), and
+   * witnessSidesFor for which DecorSide values are actually valid seats/positions for that kind
+   * (a vehicle's occupant is always at one of its 4 door positions, never "at the windshield").
+   * Absent means the witness isn't inside this object. At most one decor object in a sighting is
+   * expected to have this set at a time — the recording witness can only be in one place — but
+   * that's a UI convention, not enforced here. */
   witnessSide?: DecorSide
   /** Kind "building" only: number of upper stories above the ground floor, set when the building
    * is created (default 2, see UfoRecorderElement.addDecor) and editable afterward. Drives the

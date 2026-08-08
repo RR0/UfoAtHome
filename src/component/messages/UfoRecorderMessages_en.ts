@@ -112,5 +112,9 @@ export const ufoRecorderMessages_en: UfoRecorderMessages = {
   decorSideFront: "Front",
   decorSideBehind: "Behind",
   decorSideLeft: "Left",
-  decorSideRight: "Right"
+  decorSideRight: "Right",
+  decorSideFrontLeft: "Front-left",
+  decorSideFrontRight: "Front-right",
+  decorSideBehindLeft: "Behind-left",
+  decorSideBehindRight: "Behind-right"
 }

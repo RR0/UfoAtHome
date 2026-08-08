@@ -17,6 +17,8 @@ import {
   DEFAULT_BUILDING_FLOORS,
   FIXED_WINDOW_MIN_OPACITY_PERCENT,
   defaultWindows,
+  decorSidesFor,
+  witnessSidesFor,
   hasWindows,
   isWindowOpenable,
   canHoldWitness
@@ -208,11 +210,12 @@ export class UfoRecorderElement extends HTMLElement {
   private readonly optionPrecipitationHail: HTMLElement
   private readonly decorKindSelect: HTMLSelectElement
   private readonly addDecorWitnessButton: HTMLButtonElement
-  /** Labeled "Add decor" (not "Add building" — see template's own comment on this rename) and
-   * adds whatever kind decorKindSelect currently shows, building included now that it's no longer
-   * hidden from that dropdown — the ONLY way to add a building/tree/streetlight/vehicle. Only
-   * "other witness" still gets its own dedicated button (addDecorWitnessButton) and stays hidden
-   * from the dropdown, since a witness has no other fields to configure via it beforehand. */
+  /** A plain "+" glyph (its accessible name/tooltip is "Add decor", not "Add building" — see
+   * template's own comment on this rename) that adds whatever kind decorKindSelect currently
+   * shows, building included now that it's no longer hidden from that dropdown — the ONLY way to
+   * add a building/tree/streetlight/vehicle. Only "other witness" still gets its own dedicated
+   * button (addDecorWitnessButton) and stays hidden from the dropdown, since a witness has no
+   * other fields to configure via it beforehand. */
   private readonly addDecorBuildingButton: HTMLButtonElement
   private readonly deleteDecorButton: HTMLButtonElement
   private readonly decorSelect: HTMLSelectElement
@@ -519,19 +522,31 @@ export class UfoRecorderElement extends HTMLElement {
       front: this.shadow.getElementById("decorWindowFront") as HTMLInputElement,
       behind: this.shadow.getElementById("decorWindowBehind") as HTMLInputElement,
       left: this.shadow.getElementById("decorWindowLeft") as HTMLInputElement,
-      right: this.shadow.getElementById("decorWindowRight") as HTMLInputElement
+      right: this.shadow.getElementById("decorWindowRight") as HTMLInputElement,
+      "front-left": this.shadow.getElementById("decorWindowFrontLeft") as HTMLInputElement,
+      "front-right": this.shadow.getElementById("decorWindowFrontRight") as HTMLInputElement,
+      "behind-left": this.shadow.getElementById("decorWindowBehindLeft") as HTMLInputElement,
+      "behind-right": this.shadow.getElementById("decorWindowBehindRight") as HTMLInputElement
     }
     this.labelDecorSide = {
       front: this.shadow.getElementById("label-decor-window-front")!,
       behind: this.shadow.getElementById("label-decor-window-behind")!,
       left: this.shadow.getElementById("label-decor-window-left")!,
-      right: this.shadow.getElementById("label-decor-window-right")!
+      right: this.shadow.getElementById("label-decor-window-right")!,
+      "front-left": this.shadow.getElementById("label-decor-window-front-left")!,
+      "front-right": this.shadow.getElementById("label-decor-window-front-right")!,
+      "behind-left": this.shadow.getElementById("label-decor-window-behind-left")!,
+      "behind-right": this.shadow.getElementById("label-decor-window-behind-right")!
     }
     this.optionWitnessSide = {
       front: this.shadow.getElementById("option-witness-side-front") as HTMLOptionElement,
       behind: this.shadow.getElementById("option-witness-side-behind") as HTMLOptionElement,
       left: this.shadow.getElementById("option-witness-side-left") as HTMLOptionElement,
-      right: this.shadow.getElementById("option-witness-side-right") as HTMLOptionElement
+      right: this.shadow.getElementById("option-witness-side-right") as HTMLOptionElement,
+      "front-left": this.shadow.getElementById("option-witness-side-front-left") as HTMLOptionElement,
+      "front-right": this.shadow.getElementById("option-witness-side-front-right") as HTMLOptionElement,
+      "behind-left": this.shadow.getElementById("option-witness-side-behind-left") as HTMLOptionElement,
+      "behind-right": this.shadow.getElementById("option-witness-side-behind-right") as HTMLOptionElement
     }
     this.optionWitnessSideNone = this.shadow.getElementById("option-witness-side-none") as HTMLOptionElement
     this.labelDecor = this.shadow.getElementById("label-decor")!
@@ -1506,8 +1521,13 @@ export class UfoRecorderElement extends HTMLElement {
     this.ufoElement.refresh()
   }
 
+  /** Also syncs decorSelect's own displayed value — a no-op when called from that same select's
+   * "change" listener (its value is already `id` by then), but load-bearing for any other caller
+   * (e.g. onPointerDown's own decor-click selection) that changes currentDecorId without the
+   * dropdown itself having been touched. */
   private selectDecor(id: string): void {
     this.currentDecorId = id
+    this.decorSelect.value = id
     this.syncDecorFields()
   }
 
@@ -1703,8 +1723,25 @@ export class UfoRecorderElement extends HTMLElement {
     const decor = this.ufoElement.sighting.decor.find(d => d.id === this.currentDecorId)
     const hasSelection = decor !== undefined
     const kind = decor?.kind
+    // With no decor at all, the fieldset shows only the Add row below (see template.ts's own
+    // comment on why that row is forced onto its own line) — the picker/delete button and every
+    // core property row are hidden entirely rather than left visible-but-disabled, so a blank
+    // recording doesn't present a wall of inert fields with nothing to edit yet.
+    this.setRowVisible(this.decorSelect, hasSelection)
+    this.setRowVisible(this.deleteDecorButton, hasSelection)
+    this.setRowVisible(this.decorTitleInput, hasSelection)
+    this.setRowVisible(this.decorEastInput, hasSelection)
+    this.setRowVisible(this.decorNorthInput, hasSelection)
+    this.setRowVisible(this.decorHeadingInput, hasSelection)
+    this.setRowVisible(this.decorLitInput, hasSelection)
     const showWindows = hasSelection && kind !== undefined && hasWindows(kind)
     this.setRowVisible(this.labelDecorWindows, showWindows)
+    // Which of the 8 DecorSide values actually apply to this kind — a building shows plain
+    // Left/Right, a vehicle shows its own 4 door corners instead (see decorSidesFor's own doc
+    // comment); every side outside that set stays hidden regardless of showWindows, even though
+    // its own input keeps getting value-synced elsewhere (syncDecorFields) so a stale value never
+    // lingers if the row becomes visible again for a differently-kinded decor object later.
+    const applicableSides = kind !== undefined ? decorSidesFor(kind) : []
     for (const side of DECOR_SIDES) {
       // Empty (no window at all) is always valid regardless of kind; only how far the opacity can
       // go toward 0 (fully open) needs a per-side, per-kind gate (a vehicle's front/behind
@@ -1713,10 +1750,17 @@ export class UfoRecorderElement extends HTMLElement {
       // "closed" (100) or left empty (no window), just never opened.
       this.decorWindowInputs[side].disabled = !hasSelection
       this.decorWindowInputs[side].min = String(kind !== undefined && isWindowOpenable(kind, side) ? 0 : FIXED_WINDOW_MIN_OPACITY_PERCENT)
-      this.setRowVisible(this.decorWindowInputs[side], showWindows)
+      this.setRowVisible(this.decorWindowInputs[side], showWindows && applicableSides.includes(side))
     }
     const showWitnessSide = hasSelection && kind !== undefined && canHoldWitness(kind)
     this.setRowVisible(this.decorWitnessSideSelect, showWitnessSide)
+    // Which of the 8 DecorSide values are valid SEATS for this kind (a subset of applicableSides
+    // — see witnessSidesFor's own doc comment: a vehicle's occupant sits at one of its 4 doors,
+    // never "at the windshield", even though the windshield itself is a valid WINDOW side above).
+    const seatSides = kind !== undefined ? witnessSidesFor(kind) : []
+    for (const side of DECOR_SIDES) {
+      this.optionWitnessSide[side].hidden = !seatSides.includes(side)
+    }
     // Shown together, both as soon as the decor object is a building — occupiedFloor doesn't wait
     // on witnessSide being set first (a building's own floor count is part of specifying it, same
     // as picking which floor the witness would be on if/when they're placed inside), even though
@@ -1891,9 +1935,12 @@ export class UfoRecorderElement extends HTMLElement {
     // masks's own doc comment.
     this.labelContextMasks.textContent = `${messages.masks} ▸`
     this.addDecorWitnessButton.textContent = messages.addWitness
-    // Reuses the same "Add decor" text as the generic addDecor label above — see this button's
-    // own field doc comment on why it's no longer building-specific.
-    this.addDecorBuildingButton.textContent = messages.addDecor
+    // The visible glyph itself is a plain "+" (baked into the template, not translated — see
+    // addDecorBuildingButton's own field doc comment) since the adjacent Kind dropdown already
+    // says what's being added; messages.addDecor still drives the accessible name/tooltip so a
+    // screen reader (or a sighted hover) gets a real word, not just a symbol.
+    this.addDecorBuildingButton.title = messages.addDecor
+    this.addDecorBuildingButton.setAttribute("aria-label", messages.addDecor)
     this.labelDecorFloors.textContent = messages.decorFloors
     this.labelDecorOccupiedFloor.textContent = messages.decorOccupiedFloor
     this.labelDecorWitnessSide.textContent = messages.decorWitnessSide
@@ -1903,7 +1950,11 @@ export class UfoRecorderElement extends HTMLElement {
       front: messages.decorSideFront,
       behind: messages.decorSideBehind,
       left: messages.decorSideLeft,
-      right: messages.decorSideRight
+      right: messages.decorSideRight,
+      "front-left": messages.decorSideFrontLeft,
+      "front-right": messages.decorSideFrontRight,
+      "behind-left": messages.decorSideBehindLeft,
+      "behind-right": messages.decorSideBehindRight
     }
     for (const side of DECOR_SIDES) {
       this.labelDecorSide[side].textContent = decorSideMessages[side]
@@ -1999,7 +2050,18 @@ export class UfoRecorderElement extends HTMLElement {
 
     const hit = timeline.hitTest(t, point.x, point.y)
     if (!hit) {
-      // Nothing under the pointer to select/move — the "landscape" itself becomes the drag
+      // No shape under the pointer — try a decor object next (a plain click, not the right-click
+      // context menu's own pickDecorAt call) so clicking a building/tree/vehicle in the 3D scene
+      // selects it in the Decor fieldset, the same way clicking a shape selects it in the Shape
+      // one. Only reached once a shape hit is already ruled out, matching the same "shape wins"
+      // precedent as SceneElement's own hover tooltip (a shape is painted on top of decor, so it
+      // should win a click there too).
+      const decorId = this.pickDecorAt(event)
+      if (decorId !== undefined) {
+        this.selectDecor(decorId)
+        return
+      }
+      // Nothing at all under the pointer to select/move — the "landscape" itself becomes the drag
       // target instead of this being a no-op, letting a witness set their own heading/pitch by
       // dragging the sky/ground the same way they'd drag a shape. Selection is left untouched.
       if (!playing) this.beginCameraDrag(point)

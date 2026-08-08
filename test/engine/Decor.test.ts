@@ -5,6 +5,8 @@ import {
   isWindowOpenable,
   canHoldWitness,
   defaultWindows,
+  decorSidesFor,
+  witnessSidesFor,
   DECOR_SIDES,
   DEFAULT_WINDOW_OPACITY_PERCENT,
   FIXED_WINDOW_MIN_OPACITY_PERCENT
@@ -74,17 +76,39 @@ describe("isWindowOpenable", () => {
     for (const side of DECOR_SIDES) expect(isWindowOpenable("building", side)).toBe(true)
   })
 
-  it("only left/right are openable for a vehicle — front/behind (windshield/rear window) are fixed", () => {
+  it("only the 4 door corners are openable for a vehicle — front/behind (windshield/rear window) are fixed", () => {
     expect(isWindowOpenable("vehicle", "front")).toBe(false)
     expect(isWindowOpenable("vehicle", "behind")).toBe(false)
-    expect(isWindowOpenable("vehicle", "left")).toBe(true)
-    expect(isWindowOpenable("vehicle", "right")).toBe(true)
+    expect(isWindowOpenable("vehicle", "front-left")).toBe(true)
+    expect(isWindowOpenable("vehicle", "front-right")).toBe(true)
+    expect(isWindowOpenable("vehicle", "behind-left")).toBe(true)
+    expect(isWindowOpenable("vehicle", "behind-right")).toBe(true)
   })
 
   it("no side is openable for a kind with no windows at all", () => {
     for (const kind of NON_WINDOWED_KINDS) {
       for (const side of DECOR_SIDES) expect(isWindowOpenable(kind, side)).toBe(false)
     }
+  })
+})
+
+describe("decorSidesFor", () => {
+  it("a building uses the plain 4 sides", () => {
+    expect(decorSidesFor("building")).toEqual(["front", "behind", "left", "right"])
+  })
+
+  it("a vehicle uses front/behind plus its own 4 door corners — not plain left/right, a real car's side has 2 windows each", () => {
+    expect(decorSidesFor("vehicle")).toEqual(["front", "behind", "front-left", "front-right", "behind-left", "behind-right"])
+  })
+})
+
+describe("witnessSidesFor", () => {
+  it("a building's witness can stand at any of its own decorSidesFor", () => {
+    expect(witnessSidesFor("building")).toEqual(decorSidesFor("building"))
+  })
+
+  it("a vehicle's witness can only sit at one of its 4 door/seat positions, never at the fixed windshield/rear window", () => {
+    expect(witnessSidesFor("vehicle")).toEqual(["front-left", "front-right", "behind-left", "behind-right"])
   })
 })
 
@@ -106,12 +130,14 @@ describe("defaultWindows", () => {
     })
   })
 
-  it("gives a vehicle's fixed front/behind FIXED_WINDOW_MIN_OPACITY_PERCENT instead, since they can never open", () => {
+  it("gives a vehicle's fixed front/behind FIXED_WINDOW_MIN_OPACITY_PERCENT instead, since they can never open — its 4 door corners get DEFAULT_WINDOW_OPACITY_PERCENT like a building's own sides", () => {
     expect(defaultWindows("vehicle")).toEqual({
       front: FIXED_WINDOW_MIN_OPACITY_PERCENT,
       behind: FIXED_WINDOW_MIN_OPACITY_PERCENT,
-      left: DEFAULT_WINDOW_OPACITY_PERCENT,
-      right: DEFAULT_WINDOW_OPACITY_PERCENT
+      "front-left": DEFAULT_WINDOW_OPACITY_PERCENT,
+      "front-right": DEFAULT_WINDOW_OPACITY_PERCENT,
+      "behind-left": DEFAULT_WINDOW_OPACITY_PERCENT,
+      "behind-right": DEFAULT_WINDOW_OPACITY_PERCENT
     })
   })
 

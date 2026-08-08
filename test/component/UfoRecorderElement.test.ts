@@ -2825,12 +2825,41 @@ describe("UfoRecorderElement decor group", () => {
     document.body.innerHTML = ""
   })
 
-  it("starts with no decor and a disabled field row", () => {
+  it("starts with no decor, showing only the Add row — the picker/delete button/property fields are hidden entirely, not just disabled", () => {
     const element = mount()
     expect(element.sightingData.decor).toEqual([])
     const shadow = element.shadowRoot!
+    const rowHidden = (id: string) => {
+      const el = shadow.getElementById(id) as HTMLElement
+      return (el.closest("label") ?? el).hidden
+    }
     expect((shadow.getElementById("delete-decor") as HTMLButtonElement).disabled).toBe(true)
     expect((shadow.getElementById("decorEast") as HTMLInputElement).disabled).toBe(true)
+    expect(rowHidden("decor")).toBe(true)
+    expect(rowHidden("delete-decor")).toBe(true)
+    expect(rowHidden("decorTitle")).toBe(true)
+    expect(rowHidden("decorEast")).toBe(true)
+    expect(rowHidden("decorNorth")).toBe(true)
+    expect(rowHidden("decorHeading")).toBe(true)
+    expect(rowHidden("decorLit")).toBe(true)
+    // The Add row itself is the one thing that's never hidden — always reachable even with
+    // nothing to edit yet.
+    expect((shadow.getElementById("add-decor-building") as HTMLElement).closest(".decor-add-row")).not.toBeNull()
+    expect(((shadow.getElementById("add-decor-building") as HTMLElement).closest(".decor-add-row") as HTMLElement).hidden).toBe(false)
+  })
+
+  it("shows the picker/delete button/property fields again once a decor object exists", () => {
+    const element = mount()
+    const shadow = element.shadowRoot!
+    const rowHidden = (id: string) => {
+      const el = shadow.getElementById(id) as HTMLElement
+      return (el.closest("label") ?? el).hidden
+    }
+    ;(shadow.getElementById("add-decor-building") as HTMLButtonElement).click()
+    expect(rowHidden("decor")).toBe(false)
+    expect(rowHidden("delete-decor")).toBe(false)
+    expect(rowHidden("decorTitle")).toBe(false)
+    expect(rowHidden("decorEast")).toBe(false)
   })
 
   it("hides only 'other witness' from the generic Decor group's own kind dropdown", () => {
@@ -3049,7 +3078,14 @@ describe("UfoRecorderElement decor group", () => {
 
     kindSelect.value = "vehicle"
     ;(shadow.getElementById("add-decor-building") as HTMLButtonElement).click()
-    expect(element.sightingData.decor![1].windows).toEqual({ front: 90, behind: 90, left: 50, right: 50 })
+    expect(element.sightingData.decor![1].windows).toEqual({
+      front: 90,
+      behind: 90,
+      "front-left": 50,
+      "front-right": 50,
+      "behind-left": 50,
+      "behind-right": 50
+    })
   })
 
   it("writes the 4 window opacity inputs back onto the selected decor object's windows record, leaving the other (already-defaulted) sides alone — empty means no window at all", () => {
@@ -3069,7 +3105,7 @@ describe("UfoRecorderElement decor group", () => {
     expect(element.sightingData.decor![0].windows).toEqual({ front: 0, behind: 50, left: 80, right: 50 })
   })
 
-  it("clamps a fixed (non-openable) side's opacity up to FIXED_WINDOW_MIN_OPACITY_PERCENT even if a lower value is typed, but leaves an openable side free down to 0", () => {
+  it("clamps a fixed (non-openable) side's opacity up to FIXED_WINDOW_MIN_OPACITY_PERCENT even if a lower value is typed, but leaves an openable door window free down to 0", () => {
     const element = mount()
     const shadow = element.shadowRoot!
     const kindSelect = shadow.getElementById("decorKind") as HTMLSelectElement
@@ -3078,17 +3114,26 @@ describe("UfoRecorderElement decor group", () => {
 
     expect((shadow.getElementById("decorWindowFront") as HTMLInputElement).min).toBe("90")
     expect((shadow.getElementById("decorWindowBehind") as HTMLInputElement).min).toBe("90")
-    expect((shadow.getElementById("decorWindowLeft") as HTMLInputElement).min).toBe("0")
-    expect((shadow.getElementById("decorWindowRight") as HTMLInputElement).min).toBe("0")
+    expect((shadow.getElementById("decorWindowFrontLeft") as HTMLInputElement).min).toBe("0")
+    expect((shadow.getElementById("decorWindowFrontRight") as HTMLInputElement).min).toBe("0")
+    expect((shadow.getElementById("decorWindowBehindLeft") as HTMLInputElement).min).toBe("0")
+    expect((shadow.getElementById("decorWindowBehindRight") as HTMLInputElement).min).toBe("0")
 
     const frontInput = shadow.getElementById("decorWindowFront") as HTMLInputElement
     frontInput.value = "10"
     frontInput.dispatchEvent(new Event("input"))
-    const leftInput = shadow.getElementById("decorWindowLeft") as HTMLInputElement
-    leftInput.value = "10"
-    leftInput.dispatchEvent(new Event("input"))
+    const frontLeftInput = shadow.getElementById("decorWindowFrontLeft") as HTMLInputElement
+    frontLeftInput.value = "10"
+    frontLeftInput.dispatchEvent(new Event("input"))
 
-    expect(element.sightingData.decor![0].windows).toEqual({ front: 90, behind: 90, left: 10, right: 50 })
+    expect(element.sightingData.decor![0].windows).toEqual({
+      front: 90,
+      behind: 90,
+      "front-left": 10,
+      "front-right": 50,
+      "behind-left": 50,
+      "behind-right": 50
+    })
   })
 
   it("shows the Occupied floor row alongside Floors as soon as it's a building, even before a witness location is picked", () => {
@@ -3277,6 +3322,74 @@ describe("UfoRecorderElement decor context menu", () => {
     expect(element.sightingData.witness).toEqual({ id: "other-witness" })
     expect((element.shadowRoot!.getElementById("decor-context-menu") as HTMLElement).hidden).toBe(true)
     fetchSpy.mockRestore()
+  })
+})
+
+describe("UfoRecorderElement decor click-to-select", () => {
+  afterEach(() => {
+    document.body.innerHTML = ""
+  })
+
+  // jsdom has no global PointerEvent — a plain MouseEvent dispatched as "pointerdown" exercises
+  // the same handler, which only reads clientX/clientY/shiftKey (same convention as this file's
+  // other clickAt/rightClickAt helpers).
+  function clickCanvas(element: UfoRecorderElement): void {
+    const canvas = nestedUfo(element).shadowRoot!.querySelector("canvas")!
+    canvas.getBoundingClientRect = () => ({ left: 0, top: 0, width: 800, height: 600 }) as DOMRect
+    canvas.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true, composed: true, clientX: 400, clientY: 300 }))
+  }
+
+  it("selects a decor object clicked in the 3D scene — the picker/property fields sync to it", () => {
+    const element = mount()
+    element.sightingData = {
+      version: 1,
+      timeline: { keyframes: [] },
+      decor: [
+        { id: "decor-1", kind: "building", eastM: 0, northM: 10, title: "Maison" },
+        { id: "decor-2", kind: "tree", eastM: 5, northM: 10, title: "Chêne" }
+      ]
+    }
+    const sceneEl = element.shadowRoot!.querySelector("rr0-scene") as unknown as { pickDecorAt: () => string }
+    sceneEl.pickDecorAt = () => "decor-2"
+
+    clickCanvas(element)
+
+    const shadow = element.shadowRoot!
+    expect((shadow.getElementById("decor") as HTMLSelectElement).value).toBe("decor-2")
+    expect((shadow.getElementById("decorTitle") as HTMLInputElement).value).toBe("Chêne")
+  })
+
+  it("a shape under the pointer wins over decor beneath it — decor is never even picked at that point", () => {
+    const element = mount()
+    element.sightingData = {
+      version: 1,
+      timeline: {
+        // clickCanvas clicks at clientX=400/clientY=300 against an 800x600 CSS rect, which
+        // canvasPointFromEvent maps to (320,180) in the fixed 640x360 canvas space — bounds must
+        // surround that point for the shape hit test to actually succeed.
+        keyframes: [{ t: 0, shapes: [{ sourceId: "ufo-9", shape: { kind: "oval", bounds: { x: 300, y: 160, width: 40, height: 40 }, color: "#fff", angle: 0, transparency: 0, haloScale: 0, selected: false } }] }]
+      },
+      decor: [{ id: "decor-1", kind: "building", eastM: 0, northM: 10, title: "Maison" }]
+    }
+    const sceneEl = element.shadowRoot!.querySelector("rr0-scene") as unknown as { pickDecorAt: () => string }
+    const pickDecorAtSpy = vi.fn(() => "decor-1")
+    sceneEl.pickDecorAt = pickDecorAtSpy
+
+    clickCanvas(element)
+
+    const shadow = element.shadowRoot!
+    expect(pickDecorAtSpy).not.toHaveBeenCalled()
+    expect((shadow.getElementById("source") as HTMLSelectElement).value).toBe("ufo-9")
+  })
+
+  it("clicking empty space (no shape, no decor hit) is a harmless no-op for decor selection — falls through to the existing camera-drag behavior instead", () => {
+    const element = mount()
+    element.sightingData = { version: 1, timeline: { keyframes: [] } }
+    const sceneEl = element.shadowRoot!.querySelector("rr0-scene") as unknown as { pickDecorAt: () => undefined }
+    sceneEl.pickDecorAt = () => undefined
+
+    expect(() => clickCanvas(element)).not.toThrow()
+    expect((element.shadowRoot!.getElementById("decor") as HTMLSelectElement).disabled).toBe(true)
   })
 })
 

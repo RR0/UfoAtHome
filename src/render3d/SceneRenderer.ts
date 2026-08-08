@@ -18,7 +18,7 @@ import {
   MeshBasicMaterial,
   MeshLambertMaterial,
   Object3D,
-  PCFSoftShadowMap,
+  PCFShadowMap,
   PerspectiveCamera,
   PointLight,
   Points,
@@ -645,7 +645,11 @@ export class SceneRenderer {
     this.renderer = new WebGLRenderer({ canvas, antialias: true })
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2))
     this.renderer.shadowMap.enabled = true
-    this.renderer.shadowMap.type = PCFSoftShadowMap
+    // PCFSoftShadowMap (this project's original choice) is no longer its own WebGL shadow
+    // algorithm in this three.js version (^0.185) — WebGLRenderer silently substitutes
+    // PCFShadowMap for it anyway and logs a deprecation warning; setting it directly here gets
+    // the identical rendered result without that warning.
+    this.renderer.shadowMap.type = PCFShadowMap
     this.camera = new PerspectiveCamera(60, canvas.width / Math.max(canvas.height, 1), 0.1, SKY_RADIUS * 1.2)
     this.camera.position.set(0, 1.6, 0)
     this.terrainProviders = terrainProviders

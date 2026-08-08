@@ -54,12 +54,19 @@ const WINDOW_THICKNESS = 0.05
 
 /** Rotation.y that makes buildWitness's own "nose" (see its own doc comment — points -Z by
  * default) face outward through the given side of the object it's placed inside, matching the
- * front=-Z/behind=+Z/right=+X/left=-X convention buildVehicle's own body/headlights already use. */
+ * front=-Z/behind=+Z/right=+X/left=-X convention buildVehicle's own body/headlights already use.
+ * The 4 vehicle-only corners share their plain left/right counterpart's own yaw — looking out the
+ * left side of a car faces the same -X direction whether you're in the front or rear seat, only
+ * WHERE along the cabin you're sitting differs (see sideOffset). */
 const SIDE_YAW_RAD: Record<DecorSide, number> = {
   front: 0,
   behind: Math.PI,
   left: Math.PI / 2,
-  right: -Math.PI / 2
+  right: -Math.PI / 2,
+  "front-left": Math.PI / 2,
+  "behind-left": Math.PI / 2,
+  "front-right": -Math.PI / 2,
+  "behind-right": -Math.PI / 2
 }
 
 function windowOpacityPercent(windows: DecorObject["windows"], side: DecorSide): number | undefined {
@@ -85,95 +92,102 @@ function addRoomPanel(group: Group, sizeX: number, sizeY: number, sizeZ: number,
   group.add(mesh)
 }
 
-/** The size (within its own wall's plane) of the window this side would get, matching whatever
- * addWindowPane's own call sites for this kind/side already build it at — the single source of
- * truth addFramedRoomWall needs to know how big a gap to leave; the exact numbers are pure
- * duplication of the addWindowPane call sites' own literals, kept in sync by hand (both are read
- * together in buildBuilding/buildVehicle, not spread across the file). */
-interface WindowSize {
+/** One window gap to leave in a room wall — `main` its size along the wall's own main axis,
+ * `center` its position along that axis (0 = wall center), matching whatever addWindowPane's own
+ * call sites for this kind/side already build it at (the single source of truth
+ * addFramedRoomWall needs; the numbers are pure duplication of addWindowPane's own literals, kept
+ * in sync by hand — both are read together in buildBuilding/buildVehicle, not spread across the
+ * file). An explicit center (not always 0) is what lets a wall carry more than one gap — see
+ * addFramedRoomWall's own doc comment for why a vehicle's left/right walls need that. */
+interface WallWindow {
   main: number
-  height: number
+  center: number
 }
 
-/** Builds one side of the room as a 4-strip picture frame around a centered `windowMain` x
- * `windowHeight` gap, instead of a single solid panel — used whenever this side has ANY window
- * entry (regardless of opacity, even 0): the window pane itself (addWindowPane) is usually much
- * smaller than the whole wall (e.g. a building's BUILDING_WINDOW_WIDTH=1.4 out of
- * BUILDING_WIDTH=6), so skipping the ENTIRE wall panel there — an earlier version's behavior —
- * left most of that side as an unintended void straight through to the sky, not a wall with one
- * window in it (seen directly in a user screenshot: two side walls framing a huge open gap instead
- * of a recognizable window). `mainIsX` picks the wall's own horizontal axis: true for a
- * front/behind wall (its plane is X-Y, thin along Z), false for a left/right wall (its plane is
- * Z-Y, thin along X) — same distinction addWindowPane's own call sites already make explicitly per
- * side. Decomposition: two full-width caps (top/bottom, above/below the window's own height) plus
- * two side strips exactly as tall as the window itself (left/right of it) — together tiling the
- * whole panel minus the centered gap, with no overlap. */
+/** Builds one side of the room as a picture frame around zero or more window gaps along its own
+ * main axis, instead of a single solid panel — used whenever this side has ANY window entry
+ * (regardless of opacity, even 0): the window pane itself (addWindowPane) is usually much smaller
+ * than the whole wall (e.g. a building's BUILDING_WINDOW_WIDTH=1.4 out of BUILDING_WIDTH=6), so
+ * skipping the ENTIRE wall panel there — an earlier version's behavior — left most of that side as
+ * an unintended void straight through to the sky, not a wall with a window in it (seen directly in
+ * a user screenshot: two side walls framing a huge open gap instead of a recognizable window).
+ * `mainIsX` picks the wall's own horizontal axis: true for a front/behind wall (its plane is X-Y,
+ * thin along Z), false for a left/right wall (its plane is Z-Y, thin along X) — same distinction
+ * addWindowPane's own call sites already make explicitly per side. More than one gap is what a
+ * vehicle's own left/right wall needs now (front-door window + rear-door window — see DecorSide's
+ * own doc comment on why a car's side isn't a single window the way a building's is); every other
+ * wall today passes exactly one. Decomposition: two full-width caps (top/bottom, above/below the
+ * windows' own shared height) plus one strip per gap, tiling every stretch of wall before/between/
+ * after the (center-sorted) gaps — together covering the whole panel minus the gaps themselves,
+ * with no overlap, for any gap count including zero (see addRoom's own solid-panel branch for why
+ * zero never actually reaches here in practice). */
 function addFramedRoomWall(
   group: Group,
   mainIsX: boolean,
   fullMain: number,
   fullHeight: number,
-  windowMain: number,
+  windows: WallWindow[],
   windowHeight: number,
   crossFixed: number,
   yCenter: number,
   color: RgbColor
 ): void {
   const capHeight = (fullHeight - windowHeight) / 2
-  const sideMain = (fullMain - windowMain) / 2
   const panel = (main: number, y: number, mainOffset: number, yOffset: number) => {
+    if (main <= 0) return
     if (mainIsX) addRoomPanel(group, main, y, ROOM_PANEL_THICKNESS, mainOffset, yCenter + yOffset, crossFixed, color)
     else addRoomPanel(group, ROOM_PANEL_THICKNESS, y, main, crossFixed, yCenter + yOffset, mainOffset, color)
   }
   panel(fullMain, capHeight, 0, fullHeight / 2 - capHeight / 2)
   panel(fullMain, capHeight, 0, -(fullHeight / 2 - capHeight / 2))
-  panel(sideMain, windowHeight, -(fullMain / 2 - sideMain / 2), 0)
-  panel(sideMain, windowHeight, fullMain / 2 - sideMain / 2, 0)
+  const sorted = [...windows].sort((a, b) => a.center - b.center)
+  let cursor = -fullMain / 2
+  for (const w of sorted) {
+    const gapStart = w.center - w.main / 2
+    const stripMain = gapStart - cursor
+    panel(stripMain, windowHeight, cursor + stripMain / 2, 0)
+    cursor = w.center + w.main / 2
+  }
+  const tailMain = fullMain / 2 - cursor
+  panel(tailMain, windowHeight, cursor + tailMain / 2, 0)
 }
 
 /** The enclosure of the room the witness stands inside, visible only from within (BackSide
  * materials — the object's own exterior shell already covers the outside view, this would just
- * double up on top of it there): 4 side walls plus a floor and ceiling. A side with no window
- * entry at all gets one plain solid panel; a side WITH one (any opacity, even 0 — still an
- * opening, not a wall) gets a framed wall instead (see addFramedRoomWall) so the rest of that
- * side, outside the window's own rectangle, still reads as a wall rather than a void. Only ever
- * built when witnessSide is set — see buildBuilding/buildVehicle's own call sites — a room nobody
- * stands in is never rendered from its own inside. */
+ * double up on top of it there): 4 side walls plus a floor and ceiling. A side passed an empty
+ * window list gets one plain solid panel; a non-empty one (any opacity, even 0 — still an opening,
+ * not a wall) gets a framed wall instead (see addFramedRoomWall) so the rest of that side, outside
+ * the window gap(s), still reads as a wall rather than a void. Only ever built when witnessSide is
+ * set — see buildBuilding/buildVehicle's own call sites — a room nobody stands in is never
+ * rendered from its own inside. `windowHeight` is shared by every gap on a given wall (true for
+ * every caller today — even a vehicle's own front-door/rear-door pair are always the same
+ * height). */
 function addRoom(
   group: Group,
   halfWidth: number,
   halfDepth: number,
   floorY: number,
   ceilingY: number,
-  windows: DecorObject["windows"],
-  windowSize: Record<DecorSide, WindowSize>
+  windowHeight: number,
+  front: WallWindow[],
+  behind: WallWindow[],
+  left: WallWindow[],
+  right: WallWindow[]
 ): void {
   const centerY = (floorY + ceilingY) / 2
   const height = ceilingY - floorY
-  const front = windowOpacityPercent(windows, "front")
-  if (front === undefined) {
-    addRoomPanel(group, halfWidth * 2, height, ROOM_PANEL_THICKNESS, 0, centerY, -halfDepth + ROOM_PANEL_THICKNESS, ROOM_WALL_COLOR)
-  } else {
-    addFramedRoomWall(group, true, halfWidth * 2, height, windowSize.front.main, windowSize.front.height, -halfDepth + ROOM_PANEL_THICKNESS, centerY, ROOM_WALL_COLOR)
+  const wall = (windows: WallWindow[], mainIsX: boolean, fullMain: number, crossFixed: number) => {
+    if (windows.length === 0) {
+      if (mainIsX) addRoomPanel(group, fullMain, height, ROOM_PANEL_THICKNESS, 0, centerY, crossFixed, ROOM_WALL_COLOR)
+      else addRoomPanel(group, ROOM_PANEL_THICKNESS, height, fullMain, crossFixed, centerY, 0, ROOM_WALL_COLOR)
+    } else {
+      addFramedRoomWall(group, mainIsX, fullMain, height, windows, windowHeight, crossFixed, centerY, ROOM_WALL_COLOR)
+    }
   }
-  const behind = windowOpacityPercent(windows, "behind")
-  if (behind === undefined) {
-    addRoomPanel(group, halfWidth * 2, height, ROOM_PANEL_THICKNESS, 0, centerY, halfDepth - ROOM_PANEL_THICKNESS, ROOM_WALL_COLOR)
-  } else {
-    addFramedRoomWall(group, true, halfWidth * 2, height, windowSize.behind.main, windowSize.behind.height, halfDepth - ROOM_PANEL_THICKNESS, centerY, ROOM_WALL_COLOR)
-  }
-  const left = windowOpacityPercent(windows, "left")
-  if (left === undefined) {
-    addRoomPanel(group, ROOM_PANEL_THICKNESS, height, halfDepth * 2, -halfWidth + ROOM_PANEL_THICKNESS, centerY, 0, ROOM_WALL_COLOR)
-  } else {
-    addFramedRoomWall(group, false, halfDepth * 2, height, windowSize.left.main, windowSize.left.height, -halfWidth + ROOM_PANEL_THICKNESS, centerY, ROOM_WALL_COLOR)
-  }
-  const right = windowOpacityPercent(windows, "right")
-  if (right === undefined) {
-    addRoomPanel(group, ROOM_PANEL_THICKNESS, height, halfDepth * 2, halfWidth - ROOM_PANEL_THICKNESS, centerY, 0, ROOM_WALL_COLOR)
-  } else {
-    addFramedRoomWall(group, false, halfDepth * 2, height, windowSize.right.main, windowSize.right.height, halfWidth - ROOM_PANEL_THICKNESS, centerY, ROOM_WALL_COLOR)
-  }
+  wall(front, true, halfWidth * 2, -halfDepth + ROOM_PANEL_THICKNESS)
+  wall(behind, true, halfWidth * 2, halfDepth - ROOM_PANEL_THICKNESS)
+  wall(left, false, halfDepth * 2, -halfWidth + ROOM_PANEL_THICKNESS)
+  wall(right, false, halfDepth * 2, halfWidth - ROOM_PANEL_THICKNESS)
   addRoomPanel(group, halfWidth * 2, ROOM_PANEL_THICKNESS, halfDepth * 2, 0, floorY + ROOM_PANEL_THICKNESS, 0, ROOM_FLOOR_CEILING_COLOR)
   addRoomPanel(group, halfWidth * 2, ROOM_PANEL_THICKNESS, halfDepth * 2, 0, ceilingY - ROOM_PANEL_THICKNESS, 0, ROOM_FLOOR_CEILING_COLOR)
 }
@@ -183,15 +197,30 @@ function addRoom(
  * the wall/cabin they are. The single source of truth for this math: both addOccupant (the visible
  * figure) and SceneRenderer's camera placement (occupantView, below — "look outward from inside
  * this decor object") must agree exactly, or the camera would render from a different spot than
- * where the figure appears to stand. */
+ * where the figure appears to stand. The 4 vehicle-only corners reuse their plain left/right
+ * counterpart's own X inset (same distance from the door) but additionally offset along Z by
+ * VEHICLE_DOOR_WINDOW_Z, toward whichever of the front/rear seats they name — see that constant's
+ * own doc comment for why this specific Z value (it's the same one the door windows themselves
+ * are centered at, so a seated occupant always lines up with their own window). */
 function sideOffset(side: DecorSide, halfWidth: number, halfDepth: number, inset: number): { x: number; z: number } {
-  return side === "front"
-    ? { x: 0, z: -(halfDepth - inset) }
-    : side === "behind"
-      ? { x: 0, z: halfDepth - inset }
-      : side === "left"
-        ? { x: -(halfWidth - inset), z: 0 }
-        : { x: halfWidth - inset, z: 0 }
+  switch (side) {
+    case "front":
+      return { x: 0, z: -(halfDepth - inset) }
+    case "behind":
+      return { x: 0, z: halfDepth - inset }
+    case "left":
+      return { x: -(halfWidth - inset), z: 0 }
+    case "right":
+      return { x: halfWidth - inset, z: 0 }
+    case "front-left":
+      return { x: -(halfWidth - inset), z: -VEHICLE_DOOR_WINDOW_Z }
+    case "front-right":
+      return { x: halfWidth - inset, z: -VEHICLE_DOOR_WINDOW_Z }
+    case "behind-left":
+      return { x: -(halfWidth - inset), z: VEHICLE_DOOR_WINDOW_Z }
+    case "behind-right":
+      return { x: halfWidth - inset, z: VEHICLE_DOOR_WINDOW_Z }
+  }
 }
 
 /** Places a scaled-down buildWitness figure inside `group`, standing/sitting at `y` (local, i.e.
@@ -248,13 +277,19 @@ function buildBuilding(floors: number, windows: DecorObject["windows"], witnessS
   if (witnessSide) {
     const level = Math.min(Math.max(occupiedFloor ?? 0, 0), levels - 1)
     addOccupant(group, witnessSide, level * BUILDING_FLOOR_HEIGHT, 0.72, halfWidth, halfDepth, BUILDING_WITNESS_INSET)
-    const windowSize: WindowSize = { main: BUILDING_WINDOW_WIDTH, height: BUILDING_WINDOW_HEIGHT }
-    addRoom(group, halfWidth, halfDepth, level * BUILDING_FLOOR_HEIGHT, (level + 1) * BUILDING_FLOOR_HEIGHT, windows, {
-      front: windowSize,
-      behind: windowSize,
-      left: windowSize,
-      right: windowSize
-    })
+    const wallWindow = (side: DecorSide): WallWindow[] => (windowOpacityPercent(windows, side) !== undefined ? [{ main: BUILDING_WINDOW_WIDTH, center: 0 }] : [])
+    addRoom(
+      group,
+      halfWidth,
+      halfDepth,
+      level * BUILDING_FLOOR_HEIGHT,
+      (level + 1) * BUILDING_FLOOR_HEIGHT,
+      BUILDING_WINDOW_HEIGHT,
+      wallWindow("front"),
+      wallWindow("behind"),
+      wallWindow("left"),
+      wallWindow("right")
+    )
   }
   return group
 }
@@ -286,7 +321,16 @@ const VEHICLE_CABIN_Y = 1.7
 const VEHICLE_CABIN_HEIGHT = 0.6
 const VEHICLE_WINDOW_HEIGHT = 0.4
 const VEHICLE_WINDSHIELD_WIDTH = 1.2
-const VEHICLE_SIDE_WINDOW_LENGTH = 1.6
+/** Was one VEHICLE_SIDE_WINDOW_LENGTH=1.6 pane spanning nearly the whole cabin depth per side —
+ * replaced by two shorter door windows (front-left/front-right/behind-left/behind-right, see
+ * DecorSide's own doc comment) once a real car's left/right side turned out to have 2 windows
+ * each, not 1. */
+const VEHICLE_DOOR_WINDOW_LENGTH = 0.7
+/** Front door window centered at -this along Z, behind door at +this — cabin half-depth is
+ * VEHICLE_CABIN_HALF_DEPTH=1.0, so this leaves ~0.15 margin at the cabin's own front/rear edges
+ * and a ~0.3 gap at Z=0 for the B-pillar between the two doors. Also what sideOffset uses to seat
+ * a front-left/front-right/behind-left/behind-right occupant exactly under their own window. */
+const VEHICLE_DOOR_WINDOW_Z = 0.5
 /** The camera's own absolute eye height while inside a vehicle — set to VEHICLE_CABIN_Y itself
  * (the cabin's own vertical center, which is also where every window pane is centered), well
  * within the room addRoom builds (VEHICLE_CABIN_Y +/- VEHICLE_CABIN_HEIGHT/2). Deliberately NOT
@@ -329,22 +373,38 @@ function buildVehicle(lit: boolean, windows: DecorObject["windows"], witnessSide
   }
   // Windshield/rear window sit on the cabin box's own front/behind faces — never openable for a
   // vehicle (isWindowOpenable in Decor.ts returns false there, so the recorder UI clamps their
-  // opacity to FIXED_WINDOW_MIN_OPACITY_PERCENT), only the two side doors' windows go all the way
-  // to 0 — windowOpacityPercent() itself applies with no special-casing either way.
+  // opacity to FIXED_WINDOW_MIN_OPACITY_PERCENT); the 4 door windows go all the way to 0 —
+  // windowOpacityPercent() itself applies with no special-casing either way.
   addWindowPane(group, VEHICLE_WINDSHIELD_WIDTH, VEHICLE_WINDOW_HEIGHT, WINDOW_THICKNESS, 0, VEHICLE_CABIN_Y, -VEHICLE_CABIN_HALF_DEPTH - WINDOW_MARGIN, windowOpacityPercent(windows, "front"))
   addWindowPane(group, VEHICLE_WINDSHIELD_WIDTH, VEHICLE_WINDOW_HEIGHT, WINDOW_THICKNESS, 0, VEHICLE_CABIN_Y, VEHICLE_CABIN_HALF_DEPTH + WINDOW_MARGIN, windowOpacityPercent(windows, "behind"))
-  addWindowPane(group, WINDOW_THICKNESS, VEHICLE_WINDOW_HEIGHT, VEHICLE_SIDE_WINDOW_LENGTH, -VEHICLE_CABIN_HALF_WIDTH - WINDOW_MARGIN, VEHICLE_CABIN_Y, 0, windowOpacityPercent(windows, "left"))
-  addWindowPane(group, WINDOW_THICKNESS, VEHICLE_WINDOW_HEIGHT, VEHICLE_SIDE_WINDOW_LENGTH, VEHICLE_CABIN_HALF_WIDTH + WINDOW_MARGIN, VEHICLE_CABIN_Y, 0, windowOpacityPercent(windows, "right"))
+  // 2 door windows per side (front seat/rear seat), not 1 — see VEHICLE_DOOR_WINDOW_LENGTH/Z's own
+  // doc comment.
+  addWindowPane(group, WINDOW_THICKNESS, VEHICLE_WINDOW_HEIGHT, VEHICLE_DOOR_WINDOW_LENGTH, -VEHICLE_CABIN_HALF_WIDTH - WINDOW_MARGIN, VEHICLE_CABIN_Y, -VEHICLE_DOOR_WINDOW_Z, windowOpacityPercent(windows, "front-left"))
+  addWindowPane(group, WINDOW_THICKNESS, VEHICLE_WINDOW_HEIGHT, VEHICLE_DOOR_WINDOW_LENGTH, -VEHICLE_CABIN_HALF_WIDTH - WINDOW_MARGIN, VEHICLE_CABIN_Y, VEHICLE_DOOR_WINDOW_Z, windowOpacityPercent(windows, "behind-left"))
+  addWindowPane(group, WINDOW_THICKNESS, VEHICLE_WINDOW_HEIGHT, VEHICLE_DOOR_WINDOW_LENGTH, VEHICLE_CABIN_HALF_WIDTH + WINDOW_MARGIN, VEHICLE_CABIN_Y, -VEHICLE_DOOR_WINDOW_Z, windowOpacityPercent(windows, "front-right"))
+  addWindowPane(group, WINDOW_THICKNESS, VEHICLE_WINDOW_HEIGHT, VEHICLE_DOOR_WINDOW_LENGTH, VEHICLE_CABIN_HALF_WIDTH + WINDOW_MARGIN, VEHICLE_CABIN_Y, VEHICLE_DOOR_WINDOW_Z, windowOpacityPercent(windows, "behind-right"))
   if (witnessSide) {
     addOccupant(group, witnessSide, VEHICLE_WITNESS_Y, 0.5, VEHICLE_CABIN_HALF_WIDTH, VEHICLE_CABIN_HALF_DEPTH, VEHICLE_WITNESS_INSET)
-    const windshield: WindowSize = { main: VEHICLE_WINDSHIELD_WIDTH, height: VEHICLE_WINDOW_HEIGHT }
-    const sideWindow: WindowSize = { main: VEHICLE_SIDE_WINDOW_LENGTH, height: VEHICLE_WINDOW_HEIGHT }
-    addRoom(group, VEHICLE_CABIN_HALF_WIDTH, VEHICLE_CABIN_HALF_DEPTH, VEHICLE_CABIN_Y - VEHICLE_CABIN_HEIGHT / 2, VEHICLE_CABIN_Y + VEHICLE_CABIN_HEIGHT / 2, windows, {
-      front: windshield,
-      behind: windshield,
-      left: sideWindow,
-      right: sideWindow
-    })
+    const doorWindow = (frontSide: DecorSide, behindSide: DecorSide): WallWindow[] => {
+      const result: WallWindow[] = []
+      if (windowOpacityPercent(windows, frontSide) !== undefined) result.push({ main: VEHICLE_DOOR_WINDOW_LENGTH, center: -VEHICLE_DOOR_WINDOW_Z })
+      if (windowOpacityPercent(windows, behindSide) !== undefined) result.push({ main: VEHICLE_DOOR_WINDOW_LENGTH, center: VEHICLE_DOOR_WINDOW_Z })
+      return result
+    }
+    const windshield: WallWindow[] = windowOpacityPercent(windows, "front") !== undefined ? [{ main: VEHICLE_WINDSHIELD_WIDTH, center: 0 }] : []
+    const rearWindow: WallWindow[] = windowOpacityPercent(windows, "behind") !== undefined ? [{ main: VEHICLE_WINDSHIELD_WIDTH, center: 0 }] : []
+    addRoom(
+      group,
+      VEHICLE_CABIN_HALF_WIDTH,
+      VEHICLE_CABIN_HALF_DEPTH,
+      VEHICLE_CABIN_Y - VEHICLE_CABIN_HEIGHT / 2,
+      VEHICLE_CABIN_Y + VEHICLE_CABIN_HEIGHT / 2,
+      VEHICLE_WINDOW_HEIGHT,
+      windshield,
+      rearWindow,
+      doorWindow("front-left", "behind-left"),
+      doorWindow("front-right", "behind-right")
+    )
   }
   return group
 }

@@ -136,9 +136,11 @@ export interface UfoRecorderMessages {
   decorStreetlight: string
   decorVehicle: string
   decorWitness: string
-  /** Button that adds a new decor object of whichever kind decorKindSelect currently shows —
-   * placed right before that dropdown ("[Add] [Kind ▾]"), so it's deliberately just "Add", not
-   * "Add decor" — the adjacent dropdown already says what's being added. */
+  /** The accessible name/tooltip for the "+" button that adds a new decor object of whichever
+   * kind decorKindSelect currently shows — placed right before that dropdown ("[+] [Kind ▾]"), a
+   * plain "+" glyph rather than this text (see UfoRecorderElement.addDecorBuildingButton), so
+   * it's deliberately just "Add", not "Add decor" — the adjacent dropdown already says what's
+   * being added. */
   addDecor: string
   deleteDecor: string
   decorEast: string
@@ -174,11 +176,18 @@ export interface UfoRecorderMessages {
   decorWitnessSideNone: string
   /** Heading above the 4 per-side window-opacity inputs (see DecorObject.windows). */
   decorWindows: string
-  /** Shared by the 4 window-opacity input labels AND decorWitnessSide's own 4 non-empty options —
-   * both are the same DecorSide concept ("front"/"behind"/"left"/"right", relative to the
-   * object's own heading, not a compass direction), so one set of labels covers both. */
+  /** Shared by the window-opacity input labels AND decorWitnessSide's own non-empty options —
+   * both are the same DecorSide concept (relative to the object's own heading, not a compass
+   * direction), so one set of labels covers both. */
   decorSideFront: string
   decorSideBehind: string
   decorSideLeft: string
   decorSideRight: string
+  /** Vehicle-only DecorSide corners — a car's left/right side has 2 windows/seats each
+   * (front-door, rear-door), not 1 — see DecorSide's own doc comment. Shown instead of
+   * decorSideLeft/decorSideRight for that kind (see UfoRecorderElement.syncDecorVisibility). */
+  decorSideFrontLeft: string
+  decorSideFrontRight: string
+  decorSideBehindLeft: string
+  decorSideBehindRight: string
 }
