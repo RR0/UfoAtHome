@@ -863,3 +863,36 @@ describe("UfoElement seek range vs. declared duration", () => {
     expect(element.seekableDuration).toBe(10_000)
   })
 })
+
+/**
+ * The clock the player shows is built from a cached copy of the observation's own start time, so
+ * editing that start (an EDTF field in the recorder, which mutates event.time in place) has to
+ * re-derive it — otherwise the labels keep reading the previous time until a full reload.
+ */
+describe("UfoElement observation start", () => {
+  afterEach(() => {
+    document.body.innerHTML = ""
+  })
+
+  it("re-reads the observation's start time on refresh", () => {
+    const element = mount()
+    element.sightingData = {
+      version: 1,
+      durationSeconds: 20,
+      time: { year: 1964, month: 4, day: 24, hour: 17, minute: 50 },
+      timeline: {
+        keyframes: [
+          { t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 0, y: 0, width: 10, height: 10 }, color: "#fff", angle: 0, transparency: 0, haloScale: 0, selected: false } }] },
+          { t: 6000, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 90, y: 0, width: 10, height: 10 }, color: "#fff", angle: 0, transparency: 0, haloScale: 0, selected: false } }] }
+        ]
+      }
+    }
+    expect(element.durationLabel).toBe("17:50:20")
+
+    element.sighting.event.time = { year: 1964, month: 4, day: 24, hour: 21, minute: 5 }
+    element.refresh()
+
+    expect(element.durationLabel).toBe("21:05:20")
+    expect(element.positionLabel).toBe("21:05")
+  })
+})

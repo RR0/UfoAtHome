@@ -1808,8 +1808,15 @@ export class SceneRenderer {
     if (!this.cloudUniforms) return
     const { x, y, z } = horizontalToCartesian(sun.altitudeDeg, sun.azimuthDeg, 1)
     const tint = atmosphericTint(sun.altitudeDeg)
+    // Scaled by how high the Sun actually is, exactly as the scene's own real light already is
+    // (see updateCelestialLight's altitudeFactor): atmosphericTint only says what COLOUR sunlight
+    // has at that altitude, never how much of it there is, so feeding it raw lit the deck at full
+    // daylight strength with the Sun 23 degrees below the horizon — Chiles-Whitted's clouds glowed
+    // through a 02:45 night. Below the horizon the only real light left on a cloud base is
+    // moonlight and skyglow, which is what ambientColor already carries.
+    const daylight = Math.max(0, Math.sin(Math.max(sun.altitudeDeg, 0) * DEG_TO_RAD))
     this.cloudUniforms.sunDir.value.set(x, y, z)
-    this.cloudUniforms.sunColor.value.setRGB(tint[0], 0.96 * tint[1], 0.88 * tint[2])
+    this.cloudUniforms.sunColor.value.setRGB(tint[0] * daylight, 0.96 * tint[1] * daylight, 0.88 * tint[2] * daylight)
     this.cloudUniforms.ambientColor.value.setRGB(groundColor[0], groundColor[1], groundColor[2])
   }
 

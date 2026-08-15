@@ -347,6 +347,11 @@ export class UfoElement extends HTMLElement {
    * (e.g. UfoRecorderElement adding keyframes while recording).
    */
   refresh(): void {
+    // Re-derives the real start/duration too: editing the observation's own start time (an EDTF
+    // field in the recorder) mutates event.time in place, and the clock the player shows is built
+    // from a cached copy of it — without this, changing "Observation start" left the seek bar's
+    // own labels reading the previous time until the whole recording was reloaded.
+    this.updateTimeLabels()
     this.seekInput.max = String(this.player.seekableDuration)
     this.player.seek(this.player.time)
   }
