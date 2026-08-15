@@ -57,6 +57,9 @@ export const css = `
   max-width: 12em;
 }
 .info-btn {
+  /* Named so the info panel can anchor itself to this button from the top layer — see
+     .info-panel:popover-open below. */
+  anchor-name: --info-button;
   margin-left: auto;
   flex-shrink: 0;
   width: 1.6em;
@@ -96,6 +99,34 @@ export const css = `
 .info-panel:popover-open {
   display: block;
   max-height: 80vh;
+}
+/* Back under the "?" button it belongs to, rather than centred in the viewport as the UA's own
+   [popover] rules place it. Anchor positioning is what makes that possible from the top layer:
+   the panel is no longer a descendant of anything, so there is nothing left to position it
+   against but the button itself. Where the browser lacks it, the centred placement above stands —
+   correct, just less connected to what opened it. */
+@supports (position-area: bottom span-left) {
+  .info-panel:popover-open {
+    position-anchor: --info-button;
+    /* The UA centres a popover with inset:0 + margin:auto; both have to go for the anchor to
+       have any say. */
+    inset: auto;
+    margin: 0.3em 0 0 0;
+    /* Below the button, extending leftwards from its right edge — the panel is far wider than
+       the button, and its right edge is where it used to sit. */
+    position-area: bottom span-left;
+    /* Not enough room below (the widget sits low on screen)? Put it above the button instead;
+       and if neither side can take it, fall back to the viewport-centred placement, which always
+       fits. Without this last resort a fixed panel with nowhere to go would be cut off by the
+       viewport with no way to scroll it back — the very failure the top layer was meant to end. */
+    position-try-fallbacks: flip-block, --info-panel-centred;
+  }
+  @position-try --info-panel-centred {
+    position-area: none;
+    inset: 0;
+    margin: auto;
+    max-height: 80vh;
+  }
 }
 .info-panel::backdrop {
   background: rgba(0, 0, 0, 0.2);
