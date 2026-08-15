@@ -101,6 +101,14 @@ export class Timeline {
    * Like getLatestShapeAt, but blends toward the source's next keyframe instead of holding the
    * last one — this is what Player uses for smooth motion. Falls back to hold-last-value at the
    * ends of the source's recorded range (before its first keyframe, or after its last).
+   *
+   * Consequence worth stating for anyone writing a recording by hand: **leaving a source out of
+   * later keyframes does not hide it, it FREEZES it** at whatever it last was, forever — and
+   * likewise a source that only starts at t=5000 is already painted, in that same state, from
+   * t=0. To make a shape stop being visible, keyframe it with transparency 1; to make one appear,
+   * keyframe it transparent beforehand. A real case file got this wrong: Valensole's six landing
+   * legs were simply dropped from the keyframes after the craft vanished, and stayed hanging in
+   * the sky at full size while the craft they belong to faded out.
    */
   getInterpolatedShapeAt(t: number, sourceId: string): Shape | undefined {
     const from = this.findShapeAtOrBefore(t, sourceId)

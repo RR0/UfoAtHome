@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 import { Timeline } from "../../src/engine/model/Timeline.js"
 import { createOval } from "../../src/engine/shape/Shape.js"
+import type { Shape } from "../../src/engine/shape/Shape.js"
 
 function shapeAt(x: number): ReturnType<typeof createOval> {
   return createOval({ x, y: 0, width: 10, height: 10 })
@@ -325,5 +326,42 @@ describe("Timeline", () => {
       })
       expect(timeline.groupMembers("a")).toEqual(["a", "b"])
     })
+  })
+})
+
+/**
+ * Hold-last-value at both ends of a source's own recorded range — the behaviour that makes a
+ * shape left out of later keyframes stay frozen on screen rather than disappear. Pinned here
+ * because a real case file got it wrong (Valensole's landing legs outlived the craft).
+ */
+describe("a source absent from a keyframe", () => {
+  function shapeAt(x: number, transparency = 0): Shape {
+    return { kind: "oval", bounds: { x, y: 0, width: 10, height: 10 }, color: "#fff", angle: 0, transparency, haloScale: 0, selected: false }
+  }
+
+  it("is held at its last state, not hidden, once it stops being keyframed", () => {
+    const timeline = new Timeline()
+    timeline.addKeyframe(0, [{ sourceId: "body", shape: shapeAt(0) }, { sourceId: "leg", shape: shapeAt(5) }])
+    timeline.addKeyframe(1000, [{ sourceId: "body", shape: shapeAt(100) }])
+
+    expect(timeline.getInterpolatedShapeAt(1000, "leg")).toEqual(shapeAt(5))
+    expect(timeline.getInterpolatedShapeAt(99_999, "leg")).toEqual(shapeAt(5))
+  })
+
+  it("is already painted, in its first recorded state, before that keyframe is reached", () => {
+    const timeline = new Timeline()
+    timeline.addKeyframe(0, [{ sourceId: "body", shape: shapeAt(0) }])
+    timeline.addKeyframe(1000, [{ sourceId: "body", shape: shapeAt(100) }, { sourceId: "flame", shape: shapeAt(60) }])
+
+    expect(timeline.getInterpolatedShapeAt(0, "flame")).toEqual(shapeAt(60))
+  })
+
+  it("really does disappear when keyframed transparent instead of omitted", () => {
+    const timeline = new Timeline()
+    timeline.addKeyframe(0, [{ sourceId: "leg", shape: shapeAt(5) }])
+    timeline.addKeyframe(1000, [{ sourceId: "leg", shape: shapeAt(5, 1) }])
+
+    expect(timeline.getInterpolatedShapeAt(1000, "leg")?.transparency).toBe(1)
+    expect(timeline.getInterpolatedShapeAt(99_999, "leg")?.transparency).toBe(1)
   })
 })
