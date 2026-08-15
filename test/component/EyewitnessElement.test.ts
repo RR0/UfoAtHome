@@ -309,8 +309,10 @@ describe("EyewitnessElement", () => {
     infoButton.click()
 
     expect(infoPanel.hidden).toBe(false)
+    // The app link opens THIS observation in the editor, not the application's bare home page —
+    // the recording's own path on the app's domain, which the site redirects into the editor.
     const appLink = element.shadowRoot!.getElementById("info-app-link") as HTMLAnchorElement
-    expect(appLink.href).toBe("https://ufoathome.org/")
+    expect(appLink.href).toBe("https://ufoathome.org/john.json")
     expect(appLink.textContent).toMatch(/^UFO@home v\d+\.\d+\.\d+$/)
     const observationList = element.shadowRoot!.getElementById("info-observation-list") as HTMLElement
     expect(observationList.textContent).toContain("32.4000, -86.3000")
@@ -424,5 +426,80 @@ describe("EyewitnessElement i18n", () => {
 
     expect(element.shadowRoot!.getElementById("testimony-prefix")!.textContent).toBe("Testimony by")
     spy.mockRestore()
+  })
+})
+
+/**
+ * The info panel hands the reader the two lines it takes to put this very observation on their
+ * own page — either as a replay or as the editor, both taking the same absolute `src`.
+ */
+describe("EyewitnessElement embed markup", () => {
+  beforeEach(() => {
+    stubFetch({ "john.json": johnSighting })
+  })
+
+  afterEach(() => {
+    document.body.innerHTML = ""
+  })
+
+  async function openInfoPanel(): Promise<HTMLElement> {
+    const element = mount()
+    element.witnessUrls = ["john.json"]
+    await new Promise(resolve => setTimeout(resolve, 0))
+    ;(element.shadowRoot!.getElementById("info-button") as HTMLButtonElement).click()
+    return element.shadowRoot as unknown as HTMLElement
+  }
+
+  it("offers a self-contained replay snippet with an absolute src", async () => {
+    const shadow = await openInfoPanel()
+    const markup = (shadow.querySelector("#embed-markup") as HTMLTextAreaElement).value
+
+    expect(markup).toContain("<rr0-eyewitness src=\"http://localhost:3000/john.json\"></rr0-eyewitness>")
+    expect(markup).toContain("rr0-eyewitness.mjs")
+    expect(markup).toContain("<script type=\"module\"")
+  })
+
+  it("switches to the editor element, keeping the same recording", async () => {
+    const shadow = await openInfoPanel()
+    const editRadio = shadow.querySelector("#embed-kind-edit") as HTMLInputElement
+    editRadio.checked = true
+    editRadio.dispatchEvent(new Event("change"))
+    const markup = (shadow.querySelector("#embed-markup") as HTMLTextAreaElement).value
+
+    expect(markup).toContain("<rr0-ufo-recorder src=\"http://localhost:3000/john.json\"></rr0-ufo-recorder>")
+    expect(markup).toContain("rr0-ufo-recorder.mjs")
+  })
+})
+
+/**
+ * A testimony's time is what the witness's own clock said, never what the reader's clock would
+ * say for the same instant: Chiles and Whitted saw their object at 02:45 over Montgomery, and
+ * that stays 02:45 whoever opens the page from wherever.
+ */
+describe("EyewitnessElement observation time", () => {
+  afterEach(() => {
+    document.body.innerHTML = ""
+  })
+
+  async function dateRowFor(time: object, extra: object = {}): Promise<string> {
+    stubFetch({
+      "x.json": { version: 1, time, place: [{ lat: 32.3792, lng: -86.3077 }], timeline: { keyframes: [] }, ...extra }
+    })
+    const element = mount()
+    element.witnessUrls = ["x.json"]
+    await new Promise(resolve => setTimeout(resolve, 0))
+    ;(element.shadowRoot!.getElementById("info-button") as HTMLButtonElement).click()
+    const list = element.shadowRoot!.getElementById("info-observation-list")!
+    return list.querySelector("dd")?.textContent ?? ""
+  }
+
+  it("shows the witness's own wall-clock time, with an explicit time zone", async () => {
+    const shown = await dateRowFor({ year: 1948, month: 7, day: 24, hour: 2, minute: 45 }, { utcOffsetHours: -6 })
+    expect(shown).toContain("2:45") // "July 24, 1948 at 2:45 AM" — the witness's clock, not the reader's
+  })
+
+  it("shows it unchanged when the time zone is only approximated from the longitude", async () => {
+    const shown = await dateRowFor({ year: 1948, month: 7, day: 24, hour: 2, minute: 45 })
+    expect(shown).toContain("2:45") // "July 24, 1948 at 2:45 AM" — the witness's clock, not the reader's
   })
 })

@@ -3690,3 +3690,51 @@ describe("UfoRecorderElement hover cursor", () => {
     expect(canvas.dataset.cursor).toBeUndefined()
   })
 })
+
+/**
+ * `src` is what makes a per-observation editor URL possible: rr0.org's editor page maps its own
+ * `?sighting=` parameter onto it, so ufoathome.org/<path> opens that recording for editing
+ * instead of an empty canvas.
+ */
+describe("UfoRecorderElement src attribute", () => {
+  afterEach(() => {
+    document.body.innerHTML = ""
+    vi.unstubAllGlobals()
+  })
+
+  const recording = {
+    version: 1 as const,
+    durationSeconds: 4,
+    caseId: "socorro",
+    timeline: {
+      keyframes: [
+        { t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval" as const, bounds: { x: 1, y: 2, width: 10, height: 6 }, color: "#fff", angle: 0, transparency: 0, haloScale: 0, selected: false } }] }
+      ]
+    }
+  }
+
+  it("loads the recording it points at on connect", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve(recording) })
+    vi.stubGlobal("fetch", fetchMock)
+
+    const element = document.createElement(ELEMENT_NAME) as UfoRecorderElement
+    element.setAttribute("src", "/science/crypto/ufo/enquete/dossier/Socorro/sighting.json")
+    document.body.appendChild(element)
+    await new Promise(resolve => setTimeout(resolve, 0))
+
+    expect(fetchMock).toHaveBeenCalledWith("/science/crypto/ufo/enquete/dossier/Socorro/sighting.json")
+    expect(element.sightingData.caseId).toBe("socorro")
+    expect(element.sightingData.timeline.keyframes[0].shapes[0].shape.bounds.width).toBe(10)
+  })
+
+  it("re-loads when src changes afterwards", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve(recording) })
+    vi.stubGlobal("fetch", fetchMock)
+
+    const element = mount()
+    element.setAttribute("src", "other.json")
+    await new Promise(resolve => setTimeout(resolve, 0))
+
+    expect(fetchMock).toHaveBeenCalledWith("other.json")
+  })
+})

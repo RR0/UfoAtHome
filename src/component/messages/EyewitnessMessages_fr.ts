@@ -10,5 +10,11 @@ export const eyewitnessMessages_fr: EyewitnessMessages = {
   case: "Dossier",
   description: "Description",
   tags: "Mots-clés",
-  credits: "Crédits"
+  credits: "Crédits",
+  editThisObservation: "Éditer cette observation",
+  embed: "Intégrer",
+  embedReplay: "Relecture",
+  embedEdit: "Édition",
+  embedCopy: "Copier",
+  embedCopied: "Copié"
 }

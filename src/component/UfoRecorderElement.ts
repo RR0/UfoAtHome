@@ -765,6 +765,25 @@ export class UfoRecorderElement extends HTMLElement {
     void this.loadLocaleMessages()
   }
 
+  /** `src` loads an existing recording straight into the editor, the same attribute every other
+   * element in this package already takes — what makes a per-observation editor URL possible at
+   * all (rr0.org's own editor page maps `?sighting=` onto it, so ufoathome.org/<path> opens that
+   * observation for editing rather than an empty canvas). */
+  static get observedAttributes(): string[] {
+    return ["src"]
+  }
+
+  connectedCallback(): void {
+    const src = this.getAttribute("src")
+    if (src) void this.importFromUrl(src)
+  }
+
+  attributeChangedCallback(name: string, oldValue: string, newValue: string): void {
+    if (name === "src" && newValue && newValue !== oldValue && this.isConnected) {
+      void this.importFromUrl(newValue)
+    }
+  }
+
   disconnectedCallback(): void {
     document.removeEventListener("keydown", this.handleKeyDown)
     document.removeEventListener("click", this.handleOutsideContextMenuClick)
@@ -843,6 +862,9 @@ export class UfoRecorderElement extends HTMLElement {
    * origin. */
   /** `url` defaults to the Observation group's own "load from URL" field — explicit callers
    * (viewWitnessTestimony) pass a witness decor object's own sightingUrl instead. */
+  /** Fetches a recording and loads it into the editor — shared by the "Load from URL" field and
+   * by the `src` attribute above. Failure is reported to the user rather than thrown: a bad URL
+   * in a shared link should leave a usable empty editor, not a broken page. */
   private async importFromUrl(url: string = this.importUrlInput.value.trim()): Promise<void> {
     if (!url) return
     try {

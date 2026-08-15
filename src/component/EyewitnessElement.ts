@@ -71,6 +71,13 @@ export class EyewitnessElement extends HTMLElement {
   private readonly infoCreditsToggle: HTMLButtonElement
   private readonly infoCreditsList: HTMLElement
   private readonly infoCloseButton: HTMLButtonElement
+  private readonly infoEmbedHeading: HTMLElement
+  private readonly embedReplayRadio: HTMLInputElement
+  private readonly embedEditRadio: HTMLInputElement
+  private readonly labelEmbedReplay: HTMLElement
+  private readonly labelEmbedEdit: HTMLElement
+  private readonly embedMarkup: HTMLTextAreaElement
+  private readonly embedCopyButton: HTMLButtonElement
 
   private entries: WitnessEntry[] = []
   private currentSrc?: string
@@ -104,11 +111,22 @@ export class EyewitnessElement extends HTMLElement {
     this.infoCreditsToggle = this.shadow.getElementById("info-credits-toggle") as HTMLButtonElement
     this.infoCreditsList = this.shadow.getElementById("info-credits-list")!
     this.infoCloseButton = this.shadow.getElementById("info-close") as HTMLButtonElement
+    this.infoEmbedHeading = this.shadow.getElementById("info-embed-heading")!
+    this.embedReplayRadio = this.shadow.getElementById("embed-kind-replay") as HTMLInputElement
+    this.embedEditRadio = this.shadow.getElementById("embed-kind-edit") as HTMLInputElement
+    this.labelEmbedReplay = this.shadow.getElementById("label-embed-replay")!
+    this.labelEmbedEdit = this.shadow.getElementById("label-embed-edit")!
+    this.embedMarkup = this.shadow.getElementById("embed-markup") as HTMLTextAreaElement
+    this.embedCopyButton = this.shadow.getElementById("embed-copy") as HTMLButtonElement
 
     this.witnessSelect.addEventListener("change", () => this.selectWitness(this.witnessSelect.value))
     this.infoButton.addEventListener("click", () => this.toggleInfoPanel())
     this.infoCloseButton.addEventListener("click", () => this.toggleInfoPanel())
     this.infoCreditsToggle.addEventListener("click", () => this.toggleCredits())
+    for (const radio of [this.embedReplayRadio, this.embedEditRadio]) {
+      radio.addEventListener("change", () => this.refreshEmbedMarkup())
+    }
+    this.embedCopyButton.addEventListener("click", () => void this.copyEmbedMarkup())
 
     void this.loadLocaleMessages()
   }
@@ -127,6 +145,10 @@ export class EyewitnessElement extends HTMLElement {
     this.infoCloseButton.setAttribute("aria-label", this.messages.close)
     this.infoObservationHeading.textContent = this.messages.observation
     this.infoCreditsToggle.textContent = this.messages.credits
+    this.infoEmbedHeading.textContent = this.messages.embed
+    this.labelEmbedReplay.textContent = this.messages.embedReplay
+    this.labelEmbedEdit.textContent = this.messages.embedEdit
+    this.embedCopyButton.textContent = this.messages.embedCopy
     if (this.infoOpen) this.populateInfoPanel()
     this.updateTestimonyLine()
   }
@@ -209,6 +231,58 @@ export class EyewitnessElement extends HTMLElement {
     }
   }
 
+  /**
+   * Where to open THIS observation for editing — the app link in the info panel, which used to
+   * point at the application's bare home page and so dropped the one thing the reader was looking
+   * at. A same-origin recording becomes a path on the app's own domain
+   * (ufoathome.org/science/.../Socorro/sighting.json, which the site redirects into the editor);
+   * anything else is passed as an explicit `?sighting=` parameter, since there is no path on this
+   * domain that would name it. Falls back to the bare home page only when no recording is loaded
+   * at all.
+   */
+  private editorUrl(): string {
+    if (!this.currentSrc) return APP_HOME_URL
+    const url = new URL(this.currentSrc, location.href)
+    return url.origin === location.origin
+      ? `${APP_HOME_URL}${url.pathname}`
+      : `${APP_HOME_URL}/?sighting=${encodeURIComponent(url.href)}`
+  }
+
+  /**
+   * The two lines it takes to put THIS observation on someone else's page — a module script for
+   * the element and the element itself, both with absolute URLs, so the snippet is self-contained
+   * rather than something the reader has to work out. Replay embeds `<rr0-eyewitness>` (this very
+   * element, so what they paste is what they are looking at); Editor embeds
+   * `<rr0-ufo-recorder>`, which takes the same `src`.
+   *
+   * The script URL is derived from where THIS bundle was itself loaded from (import.meta.url),
+   * not hardcoded: the four bundles are published side by side, so the sibling's name is enough,
+   * and a snippet generated from a staging or local copy correctly points back at that copy
+   * instead of silently sending readers to production.
+   */
+  private embedMarkupFor(kind: "replay" | "edit"): string {
+    const tag = kind === "edit" ? "rr0-ufo-recorder" : "rr0-eyewitness"
+    const script = new URL(`${tag}.mjs`, import.meta.url).href
+    const src = this.currentSrc ? new URL(this.currentSrc, location.href).href : ""
+    return `<script type="module" src="${script}"></script>\n<${tag} src="${src}"></${tag}>`
+  }
+
+  private refreshEmbedMarkup(): void {
+    this.embedMarkup.value = this.embedMarkupFor(this.embedEditRadio.checked ? "edit" : "replay")
+  }
+
+  /** Clipboard write can be refused (permissions, insecure context) — falls back to selecting the
+   * text so the reader can copy it themselves, rather than failing silently. */
+  private async copyEmbedMarkup(): Promise<void> {
+    try {
+      await navigator.clipboard.writeText(this.embedMarkup.value)
+      this.embedCopyButton.textContent = this.messages.embedCopied
+      window.setTimeout(() => (this.embedCopyButton.textContent = this.messages.embedCopy), 1500)
+    } catch {
+      this.embedMarkup.select()
+    }
+  }
+
   /** Cases are grouped by listing several witnesses together — warns (doesn't block) if their
    * declared caseIds actually disagree, since that likely means the page author listed
    * unrelated recordings together by mistake. Witnesses with no caseId at all are ignored. */
@@ -254,11 +328,30 @@ export class EyewitnessElement extends HTMLElement {
     return witness.title || fullName || witness.id || witness.dirName
   }
 
+  /**
+   * The date and time the WITNESS reported, on their own clock — never converted into the
+   * reader's time zone. `sighting.time` is already a local wall-clock reading ("02:45" over
+   * Montgomery), so it is formatted as UTC here purely to stop the platform from shifting it:
+   * rendered through the reader's zone instead, Chiles and Whitted's 02:45 sighting reads
+   * "09:45" in Paris, which is not a fact about the observation but about whoever is reading it.
+   */
   private formatDate(sighting: SightingRecordingJson): string | undefined {
     const place = sighting.place?.[0]
     const date = sightingTimeToDate(sighting.time ?? {}, place?.lng ?? 0, sighting.utcOffsetHours)
     if (!date) return undefined
-    return new Intl.DateTimeFormat(this.language === "fr" ? "fr-FR" : "en-US", { dateStyle: "long", timeStyle: "short" }).format(date)
+    const localMs = date.getTime() + this.utcOffsetHoursOf(sighting, place?.lng ?? 0) * 3_600_000
+    return new Intl.DateTimeFormat(this.language === "fr" ? "fr-FR" : "en-US", {
+      dateStyle: "long",
+      timeStyle: "short",
+      timeZone: "UTC"
+    }).format(new Date(localMs))
+  }
+
+  /** The offset sightingTimeToDate itself applied — declared when the recording knows it, else
+   * the same longitude approximation that function falls back to (see SightingEvent.
+   * utcOffsetHours). Undoing exactly it is what recovers the witness's own wall clock. */
+  private utcOffsetHoursOf(sighting: SightingRecordingJson, lng: number): number {
+    return sighting.utcOffsetHours ?? Math.round(lng / 15)
   }
 
   private formatLocation(sighting: SightingRecordingJson): string | undefined {
@@ -336,8 +429,11 @@ export class EyewitnessElement extends HTMLElement {
       }
     }
 
-    this.infoAppLink.href = APP_HOME_URL
+    this.refreshEmbedMarkup()
+    this.infoAppLink.href = this.editorUrl()
     this.infoAppLink.textContent = `UFO@home v${__APP_VERSION__}`
+    this.infoAppLink.title = this.messages.editThisObservation
+    this.infoAppLink.setAttribute("aria-label", this.messages.editThisObservation)
 
     this.infoCreditsList.innerHTML = ""
     const terrainAttribution = this.sceneElement.currentTerrainAttribution

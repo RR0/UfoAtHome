@@ -11,6 +11,15 @@ export const html = `
       <h3 id="info-observation-heading">Observation</h3>
       <dl id="info-observation-list" class="info-dl"></dl>
     </section>
+    <section>
+      <h3 id="info-embed-heading">Embed</h3>
+      <div class="embed-row">
+        <label><input type="radio" name="embed-kind" id="embed-kind-replay" value="replay" checked/> <span id="label-embed-replay">Replay</span></label>
+        <label><input type="radio" name="embed-kind" id="embed-kind-edit" value="edit"/> <span id="label-embed-edit">Editor</span></label>
+        <button id="embed-copy" class="embed-copy" type="button">Copy</button>
+      </div>
+      <textarea id="embed-markup" class="embed-markup" rows="3" readonly spellcheck="false"></textarea>
+    </section>
     <div class="info-footer">
       <a id="info-app-link" href="https://ufoathome.org" target="_blank" rel="noopener"></a>
       <button id="info-credits-toggle" class="info-credits-toggle" type="button" aria-expanded="false">Credits</button>
@@ -109,6 +118,28 @@ export const css = `
 /* The smaller, secondary row below the observation details — app identity on the left, the
    credits reveal on the right, matching the reduced visual weight of "fine print" rather than
    competing with the sighting's own metadata for attention. */
+/* Self-contained markup a reader can paste into their own page — the two lines it takes to embed
+   this very observation, either as a replay or as the full editor. Read-only: it is generated,
+   never typed into, and selecting it wholesale is the only interaction it needs. */
+.embed-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75em;
+  flex-wrap: wrap;
+  margin-bottom: 0.4em;
+}
+.embed-markup {
+  width: 100%;
+  box-sizing: border-box;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.75em;
+  line-height: 1.4;
+  resize: vertical;
+  white-space: pre;
+}
+.embed-copy {
+  margin-left: auto;
+}
 .info-footer {
   display: flex;
   align-items: center;
