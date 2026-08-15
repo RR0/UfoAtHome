@@ -1,3 +1,6 @@
+import { ApparentSize } from "./ApparentSize.js"
+import type { PhysicalExtent } from "./ApparentSize.js"
+
 /**
  * A shape's screen-space bounding box.
  */
@@ -20,6 +23,12 @@ export interface BaseShape {
   haloScale: number
   selected: boolean
   title?: string
+  /** The real size/distance `bounds` was computed from, when the witness reported them (see
+   * ApparentSize) — absent for a shape drawn purely by eye, which is why it's optional rather
+   * than required: most freehand recordings have no reported measurement to attach. Never read
+   * by rendering or hit-testing, which always use `bounds`; this documents where that size came
+   * from and lets it be recomputed. */
+  physical?: PhysicalExtent
 }
 
 export interface OvalShape extends BaseShape {
@@ -150,6 +159,10 @@ export function lerpShape(from: Shape, to: Shape, fraction: number): Shape {
   const transparency = lerp(from.transparency, to.transparency, fraction)
   const haloScale = lerp(from.haloScale, to.haloScale, fraction)
   const color = lerpColor(from.color, to.color, fraction)
+  // An object that recedes has a real distance at every instant, not just at its keyframes —
+  // interpolated (rather than held from `from`) so that stays true mid-flight. Undefined unless
+  // both ends document one; see ApparentSize.lerp.
+  const physical = ApparentSize.lerp(from.physical, to.physical, fraction)
 
   if (from.kind === "polygon" && to.kind === "polygon" && from.points.length === to.points.length) {
     return {
@@ -159,6 +172,7 @@ export function lerpShape(from: Shape, to: Shape, fraction: number): Shape {
       transparency,
       haloScale,
       color,
+      physical,
       points: from.points.map((point, i) => ({
         x: lerp(point.x, to.points[i].x, fraction),
         y: lerp(point.y, to.points[i].y, fraction)
@@ -166,5 +180,5 @@ export function lerpShape(from: Shape, to: Shape, fraction: number): Shape {
     }
   }
 
-  return { ...(fraction < 1 ? from : to), bounds, angle, transparency, haloScale, color }
+  return { ...(fraction < 1 ? from : to), bounds, angle, transparency, haloScale, color, physical }
 }

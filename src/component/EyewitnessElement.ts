@@ -256,7 +256,7 @@ export class EyewitnessElement extends HTMLElement {
 
   private formatDate(sighting: SightingRecordingJson): string | undefined {
     const place = sighting.place?.[0]
-    const date = sightingTimeToDate(sighting.time ?? {}, place?.lng ?? 0)
+    const date = sightingTimeToDate(sighting.time ?? {}, place?.lng ?? 0, sighting.utcOffsetHours)
     if (!date) return undefined
     return new Intl.DateTimeFormat(this.language === "fr" ? "fr-FR" : "en-US", { dateStyle: "long", timeStyle: "short" }).format(date)
   }

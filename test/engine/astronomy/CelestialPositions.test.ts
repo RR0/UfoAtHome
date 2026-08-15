@@ -121,3 +121,30 @@ describe("computeMoonPhase", () => {
     expect(computeMoonPhase(fullMoon.time.date).illuminatedFraction).toBeGreaterThan(0.95)
   })
 })
+
+/**
+ * A witness's clock shows LEGAL time, which no longitude can derive: France was on UTC+1 in July
+ * 1965 (summer time only came back in 1976) while 6 degrees east approximates to UTC+0, and the
+ * United States' own summer-time switch fell two days after Socorro. An hour of error puts the
+ * Sun in the wrong place, which for a dawn or dusk sighting is the whole scene.
+ */
+describe("sightingTimeToDate with an explicit time zone", () => {
+  const valensole = { year: 1965, month: 7, day: 1, hour: 5, minute: 45 }
+
+  it("uses the declared offset instead of approximating one from the longitude", () => {
+    const declared = sightingTimeToDate(valensole, 5.993, 1)
+    expect(declared?.toISOString()).toBe("1965-07-01T04:45:00.000Z")
+  })
+
+  it("still approximates from the longitude when no offset is declared", () => {
+    const approximated = sightingTimeToDate(valensole, 5.993)
+    expect(approximated?.toISOString()).toBe("1965-07-01T05:45:00.000Z") // an hour late
+  })
+
+  it("accepts a negative offset, and one that disagrees with the longitude entirely", () => {
+    expect(sightingTimeToDate({ year: 1964, month: 4, day: 24, hour: 17, minute: 50 }, -106.891, -7)?.toISOString())
+      .toBe("1964-04-25T00:50:00.000Z")
+    expect(sightingTimeToDate({ year: 2000, month: 1, day: 1, hour: 12 }, 0, 8)?.toISOString())
+      .toBe("2000-01-01T04:00:00.000Z")
+  })
+})

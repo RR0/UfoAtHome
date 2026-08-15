@@ -433,7 +433,7 @@ export class SceneElement extends HTMLElement {
 
     const lat = pose?.lat ?? DEFAULT_OBSERVER_POSE.lat!
     const lng = pose?.lng ?? DEFAULT_OBSERVER_POSE.lng!
-    const startDate = sightingTimeToDate(sighting.event.time ?? {}, lng)
+    const startDate = sightingTimeToDate(sighting.event.time ?? {}, lng, sighting.event.utcOffsetHours)
     if (!startDate) {
       this.sceneRenderer.setAstronomy(DEFAULT_ASTRONOMY)
       return

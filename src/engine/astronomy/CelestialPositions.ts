@@ -100,7 +100,11 @@ const REFERENCE_DAY_FOR_TIME_ONLY = 20
  * plausible day/night sky instead of nothing. undefined only when literally no date/time field at
  * all is known — there's nothing left to approximate from.
  */
-export function sightingTimeToDate(time: SightingTime, lngForTimezoneApprox: number): Date | undefined {
+export function sightingTimeToDate(
+  time: SightingTime,
+  lngForTimezoneApprox: number,
+  utcOffsetHours?: number
+): Date | undefined {
   if (time.year === undefined && time.month === undefined && time.day === undefined && time.hour === undefined) {
     return undefined
   }
@@ -108,7 +112,10 @@ export function sightingTimeToDate(time: SightingTime, lngForTimezoneApprox: num
   const year = time.year ?? REFERENCE_YEAR_FOR_TIME_ONLY
   const month = time.month ?? (yearKnown ? 1 : REFERENCE_MONTH_FOR_TIME_ONLY)
   const day = time.day ?? (yearKnown ? 1 : REFERENCE_DAY_FOR_TIME_ONLY)
-  const timezoneOffsetHours = Math.round(lngForTimezoneApprox / 15)
+  // The recording's own declared offset when it has one, since only it can know the LEGAL time
+  // the witness's clock was on (see SightingEvent.utcOffsetHours); the longitude is just the
+  // best guess available when it doesn't.
+  const timezoneOffsetHours = utcOffsetHours ?? Math.round(lngForTimezoneApprox / 15)
   return new Date(
     Date.UTC(year, month - 1, day, (time.hour ?? 12) - timezoneOffsetHours, time.minute ?? 0, time.second ?? 0)
   )

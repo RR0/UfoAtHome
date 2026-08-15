@@ -22,6 +22,8 @@ export interface SightingRecordingJson {
   endTime?: SightingTime
   /** See SightingEvent.durationSeconds. */
   durationSeconds?: number
+  /** See SightingEvent.utcOffsetHours — the legal time zone `time`/`endTime` are expressed in. */
+  utcOffsetHours?: number
   place?: SightingLocation[]
   /** See Sighting.witness. */
   witness?: People
@@ -54,6 +56,7 @@ export function toSightingJson(sighting: Sighting): SightingRecordingJson {
     time: sighting.event.time,
     endTime: sighting.event.endTime,
     durationSeconds: sighting.event.durationSeconds,
+    utcOffsetHours: sighting.event.utcOffsetHours,
     place: sighting.event.place,
     witness: sighting.witness,
     caseId: sighting.caseId,
@@ -74,6 +77,7 @@ export function fromSightingJson(json: SightingRecordingJson): Sighting {
       time: json.time,
       endTime: json.endTime,
       durationSeconds: json.durationSeconds,
+      utcOffsetHours: json.utcOffsetHours,
       place: json.place,
       description: json.description,
       tags: json.tags

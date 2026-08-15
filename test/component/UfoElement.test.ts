@@ -806,3 +806,60 @@ describe("UfoElement hover tooltip", () => {
     expect(tooltip.hidden).toBe(true)
   })
 })
+
+/**
+ * A recorded timeline is a normalized parameterization of the observation's real declared
+ * duration (playbackRate stretches one onto the other), so the seek bar has exactly one time
+ * base. Extending its range past the last keyframe used to mix in a second one, which made the
+ * displayed clock run backwards mid-bar — reproduced live on rr0.org's Socorro page (a 6 s
+ * timeline declared as a 20 s observation showed 17:50:20 at 30% of the bar, then 17:50:07).
+ */
+describe("UfoElement seek range vs. declared duration", () => {
+  afterEach(() => {
+    document.body.innerHTML = ""
+  })
+
+  /** A 6-second recording declared as a 20-second observation — Socorro's own shape. */
+  function shortRecordingLongObservation() {
+    return {
+      version: 1 as const,
+      durationSeconds: 20,
+      time: { year: 1964, month: 4, day: 24, hour: 17, minute: 50 },
+      timeline: {
+        keyframes: [
+          { t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval" as const, bounds: { x: 0, y: 0, width: 10, height: 10 }, color: "#fff", angle: 0, transparency: 0, haloScale: 0, selected: false } }] },
+          { t: 6000, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval" as const, bounds: { x: 100, y: 0, width: 10, height: 10 }, color: "#fff", angle: 0, transparency: 0, haloScale: 0, selected: false } }] }
+        ]
+      }
+    }
+  }
+
+  it("keeps the seek range on the recorded timeline once there is motion to stretch", () => {
+    const element = mount()
+    element.sightingData = shortRecordingLongObservation()
+
+    expect(element.seekableDuration).toBe(6000)
+  })
+
+  it("advances the displayed clock monotonically across the whole bar", () => {
+    const element = mount()
+    element.sightingData = shortRecordingLongObservation()
+    const seen: string[] = []
+    for (let t = 0; t <= element.seekableDuration; t += 500) {
+      element.currentTime = t
+      seen.push(element.positionLabel)
+    }
+
+    expect(seen[0]).toBe("17:50")
+    expect(seen[seen.length - 1]).toBe("17:50:20") // the full declared duration, reached at the end
+    const seconds = seen.map(label => Number(label.split(":")[2] ?? 0))
+    expect(seconds).toEqual([...seconds].sort((a, b) => a - b)) // never runs backwards
+  })
+
+  it("still extends the range to the declared duration while nothing is recorded yet — an editor needs somewhere to place its first keyframes", () => {
+    const element = mount()
+    element.durationSeconds = 10
+
+    expect(element.seekableDuration).toBe(10_000)
+  })
+})

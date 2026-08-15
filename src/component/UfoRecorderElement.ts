@@ -4,6 +4,7 @@ import { SceneElement, registerScene, SCENE_ELEMENT_NAME } from "./SceneElement.
 import { Recorder } from "../engine/record/Recorder.js"
 import { RafSamplingClock } from "../engine/record/SamplingClock.js"
 import { createShape, moveShapeTo } from "../engine/shape/Shape.js"
+import { ApparentSize } from "../engine/shape/ApparentSize.js"
 import type { Appearance, PolygonShape, Shape, ShapeBounds, ShapePresetId } from "../engine/shape/Shape.js"
 import { ShapeHandles, ShapeGroup, MIN_SHAPE_SIZE, MIN_POLYGON_VERTICES } from "../engine/shape/ShapeHandles.js"
 import type { HandleId, ResizeAxis } from "../engine/shape/ShapeHandles.js"
@@ -28,7 +29,8 @@ import {
   sightingDurationBlockedReason,
   parseEdtfTime,
   formatEdtfTime,
-  resolveWeatherAt
+  resolveWeatherAt,
+  resolveObserverPoseAt
 } from "../engine/model/Sighting.js"
 import type { SightingTime } from "../engine/model/Sighting.js"
 import { selectLocale } from "../i18n/locale.js"
@@ -45,6 +47,10 @@ const DEFAULT_SHAPE_SIZE = { width: 48, height: 28 }
  * across the canvas's own 640px internal width is ~130deg, a reasonable full sweep without being
  * so twitchy that fine-tuning a heading/pitch by hand becomes fiddly. */
 const CAMERA_DRAG_DEG_PER_PX = 0.2
+/** The vertical field of view every pose this recorder writes declares — matching
+ * ObserverPose.fovDeg's own default. Also what the apparent-size math projects through whenever a
+ * recording has no pose of its own yet (see currentFovDeg), so the two can never disagree. */
+const WITNESS_FOV_DEG = 60
 
 const ARROW_KEYS = new Set(["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"])
 /** Px per arrow-key press, for both moving and resizing the selected shape — see
@@ -110,6 +116,13 @@ export class UfoRecorderElement extends HTMLElement {
   private readonly haloScaleInput: HTMLInputElement
   private readonly sourceSelect: HTMLSelectElement
   private readonly shapeTitleInput: HTMLInputElement
+  /** The witness's own reported size/distance for the selected shape — the pair that makes
+   * its on-screen size computable instead of eyeballed (see ApparentSize/updatePhysicalExtent).
+   * apparentSizeOutput reads back what they actually produce. */
+  private readonly utcOffsetInput: HTMLInputElement
+  private readonly objectSizeInput: HTMLInputElement
+  private readonly objectDistanceInput: HTMLInputElement
+  private readonly apparentSizeOutput: HTMLElement
   private readonly addShapeButton: HTMLButtonElement
   private readonly deleteShapeButton: HTMLButtonElement
   private readonly contextMenu: HTMLElement
@@ -176,6 +189,9 @@ export class UfoRecorderElement extends HTMLElement {
   private readonly labelHalo: HTMLElement
   private readonly labelShape: HTMLElement
   private readonly labelShapeTitle: HTMLElement
+  private readonly labelUtcOffset: HTMLElement
+  private readonly labelObjectSize: HTMLElement
+  private readonly labelObjectDistance: HTMLElement
   private readonly labelSamplingRate: HTMLElement
   private readonly labelDuration: HTMLElement
   private readonly labelLatitude: HTMLElement
@@ -427,6 +443,10 @@ export class UfoRecorderElement extends HTMLElement {
     this.haloScaleInput = this.shadow.getElementById("haloScale") as HTMLInputElement
     this.sourceSelect = this.shadow.getElementById("source") as HTMLSelectElement
     this.shapeTitleInput = this.shadow.getElementById("shapeTitle") as HTMLInputElement
+    this.utcOffsetInput = this.shadow.getElementById("utcOffsetHours") as HTMLInputElement
+    this.objectSizeInput = this.shadow.getElementById("objectSize") as HTMLInputElement
+    this.objectDistanceInput = this.shadow.getElementById("objectDistance") as HTMLInputElement
+    this.apparentSizeOutput = this.shadow.getElementById("apparent-size")!
     this.addShapeButton = this.shadow.getElementById("add-shape") as HTMLButtonElement
     this.deleteShapeButton = this.shadow.getElementById("delete-shape") as HTMLButtonElement
     this.contextMenu = this.shadow.getElementById("context-menu")!
@@ -479,6 +499,9 @@ export class UfoRecorderElement extends HTMLElement {
     this.labelHalo = this.shadow.getElementById("label-halo")!
     this.labelShape = this.shadow.getElementById("label-shape")!
     this.labelShapeTitle = this.shadow.getElementById("label-shape-title")!
+    this.labelUtcOffset = this.shadow.getElementById("label-utc-offset")!
+    this.labelObjectSize = this.shadow.getElementById("label-object-size")!
+    this.labelObjectDistance = this.shadow.getElementById("label-object-distance")!
     this.labelSamplingRate = this.shadow.getElementById("label-sampling-rate")!
     this.labelDuration = this.shadow.getElementById("label-duration")!
     this.labelLatitude = this.shadow.getElementById("label-lat")!
@@ -624,6 +647,9 @@ export class UfoRecorderElement extends HTMLElement {
     // itself already resyncs the toolbar, no separate onSelectionOrTimeChanged() call needed).
     this.sourceSelect.addEventListener("change", () => this.selectUnit(this.sourceSelect.value))
     this.shapeTitleInput.addEventListener("input", () => this.updateShapeTitle())
+    for (const input of [this.objectSizeInput, this.objectDistanceInput]) {
+      input.addEventListener("input", () => this.updatePhysicalExtent())
+    }
     this.addDecorWitnessButton.addEventListener("click", () => this.addDecor("witness"))
     this.addDecorBuildingButton.addEventListener("click", () => this.addDecor())
     this.deleteDecorButton.addEventListener("click", () => this.deleteDecor())
@@ -687,6 +713,7 @@ export class UfoRecorderElement extends HTMLElement {
     this.cameraDeviceInput.addEventListener("input", () =>
       this.sceneElement.setAttribute("lens-flare-intensity", this.cameraDeviceInput.value)
     )
+    this.utcOffsetInput.addEventListener("input", () => this.updateUtcOffset())
     this.obsTimeInput.addEventListener("input", () => this.updateObservationTime())
     this.obsEndTimeInput.addEventListener("input", () => this.updateObservationEndTime())
     this.obsTimeInput.addEventListener("blur", () => this.validateEdtfTimeInput(this.obsTimeInput))
@@ -889,7 +916,7 @@ export class UfoRecorderElement extends HTMLElement {
     if (nothingSet) {
       witnessTrack.removeKeyframeAt(t)
     } else {
-      witnessTrack.addKeyframe(t, { lat, lng, elevationM: 0, headingDeg, pitchDeg, fovDeg: 60 })
+      witnessTrack.addKeyframe(t, { lat, lng, elevationM: 0, headingDeg, pitchDeg, fovDeg: WITNESS_FOV_DEG })
     }
     // Neither field affects the 2D shape canvas, so this refresh() is only for its side effect —
     // it's what makes this edit surface as a "timeupdate" (see the constructor's listener), the
@@ -935,6 +962,16 @@ export class UfoRecorderElement extends HTMLElement {
   }
 
   /** Writes the sighting's reported observation-start time (event.time) from the EDTF text field. */
+  /** Writes the observation's own legal time zone (event.utcOffsetHours) — what turns the
+   * witness's wall-clock time into a real instant, and so which sky the scene renders. Empty
+   * means unknown, falling back to approximating it from the longitude (see
+   * SightingEvent.utcOffsetHours). Refreshes right away since every celestial body in the 3D
+   * scene moves with it. */
+  private updateUtcOffset(): void {
+    this.ufoElement.sighting.event.utcOffsetHours = this.numberOrUndefined(this.utcOffsetInput.value)
+    this.ufoElement.refresh()
+  }
+
   private updateObservationTime(): void {
     this.applyEdtfTimeInput(this.obsTimeInput, time => {
       this.ufoElement.sighting.event.time = time
@@ -1278,6 +1315,8 @@ export class UfoRecorderElement extends HTMLElement {
       this.colorInput,
       this.transparencyInput,
       this.haloScaleInput,
+      this.objectSizeInput,
+      this.objectDistanceInput,
       this.sourceSelect,
       ...Object.values(this.presetButtons)
     ]) {
@@ -1315,6 +1354,14 @@ export class UfoRecorderElement extends HTMLElement {
     if (this.shadow.activeElement !== this.shapeTitleInput) {
       this.shapeTitleInput.value = shape.title ?? ""
     }
+    // Same focused-field skip as the title above, for the same reason.
+    if (this.shadow.activeElement !== this.objectSizeInput) {
+      this.objectSizeInput.value = shape.physical ? String(Number(shape.physical.sizeM.toFixed(2))) : ""
+    }
+    if (this.shadow.activeElement !== this.objectDistanceInput) {
+      this.objectDistanceInput.value = shape.physical ? String(Number(shape.physical.distanceM.toFixed(2))) : ""
+    }
+    this.refreshApparentSize()
   }
 
   /** Writes the Name field straight onto the shape at the current playhead — a plain
@@ -1329,6 +1376,92 @@ export class UfoRecorderElement extends HTMLElement {
     this.ufoElement.refresh()
     this.refreshSourceList() // keeps the dropdown's own label live as the user types
     this.updateShapeTitleValidity()
+  }
+
+  /**
+   * Resizes the selected shape to the size a real object of the reported width, at the reported
+   * distance, ACTUALLY looks — the whole point of the Real size / Distance pair. Apparent size is
+   * the one quantity a testimony gives that can be checked arithmetically, and drawing it by eye
+   * gets it wrong by a factor of five to ten, so this exists to stop it being drawn by eye at all.
+   *
+   * Resizes about the shape's own center (its position is where the witness saw it, and has
+   * nothing to do with how big it was) and keeps its aspect ratio (the reported width is one
+   * measurement; the outline's proportions are a separate observation this must not overwrite).
+   * The pair is stored on the shape as well as applied (see BaseShape.physical), so the case file
+   * documents where its size came from. Both fields empty clears it back to a plain eyeballed
+   * shape; a half-filled pair is simply not enough to compute anything and leaves the shape alone.
+   */
+  private updatePhysicalExtent(): void {
+    const timeline = this.ufoElement.sighting.timeline
+    const t = this.ufoElement.currentTime
+    const shape = timeline.getInterpolatedShapeAt(t, this.currentSourceId)
+    if (!shape) return
+    const sizeM = this.numberOrUndefined(this.objectSizeInput.value)
+    const distanceM = this.numberOrUndefined(this.objectDistanceInput.value)
+    if (sizeM === undefined && distanceM === undefined) {
+      timeline.addKeyframe(t, [{ sourceId: this.currentSourceId, shape: { ...shape, physical: undefined } }])
+      this.ufoElement.refresh()
+      this.refreshApparentSize()
+      return
+    }
+    if (sizeM === undefined || distanceM === undefined || sizeM <= 0 || distanceM <= 0) {
+      this.refreshApparentSize()
+      return
+    }
+    const physical = { sizeM, distanceM }
+    const canvas = this.ufoElement.canvasElement
+    const width = ApparentSize.widthPx(physical, canvas.height, this.currentFovDeg())
+    const height = shape.bounds.height * (shape.bounds.width === 0 ? 1 : width / shape.bounds.width)
+    const bounds = {
+      x: shape.bounds.x + (shape.bounds.width - width) / 2,
+      y: shape.bounds.y + (shape.bounds.height - height) / 2,
+      width,
+      height
+    }
+    const resized = shape.kind === "oval" ? { ...shape, bounds, physical } : { ...shape, bounds, physical, points: this.scalePoints(shape, bounds) }
+    timeline.addKeyframe(t, [{ sourceId: this.currentSourceId, shape: resized }])
+    this.ufoElement.refresh()
+    this.refreshApparentSize()
+  }
+
+  /** Rescales a polygon's own points to a new bounds, exactly as ShapeHandles.resizeShape does
+   * for a handle drag — a physically-computed resize must reshape the outline the same way a
+   * manual one does, or the points would keep the old bounds' scale and drift off the shape. */
+  private scalePoints(shape: PolygonShape, bounds: ShapeBounds): ReadonlyArray<{ x: number; y: number }> {
+    const scaleX = shape.bounds.width === 0 ? 1 : bounds.width / shape.bounds.width
+    const scaleY = shape.bounds.height === 0 ? 1 : bounds.height / shape.bounds.height
+    return shape.points.map(point => ({ x: point.x * scaleX, y: point.y * scaleY }))
+  }
+
+  /** The field of view the witness's own pose declares at the current playhead — what the
+   * apparent-size math must project through, rather than a fixed 60 degrees, so a recording that
+   * ever records a different fov stays self-consistent. */
+  private currentFovDeg(): number {
+    return resolveObserverPoseAt(this.ufoElement.sighting, this.ufoElement.currentTime)?.fovDeg ?? WITNESS_FOV_DEG
+  }
+
+  /** Reads back what the selected shape actually subtends on screen — always from its real
+   * `bounds`, never from the size/distance fields, so it stays honest for a shape drawn purely by
+   * eye (the common case, and the one that most needs telling that it spans 19 degrees, i.e. 37
+   * full Moons). Blank when there's no single shape to describe. */
+  private refreshApparentSize(): void {
+    const shape =
+      this.selectedSourceIds.size === 1
+        ? this.ufoElement.sighting.timeline.getInterpolatedShapeAt(this.ufoElement.currentTime, this.currentSourceId)
+        : undefined
+    if (!shape) {
+      this.apparentSizeOutput.textContent = ""
+      return
+    }
+    const canvas = this.ufoElement.canvasElement
+    const degrees = ApparentSize.pxToDeg(shape.bounds.width, canvas.height, this.currentFovDeg())
+    const moons = ApparentSize.inMoons(degrees)
+    // Decimal separator follows the reader's own locale (a comma in French), like every other
+    // number a browser formats — the surrounding wording comes from this.messages, but a number
+    // isn't something to translate by hand.
+    this.apparentSizeOutput.textContent = this.messages.apparentSize
+      .replace("{deg}", degrees.toLocaleString(undefined, { maximumFractionDigits: degrees < 1 ? 2 : 1 }))
+      .replace("{moons}", moons.toLocaleString(undefined, { maximumFractionDigits: moons < 10 ? 1 : 0 }))
   }
 
   /** Name is mandatory for a shape too, same reasoning and same "flagged, not blocked"
@@ -1899,6 +2032,15 @@ export class UfoRecorderElement extends HTMLElement {
     this.labelHalo.textContent = messages.halo
     this.labelShape.textContent = messages.shape
     this.labelShapeTitle.textContent = messages.shapeTitle
+    this.labelUtcOffset.textContent = messages.utcOffset
+    this.utcOffsetInput.placeholder = messages.utcOffsetPlaceholder
+    this.labelObjectSize.textContent = messages.objectSize
+    this.labelObjectDistance.textContent = messages.objectDistance
+    this.objectSizeInput.placeholder = messages.objectSizePlaceholder
+    this.objectDistanceInput.placeholder = messages.objectDistancePlaceholder
+    // The read-back is a formatted sentence, not a static label — re-rendered rather than
+    // assigned, so switching language refreshes the numbers already shown.
+    this.refreshApparentSize()
     this.labelSamplingRate.textContent = messages.samplingRate
     this.labelDuration.textContent = messages.duration
     this.durationInput.placeholder = messages.durationPlaceholder

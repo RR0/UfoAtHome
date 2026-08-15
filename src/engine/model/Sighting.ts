@@ -125,6 +125,17 @@ export interface SightingEvent {
   place?: SightingLocation[]
   description?: string
   tags?: string[]
+  /**
+   * Hours to subtract from `time`/`endTime` to get UTC — i.e. the legal time zone the witness's
+   * own clock was on, +1 for France in 1965, -7 for New Mexico in April 1964. Absent means
+   * "unknown", and astronomy falls back to approximating it from the longitude (see
+   * sightingTimeToDate), which is right often enough but cannot know legal time: France in July
+   * 1965 was on UTC+1 while its longitude says UTC+0 (summer time was only reintroduced in 1976),
+   * so a dawn sighting there renders an hour of sky too late — the Sun 17 degrees up instead of
+   * the 7 the witness actually had. Daylight-saving transitions are the same problem: Socorro's
+   * own 1964-04-24 falls two days before that year's US summer-time switch.
+   */
+  utcOffsetHours?: number
 }
 
 /** `time`/`endTime` as a Unix timestamp (ms) — undefined if `year` isn't known (the one field with no sane default). */

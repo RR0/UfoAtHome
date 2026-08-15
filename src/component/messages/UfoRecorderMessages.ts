@@ -24,6 +24,23 @@ export interface UfoRecorderMessages {
   halo: string
   shape: string
   shapeTitle: string
+  /** The object's real reported width, in meters — one half of what makes an apparent size
+   * computable rather than guessed (see ApparentSize). */
+  objectSize: string
+  /** How far the object was from the witness, in meters — the other half. */
+  objectDistance: string
+  /** Read-back of what Real size / Distance actually produce on screen. {deg} is the apparent
+   * width in degrees, {moons} the same width counted in full Moons — the comparison a reader
+   * can picture, and the quickest way to catch an object drawn ten times too big. */
+  apparentSize: string
+  /** objectSize/objectDistance's own placeholders — both say "as reported", the whole point
+   * being that these are the witness's numbers, not the drawing's. */
+  /** The observation's own legal time zone — see SightingEvent.utcOffsetHours. */
+  utcOffset: string
+  /** utcOffset's placeholder: left empty, the time zone is approximated from the longitude. */
+  utcOffsetPlaceholder: string
+  objectSizePlaceholder: string
+  objectDistancePlaceholder: string
   addShape: string
   deleteShape: string
   /** The external Play/Pause/Loop row's own labels — see UfoRecorderElement's

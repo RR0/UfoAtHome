@@ -509,9 +509,18 @@ export class UfoElement extends HTMLElement {
     this.player.playbackRate =
       this.realDurationMs !== undefined && timelineDuration > 0 ? timelineDuration / this.realDurationMs : 1
     // Lets an editor scrub to and place a keyframe anywhere across the full real declared
-    // duration, even before anything's actually been recorded there yet (see
-    // Player.seekableDuration's own doc comment).
-    this.player.durationOverrideMs = this.realDurationMs ?? 0
+    // duration before anything's been recorded there yet (see Player.seekableDuration's own doc
+    // comment) — but ONLY while there's nothing recorded to stretch, the exact same condition
+    // playbackRate uses just above, and for the same reason: once motion exists, the stretch
+    // already maps the timeline's whole [0, timelineDuration] range onto the full real duration,
+    // so every real instant is reachable within it and extending the range beyond only adds
+    // positions with two conflicting meanings. Extending it anyway is what made a real
+    // observation's clock run FORWARDS to the declared end at t=timelineDuration and then jump
+    // BACKWARDS for the rest of the bar (Socorro on rr0.org: 17:50:20 at 30% of the bar, then
+    // 17:50:07 just after, the same 20 seconds shown twice with the object frozen throughout) —
+    // formatPosition reads t <= timelineDuration as stretched timeline-ms and anything beyond as
+    // raw real-ms, two different time bases on one slider.
+    this.player.durationOverrideMs = timelineDuration > 0 ? 0 : (this.realDurationMs ?? 0)
 
     this.timeEndLabel.textContent = this.formatEndOfTimeline()
     this.timeStartLabel.textContent = this.formatPosition(this.player.time)

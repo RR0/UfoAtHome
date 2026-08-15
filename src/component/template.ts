@@ -109,6 +109,8 @@ export const html = `
     <label><span id="label-observation-end-time">Observation end</span>
       <input id="obs-end-time" type="text" placeholder="YYYY-MM-DDThh:mm[?~%] or hh:mm" title="EDTF — e.g. 1965-07-01T05:10, 2025-06? (uncertain), 2025~ (approximate), or just 05:10 if the date isn't known"/></label>
     <label><span id="label-duration">Duration</span> <input id="durationSeconds" type="number" min="0" step="0.1" placeholder="observation length" aria-required="true"/> s</label>
+    <label><span id="label-utc-offset">Time zone</span>
+      <input id="utcOffsetHours" type="number" min="-12" max="14" step="0.5" placeholder="from longitude" title="Hours ahead of UTC on the witness's own clock — legal time, which the longitude cannot know (France was on UTC+1 in 1965)"/> UTC&plusmn;h</label>
   </div>
 </details>
 <details open>
@@ -146,8 +148,15 @@ export const html = `
     <button id="add-shape" type="button" class="icon-btn" title="Add shape" aria-label="Add shape">+</button>
     <button id="delete-shape" type="button" class="icon-btn" title="Delete shape" aria-label="Delete shape">🗑</button>
     <label><span id="label-shape-title">Name</span> <input id="shapeTitle" type="text"/></label>
-    <button id="record" type="button" class="record-btn"></button>
-    <label><span id="label-sampling-rate">Sampling rate</span> <input id="samplingRate" type="number" min="16" step="16" value="100"/> ms</label>
+    <label><span id="label-object-size">Real size</span>
+      <input id="objectSize" type="number" min="0" step="0.1" placeholder="reported width" title="The object's real width as reported by the witness"/> m</label>
+    <label><span id="label-object-distance">Distance</span>
+      <input id="objectDistance" type="number" min="0" step="1" placeholder="reported distance" title="How far the object was from the witness"/> m</label>
+    <output id="apparent-size" class="apparent-size" for="objectSize objectDistance"></output>
+    <div class="record-row">
+      <button id="record" type="button" class="record-btn"></button>
+      <label><span id="label-sampling-rate">Sampling rate</span> <input id="samplingRate" type="number" min="16" step="16" value="100"/> ms</label>
+    </div>
   </div>
 </details>
 <div id="ufo-slot"></div>
@@ -242,6 +251,23 @@ input.invalid {
 #description {
   width: 16em;
   font: inherit;
+}
+/* Reads back what the Real size / Distance pair actually produces on screen — an apparent size in
+   degrees, and in full Moons, the only unit of apparent size most testimonies come with. Purely
+   informative (an output, never an input), so it stays visually quieter than the fields it
+   comments on. */
+.apparent-size {
+  font-size: 0.85em;
+  opacity: 0.8;
+  white-space: nowrap;
+}
+/* Record and the sampling rate it records at are one control, not two: grouping them makes them a
+   single flex item of the wrapping toolbar, so they stay on the same line together wherever that
+   line happens to break, instead of the button drifting up next to whatever field precedes it. */
+.record-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
 }
 details {
   border: 1px solid #444;
