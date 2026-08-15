@@ -25,6 +25,11 @@ export interface CloudUniforms {
   ambientColor: { value: Color }
   baseColor: { value: Color }
   coverage: { value: number }
+  /** How far the deck is from the observer, along the vertical, in this scene's own units — see
+   * the shader's own use of it, and SceneRenderer.cloudLayerOffset for how a real cloud base in
+   * meters becomes this. Always positive: which SIDE the deck is on is the mesh's business (it
+   * gets flipped), not the shading's. */
+  layerHeight: { value: number }
 }
 
 const CLOUD_VERTEX_SHADER = `
@@ -45,11 +50,13 @@ uniform vec3 baseColor;
 uniform float coverage;
 varying vec3 vDir;
 
-// Implied altitude (world units) of the flat plane cloud noise is projected onto — see main()'s own
-// comment for why. Roughly matches typical real cloud-base altitudes scaled into this scene's own
-// CLOUD_RADIUS=700 dome: a mid-low value so the horizon compression effect is clearly visible
-// without being so low it reads as unrealistically close fog.
-const float CLOUD_LAYER_HEIGHT = 250.0;
+// How far the flat plane that cloud noise is projected onto sits from the observer — see main()'s
+// own comment for why there is a plane at all. A uniform rather than a constant since a recording
+// states its own cloud base (Weather.cloudBaseM) and the witness their own altitude: the distance
+// between the two is what decides how compressed the deck looks toward the horizon, and a witness
+// flying just under a low deck sees something very different from one standing under the same deck
+// on the ground.
+uniform float layerHeight;
 
 vec3 hash3(vec3 p) {
   p = vec3(dot(p, vec3(127.1, 311.7, 74.7)), dot(p, vec3(269.5, 183.3, 246.1)), dot(p, vec3(113.5, 271.9, 124.6)));
@@ -114,7 +121,7 @@ void main() {
   // features); near the horizon dir.y shrinks toward 0 and the projected point races toward infinity
   // (huge, fast-varying coordinates between neighboring pixels = visual compression). dir.y is
   // floored, not left to hit exactly 0, to avoid an infinite/NaN blowup right at the horizon edge.
-  float t = CLOUD_LAYER_HEIGHT / max(dir.y, 0.04);
+  float t = layerHeight / max(dir.y, 0.04);
   vec3 planePos = dir * t;
 
   // Domain warp: distorts the position each noise layer below actually samples, using a slower,
@@ -168,13 +175,14 @@ void main() {
  * from a few scattered patches to genuine full-sky overcast, forced fully opaque at coverage's own
  * max so cloudCover=1 always guarantees zero visible sky. `coverage` is weather.cloudCover directly,
  * baked in at build time (weather is static per sighting, same reasoning as baseColor below). */
-export function buildCloudMaterial(baseColor: Color, coverage: number): { material: ShaderMaterial; uniforms: CloudUniforms } {
+export function buildCloudMaterial(baseColor: Color, coverage: number, layerHeight: number): { material: ShaderMaterial; uniforms: CloudUniforms } {
   const uniforms: CloudUniforms = {
     sunDir: { value: new Vector3(0, 1, 0) },
     sunColor: { value: new Color(1, 1, 1) },
     ambientColor: { value: new Color(0.5, 0.5, 0.5) },
     baseColor: { value: baseColor },
-    coverage: { value: coverage }
+    coverage: { value: coverage },
+    layerHeight: { value: layerHeight }
   }
   const material = new ShaderMaterial({
     uniforms,

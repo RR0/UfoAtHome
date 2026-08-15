@@ -168,6 +168,7 @@ export class UfoRecorderElement extends HTMLElement {
   private readonly tagsInput: HTMLInputElement
   private readonly cloudCoverInput: HTMLInputElement
   private readonly cloudDarknessInput: HTMLInputElement
+  private readonly cloudBaseInput: HTMLInputElement
   private readonly precipitationTypeSelect: HTMLSelectElement
   private readonly precipitationIntensityInput: HTMLInputElement
   private readonly windDirectionInput: HTMLInputElement
@@ -221,6 +222,7 @@ export class UfoRecorderElement extends HTMLElement {
   private readonly labelCircumstancesGroup: HTMLElement
   private readonly labelCloudCover: HTMLElement
   private readonly labelCloudDarkness: HTMLElement
+  private readonly labelCloudBase: HTMLElement
   private readonly labelPrecipitationType: HTMLElement
   private readonly labelPrecipitationIntensity: HTMLElement
   private readonly labelWindDirection: HTMLElement
@@ -490,6 +492,7 @@ export class UfoRecorderElement extends HTMLElement {
     this.tagsInput = this.shadow.getElementById("tags") as HTMLInputElement
     this.cloudCoverInput = this.shadow.getElementById("cloudCover") as HTMLInputElement
     this.cloudDarknessInput = this.shadow.getElementById("cloudDarkness") as HTMLInputElement
+    this.cloudBaseInput = this.shadow.getElementById("cloudBase") as HTMLInputElement
     this.precipitationTypeSelect = this.shadow.getElementById("precipitationType") as HTMLSelectElement
     this.precipitationIntensityInput = this.shadow.getElementById("precipitationIntensity") as HTMLInputElement
     this.windDirectionInput = this.shadow.getElementById("windDirection") as HTMLInputElement
@@ -533,6 +536,7 @@ export class UfoRecorderElement extends HTMLElement {
     this.labelCircumstancesGroup = this.shadow.getElementById("label-circumstances-group")!
     this.labelCloudCover = this.shadow.getElementById("label-cloud-cover")!
     this.labelCloudDarkness = this.shadow.getElementById("label-cloud-darkness")!
+    this.labelCloudBase = this.shadow.getElementById("label-cloud-base")!
     this.labelPrecipitationType = this.shadow.getElementById("label-precipitation-type")!
     this.labelPrecipitationIntensity = this.shadow.getElementById("label-precipitation-intensity")!
     this.labelWindDirection = this.shadow.getElementById("label-wind-direction")!
@@ -737,6 +741,7 @@ export class UfoRecorderElement extends HTMLElement {
     for (const input of [
       this.cloudCoverInput,
       this.cloudDarknessInput,
+      this.cloudBaseInput,
       this.precipitationTypeSelect,
       this.precipitationIntensityInput,
       this.windDirectionInput,
@@ -1077,6 +1082,7 @@ export class UfoRecorderElement extends HTMLElement {
     const weather: Weather = {
       cloudCover: Number(this.cloudCoverInput.value),
       cloudDarkness: Number(this.cloudDarknessInput.value),
+      cloudBaseM: this.numberOrUndefined(this.cloudBaseInput.value),
       precipitationType: this.precipitationTypeSelect.value as PrecipitationType,
       precipitationIntensity: Number(this.precipitationIntensityInput.value),
       windDirectionDeg: this.wrapDegrees(this.numberOrUndefined(this.windDirectionInput.value), this.windDirectionInput) ?? 0,
@@ -1200,6 +1206,7 @@ export class UfoRecorderElement extends HTMLElement {
     const active = this.shadow.activeElement
     if (active !== this.cloudCoverInput) this.cloudCoverInput.value = String(weather.cloudCover)
     if (active !== this.cloudDarknessInput) this.cloudDarknessInput.value = String(weather.cloudDarkness)
+    if (active !== this.cloudBaseInput) this.cloudBaseInput.value = weather.cloudBaseM === undefined ? "" : String(weather.cloudBaseM)
     if (active !== this.precipitationTypeSelect) this.precipitationTypeSelect.value = weather.precipitationType
     if (active !== this.precipitationIntensityInput) {
       this.precipitationIntensityInput.value = String(weather.precipitationIntensity)
@@ -2170,6 +2177,7 @@ export class UfoRecorderElement extends HTMLElement {
     this.labelCircumstancesGroup.textContent = messages.circumstancesGroup
     this.labelCloudCover.textContent = messages.cloudCover
     this.labelCloudDarkness.textContent = messages.cloudDarkness
+    this.labelCloudBase.textContent = messages.cloudBase
     this.labelPrecipitationType.textContent = messages.precipitationType
     this.optionPrecipitationNone.textContent = messages.precipitationNone
     this.optionPrecipitationRain.textContent = messages.precipitationRain

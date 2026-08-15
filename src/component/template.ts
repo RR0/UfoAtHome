@@ -121,6 +121,8 @@ export const html = `
     <span id="label-weather">Weather</span>
     <label><span id="label-cloud-cover">Cloud cover</span> <input id="cloudCover" type="range" min="0" max="1" step="0.05" value="0"/></label>
     <label><span id="label-cloud-darkness">Cloud darkness</span> <input id="cloudDarkness" type="range" min="0" max="1" step="0.05" value="0"/></label>
+    <label><span id="label-cloud-base">Cloud base</span>
+      <input id="cloudBase" type="number" min="0" step="50" placeholder="1000" title="Height of the cloud layer's base above the ground — decides whether the witness is under the deck or above it"/> m</label>
     <label><span id="label-precipitation-type">Precipitation</span>
       <select id="precipitationType">
         <option id="option-precipitation-none" value="none">None</option>

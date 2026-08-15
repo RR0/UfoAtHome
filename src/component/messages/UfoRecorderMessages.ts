@@ -77,6 +77,8 @@ export interface UfoRecorderMessages {
   multipleShapesSelected: string
   /** Kept short: it shares its row with the Record button (see template's .record-row), and a
    * long label pushed that row's own width past what the toolbar could give it. */
+  /** Height of the cloud layer's base above the ground — see Weather.cloudBaseM. */
+  cloudBase: string
   /** How high above the ground the witness was — see ObserverPose.elevationM. */
   elevation: string
   samplingRate: string

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { WeatherTrack, lerpWeather } from "../../src/engine/model/WeatherTrack.js"
+import { DEFAULT_CLOUD_BASE_M, DEFAULT_WEATHER } from "../../src/engine/model/Weather.js"
 import type { Weather } from "../../src/engine/model/Weather.js"
 
 function weatherAt(cloudCover: number, precipitationType: Weather["precipitationType"] = "none"): Weather {
@@ -127,5 +128,27 @@ describe("lerpWeather windDirectionDeg", () => {
   it("interpolates a plain within-range direction normally", () => {
     const result = lerpWeather({ ...weatherAt(0), windDirectionDeg: 10 }, { ...weatherAt(0), windDirectionDeg: 30 }, 0.5)
     expect(result.windDirectionDeg).toBeCloseTo(20)
+  })
+})
+
+/**
+ * A cloud base is what decides which side of the deck a witness is on — under it, as almost every
+ * ground witness is, or above it, as a witness in an aircraft can be.
+ */
+describe("cloudBaseM", () => {
+  const at = (cloudBaseM?: number): Weather => ({ ...DEFAULT_WEATHER, cloudCover: 0.5, cloudBaseM })
+
+  it("blends between two stated bases, like the other continuous fields", () => {
+    expect(lerpWeather(at(800), at(1800), 0.5).cloudBaseM).toBe(1300)
+  })
+
+  it("stays unstated when either side is — an unrecorded base has no midpoint", () => {
+    expect(lerpWeather(at(800), at(undefined), 0.5).cloudBaseM).toBeUndefined()
+    expect(lerpWeather(at(undefined), at(1800), 0.5).cloudBaseM).toBeUndefined()
+  })
+
+  it("is absent from the default weather — unstated, not zero", () => {
+    expect(DEFAULT_WEATHER.cloudBaseM).toBeUndefined()
+    expect(DEFAULT_CLOUD_BASE_M).toBeGreaterThan(0)
   })
 })

@@ -38,6 +38,7 @@ export const ufoRecorderMessages_en: UfoRecorderMessages = {
   needTwoShapesToGroup: "Select at least two shapes to group them",
   notGrouped: "This shape isn't part of a group",
   multipleShapesSelected: "Multiple shapes selected — select just one to edit this",
+  cloudBase: "Cloud base",
   elevation: "Altitude",
   samplingRate: "Sampling rate",
   duration: "Duration",

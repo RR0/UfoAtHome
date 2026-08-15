@@ -60,7 +60,7 @@ import { defaultTerrainProviders } from "./terrain/defaultTerrainProviders.js"
 import type { TerrainProviders } from "./terrain/defaultTerrainProviders.js"
 import { buildTerrainMesh } from "./terrain/TerrainMeshBuilder.js"
 import { geoToLocalMeters } from "./terrain/GeoProjection.js"
-import { DEFAULT_WEATHER } from "../engine/model/Weather.js"
+import { DEFAULT_CLOUD_BASE_M, DEFAULT_WEATHER } from "../engine/model/Weather.js"
 import type { PrecipitationType, Weather } from "../engine/model/Weather.js"
 import { buildRainSystem } from "./RainSystem.js"
 import type { RainSystem } from "./RainSystem.js"
@@ -79,6 +79,7 @@ function weatherEquals(a: Weather, b: Weather): boolean {
   return (
     a.cloudCover === b.cloudCover &&
     a.cloudDarkness === b.cloudDarkness &&
+    a.cloudBaseM === b.cloudBaseM &&
     a.precipitationType === b.precipitationType &&
     a.precipitationIntensity === b.precipitationIntensity &&
     a.windDirectionDeg === b.windDirectionDeg &&
@@ -180,6 +181,16 @@ const LENS_FLARE_BASE_GAIN = 55
 const LENS_FLARE_BASE_OPACITY = 0.5
 
 const CLOUD_RADIUS = 700 // inside STAR_RADIUS/BODY_PLACEMENT_RADIUS (850) so clouds occlude stars/bodies, matching real sky layering
+/** Scene units per real meter of vertical distance to the cloud deck. Fixed by continuity: this
+ * project rendered its layer at a hardcoded 250 units, described as standing in for a mid-low real
+ * cloud base — so DEFAULT_CLOUD_BASE_M (1000 m) maps to exactly that, and any stated base scales
+ * from there. Purely a rendering scale for the deck's own perspective compression, unrelated to the
+ * real meters terrain and decor are placed in. */
+const CLOUD_UNITS_PER_METRE = 250 / DEFAULT_CLOUD_BASE_M
+/** Never lets the deck collapse onto the observer: at a vertical distance of zero the projection
+ * that gives it its perspective degenerates, and a witness INSIDE cloud is a whiteout this renderer
+ * doesn't model anyway. */
+const CLOUD_MIN_LAYER_UNITS = 12
 /** Between TERRAIN_RENDER_ORDER (1) and COMPASS_RENDER_ORDER (10) — clouds are part of the
  * astronomically-positioned scene (unlike the compass HUD), but must never be hidden behind the
  * ground/terrain (irrelevant since they're always above it) and must stay under the compass labels. */
@@ -532,6 +543,9 @@ export class SceneRenderer {
 
   private weather: Weather = DEFAULT_WEATHER
   /** The cloud-layer shell (see buildCloudMaterial) — undefined whenever weather.cloudCover is 0. */
+  /** The witness's own height above the ground, as last set by setObserverPose — the cloud deck is
+   * the one thing that needs it beyond the camera itself (see cloudLayerOffset). */
+  private observerElevationM = 0
   private cloudMesh?: Mesh
   private cloudMaterial?: ShaderMaterial
   private cloudUniforms?: CloudUniforms
@@ -712,6 +726,13 @@ export class SceneRenderer {
       this.camera.rotation.set(pose.pitchDeg * DEG_TO_RAD, -pose.headingDeg * DEG_TO_RAD, 0, "YXZ")
     } else {
       this.camera.rotation.set(pose.pitchDeg * DEG_TO_RAD, this.camera.rotation.y, 0, "YXZ")
+    }
+    if (pose.elevationM !== this.observerElevationM) {
+      this.observerElevationM = pose.elevationM
+      // Climbing changes where the deck is relative to the witness — and possibly which side of it
+      // they are on — without the weather itself changing at all, so buildClouds (driven by
+      // setWeather) would never hear about it.
+      this.syncCloudLayer()
     }
     this.camera.position.y = 1.6 + pose.elevationM
     // Keeps the observer at the centre of their own sky, whatever altitude they are at — see
@@ -1628,7 +1649,7 @@ export class SceneRenderer {
       CLOUD_LIGHT_COLOR[1] + (CLOUD_DARK_COLOR[1] - CLOUD_LIGHT_COLOR[1]) * darkness,
       CLOUD_LIGHT_COLOR[2] + (CLOUD_DARK_COLOR[2] - CLOUD_LIGHT_COLOR[2]) * darkness
     )
-    const { material, uniforms } = buildCloudMaterial(baseColor, this.weather.cloudCover)
+    const { material, uniforms } = buildCloudMaterial(baseColor, this.weather.cloudCover, Math.abs(this.cloudLayerOffset()))
     this.cloudMaterial = material
     this.cloudUniforms = uniforms
     // Seeds real lighting immediately from the last known sun position — see lastSunPosition's own
@@ -1636,6 +1657,9 @@ export class SceneRenderer {
     if (this.lastSunPosition) this.updateCloudLighting(this.lastSunPosition, this.baseFogColor)
     const geometry = buildCloudGeometry(CLOUD_RADIUS)
     this.cloudMesh = new Mesh(geometry, material)
+    // Above the deck? Turn the same shell upside down, so its dome opens downwards and the witness
+    // looks at the TOP of the cloud layer — the one thing a ground-anchored dome could never show.
+    if (this.cloudLayerOffset() < 0) this.cloudMesh.scale.y = -1
     this.cloudMesh.renderOrder = CLOUD_RENDER_ORDER
     // In the celestial group, i.e. centred on the observer, for a reason that is the cloud
     // shader's own: it shades each vertex from the direction between the DOME'S CENTRE and that
@@ -1644,6 +1668,27 @@ export class SceneRenderer {
     // climbing a few hundred metres broke the assumption and the layer came out bent into a
     // fish-eye arc, then vanished entirely once past the dome's own 700-unit radius.
     this.celestialGroup.add(this.cloudMesh)
+  }
+
+  /**
+   * Where the cloud deck sits relative to the observer's own eye, in scene units: positive when the
+   * deck is overhead (the usual case), negative when the witness is above it — an aircraft, a
+   * mountain top. Both the deck's own perspective compression (the shader's layerHeight) and which
+   * way its shell has to face come from this one number, so a recording stating a real cloud base
+   * and a real witness altitude gets the right side of the deck for free.
+   */
+  /** Re-aims an already-built deck at the observer's current altitude: how compressed it looks and
+   * which way its shell faces, no geometry rebuild. */
+  private syncCloudLayer(): void {
+    const offset = this.cloudLayerOffset()
+    if (this.cloudUniforms) this.cloudUniforms.layerHeight.value = Math.abs(offset)
+    if (this.cloudMesh) this.cloudMesh.scale.y = offset < 0 ? -1 : 1
+  }
+
+  private cloudLayerOffset(): number {
+    const baseM = this.weather.cloudBaseM ?? DEFAULT_CLOUD_BASE_M
+    const units = (baseM - this.observerElevationM) * CLOUD_UNITS_PER_METRE
+    return Math.sign(units || 1) * Math.max(Math.abs(units), CLOUD_MIN_LAYER_UNITS)
   }
 
   /** Cheap per-tick uniform refresh (no geometry rebuild) — updates only the time-varying lighting
