@@ -903,7 +903,7 @@ export class SceneRenderer {
     if (this.decorObjects === decor) return
     this.decorObjects = decor
     for (const group of this.decorGroups.values()) {
-      this.scene.remove(group)
+      group.removeFromParent()
       DecorSystem.dispose(group)
     }
     this.decorGroups.clear()
@@ -1263,7 +1263,7 @@ export class SceneRenderer {
     this.decorGroups.clear()
     this.streetlightLights.clear()
     if (this.lensFlare) {
-      this.scene.remove(this.lensFlare.mesh)
+      this.lensFlare.mesh.removeFromParent()
       this.lensFlare.mesh.geometry.dispose()
       ;(this.lensFlare.mesh.material as ShaderMaterial).dispose()
       this.lensFlare = undefined
@@ -1468,7 +1468,7 @@ export class SceneRenderer {
   private disposeHitArea(key: string): void {
     const hitArea = this.hitAreas.get(key)
     if (!hitArea) return
-    this.scene.remove(hitArea)
+    hitArea.removeFromParent()
     hitArea.material.dispose()
     this.hitAreas.delete(key)
   }
@@ -1502,7 +1502,7 @@ export class SceneRenderer {
   private disposeGlare(key: string): void {
     const sprite = this.glareSprites.get(key)
     if (!sprite) return
-    this.scene.remove(sprite)
+    sprite.removeFromParent()
     sprite.material.dispose()
     this.glareSprites.delete(key)
   }
@@ -1660,7 +1660,7 @@ export class SceneRenderer {
 
   private disposeCloudSystem(): void {
     if (this.cloudMesh) {
-      this.scene.remove(this.cloudMesh)
+      this.cloudMesh.removeFromParent()
       this.cloudMesh.geometry.dispose()
     }
     this.cloudMaterial?.dispose()
@@ -1679,7 +1679,7 @@ export class SceneRenderer {
    * this is about never adding that behavior later, not undoing something dispose() already does.) */
   private disposePrecipitationPoints(): void {
     if (this.precipitationPoints) {
-      this.scene.remove(this.precipitationPoints)
+      this.precipitationPoints.removeFromParent()
       this.precipitationPoints.geometry.dispose()
       ;(this.precipitationPoints.material as ShaderMaterial).dispose()
     }
@@ -2015,7 +2015,7 @@ export class SceneRenderer {
    * shared textures. */
   private disposeRain(): void {
     if (this.rainSystem) {
-      this.scene.remove(this.rainSystem.points)
+      this.rainSystem.points.removeFromParent()
       this.rainSystem.points.geometry.dispose()
       ;(this.rainSystem.points.material as ShaderMaterial).dispose()
     }
@@ -2028,7 +2028,7 @@ export class SceneRenderer {
    * special-case skip is actually needed here (see disposeRain's own comment for the general rule). */
   private disposeRainSplashes(): void {
     if (this.rainSplashSystem) {
-      this.scene.remove(this.rainSplashSystem.points)
+      this.rainSplashSystem.points.removeFromParent()
       this.rainSplashSystem.points.geometry.dispose()
       ;(this.rainSplashSystem.points.material as ShaderMaterial).dispose()
     }
@@ -2150,7 +2150,7 @@ export class SceneRenderer {
 
   private disposeCompassLabels(): void {
     for (const sprite of this.compassSprites) {
-      this.scene.remove(sprite)
+      sprite.removeFromParent()
       sprite.material.map?.dispose()
       sprite.material.dispose()
     }
@@ -2169,7 +2169,14 @@ export class SceneRenderer {
    * cleanup. */
   private disposeMesh(object?: Mesh | Points | Sprite): void {
     if (!object) return
-    this.scene.remove(object)
+    // Detaches from whatever actually holds it, not from the scene: sky, stars, bodies, glares,
+    // hit areas, the compass and the cloud deck all live in celestialGroup now (see its own doc
+    // comment), and scene.remove() silently does nothing for a child of a group. Every rebuild
+    // was therefore LEAVING the previous one in the scene — one more sky dome, one more star
+    // field, one more cloud deck per astronomy tick, piling up on top of each other. It showed as
+    // a cloud cover that could be raised but never lowered: the denser deck was still there
+    // underneath the new one.
+    object.removeFromParent()
     if ("geometry" in object) {
       object.geometry.dispose()
     }
