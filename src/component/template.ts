@@ -263,11 +263,15 @@ input.invalid {
 }
 /* Record and the sampling rate it records at are one control, not two: grouping them makes them a
    single flex item of the wrapping toolbar, so they stay on the same line together wherever that
-   line happens to break, instead of the button drifting up next to whatever field precedes it. */
+   line happens to break, instead of the button drifting up next to whatever field precedes it.
+   flex-basis: 100% then gives them that line outright, always — the pair is wider than whatever
+   the appearance fields leave at the end of theirs, so it was going to wrap anyway; taking the
+   whole line makes that a deliberate row rather than a break that moves with the window width. */
 .record-row {
   display: flex;
   align-items: center;
   gap: 0.5em;
+  flex-basis: 100%;
 }
 details {
   border: 1px solid #444;

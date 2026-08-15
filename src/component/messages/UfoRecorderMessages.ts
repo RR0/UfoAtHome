@@ -75,6 +75,8 @@ export interface UfoRecorderMessages {
   /** Disabled title on the Name/Color/Transparency/Halo/source-dropdown/preset fields whenever
    * more than one shape is selected — see updateAppearanceFieldsDisabledState(). */
   multipleShapesSelected: string
+  /** Kept short: it shares its row with the Record button (see template's .record-row), and a
+   * long label pushed that row's own width past what the toolbar could give it. */
   samplingRate: string
   duration: string
   durationPlaceholder: string
