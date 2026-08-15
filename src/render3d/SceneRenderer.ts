@@ -64,7 +64,7 @@ import { DEFAULT_CLOUD_BASE_M, DEFAULT_WEATHER } from "../engine/model/Weather.j
 import type { PrecipitationType, Weather } from "../engine/model/Weather.js"
 import { buildRainSystem } from "./RainSystem.js"
 import type { RainSystem } from "./RainSystem.js"
-import { buildCloudGeometry, buildCloudMaterial } from "./CloudSystem.js"
+import { CloudField, buildCloudGeometry, buildCloudMaterial } from "./CloudSystem.js"
 import type { CloudUniforms } from "./CloudSystem.js"
 import { buildLensFlare } from "./LensFlareEffect.js"
 import type { LensFlareSystem } from "./LensFlareEffect.js"
@@ -93,6 +93,29 @@ const SKY_RADIUS = 900
  * self-intersection with terrain geometry built close to the observer. */
 const UFO_OCCLUSION_MIN_DISTANCE_M = 0.5
 const GROUND_RADIUS = 900
+/** Mean Earth radius, for the one thing this scene needs it for: how far a witness can actually
+ * see the ground from a given height. */
+const EARTH_RADIUS_M = 6_371_000
+/** How far the ground stays worth drawing through real air — a clear day's visibility. Beyond it
+ * everything is haze whatever the geometry says, so there is nothing to gain by building more. */
+const MAX_GROUND_VISIBILITY_M = 30_000
+
+/**
+ * How far the ground disc has to reach for a witness at `elevationM`: their real horizon distance
+ * (sqrt(2Rh) — 4.5 km at eye height, 138 km at a DC-3's 1500 m), capped by what air lets anyone
+ * see anyway, and never smaller than the 900 m this always used at ground level.
+ *
+ * A fixed 900-unit disc was fine for a witness standing on it and nothing else: from a few hundred
+ * metres up its own rim curved away into view with a void beyond — the "fish-eye ground" of a
+ * witness in an aircraft. Deliberately NOT an attempt to render Earth's curvature: the horizon
+ * only starts visibly bending around 10-15 km up, and at the altitudes a sighting is reported from
+ * the real correction is the 1.24deg horizon dip at 1500 m, well under what any witness could
+ * judge, while the missing ground was impossible to miss.
+ */
+function groundRadiusFor(elevationM: number): number {
+  const horizonM = Math.sqrt(2 * EARTH_RADIUS_M * Math.max(elevationM, 0))
+  return Math.max(GROUND_RADIUS, Math.min(horizonM, MAX_GROUND_VISIBILITY_M))
+}
 const GROUND_ALBEDO = 0.5
 const STAR_RADIUS = 850
 const BODY_PLACEMENT_RADIUS = 850
@@ -191,6 +214,10 @@ const CLOUD_UNITS_PER_METRE = 250 / DEFAULT_CLOUD_BASE_M
  * that gives it its perspective degenerates, and a witness INSIDE cloud is a whiteout this renderer
  * doesn't model anyway. */
 const CLOUD_MIN_LAYER_UNITS = 12
+/** How solid the deck has to be in a given direction before it hides what's behind it. Matches the
+ * shader's own alpha for "cloud rather than gap" — below it you are looking through the thin,
+ * ragged edge of a billow, which a real witness sees through too. */
+const CLOUD_OCCLUSION_MIN_ALPHA = 0.5
 /** Between TERRAIN_RENDER_ORDER (1) and COMPASS_RENDER_ORDER (10) — clouds are part of the
  * astronomically-positioned scene (unlike the compass HUD), but must never be hidden behind the
  * ground/terrain (irrelevant since they're always above it) and must stay under the compass labels. */
@@ -546,6 +573,9 @@ export class SceneRenderer {
   /** The witness's own height above the ground, as last set by setObserverPose — the cloud deck is
    * the one thing that needs it beyond the camera itself (see cloudLayerOffset). */
   private observerElevationM = 0
+  /** Radius the ground disc was last built at — compared against groundRadiusFor on every pose so
+   * a climb rebuilds it, and only a climb does. */
+  private groundRadius = GROUND_RADIUS
   private cloudMesh?: Mesh
   private cloudMaterial?: ShaderMaterial
   private cloudUniforms?: CloudUniforms
@@ -733,6 +763,20 @@ export class SceneRenderer {
       // they are on — without the weather itself changing at all, so buildClouds (driven by
       // setWeather) would never hear about it.
       this.syncCloudLayer()
+      // Same for the ground: how far it has to reach depends on how high up you are — and so does
+      // how far the camera can see, or the far plane clips the very ground just added and leaves
+      // the clear colour showing through (a black void below the horizon, at 1500 m).
+      if (Math.abs(groundRadiusFor(pose.elevationM) - this.groundRadius) > 1) {
+        this.buildGround()
+        // The celestial shells grow with it, keeping the sky dome BEYOND the ground rather than
+        // in front of it: everything they hold sits on a sphere around the observer, so scaling
+        // them changes nothing angular — the same stars in the same places — while making sure the
+        // dome's own underside can't paint over ground that is now kilometres away. Without this
+        // the dome, fixed at 900 units, was simply the nearest thing in every downward direction.
+        this.celestialGroup.scale.setScalar(this.groundRadius / GROUND_RADIUS)
+        this.camera.far = Math.max(SKY_RADIUS * 1.2, this.groundRadius * 2.5)
+        this.camera.updateProjectionMatrix()
+      }
     }
     this.camera.position.y = 1.6 + pose.elevationM
     // Keeps the observer at the centre of their own sky, whatever altitude they are at — see
@@ -1082,7 +1126,12 @@ export class SceneRenderer {
     this.setBodyMesh("sun", astronomy.sun, SUN_MOON_VISUAL_RADIUS, new Color(1, 0.96, 0.88), astronomy.sun.magnitude)
     this.setMoonMesh(astronomy.moon)
     this.buildPlanets(astronomy.planets)
-    this.scene.fog = new Fog(new Color(...groundColor), SKY_RADIUS * 0.2, SKY_RADIUS)
+    // Fog reaches as far as the ground actually goes, not a fixed SKY_RADIUS: from altitude the
+    // whole visible ground lies beyond 900 units, so a fog capped there turned all of it into flat
+    // fog colour — a black void below the horizon at 1500 m, since that colour is the night-ground
+    // colour and nothing else was left to see. Proportions kept, so the horizon haze reads the same
+    // at every altitude.
+    this.scene.fog = new Fog(new Color(...groundColor), this.groundRadius * 0.2, this.groundRadius)
     // buildStars() above already called syncAnimationLoop(), but that ran before setBodyMesh("sun",
     // ...) updated sunVisible — needsAnimationLoop() needs re-checking now that it's current, so the
     // loop actually starts/stops the instant the Sun crosses the horizon during pure-daylight
@@ -1210,7 +1259,8 @@ export class SceneRenderer {
    * even visibly rendered), reading as permanently occluded regardless of where the shape actually
    * is. No real decor a UFO could meaningfully vanish behind sits this close to the observer, so
    * filtering it out only removes that artifact, never a legitimate close occlusion. */
-  isScreenPointOccluded(ndcX: number, ndcY: number, sourceId: string): boolean {
+  isScreenPointOccluded(ndcX: number, ndcY: number, sourceId: string, distanceM?: number): boolean {
+    if (this.isBehindCloudLayer(ndcX, ndcY, distanceM)) return true
     const occluders: Object3D[] = []
     for (const object of this.decorObjects) {
       if (!object.occludesSourceIds?.includes(sourceId)) continue
@@ -1221,6 +1271,38 @@ export class SceneRenderer {
     this.ufoOcclusionRaycaster.setFromCamera(new Vector2(ndcX, ndcY), this.camera)
     this.ufoOcclusionRaycaster.near = UFO_OCCLUSION_MIN_DISTANCE_M
     return this.ufoOcclusionRaycaster.intersectObjects(occluders, true).length > 0
+  }
+
+  /**
+   * Whether the cloud deck actually stands between the witness and something `distanceM` away in
+   * this direction — the "it disappeared into a cloud" every other reported sighting eventually
+   * needs.
+   *
+   * Three things have to hold, and only the data can say so: the deck has to be crossed BEFORE the
+   * object (hence distanceM, from the witness's own reported distance — see BaseShape.physical;
+   * unstated means no claim, so no occlusion, rather than hiding shapes on a guess), it has to be
+   * on the right side (a witness above the deck is hidden from what is below it, not above), and
+   * there has to be actual cloud in that exact direction rather than one of the deck's own gaps —
+   * which is what CloudField.alphaAt re-evaluates, the shader's own coverage field being on the
+   * GPU where nothing can ask it a question.
+   */
+  private isBehindCloudLayer(ndcX: number, ndcY: number, distanceM?: number): boolean {
+    if (distanceM === undefined || !this.cloudMesh || this.weather.cloudCover <= 0) return false
+    const offset = this.cloudLayerOffset()
+    this.ufoOcclusionRaycaster.setFromCamera(new Vector2(ndcX, ndcY), this.camera)
+    const direction = this.ufoOcclusionRaycaster.ray.direction
+    // Looking away from the deck (up, from above it — or down, from below): it can't be in the way.
+    if (Math.sign(direction.y || 1) !== Math.sign(offset)) return false
+    // Where the line of sight crosses the deck, in real meters, against how far the object is.
+    const layerDistanceM = Math.abs(this.cloudLayerHeightM()) / Math.max(Math.abs(direction.y), 0.026)
+    if (layerDistanceM >= distanceM) return false
+    return CloudField.alphaAt(direction, Math.abs(offset), this.weather.cloudCover) >= CLOUD_OCCLUSION_MIN_ALPHA
+  }
+
+  /** The deck's vertical distance from the witness in REAL meters (cloudLayerOffset is the same
+   * quantity in the scene's own compressed units, which is what the shader wants). */
+  private cloudLayerHeightM(): number {
+    return (this.weather.cloudBaseM ?? DEFAULT_CLOUD_BASE_M) - this.observerElevationM
   }
 
   /** Finds which celestial body (if any) sits under normalized device coordinates (each in
@@ -1352,6 +1434,12 @@ export class SceneRenderer {
 
   private buildSky(sun: HorizontalPosition): void {
     this.disposeMesh(this.skyMesh)
+    // A FULL sphere, deliberately: its lower half is what the eye meets past the far edge of the
+    // ground disc, and it is coloured by the same per-direction sky/ground gradient as the rest
+    // (skyColorForPosition below the horizon = the ground haze), so the two meet in one continuous
+    // colour. Clipping it to a hemisphere leaves a hard-edged void there instead — a finite disc
+    // can never reach the horizon from any altitude at all, since a ray approaching horizontal
+    // meets the ground plane arbitrarily far away.
     const geometry = new SphereGeometry(SKY_RADIUS, 32, 16)
     const position = geometry.attributes.position
     const colors: number[] = []
@@ -1375,7 +1463,8 @@ export class SceneRenderer {
    * lit by full daylight or the Moon's own dim glow. */
   private buildGround(): void {
     this.disposeMesh(this.groundMesh)
-    const geometry = new CircleGeometry(GROUND_RADIUS, 48)
+    this.groundRadius = groundRadiusFor(this.observerElevationM)
+    const geometry = new CircleGeometry(this.groundRadius, 48)
     const material = new MeshLambertMaterial({ color: new Color(GROUND_ALBEDO, GROUND_ALBEDO, GROUND_ALBEDO), fog: true })
     this.groundMesh = new Mesh(geometry, material)
     this.groundMesh.rotation.x = -Math.PI / 2
@@ -1429,7 +1518,8 @@ export class SceneRenderer {
     if (key !== "sun") this.setGlare(key, x, y, z, magnitude, tintedColor)
     if (key === "sun") {
       this.sunVisible = true
-      this.sunWorldPosition.set(x, y + this.celestialGroup.position.y, z)
+      const celestialScale = this.celestialGroup.scale.x
+      this.sunWorldPosition.set(x * celestialScale, y * celestialScale + this.celestialGroup.position.y, z * celestialScale)
       if (!this.lensFlare) {
         // Built here, unconditionally, the same way setGlare's own halo already was above for
         // every other body — see LensFlareEffect.ts's own doc comment on why the dazzle core isn't

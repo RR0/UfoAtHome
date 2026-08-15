@@ -224,3 +224,130 @@ export function buildCloudGeometry(radius: number): SphereGeometry {
   const thetaLength = Math.PI / 2 - (CLOUD_MIN_ALTITUDE_DEG * Math.PI) / 180
   return new SphereGeometry(radius, 48, 24, 0, Math.PI * 2, 0, thetaLength)
 }
+
+/**
+ * The same coverage decision the fragment shader above makes, evaluated on the CPU for a single
+ * direction — what tells the app whether a given line of sight actually passes through cloud or
+ * through one of the deck's gaps.
+ *
+ * Needed because a UFO shape is painted on a 2D canvas over this scene, not in it (see
+ * SceneRenderer.isScreenPointOccluded): the GPU has no idea it exists and cannot hide it behind a
+ * cloud, so the app has to ask "is there cloud in this direction" itself. Reading the rendered
+ * pixel back would answer "is it bright there", not "is it cloud"; sampling coverage alone would
+ * answer "how much cloud in total", not "any right HERE". Only re-evaluating the field does.
+ *
+ * Kept in this file, immediately below the GLSL it mirrors, precisely because the two must agree:
+ * every constant here has a visible twin a few lines up, and changing one without the other would
+ * hide a shape where the sky is plainly clear (or leave it visible through a solid deck).
+ */
+export class CloudField {
+  /** Mirrors the shader's own fbm octave count/gain/lacunarity. */
+  private static readonly OCTAVES = 4
+  private static readonly GAIN = 0.55
+  private static readonly LACUNARITY = 2.03
+
+  private static fract(value: number): number {
+    return value - Math.floor(value)
+  }
+
+  private static hash3(x: number, y: number, z: number): [number, number, number] {
+    const dx = x * 127.1 + y * 311.7 + z * 74.7
+    const dy = x * 269.5 + y * 183.3 + z * 246.1
+    const dz = x * 113.5 + y * 271.9 + z * 124.6
+    return [
+      CloudField.fract(Math.sin(dx) * 43758.5453) * 2 - 1,
+      CloudField.fract(Math.sin(dy) * 43758.5453) * 2 - 1,
+      CloudField.fract(Math.sin(dz) * 43758.5453) * 2 - 1
+    ]
+  }
+
+  private static noise3D(x: number, y: number, z: number): number {
+    const ix = Math.floor(x)
+    const iy = Math.floor(y)
+    const iz = Math.floor(z)
+    const fx = x - ix
+    const fy = y - iy
+    const fz = z - iz
+    const ux = fx * fx * (3 - 2 * fx)
+    const uy = fy * fy * (3 - 2 * fy)
+    const uz = fz * fz * (3 - 2 * fz)
+    const corner = (cx: number, cy: number, cz: number): number => {
+      const [hx, hy, hz] = CloudField.hash3(ix + cx, iy + cy, iz + cz)
+      return hx * (fx - cx) + hy * (fy - cy) + hz * (fz - cz)
+    }
+    const mix = (a: number, b: number, t: number): number => a + (b - a) * t
+    return mix(
+      mix(mix(corner(0, 0, 0), corner(1, 0, 0), ux), mix(corner(0, 1, 0), corner(1, 1, 0), ux), uy),
+      mix(mix(corner(0, 0, 1), corner(1, 0, 1), ux), mix(corner(0, 1, 1), corner(1, 1, 1), ux), uy),
+      uz
+    )
+  }
+
+  private static fbm(x: number, y: number, z: number): number {
+    let sum = 0
+    let amp = CloudField.GAIN
+    for (let octave = 0; octave < CloudField.OCTAVES; octave++) {
+      sum += CloudField.noise3D(x, y, z) * amp
+      x *= CloudField.LACUNARITY
+      y *= CloudField.LACUNARITY
+      z *= CloudField.LACUNARITY
+      amp *= CloudField.GAIN
+    }
+    return sum
+  }
+
+  private static worley(x: number, y: number, z: number): number {
+    const ix = Math.floor(x)
+    const iy = Math.floor(y)
+    const iz = Math.floor(z)
+    const fx = x - ix
+    const fy = y - iy
+    const fz = z - iz
+    let minDist = Infinity
+    for (let nx = -1; nx <= 1; nx++) {
+      for (let ny = -1; ny <= 1; ny++) {
+        for (let nz = -1; nz <= 1; nz++) {
+          const [px, py, pz] = CloudField.hash3(ix + nx, iy + ny, iz + nz)
+          const dx = nx + (px * 0.5 + 0.5) - fx
+          const dy = ny + (py * 0.5 + 0.5) - fy
+          const dz = nz + (pz * 0.5 + 0.5) - fz
+          minDist = Math.min(minDist, dx * dx + dy * dy + dz * dz)
+        }
+      }
+    }
+    return Math.sqrt(minDist)
+  }
+
+  /**
+   * How opaque the deck is along `direction` (a unit vector in the same frame the shader's own
+   * vDir uses: +Y up), for a deck `layerHeight` away and a given coverage — 0 through a gap, 1
+   * through solid cloud. Returns 0 below the deck's own horizon cutoff, where it isn't drawn.
+   */
+  static alphaAt(direction: { x: number; y: number; z: number }, layerHeight: number, coverage: number): number {
+    if (coverage <= 0) return 0
+    const dy = Math.abs(direction.y)
+    // The shader's own horizonFade, and the geometry's matching cutoff: nothing is drawn in the
+    // last couple of degrees, so nothing can hide anything there either.
+    if (dy < 0.026) return 0
+    const t = layerHeight / Math.max(dy, 0.04)
+    const px = direction.x * t
+    const py = direction.y * t
+    const pz = direction.z * t
+    const wx = px * 0.006
+    const wy = py * 0.006
+    const wz = pz * 0.006
+    const warpedX = px + CloudField.fbm(wx + 12.3, wy + 12.3, wz + 12.3) * 40
+    const warpedY = py + CloudField.fbm(wx + 47.1, wy + 47.1, wz + 47.1) * 40
+    const warpedZ = pz + CloudField.fbm(wx + 91.7, wy + 91.7, wz + 91.7) * 40
+    const shapeFbm = CloudField.fbm(warpedX * 0.014, warpedY * 0.014, warpedZ * 0.014) * 0.5 + 0.5
+    const shapeCell = 1 - CloudField.worley(warpedX * 0.011, warpedY * 0.011, warpedZ * 0.011)
+    const shape = shapeFbm + (shapeCell - shapeFbm) * 0.4
+    const threshold = 1 - coverage
+    const smoothstep = (edge0: number, edge1: number, value: number): number => {
+      const t2 = Math.min(1, Math.max(0, (value - edge0) / (edge1 - edge0)))
+      return t2 * t2 * (3 - 2 * t2)
+    }
+    const alpha = smoothstep(threshold - 0.08, threshold + 0.08, shape)
+    return alpha + (1 - alpha) * smoothstep(0.82, 1, coverage)
+  }
+}
