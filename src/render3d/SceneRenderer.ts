@@ -1271,8 +1271,8 @@ export class SceneRenderer {
    * even visibly rendered), reading as permanently occluded regardless of where the shape actually
    * is. No real decor a UFO could meaningfully vanish behind sits this close to the observer, so
    * filtering it out only removes that artifact, never a legitimate close occlusion. */
-  isScreenPointOccluded(ndcX: number, ndcY: number, sourceId: string, distanceM?: number): boolean {
-    if (this.isBehindCloudLayer(ndcX, ndcY, distanceM)) return true
+  isScreenPointOccluded(ndcX: number, ndcY: number, sourceId: string, cloud?: { declared?: boolean; distanceM?: number }): boolean {
+    if (this.isBehindCloudLayer(ndcX, ndcY, cloud)) return true
     const occluders: Object3D[] = []
     for (const object of this.decorObjects) {
       if (!object.occludesSourceIds?.includes(sourceId)) continue
@@ -1286,20 +1286,28 @@ export class SceneRenderer {
   }
 
   /**
-   * Whether the cloud deck actually stands between the witness and something `distanceM` away in
-   * this direction — the "it disappeared into a cloud" every other reported sighting eventually
-   * needs.
+   * Whether cloud stands between the witness and this shape — "it disappeared into a cloud".
    *
-   * Three things have to hold, and only the data can say so: the deck has to be crossed BEFORE the
-   * object (hence distanceM, from the witness's own reported distance — see BaseShape.physical;
-   * unstated means no claim, so no occlusion, rather than hiding shapes on a guess), it has to be
-   * on the right side (a witness above the deck is hidden from what is below it, not above), and
-   * there has to be actual cloud in that exact direction rather than one of the deck's own gaps —
-   * which is what CloudField.alphaAt re-evaluates, the shader's own coverage field being on the
-   * GPU where nothing can ask it a question.
+   * Answered first from what the witness actually reported (BaseShape.behindCloud), exactly as
+   * decor occlusion is answered from DecorObject.occludesSourceIds and for the same reason:
+   * nothing in a recording of a 2D appearance can deduce it.
+   *
+   * The geometric path below is only a fallback, for a recording that states a real distance (see
+   * BaseShape.physical) and makes no claim about cloud: the deck has to be crossed BEFORE the
+   * object, on the right side of the witness (one above the deck is hidden from what is below it,
+   * not above), and with actual cloud in that exact direction rather than one of the deck's own
+   * gaps — which is what CloudField.alphaAt re-evaluates, the shader's coverage field living on
+   * the GPU where nothing can ask it a question. No distance stated means no claim either way, so
+   * nothing is hidden on a guess.
    */
-  private isBehindCloudLayer(ndcX: number, ndcY: number, distanceM?: number): boolean {
-    if (distanceM === undefined || !this.cloudMesh || this.weather.cloudCover <= 0) return false
+  private isBehindCloudLayer(ndcX: number, ndcY: number, cloud?: { declared?: boolean; distanceM?: number }): boolean {
+    if (!cloud || !this.cloudMesh || this.weather.cloudCover <= 0) return false
+    // The witness said so: that settles it. Their account is the observation; where this sky's own
+    // gaps happen to fall is procedural noise, and letting it overrule them would mean tuning the
+    // weather until a reported disappearance happens to occur — see BaseShape.behindCloud.
+    if (cloud.declared) return true
+    const distanceM = cloud.distanceM
+    if (distanceM === undefined) return false
     const offset = this.cloudLayerOffset()
     this.ufoOcclusionRaycaster.setFromCamera(new Vector2(ndcX, ndcY), this.camera)
     const direction = this.ufoOcclusionRaycaster.ray.direction

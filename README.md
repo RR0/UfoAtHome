@@ -309,6 +309,7 @@ interface SightingRecordingJson {
           haloScale: number    // 0 = no glow
           selected: boolean
           title?: string       // shown as an on-canvas tooltip when hovered
+          behindCloud?: boolean // the witness reported it behind cloud at this instant — stated, never deduced (see below)
           physical?: { sizeM: number, distanceM: number } // what the witness reported — see Apparent size
           points?: { x: number, y: number }[] // "polygon" shapes only
         }
@@ -327,6 +328,18 @@ interface SightingRecordingJson {
 A shape left out of a later keyframe is **held** at its last recorded state, not hidden — and one whose first
 keyframe is at `t=5000` is already painted, in that state, from `t=0` (hold-first/hold-last at both ends of a
 source's own range). To make something stop being visible, keyframe it with `transparency: 1`.
+
+### Behind a cloud
+
+`behindCloud` is how a recording says "it disappeared into a cloud" — keyframed like any other
+appearance field, and held rather than blended. It is *stated*, for the same reason
+`DecorObject.occludesSourceIds` is: this format describes a 2D appearance on the witness's own field
+of view, not where an object was in space, so nothing in it can deduce whether cloud came between
+them. A reported distance (`physical`) is an occasional, often shaky extra, and the sky's own gaps
+are procedural noise — leaving the question to geometry means tuning the weather until the reported
+disappearance happens to occur. The witness's account outranks both; where a recording states a
+distance and makes no claim about cloud, the renderer falls back to the geometric test (is the deck
+crossed before the object, on the right side, with actual cloud in that direction).
 
 ### Apparent size
 

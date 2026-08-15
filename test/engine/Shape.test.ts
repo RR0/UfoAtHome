@@ -114,3 +114,29 @@ describe("lerpShape", () => {
     expect((mid as typeof from).points).toEqual(from.points)
   })
 })
+
+/**
+ * "It disappeared into a cloud" is something the witness SAW, not something to deduce from a
+ * geometry this format deliberately doesn't hold — see BaseShape.behindCloud.
+ */
+describe("behindCloud", () => {
+  const at = (x: number, behindCloud?: boolean) => ({
+    ...createOval({ x, y: 0, width: 10, height: 10 }),
+    behindCloud
+  })
+
+  it("is held, never blended — there is no halfway behind a cloud", () => {
+    expect(lerpShape(at(0, false), at(100, true), 0.5).behindCloud).toBe(false)
+    expect(lerpShape(at(0, false), at(100, true), 1).behindCloud).toBe(true)
+  })
+
+  it("stays absent when neither keyframe claims anything", () => {
+    expect(lerpShape(at(0), at(100), 0.5).behindCloud).toBeUndefined()
+  })
+
+  it("rides along with the rest of the shape's interpolation", () => {
+    const blended = lerpShape(at(0, true), at(100, true), 0.5)
+    expect(blended.behindCloud).toBe(true)
+    expect(blended.bounds.x).toBe(50)
+  })
+})

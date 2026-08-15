@@ -479,9 +479,10 @@ export class SceneElement extends HTMLElement {
       if (!shape) continue
       const ndcX = ((shape.bounds.x + shape.bounds.width / 2) / canvas.width) * 2 - 1
       const ndcY = -(((shape.bounds.y + shape.bounds.height / 2) / canvas.height) * 2 - 1)
-      // The witness's own reported distance, where they gave one (see BaseShape.physical) — what
-      // lets the cloud deck decide whether it is in front of this object or behind it.
-      if (this.sceneRenderer.isScreenPointOccluded(ndcX, ndcY, sourceId, shape.physical?.distanceM)) occluded.add(sourceId)
+      // What the witness said about cloud first (behindCloud), their reported distance only as a
+      // fallback — see SceneRenderer.isBehindCloudLayer.
+      const cloud = { declared: shape.behindCloud, distanceM: shape.physical?.distanceM }
+      if (this.sceneRenderer.isScreenPointOccluded(ndcX, ndcY, sourceId, cloud)) occluded.add(sourceId)
     }
     this.ufoElement.setOccludedSourceIds(occluded)
   }
