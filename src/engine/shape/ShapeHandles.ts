@@ -10,6 +10,13 @@ export type HandleId = "nw" | "n" | "ne" | "e" | "se" | "s" | "sw" | "w" | "rota
 
 export const RESIZE_HANDLE_IDS: HandleId[] = ["nw", "n", "ne", "e", "se", "s", "sw", "w"]
 
+/** Which of the 4 diagonal/orthogonal axes a resize handle actually stretches along, once the
+ * shape's own rotation is taken into account — named after the CSS `*-resize` cursor family
+ * ("ew-resize", "nwse-resize", ...) they're meant to drive, but kept axis names rather than CSS
+ * strings so this stays plain geometry (the component's stylesheet is what turns them into real
+ * cursors, see ufoTemplate's own canvas[data-cursor] rules). */
+export type ResizeAxis = "ew" | "nwse" | "ns" | "nesw"
+
 const ROTATE_HANDLE_OFFSET = 24 // px above the top edge, in the shape's local (unrotated) frame
 export const MIN_SHAPE_SIZE = 8 // px resize floor — avoids degenerate/inverted bounds — shared with UfoRecorderElement's arrow-key resize
 /** A polygon needs at least 3 points to remain a real shape — deleteVertex refuses to go below
@@ -94,6 +101,36 @@ export class ShapeHandles {
       if (Math.hypot(point.x - points[id].x, point.y - points[id].y) <= tolerance) return id
     }
     return undefined
+  }
+
+  /** The direction each resize handle pushes/pulls in the shape's own local frame, as a screen-
+   * space angle in degrees (0 = right, 90 = down, matching canvas y-down convention). Opposite
+   * handles (e/w, nw/se, ...) deliberately keep distinct entries even though they share an axis —
+   * resizeAxisFor folds them together, and keeping the full circle here makes adding the shape's
+   * own rotation a plain sum. */
+  private static readonly HANDLE_DIRECTION_DEG: Record<Exclude<HandleId, "rotate">, number> = {
+    e: 0,
+    se: 45,
+    s: 90,
+    sw: 135,
+    w: 180,
+    nw: 225,
+    n: 270,
+    ne: 315
+  }
+
+  /**
+   * Which axis dragging `handle` stretches along once the shape is rotated by `angle` (radians) —
+   * i.e. which resize cursor should be shown while hovering it. A rotated shape's "east" handle
+   * no longer resizes horizontally on screen, so the handle's own direction and the shape's angle
+   * are summed, then folded into the 4 axes the 8 handles reduce to (direction and its opposite
+   * resize along the same line, hence the modulo 180) and rounded to the nearest 45 degree sector.
+   */
+  static resizeAxisFor(handle: Exclude<HandleId, "rotate">, angle: number): ResizeAxis {
+    const degrees = ShapeHandles.HANDLE_DIRECTION_DEG[handle] + (angle * 180) / Math.PI
+    const folded = (((degrees % 180) + 180) % 180) / 45
+    const axes: ResizeAxis[] = ["ew", "nwse", "ns", "nesw"]
+    return axes[Math.round(folded) % axes.length]
   }
 
   /**

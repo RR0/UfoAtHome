@@ -6,7 +6,7 @@ import { RafSamplingClock } from "../engine/record/SamplingClock.js"
 import { createShape, moveShapeTo } from "../engine/shape/Shape.js"
 import type { Appearance, PolygonShape, Shape, ShapeBounds, ShapePresetId } from "../engine/shape/Shape.js"
 import { ShapeHandles, ShapeGroup, MIN_SHAPE_SIZE, MIN_POLYGON_VERTICES } from "../engine/shape/ShapeHandles.js"
-import type { HandleId } from "../engine/shape/ShapeHandles.js"
+import type { HandleId, ResizeAxis } from "../engine/shape/ShapeHandles.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
 import type { PrecipitationType, Weather } from "../engine/model/Weather.js"
 import type { People } from "../engine/model/People.js"
@@ -53,6 +53,12 @@ const ARROW_KEY_STEP_PX = 4
 const DEFAULT_SOURCE_ID = "ufo-1"
 const PRESET_IDS: ShapePresetId[] = ["oval", "polygon"]
 const DEFAULT_APPEARANCE: Appearance = { presetId: "oval", color: "#39ff14", transparency: 0, haloScale: 1.5 }
+
+/** What the pointer is currently over on the canvas, as written to its own `data-cursor`
+ * attribute — the canvas's contents are drawn, not DOM, so only script can hit-test them, but
+ * every one of these names is turned into an actual cursor by a plain CSS rule (see
+ * ufoTemplate's own canvas[data-cursor] block) rather than by assigning style.cursor here. */
+type CanvasCursor = "record" | "select" | "move" | "vertex" | "pan" | "panning" | "rotate" | `resize-${ResizeAxis}`
 
 /** Best-effort reverse mapping from a recorded/loaded shape back to a preset id, so the preset
  * buttons' pressed-state stays honest after scrubbing to or selecting a shape. Every polygon —
@@ -325,6 +331,13 @@ export class UfoRecorderElement extends HTMLElement {
      * to cross the moment witnessSide gets cleared mid-drag doesn't switch targets partway. */
     insideDecor: boolean
   }
+
+  /** Whatever the pointer was last hovering over the canvas (see updateHoverCursor) — remembered
+   * only so endDrag can put it back: hover detection is deliberately frozen for a drag's whole
+   * duration (the cursor must keep saying "resizing"/"rotating" even as the pointer wanders off
+   * the handle it grabbed, which is exactly what dragging one does), so releasing needs the
+   * pre-drag answer rather than a fresh hit test the pointer may not have moved to trigger. */
+  private hoverCursor?: CanvasCursor
 
   /** How far the witness has turned their head from center while looking through a decor
    * object's window — mirrors cameraDragState's own startHeadingDeg/startPitchDeg role, just for
@@ -1819,7 +1832,7 @@ export class UfoRecorderElement extends HTMLElement {
       this.recorder?.stop()
       this.isRecording = false
       this.setRecordButtonLabel(false)
-      canvas.style.cursor = ""
+      this.setCanvasCursor(undefined)
       canvas.style.touchAction = ""
       this.sourceSelect.disabled = false
       this.addShapeButton.disabled = false
@@ -1830,7 +1843,7 @@ export class UfoRecorderElement extends HTMLElement {
       this.recorder.start(this.currentSourceId, this.buildPrototype())
       this.isRecording = true
       this.setRecordButtonLabel(true)
-      canvas.style.cursor = "crosshair"
+      this.setCanvasCursor("record")
       canvas.style.touchAction = "none"
       // Prevents switching/adding a shape mid-drag from leaving the toolbar pointing at a
       // different shape than the one actually being recorded into.
@@ -2010,10 +2023,7 @@ export class UfoRecorderElement extends HTMLElement {
     const playing = this.ufoElement.playbackState === "playing"
 
     if (this.selectedSourceIds.size > 1) {
-      const members = [...this.selectedSourceIds]
-        .map(sourceId => ({ sourceId, shape: timeline.getInterpolatedShapeAt(t, sourceId) }))
-        .filter((member): member is { sourceId: string; shape: Shape } => !!member.shape)
-      const group = new ShapeGroup(members)
+      const group = new ShapeGroup(this.selectedMembers())
       const handle = ShapeHandles.hitTestHandle({ bounds: group.bounds(), angle: 0 }, point)
       if (handle === "rotate") {
         if (playing) return // don't fight the player's per-frame repaint
@@ -2087,6 +2097,18 @@ export class UfoRecorderElement extends HTMLElement {
     }))
     this.dragState = { kind: "move", sources, startPointer: point }
     this.startDragListening()
+  }
+
+  /** Every currently-selected shape as it stands at the playhead, ready to hand to ShapeGroup —
+   * sources whose shape isn't defined at this instant (not yet born, or already gone) drop out
+   * rather than being carried along as holes. Shared by the pointer-drag, hover-cursor and
+   * arrow-key paths, which all need exactly this list. */
+  private selectedMembers(): Array<{ sourceId: string; shape: Shape }> {
+    const timeline = this.ufoElement.sighting.timeline
+    const t = this.ufoElement.currentTime
+    return [...this.selectedSourceIds]
+      .map(sourceId => ({ sourceId, shape: timeline.getInterpolatedShapeAt(t, sourceId) }))
+      .filter((member): member is { sourceId: string; shape: Shape } => !!member.shape)
   }
 
   /** Plain-click selection semantics: replaces the whole selection with sourceId's "unit" — its
@@ -2427,6 +2449,9 @@ export class UfoRecorderElement extends HTMLElement {
     // inside a decor object (a different reference frame, see SceneRenderer.setIndoorLook), so
     // it's only forced visible for an outside drag.
     if (!insideDecor) this.sceneElement.setCompassForced(true)
+    // The only drag whose cursor differs from the hover cursor that led to it: hovering empty
+    // canvas offers the landscape to grab ("pan"), pressing actually closes the hand on it.
+    this.setCanvasCursor("panning")
     this.startDragListening()
   }
 
@@ -2541,6 +2566,10 @@ export class UfoRecorderElement extends HTMLElement {
     if (this.cameraDragState && !this.cameraDragState.insideDecor) this.sceneElement.setCompassForced(false)
     this.dragState = undefined
     this.cameraDragState = undefined
+    // Back to whatever the pointer was over before the drag started (see hoverCursor) — the next
+    // real pointermove re-tests it properly, but a release with no move at all must not leave the
+    // drag's own cursor behind (a grabbing hand over a landscape nobody is dragging any more).
+    this.setCanvasCursor(this.hoverCursor)
     document.removeEventListener("pointermove", this.handleDragPointerMove)
     document.removeEventListener("pointerup", this.handleDragPointerUp)
   }
@@ -2606,9 +2635,7 @@ export class UfoRecorderElement extends HTMLElement {
     if (this.isRecording || this.ufoElement.playbackState === "playing") return
     const timeline = this.ufoElement.sighting.timeline
     const t = this.ufoElement.currentTime
-    const members = [...this.selectedSourceIds]
-      .map(sourceId => ({ sourceId, shape: timeline.getInterpolatedShapeAt(t, sourceId) }))
-      .filter((member): member is { sourceId: string; shape: Shape } => !!member.shape)
+    const members = this.selectedMembers()
     if (members.length === 0) return
     event.preventDefault() // arrow keys otherwise scroll the page
     if (members.length === 1) {
@@ -2624,8 +2651,68 @@ export class UfoRecorderElement extends HTMLElement {
     this.ufoElement.refresh()
   }
 
+  /** Points the canvas's own `data-cursor` at whatever the pointer is over, so the cursor itself
+   * advertises what a press would do there (move a shape, resize/rotate it, drag a vertex, pan
+   * the view, ...) before the user commits to it. The stylesheet owns the actual cursor shapes —
+   * this only ever names the target (see CanvasCursor). Skipped while recording (the whole canvas
+   * is a drawing surface then, cursor already set once by toggleRecording) and for a drag's whole
+   * duration (see hoverCursor). */
+  private updateHoverCursor(event: PointerEvent): void {
+    if (this.isRecording || this.dragState || this.cameraDragState) return
+    this.hoverCursor = this.hoverCursorAt(event)
+    this.setCanvasCursor(this.hoverCursor)
+  }
+
+  /**
+   * What a pointerdown at this event's position would actually start — deliberately mirrors
+   * onPointerDown's own hit-testing order and guards step for step (group handles before single-
+   * shape ones, vertices before the bounding box they sit on, shapes before decor, decor before
+   * the landscape behind it), since a cursor that promises an interaction the press then doesn't
+   * deliver is worse than no cursor at all. While playing, every edit is refused (onPointerDown
+   * returns early) and only selection remains, hence "select" rather than move/resize/rotate.
+   */
+  private hoverCursorAt(event: PointerEvent): CanvasCursor | undefined {
+    const point = this.canvasPointFromEvent(event)
+    if (!point) return undefined
+    const timeline = this.ufoElement.sighting.timeline
+    const t = this.ufoElement.currentTime
+    const editable = this.ufoElement.playbackState !== "playing"
+    if (editable) {
+      if (this.selectedSourceIds.size > 1) {
+        const handle = ShapeHandles.hitTestHandle({ bounds: new ShapeGroup(this.selectedMembers()).bounds(), angle: 0 }, point)
+        // The group's own bounding box is never rotated (see ShapeHandles.groupBoundsFor), so its
+        // handles resize along plain screen axes whatever its members' individual angles are.
+        if (handle) return this.cursorForHandle(handle, 0)
+      } else {
+        const selected = timeline.getInterpolatedShapeAt(t, this.currentSourceId)
+        if (selected?.kind === "polygon" && ShapeHandles.hitTestVertex(selected, point) !== undefined) return "vertex"
+        const handle = selected && ShapeHandles.hitTestHandle(selected, point)
+        if (selected && handle) return this.cursorForHandle(handle, selected.angle)
+      }
+    }
+    if (timeline.hitTest(t, point.x, point.y)) return editable ? "move" : "select"
+    if (this.pickDecorAt(event) !== undefined) return "select"
+    return editable ? "pan" : undefined
+  }
+
+  private cursorForHandle(handle: HandleId, angle: number): CanvasCursor {
+    return handle === "rotate" ? "rotate" : `resize-${ShapeHandles.resizeAxisFor(handle, angle)}`
+  }
+
+  /** Writes (or clears) the canvas's `data-cursor` — the single place this component touches the
+   * cursor at all, so every cursor it can show is declared in one CSS block rather than scattered
+   * across inline styles. */
+  private setCanvasCursor(cursor: CanvasCursor | undefined): void {
+    const canvas = this.ufoElement.canvasElement
+    if (cursor) canvas.dataset.cursor = cursor
+    else delete canvas.dataset.cursor
+  }
+
   private onPointerMove(event: PointerEvent): void {
-    if (!this.isRecording) return
+    if (!this.isRecording) {
+      this.updateHoverCursor(event)
+      return
+    }
     const canvas = this.ufoElement.canvasElement
     const rect = canvas.getBoundingClientRect()
     const x = event.clientX - rect.left

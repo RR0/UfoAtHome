@@ -1,7 +1,8 @@
 import { describe, expect, it, afterEach, beforeAll, vi } from "vitest"
 import { register, ELEMENT_NAME } from "../../src/component/UfoRecorderElement.js"
 import type { UfoRecorderElement } from "../../src/component/UfoRecorderElement.js"
-import type { PolygonShape } from "../../src/engine/shape/Shape.js"
+import type { PolygonShape, Shape } from "../../src/engine/shape/Shape.js"
+import { ShapeHandles } from "../../src/engine/shape/ShapeHandles.js"
 
 register()
 
@@ -3567,5 +3568,125 @@ describe("UfoRecorderElement polygon vertex editing", () => {
 
     expect(addVertexButton.disabled).toBe(true)
     expect(deleteVertexButton.disabled).toBe(true)
+  })
+})
+
+/**
+ * The canvas's contents are drawn, not DOM, so the component hit-tests them itself and states
+ * what the pointer is over in a `data-cursor` attribute — the actual cursor shapes are plain CSS
+ * rules keyed on it (see ufoTemplate). These tests therefore assert the attribute, which is the
+ * component's whole share of the feature.
+ */
+describe("UfoRecorderElement hover cursor", () => {
+  afterEach(() => {
+    document.body.innerHTML = ""
+  })
+
+  function nestedCanvas(element: UfoRecorderElement): HTMLCanvasElement {
+    const canvas = nestedUfo(element)!.shadowRoot!.getElementById("canvas") as HTMLCanvasElement
+    vi.spyOn(canvas, "getBoundingClientRect").mockReturnValue({ left: 0, top: 0, width: 640, height: 360 } as DOMRect)
+    return canvas
+  }
+
+  /** jsdom has no global PointerEvent — a plain MouseEvent dispatched as "pointermove" exercises
+   * the same handler, which only reads clientX/clientY. */
+  function hoverAt(canvas: HTMLCanvasElement, x: number, y: number): string | undefined {
+    canvas.dispatchEvent(new MouseEvent("pointermove", { clientX: x, clientY: y }))
+    return canvas.dataset.cursor
+  }
+
+  function selectedShape(element: UfoRecorderElement): Shape {
+    return element.sightingData.timeline.keyframes[0].shapes[0].shape as Shape
+  }
+
+  it("offers to move whatever shape is under the pointer", () => {
+    const element = mount()
+    const canvas = nestedCanvas(element)
+    const { x, y, width, height } = selectedShape(element).bounds
+
+    expect(hoverAt(canvas, x + width / 2, y + height / 2)).toBe("move")
+  })
+
+  it("names the axis each resize handle stretches along", () => {
+    const element = mount()
+    const canvas = nestedCanvas(element)
+    const points = ShapeHandles.handlePointsFor(selectedShape(element))
+
+    expect(hoverAt(canvas, points.e.x, points.e.y)).toBe("resize-ew")
+    expect(hoverAt(canvas, points.s.x, points.s.y)).toBe("resize-ns")
+    expect(hoverAt(canvas, points.nw.x, points.nw.y)).toBe("resize-nwse")
+    expect(hoverAt(canvas, points.ne.x, points.ne.y)).toBe("resize-nesw")
+  })
+
+  it("turns the resize axes with the shape once it has been rotated", () => {
+    const element = mount()
+    const canvas = nestedCanvas(element)
+    const before = selectedShape(element)
+    const center = { x: before.bounds.x + before.bounds.width / 2, y: before.bounds.y + before.bounds.height / 2 }
+    const rotateHandle = ShapeHandles.handlePointsFor(before).rotate
+
+    // Drags the rotate handle a quarter turn clockwise (straight out to the shape's right).
+    canvas.dispatchEvent(new MouseEvent("pointerdown", { clientX: rotateHandle.x, clientY: rotateHandle.y }))
+    document.dispatchEvent(new MouseEvent("pointermove", { clientX: center.x + 60, clientY: center.y }))
+    document.dispatchEvent(new MouseEvent("pointerup", { clientX: center.x + 60, clientY: center.y }))
+
+    const rotated = selectedShape(element)
+    expect(rotated.angle).toBeCloseTo(Math.PI / 2)
+    const points = ShapeHandles.handlePointsFor(rotated)
+    expect(hoverAt(canvas, points.e.x, points.e.y)).toBe("resize-ns")
+    expect(hoverAt(canvas, points.n.x, points.n.y)).toBe("resize-ew")
+  })
+
+  it("advertises the rotate handle with its own cursor", () => {
+    const element = mount()
+    const canvas = nestedCanvas(element)
+    const { rotate } = ShapeHandles.handlePointsFor(selectedShape(element))
+
+    expect(hoverAt(canvas, rotate.x, rotate.y)).toBe("rotate")
+  })
+
+  it("advertises a polygon's vertex handles, which sit on top of the bounding box's own", () => {
+    const element = mount()
+    ;(element.shadowRoot!.getElementById("preset-polygon") as HTMLButtonElement).click()
+    const canvas = nestedCanvas(element)
+    const shape = selectedShape(element) as PolygonShape
+    const vertex = ShapeHandles.vertexPointsFor(shape)[0]
+
+    expect(hoverAt(canvas, vertex.x, vertex.y)).toBe("vertex")
+  })
+
+  it("offers the empty landscape as a grabbable pan, and closes the hand while it is being dragged", () => {
+    const element = mount()
+    const canvas = nestedCanvas(element)
+
+    expect(hoverAt(canvas, 20, 20)).toBe("pan")
+    canvas.dispatchEvent(new MouseEvent("pointerdown", { clientX: 20, clientY: 20 }))
+    expect(canvas.dataset.cursor).toBe("panning")
+    document.dispatchEvent(new MouseEvent("pointerup", { clientX: 60, clientY: 20 }))
+    expect(canvas.dataset.cursor).toBe("pan")
+  })
+
+  it("keeps the drag's own cursor while the pointer wanders away from the handle it grabbed", () => {
+    const element = mount()
+    const canvas = nestedCanvas(element)
+    const { e } = ShapeHandles.handlePointsFor(selectedShape(element))
+
+    expect(hoverAt(canvas, e.x, e.y)).toBe("resize-ew")
+    canvas.dispatchEvent(new MouseEvent("pointerdown", { clientX: e.x, clientY: e.y }))
+    expect(hoverAt(canvas, 20, 20)).toBe("resize-ew") // empty canvas, but a resize is in progress
+    document.dispatchEvent(new MouseEvent("pointerup", { clientX: 20, clientY: 20 }))
+  })
+
+  it("switches the whole canvas to the recording cursor while recording, and back afterwards", () => {
+    const element = mount()
+    const canvas = nestedCanvas(element)
+    const recordButton = element.shadowRoot!.getElementById("record") as HTMLButtonElement
+
+    recordButton.click()
+    expect(canvas.dataset.cursor).toBe("record")
+    expect(hoverAt(canvas, 20, 20)).toBe("record") // hover detection stays out of the way
+
+    recordButton.click()
+    expect(canvas.dataset.cursor).toBeUndefined()
   })
 })

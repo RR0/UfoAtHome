@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
-import { ShapeHandles, ShapeGroup } from "../../src/engine/shape/ShapeHandles.js"
+import { ShapeHandles, ShapeGroup, RESIZE_HANDLE_IDS } from "../../src/engine/shape/ShapeHandles.js"
+import type { HandleId } from "../../src/engine/shape/ShapeHandles.js"
 import { createOval, createPolygon } from "../../src/engine/shape/Shape.js"
 
 describe("handlePointsFor", () => {
@@ -387,5 +388,40 @@ describe("deleteVertex", () => {
     ])
     const updated = ShapeHandles.deleteVertex(shape, 0)
     expect(updated).toBe(shape)
+  })
+})
+
+describe("resizeAxisFor", () => {
+  it("maps each handle of an unrotated shape to the axis it visibly stretches along", () => {
+    expect(ShapeHandles.resizeAxisFor("e", 0)).toBe("ew")
+    expect(ShapeHandles.resizeAxisFor("w", 0)).toBe("ew")
+    expect(ShapeHandles.resizeAxisFor("n", 0)).toBe("ns")
+    expect(ShapeHandles.resizeAxisFor("s", 0)).toBe("ns")
+    expect(ShapeHandles.resizeAxisFor("nw", 0)).toBe("nwse")
+    expect(ShapeHandles.resizeAxisFor("se", 0)).toBe("nwse")
+    expect(ShapeHandles.resizeAxisFor("ne", 0)).toBe("nesw")
+    expect(ShapeHandles.resizeAxisFor("sw", 0)).toBe("nesw")
+  })
+
+  it("rotates the axis with the shape — a quarter turn swaps every handle's own axis", () => {
+    const quarter = Math.PI / 2
+    expect(ShapeHandles.resizeAxisFor("e", quarter)).toBe("ns")
+    expect(ShapeHandles.resizeAxisFor("n", quarter)).toBe("ew")
+    expect(ShapeHandles.resizeAxisFor("nw", quarter)).toBe("nesw")
+    expect(ShapeHandles.resizeAxisFor("ne", quarter)).toBe("nwse")
+  })
+
+  it("is unchanged by a half turn — opposite handles resize along the same line", () => {
+    for (const handle of RESIZE_HANDLE_IDS.filter(id => id !== "rotate") as Exclude<HandleId, "rotate">[]) {
+      expect(ShapeHandles.resizeAxisFor(handle, Math.PI)).toBe(ShapeHandles.resizeAxisFor(handle, 0))
+      expect(ShapeHandles.resizeAxisFor(handle, -Math.PI)).toBe(ShapeHandles.resizeAxisFor(handle, 0))
+    }
+  })
+
+  it("snaps to the nearest 45 degree sector rather than only handling exact multiples", () => {
+    const tenDegrees = (10 * Math.PI) / 180
+    expect(ShapeHandles.resizeAxisFor("e", tenDegrees)).toBe("ew") // still nearest horizontal
+    const thirtyDegrees = (30 * Math.PI) / 180
+    expect(ShapeHandles.resizeAxisFor("e", thirtyDegrees)).toBe("nwse") // past the 22.5 midpoint
   })
 })

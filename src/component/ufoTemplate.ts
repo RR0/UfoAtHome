@@ -73,6 +73,51 @@ canvas {
   border: var(--ufo-canvas-border, 1px solid #333);
   box-sizing: border-box;
 }
+/* Hover feedback for the editor (<rr0-ufo-recorder>): what the pointer is over is drawn INSIDE
+   the canvas, so only script can hit-test it — but the appearance stays here, in CSS. The
+   component only ever states what is under the pointer (data-cursor="move", "resize-ns", ...);
+   which actual cursor that means is this stylesheet's business alone. Plain <rr0-ufo> playback
+   never sets the attribute, so it keeps the default arrow throughout.
+   Directions are SCREEN axes, already accounting for the shape's own rotation (see
+   ShapeHandles.resizeAxisFor) — a 45-degree-rotated shape's top-left handle really does resize
+   along the screen's north-east/south-west diagonal, so that is the cursor it gets. */
+canvas[data-cursor="record"] {
+  cursor: crosshair;
+}
+canvas[data-cursor="select"] {
+  cursor: pointer;
+}
+canvas[data-cursor="move"] {
+  cursor: move;
+}
+canvas[data-cursor="vertex"] {
+  cursor: cell;
+}
+canvas[data-cursor="pan"] {
+  cursor: grab;
+}
+canvas[data-cursor="panning"] {
+  cursor: grabbing;
+}
+canvas[data-cursor="resize-ew"] {
+  cursor: ew-resize;
+}
+canvas[data-cursor="resize-ns"] {
+  cursor: ns-resize;
+}
+canvas[data-cursor="resize-nwse"] {
+  cursor: nwse-resize;
+}
+canvas[data-cursor="resize-nesw"] {
+  cursor: nesw-resize;
+}
+/* No native CSS cursor means "rotate", so this one is drawn here: a circular arrow, white with a
+   black outline so it stays readable over both a bright daytime sky and a night one. 12 12 is its
+   hotspot (the 24x24 image's own center, i.e. the middle of the circle it draws). The grab
+   fallback applies if the data URI cursor is ever rejected. */
+canvas[data-cursor="rotate"] {
+  cursor: url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%2224%22%20height=%2224%22%3E%3Cpath%20d=%22M12%205A7%207%200%201%201%206.1%208.5%22%20fill=%22none%22%20stroke=%22%23000%22%20stroke-width=%224%22%20stroke-linecap=%22round%22/%3E%3Cpath%20d=%22M12%201.5%2012%208.5%2017%205Z%22%20fill=%22%23000%22%20stroke=%22%23000%22%20stroke-width=%223%22%20stroke-linejoin=%22round%22/%3E%3Cpath%20d=%22M12%205A7%207%200%201%201%206.1%208.5%22%20fill=%22none%22%20stroke=%22%23fff%22%20stroke-width=%221.6%22%20stroke-linecap=%22round%22/%3E%3Cpath%20d=%22M12%201.5%2012%208.5%2017%205Z%22%20fill=%22%23fff%22/%3E%3C/svg%3E") 12 12, grab;
+}
 .toolbar {
   position: absolute;
   left: 0;
