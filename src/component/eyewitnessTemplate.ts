@@ -111,15 +111,33 @@ export const css = `
     /* The UA centres a popover with inset:0 + margin:auto; both have to go for the anchor to
        have any say. */
     inset: auto;
-    margin: 0.3em 0 0 0;
-    /* Below the button, extending leftwards from its right edge — the panel is far wider than
-       the button, and its right edge is where it used to sit. */
+    /* The BASE position, not a fallback: fallbacks are only ever consulted when the base itself
+       overflows, so leaving the base centred (as the UA has it) meant the anchored options were
+       never even tried. */
     position-area: bottom span-left;
-    /* Not enough room below (the widget sits low on screen)? Put it above the button instead;
-       and if neither side can take it, fall back to the viewport-centred placement, which always
-       fits. Without this last resort a fixed panel with nowhere to go would be cut off by the
-       viewport with no way to scroll it back — the very failure the top layer was meant to end. */
-    position-try-fallbacks: flip-block, --info-panel-centred;
+    margin: 0.3em 0 0 0;
+    /* Fit the space this side actually offers, and scroll inside it. This is what keeps the panel
+       anchored at all: the browser judges whether a position option overflows by the element's
+       UNCONSTRAINED height, so a percentage or viewport cap still reads as "doesn't fit" and hands
+       over to the next option — with a description long enough (Socorro's wants 515px against the
+       465 a normal window leaves below the button) that meant every anchored option was rejected
+       and the panel went back to the middle of the screen. A stretch cap has no such effect: the
+       used height IS the available space, so the option genuinely fits. Declared twice for the
+       browsers that only know the prefixed spelling; the later valid one wins. */
+    max-height: -webkit-fill-available;
+    max-height: stretch;
+    /* Only reached if a browser understands neither stretch spelling above (so the panel keeps its
+       full height and really does overflow): above the button, then the viewport centre.
+       Deliberately no position-try-order — most-height ranks the centred option first, since the
+       whole viewport is always taller than either side of the button, which is exactly how the
+       panel ended up centred everywhere. */
+    position-try-fallbacks: --info-panel-above, --info-panel-centred;
+  }
+  @position-try --info-panel-above {
+    position-area: top span-left;
+    margin: 0 0 0.3em 0;
+    max-height: -webkit-fill-available;
+    max-height: stretch;
   }
   @position-try --info-panel-centred {
     position-area: none;
@@ -127,9 +145,6 @@ export const css = `
     margin: auto;
     max-height: 80vh;
   }
-}
-.info-panel::backdrop {
-  background: rgba(0, 0, 0, 0.2);
 }
 /* Placement without the popover API (browsers older than 2024): the plain absolutely-positioned
    overlay this has always been, capped against the viewport. Still clippable by a host page — the
