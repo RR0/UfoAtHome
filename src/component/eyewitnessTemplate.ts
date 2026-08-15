@@ -70,29 +70,46 @@ export const css = `
   line-height: 1;
   padding: 0;
 }
-/* The panel grows with whatever the observation has to say — a real case description runs to a
-   paragraph or more — so it caps its height and scrolls instead of running off the bottom of the
-   screen, which used to put its footer (and with it the link to this observation's editor)
-   somewhere unreachable. The close button and that footer are pinned to the panel's own edges
-   rather than scrolling away with the content: they are how you leave it and what you came for. */
+/* The panel's own look, independent of where it is placed. It caps its height and scrolls: a real
+   case description runs to a paragraph or more, and its footer holds the link to this
+   observation's editor — the close button and that footer are pinned to its edges rather than
+   scrolling away with the content, since they are how you leave it and what you came for. */
 .info-panel {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  z-index: 2;
-  margin-top: 0.3em;
   padding: 0.6em 0.8em;
   border: 1px solid #ccc;
   border-radius: 4px;
   background: #fff;
   color: #222;
   max-width: 28em;
-  max-height: 70vh;
   overflow-y: auto;
-  /* A popover's own scrolling shouldn't carry on into the page behind it once it hits its end. */
+  /* Its own scrolling shouldn't carry on into the page behind it once it reaches an end. */
   overscroll-behavior: contain;
   font-size: 0.9em;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+/* Placement wherever the browser has the popover API: the top layer, which is the only way out of
+   an ancestor's clipping. Anchored under the "?" button, this panel was being CUT OFF by a host
+   page's own wrapper in overflow:hidden (rr0.org's layout) — not merely pushed off-screen, so no
+   scrolling could bring it back and its footer was plainly unreachable. A top-layer popover is
+   clipped by nothing at all; the UA's own [popover] rules centre it in the viewport, leaving it
+   needing only a height cap. */
+.info-panel:popover-open {
+  display: block;
+  max-height: 80vh;
+}
+.info-panel::backdrop {
+  background: rgba(0, 0, 0, 0.2);
+}
+/* Placement without the popover API (browsers older than 2024): the plain absolutely-positioned
+   overlay this has always been, capped against the viewport. Still clippable by a host page — the
+   very limitation the popover path above removes — but no worse than what those browsers had. */
+.info-panel:not([popover]) {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 2;
+  margin-top: 0.3em;
+  max-height: 70vh;
 }
 /* Floated rather than absolutely positioned, so it stays pinned to the top of the panel's own
    scrolling content (position: absolute would anchor it to the panel's full height and scroll out

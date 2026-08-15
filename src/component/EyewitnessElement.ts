@@ -79,6 +79,11 @@ export class EyewitnessElement extends HTMLElement {
   private readonly embedMarkup: HTMLTextAreaElement
   private readonly embedCopyButton: HTMLButtonElement
 
+  /** Whether this browser has the popover API — where it does, the info panel lives in the top
+   * layer and cannot be clipped by the host page; where it doesn't (anything older than 2024), it
+   * stays the absolutely-positioned overlay it has always been. */
+  private readonly supportsPopover = typeof (HTMLElement.prototype as { showPopover?: unknown }).showPopover === "function"
+
   private entries: WitnessEntry[] = []
   private currentSrc?: string
   private infoOpen = false
@@ -120,7 +125,23 @@ export class EyewitnessElement extends HTMLElement {
     this.embedCopyButton = this.shadow.getElementById("embed-copy") as HTMLButtonElement
 
     this.witnessSelect.addEventListener("change", () => this.selectWitness(this.witnessSelect.value))
-    this.infoButton.addEventListener("click", () => this.toggleInfoPanel())
+    if (this.supportsPopover) {
+      // Promoted to the TOP LAYER, the one placement an ancestor's overflow:hidden cannot clip —
+      // see the .info-panel:popover-open rules. Opening is left to the browser's own invoker
+      // (popovertarget) rather than a click handler of ours: a manual toggle races with light
+      // dismiss, which closes the panel on the very click that would reopen it. Our own state
+      // follows the element instead, through beforetoggle/toggle below.
+      this.infoPanel.setAttribute("popover", "auto")
+      this.infoPanel.removeAttribute("hidden")
+      this.infoButton.setAttribute("popovertarget", "info-panel")
+      this.infoPanel.addEventListener("beforetoggle", event => {
+        // Filled in before it becomes visible, never after — no flash of the previous witness.
+        if ((event as ToggleEvent).newState === "open") this.populateInfoPanel()
+      })
+      this.infoPanel.addEventListener("toggle", event => this.syncInfoOpen((event as ToggleEvent).newState === "open"))
+    } else {
+      this.infoButton.addEventListener("click", () => this.toggleInfoPanel())
+    }
     this.infoCloseButton.addEventListener("click", () => this.toggleInfoPanel())
     this.infoCreditsToggle.addEventListener("click", () => this.toggleCredits())
     for (const radio of [this.embedReplayRadio, this.embedEditRadio]) {
@@ -360,24 +381,48 @@ export class EyewitnessElement extends HTMLElement {
     return `${place.lat.toFixed(4)}, ${place.lng.toFixed(4)}`
   }
 
+  /** The close button's own path, and the whole path on browsers without the popover API. Where
+   * there IS one, opening goes through the browser's invoker instead (see the constructor) and
+   * this only ever runs to close. */
   private toggleInfoPanel(): void {
-    this.infoOpen = !this.infoOpen
-    this.infoPanel.hidden = !this.infoOpen
-    this.infoButton.setAttribute("aria-expanded", String(this.infoOpen))
-    if (this.infoOpen) {
-      this.populateInfoPanel()
+    const open = !this.infoOpen
+    if (this.supportsPopover) {
+      // hidePopover/showPopover throw if the element is already in the requested state, so ask it
+      // rather than assume: light dismiss may have closed the panel without going through here.
+      const showing = this.infoPanel.matches(":popover-open")
+      if (open && !showing) this.infoPanel.showPopover()
+      else if (!open && showing) this.infoPanel.hidePopover()
+      return // the toggle event syncs the rest
+    }
+    this.syncInfoOpen(open)
+    this.infoPanel.hidden = !open
+    if (open) {
       // Registered only while actually open, not for the component's whole lifetime — a global
       // listener that's a no-op almost all the time would be pure overhead. Safe to add from
       // inside this same click handler: the click that opened the panel (on infoButton) is still
       // bubbling when this listener gets attached, so it *will* see that same event once it
       // reaches document — handleOutsideClick's own composedPath() check is what stops that from
-      // immediately closing the panel it just opened.
+      // immediately closing the panel it just opened. The popover path needs none of this: light
+      // dismiss is the browser's own.
       document.addEventListener("click", this.handleOutsideClick)
+    } else {
+      document.removeEventListener("click", this.handleOutsideClick)
+    }
+  }
+
+  /** Brings this element's own state in line with whether the panel is open — driven BY the panel
+   * on the popover path (it can be closed by Escape or a click anywhere outside, neither of which
+   * goes through any code of ours), and by toggleInfoPanel itself otherwise. */
+  private syncInfoOpen(open: boolean): void {
+    if (open === this.infoOpen) return
+    this.infoOpen = open
+    this.infoButton.setAttribute("aria-expanded", String(open))
+    if (open) {
+      if (!this.supportsPopover) this.populateInfoPanel() // the popover path fills it on beforetoggle
     } else {
       this.creditsOpen = false
       this.infoCreditsList.hidden = true
       this.infoCreditsToggle.setAttribute("aria-expanded", "false")
-      document.removeEventListener("click", this.handleOutsideClick)
     }
   }
 

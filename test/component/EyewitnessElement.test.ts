@@ -503,3 +503,71 @@ describe("EyewitnessElement observation time", () => {
     expect(shown).toContain("2:45") // "July 24, 1948 at 2:45 AM" — the witness's clock, not the reader's
   })
 })
+
+/**
+ * Where the browser has the popover API, the info panel goes into the top layer — the one
+ * placement a host page's own `overflow: hidden` wrapper cannot clip. rr0.org has exactly such a
+ * wrapper (`div.wide`), which was cutting the panel's footer, and with it the link to the
+ * observation's editor, clean off the page: nothing could scroll it back into view because an
+ * absolutely-positioned panel adds nothing to the document's own height.
+ */
+describe("EyewitnessElement info panel placement", () => {
+  afterEach(() => {
+    document.body.innerHTML = ""
+    vi.unstubAllGlobals()
+    delete (HTMLElement.prototype as { showPopover?: unknown }).showPopover
+    delete (HTMLElement.prototype as { hidePopover?: unknown }).hidePopover
+  })
+
+  /** jsdom implements no popover at all, so the API is stubbed to exercise that path. */
+  function withPopoverSupport(): { shown: string[] } {
+    const shown: string[] = []
+    ;(HTMLElement.prototype as { showPopover?: unknown }).showPopover = function (this: HTMLElement) {
+      shown.push("show")
+      this.dispatchEvent(Object.assign(new Event("toggle"), { newState: "open" }))
+    }
+    ;(HTMLElement.prototype as { hidePopover?: unknown }).hidePopover = function (this: HTMLElement) {
+      shown.push("hide")
+      this.dispatchEvent(Object.assign(new Event("toggle"), { newState: "closed" }))
+    }
+    return { shown }
+  }
+
+  it("declares the panel a popover and lets the browser's own invoker open it", () => {
+    withPopoverSupport()
+    const element = mount()
+    const panel = element.shadowRoot!.getElementById("info-panel")!
+    const button = element.shadowRoot!.getElementById("info-button")!
+
+    expect(panel.getAttribute("popover")).toBe("auto")
+    expect(panel.hasAttribute("hidden")).toBe(false) // the popover mechanism controls visibility
+    expect(button.getAttribute("popovertarget")).toBe("info-panel")
+  })
+
+  it("follows the panel when the browser closes it on its own (Escape, click outside)", () => {
+    withPopoverSupport()
+    const element = mount()
+    const panel = element.shadowRoot!.getElementById("info-panel")!
+    const button = element.shadowRoot!.getElementById("info-button")!
+
+    panel.dispatchEvent(Object.assign(new Event("toggle"), { newState: "open" }))
+    expect(button.getAttribute("aria-expanded")).toBe("true")
+
+    panel.dispatchEvent(Object.assign(new Event("toggle"), { newState: "closed" }))
+    expect(button.getAttribute("aria-expanded")).toBe("false")
+  })
+
+  it("keeps the plain overlay, and its own outside-click close, without the API", () => {
+    const element = mount()
+    const panel = element.shadowRoot!.getElementById("info-panel")!
+    const button = element.shadowRoot!.getElementById("info-button") as HTMLButtonElement
+
+    expect(panel.hasAttribute("popover")).toBe(false)
+    expect(button.hasAttribute("popovertarget")).toBe(false)
+
+    button.click()
+    expect(panel.hidden).toBe(false)
+    document.body.dispatchEvent(new MouseEvent("click", { bubbles: true, composed: true }))
+    expect(panel.hidden).toBe(true)
+  })
+})
