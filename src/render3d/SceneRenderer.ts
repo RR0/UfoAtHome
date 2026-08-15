@@ -461,6 +461,17 @@ export class SceneRenderer {
   private readonly scene = new Scene()
   private readonly camera: PerspectiveCamera
 
+  /** Everything that is, physically, at infinity: the sky dome, the stars, the Sun/Moon/planets
+   * and their glares, the compass ring. All of it is built on a shell of a few hundred units
+   * around ITS OWN CENTRE, so that centre has to travel with the observer — otherwise an observer
+   * high enough above the ground ends up OUTSIDE the shell, and since the sky sphere is drawn
+   * BackSide-only and every star sits on a 850-unit sphere around the origin, both simply vanish:
+   * Chiles-Whitted's own witnesses, at their DC-3's real 1500 m, were left with a pure black sky
+   * (measured: not one lit pixel in the upper half of the canvas, against 583k at ground level).
+   * The ground, terrain, decor and weather stay in world space, where they belong — from up there
+   * they really are far below. */
+  private readonly celestialGroup = new Group()
+
   private skyMesh?: Mesh
   private groundMesh?: Mesh
   /** Location-accurate relief+imagery patch built by setTerrainOrigin(), layered on top of the
@@ -674,6 +685,7 @@ export class SceneRenderer {
     this.celestialLight.shadow.bias = -0.0015
     this.celestialLight.target = this.celestialLightTarget
     this.scene.add(this.celestialLight, this.celestialLightTarget, this.skyLight)
+    this.scene.add(this.celestialGroup)
   }
 
   /** Verbatim attribution text required by the currently active imagery provider's license, once a
@@ -702,6 +714,10 @@ export class SceneRenderer {
       this.camera.rotation.set(pose.pitchDeg * DEG_TO_RAD, this.camera.rotation.y, 0, "YXZ")
     }
     this.camera.position.y = 1.6 + pose.elevationM
+    // Keeps the observer at the centre of their own sky, whatever altitude they are at — see
+    // celestialGroup. x/z never move (this renderer keeps the camera on the vertical axis and
+    // shifts the world around it instead — see updateDecorAnchoring), so only y is tracked.
+    this.celestialGroup.position.y = this.camera.position.y
     if (this.camera.fov !== pose.fovDeg) {
       this.camera.fov = pose.fovDeg
       this.camera.updateProjectionMatrix()
@@ -1326,7 +1342,7 @@ export class SceneRenderer {
     geometry.setAttribute("color", new Float32BufferAttribute(colors, 3))
     const material = new MeshBasicMaterial({ vertexColors: true, side: BackSide, fog: false })
     this.skyMesh = new Mesh(geometry, material)
-    this.scene.add(this.skyMesh)
+    this.celestialGroup.add(this.skyMesh)
   }
 
   /** A neutral (not sky/horizon-tinted) base color, unlike before this session — day/night color
@@ -1380,7 +1396,7 @@ export class SceneRenderer {
     const material = new MeshBasicMaterial({ color: tintedColor, fog: false })
     const mesh = new Mesh(geometry, material)
     mesh.position.set(x, y, z)
-    this.scene.add(mesh)
+    this.celestialGroup.add(mesh)
     this.bodyMeshes.set(key, mesh)
     this.setHitArea(key, x, y, z, visualRadius)
     // The Sun's own dazzle comes entirely from the lens-flare mesh below (its always-on glareOut
@@ -1392,7 +1408,7 @@ export class SceneRenderer {
     if (key !== "sun") this.setGlare(key, x, y, z, magnitude, tintedColor)
     if (key === "sun") {
       this.sunVisible = true
-      this.sunWorldPosition.set(x, y, z)
+      this.sunWorldPosition.set(x, y + this.celestialGroup.position.y, z)
       if (!this.lensFlare) {
         // Built here, unconditionally, the same way setGlare's own halo already was above for
         // every other body — see LensFlareEffect.ts's own doc comment on why the dazzle core isn't
@@ -1433,7 +1449,7 @@ export class SceneRenderer {
     sprite.position.set(x, y, z)
     const diameter = SUN_MOON_VISUAL_RADIUS * 2
     sprite.scale.set(diameter, diameter, 1)
-    this.scene.add(sprite)
+    this.celestialGroup.add(sprite)
     this.bodyMeshes.set(key, sprite)
     this.setHitArea(key, x, y, z, SUN_MOON_VISUAL_RADIUS)
     this.setGlare(key, x, y, z, position.magnitude, tintColor)
@@ -1445,7 +1461,7 @@ export class SceneRenderer {
     hitArea.position.set(x, y, z)
     const size = visualRadius * HOVER_HIT_RADIUS_SCALE
     hitArea.scale.set(size, size, 1)
-    this.scene.add(hitArea)
+    this.celestialGroup.add(hitArea)
     this.hitAreas.set(key, hitArea)
   }
 
@@ -1479,7 +1495,7 @@ export class SceneRenderer {
     const sprite = new Sprite(material)
     sprite.position.set(x, y, z)
     sprite.scale.set(radius * 2, radius * 2, 1)
-    this.scene.add(sprite)
+    this.celestialGroup.add(sprite)
     this.glareSprites.set(key, sprite)
   }
 
@@ -1566,7 +1582,7 @@ export class SceneRenderer {
       geometry.setAttribute("color", colorAttribute)
       const material = new PointsMaterial({ vertexColors: true, size: tier.size, sizeAttenuation: false, fog: false })
       const points = new Points(geometry, material)
-      this.scene.add(points)
+      this.celestialGroup.add(points)
       return { points, colorAttribute, brightness, phase, speedFactor }
     })
     // Populates real initial colors synchronously (single source of truth for the color
@@ -2121,7 +2137,7 @@ export class SceneRenderer {
       sprite.scale.set(COMPASS_SPRITE_SIZE, COMPASS_SPRITE_SIZE, 1)
       sprite.renderOrder = COMPASS_RENDER_ORDER
       sprite.visible = this.compassHovered || this.compassForced
-      this.scene.add(sprite)
+      this.celestialGroup.add(sprite)
       return sprite
     })
   }
