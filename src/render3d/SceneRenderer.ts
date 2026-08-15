@@ -576,6 +576,9 @@ export class SceneRenderer {
   /** Radius the ground disc was last built at — compared against groundRadiusFor on every pose so
    * a climb rebuilds it, and only a climb does. */
   private groundRadius = GROUND_RADIUS
+  /** Radius the terrain patch was last built at, so a real change of altitude refetches it at the
+   * span the witness can now see, while a small drift doesn't. */
+  private terrainRadius = GROUND_RADIUS
   private cloudMesh?: Mesh
   private cloudMaterial?: ShaderMaterial
   private cloudUniforms?: CloudUniforms
@@ -812,13 +815,22 @@ export class SceneRenderer {
    */
   setTerrainOrigin(lat?: number, lng?: number, onSettled?: () => void): void {
     if (lat === undefined || lng === undefined) return
-    if (this.terrainOrigin) {
+    // How much ground the witness can actually see is what the patch has to cover: 900 m standing
+    // on it, tens of kilometres from an aircraft. Built at the flat disc's own radius (see
+    // groundRadiusFor), so real relief and imagery reach the horizon instead of stopping a few
+    // hundred metres out and leaving the rest of the visible ground a flat haze — the providers
+    // pick a coarser zoom for the wider span on their own (see TileMath.chooseZoomForTileEdge),
+    // which is exactly right: from up there you see more ground, in less detail.
+    const radiusM = this.groundRadius
+    if (this.terrainOrigin && Math.abs(this.terrainRadius - radiusM) < radiusM * 0.1) {
       const { x, z } = geoToLocalMeters(lat, lng, this.terrainOrigin.lat, this.terrainOrigin.lng)
-      if (Math.sqrt(x * x + z * z) < TERRAIN_REBUILD_DISTANCE_M) return
+      // Scaled to the patch itself: 150 m matters for a 900 m patch and is meaningless for a 30 km one.
+      if (Math.sqrt(x * x + z * z) < TERRAIN_REBUILD_DISTANCE_M * (radiusM / GROUND_RADIUS)) return
     }
     this.terrainOrigin = { lat, lng }
+    this.terrainRadius = radiusM
     const token = ++this.terrainBuildToken
-    buildTerrainMesh(lat, lng, this.terrainProviders)
+    buildTerrainMesh(lat, lng, this.terrainProviders, radiusM)
       .then(({ mesh, attribution }) => {
         if (token !== this.terrainBuildToken) return // superseded by a newer call while this was in flight
         this.disposeMesh(this.terrainMesh)

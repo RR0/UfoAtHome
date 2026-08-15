@@ -19,8 +19,11 @@ const IMAGERY_RESOLUTION = 512
  * with an upward-pitched gaze, where most of the frame's ground band is actually far away, not
  * close underfoot — showing the flat disc instead of real terrain far more than the data shortage
  * alone required. */
-const FULL_OPACITY_RADIUS_M = 700
-const FADE_END_RADIUS_M = 900
+const DEFAULT_RADIUS_M = 900
+/** Where the patch starts fading out, as a fraction of its own radius — the 700/900 this always
+ * used, kept proportional so a patch built for an observer high enough to see 30 km blends the
+ * same way a 900 m one does. */
+const FULL_OPACITY_FRACTION = 700 / 900
 
 /** Must match SceneRenderer's own flat groundMesh.position.y — real ground level, world y=0 (see
  * buildGround's own doc comment) — so the terrain patch meets the existing disc at the same height
@@ -57,9 +60,12 @@ function boundsAroundObserver(observerLat: number, observerLng: number, radiusM:
 export async function buildTerrainMesh(
   observerLat: number,
   observerLng: number,
-  providers: { elevation: ElevationProvider; imagery: ImageryProvider }
+  providers: { elevation: ElevationProvider; imagery: ImageryProvider },
+  radiusM: number = DEFAULT_RADIUS_M
 ): Promise<TerrainBuildResult> {
-  const bounds = boundsAroundObserver(observerLat, observerLng, FADE_END_RADIUS_M)
+  const fadeEndM = radiusM
+  const fullOpacityM = radiusM * FULL_OPACITY_FRACTION
+  const bounds = boundsAroundObserver(observerLat, observerLng, fadeEndM)
   const resolution = { width: GRID_SIZE, height: GRID_SIZE }
   const [elevationGrid, imageryTexture] = await Promise.all([
     providers.elevation.getElevationGrid(bounds, resolution),
@@ -91,13 +97,13 @@ export async function buildTerrainMesh(
       uvs[i * 2 + 1] = tRow
 
       // Chebyshev (box) distance, not Euclidean: the patch is a SQUARE of real, successfully-
-      // fetched data out to FADE_END_RADIUS_M on every side (see boundsAroundObserver) — a radial
+      // fetched data out to fadeEndM on every side (see boundsAroundObserver) — a radial
       // (circular) fade would needlessly hide the ~21% of that square outside its inscribed circle
       // (the four corners), which is exactly what a viewer sees as random flat-disc patches poking
       // through valid terrain depending on camera heading. Box distance fades uniformly right up to
       // the patch's own true edge on all four sides instead, using data that was already fetched.
       const distance = Math.max(Math.abs(x), Math.abs(z))
-      const alpha = 1 - clamp((distance - FULL_OPACITY_RADIUS_M) / (FADE_END_RADIUS_M - FULL_OPACITY_RADIUS_M), 0, 1)
+      const alpha = 1 - clamp((distance - fullOpacityM) / (fadeEndM - fullOpacityM), 0, 1)
       colors[i * 4] = 1
       colors[i * 4 + 1] = 1
       colors[i * 4 + 2] = 1
