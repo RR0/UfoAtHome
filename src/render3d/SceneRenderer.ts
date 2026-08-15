@@ -1637,7 +1637,13 @@ export class SceneRenderer {
     const geometry = buildCloudGeometry(CLOUD_RADIUS)
     this.cloudMesh = new Mesh(geometry, material)
     this.cloudMesh.renderOrder = CLOUD_RENDER_ORDER
-    this.scene.add(this.cloudMesh)
+    // In the celestial group, i.e. centred on the observer, for a reason that is the cloud
+    // shader's own: it shades each vertex from the direction between the DOME'S CENTRE and that
+    // vertex, then projects it onto a flat layer (see CloudSystem's CLOUD_LAYER_HEIGHT). That is
+    // only the view ray if the camera sits at that centre. Left at ground level, a witness merely
+    // climbing a few hundred metres broke the assumption and the layer came out bent into a
+    // fish-eye arc, then vanished entirely once past the dome's own 700-unit radius.
+    this.celestialGroup.add(this.cloudMesh)
   }
 
   /** Cheap per-tick uniform refresh (no geometry rebuild) — updates only the time-varying lighting
