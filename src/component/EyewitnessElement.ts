@@ -468,7 +468,10 @@ export class EyewitnessElement extends HTMLElement {
    * bottom otherwise adds content below the fold — indistinguishable, to the reader, from a
    * toggle that does nothing. */
   private revealInPanel(block: HTMLElement): void {
-    block.scrollIntoView({ block: "nearest" })
+    // Optional call: this is a pure layout concern, and jsdom (where this component's own tests
+    // run) implements no layout and so no scrollIntoView at all — throwing there would fail a
+    // suite over something that has no meaning without a rendering engine.
+    block.scrollIntoView?.({ block: "nearest" })
   }
 
   /** Fills the info panel in one pass: the currently-selected witness's observation metadata
