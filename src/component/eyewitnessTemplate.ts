@@ -70,6 +70,11 @@ export const css = `
   line-height: 1;
   padding: 0;
 }
+/* The panel grows with whatever the observation has to say — a real case description runs to a
+   paragraph or more — so it caps its height and scrolls instead of running off the bottom of the
+   screen, which used to put its footer (and with it the link to this observation's editor)
+   somewhere unreachable. The close button and that footer are pinned to the panel's own edges
+   rather than scrolling away with the content: they are how you leave it and what you came for. */
 .info-panel {
   position: absolute;
   top: 100%;
@@ -82,13 +87,21 @@ export const css = `
   background: #fff;
   color: #222;
   max-width: 28em;
+  max-height: 70vh;
+  overflow-y: auto;
+  /* A popover's own scrolling shouldn't carry on into the page behind it once it hits its end. */
+  overscroll-behavior: contain;
   font-size: 0.9em;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
 }
+/* Floated rather than absolutely positioned, so it stays pinned to the top of the panel's own
+   scrolling content (position: absolute would anchor it to the panel's full height and scroll out
+   of sight); the heading beside it simply wraps around it. */
 .info-close {
-  position: absolute;
-  top: 0.3em;
-  right: 0.3em;
+  position: sticky;
+  float: right;
+  top: 0;
+  margin-left: 0.4em;
   width: 1.6em;
   height: 1.6em;
   border: none;
@@ -141,12 +154,18 @@ export const css = `
   margin-left: auto;
 }
 .info-footer {
+  position: sticky;
+  bottom: 0;
+  /* Opaque, or the scrolling content would show through it — inherited rather than repeated, so
+     it can never drift from the panel's own background. */
+  background: inherit;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.8em;
   margin-top: 0.6em;
   padding-top: 0.4em;
+  padding-bottom: 0.2em;
   border-top: 1px solid #eee;
   font-size: 0.8em;
 }
