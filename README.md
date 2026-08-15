@@ -100,7 +100,8 @@ mechanism.
 ## `<rr0-ufo-recorder>` — full editor
 
 The authoring component (~540KB gzip — see below for why): everything `<rr0-ufo>` has, plus a shape/appearance
-toolbar (oval/saucer/triangle presets, color, transparency, halo) and drag-to-record. It composes a nested
+toolbar (oval/polygon presets, color, transparency, halo, and the object's real reported
+size/distance — see [Apparent size](#apparent-size)) and drag-to-record. It composes a nested
 `<rr0-scene>` internally — not a bare `<rr0-ufo>` — so the shape being drawn is always seen against the
 sighting's own real sky, computed live from whatever latitude/longitude/heading/orientation/observation-time
 fields the toolbar currently holds (see [Architecture](#architecture)). This absorbs `<rr0-scene>`'s own
@@ -111,7 +112,22 @@ this heavier authoring component.
 
 ```html
 <rr0-ufo-recorder></rr0-ufo-recorder>
+<rr0-ufo-recorder src="sighting.json"></rr0-ufo-recorder>
 ```
+
+With `src`, the editor opens on an existing recording instead of an empty canvas — the same
+attribute the three other elements take. That is what makes an editor URL per observation possible:
+rr0.org's own editor page maps its `?sighting=` parameter onto it, and
+[ufoathome.org](https://ufoathome.org) redirects any path it is given into that parameter, so
+
+- `https://ufoathome.org/science/crypto/ufo/enquete/dossier/Socorro/sighting.json`, or simply
+- `https://ufoathome.org/Socorro` for a case dossier of that site (a value with no `/` is expanded
+  to `/science/crypto/ufo/enquete/dossier/<name>/sighting.json`),
+
+opens that observation for editing. The page only accepts recordings from its own origin: a shared
+link must not be able to display a recording fabricated elsewhere inside an rr0.org page. To load
+one from anywhere else, use the editor's own **Load from URL** field, which is an explicit gesture
+by whoever is sitting at the keyboard.
 
 Usage: click **Record**, move the pointer over the canvas to draw the UFO's path, click **Stop**, then **Play** to
 replay it. The nested `<rr0-ufo>`'s `enableClickToPlay` is set to `false` here — a completed recording drag also
@@ -123,8 +139,9 @@ Duration) are translated (English/French) the same way `<rr0-ufo>`'s own labels 
 
 | Member | Kind | Description |
 |---|---|---|
+| `src` | attribute | URL of a `SightingRecordingJson` to open in the editor, fetched on connect and whenever the attribute changes |
 | `sightingData` | property (get/set) | Delegates to the nested `<rr0-ufo>`'s `sightingData` |
-| `appearance` | property (get/set, accepts a partial object on set) | `{ presetId: "oval" \| "saucer" \| "triangle", color: string, transparency: number, haloScale: number }` — the UFO's appearance used for the next recording |
+| `appearance` | property (get/set, accepts a partial object on set) | `{ presetId: "oval" \| "polygon", color: string, transparency: number, haloScale: number }` — the UFO's appearance used for the next recording |
 
 ## `<rr0-scene>` — 3D decor
 
@@ -208,10 +225,10 @@ URL (typically relative to the case's own page, same as `<rr0-ufo>`'s own `src`)
 
 The two shapes are told apart automatically — a fetched JSON array is a manifest, a plain object is one witness's
 own recording. No labels or ids are duplicated in a manifest itself — each witness's display name and the shared
-case id grouping them together are read from that witness's *own* file (`witnessName`/`caseId`, see
+case id grouping them together are read from that witness's *own* file (`witness`/`caseId`, see
 [Data format](#data-format)), so there's a single source of truth and nothing to drift out of sync. This means
 every listed witness's recording is fetched upfront (to read its name), not lazily on selection — fine at the
-scale a case's witness list actually has. If a witness has no `witnessName`, its `witnessId` is shown instead, or
+scale a case's witness list actually has. If a witness has no `witness.title`, its `witness.id` is shown instead, or
 the URL itself as a last resort. A mismatched `caseId` across the listed witnesses logs a console warning (doesn't
 block) — likely means unrelated recordings got listed together by mistake.
 
@@ -229,13 +246,35 @@ selector loads that witness's already-fetched recording into the nested `<rr0-sc
 `witnessUrls` again (e.g. a manifest refresh) keeps the current selection if that witness is still present, instead
 of resetting back to the first.
 
-Clicking "?" opens a panel, anchored to the button as a floating overlay (it never shifts the canvas below it).
-Its main content is the currently-selected witness's observation metadata (date, location, case id — whichever are
-actually present in that witness's own `sighting.json`; the witness's own name isn't repeated here, since it's
-already in the toolbar's testimony line). Below that, a smaller footer row holds the app's own name/version on the
-left, linking to [ufoathome.org](https://ufoathome.org), and a "Credits" link on the right that reveals third-party
-credits on click (the live terrain imagery attribution, once a real relief patch has resolved, plus the bundled
-thunder sound's own required attribution — see [`CREDITS.md`](CREDITS.md)).
+Clicking "?" opens a panel anchored under the button (it never shifts the canvas below it). Where the browser has
+the popover API the panel is a top-layer `popover="auto"` — the one placement a host page's own `overflow: hidden`
+wrapper cannot clip, which is what rr0.org's layout was doing to it — kept under the button by CSS anchor
+positioning, flipping above it or centring in the viewport when that side is too short, and closing on Escape or a
+click outside. Browsers without the API get the plain absolutely-positioned overlay instead.
+
+Its main content is the currently-selected witness's observation metadata (date, location, case id, description,
+tags — whichever are actually present in that witness's own `sighting.json`; the witness's own name isn't repeated
+here, since it's already in the toolbar's testimony line). The date is shown on the WITNESS's own clock, never
+converted into the reader's time zone (see `utcOffsetHours` in [Data format](#data-format)).
+
+A footer row holds the app's own name/version on the left — linking to that very observation in the editor (see
+[`<rr0-ufo-recorder>`](#rr0-ufo-recorder--full-editor)'s own `src`), not to the application's home page — and two
+fold-outs on the right, both closed until asked for:
+
+- **Embed** hands out the two self-contained lines it takes to put this observation on any other page, either as a
+  replay (`<rr0-eyewitness>`) or as the editor (`<rr0-ufo-recorder>`), with absolute URLs and a copy button:
+
+  ```html
+  <script type="module" src="https://rr0.org/science/crypto/ufo/rr0-eyewitness.mjs"></script>
+  <rr0-eyewitness src="https://rr0.org/science/crypto/ufo/enquete/dossier/Socorro/sighting.json"></rr0-eyewitness>
+  ```
+
+  The script URL is derived from where the running bundle was itself loaded from (`import.meta.url`), never
+  hardcoded, so a snippet generated from a local or staging copy points back at that copy. Pasting it into a site
+  of your own needs the bundle and the recording to be readable cross-origin (rr0.org serves
+  `/science/crypto/ufo/*` with `Access-Control-Allow-Origin: *` for exactly this).
+- **Credits** reveals third-party credits (the live terrain imagery attribution, once a real relief patch has
+  resolved, plus the bundled thunder sound's own required attribution — see [`CREDITS.md`](CREDITS.md)).
 
 All of this component's own labels (Testimony by, About, Close, Observation/Date/Location/Case, Credits) are
 translated (English/French) the same way as `<rr0-ufo>`'s own labels.
@@ -250,10 +289,12 @@ interface SightingRecordingJson {
   time?: { year?: number, month?: number, day?: number, hour?: number, minute?: number, second?: number }
   endTime?: { year?: number, month?: number, day?: number, hour?: number, minute?: number, second?: number } // alternative to durationSeconds
   durationSeconds?: number // alternative to endTime; takes precedence if both are set
+  utcOffsetHours?: number // the LEGAL time zone the witness's clock was on (+1 for France in 1965, -7 for New Mexico in April 1964). Absent = approximated from the longitude, which cannot know legal time or a daylight-saving switch
   place?: { lat: number, lng: number }[]
-  witnessId?: string // opaque internal reference — no PII beyond a display name (see witnessName)
-  witnessName?: string // for cases where the witness is already publicly named in the published material (e.g. Chiles-Whitted) — omit for anonymous witnesses
+  witness?: { id?: string, dirName?: string, title?: string, lastName?: string, firstNames?: string[] } // every field optional — supply whichever is known; omit entirely for an anonymous witness
   caseId?: string // shared by every witness's own sighting.json for the same case — see <rr0-eyewitness>
+  description?: string
+  tags?: string[]
   timeline: {
     keyframes: Array<{
       t: number // milliseconds since recording start
@@ -267,13 +308,34 @@ interface SightingRecordingJson {
           transparency: number // 0 = opaque, 1 = fully transparent
           haloScale: number    // 0 = no glow
           selected: boolean
+          title?: string       // shown as an on-canvas tooltip when hovered
+          physical?: { sizeM: number, distanceM: number } // what the witness reported — see Apparent size
           points?: { x: number, y: number }[] // "polygon" shapes only
         }
       }>
     }>
+    order?: string[]     // back-to-front paint/hit-test order; absent = first-appearance order
+    groups?: string[][]  // each inner array is one group's member sourceIds
   }
+  witnessTrack?: { keyframes: Array<{ t: number, pose: { lat?: number, lng?: number, elevationM: number, headingDeg?: number, pitchDeg: number, fovDeg: number } }> }
+  weatherTrack?: { keyframes: Array<{ t: number, weather: Weather }> }
+  weather?: Weather // legacy static fallback for recordings predating weatherTrack
+  decor?: DecorObject[] // buildings, trees, streetlights, vehicles, other witnesses — see src/engine/model/Decor.ts
 }
 ```
+
+A shape left out of a later keyframe is **held** at its last recorded state, not hidden — and one whose first
+keyframe is at `t=5000` is already painted, in that state, from `t=0` (hold-first/hold-last at both ends of a
+source's own range). To make something stop being visible, keyframe it with `transparency: 1`.
+
+### Apparent size
+
+`physical` is the witness's own reported size and distance, and the on-screen `bounds.width` is derived from it
+rather than drawn by eye: on the 640x360 canvas at the default 60° vertical field of view, one degree is about
+5.4px and the full Moon about 2.8px, so an object of 3.5m at 90m is 12px wide — not the 90px an author reaches for
+unaided. `ApparentSize` (`src/engine/shape/ApparentSize.ts`) does the conversion both ways, and the editor's own
+**Real size** / **Distance** fields apply it and read back what the current drawing actually spans, in degrees and
+in full Moons.
 
 This format is deliberately independent of [`@rr0/data`](https://github.com/RR0/data)'s `RR0Event`/`@rr0/time`'s
 `Level2Date`/`@rr0/place`'s `Place` classes, even though its `time`/`place` fields are structurally aligned with

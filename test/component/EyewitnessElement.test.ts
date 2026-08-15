@@ -447,6 +447,8 @@ describe("EyewitnessElement embed markup", () => {
     element.witnessUrls = ["john.json"]
     await new Promise(resolve => setTimeout(resolve, 0))
     ;(element.shadowRoot!.getElementById("info-button") as HTMLButtonElement).click()
+    // The snippet is folded away behind its own footer toggle, like the credits.
+    ;(element.shadowRoot!.getElementById("info-embed-toggle") as HTMLButtonElement).click()
     return element.shadowRoot as unknown as HTMLElement
   }
 
@@ -569,5 +571,64 @@ describe("EyewitnessElement info panel placement", () => {
     expect(panel.hidden).toBe(false)
     document.body.dispatchEvent(new MouseEvent("click", { bubbles: true, composed: true }))
     expect(panel.hidden).toBe(true)
+  })
+})
+
+/**
+ * Both fold-outs live above the panel's sticky footer. After it, they open UNDERNEATH it — which
+ * is how clicking Credits came to reveal a list nobody could see once the panel had a height cap.
+ */
+describe("EyewitnessElement info panel fold-outs", () => {
+  beforeEach(() => {
+    stubFetch({ "john.json": johnSighting })
+  })
+
+  afterEach(() => {
+    document.body.innerHTML = ""
+  })
+
+  async function openPanel(): Promise<ShadowRoot> {
+    const element = mount()
+    element.witnessUrls = ["john.json"]
+    await new Promise(resolve => setTimeout(resolve, 0))
+    ;(element.shadowRoot!.getElementById("info-button") as HTMLButtonElement).click()
+    return element.shadowRoot!
+  }
+
+  it("keeps the embed snippet folded away until asked for, like the credits", async () => {
+    const shadow = await openPanel()
+    const embed = shadow.getElementById("info-embed")!
+    const toggle = shadow.getElementById("info-embed-toggle") as HTMLButtonElement
+
+    expect(embed.hidden).toBe(true)
+    expect(toggle.getAttribute("aria-expanded")).toBe("false")
+
+    toggle.click()
+    expect(embed.hidden).toBe(false)
+    expect(toggle.getAttribute("aria-expanded")).toBe("true")
+
+    toggle.click()
+    expect(embed.hidden).toBe(true)
+  })
+
+  it("puts both fold-outs before the footer, so neither opens underneath it", async () => {
+    const shadow = await openPanel()
+    const children = [...shadow.getElementById("info-panel")!.children]
+    const footer = children.findIndex(el => el.classList.contains("info-footer"))
+
+    expect(children.findIndex(el => el.id === "info-embed")).toBeLessThan(footer)
+    expect(children.findIndex(el => el.id === "info-credits-list")).toBeLessThan(footer)
+  })
+
+  it("folds both back when the panel is closed, so it reopens on the metadata", async () => {
+    const shadow = await openPanel()
+    ;(shadow.getElementById("info-embed-toggle") as HTMLButtonElement).click()
+    ;(shadow.getElementById("info-credits-toggle") as HTMLButtonElement).click()
+
+    ;(shadow.getElementById("info-button") as HTMLButtonElement).click() // close the panel
+    ;(shadow.getElementById("info-button") as HTMLButtonElement).click() // and reopen it
+
+    expect(shadow.getElementById("info-embed")!.hidden).toBe(true)
+    expect(shadow.getElementById("info-credits-list")!.hidden).toBe(true)
   })
 })

@@ -71,7 +71,8 @@ export class EyewitnessElement extends HTMLElement {
   private readonly infoCreditsToggle: HTMLButtonElement
   private readonly infoCreditsList: HTMLElement
   private readonly infoCloseButton: HTMLButtonElement
-  private readonly infoEmbedHeading: HTMLElement
+  private readonly infoEmbedToggle: HTMLButtonElement
+  private readonly infoEmbedPanel: HTMLElement
   private readonly embedReplayRadio: HTMLInputElement
   private readonly embedEditRadio: HTMLInputElement
   private readonly labelEmbedReplay: HTMLElement
@@ -88,6 +89,7 @@ export class EyewitnessElement extends HTMLElement {
   private currentSrc?: string
   private infoOpen = false
   private creditsOpen = false
+  private embedOpen = false
   private language: UfoLanguage = "en"
   private messages: EyewitnessMessages = eyewitnessMessages_en
 
@@ -116,7 +118,8 @@ export class EyewitnessElement extends HTMLElement {
     this.infoCreditsToggle = this.shadow.getElementById("info-credits-toggle") as HTMLButtonElement
     this.infoCreditsList = this.shadow.getElementById("info-credits-list")!
     this.infoCloseButton = this.shadow.getElementById("info-close") as HTMLButtonElement
-    this.infoEmbedHeading = this.shadow.getElementById("info-embed-heading")!
+    this.infoEmbedToggle = this.shadow.getElementById("info-embed-toggle") as HTMLButtonElement
+    this.infoEmbedPanel = this.shadow.getElementById("info-embed")!
     this.embedReplayRadio = this.shadow.getElementById("embed-kind-replay") as HTMLInputElement
     this.embedEditRadio = this.shadow.getElementById("embed-kind-edit") as HTMLInputElement
     this.labelEmbedReplay = this.shadow.getElementById("label-embed-replay")!
@@ -144,6 +147,7 @@ export class EyewitnessElement extends HTMLElement {
     }
     this.infoCloseButton.addEventListener("click", () => this.toggleInfoPanel())
     this.infoCreditsToggle.addEventListener("click", () => this.toggleCredits())
+    this.infoEmbedToggle.addEventListener("click", () => this.toggleEmbed())
     for (const radio of [this.embedReplayRadio, this.embedEditRadio]) {
       radio.addEventListener("change", () => this.refreshEmbedMarkup())
     }
@@ -166,7 +170,7 @@ export class EyewitnessElement extends HTMLElement {
     this.infoCloseButton.setAttribute("aria-label", this.messages.close)
     this.infoObservationHeading.textContent = this.messages.observation
     this.infoCreditsToggle.textContent = this.messages.credits
-    this.infoEmbedHeading.textContent = this.messages.embed
+    this.infoEmbedToggle.textContent = this.messages.embed
     this.labelEmbedReplay.textContent = this.messages.embedReplay
     this.labelEmbedEdit.textContent = this.messages.embedEdit
     this.embedCopyButton.textContent = this.messages.embedCopy
@@ -423,6 +427,9 @@ export class EyewitnessElement extends HTMLElement {
       this.creditsOpen = false
       this.infoCreditsList.hidden = true
       this.infoCreditsToggle.setAttribute("aria-expanded", "false")
+      this.embedOpen = false
+      this.infoEmbedPanel.hidden = true
+      this.infoEmbedToggle.setAttribute("aria-expanded", "false")
     }
   }
 
@@ -441,6 +448,27 @@ export class EyewitnessElement extends HTMLElement {
     this.creditsOpen = !this.creditsOpen
     this.infoCreditsList.hidden = !this.creditsOpen
     this.infoCreditsToggle.setAttribute("aria-expanded", String(this.creditsOpen))
+    if (this.creditsOpen) this.revealInPanel(this.infoCreditsList)
+  }
+
+  /** The embed snippet is folded away like the credits are: what the panel is for is the
+   * observation's own metadata, and a block of markup sitting open above it competes with that. */
+  private toggleEmbed(): void {
+    this.embedOpen = !this.embedOpen
+    this.infoEmbedPanel.hidden = !this.embedOpen
+    this.infoEmbedToggle.setAttribute("aria-expanded", String(this.embedOpen))
+    if (this.embedOpen) {
+      this.refreshEmbedMarkup()
+      this.revealInPanel(this.infoEmbedPanel)
+    }
+  }
+
+  /** Scrolls a just-revealed block into the panel's own visible area. The panel is sized to
+   * whatever space the button has (see .info-panel:popover-open), so unfolding something at its
+   * bottom otherwise adds content below the fold — indistinguishable, to the reader, from a
+   * toggle that does nothing. */
+  private revealInPanel(block: HTMLElement): void {
+    block.scrollIntoView({ block: "nearest" })
   }
 
   /** Fills the info panel in one pass: the currently-selected witness's observation metadata
