@@ -76,7 +76,7 @@ export function skyColorsForAltitude(altitudeDeg: number): SkyColors {
  * (astronomical twilight ends, sun at -18deg); in between, the limit relaxes continuously.
  */
 export function visibleMagnitudeLimit(sunAltitudeDeg: number): number {
-  const FULL_DARK_LIMIT = 7.5
+  const FULL_DARK_LIMIT = NAKED_EYE_MAG_LIMIT
   const DAYLIGHT_LIMIT = -4 // brighter than Venus ever gets — effectively "nothing" by day
   if (sunAltitudeDeg <= -18) return FULL_DARK_LIMIT
   if (sunAltitudeDeg >= 0) return DAYLIGHT_LIMIT
@@ -85,18 +85,32 @@ export function visibleMagnitudeLimit(sunAltitudeDeg: number): number {
 }
 
 const BRIGHT_MAG_REFERENCE = -1.5 // brighter than any real star (Sirius, -1.46) maps to brightness 1
-const FAINT_MAG_REFERENCE = 7.5 // the catalog's own magnitude cutoff maps to brightness ~0
+/** What an unaided eye actually reaches on a genuinely dark night. The star catalog itself goes to
+ * 7.5, which is binocular territory: rendering all of it put thousands of stars in the sky that no
+ * witness ever saw, and made every night scene read as an observatory photograph rather than as a
+ * testimony. Also the magnitude that maps to brightness 0 below — the two must agree, or the
+ * faintest star still drawn would be drawn at something other than the faintest brightness. */
+const NAKED_EYE_MAG_LIMIT = 6.5
+const FAINT_MAG_REFERENCE = NAKED_EYE_MAG_LIMIT
+
+/** Bends the linear magnitude ramp so the faint majority stays faint instead of crowding toward
+ * mid-grey — the eye's own response to a night sky, where a handful of stars dominate and the rest
+ * are barely there. */
+const BRIGHTNESS_GAMMA = 1.6
 
 /**
- * Real apparent magnitude -> render brightness in [0,1], replacing the old synthetic
- * starBrightness(random) = random**4. Uses the standard Pogson flux ratio (~2.512, i.e. 100^(1/5),
- * per magnitude) rather than treating magnitude as if it were already linear brightness.
+ * Real apparent magnitude -> render brightness in [0,1].
+ *
+ * Linear in MAGNITUDE, not in flux: magnitude is already a logarithmic scale, and it is the one
+ * the eye works on. Interpolating flux instead — as this did — collapses the entire naked-eye sky
+ * into the bottom of the range, since Sirius outshines a magnitude-6 star by a factor of a
+ * thousand: every star from magnitude 2 to 6.5 came out between 0.04 and 0.0004, which
+ * starColorScale's floor then rendered as one indistinguishable grey. All of them looked the same,
+ * because they very nearly were.
  */
 export function magnitudeToBrightness(mag: number): number {
-  const flux = 10 ** (-0.4 * mag)
-  const brightFlux = 10 ** (-0.4 * BRIGHT_MAG_REFERENCE)
-  const faintFlux = 10 ** (-0.4 * FAINT_MAG_REFERENCE)
-  return clamp((flux - faintFlux) / (brightFlux - faintFlux), 0, 1)
+  const ramp = (FAINT_MAG_REFERENCE - mag) / (FAINT_MAG_REFERENCE - BRIGHT_MAG_REFERENCE)
+  return clamp(ramp, 0, 1) ** BRIGHTNESS_GAMMA
 }
 
 /**
@@ -164,7 +178,10 @@ export function skyColorForPosition(altitudeDeg: number, vertexAzimuthDeg: numbe
 /** How much a star's rendered color is floored above black at a given brightness — keeps even
  * the dimmest star in a tier faintly visible instead of literally invisible. */
 export function starColorScale(brightness: number): number {
-  return 0.3 + 0.7 * brightness
+  // A low floor, not the old 0.3: that lifted the faintest star to nearly a third of full white,
+  // which is most of why the field read as uniform. Kept above zero all the same, so a star at the
+  // visibility limit is dim rather than absent.
+  return 0.12 + 0.88 * brightness
 }
 
 /**
@@ -253,8 +270,8 @@ export interface StarBrightnessTier {
  * varies continuously *within* a tier via per-vertex color (see starColorScale).
  */
 export const STAR_BRIGHTNESS_TIERS: StarBrightnessTier[] = [
-  { maxBrightness: 0.5, size: 1.2 },
-  { maxBrightness: 0.85, size: 2.0 },
+  { maxBrightness: 0.35, size: 1.2 },
+  { maxBrightness: 0.7, size: 2.0 },
   { maxBrightness: Infinity, size: 3.2 }
 ]
 

@@ -30,6 +30,8 @@ export const html = `
     <label><span id="label-lng">Longitude</span> <input id="lng" type="number" min="-180" max="180" step="0.0001" placeholder="lng"/></label>
     <label><span id="label-heading">Heading</span> <input id="heading" type="number" min="0" max="360" step="1" placeholder="unknown"/> &deg;</label>
     <label><span id="label-pitch">Tilt</span> <input id="pitch" type="number" min="-90" max="90" step="1" value="0"/> &deg;</label>
+    <label><span id="label-elevation">Altitude</span>
+      <input id="elevation" type="number" step="1" value="0" title="Height above the ground the witness was at — a hilltop, a floor, an aircraft's cruising altitude"/> m</label>
     <fieldset class="decor-fieldset">
       <legend id="label-decor-fieldset">Decor</legend>
       <!-- This whole block (picker through Occupied floor) is hidden entirely — not just

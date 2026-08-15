@@ -3738,3 +3738,53 @@ describe("UfoRecorderElement src attribute", () => {
     expect(fetchMock).toHaveBeenCalledWith("other.json")
   })
 })
+
+/**
+ * How high the witness was decides which part of the sky they are even inside — a DC-3's 1500 m
+ * puts them above the cloud layer and, before this was rendered properly, outside the star shell
+ * altogether. The field also has to READ back: writing 0 unconditionally, as this did, flattened
+ * an imported recording's own altitude the moment anything else in the panel was touched.
+ */
+describe("UfoRecorderElement witness altitude", () => {
+  afterEach(() => {
+    document.body.innerHTML = ""
+  })
+
+  function setField(element: UfoRecorderElement, id: string, value: string): void {
+    const input = element.shadowRoot!.getElementById(id) as HTMLInputElement
+    input.value = value
+    input.dispatchEvent(new Event("input"))
+  }
+
+  it("records the altitude the witness was at", () => {
+    const element = mount()
+    setField(element, "lat", "32.3792")
+    setField(element, "lng", "-86.3077")
+    setField(element, "elevation", "1500")
+
+    const pose = element.sightingData.witnessTrack!.keyframes[0].pose
+    expect(pose.elevationM).toBe(1500)
+    expect(pose.lat).toBeCloseTo(32.3792)
+  })
+
+  it("keeps it when another observer field is edited afterwards", () => {
+    const element = mount()
+    setField(element, "elevation", "1500")
+    setField(element, "heading", "40")
+
+    const keyframes = element.sightingData.witnessTrack!.keyframes
+    expect(keyframes[keyframes.length - 1].pose.elevationM).toBe(1500)
+  })
+
+  it("shows the altitude of a loaded recording instead of a hardcoded ground level", () => {
+    const element = mount()
+    element.sightingData = {
+      version: 1,
+      durationSeconds: 10,
+      timeline: { keyframes: [{ t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 0, y: 0, width: 10, height: 10 }, color: "#fff", angle: 0, transparency: 0, haloScale: 0, selected: false } }] }] },
+      witnessTrack: { keyframes: [{ t: 0, pose: { lat: 32.3792, lng: -86.3077, elevationM: 1500, headingDeg: 40, pitchDeg: 0, fovDeg: 60 } }] }
+    }
+
+    expect((element.shadowRoot!.getElementById("elevation") as HTMLInputElement).value).toBe("1500")
+  })
+})

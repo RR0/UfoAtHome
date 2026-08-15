@@ -38,6 +38,7 @@ export const ufoRecorderMessages_fr: UfoRecorderMessages = {
   needTwoShapesToGroup: "Sélectionnez au moins deux formes pour les grouper",
   notGrouped: "Cette forme ne fait pas partie d'un groupe",
   multipleShapesSelected: "Plusieurs formes sélectionnées — sélectionnez-en une seule pour modifier ceci",
+  elevation: "Altitude",
   samplingRate: "Échantillonnage",
   duration: "Durée",
   durationPlaceholder: "durée de l'observation",

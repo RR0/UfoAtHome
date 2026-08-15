@@ -155,6 +155,7 @@ export class UfoRecorderElement extends HTMLElement {
   private readonly lngInput: HTMLInputElement
   private readonly headingInput: HTMLInputElement
   private readonly pitchInput: HTMLInputElement
+  private readonly elevationInput: HTMLInputElement
   private readonly obsTimeInput: HTMLInputElement
   private readonly obsEndTimeInput: HTMLInputElement
   private readonly witnessIdInput: HTMLInputElement
@@ -198,6 +199,7 @@ export class UfoRecorderElement extends HTMLElement {
   private readonly labelLongitude: HTMLElement
   private readonly labelHeading: HTMLElement
   private readonly labelPitch: HTMLElement
+  private readonly labelElevation: HTMLElement
   private readonly labelObservationTime: HTMLElement
   private readonly labelObservationEndTime: HTMLElement
   private readonly labelWitnessId: HTMLElement
@@ -475,6 +477,7 @@ export class UfoRecorderElement extends HTMLElement {
     this.lngInput = this.shadow.getElementById("lng") as HTMLInputElement
     this.headingInput = this.shadow.getElementById("heading") as HTMLInputElement
     this.pitchInput = this.shadow.getElementById("pitch") as HTMLInputElement
+    this.elevationInput = this.shadow.getElementById("elevation") as HTMLInputElement
     this.obsTimeInput = this.shadow.getElementById("obs-time") as HTMLInputElement
     this.obsEndTimeInput = this.shadow.getElementById("obs-end-time") as HTMLInputElement
     this.witnessIdInput = this.shadow.getElementById("witnessId") as HTMLInputElement
@@ -508,6 +511,7 @@ export class UfoRecorderElement extends HTMLElement {
     this.labelLongitude = this.shadow.getElementById("label-lng")!
     this.labelHeading = this.shadow.getElementById("label-heading")!
     this.labelPitch = this.shadow.getElementById("label-pitch")!
+    this.labelElevation = this.shadow.getElementById("label-elevation")!
     this.labelObservationTime = this.shadow.getElementById("label-observation-time")!
     this.labelObservationEndTime = this.shadow.getElementById("label-observation-end-time")!
     this.labelWitnessId = this.shadow.getElementById("label-witness-id")!
@@ -698,7 +702,7 @@ export class UfoRecorderElement extends HTMLElement {
       this.setAppearance({ haloScale: Number(this.haloScaleInput.value) })
     )
 
-    for (const input of [this.latInput, this.lngInput, this.headingInput, this.pitchInput]) {
+    for (const input of [this.latInput, this.lngInput, this.headingInput, this.pitchInput, this.elevationInput]) {
       input.addEventListener("input", () => this.updateObserver())
     }
     // Reading the heading off the compass is the whole point of editing this field — showing the
@@ -928,17 +932,22 @@ export class UfoRecorderElement extends HTMLElement {
     // an empty/invalid input just falls back to 0 (looking straight at the horizon) rather than
     // propagating NaN into the pose.
     const pitchDeg = this.numberOrUndefined(this.pitchInput.value) ?? 0
+    // Ground level unless stated — but stated it must be able to be: it decides which part of the
+    // sky the witness is even inside (see SceneRenderer.celestialGroup), and writing 0 here
+    // unconditionally, as this did, silently flattened an aircraft's own cruising altitude the
+    // first time anything else in this panel was touched.
+    const elevationM = this.numberOrUndefined(this.elevationInput.value) ?? 0
     const event = this.ufoElement.sighting.event
     const witnessTrack = this.ufoElement.sighting.witnessTrack
     const t = this.ufoElement.currentTime
 
     event.place = lat !== undefined && lng !== undefined ? [{ lat, lng }] : undefined
 
-    const nothingSet = lat === undefined && lng === undefined && headingDeg === undefined && pitchDeg === 0
+    const nothingSet = lat === undefined && lng === undefined && headingDeg === undefined && pitchDeg === 0 && elevationM === 0
     if (nothingSet) {
       witnessTrack.removeKeyframeAt(t)
     } else {
-      witnessTrack.addKeyframe(t, { lat, lng, elevationM: 0, headingDeg, pitchDeg, fovDeg: WITNESS_FOV_DEG })
+      witnessTrack.addKeyframe(t, { lat, lng, elevationM, headingDeg, pitchDeg, fovDeg: WITNESS_FOV_DEG })
     }
     // Neither field affects the 2D shape canvas, so this refresh() is only for its side effect —
     // it's what makes this edit surface as a "timeupdate" (see the constructor's listener), the
@@ -1232,6 +1241,9 @@ export class UfoRecorderElement extends HTMLElement {
     }
     if (active !== this.pitchInput) {
       this.pitchInput.value = String(pose?.pitchDeg ?? 0)
+    }
+    if (active !== this.elevationInput) {
+      this.elevationInput.value = String(pose?.elevationM ?? 0)
     }
   }
 
@@ -2085,6 +2097,7 @@ export class UfoRecorderElement extends HTMLElement {
     this.labelHeading.textContent = messages.heading
     this.headingInput.placeholder = messages.headingPlaceholder
     this.labelPitch.textContent = messages.pitch
+    this.labelElevation.textContent = messages.elevation
     this.labelObservationTime.textContent = messages.observationTime
     this.labelObservationEndTime.textContent = messages.observationEndTime
     this.obsTimeInput.placeholder = messages.edtfPlaceholder

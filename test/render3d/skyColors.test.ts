@@ -67,9 +67,9 @@ describe("visibleMagnitudeLimit", () => {
     expect(visibleMagnitudeLimit(10)).toBeLessThan(0)
   })
 
-  it("reaches the catalog's own naked-eye cutoff once fully dark", () => {
-    expect(visibleMagnitudeLimit(-18)).toBe(7.5)
-    expect(visibleMagnitudeLimit(-30)).toBe(7.5)
+  it("reaches the unaided eye's own limit once fully dark — not the catalog's, which is binocular territory", () => {
+    expect(visibleMagnitudeLimit(-18)).toBe(6.5)
+    expect(visibleMagnitudeLimit(-30)).toBe(6.5)
   })
 
   it("relaxes continuously between daylight and full night", () => {
@@ -93,9 +93,31 @@ describe("magnitudeToBrightness", () => {
     expect(magnitudeToBrightness(4)).toBeGreaterThan(magnitudeToBrightness(7))
   })
 
-  it("clamps beyond the catalog's own reference range", () => {
+  it("clamps beyond its own reference range", () => {
     expect(magnitudeToBrightness(-5)).toBe(1)
     expect(magnitudeToBrightness(20)).toBe(0)
+  })
+
+  it("spreads the naked-eye range across the scale instead of crowding it at the bottom", () => {
+    // The whole point: interpolating flux put every star from magnitude 2 to the visibility limit
+    // between 0.04 and 0.0004, an interval no display can show — they all came out the same grey.
+    const spread = magnitudeToBrightness(2) - magnitudeToBrightness(6)
+    expect(spread).toBeGreaterThan(0.3)
+    // and the steps between whole magnitudes stay perceptible all the way down
+    for (const mag of [1, 2, 3, 4, 5]) {
+      expect(magnitudeToBrightness(mag) - magnitudeToBrightness(mag + 1)).toBeGreaterThan(0.05)
+    }
+  })
+
+  it("renders the faintest visible stars genuinely faint", () => {
+    expect(starColorScale(magnitudeToBrightness(6))).toBeLessThan(0.2)
+    expect(starColorScale(magnitudeToBrightness(-1.46))).toBeGreaterThan(0.9)
+  })
+
+  it("gives the brightest stars a bigger point size, and the ordinary ones the smallest", () => {
+    expect(STAR_BRIGHTNESS_TIERS[starBrightnessTierIndex(magnitudeToBrightness(-1.46))].size).toBe(3.2)
+    expect(STAR_BRIGHTNESS_TIERS[starBrightnessTierIndex(magnitudeToBrightness(1.5))].size).toBe(2)
+    expect(STAR_BRIGHTNESS_TIERS[starBrightnessTierIndex(magnitudeToBrightness(4))].size).toBe(1.2)
   })
 })
 
@@ -157,8 +179,10 @@ describe("skyColorForPosition", () => {
 })
 
 describe("starColorScale", () => {
-  it("floors above black even at brightness 0, and reaches 1 at brightness 1", () => {
-    expect(starColorScale(0)).toBeCloseTo(0.3)
+  it("floors just above black at brightness 0, and reaches 1 at brightness 1", () => {
+    // A low floor on purpose: the old 0.3 lifted the faintest star to nearly a third of full
+    // white, which is most of why a night sky read as a field of identical dots.
+    expect(starColorScale(0)).toBeCloseTo(0.12)
     expect(starColorScale(1)).toBeCloseTo(1)
   })
 })
