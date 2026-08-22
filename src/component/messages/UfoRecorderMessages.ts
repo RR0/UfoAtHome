@@ -95,6 +95,40 @@ export interface UfoRecorderMessages {
   importError: string
   record: string
   stop: string
+  /** Connects a reported result to the picker naming who produced it: "2 places found
+   * {according} [Nominatim]". The pickers ARE the credits — see engine/source/DataSource.ts. */
+  according: string
+  sourceElevation: string
+  sourceImagery: string
+  /** Label of the place-NAME field the Location group now leads with — testimony names a place,
+   * it doesn't give coordinates (see engine/place/PlaceProvider.ts). */
+  placeName: string
+  placeNamePlaceholder: string
+  /** The button (and Enter) that runs the search. */
+  searchPlace: string
+  /** Label of the candidate list a search fills — a place name is often ambiguous, and only the
+   * witness knows which one it was. */
+  placeMatch: string
+  placeSearching: string
+  /** Completed in code with the number of candidates: "3 {placeMatchesFound}". Singular has its
+   * own message rather than an "(s)" suffix — French and English disagree on where such a suffix
+   * even goes, and "1 lieu(x) trouvé(s)" is nobody's language. */
+  placeMatchFound: string
+  placeMatchesFound: string
+  placeNotFound: string
+  /** The search itself couldn't be made (offline, HTTP error) — distinct from placeNotFound, the
+   * same distinction the weather status line makes. */
+  placeSearchFailed: string
+  /** Tooltip on a time zone no country has ever placed on that longitude — "{solar}" is replaced
+   * with the offset the meridian itself implies. See UfoRecorderElement.updateUtcOffsetValidity. */
+  utcOffsetImplausible: string
+  /** The zone picker's first entry: no zone, type the offset yourself. */
+  timeZoneManual: string
+  /** Tooltip on the Altitude field once the ground's own height is known — it says what the number
+   * is measured from, which is the whole point of anchoring it. */
+  altitudeAboveSeaLevel: string
+  /** Shown beside Altitude: the ground's own height there. "{m}" is replaced with the metres. */
+  groundAt: string
   latitude: string
   longitude: string
   heading: string
@@ -129,6 +163,25 @@ export interface UfoRecorderMessages {
   observationGroup: string
   witnessGroup: string
   circumstancesGroup: string
+  /** Label of the checkbox that decides whether the weather fields are looked up from a real
+   * record (checked, and then read-only) or stated by the witness (unchecked, and then never
+   * overwritten) — see UfoRecorderElement.inferWeather. */
+  weatherInferred: string
+  /** That checkbox's tooltip, where the reasoning actually fits. */
+  weatherInferredTitle: string
+  /** Prefix of the sourced-weather line, completed in code with the dataset name and the UTC
+   * instant it describes: "{weatherFrom} ERA5 (Open-Meteo), 1965-07-01 04:00 UTC". Kept as a
+   * prefix rather than a placeholder string since neither of the two parts is translatable. */
+  weatherFrom: string
+  /** Shown while the lookup is in flight. */
+  weatherLookingUp: string
+  /** The sighting doesn't yet say where or exactly when — nothing to look up yet. */
+  weatherNeedsDateAndPlace: string
+  /** Asked, and no record covers that place and date (nothing exists before 1940). */
+  weatherNoRecord: string
+  /** The lookup itself couldn't be made (offline, HTTP error) — deliberately distinct from
+   * weatherNoRecord: one is a fact about the sighting, the other isn't. */
+  weatherLookupFailed: string
   cloudCover: string
   cloudDarkness: string
   precipitationType: string

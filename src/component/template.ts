@@ -26,12 +26,33 @@ export const html = `
 <details open>
   <summary id="label-location-group">Location</summary>
   <div class="toolbar">
+    <!-- Testimony names a place, it doesn't give coordinates ("on the Valensole plateau", never
+         43.8379 / 5.9840) — so the name is what this group asks for first, and the latitude and
+         longitude below are what answering it produces. Searched only on Enter or the button, never
+         per keystroke: see NominatimPlaceProvider's own doc comment on why that restraint matters. -->
+    <div class="place-search-row">
+      <label><span id="label-place-name">Place</span>
+        <input id="placeName" type="text" placeholder="Valensole, France" autocomplete="off" class="place-name"/></label>
+      <button id="search-place" type="button">Locate</button>
+      <label id="place-match-row" hidden><span id="label-place-match">Matches</span> <select id="placeMatch"></select></label>
+      <!-- "2 lieux trouvés selon [Nominatim]" — the picker sits where the count is reported, not in
+           a settings drawer: who answered is part of the answer. See DataSource.ts. -->
+      <output id="place-status" class="place-status" for="placeName"><span id="place-status-text"></span><span id="place-source-row" class="inline-source" hidden></span></output>
+    </div>
     <label><span id="label-lat">Latitude</span> <input id="lat" type="number" min="-90" max="90" step="0.0001" placeholder="lat"/></label>
     <label><span id="label-lng">Longitude</span> <input id="lng" type="number" min="-180" max="180" step="0.0001" placeholder="lng"/></label>
     <label><span id="label-heading">Heading</span> <input id="heading" type="number" min="0" max="360" step="1" placeholder="unknown"/> &deg;</label>
     <label><span id="label-pitch">Tilt</span> <input id="pitch" type="number" min="-90" max="90" step="1" value="0"/> &deg;</label>
+    <!-- Above SEA LEVEL, not above the ground: "0 m" is simply false for a witness in the Alps, and
+         an editor that offers it invites a recording that says so. The ground's own height at the
+         location becomes the field's floor and its default the moment the location is known — see
+         UfoRecorderElement.applyGroundElevation. -->
     <label><span id="label-elevation">Altitude</span>
-      <input id="elevation" type="number" step="1" value="0" title="Height above the ground the witness was at — a hilltop, a floor, an aircraft's cruising altitude"/> m</label>
+      <input id="elevation" type="number" step="1" value="0"/> m</label>
+    <output id="ground-elevation" class="ground-elevation" for="lat lng"></output>
+    <!-- Relief and imagery describe the ground at the location above, so they are chosen here
+         rather than in a drawer of their own — same reasoning as the place picker's placement. -->
+    <div id="terrain-source-rows" class="terrain-source-rows"></div>
     <fieldset class="decor-fieldset">
       <legend id="label-decor-fieldset">Decor</legend>
       <!-- This whole block (picker through Occupied floor) is hidden entirely — not just
@@ -104,37 +125,51 @@ export const html = `
   </div>
 </details>
 <details open>
-  <summary id="label-temporal-group">Temporal</summary>
+  <summary id="label-temporal-group">Date and time</summary>
   <div class="toolbar">
     <label><span id="label-observation-time">Observation start</span>
       <input id="obs-time" type="text" placeholder="YYYY-MM-DDThh:mm[?~%] or hh:mm" title="EDTF — e.g. 1965-07-01T05:00, 2025-06? (uncertain), 2025~ (approximate), or just 05:00 if the date isn't known"/></label>
     <label><span id="label-observation-end-time">Observation end</span>
       <input id="obs-end-time" type="text" placeholder="YYYY-MM-DDThh:mm[?~%] or hh:mm" title="EDTF — e.g. 1965-07-01T05:10, 2025-06? (uncertain), 2025~ (approximate), or just 05:10 if the date isn't known"/></label>
     <label><span id="label-duration">Duration</span> <input id="durationSeconds" type="number" min="0" step="0.1" placeholder="observation length" aria-required="true"/> s</label>
-    <label><span id="label-utc-offset">Time zone</span>
+    <!-- The zone is the RULE, the number is what that rule produced for this sighting's own date —
+         summer time included, and as it was then (see engine/time/TimeZones.ts). Pick a zone and
+         the number is derived and read-only; leave it on the manual entry and type the number
+         yourself, which is all a recording used to be able to say. -->
+    <label><span id="label-utc-offset">Time zone</span> <select id="timeZone"></select>
       <input id="utcOffsetHours" type="number" min="-12" max="14" step="0.5" placeholder="from longitude" title="Hours ahead of UTC on the witness's own clock — legal time, which the longitude cannot know (France was on UTC+1 in 1965)"/> UTC&plusmn;h</label>
   </div>
 </details>
 <details open>
   <summary id="label-circumstances-group">Circumstances</summary>
   <div class="toolbar">
+    <!-- Weather is the one thing in this editor that isn't testimony: it's a measurable fact about
+         a place at an instant, and the Location and Temporal groups above already state both. So
+         it's looked up from a real record by default (see UfoRecorderElement.inferWeather) and
+         shown read-only on that basis — a reanalysis value is a measurement to report, not a dial
+         to tune. Unchecking hands the fields back to the witness, whose account then outranks the
+         record and is never overwritten by it (Sighting.weatherSource). -->
+    <div class="weather-source-row">
+      <label><input id="weatherInferred" type="checkbox" checked/> <span id="label-weather-inferred">From weather records</span></label>
+      <output id="weather-source" class="weather-source" for="lat lng obs-time"><span id="weather-source-text"></span><span id="weather-source-row" class="inline-source" hidden></span><a id="weather-source-link" target="_blank" rel="noopener noreferrer" hidden></a></output>
+    </div>
     <span id="label-weather">Weather</span>
-    <label><span id="label-cloud-cover">Cloud cover</span> <input id="cloudCover" type="range" min="0" max="1" step="0.05" value="0"/></label>
-    <label><span id="label-cloud-darkness">Cloud darkness</span> <input id="cloudDarkness" type="range" min="0" max="1" step="0.05" value="0"/></label>
+    <label><span id="label-cloud-cover">Cloud cover</span> <input id="cloudCover" class="weather-field" type="range" min="0" max="1" step="0.05" value="0"/></label>
+    <label><span id="label-cloud-darkness">Cloud darkness</span> <input id="cloudDarkness" class="weather-field" type="range" min="0" max="1" step="0.05" value="0"/></label>
     <label><span id="label-cloud-base">Cloud base</span>
-      <input id="cloudBase" type="number" min="0" step="50" placeholder="1000" title="Height of the cloud layer's base above the ground — decides whether the witness is under the deck or above it"/> m</label>
+      <input id="cloudBase" class="weather-field" type="number" min="0" step="50" placeholder="1000" title="Height of the cloud layer's base above the ground — decides whether the witness is under the deck or above it"/> m</label>
     <label><span id="label-precipitation-type">Precipitation</span>
-      <select id="precipitationType">
+      <select id="precipitationType" class="weather-field">
         <option id="option-precipitation-none" value="none">None</option>
         <option id="option-precipitation-rain" value="rain">Rain</option>
         <option id="option-precipitation-snow" value="snow">Snow</option>
         <option id="option-precipitation-hail" value="hail">Hail</option>
       </select>
     </label>
-    <label><span id="label-precipitation-intensity">Intensity</span> <input id="precipitationIntensity" type="range" min="0" max="1" step="0.05" value="0"/></label>
-    <label><span id="label-wind-direction">Wind direction</span> <input id="windDirection" type="number" min="0" max="360" step="1" value="0"/> &deg;</label>
-    <label><span id="label-wind-speed">Wind speed</span> <input id="windSpeed" type="number" min="0" max="30" step="0.5" value="0"/> m/s</label>
-    <label><span id="label-storm">Storm</span> <input id="storm" type="checkbox"/></label>
+    <label><span id="label-precipitation-intensity">Intensity</span> <input id="precipitationIntensity" class="weather-field" type="range" min="0" max="1" step="0.05" value="0"/></label>
+    <label><span id="label-wind-direction">Wind direction</span> <input id="windDirection" class="weather-field" type="number" min="0" max="360" step="1" value="0" title="The direction the wind blows TOWARD, clockwise from true north — the opposite of the meteorological convention a forecast uses (see Weather.windDirectionDeg)"/> &deg;</label>
+    <label><span id="label-wind-speed">Wind speed</span> <input id="windSpeed" class="weather-field" type="number" min="0" max="30" step="0.5" value="0"/> m/s</label>
+    <label><span id="label-storm">Storm</span> <input id="storm" class="weather-field" type="checkbox"/></label>
     <label><span id="label-lens-flare-brightness">Light intensity</span> <input id="lensFlareBrightness" type="range" min="0" max="3" step="0.1" value="1"/></label>
   </div>
 </details>
@@ -276,6 +311,107 @@ input.invalid {
   align-items: center;
   gap: 0.5em;
   flex-basis: 100%;
+}
+/* Same "one control, its own line" treatment as .record-row above, and for a stronger reason: this
+   row states whether everything below it in the group is the witness's word or a looked-up record,
+   so it has to read as a heading for them rather than as one more field wrapped in among them. */
+.weather-source-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  flex-basis: 100%;
+  flex-wrap: wrap;
+}
+/* A picker sitting inside a sentence ("2 places found according to [Nominatim]") rather than in a
+   settings drawer: who answered is part of the answer, and a credit nobody can act on is just fine
+   print. Sized down to the surrounding status text so it reads as part of it. */
+.inline-source {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35em;
+}
+.inline-source select {
+  font: inherit;
+  max-width: 14em;
+}
+/* Relief and imagery have no sentence to sit in, so they get their own row under the coordinates
+   they describe the ground of. */
+.terrain-source-rows {
+  display: flex;
+  align-items: center;
+  gap: 1em;
+  flex-basis: 100%;
+  flex-wrap: wrap;
+  font-size: 0.85em;
+  opacity: 0.8;
+}
+.terrain-source-rows label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+}
+.source-credit {
+  color: inherit;
+  text-decoration: underline dotted;
+}
+/* Same "one control, its own line" treatment as .record-row/.weather-source-row — the name and
+   what searching it resolved to belong together, above the coordinates they produce. */
+.place-search-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  flex-basis: 100%;
+  flex-wrap: wrap;
+}
+/* Wide enough for a real place name with its region and country, which is what gets stored (see
+   PlaceMatch.name) — a name short enough to fit a default input is exactly the ambiguous kind. */
+.place-name {
+  width: 18em;
+  font: inherit;
+}
+/* How many places matched, and the credit the data requires — quieter than the field it explains,
+   same role and styling as .weather-source/.apparent-size. */
+.place-status,
+.ground-elevation {
+  font-size: 0.85em;
+  opacity: 0.8;
+  white-space: nowrap;
+}
+.place-status a {
+  color: inherit;
+  text-decoration: underline dotted;
+}
+/* Says which record the locked fields came from, and when for — quieter than the fields it
+   explains, same role and styling as .apparent-size. The link goes to the exact request that
+   produced them, so the claim stays checkable rather than just asserted. */
+.weather-source {
+  font-size: 0.85em;
+  opacity: 0.8;
+}
+/* Takes the host page's own text color rather than its link color: this widget has no background
+   of its own (see input.invalid's comment on the same constraint), and a host's link blue against
+   a host's dark page was unreadable — the surrounding label color is legible wherever this is
+   embedded, by construction. The underline is what still reads as a link. */
+.weather-source a {
+  color: inherit;
+  text-decoration: underline dotted;
+}
+/* Locked because they were looked up, not because they're unavailable — so they stay exactly as
+   legible as the fields around them, and only the affordance goes away. The UA's own disabled
+   styling (grey text over a translucent grey fill, which on a dark host page turns into grey on
+   near-black) is meant to say "unavailable"; forcing the system Field/FieldText pair back says
+   "read-only" instead. -webkit-text-fill-color is needed alongside the color property: on Blink/WebKit it is
+   what actually paints a disabled control's text. Scoped by .weather-field rather than by the
+   group, since Circumstances also holds Light intensity, a view preference that is never locked. */
+.weather-field:disabled {
+  opacity: 1;
+  cursor: not-allowed;
+}
+input.weather-field[type="number"]:disabled,
+select.weather-field:disabled {
+  background-color: Field;
+  color: FieldText;
+  -webkit-text-fill-color: FieldText;
 }
 details {
   border: 1px solid #444;

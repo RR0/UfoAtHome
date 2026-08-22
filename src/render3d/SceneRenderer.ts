@@ -222,6 +222,19 @@ const CLOUD_OCCLUSION_MIN_ALPHA = 0.5
  * astronomically-positioned scene (unlike the compass HUD), but must never be hidden behind the
  * ground/terrain (irrelevant since they're always above it) and must stay under the compass labels. */
 const CLOUD_RENDER_ORDER = 5
+/**
+ * Above the terrain patch (1) and the cloud deck (5), below the compass HUD (10) — because falling
+ * precipitation is, by construction, the nearest thing in the scene to the witness's face.
+ *
+ * Not a nicety: the terrain patch's own material is `transparent` (it fades out at the patch edge,
+ * see TerrainMeshBuilder), so it lands in three.js's transparent pass alongside every precipitation
+ * material, where renderOrder — not distance — decides who draws first. At the default 0 the rain
+ * drew BEFORE the terrain, and since precipitation writes no depth (depthWrite:false, so overlapping
+ * drops don't clip each other), the terrain then painted straight over every drop in front of it.
+ * The symptom was rain visible against the sky and nowhere else: a downpour that stopped at the
+ * horizon.
+ */
+const PRECIPITATION_RENDER_ORDER = 6
 const CLOUD_LIGHT_COLOR: [number, number, number] = [0.92, 0.92, 0.95]
 const CLOUD_DARK_COLOR: [number, number, number] = [0.15, 0.15, 0.19]
 
@@ -517,7 +530,7 @@ export class SceneRenderer {
    * setTerrainOrigin's own doc comment for why that's the permanent fallback, not something this
    * replaces). Undefined until a real observer location resolves and the async build finishes. */
   private terrainMesh?: Mesh
-  private readonly terrainProviders: TerrainProviders
+  private terrainProviders: TerrainProviders
   private terrainOrigin?: { lat: number; lng: number }
   private terrainBuildToken = 0
   private terrainAttribution?: string
@@ -813,6 +826,21 @@ export class SceneRenderer {
    * isn't actively running at that moment (e.g. a scene sitting idle at t=0, never re-ticking after
    * the initial render that kicked the build off).
    */
+  /** Points the terrain at a different elevation/imagery source, and drops the patch already
+   * built so the next setTerrainOrigin() rebuilds from it — otherwise the new source would only
+   * take effect once the observer happened to move far enough to trigger a rebuild anyway (see
+   * setTerrainOrigin's own distance check), which for a stationary witness is never. Not readonly
+   * for exactly this: the recorder now lets the sources be chosen (see its Data sources group). */
+  setTerrainProviders(providers: TerrainProviders): void {
+    this.terrainProviders = providers
+    this.disposeMesh(this.terrainMesh)
+    this.terrainMesh = undefined
+    this.terrainOrigin = undefined
+    this.terrainAttribution = undefined
+    // Any build still in flight is about the old source now.
+    this.terrainBuildToken++
+  }
+
   setTerrainOrigin(lat?: number, lng?: number, onSettled?: () => void): void {
     if (lat === undefined || lng === undefined) return
     // How much ground the witness can actually see is what the patch has to cover: 900 m standing
@@ -1942,6 +1970,7 @@ export class SceneRenderer {
     })
     this.precipitationUniforms = uniforms
     const points = new Points(geometry, material)
+    points.renderOrder = PRECIPITATION_RENDER_ORDER
     this.scene.add(points)
     this.precipitationPoints = points
     this.precipitationPositions = positions
@@ -2120,6 +2149,7 @@ export class SceneRenderer {
       hazeColor: new Color(...this.baseFogColor)
     })
     this.rainLastVerticalFacing = -1 // forces the first updateRain call to (re)apply size/UV-squash
+    this.rainSystem.points.renderOrder = PRECIPITATION_RENDER_ORDER
     this.scene.add(this.rainSystem.points)
     this.buildRainSplashes()
   }
@@ -2168,6 +2198,9 @@ export class SceneRenderer {
       depthWrite: false // same overlapping-ripples reasoning as every other precipitation material
     })
     const points = new Points(geometry, material)
+    // Splashes land ON the ground, so they need to outdraw the terrain for the same reason the
+    // drops above them do.
+    points.renderOrder = PRECIPITATION_RENDER_ORDER
     this.scene.add(points)
     this.rainSplashSystem = { points, positions, life, duration, lifeAttribute }
   }

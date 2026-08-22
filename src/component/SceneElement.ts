@@ -1,6 +1,7 @@
 import { html, css } from "./sceneTemplate.js"
 import { UfoElement, registerUfo, UFO_ELEMENT_NAME } from "./UfoElement.js"
 import { SceneRenderer } from "../render3d/SceneRenderer.js"
+import type { TerrainProviders } from "../render3d/terrain/defaultTerrainProviders.js"
 import type { SceneAstronomy } from "../render3d/SceneRenderer.js"
 import { loadStarCatalog } from "../render3d/StarCatalog.js"
 import type { StarCatalog } from "../render3d/StarCatalog.js"
@@ -378,6 +379,12 @@ export class SceneElement extends HTMLElement {
    * corner label itself; a real-time pull (not push/cached) since it can resolve at any time. */
   get currentTerrainAttribution(): string | undefined {
     return this.sceneRenderer.currentTerrainAttribution
+  }
+
+  /** Relays a change of terrain source through to the renderer — see its setTerrainProviders.
+   * Same "expose the nested renderer to a composing wrapper" arrangement as the getters above. */
+  setTerrainProviders(providers: TerrainProviders): void {
+    this.sceneRenderer.setTerrainProviders(providers)
   }
 
   private resizeToStage(): void {

@@ -14,5 +14,27 @@
       { "t": 1800, "shapes": [{ "sourceId": "ufo-1", "shape": { "kind": "oval", "bounds": { "x": 416, "y": 166, "width": 48, "height": 28 }, "color": "#39ff14", "angle": 0, "transparency": 0.1, "haloScale": 1.3, "selected": false } }] },
       { "t": 2100, "shapes": [{ "sourceId": "ufo-1", "shape": { "kind": "oval", "bounds": { "x": 476, "y": 196, "width": 48, "height": 28 }, "color": "#39ff14", "angle": 0, "transparency": 0.4, "haloScale": 1, "selected": false } }] }
     ]
+  },
+  "weatherTrack": {
+    "keyframes": [
+      {
+        "t": 0,
+        "weather": {
+          "cloudCover": 0.28,
+          "cloudDarkness": 0.43342105263157904,
+          "cloudBaseM": 3500,
+          "precipitationType": "rain",
+          "precipitationIntensity": 0.11180339887498948,
+          "windDirectionDeg": 66,
+          "windSpeed": 1.97,
+          "storm": false
+        }
+      }
+    ]
+  },
+  "weatherSource": {
+    "id": "era5",
+    "name": "ERA5 (Open-Meteo)",
+    "url": "https://archive-api.open-meteo.com/v1/archive?latitude=45.188529&longitude=5.724524&start_date=1987-06-12&end_date=1987-06-12&hourly=cloud_cover%2Ccloud_cover_low%2Ccloud_cover_mid%2Ccloud_cover_high%2Cprecipitation%2Csnowfall%2Cweather_code%2Cwind_speed_10m%2Cwind_direction_10m%2Ctemperature_2m%2Cdew_point_2m&wind_speed_unit=ms&timezone=UTC"
   }
 }

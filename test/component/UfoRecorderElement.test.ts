@@ -3,6 +3,9 @@ import { register, ELEMENT_NAME } from "../../src/component/UfoRecorderElement.j
 import type { UfoRecorderElement } from "../../src/component/UfoRecorderElement.js"
 import type { PolygonShape, Shape } from "../../src/engine/shape/Shape.js"
 import { ShapeHandles } from "../../src/engine/shape/ShapeHandles.js"
+import type { WeatherProvider } from "../../src/engine/weather/WeatherProvider.js"
+import type { Weather } from "../../src/engine/model/Weather.js"
+import type { PlaceMatch, PlaceProvider } from "../../src/engine/place/PlaceProvider.js"
 
 register()
 
@@ -17,6 +20,7 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     resize(): void {}
     setObserverPose(): void {}
     setTerrainOrigin(): void {}
+    setTerrainProviders(): void {}
     get currentTerrainAttribution(): undefined {
       return undefined
     }
@@ -81,8 +85,15 @@ beforeAll(() => {
   } as unknown as typeof ResizeObserver
 })
 
-function mount(): UfoRecorderElement {
+/** Weather is looked up from a real meteorological record as soon as a recording states a date and
+ * a place (see UfoRecorderElement.inferWeather), so every editor mounted here gets a provider that
+ * answers "no record" — the suite must never reach the network, and the weather tests below
+ * substitute their own answers. */
+const NO_RECORD_PROVIDER: WeatherProvider = { getWeather: () => Promise.resolve(undefined) }
+
+function mount(weatherProvider: WeatherProvider = NO_RECORD_PROVIDER): UfoRecorderElement {
   const element = document.createElement(ELEMENT_NAME) as UfoRecorderElement
+  element.weatherProvider = weatherProvider
   document.body.appendChild(element)
   return element
 }
@@ -3718,6 +3729,7 @@ describe("UfoRecorderElement src attribute", () => {
     vi.stubGlobal("fetch", fetchMock)
 
     const element = document.createElement(ELEMENT_NAME) as UfoRecorderElement
+    element.weatherProvider = NO_RECORD_PROVIDER
     element.setAttribute("src", "/science/crypto/ufo/enquete/dossier/Socorro/sighting.json")
     document.body.appendChild(element)
     await new Promise(resolve => setTimeout(resolve, 0))
@@ -3786,5 +3798,761 @@ describe("UfoRecorderElement witness altitude", () => {
     }
 
     expect((element.shadowRoot!.getElementById("elevation") as HTMLInputElement).value).toBe("1500")
+  })
+})
+
+/**
+ * The Circumstances group is the one part of this editor that isn't testimony: weather is a
+ * measurable fact about a place at an instant, and the Location and Temporal groups already state
+ * both. So it is looked up from a real record and shown read-only on that basis — unless the
+ * witness takes the fields back, in which case their account outranks the record for good. See
+ * UfoRecorderElement.inferWeather and engine/weather/WeatherInference.ts.
+ */
+describe("UfoRecorderElement inferred weather", () => {
+  afterEach(() => {
+    document.body.innerHTML = ""
+    vi.unstubAllGlobals()
+  })
+
+  const SOURCE = { id: "era5", name: "ERA5 (Open-Meteo)", url: "https://example.org/archive?start_date=1965-07-01" }
+
+  /** Cloud cover sits on a step-0.05 range input, so the fixture uses values that survive the
+   * browser's own value sanitization unchanged. */
+  const ON_RECORD: Weather = {
+    cloudCover: 0.1,
+    cloudDarkness: 0.15,
+    cloudBaseM: 8000,
+    precipitationType: "none",
+    precipitationIntensity: 0,
+    windDirectionDeg: 229,
+    windSpeed: 1.5,
+    storm: false
+  }
+
+  function recordProvider(weather: Weather = ON_RECORD): WeatherProvider {
+    return {
+      getWeather: query =>
+        Promise.resolve({ source: SOURCE, samples: query.points.map(point => ({ time: point.time, weather })) })
+    }
+  }
+
+  function setInput(shadow: ShadowRoot, id: string, value: string): void {
+    const input = shadow.getElementById(id) as HTMLInputElement
+    input.value = value
+    input.dispatchEvent(new Event("input"))
+  }
+
+  /** States where and when the observation happened — everything the record needs to be asked. */
+  function stateDateAndPlace(element: UfoRecorderElement): void {
+    const shadow = element.shadowRoot!
+    setInput(shadow, "lat", "43.837")
+    setInput(shadow, "lng", "5.983")
+    setInput(shadow, "utcOffsetHours", "1")
+    setInput(shadow, "obs-time", "1965-07-01T05:00")
+  }
+
+  function weatherField(element: UfoRecorderElement, id: string): HTMLInputElement | HTMLSelectElement {
+    return element.shadowRoot!.getElementById(id) as HTMLInputElement | HTMLSelectElement
+  }
+
+  function sourceLink(element: UfoRecorderElement): HTMLAnchorElement {
+    return element.shadowRoot!.getElementById("weather-source-link") as HTMLAnchorElement
+  }
+
+  function sourceText(element: UfoRecorderElement): HTMLElement {
+    return element.shadowRoot!.getElementById("weather-source-text")!
+  }
+
+  it("looks the weather up as soon as the sighting says where and when", async () => {
+    const element = mount(recordProvider())
+    stateDateAndPlace(element)
+
+    await waitFor(() => element.sightingData.weatherSource !== undefined, 2000)
+    expect(element.sightingData.weatherSource).toEqual(SOURCE)
+    expect(element.sightingData.weatherTrack?.keyframes[0].weather.cloudCover).toBe(0.1)
+  })
+
+  it("shows the looked-up values, read-only, with the record and the instant they describe", async () => {
+    const element = mount(recordProvider())
+    stateDateAndPlace(element)
+    await waitFor(() => sourceLink(element).hidden === false, 2000)
+
+    expect((weatherField(element, "cloudCover") as HTMLInputElement).value).toBe("0.1")
+    expect((weatherField(element, "windSpeed") as HTMLInputElement).value).toBe("1.5")
+    for (const id of ["cloudCover", "cloudDarkness", "cloudBase", "precipitationType", "windSpeed", "storm"]) {
+      expect(weatherField(element, id).disabled).toBe(true)
+    }
+    expect(sourceLink(element).href).toBe(SOURCE.url)
+    // The record that answered is named by a picker beside the line, not baked into it.
+    expect((weatherField(element, "weatherSource") as HTMLSelectElement).value).toBe("era5")
+    // 05:00 on the UTC+1 clock the sighting declares — a wrong time zone shows up here first.
+    expect(sourceLink(element).textContent).toContain("1965-07-01 04:00 UTC")
+  })
+
+  it("leaves Light intensity alone — it's a view preference, not weather", async () => {
+    const element = mount(recordProvider())
+    stateDateAndPlace(element)
+    await waitFor(() => sourceLink(element).hidden === false, 2000)
+
+    expect((element.shadowRoot!.getElementById("lensFlareBrightness") as HTMLInputElement).disabled).toBe(false)
+  })
+
+  it("leaves the fields editable, and says why, when no record covers the sighting", async () => {
+    const element = mount()
+    stateDateAndPlace(element)
+
+    await waitFor(() => sourceText(element).textContent!.includes("No record"), 2000)
+    // Nothing is being claimed, so nothing is locked: a pre-1940 case is filled in by hand.
+    expect(weatherField(element, "cloudCover").disabled).toBe(false)
+    expect(element.sightingData.weatherSource).toBeUndefined()
+  })
+
+  it("says a lookup that couldn't be made isn't the same as no record existing", async () => {
+    const element = mount({ getWeather: () => Promise.reject(new Error("offline")) })
+    stateDateAndPlace(element)
+
+    await waitFor(() => sourceText(element).textContent!.includes("unreachable"), 2000)
+    expect(weatherField(element, "cloudCover").disabled).toBe(false)
+  })
+
+  it("states what's still missing before it can ask", () => {
+    const element = mount(recordProvider())
+
+    expect(sourceText(element).textContent).toContain("full date and a place")
+  })
+
+  it("hands the fields back to the witness on demand, keeping the record's values as a start", async () => {
+    const element = mount(recordProvider())
+    stateDateAndPlace(element)
+    await waitFor(() => element.sightingData.weatherSource !== undefined, 2000)
+
+    const inferredCheckbox = element.shadowRoot!.getElementById("weatherInferred") as HTMLInputElement
+    inferredCheckbox.checked = false
+    inferredCheckbox.dispatchEvent(new Event("change"))
+
+    expect(weatherField(element, "cloudCover").disabled).toBe(false)
+    expect((weatherField(element, "cloudCover") as HTMLInputElement).value).toBe("0.1")
+    // The values are no longer claimed as measurements — and no later lookup may overwrite them.
+    expect(element.sightingData.weatherSource).toBeUndefined()
+  })
+
+  it("never re-derives weather a witness declared", async () => {
+    const provider = recordProvider()
+    const getWeather = vi.spyOn(provider, "getWeather")
+    const element = mount(provider)
+    element.sightingData = {
+      version: 1,
+      time: { year: 1965, month: 7, day: 1, hour: 5, minute: 0, raw: "1965-07-01T05:00" },
+      utcOffsetHours: 1,
+      place: [{ lat: 43.837, lng: 5.983 }],
+      timeline: { keyframes: [] },
+      weatherTrack: { keyframes: [{ t: 0, weather: { ...ON_RECORD, cloudCover: 0.6, storm: true } }] }
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 900))
+    expect(getWeather).not.toHaveBeenCalled()
+    expect((weatherField(element, "cloudCover") as HTMLInputElement).value).toBe("0.6")
+    expect(weatherField(element, "cloudCover").disabled).toBe(false)
+  })
+
+  it("replays a recording's own stored record instead of looking it up again", async () => {
+    const provider = recordProvider()
+    const getWeather = vi.spyOn(provider, "getWeather")
+    const element = mount(provider)
+    element.sightingData = {
+      version: 1,
+      time: { year: 1965, month: 7, day: 1, hour: 5, minute: 0, raw: "1965-07-01T05:00" },
+      utcOffsetHours: 1,
+      place: [{ lat: 43.837, lng: 5.983 }],
+      timeline: { keyframes: [] },
+      weatherTrack: { keyframes: [{ t: 0, weather: { ...ON_RECORD, cloudCover: 0.45 } }] },
+      weatherSource: SOURCE
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 900))
+    // A published case file must replay identically offline, and years after it was authored.
+    expect(getWeather).not.toHaveBeenCalled()
+    expect((weatherField(element, "cloudCover") as HTMLInputElement).value).toBe("0.45")
+    expect(weatherField(element, "cloudCover").disabled).toBe(true)
+    expect(sourceLink(element).hidden).toBe(false)
+  })
+})
+
+/**
+ * Testimony names a place, it never gives coordinates — so the Location group leads with the name,
+ * and the latitude/longitude below are what searching it produces. See
+ * UfoRecorderElement.searchPlace and engine/place/PlaceProvider.ts.
+ */
+describe("UfoRecorderElement place search", () => {
+  afterEach(() => {
+    document.body.innerHTML = ""
+    vi.unstubAllGlobals()
+  })
+
+  const VALENSOLE = { name: "Valensole, Alpes-de-Haute-Provence, France", lat: 43.8379283, lng: 5.9839867 }
+  const SPRINGFIELDS = [
+    { name: "Springfield, Illinois, United States", lat: 39.8, lng: -89.6 },
+    { name: "Springfield, Massachusetts, United States", lat: 42.1, lng: -72.6 }
+  ]
+
+  function placeProvider(matches: PlaceMatch[]): PlaceProvider {
+    return {
+      attribution: { text: "© OpenStreetMap", url: "https://osm.org/copyright" },
+      search: () => Promise.resolve(matches),
+      reverse: () => Promise.resolve(matches[0])
+    }
+  }
+
+  function mountWith(matches: PlaceMatch[] | PlaceProvider): UfoRecorderElement {
+    const element = mount()
+    element.placeSearchProvider = Array.isArray(matches) ? placeProvider(matches) : matches
+    return element
+  }
+
+  function field(element: UfoRecorderElement, id: string): HTMLInputElement | HTMLSelectElement {
+    return element.shadowRoot!.getElementById(id) as HTMLInputElement | HTMLSelectElement
+  }
+
+  function statusText(element: UfoRecorderElement): string {
+    return element.shadowRoot!.getElementById("place-status-text")!.textContent!
+  }
+
+  async function searchFor(element: UfoRecorderElement, name: string): Promise<void> {
+    const input = field(element, "placeName") as HTMLInputElement
+    input.value = name
+    input.dispatchEvent(new Event("input"))
+    ;(element.shadowRoot!.getElementById("search-place") as HTMLButtonElement).click()
+    await waitFor(() => statusText(element) !== "" && !statusText(element).includes("Looking up"), 1000)
+  }
+
+  it("fills latitude and longitude from a searched name", async () => {
+    const element = mountWith([VALENSOLE])
+    await searchFor(element, "Valensole")
+
+    expect((field(element, "lat") as HTMLInputElement).value).toBe("43.8379283")
+    expect((field(element, "lng") as HTMLInputElement).value).toBe("5.9839867")
+    expect(element.sightingData.place).toEqual([{ lat: 43.8379283, lng: 5.9839867, name: VALENSOLE.name }])
+  })
+
+  it("replaces the typed name with the qualified one it actually resolved", async () => {
+    const element = mountWith([VALENSOLE])
+    await searchFor(element, "Valensole")
+
+    // The coordinates came from THAT place; leaving a vaguer name beside them would claim a
+    // precision the typed text never had.
+    expect((field(element, "placeName") as HTMLInputElement).value).toBe(VALENSOLE.name)
+  })
+
+  it("keyframes the observer pose, exactly as a hand-typed coordinate would", async () => {
+    const element = mountWith([VALENSOLE])
+    await searchFor(element, "Valensole")
+
+    expect(element.sightingData.witnessTrack?.keyframes[0].pose.lat).toBe(43.8379283)
+  })
+
+  it("offers every candidate when a name is ambiguous, and applies the best one", async () => {
+    const element = mountWith(SPRINGFIELDS)
+    await searchFor(element, "Springfield")
+
+    const picker = field(element, "placeMatch") as HTMLSelectElement
+    expect(element.shadowRoot!.getElementById("place-match-row")!.hidden).toBe(false)
+    expect([...picker.options].map(option => option.textContent)).toEqual(SPRINGFIELDS.map(match => match.name))
+    expect(statusText(element)).toContain("2")
+    expect((field(element, "lat") as HTMLInputElement).value).toBe("39.8")
+  })
+
+  it("moves the witness when another candidate is picked", async () => {
+    const element = mountWith(SPRINGFIELDS)
+    await searchFor(element, "Springfield")
+
+    const picker = field(element, "placeMatch") as HTMLSelectElement
+    picker.selectedIndex = 1
+    picker.dispatchEvent(new Event("change"))
+
+    expect((field(element, "lat") as HTMLInputElement).value).toBe("42.1")
+    expect(element.sightingData.place?.[0].name).toBe(SPRINGFIELDS[1].name)
+  })
+
+  it("says so when no place bears the name", async () => {
+    const element = mountWith([])
+    await searchFor(element, "Zzzzz")
+
+    expect(statusText(element)).toContain("No place")
+    expect(element.shadowRoot!.getElementById("place-match-row")!.hidden).toBe(true)
+  })
+
+  it("says a search that couldn't be made isn't the same as no such place", async () => {
+    const element = mountWith({
+      attribution: { text: "© OpenStreetMap", url: "https://osm.org/copyright" },
+      search: () => Promise.reject(new Error("offline")),
+      reverse: () => Promise.resolve(undefined)
+    })
+    await searchFor(element, "Valensole")
+
+    expect(statusText(element)).toContain("unavailable")
+  })
+
+  it("keeps a name no geocoder knows, typed by hand", () => {
+    const element = mountWith([])
+    const input = field(element, "placeName") as HTMLInputElement
+    input.value = "the lavender field east of the farm"
+    input.dispatchEvent(new Event("input"))
+    const lat = field(element, "lat") as HTMLInputElement
+    lat.value = "43.84"
+    lat.dispatchEvent(new Event("input"))
+    const lng = field(element, "lng") as HTMLInputElement
+    lng.value = "5.99"
+    lng.dispatchEvent(new Event("input"))
+
+    expect(element.sightingData.place?.[0].name).toBe("the lavender field east of the farm")
+  })
+
+  it("restores the place name a recording carries", () => {
+    const element = mountWith([])
+    element.sightingData = {
+      version: 1,
+      place: [{ lat: 34.058, lng: -106.891, name: "Socorro, New Mexico, United States" }],
+      timeline: { keyframes: [] }
+    }
+
+    expect((field(element, "placeName") as HTMLInputElement).value).toBe("Socorro, New Mexico, United States")
+  })
+
+  it("searches only when asked, never as the name is typed", async () => {
+    const search = vi.fn().mockResolvedValue([VALENSOLE])
+    const element = mountWith({ attribution: { text: "©", url: "https://example.org" }, search, reverse: () => Promise.resolve(undefined) })
+    const input = field(element, "placeName") as HTMLInputElement
+    for (const text of ["V", "Va", "Val"]) {
+      input.value = text
+      input.dispatchEvent(new Event("input"))
+    }
+    await new Promise(resolve => setTimeout(resolve, 800))
+
+    // Nominatim's usage policy rules out per-keystroke autocomplete — see its provider.
+    expect(search).not.toHaveBeenCalled()
+  })
+
+  it("searches on Enter as well as on the button", async () => {
+    const search = vi.fn().mockResolvedValue([VALENSOLE])
+    const element = mountWith({ attribution: { text: "©", url: "https://example.org" }, search, reverse: () => Promise.resolve(undefined) })
+    const input = field(element, "placeName") as HTMLInputElement
+    input.value = "Valensole"
+    input.dispatchEvent(new Event("input"))
+    input.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }))
+    await waitFor(() => search.mock.calls.length > 0, 1000)
+
+    expect(search).toHaveBeenCalledWith("Valensole", expect.anything())
+  })
+})
+
+/**
+ * `durationSeconds` and `endTime` are two ways of saying one thing, and sightingDurationMs gives
+ * the first precedence — so editing "Observation end" on any recording carrying a durationSeconds
+ * (which is every published case file) used to do nothing at all, silently. The more recent edit
+ * wins now. See UfoRecorderElement.dropDurationOutrankedByDates.
+ */
+describe("UfoRecorderElement duration and dates", () => {
+  afterEach(() => {
+    document.body.innerHTML = ""
+  })
+
+  function setInput(element: UfoRecorderElement, id: string, value: string): void {
+    const input = element.shadowRoot!.getElementById(id) as HTMLInputElement
+    input.value = value
+    input.dispatchEvent(new Event("input"))
+  }
+
+  function duration(element: UfoRecorderElement): string {
+    return (element.shadowRoot!.getElementById("durationSeconds") as HTMLInputElement).value
+  }
+
+  it("derives the duration from a start and an end", () => {
+    const element = mount()
+    setInput(element, "obs-time", "1965-07-01T05:45")
+    setInput(element, "obs-end-time", "1965-07-01T05:50")
+
+    expect(duration(element)).toBe("300")
+  })
+
+  it("lets a new end time override a duration that was already stated", () => {
+    const element = mount()
+    setInput(element, "obs-time", "1965-07-01T05:45")
+    setInput(element, "durationSeconds", "42")
+    setInput(element, "obs-end-time", "1965-07-01T06:00")
+
+    expect(duration(element)).toBe("900")
+    expect(element.sightingData.durationSeconds).toBeUndefined()
+  })
+
+  it("lets a new duration override the dates right back", () => {
+    const element = mount()
+    setInput(element, "obs-time", "1965-07-01T05:45")
+    setInput(element, "obs-end-time", "1965-07-01T06:00")
+    setInput(element, "durationSeconds", "7")
+
+    expect(element.sightingData.durationSeconds).toBe(7)
+  })
+
+  it("keeps a stated duration when the dates are too imprecise to replace it", () => {
+    const element = mount()
+    setInput(element, "obs-time", "1965-07-01T05:45")
+    setInput(element, "durationSeconds", "42")
+    // Known to the month only: there is no exact length to subtract here, so wiping the explicit
+    // one would leave the recording with no duration at all.
+    setInput(element, "obs-end-time", "1965-07")
+
+    expect(duration(element)).toBe("42")
+    expect(element.sightingData.durationSeconds).toBe(42)
+  })
+
+  it("overrides a duration a loaded recording carried, once its end time is edited", () => {
+    const element = mount()
+    element.sightingData = {
+      version: 1,
+      time: { year: 1948, month: 7, day: 24, hour: 2, minute: 45, raw: "1948-07-24T02:45" },
+      durationSeconds: 10,
+      timeline: { keyframes: [] }
+    }
+    setInput(element, "obs-end-time", "1948-07-24T02:50")
+
+    expect(duration(element)).toBe("300")
+  })
+})
+
+/**
+ * The credits became pickers, sitting where the data is reported — "2 places found according to
+ * [Nominatim]" — because which source answered is part of the answer. See
+ * engine/source/DataSource.ts and UfoRecorderElement.sourcePicker.
+ */
+describe("UfoRecorderElement data sources", () => {
+  afterEach(() => {
+    document.body.innerHTML = ""
+  })
+
+  function select(element: UfoRecorderElement, kind: string): HTMLSelectElement {
+    return element.shadowRoot!.getElementById(`${kind}Source`) as HTMLSelectElement
+  }
+
+  function creditNextTo(select: HTMLSelectElement): HTMLAnchorElement {
+    return select.parentElement!.querySelector(".source-credit") as HTMLAnchorElement
+  }
+
+  it("offers a picker for every kind of real-world data it pulls in", () => {
+    const element = mount()
+    for (const kind of ["place", "weather", "elevation", "imagery"]) {
+      expect(select(element, kind)).not.toBeNull()
+    }
+  })
+
+  it("puts the geocoder's picker in the sentence reporting what it found", async () => {
+    const element = mount()
+    element.placeSearchProvider = {
+      attribution: { text: "© OpenStreetMap", url: "https://osm.org/copyright" },
+      search: () => Promise.resolve([{ name: "Valensole, France", lat: 43.8, lng: 5.9 }]),
+      reverse: () => Promise.resolve(undefined)
+    }
+    const row = element.shadowRoot!.getElementById("place-source-row")!
+    // Nothing found yet is nothing to attribute.
+    expect(row.hidden).toBe(true)
+
+    const input = element.shadowRoot!.getElementById("placeName") as HTMLInputElement
+    input.value = "Valensole"
+    input.dispatchEvent(new Event("input"))
+    ;(element.shadowRoot!.getElementById("search-place") as HTMLButtonElement).click()
+    await waitFor(() => !row.hidden, 1000)
+
+    expect(element.shadowRoot!.getElementById("place-status-text")!.textContent).toContain("1")
+    expect(row.textContent).toContain("according to")
+    expect(row.querySelector("select")!.value).toBe("nominatim")
+  })
+
+  it("carries each source's own attribution beside its picker", () => {
+    const element = mount()
+    const credits = [...element.shadowRoot!.querySelectorAll(".source-credit")] as HTMLAnchorElement[]
+    const text = credits.map(credit => credit.textContent).join(" ")
+
+    expect(text).toContain("OpenStreetMap")
+    expect(text).toContain("Copernicus")
+    expect(credits.every(credit => credit.href.startsWith("http"))).toBe(true)
+  })
+
+  it("swaps the attribution when a different source is picked", () => {
+    const element = mount()
+    const imagery = select(element, "imagery")
+    expect(creditNextTo(imagery).textContent).toContain("Esri")
+
+    imagery.value = "eox-s2cloudless"
+    imagery.dispatchEvent(new Event("change"))
+
+    expect(creditNextTo(imagery).textContent).toContain("EOx")
+  })
+
+  it("keeps every option's attribution honest — a picker that credited nobody would be worse than a static line", () => {
+    const element = mount()
+    for (const kind of ["place", "weather", "elevation", "imagery"]) {
+      expect(select(element, kind).options.length).toBeGreaterThan(0)
+      expect(creditNextTo(select(element, kind)).textContent!.length).toBeGreaterThan(0)
+    }
+  })
+})
+
+/**
+ * An hour of time zone is an hour of Earth's rotation and a different row of the weather record,
+ * and both obey what is declared here in silence — so a value that cannot belong to the declared
+ * longitude has to say so. See UfoRecorderElement.updateUtcOffsetValidity.
+ */
+describe("UfoRecorderElement time zone", () => {
+  afterEach(() => {
+    document.body.innerHTML = ""
+  })
+
+  function setInput(element: UfoRecorderElement, id: string, value: string): void {
+    const input = element.shadowRoot!.getElementById(id) as HTMLInputElement
+    input.value = value
+    input.dispatchEvent(new Event("input"))
+  }
+
+  function utcOffset(element: UfoRecorderElement): HTMLInputElement {
+    return element.shadowRoot!.getElementById("utcOffsetHours") as HTMLInputElement
+  }
+
+  it("flags a time zone no country has ever placed on that longitude", () => {
+    const element = mount()
+    setInput(element, "lat", "48.892")
+    setInput(element, "lng", "2.207")
+    setInput(element, "utcOffsetHours", "-6")
+
+    expect(utcOffset(element).classList.contains("invalid")).toBe(true)
+    expect(utcOffset(element).title).toContain("UTC+0")
+  })
+
+  it("stays silent on legal time that merely departs from solar time", () => {
+    const element = mount()
+    setInput(element, "lat", "43.837")
+    setInput(element, "lng", "5.983")
+    // France really was on UTC+1 in 1965, an hour off its own meridian.
+    setInput(element, "utcOffsetHours", "1")
+
+    expect(utcOffset(element).classList.contains("invalid")).toBe(false)
+  })
+
+  it("clears the flag once the place it contradicted moves", () => {
+    const element = mount()
+    setInput(element, "lat", "48.892")
+    setInput(element, "lng", "2.207")
+    setInput(element, "utcOffsetHours", "-6")
+    expect(utcOffset(element).classList.contains("invalid")).toBe(true)
+
+    setInput(element, "lng", "-106.891")
+
+    expect(utcOffset(element).classList.contains("invalid")).toBe(false)
+  })
+
+  it("resyncs from a loaded recording instead of leaving the previous one's zone on screen", () => {
+    const element = mount()
+    setInput(element, "utcOffsetHours", "-6")
+    element.sightingData = {
+      version: 1,
+      time: { year: 1965, month: 7, day: 1, hour: 5, minute: 45, raw: "1965-07-01T05:45" },
+      utcOffsetHours: 1,
+      place: [{ lat: 43.837, lng: 5.993 }],
+      timeline: { keyframes: [] }
+    }
+
+    // The number shown described a sighting the editor was no longer holding.
+    expect(utcOffset(element).value).toBe("1")
+  })
+
+  it("empties the field for a recording that declares no zone at all", () => {
+    const element = mount()
+    setInput(element, "utcOffsetHours", "-6")
+    element.sightingData = { version: 1, timeline: { keyframes: [] } }
+
+    expect(utcOffset(element).value).toBe("")
+  })
+})
+
+/**
+ * The Location group's two halves state one thing between them, so neither may drift: a name
+ * resolved from a search follows coordinates edited by hand, and the altitude is measured from the
+ * ground that location actually has. See UfoRecorderElement.schedulePlaceReverse /
+ * applyGroundElevation.
+ */
+describe("UfoRecorderElement location coherence", () => {
+  afterEach(() => {
+    document.body.innerHTML = ""
+  })
+
+  const VALENSOLE = { name: "Valensole, Alpes-de-Haute-Provence, France", lat: 43.837, lng: 5.983 }
+  const RIEZ = { name: "Riez, Alpes-de-Haute-Provence, France", lat: 43.817, lng: 6.093 }
+
+  function setInput(element: UfoRecorderElement, id: string, value: string): void {
+    const input = element.shadowRoot!.getElementById(id) as HTMLInputElement
+    input.value = value
+    input.dispatchEvent(new Event("input"))
+  }
+
+  function placeName(element: UfoRecorderElement): HTMLInputElement {
+    return element.shadowRoot!.getElementById("placeName") as HTMLInputElement
+  }
+
+  async function searchValensole(element: UfoRecorderElement, reverse: () => Promise<PlaceMatch | undefined>): Promise<void> {
+    element.placeSearchProvider = {
+      attribution: { text: "© OpenStreetMap", url: "https://osm.org/copyright" },
+      search: () => Promise.resolve([VALENSOLE]),
+      reverse
+    }
+    const input = placeName(element)
+    input.value = "Valensole"
+    input.dispatchEvent(new Event("input"))
+    ;(element.shadowRoot!.getElementById("search-place") as HTMLButtonElement).click()
+    await waitFor(() => input.value === VALENSOLE.name, 1000)
+  }
+
+  it("re-derives the shown name when the coordinates are moved by hand", async () => {
+    const element = mount()
+    await searchValensole(element, () => Promise.resolve(RIEZ))
+
+    setInput(element, "lat", "43.817")
+    setInput(element, "lng", "6.093")
+    await waitFor(() => placeName(element).value === RIEZ.name, 3000)
+
+    expect(element.sightingData.place?.[0].name).toBe(RIEZ.name)
+  })
+
+  it("clears a name the coordinates have moved away from any place at all", async () => {
+    const element = mount()
+    await searchValensole(element, () => Promise.resolve(undefined))
+
+    setInput(element, "lat", "0")
+    setInput(element, "lng", "-30")
+    await waitFor(() => placeName(element).value === "", 3000)
+
+    // A name left describing somewhere the sighting is not at would be worse than none.
+    expect(element.sightingData.place?.[0].name).toBeUndefined()
+  })
+
+  it("leaves a name the witness typed themselves alone", async () => {
+    const reverse = vi.fn().mockResolvedValue(RIEZ)
+    const element = mount()
+    element.placeSearchProvider = {
+      attribution: { text: "© OpenStreetMap", url: "https://osm.org/copyright" },
+      search: () => Promise.resolve([]),
+      reverse
+    }
+    const input = placeName(element)
+    input.value = "the lavender field east of the farm"
+    input.dispatchEvent(new Event("input"))
+    setInput(element, "lat", "43.817")
+    setInput(element, "lng", "6.093")
+    await new Promise(resolve => setTimeout(resolve, 1200))
+
+    // Their words describe a place no gazetteer lists; replacing them would lose the testimony.
+    expect(reverse).not.toHaveBeenCalled()
+    expect(placeName(element).value).toBe("the lavender field east of the farm")
+  })
+
+  it("doesn't re-ask about a move too small to be a different place", async () => {
+    const reverse = vi.fn().mockResolvedValue(RIEZ)
+    const element = mount()
+    await searchValensole(element, reverse)
+
+    // ~1 m: finer than any place name is.
+    setInput(element, "lat", "43.83701")
+    await new Promise(resolve => setTimeout(resolve, 1200))
+
+    expect(reverse).not.toHaveBeenCalled()
+  })
+})
+
+/**
+ * A time zone is a rule, and the number it produces depends on the date it is asked about — summer
+ * time included, and as it was then. See engine/time/TimeZones.ts.
+ */
+describe("UfoRecorderElement time zone picker", () => {
+  afterEach(() => {
+    document.body.innerHTML = ""
+  })
+
+  function setInput(element: UfoRecorderElement, id: string, value: string): void {
+    const input = element.shadowRoot!.getElementById(id) as HTMLInputElement
+    input.value = value
+    input.dispatchEvent(new Event("input"))
+  }
+
+  function pickZone(element: UfoRecorderElement, zone: string): void {
+    const select = element.shadowRoot!.getElementById("timeZone") as HTMLSelectElement
+    select.value = zone
+    select.dispatchEvent(new Event("change"))
+  }
+
+  function offset(element: UfoRecorderElement): HTMLInputElement {
+    return element.shadowRoot!.getElementById("utcOffsetHours") as HTMLInputElement
+  }
+
+  it("offers the platform's zones alongside a plain entered offset", () => {
+    const element = mount()
+    const options = [...(element.shadowRoot!.getElementById("timeZone") as HTMLSelectElement).options]
+
+    expect(options[0].value).toBe("")
+    expect(options.map(option => option.value)).toContain("Europe/Paris")
+  })
+
+  it("derives the offset from the zone's rules at the observation's own date", () => {
+    const element = mount()
+    setInput(element, "obs-time", "1965-07-01T05:45")
+    pickZone(element, "Europe/Paris")
+
+    // France reintroduced summer time only in 1976 — July 1965 was UTC+1.
+    expect(element.sightingData.utcOffsetHours).toBe(1)
+    expect(offset(element).value).toBe("1")
+  })
+
+  it("re-derives it when the date moves to the other side of a summer-time rule", () => {
+    const element = mount()
+    setInput(element, "obs-time", "1965-07-01T05:45")
+    pickZone(element, "Europe/Paris")
+    expect(element.sightingData.utcOffsetHours).toBe(1)
+
+    setInput(element, "obs-time", "2026-07-01T05:45")
+
+    expect(element.sightingData.utcOffsetHours).toBe(2)
+  })
+
+  it("stops the offset being typed while a zone is deciding it, and hands it back when none is", () => {
+    const element = mount()
+    setInput(element, "obs-time", "1965-07-01T05:45")
+    pickZone(element, "Europe/Paris")
+    expect(offset(element).readOnly).toBe(true)
+
+    pickZone(element, "")
+
+    expect(offset(element).readOnly).toBe(false)
+    // The zone's last answer stays as the witness's starting point.
+    expect(element.sightingData.utcOffsetHours).toBe(1)
+    expect(element.sightingData.timeZone).toBeUndefined()
+  })
+
+  it("records the rule alongside the number it produced", () => {
+    const element = mount()
+    setInput(element, "obs-time", "1965-07-01T05:45")
+    pickZone(element, "Europe/Paris")
+
+    expect(element.sightingData.timeZone).toBe("Europe/Paris")
+    expect(element.sightingData.utcOffsetHours).toBe(1)
+  })
+
+  it("restores a loaded recording's zone", () => {
+    const element = mount()
+    element.sightingData = {
+      version: 1,
+      time: { year: 1965, month: 7, day: 1, hour: 5, minute: 45, raw: "1965-07-01T05:45" },
+      utcOffsetHours: 1,
+      timeZone: "Europe/Paris",
+      timeline: { keyframes: [] }
+    }
+
+    expect((element.shadowRoot!.getElementById("timeZone") as HTMLSelectElement).value).toBe("Europe/Paris")
+    expect(offset(element).readOnly).toBe(true)
   })
 })

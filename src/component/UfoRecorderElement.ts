@@ -33,6 +33,20 @@ import {
   resolveObserverPoseAt
 } from "../engine/model/Sighting.js"
 import type { SightingTime } from "../engine/model/Sighting.js"
+import { WeatherInference } from "../engine/weather/WeatherInference.js"
+import type { WeatherInferenceResult } from "../engine/weather/WeatherInference.js"
+import { defaultWeatherProvider } from "../engine/weather/defaultWeatherProvider.js"
+import type { WeatherProvider } from "../engine/weather/WeatherProvider.js"
+import { defaultPlaceProvider } from "../engine/place/defaultPlaceProvider.js"
+import { PLACE_SOURCES } from "../engine/place/placeSources.js"
+import { WEATHER_SOURCES } from "../engine/weather/weatherSources.js"
+import { ELEVATION_SOURCES, IMAGERY_SOURCES } from "../render3d/terrain/terrainSources.js"
+import { GroundElevation } from "../render3d/terrain/ElevationProvider.js"
+import { TimeZones } from "../engine/time/TimeZones.js"
+import { dataSourceById } from "../engine/source/DataSource.js"
+import type { DataSource } from "../engine/source/DataSource.js"
+import type { PlaceMatch, PlaceProvider } from "../engine/place/PlaceProvider.js"
+import { sightingTimeToDate } from "../engine/astronomy/CelestialPositions.js"
 import { selectLocale } from "../i18n/locale.js"
 import { loadUfoRecorderMessages, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
 import type { UfoLanguage } from "./messages/index.js"
@@ -43,6 +57,28 @@ registerUfo()
 registerScene()
 
 const DEFAULT_SHAPE_SIZE = { width: 48, height: 28 }
+/** How long a date/place edit must settle before the weather record is looked up again. Long
+ * enough that typing a latitude digit by digit is one request, not six — the values it asks about
+ * only become meaningful once the field is finished anyway. */
+const WEATHER_LOOKUP_DEBOUNCE_MS = 600
+
+/** How long a coordinate edit must settle before the place name is re-derived from it. Longer than
+ * the weather's: this one asks Nominatim, which asks not to be polled (see its provider), and a
+ * latitude typed digit by digit passes through several perfectly real places on the way. */
+const PLACE_REVERSE_DEBOUNCE_MS = 900
+
+/** Below this, a coordinate change is the same spot — the ~11 m a fourth decimal of latitude buys,
+ * which is finer than any place name is. Keeps a re-render or a rounding write from asking again. */
+const SAME_PLACE_DEG = 0.0002
+
+/** Same restraint as the reverse lookup, and for the same reason: a latitude typed digit by digit
+ * would otherwise fetch a tile per keystroke. */
+const GROUND_ELEVATION_DEBOUNCE_MS = 900
+
+/** How far a declared legal time zone may sit from its own longitude's solar time before the
+ * recording is stating something no country has ever done. China's western edge, the widest real
+ * case, is about 3 h — see updateUtcOffsetValidity on why this errs so far toward silence. */
+const MAX_LEGAL_SOLAR_OFFSET_GAP_HOURS = 3
 /** Mouse-drag-to-look sensitivity for the "landscape drag" — see beginCameraDrag. A full drag
  * across the canvas's own 640px internal width is ~130deg, a reasonable full sweep without being
  * so twitchy that fine-tuning a heading/pitch by hand becomes fiddly. */
@@ -120,6 +156,8 @@ export class UfoRecorderElement extends HTMLElement {
    * its on-screen size computable instead of eyeballed (see ApparentSize/updatePhysicalExtent).
    * apparentSizeOutput reads back what they actually produce. */
   private readonly utcOffsetInput: HTMLInputElement
+  private readonly timeZoneSelect: HTMLSelectElement
+  private readonly timeZones = new TimeZones()
   private readonly objectSizeInput: HTMLInputElement
   private readonly objectDistanceInput: HTMLInputElement
   private readonly apparentSizeOutput: HTMLElement
@@ -151,11 +189,35 @@ export class UfoRecorderElement extends HTMLElement {
   private readonly importFileInput: HTMLInputElement
   private readonly importUrlInput: HTMLInputElement
   private readonly importUrlButton: HTMLButtonElement
+  private readonly placeNameInput: HTMLInputElement
+  private readonly searchPlaceButton: HTMLButtonElement
+  private readonly placeMatchRow: HTMLElement
+  private readonly placeMatchSelect: HTMLSelectElement
+  private readonly placeStatusText: HTMLElement
+  /** Swappable for tests and for any embedder wanting a different geocoder — the element itself
+   * only ever names the interface, same as for weather and terrain. */
+  private placeProvider: PlaceProvider = defaultPlaceProvider()
+  /** The candidates the last search returned, in the order the picker lists them. */
+  private placeMatches: PlaceMatch[] = []
+  /** Bumped per search so a slow answer to an old name can never land on a newer one. Shared with
+   * the reverse lookup, which asks the same question the other way round. */
+  private placeSearchToken = 0
+  private placeReverseTimer?: ReturnType<typeof setTimeout>
+  /** The coordinates the displayed name is known to describe — what tells a real move apart from
+   * this element writing back the coordinates it just resolved (see applyPlaceMatch). */
+  private namedCoordinates?: { lat: number; lng: number }
   private readonly latInput: HTMLInputElement
   private readonly lngInput: HTMLInputElement
   private readonly headingInput: HTMLInputElement
   private readonly pitchInput: HTMLInputElement
   private readonly elevationInput: HTMLInputElement
+  private readonly groundElevationOutput: HTMLElement
+  /** The ground's own height above sea level at the current location, once it is known — what the
+   * Altitude field is measured from (see applyGroundElevation). Undefined while it isn't known, and
+   * then the field is a plain height above an unstated datum, exactly as it always was. */
+  private groundElevationM?: number
+  private groundElevationTimer?: ReturnType<typeof setTimeout>
+  private groundElevationToken = 0
   private readonly obsTimeInput: HTMLInputElement
   private readonly obsEndTimeInput: HTMLInputElement
   private readonly witnessIdInput: HTMLInputElement
@@ -174,6 +236,27 @@ export class UfoRecorderElement extends HTMLElement {
   private readonly windDirectionInput: HTMLInputElement
   private readonly windSpeedInput: HTMLInputElement
   private readonly stormInput: HTMLInputElement
+  private readonly weatherInferredInput: HTMLInputElement
+  private readonly weatherSourceText: HTMLElement
+  private readonly weatherSourceLink: HTMLAnchorElement
+  /** Every field the weather record itself provides — the ones locked while it does, and the ones
+   * whose edits write a keyframe while it doesn't. Excludes Light intensity, which sits in the
+   * same group but is a view preference (see lensFlareBrightnessInput below). */
+  private readonly weatherFields: (HTMLInputElement | HTMLSelectElement)[]
+  /** Swappable for tests and for any embedder wanting a different record — the element itself only
+   * ever names the interface, same as SceneRenderer does for terrain. Rebuilds the inference so a
+   * provider set after construction is the one actually used. */
+  private weatherInference = new WeatherInference(defaultWeatherProvider())
+  private weatherLookupTimer?: ReturnType<typeof setTimeout>
+  /** Bumped per lookup so a slow answer to an old date can never land on a newer one. */
+  private weatherLookupToken = 0
+  private weatherLookupPending = false
+  /** The last answer, kept so the status line can be re-rendered (on a language change, on a
+   * playhead move) without asking the record again. */
+  private weatherLookupResult?: WeatherInferenceResult
+  /** The seekable span the current weather track was laid out against — see
+   * ensureWeatherTrackSpan for the freeze this catches. */
+  private weatherTrackSpan?: number
   // View preferences, not sighting data — unlike stormInput/weather's other fields, neither is
   // read by getWeather()/restored from a loaded sighting; they just directly set SceneElement's
   // own lens-flare-brightness/lens-flare-intensity attributes. Kept as two independent continuous
@@ -196,6 +279,14 @@ export class UfoRecorderElement extends HTMLElement {
   private readonly labelObjectDistance: HTMLElement
   private readonly labelSamplingRate: HTMLElement
   private readonly labelDuration: HTMLElement
+  private readonly placeSourceRow: HTMLElement
+  private readonly weatherSourceRow: HTMLElement
+  private readonly terrainSourceRows: HTMLElement
+  /** Which entry of each registry is live — held here rather than read back off the pickers so
+   * rebuilding the rows (a language change) can restore the selection. */
+  private readonly chosenSourceId = new Map<string, string>()
+  private readonly labelPlaceName: HTMLElement
+  private readonly labelPlaceMatch: HTMLElement
   private readonly labelLatitude: HTMLElement
   private readonly labelLongitude: HTMLElement
   private readonly labelHeading: HTMLElement
@@ -228,6 +319,7 @@ export class UfoRecorderElement extends HTMLElement {
   private readonly labelWindDirection: HTMLElement
   private readonly labelWindSpeed: HTMLElement
   private readonly labelStorm: HTMLElement
+  private readonly labelWeatherInferred: HTMLElement
   private readonly labelLensFlareBrightness: HTMLElement
   private readonly labelCameraDevice: HTMLElement
   private readonly optionPrecipitationNone: HTMLElement
@@ -448,6 +540,7 @@ export class UfoRecorderElement extends HTMLElement {
     this.sourceSelect = this.shadow.getElementById("source") as HTMLSelectElement
     this.shapeTitleInput = this.shadow.getElementById("shapeTitle") as HTMLInputElement
     this.utcOffsetInput = this.shadow.getElementById("utcOffsetHours") as HTMLInputElement
+    this.timeZoneSelect = this.shadow.getElementById("timeZone") as HTMLSelectElement
     this.objectSizeInput = this.shadow.getElementById("objectSize") as HTMLInputElement
     this.objectDistanceInput = this.shadow.getElementById("objectDistance") as HTMLInputElement
     this.apparentSizeOutput = this.shadow.getElementById("apparent-size")!
@@ -475,11 +568,17 @@ export class UfoRecorderElement extends HTMLElement {
     this.importFileInput = this.shadow.getElementById("import-file") as HTMLInputElement
     this.importUrlInput = this.shadow.getElementById("import-url") as HTMLInputElement
     this.importUrlButton = this.shadow.getElementById("import-url-button") as HTMLButtonElement
+    this.placeNameInput = this.shadow.getElementById("placeName") as HTMLInputElement
+    this.searchPlaceButton = this.shadow.getElementById("search-place") as HTMLButtonElement
+    this.placeMatchRow = this.shadow.getElementById("place-match-row")!
+    this.placeMatchSelect = this.shadow.getElementById("placeMatch") as HTMLSelectElement
+    this.placeStatusText = this.shadow.getElementById("place-status-text")!
     this.latInput = this.shadow.getElementById("lat") as HTMLInputElement
     this.lngInput = this.shadow.getElementById("lng") as HTMLInputElement
     this.headingInput = this.shadow.getElementById("heading") as HTMLInputElement
     this.pitchInput = this.shadow.getElementById("pitch") as HTMLInputElement
     this.elevationInput = this.shadow.getElementById("elevation") as HTMLInputElement
+    this.groundElevationOutput = this.shadow.getElementById("ground-elevation")!
     this.obsTimeInput = this.shadow.getElementById("obs-time") as HTMLInputElement
     this.obsEndTimeInput = this.shadow.getElementById("obs-end-time") as HTMLInputElement
     this.witnessIdInput = this.shadow.getElementById("witnessId") as HTMLInputElement
@@ -498,6 +597,19 @@ export class UfoRecorderElement extends HTMLElement {
     this.windDirectionInput = this.shadow.getElementById("windDirection") as HTMLInputElement
     this.windSpeedInput = this.shadow.getElementById("windSpeed") as HTMLInputElement
     this.stormInput = this.shadow.getElementById("storm") as HTMLInputElement
+    this.weatherInferredInput = this.shadow.getElementById("weatherInferred") as HTMLInputElement
+    this.weatherSourceText = this.shadow.getElementById("weather-source-text")!
+    this.weatherSourceLink = this.shadow.getElementById("weather-source-link") as HTMLAnchorElement
+    this.weatherFields = [
+      this.cloudCoverInput,
+      this.cloudDarknessInput,
+      this.cloudBaseInput,
+      this.precipitationTypeSelect,
+      this.precipitationIntensityInput,
+      this.windDirectionInput,
+      this.windSpeedInput,
+      this.stormInput
+    ]
     this.lensFlareBrightnessInput = this.shadow.getElementById("lensFlareBrightness") as HTMLInputElement
     this.cameraDeviceInput = this.shadow.getElementById("cameraDevice") as HTMLInputElement
     this.labelColor = this.shadow.getElementById("label-color")!
@@ -510,6 +622,11 @@ export class UfoRecorderElement extends HTMLElement {
     this.labelObjectDistance = this.shadow.getElementById("label-object-distance")!
     this.labelSamplingRate = this.shadow.getElementById("label-sampling-rate")!
     this.labelDuration = this.shadow.getElementById("label-duration")!
+    this.placeSourceRow = this.shadow.getElementById("place-source-row")!
+    this.weatherSourceRow = this.shadow.getElementById("weather-source-row")!
+    this.terrainSourceRows = this.shadow.getElementById("terrain-source-rows")!
+    this.labelPlaceName = this.shadow.getElementById("label-place-name")!
+    this.labelPlaceMatch = this.shadow.getElementById("label-place-match")!
     this.labelLatitude = this.shadow.getElementById("label-lat")!
     this.labelLongitude = this.shadow.getElementById("label-lng")!
     this.labelHeading = this.shadow.getElementById("label-heading")!
@@ -542,6 +659,7 @@ export class UfoRecorderElement extends HTMLElement {
     this.labelWindDirection = this.shadow.getElementById("label-wind-direction")!
     this.labelWindSpeed = this.shadow.getElementById("label-wind-speed")!
     this.labelStorm = this.shadow.getElementById("label-storm")!
+    this.labelWeatherInferred = this.shadow.getElementById("label-weather-inferred")!
     this.labelLensFlareBrightness = this.shadow.getElementById("label-lens-flare-brightness")!
     this.labelCameraDevice = this.shadow.getElementById("label-camera-device")!
     this.optionPrecipitationNone = this.shadow.getElementById("option-precipitation-none")!
@@ -649,6 +767,9 @@ export class UfoRecorderElement extends HTMLElement {
       this.ufoElement.durationSeconds = this.durationInput.value === "" ? undefined : Number(this.durationInput.value)
       this.ufoElement.refresh() // otherwise the seek bar's max (seekableDuration) only updates on the next tick
       this.updateDurationValidity()
+      // A longer observation spans more hours of record, so its weather is a different (possibly
+      // multi-keyframe) answer — see WeatherInference.sampleTimes.
+      this.scheduleWeatherLookup()
     })
     // Same plain-click-collapses-to-one-shape semantics as clicking directly on canvas — see
     // selectUnit's own doc comment (also picks up the picked shape's group, if any; selectUnit
@@ -709,6 +830,17 @@ export class UfoRecorderElement extends HTMLElement {
     for (const input of [this.latInput, this.lngInput, this.headingInput, this.pitchInput, this.elevationInput]) {
       input.addEventListener("input", () => this.updateObserver())
     }
+    this.searchPlaceButton.addEventListener("click", () => void this.searchPlace())
+    // Enter in the name field runs the same search — the reflex in any search box, and the reason
+    // the field isn't inside a <form> that would try to submit the page instead.
+    this.placeNameInput.addEventListener("keydown", event => {
+      if (event.key !== "Enter") return
+      event.preventDefault()
+      void this.searchPlace()
+    })
+    this.placeMatchSelect.addEventListener("change", () => this.applyPlaceMatch(this.placeMatchSelect.selectedIndex))
+    // Retyping the name makes the previous candidates stale — they described a different search.
+    this.placeNameInput.addEventListener("input", () => this.updatePlaceName())
     // Reading the heading off the compass is the whole point of editing this field — showing the
     // labels only requires the mouse to *also* be hovering the canvas (see SceneRenderer's own
     // hover-only default) would make the one moment they're most needed the one moment they're
@@ -722,6 +854,7 @@ export class UfoRecorderElement extends HTMLElement {
       this.sceneElement.setAttribute("lens-flare-intensity", this.cameraDeviceInput.value)
     )
     this.utcOffsetInput.addEventListener("input", () => this.updateUtcOffset())
+    this.timeZoneSelect.addEventListener("change", () => this.updateTimeZone())
     this.obsTimeInput.addEventListener("input", () => this.updateObservationTime())
     this.obsEndTimeInput.addEventListener("input", () => this.updateObservationEndTime())
     this.obsTimeInput.addEventListener("blur", () => this.validateEdtfTimeInput(this.obsTimeInput))
@@ -738,18 +871,10 @@ export class UfoRecorderElement extends HTMLElement {
     }
     this.descriptionInput.addEventListener("input", () => this.updateDescription())
     this.tagsInput.addEventListener("input", () => this.updateTags())
-    for (const input of [
-      this.cloudCoverInput,
-      this.cloudDarknessInput,
-      this.cloudBaseInput,
-      this.precipitationTypeSelect,
-      this.precipitationIntensityInput,
-      this.windDirectionInput,
-      this.windSpeedInput,
-      this.stormInput
-    ]) {
+    for (const input of this.weatherFields) {
       input.addEventListener("input", () => this.applyWeatherAtPlayhead())
     }
+    this.weatherInferredInput.addEventListener("change", () => this.onWeatherInferredToggled())
 
     this.updatePresetButtons()
     this.setRecordButtonLabel(false)
@@ -771,6 +896,11 @@ export class UfoRecorderElement extends HTMLElement {
     this.syncDurationField()
     // So the external playback row isn't blank/stale before the first timeupdate tick.
     this.syncPlaybackControls()
+    this.refreshSourceRows()
+    this.refreshTimeZoneOptions()
+    // An empty editor has no date or place yet, so this only states what's missing — the lookup
+    // itself starts the moment those fields say enough (see scheduleWeatherLookup's callers).
+    this.syncWeatherSourceState()
     void this.loadLocaleMessages()
   }
 
@@ -821,6 +951,12 @@ export class UfoRecorderElement extends HTMLElement {
     this.syncObservationTimeFields()
     this.syncObservationEndTimeFields()
     this.syncWitnessMetadataFields()
+    this.refreshTimeZoneOptions()
+    this.utcOffsetInput.readOnly = this.ufoElement.sighting.event.timeZone !== undefined
+    this.syncUtcOffsetField()
+    this.syncPlaceNameField()
+    this.syncGroundElevationField()
+    this.syncWeatherOwnership()
     // Weather itself is resynced by onSelectionOrTimeChanged() above (syncWeatherFromTimeline) —
     // and SceneElement's own updateAstronomy() (driven by the sightingData assignment above,
     // which surfaces as a timeupdate) already resolves+applies it, unlike before this was a
@@ -907,6 +1043,235 @@ export class UfoRecorderElement extends HTMLElement {
     return wrapped
   }
 
+  /**
+   * Rebuilds the Data sources group: one row per kind of real-world data this editor pulls in, each
+   * a picker over that kind's registry plus the attribution its licence requires (see
+   * engine/source/DataSource.ts on why those are one control and not two).
+   *
+   * Built in script rather than spelled out in the template because the rows ARE the registries:
+   * adding a second geocoder, or a third imagery tileset, must not also mean adding markup and
+   * four more element ids for it. Re-run on a language change, which is why the live choice is
+   * held in chosenSourceId rather than read back off pickers this is about to replace.
+   */
+  private refreshSourceRows(): void {
+    this.placeSourceRow.replaceChildren(
+      document.createTextNode(`${this.messages.according} `),
+      this.sourcePicker("place", PLACE_SOURCES, source => {
+        this.placeProvider = source.create()
+      })
+    )
+    this.weatherSourceRow.replaceChildren(
+      this.sourcePicker("weather", WEATHER_SOURCES, source => {
+        this.weatherInference = new WeatherInference(source.create())
+        // The values on screen came from the previous record — ask the new one for its own.
+        this.scheduleWeatherLookup()
+      })
+    )
+    this.terrainSourceRows.replaceChildren(
+      this.labelledPicker("elevation", this.messages.sourceElevation, ELEVATION_SOURCES, () => this.applyTerrainSources()),
+      this.labelledPicker("imagery", this.messages.sourceImagery, IMAGERY_SOURCES, () => this.applyTerrainSources())
+    )
+  }
+
+  /** A picker over one registry, plus the attribution its licence requires as its own title and a
+   * link beside it. Built in script rather than spelled out in the template because the options ARE
+   * the registry: adding a second geocoder, or a third imagery tileset, must not also mean adding
+   * markup and element ids for it. */
+  private sourcePicker<T>(kind: string, sources: DataSource<T>[], apply: (source: DataSource<T>) => void): DocumentFragment {
+    const fragment = document.createDocumentFragment()
+    const select = document.createElement("select")
+    select.id = `${kind}Source`
+    for (const source of sources) {
+      const option = document.createElement("option")
+      option.value = source.id
+      option.textContent = source.name
+      option.title = source.credit
+      select.appendChild(option)
+    }
+    select.value = this.chosenSourceId.get(kind) ?? sources[0].id
+    const credit = document.createElement("a")
+    credit.className = "source-credit"
+    credit.target = "_blank"
+    credit.rel = "noopener noreferrer"
+    const showCredit = (): void => {
+      const source = dataSourceById(sources, select.value)
+      select.title = source.credit
+      credit.href = source.creditUrl
+      // The licence's own wording is what has to be shown; the picker only names the service.
+      credit.textContent = source.credit
+    }
+    showCredit()
+    select.addEventListener("change", () => {
+      this.chosenSourceId.set(kind, select.value)
+      showCredit()
+      apply(dataSourceById(sources, select.value))
+    })
+    fragment.append(select, document.createTextNode(" "), credit)
+    return fragment
+  }
+
+  /** The same picker with a label in front, for the two sources that have no sentence to sit in. */
+  private labelledPicker<T>(kind: string, label: string, sources: DataSource<T>[], apply: () => void): HTMLElement {
+    const labelElement = document.createElement("label")
+    const labelText = document.createElement("span")
+    labelText.textContent = label
+    labelElement.append(labelText, this.sourcePicker(kind, sources, apply))
+    return labelElement
+  }
+
+  /** Elevation and imagery are chosen separately but reach the renderer as one pair — see
+   * SceneRenderer.setTerrainProviders, which drops the patch already built so the next frame
+   * rebuilds it from whichever pair is now live. */
+  private applyTerrainSources(): void {
+    this.sceneElement.setTerrainProviders({
+      elevation: dataSourceById(ELEVATION_SOURCES, this.chosenSourceId.get("elevation")).create(),
+      imagery: dataSourceById(IMAGERY_SOURCES, this.chosenSourceId.get("imagery")).create()
+    })
+    // The rebuild itself only happens on the scene's next tick (setTerrainOrigin is called from
+    // SceneElement.updateAstronomy), and a scene sitting paused at t=0 has no next tick — so
+    // without this the new source took effect at some arbitrary later moment, or never. Same
+    // "surface the edit as a timeupdate" idiom every other editor change here uses.
+    this.ufoElement.refresh()
+  }
+
+  /** The reader's OWN preferred language for place names — navigator's, not this editor's own
+   * en/fr: a geocoder can name a place in far more languages than this UI is translated into, and
+   * a Spanish reader wants "Londres" whichever of the two the labels are in. */
+  private get placeSearchLanguage(): string | undefined {
+    return navigator.languages?.[0]
+  }
+
+  /** Swaps the geocoder behind the place-name field — the element itself only ever names the
+   * PlaceProvider interface (see defaultPlaceProvider's own doc comment), so an embedder with a
+   * national gazetteer, or a test with canned answers, substitutes one here. */
+  set placeSearchProvider(provider: PlaceProvider) {
+    this.placeProvider = provider
+  }
+
+  /** Looks the typed place name up and offers what came back. Runs only on Enter or the button,
+   * never per keystroke — see NominatimPlaceProvider's own doc comment on why. The first (best)
+   * candidate is applied straight away so the common unambiguous case needs no second gesture;
+   * the picker stays there for the cases that need it. */
+  private async searchPlace(): Promise<void> {
+    const query = this.placeNameInput.value.trim()
+    if (query === "") return
+    const token = ++this.placeSearchToken
+    this.placeStatusText.textContent = this.messages.placeSearching
+    let matches: PlaceMatch[]
+    try {
+      matches = await this.placeProvider.search(query, { language: this.placeSearchLanguage })
+    } catch {
+      if (token !== this.placeSearchToken) return
+      this.placeStatusText.textContent = this.messages.placeSearchFailed
+      return
+    }
+    // A newer search already asked a newer question.
+    if (token !== this.placeSearchToken) return
+    this.placeMatches = matches
+    this.refreshPlaceMatches()
+    if (matches.length > 0) this.applyPlaceMatch(0)
+  }
+
+  /** Fills the candidate picker and says how many names matched. The credit for the data lives in
+   * the Data sources group, where it doubles as the picker that chose this geocoder — see
+   * refreshSourceRows. */
+  private refreshPlaceMatches(): void {
+    this.placeMatchSelect.replaceChildren(
+      ...this.placeMatches.map(match => {
+        const option = document.createElement("option")
+        option.textContent = match.name
+        // The list is narrow and a qualified name is long — the full one stays reachable on hover.
+        option.title = match.name
+        return option
+      })
+    )
+    this.placeMatchRow.hidden = this.placeMatches.length === 0
+    const found = this.placeMatches.length === 1 ? this.messages.placeMatchFound : this.messages.placeMatchesFound
+    this.placeStatusText.textContent =
+      this.placeMatches.length === 0 ? this.messages.placeNotFound : `${this.placeMatches.length} ${found} `
+    // "2 places found according to [Nominatim]" — attached to the count, so it only appears once
+    // there is an answer to attribute. Which geocoder answered is part of the answer.
+    this.placeSourceRow.hidden = this.placeMatches.length === 0
+  }
+
+  /** Writes a candidate's coordinates into the Latitude/Longitude fields and its own qualified
+   * name back into the name field — the coordinates came from THAT place, and leaving a vaguer
+   * "Valensole" beside them would claim a precision the typed name never had. Goes through
+   * updateObserver() like any manual edit, so it keyframes the pose and re-asks the weather record
+   * exactly the same way. */
+  private applyPlaceMatch(index: number): void {
+    const match = this.placeMatches[index]
+    if (!match) return
+    this.placeMatchSelect.selectedIndex = index
+    this.placeNameInput.value = match.name
+    this.placeNameInput.title = match.name
+    this.latInput.value = String(match.lat)
+    this.lngInput.value = String(match.lng)
+    // Recorded before updateObserver() runs, so the coordinate change this is about to make isn't
+    // mistaken for the witness moving and answered with a reverse lookup of the name we just used.
+    this.namedCoordinates = { lat: match.lat, lng: match.lng }
+    this.updateObserver()
+  }
+
+  /** A hand-typed name is stored as-is: a recording may well name a place no geocoder knows, and
+   * the name is worth keeping either way. Retyping drops the previous search's candidates, which
+   * answered a different question. */
+  private updatePlaceName(): void {
+    this.placeMatches = []
+    this.placeMatchRow.hidden = true
+    this.placeStatusText.textContent = ""
+    this.placeSourceRow.hidden = true
+    this.placeNameInput.title = this.placeNameInput.value
+    // Typed by hand, so it now describes whatever the witness means by it, not the coordinates —
+    // and must not be replaced by a reverse lookup of them.
+    this.namedCoordinates = undefined
+    this.updateObserver()
+  }
+
+  /**
+   * Re-derives the displayed place name from coordinates the witness has moved by hand — the same
+   * relation the search reads the other way, so the two halves of the Location group can never
+   * drift apart. A name left describing somewhere the sighting is no longer at is worse than no
+   * name: the recording would state, in writing, that it happened there.
+   *
+   * Only when a name resolved from a search is actually on display: a name the witness typed
+   * themselves is theirs (a farm, a stretch of road, whatever no gazetteer lists), and an empty
+   * field is not a question anyone asked. That restraint is also what keeps this inside Nominatim's
+   * usage policy, together with the debounce and the same-spot threshold.
+   */
+  private schedulePlaceReverse(): void {
+    if (!this.namedCoordinates) return
+    const lat = this.numberOrUndefined(this.latInput.value)
+    const lng = this.numberOrUndefined(this.lngInput.value)
+    if (lat === undefined || lng === undefined) return
+    if (Math.abs(lat - this.namedCoordinates.lat) < SAME_PLACE_DEG && Math.abs(lng - this.namedCoordinates.lng) < SAME_PLACE_DEG) {
+      return
+    }
+    clearTimeout(this.placeReverseTimer)
+    this.placeReverseTimer = setTimeout(() => void this.reversePlace(lat, lng), PLACE_REVERSE_DEBOUNCE_MS)
+  }
+
+  private async reversePlace(lat: number, lng: number): Promise<void> {
+    const token = ++this.placeSearchToken
+    let match: PlaceMatch | undefined
+    try {
+      match = await this.placeProvider.reverse(lat, lng, { language: this.placeSearchLanguage })
+    } catch {
+      return // the name on screen stays as it was; nothing here is worth an error message
+    }
+    if (token !== this.placeSearchToken) return
+    this.namedCoordinates = { lat, lng }
+    this.placeNameInput.value = match?.name ?? ""
+    this.placeNameInput.title = match?.name ?? ""
+    // Candidates from an earlier search answered a different question, and the picker would
+    // otherwise still be offering the place we have just moved away from.
+    this.placeMatches = []
+    this.placeMatchRow.hidden = true
+    this.placeStatusText.textContent = match ? "" : this.messages.placeNotFound
+    this.placeSourceRow.hidden = !match
+    this.updateObserver()
+  }
+
   /** Writes the witness's lat/lng into the legacy `event.place` (kept in sync for any consumer
    * that only reads that field, e.g. an older `<rr0-scene>` build, always mirroring whichever edit
    * happened most recently regardless of when on the timeline it landed) — but records the real
@@ -937,16 +1302,19 @@ export class UfoRecorderElement extends HTMLElement {
     // an empty/invalid input just falls back to 0 (looking straight at the horizon) rather than
     // propagating NaN into the pose.
     const pitchDeg = this.numberOrUndefined(this.pitchInput.value) ?? 0
-    // Ground level unless stated — but stated it must be able to be: it decides which part of the
-    // sky the witness is even inside (see SceneRenderer.celestialGroup), and writing 0 here
-    // unconditionally, as this did, silently flattened an aircraft's own cruising altitude the
-    // first time anything else in this panel was touched.
-    const elevationM = this.numberOrUndefined(this.elevationInput.value) ?? 0
+    // The FIELD states an altitude above sea level; ObserverPose.elevationM is a height above the
+    // local ground (the terrain patch is built with the observer's own ground at y=0, see
+    // TerrainMeshBuilder). Subtracting the ground's own height is the whole conversion — and while
+    // that height isn't known the two coincide, which is exactly the behaviour this had before.
+    // Never negative: a witness cannot be underneath the ground they are standing on.
+    const altitudeM = this.numberOrUndefined(this.elevationInput.value) ?? this.groundElevationM ?? 0
+    const elevationM = Math.max(0, altitudeM - (this.groundElevationM ?? 0))
     const event = this.ufoElement.sighting.event
     const witnessTrack = this.ufoElement.sighting.witnessTrack
     const t = this.ufoElement.currentTime
 
-    event.place = lat !== undefined && lng !== undefined ? [{ lat, lng }] : undefined
+    const name = this.stringOrUndefined(this.placeNameInput.value.trim())
+    event.place = lat !== undefined && lng !== undefined ? [{ lat, lng, name }] : undefined
 
     const nothingSet = lat === undefined && lng === undefined && headingDeg === undefined && pitchDeg === 0 && elevationM === 0
     if (nothingSet) {
@@ -958,6 +1326,15 @@ export class UfoRecorderElement extends HTMLElement {
     // it's what makes this edit surface as a "timeupdate" (see the constructor's listener), the
     // signal a composed live preview (e.g. a <rr0-scene>) needs to resync.
     this.ufoElement.refresh()
+    // Moving the witness moves which weather record describes them — see scheduleWeatherLookup.
+    this.scheduleWeatherLookup()
+    // ...and moves them out of the place whose name is on display — see schedulePlaceReverse.
+    this.schedulePlaceReverse()
+    // ...and onto ground of a different height, which is what Altitude is measured from.
+    this.scheduleGroundElevation()
+    // ...and can make a previously plausible time zone impossible: the offset is stated once, the
+    // place can be re-stated at any time, and it is that pairing this checks.
+    this.updateUtcOffsetValidity()
   }
 
   /** Parses `input`'s EDTF text and hands the result to `assign` on every keystroke — empty
@@ -980,8 +1357,35 @@ export class UfoRecorderElement extends HTMLElement {
     }
     input.setCustomValidity("")
     input.classList.remove("invalid")
+    this.dropDurationOutrankedByDates()
+    // A zone's offset depends on the date it is asked about — see applyTimeZoneOffset.
+    if (this.ufoElement.sighting.event.timeZone) this.applyTimeZoneOffset()
     this.ufoElement.refresh() // see updateObserver()'s comment — this is what surfaces the edit as a timeupdate
     this.syncDurationField()
+    this.scheduleWeatherLookup()
+  }
+
+  /**
+   * Lets a start/end edit actually take effect on Duration, by clearing an explicit
+   * `durationSeconds` the moment the two dates can state the length themselves.
+   *
+   * The two are alternatives for saying one thing (see SightingEvent.endTime), and
+   * sightingDurationMs gives `durationSeconds` precedence — so without this, editing "Observation
+   * end" on any recording that carries one did *nothing at all*, silently: the field kept showing
+   * the old number, and the whole observation kept its old length. Every published case file
+   * carries a durationSeconds, so that was every case file. Making the more recent edit win is
+   * both what anyone typing into a date field expects and symmetric with the reverse (typing a
+   * duration afterwards sets durationSeconds again, and takes precedence again).
+   *
+   * Only when the pair really does yield an exact length: dates too imprecise to subtract (see
+   * sightingDurationBlockedReason) must not wipe a good explicit duration and leave the recording
+   * with no length at all.
+   */
+  private dropDurationOutrankedByDates(): void {
+    const event = this.ufoElement.sighting.event
+    if (event.durationSeconds === undefined) return
+    if (sightingDurationMs({ ...event, durationSeconds: undefined }) === undefined) return
+    this.ufoElement.durationSeconds = undefined
   }
 
   /** Diagnoses `input`'s EDTF text as invalid only now, on blur — never while the witness is
@@ -1003,9 +1407,60 @@ export class UfoRecorderElement extends HTMLElement {
    * means unknown, falling back to approximating it from the longitude (see
    * SightingEvent.utcOffsetHours). Refreshes right away since every celestial body in the 3D
    * scene moves with it. */
+  /** Fills the zone picker: a manual entry first (type the number yourself, what a recording could
+   * always do), then every IANA zone the platform knows. Built in script — there are some four
+   * hundred of them, and they are the platform's list, not ours. */
+  private refreshTimeZoneOptions(): void {
+    const manual = document.createElement("option")
+    manual.value = ""
+    manual.textContent = this.messages.timeZoneManual
+    this.timeZoneSelect.replaceChildren(
+      manual,
+      ...this.timeZones.available().map(zone => {
+        const option = document.createElement("option")
+        option.value = zone
+        option.textContent = zone
+        return option
+      })
+    )
+    this.timeZoneSelect.value = this.ufoElement.sighting.event.timeZone ?? ""
+  }
+
+  /** Picking a zone hands the offset over to that zone's own rules; picking the manual entry hands
+   * it back to the witness, keeping whatever number the zone last produced as their starting
+   * point. */
+  private updateTimeZone(): void {
+    const zone = this.stringOrUndefined(this.timeZoneSelect.value)
+    this.ufoElement.sighting.event.timeZone = zone
+    this.applyTimeZoneOffset()
+  }
+
+  /**
+   * Re-derives `utcOffsetHours` from the chosen zone for the observation's OWN date — which is why
+   * this runs again on every date edit, not just when the zone changes: the same zone gives a
+   * different answer in January and July, and gave different answers in 1965 and today (see
+   * TimeZones). A no-op while the offset is the witness's to state.
+   */
+  private applyTimeZoneOffset(): void {
+    const event = this.ufoElement.sighting.event
+    const derived = event.timeZone && event.time ? this.timeZones.offsetHoursAt(event.timeZone, event.time) : undefined
+    if (derived !== undefined) event.utcOffsetHours = derived
+    // Read-only, not disabled: the number is still the thing that matters and still worth reading,
+    // it just isn't the witness's to type while a zone is deciding it.
+    this.utcOffsetInput.readOnly = event.timeZone !== undefined
+    this.syncUtcOffsetField()
+    this.ufoElement.refresh()
+    this.scheduleWeatherLookup()
+  }
+
   private updateUtcOffset(): void {
     this.ufoElement.sighting.event.utcOffsetHours = this.numberOrUndefined(this.utcOffsetInput.value)
+    this.updateUtcOffsetValidity()
     this.ufoElement.refresh()
+    // The offset is what turns the witness's wall clock into a real instant, so it decides which
+    // hour of record the sighting even falls in — an hour out is a different sky AND a different
+    // weather row (see SightingEvent.utcOffsetHours).
+    this.scheduleWeatherLookup()
   }
 
   private updateObservationTime(): void {
@@ -1095,6 +1550,161 @@ export class UfoRecorderElement extends HTMLElement {
     this.ufoElement.refresh()
   }
 
+  /** Swaps the record consulted for inferred weather — the element itself only ever names the
+   * WeatherProvider interface (see defaultWeatherProvider's own doc comment), so an embedder with
+   * a national archive, or a test with a canned response, substitutes one here. */
+  set weatherProvider(provider: WeatherProvider) {
+    this.weatherInference = new WeatherInference(provider)
+    this.scheduleWeatherLookup()
+  }
+
+  /** Checked hands the Circumstances fields to the meteorological record; unchecked hands them
+   * back to the witness. Unchecking keeps the values exactly as they are — a real record is the
+   * best starting point a correction can have — but drops the claim that they were measured, and
+   * with it any right of a later lookup to overwrite them (see Sighting.weatherSource). */
+  private onWeatherInferredToggled(): void {
+    if (this.weatherInferredInput.checked) {
+      this.scheduleWeatherLookup()
+    } else {
+      this.cancelWeatherLookup()
+      this.ufoElement.sighting.weatherSource = undefined
+      this.syncWeatherSourceState()
+    }
+  }
+
+  /** Coalesces the burst of edits a single date or coordinate produces into one lookup — see
+   * WEATHER_LOOKUP_DEBOUNCE_MS. A no-op while the witness owns these fields: their account is
+   * never re-derived behind their back. */
+  private scheduleWeatherLookup(): void {
+    if (!this.weatherInferredInput.checked) return
+    clearTimeout(this.weatherLookupTimer)
+    this.weatherLookupTimer = setTimeout(() => void this.inferWeather(), WEATHER_LOOKUP_DEBOUNCE_MS)
+  }
+
+  /** Drops a pending lookup AND disowns any answer already in flight (see inferWeather's token) —
+   * needed wherever the question itself stops applying: the witness has taken the fields back, or
+   * a whole different recording has just been loaded over the one that asked. Without it, an
+   * answer about the previous sighting lands on the new one seconds later. */
+  private cancelWeatherLookup(): void {
+    clearTimeout(this.weatherLookupTimer)
+    this.weatherLookupToken++
+    this.weatherLookupPending = false
+  }
+
+  /** Asks the record what the weather was at this sighting's own date, time and place, and writes
+   * the answer into its weatherTrack. Everything that isn't a successful lookup — no date yet, no
+   * record that far back, no network — leaves the fields UNLOCKED and says why: locking is what
+   * this editor does when it has a measurement to show, never a way to refuse an answer it
+   * couldn't produce. */
+  private async inferWeather(): Promise<void> {
+    if (!this.weatherInferredInput.checked) return
+    const token = ++this.weatherLookupToken
+    this.weatherLookupPending = true
+    this.syncWeatherSourceState()
+    const result = await this.weatherInference.infer(this.ufoElement.sighting)
+    // A newer edit already asked a newer question, or the witness took the fields back mid-flight.
+    if (token !== this.weatherLookupToken || !this.weatherInferredInput.checked) return
+    this.weatherLookupPending = false
+    this.weatherLookupResult = result
+    if (result.status === "inferred") {
+      this.weatherInference.applyTo(this.ufoElement.sighting, result)
+      this.weatherTrackSpan = this.ufoElement.seekableDuration
+      // Same role as everywhere else in this file: surfacing the edit as a timeupdate is what
+      // makes the composed <rr0-scene> re-resolve and re-render the weather at this instant.
+      this.ufoElement.refresh()
+      this.syncWeatherFromTimeline()
+    } else {
+      this.ufoElement.sighting.weatherSource = undefined
+    }
+    this.syncWeatherSourceState()
+  }
+
+  /**
+   * Re-derives the weather track when the clock it was laid out against has changed underneath it.
+   *
+   * A WeatherTrack keyframe is timed on the recording's own playback clock, and that clock CHANGES
+   * LENGTH as authoring proceeds: with nothing drawn yet it spans the observation's whole declared
+   * duration (Player.durationOverrideMs), and the moment a first shape is recorded it becomes the
+   * recording's own — often a few seconds. A fifteen-hour track laid out over 54 000 000 ms then
+   * sits entirely past the end of a 6 000 ms seek bar, so every position on it resolves to the
+   * first keyframe and the weather appears frozen for the whole observation. That is what a witness
+   * sees as "the weather never changes"; nothing about the lookup itself is wrong.
+   *
+   * Cheap to re-run: the provider answers an identical query from its own cache, so this costs no
+   * request. Only ever for a track the record owns — a witness's own account is never re-derived.
+   */
+  private ensureWeatherTrackSpan(): void {
+    if (!this.weatherInferredInput.checked || this.ufoElement.sighting.weatherSource === undefined) return
+    const span = this.ufoElement.seekableDuration
+    if (this.weatherTrackSpan === undefined || span === this.weatherTrackSpan) return
+    // Claimed before the lookup runs, so a span that keeps changing (a recording in progress)
+    // re-schedules the debounced lookup rather than queueing one per tick.
+    this.weatherTrackSpan = span
+    this.scheduleWeatherLookup()
+  }
+
+  /** Locks (or releases) the weather fields and states where their values came from. Locked only
+   * while a real source is attached: see inferWeather's own doc comment. */
+  private syncWeatherSourceState(): void {
+    const source = this.ufoElement.sighting.weatherSource
+    const inferred = this.weatherInferredInput.checked
+    for (const field of this.weatherFields) {
+      field.disabled = inferred && source !== undefined
+    }
+    const sourced = inferred && source !== undefined
+    // "From [ERA5 (Open-Meteo)] © Copernicus/ECMWF, 2026-08-21 15:30 UTC" — the record that
+    // answered is named by a picker, not a static line, for the same reason the geocoder is (see
+    // sourcePicker): which record answered is part of the answer. The instant carries the link,
+    // because it points at the exact request that produced these values, not at a home page.
+    this.weatherSourceRow.hidden = !inferred
+    this.weatherSourceLink.hidden = !sourced
+    if (sourced) {
+      this.weatherSourceText.textContent = `${this.messages.weatherFrom} `
+      this.weatherSourceLink.href = source!.url
+      this.weatherSourceLink.textContent = this.observationInstantLabel()
+      return
+    }
+    this.weatherSourceText.textContent = inferred ? `${this.weatherStatusMessage()} ` : ""
+  }
+
+  private weatherStatusMessage(): string {
+    if (this.weatherLookupPending) return this.messages.weatherLookingUp
+    switch (this.weatherLookupResult?.status) {
+      case "unavailable":
+        return this.messages.weatherNoRecord
+      case "failed":
+        return this.messages.weatherLookupFailed
+      default:
+        return this.messages.weatherNeedsDateAndPlace
+    }
+  }
+
+  /** ", 1965-07-01 04:00 UTC" — the instant the shown values describe, stated back so a wrong time
+   * zone (the one thing a longitude cannot guess, see SightingEvent.utcOffsetHours) is visible
+   * here rather than only in the rendered sky. Empty when there's no date to state. */
+  private observationInstantLabel(): string {
+    const event = this.ufoElement.sighting.event
+    const instant = event.time && sightingTimeToDate(event.time, event.place?.[0]?.lng ?? 0, event.utcOffsetHours)
+    return instant ? `, ${instant.toISOString().slice(0, 16).replace("T", " ")} UTC` : ""
+  }
+
+  /** Decides, for a freshly loaded recording, who owns its weather: the record when the file names
+   * one (its keyframes came from there, and are kept as-is rather than looked up again — a case
+   * file must replay identically offline and years later), the witness when it has weather but no
+   * source, and the record again for a file with no weather at all, which is what makes an
+   * imported case pick up its real conditions the moment it states a date and a place. */
+  private syncWeatherOwnership(): void {
+    const sighting = this.ufoElement.sighting
+    // Anything the previous recording had in flight is about a different sighting now.
+    this.cancelWeatherLookup()
+    this.weatherLookupResult = undefined
+    this.weatherInferredInput.checked = sighting.weatherSource !== undefined || sighting.weatherTrack.allKeyframes.length === 0
+    this.syncWeatherSourceState()
+    if (this.weatherInferredInput.checked && sighting.weatherSource === undefined) {
+      this.scheduleWeatherLookup()
+    }
+  }
+
   /** Auto-fills Duration from the observation's start/end dates when no explicit duration has
    * been typed — reads sightingDurationMs(event), which already prefers an explicit
    * event.durationSeconds over the endTime-minus-time fallback, so this doesn't duplicate that
@@ -1136,6 +1746,8 @@ export class UfoRecorderElement extends HTMLElement {
    * genuinely showed the wrong total and ticked at the wrong real-time speed whenever the declared
    * duration didn't match the raw recording length — normally the case). */
   private syncPlaybackControls(): void {
+    // Runs on every timeupdate, which is exactly when the seekable span can have changed.
+    this.ensureWeatherTrackSpan()
     const isPlaying = this.ufoElement.playbackState === "playing"
     const hasDuration = this.ufoElement.seekableDuration > 0
     this.playPauseButton.textContent = isPlaying ? "⏸" : "▶"
@@ -1177,6 +1789,110 @@ export class UfoRecorderElement extends HTMLElement {
   /** Resyncs witness/case/description/tags from a freshly loaded sighting — same role as
    * syncObservationTimeFields(): these are sighting-wide metadata, not per-instant keyframes, so
    * this only needs to run once on load. */
+  /** Resyncs the time-zone field from a freshly loaded recording — sighting-wide metadata like the
+   * observation date, so once on load. It had no resync at all, which meant loading a recording
+   * left the PREVIOUS one's offset sitting in the field: the number shown described a sighting the
+   * editor was no longer holding, and the one silently in force was invisible. */
+  private syncUtcOffsetField(): void {
+    const offset = this.ufoElement.sighting.event.utcOffsetHours
+    this.utcOffsetInput.value = offset === undefined ? "" : String(offset)
+    this.updateUtcOffsetValidity()
+  }
+
+  /**
+   * Flags a declared time zone that cannot belong to the declared longitude — the failure that
+   * renders midnight over Nanterre and gives no clue why, since the sky and the weather both
+   * quietly obey it (an hour of offset is an hour of Earth's rotation, and a different row of the
+   * weather record).
+   *
+   * Deliberately a wide net rather than a precise one: legal time genuinely departs from solar
+   * time, sometimes by hours (all of China runs on UTC+8, so its western edge sits ~3 h off), and
+   * the historical rules are worse still — this must never cry wolf at a correct
+   * "France on UTC+1 in 1965" or "Alabama on UTC-6 in 1948". Only an offset no country has ever
+   * placed on that meridian is flagged, and even then as a warning on the field, never as a
+   * correction: the recording states the witness's clock, and this cannot know better than the
+   * witness. Rendered with the same `.invalid` styling as an unparseable date.
+   */
+  private updateUtcOffsetValidity(): void {
+    const declared = this.ufoElement.sighting.event.utcOffsetHours
+    const lng = this.ufoElement.sighting.event.place?.[0]?.lng
+    const solar = lng === undefined ? undefined : Math.round(lng / 15)
+    const implausible = declared !== undefined && solar !== undefined && Math.abs(declared - solar) > MAX_LEGAL_SOLAR_OFFSET_GAP_HOURS
+    this.utcOffsetInput.classList.toggle("invalid", implausible)
+    this.utcOffsetInput.title = implausible
+      ? this.messages.utcOffsetImplausible.replace("{solar}", solar! >= 0 ? `+${solar}` : String(solar))
+      : ""
+  }
+
+  /** Restores the place name from a freshly loaded recording — sighting-wide metadata, like the
+   * observation date, not a per-instant keyframe (the witnessTrack's poses carry coordinates only,
+   * deliberately: a witness who moves is still at the same named place). */
+  /**
+   * Looks up the ground's own height above sea level at the current location, and re-anchors the
+   * Altitude field to it: the field's floor becomes the ground (a witness in the Alps cannot be at
+   * 0 m, and an editor that offers it invites a recording that says so), and a witness who was
+   * standing on that ground reads their real altitude rather than a zero.
+   *
+   * The stored pose is untouched by the move: ObserverPose.elevationM stays a height above the
+   * local ground — the terrain patch is built with the observer's own ground at y=0 — so all this
+   * changes is which number the field shows for the same recording.
+   */
+  private scheduleGroundElevation(): void {
+    const lat = this.numberOrUndefined(this.latInput.value)
+    const lng = this.numberOrUndefined(this.lngInput.value)
+    if (lat === undefined || lng === undefined) return
+    clearTimeout(this.groundElevationTimer)
+    this.groundElevationTimer = setTimeout(() => void this.applyGroundElevation(lat, lng), GROUND_ELEVATION_DEBOUNCE_MS)
+  }
+
+  private async applyGroundElevation(lat: number, lng: number): Promise<void> {
+    const token = ++this.groundElevationToken
+    const source = dataSourceById(ELEVATION_SOURCES, this.chosenSourceId.get("elevation"))
+    const ground = await new GroundElevation(source.create()).at(lat, lng)
+    if (token !== this.groundElevationToken || ground === undefined) return
+    const heightAboveGround = Math.max(0, (this.numberOrUndefined(this.elevationInput.value) ?? 0) - (this.groundElevationM ?? 0))
+    this.groundElevationM = Math.round(ground)
+    this.syncElevationField(heightAboveGround)
+    // The pose itself is unchanged, but the number in the field now means something different —
+    // write it back so the two can't disagree.
+    this.updateObserver()
+  }
+
+  /** Shows `heightAboveGroundM` as what it is in the world: an altitude above sea level, floored at
+   * the ground the witness is standing on. */
+  private syncElevationField(heightAboveGroundM: number): void {
+    const ground = this.groundElevationM
+    this.elevationInput.value = String(Math.round((ground ?? 0) + heightAboveGroundM))
+    this.elevationInput.min = ground === undefined ? "" : String(ground)
+    this.elevationInput.title = ground === undefined ? "" : this.messages.altitudeAboveSeaLevel
+    this.groundElevationOutput.textContent =
+      ground === undefined ? "" : this.messages.groundAt.replace("{m}", String(ground))
+  }
+
+  /** A freshly loaded recording is somewhere else: until its own ground height resolves, the
+   * Altitude field is a plain height above the local ground again, rather than one measured from a
+   * sea level the previous sighting's mountains defined. */
+  private syncGroundElevationField(): void {
+    this.groundElevationToken++
+    clearTimeout(this.groundElevationTimer)
+    this.groundElevationM = undefined
+    this.syncElevationField(resolveObserverPoseAt(this.ufoElement.sighting, 0)?.elevationM ?? 0)
+    this.scheduleGroundElevation()
+  }
+
+  private syncPlaceNameField(): void {
+    const place = this.ufoElement.sighting.event.place?.[0]
+    const name = place?.name ?? ""
+    this.placeNameInput.value = name
+    this.placeNameInput.title = name
+    // A loaded recording's name already describes its own coordinates — that pairing is what the
+    // file states, and re-deriving it would only replace the author's wording with a gazetteer's.
+    this.namedCoordinates = place && name ? { lat: place.lat, lng: place.lng } : undefined
+    this.placeMatches = []
+    this.placeMatchRow.hidden = true
+    this.placeStatusText.textContent = ""
+  }
+
   private syncWitnessMetadataFields(): void {
     const sighting = this.ufoElement.sighting
     this.witnessIdInput.value = sighting.witness?.id ?? ""
@@ -1250,7 +1966,9 @@ export class UfoRecorderElement extends HTMLElement {
       this.pitchInput.value = String(pose?.pitchDeg ?? 0)
     }
     if (active !== this.elevationInput) {
-      this.elevationInput.value = String(pose?.elevationM ?? 0)
+      // The pose stores a height above the local ground; the field shows an altitude above sea
+      // level — see syncElevationField.
+      this.syncElevationField(pose?.elevationM ?? 0)
     }
   }
 
@@ -2099,6 +2817,13 @@ export class UfoRecorderElement extends HTMLElement {
     this.labelImportUrl.textContent = messages.importUrl
     this.importUrlInput.placeholder = messages.importUrlPlaceholder
     this.importUrlButton.textContent = messages.importButton
+    // Rebuilt rather than relabelled: the connector and every label live inside DOM this builds.
+    this.refreshSourceRows()
+    this.refreshTimeZoneOptions()
+    this.labelPlaceName.textContent = messages.placeName
+    this.placeNameInput.placeholder = messages.placeNamePlaceholder
+    this.searchPlaceButton.textContent = messages.searchPlace
+    this.labelPlaceMatch.textContent = messages.placeMatch
     this.labelLatitude.textContent = messages.latitude
     this.labelLongitude.textContent = messages.longitude
     this.labelHeading.textContent = messages.heading
@@ -2187,6 +2912,11 @@ export class UfoRecorderElement extends HTMLElement {
     this.labelWindDirection.textContent = messages.windDirection
     this.labelWindSpeed.textContent = messages.windSpeed
     this.labelStorm.textContent = messages.storm
+    this.labelWeatherInferred.textContent = messages.weatherInferred
+    this.weatherInferredInput.title = messages.weatherInferredTitle
+    this.labelWeatherInferred.title = messages.weatherInferredTitle
+    // Re-renders the source/status line, whose text is half messages and half live data.
+    this.syncWeatherSourceState()
     this.labelLensFlareBrightness.textContent = messages.lensFlareBrightness
     this.labelCameraDevice.textContent = messages.cameraDevice
     this.loopButton.title = messages.autoReplay

@@ -3,7 +3,7 @@ import { ObserverTrack } from "./ObserverTrack.js"
 import type { ObserverPose } from "./ObserverTrack.js"
 import { WeatherTrack } from "./WeatherTrack.js"
 import { DEFAULT_WEATHER } from "./Weather.js"
-import type { Weather } from "./Weather.js"
+import type { Weather, WeatherSource } from "./Weather.js"
 import type { People } from "./People.js"
 import type { DecorObject } from "./Decor.js"
 
@@ -96,6 +96,12 @@ export function formatEdtfTime(time: SightingTime): string {
 export interface SightingLocation {
   lat: number
   lng: number
+  /** The place as it is named, fully qualified — "Valensole, Alpes-de-Haute-Provence, …, France".
+   * How the coordinates were arrived at in the first place (see engine/place/PlaceProvider.ts:
+   * testimony says "on the Valensole plateau", never 43.8379 / 5.9840), and what a reader needs
+   * to land on the same spot rather than on one of the four other villages of that name. Absent
+   * on recordings whose coordinates were typed in directly. */
+  name?: string
 }
 
 /**
@@ -136,6 +142,15 @@ export interface SightingEvent {
    * own 1964-04-24 falls two days before that year's US summer-time switch.
    */
   utcOffsetHours?: number
+  /**
+   * The witness's own legal time zone, as an IANA name ("Europe/Paris", "America/Denver") — the
+   * RULE, where `utcOffsetHours` is only the number that rule produced for this sighting's date.
+   * Both are stored: the offset is what every consumer reads (no consumer needs a tz database),
+   * and the zone is what lets an editor recompute it correctly when the date changes, summer time
+   * and its own history included (see engine/time/TimeZones.ts). Absent means the offset was
+   * stated directly, which is all a recording ever used to be able to say.
+   */
+  timeZone?: string
 }
 
 /** `time`/`endTime` as a Unix timestamp (ms) — undefined if `year` isn't known (the one field with no sane default). */
@@ -247,7 +262,12 @@ export class Sighting {
     /** Static scenery (buildings/trees/streetlights/vehicles/other witnesses) — see Decor.ts.
      * Not readonly, same "reassigned wholesale on edit" reasoning as witness/caseId above:
      * UfoRecorderElement's Decor group adds/removes/edits entries by replacing this array. */
-    public decor: DecorObject[] = []
+    public decor: DecorObject[] = [],
+    /** Set when every weatherTrack keyframe came from a real meteorological record looked up from
+     * this sighting's own date/time and place, rather than from the witness — see WeatherSource
+     * and engine/weather/WeatherInference.ts. Absent is the stronger statement of the two: the
+     * conditions are the witness's own, and nothing may overwrite them. */
+    public weatherSource?: WeatherSource
   ) {
   }
 

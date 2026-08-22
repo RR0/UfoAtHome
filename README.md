@@ -82,7 +82,8 @@ The lightweight component (~9KB): a canvas plus Play/Pause/Loop/seek controls. U
 
 Playback matches the observation's *real reported duration* when it's known: set `time`/`endTime`, or `time`/
 `durationSeconds`, in the [data format](#data-format) (`durationSeconds` takes precedence over `endTime` if both are
-given). Watching a 5-minute sighting then takes 5 real minutes, not however long the recording itself took to
+given — but in the recorder, editing either date clears an explicit `durationSeconds` the pair can replace, so the
+more recent edit is the one that wins rather than being silently outranked). Watching a 5-minute sighting then takes 5 real minutes, not however long the recording itself took to
 author (e.g. a quick mouse drag) — drag the seek bar directly to skip ahead. The start/end labels around the seek
 bar show real clock times when `time` has an hour (e.g. `02:45` → `02:50`); otherwise they show `0:00` → the
 duration actually available (the declared one if known, else the recording's own length). Playback loops by
@@ -232,6 +233,15 @@ scale a case's witness list actually has. If a witness has no `witness.title`, i
 the URL itself as a last resort. A mismatched `caseId` across the listed witnesses logs a console warning (doesn't
 block) — likely means unrelated recordings got listed together by mistake.
 
+**Where two witnesses described different things, the recordings have to show it.** Not that they
+must differ — witnesses often agree, and two matching recordings are then simply true. But a
+difference that exists in the record and not in the files makes the witness picker a control that
+does nothing, and nothing *looks* broken. Chiles-Whitted shipped that way for months: one testimony
+under two names. Its two pilots drew the object differently for Project Sign — the captain a slim
+ribbed cigar with a pointed nose and no windows, the co-pilot a blunt cylinder with two rows of
+lit windows — and only the co-pilot, in the right seat, saw the terminal phase (McDonald's 1968
+cross-check). Each file now carries its own witness's account.
+
 | Member | Kind | Description |
 |---|---|---|
 | `src` | attribute | URL of a single `sighting.json` or a witness manifest (above), fetched automatically on connect and whenever the attribute changes |
@@ -290,7 +300,7 @@ interface SightingRecordingJson {
   endTime?: { year?: number, month?: number, day?: number, hour?: number, minute?: number, second?: number } // alternative to durationSeconds
   durationSeconds?: number // alternative to endTime; takes precedence if both are set
   utcOffsetHours?: number // the LEGAL time zone the witness's clock was on (+1 for France in 1965, -7 for New Mexico in April 1964). Absent = approximated from the longitude, which cannot know legal time or a daylight-saving switch
-  place?: { lat: number, lng: number }[]
+  place?: { lat: number, lng: number, name?: string }[] // `name` is the fully qualified place name the coordinates were resolved from — see Naming a place
   witness?: { id?: string, dirName?: string, title?: string, lastName?: string, firstNames?: string[] } // every field optional — supply whichever is known; omit entirely for an anonymous witness
   caseId?: string // shared by every witness's own sighting.json for the same case — see <rr0-eyewitness>
   description?: string
@@ -321,6 +331,7 @@ interface SightingRecordingJson {
   witnessTrack?: { keyframes: Array<{ t: number, pose: { lat?: number, lng?: number, elevationM: number, headingDeg?: number, pitchDeg: number, fovDeg: number } }> }
   weatherTrack?: { keyframes: Array<{ t: number, weather: Weather }> }
   weather?: Weather // legacy static fallback for recordings predating weatherTrack
+  weatherSource?: { id: string, name: string, url: string } // the meteorological record weatherTrack was looked up from — see Weather is looked up, not remembered. Absent = the witness's own account
   decor?: DecorObject[] // buildings, trees, streetlights, vehicles, other witnesses — see src/engine/model/Decor.ts
 }
 ```
@@ -328,6 +339,132 @@ interface SightingRecordingJson {
 A shape left out of a later keyframe is **held** at its last recorded state, not hidden — and one whose first
 keyframe is at `t=5000` is already painted, in that state, from `t=0` (hold-first/hold-last at both ends of a
 source's own range). To make something stop being visible, keyframe it with `transparency: 1`.
+
+### Naming a place
+
+Testimony names a place. It says "on the Valensole plateau", "near Socorro", "over Montgomery" —
+never 43.8379 / 5.9840. So the Location group leads with a **Place** field: type a name, press Enter
+(or **Locate**), and the latitude and longitude below are filled from
+[Nominatim](https://nominatim.openstreetmap.org/), OpenStreetMap's own geocoder — which, unlike the
+gazetteer-style services, knows the hamlets, farms and airfields that cases actually happen at.
+A name is often ambiguous, so every candidate stays listed in **Matches** and the best one is
+applied straight away; picking another moves the witness. Results are named in the reader's own
+language, and credited as their licence requires.
+
+What gets stored is the *qualified* name the search resolved (`place[].name`), not the two words
+typed — half the interesting cases happen near a village that shares its name with four others, and
+a later reader needs to land on the same spot. A name no geocoder knows is kept as typed, so a
+recording can still say "the lavender field east of the farm" beside coordinates entered by hand.
+
+The field reads both ways: move the latitude or longitude by hand and a resolved name is re-derived
+from the new coordinates, or cleared if there is no place there. A name left describing somewhere
+the sighting is no longer at is worse than no name — the recording would state, in writing, that it
+happened there. A name the witness typed themselves is never replaced.
+
+**Altitude is above sea level**, and the ground at the location sets its floor: a witness in the
+Alps is not at 0 m, and an editor that offers it invites a recording that says so. The ground's own
+height is read from whichever elevation source is live and shown beside the field. What gets stored
+is unchanged — `ObserverPose.elevationM` stays a height above the local ground, which is what the
+terrain patch is built around.
+
+### Time zones
+
+An hour of `utcOffsetHours` is an hour of Earth's rotation *and* a different row of the weather
+record. Pick the witness's own zone (`Europe/Paris`, `America/Denver`, …) and the offset is derived
+from that zone's rules **at the observation's date**: Valensole in July 1965 resolves to UTC+1, not
+the UTC+2 the same place gives today — France only reintroduced summer time in 1976. Change the date
+and it is derived again. The recording stores both: `timeZone` is the rule, `utcOffsetHours` is the
+number it produced, and every consumer keeps reading only the number.
+
+The rules come from the platform's own IANA database. What it cannot fix is a zone whose
+*boundaries* are coarse: Montgomery, Alabama is `America/Chicago`, which observed summer time in
+1948 while Alabama did not. That is why the zone is chosen by the witness rather than derived from
+the coordinates — and why the plain entered offset remains available for exactly those cases.
+
+The search runs only when asked, never per keystroke: Nominatim's usage policy allows the first and
+rules out the second.
+
+### Who answered is part of the answer
+
+Every kind of real-world data this editor pulls in — places, weather, ground relief, aerial imagery
+— is chosen by a picker sitting **where that data is reported**, with the attribution its licence
+requires next to it:
+
+> 2 places found according to `[Nominatim ▾]` © OpenStreetMap
+>
+> From `[ERA5 (Open-Meteo) ▾]` © Copernicus/ECMWF, 2026-08-21 15:30 UTC
+
+Those pickers *are* the credits. Naming who the data comes from and letting it be chosen are the
+same act: a static "© OpenStreetMap" tucked beside a field says where today's answer came from but
+hides that it is a choice, and a picker with no attribution credits nobody. Relief and imagery have
+no sentence to sit in, so they get a row under the coordinates whose ground they describe.
+
+Most registries hold a single entry today (imagery holds two, Esri and EOX Sentinel-2 cloudless) —
+which is the point: the seam is visible before it is used, and adding an implementation means adding
+one entry to a registry (`placeSources.ts`, `weatherSources.ts`, `terrainSources.ts`), not new
+markup.
+
+A stale offset renders midnight over Paris and gives no clue why, so an offset that cannot belong to
+the declared longitude is flagged on the field, with the meridian's own solar time in the tooltip.
+
+Deliberately a wide net rather than a precise one. Legal time genuinely departs from solar time,
+sometimes by hours (all of China runs on UTC+8), and the historical rules are worse — the check must
+never cry wolf at a correct "France on UTC+1 in 1965". It flags only what no country has ever done,
+and only as a warning: the recording states the witness's clock, and nothing here knows better than
+the witness.
+
+### Weather is looked up, not remembered
+
+The Circumstances group is the one part of this editor that isn't testimony. Weather is a
+measurable fact about a place at an instant, and the recording already states both — so instead of
+leaving a witness (or an author reconstructing a case decades later) to set a cloud-cover slider
+from memory, the editor looks the conditions up from [ERA5](https://open-meteo.com/en/docs/historical-weather-api),
+the ECMWF reanalysis, hourly and worldwide from 1940 on. The fields then show the record's own
+values, **read-only**, above a line naming the dataset and the exact UTC instant they describe (a
+wrong `utcOffsetHours` shows up there before it shows up in the rendered sky). The request that
+produced them is kept in `weatherSource.url`, so the claim stays checkable years later.
+
+Two of the fields have no direct counterpart in the record and are *derived* — `cloudDarkness`,
+which is a look rather than a measurement (weighted by which layers hold the cloud, plus rain and
+thunderstorm), and `cloudBaseM`, placed at the lowest deck holding a real share of the sky, from
+Espy's temperature/dew-point spread for a low deck. Both are documented in
+`src/engine/weather/providers/OpenMeteoWeatherProvider.ts`.
+
+Unchecking **From weather records** hands the fields back to the witness: the looked-up values stay
+as a starting point, `weatherSource` is dropped, and no later lookup may overwrite them — the same
+"declared outranks deduced" rule [Behind a cloud](#behind-a-cloud) follows. A recording that names
+a `weatherSource` is replayed exactly as authored and never looked up again, so a published case
+file reads identically offline. Nothing is ever locked without a record to show for it: before 1940,
+or with no network, the fields stay editable and the line says which of the two it is.
+
+The `weatherTrack` follows the observation rather than flattening it: a keyframe at its start, one
+at every whole hour it runs through, and one at its end. The record is read *between* its hourly
+rows, not snapped to the nearest one — so Wilcox's two hours carry a cloud deck lifting from 800 m
+to 913 m, and even a four-minute sighting gets a track that moves instead of one value repeated.
+(For a short observation the record often genuinely says nothing changed. That is an answer, not a
+missing feature.)
+
+The keyframes are placed on the clock playback actually runs on — `timeline.duration` once
+something has been recorded, and the observation's own declared length before that (the same rule
+`Player.durationOverrideMs` implements). That clock *changes length as authoring proceeds*: the
+first recorded shape turns a fifteen-hour span into a few seconds, so the track is re-derived
+whenever it does. Getting either half wrong looks the same from outside — a sighting whose weather
+never changes.
+
+It follows the witness too, not just the clock. Half of aviation testimony is given from a cockpit,
+and an aircraft under observation for an hour is a long way from where it started — so each sample
+is looked up at the position the `witnessTrack` puts the witness at that instant. Positions inside
+one ERA5 grid cell (~28 km) are one query, and several cells still travel in a single request, so
+a stationary witness costs exactly what it always did.
+
+`scripts/infer-case-weather.ts` runs the same lookup over case files on disk:
+
+```bash
+npx tsx scripts/infer-case-weather.ts --dry-run path/to/sighting.json
+```
+
+It rewrites only `weatherTrack` and `weatherSource`, splicing them into the file's own text so the
+diff shows the weather and nothing else.
 
 ### Behind a cloud
 

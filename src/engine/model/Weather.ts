@@ -24,7 +24,14 @@ export interface Weather {
   precipitationType: PrecipitationType
   /** 0-1; meaningless while precipitationType is "none". */
   precipitationIntensity: number
-  /** Degrees clockwise from true north — same convention as ObserverPose.headingDeg. */
+  /**
+   * Degrees clockwise from true north — same convention as ObserverPose.headingDeg, and the
+   * direction the wind blows *toward*, not the one it comes from: SceneRenderer drifts every
+   * precipitation particle along exactly this bearing (`sin/-cos`, north = -Z), so 0 means snow
+   * drifting northward. That is the opposite of the meteorological convention every real record
+   * uses ("wind 270" = a westerly, blowing east) — OpenMeteoWeatherProvider turns one into the
+   * other, and it is the only place that conversion belongs.
+   */
   windDirectionDeg: number
   /** Real-world wind speed in m/s (0 = calm, ~30 = violent storm/hurricane-force) — drives both
    * visual precipitation drift and wind audio volume directly, see SceneRenderer/WeatherAudio. */
@@ -47,4 +54,22 @@ export const DEFAULT_WEATHER: Weather = {
   windDirectionDeg: 0,
   windSpeed: 0,
   storm: false
+}
+
+/**
+ * Where a recording's weather values came from, when they weren't stated by the witness but
+ * looked up from a real meteorological record for the observation's own date/time and place (see
+ * engine/weather/WeatherProvider.ts). Present on a Sighting means every weatherTrack keyframe was
+ * produced by that lookup — the recorder shows them read-only on that basis, since a reanalysis
+ * value is a measurement to report, not a dial to tune. Absent means the opposite and the stronger
+ * claim: the conditions are the WITNESS's, declared, and nothing may overwrite them — the same
+ * "declared, not deduced" rule BaseShape.behindCloud follows.
+ */
+export interface WeatherSource {
+  /** Stable dataset id, e.g. "era5" — what a later reader identifies the record by. */
+  id: string
+  /** Human-readable dataset name, e.g. "ERA5 (Open-Meteo)". */
+  name: string
+  /** The exact request that produced these values, so the claim stays checkable years later. */
+  url: string
 }

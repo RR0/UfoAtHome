@@ -6,7 +6,7 @@ import { ObserverTrack } from "../model/ObserverTrack.js"
 import type { ObserverTrackJson } from "../model/ObserverTrack.js"
 import { WeatherTrack } from "../model/WeatherTrack.js"
 import type { WeatherTrackJson } from "../model/WeatherTrack.js"
-import type { Weather } from "../model/Weather.js"
+import type { Weather, WeatherSource } from "../model/Weather.js"
 import type { People } from "../model/People.js"
 import type { DecorObject } from "../model/Decor.js"
 
@@ -24,6 +24,8 @@ export interface SightingRecordingJson {
   durationSeconds?: number
   /** See SightingEvent.utcOffsetHours — the legal time zone `time`/`endTime` are expressed in. */
   utcOffsetHours?: number
+  /** See SightingEvent.timeZone — the IANA rule `utcOffsetHours` was derived from, when it was. */
+  timeZone?: string
   place?: SightingLocation[]
   /** See Sighting.witness. */
   witness?: People
@@ -48,6 +50,10 @@ export interface SightingRecordingJson {
   weather?: Weather
   /** See Sighting.decor. Absent/omitted means no decor — older recordings default to []. */
   decor?: DecorObject[]
+  /** Which meteorological record `weatherTrack` was looked up from, when it wasn't the witness who
+   * stated the conditions — see Sighting.weatherSource. Absent means they ARE the witness's (or
+   * predate this field), and a reader must not treat them as measurements. */
+  weatherSource?: WeatherSource
 }
 
 export function toSightingJson(sighting: Sighting): SightingRecordingJson {
@@ -57,6 +63,7 @@ export function toSightingJson(sighting: Sighting): SightingRecordingJson {
     endTime: sighting.event.endTime,
     durationSeconds: sighting.event.durationSeconds,
     utcOffsetHours: sighting.event.utcOffsetHours,
+    timeZone: sighting.event.timeZone,
     place: sighting.event.place,
     witness: sighting.witness,
     caseId: sighting.caseId,
@@ -66,7 +73,8 @@ export function toSightingJson(sighting: Sighting): SightingRecordingJson {
     witnessTrack: sighting.witnessTrack.toJSON(),
     weatherTrack: sighting.weatherTrack.toJSON(),
     weather: sighting.weather,
-    decor: sighting.decor
+    decor: sighting.decor,
+    weatherSource: sighting.weatherSource
   }
 }
 
@@ -78,6 +86,7 @@ export function fromSightingJson(json: SightingRecordingJson): Sighting {
       endTime: json.endTime,
       durationSeconds: json.durationSeconds,
       utcOffsetHours: json.utcOffsetHours,
+      timeZone: json.timeZone,
       place: json.place,
       description: json.description,
       tags: json.tags
@@ -88,6 +97,7 @@ export function fromSightingJson(json: SightingRecordingJson): Sighting {
     json.witness,
     json.caseId,
     json.weather,
-    json.decor ?? []
+    json.decor ?? [],
+    json.weatherSource
   )
 }
