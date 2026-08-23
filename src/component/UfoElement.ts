@@ -63,6 +63,10 @@ export class UfoElement extends HTMLElement {
    * of the recording, so it must be heard in the plain 2D embed too, not only in the 3D one that
    * happens to own the weather's audio. */
   private readonly sightingAudio = new SightingAudio()
+  /** A sound being auditioned while paused (see previewSound), held rather than played and
+   * forgotten: every repaint would otherwise silence it, and a repaint follows within a frame or
+   * two of any edit on a real case page — which is precisely when a preview is asked for. */
+  private soundPreview?: SightingSound
   private player: Player
   private loopEnabled = true
   private highlightedSourceIds: Set<string> = new Set()
@@ -201,7 +205,8 @@ export class UfoElement extends HTMLElement {
     // player's loop keeps repainting frame 0 onward.
     this.player.stop()
     // The outgoing sighting's sound would otherwise keep playing over the incoming one — stop()
-    // paints no further frame, same as pause().
+    // paints no further frame, same as pause(). A preview belongs to that same outgoing recording.
+    this.soundPreview = undefined
     this.sightingAudio.silence()
     this.currentSighting = fromSightingJson(json)
     this.player = this.createPlayer()
@@ -225,17 +230,23 @@ export class UfoElement extends HTMLElement {
    * blind would be like drawing a shape with the canvas covered.
    *
    * Only ever call this from a real user gesture (an input event on a sound field is one): it
-   * unlocks the AudioContext, which nothing else in this element can do while paused. The next
-   * repaint silences it again — onFrame stops any sound whenever playback isn't running — so a
-   * caller wanting it to last must keep the preview alive itself (see the recorder's own timer).
+   * unlocks the AudioContext, which nothing else in this element can do while paused.
+   *
+   * It survives repaints, and only stopSoundPreview() or playback itself ends it. That is not a
+   * detail: onFrame silences any sound whenever playback isn't running, and an edit on a real case
+   * page triggers a repaint within a frame or two — so a preview that didn't outlive them was
+   * audible for about a tenth of a second, exactly where it was needed most. How long one lasts is
+   * the caller's own business (see the recorder's timer).
    */
   previewSound(sound: SightingSound): void {
+    this.soundPreview = sound
     this.sightingAudio.resume()
     this.sightingAudio.setSound(sound)
   }
 
-  /** Ends a previewSound() early. */
+  /** Ends a previewSound(). Callers own how long one lasts — nothing here expires it. */
   stopSoundPreview(): void {
+    this.soundPreview = undefined
     this.sightingAudio.silence()
   }
 
@@ -422,10 +433,15 @@ export class UfoElement extends HTMLElement {
     }
     this.seekInput.value = String(t)
     this.timeStartLabel.textContent = this.formatPosition(t)
-    // Only while actually playing: onFrame is also the seek sink, and a witness dragging the bar
-    // through a keyframe shouldn't fire a burst of sound at every position they pass through.
+    // The track is heard only while actually playing: onFrame is also the seek sink, and a witness
+    // dragging the bar through a keyframe shouldn't fire a burst of sound at every position they
+    // pass through. A preview outlives repaints on purpose (see previewSound), and playing ends it
+    // — the recording itself is what should be heard from then on.
     if (this.playbackState === "playing") {
+      this.soundPreview = undefined
       this.sightingAudio.setSound(resolveSoundAt(this.currentSighting, t))
+    } else if (this.soundPreview) {
+      this.sightingAudio.setSound(this.soundPreview)
     } else {
       this.sightingAudio.silence()
     }
@@ -455,6 +471,7 @@ export class UfoElement extends HTMLElement {
     if (this.player.playbackState === "playing") {
       this.player.pause()
       // pause() fires no further frame, so nothing else would ever stop the sound.
+      this.soundPreview = undefined
       this.sightingAudio.silence()
       // pause() doesn't itself trigger a repaint — force one so the selection highlight
       // (hidden while playing) reappears immediately instead of staying hidden until some

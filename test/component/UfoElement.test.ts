@@ -685,6 +685,93 @@ describe("UfoElement", () => {
   })
 })
 
+describe("UfoElement sound", () => {
+  afterEach(() => {
+    document.body.innerHTML = ""
+  })
+
+  /** The element's own SightingAudio. jsdom has no Web Audio at all, so it is a no-op object — what
+   * these tests check is which calls it is asked to make, which is where the wiring lives. */
+  function audioOf(element: UfoElement): { setSound: ReturnType<typeof vi.spyOn>; silence: ReturnType<typeof vi.spyOn> } {
+    const audio = (element as unknown as { sightingAudio: Record<string, () => void> }).sightingAudio
+    return { setSound: vi.spyOn(audio, "setSound"), silence: vi.spyOn(audio, "silence") }
+  }
+
+  const humming = {
+    ...sampleJson,
+    durationSeconds: 4,
+    soundTrack: { keyframes: [{ t: 0, sound: { kind: "hum" as const, volume: 0.8, pitchHz: 200 } }] }
+  }
+
+  it("says nothing about sound while paused, whatever the track holds", () => {
+    const element = mount()
+    element.sightingData = humming
+    const audio = audioOf(element)
+    element.refresh()
+    expect(audio.setSound).not.toHaveBeenCalled()
+    expect(audio.silence).toHaveBeenCalled()
+  })
+
+  it("plays what the track holds at the played instant", () => {
+    const element = mount()
+    element.sightingData = humming
+    const audio = audioOf(element)
+    element.togglePlayPause()
+    element.currentTime = 1000
+    expect(audio.setSound).toHaveBeenCalledWith(expect.objectContaining({ kind: "hum", volume: 0.8 }))
+  })
+
+  // The regression this exists for: a preview used to be silenced by the very next repaint, and on
+  // a real case page a repaint follows an edit within a frame or two — so it was audible for about
+  // a tenth of a second, exactly where the witness needed to hear it.
+  it("keeps a preview alive across repaints", () => {
+    const element = mount()
+    element.sightingData = humming
+    const audio = audioOf(element)
+    element.previewSound({ kind: "whistle", volume: 0.5, pitchHz: 1200 })
+    audio.setSound.mockClear()
+    audio.silence.mockClear()
+    element.refresh()
+    expect(audio.setSound).toHaveBeenCalledWith(expect.objectContaining({ kind: "whistle" }))
+    expect(audio.silence).not.toHaveBeenCalled()
+  })
+
+  it("ends a preview on stopSoundPreview, and never revives it", () => {
+    const element = mount()
+    element.sightingData = humming
+    const audio = audioOf(element)
+    element.previewSound({ kind: "whistle", volume: 0.5, pitchHz: 1200 })
+    element.stopSoundPreview()
+    audio.setSound.mockClear()
+    element.refresh()
+    expect(audio.setSound).not.toHaveBeenCalled()
+    expect(audio.silence).toHaveBeenCalled()
+  })
+
+  it("drops a preview once playback starts — the recording is what should be heard then", () => {
+    const element = mount()
+    element.sightingData = humming
+    const audio = audioOf(element)
+    element.previewSound({ kind: "whistle", volume: 0.5, pitchHz: 1200 })
+    element.togglePlayPause()
+    audio.setSound.mockClear()
+    element.currentTime = 500
+    expect(audio.setSound).toHaveBeenCalledWith(expect.objectContaining({ kind: "hum" }))
+    expect(audio.setSound).not.toHaveBeenCalledWith(expect.objectContaining({ kind: "whistle" }))
+  })
+
+  it("silences the outgoing recording's sound when another is loaded", () => {
+    const element = mount()
+    element.sightingData = humming
+    const audio = audioOf(element)
+    element.previewSound({ kind: "whistle", volume: 0.5, pitchHz: 1200 })
+    element.sightingData = sampleJson
+    audio.setSound.mockClear()
+    element.refresh()
+    expect(audio.setSound).not.toHaveBeenCalled()
+  })
+})
+
 describe("UfoElement hover tooltip", () => {
   afterEach(() => {
     document.body.innerHTML = ""
