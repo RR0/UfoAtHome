@@ -1831,7 +1831,9 @@ export class UfoRecorderElement extends HTMLElement {
     this.weatherSourceLink.hidden = !sourced
     if (sourced) {
       this.weatherSourceRow.hidden = false
-      this.weatherSourceText.textContent = `${this.messages.weatherFrom} `
+      // No lead-in word: the checkbox right above already says "from weather records", and the
+      // picker naming the record read as a second "from" immediately after it.
+      this.weatherSourceText.textContent = ""
       this.weatherSourceLink.href = source!.url
       this.weatherSourceLink.textContent = this.observationInstantLabel()
       return

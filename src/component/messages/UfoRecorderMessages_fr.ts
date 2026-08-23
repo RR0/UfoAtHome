@@ -104,7 +104,6 @@ export const ufoRecorderMessages_fr: UfoRecorderMessages = {
   weatherInferred: "D'après les relevés",
   weatherInferredTitle:
     "La météo n'est pas un témoignage : c'est un fait mesurable, relevé pour la date, l'heure et le lieu de l'observation. Décochez pour saisir les conditions rapportées par le témoin, qui priment alors sur le relevé.",
-  weatherFrom: "D'après",
   weatherLookingUp: "Recherche du relevé…",
   weatherNeedsDateAndPlace: "Date complète et lieu requis pour retrouver le relevé",
   weatherNoRecord: "Aucun relevé pour cette date et ce lieu",

@@ -104,7 +104,6 @@ export const ufoRecorderMessages_en: UfoRecorderMessages = {
   weatherInferred: "From weather records",
   weatherInferredTitle:
     "Weather isn't testimony: it's a measurable fact, on record for the observation's own date, time and place. Uncheck to state the conditions the witness reported, which then override the record.",
-  weatherFrom: "From",
   weatherLookingUp: "Looking up the record…",
   weatherNeedsDateAndPlace: "A full date and a place are needed to look up the record",
   weatherNoRecord: "No record for this date and place",

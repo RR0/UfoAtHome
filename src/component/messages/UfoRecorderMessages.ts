@@ -171,10 +171,6 @@ export interface UfoRecorderMessages {
   weatherInferred: string
   /** That checkbox's tooltip, where the reasoning actually fits. */
   weatherInferredTitle: string
-  /** Prefix of the sourced-weather line, completed in code with the dataset name and the UTC
-   * instant it describes: "{weatherFrom} ERA5 (Open-Meteo), 1965-07-01 04:00 UTC". Kept as a
-   * prefix rather than a placeholder string since neither of the two parts is translatable. */
-  weatherFrom: string
   /** Shown while the lookup is in flight. */
   weatherLookingUp: string
   /** The sighting doesn't yet say where or exactly when — nothing to look up yet. */
