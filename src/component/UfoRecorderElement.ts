@@ -29,6 +29,7 @@ import {
   sightingDurationBlockedReason,
   parseEdtfTime,
   formatEdtfTime,
+  resolveSoundAt,
   resolveWeatherAt,
   resolveObserverPoseAt
 } from "../engine/model/Sighting.js"
@@ -40,6 +41,8 @@ import type { WeatherProvider } from "../engine/weather/WeatherProvider.js"
 import { defaultPlaceProvider } from "../engine/place/defaultPlaceProvider.js"
 import { PLACE_SOURCES } from "../engine/place/placeSources.js"
 import { WEATHER_SOURCES } from "../engine/weather/weatherSources.js"
+import { SOUND_KINDS } from "../engine/model/Sound.js"
+import type { SightingSound, SoundKind } from "../engine/model/Sound.js"
 import { ELEVATION_SOURCES, IMAGERY_SOURCES } from "../render3d/terrain/terrainSources.js"
 import { GroundElevation } from "../render3d/terrain/ElevationProvider.js"
 import { TimeZones } from "../engine/time/TimeZones.js"
@@ -57,6 +60,12 @@ registerUfo()
 registerScene()
 
 const DEFAULT_SHAPE_SIZE = { width: 48, height: 28 }
+/** How long a tuned sound keeps playing after the last edit to it — long enough to judge the
+ * timbre against what was heard, short enough that a hum doesn't follow the witness around the
+ * rest of the editor. Playback itself is unaffected: this only bounds the preview that plays while
+ * paused (see UfoElement.previewSound). */
+const SOUND_PREVIEW_MS = 2500
+
 /** How long a date/place edit must settle before the weather record is looked up again. Long
  * enough that typing a latitude digit by digit is one request, not six — the values it asks about
  * only become meaningful once the field is finished anyway. */
@@ -267,6 +276,18 @@ export class UfoRecorderElement extends HTMLElement {
   // *same* reported brightness naked-eye (cameraDeviceInput at 0) against how a camera would have
   // captured it (above 0) only works if brightness itself doesn't also change when the artifact
   // strength changes.
+  private readonly soundKindSelect: HTMLSelectElement
+  private readonly soundVolumeInput: HTMLInputElement
+  private readonly soundPitchInput: HTMLInputElement
+  private readonly soundPitchValue: HTMLElement
+  private readonly soundSrcInput: HTMLInputElement
+  /** Every field the sighting's sound is read from — listened to as one, exactly like
+   * weatherFields. */
+  private readonly soundFields: (HTMLInputElement | HTMLSelectElement)[]
+  /** The kind dropdown's options, kept so applyMessages can retranslate them: they're built from
+   * SOUND_KINDS in script (see buildSoundKindOptions), not from markup with per-option ids. */
+  private readonly soundKindOptions = new Map<SoundKind, HTMLOptionElement>()
+  private soundPreviewTimer?: ReturnType<typeof setTimeout>
   private readonly lensFlareBrightnessInput: HTMLInputElement
   private readonly cameraDeviceInput: HTMLInputElement
   private readonly labelColor: HTMLElement
@@ -320,6 +341,11 @@ export class UfoRecorderElement extends HTMLElement {
   private readonly labelWindSpeed: HTMLElement
   private readonly labelStorm: HTMLElement
   private readonly labelWeatherInferred: HTMLElement
+  private readonly labelSoundGroup: HTMLElement
+  private readonly labelSoundKind: HTMLElement
+  private readonly labelSoundVolume: HTMLElement
+  private readonly labelSoundPitch: HTMLElement
+  private readonly labelSoundSrc: HTMLElement
   private readonly labelLensFlareBrightness: HTMLElement
   private readonly labelCameraDevice: HTMLElement
   private readonly optionPrecipitationNone: HTMLElement
@@ -610,6 +636,13 @@ export class UfoRecorderElement extends HTMLElement {
       this.windSpeedInput,
       this.stormInput
     ]
+    this.soundKindSelect = this.shadow.getElementById("soundKind") as HTMLSelectElement
+    this.soundVolumeInput = this.shadow.getElementById("soundVolume") as HTMLInputElement
+    this.soundPitchInput = this.shadow.getElementById("soundPitch") as HTMLInputElement
+    this.soundPitchValue = this.shadow.getElementById("sound-pitch-value")!
+    this.soundSrcInput = this.shadow.getElementById("soundSrc") as HTMLInputElement
+    this.soundFields = [this.soundKindSelect, this.soundVolumeInput, this.soundPitchInput, this.soundSrcInput]
+    this.buildSoundKindOptions()
     this.lensFlareBrightnessInput = this.shadow.getElementById("lensFlareBrightness") as HTMLInputElement
     this.cameraDeviceInput = this.shadow.getElementById("cameraDevice") as HTMLInputElement
     this.labelColor = this.shadow.getElementById("label-color")!
@@ -621,6 +654,11 @@ export class UfoRecorderElement extends HTMLElement {
     this.labelObjectSize = this.shadow.getElementById("label-object-size")!
     this.labelObjectDistance = this.shadow.getElementById("label-object-distance")!
     this.labelSamplingRate = this.shadow.getElementById("label-sampling-rate")!
+    this.labelSoundGroup = this.shadow.getElementById("label-sound-group")!
+    this.labelSoundKind = this.shadow.getElementById("label-sound-kind")!
+    this.labelSoundVolume = this.shadow.getElementById("label-sound-volume")!
+    this.labelSoundPitch = this.shadow.getElementById("label-sound-pitch")!
+    this.labelSoundSrc = this.shadow.getElementById("label-sound-src")!
     this.labelDuration = this.shadow.getElementById("label-duration")!
     this.placeSourceRow = this.shadow.getElementById("place-source-row")!
     this.weatherSourceRow = this.shadow.getElementById("weather-source-row")!
@@ -873,6 +911,9 @@ export class UfoRecorderElement extends HTMLElement {
     this.tagsInput.addEventListener("input", () => this.updateTags())
     for (const input of this.weatherFields) {
       input.addEventListener("input", () => this.applyWeatherAtPlayhead())
+    }
+    for (const field of this.soundFields) {
+      field.addEventListener("input", () => this.applySoundAtPlayhead())
     }
     this.weatherInferredInput.addEventListener("change", () => this.onWeatherInferredToggled())
 
@@ -1550,6 +1591,110 @@ export class UfoRecorderElement extends HTMLElement {
     this.ufoElement.refresh()
   }
 
+  /** Fills the kind dropdown from SOUND_KINDS, so a new timbre is one entry in that list and
+   * nothing else — no markup, no per-option element id (same rule the data-source pickers follow,
+   * see sourcePicker). Labels are set from the current messages here and retranslated by
+   * applyMessages. */
+  private buildSoundKindOptions(): void {
+    for (const kind of SOUND_KINDS) {
+      const option = document.createElement("option")
+      option.value = kind
+      option.textContent = this.soundKindLabel(kind, this.messages)
+      this.soundKindOptions.set(kind, option)
+      this.soundKindSelect.appendChild(option)
+    }
+  }
+
+  private soundKindLabel(kind: SoundKind, messages: UfoRecorderMessages): string {
+    switch (kind) {
+      case "hum":
+        return messages.soundHum
+      case "whistle":
+        return messages.soundWhistle
+      case "rumble":
+        return messages.soundRumble
+      case "crackle":
+        return messages.soundCrackle
+      default:
+        return messages.soundNone
+    }
+  }
+
+  /**
+   * Writes what the sighting sounded like at the current playhead as a keyframe — the same
+   * keyframed-track pattern as applyWeatherAtPlayhead/updateObserver, on the same clock as the
+   * shapes, which is what lets a craft be recorded silent on the ground and heard only from the
+   * instant it lifted off: keyframe "none" at the start, a hum at that instant.
+   *
+   * Like weather and unlike updateObserver, there's no "nothing set, remove the keyframe" case —
+   * every field here always holds a real value, and "none" is itself a statement (see Sound.ts).
+   * Bails out while playing, same reasoning as every other edit path.
+   */
+  private applySoundAtPlayhead(): void {
+    if (this.ufoElement.playbackState === "playing") return
+    const sound = this.readSound()
+    this.ufoElement.sighting.soundTrack.addKeyframe(this.ufoElement.currentTime, sound)
+    this.updateSoundPitchReadout(sound.pitchHz)
+    this.updateSoundFieldsDisabledState(sound)
+    this.ufoElement.refresh()
+    // AFTER refresh(), never before: refresh() paints a frame, and painting while paused is
+    // exactly what silences any sound (see UfoElement.onFrame) — previewing first would be
+    // switched off by the very repaint this edit triggers.
+    this.previewSound(sound)
+  }
+
+  /** Lets the witness hear what they are describing while they tune it — an input event on a
+   * sound field IS the user gesture an AudioContext needs. Bounded by its own timer so a hum
+   * doesn't outlive the edit that started it (see SOUND_PREVIEW_MS). */
+  private previewSound(sound: SightingSound): void {
+    clearTimeout(this.soundPreviewTimer)
+    this.ufoElement.previewSound(sound)
+    this.soundPreviewTimer = setTimeout(() => this.ufoElement.stopSoundPreview(), SOUND_PREVIEW_MS)
+  }
+
+  private readSound(): SightingSound {
+    return {
+      kind: this.soundKindSelect.value as SoundKind,
+      volume: Number(this.soundVolumeInput.value),
+      pitchHz: Number(this.soundPitchInput.value),
+      // A blank field is no recording at all, not an empty URL to try to fetch.
+      src: this.soundSrcInput.value.trim() || undefined
+    }
+  }
+
+  /** Keeps the sound fields honest as the playhead moves or a different keyframe region is
+   * scrubbed to — same role, same playing-state bailout and same skip-the-focused-field rule as
+   * syncWeatherFromTimeline (see syncObserverFromTimeline's doc comment for what that rule is
+   * there to prevent). */
+  private syncSoundFromTimeline(): void {
+    if (this.ufoElement.playbackState === "playing") return
+    const sound = resolveSoundAt(this.ufoElement.sighting, this.ufoElement.currentTime)
+    const active = this.shadow.activeElement
+    if (active !== this.soundKindSelect) this.soundKindSelect.value = sound.kind
+    if (active !== this.soundVolumeInput) this.soundVolumeInput.value = String(sound.volume)
+    if (active !== this.soundPitchInput) this.soundPitchInput.value = String(sound.pitchHz)
+    if (active !== this.soundSrcInput) this.soundSrcInput.value = sound.src ?? ""
+    this.updateSoundPitchReadout(sound.pitchHz)
+    this.updateSoundFieldsDisabledState(sound)
+  }
+
+  /** The pitch slider says nothing on its own — this is what makes it readable as the frequency
+   * it actually sets, the same role apparent-size plays for the size/distance pair. */
+  private updateSoundPitchReadout(pitchHz: number): void {
+    this.soundPitchValue.textContent = `${Math.round(pitchHz)} Hz`
+  }
+
+  /** Greys out what this sound genuinely has no use for: everything but the kind when nothing was
+   * heard, and the pitch when a real recording carries its own (see SightingSound.src). Plain
+   * `disabled`, with the UA's own "unavailable" styling — unlike the weather fields, which are
+   * locked because they were looked up and deliberately keep looking editable-but-read-only. */
+  private updateSoundFieldsDisabledState(sound: SightingSound): void {
+    const silent = sound.kind === "none" && !sound.src
+    this.soundVolumeInput.disabled = silent
+    this.soundSrcInput.disabled = silent
+    this.soundPitchInput.disabled = silent || sound.src !== undefined
+  }
+
   /** Swaps the record consulted for inferred weather — the element itself only ever names the
    * WeatherProvider interface (see defaultWeatherProvider's own doc comment), so an embedder with
    * a national archive, or a test with a canned response, substitutes one here. */
@@ -2035,6 +2180,7 @@ export class UfoRecorderElement extends HTMLElement {
     this.syncAppearanceFromTimeline()
     this.syncObserverFromTimeline()
     this.syncWeatherFromTimeline()
+    this.syncSoundFromTimeline()
     this.syncDecorLitFromTimeline()
     this.syncIndoorLookReset()
     this.updateAppearanceFieldsDisabledState()
@@ -2917,6 +3063,13 @@ export class UfoRecorderElement extends HTMLElement {
     this.labelWeatherInferred.title = messages.weatherInferredTitle
     // Re-renders the source/status line, whose text is half messages and half live data.
     this.syncWeatherSourceState()
+    this.labelSoundGroup.textContent = messages.soundGroup
+    this.labelSoundKind.textContent = messages.soundKind
+    this.labelSoundVolume.textContent = messages.soundVolume
+    this.labelSoundPitch.textContent = messages.soundPitch
+    this.labelSoundSrc.textContent = messages.soundSrc
+    this.soundSrcInput.placeholder = messages.soundSrcPlaceholder
+    for (const [kind, option] of this.soundKindOptions) option.textContent = this.soundKindLabel(kind, messages)
     this.labelLensFlareBrightness.textContent = messages.lensFlareBrightness
     this.labelCameraDevice.textContent = messages.cameraDevice
     this.loopButton.title = messages.autoReplay

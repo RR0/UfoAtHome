@@ -2,8 +2,11 @@ import { Timeline } from "./Timeline.js"
 import { ObserverTrack } from "./ObserverTrack.js"
 import type { ObserverPose } from "./ObserverTrack.js"
 import { WeatherTrack } from "./WeatherTrack.js"
+import { SoundTrack } from "./SoundTrack.js"
 import { DEFAULT_WEATHER } from "./Weather.js"
 import type { Weather, WeatherSource } from "./Weather.js"
+import { DEFAULT_SOUND } from "./Sound.js"
+import type { SightingSound } from "./Sound.js"
 import type { People } from "./People.js"
 import type { DecorObject } from "./Decor.js"
 
@@ -251,6 +254,9 @@ export class Sighting {
     readonly timeline: Timeline,
     readonly witnessTrack: ObserverTrack,
     readonly weatherTrack: WeatherTrack,
+    /** What the sighting sounded like over time — see SoundTrack. Empty (not silent) for every
+     * recording that says nothing about sound, which is most of them: see resolveSoundAt. */
+    readonly soundTrack: SoundTrack,
     public witness?: People,
     public caseId?: string,
     /** Legacy fallback only, kept for old recordings made before weatherTrack existed — see
@@ -272,7 +278,14 @@ export class Sighting {
   }
 
   static create(time?: SightingTime, place?: SightingLocation[], witness?: People): Sighting {
-    return new Sighting({ eventType: "sighting", time, place }, new Timeline(), new ObserverTrack(), new WeatherTrack(), witness)
+    return new Sighting(
+      { eventType: "sighting", time, place },
+      new Timeline(),
+      new ObserverTrack(),
+      new WeatherTrack(),
+      new SoundTrack(),
+      witness
+    )
   }
 }
 
@@ -306,4 +319,13 @@ export function resolveObserverPoseAt(sighting: Sighting, t: number): ObserverPo
  * (unlike ObserverPose) has a real default for every field, not just some. */
 export function resolveWeatherAt(sighting: Sighting, t: number): Weather {
   return sighting.weatherTrack.getInterpolatedWeatherAt(t) ?? sighting.weather ?? DEFAULT_WEATHER
+}
+
+/** Resolves the sound at t (interpolated, see SoundTrack), falling back to DEFAULT_SOUND —
+ * silence — for a recording whose track is empty, which is every recording made before the track
+ * existed and every one whose witness was never asked. Silence is the only safe fallback: unlike
+ * weather, whose DEFAULT_WEATHER stands for "unremarkable conditions", inventing a noise nobody
+ * reported would be putting words in a witness's mouth. Playing nothing says nothing. */
+export function resolveSoundAt(sighting: Sighting, t: number): SightingSound {
+  return sighting.soundTrack.getInterpolatedSoundAt(t) ?? DEFAULT_SOUND
 }

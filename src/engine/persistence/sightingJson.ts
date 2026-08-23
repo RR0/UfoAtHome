@@ -6,6 +6,8 @@ import { ObserverTrack } from "../model/ObserverTrack.js"
 import type { ObserverTrackJson } from "../model/ObserverTrack.js"
 import { WeatherTrack } from "../model/WeatherTrack.js"
 import type { WeatherTrackJson } from "../model/WeatherTrack.js"
+import { SoundTrack } from "../model/SoundTrack.js"
+import type { SoundTrackJson } from "../model/SoundTrack.js"
 import type { Weather, WeatherSource } from "../model/Weather.js"
 import type { People } from "../model/People.js"
 import type { DecorObject } from "../model/Decor.js"
@@ -48,6 +50,10 @@ export interface SightingRecordingJson {
    * made before it existed — absent means "unknown/not recorded", not "clear skies" (renderers
    * default to DEFAULT_WEATHER, see Weather.ts). New recordings write weatherTrack instead. */
   weather?: Weather
+  /** What the sighting sounded like over time — see SoundTrack. Absent means the recording says
+   * nothing about sound at all, which replays as silence; a track holding a kind "none" keyframe
+   * is the stronger, deliberate statement that the witness heard nothing (see Sound.ts). */
+  soundTrack?: SoundTrackJson
   /** See Sighting.decor. Absent/omitted means no decor — older recordings default to []. */
   decor?: DecorObject[]
   /** Which meteorological record `weatherTrack` was looked up from, when it wasn't the witness who
@@ -72,6 +78,7 @@ export function toSightingJson(sighting: Sighting): SightingRecordingJson {
     timeline: sighting.timeline.toJSON(),
     witnessTrack: sighting.witnessTrack.toJSON(),
     weatherTrack: sighting.weatherTrack.toJSON(),
+    soundTrack: sighting.soundTrack.toJSON(),
     weather: sighting.weather,
     decor: sighting.decor,
     weatherSource: sighting.weatherSource
@@ -94,6 +101,7 @@ export function fromSightingJson(json: SightingRecordingJson): Sighting {
     Timeline.fromJSON(json.timeline),
     json.witnessTrack ? ObserverTrack.fromJSON(json.witnessTrack) : new ObserverTrack(),
     json.weatherTrack ? WeatherTrack.fromJSON(json.weatherTrack) : new WeatherTrack(),
+    json.soundTrack ? SoundTrack.fromJSON(json.soundTrack) : new SoundTrack(),
     json.witness,
     json.caseId,
     json.weather,

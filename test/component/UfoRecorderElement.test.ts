@@ -5,6 +5,7 @@ import type { PolygonShape, Shape } from "../../src/engine/shape/Shape.js"
 import { ShapeHandles } from "../../src/engine/shape/ShapeHandles.js"
 import type { WeatherProvider } from "../../src/engine/weather/WeatherProvider.js"
 import type { Weather } from "../../src/engine/model/Weather.js"
+import { SOUND_KINDS } from "../../src/engine/model/Sound.js"
 import type { PlaceMatch, PlaceProvider } from "../../src/engine/place/PlaceProvider.js"
 
 register()
@@ -789,10 +790,12 @@ describe("UfoRecorderElement composes a nested rr0-ufo", () => {
     element.sightingData = json
     // timeline.order/groups are always present on the way out (order: z-order support, groups:
     // multi-select grouping), even though the hand-written fixture above predates both and omits
-    // them. decor is likewise always present (see Decor.ts), empty here since none was set.
+    // them. decor is likewise always present (see Decor.ts), empty here since none was set, and so
+    // is soundTrack (see SoundTrack.ts) — empty meaning nothing was recorded about sound.
     expect(element.sightingData).toEqual({
       ...json,
       timeline: { ...json.timeline, order: ["ufo-1"], groups: [] },
+      soundTrack: { keyframes: [] },
       decor: []
     })
   })
@@ -2282,6 +2285,95 @@ describe("UfoRecorderElement import controls", () => {
   })
 })
 
+describe("UfoRecorderElement sound keyframes over time", () => {
+  afterEach(() => {
+    document.body.innerHTML = ""
+  })
+
+  function setInput(shadow: ShadowRoot, id: string, value: string): void {
+    const input = shadow.getElementById(id) as HTMLInputElement
+    input.value = value
+    input.dispatchEvent(new Event("input"))
+  }
+
+  function seekNestedUfoTo(element: UfoRecorderElement, t: number): void {
+    const seekInput = nestedUfo(element)!.shadowRoot!.getElementById("seek") as HTMLInputElement
+    seekInput.value = String(t)
+    seekInput.dispatchEvent(new Event("input"))
+  }
+
+  it("offers every SoundKind, built from the model rather than from markup", () => {
+    const element = mount()
+    const options = [...(element.shadowRoot!.getElementById("soundKind") as HTMLSelectElement).options]
+    expect(options.map(option => option.value)).toEqual(SOUND_KINDS)
+    expect(options.every(option => option.textContent !== "")).toBe(true)
+  })
+
+  // The case this whole feature was asked for: an object silent on the ground, heard only once it
+  // takes off — which is exactly two keyframes at two instants, not one sound for the sighting.
+  it("records a sound keyframe at the scrubbed-to instant, not always at t=0", () => {
+    const element = mount()
+    element.sightingData = { version: 1, timeline: { keyframes: [] }, durationSeconds: 10 }
+    const shadow = element.shadowRoot!
+    setInput(shadow, "soundKind", "none")
+    seekNestedUfoTo(element, 4000)
+    setInput(shadow, "soundKind", "hum")
+    setInput(shadow, "soundVolume", "0.8")
+
+    const keyframes = element.sightingData.soundTrack?.keyframes ?? []
+    expect(keyframes.map(keyframe => keyframe.t)).toEqual([0, 4000])
+    expect(keyframes[0].sound.kind).toBe("none")
+    expect(keyframes[1].sound).toMatchObject({ kind: "hum", volume: 0.8 })
+  })
+
+  it("resyncs the sound fields to whatever the track says at the scrubbed-to instant", () => {
+    const element = mount()
+    element.sightingData = {
+      version: 1,
+      durationSeconds: 10,
+      timeline: { keyframes: [] },
+      soundTrack: {
+        keyframes: [
+          { t: 0, sound: { kind: "none", volume: 0, pitchHz: 100 } },
+          { t: 4000, sound: { kind: "whistle", volume: 1, pitchHz: 900 } }
+        ]
+      }
+    }
+    const shadow = element.shadowRoot!
+    seekNestedUfoTo(element, 4000)
+    expect((shadow.getElementById("soundKind") as HTMLSelectElement).value).toBe("whistle")
+    expect((shadow.getElementById("soundVolume") as HTMLInputElement).value).toBe("1")
+    expect((shadow.getElementById("soundPitch") as HTMLInputElement).value).toBe("900")
+    expect(shadow.getElementById("sound-pitch-value")!.textContent).toBe("900 Hz")
+  })
+
+  it("disables the fields a silent sighting has no use for, and the pitch a real recording carries itself", () => {
+    const element = mount()
+    element.sightingData = { version: 1, timeline: { keyframes: [] }, durationSeconds: 10 }
+    const shadow = element.shadowRoot!
+    setInput(shadow, "soundKind", "none")
+    expect((shadow.getElementById("soundVolume") as HTMLInputElement).disabled).toBe(true)
+    expect((shadow.getElementById("soundPitch") as HTMLInputElement).disabled).toBe(true)
+
+    setInput(shadow, "soundKind", "hum")
+    expect((shadow.getElementById("soundVolume") as HTMLInputElement).disabled).toBe(false)
+    expect((shadow.getElementById("soundPitch") as HTMLInputElement).disabled).toBe(false)
+
+    setInput(shadow, "soundSrc", "https://example.org/hum.ogg")
+    expect((shadow.getElementById("soundPitch") as HTMLInputElement).disabled).toBe(true)
+    expect(element.sightingData.soundTrack?.keyframes[0].sound.src).toBe("https://example.org/hum.ogg")
+  })
+
+  it("treats a blank recording URL as no recording at all", () => {
+    const element = mount()
+    element.sightingData = { version: 1, timeline: { keyframes: [] }, durationSeconds: 10 }
+    const shadow = element.shadowRoot!
+    setInput(shadow, "soundKind", "hum")
+    setInput(shadow, "soundSrc", "   ")
+    expect(element.sightingData.soundTrack?.keyframes[0].sound.src).toBeUndefined()
+  })
+})
+
 describe("UfoRecorderElement toolbar groups", () => {
   afterEach(() => {
     document.body.innerHTML = ""
@@ -2290,13 +2382,13 @@ describe("UfoRecorderElement toolbar groups", () => {
   it("renders each field group as a collapsible <details>, open by default", () => {
     const element = mount()
     const groups = element.shadowRoot!.querySelectorAll("details")
-    expect(groups.length).toBe(6)
+    expect(groups.length).toBe(7)
     for (const group of groups) {
       expect(group.hasAttribute("open")).toBe(true)
     }
   })
 
-  it("orders groups observation, witness, location, temporal, circumstances, shape — closest to the render last, recording merged into shape, decor's own fields folded into location/witness", () => {
+  it("orders groups observation, witness, location, temporal, circumstances, sound, shape — closest to the render last, recording merged into shape, decor's own fields folded into location/witness", () => {
     const element = mount()
     const summaries = [...element.shadowRoot!.querySelectorAll("details summary")].map(s => s.id)
     expect(summaries).toEqual([
@@ -2305,6 +2397,7 @@ describe("UfoRecorderElement toolbar groups", () => {
       "label-location-group",
       "label-temporal-group",
       "label-circumstances-group",
+      "label-sound-group",
       "label-shape-group"
     ])
   })

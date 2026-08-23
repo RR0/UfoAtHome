@@ -1,12 +1,14 @@
 import { html, css } from "./ufoTemplate.js"
-import { Sighting, sightingDurationMs, sightingTimeToMs } from "../engine/model/Sighting.js"
+import { Sighting, resolveSoundAt, sightingDurationMs, sightingTimeToMs } from "../engine/model/Sighting.js"
 import type { SightingTime } from "../engine/model/Sighting.js"
 import { Player } from "../engine/playback/Player.js"
 import type { PlaybackState } from "../engine/playback/Player.js"
 import { CanvasRenderer } from "../render/CanvasRenderer.js"
+import { SightingAudio } from "../audio/SightingAudio.js"
 import { fromSightingJson, toSightingJson } from "../engine/persistence/sightingJson.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
 import type { Shape } from "../engine/shape/Shape.js"
+import type { SightingSound } from "../engine/model/Sound.js"
 import { ShapeHandles } from "../engine/shape/ShapeHandles.js"
 import { selectLocale } from "../i18n/locale.js"
 import { loadUfoMessages, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
@@ -57,6 +59,10 @@ export class UfoElement extends HTMLElement {
   private readonly timeEndLabel: HTMLElement
 
   private currentSighting: Sighting = Sighting.create()
+  /** The sighting's own sound (see SoundTrack), owned here rather than by SceneElement: it is part
+   * of the recording, so it must be heard in the plain 2D embed too, not only in the 3D one that
+   * happens to own the weather's audio. */
+  private readonly sightingAudio = new SightingAudio()
   private player: Player
   private loopEnabled = true
   private highlightedSourceIds: Set<string> = new Set()
@@ -166,6 +172,7 @@ export class UfoElement extends HTMLElement {
 
   disconnectedCallback(): void {
     document.removeEventListener("fullscreenchange", this.handleFullscreenChange)
+    this.sightingAudio.dispose()
   }
 
   attributeChangedCallback(name: string, oldValue: string, newValue: string): void {
@@ -193,6 +200,9 @@ export class UfoElement extends HTMLElement {
     // looping underneath it, which looks exactly like "pause resets to the start" since the old
     // player's loop keeps repainting frame 0 onward.
     this.player.stop()
+    // The outgoing sighting's sound would otherwise keep playing over the incoming one — stop()
+    // paints no further frame, same as pause().
+    this.sightingAudio.silence()
     this.currentSighting = fromSightingJson(json)
     this.player = this.createPlayer()
     this.updateTimeLabels()
@@ -207,6 +217,26 @@ export class UfoElement extends HTMLElement {
    */
   get sighting(): Sighting {
     return this.currentSighting
+  }
+
+  /**
+   * Plays a sound right now, outside playback — how UfoRecorderElement lets a witness HEAR the
+   * sound they are describing while they tune its kind/loudness/pitch. Tuning a synthesized sound
+   * blind would be like drawing a shape with the canvas covered.
+   *
+   * Only ever call this from a real user gesture (an input event on a sound field is one): it
+   * unlocks the AudioContext, which nothing else in this element can do while paused. The next
+   * repaint silences it again — onFrame stops any sound whenever playback isn't running — so a
+   * caller wanting it to last must keep the preview alive itself (see the recorder's own timer).
+   */
+  previewSound(sound: SightingSound): void {
+    this.sightingAudio.resume()
+    this.sightingAudio.setSound(sound)
+  }
+
+  /** Ends a previewSound() early. */
+  stopSoundPreview(): void {
+    this.sightingAudio.silence()
   }
 
   /** Exposed so UfoRecorderElement can paint a live drag preview on the same canvas. */
@@ -392,6 +422,13 @@ export class UfoElement extends HTMLElement {
     }
     this.seekInput.value = String(t)
     this.timeStartLabel.textContent = this.formatPosition(t)
+    // Only while actually playing: onFrame is also the seek sink, and a witness dragging the bar
+    // through a keyframe shouldn't fire a burst of sound at every position they pass through.
+    if (this.playbackState === "playing") {
+      this.sightingAudio.setSound(resolveSoundAt(this.currentSighting, t))
+    } else {
+      this.sightingAudio.silence()
+    }
     // Catches the player stopping on its own (reaching the end without loop), not just clicks —
     // safe to read playbackState here since Player.play() flips it before painting the last frame.
     this.updatePlayPauseButton()
@@ -417,11 +454,17 @@ export class UfoElement extends HTMLElement {
     if (this.player.seekableDuration <= 0) return
     if (this.player.playbackState === "playing") {
       this.player.pause()
+      // pause() fires no further frame, so nothing else would ever stop the sound.
+      this.sightingAudio.silence()
       // pause() doesn't itself trigger a repaint — force one so the selection highlight
       // (hidden while playing) reappears immediately instead of staying hidden until some
       // unrelated repaint happens to occur.
       this.refresh()
     } else {
+      // This call is only ever reached from a real user gesture (the Play button, the canvas's own
+      // click-to-play, or a composing element's external button) — exactly what AudioContext.
+      // resume() requires, and the only place this element has one.
+      this.sightingAudio.resume()
       this.player.play()
     }
     this.updatePlayPauseButton()

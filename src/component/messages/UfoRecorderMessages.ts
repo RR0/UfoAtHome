@@ -158,6 +158,8 @@ export interface UfoRecorderMessages {
   tagsPlaceholder: string
   weather: string
   shapeGroup: string
+  /** Summary of the group holding what the sighting sounded like — see SoundTrack.ts. */
+  soundGroup: string
   temporalGroup: string
   locationGroup: string
   observationGroup: string
@@ -193,6 +195,21 @@ export interface UfoRecorderMessages {
   windDirection: string
   windSpeed: string
   storm: string
+  /** Which timbre the witness described, and the five values SOUND_KINDS offers — "none" being a
+   * reported silence, not "unknown" (see Sound.ts). */
+  soundKind: string
+  soundNone: string
+  soundHum: string
+  soundWhistle: string
+  soundRumble: string
+  soundCrackle: string
+  /** How loud it was — relative to what the witness could describe, never a dB figure. */
+  soundVolume: string
+  /** How deep or how sharp, shown alongside its own value in Hz. */
+  soundPitch: string
+  /** Label of the field naming an actual audio recording of the sound, when one exists. */
+  soundSrc: string
+  soundSrcPlaceholder: string
   /** How bright the Sun's dazzle reads, independent of whether the lens-flare artifacts (below)
    * are shown — see SceneRenderer.setDazzleIntensity's own doc comment. A view preference, not
    * sighting weather data (see UfoRecorderElement's lensFlareBrightnessInput field). */

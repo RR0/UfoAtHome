@@ -86,10 +86,12 @@ describe("UfoElement", () => {
     element.sightingData = sampleJson
     // timeline.order/groups are always present on the way out (order: z-order support, groups:
     // multi-select grouping), even though the hand-written fixture above predates both and omits
-    // them. decor is likewise always present (see Decor.ts), empty here since none was set.
+    // them. decor is likewise always present (see Decor.ts), empty here since none was set, and so
+    // is soundTrack (see SoundTrack.ts) — empty meaning nothing was recorded about sound.
     expect(element.sightingData).toEqual({
       ...sampleJson,
       timeline: { ...sampleJson.timeline, order: ["ufo-1"], groups: [] },
+      soundTrack: { keyframes: [] },
       decor: []
     })
   })

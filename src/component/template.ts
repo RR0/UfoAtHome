@@ -173,6 +173,25 @@ export const html = `
     <label><span id="label-lens-flare-brightness">Light intensity</span> <input id="lensFlareBrightness" type="range" min="0" max="3" step="0.1" value="1"/></label>
   </div>
 </details>
+<!-- Its own group rather than a row of the Shape group below: what the object sounded like is
+     keyframed on the very same clock as its shape (a craft silent on the ground and heard only as
+     it lifts off is two keyframes), but it belongs to the sighting, not to any one drawn part of
+     it — see SoundTrack.ts. The kind dropdown is filled from SOUND_KINDS in script, so adding a
+     timbre never means editing markup and element ids (same rule as the data-source pickers). -->
+<details open>
+  <summary id="label-sound-group">Sound</summary>
+  <div class="toolbar">
+    <label><span id="label-sound-kind">Sound</span> <select id="soundKind" class="sound-field"></select></label>
+    <label><span id="label-sound-volume">Loudness</span> <input id="soundVolume" class="sound-field" type="range" min="0" max="1" step="0.05" value="0"/></label>
+    <label><span id="label-sound-pitch">Pitch</span>
+      <input id="soundPitch" class="sound-field" type="range" min="30" max="4000" step="10" value="100" title="How deep or how sharp the sound was — the tone itself for a hum or a whistle, how low the noise sits for a rumble or a crackle"/>
+      <output id="sound-pitch-value" class="apparent-size" for="soundPitch"></output></label>
+    <!-- The rare case where the sound was actually captured: it then plays instead of the
+         synthesized description (see SightingSound.src), and the embed stops being self-contained,
+         which is why nothing defaults to it. -->
+    <label><span id="label-sound-src">Recording</span> <input id="soundSrc" class="sound-field" type="url" placeholder="URL of a real recording"/></label>
+  </div>
+</details>
 <details open>
   <summary id="label-shape-group">Shape</summary>
   <div class="toolbar">
@@ -198,6 +217,7 @@ export const html = `
     </div>
   </div>
 </details>
+
 <div id="ufo-slot"></div>
 <div class="toolbar playback-row">
   <button id="play-pause" type="button" class="icon-btn" title="Play" aria-label="Play">▶</button>

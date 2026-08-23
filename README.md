@@ -332,6 +332,7 @@ interface SightingRecordingJson {
   weatherTrack?: { keyframes: Array<{ t: number, weather: Weather }> }
   weather?: Weather // legacy static fallback for recordings predating weatherTrack
   weatherSource?: { id: string, name: string, url: string } // the meteorological record weatherTrack was looked up from — see Weather is looked up, not remembered. Absent = the witness's own account
+  soundTrack?: { keyframes: Array<{ t: number, sound: { kind: "none" | "hum" | "whistle" | "rumble" | "crackle", volume: number, pitchHz: number, src?: string } }> } // what the witness heard — see What it sounded like
   decor?: DecorObject[] // buildings, trees, streetlights, vehicles, other witnesses — see src/engine/model/Decor.ts
 }
 ```
@@ -339,6 +340,30 @@ interface SightingRecordingJson {
 A shape left out of a later keyframe is **held** at its last recorded state, not hidden — and one whose first
 keyframe is at `t=5000` is already painted, in that state, from `t=0` (hold-first/hold-last at both ends of a
 source's own range). To make something stop being visible, keyframe it with `transparency: 1`.
+
+### What it sounded like
+
+Half of what makes these accounts strange is the sound — most often its absence. `soundTrack` records it on the
+same clock as the shapes, because a sound rarely starts when the object does: a craft sitting silently on the
+ground and heard only as it lifts off is two keyframes, `kind: "none"` at the start and a hum at the instant it
+took off.
+
+`volume` (0..1, how loud the witness could describe it, never a dB figure) and `pitchHz` blend between keyframes;
+`kind` and `src` are **held**, like every other discrete field in this format — so the example above really is
+silent right up to that second keyframe. To record a sound emerging gradually instead, give it two keyframes of
+its own kind (hum at volume 0, then hum at full).
+
+`kind: "none"` is a statement — the witness reported hearing nothing. A recording with no `soundTrack` at all is
+the different, weaker case: nobody was asked. Both replay as silence, and neither invents a noise.
+
+Sounds are **synthesized** from that description (a drone, a whistle, a rumble, a crackle — `pitchHz` is the tone
+itself for the pitched ones and where the noise sits for the others), exactly as a described shape is drawn from
+its description, and at no cost in bundled assets. A recording that actually captured the sound can point `src` at
+the audio file, which then plays instead — at the price of an embed that is no longer self-contained, and a URL
+that must be CORS-readable.
+
+Sound plays during playback only, and only after a real click somewhere in the player: browsers refuse to start
+audio without one.
 
 ### Naming a place
 

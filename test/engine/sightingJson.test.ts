@@ -61,8 +61,15 @@ describe("sightingJson", () => {
     expect(restored.caseId).toBe("chiles-whitted")
     // timeline.order/groups are new (z-order support, multi-select grouping) — empty here since
     // there are no shapes/sources at all, but always present now, unlike the hand-written input
-    // above. decor is likewise new (see Decor.ts) and always present, empty here since none was set.
-    expect(toSightingJson(restored)).toEqual({ ...json, timeline: { ...json.timeline, order: [], groups: [] }, decor: [] })
+    // above. decor is likewise new (see Decor.ts) and always present, empty here since none was
+    // set, and so is soundTrack (see SoundTrack.ts) — empty meaning the recording says nothing
+    // about sound, which replays as silence.
+    expect(toSightingJson(restored)).toEqual({
+      ...json,
+      timeline: { ...json.timeline, order: [], groups: [] },
+      soundTrack: { keyframes: [] },
+      decor: []
+    })
   })
 
   it("round-trips witness (lastName+firstNames)", () => {
