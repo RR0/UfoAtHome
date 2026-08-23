@@ -1588,6 +1588,19 @@ export class UfoRecorderElement extends HTMLElement {
     // Unlocks weather audio right here — this input event IS a real user gesture, exactly what
     // AudioContext.resume() requires (see SceneElement.resumeWeatherAudio/WeatherAudio.resume).
     this.sceneElement.resumeWeatherAudio()
+    // Typing into these fields IS taking them back. They are only ever editable when no record
+    // owns their values (see syncWeatherSourceState), so an edit here is the witness's own
+    // account, and no later lookup may overwrite it — the same guarantee unticking the box gives,
+    // reached the other way round. Without this, a witness who described the weather BEFORE
+    // stating the date and place watched it vanish the moment they typed them: the box, which is
+    // unavailable until there is something to ask, ticked itself and the record replaced their
+    // account. They had no way to prevent it, since the only control that could was disabled.
+    if (this.weatherFromRecords) {
+      this.weatherFromRecords = false
+      this.cancelWeatherLookup()
+      this.ufoElement.sighting.weatherSource = undefined
+      this.syncWeatherSourceState()
+    }
     const weather: Weather = {
       cloudCover: Number(this.cloudCoverInput.value),
       cloudDarkness: Number(this.cloudDarknessInput.value),

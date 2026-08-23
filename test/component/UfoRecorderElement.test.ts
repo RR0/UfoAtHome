@@ -4053,6 +4053,28 @@ describe("UfoRecorderElement inferred weather", () => {
 
   // Ticking itself back on must not undo a decision the witness made: their account outranks the
   // record for good (see Sighting.weatherSource).
+  // The regression this exists for: a witness described the weather BEFORE saying when and where,
+  // watched the box tick itself the moment they typed those, and the record replaced their
+  // account — with no way to stop it, since the only control that could was disabled until then.
+  it("treats typing a weather value as taking the fields back, even before a lookup is possible", async () => {
+    const element = mount(recordProvider())
+    const shadow = element.shadowRoot!
+    const checkbox = shadow.getElementById("weatherInferred") as HTMLInputElement
+    expect(checkbox.disabled).toBe(true)
+
+    setInput(shadow, "precipitationType", "rain")
+    setInput(shadow, "precipitationIntensity", "0.9")
+    stateDateAndPlace(element)
+    await waitFor(() => !checkbox.disabled, 2000)
+    // Long enough for a lookup to have landed, had one been allowed to run.
+    await new Promise(resolve => setTimeout(resolve, 900))
+
+    expect(checkbox.checked).toBe(false)
+    expect(element.sightingData.weatherSource).toBeUndefined()
+    expect(element.sightingData.weatherTrack?.keyframes.at(-1)?.weather.precipitationType).toBe("rain")
+    expect((weatherField(element, "precipitationType") as HTMLSelectElement).value).toBe("rain")
+  })
+
   it("never re-ticks itself over a witness who turned it off", async () => {
     const element = mount(recordProvider())
     const shadow = element.shadowRoot!
