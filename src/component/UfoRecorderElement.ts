@@ -224,7 +224,20 @@ export class UfoRecorderElement extends HTMLElement {
   /** The ground's own height above sea level at the current location, once it is known — what the
    * Altitude field is measured from (see applyGroundElevation). Undefined while it isn't known, and
    * then the field is a plain height above an unstated datum, exactly as it always was. */
+  /**
+   * Whether the weather SHOULD be read from records, as last decided — by the witness's own toggle,
+   * or by what a loaded recording says (see syncWeatherOwnership). Deliberately distinct from the
+   * checkbox's own state, which is this AND whether a lookup is possible at all: a sighting with no
+   * date or no place shows it unchecked, because a ticked box there would claim a record is being
+   * read when nothing has been asked. It ticks itself again the moment the sighting says enough,
+   * without forgetting a witness who had turned it off.
+   */
+  private weatherFromRecords = true
   private groundElevationM?: number
+  /** The coordinates groundElevationM was resolved for — the ground under a place doesn't move, so
+   * it is asked once per place rather than on every observer edit. See scheduleGroundElevation for
+   * the loop this ends. */
+  private groundElevationFor?: { lat: number; lng: number }
   private groundElevationTimer?: ReturnType<typeof setTimeout>
   private groundElevationToken = 0
   private readonly obsTimeInput: HTMLInputElement
@@ -1708,7 +1721,8 @@ export class UfoRecorderElement extends HTMLElement {
    * best starting point a correction can have — but drops the claim that they were measured, and
    * with it any right of a later lookup to overwrite them (see Sighting.weatherSource). */
   private onWeatherInferredToggled(): void {
-    if (this.weatherInferredInput.checked) {
+    this.weatherFromRecords = this.weatherInferredInput.checked
+    if (this.weatherFromRecords) {
       this.scheduleWeatherLookup()
     } else {
       this.cancelWeatherLookup()
@@ -1721,7 +1735,7 @@ export class UfoRecorderElement extends HTMLElement {
    * WEATHER_LOOKUP_DEBOUNCE_MS. A no-op while the witness owns these fields: their account is
    * never re-derived behind their back. */
   private scheduleWeatherLookup(): void {
-    if (!this.weatherInferredInput.checked) return
+    if (!this.weatherFromRecords) return
     clearTimeout(this.weatherLookupTimer)
     this.weatherLookupTimer = setTimeout(() => void this.inferWeather(), WEATHER_LOOKUP_DEBOUNCE_MS)
   }
@@ -1742,13 +1756,13 @@ export class UfoRecorderElement extends HTMLElement {
    * this editor does when it has a measurement to show, never a way to refuse an answer it
    * couldn't produce. */
   private async inferWeather(): Promise<void> {
-    if (!this.weatherInferredInput.checked) return
+    if (!this.weatherFromRecords) return
     const token = ++this.weatherLookupToken
     this.weatherLookupPending = true
     this.syncWeatherSourceState()
     const result = await this.weatherInference.infer(this.ufoElement.sighting)
     // A newer edit already asked a newer question, or the witness took the fields back mid-flight.
-    if (token !== this.weatherLookupToken || !this.weatherInferredInput.checked) return
+    if (token !== this.weatherLookupToken || !this.weatherFromRecords) return
     this.weatherLookupPending = false
     this.weatherLookupResult = result
     if (result.status === "inferred") {
@@ -1779,7 +1793,7 @@ export class UfoRecorderElement extends HTMLElement {
    * request. Only ever for a track the record owns — a witness's own account is never re-derived.
    */
   private ensureWeatherTrackSpan(): void {
-    if (!this.weatherInferredInput.checked || this.ufoElement.sighting.weatherSource === undefined) return
+    if (!this.weatherFromRecords || this.ufoElement.sighting.weatherSource === undefined) return
     const span = this.ufoElement.seekableDuration
     if (this.weatherTrackSpan === undefined || span === this.weatherTrackSpan) return
     // Claimed before the lookup runs, so a span that keeps changing (a recording in progress)
@@ -1792,17 +1806,20 @@ export class UfoRecorderElement extends HTMLElement {
    * while a real source is attached: see inferWeather's own doc comment. */
   private syncWeatherSourceState(): void {
     const source = this.ufoElement.sighting.weatherSource
-    const inferred = this.weatherInferredInput.checked
+    const inferred = this.weatherFromRecords
     for (const field of this.weatherFields) {
       field.disabled = inferred && source !== undefined
     }
     // With no date or no place stated, there is no question to ask a record — so the control that
-    // asks it is disabled, and what used to be printed as a status line ("a full date and a place
-    // are needed") is its tooltip instead: an explanation of why a control is unavailable belongs
-    // ON that control, not in the space reserved for what a record answered. The requirement
-    // itself is WeatherInference's own (canInfer), never re-decided here.
+    // asks it is unavailable AND unticked, because a ticked box would say the weather below comes
+    // from a record when nothing has been asked for it. What used to be printed as a status line
+    // ("a full date and a place are needed") is its tooltip instead: an explanation of why a
+    // control is unavailable belongs ON that control, not in the space reserved for what a record
+    // answered. The requirement itself is WeatherInference's own (canInfer), never re-decided here;
+    // the box ticks itself again as soon as one can be asked, unless the witness has turned it off.
     const canLookUp = this.weatherInference.canInfer(this.ufoElement.sighting)
     this.weatherInferredInput.disabled = !canLookUp
+    this.weatherInferredInput.checked = canLookUp && this.weatherFromRecords
     const inferredTitle = canLookUp ? this.messages.weatherInferredTitle : this.messages.weatherNeedsDateAndPlace
     this.weatherInferredInput.title = inferredTitle
     this.labelWeatherInferred.title = inferredTitle
@@ -1862,9 +1879,9 @@ export class UfoRecorderElement extends HTMLElement {
     // Anything the previous recording had in flight is about a different sighting now.
     this.cancelWeatherLookup()
     this.weatherLookupResult = undefined
-    this.weatherInferredInput.checked = sighting.weatherSource !== undefined || sighting.weatherTrack.allKeyframes.length === 0
+    this.weatherFromRecords = sighting.weatherSource !== undefined || sighting.weatherTrack.allKeyframes.length === 0
     this.syncWeatherSourceState()
-    if (this.weatherInferredInput.checked && sighting.weatherSource === undefined) {
+    if (this.weatherFromRecords && sighting.weatherSource === undefined) {
       this.scheduleWeatherLookup()
     }
   }
@@ -2005,8 +2022,23 @@ export class UfoRecorderElement extends HTMLElement {
     const lat = this.numberOrUndefined(this.latInput.value)
     const lng = this.numberOrUndefined(this.lngInput.value)
     if (lat === undefined || lng === undefined) return
+    // Already answered for this place, so don't ask again — and, decisively, don't ask again in
+    // response to the write-back that same answer triggers. applyGroundElevation ends by calling
+    // updateObserver (the field's meaning has changed, so the pose must agree with it), and
+    // updateObserver schedules a ground lookup: the two called each other about once a second, for
+    // as long as the editor was open, and each turn ALSO re-asked the weather record and the
+    // geocoder. That is the "the UI refreshes every second" the user reported, and it was hammering
+    // three public services to re-derive values that never changed. Same tolerance as the reverse
+    // geocoder's own (see SAME_PLACE_DEG): ~11 m, well under a terrain sample.
+    if (this.groundElevationFor && this.isSamePlace(this.groundElevationFor, lat, lng)) return
     clearTimeout(this.groundElevationTimer)
     this.groundElevationTimer = setTimeout(() => void this.applyGroundElevation(lat, lng), GROUND_ELEVATION_DEBOUNCE_MS)
+  }
+
+  /** Whether a pair of coordinates names the same spot as `place`, within the tolerance a
+   * hand-typed decimal deserves — see SAME_PLACE_DEG. */
+  private isSamePlace(place: { lat: number; lng: number }, lat: number, lng: number): boolean {
+    return Math.abs(place.lat - lat) < SAME_PLACE_DEG && Math.abs(place.lng - lng) < SAME_PLACE_DEG
   }
 
   private async applyGroundElevation(lat: number, lng: number): Promise<void> {
@@ -2014,6 +2046,7 @@ export class UfoRecorderElement extends HTMLElement {
     const source = dataSourceById(ELEVATION_SOURCES, this.chosenSourceId.get("elevation"))
     const ground = await new GroundElevation(source.create()).at(lat, lng)
     if (token !== this.groundElevationToken || ground === undefined) return
+    this.groundElevationFor = { lat, lng }
     const heightAboveGround = Math.max(0, (this.numberOrUndefined(this.elevationInput.value) ?? 0) - (this.groundElevationM ?? 0))
     this.groundElevationM = Math.round(ground)
     this.syncElevationField(heightAboveGround)
@@ -2040,6 +2073,7 @@ export class UfoRecorderElement extends HTMLElement {
     this.groundElevationToken++
     clearTimeout(this.groundElevationTimer)
     this.groundElevationM = undefined
+    this.groundElevationFor = undefined
     this.syncElevationField(resolveObserverPoseAt(this.ufoElement.sighting, 0)?.elevationM ?? 0)
     this.scheduleGroundElevation()
   }
@@ -2199,6 +2233,12 @@ export class UfoRecorderElement extends HTMLElement {
     this.syncAppearanceFromTimeline()
     this.syncObserverFromTimeline()
     this.syncWeatherFromTimeline()
+    // Whether a record CAN be asked is a property of the sighting's own date and place, so it has
+    // to be re-read whenever either changes — and every edit path here ends in a refresh(), which
+    // is what brings us back through this. Nothing else was recomputing it, so blanking a place
+    // left the "from weather records" control enabled and ticked over a sighting that no longer
+    // said where it happened. Costs a couple of comparisons: canInfer asks nothing of the network.
+    this.syncWeatherSourceState()
     this.syncSoundFromTimeline()
     this.syncDecorLitFromTimeline()
     this.syncIndoorLookReset()

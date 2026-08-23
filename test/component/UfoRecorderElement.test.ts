@@ -4018,6 +4018,9 @@ describe("UfoRecorderElement inferred weather", () => {
     const label = shadow.getElementById("label-weather-inferred")!
 
     expect(checkbox.disabled).toBe(true)
+    // Unticked too: a ticked box would say the weather below was read from a record when nothing
+    // has been asked for one.
+    expect(checkbox.checked).toBe(false)
     expect(checkbox.title).toContain("full date and a place")
     expect(label.title).toContain("full date and a place")
     expect(sourceText(element).textContent).toBe("")
@@ -4028,8 +4031,46 @@ describe("UfoRecorderElement inferred weather", () => {
     await waitFor(() => element.sightingData.weatherSource !== undefined, 2000)
 
     expect(checkbox.disabled).toBe(false)
+    // And ticked by itself: asking the record is what this editor does by default.
+    expect(checkbox.checked).toBe(true)
     expect(checkbox.title).not.toContain("full date and a place")
     expect(label.title).toBe(checkbox.title)
+  })
+
+  it("unticks itself again when the sighting stops saying where it happened", async () => {
+    const element = mount(recordProvider())
+    const shadow = element.shadowRoot!
+    const checkbox = shadow.getElementById("weatherInferred") as HTMLInputElement
+    stateDateAndPlace(element)
+    await waitFor(() => checkbox.checked, 2000)
+
+    setInput(shadow, "lat", "")
+    setInput(shadow, "lng", "")
+
+    expect(checkbox.disabled).toBe(true)
+    expect(checkbox.checked).toBe(false)
+  })
+
+  // Ticking itself back on must not undo a decision the witness made: their account outranks the
+  // record for good (see Sighting.weatherSource).
+  it("never re-ticks itself over a witness who turned it off", async () => {
+    const element = mount(recordProvider())
+    const shadow = element.shadowRoot!
+    const checkbox = shadow.getElementById("weatherInferred") as HTMLInputElement
+    stateDateAndPlace(element)
+    await waitFor(() => element.sightingData.weatherSource !== undefined, 2000)
+
+    checkbox.checked = false
+    checkbox.dispatchEvent(new Event("change"))
+    // Out of, and back into, the state where a lookup is possible at all.
+    setInput(shadow, "lat", "")
+    setInput(shadow, "lng", "")
+    setInput(shadow, "lat", "43.837")
+    setInput(shadow, "lng", "5.983")
+    await waitFor(() => !checkbox.disabled, 2000)
+
+    expect(checkbox.checked).toBe(false)
+    expect(element.sightingData.weatherSource).toBeUndefined()
   })
 
   // A date alone isn't a question either — the record is asked about a place at an instant.
