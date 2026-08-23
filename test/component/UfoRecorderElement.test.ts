@@ -4009,10 +4009,36 @@ describe("UfoRecorderElement inferred weather", () => {
     expect(weatherField(element, "cloudCover").disabled).toBe(false)
   })
 
-  it("states what's still missing before it can ask", () => {
+  // Nothing to ask means nothing to ask WITH: the control is unavailable, and what it needs is on
+  // the control itself rather than printed in the space reserved for what a record answered.
+  it("disables the control until the sighting states a date and a place, and says so on it", async () => {
     const element = mount(recordProvider())
+    const shadow = element.shadowRoot!
+    const checkbox = shadow.getElementById("weatherInferred") as HTMLInputElement
+    const label = shadow.getElementById("label-weather-inferred")!
 
-    expect(sourceText(element).textContent).toContain("full date and a place")
+    expect(checkbox.disabled).toBe(true)
+    expect(checkbox.title).toContain("full date and a place")
+    expect(label.title).toContain("full date and a place")
+    expect(sourceText(element).textContent).toBe("")
+    // No record was asked, so its picker would be crediting data nobody produced.
+    expect(shadow.getElementById("weather-source-row")!.hidden).toBe(true)
+
+    stateDateAndPlace(element)
+    await waitFor(() => element.sightingData.weatherSource !== undefined, 2000)
+
+    expect(checkbox.disabled).toBe(false)
+    expect(checkbox.title).not.toContain("full date and a place")
+    expect(label.title).toBe(checkbox.title)
+  })
+
+  // A date alone isn't a question either — the record is asked about a place at an instant.
+  it("stays disabled while only one half of the requirement is stated", () => {
+    const element = mount(recordProvider())
+    const shadow = element.shadowRoot!
+    setInput(shadow, "obs-time", "1965-07-01T05:00")
+
+    expect((shadow.getElementById("weatherInferred") as HTMLInputElement).disabled).toBe(true)
   })
 
   it("hands the fields back to the witness on demand, keeping the record's values as a start", async () => {

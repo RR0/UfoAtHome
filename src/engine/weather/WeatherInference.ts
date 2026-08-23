@@ -48,17 +48,9 @@ export class WeatherInference {
   /** Throws nothing on a failed lookup — a provider error is reported as `failed`, since every
    * caller of this needs to tell those apart from "no such record" anyway. */
   async infer(sighting: Sighting): Promise<WeatherInferenceResult> {
-    const origin = this.originOf(sighting)
-    const time = sighting.event.time
-    // A full calendar date is the hard requirement: weather is hourly, and sightingTimeToDate's
-    // own reference-equinox fallback for a year-less time (fine for showing *a* plausible sky)
-    // would have this report the conditions of a day the sighting never happened on. A missing
-    // HOUR is allowed through, on the same midday fallback astronomy already renders — a case
-    // known to the day but not the hour still gets that day's real conditions.
-    if (!origin) return { status: "incomplete" }
-    if (time?.year === undefined || time.month === undefined || time.day === undefined) return { status: "incomplete" }
-    const start = sightingTimeToDate(time, origin.lng, sighting.event.utcOffsetHours)
-    if (!start) return { status: "incomplete" }
+    const question = this.questionOf(sighting)
+    if (!question) return { status: "incomplete" }
+    const { origin, start } = question
 
     const durationMs = sightingDurationMs(sighting.event) ?? 0
     const timings = this.sampleTimings(sighting, start, durationMs)
@@ -141,6 +133,32 @@ export class WeatherInference {
    * entering a location isn't silently discarded), and reading only the track then reported a
    * sighting with a perfectly good `place` as having nowhere to look up.
    */
+  /** Whether this sighting states enough for the record to be asked at all — the same requirement
+   * infer() enforces, exposed so an editor can say so BEFORE asking rather than only reporting
+   * "incomplete" afterwards (see UfoRecorderElement, which disables its own "from weather records"
+   * control on this). One rule, one place: a UI deciding for itself what a lookup needs would
+   * drift from what a lookup actually needs. */
+  canInfer(sighting: Sighting): boolean {
+    return this.questionOf(sighting) !== undefined
+  }
+
+  /** The place and instant a lookup would be about, or undefined when the sighting doesn't state
+   * enough for there to be a question at all.
+   *
+   * A full calendar date is the hard requirement: weather is hourly, and sightingTimeToDate's own
+   * reference-equinox fallback for a year-less time (fine for showing *a* plausible sky) would
+   * have this report the conditions of a day the sighting never happened on. A missing HOUR is
+   * allowed through, on the same midday fallback astronomy already renders — a case known to the
+   * day but not the hour still gets that day's real conditions. */
+  private questionOf(sighting: Sighting): { origin: { lat: number; lng: number }; start: Date } | undefined {
+    const origin = this.originOf(sighting)
+    if (!origin) return undefined
+    const time = sighting.event.time
+    if (time?.year === undefined || time.month === undefined || time.day === undefined) return undefined
+    const start = sightingTimeToDate(time, origin.lng, sighting.event.utcOffsetHours)
+    return start ? { origin, start } : undefined
+  }
+
   private originOf(sighting: Sighting): { lat: number; lng: number } | undefined {
     const pose = resolveObserverPoseAt(sighting, 0)
     const place = sighting.event.place?.[0]

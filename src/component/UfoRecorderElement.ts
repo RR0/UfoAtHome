@@ -1796,22 +1796,41 @@ export class UfoRecorderElement extends HTMLElement {
     for (const field of this.weatherFields) {
       field.disabled = inferred && source !== undefined
     }
+    // With no date or no place stated, there is no question to ask a record — so the control that
+    // asks it is disabled, and what used to be printed as a status line ("a full date and a place
+    // are needed") is its tooltip instead: an explanation of why a control is unavailable belongs
+    // ON that control, not in the space reserved for what a record answered. The requirement
+    // itself is WeatherInference's own (canInfer), never re-decided here.
+    const canLookUp = this.weatherInference.canInfer(this.ufoElement.sighting)
+    this.weatherInferredInput.disabled = !canLookUp
+    const inferredTitle = canLookUp ? this.messages.weatherInferredTitle : this.messages.weatherNeedsDateAndPlace
+    this.weatherInferredInput.title = inferredTitle
+    this.labelWeatherInferred.title = inferredTitle
     const sourced = inferred && source !== undefined
     // "From [ERA5 (Open-Meteo)] © Copernicus/ECMWF, 2026-08-21 15:30 UTC" — the record that
     // answered is named by a picker, not a static line, for the same reason the geocoder is (see
     // sourcePicker): which record answered is part of the answer. The instant carries the link,
     // because it points at the exact request that produced these values, not at a home page.
-    this.weatherSourceRow.hidden = !inferred
     this.weatherSourceLink.hidden = !sourced
     if (sourced) {
+      this.weatherSourceRow.hidden = false
       this.weatherSourceText.textContent = `${this.messages.weatherFrom} `
       this.weatherSourceLink.href = source!.url
       this.weatherSourceLink.textContent = this.observationInstantLabel()
       return
     }
-    this.weatherSourceText.textContent = inferred ? `${this.weatherStatusMessage()} ` : ""
+    const status = inferred ? this.weatherStatusMessage() : ""
+    this.weatherSourceText.textContent = status === "" ? "" : `${status} `
+    // The picker names which record answered, or is being asked; with nothing asked and nothing
+    // answered it would be a credit for data nobody produced.
+    this.weatherSourceRow.hidden = status === ""
   }
 
+  /** What the record had to say, for the line next to the picker — empty when nothing was asked.
+   * "Asked, and there is no such record" and "the question couldn't be put" stay different
+   * sentences (see Sighting.weatherSource); "nothing to ask yet" is no longer one of them at all,
+   * since it describes the sighting rather than the record and now lives on the disabled control's
+   * own tooltip (see syncWeatherSourceState). */
   private weatherStatusMessage(): string {
     if (this.weatherLookupPending) return this.messages.weatherLookingUp
     switch (this.weatherLookupResult?.status) {
@@ -1820,7 +1839,7 @@ export class UfoRecorderElement extends HTMLElement {
       case "failed":
         return this.messages.weatherLookupFailed
       default:
-        return this.messages.weatherNeedsDateAndPlace
+        return ""
     }
   }
 
@@ -3059,8 +3078,8 @@ export class UfoRecorderElement extends HTMLElement {
     this.labelWindSpeed.textContent = messages.windSpeed
     this.labelStorm.textContent = messages.storm
     this.labelWeatherInferred.textContent = messages.weatherInferred
-    this.weatherInferredInput.title = messages.weatherInferredTitle
-    this.labelWeatherInferred.title = messages.weatherInferredTitle
+    // Its own title is set by syncWeatherSourceState below, not here: which of the two messages it
+    // carries depends on whether a lookup is possible at all.
     // Re-renders the source/status line, whose text is half messages and half live data.
     this.syncWeatherSourceState()
     this.labelSoundGroup.textContent = messages.soundGroup

@@ -354,6 +354,16 @@ input.invalid {
   font: inherit;
   max-width: 14em;
 }
+/* The [hidden] attribute's own display:none (from the UA stylesheet) loses to the plain
+   .inline-source rule above — a class selector outweighs an attribute selector at equal
+   specificity-position — so an inline picker stayed on screen no matter what toggled it: third
+   occurrence of this exact trap, after .icon-btn[hidden] and .context-menu[hidden] (see their own
+   comments). Caught by looking at the rendered toolbar, not by the code: a weather picker still
+   crediting ERA5 while nothing had been asked of it. Any new class that sets its own display and
+   is toggled via [hidden] needs this line too. */
+.inline-source[hidden] {
+  display: none;
+}
 /* Relief and imagery have no sentence to sit in, so they get their own row under the coordinates
    they describe the ground of. */
 .terrain-source-rows {
