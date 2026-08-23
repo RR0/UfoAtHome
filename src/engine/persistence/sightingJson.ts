@@ -11,6 +11,7 @@ import type { SoundTrackJson } from "../model/SoundTrack.js"
 import type { Weather, WeatherSource } from "../model/Weather.js"
 import type { People } from "../model/People.js"
 import type { DecorObject } from "../model/Decor.js"
+import { SightingShapes } from "./SightingShapes.js"
 
 /**
  * Standalone "one JSON file per case" format (e.g. a future sighting.json
@@ -63,6 +64,11 @@ export interface SightingRecordingJson {
 }
 
 export function toSightingJson(sighting: Sighting): SightingRecordingJson {
+  // What gets written is the perception, not the pixels: every shape's stated angular extent is
+  // refreshed from the box it is currently drawn as, since between load and save `bounds` is what
+  // every editing gesture moved. Mutates the live sighting on purpose — it only ADDS the angle the
+  // drawing already implies, so memory and file agree from here on.
+  SightingShapes.toAngular(sighting)
   return {
     version: 1,
     time: sighting.event.time,
@@ -86,7 +92,7 @@ export function toSightingJson(sighting: Sighting): SightingRecordingJson {
 }
 
 export function fromSightingJson(json: SightingRecordingJson): Sighting {
-  return new Sighting(
+  const sighting = new Sighting(
     {
       eventType: "sighting",
       time: json.time,
@@ -108,4 +114,9 @@ export function fromSightingJson(json: SightingRecordingJson): Sighting {
     json.decor ?? [],
     json.weatherSource
   )
+  // The file states an angle; the drawing has to follow it. Done here rather than in
+  // Timeline.fromJSON because the projection needs the pose's own field of view, which lives on
+  // the sighting, not on the timeline.
+  SightingShapes.toBounds(sighting)
+  return sighting
 }

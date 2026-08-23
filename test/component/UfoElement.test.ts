@@ -1,6 +1,7 @@
 import { describe, expect, it, afterEach, beforeAll, vi } from "vitest"
 import { registerUfo, UFO_ELEMENT_NAME } from "../../src/component/UfoElement.js"
 import type { UfoElement } from "../../src/component/UfoElement.js"
+import { ApparentSize } from "../../src/engine/shape/ApparentSize.js"
 
 registerUfo()
 
@@ -68,6 +69,17 @@ const sampleJson = {
   weatherTrack: { keyframes: [] }
 }
 
+/** What the fixture's 10x10 px shape subtends on the 360 px canvas at the default 60 degree field
+ * of view — added to every shape on the way out, since a recording states an angle and not the
+ * pixels it happened to be drawn as (see BaseShape.angular). */
+const SAMPLE_ANGULAR = ApparentSize.ofBounds({ width: 10, height: 10 }, ApparentSize.CANVAS_HEIGHT_PX, 60)
+
+/** sampleJson's own keyframes, as they come back out: same shapes, each now stating its angle. */
+const sampleKeyframesOut = sampleJson.timeline.keyframes.map(keyframe => ({
+  ...keyframe,
+  shapes: keyframe.shapes.map(state => ({ ...state, shape: { ...state.shape, angular: SAMPLE_ANGULAR } }))
+}))
+
 describe("UfoElement", () => {
   afterEach(() => {
     document.body.innerHTML = ""
@@ -90,7 +102,7 @@ describe("UfoElement", () => {
     // is soundTrack (see SoundTrack.ts) — empty meaning nothing was recorded about sound.
     expect(element.sightingData).toEqual({
       ...sampleJson,
-      timeline: { ...sampleJson.timeline, order: ["ufo-1"], groups: [] },
+      timeline: { keyframes: sampleKeyframesOut, order: ["ufo-1"], groups: [] },
       soundTrack: { keyframes: [] },
       decor: []
     })
@@ -223,7 +235,7 @@ describe("UfoElement", () => {
     expect(element.durationSeconds).toBe(300)
     expect(element.sightingData.durationSeconds).toBe(300)
     expect(end.textContent).toBe("02:50") // now scaled by the real reported duration
-    expect(element.sightingData.timeline.keyframes).toEqual(sampleJson.timeline.keyframes) // untouched
+    expect(element.sightingData.timeline.keyframes).toEqual(sampleKeyframesOut) // untouched
 
     element.durationSeconds = undefined // clearing falls back to the recording's own length
     expect(end.textContent).toBe("0:00")

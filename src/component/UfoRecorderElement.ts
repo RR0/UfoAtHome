@@ -162,7 +162,7 @@ export class UfoRecorderElement extends HTMLElement {
   private readonly sourceSelect: HTMLSelectElement
   private readonly shapeTitleInput: HTMLInputElement
   /** The witness's own reported size/distance for the selected shape — the pair that makes
-   * its on-screen size computable instead of eyeballed (see ApparentSize/updatePhysicalExtent).
+   * its on-screen size computable instead of eyeballed (see ApparentSize/applySizeHypothesis).
    * apparentSizeOutput reads back what they actually produce. */
   private readonly utcOffsetInput: HTMLInputElement
   private readonly timeZoneSelect: HTMLSelectElement
@@ -170,6 +170,8 @@ export class UfoRecorderElement extends HTMLElement {
   private readonly objectSizeInput: HTMLInputElement
   private readonly objectDistanceInput: HTMLInputElement
   private readonly apparentSizeOutput: HTMLElement
+  /** Where the only meters a recording can honestly produce are shown — see refreshRealSize. */
+  private readonly realSizeOutput: HTMLElement
   private readonly addShapeButton: HTMLButtonElement
   private readonly deleteShapeButton: HTMLButtonElement
   private readonly contextMenu: HTMLElement
@@ -583,6 +585,7 @@ export class UfoRecorderElement extends HTMLElement {
     this.objectSizeInput = this.shadow.getElementById("objectSize") as HTMLInputElement
     this.objectDistanceInput = this.shadow.getElementById("objectDistance") as HTMLInputElement
     this.apparentSizeOutput = this.shadow.getElementById("apparent-size")!
+    this.realSizeOutput = this.shadow.getElementById("real-size")!
     this.addShapeButton = this.shadow.getElementById("add-shape") as HTMLButtonElement
     this.deleteShapeButton = this.shadow.getElementById("delete-shape") as HTMLButtonElement
     this.contextMenu = this.shadow.getElementById("context-menu")!
@@ -828,7 +831,7 @@ export class UfoRecorderElement extends HTMLElement {
     this.sourceSelect.addEventListener("change", () => this.selectUnit(this.sourceSelect.value))
     this.shapeTitleInput.addEventListener("input", () => this.updateShapeTitle())
     for (const input of [this.objectSizeInput, this.objectDistanceInput]) {
-      input.addEventListener("input", () => this.updatePhysicalExtent())
+      input.addEventListener("input", () => this.applySizeHypothesis())
     }
     this.addDecorWitnessButton.addEventListener("click", () => this.addDecor("witness"))
     this.addDecorBuildingButton.addEventListener("click", () => this.addDecor())
@@ -2263,6 +2266,12 @@ export class UfoRecorderElement extends HTMLElement {
     // — its own missing/selectedSourceIds.size===1 guard is what actually clears a stale red
     // border left over from whatever single shape was selected before.
     this.updateShapeTitleValidity()
+    // Also unconditional, and for a different reason from the line above: syncAppearanceFromTimeline
+    // bows out while the recording is playing (nothing there may write the timeline mid-playback),
+    // but the size estimate is exactly what playing the recording BUILDS — every instant the
+    // playhead visits can tighten it (see SceneElement.sizeRangeOf). Refreshed from here so the
+    // author watches it narrow as the object goes behind the first building.
+    this.refreshRealSize()
     this.ufoElement.selectedSourceIds = this.selectedSourceIds
     // Disabled once deleting the whole selection would leave nothing behind (a recording always
     // needs at least one shape — see deleteShape()'s own doc comment), for a source that's only a
@@ -2333,13 +2342,11 @@ export class UfoRecorderElement extends HTMLElement {
     if (this.shadow.activeElement !== this.shapeTitleInput) {
       this.shapeTitleInput.value = shape.title ?? ""
     }
-    // Same focused-field skip as the title above, for the same reason.
-    if (this.shadow.activeElement !== this.objectSizeInput) {
-      this.objectSizeInput.value = shape.physical ? String(Number(shape.physical.sizeM.toFixed(2))) : ""
-    }
-    if (this.shadow.activeElement !== this.objectDistanceInput) {
-      this.objectDistanceInput.value = shape.physical ? String(Number(shape.physical.distanceM.toFixed(2))) : ""
-    }
+    // The size/distance pair is deliberately NOT re-read from the shape here, unlike every other
+    // field above: it isn't one of the shape's properties any more (see BaseShape.angular). It is
+    // a working hypothesis the author typed — "suppose it was 30 m at 500 m" — and leaving it
+    // standing across a change of selection is what lets the same hypothesis be tried on the
+    // several shapes of one object.
     this.refreshApparentSize()
   }
 
@@ -2358,38 +2365,38 @@ export class UfoRecorderElement extends HTMLElement {
   }
 
   /**
-   * Resizes the selected shape to the size a real object of the reported width, at the reported
-   * distance, ACTUALLY looks — the whole point of the Real size / Distance pair. Apparent size is
-   * the one quantity a testimony gives that can be checked arithmetically, and drawing it by eye
-   * gets it wrong by a factor of five to ten, so this exists to stop it being drawn by eye at all.
+   * Resizes the selected shape to the size a real object of that width, at that distance, ACTUALLY
+   * looks — an authoring aid, and nothing more.
+   *
+   * Drawing an apparent size by eye gets it wrong by a factor of five to ten, and a witness who
+   * says "it was about the size of a car, maybe ninety meters off" has given something far more
+   * usable than a freehand drag. So the pair is a way to GET to the right angle on the canvas.
+   *
+   * What it is not, any more, is something the recording keeps. The shape ends up with the angular
+   * extent this implies (see BaseShape.angular) and the meters are forgotten the moment they have
+   * been applied — because they were never an observation: the witness inferred the distance, then
+   * inferred the size from it, and a file that stored the pair would be recording that arithmetic
+   * as if it were the sighting. Real meters come back only where the scene can establish them (see
+   * SizeEstimate), which is what the readout underneath these fields shows.
    *
    * Resizes about the shape's own center (its position is where the witness saw it, and has
-   * nothing to do with how big it was) and keeps its aspect ratio (the reported width is one
-   * measurement; the outline's proportions are a separate observation this must not overwrite).
-   * The pair is stored on the shape as well as applied (see BaseShape.physical), so the case file
-   * documents where its size came from. Both fields empty clears it back to a plain eyeballed
-   * shape; a half-filled pair is simply not enough to compute anything and leaves the shape alone.
+   * nothing to do with how big it was) and keeps its aspect ratio (the width is one measurement;
+   * the outline's proportions are a separate observation this must not overwrite). A half-filled
+   * pair is simply not enough to compute anything and leaves the shape alone.
    */
-  private updatePhysicalExtent(): void {
+  private applySizeHypothesis(): void {
     const timeline = this.ufoElement.sighting.timeline
     const t = this.ufoElement.currentTime
     const shape = timeline.getInterpolatedShapeAt(t, this.currentSourceId)
     if (!shape) return
     const sizeM = this.numberOrUndefined(this.objectSizeInput.value)
     const distanceM = this.numberOrUndefined(this.objectDistanceInput.value)
-    if (sizeM === undefined && distanceM === undefined) {
-      timeline.addKeyframe(t, [{ sourceId: this.currentSourceId, shape: { ...shape, physical: undefined } }])
-      this.ufoElement.refresh()
-      this.refreshApparentSize()
-      return
-    }
     if (sizeM === undefined || distanceM === undefined || sizeM <= 0 || distanceM <= 0) {
       this.refreshApparentSize()
       return
     }
-    const physical = { sizeM, distanceM }
     const canvas = this.ufoElement.canvasElement
-    const width = ApparentSize.widthPx(physical, canvas.height, this.currentFovDeg())
+    const width = ApparentSize.widthPx({ sizeM, distanceM }, canvas.height, this.currentFovDeg())
     const height = shape.bounds.height * (shape.bounds.width === 0 ? 1 : width / shape.bounds.width)
     const bounds = {
       x: shape.bounds.x + (shape.bounds.width - width) / 2,
@@ -2397,7 +2404,11 @@ export class UfoRecorderElement extends HTMLElement {
       width,
       height
     }
-    const resized = shape.kind === "oval" ? { ...shape, bounds, physical } : { ...shape, bounds, physical, points: this.scalePoints(shape, bounds) }
+    const angular = ApparentSize.ofBounds(bounds, canvas.height, this.currentFovDeg())
+    const resized =
+      shape.kind === "oval"
+        ? { ...shape, bounds, angular }
+        : { ...shape, bounds, angular, points: this.scalePoints(shape, bounds) }
     timeline.addKeyframe(t, [{ sourceId: this.currentSourceId, shape: resized }])
     this.ufoElement.refresh()
     this.refreshApparentSize()
@@ -2441,6 +2452,59 @@ export class UfoRecorderElement extends HTMLElement {
     this.apparentSizeOutput.textContent = this.messages.apparentSize
       .replace("{deg}", degrees.toLocaleString(undefined, { maximumFractionDigits: degrees < 1 ? 2 : 1 }))
       .replace("{moons}", moons.toLocaleString(undefined, { maximumFractionDigits: moons < 10 ? 1 : 0 }))
+    this.refreshRealSize()
+  }
+
+  /**
+   * Says what the recording can actually establish about the object's real width — and, far more
+   * often, that it cannot establish anything.
+   *
+   * This is the other half of dropping stored sizes (see BaseShape.angular). A testimony states an
+   * angle; meters only ever follow from the object being seen to cross something whose distance is
+   * known, which is an inequality, not a measurement — so what shows here is a range, a one-sided
+   * bound, or an honest "unknown". A witness alone under an empty night sky has crossed nothing,
+   * and no amount of confidence in their "about a hundred feet" changes that.
+   *
+   * Blank for a multiple selection, like the apparent size above it: a range belongs to one object.
+   */
+  private refreshRealSize(): void {
+    if (this.selectedSourceIds.size !== 1) {
+      this.realSizeOutput.textContent = ""
+      return
+    }
+    const sourceId = this.currentSourceId
+    if (this.sceneElement.sizeContradictory(sourceId)) {
+      this.realSizeOutput.textContent = this.messages.realSizeContradiction
+      return
+    }
+    const { minM, maxM } = this.sceneElement.sizeRangeOf(sourceId)
+    if (minM === undefined && maxM === undefined) {
+      this.realSizeOutput.textContent = this.messages.realSizeUnknown
+      return
+    }
+    if (minM !== undefined && maxM !== undefined) {
+      const here = this.sceneElement.distanceRangeAt(sourceId, this.ufoElement.currentTime)
+      const distance =
+        here.minM === undefined || here.maxM === undefined
+          ? ""
+          : this.messages.realDistanceHere.replace("{min}", this.meters(here.minM)).replace("{max}", this.meters(here.maxM))
+      this.realSizeOutput.textContent =
+        this.messages.realSizeBetween.replace("{min}", this.meters(minM)).replace("{max}", this.meters(maxM)) + distance
+      return
+    }
+    this.realSizeOutput.textContent =
+      minM !== undefined
+        ? this.messages.realSizeAtLeast.replace("{min}", this.meters(minM))
+        : this.messages.realSizeAtMost.replace("{max}", this.meters(maxM!))
+  }
+
+  /** A length in meters at the precision it is actually known to — two decimals under a meter, one
+   * up to ten, none beyond. A bound derived from a raycast against a hangar is not a millimeter
+   * measurement, and printing it as one would claim a precision the inequality never had. Decimal
+   * separator follows the reader's own locale, like every other number a browser formats. */
+  private meters(value: number): string {
+    const digits = value < 1 ? 2 : value < 10 ? 1 : 0
+    return value.toLocaleString(undefined, { maximumFractionDigits: digits })
   }
 
   /** Name is mandatory for a shape too, same reasoning and same "flagged, not blocked"

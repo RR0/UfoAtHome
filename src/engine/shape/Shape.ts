@@ -1,5 +1,5 @@
 import { ApparentSize } from "./ApparentSize.js"
-import type { PhysicalExtent } from "./ApparentSize.js"
+import type { AngularExtent } from "./ApparentSize.js"
 
 /**
  * A shape's screen-space bounding box.
@@ -30,7 +30,7 @@ export interface BaseShape {
    * Stated rather than inferred on purpose, and for the same reason DecorObject.occludesSourceIds
    * is: nothing in a recording can decide it. This format describes what reached the witness's
    * eyes — a 2D appearance on their own field of view — not where an object was in space; a
-   * reported distance (see physical) is an occasional, often shaky extra, and the sky's own gaps
+   * reported distance is never even stated (see BaseShape.angular), and the sky's own gaps
    * here are procedural noise, so leaving the question to geometry means bending the weather until
    * the reported disappearance happens to occur. The witness's own account outranks both.
    *
@@ -38,12 +38,26 @@ export interface BaseShape {
    * there is no halfway between visible and hidden behind a cloud.
    */
   behindCloud?: boolean
-  /** The real size/distance `bounds` was computed from, when the witness reported them (see
-   * ApparentSize) — absent for a shape drawn purely by eye, which is why it's optional rather
-   * than required: most freehand recordings have no reported measurement to attach. Never read
-   * by rendering or hit-testing, which always use `bounds`; this documents where that size came
-   * from and lets it be recomputed. */
-  physical?: PhysicalExtent
+  /**
+   * How big this looked to the witness, in degrees of arc (see AngularExtent) — the recording's
+   * OWN statement of size, and the one it is allowed to make.
+   *
+   * A testimony never contains a real size: "about 30 m long" is a conclusion the witness drew
+   * from a distance they could not perceive either, and storing it would freeze one person's
+   * arithmetic as if it were their observation. What they did perceive is how much of their view
+   * the thing filled, which is exactly this. Real meters are DERIVED, at read time and only where
+   * something in the scene actually constrains them — see SizeEstimate.
+   *
+   * Authoritative over `bounds`: a file states the angle, and `bounds`'s width/height are
+   * recomputed from it on load (see SightingShapes.toAngular/toBounds) against the canvas and the
+   * pose's own field of view. The pixel box saved alongside is that projection, kept so a file
+   * stays readable and so position (`bounds.x/y`, which the angle says nothing about) has
+   * somewhere to live — but if the two ever disagree, the angle wins.
+   *
+   * Optional only because a shape can exist in memory before it has been through that projection
+   * — freshly drawn, mid-drag. Every shape written to a file has one.
+   */
+  angular?: AngularExtent
 }
 
 export interface OvalShape extends BaseShape {
@@ -174,10 +188,10 @@ export function lerpShape(from: Shape, to: Shape, fraction: number): Shape {
   const transparency = lerp(from.transparency, to.transparency, fraction)
   const haloScale = lerp(from.haloScale, to.haloScale, fraction)
   const color = lerpColor(from.color, to.color, fraction)
-  // An object that recedes has a real distance at every instant, not just at its keyframes —
-  // interpolated (rather than held from `from`) so that stays true mid-flight. Undefined unless
-  // both ends document one; see ApparentSize.lerp.
-  const physical = ApparentSize.lerp(from.physical, to.physical, fraction)
+  // An object that closes in visibly grows at every instant, not just at its keyframes —
+  // interpolated (rather than held from `from`) so the recording keeps stating a real apparent
+  // size mid-flight. Undefined unless both ends document one; see ApparentSize.lerpAngular.
+  const angular = ApparentSize.lerpAngular(from.angular, to.angular, fraction)
 
   if (from.kind === "polygon" && to.kind === "polygon" && from.points.length === to.points.length) {
     return {
@@ -187,7 +201,7 @@ export function lerpShape(from: Shape, to: Shape, fraction: number): Shape {
       transparency,
       haloScale,
       color,
-      physical,
+      angular,
       // Held, not blended — see BaseShape.behindCloud. The spread above already carries `from`'s
       // value; this is only here so the field is visibly part of the interpolation contract.
       behindCloud: fraction < 1 ? from.behindCloud : to.behindCloud,
@@ -198,5 +212,5 @@ export function lerpShape(from: Shape, to: Shape, fraction: number): Shape {
     }
   }
 
-  return { ...(fraction < 1 ? from : to), bounds, angle, transparency, haloScale, color, physical }
+  return { ...(fraction < 1 ? from : to), bounds, angle, transparency, haloScale, color, angular }
 }

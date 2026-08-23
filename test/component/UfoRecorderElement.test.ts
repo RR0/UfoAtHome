@@ -3,6 +3,7 @@ import { register, ELEMENT_NAME } from "../../src/component/UfoRecorderElement.j
 import type { UfoRecorderElement } from "../../src/component/UfoRecorderElement.js"
 import type { PolygonShape, Shape } from "../../src/engine/shape/Shape.js"
 import { ShapeHandles } from "../../src/engine/shape/ShapeHandles.js"
+import { ApparentSize } from "../../src/engine/shape/ApparentSize.js"
 import type { WeatherProvider } from "../../src/engine/weather/WeatherProvider.js"
 import type { Weather } from "../../src/engine/model/Weather.js"
 import { SOUND_KINDS } from "../../src/engine/model/Sound.js"
@@ -42,6 +43,9 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     }
     isScreenPointOccluded(): boolean {
       return false
+    }
+    decorDistancesAt(): { behindM?: number; inFrontM?: number } {
+      return {}
     }
     render(): void {}
     dispose(): void {}
@@ -793,9 +797,15 @@ describe("UfoRecorderElement composes a nested rr0-ufo", () => {
     // multi-select grouping), even though the hand-written fixture above predates both and omits
     // them. decor is likewise always present (see Decor.ts), empty here since none was set, and so
     // is soundTrack (see SoundTrack.ts) — empty meaning nothing was recorded about sound.
+    // Every shape also comes back stating the angle its box subtends — see BaseShape.angular.
+    const angular = ApparentSize.ofBounds({ width: 3, height: 4 }, ApparentSize.CANVAS_HEIGHT_PX, 60)
+    const keyframesOut = json.timeline.keyframes.map(keyframe => ({
+      ...keyframe,
+      shapes: keyframe.shapes.map(state => ({ ...state, shape: { ...state.shape, angular } }))
+    }))
     expect(element.sightingData).toEqual({
       ...json,
-      timeline: { ...json.timeline, order: ["ufo-1"], groups: [] },
+      timeline: { keyframes: keyframesOut, order: ["ufo-1"], groups: [] },
       soundTrack: { keyframes: [] },
       decor: []
     })

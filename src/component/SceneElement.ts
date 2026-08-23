@@ -20,6 +20,10 @@ import type { DecorKind } from "../engine/model/Decor.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
 import { selectLocale } from "../i18n/locale.js"
 import { WeatherAudio } from "../render3d/WeatherAudio.js"
+import { SizeEstimate } from "../engine/shape/SizeEstimate.js"
+import type { MeterRange } from "../engine/shape/SizeEstimate.js"
+import { ApparentSize } from "../engine/shape/ApparentSize.js"
+import { SightingShapes } from "../engine/persistence/SightingShapes.js"
 
 registerUfo()
 
@@ -115,6 +119,9 @@ export class SceneElement extends HTMLElement {
   private readonly sceneRenderer: SceneRenderer
   private readonly hoverTooltip: HTMLElement
   private resizeObserver?: ResizeObserver
+  /** One accumulating estimate per shape — see sizeRangeOf. Keyed by sourceId, cleared whenever a
+   * different recording is loaded. */
+  private readonly sizeEstimates = new Map<string, SizeEstimate>()
   private lastTimeMs = 0
   private starCatalog?: StarCatalog
   /** Owned here, not by SceneRenderer — the renderer stays audio-agnostic (see its own
@@ -388,6 +395,8 @@ export class SceneElement extends HTMLElement {
 
   set sightingData(json: SightingRecordingJson) {
     this.ufoElement.sightingData = json
+    // A different recording's crossings say nothing about this one's object.
+    this.sizeEstimates.clear()
     this.lastTimeMs = 0
     // Also resolves+applies weather at t=0 — see updateAstronomy's own doc comment.
     this.updateAstronomy(0)
@@ -500,18 +509,64 @@ export class SceneElement extends HTMLElement {
   private updateUfoOcclusion(t: number): void {
     const timeline = this.ufoElement.sighting.timeline
     const canvas = this.ufoElement.canvasElement
+    const fovDeg = resolveObserverPoseAt(this.ufoElement.sighting, t)?.fovDeg ?? SightingShapes.DEFAULT_FOV_DEG
     const occluded = new Set<string>()
     for (const sourceId of timeline.sourceIds) {
       const shape = timeline.getInterpolatedShapeAt(t, sourceId)
       if (!shape) continue
       const ndcX = ((shape.bounds.x + shape.bounds.width / 2) / canvas.width) * 2 - 1
       const ndcY = -(((shape.bounds.y + shape.bounds.height / 2) / canvas.height) * 2 - 1)
-      // What the witness said about cloud first (behindCloud), their reported distance only as a
-      // fallback — see SceneRenderer.isBehindCloudLayer.
-      const cloud = { declared: shape.behindCloud, distanceM: shape.physical?.distanceM }
-      if (this.sceneRenderer.isScreenPointOccluded(ndcX, ndcY, sourceId, cloud)) occluded.add(sourceId)
+      if (this.sceneRenderer.isScreenPointOccluded(ndcX, ndcY, sourceId, shape.behindCloud)) occluded.add(sourceId)
+      // The same ray, asked the other question: not "is it hidden" but "by what, and how far
+      // away". Free to ask here (the camera and the decor are already posed for exactly this
+      // instant, which is the only state in which the answer is meaningful) and accumulated across
+      // every instant the playhead visits — see SizeEstimate, and sizeRangeOf's own comment on why
+      // that accumulation is the honest shape for this.
+      const widthDeg = shape.angular?.widthDeg ?? ApparentSize.pxToDeg(shape.bounds.width, canvas.height, fovDeg)
+      this.sizeEstimateOf(sourceId).add(widthDeg, this.sceneRenderer.decorDistancesAt(ndcX, ndcY, sourceId))
     }
     this.ufoElement.setOccludedSourceIds(occluded)
+  }
+
+  /**
+   * How wide this shape's object really was, in meters, as far as anything in the scene has been
+   * able to establish — empty ranges included, which is the usual answer and the correct one.
+   *
+   * Accumulated from the instants the playhead has actually visited rather than scanned ahead: a
+   * crossing only means anything with the camera, the witness's own position and the decor all
+   * posed for that exact instant, which is the state render() puts them in and nothing else does.
+   * Playing a recording through therefore establishes everything it can establish; scrubbing
+   * establishes what was scrubbed past. Bounds only ever tighten, so nothing is lost by arriving
+   * at them gradually.
+   */
+  sizeRangeOf(sourceId: string): MeterRange {
+    return this.sizeEstimateOf(sourceId).sizeRange
+  }
+
+  /** How far that object must have been at time `t`, read back from its established size through
+   * the angle it subtends then — see SizeEstimate.distanceRangeAt. Empty whenever the size is. */
+  distanceRangeAt(sourceId: string, t: number): MeterRange {
+    const shape = this.ufoElement.sighting.timeline.getInterpolatedShapeAt(t, sourceId)
+    if (!shape) return {}
+    const fovDeg = resolveObserverPoseAt(this.ufoElement.sighting, t)?.fovDeg ?? SightingShapes.DEFAULT_FOV_DEG
+    const widthDeg = shape.angular?.widthDeg
+      ?? ApparentSize.pxToDeg(shape.bounds.width, this.ufoElement.canvasElement.height, fovDeg)
+    return this.sizeEstimateOf(sourceId).distanceRangeAt(widthDeg)
+  }
+
+  /** Whether what the recording states about this object cannot all be true at once — see
+   * SizeEstimate.contradictory. */
+  sizeContradictory(sourceId: string): boolean {
+    return this.sizeEstimateOf(sourceId).contradictory
+  }
+
+  private sizeEstimateOf(sourceId: string): SizeEstimate {
+    let estimate = this.sizeEstimates.get(sourceId)
+    if (!estimate) {
+      estimate = new SizeEstimate()
+      this.sizeEstimates.set(sourceId, estimate)
+    }
+    return estimate
   }
 
 }

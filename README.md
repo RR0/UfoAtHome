@@ -320,7 +320,7 @@ interface SightingRecordingJson {
           selected: boolean
           title?: string       // shown as an on-canvas tooltip when hovered
           behindCloud?: boolean // the witness reported it behind cloud at this instant — stated, never deduced (see below)
-          physical?: { sizeM: number, distanceM: number } // what the witness reported — see Apparent size
+          angular?: { widthDeg: number, heightDeg: number } // how big it LOOKED — the only size a testimony holds, see Apparent size
           points?: { x: number, y: number }[] // "polygon" shapes only
         }
       }>
@@ -504,20 +504,49 @@ diff shows the weather and nothing else.
 appearance field, and held rather than blended. It is *stated*, for the same reason
 `DecorObject.occludesSourceIds` is: this format describes a 2D appearance on the witness's own field
 of view, not where an object was in space, so nothing in it can deduce whether cloud came between
-them. A reported distance (`physical`) is an occasional, often shaky extra, and the sky's own gaps
-are procedural noise — leaving the question to geometry means tuning the weather until the reported
-disappearance happens to occur. The witness's account outranks both; where a recording states a
-distance and makes no claim about cloud, the renderer falls back to the geometric test (is the deck
-crossed before the object, on the right side, with actual cloud in that direction).
+them. A recording holds no distance at all (see *Apparent size* below), and the sky's own gaps are
+procedural noise — leaving the question to geometry means tuning the weather until the reported
+disappearance happens to occur. So the witness's account is the whole answer: no `behindCloud`, no
+cloud.
 
-### Apparent size
+There used to be a geometric fallback here, for a recording that stated a real distance and made no
+claim about cloud. It went when stated distances did, and it had earned it: the one case it fired on
+was Chiles-Whitted, where "it disappeared into the cloud deck" turned out to be an interrogator's
+reconstruction that Whitted himself denied to McDonald in 1968.
 
-`physical` is the witness's own reported size and distance, and the on-screen `bounds.width` is derived from it
-rather than drawn by eye: on the 640x360 canvas at the default 60° vertical field of view, one degree is about
-5.4px and the full Moon about 2.8px, so an object of 3.5m at 90m is 12px wide — not the 90px an author reaches for
-unaided. `ApparentSize` (`src/engine/shape/ApparentSize.ts`) does the conversion both ways, and the editor's own
-**Real size** / **Distance** fields apply it and read back what the current drawing actually spans, in degrees and
-in full Moons.
+### Apparent size — and why there is no real one
+
+A witness never perceives meters. They perceive an angle: the thing covered a thumbnail at arm's length, or a fifth
+of the windshield, or two full Moons. "About thirty meters long" is a conclusion they drew from a distance they
+could not perceive either, and the two errors multiply. So a recording stores `angular` — how wide and how tall the
+object *looked*, in degrees — and stores no real size and no real distance anywhere.
+
+`bounds` is that angle projected onto the fixed 640x360 canvas at the pose's own field of view, which is what every
+editing gesture, hit-test and renderer keeps working on. The angle is authoritative: `SightingShapes`
+(`src/engine/persistence/SightingShapes.ts`) re-derives `bounds` from it on load and reads it back from `bounds` on
+save, so a file survives a change of canvas or of field of view, and if the two ever disagree the angle wins.
+
+At 60° across 360px, one degree is about 5.4px and the full Moon about 2.8px — so an object of 3.5m at 90m is 12px
+wide, not the 90px an author reaches for unaided. That is why the editor's **Try a size** / **at a distance of**
+fields exist: type a hypothesis, get the angle it implies on the canvas, and the meters are forgotten the moment
+they have been applied. They are an authoring aid, never testimony.
+
+#### Where meters do come back
+
+The only real distance a testimony can support is an **inequality**, and only where the witness saw the object
+cross something whose position is known: it passed *behind* that hangar (at least that far), or *in front of* that
+tree (at most that far). `DecorObject.eastM/northM` give the decor its real position, `occludesSourceIds` says
+which side of it the object was on, and `SceneRenderer.decorDistancesAt` raycasts the exact line of sight to
+measure the crossing.
+
+An angle plus a distance is a size, and a size does not change as the object flies — so every crossing narrows the
+object's real width from one side, for the whole recording, and the narrowed width reads back as a distance at
+every other instant. `SizeEstimate` (`src/engine/shape/SizeEstimate.ts`) accumulates that, reports a contradiction
+rather than clamping one, and the editor prints the result under the apparent size.
+
+Most sightings constrain nothing at all — a light in an empty night sky crosses nothing — and the readout then says
+so. "Unknown" is the honest answer for a majority of cases, and saying it out loud is the entire point of not
+storing a number instead.
 
 This format is deliberately independent of [`@rr0/data`](https://github.com/RR0/data)'s `RR0Event`/`@rr0/time`'s
 `Level2Date`/`@rr0/place`'s `Place` classes, even though its `time`/`place` fields are structurally aligned with

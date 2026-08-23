@@ -206,11 +206,12 @@ export const html = `
     <button id="add-shape" type="button" class="icon-btn" title="Add shape" aria-label="Add shape">+</button>
     <button id="delete-shape" type="button" class="icon-btn" title="Delete shape" aria-label="Delete shape">🗑</button>
     <label><span id="label-shape-title">Name</span> <input id="shapeTitle" type="text"/></label>
-    <label><span id="label-object-size">Real size</span>
-      <input id="objectSize" type="number" min="0" step="0.1" placeholder="reported width" title="The object's real width as reported by the witness"/> m</label>
-    <label><span id="label-object-distance">Distance</span>
-      <input id="objectDistance" type="number" min="0" step="1" placeholder="reported distance" title="How far the object was from the witness"/> m</label>
+    <label><span id="label-object-size">Try a size</span>
+      <input id="objectSize" type="number" min="0" step="0.1" placeholder="assumed width" title="A real width to try, so the shape's apparent size is computed rather than eyeballed. Not stored."/> m</label>
+    <label><span id="label-object-distance">at a distance of</span>
+      <input id="objectDistance" type="number" min="0" step="1" placeholder="assumed distance" title="The distance to try that width at. Not stored either — only the resulting angular size is."/> m</label>
     <output id="apparent-size" class="apparent-size" for="objectSize objectDistance"></output>
+    <output id="real-size" class="apparent-size" for="objectSize objectDistance"></output>
     <div class="record-row">
       <button id="record" type="button" class="record-btn"></button>
       <label><span id="label-sampling-rate">Sampling rate</span> <input id="samplingRate" type="number" min="16" step="16" value="100"/> ms</label>

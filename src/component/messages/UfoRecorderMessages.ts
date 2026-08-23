@@ -24,10 +24,12 @@ export interface UfoRecorderMessages {
   halo: string
   shape: string
   shapeTitle: string
-  /** The object's real reported width, in meters — one half of what makes an apparent size
-   * computable rather than guessed (see ApparentSize). */
+  /** A real width to TRY, in meters — one half of the authoring aid that puts an angle on the
+   * canvas arithmetically instead of by eye (see UfoRecorderElement.applySizeHypothesis). Not
+   * something the recording keeps: the shape ends up with the angle, and these meters are
+   * forgotten. */
   objectSize: string
-  /** How far the object was from the witness, in meters — the other half. */
+  /** The distance to try it at — the other half. */
   objectDistance: string
   /** Read-back of what Real size / Distance actually produce on screen. {deg} is the apparent
    * width in degrees, {moons} the same width counted in full Moons — the comparison a reader
@@ -41,6 +43,25 @@ export interface UfoRecorderMessages {
   utcOffsetPlaceholder: string
   objectSizePlaceholder: string
   objectDistancePlaceholder: string
+  /** What the scene actually establishes about the object's real width, from the moments it was
+   * declared to pass behind or in front of decor whose distance is known (see SizeEstimate) —
+   * the only meters a recording can honestly produce. {min}/{max} are in meters. */
+  realSizeBetween: string
+  /** Same, when only a floor was established: it passed behind something, never in front of
+   * anything. */
+  realSizeAtLeast: string
+  /** Same, when only a ceiling was established. */
+  realSizeAtMost: string
+  /** Nothing in the scene ever crossed this object's line of sight, so its real size is unknown —
+   * said out loud rather than left blank, because "unknown" is the answer for most sightings and
+   * a blank reads as a missing feature. */
+  realSizeUnknown: string
+  /** The declared crossings cannot all be true of one rigid object — see
+   * SizeEstimate.contradictory. */
+  realSizeContradiction: string
+  /** Appended to a two-sided size once it can be read back as a distance at the playhead's own
+   * instant (see SizeEstimate.distanceRangeAt). {min}/{max} are in meters. */
+  realDistanceHere: string
   addShape: string
   deleteShape: string
   /** The external Play/Pause/Loop row's own labels — see UfoRecorderElement's

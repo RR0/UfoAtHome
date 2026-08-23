@@ -64,7 +64,7 @@ import { DEFAULT_CLOUD_BASE_M, DEFAULT_WEATHER } from "../engine/model/Weather.j
 import type { PrecipitationType, Weather } from "../engine/model/Weather.js"
 import { buildRainSystem } from "./RainSystem.js"
 import type { RainSystem } from "./RainSystem.js"
-import { CloudField, buildCloudGeometry, buildCloudMaterial } from "./CloudSystem.js"
+import { buildCloudGeometry, buildCloudMaterial } from "./CloudSystem.js"
 import type { CloudUniforms } from "./CloudSystem.js"
 import { buildLensFlare } from "./LensFlareEffect.js"
 import type { LensFlareSystem } from "./LensFlareEffect.js"
@@ -217,7 +217,6 @@ const CLOUD_MIN_LAYER_UNITS = 12
 /** How solid the deck has to be in a given direction before it hides what's behind it. Matches the
  * shader's own alpha for "cloud rather than gap" — below it you are looking through the thin,
  * ragged edge of a billow, which a real witness sees through too. */
-const CLOUD_OCCLUSION_MIN_ALPHA = 0.5
 /** Between TERRAIN_RENDER_ORDER (1) and COMPASS_RENDER_ORDER (10) — clouds are part of the
  * astronomically-positioned scene (unlike the compass HUD), but must never be hidden behind the
  * ground/terrain (irrelevant since they're always above it) and must stay under the compass labels. */
@@ -1299,8 +1298,14 @@ export class SceneRenderer {
    * even visibly rendered), reading as permanently occluded regardless of where the shape actually
    * is. No real decor a UFO could meaningfully vanish behind sits this close to the observer, so
    * filtering it out only removes that artifact, never a legitimate close occlusion. */
-  isScreenPointOccluded(ndcX: number, ndcY: number, sourceId: string, cloud?: { declared?: boolean; distanceM?: number }): boolean {
-    if (this.isBehindCloudLayer(ndcX, ndcY, cloud)) return true
+  isScreenPointOccluded(ndcX: number, ndcY: number, sourceId: string, behindCloud?: boolean): boolean {
+    // Cloud is answered from what the witness reported and from nothing else. There used to be a
+    // geometric fallback here for a recording that stated a real distance and made no claim about
+    // cloud — it went when stated distances did (see BaseShape.angular), and it deserved to: the
+    // only case it ever fired on turned out to be Chiles-Whitted, where "it disappeared into the
+    // cloud deck" was an interrogator's reconstruction that the witness himself denied. Deducing
+    // cloud from a distance nobody perceived is how that kind of claim gets made twice.
+    if (behindCloud && this.cloudMesh && this.weather.cloudCover > 0) return true
     const occluders: Object3D[] = []
     for (const object of this.decorObjects) {
       if (!object.occludesSourceIds?.includes(sourceId)) continue
@@ -1314,44 +1319,47 @@ export class SceneRenderer {
   }
 
   /**
-   * Whether cloud stands between the witness and this shape — "it disappeared into a cloud".
+   * How far the decor stands along the exact line of sight to this screen point, split by which
+   * side of the shape each piece of it is on — the raw material of the only distance statement a
+   * testimony can make.
    *
-   * Answered first from what the witness actually reported (BaseShape.behindCloud), exactly as
-   * decor occlusion is answered from DecorObject.occludesSourceIds and for the same reason:
-   * nothing in a recording of a 2D appearance can deduce it.
+   * A recording holds no distance (see BaseShape.angular). What it can hold is a relationship the
+   * witness actually saw: the object passed BEHIND that hangar, or in FRONT of that tree. Since
+   * the decor's own position is known (DecorObject.eastM/northM, built into real geometry here),
+   * each such crossing turns into an inequality — at least this far, or at most that far — and
+   * that is the entire basis on which meters are ever attached to an object (see SizeEstimate).
    *
-   * The geometric path below is only a fallback, for a recording that states a real distance (see
-   * BaseShape.physical) and makes no claim about cloud: the deck has to be crossed BEFORE the
-   * object, on the right side of the witness (one above the deck is hidden from what is below it,
-   * not above), and with actual cloud in that exact direction rather than one of the deck's own
-   * gaps — which is what CloudField.alphaAt re-evaluates, the shader's coverage field living on
-   * the GPU where nothing can ask it a question. No distance stated means no claim either way, so
-   * nothing is hidden on a guess.
+   * `behindM` is the LARGEST such floor and `inFrontM` the SMALLEST such ceiling, since every
+   * crossing constrains the same object and the tightest one wins. Both read the NEAREST face of
+   * each piece of decor, which is exact for a ceiling and deliberately conservative for a floor:
+   * something beyond a hangar is beyond its far wall too, but claiming only the near one can never
+   * be wrong.
+   *
+   * Which side a crossing is on is NOT geometry's to decide — it is DecorObject.occludesSourceIds,
+   * i.e. what the witness reported, for exactly the reasons that field's own comment gives. Decor
+   * this shape is not listed as hidden by, but whose silhouette it crosses, is decor it passed in
+   * front of.
    */
-  private isBehindCloudLayer(ndcX: number, ndcY: number, cloud?: { declared?: boolean; distanceM?: number }): boolean {
-    if (!cloud || !this.cloudMesh || this.weather.cloudCover <= 0) return false
-    // The witness said so: that settles it. Their account is the observation; where this sky's own
-    // gaps happen to fall is procedural noise, and letting it overrule them would mean tuning the
-    // weather until a reported disappearance happens to occur — see BaseShape.behindCloud.
-    if (cloud.declared) return true
-    const distanceM = cloud.distanceM
-    if (distanceM === undefined) return false
-    const offset = this.cloudLayerOffset()
+  decorDistancesAt(ndcX: number, ndcY: number, sourceId: string): { behindM?: number; inFrontM?: number } {
     this.ufoOcclusionRaycaster.setFromCamera(new Vector2(ndcX, ndcY), this.camera)
-    const direction = this.ufoOcclusionRaycaster.ray.direction
-    // Looking away from the deck (up, from above it — or down, from below): it can't be in the way.
-    if (Math.sign(direction.y || 1) !== Math.sign(offset)) return false
-    // Where the line of sight crosses the deck, in real meters, against how far the object is.
-    const layerDistanceM = Math.abs(this.cloudLayerHeightM()) / Math.max(Math.abs(direction.y), 0.026)
-    if (layerDistanceM >= distanceM) return false
-    return CloudField.alphaAt(direction, Math.abs(offset), this.weather.cloudCover) >= CLOUD_OCCLUSION_MIN_ALPHA
+    this.ufoOcclusionRaycaster.near = UFO_OCCLUSION_MIN_DISTANCE_M
+    let behindM: number | undefined
+    let inFrontM: number | undefined
+    for (const object of this.decorObjects) {
+      const group = this.decorGroups.get(object.id)
+      if (!group) continue
+      const hit = this.ufoOcclusionRaycaster.intersectObject(group, true)[0]
+      if (!hit) continue
+      if (object.occludesSourceIds?.includes(sourceId)) {
+        behindM = behindM === undefined ? hit.distance : Math.max(behindM, hit.distance)
+      } else {
+        inFrontM = inFrontM === undefined ? hit.distance : Math.min(inFrontM, hit.distance)
+      }
+    }
+    return { behindM, inFrontM }
   }
 
-  /** The deck's vertical distance from the witness in REAL meters (cloudLayerOffset is the same
-   * quantity in the scene's own compressed units, which is what the shader wants). */
-  private cloudLayerHeightM(): number {
-    return (this.weather.cloudBaseM ?? DEFAULT_CLOUD_BASE_M) - this.observerElevationM
-  }
+
 
   /** Finds which celestial body (if any) sits under normalized device coordinates (each in
    * [-1,1], as THREE.Raycaster.setFromCamera expects) — for hover/click identification, not

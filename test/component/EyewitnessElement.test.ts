@@ -33,6 +33,9 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     isScreenPointOccluded(): boolean {
       return false
     }
+    decorDistancesAt(): { behindM?: number; inFrontM?: number } {
+      return {}
+    }
     render(): void {}
     dispose(): void {}
     startTwinkle(): void {}

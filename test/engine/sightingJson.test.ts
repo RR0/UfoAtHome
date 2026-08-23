@@ -34,6 +34,67 @@ describe("sightingJson", () => {
     expect(restored.decor).toEqual(sighting.decor)
   })
 
+  it("writes the angle a shape subtends, not the meters someone guessed for it", () => {
+    const sighting = Sighting.create({ year: 1948 }, [{ lat: 32.3792, lng: -86.3077 }])
+    sighting.timeline.addKeyframe(0, [
+      { sourceId: "ufo-1", shape: createOval({ x: 300, y: 170, width: 51.2, height: 6.8 }) }
+    ])
+
+    const json = toSightingJson(sighting)
+    const written = json.timeline.keyframes[0].shapes[0].shape
+
+    // 51.2 px of a 360 px canvas at 60 degrees: 9.39 degrees across, 1.25 tall.
+    expect(written.angular?.widthDeg).toBeCloseTo(9.39, 2)
+    expect(written.angular?.heightDeg).toBeCloseTo(1.25, 2)
+    // And nothing anywhere claims a real size or a real distance.
+    expect(JSON.stringify(json)).not.toContain("sizeM")
+    expect(JSON.stringify(json)).not.toContain("distanceM")
+  })
+
+  it("re-derives the drawing from the stated angle, about the shape's own centre", () => {
+    const restored = fromSightingJson({
+      version: 1,
+      timeline: {
+        keyframes: [
+          {
+            t: 0,
+            shapes: [
+              {
+                sourceId: "ufo-1",
+                shape: {
+                  ...createOval({ x: 300, y: 170, width: 10, height: 10 }),
+                  // Deliberately inconsistent with the box above: the angle is what a witness
+                  // stated, the box is a projection of it, and the angle is what must win.
+                  angular: { widthDeg: 9.3883, heightDeg: 1.2496 }
+                }
+              }
+            ]
+          }
+        ]
+      }
+    })
+
+    const bounds = restored.timeline.getShapeAt(0, "ufo-1")!.bounds
+    expect(bounds.width).toBeCloseTo(51.2, 1)
+    expect(bounds.height).toBeCloseTo(6.8, 1)
+    // Position is not the angle's business: the centre stayed exactly where the file put it.
+    expect(bounds.x + bounds.width / 2).toBeCloseTo(305, 6)
+    expect(bounds.y + bounds.height / 2).toBeCloseTo(175, 6)
+  })
+
+  it("leaves a recording made before angles were stated exactly as it was drawn", () => {
+    const restored = fromSightingJson({
+      version: 1,
+      timeline: {
+        keyframes: [
+          { t: 0, shapes: [{ sourceId: "ufo-1", shape: createOval({ x: 10, y: 20, width: 40, height: 24 }) }] }
+        ]
+      }
+    })
+
+    expect(restored.timeline.getShapeAt(0, "ufo-1")?.bounds).toEqual({ x: 10, y: 20, width: 40, height: 24 })
+  })
+
   it("defaults decor to [] for older JSON that predates it", () => {
     const restored = fromSightingJson({ version: 1, timeline: { keyframes: [] } })
     expect(restored.decor).toEqual([])
