@@ -365,10 +365,12 @@ that must be CORS-readable.
 Sound plays during playback only, and only after a real click somewhere in the player: browsers refuse to start
 audio without one.
 
-The same rule governs the whole scene, not just the object's own sound: **paused is paused**. Falling rain, a
-drifting cloud deck, twinkling stars, lightning and the weather's own ambient beds all stop with the player and
-resume with it, leaving the frozen frame on screen. A paused replay is one instant of a sighting — weather still
-going on over it would be the reader's own room, not the witness's evening.
+The same rule governs the whole scene, not just the object's own sound: **paused is paused**. Falling
+precipitation and its splashes, twinkling stars, lightning flashes, the sun's lens flare and the weather's own
+ambient beds all stop with the player and resume with it, leaving the frozen frame on screen. A paused replay is
+one instant of a sighting — weather still going on over it would be the reader's own room, not the witness's
+evening. (The cloud deck is not in that list because it does not move at all: its noise field is fixed, with no
+time of its own. Real drifting cloud is part of the volumetric-cloud work still to come.)
 
 ### Naming a place
 
