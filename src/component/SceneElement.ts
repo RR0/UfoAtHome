@@ -14,6 +14,7 @@ import {
 } from "../engine/astronomy/CelestialPositions.js"
 import type { ObserverGeo } from "../engine/astronomy/CelestialPositions.js"
 import { resolveObserverPoseAt, resolveWeatherAt } from "../engine/model/Sighting.js"
+import type { Sighting } from "../engine/model/Sighting.js"
 import type { ObserverPose } from "../engine/model/ObserverTrack.js"
 import type { Weather } from "../engine/model/Weather.js"
 import type { DecorKind } from "../engine/model/Decor.js"
@@ -119,9 +120,17 @@ export class SceneElement extends HTMLElement {
   private readonly sceneRenderer: SceneRenderer
   private readonly hoverTooltip: HTMLElement
   private resizeObserver?: ResizeObserver
-  /** One accumulating estimate per shape — see sizeRangeOf. Keyed by sourceId, cleared whenever a
-   * different recording is loaded. */
+  /** One accumulating estimate per shape — see sizeRangeOf. Keyed by sourceId, and dropped whole
+   * whenever a different recording is loaded (see sizeEstimatesFor). */
   private readonly sizeEstimates = new Map<string, SizeEstimate>()
+  /** Which Sighting the estimates above were accumulated against. Tracked by identity rather than
+   * cleared from this element's own `sightingData` setter, because that setter is not the only way
+   * in: UfoRecorderElement composes this element but delegates its own sightingData straight to the
+   * nested `<rr0-ufo>`, so a recording loaded through the recorder never passes through here at
+   * all. Keying on the instance catches every path — loading a file replaces the Sighting (see
+   * UfoElement's own setter), and a stale estimate carried across recordings is worse than none:
+   * bounds only ever tighten, so one wrong crossing from a previous case would poison the next. */
+  private sizeEstimatesFor?: Sighting
   private lastTimeMs = 0
   private starCatalog?: StarCatalog
   /** Owned here, not by SceneRenderer — the renderer stays audio-agnostic (see its own
@@ -395,8 +404,6 @@ export class SceneElement extends HTMLElement {
 
   set sightingData(json: SightingRecordingJson) {
     this.ufoElement.sightingData = json
-    // A different recording's crossings say nothing about this one's object.
-    this.sizeEstimates.clear()
     this.lastTimeMs = 0
     // Also resolves+applies weather at t=0 — see updateAstronomy's own doc comment.
     this.updateAstronomy(0)
@@ -507,7 +514,12 @@ export class SceneElement extends HTMLElement {
    * about to paint — converts its bounds center from the fixed 640x360 canvas drawing space to
    * NDC, and raycasts. */
   private updateUfoOcclusion(t: number): void {
-    const timeline = this.ufoElement.sighting.timeline
+    const sighting = this.ufoElement.sighting
+    if (sighting !== this.sizeEstimatesFor) {
+      this.sizeEstimates.clear()
+      this.sizeEstimatesFor = sighting
+    }
+    const timeline = sighting.timeline
     const canvas = this.ufoElement.canvasElement
     const fovDeg = resolveObserverPoseAt(this.ufoElement.sighting, t)?.fovDeg ?? SightingShapes.DEFAULT_FOV_DEG
     const occluded = new Set<string>()

@@ -20,7 +20,7 @@
     "title": "Clarence Chiles"
   },
   "caseId": "ChilesWhitted",
-  "description": "Version du commandant Clarence S. Chiles, en place gauche. Vue depuis le poste de pilotage du DC-3 à 1500 m — d'où le sol, très bas, et le ciel de nuit du 24 juillet 1948. L'objet arrive de face sur une trajectoire de collision et passe sur la droite ; Chiles vire à gauche pour l'éviter, et voit la ressource abrupte. Son témoignage s'arrête là : d'après le recoupement de McDonald (1968), seul Whitted, en place droite, a vu la phase finale. L'objet quitte donc simplement son champ de vision après la ressource, sans que rien ne soit déclaré sur un nuage — McDonald précise que le « disparu dans la couche » des premiers interrogatoires est une reconstruction, démentie par Whitted. Distance : les deux hommes n'ont jamais pu s'accorder (l'un sous 1000 ft, l'autre plusieurs fois cela), et McDonald ne dit pas lequel disait quoi. L'enregistrement ne tranche pas, et ne le peut pas : il ne déclare que des tailles angulaires, et une distance ne s'en déduit que là où l'objet croise un élément de décor dont la position est connue — ce qu'un ciel de nuit vide n'offre nulle part. Le dessin suit le cadrage du relevé officiel (~180 m au plus près), qui reste donc un choix de mise en scène et non une affirmation du fichier. Forme d'après le dessin que Chiles lui-même a remis au projet Sign (Blue Book, rapport n° 14, cas 5) : un cigare mince effilé aux deux bouts, sans aucun hublot, avec à l'avant la zone claire qu'il annote « pare-brise de cockpit ? ». Les nervures transversales de son croquis ne sont pas rendues : ce format dessine des formes, pas un état de surface. Longueur rapportée ~30 m ; sa longueur apparente croît à mesure qu'il se présente de profil. Le virage d'évitement n'est pas reproduit : le format ne sait pas encore incliner le point de vue (roulis).",
+  "description": "Version du commandant Clarence S. Chiles, en place gauche. Vue depuis le poste de pilotage du DC-3 à 1500 m — d'où le sol, très bas, et le ciel de nuit du 24 juillet 1948. L'objet arrive de face sur une trajectoire de collision et passe sur la droite ; Chiles vire à gauche pour l'éviter, et voit la ressource abrupte. Son témoignage s'arrête là : d'après le recoupement de McDonald (1968), seul Whitted, en place droite, a vu la phase finale. L'objet quitte donc simplement son champ de vision après la ressource, sans que rien ne soit déclaré sur un nuage — McDonald précise que le « disparu dans la couche » des premiers interrogatoires est une reconstruction, démentie par Whitted. Distance : les deux hommes n'ont jamais pu s'accorder (l'un sous 1000 ft, l'autre plusieurs fois cela), et McDonald ne dit pas lequel disait quoi. L'enregistrement ne tranche pas, et ne le peut pas : il ne déclare que des tailles angulaires, et une distance ne s'en déduit que là où l'objet croise un élément de décor dont la position est connue — ce qu'un ciel de nuit vide n'offre nulle part. Le dessin suit le cadrage du relevé officiel (~180 m au plus près), qui reste donc un choix de mise en scène et non une affirmation du fichier. Forme d'après le dessin que Chiles lui-même a remis au projet Sign (Blue Book, rapport n° 14, cas 5) : un cigare mince effilé aux deux bouts, sans aucun hublot, avec à l'avant la zone claire qu'il annote « pare-brise de cockpit ? ». Les nervures transversales de son croquis ne sont pas rendues : ce format dessine des formes, pas un état de surface. La flamme suit les 40 pieds que Whitted a portés sur son propre dessin, seul chiffre de témoin la concernant : Chiles n'en a annoté aucun, et rien au dossier ne dit qu'ils divergeaient là-dessus. Longueur rapportée ~30 m ; sa longueur apparente croît à mesure qu'il se présente de profil. Le virage d'évitement n'est pas reproduit : le format ne sait pas encore incliner le point de vue (roulis).",
   "tags": [
     "NL",
     "observation aérienne",
@@ -60,7 +60,7 @@
               "bounds": {
                 "x": 331.9,
                 "y": 174.2,
-                "width": 0.4,
+                "width": 0.3,
                 "height": 0.6
               },
               "color": "#ff5a1f",
@@ -70,7 +70,7 @@
               "selected": false,
               "title": "Flamme arrière",
               "angular": {
-                "widthDeg": 0.0735,
+                "widthDeg": 0.0551,
                 "heightDeg": 0.1103
               }
             }
@@ -131,7 +131,7 @@
               "bounds": {
                 "x": 334.2,
                 "y": 174.1,
-                "width": 0.5,
+                "width": 0.4,
                 "height": 0.8
               },
               "color": "#ff5a1f",
@@ -141,7 +141,7 @@
               "selected": false,
               "title": "Flamme arrière",
               "angular": {
-                "widthDeg": 0.0919,
+                "widthDeg": 0.0735,
                 "heightDeg": 0.147
               }
             }
@@ -202,7 +202,7 @@
               "bounds": {
                 "x": 339.9,
                 "y": 173.9,
-                "width": 0.9,
+                "width": 0.7,
                 "height": 1.4
               },
               "color": "#ff5a1f",
@@ -212,7 +212,7 @@
               "selected": false,
               "title": "Flamme arrière",
               "angular": {
-                "widthDeg": 0.1654,
+                "widthDeg": 0.1286,
                 "heightDeg": 0.2573
               }
             }
@@ -273,7 +273,7 @@
               "bounds": {
                 "x": 352.6,
                 "y": 174.9,
-                "width": 2.7,
+                "width": 2.2,
                 "height": 2.1
               },
               "color": "#ff5a1f",
@@ -283,7 +283,7 @@
               "selected": false,
               "title": "Flamme arrière",
               "angular": {
-                "widthDeg": 0.4962,
+                "widthDeg": 0.4043,
                 "heightDeg": 0.3859
               }
             }
@@ -344,7 +344,7 @@
               "bounds": {
                 "x": 344.6,
                 "y": 176.9,
-                "width": 12.6,
+                "width": 10.1,
                 "height": 3.8
               },
               "color": "#ff5a1f",
@@ -354,7 +354,7 @@
               "selected": false,
               "title": "Flamme arrière",
               "angular": {
-                "widthDeg": 2.3153,
+                "widthDeg": 1.856,
                 "heightDeg": 0.6983
               }
             }
@@ -415,7 +415,7 @@
               "bounds": {
                 "x": 365.3,
                 "y": 169.5,
-                "width": 22.4,
+                "width": 17.9,
                 "height": 4.8
               },
               "color": "#ff5a1f",
@@ -425,7 +425,7 @@
               "selected": false,
               "title": "Flamme arrière",
               "angular": {
-                "widthDeg": 4.1148,
+                "widthDeg": 3.2887,
                 "heightDeg": 0.8821
               }
             }
@@ -486,7 +486,7 @@
               "bounds": {
                 "x": 385.7,
                 "y": 160.7,
-                "width": 25.6,
+                "width": 20.5,
                 "height": 5.5
               },
               "color": "#ff5a1f",
@@ -496,7 +496,7 @@
               "selected": false,
               "title": "Flamme arrière",
               "angular": {
-                "widthDeg": 4.702,
+                "widthDeg": 3.7661,
                 "heightDeg": 1.0107
               }
             }
@@ -557,7 +557,7 @@
               "bounds": {
                 "x": 378.2,
                 "y": 145.0,
-                "width": 12.5,
+                "width": 10.0,
                 "height": 2.7
               },
               "color": "#ff5a1f",
@@ -567,7 +567,7 @@
               "selected": false,
               "title": "Flamme arrière",
               "angular": {
-                "widthDeg": 2.2969,
+                "widthDeg": 1.8376,
                 "heightDeg": 0.4962
               }
             }
@@ -628,7 +628,7 @@
               "bounds": {
                 "x": 378.2,
                 "y": 145.0,
-                "width": 12.5,
+                "width": 10.0,
                 "height": 2.7
               },
               "color": "#ff5a1f",
@@ -638,7 +638,7 @@
               "selected": false,
               "title": "Flamme arrière",
               "angular": {
-                "widthDeg": 2.2969,
+                "widthDeg": 1.8376,
                 "heightDeg": 0.4962
               }
             }
@@ -699,7 +699,7 @@
               "bounds": {
                 "x": 378.2,
                 "y": 145.0,
-                "width": 12.5,
+                "width": 10.0,
                 "height": 2.7
               },
               "color": "#ff5a1f",
@@ -709,7 +709,7 @@
               "selected": false,
               "title": "Flamme arrière",
               "angular": {
-                "widthDeg": 2.2969,
+                "widthDeg": 1.8376,
                 "heightDeg": 0.4962
               }
             }
