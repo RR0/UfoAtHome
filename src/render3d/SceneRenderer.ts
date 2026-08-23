@@ -987,7 +987,7 @@ export class SceneRenderer {
     if (!this.lightningArmed) {
       this.nextLightningAtS = null
       this.lightningFlashRemainingS = 0
-      if (this.scene.fog) (this.scene.fog as Fog).color.setRGB(...this.baseFogColor)
+      this.restoreFogColor()
     }
     this.syncAnimationLoop()
     this.render()
@@ -1422,6 +1422,19 @@ export class SceneRenderer {
     this.renderer.dispose()
   }
 
+  /**
+   * Whether the observation's own clock is running. Everything animated here — falling rain, a
+   * drifting cloud deck, twinkling stars, lightning, the lens flare — is part of the observed
+   * scene, and an observation that is paused did not go on happening: a witness who stops the
+   * replay to look at a frame is looking at ONE instant, not at a still object under live weather.
+   * So the whole loop stops with playback (see needsAnimationLoop), and the last frame stays on
+   * screen; every state change repaints through render() as it already did.
+   *
+   * Starts false: nothing has been played yet at construction, and the scene is a still until
+   * someone presses Play. SceneElement drives it from the nested player's own state.
+   */
+  private animationsRunning = false
+
   /** Starts the shared per-frame animation loop — idempotent, and a no-op when nothing needs it
    * (see syncAnimationLoop). Originally just star twinkle; now also drives falling/drifting
    * precipitation and lightning scheduling, since all three are cheap enough to share one RAF loop
@@ -1453,6 +1466,28 @@ export class SceneRenderer {
     this.animationFrameId = requestAnimationFrame(tick)
   }
 
+  /**
+   * Runs or freezes every animation in the scene, following the player (see animationsRunning).
+   *
+   * Resuming re-arms the lightning schedule rather than carrying the old one over: it is kept in
+   * absolute rAF seconds, so a pause of any length would leave a flash "due" and fire it on the
+   * very first frame back. Pausing ends any flash in progress, since a whitened fog frozen forever
+   * would read as the scene's real ambient light rather than as the instant of a strike.
+   */
+  setAnimationsRunning(running: boolean): void {
+    if (running === this.animationsRunning) return
+    this.animationsRunning = running
+    if (running) {
+      this.nextLightningAtS = null
+    } else if (this.lightningFlashRemainingS > 0) {
+      this.lightningFlashRemainingS = 0
+      this.restoreFogColor()
+    }
+    this.syncAnimationLoop()
+    // The loop is what normally repaints; with it stopped, this is what leaves a coherent still.
+    if (!running) this.render()
+  }
+
   stopTwinkle(): void {
     if (this.animationFrameId !== null) {
       cancelAnimationFrame(this.animationFrameId)
@@ -1460,13 +1495,20 @@ export class SceneRenderer {
     }
   }
 
+  /** Puts the fog back to the sky's own current colour, undoing whatever a flash in progress had
+   * whitened it to — see updateLightning, which borrows the fog as this renderer's ambient light. */
+  private restoreFogColor(): void {
+    if (this.scene.fog) (this.scene.fog as Fog).color.setRGB(...this.baseFogColor)
+  }
+
   private needsAnimationLoop(): boolean {
     return (
-      this.starTiers.length > 0 ||
+      this.animationsRunning &&
+      (this.starTiers.length > 0 ||
       this.precipitationPoints !== undefined ||
       this.rainSystem !== undefined ||
       this.lightningArmed ||
-      (this.lensFlare !== undefined && this.sunVisible)
+      (this.lensFlare !== undefined && this.sunVisible))
     )
   }
 

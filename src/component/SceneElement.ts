@@ -213,8 +213,28 @@ export class SceneElement extends HTMLElement {
    * separate animation loop just for astronomy. */
   private readonly handleTimeUpdate = (event: Event) => {
     this.lastTimeMs = (event as CustomEvent<{ time: number }>).detail.time
+    this.syncAnimationsToPlayback()
     this.updateAstronomy(this.lastTimeMs)
     this.updateUfoOcclusion(this.lastTimeMs)
+  }
+
+  /**
+   * Makes the weather follow the player: rain falls, clouds drift, lightning strikes and the beds
+   * are heard only while the observation's own clock is running. Pause a replay and it is one
+   * frozen instant of a sighting — weather still going on over it would be the reader's own room,
+   * not the witness's evening.
+   *
+   * Driven from timeupdate rather than from a playback-state event of its own because every
+   * transition already produces one: a play tick, a seek, and pause's own forced repaint all funnel
+   * through the nested player's single onFrame sink.
+   */
+  private syncAnimationsToPlayback(): void {
+    const playing = this.ufoElement.playbackState === "playing"
+    this.sceneRenderer.setAnimationsRunning(playing)
+    this.weatherAudio.setPaused(!playing)
+    // A thunderclap is deliberately delayed by the distance sound travels (see
+    // handleLightningFlash); one still in flight belongs to a flash that is no longer happening.
+    if (!playing) clearTimeout(this.thunderTimeoutId)
   }
 
   constructor() {

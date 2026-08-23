@@ -365,6 +365,11 @@ that must be CORS-readable.
 Sound plays during playback only, and only after a real click somewhere in the player: browsers refuse to start
 audio without one.
 
+The same rule governs the whole scene, not just the object's own sound: **paused is paused**. Falling rain, a
+drifting cloud deck, twinkling stars, lightning and the weather's own ambient beds all stop with the player and
+resume with it, leaving the frozen frame on screen. A paused replay is one instant of a sighting — weather still
+going on over it would be the reader's own room, not the witness's evening.
+
 ### Naming a place
 
 Testimony names a place. It says "on the Valensole plateau", "near Socorro", "over Montgomery" —

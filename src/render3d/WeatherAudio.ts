@@ -59,6 +59,22 @@ export class WeatherAudio {
   private windToken = 0
   private windVolume = 0
 
+  /** Whether the observation's clock is stopped. Weather is something that was happening at an
+   * instant of the sighting, so it is heard only while that instant is advancing — a paused replay
+   * is one frozen moment, and rain going on over it would be the room's own weather, not the
+   * witness's. Mirrors SceneRenderer.animationsRunning, which freezes the same weather visually.
+   *
+   * Starts true: nothing has been played yet, and setAmbient is a no-op before resume() anyway. */
+  private paused = true
+  /** The last conditions setAmbient was asked for, replayed on unpause — the beds are genuinely
+   * stopped while paused (an inaudible source still costs), so resuming needs to know what to
+   * start again without waiting for the weather itself to change. */
+  private requested: { type: PrecipitationType; intensity: number; windSpeed: number } = {
+    type: "none",
+    intensity: 0,
+    windSpeed: 0
+  }
+
   /** Unlocks the AudioContext — must be called from a real user gesture (browsers start it
    * suspended otherwise). Safe to call repeatedly; a no-op once already running. Never throws to
    * the caller — a browser/environment with no Web Audio support (or a security policy blocking
@@ -92,7 +108,14 @@ export class WeatherAudio {
    * loop, not a shortcut.
    */
   setAmbient(type: PrecipitationType, intensity: number, windSpeed: number): void {
+    this.requested = { type, intensity, windSpeed }
     if (!this.context) return
+    // Remembered above first: a weather edit made while paused must be what plays on resume.
+    if (this.paused) {
+      type = "none"
+      intensity = 0
+      windSpeed = 0
+    }
     const key = type === "rain" || type === "hail" ? type : "none"
     // Tracked in a field (not just a local `volume` const) so applyIfCurrent's resolve callback
     // below can always read the *latest* requested volume, not the one captured in startLoop()'s
@@ -152,12 +175,27 @@ export class WeatherAudio {
     }
   }
 
+  /**
+   * Runs or stops the weather beds with the player (see `paused`). Stopping goes through
+   * setAmbient's own "no precipitation, no wind" path rather than a separate teardown, so a pause
+   * and a genuine clearing of the weather leave exactly the same state behind; resuming replays
+   * whatever conditions were last asked for, including any edited while paused.
+   */
+  setPaused(paused: boolean): void {
+    if (paused === this.paused) return
+    this.paused = paused
+    const { type, intensity, windSpeed } = this.requested
+    this.setAmbient(type, intensity, windSpeed)
+  }
+
   /** One-shot thunderclap, triggered by SceneElement on SceneRenderer's onLightningFlash callback
    * (with its own randomized delay applied by the caller — see SceneElement, not here, so audio
    * timing logic stays out of the renderer entirely). A no-op before resume(), same reasoning as
    * setAmbient. */
   playThunder(): void {
-    if (!this.context) return
+    // A clap already in flight when the replay was paused (SceneElement delays it by the distance
+    // sound travels) must not land over a frozen scene.
+    if (!this.context || this.paused) return
     void this.playOneShot(THUNDER_URL, 0.9)
   }
 
