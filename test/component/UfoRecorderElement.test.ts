@@ -1051,7 +1051,7 @@ describe("UfoRecorderElement post-hoc appearance editing + multi-shape authoring
     recordButton.click()
     expect(element.shadowRoot!.getElementById("source")!.hasAttribute("disabled")).toBe(true)
 
-    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }))
+    element.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }))
 
     expect(element.shadowRoot!.getElementById("source")!.hasAttribute("disabled")).toBe(false)
   })
@@ -1060,7 +1060,7 @@ describe("UfoRecorderElement post-hoc appearance editing + multi-shape authoring
     const element = mount()
     const recordButton = element.shadowRoot!.getElementById("record") as HTMLButtonElement
 
-    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }))
+    element.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }))
 
     expect(recordButton.title).toBe("Record")
   })
@@ -1499,7 +1499,7 @@ describe("UfoRecorderElement right-click context menu", () => {
     rightClickAt(canvas, 320, 180) // hits the default centered shape
     expect(menu.hidden).toBe(false)
 
-    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }))
+    element.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }))
 
     expect(menu.hidden).toBe(true)
   })
@@ -1617,8 +1617,11 @@ describe("UfoRecorderElement Delete/Backspace key", () => {
     document.body.innerHTML = ""
   })
 
-  function pressKey(key: string): void {
-    document.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true, composed: true }))
+  /** Dispatched ON the editor, which is where a key actually lands once it has the focus — it no
+   * longer listens on document, so that a page's own forms keep their keys (see the two tests at
+   * the end of this block). */
+  function pressKey(element: UfoRecorderElement, key: string): void {
+    element.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true, composed: true }))
   }
 
   it("deletes the selected shape, with the same confirmation as the toolbar button", () => {
@@ -1627,7 +1630,7 @@ describe("UfoRecorderElement Delete/Backspace key", () => {
     const addShapeButton = element.shadowRoot!.getElementById("add-shape") as HTMLButtonElement
     addShapeButton.click() // "ufo-1" + "ufo-2", "ufo-2" selected
 
-    pressKey("Delete")
+    pressKey(element, "Delete")
 
     expect(confirmSpy).toHaveBeenCalled()
     const sourceIds = element.sightingData.timeline.keyframes.flatMap(k => k.shapes.map(s => s.sourceId))
@@ -1641,7 +1644,7 @@ describe("UfoRecorderElement Delete/Backspace key", () => {
     const addShapeButton = element.shadowRoot!.getElementById("add-shape") as HTMLButtonElement
     addShapeButton.click()
 
-    pressKey("Backspace")
+    pressKey(element, "Backspace")
 
     const sourceIds = element.sightingData.timeline.keyframes.flatMap(k => k.shapes.map(s => s.sourceId))
     expect(sourceIds).toEqual(["ufo-1"])
@@ -1654,7 +1657,7 @@ describe("UfoRecorderElement Delete/Backspace key", () => {
     const addShapeButton = element.shadowRoot!.getElementById("add-shape") as HTMLButtonElement
     addShapeButton.click()
 
-    pressKey("Delete")
+    pressKey(element, "Delete")
 
     const sourceIds = element.sightingData.timeline.keyframes.flatMap(k => k.shapes.map(s => s.sourceId))
     expect(sourceIds).toEqual(["ufo-1", "ufo-2"])
@@ -1665,7 +1668,7 @@ describe("UfoRecorderElement Delete/Backspace key", () => {
     const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(true)
     const element = mount() // just "ufo-1"
 
-    pressKey("Delete")
+    pressKey(element, "Delete")
 
     const sourceIds = element.sightingData.timeline.keyframes.flatMap(k => k.shapes.map(s => s.sourceId))
     expect(sourceIds).toEqual(["ufo-1"])
@@ -1685,6 +1688,62 @@ describe("UfoRecorderElement Delete/Backspace key", () => {
     const sourceIds = element.sightingData.timeline.keyframes.flatMap(k => k.shapes.map(s => s.sourceId))
     expect(sourceIds).toEqual(["ufo-1", "ufo-2"])
     confirmSpy.mockRestore()
+  })
+
+  it("ignores a key pressed in another form on the same page", () => {
+    const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(true)
+    const element = mount()
+    ;(element.shadowRoot!.getElementById("add-shape") as HTMLButtonElement).click()
+    const foreign = document.createElement("input")
+    document.body.appendChild(foreign)
+    foreign.focus()
+
+    foreign.dispatchEvent(new KeyboardEvent("keydown", { key: "Backspace", bubbles: true, composed: true }))
+
+    expect(confirmSpy).not.toHaveBeenCalled()
+    const sourceIds = element.sightingData.timeline.keyframes.flatMap(k => k.shapes.map(s => s.sourceId))
+    expect(sourceIds).toEqual(["ufo-1", "ufo-2"])
+    confirmSpy.mockRestore()
+  })
+
+  it("ignores a key from a field inside a CLOSED shadow root elsewhere on the page", () => {
+    // The bug this block exists for. rr0.org's own <rr0-search> attaches a closed shadow root, so
+    // its input never appears in composedPath() — the path stops at the host. A document-level
+    // listener testing "did this come from an input?" therefore saw a custom element, decided it
+    // had not, and Backspace in the site's search box asked to delete the shape being edited.
+    const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(true)
+    const element = mount()
+    ;(element.shadowRoot!.getElementById("add-shape") as HTMLButtonElement).click()
+    const host = document.createElement("div")
+    document.body.appendChild(host)
+    const closed = host.attachShadow({ mode: "closed" })
+    const search = document.createElement("input")
+    closed.appendChild(search)
+    search.focus()
+
+    search.dispatchEvent(new KeyboardEvent("keydown", { key: "Backspace", bubbles: true, composed: true }))
+
+    expect(confirmSpy).not.toHaveBeenCalled()
+    const sourceIds = element.sightingData.timeline.keyframes.flatMap(k => k.shapes.map(s => s.sourceId))
+    expect(sourceIds).toEqual(["ufo-1", "ufo-2"])
+    confirmSpy.mockRestore()
+  })
+
+  it("takes the focus when the canvas is used, so its own keys reach it at all", () => {
+    const element = mount()
+    const canvas = nestedUfo(element)!.shadowRoot!.getElementById("canvas") as HTMLCanvasElement
+    vi.spyOn(canvas, "getBoundingClientRect").mockReturnValue({ left: 0, top: 0, width: 640, height: 360 } as DOMRect)
+    const foreign = document.createElement("input")
+    document.body.appendChild(foreign)
+    foreign.focus()
+    expect(document.activeElement).toBe(foreign)
+
+    // jsdom has no global PointerEvent — a plain MouseEvent dispatched as "pointerdown" is what
+    // the rest of this file uses, and what the element listens for.
+    canvas.dispatchEvent(new MouseEvent("pointerdown", { clientX: 320, clientY: 180, bubbles: true }))
+
+    // The canvas takes no focus of its own, so the editor has to be the thing that holds it.
+    expect(document.activeElement).toBe(element)
   })
 })
 
@@ -1965,15 +2024,15 @@ describe("UfoRecorderElement arrow-key move/resize", () => {
     }
   }
 
-  function pressKey(key: string, options: { shiftKey?: boolean; target?: EventTarget } = {}): void {
-    document.dispatchEvent(new KeyboardEvent("keydown", { key, shiftKey: options.shiftKey ?? false, bubbles: true, composed: true }))
+  function pressKey(element: UfoRecorderElement, key: string, options: { shiftKey?: boolean } = {}): void {
+    element.dispatchEvent(new KeyboardEvent("keydown", { key, shiftKey: options.shiftKey ?? false, bubbles: true, composed: true }))
   }
 
   it("arrow keys move the selected shape by a fixed step", () => {
     const element = mount()
     element.sightingData = oneShapeJson()
-    pressKey("ArrowRight")
-    pressKey("ArrowDown")
+    pressKey(element, "ArrowRight")
+    pressKey(element, "ArrowDown")
 
     expect(element.sightingData.timeline.keyframes[0].shapes[0].shape.bounds).toEqual({ x: 104, y: 104, width: 20, height: 20 })
   })
@@ -1981,8 +2040,8 @@ describe("UfoRecorderElement arrow-key move/resize", () => {
   it("Shift+arrow resizes the selected shape instead, growing/shrinking around its center", () => {
     const element = mount()
     element.sightingData = oneShapeJson()
-    pressKey("ArrowRight", { shiftKey: true }) // widen
-    pressKey("ArrowUp", { shiftKey: true }) // shrink height
+    pressKey(element, "ArrowRight", { shiftKey: true }) // widen
+    pressKey(element, "ArrowUp", { shiftKey: true }) // shrink height
 
     expect(element.sightingData.timeline.keyframes[0].shapes[0].shape.bounds).toEqual({ x: 98, y: 102, width: 24, height: 16 })
   })
@@ -1995,8 +2054,8 @@ describe("UfoRecorderElement arrow-key move/resize", () => {
         keyframes: [{ t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 100, y: 100, width: 10, height: 10 }, color: "#39ff14", angle: 0, transparency: 0, haloScale: 1.5, selected: false } }] }]
       }
     }
-    pressKey("ArrowLeft", { shiftKey: true })
-    pressKey("ArrowUp", { shiftKey: true })
+    pressKey(element, "ArrowLeft", { shiftKey: true })
+    pressKey(element, "ArrowUp", { shiftKey: true })
 
     expect(element.sightingData.timeline.keyframes[0].shapes[0].shape.bounds.width).toBe(8)
     expect(element.sightingData.timeline.keyframes[0].shapes[0].shape.bounds.height).toBe(8)
@@ -2018,7 +2077,7 @@ describe("UfoRecorderElement arrow-key move/resize", () => {
 
     const recordButton = element.shadowRoot!.getElementById("record") as HTMLButtonElement
     recordButton.click()
-    pressKey("ArrowRight")
+    pressKey(element, "ArrowRight")
     recordButton.click()
 
     expect(element.sightingData.timeline.keyframes[0].shapes[0].shape.bounds).toEqual({ x: 100, y: 100, width: 20, height: 20 })
@@ -2487,8 +2546,8 @@ describe("UfoRecorderElement multi-select", () => {
     canvas.dispatchEvent(new MouseEvent("contextmenu", { clientX: x, clientY: y, bubbles: true, cancelable: true, composed: true }))
   }
 
-  function pressKey(key: string, options: { shiftKey?: boolean } = {}): void {
-    document.dispatchEvent(new KeyboardEvent("keydown", { key, shiftKey: options.shiftKey ?? false }))
+  function pressKey(element: UfoRecorderElement, key: string, options: { shiftKey?: boolean } = {}): void {
+    element.dispatchEvent(new KeyboardEvent("keydown", { key, shiftKey: options.shiftKey ?? false, bubbles: true }))
   }
 
   function selectedIdsOf(element: UfoRecorderElement): string[] {
@@ -2802,8 +2861,8 @@ describe("UfoRecorderElement multi-select", () => {
     clickAt(canvas, 10, 10)
     clickAt(canvas, 105, 105, { shiftKey: true })
 
-    pressKey("ArrowRight")
-    pressKey("ArrowDown")
+    pressKey(element, "ArrowRight")
+    pressKey(element, "ArrowDown")
 
     const shapes = element.sightingData.timeline.keyframes[0].shapes
     expect(shapes.find(s => s.sourceId === "ufo-1")!.shape.bounds).toMatchObject({ x: 4, y: 4 })
@@ -2817,7 +2876,7 @@ describe("UfoRecorderElement multi-select", () => {
     clickAt(canvas, 10, 10)
     clickAt(canvas, 105, 105, { shiftKey: true })
 
-    pressKey("ArrowRight", { shiftKey: true }) // group bbox width 120 -> 124, symmetric about center
+    pressKey(element, "ArrowRight", { shiftKey: true }) // group bbox width 120 -> 124, symmetric about center
 
     const shapes = element.sightingData.timeline.keyframes[0].shapes
     // Both members scale by the same factor (124/120) and translate to match the new, still

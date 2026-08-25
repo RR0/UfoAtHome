@@ -525,13 +525,16 @@ export class UfoRecorderElement extends HTMLElement {
       if (!this.decorContextMenu.hidden) this.hideDecorContextMenu()
     }
     if (ARROW_KEYS.has(event.key) || event.key === "Delete" || event.key === "Backspace") {
-      // event.composedPath()[0] (not event.target, which retargets across shadow boundaries, and
-      // not document.activeElement, which doesn't resolve into open shadow roots consistently
-      // enough to trust here) is always the true originating element regardless of shadow
-      // nesting — arrow/delete keys must reach a focused lat/lng/heading/pitch/duration/
-      // source-select control untouched (moving the text cursor, nudging a number input's own
-      // value, deleting a character, navigating the dropdown), not get hijacked into
-      // moving/deleting the selected shape.
+      // Which of the EDITOR'S OWN controls the key came from — this listener is scoped to the
+      // editor (see the constructor), so a field elsewhere on the page never gets here in the first
+      // place. Arrow/delete keys must reach a focused lat/lng/heading/pitch/duration/source-select
+      // control untouched (moving the text cursor, nudging a number input's own value, deleting a
+      // character, navigating the dropdown), not get hijacked into moving/deleting the shape.
+      //
+      // composedPath()[0] rather than event.target, which retargets across shadow boundaries: the
+      // editor's own fields live in its shadow root, so target would be the host for every one of
+      // them. (composedPath stops at a CLOSED shadow root, but the editor's is open and so is every
+      // element it nests.)
       const target = event.composedPath()[0]
       if (target instanceof HTMLInputElement || target instanceof HTMLSelectElement || target instanceof HTMLTextAreaElement) return
       if (ARROW_KEYS.has(event.key)) {
@@ -800,7 +803,14 @@ export class UfoRecorderElement extends HTMLElement {
     this.optionDecorVehicle = this.shadow.getElementById("option-decor-vehicle")!
     this.optionDecorWitness = this.shadow.getElementById("option-decor-witness")!
 
-    this.ufoElement.canvasElement.addEventListener("pointerdown", event => this.onPointerDown(event))
+    this.ufoElement.canvasElement.addEventListener("pointerdown", event => {
+      // Touching the canvas is working in the editor, so the editor takes the focus — which is what
+      // its own keydown listener needs to see anything at all, the canvas itself taking none. Also
+      // the right thing on its own terms: it takes focus away from whatever field the author was
+      // typing in, exactly as clicking anything else would.
+      this.focus({ preventScroll: true })
+      this.onPointerDown(event)
+    })
     this.ufoElement.canvasElement.addEventListener("pointermove", event => this.onPointerMove(event))
     this.ufoElement.canvasElement.addEventListener("contextmenu", event => this.onContextMenu(event))
     this.contextGroupButton.addEventListener("click", () => this.groupSelected())
@@ -885,7 +895,21 @@ export class UfoRecorderElement extends HTMLElement {
       this.syncPlaybackControls()
       this.dispatchEvent(new CustomEvent("sightingchange"))
     })
-    document.addEventListener("keydown", this.handleKeyDown)
+    // On the editor itself, NEVER on document. A keydown only reaches this if it was dispatched
+    // inside the editor, which is the only place its shortcuts mean anything — an editor embedded
+    // in a real page shares that page with other forms, and Backspace in a site's own search box is
+    // not a request to delete the shape being edited.
+    //
+    // Guarding a document-level listener by inspecting the event's target instead is what this used
+    // to do, and it cannot be made to work: a field inside a CLOSED shadow root (rr0.org's own
+    // <rr0-search> is one) never appears in composedPath() at all — the path stops at the host, the
+    // "is it an input?" test sees a custom element, and the delete goes through. Scope is the fix;
+    // the target test below stays only for the editor's OWN fields.
+    //
+    // Never removed: a listener on the element dies with it, and removing it in
+    // disconnectedCallback (as this did) meant an editor moved in the DOM lost its shortcuts for
+    // good, since it is only ever attached here in the constructor.
+    this.addEventListener("keydown", this.handleKeyDown)
 
     for (const presetId of PRESET_IDS) {
       this.presetButtons[presetId].addEventListener("click", () => this.setAppearance({ presetId }))
@@ -997,6 +1021,14 @@ export class UfoRecorderElement extends HTMLElement {
   }
 
   connectedCallback(): void {
+    // Focusable so that it can BE the thing focus is inside — the canvas takes no focus of its own,
+    // so without this, clicking a shape and pressing Delete would send the key to <body> and never
+    // reach the keydown listener, which is scoped to this element. -1 rather than 0: not a tab stop
+    // of the surrounding page, since every control that deserves one is already inside.
+    //
+    // Here and not in the constructor: a custom element may not touch its own attributes before it
+    // is connected, and `tabIndex` is an attribute. Respects one already set by the page.
+    if (!this.hasAttribute("tabindex")) this.tabIndex = -1
     const src = this.getAttribute("src")
     if (src) void this.importFromUrl(src)
   }
@@ -1008,7 +1040,6 @@ export class UfoRecorderElement extends HTMLElement {
   }
 
   disconnectedCallback(): void {
-    document.removeEventListener("keydown", this.handleKeyDown)
     document.removeEventListener("click", this.handleOutsideContextMenuClick)
     this.endDrag()
   }
