@@ -237,6 +237,13 @@ export interface UfoRecorderMessages {
    * on why it's opt-in. A view preference, not sighting weather data (see UfoRecorderElement's
    * cameraDeviceInput field). */
   cameraDevice: string
+  /** The decor kind added by the "+" button beside it — an aircraft crossing the sky is decor like
+   * any other, just decor with a trajectory. */
+  decorAircraft: string
+  /** Which set of lamps the selected decor object carries — see LightRig.ts. */
+  decorLights: string
+  /** The empty entry of that picker: an object with no lamps at all, which is most scenery. */
+  decorLightsNone: string
   /** What the observation was made THROUGH — see Instrument.ts. Sighting data, unlike cameraDevice
    * above: it changes the geometry of every shape, so it belongs in the file. */
   instrument: string

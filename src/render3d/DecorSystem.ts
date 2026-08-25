@@ -1,7 +1,7 @@
 import { BackSide, BoxGeometry, Color, ConeGeometry, CylinderGeometry, Group, Mesh, MeshBasicMaterial, MeshLambertMaterial, SphereGeometry } from "three"
 import type { Object3D } from "three"
-import type { DecorKind, DecorObject, DecorSide } from "../engine/model/Decor.js"
-import { DEFAULT_BUILDING_FLOORS } from "../engine/model/Decor.js"
+import type { DecorKind, DecorLight, DecorObject, DecorSide } from "../engine/model/Decor.js"
+import { DEFAULT_BUILDING_FLOORS, isLightOnAt } from "../engine/model/Decor.js"
 import type { RgbColor } from "./skyColors.js"
 
 const DEG_TO_RAD = Math.PI / 180
@@ -16,6 +16,10 @@ const DEG_TO_RAD = Math.PI / 180
  * PointLight at, without hardcoding which child index that is. */
 interface DecorMeshUserData {
   emissive: boolean
+  /** Set on a lamp built from DecorObject.lights — see DecorSystem.addLights. Lets setLights find
+   * its own mesh again per tick, and keeps setLit (which re-tints every OTHER emissive part as one)
+   * from repainting a navigation light the colour of a headlight. */
+  lightId?: string
 }
 
 function addPart(group: Group, geometry: BoxGeometry | ConeGeometry | CylinderGeometry | SphereGeometry, baseColor: RgbColor, y: number, emissive = false): Mesh {
@@ -30,6 +34,24 @@ function addPart(group: Group, geometry: BoxGeometry | ConeGeometry | CylinderGe
   mesh.receiveShadow = !emissive
   group.add(mesh)
   return mesh
+}
+
+/** The modelled radius of a declared lamp, before setLights scales it for distance. */
+const LAMP_RADIUS_M = 0.25
+/** The angular radius a lamp is never drawn smaller than: 0.07 degrees, so an ordinary navigation
+ * light spreads to about a seventh of the Moon's width and a wingtip strobe (four times the
+ * intensity, hence twice the radius) to about a quarter. Tuned by eye against what a bright point
+ * really blooms to at night rather than derived — the bulb's own size is not what anyone sees at
+ * these distances. See setLights. */
+const LAMP_MIN_ANGULAR_RADIUS_RAD = 0.0012
+
+/** `#rrggbb` to the 0-1 triple every material here takes. Falls back to white rather than throwing:
+ * a lamp of an unparseable colour should still light up. */
+function hexToRgb(hex: string): RgbColor {
+  const match = /^#([0-9a-f]{6})$/i.exec(hex)
+  if (!match) return [1, 1, 1]
+  const value = parseInt(match[1], 16)
+  return [((value >> 16) & 0xff) / 255, ((value >> 8) & 0xff) / 255, (value & 0xff) / 255]
 }
 
 const UNLIT_LAMP_COLOR: RgbColor = [0.32, 0.32, 0.3]
@@ -426,6 +448,25 @@ function buildWitness(): Group {
   return group
 }
 
+/** A narrow-body airliner's own dimensions, in meters — 35 m of span, 37 of length. Kept crude on
+ * purpose: at the distance an aircraft is mistaken for something else, its silhouette is a couple
+ * of pixels and it is the LIGHTS that make the image (see LightRig.ts). A real airframe belongs
+ * with the downloadable 3D models, not here. */
+const AIRCRAFT_HALF_SPAN = 17
+const AIRCRAFT_HALF_LENGTH = 18.5
+const AIRCRAFT_BODY_COLOR: RgbColor = [0.16, 0.16, 0.18]
+
+function buildAircraft(): Group {
+  const group = new Group()
+  const fuselage = addPart(group, new CylinderGeometry(1.8, 1.8, AIRCRAFT_HALF_LENGTH * 2, 10), AIRCRAFT_BODY_COLOR, 0)
+  // Cylinders stand up by default; an aeroplane lies along its own +z.
+  fuselage.rotation.x = Math.PI / 2
+  addPart(group, new BoxGeometry(AIRCRAFT_HALF_SPAN * 2, 0.5, 4.5), AIRCRAFT_BODY_COLOR, 0)
+  const fin = addPart(group, new BoxGeometry(0.4, 5.5, 4), AIRCRAFT_BODY_COLOR, 3)
+  fin.position.z = -AIRCRAFT_HALF_LENGTH + 2
+  return group
+}
+
 /**
  * Builds/lights the compound Three.js primitive objects for decor (buildings/trees/streetlights/
  * vehicles/other witnesses) — static methods, not an instance class: each call is a single,
@@ -477,9 +518,51 @@ export class DecorSystem {
             ? buildStreetlight(lit)
             : object.kind === "vehicle"
               ? buildVehicle(lit, object.windows, object.witnessSide)
-              : buildWitness()
+              : object.kind === "aircraft"
+                ? buildAircraft()
+                : buildWitness()
     if (object.headingDeg !== undefined) group.rotation.y = -object.headingDeg * DEG_TO_RAD
+    this.addLights(group, object.lights)
     return group
+  }
+
+  /** One small emissive sphere per declared lamp, at its own place on the body. Built dark: every
+   * one of them is switched by setLights on the very first tick, from the pattern it declares. */
+  private static addLights(group: Group, lights: DecorLight[] | undefined): void {
+    for (const light of lights ?? []) {
+      const mesh = addPart(group, new SphereGeometry(LAMP_RADIUS_M, 8, 6), hexToRgb(light.color), light.offsetM.y, true)
+      mesh.position.set(light.offsetM.x, light.offsetM.y, light.offsetM.z)
+      mesh.userData = { emissive: true, lightId: light.id } satisfies DecorMeshUserData
+      mesh.visible = false
+    }
+  }
+
+  /**
+   * Switches every declared lamp for the instant `t`, and sizes it for its distance.
+   *
+   * A real navigation light is a point: at three kilometres its bulb subtends far less than a
+   * pixel, and rendering it true to size would make an aircraft that is plainly visible in life
+   * disappear here. What the eye and the sensor actually see at that range is not the bulb but its
+   * glare, whose size comes from the optics rather than from the lamp — so the mesh is scaled to
+   * hold a constant small ANGLE instead of a constant size, which is the same argument (and the
+   * same remedy) as the floor already applied to the planets in SceneRenderer.
+   *
+   * `distanceM` is measured to the object as a whole; a wingtip is not meaningfully further away
+   * than a tail at any distance where this matters.
+   */
+  static setLights(group: Group, lights: DecorLight[] | undefined, t: number, distanceM: number): void {
+    if (!lights || lights.length === 0) return
+    const byId = new Map(lights.map(light => [light.id, light]))
+    const scale = Math.max(1, (distanceM * LAMP_MIN_ANGULAR_RADIUS_RAD) / LAMP_RADIUS_M)
+    for (const child of group.children) {
+      if (!(child instanceof Mesh)) continue
+      const lightId = (child.userData as DecorMeshUserData).lightId
+      if (!lightId) continue
+      const light = byId.get(lightId)
+      if (!light) continue
+      child.visible = isLightOnAt(light, t)
+      child.scale.setScalar(scale * (light.intensity ?? 1) ** 0.5)
+    }
   }
 
   /** Re-tints a streetlight's lamp head / vehicle's headlights in place when their lit state
@@ -491,7 +574,10 @@ export class DecorSystem {
   static setLit(group: Group, kind: DecorKind, lit: boolean): void {
     const color = kind === "streetlight" ? (lit ? LIT_LAMP_COLOR : UNLIT_LAMP_COLOR) : lit ? LIT_HEADLIGHT_COLOR : UNLIT_HEADLIGHT_COLOR
     for (const child of group.children) {
-      if (!(child instanceof Mesh) || !(child.userData as DecorMeshUserData).emissive) continue
+      const data = child.userData as DecorMeshUserData
+      // A declared lamp keeps its own regulated colour — a red port light must not be repainted
+      // the warm white of a headlight just because both are emissive.
+      if (!(child instanceof Mesh) || !data.emissive || data.lightId) continue
       ;(child.material as MeshBasicMaterial).color.setRGB(...color)
     }
   }

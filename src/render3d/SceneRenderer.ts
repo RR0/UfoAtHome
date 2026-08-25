@@ -72,7 +72,7 @@ import type { ProjectionKind } from "../engine/instrument/Instrument.js"
 import type { LensFlareSystem } from "./LensFlareEffect.js"
 import { DecorSystem } from "./DecorSystem.js"
 import type { DecorObject } from "../engine/model/Decor.js"
-import { resolveDecorLitAt, canHoldWitness } from "../engine/model/Decor.js"
+import { resolveDecorLitAt, resolveDecorPlacementAt, canHoldWitness } from "../engine/model/Decor.js"
 
 /** Plain field-by-field comparison — see setWeather's own doc comment on why reference equality
  * stopped being enough once weather started being resolved fresh every tick from a keyframe
@@ -1071,7 +1071,7 @@ export class SceneRenderer {
    * (straight out through the chosen window); indoorLookYawDeg/indoorLookPitchDeg (see
    * setIndoorLook) are added on top so the witness can still turn their head to see the room's
    * other walls/floor/ceiling, not just whatever's directly ahead through that one window. */
-  updateDecorAnchoring(referencePose: ObserverPose | undefined, currentPose: ObserverPose | undefined): void {
+  updateDecorAnchoring(referencePose: ObserverPose | undefined, currentPose: ObserverPose | undefined, t = 0): void {
     const offset =
       referencePose?.lat !== undefined && referencePose.lng !== undefined && currentPose?.lat !== undefined && currentPose?.lng !== undefined
         ? geoToLocalMeters(referencePose.lat, referencePose.lng, currentPose.lat, currentPose.lng)
@@ -1097,7 +1097,17 @@ export class SceneRenderer {
     for (const object of this.decorObjects) {
       const group = this.decorGroups.get(object.id)
       if (!group) continue
-      group.position.set(object.eastM + offset.x + shift.x, DECOR_GROUND_Y, -object.northM + offset.z + shift.z)
+      // Resolved rather than read straight off the object: scenery stays where it was put, but an
+      // aircraft crossing the sky or a car driving past states a whole track (see
+      // resolveDecorPlacementAt). Altitude joins the two horizontal axes here — it is the one thing
+      // ground-bound scenery never needed and a flying object cannot do without.
+      const placement = resolveDecorPlacementAt(object, t)
+      group.position.set(
+        placement.eastM + offset.x + shift.x,
+        DECOR_GROUND_Y + placement.altitudeM,
+        -placement.northM + offset.z + shift.z
+      )
+      if (placement.headingDeg !== undefined) group.rotation.y = -placement.headingDeg * DEG_TO_RAD
     }
   }
 
@@ -1126,6 +1136,13 @@ export class SceneRenderer {
    * doesn't change, only whether it's currently switched on. */
   updateDecorLitState(t: number): void {
     for (const object of this.decorObjects) {
+      const lampGroup = this.decorGroups.get(object.id)
+      // Declared lamps first, and for every kind: an aircraft's strobes, a car's hazards, a
+      // streetlamp. Sized against the group's own distance from the camera — see
+      // DecorSystem.setLights on why a point source cannot be drawn true to size.
+      if (lampGroup && object.lights?.length) {
+        DecorSystem.setLights(lampGroup, object.lights, t, lampGroup.position.distanceTo(this.camera.position))
+      }
       if (object.kind !== "streetlight" && object.kind !== "vehicle") continue
       const group = this.decorGroups.get(object.id)
       if (!group) continue

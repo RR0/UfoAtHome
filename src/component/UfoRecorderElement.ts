@@ -7,6 +7,7 @@ import { createShape, moveShapeTo } from "../engine/shape/Shape.js"
 import { ApparentSize } from "../engine/shape/ApparentSize.js"
 import { ImageProjection } from "../engine/instrument/ImageProjection.js"
 import { INSTRUMENTS } from "../engine/instrument/Instrument.js"
+import { LightRigs } from "../engine/model/LightRig.js"
 import { SightingShapes } from "../engine/persistence/SightingShapes.js"
 import type { Appearance, PolygonShape, Shape, ShapeBounds, ShapePresetId } from "../engine/shape/Shape.js"
 import { ShapeHandles, ShapeGroup, MIN_SHAPE_SIZE, MIN_POLYGON_VERTICES } from "../engine/shape/ShapeHandles.js"
@@ -390,6 +391,10 @@ export class UfoRecorderElement extends HTMLElement {
   private readonly decorNorthInput: HTMLInputElement
   private readonly decorHeadingInput: HTMLInputElement
   private readonly decorLitInput: HTMLInputElement
+  /** Which set of lamps the selected decor object carries — see LightRig.ts. Rebuilt for each
+   * selection, since the rigs that make sense on a tree are not the ones that make sense on an
+   * aircraft. */
+  private readonly decorLightRigSelect: HTMLSelectElement
   private readonly decorSightingUrlInput: HTMLInputElement
   private readonly decorFloorsInput: HTMLInputElement
   private readonly decorOccupiedFloorInput: HTMLInputElement
@@ -422,6 +427,8 @@ export class UfoRecorderElement extends HTMLElement {
   private readonly optionDecorTree: HTMLElement
   private readonly optionDecorStreetlight: HTMLElement
   private readonly optionDecorVehicle: HTMLElement
+  private readonly optionDecorAircraft: HTMLElement
+  private readonly labelDecorLights: HTMLElement
   private readonly optionDecorWitness: HTMLElement
 
   private recorder?: Recorder
@@ -750,6 +757,7 @@ export class UfoRecorderElement extends HTMLElement {
     this.decorNorthInput = this.shadow.getElementById("decorNorth") as HTMLInputElement
     this.decorHeadingInput = this.shadow.getElementById("decorHeading") as HTMLInputElement
     this.decorLitInput = this.shadow.getElementById("decorLit") as HTMLInputElement
+    this.decorLightRigSelect = this.shadow.getElementById("decorLightRig") as HTMLSelectElement
     this.decorSightingUrlInput = this.shadow.getElementById("decorSightingUrl") as HTMLInputElement
     this.decorFloorsInput = this.shadow.getElementById("decorFloors") as HTMLInputElement
     this.decorOccupiedFloorInput = this.shadow.getElementById("decorOccupiedFloor") as HTMLInputElement
@@ -801,6 +809,8 @@ export class UfoRecorderElement extends HTMLElement {
     this.optionDecorTree = this.shadow.getElementById("option-decor-tree")!
     this.optionDecorStreetlight = this.shadow.getElementById("option-decor-streetlight")!
     this.optionDecorVehicle = this.shadow.getElementById("option-decor-vehicle")!
+    this.optionDecorAircraft = this.shadow.getElementById("option-decor-aircraft")!
+    this.labelDecorLights = this.shadow.getElementById("label-decor-lights")!
     this.optionDecorWitness = this.shadow.getElementById("option-decor-witness")!
 
     this.ufoElement.canvasElement.addEventListener("pointerdown", event => {
@@ -884,6 +894,7 @@ export class UfoRecorderElement extends HTMLElement {
     // records it at the current playhead, same "at the current instant" idiom as
     // applyWeatherAtPlayhead/updateObserver.
     this.decorLitInput.addEventListener("input", () => this.updateDecorLit())
+    this.decorLightRigSelect.addEventListener("change", () => this.updateDecorLightRig())
     // The single funnel for "the recording changed, a consumer composing this element (e.g. a
     // live <rr0-scene> preview) should resync" — refresh() (called after every mutation: shape
     // edits, drag, observer/time edits, duration) always ends in a timeupdate on the *nested*
@@ -2741,6 +2752,12 @@ export class UfoRecorderElement extends HTMLElement {
       northM: 15,
       headingDeg: 0,
       lit: false,
+      // An aircraft placed 15 m away on the ground would just look broken. It starts as what it
+      // actually is: a crossing, at a cruising altitude, with the lights an airliner is required
+      // to carry — which is the whole reason to have one in a scene. Every number of it is then
+      // editable, and none of it is testimony (see the Decor group's own doc): this is a
+      // hypothesis about what the witness might have been looking at.
+      ...(kind === "aircraft" ? this.defaultAircraft() : {}),
       // Only a building has floors at all — see DecorObject.floors's own doc comment.
       ...(kind === "building" ? { floors: DEFAULT_BUILDING_FLOORS } : {}),
       // undefined (spread as a no-op) for a kind with no windows at all — see defaultWindows.
@@ -2750,6 +2767,24 @@ export class UfoRecorderElement extends HTMLElement {
     this.currentDecorId = decor.id
     this.refreshDecorList()
     this.ufoElement.refresh()
+  }
+
+  /** A straight, level pass in front of the witness, at the rate and altitude an airliner really
+   * flies: 3 km up, crossing 8 km of sky over the recording's own length. At 20 seconds that is
+   * about 1400 km/h, which is too fast — but a recording is rarely as long as a real pass, and an
+   * author who knows the aircraft edits the track. What matters here is that it MOVES, since a
+   * flash rate with no motion draws all its dots in one place. */
+  private defaultAircraft(): Partial<DecorObject> {
+    const timeline = this.ufoElement.sighting.timeline
+    const recorded = timeline.allKeyframes[timeline.allKeyframes.length - 1]?.t ?? 0
+    const durationMs = Math.max((this.ufoElement.durationSeconds ?? 0) * 1000, recorded, 1000)
+    return {
+      lights: LightRigs.byId("airliner")?.create(),
+      track: [
+        { t: 0, eastM: -4000, northM: 3000, altitudeM: 3000, headingDeg: 90 },
+        { t: durationMs, eastM: 4000, northM: 3000, altitudeM: 3000, headingDeg: 90 }
+      ]
+    }
   }
 
   /** The "{kind} {n}" label a freshly added decor object of this kind starts with — same
@@ -2934,7 +2969,8 @@ export class UfoRecorderElement extends HTMLElement {
       this.decorSightingUrlInput,
       this.decorFloorsInput,
       this.decorOccupiedFloorInput,
-      this.decorWitnessSideSelect
+      this.decorWitnessSideSelect,
+      this.decorLightRigSelect
     ]) {
       input.disabled = !hasSelection
     }
@@ -2943,6 +2979,7 @@ export class UfoRecorderElement extends HTMLElement {
     this.decorNorthInput.value = String(decor?.northM ?? 0)
     this.decorHeadingInput.value = String(decor?.headingDeg ?? 0)
     this.decorLitInput.checked = decor ? resolveDecorLitAt(decor, this.ufoElement.currentTime) : false
+    this.refreshDecorLightRigOptions(decor)
     this.decorSightingUrlInput.value = decor?.sightingUrl ?? ""
     this.decorFloorsInput.value = String(decor?.floors ?? DEFAULT_BUILDING_FLOORS)
     this.decorOccupiedFloorInput.value = String(decor?.occupiedFloor ?? 0)
@@ -3024,6 +3061,44 @@ export class UfoRecorderElement extends HTMLElement {
     this.setRowVisible(this.decorFloorsInput, showFloors)
     this.setRowVisible(this.decorOccupiedFloorInput, showFloors)
     this.decorOccupiedFloorInput.max = String(decor?.floors ?? DEFAULT_BUILDING_FLOORS)
+  }
+
+  /** Offers the rigs that make sense on this object's kind, plus "none" — see LightRigs.forKind.
+   * Selects whichever rig the object's own lamps came from, matched by their ids, so reopening a
+   * saved recording shows what it actually carries rather than resetting the picker. */
+  private refreshDecorLightRigOptions(decor: DecorObject | undefined): void {
+    const rigs = decor ? LightRigs.forKind(decor.kind) : []
+    const none = document.createElement("option")
+    none.value = ""
+    none.textContent = this.messages.decorLightsNone
+    this.decorLightRigSelect.replaceChildren(
+      none,
+      ...rigs.map(rig => {
+        const option = document.createElement("option")
+        option.value = rig.id
+        option.textContent = rig.name
+        return option
+      })
+    )
+    const carried = decor?.lights?.map(light => light.id).join() ?? ""
+    this.decorLightRigSelect.value = rigs.find(rig => rig.create().map(l => l.id).join() === carried)?.id ?? ""
+  }
+
+  /** Fits the chosen rig to the selected object, or strips its lamps for "none".
+   *
+   * Replaces the whole decor array rather than mutating in place: the lamps are built INTO the
+   * object's 3D group (see DecorSystem.addLights), so the scene has to rebuild it, and it only
+   * does that when the array's own identity changes (see SceneRenderer.setDecor). */
+  private updateDecorLightRig(): void {
+    const sighting = this.ufoElement.sighting
+    const decor = sighting.decor.find(object => object.id === this.currentDecorId)
+    if (!decor) return
+    const rig = LightRigs.byId(this.decorLightRigSelect.value)
+    sighting.decor = sighting.decor.map(object =>
+      object.id === decor.id ? { ...object, lights: rig ? rig.create() : undefined } : object
+    )
+    this.ufoElement.refresh()
+    this.dispatchEvent(new CustomEvent("sightingchange"))
   }
 
   /** Keeps the Lit checkbox honest as the playhead moves or a different keyframe region is
@@ -3192,6 +3267,8 @@ export class UfoRecorderElement extends HTMLElement {
     this.optionDecorTree.textContent = messages.decorTree
     this.optionDecorStreetlight.textContent = messages.decorStreetlight
     this.optionDecorVehicle.textContent = messages.decorVehicle
+    this.optionDecorAircraft.textContent = messages.decorAircraft
+    this.labelDecorLights.textContent = messages.decorLights
     this.optionDecorWitness.textContent = messages.decorWitness
     this.deleteDecorButton.title = messages.deleteDecor
     this.deleteDecorButton.setAttribute("aria-label", messages.deleteDecor)

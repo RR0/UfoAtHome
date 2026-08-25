@@ -56,7 +56,8 @@ const DECOR_KIND_NAMES: Record<DecorKind, { en: string; fr: string }> = {
   tree: { en: "Tree", fr: "Arbre" },
   streetlight: { en: "Streetlight", fr: "Lampadaire" },
   vehicle: { en: "Vehicle", fr: "Véhicule" },
-  witness: { en: "Witness", fr: "Témoin" }
+  witness: { en: "Witness", fr: "Témoin" },
+  aircraft: { en: "Aircraft", fr: "Aéronef" }
 }
 
 /** Where the star catalog asset (see scripts/build-star-catalog.ts) is fetched from by default —
@@ -472,7 +473,7 @@ export class SceneElement extends HTMLElement {
     // Keeps decor anchored to its own real-world spot rather than sliding along with a moving
     // witness — see SceneRenderer.updateDecorAnchoring's own doc comment. The reference pose is
     // always the recording's own t=0, regardless of what t is being rendered right now.
-    this.sceneRenderer.updateDecorAnchoring(resolveObserverPoseAt(sighting, 0), pose)
+    this.sceneRenderer.updateDecorAnchoring(resolveObserverPoseAt(sighting, 0), pose, t)
     // A streetlight/vehicle's own lit state can change mid-recording (a photocell at dusk, a
     // driver's headlights) — see Decor.ts's own resolveDecorLitAt.
     this.sceneRenderer.updateDecorLitState(t)

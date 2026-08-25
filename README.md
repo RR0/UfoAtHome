@@ -534,6 +534,33 @@ at 90m is 13px wide, not the 90px an author reaches for unaided. That is why the
 fields exist: type a hypothesis, get the angle it implies on the canvas, and the meters are forgotten the moment
 they have been applied. They are an authoring aid, never testimony.
 
+### Decor that moves, and lights that blink
+
+`DecorObject` is scenery whose position is known, and two things it can now also be:
+
+- **`track`** — where it is over time, altitude included. Scenery stays put; an aircraft crossing the sky or a car
+  driving past states a few keyframes and `resolveDecorPlacementAt` interpolates between them (heading is *held*,
+  not blended: nothing here knows which way round a turn was flown).
+- **`lights`** — its individual lamps, each with a place on the body, a colour, and a **pattern**: steady, or
+  flashing at `perMinute` with a `dutyCycle` and a `phase`. A square wave, never a fade.
+
+The rates are real and regulated — aircraft anticollision lights flash 40–100 times a minute, road-vehicle hazard
+flashers 60–120 — and `LIGHT_RIGS` (`src/engine/model/LightRig.ts`) holds ready-made sets: airliner, helicopter,
+car headlights, car hazards, emergency beacons, streetlamp. A catalogue of specific aircraft is more entries there,
+never more code. Nothing about this is aircraft-specific: what dots a long exposure for an airliner's beacon dots
+it for a car's hazards too, at a different rate.
+
+That rate is the point. On a long exposure the spacing of the dots along a streak is the flash rate times the
+object's angular speed, which is exactly how a photograph of a passing airliner is told from a photograph of
+something that does not blink — and it is why the model exposes `lightOnFractionBetween` rather than only "is it
+on?". A wingtip strobe is lit for a hundredth of its cycle; sampled instant by instant it would be missed almost
+every time, and the dots that did appear would be an artefact of the sampling rate. Integrating the fraction of
+each interval is exact however coarsely it is sampled.
+
+An aircraft in a scene is a **hypothesis**, not testimony — "here is what a flight at that altitude and heading
+would have looked like" — and belongs to the decor for that reason, next to the buildings and trees whose
+positions are likewise known rather than reported.
+
 ### Instrument — an eye is not a lens
 
 `instrument` says what the observation was made through, and it changes the geometry of every frame.
