@@ -50,6 +50,15 @@ describe("MeteorFall", () => {
     }
   })
 
+  it("draws streaks of the length a shower meteor really has", () => {
+    // The trap this guards: a plausible-looking formula gave trails of a couple of degrees, which
+    // render as a dozen pixels — a speck rather than the streak anybody would call a meteor.
+    const wellOffRadiant = MeteorFall.schedule(perseidNight).filter(m => m.fromRadiantDeg > 40)
+    const mean = wellOffRadiant.reduce((sum, m) => sum + m.lengthDeg, 0) / wellOffRadiant.length
+    expect(mean).toBeGreaterThan(8)
+    expect(mean).toBeLessThan(30)
+  })
+
   it("makes most of them faint, as the sky does", () => {
     const meteors = MeteorFall.schedule(perseidNight)
     const bright = meteors.filter(m => m.brightness > 0.5).length

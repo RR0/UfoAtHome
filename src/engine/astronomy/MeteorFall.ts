@@ -98,8 +98,11 @@ export class MeteorFall {
         fromRadiantDeg,
         bearingDeg: rng.between(0, 360),
         // A trail grows with how far off the radiant it is — one seen edge-on sweeps the sky, one
-        // near the radiant barely moves — and with how fast the thing is going.
-        lengthDeg: Math.sin((fromRadiantDeg * Math.PI) / 180) * rng.between(3, 18) * (0.6 + speedFactor),
+        // near the radiant barely moves — and with how fast the thing is going. The range gives 5
+        // to 25 degrees for a meteor well off its radiant, which is what a shower meteor really
+        // draws; a first attempt at a third of this produced trails a dozen pixels long, which is
+        // a speck and not a streak.
+        lengthDeg: Math.sin((fromRadiantDeg * Math.PI) / 180) * rng.between(8, 40) * (0.6 + speedFactor),
         // Skewed hard toward the faint: cubing a uniform draw is a crude stand-in for the real
         // magnitude distribution, and errs the way the sky does.
         brightness: rng.next() ** 3
