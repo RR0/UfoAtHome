@@ -161,6 +161,11 @@ export const html = `
       <label><input id="weatherInferred" type="checkbox" checked/> <span id="label-weather-inferred">From weather records</span></label>
       <output id="weather-source" class="weather-source" for="lat lng obs-time"><span id="weather-source-text"></span><span id="weather-source-row" class="inline-source" hidden></span><a id="weather-source-link" target="_blank" rel="noopener noreferrer" hidden></a></output>
     </div>
+    <!-- Not testimony either, and not even a lookup: a meteor shower is a position in the Earth's
+         own orbit, so the date alone decides it. Read-only on purpose — it states what else was in
+         that patch of sky, and whether that explains anything is the reader's conclusion, never the
+         file's claim. See MeteorShowers.ts. -->
+    <output id="sky-candidates" class="weather-source" for="lat lng obs-time"></output>
     <span id="label-weather">Weather</span>
     <label><span id="label-cloud-cover">Cloud cover</span> <input id="cloudCover" class="weather-field" type="range" min="0" max="1" step="0.05" value="0"/></label>
     <label><span id="label-cloud-darkness">Cloud darkness</span> <input id="cloudDarkness" class="weather-field" type="range" min="0" max="1" step="0.05" value="0"/></label>

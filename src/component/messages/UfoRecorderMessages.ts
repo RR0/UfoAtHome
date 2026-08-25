@@ -246,6 +246,18 @@ export interface UfoRecorderMessages {
    * which is all ordinary scenery; an aircraft is the reason it exists. Setting it on an object
    * that has no trajectory gives it one, of a single instant — see UfoRecorderElement.updateDecor. */
   decorAltitude: string
+  /** What else was in that sky, from the date and the place alone — see MeteorShowers.ts.
+   * {name} is the shower, {rate} how many an observer would really have seen per hour, {altitude}
+   * the radiant's own height above the horizon. */
+  skyShowerActive: string
+  /** Same, for a shower whose radiant had not risen: it cannot have produced anything, which is
+   * worth saying as loudly as the opposite. */
+  skyShowerBelowHorizon: string
+  /** No shower running at all on that date. */
+  skyNothingActive: string
+  /** The date or the place is missing, so nothing can be worked out — distinct from "there was
+   * nothing", the same way the weather distinguishes the two. */
+  skyUnknown: string
   /** Turns the witness to face the selected decor object — the only practical way to find an
    * aircraft in an otherwise empty sky. */
   lookAtDecor: string

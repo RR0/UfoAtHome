@@ -8,6 +8,7 @@ import { ApparentSize } from "../engine/shape/ApparentSize.js"
 import { ImageProjection } from "../engine/instrument/ImageProjection.js"
 import { INSTRUMENTS } from "../engine/instrument/Instrument.js"
 import { LightRigs } from "../engine/model/LightRig.js"
+import { MeteorShowers } from "../engine/astronomy/MeteorShowers.js"
 import { resolveDecorPlacementAt } from "../engine/model/Decor.js"
 import { SightingShapes } from "../engine/persistence/SightingShapes.js"
 import type { Appearance, PolygonShape, Shape, ShapeBounds, ShapePresetId } from "../engine/shape/Shape.js"
@@ -277,6 +278,8 @@ export class UfoRecorderElement extends HTMLElement {
   private readonly stormInput: HTMLInputElement
   private readonly weatherInferredInput: HTMLInputElement
   private readonly weatherSourceText: HTMLElement
+  /** What else was in that sky — see refreshSkyCandidates. */
+  private readonly skyCandidatesOutput: HTMLElement
   private readonly weatherSourceLink: HTMLAnchorElement
   /** Every field the weather record itself provides — the ones locked while it does, and the ones
    * whose edits write a keyframe while it doesn't. Excludes Light intensity, which sits in the
@@ -672,6 +675,7 @@ export class UfoRecorderElement extends HTMLElement {
     this.stormInput = this.shadow.getElementById("storm") as HTMLInputElement
     this.weatherInferredInput = this.shadow.getElementById("weatherInferred") as HTMLInputElement
     this.weatherSourceText = this.shadow.getElementById("weather-source-text")!
+    this.skyCandidatesOutput = this.shadow.getElementById("sky-candidates")!
     this.weatherSourceLink = this.shadow.getElementById("weather-source-link") as HTMLAnchorElement
     this.weatherFields = [
       this.cloudCoverInput,
@@ -2362,6 +2366,7 @@ export class UfoRecorderElement extends HTMLElement {
     // playhead visits can tighten it (see SceneElement.sizeRangeOf). Refreshed from here so the
     // author watches it narrow as the object goes behind the first building.
     this.refreshRealSize()
+    this.refreshSkyCandidates()
     this.ufoElement.selectedSourceIds = this.selectedSourceIds
     // Disabled once deleting the whole selection would leave nothing behind (a recording always
     // needs at least one shape — see deleteShape()'s own doc comment), for a source that's only a
@@ -3155,6 +3160,68 @@ export class UfoRecorderElement extends HTMLElement {
   private syncDecorPlacementFromTimeline(): void {
     if (this.ufoElement.playbackState === "playing") return
     this.showDecorPlacement(this.ufoElement.sighting.decor.find(object => object.id === this.currentDecorId))
+  }
+
+  /** Which of a shower's own names to use — the reader's, resolved the same way every other label
+   * in this element is. */
+  private showerLanguage(): "en" | "fr" {
+    return selectLocale(navigator.languages, ["en", "fr"]) as "en" | "fr"
+  }
+
+  /**
+   * States what else was in that patch of sky, worked out from the date and the place alone.
+   *
+   * The one candidate explanation whose record is complete for every case this project can
+   * reconstruct: a meteor shower is a position in the Earth's own orbit, so the Perseids of 1948
+   * are the Perseids of today (see MeteorShowers.ts). No lookup, no coverage floor, no network.
+   *
+   * Read-only, and deliberately so. It says what was there; whether it explains the sighting is the
+   * reader's conclusion and never the file's claim. An author who wants to put a shower IN a
+   * reconstruction still does it by hand, the same way an aircraft is placed by hand — which is
+   * also what happens for every candidate whose record does not go back far enough.
+   *
+   * The strongest thing it can say is the negative one: a radiant below the horizon is a shower
+   * that cannot have produced anything, whatever its rate on paper.
+   */
+  private refreshSkyCandidates(): void {
+    const sighting = this.ufoElement.sighting
+    const place = sighting.event.place?.[0]
+    const time = sighting.event.time
+    if (!place || place.lat === undefined || place.lng === undefined || time?.year === undefined) {
+      this.skyCandidatesOutput.textContent = this.messages.skyUnknown
+      return
+    }
+    // Undefined when the stated time cannot be resolved at all — the same "we couldn't ask"
+    // rather than "there was nothing" distinction the weather makes.
+    const date = sightingTimeToDate(time, place.lng, sighting.event.utcOffsetHours)
+    if (!date) {
+      this.skyCandidatesOutput.textContent = this.messages.skyUnknown
+      return
+    }
+    const active = MeteorShowers.activeAt(date)
+    if (active.length === 0) {
+      this.skyCandidatesOutput.textContent = this.messages.skyNothingActive
+      return
+    }
+    const observer = { lat: place.lat, lng: place.lng, elevationM: this.groundElevationM ?? 0 }
+    // The strongest shower running, by what would ACTUALLY have been seen rather than by its
+    // reputation: a famous shower with its radiant near the horizon yields less than a modest one
+    // overhead, and that is the whole point of the correction.
+    const rated = active
+      .map(entry => {
+        const position = MeteorShowers.radiantPosition(entry.shower, date, observer)
+        return { entry, position, rate: MeteorShowers.observedRatePerHour(entry.zhr, position.altitudeDeg, entry.shower.populationIndex) }
+      })
+      .sort((a, b) => b.rate - a.rate)
+    const best = rated[0]
+    if (best.rate <= 0) {
+      this.skyCandidatesOutput.textContent = this.messages.skyShowerBelowHorizon.replace("{name}", best.entry.shower.name[this.showerLanguage()])
+      return
+    }
+    this.skyCandidatesOutput.textContent = this.messages.skyShowerActive
+      .replace("{name}", best.entry.shower.name[this.showerLanguage()])
+      .replace("{altitude}", String(Math.round(best.position.altitudeDeg)))
+      .replace("{rate}", best.rate.toLocaleString(undefined, { maximumFractionDigits: best.rate < 10 ? 1 : 0 }))
   }
 
   /** One decimal, so a placement read back from an interpolated trajectory doesn't fill the field
