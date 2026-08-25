@@ -68,6 +68,8 @@ import { buildCloudGeometry, buildCloudMaterial } from "./CloudSystem.js"
 import type { CloudUniforms } from "./CloudSystem.js"
 import { buildLensFlare } from "./LensFlareEffect.js"
 import { EquidistantProjectionPass } from "./EquidistantProjectionPass.js"
+import { MeteorSystem } from "./MeteorSystem.js"
+import type { Meteor } from "../engine/astronomy/MeteorFall.js"
 import type { ProjectionKind } from "../engine/instrument/Instrument.js"
 import type { LensFlareSystem } from "./LensFlareEffect.js"
 import { DecorSystem } from "./DecorSystem.js"
@@ -714,6 +716,9 @@ export class SceneRenderer {
   /** Built on first equidistant frame and kept — a render target is not worth allocating for a
    * recording made through a lens, which is most of them once real photographs are in. */
   private equidistantPass?: EquidistantProjectionPass
+  /** The shower falling in this sky, if any — see MeteorSystem. Built once and kept: an empty
+   * shower draws nothing, so there is no reason to tear it down between recordings. */
+  private meteorSystem?: MeteorSystem
   private readonly onLightningFlash?: () => void
 
   constructor(
@@ -1246,6 +1251,28 @@ export class SceneRenderer {
     const altitudeFactor = Math.max(0, Math.sin(Math.max(body.altitudeDeg, 0) * DEG_TO_RAD))
     this.celestialLight.intensity = (useSun ? SUN_LIGHT_INTENSITY : MOON_LIGHT_INTENSITY) * altitudeFactor
     this.celestialLight.castShadow = this.decorGroups.size > 0
+  }
+
+  /**
+   * The meteor shower falling in this sky, and where its radiant stands.
+   *
+   * Pushed rather than computed here: which shower is running follows from the sighting's own date
+   * and place (see MeteorShowers), which this renderer knows nothing about — the same division as
+   * the Sun and the planets, whose positions arrive through setAstronomy.
+   */
+  setMeteorShower(meteors: Meteor[], radiantAltitudeDeg: number, radiantAzimuthDeg: number): void {
+    if (!this.meteorSystem) {
+      this.meteorSystem = new MeteorSystem()
+      // In the celestial group, so it follows the witness's own eye height like the stars do.
+      this.celestialGroup.add(this.meteorSystem.object)
+    }
+    this.meteorSystem.setShower(meteors, radiantAltitudeDeg, radiantAzimuthDeg)
+  }
+
+  /** Places the shower at the recording's own instant. Driven by the recording's clock and never by
+   * a wall clock, so a paused scene freezes — the rule the whole scene follows. */
+  updateMeteors(t: number): void {
+    this.meteorSystem?.update(t)
   }
 
   /** Declares what the observation was made through. Changing it changes the geometry of every

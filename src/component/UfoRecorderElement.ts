@@ -57,6 +57,8 @@ import type { DataSource } from "../engine/source/DataSource.js"
 import type { PlaceMatch, PlaceProvider } from "../engine/place/PlaceProvider.js"
 import { sightingTimeToDate } from "../engine/astronomy/CelestialPositions.js"
 import { selectLocale } from "../i18n/locale.js"
+import { TIME_ZONE_SOURCES } from "../engine/time/timeZoneSources.js"
+import type { TimeZoneProvider } from "../engine/time/TimeZoneProvider.js"
 import { loadUfoRecorderMessages, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
 import type { UfoLanguage } from "./messages/index.js"
 import { ufoRecorderMessages_en } from "./messages/UfoRecorderMessages_en.js"
@@ -182,6 +184,17 @@ export class UfoRecorderElement extends HTMLElement {
    * apparentSizeOutput reads back what they actually produce. */
   private readonly utcOffsetInput: HTMLInputElement
   private readonly timeZoneSelect: HTMLSelectElement
+  /** Which service is asked what legal zone a place falls in — see TimeZoneProvider. */
+  private readonly timeZoneProvider: TimeZoneProvider = TIME_ZONE_SOURCES[0].create()
+  private timeZoneLookupTimer?: ReturnType<typeof setTimeout>
+  /** The coordinates the last zone lookup was made for, so moving within the same spot doesn't
+   * ask again — same guard as schedulePlaceReverse's own namedCoordinates. */
+  private timeZoneLookedUpAt?: { lat: number; lng: number }
+  /** The zone this element filled in itself, as opposed to one the author picked. Only its own
+   * answer may be replaced when the place moves — what the author states outranks what a service
+   * infers, the same rule the weather follows, and without this marker the two are
+   * indistinguishable. In memory only: a saved file records the zone, not who chose it. */
+  private autoFilledTimeZone?: string
   private readonly timeZones = new TimeZones()
   private readonly objectSizeInput: HTMLInputElement
   private readonly objectDistanceInput: HTMLInputElement
@@ -993,7 +1006,11 @@ export class UfoRecorderElement extends HTMLElement {
       this.sceneElement.setAttribute("lens-flare-intensity", this.cameraDeviceInput.value)
     )
     this.utcOffsetInput.addEventListener("input", () => this.updateUtcOffset())
-    this.timeZoneSelect.addEventListener("change", () => this.updateTimeZone())
+    this.timeZoneSelect.addEventListener("change", () => {
+      // Picked by hand: from here on it is the author's, and moving the place no longer touches it.
+      this.autoFilledTimeZone = undefined
+      this.updateTimeZone()
+    })
     this.obsTimeInput.addEventListener("input", () => this.updateObservationTime())
     this.obsEndTimeInput.addEventListener("input", () => this.updateObservationEndTime())
     this.obsTimeInput.addEventListener("blur", () => this.validateEdtfTimeInput(this.obsTimeInput))
@@ -1400,6 +1417,46 @@ export class UfoRecorderElement extends HTMLElement {
     this.placeReverseTimer = setTimeout(() => void this.reversePlace(lat, lng), PLACE_REVERSE_DEBOUNCE_MS)
   }
 
+  /**
+   * Asks which legal time zone the witness's own coordinates fall in, and picks it.
+   *
+   * A place decides a zone — nobody states "Europe/Paris" by hand when they have already said
+   * Valensole — and until now the picker sat on "manual" while the offset had to be typed. What is
+   * looked up is the zone's IDENTIFIER and nothing else: the offset for the observation's own date
+   * is then worked out from that zone's own historical rules (see TimeZones.offsetHoursAt), which
+   * is the only way a 1965 sighting comes out at +1 rather than at whatever France is doing this
+   * week.
+   *
+   * Never overwrites a zone already chosen — the same rule the weather follows: what the author
+   * has stated outranks what a service would infer. Debounced, and skipped for a move too small to
+   * change the answer.
+   */
+  private scheduleTimeZoneLookup(): void {
+    const lat = this.numberOrUndefined(this.latInput.value)
+    const lng = this.numberOrUndefined(this.lngInput.value)
+    if (lat === undefined || lng === undefined) return
+    const stated = this.ufoElement.sighting.event.timeZone
+    if (stated && stated !== this.autoFilledTimeZone) return
+    const previous = this.timeZoneLookedUpAt
+    if (previous && Math.abs(lat - previous.lat) < SAME_PLACE_DEG && Math.abs(lng - previous.lng) < SAME_PLACE_DEG) return
+    clearTimeout(this.timeZoneLookupTimer)
+    this.timeZoneLookupTimer = setTimeout(() => void this.lookUpTimeZone(lat, lng), PLACE_REVERSE_DEBOUNCE_MS)
+  }
+
+  private async lookUpTimeZone(lat: number, lng: number): Promise<void> {
+    this.timeZoneLookedUpAt = { lat, lng }
+    const zone = await this.timeZoneProvider.zoneAt(lat, lng)
+    // Re-checked after the await, not only before it: the author may have picked one meanwhile, and
+    // a service's answer must never win over a stated one.
+    const stated = this.ufoElement.sighting.event.timeZone
+    if (!zone || (stated && stated !== this.autoFilledTimeZone)) return
+    if (!this.timeZones.available().includes(zone)) return
+    this.autoFilledTimeZone = zone
+    this.timeZoneSelect.value = zone
+    this.updateTimeZone()
+    this.dispatchEvent(new CustomEvent("sightingchange"))
+  }
+
   private async reversePlace(lat: number, lng: number): Promise<void> {
     const token = ++this.placeSearchToken
     let match: PlaceMatch | undefined
@@ -1479,6 +1536,9 @@ export class UfoRecorderElement extends HTMLElement {
     this.scheduleWeatherLookup()
     // ...and moves them out of the place whose name is on display — see schedulePlaceReverse.
     this.schedulePlaceReverse()
+    // ...and into a different country's clocks, which is what the observation's own hour is read
+    // against — see scheduleTimeZoneLookup.
+    this.scheduleTimeZoneLookup()
     // ...and onto ground of a different height, which is what Altitude is measured from.
     this.scheduleGroundElevation()
     // ...and can make a previously plausible time zone impossible: the offset is stated once, the

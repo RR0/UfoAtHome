@@ -21,6 +21,8 @@ import type { DecorKind } from "../engine/model/Decor.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
 import { selectLocale } from "../i18n/locale.js"
 import { WeatherAudio } from "../render3d/WeatherAudio.js"
+import { MeteorShowers } from "../engine/astronomy/MeteorShowers.js"
+import { MeteorFall } from "../engine/astronomy/MeteorFall.js"
 import { SizeEstimate } from "../engine/shape/SizeEstimate.js"
 import type { MeterRange } from "../engine/shape/SizeEstimate.js"
 import { ApparentSize } from "../engine/shape/ApparentSize.js"
@@ -133,6 +135,10 @@ export class SceneElement extends HTMLElement {
    * UfoElement's own setter), and a stale estimate carried across recordings is worse than none:
    * bounds only ever tighten, so one wrong crossing from a previous case would poison the next. */
   private sizeEstimatesFor?: Sighting
+  /** The sighting the meteor fall was worked out for, so it is scheduled once per recording rather
+   * than every tick — the schedule is deterministic (see MeteorFall) and must not be re-drawn
+   * underneath a paused scene or a long exposure. */
+  private meteorScheduleFor?: Sighting
   private lastTimeMs = 0
   private starCatalog?: StarCatalog
   /** Owned here, not by SceneRenderer — the renderer stays audio-agnostic (see its own
@@ -467,6 +473,7 @@ export class SceneElement extends HTMLElement {
     // over from the previous one would render the whole scene through the wrong optics (see
     // Instrument.ts). Cheap — SceneRenderer.setProjection stores a string.
     this.sceneRenderer.setProjection(sighting.instrument.projection)
+    this.updateMeteorShower(sighting, t)
     this.sceneRenderer.setDecor(sighting.decor)
     const pose = resolveObserverPoseAt(sighting, t)
     this.sceneRenderer.setObserverPose(pose ?? DEFAULT_OBSERVER_POSE)
@@ -574,6 +581,59 @@ export class SceneElement extends HTMLElement {
    * SizeEstimate.contradictory. */
   sizeContradictory(sourceId: string): boolean {
     return this.sizeEstimateOf(sourceId).contradictory
+  }
+
+  /**
+   * Works out which shower was falling, and drops it into the sky.
+   *
+   * Scheduled ONCE per recording rather than per tick, for the reason MeteorFall exists: the fall
+   * has to be the same sky every time the recording is played, so that pausing freezes it and a
+   * long exposure can integrate it without meteors appearing out of the sampling itself.
+   *
+   * Everything about it is a fact of the date and the place — no lookup, no network, and no
+   * coverage floor, which is what makes a shower the one candidate explanation available for every
+   * case this project reconstructs. When no shower is running, or its radiant has not risen, the
+   * sky simply stays empty.
+   */
+  private updateMeteorShower(sighting: Sighting, t: number): void {
+    if (sighting !== this.meteorScheduleFor) {
+      this.meteorScheduleFor = sighting
+      this.scheduleMeteors(sighting)
+    }
+    this.sceneRenderer.updateMeteors(t)
+  }
+
+  private scheduleMeteors(sighting: Sighting): void {
+    const place = sighting.event.place?.[0]
+    const time = sighting.event.time
+    const date = place?.lat !== undefined && place.lng !== undefined && time?.year !== undefined
+      ? sightingTimeToDate(time, place.lng, sighting.event.utcOffsetHours)
+      : undefined
+    if (!date || place?.lat === undefined || place.lng === undefined) {
+      this.sceneRenderer.setMeteorShower([], 0, 0)
+      return
+    }
+    const observer = { lat: place.lat, lng: place.lng, elevationM: 0 }
+    const best = MeteorShowers.activeAt(date)
+      .map(entry => {
+        const position = MeteorShowers.radiantPosition(entry.shower, date, observer)
+        return { entry, position, rate: MeteorShowers.observedRatePerHour(entry.zhr, position.altitudeDeg, entry.shower.populationIndex) }
+      })
+      .sort((a, b) => b.rate - a.rate)[0]
+    if (!best || best.rate <= 0) {
+      this.sceneRenderer.setMeteorShower([], 0, 0)
+      return
+    }
+    const durationMs = (sighting.event.durationSeconds ?? 0) * 1000 || sighting.timeline.duration || 20_000
+    const meteors = MeteorFall.schedule({
+      ratePerHour: best.rate,
+      durationMs,
+      velocityKmS: best.entry.shower.velocityKmS,
+      // Seeded from the observation itself, so the same recording always drops the same meteors and
+      // two different ones never share a sky by accident.
+      seed: Math.round(date.getTime() / 1000) + Math.round(place.lat * 1000)
+    })
+    this.sceneRenderer.setMeteorShower(meteors, best.position.altitudeDeg, best.position.azimuthDeg)
   }
 
   /** How this recording's own instrument turns an angle into a pixel at time `t` — rebuilt per call

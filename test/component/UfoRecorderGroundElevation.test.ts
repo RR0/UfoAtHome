@@ -77,6 +77,8 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
       return {}
     }
     setProjection(): void {}
+    setMeteorShower(): void {}
+    updateMeteors(): void {}
     render(): void {}
     dispose(): void {}
     startTwinkle(): void {}
