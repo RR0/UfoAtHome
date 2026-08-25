@@ -136,6 +136,7 @@ export const ufoRecorderMessages_fr: UfoRecorderMessages = {
   soundSrc: "Enregistrement",
   soundSrcPlaceholder: "URL d'un enregistrement réel",
   lensFlareBrightness: "Intensité lumineuse",
+  instrument: "Observé avec",
   cameraDevice: "Appareil photo/vidéo",
   decor: "Décor",
   decorBuilding: "Bâtiment",

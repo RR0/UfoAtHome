@@ -9,6 +9,8 @@ import { DEFAULT_SOUND } from "./Sound.js"
 import type { SightingSound } from "./Sound.js"
 import type { People } from "./People.js"
 import type { DecorObject } from "./Decor.js"
+import { Instruments } from "../instrument/Instrument.js"
+import type { Instrument } from "../instrument/Instrument.js"
 
 /**
  * A fuzzy date, structurally aligned with @rr0/time's Level2Date fields
@@ -273,8 +275,20 @@ export class Sighting {
      * this sighting's own date/time and place, rather than from the witness — see WeatherSource
      * and engine/weather/WeatherInference.ts. Absent is the stronger statement of the two: the
      * conditions are the witness's own, and nothing may overwrite them. */
-    public weatherSource?: WeatherSource
+    public weatherSource?: WeatherSource,
+    /** Which INSTRUMENTS entry this observation was made through — an eye, a camera — by id, so a
+     * file names a registry entry rather than carrying a copy of its settings that could drift out
+     * of date with it. Absent means the naked eye, which is what every recording made before this
+     * existed was: a witness who filmed says so, a witness who looked says nothing. See
+     * Instrument.ts for why it changes the geometry of every shape. */
+    public instrumentId?: string
   ) {
+  }
+
+  /** The instrument this observation was made through, resolved — never undefined: an unknown or
+   * absent id falls back to the naked eye (see Instruments.byId). */
+  get instrument(): Instrument {
+    return Instruments.byId(this.instrumentId)
   }
 
   static create(time?: SightingTime, place?: SightingLocation[], witness?: People): Sighting {

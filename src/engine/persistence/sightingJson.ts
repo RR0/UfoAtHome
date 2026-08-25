@@ -61,6 +61,9 @@ export interface SightingRecordingJson {
    * stated the conditions — see Sighting.weatherSource. Absent means they ARE the witness's (or
    * predate this field), and a reader must not treat them as measurements. */
   weatherSource?: WeatherSource
+  /** Which INSTRUMENTS entry this was observed through — see Sighting.instrumentId. Absent means
+   * the naked eye, and every recording made before this field existed is one. */
+  instrument?: string
 }
 
 export function toSightingJson(sighting: Sighting): SightingRecordingJson {
@@ -87,7 +90,8 @@ export function toSightingJson(sighting: Sighting): SightingRecordingJson {
     soundTrack: sighting.soundTrack.toJSON(),
     weather: sighting.weather,
     decor: sighting.decor,
-    weatherSource: sighting.weatherSource
+    weatherSource: sighting.weatherSource,
+    instrument: sighting.instrumentId
   }
 }
 
@@ -112,7 +116,8 @@ export function fromSightingJson(json: SightingRecordingJson): Sighting {
     json.caseId,
     json.weather,
     json.decor ?? [],
-    json.weatherSource
+    json.weatherSource,
+    json.instrument
   )
   // The file states an angle; the drawing has to follow it. Done here rather than in
   // Timeline.fromJSON because the projection needs the pose's own field of view, which lives on

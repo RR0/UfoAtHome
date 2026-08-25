@@ -4,6 +4,7 @@ import type { UfoRecorderElement } from "../../src/component/UfoRecorderElement.
 import type { PolygonShape, Shape } from "../../src/engine/shape/Shape.js"
 import { ShapeHandles } from "../../src/engine/shape/ShapeHandles.js"
 import { ApparentSize } from "../../src/engine/shape/ApparentSize.js"
+import { ImageProjection } from "../../src/engine/instrument/ImageProjection.js"
 import type { WeatherProvider } from "../../src/engine/weather/WeatherProvider.js"
 import type { Weather } from "../../src/engine/model/Weather.js"
 import { SOUND_KINDS } from "../../src/engine/model/Sound.js"
@@ -47,6 +48,7 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     decorDistancesAt(): { behindM?: number; inFrontM?: number } {
       return {}
     }
+    setProjection(): void {}
     render(): void {}
     dispose(): void {}
     startTwinkle(): void {}
@@ -798,7 +800,7 @@ describe("UfoRecorderElement composes a nested rr0-ufo", () => {
     // them. decor is likewise always present (see Decor.ts), empty here since none was set, and so
     // is soundTrack (see SoundTrack.ts) — empty meaning nothing was recorded about sound.
     // Every shape also comes back stating the angle its box subtends — see BaseShape.angular.
-    const angular = ApparentSize.ofBounds({ width: 3, height: 4 }, ApparentSize.CANVAS_HEIGHT_PX, 60)
+    const angular = new ImageProjection("equidistant", ApparentSize.CANVAS_HEIGHT_PX, 60).ofBounds({ width: 3, height: 4 })
     const keyframesOut = json.timeline.keyframes.map(keyframe => ({
       ...keyframe,
       shapes: keyframe.shapes.map(state => ({ ...state, shape: { ...state.shape, angular } }))

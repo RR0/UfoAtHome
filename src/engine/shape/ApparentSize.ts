@@ -1,6 +1,6 @@
 /**
  * The one size a testimony actually contains — how much of the witness's field of view the thing
- * filled — and the arithmetic for turning that into the pixels a shape occupies on the canvas.
+ * filled — and the arithmetic relating it to a real size and a real distance.
  *
  * A witness never perceives meters. They perceive an angle: the object covered a thumbnail at
  * arm's length, or a fifth of the windshield, or two full Moons. Everything else they say about
@@ -13,6 +13,10 @@
  * Apparent size is also the one quantity in a testimony that can be checked arithmetically, so it
  * is the one that should never be drawn by eye — eyes are wrong about it by a factor of five to
  * ten.
+ *
+ * What lives here is the optics that hold whatever the observation was made through: an angle, a
+ * size and a distance are related the same way for an eye and for a lens. How that angle then
+ * becomes a PIXEL is not — it depends on the instrument, and belongs to ImageProjection.
  */
 
 /**
@@ -53,8 +57,7 @@ export class ApparentSize {
 
   /** The fixed drawing space every shape's `bounds` is expressed in — see UfoElement's own canvas,
    * which is 640x360 whatever CSS size it is displayed at. Named here rather than left implicit in
-   * the template because the angular extent is defined AGAINST it: a width in pixels only means an
-   * angle once you know how many pixels the field of view spans. */
+   * the template because every ImageProjection is built against it. */
   static readonly CANVAS_WIDTH_PX = 640
   static readonly CANVAS_HEIGHT_PX = 360
 
@@ -65,57 +68,10 @@ export class ApparentSize {
     return (2 * Math.atan(extent.sizeM / (2 * extent.distanceM)) * 180) / Math.PI
   }
 
-  /**
-   * How many canvas pixels wide `extent` should be drawn, on a canvas `canvasHeightPx` tall
-   * showing a vertical field of view of `fovDeg` (the perspective camera's own convention, see
-   * ObserverPose.fovDeg — Three.js's `fov` is vertical too, which is why height, not width, is
-   * what this scales against).
-   *
-   * Exact for an object centered in the view, which is what a witness looking AT something gives
-   * you; an object near the frame's edge is stretched further by the perspective projection
-   * itself, an error that stays under a percent well beyond where a testimony's own "about 3
-   * meters, about 90 meters away" is meaningful.
-   */
-  static widthPx(extent: PhysicalExtent, canvasHeightPx: number, fovDeg: number): number {
-    return (canvasHeightPx * extent.sizeM) / (2 * extent.distanceM * Math.tan((fovDeg * Math.PI) / 360))
-  }
-
-  /** Inverse of widthPx's own projection: what a pixel width on this canvas actually subtends.
-   * Used to tell an author what they just drew ("110 px, i.e. 19 degrees, i.e. 37 full Moons"),
-   * which is usually all it takes to see that it can't be right. */
-  static pxToDeg(px: number, canvasHeightPx: number, fovDeg: number): number {
-    return (2 * Math.atan((px * Math.tan((fovDeg * Math.PI) / 360)) / canvasHeightPx) * 180) / Math.PI
-  }
-
-  /** Inverse of pxToDeg — what an angle spans on this canvas. This is the direction that actually
-   * matters at load time, since the file states the angle and the drawing has to follow it. */
-  static degToPx(deg: number, canvasHeightPx: number, fovDeg: number): number {
-    return (canvasHeightPx * Math.tan((deg * Math.PI) / 360)) / Math.tan((fovDeg * Math.PI) / 360)
-  }
-
   /** How many full Moons wide something of `angularWidthDeg` is — the comparison a reader can
    * actually picture, and the quickest sanity check on a reproduction. */
   static inMoons(angularWidthDeg: number): number {
     return angularWidthDeg / ApparentSize.MOON_ANGULAR_WIDTH_DEG
-  }
-
-  /** What a drawn box actually subtends, on both axes — the conversion that turns an author's
-   * freehand drag into the recording's own unit before it is written to a file. */
-  static ofBounds(size: { width: number; height: number }, canvasHeightPx: number, fovDeg: number): AngularExtent {
-    return {
-      widthDeg: ApparentSize.pxToDeg(size.width, canvasHeightPx, fovDeg),
-      heightDeg: ApparentSize.pxToDeg(size.height, canvasHeightPx, fovDeg)
-    }
-  }
-
-  /** The exact inverse: how big a stated angular extent has to be drawn here. Applied at load
-   * time, which is what makes the stated angle — not the pixel box saved next to it — the thing
-   * that survives a change of canvas or of field of view. */
-  static toBoundsSize(angular: AngularExtent, canvasHeightPx: number, fovDeg: number): { width: number; height: number } {
-    return {
-      width: ApparentSize.degToPx(angular.widthDeg, canvasHeightPx, fovDeg),
-      height: ApparentSize.degToPx(angular.heightDeg, canvasHeightPx, fovDeg)
-    }
   }
 
   /** Interpolates an angular extent, so an object that visibly grows as it closes keeps stating a

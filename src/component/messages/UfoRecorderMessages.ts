@@ -237,6 +237,9 @@ export interface UfoRecorderMessages {
    * on why it's opt-in. A view preference, not sighting weather data (see UfoRecorderElement's
    * cameraDeviceInput field). */
   cameraDevice: string
+  /** What the observation was made THROUGH — see Instrument.ts. Sighting data, unlike cameraDevice
+   * above: it changes the geometry of every shape, so it belongs in the file. */
+  instrument: string
   /** Label on the dropdown listing the sighting's own decor objects — the Decor group itself no
    * longer has its own summary/heading (its fields now live inside Location/Witness instead, see
    * UfoRecorderElement's addDecorWitnessButton/addDecorBuildingButton doc comments). */

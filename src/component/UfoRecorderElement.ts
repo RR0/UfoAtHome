@@ -5,6 +5,9 @@ import { Recorder } from "../engine/record/Recorder.js"
 import { RafSamplingClock } from "../engine/record/SamplingClock.js"
 import { createShape, moveShapeTo } from "../engine/shape/Shape.js"
 import { ApparentSize } from "../engine/shape/ApparentSize.js"
+import { ImageProjection } from "../engine/instrument/ImageProjection.js"
+import { INSTRUMENTS } from "../engine/instrument/Instrument.js"
+import { SightingShapes } from "../engine/persistence/SightingShapes.js"
 import type { Appearance, PolygonShape, Shape, ShapeBounds, ShapePresetId } from "../engine/shape/Shape.js"
 import { ShapeHandles, ShapeGroup, MIN_SHAPE_SIZE, MIN_POLYGON_VERTICES } from "../engine/shape/ShapeHandles.js"
 import type { HandleId, ResizeAxis } from "../engine/shape/ShapeHandles.js"
@@ -305,6 +308,9 @@ export class UfoRecorderElement extends HTMLElement {
   private soundPreviewTimer?: ReturnType<typeof setTimeout>
   private readonly lensFlareBrightnessInput: HTMLInputElement
   private readonly cameraDeviceInput: HTMLInputElement
+  /** Which instrument the sighting was made through — sighting data, not a view preference, and the
+   * one control here that changes the geometry of every shape (see Instrument.ts). */
+  private readonly instrumentSelect: HTMLSelectElement
   private readonly labelColor: HTMLElement
   private readonly labelTransparency: HTMLElement
   private readonly labelHalo: HTMLElement
@@ -362,6 +368,7 @@ export class UfoRecorderElement extends HTMLElement {
   private readonly labelSoundPitch: HTMLElement
   private readonly labelSoundSrc: HTMLElement
   private readonly labelLensFlareBrightness: HTMLElement
+  private readonly labelInstrument: HTMLElement
   private readonly labelCameraDevice: HTMLElement
   private readonly optionPrecipitationNone: HTMLElement
   private readonly optionPrecipitationRain: HTMLElement
@@ -661,6 +668,15 @@ export class UfoRecorderElement extends HTMLElement {
     this.buildSoundKindOptions()
     this.lensFlareBrightnessInput = this.shadow.getElementById("lensFlareBrightness") as HTMLInputElement
     this.cameraDeviceInput = this.shadow.getElementById("cameraDevice") as HTMLInputElement
+    this.instrumentSelect = this.shadow.getElementById("instrument") as HTMLSelectElement
+    // Options ARE the registry, exactly as the source pickers are (see sourcePicker): adding a real
+    // dated camera must never also mean adding markup and an element id for it.
+    for (const instrument of INSTRUMENTS) {
+      const option = document.createElement("option")
+      option.value = instrument.id
+      option.textContent = instrument.name
+      this.instrumentSelect.appendChild(option)
+    }
     this.labelColor = this.shadow.getElementById("label-color")!
     this.labelTransparency = this.shadow.getElementById("label-transparency")!
     this.labelHalo = this.shadow.getElementById("label-halo")!
@@ -715,6 +731,7 @@ export class UfoRecorderElement extends HTMLElement {
     this.labelStorm = this.shadow.getElementById("label-storm")!
     this.labelWeatherInferred = this.shadow.getElementById("label-weather-inferred")!
     this.labelLensFlareBrightness = this.shadow.getElementById("label-lens-flare-brightness")!
+    this.labelInstrument = this.shadow.getElementById("label-instrument")!
     this.labelCameraDevice = this.shadow.getElementById("label-camera-device")!
     this.optionPrecipitationNone = this.shadow.getElementById("option-precipitation-none")!
     this.optionPrecipitationRain = this.shadow.getElementById("option-precipitation-rain")!
@@ -904,6 +921,16 @@ export class UfoRecorderElement extends HTMLElement {
     this.lensFlareBrightnessInput.addEventListener("input", () =>
       this.sceneElement.setAttribute("lens-flare-brightness", this.lensFlareBrightnessInput.value)
     )
+    this.instrumentSelect.addEventListener("change", () => {
+      const previous = this.ufoElement.sighting.instrument
+      this.ufoElement.sighting.instrumentId = this.instrumentSelect.value
+      // Not just a resize: every stated angle now lands at a different place AND a different size
+      // on the image, and a shape drawn in several parts comes apart unless both follow — see
+      // SightingShapes.reproject.
+      SightingShapes.reproject(this.ufoElement.sighting, previous)
+      this.ufoElement.refresh()
+      this.dispatchEvent(new CustomEvent("sightingchange"))
+    })
     this.cameraDeviceInput.addEventListener("input", () =>
       this.sceneElement.setAttribute("lens-flare-intensity", this.cameraDeviceInput.value)
     )
@@ -2119,6 +2146,7 @@ export class UfoRecorderElement extends HTMLElement {
     this.caseIdInput.value = sighting.caseId ?? ""
     this.descriptionInput.value = sighting.event.description ?? ""
     this.tagsInput.value = sighting.event.tags?.join(", ") ?? ""
+    this.instrumentSelect.value = sighting.instrument.id
   }
 
   /** Keeps the weather toolbar honest as the playhead moves or a different keyframe region is
@@ -2395,8 +2423,8 @@ export class UfoRecorderElement extends HTMLElement {
       this.refreshApparentSize()
       return
     }
-    const canvas = this.ufoElement.canvasElement
-    const width = ApparentSize.widthPx({ sizeM, distanceM }, canvas.height, this.currentFovDeg())
+    const projection = this.currentProjection()
+    const width = projection.widthPx({ sizeM, distanceM })
     const height = shape.bounds.height * (shape.bounds.width === 0 ? 1 : width / shape.bounds.width)
     const bounds = {
       x: shape.bounds.x + (shape.bounds.width - width) / 2,
@@ -2404,7 +2432,7 @@ export class UfoRecorderElement extends HTMLElement {
       width,
       height
     }
-    const angular = ApparentSize.ofBounds(bounds, canvas.height, this.currentFovDeg())
+    const angular = projection.ofBounds(bounds)
     const resized =
       shape.kind === "oval"
         ? { ...shape, bounds, angular }
@@ -2430,6 +2458,13 @@ export class UfoRecorderElement extends HTMLElement {
     return resolveObserverPoseAt(this.ufoElement.sighting, this.ufoElement.currentTime)?.fovDeg ?? WITNESS_FOV_DEG
   }
 
+  /** How this recording's own instrument turns an angle into a pixel at the playhead — an eye and a
+   * camera lens do not agree, and every size the toolbar shows or applies has to go through the one
+   * the file declares (see Instrument.ts). */
+  private currentProjection(): ImageProjection {
+    return ImageProjection.of(this.ufoElement.sighting.instrument, this.ufoElement.canvasElement.height, this.currentFovDeg())
+  }
+
   /** Reads back what the selected shape actually subtends on screen — always from its real
    * `bounds`, never from the size/distance fields, so it stays honest for a shape drawn purely by
    * eye (the common case, and the one that most needs telling that it spans 19 degrees, i.e. 37
@@ -2443,8 +2478,7 @@ export class UfoRecorderElement extends HTMLElement {
       this.apparentSizeOutput.textContent = ""
       return
     }
-    const canvas = this.ufoElement.canvasElement
-    const degrees = ApparentSize.pxToDeg(shape.bounds.width, canvas.height, this.currentFovDeg())
+    const degrees = this.currentProjection().pxToDeg(shape.bounds.width)
     const moons = ApparentSize.inMoons(degrees)
     // Decimal separator follows the reader's own locale (a comma in French), like every other
     // number a browser formats — the surrounding wording comes from this.messages, but a number
@@ -3209,6 +3243,7 @@ export class UfoRecorderElement extends HTMLElement {
     this.soundSrcInput.placeholder = messages.soundSrcPlaceholder
     for (const [kind, option] of this.soundKindOptions) option.textContent = this.soundKindLabel(kind, messages)
     this.labelLensFlareBrightness.textContent = messages.lensFlareBrightness
+    this.labelInstrument.textContent = messages.instrument
     this.labelCameraDevice.textContent = messages.cameraDevice
     this.loopButton.title = messages.autoReplay
     this.loopButton.setAttribute("aria-label", messages.autoReplay)

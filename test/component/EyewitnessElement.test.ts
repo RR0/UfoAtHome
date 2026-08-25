@@ -36,6 +36,7 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     decorDistancesAt(): { behindM?: number; inFrontM?: number } {
       return {}
     }
+    setProjection(): void {}
     render(): void {}
     dispose(): void {}
     startTwinkle(): void {}

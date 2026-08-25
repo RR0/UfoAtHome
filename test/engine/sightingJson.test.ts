@@ -43,9 +43,11 @@ describe("sightingJson", () => {
     const json = toSightingJson(sighting)
     const written = json.timeline.keyframes[0].shapes[0].shape
 
-    // 51.2 px of a 360 px canvas at 60 degrees: 9.39 degrees across, 1.25 tall.
-    expect(written.angular?.widthDeg).toBeCloseTo(9.39, 2)
-    expect(written.angular?.heightDeg).toBeCloseTo(1.25, 2)
+    // Through the naked eye every recording defaults to, 360 px IS 60 degrees: exactly 6 px per
+    // degree, wherever on the canvas it falls. So 51.2 px is 8.53 degrees across, 6.8 px is 1.13
+    // tall. (A camera would read the same box as 9.39 by 1.25 — see ImageProjection.)
+    expect(written.angular?.widthDeg).toBeCloseTo(8.5333, 3)
+    expect(written.angular?.heightDeg).toBeCloseTo(1.1333, 3)
     // And nothing anywhere claims a real size or a real distance.
     expect(JSON.stringify(json)).not.toContain("sizeM")
     expect(JSON.stringify(json)).not.toContain("distanceM")
@@ -65,7 +67,7 @@ describe("sightingJson", () => {
                   ...createOval({ x: 300, y: 170, width: 10, height: 10 }),
                   // Deliberately inconsistent with the box above: the angle is what a witness
                   // stated, the box is a projection of it, and the angle is what must win.
-                  angular: { widthDeg: 9.3883, heightDeg: 1.2496 }
+                  angular: { widthDeg: 8.5333, heightDeg: 1.1333 }
                 }
               }
             ]

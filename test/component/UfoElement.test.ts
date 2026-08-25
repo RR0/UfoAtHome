@@ -2,6 +2,7 @@ import { describe, expect, it, afterEach, beforeAll, vi } from "vitest"
 import { registerUfo, UFO_ELEMENT_NAME } from "../../src/component/UfoElement.js"
 import type { UfoElement } from "../../src/component/UfoElement.js"
 import { ApparentSize } from "../../src/engine/shape/ApparentSize.js"
+import { ImageProjection } from "../../src/engine/instrument/ImageProjection.js"
 
 registerUfo()
 
@@ -70,9 +71,13 @@ const sampleJson = {
 }
 
 /** What the fixture's 10x10 px shape subtends on the 360 px canvas at the default 60 degree field
- * of view — added to every shape on the way out, since a recording states an angle and not the
- * pixels it happened to be drawn as (see BaseShape.angular). */
-const SAMPLE_ANGULAR = ApparentSize.ofBounds({ width: 10, height: 10 }, ApparentSize.CANVAS_HEIGHT_PX, 60)
+ * of view, through the naked eye every recording is assumed to have used — added to every shape on
+ * the way out, since a recording states an angle and not the pixels it happened to be drawn as
+ * (see BaseShape.angular). */
+const SAMPLE_ANGULAR = new ImageProjection("equidistant", ApparentSize.CANVAS_HEIGHT_PX, 60).ofBounds({
+  width: 10,
+  height: 10
+})
 
 /** sampleJson's own keyframes, as they come back out: same shapes, each now stating its angle. */
 const sampleKeyframesOut = sampleJson.timeline.keyframes.map(keyframe => ({

@@ -24,6 +24,7 @@ import { WeatherAudio } from "../render3d/WeatherAudio.js"
 import { SizeEstimate } from "../engine/shape/SizeEstimate.js"
 import type { MeterRange } from "../engine/shape/SizeEstimate.js"
 import { ApparentSize } from "../engine/shape/ApparentSize.js"
+import { ImageProjection } from "../engine/instrument/ImageProjection.js"
 import { SightingShapes } from "../engine/persistence/SightingShapes.js"
 
 registerUfo()
@@ -460,6 +461,11 @@ export class SceneElement extends HTMLElement {
     // even every tick: setWeather/SceneRenderer.setWeather both dedupe on actual field values, not
     // just call frequency (see SceneRenderer.setWeather's own doc comment).
     this.setWeather(resolveWeatherAt(sighting, t))
+    // Pushed every tick like the pose and the weather, and for the same reason: the recording it
+    // describes can be swapped or edited under this element at any moment, and an instrument left
+    // over from the previous one would render the whole scene through the wrong optics (see
+    // Instrument.ts). Cheap — SceneRenderer.setProjection stores a string.
+    this.sceneRenderer.setProjection(sighting.instrument.projection)
     this.sceneRenderer.setDecor(sighting.decor)
     const pose = resolveObserverPoseAt(sighting, t)
     this.sceneRenderer.setObserverPose(pose ?? DEFAULT_OBSERVER_POSE)
@@ -521,7 +527,6 @@ export class SceneElement extends HTMLElement {
     }
     const timeline = sighting.timeline
     const canvas = this.ufoElement.canvasElement
-    const fovDeg = resolveObserverPoseAt(this.ufoElement.sighting, t)?.fovDeg ?? SightingShapes.DEFAULT_FOV_DEG
     const occluded = new Set<string>()
     for (const sourceId of timeline.sourceIds) {
       const shape = timeline.getInterpolatedShapeAt(t, sourceId)
@@ -534,7 +539,7 @@ export class SceneElement extends HTMLElement {
       // instant, which is the only state in which the answer is meaningful) and accumulated across
       // every instant the playhead visits — see SizeEstimate, and sizeRangeOf's own comment on why
       // that accumulation is the honest shape for this.
-      const widthDeg = shape.angular?.widthDeg ?? ApparentSize.pxToDeg(shape.bounds.width, canvas.height, fovDeg)
+      const widthDeg = shape.angular?.widthDeg ?? this.projectionAt(t).pxToDeg(shape.bounds.width)
       this.sizeEstimateOf(sourceId).add(widthDeg, this.sceneRenderer.decorDistancesAt(ndcX, ndcY, sourceId))
     }
     this.ufoElement.setOccludedSourceIds(occluded)
@@ -560,9 +565,7 @@ export class SceneElement extends HTMLElement {
   distanceRangeAt(sourceId: string, t: number): MeterRange {
     const shape = this.ufoElement.sighting.timeline.getInterpolatedShapeAt(t, sourceId)
     if (!shape) return {}
-    const fovDeg = resolveObserverPoseAt(this.ufoElement.sighting, t)?.fovDeg ?? SightingShapes.DEFAULT_FOV_DEG
-    const widthDeg = shape.angular?.widthDeg
-      ?? ApparentSize.pxToDeg(shape.bounds.width, this.ufoElement.canvasElement.height, fovDeg)
+    const widthDeg = shape.angular?.widthDeg ?? this.projectionAt(t).pxToDeg(shape.bounds.width)
     return this.sizeEstimateOf(sourceId).distanceRangeAt(widthDeg)
   }
 
@@ -570,6 +573,15 @@ export class SceneElement extends HTMLElement {
    * SizeEstimate.contradictory. */
   sizeContradictory(sourceId: string): boolean {
     return this.sizeEstimateOf(sourceId).contradictory
+  }
+
+  /** How this recording's own instrument turns an angle into a pixel at time `t` — rebuilt per call
+   * rather than cached, since both the instrument and the pose's field of view can change under it
+   * and a stale projection is a silently wrong size. */
+  private projectionAt(t: number): ImageProjection {
+    const sighting = this.ufoElement.sighting
+    const fovDeg = resolveObserverPoseAt(sighting, t)?.fovDeg ?? SightingShapes.DEFAULT_FOV_DEG
+    return ImageProjection.of(sighting.instrument, ApparentSize.CANVAS_HEIGHT_PX, fovDeg)
   }
 
   private sizeEstimateOf(sourceId: string): SizeEstimate {

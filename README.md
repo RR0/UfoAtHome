@@ -332,6 +332,7 @@ interface SightingRecordingJson {
   weatherTrack?: { keyframes: Array<{ t: number, weather: Weather }> }
   weather?: Weather // legacy static fallback for recordings predating weatherTrack
   weatherSource?: { id: string, name: string, url: string } // the meteorological record weatherTrack was looked up from — see Weather is looked up, not remembered. Absent = the witness's own account
+  instrument?: "eye" | "rectilinear-lens" // what it was observed THROUGH — see Instrument. Absent = the naked eye
   soundTrack?: { keyframes: Array<{ t: number, sound: { kind: "none" | "hum" | "whistle" | "rumble" | "crackle", volume: number, pitchHz: number, src?: string } }> } // what the witness heard — see What it sounded like
   decor?: DecorObject[] // buildings, trees, streetlights, vehicles, other witnesses — see src/engine/model/Decor.ts
 }
@@ -521,15 +522,46 @@ of the windshield, or two full Moons. "About thirty meters long" is a conclusion
 could not perceive either, and the two errors multiply. So a recording stores `angular` — how wide and how tall the
 object *looked*, in degrees — and stores no real size and no real distance anywhere.
 
-`bounds` is that angle projected onto the fixed 640x360 canvas at the pose's own field of view, which is what every
-editing gesture, hit-test and renderer keeps working on. The angle is authoritative: `SightingShapes`
-(`src/engine/persistence/SightingShapes.ts`) re-derives `bounds` from it on load and reads it back from `bounds` on
-save, so a file survives a change of canvas or of field of view, and if the two ever disagree the angle wins.
+`bounds` is that angle projected onto the fixed 640x360 canvas at the pose's own field of view **and through the
+recording's own instrument** (see below), which is what every editing gesture, hit-test and renderer keeps working
+on. The angle is authoritative: `SightingShapes` (`src/engine/persistence/SightingShapes.ts`) re-derives `bounds`
+from it on load and reads it back from `bounds` on save, so a file survives a change of canvas, of field of view or
+of instrument, and if the two ever disagree the angle wins. `ImageProjection`
+(`src/engine/instrument/ImageProjection.ts`) owns the conversion itself.
 
-At 60° across 360px, one degree is about 5.4px and the full Moon about 2.8px — so an object of 3.5m at 90m is 12px
-wide, not the 90px an author reaches for unaided. That is why the editor's **Try a size** / **at a distance of**
+Through an eye at 60° across 360px, one degree is exactly 6px and the full Moon about 3.1px — so an object of 3.5m
+at 90m is 13px wide, not the 90px an author reaches for unaided. That is why the editor's **Try a size** / **at a distance of**
 fields exist: type a hypothesis, get the angle it implies on the canvas, and the meters are forgotten the moment
 they have been applied. They are an authoring aid, never testimony.
+
+### Instrument — an eye is not a lens
+
+`instrument` says what the observation was made through, and it changes the geometry of every frame.
+
+A camera lens maps a direction to its sensor as `r = f·tan θ`: straight lines stay straight, and everything away
+from the axis is stretched by `sec²θ` — 42% at 33° off-centre, 105% at the corner of a 16:9 frame with a 60°
+vertical field. That is *correct* for a photograph and only looks right from the projection centre, about half an
+image-width from the screen. An eye does no such thing: it perceives an angle as an angle wherever it falls, so
+`instrument: "eye"` renders `r = f·θ` — image distance proportional to angle, which is what lets a ruler held to
+the screen mean something. (A slight tangential stretch of `θ/sin θ` remains, 6% at 33°; no flat image escapes
+trading one distortion for another.)
+
+three.js's camera can only do the pinhole, so `EquidistantProjectionPass` renders the scene into an offscreen
+target with a deliberately wider field and resamples it in one fullscreen pass. Everything that *aims* at the scene
+rather than drawing it — the decor raycasts behind `isScreenPointOccluded` and `decorDistancesAt` — goes through
+`directionFor`, since a point on the visible image no longer means what the pinhole camera thinks it means.
+
+This is also why a change of instrument **moves** shapes and not just resizes them (`SightingShapes.reproject`): a
+pixel only names a direction once a projection is named. Leaving positions alone is exactly how an object drawn in
+several parts comes apart — the fuselage grows and its row of windows stays put.
+
+Every case file here declares `eye`, because every one of them was watched rather than filmed. Until this existed
+they were all rendered as photographs, which is what made Socorro's dynamite shack read as twice the size it
+subtends.
+
+One residual worth naming: an angular extent is stored as its *on-axis* value, and applied to a shape wherever it
+sits. For an object 9° off-axis subtending 9°, that is about 2.5% out. The overlay draws axis-aligned boxes and
+cannot express more; it is a fifth of the error it replaces, and it shrinks towards the centre of the frame.
 
 #### Where meters do come back
 

@@ -1,6 +1,8 @@
 import { ApparentSize } from "../shape/ApparentSize.js"
+import { ImageProjection } from "../instrument/ImageProjection.js"
 import type { Shape } from "../shape/Shape.js"
 import { Sighting, resolveObserverPoseAt } from "../model/Sighting.js"
+import type { Instrument } from "../instrument/Instrument.js"
 
 /**
  * Reconciles a recording's stated angular sizes with the pixel boxes it is drawn as — the one
@@ -14,7 +16,9 @@ import { Sighting, resolveObserverPoseAt } from "../model/Sighting.js"
  *
  * The projection runs against the pose's own field of view AT THAT KEYFRAME's instant, not a fixed
  * 60 degrees — a recording whose witness zooms (or one authored at another fov entirely) then
- * still draws each instant at the size its own angle implies.
+ * still draws each instant at the size its own angle implies — and through the sighting's own
+ * INSTRUMENT, since an eye and a camera lens turn the same angle into different pixels (see
+ * ImageProjection).
  */
 export class SightingShapes {
   /** What a recording without any observer track is assumed to have been seen through — the
@@ -32,10 +36,7 @@ export class SightingShapes {
    * the author's last resize.
    */
   static toAngular(sighting: Sighting): void {
-    this.eachKeyframe(sighting, (shape, fovDeg) => ({
-      ...shape,
-      angular: ApparentSize.ofBounds(shape.bounds, ApparentSize.CANVAS_HEIGHT_PX, fovDeg)
-    }))
+    this.eachKeyframe(sighting, (shape, projection) => ({ ...shape, angular: projection.ofBounds(shape.bounds) }))
   }
 
   /**
@@ -53,9 +54,9 @@ export class SightingShapes {
    * saved.
    */
   static toBounds(sighting: Sighting): void {
-    this.eachKeyframe(sighting, (shape, fovDeg) => {
+    this.eachKeyframe(sighting, (shape, projection) => {
       if (!shape.angular) return shape
-      const { width, height } = ApparentSize.toBoundsSize(shape.angular, ApparentSize.CANVAS_HEIGHT_PX, fovDeg)
+      const { width, height } = projection.toBoundsSize(shape.angular)
       const bounds = {
         x: shape.bounds.x + (shape.bounds.width - width) / 2,
         y: shape.bounds.y + (shape.bounds.height - height) / 2,
@@ -69,17 +70,62 @@ export class SightingShapes {
     })
   }
 
+  /**
+   * Re-expresses a whole recording for a different instrument — what has to happen the moment the
+   * declared instrument changes, and what the case files themselves went through when they stopped
+   * being rendered as photographs.
+   *
+   * Sizes follow from the stated angles, as always. POSITIONS have to move too, and that is the
+   * part it would be easy to miss: a pixel only names a direction once a projection is named, so a
+   * shape 9 degrees off-axis sits 371 px across a lens's image and 375 px across an eye's. Leaving
+   * positions alone while resizing each shape about its own old centre is exactly how an object
+   * drawn in several parts comes apart — the fuselage grows, its windows stay put.
+   *
+   * Radially, about the centre of the image: an angle off-axis is an angle off-axis whichever way
+   * the point lies, and only its distance from the axis is projection-dependent.
+   */
+  static reproject(sighting: Sighting, previous: Instrument): void {
+    const halfWidth = ApparentSize.CANVAS_WIDTH_PX / 2
+    const halfHeight = ApparentSize.CANVAS_HEIGHT_PX / 2
+    for (const keyframe of [...sighting.timeline.allKeyframes]) {
+      const fovDeg = resolveObserverPoseAt(sighting, keyframe.t)?.fovDeg ?? this.DEFAULT_FOV_DEG
+      const from = ImageProjection.of(previous, ApparentSize.CANVAS_HEIGHT_PX, fovDeg)
+      const to = ImageProjection.of(sighting.instrument, ApparentSize.CANVAS_HEIGHT_PX, fovDeg)
+      sighting.timeline.addKeyframe(
+        keyframe.t,
+        keyframe.shapes.map(state => {
+          const { bounds } = state.shape
+          const dx = bounds.x + bounds.width / 2 - halfWidth
+          const dy = bounds.y + bounds.height / 2 - halfHeight
+          const radius = Math.hypot(dx, dy)
+          if (radius === 0) return state
+          const scale = to.angleDegToRadiusPx(from.radiusPxToAngleDeg(radius)) / radius
+          const moved = {
+            ...bounds,
+            x: halfWidth + dx * scale - bounds.width / 2,
+            y: halfHeight + dy * scale - bounds.height / 2
+          }
+          return { ...state, shape: { ...state.shape, bounds: moved } }
+        })
+      )
+    }
+    // Now that every shape sits where the new projection puts it, its size follows from its own
+    // stated angle — about the centre it has just been moved to.
+    this.toBounds(sighting)
+  }
+
   /** Rewrites every shape of every keyframe through `transform`, going through the timeline's own
    * addKeyframe rather than mutating its keyframes in place — same reason anything else does: the
    * timeline owns its ordering and its per-source merge, and a shape rewritten behind its back
    * would be the one write in the codebase that doesn't. */
-  private static eachKeyframe(sighting: Sighting, transform: (shape: Shape, fovDeg: number) => Shape): void {
+  private static eachKeyframe(sighting: Sighting, transform: (shape: Shape, projection: ImageProjection) => Shape): void {
     const { timeline } = sighting
     for (const keyframe of [...timeline.allKeyframes]) {
       const fovDeg = resolveObserverPoseAt(sighting, keyframe.t)?.fovDeg ?? this.DEFAULT_FOV_DEG
+      const projection = ImageProjection.of(sighting.instrument, ApparentSize.CANVAS_HEIGHT_PX, fovDeg)
       timeline.addKeyframe(
         keyframe.t,
-        keyframe.shapes.map(state => ({ ...state, shape: transform(state.shape, fovDeg) }))
+        keyframe.shapes.map(state => ({ ...state, shape: transform(state.shape, projection) }))
       )
     }
   }

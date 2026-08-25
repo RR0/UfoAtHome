@@ -67,6 +67,8 @@ import type { RainSystem } from "./RainSystem.js"
 import { buildCloudGeometry, buildCloudMaterial } from "./CloudSystem.js"
 import type { CloudUniforms } from "./CloudSystem.js"
 import { buildLensFlare } from "./LensFlareEffect.js"
+import { EquidistantProjectionPass } from "./EquidistantProjectionPass.js"
+import type { ProjectionKind } from "../engine/instrument/Instrument.js"
 import type { LensFlareSystem } from "./LensFlareEffect.js"
 import { DecorSystem } from "./DecorSystem.js"
 import type { DecorObject } from "../engine/model/Decor.js"
@@ -705,6 +707,13 @@ export class SceneRenderer {
   /** Dedicated raycaster for isScreenPointOccluded — same "don't share a raycaster across
    * independent purposes" reasoning as sunOcclusionRaycaster above. */
   private readonly ufoOcclusionRaycaster = new Raycaster()
+  /** How this recording's own instrument maps a direction onto its image — see Instrument.ts. A
+   * lens photographs `tan θ`, which three.js's camera does natively; an eye perceives `θ`, which
+   * needs the resampling pass below. */
+  private projectionKind: ProjectionKind = "rectilinear"
+  /** Built on first equidistant frame and kept — a render target is not worth allocating for a
+   * recording made through a lens, which is most of them once real photographs are in. */
+  private equidistantPass?: EquidistantProjectionPass
   private readonly onLightningFlash?: () => void
 
   constructor(
@@ -1211,9 +1220,57 @@ export class SceneRenderer {
     this.celestialLight.castShadow = this.decorGroups.size > 0
   }
 
+  /** Declares what the observation was made through. Changing it changes the geometry of every
+   * frame from here on — see Instrument.ts on why that is a property of the sighting and not a
+   * display preference. */
+  setProjection(kind: ProjectionKind): void {
+    this.projectionKind = kind
+  }
+
   render(): void {
-    this.updateLensFlarePosition()
-    this.renderer.render(this.scene, this.camera)
+    const pass = this.usableEquidistantPass()
+    if (!pass) {
+      this.updateLensFlarePosition()
+      this.renderer.render(this.scene, this.camera)
+      return
+    }
+    // The flare is repositioned from inside, once the camera has been widened for the offscreen
+    // render — see the pass's own onCameraWidened.
+    pass.render(this.renderer, this.scene, this.camera, this.camera.fov, () => this.updateLensFlarePosition())
+  }
+
+  /** The resampling pass, if this recording needs one AND its field is narrow enough for a single
+   * rectilinear source to hold. A field too wide falls back to rendering straight to the canvas:
+   * a frame that is merely projected like a camera is wrong in a way this project can name and
+   * measure, where a frame with black corners is just broken. */
+  private usableEquidistantPass(): EquidistantProjectionPass | undefined {
+    if (this.projectionKind !== "equidistant") return undefined
+    const size = this.renderer.getDrawingBufferSize(new Vector2())
+    if (!EquidistantProjectionPass.supports(this.camera.fov, size.x / Math.max(size.y, 1))) return undefined
+    if (!this.equidistantPass) this.equidistantPass = new EquidistantProjectionPass(size.x, size.y)
+    else this.equidistantPass.resize(size.x, size.y)
+    return this.equidistantPass
+  }
+
+  /**
+   * Points `raycaster` at whatever the viewer sees at this point of the image.
+   *
+   * three.js's own setFromCamera reads a point through the pinhole camera, which is right only when
+   * that is also what the viewer is looking at. Under the eye's projection the visible image is a
+   * resampling of a wider render, so the same point stands for a different direction — and a
+   * hit-test that skipped this would test the wrong part of the scene, silently, and only
+   * noticeably towards the frame's edges.
+   */
+  private aimAtScreenPoint(raycaster: Raycaster, ndcX: number, ndcY: number): void {
+    const pass = this.projectionKind === "equidistant" ? this.equidistantPass : undefined
+    if (!pass) {
+      raycaster.setFromCamera(new Vector2(ndcX, ndcY), this.camera)
+      return
+    }
+    const direction = pass.directionFor(ndcX, ndcY, this.camera.fov)
+    this.camera.updateMatrixWorld()
+    raycaster.ray.origin.setFromMatrixPosition(this.camera.matrixWorld)
+    raycaster.ray.direction.set(direction.x, direction.y, direction.z).applyQuaternion(this.camera.quaternion).normalize()
   }
 
   /** Projects the Sun's real world position (see setBodyMesh's "sun" branch) to screen space for
@@ -1313,7 +1370,7 @@ export class SceneRenderer {
       if (group) occluders.push(group)
     }
     if (occluders.length === 0) return false
-    this.ufoOcclusionRaycaster.setFromCamera(new Vector2(ndcX, ndcY), this.camera)
+    this.aimAtScreenPoint(this.ufoOcclusionRaycaster, ndcX, ndcY)
     this.ufoOcclusionRaycaster.near = UFO_OCCLUSION_MIN_DISTANCE_M
     return this.ufoOcclusionRaycaster.intersectObjects(occluders, true).length > 0
   }
@@ -1341,7 +1398,7 @@ export class SceneRenderer {
    * front of.
    */
   decorDistancesAt(ndcX: number, ndcY: number, sourceId: string): { behindM?: number; inFrontM?: number } {
-    this.ufoOcclusionRaycaster.setFromCamera(new Vector2(ndcX, ndcY), this.camera)
+    this.aimAtScreenPoint(this.ufoOcclusionRaycaster, ndcX, ndcY)
     this.ufoOcclusionRaycaster.near = UFO_OCCLUSION_MIN_DISTANCE_M
     let behindM: number | undefined
     let inFrontM: number | undefined
