@@ -523,7 +523,30 @@ export class DecorSystem {
                 : buildWitness()
     if (object.headingDeg !== undefined) group.rotation.y = -object.headingDeg * DEG_TO_RAD
     this.addLights(group, object.lights)
+    if (object.kind === "aircraft") this.exemptFromFog(group)
     return group
+  }
+
+  /**
+   * Takes an aircraft out of the scene's fog.
+   *
+   * That fog is not an atmosphere: it is sized to the GROUND disc's own radius, so the disc fades
+   * out at its rim instead of ending at a visible edge (see SceneRenderer's own Fog construction).
+   * At ground level that radius is 900 m — which quietly erased anything further, and an aircraft is
+   * five to ten kilometres away. It was invisible for a reason no viewer could have guessed.
+   *
+   * Real atmospheric extinction over those distances is NOT modelled by this, and it is real: a
+   * distant strobe genuinely does dim, and more so through haze. But erasing an aircraft completely
+   * is a far worse answer than not attenuating it at all, and doing it properly means a visibility
+   * model the weather feeds — which belongs with the exposure work, not here.
+   */
+  private static exemptFromFog(group: Group): void {
+    for (const child of group.children) {
+      if (!(child instanceof Mesh)) continue
+      const material = child.material as MeshBasicMaterial | MeshLambertMaterial
+      material.fog = false
+      material.needsUpdate = true
+    }
   }
 
   /** One small emissive sphere per declared lamp, at its own place on the body. Built dark: every

@@ -8,6 +8,7 @@ import { ApparentSize } from "../engine/shape/ApparentSize.js"
 import { ImageProjection } from "../engine/instrument/ImageProjection.js"
 import { INSTRUMENTS } from "../engine/instrument/Instrument.js"
 import { LightRigs } from "../engine/model/LightRig.js"
+import { resolveDecorPlacementAt } from "../engine/model/Decor.js"
 import { SightingShapes } from "../engine/persistence/SightingShapes.js"
 import type { Appearance, PolygonShape, Shape, ShapeBounds, ShapePresetId } from "../engine/shape/Shape.js"
 import { ShapeHandles, ShapeGroup, MIN_SHAPE_SIZE, MIN_POLYGON_VERTICES } from "../engine/shape/ShapeHandles.js"
@@ -100,6 +101,10 @@ const CAMERA_DRAG_DEG_PER_PX = 0.2
  * ObserverPose.fovDeg's own default. Also what the apparent-size math projects through whenever a
  * recording has no pose of its own yet (see currentFovDeg), so the two can never disagree. */
 const WITNESS_FOV_DEG = 60
+
+/** A standing witness's eye height, the same 1.6 m SceneRenderer puts the camera at — what a pitch
+ * towards a decor object has to be measured FROM (see lookAtDecor). */
+const EYE_HEIGHT_M = 1.6
 
 const ARROW_KEYS = new Set(["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"])
 /** Px per arrow-key press, for both moving and resizing the selected shape — see
@@ -395,6 +400,7 @@ export class UfoRecorderElement extends HTMLElement {
    * selection, since the rigs that make sense on a tree are not the ones that make sense on an
    * aircraft. */
   private readonly decorLightRigSelect: HTMLSelectElement
+  private readonly lookAtDecorButton: HTMLButtonElement
   private readonly decorSightingUrlInput: HTMLInputElement
   private readonly decorFloorsInput: HTMLInputElement
   private readonly decorOccupiedFloorInput: HTMLInputElement
@@ -758,6 +764,7 @@ export class UfoRecorderElement extends HTMLElement {
     this.decorHeadingInput = this.shadow.getElementById("decorHeading") as HTMLInputElement
     this.decorLitInput = this.shadow.getElementById("decorLit") as HTMLInputElement
     this.decorLightRigSelect = this.shadow.getElementById("decorLightRig") as HTMLSelectElement
+    this.lookAtDecorButton = this.shadow.getElementById("look-at-decor") as HTMLButtonElement
     this.decorSightingUrlInput = this.shadow.getElementById("decorSightingUrl") as HTMLInputElement
     this.decorFloorsInput = this.shadow.getElementById("decorFloors") as HTMLInputElement
     this.decorOccupiedFloorInput = this.shadow.getElementById("decorOccupiedFloor") as HTMLInputElement
@@ -895,6 +902,7 @@ export class UfoRecorderElement extends HTMLElement {
     // applyWeatherAtPlayhead/updateObserver.
     this.decorLitInput.addEventListener("input", () => this.updateDecorLit())
     this.decorLightRigSelect.addEventListener("change", () => this.updateDecorLightRig())
+    this.lookAtDecorButton.addEventListener("click", () => this.lookAtDecor())
     // The single funnel for "the recording changed, a consumer composing this element (e.g. a
     // live <rr0-scene> preview) should resync" — refresh() (called after every mutation: shape
     // edits, drag, observer/time edits, duration) always ends in a timeupdate on the *nested*
@@ -2970,7 +2978,8 @@ export class UfoRecorderElement extends HTMLElement {
       this.decorFloorsInput,
       this.decorOccupiedFloorInput,
       this.decorWitnessSideSelect,
-      this.decorLightRigSelect
+      this.decorLightRigSelect,
+      this.lookAtDecorButton
     ]) {
       input.disabled = !hasSelection
     }
@@ -3061,6 +3070,31 @@ export class UfoRecorderElement extends HTMLElement {
     this.setRowVisible(this.decorFloorsInput, showFloors)
     this.setRowVisible(this.decorOccupiedFloorInput, showFloors)
     this.decorOccupiedFloorInput.max = String(decor?.floors ?? DEFAULT_BUILDING_FLOORS)
+  }
+
+  /**
+   * Turns the witness to face the selected decor object, at the playhead's own instant.
+   *
+   * Placing something by typing three numbers and then hunting for it by dragging the sky is
+   * unreasonable at any distance, and impossible for an aircraft: five kilometres away it is a
+   * couple of pixels somewhere in a sixty-degree field. This aims straight at it.
+   *
+   * Goes through the same heading/pitch fields a drag does (see onCameraDragPointerMove), so it
+   * keyframes the pose exactly as any other look would — turning to watch something IS part of what
+   * the witness did, not a camera convenience layered on top.
+   */
+  private lookAtDecor(): void {
+    const decor = this.ufoElement.sighting.decor.find(object => object.id === this.currentDecorId)
+    if (!decor) return
+    const { eastM, northM, altitudeM } = resolveDecorPlacementAt(decor, this.ufoElement.currentTime)
+    const horizontalM = Math.hypot(eastM, northM)
+    // Nothing to aim at: the object is exactly where the witness stands.
+    if (horizontalM === 0 && altitudeM === 0) return
+    const headingDeg = (Math.atan2(eastM, northM) * 180) / Math.PI
+    const pitchDeg = (Math.atan2(altitudeM - EYE_HEIGHT_M, horizontalM) * 180) / Math.PI
+    this.headingInput.value = String(Math.round(headingDeg * 10) / 10)
+    this.pitchInput.value = String(Math.round(pitchDeg * 10) / 10)
+    this.updateObserver()
   }
 
   /** Offers the rigs that make sense on this object's kind, plus "none" — see LightRigs.forKind.
@@ -3269,6 +3303,8 @@ export class UfoRecorderElement extends HTMLElement {
     this.optionDecorVehicle.textContent = messages.decorVehicle
     this.optionDecorAircraft.textContent = messages.decorAircraft
     this.labelDecorLights.textContent = messages.decorLights
+    this.lookAtDecorButton.title = messages.lookAtDecor
+    this.lookAtDecorButton.setAttribute("aria-label", messages.lookAtDecor)
     this.optionDecorWitness.textContent = messages.decorWitness
     this.deleteDecorButton.title = messages.deleteDecor
     this.deleteDecorButton.setAttribute("aria-label", messages.deleteDecor)

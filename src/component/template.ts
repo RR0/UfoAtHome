@@ -65,6 +65,7 @@ export const html = `
            the Add row, once at least one decor object exists — see that row's own comment for why
            it's forced onto its own line after this block instead of just flowing after it. -->
       <label><span id="label-decor">Decor</span> <select id="decor"></select></label>
+      <button id="look-at-decor" type="button" class="icon-btn" title="Look at it" aria-label="Look at it">🎯</button>
       <button id="delete-decor" type="button" class="icon-btn" title="Delete decor" aria-label="Delete decor">🗑</button>
       <label><span id="label-decor-title">Name</span> <input id="decorTitle" type="text"/></label>
       <label><span id="label-decor-east">Distance east</span> <input id="decorEast" type="number" step="0.5" value="0"/> m</label>

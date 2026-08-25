@@ -242,6 +242,9 @@ export interface UfoRecorderMessages {
   decorAircraft: string
   /** Which set of lamps the selected decor object carries — see LightRig.ts. */
   decorLights: string
+  /** Turns the witness to face the selected decor object — the only practical way to find an
+   * aircraft in an otherwise empty sky. */
+  lookAtDecor: string
   /** The empty entry of that picker: an object with no lamps at all, which is most scenery. */
   decorLightsNone: string
   /** What the observation was made THROUGH — see Instrument.ts. Sighting data, unlike cameraDevice

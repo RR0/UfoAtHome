@@ -139,6 +139,7 @@ export const ufoRecorderMessages_en: UfoRecorderMessages = {
   instrument: "Observed through",
   decorAircraft: "Aircraft",
   decorLights: "Lights",
+  lookAtDecor: "Look at it",
   decorLightsNone: "none",
   cameraDevice: "Camera/video device",
   decor: "Decor",

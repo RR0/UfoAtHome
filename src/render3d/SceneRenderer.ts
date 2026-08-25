@@ -1078,6 +1078,7 @@ export class SceneRenderer {
         : { x: 0, z: 0 }
     const inhabited = this.decorObjects.find(object => object.witnessSide !== undefined && canHoldWitness(object.kind))
     const shift = { x: 0, z: 0 }
+    let furthestDecorM = 0
     if (inhabited) {
       const view = DecorSystem.occupantView(inhabited)
       // Rotates the occupant's own LOCAL (x,z) by the inhabited object's world rotation (same
@@ -1108,6 +1109,16 @@ export class SceneRenderer {
         -placement.northM + offset.z + shift.z
       )
       if (placement.headingDeg !== undefined) group.rotation.y = -placement.headingDeg * DEG_TO_RAD
+      furthestDecorM = Math.max(furthestDecorM, group.position.distanceTo(this.camera.position))
+    }
+    // Decor used to be local scenery, a couple of hundred meters out at most, so a far plane sized
+    // for the sky and the ground was always enough. An aircraft is 5 to 10 km away, and would be
+    // clipped away entirely. Widened here rather than in setObserverPose because a moving object's
+    // distance changes every tick, not only when the witness does.
+    const needed = Math.max(SKY_RADIUS * 1.2, this.groundRadius * 2.5, furthestDecorM * 1.2)
+    if (Math.abs(this.camera.far - needed) > 1) {
+      this.camera.far = needed
+      this.camera.updateProjectionMatrix()
     }
   }
 
@@ -1621,8 +1632,15 @@ export class SceneRenderer {
       colors.push(color[0], color[1], color[2])
     }
     geometry.setAttribute("color", new Float32BufferAttribute(colors, 3))
-    const material = new MeshBasicMaterial({ vertexColors: true, side: BackSide, fog: false })
+    // A BACKDROP, not a shell 900 m away. Written as ordinary geometry it filled the depth buffer
+    // at its own radius, so anything further off — an aircraft at cruising altitude above all — was
+    // hidden BEHIND the sky, invisible for no reason a viewer could ever guess. Drawn first and
+    // writing no depth, it is what every other thing in the scene is painted over, whatever its
+    // distance. The Sun, Moon and stars sit inside it and are unaffected: they are drawn afterwards
+    // against a depth buffer the sky left untouched.
+    const material = new MeshBasicMaterial({ vertexColors: true, side: BackSide, fog: false, depthWrite: false })
     this.skyMesh = new Mesh(geometry, material)
+    this.skyMesh.renderOrder = -1
     this.celestialGroup.add(this.skyMesh)
   }
 
