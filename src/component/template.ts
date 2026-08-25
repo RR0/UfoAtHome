@@ -5,6 +5,10 @@ export const html = `
     <label><span id="label-import-file">Load JSON file</span> <input id="import-file" type="file" accept="application/json,.json"/></label>
     <label><span id="label-import-url">Or load from URL</span> <input id="import-url" type="url" placeholder="https://…/sighting.json"/></label>
     <button id="import-url-button" type="button">Load</button>
+    <!-- The case, not the witness: every witness's own recording of the same sighting carries the
+         same caseId, which is exactly what lets a page group them (see Sighting.caseId). Putting it
+         beside a witness's name suggested it was theirs. -->
+    <label><span id="label-case-id">Case ID</span> <input id="caseId" type="text"/></label>
     <label><span id="label-description">Description</span> <textarea id="description" rows="2"></textarea></label>
     <label><span id="label-tags">Tags</span> <input id="tags" type="text" placeholder="comma-separated"/></label>
   </div>
@@ -17,7 +21,6 @@ export const html = `
     <label><span id="label-witness-title">Witness title</span> <input id="witnessTitle" type="text"/></label>
     <label><span id="label-witness-last-name">Witness last name</span> <input id="witnessLastName" type="text"/></label>
     <label><span id="label-witness-first-names">Witness first names</span> <input id="witnessFirstNames" type="text" placeholder="comma-separated"/></label>
-    <label><span id="label-case-id">Case ID</span> <input id="caseId" type="text"/></label>
     <label><span id="label-instrument">Observed through</span> <select id="instrument"></select></label>
     <label><span id="label-camera-device">Camera/video device</span> <input id="cameraDevice" type="range" min="0" max="2" step="0.1" value="0"/></label>
     <button id="add-decor-witness" type="button">Add witness</button>
