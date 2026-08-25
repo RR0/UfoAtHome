@@ -248,7 +248,8 @@ export interface UfoRecorderMessages {
   decorAltitude: string
   /** What else was in that sky, from the date and the place alone — see MeteorShowers.ts.
    * {name} is the shower, {rate} how many an observer would really have seen per hour, {altitude}
-   * the radiant's own height above the horizon. */
+   * the radiant's HEIGHT above the horizon and {bearing} the compass point it stands in. Both are
+   * needed and both must be named: a lone "77 degrees" beside a sky reads as either. */
   skyShowerActive: string
   /** Same, for a shower whose radiant had not risen: it cannot have produced anything, which is
    * worth saying as loudly as the opposite. */

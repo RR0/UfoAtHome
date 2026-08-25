@@ -9,6 +9,7 @@ import { ImageProjection } from "../engine/instrument/ImageProjection.js"
 import { INSTRUMENTS } from "../engine/instrument/Instrument.js"
 import { LightRigs } from "../engine/model/LightRig.js"
 import { MeteorShowers } from "../engine/astronomy/MeteorShowers.js"
+import { Compass } from "../engine/astronomy/Compass.js"
 import { resolveDecorPlacementAt } from "../engine/model/Decor.js"
 import { SightingShapes } from "../engine/persistence/SightingShapes.js"
 import type { Appearance, PolygonShape, Shape, ShapeBounds, ShapePresetId } from "../engine/shape/Shape.js"
@@ -3309,6 +3310,7 @@ export class UfoRecorderElement extends HTMLElement {
     this.skyCandidatesOutput.textContent = this.messages.skyShowerActive
       .replace("{name}", best.entry.shower.name[this.showerLanguage()])
       .replace("{altitude}", String(Math.round(best.position.altitudeDeg)))
+      .replace("{bearing}", Compass.point(best.position.azimuthDeg, this.showerLanguage()))
       .replace("{rate}", best.rate.toLocaleString(undefined, { maximumFractionDigits: best.rate < 10 ? 1 : 0 }))
   }
 

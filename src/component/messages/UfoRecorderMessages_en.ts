@@ -138,7 +138,7 @@ export const ufoRecorderMessages_en: UfoRecorderMessages = {
   lensFlareBrightness: "Light intensity",
   instrument: "Observed through",
   decorAircraft: "Aircraft",
-  skyShowerActive: "Sky: {name}, radiant {altitude}° up — about {rate}/h under this sky",
+  skyShowerActive: "Sky: {name} — radiant {altitude}° above the horizon, to the {bearing} — about {rate}/h under this sky",
   skyShowerBelowHorizon: "Sky: {name} is active, but its radiant is below the horizon — it can have produced nothing",
   skyNothingActive: "Sky: no meteor shower active on this date",
   showMeteor: "Show me one",
