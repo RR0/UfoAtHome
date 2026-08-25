@@ -166,6 +166,7 @@ export const html = `
          that patch of sky, and whether that explains anything is the reader's conclusion, never the
          file's claim. See MeteorShowers.ts. -->
     <output id="sky-candidates" class="weather-source" for="lat lng obs-time"></output>
+    <button id="show-meteor" type="button" class="icon-btn" title="Show me one" aria-label="Show me one" hidden>☄</button>
     <span id="label-weather">Weather</span>
     <label><span id="label-cloud-cover">Cloud cover</span> <input id="cloudCover" class="weather-field" type="range" min="0" max="1" step="0.05" value="0"/></label>
     <label><span id="label-cloud-darkness">Cloud darkness</span> <input id="cloudDarkness" class="weather-field" type="range" min="0" max="1" step="0.05" value="0"/></label>

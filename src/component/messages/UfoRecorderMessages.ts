@@ -258,6 +258,10 @@ export interface UfoRecorderMessages {
   /** The date or the place is missing, so nothing can be worked out — distinct from "there was
    * nothing", the same way the weather distinguishes the two. */
   skyUnknown: string
+  /** Jumps the playhead to the next meteor of the shower and turns the witness to face it. Stating
+   * that a shower was running without offering this is half a feature: a one-second streak
+   * somewhere in sixty degrees of sky is not findable by hand. */
+  showMeteor: string
   /** Turns the witness to face the selected decor object — the only practical way to find an
    * aircraft in an otherwise empty sky. */
   lookAtDecor: string

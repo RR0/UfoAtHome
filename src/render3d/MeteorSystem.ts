@@ -51,6 +51,11 @@ export class MeteorSystem {
     this.object.frustumCulled = false
   }
 
+  /** What is falling — read by anything that needs to find a meteor rather than draw one. */
+  get schedule(): readonly Meteor[] {
+    return this.meteors
+  }
+
   /** The shower now falling, and where its radiant stands. An empty list is a sky with no shower in
    * it, which is most skies. */
   setShower(meteors: Meteor[], radiantAltitudeDeg: number, radiantAzimuthDeg: number): void {
@@ -100,6 +105,34 @@ export class MeteorSystem {
     geometry.setDrawRange(0, vertex)
     ;(geometry.getAttribute("position") as BufferAttribute).needsUpdate = true
     ;(geometry.getAttribute("color") as BufferAttribute).needsUpdate = true
+  }
+
+  /**
+   * Where a meteor's own midpoint sits in the observer's sky — what a "show me one" control has to
+   * aim at.
+   *
+   * Finding a streak that lasts a second, somewhere in sixty degrees of sky, is not something
+   * anybody does by hand. Stating that a shower was running and leaving the reader to hunt for it
+   * is half a feature; this is the other half, and the same reasoning as the decor's own aim
+   * button.
+   */
+  midpointOf(meteor: Meteor): { altitudeDeg: number; azimuthDeg: number } | undefined {
+    if (this.radiantAltitudeDeg <= 0) return undefined
+    const radiant = horizontalToCartesian(this.radiantAltitudeDeg, this.radiantAzimuthDeg, 1)
+    const [right, up] = this.basisAround(radiant)
+    const bearing = (meteor.bearingDeg * Math.PI) / 180
+    const along = {
+      x: right.x * Math.cos(bearing) + up.x * Math.sin(bearing),
+      y: right.y * Math.cos(bearing) + up.y * Math.sin(bearing),
+      z: right.z * Math.cos(bearing) + up.z * Math.sin(bearing)
+    }
+    const point = this.onSphere(radiant, along, meteor.fromRadiantDeg + meteor.lengthDeg / 2)
+    const length = Math.hypot(point.x, point.y, point.z) || 1
+    return {
+      altitudeDeg: (Math.asin(point.y / length) * 180) / Math.PI,
+      // The inverse of horizontalToCartesian: north is -z, east is +x.
+      azimuthDeg: ((Math.atan2(point.x, -point.z) * 180) / Math.PI + 360) % 360
+    }
   }
 
   private push(vertex: number, point: { x: number; y: number; z: number }, brightness: number): number {

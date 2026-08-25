@@ -1269,6 +1269,18 @@ export class SceneRenderer {
     this.meteorSystem.setShower(meteors, radiantAltitudeDeg, radiantAzimuthDeg)
   }
 
+  /** The fall this sky is currently showing — the single copy of it, so nothing can hold a stale
+   * one (an earlier version kept a second list in SceneElement, and the two drifted apart the
+   * moment a recording without a shower emptied one and not the other). */
+  get meteorSchedule(): readonly Meteor[] {
+    return this.meteorSystem?.schedule ?? []
+  }
+
+  /** Where one of this shower's meteors sits in the sky — see MeteorSystem.midpointOf. */
+  meteorMidpoint(meteor: Meteor): { altitudeDeg: number; azimuthDeg: number } | undefined {
+    return this.meteorSystem?.midpointOf(meteor)
+  }
+
   /** Places the shower at the recording's own instant. Driven by the recording's clock and never by
    * a wall clock, so a paused scene freezes — the rule the whole scene follows. */
   updateMeteors(t: number): void {

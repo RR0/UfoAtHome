@@ -141,6 +141,7 @@ export const ufoRecorderMessages_fr: UfoRecorderMessages = {
   skyShowerActive: "Ciel : {name}, radiant à {altitude}° — environ {rate}/h sous ce ciel",
   skyShowerBelowHorizon: "Ciel : {name} est actif, mais son radiant est sous l'horizon — il n'a rien pu produire",
   skyNothingActive: "Ciel : aucune pluie de météores active à cette date",
+  showMeteor: "Montrer un météore",
   skyUnknown: "Ciel : indéterminable sans date ni lieu",
   decorAltitude: "Altitude",
   decorLights: "Feux",

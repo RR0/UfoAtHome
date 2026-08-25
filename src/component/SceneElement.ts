@@ -636,6 +636,24 @@ export class SceneElement extends HTMLElement {
     this.sceneRenderer.setMeteorShower(meteors, best.position.altitudeDeg, best.position.azimuthDeg)
   }
 
+  /**
+   * The next meteor to fall after `afterMs`, and where in the sky to look for it — what a control
+   * offering to show one needs, and the whole difference between stating that a shower was running
+   * and letting anybody actually see it.
+   *
+   * Wraps back to the first when the playhead is past the last: a reader who reaches the end should
+   * be able to go round again rather than be told there is nothing.
+   */
+  nextMeteor(afterMs: number): { t: number; altitudeDeg: number; azimuthDeg: number } | undefined {
+    const schedule = this.sceneRenderer.meteorSchedule
+    if (schedule.length === 0) return undefined
+    const next = schedule.find(meteor => meteor.t > afterMs) ?? schedule[0]
+    const where = this.sceneRenderer.meteorMidpoint(next)
+    if (!where) return undefined
+    // Mid-flight, where the streak is longest and brightest rather than just appearing.
+    return { t: Math.round(next.t + next.durationMs * 0.45), ...where }
+  }
+
   /** How this recording's own instrument turns an angle into a pixel at time `t` — rebuilt per call
    * rather than cached, since both the instrument and the pose's field of view can change under it
    * and a stale projection is a silently wrong size. */

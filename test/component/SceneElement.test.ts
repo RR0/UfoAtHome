@@ -44,6 +44,12 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     }
     setProjection(): void {}
     setMeteorShower(): void {}
+    get meteorSchedule(): unknown[] {
+      return []
+    }
+    meteorMidpoint(): undefined {
+      return undefined
+    }
     updateMeteors(): void {}
     render(): void {}
     dispose(): void {}

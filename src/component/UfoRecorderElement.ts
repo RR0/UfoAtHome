@@ -293,6 +293,7 @@ export class UfoRecorderElement extends HTMLElement {
   private readonly weatherSourceText: HTMLElement
   /** What else was in that sky — see refreshSkyCandidates. */
   private readonly skyCandidatesOutput: HTMLElement
+  private readonly showMeteorButton: HTMLButtonElement
   private readonly weatherSourceLink: HTMLAnchorElement
   /** Every field the weather record itself provides — the ones locked while it does, and the ones
    * whose edits write a keyframe while it doesn't. Excludes Light intensity, which sits in the
@@ -689,6 +690,7 @@ export class UfoRecorderElement extends HTMLElement {
     this.weatherInferredInput = this.shadow.getElementById("weatherInferred") as HTMLInputElement
     this.weatherSourceText = this.shadow.getElementById("weather-source-text")!
     this.skyCandidatesOutput = this.shadow.getElementById("sky-candidates")!
+    this.showMeteorButton = this.shadow.getElementById("show-meteor") as HTMLButtonElement
     this.weatherSourceLink = this.shadow.getElementById("weather-source-link") as HTMLAnchorElement
     this.weatherFields = [
       this.cloudCoverInput,
@@ -931,6 +933,7 @@ export class UfoRecorderElement extends HTMLElement {
     this.decorLitInput.addEventListener("input", () => this.updateDecorLit())
     this.decorLightRigSelect.addEventListener("change", () => this.updateDecorLightRig())
     this.lookAtDecorButton.addEventListener("click", () => this.lookAtDecor())
+    this.showMeteorButton.addEventListener("click", () => this.showNextMeteor())
     // The single funnel for "the recording changed, a consumer composing this element (e.g. a
     // live <rr0-scene> preview) should resync" — refresh() (called after every mutation: shape
     // edits, drag, observer/time edits, duration) always ends in a timeupdate on the *nested*
@@ -3222,6 +3225,25 @@ export class UfoRecorderElement extends HTMLElement {
     this.showDecorPlacement(this.ufoElement.sighting.decor.find(object => object.id === this.currentDecorId))
   }
 
+  /**
+   * Jumps to the next meteor and turns the witness to face it.
+   *
+   * The half of the feature that was missing. Knowing a shower was running is a fact; a streak that
+   * lasts a second, somewhere in sixty degrees of sky, at one instant of a recording, is not
+   * something anybody finds by hand — and one that cannot be found may as well not be rendered.
+   *
+   * Seeks FIRST and aims afterwards, in that order and never the other way: the direction of gaze
+   * is keyframed, so aiming at one instant aims at that instant only.
+   */
+  private showNextMeteor(): void {
+    const next = this.sceneElement.nextMeteor(this.ufoElement.currentTime)
+    if (!next) return
+    this.ufoElement.currentTime = next.t
+    this.headingInput.value = String(Math.round(next.azimuthDeg * 10) / 10)
+    this.pitchInput.value = String(Math.round(next.altitudeDeg * 10) / 10)
+    this.updateObserver()
+  }
+
   /** Which of a shower's own names to use — the reader's, resolved the same way every other label
    * in this element is. */
   private showerLanguage(): "en" | "fr" {
@@ -3248,6 +3270,7 @@ export class UfoRecorderElement extends HTMLElement {
     const place = sighting.event.place?.[0]
     const time = sighting.event.time
     if (!place || place.lat === undefined || place.lng === undefined || time?.year === undefined) {
+      this.showMeteorButton.hidden = true
       this.skyCandidatesOutput.textContent = this.messages.skyUnknown
       return
     }
@@ -3255,11 +3278,13 @@ export class UfoRecorderElement extends HTMLElement {
     // rather than "there was nothing" distinction the weather makes.
     const date = sightingTimeToDate(time, place.lng, sighting.event.utcOffsetHours)
     if (!date) {
+      this.showMeteorButton.hidden = true
       this.skyCandidatesOutput.textContent = this.messages.skyUnknown
       return
     }
     const active = MeteorShowers.activeAt(date)
     if (active.length === 0) {
+      this.showMeteorButton.hidden = true
       this.skyCandidatesOutput.textContent = this.messages.skyNothingActive
       return
     }
@@ -3275,9 +3300,12 @@ export class UfoRecorderElement extends HTMLElement {
       .sort((a, b) => b.rate - a.rate)
     const best = rated[0]
     if (best.rate <= 0) {
+      this.showMeteorButton.hidden = true
       this.skyCandidatesOutput.textContent = this.messages.skyShowerBelowHorizon.replace("{name}", best.entry.shower.name[this.showerLanguage()])
       return
     }
+    // Only offered when there is genuinely one to show.
+    this.showMeteorButton.hidden = !this.sceneElement.nextMeteor(0)
     this.skyCandidatesOutput.textContent = this.messages.skyShowerActive
       .replace("{name}", best.entry.shower.name[this.showerLanguage()])
       .replace("{altitude}", String(Math.round(best.position.altitudeDeg)))
@@ -3511,6 +3539,8 @@ export class UfoRecorderElement extends HTMLElement {
     this.optionDecorAircraft.textContent = messages.decorAircraft
     this.labelDecorLights.textContent = messages.decorLights
     this.labelDecorAltitude.textContent = messages.decorAltitude
+    this.showMeteorButton.title = messages.showMeteor
+    this.showMeteorButton.setAttribute("aria-label", messages.showMeteor)
     this.lookAtDecorButton.title = messages.lookAtDecor
     this.lookAtDecorButton.setAttribute("aria-label", messages.lookAtDecor)
     this.optionDecorWitness.textContent = messages.decorWitness
