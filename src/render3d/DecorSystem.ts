@@ -38,12 +38,19 @@ function addPart(group: Group, geometry: BoxGeometry | ConeGeometry | CylinderGe
 
 /** The modelled radius of a declared lamp, before setLights scales it for distance. */
 const LAMP_RADIUS_M = 0.25
-/** The angular radius a lamp is never drawn smaller than: 0.07 degrees, so an ordinary navigation
- * light spreads to about a seventh of the Moon's width and a wingtip strobe (four times the
- * intensity, hence twice the radius) to about a quarter. Tuned by eye against what a bright point
- * really blooms to at night rather than derived — the bulb's own size is not what anyone sees at
- * these distances. See setLights. */
-const LAMP_MIN_ANGULAR_RADIUS_RAD = 0.0012
+/**
+ * The angular radius a lamp is never drawn smaller than: 0.115 degrees, so an ordinary navigation
+ * light spreads to about 0.23 degrees across — under half the Moon — and a wingtip strobe (four
+ * times the intensity, hence twice the radius) to about 0.46, roughly the Moon's own width.
+ *
+ * Raised from a third of this after the first real look at an aircraft: at cruising distance the
+ * lamps came out under a pixel each, so turning the lights on changed nothing at all on screen.
+ * That is not fidelity — a strobe at five kilometres is unmistakable in life, because what reaches
+ * the eye is its bloom and not its bulb, and a bulb rendered true to size reaches nobody. Tuned by
+ * eye against what a bright point really spreads to at night; the honest caveat is that real
+ * atmospheric extinction, which would dim it with distance and haze, is still not modelled.
+ */
+const LAMP_MIN_ANGULAR_RADIUS_RAD = 0.002
 
 /** `#rrggbb` to the 0-1 triple every material here takes. Falls back to white rather than throwing:
  * a lamp of an unparseable colour should still light up. */

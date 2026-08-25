@@ -1281,7 +1281,8 @@ export class SceneRenderer {
   }
 
   /**
-   * Points `raycaster` at whatever the viewer sees at this point of the image.
+   * Points `raycaster` at whatever the viewer sees at this point of the image — every hit-test in
+   * this class goes through it (occlusion, decor distances, and the two hover picks).
    *
    * three.js's own setFromCamera reads a point through the pinhole camera, which is right only when
    * that is also what the viewer is looking at. Under the eye's projection the visible image is a
@@ -1299,6 +1300,12 @@ export class SceneRenderer {
     this.camera.updateMatrixWorld()
     raycaster.ray.origin.setFromMatrixPosition(this.camera.matrixWorld)
     raycaster.ray.direction.set(direction.x, direction.y, direction.z).applyQuaternion(this.camera.quaternion).normalize()
+    // Setting the ray by hand skips what setFromCamera would also have done: name the camera. A
+    // Sprite cannot be raycast without it — it has no fixed orientation of its own, so three needs
+    // the camera to know which way the sprite is facing — and pickBodyAt tests against sprites,
+    // which made it throw on every single pointer move over the canvas, taking the hover tooltip
+    // down with it.
+    raycaster.camera = this.camera
   }
 
   /** Projects the Sun's real world position (see setBodyMesh's "sun" branch) to screen space for
@@ -1344,6 +1351,12 @@ export class SceneRenderer {
    * all (the flare mesh it gates skips the z-buffer entirely). Cheap: a handful of occluder
    * objects (groundMesh always, terrainMesh once loaded, a few decor groups at most), one ray. */
   private isSunOccluded(): boolean {
+    // The scene's own matrices, not just the camera's. This runs BEFORE renderer.render(), which is
+    // what normally refreshes them, so every object it tests would otherwise be where it was on the
+    // PREVIOUS frame — fine while nothing moves, and wrong exactly while something does. The ground
+    // and the terrain are re-anchored under a moving witness every tick (see updateDecorAnchoring),
+    // so during a drag this was raycasting against a world one frame out of date.
+    this.scene.updateMatrixWorld()
     const occluders: Object3D[] = []
     if (this.groundMesh) occluders.push(this.groundMesh)
     if (this.terrainMesh) occluders.push(this.terrainMesh)
@@ -1447,13 +1460,14 @@ export class SceneRenderer {
 
 
   /** Finds which celestial body (if any) sits under normalized device coordinates (each in
-   * [-1,1], as THREE.Raycaster.setFromCamera expects) — for hover/click identification, not
+   * [-1,1], of the VISIBLE image — see aimAtScreenPoint, which is what turns that into a direction
+   * under whichever projection the recording's instrument declares) — for hover/click identification, not
    * anything that changes rendering. Tests against the invisible, larger-than-the-real-disc
    * hitAreas (see HOVER_HIT_RADIUS_SCALE), not the tiny true-scale visible meshes themselves,
    * which would be impractical to point at exactly. Returns the same key setBodyMesh/setMoonMesh
    * were called with (e.g. "sun", "moon", "Venus"). */
   pickBodyAt(ndcX: number, ndcY: number): string | undefined {
-    this.raycaster.setFromCamera(new Vector2(ndcX, ndcY), this.camera)
+    this.aimAtScreenPoint(this.raycaster, ndcX, ndcY)
     const entries = [...this.hitAreas.entries()]
     const intersection = this.raycaster.intersectObjects(entries.map(([, sprite]) => sprite))[0]
     if (!intersection) return undefined
@@ -1468,7 +1482,7 @@ export class SceneRenderer {
    * whichever part was actually hit (e.g. a building's own wall mesh) to the top-level group
    * stored in decorGroups, since that's what carries the DecorObject's own id. */
   pickDecorAt(ndcX: number, ndcY: number): string | undefined {
-    this.raycaster.setFromCamera(new Vector2(ndcX, ndcY), this.camera)
+    this.aimAtScreenPoint(this.raycaster, ndcX, ndcY)
     const entries = [...this.decorGroups.entries()]
     const intersection = this.raycaster.intersectObjects(
       entries.map(([, group]) => group),
@@ -1780,24 +1794,26 @@ export class SceneRenderer {
    * glare at all, which is true for every ordinary star/planet. `color` is the body's own already
    * atmosphere-tinted color, so the halo warms near the horizon along with the disc itself. */
   private setGlare(key: string, x: number, y: number, z: number, magnitude: number, color: Color): void {
-    this.disposeGlare(key)
     const strength = glareStrength(magnitude)
-    if (strength <= 0) return
+    if (strength <= 0) {
+      this.disposeGlare(key)
+      return
+    }
     const radius = glareRadius(strength)
-    const material = new SpriteMaterial({
-      map: getGlareTexture(),
-      color,
-      transparent: true,
-      opacity: glareOpacity(strength),
-      blending: AdditiveBlending,
-      depthWrite: false,
-      fog: false
-    })
-    const sprite = new Sprite(material)
+    // Updated in place rather than disposed and rebuilt. This runs on every astronomy tick, and a
+    // drag fires one per pointer move: throwing the sprite and its material away that often meant
+    // the Sun's dazzle was a brand-new GPU object several times a second, for a halo whose only
+    // changing properties are four numbers and a colour.
+    const existing = this.glareSprites.get(key)
+    const sprite = existing ?? new Sprite(new SpriteMaterial({ map: getGlareTexture(), transparent: true, blending: AdditiveBlending, depthWrite: false, fog: false }))
+    sprite.material.color.copy(color)
+    sprite.material.opacity = glareOpacity(strength)
     sprite.position.set(x, y, z)
     sprite.scale.set(radius * 2, radius * 2, 1)
-    this.celestialGroup.add(sprite)
-    this.glareSprites.set(key, sprite)
+    if (!existing) {
+      this.celestialGroup.add(sprite)
+      this.glareSprites.set(key, sprite)
+    }
   }
 
   private disposeGlare(key: string): void {

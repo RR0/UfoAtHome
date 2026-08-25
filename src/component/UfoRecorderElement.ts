@@ -106,6 +106,12 @@ const WITNESS_FOV_DEG = 60
  * towards a decor object has to be measured FROM (see lookAtDecor). */
 const EYE_HEIGHT_M = 1.6
 
+/** Half the length of the pass a freshly added aircraft flies, and the speed it flies it at —
+ * 250 m/s is 900 km/h, an airliner's cruise. Together they give the crossing its own real duration
+ * (32 s over 8 km), independent of how long the recording happens to be. */
+const AIRCRAFT_PASS_HALF_LENGTH_M = 2000
+const AIRCRAFT_CRUISE_M_PER_S = 250
+
 const ARROW_KEYS = new Set(["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"])
 /** Px per arrow-key press, for both moving and resizing the selected shape — see
  * moveOrResizeSelectedShape. Small enough for fine nudges, still visible in one press. */
@@ -401,6 +407,8 @@ export class UfoRecorderElement extends HTMLElement {
    * aircraft. */
   private readonly decorLightRigSelect: HTMLSelectElement
   private readonly lookAtDecorButton: HTMLButtonElement
+  private readonly decorAltitudeInput: HTMLInputElement
+  private readonly labelDecorAltitude: HTMLElement
   private readonly decorSightingUrlInput: HTMLInputElement
   private readonly decorFloorsInput: HTMLInputElement
   private readonly decorOccupiedFloorInput: HTMLInputElement
@@ -765,6 +773,8 @@ export class UfoRecorderElement extends HTMLElement {
     this.decorLitInput = this.shadow.getElementById("decorLit") as HTMLInputElement
     this.decorLightRigSelect = this.shadow.getElementById("decorLightRig") as HTMLSelectElement
     this.lookAtDecorButton = this.shadow.getElementById("look-at-decor") as HTMLButtonElement
+    this.decorAltitudeInput = this.shadow.getElementById("decorAltitude") as HTMLInputElement
+    this.labelDecorAltitude = this.shadow.getElementById("label-decor-altitude")!
     this.decorSightingUrlInput = this.shadow.getElementById("decorSightingUrl") as HTMLInputElement
     this.decorFloorsInput = this.shadow.getElementById("decorFloors") as HTMLInputElement
     this.decorOccupiedFloorInput = this.shadow.getElementById("decorOccupiedFloor") as HTMLInputElement
@@ -885,6 +895,7 @@ export class UfoRecorderElement extends HTMLElement {
       this.decorTitleInput,
       this.decorEastInput,
       this.decorNorthInput,
+      this.decorAltitudeInput,
       this.decorHeadingInput,
       this.decorSightingUrlInput,
       this.decorFloorsInput,
@@ -2337,6 +2348,7 @@ export class UfoRecorderElement extends HTMLElement {
     this.syncWeatherSourceState()
     this.syncSoundFromTimeline()
     this.syncDecorLitFromTimeline()
+    this.syncDecorPlacementFromTimeline()
     this.syncIndoorLookReset()
     this.updateAppearanceFieldsDisabledState()
     // Called unconditionally (not nested inside syncAppearanceFromTimeline's own early-return
@@ -2777,20 +2789,31 @@ export class UfoRecorderElement extends HTMLElement {
     this.ufoElement.refresh()
   }
 
-  /** A straight, level pass in front of the witness, at the rate and altitude an airliner really
-   * flies: 3 km up, crossing 8 km of sky over the recording's own length. At 20 seconds that is
-   * about 1400 km/h, which is too fast — but a recording is rarely as long as a real pass, and an
-   * author who knows the aircraft edits the track. What matters here is that it MOVES, since a
-   * flash rate with no motion draws all its dots in one place. */
+  /**
+   * A straight, level pass in front of the witness — an airliner at 1500 m, a kilometre out,
+   * crossing four kilometres of sky over the recording's own length.
+   *
+   * Lower and nearer than a first attempt at cruising altitude and four kilometres out, which was
+   * just as real and completely unusable: 35 m of aeroplane at 5.8 km is four pixels, so it read as
+   * a speck nobody could tell from a stuck pixel. This is an aircraft on approach, which is both
+   * honest and the case a witness is actually near enough to describe. Every number of it is
+   * editable, at any instant of the pass.
+   *
+   * What matters most is that it MOVES: a flash rate with no motion draws all its dots in one spot.
+   */
   private defaultAircraft(): Partial<DecorObject> {
-    const timeline = this.ufoElement.sighting.timeline
-    const recorded = timeline.allKeyframes[timeline.allKeyframes.length - 1]?.t ?? 0
-    const durationMs = Math.max((this.ufoElement.durationSeconds ?? 0) * 1000, recorded, 1000)
+    // Timed from how fast an aeroplane actually flies, NOT from the recording's own length. Tying
+    // it to the recording meant an empty one — no stated duration, no keyframes — fell back to a
+    // second, and the aircraft crossed four kilometres of sky in that second: fourteen thousand
+    // km/h, out of frame before anyone saw it. A pass has its own real duration, and a recording
+    // shorter than it simply shows part of it.
+    const crossingM = 2 * AIRCRAFT_PASS_HALF_LENGTH_M
+    const durationMs = Math.round((crossingM / AIRCRAFT_CRUISE_M_PER_S) * 1000)
     return {
       lights: LightRigs.byId("airliner")?.create(),
       track: [
-        { t: 0, eastM: -4000, northM: 3000, altitudeM: 3000, headingDeg: 90 },
-        { t: durationMs, eastM: 4000, northM: 3000, altitudeM: 3000, headingDeg: 90 }
+        { t: 0, eastM: -AIRCRAFT_PASS_HALF_LENGTH_M, northM: 1000, altitudeM: 1500, headingDeg: 90 },
+        { t: durationMs, eastM: AIRCRAFT_PASS_HALF_LENGTH_M, northM: 1000, altitudeM: 1500, headingDeg: 90 }
       ]
     }
   }
@@ -2856,11 +2879,26 @@ export class UfoRecorderElement extends HTMLElement {
     sighting.decor = sighting.decor.map(d => {
       if (d.id !== this.currentDecorId) return d
       const witnessSide = canHoldWitness(d.kind) && witnessSideValue !== "" ? (witnessSideValue as DecorSide) : undefined
+      const eastM = Number(this.decorEastInput.value)
+      const northM = Number(this.decorNorthInput.value)
+      const altitudeM = Number(this.decorAltitudeInput.value)
+      // An object that moves is edited AT THE PLAYHEAD, like everything else keyframed here: the
+      // fields showed its placement at this instant (see syncDecorFields), so writing them back
+      // has to land at this instant too. Giving a still object an altitude starts a trajectory of
+      // a single keyframe — which is exactly what "it sits up there" means, and saves inventing a
+      // second way to say the same thing.
+      const track = d.track ?? (altitudeM !== 0 ? [] : undefined)
+      if (track) {
+        const t = this.ufoElement.currentTime
+        const keyframe = { t, eastM, northM, altitudeM, headingDeg }
+        const kept = track.filter(existing => existing.t !== t)
+        return { ...d, title: this.stringOrUndefined(this.decorTitleInput.value), track: [...kept, keyframe].sort((a, b) => a.t - b.t), sightingUrl: this.stringOrUndefined(this.decorSightingUrlInput.value), witnessSide, floors: d.kind === "building" ? Number(this.decorFloorsInput.value) : undefined, occupiedFloor: d.kind === "building" ? Number(this.decorOccupiedFloorInput.value) : undefined }
+      }
       return {
         ...d,
         title: this.stringOrUndefined(this.decorTitleInput.value),
-        eastM: Number(this.decorEastInput.value),
-        northM: Number(this.decorNorthInput.value),
+        eastM,
+        northM,
         headingDeg,
         sightingUrl: this.stringOrUndefined(this.decorSightingUrlInput.value),
         witnessSide,
@@ -2979,14 +3017,18 @@ export class UfoRecorderElement extends HTMLElement {
       this.decorOccupiedFloorInput,
       this.decorWitnessSideSelect,
       this.decorLightRigSelect,
+      this.decorAltitudeInput,
       this.lookAtDecorButton
     ]) {
       input.disabled = !hasSelection
     }
     this.decorTitleInput.value = decor?.title ?? ""
-    this.decorEastInput.value = String(decor?.eastM ?? 0)
-    this.decorNorthInput.value = String(decor?.northM ?? 0)
-    this.decorHeadingInput.value = String(decor?.headingDeg ?? 0)
+    // Where the object actually IS at the playhead, not the static fields it may never use. An
+    // object with a trajectory (an aircraft, a passing car) is somewhere quite else than the
+    // eastM/northM it was created with, and a form showing those reads as a plain lie: "15 m north"
+    // beside an aeroplane three kilometres up. Same principle as every other keyframed field in
+    // this toolbar — the weather, the lit state, the witness's own pose all show the instant.
+    this.showDecorPlacement(decor)
     this.decorLitInput.checked = decor ? resolveDecorLitAt(decor, this.ufoElement.currentTime) : false
     this.refreshDecorLightRigOptions(decor)
     this.decorSightingUrlInput.value = decor?.sightingUrl ?? ""
@@ -3033,7 +3075,10 @@ export class UfoRecorderElement extends HTMLElement {
     this.setRowVisible(this.decorEastInput, hasSelection)
     this.setRowVisible(this.decorNorthInput, hasSelection)
     this.setRowVisible(this.decorHeadingInput, hasSelection)
-    this.setRowVisible(this.decorLitInput, hasSelection)
+    // Lit is the legacy single switch (a streetlamp, a car's headlights). An aircraft's lamps are a
+    // rig of their own (see LightRig.ts), so the checkbox would sit there doing nothing at all —
+    // which is exactly how it was read.
+    this.setRowVisible(this.decorLitInput, hasSelection && decor?.kind !== "aircraft")
     const showWindows = hasSelection && kind !== undefined && hasWindows(kind)
     this.setRowVisible(this.labelDecorWindows, showWindows)
     // Which of the 8 DecorSide values actually apply to this kind — a building shows plain
@@ -3083,6 +3128,41 @@ export class UfoRecorderElement extends HTMLElement {
    * keyframes the pose exactly as any other look would — turning to watch something IS part of what
    * the witness did, not a camera convenience layered on top.
    */
+  /** Writes where the object stands at the playhead into the four placement fields. Skips any the
+   * user is currently typing in, the same "don't fight active interaction" rule the rest of this
+   * toolbar follows. */
+  private showDecorPlacement(decor: DecorObject | undefined): void {
+    const placement = decor ? resolveDecorPlacementAt(decor, this.ufoElement.currentTime) : undefined
+    const values: [HTMLInputElement, number][] = [
+      [this.decorEastInput, placement?.eastM ?? 0],
+      [this.decorNorthInput, placement?.northM ?? 0],
+      [this.decorAltitudeInput, placement?.altitudeM ?? 0],
+      [this.decorHeadingInput, placement?.headingDeg ?? 0]
+    ]
+    for (const [input, value] of values) {
+      if (this.shadow.activeElement === input) continue
+      input.value = String(this.rounded(value))
+    }
+  }
+
+  /**
+   * Keeps those fields honest as the playhead moves — the same role, timing and playing-state
+   * bailout as syncDecorLitFromTimeline beside it.
+   *
+   * Needed the moment decor could move: an aircraft is somewhere different at every instant, and a
+   * form frozen on where it was at t=0 says the wrong thing for the whole rest of the recording.
+   */
+  private syncDecorPlacementFromTimeline(): void {
+    if (this.ufoElement.playbackState === "playing") return
+    this.showDecorPlacement(this.ufoElement.sighting.decor.find(object => object.id === this.currentDecorId))
+  }
+
+  /** One decimal, so a placement read back from an interpolated trajectory doesn't fill the field
+   * with sixteen digits of floating point. */
+  private rounded(value: number): number {
+    return Math.round(value * 10) / 10
+  }
+
   private lookAtDecor(): void {
     const decor = this.ufoElement.sighting.decor.find(object => object.id === this.currentDecorId)
     if (!decor) return
@@ -3303,6 +3383,7 @@ export class UfoRecorderElement extends HTMLElement {
     this.optionDecorVehicle.textContent = messages.decorVehicle
     this.optionDecorAircraft.textContent = messages.decorAircraft
     this.labelDecorLights.textContent = messages.decorLights
+    this.labelDecorAltitude.textContent = messages.decorAltitude
     this.lookAtDecorButton.title = messages.lookAtDecor
     this.lookAtDecorButton.setAttribute("aria-label", messages.lookAtDecor)
     this.optionDecorWitness.textContent = messages.decorWitness

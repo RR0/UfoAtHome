@@ -70,6 +70,7 @@ export const html = `
       <label><span id="label-decor-title">Name</span> <input id="decorTitle" type="text"/></label>
       <label><span id="label-decor-east">Distance east</span> <input id="decorEast" type="number" step="0.5" value="0"/> m</label>
       <label><span id="label-decor-north">Distance north</span> <input id="decorNorth" type="number" step="0.5" value="0"/> m</label>
+      <label><span id="label-decor-altitude">Altitude</span> <input id="decorAltitude" type="number" step="1" value="0"/> m</label>
       <label><span id="label-decor-heading">Heading</span> <input id="decorHeading" type="number" min="0" max="360" step="1" value="0"/> &deg;</label>
       <label><span id="label-decor-lit">Lit</span> <input id="decorLit" type="checkbox"/></label>
       <label><span id="label-decor-lights">Lights</span> <select id="decorLightRig"></select></label>

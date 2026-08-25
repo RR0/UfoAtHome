@@ -86,6 +86,20 @@ describe("DecorObject placement over time", () => {
     expect(resolveDecorPlacementAt(plane, 99_000).eastM).toBe(4000)
   })
 
+  it("a single keyframe is a still object placed somewhere — including above the ground", () => {
+    const hovering: DecorObject = {
+      id: "h",
+      kind: "aircraft",
+      eastM: 0,
+      northM: 15,
+      track: [{ t: 0, eastM: 200, northM: -50, altitudeM: 400, headingDeg: 270 }]
+    }
+    // Whatever the instant, and never the unused static fields it was created with.
+    for (const t of [0, 5000, 99_000]) {
+      expect(resolveDecorPlacementAt(hovering, t)).toEqual({ eastM: 200, northM: -50, altitudeM: 400, headingDeg: 270 })
+    }
+  })
+
   it("holds a heading rather than blending it", () => {
     const turning: DecorObject = {
       id: "p",

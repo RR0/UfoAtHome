@@ -242,6 +242,10 @@ export interface UfoRecorderMessages {
   decorAircraft: string
   /** Which set of lamps the selected decor object carries — see LightRig.ts. */
   decorLights: string
+  /** How high above the witness the decor object sits. Zero for anything standing on the ground,
+   * which is all ordinary scenery; an aircraft is the reason it exists. Setting it on an object
+   * that has no trajectory gives it one, of a single instant — see UfoRecorderElement.updateDecor. */
+  decorAltitude: string
   /** Turns the witness to face the selected decor object — the only practical way to find an
    * aircraft in an otherwise empty sky. */
   lookAtDecor: string
