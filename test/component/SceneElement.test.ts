@@ -46,14 +46,16 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
       return {}
     }
     setProjection(): void {}
-    setMeteorShower(meteors: unknown[], altitudeDeg: number): void {
+    private meteors: { t: number; durationMs: number }[] = []
+    setMeteorShower(meteors: { t: number; durationMs: number }[], altitudeDeg: number): void {
+      this.meteors = meteors
       meteorShowersSet.push({ count: meteors.length, altitudeDeg })
     }
-    get meteorSchedule(): unknown[] {
-      return []
+    get meteorSchedule(): { t: number; durationMs: number }[] {
+      return this.meteors
     }
-    meteorMidpoint(): undefined {
-      return undefined
+    meteorMidpoint(): { altitudeDeg: number; azimuthDeg: number } {
+      return { altitudeDeg: 42, azimuthDeg: 137 }
     }
     updateMeteors(): void {}
     render(): void {}
@@ -242,5 +244,36 @@ describe("meteor scheduling", () => {
     element.nextMeteor(0)
     element.nextMeteor(0)
     expect(meteorShowersSet).toEqual([])
+  })
+
+  it("offers only meteors the playhead can actually be moved to", () => {
+    // The fall covers the DECLARED observation, which is routinely far longer than what was
+    // recorded of it: a five-minute sighting with forty seconds of drawn track has most of its
+    // meteors beyond the end of the timeline. Seeking to one of those clamps to the last frame,
+    // where nothing is burning — the button then looks broken while doing exactly what it says.
+    const element = mount()
+    edit(element, geminidNight)
+    const schedule = [...(element as unknown as { sceneRenderer: { meteorSchedule: { t: number; durationMs: number }[] } }).sceneRenderer.meteorSchedule]
+    expect(schedule.length).toBeGreaterThan(1)
+    // Only the recording's own first forty seconds can be played back.
+    const recordedMs = 40_000
+    const ufo = element.shadowRoot!.querySelector("rr0-ufo")!
+    Object.defineProperty(ufo, "seekableDuration", { get: () => recordedMs, configurable: true })
+    expect(schedule.some(meteor => meteor.t > recordedMs)).toBe(true)
+    let after = 0
+    for (let i = 0; i < 6; i++) {
+      const answer = element.nextMeteor(after)
+      if (!answer) break
+      expect(answer.t).toBeLessThanOrEqual(recordedMs)
+      after = answer.t
+    }
+  })
+
+  it("offers nothing at all when the recording ends before the first meteor falls", () => {
+    const element = mount()
+    edit(element, geminidNight)
+    const ufo = element.shadowRoot!.querySelector("rr0-ufo")!
+    Object.defineProperty(ufo, "seekableDuration", { get: () => 1000, configurable: true })
+    expect(element.nextMeteor(0)).toBeUndefined()
   })
 })

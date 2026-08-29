@@ -687,9 +687,16 @@ export class SceneElement extends HTMLElement {
     // Asked by the toolbar, which may well run before the scene next paints: schedule on demand
     // rather than answer "no meteors" from a sky that simply has not been worked out yet.
     this.ensureMeteorSchedule(this.ufoElement.sighting)
-    const schedule = this.sceneRenderer.meteorSchedule
-    if (schedule.length === 0) return undefined
-    const next = schedule.find(meteor => meteor.t > afterMs) ?? schedule[0]
+    // Only what the playhead can actually be moved to. The fall covers the DECLARED observation,
+    // which is routinely far longer than what was recorded of it — a five-minute sighting with
+    // forty seconds of drawn track puts eleven of its twelve meteors beyond the end of the
+    // timeline. Offering those was the whole of "je ne vois rien": the seek clamped to the last
+    // frame, where nothing was burning, and the button looked broken while working exactly as
+    // written. The sky itself is left alone — those meteors really did fall, after the recording
+    // stops.
+    const reachable = this.sceneRenderer.meteorSchedule.filter(meteor => meteor.t + meteor.durationMs <= this.ufoElement.seekableDuration)
+    if (reachable.length === 0) return undefined
+    const next = reachable.find(meteor => meteor.t > afterMs) ?? reachable[0]
     const where = this.sceneRenderer.meteorMidpoint(next)
     if (!where) return undefined
     // Mid-flight, where the streak is longest and brightest rather than just appearing.
