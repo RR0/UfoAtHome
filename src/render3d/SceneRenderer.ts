@@ -1572,6 +1572,12 @@ export class SceneRenderer {
     this.disposePrecipitationPoints()
     this.disposeRain()
     this.disposeStarTiers()
+    // Both were being left behind: every other subsystem here is released explicitly, and these two
+    // hold a geometry and a material apiece.
+    this.meteorSystem?.dispose()
+    this.meteorSystem = undefined
+    this.cometTail?.dispose()
+    this.cometTail = undefined
     for (const mesh of this.bodyMeshes.values()) {
       this.disposeMesh(mesh)
     }
