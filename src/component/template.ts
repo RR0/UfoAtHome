@@ -173,6 +173,10 @@ export const html = `
     <button id="show-comet" type="button" class="icon-btn" title="Show me the comet" aria-label="Show me the comet" hidden>☄</button>
     <span id="label-weather">Weather</span>
     <label><span id="label-cloud-cover">Cloud cover</span> <input id="cloudCover" class="weather-field" type="range" min="0" max="1" step="0.05" value="0"/></label>
+    <!-- The HIGH deck, kept apart from the total: it is not about how much sky was hidden but about
+         whether there were ICE CRYSTALS in it, which is what halos and sundogs need. See
+         IceHalos.ts. -->
+    <label><span id="label-high-cloud">Ice cloud (cirrus)</span> <input id="highCloudCover" class="weather-field" type="range" min="0" max="1" step="0.05" value="0" title="How much of the sky the high, icy deck covered — what refracts a halo or a pair of sundogs into being"/></label>
     <label><span id="label-cloud-darkness">Cloud darkness</span> <input id="cloudDarkness" class="weather-field" type="range" min="0" max="1" step="0.05" value="0"/></label>
     <label><span id="label-cloud-base">Cloud base</span>
       <input id="cloudBase" class="weather-field" type="number" min="0" step="50" placeholder="1000" title="Height of the cloud layer's base above the ground — decides whether the witness is under the deck or above it"/> m</label>

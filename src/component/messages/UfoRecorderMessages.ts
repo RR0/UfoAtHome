@@ -207,6 +207,9 @@ export interface UfoRecorderMessages {
    * weatherNoRecord: one is a fact about the sighting, the other isn't. */
   weatherLookupFailed: string
   cloudCover: string
+  /** The high, icy deck — distinct from the total cover, because it is the one ingredient the ice
+   * halos need rather than a measure of how much sky was hidden. */
+  highCloudCover: string
   cloudDarkness: string
   precipitationType: string
   precipitationNone: string

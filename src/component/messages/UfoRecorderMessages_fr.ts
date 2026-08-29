@@ -118,6 +118,7 @@ export const ufoRecorderMessages_fr: UfoRecorderMessages = {
   weatherNoRecord: "Aucun relevé pour cette date et ce lieu",
   weatherLookupFailed: "Relevés météo momentanément inaccessibles",
   cloudCover: "Couverture nuageuse",
+  highCloudCover: "Nuages de glace (cirrus)",
   cloudDarkness: "Obscurité des nuages",
   precipitationType: "Précipitations",
   precipitationNone: "Aucune",

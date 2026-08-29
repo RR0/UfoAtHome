@@ -36,11 +36,18 @@ function clamp(value: number, min: number, max: number): number {
 /** precipitationType and storm are held (from's value until t reaches 1), not blended — there's no
  * meaningful halfway point between "raining" and "not raining", same "discrete fields are held"
  * convention as Shape.ts's own lerpShape (kind/outline/title/selected). Every continuous field
- * (cloudCover, cloudDarkness, precipitationIntensity, windSpeed, windDirectionDeg) blends. */
+ * (cloudCover, cloudDarkness, highCloudCover, precipitationIntensity, windSpeed, windDirectionDeg)
+ * blends. */
 export function lerpWeather(a: Weather, b: Weather, t: number): Weather {
   return {
     cloudCover: lerpNumber(a.cloudCover, b.cloudCover, t),
     cloudDarkness: lerpNumber(a.cloudDarkness, b.cloudDarkness, t),
+    // The ice deck blends like the rest — a cirrus veil really does thicken or clear during an
+    // observation, and it is what decides whether a halo could have stood there. Undefined on
+    // either side means unstated, which has no midpoint and must not become nought: nought is a
+    // sky somebody looked at and found no cirrus in.
+    highCloudCover:
+      a.highCloudCover === undefined || b.highCloudCover === undefined ? undefined : lerpNumber(a.highCloudCover, b.highCloudCover, t),
     // A deck really does lift or lower during an observation, so this blends like the other
     // continuous fields — undefined on either side means unstated, which has no midpoint.
     cloudBaseM: a.cloudBaseM === undefined || b.cloudBaseM === undefined ? undefined : lerpNumber(a.cloudBaseM, b.cloudBaseM, t),

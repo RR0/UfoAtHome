@@ -69,7 +69,9 @@ import { buildCloudGeometry, buildCloudMaterial } from "./CloudSystem.js"
 import type { CloudUniforms } from "./CloudSystem.js"
 import { buildLensFlare } from "./LensFlareEffect.js"
 import { EquidistantProjectionPass } from "./EquidistantProjectionPass.js"
+import { IceHalos } from "../engine/atmosphere/IceHalos.js"
 import { CometTail } from "./CometTail.js"
+import { IceHaloEffect } from "./IceHaloEffect.js"
 import { MeteorSystem } from "./MeteorSystem.js"
 import type { Meteor } from "../engine/astronomy/MeteorFall.js"
 import type { ProjectionKind } from "../engine/instrument/Instrument.js"
@@ -86,6 +88,10 @@ function weatherEquals(a: Weather, b: Weather): boolean {
     a.cloudCover === b.cloudCover &&
     a.cloudDarkness === b.cloudDarkness &&
     a.cloudBaseM === b.cloudBaseM &&
+    // Anything added to Weather has to be added here too, or a change to it alone leaves this
+    // returning early and the renderer holding the previous sky. That is exactly how the ice deck
+    // arrived: the value reached resolveWeatherAt correctly and never got past this line.
+    a.highCloudCover === b.highCloudCover &&
     a.precipitationType === b.precipitationType &&
     a.precipitationIntensity === b.precipitationIntensity &&
     a.windDirectionDeg === b.windDirectionDeg &&
@@ -143,6 +149,12 @@ const HOVER_HIT_RADIUS_SCALE = 6
 /** Sun/Moon/planet meshes stop being built once this far below the horizon — well past the point
  * the opaque ground plane would occlude them anyway, so there's no point paying for the geometry. */
 const BODY_HIDE_BELOW_DEG = -4
+
+/** How much fainter a lunar ice display is than a solar one. A halo is the source's own light bent,
+ * and the Moon at its brightest is some fourteen magnitudes down on the Sun — but the eye is dark
+ * adapted and the sky behind it is black, so the ring is not fourteen magnitudes harder to see. A
+ * fifth is the honest middle: plainly there, plainly fainter. */
+const MOON_HALO_STRENGTH = 0.2
 /** Same threshold as BODY_HIDE_BELOW_DEG, named separately for updateCelestialLight's own use —
  * a body that isn't even rendered shouldn't be lighting anything either. */
 const CELESTIAL_LIGHT_MIN_ALTITUDE_DEG = BODY_HIDE_BELOW_DEG
@@ -744,6 +756,8 @@ export class SceneRenderer {
   private meteorSystem?: MeteorSystem
   /** The comet's tail, if this sky has ever had one — built once and kept, like the meteors. */
   private cometTail?: CometTail
+  /** What ice crystals did to the light of the Sun or Moon — see IceHaloEffect. */
+  private iceHalos?: IceHaloEffect
   /** The body-mesh key of the comet currently drawn, so buildPlanets' own sweep can be told to
    * leave it alone and so a change of apparition takes the old one down. */
   private cometKey?: string
@@ -1241,6 +1255,7 @@ export class SceneRenderer {
     this.setMoonMesh(astronomy.moon, magnitudeLimit)
     this.buildPlanets(astronomy.planets, magnitudeLimit)
     this.buildComet(astronomy.comet, magnitudeLimit)
+    this.buildIceHalos(astronomy.sun, astronomy.moon)
     // Fog reaches as far as the ground actually goes, not a fixed SKY_RADIUS: from altitude the
     // whole visible ground lies beyond 900 units, so a fog capped there turned all of it into flat
     // fog colour — a black void below the horizon at 1500 m, since that colour is the night-ground
@@ -1581,6 +1596,8 @@ export class SceneRenderer {
     // hold a geometry and a material apiece.
     this.meteorSystem?.dispose()
     this.meteorSystem = undefined
+    this.iceHalos?.dispose()
+    this.iceHalos = undefined
     this.cometTail?.dispose()
     this.cometTail = undefined
     for (const mesh of this.bodyMeshes.values()) {
@@ -1945,6 +1962,37 @@ export class SceneRenderer {
     // a comet whose head has set can still stand its tail up out of the twilight, and several of
     // these were first noticed exactly that way.
     this.cometTail.set(comet.position, comet.tailEnd, brightness)
+  }
+
+  /**
+   * Puts the ice display around whichever light source can make one.
+   *
+   * The Sun when it is up, and the MOON when it is not — moon halos and moondogs are the same
+   * physics on a source a hundred thousand times fainter, and they are reported as often as the
+   * solar ones because a ring around the Moon at night is a stranger sight than one around the Sun.
+   *
+   * Driven by the weather that was looked up: the high deck is the ice, the lower decks are what
+   * stands between it and the witness. A sky with no cirrus draws nothing at all, which is most
+   * skies, and a hand-authored sky that never stated its ice cloud also draws nothing rather than
+   * inventing some.
+   */
+  private buildIceHalos(sun: HorizontalPosition, moon: HorizontalPosition & { magnitude: number }): void {
+    if (!this.iceHalos) {
+      this.iceHalos = new IceHaloEffect()
+      this.celestialGroup.add(this.iceHalos.object)
+    }
+    const ice = this.weather.highCloudCover
+    if (ice === undefined) {
+      this.iceHalos.update({ x: 0, y: 1, z: 0 }, -1, 0, [1, 1, 1])
+      return
+    }
+    // The lower decks are whatever total cover is not accounted for by the high one.
+    const lower = Math.max(0, this.weather.cloudCover - ice)
+    const source = sun.altitudeDeg > 0 ? sun : moon
+    const strength = IceHalos.strength(ice, lower) * (source === sun ? 1 : MOON_HALO_STRENGTH)
+    const { x, y, z } = horizontalToCartesian(source.altitudeDeg, source.azimuthDeg, 1)
+    const tint = atmosphericTint(source.altitudeDeg)
+    this.iceHalos.update({ x, y, z }, source.altitudeDeg, strength, [tint[0], tint[1], tint[2]])
   }
 
   /** Takes down whatever comet was drawn, head, halo, hover target and tail. */

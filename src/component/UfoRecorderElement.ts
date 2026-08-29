@@ -390,6 +390,8 @@ export class UfoRecorderElement extends HTMLElement {
   private readonly labelWitnessGroup: HTMLElement
   private readonly labelCircumstancesGroup: HTMLElement
   private readonly labelCloudCover: HTMLElement
+  private readonly labelHighCloud: HTMLElement
+  private readonly highCloudCoverInput: HTMLInputElement
   private readonly labelCloudDarkness: HTMLElement
   private readonly labelCloudBase: HTMLElement
   private readonly labelPrecipitationType: HTMLElement
@@ -695,6 +697,7 @@ export class UfoRecorderElement extends HTMLElement {
     this.descriptionInput = this.shadow.getElementById("description") as HTMLTextAreaElement
     this.tagsInput = this.shadow.getElementById("tags") as HTMLInputElement
     this.cloudCoverInput = this.shadow.getElementById("cloudCover") as HTMLInputElement
+    this.highCloudCoverInput = this.shadow.getElementById("highCloudCover") as HTMLInputElement
     this.cloudDarknessInput = this.shadow.getElementById("cloudDarkness") as HTMLInputElement
     this.cloudBaseInput = this.shadow.getElementById("cloudBase") as HTMLInputElement
     this.precipitationTypeSelect = this.shadow.getElementById("precipitationType") as HTMLSelectElement
@@ -781,6 +784,7 @@ export class UfoRecorderElement extends HTMLElement {
     this.labelWitnessGroup = this.shadow.getElementById("label-witness-group")!
     this.labelCircumstancesGroup = this.shadow.getElementById("label-circumstances-group")!
     this.labelCloudCover = this.shadow.getElementById("label-cloud-cover")!
+    this.labelHighCloud = this.shadow.getElementById("label-high-cloud")!
     this.labelCloudDarkness = this.shadow.getElementById("label-cloud-darkness")!
     this.labelCloudBase = this.shadow.getElementById("label-cloud-base")!
     this.labelPrecipitationType = this.shadow.getElementById("label-precipitation-type")!
@@ -1778,6 +1782,7 @@ export class UfoRecorderElement extends HTMLElement {
     }
     const weather: Weather = {
       cloudCover: Number(this.cloudCoverInput.value),
+      highCloudCover: Number(this.highCloudCoverInput.value),
       cloudDarkness: Number(this.cloudDarknessInput.value),
       cloudBaseM: this.numberOrUndefined(this.cloudBaseInput.value),
       precipitationType: this.precipitationTypeSelect.value as PrecipitationType,
@@ -2348,6 +2353,7 @@ export class UfoRecorderElement extends HTMLElement {
     const weather = resolveWeatherAt(this.ufoElement.sighting, this.ufoElement.currentTime)
     const active = this.shadow.activeElement
     if (active !== this.cloudCoverInput) this.cloudCoverInput.value = String(weather.cloudCover)
+    if (active !== this.highCloudCoverInput) this.highCloudCoverInput.value = String(weather.highCloudCover ?? 0)
     if (active !== this.cloudDarknessInput) this.cloudDarknessInput.value = String(weather.cloudDarkness)
     if (active !== this.cloudBaseInput) this.cloudBaseInput.value = weather.cloudBaseM === undefined ? "" : String(weather.cloudBaseM)
     if (active !== this.precipitationTypeSelect) this.precipitationTypeSelect.value = weather.precipitationType
@@ -3815,6 +3821,7 @@ export class UfoRecorderElement extends HTMLElement {
     this.labelWitnessGroup.textContent = messages.witnessGroup
     this.labelCircumstancesGroup.textContent = messages.circumstancesGroup
     this.labelCloudCover.textContent = messages.cloudCover
+    this.labelHighCloud.textContent = messages.highCloudCover
     this.labelCloudDarkness.textContent = messages.cloudDarkness
     this.labelCloudBase.textContent = messages.cloudBase
     this.labelPrecipitationType.textContent = messages.precipitationType

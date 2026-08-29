@@ -21,6 +21,16 @@ export interface Weather {
    * rendering, only an unrecorded one.
    */
   cloudBaseM?: number
+  /**
+   * How much of the sky the HIGH deck covered, 0 to 1 — cirrus and cirrostratus, above about six
+   * kilometres, where anything present is ice rather than water.
+   *
+   * Separate from cloudCover because it answers a different question. The total cover says how much
+   * of the sky was hidden; this says whether there were ICE CRYSTALS in it, which is the one
+   * ingredient halos, sundogs and pillars need (see IceHalos). Undefined means nobody asked — a
+   * hand-authored sky with no ice cloud stated, which draws no display rather than guessing one.
+   */
+  highCloudCover?: number
   precipitationType: PrecipitationType
   /** 0-1; meaningless while precipitationType is "none". */
   precipitationIntensity: number
