@@ -77,6 +77,36 @@ describe("visibleMagnitudeLimit", () => {
     expect(twilight).toBeGreaterThan(visibleMagnitudeLimit(0))
     expect(twilight).toBeLessThan(visibleMagnitudeLimit(-18))
   })
+
+  it("follows the twilight the standard definitions describe, not a straight line between its ends", () => {
+    // The three published reference points, which is what the curve is for. A straight ramp between
+    // daylight and full dark hits -0.5 at the end of civil twilight and 3.0 at the end of nautical,
+    // both about two magnitudes short — enough to empty a dusk sky of everything but Sirius.
+    expect(visibleMagnitudeLimit(-6)).toBeGreaterThan(1)
+    expect(visibleMagnitudeLimit(-6)).toBeLessThan(2)
+    expect(visibleMagnitudeLimit(-12)).toBeGreaterThan(4.5)
+    expect(visibleMagnitudeLimit(-12)).toBeLessThan(5.5)
+    // And the case that exposed it: ten degrees down, an eye reaches about fourth magnitude.
+    expect(visibleMagnitudeLimit(-10)).toBeGreaterThan(3.5)
+    expect(visibleMagnitudeLimit(-10)).toBeLessThan(4.5)
+  })
+
+  it("still meets its two ends exactly", () => {
+    // The curve must not buy its middle by moving its endpoints: nothing but Venus at sunset, the
+    // unaided eye's own 6.5 once astronomical twilight is over.
+    expect(visibleMagnitudeLimit(0)).toBe(-4)
+    expect(visibleMagnitudeLimit(-18)).toBe(6.5)
+  })
+
+  it("darkens monotonically, with no step anywhere", () => {
+    let previous = visibleMagnitudeLimit(0.5)
+    for (let altitude = 0; altitude >= -20; altitude -= 0.1) {
+      const limit = visibleMagnitudeLimit(altitude)
+      expect(limit).toBeGreaterThanOrEqual(previous - 1e-9)
+      expect(limit - previous).toBeLessThan(0.2)
+      previous = limit
+    }
+  })
 })
 
 describe("magnitudeToBrightness", () => {

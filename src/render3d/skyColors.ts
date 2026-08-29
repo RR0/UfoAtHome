@@ -68,20 +68,41 @@ export function skyColorsForAltitude(altitudeDeg: number): SkyColors {
   return { zenith: last.zenith, horizon: last.horizon }
 }
 
+/** Where astronomical twilight ends and the sky is as dark as it will get. */
+const ASTRONOMICAL_TWILIGHT_DEG = -18
+/** Brighter than Venus ever gets — effectively "nothing" by day. */
+const DAYLIGHT_MAG_LIMIT = -4
+/**
+ * How sharply the sky darkens through twilight.
+ *
+ * The number that turns a straight line into the curve the sky actually follows, and it was
+ * measured against the standard twilight definitions rather than chosen: at the end of civil
+ * twilight (-6 degrees) an unaided eye reaches about magnitude 1 to 2, at the end of nautical
+ * twilight (-12) about 5, and at -18 the full 6.5. An exponent of 1.8 passes through all three.
+ */
+const TWILIGHT_FALLOFF = 1.8
+
 /**
  * The faintest real apparent magnitude visible given the sun's altitude — replaces the old
  * step-function starCountForAltitude() now that stars come from a real catalog with real
  * magnitudes to filter by, instead of an arbitrary point count. Daylight washes out everything;
  * the catalog's own naked-eye cutoff (7.5) is only reached once the sky is properly dark
  * (astronomical twilight ends, sun at -18deg); in between, the limit relaxes continuously.
+ *
+ * CURVED, not straight, and the difference is two magnitudes in the middle of twilight — which is
+ * to say most of the sky. A real sky darkens fast just after sunset and then creeps: by the end of
+ * nautical twilight it is already within a magnitude and a half of its final depth. Interpolating
+ * linearly between the two ends sags badly in between — it put the limit at 1.8 with the sun ten
+ * degrees down, where an eye really reaches about 4, so a scene at dusk showed twenty-nine stars
+ * instead of several hundred and read as a black sky with a few dots in it. Found because a comet
+ * at magnitude -0.8 sailed over the sagging limit while the whole star field fell under it.
  */
 export function visibleMagnitudeLimit(sunAltitudeDeg: number): number {
-  const FULL_DARK_LIMIT = NAKED_EYE_MAG_LIMIT
-  const DAYLIGHT_LIMIT = -4 // brighter than Venus ever gets — effectively "nothing" by day
-  if (sunAltitudeDeg <= -18) return FULL_DARK_LIMIT
-  if (sunAltitudeDeg >= 0) return DAYLIGHT_LIMIT
-  const t = (sunAltitudeDeg + 18) / 18
-  return lerp(FULL_DARK_LIMIT, DAYLIGHT_LIMIT, t)
+  if (sunAltitudeDeg <= ASTRONOMICAL_TWILIGHT_DEG) return NAKED_EYE_MAG_LIMIT
+  if (sunAltitudeDeg >= 0) return DAYLIGHT_MAG_LIMIT
+  // 0 at sunset, 1 at the end of astronomical twilight.
+  const darkness = sunAltitudeDeg / ASTRONOMICAL_TWILIGHT_DEG
+  return NAKED_EYE_MAG_LIMIT - (NAKED_EYE_MAG_LIMIT - DAYLIGHT_MAG_LIMIT) * (1 - darkness) ** TWILIGHT_FALLOFF
 }
 
 const BRIGHT_MAG_REFERENCE = -1.5 // brighter than any real star (Sirius, -1.46) maps to brightness 1
