@@ -7,6 +7,8 @@ export const ufoMessages_en: UfoMessages = {
   autoReplay: "Auto-replay",
   currentPosition: "Current position",
   duration: "Duration",
+  switchToElapsed: "click to show elapsed time",
+  switchToClockTime: "click to show the time of day",
   fullscreen: "Fullscreen",
   exitFullscreen: "Exit fullscreen"
 }

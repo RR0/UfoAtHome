@@ -521,6 +521,13 @@ fieldset.decor-fieldset legend {
 #seek {
   flex: 1;
 }
+.time-label.switchable {
+  cursor: pointer;
+}
+.time-label.switchable:hover,
+.time-label.switchable:focus-visible {
+  text-decoration: underline;
+}
 .time-label {
   font-variant-numeric: tabular-nums;
   font-size: 0.85em;

@@ -104,6 +104,11 @@ export interface UfoRecorderMessages {
   elevation: string
   samplingRate: string
   duration: string
+  /** The playback counters' own titles. They name what each value is, and — when the observation
+   * has a start time, so there are two readings to choose between — what clicking one does. */
+  currentPosition: string
+  switchToElapsed: string
+  switchToClockTime: string
   durationPlaceholder: string
   /** Duration field title/tooltip when start+end are both given but too imprecise/mismatched to
    * derive an exact duration from — see sightingDurationBlockedReason. */

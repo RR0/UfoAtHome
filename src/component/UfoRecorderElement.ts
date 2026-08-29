@@ -653,6 +653,14 @@ export class UfoRecorderElement extends HTMLElement {
     this.seekInput = this.shadow.getElementById("seek") as HTMLInputElement
     this.timeStartLabel = this.shadow.getElementById("time-start")!
     this.timeEndLabel = this.shadow.getElementById("time-end")!
+    for (const label of [this.timeStartLabel, this.timeEndLabel]) {
+      label.addEventListener("click", () => this.switchTimeDisplay())
+      label.addEventListener("keydown", event => {
+        if (event.key !== "Enter" && event.key !== " ") return
+        event.preventDefault()
+        this.switchTimeDisplay()
+      })
+    }
     this.loopButton = this.shadow.getElementById("loop") as HTMLButtonElement
     this.durationInput = this.shadow.getElementById("durationSeconds") as HTMLInputElement
     this.exportButton = this.shadow.getElementById("export") as HTMLButtonElement
@@ -2119,6 +2127,44 @@ export class UfoRecorderElement extends HTMLElement {
     }
     this.timeStartLabel.textContent = this.ufoElement.positionLabel
     this.timeEndLabel.textContent = this.ufoElement.durationLabel
+    this.syncTimeDisplaySwitch()
+  }
+
+  /**
+   * Makes this toolbar's own two counters switch between clock time and elapsed time, exactly as
+   * the nested element's do.
+   *
+   * The state lives in <rr0-ufo> and is only read here. Both toolbars show the same two values —
+   * these labels are literally its own formatted text — so a second copy of "which reading am I
+   * displaying" would be one copy too many, and the first thing to drift.
+   */
+  /** Switches, then repaints these labels straight away: syncPlaybackControls is driven by
+   * timeupdate, which does not fire while the recording is stopped — and a counter that only
+   * changed once playback resumed would read as a click that did nothing. */
+  private switchTimeDisplay(): void {
+    this.ufoElement.toggleTimeDisplay()
+    this.timeStartLabel.textContent = this.ufoElement.positionLabel
+    this.timeEndLabel.textContent = this.ufoElement.durationLabel
+    this.syncTimeDisplaySwitch()
+  }
+
+  private syncTimeDisplaySwitch(): void {
+    const canSwitch = this.ufoElement.canSwitchTimeDisplay
+    const hint = this.ufoElement.showingClockTime ? this.messages.switchToElapsed : this.messages.switchToClockTime
+    for (const [label, what] of [
+      [this.timeStartLabel, this.messages.currentPosition],
+      [this.timeEndLabel, this.messages.duration]
+    ] as const) {
+      label.title = canSwitch ? `${what} — ${hint}` : what
+      label.classList.toggle("switchable", canSwitch)
+      if (canSwitch) {
+        label.setAttribute("role", "button")
+        label.setAttribute("tabindex", "0")
+      } else {
+        label.removeAttribute("role")
+        label.removeAttribute("tabindex")
+      }
+    }
   }
 
   /** Resyncs the observation date/time fields from a freshly loaded sighting (sightingData

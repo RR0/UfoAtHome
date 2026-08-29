@@ -1002,3 +1002,74 @@ describe("UfoElement observation start", () => {
     expect(element.positionLabel).toBe("21:05")
   })
 })
+
+describe("switching the counters between clock time and elapsed time", () => {
+  /** An observation with a real start time: 17:50, running twenty seconds. */
+  const timedSighting = {
+    ...sampleJson,
+    time: { year: 1964, month: 4, day: 24, hour: 17, minute: 50 },
+    durationSeconds: 20
+  }
+
+  function mountUfo(sighting: object): UfoElement {
+    const element = mount()
+    element.sightingData = sighting as typeof sampleJson
+    return element
+  }
+
+  function counters(element: UfoElement): { start: HTMLElement; end: HTMLElement } {
+    const shadow = element.shadowRoot!
+    return { start: shadow.getElementById("time-start")!, end: shadow.getElementById("time-end")! }
+  }
+
+  it("starts on the clock, which is how a testimony is written", () => {
+    const element = mountUfo(timedSighting)
+    const { start, end } = counters(element)
+    expect(start.textContent).toBe("17:50")
+    expect(end.textContent).toBe("17:50:20")
+  })
+
+  it("switches both counters together when either is clicked", () => {
+    // Both or neither: one counter reading 17:50 beside another reading 0:20 would be two time
+    // bases on one bar, which is exactly the confusion this is meant to remove.
+    const element = mountUfo(timedSighting)
+    const { start, end } = counters(element)
+    start.click()
+    expect(start.textContent).toBe("0:00")
+    expect(end.textContent).toBe("0:20")
+    // And back, from the other one.
+    end.click()
+    expect(start.textContent).toBe("17:50")
+    expect(end.textContent).toBe("17:50:20")
+  })
+
+  it("says in its title what the click will do, and updates that after the click", () => {
+    const element = mountUfo(timedSighting)
+    const { start } = counters(element)
+    expect(start.title).toContain("elapsed")
+    start.click()
+    expect(start.title).toContain("time of day")
+  })
+
+  it("offers nothing to switch to when the observation has no start time", () => {
+    // With no clock there is only one reading available, so the counter stays plain text rather
+    // than advertising a control that cannot do anything.
+    const { time: _omitted, ...noTime } = sampleJson
+    const element = mountUfo({ ...noTime, durationSeconds: 20 })
+    const { start } = counters(element)
+    expect(start.getAttribute("role")).toBe(null)
+    expect(start.title).not.toContain("click")
+    const before = start.textContent
+    start.click()
+    expect(start.textContent).toBe(before)
+  })
+
+  it("is reachable from the keyboard, as its role promises", () => {
+    const element = mountUfo(timedSighting)
+    const { start } = counters(element)
+    expect(start.getAttribute("role")).toBe("button")
+    expect(start.getAttribute("tabindex")).toBe("0")
+    start.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }))
+    expect(start.textContent).toBe("0:00")
+  })
+})

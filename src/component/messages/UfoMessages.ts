@@ -7,6 +7,10 @@ export interface UfoMessages {
   autoReplay: string
   currentPosition: string
   duration: string
+  /** Appended to both counters' titles to say what clicking one does. Only ever shown when the
+   * observation has a start time, since with no clock there is nothing to switch to. */
+  switchToElapsed: string
+  switchToClockTime: string
   fullscreen: string
   exitFullscreen: string
 }

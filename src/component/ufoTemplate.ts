@@ -192,6 +192,13 @@ input[type=range] {
   cursor: default;
   opacity: 0.4;
 }
+.time-label.switchable {
+  cursor: pointer;
+}
+.time-label.switchable:hover,
+.time-label.switchable:focus-visible {
+  text-decoration: underline;
+}
 .time-label {
   color: #fff;
   font-variant-numeric: tabular-nums;

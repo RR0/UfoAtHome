@@ -95,6 +95,19 @@ export class UfoElement extends HTMLElement {
   private realDurationMs: number | undefined
   private realStartMs: number | undefined
 
+  /**
+   * Whether the two counters read as a time of day or as time elapsed.
+   *
+   * Both are wanted, and which one is wanted changes with the question being asked. "The object
+   * crossed the road at 17:50:12" is how a testimony is written and how it is checked against
+   * anything else that happened that evening; "eight seconds in" is how a recording is discussed
+   * while it is being edited. Deriving one from the other in one's head means holding the start
+   * time and doing arithmetic on every glance.
+   *
+   * Clock time stays the default wherever there is one, which is what this element already did.
+   */
+  private showClockTime = true
+
   /** Bound once so document.removeEventListener (disconnectedCallback) can actually find it. */
   private readonly handleFullscreenChange = () => this.updateFullscreenButton()
 
@@ -146,6 +159,16 @@ export class UfoElement extends HTMLElement {
     this.seekInput = this.shadow.getElementById("seek") as HTMLInputElement
     this.timeStartLabel = this.shadow.getElementById("time-start")!
     this.timeEndLabel = this.shadow.getElementById("time-end")!
+    for (const label of [this.timeStartLabel, this.timeEndLabel]) {
+      label.addEventListener("click", () => this.toggleTimeDisplay())
+      // Reachable from the keyboard too, since role="button" promises as much. Space is guarded
+      // against its own default, which would scroll the page out from under the toolbar.
+      label.addEventListener("keydown", event => {
+        if (event.key !== "Enter" && event.key !== " ") return
+        event.preventDefault()
+        this.toggleTimeDisplay()
+      })
+    }
     this.fullscreenTarget = this.stageElement
 
     this.playPauseButton.addEventListener("click", () => this.togglePlayPause())
@@ -302,6 +325,38 @@ export class UfoElement extends HTMLElement {
 
   get durationLabel(): string {
     return this.timeEndLabel.textContent ?? ""
+  }
+
+  /** Whether the counters are currently showing a clock. False when they show elapsed time, and
+   * also false when the observation has no start time at all — there is then no clock to show. */
+  get showingClockTime(): boolean {
+    return this.canShowClockTime
+  }
+
+  /** Whether switching is offered at all: an observation with no recorded start time has only one
+   * of the two readings available, so its counters are plain text rather than a control. */
+  get canSwitchTimeDisplay(): boolean {
+    return this.realStartMs !== undefined
+  }
+
+  /**
+   * Swaps the counters between the time of day and time elapsed.
+   *
+   * Public because the recorder shows the same two values in its own toolbar (see
+   * UfoRecorderElement.updateTimeLabels) and its counters must switch the same way — one piece of
+   * state, read by both, rather than each keeping its own idea of what is being displayed.
+   */
+  toggleTimeDisplay(): void {
+    if (!this.canSwitchTimeDisplay) return
+    this.showClockTime = !this.showClockTime
+    this.updateTimeLabels()
+    this.updateTimeLabelTitles()
+    this.dispatchEvent(new CustomEvent("timedisplaychange", { bubbles: true, composed: true }))
+  }
+
+  /** True only when a clock is both wanted and available. */
+  private get canShowClockTime(): boolean {
+    return this.realStartMs !== undefined && this.showClockTime
   }
 
   /** Hides this element's own overlaid play/seek/loop bar — set by a composing element that
@@ -544,10 +599,34 @@ export class UfoElement extends HTMLElement {
     this.applyMessages(await loadUfoMessages(language))
   }
 
+  /**
+   * Both counters' titles: what the value is, and — when there is a second reading to switch to —
+   * what clicking will do.
+   *
+   * A control that looks exactly like static text has to say so somewhere, and the title is the
+   * only place a counter this small can say it. With no start time recorded there is nothing to
+   * switch to, so it stays plain text and says nothing it cannot do.
+   */
+  private updateTimeLabelTitles(): void {
+    const hint = this.showClockTime ? this.messages.switchToElapsed : this.messages.switchToClockTime
+    const suffix = this.canSwitchTimeDisplay ? ` — ${hint}` : ""
+    this.timeStartLabel.title = this.messages.currentPosition + suffix
+    this.timeEndLabel.title = this.messages.duration + suffix
+    for (const label of [this.timeStartLabel, this.timeEndLabel]) {
+      label.classList.toggle("switchable", this.canSwitchTimeDisplay)
+      if (this.canSwitchTimeDisplay) {
+        label.setAttribute("role", "button")
+        label.setAttribute("tabindex", "0")
+      } else {
+        label.removeAttribute("role")
+        label.removeAttribute("tabindex")
+      }
+    }
+  }
+
   private applyMessages(messages: UfoMessages): void {
     this.messages = messages
-    this.timeStartLabel.title = messages.currentPosition
-    this.timeEndLabel.title = messages.duration
+    this.updateTimeLabelTitles()
     this.loopButton.title = messages.autoReplay
     this.loopButton.setAttribute("aria-label", messages.autoReplay)
     this.updatePlayPauseButton()
@@ -589,6 +668,9 @@ export class UfoElement extends HTMLElement {
 
     this.timeEndLabel.textContent = this.formatEndOfTimeline()
     this.timeStartLabel.textContent = this.formatPosition(this.player.time)
+    // Whether there is a second reading to switch to is decided by realStartMs, which was only
+    // just recomputed a few lines above: a sighting loaded after construction changes the answer.
+    this.updateTimeLabelTitles()
   }
 
   /**
@@ -606,8 +688,8 @@ export class UfoElement extends HTMLElement {
     // recorded pacing to stretch, so t is already a real-ms position (1 timeline-ms == 1 real-ms
     // is the natural default until real recorded data establishes a different scale).
     const realElapsedMs = timelineDuration > 0 && t <= timelineDuration ? (t / timelineDuration) * this.realDurationMs : t
-    return this.realStartMs !== undefined
-      ? formatClockTime(msToTimeOfDay(this.realStartMs + realElapsedMs))
+    return this.canShowClockTime
+      ? formatClockTime(msToTimeOfDay(this.realStartMs! + realElapsedMs))
       : formatElapsed(realElapsedMs)
   }
 
@@ -619,8 +701,8 @@ export class UfoElement extends HTMLElement {
    */
   private formatEndOfTimeline(): string {
     if (this.realDurationMs === undefined) return formatElapsed(this.currentSighting.timeline.duration)
-    return this.realStartMs !== undefined
-      ? formatClockTime(msToTimeOfDay(this.realStartMs + this.realDurationMs))
+    return this.canShowClockTime
+      ? formatClockTime(msToTimeOfDay(this.realStartMs! + this.realDurationMs))
       : formatElapsed(this.realDurationMs)
   }
 }
