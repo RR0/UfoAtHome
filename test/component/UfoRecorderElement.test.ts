@@ -4818,3 +4818,57 @@ describe("UfoRecorderElement time zone picker", () => {
     expect(offset(element).readOnly).toBe(true)
   })
 })
+
+describe("showing the next meteor", () => {
+  /** The meteor the scene will report, wherever the button is asked to look. */
+  const SOMEWHERE_IN_THE_SKY = { t: 5000, altitudeDeg: 42, azimuthDeg: 137 }
+
+  function armedWithAMeteor(): {
+    element: UfoRecorderElement
+    ufo: { currentTime: number; durationSeconds?: number; playbackState: string; togglePlayPause: () => void }
+    toggles: () => number
+  } {
+    const element = mount()
+    const ufo = nestedUfo(element) as unknown as {
+      currentTime: number
+      durationSeconds?: number
+      playbackState: string
+      togglePlayPause: () => void
+    }
+    ufo.durationSeconds = 300
+    const scene = element.shadowRoot!.querySelector("rr0-scene") as unknown as { nextMeteor: () => unknown }
+    scene.nextMeteor = () => SOMEWHERE_IN_THE_SKY
+    let toggled = 0
+    ufo.togglePlayPause = () => {
+      toggled++
+    }
+    return { element, ufo, toggles: () => toggled }
+  }
+
+  function clickShowMeteor(element: UfoRecorderElement): void {
+    ;(element.shadowRoot!.getElementById("show-meteor") as HTMLButtonElement).click()
+  }
+
+  it("stops a running recording, so the streak is still there when the eye arrives", () => {
+    // The bug this exists for: a meteor is lit for about half a second. Seeking to one while the
+    // recording keeps running lands on it and leaves it behind within a frame or two of the click —
+    // which looks exactly like a button that does nothing, even though it aimed perfectly.
+    const { element, ufo, toggles } = armedWithAMeteor()
+    Object.defineProperty(ufo, "playbackState", { get: () => "playing", configurable: true })
+    clickShowMeteor(element)
+    expect(toggles()).toBe(1)
+    expect(ufo.currentTime).toBe(SOMEWHERE_IN_THE_SKY.t)
+    expect((element.shadowRoot!.getElementById("heading") as HTMLInputElement).value).toBe("137")
+    expect((element.shadowRoot!.getElementById("pitch") as HTMLInputElement).value).toBe("42")
+  })
+
+  it("leaves an already-stopped recording alone rather than starting it", () => {
+    // The trap on the other side: the pause is a toggle, so calling it unconditionally would set a
+    // paused recording PLAYING and sweep straight past the meteor it was asked to show.
+    const { element, ufo, toggles } = armedWithAMeteor()
+    Object.defineProperty(ufo, "playbackState", { get: () => "paused", configurable: true })
+    clickShowMeteor(element)
+    expect(toggles()).toBe(0)
+    expect(ufo.currentTime).toBe(SOMEWHERE_IN_THE_SKY.t)
+  })
+})

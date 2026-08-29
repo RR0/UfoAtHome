@@ -3235,10 +3235,17 @@ export class UfoRecorderElement extends HTMLElement {
    *
    * Seeks FIRST and aims afterwards, in that order and never the other way: the direction of gaze
    * is keyframed, so aiming at one instant aims at that instant only.
+   *
+   * And it STOPS the playback before seeking. A meteor is lit for about half a second: jumping to
+   * one while the recording keeps running lands on it and leaves it behind within a frame or two of
+   * the click, which looks exactly like nothing having happened at all — the button appears broken
+   * even though it aimed perfectly. Held on the paused instant, the streak simply stays there to be
+   * looked at, which is the whole point of a button that says "show me one".
    */
   private showNextMeteor(): void {
     const next = this.sceneElement.nextMeteor(this.ufoElement.currentTime)
     if (!next) return
+    if (this.ufoElement.playbackState === "playing") this.ufoElement.togglePlayPause()
     this.ufoElement.currentTime = next.t
     this.headingInput.value = String(Math.round(next.azimuthDeg * 10) / 10)
     this.pitchInput.value = String(Math.round(next.altitudeDeg * 10) / 10)
