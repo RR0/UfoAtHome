@@ -26,6 +26,14 @@ export interface Meteor {
   lengthDeg: number
   /** 0 to 1, faint to brilliant. Most are faint; the population index is what makes that so. */
   brightness: number
+  /**
+   * Where THIS meteor came from, when it did not come from the shower's own radiant.
+   *
+   * Present only on sporadics, and it is what makes them sporadic: they belong to no stream, so
+   * each arrives from its own direction instead of all of them tracing back to one point. The
+   * rendering reads it in place of the shower radiant — see MeteorSystem.
+   */
+  radiant?: { altitudeDeg: number; azimuthDeg: number }
 }
 
 export interface MeteorFallOptions {
@@ -41,7 +49,7 @@ export interface MeteorFallOptions {
 
 /** A tiny deterministic generator — mulberry32. Not for cryptography, only for a sky that comes out
  * the same twice, which Math.random cannot promise. */
-class Rng {
+export class Rng {
   constructor(private state: number) {}
 
   next(): number {

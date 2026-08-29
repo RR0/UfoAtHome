@@ -10,6 +10,7 @@ import { INSTRUMENTS } from "../engine/instrument/Instrument.js"
 import { LightRigs } from "../engine/model/LightRig.js"
 import { DARK_SKY_LIMITING_MAGNITUDE, MeteorShowers } from "../engine/astronomy/MeteorShowers.js"
 import { Comets } from "../engine/astronomy/Comets.js"
+import { Sporadics } from "../engine/astronomy/Sporadics.js"
 import { Satellites } from "../engine/astronomy/Satellites.js"
 import { visibleMagnitudeLimit } from "../render3d/skyColors.js"
 import type { CometAppearance } from "../engine/astronomy/Comets.js"
@@ -3375,10 +3376,16 @@ export class UfoRecorderElement extends HTMLElement {
   /** The strongest shower running, and what it would really have produced — or the fact that none
    * was. Also decides whether the meteor button has anything to offer. */
   private showerClause(date: Date, observer: { lat: number; lng: number; elevationM: number }): string {
+    // Always stated, because it is always there: the sporadic background falls on every night of
+    // the year, and most showers on most nights are weaker than it. A line naming only the shower
+    // would put the smaller of the two numbers in front of the reader.
+    const sporadic = Sporadics.observedRatePerHour(Sporadics.apexPosition(date, observer).altitudeDeg).toLocaleString(undefined, {
+      maximumFractionDigits: 1
+    })
     const active = MeteorShowers.activeAt(date)
     if (active.length === 0) {
-      this.showMeteorButton.hidden = true
-      return this.messages.skyNothingActive
+      this.showMeteorButton.hidden = !this.sceneElement.meteorByRank(0)
+      return this.messages.skyNothingActive.replace("{sporadic}", sporadic)
     }
     // The strongest shower running, by what would ACTUALLY have been seen rather than by its
     // reputation: a famous shower with its radiant near the horizon yields less than a modest one
@@ -3390,7 +3397,9 @@ export class UfoRecorderElement extends HTMLElement {
       })
       .sort((a, b) => b.rate - a.rate)[0]
     if (best.rate <= 0) {
-      this.showMeteorButton.hidden = true
+      // The shower produced nothing, but the sky is not empty — the background is still falling, and
+      // the button still has something to show.
+      this.showMeteorButton.hidden = !this.sceneElement.meteorByRank(0)
       return this.messages.skyShowerBelowHorizon.replace("{name}", best.entry.shower.name[this.showerLanguage()])
     }
     // Only offered when there is genuinely one to show.
@@ -3400,6 +3409,7 @@ export class UfoRecorderElement extends HTMLElement {
       .replace("{altitude}", String(Math.round(best.position.altitudeDeg)))
       .replace("{bearing}", Compass.towards(best.position.azimuthDeg, this.showerLanguage()))
       .replace("{rate}", best.rate.toLocaleString(undefined, { maximumFractionDigits: best.rate < 10 ? 1 : 0 }))
+      .replace("{sporadic}", sporadic)
   }
 
   /**

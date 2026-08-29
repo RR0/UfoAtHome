@@ -25,6 +25,7 @@ import { Comets } from "../engine/astronomy/Comets.js"
 import { BRIGHT_COMETS } from "../engine/astronomy/cometCatalog.js"
 import { MeteorShowers } from "../engine/astronomy/MeteorShowers.js"
 import { MeteorFall } from "../engine/astronomy/MeteorFall.js"
+import { Sporadics } from "../engine/astronomy/Sporadics.js"
 import { SizeEstimate } from "../engine/shape/SizeEstimate.js"
 import type { MeterRange } from "../engine/shape/SizeEstimate.js"
 import { ApparentSize } from "../engine/shape/ApparentSize.js"
@@ -685,6 +686,17 @@ export class SceneElement extends HTMLElement {
     ])
   }
 
+  /**
+   * Works out what falls during this recording — the shower, if one is running, and the sporadic
+   * background, which is always.
+   *
+   * Both go into ONE list, because a witness does not see two skies. The shower's meteors radiate
+   * from its radiant; each sporadic carries its own (see MeteorFall.scheduleSporadic), and the
+   * renderer reads whichever applies.
+   *
+   * The sporadics are what makes a night with no shower stop rendering as an empty sky. Most
+   * showers, most nights, are weaker than the background they fall against.
+   */
   private scheduleMeteors(sighting: Sighting): void {
     const place = sighting.event.place?.[0]
     const time = sighting.event.time
@@ -696,6 +708,16 @@ export class SceneElement extends HTMLElement {
       return
     }
     const observer = { lat: place.lat, lng: place.lng, elevationM: 0 }
+    const durationMs = (sighting.event.durationSeconds ?? 0) * 1000 || sighting.timeline.duration || 20_000
+    // Seeded from the observation itself, so the same recording always drops the same meteors and
+    // two different ones never share a sky by accident.
+    const seed = Math.round(date.getTime() / 1000) + Math.round(place.lat * 1000)
+    const sporadics = Sporadics.schedule({
+      ratePerHour: Sporadics.observedRatePerHour(Sporadics.apexPosition(date, observer).altitudeDeg),
+      durationMs,
+      velocityKmS: Sporadics.TYPICAL_VELOCITY_KM_S,
+      seed
+    })
     const best = MeteorShowers.activeAt(date)
       .map(entry => {
         const position = MeteorShowers.radiantPosition(entry.shower, date, observer)
@@ -703,19 +725,18 @@ export class SceneElement extends HTMLElement {
       })
       .sort((a, b) => b.rate - a.rate)[0]
     if (!best || best.rate <= 0) {
-      this.sceneRenderer.setMeteorShower([], 0, 0)
+      this.sceneRenderer.setMeteorShower(sporadics, 0, 0)
       return
     }
-    const durationMs = (sighting.event.durationSeconds ?? 0) * 1000 || sighting.timeline.duration || 20_000
-    const meteors = MeteorFall.schedule({
+    const shower = MeteorFall.schedule({
       ratePerHour: best.rate,
       durationMs,
       velocityKmS: best.entry.shower.velocityKmS,
-      // Seeded from the observation itself, so the same recording always drops the same meteors and
-      // two different ones never share a sky by accident.
-      seed: Math.round(date.getTime() / 1000) + Math.round(place.lat * 1000)
+      // Offset from the sporadics' seed so the two populations are independent draws rather than
+      // the same meteors twice over.
+      seed: seed + 1
     })
-    this.sceneRenderer.setMeteorShower(meteors, best.position.altitudeDeg, best.position.azimuthDeg)
+    this.sceneRenderer.setMeteorShower([...shower, ...sporadics], best.position.altitudeDeg, best.position.azimuthDeg)
   }
 
   /**

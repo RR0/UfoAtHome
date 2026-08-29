@@ -86,8 +86,9 @@ export class MeteorSystem {
     return this.meteors
   }
 
-  /** The shower now falling, and where its radiant stands. An empty list is a sky with no shower in
-   * it, which is most skies. */
+  /** What is falling, and where the SHOWER's radiant stands — sporadics in the list carry their own
+   * (see radiantOf). An empty list is a sky with nothing falling in it at all, which since the
+   * sporadics were added is only ever a sky with no date to work one out from. */
   setShower(meteors: Meteor[], radiantAltitudeDeg: number, radiantAzimuthDeg: number): void {
     this.meteors = meteors
     this.radiantAltitudeDeg = radiantAltitudeDeg
@@ -102,15 +103,17 @@ export class MeteorSystem {
    */
   update(t: number): void {
     const geometry = this.object.geometry
-    if (this.meteors.length === 0 || this.radiantAltitudeDeg <= 0) {
+    if (this.meteors.length === 0) {
       geometry.setDrawRange(0, 0)
       return
     }
-    const radiant = horizontalToCartesian(this.radiantAltitudeDeg, this.radiantAzimuthDeg, 1)
-    const [right, up] = this.basisAround(radiant)
     const alive = MeteorFall.aliveAt(this.meteors, t).slice(0, MeteorSystem.MAX_CONCURRENT)
     let vertex = 0
     for (const { meteor, progress } of alive) {
+      const origin = this.radiantOf(meteor)
+      if (!origin) continue
+      const radiant = horizontalToCartesian(origin.altitudeDeg, origin.azimuthDeg, 1)
+      const [right, up] = this.basisAround(radiant)
       // Head runs outward from where it appeared; the trail lags behind it, back toward the radiant.
       const head = meteor.fromRadiantDeg + progress * meteor.lengthDeg
       const tail = Math.max(meteor.fromRadiantDeg, head - meteor.lengthDeg * 0.6)
@@ -148,8 +151,9 @@ export class MeteorSystem {
    * button.
    */
   midpointOf(meteor: Meteor): { altitudeDeg: number; azimuthDeg: number } | undefined {
-    if (this.radiantAltitudeDeg <= 0) return undefined
-    const radiant = horizontalToCartesian(this.radiantAltitudeDeg, this.radiantAzimuthDeg, 1)
+    const origin = this.radiantOf(meteor)
+    if (!origin) return undefined
+    const radiant = horizontalToCartesian(origin.altitudeDeg, origin.azimuthDeg, 1)
     const [right, up] = this.basisAround(radiant)
     const along = this.turn(right, up, meteor.bearingDeg)
     const point = this.onSphere(radiant, along, meteor.fromRadiantDeg + meteor.lengthDeg / 2)
@@ -159,6 +163,21 @@ export class MeteorSystem {
       // The inverse of horizontalToCartesian: north is -z, east is +x.
       azimuthDeg: ((Math.atan2(point.x, -point.z) * 180) / Math.PI + 360) % 360
     }
+  }
+
+  /**
+   * Where this particular meteor came from.
+   *
+   * Its own radiant if it has one — a sporadic belongs to no stream, so it arrives from its own
+   * direction, and that scatter IS what makes it sporadic. Otherwise the shower's, and then only if
+   * the shower's radiant has risen: a shower whose radiant is below the horizon produces nothing at
+   * all, which is the same statement MeteorShowers makes in words. A sporadic's own radiant carries
+   * no such rule, and deliberately: it may sit below the horizon and still throw its meteor up over
+   * it, which is how the quiet evening background arrives.
+   */
+  private radiantOf(meteor: Meteor): { altitudeDeg: number; azimuthDeg: number } | undefined {
+    if (meteor.radiant) return meteor.radiant
+    return this.radiantAltitudeDeg > 0 ? { altitudeDeg: this.radiantAltitudeDeg, azimuthDeg: this.radiantAzimuthDeg } : undefined
   }
 
   /** One segment of the streak, as a pair of quads sharing a bright core line. The offset is taken

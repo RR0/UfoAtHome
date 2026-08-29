@@ -264,7 +264,8 @@ export interface UfoRecorderMessages {
   /** Same, for a shower whose radiant had not risen: it cannot have produced anything, which is
    * worth saying as loudly as the opposite. */
   skyShowerBelowHorizon: string
-  /** No shower running at all on that date. */
+  /** No shower running at all on that date — but never an empty sky: {sporadic} is the sporadic
+   * background, the meteors that belong to no stream and fall on every night of the year. */
   skyNothingActive: string
   /** The date or the place is missing, so nothing can be worked out — distinct from "there was
    * nothing", the same way the weather distinguishes the two. */
