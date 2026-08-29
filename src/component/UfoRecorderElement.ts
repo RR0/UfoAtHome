@@ -3394,7 +3394,7 @@ export class UfoRecorderElement extends HTMLElement {
     return this.messages.skyShowerActive
       .replace("{name}", best.entry.shower.name[this.showerLanguage()])
       .replace("{altitude}", String(Math.round(best.position.altitudeDeg)))
-      .replace("{bearing}", Compass.point(best.position.azimuthDeg, this.showerLanguage()))
+      .replace("{bearing}", Compass.towards(best.position.azimuthDeg, this.showerLanguage()))
       .replace("{rate}", best.rate.toLocaleString(undefined, { maximumFractionDigits: best.rate < 10 ? 1 : 0 }))
   }
 
@@ -3434,7 +3434,7 @@ export class UfoRecorderElement extends HTMLElement {
       .replace("{name}", name)
       .replace("{magnitude}", magnitude)
       .replace("{altitude}", String(Math.round(comet.position.altitudeDeg)))
-      .replace("{bearing}", Compass.point(comet.position.azimuthDeg, this.showerLanguage()))
+      .replace("{bearing}", Compass.towards(comet.position.azimuthDeg, this.showerLanguage()))
       .replace("{tail}", String(Math.round(comet.tailLengthDeg ?? 0)))
       .replace("{elongation}", String(Math.round(comet.elongationDeg)))
   }

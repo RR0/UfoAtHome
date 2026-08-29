@@ -24,4 +24,27 @@ export class Compass {
     const index = Math.round(normalised / Compass.POINT_DEG) % 16
     return POINTS[language][index]
   }
+
+  /**
+   * "to the NW", "au NO", "à l'OSO" — the point with the preposition already on it.
+   *
+   * The preposition belongs here rather than in the message it lands in, because in French it
+   * depends on the ANSWER and not on the sentence: an abbreviation is read as the words it stands
+   * for, so NO is "au nord-ouest" and OSO is "à l'ouest-sud-ouest". A message template with a fixed
+   * "au " in front of the placeholder cannot know which it is about to get, and produced "au OSO"
+   * and "au ESE" — the kind of wart that makes a page read as machine output.
+   *
+   * The rule is the first word of what the letters stand for, so it is the leading letter that
+   * decides: est and ouest elide, nord and sud do not. English has no such worry.
+   */
+  static towards(azimuthDeg: number, language: "en" | "fr"): string {
+    const point = Compass.point(azimuthDeg, language)
+    if (language === "en") return `to the ${point}`
+    return ELIDING_POINTS.test(point) ? `à l'${point}` : `au ${point}`
+  }
 }
+
+/** The French points whose spelled-out name begins with a vowel — those starting with E (est) or
+ * O (ouest). Deliberately not a list of the four: it is the first letter that carries the rule, and
+ * writing it that way keeps ENE and OSO right for the same reason E and O are. */
+const ELIDING_POINTS = /^[EO]/

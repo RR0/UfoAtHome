@@ -257,8 +257,9 @@ export interface UfoRecorderMessages {
   skyLine: string
   /** What else was in that sky, from the date and the place alone — see MeteorShowers.ts.
    * {name} is the shower, {rate} how many an observer would really have seen per hour, {altitude}
-   * the radiant's HEIGHT above the horizon and {bearing} the compass point it stands in. Both are
-   * needed and both must be named: a lone "77 degrees" beside a sky reads as either. */
+   * the radiant's HEIGHT above the horizon and {bearing} the compass point it stands in, WITH its
+   * own preposition (see Compass.towards — in French that depends on the point, not the sentence).
+   * Both are needed and both must be named: a lone "77 degrees" beside a sky reads as either. */
   skyShowerActive: string
   /** Same, for a shower whose radiant had not risen: it cannot have produced anything, which is
    * worth saying as loudly as the opposite. */
@@ -274,7 +275,8 @@ export interface UfoRecorderMessages {
   showMeteor: string
   /** A naked-eye comet standing in that sky — see Comets.ts. {name} is the apparition, {magnitude}
    * how bright the light curve makes it that night, {altitude} its HEIGHT above the horizon,
-   * {bearing} the compass point, {tail} how many degrees of sky its tail covered from there. */
+   * {bearing} the compass point with its own preposition, {tail} how many degrees of sky its tail
+   * covered from there. */
   skyComet: string
   /** Same, for an apparition with no recorded tail length — half the catalog. Saying nothing about
    * the tail is the point: there is no figure for it, so there is nothing to state. */
