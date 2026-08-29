@@ -138,7 +138,9 @@ export class SceneElement extends HTMLElement {
   /** The sighting the meteor fall was worked out for, so it is scheduled once per recording rather
    * than every tick — the schedule is deterministic (see MeteorFall) and must not be re-drawn
    * underneath a paused scene or a long exposure. */
-  private meteorScheduleFor?: Sighting
+  /** What the standing meteor schedule was built from — see meteorInputsOf. A string, never the
+   * Sighting itself: the recorder edits ONE instance in place. */
+  private meteorScheduleFor?: string
   private lastTimeMs = 0
   private starCatalog?: StarCatalog
   /** Owned here, not by SceneRenderer — the renderer stays audio-agnostic (see its own
@@ -596,11 +598,48 @@ export class SceneElement extends HTMLElement {
    * sky simply stays empty.
    */
   private updateMeteorShower(sighting: Sighting, t: number): void {
-    if (sighting !== this.meteorScheduleFor) {
-      this.meteorScheduleFor = sighting
-      this.scheduleMeteors(sighting)
-    }
+    this.ensureMeteorSchedule(sighting)
     this.sceneRenderer.updateMeteors(t)
+  }
+
+  /**
+   * Rebuilds the fall whenever anything it was computed FROM has moved.
+   *
+   * This used to compare the Sighting by identity, which quietly meant "never": the recorder edits
+   * one instance in place, so typing a date, locating a place or setting a duration left the very
+   * first schedule standing — and the first one is computed before any of those exist, so it is
+   * empty. The readout, which recomputes from the shower tables directly, would then announce a
+   * hundred and forty-six meteors an hour over a sky that had none, and the button offering to show
+   * one stayed hidden because there was genuinely nothing to show. Every "je ne vois rien" came
+   * through here.
+   *
+   * Called from the render path AND from nextMeteor, so the answer is current whichever asks first:
+   * the toolbar refreshing its sky line does not depend on having been run after the scene.
+   */
+  private ensureMeteorSchedule(sighting: Sighting): void {
+    const inputs = this.meteorInputsOf(sighting)
+    if (inputs === this.meteorScheduleFor) return
+    this.meteorScheduleFor = inputs
+    this.scheduleMeteors(sighting)
+  }
+
+  /** Everything scheduleMeteors actually reads, as one comparable value. Anything added to the
+   * scheduling below has to be added here too, or editing it will silently leave the old sky up. */
+  private meteorInputsOf(sighting: Sighting): string {
+    const place = sighting.event.place?.[0]
+    const time = sighting.event.time
+    return JSON.stringify([
+      place?.lat,
+      place?.lng,
+      time?.year,
+      time?.month,
+      time?.day,
+      time?.hour,
+      time?.minute,
+      sighting.event.utcOffsetHours,
+      sighting.event.durationSeconds,
+      sighting.timeline.duration
+    ])
   }
 
   private scheduleMeteors(sighting: Sighting): void {
@@ -645,6 +684,9 @@ export class SceneElement extends HTMLElement {
    * be able to go round again rather than be told there is nothing.
    */
   nextMeteor(afterMs: number): { t: number; altitudeDeg: number; azimuthDeg: number } | undefined {
+    // Asked by the toolbar, which may well run before the scene next paints: schedule on demand
+    // rather than answer "no meteors" from a sky that simply has not been worked out yet.
+    this.ensureMeteorSchedule(this.ufoElement.sighting)
     const schedule = this.sceneRenderer.meteorSchedule
     if (schedule.length === 0) return undefined
     const next = schedule.find(meteor => meteor.t > afterMs) ?? schedule[0]

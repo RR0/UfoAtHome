@@ -10,6 +10,9 @@ registerScene()
 const animationsRunning: boolean[] = []
 const audioPaused: boolean[] = []
 const thunderPlayed: number[] = []
+/** Every sky the element hands the renderer, so a test can see whether editing the observation
+ * actually rebuilt the fall or silently left the previous one standing. */
+const meteorShowersSet: { count: number; altitudeDeg: number }[] = []
 
 // jsdom's <canvas> can back neither WebGL nor Web Audio, so both are stubbed whole — same reason
 // and shape as EyewitnessElement.test.ts's identical SceneRenderer mock.
@@ -43,7 +46,9 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
       return {}
     }
     setProjection(): void {}
-    setMeteorShower(): void {}
+    setMeteorShower(meteors: unknown[], altitudeDeg: number): void {
+      meteorShowersSet.push({ count: meteors.length, altitudeDeg })
+    }
     get meteorSchedule(): unknown[] {
       return []
     }
@@ -149,6 +154,7 @@ function mount(): SceneElement {
   animationsRunning.length = 0
   audioPaused.length = 0
   thunderPlayed.length = 0
+  meteorShowersSet.length = 0
   return element
 }
 
@@ -195,5 +201,46 @@ describe("SceneElement weather follows the player", () => {
     } finally {
       vi.useRealTimers()
     }
+  })
+})
+
+describe("meteor scheduling", () => {
+  // The in-place-editing regression this pairs with lives in UfoRecorderElement.test.ts: it only
+  // bites through the recorder's own form, which mutates ONE Sighting, where assigning sightingData
+  // here builds a fresh one every time and would hide it.
+  /** The Geminid peak over Provence: the radiant stands 77 degrees up at 3 a.m., which is about as
+   * strong as any sky this project can look up ever gets. */
+  const geminidNight = {
+    time: { year: 2023, month: 12, day: 14, hour: 3, minute: 0 },
+    utcOffsetHours: 1,
+    place: [{ lat: 43.8379, lng: 5.9822 }],
+    durationSeconds: 300
+  }
+
+  function edit(element: SceneElement, changes: Record<string, unknown>): void {
+    // Edited IN PLACE, the way the recorder's own form does it — the same instance, mutated.
+    const data = element.sightingData
+    Object.assign(data, changes)
+    element.sightingData = data
+  }
+
+  it("answers a request for the next meteor from the sky as it is now, not as it was", () => {
+    // nextMeteor is asked by the toolbar, which may run before the scene next paints. It has to
+    // schedule on demand rather than report "no meteors" from a sky not yet worked out.
+    const element = mount()
+    edit(element, geminidNight)
+    meteorShowersSet.length = 0
+    edit(element, { ...geminidNight, durationSeconds: 600 })
+    element.nextMeteor(0)
+    expect(meteorShowersSet.length).toBeGreaterThan(0)
+  })
+
+  it("leaves the sky alone when nothing it was built from has moved", () => {
+    const element = mount()
+    edit(element, geminidNight)
+    meteorShowersSet.length = 0
+    element.nextMeteor(0)
+    element.nextMeteor(0)
+    expect(meteorShowersSet).toEqual([])
   })
 })

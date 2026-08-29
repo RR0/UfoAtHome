@@ -49,12 +49,15 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
       return {}
     }
     setProjection(): void {}
-    setMeteorShower(): void {}
-    get meteorSchedule(): unknown[] {
-      return []
+    private meteors: { t: number; durationMs: number }[] = []
+    setMeteorShower(meteors: { t: number; durationMs: number }[]): void {
+      this.meteors = meteors
     }
-    meteorMidpoint(): undefined {
-      return undefined
+    get meteorSchedule(): { t: number; durationMs: number }[] {
+      return this.meteors
+    }
+    meteorMidpoint(): { altitudeDeg: number; azimuthDeg: number } {
+      return { altitudeDeg: 42, azimuthDeg: 137 }
     }
     updateMeteors(): void {}
     render(): void {}
@@ -4870,5 +4873,38 @@ describe("showing the next meteor", () => {
     clickShowMeteor(element)
     expect(toggles()).toBe(0)
     expect(ufo.currentTime).toBe(SOMEWHERE_IN_THE_SKY.t)
+  })
+})
+
+describe("the sky under an observation being edited", () => {
+  function typeInto(element: UfoRecorderElement, id: string, value: string): void {
+    const field = element.shadowRoot!.getElementById(id) as HTMLInputElement
+    field.value = value
+    field.dispatchEvent(new Event("input", { bubbles: true }))
+    field.dispatchEvent(new Event("change", { bubbles: true }))
+  }
+
+  it("works out the meteors again once the date and place have been typed in", async () => {
+    // The bug every "je ne vois rien" came through. The fall was cached against the Sighting's
+    // IDENTITY — and this element edits ONE instance in place, so the schedule computed before any
+    // date or place existed (necessarily empty) survived every edit a reader could make. The sky
+    // line, which recomputes from the shower tables directly, would then announce 146 meteors an
+    // hour while the renderer held none and the button offering to show one stayed hidden.
+    //
+    // Typed field by field on purpose: assigning sightingData replaces the Sighting wholesale,
+    // which changes its identity and hides the bug completely.
+    const element = mount()
+    const button = element.shadowRoot!.getElementById("show-meteor") as HTMLButtonElement
+    expect(button.hidden).toBe(true)
+    // The Geminid peak over Provence — radiant 77 degrees up at 3 a.m., about 146 an hour.
+    typeInto(element, "obs-time", "2023-12-14 03:00")
+    typeInto(element, "lat", "43.8379")
+    typeInto(element, "lng", "5.9822")
+    typeInto(element, "durationSeconds", "300")
+    await waitFor(() => !button.hidden)
+    expect(button.hidden).toBe(false)
+    // Either language: the test environment's own locale decides which, and the point here is that
+    // the shower is named at all.
+    expect(element.shadowRoot!.getElementById("sky-candidates")!.textContent).toMatch(/G[ée]minid/)
   })
 })
