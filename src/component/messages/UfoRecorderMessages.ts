@@ -294,6 +294,31 @@ export interface UfoRecorderMessages {
   /** Turns the witness to face the comet. Unlike a meteor it does not need seeking to: it was
    * there for the whole recording, and for weeks either side. */
   showComet: string
+  /**
+   * Whether anything in orbit could have been seen — see Satellites.ts. Stated only once the Sun
+   * has set, since a satellite in a daylit sky is not a candidate for anything.
+   *
+   * {height} is how far above the witness the Earth's own shadow stood, which is the number the
+   * whole verdict rests on and is worth showing rather than hiding behind a yes or no.
+   */
+  skySatellitesLit: string
+  /** Same, plus the classes of object that existed on that date: {eras}. */
+  skySatellitesLitWith: string
+  /** The negative, and the strong one: deep in the night the shadow stands thousands of kilometres
+   * up and nothing in low orbit is lit, so a light crossing the sky then was not a satellite. */
+  skySatellitesShadowed: string
+  /** Before Sputnik. The hardest coverage floor in the project, and worth saying plainly for the
+   * many reports that predate it. */
+  skySatellitesNotYet: string
+  /**
+   * Daylight, and something up there bright enough to be picked out of it anyway — which is a real
+   * class of report rather than a technicality: an Iridium flare reached magnitude -8 and those were
+   * genuinely watched in broad daylight.
+   *
+   * Everything in orbit is sunlit by day (the Earth's shadow is behind the witness, not above), so
+   * what the clause states is the CONTRAST: {eras} are the classes that outshone that sky.
+   */
+  skySatellitesDaylight: string
   /** Turns the witness to face the selected decor object — the only practical way to find an
    * aircraft in an otherwise empty sky. */
   lookAtDecor: string

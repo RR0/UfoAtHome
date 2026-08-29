@@ -10,6 +10,8 @@ import { INSTRUMENTS } from "../engine/instrument/Instrument.js"
 import { LightRigs } from "../engine/model/LightRig.js"
 import { DARK_SKY_LIMITING_MAGNITUDE, MeteorShowers } from "../engine/astronomy/MeteorShowers.js"
 import { Comets } from "../engine/astronomy/Comets.js"
+import { Satellites } from "../engine/astronomy/Satellites.js"
+import { visibleMagnitudeLimit } from "../render3d/skyColors.js"
 import type { CometAppearance } from "../engine/astronomy/Comets.js"
 import { Compass } from "../engine/astronomy/Compass.js"
 import { resolveDecorPlacementAt } from "../engine/model/Decor.js"
@@ -3364,7 +3366,9 @@ export class UfoRecorderElement extends HTMLElement {
       return
     }
     const observer = { lat: place.lat, lng: place.lng, elevationM: this.groundElevationM ?? 0 }
-    const parts = [this.showerClause(date, observer), this.cometClause(date, observer)].filter(part => part !== undefined)
+    const parts = [this.showerClause(date, observer), this.cometClause(date, observer), this.satelliteClause(date, observer)].filter(
+      part => part !== undefined
+    )
     this.skyCandidatesOutput.textContent = this.messages.skyLine.replace("{parts}", parts.join(" · "))
   }
 
@@ -3416,6 +3420,50 @@ export class UfoRecorderElement extends HTMLElement {
     // at by looking into the ground.
     this.showCometButton.hidden = comet.position.altitudeDeg <= 0
     return this.cometText(comet)
+  }
+
+  /**
+   * Whether anything in orbit could have been seen from there — see Satellites.ts.
+   *
+   * Two questions, kept apart, because merging them is how this got written wrong the first time.
+   * WAS IT LIT is geometry: where the Earth's shadow stood, which by day is behind the witness so
+   * that everything above them is in sunlight. COULD IT BE PICKED OUT is contrast, and it is
+   * settled here against the same visibleMagnitudeLimit the star field is drawn by — the identical
+   * rule that lets Ikeya-Seki be drawn beside the Sun and leaves an ordinary comet out of it.
+   *
+   * That split is what makes a daylight Iridium flare sayable. At magnitude -8 it beat a daylit sky,
+   * and people really did watch them at noon; a satellite does not need a dark observer, it needs to
+   * be brighter than the sky it stands in.
+   *
+   * What the clause never says is WHICH satellite. Historical orbital elements cannot be obtained
+   * (see Satellites.ts), so an individual pass is placed by hand like an aircraft — this states the
+   * window, not the object.
+   */
+  private satelliteClause(date: Date, observer: { lat: number; lng: number; elevationM: number }): string | undefined {
+    const sky = Satellites.visibilityAt(date, observer)
+    if (!sky.anythingInOrbit) {
+      // Only worth saying against a sky somebody could have seen anything in at all.
+      return sky.sunAltitudeDeg < 0 ? this.messages.skySatellitesNotYet : undefined
+    }
+    const magnitudeLimit = visibleMagnitudeLimit(sky.sunAltitudeDeg)
+    const bright = sky.eras.filter(era => era.peakMagnitude <= magnitudeLimit)
+    const named = this.listed(bright.map(era => era.name[this.showerLanguage()]))
+    if (sky.sunAltitudeDeg >= 0) {
+      // By day the geometry is never the limit — the sky is. Silent unless something up there beat
+      // it, since "a satellite was lit and invisible" describes every daylit hour ever recorded.
+      return bright.length === 0 ? undefined : this.messages.skySatellitesDaylight.replace("{eras}", named)
+    }
+    const height = Math.round(sky.shadowHeightKm).toLocaleString()
+    if (!sky.lowOrbitLit) return this.messages.skySatellitesShadowed.replace("{height}", height)
+    if (bright.length === 0) return this.messages.skySatellitesLit.replace("{height}", height)
+    return this.messages.skySatellitesLitWith.replace("{height}", height).replace("{eras}", named)
+  }
+
+  /** A list said the way a sentence says it rather than the way an array prints it — the reader's
+   * own language decides whether that is "a, b and c" or "a, b et c". */
+  private listed(items: string[]): string {
+    const formatter = new Intl.ListFormat(this.showerLanguage(), { style: "long", type: "conjunction" })
+    return formatter.format(items)
   }
 
   private cometText(comet: CometAppearance): string {
