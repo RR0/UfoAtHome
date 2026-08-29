@@ -319,6 +319,11 @@ export interface UfoRecorderMessages {
    * what the clause states is the CONTRAST: {eras} are the classes that outshone that sky.
    */
   skySatellitesDaylight: string
+  /** The same clause when {eras} names exactly one class. It exists because French agrees the verb
+   * with the list — "la Station spatiale internationale POUVAIENT" is what a single template
+   * produced — and no amount of care in the list formatter fixes a verb outside it. English needs
+   * no such split and carries the same sentence twice. */
+  skySatellitesDaylightOne: string
   /** Turns the witness to face the selected decor object — the only practical way to find an
    * aircraft in an otherwise empty sky. */
   lookAtDecor: string

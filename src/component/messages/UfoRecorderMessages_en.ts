@@ -156,6 +156,7 @@ export const ufoRecorderMessages_en: UfoRecorderMessages = {
   skySatellitesShadowed: "the Earth's shadow stood {height} km above the witness: nothing in low orbit was lit",
   skySatellitesNotYet: "nothing had been put in orbit yet",
   skySatellitesDaylight: "everything in orbit was sunlit, as it always is by day, and {eras} could outshine even this sky",
+  skySatellitesDaylightOne: "everything in orbit was sunlit, as it always is by day, and {eras} could outshine even this sky",
   skyUnknown: "cannot be worked out without a date and a place",
   decorAltitude: "Altitude",
   decorLights: "Lights",

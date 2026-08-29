@@ -133,4 +133,18 @@ describe("Satellites", () => {
       expect(starlink.peakMagnitude).toBeGreaterThan(daylightLimit)
     })
   })
+
+  it("has exactly one class that outshines a daylit sky in the sixties, and none at all in the fifties", () => {
+    // Why the readout needs a singular form as well as a plural one: in 2005 two classes clear a
+    // daylit sky and in 1965 the only one that existed did not, so the number of names in that
+    // sentence really does vary between nought, one and several. French agrees the verb with it.
+    const daylightLimit = -4
+    const clearing = (on: string) => Satellites.erasAt(new Date(on)).filter(era => era.peakMagnitude <= daylightLimit)
+    // 2005: the Iridium flares and the Station both clear it. 2020: the flares are over and only
+    // the Station does — the Starlink trains at magnitude 1 never could. 1965: the Echo balloons at
+    // magnitude -1 were a night-sky object and nothing else was up.
+    expect(clearing("2005-06-15T11:00:00Z").length).toBeGreaterThan(1)
+    expect(clearing("2020-06-15T11:00:00Z")).toHaveLength(1)
+    expect(clearing("1965-07-01T11:00:00Z")).toHaveLength(0)
+  })
 })

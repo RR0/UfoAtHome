@@ -156,6 +156,7 @@ export const ufoRecorderMessages_fr: UfoRecorderMessages = {
   skySatellitesShadowed: "l'ombre de la Terre montait à {height} km au-dessus du témoin : rien en orbite basse n'était éclairé",
   skySatellitesNotYet: "rien n'était encore en orbite",
   skySatellitesDaylight: "tout ce qui est en orbite était éclairé, comme toujours de jour, et {eras} pouvaient l'emporter même sur ce ciel",
+  skySatellitesDaylightOne: "tout ce qui est en orbite était éclairé, comme toujours de jour, et {eras} pouvait l'emporter même sur ce ciel",
   skyUnknown: "indéterminable sans date ni lieu",
   decorAltitude: "Altitude",
   decorLights: "Feux",

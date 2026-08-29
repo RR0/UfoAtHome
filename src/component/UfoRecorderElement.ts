@@ -3451,7 +3451,9 @@ export class UfoRecorderElement extends HTMLElement {
     if (sky.sunAltitudeDeg >= 0) {
       // By day the geometry is never the limit — the sky is. Silent unless something up there beat
       // it, since "a satellite was lit and invisible" describes every daylit hour ever recorded.
-      return bright.length === 0 ? undefined : this.messages.skySatellitesDaylight.replace("{eras}", named)
+      if (bright.length === 0) return undefined
+      const daylight = bright.length === 1 ? this.messages.skySatellitesDaylightOne : this.messages.skySatellitesDaylight
+      return daylight.replace("{eras}", named)
     }
     const height = Math.round(sky.shadowHeightKm).toLocaleString()
     if (!sky.lowOrbitLit) return this.messages.skySatellitesShadowed.replace("{height}", height)
