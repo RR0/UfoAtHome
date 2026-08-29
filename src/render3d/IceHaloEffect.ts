@@ -74,7 +74,10 @@ export class IceHaloEffect {
           // the ring, while beyond it rays of every larger deviation pile up and thin out. The
           // colour comes from the red and blue edges being at genuinely different angles.
           float inside = smoothstep(uHaloInner - 0.004, uHaloInner + 0.001, angle);
-          float outside = 1.0 - smoothstep(uHaloOuter, uHaloOuter + 0.09, angle);
+          // The outer tail runs about a degree and a half, not five. It used to reach 0.09 radians,
+          // which put the ring's own glow straight over where the sundogs stand at 24.7 degrees and
+          // washed them out — they read as half hidden behind the halo, which is what a reader saw.
+          float outside = 1.0 - smoothstep(uHaloOuter, uHaloOuter + 0.026, angle);
           float ring = inside * outside;
           float across = clamp((angle - uHaloInner) / max(uHaloOuter - uHaloInner, 1e-4), 0.0, 1.0);
           // Red at the inner edge running to a cold white outward — the spectrum smeared across the
@@ -98,10 +101,20 @@ export class IceHaloEffect {
               float sign = side == 0 ? 1.0 : -1.0;
               vec3 dog = normalize(uUp * height + (alongHorizon * cos(swing) + east * sign * sin(swing)) * sqrt(max(1.0 - height * height, 0.0)));
               float apart = acos(clamp(dot(dir, dog), -1.0, 1.0));
-              // Compact, and with a tail streaming AWAY from the source, as a real one has.
-              float core = exp(-apart * apart / 0.00035);
-              float outward = acos(clamp(dot(dir, sun), -1.0, 1.0)) > uParhelion ? 1.0 : 0.25;
-              light += core * mix(vec3(1.0, 0.72, 0.42), vec3(1.0, 0.95, 0.85), 0.4) * outward * 1.6;
+              // A real parhelion is not a symmetric blob. Its SUNWARD edge is sharp, red and bright
+              // — that is the minimum-deviation edge, with nothing closer to the Sun than it — and a
+              // white tail streams outward from it. So the core is cut off hard on the inside and
+              // allowed to run on the outside, and the colour follows: red at the sharp edge, white
+              // down the tail.
+              float fromSun = acos(clamp(dot(dir, sun), -1.0, 1.0));
+              float beyond = fromSun - uParhelion;
+              float core = exp(-apart * apart / 0.00028);
+              float sunward = 1.0 - smoothstep(-0.012, -0.002, beyond);
+              float tail = exp(-max(beyond, 0.0) / 0.055) * exp(-apart * apart / 0.0016);
+              vec3 warm = vec3(1.0, 0.66, 0.36);
+              vec3 pale = vec3(0.95, 0.95, 1.0);
+              light += core * mix(warm, pale, clamp(beyond / 0.03, 0.0, 1.0)) * 1.9;
+              light += tail * pale * 0.35 * (1.0 - sunward);
             }
           }
 
