@@ -299,13 +299,17 @@ export interface UfoRecorderMessages {
    * has set, since a satellite in a daylit sky is not a candidate for anything.
    *
    * {height} is how far above the witness the Earth's own shadow stood, which is the number the
-   * whole verdict rests on and is worth showing rather than hiding behind a yes or no.
+   * whole verdict rests on and is worth showing rather than hiding behind a yes or no. {count} is
+   * how many tracked objects were in orbit THAT MONTH — the wording says "that month" because the
+   * catalogue is monthly, and claiming a figure for one particular night would be precision it does
+   * not carry (see Satellites.trackedInOrbitAt).
    */
   skySatellitesLit: string
   /** Same, plus the classes of object that existed on that date: {eras}. */
   skySatellitesLitWith: string
   /** The negative, and the strong one: deep in the night the shadow stands thousands of kilometres
-   * up and nothing in low orbit is lit, so a light crossing the sky then was not a satellite. */
+   * up and nothing in low orbit is lit, so a light crossing the sky then was not a satellite. The
+   * count makes it concrete — of {count} objects up there, none of them lit. */
   skySatellitesShadowed: string
   /** Before Sputnik. The hardest coverage floor in the project, and worth saying plainly for the
    * many reports that predate it. */

@@ -38,7 +38,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "build:stars": "tsx scripts/build-star-catalog.ts",
-    "build:comets": "tsx scripts/build-comet-catalog.ts"
+    "build:comets": "tsx scripts/build-comet-catalog.ts",
+    "build:satellites": "tsx scripts/build-satellite-catalog.ts"
   },
   "dependencies": {
     "@rr0/data": "^0.3.40",

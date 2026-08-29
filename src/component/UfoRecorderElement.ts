@@ -3446,8 +3446,8 @@ export class UfoRecorderElement extends HTMLElement {
       return sky.sunAltitudeDeg < 0 ? this.messages.skySatellitesNotYet : undefined
     }
     const magnitudeLimit = visibleMagnitudeLimit(sky.sunAltitudeDeg)
-    const bright = sky.eras.filter(era => era.peakMagnitude <= magnitudeLimit)
-    const named = this.listed(bright.map(era => era.name[this.showerLanguage()]))
+    const bright = sky.classes.filter(entry => entry.peakMagnitude <= magnitudeLimit)
+    const named = this.listed(bright.map(entry => entry.name[this.showerLanguage()]))
     if (sky.sunAltitudeDeg >= 0) {
       // By day the geometry is never the limit — the sky is. Silent unless something up there beat
       // it, since "a satellite was lit and invisible" describes every daylit hour ever recorded.
@@ -3456,9 +3456,12 @@ export class UfoRecorderElement extends HTMLElement {
       return daylight.replace("{eras}", named)
     }
     const height = Math.round(sky.shadowHeightKm).toLocaleString()
-    if (!sky.lowOrbitLit) return this.messages.skySatellitesShadowed.replace("{height}", height)
-    if (bright.length === 0) return this.messages.skySatellitesLit.replace("{height}", height)
-    return this.messages.skySatellitesLitWith.replace("{height}", height).replace("{eras}", named)
+    // Present for every date past the first launch, which this branch already is.
+    const count = (sky.trackedObjects ?? 0).toLocaleString()
+    const filled = (template: string): string => template.replace("{height}", height).replace("{count}", count)
+    if (!sky.lowOrbitLit) return filled(this.messages.skySatellitesShadowed)
+    if (bright.length === 0) return filled(this.messages.skySatellitesLit)
+    return filled(this.messages.skySatellitesLitWith).replace("{eras}", named)
   }
 
   /** A list said the way a sentence says it rather than the way an array prints it — the reader's

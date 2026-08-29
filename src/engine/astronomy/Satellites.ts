@@ -1,5 +1,7 @@
 import { computeBodyPosition } from "./CelestialPositions.js"
 import type { ObserverGeo } from "./CelestialPositions.js"
+import { FIRST_TRACKED_MONTH, SATELLITE_CLASSES, TRACKED_OBJECTS_BY_MONTH } from "./satelliteCatalog.js"
+import type { SatelliteClass } from "./satelliteCatalog.js"
 
 /**
  * Whether anything in orbit could have been seen from here, at this hour, on this date.
@@ -32,74 +34,17 @@ import type { ObserverGeo } from "./CelestialPositions.js"
  * comet in this scene already goes through. A satellite does NOT require a dark observer; it
  * requires more light than the sky it stands in.
  *
- * What individual objects there were is handled the way the aircraft are: placed by hand, because
- * the record does not exist. What CLASS of object existed is a matter of dates, and that is what
- * SATELLITE_ERAS below is for.
- */
-export interface SatelliteEra {
-  id: string
-  name: { en: string; fr: string }
-  /** When objects of this kind started being visible overhead. */
-  from: string
-  /** When they stopped, where they have. Absent means they are still up there. */
-  to?: string
-  /**
-   * The brightest this class is recorded as getting, apparent visual magnitude.
-   *
-   * Here because being SUNLIT and being SEEABLE are two different questions, and only the first is
-   * geometry. An Iridium flare at magnitude -8 outshines a daylit sky; an ordinary satellite at
-   * magnitude 2 needs a dark one. Nothing in this file decides which — it reports the number, and
-   * the caller compares it against whatever that sky allowed (the scene's own visibleMagnitudeLimit,
-   * the same rule every star and the comets already go through).
-   */
-  peakMagnitude: number
-  /** What made this class worth naming — in the terms a report of the period would have used. */
-  note: string
-}
-
-/**
- * The datable classes of orbiting object bright enough to be reported by somebody who was not
- * looking for them.
+ * HOW MANY there were is also complete, and it came as a surprise: CelesTrak's SATCAT registers
+ * every object ever tracked, with the date it went up and the date it came down, back to Sputnik and
+ * open to a browser. That gives a real, dated count for any night — two the month Sputnik launched,
+ * a hundred and sixty-one the month of the Socorro landing, twenty-two thousand now — which bears
+ * directly on how plausible an attribution is. What it does NOT give is where any of them was.
  *
- * Dates, not counts. How many objects were in orbit in a given year is a real number and a
- * misleading one — most of them were never visible to anybody — whereas "Iridium flares did not
- * exist before 1997 and stopped in 2019" is a fact that settles reports on both sides of it. Every
- * entry here is a window a report can be inside or outside of, which is the only thing this list is
- * for.
+ * What individual objects there were is therefore handled the way the aircraft are: placed by hand,
+ * because that part of the record does not exist. What CLASS of object existed is a matter of dates,
+ * and those dates now come from the catalogue rather than from anybody's memory — see
+ * satelliteCatalog.ts.
  */
-export const SATELLITE_ERAS: SatelliteEra[] = [
-  {
-    id: "echo",
-    name: { en: "the Echo balloons", fr: "les ballons Echo" },
-    from: "1960-08-12",
-    to: "1969-06-07",
-    peakMagnitude: -1,
-    note: "Echo 1 and 2 were 30- and 40-metre reflective balloons, as bright as the brightest stars and moving slowly enough to be watched — deliberately visible, widely announced in newspapers, and the first objects most people ever saw crossing the night sky. They fall squarely inside the sighting waves this project reconstructs."
-  },
-  {
-    id: "iridium-flares",
-    name: { en: "the Iridium flares", fr: "les flashes d'Iridium" },
-    from: "1997-05-05",
-    to: "2019-12-27",
-    peakMagnitude: -8,
-    note: "The original Iridium satellites carried flat, mirror-finish antennas that threw a sunbeam a few kilometres wide across the ground: a still point of sky flaring to magnitude -8 over five seconds and vanishing again. Nothing else in the sky does that. The replacement Iridium NEXT satellites have no such panels, so the phenomenon has a hard end date as well as a hard start."
-  },
-  {
-    id: "iss",
-    name: { en: "the International Space Station", fr: "la Station spatiale internationale" },
-    from: "1998-11-20",
-    peakMagnitude: -5.9,
-    note: "Since its first modules, and much brighter as it grew: at its best it outshines everything in the sky but the Sun and the Moon, crossing in a straight silent line in about four minutes."
-  },
-  {
-    id: "starlink-trains",
-    name: { en: "the Starlink trains", fr: "les trains de Starlink" },
-    from: "2019-05-24",
-    peakMagnitude: 1,
-    note: "In the days after a launch, sixty satellites still bunched in their deployment string cross as an evenly spaced line of lights — the single most reported 'formation of UFOs' of the era. They spread out within weeks, so a train is a fact about the days after a launch rather than about the year."
-  }
-]
-
 export interface SatelliteVisibility {
   /** The Sun's real altitude, degrees. Negative once it has set. */
   sunAltitudeDeg: number
@@ -118,7 +63,10 @@ export interface SatelliteVisibility {
   lowOrbitLit: boolean
   /** The classes of visible object that existed on that date. Empty before Sputnik, and that is a
    * complete answer rather than a missing one. */
-  eras: SatelliteEra[]
+  classes: SatelliteClass[]
+  /** How many tracked objects — payloads and spent rocket bodies, never debris — were in orbit that
+   * month. Undefined before the first launch, which is a different statement from zero. */
+  trackedObjects?: number
   /** Whether anything at all was in orbit yet. */
   anythingInOrbit: boolean
 }
@@ -180,14 +128,33 @@ export class Satellites {
     return heightKm > Satellites.shadowHeightKm(sunAltitudeDeg)
   }
 
-  /** The classes of visible object that existed on that date — see SATELLITE_ERAS. */
-  static erasAt(date: Date): SatelliteEra[] {
+  /** The classes of visible object that existed on that date — see satelliteCatalog.ts. */
+  static classesAt(date: Date): SatelliteClass[] {
     const day = date.getTime()
-    return SATELLITE_ERAS.filter(era => {
-      const from = Date.parse(`${era.from}T00:00:00Z`)
-      const to = era.to === undefined ? Infinity : Date.parse(`${era.to}T23:59:59Z`)
+    return SATELLITE_CLASSES.filter(satelliteClass => {
+      const from = Date.parse(`${satelliteClass.from}T00:00:00Z`)
+      const to = satelliteClass.to === undefined ? Infinity : Date.parse(`${satelliteClass.to}T23:59:59Z`)
       return day >= from && day <= to
     })
+  }
+
+  /**
+   * How many tracked objects were in orbit that month.
+   *
+   * Payloads and spent rocket bodies, never debris — a fragment is a fact about radar, not about
+   * what a witness could have seen. Undefined before the first launch, which says "there was no
+   * such thing" rather than "none that month".
+   *
+   * Monthly, and the readout says so: the count moves by a handful over a fortnight, and quoting it
+   * against one particular night would be precision this does not carry. Counted at the END of the
+   * month — an object launched during it counts, one that came down during it does not.
+   */
+  static trackedInOrbitAt(date: Date): number | undefined {
+    const month = date.getUTCFullYear() * 12 + date.getUTCMonth() - FIRST_TRACKED_MONTH
+    if (month < 0) return undefined
+    // Past the end of the table is the last month it has, not nothing: a catalogue built today
+    // cannot know about next year, and the honest answer for a future date is the latest count.
+    return TRACKED_OBJECTS_BY_MONTH[Math.min(month, TRACKED_OBJECTS_BY_MONTH.length - 1)]
   }
 
   /**
@@ -204,7 +171,8 @@ export class Satellites {
       sunAltitudeDeg,
       shadowHeightKm: Satellites.shadowHeightKm(sunAltitudeDeg),
       lowOrbitLit: Satellites.isLitOverhead(Satellites.LOW_ORBIT_KM, sunAltitudeDeg),
-      eras: Satellites.erasAt(date),
+      classes: Satellites.classesAt(date),
+      trackedObjects: Satellites.trackedInOrbitAt(date),
       anythingInOrbit: date.getTime() >= Date.parse(`${Satellites.FIRST_ORBIT}T00:00:00Z`)
     }
   }
