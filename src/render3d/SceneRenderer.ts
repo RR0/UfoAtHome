@@ -1232,10 +1232,15 @@ export class SceneRenderer {
     // can never receive a real shadow, since there's no actual light for something to block).
     this.updateCelestialLight(astronomy, skyColors.zenith, groundColor)
     this.buildStars(astronomy.stars, astronomy.sun.altitudeDeg)
+    // What that sky allowed to be seen — ONE rule, applied to every body in it. The star field has
+    // always gone through this; the Moon, the planets and the comet now do too, and the difference
+    // is not cosmetic: a magnitude-one Mars was being drawn at two in the afternoon. The Sun is the
+    // only thing exempt, for the obvious reason.
+    const magnitudeLimit = visibleMagnitudeLimit(astronomy.sun.altitudeDeg)
     this.setBodyMesh("sun", astronomy.sun, SUN_MOON_VISUAL_RADIUS, new Color(1, 0.96, 0.88), astronomy.sun.magnitude)
-    this.setMoonMesh(astronomy.moon)
-    this.buildPlanets(astronomy.planets)
-    this.buildComet(astronomy.comet, astronomy.sun.altitudeDeg)
+    this.setMoonMesh(astronomy.moon, magnitudeLimit)
+    this.buildPlanets(astronomy.planets, magnitudeLimit)
+    this.buildComet(astronomy.comet, magnitudeLimit)
     // Fog reaches as far as the ground actually goes, not a fixed SKY_RADIUS: from altitude the
     // whole visible ground lies beyond 900 units, so a fog capped there turned all of it into flat
     // fog colour — a black void below the horizon at 1500 m, since that colour is the night-ground
@@ -1821,12 +1826,16 @@ export class SceneRenderer {
    * from Earth (its phase doesn't meaningfully depend on the camera's viewing angle around it).
    * `material.color` (which multiplies against the texture) carries the same altitude-based
    * atmospheric tint as setBodyMesh, so a low Moon reddens the same way a real moonrise does. */
-  private setMoonMesh(position: HorizontalPosition & { phase: MoonPhase; magnitude: number }): void {
+  private setMoonMesh(position: HorizontalPosition & { phase: MoonPhase; magnitude: number }, magnitudeLimit: number): void {
     const key = "moon"
     this.disposeMesh(this.bodyMeshes.get(key))
     this.disposeHitArea(key)
     this.disposeGlare(key)
-    if (position.altitudeDeg < BODY_HIDE_BELOW_DEG) {
+    // The Moon passes this at almost every phase — it is magnitude -10 at the quarter, six
+    // magnitudes clear of what a daylit sky hides, which is exactly why a daytime Moon is an
+    // ordinary sight. Only a sliver a day or so from new falls under it, and that one really is
+    // lost next to the Sun.
+    if (position.magnitude > magnitudeLimit || position.altitudeDeg < BODY_HIDE_BELOW_DEG) {
       this.bodyMeshes.delete(key)
       return
     }
@@ -1907,14 +1916,15 @@ export class SceneRenderer {
    * of some chosen size would be inventing the one thing that separates a comet's head from a star.
    * What separates them here is the tail, which has a source (see CometTail).
    *
-   * Held to the same visibility limit as the star field: a comet fainter than the sky it stands in
-   * is not drawn, which through a whole daylit apparition means nothing is drawn at all. Several of
-   * these comets reached their recorded peak while inside the Sun's own glare, and a reconstruction
-   * that painted them there anyway would be showing the reader something nobody could have seen.
+   * Held to the same visibility limit as everything else in this sky: a comet fainter than the sky
+   * it stands in is not drawn. Several of these reached their recorded peak while inside the Sun's
+   * own glare, and a reconstruction that painted them there anyway would be showing the reader
+   * something nobody could have seen — while Ikeya-Seki, at magnitude -9, clears a daylit sky and
+   * IS drawn, exactly as it was seen.
    */
-  private buildComet(comet: SceneComet | undefined, sunAltitudeDeg: number): void {
+  private buildComet(comet: SceneComet | undefined, magnitudeLimit: number): void {
     const key = comet && `comet:${comet.id}`
-    if (!comet || !key || comet.magnitude > visibleMagnitudeLimit(sunAltitudeDeg)) {
+    if (!comet || !key || comet.magnitude > magnitudeLimit) {
       this.disposeComet()
       return
     }
@@ -1948,12 +1958,16 @@ export class SceneRenderer {
     this.cometKey = undefined
   }
 
-  private buildPlanets(planets: ReadonlyArray<ScenePlanet>): void {
+  private buildPlanets(planets: ReadonlyArray<ScenePlanet>, magnitudeLimit: number): void {
     // The comet's key is seeded in because this sweep removes every body mesh it does not
     // recognise, and buildComet runs after it: without this the comet would be disposed and rebuilt
     // on every single tick, taking its glare halo with it.
     const seen = new Set<string>(["sun", "moon", ...(this.cometKey ? [this.cometKey] : [])])
     for (const planet of planets) {
+      // Venus at its brightest is the only planet that clears a daylit sky, which is precisely the
+      // one people do report seeing by day — and take for something else. Mars and Saturn at
+      // magnitude one do not, and were being drawn in broad daylight until this line.
+      if (planet.magnitude > magnitudeLimit) continue
       seen.add(planet.body)
       const brightness = magnitudeToBrightness(planet.magnitude)
       const scale = starColorScale(brightness)
