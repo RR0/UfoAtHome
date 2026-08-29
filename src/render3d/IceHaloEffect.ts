@@ -139,6 +139,10 @@ export class IceHaloEffect {
    */
   update(source: { x: number; y: number; z: number }, sourceAltitudeDeg: number, strength: number, tint: [number, number, number]): void {
     if (strength <= 0 || sourceAltitudeDeg <= 0) {
+      // Zeroed as well as hidden. Leaving the old value in the uniform changes nothing on screen —
+      // the mesh is not drawn — but it leaves the effect REPORTING a strength it is not showing,
+      // which is how a probe of the live scene ends up believing a display is up when it is not.
+      this.material.uniforms.uStrength.value = 0
       this.object.visible = false
       return
     }
