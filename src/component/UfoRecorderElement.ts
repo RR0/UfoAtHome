@@ -2378,11 +2378,14 @@ export class UfoRecorderElement extends HTMLElement {
     if (active !== this.lngInput) {
       this.lngInput.value = pose?.lng !== undefined ? String(pose.lng) : location ? String(location.lng) : ""
     }
+    // Rounded for exactly the reason the decor's own fields are (see rounded()): a gaze read back
+    // from an interpolated trajectory is a float, and printing it raw fills the field with sixteen
+    // digits — "312.7835073245701" in a box asking for degrees.
     if (active !== this.headingInput) {
-      this.headingInput.value = pose?.headingDeg !== undefined ? String(pose.headingDeg) : ""
+      this.headingInput.value = pose?.headingDeg !== undefined ? String(this.rounded(pose.headingDeg)) : ""
     }
     if (active !== this.pitchInput) {
-      this.pitchInput.value = String(pose?.pitchDeg ?? 0)
+      this.pitchInput.value = String(this.rounded(pose?.pitchDeg ?? 0))
     }
     if (active !== this.elevationInput) {
       // The pose stores a height above the local ground; the field shows an altitude above sea
@@ -3386,8 +3389,9 @@ export class UfoRecorderElement extends HTMLElement {
       .replace("{rate}", best.rate.toLocaleString(undefined, { maximumFractionDigits: best.rate < 10 ? 1 : 0 }))
   }
 
-  /** One decimal, so a placement read back from an interpolated trajectory doesn't fill the field
-   * with sixteen digits of floating point. */
+  /** One decimal, so a placement or a gaze read back from an interpolated trajectory — or written
+   * by a drag — doesn't fill the field with sixteen digits of floating point. A tenth of a degree
+   * is roughly one pixel across this canvas, so nothing visible is lost. */
   private rounded(value: number): number {
     return Math.round(value * 10) / 10
   }
@@ -4253,8 +4257,10 @@ export class UfoRecorderElement extends HTMLElement {
     // wrapDegrees() (called from within updateObserver) both normalizes headingDeg into [0,360)
     // and reflects that back into headingInput.value, so an unwrapped/out-of-range intermediate
     // value here (e.g. 372, or -15) is exactly as valid an input as anything a user could type.
-    this.headingInput.value = String(headingDeg)
-    this.pitchInput.value = String(pitchDeg)
+    // A tenth of a degree is about a pixel across this canvas, and the drag recomputes from its own
+    // fixed start reference every move (see above), so rounding what is shown cannot accumulate.
+    this.headingInput.value = String(this.rounded(headingDeg))
+    this.pitchInput.value = String(this.rounded(pitchDeg))
     this.updateObserver()
   }
 

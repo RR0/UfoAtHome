@@ -4908,3 +4908,30 @@ describe("the sky under an observation being edited", () => {
     expect(element.shadowRoot!.getElementById("sky-candidates")!.textContent).toMatch(/G[ée]minid/)
   })
 })
+
+describe("how precisely the gaze fields read back", () => {
+  it("shows degrees to a tenth, not to sixteen digits", () => {
+    // What a reader actually saw in the Orientation box after dragging the view:
+    // "312.7835073245701". A field asking for degrees should not print a float's full mantissa —
+    // and a tenth of a degree is about one pixel across this canvas, so nothing visible is lost.
+    const element = mount()
+    const heading = element.shadowRoot!.getElementById("heading") as HTMLInputElement
+    const pitch = element.shadowRoot!.getElementById("pitch") as HTMLInputElement
+    element.sightingData = {
+      version: 1,
+      durationSeconds: 10,
+      timeline: { keyframes: [] },
+      weatherTrack: { keyframes: [] },
+      witnessTrack: {
+        keyframes: [
+          { t: 0, pose: { headingDeg: 312.7835073245701, pitchDeg: 61.13732147026157 } },
+          { t: 10_000, pose: { headingDeg: 313.9112223334445, pitchDeg: 61.55566677788899 } }
+        ]
+      }
+    } as never
+    const ufo = element.shadowRoot!.querySelector("rr0-scene")!.shadowRoot!.querySelector("rr0-ufo") as unknown as { currentTime: number }
+    ufo.currentTime = 5000
+    expect(heading.value).toBe("313.3")
+    expect(pitch.value).toBe("61.3")
+  })
+})
