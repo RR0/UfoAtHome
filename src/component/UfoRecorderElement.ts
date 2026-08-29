@@ -8,7 +8,9 @@ import { ApparentSize } from "../engine/shape/ApparentSize.js"
 import { ImageProjection } from "../engine/instrument/ImageProjection.js"
 import { INSTRUMENTS } from "../engine/instrument/Instrument.js"
 import { LightRigs } from "../engine/model/LightRig.js"
-import { MeteorShowers } from "../engine/astronomy/MeteorShowers.js"
+import { DARK_SKY_LIMITING_MAGNITUDE, MeteorShowers } from "../engine/astronomy/MeteorShowers.js"
+import { Comets } from "../engine/astronomy/Comets.js"
+import type { CometAppearance } from "../engine/astronomy/Comets.js"
 import { Compass } from "../engine/astronomy/Compass.js"
 import { resolveDecorPlacementAt } from "../engine/model/Decor.js"
 import { SightingShapes } from "../engine/persistence/SightingShapes.js"
@@ -295,6 +297,7 @@ export class UfoRecorderElement extends HTMLElement {
   /** What else was in that sky — see refreshSkyCandidates. */
   private readonly skyCandidatesOutput: HTMLElement
   private readonly showMeteorButton: HTMLButtonElement
+  private readonly showCometButton: HTMLButtonElement
   private readonly weatherSourceLink: HTMLAnchorElement
   /** Every field the weather record itself provides — the ones locked while it does, and the ones
    * whose edits write a keyframe while it doesn't. Excludes Light intensity, which sits in the
@@ -700,6 +703,7 @@ export class UfoRecorderElement extends HTMLElement {
     this.weatherSourceText = this.shadow.getElementById("weather-source-text")!
     this.skyCandidatesOutput = this.shadow.getElementById("sky-candidates")!
     this.showMeteorButton = this.shadow.getElementById("show-meteor") as HTMLButtonElement
+    this.showCometButton = this.shadow.getElementById("show-comet") as HTMLButtonElement
     this.weatherSourceLink = this.shadow.getElementById("weather-source-link") as HTMLAnchorElement
     this.weatherFields = [
       this.cloudCoverInput,
@@ -943,6 +947,7 @@ export class UfoRecorderElement extends HTMLElement {
     this.decorLightRigSelect.addEventListener("change", () => this.updateDecorLightRig())
     this.lookAtDecorButton.addEventListener("click", () => this.lookAtDecor())
     this.showMeteorButton.addEventListener("click", () => this.showNextMeteor())
+    this.showCometButton.addEventListener("click", () => this.lookAtComet())
     // The single funnel for "the recording changed, a consumer composing this element (e.g. a
     // live <rr0-scene> preview) should resync" — refresh() (called after every mutation: shape
     // edits, drag, observer/time edits, duration) always ends in a timeupdate on the *nested*
@@ -3328,65 +3333,131 @@ export class UfoRecorderElement extends HTMLElement {
   /**
    * States what else was in that patch of sky, worked out from the date and the place alone.
    *
-   * The one candidate explanation whose record is complete for every case this project can
-   * reconstruct: a meteor shower is a position in the Earth's own orbit, so the Perseids of 1948
-   * are the Perseids of today (see MeteorShowers.ts). No lookup, no coverage floor, no network.
+   * Two candidates now, and they compose into one line rather than two: a meteor shower, whose
+   * record is complete because a shower is a position in the Earth's own orbit, and a naked-eye
+   * comet, whose orbit is a solved problem for as far back as anybody wrote a report. Neither needs
+   * a lookup, a key, or a coverage floor that begins in 1957.
    *
    * Read-only, and deliberately so. It says what was there; whether it explains the sighting is the
-   * reader's conclusion and never the file's claim. An author who wants to put a shower IN a
-   * reconstruction still does it by hand, the same way an aircraft is placed by hand — which is
-   * also what happens for every candidate whose record does not go back far enough.
+   * reader's conclusion and never the file's claim. An author who wants to put either INTO a
+   * reconstruction still does it by hand, the same way an aircraft is placed by hand.
    *
-   * The strongest thing it can say is the negative one: a radiant below the horizon is a shower
-   * that cannot have produced anything, whatever its rate on paper.
+   * The strongest things it can say are the negative ones: a radiant below the horizon is a shower
+   * that cannot have produced anything, and a comet below the horizon, or inside the Sun's glare, is
+   * one nobody standing here saw whatever its magnitude on paper.
    */
   private refreshSkyCandidates(): void {
     this.resetMeteorRankIfSkyChanged()
     const sighting = this.ufoElement.sighting
     const place = sighting.event.place?.[0]
     const time = sighting.event.time
-    if (!place || place.lat === undefined || place.lng === undefined || time?.year === undefined) {
+    // Undefined when the stated time cannot be resolved at all — the same "we couldn't ask" rather
+    // than "there was nothing" distinction the weather makes.
+    const date =
+      place && place.lat !== undefined && place.lng !== undefined && time?.year !== undefined
+        ? sightingTimeToDate(time, place.lng, sighting.event.utcOffsetHours)
+        : undefined
+    if (!date || !place || place.lat === undefined || place.lng === undefined) {
       this.showMeteorButton.hidden = true
-      this.skyCandidatesOutput.textContent = this.messages.skyUnknown
-      return
-    }
-    // Undefined when the stated time cannot be resolved at all — the same "we couldn't ask"
-    // rather than "there was nothing" distinction the weather makes.
-    const date = sightingTimeToDate(time, place.lng, sighting.event.utcOffsetHours)
-    if (!date) {
-      this.showMeteorButton.hidden = true
-      this.skyCandidatesOutput.textContent = this.messages.skyUnknown
-      return
-    }
-    const active = MeteorShowers.activeAt(date)
-    if (active.length === 0) {
-      this.showMeteorButton.hidden = true
-      this.skyCandidatesOutput.textContent = this.messages.skyNothingActive
+      this.showCometButton.hidden = true
+      this.skyCandidatesOutput.textContent = this.messages.skyLine.replace("{parts}", this.messages.skyUnknown)
       return
     }
     const observer = { lat: place.lat, lng: place.lng, elevationM: this.groundElevationM ?? 0 }
+    const parts = [this.showerClause(date, observer), this.cometClause(date, observer)].filter(part => part !== undefined)
+    this.skyCandidatesOutput.textContent = this.messages.skyLine.replace("{parts}", parts.join(" · "))
+  }
+
+  /** The strongest shower running, and what it would really have produced — or the fact that none
+   * was. Also decides whether the meteor button has anything to offer. */
+  private showerClause(date: Date, observer: { lat: number; lng: number; elevationM: number }): string {
+    const active = MeteorShowers.activeAt(date)
+    if (active.length === 0) {
+      this.showMeteorButton.hidden = true
+      return this.messages.skyNothingActive
+    }
     // The strongest shower running, by what would ACTUALLY have been seen rather than by its
     // reputation: a famous shower with its radiant near the horizon yields less than a modest one
     // overhead, and that is the whole point of the correction.
-    const rated = active
+    const best = active
       .map(entry => {
         const position = MeteorShowers.radiantPosition(entry.shower, date, observer)
         return { entry, position, rate: MeteorShowers.observedRatePerHour(entry.zhr, position.altitudeDeg, entry.shower.populationIndex) }
       })
-      .sort((a, b) => b.rate - a.rate)
-    const best = rated[0]
+      .sort((a, b) => b.rate - a.rate)[0]
     if (best.rate <= 0) {
       this.showMeteorButton.hidden = true
-      this.skyCandidatesOutput.textContent = this.messages.skyShowerBelowHorizon.replace("{name}", best.entry.shower.name[this.showerLanguage()])
-      return
+      return this.messages.skyShowerBelowHorizon.replace("{name}", best.entry.shower.name[this.showerLanguage()])
     }
     // Only offered when there is genuinely one to show.
     this.showMeteorButton.hidden = !this.sceneElement.meteorByRank(0)
-    this.skyCandidatesOutput.textContent = this.messages.skyShowerActive
+    return this.messages.skyShowerActive
       .replace("{name}", best.entry.shower.name[this.showerLanguage()])
       .replace("{altitude}", String(Math.round(best.position.altitudeDeg)))
       .replace("{bearing}", Compass.point(best.position.azimuthDeg, this.showerLanguage()))
       .replace("{rate}", best.rate.toLocaleString(undefined, { maximumFractionDigits: best.rate < 10 ? 1 : 0 }))
+  }
+
+  /**
+   * The comet standing in that sky, if one was bright enough to be worth naming.
+   *
+   * Silent below naked-eye brightness, and that is the useful filter: every apparition in the
+   * catalog was a naked-eye comet at its best, but its window runs two hundred days either side of
+   * perihelion and for most of that it was a telescopic smudge. A magnitude-eleven comet is a fact
+   * about an observatory, not a candidate for what a witness saw.
+   */
+  private cometClause(date: Date, observer: { lat: number; lng: number; elevationM: number }): string | undefined {
+    const comet = Comets.brightestAt(date, observer)
+    if (!comet || comet.magnitude > DARK_SKY_LIMITING_MAGNITUDE) {
+      this.showCometButton.hidden = true
+      return undefined
+    }
+    // Worth pointing at only when there is somewhere to point: a comet that has not risen is aimed
+    // at by looking into the ground.
+    this.showCometButton.hidden = comet.position.altitudeDeg <= 0
+    return this.cometText(comet)
+  }
+
+  private cometText(comet: CometAppearance): string {
+    const name = comet.apparition.name[this.showerLanguage()]
+    const magnitude = comet.magnitude.toLocaleString(undefined, { maximumFractionDigits: 1 })
+    if (comet.position.altitudeDeg <= 0) {
+      return this.messages.skyCometBelowHorizon.replace("{name}", name).replace("{magnitude}", magnitude)
+    }
+    const template =
+      comet.elongationDeg < Comets.TWILIGHT_ELONGATION_DEG
+        ? this.messages.skyCometInDaylight
+        : comet.tailLengthDeg === undefined
+          ? this.messages.skyCometNoTail
+          : this.messages.skyComet
+    return template
+      .replace("{name}", name)
+      .replace("{magnitude}", magnitude)
+      .replace("{altitude}", String(Math.round(comet.position.altitudeDeg)))
+      .replace("{bearing}", Compass.point(comet.position.azimuthDeg, this.showerLanguage()))
+      .replace("{tail}", String(Math.round(comet.tailLengthDeg ?? 0)))
+      .replace("{elongation}", String(Math.round(comet.elongationDeg)))
+  }
+
+  /**
+   * Turns the witness to face the comet.
+   *
+   * No seeking, unlike the meteor button, and no pausing either: a comet was there for the whole
+   * recording and for weeks either side, so there is no instant to be caught at. The same aim the
+   * decor's own button performs, through the same keyframed gaze fields.
+   */
+  private lookAtComet(): void {
+    const sighting = this.ufoElement.sighting
+    const place = sighting.event.place?.[0]
+    const time = sighting.event.time
+    if (!place || place.lat === undefined || place.lng === undefined || time?.year === undefined) return
+    const date = sightingTimeToDate(time, place.lng, sighting.event.utcOffsetHours)
+    if (!date) return
+    const comet = Comets.brightestAt(date, { lat: place.lat, lng: place.lng, elevationM: this.groundElevationM ?? 0 })
+    if (!comet) return
+    this.headingInput.value = String(this.rounded(comet.position.azimuthDeg))
+    this.pitchInput.value = String(this.rounded(comet.position.altitudeDeg))
+    this.updateObserver()
   }
 
   /** One decimal, so a placement or a gaze read back from an interpolated trajectory — or written
@@ -3619,6 +3690,8 @@ export class UfoRecorderElement extends HTMLElement {
     this.labelDecorAltitude.textContent = messages.decorAltitude
     this.showMeteorButton.title = messages.showMeteor
     this.showMeteorButton.setAttribute("aria-label", messages.showMeteor)
+    this.showCometButton.title = messages.showComet
+    this.showCometButton.setAttribute("aria-label", messages.showComet)
     this.lookAtDecorButton.title = messages.lookAtDecor
     this.lookAtDecorButton.setAttribute("aria-label", messages.lookAtDecor)
     this.optionDecorWitness.textContent = messages.decorWitness

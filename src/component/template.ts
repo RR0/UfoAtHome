@@ -162,11 +162,15 @@ export const html = `
       <output id="weather-source" class="weather-source" for="lat lng obs-time"><span id="weather-source-text"></span><span id="weather-source-row" class="inline-source" hidden></span><a id="weather-source-link" target="_blank" rel="noopener noreferrer" hidden></a></output>
     </div>
     <!-- Not testimony either, and not even a lookup: a meteor shower is a position in the Earth's
-         own orbit, so the date alone decides it. Read-only on purpose — it states what else was in
-         that patch of sky, and whether that explains anything is the reader's conclusion, never the
-         file's claim. See MeteorShowers.ts. -->
+         own orbit and a comet's orbit is a solved problem, so the date and the place alone decide
+         both. Read-only on purpose — it states what else was in that patch of sky, and whether that
+         explains anything is the reader's conclusion, never the file's claim. See MeteorShowers.ts
+         and Comets.ts. -->
     <output id="sky-candidates" class="weather-source" for="lat lng obs-time"></output>
-    <button id="show-meteor" type="button" class="icon-btn" title="Show me one" aria-label="Show me one" hidden>☄</button>
+    <!-- A shooting star for the meteor and a comet for the comet. The meteor button used to carry
+         the comet glyph, which was only ever unambiguous while there was nothing else up there. -->
+    <button id="show-meteor" type="button" class="icon-btn" title="Show me one" aria-label="Show me one" hidden>🌠</button>
+    <button id="show-comet" type="button" class="icon-btn" title="Show me the comet" aria-label="Show me the comet" hidden>☄</button>
     <span id="label-weather">Weather</span>
     <label><span id="label-cloud-cover">Cloud cover</span> <input id="cloudCover" class="weather-field" type="range" min="0" max="1" step="0.05" value="0"/></label>
     <label><span id="label-cloud-darkness">Cloud darkness</span> <input id="cloudDarkness" class="weather-field" type="range" min="0" max="1" step="0.05" value="0"/></label>

@@ -251,6 +251,10 @@ export interface UfoRecorderMessages {
    * which is all ordinary scenery; an aircraft is the reason it exists. Setting it on an object
    * that has no trajectory gives it one, of a single instant — see UfoRecorderElement.updateDecor. */
   decorAltitude: string
+  /** The whole "what else was in that sky" line, into which {parts} drops one clause per candidate
+   * — a meteor shower, a comet, both. The prefix lives here and nowhere else, so two candidates on
+   * one night read as one statement about the sky rather than as two competing announcements. */
+  skyLine: string
   /** What else was in that sky, from the date and the place alone — see MeteorShowers.ts.
    * {name} is the shower, {rate} how many an observer would really have seen per hour, {altitude}
    * the radiant's HEIGHT above the horizon and {bearing} the compass point it stands in. Both are
@@ -268,6 +272,26 @@ export interface UfoRecorderMessages {
    * that a shower was running without offering this is half a feature: a one-second streak
    * somewhere in sixty degrees of sky is not findable by hand. */
   showMeteor: string
+  /** A naked-eye comet standing in that sky — see Comets.ts. {name} is the apparition, {magnitude}
+   * how bright the light curve makes it that night, {altitude} its HEIGHT above the horizon,
+   * {bearing} the compass point, {tail} how many degrees of sky its tail covered from there. */
+  skyComet: string
+  /** Same, for an apparition with no recorded tail length — half the catalog. Saying nothing about
+   * the tail is the point: there is no figure for it, so there is nothing to state. */
+  skyCometNoTail: string
+  /** A comet that was there and had not risen. The same negative the meteor showers make, and
+   * worth as much. */
+  skyCometBelowHorizon: string
+  /** A comet standing very close to the Sun, which is how several of these reached their recorded
+   * peak. {elongation} is how many degrees from it — and the clause stops there rather than
+   * concluding, because the conclusion is not the same for every comet: an ordinary one two degrees
+   * from the Sun is lost in the glare, and Ikeya-Seki at magnitude -9 was seen there in broad
+   * daylight by people who blocked the Sun with a hand. The scene's own visibility rule decides
+   * whether it is drawn; this line states the geometry that decision rests on. */
+  skyCometInDaylight: string
+  /** Turns the witness to face the comet. Unlike a meteor it does not need seeking to: it was
+   * there for the whole recording, and for weeks either side. */
+  showComet: string
   /** Turns the witness to face the selected decor object — the only practical way to find an
    * aircraft in an otherwise empty sky. */
   lookAtDecor: string

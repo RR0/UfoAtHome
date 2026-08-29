@@ -2,7 +2,7 @@ import { html, css } from "./sceneTemplate.js"
 import { UfoElement, registerUfo, UFO_ELEMENT_NAME } from "./UfoElement.js"
 import { SceneRenderer } from "../render3d/SceneRenderer.js"
 import type { TerrainProviders } from "../render3d/terrain/defaultTerrainProviders.js"
-import type { SceneAstronomy } from "../render3d/SceneRenderer.js"
+import type { SceneAstronomy, SceneComet } from "../render3d/SceneRenderer.js"
 import { loadStarCatalog } from "../render3d/StarCatalog.js"
 import type { StarCatalog } from "../render3d/StarCatalog.js"
 import {
@@ -21,6 +21,8 @@ import type { DecorKind } from "../engine/model/Decor.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
 import { selectLocale } from "../i18n/locale.js"
 import { WeatherAudio } from "../render3d/WeatherAudio.js"
+import { Comets } from "../engine/astronomy/Comets.js"
+import { BRIGHT_COMETS } from "../engine/astronomy/cometCatalog.js"
 import { MeteorShowers } from "../engine/astronomy/MeteorShowers.js"
 import { MeteorFall } from "../engine/astronomy/MeteorFall.js"
 import { SizeEstimate } from "../engine/shape/SizeEstimate.js"
@@ -44,6 +46,11 @@ const BODY_NAMES: Record<string, { en: string; fr: string }> = {
   Saturn: { en: "Saturn", fr: "Saturne" }
 }
 const BODY_TOOLTIP_SUPPORTED_LANGUAGES = ["en", "fr"]
+
+/** How SceneRenderer keys a comet's own body mesh — see its buildComet. Kept here beside the names
+ * it is used with rather than exported from the renderer, which has no interest in what the rest of
+ * the key means. */
+const COMET_KEY_PREFIX = "comet:"
 
 /** Fallback hover-tooltip label for an untitled decor object — a coarse "what is this" (unlike an
  * untitled SHAPE's tooltip, which shows nothing at all — see UfoElement.handlePointerMove's own
@@ -183,7 +190,7 @@ export class SceneElement extends HTMLElement {
     const language = selectLocale(navigator.languages, BODY_TOOLTIP_SUPPORTED_LANGUAGES) as "en" | "fr"
     const bodyKey = this.sceneRenderer.pickBodyAt(ndcX, ndcY)
     if (bodyKey) {
-      this.showHoverTooltip(event, BODY_NAMES[bodyKey]?.[language] ?? bodyKey)
+      this.showHoverTooltip(event, this.bodyName(bodyKey, language))
       return
     }
     const decorId = this.sceneRenderer.pickDecorAt(ndcX, ndcY)
@@ -193,6 +200,15 @@ export class SceneElement extends HTMLElement {
       return
     }
     this.hoverTooltip.hidden = true
+  }
+
+  /** What to call the thing under the pointer. The comets are not in BODY_NAMES because there are
+   * two dozen of them and they carry their own names in the catalog — a comet is a dated event
+   * rather than a fixed body, which is also why the key names the apparition. */
+  private bodyName(bodyKey: string, language: "en" | "fr"): string {
+    const cometId = bodyKey.startsWith(COMET_KEY_PREFIX) ? bodyKey.slice(COMET_KEY_PREFIX.length) : undefined
+    const comet = cometId ? BRIGHT_COMETS.find(apparition => apparition.id === cometId) : undefined
+    return comet?.name[language] ?? BODY_NAMES[bodyKey]?.[language] ?? bodyKey
   }
 
   private showHoverTooltip(event: PointerEvent, text: string): void {
@@ -516,8 +532,35 @@ export class SceneElement extends HTMLElement {
       sun,
       moon,
       planets,
+      // Recomputed every tick like the planets, and for the same reason: it moves with the date,
+      // and near a close approach it moves fast enough to matter within a single recording. Cheap —
+      // in all but a couple of dozen months of the last century there is no comet to compute at all
+      // (see Comets.aroundDate).
+      comet: this.cometAt(date, observer),
       stars: this.starCatalog ? { catalog: this.starCatalog, date, observer } : undefined
     })
+  }
+
+  /**
+   * The brightest comet standing in that sky, if any was — in the form the renderer wants it.
+   *
+   * The brightest rather than a list: two apparitions overlap only in the odd year (1957, 1970),
+   * and a scene showing both would be stating that a witness could have confused either, which is a
+   * conclusion rather than a fact. The one that was actually conspicuous is the one to draw.
+   *
+   * Nothing is filtered on here — not the horizon, not the twilight. Whether the comet was
+   * observable is the renderer's own visibility rule, applied to every body in this sky alike, and
+   * the readout in the recorder says so in words.
+   */
+  private cometAt(date: Date, observer: ObserverGeo): SceneComet | undefined {
+    const appearance = Comets.brightestAt(date, observer)
+    if (!appearance) return undefined
+    return {
+      id: appearance.apparition.id,
+      position: appearance.position,
+      tailEnd: appearance.tailEnd,
+      magnitude: appearance.magnitude
+    }
   }
 
   /** Hides a UFO shape exactly where a decor object (building, tree...) sits directly between

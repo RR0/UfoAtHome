@@ -8,6 +8,7 @@ import { ImageProjection } from "../../src/engine/instrument/ImageProjection.js"
 import type { WeatherProvider } from "../../src/engine/weather/WeatherProvider.js"
 import type { Weather } from "../../src/engine/model/Weather.js"
 import { SOUND_KINDS } from "../../src/engine/model/Sound.js"
+import { Comets } from "../../src/engine/astronomy/Comets.js"
 import type { PlaceMatch, PlaceProvider } from "../../src/engine/place/PlaceProvider.js"
 
 register()
@@ -4906,6 +4907,81 @@ describe("the sky under an observation being edited", () => {
     // Either language: the test environment's own locale decides which, and the point here is that
     // the shower is named at all.
     expect(element.shadowRoot!.getElementById("sky-candidates")!.textContent).toMatch(/G[ée]minid/)
+  })
+
+  /** Provence, on the evening of 1 April 1997, which is Hale-Bopp at its own recorded peak — and
+   * also the place four of this project's own case files stand in. The offset is typed rather than
+   * left to the longitude, because an hour is a different sky. */
+  function overProvence(element: UfoRecorderElement, when: string, offsetHours: string): void {
+    typeInto(element, "obs-time", when)
+    typeInto(element, "utcOffsetHours", offsetHours)
+    typeInto(element, "lat", "43.8379")
+    typeInto(element, "lng", "5.9822")
+  }
+
+  function skyLine(element: UfoRecorderElement): string {
+    return element.shadowRoot!.getElementById("sky-candidates")!.textContent ?? ""
+  }
+
+  it("names the comet that really stood over that evening, and offers to look at it", async () => {
+    const element = mount()
+    const button = element.shadowRoot!.getElementById("show-comet") as HTMLButtonElement
+    expect(button.hidden).toBe(true)
+    overProvence(element, "1997-04-01 21:00", "2")
+
+    await waitFor(() => !button.hidden)
+    expect(skyLine(element)).toMatch(/Hale-Bopp/)
+    // Where it actually was: about 27 degrees up in the north-west, with some twenty degrees of
+    // tail. Checked against JPL Horizons in test/engine/astronomy/Comets.test.ts.
+    expect(skyLine(element)).toMatch(/\b27\b/)
+    button.click()
+    // Within a degree: the readout rounds, and the button aims from the ground elevation the
+    // recorder has resolved rather than from the one a bare lookup would assume.
+    expect(Number((element.shadowRoot!.getElementById("pitch") as HTMLInputElement).value)).toBeGreaterThan(26)
+    expect(Number((element.shadowRoot!.getElementById("pitch") as HTMLInputElement).value)).toBeLessThan(29)
+    const heading = Number((element.shadowRoot!.getElementById("heading") as HTMLInputElement).value)
+    expect(heading).toBeGreaterThan(300)
+    expect(heading).toBeLessThan(311)
+  })
+
+  it("says nothing about a comet that was still a telescopic smudge", async () => {
+    // Valensole, 1 July 1965. Ikeya-Seki IS in the window — it reached perihelion that October and
+    // became the brightest comet of the century — but on this date it was magnitude twelve and had
+    // not even been discovered yet. A readout that named it would be offering a candidate no
+    // witness could possibly have seen, which is the opposite of what this line is for.
+    const element = mount()
+    overProvence(element, "1965-07-01 05:45", "1")
+    await waitFor(() => skyLine(element).length > 0)
+
+    expect(Comets.aroundDate(new Date("1965-07-01T04:45:00Z")).map(comet => comet.id)).toContain("ikeya-seki-1965")
+    expect(skyLine(element)).not.toMatch(/Ikeya/)
+    expect((element.shadowRoot!.getElementById("show-comet") as HTMLButtonElement).hidden).toBe(true)
+  })
+
+  it("says how close to the Sun a comet stood, and stops there", async () => {
+    // Ikeya-Seki at noon on 21 October 1965: magnitude -9, thirty-six degrees up, and two degrees
+    // from the Sun. An earlier version of this line concluded for the reader — "lost in its glare" —
+    // and was wrong about the one comet it most mattered for: people really did see this one that
+    // afternoon, by blocking the Sun with a hand, and the scene draws it because at magnitude -9 it
+    // beats the daylight sky. The line states the geometry the reader needs and leaves the
+    // conclusion to them.
+    const element = mount()
+    overProvence(element, "1965-10-21 12:00", "1")
+    await waitFor(() => /Ikeya/.test(skyLine(element)))
+
+    expect(skyLine(element)).toMatch(/Sun|Soleil/)
+    expect(skyLine(element)).not.toMatch(/tail|queue/)
+  })
+
+  it("keeps both candidates in one line when the sky had both", async () => {
+    // Mid-October 1965 had the Orionids running and Ikeya-Seki in the morning sky. Two candidates
+    // are two clauses of one statement about that sky, not two competing announcements.
+    const element = mount()
+    overProvence(element, "1965-10-21 05:00", "1")
+    await waitFor(() => /Ikeya/.test(skyLine(element)))
+
+    expect(skyLine(element)).toMatch(/Orionid/)
+    expect(skyLine(element).match(/Sky:|Ciel :/g)).toHaveLength(1)
   })
 })
 

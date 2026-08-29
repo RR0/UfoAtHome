@@ -69,6 +69,7 @@ import { buildCloudGeometry, buildCloudMaterial } from "./CloudSystem.js"
 import type { CloudUniforms } from "./CloudSystem.js"
 import { buildLensFlare } from "./LensFlareEffect.js"
 import { EquidistantProjectionPass } from "./EquidistantProjectionPass.js"
+import { CometTail } from "./CometTail.js"
 import { MeteorSystem } from "./MeteorSystem.js"
 import type { Meteor } from "../engine/astronomy/MeteorFall.js"
 import type { ProjectionKind } from "../engine/instrument/Instrument.js"
@@ -489,6 +490,26 @@ export interface ScenePlanet {
   magnitude: number
 }
 
+/**
+ * A comet standing in that sky, if one was.
+ *
+ * Worked out by SceneElement from the sighting's own date and place (see engine/astronomy/Comets),
+ * the same division of labour the Sun and the planets follow: this renderer is told where a thing
+ * is and how bright, and knows nothing about orbits.
+ *
+ * `tailEnd` is absent for an apparition with no recorded tail length — half the catalog — and such
+ * a comet draws as a bright point and nothing more, which is exactly what its file supports.
+ */
+export interface SceneComet {
+  /** The apparition's own id, so a hover can name it. */
+  id: string
+  position: HorizontalPosition
+  /** Where the far end of the tail stands, already projected from its real length in space. */
+  tailEnd?: HorizontalPosition
+  /** Real apparent visual magnitude, as modelled from what was recorded at the time. */
+  magnitude: number
+}
+
 /** Everything needed to render one instant's sky: real Sun/Moon/planet positions (already
  * resolved by SceneElement via engine/astronomy/CelestialPositions.ts) plus the star catalog and
  * the date/observer needed to place its fixed RA/dec entries in the sky right now. `stars` is
@@ -498,6 +519,7 @@ export interface SceneAstronomy {
   sun: HorizontalPosition & { magnitude: number }
   moon: HorizontalPosition & { phase: MoonPhase; magnitude: number }
   planets: ReadonlyArray<ScenePlanet>
+  comet?: SceneComet
   stars?: { catalog: StarCatalog; date: Date; observer: ObserverGeo }
 }
 
@@ -720,6 +742,11 @@ export class SceneRenderer {
   /** The shower falling in this sky, if any — see MeteorSystem. Built once and kept: an empty
    * shower draws nothing, so there is no reason to tear it down between recordings. */
   private meteorSystem?: MeteorSystem
+  /** The comet's tail, if this sky has ever had one — built once and kept, like the meteors. */
+  private cometTail?: CometTail
+  /** The body-mesh key of the comet currently drawn, so buildPlanets' own sweep can be told to
+   * leave it alone and so a change of apparition takes the old one down. */
+  private cometKey?: string
   private readonly onLightningFlash?: () => void
 
   constructor(
@@ -1208,6 +1235,7 @@ export class SceneRenderer {
     this.setBodyMesh("sun", astronomy.sun, SUN_MOON_VISUAL_RADIUS, new Color(1, 0.96, 0.88), astronomy.sun.magnitude)
     this.setMoonMesh(astronomy.moon)
     this.buildPlanets(astronomy.planets)
+    this.buildComet(astronomy.comet, astronomy.sun.altitudeDeg)
     // Fog reaches as far as the ground actually goes, not a fixed SKY_RADIUS: from altitude the
     // whole visible ground lies beyond 900 units, so a fog capped there turned all of it into flat
     // fog colour — a black void below the horizon at 1500 m, since that colour is the night-ground
@@ -1864,8 +1892,61 @@ export class SceneRenderer {
     this.glareSprites.delete(key)
   }
 
+  /**
+   * Places the comet standing in this sky, head and tail.
+   *
+   * The head goes through setBodyMesh like any other bright point, which gives it the same real
+   * glare, the same atmospheric reddening near the horizon and the same hover target as a planet.
+   * That is the honest treatment: no coma diameter is on record in the catalog, so drawing a disc
+   * of some chosen size would be inventing the one thing that separates a comet's head from a star.
+   * What separates them here is the tail, which has a source (see CometTail).
+   *
+   * Held to the same visibility limit as the star field: a comet fainter than the sky it stands in
+   * is not drawn, which through a whole daylit apparition means nothing is drawn at all. Several of
+   * these comets reached their recorded peak while inside the Sun's own glare, and a reconstruction
+   * that painted them there anyway would be showing the reader something nobody could have seen.
+   */
+  private buildComet(comet: SceneComet | undefined, sunAltitudeDeg: number): void {
+    const key = comet && `comet:${comet.id}`
+    if (!comet || !key || comet.magnitude > visibleMagnitudeLimit(sunAltitudeDeg)) {
+      this.disposeComet()
+      return
+    }
+    // A different apparition than last tick — two only ever overlap in the odd year, but when they
+    // do the one that stops being brightest has to come down.
+    if (this.cometKey && this.cometKey !== key) this.disposeComet()
+    const brightness = magnitudeToBrightness(comet.magnitude)
+    const scale = starColorScale(brightness)
+    this.cometKey = key
+    this.setBodyMesh(key, comet.position, PLANET_VISUAL_RADIUS * (0.5 + 0.5 * brightness), new Color(scale, scale, scale), comet.magnitude)
+    if (!this.cometTail) {
+      this.cometTail = new CometTail(BODY_PLACEMENT_RADIUS)
+      // In the celestial group with everything else at infinity, so it follows the witness's own
+      // eye height the way the stars do.
+      this.celestialGroup.add(this.cometTail.object)
+    }
+    // Drawn from the head even when the head itself is below the horizon, which is not an oversight:
+    // a comet whose head has set can still stand its tail up out of the twilight, and several of
+    // these were first noticed exactly that way.
+    this.cometTail.set(comet.position, comet.tailEnd, brightness)
+  }
+
+  /** Takes down whatever comet was drawn, head, halo, hover target and tail. */
+  private disposeComet(): void {
+    this.cometTail?.set(undefined, undefined, 0)
+    if (!this.cometKey) return
+    this.disposeMesh(this.bodyMeshes.get(this.cometKey))
+    this.bodyMeshes.delete(this.cometKey)
+    this.disposeHitArea(this.cometKey)
+    this.disposeGlare(this.cometKey)
+    this.cometKey = undefined
+  }
+
   private buildPlanets(planets: ReadonlyArray<ScenePlanet>): void {
-    const seen = new Set<string>(["sun", "moon"])
+    // The comet's key is seeded in because this sweep removes every body mesh it does not
+    // recognise, and buildComet runs after it: without this the comet would be disposed and rebuilt
+    // on every single tick, taking its glare halo with it.
+    const seen = new Set<string>(["sun", "moon", ...(this.cometKey ? [this.cometKey] : [])])
     for (const planet of planets) {
       seen.add(planet.body)
       const brightness = magnitudeToBrightness(planet.magnitude)
