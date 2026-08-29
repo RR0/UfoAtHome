@@ -56,6 +56,7 @@ import { selectLocale } from "../i18n/locale.js"
 import type { CelestialBody, HorizontalPosition, MoonPhase, ObserverGeo } from "../engine/astronomy/CelestialPositions.js"
 import type { ObserverPose } from "../engine/model/ObserverTrack.js"
 import type { StarCatalog } from "./StarCatalog.js"
+import { RoundPoints } from "./RoundPoints.js"
 import { defaultTerrainProviders } from "./terrain/defaultTerrainProviders.js"
 import type { TerrainProviders } from "./terrain/defaultTerrainProviders.js"
 import { buildTerrainMesh } from "./terrain/TerrainMeshBuilder.js"
@@ -1937,6 +1938,8 @@ export class SceneRenderer {
       const colorAttribute = new BufferAttribute(new Float32Array(tierStars.length * 3), 3)
       geometry.setAttribute("color", colorAttribute)
       const material = new PointsMaterial({ vertexColors: true, size: tier.size, sizeAttenuation: false, fog: false })
+      // A star is a point source: everything visible of it is radial glare, never a square quad.
+      RoundPoints.apply(material)
       const points = new Points(geometry, material)
       this.celestialGroup.add(points)
       return { points, colorAttribute, brightness, phase, speedFactor }
