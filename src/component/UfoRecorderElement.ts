@@ -3289,7 +3289,7 @@ export class UfoRecorderElement extends HTMLElement {
    * looked at, which is the whole point of a button that says "show me one".
    */
   private showNextMeteor(): void {
-    const next = this.sceneElement.nextMeteor(this.ufoElement.currentTime)
+    const next = this.sceneElement.meteorByRank(this.meteorRank++)
     if (!next) return
     if (this.ufoElement.playbackState === "playing") this.ufoElement.togglePlayPause()
     this.ufoElement.currentTime = next.t
@@ -3297,6 +3297,24 @@ export class UfoRecorderElement extends HTMLElement {
     this.pitchInput.value = String(Math.round(next.altitudeDeg * 10) / 10)
     this.updateObserver()
   }
+
+  /** Puts the ☄ button back to the best example whenever the sky it is offering examples FROM has
+   * changed. Compared on the answer rather than on the inputs: two different dates can perfectly
+   * well give the same shower at the same rate, and that is the same sky to walk through. */
+  private resetMeteorRankIfSkyChanged(): void {
+    const brightest = this.sceneElement.meteorByRank(0)
+    const sky = brightest ? `${brightest.t}` : ""
+    if (sky === this.meteorRankFor) return
+    this.meteorRankFor = sky
+    this.meteorRank = 0
+  }
+
+  private meteorRankFor?: string
+
+  /** How far down the brightness ranking the ☄ button has walked. Reset whenever the sky changes,
+   * so a reader who edits the date is offered that night's best example rather than resuming at
+   * rank seven of a shower that is no longer running. */
+  private meteorRank = 0
 
   /** Which of a shower's own names to use — the reader's, resolved the same way every other label
    * in this element is. */
@@ -3320,6 +3338,7 @@ export class UfoRecorderElement extends HTMLElement {
    * that cannot have produced anything, whatever its rate on paper.
    */
   private refreshSkyCandidates(): void {
+    this.resetMeteorRankIfSkyChanged()
     const sighting = this.ufoElement.sighting
     const place = sighting.event.place?.[0]
     const time = sighting.event.time
@@ -3359,7 +3378,7 @@ export class UfoRecorderElement extends HTMLElement {
       return
     }
     // Only offered when there is genuinely one to show.
-    this.showMeteorButton.hidden = !this.sceneElement.nextMeteor(0)
+    this.showMeteorButton.hidden = !this.sceneElement.meteorByRank(0)
     this.skyCandidatesOutput.textContent = this.messages.skyShowerActive
       .replace("{name}", best.entry.shower.name[this.showerLanguage()])
       .replace("{altitude}", String(Math.round(best.position.altitudeDeg)))

@@ -4839,8 +4839,8 @@ describe("showing the next meteor", () => {
       togglePlayPause: () => void
     }
     ufo.durationSeconds = 300
-    const scene = element.shadowRoot!.querySelector("rr0-scene") as unknown as { nextMeteor: () => unknown }
-    scene.nextMeteor = () => SOMEWHERE_IN_THE_SKY
+    const scene = element.shadowRoot!.querySelector("rr0-scene") as unknown as { meteorByRank: () => unknown }
+    scene.meteorByRank = () => SOMEWHERE_IN_THE_SKY
     let toggled = 0
     ufo.togglePlayPause = () => {
       toggled++

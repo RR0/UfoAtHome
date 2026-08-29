@@ -676,31 +676,41 @@ export class SceneElement extends HTMLElement {
   }
 
   /**
-   * The next meteor to fall after `afterMs`, and where in the sky to look for it — what a control
-   * offering to show one needs, and the whole difference between stating that a shower was running
-   * and letting anybody actually see it.
+   * The rank-th brightest meteor the playhead can be moved to, and where in the sky to look for
+   * it — what a control offering to show one needs, and the whole difference between stating that
+   * a shower was running and letting anybody actually see it.
    *
-   * Wraps back to the first when the playhead is past the last: a reader who reaches the end should
-   * be able to go round again rather than be told there is nothing.
+   * Ranked rather than chronological, and reachable-only; both reasons are in the body. Pure: the
+   * same rank always gives the same answer, so a toolbar can ask for rank 0 just to find out
+   * whether to offer the control at all.
+   *
+   * Wraps, so a reader who reaches the faintest goes round again rather than being told there is
+   * nothing.
    */
-  nextMeteor(afterMs: number): { t: number; altitudeDeg: number; azimuthDeg: number } | undefined {
+  meteorByRank(rank: number): { t: number; altitudeDeg: number; azimuthDeg: number } | undefined {
     // Asked by the toolbar, which may well run before the scene next paints: schedule on demand
     // rather than answer "no meteors" from a sky that simply has not been worked out yet.
     this.ensureMeteorSchedule(this.ufoElement.sighting)
     // Only what the playhead can actually be moved to. The fall covers the DECLARED observation,
     // which is routinely far longer than what was recorded of it — a five-minute sighting with
-    // forty seconds of drawn track puts eleven of its twelve meteors beyond the end of the
-    // timeline. Offering those was the whole of "je ne vois rien": the seek clamped to the last
-    // frame, where nothing was burning, and the button looked broken while working exactly as
-    // written. The sky itself is left alone — those meteors really did fall, after the recording
-    // stops.
-    const reachable = this.sceneRenderer.meteorSchedule.filter(meteor => meteor.t + meteor.durationMs <= this.ufoElement.seekableDuration)
+    // forty seconds of drawn track puts most of its meteors beyond the end of the timeline, and
+    // seeking to one of those clamps to the last frame, where nothing is burning. The sky itself
+    // is left alone: those meteors really did fall, after the recording stops.
+    const reachable = [...this.sceneRenderer.meteorSchedule]
+      .filter(meteor => meteor.t + meteor.durationMs <= this.ufoElement.seekableDuration)
+      // Brightest first. Chronological order sounds like the natural one and is the wrong one
+      // here: brightness is a cubed draw, so most of a shower is close to the threshold of being
+      // seen at all, and walking the night in order opens on whatever happened to fall first —
+      // which, measured, was one at brightness 0.007, three times dimmer than the stars around it.
+      // The sky is untouched; only the order the examples are offered in. A control that says
+      // "show me one" owes the reader one they can see.
+      .sort((a, b) => b.brightness - a.brightness)
     if (reachable.length === 0) return undefined
-    const next = reachable.find(meteor => meteor.t > afterMs) ?? reachable[0]
-    const where = this.sceneRenderer.meteorMidpoint(next)
+    const meteor = reachable[rank % reachable.length]
+    const where = this.sceneRenderer.meteorMidpoint(meteor)
     if (!where) return undefined
     // Mid-flight, where the streak is longest and brightest rather than just appearing.
-    return { t: Math.round(next.t + next.durationMs * 0.45), ...where }
+    return { t: Math.round(meteor.t + meteor.durationMs * 0.45), ...where }
   }
 
   /** How this recording's own instrument turns an angle into a pixel at time `t` — rebuilt per call

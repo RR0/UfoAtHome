@@ -233,7 +233,7 @@ describe("meteor scheduling", () => {
     edit(element, geminidNight)
     meteorShowersSet.length = 0
     edit(element, { ...geminidNight, durationSeconds: 600 })
-    element.nextMeteor(0)
+    element.meteorByRank(0)
     expect(meteorShowersSet.length).toBeGreaterThan(0)
   })
 
@@ -241,8 +241,8 @@ describe("meteor scheduling", () => {
     const element = mount()
     edit(element, geminidNight)
     meteorShowersSet.length = 0
-    element.nextMeteor(0)
-    element.nextMeteor(0)
+    element.meteorByRank(0)
+    element.meteorByRank(0)
     expect(meteorShowersSet).toEqual([])
   })
 
@@ -260,12 +260,10 @@ describe("meteor scheduling", () => {
     const ufo = element.shadowRoot!.querySelector("rr0-ufo")!
     Object.defineProperty(ufo, "seekableDuration", { get: () => recordedMs, configurable: true })
     expect(schedule.some(meteor => meteor.t > recordedMs)).toBe(true)
-    let after = 0
-    for (let i = 0; i < 6; i++) {
-      const answer = element.nextMeteor(after)
+    for (let rank = 0; rank < 6; rank++) {
+      const answer = element.meteorByRank(rank)
       if (!answer) break
       expect(answer.t).toBeLessThanOrEqual(recordedMs)
-      after = answer.t
     }
   })
 
@@ -274,6 +272,58 @@ describe("meteor scheduling", () => {
     edit(element, geminidNight)
     const ufo = element.shadowRoot!.querySelector("rr0-ufo")!
     Object.defineProperty(ufo, "seekableDuration", { get: () => 1000, configurable: true })
-    expect(element.nextMeteor(0)).toBeUndefined()
+    expect(element.meteorByRank(0)).toBeUndefined()
+  })
+})
+
+describe("which meteor gets offered", () => {
+  const geminidNight = {
+    time: { year: 2023, month: 12, day: 14, hour: 3, minute: 0 },
+    utcOffsetHours: 1,
+    place: [{ lat: 43.8379, lng: 5.9822 }],
+    durationSeconds: 300
+  }
+
+  function edit(element: SceneElement, changes: Record<string, unknown>): void {
+    const data = element.sightingData
+    Object.assign(data, changes)
+    element.sightingData = data
+  }
+
+  function scheduleOf(element: SceneElement): { t: number; durationMs: number; brightness: number }[] {
+    return [...(element as unknown as { sceneRenderer: { meteorSchedule: { t: number; durationMs: number; brightness: number }[] } }).sceneRenderer.meteorSchedule]
+  }
+
+  it("offers the brightest one first, not whichever fell first", () => {
+    // Measured before this existed: walking the night in order opened on a meteor of brightness
+    // 0.007 — rendering three times dimmer than the stars around it. Brightness is a cubed draw,
+    // so most of a shower sits near the threshold of being seen at all and chronological order
+    // lands there nearly every time. A control that says "show me one" owes the reader one they
+    // can actually see. The sky is untouched; only the order the examples come in.
+    const element = mount()
+    edit(element, geminidNight)
+    const schedule = scheduleOf(element)
+    const brightest = schedule.reduce((a, b) => (b.brightness > a.brightness ? b : a))
+    const first = element.meteorByRank(0)!
+    expect(first.t).toBe(Math.round(brightest.t + brightest.durationMs * 0.45))
+    expect(schedule.some(meteor => meteor.t < brightest.t)).toBe(true)
+  })
+
+  it("walks down the ranking, never repeating until it wraps", () => {
+    const element = mount()
+    edit(element, geminidNight)
+    const count = scheduleOf(element).length
+    const seen = new Set<number>()
+    for (let rank = 0; rank < count; rank++) seen.add(element.meteorByRank(rank)!.t)
+    expect(seen.size).toBe(count)
+    // And round again rather than running out.
+    expect(element.meteorByRank(count)!.t).toBe(element.meteorByRank(0)!.t)
+  })
+
+  it("gives the same answer for the same rank, so asking is free of side effects", () => {
+    // The toolbar asks for rank 0 purely to decide whether to offer the button at all.
+    const element = mount()
+    edit(element, geminidNight)
+    expect(element.meteorByRank(0)).toEqual(element.meteorByRank(0))
   })
 })
