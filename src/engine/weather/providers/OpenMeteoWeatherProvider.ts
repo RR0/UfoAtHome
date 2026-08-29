@@ -288,6 +288,9 @@ export class OpenMeteoWeatherProvider implements WeatherProvider {
       // The ice deck, carried through rather than only folded into the darkness: it is the one
       // ingredient the halos need, and the record has it (see Weather.highCloudCover).
       highCloudCover: record.cloudCoverHigh,
+      // Whichever of the two lower decks covers more sky: that is what stands between the witness
+      // and the ice above, and it is the deck a halo has to be seen through.
+      lowerCloudCover: Math.max(record.cloudCoverLow, record.cloudCoverMid),
       precipitationType,
       precipitationIntensity:
         precipitationType === "none" ? 0 : this.clamp(Math.sqrt(record.precipitationMm / HEAVY_PRECIPITATION_MM), 0, 1),

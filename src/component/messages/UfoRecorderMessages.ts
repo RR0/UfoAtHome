@@ -295,6 +295,26 @@ export interface UfoRecorderMessages {
    * daylight by people who blocked the Sun with a hand. The scene's own visibility rule decides
    * whether it is drawn; this line states the geometry that decision rests on. */
   skyCometInDaylight: string
+  /**
+   * What ice crystals could have put beside the Sun or the Moon — see IceHalos.ts.
+   *
+   * Stated whether or not anything is drawn, and that is the point of it. A display that silently
+   * fails to appear leaves a reader adjusting sliders and guessing; a line that says "no ice cloud,
+   * so no halo" tells them which of the ingredients is missing. {parhelia} is how far to either
+   * side the sundogs would have stood, which moves with the Sun's height.
+   */
+  skyOpticsPossible: string
+  /** Ice cloud present, but the Sun is too high for sundogs to form at all — above about 61
+   * degrees the skew ray cannot leave the crystal. The halo itself is unaffected. */
+  skyOpticsHaloOnly: string
+  /** No ice cloud at all, so none of it could have happened. The commonest answer. */
+  skyOpticsNoIce: string
+  /** Ice above, but a lower deck between it and the witness. */
+  skyOpticsHidden: string
+  /** How the two messages above name whichever light source is making the display — the Sun by day,
+   * the Moon by night. Separate strings because French wants "du Soleil" and "de la Lune". */
+  skyOpticsSun: string
+  skyOpticsMoon: string
   /** Turns the witness to face the comet. Unlike a meteor it does not need seeking to: it was
    * there for the whole recording, and for weeks either side. */
   showComet: string

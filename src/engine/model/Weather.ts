@@ -31,6 +31,18 @@ export interface Weather {
    * hand-authored sky with no ice cloud stated, which draws no display rather than guessing one.
    */
   highCloudCover?: number
+  /**
+   * How much of the sky the LOW and MIDDLE decks covered, 0 to 1 — the cloud that stands between a
+   * witness and anything higher up.
+   *
+   * Carried separately rather than derived from the total, because the decks OVERLAP and the
+   * subtraction is not sound: a sky reported as fully covered with sixty per cent cirrus does not
+   * have forty per cent low cloud, it has an unknown amount. That derivation made the "the display
+   * was hidden" case arithmetically unreachable, which is a plausible-looking model that can never
+   * say one of the two things it exists to say. Undefined means nobody asked, and the total cover is
+   * the best available stand-in.
+   */
+  lowerCloudCover?: number
   precipitationType: PrecipitationType
   /** 0-1; meaningless while precipitationType is "none". */
   precipitationIntensity: number

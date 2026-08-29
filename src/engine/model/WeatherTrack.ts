@@ -48,6 +48,8 @@ export function lerpWeather(a: Weather, b: Weather, t: number): Weather {
     // sky somebody looked at and found no cirrus in.
     highCloudCover:
       a.highCloudCover === undefined || b.highCloudCover === undefined ? undefined : lerpNumber(a.highCloudCover, b.highCloudCover, t),
+    lowerCloudCover:
+      a.lowerCloudCover === undefined || b.lowerCloudCover === undefined ? undefined : lerpNumber(a.lowerCloudCover, b.lowerCloudCover, t),
     // A deck really does lift or lower during an observation, so this blends like the other
     // continuous fields — undefined on either side means unstated, which has no midpoint.
     cloudBaseM: a.cloudBaseM === undefined || b.cloudBaseM === undefined ? undefined : lerpNumber(a.cloudBaseM, b.cloudBaseM, t),

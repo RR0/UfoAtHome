@@ -92,6 +92,7 @@ function weatherEquals(a: Weather, b: Weather): boolean {
     // returning early and the renderer holding the previous sky. That is exactly how the ice deck
     // arrived: the value reached resolveWeatherAt correctly and never got past this line.
     a.highCloudCover === b.highCloudCover &&
+    a.lowerCloudCover === b.lowerCloudCover &&
     a.precipitationType === b.precipitationType &&
     a.precipitationIntensity === b.precipitationIntensity &&
     a.windDirectionDeg === b.windDirectionDeg &&
@@ -1986,8 +1987,9 @@ export class SceneRenderer {
       this.iceHalos.update({ x: 0, y: 1, z: 0 }, -1, 0, [1, 1, 1])
       return
     }
-    // The lower decks are whatever total cover is not accounted for by the high one.
-    const lower = Math.max(0, this.weather.cloudCover - ice)
+    // The real lower decks when the record gave them, and the total cover as a stand-in when
+    // nobody asked — never the total minus the ice, which the decks overlapping makes unsound.
+    const lower = this.weather.lowerCloudCover ?? this.weather.cloudCover
     const source = sun.altitudeDeg > 0 ? sun : moon
     const strength = IceHalos.strength(ice, lower) * (source === sun ? 1 : MOON_HALO_STRENGTH)
     const { x, y, z } = horizontalToCartesian(source.altitudeDeg, source.azimuthDeg, 1)

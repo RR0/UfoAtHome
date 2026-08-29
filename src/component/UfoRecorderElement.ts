@@ -12,6 +12,8 @@ import { DARK_SKY_LIMITING_MAGNITUDE, MeteorShowers } from "../engine/astronomy/
 import { Comets } from "../engine/astronomy/Comets.js"
 import { Sporadics } from "../engine/astronomy/Sporadics.js"
 import { Satellites } from "../engine/astronomy/Satellites.js"
+import { IceHalos } from "../engine/atmosphere/IceHalos.js"
+import { computeBodyPosition } from "../engine/astronomy/CelestialPositions.js"
 import { visibleMagnitudeLimit } from "../render3d/skyColors.js"
 import type { CometAppearance } from "../engine/astronomy/Comets.js"
 import { Compass } from "../engine/astronomy/Compass.js"
@@ -1783,6 +1785,9 @@ export class UfoRecorderElement extends HTMLElement {
     const weather: Weather = {
       cloudCover: Number(this.cloudCoverInput.value),
       highCloudCover: Number(this.highCloudCoverInput.value),
+      // Hand-authored, the cover slider IS the lower deck: it is what a reader means by "cloud",
+      // and the ice has its own control beside it.
+      lowerCloudCover: Number(this.cloudCoverInput.value),
       cloudDarkness: Number(this.cloudDarknessInput.value),
       cloudBaseM: this.numberOrUndefined(this.cloudBaseInput.value),
       precipitationType: this.precipitationTypeSelect.value as PrecipitationType,
@@ -3373,9 +3378,12 @@ export class UfoRecorderElement extends HTMLElement {
       return
     }
     const observer = { lat: place.lat, lng: place.lng, elevationM: this.groundElevationM ?? 0 }
-    const parts = [this.showerClause(date, observer), this.cometClause(date, observer), this.satelliteClause(date, observer)].filter(
-      part => part !== undefined
-    )
+    const parts = [
+      this.showerClause(date, observer),
+      this.cometClause(date, observer),
+      this.satelliteClause(date, observer),
+      this.opticsClause(date, observer)
+    ].filter(part => part !== undefined)
     this.skyCandidatesOutput.textContent = this.messages.skyLine.replace("{parts}", parts.join(" · "))
   }
 
@@ -3478,6 +3486,34 @@ export class UfoRecorderElement extends HTMLElement {
     if (!sky.lowOrbitLit) return filled(this.messages.skySatellitesShadowed)
     if (bright.length === 0) return filled(this.messages.skySatellitesLit)
     return filled(this.messages.skySatellitesLitWith).replace("{eras}", named)
+  }
+
+  /**
+   * What ice crystals could have put beside the Sun or the Moon — see IceHalos.ts.
+   *
+   * Stated whether or not the scene draws anything, and that is the whole reason it exists. The
+   * display is silent when an ingredient is missing, and a reader who has just moved the ice-cloud
+   * slider to its maximum and seen nothing has no way to tell an empty sky from a broken one. This
+   * says which ingredient is absent.
+   *
+   * Silent only when there is no lit source at all: a halo is the source's own light bent through
+   * crystals, so with the Sun and the Moon both down there is nothing to say.
+   */
+  private opticsClause(date: Date, observer: { lat: number; lng: number; elevationM: number }): string | undefined {
+    const weather = resolveWeatherAt(this.ufoElement.sighting, 0)
+    const sun = computeBodyPosition("Sun", date, observer)
+    const moon = computeBodyPosition("Moon", date, observer)
+    const bySun = sun.altitudeDeg > 0
+    const source = bySun ? sun : moon
+    if (source.altitudeDeg <= 0) return undefined
+    const ice = weather.highCloudCover
+    if (ice === undefined || ice <= 0) return this.messages.skyOpticsNoIce
+    // The same reading the renderer takes (see SceneRenderer.buildIceHalos).
+    if (IceHalos.strength(ice, weather.lowerCloudCover ?? weather.cloudCover) <= 0) return this.messages.skyOpticsHidden
+    const parhelia = IceHalos.parheliaDistanceDeg(source.altitudeDeg)
+    const named = bySun ? this.messages.skyOpticsSun : this.messages.skyOpticsMoon
+    if (parhelia === undefined) return this.messages.skyOpticsHaloOnly.replace("{source}", named)
+    return this.messages.skyOpticsPossible.replace("{parhelia}", String(Math.round(parhelia))).replace("{source}", named)
   }
 
   /** A list said the way a sentence says it rather than the way an array prints it — the reader's

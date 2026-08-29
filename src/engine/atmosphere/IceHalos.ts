@@ -137,18 +137,24 @@ export class IceHalos {
   /**
    * How strongly the ice forms could have shown, 0 to 1, given the sky that was over the witness.
    *
-   * Two ingredients, and both are real observations rather than guesses: ICE CLOUD, which is the
-   * high deck (cirrus and cirrostratus live above about six kilometres, where anything present is
-   * ice), and a LIGHT SOURCE that the lower decks are not covering.
+   * MONOTONIC in the ice cover, and that is a correction. The first version peaked at half cover
+   * and fell back to nothing at full, on the reasoning that a solidly covered sky has ground the
+   * light out — which confuses two different quantities. How much of the sky a deck COVERS is not
+   * how much light it ABSORBS, and a cirrostratus veil covering the whole sky is the classic
+   * halo-maker: the best displays anybody photographs come from exactly that. The old curve handed
+   * back nothing at the setting a reader would most naturally reach for.
    *
-   * Peaked rather than monotonic, because that is how it works: a sky with no cirrus has no crystals
-   * to refract through, and a sky completely covered by thick cirrostratus has ground the Sun's
-   * light out before it reaches the eye. The displays people photograph come from a thin veil.
+   * What the record does not hold is the veil's OPTICAL DEPTH, which is what would actually dim a
+   * display, and no reanalysis product this project can reach carries it. So a thin veil and a thick
+   * one are indistinguishable here, and the strength returned is a statement about ingredients
+   * rather than about brightness — as the class comment says, this says the display could have
+   * stood, not how vivid it was.
+   *
+   * The lower decks are the one thing that genuinely removes it: cirrus lives above six kilometres,
+   * and a layer of stratocumulus under it hides the whole display whatever the crystals are doing.
    */
   static strength(highCloudCover: number, lowerCloudCover: number): number {
-    const veil = Math.max(0, Math.min(1, highCloudCover))
-    // Peaks at half cover and falls to nothing at either end.
-    const ice = 4 * veil * (1 - veil)
+    const ice = Math.max(0, Math.min(1, highCloudCover))
     const throughLowerDecks = Math.max(0, 1 - Math.max(0, Math.min(1, lowerCloudCover)))
     return ice * throughLowerDecks
   }
