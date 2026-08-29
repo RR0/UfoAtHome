@@ -715,6 +715,10 @@ export class UfoRecorderElement extends HTMLElement {
     this.weatherSourceLink = this.shadow.getElementById("weather-source-link") as HTMLAnchorElement
     this.weatherFields = [
       this.cloudCoverInput,
+      // Every input the weather is READ from has to be listed here, or editing it alone changes
+      // nothing until some other weather field is touched — which reads as a control that does not
+      // work, and cost a reader an evening deciding the halos were "constant".
+      this.highCloudCoverInput,
       this.cloudDarknessInput,
       this.cloudBaseInput,
       this.precipitationTypeSelect,

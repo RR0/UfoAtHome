@@ -4877,6 +4877,28 @@ describe("showing the next meteor", () => {
   })
 })
 
+describe("every weather control actually reaching the scene", () => {
+  it("listens to every input the weather is read from", () => {
+    // The bug this exists for: an input left out of the listener list still WRITES its value — on
+    // the NEXT edit of some other field — so the recording lags one change behind and a reader
+    // moving one slider watches the sky not respond. That is how the ice-cloud slider shipped.
+    //
+    // Pinned structurally rather than behaviourally, and deliberately. Reading sightingData back
+    // does not catch it (the getter rebuilds the weather from the inputs, so it always agrees with
+    // them), and the readout refreshes through a different path, so both of those pass whether the
+    // listener exists or not. What actually has to hold is this: the template marks every weather
+    // input with a class, and every one of them has to be in the list the element listens to.
+    const element = mount()
+    const shadow = element.shadowRoot!
+    const inTemplate = [...shadow.querySelectorAll(".weather-field")].map(field => field.id).filter(Boolean)
+    const listened = new Set(((element as unknown as { weatherFields: HTMLElement[] }).weatherFields ?? []).map(field => field.id))
+    expect(inTemplate.length).toBeGreaterThan(5)
+    for (const id of inTemplate) {
+      expect(listened.has(id), `#${id} is a weather field the element never listens to`).toBe(true)
+    }
+  })
+})
+
 describe("the sky under an observation being edited", () => {
   function typeInto(element: UfoRecorderElement, id: string, value: string): void {
     const field = element.shadowRoot!.getElementById(id) as HTMLInputElement
