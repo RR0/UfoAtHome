@@ -67,6 +67,7 @@ import { buildRainSystem } from "./RainSystem.js"
 import type { RainSystem } from "./RainSystem.js"
 import { buildCloudGeometry, buildCloudMaterial } from "./CloudSystem.js"
 import type { CloudUniforms } from "./CloudSystem.js"
+import { CloudField } from "./CloudSystem.js"
 import { buildLensFlare } from "./LensFlareEffect.js"
 import { EquidistantProjectionPass } from "./EquidistantProjectionPass.js"
 import { IceHalos } from "../engine/atmosphere/IceHalos.js"
@@ -161,6 +162,13 @@ const MOON_HALO_STRENGTH = 0.2
  * between six and twelve kilometres; what matters here is only that it is several times the water
  * deck's height, so its features come out correspondingly larger and slower across the sky. */
 const CIRRUS_LAYER_HEIGHT = 2600
+
+/** How much of the light a fully covered patch of each deck stops. A water deck is very nearly
+ * opaque — a witness under overcast sees a bright patch where the Sun is and no disc at all — while
+ * an ice veil takes only a little, which is exactly why a halo can form behind one. Mirrors the two
+ * decks' own alphas in the cloud shader. */
+const WATER_DECK_OPACITY = 0.97
+const ICE_DECK_OPACITY = 0.38
 /** Same threshold as BODY_HIDE_BELOW_DEG, named separately for updateCelestialLight's own use —
  * a body that isn't even rendered shouldn't be lighting anything either. */
 const CELESTIAL_LIGHT_MIN_ALTITUDE_DEG = BODY_HIDE_BELOW_DEG
@@ -730,6 +738,10 @@ export class SceneRenderer {
    * artifacts are shown at all. 1 is the tuned default look — see setDazzleIntensity/
    * LENS_FLARE_BASE_GAIN/LENS_FLARE_BASE_OPACITY, which this multiplies. */
   private dazzleIntensity = 1
+  /** What fraction of the Sun's light the cloud is letting through, from the last time it was
+   * placed — see cloudTransmission. Held because the lens flare is retinted from more than one
+   * place and every one of them needs it. */
+  private sunCloudTransmission = 1
   /** How strongly the optional lens-flare artifacts (star rays, ghost trail, hex ghosts, streaks,
    * starburst) show on top of the Sun's always-on dazzle core — see setLensFlareArtifactIntensity.
    * 0 means off. The point of keeping this independent of dazzleIntensity: comparing the *same*
@@ -996,11 +1008,12 @@ export class SceneRenderer {
    * changes. A no-op if the flare hasn't been built yet. */
   private applyLensFlareTint(tint: RgbColor): void {
     if (!this.lensFlare) return
-    this.lensFlare.uniforms.uColorGain.value.setRGB(
-      LENS_FLARE_BASE_GAIN * this.dazzleIntensity * tint[0],
-      LENS_FLARE_BASE_GAIN * this.dazzleIntensity * tint[1],
-      LENS_FLARE_BASE_GAIN * this.dazzleIntensity * tint[2]
-    )
+    // Times whatever fraction of the Sun's light the cloud lets past. The dazzle is the Sun's own
+    // light scattered in the eye, so cloud that takes the light takes the dazzle with it — an
+    // overcast sky that still threw a full lens flare was the most obviously impossible thing left
+    // in this scene.
+    const gain = LENS_FLARE_BASE_GAIN * this.dazzleIntensity * this.sunCloudTransmission
+    this.lensFlare.uniforms.uColorGain.value.setRGB(gain * tint[0], gain * tint[1], gain * tint[2])
   }
 
   /** Shows/hides the compass labels built by setShowCompass — cheap visibility toggle, never
@@ -1794,6 +1807,35 @@ export class SceneRenderer {
     this.scene.add(this.groundMesh)
   }
 
+  /**
+   * How much of a body's light reaches the witness through the cloud between them, 0 to 1.
+   *
+   * A gap the whole scene had: an overcast deck was drawn, and the Sun went on blazing through it at
+   * full strength with its dazzle intact — a sky that could not happen. Cloud is what a witness
+   * mostly does NOT see through, and for a project about what somebody could have seen that is not
+   * a detail.
+   *
+   * Read from the same CPU mirror of the cloud field the shape occlusion already uses, at the body's
+   * own direction, so the Sun dims exactly where the deck is thick and shows through where it is
+   * broken — the real behaviour of a Sun behind moving cloud, rather than an average.
+   *
+   * The ice deck attenuates too, but only slightly, and that is the point of it being separate: you
+   * see the Sun THROUGH cirrus, which is why it can make a halo at all.
+   */
+  private cloudTransmission(position: HorizontalPosition): number {
+    const direction = horizontalToCartesian(position.altitudeDeg, position.azimuthDeg, 1)
+    let through = 1
+    const water = this.lowerCloudCover()
+    if (water > 0) {
+      through *= 1 - CloudField.alphaAt(direction, Math.abs(this.cloudLayerOffset()), water) * WATER_DECK_OPACITY
+    }
+    const ice = this.weather.highCloudCover ?? 0
+    if (ice > 0) {
+      through *= 1 - CloudField.alphaAt(direction, CIRRUS_LAYER_HEIGHT, ice) * ICE_DECK_OPACITY
+    }
+    return Math.max(0, Math.min(1, through))
+  }
+
   /** Places (or updates) a single self-illuminated, true-to-scale disc mesh, keyed by name so
    * repeated calls (Sun each update, or one call per tracked planet) reuse/replace the same slot
    * instead of accumulating duplicates. Also places a matching invisible hitArea (see
@@ -1815,7 +1857,9 @@ export class SceneRenderer {
     }
     const { x, y, z } = horizontalToCartesian(position.altitudeDeg, position.azimuthDeg, BODY_PLACEMENT_RADIUS)
     const tint = atmosphericTint(position.altitudeDeg)
-    const tintedColor = new Color(color.r * tint[0], color.g * tint[1], color.b * tint[2])
+    // Dimmed by whatever cloud stands in front of it — see cloudTransmission.
+    const through = this.cloudTransmission(position)
+    const tintedColor = new Color(color.r * tint[0] * through, color.g * tint[1] * through, color.b * tint[2] * through)
     const geometry = new SphereGeometry(visualRadius, 16, 16)
     const material = new MeshBasicMaterial({ color: tintedColor, fog: false })
     const mesh = new Mesh(geometry, material)
@@ -1829,7 +1873,12 @@ export class SceneRenderer {
     // constant halo showing even at dazzleIntensity 0, when the whole point of that dial is to go
     // genuinely down to "no extra dazzle, just the plain disc". Every other tracked body (Moon,
     // Venus, ...) still gets the ordinary always-on sprite halo exactly as before.
-    if (key !== "sun") this.setGlare(key, x, y, z, magnitude, tintedColor)
+    // The glare goes with the light that causes it: a magnitude of cloud is a magnitude less dazzle.
+    // Adding 2.5·log10 rather than scaling the colour, because that is what the halo's own strength
+    // function is written in terms of.
+    const dimmedMagnitude = magnitude - 2.5 * Math.log10(Math.max(through, 1e-3))
+    if (key === "sun") this.sunCloudTransmission = through
+    if (key !== "sun") this.setGlare(key, x, y, z, dimmedMagnitude, tintedColor)
     if (key === "sun") {
       this.sunVisible = true
       const celestialScale = this.celestialGroup.scale.x
