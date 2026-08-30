@@ -53,7 +53,7 @@ export const ufoRecorderMessages_en: UfoRecorderMessages = {
   switchToClockTime: "click to show the time of day",
   durationPlaceholder: "observation length",
   durationImprecise: "These dates don't precisely enough determine a duration — enter it manually.",
-  export: "Export JSON",
+  export: "Save",
   importFile: "Load JSON file",
   importUrl: "Or load from URL",
   importUrlPlaceholder: "https://…/sighting.json",

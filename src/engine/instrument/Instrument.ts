@@ -38,6 +38,24 @@ export interface Instrument {
   name: string
   /** How this instrument maps a direction onto its image. */
   projection: ProjectionKind
+  /**
+   * How many straight blades close down its aperture, if it has an aperture at all.
+   *
+   * This is what puts a STAR on a bright light, and it is the reason the Sun looks different in
+   * every photograph of it. Light passing an aperture is diffracted by its EDGES, so each straight
+   * blade throws a pair of spikes at right angles to itself: an even number of blades has opposite
+   * blades parallel, their spikes fall on top of one another, and the count is N; an odd number has
+   * none parallel and the count is 2N. A round aperture has no straight edge anywhere and throws no
+   * spikes at all, only a round glow — which is why a phone photograph of the Sun is a disc with a
+   * halo and an SLR photograph at f/16 is a starburst.
+   *
+   * Absent means there is no aperture with edges: the naked eye, and any lens shot wide open where
+   * the blades have swung clear of the beam. An eye is round, and the faint rays people do see
+   * around a bright light come from the lens's own suture lines and the film of tears, which are
+   * not straight edges and do not make a clean star. Drawing a six-pointed star for a witness who
+   * simply looked up says they were holding a camera.
+   */
+  apertureBlades?: number
 }
 
 /** Every instrument a recording can declare having been made through. Deliberately two entries and
@@ -52,7 +70,10 @@ export const INSTRUMENTS: Instrument[] = [
   {
     id: "rectilinear-lens",
     name: "Camera, rectilinear lens",
-    projection: "rectilinear"
+    projection: "rectilinear",
+    // Six is the commonest count on ordinary lenses, and it gives the six-spiked Sun that everybody
+    // recognises from a photograph. A real dated device would state its own.
+    apertureBlades: 6
   }
 ]
 
@@ -67,5 +88,19 @@ export class Instruments {
    * hand-edited id, a preset since renamed all resolve to the eye, which is the safe assumption. */
   static byId(id: string | undefined): Instrument {
     return INSTRUMENTS.find(instrument => instrument.id === id) ?? this.default
+  }
+
+  /**
+   * How many spikes a bright light grows when seen through that instrument — zero for anything
+   * without straight-edged blades in front of it.
+   *
+   * Derived, not listed: an even blade count gives that many spikes because opposite blades are
+   * parallel and their pairs of spikes coincide; an odd count gives twice as many because none of
+   * them do. Six blades, six spikes; five blades, ten. The eye gets none.
+   */
+  static starPointsOf(instrument: Instrument): number {
+    const blades = instrument.apertureBlades
+    if (blades === undefined || blades < 3) return 0
+    return blades % 2 === 0 ? blades : blades * 2
   }
 }

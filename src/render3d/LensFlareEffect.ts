@@ -509,7 +509,12 @@ export function buildLensFlare(): LensFlareSystem {
     uColorGain: { value: new Color(55, 55, 51) },
     uOpacity: { value: 0.5 },
     uFlareIntensity: { value: 0 },
-    uStarPoints: { value: 6 },
+    // NONE by default, and that is not a neutral choice: it is what an eye sees. The star on a
+    // bright light is diffraction at the straight edges of an aperture's blades, an eye has no
+    // blades, and this project's own default instrument is an eye (see Instrument.ts). The
+    // reference implementation shipped six, which quietly put a camera in every witness's hands —
+    // SceneRenderer.setInstrument sets the real count for anything that does have a lens.
+    uStarPoints: { value: 0 },
     uGlareSize: { value: 0.55 },
     uFlareSize: { value: 0.0025 },
     uFlareSpeed: { value: 0.4 },

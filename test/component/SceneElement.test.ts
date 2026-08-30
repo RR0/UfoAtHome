@@ -45,7 +45,7 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     decorDistancesAt(): { behindM?: number; inFrontM?: number } {
       return {}
     }
-    setProjection(): void {}
+    setInstrument(): void {}
     private meteors: { t: number; durationMs: number }[] = []
     setMeteorShower(meteors: { t: number; durationMs: number }[], altitudeDeg: number): void {
       this.meteors = meteors

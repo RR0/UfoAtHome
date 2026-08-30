@@ -75,7 +75,8 @@ import { CometTail } from "./CometTail.js"
 import { IceHaloEffect } from "./IceHaloEffect.js"
 import { MeteorSystem } from "./MeteorSystem.js"
 import type { Meteor } from "../engine/astronomy/MeteorFall.js"
-import type { ProjectionKind } from "../engine/instrument/Instrument.js"
+import { Instruments } from "../engine/instrument/Instrument.js"
+import type { Instrument, ProjectionKind } from "../engine/instrument/Instrument.js"
 import type { LensFlareSystem } from "./LensFlareEffect.js"
 import { DecorSystem } from "./DecorSystem.js"
 import type { DecorObject } from "../engine/model/Decor.js"
@@ -774,6 +775,8 @@ export class SceneRenderer {
    * lens photographs `tan θ`, which three.js's camera does natively; an eye perceives `θ`, which
    * needs the resampling pass below. */
   private projectionKind: ProjectionKind = "rectilinear"
+  /** How many spikes the instrument's aperture puts on a bright light — see setInstrument. */
+  private starPoints = 0
   /** Built on first equidistant frame and kept — a render target is not worth allocating for a
    * recording made through a lens, which is most of them once real photographs are in. */
   private equidistantPass?: EquidistantProjectionPass
@@ -1364,11 +1367,23 @@ export class SceneRenderer {
     this.meteorSystem?.update(t)
   }
 
-  /** Declares what the observation was made through. Changing it changes the geometry of every
-   * frame from here on — see Instrument.ts on why that is a property of the sighting and not a
-   * display preference. */
-  setProjection(kind: ProjectionKind): void {
-    this.projectionKind = kind
+  /**
+   * Declares what the observation was made through. Changing it changes the geometry of every frame
+   * from here on — see Instrument.ts on why that is a property of the sighting and not a display
+   * preference — and now the LOOK of every bright light too.
+   *
+   * The star on the Sun is not a style. It is diffraction at the straight edges of an aperture, so
+   * it belongs to the thing that has an aperture: six spikes through a six-bladed lens, ten through
+   * a five-bladed one, and NONE at all through an eye, which is round and has no edges to diffract
+   * at. Drawing the same star whatever the sighting was made with is the same mistake as rendering
+   * every witness through a camera lens, which this class already stopped making.
+   */
+  setInstrument(instrument: Instrument): void {
+    this.projectionKind = instrument.projection
+    const points = Instruments.starPointsOf(instrument)
+    if (points === this.starPoints) return
+    this.starPoints = points
+    if (this.lensFlare) this.lensFlare.uniforms.uStarPoints.value = points
   }
 
   render(): void {
@@ -1892,6 +1907,7 @@ export class SceneRenderer {
         this.lensFlare = buildLensFlare()
         this.lensFlare.uniforms.uOpacity.value = LENS_FLARE_BASE_OPACITY * this.dazzleIntensity
         this.lensFlare.uniforms.uFlareIntensity.value = this.lensFlareArtifactIntensity
+        this.lensFlare.uniforms.uStarPoints.value = this.starPoints
         this.scene.add(this.lensFlare.mesh)
       }
       // Same real atmospheric-reddening tint as the disc/glare halo above (see atmosphericTint's

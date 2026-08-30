@@ -113,6 +113,9 @@ export interface UfoRecorderMessages {
   /** Duration field title/tooltip when start+end are both given but too imprecise/mismatched to
    * derive an exact duration from — see sightingDurationBlockedReason. */
   durationImprecise: string
+  /** The button that writes the recording out to a file. Named for what a reader is DOING —
+   * keeping their work — and not for the format it happens to land in. "Export JSON" described the
+   * implementation to somebody who came to describe what they saw. */
   export: string
   importFile: string
   importUrl: string

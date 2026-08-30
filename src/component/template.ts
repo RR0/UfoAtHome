@@ -204,7 +204,10 @@ export const html = `
      it lifts off is two keyframes), but it belongs to the sighting, not to any one drawn part of
      it — see SoundTrack.ts. The kind dropdown is filled from SOUND_KINDS in script, so adding a
      timbre never means editing markup and element ids (same rule as the data-source pickers). -->
-<details open>
+<!-- Closed to start with, unlike every other group. Most sightings state nothing about sound at
+     all, and an open panel of silent controls is four rows of nothing between the sky and the
+     shape. It opens the moment a reader has something to say about what was heard. -->
+<details>
   <summary id="label-sound-group">Sound</summary>
   <div class="toolbar">
     <label><span id="label-sound-kind">Sound</span> <select id="soundKind" class="sound-field"></select></label>
@@ -254,7 +257,7 @@ export const html = `
   <button id="loop" type="button" class="icon-btn" title="Auto-replay" aria-label="Auto-replay" aria-pressed="true">↻</button>
 </div>
 <div class="export-row">
-  <button id="export" type="button">Export JSON</button>
+  <button id="export" type="button">Save</button>
 </div>
 <div id="context-menu" class="context-menu" hidden role="menu">
   <button id="context-group" type="button" role="menuitem">Group</button>

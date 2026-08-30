@@ -490,8 +490,8 @@ export class SceneElement extends HTMLElement {
     // Pushed every tick like the pose and the weather, and for the same reason: the recording it
     // describes can be swapped or edited under this element at any moment, and an instrument left
     // over from the previous one would render the whole scene through the wrong optics (see
-    // Instrument.ts). Cheap — SceneRenderer.setProjection stores a string.
-    this.sceneRenderer.setProjection(sighting.instrument.projection)
+    // Instrument.ts). Cheap — SceneRenderer.setInstrument stores two numbers.
+    this.sceneRenderer.setInstrument(sighting.instrument)
     this.updateMeteorShower(sighting, t)
     this.sceneRenderer.setDecor(sighting.decor)
     const pose = resolveObserverPoseAt(sighting, t)

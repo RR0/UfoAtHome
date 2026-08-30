@@ -49,7 +49,7 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     decorDistancesAt(): { behindM?: number; inFrontM?: number } {
       return {}
     }
-    setProjection(): void {}
+    setInstrument(): void {}
     private meteors: { t: number; durationMs: number }[] = []
     setMeteorShower(meteors: { t: number; durationMs: number }[]): void {
       this.meteors = meteors
@@ -2463,12 +2463,15 @@ describe("UfoRecorderElement toolbar groups", () => {
     document.body.innerHTML = ""
   })
 
-  it("renders each field group as a collapsible <details>, open by default", () => {
+  it("renders each field group as a collapsible <details>, open by default — except sound", () => {
     const element = mount()
-    const groups = element.shadowRoot!.querySelectorAll("details")
+    const groups = [...element.shadowRoot!.querySelectorAll("details")]
     expect(groups.length).toBe(7)
     for (const group of groups) {
-      expect(group.hasAttribute("open")).toBe(true)
+      // Sound starts closed: most sightings say nothing at all about what was heard, and four rows
+      // of silent controls standing open between the sky and the shape is four rows of nothing.
+      const closedByDesign = group.querySelector("summary")?.id === "label-sound-group"
+      expect(group.hasAttribute("open")).toBe(!closedByDesign)
     }
   })
 
@@ -2509,7 +2512,7 @@ describe("UfoRecorderElement i18n", () => {
 
     expect(element.shadowRoot!.getElementById("label-color")!.textContent).toBe("Couleur")
     expect(element.shadowRoot!.getElementById("label-duration")!.textContent).toBe("Durée")
-    expect(element.shadowRoot!.getElementById("export")!.textContent).toBe("Exporter le JSON")
+    expect(element.shadowRoot!.getElementById("export")!.textContent).toBe("Enregistrer")
     expect(element.shadowRoot!.getElementById("preset-oval")!.textContent).toBe("Ovale")
     const durationInput = element.shadowRoot!.getElementById("durationSeconds") as HTMLInputElement
     expect(durationInput.placeholder).toBe("durée de l'observation")
