@@ -105,7 +105,13 @@ float cirrusCoverAt(vec3 dir, float layerHeight, float coverage) {
   float wisp = fbm(drawnOut * 3.1 + 7.0) * 0.5 + 0.5;
   float shape = fibre * 0.72 + wisp * 0.28;
   float threshold = 1.0 - coverage;
-  return smoothstep(threshold - 0.10, threshold + 0.10, shape);
+  float present = smoothstep(threshold - 0.10, threshold + 0.10, shape);
+  // GRADED, not a mask. A pure threshold saturates to 1 everywhere once the veil is thick — which
+  // is exactly the sky a reader tested, 88 per cent cover — and the halo went back to being the
+  // perfect circle of a diagram. A veil is not uniform just because it is complete: it has dense
+  // fibres and thin lanes, and the display follows them. Keeping the underlying shape in the answer
+  // is what makes a halo brighter along one arc than another even under total cover.
+  return present * (0.30 + 0.70 * smoothstep(0.25, 0.85, shape));
 }
 `
 
@@ -208,7 +214,10 @@ void main() {
   // opacity everywhere as coverage approaches its max, overriding the noise field's own local value
   // rather than merely biasing it (a pure threshold shift would still leave the occasional fragment
   // below threshold even at coverage=1, since fbm's own range rarely spans a full 0..1).
-  alpha = mix(alpha, 1.0, smoothstep(0.82, 1.0, coverage)) * horizonFade;
+  // The "force it opaque near full coverage" rule belongs to WATER and is wrong for ice. A water
+  // deck at cover 1 is a ceiling; an ice deck at cover 1 is a milky veil you still read the Sun
+  // through — which is the commonest halo sky there is, and it must not come out as a white lid.
+  alpha = mix(mix(alpha, 1.0, smoothstep(0.82, 1.0, coverage)), alpha, fibrous) * horizonFade;
   // A cirrus veil never closes the sky. Even the thickest cirrostratus is something you see the Sun
   // THROUGH — that is the entire reason it can make a halo at all — so an ice deck is held down to
   // a fraction of the opacity a water deck reaches, however completely it covers.
