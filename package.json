@@ -42,8 +42,8 @@
     "build:satellites": "tsx scripts/build-satellite-catalog.ts"
   },
   "dependencies": {
-    "@rr0/data": "^0.3.40",
-    "@rr0/place": "^0.5.3",
+    "@rr0/data": "^0.3.41",
+    "@rr0/place": "^0.5.4",
     "@rr0/time": "^0.11.2",
     "astronomy-engine": "^2.1.19",
     "three": "^0.185.1"
