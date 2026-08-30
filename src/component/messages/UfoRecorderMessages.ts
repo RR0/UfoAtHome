@@ -300,13 +300,33 @@ export interface UfoRecorderMessages {
    *
    * Stated whether or not anything is drawn, and that is the point of it. A display that silently
    * fails to appear leaves a reader adjusting sliders and guessing; a line that says "no ice cloud,
-   * so no halo" tells them which of the ingredients is missing. {parhelia} is how far to either
-   * side the sundogs would have stood, which moves with the Sun's height.
+   * so no halo" tells them which of the ingredients is missing. {forms} is every form the geometry
+   * allowed at that source height — which is most of what the line is for, since which of them a
+   * given sky shows is the whole question.
    */
   skyOpticsPossible: string
-  /** Ice cloud present, but the Sun is too high for sundogs to form at all — above about 61
-   * degrees the skew ray cannot leave the crystal. The halo itself is unaffected. */
-  skyOpticsHaloOnly: string
+  /**
+   * What the crystals were assumed to be doing, appended to the list of forms.
+   *
+   * The one weather quantity in this whole project that is STATED rather than looked up, and the
+   * line says so rather than letting a reader take it for another reading (see
+   * Weather.iceCrystalAlignment). It is also the answer to the question the forms list raises: why
+   * a sky with the same cloud in it shows a bare ring one hour and six forms the next.
+   */
+  skyOpticsAlignment: string
+  /** One name per form, each with the angle IceHalos derives for it where it has one. Separate
+   * strings rather than one built by code, because a language decides for itself whether a form is
+   * "a 22° halo" or "un halo à 22°" and where the number goes. */
+  skyOpticsHalo22: string
+  skyOpticsHalo46: string
+  skyOpticsParhelia: string
+  skyOpticsTangentArc: string
+  skyOpticsParhelicCircle: string
+  skyOpticsCircumzenithal: string
+  skyOpticsCircumhorizontal: string
+  skyOpticsPillar: string
+  /** The label on the control for how steadily the crystals were falling. */
+  iceCrystalAlignment: string
   /** No ice cloud at all, so none of it could have happened. The commonest answer. */
   skyOpticsNoIce: string
   /** Ice above, but a lower deck between it and the witness. */

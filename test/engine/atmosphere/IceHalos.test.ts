@@ -42,6 +42,42 @@ describe("IceHalos", () => {
     })
   })
 
+  describe("the deck outliving the witness's own sunset", () => {
+    it("keeps ice at eight kilometres in sunlight for nearly three degrees past the horizon", () => {
+      // The Earth's own shadow, as an angle: acos(R/(R+h)). It is why a pillar is a sunset sight —
+      // the crystals are still lit for a quarter of an hour after the ground is not.
+      const lit = IceHalos.deckLitUntilDeg(8000)
+      expect(lit).toBeGreaterThan(2.7)
+      expect(lit).toBeLessThan(3.0)
+      // And a lower deck goes dark sooner, which is the whole content of the formula.
+      expect(IceHalos.deckLitUntilDeg(2000)).toBeLessThan(lit)
+      expect(IceHalos.deckLitUntilDeg(0)).toBe(0)
+    })
+
+    it("puts the display out from below rather than switching it off at the horizon", () => {
+      const lit = IceHalos.deckLitUntilDeg(8000)
+      expect(IceHalos.strength(1, 0, 5, lit)).toBe(1)
+      expect(IceHalos.strength(1, 0, 0, lit)).toBe(1)
+      const halfWay = IceHalos.strength(1, 0, -lit / 2, lit)
+      expect(halfWay).toBeGreaterThan(0.4)
+      expect(halfWay).toBeLessThan(0.6)
+      expect(IceHalos.strength(1, 0, -lit - 0.5, lit)).toBe(0)
+    })
+  })
+
+  describe("what the rings would be CALLED", () => {
+    it("comes out 22 and 46 to a whole degree, which is how everybody names them", () => {
+      // Worth pinning, because the big ring's red edge is at 45.0 and quoting that would have the
+      // scene reporting "a 45-degree halo" for a thing every reference calls the 46-degree halo.
+      // Its band is two degrees wide, and the name is the middle of it.
+      expect(Math.round(IceHalos.halo22().angleDeg!)).toBe(22)
+      expect(Math.round(IceHalos.halo46().angleDeg!)).toBe(46)
+      // And the edges are still the edges, which is what a display is drawn from.
+      expect(IceHalos.halo46().blueAngleDeg! - IceHalos.halo46().redAngleDeg!).toBeGreaterThan(2)
+      expect(IceHalos.halo22().blueAngleDeg! - IceHalos.halo22().redAngleDeg!).toBeLessThan(1)
+    })
+  })
+
   describe("the sundogs", () => {
     it("stands them at the halo's own radius when the Sun is on the horizon", () => {
       // With the Sun level, the skew ray is not skew at all and the effective index is just the
@@ -50,14 +86,31 @@ describe("IceHalos", () => {
       expect(IceHalos.parheliaDistanceDeg(0)!).toBeCloseTo(IceHalos.halo22().redAngleDeg!, 6)
     })
 
-    it("slides them outward as the Sun climbs", () => {
+    it("slides them outward as the Sun climbs, by what an observer would MEASURE", () => {
       // What separates a sundog from a halo in a photograph, and what a reconstruction has to get
       // right if it is going to place them at all.
       const distances = [0, 10, 20, 30, 40, 50].map(altitude => IceHalos.parheliaDistanceDeg(altitude)!)
       for (let i = 1; i < distances.length; i++) expect(distances[i]).toBeGreaterThan(distances[i - 1])
-      // Around 28 degrees with the Sun 30 up, which is what observers measure.
-      expect(IceHalos.parheliaDistanceDeg(30)!).toBeGreaterThan(27)
-      expect(IceHalos.parheliaDistanceDeg(30)!).toBeLessThan(30)
+      // How observers describe the slide, and what this got wrong until a traced simulation of the
+      // same crystals disagreed with it: barely off the ring at ten degrees, a couple of degrees
+      // out by thirty, and running away from it thereafter. The old code reported the deviation
+      // instead of the separation and had them a degree and a half too far out through the middle
+      // of that range — the range nearly every photographed display sits in.
+      expect(distances[1] - distances[0]).toBeLessThan(0.6)
+      expect(IceHalos.parheliaDistanceDeg(30)! - distances[0]).toBeGreaterThan(2)
+      expect(IceHalos.parheliaDistanceDeg(30)! - distances[0]).toBeLessThan(4)
+      expect(IceHalos.parheliaDistanceDeg(50)! - distances[0]).toBeGreaterThan(9)
+    })
+
+    it("swings them further round in BEARING than it moves them across the sky", () => {
+      // The distinction the numbers above turn on, and the one this file got wrong until a traced
+      // simulation of the same crystals disagreed with it. The prism turns the ray about the
+      // crystal's vertical edge, so the deviation it produces is a change of BEARING; the angle an
+      // observer measures between Sun and sundog is smaller, because a circle of altitude is
+      // shorter than a great circle. The two agree only with the Sun on the horizon, where the
+      // circle of altitude IS a great circle.
+      expect(IceHalos.parheliaAzimuthDeg(0)!).toBeCloseTo(IceHalos.parheliaDistanceDeg(0)!, 6)
+      expect(IceHalos.parheliaAzimuthDeg(40)!).toBeGreaterThan(IceHalos.parheliaDistanceDeg(40)! + 2)
     })
 
     it("loses them above about sixty degrees, and does not choose that number", () => {

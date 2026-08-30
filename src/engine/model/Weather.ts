@@ -43,6 +43,25 @@ export interface Weather {
    * the best available stand-in.
    */
   lowerCloudCover?: number
+  /**
+   * How steadily the ice crystals were falling, 0 to 1 — the one thing about the sky that decides
+   * which halo forms stood, and the one thing no record of any sighting holds.
+   *
+   * At 0 every crystal tumbles as it falls and the display is a plain ring or two. At 1 the plates
+   * lie flat and the columns roll level, and the whole family stands: sundogs, the arc tangent on
+   * top of the ring, the coloured arc high overhead, the white circle at the source's own height,
+   * the shaft above a low Sun. Real skies move between the two within an hour, which is why a
+   * photograph almost never shows every form at once and why the same afternoon can give a bare
+   * ring and then a display of six.
+   *
+   * DECLARED, NEVER DEDUCED, and it is alone among the weather fields in that. What a cirrus deck's
+   * crystals were doing depends on their size and on the turbulence eight kilometres up; ERA5 holds
+   * neither, no reanalysis this project can reach holds either, and it could only have been known by
+   * being up there with a collecting slide. So it stays editable even when every other field is
+   * locked to a record, because locking it would claim a measurement that does not exist. Undefined
+   * means nobody said, and DEFAULT_ICE_CRYSTAL_ALIGNMENT stands in.
+   */
+  iceCrystalAlignment?: number
   precipitationType: PrecipitationType
   /** 0-1; meaningless while precipitationType is "none". */
   precipitationIntensity: number
@@ -67,6 +86,11 @@ export interface Weather {
 /** What an unstated cloud base falls back to — a mid-low deck, and the value that reproduces
  * exactly the layer geometry this project rendered before cloudBaseM existed. */
 export const DEFAULT_CLOUD_BASE_M = 1000
+
+/** What an unstated crystal alignment falls back to: an ordinary cirrus, well enough sorted to show
+ * sundogs beside its ring but not the once-a-decade display. See Weather.iceCrystalAlignment for why
+ * this is a stated assumption rather than a reading. */
+export const DEFAULT_ICE_CRYSTAL_ALIGNMENT = 0.65
 
 export const DEFAULT_WEATHER: Weather = {
   cloudCover: 0,

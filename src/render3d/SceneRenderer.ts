@@ -61,7 +61,7 @@ import { defaultTerrainProviders } from "./terrain/defaultTerrainProviders.js"
 import type { TerrainProviders } from "./terrain/defaultTerrainProviders.js"
 import { buildTerrainMesh } from "./terrain/TerrainMeshBuilder.js"
 import { geoToLocalMeters } from "./terrain/GeoProjection.js"
-import { DEFAULT_CLOUD_BASE_M, DEFAULT_WEATHER } from "../engine/model/Weather.js"
+import { DEFAULT_CLOUD_BASE_M, DEFAULT_ICE_CRYSTAL_ALIGNMENT, DEFAULT_WEATHER } from "../engine/model/Weather.js"
 import type { PrecipitationType, Weather } from "../engine/model/Weather.js"
 import { buildRainSystem } from "./RainSystem.js"
 import type { RainSystem } from "./RainSystem.js"
@@ -93,6 +93,7 @@ function weatherEquals(a: Weather, b: Weather): boolean {
     // returning early and the renderer holding the previous sky. That is exactly how the ice deck
     // arrived: the value reached resolveWeatherAt correctly and never got past this line.
     a.highCloudCover === b.highCloudCover &&
+    a.iceCrystalAlignment === b.iceCrystalAlignment &&
     a.lowerCloudCover === b.lowerCloudCover &&
     a.precipitationType === b.precipitationType &&
     a.precipitationIntensity === b.precipitationIntensity &&
@@ -162,6 +163,7 @@ const MOON_HALO_STRENGTH = 0.2
  * between six and twelve kilometres; what matters here is only that it is several times the water
  * deck's height, so its features come out correspondingly larger and slower across the sky. */
 const CIRRUS_LAYER_HEIGHT = 2600
+
 
 /** How much of the light a fully covered patch of each deck stops. A water deck is very nearly
  * opaque — a witness under overcast sees a bright patch where the Sun is and no disc at all — while
@@ -2042,25 +2044,41 @@ export class SceneRenderer {
   private buildIceHalos(sun: HorizontalPosition, moon: HorizontalPosition & { magnitude: number }): void {
     if (!this.iceHalos) {
       this.iceHalos = new IceHaloEffect()
+      // A display is traced over a second or so of frames, and a reader who has PAUSED to look at
+      // the sky is exactly the reader waiting for it — so it asks for the repaint itself rather
+      // than waiting for an animation loop that only runs during playback.
+      this.iceHalos.onReady = () => this.render()
       this.celestialGroup.add(this.iceHalos.object)
     }
     const ice = this.weather.highCloudCover
     if (ice === undefined) {
-      this.iceHalos.update({ x: 0, y: 1, z: 0 }, -1, 0, [1, 1, 1], { cover: 0, layerHeight: CIRRUS_LAYER_HEIGHT })
+      this.iceHalos.update({ x: 0, y: 1, z: 0 }, -1, 0, [1, 1, 1], { cover: 0, layerHeight: CIRRUS_LAYER_HEIGHT }, 0)
       return
     }
     // The real lower decks when the record gave them, and the total cover as a stand-in when
     // nobody asked — never the total minus the ice, which the decks overlapping makes unsound.
     const lower = this.weather.lowerCloudCover ?? this.weather.cloudCover
-    const source = sun.altitudeDeg > 0 ? sun : moon
-    const strength = IceHalos.strength(ice, lower) * (source === sun ? 1 : MOON_HALO_STRENGTH)
+    // The Sun while the ice deck can still see it, which outlasts the witness's own sunset: the
+    // crystals are eight kilometres up and stay in sunlight for minutes after the ground is in
+    // shadow. That interval is exactly when pillars are photographed, so cutting the display at
+    // the observer's horizon would throw away the sight the form is famous for.
+    const lit = // The deck's REAL height, not the scene-unit one just above: this has to come out as an angle,
+    // and CIRRUS_LAYER_HEIGHT is a look. Passing that one put the ice at 2.6 km and cut a quarter of
+    // an hour of pillar off the end of the day.
+    IceHalos.deckLitUntilDeg(IceHalos.DECK_HEIGHT_M)
+    const source = sun.altitudeDeg > -lit ? sun : moon
+    const strength = IceHalos.strength(ice, lower, source.altitudeDeg, lit) * (source === sun ? 1 : MOON_HALO_STRENGTH)
     const { x, y, z } = horizontalToCartesian(source.altitudeDeg, source.azimuthDeg, 1)
     const tint = atmosphericTint(source.altitudeDeg)
-    // The very veil that is drawn, so the halo is broken exactly where the sky is clear.
-    this.iceHalos.update({ x, y, z }, source.altitudeDeg, strength, [tint[0], tint[1], tint[2]], {
-      cover: ice,
-      layerHeight: CIRRUS_LAYER_HEIGHT
-    })
+    // The very veil that is drawn, so the display is broken exactly where the sky is clear.
+    this.iceHalos.update(
+      { x, y, z },
+      source.altitudeDeg,
+      strength,
+      [tint[0], tint[1], tint[2]],
+      { cover: ice, layerHeight: CIRRUS_LAYER_HEIGHT },
+      this.weather.iceCrystalAlignment ?? DEFAULT_ICE_CRYSTAL_ALIGNMENT
+    )
   }
 
   /** Takes down whatever comet was drawn, head, halo, hover target and tail. */

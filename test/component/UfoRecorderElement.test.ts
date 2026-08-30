@@ -4066,6 +4066,35 @@ describe("UfoRecorderElement inferred weather", () => {
     expect(sourceLink(element).textContent).toContain("1965-07-01 04:00 UTC")
   })
 
+  it("leaves the crystal alignment editable, because no record holds it", async () => {
+    // The one weather control a lookup cannot answer: what the ice crystals eight kilometres up
+    // were doing was never measured anywhere, so locking it because ERA5 answered about the CLOUDS
+    // would claim a reading that does not exist — and would leave a reader unable to try the very
+    // thing that decides whether the sky showed a bare ring or a display of six forms.
+    const element = mount(recordProvider())
+    stateDateAndPlace(element)
+    await waitFor(() => sourceLink(element).hidden === false, 2000)
+
+    expect(weatherField(element, "cloudCover").disabled).toBe(true)
+    expect(weatherField(element, "iceCrystalAlignment").disabled).toBe(false)
+  })
+
+  it("keeps the record when the crystal alignment is the only thing stated", async () => {
+    // Typing into any OTHER weather field is a witness taking their account back, and rightly
+    // discards the record. This one contradicts no record, so it must not.
+    const element = mount(recordProvider())
+    stateDateAndPlace(element)
+    await waitFor(() => sourceLink(element).hidden === false, 2000)
+
+    const alignment = weatherField(element, "iceCrystalAlignment") as HTMLInputElement
+    alignment.value = "0.2"
+    alignment.dispatchEvent(new Event("input", { bubbles: true }))
+
+    expect(element.sightingData.weatherSource?.id).toBe("era5")
+    expect(weatherField(element, "cloudCover").disabled).toBe(true)
+    expect((weatherField(element, "cloudCover") as HTMLInputElement).value).toBe("0.1")
+  })
+
   it("leaves Light intensity alone — it's a view preference, not weather", async () => {
     const element = mount(recordProvider())
     stateDateAndPlace(element)

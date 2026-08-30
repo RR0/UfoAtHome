@@ -13,6 +13,7 @@ import { Comets } from "../engine/astronomy/Comets.js"
 import { Sporadics } from "../engine/astronomy/Sporadics.js"
 import { Satellites } from "../engine/astronomy/Satellites.js"
 import { IceHalos } from "../engine/atmosphere/IceHalos.js"
+import type { HaloForm } from "../engine/atmosphere/IceHalos.js"
 import { computeBodyPosition } from "../engine/astronomy/CelestialPositions.js"
 import { visibleMagnitudeLimit } from "../render3d/skyColors.js"
 import type { CometAppearance } from "../engine/astronomy/Comets.js"
@@ -23,6 +24,7 @@ import type { Appearance, PolygonShape, Shape, ShapeBounds, ShapePresetId } from
 import { ShapeHandles, ShapeGroup, MIN_SHAPE_SIZE, MIN_POLYGON_VERTICES } from "../engine/shape/ShapeHandles.js"
 import type { HandleId, ResizeAxis } from "../engine/shape/ShapeHandles.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
+import { DEFAULT_ICE_CRYSTAL_ALIGNMENT } from "../engine/model/Weather.js"
 import type { PrecipitationType, Weather } from "../engine/model/Weather.js"
 import type { People } from "../engine/model/People.js"
 import type { DecorObject, DecorSide } from "../engine/model/Decor.js"
@@ -393,7 +395,10 @@ export class UfoRecorderElement extends HTMLElement {
   private readonly labelCircumstancesGroup: HTMLElement
   private readonly labelCloudCover: HTMLElement
   private readonly labelHighCloud: HTMLElement
+  private readonly labelIceAlignment: HTMLElement
   private readonly highCloudCoverInput: HTMLInputElement
+  /** The one weather control no record can fill in — see Weather.iceCrystalAlignment. */
+  private readonly iceCrystalAlignmentInput: HTMLInputElement
   private readonly labelCloudDarkness: HTMLElement
   private readonly labelCloudBase: HTMLElement
   private readonly labelPrecipitationType: HTMLElement
@@ -700,6 +705,7 @@ export class UfoRecorderElement extends HTMLElement {
     this.tagsInput = this.shadow.getElementById("tags") as HTMLInputElement
     this.cloudCoverInput = this.shadow.getElementById("cloudCover") as HTMLInputElement
     this.highCloudCoverInput = this.shadow.getElementById("highCloudCover") as HTMLInputElement
+    this.iceCrystalAlignmentInput = this.shadow.getElementById("iceCrystalAlignment") as HTMLInputElement
     this.cloudDarknessInput = this.shadow.getElementById("cloudDarkness") as HTMLInputElement
     this.cloudBaseInput = this.shadow.getElementById("cloudBase") as HTMLInputElement
     this.precipitationTypeSelect = this.shadow.getElementById("precipitationType") as HTMLSelectElement
@@ -719,6 +725,7 @@ export class UfoRecorderElement extends HTMLElement {
       // nothing until some other weather field is touched — which reads as a control that does not
       // work, and cost a reader an evening deciding the halos were "constant".
       this.highCloudCoverInput,
+      this.iceCrystalAlignmentInput,
       this.cloudDarknessInput,
       this.cloudBaseInput,
       this.precipitationTypeSelect,
@@ -791,6 +798,7 @@ export class UfoRecorderElement extends HTMLElement {
     this.labelCircumstancesGroup = this.shadow.getElementById("label-circumstances-group")!
     this.labelCloudCover = this.shadow.getElementById("label-cloud-cover")!
     this.labelHighCloud = this.shadow.getElementById("label-high-cloud")!
+    this.labelIceAlignment = this.shadow.getElementById("label-ice-alignment")!
     this.labelCloudDarkness = this.shadow.getElementById("label-cloud-darkness")!
     this.labelCloudBase = this.shadow.getElementById("label-cloud-base")!
     this.labelPrecipitationType = this.shadow.getElementById("label-precipitation-type")!
@@ -1058,6 +1066,14 @@ export class UfoRecorderElement extends HTMLElement {
     this.descriptionInput.addEventListener("input", () => this.updateDescription())
     this.tagsInput.addEventListener("input", () => this.updateTags())
     for (const input of this.weatherFields) {
+      // The crystal alignment writes itself and only itself (see applyIceAlignmentAtPlayhead): it
+      // is listed here because it IS a weather field and the whole point of that list is that no
+      // weather field goes unlistened-to, but it must not go through the general path, which would
+      // take the recording away from the record it was looked up from.
+      if (input === this.iceCrystalAlignmentInput) {
+        input.addEventListener("input", () => this.applyIceAlignmentAtPlayhead())
+        continue
+      }
       input.addEventListener("input", () => this.applyWeatherAtPlayhead())
     }
     for (const field of this.soundFields) {
@@ -1806,6 +1822,27 @@ export class UfoRecorderElement extends HTMLElement {
     this.ufoElement.refresh()
   }
 
+  /**
+   * Writes the crystal alignment, and nothing else, into the weather at the playhead.
+   *
+   * Deliberately not applyWeatherAtPlayhead. That one rebuilds the whole weather from the visible
+   * inputs and, in doing so, takes the recording away from whatever record it was looked up from —
+   * which is exactly right for a witness overruling a cloud cover, and exactly wrong here. Nobody
+   * measured what the crystals were doing, so stating it contradicts no record and must not discard
+   * one; and rebuilding from the inputs would also throw away the fields a record fills that have no
+   * control of their own, the lower decks among them.
+   */
+  private applyIceAlignmentAtPlayhead(): void {
+    if (this.ufoElement.playbackState === "playing") return
+    this.sceneElement.resumeWeatherAudio()
+    const weather: Weather = {
+      ...resolveWeatherAt(this.ufoElement.sighting, this.ufoElement.currentTime),
+      iceCrystalAlignment: Number(this.iceCrystalAlignmentInput.value)
+    }
+    this.ufoElement.sighting.weatherTrack.addKeyframe(this.ufoElement.currentTime, weather)
+    this.ufoElement.refresh()
+  }
+
   /** Fills the kind dropdown from SOUND_KINDS, so a new timbre is one entry in that list and
    * nothing else — no markup, no per-option element id (same rule the data-source pickers follow,
    * see sourcePicker). Labels are set from the current messages here and retranslated by
@@ -2010,7 +2047,11 @@ export class UfoRecorderElement extends HTMLElement {
     const source = this.ufoElement.sighting.weatherSource
     const inferred = this.weatherFromRecords
     for (const field of this.weatherFields) {
-      field.disabled = inferred && source !== undefined
+      // Every field but one. What the crystals were doing eight kilometres up is in no reanalysis
+      // and in no station log; locking that slider because ERA5 answered about the CLOUDS would be
+      // claiming a measurement that does not exist, and would leave a reader unable to try the
+      // display the record cannot decide (see Weather.iceCrystalAlignment).
+      field.disabled = inferred && source !== undefined && field !== this.iceCrystalAlignmentInput
     }
     // With no date or no place stated, there is no question to ask a record — so the control that
     // asks it is unavailable AND unticked, because a ticked box would say the weather below comes
@@ -2363,6 +2404,9 @@ export class UfoRecorderElement extends HTMLElement {
     const active = this.shadow.activeElement
     if (active !== this.cloudCoverInput) this.cloudCoverInput.value = String(weather.cloudCover)
     if (active !== this.highCloudCoverInput) this.highCloudCoverInput.value = String(weather.highCloudCover ?? 0)
+    if (active !== this.iceCrystalAlignmentInput) {
+      this.iceCrystalAlignmentInput.value = String(weather.iceCrystalAlignment ?? DEFAULT_ICE_CRYSTAL_ALIGNMENT)
+    }
     if (active !== this.cloudDarknessInput) this.cloudDarknessInput.value = String(weather.cloudDarkness)
     if (active !== this.cloudBaseInput) this.cloudBaseInput.value = weather.cloudBaseM === undefined ? "" : String(weather.cloudBaseM)
     if (active !== this.precipitationTypeSelect) this.precipitationTypeSelect.value = weather.precipitationType
@@ -3507,17 +3551,57 @@ export class UfoRecorderElement extends HTMLElement {
     const weather = resolveWeatherAt(this.ufoElement.sighting, 0)
     const sun = computeBodyPosition("Sun", date, observer)
     const moon = computeBodyPosition("Moon", date, observer)
-    const bySun = sun.altitudeDeg > 0
+    // The ice is still in sunlight after the ground is not, so the source is whichever of the two
+    // the DECK can still see — the same choice the renderer makes, and for the same reason (see
+    // SceneRenderer.buildIceHalos). Deciding it differently here is how a line ends up describing
+    // the Moon's display while the scene draws the Sun's.
+    const lit = IceHalos.deckLitUntilDeg(IceHalos.DECK_HEIGHT_M)
+    const bySun = sun.altitudeDeg > -lit
     const source = bySun ? sun : moon
-    if (source.altitudeDeg <= 0) return undefined
+    if (source.altitudeDeg <= -lit) return undefined
     const ice = weather.highCloudCover
     if (ice === undefined || ice <= 0) return this.messages.skyOpticsNoIce
     // The same reading the renderer takes (see SceneRenderer.buildIceHalos).
-    if (IceHalos.strength(ice, weather.lowerCloudCover ?? weather.cloudCover) <= 0) return this.messages.skyOpticsHidden
-    const parhelia = IceHalos.parheliaDistanceDeg(source.altitudeDeg)
+    if (IceHalos.strength(ice, weather.lowerCloudCover ?? weather.cloudCover, source.altitudeDeg, lit) <= 0) {
+      return this.messages.skyOpticsHidden
+    }
     const named = bySun ? this.messages.skyOpticsSun : this.messages.skyOpticsMoon
-    if (parhelia === undefined) return this.messages.skyOpticsHaloOnly.replace("{source}", named)
-    return this.messages.skyOpticsPossible.replace("{parhelia}", String(Math.round(parhelia))).replace("{source}", named)
+    const forms = this.listed(IceHalos.formsAt(source.altitudeDeg, lit).map(form => this.opticsFormName(form)))
+    const alignment = weather.iceCrystalAlignment ?? DEFAULT_ICE_CRYSTAL_ALIGNMENT
+    return (
+      this.messages.skyOpticsPossible.replace("{forms}", forms).replace("{source}", named) +
+      this.messages.skyOpticsAlignment.replace("{alignment}", String(Math.round(alignment * 100)))
+    )
+  }
+
+  /**
+   * Names one form of the display, with the angle it stands at where it has one.
+   *
+   * The angles are IceHalos's, derived from the refractive index of ice, and they are NOT the
+   * numbers the scene draws from: the scene traces light through crystals and finds out for itself
+   * (HaloSky). Two derivations of the same physics that have to agree is a check; one number shared
+   * between the sentence and the picture would only be a habit.
+   */
+  private opticsFormName(form: HaloForm): string {
+    const round = (value: number | undefined): string => String(Math.round(value ?? 0))
+    switch (form.id) {
+      case "halo22":
+        return this.messages.skyOpticsHalo22.replace("{angle}", round(form.angleDeg))
+      case "halo46":
+        return this.messages.skyOpticsHalo46.replace("{angle}", round(form.angleDeg))
+      case "parhelia":
+        return this.messages.skyOpticsParhelia.replace("{angle}", round(form.angleDeg))
+      case "tangentArc":
+        return this.messages.skyOpticsTangentArc
+      case "parhelicCircle":
+        return this.messages.skyOpticsParhelicCircle
+      case "circumzenithal":
+        return this.messages.skyOpticsCircumzenithal.replace("{angle}", round(form.angleDeg))
+      case "circumhorizontal":
+        return this.messages.skyOpticsCircumhorizontal
+      case "pillar":
+        return this.messages.skyOpticsPillar
+    }
   }
 
   /** A list said the way a sentence says it rather than the way an array prints it — the reader's
@@ -3862,6 +3946,7 @@ export class UfoRecorderElement extends HTMLElement {
     this.labelCircumstancesGroup.textContent = messages.circumstancesGroup
     this.labelCloudCover.textContent = messages.cloudCover
     this.labelHighCloud.textContent = messages.highCloudCover
+    this.labelIceAlignment.textContent = messages.iceCrystalAlignment
     this.labelCloudDarkness.textContent = messages.cloudDarkness
     this.labelCloudBase.textContent = messages.cloudBase
     this.labelPrecipitationType.textContent = messages.precipitationType
