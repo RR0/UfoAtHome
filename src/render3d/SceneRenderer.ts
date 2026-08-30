@@ -251,24 +251,20 @@ const LENS_FLARE_BASE_OPACITY = 0.5
  * Everything else follows from it rather than being set beside it: the veil goes as the inverse
  * square of the angle (see LensFlareEffect), so this radius IS the calibration, and it shrinks as
  * the square root of however much of the Sun's light is actually arriving.
+ *
+ * Set a little UNDER the measured two and a half, because the sky helps: a veil reaching one is
+ * white on its own and it is being added to a sky already a fifth of the way there, so the blob
+ * that actually READS as white runs a few tenths of a degree wider than this number.
+ *
+ * That distinction was learned the hard way. Measured as a rendered radius, with the sky and the
+ * resampling in the way, the calibration came out wrong by a factor of nearly four — and that
+ * factor was then multiplied into the WHOLE profile, wings and all, so the core matched the
+ * photographs while the Sun went on reading as a ball ten degrees across. What is measured now is
+ * the LAW: the same frame rendered with the dazzle off and on, differenced, which nothing else can
+ * get into. It reproduces the inverse square to within a tenth from two degrees out to sixteen.
  */
-const GLARE_SATURATION_RADIUS_DEG = 2.5
+const GLARE_SATURATION_RADIUS_DEG = 2.2
 
-/**
- * What the veil has to reach, in the shader's own units, to come out white on the finished frame.
- *
- * Not one, and this is a statement about the chain rather than about the light. The dazzle is
- * written into a frame that is then composited over a sky and, for an eye, resampled from a wider
- * rendering into the witness's own even-angled one — and the clip to white happens at the far end
- * of all that, not where the value is written. Measured on the rendered frame rather than reasoned
- * about: with the veil set to reach one at two and a half degrees, the blaze came out at one point
- * three, and it scales as the square root, so the shortfall is this.
- *
- * It is a display-chain number and nothing else. Every physical thing about the dazzle — the
- * inverse square, the extinction, the cloud, the fraction of the disc still showing — is upstream of
- * it and untouched by it.
- */
-const GLARE_RENDER_WHITE_POINT = 3.7
 
 /**
  * Where the Sun's disc is sampled to ask what is standing in front of it — its centre and eight
@@ -1097,8 +1093,7 @@ export class SceneRenderer {
       atmosphericTransmission(altitudeDeg) * this.sunCloudTransmission * this.dazzleIntensity * this.sunUnhiddenFraction
     const tint = atmosphericTint(altitudeDeg)
     this.lensFlare.uniforms.uDazzleColour.value.setRGB(tint[0], tint[1], tint[2])
-    this.lensFlare.uniforms.uVeilStrength.value =
-      GLARE_SATURATION_RADIUS_DEG ** 2 * GLARE_RENDER_WHITE_POINT * Math.max(0, arriving)
+    this.lensFlare.uniforms.uVeilStrength.value = GLARE_SATURATION_RADIUS_DEG ** 2 * Math.max(0, arriving)
   }
 
   /** Shows/hides the compass labels built by setShowCompass — cheap visibility toggle, never
