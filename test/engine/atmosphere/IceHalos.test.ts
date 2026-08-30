@@ -74,14 +74,21 @@ describe("IceHalos", () => {
   })
 
   describe("whether the sky could have shown any of it", () => {
-    it("needs ice cloud, and not too much of it", () => {
-      // The ingredient test, and the reason it is peaked rather than monotonic: no cirrus means no
-      // crystals to refract through, and a sky solidly covered in thick cirrostratus has ground the
-      // light out before it arrives. The displays people photograph come from a thin veil.
+    it("grows with the ice cloud, all the way to a sky full of it", () => {
+      // The correction a reader found by doing the obvious thing. This used to peak at half cover
+      // and return NOTHING at full, on the reasoning that a solid deck had ground the light out —
+      // which confuses coverage with optical depth. A cirrostratus veil over the whole sky is the
+      // classic halo-maker, and the old curve handed back zero at exactly the setting somebody
+      // reaching for "more of this please" would choose.
       expect(IceHalos.strength(0, 0)).toBe(0)
-      expect(IceHalos.strength(1, 0)).toBe(0)
-      expect(IceHalos.strength(0.5, 0)).toBeGreaterThan(IceHalos.strength(0.15, 0))
-      expect(IceHalos.strength(0.5, 0)).toBeGreaterThan(IceHalos.strength(0.9, 0))
+      expect(IceHalos.strength(1, 0)).toBe(1)
+      expect(IceHalos.strength(1, 0)).toBeGreaterThan(IceHalos.strength(0.5, 0))
+      let previous = -1
+      for (let cover = 0; cover <= 1.0001; cover += 0.05) {
+        const strength = IceHalos.strength(cover, 0)
+        expect(strength).toBeGreaterThanOrEqual(previous)
+        previous = strength
+      }
     })
 
     it("is put out by a lower deck between the witness and the crystals", () => {
