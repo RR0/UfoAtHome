@@ -1,5 +1,6 @@
 import { AdditiveBlending, BackSide, Mesh, ShaderMaterial, SphereGeometry, Vector3 } from "three"
 import { IceHalos } from "../engine/atmosphere/IceHalos.js"
+import { CIRRUS_COVER_GLSL, CLOUD_NOISE_GLSL } from "./CloudSystem.js"
 
 /**
  * Draws what ice crystals do to the light of the Sun or the Moon: the 22-degree halo, the two
@@ -42,7 +43,11 @@ export class IceHaloEffect {
          * for them to form at all. */
         uParhelion: { value: 0 },
         uPillar: { value: 0 },
-        uTint: { value: new Vector3(1, 0.97, 0.92) }
+        uTint: { value: new Vector3(1, 0.97, 0.92) },
+        /** The ice deck this display is being refracted through — the same coverage and the same
+         * height the sky itself is drawn from, so the gaps line up with the visible veil. */
+        uIceCover: { value: 0 },
+        uIceHeight: { value: 1 }
       },
       vertexShader: `
         varying vec3 vDirection;
@@ -53,6 +58,8 @@ export class IceHaloEffect {
       `,
       fragmentShader: `
         precision highp float;
+        ${CLOUD_NOISE_GLSL}
+        ${CIRRUS_COVER_GLSL}
         varying vec3 vDirection;
         uniform vec3 uSource;
         uniform vec3 uUp;
@@ -62,9 +69,19 @@ export class IceHaloEffect {
         uniform float uParhelion;
         uniform float uPillar;
         uniform vec3 uTint;
+        uniform float uIceCover;
+        uniform float uIceHeight;
 
         void main() {
           vec3 dir = normalize(vDirection);
+          // WHERE THERE ARE CRYSTALS, AND NOWHERE ELSE. A halo is the light of the source refracted
+          // by the ice it passes through, so it exists only along lines of sight that cross the
+          // veil — which is why real halos are so rarely the complete circle a diagram shows. They
+          // are arcs, fragments, one sundog and not the other. Sampling the same field the ice deck
+          // is drawn from gets all of that for free, and guarantees the gaps fall where the sky
+          // actually has none.
+          float ice = cirrusCoverAt(dir, uIceHeight, uIceCover);
+          if (ice <= 0.0) discard;
           vec3 sun = normalize(uSource);
           float angle = acos(clamp(dot(dir, sun), -1.0, 1.0));
           vec3 light = vec3(0.0);
@@ -129,7 +146,9 @@ export class IceHaloEffect {
             light += shaft * uTint * uPillar * 0.5;
           }
 
-          gl_FragColor = vec4(light * uStrength, 1.0);
+          // A little of the veil's own patchiness carried through rather than a hard mask, so the
+          // display fades at the edge of a fibre instead of ending on a cut line.
+          gl_FragColor = vec4(light * uStrength * (0.25 + 0.75 * ice), 1.0);
         }
       `,
       transparent: true,
@@ -150,7 +169,13 @@ export class IceHaloEffect {
    * `strength` of zero takes the whole thing down, which is the usual state of the sky: no ice
    * cloud, no display.
    */
-  update(source: { x: number; y: number; z: number }, sourceAltitudeDeg: number, strength: number, tint: [number, number, number]): void {
+  update(
+    source: { x: number; y: number; z: number },
+    sourceAltitudeDeg: number,
+    strength: number,
+    tint: [number, number, number],
+    ice: { cover: number; layerHeight: number }
+  ): void {
     if (strength <= 0 || sourceAltitudeDeg <= 0) {
       // Zeroed as well as hidden. Leaving the old value in the uniform changes nothing on screen —
       // the mesh is not drawn — but it leaves the effect REPORTING a strength it is not showing,
@@ -172,6 +197,8 @@ export class IceHaloEffect {
     // rendering artefact rather than a sight.
     uniforms.uPillar.value = Math.max(0, 1 - sourceAltitudeDeg / IceHalos.PILLAR_MAX_SOURCE_ALTITUDE_DEG)
     uniforms.uTint.value.set(tint[0], tint[1], tint[2])
+    uniforms.uIceCover.value = ice.cover
+    uniforms.uIceHeight.value = ice.layerHeight
     this.object.visible = true
   }
 

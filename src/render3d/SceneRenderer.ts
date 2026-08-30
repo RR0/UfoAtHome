@@ -156,6 +156,11 @@ const BODY_HIDE_BELOW_DEG = -4
  * adapted and the sky behind it is black, so the ring is not fourteen magnitudes harder to see. A
  * fifth is the honest middle: plainly there, plainly fainter. */
 const MOON_HALO_STRENGTH = 0.2
+
+/** How far above the witness the ice deck is projected, in this scene's own units. Cirrus lives
+ * between six and twelve kilometres; what matters here is only that it is several times the water
+ * deck's height, so its features come out correspondingly larger and slower across the sky. */
+const CIRRUS_LAYER_HEIGHT = 2600
 /** Same threshold as BODY_HIDE_BELOW_DEG, named separately for updateCelestialLight's own use —
  * a body that isn't even rendered shouldn't be lighting anything either. */
 const CELESTIAL_LIGHT_MIN_ALTITUDE_DEG = BODY_HIDE_BELOW_DEG
@@ -632,6 +637,12 @@ export class SceneRenderer {
    * span the witness can now see, while a small drift doesn't. */
   private terrainRadius = GROUND_RADIUS
   private cloudMesh?: Mesh
+  /** The ICE deck, drawn separately from the water one and never mixed with it: it sits at its own
+   * height, it is translucent, and it must not take part in occlusion — a cirrus veil hides nothing
+   * (see buildCirrus). */
+  private cirrusMesh?: Mesh
+  private cirrusMaterial?: ShaderMaterial
+  private cirrusUniforms?: CloudUniforms
   private cloudMaterial?: ShaderMaterial
   private cloudUniforms?: CloudUniforms
   private precipitationPoints?: Points
@@ -1038,6 +1049,7 @@ export class SceneRenderer {
     if (weatherEquals(this.weather, weather)) return
     this.weather = weather
     this.buildClouds()
+    this.buildCirrus()
     this.buildPrecipitation()
     this.lightningArmed = weather.storm && weather.cloudDarkness >= LIGHTNING_MIN_DARKNESS
     if (!this.lightningArmed) {
@@ -1492,7 +1504,7 @@ export class SceneRenderer {
     // only case it ever fired on turned out to be Chiles-Whitted, where "it disappeared into the
     // cloud deck" was an interrogator's reconstruction that the witness himself denied. Deducing
     // cloud from a distance nobody perceived is how that kind of claim gets made twice.
-    if (behindCloud && this.cloudMesh && this.weather.cloudCover > 0) return true
+    if (behindCloud && this.cloudMesh && this.lowerCloudCover() > 0) return true
     const occluders: Object3D[] = []
     for (const object of this.decorObjects) {
       if (!object.occludesSourceIds?.includes(sourceId)) continue
@@ -1590,6 +1602,7 @@ export class SceneRenderer {
     this.disposeMesh(this.groundMesh)
     this.disposeMesh(this.terrainMesh)
     this.disposeCloudSystem()
+    this.disposeCirrus()
     this.disposePrecipitationPoints()
     this.disposeRain()
     this.disposeStarTiers()
@@ -1984,7 +1997,7 @@ export class SceneRenderer {
     }
     const ice = this.weather.highCloudCover
     if (ice === undefined) {
-      this.iceHalos.update({ x: 0, y: 1, z: 0 }, -1, 0, [1, 1, 1])
+      this.iceHalos.update({ x: 0, y: 1, z: 0 }, -1, 0, [1, 1, 1], { cover: 0, layerHeight: CIRRUS_LAYER_HEIGHT })
       return
     }
     // The real lower decks when the record gave them, and the total cover as a stand-in when
@@ -1994,7 +2007,11 @@ export class SceneRenderer {
     const strength = IceHalos.strength(ice, lower) * (source === sun ? 1 : MOON_HALO_STRENGTH)
     const { x, y, z } = horizontalToCartesian(source.altitudeDeg, source.azimuthDeg, 1)
     const tint = atmosphericTint(source.altitudeDeg)
-    this.iceHalos.update({ x, y, z }, source.altitudeDeg, strength, [tint[0], tint[1], tint[2]])
+    // The very veil that is drawn, so the halo is broken exactly where the sky is clear.
+    this.iceHalos.update({ x, y, z }, source.altitudeDeg, strength, [tint[0], tint[1], tint[2]], {
+      cover: ice,
+      layerHeight: CIRRUS_LAYER_HEIGHT
+    })
   }
 
   /** Takes down whatever comet was drawn, head, halo, hover target and tail. */
@@ -2131,14 +2148,17 @@ export class SceneRenderer {
    * setAstronomy tick. */
   private buildClouds(): void {
     this.disposeCloudSystem()
-    if (this.weather.cloudCover <= 0) return
+    // The water deck only. Driven by the lower cover where the record gave one, because the ice now
+    // has a deck of its own and adding the total would draw the cirrus twice.
+    const cover = this.lowerCloudCover()
+    if (cover <= 0) return
     const darkness = this.weather.cloudDarkness
     const baseColor = new Color(
       CLOUD_LIGHT_COLOR[0] + (CLOUD_DARK_COLOR[0] - CLOUD_LIGHT_COLOR[0]) * darkness,
       CLOUD_LIGHT_COLOR[1] + (CLOUD_DARK_COLOR[1] - CLOUD_LIGHT_COLOR[1]) * darkness,
       CLOUD_LIGHT_COLOR[2] + (CLOUD_DARK_COLOR[2] - CLOUD_LIGHT_COLOR[2]) * darkness
     )
-    const { material, uniforms } = buildCloudMaterial(baseColor, this.weather.cloudCover, Math.abs(this.cloudLayerOffset()))
+    const { material, uniforms } = buildCloudMaterial(baseColor, cover, Math.abs(this.cloudLayerOffset()))
     this.cloudMaterial = material
     this.cloudUniforms = uniforms
     // Seeds real lighting immediately from the last known sun position — see lastSunPosition's own
@@ -2157,6 +2177,49 @@ export class SceneRenderer {
     // climbing a few hundred metres broke the assumption and the layer came out bent into a
     // fish-eye arc, then vanished entirely once past the dome's own 700-unit radius.
     this.celestialGroup.add(this.cloudMesh)
+  }
+
+  /** How much of the sky the WATER decks covered — the record's own figure where there is one, and
+   * the total as a stand-in when a scene was written by hand. */
+  private lowerCloudCover(): number {
+    return this.weather.lowerCloudCover ?? this.weather.cloudCover
+  }
+
+  /**
+   * The ice deck, drawn as what it is.
+   *
+   * Its own mesh rather than a setting on the water one, because almost everything about it differs:
+   * it sits three or four times higher, it is fibrous instead of billowy, it is translucent enough
+   * to see the Sun through — which is the whole reason it can make a halo — and it occludes nothing,
+   * so it stays out of the CPU-side field the shape occlusion reads.
+   *
+   * Until this existed, describing a cirrus veil produced a halo and no cloud: the ice was an
+   * invisible ingredient. Worse, when a hand-authored scene put the ONE deck up at cirrus height,
+   * the water shading drew it as a field of white dots that a reader took for stars at midday.
+   */
+  private buildCirrus(): void {
+    this.disposeCirrus()
+    const cover = this.weather.highCloudCover ?? 0
+    if (cover <= 0) return
+    const { material, uniforms } = buildCloudMaterial(new Color(...CLOUD_LIGHT_COLOR), cover, CIRRUS_LAYER_HEIGHT, 1)
+    this.cirrusMaterial = material
+    this.cirrusUniforms = uniforms
+    if (this.lastSunPosition) this.updateCloudLighting(this.lastSunPosition, this.baseFogColor)
+    this.cirrusMesh = new Mesh(buildCloudGeometry(CLOUD_RADIUS * 1.04), material)
+    // Behind the water deck, and behind the ice optics, so a lower cloud paints over it.
+    this.cirrusMesh.renderOrder = CLOUD_RENDER_ORDER - 1
+    this.celestialGroup.add(this.cirrusMesh)
+  }
+
+  private disposeCirrus(): void {
+    if (this.cirrusMesh) {
+      this.cirrusMesh.removeFromParent()
+      this.cirrusMesh.geometry.dispose()
+    }
+    this.cirrusMaterial?.dispose()
+    this.cirrusMesh = undefined
+    this.cirrusMaterial = undefined
+    this.cirrusUniforms = undefined
   }
 
   /**
@@ -2184,7 +2247,10 @@ export class SceneRenderer {
    * terms (sun direction/color, ambient) on cloudUniforms, driven by the app's real current sun
    * position/atmosphericTint instead of a hardcoded time-of-day color table. */
   private updateCloudLighting(sun: HorizontalPosition, groundColor: [number, number, number]): void {
-    if (!this.cloudUniforms) return
+    // Whichever decks exist, and NOT gated on the water one: a sky with cirrus and nothing below it
+    // used to leave the ice deck unlit, because this returned early on the water deck's absence.
+    const decks = [this.cloudUniforms, this.cirrusUniforms].filter((deck): deck is CloudUniforms => deck !== undefined)
+    if (decks.length === 0) return
     const { x, y, z } = horizontalToCartesian(sun.altitudeDeg, sun.azimuthDeg, 1)
     const tint = atmosphericTint(sun.altitudeDeg)
     // Scaled by how high the Sun actually is, exactly as the scene's own real light already is
@@ -2194,10 +2260,13 @@ export class SceneRenderer {
     // through a 02:45 night. Below the horizon the only real light left on a cloud base is
     // moonlight and skyglow, which is what ambientColor already carries.
     const daylight = Math.max(0, Math.sin(Math.max(sun.altitudeDeg, 0) * DEG_TO_RAD))
-    this.cloudUniforms.sunDir.value.set(x, y, z)
-    this.cloudUniforms.sunColor.value.setRGB(tint[0] * daylight, 0.96 * tint[1] * daylight, 0.88 * tint[2] * daylight)
-    this.cloudUniforms.ambientColor.value.setRGB(groundColor[0], groundColor[1], groundColor[2])
+    for (const deck of decks) {
+      deck.sunDir.value.set(x, y, z)
+      deck.sunColor.value.setRGB(tint[0] * daylight, 0.96 * tint[1] * daylight, 0.88 * tint[2] * daylight)
+      deck.ambientColor.value.setRGB(groundColor[0], groundColor[1], groundColor[2])
+    }
   }
+
 
   private disposeCloudSystem(): void {
     if (this.cloudMesh) {

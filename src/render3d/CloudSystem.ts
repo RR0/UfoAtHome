@@ -30,6 +30,16 @@ export interface CloudUniforms {
    * meters becomes this. Always positive: which SIDE the deck is on is the mesh's business (it
    * gets flipped), not the shading's. */
   layerHeight: { value: number }
+  /**
+   * How ICY the deck is, 0 to 1 — the difference between a cumulus and a cirrus.
+   *
+   * Not a style setting. Water cloud billows: it has cauliflower tops and real gaps, which is what
+   * the Worley cells give. Ice cloud does not billow at all — the crystals fall and are drawn out by
+   * the wind into long parallel fibres, translucent enough to see the Sun straight through. Drawing
+   * ice with the water shading is what made a cirrus deck read as a field of white dots, which a
+   * reader quite reasonably took for stars in the middle of the day.
+   */
+  fibrous: { value: number }
 }
 
 const CLOUD_VERTEX_SHADER = `
@@ -41,24 +51,16 @@ void main() {
 }
 `
 
-const CLOUD_FRAGMENT_SHADER = `
-precision highp float;
-uniform vec3 sunDir;
-uniform vec3 sunColor;
-uniform vec3 ambientColor;
-uniform vec3 baseColor;
-uniform float coverage;
-varying vec3 vDir;
-
-// How far the flat plane that cloud noise is projected onto sits from the observer — see main()'s
-// own comment for why there is a plane at all. A uniform rather than a constant since a recording
-// states its own cloud base (Weather.cloudBaseM) and the witness their own altitude: the distance
-// between the two is what decides how compressed the deck looks toward the horizon, and a witness
-// flying just under a low deck sees something very different from one standing under the same deck
-// on the ground.
-uniform float layerHeight;
-
-vec3 hash3(vec3 p) {
+/**
+ * The noise the cloud decks are shaped from, shared as source so anything else that needs to know
+ * WHERE the cloud is can ask the same field rather than inventing a second one.
+ *
+ * The ice optics need exactly that: a halo only exists along a line of sight that actually passes
+ * through crystals, which is why real halos are partial — an arc rather than a circle, one sundog
+ * and not two. Reproducing that means sampling the same veil the sky is drawn from, and two noise
+ * fields that merely looked alike would put the gaps in the halo somewhere the cirrus is not.
+ */
+export const CLOUD_NOISE_GLSL = `vec3 hash3(vec3 p) {
   p = vec3(dot(p, vec3(127.1, 311.7, 74.7)), dot(p, vec3(269.5, 183.3, 246.1)), dot(p, vec3(113.5, 271.9, 124.6)));
   return fract(sin(p) * 43758.5453) * 2.0 - 1.0;
 }
@@ -86,7 +88,47 @@ float fbm(vec3 p) {
     amp *= 0.55;
   }
   return sum;
+}`
+
+/** How much ice cloud lies along a given direction, 0 to 1 — the ice deck's own coverage field,
+ * pulled out so the halo shader can multiply by it. Mirrors the fibrous branch of the fragment
+ * shader below; the two must move together. */
+export const CIRRUS_COVER_GLSL = `
+float cirrusCoverAt(vec3 dir, float layerHeight, float coverage) {
+  if (coverage <= 0.0 || dir.y <= 0.02) return 0.0;
+  vec3 planePos = dir * (layerHeight / max(dir.y, 0.04));
+  vec3 warpPos = planePos * 0.006;
+  vec3 warp = vec3(fbm(warpPos + 12.3), fbm(warpPos + 47.1), fbm(warpPos + 91.7)) * 40.0;
+  vec3 warpedPos = planePos + warp;
+  vec3 drawnOut = vec3(warpedPos.x * 0.0016, warpedPos.y * 0.02, warpedPos.z * 0.045);
+  float fibre = fbm(drawnOut) * 0.5 + 0.5;
+  float wisp = fbm(drawnOut * 3.1 + 7.0) * 0.5 + 0.5;
+  float shape = fibre * 0.72 + wisp * 0.28;
+  float threshold = 1.0 - coverage;
+  return smoothstep(threshold - 0.10, threshold + 0.10, shape);
 }
+`
+
+const CLOUD_FRAGMENT_SHADER = `
+precision highp float;
+uniform vec3 sunDir;
+uniform vec3 sunColor;
+uniform vec3 ambientColor;
+uniform vec3 baseColor;
+uniform float coverage;
+varying vec3 vDir;
+
+// How far the flat plane that cloud noise is projected onto sits from the observer — see main()'s
+// own comment for why there is a plane at all. A uniform rather than a constant since a recording
+// states its own cloud base (Weather.cloudBaseM) and the witness their own altitude: the distance
+// between the two is what decides how compressed the deck looks toward the horizon, and a witness
+// flying just under a low deck sees something very different from one standing under the same deck
+// on the ground.
+uniform float layerHeight;
+uniform float fibrous;
+
+${CLOUD_NOISE_GLSL}
+
 // Cellular (Worley) noise — distance to the nearest of 27 randomly-jittered cell points. Unlike
 // fbm's smooth interpolated blobs, this has genuinely sharp valleys between cells, reading as
 // distinct billowy cloud masses with real gaps/shadows between them rather than one soft gradient.
@@ -138,6 +180,17 @@ void main() {
   float shape = mix(shapeFbm, shapeCell, 0.4);
   float detail = fbm(warpedPos * 0.031 + 41.0) * 0.5 + 0.5;
 
+  // ICE. Sampled through a strongly anisotropic scale — a twentieth of the frequency along one
+  // axis and four times it across — so the same noise comes out as long parallel filaments instead
+  // of blobs. No Worley at all: cells are what billowing looks like, and ice does not billow.
+  if (fibrous > 0.0) {
+    vec3 drawnOut = vec3(warpedPos.x * 0.0016, warpedPos.y * 0.02, warpedPos.z * 0.045);
+    float fibre = fbm(drawnOut) * 0.5 + 0.5;
+    float wisp = fbm(drawnOut * 3.1 + 7.0) * 0.5 + 0.5;
+    shape = mix(shape, fibre * 0.72 + wisp * 0.28, fibrous);
+    detail = mix(detail, wisp, fibrous);
+  }
+
   // Leaves a real, unclouded gap near the horizon (see buildCloudGeometry's own thetaLength — the
   // geometry itself stops short of the true horizon) — a soft fade across that same last few degrees
   // so the shell's own edge doesn't read as a hard-edged rim floating in the sky. Real terrain relief
@@ -156,6 +209,10 @@ void main() {
   // rather than merely biasing it (a pure threshold shift would still leave the occasional fragment
   // below threshold even at coverage=1, since fbm's own range rarely spans a full 0..1).
   alpha = mix(alpha, 1.0, smoothstep(0.82, 1.0, coverage)) * horizonFade;
+  // A cirrus veil never closes the sky. Even the thickest cirrostratus is something you see the Sun
+  // THROUGH — that is the entire reason it can make a halo at all — so an ice deck is held down to
+  // a fraction of the opacity a water deck reaches, however completely it covers.
+  alpha *= mix(1.0, 0.38, fibrous);
   if (alpha < 0.02) discard;
 
   float diff = dot(dir, L) * 0.5 + 0.5;
@@ -165,6 +222,9 @@ void main() {
   // own cell structure must stay visible as darker valleys / brighter billow tops, or a "fully
   // overcast" sky degenerates back into one flat painted color with no visible cloud structure.
   color *= mix(0.45, 1.4, shape) * mix(0.8, 1.15, detail);
+  // And ice has no shadowed undersides to give it that contrast — it is a bright thin sheet lit
+  // through, so the modelling is flattened right down as the deck turns icy.
+  color = mix(color, baseColor * (sunColor * 0.85 + ambientColor * 0.45) * mix(0.72, 1.25, shape), fibrous * 0.75);
 
   gl_FragColor = vec4(color, alpha);
 }
@@ -175,14 +235,20 @@ void main() {
  * from a few scattered patches to genuine full-sky overcast, forced fully opaque at coverage's own
  * max so cloudCover=1 always guarantees zero visible sky. `coverage` is weather.cloudCover directly,
  * baked in at build time (weather is static per sighting, same reasoning as baseColor below). */
-export function buildCloudMaterial(baseColor: Color, coverage: number, layerHeight: number): { material: ShaderMaterial; uniforms: CloudUniforms } {
+export function buildCloudMaterial(
+  baseColor: Color,
+  coverage: number,
+  layerHeight: number,
+  fibrous = 0
+): { material: ShaderMaterial; uniforms: CloudUniforms } {
   const uniforms: CloudUniforms = {
     sunDir: { value: new Vector3(0, 1, 0) },
     sunColor: { value: new Color(1, 1, 1) },
     ambientColor: { value: new Color(0.5, 0.5, 0.5) },
     baseColor: { value: baseColor },
     coverage: { value: coverage },
-    layerHeight: { value: layerHeight }
+    layerHeight: { value: layerHeight },
+    fibrous: { value: fibrous }
   }
   const material = new ShaderMaterial({
     uniforms,
