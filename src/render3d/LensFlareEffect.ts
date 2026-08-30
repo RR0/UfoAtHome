@@ -35,7 +35,18 @@ export interface LensFlareUniforms {
    * this. */
   uFlareIntensity: { value: number }
   uStarPoints: { value: number }
-  uGlareSize: { value: number }
+  /** The tangent of half the vertical field the camera is actually rendering with — what turns a
+   * point of the frame back into the direction it looks along, and so a screen distance into the
+   * real angle veiling glare is a function of. */
+  uTanHalfFov: { value: number }
+  /** The source's own angular radius, degrees: inside its disc there is no angle to divide by. */
+  uSourceRadiusDeg: { value: number }
+  /** The SQUARE of the angle, in degrees, at which the veil reaches full white — so the blazing
+   * core's radius is its square root. Scaled by how much of the Sun's light actually arrives. */
+  uVeilStrength: { value: number }
+  /** The dazzle's own colour and strength: the source's atmospheric tint, times the cloud it
+   * shines through, times the reader's own intensity dial. */
+  uDazzleColour: { value: Color }
   uFlareSize: { value: number }
   uFlareSpeed: { value: number }
   uFlareShape: { value: number }
@@ -77,7 +88,10 @@ uniform vec2 uLensPosition;
 uniform vec2 uResolution;
 uniform vec3 uColorGain;
 uniform float uStarPoints;
-uniform float uGlareSize;
+uniform float uTanHalfFov;
+uniform float uSourceRadiusDeg;
+uniform float uVeilStrength;
+uniform vec3 uDazzleColour;
 uniform float uFlareSize;
 uniform float uFlareSpeed;
 uniform float uFlareShape;
@@ -150,17 +164,46 @@ vec3 drawflare(vec2 p, float intensity, float rnd, float speed, int id)
     }
 }
 
-float glare(vec2 uv, vec2 pos, float size)
+// THE DAZZLE ITSELF, and the one part of this shader that is not a look.
+//
+// A bright light does not grow. What grows around it is VEILING GLARE: a fixed small fraction of
+// its flux scattered sideways on its way through the eye — off the cornea, the lens, the fibres of
+// the vitreous — or, in a camera, off every air-glass surface in the barrel. Stiles and Crawford
+// measured it in the 1930s and it has been re-measured ever since, and what they found is an
+// INVERSE SQUARE in the angle from the source: the veil at two degrees is a quarter of the veil at
+// one. Nothing else in this file mattered as much as getting that exponent right. What was here
+// before fell off as 1/θ, whose tail is so much fatter that the Sun read as a white ball six
+// degrees across in broad daylight — which is what a reader saw and said was too big.
+//
+// The angle is a REAL angle between two lines of sight, not a screen distance: the same dazzle has
+// to be the same number of degrees wide whatever the field of view and whichever projection the
+// recording was made through, exactly as the halo ring is (see IceHaloEffect). Inside the source's
+// own disc there is no angle left to divide by, so it is held there.
+//
+// uVeilStrength is the square of the angle at which the veil reaches full white — so the radius of
+// the blazing core is sqrt(strength), and it shrinks as the SQUARE ROOT of the Sun's brightness.
+// A hundredfold weaker Sun makes a tenfold smaller blaze, which is the whole shape of a sunset.
+// Which way the eye is looking at this point of the frame. The frame this shader draws into is
+// always the RECTILINEAR one the camera renders (an equidistant recording resamples it afterwards,
+// which is why reading an angle off pixel distances here was wrong by half again at the edges) — so
+// a point of it is a direction through a pinhole, and the angle between two of them is exact under
+// both projections.
+vec3 lookAt(vec2 p)
+{
+    float aspect = uResolution.x / max(uResolution.y, 1.0);
+    return normalize(vec3(2.0 * p.x * uTanHalfFov * aspect, 2.0 * p.y * aspect * uTanHalfFov, -1.0));
+}
+
+float glare(vec2 uv, vec2 pos)
 {
     vec2 main = uAnimated ? rotateUV(uv-pos, uTime * 0.1) : uv-pos;
-
     float ang = atan(main.y, main.x) * (uAnamorphic ? 1.0 : uStarPoints);
-    float dist = length(main);
-    dist = pow(dist, .9);
-
-    float f0 = 1.0/(length(uv-pos)*(1.0/size*16.0)+.2);
-
-    return f0+f0*(sin((ang))*.2 +.3);
+    float theta = max(degrees(acos(clamp(dot(lookAt(uv), lookAt(pos)), -1.0, 1.0))), uSourceRadiusDeg);
+    float veil = uVeilStrength / (theta * theta);
+    // The aperture's spikes ride on the veil rather than being drawn on top of it — they ARE the
+    // same scattered light, gathered along the directions the blade edges diffract it into. With no
+    // blades uStarPoints is zero, the angle collapses and this is exactly 1: a round dazzle.
+    return veil * (1.0 + 0.45 * sin(ang));
 }
 
 //https://www.shadertoy.com/view/Xd2GR3
@@ -233,13 +276,18 @@ void LensFlare(vec2 uv, vec2 pos, out vec3 glareOut, out vec3 flareOut)
         prot = uv - pos;
     }
 
-    vec3 core = vec3(glare(uv,pos, uGlareSize));
+    vec3 core = vec3(glare(uv,pos));
     vec3 rays = drawflare(prot, (uAnamorphic ? uFlareSize * 10. : uFlareSize), 0.1, uTime, 1);
     vec3 ghosts;
     ghosts.r = f1+f2+f4+f5+f6; ghosts.g = f1+f22+f42+f52+f62; ghosts.b = f1+f23+f43+f53+f63;
 
     vec3 vignette = vec3(length(uvd)+.09) * 1.3;
-    glareOut = core * vignette + vec3(f0);
+    // NOT on the dazzle. The reference's vignette darkens toward the middle of the frame, which is
+    // a look and a defensible one for lens artifacts — but veiling glare is a property of the angle
+    // between the eye and the source, not of where the source happens to be framed. Left on it, the
+    // same Sun threw a dazzle eight times weaker in the centre of the picture than at its edge, and
+    // no calibration in real degrees could survive that.
+    glareOut = core + vec3(f0);
     flareOut = (rays + ghosts) * vignette;
 }
 
@@ -404,7 +452,11 @@ void main()
     const float DAZZLE_COMPENSATION = 0.6;
     vec3 glareColor, flareColor;
     LensFlare(myUV, mouse, glareColor, flareColor);
-    vec3 dazzle = glareColor * 20.0 * uColorGain / 256.;
+    // Straight through, in fractions of white: glare() already answers "how much of full white is
+    // veiling this pixel", so multiplying it by anything but the source's own colour would be
+    // undoing the calibration. The artifacts keep the reference implementation's own gain chain
+    // below, because they are a look and were tuned as one.
+    vec3 dazzle = glareColor * uDazzleColour;
     vec3 artifacts = flareColor * 20.0 * uColorGain / 256.;
 
     if(uAdditionalStreaks){
@@ -451,11 +503,13 @@ void main()
     // grey smudge instead of the vivid, distinct artifact it's meant to be (dazzle-alone was
     // originally chosen to stop artifacts from ever *adding* opacity on top of an already-opaque
     // core — max() still does that, since near the core dazzleAlpha already dominates).
-    float dazzleAlpha = clamp(dot(dazzle, vec3(0.35)), 0.0, 1.0) * uOpacity;
-    float artifactsAlpha = clamp(dot(artifactsContribution, vec3(0.35)), 0.0, 1.0) * uOpacity;
-    vec3 finalColor = dazzle + artifactsContribution;
-
-    gl_FragColor = vec4(finalColor, max(dazzleAlpha, artifactsAlpha));
+    // Everything this draw contributes is carried by the COLOUR, and the alpha is left at one.
+    // Additive blending multiplies colour by alpha, so an alpha computed from the colour squared
+    // the dazzle — turning an inverse-square falloff into an inverse-fourth one out in the wings,
+    // where a real dazzle still has most of its reach. The reader's own intensity dial reaches the
+    // dazzle through uVeilStrength instead (see SceneRenderer.applyDazzleStrength), and uOpacity
+    // stays what it always was for the optional artifacts.
+    gl_FragColor = vec4(dazzle + artifactsContribution * uOpacity, 1.0);
 }
 `
 
@@ -515,7 +569,10 @@ export function buildLensFlare(): LensFlareSystem {
     // reference implementation shipped six, which quietly put a camera in every witness's hands —
     // SceneRenderer.setInstrument sets the real count for anything that does have a lens.
     uStarPoints: { value: 0 },
-    uGlareSize: { value: 0.55 },
+    uTanHalfFov: { value: Math.tan(Math.PI / 6) },
+    uSourceRadiusDeg: { value: 0.265 },
+    uVeilStrength: { value: 0 },
+    uDazzleColour: { value: new Color(1, 1, 1) },
     uFlareSize: { value: 0.0025 },
     uFlareSpeed: { value: 0.4 },
     uFlareShape: { value: 1.2 },

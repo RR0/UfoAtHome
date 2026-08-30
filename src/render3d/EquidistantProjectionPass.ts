@@ -5,6 +5,7 @@ import {
   Scene,
   ShaderMaterial,
   Vector2,
+  HalfFloatType,
   WebGLRenderTarget,
   type Camera,
   type PerspectiveCamera,
@@ -46,7 +47,13 @@ export class EquidistantProjectionPass {
   constructor(width: number, height: number) {
     this.width = Math.max(1, width)
     this.height = Math.max(1, height)
-    this.target = new WebGLRenderTarget(this.width, this.height)
+    // HALF-FLOAT, not the default byte. Every additive light in this scene — the Sun's dazzle above
+    // all — is written in real units where "one" means white and brighter things are simply more
+    // than one. A byte target throws that away before the frame is resampled, so a dazzle calibrated
+    // to blaze out to two and a half degrees came out blazing to one: it had been flattened to white
+    // at the buffer and then blurred back down by the resampling. The clip belongs at the end of the
+    // chain, where the canvas is written, and nowhere before it.
+    this.target = new WebGLRenderTarget(this.width, this.height, { type: HalfFloatType })
     this.material = new ShaderMaterial({
       uniforms: {
         uSource: { value: this.target.texture },

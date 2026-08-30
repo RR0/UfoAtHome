@@ -171,11 +171,41 @@ function angularAzimuthDistance(a: number, b: number): number {
  * horizon (dawn/dusk) — negligible at full day or full night, when skyColorsForAltitude's own
  * horizon stop is already appropriately bright/dark on its own.
  */
-function sunGlowWeight(vertexAzimuthDeg: number, sunAzimuthDeg: number, sunAltitudeDeg: number): number {
-  const azimuthFalloff = Math.max(0, 1 - angularAzimuthDistance(vertexAzimuthDeg, sunAzimuthDeg) / 90)
-  const twilightWindow = Math.max(0, 1 - Math.abs(sunAltitudeDeg) / 18)
-  return azimuthFalloff * twilightWindow
+function sunGlowWeight(
+  vertexAzimuthDeg: number,
+  vertexAltitudeDeg: number,
+  sunAzimuthDeg: number,
+  sunAltitudeDeg: number
+): number {
+  const azimuthFalloff = Math.max(0, 1 - angularAzimuthDistance(vertexAzimuthDeg, sunAzimuthDeg) / GLOW_AZIMUTH_SPREAD_DEG)
+  // It HUGS THE HORIZON, and that is the whole look of a sunset. The glow is a long slanting path
+  // through the lowest air, and a line of sight tilted even twenty degrees up leaves that air almost
+  // at once. Spread evenly up the dome instead — which is what a plain "the higher, the less" ramp
+  // does — it reads as a wash over half the sky and as no sunset at all.
+  const height = Math.exp(-Math.max(0, vertexAltitudeDeg) / GLOW_HEIGHT_SCALE_DEG)
+  // Brightest with the Sun just under the horizon rather than at it, and gone by the end of
+  // nautical twilight — which is where the last colour on the horizon really does go.
+  const twilightWindow =
+    sunAltitudeDeg > 0
+      ? Math.max(0, 1 - sunAltitudeDeg / GLOW_FADES_ABOVE_DEG)
+      : Math.max(0, 1 - Math.abs(sunAltitudeDeg + GLOW_PEAK_ALTITUDE_DEG) / GLOW_LASTS_BELOW_DEG)
+  return azimuthFalloff * height * twilightWindow
 }
+
+/** A quarter turn either side of the Sun's bearing, which is about as far round as a sunset
+ * reaches before the sky behind you stops knowing about it. */
+const GLOW_AZIMUTH_SPREAD_DEG = 90
+/** How fast the glow gives out with height — an e-fold every dozen degrees, so it is a band along
+ * the horizon rather than a tint over the whole dome. */
+const GLOW_HEIGHT_SCALE_DEG = 12
+/** Above this the Sun is simply up and the sky is simply day. */
+const GLOW_FADES_ABOVE_DEG = 8
+/** Where the glow is strongest: a couple of degrees under, when the Sun has gone for the witness
+ * and the air in front of them is still lit. */
+const GLOW_PEAK_ALTITUDE_DEG = 2
+/** And how far under it survives — the end of nautical twilight, where the horizon's last colour
+ * really does go. */
+const GLOW_LASTS_BELOW_DEG = 12
 
 /**
  * The final render color for one point of the sky dome at (altitudeDeg, vertexAzimuthDeg), given
@@ -191,10 +221,33 @@ export function skyColorForPosition(altitudeDeg: number, vertexAzimuthDeg: numbe
   const { zenith, horizon } = skyColorsForAltitude(sunAltitudeDeg)
   const heightFraction = clamp((altitudeDeg + 90) / 180, 0, 1)
   const base = lerpColor(horizon, zenith, heightFraction)
-  const glow = sunGlowWeight(vertexAzimuthDeg, sunAzimuthDeg, sunAltitudeDeg)
+  const glow = sunGlowWeight(vertexAzimuthDeg, altitudeDeg, sunAzimuthDeg, sunAltitudeDeg)
   if (glow <= 0) return base
-  return lerpColor(base, horizon, glow * (1 - heightFraction) * 0.8)
+  // Lit as though the Sun stood HIGHER, because where you are looking it does. The glow over a
+  // sunset is air a few hundred kilometres away, and from under that air the Sun has not set yet —
+  // a degree of the Earth is a hundred and eleven kilometres, so a few degrees of extra elevation
+  // is the honest way to say "still in sunlight over there". Blending toward the horizon colour of
+  // the same instant, as this did before, could only ever move the sky toward a colour it already
+  // had, which is why there was no visible glow to see.
+  const ahead = skyColorsForAltitude(sunAltitudeDeg + GLOW_LOOK_AHEAD_DEG).horizon
+  // The horizon's own colour, and never LESS than it — but lit as though the Sun stood higher,
+  // because where you are looking it does. The glow over a sunset is air a few hundred kilometres
+  // away, and from under that air the Sun has not set yet; a degree of the Earth is a hundred and
+  // eleven kilometres, so a few degrees of extra elevation is the honest way to say "still in
+  // sunlight over there". Taken channel by channel against the horizon of THIS instant so the glow
+  // can only ever add: the higher Sun's horizon is the brighter one but also the whiter one, and
+  // reaching straight for it would have drained the red out of a sunset instead of lighting it.
+  const target: RgbColor = [
+    Math.max(horizon[0], ahead[0]),
+    Math.max(horizon[1], ahead[1]),
+    Math.max(horizon[2], ahead[2])
+  ]
+  return lerpColor(base, target, glow)
 }
+
+/** How much higher the Sun stands over the air the glow is coming from than over the witness — a
+ * few hundred kilometres away along the line of sight, which is a few degrees of the Earth. */
+const GLOW_LOOK_AHEAD_DEG = 6
 
 /** How much a star's rendered color is floored above black at a given brightness — keeps even
  * the dimmest star in a tier faintly visible instead of literally invisible. */
@@ -278,6 +331,44 @@ export function atmosphericTint(altitudeDeg: number): RgbColor {
   const extraAirMass = airMassApprox(altitudeDeg) - 1
   return [1, Math.exp(-ATMOSPHERIC_TINT_GREEN_COEFF * extraAirMass), Math.exp(-ATMOSPHERIC_TINT_BLUE_COEFF * extraAirMass)]
 }
+
+/**
+ * How many magnitudes of a body's light the atmosphere takes away at that altitude — nothing at the
+ * zenith, about five right at the horizon.
+ *
+ * Anchored on the one number here that is measured rather than chosen: sunlight arriving on a
+ * surface facing it falls from around a hundred thousand lux with the Sun overhead to around a
+ * thousand at sunset. That is a hundredfold, five magnitudes, and it is the whole reason a setting
+ * Sun can be looked straight at while a noon Sun cannot.
+ *
+ * Kept SEPARATE from atmosphericTint, which reddens without darkening, and that separation is the
+ * point rather than an oversight. A low Sun still READS bright, because an eye adapts and because
+ * anything that bright saturates a screen whatever you multiply it by. What does not adapt is the
+ * light scattered sideways inside the eye or the lens on its way to the retina: veiling glare is a
+ * fixed fraction of the source's flux, so a hundredfold weaker Sun throws a hundredfold weaker
+ * dazzle. That is what this is for, and it is why the dazzle must not be driven by the tint.
+ */
+export function atmosphericExtinctionMag(altitudeDeg: number): number {
+  // Held at the horizon rather than followed below it. Kasten-Young's fit is a fit to the sky above
+  // the horizon and turns on itself underneath — its denominator changes sign near a degree down, so
+  // asking it about a Sun two degrees under gives a THINNER atmosphere than four degrees under, and
+  // an extinction that goes back up as the Sun goes further down. There is no direct beam left to
+  // extinguish below the horizon anyway: what is left down there is scattered light, and scattered
+  // light is the sky's business (see skyColorForPosition's own twilight glow).
+  return EXTINCTION_MAG_PER_AIR_MASS * (airMassApprox(Math.max(altitudeDeg, 0)) - 1)
+}
+
+/** The same thing as a plain multiplier on the light, 1 at the zenith. */
+export function atmosphericTransmission(altitudeDeg: number): number {
+  return Math.pow(10, -0.4 * atmosphericExtinctionMag(altitudeDeg))
+}
+
+/** Five magnitudes spread over the thirty-seven extra air masses Kasten-Young gives at the horizon.
+ * A clear sea-level sky is usually quoted at 0.2 to 0.3 magnitudes per air mass, which is right in
+ * the middle of the sky and far too much at the bottom of it: the plane-parallel picture the
+ * coefficient belongs to has broken down long before the horizon. Fitting the measured end point
+ * instead keeps the answer honest exactly where it matters, which is the last few degrees. */
+const EXTINCTION_MAG_PER_AIR_MASS = 5 / 37
 
 export interface StarBrightnessTier {
   readonly maxBrightness: number

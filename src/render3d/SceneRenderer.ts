@@ -43,6 +43,7 @@ import {
   horizontalToCartesian,
   magnitudeToBrightness,
   skyColorForPosition,
+  atmosphericTransmission,
   skyColorsForAltitude,
   starBrightnessTierIndex,
   starColorScale,
@@ -237,6 +238,53 @@ const TERRAIN_REBUILD_DISTANCE_M = 150
 const LENS_FLARE_BASE_GAIN = 55
 /** uOpacity at dazzleIntensity 1 — see setDazzleIntensity. */
 const LENS_FLARE_BASE_OPACITY = 0.5
+
+/**
+ * How wide the Sun's blazing white core is, in degrees of RADIUS, with the Sun high in a clear sky.
+ *
+ * MEASURED OFF PHOTOGRAPHS, and measurable because those photographs came with their own ruler: a
+ * 22-degree halo is a known angle, so the ratio of the white blob to the ring gives the blob in
+ * degrees without knowing anything about the camera. Two independent halo photographs put it at
+ * about two and a half degrees, which is five times the Sun's own disc and about a fifth of what
+ * this scene was drawing.
+ *
+ * Everything else follows from it rather than being set beside it: the veil goes as the inverse
+ * square of the angle (see LensFlareEffect), so this radius IS the calibration, and it shrinks as
+ * the square root of however much of the Sun's light is actually arriving.
+ */
+const GLARE_SATURATION_RADIUS_DEG = 2.5
+
+/**
+ * What the veil has to reach, in the shader's own units, to come out white on the finished frame.
+ *
+ * Not one, and this is a statement about the chain rather than about the light. The dazzle is
+ * written into a frame that is then composited over a sky and, for an eye, resampled from a wider
+ * rendering into the witness's own even-angled one — and the clip to white happens at the far end
+ * of all that, not where the value is written. Measured on the rendered frame rather than reasoned
+ * about: with the veil set to reach one at two and a half degrees, the blaze came out at one point
+ * three, and it scales as the square root, so the shortfall is this.
+ *
+ * It is a display-chain number and nothing else. Every physical thing about the dazzle — the
+ * inverse square, the extinction, the cloud, the fraction of the disc still showing — is upstream of
+ * it and untouched by it.
+ */
+const GLARE_RENDER_WHITE_POINT = 3.7
+
+/**
+ * Where the Sun's disc is sampled to ask what is standing in front of it — its centre and eight
+ * points round its rim, in degrees from the centre.
+ *
+ * Its own angular radius, which is what makes the answer a real fraction of a real disc rather
+ * than a softening chosen to look right.
+ */
+const SUN_ANGULAR_RADIUS_DEG = 0.265
+const SUN_DISC_SAMPLES: readonly [number, number][] = [
+  [0, 0],
+  ...Array.from({ length: 8 }, (_, index): [number, number] => {
+    const angle = (index * Math.PI) / 4
+    return [Math.cos(angle) * SUN_ANGULAR_RADIUS_DEG, Math.sin(angle) * SUN_ANGULAR_RADIUS_DEG]
+  })
+]
 
 const CLOUD_RADIUS = 700 // inside STAR_RADIUS/BODY_PLACEMENT_RADIUS (850) so clouds occlude stars/bodies, matching real sky layering
 /** Scene units per real meter of vertical distance to the cloud deck. Fixed by continuity: this
@@ -745,6 +793,9 @@ export class SceneRenderer {
    * placed — see cloudTransmission. Held because the lens flare is retinted from more than one
    * place and every one of them needs it. */
   private sunCloudTransmission = 1
+  /** How much of the Sun's disc is clear of the ground, the terrain and any building, 0 to 1 — see
+   * sunVisibleFraction. */
+  private sunUnhiddenFraction = 1
   /** How strongly the optional lens-flare artifacts (star rays, ghost trail, hex ghosts, streaks,
    * starburst) show on top of the Sun's always-on dazzle core — see setLensFlareArtifactIntensity.
    * 0 means off. The point of keeping this independent of dazzleIntensity: comparing the *same*
@@ -768,6 +819,9 @@ export class SceneRenderer {
   /** Scratch vector reused every isSunOccluded call — the camera->Sun ray direction, avoiding a
    * per-frame allocation (same discipline as lensFlareScratch). */
   private readonly sunOcclusionDirectionScratch = new Vector3()
+  /** Two more scratch vectors, for stepping across the Sun's disc — see sunVisibleFraction. */
+  private readonly sunOcclusionRightScratch = new Vector3()
+  private readonly sunOcclusionUpScratch = new Vector3()
   /** Dedicated raycaster for isScreenPointOccluded — same "don't share a raycaster across
    * independent purposes" reasoning as sunOcclusionRaycaster above. */
   private readonly ufoOcclusionRaycaster = new Raycaster()
@@ -1019,6 +1073,32 @@ export class SceneRenderer {
     // in this scene.
     const gain = LENS_FLARE_BASE_GAIN * this.dazzleIntensity * this.sunCloudTransmission
     this.lensFlare.uniforms.uColorGain.value.setRGB(gain * tint[0], gain * tint[1], gain * tint[2])
+    this.applyDazzleStrength()
+  }
+
+  /**
+   * Sets how far the Sun's dazzle actually reaches, from how much of its light is arriving.
+   *
+   * The chain is every real thing standing between the Sun and the retina, and none of it is a
+   * dial: the atmosphere it shone through (five magnitudes' worth at the horizon — see
+   * atmosphericExtinctionMag), the cloud in front of it, and how much of its disc is behind the
+   * ground or a roof. The reader's own intensity dial multiplies all of that, and is the only part
+   * that is a preference.
+   *
+   * Because the veil goes as the inverse square of the angle, the blazing core's radius comes out
+   * as the SQUARE ROOT of this — so a Sun a hundred times dimmed at the horizon does not vanish,
+   * it shrinks tenfold, which is the sunset a reader was asking for and the opposite of a light
+   * being switched off.
+   */
+  private applyDazzleStrength(): void {
+    if (!this.lensFlare) return
+    const altitudeDeg = this.lastSunPosition?.altitudeDeg ?? -90
+    const arriving =
+      atmosphericTransmission(altitudeDeg) * this.sunCloudTransmission * this.dazzleIntensity * this.sunUnhiddenFraction
+    const tint = atmosphericTint(altitudeDeg)
+    this.lensFlare.uniforms.uDazzleColour.value.setRGB(tint[0], tint[1], tint[2])
+    this.lensFlare.uniforms.uVeilStrength.value =
+      GLARE_SATURATION_RADIUS_DEG ** 2 * GLARE_RENDER_WHITE_POINT * Math.max(0, arriving)
   }
 
   /** Shows/hides the compass labels built by setShowCompass — cheap visibility toggle, never
@@ -1461,27 +1541,54 @@ export class SceneRenderer {
       flare.mesh.visible = false
       return
     }
-    if (this.isSunOccluded()) {
-      // The flare mesh is a screen-space overlay (depthTest:false, see LensFlareEffect.ts's own
-      // doc comment on why — its geometry has no meaningful 3D depth of its own) so the GPU's own
-      // z-buffer can never hide it behind the ground/terrain/decor the way it does for the Sun's
-      // small disc mesh above. This manual raycast against the same occluders is what makes the
-      // dazzle actually disappear behind the horizon or a building instead of always bleeding
-      // through them.
+    // The flare mesh is a screen-space overlay (depthTest:false, see LensFlareEffect.ts's own doc
+    // comment on why — its geometry has no meaningful 3D depth of its own) so the GPU's own z-buffer
+    // can never hide it behind the ground/terrain/decor the way it does for the Sun's small disc
+    // mesh above. Raycasting the disc by hand is what makes the dazzle actually go behind the
+    // horizon or a building — and asking for a FRACTION rather than a yes is what makes it go
+    // rather than being cut.
+    const unhidden = this.sunVisibleFraction()
+    if (unhidden <= 0) {
       flare.mesh.visible = false
       return
     }
     flare.mesh.visible = true
+    this.sunUnhiddenFraction = unhidden
+    this.applyDazzleStrength()
     const projected = this.lensFlareScratch.copy(this.sunWorldPosition).project(this.camera)
     flare.uniforms.uLensPosition.value.set(projected.x, projected.y)
-    flare.uniforms.uResolution.value.set(this.renderer.domElement.width, this.renderer.domElement.height)
+    const width = this.renderer.domElement.width
+    const height = this.renderer.domElement.height
+    flare.uniforms.uResolution.value.set(width, height)
+    // The camera's field AS IT STANDS RIGHT NOW, which is not the recording's own: an equidistant
+    // recording renders through a deliberately widened camera and resamples afterwards (see
+    // EquidistantProjectionPass), and this runs from inside that widened pass. Reading the
+    // recording's field here instead put the dazzle's angles out by half.
+    flare.uniforms.uTanHalfFov.value = Math.tan((this.camera.fov * Math.PI) / 360)
   }
 
   /** True when the ground/terrain/decor sits between the camera and the Sun's real world
    * position — see updateLensFlarePosition's own doc comment for why this manual check exists at
    * all (the flare mesh it gates skips the z-buffer entirely). Cheap: a handful of occluder
    * objects (groundMesh always, terrainMesh once loaded, a few decor groups at most), one ray. */
-  private isSunOccluded(): boolean {
+  /**
+   * What fraction of the Sun's disc the ground, the terrain or a building is standing in front of.
+   *
+   * A yes-or-no answer put the dazzle out in one frame the moment the Sun's CENTRE crossed a
+   * horizon it takes two minutes to sink behind, and a reader saw exactly that: the light being cut
+   * rather than going out. The Sun is half a degree wide and its edge sets before its middle does,
+   * so the honest answer is a fraction — sampled across the disc, which is also what makes a
+   * rooftop edge slice the dazzle down instead of switching it off.
+   */
+  private sunVisibleFraction(): number {
+    let visible = 0
+    for (const sample of SUN_DISC_SAMPLES) {
+      if (!this.isSunOccluded(sample[0], sample[1])) visible++
+    }
+    return visible / SUN_DISC_SAMPLES.length
+  }
+
+  private isSunOccluded(offsetRightDeg = 0, offsetUpDeg = 0): boolean {
     // The scene's own matrices, not just the camera's. This runs BEFORE renderer.render(), which is
     // what normally refreshes them, so every object it tests would otherwise be where it was on the
     // PREVIOUS frame — fine while nothing moves, and wrong exactly while something does. The ground
@@ -1496,6 +1603,19 @@ export class SceneRenderer {
     const direction = this.sunOcclusionDirectionScratch.copy(this.sunWorldPosition).sub(this.camera.position)
     const distanceToSun = direction.length()
     direction.normalize()
+    if (offsetRightDeg !== 0 || offsetUpDeg !== 0) {
+      // A point of the disc's rim rather than its centre: nudged across the line of sight by its own
+      // angular radius, which is all "the edge of the Sun" means.
+      const toRadians = Math.PI / 180
+      const right = this.sunOcclusionRightScratch.set(direction.z, 0, -direction.x)
+      if (right.lengthSq() < 1e-9) right.set(1, 0, 0)
+      right.normalize()
+      const up = this.sunOcclusionUpScratch.crossVectors(right, direction).normalize()
+      direction
+        .addScaledVector(right, offsetRightDeg * toRadians)
+        .addScaledVector(up, offsetUpDeg * toRadians)
+        .normalize()
+    }
     this.sunOcclusionRaycaster.set(this.camera.position, direction)
     const hit = this.sunOcclusionRaycaster.intersectObjects(occluders, true)[0]
     return hit !== undefined && hit.distance < distanceToSun
