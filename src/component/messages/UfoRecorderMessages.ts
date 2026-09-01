@@ -238,12 +238,6 @@ export interface UfoRecorderMessages {
   /** Label of the field naming an actual audio recording of the sound, when one exists. */
   soundSrc: string
   soundSrcPlaceholder: string
-  /** Sets how strongly the optional procedural sun lens-flare artifacts show, framed as "how much
-   * was the witness looking through a camera/video device" since that's physically what produces
-   * them (a naked eye never sees lens-flare artifacts) — see LensFlareEffect.ts's own doc comment
-   * on why it's opt-in. A view preference, not sighting weather data (see UfoRecorderElement's
-   * cameraDeviceInput field). */
-  cameraDevice: string
   /** The decor kind added by the "+" button beside it — an aircraft crossing the sky is decor like
    * any other, just decor with a trajectory. */
   decorAircraft: string
@@ -404,7 +398,7 @@ export interface UfoRecorderMessages {
   lookAtDecor: string
   /** The empty entry of that picker: an object with no lamps at all, which is most scenery. */
   decorLightsNone: string
-  /** What the observation was made THROUGH — see Instrument.ts. Sighting data, unlike cameraDevice
+  /** What the observation was made THROUGH — see Instrument.ts. Sighting data, unlike the view
    * above: it changes the geometry of every shape, so it belongs in the file. */
   instrument: string
   /** Label on the dropdown listing the sighting's own decor objects — the Decor group itself no

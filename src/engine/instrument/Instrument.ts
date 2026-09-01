@@ -68,8 +68,11 @@ export interface InstrumentYears {
 export interface Instrument {
   /** Stable id — what a case file names, and what an unknown value falls back from. */
   id: string
-  /** Short name for the picker, and what a page shows to say how the sighting was recorded. */
-  name: string
+  /** Short name for the picker, and what a page shows to say how the sighting was recorded — in
+   * every language this project speaks, exactly as the satellite classes and the meteor showers
+   * are named (see satelliteCatalog.ts). A catalogue entry is DATA, and data that only exists in
+   * English puts English into a French page. */
+  name: { en: string; fr: string }
   /** How this instrument maps a direction onto its image. */
   projection: ProjectionKind
   /**
@@ -84,6 +87,18 @@ export interface Instrument {
   /** When such a device existed. Absent means the question does not arise: an eye, or a camera
    * stated so generically that no date bounds it. */
   years?: InstrumentYears
+  /**
+   * How strongly this device's own glass throws the ghosts, streaks and veils that a photograph of
+   * a bright light shows around it, and a witness's account of one does not.
+   *
+   * ZERO IS AN EYE, and it is the whole reason this is stated rather than inferred: those artefacts
+   * are made by reflections between the surfaces of a LENS, so what decides them is whether the
+   * sighting went through glass — not how bright the light was, and not a reader's taste. Every
+   * camera here carries the same one until a real device states its own, which is what the number
+   * of its elements and the age of its coatings would settle; the star is already derived
+   * separately, from the blades (see starPointsOf).
+   */
+  flare?: number
   /**
    * How many straight blades close down its aperture, if it has an aperture at all.
    *
@@ -110,12 +125,13 @@ export interface Instrument {
 export const INSTRUMENTS: Instrument[] = [
   {
     id: "eye",
-    name: "Naked eye",
+    name: { en: "Naked eye", fr: "Œil nu" },
+    flare: 0,
     projection: "equidistant"
   },
   {
     id: "rectilinear-lens",
-    name: "Camera, unknown device",
+    name: { en: "Camera, unknown device", fr: "Appareil, modèle inconnu" },
     projection: "rectilinear",
     // Six is the commonest count on ordinary lenses, and it gives the six-spiked Sun that everybody
     // recognises from a photograph. No frame and no dates: this is the entry for a case that says
@@ -129,7 +145,7 @@ export const INSTRUMENTS: Instrument[] = [
     // that is neither the scene's 16:9 nor a phone's tall rectangle. 28 x 28 mm of image behind a
     // 43 mm lens (the Instamatic 100's own), so 36 degrees of field each way.
     id: "instamatic-126",
-    name: "Instamatic, 126 film",
+    name: { en: "Instamatic, 126 film", fr: "Instamatic, film 126" },
     projection: "rectilinear",
     frame: { widthMm: 28, heightMm: 28, focalLengthMm: 43 },
     // The line ran from 1963 to 1988, and it is what most people photographing anything in the
@@ -142,7 +158,7 @@ export const INSTRUMENTS: Instrument[] = [
     // body, giving the narrow 27-degree vertical field that is why a photographed light so often
     // has nothing recognisable beside it in the frame.
     id: "slr-35mm-50",
-    name: "35 mm SLR, 50 mm lens",
+    name: { en: "35 mm SLR, 50 mm lens", fr: "Reflex 35 mm, objectif 50 mm" },
     projection: "rectilinear",
     frame: { widthMm: 36, heightMm: 24, focalLengthMm: 50 },
     // Dated from the Nikon F, which is when an SLR became an object an ordinary witness might own.
@@ -153,7 +169,7 @@ export const INSTRUMENTS: Instrument[] = [
     // A modern phone's main camera, landscape: about 7.6 x 5.7 mm of sensor behind a 5.7 mm lens —
     // the "26 mm equivalent" everybody quotes, which is 67 degrees across.
     id: "phone-landscape",
-    name: "Phone, held sideways",
+    name: { en: "Phone, held sideways", fr: "Téléphone, tenu couché" },
     projection: "rectilinear",
     frame: { widthMm: 7.6, heightMm: 5.7, focalLengthMm: 5.7 },
     // Dated from the first phone camera anybody would bother pointing at the sky.
@@ -167,7 +183,7 @@ export const INSTRUMENTS: Instrument[] = [
     // wide — 67 degrees up and down against 53 across — and a witness who filmed a light rising had
     // rather more sky above it and rather less horizon than the landscape entry would draw.
     id: "phone-portrait",
-    name: "Phone, held upright",
+    name: { en: "Phone, held upright", fr: "Téléphone, tenu debout" },
     projection: "rectilinear",
     frame: { widthMm: 5.7, heightMm: 7.6, focalLengthMm: 5.7 },
     years: { from: 2007 },
@@ -253,6 +269,20 @@ export class Instruments {
       instrument =>
         !instrument.years || (year >= instrument.years.from && (instrument.years.to === undefined || year <= instrument.years.to))
     )
+  }
+
+  /** What a lens throws when nothing about the device says otherwise — see Instrument.flare. */
+  static readonly LENS_FLARE_ARTIFACTS = 1
+
+  /**
+   * How strongly the lens-flare artefacts show for that instrument — the device's own value, or a
+   * lens's ordinary share, or nothing at all for something with no glass in it.
+   *
+   * This replaced a slider. How much flare a photograph carries is not a preference: it is whether
+   * the witness was holding a camera, which the instrument already says.
+   */
+  static flareArtifactsOf(instrument: Instrument): number {
+    return instrument.flare ?? Instruments.LENS_FLARE_ARTIFACTS
   }
 
   /**

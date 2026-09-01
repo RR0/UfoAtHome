@@ -800,11 +800,11 @@ export class SceneRenderer {
   /** How much of the Sun's disc is clear of the ground, the terrain and any building, 0 to 1 — see
    * sunVisibleFraction. */
   private sunUnhiddenFraction = 1
-  /** How strongly the optional lens-flare artifacts (star rays, ghost trail, hex ghosts, streaks,
-   * starburst) show on top of the Sun's always-on dazzle core — see setLensFlareArtifactIntensity.
-   * 0 means off, and off is what an eye is: these artifacts are made by a LENS, so this says whether
-   * the witness was looking through one and how strongly it drew them — not how bright the light
-   * was, which is the Sun's own business (see applyDazzleStrength). */
+  /** How strongly the lens-flare artifacts (ghost trail, hex ghosts, streaks) show on top of the
+   * Sun's always-on dazzle core — set from the INSTRUMENT (see setInstrument), never dialled. 0
+   * means off, and off is what an eye is: those artifacts are made by reflections between the
+   * surfaces of a lens, so what decides them is whether the sighting went through glass — not how
+   * bright the light was, which is the Sun's own business (see applyDazzleStrength). */
   private lensFlareArtifactIntensity = 0
   /** The Sun's current world position/visibility, as last set by setBodyMesh("sun", ...) — what
    * updateLensFlarePosition projects to screen space every render(). Kept separately from
@@ -1038,18 +1038,6 @@ export class SceneRenderer {
     this.showCompass = show
     this.disposeCompassLabels()
     if (show) this.buildCompassLabels()
-    this.render()
-  }
-
-  /** Sets how strongly the optional lens-flare *artifacts* (star rays, ghost trail, hex ghosts,
-   * streaks, starburst) show around the Sun's always-on dazzle core — see LensFlareEffect.ts's own
-   * doc comment for why only these artifacts are opt-in while the dazzle itself isn't. A no-op on
-   * the mesh/uniforms until the Sun has actually been visible at least once (setBodyMesh builds
-   * it) — harmless: the stored value still applies the moment it is. */
-  setLensFlareArtifactIntensity(intensity: number): void {
-    if (this.lensFlareArtifactIntensity === intensity) return
-    this.lensFlareArtifactIntensity = intensity
-    if (this.lensFlare) this.lensFlare.uniforms.uFlareIntensity.value = intensity
     this.render()
   }
 
@@ -1451,10 +1439,21 @@ export class SceneRenderer {
    */
   setInstrument(instrument: Instrument): void {
     this.projectionKind = instrument.projection
+    // Both of the things a bright light does differently through glass, and both derived from the
+    // device rather than dialled: the STAR from the aperture's blades (an even count gives that many
+    // spikes, an odd one twice as many, a round opening none at all), and the GHOSTS from the lens
+    // having surfaces to reflect between, which an eye has not. Neither was ever a preference —
+    // they are the difference between "he saw it" and "he photographed it".
     const points = Instruments.starPointsOf(instrument)
-    if (points === this.starPoints) return
+    const artifacts = Instruments.flareArtifactsOf(instrument)
+    if (points === this.starPoints && artifacts === this.lensFlareArtifactIntensity) return
     this.starPoints = points
-    if (this.lensFlare) this.lensFlare.uniforms.uStarPoints.value = points
+    this.lensFlareArtifactIntensity = artifacts
+    if (this.lensFlare) {
+      this.lensFlare.uniforms.uStarPoints.value = points
+      this.lensFlare.uniforms.uFlareIntensity.value = artifacts
+    }
+    this.render()
   }
 
   render(): void {

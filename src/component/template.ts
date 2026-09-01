@@ -22,7 +22,6 @@ export const html = `
     <label><span id="label-witness-last-name">Witness last name</span> <input id="witnessLastName" type="text"/></label>
     <label><span id="label-witness-first-names">Witness first names</span> <input id="witnessFirstNames" type="text" placeholder="comma-separated"/></label>
     <label><span id="label-instrument">Observed through</span> <select id="instrument"></select></label>
-    <label><span id="label-camera-device">Camera/video device</span> <input id="cameraDevice" type="range" min="0" max="2" step="0.1" value="0"/></label>
     <button id="add-decor-witness" type="button">Add witness</button>
     <label><span id="label-decor-sighting-url">Witness's own recording URL</span> <input id="decorSightingUrl" type="url" placeholder="https://…/sighting.json"/></label>
   </div>

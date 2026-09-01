@@ -116,7 +116,7 @@ const DEFAULT_OBSERVER_POSE: ObserverPose = { lat: 0, lng: 0, elevationM: 0, hea
  */
 export class SceneElement extends HTMLElement {
   static get observedAttributes(): string[] {
-    return ["src", "star-catalog-src", "show-compass", "lens-flare-intensity"]
+    return ["src", "star-catalog-src", "show-compass"]
   }
 
   private readonly shadow: ShadowRoot
@@ -357,15 +357,6 @@ export class SceneElement extends HTMLElement {
     }
     if (name === "show-compass" && newValue !== oldValue) {
       this.sceneRenderer.setShowCompass(this.hasAttribute("show-compass"))
-    }
-    if (name === "lens-flare-intensity" && newValue !== oldValue) {
-      // How strongly the CAMERA's own artifacts show around the Sun's dazzle — the one thing about
-      // that light which is a fact about the witness rather than about the sky: whether they were
-      // looking through a lens. How BRIGHT the dazzle is has no attribute any more, because it is
-      // no longer anybody's to set — it is the Sun's photometry (see SceneRenderer.
-      // applyDazzleStrength). Absent/unparseable defaults to 0 — no artifacts, no camera.
-      const parsed = newValue === null ? NaN : parseFloat(newValue)
-      this.sceneRenderer.setLensFlareArtifactIntensity(Number.isFinite(parsed) ? parsed : 0)
     }
   }
 

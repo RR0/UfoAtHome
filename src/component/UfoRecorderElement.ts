@@ -326,13 +326,6 @@ export class UfoRecorderElement extends HTMLElement {
   /** The seekable span the current weather track was laid out against — see
    * ensureWeatherTrackSpan for the freeze this catches. */
   private weatherTrackSpan?: number
-  // A view preference, not sighting data — it isn't read by getWeather()/restored from a loaded
-  // sighting, it just sets SceneElement's own lens-flare-intensity attribute. It survives, where
-  // the brightness dial beside it did not, because it is not about the light: it says whether the
-  // witness was looking through a LENS, which is the only thing that makes those artifacts. How
-  // bright the Sun's blaze reads is the Sun's own photometry now — see SceneRenderer.
-  // applyDazzleStrength — and dimming or brightening it by hand could only make the scene lie
-  // about the one thing a reader is there to judge.
   private readonly soundKindSelect: HTMLSelectElement
   private readonly soundVolumeInput: HTMLInputElement
   private readonly soundPitchInput: HTMLInputElement
@@ -345,7 +338,6 @@ export class UfoRecorderElement extends HTMLElement {
    * SOUND_KINDS in script (see buildSoundKindOptions), not from markup with per-option ids. */
   private readonly soundKindOptions = new Map<SoundKind, HTMLOptionElement>()
   private soundPreviewTimer?: ReturnType<typeof setTimeout>
-  private readonly cameraDeviceInput: HTMLInputElement
   /** Which instrument the sighting was made through — sighting data, not a view preference, and the
    * one control here that changes the geometry of every shape (see Instrument.ts). */
   private readonly instrumentSelect: HTMLSelectElement
@@ -411,7 +403,6 @@ export class UfoRecorderElement extends HTMLElement {
   private readonly labelSoundPitch: HTMLElement
   private readonly labelSoundSrc: HTMLElement
   private readonly labelInstrument: HTMLElement
-  private readonly labelCameraDevice: HTMLElement
   private readonly optionPrecipitationNone: HTMLElement
   private readonly optionPrecipitationRain: HTMLElement
   private readonly optionPrecipitationSnow: HTMLElement
@@ -738,7 +729,6 @@ export class UfoRecorderElement extends HTMLElement {
     this.soundSrcInput = this.shadow.getElementById("soundSrc") as HTMLInputElement
     this.soundFields = [this.soundKindSelect, this.soundVolumeInput, this.soundPitchInput, this.soundSrcInput]
     this.buildSoundKindOptions()
-    this.cameraDeviceInput = this.shadow.getElementById("cameraDevice") as HTMLInputElement
     this.instrumentSelect = this.shadow.getElementById("instrument") as HTMLSelectElement
     this.refreshInstrumentOptions()
     this.labelColor = this.shadow.getElementById("label-color")!
@@ -797,7 +787,6 @@ export class UfoRecorderElement extends HTMLElement {
     this.labelStorm = this.shadow.getElementById("label-storm")!
     this.labelWeatherInferred = this.shadow.getElementById("label-weather-inferred")!
     this.labelInstrument = this.shadow.getElementById("label-instrument")!
-    this.labelCameraDevice = this.shadow.getElementById("label-camera-device")!
     this.optionPrecipitationNone = this.shadow.getElementById("option-precipitation-none")!
     this.optionPrecipitationRain = this.shadow.getElementById("option-precipitation-rain")!
     this.optionPrecipitationSnow = this.shadow.getElementById("option-precipitation-snow")!
@@ -1036,9 +1025,6 @@ export class UfoRecorderElement extends HTMLElement {
       this.ufoElement.refresh()
       this.dispatchEvent(new CustomEvent("sightingchange"))
     })
-    this.cameraDeviceInput.addEventListener("input", () =>
-      this.sceneElement.setAttribute("lens-flare-intensity", this.cameraDeviceInput.value)
-    )
     this.utcOffsetInput.addEventListener("input", () => this.updateUtcOffset())
     this.timeZoneSelect.addEventListener("change", () => {
       // Picked by hand: from here on it is the author's, and moving the place no longer touches it.
@@ -2722,9 +2708,10 @@ export class UfoRecorderElement extends HTMLElement {
     for (const instrument of offered) {
       const option = document.createElement("option")
       option.value = instrument.id
+      const name = instrument.name[this.showerLanguage()]
       option.textContent = available.includes(instrument)
-        ? instrument.name
-        : this.messages.instrumentOutOfPeriod.replace("{name}", instrument.name)
+        ? name
+        : this.messages.instrumentOutOfPeriod.replace("{name}", name)
       this.instrumentSelect.appendChild(option)
     }
     this.instrumentSelect.value = offered.some(instrument => instrument.id === selected) ? selected : current.id
@@ -4078,7 +4065,6 @@ export class UfoRecorderElement extends HTMLElement {
     this.soundSrcInput.placeholder = messages.soundSrcPlaceholder
     for (const [kind, option] of this.soundKindOptions) option.textContent = this.soundKindLabel(kind, messages)
     this.labelInstrument.textContent = messages.instrument
-    this.labelCameraDevice.textContent = messages.cameraDevice
     this.loopButton.title = messages.autoReplay
     this.loopButton.setAttribute("aria-label", messages.autoReplay)
     this.setRecordButtonLabel(this.isRecording)

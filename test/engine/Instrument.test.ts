@@ -17,17 +17,17 @@ describe("Instruments", () => {
       // Each straight blade throws a pair of spikes across itself. With an even count the opposite
       // blades are parallel and their spikes land on each other; with an odd count none are, so
       // every blade keeps its own pair. Six blades, six spikes; five blades, ten.
-      expect(Instruments.starPointsOf({ id: "x", name: "x", projection: "rectilinear", apertureBlades: 6 })).toBe(6)
-      expect(Instruments.starPointsOf({ id: "x", name: "x", projection: "rectilinear", apertureBlades: 8 })).toBe(8)
-      expect(Instruments.starPointsOf({ id: "x", name: "x", projection: "rectilinear", apertureBlades: 5 })).toBe(10)
-      expect(Instruments.starPointsOf({ id: "x", name: "x", projection: "rectilinear", apertureBlades: 7 })).toBe(14)
+      expect(Instruments.starPointsOf({ id: "x", name: { en: "x", fr: "x" }, projection: "rectilinear", apertureBlades: 6 })).toBe(6)
+      expect(Instruments.starPointsOf({ id: "x", name: { en: "x", fr: "x" }, projection: "rectilinear", apertureBlades: 8 })).toBe(8)
+      expect(Instruments.starPointsOf({ id: "x", name: { en: "x", fr: "x" }, projection: "rectilinear", apertureBlades: 5 })).toBe(10)
+      expect(Instruments.starPointsOf({ id: "x", name: { en: "x", fr: "x" }, projection: "rectilinear", apertureBlades: 7 })).toBe(14)
     })
 
     it("treats an aperture too round to have corners as having none", () => {
       // Two blades cannot close a polygon, and a lens shot wide open has swung its blades clear of
       // the beam entirely — both are round openings, and a round opening has no edge to diffract at.
-      expect(Instruments.starPointsOf({ id: "x", name: "x", projection: "rectilinear", apertureBlades: 0 })).toBe(0)
-      expect(Instruments.starPointsOf({ id: "x", name: "x", projection: "rectilinear", apertureBlades: 2 })).toBe(0)
+      expect(Instruments.starPointsOf({ id: "x", name: { en: "x", fr: "x" }, projection: "rectilinear", apertureBlades: 0 })).toBe(0)
+      expect(Instruments.starPointsOf({ id: "x", name: { en: "x", fr: "x" }, projection: "rectilinear", apertureBlades: 2 })).toBe(0)
     })
 
     it("gives the camera preset a real count, so a photographed Sun is starred and a seen one is not", () => {
