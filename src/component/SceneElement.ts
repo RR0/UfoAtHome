@@ -29,6 +29,7 @@ import { Sporadics } from "../engine/astronomy/Sporadics.js"
 import { SizeEstimate } from "../engine/shape/SizeEstimate.js"
 import type { MeterRange } from "../engine/shape/SizeEstimate.js"
 import { ApparentSize } from "../engine/shape/ApparentSize.js"
+import { Instruments } from "../engine/instrument/Instrument.js"
 import { ImageProjection } from "../engine/instrument/ImageProjection.js"
 import { SightingShapes } from "../engine/persistence/SightingShapes.js"
 
@@ -422,6 +423,8 @@ export class SceneElement extends HTMLElement {
 
   set sightingData(json: SightingRecordingJson) {
     this.ufoElement.sightingData = json
+    // A loaded recording may have been made through something with a format of its own.
+    this.applyFrameFormat()
     this.lastTimeMs = 0
     // Also resolves+applies weather at t=0 — see updateAstronomy's own doc comment.
     this.updateAstronomy(0)
@@ -439,6 +442,28 @@ export class SceneElement extends HTMLElement {
    * Same "expose the nested renderer to a composing wrapper" arrangement as the getters above. */
   setTerrainProviders(providers: TerrainProviders): void {
     this.sceneRenderer.setTerrainProviders(providers)
+  }
+
+  /**
+   * Gives the rendered frame the shape of the picture this recording was made in — the same format
+   * the shape canvas takes (see UfoElement.applyFrameFormat), so the sky and the shapes drawn over
+   * it are one picture rather than two.
+   *
+   * Letterboxed rather than stretched, which is what the frame box already did for fullscreen: a
+   * square 126 frame or a phone held upright leaves the stage's own space unused to either side,
+   * and that emptiness is honest — it is sky the device never recorded.
+   *
+   * Public because a composing editor changes the instrument from outside (see
+   * UfoRecorderElement's instrument picker) and the frame has to follow at that moment; everything
+   * else that changes it goes through this element's own load path.
+   */
+  applyFrameFormat(): void {
+    const instrument = this.ufoElement.sighting.instrument
+    const height = ApparentSize.CANVAS_HEIGHT_PX
+    const width = Instruments.frameWidthPx(instrument, height)
+    // The ResizeObserver on this very element then resizes the 3D canvas and its camera's aspect,
+    // so nothing else has to be told.
+    this.frameElement.style.setProperty("--frame-aspect", `${width} / ${height}`)
   }
 
   private resizeToStage(): void {
@@ -773,8 +798,7 @@ export class SceneElement extends HTMLElement {
    * and a stale projection is a silently wrong size. */
   private projectionAt(t: number): ImageProjection {
     const sighting = this.ufoElement.sighting
-    const fovDeg = resolveObserverPoseAt(sighting, t)?.fovDeg ?? SightingShapes.DEFAULT_FOV_DEG
-    return ImageProjection.of(sighting.instrument, ApparentSize.CANVAS_HEIGHT_PX, fovDeg)
+    return ImageProjection.of(sighting.instrument, ApparentSize.CANVAS_HEIGHT_PX, SightingShapes.fovOf(sighting, t))
   }
 
   private sizeEstimateOf(sourceId: string): SizeEstimate {

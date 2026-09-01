@@ -227,6 +227,19 @@ export class Instruments {
   }
 
   /**
+   * How wide the drawing space is for that instrument, in the fixed pixels every shape's bounds are
+   * expressed in.
+   *
+   * THE HEIGHT IS THE INVARIANT, and that is what keeps a change of instrument from moving anything
+   * vertically: the image's full height is exactly the field (see ImageProjection), so holding it
+   * fixed means one degree is the same number of pixels before and after, and only how much sky
+   * stands to the sides changes. A square frame is 360 wide, a phone held upright 270, an eye 640.
+   */
+  static frameWidthPx(instrument: Instrument, heightPx: number): number {
+    return Math.round(heightPx * Instruments.aspectOf(instrument))
+  }
+
+  /**
    * Every instrument that existed in that year — what a picker should offer, and the reason to date
    * the catalogue at all.
    *

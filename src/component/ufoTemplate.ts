@@ -35,10 +35,17 @@ export const css = `
    instant .stage's height actually exceeds .frame's. Harmless in the normal standalone case:
    .stage's height already matches .frame's exactly there (see above), so there's no extra
    space to center within regardless. */
+/* The WIDGET's own box, which does not move when the instrument does. A camera's format changes
+   the shape of the PICTURE, not the shape of the page: a square 126 frame or a phone held upright
+   is letterboxed inside this box, leaving space to either side that is honest — it is sky the
+   device never recorded. Without a definite height here the frame would size the widget instead,
+   and choosing an Instamatic would double the height of the page. Ignored, as it should be,
+   wherever a real height is imposed (fullscreen, or nested inside <rr0-scene>). */
 .stage {
   position: relative;
   width: 100%;
   height: 100%;
+  aspect-ratio: 640 / 360;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -60,10 +67,16 @@ export const css = `
    of width/height is the tighter constraint from the other — a real "contain, centered" fit,
    not just a single-axis cap that can let the other axis overflow and crop instead of shrink. */
 .frame {
-  width: 100%;
+  /* Contained inside the stage's own box rather than sizing it: the HEIGHT is taken from the
+     stage and the width follows the format, so a square or upright frame leaves space to either
+     side instead of making the widget taller. Width first (100%) with a max-height cap would not
+     do it — a max-height clamp does not shrink a definite width back, it just breaks the ratio. */
+  height: 100%;
+  width: auto;
   max-width: 100%;
-  aspect-ratio: 640 / 360;
-  max-height: 100%;
+  /* The instrument's own format — see Instruments.aspectOf. An eye and an unidentified camera
+     have no frame of their own, and fall back to the shape this project draws its scene in. */
+  aspect-ratio: var(--frame-aspect, 640 / 360);
 }
 canvas {
   display: block;

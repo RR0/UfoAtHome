@@ -1,4 +1,5 @@
 import { html, css } from "./ufoTemplate.js"
+import { Instruments } from "../engine/instrument/Instrument.js"
 import { Sighting, resolveSoundAt, sightingDurationMs, sightingTimeToMs } from "../engine/model/Sighting.js"
 import type { SightingTime } from "../engine/model/Sighting.js"
 import { Player } from "../engine/playback/Player.js"
@@ -443,6 +444,7 @@ export class UfoElement extends HTMLElement {
    * (e.g. UfoRecorderElement adding keyframes while recording).
    */
   refresh(): void {
+    this.applyFrameFormat()
     // Re-derives the real start/duration too: editing the observation's own start time (an EDTF
     // field in the recorder) mutates event.time in place, and the clock the player shows is built
     // from a cached copy of it — without this, changing "Observation start" left the seek bar's
@@ -450,6 +452,27 @@ export class UfoElement extends HTMLElement {
     this.updateTimeLabels()
     this.seekInput.max = String(this.player.seekableDuration)
     this.player.seek(this.player.time)
+  }
+
+  /**
+   * Gives the canvas the shape of the picture this recording was actually made in — see
+   * Instruments.frameWidthPx.
+   *
+   * The height never moves, so one degree stays the same number of pixels and nothing a witness
+   * drew shifts up or down; only how much sky stands to either side changes. A square 126 frame is
+   * as tall as an eye's and half as wide; a phone held upright is narrower still.
+   *
+   * ONLY WHEN IT ACTUALLY CHANGES: assigning to canvas.width resets the drawing surface, so doing
+   * it unconditionally would clear the canvas on every single frame of playback.
+   */
+  private applyFrameFormat(): void {
+    const width = Instruments.frameWidthPx(this.currentSighting.instrument, this.canvas.height)
+    if (this.canvas.width === width) return
+    this.canvas.width = width
+    // The displayed box has to follow, or a 360-wide canvas would be stretched back out to the
+    // sixteen-by-nine the CSS was holding it at, and the square frame would not look square.
+    const frame = this.canvas.parentElement as HTMLElement | null
+    frame?.style.setProperty("--frame-aspect", `${width} / ${this.canvas.height}`)
   }
 
   /** Converts a pointer event's CSS-pixel position into the canvas's fixed internal 640x360

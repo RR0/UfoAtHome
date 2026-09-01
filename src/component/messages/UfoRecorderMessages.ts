@@ -324,6 +324,10 @@ export interface UfoRecorderMessages {
   skyOpticsCircumzenithal: string
   skyOpticsCircumhorizontal: string
   skyOpticsPillar: string
+  /** A device the recording names although its own dates exclude it — offered anyway, and said to
+   * be out of period rather than dropped: dropping it would silently re-instrument a testimony.
+   * {name} is the device's own name. */
+  instrumentOutOfPeriod: string
   /** The label on the control for how steadily the crystals were falling. */
   iceCrystalAlignment: string
   /** No ice cloud at all, so none of it could have happened. The commonest answer. */

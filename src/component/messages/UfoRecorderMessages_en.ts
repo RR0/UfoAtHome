@@ -119,6 +119,7 @@ export const ufoRecorderMessages_en: UfoRecorderMessages = {
   weatherLookupFailed: "Weather records temporarily unreachable",
   cloudCover: "Cloud cover",
   highCloudCover: "Ice cloud (cirrus)",
+  instrumentOutOfPeriod: "{name} — not of this date",
   iceCrystalAlignment: "Crystal alignment",
   cloudDarkness: "Cloud darkness",
   precipitationType: "Precipitation",

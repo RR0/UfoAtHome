@@ -6,7 +6,8 @@ import { RafSamplingClock } from "../engine/record/SamplingClock.js"
 import { createShape, moveShapeTo } from "../engine/shape/Shape.js"
 import { ApparentSize } from "../engine/shape/ApparentSize.js"
 import { ImageProjection } from "../engine/instrument/ImageProjection.js"
-import { INSTRUMENTS } from "../engine/instrument/Instrument.js"
+import { Instruments } from "../engine/instrument/Instrument.js"
+import type { Instrument } from "../engine/instrument/Instrument.js"
 import { LightRigs } from "../engine/model/LightRig.js"
 import { DARK_SKY_LIMITING_MAGNITUDE, MeteorShowers } from "../engine/astronomy/MeteorShowers.js"
 import { Comets } from "../engine/astronomy/Comets.js"
@@ -112,10 +113,10 @@ const MAX_LEGAL_SOLAR_OFFSET_GAP_HOURS = 3
  * across the canvas's own 640px internal width is ~130deg, a reasonable full sweep without being
  * so twitchy that fine-tuning a heading/pitch by hand becomes fiddly. */
 const CAMERA_DRAG_DEG_PER_PX = 0.2
-/** The vertical field of view every pose this recorder writes declares — matching
- * ObserverPose.fovDeg's own default. Also what the apparent-size math projects through whenever a
- * recording has no pose of its own yet (see currentFovDeg), so the two can never disagree. */
-const WITNESS_FOV_DEG = 60
+/** How close two fields have to be to count as the same one, degrees. Only ever used to tell a
+ * field NOBODY STATED — one this recorder wrote from an instrument's own optics — from one somebody
+ * meant, so that changing the instrument may retune the first and must never touch the second. */
+const SAME_FIELD_EPSILON_DEG = 0.01
 
 /** A standing witness's eye height, the same 1.6 m SceneRenderer puts the camera at — what a pitch
  * towards a decor object has to be measured FROM (see lookAtDecor). */
@@ -739,14 +740,7 @@ export class UfoRecorderElement extends HTMLElement {
     this.buildSoundKindOptions()
     this.cameraDeviceInput = this.shadow.getElementById("cameraDevice") as HTMLInputElement
     this.instrumentSelect = this.shadow.getElementById("instrument") as HTMLSelectElement
-    // Options ARE the registry, exactly as the source pickers are (see sourcePicker): adding a real
-    // dated camera must never also mean adding markup and an element id for it.
-    for (const instrument of INSTRUMENTS) {
-      const option = document.createElement("option")
-      option.value = instrument.id
-      option.textContent = instrument.name
-      this.instrumentSelect.appendChild(option)
-    }
+    this.refreshInstrumentOptions()
     this.labelColor = this.shadow.getElementById("label-color")!
     this.labelTransparency = this.shadow.getElementById("label-transparency")!
     this.labelHalo = this.shadow.getElementById("label-halo")!
@@ -1027,7 +1021,18 @@ export class UfoRecorderElement extends HTMLElement {
       // Not just a resize: every stated angle now lands at a different place AND a different size
       // on the image, and a shape drawn in several parts comes apart unless both follow — see
       // SightingShapes.reproject.
-      SightingShapes.reproject(this.ufoElement.sighting, previous)
+      // Captured BEFORE the field is retuned, since the shapes on screen were drawn under it.
+      const fieldBefore = new Map(
+        this.ufoElement.sighting.timeline.allKeyframes.map(keyframe => [
+          keyframe.t,
+          SightingShapes.fovOf(this.ufoElement.sighting, keyframe.t)
+        ])
+      )
+      this.retuneFieldOfView(previous)
+      SightingShapes.reproject(this.ufoElement.sighting, previous, fieldBefore)
+      // The picture's own shape changes with it — a square 126 frame, a phone held upright — and
+      // both the sky and the shapes drawn over it have to take it at the same moment.
+      this.sceneElement.applyFrameFormat()
       this.ufoElement.refresh()
       this.dispatchEvent(new CustomEvent("sightingchange"))
     })
@@ -1563,7 +1568,10 @@ export class UfoRecorderElement extends HTMLElement {
     if (nothingSet) {
       witnessTrack.removeKeyframeAt(t)
     } else {
-      witnessTrack.addKeyframe(t, { lat, lng, elevationM, headingDeg, pitchDeg, fovDeg: WITNESS_FOV_DEG })
+      // The instrument's own field, not a constant: sixty degrees for an eye, twenty-seven through
+      // a 50 mm lens (see Instruments.fieldOfViewDeg).
+      const fovDeg = this.currentFovDeg()
+      witnessTrack.addKeyframe(t, { lat, lng, elevationM, headingDeg, pitchDeg, fovDeg })
     }
     // Neither field affects the 2D shape canvas, so this refresh() is only for its side effect —
     // it's what makes this edit surface as a "timeupdate" (see the constructor's listener), the
@@ -2538,6 +2546,8 @@ export class UfoRecorderElement extends HTMLElement {
     // author watches it narrow as the object goes behind the first building.
     this.refreshRealSize()
     this.refreshSkyCandidates()
+    // The date decides which devices are offered — see refreshInstrumentOptions.
+    this.refreshInstrumentOptions()
     this.ufoElement.selectedSourceIds = this.selectedSourceIds
     // Disabled once deleting the whole selection would leave nothing behind (a recording always
     // needs at least one shape — see deleteShape()'s own doc comment), for a source that's only a
@@ -2689,11 +2699,66 @@ export class UfoRecorderElement extends HTMLElement {
     return shape.points.map(point => ({ x: point.x * scaleX, y: point.y * scaleY }))
   }
 
-  /** The field of view the witness's own pose declares at the current playhead — what the
-   * apparent-size math must project through, rather than a fixed 60 degrees, so a recording that
-   * ever records a different fov stays self-consistent. */
+  /**
+   * Offers the devices that existed when the sighting happened, and nothing else.
+   *
+   * Options ARE the registry, exactly as the source pickers are (see sourcePicker): adding a real
+   * dated camera must never also mean adding markup and an element id for it. What the date adds is
+   * a refusal — nobody photographed anything with a telephone in 1964 — which is the same kind of
+   * negative statement the satellite line makes, and as useful.
+   *
+   * A device the recording ALREADY names is always offered even when its own dates exclude it, and
+   * said to be out of its period rather than dropped. Dropping it would silently re-instrument a
+   * testimony; saying so leaves the reader to judge, which is this project's whole posture.
+   */
+  private refreshInstrumentOptions(): void {
+    const sighting = this.ufoElement.sighting
+    const year = sighting.event.time?.year
+    const available = Instruments.availableAt(year)
+    const current = sighting.instrument
+    const offered = available.includes(current) ? available : [...available, current]
+    const selected = this.instrumentSelect.value || current.id
+    this.instrumentSelect.replaceChildren()
+    for (const instrument of offered) {
+      const option = document.createElement("option")
+      option.value = instrument.id
+      option.textContent = available.includes(instrument)
+        ? instrument.name
+        : this.messages.instrumentOutOfPeriod.replace("{name}", instrument.name)
+      this.instrumentSelect.appendChild(option)
+    }
+    this.instrumentSelect.value = offered.some(instrument => instrument.id === selected) ? selected : current.id
+  }
+
+  /**
+   * Moves every pose whose field was never really stated onto the new instrument's own field.
+   *
+   * The rule, and it is the whole reason this is not a blanket overwrite: a field that still reads
+   * as the OLD instrument's is one nobody chose — this recorder wrote it from that instrument's
+   * optics — so it follows the change. Any other value was meant by somebody (a zoom, binoculars,
+   * a hand-authored file), and a picker must not quietly edit a testimony. Same distinction the
+   * weather fields draw between a looked-up reading and a witness's own declaration.
+   */
+  private retuneFieldOfView(previous: Instrument): void {
+    const sighting = this.ufoElement.sighting
+    const was = Instruments.fieldOfViewDeg(previous)
+    const now = Instruments.fieldOfViewDeg(sighting.instrument)
+    for (const keyframe of [...sighting.witnessTrack.allKeyframes]) {
+      if (Math.abs(keyframe.pose.fovDeg - was) > SAME_FIELD_EPSILON_DEG) continue
+      sighting.witnessTrack.addKeyframe(keyframe.t, { ...keyframe.pose, fovDeg: now })
+    }
+  }
+
+  /** The field of view the witness's own pose declares at the current playhead, falling back to
+   * whatever the INSTRUMENT takes in — what the apparent-size math must project through, rather
+   * than a fixed sixty degrees, so a recording that states a different field (a zoom, a pair of
+   * binoculars) stays self-consistent. */
   private currentFovDeg(): number {
-    return resolveObserverPoseAt(this.ufoElement.sighting, this.ufoElement.currentTime)?.fovDeg ?? WITNESS_FOV_DEG
+    const sighting = this.ufoElement.sighting
+    return (
+      resolveObserverPoseAt(sighting, this.ufoElement.currentTime)?.fovDeg ??
+      Instruments.fieldOfViewDeg(sighting.instrument)
+    )
   }
 
   /** How this recording's own instrument turns an angle into a pixel at the playhead — an eye and a

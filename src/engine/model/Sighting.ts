@@ -308,7 +308,6 @@ export class Sighting {
  * not "facing north"). Mirrors DEFAULT_ALTITUDE_DEG's role as SceneElement's existing fallback. */
 const DEFAULT_ELEVATION_M = 0
 const DEFAULT_PITCH_DEG = 0
-const DEFAULT_FOV_DEG = 60
 
 /** Resolves the observer's pose at t: prefers witnessTrack (interpolated), falls back to the
  * legacy static place[0] when the track has no keyframes. undefined only when neither exists. */
@@ -323,7 +322,10 @@ export function resolveObserverPoseAt(sighting: Sighting, t: number): ObserverPo
     elevationM: DEFAULT_ELEVATION_M,
     headingDeg: undefined,
     pitchDeg: DEFAULT_PITCH_DEG,
-    fovDeg: DEFAULT_FOV_DEG
+    // The instrument's own field, not a constant: a sighting photographed through a 50 mm lens took
+    // in 27 degrees and one simply looked at took in sixty, and neither is a preference. A
+    // recording that states its own field per keyframe overrides this, which is the branch above.
+    fovDeg: Instruments.fieldOfViewDeg(sighting.instrument)
   }
 }
 

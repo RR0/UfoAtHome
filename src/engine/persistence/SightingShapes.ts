@@ -2,6 +2,7 @@ import { ApparentSize } from "../shape/ApparentSize.js"
 import { ImageProjection } from "../instrument/ImageProjection.js"
 import type { Shape } from "../shape/Shape.js"
 import { Sighting, resolveObserverPoseAt } from "../model/Sighting.js"
+import { Instruments } from "../instrument/Instrument.js"
 import type { Instrument } from "../instrument/Instrument.js"
 
 /**
@@ -21,10 +22,13 @@ import type { Instrument } from "../instrument/Instrument.js"
  * ImageProjection).
  */
 export class SightingShapes {
-  /** What a recording without any observer track is assumed to have been seen through — the
-   * unaided human field of view the recorder itself writes (see UfoRecorderElement's own
-   * WITNESS_FOV_DEG). Only ever reached by a file too old to carry a witnessTrack. */
-  static readonly DEFAULT_FOV_DEG = 60
+  /** What a recording without any observer track is assumed to have been seen through: its own
+   * INSTRUMENT's field (see Instruments.fieldOfViewDeg), which for an eye is the unaided sixty
+   * degrees and for a 50 mm lens is twenty-seven. Only ever reached by a file too old to carry a
+   * witnessTrack, or one that never stated a pose. */
+  static fovOf(sighting: Sighting, t: number): number {
+    return resolveObserverPoseAt(sighting, t)?.fovDeg ?? Instruments.fieldOfViewDeg(sighting.instrument)
+  }
 
   /**
    * Fills in every shape's angular extent from the box it is currently drawn as — run just before
@@ -84,25 +88,38 @@ export class SightingShapes {
    * Radially, about the centre of the image: an angle off-axis is an angle off-axis whichever way
    * the point lies, and only its distance from the axis is projection-dependent.
    */
-  static reproject(sighting: Sighting, previous: Instrument): void {
-    const halfWidth = ApparentSize.CANVAS_WIDTH_PX / 2
+  static reproject(sighting: Sighting, previous: Instrument, fieldBefore?: ReadonlyMap<number, number>): void {
+    // The two frames are not the same size. A change of instrument is a change of FORMAT as well as
+    // of projection — the same silicon held upright is 270 pixels wide where an eye's frame is 640 —
+    // and every stored bound is measured from its own frame's left edge. So a shape is taken out of
+    // the old centre and put back around the new one; leaving the centre where it was would slide
+    // every shape sideways by half the difference, which is a testimony being edited by a picker.
+    // The HEIGHT never moves (see Instruments.frameWidthPx), so nothing shifts vertically.
+    const fromHalfWidth = Instruments.frameWidthPx(previous, ApparentSize.CANVAS_HEIGHT_PX) / 2
+    const toHalfWidth = Instruments.frameWidthPx(sighting.instrument, ApparentSize.CANVAS_HEIGHT_PX) / 2
     const halfHeight = ApparentSize.CANVAS_HEIGHT_PX / 2
     for (const keyframe of [...sighting.timeline.allKeyframes]) {
-      const fovDeg = resolveObserverPoseAt(sighting, keyframe.t)?.fovDeg ?? this.DEFAULT_FOV_DEG
-      const from = ImageProjection.of(previous, ApparentSize.CANVAS_HEIGHT_PX, fovDeg)
-      const to = ImageProjection.of(sighting.instrument, ApparentSize.CANVAS_HEIGHT_PX, fovDeg)
+      // TWO fields, not one, and getting this wrong moved every off-centre shape in the sky. An
+      // instrument brings its own field with it (see Instruments.fieldOfViewDeg), so by the time
+      // this runs the recording may already state a different one than the pixels were drawn under.
+      // The old pixels have to be read under the OLD field and written under the new: read both
+      // under the new one and a shape 19 degrees off-axis comes out at 9, which is the reconstruction
+      // quietly moving what a witness drew.
+      const toFovDeg = this.fovOf(sighting, keyframe.t)
+      const fromFovDeg = fieldBefore?.get(keyframe.t) ?? toFovDeg
+      const from = ImageProjection.of(previous, ApparentSize.CANVAS_HEIGHT_PX, fromFovDeg)
+      const to = ImageProjection.of(sighting.instrument, ApparentSize.CANVAS_HEIGHT_PX, toFovDeg)
       sighting.timeline.addKeyframe(
         keyframe.t,
         keyframe.shapes.map(state => {
           const { bounds } = state.shape
-          const dx = bounds.x + bounds.width / 2 - halfWidth
+          const dx = bounds.x + bounds.width / 2 - fromHalfWidth
           const dy = bounds.y + bounds.height / 2 - halfHeight
           const radius = Math.hypot(dx, dy)
-          if (radius === 0) return state
-          const scale = to.angleDegToRadiusPx(from.radiusPxToAngleDeg(radius)) / radius
+          const scale = radius === 0 ? 1 : to.angleDegToRadiusPx(from.radiusPxToAngleDeg(radius)) / radius
           const moved = {
             ...bounds,
-            x: halfWidth + dx * scale - bounds.width / 2,
+            x: toHalfWidth + dx * scale - bounds.width / 2,
             y: halfHeight + dy * scale - bounds.height / 2
           }
           return { ...state, shape: { ...state.shape, bounds: moved } }
@@ -121,7 +138,7 @@ export class SightingShapes {
   private static eachKeyframe(sighting: Sighting, transform: (shape: Shape, projection: ImageProjection) => Shape): void {
     const { timeline } = sighting
     for (const keyframe of [...timeline.allKeyframes]) {
-      const fovDeg = resolveObserverPoseAt(sighting, keyframe.t)?.fovDeg ?? this.DEFAULT_FOV_DEG
+      const fovDeg = this.fovOf(sighting, keyframe.t)
       const projection = ImageProjection.of(sighting.instrument, ApparentSize.CANVAS_HEIGHT_PX, fovDeg)
       timeline.addKeyframe(
         keyframe.t,

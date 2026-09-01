@@ -160,6 +160,21 @@ nested element's `fullscreenTarget` to its own outer stage for this.
 <rr0-scene src="sighting.json"></rr0-scene>
 ```
 
+**What the sighting was made through.** An eye and a camera are not the same claim, and the difference
+is geometric: a lens maps a direction as `tan θ` (a building 33 degrees off-centre comes out 42% wider
+than the angle it subtends), while an eye perceives an angle as an angle wherever it falls — so the
+scene renders a naked-eye sighting through an equidistant resampling pass and a photographed one
+through the ordinary pinhole projection (`src/engine/instrument/`, `src/render3d/EquidistantProjectionPass.ts`).
+A camera also has a FORMAT, which is part of what a photograph carries as evidence: an instrument
+states the image it exposes and the lens in front of it, in millimetres, so the ratio is the shape of
+the picture (a square 126 frame, a phone held upright) and `2·atan(h/2f)` is the field it takes in.
+The frame is letterboxed inside the widget's own box rather than resizing it, and the field it
+implies becomes the recording's default — a recording that states its own (a zoom, binoculars) keeps
+it. An eye has no rectangle and no format, and neither has a camera nobody identified: both fall back
+to the scene's own 16:9 at the 60° vertical field this project draws an unaided witness through
+(about the middle half of a real human field, which is where acuity actually is). The catalogue is
+dated, so the picker offers what existed: no telephone in 1964.
+
 **Real astronomy for misidentification spotting.** A recurring cause of UFO reports is a mundane astronomical
 object or atmospheric optical effect — Venus (by far the most commonly misreported "UFO"), other planets, the
 Moon, lens flare, or halo phenomena like sun dogs/moon dogs. `<rr0-scene>` renders the sky astronomically: real
