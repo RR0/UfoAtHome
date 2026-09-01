@@ -72,8 +72,10 @@ import { CloudField } from "./CloudSystem.js"
 import { buildLensFlare } from "./LensFlareEffect.js"
 import { EquidistantProjectionPass } from "./EquidistantProjectionPass.js"
 import { IceHalos } from "../engine/atmosphere/IceHalos.js"
+import { Rainbows } from "../engine/atmosphere/Rainbows.js"
 import { CometTail } from "./CometTail.js"
 import { IceHaloEffect } from "./IceHaloEffect.js"
+import { RainbowEffect } from "./RainbowEffect.js"
 import { MeteorSystem } from "./MeteorSystem.js"
 import type { Meteor } from "../engine/astronomy/MeteorFall.js"
 import { Instruments } from "../engine/instrument/Instrument.js"
@@ -155,11 +157,14 @@ const HOVER_HIT_RADIUS_SCALE = 6
  * the opaque ground plane would occlude them anyway, so there's no point paying for the geometry. */
 const BODY_HIDE_BELOW_DEG = -4
 
-/** How much fainter a lunar ice display is than a solar one. A halo is the source's own light bent,
- * and the Moon at its brightest is some fourteen magnitudes down on the Sun — but the eye is dark
- * adapted and the sky behind it is black, so the ring is not fourteen magnitudes harder to see. A
- * fifth is the honest middle: plainly there, plainly fainter. */
-const MOON_HALO_STRENGTH = 0.2
+/** How much fainter a lunar display is than a solar one — the ice one and the water one alike. The
+ * source's own light is what is being bent, and the Moon at its brightest is some fourteen
+ * magnitudes down on the Sun — but the eye is dark adapted and the sky behind it is black, so a ring
+ * or a bow is not fourteen magnitudes harder to see. A fifth is the honest middle: plainly there,
+ * plainly fainter. The bow scales this by the Moon's PHASE on top (see Rainbows.moonlightShare); the
+ * halo does not, because a ring round a half moon is an ordinary sight while a moonbow under one is
+ * not a sight at all. */
+const MOON_DISPLAY_STRENGTH = 0.2
 
 /** How far above the witness the ice deck is projected, in this scene's own units. Cirrus lives
  * between six and twelve kilometres; what matters here is only that it is several times the water
@@ -837,6 +842,9 @@ export class SceneRenderer {
   private cometTail?: CometTail
   /** What ice crystals did to the light of the Sun or Moon — see IceHaloEffect. */
   private iceHalos?: IceHaloEffect
+  /** What falling water did to it — see RainbowEffect. The two are independent and a sky may
+   * honestly show both: a shower under a cirrus veil is an ordinary afternoon. */
+  private rainbow?: RainbowEffect
   /** The body-mesh key of the comet currently drawn, so buildPlanets' own sweep can be told to
    * leave it alone and so a change of apparition takes the old one down. */
   private cometKey?: string
@@ -1362,6 +1370,7 @@ export class SceneRenderer {
     this.buildPlanets(astronomy.planets, magnitudeLimit)
     this.buildComet(astronomy.comet, magnitudeLimit)
     this.buildIceHalos(astronomy.sun, astronomy.moon)
+    this.buildRainbow(astronomy.sun, astronomy.moon)
     // Fog reaches as far as the ground actually goes, not a fixed SKY_RADIUS: from altitude the
     // whole visible ground lies beyond 900 units, so a fog capped there turned all of it into flat
     // fog colour — a black void below the horizon at 1500 m, since that colour is the night-ground
@@ -1757,6 +1766,8 @@ export class SceneRenderer {
     this.meteorSystem = undefined
     this.iceHalos?.dispose()
     this.iceHalos = undefined
+    this.rainbow?.dispose()
+    this.rainbow = undefined
     this.cometTail?.dispose()
     this.cometTail = undefined
     for (const mesh of this.bodyMeshes.values()) {
@@ -2198,7 +2209,7 @@ export class SceneRenderer {
     // an hour of pillar off the end of the day.
     IceHalos.deckLitUntilDeg(IceHalos.DECK_HEIGHT_M)
     const source = sun.altitudeDeg > -lit ? sun : moon
-    const strength = IceHalos.strength(ice, lower, source.altitudeDeg, lit) * (source === sun ? 1 : MOON_HALO_STRENGTH)
+    const strength = IceHalos.strength(ice, lower, source.altitudeDeg, lit) * (source === sun ? 1 : MOON_DISPLAY_STRENGTH)
     const { x, y, z } = horizontalToCartesian(source.altitudeDeg, source.azimuthDeg, 1)
     const tint = atmosphericTint(source.altitudeDeg)
     // The very veil that is drawn, so the display is broken exactly where the sky is clear.
@@ -2210,6 +2221,45 @@ export class SceneRenderer {
       { cover: ice, layerHeight: CIRRUS_LAYER_HEIGHT },
       this.weather.iceCrystalAlignment ?? DEFAULT_ICE_CRYSTAL_ALIGNMENT
     )
+  }
+
+  /**
+   * Puts the bows of falling water opposite whichever light source could have made them.
+   *
+   * The Sun when it is up, and the MOON when it is not: a moonbow is the same physics on a source
+   * hundreds of thousands of times fainter, it is reported by people who did not know such a thing
+   * existed, and it comes out WHITE — see RainbowEffect.MOON_SATURATION. Unlike the ice display, this
+   * weighs the moon's PHASE, because a moonbow is only ever seen within a day or two of full while a
+   * ring round a half moon is an ordinary sight.
+   *
+   * Driven by the weather that was looked up, and by two ingredients that are BOTH in the record for
+   * once (see Rainbows.strength): water falling, and a source that can reach it. A sky with no rain
+   * draws nothing at all, which is most skies.
+   */
+  private buildRainbow(sun: HorizontalPosition, moon: HorizontalPosition & { magnitude: number }): void {
+    if (!this.rainbow) {
+      this.rainbow = new RainbowEffect()
+      this.celestialGroup.add(this.rainbow.object)
+    }
+    // Only water makes a bow. Snow and hail are ice, and irregular ice at that: they make the halo
+    // family or they make nothing, and neither is this.
+    const rain = this.weather.precipitationType === "rain" ? this.weather.precipitationIntensity : 0
+    const bySun = sun.altitudeDeg > 0
+    const source = bySun ? sun : moon
+    // The deck that stands between the source and the rain, which is what "the Sun broke through"
+    // is about — the same reading the ice display takes of the same field, and for the same reason:
+    // the total cover would count a cirrus veil as a blocker, and a veil dims a bow rather than
+    // preventing it.
+    const blocking = this.weather.lowerCloudCover ?? this.weather.cloudCover
+    const moonlight = MOON_DISPLAY_STRENGTH * Rainbows.moonlightShare(moon.magnitude)
+    const strength = Rainbows.strength(rain, blocking, source.altitudeDeg) * (bySun ? 1 : moonlight)
+    if (strength <= 0) {
+      this.rainbow.update({ x: 0, y: 1, z: 0 }, 0, [1, 1, 1], true)
+      return
+    }
+    const { x, y, z } = horizontalToCartesian(source.altitudeDeg, source.azimuthDeg, 1)
+    const tint = atmosphericTint(source.altitudeDeg)
+    this.rainbow.update({ x, y, z }, strength, [tint[0], tint[1], tint[2]], bySun)
   }
 
   /** Takes down whatever comet was drawn, head, halo, hover target and tail. */

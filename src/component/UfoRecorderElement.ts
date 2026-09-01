@@ -13,8 +13,10 @@ import { Comets } from "../engine/astronomy/Comets.js"
 import { Sporadics } from "../engine/astronomy/Sporadics.js"
 import { Satellites } from "../engine/astronomy/Satellites.js"
 import { IceHalos } from "../engine/atmosphere/IceHalos.js"
+import { Rainbows } from "../engine/atmosphere/Rainbows.js"
+import type { BowForm } from "../engine/atmosphere/Rainbows.js"
 import type { HaloForm } from "../engine/atmosphere/IceHalos.js"
-import { computeBodyPosition } from "../engine/astronomy/CelestialPositions.js"
+import { computeBodyPosition, computeMoonPhase } from "../engine/astronomy/CelestialPositions.js"
 import { visibleMagnitudeLimit } from "../render3d/skyColors.js"
 import type { CometAppearance } from "../engine/astronomy/Comets.js"
 import { Compass } from "../engine/astronomy/Compass.js"
@@ -3430,7 +3432,8 @@ export class UfoRecorderElement extends HTMLElement {
       this.showerClause(date, observer),
       this.cometClause(date, observer),
       this.satelliteClause(date, observer),
-      this.opticsClause(date, observer)
+      this.opticsClause(date, observer),
+      this.rainbowClause(date, observer)
     ].filter(part => part !== undefined)
     this.skyCandidatesOutput.textContent = this.messages.skyLine.replace("{parts}", parts.join(" · "))
   }
@@ -3572,6 +3575,56 @@ export class UfoRecorderElement extends HTMLElement {
       this.messages.skyOpticsPossible.replace("{forms}", forms).replace("{source}", named) +
       this.messages.skyOpticsAlignment.replace("{alignment}", String(Math.round(alignment * 100)))
     )
+  }
+
+  /**
+   * What falling water could have put opposite the Sun or the Moon — see Rainbows.ts.
+   *
+   * SILENT UNLESS IT WAS RAINING, which is the opposite rule to the ice line's and the right one for
+   * each. Nobody can tell by looking whether there was ice cloud eight kilometres up, so that line
+   * has to say so; everybody knows whether it was raining, so a "no rain, no rainbow" on every clear
+   * sky would be noise. Once there IS rain the question becomes live, and the negative answers are
+   * the interesting ones: a Sun too high for any bow to clear the horizon rules out a midday report
+   * outright, and an unbroken deck rules out the rest.
+   */
+  private rainbowClause(date: Date, observer: { lat: number; lng: number; elevationM: number }): string | undefined {
+    const weather = resolveWeatherAt(this.ufoElement.sighting, 0)
+    if (weather.precipitationType !== "rain" || weather.precipitationIntensity <= 0) return undefined
+    const sun = computeBodyPosition("Sun", date, observer)
+    const moon = computeBodyPosition("Moon", date, observer)
+    const bySun = sun.altitudeDeg > 0
+    const source = bySun ? sun : moon
+    // A bow is the source's own light bent back: with both down there was nothing to bend.
+    if (source.altitudeDeg <= 0) return this.messages.skyBowNoSource
+    // The same reading the renderer takes (see SceneRenderer.buildRainbow).
+    const blocking = weather.lowerCloudCover ?? weather.cloudCover
+    if (Rainbows.strength(weather.precipitationIntensity, blocking, source.altitudeDeg) <= 0) {
+      return this.messages.skyBowHidden
+    }
+    const forms = Rainbows.formsAt(source.altitudeDeg)
+    if (forms.length === 0) {
+      return this.messages.skyBowSourceTooHigh
+        .replace("{altitude}", String(Math.round(source.altitudeDeg)))
+        .replace("{radius}", String(Math.round(Rainbows.primary().radiusDeg)))
+    }
+    const named = this.listed(forms.map(bow => this.bowFormName(bow)))
+    if (bySun) return this.messages.skyBowPossible.replace("{forms}", named)
+    const lit = Math.round(computeMoonPhase(date).illuminatedFraction * 100)
+    return this.messages.skyBowMoon.replace("{forms}", named).replace("{lit}", String(lit))
+  }
+
+  /**
+   * Names one bow, with the radius it stands at and how high its top reached.
+   *
+   * The height is the number worth having, and it is the one a witness's account can be checked
+   * against: a bow's top is its radius minus the source's altitude, so an account of a HIGH bow is
+   * an account of a low Sun, whatever hour the file claims.
+   */
+  private bowFormName(bow: BowForm): string {
+    const template = bow.id === "primary" ? this.messages.skyBowPrimary : this.messages.skyBowSecondary
+    return template
+      .replace("{radius}", String(Math.round(bow.radiusDeg)))
+      .replace("{top}", String(Math.round(bow.topAltitudeDeg)))
   }
 
   /**

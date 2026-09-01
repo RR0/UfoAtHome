@@ -338,6 +338,30 @@ export interface UfoRecorderMessages {
    * the Moon by night. Separate strings because French wants "du Soleil" and "de la Lune". */
   skyOpticsSun: string
   skyOpticsMoon: string
+  /**
+   * What falling water could have put opposite the source — see Rainbows.ts.
+   *
+   * Said only when rain was reported, unlike the ice line: everybody knows whether it was raining,
+   * so the clause exists to answer the question that rain RAISES rather than to list an absent
+   * ingredient. {forms} is every bow that could have cleared the witness's own horizon.
+   */
+  skyBowPossible: string
+  /** The same under a Moon, which is the version worth reporting: a moonbow is white to the eye,
+   * needs a nearly full Moon, and is seen by people who did not know it could happen. {lit} is how
+   * much of the Moon was lit. */
+  skyBowMoon: string
+  /** One name per bow, with the radius it stands at and how high its top reached — the height being
+   * the number an account can be checked against, since it fixes how low the source was. */
+  skyBowPrimary: string
+  skyBowSecondary: string
+  /** Rain, but the source too high for any bow to clear the horizon: the strongest negative in this
+   * family, and the one that rules out a midday report outright. */
+  skyBowSourceTooHigh: string
+  /** Rain, but an unbroken deck between the source and it — the missing half of the famous
+   * condition. */
+  skyBowHidden: string
+  /** Rain in the dark, with neither Sun nor Moon up to be bent. */
+  skyBowNoSource: string
   /** Turns the witness to face the comet. Unlike a meteor it does not need seeking to: it was
    * there for the whole recording, and for weeks either side. */
   showComet: string
