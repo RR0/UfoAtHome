@@ -258,18 +258,25 @@ const LENS_FLARE_BASE_OPACITY = 0.5
  * square of the angle (see LensFlareEffect), so this radius IS the calibration, and it shrinks as
  * the square root of however much of the Sun's light is actually arriving.
  *
- * Set a little UNDER the measured two and a half, because the sky helps: a veil reaching one is
- * white on its own and it is being added to a sky already a fifth of the way there, so the blob
- * that actually READS as white runs a few tenths of a degree wider than this number.
+ * Set UNDER the measured two and a half, because the sky helps: a veil reaching one is white on its
+ * own and it is being added to a sky already some way there, so the blob that actually READS as
+ * white runs wider than this number. HOW MUCH wider was first guessed and is now measured, the same
+ * frame rendered both ways with the Sun at 66 degrees in a clear sky: at 2.2 the white core came out
+ * at 2.75 degrees of radius against the photographs' 2.5, and at this value it comes out at 2.55.
+ * The white radius is linear in this constant — the veil goes as its square over the angle's, so it
+ * reaches one at exactly this radius divided by the root of what the sky has not already supplied —
+ * and the two measurements agree with that to half a per cent, which is what says the number was
+ * moved along the law rather than away from it.
  *
- * That distinction was learned the hard way. Measured as a rendered radius, with the sky and the
- * resampling in the way, the calibration came out wrong by a factor of nearly four — and that
- * factor was then multiplied into the WHOLE profile, wings and all, so the core matched the
- * photographs while the Sun went on reading as a ball ten degrees across. What is measured now is
- * the LAW: the same frame rendered with the dazzle off and on, differenced, which nothing else can
- * get into. It reproduces the inverse square to within a tenth from two degrees out to sixteen.
+ * WHAT IS NOT DONE THIS WAY IS THE LAW, and that distinction was learned the hard way. Measured as
+ * a rendered radius, with the sky and the resampling in the way, the calibration once came out
+ * wrong by a factor of nearly four — and that factor was then multiplied into the WHOLE profile,
+ * wings and all, so the core matched the photographs while the Sun went on reading as a ball ten
+ * degrees across. The law is measured instead from the same frame rendered with the dazzle off and
+ * on, differenced, which nothing else can get into: it reproduces the inverse square to within a
+ * tenth from two degrees out to sixteen. This number only says where that law crosses white.
  */
-const GLARE_SATURATION_RADIUS_DEG = 2.2
+const GLARE_SATURATION_RADIUS_DEG = 2.05
 
 
 /**
