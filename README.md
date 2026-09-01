@@ -171,10 +171,12 @@ darkness/color follows the sun's altitude (day/twilight bands/night), and its da
 sun's real compass direction, not spread uniformly around the horizon — see `src/render3d/skyColors.ts`.
 
 The witness's own pose — geographic position, elevation, and viewing heading/pitch/field of view — can vary over
-the sighting's timeline via `observerTrack` in the sighting JSON (a keyframe array alongside `timeline`, same
+the sighting's timeline via `witnessTrack` in the sighting JSON (a keyframe array of `{ t, pose }` alongside
+`timeline` — the model class is `ObserverTrack`, but the serialized key is `witnessTrack`, and writing the class's
+name into a file is a mistake that costs an afternoon; same
 hold-last/interpolated-lookup shape — see `src/engine/model/ObserverTrack.ts`), driving both the camera's own
 orientation and which real-world instant the astronomy is computed for as playback advances. Older recordings
-with no `observerTrack` fall back to the legacy static `place[0]` (see `resolveObserverPoseAt` in
+with no `witnessTrack` fall back to the legacy static `place[0]` (see `resolveObserverPoseAt` in
 `src/engine/model/Sighting.ts`) — usable for sky darkness/color and camera pitch/fov, but with no compass heading
 to orient the camera by.
 
@@ -184,13 +186,13 @@ the live rendering path now uses `astronomy-engine` for the Sun too, for a singl
 Sun's azimuth from the same call used for the sky's directional glow.
 
 `<rr0-ufo-recorder>` has editor fields for the witness's latitude/longitude/heading and the observation's start
-date/time (all optional) — filling in lat+lng writes both the legacy `place` and a single t=0 `observerTrack`
+date/time (all optional) — filling in lat+lng writes both the legacy `place` and a single t=0 `witnessTrack`
 keyframe (elevation/pitch/field of view stay at neutral defaults; there's no UI yet for authoring the observer
 *moving* over time, only a single static pose per recording).
 
 Not yet done: a mirage, the supernumerary arcs crowded inside a bright rainbow and the corona round a Sun seen
 through a thin water cloud (all three are interference, and nothing here models the wave — see `WaterDrop.ts`),
-and a multi-keyframe `observerTrack` authoring UI (today the recorder can only set
+and a multi-keyframe `witnessTrack` authoring UI (today the recorder can only set
 one static pose; an observer that moves/re-orients mid-recording still needs hand-authored or scripted JSON). The
 Moon's phase currently only dims/brightens its disc's overall
 color rather than rendering a geometrically accurate crescent shape — a natural follow-up.

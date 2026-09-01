@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "caseId": "sky-test-moonbow",
+  "description": "Le même ciel d'essai sous une pleine Lune : arc-en-ciel lunaire. Même pluie, Lune pleine à 21,6° de hauteur au sud, témoin tourné vers le point opposé (cap 10°). L'arc est vingt fois plus faible qu'au Soleil et sort BLANC, parce que c'est ce que l'œil rapporte à ce niveau de lumière.",
+  "time": {
+    "year": 2020,
+    "month": 6,
+    "day": 6,
+    "hour": 2,
+    "minute": 30
+  },
+  "utcOffsetHours": 2,
+  "durationSeconds": 60,
+  "place": [
+    {
+      "lat": 45.0,
+      "lng": 5.0
+    }
+  ],
+  "weatherTrack": {
+    "keyframes": [
+      {
+        "t": 0,
+        "weather": {
+          "cloudCover": 0.35,
+          "cloudDarkness": 0.4,
+          "cloudBaseM": 900,
+          "lowerCloudCover": 0.3,
+          "highCloudCover": 0,
+          "precipitationType": "rain",
+          "precipitationIntensity": 0.9,
+          "windDirectionDeg": 240,
+          "windSpeed": 4,
+          "storm": false
+        }
+      }
+    ]
+  },
+  "timeline": {
+    "keyframes": [
+      {
+        "t": 0,
+        "shapes": []
+      }
+    ],
+    "order": [],
+    "groups": []
+  },
+  "witnessTrack": {
+    "keyframes": [
+      {
+        "t": 0,
+        "pose": {
+          "lat": 45.0,
+          "lng": 5.0,
+          "elevationM": 0,
+          "headingDeg": 10,
+          "pitchDeg": 8,
+          "fovDeg": 60
+        }
+      }
+    ]
+  },
+  "soundTrack": {
+    "keyframes": []
+  },
+  "decor": []
+}

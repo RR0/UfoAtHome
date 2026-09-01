@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "caseId": "sky-test-rainbow",
+  "description": "Ciel d'essai, pas un cas : aucune forme n'est enregistrée. Les conditions sont celles qu'un arc-en-ciel exige — pluie (0,9), un Soleil bas (9,5° de hauteur) et une couche basse trouée (0,3) pour qu'il l'atteigne — et le témoin regarde le point opposé au Soleil (cap 246°), là où l'arc se tient. La météo est DÉCLARÉE (pas de weatherSource), donc la recherche de relevé ne l'écrasera pas.",
+  "time": {
+    "year": 2020,
+    "month": 6,
+    "day": 21,
+    "hour": 7,
+    "minute": 0
+  },
+  "utcOffsetHours": 2,
+  "durationSeconds": 60,
+  "place": [
+    {
+      "lat": 45.0,
+      "lng": 5.0
+    }
+  ],
+  "weatherTrack": {
+    "keyframes": [
+      {
+        "t": 0,
+        "weather": {
+          "cloudCover": 0.35,
+          "cloudDarkness": 0.4,
+          "cloudBaseM": 900,
+          "lowerCloudCover": 0.3,
+          "highCloudCover": 0,
+          "precipitationType": "rain",
+          "precipitationIntensity": 0.9,
+          "windDirectionDeg": 240,
+          "windSpeed": 4,
+          "storm": false
+        }
+      }
+    ]
+  },
+  "timeline": {
+    "keyframes": [
+      {
+        "t": 0,
+        "shapes": []
+      }
+    ],
+    "order": [],
+    "groups": []
+  },
+  "witnessTrack": {
+    "keyframes": [
+      {
+        "t": 0,
+        "pose": {
+          "lat": 45.0,
+          "lng": 5.0,
+          "elevationM": 0,
+          "headingDeg": 246,
+          "pitchDeg": 14,
+          "fovDeg": 60
+        }
+      }
+    ]
+  },
+  "soundTrack": {
+    "keyframes": []
+  },
+  "decor": []
+}
