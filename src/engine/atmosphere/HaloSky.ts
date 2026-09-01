@@ -1,4 +1,5 @@
 import { IceCrystal, IceRefraction, type EmergentRay } from "./IceCrystal.js"
+import { VisibleSpectrum } from "./Spectrum.js"
 
 /**
  * The whole ice display, built by shooting light at crystals and seeing where it lands.
@@ -175,7 +176,7 @@ export class HaloSky {
       // Every ray of this population carries the light falling on the square it was aimed through,
       // so a wide plate gathers more than a narrow column exactly as it does in the sky.
       const flux = 4 * radius * radius
-      const sample = HaloSky.SPECTRUM[(this.random() * HaloSky.SPECTRUM.length) | 0]
+      const sample = VisibleSpectrum.SAMPLES[(this.random() * VisibleSpectrum.SAMPLES.length) | 0]
       const count = this.crystal.trace(
         dirX,
         dirY,
@@ -199,7 +200,7 @@ export class HaloSky {
         const azimuthBin = Math.min(width - 1, ((relativeAzimuth / Math.PI) * width) | 0)
         const altitudeBin = Math.min(height - 1, (((skyAltitude + Math.PI / 2) / Math.PI) * height) | 0)
         const at = (altitudeBin * width + azimuthBin) * 3
-        const weight = ray.weight * flux * HaloSky.SPECTRUM.length
+        const weight = ray.weight * flux * VisibleSpectrum.SAMPLES.length
         data[at] += weight * sample.r
         data[at + 1] += weight * sample.g
         data[at + 2] += weight * sample.b
@@ -412,59 +413,5 @@ export class HaloSky {
     this.spare = radius * Math.sin(angle)
     this.hasSpare = true
     return radius * Math.cos(angle)
-  }
-
-  /**
-   * The colours a halo is made of.
-   *
-   * The visible spectrum sampled at even steps, each sample given the colour an eye assigns it: the
-   * 1931 colour-matching functions turned into screen primaries and normalised so that a flat
-   * spectrum comes back white. That normalisation is the test that the WHITE parts of a display —
-   * the ones made by reflection, which bends no colour away from any other — come out white and not
-   * tinted, while the refracted parts come out with the spectrum ice actually spreads.
-   */
-  private static readonly SPECTRUM = HaloSky.buildSpectrum(24)
-
-  private static buildSpectrum(samples: number): readonly { wavelengthNm: number; r: number; g: number; b: number }[] {
-    const spectrum: { wavelengthNm: number; r: number; g: number; b: number }[] = []
-    let totalR = 0
-    let totalG = 0
-    let totalB = 0
-    for (let index = 0; index < samples; index++) {
-      const wavelengthNm =
-        IceRefraction.VIOLET_NM + ((index + 0.5) / samples) * (IceRefraction.DEEP_RED_NM - IceRefraction.VIOLET_NM)
-      const [x, y, z] = HaloSky.colourMatching(wavelengthNm)
-      // CIE XYZ to linear sRGB.
-      const entry = {
-        wavelengthNm,
-        r: Math.max(0, 3.2406 * x - 1.5372 * y - 0.4986 * z),
-        g: Math.max(0, -0.9689 * x + 1.8758 * y + 0.0415 * z),
-        b: Math.max(0, 0.0557 * x - 0.204 * y + 1.057 * z)
-      }
-      totalR += entry.r
-      totalG += entry.g
-      totalB += entry.b
-      spectrum.push(entry)
-    }
-    for (const entry of spectrum) {
-      entry.r /= totalR
-      entry.g /= totalG
-      entry.b /= totalB
-    }
-    return spectrum
-  }
-
-  /** A standard multi-lobe fit to the 1931 observer — how strongly one wavelength excites each of
-   * the three responses an eye has. */
-  private static colourMatching(wavelengthNm: number): [number, number, number] {
-    const lobe = (centre: number, below: number, above: number): number => {
-      const t = (wavelengthNm - centre) / (wavelengthNm < centre ? below : above)
-      return Math.exp(-0.5 * t * t)
-    }
-    return [
-      1.056 * lobe(599.8, 37.9, 31.0) + 0.362 * lobe(442.0, 16.0, 26.7) - 0.065 * lobe(501.1, 20.4, 26.2),
-      0.821 * lobe(568.8, 46.9, 40.5) + 0.286 * lobe(530.9, 16.3, 31.1),
-      1.217 * lobe(437.0, 11.8, 36.0) + 0.681 * lobe(459.0, 26.0, 13.8)
-    ]
   }
 }

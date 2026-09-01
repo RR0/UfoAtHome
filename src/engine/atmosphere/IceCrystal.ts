@@ -24,6 +24,8 @@
  * photographs on forms nobody derived by hand.
  */
 
+import { Fresnel } from "./Fresnel.js"
+
 /**
  * The refractive index of ice as a function of wavelength.
  *
@@ -36,9 +38,6 @@ export class IceRefraction {
   /** The wavelengths the two anchoring indices were measured at, nanometres. */
   static readonly RED_NM = 656.3
   static readonly BLUE_NM = 435.8
-
-  static readonly VIOLET_NM = 400
-  static readonly DEEP_RED_NM = 700
 
   private static readonly ANCHOR_RED = 1.3067
   private static readonly ANCHOR_BLUE = 1.317
@@ -211,7 +210,7 @@ export class IceCrystal {
     const entryNy = this.normals[entryFace * 3 + 1]
     const entryNz = this.normals[entryFace * 3 + 2]
     const cosIncident = -(entryNx * dirX + entryNy * dirY + entryNz * dirZ)
-    const outerReflectance = IceCrystal.reflectance(cosIncident, 1, refractiveIndex)
+    const outerReflectance = Fresnel.reflectance(cosIncident, 1, refractiveIndex)
 
     // The share that never gets in: a mirror image of the source in the crystal's own face. Tilted
     // faces send it to places a refracted ray never reaches, and that is a whole family of forms.
@@ -258,7 +257,7 @@ export class IceCrystal {
       pointZ += rayZ * hitT
       if (sineOut < 1) {
         const cosOut = Math.sqrt(Math.max(0, 1 - sineOut * sineOut))
-        const reflectance = IceCrystal.reflectance(cosInside, refractiveIndex, 1)
+        const reflectance = Fresnel.reflectance(cosInside, refractiveIndex, 1)
         out[count].x = refractiveIndex * rayX - (refractiveIndex * cosInside - cosOut) * nx
         out[count].y = refractiveIndex * rayY - (refractiveIndex * cosInside - cosOut) * ny
         out[count].z = refractiveIndex * rayZ - (refractiveIndex * cosInside - cosOut) * nz
@@ -281,22 +280,4 @@ export class IceCrystal {
    * The forms that need three or four faces exist; nothing anybody has photographed needs eight. */
   static readonly MAX_BOUNCES = 6
   private static readonly MIN_WEIGHT = 1e-4
-
-  /**
-   * Fresnel's reflectance for unpolarised light at a face, from the cosine of the angle inside the
-   * denser medium or outside it as the case may be.
-   *
-   * It matters, and not only for realism: it is why the outer edge of a halo fades rather than
-   * ending, why the reflection forms are pale rather than coloured, and why a grazing ray gives
-   * almost all of itself to the mirror image instead of the refracted one.
-   */
-  static reflectance(cosIncident: number, fromIndex: number, toIndex: number): number {
-    const ratio = fromIndex / toIndex
-    const sineOut = ratio * Math.sqrt(Math.max(0, 1 - cosIncident * cosIncident))
-    if (sineOut >= 1) return 1
-    const cosOut = Math.sqrt(Math.max(0, 1 - sineOut * sineOut))
-    const parallel = (toIndex * cosIncident - fromIndex * cosOut) / (toIndex * cosIncident + fromIndex * cosOut)
-    const perpendicular = (fromIndex * cosIncident - toIndex * cosOut) / (fromIndex * cosIncident + toIndex * cosOut)
-    return (parallel * parallel + perpendicular * perpendicular) / 2
-  }
 }
