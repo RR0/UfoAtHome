@@ -213,7 +213,11 @@ const COMPASS_LABELS: Record<"en" | "fr", readonly string[]> = {
 }
 const COMPASS_SUPPORTED_LANGUAGES = ["en", "fr"]
 const COMPASS_PLACEMENT_RADIUS = 880 // just inside the sky dome, reading as "on the horizon"
+/** How big a compass label is drawn, in world units at COMPASS_PLACEMENT_RADIUS — sized for the
+ * unaided sixty-degree field this project draws an eye through, and then held to that SIZE ON
+ * SCREEN whatever field the instrument has (see updateCompassScale). */
 const COMPASS_SPRITE_SIZE = 40
+const COMPASS_REFERENCE_FOV_DEG = 60
 /** Higher than every other mesh's default renderOrder (0) — combined with the sprite material's
  * own depthTest:false, this guarantees compass labels paint over the ground/terrain regardless of
  * scene-graph insertion order or actual distance, matching their own "fixed HUD reference" intent
@@ -954,6 +958,7 @@ export class SceneRenderer {
     if (this.camera.fov !== pose.fovDeg) {
       this.camera.fov = pose.fovDeg
       this.camera.updateProjectionMatrix()
+      this.updateCompassScale()
     }
   }
 
@@ -3044,6 +3049,30 @@ export class SceneRenderer {
       this.celestialGroup.add(sprite)
       return sprite
     })
+    // Built at the reference size above; this puts them at the size the CURRENT field needs.
+    this.updateCompassScale()
+  }
+
+  /**
+   * Keeps the compass labels the same size ON SCREEN however narrow the instrument's field is.
+   *
+   * They are not in the sky. Everything else this scene draws is a thing at an angle — a star, a
+   * cloud, a building — and a narrow field is SUPPOSED to magnify all of it, which is what a
+   * telephoto lens does. A cardinal point is a caption: it says which way the witness is facing,
+   * and a caption that grew ninefold when the recording changed to a 210 mm lens (as this one did)
+   * was reading as part of the picture instead of as a note on it.
+   *
+   * The screen size of a fixed-size thing goes as one over the tangent of the half-field, so
+   * scaling by that tangent holds it still. Referred to the unaided sixty degrees the labels were
+   * drawn for.
+   */
+  private updateCompassScale(): void {
+    const half = (this.camera.fov * Math.PI) / 360
+    const reference = (COMPASS_REFERENCE_FOV_DEG * Math.PI) / 360
+    const size = (COMPASS_SPRITE_SIZE * Math.tan(half)) / Math.tan(reference)
+    for (const sprite of this.compassSprites) {
+      sprite.scale.set(size, size, 1)
+    }
   }
 
   private disposeCompassLabels(): void {
