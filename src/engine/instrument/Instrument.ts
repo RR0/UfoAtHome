@@ -49,8 +49,12 @@ export interface InstrumentFrame {
   /** The exposed image's width and height, millimetres, as held. */
   widthMm: number
   heightMm: number
-  /** The lens's focal length, millimetres. */
+  /** The lens's focal length, millimetres — the setting a fixed lens is stuck at, and where a zoom
+   * sits until a recording says otherwise. */
   focalLengthMm: number
+  /** What a zoom can be turned to. Absent means the lens does not zoom, and a reader may read its
+   * focal but not set it. */
+  focalRangeMm?: { minMm: number; maxMm: number }
 }
 
 /**
@@ -87,6 +91,29 @@ export interface Instrument {
   /** When such a device existed. Absent means the question does not arise: an eye, or a camera
    * stated so generically that no date bounds it. */
   years?: InstrumentYears
+  /**
+   * How far the lens is stopped down — the f-number — and how far it can be, if at all.
+   *
+   * Two things follow from it, and both are visible. The DEPTH OF FIELD: a wide opening puts a
+   * narrow slice of distance in focus, which is a real bound on how far away something stood, since
+   * a photograph that shows it sharp says it was inside that slice. And the STAR: the blades only
+   * stand in the beam once the lens is stopped down, so a lens shot wide open has no straight edge
+   * anywhere and throws none, whatever its blade count says.
+   *
+   * Absent on anything with no diaphragm at all — an eye, and a phone, whose opening is fixed and
+   * round (which is why a phone's Sun is a plain disc).
+   */
+  fNumber?: number
+  fNumberRange?: { min: number; max: number }
+  /**
+   * How long the shutter stays open, seconds, and what it can be set to.
+   *
+   * The parameter behind the classic UFO photograph: a long pose does not freeze a moving light, it
+   * ACCUMULATES it into a streak — and a blinking one into a dashed streak, which is how an
+   * aircraft's strobe signs its own picture.
+   */
+  exposureSeconds?: number
+  exposureRangeSeconds?: { min: number; max: number }
   /**
    * How strongly this device's own glass throws the ghosts, streaks and veils that a photograph of
    * a bright light shows around it, and a witness's account of one does not.
@@ -133,6 +160,12 @@ export const INSTRUMENTS: Instrument[] = [
     id: "rectilinear-lens",
     name: { en: "Camera, unknown device", fr: "Appareil, modèle inconnu" },
     projection: "rectilinear",
+    // An ordinary daylight snapshot's settings, and adjustable, since nothing about an unnamed
+    // camera says they were not.
+    fNumber: 8,
+    fNumberRange: { min: 2, max: 22 },
+    exposureSeconds: 1 / 250,
+    exposureRangeSeconds: { min: 1 / 1000, max: 8 },
     // Six is the commonest count on ordinary lenses, and it gives the six-spiked Sun that everybody
     // recognises from a photograph. No frame and no dates: this is the entry for a case that says
     // "he photographed it" and nothing more, and claiming a format for it would be inventing
@@ -148,6 +181,10 @@ export const INSTRUMENTS: Instrument[] = [
     name: { en: "Instamatic, 126 film", fr: "Instamatic, film 126" },
     projection: "rectilinear",
     frame: { widthMm: 28, heightMm: 28, focalLengthMm: 43 },
+    // Everything about this camera is fixed, which is the point of it: one aperture, one shutter
+    // speed, one focal length. A witness holding one had nothing to set and nothing to get wrong.
+    fNumber: 11,
+    exposureSeconds: 1 / 90,
     // The line ran from 1963 to 1988, and it is what most people photographing anything in the
     // sixties and seventies were holding.
     years: { from: 1963, to: 1988 },
@@ -161,9 +198,32 @@ export const INSTRUMENTS: Instrument[] = [
     name: { en: "35 mm SLR, 50 mm lens", fr: "Reflex 35 mm, objectif 50 mm" },
     projection: "rectilinear",
     frame: { widthMm: 36, heightMm: 24, focalLengthMm: 50 },
+    // The one device here where a witness chose: a fast normal lens stopping down to f/16, and a
+    // shutter from a thousandth to a long pose on B.
+    fNumber: 8,
+    fNumberRange: { min: 2, max: 16 },
+    exposureSeconds: 1 / 250,
+    exposureRangeSeconds: { min: 1 / 1000, max: 30 },
     // Dated from the Nikon F, which is when an SLR became an object an ordinary witness might own.
     years: { from: 1959 },
     apertureBlades: 6
+  },
+  {
+    // The lens a photographed light is most often taken with, and the one entry here that ZOOMS: a
+    // 70-210 mm on the same 36 x 24 frame, so its field runs from 19 degrees down to 6.5. It is also
+    // the reason a distant aircraft can fill a frame — and the reason a hand-held shot at 210 mm
+    // shakes.
+    id: "slr-35mm-zoom",
+    name: { en: "35 mm SLR, 70-210 mm zoom", fr: "Reflex 35 mm, zoom 70-210 mm" },
+    projection: "rectilinear",
+    frame: { widthMm: 36, heightMm: 24, focalLengthMm: 135, focalRangeMm: { minMm: 70, maxMm: 210 } },
+    fNumber: 8,
+    fNumberRange: { min: 4, max: 22 },
+    exposureSeconds: 1 / 250,
+    exposureRangeSeconds: { min: 1 / 1000, max: 30 },
+    // Zooms of the period commonly had more blades than a prime.
+    apertureBlades: 8,
+    years: { from: 1975 }
   },
   {
     // A modern phone's main camera, landscape: about 7.6 x 5.7 mm of sensor behind a 5.7 mm lens —
@@ -172,6 +232,11 @@ export const INSTRUMENTS: Instrument[] = [
     name: { en: "Phone, held sideways", fr: "Téléphone, tenu couché" },
     projection: "rectilinear",
     frame: { widthMm: 7.6, heightMm: 5.7, focalLengthMm: 5.7 },
+    // No diaphragm at all: the opening is fixed and round, which is why the star is absent and why
+    // its depth of field is so deep that almost everything comes out sharp. The exposure is the
+    // phone's own to choose, from a daylight thousandth to a night-mode ten seconds.
+    exposureSeconds: 1 / 120,
+    exposureRangeSeconds: { min: 1 / 8000, max: 10 },
     // Dated from the first phone camera anybody would bother pointing at the sky.
     years: { from: 2007 },
     // A phone's aperture is fixed and round: no blades, and so no star on a bright light — which is
@@ -186,6 +251,11 @@ export const INSTRUMENTS: Instrument[] = [
     name: { en: "Phone, held upright", fr: "Téléphone, tenu debout" },
     projection: "rectilinear",
     frame: { widthMm: 5.7, heightMm: 7.6, focalLengthMm: 5.7 },
+    // No diaphragm at all: the opening is fixed and round, which is why the star is absent and why
+    // its depth of field is so deep that almost everything comes out sharp. The exposure is the
+    // phone's own to choose, from a daylight thousandth to a night-mode ten seconds.
+    exposureSeconds: 1 / 120,
+    exposureRangeSeconds: { min: 1 / 8000, max: 10 },
     years: { from: 2007 },
     apertureBlades: undefined
   }
@@ -269,6 +339,52 @@ export class Instruments {
       instrument =>
         !instrument.years || (year >= instrument.years.from && (instrument.years.to === undefined || year <= instrument.years.to))
     )
+  }
+
+  /**
+   * The vertical field a lens of that focal length takes in on that instrument's frame, degrees.
+   *
+   * The same `2·atan(h/2f)` fieldOfViewDeg uses, with the focal a recording states rather than the
+   * one the device sits at — which is what a zoom IS. Undefined for anything with no frame: there
+   * is no focal length to set on an eye.
+   */
+  static fieldOfViewDegAt(instrument: Instrument, focalLengthMm: number): number | undefined {
+    const frame = instrument.frame
+    if (!frame || focalLengthMm <= 0) return undefined
+    return (2 * Math.atan(frame.heightMm / (2 * focalLengthMm)) * 180) / Math.PI
+  }
+
+  /**
+   * The exact inverse: what focal length a stated field of view means on that instrument.
+   *
+   * A recording keeps the FIELD (ObserverPose.fovDeg) rather than the focal, because a field is
+   * what an eye and a lens have in common and what every projection here is anchored on. Millimetres
+   * are how a photographer says it, so the editor shows those and converts here — one value, two
+   * ways of writing it, and no second source of truth.
+   */
+  static focalLengthMmFor(instrument: Instrument, fieldOfViewDeg: number): number | undefined {
+    const frame = instrument.frame
+    if (!frame || fieldOfViewDeg <= 0 || fieldOfViewDeg >= 180) return undefined
+    return frame.heightMm / (2 * Math.tan((fieldOfViewDeg * Math.PI) / 360))
+  }
+
+  /**
+   * How far the diaphragm's blades actually stand in the beam, 0 to 1 — and so how much of a star
+   * they throw.
+   *
+   * A lens WIDE OPEN has swung its blades clear: the opening is the round barrel itself, there is no
+   * straight edge left to diffract at, and the same lens that starbursts at f/16 gives a plain round
+   * blob at f/2. Stated as the fraction of the way from wide open to fully stopped down, so a device
+   * with no diaphragm at all (a phone, an eye) never gets one and a fixed-aperture box camera gets
+   * whatever its one aperture gives.
+   */
+  static bladesShowing(instrument: Instrument, fNumber: number | undefined): number {
+    const set = fNumber ?? instrument.fNumber
+    if (set === undefined || instrument.apertureBlades === undefined) return 0
+    const range = instrument.fNumberRange
+    if (!range) return 1
+    if (range.max <= range.min) return 1
+    return Math.max(0, Math.min(1, (set - range.min) / (range.max - range.min)))
   }
 
   /** What a lens throws when nothing about the device says otherwise — see Instrument.flare. */

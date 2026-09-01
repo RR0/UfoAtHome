@@ -26,8 +26,23 @@ export interface ObserverPose {
   /** Degrees above (positive) or below (negative) the local horizontal — how far up/down the
    * witness was looking, e.g. craning their neck to look overhead. */
   pitchDeg: number
-  /** Vertical field of view in degrees, as a Three.js PerspectiveCamera would take it. */
+  /** Vertical field of view in degrees, as a Three.js PerspectiveCamera would take it. For a
+   * camera this IS the focal length, written the way every projection here is anchored (see
+   * Instruments.focalLengthMmFor, which converts it back to millimetres for the editor). */
   fovDeg: number
+  /**
+   * How far the lens was stopped down, and how long its shutter stayed open — undefined for
+   * anything the recording did not state, which then falls back to the instrument's own settings
+   * (see Instrument.fNumber/exposureSeconds).
+   *
+   * On the POSE rather than on the instrument because they are facts about this observation and not
+   * about the device: the same camera is set differently from one photograph to the next, and a
+   * recording that keeps both can say the lens was opened up as the light failed. HELD rather than
+   * blended between keyframes — a shutter speed does not pass through the values between two
+   * settings on its way from one to the other, unlike a witness turning round.
+   */
+  fNumber?: number
+  exposureSeconds?: number
 }
 
 export interface ObserverKeyframe {
@@ -64,7 +79,11 @@ export function lerpObserverPose(a: ObserverPose, b: ObserverPose, t: number): O
     headingDeg:
       a.headingDeg === undefined || b.headingDeg === undefined ? undefined : lerpAngleDeg(a.headingDeg, b.headingDeg, t),
     pitchDeg: lerpNumber(a.pitchDeg, b.pitchDeg, t),
-    fovDeg: lerpNumber(a.fovDeg, b.fovDeg, t)
+    fovDeg: lerpNumber(a.fovDeg, b.fovDeg, t),
+    // Held, not blended — see ObserverPose's own doc comment: a camera setting is discrete, and a
+    // lens on its way from f/2 to f/16 was never really at f/7.3.
+    fNumber: a.fNumber,
+    exposureSeconds: a.exposureSeconds
   }
 }
 

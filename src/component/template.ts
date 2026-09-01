@@ -22,6 +22,14 @@ export const html = `
     <label><span id="label-witness-last-name">Witness last name</span> <input id="witnessLastName" type="text"/></label>
     <label><span id="label-witness-first-names">Witness first names</span> <input id="witnessFirstNames" type="text" placeholder="comma-separated"/></label>
     <label><span id="label-instrument">Observed through</span> <select id="instrument"></select></label>
+    <!-- What the device was SET to, when it could be set at all: the lens's focal length (shown as
+         the field of view for an eye, which has no focal length), how far it was stopped down, and
+         how long its shutter stayed open. Each falls back to the instrument's own value and each is
+         disabled when the device fixes it — an Instamatic's owner had nothing to choose. See
+         Instrument.ts and ObserverPose.fNumber/exposureSeconds. -->
+    <label><span id="label-focal-length">Focal length</span> <input id="focalLength" type="number" min="1" max="2000" step="0.1"/> <span id="unit-focal-length">mm</span></label>
+    <label><span id="label-f-number">Aperture</span> f/<input id="fNumber" type="number" min="0.7" max="64" step="0.1"/></label>
+    <label><span id="label-exposure">Exposure</span> <input id="exposureSeconds" type="text" inputmode="decimal" size="7" placeholder="1/250"/> s</label>
     <button id="add-decor-witness" type="button">Add witness</button>
     <label><span id="label-decor-sighting-url">Witness's own recording URL</span> <input id="decorSightingUrl" type="url" placeholder="https://…/sighting.json"/></label>
   </div>

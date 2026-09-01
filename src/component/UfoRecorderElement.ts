@@ -341,6 +341,16 @@ export class UfoRecorderElement extends HTMLElement {
   /** Which instrument the sighting was made through — sighting data, not a view preference, and the
    * one control here that changes the geometry of every shape (see Instrument.ts). */
   private readonly instrumentSelect: HTMLSelectElement
+  /** What that instrument was SET to. Each writes the pose at the playhead, exactly as the
+   * heading and the pitch do, and each is disabled when the device leaves nothing to set — see
+   * syncOpticsFromInstrument. */
+  private readonly focalLengthInput: HTMLInputElement
+  private readonly labelFocalLength: HTMLElement
+  private readonly unitFocalLength: HTMLElement
+  private readonly labelFNumber: HTMLElement
+  private readonly labelExposure: HTMLElement
+  private readonly fNumberInput: HTMLInputElement
+  private readonly exposureInput: HTMLInputElement
   private readonly labelColor: HTMLElement
   private readonly labelTransparency: HTMLElement
   private readonly labelHalo: HTMLElement
@@ -730,6 +740,13 @@ export class UfoRecorderElement extends HTMLElement {
     this.soundFields = [this.soundKindSelect, this.soundVolumeInput, this.soundPitchInput, this.soundSrcInput]
     this.buildSoundKindOptions()
     this.instrumentSelect = this.shadow.getElementById("instrument") as HTMLSelectElement
+    this.focalLengthInput = this.shadow.getElementById("focalLength") as HTMLInputElement
+    this.labelFocalLength = this.shadow.getElementById("label-focal-length")!
+    this.unitFocalLength = this.shadow.getElementById("unit-focal-length")!
+    this.labelFNumber = this.shadow.getElementById("label-f-number")!
+    this.labelExposure = this.shadow.getElementById("label-exposure")!
+    this.fNumberInput = this.shadow.getElementById("fNumber") as HTMLInputElement
+    this.exposureInput = this.shadow.getElementById("exposureSeconds") as HTMLInputElement
     this.refreshInstrumentOptions()
     this.labelColor = this.shadow.getElementById("label-color")!
     this.labelTransparency = this.shadow.getElementById("label-transparency")!
@@ -987,6 +1004,11 @@ export class UfoRecorderElement extends HTMLElement {
     for (const input of [this.latInput, this.lngInput, this.headingInput, this.pitchInput, this.elevationInput]) {
       input.addEventListener("input", () => this.updateObserver())
     }
+    // The optics are pose fields like the rest — see ObserverPose.fNumber's own doc comment — so
+    // they keyframe through the very same path.
+    for (const input of [this.focalLengthInput, this.fNumberInput, this.exposureInput]) {
+      input.addEventListener("input", () => this.updateObserver())
+    }
     this.searchPlaceButton.addEventListener("click", () => void this.searchPlace())
     // Enter in the name field runs the same search — the reflex in any search box, and the reason
     // the field isn't inside a <form> that would try to submit the page instead.
@@ -1022,6 +1044,7 @@ export class UfoRecorderElement extends HTMLElement {
       // The picture's own shape changes with it — a square 126 frame, a phone held upright — and
       // both the sky and the shapes drawn over it have to take it at the same moment.
       this.sceneElement.applyFrameFormat()
+      this.syncOpticsFromInstrument()
       this.ufoElement.refresh()
       this.dispatchEvent(new CustomEvent("sightingchange"))
     })
@@ -1550,14 +1573,22 @@ export class UfoRecorderElement extends HTMLElement {
     const name = this.stringOrUndefined(this.placeNameInput.value.trim())
     event.place = lat !== undefined && lng !== undefined ? [{ lat, lng, name }] : undefined
 
+    const instrument = this.ufoElement.sighting.instrument
+    // A focal length is only ever another way of writing the field, which is what the pose keeps
+    // and what every projection here is anchored on (see Instruments.focalLengthMmFor). For an eye
+    // the same input states the field in degrees directly, since an eye has no focal length.
+    const stated = this.numberOrUndefined(this.focalLengthInput.value)
+    const fovDeg =
+      (instrument.frame && stated !== undefined
+        ? Instruments.fieldOfViewDegAt(instrument, stated)
+        : stated) ?? this.currentFovDeg()
+    const fNumber = this.numberOrUndefined(this.fNumberInput.value)
+    const exposureSeconds = UfoRecorderElement.exposureSeconds(this.exposureInput.value)
     const nothingSet = lat === undefined && lng === undefined && headingDeg === undefined && pitchDeg === 0 && elevationM === 0
     if (nothingSet) {
       witnessTrack.removeKeyframeAt(t)
     } else {
-      // The instrument's own field, not a constant: sixty degrees for an eye, twenty-seven through
-      // a 50 mm lens (see Instruments.fieldOfViewDeg).
-      const fovDeg = this.currentFovDeg()
-      witnessTrack.addKeyframe(t, { lat, lng, elevationM, headingDeg, pitchDeg, fovDeg })
+      witnessTrack.addKeyframe(t, { lat, lng, elevationM, headingDeg, pitchDeg, fovDeg, fNumber, exposureSeconds })
     }
     // Neither field affects the 2D shape canvas, so this refresh() is only for its side effect —
     // it's what makes this edit surface as a "timeupdate" (see the constructor's listener), the
@@ -2534,6 +2565,7 @@ export class UfoRecorderElement extends HTMLElement {
     this.refreshSkyCandidates()
     // The date decides which devices are offered — see refreshInstrumentOptions.
     this.refreshInstrumentOptions()
+    this.syncOpticsFromInstrument()
     this.ufoElement.selectedSourceIds = this.selectedSourceIds
     // Disabled once deleting the whole selection would leave nothing behind (a recording always
     // needs at least one shape — see deleteShape()'s own doc comment), for a source that's only a
@@ -2715,6 +2747,82 @@ export class UfoRecorderElement extends HTMLElement {
       this.instrumentSelect.appendChild(option)
     }
     this.instrumentSelect.value = offered.some(instrument => instrument.id === selected) ? selected : current.id
+  }
+
+  /**
+   * A shutter speed as photography writes it — "1/250" rather than "0.004".
+   *
+   * Not decoration: a witness's own account of a photograph says "a five-second exposure" or "a
+   * five-hundredth", and a field that answers in thousandths of a second is a field nobody can
+   * check against what they were told. Long poses stay decimal, because that is how those are said
+   * too.
+   */
+  private static exposureText(seconds: number): string {
+    if (seconds >= 1) return String(Math.round(seconds * 100) / 100)
+    return `1/${Math.round(1 / seconds)}`
+  }
+
+  /** The inverse, accepting either way of writing it. */
+  private static exposureSeconds(text: string): number | undefined {
+    const trimmed = text.trim()
+    if (!trimmed) return undefined
+    const fraction = /^(\d*\.?\d+)\s*\/\s*(\d*\.?\d+)$/.exec(trimmed)
+    if (fraction) {
+      const over = Number(fraction[1])
+      const under = Number(fraction[2])
+      return under > 0 ? over / under : undefined
+    }
+    const value = Number(trimmed)
+    return Number.isFinite(value) && value > 0 ? value : undefined
+  }
+
+  /**
+   * Shows what the device is set to, and lets a reader set only what the device could set.
+   *
+   * READ-ONLY IS THE COMMON CASE, and saying so is the point: an Instamatic's owner had one
+   * aperture, one shutter speed and one focal length, so the three fields show 43 mm, f/11 and a
+   * ninetieth of a second and refuse to be touched. A witness's testimony is not improved by
+   * offering them settings their camera never had.
+   *
+   * The focal length is shown in millimetres for anything with a frame and in DEGREES for an eye,
+   * which has no focal length — one value underneath (ObserverPose.fovDeg), two ways of writing it.
+   */
+  private syncOpticsFromInstrument(): void {
+    const sighting = this.ufoElement.sighting
+    const instrument = sighting.instrument
+    const pose = resolveObserverPoseAt(sighting, this.ufoElement.currentTime)
+    const frame = instrument.frame
+    const fovDeg = pose?.fovDeg ?? Instruments.fieldOfViewDeg(instrument)
+
+    const focal = frame ? Instruments.focalLengthMmFor(instrument, fovDeg) : fovDeg
+    if (this.focalLengthInput !== this.shadow.activeElement) {
+      this.focalLengthInput.value = focal === undefined ? "" : String(Math.round(focal * 10) / 10)
+    }
+    this.unitFocalLength.textContent = frame ? this.messages.unitMillimetres : this.messages.unitDegrees
+    this.labelFocalLength.textContent = frame ? this.messages.focalLength : this.messages.fieldOfView
+    // A fixed lens may be read but not set. An eye's field is always the reader's to state: it is
+    // not a device setting at all, it is how much of their surroundings the witness took in.
+    this.focalLengthInput.disabled = frame !== undefined && frame.focalRangeMm === undefined
+    this.focalLengthInput.min = String(frame?.focalRangeMm?.minMm ?? 1)
+    this.focalLengthInput.max = String(frame?.focalRangeMm?.maxMm ?? 2000)
+
+    const fNumber = pose?.fNumber ?? instrument.fNumber
+    if (this.fNumberInput !== this.shadow.activeElement) {
+      this.fNumberInput.value = fNumber === undefined ? "" : String(fNumber)
+    }
+    // Nothing to show at all for a device with no diaphragm: an eye, and a phone whose one opening
+    // is round and fixed.
+    this.setRowVisible(this.fNumberInput, instrument.fNumber !== undefined)
+    this.fNumberInput.disabled = instrument.fNumberRange === undefined
+    this.fNumberInput.min = String(instrument.fNumberRange?.min ?? 0.7)
+    this.fNumberInput.max = String(instrument.fNumberRange?.max ?? 64)
+
+    const exposure = pose?.exposureSeconds ?? instrument.exposureSeconds
+    if (this.exposureInput !== this.shadow.activeElement) {
+      this.exposureInput.value = exposure === undefined ? "" : UfoRecorderElement.exposureText(exposure)
+    }
+    this.setRowVisible(this.exposureInput, instrument.exposureSeconds !== undefined)
+    this.exposureInput.disabled = instrument.exposureRangeSeconds === undefined
   }
 
   /**
@@ -4041,6 +4149,10 @@ export class UfoRecorderElement extends HTMLElement {
     this.labelCloudCover.textContent = messages.cloudCover
     this.labelHighCloud.textContent = messages.highCloudCover
     this.labelIceAlignment.textContent = messages.iceCrystalAlignment
+    this.labelFNumber.textContent = messages.aperture
+    this.labelExposure.textContent = messages.exposure
+    // The focal row's own label and unit depend on the instrument, not only on the language.
+    this.syncOpticsFromInstrument()
     this.labelCloudDarkness.textContent = messages.cloudDarkness
     this.labelCloudBase.textContent = messages.cloudBase
     this.labelPrecipitationType.textContent = messages.precipitationType

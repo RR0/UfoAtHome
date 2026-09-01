@@ -322,6 +322,20 @@ export interface UfoRecorderMessages {
    * be out of period rather than dropped: dropping it would silently re-instrument a testimony.
    * {name} is the device's own name. */
   instrumentOutOfPeriod: string
+  /** The lens's focal length, in millimetres — shown for anything with a frame, and read-only when
+   * the device's lens does not zoom. */
+  focalLength: string
+  /** What the same control says for an EYE, which has no focal length: how much of their
+   * surroundings the witness took in, in degrees. */
+  fieldOfView: string
+  /** How far the lens was stopped down. Absent from the interface entirely for a device with no
+   * diaphragm at all — an eye, a phone. */
+  aperture: string
+  /** How long the shutter stayed open, in seconds. */
+  exposure: string
+  /** The two units the focal row switches between. */
+  unitMillimetres: string
+  unitDegrees: string
   /** The label on the control for how steadily the crystals were falling. */
   iceCrystalAlignment: string
   /** No ice cloud at all, so none of it could have happened. The commonest answer. */
