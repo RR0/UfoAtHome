@@ -238,10 +238,6 @@ export interface UfoRecorderMessages {
   /** Label of the field naming an actual audio recording of the sound, when one exists. */
   soundSrc: string
   soundSrcPlaceholder: string
-  /** How bright the Sun's dazzle reads, independent of whether the lens-flare artifacts (below)
-   * are shown — see SceneRenderer.setDazzleIntensity's own doc comment. A view preference, not
-   * sighting weather data (see UfoRecorderElement's lensFlareBrightnessInput field). */
-  lensFlareBrightness: string
   /** Sets how strongly the optional procedural sun lens-flare artifacts show, framed as "how much
    * was the witness looking through a camera/video device" since that's physically what produces
    * them (a naked eye never sees lens-flare artifacts) — see LensFlareEffect.ts's own doc comment

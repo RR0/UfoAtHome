@@ -140,7 +140,6 @@ export const ufoRecorderMessages_en: UfoRecorderMessages = {
   soundPitch: "Pitch",
   soundSrc: "Recording",
   soundSrcPlaceholder: "URL of a real recording",
-  lensFlareBrightness: "Light intensity",
   instrument: "Observed through",
   decorAircraft: "Aircraft",
   skyLine: "Sky: {parts}",

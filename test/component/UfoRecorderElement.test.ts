@@ -4098,14 +4098,6 @@ describe("UfoRecorderElement inferred weather", () => {
     expect((weatherField(element, "cloudCover") as HTMLInputElement).value).toBe("0.1")
   })
 
-  it("leaves Light intensity alone — it's a view preference, not weather", async () => {
-    const element = mount(recordProvider())
-    stateDateAndPlace(element)
-    await waitFor(() => sourceLink(element).hidden === false, 2000)
-
-    expect((element.shadowRoot!.getElementById("lensFlareBrightness") as HTMLInputElement).disabled).toBe(false)
-  })
-
   it("leaves the fields editable, and says why, when no record covers the sighting", async () => {
     const element = mount()
     stateDateAndPlace(element)

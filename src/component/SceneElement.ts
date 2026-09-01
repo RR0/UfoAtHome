@@ -115,7 +115,7 @@ const DEFAULT_OBSERVER_POSE: ObserverPose = { lat: 0, lng: 0, elevationM: 0, hea
  */
 export class SceneElement extends HTMLElement {
   static get observedAttributes(): string[] {
-    return ["src", "star-catalog-src", "show-compass", "lens-flare-intensity", "lens-flare-brightness"]
+    return ["src", "star-catalog-src", "show-compass", "lens-flare-intensity"]
   }
 
   private readonly shadow: ShadowRoot
@@ -358,22 +358,13 @@ export class SceneElement extends HTMLElement {
       this.sceneRenderer.setShowCompass(this.hasAttribute("show-compass"))
     }
     if (name === "lens-flare-intensity" && newValue !== oldValue) {
-      // How strongly the camera-lens artifacts show around the Sun's always-on dazzle — see
-      // SceneRenderer.setLensFlareArtifactIntensity's own doc comment on why this is independent
-      // of lens-flare-brightness (comparing the same reported brightness naked-eye vs. as a camera
-      // would have captured it). Absent/unparseable defaults to 0 — no artifacts, matching the
-      // slider's own default.
+      // How strongly the CAMERA's own artifacts show around the Sun's dazzle — the one thing about
+      // that light which is a fact about the witness rather than about the sky: whether they were
+      // looking through a lens. How BRIGHT the dazzle is has no attribute any more, because it is
+      // no longer anybody's to set — it is the Sun's photometry (see SceneRenderer.
+      // applyDazzleStrength). Absent/unparseable defaults to 0 — no artifacts, no camera.
       const parsed = newValue === null ? NaN : parseFloat(newValue)
       this.sceneRenderer.setLensFlareArtifactIntensity(Number.isFinite(parsed) ? parsed : 0)
-    }
-    if (name === "lens-flare-brightness" && newValue !== oldValue) {
-      // Absent/unparseable defaults to 1 — SceneRenderer's own tuned baseline look. `|| 1` here
-      // would be wrong: parseFloat("0") is the legitimate number 0, which is falsy, so `0 || 1`
-      // silently becomes 1 — exactly the reported bug (dragging the slider to 0 still showed the
-      // default brightness). Number.isFinite is what actually distinguishes "genuinely 0" from
-      // "absent/NaN".
-      const parsed = newValue === null ? NaN : parseFloat(newValue)
-      this.sceneRenderer.setDazzleIntensity(Number.isFinite(parsed) ? parsed : 1)
     }
   }
 

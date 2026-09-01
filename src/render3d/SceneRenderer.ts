@@ -232,16 +232,17 @@ const TERRAIN_RENDER_ORDER = 1
  * while after a rebuild, rather than needing to be pixel-perfect the instant they've moved at all. */
 const TERRAIN_REBUILD_DISTANCE_M = 150
 
-/** Base (zenith, unwarmed, dazzleIntensity 1) magnitude for the always-on lens-flare dazzle's
- * uColorGain uniform — see applyLensFlareTint, which scales this by both atmosphericTint per
- * channel and the user-set dazzleIntensity. The shader itself divides uColorGain by 256 (ported
+/** Base (zenith, unwarmed, unclouded) magnitude for the always-on lens-flare dazzle's
+ * uColorGain uniform — see applyLensFlareTint, which scales this by atmosphericTint per channel and
+ * by how much of the Sun's light is actually arriving. The shader itself divides uColorGain by 256 (ported
  * as-is from the reference — see LensFlareEffect.ts), so this is on that same raw-0-255-ish scale,
  * not a normal [0,1] color. Tuned together with LENS_FLARE_BASE_OPACITY (see LensFlareEffect.ts's
  * own doc comment on why) — don't change one without re-checking the other via a real render
  * (gl.readPixels diff, not a screenshot — see this project's own lens-flare memory for why
  * screenshots of this canvas are unreliable). */
 const LENS_FLARE_BASE_GAIN = 55
-/** uOpacity at dazzleIntensity 1 — see setDazzleIntensity. */
+/** The dazzle's own uOpacity. Fixed: how bright the Sun's blaze reads is the Sun's photometry
+ * (see applyDazzleStrength), not a dial. */
 const LENS_FLARE_BASE_OPACITY = 0.5
 
 /**
@@ -785,11 +786,6 @@ export class SceneRenderer {
    * stays built (just hidden via updateLensFlarePosition whenever the Sun isn't visible) rather
    * than being torn down and rebuilt on every horizon crossing. */
   private lensFlare?: LensFlareSystem
-  /** How bright the Sun's dazzle (and, if lensFlareArtifactIntensity > 0, the lens-flare artifacts
-   * riding on the same light) reads — a real "how intense was it" dial, independent of whether the
-   * artifacts are shown at all. 1 is the tuned default look — see setDazzleIntensity/
-   * LENS_FLARE_BASE_GAIN/LENS_FLARE_BASE_OPACITY, which this multiplies. */
-  private dazzleIntensity = 1
   /** What fraction of the Sun's light the cloud is letting through, from the last time it was
    * placed — see cloudTransmission. Held because the lens flare is retinted from more than one
    * place and every one of them needs it. */
@@ -799,9 +795,9 @@ export class SceneRenderer {
   private sunUnhiddenFraction = 1
   /** How strongly the optional lens-flare artifacts (star rays, ghost trail, hex ghosts, streaks,
    * starburst) show on top of the Sun's always-on dazzle core — see setLensFlareArtifactIntensity.
-   * 0 means off. The point of keeping this independent of dazzleIntensity: comparing the *same*
-   * reported brightness as seen with the naked eye (this at 0) against how a camera would have
-   * captured it (this above 0) — see LensFlareEffect.ts's own doc comment. */
+   * 0 means off, and off is what an eye is: these artifacts are made by a LENS, so this says whether
+   * the witness was looking through one and how strongly it drew them — not how bright the light
+   * was, which is the Sun's own business (see applyDazzleStrength). */
   private lensFlareArtifactIntensity = 0
   /** The Sun's current world position/visibility, as last set by setBodyMesh("sun", ...) — what
    * updateLensFlarePosition projects to screen space every render(). Kept separately from
@@ -1038,21 +1034,6 @@ export class SceneRenderer {
     this.render()
   }
 
-  /** Sets how bright the Sun's dazzle (and, if enabled, the lens-flare artifacts riding on the same
-   * light) reads — see dazzleIntensity's own doc comment for why this is independent of
-   * lensFlareArtifactIntensity. A no-op on the mesh/uniforms until the Sun has actually been
-   * visible at least once (setBodyMesh builds it) — harmless: the stored value still applies the
-   * moment it is. */
-  setDazzleIntensity(intensity: number): void {
-    if (this.dazzleIntensity === intensity) return
-    this.dazzleIntensity = intensity
-    if (this.lensFlare) {
-      this.lensFlare.uniforms.uOpacity.value = LENS_FLARE_BASE_OPACITY * intensity
-      if (this.lastSunPosition) this.applyLensFlareTint(atmosphericTint(this.lastSunPosition.altitudeDeg))
-    }
-    this.render()
-  }
-
   /** Sets how strongly the optional lens-flare *artifacts* (star rays, ghost trail, hex ghosts,
    * streaks, starburst) show around the Sun's always-on dazzle core — see LensFlareEffect.ts's own
    * doc comment for why only these artifacts are opt-in while the dazzle itself isn't. A no-op on
@@ -1066,16 +1047,15 @@ export class SceneRenderer {
   }
 
   /** Retints the lens flare's uColorGain from a real atmospheric tint (see atmosphericTint's own
-   * doc comment) scaled by dazzleIntensity — called from setBodyMesh's "sun" branch every time the
-   * Sun's altitude (and so its tint) changes, and from setDazzleIntensity when the dial itself
-   * changes. A no-op if the flare hasn't been built yet. */
+   * doc comment) — called from setBodyMesh's "sun" branch every time the Sun's altitude, and so its
+   * tint, changes. A no-op if the flare hasn't been built yet. */
   private applyLensFlareTint(tint: RgbColor): void {
     if (!this.lensFlare) return
     // Times whatever fraction of the Sun's light the cloud lets past. The dazzle is the Sun's own
     // light scattered in the eye, so cloud that takes the light takes the dazzle with it — an
     // overcast sky that still threw a full lens flare was the most obviously impossible thing left
     // in this scene.
-    const gain = LENS_FLARE_BASE_GAIN * this.dazzleIntensity * this.sunCloudTransmission
+    const gain = LENS_FLARE_BASE_GAIN * this.sunCloudTransmission
     this.lensFlare.uniforms.uColorGain.value.setRGB(gain * tint[0], gain * tint[1], gain * tint[2])
     this.applyDazzleStrength()
   }
@@ -1098,7 +1078,7 @@ export class SceneRenderer {
     if (!this.lensFlare) return
     const altitudeDeg = this.lastSunPosition?.altitudeDeg ?? -90
     const arriving =
-      atmosphericTransmission(altitudeDeg) * this.sunCloudTransmission * this.dazzleIntensity * this.sunUnhiddenFraction
+      atmosphericTransmission(altitudeDeg) * this.sunCloudTransmission * this.sunUnhiddenFraction
     const tint = atmosphericTint(altitudeDeg)
     this.lensFlare.uniforms.uDazzleColour.value.setRGB(tint[0], tint[1], tint[2])
     this.lensFlare.uniforms.uVeilStrength.value = GLARE_SATURATION_RADIUS_DEG ** 2 * Math.max(0, arriving)
@@ -2012,10 +1992,9 @@ export class SceneRenderer {
     this.setHitArea(key, x, y, z, visualRadius)
     // The Sun's own dazzle comes entirely from the lens-flare mesh below (its always-on glareOut
     // term — see LensFlareEffect.ts's own doc comment), not this sprite-based halo: setGlare's
-    // opacity is a fixed function of real magnitude, so calling it for "sun" too would leave a
-    // constant halo showing even at dazzleIntensity 0, when the whole point of that dial is to go
-    // genuinely down to "no extra dazzle, just the plain disc". Every other tracked body (Moon,
-    // Venus, ...) still gets the ordinary always-on sprite halo exactly as before.
+    // opacity is a fixed function of real magnitude, so calling it for "sun" too would put a
+    // second, differently-derived halo on top of the veil that already has the Sun's photometry in
+    // it. Every other tracked body (Moon, Venus, ...) still gets the ordinary sprite halo.
     // The glare goes with the light that causes it: a magnitude of cloud is a magnitude less dazzle.
     // Adding 2.5·log10 rather than scaling the colour, because that is what the halo's own strength
     // function is written in terms of.
@@ -2031,7 +2010,7 @@ export class SceneRenderer {
         // every other body — see LensFlareEffect.ts's own doc comment on why the dazzle core isn't
         // gated by lensFlareArtifactIntensity, only the surrounding artifacts are.
         this.lensFlare = buildLensFlare()
-        this.lensFlare.uniforms.uOpacity.value = LENS_FLARE_BASE_OPACITY * this.dazzleIntensity
+        this.lensFlare.uniforms.uOpacity.value = LENS_FLARE_BASE_OPACITY
         this.lensFlare.uniforms.uFlareIntensity.value = this.lensFlareArtifactIntensity
         this.lensFlare.uniforms.uStarPoints.value = this.starPoints
         this.scene.add(this.lensFlare.mesh)

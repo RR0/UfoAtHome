@@ -309,8 +309,7 @@ export class UfoRecorderElement extends HTMLElement {
   private readonly showCometButton: HTMLButtonElement
   private readonly weatherSourceLink: HTMLAnchorElement
   /** Every field the weather record itself provides — the ones locked while it does, and the ones
-   * whose edits write a keyframe while it doesn't. Excludes Light intensity, which sits in the
-   * same group but is a view preference (see lensFlareBrightnessInput below). */
+   * whose edits write a keyframe while it doesn't. */
   private readonly weatherFields: (HTMLInputElement | HTMLSelectElement)[]
   /** Swappable for tests and for any embedder wanting a different record — the element itself only
    * ever names the interface, same as SceneRenderer does for terrain. Rebuilds the inference so a
@@ -326,16 +325,13 @@ export class UfoRecorderElement extends HTMLElement {
   /** The seekable span the current weather track was laid out against — see
    * ensureWeatherTrackSpan for the freeze this catches. */
   private weatherTrackSpan?: number
-  // View preferences, not sighting data — unlike stormInput/weather's other fields, neither is
-  // read by getWeather()/restored from a loaded sighting; they just directly set SceneElement's
-  // own lens-flare-brightness/lens-flare-intensity attributes. Kept as two independent continuous
-  // dials (brightness in Circumstances, camera/video-device artifact strength in Witness — whether
-  // and how strongly the witness happened to be looking through a camera/video device, which is
-  // what actually produces lens-flare artifacts) rather than one — see SceneRenderer.
-  // setDazzleIntensity/setLensFlareArtifactIntensity's own doc comments on why: comparing the
-  // *same* reported brightness naked-eye (cameraDeviceInput at 0) against how a camera would have
-  // captured it (above 0) only works if brightness itself doesn't also change when the artifact
-  // strength changes.
+  // A view preference, not sighting data — it isn't read by getWeather()/restored from a loaded
+  // sighting, it just sets SceneElement's own lens-flare-intensity attribute. It survives, where
+  // the brightness dial beside it did not, because it is not about the light: it says whether the
+  // witness was looking through a LENS, which is the only thing that makes those artifacts. How
+  // bright the Sun's blaze reads is the Sun's own photometry now — see SceneRenderer.
+  // applyDazzleStrength — and dimming or brightening it by hand could only make the scene lie
+  // about the one thing a reader is there to judge.
   private readonly soundKindSelect: HTMLSelectElement
   private readonly soundVolumeInput: HTMLInputElement
   private readonly soundPitchInput: HTMLInputElement
@@ -348,7 +344,6 @@ export class UfoRecorderElement extends HTMLElement {
    * SOUND_KINDS in script (see buildSoundKindOptions), not from markup with per-option ids. */
   private readonly soundKindOptions = new Map<SoundKind, HTMLOptionElement>()
   private soundPreviewTimer?: ReturnType<typeof setTimeout>
-  private readonly lensFlareBrightnessInput: HTMLInputElement
   private readonly cameraDeviceInput: HTMLInputElement
   /** Which instrument the sighting was made through — sighting data, not a view preference, and the
    * one control here that changes the geometry of every shape (see Instrument.ts). */
@@ -414,7 +409,6 @@ export class UfoRecorderElement extends HTMLElement {
   private readonly labelSoundVolume: HTMLElement
   private readonly labelSoundPitch: HTMLElement
   private readonly labelSoundSrc: HTMLElement
-  private readonly labelLensFlareBrightness: HTMLElement
   private readonly labelInstrument: HTMLElement
   private readonly labelCameraDevice: HTMLElement
   private readonly optionPrecipitationNone: HTMLElement
@@ -743,7 +737,6 @@ export class UfoRecorderElement extends HTMLElement {
     this.soundSrcInput = this.shadow.getElementById("soundSrc") as HTMLInputElement
     this.soundFields = [this.soundKindSelect, this.soundVolumeInput, this.soundPitchInput, this.soundSrcInput]
     this.buildSoundKindOptions()
-    this.lensFlareBrightnessInput = this.shadow.getElementById("lensFlareBrightness") as HTMLInputElement
     this.cameraDeviceInput = this.shadow.getElementById("cameraDevice") as HTMLInputElement
     this.instrumentSelect = this.shadow.getElementById("instrument") as HTMLSelectElement
     // Options ARE the registry, exactly as the source pickers are (see sourcePicker): adding a real
@@ -809,7 +802,6 @@ export class UfoRecorderElement extends HTMLElement {
     this.labelWindSpeed = this.shadow.getElementById("label-wind-speed")!
     this.labelStorm = this.shadow.getElementById("label-storm")!
     this.labelWeatherInferred = this.shadow.getElementById("label-weather-inferred")!
-    this.labelLensFlareBrightness = this.shadow.getElementById("label-lens-flare-brightness")!
     this.labelInstrument = this.shadow.getElementById("label-instrument")!
     this.labelCameraDevice = this.shadow.getElementById("label-camera-device")!
     this.optionPrecipitationNone = this.shadow.getElementById("option-precipitation-none")!
@@ -1029,9 +1021,6 @@ export class UfoRecorderElement extends HTMLElement {
     // easiest to miss. Independent of hover, see SceneElement.setCompassForced's own doc comment.
     this.headingInput.addEventListener("focus", () => this.sceneElement.setCompassForced(true))
     this.headingInput.addEventListener("blur", () => this.sceneElement.setCompassForced(false))
-    this.lensFlareBrightnessInput.addEventListener("input", () =>
-      this.sceneElement.setAttribute("lens-flare-brightness", this.lensFlareBrightnessInput.value)
-    )
     this.instrumentSelect.addEventListener("change", () => {
       const previous = this.ufoElement.sighting.instrument
       this.ufoElement.sighting.instrumentId = this.instrumentSelect.value
@@ -4023,7 +4012,6 @@ export class UfoRecorderElement extends HTMLElement {
     this.labelSoundSrc.textContent = messages.soundSrc
     this.soundSrcInput.placeholder = messages.soundSrcPlaceholder
     for (const [kind, option] of this.soundKindOptions) option.textContent = this.soundKindLabel(kind, messages)
-    this.labelLensFlareBrightness.textContent = messages.lensFlareBrightness
     this.labelInstrument.textContent = messages.instrument
     this.labelCameraDevice.textContent = messages.cameraDevice
     this.loopButton.title = messages.autoReplay

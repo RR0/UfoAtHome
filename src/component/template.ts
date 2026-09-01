@@ -196,7 +196,6 @@ export const html = `
     <label><span id="label-wind-direction">Wind direction</span> <input id="windDirection" class="weather-field" type="number" min="0" max="360" step="1" value="0" title="The direction the wind blows TOWARD, clockwise from true north — the opposite of the meteorological convention a forecast uses (see Weather.windDirectionDeg)"/> &deg;</label>
     <label><span id="label-wind-speed">Wind speed</span> <input id="windSpeed" class="weather-field" type="number" min="0" max="30" step="0.5" value="0"/> m/s</label>
     <label><span id="label-storm">Storm</span> <input id="storm" class="weather-field" type="checkbox"/></label>
-    <label><span id="label-lens-flare-brightness">Light intensity</span> <input id="lensFlareBrightness" type="range" min="0" max="3" step="0.1" value="1"/></label>
   </div>
 </details>
 <!-- Its own group rather than a row of the Shape group below: what the object sounded like is
