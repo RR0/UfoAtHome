@@ -1,6 +1,6 @@
 import { html, css } from "./ufoTemplate.js"
 import { Instruments } from "../engine/instrument/Instrument.js"
-import { Sighting, resolveSoundAt, sightingDurationMs, sightingTimeToMs } from "../engine/model/Sighting.js"
+import { resolveObserverPoseAt, Sighting, resolveSoundAt, sightingDurationMs, sightingTimeToMs } from "../engine/model/Sighting.js"
 import type { SightingTime } from "../engine/model/Sighting.js"
 import { Player } from "../engine/playback/Player.js"
 import type { PlaybackState } from "../engine/playback/Player.js"
@@ -455,6 +455,57 @@ export class UfoElement extends HTMLElement {
   }
 
   /**
+   * The instants this frame is made of — one, unless the shutter was open long enough to matter.
+   *
+   * A photograph is not a moment: it is everything that crossed the frame while the shutter was
+   * open, added together. A light that moved becomes a STREAK, and one that was blinking becomes a
+   * dashed streak — which is how an aircraft's strobe signs its own picture, and one of the
+   * commonest things a witness's photograph turns out to show. So a long exposure is drawn as what
+   * it is: the object painted at every instant the shutter was open, each contributing its share.
+   *
+   * Only for exposures long enough to be seen — a thousandth of a second moves nothing, and paying
+   * for sixteen paintings of the same pixel would be waste. And only from the recording's own
+   * timeline, which is what actually holds the movement; the sky behind is drawn once, since over
+   * these spans nothing celestial moves far (a star crosses a hundredth of a degree in a quarter of
+   * a second) — a MINUTES-long pose, which would draw star trails, is a different piece of work.
+   */
+  private exposureInstants(t: number): { shapes: Map<string, Shape>; share: number }[] {
+    const exposureMs = (resolveObserverPoseAt(this.currentSighting, t)?.exposureSeconds ?? 0) * 1000
+    const single = () => [{ shapes: this.shapesAt(t), share: 1 }]
+    if (exposureMs < UfoElement.SHORTEST_VISIBLE_EXPOSURE_MS) return single()
+    const steps = Math.min(
+      UfoElement.MAX_EXPOSURE_STEPS,
+      Math.max(2, Math.round(exposureMs / UfoElement.SHORTEST_VISIBLE_EXPOSURE_MS))
+    )
+    const instants: { shapes: Map<string, Shape>; share: number }[] = []
+    for (let step = 0; step < steps; step++) {
+      // The shutter opens AT the stated instant and stays open: what a photograph timed at t holds
+      // is what happened from t onward, not what happened around it.
+      instants.push({ shapes: this.shapesAt(t + (exposureMs * step) / steps), share: 1 / steps })
+    }
+    return instants
+  }
+
+  /** Every shape the recording holds at that instant, the way the player resolves them. */
+  private shapesAt(t: number): Map<string, Shape> {
+    const shapes = new Map<string, Shape>()
+    for (const sourceId of this.currentSighting.timeline.sourceIds) {
+      const shape = this.currentSighting.timeline.getInterpolatedShapeAt(t, sourceId)
+      if (shape) shapes.set(sourceId, shape)
+    }
+    return shapes
+  }
+
+  /** Below this the shutter froze whatever it saw, and the streak is not worth painting — a
+   * fiftieth of a second is about where a hand-held photograph stops showing movement. */
+  private static readonly SHORTEST_VISIBLE_EXPOSURE_MS = 20
+  /** However long the pose, this many paintings of it. Set by looking: at two dozen, an eight-second
+   * streak came out visibly STRIPED — the object moves further than its own width between steps, and
+   * a reader sees the steps rather than the streak. Twice that closes it up, and painting one shape
+   * fifty times costs nothing worth counting. */
+  private static readonly MAX_EXPOSURE_STEPS = 48
+
+  /**
    * Gives the canvas the shape of the picture this recording was actually made in — see
    * Instruments.frameWidthPx.
    *
@@ -493,16 +544,21 @@ export class UfoElement extends HTMLElement {
     // Selection handles are an editing affordance — hidden while actively playing, matching
     // the toolbar's own auto-hide-while-playing convention.
     const selectedIds = this.playbackState !== "playing" ? this.highlightedSourceIds : EMPTY_SELECTION
-    for (const [sourceId, shape] of shapesBySource) {
-      if (this.occludedSourceIds.has(sourceId)) continue
-      const isSelected = selectedIds.has(sourceId)
-      if (isSelected && selectedIds.size === 1) {
-        this.canvasRenderer.paintShape({ ...shape, selected: true })
-      } else {
-        this.canvasRenderer.paintShape(shape)
-        if (isSelected) this.canvasRenderer.paintMemberOutline(shape)
+    for (const instant of this.exposureInstants(t)) {
+      for (const [sourceId, shape] of instant.shapes) {
+        if (this.occludedSourceIds.has(sourceId)) continue
+        const share = instant.share
+        const exposed = share === 1 ? shape : { ...shape, transparency: 1 - (1 - shape.transparency) * share }
+        const isSelected = selectedIds.has(sourceId) && share === 1
+        if (isSelected && selectedIds.size === 1) {
+          this.canvasRenderer.paintShape({ ...exposed, selected: true })
+        } else {
+          this.canvasRenderer.paintShape(exposed)
+          if (isSelected) this.canvasRenderer.paintMemberOutline(exposed)
+        }
       }
     }
+    void shapesBySource
     if (selectedIds.size > 1) {
       const bounds = ShapeHandles.groupBoundsFor(
         [...shapesBySource].filter(([sourceId]) => selectedIds.has(sourceId)).map(([, shape]) => shape.bounds)

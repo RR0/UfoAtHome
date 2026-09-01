@@ -168,6 +168,15 @@ through the ordinary pinhole projection (`src/engine/instrument/`, `src/render3d
 A camera also has a FORMAT, which is part of what a photograph carries as evidence: an instrument
 states the image it exposes and the lens in front of it, in millimetres, so the ratio is the shape of
 the picture (a square 126 frame, a phone held upright) and `2·atan(h/2f)` is the field it takes in.
+And it has SETTINGS, each kept on the pose beside the heading and the pitch, each read-only where the
+device fixed it (an Instamatic's owner had one aperture, one shutter speed and one focal length):
+the focal length, which is the field written the way a photographer writes it; the aperture, which
+decides both the depth of field and whether the diaphragm's blades throw a star at all; the shutter,
+which accumulates a moving light into a STREAK and a blinking one into a dashed streak; and where the
+lens was focused. Two of them are drawn rather than merely stated — the blur (`DepthOfFieldPass.ts`,
+from the thin-lens geometry in `DepthOfField.ts`) and the streak — because that is what makes them
+evidence a reader can compare against a photograph: a sharp object bounds its own distance, and a
+blurred one in a sharp frame was close.
 The frame is letterboxed inside the widget's own box rather than resizing it, and the field it
 implies becomes the recording's default — a recording that states its own (a zoom, binoculars) keeps
 it. An eye has no rectangle and no format, and neither has a camera nobody identified: both fall back
