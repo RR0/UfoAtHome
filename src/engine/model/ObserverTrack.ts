@@ -43,6 +43,16 @@ export interface ObserverPose {
    */
   fNumber?: number
   exposureSeconds?: number
+  /**
+   * How far away the lens was focused, metres — undefined meaning at infinity, which is where a
+   * camera pointed at the sky sits and the only setting under which everything celestial comes out
+   * sharp.
+   *
+   * It is what turns the aperture into evidence: a photograph focused at infinity that shows the
+   * object sharp says the object was beyond the hyperfocal distance (see DepthOfField), and one
+   * focused close that shows it sharp says it was NOT.
+   */
+  focusDistanceM?: number
 }
 
 export interface ObserverKeyframe {
@@ -83,7 +93,8 @@ export function lerpObserverPose(a: ObserverPose, b: ObserverPose, t: number): O
     // Held, not blended — see ObserverPose's own doc comment: a camera setting is discrete, and a
     // lens on its way from f/2 to f/16 was never really at f/7.3.
     fNumber: a.fNumber,
-    exposureSeconds: a.exposureSeconds
+    exposureSeconds: a.exposureSeconds,
+    focusDistanceM: a.focusDistanceM
   }
 }
 

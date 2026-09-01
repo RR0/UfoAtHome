@@ -71,6 +71,7 @@ import type { CloudUniforms } from "./CloudSystem.js"
 import { CloudField } from "./CloudSystem.js"
 import { buildLensFlare } from "./LensFlareEffect.js"
 import { EquidistantProjectionPass } from "./EquidistantProjectionPass.js"
+import { DepthOfFieldPass } from "./DepthOfFieldPass.js"
 import { IceHalos } from "../engine/atmosphere/IceHalos.js"
 import { Rainbows } from "../engine/atmosphere/Rainbows.js"
 import { CometTail } from "./CometTail.js"
@@ -838,6 +839,12 @@ export class SceneRenderer {
   /** Built on first equidistant frame and kept — a render target is not worth allocating for a
    * recording made through a lens, which is most of them once real photographs are in. */
   private equidistantPass?: EquidistantProjectionPass
+  /** Built the first time a lens is stopped somewhere that actually blurs something — see
+   * setLensOptics. An eye never builds one. */
+  private depthOfFieldPass?: DepthOfFieldPass
+  /** The lens this scene is being drawn through, or undefined for an eye and for any camera whose
+   * own settings leave everything sharp. */
+  private lensOptics?: { focalLengthMm: number; fNumber: number; focusDistance: number; frameHeightMm: number }
   /** The shower falling in this sky, if any — see MeteorSystem. Built once and kept: an empty
    * shower draws nothing, so there is no reason to tear it down between recordings. */
   private meteorSystem?: MeteorSystem
@@ -1460,7 +1467,9 @@ export class SceneRenderer {
     const pass = this.usableEquidistantPass()
     if (!pass) {
       this.updateLensFlarePosition()
-      this.renderer.render(this.scene, this.camera)
+      const blur = this.usableDepthOfFieldPass()
+      if (blur) blur.render(this.renderer, this.scene, this.camera)
+      else this.renderer.render(this.scene, this.camera)
       return
     }
     // The flare is repositioned from inside, once the camera has been widened for the offscreen
@@ -1472,6 +1481,45 @@ export class SceneRenderer {
    * rectilinear source to hold. A field too wide falls back to rendering straight to the canvas:
    * a frame that is merely projected like a camera is wrong in a way this project can name and
    * measure, where a frame with black corners is just broken. */
+  /**
+   * States the lens the scene is being drawn through — see DepthOfFieldPass.
+   *
+   * Undefined for an eye, which has no aperture in this project's model and whose depth of field is
+   * not what a reconstruction of a SIGHTING turns on. Undefined too whenever the settings would
+   * blur nothing anyway, so a scene never pays for a pass that cannot show.
+   */
+  setLensOptics(optics: { focalLengthMm: number; fNumber: number; focusDistance: number; frameHeightMm: number } | undefined): void {
+    const was = this.lensOptics
+    this.lensOptics = optics
+    const changed =
+      (was === undefined) !== (optics === undefined) ||
+      (was &&
+        optics &&
+        (was.focalLengthMm !== optics.focalLengthMm ||
+          was.fNumber !== optics.fNumber ||
+          was.focusDistance !== optics.focusDistance ||
+          was.frameHeightMm !== optics.frameHeightMm))
+    if (!changed) return
+    if (optics && this.depthOfFieldPass) {
+      this.depthOfFieldPass.setLens(optics.focalLengthMm, optics.fNumber, optics.focusDistance, optics.frameHeightMm)
+    }
+    this.render()
+  }
+
+  private usableDepthOfFieldPass(): DepthOfFieldPass | undefined {
+    const optics = this.lensOptics
+    if (!optics) return undefined
+    const size = this.renderer.getDrawingBufferSize(new Vector2())
+    const width = Math.max(1, Math.round(size.x))
+    const height = Math.max(1, Math.round(size.y))
+    if (!this.depthOfFieldPass) {
+      this.depthOfFieldPass = new DepthOfFieldPass(width, height)
+    }
+    this.depthOfFieldPass.resize(width, height)
+    this.depthOfFieldPass.setLens(optics.focalLengthMm, optics.fNumber, optics.focusDistance, optics.frameHeightMm)
+    return this.depthOfFieldPass
+  }
+
   private usableEquidistantPass(): EquidistantProjectionPass | undefined {
     if (this.projectionKind !== "equidistant") return undefined
     const size = this.renderer.getDrawingBufferSize(new Vector2())
@@ -1754,6 +1802,8 @@ export class SceneRenderer {
     this.iceHalos = undefined
     this.rainbow?.dispose()
     this.rainbow = undefined
+    this.depthOfFieldPass?.dispose()
+    this.depthOfFieldPass = undefined
     this.cometTail?.dispose()
     this.cometTail = undefined
     for (const mesh of this.bodyMeshes.values()) {

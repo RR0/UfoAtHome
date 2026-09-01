@@ -124,6 +124,7 @@ export const ufoRecorderMessages_en: UfoRecorderMessages = {
   fieldOfView: "Field of view",
   aperture: "Aperture",
   exposure: "Exposure",
+  focusDistance: "Focused at",
   unitMillimetres: "mm",
   unitDegrees: "°",
   iceCrystalAlignment: "Crystal alignment",

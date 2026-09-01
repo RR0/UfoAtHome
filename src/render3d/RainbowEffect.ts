@@ -54,12 +54,17 @@ export class RainbowEffect {
    * SET AGAINST CLIPPING rather than by eye, which is the only way a number like this can be argued
    * about. A bow stands against a bright sky, and additive light that runs past what the screen can
    * show does not make it brighter — it flattens the display into one white band and takes the
-   * colours out, the very thing this exists to draw. Measured in a live scene against a daylit sky:
-   * at 0.5 nearly nine tenths of the bow's own pixels were clipped, at 0.2 a tenth, and at this
-   * value none, with the primary still adding about a third again to the brightness of the sky it
-   * stands on. That is a bow anybody would point at, and every colour in it survives.
+   * colours out, the very thing this exists to draw. So the rule is the highest gain at which none
+   * of the bow's own pixels clip, measured in a live scene against a daylit sky: 0.25 clips, 0.5
+   * clips a sixth of them, and this value clips nothing while the primary still adds about a third
+   * again to the brightness of the sky it stands on.
+   *
+   * RE-MEASURED after the fullscreen passes were found to be skipping the sRGB encoding
+   * (see colorSpace.ts), which had been showing every scene far darker than it is: the same
+   * criterion in the corrected picture gives 0.22 where it had given 0.15. Nothing about the bow
+   * changed — the sky it is added to did.
    */
-  private static readonly GAIN = 0.15
+  private static readonly GAIN = 0.22
 
   /**
    * How much of a moonbow's colour survives to be seen.

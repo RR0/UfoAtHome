@@ -503,6 +503,7 @@ export class SceneElement extends HTMLElement {
     this.sceneRenderer.setDecor(sighting.decor)
     const pose = resolveObserverPoseAt(sighting, t)
     this.sceneRenderer.setObserverPose(pose ?? DEFAULT_OBSERVER_POSE)
+    this.sceneRenderer.setLensOptics(this.lensOpticsAt(t))
     // Keeps decor anchored to its own real-world spot rather than sliding along with a moving
     // witness — see SceneRenderer.updateDecorAnchoring's own doc comment. The reference pose is
     // always the recording's own t=0, regardless of what t is being rendered right now.
@@ -782,6 +783,34 @@ export class SceneElement extends HTMLElement {
     if (!where) return undefined
     // Mid-flight, where the streak is longest and brightest rather than just appearing.
     return { t: Math.round(meteor.t + meteor.durationMs * 0.45), ...where }
+  }
+
+  /**
+   * The lens this recording was made through, as the depth-of-field pass needs it — or undefined
+   * where the question does not arise.
+   *
+   * It arises only for a device that has BOTH a frame and a diaphragm: without a frame there is no
+   * focal length to work from (a camera nobody identified), and without a diaphragm nothing is ever
+   * out of focus in this model (an eye, a phone). Anything else would be guessing at a blur.
+   */
+  private lensOpticsAt(t: number):
+    | { focalLengthMm: number; fNumber: number; focusDistance: number; frameHeightMm: number }
+    | undefined {
+    const sighting = this.ufoElement.sighting
+    const instrument = sighting.instrument
+    const frame = instrument.frame
+    const pose = resolveObserverPoseAt(sighting, t)
+    const fNumber = pose?.fNumber ?? instrument.fNumber
+    if (!frame || fNumber === undefined) return undefined
+    const focalLengthMm = Instruments.focalLengthMmFor(instrument, SightingShapes.fovOf(sighting, t))
+    if (focalLengthMm === undefined) return undefined
+    return {
+      focalLengthMm,
+      fNumber,
+      // Zero says "at infinity", which is what an unstated focus means — see ObserverPose.
+      focusDistance: pose?.focusDistanceM ?? 0,
+      frameHeightMm: frame.heightMm
+    }
   }
 
   /** How this recording's own instrument turns an angle into a pixel at time `t` — rebuilt per call

@@ -333,6 +333,10 @@ export interface UfoRecorderMessages {
   aperture: string
   /** How long the shutter stayed open, in seconds. */
   exposure: string
+  /** How far away the lens was focused. Left empty it means at infinity, which is where a camera
+   * pointed at the sky is — and what decides whether a sharp photograph bounds the object's
+   * distance (see DepthOfField.ts). */
+  focusDistance: string
   /** The two units the focal row switches between. */
   unitMillimetres: string
   unitDegrees: string

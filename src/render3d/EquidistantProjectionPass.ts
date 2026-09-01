@@ -11,6 +11,7 @@ import {
   type PerspectiveCamera,
   type WebGLRenderer
 } from "three"
+import { SRGB_ENCODE_GLSL } from "./colorSpace.js"
 
 /**
  * Renders the scene the way an eye sees it rather than the way a lens photographs it.
@@ -75,6 +76,7 @@ export class EquidistantProjectionPass {
       `,
       fragmentShader: `
         precision highp float;
+        ${SRGB_ENCODE_GLSL}
         uniform sampler2D uSource;
         uniform float uHalfFovRad;
         uniform float uAspect;
@@ -99,7 +101,9 @@ export class EquidistantProjectionPass {
           if (dir.z >= -1e-6) { gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); return; }
           vec2 src = vec2(dir.x / -dir.z / (uSrcTanHalfFovY * uAspect), dir.y / -dir.z / uSrcTanHalfFovY);
           if (any(greaterThan(abs(src), vec2(1.0)))) { gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); return; }
-          gl_FragColor = texture2D(uSource, src * 0.5 + 0.5);
+          // Encoded here because this pass draws to the CANVAS, which three.js would have encoded
+          // for itself had the scene gone there directly — see colorSpace.ts.
+          gl_FragColor = vec4(encodeSrgb(texture2D(uSource, src * 0.5 + 0.5).rgb), 1.0);
         }
       `,
       depthTest: false,

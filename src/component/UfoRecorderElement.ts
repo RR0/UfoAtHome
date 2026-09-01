@@ -349,8 +349,10 @@ export class UfoRecorderElement extends HTMLElement {
   private readonly unitFocalLength: HTMLElement
   private readonly labelFNumber: HTMLElement
   private readonly labelExposure: HTMLElement
+  private readonly labelFocusDistance: HTMLElement
   private readonly fNumberInput: HTMLInputElement
   private readonly exposureInput: HTMLInputElement
+  private readonly focusDistanceInput: HTMLInputElement
   private readonly labelColor: HTMLElement
   private readonly labelTransparency: HTMLElement
   private readonly labelHalo: HTMLElement
@@ -747,6 +749,8 @@ export class UfoRecorderElement extends HTMLElement {
     this.labelExposure = this.shadow.getElementById("label-exposure")!
     this.fNumberInput = this.shadow.getElementById("fNumber") as HTMLInputElement
     this.exposureInput = this.shadow.getElementById("exposureSeconds") as HTMLInputElement
+    this.focusDistanceInput = this.shadow.getElementById("focusDistance") as HTMLInputElement
+    this.labelFocusDistance = this.shadow.getElementById("label-focus-distance")!
     this.refreshInstrumentOptions()
     this.labelColor = this.shadow.getElementById("label-color")!
     this.labelTransparency = this.shadow.getElementById("label-transparency")!
@@ -1006,7 +1010,7 @@ export class UfoRecorderElement extends HTMLElement {
     }
     // The optics are pose fields like the rest — see ObserverPose.fNumber's own doc comment — so
     // they keyframe through the very same path.
-    for (const input of [this.focalLengthInput, this.fNumberInput, this.exposureInput]) {
+    for (const input of [this.focalLengthInput, this.fNumberInput, this.exposureInput, this.focusDistanceInput]) {
       input.addEventListener("input", () => this.updateObserver())
     }
     this.searchPlaceButton.addEventListener("click", () => void this.searchPlace())
@@ -1584,11 +1588,23 @@ export class UfoRecorderElement extends HTMLElement {
         : stated) ?? this.currentFovDeg()
     const fNumber = this.numberOrUndefined(this.fNumberInput.value)
     const exposureSeconds = UfoRecorderElement.exposureSeconds(this.exposureInput.value)
+    // Empty is not missing here, it is INFINITY — where a camera pointed at the sky is focused.
+    const focusDistanceM = this.numberOrUndefined(this.focusDistanceInput.value)
     const nothingSet = lat === undefined && lng === undefined && headingDeg === undefined && pitchDeg === 0 && elevationM === 0
     if (nothingSet) {
       witnessTrack.removeKeyframeAt(t)
     } else {
-      witnessTrack.addKeyframe(t, { lat, lng, elevationM, headingDeg, pitchDeg, fovDeg, fNumber, exposureSeconds })
+      witnessTrack.addKeyframe(t, {
+        lat,
+        lng,
+        elevationM,
+        headingDeg,
+        pitchDeg,
+        fovDeg,
+        fNumber,
+        exposureSeconds,
+        focusDistanceM
+      })
     }
     // Neither field affects the 2D shape canvas, so this refresh() is only for its side effect —
     // it's what makes this edit surface as a "timeupdate" (see the constructor's listener), the
@@ -2823,6 +2839,14 @@ export class UfoRecorderElement extends HTMLElement {
     }
     this.setRowVisible(this.exposureInput, instrument.exposureSeconds !== undefined)
     this.exposureInput.disabled = instrument.exposureRangeSeconds === undefined
+
+    // Only ever askable of something that can be focused at all, which is to say something with a
+    // lens and a diaphragm: an eye is not focused BY the witness, and its depth of field is not
+    // what a reconstruction turns on.
+    if (this.focusDistanceInput !== this.shadow.activeElement) {
+      this.focusDistanceInput.value = pose?.focusDistanceM === undefined ? "" : String(pose.focusDistanceM)
+    }
+    this.setRowVisible(this.focusDistanceInput, frame !== undefined && instrument.fNumber !== undefined)
   }
 
   /**
@@ -4151,6 +4175,7 @@ export class UfoRecorderElement extends HTMLElement {
     this.labelIceAlignment.textContent = messages.iceCrystalAlignment
     this.labelFNumber.textContent = messages.aperture
     this.labelExposure.textContent = messages.exposure
+    this.labelFocusDistance.textContent = messages.focusDistance
     // The focal row's own label and unit depend on the instrument, not only on the language.
     this.syncOpticsFromInstrument()
     this.labelCloudDarkness.textContent = messages.cloudDarkness
