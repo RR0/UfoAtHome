@@ -26,6 +26,11 @@ export const html = `
     <div class="info-footer">
       <a id="info-app-link" href="https://ufoathome.org" target="_blank" rel="noopener"></a>
       <span class="info-footer-actions">
+        <!-- Turns the parameter strip under the render on and off. It lives in the panel rather
+             than on the toolbar because it is a preference about how much this player says, not
+             an action on the observation — and because the panel is what it takes over from: with
+             the strip showing, the rows above become a second, poorer copy of it. -->
+        <button id="info-labels-toggle" class="info-credits-toggle" type="button" aria-pressed="false">Labels</button>
         <button id="info-embed-toggle" class="info-credits-toggle" type="button" aria-expanded="false">Embed</button>
         <button id="info-credits-toggle" class="info-credits-toggle" type="button" aria-expanded="false">Credits</button>
       </span>
@@ -33,6 +38,12 @@ export const html = `
   </div>
 </div>
 <div id="ufo-slot"></div>
+<!-- What this recording states, field by field, in the same words the editor uses for the same
+     fields — the very same SightingSummary the recorder shows under its own render. Off unless
+     the page asks for it (show-labels) or the reader does (the info panel's own toggle): a player
+     dropped into an article is there to be watched, and forty labels under it is a data sheet.
+     Read-only here, unlike in the editor, where each one is a way back to its field. -->
+<div id="param-summary" class="param-summary" hidden></div>
 `
 
 export const css = `
@@ -82,6 +93,45 @@ export const css = `
    case description runs to a paragraph or more, and its footer holds the link to this
    observation's editor — the close button and that footer are pinned to its edges rather than
    scrolling away with the content, since they are how you leave it and what you came for. */
+/* Deliberately quieter than the render it sits under, and wrapping rather than scrolling: this is
+   meant to be scanned in one pass, and a strip that hides half of itself off the right edge would
+   be worse than not showing it. */
+.param-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3em;
+  margin-top: 0.5em;
+  font-size: 0.85em;
+}
+.param-summary[hidden] {
+  display: none;
+}
+.param-label {
+  color: #bbb;
+  border: 1px solid #3a3a3a;
+  border-radius: 999px;
+  padding: 0.1em 0.6em;
+  white-space: nowrap;
+}
+.param-label .param-label-value {
+  color: inherit;
+  font-weight: 600;
+}
+/* A value no witness gave: read from a record (ERA5's weather, a terrain provider's ground) — the
+   distinction this whole project turns on, and the one thing a plain list of numbers loses. */
+.param-label.from-source .param-label-value {
+  color: #8cf;
+  font-weight: normal;
+  font-style: italic;
+}
+.param-label .param-label-swatch {
+  display: inline-block;
+  width: 0.7em;
+  height: 0.7em;
+  border: 1px solid #666;
+  border-radius: 2px;
+  vertical-align: -1px;
+}
 .info-panel {
   padding: 0.6em 0.8em;
   border: 1px solid #ccc;

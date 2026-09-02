@@ -1,4 +1,5 @@
 import { html, css } from "./eyewitnessTemplate.js"
+import { SightingSummary } from "./SightingSummary.js"
 import { SceneElement, registerScene, SCENE_ELEMENT_NAME } from "./SceneElement.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
 import type { People } from "../engine/model/People.js"
@@ -54,7 +55,7 @@ const APP_HOME_URL = "https://ufoathome.org"
  */
 export class EyewitnessElement extends HTMLElement {
   static get observedAttributes(): string[] {
-    return ["src"]
+    return ["src", "show-labels"]
   }
 
   private readonly shadow: ShadowRoot
@@ -79,6 +80,13 @@ export class EyewitnessElement extends HTMLElement {
   private readonly labelEmbedEdit: HTMLElement
   private readonly embedMarkup: HTMLTextAreaElement
   private readonly embedCopyButton: HTMLButtonElement
+  private readonly labelsToggle: HTMLButtonElement
+  private readonly paramSummary: HTMLElement
+  private summaryBuilder = new SightingSummary(eyewitnessMessages_en, "en")
+  /** What the strip last rendered. It refreshes on every playback tick (see the timeupdate
+   * listener), and replacing forty elements sixty times a second — under a reader's own text
+   * selection, at that — for values that changed in none of them is not free. */
+  private summarySignature = ""
 
   /** Whether this browser has the popover API — where it does, the info panel lives in the top
    * layer and cannot be clipped by the host page; where it doesn't (anything older than 2024), it
@@ -90,6 +98,11 @@ export class EyewitnessElement extends HTMLElement {
   private infoOpen = false
   private creditsOpen = false
   private embedOpen = false
+  /** Whether the parameter strip under the render is showing. Off by default: a player dropped
+   * into an article is there to be watched. Turned on by the `show-labels` attribute (a page
+   * deciding for its readers) or by the info panel's own toggle (a reader deciding for
+   * themselves) — the two are the same switch, so a reader can always close what a page opened. */
+  private labelsShown = false
   private language: UfoLanguage = "en"
   private messages: EyewitnessMessages = eyewitnessMessages_en
 
@@ -118,6 +131,9 @@ export class EyewitnessElement extends HTMLElement {
     this.infoCreditsToggle = this.shadow.getElementById("info-credits-toggle") as HTMLButtonElement
     this.infoCreditsList = this.shadow.getElementById("info-credits-list")!
     this.infoCloseButton = this.shadow.getElementById("info-close") as HTMLButtonElement
+    this.labelsToggle = this.shadow.getElementById("info-labels-toggle") as HTMLButtonElement
+    this.paramSummary = this.shadow.getElementById("param-summary")!
+    this.labelsToggle.addEventListener("click", () => { this.showLabels = !this.showLabels })
     this.infoEmbedToggle = this.shadow.getElementById("info-embed-toggle") as HTMLButtonElement
     this.infoEmbedPanel = this.shadow.getElementById("info-embed")!
     this.embedReplayRadio = this.shadow.getElementById("embed-kind-replay") as HTMLInputElement
@@ -128,6 +144,11 @@ export class EyewitnessElement extends HTMLElement {
     this.embedCopyButton = this.shadow.getElementById("embed-copy") as HTMLButtonElement
 
     this.witnessSelect.addEventListener("change", () => this.selectWitness(this.witnessSelect.value))
+    // Weather, sound and the witness's own pose are keyframed, so what the recording states at
+    // one instant isn't what it states at another — a strip frozen on the opening frame would be
+    // wrong for the rest of the replay. Cheap: refreshParamSummary does nothing at all while the
+    // strip is hidden, which is the default.
+    this.sceneElement.ufoElement.addEventListener("timeupdate", () => this.refreshParamSummary())
     if (this.supportsPopover) {
       // Promoted to the TOP LAYER, the one placement an ancestor's overflow:hidden cannot clip —
       // see the .info-panel:popover-open rules. Opening is left to the browser's own invoker
@@ -170,6 +191,9 @@ export class EyewitnessElement extends HTMLElement {
     this.infoCloseButton.setAttribute("aria-label", this.messages.close)
     this.infoObservationHeading.textContent = this.messages.observation
     this.infoCreditsToggle.textContent = this.messages.credits
+    this.summaryBuilder = new SightingSummary(this.messages, this.language === "fr" ? "fr" : "en")
+    this.syncLabelsToggle()
+    this.refreshParamSummary()
     this.infoEmbedToggle.textContent = this.messages.embed
     this.labelEmbedReplay.textContent = this.messages.embedReplay
     this.labelEmbedEdit.textContent = this.messages.embedEdit
@@ -195,6 +219,9 @@ export class EyewitnessElement extends HTMLElement {
   attributeChangedCallback(name: string, oldValue: string, newValue: string): void {
     if (name === "src" && newValue && newValue !== oldValue && this.isConnected) {
       void this.loadFromSrc(newValue)
+    }
+    if (name === "show-labels") {
+      this.applyLabels(this.hasAttribute("show-labels"))
     }
   }
 
@@ -327,6 +354,8 @@ export class EyewitnessElement extends HTMLElement {
     // SceneElement's own setter updates astronomy/weather/terrain for the new sighting too.
     this.sceneElement.sightingData = entry.sighting
     this.updateTestimonyLine()
+    // A different witness is a different recording: what it states changes with it.
+    this.refreshParamSummary()
     if (this.infoOpen) this.populateInfoPanel()
   }
 
@@ -482,25 +511,114 @@ export class EyewitnessElement extends HTMLElement {
    * toggleCredits() reveals it — no point building visible DOM for content nobody asked to see
    * yet. Re-run on open and whenever the selected witness changes while the panel is already
    * open — cheap enough not to bother with a more granular per-section update path. */
+  /**
+   * Whether the parameter strip under the render is showing — what the recording states, field by
+   * field, in the same words the editor uses for the same fields.
+   *
+   * Reflected onto the `show-labels` attribute, so a page can declare it in markup, a script can
+   * set it, and the info panel's own toggle can flip it, without the three ever disagreeing about
+   * what is on screen. The same relationship `<details>` has with its own `open`: the attribute
+   * IS the state, not a one-time instruction that a reader's click then silently invalidates.
+   *
+   * Off unless asked for: a player dropped into an article is there to be watched, and forty
+   * labels under it is a data sheet.
+   */
+  get showLabels(): boolean {
+    return this.labelsShown
+  }
+
+  set showLabels(show: boolean) {
+    this.toggleAttribute("show-labels", show)
+  }
+
+  /**
+   * Applies that state: the strip appears, and the info panel is re-cut around it.
+   *
+   * The two move together on purpose. With the strip showing, the panel's Date/Place/Case/Tags
+   * rows say again, in a worse form, what is already spelled out under the render — so they step
+   * aside and the panel is left holding the one thing the strip deliberately refuses: the
+   * description, which is prose and belongs in a panel rather than on a chip.
+   */
+  private applyLabels(shown: boolean): void {
+    this.labelsShown = shown
+    this.syncLabelsToggle()
+    this.refreshParamSummary()
+    // Unconditionally, not just while the panel happens to be open: the toggle that changes what
+    // the panel should hold is IN the panel, so guarding on infoOpen (as selectWitness does, for a
+    // change that comes from outside it) left the rows the strip had taken over missing after the
+    // strip was turned back off.
+    this.populateInfoPanel()
+  }
+
+  private syncLabelsToggle(): void {
+    this.labelsToggle.textContent = this.labelsShown ? this.messages.hideLabels : this.messages.showLabels
+    this.labelsToggle.setAttribute("aria-pressed", String(this.labelsShown))
+  }
+
+  /** Rebuilds the strip from the recording itself, through the same SightingSummary the editor
+   * shows the same file with. Read-only here: there is no form behind a player to send anyone
+   * back to, so a label is a statement and not a way in. */
+  private refreshParamSummary(): void {
+    this.paramSummary.hidden = !this.labelsShown
+    if (!this.labelsShown) {
+      this.paramSummary.replaceChildren()
+      this.summarySignature = ""
+      return
+    }
+    const sighting = this.sceneElement.ufoElement.sighting
+    // No decorId and no sourceId: a reader isn't pointing at one building or one shape, so the
+    // summary describes the observation and lists what stood around rather than detailing a
+    // selection nobody made. No ground height either — the scene doesn't resolve one, so the
+    // witness's own height is stated as height above the ground rather than as a sea-level
+    // altitude that would be wrong by the whole relief (see SummaryContext).
+    const entries = this.summaryBuilder.entriesFor(sighting, this.sceneElement.ufoElement.currentTime)
+    const signature = entries.map(entry => `${entry.field}=${entry.label}=${entry.value}${entry.unit}${entry.fromSource ? "*" : ""}`).join("|")
+    if (signature === this.summarySignature) {
+      return
+    }
+    this.summarySignature = signature
+    this.paramSummary.replaceChildren(...entries.map(entry => {
+      const item = document.createElement("span")
+      item.className = entry.fromSource ? "param-label from-source" : "param-label"
+      item.append(`${entry.label} `)
+      if (entry.color !== undefined) {
+        const swatch = document.createElement("span")
+        swatch.className = "param-label-swatch"
+        swatch.style.background = entry.color
+        item.append(swatch)
+      }
+      const value = document.createElement("span")
+      value.className = "param-label-value"
+      value.textContent = entry.unit === "" ? entry.value : `${entry.value} ${entry.unit}`
+      item.append(value)
+      return item
+    }))
+  }
+
   private populateInfoPanel(): void {
     const entry = this.entries.find(e => e.src === this.currentSrc)
     this.infoObservationList.innerHTML = ""
     if (entry) {
-      const date = this.formatDate(entry.sighting)
-      if (date) {
-        this.appendInfoRow(this.infoObservationList, this.messages.date, date)
-      }
-      const location = this.formatLocation(entry.sighting)
-      if (location) {
-        this.appendInfoRow(this.infoObservationList, this.messages.location, location)
-      }
-      if (entry.sighting.caseId) {
-        this.appendInfoRow(this.infoObservationList, this.messages.case, entry.sighting.caseId)
+      // Date, place, case and tags only while the strip under the render isn't already stating
+      // them — see toggleLabels. The description is never dropped: it is the one thing the strip
+      // refuses to carry, because prose doesn't fit on a chip.
+      if (!this.labelsShown) {
+        const date = this.formatDate(entry.sighting)
+        if (date) {
+          this.appendInfoRow(this.infoObservationList, this.messages.date, date)
+        }
+        const location = this.formatLocation(entry.sighting)
+        if (location) {
+          this.appendInfoRow(this.infoObservationList, this.messages.location, location)
+        }
+        if (entry.sighting.caseId) {
+          this.appendInfoRow(this.infoObservationList, this.messages.case, entry.sighting.caseId)
+        }
       }
       if (entry.sighting.description) {
         this.appendInfoRow(this.infoObservationList, this.messages.description, entry.sighting.description)
       }
-      if (entry.sighting.tags && entry.sighting.tags.length > 0) {
+      if (!this.labelsShown && entry.sighting.tags && entry.sighting.tags.length > 0) {
         this.appendInfoRow(this.infoObservationList, this.messages.tags, entry.sighting.tags.join(", "))
       }
     }

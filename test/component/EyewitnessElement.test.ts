@@ -592,6 +592,117 @@ describe("EyewitnessElement info panel placement", () => {
  * Both fold-outs live above the panel's sticky footer. After it, they open UNDERNEATH it — which
  * is how clicking Credits came to reveal a list nobody could see once the panel had a height cap.
  */
+describe("EyewitnessElement parameter labels", () => {
+  beforeEach(() => {
+    stubFetch({ "john.json": johnSighting })
+  })
+
+  afterEach(() => {
+    document.body.innerHTML = ""
+  })
+
+  async function mounted(showLabels = false): Promise<EyewitnessElement> {
+    const element = mount()
+    if (showLabels) {
+      element.setAttribute("show-labels", "")
+    }
+    element.witnessUrls = ["john.json"]
+    await new Promise(resolve => setTimeout(resolve, 0))
+    return element
+  }
+
+  function labels(element: EyewitnessElement): string[] {
+    return [...element.shadowRoot!.querySelectorAll(".param-label")].map(item => item.textContent!)
+  }
+
+  // A player dropped into an article is there to be watched, not to be a data sheet.
+  it("shows no strip at all until a page or a reader asks for one", async () => {
+    const element = await mounted()
+    expect(element.shadowRoot!.getElementById("param-summary")!.hidden).toBe(true)
+    expect(labels(element)).toEqual([])
+  })
+
+  it("states the recording when the page asks with show-labels", async () => {
+    const element = await mounted(true)
+    expect(element.shadowRoot!.getElementById("param-summary")!.hidden).toBe(false)
+    expect(labels(element).some(text => text.includes("chiles-whitted"))).toBe(true)
+  })
+
+  it("takes the same instruction from a script as from the markup", async () => {
+    const element = await mounted()
+    expect(element.showLabels).toBe(false)
+
+    element.showLabels = true
+    expect(element.hasAttribute("show-labels")).toBe(true)
+    expect(labels(element).length).toBeGreaterThan(0)
+
+    element.showLabels = false
+    expect(element.hasAttribute("show-labels")).toBe(false)
+    expect(labels(element)).toEqual([])
+  })
+
+  /*
+   * The attribute IS the state, the way <details open> works — not a one-time instruction a
+   * reader's click then silently invalidates. Without that, a page that declared show-labels and
+   * a reader who closed the strip left the property lying, and setting it back to true did
+   * nothing at all: the attribute had never come off.
+   */
+  it("reports what the reader did, and can be reopened afterwards", async () => {
+    const element = await mounted(true)
+    ;(element.shadowRoot!.getElementById("info-labels-toggle") as HTMLButtonElement).click()
+    expect(element.showLabels).toBe(false)
+    expect(element.hasAttribute("show-labels")).toBe(false)
+
+    element.showLabels = true
+    expect(labels(element).length).toBeGreaterThan(0)
+  })
+
+  // Same switch as the attribute, so a reader can always close what a page opened.
+  it("lets the reader turn it on and off from the info panel", async () => {
+    const element = await mounted()
+    const toggle = element.shadowRoot!.getElementById("info-labels-toggle") as HTMLButtonElement
+    expect(toggle.getAttribute("aria-pressed")).toBe("false")
+
+    toggle.click()
+    expect(toggle.getAttribute("aria-pressed")).toBe("true")
+    expect(labels(element).length).toBeGreaterThan(0)
+
+    toggle.click()
+    expect(labels(element)).toEqual([])
+  })
+
+  /*
+   * With the strip showing, the panel's own date/place/case rows say again, in a worse form, what
+   * is spelled out under the render. The description never goes: it is the one thing the strip
+   * refuses to carry, because prose doesn't fit on a chip.
+   */
+  it("stops the info panel repeating what the strip already states, and leaves it the description", async () => {
+    const element = await mounted()
+    const shadow = element.shadowRoot!
+    ;(shadow.getElementById("info-button") as HTMLButtonElement).click()
+    const rows = (): string[] => [...shadow.querySelectorAll("#info-observation-list dt")].map(dt => dt.textContent!)
+    expect(rows()).toContain("Case")
+
+    ;(shadow.getElementById("info-labels-toggle") as HTMLButtonElement).click()
+    expect(rows()).not.toContain("Case")
+    expect(rows()).not.toContain("Date")
+    // Nothing is left here at all only because this fixture states no description; a recording
+    // that does keeps it, which is the whole point of leaving that one row alone.
+
+    // And gives them back. The toggle lives inside the panel it re-cuts, so an earlier version
+    // that only repopulated "while the panel is open" left these rows gone for good.
+    ;(shadow.getElementById("info-labels-toggle") as HTMLButtonElement).click()
+    expect(rows()).toContain("Case")
+  })
+
+  // Read-only: there is no form behind a player to send anyone back to.
+  it("makes the labels statements, not controls", async () => {
+    const element = await mounted(true)
+    expect(element.shadowRoot!.querySelectorAll(".param-label button").length).toBe(0)
+    expect([...element.shadowRoot!.querySelectorAll(".param-label")].every(item => item.tagName === "SPAN")).toBe(true)
+  })
+})
+
 describe("EyewitnessElement info panel fold-outs", () => {
   beforeEach(() => {
     stubFetch({ "john.json": johnSighting })

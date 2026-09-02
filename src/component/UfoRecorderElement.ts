@@ -1,4 +1,6 @@
 import { html, css } from "./template.js"
+import { SightingSummary } from "./SightingSummary.js"
+import type { SummaryGroup } from "./SightingSummary.js"
 import { UfoElement, registerUfo } from "./UfoElement.js"
 import { SceneElement, registerScene, SCENE_ELEMENT_NAME } from "./SceneElement.js"
 import { Recorder } from "../engine/record/Recorder.js"
@@ -386,15 +388,28 @@ export class UfoRecorderElement extends HTMLElement {
   private readonly labelCaseId: HTMLElement
   private readonly labelDescription: HTMLElement
   private readonly labelTags: HTMLElement
-  private readonly labelWeather: HTMLElement
   private readonly labelImportFile: HTMLElement
   private readonly labelImportUrl: HTMLElement
+  private readonly groupTabs: HTMLButtonElement[]
+  private readonly groupPanels: HTMLElement[]
+  private readonly paramSummary: HTMLElement
+  /** Rebuilt on a language change, since the labels it holds are the ones it was made with. */
+  private paramSummaryBuilder: SightingSummary
+  /** What the summary last rendered, so the rebuild can be skipped when nothing it shows has
+   * changed. onSelectionOrTimeChanged — where the refresh hangs — also runs on every playhead
+   * tick during playback, and a summary is 75 fields wide: reading them is cheap, replacing the
+   * DOM sixty times a second while the author is trying to click one of the chips is not. */
+  private paramSummarySignature = ""
   private readonly labelShapeGroup: HTMLElement
   private readonly labelTemporalGroup: HTMLElement
   private readonly labelLocationGroup: HTMLElement
   private readonly labelObservationGroup: HTMLElement
   private readonly labelWitnessGroup: HTMLElement
-  private readonly labelCircumstancesGroup: HTMLElement
+  private readonly skyDetailsButton: HTMLButtonElement
+  /** The two prose lines the button unclamps: which record answered, and what else was in that
+   * patch of sky. */
+  private readonly clampedLines: HTMLElement[]
+  private readonly labelWeatherGroup: HTMLElement
   private readonly labelCloudCover: HTMLElement
   private readonly labelHighCloud: HTMLElement
   private readonly labelIceAlignment: HTMLElement
@@ -455,10 +470,10 @@ export class UfoRecorderElement extends HTMLElement {
   private readonly labelDecorSide: Record<DecorSide, HTMLElement>
   private readonly optionWitnessSide: Record<DecorSide, HTMLOptionElement>
   private readonly labelDecor: HTMLElement
-  /** The <legend> of the fieldset wrapping every decor-object field (Add through Occupied floor)
-   * inside the Location group — reuses the same "Decor" text as labelDecor (the object-picker's
-   * own label), just on a different element, so no separate message key is needed. */
-  private readonly labelDecorFieldset: HTMLElement
+  /** The Decor group's own handle in the tab strip — reuses the same "Decor" text as labelDecor
+   * (the object-picker's own label), just on a different element, so no separate message key is
+   * needed. */
+  private readonly labelDecorGroup: HTMLElement
   private readonly labelDecorTitle: HTMLElement
   private readonly labelDecorEast: HTMLElement
   private readonly labelDecorNorth: HTMLElement
@@ -787,7 +802,6 @@ export class UfoRecorderElement extends HTMLElement {
     this.labelCaseId = this.shadow.getElementById("label-case-id")!
     this.labelDescription = this.shadow.getElementById("label-description")!
     this.labelTags = this.shadow.getElementById("label-tags")!
-    this.labelWeather = this.shadow.getElementById("label-weather")!
     this.labelImportFile = this.shadow.getElementById("label-import-file")!
     this.labelImportUrl = this.shadow.getElementById("label-import-url")!
     this.labelShapeGroup = this.shadow.getElementById("label-shape-group")!
@@ -795,7 +809,7 @@ export class UfoRecorderElement extends HTMLElement {
     this.labelLocationGroup = this.shadow.getElementById("label-location-group")!
     this.labelObservationGroup = this.shadow.getElementById("label-observation-group")!
     this.labelWitnessGroup = this.shadow.getElementById("label-witness-group")!
-    this.labelCircumstancesGroup = this.shadow.getElementById("label-circumstances-group")!
+    this.labelWeatherGroup = this.shadow.getElementById("label-weather-group")!
     this.labelCloudCover = this.shadow.getElementById("label-cloud-cover")!
     this.labelHighCloud = this.shadow.getElementById("label-high-cloud")!
     this.labelIceAlignment = this.shadow.getElementById("label-ice-alignment")!
@@ -862,7 +876,7 @@ export class UfoRecorderElement extends HTMLElement {
     }
     this.optionWitnessSideNone = this.shadow.getElementById("option-witness-side-none") as HTMLOptionElement
     this.labelDecor = this.shadow.getElementById("label-decor")!
-    this.labelDecorFieldset = this.shadow.getElementById("label-decor-fieldset")!
+    this.labelDecorGroup = this.shadow.getElementById("label-decor-group")!
     this.labelDecorTitle = this.shadow.getElementById("label-decor-title")!
     this.labelDecorEast = this.shadow.getElementById("label-decor-east")!
     this.labelDecorNorth = this.shadow.getElementById("label-decor-north")!
@@ -1089,6 +1103,25 @@ export class UfoRecorderElement extends HTMLElement {
       field.addEventListener("input", () => this.applySoundAtPlayhead())
     }
     this.weatherInferredInput.addEventListener("change", () => this.onWeatherInferredToggled())
+
+    this.skyDetailsButton = this.shadow.getElementById("sky-details") as HTMLButtonElement
+    this.clampedLines = [this.shadow.getElementById("weather-source")!, this.shadow.getElementById("sky-candidates")!]
+    this.skyDetailsButton.addEventListener("click", () => this.toggleSkyDetails())
+
+    this.groupTabs = [...this.shadow.querySelectorAll<HTMLButtonElement>(".group-tab")]
+    this.groupPanels = this.groupTabs.map(tab => this.shadow.getElementById(tab.getAttribute("aria-controls")!)!)
+    for (const tab of this.groupTabs) {
+      tab.addEventListener("click", () => this.toggleGroup(tab, !this.isGroupOpen(tab)))
+    }
+    this.paramSummary = this.shadow.getElementById("param-summary")!
+    this.paramSummaryBuilder = new SightingSummary(this.messages, this.showerLanguage())
+    // One listener on the strip rather than one per chip: the chips are rebuilt from scratch on
+    // every refresh, and re-binding 37 handlers each time is how a summary meant to be cheap stops
+    // being cheap.
+    this.paramSummary.addEventListener("click", event => this.onParamSummaryClick(event))
+    // Shape is the group left open on load — of the eight it's the one whose every field changes
+    // what the canvas right below it draws, so it's the one worth having open while looking at it.
+    this.toggleGroup(this.groupTabs[this.groupTabs.length - 1], true)
 
     this.updatePresetButtons()
     this.setRecordButtonLabel(false)
@@ -2552,6 +2585,159 @@ export class UfoRecorderElement extends HTMLElement {
 
   /** Runs everything that depends on {currentSourceId, currentTime}: resyncs the appearance
    * toolbar and drives the canvas-native selection highlight on the nested ufo element. */
+  /** Unclamps the weather-record and sky lines, or clamps them again. Both at once: they answer
+   * the same question about the same night, and a reader who wants one wants the other. */
+  private toggleSkyDetails(): void {
+    const expanded = this.skyDetailsButton.getAttribute("aria-expanded") !== "true"
+    this.skyDetailsButton.setAttribute("aria-expanded", String(expanded))
+    this.skyDetailsButton.textContent = expanded ? "\u25B4" : "\u25BE"
+    this.skyDetailsButton.title = expanded ? this.messages.skyDetailsHide : this.messages.skyDetails
+    this.skyDetailsButton.setAttribute("aria-label", this.skyDetailsButton.title)
+    for (const line of this.clampedLines) {
+      line.classList.toggle("clamped", !expanded)
+    }
+  }
+
+  private isGroupOpen(tab: HTMLButtonElement): boolean {
+    return tab.getAttribute("aria-expanded") === "true"
+  }
+
+  /**
+   * Opens one group and closes every other one.
+   *
+   * Exclusive rather than a free-for-all of independent toggles, and that's the whole point of the
+   * strip: eight panels open at once is the 1210px-tall form this replaced, with the render pushed
+   * below the fold and the impact of an edit invisible at the moment it's made. One open panel
+   * (the tallest, Location, is 180px once Decor is split out of it) keeps the canvas on screen on
+   * a laptop and within one scroll of it on a phone. Comparing two groups isn't lost — what's set
+   * everywhere else stays readable in the summary under the render, which is why that summary is
+   * what makes this restriction affordable.
+   */
+  private toggleGroup(tab: HTMLButtonElement, open: boolean): void {
+    for (const [index, candidate] of this.groupTabs.entries()) {
+      const nowOpen = candidate === tab && open
+      candidate.setAttribute("aria-expanded", String(nowOpen))
+      this.groupPanels[index].hidden = !nowOpen
+    }
+  }
+
+  /** The eight groups in the order their handles stand on the strip, which is also the order
+   * SightingSummary emits them in — so a chip's own group names the panel to open. */
+  private static readonly SUMMARY_GROUPS: SummaryGroup[] = [
+    "observation", "witness", "location", "decor", "temporal", "weather", "sound", "shape"
+  ]
+
+  /**
+   * Rebuilds the strip of what this recording states, under the render.
+   *
+   * Read off the Sighting through SightingSummary, the same class `<rr0-eyewitness>` shows the
+   * same recording with. An earlier version of this derived itself from the editor's own form —
+   * cheaper, and translated for free, since the markup already pairs a label with a value and a
+   * unit — but a player has no form, so showing the summary there meant either a second
+   * implementation free to disagree with this one, or this one moving to the model. It moved.
+   *
+   * What it costs, and it is worth writing down: the summary now states only what the FILE holds.
+   * The sampling rate is gone from it, and so is the "from weather records" tickbox — the first
+   * is a property of the act of recording rather than of the sighting, and the second is said
+   * better by the marks on the nine values that record supplied.
+   */
+  private refreshParamSummary(): void {
+    const selectedSourceIds = [...this.selectedSourceIds]
+    const entries = this.paramSummaryBuilder.entriesFor(this.ufoElement.sighting, this.ufoElement.currentTime, {
+      decorId: this.currentDecorId,
+      // The one thing the file can't tell the summary: a pose's elevationM is height above the
+      // GROUND, and this toolbar's "Altitude" field is height above sea level. See SummaryContext.
+      // Zero rather than undefined when no terrain has resolved yet, because that is exactly what
+      // the field itself then shows (see syncElevationField's own `ground ?? 0`) — a chip is a way
+      // back to a field, so it has to say what that field says.
+      groundElevationM: this.groundElevationM ?? 0,
+      // One shape only: the appearance fields describe a single shape, and an arbitrary member of
+      // a multiple selection is not a fact about anything (see updateAppearanceFieldsDisabledState,
+      // which disables those same fields for the same reason).
+      sourceId: selectedSourceIds.length === 1 ? selectedSourceIds[0] : undefined
+    })
+    // "Altitude 220 m" and "Altitude 0 m" side by side are the witness's own height above the sea
+    // and a building's — two different assertions under one word, which is fine inside a panel
+    // that names its subject and misleading on a strip that doesn't. Only a label shared across
+    // GROUPS pays for the group name: two fields sharing one inside a single group are told apart
+    // by their own values and units, and repeating the group twice would just be the same word
+    // twice on a strip that exists to be scanned.
+    const labelGroups = new Map<string, Set<string>>()
+    for (const entry of entries) {
+      const groups = labelGroups.get(entry.label) ?? new Set<string>()
+      groups.add(entry.group)
+      labelGroups.set(entry.label, groups)
+    }
+    const chips = entries.map(entry => {
+      const panel = UfoRecorderElement.SUMMARY_GROUPS.indexOf(entry.group)
+      const label = labelGroups.get(entry.label)!.size > 1
+        ? `${this.groupTabs[panel].textContent!.trim()} \u00b7 ${entry.label}`
+        : entry.label
+      return { ...entry, panel, label }
+    })
+    const signature = chips.map(chip => `${chip.field}=${chip.label}=${chip.value}${chip.unit}${chip.fromSource ? "*" : ""}`).join("|")
+    if (signature === this.paramSummarySignature) {
+      return
+    }
+    this.paramSummarySignature = signature
+    this.paramSummary.replaceChildren(...chips.map(chip => {
+      const button = document.createElement("button")
+      button.type = "button"
+      button.className = chip.fromSource ? "param-chip from-source" : "param-chip"
+      button.dataset.panel = String(chip.panel)
+      button.dataset.field = chip.field
+      button.append(`${chip.label} `)
+      if (chip.color !== undefined) {
+        const swatch = document.createElement("span")
+        swatch.className = "param-chip-swatch"
+        swatch.style.background = chip.color
+        button.append(swatch)
+      }
+      const value = document.createElement("span")
+      value.className = "param-chip-value"
+      value.textContent = chip.unit === "" ? chip.value : `${chip.value} ${chip.unit}`
+      button.append(value)
+      return button
+    }))
+  }
+
+  /** A chip is a way back to its own field: opens the group holding it, then puts the caret in it,
+   * pre-selected — the summary is where you notice a value is wrong, so the click that says so
+   * should leave you able to type the right one. */
+  private onParamSummaryClick(event: Event): void {
+    const chip = (event.target as HTMLElement).closest<HTMLElement>(".param-chip")
+    if (chip === undefined || chip === null) {
+      return
+    }
+    const panel = this.groupPanels[Number(chip.dataset.panel)]
+    this.toggleGroup(this.groupTabs[Number(chip.dataset.panel)], true)
+    // A decor object the summary listed rather than one of its fields (see
+    // SightingSummary.addDecor): there is no control to focus, so the click selects that object,
+    // which is what makes its own fields appear in the panel just opened.
+    const field = chip.dataset.field!
+    if (field.startsWith("decor:")) {
+      this.currentDecorId = field.slice("decor:".length)
+      this.refreshDecorList()
+      this.decorSelect.focus()
+      return
+    }
+    // Looked up by id on the shadow root rather than through a selector: the field ids come from
+    // the model, and building a selector out of them means CSS.escape, which isn't there in every
+    // environment this component is exercised in.
+    const control = this.shadow.getElementById(field)
+    if (control === null || !panel.contains(control)) {
+      return
+    }
+    // Focus is what actually has to happen, and it brings the field into view by itself; centring
+    // it is a nicety, called as one so that an environment without scrollIntoView still lands the
+    // caret rather than throwing on the way there.
+    control.focus()
+    if (control instanceof HTMLInputElement && control.type !== "checkbox" && control.type !== "color" && control.type !== "range") {
+      control.select()
+    }
+    control.scrollIntoView?.({ block: "center" })
+  }
+
   private onSelectionOrTimeChanged(): void {
     this.syncAppearanceFromTimeline()
     this.syncObserverFromTimeline()
@@ -2597,6 +2783,12 @@ export class UfoRecorderElement extends HTMLElement {
       this.ufoElement.playbackState === "playing" ||
       selectedKnownCount === 0 ||
       sourceIds.length - selectedKnownCount < 1
+    // Last, so it reads the fields every sync above has just rewritten rather than their previous
+    // values. This is the one place worth hanging it from: every edit path in this toolbar ends in
+    // a refresh() that comes back through here, including the ones that write fields the author
+    // never touched (a place lookup filling latitude/longitude, a weather record filling nine
+    // more) — which are exactly the values the summary exists to surface.
+    this.refreshParamSummary()
   }
 
   /** When more than one shape is selected, the appearance fields (Name/Color/Transparency/Halo/
@@ -3434,6 +3626,10 @@ export class UfoRecorderElement extends HTMLElement {
     this.setRowVisible(this.decorTitleInput, hasSelection)
     this.setRowVisible(this.decorEastInput, hasSelection)
     this.setRowVisible(this.decorNorthInput, hasSelection)
+    // Was the one placement field left out of this list, so an empty recording showed a lone
+    // "Altitude 0 m" for a decor object that didn't exist — visible in the form, and stated
+    // outright by the parameter summary, which is what turned it up.
+    this.setRowVisible(this.decorAltitudeInput, hasSelection)
     this.setRowVisible(this.decorHeadingInput, hasSelection)
     // Lit is the legacy single switch (a streetlamp, a car's headlights). An aircraft's lamps are a
     // rig of their own (see LightRig.ts), so the checkbox would sit there doing nothing at all —
@@ -4099,7 +4295,7 @@ export class UfoRecorderElement extends HTMLElement {
     this.obsEndTimeInput.title = messages.observationEndTimeHint
     this.presetsGroup.setAttribute("aria-label", messages.presetsGroupLabel)
     this.labelDecor.textContent = messages.decor
-    this.labelDecorFieldset.textContent = messages.decor
+    this.labelDecorGroup.textContent = messages.decor
     this.optionDecorBuilding.textContent = messages.decorBuilding
     this.optionDecorTree.textContent = messages.decorTree
     this.optionDecorStreetlight.textContent = messages.decorStreetlight
@@ -4163,13 +4359,22 @@ export class UfoRecorderElement extends HTMLElement {
     this.labelDescription.textContent = messages.description
     this.labelTags.textContent = messages.tags
     this.tagsInput.placeholder = messages.tagsPlaceholder
-    this.labelWeather.textContent = messages.weather
     this.labelShapeGroup.textContent = messages.shapeGroup
     this.labelTemporalGroup.textContent = messages.temporalGroup
     this.labelLocationGroup.textContent = messages.locationGroup
     this.labelObservationGroup.textContent = messages.observationGroup
     this.labelWitnessGroup.textContent = messages.witnessGroup
-    this.labelCircumstancesGroup.textContent = messages.circumstancesGroup
+    // The group's own handle now carries the caption that used to stand inside it, so the one
+    // message serves both and "Circumstances" — which never named what the group actually holds —
+    // is gone.
+    this.labelWeatherGroup.textContent = messages.weather
+    // The chips hold translated labels, so they are rebuilt with the new ones — and the signature
+    // check lets that happen without a diff, since every label changed.
+    this.paramSummaryBuilder = new SightingSummary(messages, this.showerLanguage())
+    this.refreshParamSummary()
+    const skyExpanded = this.skyDetailsButton.getAttribute("aria-expanded") === "true"
+    this.skyDetailsButton.title = skyExpanded ? messages.skyDetailsHide : messages.skyDetails
+    this.skyDetailsButton.setAttribute("aria-label", this.skyDetailsButton.title)
     this.labelCloudCover.textContent = messages.cloudCover
     this.labelHighCloud.textContent = messages.highCloudCover
     this.labelIceAlignment.textContent = messages.iceCrystalAlignment

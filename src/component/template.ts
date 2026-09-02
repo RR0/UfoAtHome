@@ -1,6 +1,23 @@
 export const html = `
-<details open>
-  <summary id="label-observation-group">Observation</summary>
+<!-- The groups' own handles, gathered onto one wrapping strip instead of standing as seven stacked
+     <summary> rows down the left edge. Seven collapsed rows cost 259px of pure chrome before a
+     single field is shown, which is most of a phone's screen spent on nothing; the same seven
+     handles side by side cost one line, sometimes two when the viewport is narrow. Only one panel
+     opens at a time (see UfoRecorderElement.toggleGroup) — with all of them open the form stood
+     1210px tall and pushed the render, the whole point of editing here, off the bottom of the
+     screen. What's set across ALL groups stays legible without opening any of them: see the
+     parameter summary under the render. -->
+<div id="group-tabs" class="group-tabs">
+  <button class="group-tab" type="button" aria-controls="group-observation" aria-expanded="false"><span id="label-observation-group">Observation</span></button>
+  <button class="group-tab" type="button" aria-controls="group-witness" aria-expanded="false"><span id="label-witness-group">Witness</span></button>
+  <button class="group-tab" type="button" aria-controls="group-location" aria-expanded="false"><span id="label-location-group">Location</span></button>
+  <button class="group-tab" type="button" aria-controls="group-decor" aria-expanded="false"><span id="label-decor-group">Decor</span></button>
+  <button class="group-tab" type="button" aria-controls="group-temporal" aria-expanded="false"><span id="label-temporal-group">Date and time</span></button>
+  <button class="group-tab" type="button" aria-controls="group-weather" aria-expanded="false"><span id="label-weather-group">Weather</span></button>
+  <button class="group-tab" type="button" aria-controls="group-sound" aria-expanded="false"><span id="label-sound-group">Sound</span></button>
+  <button class="group-tab" type="button" aria-controls="group-shape" aria-expanded="false"><span id="label-shape-group">Shape</span></button>
+</div>
+<section class="group-panel" id="group-observation" aria-labelledby="label-observation-group" hidden>
   <div class="toolbar">
     <label><span id="label-import-file">Load JSON file</span> <input id="import-file" type="file" accept="application/json,.json"/></label>
     <label><span id="label-import-url">Or load from URL</span> <input id="import-url" type="url" placeholder="https://…/sighting.json"/></label>
@@ -12,9 +29,8 @@ export const html = `
     <label><span id="label-description">Description</span> <textarea id="description" rows="2"></textarea></label>
     <label><span id="label-tags">Tags</span> <input id="tags" type="text" placeholder="comma-separated"/></label>
   </div>
-</details>
-<details open>
-  <summary id="label-witness-group">Witness</summary>
+</section>
+<section class="group-panel" id="group-witness" aria-labelledby="label-witness-group" hidden>
   <div class="toolbar">
     <label><span id="label-witness-id">Witness ID</span> <input id="witnessId" type="text"/></label>
     <label><span id="label-witness-dir-name">Witness dir name</span> <input id="witnessDirName" type="text"/></label>
@@ -34,9 +50,8 @@ export const html = `
     <button id="add-decor-witness" type="button">Add witness</button>
     <label><span id="label-decor-sighting-url">Witness's own recording URL</span> <input id="decorSightingUrl" type="url" placeholder="https://…/sighting.json"/></label>
   </div>
-</details>
-<details open>
-  <summary id="label-location-group">Location</summary>
+</section>
+<section class="group-panel" id="group-location" aria-labelledby="label-location-group" hidden>
   <div class="toolbar">
     <!-- Testimony names a place, it doesn't give coordinates ("on the Valensole plateau", never
          43.8379 / 5.9840) — so the name is what this group asks for first, and the latitude and
@@ -65,83 +80,88 @@ export const html = `
     <!-- Relief and imagery describe the ground at the location above, so they are chosen here
          rather than in a drawer of their own — same reasoning as the place picker's placement. -->
     <div id="terrain-source-rows" class="terrain-source-rows"></div>
-    <fieldset class="decor-fieldset">
-      <legend id="label-decor-fieldset">Decor</legend>
-      <!-- This whole block (picker through Occupied floor) is hidden entirely — not just
-           disabled — while there's no decor at all (see UfoRecorderElement.syncDecorVisibility):
-           an empty recording shows nothing here but the Add controls below. Shown first, above
-           the Add row, once at least one decor object exists — see that row's own comment for why
-           it's forced onto its own line after this block instead of just flowing after it. -->
-      <label><span id="label-decor">Decor</span> <select id="decor"></select></label>
-      <button id="look-at-decor" type="button" class="icon-btn" title="Look at it" aria-label="Look at it">🎯</button>
-      <button id="delete-decor" type="button" class="icon-btn" title="Delete decor" aria-label="Delete decor">🗑</button>
-      <label><span id="label-decor-title">Name</span> <input id="decorTitle" type="text"/></label>
-      <label><span id="label-decor-east">Distance east</span> <input id="decorEast" type="number" step="0.5" value="0"/> m</label>
-      <label><span id="label-decor-north">Distance north</span> <input id="decorNorth" type="number" step="0.5" value="0"/> m</label>
-      <label><span id="label-decor-altitude">Altitude</span> <input id="decorAltitude" type="number" step="1" value="0"/> m</label>
-      <label><span id="label-decor-heading">Heading</span> <input id="decorHeading" type="number" min="0" max="360" step="1" value="0"/> &deg;</label>
-      <label><span id="label-decor-lit">Lit</span> <input id="decorLit" type="checkbox"/></label>
-      <label><span id="label-decor-lights">Lights</span> <select id="decorLightRig"></select></label>
-      <label><span id="label-decor-floors">Floors</span> <input id="decorFloors" type="number" min="0" max="20" step="1" value="2"/></label>
-      <span id="label-decor-windows">Windows</span>
-      <!-- autocomplete="off" on all 4: without it, browsers reliably re-suggest/autofill whatever
-           value was last typed into a field with this exact id from earlier in the same session
-           (e.g. "50", typed while testing a completely different decor object) — since
-           syncDecorFields already leaves an empty field for "no window recorded" (see its own doc
-           comment), an autofilled value here isn't a leftover the app itself wrote, but the field
-           visually shows one anyway, misleadingly reading as "windows default to 50%". -->
-      <label><span id="label-decor-window-front">Front</span> <input id="decorWindowFront" type="number" min="0" max="100" step="5" placeholder="none" autocomplete="off"/> %</label>
-      <label><span id="label-decor-window-behind">Behind</span> <input id="decorWindowBehind" type="number" min="0" max="100" step="5" placeholder="none" autocomplete="off"/> %</label>
-      <label><span id="label-decor-window-left">Left</span> <input id="decorWindowLeft" type="number" min="0" max="100" step="5" placeholder="none" autocomplete="off"/> %</label>
-      <label><span id="label-decor-window-right">Right</span> <input id="decorWindowRight" type="number" min="0" max="100" step="5" placeholder="none" autocomplete="off"/> %</label>
-      <!-- Vehicle only (see DecorSide's own doc comment: a car's left/right side has 2 windows
-           each, front-door and rear-door, not 1) — shown instead of the plain Left/Right rows
-           above for that kind, hidden otherwise (see UfoRecorderElement.syncDecorVisibility). -->
-      <label><span id="label-decor-window-front-left">Front-left</span> <input id="decorWindowFrontLeft" type="number" min="0" max="100" step="5" placeholder="none" autocomplete="off"/> %</label>
-      <label><span id="label-decor-window-front-right">Front-right</span> <input id="decorWindowFrontRight" type="number" min="0" max="100" step="5" placeholder="none" autocomplete="off"/> %</label>
-      <label><span id="label-decor-window-behind-left">Behind-left</span> <input id="decorWindowBehindLeft" type="number" min="0" max="100" step="5" placeholder="none" autocomplete="off"/> %</label>
-      <label><span id="label-decor-window-behind-right">Behind-right</span> <input id="decorWindowBehindRight" type="number" min="0" max="100" step="5" placeholder="none" autocomplete="off"/> %</label>
-      <label><span id="label-decor-witness-side">Witness location</span>
-        <select id="decorWitnessSide">
-          <option id="option-witness-side-none" value="">Not present</option>
-          <option id="option-witness-side-front" value="front">Front</option>
-          <option id="option-witness-side-behind" value="behind">Behind</option>
-          <option id="option-witness-side-left" value="left">Left</option>
-          <option id="option-witness-side-right" value="right">Right</option>
-          <!-- Vehicle only — the 4 seat/door positions replace front/behind/left/right above for
-               that kind (see witnessSidesFor's own doc comment: you sit AT a door, never "at the
-               windshield"). Hidden by default, same technique as decorKind's own hidden "witness"
-               option — toggled per kind in syncDecorVisibility. -->
-          <option id="option-witness-side-front-left" value="front-left" hidden>Front-left</option>
-          <option id="option-witness-side-front-right" value="front-right" hidden>Front-right</option>
-          <option id="option-witness-side-behind-left" value="behind-left" hidden>Behind-left</option>
-          <option id="option-witness-side-behind-right" value="behind-right" hidden>Behind-right</option>
-        </select>
-      </label>
-      <label><span id="label-decor-occupied-floor">Occupied floor</span> <input id="decorOccupiedFloor" type="number" min="0" step="1" value="0"/></label>
-      <!-- flex-basis:100% (see the CSS rule below) forces this row onto its own line, after
-           whatever decor properties are showing above — the only thing shown at all when there's
-           no decor yet (see the block above's own comment). -->
-      <div class="decor-add-row">
-        <button id="add-decor-building" type="button" class="icon-btn" title="Add" aria-label="Add">+</button>
-        <select id="decorKind">
-          <option id="option-decor-building" value="building">Building</option>
-          <option id="option-decor-tree" value="tree">Tree</option>
-          <option id="option-decor-streetlight" value="streetlight">Streetlight</option>
-          <option id="option-decor-vehicle" value="vehicle">Vehicle</option>
-          <option id="option-decor-aircraft" value="aircraft">Aircraft</option>
-          <!-- Other witness is added from its own dedicated button instead (Witness group's own
-               "Add witness" — nothing else to configure beforehand) — hidden (not removed) so
-               decorLabel() can still look up its translated kind name by id for the fallback
-               "{kind} {n}" label, see UfoRecorderElement.decorLabel. -->
-          <option id="option-decor-witness" value="witness" hidden>Other witness</option>
-        </select>
-      </div>
-    </fieldset>
   </div>
-</details>
-<details open>
-  <summary id="label-temporal-group">Date and time</summary>
+</section>
+<!-- Its own group, no longer a fieldset nested inside Location. What stands around the witness is
+     the single largest thing this editor asks for — 34 controls against Location's own 8 — so
+     folded in there it made Location the tallest panel by far (313px) and, with one panel open at
+     a time, the one that alone still overflowed a phone. Split out, neither half does. The two
+     stay adjacent because a decor object is placed RELATIVE to the location above it. -->
+<section class="group-panel" id="group-decor" aria-labelledby="label-decor-group" hidden>
+  <div class="toolbar">
+    <!-- This whole block (picker through Occupied floor) is hidden entirely — not just
+         disabled — while there's no decor at all (see UfoRecorderElement.syncDecorVisibility):
+         an empty recording shows nothing here but the Add controls below. Shown first, above
+         the Add row, once at least one decor object exists — see that row's own comment for why
+         it's forced onto its own line after this block instead of just flowing after it. -->
+    <label><span id="label-decor">Decor</span> <select id="decor"></select></label>
+    <button id="look-at-decor" type="button" class="icon-btn" title="Look at it" aria-label="Look at it">🎯</button>
+    <button id="delete-decor" type="button" class="icon-btn" title="Delete decor" aria-label="Delete decor">🗑</button>
+    <label><span id="label-decor-title">Name</span> <input id="decorTitle" type="text"/></label>
+    <label><span id="label-decor-east">Distance east</span> <input id="decorEast" type="number" step="0.5" value="0"/> m</label>
+    <label><span id="label-decor-north">Distance north</span> <input id="decorNorth" type="number" step="0.5" value="0"/> m</label>
+    <label><span id="label-decor-altitude">Altitude</span> <input id="decorAltitude" type="number" step="1" value="0"/> m</label>
+    <label><span id="label-decor-heading">Heading</span> <input id="decorHeading" type="number" min="0" max="360" step="1" value="0"/> &deg;</label>
+    <label><span id="label-decor-lit">Lit</span> <input id="decorLit" type="checkbox"/></label>
+    <label><span id="label-decor-lights">Lights</span> <select id="decorLightRig"></select></label>
+    <label><span id="label-decor-floors">Floors</span> <input id="decorFloors" type="number" min="0" max="20" step="1" value="2"/></label>
+    <span id="label-decor-windows">Windows</span>
+    <!-- autocomplete="off" on all 4: without it, browsers reliably re-suggest/autofill whatever
+         value was last typed into a field with this exact id from earlier in the same session
+         (e.g. "50", typed while testing a completely different decor object) — since
+         syncDecorFields already leaves an empty field for "no window recorded" (see its own doc
+         comment), an autofilled value here isn't a leftover the app itself wrote, but the field
+         visually shows one anyway, misleadingly reading as "windows default to 50%". -->
+    <label><span id="label-decor-window-front">Front</span> <input id="decorWindowFront" type="number" min="0" max="100" step="5" placeholder="none" autocomplete="off"/> %</label>
+    <label><span id="label-decor-window-behind">Behind</span> <input id="decorWindowBehind" type="number" min="0" max="100" step="5" placeholder="none" autocomplete="off"/> %</label>
+    <label><span id="label-decor-window-left">Left</span> <input id="decorWindowLeft" type="number" min="0" max="100" step="5" placeholder="none" autocomplete="off"/> %</label>
+    <label><span id="label-decor-window-right">Right</span> <input id="decorWindowRight" type="number" min="0" max="100" step="5" placeholder="none" autocomplete="off"/> %</label>
+    <!-- Vehicle only (see DecorSide's own doc comment: a car's left/right side has 2 windows
+         each, front-door and rear-door, not 1) — shown instead of the plain Left/Right rows
+         above for that kind, hidden otherwise (see UfoRecorderElement.syncDecorVisibility). -->
+    <label><span id="label-decor-window-front-left">Front-left</span> <input id="decorWindowFrontLeft" type="number" min="0" max="100" step="5" placeholder="none" autocomplete="off"/> %</label>
+    <label><span id="label-decor-window-front-right">Front-right</span> <input id="decorWindowFrontRight" type="number" min="0" max="100" step="5" placeholder="none" autocomplete="off"/> %</label>
+    <label><span id="label-decor-window-behind-left">Behind-left</span> <input id="decorWindowBehindLeft" type="number" min="0" max="100" step="5" placeholder="none" autocomplete="off"/> %</label>
+    <label><span id="label-decor-window-behind-right">Behind-right</span> <input id="decorWindowBehindRight" type="number" min="0" max="100" step="5" placeholder="none" autocomplete="off"/> %</label>
+    <label><span id="label-decor-witness-side">Witness location</span>
+      <select id="decorWitnessSide">
+        <option id="option-witness-side-none" value="">Not present</option>
+        <option id="option-witness-side-front" value="front">Front</option>
+        <option id="option-witness-side-behind" value="behind">Behind</option>
+        <option id="option-witness-side-left" value="left">Left</option>
+        <option id="option-witness-side-right" value="right">Right</option>
+        <!-- Vehicle only — the 4 seat/door positions replace front/behind/left/right above for
+             that kind (see witnessSidesFor's own doc comment: you sit AT a door, never "at the
+             windshield"). Hidden by default, same technique as decorKind's own hidden "witness"
+             option — toggled per kind in syncDecorVisibility. -->
+        <option id="option-witness-side-front-left" value="front-left" hidden>Front-left</option>
+        <option id="option-witness-side-front-right" value="front-right" hidden>Front-right</option>
+        <option id="option-witness-side-behind-left" value="behind-left" hidden>Behind-left</option>
+        <option id="option-witness-side-behind-right" value="behind-right" hidden>Behind-right</option>
+      </select>
+    </label>
+    <label><span id="label-decor-occupied-floor">Occupied floor</span> <input id="decorOccupiedFloor" type="number" min="0" step="1" value="0"/></label>
+    <!-- flex-basis:100% (see the CSS rule below) forces this row onto its own line, after
+         whatever decor properties are showing above — the only thing shown at all when there's
+         no decor yet (see the block above's own comment). -->
+    <div class="decor-add-row">
+      <button id="add-decor-building" type="button" class="icon-btn" title="Add" aria-label="Add">+</button>
+      <select id="decorKind">
+        <option id="option-decor-building" value="building">Building</option>
+        <option id="option-decor-tree" value="tree">Tree</option>
+        <option id="option-decor-streetlight" value="streetlight">Streetlight</option>
+        <option id="option-decor-vehicle" value="vehicle">Vehicle</option>
+        <option id="option-decor-aircraft" value="aircraft">Aircraft</option>
+        <!-- Other witness is added from its own dedicated button instead (Witness group's own
+             "Add witness" — nothing else to configure beforehand) — hidden (not removed) so
+             decorLabel() can still look up its translated kind name by id for the fallback
+             "{kind} {n}" label, see UfoRecorderElement.decorLabel. -->
+        <option id="option-decor-witness" value="witness" hidden>Other witness</option>
+      </select>
+    </div>
+  </div>
+</section>
+<section class="group-panel" id="group-temporal" aria-labelledby="label-temporal-group" hidden>
   <div class="toolbar">
     <label><span id="label-observation-time">Observation start</span>
       <input id="obs-time" type="text" placeholder="YYYY-MM-DDThh:mm[?~%] or hh:mm" title="EDTF — e.g. 1965-07-01T05:00, 2025-06? (uncertain), 2025~ (approximate), or just 05:00 if the date isn't known"/></label>
@@ -155,9 +175,8 @@ export const html = `
     <label><span id="label-utc-offset">Time zone</span> <select id="timeZone"></select>
       <input id="utcOffsetHours" type="number" min="-12" max="14" step="0.5" placeholder="from longitude" title="Hours ahead of UTC on the witness's own clock — legal time, which the longitude cannot know (France was on UTC+1 in 1965)"/> UTC&plusmn;h</label>
   </div>
-</details>
-<details open>
-  <summary id="label-circumstances-group">Circumstances</summary>
+</section>
+<section class="group-panel" id="group-weather" aria-labelledby="label-weather-group" hidden>
   <div class="toolbar">
     <!-- Weather is the one thing in this editor that isn't testimony: it's a measurable fact about
          a place at an instant, and the Location and Temporal groups above already state both. So
@@ -167,19 +186,29 @@ export const html = `
          record and is never overwritten by it (Sighting.weatherSource). -->
     <div class="weather-source-row">
       <label><input id="weatherInferred" type="checkbox" checked/> <span id="label-weather-inferred">From weather records</span></label>
-      <output id="weather-source" class="weather-source" for="lat lng obs-time"><span id="weather-source-text"></span><span id="weather-source-row" class="inline-source" hidden></span><a id="weather-source-link" target="_blank" rel="noopener noreferrer" hidden></a></output>
+      <!-- Clamped to one line unless the reader asks for the rest (see #sky-details below). What
+           these two lines say is worth saying — which record answered, and what else was up there
+           that night — but they say it in prose, and the sky line runs to 575 characters on a night
+           with cirrus in it. Left to flow, the two of them were most of this group's height: 550px
+           of it on a phone, where the render then no longer fitted under the panel at all. -->
+      <output id="weather-source" class="weather-source clamped" for="lat lng obs-time"><span id="weather-source-text"></span><span id="weather-source-row" class="inline-source" hidden></span><a id="weather-source-link" target="_blank" rel="noopener noreferrer" hidden></a></output>
     </div>
     <!-- Not testimony either, and not even a lookup: a meteor shower is a position in the Earth's
          own orbit and a comet's orbit is a solved problem, so the date and the place alone decide
          both. Read-only on purpose — it states what else was in that patch of sky, and whether that
          explains anything is the reader's conclusion, never the file's claim. See MeteorShowers.ts
          and Comets.ts. -->
-    <output id="sky-candidates" class="weather-source" for="lat lng obs-time"></output>
+    <output id="sky-candidates" class="weather-source clamped" for="lat lng obs-time"></output>
+    <!-- One button for both lines rather than one each: they are the same kind of statement (what
+         the records say about that sky) and they sit together, so two separate disclosures would
+         be more chrome than the sentences they hide. Nothing is ever hidden outright — clamped,
+         each line still shows its opening clause, which is the part that says whether there is
+         anything to expand for. -->
+    <button id="sky-details" type="button" class="icon-btn" aria-expanded="false">&#9662;</button>
     <!-- A shooting star for the meteor and a comet for the comet. The meteor button used to carry
          the comet glyph, which was only ever unambiguous while there was nothing else up there. -->
     <button id="show-meteor" type="button" class="icon-btn" title="Show me one" aria-label="Show me one" hidden>🌠</button>
     <button id="show-comet" type="button" class="icon-btn" title="Show me the comet" aria-label="Show me the comet" hidden>☄</button>
-    <span id="label-weather">Weather</span>
     <label><span id="label-cloud-cover">Cloud cover</span> <input id="cloudCover" class="weather-field" type="range" min="0" max="1" step="0.05" value="0"/></label>
     <!-- The HIGH deck, kept apart from the total: it is not about how much sky was hidden but about
          whether there were ICE CRYSTALS in it, which is what halos and sundogs need. See
@@ -205,17 +234,13 @@ export const html = `
     <label><span id="label-wind-speed">Wind speed</span> <input id="windSpeed" class="weather-field" type="number" min="0" max="30" step="0.5" value="0"/> m/s</label>
     <label><span id="label-storm">Storm</span> <input id="storm" class="weather-field" type="checkbox"/></label>
   </div>
-</details>
+</section>
 <!-- Its own group rather than a row of the Shape group below: what the object sounded like is
      keyframed on the very same clock as its shape (a craft silent on the ground and heard only as
      it lifts off is two keyframes), but it belongs to the sighting, not to any one drawn part of
      it — see SoundTrack.ts. The kind dropdown is filled from SOUND_KINDS in script, so adding a
      timbre never means editing markup and element ids (same rule as the data-source pickers). -->
-<!-- Closed to start with, unlike every other group. Most sightings state nothing about sound at
-     all, and an open panel of silent controls is four rows of nothing between the sky and the
-     shape. It opens the moment a reader has something to say about what was heard. -->
-<details>
-  <summary id="label-sound-group">Sound</summary>
+<section class="group-panel" id="group-sound" aria-labelledby="label-sound-group" hidden>
   <div class="toolbar">
     <label><span id="label-sound-kind">Sound</span> <select id="soundKind" class="sound-field"></select></label>
     <label><span id="label-sound-volume">Loudness</span> <input id="soundVolume" class="sound-field" type="range" min="0" max="1" step="0.05" value="0"/></label>
@@ -227,9 +252,8 @@ export const html = `
          which is why nothing defaults to it. -->
     <label><span id="label-sound-src">Recording</span> <input id="soundSrc" class="sound-field" type="url" placeholder="URL of a real recording"/></label>
   </div>
-</details>
-<details open>
-  <summary id="label-shape-group">Shape</summary>
+</section>
+<section class="group-panel" id="group-shape" aria-labelledby="label-shape-group" hidden>
   <div class="toolbar">
     <div class="presets" id="presets-group" role="group" aria-label="UFO shape">
       <button class="preset" id="preset-oval" type="button" data-preset="oval">Oval</button>
@@ -253,7 +277,7 @@ export const html = `
       <label><span id="label-sampling-rate">Sampling rate</span> <input id="samplingRate" type="number" min="16" step="16" value="100"/> ms</label>
     </div>
   </div>
-</details>
+</section>
 
 <div id="ufo-slot"></div>
 <div class="toolbar playback-row">
@@ -263,6 +287,16 @@ export const html = `
   <span id="time-end" class="time-label">0:00</span>
   <button id="loop" type="button" class="icon-btn" title="Auto-replay" aria-label="Auto-replay" aria-pressed="true">↻</button>
 </div>
+<!-- Everything this reconstruction actually asserts, on one wrapping strip: only fields that are
+     SET appear (37 of 75 on a real case), so it reads as a statement rather than as a second copy
+     of the form. It has to sit BELOW the render, not between the groups and it: 200px of chips
+     above the canvas would push it back off the screen and undo what the tab strip just bought.
+     Nothing is lost by the move — a summary is read while you are not editing, the render is
+     watched while you are, never both at once. Each chip carries its group and its field, so
+     clicking one opens the right panel and puts the caret in the right input (see
+     UfoRecorderElement.refreshParamSummary); a value a data source supplied rather than the
+     author is marked, which is the one thing the form itself never showed at a glance. -->
+<div id="param-summary" class="param-summary"></div>
 <div class="export-row">
   <button id="export" type="button">Save</button>
 </div>
@@ -455,6 +489,17 @@ input.invalid {
   font-size: 0.85em;
   opacity: 0.8;
 }
+/* min-width:0 as well as the clamp itself: a flex item refuses to shrink below its own content by
+   default, so an unbreakable 575-character line would simply widen the row and take the ellipsis
+   off-screen with it instead of ever being cut. */
+.weather-source.clamped {
+  display: block;
+  min-width: 0;
+  flex: 1 1 12em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 /* Takes the host page's own text color rather than its link color: this widget has no background
    of its own (see input.invalid's comment on the same constraint), and a host's link blue against
    a host's dark page was unreadable — the surrounding label color is legible wherever this is
@@ -480,43 +525,56 @@ select.weather-field:disabled {
   color: FieldText;
   -webkit-text-fill-color: FieldText;
 }
-details {
+/* Wraps rather than scrolls sideways. A horizontally scrolling strip would keep the row to one
+   line on a phone, but at the cost of putting half the groups off-screen with nothing to say they
+   are there — the whole complaint being answered here is exactly that kind of invisibility. Two
+   wrapped lines of 8 handles at 375px is still a twentieth of what the stacked groups cost. */
+.group-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35em;
+  margin-bottom: 0.5em;
+}
+.group-tab {
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  color: inherit;
+  background: transparent;
   border: 1px solid #444;
+  border-radius: 4px;
+  padding: 0.35em 0.7em;
+}
+.group-tab:hover {
+  border-color: #777;
+}
+/* The open group's handle reads as attached to the panel below it: same border colour, and the
+   only one filled. Without it, an open panel on a narrow screen (where the handle may have wrapped
+   onto another line entirely) gives no clue which of the eight it belongs to. */
+.group-tab[aria-expanded="true"] {
+  background: #333;
+  border-color: #777;
+}
+.group-tab:focus-visible {
+  outline: 2px solid #4af;
+  outline-offset: 1px;
+}
+.group-panel {
+  border: 1px solid #777;
   border-radius: 4px;
   padding: 0.5em 0.75em;
   margin: 0 0 0.5em;
 }
-details[open] {
-  padding-bottom: 0.75em;
+/* Stated rather than left to the UA sheet's own hidden rule. That rule works only for as long as
+   .group-panel itself never sets a display — the day it becomes a grid or a flex container, that
+   declaration outranks the UA one and every panel is permanently open, with the attribute set and
+   nothing happening. This component has already been bitten by exactly that once (.icon-btn), so
+   the guard is written down. */
+.group-panel[hidden] {
+  display: none;
 }
-summary {
-  cursor: pointer;
-  font-weight: 600;
-}
-details[open] summary {
-  margin-bottom: 0.5em;
-}
-details > .toolbar {
+.group-panel > .toolbar {
   margin-bottom: 0;
-}
-/* Groups every decor-object field (Add through Occupied floor) apart from the Location group's
-   own observer-pose fields (Latitude/Longitude/Heading/Tilt) above it — same flex-wrap layout as
-   .toolbar itself (a plain block-level fieldset would otherwise stack its own children instead of
-   flowing them inline like every other field in this toolbar) and matching border/radius as the
-   surrounding <details> groups for visual consistency. */
-fieldset.decor-fieldset {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.5em;
-  border: 1px solid #444;
-  border-radius: 4px;
-  padding: 0.5em 0.75em;
-  margin: 0;
-}
-fieldset.decor-fieldset legend {
-  font-weight: 600;
-  padding: 0 0.25em;
 }
 /* flex-basis:100% on a flex-wrap:wrap container's own child forces it onto a fresh line — nothing
    else fits beside a 100%-wide item — which is what puts the Add controls below whatever decor
@@ -536,6 +594,57 @@ fieldset.decor-fieldset legend {
   display: flex;
   justify-content: flex-end;
   margin-top: 0.5em;
+}
+.param-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3em;
+  margin-top: 0.5em;
+}
+.param-summary:empty {
+  display: none;
+}
+/* Deliberately quieter than the fields it summarises: this is meant to be scanned, and 37 chips
+   competing with the render above them would be worse than the scrolling it replaces. */
+.param-chip {
+  font: inherit;
+  font-size: 0.85em;
+  cursor: pointer;
+  color: #bbb;
+  background: transparent;
+  border: 1px solid #3a3a3a;
+  border-radius: 999px;
+  padding: 0.1em 0.6em;
+  white-space: nowrap;
+}
+.param-chip:hover {
+  color: #eee;
+  border-color: #777;
+}
+.param-chip:focus-visible {
+  outline: 2px solid #4af;
+  outline-offset: 1px;
+}
+.param-chip .param-chip-value {
+  color: #eee;
+  font-weight: 600;
+}
+/* A value nobody typed: read from a record (ERA5's weather, Nominatim's coordinates, the terrain
+   provider's ground height) or computed from one. The form shows this by disabling the field,
+   which is invisible the moment the field is — so the distinction that matters most to this
+   project, what the witness said versus what the archives say, gets its own mark here. */
+.param-chip.from-source .param-chip-value {
+  color: #8cf;
+  font-weight: normal;
+  font-style: italic;
+}
+.param-chip .param-chip-swatch {
+  display: inline-block;
+  width: 0.7em;
+  height: 0.7em;
+  border: 1px solid #666;
+  border-radius: 2px;
+  vertical-align: -1px;
 }
 /* Below the rendered scene, not overlaid on it (unlike <rr0-ufo>'s own internal toolbar, hidden
    here via showToolbar — see UfoRecorderElement's constructor) — its seek bar needs the whole

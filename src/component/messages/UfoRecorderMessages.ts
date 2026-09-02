@@ -1,7 +1,9 @@
+import type { SightingLabels } from "./SightingLabels.js"
+
 /** Contract for `<rr0-ufo-recorder>`'s user-visible label strings — implemented per language
  * under this directory (`UfoRecorderMessages_en.ts`, `UfoRecorderMessages_fr.ts`) and loaded
  * via `loadUfoRecorderMessages`. */
-export interface UfoRecorderMessages {
+export interface UfoRecorderMessages extends SightingLabels {
   oval: string
   /** The "Polygon" preset button — a plain quad, the starting point for a freeform shape (see
    * Shape.ts's own createCustomPolygon doc comment). */
@@ -19,11 +21,7 @@ export interface UfoRecorderMessages {
   /** deleteVertex's own disabled title when the polygon is already down to MIN_POLYGON_VERTICES
    * points — removing one more would stop being a real shape. */
   tooFewVertices: string
-  color: string
-  transparency: string
-  halo: string
   shape: string
-  shapeTitle: string
   /** A real width to TRY, in meters — one half of the authoring aid that puts an angle on the
    * canvas arithmetically instead of by eye (see UfoRecorderElement.applySizeHypothesis). Not
    * something the recording keeps: the shape ends up with the angle, and these meters are
@@ -35,10 +33,6 @@ export interface UfoRecorderMessages {
    * width in degrees, {moons} the same width counted in full Moons — the comparison a reader
    * can picture, and the quickest way to catch an object drawn ten times too big. */
   apparentSize: string
-  /** objectSize/objectDistance's own placeholders — both say "as reported", the whole point
-   * being that these are the witness's numbers, not the drawing's. */
-  /** The observation's own legal time zone — see SightingEvent.utcOffsetHours. */
-  utcOffset: string
   /** utcOffset's placeholder: left empty, the time zone is approximated from the longitude. */
   utcOffsetPlaceholder: string
   objectSizePlaceholder: string
@@ -96,14 +90,7 @@ export interface UfoRecorderMessages {
   /** Disabled title on the Name/Color/Transparency/Halo/source-dropdown/preset fields whenever
    * more than one shape is selected — see updateAppearanceFieldsDisabledState(). */
   multipleShapesSelected: string
-  /** Kept short: it shares its row with the Record button (see template's .record-row), and a
-   * long label pushed that row's own width past what the toolbar could give it. */
-  /** Height of the cloud layer's base above the ground — see Weather.cloudBaseM. */
-  cloudBase: string
-  /** How high above the ground the witness was — see ObserverPose.elevationM. */
-  elevation: string
   samplingRate: string
-  duration: string
   /** The playback counters' own titles. They name what each value is, and — when the observation
    * has a start time, so there are two readings to choose between — what clicking one does. */
   currentPosition: string
@@ -129,9 +116,6 @@ export interface UfoRecorderMessages {
   according: string
   sourceElevation: string
   sourceImagery: string
-  /** Label of the place-NAME field the Location group now leads with — testimony names a place,
-   * it doesn't give coordinates (see engine/place/PlaceProvider.ts). */
-  placeName: string
   placeNamePlaceholder: string
   /** The button (and Enter) that runs the search. */
   searchPlace: string
@@ -158,13 +142,7 @@ export interface UfoRecorderMessages {
   altitudeAboveSeaLevel: string
   /** Shown beside Altitude: the ground's own height there. "{m}" is replaced with the metres. */
   groundAt: string
-  latitude: string
-  longitude: string
-  heading: string
   headingPlaceholder: string
-  pitch: string
-  observationTime: string
-  observationEndTime: string
   /** Custom-validity message shown when an observation start/end field's text doesn't match
    * EDTF_TIME_PATTERN — see UfoRecorderElement.applyEdtfTimeInput. */
   edtfInvalid: string
@@ -176,14 +154,8 @@ export interface UfoRecorderMessages {
   observationEndTimeHint: string
   /** aria-label on the Oval/Polygon preset button group. */
   presetsGroupLabel: string
-  witnessId: string
   witnessDirName: string
-  witnessTitle: string
-  witnessLastName: string
-  witnessFirstNames: string
-  caseId: string
   description: string
-  tags: string
   tagsPlaceholder: string
   weather: string
   shapeGroup: string
@@ -193,7 +165,6 @@ export interface UfoRecorderMessages {
   locationGroup: string
   observationGroup: string
   witnessGroup: string
-  circumstancesGroup: string
   /** Label of the checkbox that decides whether the weather fields are looked up from a real
    * record (checked, and then read-only) or stated by the witness (unchecked, and then never
    * overwritten) — see UfoRecorderElement.inferWeather. */
@@ -209,48 +180,14 @@ export interface UfoRecorderMessages {
   /** The lookup itself couldn't be made (offline, HTTP error) — deliberately distinct from
    * weatherNoRecord: one is a fact about the sighting, the other isn't. */
   weatherLookupFailed: string
-  cloudCover: string
-  /** The high, icy deck — distinct from the total cover, because it is the one ingredient the ice
-   * halos need rather than a measure of how much sky was hidden. */
-  highCloudCover: string
-  cloudDarkness: string
-  precipitationType: string
-  precipitationNone: string
-  precipitationRain: string
-  precipitationSnow: string
-  precipitationHail: string
-  precipitationIntensity: string
-  windDirection: string
-  windSpeed: string
-  storm: string
-  /** Which timbre the witness described, and the five values SOUND_KINDS offers — "none" being a
-   * reported silence, not "unknown" (see Sound.ts). */
-  soundKind: string
-  soundNone: string
-  soundHum: string
-  soundWhistle: string
-  soundRumble: string
-  soundCrackle: string
-  /** How loud it was — relative to what the witness could describe, never a dB figure. */
-  soundVolume: string
-  /** How deep or how sharp, shown alongside its own value in Hz. */
-  soundPitch: string
-  /** Label of the field naming an actual audio recording of the sound, when one exists. */
-  soundSrc: string
   soundSrcPlaceholder: string
-  /** The decor kind added by the "+" button beside it — an aircraft crossing the sky is decor like
-   * any other, just decor with a trajectory. */
-  decorAircraft: string
-  /** Which set of lamps the selected decor object carries — see LightRig.ts. */
-  decorLights: string
-  /** How high above the witness the decor object sits. Zero for anything standing on the ground,
-   * which is all ordinary scenery; an aircraft is the reason it exists. Setting it on an object
-   * that has no trajectory gives it one, of a single instant — see UfoRecorderElement.updateDecor. */
-  decorAltitude: string
   /** The whole "what else was in that sky" line, into which {parts} drops one clause per candidate
    * — a meteor shower, a comet, both. The prefix lives here and nowhere else, so two candidates on
    * one night read as one statement about the sky rather than as two competing announcements. */
   skyLine: string
+  /** Title of the button that unclamps the weather-record and sky lines. */
+  skyDetails: string
+  skyDetailsHide: string
   /** What else was in that sky, from the date and the place alone — see MeteorShowers.ts.
    * {name} is the shower, {rate} how many an observer would really have seen per hour, {altitude}
    * the radiant's HEIGHT above the horizon and {bearing} the compass point it stands in, WITH its
@@ -322,26 +259,9 @@ export interface UfoRecorderMessages {
    * be out of period rather than dropped: dropping it would silently re-instrument a testimony.
    * {name} is the device's own name. */
   instrumentOutOfPeriod: string
-  /** The lens's focal length, in millimetres — shown for anything with a frame, and read-only when
-   * the device's lens does not zoom. */
-  focalLength: string
-  /** What the same control says for an EYE, which has no focal length: how much of their
-   * surroundings the witness took in, in degrees. */
-  fieldOfView: string
-  /** How far the lens was stopped down. Absent from the interface entirely for a device with no
-   * diaphragm at all — an eye, a phone. */
-  aperture: string
-  /** How long the shutter stayed open, in seconds. */
-  exposure: string
-  /** How far away the lens was focused. Left empty it means at infinity, which is where a camera
-   * pointed at the sky is — and what decides whether a sharp photograph bounds the object's
-   * distance (see DepthOfField.ts). */
-  focusDistance: string
   /** The two units the focal row switches between. */
   unitMillimetres: string
   unitDegrees: string
-  /** The label on the control for how steadily the crystals were falling. */
-  iceCrystalAlignment: string
   /** No ice cloud at all, so none of it could have happened. The commonest answer. */
   skyOpticsNoIce: string
   /** Ice above, but a lower deck between it and the witness. */
@@ -414,20 +334,6 @@ export interface UfoRecorderMessages {
   /** Turns the witness to face the selected decor object — the only practical way to find an
    * aircraft in an otherwise empty sky. */
   lookAtDecor: string
-  /** The empty entry of that picker: an object with no lamps at all, which is most scenery. */
-  decorLightsNone: string
-  /** What the observation was made THROUGH — see Instrument.ts. Sighting data, unlike the view
-   * above: it changes the geometry of every shape, so it belongs in the file. */
-  instrument: string
-  /** Label on the dropdown listing the sighting's own decor objects — the Decor group itself no
-   * longer has its own summary/heading (its fields now live inside Location/Witness instead, see
-   * UfoRecorderElement's addDecorWitnessButton/addDecorBuildingButton doc comments). */
-  decor: string
-  decorBuilding: string
-  decorTree: string
-  decorStreetlight: string
-  decorVehicle: string
-  decorWitness: string
   /** The accessible name/tooltip for the "+" button that adds a new decor object of whichever
    * kind decorKindSelect currently shows — placed right before that dropdown ("[+] [Kind ▾]"), a
    * plain "+" glyph rather than this text (see UfoRecorderElement.addDecorBuildingButton), so
@@ -435,11 +341,6 @@ export interface UfoRecorderMessages {
    * being added. */
   addDecor: string
   deleteDecor: string
-  decorEast: string
-  decorNorth: string
-  decorHeading: string
-  decorLit: string
-  decorTitle: string
   decorSightingUrl: string
   /** Right-click menu item on a witness decor object that has a sightingUrl — loads that
    * recording (see UfoRecorderElement.viewWitnessTestimony). */
@@ -455,31 +356,4 @@ export interface UfoRecorderMessages {
    * UfoRecorderElement's addDecorWitnessButton) — distinct from decorWitness, that dropdown
    * option's own (now-hidden) label. */
   addWitness: string
-  /** Number of upper stories a building decor object has (see DecorObject.floors) — shown only
-   * for kind "building". */
-  decorFloors: string
-  /** Which floor of a building the recording witness is on (see DecorObject.occupiedFloor) —
-   * shown only for kind "building" once decorWitnessSide is set. */
-  decorOccupiedFloor: string
-  /** Which side of the selected decor object the recording witness is positioned at, if inside it
-   * at all — the select field's own label (see DecorObject.witnessSide). */
-  decorWitnessSide: string
-  /** decorWitnessSide's own "not inside this object" option — the field's default/empty value. */
-  decorWitnessSideNone: string
-  /** Heading above the 4 per-side window-opacity inputs (see DecorObject.windows). */
-  decorWindows: string
-  /** Shared by the window-opacity input labels AND decorWitnessSide's own non-empty options —
-   * both are the same DecorSide concept (relative to the object's own heading, not a compass
-   * direction), so one set of labels covers both. */
-  decorSideFront: string
-  decorSideBehind: string
-  decorSideLeft: string
-  decorSideRight: string
-  /** Vehicle-only DecorSide corners — a car's left/right side has 2 windows/seats each
-   * (front-door, rear-door), not 1 — see DecorSide's own doc comment. Shown instead of
-   * decorSideLeft/decorSideRight for that kind (see UfoRecorderElement.syncDecorVisibility). */
-  decorSideFrontLeft: string
-  decorSideFrontRight: string
-  decorSideBehindLeft: string
-  decorSideBehindRight: string
 }

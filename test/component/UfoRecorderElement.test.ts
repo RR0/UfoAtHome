@@ -8,6 +8,7 @@ import { ImageProjection } from "../../src/engine/instrument/ImageProjection.js"
 import type { WeatherProvider } from "../../src/engine/weather/WeatherProvider.js"
 import type { Weather } from "../../src/engine/model/Weather.js"
 import { SOUND_KINDS } from "../../src/engine/model/Sound.js"
+import { ufoRecorderMessages_en } from "../../src/component/messages/UfoRecorderMessages_en.js"
 import { Comets } from "../../src/engine/astronomy/Comets.js"
 import type { PlaceMatch, PlaceProvider } from "../../src/engine/place/PlaceProvider.js"
 
@@ -2464,37 +2465,157 @@ describe("UfoRecorderElement toolbar groups", () => {
     document.body.innerHTML = ""
   })
 
-  it("renders each field group as a collapsible <details>, open by default — except sound", () => {
-    const element = mount()
-    const groups = [...element.shadowRoot!.querySelectorAll("details")]
-    expect(groups.length).toBe(7)
-    for (const group of groups) {
-      // Sound starts closed: most sightings say nothing at all about what was heard, and four rows
-      // of silent controls standing open between the sky and the shape is four rows of nothing.
-      const closedByDesign = group.querySelector("summary")?.id === "label-sound-group"
-      expect(group.hasAttribute("open")).toBe(!closedByDesign)
-    }
-  })
+  function tabs(element: UfoRecorderElement): HTMLButtonElement[] {
+    return [...element.shadowRoot!.querySelectorAll<HTMLButtonElement>(".group-tab")]
+  }
 
-  it("orders groups observation, witness, location, temporal, circumstances, sound, shape — closest to the render last, recording merged into shape, decor's own fields folded into location/witness", () => {
+  function openPanelIds(element: UfoRecorderElement): string[] {
+    return [...element.shadowRoot!.querySelectorAll<HTMLElement>(".group-panel")].filter(panel => !panel.hidden).map(panel => panel.id)
+  }
+
+  it("renders one handle per group on a single strip, each pointing at its own panel", () => {
     const element = mount()
-    const summaries = [...element.shadowRoot!.querySelectorAll("details summary")].map(s => s.id)
-    expect(summaries).toEqual([
+    expect(tabs(element).map(tab => tab.querySelector("span")!.id)).toEqual([
       "label-observation-group",
       "label-witness-group",
       "label-location-group",
+      "label-decor-group",
       "label-temporal-group",
-      "label-circumstances-group",
+      "label-weather-group",
       "label-sound-group",
       "label-shape-group"
     ])
+    for (const tab of tabs(element)) {
+      expect(element.shadowRoot!.getElementById(tab.getAttribute("aria-controls")!)).not.toBeNull()
+    }
+  })
+
+  it("opens shape on load and nothing else — the group whose every field changes what the canvas right below it draws", () => {
+    const element = mount()
+    expect(openPanelIds(element)).toEqual(["group-shape"])
+  })
+
+  // The whole point of the strip: eight panels open at once is the 1210px-tall form it replaced,
+  // with the render pushed off the bottom and the impact of an edit invisible as it's made.
+  it("opens one group at a time, and closes it again when its own handle is clicked", () => {
+    const element = mount()
+    const locationTab = tabs(element)[2]
+    locationTab.click()
+    expect(openPanelIds(element)).toEqual(["group-location"])
+    expect(locationTab.getAttribute("aria-expanded")).toBe("true")
+    tabs(element)[5].click()
+    expect(openPanelIds(element)).toEqual(["group-weather"])
+    expect(locationTab.getAttribute("aria-expanded")).toBe("false")
+    tabs(element)[5].click()
+    expect(openPanelIds(element)).toEqual([])
+  })
+
+  // 575 characters of prose about that night's sky, left to flow, were most of this group's
+  // height — and on a phone that alone put the render back off the screen.
+  it("clamps the record and sky lines to one line each until the reader asks for the rest", () => {
+    const element = mount()
+    const shadow = element.shadowRoot!
+    const lines = [shadow.getElementById("weather-source")!, shadow.getElementById("sky-candidates")!]
+    const toggle = shadow.getElementById("sky-details") as HTMLButtonElement
+    expect(lines.every(line => line.classList.contains("clamped"))).toBe(true)
+
+    toggle.click()
+    expect(lines.some(line => line.classList.contains("clamped"))).toBe(false)
+    expect(toggle.getAttribute("aria-expanded")).toBe("true")
+    expect(toggle.title).toBe(ufoRecorderMessages_en.skyDetailsHide)
+
+    toggle.click()
+    expect(lines.every(line => line.classList.contains("clamped"))).toBe(true)
+    expect(toggle.title).toBe(ufoRecorderMessages_en.skyDetails)
+  })
+
+  it("gives decor its own group instead of a fieldset inside location — the single largest thing this editor asks for", () => {
+    const element = mount()
+    const decorPanel = element.shadowRoot!.getElementById("group-decor")!
+    expect(decorPanel.querySelector("#decor")).not.toBeNull()
+    expect(decorPanel.querySelector("#decorWindowFront")).not.toBeNull()
+    expect(element.shadowRoot!.getElementById("group-location")!.querySelector("#decorEast")).toBeNull()
+    expect(element.shadowRoot!.getElementById("group-location")!.querySelector("#lat")).not.toBeNull()
   })
 
   it("keeps the record button and sampling rate inside the shape group", () => {
     const element = mount()
-    const shapeDetails = element.shadowRoot!.getElementById("label-shape-group")!.closest("details")!
-    expect(shapeDetails.querySelector("#record")).not.toBeNull()
-    expect(shapeDetails.querySelector("#samplingRate")).not.toBeNull()
+    const shapePanel = element.shadowRoot!.getElementById("group-shape")!
+    expect(shapePanel.querySelector("#record")).not.toBeNull()
+    expect(shapePanel.querySelector("#samplingRate")).not.toBeNull()
+  })
+})
+
+describe("UfoRecorderElement parameter summary", () => {
+  afterEach(() => {
+    document.body.innerHTML = ""
+  })
+
+  function chips(element: UfoRecorderElement): HTMLButtonElement[] {
+    return [...element.shadowRoot!.querySelectorAll<HTMLButtonElement>(".param-chip")]
+  }
+
+  function setInput(shadow: ShadowRoot, id: string, value: string): void {
+    const input = shadow.getElementById(id) as HTMLInputElement
+    input.value = value
+    input.dispatchEvent(new Event("input"))
+  }
+
+  it("sits under the render, not between the groups and it — chips above the canvas would push it back off the screen", () => {
+    const element = mount()
+    const children = [...element.shadowRoot!.children].map(child => child.id || child.tagName.toLowerCase())
+    expect(children.indexOf("param-summary")).toBeGreaterThan(children.indexOf("rr0-scene"))
+  })
+
+  it("states only what is set, so it reads as a statement rather than a second copy of the form", () => {
+    const element = mount()
+    setInput(element.shadowRoot!, "caseId", "")
+    expect(chips(element).some(chip => chip.dataset.field === "caseId")).toBe(false)
+    setInput(element.shadowRoot!, "caseId", "valensole")
+    const chip = chips(element).find(c => c.dataset.field === "caseId")!
+    expect(chip.textContent).toContain("valensole")
+  })
+
+  it("says what the field it points at says — same label, same value, same unit", async () => {
+    const element = mount()
+    setInput(element.shadowRoot!, "elevation", "220")
+    const chip = chips(element).find(c => c.dataset.field === "elevation")!
+    expect(chip.textContent).toBe(`${element.shadowRoot!.getElementById("label-elevation")!.textContent} 220 m`)
+  })
+
+  // A label shared across groups says two different things under one word — the witness's own
+  // height above the sea, and a building's.
+  it("names the group only when the same label appears in more than one of them", () => {
+    const element = mount()
+    setInput(element.shadowRoot!, "elevation", "220")
+    expect(chips(element).find(c => c.dataset.field === "elevation")!.textContent).not.toContain("·")
+    element.shadowRoot!.getElementById("add-decor-building")!.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    setInput(element.shadowRoot!, "decorAltitude", "12")
+    expect(chips(element).find(c => c.dataset.field === "elevation")!.textContent).toContain("·")
+    expect(chips(element).find(c => c.dataset.field === "decorAltitude")!.textContent).toContain("·")
+  })
+
+  // The summary is where a wrong value is noticed, so the click that says so should leave the
+  // author able to type the right one.
+  it("takes a click back to the field itself: opens its group and puts the caret in it", () => {
+    const element = mount()
+    setInput(element.shadowRoot!, "elevation", "220")
+    chips(element).find(c => c.dataset.field === "elevation")!.click()
+    expect([...element.shadowRoot!.querySelectorAll<HTMLElement>(".group-panel")].filter(p => !p.hidden).map(p => p.id)).toEqual(["group-location"])
+    expect(element.shadowRoot!.activeElement!.id).toBe("elevation")
+  })
+
+  // Who answered isn't what was seen — and the credit text a picker carries made chips several
+  // lines long. The provenance itself is kept, as the mark on every value a record supplied.
+  it("leaves the data-source pickers out of the summary entirely", () => {
+    const element = mount()
+    expect(chips(element).some(chip => chip.dataset.field?.endsWith("Source"))).toBe(false)
+  })
+
+  it("says a 0..1 slider the way it is read, not the way it is stored", () => {
+    const element = mount()
+    setInput(element.shadowRoot!, "transparency", "0.35")
+    expect(chips(element).find(c => c.dataset.field === "transparency")!.textContent).toContain("35 %")
   })
 })
 
@@ -4068,6 +4189,26 @@ describe("UfoRecorderElement inferred weather", () => {
     expect((weatherField(element, "weatherSource") as HTMLSelectElement).value).toBe("era5")
     // 05:00 on the UTC+1 clock the sighting declares — a wrong time zone shows up here first.
     expect(sourceLink(element).textContent).toContain("1965-07-01 04:00 UTC")
+  })
+
+  // "Disabled" means two unrelated things in this toolbar: a value a record owns, and a field that
+  // doesn't apply. The summary marks only the first — marking both had it claim that a silent
+  // sighting's loudness came out of an archive, which is a statement about provenance, the one
+  // thing here that must not be guessed.
+  it("marks the summary chips a record owns, and leaves the author's own values unmarked", async () => {
+    const element = mount(recordProvider())
+    stateDateAndPlace(element)
+    await waitFor(() => sourceLink(element).hidden === false, 2000)
+
+    const alignment = weatherField(element, "iceCrystalAlignment") as HTMLInputElement
+    alignment.value = "0.2"
+    alignment.dispatchEvent(new Event("input", { bubbles: true }))
+
+    const chipFor = (field: string): HTMLElement =>
+      element.shadowRoot!.querySelector<HTMLElement>(`.param-chip[data-field="${field}"]`)!
+    expect(chipFor("cloudCover").classList).toContain("from-source")
+    // Stated by hand, over a sighting a record otherwise answers for — and no record holds it.
+    expect(chipFor("iceCrystalAlignment").classList).not.toContain("from-source")
   })
 
   it("leaves the crystal alignment editable, because no record holds it", async () => {
