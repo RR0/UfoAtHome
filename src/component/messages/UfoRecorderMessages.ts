@@ -50,6 +50,13 @@ export interface UfoRecorderMessages extends SightingLabels {
    * said out loud rather than left blank, because "unknown" is the answer for most sightings and
    * a blank reads as a missing feature. */
   realSizeUnknown: string
+  /** What a stated blur is worth as a distance, read back through the instrument's own thin-lens
+   * geometry — the reverse of the depth of field this scene draws (see DepthOfField). */
+  blurBound: string
+  /** Why no bound can be read: the eye has no aperture to speak of, and a lens focused at a stated
+   * distance blurs on both sides of it, which gives two answers rather than one. */
+  blurBoundNoInstrument: string
+  blurBoundNotAtInfinity: string
   /** The declared crossings cannot all be true of one rigid object — see
    * SizeEstimate.contradictory. */
   realSizeContradiction: string
@@ -162,12 +169,24 @@ export interface UfoRecorderMessages extends SightingLabels {
   /** Summary of the group holding what the sighting sounded like — see SoundTrack.ts. */
   soundGroup: string
   temporalGroup: string
+  /** The four states EDTF_TIME_PATTERN can express about a whole value, offered beside the native
+   * picker so that "around 05:00" needs no text mode. */
+  timeQualifierExact: string
+  timeQualifierApproximate: string
+  timeQualifierUncertain: string
+  timeQualifierBoth: string
+  /** Title of the switch between the native picker and the EDTF text field — the picker cannot
+   * state a bare year, a month, or a time without a date. */
+  edtfModeTitle: string
   locationGroup: string
   observationGroup: string
   witnessGroup: string
   /** Label of the checkbox that decides whether the weather fields are looked up from a real
    * record (checked, and then read-only) or stated by the witness (unchecked, and then never
    * overwritten) — see UfoRecorderElement.inferWeather. */
+  /** Why the weather fields are unavailable mid-playback: the instant they would be written at is
+   * moving, and the next tick would overwrite the field being dragged. */
+  weatherWhilePlaying: string
   weatherInferred: string
   /** That checkbox's tooltip, where the reasoning actually fits. */
   weatherInferredTitle: string

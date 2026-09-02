@@ -7,6 +7,10 @@ export interface SightingLabels {
   color: string
   transparency: string
   halo: string
+  /** How indistinct the witness said the object's edges were — see BaseShape.blur. */
+  blur: string
+  /** How dazzling the witness said it was — see BaseShape.brightness. */
+  brightness: string
   shapeTitle: string
   /** objectSize/objectDistance's own placeholders — both say "as reported", the whole point
    * being that these are the witness's numbers, not the drawing's. */
@@ -29,6 +33,8 @@ export interface SightingLabels {
   longitude: string
   heading: string
   pitch: string
+  /** How far the instrument was tilted about its own line of sight — see ObserverPose.rollDeg. */
+  roll: string
   observationTime: string
   observationEndTime: string
   witnessId: string

@@ -49,6 +49,19 @@ const BODY_NAMES: Record<string, { en: string; fr: string }> = {
 }
 const BODY_TOOLTIP_SUPPORTED_LANGUAGES = ["en", "fr"]
 
+/**
+ * What a star's tooltip says, and why it says three things rather than one.
+ *
+ * A name alone identifies without explaining. What makes a bright point a candidate for a
+ * misidentification is how bright it was and how low it stood — a witness reporting a light near
+ * the horizon has been answered the moment they read "Venus, magnitude -4, 8 degrees up", and not
+ * at all by a bare name.
+ */
+const STAR_TOOLTIP: Record<string, string> = {
+  en: "{name} — mag {mag}, {alt}° above the horizon",
+  fr: "{name} — mag {mag}, {alt}° au-dessus de l'horizon"
+}
+
 /** How SceneRenderer keys a comet's own body mesh — see its buildComet. Kept here beside the names
  * it is used with rather than exported from the renderer, which has no interest in what the rest of
  * the key means. */
@@ -156,6 +169,22 @@ export class SceneElement extends HTMLElement {
    * onLightningFlash callback param), this is the one place that already orchestrates a non-
    * rendering side effect alongside pure rendering (see the terrain-attribution label above). */
   private readonly weatherAudio = new WeatherAudio()
+
+  /**
+   * Keeps the scene's own weather moving while the recording is not playing — set by the editor
+   * that composes this element, never by a replay. See syncAnimationsToPlayback.
+   */
+  private animateWhilePausedValue = false
+
+  set animateWhilePaused(animate: boolean) {
+    if (animate === this.animateWhilePausedValue) return
+    this.animateWhilePausedValue = animate
+    this.syncAnimationsToPlayback()
+  }
+
+  get animateWhilePaused(): boolean {
+    return this.animateWhilePausedValue
+  }
   private thunderTimeoutId?: number
 
   /** Bound once so document.removeEventListener (disconnectedCallback) can actually find it. */
@@ -199,6 +228,24 @@ export class SceneElement extends HTMLElement {
     const decor = decorId ? this.ufoElement.sighting.decor.find(d => d.id === decorId) : undefined
     if (decor) {
       this.showHoverTooltip(event, decor.title || DECOR_KIND_NAMES[decor.kind][language])
+      return
+    }
+    // Last of the four, and deliberately: a shape is painted over everything, a planet is a better
+    // answer than the star behind it, and a building stands between the witness and the whole sky.
+    // A star is what is left when nothing nearer is under the pointer.
+    const star = this.sceneRenderer.pickStarAt(ndcX, ndcY)
+    if (star) {
+      // toLocaleString with the page's own locale, like every other number this project prints —
+      // a French page writes 0,03 and not 0.03. Two decimals below magnitude 1 and one above, the
+      // same rule the apparent-size readout already applies to degrees, and here for the same
+      // reason: a single decimal printed the four brightest stars as "mag 0,0" and "mag -0", which
+      // read like a field that failed to fill rather than like Vega, the star the whole scale was
+      // originally anchored on.
+      const magnitude = star.star.mag
+      this.showHoverTooltip(event, STAR_TOOLTIP[language]
+        .replace("{name}", star.star.name[language])
+        .replace("{mag}", magnitude.toLocaleString(undefined, { maximumFractionDigits: Math.abs(magnitude) < 1 ? 2 : 1 }))
+        .replace("{alt}", String(Math.round(star.altitudeDeg))))
       return
     }
     this.hoverTooltip.hidden = true
@@ -273,12 +320,20 @@ export class SceneElement extends HTMLElement {
    * through the nested player's single onFrame sink.
    */
   private syncAnimationsToPlayback(): void {
-    const playing = this.ufoElement.playbackState === "playing"
-    this.sceneRenderer.setAnimationsRunning(playing)
-    this.weatherAudio.setPaused(!playing)
+    // "Running" is not quite "playing", and the difference is what an editor needs. The rule above
+    // is about a REPLAY: a reader paused on one instant of somebody's sighting, over which weather
+    // still going on would be the reader's own room. It says nothing about an author who is at
+    // that moment STATING the weather — for them a frozen sky is a preview of nothing, and there
+    // is often no way out of it either, since a recording with no duration yet cannot be played at
+    // all. So the recorder asks for the scene to keep moving (see animateWhilePaused), and the
+    // sound follows the picture rather than diverging from it: what turned this up was hearing
+    // rain fall over a still image.
+    const running = this.ufoElement.playbackState === "playing" || this.animateWhilePaused
+    this.sceneRenderer.setAnimationsRunning(running)
+    this.weatherAudio.setPaused(!running)
     // A thunderclap is deliberately delayed by the distance sound travels (see
     // handleLightningFlash); one still in flight belongs to a flash that is no longer happening.
-    if (!playing) clearTimeout(this.thunderTimeoutId)
+    if (!running) clearTimeout(this.thunderTimeoutId)
   }
 
   constructor() {

@@ -21,6 +21,42 @@ export interface BaseShape {
   transparency: number
   /** 0 = no halo/glow, >1 = larger glow radius */
   haloScale: number
+  /**
+   * How indistinct the witness said its edges were — 0 for a hard outline, 1 for a shape with no
+   * edge at all. What they SAW, in the same sense as its colour: not a consequence of the optics.
+   *
+   * The depth of field this project draws (see DepthOfFieldPass) deliberately does not touch the
+   * witness's own object, because the object's distance is the very unknown a reconstruction is
+   * about and blurring it from a distance would assert the answer. This runs the other way, and is
+   * worth more: a stated blur, read back through the instrument's own thin-lens geometry, BOUNDS
+   * that distance — an object photographed as a disc through a lens focused at infinity was near.
+   * See DepthOfField and UfoRecorderElement.refreshBlurDistanceBound.
+   *
+   * Distinct from haloScale, which they will be mistaken for. A halo is light AROUND the shape, a
+   * bright fringe outside a hard edge; this is the edge itself losing its position.
+   *
+   * Optional so that every recording made before it existed reads as what it was: a shape whose
+   * edges nobody said anything about.
+   */
+  blur?: number
+  /**
+   * How dazzling the witness said it was — 0 for a light you can look at, 1 for one you cannot.
+   *
+   * Not a bigger halo, which is what it will be reached for instead. A halo is a coloured fringe
+   * around a shape; brilliance is not a colour at all, because a screen cannot go brighter than
+   * white. It is a BEHAVIOUR, and a very bright source has three: its core saturates to white
+   * whatever its own hue, a wide faint veil spreads far past it (light scattered in the eye, or in
+   * the lens), and a straight-bladed aperture throws spikes. This project already renders all
+   * three — for the Sun, from its real photometry (see SceneRenderer's glare and
+   * applyDazzleStrength). The witness's own object got none of them, because it is painted on the
+   * 2D overlay above the 3D scene where that machinery lives; CanvasRenderer draws the same three
+   * behaviours from this one stated number.
+   *
+   * Stated, not derived, and there is no reading it back: unlike a blur, which the lens's own
+   * thin-lens geometry turns into a bound on distance, nothing here models what a film or a retina
+   * saturates at. What the witness said is all this is.
+   */
+  brightness?: number
   selected: boolean
   title?: string
   /**
@@ -116,13 +152,17 @@ export interface Appearance {
   color: string
   transparency: number
   haloScale: number
+  blur: number
+  brightness: number
 }
 
 export function createShape(bounds: ShapeBounds, appearance: Appearance): Shape {
   return {
     ...SHAPE_PRESETS[appearance.presetId](bounds, appearance.color),
     transparency: appearance.transparency,
-    haloScale: appearance.haloScale
+    haloScale: appearance.haloScale,
+    blur: appearance.blur,
+    brightness: appearance.brightness
   }
 }
 
@@ -169,7 +209,7 @@ function lerpColor(from: string, to: string, fraction: number): string {
 
 /**
  * Blends two keyframe shapes for smooth in-between playback frames. Geometry/appearance
- * (bounds, angle, transparency, haloScale, color) always blends linearly; polygon `points`
+ * (bounds, angle, transparency, haloScale, blur, brightness, color) always blends linearly; polygon `points`
  * only blend when both shapes are polygons with the same point count (there's no meaningful
  * per-vertex correspondence otherwise) — mismatched kind, or differing point counts, holds
  * `from`'s outline/title/selected until `fraction` reaches 1, at which point `to`'s take over;
@@ -187,6 +227,10 @@ export function lerpShape(from: Shape, to: Shape, fraction: number): Shape {
   const angle = lerp(from.angle, to.angle, fraction)
   const transparency = lerp(from.transparency, to.transparency, fraction)
   const haloScale = lerp(from.haloScale, to.haloScale, fraction)
+  // Absent means nothing was said about the edges, and blending from "nothing said" toward a
+  // stated blur would invent a statement — so an absent value counts as the hard edge it draws as.
+  const blur = lerp(from.blur ?? 0, to.blur ?? 0, fraction)
+  const brightness = lerp(from.brightness ?? 0, to.brightness ?? 0, fraction)
   const color = lerpColor(from.color, to.color, fraction)
   // An object that closes in visibly grows at every instant, not just at its keyframes —
   // interpolated (rather than held from `from`) so the recording keeps stating a real apparent
@@ -200,6 +244,8 @@ export function lerpShape(from: Shape, to: Shape, fraction: number): Shape {
       angle,
       transparency,
       haloScale,
+      blur,
+      brightness,
       color,
       angular,
       // Held, not blended — see BaseShape.behindCloud. The spread above already carries `from`'s
@@ -212,5 +258,5 @@ export function lerpShape(from: Shape, to: Shape, fraction: number): Shape {
     }
   }
 
-  return { ...(fraction < 1 ? from : to), bounds, angle, transparency, haloScale, color, angular }
+  return { ...(fraction < 1 ? from : to), bounds, angle, transparency, haloScale, blur, brightness, color, angular }
 }

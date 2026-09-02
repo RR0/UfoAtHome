@@ -1,4 +1,4 @@
-import { BufferAttribute, BufferGeometry, CanvasTexture, Color, Points, ShaderMaterial, Vector2 } from "three"
+import { BufferAttribute, BufferGeometry, CanvasTexture, Color, Points, ShaderMaterial, Vector2, Vector3 } from "three"
 
 /**
  * GPU-driven rain streaks — ported from the technique at
@@ -122,6 +122,11 @@ export interface RainUniforms {
   uUvSquash: { value: number }
   uSpeedStreak: { value: number }
   uWindOffset: { value: Vector2 }
+  /** The drop's own velocity in metres per second — sideways from the wind, downward from the
+   * fall. What LEANS the streak: see the vertex shader's vSlant. */
+  uDropVelocity: { value: Vector3 }
+  /** Viewport width over height, so the lean can be measured where it is seen — in pixels. */
+  uAspect: { value: number }
   uHeight: { value: number }
   uBottomY: { value: number }
   uHalfWidth: { value: number }
@@ -152,10 +157,13 @@ uniform float uHeight;
 uniform float uBottomY;
 uniform float uHalfWidth;
 uniform vec2 uWindOffset;
+uniform vec3 uDropVelocity;
+uniform float uAspect;
 uniform float uNearFocusDistance;
 uniform float uHazeDistance;
 varying float vNearBlur;
 varying float vHaze;
+varying float vSlant;
 
 void main() {
   // uOverallSpeed*aSpeed, not a real-world m/s value — see RainSystemConfig.overallSpeed's own
@@ -180,6 +188,24 @@ void main() {
   // a real, caught bug (a user directly noticed "darker/farther streaks equal-or-bigger than
   // lighter/closer ones"), not just a stylistic overcorrection.
   vHaze = clamp(dist / uHazeDistance, 0.0, 1.0);
+  // Where this drop is actually going, as an angle ON SCREEN.
+  //
+  // The wind already carried the whole field sideways (uWindOffset above), but each streak stayed
+  // bolt upright while doing it — rain blowing across the frame drawn as if it fell straight down.
+  // A streak is the drop's own path over the exposure, so it has to point along the drop's
+  // velocity: down from the fall, sideways from the wind.
+  //
+  // Projected rather than computed from the wind angle alone, because how slanted it LOOKS depends
+  // on where the witness is facing. Rain driven straight at them leans hardly at all; the same rain
+  // seen from the side leans its full angle. Taking the difference between this drop and a point
+  // one second along its own velocity, both through the projection, gets that for free — and the
+  // aspect ratio converts the two clip-space axes into the pixels the angle is measured in.
+  vec4 aheadClip = projectionMatrix * (modelViewMatrix * vec4(driftedX + uDropVelocity.x, wrappedY + uDropVelocity.y, driftedZ + uDropVelocity.z, 1.0));
+  vec2 here = gl_Position.xy / max(gl_Position.w, 0.0001);
+  vec2 ahead = aheadClip.xy / max(aheadClip.w, 0.0001);
+  vec2 travel = vec2((ahead.x - here.x) * uAspect, ahead.y - here.y);
+  // Straight down is the texture's own orientation, so that is the zero.
+  vSlant = length(travel) < 1e-6 ? 0.0 : atan(travel.x, -travel.y);
   gl_PointSize = uPixelSize / dist + vNearBlur * ${MAX_BLUR_PIXELS.toFixed(1)};
 }
 `
@@ -194,9 +220,17 @@ uniform float uSpeedStreak;
 uniform vec3 uHazeColor;
 varying float vNearBlur;
 varying float vHaze;
+varying float vSlant;
 
 void main() {
-  vec2 uv = gl_PointCoord;
+  // A point sprite is always axis-aligned and cannot be rotated, but its texture lookup can:
+  // turning the coordinates by the opposite angle leans the streak drawn inside it. This is what
+  // makes wind visible on a drop — the field was already being carried sideways (uWindOffset),
+  // while every streak in it stayed bolt upright.
+  vec2 centered = gl_PointCoord - 0.5;
+  float slantCos = cos(vSlant);
+  float slantSin = sin(vSlant);
+  vec2 uv = vec2(centered.x * slantCos - centered.y * slantSin, centered.x * slantSin + centered.y * slantCos) + 0.5;
   // Squashes sampled UV.x toward the texture's own center column — at a steep camera pitch this
   // keeps the streak reading as a normal-width drop instead of the full-width bar you'd get from
   // sampling the (already very thin) streak texture undistorted at a near-face-on angle.
@@ -229,6 +263,19 @@ function mulberry32(seed: number): () => number {
   }
 }
 
+/**
+ * How much of the streak's length each rounded end takes — the drop's own radius against the
+ * distance it fell while the shutter was open.
+ */
+const STREAK_CAP_FRACTION = 0.14
+/**
+ * The width of the blur every image of a point has, in texture pixels. Sets how wide the streak
+ * reads: it is a hairline, and the reference project's own drop is a 2-3 px line on a 512 px
+ * canvas — an early version of this texture ramped its opacity across nearly half the canvas and
+ * rendered as a fat blurry column instead.
+ */
+const STREAK_SIGMA_PX = 4.5
+
 let sharedRainStreakTexture: CanvasTexture | undefined
 
 /**
@@ -247,36 +294,37 @@ export function getRainStreakTexture(): CanvasTexture {
   canvas.width = size
   canvas.height = size
   const context = canvas.getContext("2d")!
-  // A genuinely thin hairline, not a soft-edged bar: the reference project's own rainDrop.png is a
-  // crisp ~2-3px line on a 512px-wide canvas (under 1% of the width) — the first version of this
-  // texture used a slow 0->0.47 ramp that put visible opacity across nearly half the canvas, which
-  // is why it rendered as a fat blurry column instead of a streak. Confining the falloff to a narrow
-  // band on each side of the center keeps the glow localized to a real hairline.
-  const column = context.createLinearGradient(0, 0, size, 0)
-  column.addColorStop(0, "rgba(255,255,255,0)")
-  column.addColorStop(0.42, "rgba(255,255,255,0)")
-  column.addColorStop(0.47, "rgba(255,255,255,0.85)")
-  column.addColorStop(0.5, "rgba(255,255,255,1)")
-  column.addColorStop(0.53, "rgba(255,255,255,0.85)")
-  column.addColorStop(0.58, "rgba(255,255,255,0)")
-  column.addColorStop(1, "rgba(255,255,255,0)")
-  context.fillStyle = column
-  context.fillRect(0, 0, size, size)
-  // Erases (destination-out) both vertical tips back to transparent, so the streak tapers instead of
-  // ending in a hard-edged cut top and bottom.
-  const tips = context.createLinearGradient(0, 0, 0, size)
-  tips.addColorStop(0, "rgba(0,0,0,1)")
-  tips.addColorStop(0.1, "rgba(0,0,0,0)")
-  tips.addColorStop(0.9, "rgba(0,0,0,0)")
-  tips.addColorStop(1, "rgba(0,0,0,1)")
-  context.globalCompositeOperation = "destination-out"
-  context.fillStyle = tips
-  context.fillRect(0, 0, size, size)
-  context.globalCompositeOperation = "source-over"
+  const image = context.createImageData(size, size)
+  const centerX = size / 2
+  // The streak is a drop swept along a line, so its outline is a capsule: a segment with a
+  // hemisphere at each end. Both ends are therefore round for free — the taper is not a fade
+  // painted onto a bar, it is the drop's own shape at the two instants the exposure caught it
+  // starting and finishing.
+  const capTop = size * STREAK_CAP_FRACTION
+  const capBottom = size - capTop
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      // Distance to the capsule's axis — the segment itself in the middle, its endpoints beyond.
+      const dx = x + 0.5 - centerX
+      const dy = y + 0.5 < capTop ? y + 0.5 - capTop : y + 0.5 > capBottom ? y + 0.5 - capBottom : 0
+      const distance = Math.hypot(dx, dy)
+      // And a Gaussian of that distance, which is what a point spread function IS: no real image
+      // has a hard edge, because no lens and no eye focuses a point to a point. It is also why the
+      // drop's own geometric profile is not used directly — the chord through a sphere,
+      // sqrt(1 - u²), has an infinite slope at the rim and would draw the very hard edge this is
+      // meant to be rid of.
+      const alpha = Math.exp(-(distance * distance) / (2 * STREAK_SIGMA_PX * STREAK_SIGMA_PX))
+      const offset = (y * size + x) * 4
+      image.data[offset] = 255
+      image.data[offset + 1] = 255
+      image.data[offset + 2] = 255
+      image.data[offset + 3] = Math.round(255 * Math.min(1, alpha))
+    }
+  }
+  context.putImageData(image, 0, 0)
   sharedRainStreakTexture = new CanvasTexture(canvas)
   return sharedRainStreakTexture
 }
-
 /** Builds the rain Points/geometry/ShaderMaterial — see this module's own doc comment for why a
  * custom shader, and each RainSystemConfig field's comment for the tuning rationale. Every particle
  * stores its pre-wrap Y (uniformly spread through one fall cycle so the field doesn't visibly "start"
@@ -314,6 +362,8 @@ export function buildRainSystem(config: RainSystemConfig): RainSystem {
     uUvSquash: { value: 1 },
     uSpeedStreak: { value: config.speedStreak },
     uWindOffset: { value: new Vector2(0, 0) },
+    uDropVelocity: { value: new Vector3(0, -1, 0) },
+    uAspect: { value: 1 },
     uHeight: { value: config.heightM },
     uBottomY: { value: config.bottomYM },
     uHalfWidth: { value: halfWidth },

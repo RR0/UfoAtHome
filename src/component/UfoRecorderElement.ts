@@ -1,3 +1,4 @@
+import { BLUR_RADIUS_UNIT } from "../render/CanvasRenderer.js"
 import { html, css } from "./template.js"
 import { SightingSummary } from "./SightingSummary.js"
 import type { SummaryGroup } from "./SightingSummary.js"
@@ -136,7 +137,7 @@ const ARROW_KEYS = new Set(["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"])
 const ARROW_KEY_STEP_PX = 4
 const DEFAULT_SOURCE_ID = "ufo-1"
 const PRESET_IDS: ShapePresetId[] = ["oval", "polygon"]
-const DEFAULT_APPEARANCE: Appearance = { presetId: "oval", color: "#39ff14", transparency: 0, haloScale: 1.5 }
+const DEFAULT_APPEARANCE: Appearance = { presetId: "oval", color: "#39ff14", transparency: 0, haloScale: 1.5, blur: 0, brightness: 0 }
 
 /** What the pointer is currently over on the canvas, as written to its own `data-cursor`
  * attribute — the canvas's contents are drawn, not DOM, so only script can hit-test them, but
@@ -192,6 +193,9 @@ export class UfoRecorderElement extends HTMLElement {
   private readonly colorInput: HTMLInputElement
   private readonly transparencyInput: HTMLInputElement
   private readonly haloScaleInput: HTMLInputElement
+  private readonly blurInput: HTMLInputElement
+  private readonly brightnessInput: HTMLInputElement
+  private readonly blurBoundOutput: HTMLElement
   private readonly sourceSelect: HTMLSelectElement
   private readonly shapeTitleInput: HTMLInputElement
   /** The witness's own reported size/distance for the selected shape — the pair that makes
@@ -265,6 +269,7 @@ export class UfoRecorderElement extends HTMLElement {
   private readonly lngInput: HTMLInputElement
   private readonly headingInput: HTMLInputElement
   private readonly pitchInput: HTMLInputElement
+  private readonly rollInput: HTMLInputElement
   private readonly elevationInput: HTMLInputElement
   private readonly groundElevationOutput: HTMLElement
   /** The ground's own height above sea level at the current location, once it is known — what the
@@ -287,6 +292,14 @@ export class UfoRecorderElement extends HTMLElement {
   private groundElevationTimer?: ReturnType<typeof setTimeout>
   private groundElevationToken = 0
   private readonly obsTimeInput: HTMLInputElement
+  private readonly obsTimeNativeInput: HTMLInputElement
+  private readonly obsEndTimeNativeInput: HTMLInputElement
+  private readonly obsTimeQualifier: HTMLSelectElement
+  private readonly obsEndTimeQualifier: HTMLSelectElement
+  private readonly edtfModeButton: HTMLButtonElement
+  /** Whether the two observation times are typed as EDTF rather than picked. Chosen for the
+   * author when a recording loads (see chooseTimeInputMode) and theirs to change afterwards. */
+  private edtfMode = false
   private readonly obsEndTimeInput: HTMLInputElement
   private readonly witnessIdInput: HTMLInputElement
   private readonly witnessDirNameInput: HTMLInputElement
@@ -358,6 +371,8 @@ export class UfoRecorderElement extends HTMLElement {
   private readonly labelColor: HTMLElement
   private readonly labelTransparency: HTMLElement
   private readonly labelHalo: HTMLElement
+  private readonly labelBlur: HTMLElement
+  private readonly labelBrightness: HTMLElement
   private readonly labelShape: HTMLElement
   private readonly labelShapeTitle: HTMLElement
   private readonly labelUtcOffset: HTMLElement
@@ -377,6 +392,7 @@ export class UfoRecorderElement extends HTMLElement {
   private readonly labelLongitude: HTMLElement
   private readonly labelHeading: HTMLElement
   private readonly labelPitch: HTMLElement
+  private readonly labelRoll: HTMLElement
   private readonly labelElevation: HTMLElement
   private readonly labelObservationTime: HTMLElement
   private readonly labelObservationEndTime: HTMLElement
@@ -637,6 +653,10 @@ export class UfoRecorderElement extends HTMLElement {
     // N/NE/E/SE/S/SO/O/NO reference labels on the horizon — useful while authoring a heading, not
     // meaningful in the plain playback case, so this is opt-in on SceneElement rather than always on.
     this.sceneElement.setAttribute("show-compass", "")
+    // An author stating the weather has to be able to SEE it: a scene frozen until the recording
+    // plays is a preview of nothing, and a recording with no duration yet cannot be played at all.
+    // Replays keep the opposite rule — see SceneElement.syncAnimationsToPlayback.
+    this.sceneElement.animateWhilePaused = true
     this.ufoElement = this.sceneElement.ufoElement
     // This canvas is used for drag-to-record shape placement instead — a plain click shouldn't
     // also toggle the nested player's playback (every recording drag ends in a native "click").
@@ -657,6 +677,9 @@ export class UfoRecorderElement extends HTMLElement {
     this.colorInput = this.shadow.getElementById("color") as HTMLInputElement
     this.transparencyInput = this.shadow.getElementById("transparency") as HTMLInputElement
     this.haloScaleInput = this.shadow.getElementById("haloScale") as HTMLInputElement
+    this.blurInput = this.shadow.getElementById("blur") as HTMLInputElement
+    this.brightnessInput = this.shadow.getElementById("brightness") as HTMLInputElement
+    this.blurBoundOutput = this.shadow.getElementById("blur-bound")!
     this.sourceSelect = this.shadow.getElementById("source") as HTMLSelectElement
     this.shapeTitleInput = this.shadow.getElementById("shapeTitle") as HTMLInputElement
     this.utcOffsetInput = this.shadow.getElementById("utcOffsetHours") as HTMLInputElement
@@ -706,10 +729,16 @@ export class UfoRecorderElement extends HTMLElement {
     this.lngInput = this.shadow.getElementById("lng") as HTMLInputElement
     this.headingInput = this.shadow.getElementById("heading") as HTMLInputElement
     this.pitchInput = this.shadow.getElementById("pitch") as HTMLInputElement
+    this.rollInput = this.shadow.getElementById("roll") as HTMLInputElement
     this.elevationInput = this.shadow.getElementById("elevation") as HTMLInputElement
     this.groundElevationOutput = this.shadow.getElementById("ground-elevation")!
     this.obsTimeInput = this.shadow.getElementById("obs-time") as HTMLInputElement
     this.obsEndTimeInput = this.shadow.getElementById("obs-end-time") as HTMLInputElement
+    this.obsTimeNativeInput = this.shadow.getElementById("obs-time-native") as HTMLInputElement
+    this.obsEndTimeNativeInput = this.shadow.getElementById("obs-end-time-native") as HTMLInputElement
+    this.obsTimeQualifier = this.shadow.getElementById("obs-time-qualifier") as HTMLSelectElement
+    this.obsEndTimeQualifier = this.shadow.getElementById("obs-end-time-qualifier") as HTMLSelectElement
+    this.edtfModeButton = this.shadow.getElementById("edtf-mode") as HTMLButtonElement
     this.witnessIdInput = this.shadow.getElementById("witnessId") as HTMLInputElement
     this.witnessDirNameInput = this.shadow.getElementById("witnessDirName") as HTMLInputElement
     this.witnessTitleInput = this.shadow.getElementById("witnessTitle") as HTMLInputElement
@@ -770,6 +799,8 @@ export class UfoRecorderElement extends HTMLElement {
     this.labelColor = this.shadow.getElementById("label-color")!
     this.labelTransparency = this.shadow.getElementById("label-transparency")!
     this.labelHalo = this.shadow.getElementById("label-halo")!
+    this.labelBlur = this.shadow.getElementById("label-blur")!
+    this.labelBrightness = this.shadow.getElementById("label-brightness")!
     this.labelShape = this.shadow.getElementById("label-shape")!
     this.labelShapeTitle = this.shadow.getElementById("label-shape-title")!
     this.labelUtcOffset = this.shadow.getElementById("label-utc-offset")!
@@ -791,6 +822,7 @@ export class UfoRecorderElement extends HTMLElement {
     this.labelLongitude = this.shadow.getElementById("label-lng")!
     this.labelHeading = this.shadow.getElementById("label-heading")!
     this.labelPitch = this.shadow.getElementById("label-pitch")!
+    this.labelRoll = this.shadow.getElementById("label-roll")!
     this.labelElevation = this.shadow.getElementById("label-elevation")!
     this.labelObservationTime = this.shadow.getElementById("label-observation-time")!
     this.labelObservationEndTime = this.shadow.getElementById("label-observation-end-time")!
@@ -1015,11 +1047,18 @@ export class UfoRecorderElement extends HTMLElement {
     this.transparencyInput.addEventListener("input", () =>
       this.setAppearance({ transparency: Number(this.transparencyInput.value) })
     )
+    this.brightnessInput.addEventListener("input", () =>
+      this.setAppearance({ brightness: Number(this.brightnessInput.value) })
+    )
+    this.blurInput.addEventListener("input", () => {
+      this.setAppearance({ blur: Number(this.blurInput.value) })
+      this.refreshBlurDistanceBound()
+    })
     this.haloScaleInput.addEventListener("input", () =>
       this.setAppearance({ haloScale: Number(this.haloScaleInput.value) })
     )
 
-    for (const input of [this.latInput, this.lngInput, this.headingInput, this.pitchInput, this.elevationInput]) {
+    for (const input of [this.latInput, this.lngInput, this.headingInput, this.pitchInput, this.rollInput, this.elevationInput]) {
       input.addEventListener("input", () => this.updateObserver())
     }
     // The optics are pose fields like the rest — see ObserverPose.fNumber's own doc comment — so
@@ -1074,6 +1113,13 @@ export class UfoRecorderElement extends HTMLElement {
     })
     this.obsTimeInput.addEventListener("input", () => this.updateObservationTime())
     this.obsEndTimeInput.addEventListener("input", () => this.updateObservationEndTime())
+    // "change", not "input": a datetime-local reports an empty value while it is still half
+    // typed, and only a committed change can be told apart from a field in mid-entry.
+    this.obsTimeNativeInput.addEventListener("change", () => this.writeFromPicker(this.obsTimeNativeInput, this.obsTimeQualifier, this.obsTimeInput, () => this.updateObservationTime()))
+    this.obsEndTimeNativeInput.addEventListener("change", () => this.writeFromPicker(this.obsEndTimeNativeInput, this.obsEndTimeQualifier, this.obsEndTimeInput, () => this.updateObservationEndTime()))
+    this.obsTimeQualifier.addEventListener("change", () => this.writeFromPicker(this.obsTimeNativeInput, this.obsTimeQualifier, this.obsTimeInput, () => this.updateObservationTime()))
+    this.obsEndTimeQualifier.addEventListener("change", () => this.writeFromPicker(this.obsEndTimeNativeInput, this.obsEndTimeQualifier, this.obsEndTimeInput, () => this.updateObservationEndTime()))
+    this.edtfModeButton.addEventListener("click", () => this.setEdtfMode(!this.edtfMode))
     this.obsTimeInput.addEventListener("blur", () => this.validateEdtfTimeInput(this.obsTimeInput))
     this.obsEndTimeInput.addEventListener("blur", () => this.validateEdtfTimeInput(this.obsEndTimeInput))
     for (const input of [
@@ -1144,6 +1190,9 @@ export class UfoRecorderElement extends HTMLElement {
     // So the external playback row isn't blank/stale before the first timeupdate tick.
     this.syncPlaybackControls()
     this.refreshSourceRows()
+    // Synchronously, with the English defaults: loadLocaleMessages() below is async, and an empty
+    // qualifier picker on first paint would read as a control with nothing to offer.
+    this.refreshTimeQualifierOptions()
     this.refreshTimeZoneOptions()
     // An empty editor has no date or place yet, so this only states what's missing — the lookup
     // itself starts the moment those fields say enough (see scheduleWeatherLookup's callers).
@@ -1204,6 +1253,8 @@ export class UfoRecorderElement extends HTMLElement {
     this.syncDurationField()
     this.syncObservationTimeFields()
     this.syncObservationEndTimeFields()
+    // After the two syncs above, which is what it reads to decide.
+    this.chooseTimeInputMode()
     this.syncWitnessMetadataFields()
     this.refreshTimeZoneOptions()
     this.utcOffsetInput.readOnly = this.ufoElement.sighting.event.timeZone !== undefined
@@ -1596,6 +1647,7 @@ export class UfoRecorderElement extends HTMLElement {
     // an empty/invalid input just falls back to 0 (looking straight at the horizon) rather than
     // propagating NaN into the pose.
     const pitchDeg = this.numberOrUndefined(this.pitchInput.value) ?? 0
+    const rollDeg = this.numberOrUndefined(this.rollInput.value) ?? 0
     // The FIELD states an altitude above sea level; ObserverPose.elevationM is a height above the
     // local ground (the terrain patch is built with the observer's own ground at y=0, see
     // TerrainMeshBuilder). Subtracting the ground's own height is the whole conversion — and while
@@ -1623,7 +1675,7 @@ export class UfoRecorderElement extends HTMLElement {
     const exposureSeconds = UfoRecorderElement.exposureSeconds(this.exposureInput.value)
     // Empty is not missing here, it is INFINITY — where a camera pointed at the sky is focused.
     const focusDistanceM = this.numberOrUndefined(this.focusDistanceInput.value)
-    const nothingSet = lat === undefined && lng === undefined && headingDeg === undefined && pitchDeg === 0 && elevationM === 0
+    const nothingSet = lat === undefined && lng === undefined && headingDeg === undefined && pitchDeg === 0 && rollDeg === 0 && elevationM === 0
     if (nothingSet) {
       witnessTrack.removeKeyframeAt(t)
     } else {
@@ -1633,6 +1685,10 @@ export class UfoRecorderElement extends HTMLElement {
         elevationM,
         headingDeg,
         pitchDeg,
+        // Written only when there IS one. Absent already means upright (see ObserverPose.rollDeg),
+        // so storing a zero on every pose would add a field to every recording ever made to say
+        // what saying nothing says — and would rewrite files that never mentioned it.
+        rollDeg: rollDeg === 0 ? undefined : rollDeg,
         fovDeg,
         fNumber,
         exposureSeconds,
@@ -2116,7 +2172,19 @@ export class UfoRecorderElement extends HTMLElement {
       // and in no station log; locking that slider because ERA5 answered about the CLOUDS would be
       // claiming a measurement that does not exist, and would leave a reader unable to try the
       // display the record cannot decide (see Weather.iceCrystalAlignment).
-      field.disabled = inferred && source !== undefined && field !== this.iceCrystalAlignmentInput
+      // And while the recording is PLAYING, whatever owns them. applyWeatherAtPlayhead refuses to
+      // write then — the playhead is a moving target, and syncWeatherFromTimeline would overwrite
+      // the very field being dragged on the next tick — but nothing said so: the slider moved, the
+      // sky did not, and the value snapped back. A control that cannot be acted on has to look
+      // like one, which is the same rule the appearance fields already follow.
+      field.disabled =
+        (inferred && source !== undefined && field !== this.iceCrystalAlignmentInput) ||
+        this.ufoElement.playbackState === "playing"
+      if (this.ufoElement.playbackState === "playing") {
+        field.title = this.messages.weatherWhilePlaying
+      } else if (field.title === this.messages.weatherWhilePlaying) {
+        field.title = ""
+      }
     }
     // With no date or no place stated, there is no question to ask a record — so the control that
     // asks it is unavailable AND unticked, because a ticked box would say the weather below comes
@@ -2299,9 +2367,123 @@ export class UfoRecorderElement extends HTMLElement {
    * setter) — same role syncDurationField() plays just above this call site. event.time is
    * sighting-wide metadata, not a per-instant keyframe like the observer's own pose (see
    * syncObserverFromTimeline for that), so this only needs to run once on load. */
+  /**
+   * The four things EDTF_TIME_PATTERN can say about a value as a whole, in the order they get
+   * less certain. Built in script rather than spelled out as eight <option> ids, the same rule the
+   * sound kinds and the data sources follow: the list IS the set the parser accepts.
+   */
+  private static readonly TIME_QUALIFIERS: { value: string, key: "timeQualifierExact" | "timeQualifierApproximate" | "timeQualifierUncertain" | "timeQualifierBoth" }[] = [
+    { value: "", key: "timeQualifierExact" },
+    { value: "~", key: "timeQualifierApproximate" },
+    { value: "?", key: "timeQualifierUncertain" },
+    { value: "%", key: "timeQualifierBoth" }
+  ]
+
+  private refreshTimeQualifierOptions(): void {
+    for (const select of [this.obsTimeQualifier, this.obsEndTimeQualifier]) {
+      const chosen = select.value
+      select.replaceChildren(...UfoRecorderElement.TIME_QUALIFIERS.map(qualifier => {
+        const option = document.createElement("option")
+        option.value = qualifier.value
+        option.textContent = this.messages[qualifier.key]
+        return option
+      }))
+      select.value = chosen
+    }
+  }
+
+  /** The trailing [?~%] of an EDTF value, or "" — the only qualifier this parser carries. */
+  private qualifierOf(edtf: string): string {
+    const last = edtf.trim().slice(-1)
+    return "?~%".includes(last) ? last : ""
+  }
+
+  /**
+   * Whether a stated time is one the native picker can hold: a full instant to the minute.
+   *
+   * Seconds are the reason this asks about them at all — the picker is stepped to the minute, so
+   * a recording that states a second would quietly lose it on the first edit. Such a value opens
+   * in the text field instead, where nothing is dropped. A qualifier is no obstacle: the select
+   * beside the picker carries it.
+   */
+  private isPickable(time: SightingTime | undefined): boolean {
+    if (!time) {
+      return false
+    }
+    const complete = time.year !== undefined && time.month !== undefined && time.day !== undefined &&
+      time.hour !== undefined && time.minute !== undefined
+    return complete && (time.second === undefined || time.second === 0)
+  }
+
+  /** The value a datetime-local takes for a stated time — "" for anything it cannot hold. */
+  private pickerValueOf(time: SightingTime | undefined): string {
+    if (!this.isPickable(time)) {
+      return ""
+    }
+    const pad = (n: number, width = 2): string => String(n).padStart(width, "0")
+    return `${pad(time!.year!, 4)}-${pad(time!.month!)}-${pad(time!.day!)}T${pad(time!.hour!)}:${pad(time!.minute!)}`
+  }
+
+  /**
+   * Turns what the picker and its qualifier now say into EDTF, and sends it down the ordinary
+   * typed-input path.
+   *
+   * Through the text field rather than into the sighting directly, so there is one write path and
+   * one parse — and so the stored raw string stays canonical whatever produced it (formatEdtfTime
+   * returns it verbatim, and would otherwise show a stale string over fresh numbers).
+   *
+   * An empty picker is two different statements, told apart by badInput: genuinely cleared, which
+   * is a witness withdrawing a time and must be recorded; or half typed, which is nothing yet and
+   * must NOT be, since applyEdtfTimeInput reads an empty string as "no time at all" and would
+   * erase the date between a date being entered and its hour.
+   */
+  private writeFromPicker(picker: HTMLInputElement, qualifier: HTMLSelectElement, text: HTMLInputElement, apply: () => void): void {
+    if (picker.value === "" && picker.validity.badInput) {
+      return
+    }
+    text.value = picker.value === "" ? "" : `${picker.value}${qualifier.value}`
+    apply()
+  }
+
+  /**
+   * Picks the mode a freshly loaded recording opens in: the picker whenever both stated times are
+   * full instants, the text field otherwise.
+   *
+   * The picker is the default because a reconstruction needs a full instant to compute a sky at
+   * all — of the nine recordings that exist, eight state one to the minute. It is not the only
+   * mode because the corpus those recordings are made FROM says otherwise: of 241 case files, 43%
+   * state a bare year and 17% a date with a time.
+   *
+   * Only on load. After that the mode is the author's, and re-deciding it under them mid-edit is
+   * how a half-typed year would snap the field away.
+   */
+  private chooseTimeInputMode(): void {
+    const event = this.ufoElement.sighting.event
+    const statable = (time: SightingTime | undefined): boolean => time === undefined || this.isPickable(time)
+    this.setEdtfMode(!(statable(event.time) && statable(event.endTime)))
+  }
+
+  /** Swaps which control is showing. Writes nothing: a mode is a way of saying something, not a
+   * statement, and switching on a value the picker cannot hold would otherwise read as clearing
+   * it. */
+  private setEdtfMode(edtf: boolean): void {
+    this.edtfMode = edtf
+    this.edtfModeButton.setAttribute("aria-pressed", String(edtf))
+    for (const [text, picker, qualifier] of [
+      [this.obsTimeInput, this.obsTimeNativeInput, this.obsTimeQualifier],
+      [this.obsEndTimeInput, this.obsEndTimeNativeInput, this.obsEndTimeQualifier]
+    ] as [HTMLInputElement, HTMLInputElement, HTMLSelectElement][]) {
+      text.hidden = !edtf
+      picker.hidden = edtf
+      qualifier.hidden = edtf
+    }
+  }
+
   private syncObservationTimeFields(): void {
     const time = this.ufoElement.sighting.event.time
     this.obsTimeInput.value = time ? formatEdtfTime(time) : ""
+    this.obsTimeNativeInput.value = this.pickerValueOf(time)
+    this.obsTimeQualifier.value = this.qualifierOf(this.obsTimeInput.value)
     this.obsTimeInput.setCustomValidity("")
     this.obsTimeInput.classList.remove("invalid")
   }
@@ -2311,6 +2493,8 @@ export class UfoRecorderElement extends HTMLElement {
   private syncObservationEndTimeFields(): void {
     const endTime = this.ufoElement.sighting.event.endTime
     this.obsEndTimeInput.value = endTime ? formatEdtfTime(endTime) : ""
+    this.obsEndTimeNativeInput.value = this.pickerValueOf(endTime)
+    this.obsEndTimeQualifier.value = this.qualifierOf(this.obsEndTimeInput.value)
     this.obsEndTimeInput.setCustomValidity("")
     this.obsEndTimeInput.classList.remove("invalid")
   }
@@ -2518,6 +2702,7 @@ export class UfoRecorderElement extends HTMLElement {
     }
     if (active !== this.pitchInput) {
       this.pitchInput.value = String(this.rounded(pose?.pitchDeg ?? 0))
+      this.rollInput.value = String(this.rounded(pose?.rollDeg ?? 0))
     }
     if (active !== this.elevationInput) {
       // The pose stores a height above the local ground; the field shows an altitude above sea
@@ -2577,7 +2762,14 @@ export class UfoRecorderElement extends HTMLElement {
    * silently erase an existing rotation or title. */
   private buildAppearanceShape(bounds: ShapeBounds, preserve?: Shape, changingPreset = true): Shape {
     if (preserve && !changingPreset) {
-      return { ...preserve, color: this.currentAppearance.color, transparency: this.currentAppearance.transparency, haloScale: this.currentAppearance.haloScale }
+      return {
+        ...preserve,
+        color: this.currentAppearance.color,
+        transparency: this.currentAppearance.transparency,
+        haloScale: this.currentAppearance.haloScale,
+        blur: this.currentAppearance.blur,
+        brightness: this.currentAppearance.brightness
+      }
     }
     const shape = createShape(bounds, this.currentAppearance)
     return preserve ? { ...shape, angle: preserve.angle, title: preserve.title, selected: preserve.selected } : shape
@@ -2764,6 +2956,7 @@ export class UfoRecorderElement extends HTMLElement {
     // playhead visits can tighten it (see SceneElement.sizeRangeOf). Refreshed from here so the
     // author watches it narrow as the object goes behind the first building.
     this.refreshRealSize()
+    this.refreshBlurDistanceBound()
     this.refreshSkyCandidates()
     // The date decides which devices are offered — see refreshInstrumentOptions.
     this.refreshInstrumentOptions()
@@ -2805,6 +2998,8 @@ export class UfoRecorderElement extends HTMLElement {
       this.colorInput,
       this.transparencyInput,
       this.haloScaleInput,
+      this.blurInput,
+      this.brightnessInput,
       this.objectSizeInput,
       this.objectDistanceInput,
       this.sourceSelect,
@@ -2832,12 +3027,16 @@ export class UfoRecorderElement extends HTMLElement {
       presetId: presetIdForShape(shape),
       color: shape.color,
       transparency: shape.transparency,
-      haloScale: shape.haloScale
+      haloScale: shape.haloScale,
+      blur: shape.blur ?? 0,
+      brightness: shape.brightness ?? 0
     }
     this.updatePresetButtons()
     this.colorInput.value = this.currentAppearance.color
     this.transparencyInput.value = String(this.currentAppearance.transparency)
     this.haloScaleInput.value = String(this.currentAppearance.haloScale)
+    this.blurInput.value = String(this.currentAppearance.blur)
+    this.brightnessInput.value = String(this.currentAppearance.brightness)
     // Skips the field while it's focused — same reasoning as syncObserverFromTimeline's lat/lng
     // skip: this same edit path re-syncs on every keystroke (input -> refresh() -> timeupdate),
     // which would otherwise stomp whatever the user is actively typing.
@@ -3115,6 +3314,62 @@ export class UfoRecorderElement extends HTMLElement {
    *
    * Blank for a multiple selection, like the apparent size above it: a range belongs to one object.
    */
+  /**
+   * What the stated blur is worth as a distance, through the instrument the recording names.
+   *
+   * The depth of field this scene draws runs one way: the recording states a lens, and the world
+   * is blurred by how far each thing stands. It deliberately leaves the witness's own object
+   * sharp, because that object's distance is the very unknown a reconstruction is about. A blur
+   * the witness STATED runs the same geometry backwards and bounds it — which DepthOfField's own
+   * doc comment called for before there was anything to state it with: "an object photographed as
+   * a blur, in a picture whose horizon is sharp, was CLOSE".
+   *
+   * Only for a lens focused at infinity, which is where a camera pointed at the sky sits and is
+   * also the only case with ONE answer: a lens focused at 40 m blurs a thing at 20 as much as a
+   * thing at 90, and printing either would be choosing. And only for an instrument with a frame:
+   * an eye's pupil is an aperture in name only here, with no film for a circle of confusion to
+   * land on. In both other cases this says why it cannot say, rather than nothing.
+   */
+  private refreshBlurDistanceBound(): void {
+    const blur = this.currentAppearance.blur
+    if (blur <= 0 || this.selectedSourceIds.size !== 1) {
+      this.blurBoundOutput.textContent = ""
+      return
+    }
+    const instrument = this.ufoElement.sighting.instrument
+    const frame = instrument.frame
+    if (!frame) {
+      this.blurBoundOutput.textContent = this.messages.blurBoundNoInstrument
+      return
+    }
+    // Read off the POSE, not off the three optics fields. Those hold whatever is being typed into
+    // them, committed or not — a focal length keyed in and not yet applied made this state a bound
+    // for a lens the recording did not have, and the field then snapped back to the old value with
+    // the bound left standing. The pose is what the file says.
+    const pose = resolveObserverPoseAt(this.ufoElement.sighting, this.ufoElement.currentTime)
+    const focusM = pose?.focusDistanceM
+    if (focusM !== undefined) {
+      this.blurBoundOutput.textContent = this.messages.blurBoundNotAtInfinity.replace("{focus}", this.meters(focusM))
+      return
+    }
+    const focalLengthMm = (pose ? Instruments.focalLengthMmFor(instrument, pose.fovDeg) : undefined) ?? frame.focalLengthMm
+    const fNumber = pose?.fNumber ?? instrument.fNumber
+    if (fNumber === undefined || focalLengthMm <= 0) {
+      this.blurBoundOutput.textContent = ""
+      return
+    }
+    // The drawn blur is a radius in canvas pixels; a circle of confusion is a diameter in
+    // millimetres on the frame. Both conversions, in that order — the same pixels-to-frame scale
+    // DepthOfFieldPass uses for the world it blurs, so the two readings of one lens agree.
+    const canvasHeightPx = this.ufoElement.canvasElement.height
+    if (canvasHeightPx <= 0) return
+    const circleMm = ((2 * BLUR_RADIUS_UNIT * blur) / canvasHeightPx) * frame.heightMm
+    // c = f² / (N·d) rearranged. Focused at infinity, the disc is the aperture's own image and
+    // grows without limit as the object comes closer, so this inverts cleanly.
+    const subjectM = (focalLengthMm * focalLengthMm) / (fNumber * circleMm) / 1000
+    this.blurBoundOutput.textContent = this.messages.blurBound.replace("{max}", this.meters(subjectM))
+  }
+
   private refreshRealSize(): void {
     if (this.selectedSourceIds.size !== 1) {
       this.realSizeOutput.textContent = ""
@@ -4246,6 +4501,8 @@ export class UfoRecorderElement extends HTMLElement {
     this.labelColor.textContent = messages.color
     this.labelTransparency.textContent = messages.transparency
     this.labelHalo.textContent = messages.halo
+    this.labelBlur.textContent = messages.blur
+    this.labelBrightness.textContent = messages.brightness
     this.labelShape.textContent = messages.shape
     this.labelShapeTitle.textContent = messages.shapeTitle
     this.labelUtcOffset.textContent = messages.utcOffset
@@ -4286,6 +4543,7 @@ export class UfoRecorderElement extends HTMLElement {
     this.labelHeading.textContent = messages.heading
     this.headingInput.placeholder = messages.headingPlaceholder
     this.labelPitch.textContent = messages.pitch
+    this.labelRoll.textContent = messages.roll
     this.labelElevation.textContent = messages.elevation
     this.labelObservationTime.textContent = messages.observationTime
     this.labelObservationEndTime.textContent = messages.observationEndTime
@@ -4368,6 +4626,9 @@ export class UfoRecorderElement extends HTMLElement {
     // message serves both and "Circumstances" — which never named what the group actually holds —
     // is gone.
     this.labelWeatherGroup.textContent = messages.weather
+    this.refreshTimeQualifierOptions()
+    this.edtfModeButton.title = messages.edtfModeTitle
+    this.edtfModeButton.setAttribute("aria-label", messages.edtfModeTitle)
     // The chips hold translated labels, so they are rebuilt with the new ones — and the signature
     // check lets that happen without a diff, since every label changed.
     this.paramSummaryBuilder = new SightingSummary(messages, this.showerLanguage())

@@ -58,6 +58,8 @@ import type { CelestialBody, HorizontalPosition, MoonPhase, ObserverGeo } from "
 import type { ObserverPose } from "../engine/model/ObserverTrack.js"
 import type { StarCatalog } from "./StarCatalog.js"
 import { RoundPoints } from "./RoundPoints.js"
+import { BRIGHT_STARS } from "../engine/astronomy/brightStarCatalog.js"
+import type { BrightStar } from "../engine/astronomy/brightStarCatalog.js"
 import { defaultTerrainProviders } from "./terrain/defaultTerrainProviders.js"
 import type { TerrainProviders } from "./terrain/defaultTerrainProviders.js"
 import { buildTerrainMesh } from "./terrain/TerrainMeshBuilder.js"
@@ -138,6 +140,15 @@ function groundRadiusFor(elevationM: number): number {
 }
 const GROUND_ALBEDO = 0.5
 const STAR_RADIUS = 850
+/**
+ * How close the pointer has to come to a named star, as a fraction of the vertical field.
+ *
+ * A fraction and not an angle, so it stays the same distance ON SCREEN whatever the instrument:
+ * 1.8 degrees through an eye's 60-degree field, 0.2 through a 210 mm's 6.5. The same reasoning as
+ * HOVER_HIT_RADIUS_SCALE for the bodies, which a star cannot use — those are individual meshes
+ * with an oversized invisible proxy each, and there is no proxy to give a point in a Points cloud.
+ */
+const STAR_HOVER_FIELD_FRACTION = 0.03
 const BODY_PLACEMENT_RADIUS = 850
 /** Sized to match the Sun/Moon's real ~0.53deg angular diameter at BODY_PLACEMENT_RADIUS
  * (radius = R*tan(0.265deg) =~ 3.9) — this is a simulation, not an illustration: rendering them
@@ -774,6 +785,7 @@ export class SceneRenderer {
    * camera's current look direction, used to detect how steeply the witness is looking up/down. */
   private readonly rainCameraDirection = new Vector3()
   private rainLastVerticalFacing = -1
+  private readonly rainViewportSize = new Vector2()
   private lightningArmed = false
   /** Absolute RAF clock (seconds) of the next scheduled flash — null while unarmed. Compared
    * against the same requestAnimationFrame timestamp startTwinkle's own loop already receives, not
@@ -840,6 +852,11 @@ export class SceneRenderer {
   private projectionKind: ProjectionKind = "rectilinear"
   /** How many spikes the instrument's aperture puts on a bright light — see setInstrument. */
   private starPoints = 0
+  /** The named stars above the horizon and bright enough to be drawn right now, with the direction
+   * they are drawn in — rebuilt with the star field itself, since it is the same sky. Only 499
+   * stars are named at all (see brightStarCatalog), so this is a few hundred entries at most and
+   * a linear scan over it costs nothing on a pointer move. */
+  private namedStars: { star: BrightStar; direction: Vector3; altitudeDeg: number }[] = []
   /** Built on first equidistant frame and kept — a render target is not worth allocating for a
    * recording made through a lens, which is most of them once real photographs are in. */
   private equidistantPass?: EquidistantProjectionPass
@@ -924,10 +941,18 @@ export class SceneRenderer {
    * `headingDeg` undefined (unknown heading) leaves the camera's current yaw untouched rather
    * than snapping it to a default. */
   setObserverPose(pose: ObserverPose): void {
+    // YXZ, so the third component is a rotation about the camera's OWN forward axis once heading
+    // and pitch have aimed it — which is exactly what roll is.
+    //
+    // The sign is the one thing here worth checking against the world rather than against
+    // intuition, and the first attempt had it backwards. The pose states how the INSTRUMENT was
+    // held, so tilting it clockwise leaves the scene where it is and swings the frame: a level
+    // horizon then comes out running UPHILL to the right, by the same angle.
+    const rollRad = (pose.rollDeg ?? 0) * DEG_TO_RAD
     if (pose.headingDeg !== undefined) {
-      this.camera.rotation.set(pose.pitchDeg * DEG_TO_RAD, -pose.headingDeg * DEG_TO_RAD, 0, "YXZ")
+      this.camera.rotation.set(pose.pitchDeg * DEG_TO_RAD, -pose.headingDeg * DEG_TO_RAD, rollRad, "YXZ")
     } else {
-      this.camera.rotation.set(pose.pitchDeg * DEG_TO_RAD, this.camera.rotation.y, 0, "YXZ")
+      this.camera.rotation.set(pose.pitchDeg * DEG_TO_RAD, this.camera.rotation.y, rollRad, "YXZ")
     }
     if (pose.elevationM !== this.observerElevationM) {
       this.observerElevationM = pose.elevationM
@@ -1768,6 +1793,37 @@ export class SceneRenderer {
     return entries.find(([, sprite]) => sprite === intersection.object)?.[0]
   }
 
+  /**
+   * Finds which named star (if any) sits under normalized device coordinates — the nearest one
+   * within STAR_HOVER_FIELD_FRACTION of the field, or nothing.
+   *
+   * An angular nearest-neighbour rather than a raycast, because there is nothing to raycast: the
+   * sky is one Points cloud of up to 25 791 vertices, and giving each an invisible hit proxy the
+   * way the six bodies have one is out of the question. Tested against the named list alone, which
+   * is also what makes it cheap — and what makes the answer meaningful, since a star with no name
+   * has nothing to tell a witness anyway.
+   *
+   * Returns the star and how high it stood, because a name alone identifies without explaining:
+   * what makes a bright point a candidate for a misidentification is that it was low, or bright,
+   * or both.
+   */
+  pickStarAt(ndcX: number, ndcY: number): { star: BrightStar; altitudeDeg: number } | undefined {
+    if (this.namedStars.length === 0) return undefined
+    this.aimAtScreenPoint(this.raycaster, ndcX, ndcY)
+    const aim = this.raycaster.ray.direction
+    const thresholdCos = Math.cos((STAR_HOVER_FIELD_FRACTION * this.camera.fov * Math.PI) / 180)
+    let best: { star: BrightStar; altitudeDeg: number } | undefined
+    let bestCos = thresholdCos
+    for (const candidate of this.namedStars) {
+      const cos = candidate.direction.dot(aim)
+      if (cos > bestCos) {
+        bestCos = cos
+        best = { star: candidate.star, altitudeDeg: candidate.altitudeDeg }
+      }
+    }
+    return best
+  }
+
   /** Finds which decor object (if any) sits under normalized device coordinates — same NDC
    * convention as pickBodyAt, for the recorder's own right-click "view this witness's testimony"
    * menu (see UfoRecorderElement.onContextMenu). Tests every real mesh recursively (decor has no
@@ -2348,6 +2404,7 @@ export class SceneRenderer {
    * of positions/brightness changed, not how they're rendered. */
   private buildStars(stars: SceneAstronomy["stars"], sunAltitudeDeg: number): void {
     this.disposeStarTiers()
+    this.namedStars = []
     if (!stars || stars.catalog.count === 0) {
       this.syncAnimationLoop() // stars gone, but precipitation/lightning may still need the loop
       return
@@ -2373,6 +2430,17 @@ export class SceneRenderer {
         phase: jitterRandom() * Math.PI * 2,
         speedFactor: 0.7 + jitterRandom() * 0.6
       })
+    }
+
+    // The same sky, walked a second time over the 499 stars that have a name — under the same two
+    // filters, so nothing is offered for hovering that is not actually drawn: a star below the
+    // horizon, or one the daylight has washed out, must not answer to the pointer.
+    for (const star of BRIGHT_STARS) {
+      if (star.mag > magnitudeLimit) continue
+      const { altitudeDeg, azimuthDeg } = equatorialToHorizontal(star.raHours, star.decDeg, date, observer)
+      if (altitudeDeg < BELOW_HORIZON_CUTOFF_DEG) continue
+      const { x, y, z } = horizontalToCartesian(altitudeDeg, azimuthDeg, STAR_RADIUS)
+      this.namedStars.push({ star, direction: new Vector3(x, y, z).normalize(), altitudeDeg })
     }
 
     this.starTiers = STAR_BRIGHTNESS_TIERS.map((tier, tierIndex) => {
@@ -2857,6 +2925,7 @@ export class SceneRenderer {
       hazeColor: new Color(...this.baseFogColor)
     })
     this.rainLastVerticalFacing = -1 // forces the first updateRain call to (re)apply size/UV-squash
+    this.syncRainSlant()
     this.rainSystem.points.renderOrder = PRECIPITATION_RENDER_ORDER
     this.scene.add(this.rainSystem.points)
     this.buildRainSplashes()
@@ -2946,6 +3015,30 @@ export class SceneRenderer {
    * shader from uTime, so an arbitrarily large dt (e.g. after a throttled/backgrounded tab, see
    * startTwinkle's own dt-clamp comment) is inherently safe here: mod() is well-defined for any
    * input, there's no "if past threshold, reset" branch to desync. */
+  /**
+   * States the velocity each streak leans along, and the aspect the lean is measured in.
+   *
+   * Called when the rain is BUILT as well as on every animated frame, and that is the whole point
+   * of it being its own method: this scene freezes when the recording is not playing (its
+   * animation loop stops with it), so anything set only in updateRain is never set at all for a
+   * paused sighting — which is most of them, and every screenshot. Rain stated with an 8 m/s wind
+   * would have sat there falling straight down until somebody pressed play.
+   */
+  private syncRainSlant(): void {
+    const rain = this.rainSystem
+    if (!rain) return
+    const windRad = this.weather.windDirectionDeg * DEG_TO_RAD
+    // The vertical component is the drop's real terminal speed at this intensity, so the lean is
+    // the true ratio of the two: 5 m/s of wind against a 9 m/s fall is a 29-degree slant.
+    rain.uniforms.uDropVelocity.value.set(
+      Math.sin(windRad) * this.weather.windSpeed,
+      -rainFallSpeedMPerS(this.weather.precipitationIntensity),
+      -Math.cos(windRad) * this.weather.windSpeed
+    )
+    const size = this.renderer.getSize(this.rainViewportSize)
+    rain.uniforms.uAspect.value = size.x / Math.max(size.y, 1)
+  }
+
   private updateRain(dtSeconds: number): void {
     const rain = this.rainSystem
     if (!rain) return
@@ -2961,6 +3054,7 @@ export class SceneRenderer {
     const halfWidth = RAIN_RADIUS_M
     const wrap = (value: number): number => (((value % (halfWidth * 2)) + halfWidth * 3) % (halfWidth * 2)) - halfWidth
     rain.uniforms.uWindOffset.value.set(wrap(rain.uniforms.uWindOffset.value.x + driftX * dtSeconds), wrap(rain.uniforms.uWindOffset.value.y + driftZ * dtSeconds))
+    this.syncRainSlant()
 
     this.camera.getWorldDirection(this.rainCameraDirection)
     const verticalFacing = Math.abs(this.rainCameraDirection.y)

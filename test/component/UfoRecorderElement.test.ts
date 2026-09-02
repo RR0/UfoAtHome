@@ -44,6 +44,9 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     pickDecorAt(): undefined {
       return undefined
     }
+    pickStarAt(): undefined {
+      return undefined
+    }
     isScreenPointOccluded(): boolean {
       return false
     }
@@ -142,7 +145,7 @@ describe("UfoRecorderElement appearance toolbar", () => {
 
   it("defaults to an oval, opaque, green appearance", () => {
     const element = mount()
-    expect(element.appearance).toEqual({ presetId: "oval", color: "#39ff14", transparency: 0, haloScale: 1.5 })
+    expect(element.appearance).toEqual({ presetId: "oval", color: "#39ff14", transparency: 0, haloScale: 1.5, blur: 0, brightness: 0 })
   })
 
   it("clicking a preset button updates the appearance and its pressed state", () => {
@@ -170,13 +173,13 @@ describe("UfoRecorderElement appearance toolbar", () => {
     haloInput.value = "2.5"
     haloInput.dispatchEvent(new Event("input"))
 
-    expect(element.appearance).toEqual({ presetId: "oval", color: "#ff8800", transparency: 0.6, haloScale: 2.5 })
+    expect(element.appearance).toEqual({ presetId: "oval", color: "#ff8800", transparency: 0.6, haloScale: 2.5, blur: 0, brightness: 0 })
   })
 
   it("the appearance setter merges partial updates", () => {
     const element = mount()
     element.appearance = { color: "#0000ff" }
-    expect(element.appearance).toEqual({ presetId: "oval", color: "#0000ff", transparency: 0, haloScale: 1.5 })
+    expect(element.appearance).toEqual({ presetId: "oval", color: "#0000ff", transparency: 0, haloScale: 1.5, blur: 0, brightness: 0 })
   })
 
   it("changing color/transparency/halo preserves a custom-edited polygon's own points — the real bug this fixes: appearance edits used to always rebuild geometry from the preset's default shape, silently discarding vertex edits", () => {
@@ -1188,7 +1191,7 @@ describe("UfoRecorderElement post-hoc appearance editing + multi-shape authoring
     deleteShapeButton.click()
 
     expect(sourceSelect.value).toBe("ufo-2")
-    expect(element.appearance).toEqual({ presetId: "oval", color: "#ff8800", transparency: 0.5, haloScale: 2 })
+    expect(element.appearance).toEqual({ presetId: "oval", color: "#ff8800", transparency: 0.5, haloScale: 2, blur: 0, brightness: 0 })
     confirmSpy.mockRestore()
   })
 
@@ -1275,7 +1278,7 @@ describe("UfoRecorderElement post-hoc appearance editing + multi-shape authoring
     sourceSelect.value = "ufo-2"
     sourceSelect.dispatchEvent(new Event("change"))
 
-    expect(element.appearance).toEqual({ presetId: "polygon", color: "#ff8800", transparency: 0.5, haloScale: 2 })
+    expect(element.appearance).toEqual({ presetId: "polygon", color: "#ff8800", transparency: 0.5, haloScale: 2, blur: 0, brightness: 0 })
   })
 })
 
@@ -4583,6 +4586,228 @@ describe("UfoRecorderElement place search", () => {
  * (which is every published case file) used to do nothing at all, silently. The more recent edit
  * wins now. See UfoRecorderElement.dropDurationOutrankedByDates.
  */
+describe("UfoRecorderElement instrument roll", () => {
+  afterEach(() => {
+    document.body.innerHTML = ""
+  })
+
+  function setField(element: UfoRecorderElement, id: string, value: string): void {
+    const input = element.shadowRoot!.getElementById(id) as HTMLInputElement
+    input.value = value
+    input.dispatchEvent(new Event("input"))
+  }
+
+  function pose(element: UfoRecorderElement): { rollDeg?: number } {
+    return element.sightingData.witnessTrack!.keyframes[0].pose as { rollDeg?: number }
+  }
+
+  it("states how the instrument was held, alongside where it pointed", () => {
+    const element = mount()
+    setField(element, "heading", "180")
+    setField(element, "roll", "25")
+
+    expect(pose(element).rollDeg).toBe(25)
+  })
+
+  /*
+   * Absent already means upright, so a zero on every pose would add a field to every recording
+   * ever made in order to say what saying nothing says.
+   */
+  it("writes nothing at all for an instrument held straight", () => {
+    const element = mount()
+    setField(element, "heading", "180")
+    setField(element, "roll", "0")
+
+    expect(pose(element).rollDeg).toBeUndefined()
+  })
+})
+
+describe("UfoRecorderElement stated blur", () => {
+  afterEach(() => {
+    document.body.innerHTML = ""
+  })
+
+  function control<T extends HTMLElement>(element: UfoRecorderElement, id: string): T {
+    return element.shadowRoot!.getElementById(id) as T
+  }
+
+  function setRange(element: UfoRecorderElement, id: string, value: string): void {
+    const input = control<HTMLInputElement>(element, id)
+    input.value = value
+    input.dispatchEvent(new Event("input"))
+  }
+
+  function shape(element: UfoRecorderElement): { blur?: number } {
+    return element.sightingData.timeline.keyframes[0].shapes[0].shape as { blur?: number }
+  }
+
+  function bound(element: UfoRecorderElement): string {
+    return control(element, "blur-bound").textContent ?? ""
+  }
+
+  it("states the blur on the shape, keyframed like every other appearance field", () => {
+    const element = mount()
+    expect(shape(element).blur).toBe(0)
+
+    setRange(element, "blur", "0.4")
+    expect(shape(element).blur).toBe(0.4)
+    expect(element.appearance.blur).toBe(0.4)
+  })
+
+  /*
+   * The point of the whole thing, and what DepthOfField's own doc comment asked for before there
+   * was anything to state it with: the scene's depth of field blurs the WORLD from its distance
+   * and leaves the witness's object alone, because that distance is the unknown. A blur the
+   * witness stated runs the same geometry backwards and bounds it.
+   */
+  it("reads a stated blur back as a bound on distance, through the lens the recording names", () => {
+    const element = mount()
+    element.sightingData = {
+      version: 1,
+      instrument: "slr-35mm-zoom",
+      timeline: { keyframes: [{ t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 10, y: 10, width: 20, height: 20 }, color: "#fff", angle: 0, transparency: 0, haloScale: 0, selected: false } }] }] },
+      durationSeconds: 10
+    }
+    setRange(element, "blur", "0.1")
+    const slight = bound(element)
+    setRange(element, "blur", "0.5")
+    const heavy = bound(element)
+
+    expect(slight).toMatch(/nearer than/)
+    // More blur is a nearer object, and by the same geometry that draws the world's own blur.
+    const metres = (text: string): number => Number(/([\d.]+)\s*m/.exec(text)![1])
+    expect(metres(heavy)).toBeLessThan(metres(slight))
+  })
+
+  // An eye has no film for a circle of confusion to land on, and a lens focused at a stated
+  // distance blurs on both sides of it — two answers, so it gives none.
+  it("says why it cannot bound anything, rather than saying nothing", () => {
+    const element = mount()
+    setRange(element, "blur", "0.4")
+    expect(bound(element)).toBe(ufoRecorderMessages_en.blurBoundNoInstrument)
+  })
+
+  it("says nothing at all while no blur is stated", () => {
+    const element = mount()
+    expect(bound(element)).toBe("")
+  })
+})
+
+describe("UfoRecorderElement date picker", () => {
+  afterEach(() => {
+    document.body.innerHTML = ""
+  })
+
+  function control<T extends HTMLElement>(element: UfoRecorderElement, id: string): T {
+    return element.shadowRoot!.getElementById(id) as T
+  }
+
+  function pick(element: UfoRecorderElement, id: string, value: string): void {
+    const input = control<HTMLInputElement>(element, id)
+    input.value = value
+    input.dispatchEvent(new Event("change"))
+  }
+
+  function choose(element: UfoRecorderElement, id: string, value: string): void {
+    const select = control<HTMLSelectElement>(element, id)
+    select.value = value
+    select.dispatchEvent(new Event("change"))
+  }
+
+  function edtfMode(element: UfoRecorderElement): boolean {
+    return control(element, "edtf-mode").getAttribute("aria-pressed") === "true"
+  }
+
+  const COMPLETE = { version: 1 as const, time: { year: 1948, month: 7, day: 24, hour: 2, minute: 45 }, timeline: { keyframes: [] }, durationSeconds: 10 }
+
+  // The picker writes through the text field, so there is one parse and one write path — and the
+  // stored raw string stays canonical, which formatEdtfTime returns verbatim.
+  it("states a picked instant, and stores it as canonical EDTF", () => {
+    const element = mount()
+    pick(element, "obs-time-native", "1965-07-01T05:45")
+
+    expect(element.sightingData.time).toEqual({ year: 1965, month: 7, day: 1, hour: 5, minute: 45, raw: "1965-07-01T05:45" })
+    expect(control<HTMLInputElement>(element, "obs-time").value).toBe("1965-07-01T05:45")
+  })
+
+  // "Around 05:45" is a complete instant plus one character, so it needs no text mode at all.
+  it("qualifies a picked instant without leaving the picker, and replaces rather than stacks", () => {
+    const element = mount()
+    pick(element, "obs-time-native", "1965-07-01T05:45")
+
+    choose(element, "obs-time-qualifier", "~")
+    expect(element.sightingData.time!.raw).toBe("1965-07-01T05:45~")
+
+    choose(element, "obs-time-qualifier", "?")
+    expect(element.sightingData.time!.raw).toBe("1965-07-01T05:45?")
+
+    choose(element, "obs-time-qualifier", "")
+    expect(element.sightingData.time!.raw).toBe("1965-07-01T05:45")
+  })
+
+  it("opens on the picker for an instant it can hold, and on the text field for one it cannot", () => {
+    const element = mount()
+    element.sightingData = COMPLETE
+    expect(edtfMode(element)).toBe(false)
+    expect(control<HTMLInputElement>(element, "obs-time-native").value).toBe("1948-07-24T02:45")
+
+    // A real recording: eight of the nine that exist state a full instant, this is the ninth.
+    element.sightingData = { version: 1, time: { year: 1987, month: 6, day: 12 }, timeline: { keyframes: [] }, durationSeconds: 10 }
+    expect(edtfMode(element)).toBe(true)
+    expect(control<HTMLInputElement>(element, "obs-time").value).toBe("1987-06-12")
+    expect(control<HTMLInputElement>(element, "obs-time-native").value).toBe("")
+  })
+
+  // The picker is stepped to the minute, so it would drop a stated second on the first edit.
+  it("opens on the text field for a time stated to the second, which the minute-stepped picker would drop", () => {
+    const element = mount()
+    element.sightingData = { version: 1, time: { year: 1948, month: 7, day: 24, hour: 2, minute: 45, second: 30 }, timeline: { keyframes: [] }, durationSeconds: 10 }
+    expect(edtfMode(element)).toBe(true)
+  })
+
+  // A mode is a way of saying something, not a statement.
+  it("changes nothing in the recording when the mode is switched", () => {
+    const element = mount()
+    element.sightingData = COMPLETE
+    const before = JSON.stringify(element.sightingData.time)
+
+    control<HTMLButtonElement>(element, "edtf-mode").click()
+    expect(edtfMode(element)).toBe(true)
+    expect(JSON.stringify(element.sightingData.time)).toBe(before)
+
+    control<HTMLButtonElement>(element, "edtf-mode").click()
+    expect(JSON.stringify(element.sightingData.time)).toBe(before)
+  })
+
+  /*
+   * A datetime-local reports "" while it is still half typed, and applyEdtfTimeInput reads "" as
+   * "no time at all" — so without this guard, entering a date and moving on to type its hour
+   * erased the date. badInput is what tells a field in mid-entry from one a witness has actually
+   * cleared.
+   */
+  it("does not erase the date while the picker is still half typed", () => {
+    const element = mount()
+    element.sightingData = COMPLETE
+    const picker = control<HTMLInputElement>(element, "obs-time-native")
+    Object.defineProperty(picker, "validity", { value: { badInput: true }, configurable: true })
+    picker.value = ""
+    picker.dispatchEvent(new Event("change"))
+
+    expect(element.sightingData.time).toEqual({ year: 1948, month: 7, day: 24, hour: 2, minute: 45 })
+  })
+
+  it("withdraws the time when the picker is genuinely cleared", () => {
+    const element = mount()
+    element.sightingData = COMPLETE
+    const picker = control<HTMLInputElement>(element, "obs-time-native")
+    Object.defineProperty(picker, "validity", { value: { badInput: false }, configurable: true })
+    picker.value = ""
+    picker.dispatchEvent(new Event("change"))
+
+    expect(element.sightingData.time).toBeUndefined()
+  })
+})
+
 describe("UfoRecorderElement duration and dates", () => {
   afterEach(() => {
     document.body.innerHTML = ""

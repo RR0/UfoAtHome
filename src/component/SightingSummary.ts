@@ -155,6 +155,10 @@ export class SightingSummary {
       this.push(entries, "witness", "exposureSeconds", this.labels.exposure,
         exposure === undefined ? undefined : (exposure < 1 ? `1/${Math.round(1 / exposure)}` : this.rounded(exposure, 2)), "s")
       this.push(entries, "witness", "focusDistance", this.labels.focusDistance, this.rounded(pose.focusDistanceM, 1), "m")
+      // With the instrument, not with the place: it says how the device was held, not where the
+      // witness stood. Absent or zero is one held upright, which states nothing worth a chip.
+      this.push(entries, "witness", "roll", this.labels.roll,
+        pose.rollDeg === undefined || pose.rollDeg === 0 ? undefined : this.rounded(pose.rollDeg), "°")
     }
   }
 
@@ -283,6 +287,12 @@ export class SightingSummary {
     this.push(entries, "shape", "color", this.labels.color, shape.color, "", { color: shape.color })
     this.push(entries, "shape", "transparency", this.labels.transparency, this.percent(shape.transparency))
     this.push(entries, "shape", "haloScale", this.labels.halo, this.rounded(shape.haloScale, 2))
+    // Stated like the colour, so the summary says it like the colour. Absent means nobody said
+    // anything about the edges, which is not the same as saying they were sharp — hence no chip
+    // rather than a "0 %" one.
+    this.push(entries, "shape", "blur", this.labels.blur, shape.blur === undefined || shape.blur === 0 ? undefined : this.percent(shape.blur))
+    this.push(entries, "shape", "brightness", this.labels.brightness,
+      shape.brightness === undefined || shape.brightness === 0 ? undefined : this.percent(shape.brightness))
   }
 
   /** What to call a decor object with no name of its own — the same "{kind} {n}" fallback the

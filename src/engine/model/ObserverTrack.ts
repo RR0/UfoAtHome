@@ -26,6 +26,25 @@ export interface ObserverPose {
   /** Degrees above (positive) or below (negative) the local horizontal — how far up/down the
    * witness was looking, e.g. craning their neck to look overhead. */
   pitchDeg: number
+  /**
+   * How far the instrument itself was tilted about its own line of sight, degrees, positive
+   * clockwise as the witness saw it — a camera held askew, a head leaned over.
+   *
+   * A property of the INSTRUMENT, not of the place. Latitude and heading say where the witness
+   * stood and which way they faced; this says nothing about either, only how the device was held —
+   * which is why the editor keeps it beside the focal length and the aperture whose own spikes it
+   * turns, and not beside the coordinates.
+   *
+   * Not a way of looking somewhere, either: heading and pitch already say where it pointed, and
+   * roll changes none of that. What it changes is the IMAGE — the horizon runs downhill, and
+   * a bright light's diffraction spikes turn with the aperture that throws them (see
+   * CanvasRenderer.setStarPoints, and LensFlareEffect for the Sun's own). A tilted horizon is one
+   * of the commonest things about a real photograph, and a reconstruction that cannot tilt one is
+   * a reconstruction that cannot be laid beside the picture it is about.
+   *
+   * Absent means upright, which is what every recording made before this said by saying nothing.
+   */
+  rollDeg?: number
   /** Vertical field of view in degrees, as a Three.js PerspectiveCamera would take it. For a
    * camera this IS the focal length, written the way every projection here is anchored (see
    * Instruments.focalLengthMmFor, which converts it back to millimetres for the editor). */
@@ -89,6 +108,7 @@ export function lerpObserverPose(a: ObserverPose, b: ObserverPose, t: number): O
     headingDeg:
       a.headingDeg === undefined || b.headingDeg === undefined ? undefined : lerpAngleDeg(a.headingDeg, b.headingDeg, t),
     pitchDeg: lerpNumber(a.pitchDeg, b.pitchDeg, t),
+    rollDeg: lerpNumber(a.rollDeg ?? 0, b.rollDeg ?? 0, t),
     fovDeg: lerpNumber(a.fovDeg, b.fovDeg, t),
     // Held, not blended — see ObserverPose's own doc comment: a camera setting is discrete, and a
     // lens on its way from f/2 to f/16 was never really at f/7.3.

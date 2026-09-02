@@ -47,6 +47,11 @@ export const html = `
     <label><span id="label-f-number">Aperture</span> f/<input id="fNumber" type="number" min="0.7" max="64" step="0.1"/></label>
     <label><span id="label-exposure">Exposure</span> <input id="exposureSeconds" type="text" inputmode="decimal" size="7" placeholder="1/250"/> s</label>
     <label><span id="label-focus-distance">Focused at</span> <input id="focusDistance" type="number" min="0.1" step="0.1" placeholder="&#8734;"/> m</label>
+    <!-- With the instrument and not with the place: latitude and heading say where the witness
+         stood and which way they faced, and this says nothing about either. It is how the device
+         was HELD — a camera askew, a head leaned over — which is why it belongs beside the focal
+         length and the aperture whose own spikes it turns. -->
+    <label><span id="label-roll">Roll</span> <input id="roll" type="number" min="-180" max="180" step="1" value="0" title="How far the instrument was tilted about its own line of sight — positive clockwise, as the witness saw it"/> &deg;</label>
     <button id="add-decor-witness" type="button">Add witness</button>
     <label><span id="label-decor-sighting-url">Witness's own recording URL</span> <input id="decorSightingUrl" type="url" placeholder="https://…/sighting.json"/></label>
   </div>
@@ -163,10 +168,35 @@ export const html = `
 </section>
 <section class="group-panel" id="group-temporal" aria-labelledby="label-temporal-group" hidden>
   <div class="toolbar">
+    <!-- Two ways to say the same thing, and the native picker is the default because a
+         reconstruction needs a full instant to compute a sky at all: of the nine recordings that
+         exist, eight state one to the minute. The EDTF text field is what the ninth needs, and
+         what the wider corpus needs far more often — of 241 case files on rr0.org, 43% state a
+         bare year and only 17% a date with a time. So the text field is never removed, only
+         folded away.
+
+         The picker writes THROUGH the text field rather than into the model: it composes an EDTF
+         string, puts it here, and goes down the same applyEdtfTimeInput path as a typed one. One
+         write path, one parse, one validation — and the stored raw string therefore stays
+         canonical whichever control produced it, which matters because formatEdtfTime returns it
+         verbatim and would otherwise display a stale string over fresh numbers. -->
     <label><span id="label-observation-time">Observation start</span>
-      <input id="obs-time" type="text" placeholder="YYYY-MM-DDThh:mm[?~%] or hh:mm" title="EDTF — e.g. 1965-07-01T05:00, 2025-06? (uncertain), 2025~ (approximate), or just 05:00 if the date isn't known"/></label>
+      <input id="obs-time-native" type="datetime-local" step="60"/>
+      <input id="obs-time" type="text" placeholder="YYYY-MM-DDThh:mm[?~%] or hh:mm" title="EDTF — e.g. 1965-07-01T05:00, 2025-06? (uncertain), 2025~ (approximate), or just 05:00 if the date isn't known" hidden/>
+      <!-- The whole of what this parser can qualify: one optional [?~%] on the whole value (see
+           EDTF_TIME_PATTERN, which by its own doc comment has no per-component qualifiers). Four
+           states, so a select says all of it — and it composes with a complete date, which is why
+           "vers 05:00" needs no text mode at all. -->
+      <select id="obs-time-qualifier" class="time-qualifier"></select></label>
     <label><span id="label-observation-end-time">Observation end</span>
-      <input id="obs-end-time" type="text" placeholder="YYYY-MM-DDThh:mm[?~%] or hh:mm" title="EDTF — e.g. 1965-07-01T05:10, 2025-06? (uncertain), 2025~ (approximate), or just 05:10 if the date isn't known"/></label>
+      <input id="obs-end-time-native" type="datetime-local" step="60"/>
+      <input id="obs-end-time" type="text" placeholder="YYYY-MM-DDThh:mm[?~%] or hh:mm" title="EDTF — e.g. 1965-07-01T05:10, 2025-06? (uncertain), 2025~ (approximate), or just 05:10 if the date isn't known" hidden/>
+      <select id="obs-end-time-qualifier" class="time-qualifier"></select></label>
+    <!-- One switch for both fields, not one each. sightingDurationMs needs the two times to share
+         the same set of stated fields to yield a duration at all, so letting one be a picked
+         instant while the other is a bare year is a way to lose the duration without being told
+         why. -->
+    <button id="edtf-mode" type="button" aria-pressed="false">EDTF</button>
     <label><span id="label-duration">Duration</span> <input id="durationSeconds" type="number" min="0" step="0.1" placeholder="observation length" aria-required="true"/> s</label>
     <!-- The zone is the RULE, the number is what that rule produced for this sighting's own date —
          summer time included, and as it was then (see engine/time/TimeZones.ts). Pick a zone and
@@ -262,6 +292,15 @@ export const html = `
     <label><span id="label-color">Color</span> <input id="color" type="color" value="#39ff14"/></label>
     <label><span id="label-transparency">Transparency</span> <input id="transparency" type="range" min="0" max="1" step="0.05" value="0"/></label>
     <label><span id="label-halo">Halo</span> <input id="haloScale" type="range" min="0" max="3" step="0.1" value="1.5"/></label>
+    <!-- Next to the halo, which it will be confused with, and named for the edge rather than for
+         the light: a halo is a glow AROUND the shape, this is the outline itself losing its
+         position. What it is worth as a distance, through the instrument the recording states, is
+         printed beside the size estimate below. -->
+    <!-- Not a bigger halo: a halo is a coloured fringe, and no fringe reads as painful. This is
+         the light's own behaviour — a veil that washes out the field around it, the spikes its
+         aperture throws, and a core clipped to white. See BaseShape.brightness. -->
+    <label><span id="label-brightness">Brilliance</span> <input id="brightness" type="range" min="0" max="1" step="0.05" value="0" title="How dazzling the witness said it was — a light you cannot look at does three things a halo never does"/></label>
+    <label><span id="label-blur">Blur</span> <input id="blur" type="range" min="0" max="1" step="0.05" value="0" title="How indistinct the witness said its edges were — not the lens's own depth of field, which never touches the object here"/></label>
     <label><span id="label-shape">Shape</span> <select id="source"></select></label>
     <button id="add-shape" type="button" class="icon-btn" title="Add shape" aria-label="Add shape">+</button>
     <button id="delete-shape" type="button" class="icon-btn" title="Delete shape" aria-label="Delete shape">🗑</button>
@@ -272,6 +311,11 @@ export const html = `
       <input id="objectDistance" type="number" min="0" step="1" placeholder="assumed distance" title="The distance to try that width at. Not stored either — only the resulting angular size is."/> m</label>
     <output id="apparent-size" class="apparent-size" for="objectSize objectDistance"></output>
     <output id="real-size" class="apparent-size" for="objectSize objectDistance"></output>
+    <!-- The depth of field, read backwards. The scene blurs the WORLD from its distance and leaves
+         the witness's object alone, because that distance is the unknown; a blur the witness
+         STATED runs the geometry the other way and bounds it. See DepthOfField's own doc comment,
+         which says so before anything existed to say it with. -->
+    <output id="blur-bound" class="apparent-size" for="blur"></output>
     <div class="record-row">
       <button id="record" type="button" class="record-btn"></button>
       <label><span id="label-sampling-rate">Sampling rate</span> <input id="samplingRate" type="number" min="16" step="16" value="100"/> ms</label>
@@ -346,6 +390,15 @@ button.preset[aria-pressed="true"] {
 }
 #lat, #lng, #heading, #pitch, #windDirection, #windSpeed, #decorEast, #decorNorth, #decorHeading, #decorFloors, #decorOccupiedFloor, #decorWindowFront, #decorWindowBehind, #decorWindowLeft, #decorWindowRight, #decorWindowFrontLeft, #decorWindowFrontRight, #decorWindowBehindLeft, #decorWindowBehindRight {
   width: 6em;
+}
+.time-qualifier {
+  font-size: 0.9em;
+}
+/* Stated, not left to the UA sheet: this component has been bitten three times by a class that
+   sets its own display outranking the [hidden] attribute, and these two swap on every mode
+   change. */
+.time-qualifier[hidden], input[hidden] {
+  display: none;
 }
 #obs-time, #obs-end-time {
   width: 12em;

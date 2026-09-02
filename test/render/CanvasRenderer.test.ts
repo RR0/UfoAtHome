@@ -143,3 +143,119 @@ describe("CanvasRenderer", () => {
     expect(ctx.ellipse).toHaveBeenCalledTimes(1) // rotate-handle glyph
   })
 })
+
+describe("CanvasRenderer stated brilliance", () => {
+  function brightContext(): CanvasRenderingContext2D {
+    return {
+      ...(createMockContext() as unknown as Record<string, unknown>),
+      arc: vi.fn(),
+      createRadialGradient: vi.fn(() => ({ addColorStop: vi.fn() })),
+      createLinearGradient: vi.fn(() => ({ addColorStop: vi.fn() }))
+    } as unknown as CanvasRenderingContext2D
+  }
+
+  /*
+   * The three things a light too bright to look at does, none of which a halo does — a halo is a
+   * coloured fringe, and no fringe reads as painful. A screen cannot go brighter than white, so
+   * brilliance can only be said by what the light does to what surrounds it.
+   */
+  it("spreads a veil far beyond the shape, which a halo never does", () => {
+    const ctx = brightContext()
+    const renderer = new CanvasRenderer(ctx)
+    const shape = { ...createOval({ x: 0, y: 0, width: 20, height: 20 }), brightness: 1 }
+
+    renderer.paintShape(shape)
+
+    // A radial gradient centred on the shape and far wider than it.
+    const veil = (ctx.createRadialGradient as ReturnType<typeof vi.fn>).mock.calls[0]
+    expect(veil[5]).toBeGreaterThan(20)
+    expect(ctx.arc).toHaveBeenCalled()
+  })
+
+  /*
+   * Clipping is not a shape. A first version painted the saturated core as a radial gradient,
+   * which put a round white blob inside a triangle and gave an oval a visible inner bead — neither
+   * of which anything in the world does. What saturates is every part of the image over the
+   * threshold at once, so the body is one flat colour carried toward white, whatever its outline.
+   */
+  it("clips the whole body to one colour rather than painting a disc inside it", () => {
+    const ctx = brightContext()
+    const renderer = new CanvasRenderer(ctx)
+    const triangle = { ...createPolygon({ x: 0, y: 0, width: 20, height: 20 }, [{ x: 0, y: 20 }, { x: 10, y: 0 }, { x: 20, y: 20 }]), color: "#39ff14", brightness: 0.7 }
+
+    renderer.paintShape(triangle)
+
+    // One radial gradient only — the veil around it. The body itself is a plain colour.
+    expect((ctx.createRadialGradient as ReturnType<typeof vi.fn>).mock.calls.length).toBe(1)
+    expect(typeof ctx.fillStyle).toBe("string")
+    // #39ff14 carried 70% of the way to white.
+    expect(ctx.fillStyle).toBe("rgb(196, 255, 185)")
+  })
+
+  /*
+   * A spike is thrown by the edge of an aperture blade, which belongs to the camera. Turning the
+   * object turns nothing — and two bright things through one lens must star in the same
+   * directions, which is also what the Sun's own shader does in the same scene.
+   */
+  it("keeps the spikes fixed in the image when the shape is rotated", () => {
+    const tips = (angle: number): unknown[] => {
+      const ctx = brightContext()
+      const renderer = new CanvasRenderer(ctx)
+      renderer.setStarPoints(6)
+      renderer.paintShape({ ...createOval({ x: 0, y: 0, width: 20, height: 20 }), brightness: 1, angle })
+      return (ctx.createLinearGradient as ReturnType<typeof vi.fn>).mock.calls
+    }
+
+    expect(tips(Math.PI / 4)).toEqual(tips(0))
+  })
+
+  // The one thing that DOES turn them, because it turns the blades that throw them.
+  it("turns the spikes with the instrument's own roll", () => {
+    const spikes = (roll: number): unknown[] => {
+      const ctx = brightContext()
+      const renderer = new CanvasRenderer(ctx)
+      renderer.setStarPoints(6)
+      renderer.setRoll(roll)
+      renderer.paintShape({ ...createOval({ x: 0, y: 0, width: 20, height: 20 }), brightness: 1 })
+      return (ctx.createLinearGradient as ReturnType<typeof vi.fn>).mock.calls
+    }
+
+    expect(spikes(0.4)).not.toEqual(spikes(0))
+    // Six spikes 60° apart, so a sixth of a turn lands the star back on itself — the same set of
+    // directions, drawn in a different order, which is why this compares sets and not sequences.
+    const sixth = (2 * Math.PI) / 6
+    const directions = (calls: unknown[]): string[] =>
+      (calls as number[][]).map(call => call.map(value => Math.round(value * 1000)).join(",")).sort()
+    expect(directions(spikes(sixth))).toEqual(directions(spikes(0)))
+  })
+
+  it("says nothing extra about a light nobody called bright", () => {
+    const ctx = brightContext()
+    const renderer = new CanvasRenderer(ctx)
+
+    renderer.paintShape(createOval({ x: 0, y: 0, width: 20, height: 20 }))
+
+    expect(ctx.arc).not.toHaveBeenCalled()
+    expect(ctx.createLinearGradient).not.toHaveBeenCalled()
+  })
+
+  // The star a bright light wears is the aperture's, not a style: the same dazzling light is a
+  // round glow through a phone and a starburst through an SLR stopped down.
+  it("gives it the spikes the instrument's own aperture throws, and none for a round one", () => {
+    const ctx = brightContext()
+    const renderer = new CanvasRenderer(ctx)
+    const shape = { ...createOval({ x: 0, y: 0, width: 20, height: 20 }), brightness: 1 }
+
+    renderer.setStarPoints(6)
+    renderer.paintShape(shape)
+    expect((ctx.createLinearGradient as ReturnType<typeof vi.fn>).mock.calls.length).toBe(6)
+
+    const roundCtx = brightContext()
+    const roundRenderer = new CanvasRenderer(roundCtx)
+    roundRenderer.setStarPoints(0)
+    roundRenderer.paintShape(shape)
+    expect(roundCtx.createLinearGradient).not.toHaveBeenCalled()
+    // The veil is still there: a round aperture glows, it just does not star.
+    expect(roundCtx.arc).toHaveBeenCalled()
+  })
+})

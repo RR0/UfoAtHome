@@ -16,7 +16,7 @@ describe("shape presets", () => {
   it("createShape applies the requested appearance on top of the preset geometry", () => {
     const shape = createShape(
       { x: 5, y: 5, width: 10, height: 10 },
-      { presetId: "polygon", color: "#ff0000", transparency: 0.4, haloScale: 2 }
+      { presetId: "polygon", color: "#ff0000", transparency: 0.4, haloScale: 2, blur: 0, brightness: 0 }
     )
     expect(shape.kind).toBe("polygon")
     expect(shape.color).toBe("#ff0000")

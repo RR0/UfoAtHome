@@ -544,6 +544,11 @@ export class UfoElement extends HTMLElement {
     // Selection handles are an editing affordance — hidden while actively playing, matching
     // the toolbar's own auto-hide-while-playing convention.
     const selectedIds = this.playbackState !== "playing" ? this.highlightedSourceIds : EMPTY_SELECTION
+    // The instrument's own aperture decides whether a dazzling light wears a star — the same
+    // statement SceneRenderer.setInstrument makes about the Sun, made here about the witness's own
+    // object, which is painted on this overlay instead of in that scene.
+    this.canvasRenderer.setStarPoints(Instruments.starPointsOf(this.sighting.instrument))
+    this.canvasRenderer.setRoll(((resolveObserverPoseAt(this.sighting, t)?.rollDeg ?? 0) * Math.PI) / 180)
     for (const instant of this.exposureInstants(t)) {
       for (const [sourceId, shape] of instant.shapes) {
         if (this.occludedSourceIds.has(sourceId)) continue
