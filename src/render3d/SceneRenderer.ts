@@ -33,7 +33,8 @@ import {
   Vector3,
   WebGLRenderer
 } from "three"
-import type { Material, Texture } from "three"
+import type { Material, Texture, WebGLRenderTarget } from "three"
+import { ExposureAccumulation } from "./ExposureAccumulation.js"
 import {
   atmosphericTint,
   cartesianToHorizontal,
@@ -863,6 +864,21 @@ export class SceneRenderer {
   /** Built the first time a lens is stopped somewhere that actually blurs something — see
    * setLensOptics. An eye never builds one. */
   private depthOfFieldPass?: DepthOfFieldPass
+  /** The film a long pose is added up on — built the first time a recording states an exposure long
+   * enough for the sky to move a pixel, which is a rare and deliberate thing (see ExposureAccumulation). */
+  private exposureAccumulation?: ExposureAccumulation
+  /** How this frame is to be drawn: one instant, or several added together. Set by setExposure and
+   * consulted by render(), so that EVERY repaint of the scene — a hover, a resize, a seek — shows
+   * the same photograph, rather than the accumulated one flickering back to a snapshot whenever
+   * something other than the playhead asked for a frame. */
+  private exposureInstants = 1
+  /** Applies the scene's own state at instant `index` of the pose. Held rather than passed because
+   * render() is called from everywhere and has to be able to redraw the whole exposure on its own —
+   * only SceneElement knows what the sky looked like at each instant (see its updateAstronomy). */
+  private exposureInstantAt?: (index: number) => void
+  /** True while the instants of one exposure are being restated, so the dozen setters each of them
+   * touches do not each repaint: a pose of 40 instants would otherwise cost hundreds of frames. */
+  private restatingExposure = false
   /** The lens this scene is being drawn through, or undefined for an eye and for any camera whose
    * own settings leave everything sharp. */
   private lensOptics?: { focalLengthMm: number; fNumber: number; focusDistance: number; frameHeightMm: number }
@@ -1494,17 +1510,102 @@ export class SceneRenderer {
   }
 
   render(): void {
+    if (this.restatingExposure) return
+    if (this.exposureInstants > 1 && this.exposureInstantAt) return this.renderExposure()
+    this.renderOnce()
+  }
+
+  /**
+   * States how many instants this frame is made of, and how to put the scene into each of them.
+   *
+   * The renderer knows nothing of dates: `instantAt` is SceneElement's own per-instant restatement
+   * of the sky (see its updateAstronomy), so what gets added up here is the real Sun, Moon, planets
+   * and stars of each moment the shutter was open — not one sky nudged sideways.
+   *
+   * Kept as STATE rather than taken as an argument to render(), because a frame is repainted by
+   * everything from a resize to a hover, and a photograph that reverted to a snapshot whenever the
+   * pointer moved would be a lie told intermittently.
+   */
+  setExposure(instants: number, instantAt?: (index: number) => void): void {
+    const steps = instantAt ? Math.max(1, Math.round(instants)) : 1
+    if (steps === this.exposureInstants && (steps === 1 || instantAt === this.exposureInstantAt)) {
+      this.exposureInstantAt = instantAt
+      return
+    }
+    this.exposureInstants = steps
+    this.exposureInstantAt = instantAt
+    if (steps === 1) {
+      // Nothing to add up any more: the film is a pair of full-size half-float targets, and a
+      // recording that has gone back to a snapshot should not still be holding them.
+      this.exposureAccumulation?.dispose()
+      this.exposureAccumulation = undefined
+    }
+    this.render()
+  }
+
+  /** One instant, straight to the canvas — the ordinary frame, and what every recording drew before
+   * poses long enough to move the sky existed. */
+  private renderOnce(target?: WebGLRenderTarget): void {
     const pass = this.usableEquidistantPass()
+    const previousTarget = this.renderer.getRenderTarget()
     if (!pass) {
       this.updateLensFlarePosition()
       const blur = this.usableDepthOfFieldPass()
+      blur?.setEncodesOutput(target === undefined)
+      if (target) this.renderer.setRenderTarget(target)
       if (blur) blur.render(this.renderer, this.scene, this.camera)
       else this.renderer.render(this.scene, this.camera)
+      if (target) this.renderer.setRenderTarget(previousTarget)
       return
     }
     // The flare is repositioned from inside, once the camera has been widened for the offscreen
     // render — see the pass's own onCameraWidened.
+    pass.setEncodesOutput(target === undefined)
+    if (target) this.renderer.setRenderTarget(target)
     pass.render(this.renderer, this.scene, this.camera, this.camera.fov, () => this.updateLensFlarePosition())
+    if (target) this.renderer.setRenderTarget(previousTarget)
+  }
+
+  /**
+   * The whole pose: the scene put into each of its instants, drawn, and added onto one film.
+   *
+   * Each instant carries its own share of the light (see ExposureAccumulation), so the picture
+   * stays exposed as it was and the sky's own movement shows as the trail it really is.
+   */
+  private renderExposure(): void {
+    const instantAt = this.exposureInstantAt
+    if (!instantAt) return this.renderOnce()
+    const size = this.renderer.getDrawingBufferSize(new Vector2())
+    const width = Math.max(1, Math.round(size.x))
+    const height = Math.max(1, Math.round(size.y))
+    if (!this.exposureAccumulation) this.exposureAccumulation = new ExposureAccumulation(width, height)
+    const film = this.exposureAccumulation
+    film.resize(width, height)
+    film.open(this.renderer)
+    const share = 1 / this.exposureInstants
+    for (let instant = 0; instant < this.exposureInstants; instant++) {
+      // Restating the sky touches a dozen setters, every one of which would otherwise paint a frame
+      // of its own — and one of them is this very method, which would then recurse.
+      this.restatingExposure = true
+      try {
+        instantAt(instant)
+      } finally {
+        this.restatingExposure = false
+      }
+      this.renderOnce(film.instantTarget)
+      film.add(this.renderer, share)
+    }
+    // Back to the instant the recording is actually at. Everything that ASKS the scene rather than
+    // drawing it — the shape occlusion raycasts, the decor distances behind SceneElement's own size
+    // estimates, the hover picks — reads the scene graph where this leaves it, and leaving it at the
+    // END of a ten-minute pose would answer every one of those questions about a different sky.
+    this.restatingExposure = true
+    try {
+      instantAt(0)
+    } finally {
+      this.restatingExposure = false
+    }
+    film.develop(this.renderer)
   }
 
   /** The resampling pass, if this recording needs one AND its field is narrow enough for a single
@@ -1865,6 +1966,8 @@ export class SceneRenderer {
     this.rainbow = undefined
     this.depthOfFieldPass?.dispose()
     this.depthOfFieldPass = undefined
+    this.exposureAccumulation?.dispose()
+    this.exposureAccumulation = undefined
     this.cometTail?.dispose()
     this.cometTail = undefined
     for (const mesh of this.bodyMeshes.values()) {

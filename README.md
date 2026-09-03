@@ -172,8 +172,9 @@ And it has SETTINGS, each kept on the pose beside the heading and the pitch, eac
 device fixed it (an Instamatic's owner had one aperture, one shutter speed and one focal length):
 the focal length, which is the field written the way a photographer writes it; the aperture, which
 decides both the depth of field and whether the diaphragm's blades throw a star at all; the shutter,
-which accumulates a moving light into a STREAK and a blinking one into a dashed streak; and where the
-lens was focused. Two of them are drawn rather than merely stated — the blur (`DepthOfFieldPass.ts`,
+which accumulates a moving light into a STREAK and a blinking one into a dashed streak — and, once the pose is
+long enough, turns every star into the arc the turning Earth draws (see [A pose long enough draws the
+sky](#a-pose-long-enough-draws-the-sky)); and where the lens was focused. Two of them are drawn rather than merely stated — the blur (`DepthOfFieldPass.ts`,
 from the thin-lens geometry in `DepthOfField.ts`) and the streak — because that is what makes them
 evidence a reader can compare against a photograph: a sharp object bounds its own distance, and a
 blurred one in a sharp frame was close.
@@ -673,6 +674,34 @@ subtends.
 One residual worth naming: an angular extent is stored as its *on-axis* value, and applied to a shape wherever it
 sits. For an object 9° off-axis subtending 9°, that is about 2.5% out. The overlay draws axis-aligned boxes and
 cannot express more; it is a fifth of the error it replaces, and it shrinks towards the centre of the frame.
+
+#### A pose long enough draws the sky
+
+The shutter accumulates the object (`UfoElement.exposureInstants`), and past a certain length it accumulates the
+**sky** too: the Earth turns under it at 15.041° an hour — a sidereal day, not a solar one — so every star is drawn
+out into the arc a tripod really records. A photograph of "lights that moved" is quite often exactly this, the
+lights having held perfectly still while the camera did not.
+
+`SkyDrift` (`src/engine/astronomy/SkyDrift.ts`) states what the sky did, in pixels, and how many instants that
+takes to draw: one per pixel of the longest trail, so the arc lands on touching pixels instead of dashing, and
+**one** — no accumulation at all — whenever the sky moved less than a pixel, which is every ordinary frame (a
+snapshot renders in a tenth of a millisecond and never comes near this). Each instant is a whole sky RECOMPUTED at
+its own moment (`SceneElement.applySceneAt`, pushed through `SceneRenderer.setExposure`) rather than one sky nudged
+sideways, so the arcs curve towards the pole exactly as they should and the Moon and the planets travel their own
+way through the frame. `ExposureAccumulation` adds them on a half-float film in linear light and bends the sRGB
+curve only once, at the end — the same rule `colorSpace.ts` states, and the reason both fullscreen passes can now
+be told not to encode what they hand to it.
+
+Each instant carries its share of the light rather than its whole, so the picture stays exposed as it was taken and
+the movement shows as a trail. That has a consequence worth stating plainly, because it is the physics and not a
+shortcoming: a trail is FAINT, and the longer it is the fainter it gets — one star's light spread over more and
+more pixels. Measured against a night sky of 30.5: a first-magnitude star peaks at 181 as a point at 1/250 s, 52
+after ten minutes, 39 after thirty, 35 after an hour. This project draws what the pose collected, not what would
+read well.
+
+Only the 35 mm SLRs offer poses like that, and they offer them because they really had them: **B**, where the
+shutter stays open as long as it is held. An Instamatic had one shutter speed and a phone's night mode stops at ten
+seconds — neither can draw a trail, and neither is offered one.
 
 #### Where meters do come back
 

@@ -80,7 +80,10 @@ export class DepthOfFieldPass {
         uFocalLengthMm: { value: 50 },
         /** Pixels per millimetre of frame, which is what turns a circle of confusion into a blur. */
         uPixelsPerMm: { value: 0 },
-        uMaxRadius: { value: DepthOfFieldPass.MAX_RADIUS_PX }
+        uMaxRadius: { value: DepthOfFieldPass.MAX_RADIUS_PX },
+        /** 1 when this pass writes the canvas, 0 when it writes a target somebody else will still
+         * add to — see setEncodesOutput. */
+        uEncodeOutput: { value: 1 }
       },
       vertexShader: `
         varying vec2 vUv;
@@ -103,6 +106,12 @@ export class DepthOfFieldPass {
         uniform float uFocalLengthMm;
         uniform float uPixelsPerMm;
         uniform float uMaxRadius;
+        uniform float uEncodeOutput;
+
+        /** The curve, or not — see setEncodesOutput. */
+        vec3 forDestination(vec3 linear) {
+          return uEncodeOutput > 0.5 ? encodeSrgb(linear) : linear;
+        }
 
         /** How far away, in the scene's own units, whatever was drawn at this pixel stands. */
         float distanceAt(vec2 uv) {
@@ -130,7 +139,7 @@ export class DepthOfFieldPass {
           float radius = blurRadius(here);
           vec4 colour = texture2D(uColour, vUv);
           if (radius < 0.75) {
-            gl_FragColor = vec4(encodeSrgb(colour.rgb), colour.a);
+            gl_FragColor = vec4(forDestination(colour.rgb), colour.a);
             return;
           }
           vec2 texel = 1.0 / uResolution;
@@ -152,7 +161,7 @@ export class DepthOfFieldPass {
           }
           // Averaged in LINEAR light, which is what a lens does — it adds photons, not screen
           // values — and encoded only at the very end. See colorSpace.ts.
-          gl_FragColor = vec4(encodeSrgb(total / weight), colour.a);
+          gl_FragColor = vec4(forDestination(total / weight), colour.a);
         }
       `,
       depthTest: false,
@@ -184,6 +193,13 @@ export class DepthOfFieldPass {
   }
 
   /** Renders the scene through the camera and blurs what the lens would not have held sharp. */
+  /** Whether the frame this pass produces is finished, or is one instant of a longer exposure —
+   * see EquidistantProjectionPass.setEncodesOutput, which draws the same distinction for the same
+   * reason. */
+  setEncodesOutput(encodes: boolean): void {
+    this.material.uniforms.uEncodeOutput.value = encodes ? 1 : 0
+  }
+
   render(renderer: WebGLRenderer, scene: Scene, camera: PerspectiveCamera): void {
     const uniforms = this.material.uniforms
     uniforms.uNear.value = camera.near

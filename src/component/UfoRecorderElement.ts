@@ -1636,8 +1636,11 @@ export class UfoRecorderElement extends HTMLElement {
    *
    * Blanking every field removes just the keyframe at *this* instant (removeKeyframeAt), not the
    * observer's whole recorded path — mirrors "no edit recorded here", not "erase everything ever
-   * entered". Bails out while playing, same reasoning as setAppearance's identical guard: the
-   * playhead is a moving target during Play, not a specific instant to keyframe. */
+   * entered". EVERY field counts there, the optics included: a witness who says nothing about
+   * where they stood but does say the shutter was open ten seconds has stated something, and a
+   * removal here would throw it away the moment it was typed. Bails out while playing, same
+   * reasoning as setAppearance's identical guard: the playhead is a moving target during Play,
+   * not a specific instant to keyframe. */
   private updateObserver(): void {
     if (this.ufoElement.playbackState === "playing") return
     const lat = this.numberOrUndefined(this.latInput.value)
@@ -1675,7 +1678,18 @@ export class UfoRecorderElement extends HTMLElement {
     const exposureSeconds = UfoRecorderElement.exposureSeconds(this.exposureInput.value)
     // Empty is not missing here, it is INFINITY — where a camera pointed at the sky is focused.
     const focusDistanceM = this.numberOrUndefined(this.focusDistanceInput.value)
-    const nothingSet = lat === undefined && lng === undefined && headingDeg === undefined && pitchDeg === 0 && rollDeg === 0 && elevationM === 0
+    // Same distinction retuneFieldOfView draws, for the same reason: these three fields are
+    // PREFILLED from the instrument (see syncOpticsFromInstrument), so a value equal to the
+    // device's own is one nobody stated, and only a departure from it is a witness talking. The
+    // focus distance has no device default at all, so any value there is theirs.
+    const opticsStated =
+      Math.abs(fovDeg - Instruments.fieldOfViewDeg(instrument)) > 0.01 ||
+      fNumber !== instrument.fNumber ||
+      exposureSeconds !== instrument.exposureSeconds ||
+      focusDistanceM !== undefined
+    const nothingSet =
+      lat === undefined && lng === undefined && headingDeg === undefined && pitchDeg === 0 && rollDeg === 0 &&
+      elevationM === 0 && !opticsStated
     if (nothingSet) {
       witnessTrack.removeKeyframeAt(t)
     } else {

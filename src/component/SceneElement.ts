@@ -32,6 +32,7 @@ import { ApparentSize } from "../engine/shape/ApparentSize.js"
 import { Instruments } from "../engine/instrument/Instrument.js"
 import { ImageProjection } from "../engine/instrument/ImageProjection.js"
 import { SightingShapes } from "../engine/persistence/SightingShapes.js"
+import { SkyDrift } from "../engine/astronomy/SkyDrift.js"
 
 registerUfo()
 
@@ -543,6 +544,56 @@ export class SceneElement extends HTMLElement {
    * observer's own heading/pitch/fov always applies to the camera regardless, since that part
    * doesn't need a date or a location either. */
   private updateAstronomy(t: number): void {
+    this.applySceneAt(t)
+    // How long the shutter was open, and therefore how many instants this frame is: a photograph is
+    // everything that crossed the frame while it was, and over a pose of any length the thing that
+    // crosses it is the SKY — the Earth turns under it and every star draws its arc (see SkyDrift).
+    // The shape's own trail is drawn by <rr0-ufo> on its own canvas and starts far sooner (a
+    // fiftieth of a second is enough to smear a moving object); the sky needs a pose long enough to
+    // move a whole pixel, which is tens of seconds.
+    const exposureSeconds = this.exposureSecondsAt(t)
+    const instants = SkyDrift.instants(exposureSeconds, this.degreesPerPixelAt(t))
+    if (instants <= 1) {
+      this.sceneRenderer.setExposure(1)
+      return
+    }
+    const exposureMs = exposureSeconds * 1000
+    // Same convention as the shape's own accumulation: the shutter opens AT the stated instant and
+    // stays open, so a photograph timed at t holds what happened from t onward.
+    //
+    // What sampling instants cannot catch, said out loud: anything SHORTER than the gap between two
+    // of them — a meteor of half a second in a ten-minute pose — is drawn only if an instant happens
+    // to land on it, where real film would have caught every one. The decor lights already solve
+    // exactly this for a strobe by integrating the lit fraction of an interval rather than asking
+    // "is it on?" (see LightRig's lightOnFractionBetween); the sky has no equivalent yet, and until
+    // it does a long pose under a shower under-reports the meteors it would really hold.
+    this.sceneRenderer.setExposure(instants, instant =>
+      this.applySceneAt(t + (exposureMs * instant) / instants)
+    )
+  }
+
+  /** How long this recording says the shutter was open at `t` — the pose's own setting, or the
+   * device's when it has only one (an Instamatic's ninetieth). Zero for an eye, which has no
+   * shutter and no pose to leave a trail on. */
+  private exposureSecondsAt(t: number): number {
+    const sighting = this.ufoElement.sighting
+    const pose = resolveObserverPoseAt(sighting, t)
+    return pose?.exposureSeconds ?? sighting.instrument.exposureSeconds ?? 0
+  }
+
+  /** The scale of the image, in degrees of sky per pixel — what turns the sky's drift into a length
+   * on the picture. Taken from the drawing buffer's own height and the field being rendered, so a
+   * narrow lens (where a trail is longest) and a wide eye each get their own answer. */
+  private degreesPerPixelAt(t: number): number {
+    const height = this.sceneCanvas.height
+    if (height <= 0) return 0
+    return SightingShapes.fovOf(this.ufoElement.sighting, t) / height
+  }
+
+  /** Everything the scene has to be told to stand at one instant — the whole of what this element
+   * pushes into the renderer. Called once for an ordinary frame, and once per instant of a pose long
+   * enough that the sky itself moved across it (see updateAstronomy). */
+  private applySceneAt(t: number): void {
     const sighting = this.ufoElement.sighting
     // Resolved here (not left to the sightingData setter's one-time call, or an explicit nudge on
     // edit) since weather is now itself keyframed over time — see Sighting.resolveWeatherAt. Cheap

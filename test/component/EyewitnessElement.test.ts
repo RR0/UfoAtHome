@@ -41,6 +41,7 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     }
     setInstrument(): void {}
     setLensOptics(): void {}
+    setExposure(): void {}
     setMeteorShower(): void {}
     get meteorSchedule(): unknown[] {
       return []

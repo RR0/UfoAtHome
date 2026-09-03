@@ -55,6 +55,7 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     }
     setInstrument(): void {}
     setLensOptics(): void {}
+    setExposure(): void {}
     private meteors: { t: number; durationMs: number }[] = []
     setMeteorShower(meteors: { t: number; durationMs: number }[]): void {
       this.meteors = meteors
@@ -293,6 +294,30 @@ describe("UfoRecorderElement observer/time fields", () => {
     expect(element.sightingData.witnessTrack?.keyframes).toEqual([
       { t: 0, pose: { lat: undefined, lng: undefined, elevationM: 0, headingDeg: 270, pitchDeg: 0, fovDeg: 60 } }
     ])
+  })
+
+  it("keeps a ten-second exposure stated on its own, with nothing else about the witness set — it used to be discarded the instant it was typed, the field snapping back to the camera's 1/250", () => {
+    const element = mount()
+    const shadow = element.shadowRoot!
+    const instrument = shadow.getElementById("instrument") as HTMLSelectElement
+    instrument.value = "slr-35mm-50"
+    instrument.dispatchEvent(new Event("change"))
+    setInput(shadow, "exposureSeconds", "10")
+
+    expect(element.sightingData.witnessTrack?.keyframes[0]?.pose.exposureSeconds).toBe(10)
+    expect((shadow.getElementById("exposureSeconds") as HTMLInputElement).value).toBe("10")
+  })
+
+  it("still removes the keyframe when the optics only ever showed what the camera itself is set to — those the recorder wrote, nobody stated", () => {
+    const element = mount()
+    const shadow = element.shadowRoot!
+    const instrument = shadow.getElementById("instrument") as HTMLSelectElement
+    instrument.value = "slr-35mm-50"
+    instrument.dispatchEvent(new Event("change"))
+    setInput(shadow, "exposureSeconds", "10")
+    setInput(shadow, "exposureSeconds", "1/250")
+
+    expect(element.sightingData.witnessTrack?.keyframes).toEqual([])
   })
 
   it("writes the observation-start EDTF text field into event.time", () => {

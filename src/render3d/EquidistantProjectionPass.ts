@@ -65,7 +65,10 @@ export class EquidistantProjectionPass {
         /** `tan` of half the SOURCE's vertical field — how to project a direction back into the
          * pinhole render this samples from. */
         uSrcTanHalfFovY: { value: 1 },
-        uResolution: { value: new Vector2(this.width, this.height) }
+        uResolution: { value: new Vector2(this.width, this.height) },
+        /** 1 when this pass writes the canvas, 0 when it writes a target somebody else will still
+         * add to — see setEncodesOutput. */
+        uEncodeOutput: { value: 1 }
       },
       vertexShader: `
         varying vec2 vNdc;
@@ -81,6 +84,7 @@ export class EquidistantProjectionPass {
         uniform float uHalfFovRad;
         uniform float uAspect;
         uniform float uSrcTanHalfFovY;
+        uniform float uEncodeOutput;
         varying vec2 vNdc;
 
         void main() {
@@ -102,8 +106,10 @@ export class EquidistantProjectionPass {
           vec2 src = vec2(dir.x / -dir.z / (uSrcTanHalfFovY * uAspect), dir.y / -dir.z / uSrcTanHalfFovY);
           if (any(greaterThan(abs(src), vec2(1.0)))) { gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); return; }
           // Encoded here because this pass draws to the CANVAS, which three.js would have encoded
-          // for itself had the scene gone there directly — see colorSpace.ts.
-          gl_FragColor = vec4(encodeSrgb(texture2D(uSource, src * 0.5 + 0.5).rgb), 1.0);
+          // for itself had the scene gone there directly — see colorSpace.ts. Not encoded when the
+          // frame is on its way into a longer exposure's accumulation, which has to add up light.
+          vec3 colour = texture2D(uSource, src * 0.5 + 0.5).rgb;
+          gl_FragColor = vec4(uEncodeOutput > 0.5 ? encodeSrgb(colour) : colour, 1.0);
         }
       `,
       depthTest: false,
@@ -145,6 +151,18 @@ export class EquidistantProjectionPass {
   /** Whether a field this wide can be served from one rectilinear source at all. */
   static supports(fovDeg: number, aspect: number): boolean {
     return this.cornerHalfAngleDeg(fovDeg, aspect) <= this.MAX_HALF_ANGLE_DEG
+  }
+
+  /**
+   * Whether the frame this pass produces is finished, or is one instant of a longer exposure.
+   *
+   * A pass that draws to the canvas must bend the light through the sRGB curve itself, since it has
+   * stepped around the moment three.js would have done it (see colorSpace.ts). A pass that draws
+   * into a target somebody is still going to ADD to must not: light adds in linear units, and
+   * averaging curve-bent numbers is the very mistake that comment warns about.
+   */
+  setEncodesOutput(encodes: boolean): void {
+    this.material.uniforms.uEncodeOutput.value = encodes ? 1 : 0
   }
 
   resize(width: number, height: number): void {

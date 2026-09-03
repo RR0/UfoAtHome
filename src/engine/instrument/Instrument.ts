@@ -203,7 +203,12 @@ export const INSTRUMENTS: Instrument[] = [
     fNumber: 8,
     fNumberRange: { min: 2, max: 16 },
     exposureSeconds: 1 / 250,
-    exposureRangeSeconds: { min: 1 / 1000, max: 30 },
+    // B is not a figure of speech: the shutter stays open as long as it is held, and the hour here
+    // is the photographer's patience rather than the camera's limit. It is also the ONLY setting on
+    // this list that lets a picture show what a tripod really records — the stars drawn out into
+    // arcs by the turning Earth (see SkyDrift), which is one of the commonest things a photograph of
+    // "lights that moved" turns out to be.
+    exposureRangeSeconds: { min: 1 / 1000, max: 3600 },
     // Dated from the Nikon F, which is when an SLR became an object an ordinary witness might own.
     years: { from: 1959 },
     apertureBlades: 6
@@ -220,7 +225,8 @@ export const INSTRUMENTS: Instrument[] = [
     fNumber: 8,
     fNumberRange: { min: 4, max: 22 },
     exposureSeconds: 1 / 250,
-    exposureRangeSeconds: { min: 1 / 1000, max: 30 },
+    // The same body, so the same B — see the 50 mm entry above.
+    exposureRangeSeconds: { min: 1 / 1000, max: 3600 },
     // Zooms of the period commonly had more blades than a prime.
     apertureBlades: 8,
     years: { from: 1975 }
