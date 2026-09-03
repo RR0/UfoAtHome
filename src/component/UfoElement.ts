@@ -124,7 +124,7 @@ export class UfoElement extends HTMLElement {
    * there (see its hasVisibleShapeAt check). */
   private readonly handlePointerMove = (event: PointerEvent): void => {
     const point = this.canvasPointFromEvent(event)
-    const hit = point && this.currentSighting.timeline.hitTest(this.currentTime, point.x, point.y, this.occludedSourceIds)
+    const hit = point && this.shapeAt(point.x, point.y)
     if (!hit?.shape.title) {
       this.tooltip.hidden = true
       return
@@ -435,7 +435,7 @@ export class UfoElement extends HTMLElement {
    * what the pointer is actually hovering; this element's own tooltip already handles that case
    * (title-only, see handlePointerMove's own doc comment). */
   hasVisibleShapeAt(x: number, y: number): boolean {
-    return this.currentSighting.timeline.hitTest(this.currentTime, x, y, this.occludedSourceIds) !== undefined
+    return this.shapeAt(x, y) !== undefined
   }
 
   /**
@@ -470,20 +470,73 @@ export class UfoElement extends HTMLElement {
    * a second) — a MINUTES-long pose, which would draw star trails, is a different piece of work.
    */
   private exposureInstants(t: number): { shapes: Map<string, Shape>; share: number }[] {
+    const times = this.exposureTimes(t)
+    const share = 1 / times.length
+    return times.map(instant => ({ shapes: this.shapesAt(instant), share }))
+  }
+
+  /**
+   * The instants a picture taken at `t` is made of, as times.
+   *
+   * Public because WHAT IS ON SCREEN is what a pointer is aimed at: a long pose draws the object
+   * everywhere it went, and anything hit-testing the single instant `t` would answer "nothing
+   * there" over most of a streak the reader can plainly see — which is how an object became
+   * impossible to select once it had a pose long enough to move.
+   *
+   * How many: enough that consecutive paintings OVERLAP, which is a distance and not a duration.
+   * The old rule counted time alone (one painting per fiftieth of a second, up to 48) and that is
+   * what leaves a long pose visibly BEADED — a ten-second pose across three hundred pixels puts its
+   * 48 paintings six pixels apart, and a reader sees the paintings rather than the streak. So the
+   * object's own travel across the frame decides it, one instant per couple of pixels, and the
+   * old count stands as a floor for a pose in which nothing moved but something changed (a light
+   * brightening, a colour turning).
+   */
+  exposureTimes(t: number = this.currentTime): number[] {
     const exposureMs = (resolveObserverPoseAt(this.currentSighting, t)?.exposureSeconds ?? 0) * 1000
-    const single = () => [{ shapes: this.shapesAt(t), share: 1 }]
-    if (exposureMs < UfoElement.SHORTEST_VISIBLE_EXPOSURE_MS) return single()
-    const steps = Math.min(
+    if (exposureMs < UfoElement.SHORTEST_VISIBLE_EXPOSURE_MS) return [t]
+    const byTime = Math.min(
       UfoElement.MAX_EXPOSURE_STEPS,
       Math.max(2, Math.round(exposureMs / UfoElement.SHORTEST_VISIBLE_EXPOSURE_MS))
     )
-    const instants: { shapes: Map<string, Shape>; share: number }[] = []
+    const byTravel = Math.ceil(this.travelPxOver(t, exposureMs) / UfoElement.EXPOSURE_STEP_PX)
+    const steps = Math.min(UfoElement.MAX_TRAVEL_STEPS, Math.max(byTime, byTravel))
+    const times: number[] = []
     for (let step = 0; step < steps; step++) {
       // The shutter opens AT the stated instant and stays open: what a photograph timed at t holds
       // is what happened from t onward, not what happened around it.
-      instants.push({ shapes: this.shapesAt(t + (exposureMs * step) / steps), share: 1 / steps })
+      times.push(t + (exposureMs * step) / steps)
     }
-    return instants
+    return times
+  }
+
+  /** How far the furthest-travelling shape moved across the canvas while the shutter was open —
+   * measured between the two ends of the pose, which is what the streak's own length is. */
+  private travelPxOver(t: number, exposureMs: number): number {
+    const start = this.shapesAt(t)
+    const end = this.shapesAt(t + exposureMs)
+    let furthest = 0
+    for (const [sourceId, from] of start) {
+      const to = end.get(sourceId)
+      if (!to) continue
+      const dx = to.bounds.x + to.bounds.width / 2 - (from.bounds.x + from.bounds.width / 2)
+      const dy = to.bounds.y + to.bounds.height / 2 - (from.bounds.y + from.bounds.height / 2)
+      furthest = Math.max(furthest, Math.hypot(dx, dy))
+    }
+    return furthest
+  }
+
+  /** Whichever shape a pointer at (x, y) is aimed at in the picture now on screen — the object at
+   * any instant of the pose, not only at the playhead. See exposureTimes. */
+  shapeAt(
+    x: number,
+    y: number,
+    excludeSourceIds: ReadonlySet<string> = this.occludedSourceIds
+  ): { sourceId: string; shape: Shape } | undefined {
+    for (const instant of this.exposureTimes()) {
+      const hit = this.currentSighting.timeline.hitTest(instant, x, y, excludeSourceIds)
+      if (hit) return hit
+    }
+    return undefined
   }
 
   /** Every shape the recording holds at that instant, the way the player resolves them. */
@@ -504,6 +557,13 @@ export class UfoElement extends HTMLElement {
    * a reader sees the steps rather than the streak. Twice that closes it up, and painting one shape
    * fifty times costs nothing worth counting. */
   private static readonly MAX_EXPOSURE_STEPS = 48
+  /** How far apart two paintings of the object may land before the streak reads as beads. Two
+   * pixels: at six (what a ten-second pose across the frame was getting) the scalloped edges of
+   * each painting are plainly visible in the trail. */
+  private static readonly EXPOSURE_STEP_PX = 2
+  /** The ceiling on that, so a pose across the whole frame cannot ask for a thousand paintings.
+   * 320 covers the widest travel this canvas can hold at two pixels a step. */
+  private static readonly MAX_TRAVEL_STEPS = 320
 
   /**
    * Gives the canvas the shape of the picture this recording was actually made in — see
@@ -549,19 +609,24 @@ export class UfoElement extends HTMLElement {
     // object, which is painted on this overlay instead of in that scene.
     this.canvasRenderer.setStarPoints(Instruments.starPointsOf(this.sighting.instrument))
     this.canvasRenderer.setRoll(((resolveObserverPoseAt(this.sighting, t)?.rollDeg ?? 0) * Math.PI) / 180)
-    for (const instant of this.exposureInstants(t)) {
+    const instants = this.exposureInstants(t)
+    for (const instant of instants) {
       for (const [sourceId, shape] of instant.shapes) {
         if (this.occludedSourceIds.has(sourceId)) continue
         const share = instant.share
         const exposed = share === 1 ? shape : { ...shape, transparency: 1 - (1 - shape.transparency) * share }
-        const isSelected = selectedIds.has(sourceId) && share === 1
-        if (isSelected && selectedIds.size === 1) {
-          this.canvasRenderer.paintShape({ ...exposed, selected: true })
-        } else {
-          this.canvasRenderer.paintShape(exposed)
-          if (isSelected) this.canvasRenderer.paintMemberOutline(exposed)
-        }
+        this.canvasRenderer.paintShape(exposed)
       }
+    }
+    // Drawn ONCE, over the finished picture, and always at the playhead's own instant — not once
+    // per painting, which is both a stack of outlines and, since a share below one used to
+    // disqualify a painting from being "the selected one", no outline at all on a long pose: a
+    // shape stayed selectable and simply stopped LOOKING selected. Where the handles sit against
+    // the streak is itself the answer to "which moment am I editing".
+    for (const [sourceId, shape] of instants[0].shapes) {
+      if (this.occludedSourceIds.has(sourceId) || !selectedIds.has(sourceId)) continue
+      if (selectedIds.size === 1) this.canvasRenderer.paintShape({ ...shape, selected: true })
+      else this.canvasRenderer.paintMemberOutline(shape)
     }
     void shapesBySource
     if (selectedIds.size > 1) {

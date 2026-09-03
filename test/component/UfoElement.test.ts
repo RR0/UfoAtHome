@@ -91,6 +91,64 @@ describe("UfoElement", () => {
     vi.unstubAllGlobals()
   })
 
+  it("hit-tests the PICTURE and not the instant: a pose long enough draws the object all along its path, and a click on the streak used to fall through to the landscape", () => {
+    const element = mount()
+    // A shape crossing the frame over five seconds, photographed with the shutter open ten.
+    element.sightingData = {
+      ...sampleJson,
+      durationSeconds: 10,
+      timeline: {
+        keyframes: [
+          { t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval" as const, bounds: { x: 0, y: 0, width: 40, height: 40 }, color: "#0f0", angle: 0, transparency: 0, haloScale: 1, selected: false } }] },
+          { t: 5000, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval" as const, bounds: { x: 300, y: 160, width: 40, height: 40 }, color: "#0f0", angle: 0, transparency: 0, haloScale: 1, selected: false } }] }
+        ]
+      },
+      witnessTrack: { keyframes: [{ t: 0, pose: { elevationM: 0, pitchDeg: 0, fovDeg: 60, exposureSeconds: 10 } }] }
+    }
+    element.currentTime = 0
+
+    // Where the object IS at the playhead — it has always been possible to hit that.
+    expect(element.shapeAt(20, 20)?.sourceId).toBe("ufo-1")
+    // ...and where the same photograph plainly shows it, five seconds into the pose.
+    expect(element.shapeAt(320, 180)?.sourceId).toBe("ufo-1")
+    // Sky the object never crossed stays empty, or every click would select something.
+    expect(element.shapeAt(600, 20)).toBeUndefined()
+  })
+
+  it("samples a long pose by how far the object TRAVELLED, not only by how long it lasted — 48 paintings over 300 px is what left the streak beaded", () => {
+    const element = mount()
+    const moving = {
+      ...sampleJson,
+      durationSeconds: 10,
+      timeline: {
+        keyframes: [
+          { t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval" as const, bounds: { x: 0, y: 0, width: 40, height: 40 }, color: "#0f0", angle: 0, transparency: 0, haloScale: 1, selected: false } }] },
+          { t: 10000, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval" as const, bounds: { x: 300, y: 0, width: 40, height: 40 }, color: "#0f0", angle: 0, transparency: 0, haloScale: 1, selected: false } }] }
+        ]
+      },
+      witnessTrack: { keyframes: [{ t: 0, pose: { elevationM: 0, pitchDeg: 0, fovDeg: 60, exposureSeconds: 10 } }] }
+    }
+    element.sightingData = moving
+    element.currentTime = 0
+    // 300 px of travel at one painting every couple of pixels — well past the 48 the clock alone asks for.
+    expect(element.exposureTimes(0).length).toBe(150)
+
+    // An object that did not move gets the old count: there is nothing to bead, and a pose can
+    // still hold something changing in place.
+    element.sightingData = {
+      ...moving,
+      timeline: { keyframes: [moving.timeline.keyframes[0]] }
+    }
+    element.currentTime = 0
+    expect(element.exposureTimes(0).length).toBe(48)
+  })
+
+  it("takes a snapshot as one instant, whatever moved", () => {
+    const element = mount()
+    element.sightingData = sampleJson
+    expect(element.exposureTimes(0)).toEqual([0])
+  })
+
   it("is ready (canvasElement/renderer/sighting available) immediately after construction", () => {
     const element = document.createElement(UFO_ELEMENT_NAME) as UfoElement
     expect(element.canvasElement).toBeInstanceOf(HTMLCanvasElement)

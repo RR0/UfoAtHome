@@ -320,6 +320,38 @@ describe("UfoRecorderElement observer/time fields", () => {
     expect(element.sightingData.witnessTrack?.keyframes).toEqual([])
   })
 
+  it("holds an exposure to what the device could actually do, and shows what it held", () => {
+    const element = mount()
+    const shadow = element.shadowRoot!
+    const instrument = shadow.getElementById("instrument") as HTMLSelectElement
+    instrument.value = "phone-landscape"
+    instrument.dispatchEvent(new Event("change"))
+    const exposure = shadow.getElementById("exposureSeconds") as HTMLInputElement
+    setInput(shadow, "exposureSeconds", "600")
+
+    // A phone's night mode stops at ten seconds; a ten-minute pose on one is not a testimony.
+    expect(element.sightingData.witnessTrack?.keyframes[0]?.pose.exposureSeconds).toBe(10)
+    expect(exposure.value).toBe("10")
+
+    setInput(shadow, "exposureSeconds", "5")
+    expect(element.sightingData.witnessTrack?.keyframes[0]?.pose.exposureSeconds).toBe(5)
+
+    // And the other end of the range, which a thousandth of a second is past on this device.
+    setInput(shadow, "exposureSeconds", "1/100000")
+    expect(element.sightingData.witnessTrack?.keyframes[0]?.pose.exposureSeconds).toBe(1 / 8000)
+  })
+
+  it("lets an SLR hold its shutter open on B, which is the only setting on the list that draws a star trail", () => {
+    const element = mount()
+    const shadow = element.shadowRoot!
+    const instrument = shadow.getElementById("instrument") as HTMLSelectElement
+    instrument.value = "slr-35mm-50"
+    instrument.dispatchEvent(new Event("change"))
+    setInput(shadow, "exposureSeconds", "600")
+
+    expect(element.sightingData.witnessTrack?.keyframes[0]?.pose.exposureSeconds).toBe(600)
+  })
+
   it("writes the observation-start EDTF text field into event.time", () => {
     const element = mount()
     const shadow = element.shadowRoot!

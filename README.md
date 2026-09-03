@@ -701,7 +701,20 @@ read well.
 
 Only the 35 mm SLRs offer poses like that, and they offer them because they really had them: **B**, where the
 shutter stays open as long as it is held. An Instamatic had one shutter speed and a phone's night mode stops at ten
-seconds — neither can draw a trail, and neither is offered one.
+seconds — neither can draw a trail, and neither is offered one: a pose typed past what the device could do is
+brought back inside its range rather than kept, since it would put a trail in the picture that the camera named on
+the same recording could never have drawn.
+
+Two consequences of drawing a pose rather than an instant, both of which cost an evening to find:
+
+- **What is on screen is not where the object is at the playhead**, so that is what a pointer has to be aimed at.
+  `UfoElement.shapeAt` hit-tests every instant of the pose, and without it an object with a ten-second pose became
+  impossible to select at all — the click fell straight through the streak onto the landscape behind. The selection
+  handles stay on the playhead's own instant: where they sit against the streak is the answer to "which moment am I
+  editing".
+- **How finely the pose is sampled is a distance, not a duration.** Counting time alone (a painting every fiftieth
+  of a second) leaves a fast object visibly BEADED — 48 paintings across three hundred pixels land six apart, and a
+  reader sees the paintings instead of the streak. The object's own travel decides it, one instant per two pixels.
 
 #### Where meters do come back
 

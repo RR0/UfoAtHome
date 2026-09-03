@@ -80,6 +80,10 @@ import type { UfoLanguage } from "./messages/index.js"
 import { ufoRecorderMessages_en } from "./messages/UfoRecorderMessages_en.js"
 import type { UfoRecorderMessages } from "./messages/UfoRecorderMessages.js"
 
+/** Hides nothing from a hit test: an occluded shape is still the author's to select, unlike a
+ * reader's hover (see UfoElement.shapeAt's own default). */
+const EMPTY_SOURCE_IDS: ReadonlySet<string> = new Set()
+
 registerUfo()
 registerScene()
 
@@ -1675,7 +1679,7 @@ export class UfoRecorderElement extends HTMLElement {
         ? Instruments.fieldOfViewDegAt(instrument, stated)
         : stated) ?? this.currentFovDeg()
     const fNumber = this.numberOrUndefined(this.fNumberInput.value)
-    const exposureSeconds = UfoRecorderElement.exposureSeconds(this.exposureInput.value)
+    const exposureSeconds = this.statedExposureSeconds(instrument)
     // Empty is not missing here, it is INFINITY — where a camera pointed at the sky is focused.
     const focusDistanceM = this.numberOrUndefined(this.focusDistanceInput.value)
     // Same distinction retuneFieldOfView draws, for the same reason: these three fields are
@@ -3183,6 +3187,27 @@ export class UfoRecorderElement extends HTMLElement {
     return `1/${Math.round(1 / seconds)}`
   }
 
+  /**
+   * What the field says the shutter did, as long as the device could do it.
+   *
+   * A camera is not a wish: a phone's night mode stops at ten seconds and an Instamatic had exactly
+   * one speed, so a pose typed past what the device offered is not a testimony this recording can
+   * hold — it would put a trail in the picture that the camera named on the same recording could
+   * never have drawn. The value is brought back inside the device's own range, and the field then
+   * shows what the recording holds (see syncOpticsFromInstrument, which rewrites it as soon as the
+   * witness leaves the field): the correction is visible rather than announced, the same way the
+   * focal length shows the millimetres a field really works out to.
+   *
+   * A device with no range at all is one with nothing to set — its own single speed stands.
+   */
+  private statedExposureSeconds(instrument: Instrument): number | undefined {
+    const stated = UfoRecorderElement.exposureSeconds(this.exposureInput.value)
+    const range = instrument.exposureRangeSeconds
+    if (!range) return instrument.exposureSeconds ?? stated
+    if (stated === undefined) return undefined
+    return Math.min(range.max, Math.max(range.min, stated))
+  }
+
   /** The inverse, accepting either way of writing it. */
   private static exposureSeconds(text: string): number | undefined {
     const trimmed = text.trim()
@@ -3240,6 +3265,8 @@ export class UfoRecorderElement extends HTMLElement {
 
     const exposure = pose?.exposureSeconds ?? instrument.exposureSeconds
     if (this.exposureInput !== this.shadow.activeElement) {
+      // What is shown IS what the recording holds — including a pose brought back inside the
+      // device's own range (see statedExposureSeconds).
       this.exposureInput.value = exposure === undefined ? "" : UfoRecorderElement.exposureText(exposure)
     }
     this.setRowVisible(this.exposureInput, instrument.exposureSeconds !== undefined)
@@ -4736,7 +4763,11 @@ export class UfoRecorderElement extends HTMLElement {
       }
     }
 
-    const hit = timeline.hitTest(t, point.x, point.y)
+    // The PICTURE, not the instant: a pose long enough draws the object all along its path, and a
+    // click on the streak that answered "nothing there" fell straight through to dragging the
+    // landscape — which is exactly what an object with a ten-second pose did (see
+    // UfoElement.shapeAt). Nothing is excluded: an occluded shape is still the author's to select.
+    const hit = this.ufoElement.shapeAt(point.x, point.y, EMPTY_SOURCE_IDS)
     if (!hit) {
       // No shape under the pointer — try a decor object next (a plain click, not the right-click
       // context menu's own pickDecorAt call) so clicking a building/tree/vehicle in the 3D scene
@@ -4862,7 +4893,9 @@ export class UfoRecorderElement extends HTMLElement {
     // can grab one of its handles, vertex or otherwise).
     const selectedShape = this.selectedSourceIds.size === 1 ? timeline.getInterpolatedShapeAt(t, this.currentSourceId) : undefined
     const hitVertex = selectedShape?.kind === "polygon" && ShapeHandles.hitTestVertex(selectedShape, point) !== undefined
-    const hit = hitVertex ? { sourceId: this.currentSourceId, shape: selectedShape! } : timeline.hitTest(t, point.x, point.y)
+    const hit = hitVertex
+      ? { sourceId: this.currentSourceId, shape: selectedShape! }
+      : this.ufoElement.shapeAt(point.x, point.y, EMPTY_SOURCE_IDS)
     if (hit) {
       // Same "don't collapse an already-selected member" rule as onPointerDown, so right-clicking
       // a shape that's part of the current multi-selection opens the menu for the whole selection.
