@@ -64,6 +64,10 @@ export interface SightingRecordingJson {
   /** Which INSTRUMENTS entry this was observed through — see Sighting.instrumentId. Absent means
    * the naked eye, and every recording made before this field existed is one. */
   instrument?: string
+  /** How long the shutter stayed open, seconds — one value for the whole observation, see
+   * Sighting.exposureSeconds. Absent means the device's own. Recordings written while this lived on
+   * each pose are read back through the first pose that stated one (see fromSightingJson). */
+  exposureSeconds?: number
 }
 
 export function toSightingJson(sighting: Sighting): SightingRecordingJson {
@@ -91,7 +95,8 @@ export function toSightingJson(sighting: Sighting): SightingRecordingJson {
     weather: sighting.weather,
     decor: sighting.decor,
     weatherSource: sighting.weatherSource,
-    instrument: sighting.instrumentId
+    instrument: sighting.instrumentId,
+    exposureSeconds: sighting.exposureSeconds
   }
 }
 
@@ -117,7 +122,17 @@ export function fromSightingJson(json: SightingRecordingJson): Sighting {
     json.weather,
     json.decor ?? [],
     json.weatherSource,
-    json.instrument
+    json.instrument,
+    // A shutter speed used to be written on every pose, back when it could vary along the timeline.
+    // The first one stated is the one that recording was photographed with — reading it here is
+    // what keeps those files saying what they said, and writing it back moves them to where it now
+    // belongs. A pose's own leftover field is simply ignored: ObserverPose no longer has one.
+    json.exposureSeconds ??
+      json.witnessTrack?.keyframes
+        // Cast because ObserverPose no longer HAS the field: this reads what an older file wrote,
+        // not what the model holds.
+        .map(keyframe => (keyframe.pose as { exposureSeconds?: number }).exposureSeconds)
+        .find(seconds => seconds !== undefined)
   )
   // The file states an angle; the drawing has to follow it. Done here rather than in
   // Timeline.fromJSON because the projection needs the pose's own field of view, which lives on

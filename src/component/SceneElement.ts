@@ -551,7 +551,7 @@ export class SceneElement extends HTMLElement {
     // The shape's own trail is drawn by <rr0-ufo> on its own canvas and starts far sooner (a
     // fiftieth of a second is enough to smear a moving object); the sky needs a pose long enough to
     // move a whole pixel, which is tens of seconds.
-    const exposureSeconds = this.exposureSecondsAt(t)
+    const exposureSeconds = this.exposureSeconds()
     const instants = SkyDrift.instants(exposureSeconds, this.degreesPerPixelAt(t))
     if (instants <= 1) {
       this.sceneRenderer.setExposure(1)
@@ -572,13 +572,11 @@ export class SceneElement extends HTMLElement {
     )
   }
 
-  /** How long this recording says the shutter was open at `t` — the pose's own setting, or the
-   * device's when it has only one (an Instamatic's ninetieth). Zero for an eye, which has no
-   * shutter and no pose to leave a trail on. */
-  private exposureSecondsAt(t: number): number {
-    const sighting = this.ufoElement.sighting
-    const pose = resolveObserverPoseAt(sighting, t)
-    return pose?.exposureSeconds ?? sighting.instrument.exposureSeconds ?? 0
+  /** How long this recording says the shutter was open — its own setting, or the device's when it
+   * has only one (an Instamatic's ninetieth). Zero for an eye, which has no shutter to leave a
+   * trail with. One value for the whole observation: see Sighting.exposureSeconds. */
+  private exposureSeconds(): number {
+    return this.ufoElement.sighting.exposure ?? 0
   }
 
   /** The scale of the image, in degrees of sky per pixel — what turns the sky's drift into a length

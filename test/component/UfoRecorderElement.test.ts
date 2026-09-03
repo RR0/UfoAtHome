@@ -304,7 +304,7 @@ describe("UfoRecorderElement observer/time fields", () => {
     instrument.dispatchEvent(new Event("change"))
     setInput(shadow, "exposureSeconds", "10")
 
-    expect(element.sightingData.witnessTrack?.keyframes[0]?.pose.exposureSeconds).toBe(10)
+    expect(element.sightingData.exposureSeconds).toBe(10)
     expect((shadow.getElementById("exposureSeconds") as HTMLInputElement).value).toBe("10")
   })
 
@@ -330,15 +330,15 @@ describe("UfoRecorderElement observer/time fields", () => {
     setInput(shadow, "exposureSeconds", "600")
 
     // A phone's night mode stops at ten seconds; a ten-minute pose on one is not a testimony.
-    expect(element.sightingData.witnessTrack?.keyframes[0]?.pose.exposureSeconds).toBe(10)
+    expect(element.sightingData.exposureSeconds).toBe(10)
     expect(exposure.value).toBe("10")
 
     setInput(shadow, "exposureSeconds", "5")
-    expect(element.sightingData.witnessTrack?.keyframes[0]?.pose.exposureSeconds).toBe(5)
+    expect(element.sightingData.exposureSeconds).toBe(5)
 
     // And the other end of the range, which a thousandth of a second is past on this device.
     setInput(shadow, "exposureSeconds", "1/100000")
-    expect(element.sightingData.witnessTrack?.keyframes[0]?.pose.exposureSeconds).toBe(1 / 8000)
+    expect(element.sightingData.exposureSeconds).toBe(1 / 8000)
   })
 
   it("lets an SLR hold its shutter open on B, which is the only setting on the list that draws a star trail", () => {
@@ -349,7 +349,31 @@ describe("UfoRecorderElement observer/time fields", () => {
     instrument.dispatchEvent(new Event("change"))
     setInput(shadow, "exposureSeconds", "600")
 
-    expect(element.sightingData.witnessTrack?.keyframes[0]?.pose.exposureSeconds).toBe(600)
+    expect(element.sightingData.exposureSeconds).toBe(600)
+  })
+
+  it("moves a stated shutter onto the new device when the instrument changes, and drops one nobody stated", () => {
+    const element = mount()
+    const shadow = element.shadowRoot!
+    const instrument = shadow.getElementById("instrument") as HTMLSelectElement
+    instrument.value = "slr-35mm-50"
+    instrument.dispatchEvent(new Event("change"))
+    setInput(shadow, "exposureSeconds", "600")
+
+    // A ten-minute pose does not survive a switch to a phone that stops at ten seconds.
+    instrument.value = "phone-landscape"
+    instrument.dispatchEvent(new Event("change"))
+    expect(element.sightingData.exposureSeconds).toBe(10)
+
+    // ...and one that only ever read as the previous device's own follows the new device instead of
+    // claiming the old camera's speed.
+    instrument.value = "slr-35mm-50"
+    instrument.dispatchEvent(new Event("change"))
+    setInput(shadow, "exposureSeconds", "1/250")
+    instrument.value = "instamatic-126"
+    instrument.dispatchEvent(new Event("change"))
+    expect(element.sightingData.exposureSeconds).toBeUndefined()
+    expect((shadow.getElementById("exposureSeconds") as HTMLInputElement).value).toBe("1/90")
   })
 
   it("writes the observation-start EDTF text field into event.time", () => {

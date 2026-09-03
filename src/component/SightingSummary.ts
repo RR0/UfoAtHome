@@ -139,6 +139,11 @@ export class SightingSummary {
 
     const instrument = sighting.instrument
     this.push(entries, "witness", "instrument", this.labels.instrument, instrument.name[this.language])
+    // The recording's own, not the instant's: one observation was photographed one way (see
+    // Sighting.exposureSeconds), so this stands whether or not there is a pose to read.
+    const exposure = sighting.exposure
+    this.push(entries, "witness", "exposureSeconds", this.labels.exposure,
+      exposure === undefined ? undefined : (exposure < 1 ? `1/${Math.round(1 / exposure)}` : this.rounded(exposure, 2)), "s")
     const pose = resolveObserverPoseAt(sighting, timeMs)
     if (pose) {
       // The one label that isn't a constant: an eye has no focal length, so what its field of view
@@ -151,9 +156,6 @@ export class SightingSummary {
         this.push(entries, "witness", "focalLength", this.labels.focalLength, this.rounded(focalLengthMm, 1), "mm")
       }
       this.push(entries, "witness", "fNumber", this.labels.aperture, this.rounded(pose.fNumber ?? instrument.fNumber, 1))
-      const exposure = pose.exposureSeconds ?? instrument.exposureSeconds
-      this.push(entries, "witness", "exposureSeconds", this.labels.exposure,
-        exposure === undefined ? undefined : (exposure < 1 ? `1/${Math.round(1 / exposure)}` : this.rounded(exposure, 2)), "s")
       this.push(entries, "witness", "focusDistance", this.labels.focusDistance, this.rounded(pose.focusDistanceM, 1), "m")
       // With the instrument, not with the place: it says how the device was held, not where the
       // witness stood. Absent or zero is one held upright, which states nothing worth a chip.

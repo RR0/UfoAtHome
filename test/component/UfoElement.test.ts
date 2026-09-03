@@ -103,7 +103,8 @@ describe("UfoElement", () => {
           { t: 5000, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval" as const, bounds: { x: 300, y: 160, width: 40, height: 40 }, color: "#0f0", angle: 0, transparency: 0, haloScale: 1, selected: false } }] }
         ]
       },
-      witnessTrack: { keyframes: [{ t: 0, pose: { elevationM: 0, pitchDeg: 0, fovDeg: 60, exposureSeconds: 10 } }] }
+      exposureSeconds: 10,
+      witnessTrack: { keyframes: [{ t: 0, pose: { elevationM: 0, pitchDeg: 0, fovDeg: 60 } }] }
     }
     element.currentTime = 0
 
@@ -126,7 +127,8 @@ describe("UfoElement", () => {
           { t: 10000, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval" as const, bounds: { x: 300, y: 0, width: 40, height: 40 }, color: "#0f0", angle: 0, transparency: 0, haloScale: 1, selected: false } }] }
         ]
       },
-      witnessTrack: { keyframes: [{ t: 0, pose: { elevationM: 0, pitchDeg: 0, fovDeg: 60, exposureSeconds: 10 } }] }
+      exposureSeconds: 10,
+      witnessTrack: { keyframes: [{ t: 0, pose: { elevationM: 0, pitchDeg: 0, fovDeg: 60 } }] }
     }
     element.sightingData = moving
     element.currentTime = 0

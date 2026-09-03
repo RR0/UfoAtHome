@@ -1101,6 +1101,7 @@ export class UfoRecorderElement extends HTMLElement {
         ])
       )
       this.retuneFieldOfView(previous)
+      this.retuneExposure(previous)
       SightingShapes.reproject(this.ufoElement.sighting, previous, fieldBefore)
       // The picture's own shape changes with it — a square 126 frame, a phone held upright — and
       // both the sky and the shapes drawn over it have to take it at the same moment.
@@ -1679,17 +1680,21 @@ export class UfoRecorderElement extends HTMLElement {
         ? Instruments.fieldOfViewDegAt(instrument, stated)
         : stated) ?? this.currentFovDeg()
     const fNumber = this.numberOrUndefined(this.fNumberInput.value)
+    // Not a pose field, and deliberately not keyframed: one observation was photographed one way
+    // (see Sighting.exposureSeconds). Written straight onto the recording from here, since this is
+    // the method every optics input reports to.
     const exposureSeconds = this.statedExposureSeconds(instrument)
+    this.ufoElement.sighting.exposureSeconds =
+      exposureSeconds === instrument.exposureSeconds ? undefined : exposureSeconds
     // Empty is not missing here, it is INFINITY — where a camera pointed at the sky is focused.
     const focusDistanceM = this.numberOrUndefined(this.focusDistanceInput.value)
-    // Same distinction retuneFieldOfView draws, for the same reason: these three fields are
-    // PREFILLED from the instrument (see syncOpticsFromInstrument), so a value equal to the
-    // device's own is one nobody stated, and only a departure from it is a witness talking. The
-    // focus distance has no device default at all, so any value there is theirs.
+    // Same distinction retuneFieldOfView draws, for the same reason: these fields are PREFILLED
+    // from the instrument (see syncOpticsFromInstrument), so a value equal to the device's own is
+    // one nobody stated, and only a departure from it is a witness talking. The focus distance has
+    // no device default at all, so any value there is theirs.
     const opticsStated =
       Math.abs(fovDeg - Instruments.fieldOfViewDeg(instrument)) > 0.01 ||
       fNumber !== instrument.fNumber ||
-      exposureSeconds !== instrument.exposureSeconds ||
       focusDistanceM !== undefined
     const nothingSet =
       lat === undefined && lng === undefined && headingDeg === undefined && pitchDeg === 0 && rollDeg === 0 &&
@@ -1709,7 +1714,6 @@ export class UfoRecorderElement extends HTMLElement {
         rollDeg: rollDeg === 0 ? undefined : rollDeg,
         fovDeg,
         fNumber,
-        exposureSeconds,
         focusDistanceM
       })
     }
@@ -3263,7 +3267,7 @@ export class UfoRecorderElement extends HTMLElement {
     this.fNumberInput.min = String(instrument.fNumberRange?.min ?? 0.7)
     this.fNumberInput.max = String(instrument.fNumberRange?.max ?? 64)
 
-    const exposure = pose?.exposureSeconds ?? instrument.exposureSeconds
+    const exposure = sighting.exposure
     if (this.exposureInput !== this.shadow.activeElement) {
       // What is shown IS what the recording holds — including a pose brought back inside the
       // device's own range (see statedExposureSeconds).
@@ -3298,6 +3302,27 @@ export class UfoRecorderElement extends HTMLElement {
       if (Math.abs(keyframe.pose.fovDeg - was) > SAME_FIELD_EPSILON_DEG) continue
       sighting.witnessTrack.addKeyframe(keyframe.t, { ...keyframe.pose, fovDeg: now })
     }
+  }
+
+  /**
+   * Moves the shutter onto the new device, the same way the field of view moves.
+   *
+   * Two cases, and the distinction is the one this file draws everywhere: a speed that still reads
+   * as the OLD device's own is one nobody stated, so it simply follows — a recording that never
+   * mentioned a shutter must not end up claiming the previous camera's. A speed somebody DID state
+   * is kept, but held to what the new device could do: a ten-minute pose typed on an SLR does not
+   * survive a switch to a phone that stops at ten seconds, and a camera with no range at all (an
+   * Instamatic, an eye) leaves nothing to state.
+   */
+  private retuneExposure(previous: Instrument): void {
+    const sighting = this.ufoElement.sighting
+    const stated = sighting.exposureSeconds
+    const range = sighting.instrument.exposureRangeSeconds
+    if (stated === undefined || stated === previous.exposureSeconds || !range) {
+      sighting.exposureSeconds = undefined
+      return
+    }
+    sighting.exposureSeconds = Math.min(range.max, Math.max(range.min, stated))
   }
 
   /** The field of view the witness's own pose declares at the current playhead, falling back to

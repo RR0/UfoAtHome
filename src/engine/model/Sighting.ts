@@ -281,8 +281,28 @@ export class Sighting {
      * of date with it. Absent means the naked eye, which is what every recording made before this
      * existed was: a witness who filmed says so, a witness who looked says nothing. See
      * Instrument.ts for why it changes the geometry of every shape. */
-    public instrumentId?: string
+    public instrumentId?: string,
+    /**
+     * How long the shutter stayed open, seconds — one value for the whole observation.
+     *
+     * NOT keyframed, unlike the aperture and the focus beside it on each pose: a witness
+     * photographs a sighting the way they set the camera, and a shutter speed that changed halfway
+     * through would be a second photograph rather than a moment of this one. It is also what the
+     * picture is MADE of here — the object's streak and the sky's own trails are drawn from it (see
+     * UfoElement.exposureTimes and SkyDrift) — so letting it vary along the timeline would have the
+     * same recording be two different photographs at two instants.
+     *
+     * Absent falls back to the instrument's own (an Instamatic's ninetieth), and an eye has none at
+     * all.
+     */
+    public exposureSeconds?: number
   ) {
+  }
+
+  /** The shutter this observation was made with, resolved — the recording's own, else the device's,
+   * else none at all (an eye has no shutter). */
+  get exposure(): number | undefined {
+    return this.exposureSeconds ?? this.instrument.exposureSeconds
   }
 
   /** The instrument this observation was made through, resolved — never undefined: an unknown or

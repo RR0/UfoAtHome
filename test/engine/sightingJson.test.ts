@@ -22,6 +22,42 @@ describe("sightingJson", () => {
     expect(restored.timeline.getShapeAt(0, "ufo-1")?.bounds).toEqual({ x: 10, y: 20, width: 40, height: 24 })
   })
 
+  it("round-trips the shutter as one setting for the whole observation", () => {
+    const sighting = Sighting.create({ year: 1975 })
+    sighting.instrumentId = "slr-35mm-50"
+    sighting.exposureSeconds = 600
+
+    const json = toSightingJson(sighting)
+    expect(json.exposureSeconds).toBe(600)
+    expect(fromSightingJson(json).exposureSeconds).toBe(600)
+    expect(fromSightingJson(json).exposure).toBe(600)
+  })
+
+  it("falls back to the device's own shutter, and says nothing of its own about it", () => {
+    const sighting = Sighting.create({ year: 1975 })
+    sighting.instrumentId = "instamatic-126"
+
+    const restored = fromSightingJson(toSightingJson(sighting))
+    expect(restored.exposureSeconds).toBeUndefined()
+    expect(restored.exposure).toBe(1 / 90)
+  })
+
+  it("reads a shutter an older recording wrote onto its poses, back when it could vary along the timeline", () => {
+    const restored = fromSightingJson({
+      version: 1,
+      timeline: { keyframes: [] },
+      instrument: "slr-35mm-50",
+      witnessTrack: {
+        keyframes: [
+          { t: 0, pose: { elevationM: 0, pitchDeg: 0, fovDeg: 27 } },
+          { t: 5000, pose: { elevationM: 0, pitchDeg: 0, fovDeg: 27, exposureSeconds: 4 } as never }
+        ]
+      }
+    })
+
+    expect(restored.exposureSeconds).toBe(4)
+  })
+
   it("round-trips decor", () => {
     const sighting = Sighting.create()
     sighting.decor = [

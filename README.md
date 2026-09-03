@@ -168,8 +168,12 @@ through the ordinary pinhole projection (`src/engine/instrument/`, `src/render3d
 A camera also has a FORMAT, which is part of what a photograph carries as evidence: an instrument
 states the image it exposes and the lens in front of it, in millimetres, so the ratio is the shape of
 the picture (a square 126 frame, a phone held upright) and `2·atan(h/2f)` is the field it takes in.
-And it has SETTINGS, each kept on the pose beside the heading and the pitch, each read-only where the
-device fixed it (an Instamatic's owner had one aperture, one shutter speed and one focal length):
+And it has SETTINGS, each read-only where the device fixed it (an Instamatic's owner had one aperture,
+one shutter speed and one focal length). The aperture, the focal length and the focus sit on the POSE
+beside the heading and the pitch — the same camera is set differently from one photograph to the next
+— while the shutter belongs to the RECORDING as a whole (`Sighting.exposureSeconds`): one observation
+was photographed one way, and a shutter speed that changed halfway through would be a second
+photograph rather than a moment of this one. The four:
 the focal length, which is the field written the way a photographer writes it; the aperture, which
 decides both the depth of field and whether the diaphragm's blades throw a star at all; the shutter,
 which accumulates a moving light into a STREAK and a blinking one into a dashed streak — and, once the pose is
@@ -691,6 +695,11 @@ sideways, so the arcs curve towards the pole exactly as they should and the Moon
 way through the frame. `ExposureAccumulation` adds them on a half-float film in linear light and bends the sRGB
 curve only once, at the end — the same rule `colorSpace.ts` states, and the reason both fullscreen passes can now
 be told not to encode what they hand to it.
+
+The pose itself is one setting for the whole recording (`Sighting.exposureSeconds`, held to the device's own range),
+not a keyframed one: what the shutter did is how this observation was photographed, and a value that varied along
+the timeline would make the same recording two different photographs at two instants. A file written while it lived
+on each pose is read back through the first pose that stated one.
 
 Each instant carries its share of the light rather than its whole, so the picture stays exposed as it was taken and
 the movement shows as a trail. That has a consequence worth stating plainly, because it is the physics and not a

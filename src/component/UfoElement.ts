@@ -492,7 +492,7 @@ export class UfoElement extends HTMLElement {
    * brightening, a colour turning).
    */
   exposureTimes(t: number = this.currentTime): number[] {
-    const exposureMs = (resolveObserverPoseAt(this.currentSighting, t)?.exposureSeconds ?? 0) * 1000
+    const exposureMs = (this.currentSighting.exposure ?? 0) * 1000
     if (exposureMs < UfoElement.SHORTEST_VISIBLE_EXPOSURE_MS) return [t]
     const byTime = Math.min(
       UfoElement.MAX_EXPOSURE_STEPS,
