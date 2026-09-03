@@ -701,6 +701,15 @@ not a keyframed one: what the shutter did is how this observation was photograph
 the timeline would make the same recording two different photographs at two instants. A file written while it lived
 on each pose is read back through the first pose that stated one.
 
+A pose is drawn in two moves, because a sky costs about 8 ms to rebuild and a five-minute pose is 37 of them: the
+**viewfinder** immediately (one instant, a twentieth of a millisecond) and the **photograph** as the scene settles,
+a dozen milliseconds of instants per animation frame, shown as the film fills and gained up to stay properly
+exposed — so it goes from beady to smooth rather than from black to bright. Anything the witness does interrupts it
+and starts it again, which is why the editor stays answerable while a long pose is on. Doing it all inside one call
+is what made it crawl: the dozen setters a single tick touches would each rebuild the whole pose, and the per-frame
+animation loop (twinkle, rain, lightning — none of which survives a pose of minutes anyway) restarted it sixty
+times a second, so the picture never finished at all.
+
 Each instant carries its share of the light rather than its whole, so the picture stays exposed as it was taken and
 the movement shows as a trail. That has a consequence worth stating plainly, because it is the physics and not a
 shortcoming: a trail is FAINT, and the longer it is the fainter it gets — one star's light spread over more and

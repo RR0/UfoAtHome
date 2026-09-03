@@ -872,6 +872,19 @@ export class SceneRenderer {
    * the same photograph, rather than the accumulated one flickering back to a snapshot whenever
    * something other than the playhead asked for a frame. */
   private exposureInstants = 1
+  /** Whether this scene draws its frames as a pose rather than as an instant — see setExposure. */
+  private get developingExposure(): boolean {
+    return this.exposureInstants > 1 && this.exposureInstantAt !== undefined
+  }
+
+  /** How long one animation frame may spend adding instants to the film. Long enough to make real
+   * progress (a sky rebuild is about 8 ms, so this is one or two of them), short enough that the
+   * frame it borrows is not one the witness notices. */
+  private static readonly EXPOSURE_BUDGET_MS = 12
+  /** The frame request developing the pose, if one is in flight — see startExposure. */
+  private exposureFrameId: number | null = null
+  /** How many instants of the pose are already on the film. */
+  private exposureInstantsDone = 0
   /** Applies the scene's own state at instant `index` of the pose. Held rather than passed because
    * render() is called from everywhere and has to be able to redraw the whole exposure on its own —
    * only SceneElement knows what the sky looked like at each instant (see its updateAstronomy). */
@@ -1511,8 +1524,12 @@ export class SceneRenderer {
 
   render(): void {
     if (this.restatingExposure) return
-    if (this.exposureInstants > 1 && this.exposureInstantAt) return this.renderExposure()
+    // A pose is drawn in two moves: the VIEWFINDER now (one instant, a twentieth of a millisecond)
+    // and the photograph as the scene settles. Drawing the whole pose here instead is what made the
+    // editor crawl — the dozen setters one tick touches would each have rebuilt a sky forty times
+    // over, at 7.8 ms a rebuild, for a picture only the last of them was going to leave on screen.
     this.renderOnce()
+    if (this.developingExposure) this.startExposure()
   }
 
   /**
@@ -1537,6 +1554,7 @@ export class SceneRenderer {
     if (steps === 1) {
       // Nothing to add up any more: the film is a pair of full-size half-float targets, and a
       // recording that has gone back to a snapshot should not still be holding them.
+      this.cancelExposure()
       this.exposureAccumulation?.dispose()
       this.exposureAccumulation = undefined
     }
@@ -1567,45 +1585,71 @@ export class SceneRenderer {
   }
 
   /**
-   * The whole pose: the scene put into each of its instants, drawn, and added onto one film.
+   * Starts (or restarts) developing the pose: the scene put into each of its instants, drawn, and
+   * added onto one film — a few instants per animation frame, never all of them in one go.
    *
-   * Each instant carries its own share of the light (see ExposureAccumulation), so the picture
-   * stays exposed as it was and the sky's own movement shows as the trail it really is.
+   * Each instant carries its own share of the light (see ExposureAccumulation), so the picture stays
+   * exposed as it was and the sky's own movement shows as the trail it really is. What is spread
+   * over several frames is only the COST: a five-minute pose is 37 skies to rebuild at about 8 ms
+   * apiece, and doing that inside one call froze the editor for a third of a second every time
+   * anything at all asked for a frame. Now the film is shown as it fills, gained up to stay properly
+   * exposed (see develop), so the picture goes from beady to smooth rather than from black to
+   * bright — and anything the witness does interrupts it and starts it again.
    */
-  private renderExposure(): void {
-    const instantAt = this.exposureInstantAt
-    if (!instantAt) return this.renderOnce()
+  private startExposure(): void {
+    this.cancelExposure()
     const size = this.renderer.getDrawingBufferSize(new Vector2())
     const width = Math.max(1, Math.round(size.x))
     const height = Math.max(1, Math.round(size.y))
     if (!this.exposureAccumulation) this.exposureAccumulation = new ExposureAccumulation(width, height)
+    this.exposureAccumulation.resize(width, height)
+    this.exposureAccumulation.open(this.renderer)
+    this.exposureInstantsDone = 0
+    this.exposureFrameId = requestAnimationFrame(() => this.developExposure())
+  }
+
+  /** One frame's worth of the pose — as many instants as fit in the budget, then the film as it
+   * stands, then a request for the next frame if any are left. */
+  private developExposure(): void {
+    this.exposureFrameId = null
+    const instantAt = this.exposureInstantAt
     const film = this.exposureAccumulation
-    film.resize(width, height)
-    film.open(this.renderer)
+    if (!instantAt || !film) return
     const share = 1 / this.exposureInstants
-    for (let instant = 0; instant < this.exposureInstants; instant++) {
-      // Restating the sky touches a dozen setters, every one of which would otherwise paint a frame
-      // of its own — and one of them is this very method, which would then recurse.
-      this.restatingExposure = true
-      try {
-        instantAt(instant)
-      } finally {
-        this.restatingExposure = false
-      }
+    const until = performance.now() + SceneRenderer.EXPOSURE_BUDGET_MS
+    do {
+      this.restateAt(instantAt, this.exposureInstantsDone)
       this.renderOnce(film.instantTarget)
       film.add(this.renderer, share)
+      this.exposureInstantsDone++
+    } while (this.exposureInstantsDone < this.exposureInstants && performance.now() < until)
+    // Back to the instant the recording is actually at, EVERY time round: everything that ASKS the
+    // scene rather than drawing it — the shape occlusion raycasts, the decor distances behind
+    // SceneElement's own size estimates, the hover picks — reads the scene graph where this leaves
+    // it, and between two frames of this that reader is the witness moving their pointer.
+    this.restateAt(instantAt, 0)
+    film.develop(this.renderer, this.exposureInstants / this.exposureInstantsDone)
+    if (this.exposureInstantsDone < this.exposureInstants) {
+      this.exposureFrameId = requestAnimationFrame(() => this.developExposure())
     }
-    // Back to the instant the recording is actually at. Everything that ASKS the scene rather than
-    // drawing it — the shape occlusion raycasts, the decor distances behind SceneElement's own size
-    // estimates, the hover picks — reads the scene graph where this leaves it, and leaving it at the
-    // END of a ten-minute pose would answer every one of those questions about a different sky.
+  }
+
+  /** Puts the scene into one instant of the pose without painting anything: restating it touches a
+   * dozen setters, every one of which would otherwise paint a frame of its own — and one of them
+   * asks for the whole pose again, which would recurse. */
+  private restateAt(instantAt: (index: number) => void, instant: number): void {
     this.restatingExposure = true
     try {
-      instantAt(0)
+      instantAt(instant)
     } finally {
       this.restatingExposure = false
     }
-    film.develop(this.renderer)
+  }
+
+  private cancelExposure(): void {
+    if (this.exposureFrameId === null) return
+    cancelAnimationFrame(this.exposureFrameId)
+    this.exposureFrameId = null
   }
 
   /** The resampling pass, if this recording needs one AND its field is narrow enough for a single
@@ -1966,6 +2010,7 @@ export class SceneRenderer {
     this.rainbow = undefined
     this.depthOfFieldPass?.dispose()
     this.depthOfFieldPass = undefined
+    this.cancelExposure()
     this.exposureAccumulation?.dispose()
     this.exposureAccumulation = undefined
     this.cometTail?.dispose()
@@ -2033,7 +2078,12 @@ export class SceneRenderer {
       this.updateRain(dtSeconds)
       this.updateLightning(timeMs / 1000, dtSeconds)
       if (this.lensFlare) this.lensFlare.uniforms.uTime.value = timeMs / 1000
-      this.render()
+      // Not while a pose is being developed. Everything this loop animates — a star's twinkle, a
+      // falling drop, a flash — lasts a fraction of a second, and a pose of minutes AVERAGES those
+      // away rather than showing any one of them; the film already samples them as it fills. Asking
+      // for a frame here would also restart that film sixty times a second, which is exactly how a
+      // five-minute pose left the editor redrawing forever and never finishing a picture.
+      if (!this.developingExposure) this.render()
       this.animationFrameId = requestAnimationFrame(tick)
     }
     this.animationFrameId = requestAnimationFrame(tick)

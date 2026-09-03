@@ -77,15 +77,21 @@ export class ExposureAccumulation {
       depthWrite: false
     })
     this.developMaterial = new ShaderMaterial({
-      uniforms: { uFilm: { value: this.filmTarget.texture } },
+      uniforms: {
+        uFilm: { value: this.filmTarget.texture },
+        /** What a film holding only SOME of the pose has to be multiplied by to be exposed as
+         * though it held all of it — see develop. One, once every instant is in. */
+        uGain: { value: 1 }
+      },
       vertexShader,
       fragmentShader: `
         precision highp float;
         ${SRGB_ENCODE_GLSL}
         varying vec2 vUv;
         uniform sampler2D uFilm;
+        uniform float uGain;
         void main() {
-          gl_FragColor = vec4(encodeSrgb(texture2D(uFilm, vUv).rgb), 1.0);
+          gl_FragColor = vec4(encodeSrgb(texture2D(uFilm, vUv).rgb * uGain), 1.0);
         }
       `,
       blending: NoBlending,
@@ -123,8 +129,16 @@ export class ExposureAccumulation {
     renderer.autoClear = previousAutoClear
   }
 
-  /** Closes the shutter: the sum, bent through the sRGB curve, onto the canvas. */
-  develop(renderer: WebGLRenderer): void {
+  /**
+   * Closes the shutter: the sum, bent through the sRGB curve, onto the canvas.
+   *
+   * `gain` is how much of the pose is actually in the film — a quarter of the instants developed at
+   * a gain of four is the same picture, sampled more coarsely, rather than a picture four times too
+   * dark. That is what lets a long pose be built a few instants at a time and shown on the way (see
+   * SceneRenderer.renderExposure): it goes from beady to smooth instead of from black to bright.
+   */
+  develop(renderer: WebGLRenderer, gain = 1): void {
+    this.developMaterial.uniforms.uGain.value = gain
     this.quad.material = this.developMaterial
     renderer.setRenderTarget(null)
     renderer.render(this.quadScene, this.quadCamera as Camera)
