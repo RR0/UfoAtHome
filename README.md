@@ -639,12 +639,24 @@ car headlights, car hazards, emergency beacons, streetlamp. A catalogue of speci
 never more code. Nothing about this is aircraft-specific: what dots a long exposure for an airliner's beacon dots
 it for a car's hazards too, at a different rate.
 
-That rate is the point. On a long exposure the spacing of the dots along a streak is the flash rate times the
-object's angular speed, which is exactly how a photograph of a passing airliner is told from a photograph of
-something that does not blink — and it is why the model exposes `lightOnFractionBetween` rather than only "is it
-on?". A wingtip strobe is lit for a hundredth of its cycle; sampled instant by instant it would be missed almost
-every time, and the dots that did appear would be an artefact of the sampling rate. Integrating the fraction of
-each interval is exact however coarsely it is sampled.
+That rate is the point, and it is now DRAWN. On a long exposure the spacing of the dots along a streak is the flash
+rate times the object's angular speed, which is exactly how a photograph of a passing airliner is told from a
+photograph of something that does not blink — and it is why the model exposes `lightOnFractionBetween` rather than
+only "is it on?". A wingtip strobe is lit for a hundredth of its cycle; sampled instant by instant it would be
+missed almost every time, and the dots that did appear would be an artefact of the sampling rate. Integrating the
+fraction of each interval is exact however coarsely it is sampled.
+
+The photograph this reproduces is Gennevilliers, 5 November 1990 (`/science/crypto/ufo/enquete/meprise/aeronef/
+avion/`): an airliner on a ten- or thirty-second pose, published as a monumental craft — its steady lamps drawing
+LINES and its flashing ones DOTS AT REGULAR INTERVALS. Reconstructed here at 6.7 km on a 20 s pose through a 50 mm
+lens, an aircraft leaves an 800 px streak carrying 21 dots a median 41 px apart, where 60 flashes a minute over
+20 s across 800 px predicts one every 40. `ExposureSampling` is what makes that possible: the sky drifts a single
+pixel in ten seconds and would ask for two instants, so the pose is sampled instead for what MOVES in the scene
+(an instant per two pixels of travel) and for what FLASHES in it (two instants per flash, which is what tells one
+dot from the next rather than dotting the line at the sampler's own rate). A lamp is also written in real units —
+`LAMP_RADIANCE`, about twenty times white for a position light, and `DecorLight.intensity` as a ratio of peak
+candela (a wingtip strobe really is some twenty times one) — because a pose spreads a lamp's light over hundreds
+of pixels, and at white a whole aircraft trail came out at a thousandth of white, i.e. invisible.
 
 An aircraft in a scene is a **hypothesis**, not testimony — "here is what a flight at that altitude and heading
 would have looked like" — and belongs to the decor for that reason, next to the buildings and trees whose
@@ -686,8 +698,10 @@ The shutter accumulates the object (`UfoElement.exposureInstants`), and past a c
 out into the arc a tripod really records. A photograph of "lights that moved" is quite often exactly this, the
 lights having held perfectly still while the camera did not.
 
-`SkyDrift` (`src/engine/astronomy/SkyDrift.ts`) states what the sky did, in pixels, and how many instants that
-takes to draw: one per pixel of the longest trail, so the arc lands on touching pixels instead of dashing, and
+`SkyDrift` (`src/engine/astronomy/SkyDrift.ts`) states what the SKY did, in pixels, and how many instants that
+takes to draw — `ExposureSampling` (`src/engine/model/ExposureSampling.ts`) answers the same question for what
+stands against it (see [Decor that moves](#decor-that-moves-and-lights-that-blink)), and the pose is drawn at
+whichever asks for more: one per pixel of the longest trail, so the arc lands on touching pixels instead of dashing, and
 **one** — no accumulation at all — whenever the sky moved less than a pixel, which is every ordinary frame (a
 snapshot renders in a tenth of a millisecond and never comes near this). Each instant is a whole sky RECOMPUTED at
 its own moment (`SceneElement.applySceneAt`, pushed through `SceneRenderer.setExposure`) rather than one sky nudged

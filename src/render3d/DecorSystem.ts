@@ -1,7 +1,7 @@
 import { BackSide, BoxGeometry, Color, ConeGeometry, CylinderGeometry, Group, Mesh, MeshBasicMaterial, MeshLambertMaterial, SphereGeometry } from "three"
 import type { Object3D } from "three"
 import type { DecorKind, DecorLight, DecorObject, DecorSide } from "../engine/model/Decor.js"
-import { DEFAULT_BUILDING_FLOORS, isLightOnAt } from "../engine/model/Decor.js"
+import { DEFAULT_BUILDING_FLOORS, isLightOnAt, lightOnFractionBetween } from "../engine/model/Decor.js"
 import type { RgbColor } from "./skyColors.js"
 
 const DEG_TO_RAD = Math.PI / 180
@@ -20,6 +20,10 @@ interface DecorMeshUserData {
    * its own mesh again per tick, and keeps setLit (which re-tints every OTHER emissive part as one)
    * from repainting a navigation light the colour of a headlight. */
   lightId?: string
+  /** The colour that lamp emits at full brightness, kept because setLights now DIMS it by the
+   * fraction of an instant the lamp was lit — a material read back as its own base would fade a
+   * little further every instant of a pose. */
+  lightColor?: RgbColor
 }
 
 function addPart(group: Group, geometry: BoxGeometry | ConeGeometry | CylinderGeometry | SphereGeometry, baseColor: RgbColor, y: number, emissive = false): Mesh {
@@ -49,8 +53,36 @@ const LAMP_RADIUS_M = 0.25
  * the eye is its bloom and not its bulb, and a bulb rendered true to size reaches nobody. Tuned by
  * eye against what a bright point really spreads to at night; the honest caveat is that real
  * atmospheric extinction, which would dim it with distance and haze, is still not modelled.
+ *
+ * The SAME size for every lamp, whatever it emits: this is the size of a bloom the optics make, not
+ * of a bulb, and a brighter lamp is brighter rather than bigger (see LAMP_RADIANCE). It used to
+ * grow with intensity, which put a strobe's whole difference into its area — and on a pose that
+ * spread its light instead of concentrating it, so the dots a strobe is supposed to leave came out
+ * fainter than the line the steady lamps draw, which is the opposite of every such photograph.
  */
 const LAMP_MIN_ANGULAR_RADIUS_RAD = 0.002
+
+/**
+ * How much brighter than white a lamp of intensity 1 really is.
+ *
+ * A lamp is a LIGHT, and a light is not a shade of grey: an aircraft's navigation light is about a
+ * hundred candela, so at a few kilometres it puts some 3e-6 lux on the lens, and spread over the
+ * 1.3e-5 steradian this draws it at that is about 0.2 cd/m² against a moonless sky's 2e-4 — a
+ * thousandfold, where this renderer draws that sky at roughly 0.02 of white. Twenty, then, for a
+ * lamp of intensity 1, and proportionally more for a brighter one (DecorLight.intensity is a ratio
+ * of peak candela: a position light is some tens, an anticollision beacon some hundreds, a wingtip
+ * strobe a couple of thousand). The
+ * half-float targets carry it (see EquidistantProjectionPass, which takes HalfFloatType for exactly
+ * this reason: everything additive here is written in units where one means white and brighter
+ * things are simply more).
+ *
+ * On an ordinary frame it changes nothing — the canvas clips it back to white, which is what a lamp
+ * looks like. What it changes is the POSE, where a lamp crossing the frame lays its light over
+ * hundreds of pixels and each of them receives a fraction of it: at white, an aircraft's trail came
+ * out at a thousandth of white, i.e. invisible, which is not what the Gennevilliers photograph
+ * shows.
+ */
+const LAMP_RADIANCE = 20
 
 /** `#rrggbb` to the 0-1 triple every material here takes. Falls back to white rather than throwing:
  * a lamp of an unparseable colour should still light up. */
@@ -560,9 +592,10 @@ export class DecorSystem {
    * one of them is switched by setLights on the very first tick, from the pattern it declares. */
   private static addLights(group: Group, lights: DecorLight[] | undefined): void {
     for (const light of lights ?? []) {
-      const mesh = addPart(group, new SphereGeometry(LAMP_RADIUS_M, 8, 6), hexToRgb(light.color), light.offsetM.y, true)
+      const colour = hexToRgb(light.color)
+      const mesh = addPart(group, new SphereGeometry(LAMP_RADIUS_M, 8, 6), colour, light.offsetM.y, true)
       mesh.position.set(light.offsetM.x, light.offsetM.y, light.offsetM.z)
-      mesh.userData = { emissive: true, lightId: light.id } satisfies DecorMeshUserData
+      mesh.userData = { emissive: true, lightId: light.id, lightColor: colour } satisfies DecorMeshUserData
       mesh.visible = false
     }
   }
@@ -580,7 +613,13 @@ export class DecorSystem {
    * `distanceM` is measured to the object as a whole; a wingtip is not meaningfully further away
    * than a tail at any distance where this matters.
    */
-  static setLights(group: Group, lights: DecorLight[] | undefined, t: number, distanceM: number): void {
+  static setLights(
+    group: Group,
+    lights: DecorLight[] | undefined,
+    t: number,
+    distanceM: number,
+    stepMs = 0
+  ): void {
     if (!lights || lights.length === 0) return
     const byId = new Map(lights.map(light => [light.id, light]))
     const scale = Math.max(1, (distanceM * LAMP_MIN_ANGULAR_RADIUS_RAD) / LAMP_RADIUS_M)
@@ -590,8 +629,26 @@ export class DecorSystem {
       if (!lightId) continue
       const light = byId.get(lightId)
       if (!light) continue
-      child.visible = isLightOnAt(light, t)
-      child.scale.setScalar(scale * (light.intensity ?? 1) ** 0.5)
+      // An instant of a POSE asks what fraction of its own interval the lamp was lit and dims it by
+      // that; an instant of a MOMENT (stepMs 0, ordinary playback) asks whether it was lit at all.
+      // The first is why a strobe survives at any sampling rate — its flash lands in one instant
+      // with its own energy, instead of being hit or missed (see lightOnFractionBetween) — and it
+      // is what draws dots at the light's own rate along a streak rather than a dotted line at the
+      // sampler's. The second keeps a blink on screen a blink.
+      const share = stepMs > 0 ? lightOnFractionBetween(light, t, t + stepMs) : (isLightOnAt(light, t) ? 1 : 0)
+      child.visible = share > 0
+      const material = child.material as MeshBasicMaterial
+      const base = (child.userData as DecorMeshUserData).lightColor
+      if (base) {
+        // Its real magnitude only where there is room for it. A pose divides a lamp's light among
+        // the hundreds of pixels it crosses, so the number that matters there is how far above
+        // white it really burns; a single frame has no such room, and multiplying there would only
+        // clip — and clipping a red navigation light channel by channel turns it YELLOW, which is
+        // a worse lie than drawing it at its own colour.
+        const emitted = stepMs > 0 ? share * LAMP_RADIANCE * (light.intensity ?? 1) : share
+        material.color.setRGB(base[0] * emitted, base[1] * emitted, base[2] * emitted)
+      }
+      child.scale.setScalar(scale)
     }
   }
 

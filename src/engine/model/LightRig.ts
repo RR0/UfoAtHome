@@ -50,9 +50,12 @@ export const LIGHT_RIGS: LightRig[] = [
       { id: "beacon-top", offsetM: { x: 0, y: 2, z: 0 }, color: TAIL_RED, intensity: 1.5, pattern: { kind: "flash", perMinute: 45, dutyCycle: 0.18 } },
       { id: "beacon-bottom", offsetM: { x: 0, y: -2, z: 0 }, color: TAIL_RED, intensity: 1.5, pattern: { kind: "flash", perMinute: 45, dutyCycle: 0.18 } },
       // Wingtip strobes: very bright, very brief, and deliberately out of phase with each other —
-      // which is what puts PAIRS of dots along a streak rather than single ones.
-      { id: "strobe-port", offsetM: { x: -17, y: 0, z: -1 }, color: WHITE, intensity: 4, pattern: { kind: "flash", perMinute: 60, dutyCycle: 0.01 } },
-      { id: "strobe-starboard", offsetM: { x: 17, y: 0, z: -1 }, color: WHITE, intensity: 4, pattern: { kind: "flash", perMinute: 60, dutyCycle: 0.01, phase: 0.08 } }
+      // which is what puts PAIRS of dots along a streak rather than single ones. Twenty, because
+      // `intensity` is a ratio of peak candela and a wingtip strobe really is some two thousand
+      // against a position light's hundred — and it is that ratio, not the flash itself, that makes
+      // its dots stand out on a long pose against the line the steady lamps draw.
+      { id: "strobe-port", offsetM: { x: -17, y: 0, z: -1 }, color: WHITE, intensity: 20, pattern: { kind: "flash", perMinute: 60, dutyCycle: 0.01 } },
+      { id: "strobe-starboard", offsetM: { x: 17, y: 0, z: -1 }, color: WHITE, intensity: 20, pattern: { kind: "flash", perMinute: 60, dutyCycle: 0.01, phase: 0.08 } }
     ]
   },
   {
@@ -67,7 +70,7 @@ export const LIGHT_RIGS: LightRig[] = [
       { id: "nav-starboard", offsetM: { x: 5, y: 0, z: 0 }, color: STARBOARD_GREEN, pattern: { kind: "steady" } },
       { id: "nav-tail", offsetM: { x: 0, y: 1, z: -7 }, color: WHITE, pattern: { kind: "steady" } },
       { id: "beacon", offsetM: { x: 0, y: 2, z: -2 }, color: TAIL_RED, intensity: 1.5, pattern: { kind: "flash", perMinute: 45, dutyCycle: 0.2 } },
-      { id: "strobe", offsetM: { x: 0, y: -1, z: 0 }, color: WHITE, intensity: 3, pattern: { kind: "flash", perMinute: 75, dutyCycle: 0.015 } }
+      { id: "strobe", offsetM: { x: 0, y: -1, z: 0 }, color: WHITE, intensity: 15, pattern: { kind: "flash", perMinute: 75, dutyCycle: 0.015 } }
     ]
   },
   {

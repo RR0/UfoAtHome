@@ -1347,14 +1347,22 @@ export class SceneRenderer {
    * rebuilding the group, and toggles a streetlight's own real PointLight (built once, up front,
    * in setDecor) visible/invisible to match — never disposed/recreated, since the light itself
    * doesn't change, only whether it's currently switched on. */
-  updateDecorLitState(t: number): void {
+  updateDecorLitState(t: number, stepMs = 0): void {
     for (const object of this.decorObjects) {
       const lampGroup = this.decorGroups.get(object.id)
       // Declared lamps first, and for every kind: an aircraft's strobes, a car's hazards, a
       // streetlamp. Sized against the group's own distance from the camera — see
       // DecorSystem.setLights on why a point source cannot be drawn true to size.
       if (lampGroup && object.lights?.length) {
-        DecorSystem.setLights(lampGroup, object.lights, t, lampGroup.position.distanceTo(this.camera.position))
+        DecorSystem.setLights(
+          lampGroup,
+          object.lights,
+          t,
+          lampGroup.position.distanceTo(this.camera.position),
+          // Zero for an ordinary frame (a blink stays a blink); an instant of a pose passes its own
+          // length, so the lamp is INTEGRATED over it — see DecorSystem.setLights.
+          stepMs
+        )
       }
       if (object.kind !== "streetlight" && object.kind !== "vehicle") continue
       const group = this.decorGroups.get(object.id)

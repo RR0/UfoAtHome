@@ -33,6 +33,7 @@ import { Instruments } from "../engine/instrument/Instrument.js"
 import { ImageProjection } from "../engine/instrument/ImageProjection.js"
 import { SightingShapes } from "../engine/persistence/SightingShapes.js"
 import { SkyDrift } from "../engine/astronomy/SkyDrift.js"
+import { ExposureSampling } from "../engine/model/ExposureSampling.js"
 
 registerUfo()
 
@@ -552,7 +553,23 @@ export class SceneElement extends HTMLElement {
     // fiftieth of a second is enough to smear a moving object); the sky needs a pose long enough to
     // move a whole pixel, which is tens of seconds.
     const exposureSeconds = this.exposureSeconds()
-    const instants = SkyDrift.instants(exposureSeconds, this.degreesPerPixelAt(t))
+    const degPerPixel = this.degreesPerPixelAt(t)
+    // Two demands, and the pose is drawn at the coarser: what the SKY did (SkyDrift) and what the
+    // scene standing against it did — an aircraft crossing the frame, a strobe flashing while it
+    // crosses (ExposureSampling). The second is the whole point of the Gennevilliers photograph:
+    // the sky drifts one pixel in ten seconds and would ask for two instants, while the aeroplane
+    // that made the picture crosses hundreds and flashes ten times.
+    const sky = SkyDrift.instants(exposureSeconds, degPerPixel)
+    const instants = Math.max(
+      sky,
+      ExposureSampling.instants(
+        this.ufoElement.sighting.decor,
+        resolveObserverPoseAt(this.ufoElement.sighting, t)?.elevationM ?? 0,
+        t,
+        exposureSeconds,
+        degPerPixel
+      )
+    )
     if (instants <= 1) {
       this.sceneRenderer.setExposure(1)
       return
@@ -568,7 +585,14 @@ export class SceneElement extends HTMLElement {
     // "is it on?" (see LightRig's lightOnFractionBetween); the sky has no equivalent yet, and until
     // it does a long pose under a shower under-reports the meteors it would really hold.
     this.sceneRenderer.setExposure(instants, instant =>
-      this.applySceneAt(t + (exposureMs * instant) / instants)
+      this.applySceneAt(t + (exposureMs * instant) / instants, {
+        // The sky is restated only on the instants the SKY asks for, which is what makes a
+        // scene-driven pose affordable at all: restating it costs about 8 ms and moving the decor
+        // costs a twentieth of one, and a pose sampled 300 times for an aeroplane must not rebuild
+        // 300 skies to draw a drift of four pixels.
+        sky: Math.floor((instant * sky) / instants) !== Math.floor(((instant - 1) * sky) / instants),
+        stepMs: exposureMs / instants
+      })
     )
   }
 
@@ -591,7 +615,7 @@ export class SceneElement extends HTMLElement {
   /** Everything the scene has to be told to stand at one instant — the whole of what this element
    * pushes into the renderer. Called once for an ordinary frame, and once per instant of a pose long
    * enough that the sky itself moved across it (see updateAstronomy). */
-  private applySceneAt(t: number): void {
+  private applySceneAt(t: number, instant?: { sky: boolean; stepMs: number }): void {
     const sighting = this.ufoElement.sighting
     // Resolved here (not left to the sightingData setter's one-time call, or an explicit nudge on
     // edit) since weather is now itself keyframed over time — see Sighting.resolveWeatherAt. Cheap
@@ -614,10 +638,15 @@ export class SceneElement extends HTMLElement {
     this.sceneRenderer.updateDecorAnchoring(resolveObserverPoseAt(sighting, 0), pose, t)
     // A streetlight/vehicle's own lit state can change mid-recording (a photocell at dusk, a
     // driver's headlights) — see Decor.ts's own resolveDecorLitAt.
-    this.sceneRenderer.updateDecorLitState(t)
+    this.sceneRenderer.updateDecorLitState(t, instant?.stepMs ?? 0)
     // Raw pose's own lat/lng (possibly undefined), never the astronomy fallback below — a real
     // terrain patch must only ever build from a real recorded location, never (0,0).
     this.sceneRenderer.setTerrainOrigin(pose?.lat, pose?.lng)
+
+    // Everything above moves with the instant and costs almost nothing; the sky below costs about
+    // 8 ms to restate, and an instant that only carries an aeroplane a few pixels further has no
+    // reason to pay for it — see updateAstronomy, which says which instants the sky itself asks for.
+    if (instant && !instant.sky) return
 
     const lat = pose?.lat ?? DEFAULT_OBSERVER_POSE.lat!
     const lng = pose?.lng ?? DEFAULT_OBSERVER_POSE.lng!
