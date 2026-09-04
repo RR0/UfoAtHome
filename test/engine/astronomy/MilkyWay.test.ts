@@ -1,0 +1,103 @@
+import { describe, expect, it } from "vitest"
+import { MilkyWay } from "../../../src/engine/astronomy/MilkyWay.js"
+import { SurfaceBrightness } from "../../../src/engine/astronomy/SurfaceBrightness.js"
+
+/**
+ * The point of these: MilkyWay is told nothing about the Milky Way. It knows an exponential disc of
+ * stars, a bulge, a thinner disc of dust, and how to walk a line of sight. Every named feature of
+ * the band has to fall out of that walk on its own — and the ones checked here are the ones a
+ * witness would describe: a band, brighter toward Sagittarius, split down the middle by something
+ * dark.
+ */
+const galaxy = new MilkyWay()
+
+describe("the band", () => {
+  it("is a band: the plane is worth many times the poles", () => {
+    // Taken a little off the plane, where the dust has not eaten it — see the rift test below for
+    // why the very middle is not the brightest place.
+    const inPlane = galaxy.radianceTowards(0, 5)
+    const pole = galaxy.radianceTowards(0, 90)
+    expect(inPlane / pole).toBeGreaterThan(10)
+  })
+
+  it("thins away from the plane rather than stopping at an edge", () => {
+    const run = [5, 10, 20, 45, 90].map(b => galaxy.radianceTowards(90, b))
+    for (let at = 1; at < run.length; at++) expect(run[at]).toBeLessThan(run[at - 1])
+  })
+
+  it("is brighter toward the centre than toward the anticentre, by about the observed three times", () => {
+    // At ten degrees up, which is above most of the dust, so this measures the STARS and not the
+    // extinction. Three is the figure the bulge's one free amplitude was set by; that it also holds
+    // at other latitudes is not something that was arranged.
+    const ratio = galaxy.radianceTowards(0, 10) / galaxy.radianceTowards(180, 10)
+    expect(ratio).toBeGreaterThan(2.5)
+    expect(ratio).toBeLessThan(4.5)
+  })
+})
+
+describe("the dark rift", () => {
+  it("splits the brightest part of the band lengthwise", () => {
+    // Straight at the centre of the Galaxy, which is where the stars are: without dust this would
+    // be the single brightest direction in the sky. It is not, and what beats it is the same
+    // direction a few degrees higher up.
+    const throughThePlane = galaxy.radianceTowards(0, 0)
+    const justAbove = galaxy.radianceTowards(0, 5)
+    expect(throughThePlane).toBeLessThan(justAbove)
+    expect(justAbove / throughThePlane).toBeGreaterThan(2)
+  })
+
+  it("is a lane and not a general dimming: it closes again away from the centre", () => {
+    // Toward the anticentre there is far less Galaxy behind the dust to be hidden, so the same
+    // extinction costs proportionally less and the band is not split there. Real observers report
+    // exactly this: the rift is a summer sight.
+    const centreContrast = galaxy.radianceTowards(0, 5) / galaxy.radianceTowards(0, 0)
+    const anticentreContrast = galaxy.radianceTowards(180, 5) / galaxy.radianceTowards(180, 0)
+    expect(anticentreContrast).toBeLessThan(centreContrast)
+  })
+})
+
+describe("what the map is worth", () => {
+  const map = (() => {
+    galaxy.walk(MilkyWay.LATITUDE_STEPS)
+    return galaxy.harvest()
+  })()
+
+  it("is finished only once every row has been walked", () => {
+    expect(galaxy.done).toBe(true)
+    expect(map.width).toBe(MilkyWay.LONGITUDE_STEPS)
+    expect(map.height).toBe(MilkyWay.LATITUDE_STEPS)
+  })
+
+  it("puts its brightest cloud one magnitude above a dark natural sky", () => {
+    let brightest = 0
+    for (const value of map.data) brightest = Math.max(brightest, value)
+    const anchored = SurfaceBrightness.fromMagPerArcsec2(MilkyWay.PEAK_MAG_PER_ARCSEC2)
+    // What is DRAWN is a little under the anchor, because the model's own faintest level was taken
+    // out as already belonging to the sky (see harvest). A little, and not most of it: if the floor
+    // were a large share of the peak there would be no band to speak of.
+    expect(brightest).toBeLessThan(anchored)
+    expect(brightest / anchored).toBeGreaterThan(0.85)
+    // Roughly twice a 22.0 sky, and no more. This is the number that explains why the band is a
+    // famous sight in a desert and an argument in a suburb.
+    const overADarkSky = brightest / SurfaceBrightness.fromMagPerArcsec2(22)
+    expect(overADarkSky).toBeGreaterThan(1.8)
+    expect(overADarkSky).toBeLessThan(3)
+  })
+
+  it("leaves the galactic poles at nothing, which is what lets it be added to a sky that already counts them", () => {
+    const poleRow = map.height - 1
+    let atPole = 0
+    for (let column = 0; column < map.width; column++) atPole = Math.max(atPole, map.data[poleRow * map.width + column])
+    let brightest = 0
+    for (const value of map.data) brightest = Math.max(brightest, value)
+    expect(atPole / brightest).toBeLessThan(0.05)
+  })
+
+  it("brightens toward the centre along its own rows, without the walk being asked to", () => {
+    const row = Math.round(SurfaceBrightness.rowCoordOfLatitude(10) * map.height - 0.5)
+    const at = (longitudeDeg: number) => map.data[row * map.width + Math.round((longitudeDeg / 360) * map.width - 0.5)]
+    expect(at(0)).toBeGreaterThan(at(90))
+    expect(at(90)).toBeGreaterThan(at(180))
+    expect(at(270)).toBeGreaterThan(at(180))
+  })
+})

@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "caseId": "sky-test-milkyway",
+  "description": "Un ciel d'essai pour la Voie lactée. Elle demande quatre choses à la fois : pas de Lune (nouvelle Lune du 20 juillet 2020), un Soleil à 65° sous l'horizon, un ciel sans nuages, et le centre de la Galaxie haut — ici à 81° de hauteur, au sud-ouest, vu du désert d'Atacama. Retirez-en une seule et il n'y a plus rien à voir : c'est exactement ce qui sépare « il n'y avait pas de Voie lactée » de « je n'aurais pas pu la voir ».",
+  "time": {
+    "year": 2020,
+    "month": 7,
+    "day": 20,
+    "hour": 23,
+    "minute": 0
+  },
+  "utcOffsetHours": -4,
+  "durationSeconds": 60,
+  "place": [
+    {
+      "lat": -24.0,
+      "lng": -70.0
+    }
+  ],
+  "weatherTrack": {
+    "keyframes": [
+      {
+        "t": 0,
+        "weather": {
+          "cloudCover": 0,
+          "cloudDarkness": 0,
+          "cloudBaseM": 2000,
+          "lowerCloudCover": 0,
+          "highCloudCover": 0,
+          "precipitationType": "none",
+          "precipitationIntensity": 0,
+          "windDirectionDeg": 0,
+          "windSpeed": 0,
+          "storm": false
+        }
+      }
+    ]
+  },
+  "timeline": {
+    "keyframes": [
+      {
+        "t": 0,
+        "shapes": []
+      }
+    ],
+    "order": [],
+    "groups": []
+  },
+  "witnessTrack": {
+    "keyframes": [
+      {
+        "t": 0,
+        "pose": {
+          "lat": -24.0,
+          "lng": -70.0,
+          "elevationM": 0,
+          "headingDeg": 233,
+          "pitchDeg": 45,
+          "fovDeg": 100
+        }
+      }
+    ]
+  },
+  "soundTrack": {
+    "keyframes": []
+  },
+  "decor": []
+}

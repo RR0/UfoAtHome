@@ -15,6 +15,7 @@ import {
   Group,
   HemisphereLight,
   Mesh,
+  Matrix3,
   MeshBasicMaterial,
   MeshLambertMaterial,
   Object3D,
@@ -70,6 +71,9 @@ import type { PrecipitationType, Weather } from "../engine/model/Weather.js"
 import { buildRainSystem } from "./RainSystem.js"
 import type { RainSystem } from "./RainSystem.js"
 import { buildCloudGeometry, buildCloudMaterial } from "./CloudSystem.js"
+import { SkyGlowEffect } from "./SkyGlowEffect.js"
+import { SkyFrames } from "../engine/astronomy/SkyFrames.js"
+import { NightSkyBrightness } from "../engine/atmosphere/NightSkyBrightness.js"
 import type { CloudUniforms } from "./CloudSystem.js"
 import { CloudField } from "./CloudSystem.js"
 import { buildLensFlare } from "./LensFlareEffect.js"
@@ -624,6 +628,17 @@ export interface SceneAstronomy {
   planets: ReadonlyArray<ScenePlanet>
   comet?: SceneComet
   stars?: { catalog: StarCatalog; date: Date; observer: ObserverGeo }
+  /**
+   * The instant and the place themselves, for the things in the sky that are not objects but whole
+   * planes — the Milky Way and the zodiacal light, which are turned to face the witness rather than
+   * placed (see SkyFrames).
+   *
+   * Separate from `stars` even though that field already carries the same pair, because `stars` is
+   * absent until a catalog asset has come down off the network and these two need nothing
+   * downloaded at all. Tying them to it would have meant a sky whose Milky Way arrives late for no
+   * reason it could name.
+   */
+  frame?: { date: Date; observer: ObserverGeo }
 }
 
 /**
@@ -905,6 +920,9 @@ export class SceneRenderer {
   /** What falling water did to it — see RainbowEffect. The two are independent and a sky may
    * honestly show both: a shower under a cirrus veil is an ordinary afternoon. */
   private rainbow?: RainbowEffect
+  /** The Milky Way and the zodiacal light standing in it — see SkyGlowEffect. Built once and
+   * kept, like the bows: the maps behind it are the same for every sky there has ever been. */
+  private skyGlow?: SkyGlowEffect
   /** The body-mesh key of the comet currently drawn, so buildPlanets' own sweep can be told to
    * leave it alone and so a change of apparition takes the old one down. */
   private cometKey?: string
@@ -1420,6 +1438,7 @@ export class SceneRenderer {
     this.buildComet(astronomy.comet, magnitudeLimit)
     this.buildIceHalos(astronomy.sun, astronomy.moon)
     this.buildRainbow(astronomy.sun, astronomy.moon)
+    this.buildSkyGlow(astronomy, skyColors.zenith)
     // Fog reaches as far as the ground actually goes, not a fixed SKY_RADIUS: from altitude the
     // whole visible ground lies beyond 900 units, so a fog capped there turned all of it into flat
     // fog colour — a black void below the horizon at 1500 m, since that colour is the night-ground
@@ -1578,6 +1597,10 @@ export class SceneRenderer {
       this.updateLensFlarePosition()
       const blur = this.usableDepthOfFieldPass()
       blur?.setEncodesOutput(target === undefined)
+      // The only path that draws the scene itself onto the canvas, where three.js has already
+      // encoded everything else — see SkyGlowEffect.setDestinationEncoded. A blur or a film target
+      // means the scene lands in a linear buffer instead.
+      this.skyGlow?.setDestinationEncoded(target === undefined && !blur)
       if (target) this.renderer.setRenderTarget(target)
       if (blur) blur.render(this.renderer, this.scene, this.camera)
       else this.renderer.render(this.scene, this.camera)
@@ -1587,6 +1610,9 @@ export class SceneRenderer {
     // The flare is repositioned from inside, once the camera has been widened for the offscreen
     // render — see the pass's own onCameraWidened.
     pass.setEncodesOutput(target === undefined)
+    // The projection renders the scene into its own target first, so what the glow is added to
+    // there is linear light, whatever happens to that target afterwards.
+    this.skyGlow?.setDestinationEncoded(false)
     if (target) this.renderer.setRenderTarget(target)
     pass.render(this.renderer, this.scene, this.camera, this.camera.fov, () => this.updateLensFlarePosition())
     if (target) this.renderer.setRenderTarget(previousTarget)
@@ -2016,6 +2042,8 @@ export class SceneRenderer {
     this.iceHalos = undefined
     this.rainbow?.dispose()
     this.rainbow = undefined
+    this.skyGlow?.dispose()
+    this.skyGlow = undefined
     this.depthOfFieldPass?.dispose()
     this.depthOfFieldPass = undefined
     this.cancelExposure()
@@ -2517,6 +2545,80 @@ export class SceneRenderer {
     const { x, y, z } = horizontalToCartesian(source.altitudeDeg, source.azimuthDeg, 1)
     const tint = atmosphericTint(source.altitudeDeg)
     this.rainbow.update({ x, y, z }, strength, [tint[0], tint[1], tint[2]], bySun)
+  }
+
+  /**
+   * Turns the Galaxy and the dust of the Solar System to face the witness, and says how bright the
+   * sky they stand in was.
+   *
+   * Nothing is placed here and nothing is decided here — see SkyGlowEffect, which owns both models
+   * and the one question that matters about them (whether the sky was dark enough). What this does
+   * is the part only a renderer can: build the two frames out of directions in THIS scene, from
+   * the same transform the star field's own positions come through.
+   *
+   * The galactic frame is a full basis, three axes, because a band that wraps the whole sky has to
+   * know which way round it goes. The ecliptic frame is two directions only — the pole, and where
+   * the Sun's own longitude lies in the plane — because the dust cloud is symmetric about both
+   * planes it has, so there is no third thing to know.
+   */
+  private buildSkyGlow(astronomy: SceneAstronomy, skyZenith: RgbColor): void {
+    if (!astronomy.frame) {
+      this.skyGlow?.hide()
+      return
+    }
+    if (!this.skyGlow) {
+      this.skyGlow = new SkyGlowEffect()
+      // A map arriving a second after the sky it belongs to still has to be shown, and a reader who
+      // has paused on a night scene has no animation loop running to show it — the same reason the
+      // ice display asks for its own repaint.
+      this.skyGlow.onReady = () => this.render()
+      this.celestialGroup.add(this.skyGlow.object)
+    }
+    const { date, observer } = astronomy.frame
+    const axes = SkyFrames.galactic(date, observer)
+    const centre = SceneRenderer.directionOf(axes.centre)
+    const rotation = SceneRenderer.directionOf(axes.rotation)
+    const pole = SceneRenderer.directionOf(axes.pole)
+    // Rows, not columns: multiplying a scene direction by this gives its coordinates IN the
+    // galactic frame, which is what the shader wants.
+    const galactic = new Matrix3().set(
+      centre.x, centre.y, centre.z,
+      rotation.x, rotation.y, rotation.z,
+      pole.x, pole.y, pole.z
+    )
+    const eclipticPole = SceneRenderer.directionOf(SkyFrames.eclipticPole(date, observer))
+    const sun = SceneRenderer.directionOf(astronomy.sun)
+    // The Sun's own longitude: itself, with the part of it that sticks out of the ecliptic taken
+    // away. The Sun is never more than a fraction of a degree off that plane anyway, so this is
+    // very nearly the Sun's own direction — it is written as a projection because near the poles of
+    // the sky the difference between "toward the Sun" and "toward the Sun's longitude" is the
+    // difference between the cone standing up and lying down.
+    const sunLongitude = sun.clone().addScaledVector(eclipticPole, -sun.dot(eclipticPole)).normalize()
+    this.skyGlow.update({
+      galactic,
+      eclipticPole,
+      sunLongitude,
+      sunDirection: sun,
+      sunAltitudeDeg: astronomy.sun.altitudeDeg,
+      moon: {
+        direction: SceneRenderer.directionOf(astronomy.moon),
+        altitudeDeg: astronomy.moon.altitudeDeg,
+        phaseAngleDeg: NightSkyBrightness.phaseAngleOf(astronomy.moon.phase.illuminatedFraction)
+      },
+      // What this renderer is ACTUALLY painting the sky with right now, which is the reference the
+      // glows are stated against: they are added as a fraction of its brightness, so a band stays
+      // exactly as many times brighter than its background as the physics says, whatever the colour
+      // table happens to be doing. Taken at the zenith and used over the whole dome — a band low
+      // down therefore reads weaker against a horizon the table paints brighter, which is also what
+      // a witness sees, and the extinction the shader applies pushes the same way.
+      skyColor: new Vector3(skyZenith[0], skyZenith[1], skyZenith[2])
+    })
+  }
+
+  /** A position in the sky as a unit direction in this scene's own axes. */
+  private static directionOf(position: HorizontalPosition): Vector3 {
+    const { x, y, z } = horizontalToCartesian(position.altitudeDeg, position.azimuthDeg, 1)
+    return new Vector3(x, y, z).normalize()
   }
 
   /** Takes down whatever comet was drawn, head, halo, hover target and tail. */

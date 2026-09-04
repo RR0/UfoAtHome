@@ -679,7 +679,10 @@ export class SceneElement extends HTMLElement {
       // in all but a couple of dozen months of the last century there is no comet to compute at all
       // (see Comets.aroundDate).
       comet: this.cometAt(date, observer),
-      stars: this.starCatalog ? { catalog: this.starCatalog, date, observer } : undefined
+      stars: this.starCatalog ? { catalog: this.starCatalog, date, observer } : undefined,
+      // The same date and place again, and deliberately not folded into `stars`: the Milky Way and
+      // the zodiacal light need no catalog to arrive first (see SceneAstronomy.frame).
+      frame: { date, observer }
     })
   }
 

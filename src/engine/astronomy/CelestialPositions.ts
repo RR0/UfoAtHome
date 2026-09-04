@@ -49,9 +49,20 @@ function toObserver(observer: ObserverGeo): Astronomy.Observer {
  * used internally by computeBodyPosition for planets/Moon. Uses astronomy-engine's own Horizon()
  * rather than hand-rolling sidereal-time + spherical trig by hand: the library already carries
  * this and it's needed for the star catalog regardless of what's used for Sun/planets.
+ *
+ * `refracted` is on for everything that is a POSITION in the sky, which is everything drawn: the air
+ * really does lift a low star. It is turned off only for the axes of a coordinate frame (see
+ * SkyFrames), where the point of the call is a rotation and a refraction would break it by bending
+ * three axes each by a different amount.
  */
-export function equatorialToHorizontal(raHours: number, decDeg: number, date: Date, observer: ObserverGeo): HorizontalPosition {
-  const horizontal = Astronomy.Horizon(date, toObserver(observer), raHours, decDeg, "normal")
+export function equatorialToHorizontal(
+  raHours: number,
+  decDeg: number,
+  date: Date,
+  observer: ObserverGeo,
+  refracted = true
+): HorizontalPosition {
+  const horizontal = Astronomy.Horizon(date, toObserver(observer), raHours, decDeg, refracted ? "normal" : undefined)
   return { altitudeDeg: horizontal.altitude, azimuthDeg: horizontal.azimuth }
 }
 

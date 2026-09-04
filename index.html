@@ -42,10 +42,12 @@
   the Moon's phase, and a real star catalog (magnitude ≤ 7.5) for the given instant and location.
 </p>
 <p>
-  The last two entries are not cases and hold no recorded shape at all: they are skies set up with the
-  conditions one optical display needs, for looking at that display. A rainbow wants rain, a Sun low enough
+  The last four entries are not cases and hold no recorded shape at all: they are skies set up with the
+  conditions one sight needs, for looking at that sight. A rainbow wants rain, a Sun low enough
   for the bow to clear the horizon, a gap in the cloud for the light to come through, and a witness facing
-  away from the Sun — all four, or there is nothing to see.
+  away from the Sun — all four, or there is nothing to see. The Milky Way and the zodiacal light are the
+  same kind of conjunction and it is worth knowing which conditions they are: no Moon at all, a Sun far
+  enough down, a clear sky, and the plane in question standing high rather than lying on the horizon.
 </p>
 <select id="scene-case">
   <option value="/demo-data/witness-chiles.json">Chiles-Whitted, 1948-07-24 02:45 — Montgomery AL (night)</option>
@@ -54,6 +56,8 @@
   <option value="/demo-data/witness-socorro.json">Socorro, 1964-04-24 17:50 — New Mexico (low sun)</option>
   <option value="/demo-data/sky-test-rainbow.json">Test sky — rainbow (rain, Sun 9° up, witness facing away from it)</option>
   <option value="/demo-data/sky-test-moonbow.json">Test sky — moonbow (rain, full Moon 22° up, seen white)</option>
+  <option value="/demo-data/sky-test-milkyway.json">Test sky — Milky Way (new Moon, Sun 65° down, galactic centre 81° up)</option>
+  <option value="/demo-data/sky-test-zodiacal.json">Test sky — zodiacal light (Sun 16° down, steep ecliptic, no Moon)</option>
 </select>
 <rr0-scene id="scene" src="/demo-data/witness-chiles.json"></rr0-scene>
 

@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "caseId": "sky-test-zodiacal",
+  "description": "Un ciel d'essai pour la lumière zodiacale — la « fausse aurore » vue le soir. Elle demande un Soleil déjà bas sous l'horizon (16°) mais pas trop, une écliptique redressée par rapport à l'horizon (mars, sous les tropiques : Ténérife), pas de Lune, et un ciel clair. Le cône se dresse là où le Soleil s'est couché, à l'ouest, penché le long du zodiaque. C'est la lueur étrange des manuels : sans bord, immobile, disparue une heure plus tard.",
+  "time": {
+    "year": 2020,
+    "month": 3,
+    "day": 20,
+    "hour": 20,
+    "minute": 30
+  },
+  "utcOffsetHours": 0,
+  "durationSeconds": 60,
+  "place": [
+    {
+      "lat": 28.3,
+      "lng": -16.5
+    }
+  ],
+  "weatherTrack": {
+    "keyframes": [
+      {
+        "t": 0,
+        "weather": {
+          "cloudCover": 0,
+          "cloudDarkness": 0,
+          "cloudBaseM": 2000,
+          "lowerCloudCover": 0,
+          "highCloudCover": 0,
+          "precipitationType": "none",
+          "precipitationIntensity": 0,
+          "windDirectionDeg": 0,
+          "windSpeed": 0,
+          "storm": false
+        }
+      }
+    ]
+  },
+  "timeline": {
+    "keyframes": [
+      {
+        "t": 0,
+        "shapes": []
+      }
+    ],
+    "order": [],
+    "groups": []
+  },
+  "witnessTrack": {
+    "keyframes": [
+      {
+        "t": 0,
+        "pose": {
+          "lat": 28.3,
+          "lng": -16.5,
+          "elevationM": 0,
+          "headingDeg": 280,
+          "pitchDeg": 25,
+          "fovDeg": 90
+        }
+      }
+    ]
+  },
+  "soundTrack": {
+    "keyframes": []
+  },
+  "decor": []
+}

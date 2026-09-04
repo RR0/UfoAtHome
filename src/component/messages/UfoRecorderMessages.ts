@@ -301,6 +301,16 @@ export interface UfoRecorderMessages extends SightingLabels {
    * needs a nearly full Moon, and is seen by people who did not know it could happen. {lit} is how
    * much of the Moon was lit. */
   skyBowMoon: string
+  /**
+   * The two diffuse glows of a dark sky, and — when there were none — which of the things that hide
+   * them was in the way. Silent by day, because nobody needs telling there is no Milky Way at noon.
+   */
+  skyGlowBand: string
+  skyGlowCone: string
+  skyGlowZodiacalBand: string
+  skyGlowMoon: string
+  skyGlowTwilight: string
+  skyGlowNothingUp: string
   /** One name per bow, with the radius it stands at and how high its top reached — the height being
    * the number an account can be checked against, since it fixes how low the source was. */
   skyBowPrimary: string

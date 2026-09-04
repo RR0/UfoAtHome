@@ -24,6 +24,7 @@ import { computeBodyPosition, computeMoonPhase } from "../engine/astronomy/Celes
 import { visibleMagnitudeLimit } from "../render3d/skyColors.js"
 import type { CometAppearance } from "../engine/astronomy/Comets.js"
 import { Compass } from "../engine/astronomy/Compass.js"
+import { SkyGlowVisibility } from "../engine/astronomy/SkyGlowVisibility.js"
 import { resolveDecorPlacementAt } from "../engine/model/Decor.js"
 import { SightingShapes } from "../engine/persistence/SightingShapes.js"
 import type { Appearance, PolygonShape, Shape, ShapeBounds, ShapePresetId } from "../engine/shape/Shape.js"
@@ -186,6 +187,27 @@ function presetIdForShape(shape: Shape): ShapePresetId {
  * see the comment at that call site for why an inline tag wouldn't be
  * upgraded yet at construction time.
  */
+/**
+ * How far the Sun has to be down before the sky line bothers asking about the Milky Way and the
+ * zodiacal light at all.
+ *
+ * The end of civil twilight. Above it there is no answer worth stating — a reader does not need
+ * telling that a two-in-the-afternoon sighting had no Milky Way in it, and a line that said so on
+ * every daylight case in an archive would be read past rather than read.
+ */
+const GLOW_QUESTION_LIVE_BELOW_DEG = -6
+
+/**
+ * How dark the sky has to have got, in magnitudes per square arcsecond, before "there was nothing to
+ * see" stops being about the sky and starts being about where the two planes were standing.
+ *
+ * Twenty-one, one short of a natural dark sky: the brightest of the Milky Way is 21.0 and the best
+ * of the zodiacal cone is brighter still, so a sky at 21 has already taken the band and left only
+ * the cone. Under it the sentence blames the sky, over it the sentence blames the geometry, and both
+ * are worth telling apart — one is an argument about the night, the other about the date.
+ */
+const GLOW_NEEDS_SKY_MAG_PER_ARCSEC2 = 21
+
 export class UfoRecorderElement extends HTMLElement {
   private readonly shadow: ShadowRoot
   private readonly sceneElement: SceneElement
@@ -3471,6 +3493,14 @@ export class UfoRecorderElement extends HTMLElement {
    * up to ten, none beyond. A bound derived from a raycast against a hangar is not a millimeter
    * measurement, and printing it as one would claim a precision the inequality never had. Decimal
    * separator follows the reader's own locale, like every other number a browser formats. */
+  /** A number with a fixed number of decimals, in the reader's own notation — which in French is a
+   * comma. Written out rather than reached for with toFixed, because toFixed always produces a
+   * point and a French line reading "2.5×" beside "6,6/h" is the kind of wart that makes a page
+   * read as machine output. */
+  private decimal(value: number, digits: number): string {
+    return value.toLocaleString(undefined, { minimumFractionDigits: digits, maximumFractionDigits: digits })
+  }
+
   private meters(value: number): string {
     const digits = value < 1 ? 2 : value < 10 ? 1 : 0
     return value.toLocaleString(undefined, { maximumFractionDigits: digits })
@@ -4123,7 +4153,8 @@ export class UfoRecorderElement extends HTMLElement {
       this.cometClause(date, observer),
       this.satelliteClause(date, observer),
       this.opticsClause(date, observer),
-      this.rainbowClause(date, observer)
+      this.rainbowClause(date, observer),
+      this.glowClause(date, observer)
     ].filter(part => part !== undefined)
     this.skyCandidatesOutput.textContent = this.messages.skyLine.replace("{parts}", parts.join(" · "))
   }
@@ -4302,6 +4333,69 @@ export class UfoRecorderElement extends HTMLElement {
     const lit = Math.round(computeMoonPhase(date).illuminatedFraction * 100)
     return this.messages.skyBowMoon.replace("{forms}", named).replace("{lit}", String(lit))
   }
+
+  /**
+   * The two diffuse glows a dark sky has in it — see SkyGlowVisibility.
+   *
+   * THE ZODIACAL LIGHT IS WHY THIS IS HERE. It is a leaning cone of light standing where the Sun
+   * went down, with no edge, no motion, and no name that a first-time observer has for it; it is
+   * gone before midnight; and the manuals have been listing it as a source of reports for as long as
+   * there have been manuals. A report of a strange glow in the west an hour after sunset deserves to
+   * be told whether that was the sky's own.
+   *
+   * SILENT BY DAY, and only by day. The rule sits between the ice line's (always speak, because
+   * nobody can tell by looking whether there was cirrus at eight kilometres) and the bow's (speak
+   * only when it rained, because everybody knows whether it rained). Nobody can tell from a case
+   * file whether the galactic plane was standing up that night — so once the Sun is far enough down
+   * for the question to be live, it gets answered either way, and the negative answers name what was
+   * in the way rather than just saying no.
+   */
+  private glowClause(date: Date, observer: { lat: number; lng: number; elevationM: number }): string | undefined {
+    const sun = computeBodyPosition("Sun", date, observer)
+    // Civil twilight not yet over: there is no sky here to have a glow in, and saying so on every
+    // daylight sighting in the archive would be noise.
+    if (sun.altitudeDeg > GLOW_QUESTION_LIVE_BELOW_DEG) return undefined
+    const seen = this.glows.assess(date, observer)
+    const language = this.showerLanguage()
+    const stated: string[] = []
+    if (seen.milkyWay) {
+      stated.push(
+        this.messages.skyGlowBand
+          .replace("{contrast}", this.decimal(seen.milkyWay.contrast, 1))
+          .replace("{altitude}", String(Math.round(seen.milkyWay.altitudeDeg)))
+          .replace("{bearing}", Compass.towards(seen.milkyWay.azimuthDeg, language))
+      )
+    }
+    if (seen.zodiacal) {
+      // The cone standing over the sunset, or the band running on round the rest of the ecliptic:
+      // the same dust, but only the first is a sight anybody reports, and calling the second one a
+      // cone would be describing something that was not there.
+      const isCone = seen.zodiacal.sunSeparationDeg <= SkyGlowVisibility.CONE_SEPARATION_DEG
+      stated.push(
+        (isCone ? this.messages.skyGlowCone : this.messages.skyGlowZodiacalBand)
+          .replace("{contrast}", this.decimal(seen.zodiacal.contrast, 1))
+          .replace("{altitude}", String(Math.round(seen.zodiacal.altitudeDeg)))
+          .replace("{bearing}", Compass.towards(seen.zodiacal.azimuthDeg, language))
+          .replace("{elongation}", String(Math.round(seen.zodiacal.sunSeparationDeg)))
+      )
+    }
+    if (stated.length > 0) return this.listed(stated)
+    const sky = this.decimal(seen.darkestSkyMagPerArcsec2, 1)
+    // Which of them was in the way, and the order matters: a sky the Moon is holding up is a sky
+    // that would have been dark enough otherwise, and that is the more useful thing to know.
+    const moon = computeBodyPosition("Moon", date, observer)
+    const skyIsTheProblem = seen.darkestSkyMagPerArcsec2 < GLOW_NEEDS_SKY_MAG_PER_ARCSEC2
+    if (skyIsTheProblem && moon.altitudeDeg > 0) {
+      const lit = Math.round(computeMoonPhase(date).illuminatedFraction * 100)
+      return this.messages.skyGlowMoon.replace("{lit}", String(lit)).replace("{sky}", sky)
+    }
+    if (skyIsTheProblem) return this.messages.skyGlowTwilight.replace("{sky}", sky)
+    return this.messages.skyGlowNothingUp.replace("{sky}", sky)
+  }
+
+  /** One sweep of the sky, kept between restatements: it holds nothing about a date or a place, and
+   * building a new one on every keystroke would throw away the anchor it works out on first use. */
+  private readonly glows = new SkyGlowVisibility()
 
   /**
    * Names one bow, with the radius it stands at and how high its top reached.
