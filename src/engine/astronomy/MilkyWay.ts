@@ -53,29 +53,60 @@ export class MilkyWay {
    * The central bulge: a flattened exponential spheroid, the naked-eye "bulge" of the band in
    * Sagittarius and Ophiuchus.
    *
-   * Its amplitude is THE ONE FITTED NUMBER in this model, and it is fitted to a ratio rather than to
-   * a picture: away from the dust, at ten degrees of galactic latitude, the sky toward the centre is
-   * about three times as bright as the sky toward the anticentre. An exponential disc alone already
-   * supplies most of that (the density it integrates through toward the centre keeps rising), so the
-   * bulge is a correction, not the main term — see the test that measures the ratio the model
-   * actually returns.
+   * Its amplitude is BOUNDED rather than fitted, and the difference matters. The quantity it moves
+   * is how much brighter the sky is toward the centre than toward the anticentre, ten degrees off
+   * the plane where the dust no longer decides it — observed at something like three to four times.
+   * The exponential disc ALONE already supplies 3.4 of that, because the density a line of sight
+   * toward the centre integrates through keeps rising all the way in. So there is no amplitude that
+   * hits three, and pretending to fit one would be pretending; what is left for the bulge is the
+   * room between 3.4 and the top of the observed range, and this amplitude uses it (3.8). A real
+   * structure, kept small because the ratio has no more room than that. See the test.
    */
   private static readonly BULGE_SCALE_KPC = 0.5
   private static readonly BULGE_FLATTENING = 0.6
-  private static readonly BULGE_TO_LOCAL_DISK = 60
+  private static readonly BULGE_TO_LOCAL_DISK = 20
 
   /**
-   * The dust, and the number the rift lives on.
+   * The dust, and the two numbers the rift lives on.
    *
-   * A scale height of 140 parsecs against the stars' 300 — dust is heavy and it settles — and one
-   * magnitude of visual extinction per kiloparsec where the Sun stands, which is the figure quoted
-   * for the local interstellar medium and is what makes the far side of the Galaxy unreachable in
-   * the plane. Its radial scale length is LONGER than the stars': the dust disc is more spread out
-   * than the light it hides, so extinction falls off outward more slowly than brightness does.
+   * A scale height of a hundred parsecs against the stars' three hundred — dust is heavy and it
+   * settles — and eight tenths of a magnitude of visual extinction per kiloparsec where the Sun
+   * stands. The radial scale length is LONGER than the stars': the dust disc is more spread out than
+   * the light it hides, so extinction falls off outward more slowly than brightness does.
+   *
+   * WHAT ACTUALLY DECIDES THE PICTURE IS THE PRODUCT of those first two, not either alone, because
+   * the column of dust an exponential layer puts above the Sun is exactly the density times the
+   * scale height. That is worth knowing because it is where this model was wrong: it began at 140
+   * parsecs and a full magnitude per kiloparsec, a column of 0.14 magnitudes, and the consequence
+   * was visible — the brightest ridge of the band sat six and a quarter degrees off the plane, where
+   * the sky's own brightest clouds sit at two to five.
+   *
+   * Three measurements bound it, and NONE of them can be met exactly by a smooth disc — which is
+   * the honest part, and why the calibration is a bracket rather than a fit:
+   *
+   * - **The galactic poles**, where the measured column is about 0.05 magnitudes. A smooth disc must
+   *   come out ABOVE that, because the Sun sits inside the Local Bubble, a cavity swept nearly clear
+   *   of dust that no axisymmetric model has. This one gives 0.080 — over by half again, which is
+   *   the right side and about the right amount.
+   * - **Baade's Window**, the famous clear line of sight to the bulge at four degrees below the
+   *   plane, where the extinction is about 1.5 magnitudes. A smooth disc must come out ABOVE that
+   *   too, for the same kind of reason turned round: a window is by definition the emptiest hole in
+   *   a clumpy layer, and an average cannot be as clear as the clearest. This one gives 2.9, inside
+   *   the range quoted for bulge sightlines generally.
+   * - **Where the band is brightest**, which is the one the eye checks: the sky's own brightest
+   *   clouds toward the inner Galaxy stand two to five degrees off the plane. This one puts its
+   *   ridge at 4.5.
+   *
+   * And within that bracket, the pair is chosen so that BOTH factors stay inside their own published
+   * ranges rather than trading one off against the other: a hundred parsecs is the scale height
+   * Galactic extinction models use, and eight tenths of a magnitude per kiloparsec is inside the
+   * seven-tenths-to-one quoted for the plane. Pinning the column on the poles alone would have
+   * forced the density down to a third of a magnitude per kiloparsec, outside its own range, and
+   * left the anticentre band fourteen times fainter than Sagittarius instead of six.
    */
   private static readonly DUST_SCALE_LENGTH_KPC = 3.5
-  private static readonly DUST_SCALE_HEIGHT_KPC = 0.14
-  private static readonly EXTINCTION_MAG_PER_KPC = 1
+  private static readonly DUST_SCALE_HEIGHT_KPC = 0.1
+  private static readonly EXTINCTION_MAG_PER_KPC = 0.8
 
   /** Where the walk starts and stops, and in how many steps. Logarithmic, because both the dust
    * that matters and the emissivity that matters are near, while the far end is either extinguished
@@ -111,9 +142,9 @@ export class MilkyWay {
    * brightness of everything in the sky would shift slightly whenever that map was made finer.
    * The test that goes with it walks the sky and checks the model still peaks here.
    */
-  static readonly PEAK_RADIANCE = 3.666
+  static readonly PEAK_RADIANCE = 6.278
   static readonly PEAK_LONGITUDE_DEG = 0
-  static readonly PEAK_LATITUDE_DEG = 6.5
+  static readonly PEAK_LATITUDE_DEG = 4.5
 
   /** What one direction of the sky is worth in S10, anchored on the one measured number this model
    * has (see PEAK_MAG_PER_ARCSEC2) — the whole brightness, including the floor that the sky it
@@ -134,6 +165,25 @@ export class MilkyWay {
    * galactic latitude.
    */
   radianceTowards(lDeg: number, bDeg: number): number {
+    return this.trace(lDeg, bDeg).light
+  }
+
+  /**
+   * How many magnitudes the dust takes out of everything behind it, along that same line of sight.
+   *
+   * Public because it is what the three calibration measurements are OF (see the dust constants) —
+   * the column over the galactic poles, and the extinction toward the bulge. A model whose only
+   * observable was its own picture could not be checked against a measurement at all.
+   *
+   * Saturates at OPAQUE_MAG rather than running to the far side of the Galaxy: a line of sight down
+   * the plane really does reach thirty magnitudes and more, and nothing this returns past fifteen
+   * would mean anything except "nothing gets through".
+   */
+  extinctionTowards(lDeg: number, bDeg: number): number {
+    return this.trace(lDeg, bDeg).extinctionMag
+  }
+
+  private trace(lDeg: number, bDeg: number): { light: number; extinctionMag: number } {
     const l = (lDeg * Math.PI) / 180
     const b = (bDeg * Math.PI) / 180
     // Galactocentric axes with the Sun on the positive x side: a line of sight toward the centre
@@ -179,7 +229,7 @@ export class MilkyWay {
         walked
       if (extinctionMag > MilkyWay.OPAQUE_MAG) break
     }
-    return collected
+    return { light: collected, extinctionMag }
   }
 
   /**
