@@ -32,7 +32,7 @@ export class DocsPage implements SitePage {
         ["/docs/share/", "Partager une observation",
           "Un lien à envoyer, ou deux lignes de HTML sur votre propre page. Les deux avec un exemple qui marche, à essayer et à copier."],
         ["/docs/components/", "Les composants",
-          "Une section par composant : ce qu'il dessine, le balisage qu'il accepte, et chaque attribut, propriété, méthode et événement auquel il répond."]
+          "Quatre éléments standards, une page chacun : lequel vous voulez, ce qu'il dessine, et tout ce à quoi il répond."]
       ]
       : [
         ["/docs/create/", "Create an observation",
@@ -40,7 +40,7 @@ export class DocsPage implements SitePage {
         ["/docs/share/", "Share an observation",
           "A link to send, or two lines of HTML on your own page. Both with a working example you can try and copy."],
         ["/docs/components/", "The components",
-          "One section per component: what it draws, the markup it takes, and every attribute, property, method and event it answers to."]
+          "Four standard elements, one page each: which one you want, what it draws, and everything it answers to."]
       ]
     const grid = cards.map(([href, title, blurb]) => `      <a class="use" href="${href}">
         <h3>${title}</h3>

@@ -9,19 +9,21 @@ export class DocsComponentsPage extends DocsSection {
     navLabel: { en: "The components", fr: "Les composants" },
     title: { en: "The components", fr: "Les composants" },
     description: {
-      en: "One section per component: what it draws, the markup it takes, and every attribute, "
-        + "property, method and event it answers to.",
-      fr: "Une section par composant : ce qu'il dessine, le balisage qu'il accepte, et chaque "
-        + "attribut, propriété, méthode et événement auquel il répond."
+      en: "Four standard elements, one page each: which one you want, what it draws, the markup it "
+        + "takes, and everything it answers to.",
+      fr: "Quatre éléments standards, une page chacun : lequel vous voulez, ce qu'il dessine, le "
+        + "balisage qu'il accepte, et tout ce à quoi il répond."
     },
     asideFromNav: true
   }
 
   private readonly lede: Said<string> = {
     en: "Four standard Web Components — the browser's own, not a framework's. Each registers itself "
-      + "on import, each takes the same <code>src</code>, and each composes the one before it.",
+      + "on import, each takes the same description of an observation as its input, and each "
+      + "composes the one before it.",
     fr: "Quatre composants web standards — ceux du navigateur, pas ceux d'un framework. Chacun "
-      + "s'enregistre à l'import, chacun prend le même <code>src</code>, et chacun compose le précédent."
+      + "s'enregistre à l'import, chacun prend en entrée la même description d'observation, et "
+      + "chacun compose le précédent."
   }
 
   /** Where each tag's own page is, by the tag itself. */
