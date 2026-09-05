@@ -80,7 +80,7 @@ if (editor && requested) {
     <ol class="steps">
       <li>
         <h3>Say when and where</h3>
-        <p>Fill <strong>Date and time</strong> and <strong>Location</strong>. That is the moment the
+        <p>Fill <strong>Moment</strong> and <strong>Location</strong>. That is the moment the
           sky appears: the Sun, the Moon and its phase, the planets, the stars of that night — and
           the weather record for that hour is fetched on its own. Doing it first means drawing
           against the real sky rather than on an empty canvas.</p>
@@ -149,14 +149,23 @@ if (editor && requested) {
     </div>
 
     <div class="faq-item">
-      <h3>Decor</h3>
+      <h3>Environment</h3>
       <p>What stood around the witness, at a real distance east and north: buildings with their
-        floors and windows, trees, streetlights, vehicles, other witnesses. Decor is the only thing
-        that can put a number on a distance — if the object passed <em>behind</em> that hangar it
-        was at least that far, if <em>in front of</em> that tree, at most. Each crossing narrows the
-        object's real width from one side for the whole recording; the result appears under the
-        apparent size, and reads “unknown” when nothing crosses its line of sight, which is the
-        honest answer for most sightings.</p>
+        floors and windows, trees, streetlights, vehicles, aircraft — and <strong>other
+        witnesses</strong>. This is the only thing that can put a number on a distance: if the object
+        passed <em>behind</em> that hangar it was at least that far, if <em>in front of</em> that
+        tree, at most. Each crossing narrows the object's real width from one side for the whole
+        recording; the result appears under the apparent size, and reads “unknown” when nothing
+        crosses its line of sight, which is the honest answer for most sightings.</p>
+      <p><strong>Several witnesses, and their points of view.</strong> A witness placed here can
+        carry the URL of their <em>own</em> recording, and right-clicking them in the scene offers
+        to view it — which loads their account and puts you where they stood, looking the way they
+        looked. Two people a hundred metres apart did not see the same thing, and being able to step
+        from one to the other is how that stops being an assertion and becomes something to check.
+        The <strong>🎯</strong> button does the smaller version of the same thing: it turns the
+        current witness to face whatever is selected.</p>
+      <p>Published together, those recordings become the witness picker a reader gets — see
+        <a href="/docs/">the documentation</a> on manifests.</p>
       <p>Decor can also <strong>move</strong> (an aircraft crossing the sky, a car driving past) and
         carry <strong>lights</strong> with real, regulated flash rates — anticollision beacons at
         40–100 a minute, hazard flashers at 60–120. On a long exposure that rate is drawn: steady
@@ -165,7 +174,7 @@ if (editor && requested) {
     </div>
 
     <div class="faq-item">
-      <h3>Date and time</h3>
+      <h3>Moment</h3>
       <p>A start, an end, a duration — and a <strong>time zone</strong>, which is the rule, not the
         number. Pick the witness's own zone and the offset is derived from that zone's rules
         <em>at the observation's date</em>: Valensole in July 1965 resolves to UTC+1, not today's
@@ -232,6 +241,20 @@ if (editor && requested) {
 </section>
 
 <section class="band">
+  <div class="wrap prose-wide">
+    <h2>Point at anything and it names itself</h2>
+    <p>Hovering the scene names what is under the pointer. A star gives its name, its magnitude and
+      how high it stood — “Venus, mag −4, 8° above the horizon” answers a report of a bright light
+      near the horizon on its own, where a bare name would not. The Sun, the Moon, the planets and
+      any comet up that night answer the same way, and so does everything in the environment: a
+      building, a tree, another witness.</p>
+    <p>What the ground hides does not answer. A star behind a hill is as unseeable as one below the
+      horizon, so neither is offered — a reconstruction is not a list of what is in the sky, it is
+      what could have been seen from where the witness stood.</p>
+  </div>
+</section>
+
+<section class="band">
   <div class="wrap">
     <h2>Rules worth knowing</h2>
     <div class="prose-wide">
@@ -256,7 +279,7 @@ if (editor && requested) {
 
 <section class="band">
   <div class="wrap">
-    <h2>Saving, and putting it somewhere</h2>
+    <h2>Exporting, and putting it somewhere</h2>
     <div class="prose-wide">
       <p><strong>Export</strong> gives you a JSON file. That file is the whole recording — there is no
         account, no database, and no copy kept here. Host it wherever you like, and put the
@@ -315,7 +338,7 @@ if (editor && requested) {
     <ol class="steps">
       <li>
         <h3>Dire quand et où</h3>
-        <p>Remplissez <strong>Date et heure</strong> et <strong>Lieu</strong>. C'est là que le ciel
+        <p>Remplissez <strong>Moment</strong> et <strong>Lieu</strong>. C'est là que le ciel
           apparaît : le Soleil, la Lune et sa phase, les planètes, les étoiles de cette nuit-là — et
           le relevé météo de cette heure-là est cherché tout seul. Commencer par là, c'est dessiner
           sur le ciel réel plutôt que sur un canevas vide.</p>
@@ -388,15 +411,24 @@ if (editor && requested) {
     </div>
 
     <div class="faq-item">
-      <h3>Décor</h3>
+      <h3>Environnement</h3>
       <p>Ce qui se tenait autour du témoin, à une distance réelle vers l'est et vers le nord :
-        bâtiments avec leurs étages et leurs fenêtres, arbres, lampadaires, véhicules, autres
-        témoins. Le décor est la seule chose qui puisse mettre un nombre sur une distance : si
-        l'objet est passé <em>derrière</em> ce hangar il était au moins aussi loin, <em>devant</em>
-        cet arbre, au plus. Chaque croisement resserre d'un côté la largeur réelle de l'objet, pour
-        tout l'enregistrement ; le résultat s'affiche sous la taille apparente, et dit
-        « inconnue » quand rien ne croise sa ligne de visée — la réponse honnête pour la plupart des
-        observations.</p>
+        bâtiments avec leurs étages et leurs fenêtres, arbres, lampadaires, véhicules, aéronefs —
+        et <strong>d'autres témoins</strong>. C'est la seule chose qui puisse mettre un nombre sur
+        une distance : si l'objet est passé <em>derrière</em> ce hangar il était au moins aussi
+        loin, <em>devant</em> cet arbre, au plus. Chaque croisement resserre d'un côté la largeur
+        réelle de l'objet, pour tout l'enregistrement ; le résultat s'affiche sous la taille
+        apparente, et dit « inconnue » quand rien ne croise sa ligne de visée — la réponse honnête
+        pour la plupart des observations.</p>
+      <p><strong>Plusieurs témoins, et leurs points de vue.</strong> Un témoin placé ici peut porter
+        l'URL de son <em>propre</em> enregistrement, et un clic droit sur lui dans la scène propose
+        de le consulter — ce qui charge son récit et vous place là où il se tenait, regardant où il
+        regardait. Deux personnes à cent mètres l'une de l'autre n'ont pas vu la même chose, et
+        pouvoir passer de l'une à l'autre est ce qui fait cesser d'être une affirmation pour devenir
+        quelque chose à vérifier. Le bouton <strong>🎯</strong> en fait la version réduite : il
+        tourne le témoin courant vers ce qui est sélectionné.</p>
+      <p>Publiés ensemble, ces enregistrements deviennent le sélecteur de témoin que voit un
+        lecteur — voir <a href="/docs/">la documentation</a> sur les manifestes.</p>
       <p>Un décor peut aussi <strong>se déplacer</strong> (un avion qui traverse le ciel, une
         voiture qui passe) et porter des <strong>feux</strong> aux cadences réelles et
         réglementaires : anticollision de 40 à 100 éclats par minute, feux de détresse de 60 à 120.
@@ -406,7 +438,7 @@ if (editor && requested) {
     </div>
 
     <div class="faq-item">
-      <h3>Date et heure</h3>
+      <h3>Moment</h3>
       <p>Un début, une fin, une durée — et un <strong>fuseau horaire</strong>, qui est la règle et
         non le nombre. Choisissez le fuseau du témoin et le décalage est dérivé des règles de ce
         fuseau <em>à la date de l'observation</em> : Valensole en juillet 1965 donne UTC+1, pas
@@ -482,6 +514,20 @@ if (editor && requested) {
 </section>
 
 <section class="band">
+  <div class="wrap prose-wide">
+    <h2>Pointez n'importe quoi, cela se nomme</h2>
+    <p>Survoler la scène nomme ce qui est sous le curseur. Une étoile donne son nom, sa magnitude et
+      sa hauteur — « Vénus, mag −4, 8° au-dessus de l'horizon » répond à lui seul à un signalement
+      de lumière vive près de l'horizon, là où un nom seul ne répondrait pas. Le Soleil, la Lune, les
+      planètes et toute comète levée cette nuit-là répondent de même, et tout l'environnement
+      aussi : un bâtiment, un arbre, un autre témoin.</p>
+    <p>Ce que le sol cache ne répond pas. Une étoile derrière une colline est aussi invisible qu'une
+      étoile sous l'horizon : ni l'une ni l'autre n'est proposée — une reconstitution n'est pas la
+      liste de ce qu'il y a dans le ciel, c'est ce qui pouvait être vu d'où se tenait le témoin.</p>
+  </div>
+</section>
+
+<section class="band">
   <div class="wrap">
     <h2>Quelques règles à connaître</h2>
     <div class="prose-wide">
@@ -508,7 +554,7 @@ if (editor && requested) {
 
 <section class="band">
   <div class="wrap">
-    <h2>Sauvegarder, et publier quelque part</h2>
+    <h2>Exporter, et publier quelque part</h2>
     <div class="prose-wide">
       <p><strong>Exporter</strong> vous remet un fichier JSON. Ce fichier <em>est</em>
         l'enregistrement complet : il n'y a ni compte, ni base de données, ni copie conservée ici.

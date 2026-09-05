@@ -202,6 +202,11 @@ ${carousel}
         interpretation, and it quietly rules out the explanations that matter most: a halo, a
         planet, a satellite, an aircraft's landing light, a lenticular cloud. A 2D shape assumes
         only what the witness actually claimed — that this is what reached their eye.</p>
+      <p>Which is why a case with several witnesses is several recordings, not one. Each states
+        what one person saw from where they stood, and a reconstruction can step from one to the
+        other — the reader through a picker, the author by placing the others in the scene and
+        opening their accounts from there. Two people a hundred metres apart did not see the same
+        thing, and the format is built so that the difference has somewhere to live.</p>
     </div>
   </div>
 </section>
@@ -216,7 +221,8 @@ ${carousel}
         <h3>The sky</h3>
         <p>Sun, Moon and its phase, planets, a star catalogue down to magnitude 7.5 — positioned for
           that instant and that latitude. The Milky Way and the zodiacal light are integrated along
-          the line of sight, not painted as a texture.</p>
+          the line of sight, not painted as a texture. Point at any of it and it names itself:
+          “Venus, mag −4, 8° above the horizon”.</p>
       </div>
       <div class="card">
         <h3>What else was up there</h3>
@@ -327,6 +333,12 @@ ${carousel}
         plus : un halo, une planète, un satellite, le phare d'atterrissage d'un avion, un nuage
         lenticulaire. Une forme 2D ne suppose que ce que le témoin a réellement affirmé : voilà ce
         qui est parvenu à son œil.</p>
+      <p>C'est pourquoi un dossier à plusieurs témoins fait plusieurs enregistrements, et non un
+        seul. Chacun énonce ce qu'une personne a vu d'où elle se tenait, et une reconstitution
+        permet de passer de l'un à l'autre — le lecteur par un sélecteur, l'auteur en plaçant les
+        autres dans la scène et en ouvrant leur récit depuis là. Deux personnes à cent mètres l'une
+        de l'autre n'ont pas vu la même chose, et le format est fait pour que cette différence ait
+        où se loger.</p>
     </div>
   </div>
 </section>
@@ -341,7 +353,8 @@ ${carousel}
         <h3>Le ciel</h3>
         <p>Soleil, Lune et sa phase, planètes, un catalogue d'étoiles jusqu'à la magnitude 7,5 —
           placés pour cet instant et cette latitude. La Voie lactée et la lumière zodiacale sont
-          intégrées le long de la ligne de visée, non plaquées en texture.</p>
+          intégrées le long de la ligne de visée, non plaquées en texture. Pointez n'importe quoi et
+          cela se nomme : « Vénus, mag −4, 8° au-dessus de l'horizon ».</p>
       </div>
       <div class="card">
         <h3>Ce qu'il y avait d'autre là-haut</h3>

@@ -58,7 +58,7 @@ export const sightingLabels_en: SightingLabels = {
   decorAltitude: "Altitude",
   decorLights: "Lights",
   decorLightsNone: "none",
-  decor: "Decor",
+  decor: "Environment",
   decorBuilding: "Building",
   decorTree: "Tree",
   decorStreetlight: "Streetlight",

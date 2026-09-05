@@ -102,9 +102,15 @@ export interface SightingLabels {
   /** What the observation was made THROUGH — see Instrument.ts. Sighting data, unlike the view
    * above: it changes the geometry of every shape, so it belongs in the file. */
   instrument: string
-  /** Label on the dropdown listing the sighting's own decor objects — the Decor group itself no
-   * longer has its own summary/heading (its fields now live inside Location/Witness instead, see
-   * UfoRecorderElement's addDecorWitnessButton/addDecorBuildingButton doc comments). */
+  /**
+   * The group of everything standing around the witness, and the dropdown listing it.
+   *
+   * "Environment", not "Decor": what goes in here is buildings, trees, streetlights, vehicles,
+   * aircraft and OTHER WITNESSES — the things that hid the object, that bound its distance by being
+   * crossed, and that a viewpoint can be moved to. "Decor" named it as scenery, as though it were
+   * there to dress the picture, when it is the half of the reconstruction that can put a number on
+   * a metre.
+   */
   decor: string
   decorBuilding: string
   decorTree: string

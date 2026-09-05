@@ -175,6 +175,13 @@ export interface UfoRecorderMessages extends SightingLabels {
   shapeGroup: string
   /** Summary of the group holding what the sighting sounded like — see SoundTrack.ts. */
   soundGroup: string
+  /**
+   * The group holding when the observation happened.
+   *
+   * "Moment" rather than "Date/time", which named two form fields; the group holds a start, an end,
+   * a duration and the witness's own time zone, and what all four are for is fixing the instant the
+   * sky is computed at.
+   */
   temporalGroup: string
   /** The four states EDTF_TIME_PATTERN can express about a whole value, offered beside the native
    * picker so that "around 05:00" needs no text mode. */

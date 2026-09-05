@@ -11,8 +11,8 @@ export const html = `
   <button class="group-tab" type="button" aria-controls="group-observation" aria-expanded="false"><span id="label-observation-group">Observation</span></button>
   <button class="group-tab" type="button" aria-controls="group-witness" aria-expanded="false"><span id="label-witness-group">Witness</span></button>
   <button class="group-tab" type="button" aria-controls="group-location" aria-expanded="false"><span id="label-location-group">Location</span></button>
-  <button class="group-tab" type="button" aria-controls="group-decor" aria-expanded="false"><span id="label-decor-group">Decor</span></button>
-  <button class="group-tab" type="button" aria-controls="group-temporal" aria-expanded="false"><span id="label-temporal-group">Date and time</span></button>
+  <button class="group-tab" type="button" aria-controls="group-decor" aria-expanded="false"><span id="label-decor-group">Environment</span></button>
+  <button class="group-tab" type="button" aria-controls="group-temporal" aria-expanded="false"><span id="label-temporal-group">Moment</span></button>
   <button class="group-tab" type="button" aria-controls="group-weather" aria-expanded="false"><span id="label-weather-group">Weather</span></button>
   <button class="group-tab" type="button" aria-controls="group-sound" aria-expanded="false"><span id="label-sound-group">Sound</span></button>
   <button class="group-tab" type="button" aria-controls="group-shape" aria-expanded="false"><span id="label-shape-group">Shape</span></button>
@@ -99,7 +99,7 @@ export const html = `
          an empty recording shows nothing here but the Add controls below. Shown first, above
          the Add row, once at least one decor object exists — see that row's own comment for why
          it's forced onto its own line after this block instead of just flowing after it. -->
-    <label><span id="label-decor">Decor</span> <select id="decor"></select></label>
+    <label><span id="label-decor">Environment</span> <select id="decor"></select></label>
     <button id="look-at-decor" type="button" class="icon-btn" title="Look at it" aria-label="Look at it">🎯</button>
     <button id="delete-decor" type="button" class="icon-btn" title="Delete decor" aria-label="Delete decor">🗑</button>
     <label><span id="label-decor-title">Name</span> <input id="decorTitle" type="text"/></label>
