@@ -1,4 +1,4 @@
-import { html, css } from "./eyewitnessTemplate.js"
+import { html, css } from "./sightingTemplate.js"
 import { SightingFetch } from "../engine/net/SightingFetch.js"
 import { SightingSummary } from "./SightingSummary.js"
 import type { SummaryEntry } from "./SightingSummary.js"
@@ -7,10 +7,10 @@ import type { SightingRecordingJson } from "../engine/persistence/sightingJson.j
 import type { People } from "../engine/model/People.js"
 import { HostLocale, selectLocale } from "../i18n/locale.js"
 import { sightingTimeToDate } from "../engine/astronomy/CelestialPositions.js"
-import { loadEyewitnessMessages, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
+import { loadSightingMessages, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
 import type { UfoLanguage } from "./messages/index.js"
-import { eyewitnessMessages_en } from "./messages/EyewitnessMessages_en.js"
-import type { EyewitnessMessages } from "./messages/EyewitnessMessages.js"
+import { sightingMessages_en } from "./messages/SightingMessages_en.js"
+import type { SightingMessages } from "./messages/SightingMessages.js"
 
 registerScene()
 
@@ -58,7 +58,7 @@ const APP_EDITOR_URL = `${APP_HOME_URL}/editor/`
  * the sentence around it never disappears. Date/location/case live only in the info panel's own
  * Observation section, not duplicated here.
  */
-export class EyewitnessElement extends HTMLElement {
+export class SightingElement extends HTMLElement {
   static get observedAttributes(): string[] {
     return ["src", "show-labels"]
   }
@@ -88,7 +88,7 @@ export class EyewitnessElement extends HTMLElement {
   private readonly embedCopyButton: HTMLButtonElement
   private readonly labelsToggle: HTMLButtonElement
   private readonly paramSummary: HTMLElement
-  private summaryBuilder = new SightingSummary(eyewitnessMessages_en, "en")
+  private summaryBuilder = new SightingSummary(sightingMessages_en, "en")
   /** What the strip last rendered. It refreshes on every playback tick (see the timeupdate
    * listener), and replacing forty elements sixty times a second — under a reader's own text
    * selection, at that — for values that changed in none of them is not free. */
@@ -110,7 +110,7 @@ export class EyewitnessElement extends HTMLElement {
    * themselves) — the two are the same switch, so a reader can always close what a page opened. */
   private labelsShown = false
   private language: UfoLanguage = "en"
-  private messages: EyewitnessMessages = eyewitnessMessages_en
+  private messages: SightingMessages = sightingMessages_en
 
   constructor() {
     super()
@@ -198,7 +198,7 @@ export class EyewitnessElement extends HTMLElement {
   private async loadLocaleMessages(): Promise<void> {
     this.language = selectLocale(HostLocale.preferencesFor(this), UFO_SUPPORTED_LANGUAGES) as UfoLanguage
     if (this.language === "en") return
-    this.messages = await loadEyewitnessMessages(this.language)
+    this.messages = await loadSightingMessages(this.language)
     this.testimonyPrefix.textContent = this.messages.testimonyBy
     this.infoButton.title = this.messages.about
     this.infoButton.setAttribute("aria-label", this.messages.about)
@@ -338,7 +338,7 @@ export class EyewitnessElement extends HTMLElement {
   /**
    * The two lines it takes to put THIS observation on someone else's page — a module script for
    * the element and the element itself, both with absolute URLs, so the snippet is self-contained
-   * rather than something the reader has to work out. Replay embeds `<rr0-eyewitness>` (this very
+   * rather than something the reader has to work out. Replay embeds `<rr0-sighting>` (this very
    * element, so what they paste is what they are looking at); Editor embeds
    * `<rr0-ufo-recorder>`, which takes the same `src`.
    *
@@ -348,7 +348,7 @@ export class EyewitnessElement extends HTMLElement {
    * instead of silently sending readers to production.
    */
   private embedMarkupFor(kind: "replay" | "edit"): string {
-    const tag = kind === "edit" ? "rr0-ufo-recorder" : "rr0-eyewitness"
+    const tag = kind === "edit" ? "rr0-ufo-recorder" : "rr0-sighting"
     const script = new URL(`${tag}.mjs`, import.meta.url).href
     const src = this.currentSrc ? new URL(this.currentSrc, location.href).href : ""
     return `<script type="module" src="${script}"></script>\n<${tag} src="${src}"></${tag}>`
@@ -376,7 +376,7 @@ export class EyewitnessElement extends HTMLElement {
   private warnOnMismatchedCaseIds(entries: WitnessEntry[]): void {
     const caseIds = new Set(entries.map(entry => entry.sighting.caseId).filter((id): id is string => id !== undefined))
     if (caseIds.size > 1) {
-      console.warn(`<rr0-eyewitness>: witnesses declare different case ids (${[...caseIds].join(", ")}) — they may not belong to the same case.`)
+      console.warn(`<rr0-sighting>: witnesses declare different case ids (${[...caseIds].join(", ")}) — they may not belong to the same case.`)
     }
   }
 
@@ -740,11 +740,31 @@ export class EyewitnessElement extends HTMLElement {
   }
 }
 
-export const EYEWITNESS_ELEMENT_NAME = "rr0-eyewitness"
+export const SIGHTING_ELEMENT_NAME = "rr0-sighting"
 
-export function registerEyewitness(): void {
+/**
+ * What this element was called until 0.41.0, still registered and still working.
+ *
+ * The name was wrong by then: the element takes several witnesses and lets a reader move between
+ * their points of view, so it is not AN eyewitness, it is the sighting seen through whichever one
+ * you pick — and everything around it already said so (a sighting.json, a ?sighting= parameter, a
+ * `sighting` attribute on <rr0-ufo>). But pages were loading it under the old name before the new
+ * one existed, and a rename that breaks them is a rename that punishes the people who used the
+ * thing early. Both names, one element, indefinitely.
+ */
+export const LEGACY_ELEMENT_NAME = "rr0-eyewitness"
+
+/** Only so that the legacy name has a constructor of its own to be defined with: customElements
+ * refuses the same class twice, and there is nothing to add. */
+class LegacySightingElement extends SightingElement {
+}
+
+export function registerSighting(): void {
   registerScene()
-  if (!customElements.get(EYEWITNESS_ELEMENT_NAME)) {
-    customElements.define(EYEWITNESS_ELEMENT_NAME, EyewitnessElement)
+  if (!customElements.get(SIGHTING_ELEMENT_NAME)) {
+    customElements.define(SIGHTING_ELEMENT_NAME, SightingElement)
+  }
+  if (!customElements.get(LEGACY_ELEMENT_NAME)) {
+    customElements.define(LEGACY_ELEMENT_NAME, LegacySightingElement)
   }
 }

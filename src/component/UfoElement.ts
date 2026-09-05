@@ -239,7 +239,7 @@ export class UfoElement extends HTMLElement {
   }
 
   set sightingData(json: SightingRecordingJson) {
-    // Without this, switching sightings mid-playback (e.g. EyewitnessElement's witness picker)
+    // Without this, switching sightings mid-playback (e.g. SightingElement's witness picker)
     // orphans the old Player: its requestAnimationFrame loop was never cancelled, so it keeps
     // ticking in the background — calling this same onFrame with the *old* timeline's positions
     // and fighting the new player for the canvas/seek bar/labels. Symptom: after switching

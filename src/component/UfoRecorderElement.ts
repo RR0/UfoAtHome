@@ -2899,7 +2899,7 @@ export class UfoRecorderElement extends HTMLElement {
   /**
    * Rebuilds the strip of what this recording states, under the render.
    *
-   * Read off the Sighting through SightingSummary, the same class `<rr0-eyewitness>` shows the
+   * Read off the Sighting through SightingSummary, the same class `<rr0-sighting>` shows the
    * same recording with. An earlier version of this derived itself from the editor's own form —
    * cheaper, and translated for free, since the markup already pairs a label with a value and a
    * unit — but a player has no form, so showing the summary there meant either a second
@@ -5176,7 +5176,7 @@ export class UfoRecorderElement extends HTMLElement {
     document.removeEventListener("click", this.handleOutsideContextMenuClick)
   }
 
-  /** composedPath(), not event.target, for the same reason EyewitnessElement's own info-panel
+  /** composedPath(), not event.target, for the same reason SightingElement's own info-panel
    * outside-click handler uses it: target gets retargeted to the shadow host from outside this
    * element's own shadow boundary, losing the inside/outside distinction this needs. Registered
    * only while a menu is actually open (showContextMenu/showDecorContextMenu/hideContextMenu/

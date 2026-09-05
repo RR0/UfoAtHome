@@ -500,7 +500,7 @@ export class SceneElement extends HTMLElement {
 
   /** Undefined until a real, location-accurate terrain relief patch has finished its async build
    * (see SceneRenderer.setTerrainOrigin) — exposed for a composing wrapper's own on-demand credit
-   * display (see EyewitnessElement's info panel) rather than this element painting a permanent
+   * display (see SightingElement's info panel) rather than this element painting a permanent
    * corner label itself; a real-time pull (not push/cached) since it can resolve at any time. */
   get currentTerrainAttribution(): string | undefined {
     return this.sceneRenderer.currentTerrainAttribution

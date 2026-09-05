@@ -1,10 +1,10 @@
 import { describe, expect, it, afterEach, beforeAll, beforeEach, vi } from "vitest"
-import { registerEyewitness, EYEWITNESS_ELEMENT_NAME } from "../../src/component/EyewitnessElement.js"
-import type { EyewitnessElement } from "../../src/component/EyewitnessElement.js"
+import { registerSighting, SIGHTING_ELEMENT_NAME, LEGACY_ELEMENT_NAME } from "../../src/component/SightingElement.js"
+import type { SightingElement } from "../../src/component/SightingElement.js"
 
-registerEyewitness()
+registerSighting()
 
-// EyewitnessElement nests a <rr0-scene> (see its own class doc comment), so mounting it also
+// SightingElement nests a <rr0-scene> (see its own class doc comment), so mounting it also
 // constructs a SceneRenderer — which jsdom's <canvas> can't back with a real WebGL context (no
 // native `canvas` package here, same reason as the 2D mock below). Stubbed out entirely, same as
 // test/component/UfoRecorderElement.test.ts's identical mock.
@@ -92,16 +92,38 @@ beforeAll(() => {
   } as unknown as typeof ResizeObserver
 })
 
-function mount(): EyewitnessElement {
-  const element = document.createElement(EYEWITNESS_ELEMENT_NAME) as EyewitnessElement
+describe("the name this element had before 0.41.0", () => {
+  afterEach(() => {
+    document.body.innerHTML = ""
+  })
+
+  // Pages were loading it as <rr0-eyewitness> before <rr0-sighting> existed — rr0.org's own case
+  // files among them — and a rename that breaks them punishes whoever used the thing early.
+  it("still upgrades, and to the same element", () => {
+    const legacy = document.createElement(LEGACY_ELEMENT_NAME)
+    document.body.appendChild(legacy)
+    expect(legacy.shadowRoot).not.toBeNull()
+    expect(customElements.get(LEGACY_ELEMENT_NAME)!.prototype)
+      .toBeInstanceOf(customElements.get(SIGHTING_ELEMENT_NAME)!)
+  })
+
+  it("reads a recording the same way the new name does", () => {
+    const legacy = document.createElement(LEGACY_ELEMENT_NAME) as SightingElement
+    document.body.appendChild(legacy)
+    expect(legacy.shadowRoot!.querySelector("rr0-scene")).not.toBeNull()
+  })
+})
+
+function mount(): SightingElement {
+  const element = document.createElement(SIGHTING_ELEMENT_NAME) as SightingElement
   document.body.appendChild(element)
   return element
 }
 
-/** The nested <rr0-ufo> lives inside the element's own nested <rr0-scene> (see EyewitnessElement's
+/** The nested <rr0-ufo> lives inside the element's own nested <rr0-scene> (see SightingElement's
  * class doc comment) — SceneElement exposes it via its own public `ufoElement` field, no need to
  * query the shadow DOM a second level down. */
-function nestedScene(element: EyewitnessElement): { ufoElement: { canvasElement: unknown }; sightingData: unknown } {
+function nestedScene(element: SightingElement): { ufoElement: { canvasElement: unknown }; sightingData: unknown } {
   return element.shadowRoot!.querySelector("rr0-scene") as unknown as {
     ufoElement: { canvasElement: unknown }
     sightingData: unknown
@@ -148,7 +170,7 @@ function stubFetch(bySrc: Record<string, unknown>): ReturnType<typeof vi.fn> {
   return fetchMock
 }
 
-describe("EyewitnessElement", () => {
+describe("SightingElement", () => {
   beforeEach(() => {
     // Default stub so tests that don't care about the resulting fetch (just about the
     // element's own DOM state) don't leave an unhandled rejection from a real jsdom fetch
@@ -317,7 +339,7 @@ describe("EyewitnessElement", () => {
     const manifest = ["john.json"]
     stubFetch({ "witnesses.json": manifest, "john.json": johnSighting })
 
-    const element = document.createElement(EYEWITNESS_ELEMENT_NAME) as EyewitnessElement
+    const element = document.createElement(SIGHTING_ELEMENT_NAME) as SightingElement
     element.setAttribute("src", "witnesses.json")
     document.body.appendChild(element)
     await new Promise(resolve => setTimeout(resolve, 0))
@@ -329,7 +351,7 @@ describe("EyewitnessElement", () => {
   it("accepts src pointing directly at a single sighting.json, with no manifest file needed", async () => {
     stubFetch({ "sighting.json": johnSighting })
 
-    const element = document.createElement(EYEWITNESS_ELEMENT_NAME) as EyewitnessElement
+    const element = document.createElement(SIGHTING_ELEMENT_NAME) as SightingElement
     element.setAttribute("src", "sighting.json")
     document.body.appendChild(element)
     await new Promise(resolve => setTimeout(resolve, 0))
@@ -455,7 +477,7 @@ describe("EyewitnessElement", () => {
   })
 })
 
-describe("EyewitnessElement i18n", () => {
+describe("SightingElement i18n", () => {
   afterEach(() => {
     document.body.innerHTML = ""
     vi.unstubAllGlobals()
@@ -484,7 +506,7 @@ describe("EyewitnessElement i18n", () => {
  * The info panel hands the reader the two lines it takes to put this very observation on their
  * own page — either as a replay or as the editor, both taking the same absolute `src`.
  */
-describe("EyewitnessElement embed markup", () => {
+describe("SightingElement embed markup", () => {
   beforeEach(() => {
     stubFetch({ "john.json": johnSighting })
   })
@@ -507,8 +529,8 @@ describe("EyewitnessElement embed markup", () => {
     const shadow = await openInfoPanel()
     const markup = (shadow.querySelector("#embed-markup") as HTMLTextAreaElement).value
 
-    expect(markup).toContain("<rr0-eyewitness src=\"http://localhost:3000/john.json\"></rr0-eyewitness>")
-    expect(markup).toContain("rr0-eyewitness.mjs")
+    expect(markup).toContain("<rr0-sighting src=\"http://localhost:3000/john.json\"></rr0-sighting>")
+    expect(markup).toContain("rr0-sighting.mjs")
     expect(markup).toContain("<script type=\"module\"")
   })
 
@@ -529,7 +551,7 @@ describe("EyewitnessElement embed markup", () => {
  * say for the same instant: Chiles and Whitted saw their object at 02:45 over Montgomery, and
  * that stays 02:45 whoever opens the page from wherever.
  */
-describe("EyewitnessElement observation time", () => {
+describe("SightingElement observation time", () => {
   afterEach(() => {
     document.body.innerHTML = ""
   })
@@ -564,7 +586,7 @@ describe("EyewitnessElement observation time", () => {
  * observation's editor, clean off the page: nothing could scroll it back into view because an
  * absolutely-positioned panel adds nothing to the document's own height.
  */
-describe("EyewitnessElement info panel placement", () => {
+describe("SightingElement info panel placement", () => {
   afterEach(() => {
     document.body.innerHTML = ""
     vi.unstubAllGlobals()
@@ -629,7 +651,7 @@ describe("EyewitnessElement info panel placement", () => {
  * Both fold-outs live above the panel's sticky footer. After it, they open UNDERNEATH it — which
  * is how clicking Credits came to reveal a list nobody could see once the panel had a height cap.
  */
-describe("EyewitnessElement parameter labels", () => {
+describe("SightingElement parameter labels", () => {
   beforeEach(() => {
     stubFetch({ "john.json": johnSighting })
   })
@@ -638,7 +660,7 @@ describe("EyewitnessElement parameter labels", () => {
     document.body.innerHTML = ""
   })
 
-  async function mounted(showLabels = false): Promise<EyewitnessElement> {
+  async function mounted(showLabels = false): Promise<SightingElement> {
     const element = mount()
     if (showLabels) {
       element.setAttribute("show-labels", "")
@@ -648,7 +670,7 @@ describe("EyewitnessElement parameter labels", () => {
     return element
   }
 
-  function labels(element: EyewitnessElement): string[] {
+  function labels(element: SightingElement): string[] {
     return [...element.shadowRoot!.querySelectorAll(".param-label")].map(item => item.textContent!)
   }
 
@@ -740,7 +762,7 @@ describe("EyewitnessElement parameter labels", () => {
   })
 })
 
-describe("EyewitnessElement info panel fold-outs", () => {
+describe("SightingElement info panel fold-outs", () => {
   beforeEach(() => {
     stubFetch({ "john.json": johnSighting })
   })

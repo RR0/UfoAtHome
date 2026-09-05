@@ -238,7 +238,7 @@ export function sightingDurationBlockedReason(event: SightingEvent): "imprecise"
  * Timeline (the recording's own internal millisecond clock), a witness
  * reference, and — for cases with several witnesses, each with their own
  * recording — a shared case id so a page can group and label them (see
- * EyewitnessElement).
+ * SightingElement).
  *
  * `witness` is a lightweight `People` reference (deliberately no PII beyond
  * an id/dirName/title/name — no email/phone/address; see

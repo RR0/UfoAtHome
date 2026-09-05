@@ -19,7 +19,7 @@ export class PlayerPage implements SitePage {
       fr: "Ouvrez une reconstitution depuis un lien, ou collez-en une. Rien n'est téléversé : elle est "
         + "rejouée dans votre navigateur, sous le ciel réel de la date et du lieu qu'elle énonce."
     },
-    modules: ["/lib/rr0-eyewitness.mjs"]
+    modules: ["/lib/rr0-sighting.mjs"]
   }
 
   private readonly catalogue = new DemoCatalogue()
@@ -247,7 +247,7 @@ if (asked) {
 <section class="band">
   <div class="wrap">
     <div class="stage" id="player-stage-box" hidden>
-      <rr0-eyewitness id="player-stage"></rr0-eyewitness>
+      <rr0-sighting id="player-stage"></rr0-sighting>
       <p class="stage-caption">
         <a class="btn" id="player-edit" href="/editor/" hidden>Edit this sighting</a>
       </p>
@@ -287,7 +287,7 @@ ${this.form("en")}
 <section class="band">
   <div class="wrap">
     <div class="stage" id="player-stage-box" hidden>
-      <rr0-eyewitness id="player-stage"></rr0-eyewitness>
+      <rr0-sighting id="player-stage"></rr0-sighting>
       <p class="stage-caption">
         <a class="btn" id="player-edit" href="/editor/" hidden>Éditer cette observation</a>
       </p>

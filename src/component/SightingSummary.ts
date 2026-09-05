@@ -51,7 +51,7 @@ export interface SummaryContext {
  * Everything a recording states, as a flat list of label/value pairs.
  *
  * Read off the `Sighting` and not off any form, which is what lets the editor and the player show
- * the same summary of the same file — and the reason it exists at all: `<rr0-eyewitness>` has no
+ * the same summary of the same file — and the reason it exists at all: `<rr0-sighting>` has no
  * form to read. The cost of that is this class: a form's own markup already pairs a label with a
  * value and a unit, a model doesn't, so each field has to be named here once. It is named ONCE —
  * an earlier version of this summary lived in the recorder and derived itself from the editor's

@@ -1,6 +1,6 @@
 /** The field labels and value names that describe a Sighting itself — everything the
  * parameter summary needs to say what a recording states, and nothing about the editor
- * that produced it. Split out of UfoRecorderMessages so that `<rr0-eyewitness>` can show
+ * that produced it. Split out of UfoRecorderMessages so that `<rr0-sighting>` can show
  * the same summary without pulling in the recorder's other ~140 strings (1.7 KB against
  * 10.6 KB), and so that "Cloud cover" is written down exactly once. */
 export interface SightingLabels {

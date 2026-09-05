@@ -1,7 +1,7 @@
-import type { EyewitnessMessages } from "./EyewitnessMessages.js"
+import type { SightingMessages } from "./SightingMessages.js"
 import { sightingLabels_en } from "./SightingLabels_en.js"
 
-export const eyewitnessMessages_en: EyewitnessMessages = {
+export const sightingMessages_en: SightingMessages = {
   ...sightingLabels_en,
   testimonyBy: "Testimony by",
   unnamedWitness: "Witness {n}",

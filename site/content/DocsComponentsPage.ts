@@ -48,7 +48,7 @@ export class DocsComponentsPage extends DocsSection {
         shadow root, so your page's CSS cannot break them and they cannot break your page.</li>
     </ul>
     <p>They compose in one line: <code>&lt;rr0-scene&gt;</code> holds an
-      <code>&lt;rr0-ufo&gt;</code>, and both <code>&lt;rr0-eyewitness&gt;</code> and
+      <code>&lt;rr0-ufo&gt;</code>, and both <code>&lt;rr0-sighting&gt;</code> and
       <code>&lt;rr0-ufo-recorder&gt;</code> hold an <code>&lt;rr0-scene&gt;</code>. So everything
       under <code>&lt;rr0-ufo&gt;</code> below is available in all four — through
       <code>.scene.ufoElement</code> from the outermost, since the composition lives in a shadow
@@ -62,7 +62,7 @@ export class DocsComponentsPage extends DocsSection {
       <li><strong><code>&lt;rr0-scene&gt;</code> — the world around it.</strong> The real sky,
         horizon, weather and ground of a stated date, hour and place, with the object composited
         over them. Useful on its own for a sky with no object in it at all.</li>
-      <li><strong><code>&lt;rr0-eyewitness&gt;</code> — the account as something to read.</strong>
+      <li><strong><code>&lt;rr0-sighting&gt;</code> — the account as something to read.</strong>
         A scene plus who is testifying, the observation's own metadata, its credits, and the lines
         that let a reader take it elsewhere. This is what a published sighting looks like.</li>
       <li><strong><code>&lt;rr0-ufo-recorder&gt;</code> — the account as something to write.</strong>
@@ -75,12 +75,12 @@ export class DocsComponentsPage extends DocsSection {
     <div class="table-scroll">
     <table>
       <tr><th>What you are doing</th><th>Component</th><th>Module</th><th>gzip</th></tr>
-      <tr><td><strong>Showing a UFO sighting</strong> — a case file, an article, a report</td><td><code>&lt;rr0-eyewitness&gt;</code></td><td><code>/lib/rr0-eyewitness.mjs</code></td><td>249 KB</td></tr>
+      <tr><td><strong>Showing a UFO sighting</strong> — a case file, an article, a report</td><td><code>&lt;rr0-sighting&gt;</code></td><td><code>/lib/rr0-sighting.mjs</code></td><td>249 KB</td></tr>
       <tr><td><strong>Letting somebody describe or correct one</strong></td><td><code>&lt;rr0-ufo-recorder&gt;</code></td><td><code>/lib/rr0-ufo-recorder.mjs</code></td><td>293 KB</td></tr>
       <tr><td><strong>Showing a sky with no object in it</strong> — what a halo, a comet or a satellite pass looked like that night</td><td><code>&lt;rr0-scene&gt;</code></td><td><code>/lib/rr0-scene.mjs</code></td><td>238 KB</td></tr>
       <tr><td><strong>Showing a sighting inside a scene of your own</strong>, with no toolbar over it</td><td><code>&lt;rr0-scene&gt;</code></td><td><code>/lib/rr0-scene.mjs</code></td><td>238 KB</td></tr>
       <tr><td><strong>Illustrating a shape</strong> in the flow of an article, with no sky and no weight</td><td><code>&lt;rr0-ufo&gt;</code></td><td><code>/lib/rr0-ufo.mjs</code></td><td>16 KB</td></tr>
-      <tr><td><strong>Not sure</strong></td><td><code>&lt;rr0-eyewitness&gt;</code></td><td><code>/lib/rr0-eyewitness.mjs</code></td><td>249 KB</td></tr>
+      <tr><td><strong>Not sure</strong></td><td><code>&lt;rr0-sighting&gt;</code></td><td><code>/lib/rr0-sighting.mjs</code></td><td>249 KB</td></tr>
     </table>
     </div>
     <p>Putting one on a page is <a href="/docs/share/">two lines</a>.</p>
@@ -125,12 +125,12 @@ export class DocsComponentsPage extends DocsSection {
       a comet, a building, another witness — and says nothing where the ground hides what you are
       pointing at.</p>
 
-    <h2><code>&lt;rr0-eyewitness&gt;</code> — the standard sighting view</h2>
+    <h2><code>&lt;rr0-sighting&gt;</code> — the standard sighting view</h2>
     <p>The default for a real sighting, one witness or several. It composes an
       <code>&lt;rr0-scene&gt;</code> and adds the toolbar: who is testifying, and the <q>?</q> panel
       with the observation's own metadata, its credits and its embed lines.</p>
-    <pre><code>&lt;rr0-eyewitness src="sighting.json"&gt;&lt;/rr0-eyewitness&gt;
-&lt;rr0-eyewitness src="witnesses.json"&gt;&lt;/rr0-eyewitness&gt;  &lt;!-- a manifest --&gt;</code></pre>
+    <pre><code>&lt;rr0-sighting src="sighting.json"&gt;&lt;/rr0-sighting&gt;
+&lt;rr0-sighting src="witnesses.json"&gt;&lt;/rr0-sighting&gt;  &lt;!-- a manifest --&gt;</code></pre>
     <div class="table-scroll">
     <table>
       <tr><th>Member</th><th>Kind</th><th>What it does</th></tr>
@@ -175,7 +175,7 @@ export class DocsComponentsPage extends DocsSection {
     <p>After <code>npm install @rr0/ufoathome</code>:</p>
     <pre><code>import "@rr0/ufoathome/ufo"        // registers &lt;rr0-ufo&gt;
 import "@rr0/ufoathome/scene"      // registers &lt;rr0-scene&gt;
-import "@rr0/ufoathome/eyewitness" // registers &lt;rr0-eyewitness&gt;
+import "@rr0/ufoathome/sighting" // registers &lt;rr0-sighting&gt;
 import "@rr0/ufoathome/recorder"   // registers &lt;rr0-ufo-recorder&gt;</code></pre>
     <p>Or copy the contents of the package's <code>dist-embed*</code> directories onto your own
       server and point the <code>&lt;script src&gt;</code> there. Each module references its own
@@ -215,7 +215,7 @@ import "@rr0/ufoathome/recorder"   // registers &lt;rr0-ufo-recorder&gt;</code><
         peuvent pas casser votre page.</li>
     </ul>
     <p>Ils se composent en ligne : <code>&lt;rr0-scene&gt;</code> contient un
-      <code>&lt;rr0-ufo&gt;</code>, et <code>&lt;rr0-eyewitness&gt;</code> comme
+      <code>&lt;rr0-ufo&gt;</code>, et <code>&lt;rr0-sighting&gt;</code> comme
       <code>&lt;rr0-ufo-recorder&gt;</code> contiennent un <code>&lt;rr0-scene&gt;</code>. Tout ce
       qui figure sous <code>&lt;rr0-ufo&gt;</code> ci-dessous est donc disponible dans les quatre —
       via <code>.scene.ufoElement</code> depuis le plus extérieur, la composition vivant dans un
@@ -229,7 +229,7 @@ import "@rr0/ufoathome/recorder"   // registers &lt;rr0-ufo-recorder&gt;</code><
       <li><strong><code>&lt;rr0-scene&gt;</code> — le monde autour.</strong> Le ciel, l'horizon, la
         météo et le sol réels d'une date, d'une heure et d'un lieu énoncés, avec l'objet composé
         par-dessus. Utile seul pour un ciel où il n'y a aucun objet.</li>
-      <li><strong><code>&lt;rr0-eyewitness&gt;</code> — le récit, à lire.</strong> Une scène, plus
+      <li><strong><code>&lt;rr0-sighting&gt;</code> — le récit, à lire.</strong> Une scène, plus
         qui témoigne, les métadonnées de l'observation, ses crédits, et les lignes qui permettent à
         un lecteur de l'emporter ailleurs. C'est à cela que ressemble une observation publiée.</li>
       <li><strong><code>&lt;rr0-ufo-recorder&gt;</code> — le récit, à écrire.</strong> Tout ce qui
@@ -243,12 +243,12 @@ import "@rr0/ufoathome/recorder"   // registers &lt;rr0-ufo-recorder&gt;</code><
     <div class="table-scroll">
     <table>
       <tr><th>Ce que vous faites</th><th>Composant</th><th>Module</th><th>gzip</th></tr>
-      <tr><td><strong>Montrer une observation d'ovni</strong> — un dossier, un article, un rapport</td><td><code>&lt;rr0-eyewitness&gt;</code></td><td><code>/lib/rr0-eyewitness.mjs</code></td><td>249 Ko</td></tr>
+      <tr><td><strong>Montrer une observation d'ovni</strong> — un dossier, un article, un rapport</td><td><code>&lt;rr0-sighting&gt;</code></td><td><code>/lib/rr0-sighting.mjs</code></td><td>249 Ko</td></tr>
       <tr><td><strong>Laisser quelqu'un en décrire ou en corriger une</strong></td><td><code>&lt;rr0-ufo-recorder&gt;</code></td><td><code>/lib/rr0-ufo-recorder.mjs</code></td><td>293 Ko</td></tr>
       <tr><td><strong>Montrer un ciel sans objet dedans</strong> — ce qu'un halo, une comète ou un passage satellite donnaient cette nuit-là</td><td><code>&lt;rr0-scene&gt;</code></td><td><code>/lib/rr0-scene.mjs</code></td><td>238 Ko</td></tr>
       <tr><td><strong>Montrer une observation dans une scène à vous</strong>, sans barre d'outils par-dessus</td><td><code>&lt;rr0-scene&gt;</code></td><td><code>/lib/rr0-scene.mjs</code></td><td>238 Ko</td></tr>
       <tr><td><strong>Illustrer une forme</strong> au fil d'un article, sans ciel et sans poids</td><td><code>&lt;rr0-ufo&gt;</code></td><td><code>/lib/rr0-ufo.mjs</code></td><td>16 Ko</td></tr>
-      <tr><td><strong>Vous ne savez pas</strong></td><td><code>&lt;rr0-eyewitness&gt;</code></td><td><code>/lib/rr0-eyewitness.mjs</code></td><td>249 Ko</td></tr>
+      <tr><td><strong>Vous ne savez pas</strong></td><td><code>&lt;rr0-sighting&gt;</code></td><td><code>/lib/rr0-sighting.mjs</code></td><td>249 Ko</td></tr>
     </table>
     </div>
     <p>En poser un sur une page, c'est <a href="/docs/share/">deux lignes</a>.</p>
@@ -294,12 +294,12 @@ import "@rr0/ufoathome/recorder"   // registers &lt;rr0-ufo-recorder&gt;</code><
       planète, une comète, un bâtiment, un autre témoin — et ne dit rien là où le sol cache ce que
       vous pointez.</p>
 
-    <h2><code>&lt;rr0-eyewitness&gt;</code> — la vue standard d'une observation</h2>
+    <h2><code>&lt;rr0-sighting&gt;</code> — la vue standard d'une observation</h2>
     <p>Le choix par défaut pour une observation réelle, à un témoin ou plusieurs. Il compose un
       <code>&lt;rr0-scene&gt;</code> et ajoute la barre d'outils : qui témoigne, et le panneau
       <q>?</q> avec les métadonnées de l'observation, ses crédits et ses lignes d'intégration.</p>
-    <pre><code>&lt;rr0-eyewitness src="sighting.json"&gt;&lt;/rr0-eyewitness&gt;
-&lt;rr0-eyewitness src="temoins.json"&gt;&lt;/rr0-eyewitness&gt;  &lt;!-- un manifeste --&gt;</code></pre>
+    <pre><code>&lt;rr0-sighting src="sighting.json"&gt;&lt;/rr0-sighting&gt;
+&lt;rr0-sighting src="temoins.json"&gt;&lt;/rr0-sighting&gt;  &lt;!-- un manifeste --&gt;</code></pre>
     <div class="table-scroll">
     <table>
       <tr><th>Membre</th><th>Nature</th><th>Rôle</th></tr>
@@ -344,7 +344,7 @@ import "@rr0/ufoathome/recorder"   // registers &lt;rr0-ufo-recorder&gt;</code><
     <p>Après <code>npm install @rr0/ufoathome</code> :</p>
     <pre><code>import "@rr0/ufoathome/ufo"        // enregistre &lt;rr0-ufo&gt;
 import "@rr0/ufoathome/scene"      // enregistre &lt;rr0-scene&gt;
-import "@rr0/ufoathome/eyewitness" // enregistre &lt;rr0-eyewitness&gt;
+import "@rr0/ufoathome/sighting" // enregistre &lt;rr0-sighting&gt;
 import "@rr0/ufoathome/recorder"   // enregistre &lt;rr0-ufo-recorder&gt;</code></pre>
     <p>Ou recopiez le contenu des répertoires <code>dist-embed*</code> du paquet sur votre serveur et
       pointez le <code>&lt;script src&gt;</code> dessus. Chaque module référence ses ressources —

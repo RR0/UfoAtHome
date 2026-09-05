@@ -15,7 +15,7 @@ const thunderPlayed: number[] = []
 const meteorShowersSet: { count: number; altitudeDeg: number }[] = []
 
 // jsdom's <canvas> can back neither WebGL nor Web Audio, so both are stubbed whole — same reason
-// and shape as EyewitnessElement.test.ts's identical SceneRenderer mock.
+// and shape as SightingElement.test.ts's identical SceneRenderer mock.
 vi.mock("../../src/render3d/SceneRenderer.js", () => ({
   SceneRenderer: class {
     resize(): void {}

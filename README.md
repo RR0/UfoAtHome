@@ -10,7 +10,7 @@ testimony is more faithful than an oral or written one.
 Originally a Java applet (2003), the project has been rewritten from scratch in TypeScript: a small,
 dependency-light engine (keyframe timeline, recording, playback, Canvas2D rendering) wrapped in four vanilla
 [Web Components](https://developer.mozilla.org/en-US/docs/Web/API/Web_components) — no UI framework, no build step
-required by the consuming page. Two of the four (`<rr0-scene>`, and `<rr0-eyewitness>` which always composes it) pull
+required by the consuming page. Two of the four (`<rr0-scene>`, and `<rr0-sighting>` which always composes it) pull
 in [Three.js](https://threejs.org/) for the 3D backdrop — see [`<rr0-scene>`](#rr0-scene--3d-decor) below for why
 that's an isolated, opt-in bundle rather than a project-wide dependency.
 
@@ -22,7 +22,7 @@ its default behavior and `<rr0-ufo-recorder>` is the one that needs a qualifier 
 real-world time and place, with no UFO-specific logic of its own — today it composes a nested `<rr0-ufo>` for the
 common case (see its section below), but the decor itself could back other kinds of reconstructions later. A fully
 generic version (accepting arbitrary overlay content instead of always creating its own `<rr0-ufo>`) is a natural
-follow-up, not implemented yet. `<rr0-eyewitness>` (renamed from `<rr0-ufo-witnesses>` — see below) is the standard
+follow-up, not implemented yet. `<rr0-sighting>` (renamed from `<rr0-ufo-witnesses>` — see below) is the standard
 way to display any real sighting, whether it has one witness or several: a witness account always implies a real
 place and time, so it always composes `<rr0-scene>`, never a bare `<rr0-ufo>`.
 
@@ -43,7 +43,7 @@ imported, no explicit setup call needed:
 <script type="module" src="/node_modules/@rr0/ufoathome/dist-embed-ufo/rr0-ufo.mjs"></script>
 <script type="module" src="/node_modules/@rr0/ufoathome/dist-embed/rr0-ufo-recorder.mjs"></script>
 <script type="module" src="/node_modules/@rr0/ufoathome/dist-embed-scene/rr0-scene.mjs"></script>
-<script type="module" src="/node_modules/@rr0/ufoathome/dist-embed-eyewitness/rr0-eyewitness.mjs"></script>
+<script type="module" src="/node_modules/@rr0/ufoathome/dist-embed-sighting/rr0-sighting.mjs"></script>
 ```
 
 or, from a bundler:
@@ -52,10 +52,10 @@ or, from a bundler:
 import "@rr0/ufoathome/ufo"        // registers <rr0-ufo>
 import "@rr0/ufoathome/recorder"   // registers <rr0-ufo-recorder> (and <rr0-scene>, which it composes)
 import "@rr0/ufoathome/scene"      // registers <rr0-scene> (and <rr0-ufo>, which it composes)
-import "@rr0/ufoathome/eyewitness" // registers <rr0-eyewitness> (and <rr0-scene>, which it composes)
+import "@rr0/ufoathome/eyewitness" // registers <rr0-sighting> (and <rr0-scene>, which it composes)
 ```
 
-Only load the one(s) a given page actually needs — `rr0-scene.mjs` and `rr0-eyewitness.mjs` in particular pull in
+Only load the one(s) a given page actually needs — `rr0-scene.mjs` and `rr0-sighting.mjs` in particular pull in
 Three.js and are far heavier than the other two (see their sections below), so pages that just need playback of an
 already-drawn shape with no astronomy backdrop should stick to `rr0-ufo.mjs`.
 
@@ -315,7 +315,7 @@ The UFO shape itself deliberately stays a 2D overlay on top of the 3D decor, nev
 what the witness reported — possibly a misidentification or optical effect — not something to interpret as a real
 3D shape. Only the surrounding environment, independently computable from real astronomy, is rendered in 3D.
 
-## `<rr0-eyewitness>` — standard sighting view
+## `<rr0-sighting>` — standard sighting view
 
 The standard way to display any real sighting, whether it has one witness or several — renamed from
 `<rr0-ufo-witnesses>` once it stopped being just a multi-witness selector (see [Naming](#naming)). It composes a
@@ -323,7 +323,7 @@ nested `<rr0-scene>` (not a bare `<rr0-ufo>`) the same way `<rr0-ufo-recorder>` 
 always a real sighting and always needs the real sky/ground backdrop.
 
 ```html
-<rr0-eyewitness src="sighting.json"></rr0-eyewitness>
+<rr0-sighting src="sighting.json"></rr0-sighting>
 ```
 
 `src` accepts either a single witness's `sighting.json` directly (the common case — no extra file needed) or, for
@@ -384,11 +384,11 @@ A footer row holds the app's own name/version on the left — linking to that ve
 fold-outs on the right, both closed until asked for:
 
 - **Embed** hands out the two self-contained lines it takes to put this observation on any other page, either as a
-  replay (`<rr0-eyewitness>`) or as the editor (`<rr0-ufo-recorder>`), with absolute URLs and a copy button:
+  replay (`<rr0-sighting>`) or as the editor (`<rr0-ufo-recorder>`), with absolute URLs and a copy button:
 
   ```html
-  <script type="module" src="https://rr0.org/science/crypto/ufo/rr0-eyewitness.mjs"></script>
-  <rr0-eyewitness src="https://rr0.org/science/crypto/ufo/enquete/dossier/Socorro/sighting.json"></rr0-eyewitness>
+  <script type="module" src="https://rr0.org/science/crypto/ufo/rr0-sighting.mjs"></script>
+  <rr0-sighting src="https://rr0.org/science/crypto/ufo/enquete/dossier/Socorro/sighting.json"></rr0-sighting>
   ```
 
   The script URL is derived from where the running bundle was itself loaded from (`import.meta.url`), never
@@ -414,7 +414,7 @@ interface SightingRecordingJson {
   utcOffsetHours?: number // the LEGAL time zone the witness's clock was on (+1 for France in 1965, -7 for New Mexico in April 1964). Absent = approximated from the longitude, which cannot know legal time or a daylight-saving switch
   place?: { lat: number, lng: number, name?: string }[] // `name` is the fully qualified place name the coordinates were resolved from — see Naming a place
   witness?: { id?: string, dirName?: string, title?: string, lastName?: string, firstNames?: string[] } // every field optional — supply whichever is known; omit entirely for an anonymous witness
-  caseId?: string // shared by every witness's own sighting.json for the same case — see <rr0-eyewitness>
+  caseId?: string // shared by every witness's own sighting.json for the same case — see <rr0-sighting>
   description?: string
   tags?: string[]
   timeline: {
@@ -805,10 +805,10 @@ case's `sighting.json` from its `RR0Event`).
 - `src/component/` — the four Web Components. `UfoElement` (`<rr0-ufo>`) owns the canvas/playback; `SceneElement`
   (`<rr0-scene>`) composes it directly (via `document.createElement`, not an inline template tag — see the
   comment at that call site) rather than duplicating it, adding the 3D decor on top. `UfoRecorderElement` and
-  `EyewitnessElement` (`<rr0-eyewitness>`) both compose a `SceneElement` in turn (not `UfoElement` directly) —
+  `SightingElement` (`<rr0-sighting>`) both compose a `SceneElement` in turn (not `UfoElement` directly) —
   the recorder reaches through to its public `ufoElement` property for the actual canvas/timeline/appearance work
   (the toolbar edits the exact same `Sighting` instance the nested scene renders from, so an observer/time/
-  appearance change needs no separate sync step to reach the sky), while `EyewitnessElement` reaches through to
+  appearance change needs no separate sync step to reach the sky), while `SightingElement` reaches through to
   its public `sightingData`/`currentTerrainAttribution` for its own toolbar (witness picker) and info panel.
 - Playback linearly interpolates shapes between a source's surrounding keyframes for smooth motion
   (`Timeline.getInterpolatedShapeAt`/`Shape.lerpShape`), holding at the ends of its recorded range.
@@ -825,7 +825,7 @@ npm run build                 # type-check + build the demo
 npm run build:embed            # build dist-embed/rr0-ufo-recorder.mjs
 npm run build:embed-ufo         # build dist-embed-ufo/rr0-ufo.mjs
 npm run build:embed-scene       # build dist-embed-scene/rr0-scene.mjs
-npm run build:embed-eyewitness  # build dist-embed-eyewitness/rr0-eyewitness.mjs
+npm run build:embed-sighting  # build dist-embed-sighting/rr0-sighting.mjs
 npm run build:all              # all four
 npm run build:site             # ufoathome.org, into dist-site/
 npm run build:comets           # regenerate the comet catalog from JPL Horizons

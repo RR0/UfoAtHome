@@ -733,7 +733,7 @@ describe("UfoElement", () => {
   })
 
   it("switching sightingData mid-playback cancels the old player's animation loop instead of leaking it", () => {
-    // Regression: EyewitnessElement assigns a new sightingData when the visitor switches
+    // Regression: SightingElement assigns a new sightingData when the visitor switches
     // witnesses. Doing that mid-playback used to leave the *old* Player's requestAnimationFrame
     // loop running — nothing had ever paused/stopped it, so it kept ticking in the background,
     // calling this same onFrame with the *old* timeline's positions and fighting the new player

@@ -1,15 +1,15 @@
 import type { SightingLabels } from "./SightingLabels.js"
 
-/** Contract for `<rr0-eyewitness>`'s user-visible label strings — implemented per language
- * under this directory (`EyewitnessMessages_en.ts`, `EyewitnessMessages_fr.ts`) and loaded via
- * `loadEyewitnessMessages`. */
+/** Contract for `<rr0-sighting>`'s user-visible label strings — implemented per language
+ * under this directory (`SightingMessages_en.ts`, `SightingMessages_fr.ts`) and loaded via
+ * `loadSightingMessages`. */
 /* `tags` is not repeated here: SightingLabels already names that field, and one string with two
  * homes is one string that can end up translated two ways. */
-export interface EyewitnessMessages extends SightingLabels {
+export interface SightingMessages extends SightingLabels {
   testimonyBy: string
   /** A listed witness with no name of any kind in their own recording, `{n}` being their place in
    * the list. Only ever needed for a MANIFEST — a single unnamed witness gets no line at all, see
-   * EyewitnessElement.updateTestimonyLine. */
+   * SightingElement.updateTestimonyLine. */
   unnamedWitness: string
   about: string
   close: string

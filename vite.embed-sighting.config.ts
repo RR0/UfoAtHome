@@ -9,16 +9,16 @@ export default defineConfig({
     __APP_VERSION__: JSON.stringify(pkg.version)
   },
   build: {
-    outDir: "dist-embed-eyewitness",
+    outDir: "dist-embed-sighting",
     emptyOutDir: true,
     copyPublicDir: false,
     assetsDir: "",
     target: "es2022",
     rollupOptions: {
-      input: "src/embed-eyewitness.ts",
+      input: "src/embed-sighting.ts",
       output: {
         format: "es",
-        entryFileNames: "rr0-eyewitness.mjs"
+        entryFileNames: "rr0-sighting.mjs"
       }
     }
   }

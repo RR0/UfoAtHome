@@ -18,7 +18,7 @@ export class HomePage implements SitePage {
       fr: "UFO@home est un outil libre qui rejoue une observation d'ovni telle que son témoin l'a décrite — "
         + "la forme, son mouvement, et le ciel réel de cette date, de cette heure et de ce lieu."
     },
-    modules: ["/lib/rr0-eyewitness.mjs"]
+    modules: ["/lib/rr0-sighting.mjs"]
   }
 
   private readonly catalogue = new DemoCatalogue()
@@ -123,7 +123,7 @@ show(0)`
     <div class="carousel" id="hero-carousel" data-auto="on">
       <div class="stage">
         <div class="carousel-viewport">
-          <rr0-eyewitness id="hero-stage"></rr0-eyewitness>
+          <rr0-sighting id="hero-stage"></rr0-sighting>
           <button class="carousel-nav is-prev" type="button" data-step="-1" aria-label="${fr ? "Précédente" : "Previous"}"></button>
           <button class="carousel-nav is-next" type="button" data-step="1" aria-label="${fr ? "Suivante" : "Next"}"></button>
         </div>

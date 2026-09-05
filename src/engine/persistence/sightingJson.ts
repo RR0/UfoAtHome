@@ -33,7 +33,7 @@ export interface SightingRecordingJson {
   /** See Sighting.witness. */
   witness?: People
   /** See Sighting.caseId — shared by every witness's own sighting.json for the same case, so
-   * a page (e.g. EyewitnessElement) can group and label them without a separate manifest
+   * a page (e.g. SightingElement) can group and label them without a separate manifest
    * duplicating names that could drift out of sync with the actual files. */
   caseId?: string
   /** See SightingEvent.description. */

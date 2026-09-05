@@ -24,7 +24,7 @@ export class DocsSharePage extends DocsSection {
       fr: "Deux façons de faire voir une reconstitution : un lien, ou deux lignes sur votre propre "
         + "page. Les deux avec un exemple qui marche, à essayer et à copier."
     },
-    modules: ["/lib/rr0-eyewitness.mjs"],
+    modules: ["/lib/rr0-sighting.mjs"],
     asideFromNav: true
   }
 
@@ -65,8 +65,8 @@ const preview = document.getElementById("share-preview")
 const playerLink = url => location.origin + player + "?sighting=" + encodeURIComponent(url)
 
 const embedMarkup = url =>
-  '<script type="module" src="' + location.origin + '/lib/rr0-eyewitness.mjs"><' + '/script>\\n' +
-  '<rr0-eyewitness src="' + url + '"><' + '/rr0-eyewitness>'
+  '<script type="module" src="' + location.origin + '/lib/rr0-sighting.mjs"><' + '/script>\\n' +
+  '<rr0-sighting src="' + url + '"><' + '/rr0-sighting>'
 
 /** Clipboard writes are refused in an insecure context and by some permission settings, so the
  * fallback selects the text instead of failing silently — the reader can then copy it themselves. */
@@ -207,7 +207,7 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
 
     <p class="doc-try-label">The result:</p>
     <div class="stage stage-padded">
-      <rr0-eyewitness id="share-preview"></rr0-eyewitness>
+      <rr0-sighting id="share-preview"></rr0-sighting>
     </div>
 
     <p>That is a live element, not a picture — the same one those two lines would give you. Which of
@@ -286,7 +286,7 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
 
     <p class="doc-try-label">Le résultat :</p>
     <div class="stage stage-padded">
-      <rr0-eyewitness id="share-preview"></rr0-eyewitness>
+      <rr0-sighting id="share-preview"></rr0-sighting>
     </div>
 
     <p>C'est un élément vivant, pas une image — celui-là même que ces deux lignes vous donneraient.

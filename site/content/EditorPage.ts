@@ -328,8 +328,8 @@ if (docs) {
       <p><strong>Export</strong> gives you a JSON file. That file is the whole recording — there is no
         account, no database, and no copy kept here. Host it wherever you like, and put the
         reconstruction on any page with two lines:</p>
-      <pre><code>&lt;script type="module" src="https://ufoathome.org/lib/rr0-eyewitness.mjs"&gt;&lt;/script&gt;
-&lt;rr0-eyewitness src="https://example.org/my-case/sighting.json"&gt;&lt;/rr0-eyewitness&gt;</code></pre>
+      <pre><code>&lt;script type="module" src="https://ufoathome.org/lib/rr0-sighting.mjs"&gt;&lt;/script&gt;
+&lt;rr0-sighting src="https://example.org/my-case/sighting.json"&gt;&lt;/rr0-sighting&gt;</code></pre>
       <p>Every published reconstruction hands out those two lines itself, from the <q>?</q> button in
         its toolbar, with absolute URLs already filled in and a copy button. The only requirement is
         that your JSON be readable cross-origin — one <code>Access-Control-Allow-Origin</code>
@@ -340,7 +340,7 @@ if (docs) {
         <tr><th>Element</th><th>What it is</th><th>Size (gzip)</th></tr>
         <tr><td><code>&lt;rr0-ufo&gt;</code></td><td>The 2D shape and its playback, no backdrop</td><td>16 KB</td></tr>
         <tr><td><code>&lt;rr0-scene&gt;</code></td><td>The 3D sky/ground decor for a real time and place</td><td>238 KB</td></tr>
-        <tr><td><code>&lt;rr0-eyewitness&gt;</code></td><td>The standard sighting view: one or several witnesses, in their scene</td><td>249 KB</td></tr>
+        <tr><td><code>&lt;rr0-sighting&gt;</code></td><td>The standard sighting view: one or several witnesses, in their scene</td><td>249 KB</td></tr>
         <tr><td><code>&lt;rr0-ufo-recorder&gt;</code></td><td>This editor</td><td>293 KB</td></tr>
       </table>
       </div>
@@ -606,8 +606,8 @@ if (docs) {
         l'enregistrement complet : il n'y a ni compte, ni base de données, ni copie conservée ici.
         Hébergez-le où vous voulez, et posez la reconstitution sur n'importe quelle page en deux
         lignes :</p>
-      <pre><code>&lt;script type="module" src="https://ufoathome.org/lib/rr0-eyewitness.mjs"&gt;&lt;/script&gt;
-&lt;rr0-eyewitness src="https://exemple.org/mon-dossier/sighting.json"&gt;&lt;/rr0-eyewitness&gt;</code></pre>
+      <pre><code>&lt;script type="module" src="https://ufoathome.org/lib/rr0-sighting.mjs"&gt;&lt;/script&gt;
+&lt;rr0-sighting src="https://exemple.org/mon-dossier/sighting.json"&gt;&lt;/rr0-sighting&gt;</code></pre>
       <p>Chaque reconstitution publiée distribue elle-même ces deux lignes, depuis le bouton
         <q>?</q> de sa barre d'outils, URLs absolues déjà remplies et bouton de copie compris. La
         seule exigence est que votre JSON soit lisible d'une autre origine — un en-tête
@@ -620,7 +620,7 @@ if (docs) {
         <tr><th>Élément</th><th>Ce que c'est</th><th>Taille (gzip)</th></tr>
         <tr><td><code>&lt;rr0-ufo&gt;</code></td><td>La forme 2D et sa lecture, sans décor</td><td>16 Ko</td></tr>
         <tr><td><code>&lt;rr0-scene&gt;</code></td><td>Le décor 3D ciel/sol pour une date et un lieu réels</td><td>238 Ko</td></tr>
-        <tr><td><code>&lt;rr0-eyewitness&gt;</code></td><td>La vue standard : un ou plusieurs témoins, dans leur décor</td><td>249 Ko</td></tr>
+        <tr><td><code>&lt;rr0-sighting&gt;</code></td><td>La vue standard : un ou plusieurs témoins, dans leur décor</td><td>249 Ko</td></tr>
         <tr><td><code>&lt;rr0-ufo-recorder&gt;</code></td><td>Cet éditeur</td><td>293 Ko</td></tr>
       </table>
       </div>

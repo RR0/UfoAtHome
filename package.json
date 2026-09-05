@@ -17,13 +17,14 @@
     "./ufo": "./dist-embed-ufo/rr0-ufo.mjs",
     "./recorder": "./dist-embed/rr0-ufo-recorder.mjs",
     "./scene": "./dist-embed-scene/rr0-scene.mjs",
-    "./eyewitness": "./dist-embed-eyewitness/rr0-eyewitness.mjs"
+    "./sighting": "./dist-embed-sighting/rr0-sighting.mjs",
+    "./eyewitness": "./dist-embed-sighting/rr0-sighting.mjs"
   },
   "files": [
     "dist-embed",
     "dist-embed-ufo",
     "dist-embed-scene",
-    "dist-embed-eyewitness"
+    "dist-embed-sighting"
   ],
   "scripts": {
     "dev": "vite",
@@ -31,13 +32,13 @@
     "build:embed": "tsc --noEmit && vite build --config vite.embed.config.ts",
     "build:embed-ufo": "tsc --noEmit && vite build --config vite.embed-ufo.config.ts",
     "build:embed-scene": "tsc --noEmit && vite build --config vite.embed-scene.config.ts",
-    "build:embed-eyewitness": "tsc --noEmit && vite build --config vite.embed-eyewitness.config.ts",
-    "build:all": "npm run build && npm run build:embed && npm run build:embed-ufo && npm run build:embed-scene && npm run build:embed-eyewitness",
-    "build:site": "npm run build:schema && npm run build:embed && npm run build:embed-ufo && npm run build:embed-scene && npm run build:embed-eyewitness && vite build --config vite.site.config.ts && tsx site/build.ts",
+    "build:embed-sighting": "tsc --noEmit && vite build --config vite.embed-sighting.config.ts",
+    "build:all": "npm run build && npm run build:embed && npm run build:embed-ufo && npm run build:embed-scene && npm run build:embed-sighting",
+    "build:site": "npm run build:schema && npm run build:embed && npm run build:embed-ufo && npm run build:embed-scene && npm run build:embed-sighting && vite build --config vite.site.config.ts && tsx site/build.ts",
     "site": "tsx site/build.ts",
     "site:watch": "node --watch-path=./site --watch-path=./public/demo-data --import tsx site/build.ts",
     "site:serve": "vite preview --outDir dist-site --port 5181 --strictPort",
-    "prepublishOnly": "npm run build:embed && npm run build:embed-ufo && npm run build:embed-scene && npm run build:embed-eyewitness && npm test",
+    "prepublishOnly": "npm run build:embed && npm run build:embed-ufo && npm run build:embed-scene && npm run build:embed-sighting && npm test",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",

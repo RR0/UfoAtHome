@@ -77,7 +77,7 @@ export class FaqPage implements SitePage {
         comet and satellite catalogues are generated ahead of time and shipped inside the bundle,
         so nothing is fetched for those.</p>
       <p>A page that only <em>replays</em> a finished recording (<code>&lt;rr0-ufo&gt;</code>,
-        <code>&lt;rr0-scene&gt;</code>, <code>&lt;rr0-eyewitness&gt;</code>) makes no lookup at all
+        <code>&lt;rr0-scene&gt;</code>, <code>&lt;rr0-sighting&gt;</code>) makes no lookup at all
         beyond the terrain and imagery tiles — a published recording carries its own weather and is
         never looked up again, which is also why it reads identically years later.</p>
     </div>
@@ -333,7 +333,7 @@ export class FaqPage implements SitePage {
         dans le <i lang="en">bundle</i>, donc rien n'est appelé pour eux.</p>
       <p>Une page qui ne fait que <em>rejouer</em> un enregistrement terminé
         (<code>&lt;rr0-ufo&gt;</code>, <code>&lt;rr0-scene&gt;</code>,
-        <code>&lt;rr0-eyewitness&gt;</code>) ne fait aucune consultation, hors les tuiles de relief
+        <code>&lt;rr0-sighting&gt;</code>) ne fait aucune consultation, hors les tuiles de relief
         et d'imagerie : un enregistrement publié porte sa propre météo et n'est jamais reconsulté —
         c'est aussi pourquoi il se lit à l'identique des années plus tard.</p>
     </div>
