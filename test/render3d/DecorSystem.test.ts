@@ -183,6 +183,27 @@ describe("DecorSystem stated size", () => {
   })
 })
 
+describe("DecorSystem.usesModel", () => {
+  const model = { id: "some-model" }
+
+  it("uses the model an object names", () => {
+    expect(DecorSystem.usesModel(vehicle({ model }))).toBe(true)
+  })
+
+  it("does not, while the witness is inside the object", () => {
+    // A downloaded model is a hull. From inside one, with front-facing materials, you see straight
+    // through it and the object simply is not there — where what the recording placed the witness
+    // to look at is the room the built-in shape builds around them, window openings and all.
+    expect(DecorSystem.usesModel(vehicle({ model, witnessSide: "front-left" }))).toBe(false)
+    expect(DecorSystem.usesModel(building({ model, witnessSide: "front" }))).toBe(false)
+  })
+
+  it("still does for a kind nobody can be inside of, whatever witnessSide says", () => {
+    const tree: DecorObject = { id: "t", kind: "tree", eastM: 0, northM: 0, model, witnessSide: "front" }
+    expect(DecorSystem.usesModel(tree)).toBe(true)
+  })
+})
+
 describe("DecorSystem.applyModel", () => {
   /** A stand-in for a loaded glTF scene: a 2 x 1 x 4 box whose base sits at y=0, offset away from
    * the origin the way an exported model usually is. */
@@ -225,18 +246,38 @@ describe("DecorSystem.applyModel", () => {
     expect((box.min.y + box.max.y) / 2).toBeCloseTo(0, 5)
   })
 
-  it("keeps the model at its own metres when the recording measured nothing", () => {
-    const object = vehicle()
+  it("fits to whichever axis the recording measured, not always the length", () => {
+    // A witness who gave only the height of a lamp post measured the thing about it that matters.
+    const object: DecorObject = { id: "l", kind: "streetlight", eastM: 0, northM: 0, sizeM: { heightM: 4.5 } }
     const group = DecorSystem.build(object, false)
     DecorSystem.applyModel(group, object, loadedModel())
     const box = new Box3().setFromObject(group)
-    expect(box.max.z - box.min.z).toBeCloseTo(4, 5) // glTF's own unit is the metre
+    expect(box.max.y - box.min.y).toBeCloseTo(4.5, 5)
+    expect(box.max.z - box.min.z).toBeCloseTo(4.5 * 4, 5) // the model's own 1:4 height:length kept
+  })
+
+  it("falls back to what the catalogue says the real thing measures, since a model file is in whatever unit its author worked in", () => {
+    // Kenney's kits export a car as 2.9 UNITS long, not 2.9 metres. With nothing to fit to, an
+    // unmeasured object would come out at an arbitrary scale that looks like a claim and is not one.
+    const object = vehicle()
+    const group = DecorSystem.build(object, false)
+    DecorSystem.applyModel(group, object, loadedModel(), { depictedSizeM: { lengthM: 4.6 } })
+    const box = new Box3().setFromObject(group)
+    expect(box.max.z - box.min.z).toBeCloseTo(4.6, 5)
+  })
+
+  it("lets the recording's own measurement outrank the catalogue's", () => {
+    const object = vehicle({ sizeM: { lengthM: 5.44 } })
+    const group = DecorSystem.build(object, false)
+    DecorSystem.applyModel(group, object, loadedModel(), { depictedSizeM: { lengthM: 4.6 } })
+    const box = new Box3().setFromObject(group)
+    expect(box.max.z - box.min.z).toBeCloseTo(5.44, 5)
   })
 
   it("turns the model by its own heading correction, on top of nothing else the object already carries", () => {
     const object = vehicle({ headingDeg: 90, sizeM: { widthM: 2, lengthM: 4, heightM: 1 } })
     const group = DecorSystem.build(object, false)
-    DecorSystem.applyModel(group, object, loadedModel(), 90)
+    DecorSystem.applyModel(group, object, loadedModel(), { headingOffsetDeg: 90 })
     // The object's own 90deg is on the outer group and the model's correction inside it, so a model
     // exported nose-right ends up facing the same way the primitive did — the two rotations must
     // never be added into one number a reader can only see half of.

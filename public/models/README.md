@@ -68,13 +68,45 @@ not guaranteed to last, take a copy, keep the credit with it, and serve it from 
 
 ## What is in here today
 
-Two stylised low-poly cars from Kenney's **Car Kit 3.1** (CC0), a patrol car and a saloon. They are
-placeholders and are named as such in the picker: they are of the right KIND, not of any particular
-model or year. What they buy is a silhouette that reads as a car at forty metres in evening light,
-where a rectangular prism reads as a building — which was the complaint that started this.
+One or more stylised low-poly models for every decor kind:
 
-Nothing here yet stands in for a building, a tree, a streetlight or an airframe. The same recipe
-applies: Kenney and Quaternius both publish CC0 kits covering all four.
+| Kind | Entries | Source |
+| --- | --- | --- |
+| vehicle | patrol car, saloon | Kenney, Car Kit 3.1 (CC0) |
+| building | detached house | Kenney, City Kit Suburban 2.0 (CC0) |
+| tree | broadleaf, conifer | Kenney, City Kit Suburban / Survival Kit (CC0) |
+| streetlight | curved-arm street lamp | Kenney, City Kit Roads 2.0 (CC0) |
+| aircraft | narrow-body airliner | Poly by Google (CC BY 3.0) |
+
+Every one of them is a placeholder and the picker says so: right KIND, no particular model, make or
+year. What they buy is a silhouette that reads as what it is at forty metres in evening light, where
+a rectangular prism reads as a building — which was the complaint that started this.
+
+Each is kept in its own directory, because a kit's models reference a texture SHARED across the
+kit (`Textures/colormap.png`), and two kits' colormaps are different files under the same name.
+
+## Which way a model faces
+
+`headingOffsetDeg` turns it so its nose points −Z, this scene's heading-0 direction. Every Kenney
+model here needs 180 (their kits are Unity exports, and Unity's forward is +Z). The airliner needs
+180 too, established by measuring rather than by eye: the centroid of its highest vertices — which
+can only be the vertical fin, and a fin is at the tail — sits at z = −899, so its nose points +Z.
+That is the check worth repeating on a new model; a plane facing backwards down its own flight path
+is not obvious in a still.
+
+## Looking out from inside one
+
+Not yet. A recording can place the witness INSIDE a building or a vehicle (`witnessSide`), and what
+the camera then looks at is the room the built-in shape builds around it — its walls, its window
+openings sized from the data, the pillar between two door windows. A downloaded model has none of
+that: it is a hull, and from inside a hull with front-facing materials you see straight through it
+and the object simply is not there. So while the witness is inside an object, the built-in shape is
+kept and the model is not applied (see `SceneRenderer.loadDecorModel`).
+
+Being able to look out through a real model IS the objective — it is what makes "how much of the sky
+did the windscreen pillar hide?" answerable. Getting there needs three things this does not have
+yet: models with a modelled interior, their glazing made genuinely transparent rather than painted,
+and the occupant's viewpoint placed from the model rather than from the primitive's own seat.
 
 ## What happens when this is unreachable
 

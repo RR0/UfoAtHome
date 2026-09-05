@@ -6,8 +6,9 @@
       "id": "kenney-car-kit-police",
       "kind": "vehicle",
       "name": "Patrol car (generic, stylised)",
-      "file": "kenney-car-kit-police.glb",
+      "file": "kenney-car-kit/police.glb",
       "headingOffsetDeg": 180,
+      "sizeM": { "widthM": 1.8, "lengthM": 4.6, "heightM": 1.45 },
       "credit": {
         "title": "Car Kit 3.1 — police",
         "author": "Kenney",
@@ -19,13 +20,82 @@
       "id": "kenney-car-kit-sedan",
       "kind": "vehicle",
       "name": "Saloon car (generic, stylised)",
-      "file": "kenney-car-kit-sedan.glb",
+      "file": "kenney-car-kit/sedan.glb",
       "headingOffsetDeg": 180,
+      "sizeM": { "widthM": 1.8, "lengthM": 4.6, "heightM": 1.45 },
       "credit": {
         "title": "Car Kit 3.1 — sedan",
         "author": "Kenney",
         "license": "CC0 1.0",
         "sourceUrl": "https://kenney.nl/assets/car-kit"
+      }
+    },
+    {
+      "id": "kenney-suburban-house",
+      "kind": "building",
+      "name": "Detached house, one storey (generic, stylised)",
+      "file": "kenney-city-kit-suburban/house.glb",
+      "headingOffsetDeg": 180,
+      "sizeM": { "widthM": 12.5, "lengthM": 10, "heightM": 8 },
+      "credit": {
+        "title": "City Kit (Suburban) 2.0 — building type A",
+        "author": "Kenney",
+        "license": "CC0 1.0",
+        "sourceUrl": "https://kenney.nl/assets/city-kit-suburban"
+      }
+    },
+    {
+      "id": "kenney-tree-broadleaf",
+      "kind": "tree",
+      "name": "Broadleaf tree (generic, stylised)",
+      "file": "kenney-city-kit-suburban/tree-broadleaf.glb",
+      "sizeM": { "widthM": 2.2, "lengthM": 2.5, "heightM": 8 },
+      "credit": {
+        "title": "City Kit (Suburban) 2.0 — large tree",
+        "author": "Kenney",
+        "license": "CC0 1.0",
+        "sourceUrl": "https://kenney.nl/assets/city-kit-suburban"
+      }
+    },
+    {
+      "id": "kenney-tree-conifer",
+      "kind": "tree",
+      "name": "Conifer (generic, stylised)",
+      "file": "kenney-survival-kit/tree-conifer.glb",
+      "sizeM": { "widthM": 3.9, "lengthM": 3.8, "heightM": 10 },
+      "credit": {
+        "title": "Survival Kit 1.0 — tree",
+        "author": "Kenney",
+        "license": "CC0 1.0",
+        "sourceUrl": "https://kenney.nl/assets/survival-kit"
+      }
+    },
+    {
+      "id": "kenney-street-light-curved",
+      "kind": "streetlight",
+      "name": "Street lamp, curved arm (generic, stylised)",
+      "file": "kenney-city-kit-roads/street-light-curved.glb",
+      "headingOffsetDeg": 180,
+      "sizeM": { "widthM": 0.35, "lengthM": 1.55, "heightM": 4.5 },
+      "credit": {
+        "title": "City Kit (Roads) 2.0 — curved light",
+        "author": "Kenney",
+        "license": "CC0 1.0",
+        "sourceUrl": "https://kenney.nl/assets/city-kit-roads"
+      }
+    },
+    {
+      "id": "poly-google-airliner",
+      "kind": "aircraft",
+      "name": "Airliner (generic, stylised)",
+      "file": "poly-google/airplane.glb",
+      "headingOffsetDeg": 180,
+      "sizeM": { "widthM": 35.8, "lengthM": 37.6, "heightM": 11.8 },
+      "credit": {
+        "title": "Airplane",
+        "author": "Poly by Google",
+        "license": "CC BY 3.0",
+        "sourceUrl": "https://poly.pizza/m/8ciDd9k8wha"
       }
     }
   ]

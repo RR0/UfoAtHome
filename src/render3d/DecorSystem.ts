@@ -1,7 +1,7 @@
 import { BackSide, Box3, BoxGeometry, Color, ConeGeometry, CylinderGeometry, Group, Mesh, MeshBasicMaterial, MeshLambertMaterial, SphereGeometry, Vector3 } from "three"
 import type { Object3D } from "three"
-import type { DecorKind, DecorLight, DecorObject, DecorSide, MeasuredDecorSize } from "../engine/model/Decor.js"
-import { DEFAULT_BUILDING_FLOORS, isLightOnAt, lightOnFractionBetween } from "../engine/model/Decor.js"
+import type { DecorKind, DecorLight, DecorObject, DecorSide, DecorSize, MeasuredDecorSize } from "../engine/model/Decor.js"
+import { canHoldWitness, DEFAULT_BUILDING_FLOORS, isLightOnAt, lightOnFractionBetween } from "../engine/model/Decor.js"
 import type { RgbColor } from "./skyColors.js"
 
 const DEG_TO_RAD = Math.PI / 180
@@ -473,6 +473,32 @@ function buildVehicle(lit: boolean, windows: DecorObject["windows"], witnessSide
 /** Natural (unstated) sizes, measured once per kind — see DecorSystem.naturalSize. */
 const NATURAL_SIZES = new Map<string, MeasuredDecorSize>()
 
+/** What applyModel needs beyond the object itself — the model file's own quirks, and what the
+ * catalogue knows about the real thing it depicts. */
+export interface ApplyModelOptions {
+  /** Degrees to turn the model so its nose faces -Z (see DecorModelRef.headingOffsetDeg). */
+  headingOffsetDeg?: number
+  /** What the real object this model depicts measures, per the catalogue — used only when the
+   * recording itself measured nothing (see applyModel). */
+  depictedSizeM?: DecorSize
+}
+
+/** The uniform factor that makes `natural` match the first axis `stated` actually states, in the
+ * order length, height, width — or undefined when it states none of them, which is what lets
+ * applyModel fall through to the catalogue's own figure. */
+function fitScale(stated: DecorSize | undefined, natural: MeasuredDecorSize): number | undefined {
+  if (!stated) return undefined
+  const axes = [
+    [stated.lengthM, natural.lengthM],
+    [stated.heightM, natural.heightM],
+    [stated.widthM, natural.widthM]
+  ] as const
+  for (const [target, own] of axes) {
+    if (target !== undefined && own > 1e-6) return target / own
+  }
+  return undefined
+}
+
 /** Stated over natural, guarding the axis a primitive has no thickness on (nothing has one today,
  * but a future flat one would divide by zero here rather than anywhere useful). */
 function ratio(stated: number, natural: number): number {
@@ -662,6 +688,22 @@ export class DecorSystem {
   }
 
   /**
+   * Whether this object may be drawn as a loaded model at all.
+   *
+   * No, once the recording places the witness INSIDE it (see DecorObject.witnessSide). A downloaded
+   * model is a hull: from inside one, with front-facing materials, you see straight through it and
+   * the object simply is not there — where what the recording placed the witness to look at is the
+   * room the built-in shape builds around them, its window openings sized from the data and the
+   * pillar between two door windows included. Looking out through a real model is the objective,
+   * and it needs three things nothing here has yet: models with a modelled interior, glazing made
+   * genuinely transparent rather than painted, and the occupant's viewpoint taken from the model
+   * instead of from the primitive's own seat.
+   */
+  static usesModel(object: DecorObject): boolean {
+    return object.model !== undefined && !(object.witnessSide !== undefined && canHoldWitness(object.kind))
+  }
+
+  /**
    * Puts a loaded 3D model in the primitive's place, sized and oriented to this object.
    *
    * Everything about the object OUTSIDE its own appearance — where it stands, which way it faces,
@@ -669,31 +711,36 @@ export class DecorSystem {
    * BODY_NAME) is swapped, so a model can arrive seconds after the scene was first drawn without
    * anything moving.
    *
-   * The fit is UNIFORM, along the length. A model has proportions of its own and stretching them to
+   * The fit is UNIFORM, on ONE axis. A model has proportions of its own, and stretching them onto
    * three separately-stated numbers would produce a car that is neither the model nor the
-   * measurement; the length is the axis the heading is defined by and the one a vehicle, an airframe
-   * or a building is most reliably described by, so it sets the scale and the model's own
-   * proportions decide the rest. A model whose proportions then disagree with the measured width or
-   * height is the wrong model for the object, which is a curation problem and not something to hide
-   * by squashing it. With no stated size the model keeps its own metres — glTF's unit is the metre,
-   * so a correctly exported model is already right.
+   * measurement; a model whose proportions then disagree with the other two is the wrong model for
+   * the object, which is a curation problem and not something to hide by squashing it. Which axis
+   * decides is whichever the recording actually measured, in the order length, height, width —
+   * length first because it is the axis the heading is defined by and the one a vehicle, an
+   * airframe or a building is most reliably described by, but a witness who gave only the height of
+   * a lamp post has measured the thing about it that matters, and that is what should set its size.
+   *
+   * Failing all three, the catalogue's own statement of what the real object DEPICTED measures is
+   * used (see DecorModelEntry.sizeM). That is not a fallback for tidiness: a downloaded model is in
+   * whatever unit its author worked in — Kenney's kits are a car of 2.9 units, not of 2.9 metres —
+   * so with nothing to fit to, an unmeasured object would come out at an arbitrary scale that looks
+   * like a claim and is not one.
    *
    * It is then seated the way the primitives are: centred on its own vertical axis, and resting on
    * the ground — except an aircraft, which the primitive also builds around y=0 because its height
    * comes from its altitude, not from standing on anything.
    */
-  static applyModel(group: Object3D, object: DecorObject, model: Object3D, headingOffsetDeg = 0): void {
+  static applyModel(group: Object3D, object: DecorObject, model: Object3D, options: ApplyModelOptions = {}): void {
     const body = this.bodyOf(group)
     const holder = new Group()
     holder.name = DecorSystem.BODY_NAME
     // The correction turns the model, not the object: the object's own headingDeg is already on the
     // outer group, and the two must not be added together anywhere a reader could see only one.
-    model.rotation.y = -headingOffsetDeg * DEG_TO_RAD
+    model.rotation.y = -(options.headingOffsetDeg ?? 0) * DEG_TO_RAD
     model.updateMatrixWorld(true)
     const box = new Box3().setFromObject(model)
-    const naturalLength = box.max.z - box.min.z
-    const statedLength = object.sizeM?.lengthM
-    const scale = statedLength !== undefined && naturalLength > 1e-6 ? statedLength / naturalLength : 1
+    const natural = { lengthM: box.max.z - box.min.z, heightM: box.max.y - box.min.y, widthM: box.max.x - box.min.x }
+    const scale = fitScale(object.sizeM, natural) ?? fitScale(options.depictedSizeM, natural) ?? 1
     model.scale.multiplyScalar(scale)
     const centre = box.getCenter(new Vector3()).multiplyScalar(scale)
     model.position.x -= centre.x

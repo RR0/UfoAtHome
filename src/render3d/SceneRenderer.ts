@@ -1314,7 +1314,9 @@ export class SceneRenderer {
    */
   private async loadDecorModel(object: DecorObject, token: number): Promise<void> {
     const ref = object.model
-    if (!ref) return
+    // usesModel, not just "does it name one": a model is the EXTERIOR, and an object the witness is
+    // inside of is being looked at from within. See its own doc comment.
+    if (!ref || !DecorSystem.usesModel(object)) return
     try {
       const entry = ref.url ? undefined : ref.id ? await this.decorModelProvider.entry(ref.id) : undefined
       const url = ref.url ?? entry?.url
@@ -1327,7 +1329,12 @@ export class SceneRenderer {
       if (token !== this.decorModelToken) return
       const group = this.decorGroups.get(object.id)
       if (!group) return
-      DecorSystem.applyModel(group, object, scene, ref.headingOffsetDeg ?? entry?.headingOffsetDeg ?? 0)
+      DecorSystem.applyModel(group, object, scene, {
+        headingOffsetDeg: ref.headingOffsetDeg ?? entry?.headingOffsetDeg,
+        // Only the catalogue can say what the real thing is; a bare url states a file and nothing
+        // about what it depicts (see DecorModelEntry.sizeM and DecorSystem.applyModel).
+        depictedSizeM: entry?.sizeM
+      })
       this.decorModelCredits.set(object.id, credit)
       this.render()
     } catch (error) {

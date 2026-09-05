@@ -729,11 +729,19 @@ not produce: when a source is not guaranteed to last, take a copy, keep the cred
 somewhere that will. See `public/models/README.md` for the catalogue's own format and for what a model has to satisfy
 to go in it.
 
-What is in it today is two stylised low-poly cars from Kenney's CC0 Car Kit, a patrol car and a saloon, named in the
-picker as the placeholders they are: right KIND, no particular model or year. That is the whole of the claim, and it
-is worth making — a car-shaped silhouette at forty metres in evening light reads as a car, where a rectangular prism
-reads as a building, which is where this started. Socorro's own patrol car uses the first of them, at the real
+What is in it today is at least one stylised low-poly model for every decor kind — two cars, a house, two trees and a
+street lamp from Kenney's CC0 kits, and a narrow-body airliner from Google's Poly archive under CC BY 3.0 — each named
+in the picker as the placeholder it is: right KIND, no particular model, make or year. That is the whole of the claim,
+and it is worth making: a car-shaped silhouette at forty metres in evening light reads as a car, where a rectangular
+prism reads as a building, which is where this started. Socorro's own patrol car uses one of them, at the real
 Pontiac's dimensions and with the substitution stated in the recording's description.
+
+One thing a model does NOT yet do is let the witness look out from inside it. A recording can place them inside a
+building or a vehicle, and what they then look at is the room the built-in shape builds around them — walls, window
+openings sized from the data, the pillar between two door windows. A downloaded model is a hull with none of that, so
+while the witness is inside an object the built-in shape is kept. Looking out through a real model is the objective
+(it is what makes "how much of the sky did the windscreen pillar hide?" answerable) and needs models with interiors,
+glazing made genuinely transparent, and the viewpoint taken from the model rather than from the primitive's seat.
 
 Three things follow, and all three are deliberate:
 
