@@ -1,6 +1,6 @@
-import { BackSide, BoxGeometry, Color, ConeGeometry, CylinderGeometry, Group, Mesh, MeshBasicMaterial, MeshLambertMaterial, SphereGeometry } from "three"
+import { BackSide, Box3, BoxGeometry, Color, ConeGeometry, CylinderGeometry, Group, Mesh, MeshBasicMaterial, MeshLambertMaterial, SphereGeometry, Vector3 } from "three"
 import type { Object3D } from "three"
-import type { DecorKind, DecorLight, DecorObject, DecorSide } from "../engine/model/Decor.js"
+import type { DecorKind, DecorLight, DecorObject, DecorSide, MeasuredDecorSize } from "../engine/model/Decor.js"
 import { DEFAULT_BUILDING_FLOORS, isLightOnAt, lightOnFractionBetween } from "../engine/model/Decor.js"
 import type { RgbColor } from "./skyColors.js"
 
@@ -470,6 +470,15 @@ function buildVehicle(lit: boolean, windows: DecorObject["windows"], witnessSide
   return group
 }
 
+/** Natural (unstated) sizes, measured once per kind — see DecorSystem.naturalSize. */
+const NATURAL_SIZES = new Map<string, MeasuredDecorSize>()
+
+/** Stated over natural, guarding the axis a primitive has no thickness on (nothing has one today,
+ * but a future flat one would divide by zero here rather than anywhere useful). */
+function ratio(stated: number, natural: number): number {
+  return natural > 1e-6 ? stated / natural : 1
+}
+
 const FACE_INDICATOR_COLOR: RgbColor = [0.95, 0.9, 0.82]
 
 function buildWitness(): Group {
@@ -537,7 +546,12 @@ export class DecorSystem {
         : sideOffset(side, BUILDING_WIDTH / 2, BUILDING_DEPTH / 2, BUILDING_WITNESS_INSET)
     const eyeY = object.kind === "vehicle" ? VEHICLE_EYE_Y : (object.occupiedFloor ?? 0) * BUILDING_FLOOR_HEIGHT + EYE_HEIGHT_M
     const headingDeg = (object.headingDeg ?? 0) - SIDE_YAW_RAD[side] / DEG_TO_RAD
-    return { x, z, eyeY, headingDeg }
+    // Scaled the same way the body is (see build/scaleFor): the seat is a place ON the object, so
+    // in a car stated a meter longer than the primitive, the driver sits a proportionate distance
+    // further forward and the camera has to follow. Without this the viewpoint stayed at the
+    // primitive's own seat and the witness ended up looking out through their own door.
+    const scale = this.scaleFor(object)
+    return { x: x * scale.x, z: z * scale.z, eyeY: eyeY * scale.y, headingDeg }
   }
 
   /** headingDeg rotates the whole group around Y, same "-heading, clockwise from north" convention
@@ -547,8 +561,19 @@ export class DecorSystem {
    * several more fields (windows/witnessSide/floors/occupiedFloor) — `lit` alone stays a
    * separate parameter since callers pass a time-resolved value (resolveDecorLitAt), not the
    * object's own static `lit` field. */
+  /** Name of the sub-group holding whatever currently stands for the object — the primitive's own
+   * parts, or a loaded model that replaced them. It is the node the stated size scales (see build),
+   * so everything about "what this object looks like" is swappable in one place while the outer
+   * group keeps the placement, the heading and the lamps. */
+  static readonly BODY_NAME = "decor-body"
+
+  /** The sub-group named above, or the group itself for anything built before it existed. */
+  static bodyOf(group: Object3D): Object3D {
+    return group.getObjectByName(DecorSystem.BODY_NAME) ?? group
+  }
+
   static build(object: DecorObject, lit: boolean): Group {
-    const group =
+    const body =
       object.kind === "building"
         ? buildBuilding(object.floors ?? DEFAULT_BUILDING_FLOORS, object.windows, object.witnessSide, object.occupiedFloor)
         : object.kind === "tree"
@@ -560,10 +585,145 @@ export class DecorSystem {
               : object.kind === "aircraft"
                 ? buildAircraft()
                 : buildWitness()
+    // The primitive is built at its own natural size and then stretched to whatever the recording
+    // measured, rather than every builder taking three more parameters: the builders place their
+    // parts by proportion (a headlight at -length/2, a window row per floor), so a scale on the
+    // whole body moves all of it consistently and no builder can be updated and left inconsistent
+    // with the others.
+    const scale = this.scaleFor(object)
+    const group = new Group()
+    body.name = DecorSystem.BODY_NAME
+    // The body is scaled inside a group that ISN'T, so a lamp added below keeps both its real size
+    // and its real offset (see addLights): DecorLight.offsetM is already in meters on the real
+    // object, and scaling it a second time would move a wingtip strobe off the wingtip.
+    body.scale.copy(scale)
+    group.add(body)
     if (object.headingDeg !== undefined) group.rotation.y = -object.headingDeg * DEG_TO_RAD
     this.addLights(group, object.lights)
     if (object.kind === "aircraft") this.exemptFromFog(group)
     return group
+  }
+
+  /**
+   * How much the primitive has to be stretched to be the size the recording says it is.
+   *
+   * Per axis, not uniform: the object's own width, length and height were each measured (or each
+   * left unmeasured), and a box has no proportions of its own worth preserving. A real 3D MODEL is
+   * a different matter and is fitted differently — see fitToSize.
+   */
+  private static scaleFor(object: DecorObject): Vector3 {
+    const size = object.sizeM
+    if (!size) return new Vector3(1, 1, 1)
+    const natural = this.naturalSize(object.kind, object.floors)
+    // Axis by axis, because a size is allowed to be partial: an axis nobody measured keeps the
+    // built-in shape's own proportion rather than being invented to match the ones that were.
+    return new Vector3(
+      size.widthM === undefined ? 1 : ratio(size.widthM, natural.widthM),
+      size.heightM === undefined ? 1 : ratio(size.heightM, natural.heightM),
+      size.lengthM === undefined ? 1 : ratio(size.lengthM, natural.lengthM)
+    )
+  }
+
+  /**
+   * The size the built-in primitive for this kind comes out at when nothing is stated — measured
+   * off the geometry rather than written down beside it.
+   *
+   * A table of "a vehicle is 1.8 x 4.2 x 2.0" would be a second statement of what buildVehicle
+   * already says, and the two would drift the first time a wheel moved. Measuring the real bounding
+   * box cannot drift. Memoised per kind (and per floor count, the only thing that changes a
+   * building's own box), because updateDecorAnchoring asks for it every frame through occupantView.
+   */
+  static naturalSize(kind: DecorKind, floors?: number): MeasuredDecorSize {
+    const levels = kind === "building" ? Math.max(1, (floors ?? DEFAULT_BUILDING_FLOORS) + 1) : 0
+    const key = `${kind}:${levels}`
+    const cached = NATURAL_SIZES.get(key)
+    if (cached) return cached
+    const probe =
+      kind === "building"
+        ? buildBuilding(levels - 1, undefined, undefined, undefined)
+        : kind === "tree"
+          ? buildTree()
+          : kind === "streetlight"
+            ? buildStreetlight(false)
+            : kind === "vehicle"
+              ? buildVehicle(false, undefined, undefined)
+              : kind === "aircraft"
+                ? buildAircraft()
+                : buildWitness()
+    const box = new Box3().setFromObject(probe)
+    const size: MeasuredDecorSize = {
+      widthM: box.max.x - box.min.x,
+      heightM: box.max.y - box.min.y,
+      lengthM: box.max.z - box.min.z
+    }
+    this.dispose(probe)
+    NATURAL_SIZES.set(key, size)
+    return size
+  }
+
+  /**
+   * Puts a loaded 3D model in the primitive's place, sized and oriented to this object.
+   *
+   * Everything about the object OUTSIDE its own appearance — where it stands, which way it faces,
+   * the lamps it carries — belongs to the outer group and is untouched here: only the body (see
+   * BODY_NAME) is swapped, so a model can arrive seconds after the scene was first drawn without
+   * anything moving.
+   *
+   * The fit is UNIFORM, along the length. A model has proportions of its own and stretching them to
+   * three separately-stated numbers would produce a car that is neither the model nor the
+   * measurement; the length is the axis the heading is defined by and the one a vehicle, an airframe
+   * or a building is most reliably described by, so it sets the scale and the model's own
+   * proportions decide the rest. A model whose proportions then disagree with the measured width or
+   * height is the wrong model for the object, which is a curation problem and not something to hide
+   * by squashing it. With no stated size the model keeps its own metres — glTF's unit is the metre,
+   * so a correctly exported model is already right.
+   *
+   * It is then seated the way the primitives are: centred on its own vertical axis, and resting on
+   * the ground — except an aircraft, which the primitive also builds around y=0 because its height
+   * comes from its altitude, not from standing on anything.
+   */
+  static applyModel(group: Object3D, object: DecorObject, model: Object3D, headingOffsetDeg = 0): void {
+    const body = this.bodyOf(group)
+    const holder = new Group()
+    holder.name = DecorSystem.BODY_NAME
+    // The correction turns the model, not the object: the object's own headingDeg is already on the
+    // outer group, and the two must not be added together anywhere a reader could see only one.
+    model.rotation.y = -headingOffsetDeg * DEG_TO_RAD
+    model.updateMatrixWorld(true)
+    const box = new Box3().setFromObject(model)
+    const naturalLength = box.max.z - box.min.z
+    const statedLength = object.sizeM?.lengthM
+    const scale = statedLength !== undefined && naturalLength > 1e-6 ? statedLength / naturalLength : 1
+    model.scale.multiplyScalar(scale)
+    const centre = box.getCenter(new Vector3()).multiplyScalar(scale)
+    model.position.x -= centre.x
+    model.position.z -= centre.z
+    model.position.y -= object.kind === "aircraft" ? centre.y : box.min.y * scale
+    holder.add(model)
+    // Replaced rather than hidden: the primitive's geometry and materials are real GPU resources,
+    // and a scene can rebuild its decor many times.
+    if (body.parent) {
+      body.parent.add(holder)
+      body.removeFromParent()
+    } else {
+      group.add(holder)
+    }
+    this.dispose(body)
+  }
+
+  /**
+   * The size a decor object is actually drawn at: what it says, or what its primitive naturally is.
+   *
+   * The one place to ask, so the editor can show a real number in an unfilled field (rather than a
+   * blank the reader has to guess at) and mean exactly what the scene will draw.
+   */
+  static sizeOf(object: DecorObject): MeasuredDecorSize {
+    const natural = this.naturalSize(object.kind, object.floors)
+    return {
+      widthM: object.sizeM?.widthM ?? natural.widthM,
+      lengthM: object.sizeM?.lengthM ?? natural.lengthM,
+      heightM: object.sizeM?.heightM ?? natural.heightM
+    }
   }
 
   /**
@@ -580,12 +740,12 @@ export class DecorSystem {
    * model the weather feeds — which belongs with the exposure work, not here.
    */
   private static exemptFromFog(group: Group): void {
-    for (const child of group.children) {
-      if (!(child instanceof Mesh)) continue
+    group.traverse(child => {
+      if (!(child instanceof Mesh)) return
       const material = child.material as MeshBasicMaterial | MeshLambertMaterial
       material.fog = false
       material.needsUpdate = true
-    }
+    })
   }
 
   /** One small emissive sphere per declared lamp, at its own place on the body. Built dark: every
@@ -660,21 +820,27 @@ export class DecorSystem {
    * `emissive` flag), so the loop below simply finds nothing to retint. */
   static setLit(group: Group, kind: DecorKind, lit: boolean): void {
     const color = kind === "streetlight" ? (lit ? LIT_LAMP_COLOR : UNLIT_LAMP_COLOR) : lit ? LIT_HEADLIGHT_COLOR : UNLIT_HEADLIGHT_COLOR
-    for (const child of group.children) {
+    // Traversed, not iterated over the direct children: a headlight sits inside the body group the
+    // stated size scales (see build), a rung below where it used to be.
+    group.traverse(child => {
       const data = child.userData as DecorMeshUserData
       // A declared lamp keeps its own regulated colour — a red port light must not be repainted
       // the warm white of a headlight just because both are emissive.
-      if (!(child instanceof Mesh) || !data.emissive || data.lightId) continue
+      if (!(child instanceof Mesh) || !data.emissive || data.lightId) return
       ;(child.material as MeshBasicMaterial).color.setRGB(...color)
-    }
+    })
   }
 
-  /** Disposes every mesh's geometry/material — Group itself owns no GPU resource of its own. */
+  /** Disposes every mesh's geometry/material — Group itself owns no GPU resource of its own.
+   * Traversed rather than iterated over the direct children: the body group the stated size scales
+   * (see build) is one, and so were the occupant figure and a loaded model's own scene graph, whose
+   * meshes this used to walk straight past and leak. */
   static dispose(group: Object3D): void {
-    for (const child of group.children) {
-      if (!(child instanceof Mesh)) continue
+    group.traverse(child => {
+      if (!(child instanceof Mesh)) return
       child.geometry.dispose()
-      ;(child.material as MeshBasicMaterial | MeshLambertMaterial).dispose()
-    }
+      const material = child.material
+      for (const one of Array.isArray(material) ? material : [material]) one.dispose()
+    })
   }
 }

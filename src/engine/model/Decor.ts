@@ -111,6 +111,81 @@ export function canHoldWitness(kind: DecorKind): boolean {
   return kind === "building" || kind === "vehicle"
 }
 
+/**
+ * A decor object's real size in meters — the one thing the scenery was missing.
+ *
+ * Every building used to be six meters square, every car the same 1.8 x 4.2 box, whatever the
+ * testimony said they were. In a project that refuses to draw an angle by eye (see Shape.angular,
+ * which stores what reached the witness's eye and nothing else), that was the last place a number
+ * was invented rather than stated: Zamora's patrol car and a delivery van were the same object, and
+ * "the dynamite shack" was a six-by-six warehouse.
+ *
+ * Along the object's OWN axes, not the compass: `widthM` across it, `lengthM` along the direction
+ * its `headingDeg` faces, `heightM` up. A car is longer than it is wide by definition; which way
+ * that length points is what heading says.
+ *
+ * Every axis is separately optional, and an absent one means "nobody measured this" — the built-in
+ * shape's own proportion is then kept for that axis alone (see DecorSystem.naturalSize). Stating a
+ * length must not oblige anyone to invent a width; that is the same distinction the rest of this
+ * data model is built on, and the reason a recording made before this field existed shows exactly
+ * what it always did.
+ */
+export interface DecorSize {
+  widthM?: number
+  lengthM?: number
+  heightM?: number
+}
+
+/** A size with every axis known — what the built-in shape itself measures (see
+ * DecorSystem.naturalSize), and what a DecorSize resolves to once its unmeasured axes fall back to
+ * it (see DecorSystem.sizeOf). Distinct from DecorSize above precisely because that one is allowed
+ * to be partial: a witness who paced out the length of a shed and not its width has stated one
+ * number, and writing the other two in beside it would turn the primitive's own arbitrary
+ * proportions into a measurement nobody made. */
+export type MeasuredDecorSize = Required<DecorSize>
+
+/**
+ * Which real 3D model stands in for this object, if one does.
+ *
+ * Named rather than embedded, and named in TWO ways on purpose. `id` is a catalogue entry resolved
+ * by whichever DecorModelProvider is live, so a recording that says "a 1960s American sedan" today
+ * can be shown by a better model tomorrow — including one re-hosted by this project when its
+ * original source turns out not to be permanent — without the recording changing at all. `url`
+ * points straight at a glTF/GLB file and wins over `id` when both are given: the escape hatch for
+ * a model no catalogue has yet, which is why the editor keeps it out of sight until asked for.
+ *
+ * A model NEVER decides how big the object is: it is fitted to the DecorSize above (see
+ * DecorSystem.fitToSize). The measurement stays in the data; the model only says what shape fills
+ * it. That way swapping the model can never quietly change an angle a reader is measuring.
+ */
+export interface DecorModelRef {
+  /** Catalogue entry, resolved by the live DecorModelProvider. */
+  id?: string
+  /** Direct glTF/GLB address, taking precedence over `id`. Must be readable cross-origin. */
+  url?: string
+  /** Degrees to turn the loaded model about its own vertical axis so its nose points the way this
+   * scene's heading convention expects (0 faces -Z — see DecorSystem's build). A property of the
+   * model, not of the sighting: a catalogue entry carries its own, and this is here for the `url`
+   * escape hatch, where nothing else can. */
+  headingOffsetDeg?: number
+  /** Who made it and under what licence. Supplied by the catalogue for an `id`; REQUIRED beside a
+   * bare `url`, since no provider can vouch for a file the recording found on its own. Shown to
+   * the reader with the recording's other credits. */
+  credit?: DecorModelCredit
+}
+
+/** What has to be shown for a model to be usable at all — same standing as an imagery or elevation
+ * provider's own attribution (see ImageryProvider.attribution): a credit that isn't displayed isn't
+ * a licence, it's a hope. */
+export interface DecorModelCredit {
+  title: string
+  author?: string
+  /** Licence name as its author states it, e.g. "CC0 1.0", "CC BY 4.0". */
+  license: string
+  /** Where it came from, so the claim can be checked. */
+  sourceUrl?: string
+}
+
 export interface DecorLitKeyframe {
   t: number
   lit: boolean
@@ -244,6 +319,12 @@ export interface DecorObject {
    * that isn't recorded anywhere else in the data model — so it's a deliberate per-shape choice set
    * by hand (see SightingEditorElement's own "masks" checkbox list) rather than an automatic rule. */
   occludesSourceIds?: string[]
+  /** How big it really is, in meters, along its own axes — see DecorSize. Absent means unmeasured,
+   * and the primitive keeps its own natural size, so no recording made before this existed moves. */
+  sizeM?: DecorSize
+  /** The real 3D model that stands in for the primitive, if one does — see DecorModelRef. Absent
+   * means the built-in primitive, which is also what a failed or unreachable model falls back to. */
+  model?: DecorModelRef
 }
 
 /** Where a moving decor object is at one instant — see DecorObject.track. */

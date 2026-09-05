@@ -685,6 +685,60 @@ An aircraft in a scene is a **hypothesis**, not testimony — "here is what a fl
 would have looked like" — and belongs to the decor for that reason, next to the buildings and trees whose
 positions are likewise known rather than reported.
 
+### How big it was, and what it looked like
+
+`DecorObject` used to have no size at all. Every building was a six-metre cube per storey, every vehicle the same
+1.8 × 4.35 × 2.0 box, whatever the testimony said. In a project that will not store an angle nobody perceived (see
+*Apparent size*, above), that was the last place a number was invented rather than stated: Zamora's Pontiac and a
+delivery van were the same object, and "the dynamite shack" was a warehouse.
+
+- **`sizeM`** — the object's real size in metres along its OWN axes: `widthM` across it, `lengthM` along the way its
+  heading faces, `heightM` up. **Each axis is separately optional**, and an absent one means nobody measured it: the
+  built-in shape keeps its own proportion there. Pacing out the length of a shed states one number, and must not
+  oblige anyone to invent a width. The editor shows what the built-in shape measures as a grey **placeholder**, which
+  is the honest way to say "this is what you are looking at, and it is not a measurement".
+- **`model`** — which real 3D model stands in for the built-in shape, if one does. Named by catalogue **`id`** (see
+  below), or by a direct **`url`** that wins over it — an escape hatch the editor keeps collapsed, since naming a
+  glTF file by hand means also carrying the credit that has to travel with it.
+
+A model **never decides how big the object is**. It is fitted to the stated size, uniformly, along the length: the
+length is the axis heading is defined by and the one a vehicle, an airframe or a building is most reliably described
+by, so it sets the scale and the model's own proportions decide the rest. A model whose proportions then disagree
+with the measured width or height is the wrong model for the object — a curation problem, not something to hide by
+squashing it. The measurement stays in the data and the model only says what shape fills it, so swapping the model
+can never quietly change an angle a reader is measuring.
+
+### Where the 3D models come from
+
+`DecorModelProvider` (`src/render3d/decor/`) is a catalogue, in the same lineage as `ElevationProvider` and
+`ImageryProvider` and registered the same way — the picker in **Data sources** *is* the credit. Its whole job is to
+answer "what does this `id` mean today, and who has to be credited for it", which is the part that is allowed to
+change under a recording that never does. A reconstruction saying a 1964 patrol car stood eight metres away should
+not have to be edited when a better model of one turns up.
+
+`UfoAtHomeModelCatalogue` is the one implementation, and it reads `/models/index.json` **beside the page first and
+from ufoathome.org otherwise**: a host that mirrors the models serves its own, and every other page embedding
+`<rr0-scene>` — an rr0.org case dossier above all — gets them from here, with no configuration.
+
+They are hosted rather than linked because of what a survey of the alternatives found. The catalogues readable
+cross-origin hold test objects and props: Khronos's sample assets exist to exercise glTF features (a toy car; a milk
+truck carrying Cesium's trademark), and Poly Haven's 521 models are tools, bottles and food, with no vehicle and no
+building among them. The CC0 kits that *do* contain a car, an airframe or a lamp post live mainly on third-party
+mirrors whose permanence and stated licence vary. So the rule is the one this project already applies to data it did
+not produce: when a source is not guaranteed to last, take a copy, keep the credit with it, and serve it from
+somewhere that will. See `public/models/README.md` for the catalogue's own format and for what a model has to satisfy
+to go in it.
+
+Three things follow, and all three are deliberate:
+
+- **`GLTFLoader` is imported only when a recording actually names a model.** It is a hundred kilobytes of addon, and
+  almost every recording has none.
+- **A model with no credit is not drawn.** An unattributed model is not a licence, it is a hope. The credits that
+  *are* complete appear in the info panel beside the recording's own sources.
+- **Every failure ends with the built-in shape.** A catalogue that is offline, an address that has rotted, a file
+  that is not valid glTF are all "no model today". Scenery that vanished because a CDN was down would be worse than
+  scenery drawn as boxes.
+
 ### Instrument — an eye is not a lens
 
 `instrument` says what the observation was made through, and it changes the geometry of every frame.

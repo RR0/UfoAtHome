@@ -35,7 +35,7 @@ import type { SightingRecordingJson } from "../engine/persistence/sightingJson.j
 import { DEFAULT_ICE_CRYSTAL_ALIGNMENT } from "../engine/model/Weather.js"
 import type { PrecipitationType, Weather } from "../engine/model/Weather.js"
 import type { People } from "../engine/model/People.js"
-import type { DecorObject, DecorSide } from "../engine/model/Decor.js"
+import type { DecorObject, DecorSide, DecorSize } from "../engine/model/Decor.js"
 import {
   resolveDecorLitAt,
   DECOR_SIDES,
@@ -68,6 +68,9 @@ import { WEATHER_SOURCES } from "../engine/weather/weatherSources.js"
 import { SOUND_KINDS } from "../engine/model/Sound.js"
 import type { SightingSound, SoundKind } from "../engine/model/Sound.js"
 import { ELEVATION_SOURCES, IMAGERY_SOURCES } from "../render3d/terrain/terrainSources.js"
+import { DECOR_MODEL_SOURCES } from "../render3d/decor/decorModelSources.js"
+import type { DecorModelProvider } from "../render3d/decor/DecorModelProvider.js"
+import { DecorSystem } from "../render3d/DecorSystem.js"
 import { GroundElevation } from "../render3d/terrain/ElevationProvider.js"
 import { TimeZones } from "../engine/time/TimeZones.js"
 import { dataSourceById } from "../engine/source/DataSource.js"
@@ -501,6 +504,19 @@ export class SightingEditorElement extends HTMLElement {
   private readonly decorAltitudeInput: HTMLInputElement
   private readonly labelDecorAltitude: HTMLElement
   private readonly decorSightingUrlInput: HTMLInputElement
+  /** Which catalogue the 3D-model picker offers, and which the scene resolves a named model
+   * through — chosen in Data sources like every other real-world source (see refreshSourceRows). */
+  private decorModelProvider: DecorModelProvider = DECOR_MODEL_SOURCES[0].create()
+  private readonly decorWidthInput: HTMLInputElement
+  private readonly decorLengthInput: HTMLInputElement
+  private readonly decorHeightInput: HTMLInputElement
+  private readonly decorModelSelect: HTMLSelectElement
+  private readonly decorModelAdvanced: HTMLDetailsElement
+  private readonly decorModelUrlInput: HTMLInputElement
+  private readonly decorModelTitleInput: HTMLInputElement
+  private readonly decorModelAuthorInput: HTMLInputElement
+  private readonly decorModelLicenseInput: HTMLInputElement
+  private readonly decorModelSourceInput: HTMLInputElement
   private readonly decorFloorsInput: HTMLInputElement
   private readonly decorOccupiedFloorInput: HTMLInputElement
   private readonly decorWitnessSideSelect: HTMLSelectElement
@@ -523,6 +539,16 @@ export class SightingEditorElement extends HTMLElement {
   private readonly labelDecorHeading: HTMLElement
   private readonly labelDecorLit: HTMLElement
   private readonly labelDecorSightingUrl: HTMLElement
+  private readonly labelDecorWidth: HTMLElement
+  private readonly labelDecorLength: HTMLElement
+  private readonly labelDecorHeight: HTMLElement
+  private readonly labelDecorModel: HTMLElement
+  private readonly labelDecorModelAdvanced: HTMLElement
+  private readonly labelDecorModelUrl: HTMLElement
+  private readonly labelDecorModelTitle: HTMLElement
+  private readonly labelDecorModelAuthor: HTMLElement
+  private readonly labelDecorModelLicense: HTMLElement
+  private readonly labelDecorModelSource: HTMLElement
   private readonly labelDecorFloors: HTMLElement
   private readonly labelDecorOccupiedFloor: HTMLElement
   private readonly labelDecorWitnessSide: HTMLElement
@@ -900,6 +926,16 @@ export class SightingEditorElement extends HTMLElement {
     this.decorAltitudeInput = this.shadow.getElementById("decorAltitude") as HTMLInputElement
     this.labelDecorAltitude = this.shadow.getElementById("label-decor-altitude")!
     this.decorSightingUrlInput = this.shadow.getElementById("decorSightingUrl") as HTMLInputElement
+    this.decorWidthInput = this.shadow.getElementById("decorWidth") as HTMLInputElement
+    this.decorLengthInput = this.shadow.getElementById("decorLength") as HTMLInputElement
+    this.decorHeightInput = this.shadow.getElementById("decorHeight") as HTMLInputElement
+    this.decorModelSelect = this.shadow.getElementById("decorModel") as HTMLSelectElement
+    this.decorModelAdvanced = this.shadow.getElementById("decor-model-advanced") as HTMLDetailsElement
+    this.decorModelUrlInput = this.shadow.getElementById("decorModelUrl") as HTMLInputElement
+    this.decorModelTitleInput = this.shadow.getElementById("decorModelTitle") as HTMLInputElement
+    this.decorModelAuthorInput = this.shadow.getElementById("decorModelAuthor") as HTMLInputElement
+    this.decorModelLicenseInput = this.shadow.getElementById("decorModelLicense") as HTMLInputElement
+    this.decorModelSourceInput = this.shadow.getElementById("decorModelSource") as HTMLInputElement
     this.decorFloorsInput = this.shadow.getElementById("decorFloors") as HTMLInputElement
     this.decorOccupiedFloorInput = this.shadow.getElementById("decorOccupiedFloor") as HTMLInputElement
     this.decorWitnessSideSelect = this.shadow.getElementById("decorWitnessSide") as HTMLSelectElement
@@ -942,6 +978,16 @@ export class SightingEditorElement extends HTMLElement {
     this.labelDecorHeading = this.shadow.getElementById("label-decor-heading")!
     this.labelDecorLit = this.shadow.getElementById("label-decor-lit")!
     this.labelDecorSightingUrl = this.shadow.getElementById("label-decor-sighting-url")!
+    this.labelDecorWidth = this.shadow.getElementById("label-decor-width")!
+    this.labelDecorLength = this.shadow.getElementById("label-decor-length")!
+    this.labelDecorHeight = this.shadow.getElementById("label-decor-height")!
+    this.labelDecorModel = this.shadow.getElementById("label-decor-model")!
+    this.labelDecorModelAdvanced = this.shadow.getElementById("label-decor-model-advanced")!
+    this.labelDecorModelUrl = this.shadow.getElementById("label-decor-model-url")!
+    this.labelDecorModelTitle = this.shadow.getElementById("label-decor-model-title")!
+    this.labelDecorModelAuthor = this.shadow.getElementById("label-decor-model-author")!
+    this.labelDecorModelLicense = this.shadow.getElementById("label-decor-model-license")!
+    this.labelDecorModelSource = this.shadow.getElementById("label-decor-model-source")!
     this.labelDecorFloors = this.shadow.getElementById("label-decor-floors")!
     this.labelDecorOccupiedFloor = this.shadow.getElementById("label-decor-occupied-floor")!
     this.labelDecorWitnessSide = this.shadow.getElementById("label-decor-witness-side")!
@@ -1022,12 +1068,21 @@ export class SightingEditorElement extends HTMLElement {
       this.decorAltitudeInput,
       this.decorHeadingInput,
       this.decorSightingUrlInput,
+      this.decorWidthInput,
+      this.decorLengthInput,
+      this.decorHeightInput,
+      this.decorModelUrlInput,
+      this.decorModelTitleInput,
+      this.decorModelAuthorInput,
+      this.decorModelLicenseInput,
+      this.decorModelSourceInput,
       this.decorFloorsInput,
       this.decorOccupiedFloorInput
     ]) {
       input.addEventListener("input", () => this.updateDecor())
     }
     this.decorWitnessSideSelect.addEventListener("change", () => this.updateDecor())
+    this.decorModelSelect.addEventListener("change", () => this.updateDecorModelChoice())
     for (const side of DECOR_SIDES) {
       this.decorWindowInputs[side].addEventListener("input", () => this.updateDecorWindows())
     }
@@ -1428,7 +1483,8 @@ export class SightingEditorElement extends HTMLElement {
     )
     this.terrainSourceRows.replaceChildren(
       this.labelledPicker("elevation", this.messages.sourceElevation, ELEVATION_SOURCES, () => this.applyTerrainSources()),
-      this.labelledPicker("imagery", this.messages.sourceImagery, IMAGERY_SOURCES, () => this.applyTerrainSources())
+      this.labelledPicker("imagery", this.messages.sourceImagery, IMAGERY_SOURCES, () => this.applyTerrainSources()),
+      this.labelledPicker("decor-model", this.messages.decorModel, DECOR_MODEL_SOURCES, () => this.applyDecorModelSource())
     )
   }
 
@@ -1490,6 +1546,17 @@ export class SightingEditorElement extends HTMLElement {
     // SceneElement.updateAstronomy), and a scene sitting paused at t=0 has no next tick — so
     // without this the new source took effect at some arbitrary later moment, or never. Same
     // "surface the edit as a timeupdate" idiom every other editor change here uses.
+    this.ufoElement.refresh()
+  }
+
+  /** A different model catalogue means different options in the decor picker AND a different
+   * answer for every id a recording already names — so both the editor's own copy and the scene's
+   * are replaced, and what is on screen is rebuilt from the new one (see
+   * SceneRenderer.setDecorModelProvider). */
+  private applyDecorModelSource(): void {
+    this.decorModelProvider = dataSourceById(DECOR_MODEL_SOURCES, this.chosenSourceId.get("decor-model")).create()
+    this.sceneElement.setDecorModelProvider(this.decorModelProvider)
+    void this.refreshDecorModelOptions()
     this.ufoElement.refresh()
   }
 
@@ -3854,7 +3921,7 @@ export class SightingEditorElement extends HTMLElement {
         const t = this.ufoElement.currentTime
         const keyframe = { t, eastM, northM, altitudeM, headingDeg }
         const kept = track.filter(existing => existing.t !== t)
-        return { ...d, title: this.stringOrUndefined(this.decorTitleInput.value), track: [...kept, keyframe].sort((a, b) => a.t - b.t), sightingUrl: this.stringOrUndefined(this.decorSightingUrlInput.value), witnessSide, floors: d.kind === "building" ? Number(this.decorFloorsInput.value) : undefined, occupiedFloor: d.kind === "building" ? Number(this.decorOccupiedFloorInput.value) : undefined }
+        return { ...d, title: this.stringOrUndefined(this.decorTitleInput.value), track: [...kept, keyframe].sort((a, b) => a.t - b.t), sightingUrl: this.stringOrUndefined(this.decorSightingUrlInput.value), witnessSide, sizeM: this.statedDecorSize(), model: this.statedDecorModel(), floors: d.kind === "building" ? Number(this.decorFloorsInput.value) : undefined, occupiedFloor: d.kind === "building" ? Number(this.decorOccupiedFloorInput.value) : undefined }
       }
       return {
         ...d,
@@ -3864,6 +3931,8 @@ export class SightingEditorElement extends HTMLElement {
         headingDeg,
         sightingUrl: this.stringOrUndefined(this.decorSightingUrlInput.value),
         witnessSide,
+        sizeM: this.statedDecorSize(),
+        model: this.statedDecorModel(),
         floors: d.kind === "building" ? Number(this.decorFloorsInput.value) : undefined,
         // Written whenever it's a building, not gated on witnessSide too (unlike witnessSide
         // itself) — see syncDecorVisibility's own doc comment on why the field is shown that
@@ -3876,6 +3945,142 @@ export class SightingEditorElement extends HTMLElement {
     this.syncDecorVisibility()
     this.updateDecorTitleValidity()
     this.ufoElement.refresh()
+  }
+
+  /**
+   * Fills the three size fields: the recording's own numbers as VALUES, and what the built-in
+   * shape measures as PLACEHOLDERS.
+   *
+   * The distinction is the whole point. A field showing 4.35 in grey says "this is what you are
+   * looking at, and nobody measured it"; the same 4.35 as a value would say a witness reported it.
+   * See DecorSize — this is the one field where the difference between drawn and measured had been
+   * lost, and it is the difference the rest of this data model is built on.
+   */
+  private syncDecorSizeFields(decor: DecorObject | undefined): void {
+    const natural = decor ? DecorSystem.naturalSize(decor.kind, decor.floors) : undefined
+    const fields = [
+      [this.decorWidthInput, decor?.sizeM?.widthM, natural?.widthM],
+      [this.decorLengthInput, decor?.sizeM?.lengthM, natural?.lengthM],
+      [this.decorHeightInput, decor?.sizeM?.heightM, natural?.heightM]
+    ] as const
+    for (const [input, stated, drawn] of fields) {
+      input.value = stated === undefined ? "" : String(this.roundedMeters(stated))
+      input.placeholder = drawn === undefined ? "" : String(this.roundedMeters(drawn))
+    }
+  }
+
+  /** Fills the model picker and the collapsed direct-address block from what the object names.
+   * The block is opened only when it actually holds something, so it stays out of the way for the
+   * ordinary case (a catalogue entry, or no model at all) — the user's own instruction. */
+  private syncDecorModelFields(decor: DecorObject | undefined): void {
+    void this.refreshDecorModelOptions(decor)
+    this.decorModelSelect.value = decor?.model?.id ?? ""
+    this.decorModelUrlInput.value = decor?.model?.url ?? ""
+    this.decorModelTitleInput.value = decor?.model?.credit?.title ?? ""
+    this.decorModelAuthorInput.value = decor?.model?.credit?.author ?? ""
+    this.decorModelLicenseInput.value = decor?.model?.credit?.license ?? ""
+    this.decorModelSourceInput.value = decor?.model?.credit?.sourceUrl ?? ""
+    this.decorModelAdvanced.open = decor?.model?.url !== undefined
+  }
+
+  /** The catalogue's own entries for this kind, plus the "no model" option that heads the list.
+   * Asked on every decor selection and answered from the provider's own cache (see
+   * UfoAtHomeModelCatalogue), so this is a fetch once per session and a filter afterwards. An
+   * unreachable catalogue simply leaves the built-in shape as the only choice. */
+  private async refreshDecorModelOptions(decor?: DecorObject): Promise<void> {
+    const selected = decor ?? this.ufoElement.sighting.decor.find(d => d.id === this.currentDecorId)
+    const entries = selected ? await this.decorModelProvider.entries(selected.kind).catch(() => []) : []
+    const chosen = selected?.model?.id ?? ""
+    const none = document.createElement("option")
+    none.value = ""
+    none.textContent = this.messages.decorModelNone
+    this.decorModelSelect.replaceChildren(
+      none,
+      ...entries.map(entry => {
+        const option = document.createElement("option")
+        option.value = entry.id
+        option.textContent = entry.name
+        option.title = `${entry.credit.title}${entry.credit.author ? ` — ${entry.credit.author}` : ""} (${entry.credit.license})`
+        return option
+      })
+    )
+    this.decorModelSelect.value = chosen
+  }
+
+  /**
+   * Picking a model states it, and — only when nothing else does — states how big the thing it
+   * depicts really is.
+   *
+   * A catalogue entry can carry the real object's measurements (see DecorModelEntry.sizeM): a 1964
+   * Catalina is 5.4 m of car whoever draws it. Adopting that when the recording says nothing is
+   * strictly better than the built-in shape's own arbitrary 4.35, and it is sourced rather than
+   * invented. It never overwrites a size the recording already states — a witness who measured
+   * their own car outranks a catalogue describing a similar one.
+   */
+  private updateDecorModelChoice(): void {
+    const id = this.decorModelSelect.value
+    void (async () => {
+      const entry = id ? await this.decorModelProvider.entry(id).catch(() => undefined) : undefined
+      const decor = this.ufoElement.sighting.decor.find(d => d.id === this.currentDecorId)
+      if (entry?.sizeM && decor && !decor.sizeM) {
+        const fields = [
+          [this.decorWidthInput, entry.sizeM.widthM],
+          [this.decorLengthInput, entry.sizeM.lengthM],
+          [this.decorHeightInput, entry.sizeM.heightM]
+        ] as const
+        for (const [input, measured] of fields) {
+          if (measured !== undefined) input.value = String(this.roundedMeters(measured))
+        }
+      }
+      this.updateDecor()
+    })()
+  }
+
+  /** Meters to the centimetre, so a field never reads 4.349999904632568 — a size is measured with
+   * a tape, not to a float's last bit. */
+  private roundedMeters(value: number): number {
+    return Math.round(value * 100) / 100
+  }
+
+  /** What a size field states, or nothing — an empty field, a non-number and a zero are all
+   * "unstated" rather than a measurement of nothing. */
+  private positiveMeters(value: string): number | undefined {
+    const parsed = Number(value)
+    return value.trim() === "" || !Number.isFinite(parsed) || parsed <= 0 ? undefined : parsed
+  }
+
+  /**
+   * What the three size fields state, or nothing at all when all three are empty.
+   *
+   * Each field stands on its own: pacing out the length of a shed and not its width states ONE
+   * number, and the other two stay unmeasured rather than being filled in from the built-in
+   * shape's own proportions — which the placeholder is already showing, honestly, in grey.
+   */
+  private statedDecorSize(): DecorSize | undefined {
+    const widthM = this.positiveMeters(this.decorWidthInput.value)
+    const lengthM = this.positiveMeters(this.decorLengthInput.value)
+    const heightM = this.positiveMeters(this.decorHeightInput.value)
+    return widthM === undefined && lengthM === undefined && heightM === undefined ? undefined : { widthM, lengthM, heightM }
+  }
+
+  /** What the model picker and the direct-address block state. A typed address wins over the
+   * picker (see DecorModelRef), and carries whatever credit has been typed beside it — incomplete
+   * is stored as typed rather than silently dropped, and simply isn't DRAWN until it is complete
+   * (see SceneRenderer.loadDecorModel), which is what makes the missing field visible. */
+  private statedDecorModel(): DecorObject["model"] {
+    const url = this.stringOrUndefined(this.decorModelUrlInput.value)
+    if (url) {
+      const title = this.stringOrUndefined(this.decorModelTitleInput.value)
+      const license = this.stringOrUndefined(this.decorModelLicenseInput.value)
+      return {
+        url,
+        credit: title !== undefined && license !== undefined
+          ? { title, license, author: this.stringOrUndefined(this.decorModelAuthorInput.value), sourceUrl: this.stringOrUndefined(this.decorModelSourceInput.value) }
+          : undefined
+      }
+    }
+    const id = this.stringOrUndefined(this.decorModelSelect.value)
+    return id === undefined ? undefined : { id }
   }
 
   /** Name is mandatory once a decor object exists — addDecor() always fills it with a real
@@ -3975,6 +4180,15 @@ export class SightingEditorElement extends HTMLElement {
       this.decorHeadingInput,
       this.decorLitInput,
       this.decorSightingUrlInput,
+      this.decorWidthInput,
+      this.decorLengthInput,
+      this.decorHeightInput,
+      this.decorModelSelect,
+      this.decorModelUrlInput,
+      this.decorModelTitleInput,
+      this.decorModelAuthorInput,
+      this.decorModelLicenseInput,
+      this.decorModelSourceInput,
       this.decorFloorsInput,
       this.decorOccupiedFloorInput,
       this.decorWitnessSideSelect,
@@ -3994,6 +4208,8 @@ export class SightingEditorElement extends HTMLElement {
     this.decorLitInput.checked = decor ? resolveDecorLitAt(decor, this.ufoElement.currentTime) : false
     this.refreshDecorLightRigOptions(decor)
     this.decorSightingUrlInput.value = decor?.sightingUrl ?? ""
+    this.syncDecorSizeFields(decor)
+    this.syncDecorModelFields(decor)
     this.decorFloorsInput.value = String(decor?.floors ?? DEFAULT_BUILDING_FLOORS)
     this.decorOccupiedFloorInput.value = String(decor?.occupiedFloor ?? 0)
     this.decorWitnessSideSelect.value = decor?.witnessSide ?? ""
@@ -4041,6 +4257,12 @@ export class SightingEditorElement extends HTMLElement {
     // outright by the parameter summary, which is what turned it up.
     this.setRowVisible(this.decorAltitudeInput, hasSelection)
     this.setRowVisible(this.decorHeadingInput, hasSelection)
+    // Size and model apply to every kind — there is no scenery whose size is not a fact about it.
+    this.setRowVisible(this.decorWidthInput, hasSelection)
+    this.setRowVisible(this.decorLengthInput, hasSelection)
+    this.setRowVisible(this.decorHeightInput, hasSelection)
+    this.setRowVisible(this.decorModelSelect, hasSelection)
+    this.decorModelAdvanced.hidden = !hasSelection
     // Lit is the legacy single switch (a streetlamp, a car's headlights). An aircraft's lamps are a
     // rig of their own (see LightRig.ts), so the checkbox would sit there doing nothing at all —
     // which is exactly how it was read.
@@ -4806,6 +5028,16 @@ export class SightingEditorElement extends HTMLElement {
     // screen reader (or a sighted hover) gets a real word, not just a symbol.
     this.addDecorBuildingButton.title = messages.addDecor
     this.addDecorBuildingButton.setAttribute("aria-label", messages.addDecor)
+    this.labelDecorWidth.textContent = messages.decorWidth
+    this.labelDecorLength.textContent = messages.decorLength
+    this.labelDecorHeight.textContent = messages.decorHeight
+    this.labelDecorModel.textContent = messages.decorModel
+    this.labelDecorModelAdvanced.textContent = messages.decorModelAdvanced
+    this.labelDecorModelUrl.textContent = messages.decorModelUrl
+    this.labelDecorModelTitle.textContent = messages.decorModelTitle
+    this.labelDecorModelAuthor.textContent = messages.decorModelAuthor
+    this.labelDecorModelLicense.textContent = messages.decorModelLicense
+    this.labelDecorModelSource.textContent = messages.decorModelSource
     this.labelDecorFloors.textContent = messages.decorFloors
     this.labelDecorOccupiedFloor.textContent = messages.decorOccupiedFloor
     this.labelDecorWitnessSide.textContent = messages.decorWitnessSide

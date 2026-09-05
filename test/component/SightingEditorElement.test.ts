@@ -29,6 +29,10 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     get currentTerrainAttribution(): undefined {
       return undefined
     }
+    setDecorModelProvider(): void {}
+    get currentDecorModelCredits(): never[] {
+      return []
+    }
     setAstronomy(): void {}
     setShowCompass(): void {}
     setCompassHovered(): void {}
@@ -3343,6 +3347,64 @@ describe("SightingEditorElement decor group", () => {
     expect(rowHidden("delete-decor")).toBe(false)
     expect(rowHidden("decorTitle")).toBe(false)
     expect(rowHidden("decorEast")).toBe(false)
+  })
+
+  it("shows what the built-in shape measures as a PLACEHOLDER, leaving the size unstated", () => {
+    // The distinction the whole field exists for: grey text saying "this is what you are looking
+    // at" is not the same claim as a value saying "a witness measured this".
+    const element = mount()
+    const shadow = element.shadowRoot!
+    ;(shadow.getElementById("decorKind") as HTMLSelectElement).value = "vehicle"
+    ;(shadow.getElementById("add-decor-building") as HTMLButtonElement).click()
+
+    const length = shadow.getElementById("decorLength") as HTMLInputElement
+    expect(length.value).toBe("")
+    expect(Number(length.placeholder)).toBeCloseTo(4.35, 2)
+    expect(element.sightingData.decor![0].sizeM).toBeUndefined()
+  })
+
+  it("states only the axis that was actually filled in, leaving the other two unmeasured", () => {
+    const element = mount()
+    const shadow = element.shadowRoot!
+    ;(shadow.getElementById("decorKind") as HTMLSelectElement).value = "vehicle"
+    ;(shadow.getElementById("add-decor-building") as HTMLButtonElement).click()
+
+    const length = shadow.getElementById("decorLength") as HTMLInputElement
+    length.value = "5.44"
+    length.dispatchEvent(new Event("input"))
+
+    expect(element.sightingData.decor![0].sizeM).toEqual({ widthM: undefined, lengthM: 5.44, heightM: undefined })
+  })
+
+  it("drops the size entirely once every field is cleared again", () => {
+    const element = mount()
+    const shadow = element.shadowRoot!
+    ;(shadow.getElementById("add-decor-building") as HTMLButtonElement).click()
+    const height = shadow.getElementById("decorHeight") as HTMLInputElement
+    height.value = "3"
+    height.dispatchEvent(new Event("input"))
+    expect(element.sightingData.decor![0].sizeM).toEqual({ widthM: undefined, lengthM: undefined, heightM: 3 })
+
+    height.value = ""
+    height.dispatchEvent(new Event("input"))
+    expect(element.sightingData.decor![0].sizeM).toBeUndefined()
+  })
+
+  it("keeps the direct-address model block collapsed until a recording actually uses one", () => {
+    // The user's own instruction: naming a glTF file by hand, with the credit that has to travel
+    // with it, is five fields the ordinary decor object never needs.
+    const element = mount()
+    const shadow = element.shadowRoot!
+    ;(shadow.getElementById("add-decor-building") as HTMLButtonElement).click()
+    expect((shadow.getElementById("decor-model-advanced") as HTMLDetailsElement).open).toBe(false)
+
+    element.sightingData = {
+      ...element.sightingData,
+      decor: [{ id: "d1", kind: "building", eastM: 0, northM: 10, model: { url: "https://example.test/shed.glb", credit: { title: "Shed", license: "CC0 1.0" } } }]
+    }
+    expect((shadow.getElementById("decor-model-advanced") as HTMLDetailsElement).open).toBe(true)
+    expect((shadow.getElementById("decorModelUrl") as HTMLInputElement).value).toBe("https://example.test/shed.glb")
+    expect((shadow.getElementById("decorModelLicense") as HTMLInputElement).value).toBe("CC0 1.0")
   })
 
   it("hides only 'other witness' from the generic Decor group's own kind dropdown", () => {

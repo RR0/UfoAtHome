@@ -24,6 +24,10 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     get currentTerrainAttribution(): undefined {
       return undefined
     }
+    setDecorModelProvider(): void {}
+    get currentDecorModelCredits(): never[] {
+      return []
+    }
     setAstronomy(): void {}
     setShowCompass(): void {}
     setCompassHovered(): void {}

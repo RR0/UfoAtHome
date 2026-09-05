@@ -126,6 +126,30 @@ export interface SightingLabels {
   decorHeading: string
   decorLit: string
   decorTitle: string
+  /** The three real dimensions of a decor object, in meters along its OWN axes (see DecorSize):
+   * across it, along the way its heading faces, and up. Each field's placeholder shows what the
+   * built-in shape measures on its own, so leaving one empty is visibly "nobody measured this"
+   * rather than a blank. */
+  decorWidth: string
+  decorLength: string
+  decorHeight: string
+  /** Which 3D model stands in for the built-in shape (see DecorModelRef) — the picker's own label.
+   * The options come from whichever model catalogue is chosen in Data sources. */
+  decorModel: string
+  /** decorModel's own "no model, draw the built-in shape" option — the field's default. */
+  decorModelNone: string
+  /** Summary of the collapsed block holding the direct-URL escape hatch below: a model no
+   * catalogue has yet. Collapsed by default because naming a file by hand, with the credit that
+   * has to travel with it, is the rare case — see DecorModelRef.url. */
+  decorModelAdvanced: string
+  /** Address of a glTF/GLB file to use directly, taking precedence over the picker above. */
+  decorModelUrl: string
+  /** The credit a directly-addressed model cannot be shown without — what it is, who made it,
+   * under what licence, and where that can be checked (see DecorModelCredit). */
+  decorModelTitle: string
+  decorModelAuthor: string
+  decorModelLicense: string
+  decorModelSource: string
   /** Number of upper stories a building decor object has (see DecorObject.floors) — shown only
    * for kind "building". */
   decorFloors: string

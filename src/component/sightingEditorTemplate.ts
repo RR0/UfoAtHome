@@ -107,6 +107,25 @@ export const html = `
     <label><span id="label-decor-north">Distance north</span> <input id="decorNorth" type="number" step="0.5" value="0"/> m</label>
     <label><span id="label-decor-altitude">Altitude</span> <input id="decorAltitude" type="number" step="1" value="0"/> m</label>
     <label><span id="label-decor-heading">Heading</span> <input id="decorHeading" type="number" min="0" max="360" step="1" value="0"/> &deg;</label>
+    <!-- Left EMPTY when the recording states no size, with the built-in shape's own measurement as
+         the placeholder: a real number typed into a field nobody measured would be a measurement
+         invented by the form, which is the one thing this project's data refuses to hold (see
+         DecorSize). Filling any one of the three states all three — the other two then take the
+         built-in shape's own value, which is what was being drawn anyway. -->
+    <label><span id="label-decor-width">Width</span> <input id="decorWidth" type="number" min="0.1" step="0.1" autocomplete="off"/> m</label>
+    <label><span id="label-decor-length">Length</span> <input id="decorLength" type="number" min="0.1" step="0.1" autocomplete="off"/> m</label>
+    <label><span id="label-decor-height">Height</span> <input id="decorHeight" type="number" min="0.1" step="0.1" autocomplete="off"/> m</label>
+    <label><span id="label-decor-model">3D model</span> <select id="decorModel"></select></label>
+    <!-- Collapsed by default, on the user's own instruction: naming a file by hand is the rare
+         case and would otherwise clutter every decor object with five fields it never uses. -->
+    <details id="decor-model-advanced" class="decor-model-advanced">
+      <summary id="label-decor-model-advanced">Model from an address</summary>
+      <label><span id="label-decor-model-url">glTF/GLB address</span> <input id="decorModelUrl" type="url" placeholder="https://…/model.glb"/></label>
+      <label><span id="label-decor-model-title">Model name</span> <input id="decorModelTitle" type="text"/></label>
+      <label><span id="label-decor-model-author">Author</span> <input id="decorModelAuthor" type="text"/></label>
+      <label><span id="label-decor-model-license">Licence</span> <input id="decorModelLicense" type="text" placeholder="CC0 1.0"/></label>
+      <label><span id="label-decor-model-source">Where it came from</span> <input id="decorModelSource" type="url" placeholder="https://…"/></label>
+    </details>
     <label><span id="label-decor-lit">Lit</span> <input id="decorLit" type="checkbox"/></label>
     <label><span id="label-decor-lights">Lights</span> <select id="decorLightRig"></select></label>
     <label><span id="label-decor-floors">Floors</span> <input id="decorFloors" type="number" min="0" max="20" step="1" value="2"/></label>
@@ -393,7 +412,7 @@ button.preset[aria-pressed="true"] {
    decimals, which is the widest thing in the list. Deliberately NOT here: #durationSeconds and
    #utcOffsetHours, whose placeholders are sentences ("observation length", "from longitude") that
    6em would cut off, and #objectSize/#objectDistance for the same reason. */
-#lat, #lng, #heading, #pitch, #roll, #elevation, #focalLength, #fNumber, #focusDistance, #samplingRate, #cloudBase, #windDirection, #windSpeed, #decorEast, #decorNorth, #decorHeading, #decorAltitude, #decorFloors, #decorOccupiedFloor, #decorWindowFront, #decorWindowBehind, #decorWindowLeft, #decorWindowRight, #decorWindowFrontLeft, #decorWindowFrontRight, #decorWindowBehindLeft, #decorWindowBehindRight {
+#lat, #lng, #heading, #pitch, #roll, #elevation, #focalLength, #fNumber, #focusDistance, #samplingRate, #cloudBase, #windDirection, #windSpeed, #decorEast, #decorNorth, #decorHeading, #decorAltitude, #decorWidth, #decorLength, #decorHeight, #decorFloors, #decorOccupiedFloor, #decorWindowFront, #decorWindowBehind, #decorWindowLeft, #decorWindowRight, #decorWindowFrontLeft, #decorWindowFrontRight, #decorWindowBehindLeft, #decorWindowBehindRight {
   width: 6em;
 }
 .time-qualifier {
@@ -411,7 +430,17 @@ button.preset[aria-pressed="true"] {
 #witnessId, #witnessDirName, #witnessTitle, #witnessLastName, #witnessFirstNames, #caseId, #tags, #shapeTitle, #decorTitle {
   width: 10em;
 }
-#decorSightingUrl {
+/* The whole disclosure sits on its own line: five stacked rows inside a row of inline labels
+   would otherwise be laid out beside the field before it. */
+.decor-model-advanced {
+  flex-basis: 100%;
+}
+
+.decor-model-advanced > summary {
+  cursor: pointer;
+}
+
+#decorModelUrl, #decorModelSource, #decorSightingUrl {
   width: 16em;
 }
 /* Shared by Duration (no sane default — real playback pacing needs some notion of the

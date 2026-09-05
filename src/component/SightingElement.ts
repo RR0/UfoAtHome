@@ -718,6 +718,24 @@ export class SightingElement extends HTMLElement {
       item.textContent = terrainAttribution
       this.infoCreditsList.appendChild(item)
     }
+    // Every 3D model currently standing in the decor, each named with its author and licence — the
+    // condition on which they are shown at all (see DecorModelRef.credit, and DataSource's own doc
+    // comment on why a credit that isn't displayed isn't a licence).
+    for (const credit of this.sceneElement.decorModelCredits) {
+      const item = document.createElement("li")
+      const author = credit.author ? ` — ${credit.author}` : ""
+      if (credit.sourceUrl) {
+        const link = document.createElement("a")
+        link.href = credit.sourceUrl
+        link.target = "_blank"
+        link.rel = "noopener"
+        link.textContent = credit.title
+        item.append(link, document.createTextNode(`${author} (${credit.license})`))
+      } else {
+        item.textContent = `${credit.title}${author} (${credit.license})`
+      }
+      this.infoCreditsList.appendChild(item)
+    }
     const thunderItem = document.createElement("li")
     thunderItem.textContent = `${THUNDER_CREDIT_TEXT} (`
     const licenseLink = document.createElement("a")

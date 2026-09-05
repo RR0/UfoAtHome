@@ -92,6 +92,10 @@ import type { LensFlareSystem } from "./LensFlareEffect.js"
 import { DecorSystem } from "./DecorSystem.js"
 import type { DecorObject } from "../engine/model/Decor.js"
 import { resolveDecorLitAt, resolveDecorPlacementAt, canHoldWitness } from "../engine/model/Decor.js"
+import type { DecorModelCredit } from "../engine/model/Decor.js"
+import type { DecorModelProvider } from "./decor/DecorModelProvider.js"
+import { DECOR_MODEL_SOURCES } from "./decor/decorModelSources.js"
+import { loadGltfScene } from "./decor/loadGltfScene.js"
 
 /** Plain field-by-field comparison — see setWeather's own doc comment on why reference equality
  * stopped being enough once weather started being resolved fresh every tick from a keyframe
@@ -678,6 +682,17 @@ export class SceneRenderer {
   private terrainOrigin?: { lat: number; lng: number }
   private terrainBuildToken = 0
   private terrainAttribution?: string
+  /** Which catalogue resolves a recording's named 3D models — swappable exactly like the terrain's
+   * own providers (see setDecorModelProvider), and built from the registry's first entry by
+   * default so nothing has to configure it. */
+  private decorModelProvider: DecorModelProvider = DECOR_MODEL_SOURCES[0].create()
+  /** Bumped on every setDecor, so a model still being fetched for a decor list that has since been
+   * replaced is dropped instead of being applied to a group that no longer exists. */
+  private decorModelToken = 0
+  /** The credit of every model actually SHOWING, keyed by decor id — read by the info panel, which
+   * is the only thing that makes a licence a licence (see DataSource's own doc comment). Entries
+   * appear as models land and disappear with the objects that named them. */
+  private readonly decorModelCredits = new Map<string, DecorModelCredit>()
   private starTiers: StarTier[] = []
   private readonly bodyMeshes = new Map<string, Mesh | Sprite>()
   /** Invisible (opacity 0), larger-than-the-real-disc proxies used only for pickBodyAt's hover/
@@ -1238,6 +1253,8 @@ export class SceneRenderer {
   setDecor(decor: DecorObject[]): void {
     if (this.decorObjects === decor) return
     this.decorObjects = decor
+    this.decorModelToken++
+    this.decorModelCredits.clear()
     for (const group of this.decorGroups.values()) {
       group.removeFromParent()
       DecorSystem.dispose(group)
@@ -1253,11 +1270,69 @@ export class SceneRenderer {
       // that starts off but switches on later still needs a real light waiting to be revealed,
       // not one that was never created at all. updateDecorLitState toggles light.visible per tick.
       if (object.kind === "streetlight") this.addStreetlightLight(object.id, group)
+      // Fired and forgotten on purpose: the primitive is already in the scene and is a complete,
+      // correct answer on its own, so a model that takes a second to arrive (or never arrives)
+      // costs the viewer nothing but detail. See loadDecorModel.
+      void this.loadDecorModel(object, this.decorModelToken)
     }
     // Toggled here too (not just in updateCelestialLight, which only runs on the next
     // setAstronomy tick): adding the sighting's first-ever decor object shouldn't have to wait an
     // extra tick before it starts actually casting a shadow.
     this.celestialLight.castShadow = this.decorGroups.size > 0
+  }
+
+  /**
+   * Points the decor at a different model catalogue, and rebuilds what is already showing from it.
+   *
+   * Same shape and same reason as setTerrainProviders: choosing a source is the editor's to do (see
+   * decorModelSources.ts), and a choice that only took effect on the next unrelated change would
+   * read as no choice at all.
+   */
+  setDecorModelProvider(provider: DecorModelProvider): void {
+    this.decorModelProvider = provider
+    const decor = this.decorObjects
+    // Rebuilt through setDecor rather than re-fetched in place: a group whose primitive was already
+    // replaced by the previous catalogue's model has nothing left to fall back to.
+    this.decorObjects = []
+    this.setDecor(decor)
+  }
+
+  /** Every model credit currently on screen — what the info panel shows beside the recording's own
+   * sources. Empty while nothing named a model, or while none has arrived yet. */
+  get currentDecorModelCredits(): DecorModelCredit[] {
+    return [...this.decorModelCredits.values()]
+  }
+
+  /**
+   * Fetches the model a decor object names, and puts it in the primitive's place once it is there.
+   *
+   * Every failure here ends the same way — the primitive stays — and that is the design, not a
+   * consolation: a catalogue that is offline, a licence-bearing URL that has rotted, a file that
+   * isn't valid glTF are all "no model today", and a reconstruction whose scenery vanished because
+   * a CDN was down would be worse than one drawn as boxes. Only a genuinely unexpected failure is
+   * worth a word in the console, and even that is a warning.
+   */
+  private async loadDecorModel(object: DecorObject, token: number): Promise<void> {
+    const ref = object.model
+    if (!ref) return
+    try {
+      const entry = ref.url ? undefined : ref.id ? await this.decorModelProvider.entry(ref.id) : undefined
+      const url = ref.url ?? entry?.url
+      const credit = ref.credit ?? entry?.credit
+      // A bare url with no credit is refused rather than drawn: an unattributed model is not a
+      // model this project can show (see DecorModelRef.credit).
+      if (!url || !credit) return
+      const scene = await loadGltfScene(url)
+      // The decor list may have been replaced entirely while this was in flight.
+      if (token !== this.decorModelToken) return
+      const group = this.decorGroups.get(object.id)
+      if (!group) return
+      DecorSystem.applyModel(group, object, scene, ref.headingOffsetDeg ?? entry?.headingOffsetDeg ?? 0)
+      this.decorModelCredits.set(object.id, credit)
+      this.render()
+    } catch (error) {
+      console.warn(`Keeping the built-in shape for decor "${object.id}":`, error)
+    }
   }
 
   /** Keeps every decor object anchored to its own fixed real-world spot as the witness moves,
@@ -1403,10 +1478,15 @@ export class SceneRenderer {
    * interpreted relative to whichever object it's added to, so copying the lamp mesh's own
    * (already-local) position is correct without any conversion. */
   private addStreetlightLight(id: string, group: Group): void {
-    const lampHead = group.children.find(child => child.userData.emissive)
+    // The lamp head sits inside the body group the stated size scales (see DecorSystem.BODY_NAME),
+    // one level below where this used to look — and its position is in that group's own scaled
+    // space, so a streetlight stated taller than the primitive puts its real light at the top of
+    // the pole rather than partway up it.
+    const body = DecorSystem.bodyOf(group)
+    const lampHead = body.children.find(child => child.userData.emissive)
     if (!lampHead) return
     const light = new PointLight(0xffcc66, STREETLIGHT_LIGHT_INTENSITY, STREETLIGHT_LIGHT_DISTANCE)
-    light.position.copy(lampHead.position)
+    light.position.copy(lampHead.position).multiply(body.scale)
     light.castShadow = true
     light.shadow.mapSize.set(512, 512)
     light.shadow.bias = -0.002

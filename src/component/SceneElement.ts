@@ -3,6 +3,8 @@ import { SightingFetch } from "../engine/net/SightingFetch.js"
 import { UfoElement, registerUfo, UFO_ELEMENT_NAME } from "./UfoElement.js"
 import { SceneRenderer } from "../render3d/SceneRenderer.js"
 import type { TerrainProviders } from "../render3d/terrain/defaultTerrainProviders.js"
+import type { DecorModelProvider } from "../render3d/decor/DecorModelProvider.js"
+import type { DecorModelCredit } from "../engine/model/Decor.js"
 import type { SceneAstronomy, SceneComet } from "../render3d/SceneRenderer.js"
 import { loadStarCatalog } from "../render3d/StarCatalog.js"
 import type { StarCatalog } from "../render3d/StarCatalog.js"
@@ -510,6 +512,19 @@ export class SceneElement extends HTMLElement {
    * Same "expose the nested renderer to a composing wrapper" arrangement as the getters above. */
   setTerrainProviders(providers: TerrainProviders): void {
     this.sceneRenderer.setTerrainProviders(providers)
+  }
+
+  /** Relays a change of 3D-model catalogue through to the renderer — see its
+   * setDecorModelProvider. Same arrangement as setTerrainProviders above. */
+  setDecorModelProvider(provider: DecorModelProvider): void {
+    this.sceneRenderer.setDecorModelProvider(provider)
+  }
+
+  /** The credit of every 3D model currently showing in the decor — see
+   * SceneRenderer.currentDecorModelCredits, and DataSource on why a credit that isn't displayed
+   * isn't a licence. */
+  get decorModelCredits(): DecorModelCredit[] {
+    return this.sceneRenderer.currentDecorModelCredits
   }
 
   /**
