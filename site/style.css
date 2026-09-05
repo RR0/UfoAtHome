@@ -329,6 +329,32 @@ section.band:first-of-type { border-top: 0; }
 .demo-links a { font-weight: 600; }
 .demo-links span { color: var(--ink-faint); margin: 0 0.35rem; }
 
+/* ------------------------------------------------------- try-it blocks in the docs */
+
+/* A worked example the reader can run rather than read: the field arrives holding a real recording,
+   so the buttons do something before anything has been understood, and the reader's own URL goes in
+   afterwards. */
+.doc-try {
+  border: 1px solid var(--line); border-radius: 10px; padding: 1rem 1.1rem;
+  background: var(--ground-raised); margin: 1.2rem 0;
+}
+.doc-try label { display: block; font-weight: 600; margin-bottom: 0.4rem; font-size: 0.95rem; }
+.doc-try input {
+  width: 100%; font: inherit; font-size: 0.9rem; font-family: var(--mono);
+  padding: 0.5rem 0.75rem; border-radius: 8px;
+  border: 1px solid var(--line-strong); background: var(--ground); color: var(--ink);
+}
+.doc-try input:focus-visible { outline: 2px solid var(--glow); outline-offset: 1px; }
+.doc-try pre { margin: 0.8rem 0 0; }
+.doc-try-out {
+  margin: 0.8rem 0 0; overflow-x: auto;
+}
+.doc-try-out code {
+  display: block; padding: 0.5rem 0.7rem; white-space: pre; font-size: 0.8rem;
+}
+.doc-try-actions { display: flex; gap: 0.6rem; flex-wrap: wrap; margin: 0.9rem 0 0; }
+.doc-try-label { font-weight: 600; margin-bottom: 0.2rem; }
+
 /* ---------------------------------------------------------------- player form */
 
 .player-inputs { display: grid; gap: 1.2rem; max-width: 46rem; margin: 0 0 1rem; }

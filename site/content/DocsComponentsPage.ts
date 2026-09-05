@@ -1,27 +1,27 @@
 import { DocsSection } from "./DocsSection.js"
 import type { PageMeta, Said, SiteLanguage } from "../SitePage.js"
 
-/** The four custom elements, one section each: markup, then what each can be told and asked. */
-export class DocsElementsPage extends DocsSection {
+/** The four components, one section each: markup, then what each can be told and asked. */
+export class DocsComponentsPage extends DocsSection {
 
   readonly meta: PageMeta = {
-    slug: "docs/elements",
-    navLabel: { en: "The elements", fr: "Les éléments" },
-    title: { en: "The four elements", fr: "Les quatre éléments" },
+    slug: "docs/components",
+    navLabel: { en: "The components", fr: "Les composants" },
+    title: { en: "The components", fr: "Les composants" },
     description: {
-      en: "One section per tag: what it draws, the markup it takes, and every attribute, property, "
-        + "method and event it answers to.",
-      fr: "Une section par balise : ce qu'elle dessine, le balisage qu'elle accepte, et chaque "
-        + "attribut, propriété, méthode et événement auquel elle répond."
+      en: "One section per component: what it draws, the markup it takes, and every attribute, "
+        + "property, method and event it answers to.",
+      fr: "Une section par composant : ce qu'il dessine, le balisage qu'il accepte, et chaque "
+        + "attribut, propriété, méthode et événement auquel il répond."
     },
     asideFromNav: true
   }
 
   private readonly lede: Said<string> = {
-    en: "Four vanilla custom elements. Each registers itself on import, each takes the same "
-      + "<code>src</code>, and each composes the one before it.",
-    fr: "Quatre éléments personnalisés natifs. Chacun s'enregistre à l'import, chacun prend le même "
-      + "<code>src</code>, et chacun compose le précédent."
+    en: "Four vanilla custom elements — no framework anywhere. Each registers itself on import, "
+      + "each takes the same <code>src</code>, and each composes the one before it.",
+    fr: "Quatre éléments personnalisés natifs, sans aucun framework. Chacun s'enregistre à "
+      + "l'import, chacun prend le même <code>src</code>, et chacun compose le précédent."
   }
 
   render(language: SiteLanguage): string {
@@ -38,7 +38,20 @@ export class DocsElementsPage extends DocsSection {
       under <code>&lt;rr0-ufo&gt;</code> below is available in all four — through
       <code>.scene.ufoElement</code> from the outermost, since the composition lives in a shadow
       root.</p>
-    <p>Which one to load, and what it costs, is on <a href="/docs/embed/">the embedding page</a>.</p>
+    <h2>Which one to load</h2>
+    <p>They are not variants of one bundle: each is self-contained, and a page should load only the
+      one it needs. The three heavier ones carry Three.js and a star catalogue, which is what a real
+      sky costs.</p>
+    <div class="table-scroll">
+    <table>
+      <tr><th>Component</th><th>Use it when</th><th>Module</th><th>gzip</th></tr>
+      <tr><td><code>&lt;rr0-ufo&gt;</code></td><td>You only need the shape replayed — an illustration inside an article, with no sky behind it</td><td><code>/lib/rr0-ufo.mjs</code></td><td>16 KB</td></tr>
+      <tr><td><code>&lt;rr0-scene&gt;</code></td><td>You want the real sky and ground, but none of the witness toolbar</td><td><code>/lib/rr0-scene.mjs</code></td><td>238 KB</td></tr>
+      <tr><td><code>&lt;rr0-eyewitness&gt;</code></td><td><strong>The default.</strong> A real sighting, one witness or several, with its metadata, credits and embed panel</td><td><code>/lib/rr0-eyewitness.mjs</code></td><td>249 KB</td></tr>
+      <tr><td><code>&lt;rr0-ufo-recorder&gt;</code></td><td>You want people to author or edit recordings on your page</td><td><code>/lib/rr0-ufo-recorder.mjs</code></td><td>293 KB</td></tr>
+    </table>
+    </div>
+    <p>Putting one on a page is <a href="/docs/share/">two lines</a>.</p>
 
     <h2><code>&lt;rr0-ufo&gt;</code> — the shape, and playback</h2>
     <p>The lightweight one: a canvas plus play/pause/loop/seek. Use it where a page only needs to
@@ -126,6 +139,18 @@ export class DocsElementsPage extends DocsSection {
     </table>
     </div>
 
+    <h2>From a bundler, or from your own server</h2>
+    <p>After <code>npm install @rr0/ufoathome</code>:</p>
+    <pre><code>import "@rr0/ufoathome/ufo"        // registers &lt;rr0-ufo&gt;
+import "@rr0/ufoathome/scene"      // registers &lt;rr0-scene&gt;
+import "@rr0/ufoathome/eyewitness" // registers &lt;rr0-eyewitness&gt;
+import "@rr0/ufoathome/recorder"   // registers &lt;rr0-ufo-recorder&gt;</code></pre>
+    <p>Or copy the contents of the package's <code>dist-embed*</code> directories onto your own
+      server and point the <code>&lt;script src&gt;</code> there. Each module references its own
+      assets — the star catalogue, the weather audio — <em>relative to itself</em>, so it keeps
+      working from any path; just keep each bundle's files together. Nothing then depends on this
+      site at all.</p>
+
     <h2>Language</h2>
     <p>Every label is translated by detection, with no picker: the page's own declared language
       first — the nearest <code>lang</code> attribute, so <code>&lt;html lang="fr"&gt;</code> gets
@@ -146,7 +171,20 @@ export class DocsElementsPage extends DocsSection {
       qui figure sous <code>&lt;rr0-ufo&gt;</code> ci-dessous est donc disponible dans les quatre —
       via <code>.scene.ufoElement</code> depuis le plus extérieur, la composition vivant dans un
       <i lang="en">shadow root</i>.</p>
-    <p>Lequel charger, et ce qu'il coûte, est sur <a href="/docs/embed/">la page d'intégration</a>.</p>
+    <h2>Lequel charger</h2>
+    <p>Ce ne sont pas des variantes d'un même <i lang="en">bundle</i> : chacun est autonome, et une
+      page ne devrait charger que celui dont elle a besoin. Les trois plus lourds embarquent Three.js
+      et un catalogue d'étoiles — c'est ce que coûte un vrai ciel.</p>
+    <div class="table-scroll">
+    <table>
+      <tr><th>Composant</th><th>À utiliser quand</th><th>Module</th><th>gzip</th></tr>
+      <tr><td><code>&lt;rr0-ufo&gt;</code></td><td>Vous ne voulez que la forme rejouée — une illustration dans un article, sans ciel derrière</td><td><code>/lib/rr0-ufo.mjs</code></td><td>16 Ko</td></tr>
+      <tr><td><code>&lt;rr0-scene&gt;</code></td><td>Vous voulez le ciel et le sol réels, mais rien de la barre d'outils du témoin</td><td><code>/lib/rr0-scene.mjs</code></td><td>238 Ko</td></tr>
+      <tr><td><code>&lt;rr0-eyewitness&gt;</code></td><td><strong>Le choix par défaut.</strong> Une observation réelle, un témoin ou plusieurs, avec ses métadonnées, ses crédits et son panneau d'intégration</td><td><code>/lib/rr0-eyewitness.mjs</code></td><td>249 Ko</td></tr>
+      <tr><td><code>&lt;rr0-ufo-recorder&gt;</code></td><td>Vous voulez que l'on puisse composer ou modifier des enregistrements sur votre page</td><td><code>/lib/rr0-ufo-recorder.mjs</code></td><td>293 Ko</td></tr>
+    </table>
+    </div>
+    <p>En poser un sur une page, c'est <a href="/docs/share/">deux lignes</a>.</p>
 
     <h2><code>&lt;rr0-ufo&gt;</code> — la forme, et la lecture</h2>
     <p>Le plus léger : un canevas plus lecture/pause/boucle/déplacement. À utiliser là où une page ne
@@ -234,6 +272,18 @@ export class DocsElementsPage extends DocsSection {
       <tr><td><code>sightingchange</code></td><td>Après une modification dans l'éditeur</td><td>Oui</td></tr>
     </table>
     </div>
+
+    <h2>Depuis un <i lang="en">bundler</i>, ou depuis votre serveur</h2>
+    <p>Après <code>npm install @rr0/ufoathome</code> :</p>
+    <pre><code>import "@rr0/ufoathome/ufo"        // enregistre &lt;rr0-ufo&gt;
+import "@rr0/ufoathome/scene"      // enregistre &lt;rr0-scene&gt;
+import "@rr0/ufoathome/eyewitness" // enregistre &lt;rr0-eyewitness&gt;
+import "@rr0/ufoathome/recorder"   // enregistre &lt;rr0-ufo-recorder&gt;</code></pre>
+    <p>Ou recopiez le contenu des répertoires <code>dist-embed*</code> du paquet sur votre serveur et
+      pointez le <code>&lt;script src&gt;</code> dessus. Chaque module référence ses ressources —
+      catalogue d'étoiles, sons de météo — <em>relativement à lui-même</em> : il fonctionne donc
+      depuis n'importe quel chemin, il suffit de garder ensemble les fichiers d'un même
+      <i lang="en">bundle</i>. Plus rien ne dépend alors de ce site.</p>
 
     <h2>Langue</h2>
     <p>Chaque libellé est traduit par détection, sans sélecteur : la langue déclarée par la page

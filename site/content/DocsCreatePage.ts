@@ -1,29 +1,33 @@
 import { DocsSection } from "./DocsSection.js"
 import type { PageMeta, Said, SiteLanguage } from "../SitePage.js"
 
-/** The recording format itself, field by field, with a whole working file to copy. */
-export class DocsFormatPage extends DocsSection {
+/**
+ * "How do I make one?" — the editor, and then the file it writes.
+ *
+ * The two are one page rather than two because they are the same task at two levels: almost
+ * everybody wants the first paragraph, and the ones who want the second want it after having seen
+ * what the first produces.
+ */
+export class DocsCreatePage extends DocsSection {
 
   readonly meta: PageMeta = {
-    slug: "docs/format",
-    navLabel: { en: "The recording format", fr: "Le format d'enregistrement" },
-    title: { en: "The recording format", fr: "Le format d'enregistrement" },
+    slug: "docs/create",
+    navLabel: { en: "Creating an observation", fr: "Créer une observation" },
+    title: { en: "Create an observation", fr: "Créer une observation" },
     description: {
-      en: "What a sighting.json holds, field by field — with a whole working file to copy and four "
-        + "rules that decide what any of it means.",
-      fr: "Ce que contient un sighting.json, champ par champ — avec un fichier entier à recopier et "
-        + "quatre règles qui décident du sens de l'ensemble."
+      en: "Two ways to make a recording: in the editor, or by writing the file yourself — with the "
+        + "format field by field and a whole working example.",
+      fr: "Deux façons de faire un enregistrement : dans l'éditeur, ou en écrivant le fichier "
+        + "vous-même — avec le format champ par champ et un exemple entier qui marche."
     },
     asideFromNav: true
   }
 
   private readonly lede: Said<string> = {
-    en: "A plain JSON file. Nothing in it is a binary blob, an id into a database, or a reference to "
-      + "this site — you can write one by hand, generate one from your own archive, or diff two of "
-      + "them in a code review.",
-    fr: "Un simple fichier JSON. Rien dedans n'est un blob binaire, un identifiant dans une base de "
-      + "données, ni une référence à ce site — vous pouvez en écrire un à la main, en engendrer "
-      + "depuis vos archives, ou en comparer deux dans une relecture de code."
+    en: "Draw it in the editor, or write the file yourself. Both produce the same thing: one JSON "
+      + "file that is yours, and that anybody can replay.",
+    fr: "Dessinez-la dans l'éditeur, ou écrivez le fichier vous-même. Les deux produisent la même "
+      + "chose : un fichier JSON qui est le vôtre, et que n'importe qui peut rejouer."
   }
 
   /** The whole of `public/demo-data/example-minimal.json`, read at build time and quoted verbatim
@@ -44,6 +48,32 @@ export class DocsFormatPage extends DocsSection {
 
   private en(): string {
     return `
+<section class="band">
+  <div class="wrap prose-wide">
+    <h2>1. In the editor</h2>
+    <p>The ordinary way, and the one to use unless you have a reason not to. Draw what was seen, say
+      when and where, record how it moved — and the sky, the weather and the ground are looked up
+      for you rather than remembered.</p>
+    <p class="doc-try-actions">
+      <a class="btn btn-primary" href="/editor/">Open the editor</a>
+      <a class="btn" href="/editor/#manual">Read the manual</a>
+    </p>
+    <p>It ends with <strong>Export</strong>, which hands you a file. That file is the whole
+      recording: there is no account and nothing kept here. Put it somewhere with a public address
+      and it is ready to <a href="/docs/share/">share</a>.</p>
+    <p>Already have one and want to change it? The editor opens on an existing recording — the
+      <q>?</q> panel of every published reconstruction carries the link that does it.</p>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap prose-wide">
+    <h2>2. By hand, or from your own archive</h2>
+    <p>A recording is a file with a documented shape, so nothing stops you writing one in a text
+      editor, or generating a thousand from a database you already have. Everything below is what
+      the editor itself writes.</p>
+  </div>
+</section>
 <section class="band">
   <div class="wrap prose-wide">
     <p>A recording is a plain JSON file. Nothing in it is a binary blob, an id into a database, or a
@@ -155,6 +185,32 @@ export class DocsFormatPage extends DocsSection {
 
   private fr(): string {
     return `
+<section class="band">
+  <div class="wrap prose-wide">
+    <h2>1. Dans l'éditeur</h2>
+    <p>La voie ordinaire, et celle à prendre sauf raison contraire. Dessinez ce qui a été vu, dites
+      quand et où, enregistrez le mouvement — et le ciel, la météo et le sol sont relevés pour vous
+      plutôt que remémorés.</p>
+    <p class="doc-try-actions">
+      <a class="btn btn-primary" href="/editor/">Ouvrir l'éditeur</a>
+      <a class="btn" href="/editor/#manual">Lire le manuel</a>
+    </p>
+    <p>Cela se termine par <strong>Exporter</strong>, qui vous remet un fichier. Ce fichier est
+      l'enregistrement complet : il n'y a pas de compte, et rien n'est conservé ici. Posez-le
+      quelque part avec une adresse publique et il est prêt à <a href="/docs/share/">partager</a>.</p>
+    <p>Vous en avez déjà un et voulez le modifier ? L'éditeur s'ouvre sur un enregistrement
+      existant — le panneau <q>?</q> de toute reconstitution publiée porte le lien qui le fait.</p>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap prose-wide">
+    <h2>2. À la main, ou depuis vos propres archives</h2>
+    <p>Un enregistrement est un fichier de forme documentée : rien ne vous empêche d'en écrire un
+      dans un éditeur de texte, ni d'en engendrer mille depuis une base que vous avez déjà. Tout ce
+      qui suit est ce que l'éditeur lui-même écrit.</p>
+  </div>
+</section>
 <section class="band">
   <div class="wrap prose-wide">
     <p>Un enregistrement est un simple fichier JSON. Rien dedans n'est un blob binaire, un

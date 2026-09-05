@@ -76,7 +76,7 @@ if (editor && requested) {
 
 <section class="band">
   <div class="wrap">
-    <h2>Three gestures to a first recording</h2>
+    <h2 id="manual">Three gestures to a first recording</h2>
     <ol class="steps">
       <li>
         <h3>Say when and where</h3>
@@ -165,7 +165,7 @@ if (editor && requested) {
         The <strong>🎯</strong> button does the smaller version of the same thing: it turns the
         current witness to face whatever is selected.</p>
       <p>Published together, those recordings become the witness picker a reader gets — see
-        <a href="/docs/">the documentation</a> on manifests.</p>
+        <a href="/docs/components/">the documentation</a> on manifests.</p>
       <p>Decor can also <strong>move</strong> (an aircraft crossing the sky, a car driving past) and
         carry <strong>lights</strong> with real, regulated flash rates — anticollision beacons at
         40–100 a minute, hazard flashers at 60–120. On a long exposure that rate is drawn: steady
@@ -334,7 +334,7 @@ if (editor && requested) {
 
 <section class="band">
   <div class="wrap">
-    <h2>Trois gestes pour un premier enregistrement</h2>
+    <h2 id="manual">Trois gestes pour un premier enregistrement</h2>
     <ol class="steps">
       <li>
         <h3>Dire quand et où</h3>
@@ -428,7 +428,7 @@ if (editor && requested) {
         quelque chose à vérifier. Le bouton <strong>🎯</strong> en fait la version réduite : il
         tourne le témoin courant vers ce qui est sélectionné.</p>
       <p>Publiés ensemble, ces enregistrements deviennent le sélecteur de témoin que voit un
-        lecteur — voir <a href="/docs/">la documentation</a> sur les manifestes.</p>
+        lecteur — voir <a href="/docs/components/">la documentation</a> sur les manifestes.</p>
       <p>Un décor peut aussi <strong>se déplacer</strong> (un avion qui traverse le ciel, une
         voiture qui passe) et porter des <strong>feux</strong> aux cadences réelles et
         réglementaires : anticollision de 40 à 100 éclats par minute, feux de détresse de 60 à 120.

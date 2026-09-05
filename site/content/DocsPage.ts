@@ -27,24 +27,20 @@ export class DocsPage implements SitePage {
     const fr = language === "fr"
     const cards: ReadonlyArray<readonly [string, string, string]> = fr
       ? [
-        ["/docs/link/", "Partager par lien",
-          "J'ai un enregistrement et je veux qu'on le voie. Une URL, rien à installer — pour un courriel, un message, un forum qui n'accepte que du texte."],
-        ["/docs/embed/", "L'intégrer à une page",
-          "J'ai un enregistrement et je le veux sur mon site, comme on y pose une vidéo. Deux lignes de HTML, sans framework ni compilation."],
-        ["/docs/elements/", "Les quatre éléments",
-          "Une section par balise : ce qu'elle dessine, le balisage qu'elle accepte, et chaque attribut, propriété, méthode et événement auquel elle répond."],
-        ["/docs/format/", "Le format d'enregistrement",
-          "Ce que contient un sighting.json, champ par champ, avec un fichier entier à recopier et les quatre règles qui décident du sens de l'ensemble."]
+        ["/docs/create/", "Créer une observation",
+          "Dans l'éditeur, ou en écrivant le fichier vous-même. Les deux produisent la même chose : un fichier JSON qui est le vôtre."],
+        ["/docs/share/", "Partager une observation",
+          "Un lien à envoyer, ou deux lignes de HTML sur votre propre page. Les deux avec un exemple qui marche, à essayer et à copier."],
+        ["/docs/components/", "Les composants",
+          "Une section par composant : ce qu'il dessine, le balisage qu'il accepte, et chaque attribut, propriété, méthode et événement auquel il répond."]
       ]
       : [
-        ["/docs/link/", "Share by link",
-          "I have a recording and I want somebody to see it. One URL, nothing to install — for an email, a message, a forum that allows nothing but text."],
-        ["/docs/embed/", "Put it on a page",
-          "I have a recording and I want it on my site, the way a video goes on a page. Two lines of HTML, no framework and no build step."],
-        ["/docs/elements/", "The four elements",
-          "One section per tag: what it draws, the markup it takes, and every attribute, property, method and event it answers to."],
-        ["/docs/format/", "The recording format",
-          "What a sighting.json holds, field by field, with a whole working file to copy and the four rules that decide what any of it means."]
+        ["/docs/create/", "Create an observation",
+          "In the editor, or by writing the file yourself. Both produce the same thing: one JSON file that is yours."],
+        ["/docs/share/", "Share an observation",
+          "A link to send, or two lines of HTML on your own page. Both with a working example you can try and copy."],
+        ["/docs/components/", "The components",
+          "One section per component: what it draws, the markup it takes, and every attribute, property, method and event it answers to."]
       ]
     const grid = cards.map(([href, title, blurb]) => `      <a class="use" href="${href}">
         <h3>${title}</h3>
@@ -58,8 +54,8 @@ export class DocsPage implements SitePage {
     <p class="eyebrow">Documentation</p>
     <h1>${fr ? "Par où vous entrez." : "Whichever way you came in."}</h1>
     <p class="lede">${fr
-      ? "Quatre pages, rangées par la question posée plutôt que par sujet. Prenez celle qui est la vôtre."
-      : "Four pages, arranged by the question being asked rather than by subject. Take the one that is yours."}</p>
+      ? "Trois pages, rangées par la question posée plutôt que par sujet. Prenez celle qui est la vôtre."
+      : "Three pages, arranged by the question being asked rather than by subject. Take the one that is yours."}</p>
   </div>
 </section>
 
