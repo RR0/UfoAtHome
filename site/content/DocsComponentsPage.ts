@@ -18,10 +18,10 @@ export class DocsComponentsPage extends DocsSection {
   }
 
   private readonly lede: Said<string> = {
-    en: "Four vanilla custom elements — no framework anywhere. Each registers itself on import, "
-      + "each takes the same <code>src</code>, and each composes the one before it.",
-    fr: "Quatre éléments personnalisés natifs, sans aucun framework. Chacun s'enregistre à "
-      + "l'import, chacun prend le même <code>src</code>, et chacun compose le précédent."
+    en: "Four standard Web Components — the browser's own, not a framework's. Each registers itself "
+      + "on import, each takes the same <code>src</code>, and each composes the one before it.",
+    fr: "Quatre composants web standards — ceux du navigateur, pas ceux d'un framework. Chacun "
+      + "s'enregistre à l'import, chacun prend le même <code>src</code>, et chacun compose le précédent."
   }
 
   render(language: SiteLanguage): string {
@@ -32,23 +32,55 @@ export class DocsComponentsPage extends DocsSection {
     return `
 <section class="band">
   <div class="wrap prose-wide">
+    <h2>Standard, and that is the whole design</h2>
+    <p>These are four <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_components">Web Components</a> — the browser's own standard for a
+      custom element, not a component of anybody's framework. What follows from that is worth
+      spelling out, because it is why the tool can be handed to you at all:</p>
+    <ul class="plain">
+      <li><strong>They work in any page.</strong> A static site, WordPress, a React or Vue app, a
+        wiki, a hand-written HTML file. They are elements; a page that can hold a
+        <code>&lt;video&gt;</code> can hold these.</li>
+      <li><strong>Nothing to build.</strong> No bundler, no compilation step, no configuration in
+        your project. The module registers its element on import and the browser does the rest.</li>
+      <li><strong>Nothing to keep up with.</strong> There is no framework version to match, so they
+        cannot be made obsolete by somebody else's major release.</li>
+      <li><strong>Their insides are their own.</strong> Each carries its markup and its styles in a
+        shadow root, so your page's CSS cannot break them and they cannot break your page.</li>
+    </ul>
     <p>They compose in one line: <code>&lt;rr0-scene&gt;</code> holds an
       <code>&lt;rr0-ufo&gt;</code>, and both <code>&lt;rr0-eyewitness&gt;</code> and
       <code>&lt;rr0-ufo-recorder&gt;</code> hold an <code>&lt;rr0-scene&gt;</code>. So everything
       under <code>&lt;rr0-ufo&gt;</code> below is available in all four — through
       <code>.scene.ufoElement</code> from the outermost, since the composition lives in a shadow
       root.</p>
-    <h2>Which one to load</h2>
-    <p>They are not variants of one bundle: each is self-contained, and a page should load only the
-      one it needs. The three heavier ones carry Three.js and a star catalogue, which is what a real
-      sky costs.</p>
+
+    <h2>What each one is for</h2>
+    <ul class="plain">
+      <li><strong><code>&lt;rr0-ufo&gt;</code> — the object, and nothing else.</strong> The shape a
+        witness drew, its colour and halo and movement, replayed on a bare background. It is the
+        testimony without the world around it.</li>
+      <li><strong><code>&lt;rr0-scene&gt;</code> — the world around it.</strong> The real sky,
+        horizon, weather and ground of a stated date, hour and place, with the object composited
+        over them. Useful on its own for a sky with no object in it at all.</li>
+      <li><strong><code>&lt;rr0-eyewitness&gt;</code> — the account as something to read.</strong>
+        A scene plus who is testifying, the observation's own metadata, its credits, and the lines
+        that let a reader take it elsewhere. This is what a published sighting looks like.</li>
+      <li><strong><code>&lt;rr0-ufo-recorder&gt;</code> — the account as something to write.</strong>
+        Everything above plus the authoring toolbar: describe an observation, or correct one.</li>
+    </ul>
+
+    <h2>Which one you want</h2>
+    <p>They are not variants of one bundle: each is self-contained, so load only the one you need.
+      The three heavier ones carry Three.js and a star catalogue, which is what a real sky costs.</p>
     <div class="table-scroll">
     <table>
-      <tr><th>Component</th><th>Use it when</th><th>Module</th><th>gzip</th></tr>
-      <tr><td><code>&lt;rr0-ufo&gt;</code></td><td>You only need the shape replayed — an illustration inside an article, with no sky behind it</td><td><code>/lib/rr0-ufo.mjs</code></td><td>16 KB</td></tr>
-      <tr><td><code>&lt;rr0-scene&gt;</code></td><td>You want the real sky and ground, but none of the witness toolbar</td><td><code>/lib/rr0-scene.mjs</code></td><td>238 KB</td></tr>
-      <tr><td><code>&lt;rr0-eyewitness&gt;</code></td><td><strong>The default.</strong> A real sighting, one witness or several, with its metadata, credits and embed panel</td><td><code>/lib/rr0-eyewitness.mjs</code></td><td>249 KB</td></tr>
-      <tr><td><code>&lt;rr0-ufo-recorder&gt;</code></td><td>You want people to author or edit recordings on your page</td><td><code>/lib/rr0-ufo-recorder.mjs</code></td><td>293 KB</td></tr>
+      <tr><th>What you are doing</th><th>Component</th><th>Module</th><th>gzip</th></tr>
+      <tr><td><strong>Showing a UFO sighting</strong> — a case file, an article, a report</td><td><code>&lt;rr0-eyewitness&gt;</code></td><td><code>/lib/rr0-eyewitness.mjs</code></td><td>249 KB</td></tr>
+      <tr><td><strong>Letting somebody describe or correct one</strong></td><td><code>&lt;rr0-ufo-recorder&gt;</code></td><td><code>/lib/rr0-ufo-recorder.mjs</code></td><td>293 KB</td></tr>
+      <tr><td><strong>Showing a sky with no object in it</strong> — what a halo, a comet or a satellite pass looked like that night</td><td><code>&lt;rr0-scene&gt;</code></td><td><code>/lib/rr0-scene.mjs</code></td><td>238 KB</td></tr>
+      <tr><td><strong>Showing a sighting inside a scene of your own</strong>, with no toolbar over it</td><td><code>&lt;rr0-scene&gt;</code></td><td><code>/lib/rr0-scene.mjs</code></td><td>238 KB</td></tr>
+      <tr><td><strong>Illustrating a shape</strong> in the flow of an article, with no sky and no weight</td><td><code>&lt;rr0-ufo&gt;</code></td><td><code>/lib/rr0-ufo.mjs</code></td><td>16 KB</td></tr>
+      <tr><td><strong>Not sure</strong></td><td><code>&lt;rr0-eyewitness&gt;</code></td><td><code>/lib/rr0-eyewitness.mjs</code></td><td>249 KB</td></tr>
     </table>
     </div>
     <p>Putting one on a page is <a href="/docs/share/">two lines</a>.</p>
@@ -165,23 +197,58 @@ import "@rr0/ufoathome/recorder"   // registers &lt;rr0-ufo-recorder&gt;</code><
     return `
 <section class="band">
   <div class="wrap prose-wide">
+    <h2>Standards, et c'est toute la conception</h2>
+    <p>Ce sont quatre <a href="https://developer.mozilla.org/fr/docs/Web/API/Web_components">composants web</a> — le standard du navigateur pour un
+      élément personnalisé, et non le composant du <i lang="en">framework</i> de quelqu'un. Ce qui
+      en découle mérite d'être dit, car c'est ce qui permet de vous le remettre :</p>
+    <ul class="plain">
+      <li><strong>Ils fonctionnent dans n'importe quelle page.</strong> Un site statique, WordPress,
+        une application React ou Vue, un wiki, un fichier HTML écrit à la main. Ce sont des
+        éléments : une page qui peut contenir une <code>&lt;video&gt;</code> peut les contenir.</li>
+      <li><strong>Rien à construire.</strong> Ni <i lang="en">bundler</i>, ni étape de compilation,
+        ni configuration dans votre projet. Le module enregistre son élément à l'import et le
+        navigateur fait le reste.</li>
+      <li><strong>Rien à suivre.</strong> Il n'y a pas de version de <i lang="en">framework</i> à
+        faire correspondre : la version majeure de quelqu'un d'autre ne peut pas les périmer.</li>
+      <li><strong>Leur intérieur est à eux.</strong> Chacun porte son balisage et ses styles dans un
+        <i lang="en">shadow root</i> : le CSS de votre page ne peut pas les casser, et eux ne
+        peuvent pas casser votre page.</li>
+    </ul>
     <p>Ils se composent en ligne : <code>&lt;rr0-scene&gt;</code> contient un
       <code>&lt;rr0-ufo&gt;</code>, et <code>&lt;rr0-eyewitness&gt;</code> comme
       <code>&lt;rr0-ufo-recorder&gt;</code> contiennent un <code>&lt;rr0-scene&gt;</code>. Tout ce
       qui figure sous <code>&lt;rr0-ufo&gt;</code> ci-dessous est donc disponible dans les quatre —
       via <code>.scene.ufoElement</code> depuis le plus extérieur, la composition vivant dans un
       <i lang="en">shadow root</i>.</p>
-    <h2>Lequel charger</h2>
-    <p>Ce ne sont pas des variantes d'un même <i lang="en">bundle</i> : chacun est autonome, et une
-      page ne devrait charger que celui dont elle a besoin. Les trois plus lourds embarquent Three.js
-      et un catalogue d'étoiles — c'est ce que coûte un vrai ciel.</p>
+
+    <h2>À quoi sert chacun</h2>
+    <ul class="plain">
+      <li><strong><code>&lt;rr0-ufo&gt;</code> — l'objet, et rien d'autre.</strong> La forme
+        dessinée par un témoin, sa couleur, son halo, son mouvement, rejoués sur un fond nu. C'est
+        le témoignage sans le monde autour.</li>
+      <li><strong><code>&lt;rr0-scene&gt;</code> — le monde autour.</strong> Le ciel, l'horizon, la
+        météo et le sol réels d'une date, d'une heure et d'un lieu énoncés, avec l'objet composé
+        par-dessus. Utile seul pour un ciel où il n'y a aucun objet.</li>
+      <li><strong><code>&lt;rr0-eyewitness&gt;</code> — le récit, à lire.</strong> Une scène, plus
+        qui témoigne, les métadonnées de l'observation, ses crédits, et les lignes qui permettent à
+        un lecteur de l'emporter ailleurs. C'est à cela que ressemble une observation publiée.</li>
+      <li><strong><code>&lt;rr0-ufo-recorder&gt;</code> — le récit, à écrire.</strong> Tout ce qui
+        précède, plus la barre d'outils de saisie : décrire une observation, ou en corriger une.</li>
+    </ul>
+
+    <h2>Celui qu'il vous faut</h2>
+    <p>Ce ne sont pas des variantes d'un même <i lang="en">bundle</i> : chacun est autonome, ne
+      chargez donc que celui dont vous avez besoin. Les trois plus lourds embarquent Three.js et un
+      catalogue d'étoiles — c'est ce que coûte un vrai ciel.</p>
     <div class="table-scroll">
     <table>
-      <tr><th>Composant</th><th>À utiliser quand</th><th>Module</th><th>gzip</th></tr>
-      <tr><td><code>&lt;rr0-ufo&gt;</code></td><td>Vous ne voulez que la forme rejouée — une illustration dans un article, sans ciel derrière</td><td><code>/lib/rr0-ufo.mjs</code></td><td>16 Ko</td></tr>
-      <tr><td><code>&lt;rr0-scene&gt;</code></td><td>Vous voulez le ciel et le sol réels, mais rien de la barre d'outils du témoin</td><td><code>/lib/rr0-scene.mjs</code></td><td>238 Ko</td></tr>
-      <tr><td><code>&lt;rr0-eyewitness&gt;</code></td><td><strong>Le choix par défaut.</strong> Une observation réelle, un témoin ou plusieurs, avec ses métadonnées, ses crédits et son panneau d'intégration</td><td><code>/lib/rr0-eyewitness.mjs</code></td><td>249 Ko</td></tr>
-      <tr><td><code>&lt;rr0-ufo-recorder&gt;</code></td><td>Vous voulez que l'on puisse composer ou modifier des enregistrements sur votre page</td><td><code>/lib/rr0-ufo-recorder.mjs</code></td><td>293 Ko</td></tr>
+      <tr><th>Ce que vous faites</th><th>Composant</th><th>Module</th><th>gzip</th></tr>
+      <tr><td><strong>Montrer une observation d'ovni</strong> — un dossier, un article, un rapport</td><td><code>&lt;rr0-eyewitness&gt;</code></td><td><code>/lib/rr0-eyewitness.mjs</code></td><td>249 Ko</td></tr>
+      <tr><td><strong>Laisser quelqu'un en décrire ou en corriger une</strong></td><td><code>&lt;rr0-ufo-recorder&gt;</code></td><td><code>/lib/rr0-ufo-recorder.mjs</code></td><td>293 Ko</td></tr>
+      <tr><td><strong>Montrer un ciel sans objet dedans</strong> — ce qu'un halo, une comète ou un passage satellite donnaient cette nuit-là</td><td><code>&lt;rr0-scene&gt;</code></td><td><code>/lib/rr0-scene.mjs</code></td><td>238 Ko</td></tr>
+      <tr><td><strong>Montrer une observation dans une scène à vous</strong>, sans barre d'outils par-dessus</td><td><code>&lt;rr0-scene&gt;</code></td><td><code>/lib/rr0-scene.mjs</code></td><td>238 Ko</td></tr>
+      <tr><td><strong>Illustrer une forme</strong> au fil d'un article, sans ciel et sans poids</td><td><code>&lt;rr0-ufo&gt;</code></td><td><code>/lib/rr0-ufo.mjs</code></td><td>16 Ko</td></tr>
+      <tr><td><strong>Vous ne savez pas</strong></td><td><code>&lt;rr0-eyewitness&gt;</code></td><td><code>/lib/rr0-eyewitness.mjs</code></td><td>249 Ko</td></tr>
     </table>
     </div>
     <p>En poser un sur une page, c'est <a href="/docs/share/">deux lignes</a>.</p>

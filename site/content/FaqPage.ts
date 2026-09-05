@@ -144,11 +144,25 @@ export class FaqPage implements SitePage {
     <div class="faq-item">
       <h3>Is a reconstruction evidence?</h3>
       <p>No. It is a way of stating a testimony precisely enough that it can be laid beside the
-        record — and the record is what does the work: the Moon's phase
-        that night, whether the sky was overcast, whether a comet was up, whether low orbit was even
-        sunlit. The tool states what the witness said and what the records say, side by side, and
-        stops there. Whether the two explain each other is the reader's conclusion, never the file's
-        claim.</p>
+        record — and the record is what does the work: the Moon's phase that night, whether the sky
+        was overcast, whether a comet was up, whether low orbit was even sunlit.</p>
+      <p><strong>What a reconstruction is trying to do is agree with the witness.</strong> Not to
+        illustrate their account, and not to correct it: to converge on it, one correction at a
+        time, until they say that is what they saw. Every step of that convergence adds something
+        that can be checked, so the closer it gets, the more there is to explain the sighting
+        with — or to fail to.</p>
+      <p>And that is where it earns its keep. Suppose the reconstruction can put a known
+        phenomenon — <a href="https://rr0.org/place/systeme/solaire/planete/venus/">a planet</a>,
+        <a href="https://rr0.org/science/crypto/ufo/enquete/meprise/optique/">a halo</a>,
+        <a href="https://rr0.org/science/crypto/ufo/enquete/meprise/aeronef/avion/">an aircraft</a> —
+        in the exact place the witness saw something, at the right size, at the right hour. Show it
+        to them and ask the only question that matters: <em>does that look like what you saw?</em>
+        If the answer is yes, investigator and witness have converged on the facts rather than
+        argued about the conclusion, and the explanation stands on something firmer than anyone's
+        opinion of the other.</p>
+      <p>If the answer is no, that is a result too, and a better one than a written note saying the
+        witness disagreed — because the thing they are rejecting is on screen, at the right place
+        and the right size, and the next person can look at it.</p>
     </div>
 
     <h2>Compared with other tools</h2>
@@ -389,12 +403,27 @@ export class FaqPage implements SitePage {
 
     <div class="faq-item">
       <h3>Une reconstitution est-elle une preuve ?</h3>
-      <p>Non. C'est une façon d'énoncer un témoignage assez précisément pour pouvoir le poser à
-        côté des relevés — et ce sont les relevés qui font le
-        travail : la phase de la Lune cette nuit-là, si le ciel était couvert, si une comète était
-        levée, si l'orbite basse était seulement éclairée. L'outil énonce côte à côte ce qu'a dit le
-        témoin et ce que disent les relevés, et s'arrête là. Que les deux s'expliquent l'un l'autre
-        est la conclusion du lecteur, jamais l'affirmation du fichier.</p>
+      <p>Non. C'est une façon d'énoncer un témoignage assez précisément pour pouvoir le poser à côté
+        des relevés — et ce sont les relevés qui font le travail : la phase de la Lune cette
+        nuit-là, si le ciel était couvert, si une comète était levée, si l'orbite basse était
+        seulement éclairée.</p>
+      <p><strong>Ce que cherche une reconstitution, c'est à s'accorder avec le témoin.</strong> Ni
+        illustrer son récit, ni le corriger : converger vers lui, correction après correction,
+        jusqu'à ce qu'il dise que c'est bien ce qu'il a vu. Chaque pas de cette convergence ajoute
+        quelque chose de vérifiable — plus on s'approche, plus on a de quoi expliquer
+        l'observation. Ou de quoi échouer à l'expliquer.</p>
+      <p>Et c'est là qu'elle vaut son prix. Supposons que la reconstitution parvienne à placer un
+        phénomène connu — <a href="https://rr0.org/place/systeme/solaire/planete/venus/">une
+        planète</a>, <a href="https://rr0.org/science/crypto/ufo/enquete/meprise/optique/">un
+        halo</a>, <a href="https://rr0.org/science/crypto/ufo/enquete/meprise/aeronef/avion/">un
+        avion</a> — à l'endroit exact où le témoin a vu quelque chose, à la bonne taille, à la bonne
+        heure. Montrez-le-lui et posez la seule question qui compte : <em>est-ce que cela ressemble
+        à ce que vous avez vu ?</em> Si la réponse est oui, l'enquêteur et le témoin ont convergé sur
+        les faits au lieu de se disputer la conclusion, et l'hypothèse d'explication repose sur
+        quelque chose de plus solide que l'opinion que l'un a de l'autre.</p>
+      <p>Si la réponse est non, c'est un résultat aussi, et meilleur qu'une note écrite disant que le
+        témoin n'était pas d'accord : ce qu'il rejette est à l'écran, au bon endroit et à la bonne
+        taille, et le suivant pourra le regarder.</p>
     </div>
 
     <h2>Face aux autres outils</h2>

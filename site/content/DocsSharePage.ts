@@ -111,14 +111,15 @@ preview.setAttribute("src", embedField.value.trim())`
     return `
 <section class="band">
   <div class="wrap prose-wide">
-    <h2>1. A link</h2>
+    <h2>1. A link to ufoathome.org</h2>
     <p>The simplest of the two, and the only one that needs nothing at all of the place you are
       sending it to. Anybody who follows it sees the observation played in the real sky of the date
       and place it states, in their own language.</p>
 
     <div class="doc-try">
       <label for="share-link-url">The address of your recording</label>
-      <input id="share-link-url" type="text" spellcheck="false" value="${sample}">
+      <input id="share-link-url" type="text" spellcheck="false" value="${sample}"
+             placeholder="https://yoursite.org/my-case/sighting.json">
       <p class="doc-try-out"><code id="share-link-out"></code></p>
       <p class="doc-try-actions">
         <a class="btn btn-primary" id="share-link-open" href="/player/" target="_blank" rel="noopener">Try it</a>
@@ -127,7 +128,9 @@ preview.setAttribute("src", embedField.value.trim())`
     </div>
 
     <p>Good for an email, a message, a comment, a forum that allows nothing but text — anywhere you
-      can put a URL.</p>
+      can put a URL. The field above starts on one of this site's own recordings so the button does
+      something; the address you put there is your own, on your own host, and this site never needs
+      a copy of it.</p>
   </div>
 </section>
 
@@ -139,7 +142,8 @@ preview.setAttribute("src", embedField.value.trim())`
 
     <div class="doc-try">
       <label for="share-embed-url">The address of your recording</label>
-      <input id="share-embed-url" type="text" spellcheck="false" value="${sample}">
+      <input id="share-embed-url" type="text" spellcheck="false" value="${sample}"
+             placeholder="https://yoursite.org/my-case/sighting.json">
       <pre><code id="share-embed-code"></code></pre>
       <p class="doc-try-actions">
         <button class="btn btn-primary" type="button" id="share-embed-copy">Copy the code</button>
@@ -184,14 +188,15 @@ preview.setAttribute("src", embedField.value.trim())`
     return `
 <section class="band">
   <div class="wrap prose-wide">
-    <h2>1. Un lien</h2>
+    <h2>1. Un lien vers ufoathome.org</h2>
     <p>Le plus simple des deux, et le seul qui n'exige rien de l'endroit où vous l'envoyez. Qui le
       suit voit l'observation jouée sous le ciel réel de la date et du lieu qu'elle énonce, dans sa
       propre langue.</p>
 
     <div class="doc-try">
       <label for="share-link-url">L'adresse de votre enregistrement</label>
-      <input id="share-link-url" type="text" spellcheck="false" value="${sample}">
+      <input id="share-link-url" type="text" spellcheck="false" value="${sample}"
+             placeholder="https://votresite.org/mon-dossier/sighting.json">
       <p class="doc-try-out"><code id="share-link-out"></code></p>
       <p class="doc-try-actions">
         <a class="btn btn-primary" id="share-link-open" href="/player/" target="_blank" rel="noopener">Essayer</a>
@@ -200,19 +205,22 @@ preview.setAttribute("src", embedField.value.trim())`
     </div>
 
     <p>Bon pour un courriel, un message, un commentaire, un forum qui n'accepte que du texte —
-      partout où l'on peut mettre une URL.</p>
+      partout où l'on peut mettre une URL. Le champ ci-dessus part d'un enregistrement de ce site
+      pour que le bouton fasse quelque chose ; l'adresse que vous y mettez est la vôtre, sur votre
+      hébergement, et ce site n'en a jamais besoin d'une copie.</p>
   </div>
 </section>
 
 <section class="band">
   <div class="wrap prose-wide">
-    <h2>2. Sur votre propre page</h2>
+    <h2>2. Dans votre propre page</h2>
     <p>Deux lignes de HTML posent la reconstitution elle-même dans votre page, comme on y pose une
       vidéo. Aucun <i lang="en">framework</i>, et rien à construire pour votre site.</p>
 
     <div class="doc-try">
       <label for="share-embed-url">L'adresse de votre enregistrement</label>
-      <input id="share-embed-url" type="text" spellcheck="false" value="${sample}">
+      <input id="share-embed-url" type="text" spellcheck="false" value="${sample}"
+             placeholder="https://votresite.org/mon-dossier/sighting.json">
       <pre><code id="share-embed-code"></code></pre>
       <p class="doc-try-actions">
         <button class="btn btn-primary" type="button" id="share-embed-copy">Copier le code</button>
