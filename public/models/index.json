@@ -1,5 +1,32 @@
 {
   "version": 1,
   "attribution": "3D models re-hosted by UFO@home, each under its own author's licence",
-  "models": []
+  "models": [
+    {
+      "id": "kenney-car-kit-police",
+      "kind": "vehicle",
+      "name": "Patrol car (generic, stylised)",
+      "file": "kenney-car-kit-police.glb",
+      "headingOffsetDeg": 180,
+      "credit": {
+        "title": "Car Kit 3.1 — police",
+        "author": "Kenney",
+        "license": "CC0 1.0",
+        "sourceUrl": "https://kenney.nl/assets/car-kit"
+      }
+    },
+    {
+      "id": "kenney-car-kit-sedan",
+      "kind": "vehicle",
+      "name": "Saloon car (generic, stylised)",
+      "file": "kenney-car-kit-sedan.glb",
+      "headingOffsetDeg": 180,
+      "credit": {
+        "title": "Car Kit 3.1 — sedan",
+        "author": "Kenney",
+        "license": "CC0 1.0",
+        "sourceUrl": "https://kenney.nl/assets/car-kit"
+      }
+    }
+  ]
 }

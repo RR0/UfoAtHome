@@ -246,7 +246,14 @@ export class SightingElement extends HTMLElement {
   async loadFromSrc(url: string): Promise<void> {
     const json = (await SightingFetch.json(url)) as string[] | SightingRecordingJson
     if (Array.isArray(json)) {
-      await this.loadWitnessUrls(json)
+      // Resolved against the MANIFEST's own address, not the page's: a manifest lists the
+      // recordings that sit beside it, so "witness-chiles.json" has to mean "beside this file"
+      // wherever the file is read from. Without that a manifest could only ever be written for one
+      // host — which is what forced this project's own copy to spell out /demo-data/... while the
+      // identical manifest in an rr0.org case dossier spelled out neither, and left two files that
+      // say the same thing byte-differently. An absolute entry is untouched (new URL ignores the
+      // base for one), so nothing already published moves.
+      await this.loadWitnessUrls(json.map(entry => new URL(entry, new URL(url, location.href)).href))
     } else {
       this.setEntries([{ src: url, sighting: json }])
     }

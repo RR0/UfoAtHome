@@ -46,6 +46,7 @@
     "build:comets": "tsx scripts/build-comet-catalog.ts",
     "build:satellites": "tsx scripts/build-satellite-catalog.ts",
     "build:schema": "tsx scripts/build-sighting-schema.ts",
+    "sync:cases": "tsx scripts/sync-case-recordings.ts",
     "pretest": "npm run build:schema",
     "build:embed-sighting-editor": "tsc --noEmit && vite build --config vite.embed-sighting-editor.config.ts"
   },

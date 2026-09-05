@@ -118,12 +118,16 @@ const reveal = (source, sighting, fallbackTitle) => {
 }
 
 /** A bare name with no slash is one of this site's own demos first, then an rr0.org case
- * directory — the shape the links that predate this site were written in. */
+ * directory — the shape the links that predate this site were written in. A dossier is tried
+ * BOTH ways round: a case with several witnesses publishes a manifest rather than a single
+ * recording (Chiles-Whitted does), and the manifest names the files beside it, so it works read
+ * from here exactly as it does read from the dossier's own page. */
 const resolve = requested => requested.includes("/")
   ? [requested]
   : [\`/demo-data/witness-\${requested.toLowerCase()}.json\`,
      \`/demo-data/sky-test-\${requested.toLowerCase()}.json\`,
      \`/demo-data/\${requested.toLowerCase()}.json\`,
+     \`https://rr0.org/science/crypto/ufo/enquete/dossier/\${requested}/witnesses-manifest.json\`,
      \`https://rr0.org/science/crypto/ufo/enquete/dossier/\${requested}/sighting.json\`]
 
 /**

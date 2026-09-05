@@ -341,7 +341,8 @@ describe("SightingElement", () => {
 
   it("fetches the witness manifest (a plain array of URLs) from the src attribute on connect", async () => {
     const manifest = ["john.json"]
-    stubFetch({ "witnesses.json": manifest, "john.json": johnSighting })
+    const johnUrl = new URL("john.json", location.href).href
+    stubFetch({ "witnesses.json": manifest, [johnUrl]: johnSighting })
 
     const element = document.createElement(SIGHTING_ELEMENT_NAME) as SightingElement
     element.setAttribute("src", "witnesses.json")
@@ -349,7 +350,39 @@ describe("SightingElement", () => {
     await new Promise(resolve => setTimeout(resolve, 0))
     await new Promise(resolve => setTimeout(resolve, 0))
 
-    expect(element.witnessUrls).toEqual(["john.json"])
+    expect(element.witnessUrls).toEqual([johnUrl])
+  })
+
+  it("reads a manifest's entries as sitting BESIDE it, not beside the page — which is what lets one manifest file serve two hosts unchanged", async () => {
+    // The concrete case: the same two-witness manifest is published in an rr0.org case dossier
+    // (read from a page in that same directory) and in this project's own /demo-data (read from
+    // /player/). Resolved against the page, the second would look for /player/witness-chiles.json;
+    // resolved against the manifest, both mean the file next to it, and the two copies can be
+    // byte-identical instead of saying the same thing two ways.
+    const manifest = ["witness-chiles.json"]
+    const chilesUrl = new URL("/dossier/ChilesWhitted/witness-chiles.json", location.href).href
+    stubFetch({ "/dossier/ChilesWhitted/witnesses-manifest.json": manifest, [chilesUrl]: johnSighting })
+
+    const element = document.createElement(SIGHTING_ELEMENT_NAME) as SightingElement
+    element.setAttribute("src", "/dossier/ChilesWhitted/witnesses-manifest.json")
+    document.body.appendChild(element)
+    await new Promise(resolve => setTimeout(resolve, 0))
+    await new Promise(resolve => setTimeout(resolve, 0))
+
+    expect(element.witnessUrls).toEqual([chilesUrl])
+  })
+
+  it("leaves an absolute entry alone, so a manifest can still point at another host", async () => {
+    const manifest = ["https://elsewhere.test/witness.json"]
+    stubFetch({ "witnesses.json": manifest, "https://elsewhere.test/witness.json": johnSighting })
+
+    const element = document.createElement(SIGHTING_ELEMENT_NAME) as SightingElement
+    element.setAttribute("src", "witnesses.json")
+    document.body.appendChild(element)
+    await new Promise(resolve => setTimeout(resolve, 0))
+    await new Promise(resolve => setTimeout(resolve, 0))
+
+    expect(element.witnessUrls).toEqual(["https://elsewhere.test/witness.json"])
   })
 
   it("accepts src pointing directly at a single sighting.json, with no manifest file needed", async () => {

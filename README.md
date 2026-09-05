@@ -729,6 +729,12 @@ not produce: when a source is not guaranteed to last, take a copy, keep the cred
 somewhere that will. See `public/models/README.md` for the catalogue's own format and for what a model has to satisfy
 to go in it.
 
+What is in it today is two stylised low-poly cars from Kenney's CC0 Car Kit, a patrol car and a saloon, named in the
+picker as the placeholders they are: right KIND, no particular model or year. That is the whole of the claim, and it
+is worth making — a car-shaped silhouette at forty metres in evening light reads as a car, where a rectangular prism
+reads as a building, which is where this started. Socorro's own patrol car uses the first of them, at the real
+Pontiac's dimensions and with the substitution stated in the recording's description.
+
 Three things follow, and all three are deliberate:
 
 - **`GLTFLoader` is imported only when a recording actually names a model.** It is a hundred kilobytes of addon, and

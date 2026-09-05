@@ -57,8 +57,24 @@ not guaranteed to last, take a copy, keep the credit with it, and serve it from 
 2. Keep it small. These are scenery at tens or hundreds of meters, where a 4K texture set buys
    nothing and costs everything — Khronos's CC0 lantern is a fine lamp post and 9.5 MB, which is
    why it is not here either.
-3. Drop the `.glb` in this directory, add its entry to `index.json`, and record where it came from
-   in the `credit`.
+3. Check whether the file is self-contained. A `.glb` may still reference its texture by relative
+   URI rather than embedding it — Kenney's kits do, with a `Textures/colormap.png` shared by every
+   model in the kit. Those files go beside the model, at the path the glTF names, and the model is
+   kept byte-for-byte as its author published it rather than rewritten to embed them.
+4. Drop the `.glb` in this directory, add its entry to `index.json`, and record where it came from
+   in the `credit`. Keep the author's own licence file beside it (see
+   `kenney-car-kit.License.txt`) — a licence quoted in a JSON field is a summary, the file is the
+   grant.
+
+## What is in here today
+
+Two stylised low-poly cars from Kenney's **Car Kit 3.1** (CC0), a patrol car and a saloon. They are
+placeholders and are named as such in the picker: they are of the right KIND, not of any particular
+model or year. What they buy is a silhouette that reads as a car at forty metres in evening light,
+where a rectangular prism reads as a building — which was the complaint that started this.
+
+Nothing here yet stands in for a building, a tree, a streetlight or an airframe. The same recipe
+applies: Kenney and Quaternius both publish CC0 kits covering all four.
 
 ## What happens when this is unreachable
 

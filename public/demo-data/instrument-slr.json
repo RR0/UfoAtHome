@@ -1163,6 +1163,9 @@
         "widthM": 2.02,
         "lengthM": 5.44,
         "heightM": 1.42
+      },
+      "model": {
+        "id": "kenney-car-kit-police"
       }
     },
     {
