@@ -25,7 +25,7 @@ export type SoundKind =
   /** Irregular sharp bursts — "un crépitement", the electrical-discharge kind of sound. */
   | "crackle"
 
-/** Every SoundKind value, in the order an editor should offer them — see UfoRecorderElement's
+/** Every SoundKind value, in the order an editor should offer them — see SightingEditorElement's
  * own sound select, which is built from this rather than from hardcoded markup (same reasoning as
  * Decor.ts's DECOR_SIDES). */
 export const SOUND_KINDS: SoundKind[] = ["none", "hum", "whistle", "rumble", "crackle"]

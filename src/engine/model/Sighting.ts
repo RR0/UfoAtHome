@@ -24,7 +24,7 @@ export interface SightingTime {
   hour?: number
   minute?: number
   second?: number
-  /** The exact EDTF-ish text as typed in the recorder UI (e.g. "2025-06?", "1948-07-24T02:45~") —
+  /** The exact EDTF-ish text as typed in the editor UI (e.g. "2025-06?", "1948-07-24T02:45~") —
    * the source of truth for display/re-editing and for round-tripping uncertain/approximate/
    * imprecise qualifiers through JSON (see parseEdtfTime/formatEdtfTime). year/month/... above are
    * always kept in sync with it whenever the UI sets it, so every existing numeric consumer
@@ -37,7 +37,7 @@ export interface SightingTime {
 /** Level 0 EDTF date/time (YYYY[-MM[-DD]][Thh:mm[:ss]]) plus the three Level 1 suffix qualifiers
  * ("?"=uncertain, "~"=approximate, "%"=both) and basic year-masking ("199X"/"19XX") — not a real
  * EDTF parser (no seasons, no per-component qualifiers, no intervals), just enough to (a) reject
- * obvious garbage in the recorder's date fields and (b) recover the numeric components
+ * obvious garbage in the editor's date fields and (b) recover the numeric components
  * SightingTime's other consumers need. The second alternative (own group names, to avoid relying
  * on duplicate-named-group support) is a deliberate departure from real EDTF: a bare hh:mm[:ss]
  * with no date at all, for a witness who remembers a time of day but not (or not precisely) which
@@ -48,7 +48,7 @@ const EDTF_TIME_PATTERN =
 
 /** Best-effort EDTF text -> SightingTime, or undefined if `raw` doesn't match EDTF_TIME_PATTERN at
  * all (the caller shows a custom-validity error and leaves the previous value alone rather than
- * overwriting it with garbage — see UfoRecorderElement.applyEdtfTimeInput). A masked year
+ * overwriting it with garbage — see SightingEditorElement.applyEdtfTimeInput). A masked year
  * component ("199X"/"19XX") parses to `year: undefined` — genuinely unknown for duration/astronomy
  * purposes, not a real number to guess at. Likewise a bare "hh:mm[:ss]" (no date at all) parses to
  * year/month/day all undefined, hour/minute/second set. */
@@ -247,7 +247,7 @@ export function sightingDurationBlockedReason(event: SightingEvent): "imprecise"
  * witnesses.
  *
  * `witness`/`caseId` are not readonly, unlike `event`/`timeline`/`witnessTrack`
- * above — same reasoning as `weather` below: UfoRecorderElement's metadata toolbar edits these
+ * above — same reasoning as `weather` below: SightingEditorElement's metadata toolbar edits these
  * directly, field-by-field, rather than replacing the whole Sighting.
  */
 export class Sighting {
@@ -265,11 +265,11 @@ export class Sighting {
      * resolveWeatherAt, which prefers weatherTrack (interpolated) and only falls back to this
      * static field when the track has no keyframes at all. Not readonly, same "reassigned
      * wholesale, never mutated field-by-field" reasoning WeatherTrack keyframes themselves now
-     * carry instead (see UfoRecorderElement.applyWeatherAtPlayhead). */
+     * carry instead (see SightingEditorElement.applyWeatherAtPlayhead). */
     public weather?: Weather,
     /** Static scenery (buildings/trees/streetlights/vehicles/other witnesses) — see Decor.ts.
      * Not readonly, same "reassigned wholesale on edit" reasoning as witness/caseId above:
-     * UfoRecorderElement's Decor group adds/removes/edits entries by replacing this array. */
+     * SightingEditorElement's Decor group adds/removes/edits entries by replacing this array. */
     public decor: DecorObject[] = [],
     /** Set when every weatherTrack keyframe came from a real meteorological record looked up from
      * this sighting's own date/time and place, rather than from the witness — see WeatherSource

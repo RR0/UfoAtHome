@@ -73,7 +73,7 @@ export class WeatherInference {
 
   /** Replaces the sighting's whole weather track with the inferred one and records what produced
    * it. Deliberately destructive: this only ever runs on a sighting whose weather is inferred (the
-   * recorder's own gate — a track the witness declared has no `weatherSource` and is never handed
+   * editor's own gate — a track the witness declared has no `weatherSource` and is never handed
    * here), so what it discards is a previous lookup's answer, not testimony. */
   applyTo(sighting: Sighting, result: WeatherInferenceResult): void {
     if (result.status !== "inferred" || !result.keyframes || !result.source) return
@@ -129,13 +129,13 @@ export class WeatherInference {
    * Where the observation started, from the witnessTrack if it says, otherwise from the sighting's
    * own `place`. resolveObserverPoseAt prefers the track and only falls back to `place` when the
    * track is entirely EMPTY — but a pose may perfectly well state a heading and no coordinates
-   * (UfoRecorderElement.updateObserver writes one deliberately, so that setting a heading before
+   * (SightingEditorElement.updateObserver writes one deliberately, so that setting a heading before
    * entering a location isn't silently discarded), and reading only the track then reported a
    * sighting with a perfectly good `place` as having nowhere to look up.
    */
   /** Whether this sighting states enough for the record to be asked at all — the same requirement
    * infer() enforces, exposed so an editor can say so BEFORE asking rather than only reporting
-   * "incomplete" afterwards (see UfoRecorderElement, which disables its own "from weather records"
+   * "incomplete" afterwards (see SightingEditorElement, which disables its own "from weather records"
    * control on this). One rule, one place: a UI deciding for itself what a lookup needs would
    * drift from what a lookup actually needs. */
   canInfer(sighting: Sighting): boolean {

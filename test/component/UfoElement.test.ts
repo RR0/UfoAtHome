@@ -390,7 +390,7 @@ describe("UfoElement", () => {
     expect(button.disabled).toBe(false)
   })
 
-  it("canvas click-to-play can be disabled (e.g. by UfoRecorderElement, which uses the canvas for drag-to-record)", () => {
+  it("canvas click-to-play can be disabled (e.g. by SightingEditorElement, which uses the canvas for drag-to-record)", () => {
     const element = mount()
     element.sightingData = twoKeyframeSighting() // a real duration — otherwise Play is disabled regardless, see above
     element.enableClickToPlay = false
@@ -856,7 +856,7 @@ describe("UfoElement hover tooltip", () => {
   })
 
   // 1:1 scale (matches the canvas's own 640x360 drawing buffer) so pointer coordinates map
-  // directly onto Shape.bounds — same trick as UfoRecorderElement.test.ts's nestedCanvas().
+  // directly onto Shape.bounds — same trick as SightingEditorElement.test.ts's nestedCanvas().
   function canvasSized(element: UfoElement): HTMLCanvasElement {
     const canvas = element.shadowRoot!.getElementById("canvas") as HTMLCanvasElement
     vi.spyOn(canvas, "getBoundingClientRect").mockReturnValue({ left: 0, top: 0, width: 640, height: 360 } as DOMRect)

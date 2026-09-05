@@ -1,6 +1,6 @@
 import { BLUR_RADIUS_UNIT } from "../render/CanvasRenderer.js"
 import { SightingFetch, SightingFetchError } from "../engine/net/SightingFetch.js"
-import { html, css } from "./template.js"
+import { html, css } from "./sightingEditorTemplate.js"
 import { SightingSummary } from "./SightingSummary.js"
 import type { SummaryEntry, SummaryGroup } from "./SightingSummary.js"
 import { UfoElement, registerUfo } from "./UfoElement.js"
@@ -77,10 +77,10 @@ import { sightingTimeToDate } from "../engine/astronomy/CelestialPositions.js"
 import { HostLocale, selectLocale } from "../i18n/locale.js"
 import { TIME_ZONE_SOURCES } from "../engine/time/timeZoneSources.js"
 import type { TimeZoneProvider } from "../engine/time/TimeZoneProvider.js"
-import { loadUfoRecorderMessages, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
+import { loadSightingEditorMessages, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
 import type { UfoLanguage } from "./messages/index.js"
-import { ufoRecorderMessages_en } from "./messages/UfoRecorderMessages_en.js"
-import type { UfoRecorderMessages } from "./messages/UfoRecorderMessages.js"
+import { sightingEditorMessages_en } from "./messages/SightingEditorMessages_en.js"
+import type { SightingEditorMessages } from "./messages/SightingEditorMessages.js"
 
 /** Hides nothing from a hit test: an occluded shape is still the author's to select, unlike a
  * reader's hover (see UfoElement.shapeAt's own default). */
@@ -209,7 +209,7 @@ const GLOW_QUESTION_LIVE_BELOW_DEG = -6
  */
 const GLOW_NEEDS_SKY_MAG_PER_ARCSEC2 = 21
 
-export class UfoRecorderElement extends HTMLElement {
+export class SightingEditorElement extends HTMLElement {
   private readonly shadow: ShadowRoot
   private readonly sceneElement: SceneElement
   private readonly ufoElement: UfoElement
@@ -540,7 +540,7 @@ export class UfoRecorderElement extends HTMLElement {
   private isRecording = false
   /** Matches the template's baked-in English defaults until (if ever) loadLocaleMessages()
    * resolves a better match — see its doc comment. */
-  private messages: UfoRecorderMessages = ufoRecorderMessages_en
+  private messages: SightingEditorMessages = sightingEditorMessages_en
   private currentAppearance: Appearance = { ...DEFAULT_APPEARANCE }
   /** Which source/shape the appearance toolbar (Name/Color/Transparency/Halo/source dropdown) and
    * Record button currently target — the selection "anchor"/last-interacted shape. Always a member
@@ -2049,7 +2049,7 @@ export class UfoRecorderElement extends HTMLElement {
     }
   }
 
-  private soundKindLabel(kind: SoundKind, messages: UfoRecorderMessages): string {
+  private soundKindLabel(kind: SoundKind, messages: SightingEditorMessages): string {
     switch (kind) {
       case "hum":
         return messages.soundHum
@@ -2453,7 +2453,7 @@ export class UfoRecorderElement extends HTMLElement {
   private refreshTimeQualifierOptions(): void {
     for (const select of [this.obsTimeQualifier, this.obsEndTimeQualifier]) {
       const chosen = select.value
-      select.replaceChildren(...UfoRecorderElement.TIME_QUALIFIERS.map(qualifier => {
+      select.replaceChildren(...SightingEditorElement.TIME_QUALIFIERS.map(qualifier => {
         const option = document.createElement("option")
         option.value = qualifier.value
         option.textContent = this.messages[qualifier.key]
@@ -2825,7 +2825,7 @@ export class UfoRecorderElement extends HTMLElement {
    * appearance fields onto `preserve` as-is — real bug this fixes: createShape ALWAYS rebuilds
    * kind/points fresh from SHAPE_PRESETS[presetId], so a plain color edit on a polygon that had
    * been custom-reshaped (vertices dragged/added/deleted via ShapeHandles, see
-   * UfoRecorderElement.addVertexAtContextMenu/deleteVertexAtContextMenu/onDragPointerMove's
+   * SightingEditorElement.addVertexAtContextMenu/deleteVertexAtContextMenu/onDragPointerMove's
    * "vertex" case) silently snapped it back to that preset's own default starting geometry every
    * time, discarding the edit. A real preset-button click (changingPreset=true) still rebuilds via
    * createShape as before — that IS meant to replace kind/points — carrying forward angle/title/
@@ -2931,8 +2931,8 @@ export class UfoRecorderElement extends HTMLElement {
     // every such collision was with one of these two, so the box replaced that mechanism outright
     // rather than joining it. A collision between two FLAT groups would need answering again, and
     // there is currently no pair of them that can produce one.
-    const nested = UfoRecorderElement.NESTED_GROUPS
-    const chips = entries.map(entry => ({ ...entry, panel: UfoRecorderElement.SUMMARY_GROUPS.indexOf(entry.group) }))
+    const nested = SightingEditorElement.NESTED_GROUPS
+    const chips = entries.map(entry => ({ ...entry, panel: SightingEditorElement.SUMMARY_GROUPS.indexOf(entry.group) }))
     const signature = chips.map(chip => `${chip.field}=${chip.label}=${chip.value}${chip.unit}${chip.fromSource ? "*" : ""}`).join("|")
     if (signature === this.paramSummarySignature) {
       return
@@ -3286,7 +3286,7 @@ export class UfoRecorderElement extends HTMLElement {
    * A device with no range at all is one with nothing to set — its own single speed stands.
    */
   private statedExposureSeconds(instrument: Instrument): number | undefined {
-    const stated = UfoRecorderElement.exposureSeconds(this.exposureInput.value)
+    const stated = SightingEditorElement.exposureSeconds(this.exposureInput.value)
     const range = instrument.exposureRangeSeconds
     if (!range) return instrument.exposureSeconds ?? stated
     if (stated === undefined) return undefined
@@ -3352,7 +3352,7 @@ export class UfoRecorderElement extends HTMLElement {
     if (this.exposureInput !== this.shadow.activeElement) {
       // What is shown IS what the recording holds — including a pose brought back inside the
       // device's own range (see statedExposureSeconds).
-      this.exposureInput.value = exposure === undefined ? "" : UfoRecorderElement.exposureText(exposure)
+      this.exposureInput.value = exposure === undefined ? "" : SightingEditorElement.exposureText(exposure)
     }
     this.setRowVisible(this.exposureInput, instrument.exposureSeconds !== undefined)
     this.exposureInput.disabled = instrument.exposureRangeSeconds === undefined
@@ -3596,7 +3596,7 @@ export class UfoRecorderElement extends HTMLElement {
    * deliberately shows nothing rather than any generated label for a genuinely title-less shape —
    * that surface is end-user-facing (a real rr0.org sighting page), where a witness who never
    * named a shape shouldn't have one invented for them; this method's own generated fallback is
-   * only ever shown inside this recorder's own authoring UI. */
+   * only ever shown inside this editor's own authoring UI. */
   private shapeLabel(sourceId: string): string {
     const shape = this.ufoElement.sighting.timeline.getInterpolatedShapeAt(this.ufoElement.currentTime, sourceId)
     if (shape?.title) return shape.title
@@ -4692,10 +4692,10 @@ export class UfoRecorderElement extends HTMLElement {
   private async loadLocaleMessages(): Promise<void> {
     const language = selectLocale(HostLocale.preferencesFor(this), UFO_SUPPORTED_LANGUAGES) as UfoLanguage
     if (language === "en") return
-    this.applyMessages(await loadUfoRecorderMessages(language))
+    this.applyMessages(await loadSightingEditorMessages(language))
   }
 
-  private applyMessages(messages: UfoRecorderMessages): void {
+  private applyMessages(messages: SightingEditorMessages): void {
     // The constructor's very first shape gets its auto-generated title (see shapeLabel/
     // shapeTitleInput's own doc comments) synchronously, before this async locale load can ever
     // resolve — English's baked-in default, same as every other label here, EXCEPT this one gets
@@ -4796,7 +4796,7 @@ export class UfoRecorderElement extends HTMLElement {
     this.labelDecorLit.textContent = messages.decorLit
     this.labelDecorSightingUrl.textContent = messages.decorSightingUrl
     this.contextViewTestimonyButton.textContent = messages.viewTestimony
-    // The arrow is appended here, not part of the translated string — see UfoRecorderMessages.
+    // The arrow is appended here, not part of the translated string — see SightingEditorMessages.
     // masks's own doc comment.
     this.labelContextMasks.textContent = `${messages.masks} ▸`
     this.addDecorWitnessButton.textContent = messages.addWitness
@@ -5646,11 +5646,33 @@ export class UfoRecorderElement extends HTMLElement {
   }
 }
 
-export const ELEMENT_NAME = "rr0-ufo-recorder"
+export const ELEMENT_NAME = "rr0-sighting-editor"
+
+/**
+ * What this element was called until 0.42.0, still registered and still working.
+ *
+ * "Recorder" had stopped describing it. Recording — the button and its sampling rate — is one
+ * control among some fifty, and everything else in the project already called this thing an
+ * editor: the page is "the editor", the button says Export, the documentation page is "create an
+ * observation". It was also the last tag still carrying "ufo" as its subject, next to the
+ * <rr0-sighting> it edits.
+ *
+ * Kept because pages were loading it under this name before the new one existed, and a rename
+ * that breaks them punishes whoever used the thing early.
+ */
+export const LEGACY_ELEMENT_NAME = "rr0-ufo-recorder"
+
+/** Only so that the legacy name has a constructor of its own to be defined with: customElements
+ * refuses the same class twice, and there is nothing to add. */
+class LegacyRecorderElement extends SightingEditorElement {
+}
 
 export function register(): void {
   registerUfo()
   if (!customElements.get(ELEMENT_NAME)) {
-    customElements.define(ELEMENT_NAME, UfoRecorderElement)
+    customElements.define(ELEMENT_NAME, SightingEditorElement)
+  }
+  if (!customElements.get(LEGACY_ELEMENT_NAME)) {
+    customElements.define(LEGACY_ELEMENT_NAME, LegacyRecorderElement)
   }
 }

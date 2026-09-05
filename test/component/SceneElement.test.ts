@@ -212,7 +212,7 @@ describe("SceneElement weather follows the player", () => {
 })
 
 describe("meteor scheduling", () => {
-  // The in-place-editing regression this pairs with lives in UfoRecorderElement.test.ts: it only
+  // The in-place-editing regression this pairs with lives in SightingEditorElement.test.ts: it only
   // bites through the recorder's own form, which mutates ONE Sighting, where assigning sightingData
   // here builds a fresh one every time and would hide it.
   /** The Geminid peak over Provence: the radiant stands 77 degrees up at 3 a.m., which is about as

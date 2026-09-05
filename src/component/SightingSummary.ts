@@ -8,13 +8,13 @@ import type { SoundKind } from "../engine/model/Sound.js"
 import { Instruments } from "../engine/instrument/Instrument.js"
 import type { SightingLabels } from "./messages/SightingLabels.js"
 
-/** Which group of the recorder's own tab strip a summary entry belongs to. The player ignores
- * these; the recorder maps them onto its panels, so that clicking a chip opens the one holding
+/** Which group of the editor's own tab strip a summary entry belongs to. The player ignores
+ * these; the editor maps them onto its panels, so that clicking a chip opens the one holding
  * the field. */
 export type SummaryGroup = "observation" | "witness" | "location" | "decor" | "temporal" | "weather" | "sound"
 
 /** One thing a recording states. `field` is the name of the field it came from, which is also the
- * id the recorder gives that field's own control — that coincidence is what lets a chip put the
+ * id the editor gives that field's own control — that coincidence is what lets a chip put the
  * caret in the right input without the summary knowing anything about the form. */
 export interface SummaryEntry {
   group: SummaryGroup
@@ -31,7 +31,7 @@ export interface SummaryEntry {
 
 /** What the caller knows that the file itself does not.
  *
- * `decorId` is what the recorder is currently pointing at, so the entries can describe that decor
+ * `decorId` is what the editor is currently pointing at, so the entries can describe that decor
  * object rather than every one of them; the player passes none and gets the observation itself:
  * where, when, through what, under what sky.
  *
@@ -54,7 +54,7 @@ export interface SummaryContext {
  * the same summary of the same file — and the reason it exists at all: `<rr0-sighting>` has no
  * form to read. The cost of that is this class: a form's own markup already pairs a label with a
  * value and a unit, a model doesn't, so each field has to be named here once. It is named ONCE —
- * an earlier version of this summary lived in the recorder and derived itself from the editor's
+ * an earlier version of this summary lived in the editor and derived itself from the editor's
  * DOM, and duplicating that for the player would have been two summaries of one object, free to
  * drift apart.
  *
@@ -188,7 +188,7 @@ export class SightingSummary {
     const pose = resolveObserverPoseAt(sighting, timeMs)
     if (pose) {
       // The one label that isn't a constant: an eye has no focal length, so what its field of view
-      // is called changes with the instrument — the same condition the recorder's own
+      // is called changes with the instrument — the same condition the editor's own
       // syncOpticsFromInstrument applies to the very same value.
       const focalLengthMm = Instruments.focalLengthMmFor(instrument, pose.fovDeg)
       if (focalLengthMm === undefined) {
@@ -256,7 +256,7 @@ export class SightingSummary {
     }
     // A rig isn't stored as a rig: the object carries the lamps it made (see DecorObject.lights),
     // so it is recognised by the set of lamp ids it produced — the same identification the
-    // recorder's own picker makes to decide which entry to show as selected.
+    // editor's own picker makes to decide which entry to show as selected.
     const carried = selected.lights?.map(light => light.id).join() ?? ""
     const rig = carried === "" ? undefined : LIGHT_RIGS.find(candidate => candidate.create().map(light => light.id).join() === carried)
     this.push(entries, "decor", "decorLightRig", this.labels.decorLights, rig?.name)
@@ -308,7 +308,7 @@ export class SightingSummary {
     this.push(entries, "weather", "cloudBase", this.labels.cloudBase,
       clouded ? this.rounded(weather.cloudBaseM) : undefined, "m", owned)
     // Falling, not merely named: the renderer already draws nothing at zero intensity (see
-    // UfoRecorderElement's rainbow guard, which reads precipitationIntensity <= 0 as no rain), so
+    // SightingEditorElement's rainbow guard, which reads precipitationIntensity <= 0 as no rain), so
     // a "Rain" chip over a dry sky would describe the file and contradict the picture beside it.
     const precipitating = weather.precipitationType !== "none" && this.showsPercent(weather.precipitationIntensity)
     this.push(entries, "weather", "precipitationType", this.labels.precipitationType,

@@ -218,8 +218,8 @@ section.band:first-of-type { border-top: 0; }
    full-bleed on purpose — there the scene IS the content — so the padding is asked for rather
    than inherited. */
 .stage-padded { padding: 0.9rem; }
-.stage-padded rr0-ufo-recorder { display: block; }
-.stage rr0-sighting, .stage rr0-scene, .stage rr0-ufo-recorder, .stage rr0-ufo { display: block; }
+.stage-padded rr0-sighting-editor { display: block; }
+.stage rr0-sighting, .stage rr0-scene, .stage rr0-sighting-editor, .stage rr0-ufo { display: block; }
 .stage-caption {
   padding: 0.7rem 1rem; border-top: 1px solid var(--line); color: var(--ink-dim);
   font-size: 0.87rem; background: var(--ground-raised);

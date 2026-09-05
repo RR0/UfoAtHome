@@ -122,7 +122,7 @@ export interface OpenMeteoWeatherProviderOptions {
 export class OpenMeteoWeatherProvider implements WeatherProvider {
   private readonly fetchImpl: typeof fetch
   private readonly baseUrl: string
-  /** Same query, same answer — the recorder re-asks on every debounced date/place edit, and a
+  /** Same query, same answer — the editor re-asks on every debounced date/place edit, and a
    * reanalysis of 1965 will not have changed since the last keystroke. */
   private readonly cache = new Map<string, WeatherObservation>()
 

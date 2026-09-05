@@ -18,7 +18,7 @@ export interface PlaceSearchOptions {
   signal?: AbortSignal
 }
 
-/** What a UI must credit the results to — every open geocoder requires it, and the recorder shows
+/** What a UI must credit the results to — every open geocoder requires it, and the editor shows
  * it next to the matches rather than burying it in a licence file. */
 export interface PlaceAttribution {
   text: string
@@ -31,7 +31,7 @@ export interface PlaceAttribution {
  * never comes that way: it says "on the Valensole plateau", "near Socorro", "over Montgomery".
  *
  * Same "one interface, interchangeable implementations" arrangement as ElevationProvider and
- * WeatherProvider (see providers/ and defaultPlaceProvider): the recorder never names a concrete
+ * WeatherProvider (see providers/ and defaultPlaceProvider): the editor never names a concrete
  * geocoder, so swapping to a keyed or national one later touches one function.
  *
  * Returns an empty array when nothing matched — a normal answer, not an error. A network or HTTP

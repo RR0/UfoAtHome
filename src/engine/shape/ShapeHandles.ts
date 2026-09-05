@@ -18,10 +18,10 @@ export const RESIZE_HANDLE_IDS: HandleId[] = ["nw", "n", "ne", "e", "se", "s", "
 export type ResizeAxis = "ew" | "nwse" | "ns" | "nesw"
 
 const ROTATE_HANDLE_OFFSET = 24 // px above the top edge, in the shape's local (unrotated) frame
-export const MIN_SHAPE_SIZE = 8 // px resize floor — avoids degenerate/inverted bounds — shared with UfoRecorderElement's arrow-key resize
+export const MIN_SHAPE_SIZE = 8 // px resize floor — avoids degenerate/inverted bounds — shared with SightingEditorElement's arrow-key resize
 /** A polygon needs at least 3 points to remain a real shape — deleteVertex refuses to go below
  * this, the same "always keep a minimum" precedent as MIN_SHAPE_SIZE above (and deleteShape's own
- * "always keep at least one shape" rule in UfoRecorderElement). */
+ * "always keep at least one shape" rule in SightingEditorElement). */
 export const MIN_POLYGON_VERTICES = 3
 export const VERTEX_HANDLE_TOLERANCE = 8 // px — same as hitTestHandle's own default
 

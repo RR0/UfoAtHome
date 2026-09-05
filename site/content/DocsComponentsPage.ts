@@ -49,7 +49,7 @@ export class DocsComponentsPage extends DocsSection {
     </ul>
     <p>They compose in one line: <code>&lt;rr0-scene&gt;</code> holds an
       <code>&lt;rr0-ufo&gt;</code>, and both <code>&lt;rr0-sighting&gt;</code> and
-      <code>&lt;rr0-ufo-recorder&gt;</code> hold an <code>&lt;rr0-scene&gt;</code>. So everything
+      <code>&lt;rr0-sighting-editor&gt;</code> hold an <code>&lt;rr0-scene&gt;</code>. So everything
       under <code>&lt;rr0-ufo&gt;</code> below is available in all four — through
       <code>.scene.ufoElement</code> from the outermost, since the composition lives in a shadow
       root.</p>
@@ -65,7 +65,7 @@ export class DocsComponentsPage extends DocsSection {
       <li><strong><code>&lt;rr0-sighting&gt;</code> — the account as something to read.</strong>
         A scene plus who is testifying, the observation's own metadata, its credits, and the lines
         that let a reader take it elsewhere. This is what a published sighting looks like.</li>
-      <li><strong><code>&lt;rr0-ufo-recorder&gt;</code> — the account as something to write.</strong>
+      <li><strong><code>&lt;rr0-sighting-editor&gt;</code> — the account as something to write.</strong>
         Everything above plus the authoring toolbar: describe an observation, or correct one.</li>
     </ul>
 
@@ -76,7 +76,7 @@ export class DocsComponentsPage extends DocsSection {
     <table>
       <tr><th>What you are doing</th><th>Component</th><th>Module</th><th>gzip</th></tr>
       <tr><td><strong>Showing a UFO sighting</strong> — a case file, an article, a report</td><td><code>&lt;rr0-sighting&gt;</code></td><td><code>/lib/rr0-sighting.mjs</code></td><td>249 KB</td></tr>
-      <tr><td><strong>Letting somebody describe or correct one</strong></td><td><code>&lt;rr0-ufo-recorder&gt;</code></td><td><code>/lib/rr0-ufo-recorder.mjs</code></td><td>293 KB</td></tr>
+      <tr><td><strong>Letting somebody describe or correct one</strong></td><td><code>&lt;rr0-sighting-editor&gt;</code></td><td><code>/lib/rr0-sighting-editor.mjs</code></td><td>293 KB</td></tr>
       <tr><td><strong>Showing a sky with no object in it</strong> — what a halo, a comet or a satellite pass looked like that night</td><td><code>&lt;rr0-scene&gt;</code></td><td><code>/lib/rr0-scene.mjs</code></td><td>238 KB</td></tr>
       <tr><td><strong>Showing a sighting inside a scene of your own</strong>, with no toolbar over it</td><td><code>&lt;rr0-scene&gt;</code></td><td><code>/lib/rr0-scene.mjs</code></td><td>238 KB</td></tr>
       <tr><td><strong>Illustrating a shape</strong> in the flow of an article, with no sky and no weight</td><td><code>&lt;rr0-ufo&gt;</code></td><td><code>/lib/rr0-ufo.mjs</code></td><td>16 KB</td></tr>
@@ -144,11 +144,11 @@ export class DocsComponentsPage extends DocsSection {
     <p>A recording that names no witness gets no “testimony by” line at all, which is the accurate
       thing to say of a sky set up to show a halo.</p>
 
-    <h2><code>&lt;rr0-ufo-recorder&gt;</code> — the editor</h2>
+    <h2><code>&lt;rr0-sighting-editor&gt;</code> — the editor</h2>
     <p>Everything above plus the authoring toolbar. Put it on a page where people should be able to
       describe or correct an observation themselves.</p>
-    <pre><code>&lt;rr0-ufo-recorder&gt;&lt;/rr0-ufo-recorder&gt;
-&lt;rr0-ufo-recorder src="sighting.json"&gt;&lt;/rr0-ufo-recorder&gt;</code></pre>
+    <pre><code>&lt;rr0-sighting-editor&gt;&lt;/rr0-sighting-editor&gt;
+&lt;rr0-sighting-editor src="sighting.json"&gt;&lt;/rr0-sighting-editor&gt;</code></pre>
     <p>Its canvas is an editing surface, so <code>enableClickToPlay</code> is off there: a click
       selects and drags a shape rather than toggling playback. What the eight groups of its toolbar
       do is <a href="/editor/">the editor's own page</a>.</p>
@@ -167,7 +167,7 @@ export class DocsComponentsPage extends DocsSection {
       <tr><td><code>ended</code></td><td>Once, when playback runs off the end without looping. Not on a pause, and not on a scrub to the end</td><td><strong>Yes</strong> — bubbling and composed, so a page can listen on the outermost element. This is how you play several recordings in turn</td></tr>
       <tr><td><code>timeupdate</code></td><td>Every playback tick and every seek, with <code>detail.time</code></td><td>No — it is meant for the composing elements</td></tr>
       <tr><td><code>timedisplaychange</code></td><td>When the counters switch between clock time and elapsed time</td><td>Yes</td></tr>
-      <tr><td><code>sightingchange</code></td><td>After an edit in the recorder</td><td>Yes</td></tr>
+      <tr><td><code>sightingchange</code></td><td>After an edit in the editor</td><td>Yes</td></tr>
     </table>
     </div>
 
@@ -176,7 +176,7 @@ export class DocsComponentsPage extends DocsSection {
     <pre><code>import "@rr0/ufoathome/ufo"        // registers &lt;rr0-ufo&gt;
 import "@rr0/ufoathome/scene"      // registers &lt;rr0-scene&gt;
 import "@rr0/ufoathome/sighting" // registers &lt;rr0-sighting&gt;
-import "@rr0/ufoathome/recorder"   // registers &lt;rr0-ufo-recorder&gt;</code></pre>
+import "@rr0/ufoathome/editor"   // registers &lt;rr0-sighting-editor&gt;</code></pre>
     <p>Or copy the contents of the package's <code>dist-embed*</code> directories onto your own
       server and point the <code>&lt;script src&gt;</code> there. Each module references its own
       assets — the star catalogue, the weather audio — <em>relative to itself</em>, so it keeps
@@ -216,7 +216,7 @@ import "@rr0/ufoathome/recorder"   // registers &lt;rr0-ufo-recorder&gt;</code><
     </ul>
     <p>Ils se composent en ligne : <code>&lt;rr0-scene&gt;</code> contient un
       <code>&lt;rr0-ufo&gt;</code>, et <code>&lt;rr0-sighting&gt;</code> comme
-      <code>&lt;rr0-ufo-recorder&gt;</code> contiennent un <code>&lt;rr0-scene&gt;</code>. Tout ce
+      <code>&lt;rr0-sighting-editor&gt;</code> contiennent un <code>&lt;rr0-scene&gt;</code>. Tout ce
       qui figure sous <code>&lt;rr0-ufo&gt;</code> ci-dessous est donc disponible dans les quatre —
       via <code>.scene.ufoElement</code> depuis le plus extérieur, la composition vivant dans un
       <i lang="en">shadow root</i>.</p>
@@ -232,7 +232,7 @@ import "@rr0/ufoathome/recorder"   // registers &lt;rr0-ufo-recorder&gt;</code><
       <li><strong><code>&lt;rr0-sighting&gt;</code> — le récit, à lire.</strong> Une scène, plus
         qui témoigne, les métadonnées de l'observation, ses crédits, et les lignes qui permettent à
         un lecteur de l'emporter ailleurs. C'est à cela que ressemble une observation publiée.</li>
-      <li><strong><code>&lt;rr0-ufo-recorder&gt;</code> — le récit, à écrire.</strong> Tout ce qui
+      <li><strong><code>&lt;rr0-sighting-editor&gt;</code> — le récit, à écrire.</strong> Tout ce qui
         précède, plus la barre d'outils de saisie : décrire une observation, ou en corriger une.</li>
     </ul>
 
@@ -244,7 +244,7 @@ import "@rr0/ufoathome/recorder"   // registers &lt;rr0-ufo-recorder&gt;</code><
     <table>
       <tr><th>Ce que vous faites</th><th>Composant</th><th>Module</th><th>gzip</th></tr>
       <tr><td><strong>Montrer une observation d'ovni</strong> — un dossier, un article, un rapport</td><td><code>&lt;rr0-sighting&gt;</code></td><td><code>/lib/rr0-sighting.mjs</code></td><td>249 Ko</td></tr>
-      <tr><td><strong>Laisser quelqu'un en décrire ou en corriger une</strong></td><td><code>&lt;rr0-ufo-recorder&gt;</code></td><td><code>/lib/rr0-ufo-recorder.mjs</code></td><td>293 Ko</td></tr>
+      <tr><td><strong>Laisser quelqu'un en décrire ou en corriger une</strong></td><td><code>&lt;rr0-sighting-editor&gt;</code></td><td><code>/lib/rr0-sighting-editor.mjs</code></td><td>293 Ko</td></tr>
       <tr><td><strong>Montrer un ciel sans objet dedans</strong> — ce qu'un halo, une comète ou un passage satellite donnaient cette nuit-là</td><td><code>&lt;rr0-scene&gt;</code></td><td><code>/lib/rr0-scene.mjs</code></td><td>238 Ko</td></tr>
       <tr><td><strong>Montrer une observation dans une scène à vous</strong>, sans barre d'outils par-dessus</td><td><code>&lt;rr0-scene&gt;</code></td><td><code>/lib/rr0-scene.mjs</code></td><td>238 Ko</td></tr>
       <tr><td><strong>Illustrer une forme</strong> au fil d'un article, sans ciel et sans poids</td><td><code>&lt;rr0-ufo&gt;</code></td><td><code>/lib/rr0-ufo.mjs</code></td><td>16 Ko</td></tr>
@@ -313,11 +313,11 @@ import "@rr0/ufoathome/recorder"   // registers &lt;rr0-ufo-recorder&gt;</code><
     <p>Un enregistrement qui ne nomme aucun témoin n'affiche aucune ligne « témoignage de » — ce qui
       est exact pour un ciel réglé pour montrer un halo.</p>
 
-    <h2><code>&lt;rr0-ufo-recorder&gt;</code> — l'éditeur</h2>
+    <h2><code>&lt;rr0-sighting-editor&gt;</code> — l'éditeur</h2>
     <p>Tout ce qui précède, plus la barre d'outils de saisie. À poser sur une page où l'on doit
       pouvoir décrire ou corriger une observation soi-même.</p>
-    <pre><code>&lt;rr0-ufo-recorder&gt;&lt;/rr0-ufo-recorder&gt;
-&lt;rr0-ufo-recorder src="sighting.json"&gt;&lt;/rr0-ufo-recorder&gt;</code></pre>
+    <pre><code>&lt;rr0-sighting-editor&gt;&lt;/rr0-sighting-editor&gt;
+&lt;rr0-sighting-editor src="sighting.json"&gt;&lt;/rr0-sighting-editor&gt;</code></pre>
     <p>Son canevas est une surface d'édition : <code>enableClickToPlay</code> y est désactivé, un
       clic sélectionne et déplace une forme au lieu de basculer la lecture. Ce que font les huit
       groupes de sa barre d'outils est sur <a href="/editor/">la page de l'éditeur</a>.</p>
@@ -345,7 +345,7 @@ import "@rr0/ufoathome/recorder"   // registers &lt;rr0-ufo-recorder&gt;</code><
     <pre><code>import "@rr0/ufoathome/ufo"        // enregistre &lt;rr0-ufo&gt;
 import "@rr0/ufoathome/scene"      // enregistre &lt;rr0-scene&gt;
 import "@rr0/ufoathome/sighting" // enregistre &lt;rr0-sighting&gt;
-import "@rr0/ufoathome/recorder"   // enregistre &lt;rr0-ufo-recorder&gt;</code></pre>
+import "@rr0/ufoathome/editor"   // enregistre &lt;rr0-sighting-editor&gt;</code></pre>
     <p>Ou recopiez le contenu des répertoires <code>dist-embed*</code> du paquet sur votre serveur et
       pointez le <code>&lt;script src&gt;</code> dessus. Chaque module référence ses ressources —
       catalogue d'étoiles, sons de météo — <em>relativement à lui-même</em> : il fonctionne donc

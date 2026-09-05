@@ -43,7 +43,7 @@ class SiteBuilder {
    * them de-duplicates instead of colliding — and `base: "./"` in each Vite config is what makes
    * the `new URL(asset, import.meta.url)` references keep working from there. */
   private readonly bundleDirs = [
-    "dist-embed-ufo", "dist-embed-scene", "dist-embed-sighting", "dist-embed", "dist-site-lib"
+    "dist-embed-ufo", "dist-embed-scene", "dist-embed-sighting", "dist-embed-sighting-editor", "dist-site-lib"
   ]
 
   async build(): Promise<void> {
@@ -87,7 +87,8 @@ class SiteBuilder {
   }
 
   /**
-   * The address `<rr0-eyewitness>` was published at, kept working under the name it now has.
+   * The addresses the elements were published at before they were renamed, kept working under the
+   * names they now have.
    *
    * A module and not a redirect: pages already load this exact URL in a `<script type="module">`
    * — rr0.org's own case files among them — and a re-export is the one form of forwarding that
@@ -96,13 +97,19 @@ class SiteBuilder {
    * a page written against the old name keeps working without changing a character.
    */
   private async writeLegacyBundle(): Promise<void> {
-    await writeFile(
-      join(this.out, "lib", "rr0-eyewitness.mjs"),
-      "/* Renamed to rr0-sighting.mjs in 0.41.0. This address goes on working: the bundle it loads\n"
-      + "   registers <rr0-eyewitness> as well as <rr0-sighting>. */\n"
-      + "export * from \"./rr0-sighting.mjs\"\n",
-      "utf8"
-    )
+    const renamed: ReadonlyArray<readonly [string, string, string]> = [
+      ["rr0-eyewitness.mjs", "rr0-sighting.mjs", "0.41.0"],
+      ["rr0-ufo-recorder.mjs", "rr0-sighting-editor.mjs", "0.42.0"]
+    ]
+    for (const [was, is, version] of renamed) {
+      await writeFile(
+        join(this.out, "lib", was),
+        `/* Renamed to ${is} in ${version}. This address goes on working: the bundle it loads\n`
+        + `   registers the old tag name as well as the new one. */\n`
+        + `export * from "./${is}"\n`,
+        "utf8"
+      )
+    }
   }
 
   /**

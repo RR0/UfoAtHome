@@ -52,7 +52,7 @@ export function witnessSidesFor(kind: DecorKind): DecorSide[] {
 }
 
 /** Minimum window opacity for a side that isWindowOpenable says can't be opened (e.g. a vehicle's
- * fixed windshield/rear window) — clamped to at write time (see UfoRecorderElement.
+ * fixed windshield/rear window) — clamped to at write time (see SightingEditorElement.
  * updateDecorWindows), so that side can still be present at a normal glazed look but can never be
  * dialed down toward "open". */
 export const FIXED_WINDOW_MIN_OPACITY_PERCENT = 90
@@ -70,7 +70,7 @@ export const DEFAULT_WINDOW_OPACITY_PERCENT = 50
 /** The DecorObject.windows record a freshly created decor object of this kind should start
  * with — every side hasWindows applies to, each at DEFAULT_WINDOW_OPACITY_PERCENT (or
  * FIXED_WINDOW_MIN_OPACITY_PERCENT for a side isWindowOpenable says is fixed). Returns undefined
- * for a kind with no windows at all, so callers (UfoRecorderElement.addDecor) can spread it in
+ * for a kind with no windows at all, so callers (SightingEditorElement.addDecor) can spread it in
  * unconditionally without an extra hasWindows check of their own. */
 export function defaultWindows(kind: DecorKind): Partial<Record<DecorSide, number>> | undefined {
   if (!hasWindows(kind)) return undefined
@@ -83,7 +83,7 @@ export function defaultWindows(kind: DecorKind): Partial<Record<DecorSide, numbe
 
 /** Upper stories a freshly created building starts with (before the ground floor) — see
  * DecorObject.floors's own doc comment for the French "étages" convention this matches. Shared by
- * UfoRecorderElement.addDecor (the default a new building is created with) and
+ * SightingEditorElement.addDecor (the default a new building is created with) and
  * DecorSystem.build (the fallback for older/hand-edited data with no floors field at all), so the
  * two can never drift apart. */
 export const DEFAULT_BUILDING_FLOORS = 2
@@ -160,7 +160,7 @@ export interface DecorObject {
   id: string
   kind: DecorKind
   /** Optional display name, same role as Shape.title — falls back to a generic "{kind} {n}"
-   * label (see UfoRecorderElement.decorLabel) when absent. */
+   * label (see SightingEditorElement.decorLabel) when absent. */
   title?: string
   /**
    * Meters from the observer's own position — eastM positive = east, northM positive = north.
@@ -197,7 +197,7 @@ export interface DecorObject {
   track?: DecorPlacementKeyframe[]
   /** For kind "witness" only: the URL of that witness's own sighting.json recording, if known —
    * lets the 3D scene's own context menu offer "view this witness's testimony" (loading it the
-   * same way UfoRecorderElement.importFromUrl already does). Undefined means no known recording
+   * same way SightingEditorElement.importFromUrl already does). Undefined means no known recording
    * for that witness, or not applicable for any other kind. */
   sightingUrl?: string
   /** Per-side window opacity, 0 (fully open — the pane is invisible, and DecorSystem.addRoom's own
@@ -225,7 +225,7 @@ export interface DecorObject {
    * that's a UI convention, not enforced here. */
   witnessSide?: DecorSide
   /** Kind "building" only: number of upper stories above the ground floor, set when the building
-   * is created (default 2, see UfoRecorderElement.addDecor) and editable afterward. Drives the
+   * is created (default 2, see SightingEditorElement.addDecor) and editable afterward. Drives the
    * window rows in the 3D model and the valid range for occupiedFloor (0 = ground floor, up to and
    * including this value). Ignored for every other kind. */
   floors?: number
@@ -242,7 +242,7 @@ export interface DecorObject {
    * reported by the same witness. There's also no way to derive this from geometry alone: the same
    * testimony could equally report either physical relationship for a given shape, a judgment call
    * that isn't recorded anywhere else in the data model — so it's a deliberate per-shape choice set
-   * by hand (see UfoRecorderElement's own "masks" checkbox list) rather than an automatic rule. */
+   * by hand (see SightingEditorElement's own "masks" checkbox list) rather than an automatic rule. */
   occludesSourceIds?: string[]
 }
 

@@ -1,6 +1,6 @@
 import { describe, expect, it, afterEach, beforeAll, vi } from "vitest"
-import { register, ELEMENT_NAME } from "../../src/component/UfoRecorderElement.js"
-import type { UfoRecorderElement } from "../../src/component/UfoRecorderElement.js"
+import { register, ELEMENT_NAME, LEGACY_ELEMENT_NAME } from "../../src/component/SightingEditorElement.js"
+import type { SightingEditorElement } from "../../src/component/SightingEditorElement.js"
 import type { PolygonShape, Shape } from "../../src/engine/shape/Shape.js"
 import { ShapeHandles } from "../../src/engine/shape/ShapeHandles.js"
 import { ApparentSize } from "../../src/engine/shape/ApparentSize.js"
@@ -8,13 +8,13 @@ import { ImageProjection } from "../../src/engine/instrument/ImageProjection.js"
 import type { WeatherProvider } from "../../src/engine/weather/WeatherProvider.js"
 import type { Weather } from "../../src/engine/model/Weather.js"
 import { SOUND_KINDS } from "../../src/engine/model/Sound.js"
-import { ufoRecorderMessages_en } from "../../src/component/messages/UfoRecorderMessages_en.js"
+import { sightingEditorMessages_en } from "../../src/component/messages/SightingEditorMessages_en.js"
 import { Comets } from "../../src/engine/astronomy/Comets.js"
 import type { PlaceMatch, PlaceProvider } from "../../src/engine/place/PlaceProvider.js"
 
 register()
 
-// UfoRecorderElement now nests a <rr0-scene> (see its own class doc comment) instead of a bare
+// SightingEditorElement now nests a <rr0-scene> (see its own class doc comment) instead of a bare
 // <rr0-ufo>, so mounting it also constructs a SceneRenderer — which jsdom's <canvas> can't back
 // with a real WebGL context (no native `canvas` package here, same reason as the 2D mock below).
 // Stubbed out entirely: these tests exercise the 2D shape/appearance/observer/time editing logic,
@@ -112,22 +112,22 @@ beforeAll(() => {
 })
 
 /** Weather is looked up from a real meteorological record as soon as a recording states a date and
- * a place (see UfoRecorderElement.inferWeather), so every editor mounted here gets a provider that
+ * a place (see SightingEditorElement.inferWeather), so every editor mounted here gets a provider that
  * answers "no record" — the suite must never reach the network, and the weather tests below
  * substitute their own answers. */
 const NO_RECORD_PROVIDER: WeatherProvider = { getWeather: () => Promise.resolve(undefined) }
 
-function mount(weatherProvider: WeatherProvider = NO_RECORD_PROVIDER): UfoRecorderElement {
-  const element = document.createElement(ELEMENT_NAME) as UfoRecorderElement
+function mount(weatherProvider: WeatherProvider = NO_RECORD_PROVIDER): SightingEditorElement {
+  const element = document.createElement(ELEMENT_NAME) as SightingEditorElement
   element.weatherProvider = weatherProvider
   document.body.appendChild(element)
   return element
 }
 
 /** The nested <rr0-ufo> now lives inside the recorder's own nested <rr0-scene> (see
- * UfoRecorderElement's class doc comment) instead of being a direct shadow child — this centralizes
+ * SightingEditorElement's class doc comment) instead of being a direct shadow child — this centralizes
  * the extra hop so test call sites don't all need to know that. */
-function nestedUfo(element: UfoRecorderElement): Element {
+function nestedUfo(element: SightingEditorElement): Element {
   return element.shadowRoot!.querySelector("rr0-scene")!.shadowRoot!.querySelector("rr0-ufo")!
 }
 
@@ -139,7 +139,28 @@ async function waitFor(check: () => boolean, timeoutMs = 500): Promise<void> {
   }
 }
 
-describe("UfoRecorderElement appearance toolbar", () => {
+describe("the name this element had before 0.42.0", () => {
+  afterEach(() => {
+    document.body.innerHTML = ""
+  })
+
+  // Pages were loading it as <rr0-ufo-recorder> before <rr0-sighting-editor> existed, and a rename
+  // that breaks them punishes whoever used the thing early.
+  it("still upgrades, and to the same element", () => {
+    const legacy = document.createElement(LEGACY_ELEMENT_NAME)
+    document.body.appendChild(legacy)
+    expect(legacy.shadowRoot).not.toBeNull()
+    expect(customElements.get(LEGACY_ELEMENT_NAME)!.prototype).toBeInstanceOf(customElements.get(ELEMENT_NAME)!)
+  })
+
+  it("brings its toolbar with it", () => {
+    const legacy = document.createElement(LEGACY_ELEMENT_NAME)
+    document.body.appendChild(legacy)
+    expect(legacy.shadowRoot!.getElementById("group-tabs")).not.toBeNull()
+  })
+})
+
+describe("SightingEditorElement appearance toolbar", () => {
   afterEach(() => {
     document.body.innerHTML = ""
   })
@@ -227,7 +248,7 @@ describe("UfoRecorderElement appearance toolbar", () => {
   })
 })
 
-describe("UfoRecorderElement observer/time fields", () => {
+describe("SightingEditorElement observer/time fields", () => {
   afterEach(() => {
     document.body.innerHTML = ""
   })
@@ -482,7 +503,7 @@ describe("UfoRecorderElement observer/time fields", () => {
   })
 })
 
-describe("UfoRecorderElement metadata fields", () => {
+describe("SightingEditorElement metadata fields", () => {
   afterEach(() => {
     document.body.innerHTML = ""
   })
@@ -606,7 +627,7 @@ describe("UfoRecorderElement metadata fields", () => {
   })
 })
 
-describe("UfoRecorderElement observer keyframes over time", () => {
+describe("SightingEditorElement observer keyframes over time", () => {
   afterEach(() => {
     document.body.innerHTML = ""
   })
@@ -617,7 +638,7 @@ describe("UfoRecorderElement observer keyframes over time", () => {
     input.dispatchEvent(new Event("input"))
   }
 
-  function seekNestedUfoTo(element: UfoRecorderElement, t: number): void {
+  function seekNestedUfoTo(element: SightingEditorElement, t: number): void {
     const seekInput = nestedUfo(element)!.shadowRoot!.getElementById("seek") as HTMLInputElement
     seekInput.value = String(t)
     seekInput.dispatchEvent(new Event("input"))
@@ -753,7 +774,7 @@ describe("UfoRecorderElement observer keyframes over time", () => {
   })
 })
 
-describe("UfoRecorderElement weather keyframes over time", () => {
+describe("SightingEditorElement weather keyframes over time", () => {
   afterEach(() => {
     document.body.innerHTML = ""
   })
@@ -764,7 +785,7 @@ describe("UfoRecorderElement weather keyframes over time", () => {
     input.dispatchEvent(new Event("input"))
   }
 
-  function seekNestedUfoTo(element: UfoRecorderElement, t: number): void {
+  function seekNestedUfoTo(element: SightingEditorElement, t: number): void {
     const seekInput = nestedUfo(element)!.shadowRoot!.getElementById("seek") as HTMLInputElement
     seekInput.value = String(t)
     seekInput.dispatchEvent(new Event("input"))
@@ -860,7 +881,7 @@ describe("UfoRecorderElement weather keyframes over time", () => {
   })
 })
 
-describe("UfoRecorderElement composes a nested rr0-ufo", () => {
+describe("SightingEditorElement composes a nested rr0-ufo", () => {
   afterEach(() => {
     document.body.innerHTML = ""
   })
@@ -933,12 +954,12 @@ describe("UfoRecorderElement composes a nested rr0-ufo", () => {
   })
 })
 
-describe("UfoRecorderElement post-hoc appearance editing + multi-shape authoring", () => {
+describe("SightingEditorElement post-hoc appearance editing + multi-shape authoring", () => {
   afterEach(() => {
     document.body.innerHTML = ""
   })
 
-  function seekNestedUfoTo(element: UfoRecorderElement, t: number): void {
+  function seekNestedUfoTo(element: SightingEditorElement, t: number): void {
     const seekInput = nestedUfo(element)!.shadowRoot!.getElementById("seek") as HTMLInputElement
     seekInput.value = String(t)
     seekInput.dispatchEvent(new Event("input"))
@@ -1363,12 +1384,12 @@ describe("UfoRecorderElement post-hoc appearance editing + multi-shape authoring
   })
 })
 
-describe("UfoRecorderElement click-to-select", () => {
+describe("SightingEditorElement click-to-select", () => {
   afterEach(() => {
     document.body.innerHTML = ""
   })
 
-  function nestedCanvas(element: UfoRecorderElement): HTMLCanvasElement {
+  function nestedCanvas(element: SightingEditorElement): HTMLCanvasElement {
     const canvas = nestedUfo(element)!.shadowRoot!.getElementById("canvas") as HTMLCanvasElement
     // 1:1 scale (matches the canvas's own 640x360 drawing buffer) so click coordinates map
     // directly onto Shape.bounds without needing to account for scaling in the test itself.
@@ -1524,12 +1545,12 @@ describe("UfoRecorderElement click-to-select", () => {
   })
 })
 
-describe("UfoRecorderElement right-click context menu", () => {
+describe("SightingEditorElement right-click context menu", () => {
   afterEach(() => {
     document.body.innerHTML = ""
   })
 
-  function nestedCanvas(element: UfoRecorderElement): HTMLCanvasElement {
+  function nestedCanvas(element: SightingEditorElement): HTMLCanvasElement {
     const canvas = nestedUfo(element)!.shadowRoot!.getElementById("canvas") as HTMLCanvasElement
     vi.spyOn(canvas, "getBoundingClientRect").mockReturnValue({ left: 0, top: 0, width: 640, height: 360 } as DOMRect)
     return canvas
@@ -1737,7 +1758,7 @@ describe("UfoRecorderElement right-click context menu", () => {
   })
 })
 
-describe("UfoRecorderElement Delete/Backspace key", () => {
+describe("SightingEditorElement Delete/Backspace key", () => {
   afterEach(() => {
     document.body.innerHTML = ""
   })
@@ -1745,7 +1766,7 @@ describe("UfoRecorderElement Delete/Backspace key", () => {
   /** Dispatched ON the editor, which is where a key actually lands once it has the focus — it no
    * longer listens on document, so that a page's own forms keep their keys (see the two tests at
    * the end of this block). */
-  function pressKey(element: UfoRecorderElement, key: string): void {
+  function pressKey(element: SightingEditorElement, key: string): void {
     element.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true, composed: true }))
   }
 
@@ -1872,12 +1893,12 @@ describe("UfoRecorderElement Delete/Backspace key", () => {
   })
 })
 
-describe("UfoRecorderElement drag-to-move/resize/rotate", () => {
+describe("SightingEditorElement drag-to-move/resize/rotate", () => {
   afterEach(() => {
     document.body.innerHTML = ""
   })
 
-  function nestedCanvas(element: UfoRecorderElement): HTMLCanvasElement {
+  function nestedCanvas(element: SightingEditorElement): HTMLCanvasElement {
     const canvas = nestedUfo(element)!.shadowRoot!.getElementById("canvas") as HTMLCanvasElement
     vi.spyOn(canvas, "getBoundingClientRect").mockReturnValue({ left: 0, top: 0, width: 640, height: 360 } as DOMRect)
     return canvas
@@ -2128,7 +2149,7 @@ describe("UfoRecorderElement drag-to-move/resize/rotate", () => {
   })
 })
 
-describe("UfoRecorderElement arrow-key move/resize", () => {
+describe("SightingEditorElement arrow-key move/resize", () => {
   afterEach(() => {
     document.body.innerHTML = ""
   })
@@ -2149,7 +2170,7 @@ describe("UfoRecorderElement arrow-key move/resize", () => {
     }
   }
 
-  function pressKey(element: UfoRecorderElement, key: string, options: { shiftKey?: boolean } = {}): void {
+  function pressKey(element: SightingEditorElement, key: string, options: { shiftKey?: boolean } = {}): void {
     element.dispatchEvent(new KeyboardEvent("keydown", { key, shiftKey: options.shiftKey ?? false, bubbles: true, composed: true }))
   }
 
@@ -2209,7 +2230,7 @@ describe("UfoRecorderElement arrow-key move/resize", () => {
   })
 })
 
-describe("UfoRecorderElement duration input", () => {
+describe("SightingEditorElement duration input", () => {
   afterEach(() => {
     document.body.innerHTML = ""
   })
@@ -2347,7 +2368,7 @@ describe("UfoRecorderElement duration input", () => {
   })
 })
 
-describe("UfoRecorderElement export button", () => {
+describe("SightingEditorElement export button", () => {
   afterEach(() => {
     document.body.innerHTML = ""
     vi.unstubAllGlobals()
@@ -2407,7 +2428,7 @@ describe("UfoRecorderElement export button", () => {
   })
 })
 
-describe("UfoRecorderElement import controls", () => {
+describe("SightingEditorElement import controls", () => {
   afterEach(() => {
     document.body.innerHTML = ""
     vi.unstubAllGlobals()
@@ -2482,7 +2503,7 @@ describe("UfoRecorderElement import controls", () => {
   })
 })
 
-describe("UfoRecorderElement sound keyframes over time", () => {
+describe("SightingEditorElement sound keyframes over time", () => {
   afterEach(() => {
     document.body.innerHTML = ""
   })
@@ -2493,7 +2514,7 @@ describe("UfoRecorderElement sound keyframes over time", () => {
     input.dispatchEvent(new Event("input"))
   }
 
-  function seekNestedUfoTo(element: UfoRecorderElement, t: number): void {
+  function seekNestedUfoTo(element: SightingEditorElement, t: number): void {
     const seekInput = nestedUfo(element)!.shadowRoot!.getElementById("seek") as HTMLInputElement
     seekInput.value = String(t)
     seekInput.dispatchEvent(new Event("input"))
@@ -2571,16 +2592,16 @@ describe("UfoRecorderElement sound keyframes over time", () => {
   })
 })
 
-describe("UfoRecorderElement toolbar groups", () => {
+describe("SightingEditorElement toolbar groups", () => {
   afterEach(() => {
     document.body.innerHTML = ""
   })
 
-  function tabs(element: UfoRecorderElement): HTMLButtonElement[] {
+  function tabs(element: SightingEditorElement): HTMLButtonElement[] {
     return [...element.shadowRoot!.querySelectorAll<HTMLButtonElement>(".group-tab")]
   }
 
-  function openPanelIds(element: UfoRecorderElement): string[] {
+  function openPanelIds(element: SightingEditorElement): string[] {
     return [...element.shadowRoot!.querySelectorAll<HTMLElement>(".group-panel")].filter(panel => !panel.hidden).map(panel => panel.id)
   }
 
@@ -2633,11 +2654,11 @@ describe("UfoRecorderElement toolbar groups", () => {
     toggle.click()
     expect(lines.some(line => line.classList.contains("clamped"))).toBe(false)
     expect(toggle.getAttribute("aria-expanded")).toBe("true")
-    expect(toggle.title).toBe(ufoRecorderMessages_en.skyDetailsHide)
+    expect(toggle.title).toBe(sightingEditorMessages_en.skyDetailsHide)
 
     toggle.click()
     expect(lines.every(line => line.classList.contains("clamped"))).toBe(true)
-    expect(toggle.title).toBe(ufoRecorderMessages_en.skyDetails)
+    expect(toggle.title).toBe(sightingEditorMessages_en.skyDetails)
   })
 
   it("gives decor its own group instead of a fieldset inside location — the single largest thing this editor asks for", () => {
@@ -2657,12 +2678,12 @@ describe("UfoRecorderElement toolbar groups", () => {
   })
 })
 
-describe("UfoRecorderElement parameter summary", () => {
+describe("SightingEditorElement parameter summary", () => {
   afterEach(() => {
     document.body.innerHTML = ""
   })
 
-  function chips(element: UfoRecorderElement): HTMLButtonElement[] {
+  function chips(element: SightingEditorElement): HTMLButtonElement[] {
     return [...element.shadowRoot!.querySelectorAll<HTMLButtonElement>(".param-chip")]
   }
 
@@ -2764,7 +2785,7 @@ describe("UfoRecorderElement parameter summary", () => {
   })
 })
 
-describe("UfoRecorderElement i18n", () => {
+describe("SightingEditorElement i18n", () => {
   afterEach(() => {
     document.body.innerHTML = ""
   })
@@ -2805,12 +2826,12 @@ describe("UfoRecorderElement i18n", () => {
   })
 })
 
-describe("UfoRecorderElement multi-select", () => {
+describe("SightingEditorElement multi-select", () => {
   afterEach(() => {
     document.body.innerHTML = ""
   })
 
-  function nestedCanvas(element: UfoRecorderElement): HTMLCanvasElement {
+  function nestedCanvas(element: SightingEditorElement): HTMLCanvasElement {
     const canvas = nestedUfo(element)!.shadowRoot!.getElementById("canvas") as HTMLCanvasElement
     vi.spyOn(canvas, "getBoundingClientRect").mockReturnValue({ left: 0, top: 0, width: 640, height: 360 } as DOMRect)
     return canvas
@@ -2831,11 +2852,11 @@ describe("UfoRecorderElement multi-select", () => {
     canvas.dispatchEvent(new MouseEvent("contextmenu", { clientX: x, clientY: y, bubbles: true, cancelable: true, composed: true }))
   }
 
-  function pressKey(element: UfoRecorderElement, key: string, options: { shiftKey?: boolean } = {}): void {
+  function pressKey(element: SightingEditorElement, key: string, options: { shiftKey?: boolean } = {}): void {
     element.dispatchEvent(new KeyboardEvent("keydown", { key, shiftKey: options.shiftKey ?? false, bubbles: true }))
   }
 
-  function selectedIdsOf(element: UfoRecorderElement): string[] {
+  function selectedIdsOf(element: SightingEditorElement): string[] {
     const ufo = nestedUfo(element) as unknown as { selectedSourceIds: Set<string> }
     return [...ufo.selectedSourceIds].sort()
   }
@@ -3171,12 +3192,12 @@ describe("UfoRecorderElement multi-select", () => {
   })
 })
 
-describe("UfoRecorderElement playback controls", () => {
+describe("SightingEditorElement playback controls", () => {
   afterEach(() => {
     document.body.innerHTML = ""
   })
 
-  function setDuration(element: UfoRecorderElement, seconds: string): void {
+  function setDuration(element: SightingEditorElement, seconds: string): void {
     const durationInput = element.shadowRoot!.getElementById("durationSeconds") as HTMLInputElement
     durationInput.value = seconds
     durationInput.dispatchEvent(new Event("input"))
@@ -3282,7 +3303,7 @@ describe("UfoRecorderElement playback controls", () => {
   })
 })
 
-describe("UfoRecorderElement decor group", () => {
+describe("SightingEditorElement decor group", () => {
   afterEach(() => {
     document.body.innerHTML = ""
   })
@@ -3652,12 +3673,12 @@ describe("UfoRecorderElement decor group", () => {
   })
 })
 
-describe("UfoRecorderElement decor context menu", () => {
+describe("SightingEditorElement decor context menu", () => {
   afterEach(() => {
     document.body.innerHTML = ""
   })
 
-  function rightClickCanvas(element: UfoRecorderElement): void {
+  function rightClickCanvas(element: SightingEditorElement): void {
     const canvas = nestedUfo(element).shadowRoot!.querySelector("canvas")!
     canvas.getBoundingClientRect = () => ({ left: 0, top: 0, width: 800, height: 600 }) as DOMRect
     canvas.dispatchEvent(new MouseEvent("contextmenu", { bubbles: true, composed: true, clientX: 400, clientY: 300 }))
@@ -3787,7 +3808,7 @@ describe("UfoRecorderElement decor context menu", () => {
   })
 })
 
-describe("UfoRecorderElement decor click-to-select", () => {
+describe("SightingEditorElement decor click-to-select", () => {
   afterEach(() => {
     document.body.innerHTML = ""
   })
@@ -3795,7 +3816,7 @@ describe("UfoRecorderElement decor click-to-select", () => {
   // jsdom has no global PointerEvent — a plain MouseEvent dispatched as "pointerdown" exercises
   // the same handler, which only reads clientX/clientY/shiftKey (same convention as this file's
   // other clickAt/rightClickAt helpers).
-  function clickCanvas(element: UfoRecorderElement): void {
+  function clickCanvas(element: SightingEditorElement): void {
     const canvas = nestedUfo(element).shadowRoot!.querySelector("canvas")!
     canvas.getBoundingClientRect = () => ({ left: 0, top: 0, width: 800, height: 600 }) as DOMRect
     canvas.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true, composed: true, clientX: 400, clientY: 300 }))
@@ -3855,12 +3876,12 @@ describe("UfoRecorderElement decor click-to-select", () => {
   })
 })
 
-describe("UfoRecorderElement polygon vertex editing", () => {
+describe("SightingEditorElement polygon vertex editing", () => {
   afterEach(() => {
     document.body.innerHTML = ""
   })
 
-  function nestedCanvas(element: UfoRecorderElement): HTMLCanvasElement {
+  function nestedCanvas(element: SightingEditorElement): HTMLCanvasElement {
     const canvas = nestedUfo(element)!.shadowRoot!.getElementById("canvas") as HTMLCanvasElement
     vi.spyOn(canvas, "getBoundingClientRect").mockReturnValue({ left: 0, top: 0, width: 640, height: 360 } as DOMRect)
     return canvas
@@ -4038,12 +4059,12 @@ describe("UfoRecorderElement polygon vertex editing", () => {
  * rules keyed on it (see ufoTemplate). These tests therefore assert the attribute, which is the
  * component's whole share of the feature.
  */
-describe("UfoRecorderElement hover cursor", () => {
+describe("SightingEditorElement hover cursor", () => {
   afterEach(() => {
     document.body.innerHTML = ""
   })
 
-  function nestedCanvas(element: UfoRecorderElement): HTMLCanvasElement {
+  function nestedCanvas(element: SightingEditorElement): HTMLCanvasElement {
     const canvas = nestedUfo(element)!.shadowRoot!.getElementById("canvas") as HTMLCanvasElement
     vi.spyOn(canvas, "getBoundingClientRect").mockReturnValue({ left: 0, top: 0, width: 640, height: 360 } as DOMRect)
     return canvas
@@ -4056,7 +4077,7 @@ describe("UfoRecorderElement hover cursor", () => {
     return canvas.dataset.cursor
   }
 
-  function selectedShape(element: UfoRecorderElement): Shape {
+  function selectedShape(element: SightingEditorElement): Shape {
     return element.sightingData.timeline.keyframes[0].shapes[0].shape as Shape
   }
 
@@ -4157,7 +4178,7 @@ describe("UfoRecorderElement hover cursor", () => {
  * `?sighting=` parameter onto it, so ufoathome.org/<path> opens that recording for editing
  * instead of an empty canvas.
  */
-describe("UfoRecorderElement src attribute", () => {
+describe("SightingEditorElement src attribute", () => {
   afterEach(() => {
     document.body.innerHTML = ""
     vi.unstubAllGlobals()
@@ -4178,7 +4199,7 @@ describe("UfoRecorderElement src attribute", () => {
     const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve(recording) })
     vi.stubGlobal("fetch", fetchMock)
 
-    const element = document.createElement(ELEMENT_NAME) as UfoRecorderElement
+    const element = document.createElement(ELEMENT_NAME) as SightingEditorElement
     element.weatherProvider = NO_RECORD_PROVIDER
     element.setAttribute("src", "/science/crypto/ufo/enquete/dossier/Socorro/sighting.json")
     document.body.appendChild(element)
@@ -4207,12 +4228,12 @@ describe("UfoRecorderElement src attribute", () => {
  * altogether. The field also has to READ back: writing 0 unconditionally, as this did, flattened
  * an imported recording's own altitude the moment anything else in the panel was touched.
  */
-describe("UfoRecorderElement witness altitude", () => {
+describe("SightingEditorElement witness altitude", () => {
   afterEach(() => {
     document.body.innerHTML = ""
   })
 
-  function setField(element: UfoRecorderElement, id: string, value: string): void {
+  function setField(element: SightingEditorElement, id: string, value: string): void {
     const input = element.shadowRoot!.getElementById(id) as HTMLInputElement
     input.value = value
     input.dispatchEvent(new Event("input"))
@@ -4256,9 +4277,9 @@ describe("UfoRecorderElement witness altitude", () => {
  * measurable fact about a place at an instant, and the Location and Temporal groups already state
  * both. So it is looked up from a real record and shown read-only on that basis — unless the
  * witness takes the fields back, in which case their account outranks the record for good. See
- * UfoRecorderElement.inferWeather and engine/weather/WeatherInference.ts.
+ * SightingEditorElement.inferWeather and engine/weather/WeatherInference.ts.
  */
-describe("UfoRecorderElement inferred weather", () => {
+describe("SightingEditorElement inferred weather", () => {
   afterEach(() => {
     document.body.innerHTML = ""
     vi.unstubAllGlobals()
@@ -4293,7 +4314,7 @@ describe("UfoRecorderElement inferred weather", () => {
   }
 
   /** States where and when the observation happened — everything the record needs to be asked. */
-  function stateDateAndPlace(element: UfoRecorderElement): void {
+  function stateDateAndPlace(element: SightingEditorElement): void {
     const shadow = element.shadowRoot!
     setInput(shadow, "lat", "43.837")
     setInput(shadow, "lng", "5.983")
@@ -4301,15 +4322,15 @@ describe("UfoRecorderElement inferred weather", () => {
     setInput(shadow, "obs-time", "1965-07-01T05:00")
   }
 
-  function weatherField(element: UfoRecorderElement, id: string): HTMLInputElement | HTMLSelectElement {
+  function weatherField(element: SightingEditorElement, id: string): HTMLInputElement | HTMLSelectElement {
     return element.shadowRoot!.getElementById(id) as HTMLInputElement | HTMLSelectElement
   }
 
-  function sourceLink(element: UfoRecorderElement): HTMLAnchorElement {
+  function sourceLink(element: SightingEditorElement): HTMLAnchorElement {
     return element.shadowRoot!.getElementById("weather-source-link") as HTMLAnchorElement
   }
 
-  function sourceText(element: UfoRecorderElement): HTMLElement {
+  function sourceText(element: SightingEditorElement): HTMLElement {
     return element.shadowRoot!.getElementById("weather-source-text")!
   }
 
@@ -4564,9 +4585,9 @@ describe("UfoRecorderElement inferred weather", () => {
 /**
  * Testimony names a place, it never gives coordinates — so the Location group leads with the name,
  * and the latitude/longitude below are what searching it produces. See
- * UfoRecorderElement.searchPlace and engine/place/PlaceProvider.ts.
+ * SightingEditorElement.searchPlace and engine/place/PlaceProvider.ts.
  */
-describe("UfoRecorderElement place search", () => {
+describe("SightingEditorElement place search", () => {
   afterEach(() => {
     document.body.innerHTML = ""
     vi.unstubAllGlobals()
@@ -4586,21 +4607,21 @@ describe("UfoRecorderElement place search", () => {
     }
   }
 
-  function mountWith(matches: PlaceMatch[] | PlaceProvider): UfoRecorderElement {
+  function mountWith(matches: PlaceMatch[] | PlaceProvider): SightingEditorElement {
     const element = mount()
     element.placeSearchProvider = Array.isArray(matches) ? placeProvider(matches) : matches
     return element
   }
 
-  function field(element: UfoRecorderElement, id: string): HTMLInputElement | HTMLSelectElement {
+  function field(element: SightingEditorElement, id: string): HTMLInputElement | HTMLSelectElement {
     return element.shadowRoot!.getElementById(id) as HTMLInputElement | HTMLSelectElement
   }
 
-  function statusText(element: UfoRecorderElement): string {
+  function statusText(element: SightingEditorElement): string {
     return element.shadowRoot!.getElementById("place-status-text")!.textContent!
   }
 
-  async function searchFor(element: UfoRecorderElement, name: string): Promise<void> {
+  async function searchFor(element: SightingEditorElement, name: string): Promise<void> {
     const input = field(element, "placeName") as HTMLInputElement
     input.value = name
     input.dispatchEvent(new Event("input"))
@@ -4732,20 +4753,20 @@ describe("UfoRecorderElement place search", () => {
  * `durationSeconds` and `endTime` are two ways of saying one thing, and sightingDurationMs gives
  * the first precedence — so editing "Observation end" on any recording carrying a durationSeconds
  * (which is every published case file) used to do nothing at all, silently. The more recent edit
- * wins now. See UfoRecorderElement.dropDurationOutrankedByDates.
+ * wins now. See SightingEditorElement.dropDurationOutrankedByDates.
  */
-describe("UfoRecorderElement instrument roll", () => {
+describe("SightingEditorElement instrument roll", () => {
   afterEach(() => {
     document.body.innerHTML = ""
   })
 
-  function setField(element: UfoRecorderElement, id: string, value: string): void {
+  function setField(element: SightingEditorElement, id: string, value: string): void {
     const input = element.shadowRoot!.getElementById(id) as HTMLInputElement
     input.value = value
     input.dispatchEvent(new Event("input"))
   }
 
-  function pose(element: UfoRecorderElement): { rollDeg?: number } {
+  function pose(element: SightingEditorElement): { rollDeg?: number } {
     return element.sightingData.witnessTrack!.keyframes[0].pose as { rollDeg?: number }
   }
 
@@ -4770,26 +4791,26 @@ describe("UfoRecorderElement instrument roll", () => {
   })
 })
 
-describe("UfoRecorderElement stated blur", () => {
+describe("SightingEditorElement stated blur", () => {
   afterEach(() => {
     document.body.innerHTML = ""
   })
 
-  function control<T extends HTMLElement>(element: UfoRecorderElement, id: string): T {
+  function control<T extends HTMLElement>(element: SightingEditorElement, id: string): T {
     return element.shadowRoot!.getElementById(id) as T
   }
 
-  function setRange(element: UfoRecorderElement, id: string, value: string): void {
+  function setRange(element: SightingEditorElement, id: string, value: string): void {
     const input = control<HTMLInputElement>(element, id)
     input.value = value
     input.dispatchEvent(new Event("input"))
   }
 
-  function shape(element: UfoRecorderElement): { blur?: number } {
+  function shape(element: SightingEditorElement): { blur?: number } {
     return element.sightingData.timeline.keyframes[0].shapes[0].shape as { blur?: number }
   }
 
-  function bound(element: UfoRecorderElement): string {
+  function bound(element: SightingEditorElement): string {
     return control(element, "blur-bound").textContent ?? ""
   }
 
@@ -4832,7 +4853,7 @@ describe("UfoRecorderElement stated blur", () => {
   it("says why it cannot bound anything, rather than saying nothing", () => {
     const element = mount()
     setRange(element, "blur", "0.4")
-    expect(bound(element)).toBe(ufoRecorderMessages_en.blurBoundNoInstrument)
+    expect(bound(element)).toBe(sightingEditorMessages_en.blurBoundNoInstrument)
   })
 
   it("says nothing at all while no blur is stated", () => {
@@ -4841,28 +4862,28 @@ describe("UfoRecorderElement stated blur", () => {
   })
 })
 
-describe("UfoRecorderElement date picker", () => {
+describe("SightingEditorElement date picker", () => {
   afterEach(() => {
     document.body.innerHTML = ""
   })
 
-  function control<T extends HTMLElement>(element: UfoRecorderElement, id: string): T {
+  function control<T extends HTMLElement>(element: SightingEditorElement, id: string): T {
     return element.shadowRoot!.getElementById(id) as T
   }
 
-  function pick(element: UfoRecorderElement, id: string, value: string): void {
+  function pick(element: SightingEditorElement, id: string, value: string): void {
     const input = control<HTMLInputElement>(element, id)
     input.value = value
     input.dispatchEvent(new Event("change"))
   }
 
-  function choose(element: UfoRecorderElement, id: string, value: string): void {
+  function choose(element: SightingEditorElement, id: string, value: string): void {
     const select = control<HTMLSelectElement>(element, id)
     select.value = value
     select.dispatchEvent(new Event("change"))
   }
 
-  function edtfMode(element: UfoRecorderElement): boolean {
+  function edtfMode(element: SightingEditorElement): boolean {
     return control(element, "edtf-mode").getAttribute("aria-pressed") === "true"
   }
 
@@ -4956,18 +4977,18 @@ describe("UfoRecorderElement date picker", () => {
   })
 })
 
-describe("UfoRecorderElement duration and dates", () => {
+describe("SightingEditorElement duration and dates", () => {
   afterEach(() => {
     document.body.innerHTML = ""
   })
 
-  function setInput(element: UfoRecorderElement, id: string, value: string): void {
+  function setInput(element: SightingEditorElement, id: string, value: string): void {
     const input = element.shadowRoot!.getElementById(id) as HTMLInputElement
     input.value = value
     input.dispatchEvent(new Event("input"))
   }
 
-  function duration(element: UfoRecorderElement): string {
+  function duration(element: SightingEditorElement): string {
     return (element.shadowRoot!.getElementById("durationSeconds") as HTMLInputElement).value
   }
 
@@ -5027,14 +5048,14 @@ describe("UfoRecorderElement duration and dates", () => {
 /**
  * The credits became pickers, sitting where the data is reported — "2 places found according to
  * [Nominatim]" — because which source answered is part of the answer. See
- * engine/source/DataSource.ts and UfoRecorderElement.sourcePicker.
+ * engine/source/DataSource.ts and SightingEditorElement.sourcePicker.
  */
-describe("UfoRecorderElement data sources", () => {
+describe("SightingEditorElement data sources", () => {
   afterEach(() => {
     document.body.innerHTML = ""
   })
 
-  function select(element: UfoRecorderElement, kind: string): HTMLSelectElement {
+  function select(element: SightingEditorElement, kind: string): HTMLSelectElement {
     return element.shadowRoot!.getElementById(`${kind}Source`) as HTMLSelectElement
   }
 
@@ -5104,20 +5125,20 @@ describe("UfoRecorderElement data sources", () => {
 /**
  * An hour of time zone is an hour of Earth's rotation and a different row of the weather record,
  * and both obey what is declared here in silence — so a value that cannot belong to the declared
- * longitude has to say so. See UfoRecorderElement.updateUtcOffsetValidity.
+ * longitude has to say so. See SightingEditorElement.updateUtcOffsetValidity.
  */
-describe("UfoRecorderElement time zone", () => {
+describe("SightingEditorElement time zone", () => {
   afterEach(() => {
     document.body.innerHTML = ""
   })
 
-  function setInput(element: UfoRecorderElement, id: string, value: string): void {
+  function setInput(element: SightingEditorElement, id: string, value: string): void {
     const input = element.shadowRoot!.getElementById(id) as HTMLInputElement
     input.value = value
     input.dispatchEvent(new Event("input"))
   }
 
-  function utcOffset(element: UfoRecorderElement): HTMLInputElement {
+  function utcOffset(element: SightingEditorElement): HTMLInputElement {
     return element.shadowRoot!.getElementById("utcOffsetHours") as HTMLInputElement
   }
 
@@ -5180,10 +5201,10 @@ describe("UfoRecorderElement time zone", () => {
 /**
  * The Location group's two halves state one thing between them, so neither may drift: a name
  * resolved from a search follows coordinates edited by hand, and the altitude is measured from the
- * ground that location actually has. See UfoRecorderElement.schedulePlaceReverse /
+ * ground that location actually has. See SightingEditorElement.schedulePlaceReverse /
  * applyGroundElevation.
  */
-describe("UfoRecorderElement location coherence", () => {
+describe("SightingEditorElement location coherence", () => {
   afterEach(() => {
     document.body.innerHTML = ""
   })
@@ -5191,17 +5212,17 @@ describe("UfoRecorderElement location coherence", () => {
   const VALENSOLE = { name: "Valensole, Alpes-de-Haute-Provence, France", lat: 43.837, lng: 5.983 }
   const RIEZ = { name: "Riez, Alpes-de-Haute-Provence, France", lat: 43.817, lng: 6.093 }
 
-  function setInput(element: UfoRecorderElement, id: string, value: string): void {
+  function setInput(element: SightingEditorElement, id: string, value: string): void {
     const input = element.shadowRoot!.getElementById(id) as HTMLInputElement
     input.value = value
     input.dispatchEvent(new Event("input"))
   }
 
-  function placeName(element: UfoRecorderElement): HTMLInputElement {
+  function placeName(element: SightingEditorElement): HTMLInputElement {
     return element.shadowRoot!.getElementById("placeName") as HTMLInputElement
   }
 
-  async function searchValensole(element: UfoRecorderElement, reverse: () => Promise<PlaceMatch | undefined>): Promise<void> {
+  async function searchValensole(element: SightingEditorElement, reverse: () => Promise<PlaceMatch | undefined>): Promise<void> {
     element.placeSearchProvider = {
       attribution: { text: "© OpenStreetMap", url: "https://osm.org/copyright" },
       search: () => Promise.resolve([VALENSOLE]),
@@ -5274,24 +5295,24 @@ describe("UfoRecorderElement location coherence", () => {
  * A time zone is a rule, and the number it produces depends on the date it is asked about — summer
  * time included, and as it was then. See engine/time/TimeZones.ts.
  */
-describe("UfoRecorderElement time zone picker", () => {
+describe("SightingEditorElement time zone picker", () => {
   afterEach(() => {
     document.body.innerHTML = ""
   })
 
-  function setInput(element: UfoRecorderElement, id: string, value: string): void {
+  function setInput(element: SightingEditorElement, id: string, value: string): void {
     const input = element.shadowRoot!.getElementById(id) as HTMLInputElement
     input.value = value
     input.dispatchEvent(new Event("input"))
   }
 
-  function pickZone(element: UfoRecorderElement, zone: string): void {
+  function pickZone(element: SightingEditorElement, zone: string): void {
     const select = element.shadowRoot!.getElementById("timeZone") as HTMLSelectElement
     select.value = zone
     select.dispatchEvent(new Event("change"))
   }
 
-  function offset(element: UfoRecorderElement): HTMLInputElement {
+  function offset(element: SightingEditorElement): HTMLInputElement {
     return element.shadowRoot!.getElementById("utcOffsetHours") as HTMLInputElement
   }
 
@@ -5367,7 +5388,7 @@ describe("showing the next meteor", () => {
   const SOMEWHERE_IN_THE_SKY = { t: 5000, altitudeDeg: 42, azimuthDeg: 137 }
 
   function armedWithAMeteor(): {
-    element: UfoRecorderElement
+    element: SightingEditorElement
     ufo: { currentTime: number; durationSeconds?: number; playbackState: string; togglePlayPause: () => void }
     toggles: () => number
   } {
@@ -5388,7 +5409,7 @@ describe("showing the next meteor", () => {
     return { element, ufo, toggles: () => toggled }
   }
 
-  function clickShowMeteor(element: UfoRecorderElement): void {
+  function clickShowMeteor(element: SightingEditorElement): void {
     ;(element.shadowRoot!.getElementById("show-meteor") as HTMLButtonElement).click()
   }
 
@@ -5439,7 +5460,7 @@ describe("every weather control actually reaching the scene", () => {
 })
 
 describe("the sky under an observation being edited", () => {
-  function typeInto(element: UfoRecorderElement, id: string, value: string): void {
+  function typeInto(element: SightingEditorElement, id: string, value: string): void {
     const field = element.shadowRoot!.getElementById(id) as HTMLInputElement
     field.value = value
     field.dispatchEvent(new Event("input", { bubbles: true }))
@@ -5473,14 +5494,14 @@ describe("the sky under an observation being edited", () => {
   /** Provence, on the evening of 1 April 1997, which is Hale-Bopp at its own recorded peak — and
    * also the place four of this project's own case files stand in. The offset is typed rather than
    * left to the longitude, because an hour is a different sky. */
-  function overProvence(element: UfoRecorderElement, when: string, offsetHours: string): void {
+  function overProvence(element: SightingEditorElement, when: string, offsetHours: string): void {
     typeInto(element, "obs-time", when)
     typeInto(element, "utcOffsetHours", offsetHours)
     typeInto(element, "lat", "43.8379")
     typeInto(element, "lng", "5.9822")
   }
 
-  function skyLine(element: UfoRecorderElement): string {
+  function skyLine(element: SightingEditorElement): string {
     return element.shadowRoot!.getElementById("sky-candidates")!.textContent ?? ""
   }
 

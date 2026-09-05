@@ -7,7 +7,7 @@ registerSighting()
 // SightingElement nests a <rr0-scene> (see its own class doc comment), so mounting it also
 // constructs a SceneRenderer — which jsdom's <canvas> can't back with a real WebGL context (no
 // native `canvas` package here, same reason as the 2D mock below). Stubbed out entirely, same as
-// test/component/UfoRecorderElement.test.ts's identical mock.
+// test/component/SightingEditorElement.test.ts's identical mock.
 vi.mock("../../src/render3d/SceneRenderer.js", () => ({
   SceneRenderer: class {
     resize(): void {}
@@ -81,7 +81,7 @@ beforeAll(() => {
   // fire-and-forget fetch resolves instead of rejecting whenever a test's own stubFetch() (below)
   // isn't active yet/covers other URLs. Plain assignment, not vi.stubGlobal, so per-test
   // vi.stubGlobal("fetch", ...) calls (via stubFetch) restore back to *this* on their own
-  // afterEach's vi.unstubAllGlobals(), same reasoning as UfoRecorderElement.test.ts's identical stub.
+  // afterEach's vi.unstubAllGlobals(), same reasoning as SightingEditorElement.test.ts's identical stub.
   globalThis.fetch = vi.fn().mockResolvedValue({ arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)) }) as typeof fetch
   // jsdom has no ResizeObserver — SceneElement.connectedCallback() (also nested now) uses one to
   // track its canvas size.
@@ -541,8 +541,8 @@ describe("SightingElement embed markup", () => {
     editRadio.dispatchEvent(new Event("change"))
     const markup = (shadow.querySelector("#embed-markup") as HTMLTextAreaElement).value
 
-    expect(markup).toContain("<rr0-ufo-recorder src=\"http://localhost:3000/john.json\"></rr0-ufo-recorder>")
-    expect(markup).toContain("rr0-ufo-recorder.mjs")
+    expect(markup).toContain("<rr0-sighting-editor src=\"http://localhost:3000/john.json\"></rr0-sighting-editor>")
+    expect(markup).toContain("rr0-sighting-editor.mjs")
   })
 })
 

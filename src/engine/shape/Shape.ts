@@ -30,7 +30,7 @@ export interface BaseShape {
    * about and blurring it from a distance would assert the answer. This runs the other way, and is
    * worth more: a stated blur, read back through the instrument's own thin-lens geometry, BOUNDS
    * that distance — an object photographed as a disc through a lens focused at infinity was near.
-   * See DepthOfField and UfoRecorderElement.refreshBlurDistanceBound.
+   * See DepthOfField and SightingEditorElement.refreshBlurDistanceBound.
    *
    * Distinct from haloScale, which they will be mistaken for. A halo is light AROUND the shape, a
    * bright fringe outside a hard edge; this is the edge itself losing its position.

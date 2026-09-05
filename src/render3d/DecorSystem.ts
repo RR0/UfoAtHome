@@ -433,7 +433,7 @@ function buildVehicle(lit: boolean, windows: DecorObject["windows"], witnessSide
     headlight.position.set(sideX, 0.7, -2.1)
   }
   // Windshield/rear window sit on the cabin box's own front/behind faces — never openable for a
-  // vehicle (isWindowOpenable in Decor.ts returns false there, so the recorder UI clamps their
+  // vehicle (isWindowOpenable in Decor.ts returns false there, so the editor UI clamps their
   // opacity to FIXED_WINDOW_MIN_OPACITY_PERCENT); the 4 door windows go all the way to 0 —
   // windowOpacityPercent() itself applies with no special-casing either way.
   addWindowPane(group, VEHICLE_WINDSHIELD_WIDTH, VEHICLE_WINDOW_HEIGHT, WINDOW_THICKNESS, 0, VEHICLE_CABIN_Y, -VEHICLE_CABIN_HALF_DEPTH - WINDOW_MARGIN, windowOpacityPercent(windows, "front"))

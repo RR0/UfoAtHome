@@ -100,7 +100,7 @@ export class SizeEstimate {
     }
   }
 
-  /** Starts over — for a recorder that has just loaded a different recording, whose crossings have
+  /** Starts over — for an editor that has just loaded a different recording, whose crossings have
    * nothing to do with the previous one's. */
   clear(): void {
     this.lowerM = undefined

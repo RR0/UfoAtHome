@@ -24,7 +24,7 @@ import type { UfoMessages } from "./messages/UfoMessages.js"
  * appearance-editing UI. This is the lightweight bundle meant for embedding
  * in real site pages (e.g. an rr0.org case dossier): a page that only needs
  * to *play* a sighting shouldn't have to download the Recorder engine,
- * SamplingClock, or appearance toolbar — see UfoRecorderElement, which
+ * SamplingClock, or appearance toolbar — see SightingEditorElement, which
  * composes this element (as a nested `<rr0-ufo>` in its own shadow DOM) for
  * the authoring/editing experience instead of duplicating the canvas/
  * playback machinery. SceneElement (`<rr0-scene>`) composes it too, for the
@@ -32,7 +32,7 @@ import type { UfoMessages } from "./messages/UfoMessages.js"
  *
  * All wiring happens in the constructor rather than connectedCallback: this
  * element only needs its own shadow DOM to exist (not to be connected to a
- * live document), which is exactly what lets UfoRecorderElement/SceneElement
+ * live document), which is exactly what lets SightingEditorElement/SceneElement
  * rely on `document.createElement(UFO_ELEMENT_NAME)` — synchronous
  * construction for an already-defined custom element — to get a
  * fully-usable instance (`canvasElement`/`renderer`/`sighting` all ready)
@@ -79,12 +79,12 @@ export class UfoElement extends HTMLElement {
   /** Sources a composing SceneElement has determined sit directly behind a decor object right
    * now (see SceneRenderer.isScreenPointOccluded) — skipped entirely on the next paint, not
    * faded, matching how a real object disappearing behind a building looks. Stays empty (no
-   * effect) for a bare `<rr0-ufo>`/`<rr0-ufo-recorder>` embed with no 3D decor to occlude
+   * effect) for a bare `<rr0-ufo>`/`<rr0-sighting-editor>` embed with no 3D decor to occlude
    * against. */
   private occludedSourceIds: ReadonlySet<string> = EMPTY_SELECTION
 
   /** Set to false by composing elements that need the canvas's own click for something else
-   * instead of toggling playback — see UfoRecorderElement, which uses pointerdown/pointermove on
+   * instead of toggling playback — see SightingEditorElement, which uses pointerdown/pointermove on
    * this same canvas to place shapes while recording. */
   enableClickToPlay = true
   /** The element the fullscreen button requests fullscreen on — defaults to this component's own
@@ -120,7 +120,7 @@ export class UfoElement extends HTMLElement {
   /** Identifies whatever VISIBLE shape (if any) is under the pointer and shows/moves/hides a text
    * label next to it, but only when that shape actually has a title — an untitled shape's raw
    * sourceId (e.g. "ufo-2") is an internal authoring detail, not something an end-user-facing
-   * tooltip should ever surface (contrast UfoRecorderElement's own shapeLabel(), which deliberately
+   * tooltip should ever surface (contrast SightingEditorElement's own shapeLabel(), which deliberately
    * does fall back to the sourceId for its own source-picker dropdown). Mirrors SceneElement's
    * near-identical hoverTooltip/handlePointerMove for celestial bodies/decor. Excludes
    * occludedSourceIds from the hit test (see Timeline.hitTest's own doc comment) — a shape hidden
@@ -191,7 +191,7 @@ export class UfoElement extends HTMLElement {
     })
     this.canvas.addEventListener("dblclick", event => {
       // Gated on the same flag as the click above, and for the same reason: where a composing
-      // element has taken the canvas over for something else (the recorder edits shapes on it),
+      // element has taken the canvas over for something else (the editor edits shapes on it),
       // this is one of its gestures and not ours.
       if (!this.enableClickToPlay) return
       // Selecting the surrounding page is never what a double-click on a picture meant.
@@ -259,7 +259,7 @@ export class UfoElement extends HTMLElement {
   }
 
   /**
-   * The live Sighting/Timeline, exposed so UfoRecorderElement/SceneElement
+   * The live Sighting/Timeline, exposed so SightingEditorElement/SceneElement
    * (which compose this element) can add keyframes to it directly as it
    * records, or read its time/place for lighting.
    */
@@ -268,7 +268,7 @@ export class UfoElement extends HTMLElement {
   }
 
   /**
-   * Plays a sound right now, outside playback — how UfoRecorderElement lets a witness HEAR the
+   * Plays a sound right now, outside playback — how SightingEditorElement lets a witness HEAR the
    * sound they are describing while they tune its kind/loudness/pitch. Tuning a synthesized sound
    * blind would be like drawing a shape with the canvas covered.
    *
@@ -279,7 +279,7 @@ export class UfoElement extends HTMLElement {
    * detail: onFrame silences any sound whenever playback isn't running, and an edit on a real case
    * page triggers a repaint within a frame or two — so a preview that didn't outlive them was
    * audible for about a tenth of a second, exactly where it was needed most. How long one lasts is
-   * the caller's own business (see the recorder's timer).
+   * the caller's own business (see the editor's timer).
    */
   previewSound(sound: SightingSound): void {
     this.soundPreview = sound
@@ -293,7 +293,7 @@ export class UfoElement extends HTMLElement {
     this.sightingAudio.silence()
   }
 
-  /** Exposed so UfoRecorderElement can paint a live drag preview on the same canvas. */
+  /** Exposed so SightingEditorElement can paint a live drag preview on the same canvas. */
   get canvasElement(): HTMLCanvasElement {
     return this.canvas
   }
@@ -302,13 +302,13 @@ export class UfoElement extends HTMLElement {
     return this.canvasRenderer
   }
 
-  /** Exposed so UfoRecorderElement can write an appearance edit at the exact instant the
+  /** Exposed so SightingEditorElement can write an appearance edit at the exact instant the
    * (already-visible) seek bar is currently scrubbed to. */
   get currentTime(): number {
     return this.player.time
   }
 
-  /** Exposed so a composing element with its own external scrub control (see UfoRecorderElement,
+  /** Exposed so a composing element with its own external scrub control (see SightingEditorElement,
    * which hides this element's own overlay toolbar and drives an external one instead) can seek
    * without reaching into the private `player`. */
   set currentTime(t: number) {
@@ -353,7 +353,7 @@ export class UfoElement extends HTMLElement {
 
   /** The already-computed, human-readable elapsed-position/total-duration text this element's own
    * (possibly hidden, see showToolbar) time labels show — exposed so a composing element's
-   * external playback row (see UfoRecorderElement) can display the same text instead of re-
+   * external playback row (see SightingEditorElement) can display the same text instead of re-
    * deriving it. This is NOT just a convenience: `currentTime`/`seekableDuration` are `Player`'s
    * own TIMELINE-position units, which advance at `playbackRate`× real wall-clock speed — that
    * rate is exactly `timelineDuration / realDurationMs` (see updateTimeLabels), so it's almost
@@ -385,8 +385,8 @@ export class UfoElement extends HTMLElement {
   /**
    * Swaps the counters between the time of day and time elapsed.
    *
-   * Public because the recorder shows the same two values in its own toolbar (see
-   * UfoRecorderElement.updateTimeLabels) and its counters must switch the same way — one piece of
+   * Public because the editor shows the same two values in its own toolbar (see
+   * SightingEditorElement.updateTimeLabels) and its counters must switch the same way — one piece of
    * state, read by both, rather than each keeping its own idea of what is being displayed.
    */
   toggleTimeDisplay(): void {
@@ -403,7 +403,7 @@ export class UfoElement extends HTMLElement {
   }
 
   /** Hides this element's own overlaid play/seek/loop bar — set by a composing element that
-   * drives an external playback UI of its own instead (see UfoRecorderElement, which needs the
+   * drives an external playback UI of its own instead (see SightingEditorElement, which needs the
    * bottom of the canvas free for dragging/resizing shapes; the overlay's seek `<input>` is
    * `flex: 1` and would otherwise intercept nearly the full width of that area). Only `.toolbar`
    * is affected — the fullscreen button (top-right corner) is unrelated and stays as-is. */
@@ -411,7 +411,7 @@ export class UfoElement extends HTMLElement {
     this.toolbar.classList.toggle("hidden", !show)
   }
 
-  /** Exposed so UfoRecorderElement can avoid editing/resyncing appearance while actively
+  /** Exposed so SightingEditorElement can avoid editing/resyncing appearance while actively
    * playing, when the playhead is a moving target rather than a specific instant. */
   get playbackState(): PlaybackState {
     return this.player.playbackState
@@ -423,7 +423,7 @@ export class UfoElement extends HTMLElement {
 
   /** The sighting's reported real-world duration in seconds (event.durationSeconds) — takes
    * precedence over endTime/time when computing playback speed (see sightingDurationMs).
-   * Exposed so UfoRecorderElement can offer a duration input in its own editor UI, patching
+   * Exposed so SightingEditorElement can offer a duration input in its own editor UI, patching
    * just this field rather than reconstructing the whole Sighting/Timeline via sightingData. */
   get durationSeconds(): number | undefined {
     return this.currentSighting.event.durationSeconds
@@ -442,7 +442,7 @@ export class UfoElement extends HTMLElement {
     this.updatePlayPauseButton()
   }
 
-  /** Exposed so UfoRecorderElement can visually flag the shape(s) currently selected in its own
+  /** Exposed so SightingEditorElement can visually flag the shape(s) currently selected in its own
    * editor UI, reusing CanvasRenderer's existing selection-handle rendering — purely a
    * paint-time hint, never persisted (Shape.selected is never written by any Timeline/JSON
    * code path, so this can't leak into a saved sighting). A single selected id gets the same
@@ -483,12 +483,12 @@ export class UfoElement extends HTMLElement {
   /**
    * Re-reads the timeline's duration into the seek slider and repaints the
    * current frame — call after externally mutating `sighting.timeline`
-   * (e.g. UfoRecorderElement adding keyframes while recording).
+   * (e.g. SightingEditorElement adding keyframes while recording).
    */
   refresh(): void {
     this.applyFrameFormat()
     // Re-derives the real start/duration too: editing the observation's own start time (an EDTF
-    // field in the recorder) mutates event.time in place, and the clock the player shows is built
+    // field in the editor) mutates event.time in place, and the clock the player shows is built
     // from a cached copy of it — without this, changing "Observation start" left the seek bar's
     // own labels reading the previous time until the whole recording was reloaded.
     this.updateTimeLabels()
@@ -630,7 +630,7 @@ export class UfoElement extends HTMLElement {
 
   /** Converts a pointer event's CSS-pixel position into the canvas's fixed internal 640x360
    * drawing space (where Shape.bounds/Timeline.hitTest operate), correcting for the canvas being
-   * displayed responsively at a different CSS size. Mirrors UfoRecorderElement's own identical
+   * displayed responsively at a different CSS size. Mirrors SightingEditorElement's own identical
    * (but private-to-that-class) canvasPointFromEvent — this is the only other call site. */
   private canvasPointFromEvent(event: PointerEvent): { x: number; y: number } | undefined {
     const rect = this.canvas.getBoundingClientRect()
@@ -695,7 +695,7 @@ export class UfoElement extends HTMLElement {
     // safe to read playbackState here since Player.play() flips it before painting the last frame.
     this.updatePlayPauseButton()
     // Mirrors <video>'s own timeupdate event/semantics — fires on every playback tick AND every
-    // seek, since both funnel through this one onFrame sink. Lets UfoRecorderElement know when
+    // seek, since both funnel through this one onFrame sink. Lets SightingEditorElement know when
     // to resync its appearance toolbar to whatever's at the current playhead.
     this.dispatchEvent(new CustomEvent("timeupdate", { detail: { time: t } }))
   }
@@ -715,7 +715,7 @@ export class UfoElement extends HTMLElement {
   }
 
   /** Public (not just used by this element's own overlay button) so a composing element's
-   * external Play/Pause control — see UfoRecorderElement/showToolbar — can trigger exactly this
+   * external Play/Pause control — see SightingEditorElement/showToolbar — can trigger exactly this
    * same guarded behavior instead of reimplementing it. */
   togglePlayPause(): void {
     // Nothing to play — the button is already disabled for this case, but the canvas's own

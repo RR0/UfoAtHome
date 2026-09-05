@@ -86,7 +86,7 @@ canvas {
   border: var(--ufo-canvas-border, 1px solid #333);
   box-sizing: border-box;
 }
-/* Hover feedback for the editor (<rr0-ufo-recorder>): what the pointer is over is drawn INSIDE
+/* Hover feedback for the editor (<rr0-sighting-editor>): what the pointer is over is drawn INSIDE
    the canvas, so only script can hit-test it — but the appearance stays here, in CSS. The
    component only ever states what is under the pointer (data-cursor="move", "resize-ns", ...);
    which actual cursor that means is this stylesheet's business alone. Plain <rr0-ufo> playback
@@ -154,7 +154,7 @@ canvas[data-cursor="rotate"] {
 }
 /* A compound class selector (0,2,0) so this reliably beats the plain .toolbar rule above (0,1,0)
    regardless of declaration order — set via UfoElement's showToolbar setter by a composing
-   element (see UfoRecorderElement) that drives its own external playback controls instead, since
+   element (see SightingEditorElement) that drives its own external playback controls instead, since
    this overlay's flex:1 seek bar would otherwise intercept nearly the full width of the canvas's
    bottom edge, blocking shape drag/resize there. */
 .toolbar.hidden {

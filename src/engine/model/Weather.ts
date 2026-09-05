@@ -106,7 +106,7 @@ export const DEFAULT_WEATHER: Weather = {
  * Where a recording's weather values came from, when they weren't stated by the witness but
  * looked up from a real meteorological record for the observation's own date/time and place (see
  * engine/weather/WeatherProvider.ts). Present on a Sighting means every weatherTrack keyframe was
- * produced by that lookup — the recorder shows them read-only on that basis, since a reanalysis
+ * produced by that lookup — the editor shows them read-only on that basis, since a reanalysis
  * value is a measurement to report, not a dial to tune. Absent means the opposite and the stronger
  * claim: the conditions are the WITNESS's, declared, and nothing may overwrite them — the same
  * "declared, not deduced" rule BaseShape.behindCloud follows.

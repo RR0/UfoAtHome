@@ -93,7 +93,7 @@ const COMET_KEY_PREFIX = "comet:"
  * doc comment on why a raw sourceId is too internal to surface) is still genuinely useful here: a
  * building/tree/streetlight/vehicle's kind is meaningful, human-facing information on its own,
  * not an authoring-only implementation detail. decor.title wins when given (same precedence as
- * UfoRecorderElement's own decorLabel, which additionally numbers same-kind objects for its
+ * SightingEditorElement's own decorLabel, which additionally numbers same-kind objects for its
  * editing dropdown — this tooltip has no such numbering need, standalone `<rr0-scene>` has no
  * dropdown to number against anyway). */
 const DECOR_KIND_NAMES: Record<DecorKind, { en: string; fr: string }> = {
@@ -157,7 +157,7 @@ export class SceneElement extends HTMLElement {
   private readonly stageElement: HTMLElement
   private readonly frameElement: HTMLElement
   private readonly sceneCanvas: HTMLCanvasElement
-  /** Exposed (not private) so a composing wrapper — e.g. UfoRecorderElement, which nests a
+  /** Exposed (not private) so a composing wrapper — e.g. SightingEditorElement, which nests a
    * `<rr0-scene>` instead of a bare `<rr0-ufo>` so the sky renders live behind the shape being
    * authored — can reach through to the same UfoElement instance this element already drives,
    * rather than needing a separate sightingData-relay to keep two copies in sync. Same
@@ -172,8 +172,8 @@ export class SceneElement extends HTMLElement {
   private readonly sizeEstimates = new Map<string, SizeEstimate>()
   /** Which Sighting the estimates above were accumulated against. Tracked by identity rather than
    * cleared from this element's own `sightingData` setter, because that setter is not the only way
-   * in: UfoRecorderElement composes this element but delegates its own sightingData straight to the
-   * nested `<rr0-ufo>`, so a recording loaded through the recorder never passes through here at
+   * in: SightingEditorElement composes this element but delegates its own sightingData straight to the
+   * nested `<rr0-ufo>`, so a recording loaded through the editor never passes through here at
    * all. Keying on the instance catches every path — loading a file replaces the Sighting (see
    * UfoElement's own setter), and a stale estimate carried across recordings is worse than none:
    * bounds only ever tighten, so one wrong crossing from a previous case would poison the next. */
@@ -182,7 +182,7 @@ export class SceneElement extends HTMLElement {
    * than every tick — the schedule is deterministic (see MeteorFall) and must not be re-drawn
    * underneath a paused scene or a long exposure. */
   /** What the standing meteor schedule was built from — see meteorInputsOf. A string, never the
-   * Sighting itself: the recorder edits ONE instance in place. */
+   * Sighting itself: the editor edits ONE instance in place. */
   private meteorScheduleFor?: string
   private lastTimeMs = 0
   private starCatalog?: StarCatalog
@@ -312,7 +312,7 @@ export class SceneElement extends HTMLElement {
   /** Unlocks weather audio on the very first interaction with the scene — needed even for a
    * read-only `<rr0-scene>` embed with no editing UI at all (e.g. a published case page whose
    * sighting.json already sets rain/wind), which has no "weather control" to hang resume() off of
-   * the way UfoRecorderElement's own updateWeather() does. Re-applies the current weather right
+   * the way SightingEditorElement's own updateWeather() does. Re-applies the current weather right
    * after resuming, since any setWeather() call made *before* this (e.g. from the sightingData
    * setter at load) was itself a no-op audio-wise while the context didn't exist yet — otherwise a
    * scene loaded with rain already set would render visible rain but never actually start the
@@ -348,7 +348,7 @@ export class SceneElement extends HTMLElement {
     // still going on would be the reader's own room. It says nothing about an author who is at
     // that moment STATING the weather — for them a frozen sky is a preview of nothing, and there
     // is often no way out of it either, since a recording with no duration yet cannot be played at
-    // all. So the recorder asks for the scene to keep moving (see animateWhilePaused), and the
+    // all. So the editor asks for the scene to keep moving (see animateWhilePaused), and the
     // sound follows the picture rather than diverging from it: what turned this up was hearing
     // rain fall over a still image.
     const running = this.ufoElement.playbackState === "playing" || this.animateWhilePaused
@@ -377,7 +377,7 @@ export class SceneElement extends HTMLElement {
     this.hoverTooltip = this.shadow.getElementById("hover-tooltip")!
 
     // Created imperatively rather than left inline in the template markup — see
-    // UfoRecorderElement's constructor for why (an inline tag parsed from
+    // SightingEditorElement's constructor for why (an inline tag parsed from
     // template.content.cloneNode(true) isn't upgraded to its class instance yet at this point).
     this.ufoElement = document.createElement(UFO_ELEMENT_NAME) as UfoElement
     this.ufoElement.classList.add("ufo-overlay")
@@ -439,14 +439,14 @@ export class SceneElement extends HTMLElement {
   }
 
   /** Forces the compass labels visible independent of pointer hover — see
-   * SceneRenderer.setCompassForced's own doc comment. `UfoRecorderElement` calls this from the
+   * SceneRenderer.setCompassForced's own doc comment. `SightingEditorElement` calls this from the
    * heading input's own focus/blur, a direct method rather than another observed attribute since
    * it's meant to change far more often (every focus/blur) than `show-compass`'s one-time setup. */
   setCompassForced(forced: boolean): void {
     this.sceneRenderer.setCompassForced(forced)
   }
 
-  /** Passthrough to SceneRenderer.setIndoorLook — see its own doc comment. `UfoRecorderElement`
+  /** Passthrough to SceneRenderer.setIndoorLook — see its own doc comment. `SightingEditorElement`
    * calls this from its camera-drag handling instead of updateObserver()/witnessTrack whenever
    * the witness is currently inside a decor object. */
   setIndoorLook(yawDeg: number, pitchDeg: number): void {
@@ -467,14 +467,14 @@ export class SceneElement extends HTMLElement {
 
   /** Finds which decor object (if any) sits under normalized device coordinates — a thin
    * passthrough to SceneRenderer.pickDecorAt, same "expose one method, not the whole renderer"
-   * convention as setWeather/currentTerrainAttribution above. Used by UfoRecorderElement's own
+   * convention as setWeather/currentTerrainAttribution above. Used by SightingEditorElement's own
    * right-click handler (see its onContextMenu) to offer "view this witness's testimony". */
   pickDecorAt(ndcX: number, ndcY: number): string | undefined {
     return this.sceneRenderer.pickDecorAt(ndcX, ndcY)
   }
 
   /** Unlocks weather audio — see WeatherAudio.resume's own doc comment on why this needs a real
-   * user gesture. UfoRecorderElement calls this from its own weather toolbar's first interaction
+   * user gesture. SightingEditorElement calls this from its own weather toolbar's first interaction
    * (handleFirstInteraction covers the other case: a read-only embed with no editing UI at all). */
   resumeWeatherAudio(): void {
     this.weatherAudio.resume()
@@ -522,7 +522,7 @@ export class SceneElement extends HTMLElement {
    * and that emptiness is honest — it is sky the device never recorded.
    *
    * Public because a composing editor changes the instrument from outside (see
-   * UfoRecorderElement's instrument picker) and the frame has to follow at that moment; everything
+   * SightingEditorElement's instrument picker) and the frame has to follow at that moment; everything
    * else that changes it goes through this element's own load path.
    */
   applyFrameFormat(): void {
@@ -558,7 +558,7 @@ export class SceneElement extends HTMLElement {
    * itself advance during playback). Falls back to a neutral DEFAULT_ASTRONOMY sky only when
    * there's nothing at all to compute from. Partial information renders a "good enough" preview
    * rather than nothing: a known time but no real lat/lng yet (e.g. mid-authoring in
-   * `<rr0-ufo-recorder>`, where the witness's heading/time might be set before their location is)
+   * `<rr0-sighting-editor>`, where the witness's heading/time might be set before their location is)
    * still renders real astronomy, using DEFAULT_OBSERVER_POSE's lat/lng (0,0) purely as a
    * *rendering* fallback — this is never written back into the sighting's own data, it just means
    * a date/time or heading edit gives live visual feedback before a location is entered. The
@@ -715,7 +715,7 @@ export class SceneElement extends HTMLElement {
    *
    * Nothing is filtered on here — not the horizon, not the twilight. Whether the comet was
    * observable is the renderer's own visibility rule, applied to every body in this sky alike, and
-   * the readout in the recorder says so in words.
+   * the readout in the editor says so in words.
    */
   private cometAt(date: Date, observer: ObserverGeo): SceneComet | undefined {
     const appearance = Comets.brightestAt(date, observer)
@@ -813,7 +813,7 @@ export class SceneElement extends HTMLElement {
   /**
    * Rebuilds the fall whenever anything it was computed FROM has moved.
    *
-   * This used to compare the Sighting by identity, which quietly meant "never": the recorder edits
+   * This used to compare the Sighting by identity, which quietly meant "never": the editor edits
    * one instance in place, so typing a date, locating a place or setting a duration left the very
    * first schedule standing — and the first one is computed before any of those exist, so it is
    * empty. The readout, which recomputes from the shower tables directly, would then announce a

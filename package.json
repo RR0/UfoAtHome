@@ -2,8 +2,8 @@
   "name": "@rr0/ufoathome",
   "type": "module",
   "version": "0.41.1",
-  "description": "UFO@home — record and replay a UFO sighting's shape, movement and appearance",
-  "author": "Jérôme Beau <rr0@rr0.org> (https://rr0.org)",
+  "description": "UFO@home \u2014 record and replay a UFO sighting's shape, movement and appearance",
+  "author": "J\u00e9r\u00f4me Beau <rr0@rr0.org> (https://rr0.org)",
   "license": "MIT",
   "homepage": "https://github.com/RR0/UfoAtHome#readme",
   "repository": {
@@ -15,30 +15,30 @@
   },
   "exports": {
     "./ufo": "./dist-embed-ufo/rr0-ufo.mjs",
-    "./recorder": "./dist-embed/rr0-ufo-recorder.mjs",
     "./scene": "./dist-embed-scene/rr0-scene.mjs",
     "./sighting": "./dist-embed-sighting/rr0-sighting.mjs",
-    "./eyewitness": "./dist-embed-sighting/rr0-sighting.mjs"
+    "./editor": "./dist-embed-sighting-editor/rr0-sighting-editor.mjs",
+    "./eyewitness": "./dist-embed-sighting/rr0-sighting.mjs",
+    "./recorder": "./dist-embed-sighting-editor/rr0-sighting-editor.mjs"
   },
   "files": [
-    "dist-embed",
     "dist-embed-ufo",
     "dist-embed-scene",
-    "dist-embed-sighting"
+    "dist-embed-sighting",
+    "dist-embed-sighting-editor"
   ],
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
-    "build:embed": "tsc --noEmit && vite build --config vite.embed.config.ts",
     "build:embed-ufo": "tsc --noEmit && vite build --config vite.embed-ufo.config.ts",
     "build:embed-scene": "tsc --noEmit && vite build --config vite.embed-scene.config.ts",
     "build:embed-sighting": "tsc --noEmit && vite build --config vite.embed-sighting.config.ts",
-    "build:all": "npm run build && npm run build:embed && npm run build:embed-ufo && npm run build:embed-scene && npm run build:embed-sighting",
-    "build:site": "npm run build:schema && npm run build:embed && npm run build:embed-ufo && npm run build:embed-scene && npm run build:embed-sighting && vite build --config vite.site.config.ts && tsx site/build.ts",
+    "build:all": "npm run build && npm run build:embed-sighting-editor && npm run build:embed-ufo && npm run build:embed-scene && npm run build:embed-sighting",
+    "build:site": "npm run build:schema && npm run build:embed-sighting-editor && npm run build:embed-ufo && npm run build:embed-scene && npm run build:embed-sighting && vite build --config vite.site.config.ts && tsx site/build.ts",
     "site": "tsx site/build.ts",
     "site:watch": "node --watch-path=./site --watch-path=./public/demo-data --import tsx site/build.ts",
     "site:serve": "vite preview --outDir dist-site --port 5181 --strictPort",
-    "prepublishOnly": "npm run build:embed && npm run build:embed-ufo && npm run build:embed-scene && npm run build:embed-sighting && npm test",
+    "prepublishOnly": "npm run build:embed-sighting-editor && npm run build:embed-ufo && npm run build:embed-scene && npm run build:embed-sighting && npm test",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -46,7 +46,8 @@
     "build:comets": "tsx scripts/build-comet-catalog.ts",
     "build:satellites": "tsx scripts/build-satellite-catalog.ts",
     "build:schema": "tsx scripts/build-sighting-schema.ts",
-    "pretest": "npm run build:schema"
+    "pretest": "npm run build:schema",
+    "build:embed-sighting-editor": "tsc --noEmit && vite build --config vite.embed-sighting-editor.config.ts"
   },
   "dependencies": {
     "@rr0/data": "^0.3.41",

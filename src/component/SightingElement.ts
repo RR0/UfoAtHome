@@ -34,7 +34,7 @@ const APP_EDITOR_URL = `${APP_HOME_URL}/editor/`
 /**
  * Vanilla Web Component displaying one or more witnesses' recordings of the same sighting (a
  * case can have more than one `sighting.json`, one per witness) — composes a nested `<rr0-scene>`
- * for the actual canvas/playback instead of duplicating it, the same way `<rr0-ufo-recorder>`
+ * for the actual canvas/playback instead of duplicating it, the same way `<rr0-sighting-editor>`
  * does. This is the standard way to display *any* real sighting, whether it has one witness or
  * several: a witness recording is always a real sighting (real date/time/location), so it always
  * needs the real sky/ground backdrop `<rr0-scene>` provides — a bare `<rr0-ufo>` (just the
@@ -120,7 +120,7 @@ export class SightingElement extends HTMLElement {
     this.shadow.appendChild(template.content.cloneNode(true))
 
     // Created imperatively rather than left inline in the template markup — see
-    // UfoRecorderElement's constructor for why (an inline tag parsed from
+    // SightingEditorElement's constructor for why (an inline tag parsed from
     // template.content.cloneNode(true) isn't upgraded to its class instance yet at this point).
     this.sceneElement = document.createElement(SCENE_ELEMENT_NAME) as SceneElement
     this.shadow.getElementById("ufo-slot")!.replaceWith(this.sceneElement)
@@ -340,7 +340,7 @@ export class SightingElement extends HTMLElement {
    * the element and the element itself, both with absolute URLs, so the snippet is self-contained
    * rather than something the reader has to work out. Replay embeds `<rr0-sighting>` (this very
    * element, so what they paste is what they are looking at); Editor embeds
-   * `<rr0-ufo-recorder>`, which takes the same `src`.
+   * `<rr0-sighting-editor>`, which takes the same `src`.
    *
    * The script URL is derived from where THIS bundle was itself loaded from (import.meta.url),
    * not hardcoded: the four bundles are published side by side, so the sibling's name is enough,
@@ -348,7 +348,7 @@ export class SightingElement extends HTMLElement {
    * instead of silently sending readers to production.
    */
   private embedMarkupFor(kind: "replay" | "edit"): string {
-    const tag = kind === "edit" ? "rr0-ufo-recorder" : "rr0-sighting"
+    const tag = kind === "edit" ? "rr0-sighting-editor" : "rr0-sighting"
     const script = new URL(`${tag}.mjs`, import.meta.url).href
     const src = this.currentSrc ? new URL(this.currentSrc, location.href).href : ""
     return `<script type="module" src="${script}"></script>\n<${tag} src="${src}"></${tag}>`

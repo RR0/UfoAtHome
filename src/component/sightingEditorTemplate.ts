@@ -3,7 +3,7 @@ export const html = `
      <summary> rows down the left edge. Seven collapsed rows cost 259px of pure chrome before a
      single field is shown, which is most of a phone's screen spent on nothing; the same seven
      handles side by side cost one line, sometimes two when the viewport is narrow. Only one panel
-     opens at a time (see UfoRecorderElement.toggleGroup) — with all of them open the form stood
+     opens at a time (see SightingEditorElement.toggleGroup) — with all of them open the form stood
      1210px tall and pushed the render, the whole point of editing here, off the bottom of the
      screen. What's set across ALL groups stays legible without opening any of them: see the
      parameter summary under the render. -->
@@ -78,7 +78,7 @@ export const html = `
     <!-- Above SEA LEVEL, not above the ground: "0 m" is simply false for a witness in the Alps, and
          an editor that offers it invites a recording that says so. The ground's own height at the
          location becomes the field's floor and its default the moment the location is known — see
-         UfoRecorderElement.applyGroundElevation. -->
+         SightingEditorElement.applyGroundElevation. -->
     <label><span id="label-elevation">Altitude</span>
       <input id="elevation" type="number" step="1" value="0"/> m</label>
     <output id="ground-elevation" class="ground-elevation" for="lat lng"></output>
@@ -95,7 +95,7 @@ export const html = `
 <section class="group-panel" id="group-decor" aria-labelledby="label-decor-group" hidden>
   <div class="toolbar">
     <!-- This whole block (picker through Occupied floor) is hidden entirely — not just
-         disabled — while there's no decor at all (see UfoRecorderElement.syncDecorVisibility):
+         disabled — while there's no decor at all (see SightingEditorElement.syncDecorVisibility):
          an empty recording shows nothing here but the Add controls below. Shown first, above
          the Add row, once at least one decor object exists — see that row's own comment for why
          it's forced onto its own line after this block instead of just flowing after it. -->
@@ -123,7 +123,7 @@ export const html = `
     <label><span id="label-decor-window-right">Right</span> <input id="decorWindowRight" type="number" min="0" max="100" step="5" placeholder="none" autocomplete="off"/> %</label>
     <!-- Vehicle only (see DecorSide's own doc comment: a car's left/right side has 2 windows
          each, front-door and rear-door, not 1) — shown instead of the plain Left/Right rows
-         above for that kind, hidden otherwise (see UfoRecorderElement.syncDecorVisibility). -->
+         above for that kind, hidden otherwise (see SightingEditorElement.syncDecorVisibility). -->
     <label><span id="label-decor-window-front-left">Front-left</span> <input id="decorWindowFrontLeft" type="number" min="0" max="100" step="5" placeholder="none" autocomplete="off"/> %</label>
     <label><span id="label-decor-window-front-right">Front-right</span> <input id="decorWindowFrontRight" type="number" min="0" max="100" step="5" placeholder="none" autocomplete="off"/> %</label>
     <label><span id="label-decor-window-behind-left">Behind-left</span> <input id="decorWindowBehindLeft" type="number" min="0" max="100" step="5" placeholder="none" autocomplete="off"/> %</label>
@@ -160,7 +160,7 @@ export const html = `
         <!-- Other witness is added from its own dedicated button instead (Witness group's own
              "Add witness" — nothing else to configure beforehand) — hidden (not removed) so
              decorLabel() can still look up its translated kind name by id for the fallback
-             "{kind} {n}" label, see UfoRecorderElement.decorLabel. -->
+             "{kind} {n}" label, see SightingEditorElement.decorLabel. -->
         <option id="option-decor-witness" value="witness" hidden>Other witness</option>
       </select>
     </div>
@@ -210,7 +210,7 @@ export const html = `
   <div class="toolbar">
     <!-- Weather is the one thing in this editor that isn't testimony: it's a measurable fact about
          a place at an instant, and the Location and Temporal groups above already state both. So
-         it's looked up from a real record by default (see UfoRecorderElement.inferWeather) and
+         it's looked up from a real record by default (see SightingEditorElement.inferWeather) and
          shown read-only on that basis — a reanalysis value is a measurement to report, not a dial
          to tune. Unchecking hands the fields back to the witness, whose account then outranks the
          record and is never overwritten by it (Sighting.weatherSource). -->
@@ -338,7 +338,7 @@ export const html = `
      Nothing is lost by the move — a summary is read while you are not editing, the render is
      watched while you are, never both at once. Each chip carries its group and its field, so
      clicking one opens the right panel and puts the caret in the right input (see
-     UfoRecorderElement.refreshParamSummary); a value a data source supplied rather than the
+     SightingEditorElement.refreshParamSummary); a value a data source supplied rather than the
      author is marked, which is the one thing the form itself never showed at a glance. -->
 <div id="param-summary" class="param-summary"></div>
 <div class="export-row">
@@ -416,7 +416,7 @@ button.preset[aria-pressed="true"] {
 }
 /* Shared by Duration (no sane default — real playback pacing needs some notion of the
    observation's length, so an empty value is flagged rather than just left blank) and the two
-   EDTF date fields (rejected text that doesn't parse as EDTF — see UfoRecorderElement.
+   EDTF date fields (rejected text that doesn't parse as EDTF — see SightingEditorElement.
    applyEdtfTimeInput). Cleared automatically once the field holds a valid/derivable value.
    Light-mode colors by default (this widget has no fixed background of its own — every other
    input just inherits the host page's own light/dark styling — so a hardcoded dark fill here
@@ -651,7 +651,7 @@ select.weather-field:disabled {
 }
 /* flex-basis:100% on a flex-wrap:wrap container's own child forces it onto a fresh line — nothing
    else fits beside a 100%-wide item — which is what puts the Add controls below whatever decor
-   properties are currently showing (see UfoRecorderElement.syncDecorVisibility), rather than just
+   properties are currently showing (see SightingEditorElement.syncDecorVisibility), rather than just
    trailing after them on whatever horizontal space happens to be left. */
 .decor-add-row {
   display: flex;
@@ -766,7 +766,7 @@ select.weather-field:disabled {
   vertical-align: -1px;
 }
 /* Below the rendered scene, not overlaid on it (unlike <rr0-ufo>'s own internal toolbar, hidden
-   here via showToolbar — see UfoRecorderElement's constructor) — its seek bar needs the whole
+   here via showToolbar — see SightingEditorElement's constructor) — its seek bar needs the whole
    width for scrubbing, which would otherwise intercept shape drags near the bottom of the canvas. */
 #seek {
   flex: 1;
@@ -817,7 +817,7 @@ select.weather-field:disabled {
    plain .icon-btn rule above — a class selector outweighs an attribute selector at equal
    specificity-position — same fix, same reason, as .context-menu[hidden] below (see its own
    comment): needed once delete-decor (an .icon-btn) started being hidden entirely rather than
-   just disabled when there's no decor object to delete (see UfoRecorderElement.
+   just disabled when there's no decor object to delete (see SightingEditorElement.
    syncDecorVisibility). */
 .icon-btn[hidden] {
   display: none;

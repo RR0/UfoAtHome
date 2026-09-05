@@ -10,7 +10,7 @@ const HALO_BLUR_UNIT = 20
  *
  * A drawing scale, deliberately, not a physical one: the recording states how indistinct the thing
  * looked, and what that is worth in metres is read back out of the instrument rather than baked in
- * here (see DepthOfField and the recorder's own distance bound).
+ * here (see DepthOfField and the editor's own distance bound).
  */
 export const BLUR_RADIUS_UNIT = 24
 /**

@@ -219,7 +219,7 @@ const STREETLIGHT_LIGHT_DISTANCE = 30
 
 /** Clockwise from north, matching this project's own azimuth convention (0deg = north, increasing
  * clockwise). Shown on the horizon in "edit mode" (see SceneElement's show-compass attribute, set
- * by UfoRecorderElement) so a witness's heading can be set/checked against a real compass
+ * by SightingEditorElement) so a witness's heading can be set/checked against a real compass
  * reference instead of a bare number. Localized the same way as SceneElement's own body-name
  * tooltip (small inline en/fr dict via selectLocale, not a full Messages file — too few strings). */
 const COMPASS_AZIMUTHS: readonly number[] = [0, 45, 90, 135, 180, 225, 270, 315]
@@ -691,7 +691,7 @@ export class SceneRenderer {
   private readonly glareSprites = new Map<string, Sprite>()
   /** The last decor list actually built — reference-checked in setDecor to skip a needless rebuild
    * (SceneElement calls setDecor every setAstronomy tick, same as setWeather/setTerrainOrigin,
-   * but unlike weather's per-tick-resolved keyframe track, decor is a static list: the recorder
+   * but unlike weather's per-tick-resolved keyframe track, decor is a static list: the editor
    * always writes a fresh array on add/remove/edit, so reference equality alone is enough — no
    * per-tick allocation, unlike weatherEquals' field-by-field compare). */
   private decorObjects: DecorObject[] = []
@@ -1059,7 +1059,7 @@ export class SceneRenderer {
    * built so the next setTerrainOrigin() rebuilds from it — otherwise the new source would only
    * take effect once the observer happened to move far enough to trigger a rebuild anyway (see
    * setTerrainOrigin's own distance check), which for a stationary witness is never. Not readonly
-   * for exactly this: the recorder now lets the sources be chosen (see its Data sources group). */
+   * for exactly this: the editor now lets the sources be chosen (see its Data sources group). */
   setTerrainProviders(providers: TerrainProviders): void {
     this.terrainProviders = providers
     this.disposeMesh(this.terrainMesh)
@@ -1178,7 +1178,7 @@ export class SceneRenderer {
   /** A second, independent reason to show the compass besides hovering the canvas: while the
    * heading input itself is focused, the labels are exactly what the editor needs to read off a
    * value against — requiring the mouse to ALSO be hovering the (possibly not even visible, e.g.
-   * scrolled off) canvas at the same time would defeat the point. `UfoRecorderElement` calls this
+   * scrolled off) canvas at the same time would defeat the point. `SightingEditorElement` calls this
    * from the heading input's own focus/blur. Independent of setCompassHovered so leaving the field
    * focused but moving the pointer away doesn't hide them, and vice versa. */
   setCompassForced(forced: boolean): void {
@@ -1345,7 +1345,7 @@ export class SceneRenderer {
   /** How far the witness has turned their head away from "straight out through the chosen
    * window" while inside a decor object — transient, in-memory only (never written into the
    * sighting's own witnessTrack, which represents the witness's real OUTSIDE recorded gaze, a
-   * different reference frame entirely). Set by UfoRecorderElement's own camera-drag handling
+   * different reference frame entirely). Set by SightingEditorElement's own camera-drag handling
    * when it detects the witness is currently inside a decor object (see its own cameraDragState
    * doc comment) — reset to {0,0} whenever the inhabited object/side changes, so looking through
    * a newly picked window always starts centered. Applied in updateDecorAnchoring, on top of
@@ -2030,8 +2030,8 @@ export class SceneRenderer {
   }
 
   /** Finds which decor object (if any) sits under normalized device coordinates — same NDC
-   * convention as pickBodyAt, for the recorder's own right-click "view this witness's testimony"
-   * menu (see UfoRecorderElement.onContextMenu). Tests every real mesh recursively (decor has no
+   * convention as pickBodyAt, for the editor's own right-click "view this witness's testimony"
+   * menu (see SightingEditorElement.onContextMenu). Tests every real mesh recursively (decor has no
    * separate oversized hit-area sprite the way bodies do — its parts are already human-sized, not
    * a tiny true-to-scale astronomical disc needing a more forgiving target) and walks back up from
    * whichever part was actually hit (e.g. a building's own wall mesh) to the top-level group

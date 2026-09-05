@@ -36,7 +36,7 @@ export interface WeatherObservation {
  * Source of real-world weather for a place and instant — the same "one interface, interchangeable
  * concrete implementations" arrangement terrain already uses (see ElevationProvider's own doc
  * comment): everything about how a record is fetched, decoded and mapped onto this project's
- * Weather fields lives in providers/, so swapping datasets never touches the recorder or the
+ * Weather fields lives in providers/, so swapping datasets never touches the editor or the
  * inference above it.
  *
  * `undefined` means the provider has no record for that place/instant (before its dataset's own

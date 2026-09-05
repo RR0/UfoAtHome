@@ -1,7 +1,7 @@
-import type { UfoRecorderMessages } from "./UfoRecorderMessages.js"
+import type { SightingEditorMessages } from "./SightingEditorMessages.js"
 import { sightingLabels_en } from "./SightingLabels_en.js"
 
-export const ufoRecorderMessages_en: UfoRecorderMessages = {
+export const sightingEditorMessages_en: SightingEditorMessages = {
   ...sightingLabels_en,
   oval: "Oval",
   polygon: "Polygon",

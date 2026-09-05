@@ -13,7 +13,7 @@ export class EditorPage implements SitePage {
       fr: "Enregistrer une observation : dessiner la forme, énoncer la date, le lieu et l'instrument, "
         + "et laisser le ciel, la météo et le sol être relevés. Le manuel complet de l'éditeur UFO@home."
     },
-    modules: ["/lib/rr0-ufo-recorder.mjs"]
+    modules: ["/lib/rr0-sighting-editor.mjs"]
   }
 
   /**
@@ -108,7 +108,7 @@ if (docs) {
 <section class="band">
   <div class="wrap">
     <div class="stage stage-padded">
-      <rr0-ufo-recorder id="editor"></rr0-ufo-recorder>
+      <rr0-sighting-editor id="editor"></rr0-sighting-editor>
     </div>
     <p class="small">Opening it on an existing recording: add <code>?sighting=</code> and a URL, or
       the name of one of <a href="/demos/">the demos</a> — for instance
@@ -352,7 +352,7 @@ if (docs) {
 <section class="band">
   <div class="wrap">
     <div class="stage stage-padded">
-      <rr0-ufo-recorder id="editor"></rr0-ufo-recorder>
+      <rr0-sighting-editor id="editor"></rr0-sighting-editor>
     </div>
     <p class="small">Pour l'ouvrir sur un enregistrement existant : ajoutez <code>?sighting=</code>
       suivi d'une URL, ou du nom d'une <a href="/demos/">démo</a> — par exemple

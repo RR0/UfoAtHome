@@ -1,19 +1,19 @@
 import type { SightingLabels } from "./SightingLabels.js"
 
-/** Contract for `<rr0-ufo-recorder>`'s user-visible label strings — implemented per language
- * under this directory (`UfoRecorderMessages_en.ts`, `UfoRecorderMessages_fr.ts`) and loaded
- * via `loadUfoRecorderMessages`. */
-export interface UfoRecorderMessages extends SightingLabels {
+/** Contract for `<rr0-sighting-editor>`'s user-visible label strings — implemented per language
+ * under this directory (`SightingEditorMessages_en.ts`, `SightingEditorMessages_fr.ts`) and loaded
+ * via `loadSightingEditorMessages`. */
+export interface SightingEditorMessages extends SightingLabels {
   oval: string
   /** The "Polygon" preset button — a plain quad, the starting point for a freeform shape (see
    * Shape.ts's own createCustomPolygon doc comment). */
   polygon: string
   /** Right-click menu item, only enabled for a single polygon selection — see
-   * UfoRecorderElement.addVertexAtContextMenu. */
+   * SightingEditorElement.addVertexAtContextMenu. */
   addVertex: string
   /** Right-click menu item, only enabled when the click landed on a real vertex of a single
    * polygon selection with more than MIN_POLYGON_VERTICES points — see
-   * UfoRecorderElement.deleteVertexAtContextMenu. */
+   * SightingEditorElement.deleteVertexAtContextMenu. */
   deleteVertex: string
   /** addVertex/deleteVertex's own disabled title when the selection isn't a single polygon shape
    * (an oval, a multi-selection, or nothing selected at all). */
@@ -23,7 +23,7 @@ export interface UfoRecorderMessages extends SightingLabels {
   tooFewVertices: string
   shape: string
   /** A real width to TRY, in meters — one half of the authoring aid that puts an angle on the
-   * canvas arithmetically instead of by eye (see UfoRecorderElement.applySizeHypothesis). Not
+   * canvas arithmetically instead of by eye (see SightingEditorElement.applySizeHypothesis). Not
    * something the recording keeps: the shape ends up with the angle, and these meters are
    * forgotten. */
   objectSize: string
@@ -65,7 +65,7 @@ export interface UfoRecorderMessages extends SightingLabels {
   realDistanceHere: string
   addShape: string
   deleteShape: string
-  /** The external Play/Pause/Loop row's own labels — see UfoRecorderElement's
+  /** The external Play/Pause/Loop row's own labels — see SightingEditorElement's
    * syncPlaybackControls(). Copied verbatim from UfoMessages (UfoElement's own overlay toolbar,
    * hidden here in favor of this external row) for consistent wording. */
   play: string
@@ -159,7 +159,7 @@ export interface UfoRecorderMessages extends SightingLabels {
    * same distinction the weather status line makes. */
   placeSearchFailed: string
   /** Tooltip on a time zone no country has ever placed on that longitude — "{solar}" is replaced
-   * with the offset the meridian itself implies. See UfoRecorderElement.updateUtcOffsetValidity. */
+   * with the offset the meridian itself implies. See SightingEditorElement.updateUtcOffsetValidity. */
   utcOffsetImplausible: string
   /** The zone picker's first entry: no zone, type the offset yourself. */
   timeZoneManual: string
@@ -170,7 +170,7 @@ export interface UfoRecorderMessages extends SightingLabels {
   groundAt: string
   headingPlaceholder: string
   /** Custom-validity message shown when an observation start/end field's text doesn't match
-   * EDTF_TIME_PATTERN — see UfoRecorderElement.applyEdtfTimeInput. */
+   * EDTF_TIME_PATTERN — see SightingEditorElement.applyEdtfTimeInput. */
   edtfInvalid: string
   /** Shared placeholder for both the start and end EDTF text fields. */
   edtfPlaceholder: string
@@ -217,7 +217,7 @@ export interface UfoRecorderMessages extends SightingLabels {
   observationGroup: string
   /** Label of the checkbox that decides whether the weather fields are looked up from a real
    * record (checked, and then read-only) or stated by the witness (unchecked, and then never
-   * overwritten) — see UfoRecorderElement.inferWeather. */
+   * overwritten) — see SightingEditorElement.inferWeather. */
   /** Why the weather fields are unavailable mid-playback: the instant they would be written at is
    * moving, and the next tick would overwrite the field being dragged. */
   weatherWhilePlaying: string
@@ -399,24 +399,24 @@ export interface UfoRecorderMessages extends SightingLabels {
   lookAtDecor: string
   /** The accessible name/tooltip for the "+" button that adds a new decor object of whichever
    * kind decorKindSelect currently shows — placed right before that dropdown ("[+] [Kind ▾]"), a
-   * plain "+" glyph rather than this text (see UfoRecorderElement.addDecorBuildingButton), so
+   * plain "+" glyph rather than this text (see SightingEditorElement.addDecorBuildingButton), so
    * it's deliberately just "Add", not "Add decor" — the adjacent dropdown already says what's
    * being added. */
   addDecor: string
   deleteDecor: string
   decorSightingUrl: string
   /** Right-click menu item on a witness decor object that has a sightingUrl — loads that
-   * recording (see UfoRecorderElement.viewWitnessTestimony). */
+   * recording (see SightingEditorElement.viewWitnessTestimony). */
   viewTestimony: string
   /** viewTestimony's own disabled title when the right-clicked witness has no sightingUrl set. */
   noWitnessRecording: string
   /** Decor context menu's "Masks ▸" flyout trigger — the arrow itself is appended in code, not
-   * part of this translated string (see UfoRecorderElement.applyMessages). Its submenu lists every
+   * part of this translated string (see SightingEditorElement.applyMessages). Its submenu lists every
    * shape/source as a checkbox (see DecorObject.occludesSourceIds), which needs no translation of
    * its own since each entry is just that shape's own name/sourceId. */
   masks: string
   /** Button in the Witness group that adds a new "other witness" decor object (see
-   * UfoRecorderElement's addDecorWitnessButton) — distinct from decorWitness, that dropdown
+   * SightingEditorElement's addDecorWitnessButton) — distinct from decorWitness, that dropdown
    * option's own (now-hidden) label. */
   addWitness: string
 }

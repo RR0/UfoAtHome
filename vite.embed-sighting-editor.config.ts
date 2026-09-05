@@ -2,7 +2,7 @@ import { defineConfig } from "vite"
 import pkg from "./package.json"
 
 /**
- * Builds the standalone, self-registering rr0-ufo-recorder.mjs distributed
+ * Builds the standalone, self-registering rr0-sighting-editor.mjs distributed
  * to rr0.org (or any other page) — a fixed filename (not content-hashed),
  * separate from the default `vite build` which produces the local demo
  * (index.html + hashed assets). Run via `npm run build:embed`.
@@ -24,16 +24,16 @@ export default defineConfig({
     __APP_VERSION__: JSON.stringify(pkg.version)
   },
   build: {
-    outDir: "dist-embed",
+    outDir: "dist-embed-sighting-editor",
     emptyOutDir: true,
     copyPublicDir: false, // public/ holds only the local demo's sample JSON, irrelevant to this bundle
     assetsDir: "",
     target: "es2022",
     rollupOptions: {
-      input: "src/embed.ts",
+      input: "src/embed-sighting-editor.ts",
       output: {
         format: "es",
-        entryFileNames: "rr0-ufo-recorder.mjs"
+        entryFileNames: "rr0-sighting-editor.mjs"
       }
     }
   }

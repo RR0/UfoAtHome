@@ -1,7 +1,7 @@
 /** The field labels and value names that describe a Sighting itself — everything the
  * parameter summary needs to say what a recording states, and nothing about the editor
- * that produced it. Split out of UfoRecorderMessages so that `<rr0-sighting>` can show
- * the same summary without pulling in the recorder's other ~140 strings (1.7 KB against
+ * that produced it. Split out of SightingEditorMessages so that `<rr0-sighting>` can show
+ * the same summary without pulling in the editor's other ~140 strings (1.7 KB against
  * 10.6 KB), and so that "Cloud cover" is written down exactly once. */
 export interface SightingLabels {
   color: string
@@ -39,7 +39,7 @@ export interface SightingLabels {
   observationEndTime: string
   /** The witness as a WHOLE, naming the chip that holds everything said about them — not
    * witnessTitle, which names one field of theirs. Shared because both components box those
-   * chips inside it, and only the recorder has a tab strip to read the name off. */
+   * chips inside it, and only the editor has a tab strip to read the name off. */
   witnessGroup: string
   witnessId: string
   witnessTitle: string
@@ -82,7 +82,7 @@ export interface SightingLabels {
   decorLights: string
   /** How high above the witness the decor object sits. Zero for anything standing on the ground,
    * which is all ordinary scenery; an aircraft is the reason it exists. Setting it on an object
-   * that has no trajectory gives it one, of a single instant — see UfoRecorderElement.updateDecor. */
+   * that has no trajectory gives it one, of a single instant — see SightingEditorElement.updateDecor. */
   decorAltitude: string
   /** The lens's focal length, in millimetres — shown for anything with a frame, and read-only when
    * the device's lens does not zoom. */
@@ -148,7 +148,7 @@ export interface SightingLabels {
   decorSideRight: string
   /** Vehicle-only DecorSide corners — a car's left/right side has 2 windows/seats each
    * (front-door, rear-door), not 1 — see DecorSide's own doc comment. Shown instead of
-   * decorSideLeft/decorSideRight for that kind (see UfoRecorderElement.syncDecorVisibility). */
+   * decorSideLeft/decorSideRight for that kind (see SightingEditorElement.syncDecorVisibility). */
   decorSideFrontLeft: string
   decorSideFrontRight: string
   decorSideBehindLeft: string

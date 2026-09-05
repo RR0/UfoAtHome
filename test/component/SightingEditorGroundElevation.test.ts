@@ -1,12 +1,12 @@
 import { describe, expect, it, afterEach, beforeAll, vi } from "vitest"
-import { register, ELEMENT_NAME } from "../../src/component/UfoRecorderElement.js"
-import type { UfoRecorderElement } from "../../src/component/UfoRecorderElement.js"
+import { register, ELEMENT_NAME } from "../../src/component/SightingEditorElement.js"
+import type { SightingEditorElement } from "../../src/component/SightingEditorElement.js"
 import type { WeatherProvider } from "../../src/engine/weather/WeatherProvider.js"
 
 register()
 
 /**
- * Its own file rather than another describe in UfoRecorderElement.test.ts: it mocks the elevation
+ * Its own file rather than another describe in SightingEditorElement.test.ts: it mocks the elevation
  * registry so the ground under a place actually resolves, which changes what the Altitude field
  * means (it becomes a height above sea level, floored by that ground) for every test in whatever
  * module scope the mock lives in.
@@ -132,8 +132,8 @@ beforeAll(() => {
   } as unknown as typeof ResizeObserver
 })
 
-function mount(): UfoRecorderElement {
-  const element = document.createElement(ELEMENT_NAME) as UfoRecorderElement
+function mount(): SightingEditorElement {
+  const element = document.createElement(ELEMENT_NAME) as SightingEditorElement
   element.weatherProvider = RECORD_PROVIDER
   document.body.appendChild(element)
   elevationLookups = 0
@@ -141,13 +141,13 @@ function mount(): UfoRecorderElement {
   return element
 }
 
-function setInput(element: UfoRecorderElement, id: string, value: string): void {
+function setInput(element: SightingEditorElement, id: string, value: string): void {
   const input = element.shadowRoot!.getElementById(id) as HTMLInputElement
   input.value = value
   input.dispatchEvent(new Event("input"))
 }
 
-function stateDateAndPlace(element: UfoRecorderElement): void {
+function stateDateAndPlace(element: SightingEditorElement): void {
   setInput(element, "lat", "43.837")
   setInput(element, "lng", "5.983")
   setInput(element, "utcOffsetHours", "1")
@@ -156,7 +156,7 @@ function stateDateAndPlace(element: UfoRecorderElement): void {
 
 const settle = (ms: number): Promise<void> => new Promise(resolve => setTimeout(resolve, ms))
 
-describe("UfoRecorderElement ground elevation", () => {
+describe("SightingEditorElement ground elevation", () => {
   afterEach(() => {
     document.body.innerHTML = ""
   })

@@ -39,7 +39,7 @@ export const html = `
 </div>
 <div id="ufo-slot"></div>
 <!-- What this recording states, field by field, in the same words the editor uses for the same
-     fields — the very same SightingSummary the recorder shows under its own render. Off unless
+     fields — the very same SightingSummary the editor shows under its own render. Off unless
      the page asks for it (show-labels) or the reader does (the info panel's own toggle): a player
      dropped into an article is there to be watched, and forty labels under it is a data sheet.
      Read-only here, unlike in the editor, where each one is a way back to its field. -->

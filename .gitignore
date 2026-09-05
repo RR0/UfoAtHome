@@ -1,9 +1,9 @@
 node_modules/
 dist/
-dist-embed/
 dist-embed-ufo/
 dist-embed-scene/
-dist-embed-eyewitness/
+dist-embed-sighting/
+dist-embed-sighting-editor/
 *.log
 *.ipr
 *.iws

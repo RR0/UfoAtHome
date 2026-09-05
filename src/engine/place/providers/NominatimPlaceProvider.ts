@@ -25,7 +25,7 @@ export interface NominatimPlaceProviderOptions {
  * places: the hamlets, farms, airfields and stretches of road that testimony actually names.
  *
  * Nominatim's usage policy allows exactly this kind of use — a search a person asked for, one at a
- * time — and rules out per-keystroke autocomplete and bulk work. That is why the recorder searches
+ * time — and rules out per-keystroke autocomplete and bulk work. That is why the editor searches
  * only on an explicit Enter or button press rather than as you type, and why identical queries are
  * answered from the cache below instead of re-asked. Attribution is not optional and is shown
  * beside the results.

@@ -97,7 +97,7 @@ export class ImageProjection {
 
   /** How many pixels a real object of that size, at that distance, actually covers here — the
    * authoring aid, and the only place meters ever enter a drawing (see
-   * UfoRecorderElement.applySizeHypothesis, which forgets them immediately afterwards). */
+   * SightingEditorElement.applySizeHypothesis, which forgets them immediately afterwards). */
   widthPx(extent: PhysicalExtent): number {
     return this.degToPx(ApparentSize.angularWidthDeg(extent))
   }

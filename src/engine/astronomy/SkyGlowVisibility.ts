@@ -28,7 +28,7 @@ export interface GlowSighting {
  * and if not, which of the four things that hide them was in the way.
  *
  * The renderer draws both onto a whole sky and lets a reader look; this answers the same question in
- * one sentence, for the line in the recorder that states what else was up there. Same models, same
+ * one sentence, for the line in the editor that states what else was up there. Same models, same
  * anchors, same sky brightness: two ways of saying one thing, never two models of it.
  *
  * WHY IT IS WORTH SAYING AT ALL, for the zodiacal light especially: it is a cone of light with no
