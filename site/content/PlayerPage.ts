@@ -41,7 +41,9 @@ export class PlayerPage implements SitePage {
       badJson: fr ? "Ce texte n'est pas une reconstitution valide : " : "That text is not a valid reconstruction: ",
       empty: fr ? "Rien à jouer — collez une reconstitution d'abord." : "Nothing to play — paste a reconstruction first.",
       playing: fr ? "Rejouer {title}" : "Playing {title}",
-      pasted: fr ? "la reconstitution collée" : "the pasted reconstruction"
+      pasted: fr ? "la reconstitution collée" : "the pasted reconstruction",
+      pasteEmpty: fr ? "Ou coller une reconstitution" : "Or paste a reconstruction in",
+      pasteLoaded: fr ? "Voir ou modifier ce fichier" : "See or edit this file"
     })
     return `const messages = ${messages}
 const demoTitles = ${demoTitles}
@@ -57,6 +59,16 @@ const pasteButton = document.getElementById("player-paste-play")
 const heading = document.getElementById("player-heading")
 const lede = document.getElementById("player-lede")
 const editorPath = "/editor/"
+const pasteSummary = pastePanel.querySelector("summary")
+
+/* The recording currently on the stage, as text — what the editor below should be holding, so that
+   opening that panel shows THIS observation rather than an empty shell. Pretty-printed from the
+   parsed object rather than kept as fetched: a minified file is not something to read or edit, and
+   nothing but whitespace is lost on the way. */
+let loadedText
+/* What was last put in the editor by this page, as against by the reader. Only text still equal to
+   it may be overwritten when another recording is loaded — anything else is somebody's own work. */
+let editorFilled
 
 const say = (text, kind) => {
   status.textContent = text ?? ""
@@ -143,6 +155,7 @@ const openUrl = async requested => {
       if (!response.ok) continue
       const sighting = await response.json() // fail here rather than inside the element
       await stage.loadFromSrc(candidate)
+      showInEditor(JSON.stringify(sighting, null, 2))
       reveal(new URL(candidate, location.href).href, Array.isArray(sighting) ? undefined : sighting, requested)
       say("")
       const next = new URL(location.href)
@@ -168,10 +181,24 @@ urlForm.addEventListener("submit", event => {
 // wrong — and worth nothing to the majority who arrive here with a link. So it is fetched the
 // first time the panel is opened, and never otherwise.
 let editor
+
+const showInEditor = text => {
+  loadedText = text
+  pasteSummary.textContent = messages.pasteLoaded
+  // An editor already open and already changed is left alone: replacing what somebody has typed
+  // because a second recording finished loading would throw their work away without asking.
+  if (editor && editor.value !== editorFilled) return
+  if (editor) {
+    editor.value = text
+    editorFilled = text
+  }
+}
+
 pastePanel.addEventListener("toggle", async () => {
   if (!pastePanel.open || editor) return
   const { JsonEditor } = await import("/lib/site-json-editor.mjs")
-  editor = new JsonEditor(pasteMount, pasteMount.dataset.sample ?? "")
+  editorFilled = loadedText ?? pasteMount.dataset.sample ?? ""
+  editor = new JsonEditor(pasteMount, editorFilled)
   editor.focus()
 })
 

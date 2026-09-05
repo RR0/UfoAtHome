@@ -42,6 +42,12 @@ export class JsonEditor {
     return this.view.state.doc.toString()
   }
 
+  /** Replaces the whole document — this is only ever used to put a WHOLE recording in, never to
+   * patch one, so there is no smaller change to make. */
+  set value(text: string) {
+    this.view.dispatch({ changes: { from: 0, to: this.view.state.doc.length, insert: text } })
+  }
+
   focus(): void {
     this.view.focus()
   }
