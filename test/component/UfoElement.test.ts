@@ -175,7 +175,7 @@ describe("UfoElement", () => {
   })
 
   it("fetches and loads the sighting referenced by the src attribute on connect", async () => {
-    const fetchMock = vi.fn().mockResolvedValue({ json: () => Promise.resolve(sampleJson) })
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, status: 200, json: () => Promise.resolve(sampleJson) })
     vi.stubGlobal("fetch", fetchMock)
 
     const element = document.createElement(UFO_ELEMENT_NAME) as UfoElement
@@ -189,7 +189,7 @@ describe("UfoElement", () => {
   })
 
   it("re-fetches when the src attribute changes after connect", async () => {
-    const fetchMock = vi.fn().mockResolvedValue({ json: () => Promise.resolve(sampleJson) })
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, status: 200, json: () => Promise.resolve(sampleJson) })
     vi.stubGlobal("fetch", fetchMock)
 
     const element = mount()

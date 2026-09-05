@@ -1,4 +1,5 @@
 import { html, css } from "./sceneTemplate.js"
+import { SightingFetch } from "../engine/net/SightingFetch.js"
 import { UfoElement, registerUfo, UFO_ELEMENT_NAME } from "./UfoElement.js"
 import { SceneRenderer } from "../render3d/SceneRenderer.js"
 import type { TerrainProviders } from "../render3d/terrain/defaultTerrainProviders.js"
@@ -481,8 +482,7 @@ export class SceneElement extends HTMLElement {
 
   /** Fetches a SightingRecordingJson from `url` and loads it — what the `src` attribute uses. */
   async loadFromSrc(url: string): Promise<void> {
-    const response = await fetch(url)
-    this.sightingData = (await response.json()) as SightingRecordingJson
+    this.sightingData = (await SightingFetch.json(url)) as SightingRecordingJson
   }
 
   get sightingData(): SightingRecordingJson {

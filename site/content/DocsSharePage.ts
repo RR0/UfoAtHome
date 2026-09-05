@@ -41,7 +41,10 @@ export class DocsSharePage extends DocsSection {
       copy: fr ? "Copier" : "Copy",
       copied: fr ? "Copié" : "Copied",
       copyLink: fr ? "Copier le lien" : "Copy the link",
-      copyCode: fr ? "Copier le code" : "Copy the code"
+      copyCode: fr ? "Copier le code" : "Copy the code",
+      notAnAddress: fr
+        ? "Ce n'est pas une adresse valide — il en faut une complète, commençant par https://"
+        : "That is not a valid address — it needs a full one, starting with https://"
     })
     return `const messages = ${messages}
 const player = ${JSON.stringify(fr ? "/player/" : "/player/")}
@@ -79,25 +82,51 @@ const copyFrom = async (button, text, element, label) => {
   }
 }
 
+/**
+ * Whether the field holds something that can actually be turned into a link.
+ *
+ * No backtick in here: this whole script is a template literal and one would end it. The field is
+ * type="url", so the browser itself is the judge — both stricter and more forgiving than anything
+ * worth writing here. Empty counts as invalid too: the field is not required, so the browser calls
+ * it valid, but there is still nothing to compose.
+ */
+const addressOf = field => {
+  const value = field.value.trim()
+  const valid = value !== "" && field.checkValidity()
+  field.setAttribute("aria-invalid", String(!valid))
+  return valid ? value : undefined
+}
+
 const refreshLink = () => {
-  const url = linkField.value.trim()
-  const href = playerLink(url)
-  linkOut.textContent = href
-  linkOpen.href = href
+  const url = addressOf(linkField)
+  linkOut.classList.toggle("is-invalid", !url)
+  linkOut.textContent = url ? playerLink(url) : messages.notAnAddress
+  // A link that cannot be built is not offered: an anchor to a half-composed URL would open a
+  // player on nothing, and a copy button would put nonsense in the clipboard.
+  linkOpen.href = url ? playerLink(url) : "#"
+  linkOpen.toggleAttribute("aria-disabled", !url)
+  linkCopy.disabled = !url
 }
 linkField.addEventListener("input", refreshLink)
 linkCopy.addEventListener("click", () => copyFrom(linkCopy, linkOut.textContent, linkOut, messages.copyLink))
 refreshLink()
 
 const refreshEmbed = () => {
-  embedCode.textContent = embedMarkup(embedField.value.trim())
+  const url = addressOf(embedField)
+  embedCode.classList.toggle("is-invalid", !url)
+  embedCode.textContent = url ? embedMarkup(url) : messages.notAnAddress
+  embedCopy.disabled = !url
+  embedTry.disabled = !url
 }
 embedField.addEventListener("input", refreshEmbed)
 embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedCode.textContent, embedCode, messages.copyCode))
 // The preview is reloaded on request rather than on every keystroke: each load fetches a recording
 // and builds a sky, and doing that per character typed would be rude to the reader's machine and
 // to whoever is hosting the file.
-embedTry.addEventListener("click", () => preview.setAttribute("src", embedField.value.trim()))
+embedTry.addEventListener("click", () => {
+  const url = addressOf(embedField)
+  if (url) preview.setAttribute("src", url)
+})
 refreshEmbed()
 preview.setAttribute("src", embedField.value.trim())`
   }
@@ -118,7 +147,7 @@ preview.setAttribute("src", embedField.value.trim())`
 
     <div class="doc-try">
       <label for="share-link-url">The address of your recording</label>
-      <input id="share-link-url" type="text" spellcheck="false" value="${sample}"
+      <input id="share-link-url" type="url" spellcheck="false" value="${sample}"
              placeholder="https://yoursite.org/my-case/sighting.json">
       <p class="doc-try-out"><code id="share-link-out"></code></p>
       <p class="doc-try-actions">
@@ -142,7 +171,7 @@ preview.setAttribute("src", embedField.value.trim())`
 
     <div class="doc-try">
       <label for="share-embed-url">The address of your recording</label>
-      <input id="share-embed-url" type="text" spellcheck="false" value="${sample}"
+      <input id="share-embed-url" type="url" spellcheck="false" value="${sample}"
              placeholder="https://yoursite.org/my-case/sighting.json">
       <pre><code id="share-embed-code"></code></pre>
       <p class="doc-try-actions">
@@ -165,15 +194,16 @@ preview.setAttribute("src", embedField.value.trim())`
 <section class="band">
   <div class="wrap prose-wide">
     <h2>What a recording needs to be shareable</h2>
-    <ul class="plain">
-      <li><strong>A public address.</strong> Anything a browser can fetch. A file on your own disk
-        has no URL that anybody else can follow.</li>
-      <li><strong>Readable from another site.</strong> One
-        <code>Access-Control-Allow-Origin: *</code> header on the JSON file. Most static hosts —
-        GitHub Pages, Netlify, S3 — either send it already or let you add it in a line of
-        configuration. If the file opens fine in a browser but the player says it could not be
-        loaded, this is almost always why.</li>
-    </ul>
+    <p><strong>One thing: a public address.</strong> Anywhere a browser can fetch it from — a static
+      site, a file host, a repository's pages. A file on your own disk has no URL anybody else can
+      follow, and that is the only real requirement.</p>
+    <p class="small">If the address is public, opens fine in your own browser, and the player still
+      says it could not be read, the cause is almost always the same one: the server is not telling
+      browsers that other sites may read the file. The remedy is one response header,
+      <code>Access-Control-Allow-Origin: *</code>, on the JSON. Most static hosts — GitHub Pages,
+      Netlify, S3 — either send it already or let you add it in a line of configuration; if the
+      server is not yours, that is the single thing to ask its administrator for. The player and
+      the editor both say so when they detect it, so you should not have to guess.</p>
     <p>Nowhere to put it yet? <a href="/player/">The player</a> also takes a recording pasted
       straight in, which is enough to check one before publishing it — though a pasted one cannot,
       of course, be shared by link.</p>
@@ -195,7 +225,7 @@ preview.setAttribute("src", embedField.value.trim())`
 
     <div class="doc-try">
       <label for="share-link-url">L'adresse de votre enregistrement</label>
-      <input id="share-link-url" type="text" spellcheck="false" value="${sample}"
+      <input id="share-link-url" type="url" spellcheck="false" value="${sample}"
              placeholder="https://votresite.org/mon-dossier/sighting.json">
       <p class="doc-try-out"><code id="share-link-out"></code></p>
       <p class="doc-try-actions">
@@ -219,7 +249,7 @@ preview.setAttribute("src", embedField.value.trim())`
 
     <div class="doc-try">
       <label for="share-embed-url">L'adresse de votre enregistrement</label>
-      <input id="share-embed-url" type="text" spellcheck="false" value="${sample}"
+      <input id="share-embed-url" type="url" spellcheck="false" value="${sample}"
              placeholder="https://votresite.org/mon-dossier/sighting.json">
       <pre><code id="share-embed-code"></code></pre>
       <p class="doc-try-actions">
@@ -242,15 +272,18 @@ preview.setAttribute("src", embedField.value.trim())`
 <section class="band">
   <div class="wrap prose-wide">
     <h2>Ce qu'il faut à un enregistrement pour être partageable</h2>
-    <ul class="plain">
-      <li><strong>Une adresse publique.</strong> Tout ce qu'un navigateur peut aller chercher. Un
-        fichier sur votre disque n'a pas d'URL que quelqu'un d'autre puisse suivre.</li>
-      <li><strong>Lisible depuis un autre site.</strong> Un en-tête
-        <code>Access-Control-Allow-Origin: *</code> sur le fichier JSON. La plupart des hébergements
-        statiques — GitHub Pages, Netlify, S3 — l'envoient déjà ou permettent de l'ajouter en une
-        ligne de configuration. Si le fichier s'ouvre bien dans un navigateur mais que le lecteur dit
-        n'avoir pas pu le charger, c'est presque toujours cela.</li>
-    </ul>
+    <p><strong>Une chose : une adresse publique.</strong> N'importe où un navigateur peut aller la
+      chercher — un site statique, un hébergeur de fichiers, les pages d'un dépôt. Un fichier sur
+      votre disque n'a pas d'URL que quelqu'un d'autre puisse suivre, et c'est là la seule vraie
+      exigence.</p>
+    <p class="small">Si l'adresse est publique, s'ouvre bien dans votre propre navigateur, et que le
+      lecteur dit malgré tout n'avoir pas pu la lire, la cause est presque toujours la même : le
+      serveur ne dit pas aux navigateurs que d'autres sites ont le droit de lire le fichier. Le
+      remède est un en-tête de réponse, <code>Access-Control-Allow-Origin: *</code>, sur le JSON. La
+      plupart des hébergements statiques — GitHub Pages, Netlify, S3 — l'envoient déjà ou permettent
+      de l'ajouter en une ligne de configuration ; si le serveur n'est pas le vôtre, c'est la seule
+      chose à demander à son administrateur. Le lecteur et l'éditeur le disent quand ils le
+      détectent, vous ne devriez donc pas avoir à le deviner.</p>
     <p>Nulle part où le poser encore ? <a href="/player/">Le lecteur</a> accepte aussi un
       enregistrement collé directement, ce qui suffit à en vérifier un avant de le publier — mais un
       enregistrement collé ne se partage évidemment pas par lien.</p>

@@ -1,4 +1,5 @@
 import { html, css } from "./eyewitnessTemplate.js"
+import { SightingFetch } from "../engine/net/SightingFetch.js"
 import { SightingSummary } from "./SightingSummary.js"
 import { SceneElement, registerScene, SCENE_ELEMENT_NAME } from "./SceneElement.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
@@ -242,8 +243,7 @@ export class EyewitnessElement extends HTMLElement {
    * `sighting.json` directly (detected by shape: an array is a manifest, an object is one
    * witness's own recording) — the common single-witness case needs no manifest file at all. */
   async loadFromSrc(url: string): Promise<void> {
-    const response = await fetch(url)
-    const json = (await response.json()) as string[] | SightingRecordingJson
+    const json = (await SightingFetch.json(url)) as string[] | SightingRecordingJson
     if (Array.isArray(json)) {
       await this.loadWitnessUrls(json)
     } else {
@@ -279,10 +279,9 @@ export class EyewitnessElement extends HTMLElement {
 
   private async loadWitnessUrls(urls: string[]): Promise<void> {
     const entries = await Promise.all(
-      urls.map(async (src): Promise<WitnessEntry> => {
-        const response = await fetch(src)
-        return { src, sighting: (await response.json()) as SightingRecordingJson }
-      })
+      urls.map(async (src): Promise<WitnessEntry> => (
+        { src, sighting: (await SightingFetch.json(src)) as SightingRecordingJson }
+      ))
     )
     this.setEntries(entries)
   }

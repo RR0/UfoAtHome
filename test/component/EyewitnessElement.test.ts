@@ -133,8 +133,13 @@ function stubFetch(bySrc: Record<string, unknown>): ReturnType<typeof vi.fn> {
   // arrayBuffer() too, not just json() — the nested <rr0-scene>'s own star-catalog fetch (an
   // unrelated URL not present in bySrc) calls response.arrayBuffer(), not .json(); a real fetch
   // handled via this same mock still needs a well-formed response to resolve instead of throwing.
+  // `ok`/`status` are part of what a Response IS, and a double that omitted them stopped standing
+  // in for one the moment the loader started reading them — see SightingFetch, which distinguishes
+  // a server that answered "no" from one that did not answer.
   const fetchMock = vi.fn().mockImplementation((url: string) =>
     Promise.resolve({
+      ok: true,
+      status: 200,
       json: () => Promise.resolve(bySrc[url]),
       arrayBuffer: () => Promise.resolve(new ArrayBuffer(0))
     })

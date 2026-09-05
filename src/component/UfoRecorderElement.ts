@@ -1,4 +1,5 @@
 import { BLUR_RADIUS_UNIT } from "../render/CanvasRenderer.js"
+import { SightingFetch, SightingFetchError } from "../engine/net/SightingFetch.js"
 import { html, css } from "./template.js"
 import { SightingSummary } from "./SightingSummary.js"
 import type { SummaryGroup } from "./SightingSummary.js"
@@ -1345,11 +1346,37 @@ export class UfoRecorderElement extends HTMLElement {
   private async importFromUrl(url: string = this.importUrlInput.value.trim()): Promise<void> {
     if (!url) return
     try {
-      const response = await fetch(url)
-      if (!response.ok) throw new Error(`HTTP ${response.status}`)
-      this.sightingData = (await response.json()) as SightingRecordingJson
-    } catch {
-      window.alert(this.messages.importError)
+      this.sightingData = (await SightingFetch.json(url)) as SightingRecordingJson
+    } catch (error) {
+      window.alert(this.importErrorFor(error))
+    }
+  }
+
+  /**
+   * Says what actually went wrong, where this used to say "couldn't load that recording" to every
+   * one of five quite different problems.
+   *
+   * The one worth telling apart is CORS, because it is the only one whose fix is not the reader's:
+   * the file is there, the address is right, and what has to change is a header on somebody else's
+   * server. Answering "check the file or URL and try again" sent people to look at the two things
+   * that were already correct. See SightingFetch for how far a browser lets a page work it out, and
+   * why the wording hedges.
+   */
+  private importErrorFor(error: unknown): string {
+    if (!(error instanceof SightingFetchError)) return this.messages.importError
+    switch (error.kind) {
+      case "cors":
+        return this.messages.importErrorCors
+      case "mixed-content":
+        return this.messages.importErrorMixedContent
+      case "unreachable":
+        return this.messages.importErrorUnreachable
+      case "status":
+        return this.messages.importErrorStatus.replace("{status}", String(error.status ?? ""))
+      case "malformed":
+        return this.messages.importErrorMalformed
+      default:
+        return this.messages.importError
     }
   }
 

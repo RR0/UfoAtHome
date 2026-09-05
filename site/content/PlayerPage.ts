@@ -33,8 +33,11 @@ export class PlayerPage implements SitePage {
     const messages = JSON.stringify({
       loading: fr ? "Chargement…" : "Loading…",
       notFound: fr
-        ? "Rien n'a pu être chargé depuis ce lien. Vérifiez l'adresse, et que le fichier est lisible depuis un autre site (en-tête CORS)."
-        : "Nothing could be loaded from that link. Check the address, and that the file is readable from another site (a CORS header).",
+        ? "Rien n'a pu être chargé depuis ce lien. Vérifiez l'adresse, et que vous êtes connecté."
+        : "Nothing could be loaded from that link. Check the address, and that you are online.",
+      cors: fr
+        ? "Cette adresse répond, mais le navigateur n'a pas le droit de la lire depuis cette page. Le fichier est bon : c'est son serveur qui doit envoyer l'en-tête « Access-Control-Allow-Origin: * » avec."
+        : "That address answers, but the browser is not allowed to read it from this page. The file is fine — its server needs to send the header \"Access-Control-Allow-Origin: *\" with it.",
       badJson: fr ? "Ce texte n'est pas une reconstitution valide : " : "That text is not a valid reconstruction: ",
       empty: fr ? "Rien à jouer — collez une reconstitution d'abord." : "Nothing to play — paste a reconstruction first.",
       playing: fr ? "Rejouer {title}" : "Playing {title}",
@@ -111,9 +114,30 @@ const resolve = requested => requested.includes("/")
      \`/demo-data/\${requested.toLowerCase()}.json\`,
      \`https://rr0.org/science/crypto/ufo/enquete/dossier/\${requested}/sighting.json\`]
 
+/**
+ * Whether a cross-origin address answered at all.
+ *
+ * A browser rejects every kind of cross-origin failure with the same bare TypeError, on purpose —
+ * telling them apart from script would leak whether a host exists. What CAN be established is
+ * this: a second request in no-cors mode gets an unreadable reply, so its RESOLVING proves
+ * something answered and the browser simply would not hand the bytes over. That is a CORS refusal,
+ * which is worth saying because it is the one failure whose fix is on somebody else's server.
+ */
+const answeredButUnreadable = async url => {
+  if (new URL(url, location.href).origin === location.origin) return false
+  try {
+    await fetch(url, { mode: "no-cors" })
+    return true
+  } catch {
+    return false
+  }
+}
+
 const openUrl = async requested => {
   say(messages.loading)
-  for (const candidate of resolve(requested)) {
+  const candidates = resolve(requested)
+  let refused = false
+  for (const candidate of candidates) {
     try {
       const response = await fetch(candidate)
       if (!response.ok) continue
@@ -126,10 +150,12 @@ const openUrl = async requested => {
       history.replaceState(null, "", next)
       return
     } catch {
-      // Try the next candidate; the message below is for having exhausted them all.
+      // Only the address the reader actually gave is worth diagnosing: the others are this site's
+      // own guesses at what a bare name might mean, and a 404 on one of those explains nothing.
+      if (candidate === requested) refused = await answeredButUnreadable(candidate)
     }
   }
-  say(messages.notFound, "error")
+  say(refused ? messages.cors : messages.notFound, "error")
 }
 
 urlForm.addEventListener("submit", event => {

@@ -1,4 +1,5 @@
 import { html, css } from "./ufoTemplate.js"
+import { SightingFetch } from "../engine/net/SightingFetch.js"
 import { Instruments } from "../engine/instrument/Instrument.js"
 import { resolveObserverPoseAt, Sighting, resolveSoundAt, sightingDurationMs, sightingTimeToMs } from "../engine/model/Sighting.js"
 import type { SightingTime } from "../engine/model/Sighting.js"
@@ -230,8 +231,7 @@ export class UfoElement extends HTMLElement {
 
   /** Fetches a SightingRecordingJson from `url` and loads it — what the `src` attribute uses. */
   async loadFromSrc(url: string): Promise<void> {
-    const response = await fetch(url)
-    this.sightingData = (await response.json()) as SightingRecordingJson
+    this.sightingData = (await SightingFetch.json(url)) as SightingRecordingJson
   }
 
   get sightingData(): SightingRecordingJson {

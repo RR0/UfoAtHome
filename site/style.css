@@ -38,6 +38,7 @@
   --backdrop: radial-gradient(120% 80% at 50% 120%, rgba(120, 160, 214, 0.22) 0%, transparent 60%),
               radial-gradient(80% 50% at 85% -10%, rgba(240, 188, 68, 0.16) 0%, transparent 70%);
   --ok: #1f7a44;
+  --error: #c0392b;
   --ok-bg: rgba(31, 122, 68, 0.12);
   --warn-bg: rgba(154, 111, 18, 0.14);
   --neutral-bg: rgba(120, 133, 155, 0.14);
@@ -74,6 +75,7 @@
     --backdrop: radial-gradient(120% 80% at 50% 120%, rgba(60, 92, 140, 0.28) 0%, transparent 60%),
                 radial-gradient(80% 50% at 85% -10%, rgba(245, 196, 81, 0.07) 0%, transparent 70%);
     --ok: #8fd7a4;
+    --error: #ff8a7a;
     --ok-bg: rgba(120, 200, 140, 0.14);
     --warn-bg: rgba(245, 196, 81, 0.14);
     --neutral-bg: rgba(140, 155, 185, 0.12);
@@ -345,6 +347,13 @@ section.band:first-of-type { border-top: 0; }
   border: 1px solid var(--line-strong); background: var(--ground); color: var(--ink);
 }
 .doc-try input:focus-visible { outline: 2px solid var(--glow); outline-offset: 1px; }
+/* Marked from the script rather than by :invalid, which would also flag a field somebody is
+   halfway through typing into. Both ends are marked — the field and what it produced — because
+   the reader is looking at whichever of the two they last touched. */
+.doc-try input[aria-invalid="true"] { border-color: var(--error); }
+.doc-try .is-invalid { color: var(--error); font-style: italic; }
+.doc-try [aria-disabled="true"] { opacity: 0.5; pointer-events: none; }
+.doc-try button:disabled { opacity: 0.5; cursor: default; }
 .doc-try pre { margin: 0.8rem 0 0; }
 .doc-try-out {
   margin: 0.8rem 0 0; overflow-x: auto;
@@ -374,8 +383,7 @@ section.band:first-of-type { border-top: 0; }
   background: var(--ground-sunken); min-height: 8rem;
 }
 .player-status { min-height: 1.4em; font-size: 0.92rem; color: var(--ink-dim); }
-.player-status.is-error { color: #c0392b; }
-@media (prefers-color-scheme: dark) { .player-status.is-error { color: #ff8a7a; } }
+.player-status.is-error { color: var(--error); }
 
 /* ---------------------------------------------------------------- steps */
 

@@ -123,6 +123,18 @@ export interface UfoRecorderMessages extends SightingLabels {
   importUrlPlaceholder: string
   importButton: string
   importError: string
+  /** The one failure whose fix is not the reader's: the file is there and the address is right, and
+   * what has to change is a header on somebody else's server. See SightingFetch for how a page
+   * establishes this much and why the wording hedges. */
+  importErrorCors: string
+  /** A secure page may not fetch an insecure URL at all — the browser refuses before asking. */
+  importErrorMixedContent: string
+  /** Nothing answered: the host does not resolve, the machine is offline, something blocked it. */
+  importErrorUnreachable: string
+  /** The server answered, and said no. `{status}` is the code it gave. */
+  importErrorStatus: string
+  /** It arrived, and it is not a recording. */
+  importErrorMalformed: string
   record: string
   stop: string
   /** Connects a reported result to the picker naming who produced it: "2 places found
