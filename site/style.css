@@ -142,10 +142,10 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 3rem 0; }
   display: inline-flex; align-items: baseline;
 }
 /* Optical spacing, not a flex gap: the @ is a letter inside the name, and a gap made it read as a
-   word between two others. Negative, because the serif's own @ is drawn well inside its advance
-   width — its side bearings alone are wider than the space this wordmark wants, so closing it
-   means eating into them. */
-.brand .at { color: var(--glow); margin: 0 -0.08em; }
+   word between two others. Slightly negative, because the serif's own @ is drawn well inside its
+   advance width — its side bearings alone are already more air than the wordmark wants, so this
+   trims a little off them and leaves the rest. */
+.brand .at { color: var(--glow); margin: 0 -0.02em; }
 .site-nav { display: flex; gap: 1.1rem; flex-wrap: wrap; margin-left: auto; align-items: center; }
 .site-nav a { color: var(--ink-dim); font-size: 0.95rem; padding: 0.2rem 0; border-bottom: 2px solid transparent; }
 .site-nav a:hover { color: var(--ink); }
@@ -330,6 +330,20 @@ section.band:first-of-type { border-top: 0; }
 .demo-links { margin-top: 0.6rem !important; font-size: 0.85rem; }
 .demo-links a { font-weight: 600; }
 .demo-links span { color: var(--ink-faint); margin: 0 0.35rem; }
+
+/* ---------------------------------------------------------------- section anchors */
+
+/* Every section heading can be linked to; the mark that says so appears when the heading is
+   pointed at, so it is there when wanted and invisible the rest of the time. It stays visible on
+   keyboard focus, which is the only way somebody navigating without a pointer can reach it. */
+.heading-anchor {
+  margin-left: 0.4em; color: var(--ink-faint); text-decoration: none; font-weight: 400;
+  opacity: 0; transition: opacity .15s;
+}
+h2:hover > .heading-anchor, h3:hover > .heading-anchor, .heading-anchor:focus-visible { opacity: 1; }
+.heading-anchor:hover { color: var(--glow); }
+/* A heading landed on from a link is not left under the sticky header. */
+h2[id], h3[id] { scroll-margin-top: 4.5rem; }
 
 /* ------------------------------------------------------- try-it blocks in the docs */
 

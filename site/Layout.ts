@@ -1,3 +1,4 @@
+import { Headings } from "./Headings.js"
 import {
   FALLBACK_LANGUAGE, type PageMeta, SITE_LANGUAGES, type SiteLanguage, type SitePage
 } from "./SitePage.js"
@@ -15,6 +16,8 @@ import {
 export class Layout {
 
   static readonly ORIGIN = "https://ufoathome.org"
+
+  private readonly headings = new Headings()
 
   constructor(private readonly pages: readonly SitePage[], private readonly version: string) {
   }
@@ -73,7 +76,7 @@ ${this.languageRedirect(meta, language)}
 <body>
 ${this.header(page, language)}
 <main>
-${page.render(language)}
+${this.headings.withAnchors(page.render(language), language === "fr" ? "Lien vers cette section" : "Link to this section")}
 </main>
 ${this.siteFooter(language)}
 ${script ? `<script type="module">\n${script}\n</script>` : ""}
