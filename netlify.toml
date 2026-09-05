@@ -1,0 +1,21 @@
+# What ufoathome.org builds, and where from.
+#
+# The site is deployed from this repository so that its documentation, its demo catalogue and its
+# roadmap can never describe a version other than the one they ship with. Netlify's own project
+# settings pointed at `npm run build` / `dist` — the local ENGINE DEMO, which is a developer's page
+# and not a site — so this file states the real target instead. A netlify.toml in the repository
+# takes precedence over those settings, which also means the build is reviewable in a diff rather
+# than living only in a web form.
+#
+# Redirects and headers are deliberately NOT here: site/build.ts writes `_redirects` and `_headers`
+# into dist-site/ itself, and Netlify reads those from the deployed directory. They are generated
+# (one language-detection rule per page), so a hand-maintained copy here would be a second source
+# of truth that drifts the first time a page is added.
+
+[build]
+  command = "npm run build:site"
+  publish = "dist-site"
+
+[build.environment]
+  # package.json asks for >= 20; pinned so a change of Netlify's own default cannot quietly move it.
+  NODE_VERSION = "22"
