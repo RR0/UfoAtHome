@@ -47,4 +47,30 @@ describe("Headings", () => {
     const html = '<h2><img src="x.png"></h2>'
     expect(anchored(html)).toBe(html)
   })
+  // How the documentation hub's three cards came apart: each was one <a> around a heading, a
+  // description and a "Read →", and putting a second <a> inside the heading made the parser close
+  // the outer one there — leaving two thirds of every card outside the link it was meant to be.
+  describe("a heading inside a link", () => {
+    const card = '<a class="use" href="/docs/create/"><h3>Create an observation</h3><p>Blurb.</p></a>'
+
+    it("gets no anchor of its own", () => {
+      expect(new Headings().withAnchors(card, "Link")).not.toContain("heading-anchor")
+    })
+
+    it("keeps its id, which costs nothing and stays linkable", () => {
+      expect(new Headings().withAnchors(card, "Link")).toContain('id="create-an-observation"')
+    })
+
+    it("does not make the headings after it lose theirs", () => {
+      const html = `${card}<h2>What a recording needs</h2>`
+      const out = new Headings().withAnchors(html, "Link")
+      expect(out).toContain('href="#what-a-recording-needs"')
+      expect(out.match(/heading-anchor/g)).toHaveLength(1)
+    })
+
+    it("is told from a heading that merely follows one", () => {
+      const out = new Headings().withAnchors('<a href="/docs/">Docs</a><h2>After the link</h2>', "Link")
+      expect(out).toContain('href="#after-the-link"')
+    })
+  })
 })
