@@ -38,6 +38,7 @@ export const sightingEditorMessages_en: SightingEditorMessages = {
   contextMenuDelete: "Delete",
   confirmDeleteShape: "Delete {name}? This can't be undone.",
   confirmDeleteShapes: "Delete {count} shapes? This can't be undone.",
+  confirmDeleteMilestone: "Stop naming moment {name}? The recording itself is unchanged.",
   onlyOneShape: "There is only one shape",
   alreadyAtFront: "This shape is already at the front",
   alreadyAtBack: "This shape is already at the back",

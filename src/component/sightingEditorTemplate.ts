@@ -28,6 +28,15 @@ export const html = `
     <label><span id="label-case-id">Case ID</span> <input id="caseId" type="text"/></label>
     <label><span id="label-description">Description</span> <textarea id="description" rows="2"></textarea></label>
     <label><span id="label-tags">Tags</span> <input id="tags" type="text" placeholder="comma-separated"/></label>
+    <!-- The named moments of the account (see Milestone) — with the observation, because that is
+         what they belong to: they are how the testimony READS, not anything about a shape. Added at
+         the playhead, which is the only instant a reader has in mind when they name one. -->
+    <span id="label-milestones">Moments</span>
+    <button id="add-milestone" type="button" class="icon-btn" title="Add" aria-label="Add">+</button>
+    <select id="milestone"></select>
+    <button id="delete-milestone" type="button" class="icon-btn" title="Delete moment" aria-label="Delete moment">🗑</button>
+    <label><span id="label-milestone-label">Label</span> <input id="milestoneLabel" type="text" size="4"/></label>
+    <label><span id="label-milestone-note">What happens</span> <input id="milestoneNote" type="text"/></label>
   </div>
 </section>
 <section class="group-panel" id="group-witness" aria-labelledby="label-witness-group" hidden>
@@ -440,6 +449,9 @@ button.preset[aria-pressed="true"] {
 }
 #obs-time, #obs-end-time {
   width: 12em;
+}
+#milestoneNote {
+  min-width: 22em;
 }
 #witnessId, #witnessDirName, #witnessTitle, #witnessLastName, #witnessFirstNames, #caseId, #tags, #shapeTitle, #decorTitle {
   width: 10em;

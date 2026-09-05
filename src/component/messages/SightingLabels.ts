@@ -133,6 +133,14 @@ export interface SightingLabels {
   /** The editor's own confirmation buttons (see the confirm-overlay in the template — a native
    * confirm() is suppressed in a sandboxed iframe and in some embedded browser views, and a
    * suppressed one returns false, which reads exactly like the reader declining). */
+  /** The named moments of the account, edited with the observation they belong to — see
+   * Milestone. The group heading, the picker, its label field and the sentence beside it. */
+  milestones: string
+  milestoneLabel: string
+  milestoneNote: string
+  /** The "+" button that names the moment at the playhead, and the bin that unnames one. */
+  addMilestone: string
+  deleteMilestone: string
   confirmAccept: string
   confirmDecline: string
   decorWidth: string

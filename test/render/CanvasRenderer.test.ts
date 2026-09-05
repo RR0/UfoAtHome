@@ -172,6 +172,32 @@ describe("CanvasRenderer stated brilliance", () => {
     expect(ctx.arc).toHaveBeenCalled()
   })
 
+  it("still spreads a veil for a light too small to have one scaled from it", () => {
+    // Socorro's own case: the flame Zamora saw from a kilometre off is 0.055 degrees of actual
+    // flame, a third of a pixel across, and a veil scaled from that reaches nobody. What arrives
+    // from a bright light is its bloom, not its outline — the same reason DecorSystem floors a
+    // lamp's own drawn radius. The floor is on the VEIL: the shape keeps the size it was given.
+    const ctx = brightContext()
+    const renderer = new CanvasRenderer(ctx)
+    const speck = { ...createOval({ x: 100, y: 100, width: 0.33, height: 0.66 }), brightness: 0.95 }
+
+    renderer.paintShape(speck)
+
+    const veil = (ctx.createRadialGradient as ReturnType<typeof vi.fn>).mock.calls[0]
+    expect(veil[5]).toBeGreaterThan(4)
+    // ...and it is still a veil around that speck, not a repositioning of it.
+    expect(veil[3]).toBeCloseTo(100.165, 2)
+  })
+
+  it("keeps scaling the veil with the shape once the shape is bigger than the floor", () => {
+    const ctx = brightContext()
+    const renderer = new CanvasRenderer(ctx)
+    renderer.paintShape({ ...createOval({ x: 0, y: 0, width: 200, height: 200 }), brightness: 1 })
+
+    const veil = (ctx.createRadialGradient as ReturnType<typeof vi.fn>).mock.calls[0]
+    expect(veil[5]).toBeGreaterThan(100)
+  })
+
   /*
    * Clipping is not a shape. A first version painted the saturated core as a radial gradient,
    * which put a round white blob inside a triangle and gave an oval a visible inner bead — neither

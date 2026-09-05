@@ -36,6 +36,7 @@ import { DEFAULT_ICE_CRYSTAL_ALIGNMENT } from "../engine/model/Weather.js"
 import type { PrecipitationType, Weather } from "../engine/model/Weather.js"
 import type { People } from "../engine/model/People.js"
 import type { DecorObject, DecorSide, DecorSize } from "../engine/model/Decor.js"
+import { sortedMilestones } from "../engine/model/Milestone.js"
 import {
   resolveDecorLitAt,
   DECOR_SIDES,
@@ -514,6 +515,15 @@ export class SightingEditorElement extends HTMLElement {
   /** What to do if the reader accepts what askConfirm is currently asking. Absent while nothing is
    * being asked. */
   private confirmAnswer?: () => void
+  private readonly milestoneSelect: HTMLSelectElement
+  private readonly milestoneLabelInput: HTMLInputElement
+  private readonly milestoneNoteInput: HTMLInputElement
+  private readonly addMilestoneButton: HTMLButtonElement
+  private readonly deleteMilestoneButton: HTMLButtonElement
+  /** Which named moment the two fields are editing, by its own time — the only thing that
+   * identifies one, since two moments can share a label and neither has an id. Undefined when the
+   * recording names none. */
+  private currentMilestoneT?: number
   private readonly decorWidthInput: HTMLInputElement
   private readonly decorLengthInput: HTMLInputElement
   private readonly decorHeightInput: HTMLInputElement
@@ -546,6 +556,9 @@ export class SightingEditorElement extends HTMLElement {
   private readonly labelDecorHeading: HTMLElement
   private readonly labelDecorLit: HTMLElement
   private readonly labelDecorSightingUrl: HTMLElement
+  private readonly labelMilestones: HTMLElement
+  private readonly labelMilestoneLabel: HTMLElement
+  private readonly labelMilestoneNote: HTMLElement
   private readonly labelDecorWidth: HTMLElement
   private readonly labelDecorLength: HTMLElement
   private readonly labelDecorHeight: HTMLElement
@@ -938,6 +951,11 @@ export class SightingEditorElement extends HTMLElement {
     this.confirmMessage = this.shadow.getElementById("confirm-message")!
     this.confirmAcceptButton = this.shadow.getElementById("confirm-ok") as HTMLButtonElement
     this.confirmDeclineButton = this.shadow.getElementById("confirm-cancel") as HTMLButtonElement
+    this.milestoneSelect = this.shadow.getElementById("milestone") as HTMLSelectElement
+    this.milestoneLabelInput = this.shadow.getElementById("milestoneLabel") as HTMLInputElement
+    this.milestoneNoteInput = this.shadow.getElementById("milestoneNote") as HTMLInputElement
+    this.addMilestoneButton = this.shadow.getElementById("add-milestone") as HTMLButtonElement
+    this.deleteMilestoneButton = this.shadow.getElementById("delete-milestone") as HTMLButtonElement
     this.decorWidthInput = this.shadow.getElementById("decorWidth") as HTMLInputElement
     this.decorLengthInput = this.shadow.getElementById("decorLength") as HTMLInputElement
     this.decorHeightInput = this.shadow.getElementById("decorHeight") as HTMLInputElement
@@ -990,6 +1008,9 @@ export class SightingEditorElement extends HTMLElement {
     this.labelDecorHeading = this.shadow.getElementById("label-decor-heading")!
     this.labelDecorLit = this.shadow.getElementById("label-decor-lit")!
     this.labelDecorSightingUrl = this.shadow.getElementById("label-decor-sighting-url")!
+    this.labelMilestones = this.shadow.getElementById("label-milestones")!
+    this.labelMilestoneLabel = this.shadow.getElementById("label-milestone-label")!
+    this.labelMilestoneNote = this.shadow.getElementById("label-milestone-note")!
     this.labelDecorWidth = this.shadow.getElementById("label-decor-width")!
     this.labelDecorLength = this.shadow.getElementById("label-decor-length")!
     this.labelDecorHeight = this.shadow.getElementById("label-decor-height")!
@@ -1095,6 +1116,12 @@ export class SightingEditorElement extends HTMLElement {
     }
     this.decorWitnessSideSelect.addEventListener("change", () => this.updateDecor())
     this.decorModelSelect.addEventListener("change", () => this.updateDecorModelChoice())
+    this.addMilestoneButton.addEventListener("click", () => this.addMilestone())
+    this.deleteMilestoneButton.addEventListener("click", () => this.deleteMilestone())
+    this.milestoneSelect.addEventListener("change", () => this.selectMilestone(Number(this.milestoneSelect.value)))
+    for (const input of [this.milestoneLabelInput, this.milestoneNoteInput]) {
+      input.addEventListener("input", () => this.updateMilestone())
+    }
     this.confirmAcceptButton.addEventListener("click", () => this.answerConfirm(true))
     this.confirmDeclineButton.addEventListener("click", () => this.answerConfirm(false))
     // Clicking the darkened area around the box declines, like every other modal.
@@ -1284,6 +1311,8 @@ export class SightingEditorElement extends HTMLElement {
     this.updateShapeTitle()
     this.currentDecorId = this.ufoElement.sighting.decor[0]?.id
     this.refreshDecorList()
+    this.currentMilestoneT = this.ufoElement.sighting.milestones[0]?.t
+    this.refreshMilestoneList()
     this.onSelectionOrTimeChanged()
     // A brand-new recording starts with no duration at all — flags it as missing right away
     // rather than only once the user first touches a date/duration field.
@@ -1350,6 +1379,8 @@ export class SightingEditorElement extends HTMLElement {
     this.refreshSourceList()
     this.currentDecorId = this.ufoElement.sighting.decor[0]?.id
     this.refreshDecorList()
+    this.currentMilestoneT = this.ufoElement.sighting.milestones[0]?.t
+    this.refreshMilestoneList()
     this.onSelectionOrTimeChanged()
     this.syncDurationField()
     this.syncObservationTimeFields()
@@ -4140,6 +4171,107 @@ export class SightingEditorElement extends HTMLElement {
     return id === undefined ? undefined : { id }
   }
 
+  /**
+   * Names the instant the playhead is on.
+   *
+   * At the playhead and nowhere else: naming a moment is something a reader does WHILE looking at
+   * it, and a moment created at t=0 for them to drag afterwards would be a different gesture. An
+   * instant already named is selected rather than named twice — the label is what changes, not the
+   * time.
+   */
+  private addMilestone(): void {
+    const t = Math.round(this.ufoElement.currentTime)
+    const sighting = this.ufoElement.sighting
+    const existing = sighting.milestones.find(milestone => milestone.t === t)
+    if (!existing) {
+      sighting.milestones = sortedMilestones([...sighting.milestones, { t, label: this.nextMilestoneLabel() }])
+    }
+    this.currentMilestoneT = t
+    this.refreshMilestoneList()
+    this.ufoElement.refresh()
+  }
+
+  /** A, B, C… — the letters the case sketches themselves use, and the first one this recording has
+   * not used yet. Falls back to the count once the alphabet runs out, which no account has. */
+  private nextMilestoneLabel(): string {
+    const used = new Set(this.ufoElement.sighting.milestones.map(milestone => milestone.label))
+    for (let i = 0; i < 26; i++) {
+      const letter = String.fromCharCode(65 + i)
+      if (!used.has(letter)) return letter
+    }
+    return String(this.ufoElement.sighting.milestones.length + 1)
+  }
+
+  private deleteMilestone(): void {
+    const t = this.currentMilestoneT
+    if (t === undefined) return
+    const sighting = this.ufoElement.sighting
+    const going = sighting.milestones.find(milestone => milestone.t === t)
+    if (!going) return
+    this.askConfirm(this.messages.confirmDeleteMilestone.replace("{name}", going.label), () => {
+      sighting.milestones = sighting.milestones.filter(milestone => milestone.t !== t)
+      this.currentMilestoneT = sighting.milestones[0]?.t
+      this.refreshMilestoneList()
+      this.ufoElement.refresh()
+    })
+  }
+
+  /** Selecting a moment moves the playhead to it: what a reader wants next after picking one out
+   * of a list is to see it. */
+  private selectMilestone(t: number): void {
+    this.currentMilestoneT = t
+    this.syncMilestoneFields()
+    this.ufoElement.currentTime = t
+  }
+
+  private updateMilestone(): void {
+    const t = this.currentMilestoneT
+    if (t === undefined) return
+    const sighting = this.ufoElement.sighting
+    sighting.milestones = sighting.milestones.map(milestone =>
+      milestone.t === t
+        ? { ...milestone, label: this.milestoneLabelInput.value, note: this.stringOrUndefined(this.milestoneNoteInput.value) }
+        : milestone
+    )
+    this.refreshMilestoneList()
+    this.ufoElement.refresh()
+  }
+
+  /** Rebuilds the picker from the recording, each option naming the moment and when it happens —
+   * a list of bare letters would be unreadable the moment there are more than three. */
+  private refreshMilestoneList(): void {
+    const milestones = sortedMilestones(this.ufoElement.sighting.milestones)
+    if (!milestones.some(milestone => milestone.t === this.currentMilestoneT)) this.currentMilestoneT = milestones[0]?.t
+    this.milestoneSelect.replaceChildren(
+      ...milestones.map(milestone => {
+        const option = document.createElement("option")
+        option.value = String(milestone.t)
+        option.textContent = `${milestone.label} — ${this.formatSeconds(milestone.t)}`
+        option.title = milestone.note ?? ""
+        return option
+      })
+    )
+    if (this.currentMilestoneT !== undefined) this.milestoneSelect.value = String(this.currentMilestoneT)
+    this.syncMilestoneFields()
+  }
+
+  /** Seconds to a tenth — enough to tell two moments apart without pretending the account was
+   * timed to the millisecond. */
+  private formatSeconds(t: number): string {
+    return `${(t / 1000).toFixed(1)} s`
+  }
+
+  private syncMilestoneFields(): void {
+    const current = this.ufoElement.sighting.milestones.find(milestone => milestone.t === this.currentMilestoneT)
+    const has = current !== undefined
+    for (const control of [this.milestoneSelect, this.milestoneLabelInput, this.milestoneNoteInput, this.deleteMilestoneButton]) {
+      control.disabled = !has
+      this.setRowVisible(control, has)
+    }
+    this.milestoneLabelInput.value = current?.label ?? ""
+    this.milestoneNoteInput.value = current?.note ?? ""
+  }
+
   /** Name is mandatory once a decor object exists — addDecor() always fills it with a real
    * generated label from the start (see its own doc comment), so an empty field here only ever
    * means the witness/recorder cleared it afterward, which decorLabel()'s own fallback then
@@ -5087,6 +5219,13 @@ export class SightingEditorElement extends HTMLElement {
     this.addDecorBuildingButton.setAttribute("aria-label", messages.addDecor)
     this.confirmAcceptButton.textContent = messages.confirmAccept
     this.confirmDeclineButton.textContent = messages.confirmDecline
+    this.labelMilestones.textContent = messages.milestones
+    this.labelMilestoneLabel.textContent = messages.milestoneLabel
+    this.labelMilestoneNote.textContent = messages.milestoneNote
+    for (const [button, text] of [[this.addMilestoneButton, messages.addMilestone], [this.deleteMilestoneButton, messages.deleteMilestone]] as const) {
+      button.title = text
+      button.setAttribute("aria-label", text)
+    }
     this.labelDecorWidth.textContent = messages.decorWidth
     this.labelDecorLength.textContent = messages.decorLength
     this.labelDecorHeight.textContent = messages.decorHeight

@@ -38,6 +38,7 @@ export const sightingEditorMessages_fr: SightingEditorMessages = {
   contextMenuDelete: "Supprimer",
   confirmDeleteShape: "Supprimer {name} ? Cette action est irréversible.",
   confirmDeleteShapes: "Supprimer {count} formes ? Cette action est irréversible.",
+  confirmDeleteMilestone: "Ne plus nommer le moment {name} ? L'enregistrement lui-même est inchangé.",
   onlyOneShape: "Il n'y a qu'une seule forme",
   alreadyAtFront: "Cette forme est déjà la plus en avant",
   alreadyAtBack: "Cette forme est déjà la plus en arrière",

@@ -28,6 +28,11 @@ const DAZZLE_VEIL_RADIUS_SCALE = 9
 const DAZZLE_VEIL_STOPS = 6
 /** Length of a diffraction spike at full brightness, as a multiple of the shape's own radius. */
 const DAZZLE_SPIKE_LENGTH_SCALE = 7
+/** Smallest radius, in image pixels, a dazzle veil is drawn at when the shape throwing it is
+ * brighter than nothing — scaled by that brightness, so a faintly-stated light still gets a faint
+ * veil. See paintDazzle for why a floor is the honest rendering of a bright point rather than an
+ * inflation of it. */
+const MIN_DAZZLE_VEIL_PX = 6
 const VERTEX_HANDLE_RADIUS = 4
 
 /**
@@ -114,7 +119,14 @@ export class CanvasRenderer {
     const centerX = x + width / 2
     const centerY = y + height / 2
     const radius = Math.max(width, height) / 2
-    const veilRadius = radius * (1 + DAZZLE_VEIL_RADIUS_SCALE * brightness)
+    // Floored, and for the same reason DecorSystem floors a lamp's own drawn radius (see
+    // LAMP_MIN_ANGULAR_RADIUS_RAD): what reaches an eye from a bright light is its BLOOM, not its
+    // outline, and a bloom scaled from an outline a third of a pixel across reaches nobody. Socorro
+    // is the case that showed it — the flame Zamora saw from a kilometre off is 0.06 degrees of
+    // actual flame, which is a third of a pixel, and it was simply absent from the reconstruction
+    // while the account has him seeing it from the road. The floor is on the VEIL only: the shape's
+    // own stated size is untouched, so nothing here claims the flame was bigger than it was.
+    const veilRadius = Math.max(radius * (1 + DAZZLE_VEIL_RADIUS_SCALE * brightness), MIN_DAZZLE_VEIL_PX * brightness)
     if (veilRadius <= 0) return
     this.ctx.save()
     // Additive, like the Sun's own glare sprite: two overlapping veils are brighter than either,

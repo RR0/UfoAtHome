@@ -83,6 +83,10 @@ export interface SightingEditorMessages extends SightingLabels {
   /** `{count}` gets replaced with the number of selected shapes — the multi-select counterpart of
    * confirmDeleteShape, used whenever more than one shape is selected at once. */
   confirmDeleteShapes: string
+  /** Asked before a named moment is unnamed — {name} is its own label. Nothing else goes with it:
+   * a milestone carries no keyframe of its own (see Milestone), so deleting one takes away a name
+   * and never a shape, a pose or a sound. */
+  confirmDeleteMilestone: string
   /** Explains, via the disabled context-menu items' own title, why front/back/delete are all
    * disabled together — see showContextMenu(). */
   onlyOneShape: string
