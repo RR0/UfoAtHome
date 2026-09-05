@@ -52,10 +52,10 @@ export class DocsPage implements SitePage {
 <section class="band hero">
   <div class="wrap">
     <p class="eyebrow">Documentation</p>
-    <h1>${fr ? "Par où vous entrez." : "Whichever way you came in."}</h1>
+    <h1>${fr ? "Trois questions, trois pages." : "Three questions, three pages."}</h1>
     <p class="lede">${fr
-      ? "Trois pages, rangées par la question posée plutôt que par sujet. Prenez celle qui est la vôtre."
-      : "Three pages, arranged by the question being asked rather than by subject. Take the one that is yours."}</p>
+      ? "Rangées par la question posée plutôt que par sujet. Prenez celle qui est la vôtre."
+      : "Arranged by the question being asked rather than by subject. Take the one that is yours."}</p>
   </div>
 </section>
 
@@ -69,13 +69,15 @@ ${grid}
 
 <section class="band">
   <div class="wrap prose-wide">
-    <h2>${fr ? "Le construire soi-même" : "Building it yourself"}</h2>
+    <h2>${fr ? "Installer les sources" : "Getting the sources"}</h2>
+    <p>${fr
+      ? "Pour déboguer un comportement, changer quelque chose, ou partir de ce code et en faire le vôtre."
+      : "To debug a behaviour, change something, or take this code and make it your own."}</p>
     <pre><code>git clone https://github.com/RR0/UfoAtHome.git
 npm install
 npm run dev          # ${fr ? "démo locale, serveur de développement Vite" : "local demo, Vite dev server"}
 npm test             # vitest
-npm run build:all    # ${fr ? "les quatre bundles d'intégration" : "the four embed bundles"}
-npm run build:site   # ${fr ? "ce site, dans dist-site/" : "this site, into dist-site/"}</code></pre>
+npm run build:all    # ${fr ? "les quatre bundles d'intégration" : "the four embed bundles"}</code></pre>
     <p>${fr
       ? `Les catalogues sont engendrés, pas saisis à la main : <code>npm run build:stars</code> (HYG),
          <code>npm run build:comets</code> (JPL Horizons) et <code>npm run build:satellites</code>
