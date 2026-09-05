@@ -79,6 +79,18 @@ The lightweight component (~9KB): a canvas plus Play/Pause/Loop/seek controls. U
 | `loadFromSrc(url)` | method (async) | What the `src` attribute triggers internally; can be called directly too |
 | `enableClickToPlay` | property (get/set, default `true`) | Whether clicking the canvas toggles Play/Pause (see below). Composing elements that need the canvas's own click for something else set this to `false` — see `<rr0-ufo-recorder>`. |
 | `fullscreenTarget` | property (get/set, default: the component's own stage) | The element the fullscreen button requests fullscreen on. Composing elements that need a *different* element fullscreened set this — see `<rr0-scene>`. |
+| `play()` / `pause()` | method | Start or stop playback. Alongside `togglePlayPause()` because a caller sequencing several recordings needs to say which state it wants, not flip whatever the current one happens to be |
+| `autoReplayEnabled` | property (get/set, default `true`) | Looping. A page playing recordings in turn has to turn it **off**, or the first one never ends |
+| `playbackState` | property (readonly) | `"stopped"`, `"playing"` or `"paused"` |
+| `currentTime` / `seekableDuration` | property | The playhead and its range, in the timeline's own units (see `positionLabel` for why those are not real milliseconds) |
+
+Three events. `ended` fires once, when playback runs off the end of a recording **without** looping — not on a
+pause, and not on a scrub to the end (`Player.onEnded` is the hook, precisely so that neither of those can be
+mistaken for one: a single tick can carry the playhead from well inside the recording to past its end, so there is
+no "last playing frame" to compare against). It is `bubbles`/`composed`, unlike `timeupdate`, so a page can listen
+for it on the outermost element — that is how ufoathome.org's front page plays one reconstruction after another.
+`timeupdate` fires on every playback tick and every seek, with `detail.time`, and is meant for the composing
+elements. `timedisplaychange` fires when the counters switch between clock time and elapsed time.
 
 Playback matches the observation's *real reported duration* when it's known: set `time`/`endTime`, or `time`/
 `durationSeconds`, in the [data format](#data-format) (`durationSeconds` takes precedence over `endTime` if both are
@@ -94,9 +106,13 @@ While playing, the toolbar and the fullscreen button (top-right, semi-transparen
 only reappear on hover — always shown while paused/stopped. The fullscreen button uses the standard Fullscreen API
 (`requestFullscreen`/`exitFullscreen`); exiting with Escape is native browser behavior, nothing custom.
 
-Labels (Play/Pause, Auto-replay, Current position, Duration, Fullscreen) are translated (English/French) based on
-the visitor's `navigator.languages`, falling back to English — there's no language-picker UI, this is the only
-mechanism.
+Labels (Play/Pause, Auto-replay, Current position, Duration, Fullscreen) are translated (English/French) by
+detection, falling back to English — there's no language-picker UI, and there deliberately isn't one. What is
+detected is the **host page's own declared language first** (the nearest `lang` attribute, so `<html lang="fr">`
+gets French labels), then `navigator.languages` — see `HostLocale.preferencesFor`. A page states what language its
+reader is reading it in, and a bilingual site that serves the same article at two URLs states it per URL, which
+`navigator.languages` cannot know. A page that declares nothing falls through to the browser's list exactly as
+before.
 
 ## `<rr0-ufo-recorder>` — full editor
 
@@ -136,7 +152,7 @@ fires a native "click" on the canvas, which would otherwise spuriously toggle pl
 
 All of the toolbar's own labels (shape presets, Color/Transparency/Halo, Add shape, Record/Stop, Export JSON,
 Duration) are translated (English/French) the same way `<rr0-ufo>`'s own labels are — based on
-`navigator.languages`, no picker UI.
+the host page's own `lang` then `navigator.languages`, no picker UI.
 
 | Member | Kind | Description |
 |---|---|---|
@@ -335,6 +351,8 @@ cross-check). Each file now carries its own witness's account.
 |---|---|---|
 | `src` | attribute | URL of a single `sighting.json` or a witness manifest (above), fetched automatically on connect and whenever the attribute changes |
 | `witnessUrls` | property (get/set) | The manifest as a plain array of URLs, for programmatic use instead of `src` |
+| `sightingData` | property (get/set) | One witness's recording, set directly instead of fetched — for a page holding one in memory (text pasted into a form, a file the reader picked). Its entry carries no URL, so the info panel's editor link and embed lines fall back to the bare application, which is the honest answer for something published nowhere |
+| `scene` | property (readonly) | The `<rr0-scene>` this composes — and through `scene.ufoElement`, the playback members above |
 | `loadFromSrc(url)` | method (async) | What the `src` attribute triggers internally; can be called directly too |
 
 A toolbar row sits above the scene: a "Testimony by &lt;witness&gt;" sentence on the left, and a round "?" info
@@ -804,9 +822,28 @@ npm run build:embed-ufo         # build dist-embed-ufo/rr0-ufo.mjs
 npm run build:embed-scene       # build dist-embed-scene/rr0-scene.mjs
 npm run build:embed-eyewitness  # build dist-embed-eyewitness/rr0-eyewitness.mjs
 npm run build:all              # all four
+npm run build:site             # ufoathome.org, into dist-site/
 npm run build:comets           # regenerate the comet catalog from JPL Horizons
 npm run build:satellites       # regenerate the satellite catalog from CelesTrak's SATCAT
 ```
+
+## The site
+
+[`ufoathome.org`](https://ufoathome.org) is built from `site/` in this repository, so the tool's documentation, its
+demo catalogue and its roadmap stay in step with the version they describe. `npm run build:site` builds the four
+embed bundles, then generates the pages into `dist-site/`, which is what Netlify deploys.
+
+It is **not** a Vite build. Its pages import the bundles `build:embed*` already produces and have nothing else to
+bundle; running them through Vite would re-emit those bundles under hashed names, which is the opposite of what a
+page handing out a copy-pasteable `<script src>` needs. So `site/build.ts` generates the HTML, copies the bundles
+as they are, and copies `public/demo-data/` alongside them. The one exception is `site/scripts/jsonEditor.ts` (the
+Player page's paste panel, which pulls in CodeMirror): it gets its own Vite config, and the page loads it lazily.
+
+Each page is one module under `site/content/` holding **both** languages, because they are translations of each
+other and keeping a sentence next to its counterpart is what stops the two from drifting. English is at the root
+and is the fallback; French lives under `/fr/` with its own slugs. Like the components, the site detects and never
+offers a picker — Netlify's own `Language=` rules do the detection, and `hreflang` declares the pairing to search
+engines.
 
 ## License
 

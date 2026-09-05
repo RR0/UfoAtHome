@@ -73,7 +73,7 @@ import { dataSourceById } from "../engine/source/DataSource.js"
 import type { DataSource } from "../engine/source/DataSource.js"
 import type { PlaceMatch, PlaceProvider } from "../engine/place/PlaceProvider.js"
 import { sightingTimeToDate } from "../engine/astronomy/CelestialPositions.js"
-import { selectLocale } from "../i18n/locale.js"
+import { HostLocale, selectLocale } from "../i18n/locale.js"
 import { TIME_ZONE_SOURCES } from "../engine/time/timeZoneSources.js"
 import type { TimeZoneProvider } from "../engine/time/TimeZoneProvider.js"
 import { loadUfoRecorderMessages, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
@@ -4111,7 +4111,7 @@ export class UfoRecorderElement extends HTMLElement {
   /** Which of a shower's own names to use — the reader's, resolved the same way every other label
    * in this element is. */
   private showerLanguage(): "en" | "fr" {
-    return selectLocale(navigator.languages, ["en", "fr"]) as "en" | "fr"
+    return selectLocale(HostLocale.preferencesFor(this), ["en", "fr"]) as "en" | "fr"
   }
 
   /**
@@ -4631,7 +4631,7 @@ export class UfoRecorderElement extends HTMLElement {
    * supported — see selectLocale. There is deliberately no language-picker UI, matching
    * `<rr0-ufo>`'s own approach. */
   private async loadLocaleMessages(): Promise<void> {
-    const language = selectLocale(navigator.languages, UFO_SUPPORTED_LANGUAGES) as UfoLanguage
+    const language = selectLocale(HostLocale.preferencesFor(this), UFO_SUPPORTED_LANGUAGES) as UfoLanguage
     if (language === "en") return
     this.applyMessages(await loadUfoRecorderMessages(language))
   }

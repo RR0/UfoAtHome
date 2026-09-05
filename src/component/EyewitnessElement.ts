@@ -3,7 +3,7 @@ import { SightingSummary } from "./SightingSummary.js"
 import { SceneElement, registerScene, SCENE_ELEMENT_NAME } from "./SceneElement.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
 import type { People } from "../engine/model/People.js"
-import { selectLocale } from "../i18n/locale.js"
+import { HostLocale, selectLocale } from "../i18n/locale.js"
 import { sightingTimeToDate } from "../engine/astronomy/CelestialPositions.js"
 import { loadEyewitnessMessages, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
 import type { UfoLanguage } from "./messages/index.js"
@@ -25,6 +25,9 @@ const THUNDER_CREDIT_LICENSE_URL = "https://creativecommons.org/licenses/by/3.0/
 const THUNDER_CREDIT_LICENSE = "CC BY 3.0"
 
 const APP_HOME_URL = "https://ufoathome.org"
+
+/** Where a recording is opened for editing on that site. */
+const APP_EDITOR_URL = `${APP_HOME_URL}/editor/`
 
 /**
  * Vanilla Web Component displaying one or more witnesses' recordings of the same sighting (a
@@ -177,12 +180,19 @@ export class EyewitnessElement extends HTMLElement {
     void this.loadLocaleMessages()
   }
 
+  /** The scene this view composes, and through it (`.ufoElement`) the playback controls — what a
+   * page sequencing several reconstructions needs to start one and to stop it looping. Read-only:
+   * the composition itself is this element's own business. */
+  get scene(): SceneElement {
+    return this.sceneElement
+  }
+
   /** Auto-detects the visitor's preferred UI language from `navigator.languages`, falling back
    * to English (already baked into the template) when none of their preferences are
    * supported — see selectLocale. There is deliberately no language-picker UI, matching
    * `<rr0-ufo>`'s own approach. */
   private async loadLocaleMessages(): Promise<void> {
-    this.language = selectLocale(navigator.languages, UFO_SUPPORTED_LANGUAGES) as UfoLanguage
+    this.language = selectLocale(HostLocale.preferencesFor(this), UFO_SUPPORTED_LANGUAGES) as UfoLanguage
     if (this.language === "en") return
     this.messages = await loadEyewitnessMessages(this.language)
     this.testimonyPrefix.textContent = this.messages.testimonyBy
@@ -239,6 +249,24 @@ export class EyewitnessElement extends HTMLElement {
     }
   }
 
+  /**
+   * One witness's recording, set directly instead of fetched.
+   *
+   * The same door `<rr0-ufo>` and `<rr0-scene>` already offer, and what a page holding a recording
+   * in memory needs — text pasted into a form, a file the reader picked, a recording just built by
+   * script. Its entry carries no URL, so the info panel's "open in the editor" and embed lines have
+   * nothing to point at and fall back to the bare application, which is the honest answer for
+   * something that is not published anywhere.
+   */
+  get sightingData(): SightingRecordingJson | undefined {
+    return this.entries.find(entry => entry.src === this.currentSrc)?.sighting
+  }
+
+  set sightingData(sighting: SightingRecordingJson) {
+    this.currentSrc = ""
+    this.setEntries([{ src: "", sighting }])
+  }
+
   get witnessUrls(): string[] {
     return this.entries.map(entry => entry.src)
   }
@@ -286,18 +314,19 @@ export class EyewitnessElement extends HTMLElement {
   /**
    * Where to open THIS observation for editing — the app link in the info panel, which used to
    * point at the application's bare home page and so dropped the one thing the reader was looking
-   * at. A same-origin recording becomes a path on the app's own domain
-   * (ufoathome.org/science/.../Socorro/sighting.json, which the site redirects into the editor);
-   * anything else is passed as an explicit `?sighting=` parameter, since there is no path on this
-   * domain that would name it. Falls back to the bare home page only when no recording is loaded
-   * at all.
+   * at.
+   *
+   * Always the explicit `?sighting=` form, with an absolute URL. It used to shorten a same-origin
+   * recording to a bare path on the app's own domain, relying on that domain redirecting any
+   * unknown path into the editor — which stopped being true the day ufoathome.org became a site
+   * with files of its own: `/demo-data/witness-socorro.json` now resolves to the recording itself,
+   * and the reader would have been handed raw JSON instead of an editor. The parameter names the
+   * recording whatever the host does with its paths.
    */
   private editorUrl(): string {
-    if (!this.currentSrc) return APP_HOME_URL
+    if (!this.currentSrc) return APP_EDITOR_URL
     const url = new URL(this.currentSrc, location.href)
-    return url.origin === location.origin
-      ? `${APP_HOME_URL}${url.pathname}`
-      : `${APP_HOME_URL}/?sighting=${encodeURIComponent(url.href)}`
+    return `${APP_EDITOR_URL}?sighting=${encodeURIComponent(url.href)}`
   }
 
   /**

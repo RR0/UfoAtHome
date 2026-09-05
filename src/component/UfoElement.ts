@@ -11,7 +11,7 @@ import type { SightingRecordingJson } from "../engine/persistence/sightingJson.j
 import type { Shape } from "../engine/shape/Shape.js"
 import type { SightingSound } from "../engine/model/Sound.js"
 import { ShapeHandles } from "../engine/shape/ShapeHandles.js"
-import { selectLocale } from "../i18n/locale.js"
+import { HostLocale, selectLocale } from "../i18n/locale.js"
 import { loadUfoMessages, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
 import type { UfoLanguage } from "./messages/index.js"
 import { ufoMessages_en } from "./messages/UfoMessages_en.js"
@@ -307,6 +307,29 @@ export class UfoElement extends HTMLElement {
    * `loopEnabled` field this mirrors. */
   get autoReplayEnabled(): boolean {
     return this.loopEnabled
+  }
+
+  /** Settable for the case the getter's own comment did not cover: a page that plays several
+   * recordings in sequence has to turn looping OFF to ever reach the `ended` event that tells it
+   * to move on. Goes through the same path the button does, so the button reflects it. */
+  set autoReplayEnabled(enabled: boolean) {
+    if (enabled !== this.loopEnabled) this.toggleLoop()
+  }
+
+  /**
+   * Starts playback. Public alongside `togglePlayPause` because a caller sequencing recordings
+   * needs to say WHICH state it wants, not flip whatever the current one happens to be — and a
+   * toggle called on an already-playing element would stop it.
+   */
+  play(): void {
+    if (this.player.seekableDuration <= 0 || this.playbackState === "playing") return
+    this.togglePlayPause()
+  }
+
+  /** Stops playback where it stands. See `play()` for why this is not just the toggle. */
+  pause(): void {
+    if (this.playbackState !== "playing") return
+    this.togglePlayPause()
   }
 
   /** The already-computed, human-readable elapsed-position/total-duration text this element's own
@@ -661,6 +684,14 @@ export class UfoElement extends HTMLElement {
   private createPlayer(): Player {
     const player = new Player(this.currentSighting.timeline, (t, shapesBySource) => this.onFrame(t, shapesBySource))
     player.loop = this.loopEnabled
+    // Composed and bubbling, unlike timeupdate: this one exists for the PAGE around the element
+    // — a page replaying several recordings in turn (see the carousel on ufoathome.org) sits
+    // outside the shadow root of every element composing this one, and has no other way to know
+    // that one reconstruction is over.
+    player.onEnded = () => {
+      this.updatePlayPauseButton()
+      this.dispatchEvent(new CustomEvent("ended", { bubbles: true, composed: true }))
+    }
     return player
   }
 
@@ -743,7 +774,7 @@ export class UfoElement extends HTMLElement {
    * see selectLocale. There is deliberately no language-picker UI: this is the only mechanism.
    */
   private async loadLocaleMessages(): Promise<void> {
-    const language = selectLocale(navigator.languages, UFO_SUPPORTED_LANGUAGES) as UfoLanguage
+    const language = selectLocale(HostLocale.preferencesFor(this), UFO_SUPPORTED_LANGUAGES) as UfoLanguage
     if (language === "en") return
     this.applyMessages(await loadUfoMessages(language))
   }

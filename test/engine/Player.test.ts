@@ -180,3 +180,64 @@ describe("Player", () => {
     })
   })
 })
+
+describe("Player.onEnded", () => {
+
+  const oneSecondTimeline = (): Timeline => {
+    const timeline = new Timeline()
+    timeline.addKeyframe(0, [{ sourceId: "a", shape: createOval({ x: 0, y: 0, width: 10, height: 10 }) }])
+    timeline.addKeyframe(1000, [{ sourceId: "a", shape: createOval({ x: 100, y: 0, width: 10, height: 10 }) }])
+    return timeline
+  }
+
+  it("fires once when playback runs off the end without looping", () => {
+    let now = 0
+    const nowSpy = vi.spyOn(performance, "now").mockImplementation(() => now)
+    let frame: FrameRequestCallback | undefined
+    vi.stubGlobal("requestAnimationFrame", (cb: FrameRequestCallback) => { frame = cb; return 1 })
+    vi.stubGlobal("cancelAnimationFrame", () => {})
+
+    const player = new Player(oneSecondTimeline(), () => {})
+    let ended = 0
+    player.onEnded = () => ended++
+    player.play()
+    now += 2000
+    frame?.(now)
+
+    expect(ended).toBe(1)
+    expect(player.playbackState).toBe("stopped")
+
+    vi.unstubAllGlobals()
+    nowSpy.mockRestore()
+  })
+
+  it("never fires while looping, however far past the end the tick lands", () => {
+    let now = 0
+    const nowSpy = vi.spyOn(performance, "now").mockImplementation(() => now)
+    let frame: FrameRequestCallback | undefined
+    vi.stubGlobal("requestAnimationFrame", (cb: FrameRequestCallback) => { frame = cb; return 1 })
+    vi.stubGlobal("cancelAnimationFrame", () => {})
+
+    const player = new Player(oneSecondTimeline(), () => {})
+    player.loop = true
+    let ended = 0
+    player.onEnded = () => ended++
+    player.play()
+    now += 5000
+    frame?.(now)
+
+    expect(ended).toBe(0)
+    expect(player.playbackState).toBe("playing")
+
+    vi.unstubAllGlobals()
+    nowSpy.mockRestore()
+  })
+
+  it("does not fire on a seek to the very end — that is a scrub, not an ending", () => {
+    const player = new Player(oneSecondTimeline(), () => {})
+    let ended = 0
+    player.onEnded = () => ended++
+    player.seek(player.seekableDuration)
+    expect(ended).toBe(0)
+  })
+})

@@ -30,6 +30,17 @@ export class Player {
   loop = false
 
   /**
+   * Called once, after the final frame is painted, when playback runs off the end of the timeline
+   * without looping.
+   *
+   * A hook rather than something a caller could infer from the frame callback: a single tick can
+   * carry the playhead from well inside the recording to past its end, so there is no "last
+   * playing frame" to compare against, and a `seek()` to the very end paints a frame at exactly
+   * the same position without anything having ended. Only this branch is the ending.
+   */
+  onEnded?: () => void
+
+  /**
    * Extends the seekable/playable range beyond timeline.duration (the last recorded
    * keyframe) when the sighting's real declared duration is longer — UfoElement sets this
    * from sightingDurationMs(event). Without it, an editor couldn't scrub to and place the
@@ -78,6 +89,7 @@ export class Player {
         // to sync a Play/Pause button) see the final "stopped" state, not a stale "playing" one.
         this.stop()
         this.resolveFrame(this.currentT)
+        this.onEnded?.()
         return
       }
       this.resolveFrame(this.currentT)

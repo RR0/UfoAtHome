@@ -19,7 +19,7 @@ import type { ObserverPose } from "../engine/model/ObserverTrack.js"
 import type { Weather } from "../engine/model/Weather.js"
 import type { DecorKind } from "../engine/model/Decor.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
-import { selectLocale } from "../i18n/locale.js"
+import { HostLocale, selectLocale } from "../i18n/locale.js"
 import { WeatherAudio } from "../render3d/WeatherAudio.js"
 import { Comets } from "../engine/astronomy/Comets.js"
 import { BRIGHT_COMETS } from "../engine/astronomy/cometCatalog.js"
@@ -220,7 +220,7 @@ export class SceneElement extends HTMLElement {
     }
     const ndcX = ((event.clientX - rect.left) / rect.width) * 2 - 1
     const ndcY = -(((event.clientY - rect.top) / rect.height) * 2 - 1)
-    const language = selectLocale(navigator.languages, BODY_TOOLTIP_SUPPORTED_LANGUAGES) as "en" | "fr"
+    const language = selectLocale(HostLocale.preferencesFor(this), BODY_TOOLTIP_SUPPORTED_LANGUAGES) as "en" | "fr"
     const bodyKey = this.sceneRenderer.pickBodyAt(ndcX, ndcY)
     if (bodyKey) {
       this.showHoverTooltip(event, this.bodyName(bodyKey, language))

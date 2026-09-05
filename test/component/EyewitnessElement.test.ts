@@ -328,9 +328,12 @@ describe("EyewitnessElement", () => {
 
     expect(infoPanel.hidden).toBe(false)
     // The app link opens THIS observation in the editor, not the application's bare home page —
-    // the recording's own path on the app's domain, which the site redirects into the editor.
+    // and it NAMES the recording rather than shortening a same-origin one to a bare path: that
+    // shortening relied on ufoathome.org redirecting any unknown path into the editor, which
+    // stopped being true once that domain became a site with files of its own.
     const appLink = element.shadowRoot!.getElementById("info-app-link") as HTMLAnchorElement
-    expect(appLink.href).toBe("https://ufoathome.org/john.json")
+    expect(appLink.href).toBe(
+      `https://ufoathome.org/editor/?sighting=${encodeURIComponent(new URL("john.json", location.href).href)}`)
     expect(appLink.textContent).toMatch(/^UFO@home v\d+\.\d+\.\d+$/)
     const observationList = element.shadowRoot!.getElementById("info-observation-list") as HTMLElement
     expect(observationList.textContent).toContain("32.4000, -86.3000")

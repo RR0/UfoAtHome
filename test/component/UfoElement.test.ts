@@ -3,6 +3,7 @@ import { registerUfo, UFO_ELEMENT_NAME } from "../../src/component/UfoElement.js
 import type { UfoElement } from "../../src/component/UfoElement.js"
 import { ApparentSize } from "../../src/engine/shape/ApparentSize.js"
 import { ImageProjection } from "../../src/engine/instrument/ImageProjection.js"
+import type { SightingRecordingJson } from "../../src/engine/persistence/sightingJson.js"
 
 registerUfo()
 
@@ -1131,5 +1132,97 @@ describe("switching the counters between clock time and elapsed time", () => {
     expect(start.getAttribute("tabindex")).toBe("0")
     start.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }))
     expect(start.textContent).toBe("0:00")
+  })
+})
+
+describe("UfoElement sequencing API", () => {
+
+  const twoSecondSighting = (): SightingRecordingJson => ({
+    version: 1,
+    durationSeconds: 2,
+    timeline: {
+      keyframes: [
+        { t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 10, y: 10, width: 20, height: 20 }, color: "#fff", angle: 0, transparency: 0, haloScale: 0, selected: false } }] },
+        { t: 200, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 40, y: 10, width: 20, height: 20 }, color: "#fff", angle: 0, transparency: 0, haloScale: 0, selected: false } }] }
+      ]
+    }
+  })
+
+  it("turns auto-replay off through the same path the button uses", () => {
+    const element = document.createElement("rr0-ufo") as UfoElement
+    document.body.append(element)
+    expect(element.autoReplayEnabled).toBe(true)
+    element.autoReplayEnabled = false
+    expect(element.autoReplayEnabled).toBe(false)
+    // Idempotent: setting it to what it already is must not toggle it back.
+    element.autoReplayEnabled = false
+    expect(element.autoReplayEnabled).toBe(false)
+    element.remove()
+  })
+
+  it("play() starts and pause() stops, whatever the current state is", () => {
+    const element = document.createElement("rr0-ufo") as UfoElement
+    document.body.append(element)
+    element.sightingData = twoSecondSighting()
+    element.play()
+    expect(element.playbackState).toBe("playing")
+    // Unlike togglePlayPause, calling it again must NOT stop it.
+    element.play()
+    expect(element.playbackState).toBe("playing")
+    element.pause()
+    expect(element.playbackState).toBe("paused")
+    element.pause()
+    expect(element.playbackState).toBe("paused")
+    element.remove()
+  })
+
+  it("fires a bubbling, composed `ended` only on the playing -> stopped transition", () => {
+    let now = 1000
+    let frame: FrameRequestCallback | undefined
+    const nowSpy = vi.spyOn(performance, "now").mockImplementation(() => now)
+    vi.stubGlobal("requestAnimationFrame", (cb: FrameRequestCallback) => {
+      frame = cb
+      return 1
+    })
+    vi.stubGlobal("cancelAnimationFrame", () => {})
+
+    const element = document.createElement(UFO_ELEMENT_NAME) as UfoElement
+    document.body.append(element)
+    element.sightingData = twoSecondSighting()
+    element.autoReplayEnabled = false
+
+    let ended = 0
+    let bubbled = false
+    let composed = false
+    element.addEventListener("ended", event => {
+      ended++
+      bubbled = event.bubbles
+      composed = (event as CustomEvent).composed
+    })
+
+    // A scrub to the very end of a recording that was never playing is not an ending.
+    element.currentTime = element.seekableDuration
+    expect(ended).toBe(0)
+
+    element.currentTime = 0
+    element.play()
+    // Pausing partway is not one either.
+    now += 500
+    frame?.(now)
+    element.pause()
+    expect(ended).toBe(0)
+
+    element.play()
+    now += 5000 // well past the declared two seconds
+    frame?.(now)
+
+    expect(element.playbackState).toBe("stopped")
+    expect(ended).toBe(1)
+    expect(bubbled).toBe(true)
+    expect(composed).toBe(true)
+
+    element.remove()
+    vi.unstubAllGlobals()
+    nowSpy.mockRestore()
   })
 })
