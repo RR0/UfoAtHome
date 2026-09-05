@@ -1969,6 +1969,9 @@ export class SceneRenderer {
     const entries = [...this.hitAreas.entries()]
     const intersection = this.raycaster.intersectObjects(entries.map(([, sprite]) => sprite))[0]
     if (!intersection) return undefined
+    // Bodies are built down to four degrees below the horizon, where the ground already hides
+    // them — see groundHides.
+    if (this.groundHides(ndcX, ndcY)) return undefined
     return entries.find(([, sprite]) => sprite === intersection.object)?.[0]
   }
 
@@ -2000,7 +2003,30 @@ export class SceneRenderer {
         best = { star: candidate.star, altitudeDeg: candidate.altitudeDeg }
       }
     }
-    return best
+    return best && this.groundHides(ndcX, ndcY) ? undefined : best
+  }
+
+  /**
+   * Whether the ground stands between the witness and whatever this screen point aims at.
+   *
+   * The hover tests are pure direction arithmetic — a star is picked by how close the pointer comes
+   * to the direction it is DRAWN in, which says nothing about whether anything is in front of it.
+   * The sky is built a little below the horizon on purpose (see BELOW_HORIZON_CUTOFF_DEG and
+   * BODY_HIDE_BELOW_DEG), so a star at −1° or a Moon at −3° really is in the scene, really is
+   * hidden behind the opaque ground, and really did answer to the pointer — naming, with its own
+   * readout, a star nobody could see, "−1° above the horizon" and all.
+   *
+   * Raycasting the ground rather than testing an altitude, because the horizon is not a number
+   * here: a real relief patch rises and falls, and a star two degrees up behind a hill is just as
+   * unseeable as one below the flat horizon. Asking the geometry is the only answer that covers
+   * both, and it is one cast, only once a candidate has been found.
+   */
+  private groundHides(ndcX: number, ndcY: number): boolean {
+    const ground = [this.terrainMesh, this.groundMesh].filter((mesh): mesh is Mesh => mesh !== undefined)
+    if (ground.length === 0) return false
+    this.aimAtScreenPoint(this.ufoOcclusionRaycaster, ndcX, ndcY)
+    this.ufoOcclusionRaycaster.near = UFO_OCCLUSION_MIN_DISTANCE_M
+    return this.ufoOcclusionRaycaster.intersectObjects(ground, true).length > 0
   }
 
   /** Finds which decor object (if any) sits under normalized device coordinates — same NDC

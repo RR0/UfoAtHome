@@ -7,6 +7,10 @@ import type { SightingLabels } from "./SightingLabels.js"
  * homes is one string that can end up translated two ways. */
 export interface EyewitnessMessages extends SightingLabels {
   testimonyBy: string
+  /** A listed witness with no name of any kind in their own recording, `{n}` being their place in
+   * the list. Only ever needed for a MANIFEST — a single unnamed witness gets no line at all, see
+   * EyewitnessElement.updateTestimonyLine. */
+  unnamedWitness: string
   about: string
   close: string
   observation: string

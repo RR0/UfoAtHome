@@ -64,6 +64,24 @@ const STAR_TOOLTIP: Record<string, string> = {
   fr: "{name} — mag {mag}, {alt}° au-dessus de l'horizon"
 }
 
+/**
+ * The same sentence for a star standing BELOW the horizontal, which is not the contradiction it
+ * looks like.
+ *
+ * The sky is built a little under the level of the eye on purpose, and for a witness who is high up
+ * that patch is genuinely in view: from a DC-3 at 1500 m the horizon has dropped 1.24°, so a star
+ * at −0.6° is above it and plainly visible. Saying "−1° above the horizon" of it was simply the
+ * wrong words for a real sight — it reads as a fault in the tool, and it buries the one fact that
+ * explains the geometry, which is that the witness was looking DOWN at it.
+ *
+ * A star the ground actually hides is a different matter and never reaches this point at all: see
+ * SceneRenderer.groundHides.
+ */
+const STAR_TOOLTIP_BELOW: Record<string, string> = {
+  en: "{name} — mag {mag}, {alt}° below the horizontal",
+  fr: "{name} — mag {mag}, {alt}° sous l'horizontale"
+}
+
 /** How SceneRenderer keys a comet's own body mesh — see its buildComet. Kept here beside the names
  * it is used with rather than exported from the renderer, which has no interest in what the rest of
  * the key means. */
@@ -244,10 +262,12 @@ export class SceneElement extends HTMLElement {
       // read like a field that failed to fill rather than like Vega, the star the whole scale was
       // originally anchored on.
       const magnitude = star.star.mag
-      this.showHoverTooltip(event, STAR_TOOLTIP[language]
+      const altitudeDeg = star.altitudeDeg
+      const template = (altitudeDeg < 0 ? STAR_TOOLTIP_BELOW : STAR_TOOLTIP)[language]!
+      this.showHoverTooltip(event, template
         .replace("{name}", star.star.name[language])
         .replace("{mag}", magnitude.toLocaleString(undefined, { maximumFractionDigits: Math.abs(magnitude) < 1 ? 2 : 1 }))
-        .replace("{alt}", String(Math.round(star.altitudeDeg))))
+        .replace("{alt}", String(Math.round(Math.abs(altitudeDeg)))))
       return
     }
     this.hoverTooltip.hidden = true

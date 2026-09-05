@@ -212,7 +212,10 @@ describe("EyewitnessElement", () => {
     expect(testimony.textContent).toContain("Clarence Chiles")
   })
 
-  it("falls back to witness.id, then the URL itself, when witness.title/name is missing", async () => {
+  it("falls back to witness.id, and then to a place in the list — never to the URL", async () => {
+    // The URL used to be the last resort, and it was a bad one: several recordings this component
+    // is pointed at have no witness at all (a sky set up to show a halo is not testimony), and
+    // "Testimony by /demo-data/sky-test-halos.json" read as a fault rather than as a name.
     const anonymousById = { version: 1 as const, witness: { id: "w2" }, timeline: { keyframes: [] } }
     const anonymousNoId = { version: 1 as const, timeline: { keyframes: [] } }
     stubFetch({ "a.json": johnSighting, "b.json": anonymousById, "c.json": anonymousNoId })
@@ -222,7 +225,29 @@ describe("EyewitnessElement", () => {
     await new Promise(resolve => setTimeout(resolve, 0))
 
     const select = element.shadowRoot!.getElementById("witness") as HTMLSelectElement
-    expect([...select.options].map(o => o.textContent)).toEqual(["Clarence Chiles", "w2", "c.json"])
+    expect([...select.options].map(o => o.textContent)).toEqual(["Clarence Chiles", "w2", "Witness 3"])
+  })
+
+  it("says nothing at all where a single recording names no witness", async () => {
+    // A sky with no witness is not a testimony, so the whole "Testimony by …" line goes — the ?
+    // button that carries the observation's own metadata stays either way.
+    const noWitness = { version: 1 as const, caseId: "sky-test-halos", timeline: { keyframes: [] } }
+    stubFetch({ "sky.json": noWitness, "john.json": johnSighting })
+    const element = mount()
+
+    element.setAttribute("src", "sky.json")
+    await new Promise(resolve => setTimeout(resolve, 0))
+
+    const testimony = element.shadowRoot!.getElementById("testimony")!
+    expect(testimony.hidden).toBe(true)
+    // And nothing stale left inside it for a screen reader to find.
+    expect(element.shadowRoot!.getElementById("witness-text")!.textContent).toBe("")
+
+    // A named one brings the line back.
+    element.setAttribute("src", "john.json")
+    await new Promise(resolve => setTimeout(resolve, 0))
+    expect(testimony.hidden).toBe(false)
+    expect(element.shadowRoot!.getElementById("witness-text")!.textContent).toBe("Clarence Chiles")
   })
 
   it("loads the first witness's sighting automatically once the list is set", async () => {

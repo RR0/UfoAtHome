@@ -107,8 +107,10 @@ export const css = `
   display: none;
 }
 .param-label {
-  color: #bbb;
-  border: 1px solid #3a3a3a;
+  /* Mixed from the host page's own text colour rather than fixed — see the same rule in
+     template.ts for why. */
+  color: color-mix(in srgb, currentColor 68%, transparent);
+  border: 1px solid color-mix(in srgb, currentColor 28%, transparent);
   border-radius: 999px;
   padding: 0.1em 0.6em;
   white-space: nowrap;
@@ -120,7 +122,7 @@ export const css = `
 /* A value no witness gave: read from a record (ERA5's weather, a terrain provider's ground) — the
    distinction this whole project turns on, and the one thing a plain list of numbers loses. */
 .param-label.from-source .param-label-value {
-  color: #8cf;
+  color: color-mix(in srgb, #3a9fd8 72%, currentColor);
   font-weight: normal;
   font-style: italic;
 }

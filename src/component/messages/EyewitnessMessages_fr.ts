@@ -4,6 +4,7 @@ import { sightingLabels_fr } from "./SightingLabels_fr.js"
 export const eyewitnessMessages_fr: EyewitnessMessages = {
   ...sightingLabels_fr,
   testimonyBy: "Témoignage de",
+  unnamedWitness: "Témoin {n}",
   about: "À propos",
   close: "Fermer",
   observation: "Observation",

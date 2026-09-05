@@ -659,27 +659,33 @@ select.weather-field:disabled {
 }
 /* Deliberately quieter than the fields it summarises: this is meant to be scanned, and 37 chips
    competing with the render above them would be worse than the scrolling it replaces. */
+/* Every colour here is a mix of the HOST PAGE's own text colour, never a fixed grey. These chips
+   were written when this element was only ever embedded in a dark page; on a light one, #bbb on
+   white was barely there at all — and it was the only part of the element that went pale, since
+   everything else already inherits. Deriving from currentColor follows whatever page the component
+   is dropped into, which is more than a prefers-color-scheme query can do: that reads the system,
+   and a page is free to disagree with it. */
 .param-chip {
   font: inherit;
   font-size: 0.85em;
   cursor: pointer;
-  color: #bbb;
+  color: color-mix(in srgb, currentColor 68%, transparent);
   background: transparent;
-  border: 1px solid #3a3a3a;
+  border: 1px solid color-mix(in srgb, currentColor 28%, transparent);
   border-radius: 999px;
   padding: 0.1em 0.6em;
   white-space: nowrap;
 }
 .param-chip:hover {
-  color: #eee;
-  border-color: #777;
+  color: currentColor;
+  border-color: color-mix(in srgb, currentColor 55%, transparent);
 }
 .param-chip:focus-visible {
   outline: 2px solid #4af;
   outline-offset: 1px;
 }
 .param-chip .param-chip-value {
-  color: #eee;
+  color: currentColor;
   font-weight: 600;
 }
 /* A value nobody typed: read from a record (ERA5's weather, Nominatim's coordinates, the terrain
@@ -687,7 +693,9 @@ select.weather-field:disabled {
    which is invisible the moment the field is — so the distinction that matters most to this
    project, what the witness said versus what the archives say, gets its own mark here. */
 .param-chip.from-source .param-chip-value {
-  color: #8cf;
+  /* Blended with the host's own text colour so the blue lightens on a dark page and darkens on a
+     light one; the italic is what carries the distinction where the hue cannot. */
+  color: color-mix(in srgb, #3a9fd8 72%, currentColor);
   font-weight: normal;
   font-style: italic;
 }
@@ -695,7 +703,7 @@ select.weather-field:disabled {
   display: inline-block;
   width: 0.7em;
   height: 0.7em;
-  border: 1px solid #666;
+  border: 1px solid color-mix(in srgb, currentColor 45%, transparent);
   border-radius: 2px;
   vertical-align: -1px;
 }

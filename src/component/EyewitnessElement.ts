@@ -64,6 +64,7 @@ export class EyewitnessElement extends HTMLElement {
   private readonly shadow: ShadowRoot
   private readonly sceneElement: SceneElement
   private readonly toolbarElement: HTMLElement
+  private readonly testimonyElement: HTMLElement
   private readonly testimonyPrefix: HTMLElement
   private readonly witnessText: HTMLElement
   private readonly witnessSelect: HTMLSelectElement
@@ -123,6 +124,7 @@ export class EyewitnessElement extends HTMLElement {
     this.shadow.getElementById("ufo-slot")!.replaceWith(this.sceneElement)
 
     this.toolbarElement = this.shadow.getElementById("toolbar")!
+    this.testimonyElement = this.shadow.getElementById("testimony")!
     this.testimonyPrefix = this.shadow.getElementById("testimony-prefix")!
     this.witnessText = this.shadow.getElementById("witness-text")!
     this.witnessSelect = this.shadow.getElementById("witness") as HTMLSelectElement
@@ -297,7 +299,11 @@ export class EyewitnessElement extends HTMLElement {
     for (const entry of entries) {
       const option = document.createElement("option")
       option.value = entry.src
-      option.textContent = this.witnessDisplayName(entry.sighting.witness) ?? entry.src
+      // Never the URL: a recording that names nobody is listed by its place in the list, which at
+      // least says what it is. `/demo-data/sky-test-halos.json` as a witness's name said nothing
+      // and looked like a fault.
+      option.textContent = this.witnessDisplayName(entry.sighting.witness)
+        ?? this.messages.unnamedWitness.replace("{n}", String(entries.indexOf(entry) + 1))
       this.witnessSelect.appendChild(option)
     }
 
@@ -388,14 +394,26 @@ export class EyewitnessElement extends HTMLElement {
     if (this.infoOpen) this.populateInfoPanel()
   }
 
-  /** Keeps the toolbar's "Testimony by <witness>" line in sync with the currently selected
-   * entry — plain text for a single witness (the `<select>` would be pointless with nothing to
-   * choose between), the live `<select>`'s own display once there's more than one. */
+  /**
+   * Keeps the toolbar's "Testimony by <witness>" line in sync — and takes it away entirely when
+   * there is no witness to name.
+   *
+   * Several of the recordings this component is pointed at are not testimony at all: a sky set up
+   * to show what a halo or a comet looked like on a given night has no witness, and "Testimony by
+   * /demo-data/sky-test-halos.json" was three wrong things at once — it claimed a testimony, it
+   * claimed a witness, and it named them with a URL. Saying nothing is the accurate answer, and the
+   * ? button that carries the observation's own metadata stays either way.
+   */
   private updateTestimonyLine(): void {
     const entry = this.entries.find(e => e.src === this.currentSrc)
-    if (entry) {
-      this.witnessText.textContent = this.witnessDisplayName(entry.sighting.witness) ?? entry.src
-    }
+    const name = entry ? this.witnessDisplayName(entry.sighting.witness) : undefined
+    // With several listed, the picker is the point even where one of them is unnamed.
+    const named = name !== undefined || this.entries.length > 1
+    this.testimonyElement.hidden = !named
+    // Cleared rather than left alone: a hidden node holding the PREVIOUS witness's name is one
+    // stylesheet away from being read out, and a screen reader does not need the stylesheet's
+    // permission to reach it.
+    this.witnessText.textContent = name ?? ""
   }
 
   /** Picks the best available display string out of a People reference — a full name (built from
