@@ -11,7 +11,7 @@ import type { SightingLabels } from "./messages/SightingLabels.js"
 /** Which group of the recorder's own tab strip a summary entry belongs to. The player ignores
  * these; the recorder maps them onto its panels, so that clicking a chip opens the one holding
  * the field. */
-export type SummaryGroup = "observation" | "witness" | "location" | "decor" | "temporal" | "weather" | "sound" | "shape"
+export type SummaryGroup = "observation" | "witness" | "location" | "decor" | "temporal" | "weather" | "sound"
 
 /** One thing a recording states. `field` is the name of the field it came from, which is also the
  * id the recorder gives that field's own control — that coincidence is what lets a chip put the
@@ -31,9 +31,9 @@ export interface SummaryEntry {
 
 /** What the caller knows that the file itself does not.
  *
- * `decorId`/`sourceId` are what the recorder is currently pointing at, so the entries can describe
- * that decor object and that shape rather than every one of them; the player passes neither and
- * gets the observation itself: where, when, through what, under what sky.
+ * `decorId` is what the recorder is currently pointing at, so the entries can describe that decor
+ * object rather than every one of them; the player passes none and gets the observation itself:
+ * where, when, through what, under what sky.
  *
  * `groundElevationM` is not a convenience. A pose's own `elevationM` is height ABOVE THE GROUND,
  * while the field both components label "Altitude" is height above SEA LEVEL — the difference
@@ -44,7 +44,6 @@ export interface SummaryEntry {
  */
 export interface SummaryContext {
   decorId?: string
-  sourceId?: string
   groundElevationM?: number
 }
 
@@ -98,7 +97,6 @@ export class SightingSummary {
     this.addTemporal(entries, sighting)
     this.addWeather(entries, sighting, timeMs)
     this.addSound(entries, sighting, timeMs)
-    this.addShape(entries, sighting, timeMs, context.sourceId)
     return entries
   }
 
@@ -337,27 +335,6 @@ export class SightingSummary {
     this.push(entries, "sound", "soundVolume", this.labels.soundVolume, this.percentShown(sound.volume))
     this.push(entries, "sound", "soundPitch", this.labels.soundPitch, this.roundedShown(sound.pitchHz), "Hz")
     this.push(entries, "sound", "soundSrc", this.labels.soundSrc, sound.src)
-  }
-
-  /** The appearance of the shape the editor has selected. Nothing at all without a selection: a
-   * recording holds several shapes, and one arbitrary member's colour is not a fact about the
-   * sighting. */
-  private addShape(entries: SummaryEntry[], sighting: Sighting, timeMs: number, sourceId: string | undefined): void {
-    if (sourceId === undefined) {
-      return
-    }
-    const shape = sighting.timeline.getInterpolatedShapeAt(timeMs, sourceId)
-    if (!shape) {
-      return
-    }
-    this.push(entries, "shape", "shapeTitle", this.labels.shapeTitle, shape.title)
-    this.push(entries, "shape", "color", this.labels.color, shape.color, "", { color: shape.color })
-    // Nought is the untouched value of all four (see Shape.ts's own constructors): opaque, no
-    // halo, sharp edges, no glow — which is to say the appearance nobody described.
-    this.push(entries, "shape", "transparency", this.labels.transparency, this.percentShown(shape.transparency))
-    this.push(entries, "shape", "haloScale", this.labels.halo, this.roundedShown(shape.haloScale, 2))
-    this.push(entries, "shape", "blur", this.labels.blur, this.percentShown(shape.blur))
-    this.push(entries, "shape", "brightness", this.labels.brightness, this.percentShown(shape.brightness))
   }
 
   /** What to call a decor object with no name of its own — the same "{kind} {n}" fallback the

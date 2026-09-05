@@ -1426,6 +1426,33 @@ describe("UfoRecorderElement click-to-select", () => {
     expect([...ufo.selectedSourceIds]).toEqual(["ufo-2"])
   })
 
+  // Its replacement for the appearance chips the summary used to carry: with those gone, clicking
+  // the shape is the only way left to the fields that describe it, so it has to arrive there.
+  it("clicking a shape opens the Phenomenon panel on it", () => {
+    const element = mount()
+    element.sightingData = twoShapesJson()
+    const canvas = nestedCanvas(element)
+    const open = (): string[] =>
+      [...element.shadowRoot!.querySelectorAll<HTMLElement>(".group-panel")].filter(panel => !panel.hidden).map(panel => panel.id)
+    element.shadowRoot!.getElementById("group-location")!.hidden = false
+
+    clickAt(canvas, 105, 105)
+
+    expect(open()).toEqual(["group-shape"])
+    expect((element.shadowRoot!.getElementById("source") as HTMLSelectElement).value).toBe("ufo-2")
+  })
+
+  it("leaves the Phenomenon panel open when the shape clicked was already the selected one", () => {
+    const element = mount()
+    element.sightingData = twoShapesJson()
+    const canvas = nestedCanvas(element)
+    clickAt(canvas, 105, 105)
+
+    clickAt(canvas, 105, 105)
+
+    expect(element.shadowRoot!.getElementById("group-shape")!.hidden).toBe(false)
+  })
+
   it("clicking empty canvas is a no-op — keeps the previous selection", () => {
     const element = mount()
     element.sightingData = twoShapesJson()
@@ -2698,8 +2725,19 @@ describe("UfoRecorderElement parameter summary", () => {
 
   it("says a 0..1 slider the way it is read, not the way it is stored", () => {
     const element = mount()
+    setInput(element.shadowRoot!, "cloudCover", "0.35")
+    expect(chips(element).find(c => c.dataset.field === "cloudCover")!.textContent).toContain("35 %")
+  })
+
+  // A recording holds several shapes and the strip summarises the OBSERVATION, so an appearance
+  // here could only be the selected one's — a fact about the editor rather than the sighting, and
+  // one that changes under the reader as they click. The way to a shape's fields is the shape.
+  it("says nothing about a shape's appearance, however it is set", () => {
+    const element = mount()
     setInput(element.shadowRoot!, "transparency", "0.35")
-    expect(chips(element).find(c => c.dataset.field === "transparency")!.textContent).toContain("35 %")
+    setInput(element.shadowRoot!, "shapeTitle", "Flame")
+    const shapeFields = ["transparency", "shapeTitle", "color", "haloScale", "blur", "brightness"]
+    expect(chips(element).filter(chip => shapeFields.includes(chip.dataset.field!))).toEqual([])
   })
 })
 

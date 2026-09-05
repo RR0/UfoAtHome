@@ -388,7 +388,12 @@ button.preset[aria-pressed="true"] {
   outline: 2px solid #39f;
   font-weight: bold;
 }
-#lat, #lng, #heading, #pitch, #windDirection, #windSpeed, #decorEast, #decorNorth, #decorHeading, #decorFloors, #decorOccupiedFloor, #decorWindowFront, #decorWindowBehind, #decorWindowLeft, #decorWindowRight, #decorWindowFrontLeft, #decorWindowFrontRight, #decorWindowBehindLeft, #decorWindowBehindRight {
+/* Every number field short enough that the browser's own ~14em default was mostly empty space —
+   a sampling rate of 100 in a field wide enough for a paragraph. Six em holds a longitude to six
+   decimals, which is the widest thing in the list. Deliberately NOT here: #durationSeconds and
+   #utcOffsetHours, whose placeholders are sentences ("observation length", "from longitude") that
+   6em would cut off, and #objectSize/#objectDistance for the same reason. */
+#lat, #lng, #heading, #pitch, #roll, #elevation, #focalLength, #fNumber, #focusDistance, #samplingRate, #cloudBase, #windDirection, #windSpeed, #decorEast, #decorNorth, #decorHeading, #decorAltitude, #decorFloors, #decorOccupiedFloor, #decorWindowFront, #decorWindowBehind, #decorWindowLeft, #decorWindowRight, #decorWindowFrontLeft, #decorWindowFrontRight, #decorWindowBehindLeft, #decorWindowBehindRight {
   width: 6em;
 }
 .time-qualifier {

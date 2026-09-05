@@ -2884,10 +2884,16 @@ export class UfoRecorderElement extends HTMLElement {
     }
   }
 
-  /** The eight groups in the order their handles stand on the strip, which is also the order
-   * SightingSummary emits them in — so a chip's own group names the panel to open. */
+  /** The groups a chip can send you to, in the order their handles stand on the strip, which is
+   * also the order SightingSummary emits them in — so a chip's own group names the panel to open.
+   *
+   * Seven of the eight handles: Phenomenon is missing because the summary says nothing about
+   * shapes. It describes the OBSERVATION, one recording of which holds several shapes, so an
+   * appearance here could only ever be the selected one's — a fact about the editor's state, not
+   * about the sighting, and one that changed under the reader as they clicked. The way to a
+   * shape's fields is the shape itself: clicking one opens that panel (see revealShapePanel). */
   private static readonly SUMMARY_GROUPS: SummaryGroup[] = [
-    "observation", "witness", "location", "decor", "temporal", "weather", "sound", "shape"
+    "observation", "witness", "location", "decor", "temporal", "weather", "sound"
   ]
 
   /**
@@ -2905,7 +2911,6 @@ export class UfoRecorderElement extends HTMLElement {
    * better by the marks on the nine values that record supplied.
    */
   private refreshParamSummary(): void {
-    const selectedSourceIds = [...this.selectedSourceIds]
     const entries = this.paramSummaryBuilder.entriesFor(this.ufoElement.sighting, this.ufoElement.currentTime, {
       decorId: this.currentDecorId,
       // The one thing the file can't tell the summary: a pose's elevationM is height above the
@@ -2913,11 +2918,7 @@ export class UfoRecorderElement extends HTMLElement {
       // Zero rather than undefined when no terrain has resolved yet, because that is exactly what
       // the field itself then shows (see syncElevationField's own `ground ?? 0`) — a chip is a way
       // back to a field, so it has to say what that field says.
-      groundElevationM: this.groundElevationM ?? 0,
-      // One shape only: the appearance fields describe a single shape, and an arbitrary member of
-      // a multiple selection is not a fact about anything (see updateAppearanceFieldsDisabledState,
-      // which disables those same fields for the same reason).
-      sourceId: selectedSourceIds.length === 1 ? selectedSourceIds[0] : undefined
+      groundElevationM: this.groundElevationM ?? 0
     })
     // "Altitude 220 m" and "Altitude 0 m" side by side are the witness's own height above the sea
     // and a building's — two different assertions under one word, which is fine inside a panel
@@ -4935,6 +4936,11 @@ export class UfoRecorderElement extends HTMLElement {
       if (!playing) this.beginCameraDrag(point)
       return
     }
+    // Whatever the click then does to the selection, it lands you on the panel that describes what
+    // you clicked — the summary strip no longer carries a shape's appearance, so the shape itself
+    // is the way to its own fields. The same move the Environment panel has always made when a
+    // building is clicked (see selectDecor).
+    this.revealShapePanel()
     if (event.shiftKey) {
       this.toggleUnitSelection(hit.sourceId)
     } else if (!this.selectedSourceIds.has(hit.sourceId)) {
@@ -4955,6 +4961,17 @@ export class UfoRecorderElement extends HTMLElement {
     }))
     this.dragState = { kind: "move", sources, startPointer: point }
     this.startDragListening()
+  }
+
+  /** Opens the Phenomenon panel, whichever one is open — idempotent, so a click on a shape while
+   * it is already open changes nothing. Found by the panel it controls rather than by its index on
+   * the strip: the strip's order is markup, and an index would go quietly wrong the day a group is
+   * inserted before it. */
+  private revealShapePanel(): void {
+    const tab = this.groupTabs.find(candidate => candidate.getAttribute("aria-controls") === "group-shape")
+    if (tab) {
+      this.toggleGroup(tab, true)
+    }
   }
 
   /** Every currently-selected shape as it stands at the playhead, ready to hand to ShapeGroup —
