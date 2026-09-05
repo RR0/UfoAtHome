@@ -746,6 +746,16 @@ export class DecorSystem {
     model.position.x -= centre.x
     model.position.z -= centre.z
     model.position.y -= object.kind === "aircraft" ? centre.y : box.min.y * scale
+    // A loaded glTF arrives with castShadow/receiveShadow OFF on every mesh — that is three.js's
+    // default, and a file has no way to say otherwise. Left as they came, a model was the one thing
+    // in the scene that threw no shadow: the primitives set both in addPart, the terrain receives,
+    // and a car standing in a low sun with nothing on the ground beside it is exactly the tell that
+    // it was pasted on rather than lit.
+    model.traverse(child => {
+      if (!(child instanceof Mesh)) return
+      child.castShadow = true
+      child.receiveShadow = true
+    })
     holder.add(model)
     // Replaced rather than hidden: the primitive's geometry and materials are real GPU resources,
     // and a scene can rebuild its decor many times.

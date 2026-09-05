@@ -117,6 +117,18 @@ export class UfoElement extends HTMLElement {
   /** Bound once so document.removeEventListener (disconnectedCallback) can actually find it. */
   private readonly handleFullscreenChange = () => this.updateFullscreenButton()
 
+  /** Whether the CSS stand-in for fullscreen is currently on — see enterSimulatedFullscreen. */
+  private simulatedFullscreen = false
+  /** The target's own inline styles as they were before the stand-in overwrote them, so leaving
+   * puts back exactly what the page had rather than a guess at it. */
+  private styleBeforeSimulatedFullscreen?: string
+  private bodyOverflowBeforeSimulatedFullscreen?: string
+  /** Escape leaves the stand-in, the way it leaves real fullscreen. Bound once, listened to only
+   * while the stand-in is on. */
+  private readonly handleSimulatedFullscreenKey = (event: KeyboardEvent) => {
+    if (event.key === "Escape") this.exitSimulatedFullscreen()
+  }
+
   /** Identifies whatever VISIBLE shape (if any) is under the pointer and shows/moves/hides a text
    * label next to it, but only when that shape actually has a title — an untitled shape's raw
    * sourceId (e.g. "ufo-2") is an internal authoring detail, not something an end-user-facing
@@ -220,6 +232,9 @@ export class UfoElement extends HTMLElement {
 
   disconnectedCallback(): void {
     document.removeEventListener("fullscreenchange", this.handleFullscreenChange)
+    // Leaves the page as it was found: the stand-in holds document.body's own overflow, and an
+    // element removed while it is on would otherwise leave the page unable to scroll.
+    this.exitSimulatedFullscreen()
     this.sightingAudio.dispose()
   }
 
@@ -791,7 +806,28 @@ export class UfoElement extends HTMLElement {
     else this.pause()
   }
 
+  /**
+   * Whether the real Fullscreen API can be used here at all.
+   *
+   * On an iPhone it cannot, in ANY browser: every iOS browser is WebKit underneath, and WebKit on
+   * the phone exposes no Element.requestFullscreen at all (only a video can go fullscreen, through
+   * its own method). Calling it there does not reject — it throws, because the method does not
+   * exist — so the button simply did nothing, which is exactly how it was reported.
+   *
+   * `document.fullscreenEnabled` catches the other case with the same answer: an embedding
+   * <iframe> without allow="fullscreen", or a Permissions-Policy that disables it. In both, the
+   * CSS stand-in below is what the reader should get instead of a dead button.
+   */
+  private get canUseNativeFullscreen(): boolean {
+    return typeof this.fullscreenTarget.requestFullscreen === "function" && document.fullscreenEnabled
+  }
+
   private toggleFullscreen(): void {
+    if (!this.canUseNativeFullscreen) {
+      if (this.simulatedFullscreen) this.exitSimulatedFullscreen()
+      else this.enterSimulatedFullscreen()
+      return
+    }
     if (document.fullscreenElement) {
       void document.exitFullscreen()
     } else {
@@ -804,8 +840,68 @@ export class UfoElement extends HTMLElement {
     }
   }
 
+  /**
+   * Fills the viewport with the stage using ordinary CSS, where the real thing is unavailable.
+   *
+   * Inline styles rather than a class, because the target is not necessarily in THIS component's
+   * shadow tree: a composing element hands over its own stage (see SceneElement, which sets
+   * fullscreenTarget so the sky goes fullscreen along with the shapes drawn over it), and a class
+   * defined in this component's stylesheet would never reach it.
+   *
+   * `100dvh` over `100vh` for the phone this exists for: on iOS the visible height changes as the
+   * browser's own bars slide away, and the dynamic unit is the one that follows it. The plain unit
+   * is written first and stays as the fallback wherever the dynamic one is not understood.
+   *
+   * Nothing else has to be told: the composing element already watches its frame with a
+   * ResizeObserver (see SceneElement), so the 3D canvas and its camera follow this by themselves.
+   */
+  private enterSimulatedFullscreen(): void {
+    const target = this.fullscreenTarget
+    this.styleBeforeSimulatedFullscreen = target.getAttribute("style") ?? ""
+    this.bodyOverflowBeforeSimulatedFullscreen = document.body.style.overflow
+    const style = target.style
+    style.setProperty("position", "fixed")
+    style.setProperty("inset", "0")
+    style.setProperty("margin", "0")
+    style.setProperty("max-width", "none")
+    style.setProperty("max-height", "none")
+    // The stage carries an aspect-ratio (see sceneTemplate/ufoTemplate) and it wins here even
+    // against an explicit width AND height: measured, the box came out 1541 px wide inside a 601 px
+    // viewport — its own 640:360 taken from the height. Real fullscreen is spared this because the
+    // stylesheet has a :fullscreen rule; the stand-in has to say it itself. Letterboxing is not
+    // lost: .frame keeps its own ratio and stays centred, which is what that rule does too.
+    style.setProperty("aspect-ratio", "auto")
+    style.setProperty("z-index", "2147483647")
+    style.setProperty("background", "#000")
+    // The plain unit first and the dynamic one over it: setProperty with a value the engine does
+    // not understand does nothing, so a browser without dvh/dvw simply keeps the line before.
+    style.setProperty("width", "100vw")
+    style.setProperty("width", "100dvw")
+    style.setProperty("height", "100vh")
+    style.setProperty("height", "100dvh")
+    // Otherwise the page keeps scrolling behind a stage that now covers it, which on a phone reads
+    // as the reconstruction sliding about under the finger.
+    document.body.style.overflow = "hidden"
+    this.simulatedFullscreen = true
+    document.addEventListener("keydown", this.handleSimulatedFullscreenKey)
+    this.updateFullscreenButton()
+  }
+
+  private exitSimulatedFullscreen(): void {
+    if (!this.simulatedFullscreen) return
+    const target = this.fullscreenTarget
+    // Restored from what was there, not by deleting the properties this set: the page may have had
+    // inline styles of its own on that element.
+    if (this.styleBeforeSimulatedFullscreen) target.setAttribute("style", this.styleBeforeSimulatedFullscreen)
+    else target.removeAttribute("style")
+    document.body.style.overflow = this.bodyOverflowBeforeSimulatedFullscreen ?? ""
+    this.simulatedFullscreen = false
+    document.removeEventListener("keydown", this.handleSimulatedFullscreenKey)
+    this.updateFullscreenButton()
+  }
+
   private updateFullscreenButton(): void {
-    const isFullscreen = document.fullscreenElement === this.fullscreenTarget
+    const isFullscreen = this.simulatedFullscreen || document.fullscreenElement === this.fullscreenTarget
     this.fullscreenButton.title = isFullscreen ? this.messages.exitFullscreen : this.messages.fullscreen
     this.fullscreenButton.setAttribute("aria-label", this.fullscreenButton.title)
   }

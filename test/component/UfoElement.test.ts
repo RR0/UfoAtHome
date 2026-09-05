@@ -540,6 +540,7 @@ describe("UfoElement", () => {
     const element = mount()
     const requestFullscreen = vi.fn().mockResolvedValue(undefined)
     element.fullscreenTarget.requestFullscreen = requestFullscreen
+    Object.defineProperty(document, "fullscreenEnabled", { value: true, configurable: true })
     const button = element.shadowRoot!.getElementById("fullscreen") as HTMLButtonElement
 
     button.click()
@@ -547,10 +548,72 @@ describe("UfoElement", () => {
     expect(requestFullscreen).toHaveBeenCalledOnce()
   })
 
+  it("fills the viewport with CSS where the browser has no Fullscreen API — every iPhone browser", () => {
+    // Reported from Chrome on an iPhone, where the button did nothing. Every iOS browser is WebKit
+    // underneath, and WebKit on the phone exposes no Element.requestFullscreen at all: the call did
+    // not reject, it threw, because the method is not there. jsdom is in exactly that position, so
+    // this is the path it takes by default.
+    const element = mount()
+    delete (document as { fullscreenEnabled?: boolean }).fullscreenEnabled
+    const target = element.fullscreenTarget
+    const button = element.shadowRoot!.getElementById("fullscreen") as HTMLButtonElement
+    expect(target.style.position).toBe("")
+
+    button.click()
+
+    expect(target.style.position).toBe("fixed")
+    expect(target.style.height).not.toBe("")
+    // Measured, not assumed: with the stage's own 640:360 still applying, an explicit width and
+    // height did not stop it taking 1541 px inside a 601 px viewport.
+    expect(target.style.aspectRatio).toBe("auto")
+    expect(document.body.style.overflow).toBe("hidden")
+    expect(button.title).toBe("Exit fullscreen")
+  })
+
+  it("puts back exactly the inline styles the page had, on the way out", () => {
+    const element = mount()
+    delete (document as { fullscreenEnabled?: boolean }).fullscreenEnabled
+    const target = element.fullscreenTarget
+    target.setAttribute("style", "outline: 1px solid red")
+    const button = element.shadowRoot!.getElementById("fullscreen") as HTMLButtonElement
+
+    button.click()
+    button.click()
+
+    expect(target.getAttribute("style")).toBe("outline: 1px solid red")
+    expect(document.body.style.overflow).toBe("")
+    expect(button.title).toBe("Fullscreen")
+  })
+
+  it("leaves the CSS stand-in on Escape, the way real fullscreen does", () => {
+    const element = mount()
+    delete (document as { fullscreenEnabled?: boolean }).fullscreenEnabled
+    const target = element.fullscreenTarget
+    ;(element.shadowRoot!.getElementById("fullscreen") as HTMLButtonElement).click()
+    expect(target.style.position).toBe("fixed")
+
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }))
+
+    expect(target.style.position).toBe("")
+    expect(document.body.style.overflow).toBe("")
+  })
+
+  it("gives the page its scrolling back when the element goes away mid-stand-in", () => {
+    const element = mount()
+    delete (document as { fullscreenEnabled?: boolean }).fullscreenEnabled
+    ;(element.shadowRoot!.getElementById("fullscreen") as HTMLButtonElement).click()
+    expect(document.body.style.overflow).toBe("hidden")
+
+    element.remove()
+
+    expect(document.body.style.overflow).toBe("")
+  })
+
   it("clicking fullscreen while already fullscreen exits instead of re-requesting", () => {
     const element = mount()
     const requestFullscreen = vi.fn().mockResolvedValue(undefined)
     element.fullscreenTarget.requestFullscreen = requestFullscreen
+    Object.defineProperty(document, "fullscreenEnabled", { value: true, configurable: true })
     const exitFullscreenSpy = vi.spyOn(document, "exitFullscreen").mockResolvedValue(undefined)
     const fullscreenElementSpy = vi
       .spyOn(document, "fullscreenElement", "get")
@@ -1255,6 +1318,11 @@ describe("double-click on the canvas", () => {
   const withFullscreenStub = (element: UfoElement): { requested: () => number; exits: () => number } => {
     let requested = 0
     let exits = 0
+    // Both halves of "this browser has fullscreen": the method AND document.fullscreenEnabled. The
+    // element checks the second too, because it is what an <iframe> without allow="fullscreen" (or
+    // a Permissions-Policy that forbids it) turns off — and there, as on an iPhone, the CSS
+    // stand-in is what the reader should get instead of a dead button.
+    Object.defineProperty(document, "fullscreenEnabled", { value: true, configurable: true })
     const stage = element.shadowRoot!.querySelector(".stage") as HTMLElement
     ;(stage as unknown as { requestFullscreen(): Promise<void> }).requestFullscreen = () => {
       requested++

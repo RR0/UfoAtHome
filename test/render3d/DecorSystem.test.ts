@@ -295,6 +295,21 @@ describe("DecorSystem.applyModel", () => {
     expect(DecorSystem.bodyOf(group)).not.toBe(primitive)
   })
 
+  it("makes the loaded model cast and receive shadows, which a glTF never says on its own", () => {
+    // three.js defaults both to false and a file has no way to say otherwise, so a model was the
+    // one thing in the scene throwing no shadow — a car in a low sun with nothing on the ground
+    // beside it, which is exactly how a pasted-on object looks.
+    const object = vehicle()
+    const group = DecorSystem.build(object, false)
+    DecorSystem.applyModel(group, object, loadedModel())
+    const meshes: Mesh[] = []
+    DecorSystem.bodyOf(group).traverse(child => {
+      if (child instanceof Mesh) meshes.push(child)
+    })
+    expect(meshes.length).toBeGreaterThan(0)
+    expect(meshes.every(mesh => mesh.castShadow && mesh.receiveShadow)).toBe(true)
+  })
+
   it("leaves the object's lamps alone — they belong to the object, not to whatever draws its body", () => {
     const light = { id: "beacon", offsetM: { x: 0, y: 3, z: -2 }, color: "#ff0000", pattern: { kind: "steady" } as const }
     const object = vehicle({ lights: [light] })
