@@ -10,7 +10,7 @@
     "minute": 30
   },
   "utcOffsetHours": 0,
-  "durationSeconds": 60,
+  "durationSeconds": 24,
   "place": [
     {
       "lat": 28.3,
@@ -54,8 +54,41 @@
           "lat": 28.3,
           "lng": -16.5,
           "elevationM": 0,
+          "headingDeg": 268,
+          "pitchDeg": 2,
+          "fovDeg": 90
+        }
+      },
+      {
+        "t": 8000,
+        "pose": {
+          "lat": 28.3,
+          "lng": -16.5,
+          "elevationM": 0,
           "headingDeg": 280,
-          "pitchDeg": 25,
+          "pitchDeg": 50,
+          "fovDeg": 90
+        }
+      },
+      {
+        "t": 16000,
+        "pose": {
+          "lat": 28.3,
+          "lng": -16.5,
+          "elevationM": 0,
+          "headingDeg": 292,
+          "pitchDeg": 2,
+          "fovDeg": 90
+        }
+      },
+      {
+        "t": 24000,
+        "pose": {
+          "lat": 28.3,
+          "lng": -16.5,
+          "elevationM": 0,
+          "headingDeg": 268,
+          "pitchDeg": 2,
           "fovDeg": 90
         }
       }

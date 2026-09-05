@@ -4,7 +4,7 @@ import type { PageMeta, SiteLanguage, SitePage } from "../SitePage.js"
 export class EditorPage implements SitePage {
 
   readonly meta: PageMeta = {
-    slug: { en: "editor", fr: "editeur" },
+    slug: "editor",
     navLabel: { en: "Editor", fr: "Éditeur" },
     title: { en: "The editor, and how to use it", fr: "L'éditeur, et comment s'en servir" },
     description: {
@@ -65,7 +65,7 @@ if (editor && requested) {
 
 <section class="band">
   <div class="wrap">
-    <div class="stage">
+    <div class="stage stage-padded">
       <rr0-ufo-recorder id="editor"></rr0-ufo-recorder>
     </div>
     <p class="small">Opening it on an existing recording: add <code>?sighting=</code> and a URL, or
@@ -77,28 +77,28 @@ if (editor && requested) {
 <section class="band">
   <div class="wrap">
     <h2>Three gestures to a first recording</h2>
-    <div class="cards">
-      <div class="card">
-        <h3>1. Draw it</h3>
+    <ol class="steps">
+      <li>
+        <h3>Draw it</h3>
         <p>Open the <strong>Shape</strong> group. Pick <em>Oval</em> or <em>Polygon</em>, set its
           colour, its transparency, its halo, how dazzling it was and how blurred its edges looked.
           Drag its handles on the canvas to size it; a polygon's vertices can be added, moved and
           deleted individually.</p>
-      </div>
-      <div class="card">
-        <h3>2. Record the movement</h3>
+      </li>
+      <li>
+        <h3>Record the movement</h3>
         <p>Press <strong>Record</strong> and move the pointer over the canvas along the path the
           object took, then <strong>Stop</strong>. Playback replays it over the observation's own
           <em>real</em> duration — a five-minute sighting takes five minutes, not the second the
           drag took.</p>
-      </div>
-      <div class="card">
-        <h3>3. Say when and where</h3>
+      </li>
+      <li>
+        <h3>Say when and where</h3>
         <p>Fill <strong>Date and time</strong> and <strong>Location</strong>. That is the moment the
           sky appears: the Sun, the Moon and its phase, the planets, the stars of that night — and
           the weather record for that hour is fetched on its own.</p>
-      </div>
-    </div>
+      </li>
+    </ol>
     <p class="small">A row of chips under the render lists everything the recording actually
       asserts — and only that. Click one to jump to the field it came from. A value a data source
       supplied rather than you is marked as such.</p>
@@ -299,40 +299,40 @@ if (editor && requested) {
 
 <section class="band">
   <div class="wrap">
-    <div class="stage">
+    <div class="stage stage-padded">
       <rr0-ufo-recorder id="editor"></rr0-ufo-recorder>
     </div>
     <p class="small">Pour l'ouvrir sur un enregistrement existant : ajoutez <code>?sighting=</code>
-      suivi d'une URL, ou du nom d'une <a href="/fr/demos/">démo</a> — par exemple
-      <a href="/fr/editeur/?sighting=Socorro"><code>/fr/editeur/?sighting=Socorro</code></a>.</p>
+      suivi d'une URL, ou du nom d'une <a href="/demos/">démo</a> — par exemple
+      <a href="/editor/?sighting=Socorro"><code>/editor/?sighting=Socorro</code></a>.</p>
   </div>
 </section>
 
 <section class="band">
   <div class="wrap">
     <h2>Trois gestes pour un premier enregistrement</h2>
-    <div class="cards">
-      <div class="card">
-        <h3>1. Dessiner</h3>
+    <ol class="steps">
+      <li>
+        <h3>Dessiner</h3>
         <p>Ouvrez le groupe <strong>Forme</strong>. Choisissez <em>Ovale</em> ou <em>Polygone</em>,
           réglez couleur, transparence, halo, éclat et flou des contours. Les poignées sur le canevas
           en donnent la taille ; les sommets d'un polygone s'ajoutent, se déplacent et se
           suppriment un par un.</p>
-      </div>
-      <div class="card">
-        <h3>2. Enregistrer le mouvement</h3>
+      </li>
+      <li>
+        <h3>Enregistrer le mouvement</h3>
         <p>Appuyez sur <strong>Enregistrer</strong> et déplacez le curseur sur le canevas le long du
           trajet suivi par l'objet, puis <strong>Arrêter</strong>. La lecture le rejoue sur la durée
           <em>réelle</em> de l'observation : une observation de cinq minutes prend cinq minutes, pas
           la seconde qu'a duré le geste.</p>
-      </div>
-      <div class="card">
-        <h3>3. Dire quand et où</h3>
+      </li>
+      <li>
+        <h3>Dire quand et où</h3>
         <p>Remplissez <strong>Date et heure</strong> et <strong>Lieu</strong>. C'est là que le ciel
           apparaît : le Soleil, la Lune et sa phase, les planètes, les étoiles de cette nuit-là — et
           le relevé météo de cette heure-là est cherché tout seul.</p>
-      </div>
-    </div>
+      </li>
+    </ol>
     <p class="small">Une bande d'étiquettes sous le rendu énumère tout ce que l'enregistrement
       affirme réellement — et rien d'autre. Cliquez-en une pour aller au champ dont elle vient. Une
       valeur fournie par une source de données plutôt que par vous est signalée comme telle.</p>

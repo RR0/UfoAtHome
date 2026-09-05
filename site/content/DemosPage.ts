@@ -1,19 +1,5 @@
-import type { PageMeta, Said, SiteLanguage, SitePage } from "../SitePage.js"
-
-interface Demo {
-  readonly id: string
-  readonly src: string
-  /** Which recording the Edit/Open links point at, when `src` is a several-witness manifest. */
-  readonly editSrc?: string
-  readonly title: Said<string>
-  readonly blurb: Said<string>
-}
-
-interface DemoGroup {
-  readonly heading: Said<string>
-  readonly intro: Said<string>
-  readonly demos: readonly Demo[]
-}
+import { DemoCatalogue } from "./DemoCatalogue.js"
+import type { PageMeta, SiteLanguage, SitePage } from "../SitePage.js"
 
 /**
  * The catalogue, and it really is one: every entry has its own live player, all of them on the
@@ -21,14 +7,14 @@ interface DemoGroup {
  *
  * The one concession to the machine is that a scene is MOUNTED as it comes near the viewport and
  * unmounted once it is far behind, keeping at most a handful of WebGL contexts alive — a browser
- * hands out about sixteen and silently loses the oldest beyond that, which on a page of fifteen
+ * hands out about sixteen and silently loses the oldest beyond that, which on a page of fourteen
  * skies would blank the ones the reader had already scrolled past. Everything on screen is
  * running; the budget is spent on what is being looked at.
  */
 export class DemosPage implements SitePage {
 
   readonly meta: PageMeta = {
-    slug: { en: "demos", fr: "demos" },
+    slug: "demos",
     navLabel: { en: "Demos", fr: "Démos" },
     title: { en: "What it can do", fr: "Ce qu'il sait faire" },
     description: {
@@ -40,167 +26,7 @@ export class DemosPage implements SitePage {
     modules: ["/lib/rr0-scene.mjs"]
   }
 
-  private readonly groups: readonly DemoGroup[] = [
-    {
-      heading: { en: "Real sightings", fr: "Des observations réelles" },
-      intro: {
-        en: "Four documented cases, each replayed in the sky of its own reported date, time and place.",
-        fr: "Quatre dossiers documentés, chacun rejoué dans le ciel de sa propre date, heure et lieu déclarés."
-      },
-      demos: [
-        {
-          id: "chiles-whitted",
-          src: "/demo-data/witness-chiles.json",
-          title: { en: "Chiles & Whitted, 1948", fr: "Chiles et Whitted, 1948" },
-          blurb: {
-            en: "Night over Alabama, 02:45. Two airline pilots described the same object differently — open it full size to switch witness.",
-            fr: "Nuit au-dessus de l'Alabama, 02:45. Deux pilotes de ligne ont décrit le même objet différemment — ouvrez-le en grand pour changer de témoin."
-          }
-        },
-        {
-          id: "valensole",
-          src: "/demo-data/witness-valensole.json",
-          title: { en: "Valensole, 1965", fr: "Valensole, 1965" },
-          blurb: {
-            en: "Dawn on the plateau, 05:45, the Sun still below the horizon — and the real relief of that field under the witness's feet.",
-            fr: "L'aube sur le plateau, 05:45, le Soleil encore sous l'horizon — et le relief réel de ce champ sous les pieds du témoin."
-          }
-        },
-        {
-          id: "socorro",
-          src: "/demo-data/witness-socorro.json",
-          title: { en: "Socorro, 1964", fr: "Socorro, 1964" },
-          blurb: {
-            en: "Low sun, 17:50, New Mexico. The case people argue about the object's size in — and where the reconstruction refuses to state one.",
-            fr: "Soleil bas, 17:50, Nouveau-Mexique. Le cas dont on discute la taille de l'objet — et où la reconstitution refuse d'en énoncer une."
-          }
-        },
-        {
-          id: "wilcox",
-          src: "/demo-data/witness-wilcox.json",
-          title: { en: "Wilcox, 1964", fr: "Wilcox, 1964" },
-          blurb: {
-            en: "Broad daylight, 10:00, New York State, with a cloud deck lifting from 800 m to 913 m across the two hours the record covers.",
-            fr: "Plein jour, 10:00, État de New York, avec une base de nuages qui monte de 800 m à 913 m sur les deux heures que couvre le relevé."
-          }
-        }
-      ]
-    },
-    {
-      heading: { en: "What the sky can hold", fr: "Ce que le ciel peut contenir" },
-      intro: {
-        en: "These hold no recorded object at all. They are skies set up with the conditions one "
-          + "sight needs, for looking at that sight — because most of them need three or four "
-          + "conditions at once, and knowing which is exactly what separates “there was no Milky "
-          + "Way” from “I could not have seen it”.",
-        fr: "Ceux-ci ne contiennent aucun objet enregistré. Ce sont des ciels réglés avec les "
-          + "conditions qu'exige un phénomène, pour regarder ce phénomène — car la plupart en "
-          + "demandent trois ou quatre à la fois, et savoir lesquelles est exactement ce qui sépare "
-          + "« il n'y avait pas de Voie lactée » de « je n'aurais pas pu la voir »."
-      },
-      demos: [
-        {
-          id: "halos",
-          src: "/demo-data/sky-test-halos.json",
-          title: { en: "Ice haloes and sundogs", fr: "Halos de glace et parhélies" },
-          blurb: {
-            en: "A cirrus veil, a Sun 20° up, crystals falling level. Nothing is placed: a hexagonal ice prism and Snell's law give every angle.",
-            fr: "Un voile de cirrus, un Soleil à 20°, des cristaux tombant à plat. Rien n'est posé : un prisme hexagonal de glace et la loi de Snell donnent chaque angle."
-          }
-        },
-        {
-          id: "rainbow",
-          src: "/demo-data/sky-test-rainbow.json",
-          title: { en: "Rainbow", fr: "Arc-en-ciel" },
-          blurb: {
-            en: "Rain, a Sun 9° up, a gap in the cloud, a witness facing away from it — all four, or nothing. Primary, secondary reversed, Alexander's band between.",
-            fr: "De la pluie, un Soleil à 9°, une trouée dans les nuages, un témoin tournant le dos — les quatre, ou rien. Primaire, secondaire inversé, bande d'Alexandre entre les deux."
-          }
-        },
-        {
-          id: "moonbow",
-          src: "/demo-data/sky-test-moonbow.json",
-          title: { en: "Moonbow", fr: "Arc lunaire" },
-          blurb: {
-            en: "The same geometry under a full Moon 22° up. Too faint for colour vision, so the eye sees a white arc — which is what witnesses describe.",
-            fr: "La même géométrie sous une pleine Lune à 22°. Trop faible pour la vision des couleurs : l'œil voit un arc blanc — c'est ce que décrivent les témoins."
-          }
-        },
-        {
-          id: "milkyway",
-          src: "/demo-data/sky-test-milkyway.json",
-          title: { en: "The Milky Way", fr: "La Voie lactée" },
-          blurb: {
-            en: "New Moon, Sun 65° down, galactic centre 81° up over the Atacama. Integrated through a real dust model, so the dark rift falls out of the calculation.",
-            fr: "Nouvelle Lune, Soleil à 65° sous l'horizon, centre galactique à 81° au-dessus de l'Atacama. Intégrée dans un vrai modèle de poussière : le rift sombre sort du calcul."
-          }
-        },
-        {
-          id: "zodiacal",
-          src: "/demo-data/sky-test-zodiacal.json",
-          title: { en: "Zodiacal light", fr: "Lumière zodiacale" },
-          blurb: {
-            en: "Sun 16° down, a steep ecliptic, no Moon: a leaning cone with no edge, gone within the hour.",
-            fr: "Soleil à 16° sous l'horizon, écliptique redressée, pas de Lune : un cône penché sans bord, disparu en une heure."
-          }
-        },
-        {
-          id: "comet",
-          src: "/demo-data/sky-test-comet.json",
-          title: { en: "A comet", fr: "Une comète" },
-          blurb: {
-            en: "Hale-Bopp at dusk on 1 April 1997, magnitude −0.8, 30° up to the north-west with a 20° tail. The orbit is propagated from that apparition's own elements.",
-            fr: "Hale-Bopp au crépuscule du 1ᵉʳ avril 1997, magnitude −0,8, à 30° de hauteur au nord-ouest, queue de 20°. L'orbite est propagée depuis les éléments de cette apparition."
-          }
-        },
-        {
-          id: "meteors",
-          src: "/demo-data/sky-test-meteors.json",
-          title: { en: "A meteor shower", fr: "Une pluie de météores" },
-          blurb: {
-            en: "Perseids, 13 August 2018, 03:30, radiant high and no Moon — over the sporadic background that falls every night of the year.",
-            fr: "Perséides, 13 août 2018, 03:30, radiant haut et pas de Lune — au-dessus du fond sporadique qui tombe toutes les nuits de l'année."
-          }
-        },
-        {
-          id: "satellites",
-          src: "/demo-data/sky-test-satellites.json",
-          title: { en: "Could a satellite have been lit?", fr: "Un satellite pouvait-il être éclairé ?" },
-          blurb: {
-            en: "No pass is drawn — no historical orbital elements are reachable. What is computed is the height of the Earth's shadow, which settles the question.",
-            fr: "Aucun passage n'est dessiné — aucun élément orbital historique n'est joignable. Ce qui est calculé, c'est la hauteur de l'ombre de la Terre, qui tranche."
-          }
-        }
-      ]
-    },
-    {
-      heading: { en: "Weather, and the instrument", fr: "La météo, et l'instrument" },
-      intro: {
-        en: "The two things that most often turn an ordinary object into an extraordinary account.",
-        fr: "Les deux choses qui transforment le plus souvent un objet ordinaire en récit extraordinaire."
-      },
-      demos: [
-        {
-          id: "storm",
-          src: "/demo-data/sky-test-storm.json",
-          title: { en: "A thunderstorm", fr: "Un orage" },
-          blurb: {
-            en: "Cloud base at 600 m, heavy rain drifting on a real 14 m/s wind, lightning lighting the scene's haze, thunder arriving late. Pause it: all of it stops.",
-            fr: "Base des nuages à 600 m, pluie forte dérivant sur un vent réel de 14 m/s, éclairs illuminant la brume, tonnerre en retard. Mettez en pause : tout s'arrête."
-          }
-        },
-        {
-          id: "aircraft",
-          src: "/demo-data/sky-test-aircraft.json",
-          title: { en: "An airliner on a 20-second exposure", fr: "Un avion de ligne sur une pose de 20 s" },
-          blurb: {
-            en: "No object is drawn here — there isn't one. Steady lamps draw lines, flashing ones drop dots, and their spacing is the flash rate times the angular speed.",
-            fr: "Aucun objet n'est dessiné ici — il n'y en a pas. Les feux fixes tracent des lignes, les clignotants posent des points, et leur espacement est la cadence multipliée par la vitesse angulaire."
-          }
-        }
-      ]
-    }
-  ]
+  private readonly catalogue = new DemoCatalogue()
 
   /**
    * Mounts a scene as its card nears the viewport, plays it while it is actually on screen, and
@@ -229,10 +55,7 @@ const mount = async card => {
   const scene = document.createElement("rr0-scene")
   card.querySelector(".demo-mount").replaceChildren(scene)
   await customElements.whenDefined("rr0-scene")
-  // loadFromSrc rather than the src attribute, because it RESOLVES: playing has to wait until the
-  // recording is in, or it finds a zero-length timeline and returns without doing anything.
   await scene.loadFromSrc(card.dataset.src)
-  if (card.dataset.mounted && card.dataset.visible) scene.ufoElement.play()
 }
 
 const unmount = card => {
@@ -264,12 +87,13 @@ const onScreen = new IntersectionObserver(entries => {
       void mount(card)
       continue
     }
+    // Nothing starts on its own. Seventeen skies playing at once is seventeen WebGL contexts each
+    // asking for sixty frames a second, and the reader is looking at one of them — so a card shows
+    // its first frame and its own play button, and runs when it is asked to. What is still
+    // automatic is STOPPING: a scene the reader has scrolled past keeps its context but gives back
+    // the frames.
     const scene = card.querySelector("rr0-scene")
-    // Off-screen scenes keep their context but stop burning frames on a sky nobody is watching.
-    if (scene?.ufoElement) {
-      if (entry.isIntersecting) scene.ufoElement.play()
-      else scene.ufoElement.pause()
-    }
+    if (!entry.isIntersecting) scene?.ufoElement?.pause()
   }
 }, { threshold: 0.1 })
 
@@ -281,13 +105,13 @@ for (const card of cards) {
 
   render(language: SiteLanguage): string {
     const fr = language === "fr"
-    const playerPath = fr ? "/fr/lecteur/" : "/player/"
-    const editorPath = fr ? "/fr/editeur/" : "/editor/"
+    const playerPath = "/player/"
+    const editorPath = "/editor/"
     const openLabel = fr ? "Ouvrir en grand" : "Open full size"
-    const editLabel = fr ? "Modifier" : "Edit"
+    const editLabel = fr ? "Éditer" : "Edit"
     const loading = fr ? "Chargement du ciel…" : "Loading the sky…"
 
-    const groups = this.groups.map(group => `
+    const groups = this.catalogue.groups.map(group => `
     <section class="demo-group">
       <h2>${group.heading[language]}</h2>
       <p class="prose-wide">${group.intro[language]}</p>
@@ -316,11 +140,11 @@ for (const card of cards) {
     <p class="eyebrow">${fr ? "Catalogue" : "Catalogue"}</p>
     <h1>${fr ? "Ce qu'il sait faire." : "What it can do."}</h1>
     <p class="lede">${fr
-      ? "Quatorze reconstitutions, toutes en fonctionnement sur cette page. Aucune n'est une vidéo : "
-        + "chacune est calculée pendant que vous la regardez, à partir d'une date, d'une heure et d'un "
-        + "lieu réels. Cliquez dans l'une d'elles pour la mettre en pause."
-      : "Fourteen reconstructions, all running on this page. None of them is a video: each is computed "
-        + "while you watch it, from a real date, a real hour and a real place. Click inside one to pause it."}</p>
+      ? "Dix-sept reconstitutions. Aucune n'est une vidéo : chacune est calculée pendant que vous la "
+        + "regardez, à partir d'une date, d'une heure et d'un lieu réels — appuyez sur lecture là où "
+        + "cela vous intéresse."
+      : "Seventeen reconstructions. None of them is a video: each is computed while you watch it, from "
+        + "a real date, a real hour and a real place — press play on whichever interests you."}</p>
   </div>
 </section>
 
@@ -336,7 +160,7 @@ ${groups}
     <p>${fr
       ? `Les rentrées atmosphériques, un passage satellite réellement calculé pour les dates récentes,
          les nuages volumétriques, l'observation depuis un avion, les anomalies de propagation radar.
-         Le détail, et ce que chacun attend, est sur <a href="/fr/plan/">la page du plan</a>.`
+         Le détail, et ce que chacun attend, est sur <a href="/roadmap/">la page du plan</a>.`
       : `Atmospheric re-entries, a satellite pass actually computed for recent dates, volumetric
          clouds, observing from an aircraft, radar propagation anomalies. What each one is waiting
          on is on <a href="/roadmap/">the roadmap</a>.`}</p>

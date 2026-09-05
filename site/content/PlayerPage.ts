@@ -1,3 +1,4 @@
+import { DemoCatalogue } from "./DemoCatalogue.js"
 import type { PageMeta, SiteLanguage, SitePage } from "../SitePage.js"
 
 /**
@@ -9,7 +10,7 @@ import type { PageMeta, SiteLanguage, SitePage } from "../SitePage.js"
 export class PlayerPage implements SitePage {
 
   readonly meta: PageMeta = {
-    slug: { en: "player", fr: "lecteur" },
+    slug: "player",
     navLabel: { en: "Player", fr: "Lecteur" },
     title: { en: "Play any reconstruction", fr: "Rejouer n'importe quelle reconstitution" },
     description: {
@@ -21,8 +22,14 @@ export class PlayerPage implements SitePage {
     modules: ["/lib/rr0-eyewitness.mjs"]
   }
 
+  private readonly catalogue = new DemoCatalogue()
+
   script(language: SiteLanguage): string {
     const fr = language === "fr"
+    // This site knows what its own demos are called; a case id like `sky-test-halos` does not.
+    // Only for these — anything else is named from what the recording itself carries.
+    const demoTitles = JSON.stringify(Object.fromEntries(
+      this.catalogue.demos.map(demo => [demo.src, demo.title[language]])))
     const messages = JSON.stringify({
       loading: fr ? "Chargement…" : "Loading…",
       notFound: fr
@@ -30,9 +37,11 @@ export class PlayerPage implements SitePage {
         : "Nothing could be loaded from that link. Check the address, and that the file is readable from another site (a CORS header).",
       badJson: fr ? "Ce texte n'est pas une reconstitution valide : " : "That text is not a valid reconstruction: ",
       empty: fr ? "Rien à jouer — collez une reconstitution d'abord." : "Nothing to play — paste a reconstruction first.",
-      editorOpen: fr ? "Modifier cette observation" : "Edit this sighting"
+      playing: fr ? "Rejouer {title}" : "Playing {title}",
+      pasted: fr ? "la reconstitution collée" : "the pasted reconstruction"
     })
     return `const messages = ${messages}
+const demoTitles = ${demoTitles}
 const stage = document.getElementById("player-stage")
 const stageBox = document.getElementById("player-stage-box")
 const status = document.getElementById("player-status")
@@ -42,14 +51,47 @@ const urlForm = document.getElementById("player-url-form")
 const pastePanel = document.getElementById("player-paste")
 const pasteMount = document.getElementById("player-paste-mount")
 const pasteButton = document.getElementById("player-paste-play")
-const editorPath = ${JSON.stringify(fr ? "/fr/editeur/" : "/editor/")}
+const heading = document.getElementById("player-heading")
+const lede = document.getElementById("player-lede")
+const editorPath = "/editor/"
 
 const say = (text, kind) => {
   status.textContent = text ?? ""
   status.className = "player-status" + (kind ? " is-" + kind : "")
 }
 
-const reveal = source => {
+/**
+ * What to call the observation now on screen.
+ *
+ * The case id first, because that is the name a case is filed and argued under; the witness's own
+ * name next, since a single-witness recording is known by them; and the file's own name last,
+ * which at least distinguishes one recording from another. A recording that says none of the three
+ * keeps the page's general title, which is then the accurate one.
+ */
+const titleOf = (sighting, source) => {
+  const known = source && demoTitles[new URL(source, location.href).pathname]
+  if (known) return known
+  const witness = sighting && sighting.witness
+  const fullName = witness && [...(witness.firstNames || []), witness.lastName].filter(Boolean).join(" ")
+  return (sighting && sighting.caseId)
+    || (witness && (witness.title || fullName || witness.id))
+    || (source && decodeURIComponent(source.split("/").pop() || "").replace(/\.json$/, ""))
+    || undefined
+}
+
+const announce = (sighting, source, fallbackTitle) => {
+  const title = titleOf(sighting, source) || fallbackTitle
+  if (!title) return
+  const sentence = messages.playing.replace("{title}", title)
+  heading.textContent = sentence + "."
+  document.title = sentence + " — UFO@home"
+  // The general subtitle describes what this PAGE is for. Once it is showing one particular
+  // observation, the heading says which, and a sentence explaining that you may point the page at
+  // something is describing a thing already done.
+  lede.hidden = true
+}
+
+const reveal = (source, sighting, fallbackTitle) => {
   stageBox.hidden = false
   if (source) {
     editLink.href = editorPath + "?sighting=" + encodeURIComponent(source)
@@ -57,6 +99,7 @@ const reveal = source => {
   } else {
     editLink.hidden = true
   }
+  announce(sighting, source, fallbackTitle)
 }
 
 /** A bare name with no slash is one of this site's own demos first, then an rr0.org case
@@ -65,17 +108,18 @@ const resolve = requested => requested.includes("/")
   ? [requested]
   : [\`/demo-data/witness-\${requested.toLowerCase()}.json\`,
      \`/demo-data/sky-test-\${requested.toLowerCase()}.json\`,
+     \`/demo-data/\${requested.toLowerCase()}.json\`,
      \`https://rr0.org/science/crypto/ufo/enquete/dossier/\${requested}/sighting.json\`]
 
 const openUrl = async requested => {
   say(messages.loading)
   for (const candidate of resolve(requested)) {
     try {
-      const response = await fetch(candidate, { method: "GET" })
+      const response = await fetch(candidate)
       if (!response.ok) continue
-      await response.json() // fail here rather than inside the element, so the message is ours
+      const sighting = await response.json() // fail here rather than inside the element
       await stage.loadFromSrc(candidate)
-      reveal(new URL(candidate, location.href).href)
+      reveal(new URL(candidate, location.href).href, Array.isArray(sighting) ? undefined : sighting, requested)
       say("")
       const next = new URL(location.href)
       next.searchParams.set("sighting", requested)
@@ -109,8 +153,9 @@ pasteButton.addEventListener("click", () => {
   const text = editor?.value?.trim()
   if (!text) return say(messages.empty, "error")
   try {
-    stage.sightingData = JSON.parse(text)
-    reveal(null)
+    const sighting = JSON.parse(text)
+    stage.sightingData = sighting
+    reveal(null, sighting, messages.pasted)
     say("")
     stageBox.scrollIntoView({ block: "start", behavior: "smooth" })
   } catch (error) {
@@ -121,7 +166,10 @@ pasteButton.addEventListener("click", () => {
 const asked = new URLSearchParams(location.search).get("sighting")
 if (asked) {
   urlField.value = asked
-  void openUrl(asked)
+  // Arriving with a recording named in the URL means being shown it, not being shown a form: the
+  // stage already sits above that form, and this puts it in view straight away rather than leaving
+  // the reader to guess that the thing they followed a link for is further down.
+  void openUrl(asked).then(() => stageBox.scrollIntoView({ block: "start" }))
 }`
   }
 
@@ -141,7 +189,7 @@ if (asked) {
           <button class="btn btn-primary" type="submit">${fr ? "Jouer" : "Play"}</button>
         </div>
         <p class="small">${fr
-          ? "Une adresse complète, ou le nom d'une <a href=\"/fr/demos/\">démo</a> — par exemple <code>Socorro</code>."
+          ? "Une adresse complète, ou le nom d'une <a href=\"/demos/\">démo</a> — par exemple <code>Socorro</code>."
           : "A full address, or the name of one of <a href=\"/demos/\">the demos</a> — <code>Socorro</code>, for instance."}</p>
       </form>
 
@@ -151,7 +199,7 @@ if (asked) {
           <div id="player-paste-mount" class="player-paste-mount" data-sample='{"version": 1, "timeline": {"keyframes": []}}'></div>
           <button class="btn" type="button" id="player-paste-play">${fr ? "Jouer ce texte" : "Play this"}</button>
           <p class="small">${fr
-            ? "Rien ne quitte votre navigateur. Le format est décrit dans <a href=\"/fr/documentation/\">la documentation</a>."
+            ? "Rien ne quitte votre navigateur. Le format est décrit dans <a href=\"/docs/\">la documentation</a>."
             : "Nothing leaves your browser. The format is described in <a href=\"/docs/\">the documentation</a>."}</p>
         </div>
       </details>
@@ -164,22 +212,21 @@ if (asked) {
 <section class="band hero">
   <div class="wrap">
     <p class="eyebrow">Player</p>
-    <h1>Play any reconstruction.</h1>
-    <p class="lede">Point it at a reconstruction someone published, or paste one in. It is replayed
-      here, in your own browser, in the real sky of the date and place it states — and nothing is
-      sent anywhere.</p>
+    <h1 id="player-heading">Play any reconstruction.</h1>
+    <p class="lede" id="player-lede">Point it at a reconstruction someone published, or paste one
+      in. It is replayed in the real sky of the date and place it states.</p>
   </div>
 </section>
 
 <section class="band">
   <div class="wrap">
-${this.form("en")}
     <div class="stage" id="player-stage-box" hidden>
       <rr0-eyewitness id="player-stage"></rr0-eyewitness>
       <p class="stage-caption">
         <a class="btn" id="player-edit" href="/editor/" hidden>Edit this sighting</a>
       </p>
     </div>
+${this.form("en")}
   </div>
 </section>
 
@@ -205,22 +252,21 @@ ${this.form("en")}
 <section class="band hero">
   <div class="wrap">
     <p class="eyebrow">Lecteur</p>
-    <h1>Rejouer n'importe quelle reconstitution.</h1>
-    <p class="lede">Pointez-le vers une reconstitution publiée par quelqu'un, ou collez-en une. Elle
-      est rejouée ici, dans votre navigateur, sous le ciel réel de la date et du lieu qu'elle énonce
-      — et rien n'est envoyé nulle part.</p>
+    <h1 id="player-heading">Rejouer n'importe quelle reconstitution.</h1>
+    <p class="lede" id="player-lede">Pointez-le vers une reconstitution publiée par quelqu'un, ou
+      collez-en une. Elle est rejouée sous le ciel réel de la date et du lieu qu'elle énonce.</p>
   </div>
 </section>
 
 <section class="band">
   <div class="wrap">
-${this.form("fr")}
     <div class="stage" id="player-stage-box" hidden>
       <rr0-eyewitness id="player-stage"></rr0-eyewitness>
       <p class="stage-caption">
-        <a class="btn" id="player-edit" href="/fr/editeur/" hidden>Modifier cette observation</a>
+        <a class="btn" id="player-edit" href="/editor/" hidden>Éditer cette observation</a>
       </p>
     </div>
+${this.form("fr")}
   </div>
 </section>
 
@@ -228,14 +274,14 @@ ${this.form("fr")}
   <div class="wrap prose-wide">
     <h2>Un lien qui ouvre une observation</h2>
     <p>Tout ce que porte cette page est atteignable directement :
-      <code>ufoathome.org/fr/lecteur/?sighting=</code> suivi de l'adresse d'une reconstitution.
+      <code>ufoathome.org/player/?sighting=</code> suivi de l'adresse d'une reconstitution.
       C'est le lien à donner à quelqu'un quand on veut qu'il voie un récit plutôt qu'il le lise —
       dans un courriel, un message, un forum qui n'accepte que du texte.</p>
     <p>C'est aussi ce que distribue le panneau <q>?</q> de chaque reconstitution publiée, et ce vers
       quoi aboutissent les anciens liens <code>ufoathome.org/&lt;nom&gt;</code>.</p>
     <p>Pour modifier ce que vous regardez au lieu de seulement le regarder,
-      <a href="/fr/editeur/">l'éditeur</a> prend le même paramètre. Pour poser une reconstitution
-      sur une page à vous, voyez <a href="/fr/documentation/">la documentation</a>.</p>
+      <a href="/editor/">l'éditeur</a> prend le même paramètre. Pour poser une reconstitution
+      sur une page à vous, voyez <a href="/docs/">la documentation</a>.</p>
   </div>
 </section>
 `

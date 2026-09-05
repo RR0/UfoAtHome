@@ -186,6 +186,12 @@ section.band:first-of-type { border-top: 0; }
   border: 1px solid var(--line-strong); border-radius: 12px; overflow: hidden;
   background: var(--ground-raised); margin: 1.5rem 0;
 }
+/* The editor draws its own frames and its own border; without a gutter the card's edge lands
+   directly on them and the two read as one broken line. The carousel and the players are
+   full-bleed on purpose — there the scene IS the content — so the padding is asked for rather
+   than inherited. */
+.stage-padded { padding: 0.9rem; }
+.stage-padded rr0-ufo-recorder { display: block; }
 .stage rr0-eyewitness, .stage rr0-scene, .stage rr0-ufo-recorder, .stage rr0-ufo { display: block; }
 .stage-caption {
   padding: 0.7rem 1rem; border-top: 1px solid var(--line); color: var(--ink-dim);
@@ -221,30 +227,41 @@ section.band:first-of-type { border-top: 0; }
 /* ---------------------------------------------------------------- carousel */
 
 .carousel .stage { margin-top: 0; }
-.carousel-bar {
-  display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;
-  padding: 0.5rem 0.7rem; border-top: 1px solid var(--line); background: var(--ground-raised);
-}
+/* Only the scene is the positioning context, so the chevrons sit against ITS edges and not against
+   the caption's — a chevron centred on the whole card would drift as the caption's length changes
+   from one reconstruction to the next. */
+.carousel-viewport { position: relative; }
+.carousel-viewport rr0-eyewitness { display: block; }
 .carousel-nav {
-  cursor: pointer; font: inherit; font-size: 1.3rem; line-height: 1;
-  width: 2rem; height: 2rem; border-radius: 50%; flex: 0 0 auto;
-  border: 1px solid var(--line-strong); background: var(--ground); color: var(--ink);
+  position: absolute; top: 50%; transform: translateY(-50%);
+  cursor: pointer; font: inherit; font-size: 1.5rem; line-height: 1;
+  width: 2.4rem; height: 2.4rem; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.25); background: rgba(7, 10, 18, 0.55);
+  color: #fff; backdrop-filter: blur(4px); transition: background .15s, border-color .15s;
+  z-index: 2;
 }
-.carousel-nav:hover { border-color: var(--glow-dim); }
-.carousel-dots { display: flex; gap: 0.4rem; align-items: center; }
+.carousel-nav:hover { background: rgba(7, 10, 18, 0.8); border-color: var(--glow); }
+.carousel-nav.is-prev { left: 0.6rem; }
+.carousel-nav.is-next { right: 0.6rem; }
+
+.carousel-dots {
+  display: flex; justify-content: center; align-items: center; gap: 0.4rem; flex-wrap: wrap;
+  padding: 0.6rem 1rem 0; background: var(--ground-raised);
+}
 .carousel-dot {
-  cursor: pointer; width: 0.55rem; height: 0.55rem; padding: 0; border-radius: 50%;
-  border: 0; background: var(--line-strong);
+  cursor: pointer; width: 0.5rem; height: 0.5rem; padding: 0; border-radius: 50%;
+  border: 0; background: var(--line-strong); transition: background .15s, transform .15s;
 }
-.carousel-dot[aria-current="true"] { background: var(--glow); }
-.carousel-edit {
-  margin-left: auto; font-size: 0.87rem; font-weight: 600; text-decoration: none;
-  border: 1px solid var(--line-strong); border-radius: 999px; padding: 0.3rem 0.8rem;
-  color: var(--ink); background: var(--ground);
-}
-.carousel-edit:hover { border-color: var(--glow-dim); color: var(--ink); }
+.carousel-dot:hover { transform: scale(1.3); }
+.carousel-dot[aria-current="true"] { background: var(--glow); transform: scale(1.3); }
 /* While the reader is driving it, the sequence is visibly not. */
 .carousel[data-auto="off"] .carousel-dot[aria-current="true"] { background: var(--sky); }
+
+/* The edit link ends the description rather than sitting among the dots: it is about the
+   reconstruction being described, not about moving between them. */
+.carousel-edit { font-weight: 600; white-space: nowrap; }
+.carousel-edit::before { content: " — "; color: var(--ink-faint); font-weight: 400; }
 
 /* ---------------------------------------------------------------- demo catalogue */
 
@@ -295,6 +312,45 @@ section.band:first-of-type { border-top: 0; }
 .player-status { min-height: 1.4em; font-size: 0.92rem; color: var(--ink-dim); }
 .player-status.is-error { color: #c0392b; }
 @media (prefers-color-scheme: dark) { .player-status.is-error { color: #ff8a7a; } }
+
+/* ---------------------------------------------------------------- steps */
+
+/* A sequence, not a set of cards: these three are done in order, and cards said nothing about
+   that. The row lays them out side by side while they fit and falls to a column when they do not,
+   with the connector following — one rule, two orientations. */
+.steps {
+  list-style: none; counter-reset: step; margin: 1.5rem 0; padding: 0;
+  display: flex; gap: 0;
+}
+/* `flex: 1 1 0`, not a width basis: a basis is along the MAIN axis, so `15rem` became a 240px
+   minimum HEIGHT the moment the media query below turned the row into a column, and the steps
+   stood a screen apart with the connector stretched between them. Sharing the width equally and
+   letting the breakpoint do the switching is one rule for both orientations. */
+.steps > li {
+  counter-increment: step; position: relative; flex: 1 1 0; min-width: 0;
+  padding: 0 1.4rem 0 0; margin: 0;
+}
+.steps > li::before {
+  content: counter(step);
+  display: flex; align-items: center; justify-content: center;
+  width: 1.9rem; height: 1.9rem; border-radius: 50%; margin-bottom: 0.7rem;
+  font: 600 0.95rem/1 var(--sans); color: var(--glow-on-solid); background: var(--glow-solid);
+}
+/* The line that makes it a sequence, drawn from each step's own number to the next one's. */
+.steps > li::after {
+  content: ""; position: absolute; left: 2.3rem; top: 0.95rem; right: 0.6rem; height: 2px;
+  background: var(--line-strong);
+}
+.steps > li:last-child::after { display: none; }
+.steps h3 { margin: 0 0 0.35rem; font-size: 1.05rem; }
+.steps p { margin: 0; font-size: 0.93rem; color: var(--ink-dim); }
+
+@media (max-width: 46rem) {
+  .steps { flex-direction: column; gap: 1.2rem; }
+  .steps > li { flex: none; padding: 0 0 0 3rem; }
+  .steps > li::before { position: absolute; left: 0; top: 0; margin: 0; }
+  .steps > li::after { left: 0.95rem; top: 2.2rem; right: auto; bottom: -1.2rem; width: 2px; height: auto; }
+}
 
 /* ---------------------------------------------------------------- lists, faq, roadmap */
 
@@ -367,8 +423,11 @@ td { color: var(--ink-dim); }
   h2 { margin-top: 1.8rem; }
   .lede { font-size: 1.08rem; }
   .hero-actions .btn { flex: 1 1 100%; text-align: center; }
-  .carousel-bar { gap: 0.4rem; padding: 0.5rem; }
-  .carousel-edit { margin-left: 0; width: 100%; text-align: center; margin-top: 0.4rem; }
+  .carousel-nav { width: 2rem; height: 2rem; font-size: 1.2rem; }
+  .carousel-nav.is-prev { left: 0.3rem; }
+  .carousel-nav.is-next { right: 0.3rem; }
+  .carousel-dot { width: 0.45rem; height: 0.45rem; }
+  .stage-padded { padding: 0.5rem; }
   .stage { border-radius: 10px; }
   .cards, .uses { grid-template-columns: 1fr; }
   pre { font-size: 0.78rem; }

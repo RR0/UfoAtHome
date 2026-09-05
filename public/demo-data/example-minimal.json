@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "description": "The smallest recording that still states something: one silent orange oval, a degree and a half wide, crossing the south-western sky from left to right over twelve seconds.",
+  "time": { "year": 2024, "month": 8, "day": 12, "hour": 22, "minute": 30 },
+  "durationSeconds": 12,
+  "utcOffsetHours": 2,
+  "place": [{ "lat": 45.19, "lng": 5.72, "name": "Grenoble, Isère, France" }],
+  "timeline": {
+    "keyframes": [
+      {
+        "t": 0,
+        "shapes": [
+          {
+            "sourceId": "ufo-1",
+            "shape": {
+              "kind": "oval",
+              "bounds": { "x": 150, "y": 150, "width": 10, "height": 3 },
+              "angular": { "widthDeg": 1.6, "heightDeg": 0.5 },
+              "color": "#ff8c1a",
+              "angle": 0,
+              "transparency": 0,
+              "haloScale": 1.2,
+              "selected": false
+            }
+          }
+        ]
+      },
+      {
+        "t": 12000,
+        "shapes": [
+          {
+            "sourceId": "ufo-1",
+            "shape": {
+              "kind": "oval",
+              "bounds": { "x": 480, "y": 130, "width": 10, "height": 3 },
+              "angular": { "widthDeg": 1.6, "heightDeg": 0.5 },
+              "color": "#ff8c1a",
+              "angle": 0,
+              "transparency": 0,
+              "haloScale": 1.2,
+              "selected": false
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "witnessTrack": {
+    "keyframes": [
+      {
+        "t": 0,
+        "pose": { "lat": 45.19, "lng": 5.72, "elevationM": 0, "headingDeg": 215, "pitchDeg": 20, "fovDeg": 60 }
+      }
+    ]
+  },
+  "soundTrack": { "keyframes": [{ "t": 0, "sound": { "kind": "none", "volume": 0, "pitchHz": 100 } }] }
+}

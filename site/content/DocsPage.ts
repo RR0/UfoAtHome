@@ -3,8 +3,13 @@ import type { PageMeta, SiteLanguage, SitePage } from "../SitePage.js"
 /** Integration guide first, then the recording format field by field. */
 export class DocsPage implements SitePage {
 
+  /** The whole of `public/demo-data/example-minimal.json`, read at build time and quoted verbatim
+   * below — see SiteBuilder.pages for why it is passed in rather than written out here. */
+  constructor(private readonly example: string) {
+  }
+
   readonly meta: PageMeta = {
-    slug: { en: "docs", fr: "documentation" },
+    slug: "docs",
     navLabel: { en: "Documentation", fr: "Documentation" },
     title: { en: "Documentation", fr: "Documentation" },
     description: {
@@ -17,6 +22,12 @@ export class DocsPage implements SitePage {
 
   render(language: SiteLanguage): string {
     return language === "fr" ? this.fr() : this.en()
+  }
+
+  /** The example is quoted inside a `<pre>`, so its angle brackets and ampersands have to stop
+   * being markup. */
+  private escape(text: string): string {
+    return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
   }
 
   private en(): string {
@@ -221,6 +232,31 @@ import "@rr0/ufoathome/recorder"   // registers &lt;rr0-ufo-recorder&gt;</code><
     </table>
     </div>
 
+    <h3>A whole file</h3>
+    <p>The smallest recording that still states something — one silent oval crossing the sky over
+      twelve seconds, on a real date at a real place. Everything else in the format is optional, and
+      everything below is doing work:</p>
+    <pre><code>${this.escape(this.example)}</code></pre>
+    <p>It is <a href="/demo-data/example-minimal.json"><code>/demo-data/example-minimal.json</code></a>
+      on this site, so you can fetch it, and
+      <a href="/player/?sighting=/demo-data/example-minimal.json">play it</a> before changing
+      anything. Note that <code>angular</code> and <code>bounds</code> both appear: the angle is what
+      the file MEANS, and the pixels are re-derived from it on load — write the angle, and let a
+      wrong guess at the pixels be corrected for you.</p>
+
+    <h3>Larger ones to read</h3>
+    <p>Every demo on this site is a plain file you can open. These four are the ones worth reading
+      to see how a real recording is put together:</p>
+    <div class="table-scroll">
+    <table>
+      <tr><th>File</th><th>What to look at in it</th></tr>
+      <tr><td><a href="/demo-data/witness-chiles.json"><code>witness-chiles.json</code></a></td><td>A real case: a witness, a case id shared with a second recording, ten keyframes, a looked-up <code>weatherTrack</code> with its <code>weatherSource</code></td></tr>
+      <tr><td><a href="/demo-data/sky-test-halos.json"><code>sky-test-halos.json</code></a></td><td>No object at all — a sky set up by its weather, with a <code>witnessTrack</code> of four poses that pans across the display</td></tr>
+      <tr><td><a href="/demo-data/sky-test-aircraft.json"><code>sky-test-aircraft.json</code></a></td><td>An <code>instrument</code> and an <code>exposureSeconds</code>, and a <code>decor</code> aircraft with a <code>track</code> and seven <code>lights</code> at their real flash rates</td></tr>
+      <tr><td><a href="/demo-data/instrument-instamatic.json"><code>instrument-instamatic.json</code></a></td><td>The same sighting as <code>witness-socorro.json</code>, changed in one field. Diff the two</td></tr>
+    </table>
+    </div>
+
     <h3>Four rules that decide what a file means</h3>
     <ul class="plain">
       <li><strong>Discrete fields are held, continuous ones are blended.</strong> A shape left out of
@@ -299,7 +335,7 @@ npm run build:site   # this site, into dist-site/</code></pre>
     <p>La plupart des forums et bien des CMS n'exécuteront pas un script de module depuis un message.
       Deux solutions qui marchent : une <code>&lt;iframe&gt;</code> pointant vers une page à vous qui
       porte le composant, ou un simple lien vers
-      <code>ufoathome.org/fr/editeur/?sighting=&lt;url de votre enregistrement&gt;</code>, qui
+      <code>ufoathome.org/editor/?sighting=&lt;url de votre enregistrement&gt;</code>, qui
       l'ouvre ici pour quiconque le suit.</p>
   </div>
 </section>
@@ -469,6 +505,31 @@ import "@rr0/ufoathome/recorder"   // enregistre &lt;rr0-ufo-recorder&gt;</code>
     </table>
     </div>
 
+    <h3>Un fichier entier</h3>
+    <p>Le plus petit enregistrement qui énonce encore quelque chose — un ovale silencieux traversant
+      le ciel en douze secondes, à une date réelle et en un lieu réel. Tout le reste du format est
+      facultatif, et tout ce qui suit sert à quelque chose :</p>
+    <pre><code>${this.escape(this.example)}</code></pre>
+    <p>C'est <a href="/demo-data/example-minimal.json"><code>/demo-data/example-minimal.json</code></a>
+      sur ce site : vous pouvez le récupérer, et
+      <a href="/player/?sighting=/demo-data/example-minimal.json">le jouer</a> avant d'y toucher.
+      Remarquez que <code>angular</code> et <code>bounds</code> y figurent tous deux : l'angle est ce
+      que le fichier SIGNIFIE, et les pixels en sont redérivés au chargement — écrivez l'angle, et
+      laissez corriger une mauvaise estimation des pixels.</p>
+
+    <h3>De plus gros, à lire</h3>
+    <p>Chaque démo de ce site est un simple fichier que vous pouvez ouvrir. Ces quatre-là valent la
+      lecture pour voir comment un vrai enregistrement est bâti :</p>
+    <div class="table-scroll">
+    <table>
+      <tr><th>Fichier</th><th>Ce qu'il faut y regarder</th></tr>
+      <tr><td><a href="/demo-data/witness-chiles.json"><code>witness-chiles.json</code></a></td><td>Un vrai dossier : un témoin, un identifiant de dossier partagé avec un second enregistrement, dix keyframes, un <code>weatherTrack</code> relevé avec son <code>weatherSource</code></td></tr>
+      <tr><td><a href="/demo-data/sky-test-halos.json"><code>sky-test-halos.json</code></a></td><td>Aucun objet — un ciel réglé par sa météo, avec un <code>witnessTrack</code> de quatre poses qui balaie le cortège</td></tr>
+      <tr><td><a href="/demo-data/sky-test-aircraft.json"><code>sky-test-aircraft.json</code></a></td><td>Un <code>instrument</code> et un <code>exposureSeconds</code>, et un décor d'aéronef avec sa <code>track</code> et sept <code>lights</code> à leurs cadences réelles</td></tr>
+      <tr><td><a href="/demo-data/instrument-instamatic.json"><code>instrument-instamatic.json</code></a></td><td>La même observation que <code>witness-socorro.json</code>, à un champ près. Comparez les deux</td></tr>
+    </table>
+    </div>
+
     <h3>Quatre règles qui décident du sens d'un fichier</h3>
     <ul class="plain">
       <li><strong>Les champs discrets sont tenus, les continus sont interpolés.</strong> Une forme
@@ -505,7 +566,7 @@ npm run build:site   # ce site, dans dist-site/</code></pre>
       <code>npm run build:stars</code> (HYG), <code>npm run build:comets</code> (JPL Horizons) et
       <code>npm run build:satellites</code> (le SATCAT de CelesTrak) reconstruisent chacun le sien
       depuis sa source publique — la donnée est donc reproductible, et pas seulement lisible.</p>
-    <p>Tout est en MIT — voir <a href="/fr/faq/">la FAQ</a> pour ce que cela vous autorise.</p>
+    <p>Tout est en MIT — voir <a href="/faq/">la FAQ</a> pour ce que cela vous autorise.</p>
   </div>
 </section>
 `

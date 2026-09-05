@@ -4,7 +4,7 @@ import type { PageMeta, SiteLanguage, SitePage } from "../SitePage.js"
 export class RoadmapPage implements SitePage {
 
   readonly meta: PageMeta = {
-    slug: { en: "roadmap", fr: "plan" },
+    slug: "roadmap",
     navLabel: { en: "Roadmap", fr: "Plan" },
     title: { en: "Where this is going", fr: "Où cela va" },
     asideFromNav: true,

@@ -4,9 +4,9 @@ import type { PageMeta, SiteLanguage, SitePage } from "../SitePage.js"
 export class FaqPage implements SitePage {
 
   readonly meta: PageMeta = {
-    slug: { en: "faq", fr: "faq" },
+    slug: "faq",
     navLabel: { en: "FAQ", fr: "FAQ" },
-    title: { en: "Questions, and straight answers", fr: "Questions, et réponses franches" },
+    title: { en: "Frequently asked", fr: "Questions fréquentes" },
     description: {
       en: "Who made UFO@home, what you are allowed to do with it, what it sends over the network, "
         + "how it compares with Sitrec, SIMOVNI and Stellarium, and how to ask for a change.",
@@ -24,58 +24,49 @@ export class FaqPage implements SitePage {
 <section class="band hero">
   <div class="wrap">
     <p class="eyebrow">FAQ</p>
-    <h1>Questions, and straight answers.</h1>
-    <p class="lede">Mostly the ones that come before anyone tries the tool at all.</p>
+    <h1>Frequently asked.</h1>
+    <p class="lede">What the tool is, what it allows, and how it differs from the others.</p>
   </div>
 </section>
 
 <section class="band">
   <div class="wrap prose-wide">
-    <h2>Independence, licence, rights</h2>
+    <h2>Who made it, and what it allows</h2>
 
     <div class="faq-item">
-      <h3>Is this an RR0 thing? Do I have to have anything to do with RR0 to use it?</h3>
-      <p>UFO@home was created and is maintained by <a href="https://rr0.org">RR0</a>, and that is
-        stated plainly rather than hidden. But you do not need RR0 for anything: not technically,
-        not legally, not editorially.</p>
-      <p><strong>Technically</strong>, the components are published on npm as
-        <code>@rr0/ufoathome</code> and served from this domain. Install them, or copy the built
-        <code>.mjs</code> files onto your own server — they are self-contained modules with no
-        runtime dependency on rr0.org whatsoever. Your recordings are your own JSON files, on your
-        own host. Nothing calls back here.</p>
-      <p><strong>Legally</strong>, the MIT licence gives you rights RR0 cannot take back. See the
-        next answer.</p>
-      <p><strong>Editorially</strong>, a reconstruction asserts what the recording states and
-        nothing more. It carries no RR0 conclusion, no RR0 branding, and no RR0 case number unless
-        you put one there yourself.</p>
+      <h3>Who is behind UFO@home?</h3>
+      <p>It is developed and maintained by <a href="https://rr0.org">RR0</a>, a French encyclopaedia
+        of unexplained phenomena, which uses it for its own case files.</p>
+      <p>It does not need RR0 to run. The components are published on npm as
+        <code>@rr0/ufoathome</code> and served from this domain; install them or copy the built
+        <code>.mjs</code> files onto your own server, and they work with no runtime dependency on
+        rr0.org. Recordings are your own files, on your own host.</p>
+      <p>A reconstruction asserts what its recording states and nothing more — no conclusion, no
+        branding, and no case number other than one you put there yourself.</p>
     </div>
 
     <div class="faq-item">
-      <h3>What exactly am I allowed to do with it?</h3>
-      <p>It is under the <a href="https://github.com/RR0/UfoAtHome/blob/main/LICENSE">MIT
-        licence</a> — one of the most permissive there is. Concretely, and with no permission to
-        ask:</p>
+      <h3>What does the licence allow?</h3>
+      <p>UFO@home is under the <a href="https://github.com/RR0/UfoAtHome/blob/main/LICENSE">MIT
+        licence</a>. That allows you to:</p>
       <ul class="plain">
-        <li>Use it on any site, including a commercial one.</li>
-        <li>Modify it, and keep your modifications to yourself if you want to.</li>
-        <li>Redistribute it, bundle it into your own product, and charge for that product.</li>
-        <li><strong>Fork it.</strong> If this project's direction stops suiting you, take the code
-          and take it elsewhere. That is a right, not a courtesy, and no one here can revoke it.</li>
+        <li>use it on any site, including a commercial one;</li>
+        <li>modify it, and keep your modifications private;</li>
+        <li>redistribute it, bundle it into your own product, and charge for that product;</li>
+        <li>fork it, and continue it in your own direction.</li>
       </ul>
-      <p>The only obligation is to keep the copyright notice and the licence text with the copies
-        you distribute. There is no contributor licence agreement, no key, no registration, no
-        “community edition”.</p>
-      <p>The whole source is on <a href="https://github.com/RR0/UfoAtHome">GitHub</a>, including the
+      <p>The one obligation is to keep the copyright notice and the licence text with the copies you
+        distribute. There is no contributor licence agreement and no registration.</p>
+      <p>The source is on <a href="https://github.com/RR0/UfoAtHome">GitHub</a>, including the
         scripts that generate its star, comet and satellite catalogues from public sources — so the
-        data is reproducible, not just readable.</p>
+        data is reproducible as well as readable.</p>
     </div>
 
     <div class="faq-item">
-      <h3>Does it upload my recording? What does it send over the network?</h3>
-      <p>No recording ever leaves your browser. There is no account, no server-side storage, no
-        analytics on the components, and no upload of anything you draw or type. <strong>Save</strong>
-        writes a file to your disk; that file is the whole thing.</p>
-      <p>What the editor does fetch, and only when it needs to:</p>
+      <h3>What does it send over the network?</h3>
+      <p>Recordings stay in your browser: there is no account and no server-side storage.
+        <strong>Save</strong> writes a file to your disk, and that file is the whole recording.</p>
+      <p>What the editor fetches, and when:</p>
       <div class="table-scroll">
       <table>
         <tr><th>Service</th><th>What for</th><th>When</th></tr>
@@ -85,10 +76,10 @@ export class FaqPage implements SitePage {
         <tr><td>Esri World Imagery, or EOX Sentinel-2 cloudless</td><td>The aerial imagery draped over that relief</td><td>Same</td></tr>
       </table>
       </div>
-      <p>Each of those is a picker in the interface, sitting where its data is reported and carrying
-        the attribution its licence requires — so you can see what answered, and choose another. The
-        star, comet and satellite catalogues are generated ahead of time and shipped inside the
-        bundle: nothing is fetched for those at all.</p>
+      <p>Each is a picker in the interface, sitting where its data is reported and carrying the
+        attribution its licence requires, so you can see what answered and choose another. The star,
+        comet and satellite catalogues are generated ahead of time and shipped inside the bundle,
+        so nothing is fetched for those.</p>
       <p>A page that only <em>replays</em> a finished recording (<code>&lt;rr0-ufo&gt;</code>,
         <code>&lt;rr0-scene&gt;</code>, <code>&lt;rr0-eyewitness&gt;</code>) makes no lookup at all
         beyond the terrain and imagery tiles — a published recording carries its own weather and is
@@ -96,7 +87,7 @@ export class FaqPage implements SitePage {
     </div>
 
     <div class="faq-item">
-      <h3>Can I self-host it entirely, with no external service?</h3>
+      <h3>Can I host it entirely myself, with no external service?</h3>
       <p>Yes. Copy the <code>.mjs</code> bundles onto your server and the reconstructions will play.
         Skip the terrain and imagery providers (or point them at your own tile server) and the scene
         falls back to a plain horizon. The lookups exist for <em>authoring</em>; playback of a
@@ -135,8 +126,8 @@ export class FaqPage implements SitePage {
 
     <div class="faq-item">
       <h3>Is a reconstruction evidence?</h3>
-      <p>No, and it is not offered as any. It is a way of stating a testimony precisely enough that
-        it can be laid beside the record — and the record is what does the work: the Moon's phase
+      <p>No. It is a way of stating a testimony precisely enough that it can be laid beside the
+        record — and the record is what does the work: the Moon's phase
         that night, whether the sky was overcast, whether a comet was up, whether low orbit was even
         sunlit. The tool states what the witness said and what the records say, side by side, and
         stops there. Whether the two explain each other is the reader's conclusion, never the file's
@@ -156,12 +147,10 @@ export class FaqPage implements SitePage {
         a <em>witness</em> described, and it is built around what a testimony can and cannot say —
         angles rather than metres, a stated appearance rather than a placed object, and an explicit
         record of who supplied every non-testimonial fact.</p>
-      <p>There is also a licensing difference worth knowing about, since this page is about what you
-        are allowed to do. Sitrec was MIT-licensed and open source; it was archived in March 2026 in
+      <p>Their licences differ too. Sitrec was MIT-licensed; it was archived in March 2026 in
         favour of <a href="https://github.com/MickWest/Sitrec2">Sitrec2</a>, whose licence permits
-        only personal or non-commercial academic use, and neither redistribution nor modification.
-        UFO@home is MIT and intends to stay that way — and if it ever did not, the version you have
-        is still MIT forever.</p>
+        personal or non-commercial academic use only, and neither redistribution nor modification.
+        UFO@home is MIT.</p>
     </div>
 
     <div class="faq-item">
@@ -243,10 +232,9 @@ export class FaqPage implements SitePage {
 
     <div class="faq-item">
       <h3>What does it cost?</h3>
-      <p>Nothing, in any sense: no price, no account, no quota, no paid tier holding back a feature,
-        and no telemetry as the hidden price. The external services it uses at authoring time are
-        public ones with usage policies the tool respects — which is why place search runs only when
-        you ask for it.</p>
+      <p>Nothing: no price, no account, no quota and no paid tier. The external services it uses
+        while authoring are public ones whose usage policies it respects — which is why place search
+        runs only when you ask for it.</p>
     </div>
   </div>
 </section>
@@ -258,60 +246,52 @@ export class FaqPage implements SitePage {
 <section class="band hero">
   <div class="wrap">
     <p class="eyebrow">FAQ</p>
-    <h1>Questions, et réponses franches.</h1>
-    <p class="lede">Surtout celles qui viennent avant même d'avoir essayé l'outil.</p>
+    <h1>Questions fréquentes.</h1>
+    <p class="lede">Ce qu'est l'outil, ce qu'il autorise, et ce qui le distingue des autres.</p>
   </div>
 </section>
 
 <section class="band">
   <div class="wrap prose-wide">
-    <h2>Indépendance, licence, droits</h2>
+    <h2>Qui l'a fait, et ce qu'il autorise</h2>
 
     <div class="faq-item">
-      <h3>C'est un truc RR0 ? Faut-il avoir affaire à RR0 pour s'en servir ?</h3>
-      <p>UFO@home a été créé et est maintenu par <a href="https://rr0.org">RR0</a>, et c'est dit
-        clairement plutôt que caché. Mais vous n'avez besoin de RR0 pour rien : ni techniquement, ni
-        juridiquement, ni éditorialement.</p>
-      <p><strong>Techniquement</strong>, les composants sont publiés sur npm sous le nom
-        <code>@rr0/ufoathome</code> et servis depuis ce domaine. Installez-les, ou recopiez les
-        fichiers <code>.mjs</code> construits sur votre propre serveur : ce sont des modules
-        autonomes, sans la moindre dépendance d'exécution à rr0.org. Vos enregistrements sont vos
-        propres fichiers JSON, sur votre propre hébergement. Rien ne rappelle ici.</p>
-      <p><strong>Juridiquement</strong>, la licence MIT vous donne des droits que RR0 ne peut pas
-        reprendre. Voir la réponse suivante.</p>
-      <p><strong>Éditorialement</strong>, une reconstitution affirme ce que l'enregistrement énonce,
-        et rien de plus. Elle ne porte aucune conclusion de RR0, aucune marque de RR0, et aucun
-        numéro de dossier RR0 — sauf si vous en mettez un vous-même.</p>
+      <h3>Qui est derrière UFO@home ?</h3>
+      <p>Il est développé et maintenu par <a href="https://rr0.org">RR0</a>, une encyclopédie
+        française des phénomènes inexpliqués, qui s'en sert pour ses propres dossiers.</p>
+      <p>Il n'a pas besoin de RR0 pour fonctionner. Les composants sont publiés sur npm sous le nom
+        <code>@rr0/ufoathome</code> et servis depuis ce domaine ; installez-les ou recopiez les
+        fichiers <code>.mjs</code> construits sur votre serveur, et ils marchent sans aucune
+        dépendance d'exécution à rr0.org. Les enregistrements sont vos fichiers, sur votre
+        hébergement.</p>
+      <p>Une reconstitution affirme ce que son enregistrement énonce, et rien de plus : aucune
+        conclusion, aucune marque, et aucun numéro de dossier autre que celui que vous y mettez.</p>
     </div>
 
     <div class="faq-item">
-      <h3>Qu'ai-je exactement le droit d'en faire ?</h3>
-      <p>Le projet est sous <a href="https://github.com/RR0/UfoAtHome/blob/main/LICENSE">licence
-        MIT</a>, l'une des plus permissives qui soient. Concrètement, et sans rien demander à
-        personne :</p>
+      <h3>Qu'autorise la licence ?</h3>
+      <p>UFO@home est sous <a href="https://github.com/RR0/UfoAtHome/blob/main/LICENSE">licence
+        MIT</a>. Elle vous permet de :</p>
       <ul class="plain">
-        <li>L'utiliser sur n'importe quel site, y compris commercial.</li>
-        <li>Le modifier, et garder vos modifications pour vous si vous le souhaitez.</li>
-        <li>Le redistribuer, l'intégrer à votre propre produit, et faire payer ce produit.</li>
-        <li><strong>Le forker.</strong> Si la direction du projet cesse de vous convenir, prenez le
-          code et emmenez-le ailleurs. C'est un droit, pas une politesse, et personne ici ne peut le
-          révoquer.</li>
+        <li>l'utiliser sur n'importe quel site, y compris commercial ;</li>
+        <li>le modifier, et garder vos modifications privées ;</li>
+        <li>le redistribuer, l'intégrer à votre produit, et faire payer ce produit ;</li>
+        <li>le forker, et le poursuivre dans votre propre direction.</li>
       </ul>
       <p>La seule obligation est de conserver la mention de copyright et le texte de la licence avec
-        les copies que vous distribuez. Pas de <i lang="en">contributor licence agreement</i>, pas de
-        clé, pas d'inscription, pas d'« édition communautaire ».</p>
-      <p>Tout le code est sur <a href="https://github.com/RR0/UfoAtHome">GitHub</a>, y compris les
+        les copies que vous distribuez. Il n'y a ni <i lang="en">contributor licence agreement</i>,
+        ni inscription.</p>
+      <p>Le code est sur <a href="https://github.com/RR0/UfoAtHome">GitHub</a>, y compris les
         scripts qui engendrent ses catalogues d'étoiles, de comètes et de satellites à partir de
-        sources publiques — les données sont donc reproductibles, et pas seulement lisibles.</p>
+        sources publiques : les données sont donc reproductibles autant que lisibles.</p>
     </div>
 
     <div class="faq-item">
-      <h3>Mon enregistrement est-il envoyé quelque part ? Qu'est-ce qui passe sur le réseau ?</h3>
-      <p>Aucun enregistrement ne quitte votre navigateur. Il n'y a ni compte, ni stockage côté
-        serveur, ni mesure d'audience dans les composants, ni envoi de quoi que ce soit que vous
-        dessiniez ou tapiez. <strong>Enregistrer</strong> écrit un fichier sur votre disque ; ce
-        fichier est le tout.</p>
-      <p>Ce que l'éditeur va chercher, et seulement quand il en a besoin :</p>
+      <h3>Qu'est-ce qui passe sur le réseau ?</h3>
+      <p>Les enregistrements restent dans votre navigateur : il n'y a ni compte ni stockage côté
+        serveur. <strong>Enregistrer</strong> écrit un fichier sur votre disque, et ce fichier est
+        l'enregistrement complet.</p>
+      <p>Ce que va chercher l'éditeur, et quand :</p>
       <div class="table-scroll">
       <table>
         <tr><th>Service</th><th>Pour quoi</th><th>Quand</th></tr>
@@ -321,11 +301,10 @@ export class FaqPage implements SitePage {
         <tr><td>Esri World Imagery, ou EOX Sentinel-2 cloudless</td><td>L'imagerie aérienne drapée sur ce relief</td><td>De même</td></tr>
       </table>
       </div>
-      <p>Chacun de ces services est un sélecteur dans l'interface, placé là où sa donnée est
-        rapportée et portant l'attribution qu'exige sa licence — vous voyez donc qui a répondu, et
-        vous pouvez en choisir un autre. Les catalogues d'étoiles, de comètes et de satellites sont
-        engendrés à l'avance et embarqués dans le <i lang="en">bundle</i> : rien n'est appelé pour
-        eux.</p>
+      <p>Chacun est un sélecteur dans l'interface, placé là où sa donnée est rapportée et portant
+        l'attribution qu'exige sa licence : vous voyez qui a répondu et pouvez en choisir un autre.
+        Les catalogues d'étoiles, de comètes et de satellites sont engendrés à l'avance et embarqués
+        dans le <i lang="en">bundle</i>, donc rien n'est appelé pour eux.</p>
       <p>Une page qui ne fait que <em>rejouer</em> un enregistrement terminé
         (<code>&lt;rr0-ufo&gt;</code>, <code>&lt;rr0-scene&gt;</code>,
         <code>&lt;rr0-eyewitness&gt;</code>) ne fait aucune consultation, hors les tuiles de relief
@@ -334,7 +313,7 @@ export class FaqPage implements SitePage {
     </div>
 
     <div class="faq-item">
-      <h3>Puis-je l'héberger entièrement moi-même, sans aucun service externe ?</h3>
+      <h3>Puis-je l'héberger entièrement moi-même, sans service externe ?</h3>
       <p>Oui. Recopiez les <i lang="en">bundles</i> <code>.mjs</code> sur votre serveur et les
         reconstitutions se joueront. Sans fournisseur de relief ni d'imagerie (ou en les pointant
         vers votre propre serveur de tuiles), la scène retombe sur un horizon nu. Les consultations
@@ -376,8 +355,8 @@ export class FaqPage implements SitePage {
 
     <div class="faq-item">
       <h3>Une reconstitution est-elle une preuve ?</h3>
-      <p>Non, et elle n'est pas présentée comme telle. C'est une façon d'énoncer un témoignage assez
-        précisément pour pouvoir le poser à côté des relevés — et ce sont les relevés qui font le
+      <p>Non. C'est une façon d'énoncer un témoignage assez précisément pour pouvoir le poser à
+        côté des relevés — et ce sont les relevés qui font le
         travail : la phase de la Lune cette nuit-là, si le ciel était couvert, si une comète était
         levée, si l'orbite basse était seulement éclairée. L'outil énonce côte à côte ce qu'a dit le
         témoin et ce que disent les relevés, et s'arrête là. Que les deux s'expliquent l'un l'autre
@@ -397,12 +376,10 @@ export class FaqPage implements SitePage {
         ce qu'un <em>témoin</em> a décrit, et il est bâti autour de ce qu'un témoignage peut et ne
         peut pas dire — des angles plutôt que des mètres, une apparence énoncée plutôt qu'un objet
         placé, et la trace explicite de qui a fourni chaque fait non testimonial.</p>
-      <p>Il y a aussi une différence de licence qui mérite d'être connue, puisque cette page parle de
-        ce que vous avez le droit de faire. Sitrec était sous licence MIT et libre ; il a été archivé
-        en mars 2026 au profit de <a href="https://github.com/MickWest/Sitrec2">Sitrec2</a>, dont la
-        licence n'autorise qu'un usage personnel ou académique non commercial, à l'exclusion de toute
-        redistribution ou modification. UFO@home est en MIT et compte le rester — et s'il cessait de
-        l'être, la version que vous avez resterait MIT pour toujours.</p>
+      <p>Leurs licences diffèrent aussi. Sitrec était sous licence MIT ; il a été archivé en mars
+        2026 au profit de <a href="https://github.com/MickWest/Sitrec2">Sitrec2</a>, dont la licence
+        n'autorise qu'un usage personnel ou académique non commercial, à l'exclusion de toute
+        redistribution ou modification. UFO@home est en MIT.</p>
     </div>
 
     <div class="faq-item">
@@ -464,11 +441,11 @@ export class FaqPage implements SitePage {
     <div class="faq-item">
       <h3>Puis-je mettre une reconstitution dans un message de forum ?</h3>
       <p>Si le forum accepte du HTML brut et un script de module, oui — les deux lignes sont sur
-        <a href="/fr/editeur/">la page de l'éditeur</a>, et chaque reconstitution publiée les
+        <a href="/editor/">la page de l'éditeur</a>, et chaque reconstitution publiée les
         distribue elle-même. La plupart des forums ne l'acceptent pas, pour de bonnes raisons. Deux
         solutions qui marchent en général : une <code>&lt;iframe&gt;</code> pointant vers une page à
         vous qui porte le composant, ou tout simplement un lien vers
-        <code>ufoathome.org/fr/editeur/?sighting=</code> suivi de l'URL de votre enregistrement, qui
+        <code>ufoathome.org/editor/?sighting=</code> suivi de l'URL de votre enregistrement, qui
         l'ouvre ici pour tout le monde.</p>
     </div>
 
@@ -490,9 +467,8 @@ export class FaqPage implements SitePage {
 
     <div class="faq-item">
       <h3>Combien ça coûte ?</h3>
-      <p>Rien, en aucun sens : pas de prix, pas de compte, pas de quota, pas de palier payant
-        retenant une fonctionnalité, et pas de télémétrie en guise de prix caché. Les services
-        externes utilisés au moment de la saisie sont des services publics dont l'outil respecte les
+      <p>Rien : pas de prix, pas de compte, pas de quota, pas de palier payant. Les services
+        externes utilisés pendant la saisie sont des services publics dont l'outil respecte les
         conditions d'usage — c'est pourquoi la recherche de lieu ne part que lorsque vous la
         demandez.</p>
     </div>

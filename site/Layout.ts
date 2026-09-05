@@ -1,39 +1,49 @@
-import { type PageMeta, type Said, SITE_LANGUAGES, type SiteLanguage, type SitePage } from "./SitePage.js"
+import {
+  FALLBACK_LANGUAGE, type PageMeta, SITE_LANGUAGES, type SiteLanguage, type SitePage
+} from "./SitePage.js"
 
 /**
- * Wraps a page's own content in the site shell: head, header with its language switch, footer.
+ * Wraps a page's own content in the site shell: head, header, footer.
  *
- * It owns the URL scheme too, since the header, the `hreflang` alternates and the file the builder
- * writes must all agree on it: English at the root (`/editor/`), French under `/fr/` with its own
- * slugs (`/fr/editeur/`). Root-absolute URLs throughout — this is a site at a domain root, and a
- * page two directories deep should not have to know how deep it is.
+ * It owns the URL scheme, and the scheme has one rule: **a page's address does not depend on the
+ * language it is read in.** `ufoathome.org/editor/` is the editor for everybody, and which
+ * translation is served is decided on arrival. So there is one directory per page, holding
+ * `index.html` (English, the fallback) beside `index_fr.html` — the sibling-file convention rr0.org
+ * and cosmochrony.org already use — and every link on this site, in either language, points at the
+ * directory.
  */
 export class Layout {
 
   static readonly ORIGIN = "https://ufoathome.org"
 
-  private readonly footer: Said<string>
-
   constructor(private readonly pages: readonly SitePage[], private readonly version: string) {
-    this.footer = {
-      en: `UFO@home v${version} — MIT licensed`,
-      fr: `UFO@home v${version} — sous licence MIT`
-    }
   }
 
-  /** The site-root-relative directory a page lives in, with a trailing slash. */
-  path(meta: PageMeta, language: SiteLanguage): string {
-    const slug = meta.slug[language]
-    const prefix = language === "en" ? "/" : "/fr/"
-    return slug ? `${prefix}${slug}/` : prefix
+  /** A page's canonical, language-independent address. This is what every link uses. */
+  path(meta: PageMeta): string {
+    return meta.slug ? `/${meta.slug}/` : "/"
+  }
+
+  /** Where a given language's file actually sits — the canonical path for the fallback, a
+   * `_<lang>` sibling for the rest. Used for the files written, for `hreflang`, and by the
+   * redirect. */
+  fileUrl(meta: PageMeta, language: SiteLanguage): string {
+    const path = this.path(meta)
+    return language === FALLBACK_LANGUAGE ? path : `${path}index_${language}.html`
+  }
+
+  /** Where the built file goes, relative to the output root. */
+  fileName(meta: PageMeta, language: SiteLanguage): string {
+    const name = language === FALLBACK_LANGUAGE ? "index.html" : `index_${language}.html`
+    return `${this.path(meta)}${name}`.replace(/^\//, "")
   }
 
   render(page: SitePage, language: SiteLanguage): string {
     const meta = page.meta
-    const self = this.path(meta, language)
+    const self = this.fileUrl(meta, language)
     const alternates = SITE_LANGUAGES
-      .map(other => `<link rel="alternate" hreflang="${other}" href="${Layout.ORIGIN}${this.path(meta, other)}">`)
-      .concat(`<link rel="alternate" hreflang="x-default" href="${Layout.ORIGIN}${this.path(meta, "en")}">`)
+      .map(other => `<link rel="alternate" hreflang="${other}" href="${Layout.ORIGIN}${this.fileUrl(meta, other)}">`)
+      .concat(`<link rel="alternate" hreflang="x-default" href="${Layout.ORIGIN}${this.path(meta)}">`)
       .join("\n  ")
     const modules = (meta.modules ?? [])
       .map(src => `<script type="module" src="${src}"></script>`)
@@ -44,6 +54,7 @@ export class Layout {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+${this.languageRedirect(meta, language)}
   <title>${meta.title[language]} — UFO@home</title>
   <meta name="description" content="${this.attribute(meta.description[language])}">
   <link rel="canonical" href="${Layout.ORIGIN}${self}">
@@ -72,18 +83,47 @@ ${script ? `<script type="module">\n${script}\n</script>` : ""}
   }
 
   /**
-   * No language picker, deliberately — the same rule the components follow: detect, and fall back
-   * to English. The French tree is reached by detection (see the Netlify rules build.ts emits) and
-   * declared to search engines through `hreflang`, which is metadata rather than a control.
+   * Sends a reader to their own language's copy of THIS page.
+   *
+   * Blocking, inline, and first in the head: it has to decide before anything is painted, or a
+   * French reader sees the English page flash past on every single navigation. That is also why it
+   * is plain ES5 in a classic script rather than a module — a module is deferred by definition, and
+   * deferred is too late.
+   *
+   * `location.search` and `location.hash` are carried across, which is not a nicety:
+   * `/player/?sighting=…` is the whole point of that page, and a redirect that dropped the query
+   * would turn every shared link into an empty player for anyone whose browser is not English.
+   *
+   * There is no picker, here or anywhere — same rule the components follow. And no server-side
+   * `Language=` rule either: one mechanism, in one place, that a reader can see the effect of.
    */
+  private languageRedirect(meta: PageMeta, pageLanguage: SiteLanguage): string {
+    const supported = JSON.stringify([...SITE_LANGUAGES])
+    const path = this.path(meta)
+    return `  <script>
+    (function () {
+      var supported = ${supported}, pageLanguage = ${JSON.stringify(pageLanguage)}, path = ${JSON.stringify(path)}
+      var preferences = navigator.languages || [navigator.language || "${FALLBACK_LANGUAGE}"]
+      var chosen = "${FALLBACK_LANGUAGE}"
+      for (var i = 0; i < preferences.length; i++) {
+        var base = String(preferences[i]).toLowerCase().split("-")[0]
+        if (supported.indexOf(base) >= 0) { chosen = base; break }
+      }
+      if (chosen !== pageLanguage) {
+        location.replace(path + (chosen === "${FALLBACK_LANGUAGE}" ? "" : "index_" + chosen + ".html")
+          + location.search + location.hash)
+      }
+    })()
+  </script>`
+  }
+
   private header(current: SitePage, language: SiteLanguage): string {
     const links = this.pages.filter(page => !page.meta.asideFromNav).map(page => {
-      const href = this.path(page.meta, language)
       const currentAttr = page === current ? ` aria-current="page"` : ""
-      return `<a href="${href}"${currentAttr}>${page.meta.navLabel[language]}</a>`
+      return `<a href="${this.path(page.meta)}"${currentAttr}>${page.meta.navLabel[language]}</a>`
     }).join("\n    ")
     return `<header class="site-header">
-  <a class="brand" href="${language === "en" ? "/" : "/fr/"}">UFO<span class="at">@</span>home</a>
+  <a class="brand" href="/">UFO<span class="at">@</span>home</a>
   <nav class="site-nav" aria-label="${language === "fr" ? "Navigation principale" : "Main navigation"}">
     ${links}
   </nav>
@@ -93,13 +133,13 @@ ${script ? `<script type="module">\n${script}\n</script>` : ""}
   private siteFooter(language: SiteLanguage): string {
     const fr = language === "fr"
     const nav = this.pages
-      .map(page => `<li><a href="${this.path(page.meta, language)}">${page.meta.navLabel[language]}</a></li>`)
+      .map(page => `<li><a href="${this.path(page.meta)}">${page.meta.navLabel[language]}</a></li>`)
       .join("\n      ")
     return `<footer class="site-footer">
   <div class="wrap">
     <div>
       <h4>UFO@home</h4>
-      <p>${this.footer[language]}<br>
+      <p>${fr ? `UFO@home v${this.version} — sous licence MIT` : `UFO@home v${this.version} — MIT licensed`}<br>
       ${fr
         ? `Créé et maintenu par <a href="https://rr0.org">RR0</a> — utilisable sans lui.`
         : `Created and maintained by <a href="https://rr0.org">RR0</a> — usable without it.`}</p>

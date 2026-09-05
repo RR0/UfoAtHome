@@ -1,18 +1,12 @@
-import type { PageMeta, Said, SiteLanguage, SitePage } from "../SitePage.js"
-
-interface Slide {
-  readonly src: string
-  /** Which single recording the "edit this" link opens, when `src` names several witnesses. */
-  readonly editSrc?: string
-  readonly caption: Said<string>
-}
+import { DemoCatalogue } from "./DemoCatalogue.js"
+import type { PageMeta, SiteLanguage, SitePage } from "../SitePage.js"
 
 /** The front page: what you can do with it, one carousel of live reconstructions, and why it is
  * built the way it is. */
 export class HomePage implements SitePage {
 
   readonly meta: PageMeta = {
-    slug: { en: "", fr: "" },
+    slug: "",
     navLabel: { en: "Home", fr: "Accueil" },
     title: {
       en: "Reconstruct what the witness saw",
@@ -27,54 +21,7 @@ export class HomePage implements SitePage {
     modules: ["/lib/rr0-eyewitness.mjs"]
   }
 
-  private readonly slides: readonly Slide[] = [
-    {
-      src: "/demo-data/witnesses-manifest.json",
-      editSrc: "/demo-data/witness-chiles.json",
-      caption: {
-        en: "Chiles &amp; Whitted, 24 July 1948, 02:45, near Montgomery, Alabama. Two airline pilots, "
-          + "two accounts that do not match — switch witness in the toolbar.",
-        fr: "Chiles et Whitted, 24 juillet 1948, 02:45, près de Montgomery (Alabama). Deux pilotes de "
-          + "ligne, deux récits qui ne concordent pas — changez de témoin dans la barre d'outils."
-      }
-    },
-    {
-      src: "/demo-data/witness-valensole.json",
-      caption: {
-        en: "Valensole, 1 July 1965, 05:45. Dawn on the plateau, the Sun still below the horizon, and "
-          + "the real relief of that field under the witness's feet.",
-        fr: "Valensole, 1ᵉʳ juillet 1965, 05:45. L'aube sur le plateau, le Soleil encore sous l'horizon, "
-          + "et le relief réel de ce champ sous les pieds du témoin."
-      }
-    },
-    {
-      src: "/demo-data/sky-test-halos.json",
-      caption: {
-        en: "A cirrus veil and a Sun 20° up. Nothing here is placed by hand: a hexagonal ice prism and "
-          + "Snell's law give the 22° ring, the sundogs and the arcs their exact angles.",
-        fr: "Un voile de cirrus et un Soleil à 20°. Rien ici n'est posé à la main : un prisme hexagonal "
-          + "de glace et la loi de Snell donnent à l'anneau de 22°, aux parhélies et aux arcs leurs angles exacts."
-      }
-    },
-    {
-      src: "/demo-data/sky-test-rainbow.json",
-      caption: {
-        en: "A rainbow needs four things at once: rain, a Sun low enough, a gap in the cloud, and a "
-          + "witness facing away from it. Remove one and there is nothing to see.",
-        fr: "Un arc-en-ciel demande quatre choses à la fois : de la pluie, un Soleil assez bas, une "
-          + "trouée dans les nuages, et un témoin qui lui tourne le dos. Retirez-en une et il n'y a rien."
-      }
-    },
-    {
-      src: "/demo-data/sky-test-aircraft.json",
-      caption: {
-        en: "No object is drawn here — there isn't one. An airliner at 6 000 m on a twenty-second "
-          + "exposure: steady lamps draw lines, flashing ones drop dots at regular intervals.",
-        fr: "Aucun objet n'est dessiné ici — il n'y en a pas. Un avion de ligne à 6 000 m sur une pose "
-          + "de vingt secondes : les feux fixes tracent des lignes, les clignotants posent des points réguliers."
-      }
-    }
-  ]
+  private readonly catalogue = new DemoCatalogue()
 
   /**
    * The carousel: plays each reconstruction through, then moves to the next.
@@ -86,10 +33,11 @@ export class HomePage implements SitePage {
    */
   script(language: SiteLanguage): string {
     const fr = language === "fr"
-    const slides = JSON.stringify(this.slides.map(slide => ({
-      src: slide.src,
-      edit: slide.editSrc ?? slide.src,
-      caption: slide.caption[language]
+    const slides = JSON.stringify(this.catalogue.demos.map(demo => ({
+      src: demo.src,
+      edit: demo.editSrc ?? demo.src,
+      title: demo.title[language],
+      blurb: demo.blurb[language]
     })))
     return `const slides = ${slides}
 // A recording as long as Valensole's four and a half minutes would hold the carousel for as long
@@ -98,7 +46,7 @@ export class HomePage implements SitePage {
 const MAX_SLIDE_MS = 25000
 // How long the carousel stays out of the way after the reader has touched it.
 const RESUME_MS = 60000
-const editorPath = ${JSON.stringify(fr ? "/fr/editeur/" : "/editor/")}
+const editorPath = "/editor/"
 
 const stage = document.getElementById("hero-stage")
 const caption = document.getElementById("hero-caption")
@@ -116,7 +64,7 @@ const ufo = () => stage.scene?.ufoElement
 const show = async position => {
   index = (position + slides.length) % slides.length
   const slide = slides[index]
-  caption.innerHTML = slide.caption
+  caption.innerHTML = "<strong>" + slide.title + "</strong> " + slide.blurb
   editLink.href = editorPath + "?sighting=" + encodeURIComponent(slide.edit)
   for (const [at, dot] of dots.entries()) dot.setAttribute("aria-current", String(at === index))
   clearTimeout(slideTimer)
@@ -168,22 +116,24 @@ show(0)`
 
   render(language: SiteLanguage): string {
     const fr = language === "fr"
-    const dots = this.slides.map((_, at) =>
-      `<button class="carousel-dot" type="button" aria-current="${at === 0}" aria-label="${fr ? "Reconstitution" : "Reconstruction"} ${at + 1}"></button>`
-    ).join("\n        ")
+    const dots = this.catalogue.demos.map((demo, at) =>
+      `<button class="carousel-dot" type="button" aria-current="${at === 0}" title="${demo.title[language]}" aria-label="${demo.title[language]}"></button>`
+    ).join("\n          ")
     const carousel = `
     <div class="carousel" id="hero-carousel" data-auto="on">
       <div class="stage">
-        <rr0-eyewitness id="hero-stage"></rr0-eyewitness>
-        <div class="carousel-bar">
-          <button class="carousel-nav" type="button" data-step="-1" aria-label="${fr ? "Précédente" : "Previous"}">‹</button>
-          <div class="carousel-dots">
-        ${dots}
-          </div>
-          <button class="carousel-nav" type="button" data-step="1" aria-label="${fr ? "Suivante" : "Next"}">›</button>
-          <a class="carousel-edit" id="hero-edit" href="${fr ? "/fr/editeur/" : "/editor/"}">${fr ? "Modifier cette observation" : "Edit this sighting"}</a>
+        <div class="carousel-viewport">
+          <rr0-eyewitness id="hero-stage"></rr0-eyewitness>
+          <button class="carousel-nav is-prev" type="button" data-step="-1" aria-label="${fr ? "Précédente" : "Previous"}">‹</button>
+          <button class="carousel-nav is-next" type="button" data-step="1" aria-label="${fr ? "Suivante" : "Next"}">›</button>
         </div>
-        <p class="stage-caption" id="hero-caption"></p>
+        <div class="carousel-dots" role="group" aria-label="${fr ? "Reconstitutions" : "Reconstructions"}">
+          ${dots}
+        </div>
+        <p class="stage-caption">
+          <span id="hero-caption"></span>
+          <a class="carousel-edit" id="hero-edit" href="/editor/">${fr ? "Éditer cette observation" : "Edit this sighting"}</a>
+        </p>
       </div>
     </div>`
     return fr ? this.fr(carousel) : this.en(carousel)
@@ -296,7 +246,11 @@ ${carousel}
         <h3>The instrument</h3>
         <p>An eye is not a lens. Naked-eye viewing maps an angle to an angle; a camera maps it to
           <code>f·tan θ</code>, with a sensor, a focal length, an aperture and an exposure that
-          draws star trails and dots a flashing light.</p>
+          draws star trails and dots a flashing light. Switch the device and the whole frame changes
+          — <a href="/demos/#instrument-eye">the same sighting through three of them</a>.</p>
+        <p>Only what that device could actually have been set to is offered: an Instamatic had one
+          aperture and one shutter speed, so there is nothing to choose, and a camera that did not
+          exist yet is flagged against the observation's own date.</p>
       </div>
     </div>
     <p class="small">Every source is named where its data is reported, with the attribution its
@@ -318,8 +272,8 @@ ${carousel}
       étoiles, la météo relevée, le sol lui-même. Pas une vue d'artiste : une reconstitution que
       n'importe qui peut vérifier.</p>
     <div class="hero-actions">
-      <a class="btn btn-primary" href="/fr/editeur/">Décrire votre propre observation</a>
-      <a class="btn" href="/fr/demos/">Voir ce qu'il sait faire</a>
+      <a class="btn btn-primary" href="/editor/">Décrire votre propre observation</a>
+      <a class="btn" href="/demos/">Voir ce qu'il sait faire</a>
     </div>
   </div>
 </section>
@@ -334,7 +288,7 @@ ${carousel}
   <div class="wrap">
     <h2>Deux choses à en faire</h2>
     <div class="uses">
-      <a class="use" href="/fr/editeur/">
+      <a class="use" href="/editor/">
         <h3>Décrire votre propre observation</h3>
         <p>Dessinez ce que vous avez vu, enregistrez son mouvement, puis dites quand et où — et le
           ciel de cet instant apparaît derrière, avec la météo qui était relevée. Corrigez la forme
@@ -342,7 +296,7 @@ ${carousel}
           n'y a pas de compte, et rien n'est téléversé.</p>
         <p class="use-more">Ouvrir l'éditeur →</p>
       </a>
-      <a class="use" href="/fr/documentation/">
+      <a class="use" href="/docs/">
         <h3>L'intégrer à votre site</h3>
         <p>Deux lignes de HTML posent une reconstitution dans un article, un dossier ou un rapport —
           votre enregistrement, sur votre hébergement, sous votre nom. Aucun <i lang="en">framework</i>,
@@ -417,13 +371,18 @@ ${carousel}
         <h3>L'instrument</h3>
         <p>Un œil n'est pas un objectif. À l'œil nu, un angle reste un angle ; un appareil le
           projette en <code>f·tan θ</code>, avec un capteur, une focale, un diaphragme et une pose
-          qui trace les filés d'étoiles et ponctue un feu clignotant.</p>
+          qui trace les filés d'étoiles et ponctue un feu clignotant. Changez d'appareil et toute
+          l'image change — <a href="/demos/#instrument-eye">la même observation à travers trois
+          d'entre eux</a>.</p>
+        <p>Seuls les réglages que cet appareil pouvait réellement avoir sont proposés : un
+          Instamatic avait un diaphragme et une vitesse, donc il n'y a rien à choisir, et un appareil
+          qui n'existait pas encore est signalé face à la date de l'observation.</p>
       </div>
     </div>
     <p class="small">Chaque source est nommée là où sa donnée est rapportée, avec l'attribution
       qu'exige sa licence — et peut être remplacée par une autre. Le sélecteur <em>est</em> le
       crédit. Ce qui manque encore, et ce que chaque élément attend, est sur
-      <a href="/fr/plan/">la page du plan</a>.</p>
+      <a href="/roadmap/">la page du plan</a>.</p>
   </div>
 </section>
 `
