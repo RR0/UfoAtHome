@@ -76,7 +76,7 @@ class SiteBuilder {
    * emitted here rather than committed anywhere.
    *
    * The only redirects are language detection, and nothing else: a catch-all that turned
-   * `/Socorro` into an editor link would sit ahead of every path this site might ever add, so the
+   * `/Socorro` into a player link would sit ahead of every path this site might ever add, so the
    * legacy convention is served by 404.html instead, which by definition can only run where
    * nothing else matched.
    */
@@ -126,9 +126,13 @@ ${negotiation}
    * path it was asked for as the observation to open — so links of that shape are already out
    * there. Reproducing that from a 404 page rather than from a redirect rule means it can never
    * shadow a real page of this site, whatever gets added later.
+   *
+   * It lands on the PLAYER, not the editor. Someone following a link of that shape was handed it to
+   * SEE an account, not to change one — and the player says so on the page itself, so sending them
+   * to the editor would have made the site contradict its own documentation.
    */
   private async write404(layout: Layout): Promise<void> {
-    const editor = layout.path(new EditorPage().meta, "en")
+    const player = layout.path(new PlayerPage().meta, "en")
     await writeFile(join(this.out, "404.html"), `<!doctype html>
 <html lang="en">
 <head>
@@ -145,16 +149,16 @@ ${negotiation}
   <div class="wrap">
     <h1>Nothing here.</h1>
     <p class="lede" id="message">This page does not exist. <a href="/">Start from the home page</a>,
-      or go straight to <a href="${editor}">the editor</a>.</p>
+      or go straight to <a href="${player}">the player</a>.</p>
   </div>
 </section>
 </main>
 <script type="module">
-// ufoathome.org/<name> used to open the editor on that observation. Keep the promise those links
-// made, without a redirect rule that would sit ahead of every future page of this site.
+// ufoathome.org/<name> used to open that observation. Keep the promise those links made, without a
+// redirect rule that would sit ahead of every future page of this site.
 const path = decodeURIComponent(location.pathname.replace(/^\\/+|\\/+$/g, ""))
 if (path && !path.includes("..")) {
-  location.replace("${editor}?sighting=" + encodeURIComponent(path))
+  location.replace("${player}?sighting=" + encodeURIComponent(path))
 }
 </script>
 </body>
