@@ -149,8 +149,8 @@ export class DemosPage implements SitePage {
           src: "/demo-data/sky-test-comet.json",
           title: { en: "A comet", fr: "Une comète" },
           blurb: {
-            en: "Hale-Bopp at dusk on 1 April 1997. The orbit is propagated from that apparition's own elements; the tail from a physical length in space.",
-            fr: "Hale-Bopp au crépuscule du 1ᵉʳ avril 1997. L'orbite est propagée depuis les éléments de cette apparition ; la queue depuis une longueur physique dans l'espace."
+            en: "Hale-Bopp at dusk on 1 April 1997, magnitude −0.8, 30° up to the north-west with a 20° tail. The orbit is propagated from that apparition's own elements.",
+            fr: "Hale-Bopp au crépuscule du 1ᵉʳ avril 1997, magnitude −0,8, à 30° de hauteur au nord-ouest, queue de 20°. L'orbite est propagée depuis les éléments de cette apparition."
           }
         },
         {
