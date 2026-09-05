@@ -125,7 +125,7 @@ if (source && mount) {
     <h3>What was seen</h3>
     <p><code>timeline.keyframes</code> is a list of <code>{ t, shapes }</code>, <code>t</code> in
       milliseconds from the start. Each shape carries a <code>sourceId</code> — several shapes can
-      share one timeline (an object, a trailing flame, a second light) — and a <code>shape</code>:</p>
+      share one timeline (the phenomenon, a trailing flame, a second light) — and a <code>shape</code>:</p>
     <pre><code>{
   "kind": "oval",          // or "polygon", which then also takes "points"
   "bounds": { "x": 0, "y": 0, "width": 0, "height": 0 },
@@ -136,7 +136,7 @@ if (source && mount) {
   "brightness": 0,         // how dazzling: a veil, aperture spikes, a core clipped to white
   "blur": 0,               // how indistinct the witness said the edges looked
   "selected": false,
-  "title": "the object",
+  "title": "the phenomenon",
   "behindCloud": false,    // STATED by the witness, never deduced
   "angular": { "widthDeg": 1.2, "heightDeg": 0.4 }
 }</code></pre>
@@ -183,7 +183,7 @@ if (source && mount) {
     <table>
       <tr><th>File</th><th>What to look at in it</th></tr>
       <tr><td><a href="/demo-data/witness-chiles.json"><code>witness-chiles.json</code></a></td><td>A real case: a witness, a case id shared with a second recording, ten keyframes, a looked-up <code>weatherTrack</code> with its <code>weatherSource</code></td></tr>
-      <tr><td><a href="/demo-data/sky-test-halos.json"><code>sky-test-halos.json</code></a></td><td>No object at all — a sky set up by its weather, with a <code>witnessTrack</code> of four poses that pans across the display</td></tr>
+      <tr><td><a href="/demo-data/sky-test-halos.json"><code>sky-test-halos.json</code></a></td><td>No phenomenon at all — a sky set up by its weather, with a <code>witnessTrack</code> of four poses that pans across the display</td></tr>
       <tr><td><a href="/demo-data/sky-test-aircraft.json"><code>sky-test-aircraft.json</code></a></td><td>An <code>instrument</code> and an <code>exposureSeconds</code>, and a <code>decor</code> aircraft with a <code>track</code> and seven <code>lights</code> at their real flash rates</td></tr>
       <tr><td><a href="/demo-data/instrument-instamatic.json"><code>instrument-instamatic.json</code></a></td><td>The same sighting as <code>witness-socorro.json</code>, changed in one field. Diff the two</td></tr>
     </table>
@@ -196,7 +196,7 @@ if (source && mount) {
         painted, in that state, from zero. To make something stop being visible, keyframe it at
         <code>transparency: 1</code>.</li>
       <li><strong>Angles only.</strong> No real size and no real distance is stored anywhere. Metres
-        are derived, as inequalities, from what the object was stated to pass behind or in front of
+        are derived, as inequalities, from what the phenomenon was stated to pass behind or in front of
         (<code>decor[].occludesSourceIds</code>).</li>
       <li><strong>Declared outranks deduced.</strong> <code>behindCloud</code> and
         <code>occludesSourceIds</code> are statements by the witness. Nothing in this format
@@ -267,7 +267,7 @@ if (source && mount) {
     <h3>Ce qui a été vu</h3>
     <p><code>timeline.keyframes</code> est une liste de <code>{ t, shapes }</code>, <code>t</code> en
       millisecondes depuis le début. Chaque forme porte un <code>sourceId</code> — plusieurs formes
-      peuvent partager une chronologie (un objet, une flamme qui traîne, une seconde lumière) — et
+      peuvent partager une chronologie (le phénomène, une flamme qui traîne, une seconde lumière) — et
       une <code>shape</code> :</p>
     <pre><code>{
   "kind": "oval",          // ou "polygon", qui prend alors aussi "points"
@@ -279,7 +279,7 @@ if (source && mount) {
   "brightness": 0,         // l'éblouissement : un voile, les aigrettes du diaphragme, un cœur saturé au blanc
   "blur": 0,               // à quel point le témoin a dit les contours indistincts
   "selected": false,
-  "title": "l'objet",
+  "title": "le phénomène",
   "behindCloud": false,    // ÉNONCÉ par le témoin, jamais déduit
   "angular": { "widthDeg": 1.2, "heightDeg": 0.4 }
 }</code></pre>
@@ -326,7 +326,7 @@ if (source && mount) {
     <table>
       <tr><th>Fichier</th><th>Ce qu'il faut y regarder</th></tr>
       <tr><td><a href="/demo-data/witness-chiles.json"><code>witness-chiles.json</code></a></td><td>Un vrai dossier : un témoin, un identifiant de dossier partagé avec un second enregistrement, dix keyframes, un <code>weatherTrack</code> relevé avec son <code>weatherSource</code></td></tr>
-      <tr><td><a href="/demo-data/sky-test-halos.json"><code>sky-test-halos.json</code></a></td><td>Aucun objet — un ciel réglé par sa météo, avec un <code>witnessTrack</code> de quatre poses qui balaie le cortège</td></tr>
+      <tr><td><a href="/demo-data/sky-test-halos.json"><code>sky-test-halos.json</code></a></td><td>Aucun phénomène — un ciel réglé par sa météo, avec un <code>witnessTrack</code> de quatre poses qui balaie le cortège</td></tr>
       <tr><td><a href="/demo-data/sky-test-aircraft.json"><code>sky-test-aircraft.json</code></a></td><td>Un <code>instrument</code> et un <code>exposureSeconds</code>, et un décor d'aéronef avec sa <code>track</code> et sept <code>lights</code> à leurs cadences réelles</td></tr>
       <tr><td><a href="/demo-data/instrument-instamatic.json"><code>instrument-instamatic.json</code></a></td><td>La même observation que <code>witness-socorro.json</code>, à un champ près. Comparez les deux</td></tr>
     </table>
@@ -339,7 +339,7 @@ if (source && mount) {
         à cinq secondes est déjà peinte, dans cet état, dès zéro. Pour qu'une chose cesse d'être
         visible, posez-lui un keyframe à <code>transparency: 1</code>.</li>
       <li><strong>Des angles, rien d'autre.</strong> Aucune taille ni distance réelle n'est stockée
-        où que ce soit. Les mètres sont déduits, en inégalités, de ce que l'objet a été déclaré
+        où que ce soit. Les mètres sont déduits, en inégalités, de ce que le phénomène a été déclaré
         passer derrière ou devant (<code>decor[].occludesSourceIds</code>).</li>
       <li><strong>L'énoncé l'emporte sur le déduit.</strong> <code>behindCloud</code> et
         <code>occludesSourceIds</code> sont des affirmations du témoin. Rien dans ce format

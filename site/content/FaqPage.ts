@@ -130,11 +130,11 @@ export class FaqPage implements SitePage {
         only way a reconstruction can be used to <em>test</em> a misperception rather than to rule
         one out by construction.</p>
       <p>It also means the tool is honest about size. A recording stores an angle, never metres —
-        but it does NOT mean distance is given up on. Where the witness saw the object cross
+        but it does NOT mean distance is given up on. Where the witness saw the phenomenon cross
         something whose position is known, that crossing is stated in the recording (it passed
         <em>behind</em> that hangar, <em>in front of</em> that tree) and the scene raycasts the exact
-        line of sight to measure it. Each crossing bounds the object's real width from one side, an
-        angle plus a distance is a size, and a size does not change as the object flies — so every
+        line of sight to measure it. Each crossing bounds its real width from one side, an
+        angle plus a distance is a size, and a size does not change as it moves — so every
         other instant of the recording reads back as a distance too. The editor prints the range
         under the apparent size, reports a contradiction where the stated crossings cannot all be
         true, and says “unknown” where nothing crosses the line of sight at all, which is the honest
@@ -205,7 +205,7 @@ export class FaqPage implements SitePage {
       <h3>Why not just use Stellarium?</h3>
       <p>Stellarium is a planetarium, and a very good one — we have read its source to learn how it
         does things. But it answers “what was in the sky?”, not “what did this person see, and could
-        the sky account for it?”. It has no testimony format, no witness object, no weather, no
+        the sky account for it?”. It has no testimony format, no witnessed phenomenon, no weather, no
         decor around the observer, no long-exposure instrument, and nothing to embed in a page.</p>
       <p>Where the two overlap, UFO@home sometimes takes the harder road on purpose: the Milky Way
         is a texture in Stellarium and a line-of-sight integral here, which is why its dark rift
@@ -389,12 +389,12 @@ export class FaqPage implements SitePage {
         ouvert — c'est la seule façon qu'une reconstitution ait de <em>tester</em> une méprise au
         lieu de l'exclure par construction.</p>
       <p>Cela rend aussi l'outil honnête sur la taille. Un enregistrement stocke un angle, jamais
-        des mètres — mais on ne renonce pas pour autant à la distance. Là où le témoin a vu l'objet
+        des mètres — mais on ne renonce pas pour autant à la distance. Là où le témoin a vu le phénomène
         croiser quelque chose dont la position est connue, ce croisement est énoncé dans
         l'enregistrement (il est passé <em>derrière</em> ce hangar, <em>devant</em> cet arbre) et la
         scène lance un rayon sur la ligne de visée exacte pour le mesurer. Chaque croisement borne
-        d'un côté la largeur réelle de l'objet ; or un angle plus une distance font une taille, et
-        une taille ne change pas pendant que l'objet vole — chaque autre instant de l'enregistrement
+        d'un côté sa largeur réelle ; or un angle plus une distance font une taille, et
+        une taille ne change pas pendant qu'il se déplace — chaque autre instant de l'enregistrement
         se relit donc en distance. L'éditeur imprime la plage sous la taille apparente, signale une
         contradiction quand les croisements énoncés ne peuvent pas tous être vrais, et dit
         « inconnue » quand rien ne croise la ligne de visée — la réponse honnête pour une lumière
@@ -469,7 +469,7 @@ export class FaqPage implements SitePage {
       <p>Stellarium est un planétarium, et un très bon — nous en avons lu le code source pour
         apprendre comment il s'y prend. Mais il répond à « qu'y avait-il dans le ciel ? », pas à
         « qu'a vu cette personne, et le ciel peut-il en rendre compte ? ». Il n'a pas de format de
-        témoignage, pas d'objet témoigné, pas de météo, pas de décor autour de l'observateur, pas
+        témoignage, pas de phénomène témoigné, pas de météo, pas de décor autour de l'observateur, pas
         d'instrument à pose longue, et rien à intégrer dans une page.</p>
       <p>Là où les deux se recoupent, UFO@home prend parfois le chemin le plus dur exprès : la Voie
         lactée est une texture chez Stellarium et une intégrale le long de la ligne de visée ici,

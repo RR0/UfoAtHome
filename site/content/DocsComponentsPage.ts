@@ -105,18 +105,48 @@ export class DocsComponentsPage extends DocsSection {
 
     <h2>What each one is for</h2>
     <ul class="plain">
-      <li><strong><code>&lt;rr0-ufo&gt;</code> — the object, and nothing else.</strong> The shape a
+      <li><strong><code>&lt;rr0-ufo&gt;</code> — the phenomenon, and nothing else.</strong> The shape a
         witness drew, its colour and halo and movement, replayed on a bare background. It is the
         testimony without the world around it.</li>
       <li><strong><code>&lt;rr0-scene&gt;</code> — the world around it.</strong> The real sky,
-        horizon, weather and ground of a stated date, hour and place, with the object composited
-        over them. Useful on its own for a sky with no object in it at all.</li>
-      <li><strong><code>&lt;rr0-sighting&gt;</code> — the account as something to read.</strong>
+        horizon, weather and ground of a stated date, hour and place, with the phenomenon composited
+        over them. Useful on its own, for a sky with nothing in it at all.</li>
+      <li><strong><code>&lt;rr0-sighting&gt;</code> — the testimony, to watch.</strong>
         A scene plus who is testifying, the observation's own metadata, its credits, and the lines
         that let a reader take it elsewhere. This is what a published sighting looks like.</li>
-      <li><strong><code>&lt;rr0-sighting-editor&gt;</code> — the account as something to write.</strong>
+      <li><strong><code>&lt;rr0-sighting-editor&gt;</code> — the testimony, to reconstruct.</strong>
         Everything above plus the authoring toolbar: describe an observation, or correct one.</li>
     </ul>
+
+    <h2>How they fit together</h2>
+    <p>You never write the nesting. Each element builds the one below it inside its own shadow
+      root, so what your page contains is a single tag:</p>
+    <pre><code>&lt;rr0-sighting&gt;           who is testifying, the metadata panel, the embed lines
+└─ &lt;rr0-scene&gt;           the real sky, horizon, weather and decor
+   └─ &lt;rr0-ufo&gt;          the canvas, the shape, playback
+
+&lt;rr0-sighting-editor&gt;    the eight authoring panels
+└─ &lt;rr0-scene&gt;           a scene, not a sighting: an editor has its own toolbar
+   └─ &lt;rr0-ufo&gt;</code></pre>
+    <p>Which is why one script tag brings the ones underneath with it:</p>
+    <div class="table-scroll">
+    <table>
+      <tr><th>Loading this</th><th>registers</th></tr>
+      <tr><td><code>/lib/rr0-ufo.mjs</code></td><td><code>&lt;rr0-ufo&gt;</code></td></tr>
+      <tr><td><code>/lib/rr0-scene.mjs</code></td><td><code>&lt;rr0-scene&gt;</code>, <code>&lt;rr0-ufo&gt;</code></td></tr>
+      <tr><td><code>/lib/rr0-sighting.mjs</code></td><td><code>&lt;rr0-sighting&gt;</code>, <code>&lt;rr0-scene&gt;</code>, <code>&lt;rr0-ufo&gt;</code></td></tr>
+      <tr><td><code>/lib/rr0-sighting-editor.mjs</code></td><td><code>&lt;rr0-sighting-editor&gt;</code>, <code>&lt;rr0-scene&gt;</code>, <code>&lt;rr0-ufo&gt;</code></td></tr>
+    </table>
+    </div>
+    <p>So a page showing a sighting and, further down, a bare sky of its own needs one script and
+      two tags — the second element is already registered.</p>
+    <p>A composition can be reached into, one property at a time:</p>
+    <pre><code>const sighting = document.querySelector("rr0-sighting")
+sighting.scene                    // the &lt;rr0-scene&gt; it composes
+sighting.scene.ufoElement         // and the &lt;rr0-ufo&gt; under that
+sighting.scene.ufoElement.play()  // so playback is two properties away</code></pre>
+    <p><code>&lt;rr0-sighting-editor&gt;</code> keeps its own composition to itself: what it offers
+      a page is the recording — <code>sightingData</code> — and the event saying it changed.</p>
 
     <h2>Which one you want</h2>
     <p>They are not variants of one bundle: each is self-contained, so load only the one you need.
@@ -126,7 +156,7 @@ export class DocsComponentsPage extends DocsSection {
       <tr><th>What you are doing</th><th>Component</th><th>Module</th><th>gzip</th></tr>
       <tr><td><strong>Showing a UFO sighting</strong> — a case file, an article, a report</td><td><code>&lt;rr0-sighting&gt;</code></td><td><code>/lib/rr0-sighting.mjs</code></td><td>249 KB</td></tr>
       <tr><td><strong>Letting somebody describe or correct one</strong></td><td><code>&lt;rr0-sighting-editor&gt;</code></td><td><code>/lib/rr0-sighting-editor.mjs</code></td><td>293 KB</td></tr>
-      <tr><td><strong>Showing a sky with no object in it</strong> — what a halo, a comet or a satellite pass looked like that night</td><td><code>&lt;rr0-scene&gt;</code></td><td><code>/lib/rr0-scene.mjs</code></td><td>238 KB</td></tr>
+      <tr><td><strong>Showing a sky with nothing in it</strong> — what a halo, a comet or a satellite pass looked like that night</td><td><code>&lt;rr0-scene&gt;</code></td><td><code>/lib/rr0-scene.mjs</code></td><td>238 KB</td></tr>
       <tr><td><strong>Showing a sighting inside a scene of your own</strong>, with no toolbar over it</td><td><code>&lt;rr0-scene&gt;</code></td><td><code>/lib/rr0-scene.mjs</code></td><td>238 KB</td></tr>
       <tr><td><strong>Illustrating a shape</strong> in the flow of an article, with no sky and no weight</td><td><code>&lt;rr0-ufo&gt;</code></td><td><code>/lib/rr0-ufo.mjs</code></td><td>16 KB</td></tr>
       <tr><td><strong>Not sure</strong></td><td><code>&lt;rr0-sighting&gt;</code></td><td><code>/lib/rr0-sighting.mjs</code></td><td>249 KB</td></tr>
@@ -197,18 +227,49 @@ import "@rr0/ufoathome/editor"   // registers &lt;rr0-sighting-editor&gt;</code>
 
     <h2>À quoi sert chacun</h2>
     <ul class="plain">
-      <li><strong><code>&lt;rr0-ufo&gt;</code> — l'objet, et rien d'autre.</strong> La forme
+      <li><strong><code>&lt;rr0-ufo&gt;</code> — le phénomène, et rien d'autre.</strong> La forme
         dessinée par un témoin, sa couleur, son halo, son mouvement, rejoués sur un fond nu. C'est
         le témoignage sans le monde autour.</li>
       <li><strong><code>&lt;rr0-scene&gt;</code> — le monde autour.</strong> Le ciel, l'horizon, la
-        météo et le sol réels d'une date, d'une heure et d'un lieu énoncés, avec l'objet composé
-        par-dessus. Utile seul pour un ciel où il n'y a aucun objet.</li>
-      <li><strong><code>&lt;rr0-sighting&gt;</code> — le récit, à lire.</strong> Une scène, plus
+        météo et le sol réels d'une date, d'une heure et d'un lieu énoncés, avec le phénomène composé
+        par-dessus. Utile seul, pour un ciel où il n'y a rien du tout.</li>
+      <li><strong><code>&lt;rr0-sighting&gt;</code> — le témoignage, à regarder.</strong> Une scène, plus
         qui témoigne, les métadonnées de l'observation, ses crédits, et les lignes qui permettent à
         un lecteur de l'emporter ailleurs. C'est à cela que ressemble une observation publiée.</li>
-      <li><strong><code>&lt;rr0-sighting-editor&gt;</code> — le récit, à écrire.</strong> Tout ce qui
+      <li><strong><code>&lt;rr0-sighting-editor&gt;</code> — le témoignage, à reconstruire.</strong> Tout ce qui
         précède, plus la barre d'outils de saisie : décrire une observation, ou en corriger une.</li>
     </ul>
+
+    <h2>Comment ils s'emboîtent</h2>
+    <p>Vous n'écrivez jamais l'imbrication. Chaque élément construit celui du dessous dans son
+      propre <i lang="en">shadow root</i> : ce que votre page contient, c'est une seule balise.</p>
+    <pre><code>&lt;rr0-sighting&gt;           qui témoigne, le panneau de métadonnées, les lignes d'intégration
+└─ &lt;rr0-scene&gt;           le ciel, l'horizon, la météo et le décor réels
+   └─ &lt;rr0-ufo&gt;          la zone de dessin, la forme, la lecture
+
+&lt;rr0-sighting-editor&gt;    les huit panneaux de saisie
+└─ &lt;rr0-scene&gt;           une scène, pas une observation : un éditeur a sa propre barre d'outils
+   └─ &lt;rr0-ufo&gt;</code></pre>
+    <p>C'est pourquoi une seule balise de script embarque ceux du dessous :</p>
+    <div class="table-scroll">
+    <table>
+      <tr><th>Charger ceci</th><th>enregistre</th></tr>
+      <tr><td><code>/lib/rr0-ufo.mjs</code></td><td><code>&lt;rr0-ufo&gt;</code></td></tr>
+      <tr><td><code>/lib/rr0-scene.mjs</code></td><td><code>&lt;rr0-scene&gt;</code>, <code>&lt;rr0-ufo&gt;</code></td></tr>
+      <tr><td><code>/lib/rr0-sighting.mjs</code></td><td><code>&lt;rr0-sighting&gt;</code>, <code>&lt;rr0-scene&gt;</code>, <code>&lt;rr0-ufo&gt;</code></td></tr>
+      <tr><td><code>/lib/rr0-sighting-editor.mjs</code></td><td><code>&lt;rr0-sighting-editor&gt;</code>, <code>&lt;rr0-scene&gt;</code>, <code>&lt;rr0-ufo&gt;</code></td></tr>
+    </table>
+    </div>
+    <p>Une page qui montre une observation puis, plus bas, un ciel seul, n'a donc besoin que d'un
+      script et de deux balises : le second élément est déjà enregistré.</p>
+    <p>On peut entrer dans une composition, une propriété à la fois :</p>
+    <pre><code>const sighting = document.querySelector("rr0-sighting")
+sighting.scene                    // le &lt;rr0-scene&gt; qu'il compose
+sighting.scene.ufoElement         // et le &lt;rr0-ufo&gt; en dessous
+sighting.scene.ufoElement.play()  // la lecture est donc à deux propriétés</code></pre>
+    <p><code>&lt;rr0-sighting-editor&gt;</code> garde sa composition pour lui : ce qu'il offre à une
+      page, c'est l'enregistrement — <code>sightingData</code> — et l'événement qui dit qu'il a
+      changé.</p>
 
     <h2>Celui qu'il vous faut</h2>
     <p>Ce ne sont pas des variantes d'un même <i lang="en">bundle</i> : chacun est autonome, ne
@@ -219,7 +280,7 @@ import "@rr0/ufoathome/editor"   // registers &lt;rr0-sighting-editor&gt;</code>
       <tr><th>Ce que vous faites</th><th>Composant</th><th>Module</th><th>gzip</th></tr>
       <tr><td><strong>Montrer une observation d'ovni</strong> — un dossier, un article, un rapport</td><td><code>&lt;rr0-sighting&gt;</code></td><td><code>/lib/rr0-sighting.mjs</code></td><td>249 Ko</td></tr>
       <tr><td><strong>Laisser quelqu'un en décrire ou en corriger une</strong></td><td><code>&lt;rr0-sighting-editor&gt;</code></td><td><code>/lib/rr0-sighting-editor.mjs</code></td><td>293 Ko</td></tr>
-      <tr><td><strong>Montrer un ciel sans objet dedans</strong> — ce qu'un halo, une comète ou un passage satellite donnaient cette nuit-là</td><td><code>&lt;rr0-scene&gt;</code></td><td><code>/lib/rr0-scene.mjs</code></td><td>238 Ko</td></tr>
+      <tr><td><strong>Montrer un ciel sans rien dedans</strong> — ce qu'un halo, une comète ou un passage satellite donnaient cette nuit-là</td><td><code>&lt;rr0-scene&gt;</code></td><td><code>/lib/rr0-scene.mjs</code></td><td>238 Ko</td></tr>
       <tr><td><strong>Montrer une observation dans une scène à vous</strong>, sans barre d'outils par-dessus</td><td><code>&lt;rr0-scene&gt;</code></td><td><code>/lib/rr0-scene.mjs</code></td><td>238 Ko</td></tr>
       <tr><td><strong>Illustrer une forme</strong> au fil d'un article, sans ciel et sans poids</td><td><code>&lt;rr0-ufo&gt;</code></td><td><code>/lib/rr0-ufo.mjs</code></td><td>16 Ko</td></tr>
       <tr><td><strong>Vous ne savez pas</strong></td><td><code>&lt;rr0-sighting&gt;</code></td><td><code>/lib/rr0-sighting.mjs</code></td><td>249 Ko</td></tr>

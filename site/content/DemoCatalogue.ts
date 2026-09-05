@@ -37,8 +37,8 @@ export class DemoCatalogue {
           src: "/demo-data/witness-chiles.json",
           title: { en: "Chiles & Whitted, 1948", fr: "Chiles et Whitted, 1948" },
           blurb: {
-            en: "Night over Alabama, 02:45. Two airline pilots described the same object differently — open it full size to switch witness.",
-            fr: "Nuit au-dessus de l'Alabama, 02:45. Deux pilotes de ligne ont décrit le même objet différemment — ouvrez-le en grand pour changer de témoin."
+            en: "Night over Alabama, 02:45. Two airline pilots described the same phenomenon differently — open it full size to switch witness.",
+            fr: "Nuit au-dessus de l'Alabama, 02:45. Deux pilotes de ligne ont décrit le même phénomène différemment — ouvrez-le en grand pour changer de témoin."
           }
         },
         {
@@ -55,8 +55,8 @@ export class DemoCatalogue {
           src: "/demo-data/witness-socorro.json",
           title: { en: "Socorro, 1964", fr: "Socorro, 1964" },
           blurb: {
-            en: "Low sun, 17:50, New Mexico. The case people argue about the object's size in — and where the reconstruction refuses to state one.",
-            fr: "Soleil bas, 17:50, Nouveau-Mexique. Le cas dont on discute la taille de l'objet — et où la reconstitution refuse d'en énoncer une."
+            en: "Low sun, 17:50, New Mexico. The case people argue about the phenomenon's size in — and where the reconstruction refuses to state one.",
+            fr: "Soleil bas, 17:50, Nouveau-Mexique. Le cas dont on discute la taille du phénomène — et où la reconstitution refuse d'en énoncer une."
           }
         },
         {
@@ -73,11 +73,11 @@ export class DemoCatalogue {
     {
       heading: { en: "What the sky can hold", fr: "Ce que le ciel peut contenir" },
       intro: {
-        en: "These hold no recorded object at all. They are skies set up with the conditions one "
+        en: "These hold no recorded phenomenon at all. They are skies set up with the conditions one "
           + "sight needs, for looking at that sight — because most of them need three or four "
           + "conditions at once, and knowing which is exactly what separates “there was no Milky "
           + "Way” from “I could not have seen it”.",
-        fr: "Ceux-ci ne contiennent aucun objet enregistré. Ce sont des ciels réglés avec les "
+        fr: "Ceux-ci ne contiennent aucun phénomène enregistré. Ce sont des ciels réglés avec les "
           + "conditions qu'exige un phénomène, pour regarder ce phénomène — car la plupart en "
           + "demandent trois ou quatre à la fois, et savoir lesquelles est exactement ce qui sépare "
           + "« il n'y avait pas de Voie lactée » de « je n'aurais pas pu la voir »."
@@ -226,8 +226,8 @@ export class DemoCatalogue {
           src: "/demo-data/sky-test-aircraft.json",
           title: { en: "An airliner on a 20-second exposure", fr: "Un avion de ligne sur une pose de 20 s" },
           blurb: {
-            en: "No object is drawn here — there isn't one. Steady lamps draw lines, flashing ones drop dots, and their spacing is the flash rate times the angular speed.",
-            fr: "Aucun objet n'est dessiné ici — il n'y en a pas. Les feux fixes tracent des lignes, les clignotants posent des points, et leur espacement est la cadence multipliée par la vitesse angulaire."
+            en: "No phenomenon is drawn here — there isn't one. Steady lamps draw lines, flashing ones drop dots, and their spacing is the flash rate times the angular speed.",
+            fr: "Aucun phénomène n'est dessiné ici — il n'y en a pas. Les feux fixes tracent des lignes, les clignotants posent des points, et leur espacement est la cadence multipliée par la vitesse angulaire."
           }
         }
       ]
