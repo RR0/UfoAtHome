@@ -108,15 +108,17 @@ export const css = `
 }
 .param-label {
   /* Mixed from the host page's own text colour rather than fixed — see the same rule in
-     template.ts for why. */
-  color: color-mix(in srgb, currentColor 68%, transparent);
-  border: 1px solid color-mix(in srgb, currentColor 28%, transparent);
+     template.ts for why. Only the introducing word steps back: the value keeps the host's ink,
+     which a child cannot recover once the whole chip has been faded. */
+  border: 1px solid color-mix(in srgb, currentColor 40%, transparent);
   border-radius: 999px;
   padding: 0.1em 0.6em;
   white-space: nowrap;
 }
+.param-label-label {
+  color: color-mix(in srgb, currentColor 78%, transparent);
+}
 .param-label .param-label-value {
-  color: inherit;
   font-weight: 600;
 }
 /* A value no witness gave: read from a record (ERA5's weather, a terrain provider's ground) — the

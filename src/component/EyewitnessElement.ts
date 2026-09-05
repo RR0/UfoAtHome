@@ -626,7 +626,10 @@ export class EyewitnessElement extends HTMLElement {
     this.paramSummary.replaceChildren(...entries.map(entry => {
       const item = document.createElement("span")
       item.className = entry.fromSource ? "param-label from-source" : "param-label"
-      item.append(`${entry.label} `)
+      const label = document.createElement("span")
+      label.className = "param-label-label"
+      label.textContent = `${entry.label} `
+      item.append(label)
       if (entry.color !== undefined) {
         const swatch = document.createElement("span")
         swatch.className = "param-label-swatch"

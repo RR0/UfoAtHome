@@ -684,9 +684,12 @@ select.weather-field:disabled {
   font: inherit;
   font-size: 0.85em;
   cursor: pointer;
-  color: color-mix(in srgb, currentColor 68%, transparent);
+  /* Stated, and not left out: a <button> gets "color: buttontext" from the UA sheet, which is
+     black whatever the page around it says — the very dark-on-dark this chip was rewritten to
+     stop doing. */
+  color: inherit;
   background: transparent;
-  border: 1px solid color-mix(in srgb, currentColor 28%, transparent);
+  border: 1px solid color-mix(in srgb, currentColor 40%, transparent);
   border-radius: 999px;
   padding: 0.1em 0.6em;
   /* A chip stays on one line — half its value is the shape of it — but a long description on a
@@ -698,15 +701,23 @@ select.weather-field:disabled {
   text-overflow: ellipsis;
 }
 .param-chip:hover {
-  color: currentColor;
-  border-color: color-mix(in srgb, currentColor 55%, transparent);
+  border-color: color-mix(in srgb, currentColor 70%, transparent);
+}
+.param-chip:hover .param-chip-label {
+  color: inherit;
+}
+/* The chip keeps the host's own ink; only its LABEL steps back. Fading the whole chip, as this
+   rule used to, made the value unrecoverable: a child asking for currentColor gets the faded
+   colour its parent computed, so the number — the only part worth reading from across the room —
+   came out exactly as pale as the word introducing it. */
+.param-chip-label {
+  color: color-mix(in srgb, currentColor 78%, transparent);
 }
 .param-chip:focus-visible {
   outline: 2px solid #4af;
   outline-offset: 1px;
 }
 .param-chip .param-chip-value {
-  color: currentColor;
   font-weight: 600;
 }
 /* A value nobody typed: read from a record (ERA5's weather, Nominatim's coordinates, the terrain

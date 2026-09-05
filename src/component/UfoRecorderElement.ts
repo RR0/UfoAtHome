@@ -2949,7 +2949,10 @@ export class UfoRecorderElement extends HTMLElement {
       button.className = chip.fromSource ? "param-chip from-source" : "param-chip"
       button.dataset.panel = String(chip.panel)
       button.dataset.field = chip.field
-      button.append(`${chip.label} `)
+      const label = document.createElement("span")
+      label.className = "param-chip-label"
+      label.textContent = `${chip.label} `
+      button.append(label)
       if (chip.color !== undefined) {
         const swatch = document.createElement("span")
         swatch.className = "param-chip-swatch"
