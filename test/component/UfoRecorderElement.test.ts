@@ -2695,15 +2695,38 @@ describe("UfoRecorderElement parameter summary", () => {
   })
 
   // A label shared across groups says two different things under one word — the witness's own
-  // height above the sea, and a building's.
-  it("names the group only when the same label appears in more than one of them", () => {
+  // height above the sea, and a building's. Containment is the answer: the building's chips are
+  // inside one that says Environment, so neither Altitude needs a word of explanation.
+  it("boxes a sub-element's chips inside a chip bearing its name", () => {
     const element = mount()
     setInput(element.shadowRoot!, "elevation", "220")
-    expect(chips(element).find(c => c.dataset.field === "elevation")!.textContent).not.toContain("·")
     element.shadowRoot!.getElementById("add-decor-building")!.dispatchEvent(new MouseEvent("click", { bubbles: true }))
     setInput(element.shadowRoot!, "decorAltitude", "12")
-    expect(chips(element).find(c => c.dataset.field === "elevation")!.textContent).toContain("·")
-    expect(chips(element).find(c => c.dataset.field === "decorAltitude")!.textContent).toContain("·")
+
+    const decorNest = chips(element).find(c => c.dataset.field === "decorAltitude")!.closest(".param-nest")!
+    expect(decorNest.querySelector(".param-nest-label")!.textContent)
+      .toBe(element.shadowRoot!.getElementById("label-decor-group")!.textContent)
+    // The sighting's own altitude is outside it, and neither one wears a prefix any more.
+    expect(chips(element).find(c => c.dataset.field === "elevation")!.closest(".param-nest")).toBe(null)
+    expect(chips(element).find(c => c.dataset.field === "elevation")!.textContent).not.toContain("·")
+    expect(chips(element).find(c => c.dataset.field === "decorAltitude")!.textContent).not.toContain("·")
+  })
+
+  it("boxes what is said about the witness under the witness", () => {
+    const element = mount()
+    setInput(element.shadowRoot!, "witnessTitle", "Lonnie Zamora")
+    const nest = chips(element).find(c => c.dataset.field === "witnessTitle")!.closest(".param-nest")!
+    expect(nest.querySelector(".param-nest-label")!.textContent)
+      .toBe(element.shadowRoot!.getElementById("label-witness-group")!.textContent)
+  })
+
+  it("leaves what describes the observation itself unboxed", () => {
+    const element = mount()
+    setInput(element.shadowRoot!, "caseId", "socorro")
+    setInput(element.shadowRoot!, "cloudCover", "0.4")
+    for (const field of ["caseId", "cloudCover"]) {
+      expect(chips(element).find(c => c.dataset.field === field)!.closest(".param-nest")).toBe(null)
+    }
   })
 
   // The summary is where a wrong value is noticed, so the click that says so should leave the

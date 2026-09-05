@@ -20,6 +20,7 @@ export const sightingLabels_fr: SightingLabels = {
   roll: "Roulis",
   observationTime: "Début de l'observation",
   observationEndTime: "Fin de l'observation",
+  witnessGroup: "Témoin",
   witnessId: "ID témoin",
   witnessTitle: "Titre du témoin",
   witnessLastName: "Nom de famille du témoin",

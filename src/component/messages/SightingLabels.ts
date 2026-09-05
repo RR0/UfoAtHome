@@ -37,6 +37,10 @@ export interface SightingLabels {
   roll: string
   observationTime: string
   observationEndTime: string
+  /** The witness as a WHOLE, naming the chip that holds everything said about them — not
+   * witnessTitle, which names one field of theirs. Shared because both components box those
+   * chips inside it, and only the recorder has a tab strip to read the name off. */
+  witnessGroup: string
   witnessId: string
   witnessTitle: string
   witnessLastName: string

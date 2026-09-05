@@ -1,6 +1,7 @@
 import { html, css } from "./eyewitnessTemplate.js"
 import { SightingFetch } from "../engine/net/SightingFetch.js"
 import { SightingSummary } from "./SightingSummary.js"
+import type { SummaryEntry } from "./SightingSummary.js"
 import { SceneElement, registerScene, SCENE_ELEMENT_NAME } from "./SceneElement.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
 import type { People } from "../engine/model/People.js"
@@ -623,25 +624,57 @@ export class EyewitnessElement extends HTMLElement {
       return
     }
     this.summarySignature = signature
-    this.paramSummary.replaceChildren(...entries.map(entry => {
-      const item = document.createElement("span")
-      item.className = entry.fromSource ? "param-label from-source" : "param-label"
-      const label = document.createElement("span")
-      label.className = "param-label-label"
-      label.textContent = `${entry.label} `
-      item.append(label)
-      if (entry.color !== undefined) {
-        const swatch = document.createElement("span")
-        swatch.className = "param-label-swatch"
-        swatch.style.background = entry.color
-        item.append(swatch)
+    // Chips describing a sub-element sit INSIDE one bearing its name — the witness who gave this
+    // testimony, and the things that stood around them — so that "Heading" inside a box saying
+    // Environment needs no other way of saying which heading it is. The summary emits its groups
+    // in one run each, so a box opens when a run starts and closes when it ends.
+    const messages = this.messages
+    const boxes: Record<string, string> = { witness: messages.witnessGroup, decor: messages.decor }
+    const strip: HTMLElement[] = []
+    let open: { group: string, element: HTMLElement } | undefined
+    for (const entry of entries) {
+      if (open && open.group !== entry.group) {
+        open = undefined
       }
-      const value = document.createElement("span")
-      value.className = "param-label-value"
-      value.textContent = entry.unit === "" ? entry.value : `${entry.value} ${entry.unit}`
-      item.append(value)
-      return item
-    }))
+      const boxName = boxes[entry.group]
+      if (boxName !== undefined && !open) {
+        const box = document.createElement("span")
+        box.className = "param-nest"
+        const name = document.createElement("span")
+        name.className = "param-nest-label"
+        name.textContent = boxName
+        box.append(name)
+        open = { group: entry.group, element: box }
+        strip.push(box)
+      }
+      const item = this.paramItem(entry)
+      if (open) {
+        open.element.append(item)
+      } else {
+        strip.push(item)
+      }
+    }
+    this.paramSummary.replaceChildren(...strip)
+  }
+
+  private paramItem(entry: SummaryEntry): HTMLElement {
+    const item = document.createElement("span")
+    item.className = entry.fromSource ? "param-label from-source" : "param-label"
+    const label = document.createElement("span")
+    label.className = "param-label-label"
+    label.textContent = `${entry.label} `
+    item.append(label)
+    if (entry.color !== undefined) {
+      const swatch = document.createElement("span")
+      swatch.className = "param-label-swatch"
+      swatch.style.background = entry.color
+      item.append(swatch)
+    }
+    const value = document.createElement("span")
+    value.className = "param-label-value"
+    value.textContent = entry.unit === "" ? entry.value : `${entry.value} ${entry.unit}`
+    item.append(value)
+    return item
   }
 
   private populateInfoPanel(): void {

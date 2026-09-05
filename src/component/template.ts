@@ -677,6 +677,27 @@ select.weather-field:disabled {
 .param-summary:empty {
   display: none;
 }
+/* A chip holding chips: everything said about ONE sub-element — the witness, a decor object —
+   boxed under its name, so a Heading inside a box saying Environment needs no prefix to say which
+   heading it is. Drawn as a frame rather than as a filled pill: the members already carry an
+   outline each, and a second solid shape around them would read as a button they sit on. */
+.param-nest {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3em;
+  border: 1px solid color-mix(in srgb, currentColor 22%, transparent);
+  border-radius: 12px;
+  padding: 0.25em 0.5em;
+  max-width: 100%;
+}
+.param-nest-label {
+  font-weight: 600;
+  color: color-mix(in srgb, currentColor 62%, transparent);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  font-size: 0.85em;
+}
 /* Deliberately quieter than the fields it summarises: this is meant to be scanned, and 37 chips
    competing with the render above them would be worse than the scrolling it replaces. */
 /* Every colour here is a mix of the HOST PAGE's own text colour, never a fixed grey. These chips

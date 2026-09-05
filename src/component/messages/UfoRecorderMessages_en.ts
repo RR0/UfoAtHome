@@ -102,7 +102,6 @@ export const ufoRecorderMessages_en: UfoRecorderMessages = {
   edtfModeTitle: "Type an imprecise date instead: a year alone, a month, a time with no date",
   locationGroup: "Location",
   observationGroup: "Observation",
-  witnessGroup: "Witness",
   weatherWhilePlaying: "Pause the recording to state the weather — while it plays, the instant these would be written at is moving",
   weatherInferred: "From weather records",
   weatherInferredTitle:

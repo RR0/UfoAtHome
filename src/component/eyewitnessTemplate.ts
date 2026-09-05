@@ -106,6 +106,27 @@ export const css = `
 .param-summary[hidden] {
   display: none;
 }
+/* A chip holding chips: everything said about ONE sub-element — the witness, a decor object —
+   boxed under its name, so a Heading inside a box saying Environment needs no prefix to say which
+   heading it is. Drawn as a frame rather than as a filled pill: the members already carry an
+   outline each, and a second solid shape around them would read as a button they sit on. */
+.param-nest {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3em;
+  border: 1px solid color-mix(in srgb, currentColor 22%, transparent);
+  border-radius: 12px;
+  padding: 0.25em 0.5em;
+  max-width: 100%;
+}
+.param-nest-label {
+  font-weight: 600;
+  color: color-mix(in srgb, currentColor 62%, transparent);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  font-size: 0.85em;
+}
 .param-label {
   /* Mixed from the host page's own text colour rather than fixed — see the same rule in
      template.ts for why. Only the introducing word steps back: the value keeps the host's ink,

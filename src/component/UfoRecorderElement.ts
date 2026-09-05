@@ -2,7 +2,7 @@ import { BLUR_RADIUS_UNIT } from "../render/CanvasRenderer.js"
 import { SightingFetch, SightingFetchError } from "../engine/net/SightingFetch.js"
 import { html, css } from "./template.js"
 import { SightingSummary } from "./SightingSummary.js"
-import type { SummaryGroup } from "./SightingSummary.js"
+import type { SummaryEntry, SummaryGroup } from "./SightingSummary.js"
 import { UfoElement, registerUfo } from "./UfoElement.js"
 import { SceneElement, registerScene, SCENE_ELEMENT_NAME } from "./SceneElement.js"
 import { Recorder } from "../engine/record/Recorder.js"
@@ -2922,50 +2922,78 @@ export class UfoRecorderElement extends HTMLElement {
     })
     // "Altitude 220 m" and "Altitude 0 m" side by side are the witness's own height above the sea
     // and a building's — two different assertions under one word, which is fine inside a panel
-    // that names its subject and misleading on a strip that doesn't. Only a label shared across
-    // GROUPS pays for the group name: two fields sharing one inside a single group are told apart
-    // by their own values and units, and repeating the group twice would just be the same word
-    // twice on a strip that exists to be scanned.
-    const labelGroups = new Map<string, Set<string>>()
-    for (const entry of entries) {
-      const groups = labelGroups.get(entry.label) ?? new Set<string>()
-      groups.add(entry.group)
-      labelGroups.set(entry.label, groups)
-    }
-    const chips = entries.map(entry => {
-      const panel = UfoRecorderElement.SUMMARY_GROUPS.indexOf(entry.group)
-      const label = labelGroups.get(entry.label)!.size > 1
-        ? `${this.groupTabs[panel].textContent!.trim()} \u00b7 ${entry.label}`
-        : entry.label
-      return { ...entry, panel, label }
-    })
+    // that names its subject and misleading on a strip that doesn't.
+    //
+    // Containment is what tells them apart. A group describing a sub-element — the witness, one
+    // decor object — puts its chips inside a chip of its own bearing its name, so a Heading in a
+    // box saying Environment needs nothing further to say which heading it is. An earlier version
+    // prefixed the label instead ("Environment · Heading") whenever one was shared across groups;
+    // every such collision was with one of these two, so the box replaced that mechanism outright
+    // rather than joining it. A collision between two FLAT groups would need answering again, and
+    // there is currently no pair of them that can produce one.
+    const nested = UfoRecorderElement.NESTED_GROUPS
+    const chips = entries.map(entry => ({ ...entry, panel: UfoRecorderElement.SUMMARY_GROUPS.indexOf(entry.group) }))
     const signature = chips.map(chip => `${chip.field}=${chip.label}=${chip.value}${chip.unit}${chip.fromSource ? "*" : ""}`).join("|")
     if (signature === this.paramSummarySignature) {
       return
     }
     this.paramSummarySignature = signature
-    this.paramSummary.replaceChildren(...chips.map(chip => {
-      const button = document.createElement("button")
-      button.type = "button"
-      button.className = chip.fromSource ? "param-chip from-source" : "param-chip"
-      button.dataset.panel = String(chip.panel)
-      button.dataset.field = chip.field
-      const label = document.createElement("span")
-      label.className = "param-chip-label"
-      label.textContent = `${chip.label} `
-      button.append(label)
-      if (chip.color !== undefined) {
-        const swatch = document.createElement("span")
-        swatch.className = "param-chip-swatch"
-        swatch.style.background = chip.color
-        button.append(swatch)
+    // The summary emits its groups in one run each (see SightingSummary.entriesFor's fixed call
+    // order), so a nest opens when a run of one starts and closes when it ends — no sorting, and
+    // no second pass to gather scattered members.
+    const strip: HTMLElement[] = []
+    let openNest: { group: SummaryGroup, element: HTMLElement } | undefined
+    for (const chip of chips) {
+      if (openNest && openNest.group !== chip.group) {
+        openNest = undefined
       }
-      const value = document.createElement("span")
-      value.className = "param-chip-value"
-      value.textContent = chip.unit === "" ? chip.value : `${chip.value} ${chip.unit}`
-      button.append(value)
-      return button
-    }))
+      if (nested.includes(chip.group) && !openNest) {
+        const box = document.createElement("span")
+        box.className = "param-nest"
+        box.dataset.group = chip.group
+        const name = document.createElement("span")
+        name.className = "param-nest-label"
+        name.textContent = this.groupTabs[chip.panel].textContent!.trim()
+        box.append(name)
+        openNest = { group: chip.group, element: box }
+        strip.push(box)
+      }
+      const button = this.paramChip(chip)
+      if (openNest) {
+        openNest.element.append(button)
+      } else {
+        strip.push(button)
+      }
+    }
+    this.paramSummary.replaceChildren(...strip)
+  }
+
+  /** Which summary groups describe a sub-element rather than the observation itself, and so read
+   * as a chip holding chips: the witness who gave the testimony, and whichever decor object is
+   * being worked on (or, with none selected, the list of them). */
+  private static readonly NESTED_GROUPS: SummaryGroup[] = ["witness", "decor"]
+
+  private paramChip(chip: SummaryEntry & { panel: number }): HTMLButtonElement {
+    const button = document.createElement("button")
+    button.type = "button"
+    button.className = chip.fromSource ? "param-chip from-source" : "param-chip"
+    button.dataset.panel = String(chip.panel)
+    button.dataset.field = chip.field
+    const label = document.createElement("span")
+    label.className = "param-chip-label"
+    label.textContent = `${chip.label} `
+    button.append(label)
+    if (chip.color !== undefined) {
+      const swatch = document.createElement("span")
+      swatch.className = "param-chip-swatch"
+      swatch.style.background = chip.color
+      button.append(swatch)
+    }
+    const value = document.createElement("span")
+    value.className = "param-chip-value"
+    value.textContent = chip.unit === "" ? chip.value : `${chip.value} ${chip.unit}`
+    button.append(value)
+    return button
   }
 
   /** A chip is a way back to its own field: opens the group holding it, then puts the caret in it,

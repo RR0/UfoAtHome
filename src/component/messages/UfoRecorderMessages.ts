@@ -215,7 +215,6 @@ export interface UfoRecorderMessages extends SightingLabels {
   edtfModeTitle: string
   locationGroup: string
   observationGroup: string
-  witnessGroup: string
   /** Label of the checkbox that decides whether the weather fields are looked up from a real
    * record (checked, and then read-only) or stated by the witness (unchecked, and then never
    * overwritten) — see UfoRecorderElement.inferWeather. */
