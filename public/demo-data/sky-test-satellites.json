@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "caseId": "sky-test-satellites",
+  "description": "Un ciel d'essai pour la question satellite. On ne prétend pas dessiner un passage : aucun élément orbital historique n'est appelable depuis un navigateur, et propager un TLE d'aujourd'hui vers une date ancienne ne donnerait rien de vrai. Ce qui est calculé, c'est la seule chose qui décide : la hauteur de l'ombre de la Terre au-dessus du témoin. Ici, au crépuscule du 20 avril 2020, elle est assez basse pour que l'orbite basse soit encore au soleil — et le compte SATCAT daté dit combien d'objets tournaient ce mois-là, trains Starlink compris. Être éclairé n'est pas être vu, mais n'être pas éclairé règle la question.",
+  "time": { "year": 2020, "month": 4, "day": 20, "hour": 21, "minute": 40 },
+  "utcOffsetHours": 2,
+  "durationSeconds": 120,
+  "place": [ { "lat": 48.8566, "lng": 2.3522, "name": "Paris, France" } ],
+  "weatherTrack": {
+    "keyframes": [
+      {
+        "t": 0,
+        "weather": {
+          "cloudCover": 0,
+          "cloudDarkness": 0,
+          "cloudBaseM": 2000,
+          "lowerCloudCover": 0,
+          "highCloudCover": 0,
+          "precipitationType": "none",
+          "precipitationIntensity": 0,
+          "windDirectionDeg": 0,
+          "windSpeed": 0,
+          "storm": false
+        }
+      }
+    ]
+  },
+  "timeline": { "keyframes": [ { "t": 0, "shapes": [] } ], "order": [], "groups": [] },
+  "witnessTrack": {
+    "keyframes": [
+      { "t": 0, "pose": { "lat": 48.8566, "lng": 2.3522, "elevationM": 0, "headingDeg": 300, "pitchDeg": 35, "fovDeg": 100 } }
+    ]
+  },
+  "soundTrack": { "keyframes": [] },
+  "decor": []
+}

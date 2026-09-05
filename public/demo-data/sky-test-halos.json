@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "caseId": "sky-test-halos",
+  "description": "Un ciel d'essai pour le cortège des halos. Rien ici n'est une forme posée : un prisme hexagonal de glace et la loi de Snell suffisent à tout produire. Le Soleil est à 20° de hauteur, un voile de cirrus couvre 85 % du ciel, et les cristaux tombent bien à plat (alignement 95 %) — c'est ce dernier réglage, que nul relevé au monde ne contient, qui décide si l'on voit un simple anneau ou le cortège entier : anneau à 22°, parhélies de part et d'autre, arc tangent, circumzénithal, cercle parhélique. Aucun angle n'a été choisi : ils sortent tous de l'indice de réfraction de la glace.",
+  "time": { "year": 2020, "month": 1, "day": 15, "hour": 12, "minute": 50 },
+  "utcOffsetHours": 1,
+  "durationSeconds": 60,
+  "place": [ { "lat": 48.8566, "lng": 2.3522, "name": "Paris, France" } ],
+  "weatherTrack": {
+    "keyframes": [
+      {
+        "t": 0,
+        "weather": {
+          "cloudCover": 0.6,
+          "cloudDarkness": 0.05,
+          "cloudBaseM": 8000,
+          "lowerCloudCover": 0,
+          "highCloudCover": 0.85,
+          "iceCrystalAlignment": 0.95,
+          "precipitationType": "none",
+          "precipitationIntensity": 0,
+          "windDirectionDeg": 90,
+          "windSpeed": 4,
+          "storm": false
+        }
+      }
+    ]
+  },
+  "timeline": { "keyframes": [ { "t": 0, "shapes": [] } ], "order": [], "groups": [] },
+  "witnessTrack": {
+    "keyframes": [
+      { "t": 0, "pose": { "lat": 48.8566, "lng": 2.3522, "elevationM": 0, "headingDeg": 180, "pitchDeg": 22, "fovDeg": 110 } }
+    ]
+  },
+  "soundTrack": { "keyframes": [] },
+  "decor": []
+}

@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "caseId": "sky-test-meteors",
+  "description": "Un ciel d'essai pour une pluie de météores : les Perséides au petit matin du 13 août 2018, radiant haut au nord-est, deux jours après la nouvelle Lune — les meilleures conditions possibles. Le taux affiché n'est pas celui des almanachs : c'est le taux zénithal corrigé de la hauteur du radiant et de la clarté du ciel, au-dessus du fond sporadique qui, lui, tombe toutes les nuits de l'année. C'est ce fond qui compte pour une méprise : il ne demande aucune date particulière.",
+  "time": { "year": 2018, "month": 8, "day": 13, "hour": 3, "minute": 30 },
+  "utcOffsetHours": 2,
+  "durationSeconds": 120,
+  "place": [ { "lat": 45.7, "lng": 4.8, "name": "Lyon, France" } ],
+  "weatherTrack": {
+    "keyframes": [
+      {
+        "t": 0,
+        "weather": {
+          "cloudCover": 0,
+          "cloudDarkness": 0,
+          "cloudBaseM": 2000,
+          "lowerCloudCover": 0,
+          "highCloudCover": 0,
+          "precipitationType": "none",
+          "precipitationIntensity": 0,
+          "windDirectionDeg": 0,
+          "windSpeed": 0,
+          "storm": false
+        }
+      }
+    ]
+  },
+  "timeline": { "keyframes": [ { "t": 0, "shapes": [] } ], "order": [], "groups": [] },
+  "witnessTrack": {
+    "keyframes": [
+      { "t": 0, "pose": { "lat": 45.7, "lng": 4.8, "elevationM": 0, "headingDeg": 45, "pitchDeg": 45, "fovDeg": 110 } }
+    ]
+  },
+  "soundTrack": { "keyframes": [] },
+  "decor": []
+}

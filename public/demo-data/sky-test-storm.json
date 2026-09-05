@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "caseId": "sky-test-storm",
+  "description": "Un ciel d'essai pour la mauvaise météo : orage en fin d'après-midi, base des nuages à 600 m, pluie forte, vent de 14 m/s. La pluie a son propre shader et dérive selon le vent réel ; les éclairs illuminent la brume de la scène puis le tonnerre arrive avec son retard. Tout s'arrête avec le lecteur : une lecture en pause est un instant d'observation, pas une ambiance. Ici la météo est énoncée à la main — sur un vrai dossier daté, elle serait relevée dans ERA5 et affichée en lecture seule.",
+  "time": { "year": 2021, "month": 7, "day": 14, "hour": 18, "minute": 30 },
+  "utcOffsetHours": 2,
+  "durationSeconds": 120,
+  "place": [ { "lat": 48.8566, "lng": 2.3522, "name": "Paris, France" } ],
+  "weatherTrack": {
+    "keyframes": [
+      {
+        "t": 0,
+        "weather": {
+          "cloudCover": 1,
+          "cloudDarkness": 0.9,
+          "cloudBaseM": 600,
+          "lowerCloudCover": 1,
+          "highCloudCover": 0,
+          "precipitationType": "rain",
+          "precipitationIntensity": 0.8,
+          "windDirectionDeg": 70,
+          "windSpeed": 14,
+          "storm": true
+        }
+      }
+    ]
+  },
+  "timeline": { "keyframes": [ { "t": 0, "shapes": [] } ], "order": [], "groups": [] },
+  "witnessTrack": {
+    "keyframes": [
+      { "t": 0, "pose": { "lat": 48.8566, "lng": 2.3522, "elevationM": 0, "headingDeg": 250, "pitchDeg": 15, "fovDeg": 90 } }
+    ]
+  },
+  "soundTrack": { "keyframes": [] },
+  "decor": []
+}

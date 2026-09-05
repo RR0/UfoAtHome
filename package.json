@@ -33,6 +33,7 @@
     "build:embed-scene": "tsc --noEmit && vite build --config vite.embed-scene.config.ts",
     "build:embed-eyewitness": "tsc --noEmit && vite build --config vite.embed-eyewitness.config.ts",
     "build:all": "npm run build && npm run build:embed && npm run build:embed-ufo && npm run build:embed-scene && npm run build:embed-eyewitness",
+    "build:site": "npm run build:embed && npm run build:embed-ufo && npm run build:embed-scene && npm run build:embed-eyewitness && vite build --config vite.site.config.ts && tsx site/build.ts",
     "prepublishOnly": "npm run build:embed && npm run build:embed-ufo && npm run build:embed-scene && npm run build:embed-eyewitness && npm test",
     "preview": "vite preview",
     "test": "vitest run",
@@ -49,7 +50,11 @@
     "three": "^0.185.1"
   },
   "devDependencies": {
+    "@codemirror/lang-json": "^6.0.2",
+    "@codemirror/state": "^6.7.4",
+    "@codemirror/view": "^6.43.11",
     "@types/three": "^0.185.3",
+    "codemirror": "^6.0.2",
     "jsdom": "^25.0.0",
     "tsx": "^4.23.5",
     "typescript": "^5.9.2",

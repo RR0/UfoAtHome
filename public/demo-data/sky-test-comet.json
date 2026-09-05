@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "caseId": "sky-test-comet",
+  "description": "Un ciel d'essai pour une comète : Hale-Bopp au soir du 1er avril 1997, vue de Paris au crépuscule, basse au nord-ouest. Son orbite n'est pas stockée — elle est propagée en variables universelles depuis les éléments de son propre passage au périhélie, et la queue est projetée à partir d'une longueur physique dans l'espace, pas dessinée à une taille choisie. La ligne « Ciel : » de l'éditeur en donne la magnitude, la hauteur et la longueur de queue, et refuse de conclure quoi que ce soit à la place du lecteur.",
+  "time": { "year": 1997, "month": 4, "day": 1, "hour": 21, "minute": 15 },
+  "utcOffsetHours": 2,
+  "durationSeconds": 60,
+  "place": [ { "lat": 48.8566, "lng": 2.3522, "name": "Paris, France" } ],
+  "weatherTrack": {
+    "keyframes": [
+      {
+        "t": 0,
+        "weather": {
+          "cloudCover": 0,
+          "cloudDarkness": 0,
+          "cloudBaseM": 2000,
+          "lowerCloudCover": 0,
+          "highCloudCover": 0,
+          "precipitationType": "none",
+          "precipitationIntensity": 0,
+          "windDirectionDeg": 0,
+          "windSpeed": 0,
+          "storm": false
+        }
+      }
+    ]
+  },
+  "timeline": { "keyframes": [ { "t": 0, "shapes": [] } ], "order": [], "groups": [] },
+  "witnessTrack": {
+    "keyframes": [
+      { "t": 0, "pose": { "lat": 48.8566, "lng": 2.3522, "elevationM": 0, "headingDeg": 320, "pitchDeg": 22, "fovDeg": 100 } }
+    ]
+  },
+  "soundTrack": { "keyframes": [] },
+  "decor": []
+}

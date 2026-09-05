@@ -17,3 +17,5 @@ dist-embed-eyewitness/
 # hyg/CURRENT/hygdata_v41.csv (see README.md) before running `npm run build:stars`.
 scripts/data/
 
+dist-site/
+dist-site-lib/

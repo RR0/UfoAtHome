@@ -1,0 +1,71 @@
+{
+  "version": 1,
+  "caseId": "sky-test-aircraft",
+  "description": "Une reproduction, pas un témoignage : ce que donne un avion de ligne photographié en pose longue. Aucune forme d'ovni n'est dessinée ici — il n'y en a pas. Un appareil 24×36 au 50 mm, vingt secondes de pose, un biréacteur à 6 000 m qui traverse le champ à 900 km/h : ses feux fixes tracent des lignes, ses feux à éclats posent des points à intervalles réguliers, et l'espacement de ces points est exactement la cadence d'éclats multipliée par la vitesse angulaire. C'est ce qui distingue la photo d'un avion de celle d'un objet qui ne clignote pas — et c'est la lecture qui manquait à la photographie de Gennevilliers du 5 novembre 1990, publiée comme un engin monumental.",
+  "time": { "year": 1990, "month": 11, "day": 5, "hour": 19, "minute": 0 },
+  "utcOffsetHours": 1,
+  "durationSeconds": 20,
+  "place": [ { "lat": 48.9339, "lng": 2.2986, "name": "Gennevilliers, Hauts-de-Seine, France" } ],
+  "instrument": "slr-35mm-50",
+  "exposureSeconds": 20,
+  "weatherTrack": {
+    "keyframes": [
+      {
+        "t": 0,
+        "weather": {
+          "cloudCover": 0,
+          "cloudDarkness": 0,
+          "cloudBaseM": 2000,
+          "lowerCloudCover": 0,
+          "highCloudCover": 0,
+          "precipitationType": "none",
+          "precipitationIntensity": 0,
+          "windDirectionDeg": 0,
+          "windSpeed": 0,
+          "storm": false
+        }
+      }
+    ]
+  },
+  "timeline": { "keyframes": [ { "t": 0, "shapes": [] } ], "order": [], "groups": [] },
+  "witnessTrack": {
+    "keyframes": [
+      {
+        "t": 0,
+        "pose": {
+          "lat": 48.9339,
+          "lng": 2.2986,
+          "elevationM": 0,
+          "headingDeg": 90,
+          "pitchDeg": 33,
+          "fovDeg": 27,
+          "fNumber": 2.8
+        }
+      }
+    ]
+  },
+  "soundTrack": { "keyframes": [] },
+  "decor": [
+    {
+      "id": "airliner-1",
+      "kind": "aircraft",
+      "title": "Biréacteur en croisière, 6 000 m",
+      "eastM": 9000,
+      "northM": 2500,
+      "headingDeg": 180,
+      "track": [
+        { "t": 0, "eastM": 9000, "northM": 2500, "altitudeM": 6000, "headingDeg": 180 },
+        { "t": 20000, "eastM": 9000, "northM": -2500, "altitudeM": 6000, "headingDeg": 180 }
+      ],
+      "lights": [
+        { "id": "nav-port", "offsetM": { "x": -17, "y": 0, "z": 0 }, "color": "#ff2200", "pattern": { "kind": "steady" } },
+        { "id": "nav-starboard", "offsetM": { "x": 17, "y": 0, "z": 0 }, "color": "#00ff44", "pattern": { "kind": "steady" } },
+        { "id": "nav-tail", "offsetM": { "x": 0, "y": 1, "z": -18 }, "color": "#ffffff", "pattern": { "kind": "steady" } },
+        { "id": "beacon-top", "offsetM": { "x": 0, "y": 2, "z": 0 }, "color": "#ff0000", "intensity": 1.5, "pattern": { "kind": "flash", "perMinute": 45, "dutyCycle": 0.18 } },
+        { "id": "beacon-bottom", "offsetM": { "x": 0, "y": -2, "z": 0 }, "color": "#ff0000", "intensity": 1.5, "pattern": { "kind": "flash", "perMinute": 45, "dutyCycle": 0.18 } },
+        { "id": "strobe-port", "offsetM": { "x": -17, "y": 0, "z": -1 }, "color": "#ffffff", "intensity": 20, "pattern": { "kind": "flash", "perMinute": 60, "dutyCycle": 0.01 } },
+        { "id": "strobe-starboard", "offsetM": { "x": 17, "y": 0, "z": -1 }, "color": "#ffffff", "intensity": 20, "pattern": { "kind": "flash", "perMinute": 60, "dutyCycle": 0.01, "phase": 0.08 } }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,376 @@
+/*
+ * ufoathome.org — the tool's own site.
+ *
+ * Light and dark, DETECTED and never picked: the same rule the components themselves follow for
+ * language. There is no theme switch anywhere on this site, so every colour is a token defined
+ * once for light and redefined once under `prefers-color-scheme: dark`, and nothing else in the
+ * sheet names a colour directly.
+ *
+ * The scene the components draw stays dark in both, because it is a night sky and a sky that went
+ * pale with the page would be lying about the subject — so `--stage-ground` is deliberately NOT
+ * one of the tokens that flips.
+ */
+
+:root {
+  color-scheme: light dark;
+
+  --ink: #131a26;
+  --ink-dim: #4c5a70;
+  --ink-faint: #78859b;
+  --ground: #f6f8fc;
+  --ground-raised: #ffffff;
+  --ground-sunken: #eaeff7;
+  --line: #dde4ef;
+  --line-strong: #c2ccdc;
+
+  /* The amber a light seen at night has. On paper it has to darken to stay readable; on a solid
+     button it stays the bright one, with dark text over it. */
+  --glow: #9a6f12;
+  --glow-solid: #f0bc44;
+  --glow-on-solid: #1a1405;
+  --glow-dim: #a07d29;
+  --sky: #12608f;
+  --sky-dim: #7ba8c4;
+
+  --card-from: rgba(255, 255, 255, 0.9);
+  --card-to: rgba(238, 243, 250, 0.9);
+  --header-bg: rgba(246, 248, 252, 0.86);
+  --backdrop: radial-gradient(120% 80% at 50% 120%, rgba(120, 160, 214, 0.22) 0%, transparent 60%),
+              radial-gradient(80% 50% at 85% -10%, rgba(240, 188, 68, 0.16) 0%, transparent 70%);
+  --ok: #1f7a44;
+  --ok-bg: rgba(31, 122, 68, 0.12);
+  --warn-bg: rgba(154, 111, 18, 0.14);
+  --neutral-bg: rgba(120, 133, 155, 0.14);
+
+  --prose: 40rem;
+  --wide: 68rem;
+
+  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Times New Roman", serif;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ink: #e8ecf4;
+    --ink-dim: #a3adc2;
+    --ink-faint: #6f7b93;
+    --ground: #070a12;
+    --ground-raised: #0e1422;
+    --ground-sunken: #050710;
+    --line: #1e2739;
+    --line-strong: #2e3a52;
+
+    --glow: #f5c451;
+    --glow-solid: #f5c451;
+    --glow-on-solid: #1a1405;
+    --glow-dim: #a8873a;
+    --sky: #7fd4ff;
+    --sky-dim: #3d7f9e;
+
+    --card-from: rgba(20, 27, 44, 0.7);
+    --card-to: rgba(10, 14, 24, 0.7);
+    --header-bg: rgba(7, 10, 18, 0.82);
+    --backdrop: radial-gradient(120% 80% at 50% 120%, rgba(60, 92, 140, 0.28) 0%, transparent 60%),
+                radial-gradient(80% 50% at 85% -10%, rgba(245, 196, 81, 0.07) 0%, transparent 70%);
+    --ok: #8fd7a4;
+    --ok-bg: rgba(120, 200, 140, 0.14);
+    --warn-bg: rgba(245, 196, 81, 0.14);
+    --neutral-bg: rgba(140, 155, 185, 0.12);
+  }
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font: 400 1.0625rem/1.65 var(--sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* The sky the whole page sits under: a horizon glow at the bottom, night above. Fixed, so the
+   content scrolls through it rather than dragging it along. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: var(--backdrop);
+  pointer-events: none;
+}
+
+a { color: var(--sky); text-decoration-color: var(--sky-dim); text-underline-offset: 0.15em; }
+a:hover { color: var(--ink); text-decoration-color: currentColor; }
+
+h1, h2, h3, h4 { font-family: var(--serif); font-weight: 600; line-height: 1.2; letter-spacing: -0.01em; }
+h1 { font-size: clamp(2.1rem, 5.5vw, 3.4rem); margin: 0 0 0.4em; }
+h2 { font-size: clamp(1.5rem, 3.2vw, 2rem); margin: 2.5rem 0 0.6em; }
+h3 { font-size: 1.2rem; margin: 2rem 0 0.4em; }
+p { margin: 0 0 1.1em; }
+code, kbd { font-family: var(--mono); font-size: 0.875em; }
+code { background: var(--ground-sunken); border: 1px solid var(--line); border-radius: 4px; padding: 0.1em 0.35em; }
+kbd {
+  background: var(--ground-raised); border: 1px solid var(--line-strong); border-bottom-width: 2px;
+  border-radius: 4px; padding: 0.1em 0.4em; color: var(--ink);
+}
+pre {
+  background: var(--ground-sunken); border: 1px solid var(--line); border-radius: 8px;
+  padding: 1rem 1.1rem; overflow-x: auto; font-size: 0.85rem; line-height: 1.55; margin: 0 0 1.2em;
+}
+pre code { background: none; border: 0; padding: 0; font-size: inherit; }
+hr { border: 0; border-top: 1px solid var(--line); margin: 3rem 0; }
+
+/* ---------------------------------------------------------------- header */
+
+.site-header {
+  position: sticky; top: 0; z-index: 20;
+  display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap;
+  padding: 0.7rem clamp(1rem, 4vw, 2.5rem);
+  background: var(--header-bg);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line);
+}
+.site-header a { text-decoration: none; }
+.brand {
+  font-family: var(--serif); font-size: 1.15rem; font-weight: 600; color: var(--ink);
+  display: inline-flex; align-items: baseline; gap: 0.4rem;
+}
+.brand .at { color: var(--glow); }
+.site-nav { display: flex; gap: 1.1rem; flex-wrap: wrap; margin-left: auto; align-items: center; }
+.site-nav a { color: var(--ink-dim); font-size: 0.95rem; padding: 0.2rem 0; border-bottom: 2px solid transparent; }
+.site-nav a:hover { color: var(--ink); }
+.site-nav a[aria-current="page"] { color: var(--ink); border-bottom-color: var(--glow); }
+
+/* ---------------------------------------------------------------- layout */
+
+main { display: block; }
+.wrap { max-width: var(--wide); margin: 0 auto; padding: 0 clamp(1rem, 4vw, 2.5rem); }
+.prose { max-width: var(--prose); }
+.prose-wide { max-width: 52rem; }
+section.band { padding: 3rem 0; border-top: 1px solid var(--line); }
+section.band:first-of-type { border-top: 0; }
+
+.lede { font-size: 1.2rem; color: var(--ink-dim); line-height: 1.6; }
+.small { font-size: 0.9rem; color: var(--ink-dim); }
+.eyebrow {
+  text-transform: uppercase; letter-spacing: 0.14em; font-size: 0.72rem; font-weight: 600;
+  color: var(--glow-dim); margin: 0 0 0.8rem;
+}
+
+/* ---------------------------------------------------------------- hero */
+
+.hero { padding: clamp(2.5rem, 7vw, 5rem) 0 2rem; }
+.hero h1 { max-width: 16ch; }
+.hero .lede { max-width: 46ch; }
+.hero-actions { display: flex; gap: 0.8rem; flex-wrap: wrap; margin-top: 1.8rem; }
+
+.btn {
+  display: inline-block; padding: 0.6rem 1.15rem; border-radius: 999px; font-weight: 600;
+  font-size: 0.95rem; text-decoration: none; border: 1px solid var(--line-strong);
+  color: var(--ink); background: var(--ground-raised); transition: border-color .15s, background .15s;
+}
+.btn:hover { border-color: var(--glow-dim); background: var(--ground-sunken); color: var(--ink); }
+.btn-primary { background: var(--glow-solid); border-color: var(--glow-solid); color: var(--glow-on-solid); }
+.btn-primary:hover { filter: brightness(1.08); color: var(--glow-on-solid); }
+
+/* ---------------------------------------------------------------- component stage */
+
+/* The card AROUND a player, not the sky inside it: the component's own toolbar sits in normal
+   flow here and inherits the page's text colour, so painting this dark in light mode left dark
+   text on a dark strip. The night belongs to the canvas, which paints its own. */
+.stage {
+  border: 1px solid var(--line-strong); border-radius: 12px; overflow: hidden;
+  background: var(--ground-raised); margin: 1.5rem 0;
+}
+.stage rr0-eyewitness, .stage rr0-scene, .stage rr0-ufo-recorder, .stage rr0-ufo { display: block; }
+.stage-caption {
+  padding: 0.7rem 1rem; border-top: 1px solid var(--line); color: var(--ink-dim);
+  font-size: 0.87rem; background: var(--ground-raised);
+}
+.loading { padding: 3rem 1rem; text-align: center; color: var(--ink-faint); font-size: 0.9rem; }
+
+/* ---------------------------------------------------------------- cards */
+
+.cards { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); margin: 1.5rem 0; }
+.card {
+  border: 1px solid var(--line); border-radius: 10px; padding: 1.1rem 1.2rem;
+  background: linear-gradient(180deg, var(--card-from), var(--card-to));
+}
+.card h3 { margin: 0 0 0.35rem; font-size: 1.05rem; }
+.card p { margin: 0; font-size: 0.92rem; color: var(--ink-dim); }
+.card p + p { margin-top: 0.6rem; }
+
+/* ------------------------------------------------------- the two things to do with it */
+
+.uses { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr)); margin: 1.5rem 0; }
+.use {
+  display: block; text-decoration: none; color: inherit;
+  border: 1px solid var(--line); border-radius: 12px; padding: 1.4rem 1.5rem;
+  background: linear-gradient(180deg, var(--card-from), var(--card-to));
+  transition: border-color .15s, transform .15s;
+}
+.use:hover { border-color: var(--glow-dim); color: inherit; transform: translateY(-2px); }
+.use h3 { margin-top: 0; font-size: 1.25rem; }
+.use p { color: var(--ink-dim); font-size: 0.95rem; }
+.use-more { color: var(--glow); font-weight: 600; margin-bottom: 0; }
+
+/* ---------------------------------------------------------------- carousel */
+
+.carousel .stage { margin-top: 0; }
+.carousel-bar {
+  display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;
+  padding: 0.5rem 0.7rem; border-top: 1px solid var(--line); background: var(--ground-raised);
+}
+.carousel-nav {
+  cursor: pointer; font: inherit; font-size: 1.3rem; line-height: 1;
+  width: 2rem; height: 2rem; border-radius: 50%; flex: 0 0 auto;
+  border: 1px solid var(--line-strong); background: var(--ground); color: var(--ink);
+}
+.carousel-nav:hover { border-color: var(--glow-dim); }
+.carousel-dots { display: flex; gap: 0.4rem; align-items: center; }
+.carousel-dot {
+  cursor: pointer; width: 0.55rem; height: 0.55rem; padding: 0; border-radius: 50%;
+  border: 0; background: var(--line-strong);
+}
+.carousel-dot[aria-current="true"] { background: var(--glow); }
+.carousel-edit {
+  margin-left: auto; font-size: 0.87rem; font-weight: 600; text-decoration: none;
+  border: 1px solid var(--line-strong); border-radius: 999px; padding: 0.3rem 0.8rem;
+  color: var(--ink); background: var(--ground);
+}
+.carousel-edit:hover { border-color: var(--glow-dim); color: var(--ink); }
+/* While the reader is driving it, the sequence is visibly not. */
+.carousel[data-auto="off"] .carousel-dot[aria-current="true"] { background: var(--sky); }
+
+/* ---------------------------------------------------------------- demo catalogue */
+
+.demo-group { margin: 3rem 0 0; }
+.demo-group:first-child { margin-top: 0; }
+.demo-group > h2 { margin-top: 0; }
+.demo-group > p { color: var(--ink-dim); }
+/* Small enough that several are on screen at once — the point of a catalogue is the mass of them,
+   not one big one at a time. */
+.demo-grid {
+  display: grid; gap: 1rem; margin: 1.5rem 0 0;
+  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+}
+.demo-card {
+  margin: 0; border: 1px solid var(--line); border-radius: 12px; overflow: hidden;
+  background: linear-gradient(180deg, var(--card-from), var(--card-to));
+  display: flex; flex-direction: column;
+}
+.demo-mount {
+  aspect-ratio: 16 / 9; background: #050710; display: flex; align-items: center; justify-content: center;
+}
+.demo-mount rr0-scene { display: block; width: 100%; height: 100%; }
+.demo-card figcaption { padding: 0.9rem 1rem 1rem; }
+.demo-card h3 { margin: 0 0 0.3rem; font-size: 1.02rem; }
+.demo-card figcaption p { margin: 0; font-size: 0.88rem; color: var(--ink-dim); line-height: 1.5; }
+.demo-links { margin-top: 0.6rem !important; font-size: 0.85rem; }
+.demo-links a { font-weight: 600; }
+.demo-links span { color: var(--ink-faint); margin: 0 0.35rem; }
+
+/* ---------------------------------------------------------------- player form */
+
+.player-inputs { display: grid; gap: 1.2rem; max-width: 46rem; margin: 0 0 1rem; }
+.player-form label { display: block; font-weight: 600; margin-bottom: 0.4rem; }
+.player-row { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+.player-row input {
+  flex: 1 1 18rem; min-width: 0; font: inherit; font-size: 0.95rem;
+  padding: 0.55rem 0.8rem; border-radius: 999px;
+  border: 1px solid var(--line-strong); background: var(--ground-raised); color: var(--ink);
+}
+.player-row input:focus-visible { outline: 2px solid var(--glow); outline-offset: 1px; }
+.player-paste { border: 1px solid var(--line); border-radius: 10px; background: var(--ground-raised); }
+.player-paste > summary { cursor: pointer; padding: 0.7rem 1rem; font-weight: 600; }
+.player-paste-body { padding: 0 1rem 1rem; display: grid; gap: 0.8rem; justify-items: start; }
+.player-paste-mount {
+  width: 100%; border: 1px solid var(--line); border-radius: 8px; overflow: hidden;
+  background: var(--ground-sunken); min-height: 8rem;
+}
+.player-status { min-height: 1.4em; font-size: 0.92rem; color: var(--ink-dim); }
+.player-status.is-error { color: #c0392b; }
+@media (prefers-color-scheme: dark) { .player-status.is-error { color: #ff8a7a; } }
+
+/* ---------------------------------------------------------------- lists, faq, roadmap */
+
+ul.plain { list-style: none; padding: 0; }
+ul.plain li { padding-left: 1.4rem; position: relative; margin-bottom: 0.55rem; }
+ul.plain li::before { content: "·"; position: absolute; left: 0.45rem; color: var(--glow); font-weight: 700; }
+
+.faq-item { border-top: 1px solid var(--line); padding: 1.4rem 0; }
+.faq-item:last-child { border-bottom: 1px solid var(--line); }
+.faq-item > h3 { margin-top: 0; }
+.faq-item > *:last-child { margin-bottom: 0; }
+
+table { border-collapse: collapse; width: 100%; font-size: 0.9rem; margin: 0 0 1.2em; }
+.table-scroll { overflow-x: auto; margin: 0 0 1.2em; }
+.table-scroll table { margin: 0; min-width: 34rem; }
+th, td { text-align: left; vertical-align: top; padding: 0.6rem 0.8rem; border-bottom: 1px solid var(--line); }
+th { color: var(--ink); font-weight: 600; border-bottom-color: var(--line-strong); }
+td { color: var(--ink-dim); }
+
+.status { display: inline-block; font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.08em; padding: 0.15em 0.5em; border-radius: 4px; vertical-align: 0.1em; }
+.status-done { background: var(--ok-bg); color: var(--ok); }
+.status-next { background: var(--warn-bg); color: var(--glow); }
+.status-later { background: var(--neutral-bg); color: var(--ink-faint); }
+
+.timeline-step { border-left: 2px solid var(--line-strong); padding: 0 0 1.6rem 1.4rem; position: relative; }
+.timeline-step:last-child { border-left-color: transparent; padding-bottom: 0; }
+.timeline-step::before {
+  content: ""; position: absolute; left: -0.36rem; top: 0.5rem; width: 0.6rem; height: 0.6rem;
+  border-radius: 50%; background: var(--line-strong);
+}
+.timeline-step.is-done::before { background: var(--ok); }
+.timeline-step.is-next::before { background: var(--glow); box-shadow: 0 0 0 4px var(--warn-bg); }
+.timeline-step h3 { margin-top: 0; }
+.timeline-step > *:last-child { margin-bottom: 0; }
+
+/* ---------------------------------------------------------------- footer */
+
+.site-footer {
+  border-top: 1px solid var(--line); margin-top: 4rem; padding: 2.5rem 0 3.5rem;
+  color: var(--ink-faint); font-size: 0.88rem;
+}
+.site-footer .wrap { display: flex; gap: 2rem; flex-wrap: wrap; justify-content: space-between; }
+.site-footer a { color: var(--ink-dim); }
+.site-footer ul { list-style: none; margin: 0; padding: 0; }
+.site-footer li { margin-bottom: 0.35rem; }
+.site-footer h4 { margin: 0 0 0.6rem; font-family: var(--sans); font-size: 0.75rem; text-transform: uppercase;
+  letter-spacing: 0.12em; color: var(--ink-faint); }
+
+/* ---------------------------------------------------------------- narrow screens */
+
+@media (max-width: 34rem) {
+  .demo-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 40rem) {
+  body { font-size: 1rem; }
+  .site-header { gap: 0.5rem; padding: 0.6rem 1rem; }
+  .site-nav {
+    gap: 0.9rem; width: 100%; margin-left: 0;
+    /* Six tabs will not fit a phone's width, and wrapping them onto three lines eats the top of
+       every page. One scrolling row keeps the header one line tall. */
+    flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none;
+  }
+  .site-nav::-webkit-scrollbar { display: none; }
+  .site-nav a { white-space: nowrap; font-size: 0.9rem; }
+  .brand { font-size: 1.05rem; }
+  section.band { padding: 2rem 0; }
+  .hero { padding: 2rem 0 1.2rem; }
+  h2 { margin-top: 1.8rem; }
+  .lede { font-size: 1.08rem; }
+  .hero-actions .btn { flex: 1 1 100%; text-align: center; }
+  .carousel-bar { gap: 0.4rem; padding: 0.5rem; }
+  .carousel-edit { margin-left: 0; width: 100%; text-align: center; margin-top: 0.4rem; }
+  .stage { border-radius: 10px; }
+  .cards, .uses { grid-template-columns: 1fr; }
+  pre { font-size: 0.78rem; }
+  .site-footer .wrap { gap: 1.5rem; }
+}
