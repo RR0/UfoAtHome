@@ -439,9 +439,20 @@ input.invalid {
    degrees, and in full Moons, the only unit of apparent size most testimonies come with. Purely
    informative (an output, never an input), so it stays visually quieter than the fields it
    comments on. */
+/* Never a backtick in here: this whole stylesheet is a template literal, and one would end it.
+   nowrap was a fair rule while these outputs were short — "i.e. 2.2 deg, 4.2x the Moon" wants to
+   stay on one line. Two of them are not short: the real-width estimate is a whole sentence and the
+   blur bound another, and on a phone they ran straight out of the element's own box. They wrap;
+   the short ones still have nothing to wrap. min-width:0 is what lets them, since a flex item
+   otherwise refuses to shrink below its own content. */
 .apparent-size {
   font-size: 0.85em;
   opacity: 0.8;
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: break-word;
+}
+#apparent-size {
   white-space: nowrap;
 }
 /* Record and the sampling rate it records at are one control, not two: grouping them makes them a
@@ -529,7 +540,9 @@ input.invalid {
 .ground-elevation {
   font-size: 0.85em;
   opacity: 0.8;
-  white-space: nowrap;
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: break-word;
 }
 .place-status a {
   color: inherit;
@@ -674,7 +687,13 @@ select.weather-field:disabled {
   border: 1px solid color-mix(in srgb, currentColor 28%, transparent);
   border-radius: 999px;
   padding: 0.1em 0.6em;
+  /* A chip stays on one line — half its value is the shape of it — but a long description on a
+     narrow screen would otherwise push the whole strip past the element's own edge, so it gives
+     up its tail rather than the layout. Clicking it opens the field that holds the whole thing. */
   white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .param-chip:hover {
   color: currentColor;
