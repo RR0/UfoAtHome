@@ -65,7 +65,7 @@ export class FaqPage implements SitePage {
     <div class="faq-item">
       <h3>What does it send over the network?</h3>
       <p>Recordings stay in your browser: there is no account and no server-side storage.
-        <strong>Save</strong> writes a file to your disk, and that file is the whole recording.</p>
+        <strong>Export</strong> writes a file to your disk, and that file is the whole recording.</p>
       <p>What the editor fetches, and when:</p>
       <div class="table-scroll">
       <table>
@@ -289,7 +289,7 @@ export class FaqPage implements SitePage {
     <div class="faq-item">
       <h3>Qu'est-ce qui passe sur le réseau ?</h3>
       <p>Les enregistrements restent dans votre navigateur : il n'y a ni compte ni stockage côté
-        serveur. <strong>Enregistrer</strong> écrit un fichier sur votre disque, et ce fichier est
+        serveur. <strong>Exporter</strong> écrit un fichier sur votre disque, et ce fichier est
         l'enregistrement complet.</p>
       <p>Ce que va chercher l'éditeur, et quand :</p>
       <div class="table-scroll">

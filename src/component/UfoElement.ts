@@ -70,6 +70,10 @@ export class UfoElement extends HTMLElement {
   private soundPreview?: SightingSound
   private player: Player
   private loopEnabled = true
+
+  /** Where playback stood before the click pair that a double-click is made of — see
+   * restorePlayback. */
+  private playbackBeforeClick?: { state: PlaybackState; time: number }
   private highlightedSourceIds: Set<string> = new Set()
   /** Sources a composing SceneElement has determined sit directly behind a decor object right
    * now (see SceneRenderer.isScreenPointOccluded) — skipped entirely on the next paint, not
@@ -176,8 +180,23 @@ export class UfoElement extends HTMLElement {
     this.loopButton.addEventListener("click", () => this.toggleLoop())
     this.fullscreenButton.addEventListener("click", () => this.toggleFullscreen())
     this.seekInput.addEventListener("input", () => this.player.seek(Number(this.seekInput.value)))
-    this.canvas.addEventListener("click", () => {
-      if (this.enableClickToPlay) this.togglePlayPause()
+    this.canvas.addEventListener("click", event => {
+      if (!this.enableClickToPlay) return
+      // Where playback stood before this click, in case it turns out to be the first half of a
+      // double-click — see the dblclick handler below. `detail` is the click count, so this
+      // records the state once per pair rather than overwriting it with the halfway state.
+      if (event.detail <= 1) this.playbackBeforeClick = { state: this.playbackState, time: this.currentTime }
+      this.togglePlayPause()
+    })
+    this.canvas.addEventListener("dblclick", event => {
+      // Gated on the same flag as the click above, and for the same reason: where a composing
+      // element has taken the canvas over for something else (the recorder edits shapes on it),
+      // this is one of its gestures and not ours.
+      if (!this.enableClickToPlay) return
+      // Selecting the surrounding page is never what a double-click on a picture meant.
+      event.preventDefault()
+      this.restorePlayback()
+      this.toggleFullscreen()
     })
     this.canvas.addEventListener("pointermove", this.handlePointerMove)
     this.canvas.addEventListener("pointerleave", this.handlePointerLeave)
@@ -747,6 +766,29 @@ export class UfoElement extends HTMLElement {
     this.loopEnabled = !this.loopEnabled
     this.loopButton.setAttribute("aria-pressed", String(this.loopEnabled))
     this.player.loop = this.loopEnabled
+  }
+
+  /**
+   * Undoes what the two clicks inside a double-click did to playback.
+   *
+   * A double-click is two clicks first, so click-to-play has already fired twice by the time it
+   * arrives. Twice is usually a round trip and looks like nothing happened — but not always: a
+   * recording sitting stopped at its own end is RESTARTED by the first of them (standard media
+   * behaviour, see Player.play), so the pair would leave it paused at the beginning. Going
+   * fullscreen is not a request to rewind, so the position goes back, and the state with it as
+   * nearly as this element can put it — a recording that was stopped at its end comes back paused
+   * there, which shows the same frame and the same button.
+   *
+   * Restoring rather than suppressing, because suppressing means waiting to find out whether a
+   * second click is coming, and that delay would be paid by every ordinary play/pause on the
+   * canvas — the gesture people actually use — to smooth over the rarer one.
+   */
+  private restorePlayback(): void {
+    const before = this.playbackBeforeClick
+    if (!before) return
+    this.currentTime = before.time
+    if (before.state === "playing") this.play()
+    else this.pause()
   }
 
   private toggleFullscreen(): void {

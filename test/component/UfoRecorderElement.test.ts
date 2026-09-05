@@ -2718,7 +2718,10 @@ describe("UfoRecorderElement i18n", () => {
 
     expect(element.shadowRoot!.getElementById("label-color")!.textContent).toBe("Couleur")
     expect(element.shadowRoot!.getElementById("label-duration")!.textContent).toBe("Durée")
-    expect(element.shadowRoot!.getElementById("export")!.textContent).toBe("Enregistrer")
+    // The two are deliberately different words now. "Enregistrer" belongs to the RECORD button, and
+    // it used to be on the export one as well — in the editor of a recorder, where recording is a
+    // thing one does, that was the same verb for two unrelated acts.
+    expect(element.shadowRoot!.getElementById("export")!.textContent).toBe("Exporter")
     expect(element.shadowRoot!.getElementById("preset-oval")!.textContent).toBe("Ovale")
     const durationInput = element.shadowRoot!.getElementById("durationSeconds") as HTMLInputElement
     expect(durationInput.placeholder).toBe("durée de l'observation")

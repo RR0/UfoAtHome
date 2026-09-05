@@ -1226,3 +1226,95 @@ describe("UfoElement sequencing API", () => {
     nowSpy.mockRestore()
   })
 })
+
+describe("double-click on the canvas", () => {
+
+  const oval = (x: number) => ({
+    kind: "oval" as const, bounds: { x, y: 10, width: 20, height: 20 }, color: "#fff",
+    angle: 0, transparency: 0, haloScale: 0, selected: false
+  })
+  const sighting = (): SightingRecordingJson => ({
+    version: 1,
+    durationSeconds: 2,
+    timeline: {
+      keyframes: [
+        { t: 0, shapes: [{ sourceId: "ufo-1", shape: oval(10) }] },
+        { t: 200, shapes: [{ sourceId: "ufo-1", shape: oval(40) }] }
+      ]
+    }
+  })
+
+  const clickPair = (canvas: HTMLCanvasElement): void => {
+    // A real double-click is two clicks and then dblclick, in that order — reproduced here because
+    // the whole design of the handler is about what those two clicks have already done.
+    canvas.dispatchEvent(new MouseEvent("click", { detail: 1, bubbles: true }))
+    canvas.dispatchEvent(new MouseEvent("click", { detail: 2, bubbles: true }))
+    canvas.dispatchEvent(new MouseEvent("dblclick", { detail: 2, bubbles: true, cancelable: true }))
+  }
+
+  const withFullscreenStub = (element: UfoElement): { requested: () => number; exits: () => number } => {
+    let requested = 0
+    let exits = 0
+    const stage = element.shadowRoot!.querySelector(".stage") as HTMLElement
+    ;(stage as unknown as { requestFullscreen(): Promise<void> }).requestFullscreen = () => {
+      requested++
+      return Promise.resolve()
+    }
+    ;(document as unknown as { exitFullscreen(): Promise<void> }).exitFullscreen = () => {
+      exits++
+      return Promise.resolve()
+    }
+    return { requested: () => requested, exits: () => exits }
+  }
+
+  it("asks for fullscreen, and leaves playback where it found it", () => {
+    const element = document.createElement(UFO_ELEMENT_NAME) as UfoElement
+    document.body.append(element)
+    element.sightingData = sighting()
+    const fullscreen = withFullscreenStub(element)
+    const canvas = element.canvasElement
+
+    // Somewhere inside the recording, so the pair of clicks really does move the playhead: the
+    // first of them plays on from here and the second stops it wherever that got to.
+    element.currentTime = 150
+    expect(element.playbackState).toBe("stopped")
+
+    clickPair(canvas)
+
+    expect(fullscreen.requested()).toBe(1)
+    // Two clicks toggled play then pause; the position they moved is put back.
+    expect(element.currentTime).toBe(150)
+    element.remove()
+  })
+
+  it("leaves a PLAYING recording playing", () => {
+    const element = document.createElement(UFO_ELEMENT_NAME) as UfoElement
+    document.body.append(element)
+    element.sightingData = sighting()
+    withFullscreenStub(element)
+
+    element.play()
+    expect(element.playbackState).toBe("playing")
+
+    clickPair(element.canvasElement)
+
+    expect(element.playbackState).toBe("playing")
+    element.remove()
+  })
+
+  it("is not ours to take where the canvas has been given to something else", () => {
+    // What the recorder does: the canvas is its editing surface, so neither click nor double-click
+    // belongs to playback there.
+    const element = document.createElement(UFO_ELEMENT_NAME) as UfoElement
+    document.body.append(element)
+    element.sightingData = sighting()
+    element.enableClickToPlay = false
+    const fullscreen = withFullscreenStub(element)
+
+    clickPair(element.canvasElement)
+
+    expect(fullscreen.requested()).toBe(0)
+    expect(element.playbackState).toBe("stopped")
+    element.remove()
+  })
+})

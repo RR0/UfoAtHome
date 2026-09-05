@@ -342,7 +342,7 @@ export const html = `
      author is marked, which is the one thing the form itself never showed at a glance. -->
 <div id="param-summary" class="param-summary"></div>
 <div class="export-row">
-  <button id="export" type="button">Save</button>
+  <button id="export" type="button">Export</button>
 </div>
 <div id="context-menu" class="context-menu" hidden role="menu">
   <button id="context-group" type="button" role="menuitem">Group</button>

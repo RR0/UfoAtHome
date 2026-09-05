@@ -107,9 +107,16 @@ export interface UfoRecorderMessages extends SightingLabels {
   /** Duration field title/tooltip when start+end are both given but too imprecise/mismatched to
    * derive an exact duration from — see sightingDurationBlockedReason. */
   durationImprecise: string
-  /** The button that writes the recording out to a file. Named for what a reader is DOING —
-   * keeping their work — and not for the format it happens to land in. "Export JSON" described the
-   * implementation to somebody who came to describe what they saw. */
+  /**
+   * The button that writes the recording out to a file.
+   *
+   * "Save" — and its French "Enregistrer" — was the earlier answer, on the reasoning that a label
+   * should name what a reader is DOING rather than the format it lands in. It named the wrong verb.
+   * There is nowhere for this tool to save TO: no account, no document, nothing it can come back to
+   * and reopen. What the button does is hand the reader a file to keep somewhere of their own, and
+   * "export" is the word for that. "Enregistrer" was worse still in the editor of a RECORDER, where
+   * it is also what one does to a recording.
+   */
   export: string
   importFile: string
   importUrl: string

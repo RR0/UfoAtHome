@@ -101,7 +101,12 @@ bar show real clock times when `time` has an hour (e.g. `02:45` → `02:50`); ot
 duration actually available (the declared one if known, else the recording's own length). Playback loops by
 default — click the loop button (pressed = looping) to play once and stop instead.
 
-Clicking anywhere on the canvas also toggles Play/Pause (not just the button), matching common video-player UX.
+Clicking anywhere on the canvas also toggles Play/Pause (not just the button), and DOUBLE-clicking it toggles
+fullscreen — both matching common video-player UX. A double-click is two clicks first, so click-to-play has
+already fired twice by the time it arrives; playback is put back where it stood rather than left wherever that
+pair happened to leave it (a recording stopped at its own end is restarted by the first of them). Both gestures
+are governed by `enableClickToPlay`: where a composing element has taken the canvas over for something else — the
+recorder edits shapes on it — neither belongs to playback.
 While playing, the toolbar and the fullscreen button (top-right, semi-transparent over the content) auto-hide and
 only reappear on hover — always shown while paused/stopped. The fullscreen button uses the standard Fullscreen API
 (`requestFullscreen`/`exitFullscreen`); exiting with Escape is native browser behavior, nothing custom.
@@ -150,7 +155,7 @@ Usage: click **Record**, move the pointer over the canvas to draw the UFO's path
 replay it. The nested `<rr0-ufo>`'s `enableClickToPlay` is set to `false` here — a completed recording drag also
 fires a native "click" on the canvas, which would otherwise spuriously toggle playback right after recording.
 
-All of the toolbar's own labels (shape presets, Color/Transparency/Halo, Add shape, Record/Stop, Export JSON,
+All of the toolbar's own labels (shape presets, Color/Transparency/Halo, Add shape, Record/Stop, Export,
 Duration) are translated (English/French) the same way `<rr0-ufo>`'s own labels are — based on
 the host page's own `lang` then `navigator.languages`, no picker UI.
 

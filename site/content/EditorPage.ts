@@ -58,7 +58,7 @@ if (editor && requested) {
     <p class="eyebrow">The editor</p>
     <h1>Record a sighting.</h1>
     <p class="lede">Everything below is live. Nothing you do here is uploaded anywhere — the
-      recording exists in your browser until you press <strong>Save</strong>, which hands you a JSON
+      recording exists in your browser until you press <strong>Export</strong>, which hands you a JSON
       file that is yours.</p>
   </div>
 </section>
@@ -79,6 +79,13 @@ if (editor && requested) {
     <h2>Three gestures to a first recording</h2>
     <ol class="steps">
       <li>
+        <h3>Say when and where</h3>
+        <p>Fill <strong>Date and time</strong> and <strong>Location</strong>. That is the moment the
+          sky appears: the Sun, the Moon and its phase, the planets, the stars of that night — and
+          the weather record for that hour is fetched on its own. Doing it first means drawing
+          against the real sky rather than on an empty canvas.</p>
+      </li>
+      <li>
         <h3>Draw it</h3>
         <p>Open the <strong>Shape</strong> group. Pick <em>Oval</em> or <em>Polygon</em>, set its
           colour, its transparency, its halo, how dazzling it was and how blurred its edges looked.
@@ -91,12 +98,6 @@ if (editor && requested) {
           object took, then <strong>Stop</strong>. Playback replays it over the observation's own
           <em>real</em> duration — a five-minute sighting takes five minutes, not the second the
           drag took.</p>
-      </li>
-      <li>
-        <h3>Say when and where</h3>
-        <p>Fill <strong>Date and time</strong> and <strong>Location</strong>. That is the moment the
-          sky appears: the Sun, the Moon and its phase, the planets, the stars of that night — and
-          the weather record for that hour is fetched on its own.</p>
       </li>
     </ol>
     <p class="small">A row of chips under the render lists everything the recording actually
@@ -257,7 +258,7 @@ if (editor && requested) {
   <div class="wrap">
     <h2>Saving, and putting it somewhere</h2>
     <div class="prose-wide">
-      <p><strong>Save</strong> gives you a JSON file. That file is the whole recording — there is no
+      <p><strong>Export</strong> gives you a JSON file. That file is the whole recording — there is no
         account, no database, and no copy kept here. Host it wherever you like, and put the
         reconstruction on any page with two lines:</p>
       <pre><code>&lt;script type="module" src="https://ufoathome.org/lib/rr0-eyewitness.mjs"&gt;&lt;/script&gt;
@@ -293,7 +294,7 @@ if (editor && requested) {
     <h1>Enregistrer une observation.</h1>
     <p class="lede">Tout ce qui suit est en état de marche. Rien de ce que vous faites ici n'est
       envoyé nulle part : l'enregistrement n'existe que dans votre navigateur jusqu'à ce que vous
-      appuyiez sur <strong>Enregistrer</strong>, qui vous remet un fichier JSON qui est le vôtre.</p>
+      appuyiez sur <strong>Exporter</strong>, qui vous remet un fichier JSON qui est le vôtre.</p>
   </div>
 </section>
 
@@ -313,6 +314,13 @@ if (editor && requested) {
     <h2>Trois gestes pour un premier enregistrement</h2>
     <ol class="steps">
       <li>
+        <h3>Dire quand et où</h3>
+        <p>Remplissez <strong>Date et heure</strong> et <strong>Lieu</strong>. C'est là que le ciel
+          apparaît : le Soleil, la Lune et sa phase, les planètes, les étoiles de cette nuit-là — et
+          le relevé météo de cette heure-là est cherché tout seul. Commencer par là, c'est dessiner
+          sur le ciel réel plutôt que sur un canevas vide.</p>
+      </li>
+      <li>
         <h3>Dessiner</h3>
         <p>Ouvrez le groupe <strong>Forme</strong>. Choisissez <em>Ovale</em> ou <em>Polygone</em>,
           réglez couleur, transparence, halo, éclat et flou des contours. Les poignées sur le canevas
@@ -325,12 +333,6 @@ if (editor && requested) {
           trajet suivi par l'objet, puis <strong>Arrêter</strong>. La lecture le rejoue sur la durée
           <em>réelle</em> de l'observation : une observation de cinq minutes prend cinq minutes, pas
           la seconde qu'a duré le geste.</p>
-      </li>
-      <li>
-        <h3>Dire quand et où</h3>
-        <p>Remplissez <strong>Date et heure</strong> et <strong>Lieu</strong>. C'est là que le ciel
-          apparaît : le Soleil, la Lune et sa phase, les planètes, les étoiles de cette nuit-là — et
-          le relevé météo de cette heure-là est cherché tout seul.</p>
       </li>
     </ol>
     <p class="small">Une bande d'étiquettes sous le rendu énumère tout ce que l'enregistrement
@@ -508,7 +510,7 @@ if (editor && requested) {
   <div class="wrap">
     <h2>Sauvegarder, et publier quelque part</h2>
     <div class="prose-wide">
-      <p><strong>Enregistrer</strong> vous remet un fichier JSON. Ce fichier <em>est</em>
+      <p><strong>Exporter</strong> vous remet un fichier JSON. Ce fichier <em>est</em>
         l'enregistrement complet : il n'y a ni compte, ni base de données, ni copie conservée ici.
         Hébergez-le où vous voulez, et posez la reconstitution sur n'importe quelle page en deux
         lignes :</p>
