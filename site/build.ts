@@ -11,6 +11,7 @@ import { DocsPage } from "./content/DocsPage.js"
 import { DocsCreatePage } from "./content/DocsCreatePage.js"
 import { DocsSharePage } from "./content/DocsSharePage.js"
 import { DocsComponentsPage } from "./content/DocsComponentsPage.js"
+import { COMPONENT_DOCS, DocsComponentPage } from "./content/DocsComponentPage.js"
 import { FaqPage } from "./content/FaqPage.js"
 import { RoadmapPage } from "./content/RoadmapPage.js"
 
@@ -54,6 +55,8 @@ class SiteBuilder {
       // The documentation pages sit under the hub above and stay out of the navigation, which names
       // only it — see DocsSection for why they are split by question rather than by subject.
       new DocsCreatePage(example.trim()), new DocsSharePage(), new DocsComponentsPage(),
+      // One page per component, under that hub — see DocsComponentPage.
+      ...COMPONENT_DOCS.map(doc => new DocsComponentPage(doc)),
       new FaqPage(), new RoadmapPage()
     ]
     const layout = new Layout(this.pages, version)

@@ -58,7 +58,7 @@ export class Layout {
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 ${this.languageRedirect(meta, language)}
-  <title>${meta.title[language]} — UFO@home</title>
+  <title>${this.text(meta.title[language])} — UFO@home</title>
   <meta name="description" content="${this.attribute(meta.description[language])}">
   <link rel="canonical" href="${Layout.ORIGIN}${self}">
   ${alternates}
@@ -123,7 +123,7 @@ ${script ? `<script type="module">\n${script}\n</script>` : ""}
   private header(current: SitePage, language: SiteLanguage): string {
     const links = this.pages.filter(page => !page.meta.asideFromNav).map(page => {
       const currentAttr = page === current ? ` aria-current="page"` : ""
-      return `<a href="${this.path(page.meta)}"${currentAttr}>${page.meta.navLabel[language]}</a>`
+      return `<a href="${this.path(page.meta)}"${currentAttr}>${this.text(page.meta.navLabel[language])}</a>`
     }).join("\n    ")
     return `<header class="site-header">
   <a class="brand" href="/">UFO<span class="at">@</span>home</a>
@@ -136,7 +136,7 @@ ${script ? `<script type="module">\n${script}\n</script>` : ""}
   private siteFooter(language: SiteLanguage): string {
     const fr = language === "fr"
     const nav = this.pages
-      .map(page => `<li><a href="${this.path(page.meta)}">${page.meta.navLabel[language]}</a></li>`)
+      .map(page => `<li><a href="${this.path(page.meta)}">${this.text(page.meta.navLabel[language])}</a></li>`)
       .join("\n      ")
     return `<footer class="site-footer">
   <div class="wrap">
@@ -164,6 +164,14 @@ ${script ? `<script type="module">\n${script}\n</script>` : ""}
     </div>
   </div>
 </footer>`
+  }
+
+  /** A title or a label as TEXT, not as markup. A component's page is called `<rr0-ufo>`, and left
+   * raw the browser reads that as a tag: the heading came out empty and an unknown element was
+   * created inside it. Titles are written plainly and escaped where they are placed, rather than
+   * being written pre-escaped, which would have to be undone for every attribute. */
+  private text(value: string): string {
+    return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
   }
 
   private attribute(text: string): string {

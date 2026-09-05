@@ -18,15 +18,22 @@ export abstract class DocsSection implements SitePage {
 
   abstract render(language: SiteLanguage): string
 
-  /** The way back up. These pages are reached from the hub, and the top navigation only names the
-   * hub, so without this a reader has nothing but the browser's own Back. */
-  protected hero(language: SiteLanguage, title: Said<string>, lede: Said<string>): string {
-    const back = language === "fr" ? "Documentation" : "Documentation"
+  /** The way back up, which is the page this one was reached from — the documentation hub for
+   * most, the components hub for a component's own page. The top navigation names only the
+   * documentation hub, so without this a reader has nothing but the browser's own Back. */
+  protected hero(
+    language: SiteLanguage, title: Said<string>, lede: Said<string>,
+    crumb: { href: string, label: Said<string> } = { href: "/docs/", label: { en: "Documentation", fr: "Documentation" } }
+  ): string {
+    // Escaped: a component's page is titled `<rr0-ufo>`, which a browser reads as a tag if it is
+    // put in the heading raw — see Layout.text.
+    const heading = title[language].replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    const back = crumb.label[language]
     return `
 <section class="band hero">
   <div class="wrap">
-    <p class="eyebrow"><a class="crumb" href="/docs/">← ${back}</a></p>
-    <h1>${title[language]}</h1>
+    <p class="eyebrow"><a class="crumb" href="${crumb.href}">← ${back}</a></p>
+    <h1>${heading}</h1>
     <p class="lede">${lede[language]}</p>
   </div>
 </section>`

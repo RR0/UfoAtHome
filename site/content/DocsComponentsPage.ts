@@ -85,79 +85,15 @@ export class DocsComponentsPage extends DocsSection {
     </div>
     <p>Putting one on a page is <a href="/docs/share/">two lines</a>.</p>
 
-    <h2><code>&lt;rr0-ufo&gt;</code> — the shape, and playback</h2>
-    <p>The lightweight one: a canvas plus play/pause/loop/seek. Use it where a page only needs to
-      replay an already-drawn shape and wants no sky behind it.</p>
-    <pre><code>&lt;rr0-ufo src="sighting.json"&gt;&lt;/rr0-ufo&gt;</code></pre>
-    <div class="table-scroll">
-    <table>
-      <tr><th>Member</th><th>Kind</th><th>What it does</th></tr>
-      <tr><td><code>src</code></td><td>attribute</td><td>URL of a recording, fetched on connect and whenever it changes</td></tr>
-      <tr><td><code>sightingData</code></td><td>property</td><td>The recording as a plain object — read it back after editing, or set it instead of using <code>src</code></td></tr>
-      <tr><td><code>sighting</code></td><td>property (read)</td><td>The live model: real-world time and place plus the recording's timeline</td></tr>
-      <tr><td><code>loadFromSrc(url)</code></td><td>method (async)</td><td>What the attribute triggers internally. Await it when you need the recording to be IN before doing anything else — playing before it resolves finds a zero-length timeline</td></tr>
-      <tr><td><code>play()</code> / <code>pause()</code></td><td>method</td><td>Say which state you want, rather than flipping the current one</td></tr>
-      <tr><td><code>togglePlayPause()</code></td><td>method</td><td>What the button, the click and the space bar do</td></tr>
-      <tr><td><code>playbackState</code></td><td>property (read)</td><td><code>"stopped"</code>, <code>"playing"</code> or <code>"paused"</code></td></tr>
-      <tr><td><code>currentTime</code></td><td>property</td><td>The playhead, in the timeline's own units — <em>not</em> real milliseconds, see <code>positionLabel</code></td></tr>
-      <tr><td><code>seekableDuration</code></td><td>property (read)</td><td>The range <code>currentTime</code> can take</td></tr>
-      <tr><td><code>autoReplayEnabled</code></td><td>property</td><td>Looping, on by default. Turn it <strong>off</strong> if you want the <code>ended</code> event</td></tr>
-      <tr><td><code>positionLabel</code> / <code>durationLabel</code></td><td>property (read)</td><td>The position and length already formatted by the element — real clock time when the observation states one</td></tr>
-      <tr><td><code>refresh()</code></td><td>method</td><td>Re-reads the duration and repaints — call it after mutating <code>sighting.timeline</code> from outside</td></tr>
-      <tr><td><code>canvasElement</code> / <code>renderer</code></td><td>property (read)</td><td>The <code>&lt;canvas&gt;</code>, and the renderer painting on it</td></tr>
-      <tr><td><code>enableClickToPlay</code></td><td>property</td><td>Whether a click toggles playback and a double-click toggles fullscreen (both, or neither). Set false where the canvas is yours for something else</td></tr>
-      <tr><td><code>fullscreenTarget</code></td><td>property</td><td>Which element the fullscreen button expands. <code>&lt;rr0-scene&gt;</code> sets it to its own stage, so the sky goes fullscreen and not just the overlay</td></tr>
-    </table>
-    </div>
-
-    <h2><code>&lt;rr0-scene&gt;</code> — the sky and the ground</h2>
-    <p>Everything <code>&lt;rr0-ufo&gt;</code> has, composited over the real sky and horizon of the
-      recording's own date, hour and place. A drop-in upgrade: same markup, same members.</p>
-    <pre><code>&lt;rr0-scene src="sighting.json"&gt;&lt;/rr0-scene&gt;</code></pre>
-    <div class="table-scroll">
-    <table>
-      <tr><th>Member</th><th>Kind</th><th>What it does</th></tr>
-      <tr><td><code>ufoElement</code></td><td>property (read)</td><td>The <code>&lt;rr0-ufo&gt;</code> it composes — and through it every playback member above</td></tr>
-      <tr><td><code>sceneRenderer</code></td><td>property (read)</td><td>The 3D renderer, for what nothing else exposes</td></tr>
-    </table>
-    </div>
-    <p>Hovering it names what is under the pointer — a star with its magnitude and height, a planet,
-      a comet, a building, another witness — and says nothing where the ground hides what you are
-      pointing at.</p>
-
-    <h2><code>&lt;rr0-sighting&gt;</code> — the standard sighting view</h2>
-    <p>The default for a real sighting, one witness or several. It composes an
-      <code>&lt;rr0-scene&gt;</code> and adds the toolbar: who is testifying, and the <q>?</q> panel
-      with the observation's own metadata, its credits and its embed lines.</p>
-    <pre><code>&lt;rr0-sighting src="sighting.json"&gt;&lt;/rr0-sighting&gt;
-&lt;rr0-sighting src="witnesses.json"&gt;&lt;/rr0-sighting&gt;  &lt;!-- a manifest --&gt;</code></pre>
-    <div class="table-scroll">
-    <table>
-      <tr><th>Member</th><th>Kind</th><th>What it does</th></tr>
-      <tr><td><code>src</code></td><td>attribute</td><td>A single recording, or a manifest — an array is one, an object is the other</td></tr>
-      <tr><td><code>witnessUrls</code></td><td>property</td><td>The manifest as a plain array of URLs, instead of <code>src</code></td></tr>
-      <tr><td><code>sightingData</code></td><td>property</td><td>One recording, set directly — for a page holding one in memory rather than at a URL</td></tr>
-      <tr><td><code>scene</code></td><td>property (read)</td><td>The composed <code>&lt;rr0-scene&gt;</code>, and through <code>scene.ufoElement</code> the playback members</td></tr>
-      <tr><td><code>loadFromSrc(url)</code></td><td>method (async)</td><td>What the attribute triggers</td></tr>
-    </table>
-    </div>
-    <p>A recording that names no witness gets no “testimony by” line at all, which is the accurate
-      thing to say of a sky set up to show a halo.</p>
-
-    <h2><code>&lt;rr0-sighting-editor&gt;</code> — the editor</h2>
-    <p>Everything above plus the authoring toolbar. Put it on a page where people should be able to
-      describe or correct an observation themselves.</p>
-    <pre><code>&lt;rr0-sighting-editor&gt;&lt;/rr0-sighting-editor&gt;
-&lt;rr0-sighting-editor src="sighting.json"&gt;&lt;/rr0-sighting-editor&gt;</code></pre>
-    <p>Its canvas is an editing surface, so <code>enableClickToPlay</code> is off there: a click
-      selects and drags a shape rather than toggling playback. What the eight groups of its toolbar
-      do is <a href="/editor/">the editor's own page</a>.</p>
-    <div class="table-scroll">
-    <table>
-      <tr><th>Member</th><th>Kind</th><th>What it does</th></tr>
-      <tr><td><code>ufoElement</code></td><td>property (read)</td><td>Reaches through to the canvas, the timeline and the appearance work</td></tr>
-      <tr><td><code>sightingchange</code></td><td>event</td><td>Fires after every edit — the single signal that the recording has changed</td></tr>
-    </table>
+    <h2>One page each</h2>
+    <p>What each takes, what it answers to, and what it draws — one page per component, because
+      what you need from one of them is never what you need from the other three at the same
+      moment.</p>
+    <div class="uses">
+      <a class="use" href="/docs/components/ufo/"><h3><code>&lt;rr0-ufo&gt;</code></h3><p>The shape and its playback, with no sky behind it — the light one.</p><p class="use-more">Read →</p></a>
+      <a class="use" href="/docs/components/scene/"><h3><code>&lt;rr0-scene&gt;</code></h3><p>The same, over the real sky and horizon of the recording's own date and place.</p><p class="use-more">Read →</p></a>
+      <a class="use" href="/docs/components/sighting/"><h3><code>&lt;rr0-sighting&gt;</code></h3><p>The standard view of a real account: one witness or several, with their toolbar.</p><p class="use-more">Read →</p></a>
+      <a class="use" href="/docs/components/editor/"><h3><code>&lt;rr0-sighting-editor&gt;</code></h3><p>The whole authoring toolbar, for describing an observation or correcting one.</p><p class="use-more">Read →</p></a>
     </div>
 
     <h2>Events</h2>
@@ -253,80 +189,15 @@ import "@rr0/ufoathome/editor"   // registers &lt;rr0-sighting-editor&gt;</code>
     </div>
     <p>En poser un sur une page, c'est <a href="/docs/share/">deux lignes</a>.</p>
 
-    <h2><code>&lt;rr0-ufo&gt;</code> — la forme, et la lecture</h2>
-    <p>Le plus léger : un canevas plus lecture/pause/boucle/déplacement. À utiliser là où une page ne
-      fait que rejouer une forme déjà dessinée et ne veut pas de ciel derrière.</p>
-    <pre><code>&lt;rr0-ufo src="sighting.json"&gt;&lt;/rr0-ufo&gt;</code></pre>
-    <div class="table-scroll">
-    <table>
-      <tr><th>Membre</th><th>Nature</th><th>Rôle</th></tr>
-      <tr><td><code>src</code></td><td>attribut</td><td>URL d'un enregistrement, chargée à la connexion et à chaque changement</td></tr>
-      <tr><td><code>sightingData</code></td><td>propriété</td><td>L'enregistrement comme objet simple — à relire après modification, ou à poser au lieu d'utiliser <code>src</code></td></tr>
-      <tr><td><code>sighting</code></td><td>propriété (lecture)</td><td>Le modèle vivant : date et lieu réels, plus la chronologie de l'enregistrement</td></tr>
-      <tr><td><code>loadFromSrc(url)</code></td><td>méthode (async)</td><td>Ce que déclenche l'attribut. À attendre quand l'enregistrement doit être arrivé avant toute autre chose — jouer avant sa résolution trouve une chronologie de longueur nulle</td></tr>
-      <tr><td><code>play()</code> / <code>pause()</code></td><td>méthode</td><td>Dire quel état on veut, plutôt que basculer l'état courant</td></tr>
-      <tr><td><code>togglePlayPause()</code></td><td>méthode</td><td>Ce que font le bouton et le clic</td></tr>
-      <tr><td><code>playbackState</code></td><td>propriété (lecture)</td><td><code>"stopped"</code>, <code>"playing"</code> ou <code>"paused"</code></td></tr>
-      <tr><td><code>currentTime</code></td><td>propriété</td><td>La tête de lecture, dans les unités de la chronologie — <em>pas</em> des millisecondes réelles, voir <code>positionLabel</code></td></tr>
-      <tr><td><code>seekableDuration</code></td><td>propriété (lecture)</td><td>L'étendue que <code>currentTime</code> peut prendre</td></tr>
-      <tr><td><code>autoReplayEnabled</code></td><td>propriété</td><td>La lecture en boucle, active par défaut. À mettre à <strong>false</strong> si vous voulez l'événement <code>ended</code></td></tr>
-      <tr><td><code>positionLabel</code> / <code>durationLabel</code></td><td>propriété (lecture)</td><td>Position et durée déjà mises en forme — heure réelle quand l'observation en énonce une</td></tr>
-      <tr><td><code>refresh()</code></td><td>méthode</td><td>Relit la durée et repeint — à appeler après avoir modifié <code>sighting.timeline</code> de l'extérieur</td></tr>
-      <tr><td><code>canvasElement</code> / <code>renderer</code></td><td>propriété (lecture)</td><td>Le <code>&lt;canvas&gt;</code>, et ce qui peint dessus</td></tr>
-      <tr><td><code>enableClickToPlay</code></td><td>propriété</td><td>Si un clic bascule la lecture et un double-clic le plein écran (les deux, ou aucun). À mettre à false là où le canevas vous sert à autre chose</td></tr>
-      <tr><td><code>fullscreenTarget</code></td><td>propriété</td><td>Quel élément le bouton plein écran agrandit. <code>&lt;rr0-scene&gt;</code> y met sa propre scène, pour que ce soit le ciel qui s'agrandisse et non la seule surcouche</td></tr>
-    </table>
-    </div>
-
-    <h2><code>&lt;rr0-scene&gt;</code> — le ciel et le sol</h2>
-    <p>Tout ce qu'a <code>&lt;rr0-ufo&gt;</code>, composé sur le ciel et l'horizon réels de la date,
-      de l'heure et du lieu de l'enregistrement. Un remplacement direct : même balisage, mêmes
-      membres.</p>
-    <pre><code>&lt;rr0-scene src="sighting.json"&gt;&lt;/rr0-scene&gt;</code></pre>
-    <div class="table-scroll">
-    <table>
-      <tr><th>Membre</th><th>Nature</th><th>Rôle</th></tr>
-      <tr><td><code>ufoElement</code></td><td>propriété (lecture)</td><td>Le <code>&lt;rr0-ufo&gt;</code> qu'il compose — et par lui tous les membres de lecture ci-dessus</td></tr>
-      <tr><td><code>sceneRenderer</code></td><td>propriété (lecture)</td><td>Le moteur de rendu 3D, pour ce que rien d'autre n'expose</td></tr>
-    </table>
-    </div>
-    <p>Le survol nomme ce qui est sous le curseur — une étoile avec sa magnitude et sa hauteur, une
-      planète, une comète, un bâtiment, un autre témoin — et ne dit rien là où le sol cache ce que
-      vous pointez.</p>
-
-    <h2><code>&lt;rr0-sighting&gt;</code> — la vue standard d'une observation</h2>
-    <p>Le choix par défaut pour une observation réelle, à un témoin ou plusieurs. Il compose un
-      <code>&lt;rr0-scene&gt;</code> et ajoute la barre d'outils : qui témoigne, et le panneau
-      <q>?</q> avec les métadonnées de l'observation, ses crédits et ses lignes d'intégration.</p>
-    <pre><code>&lt;rr0-sighting src="sighting.json"&gt;&lt;/rr0-sighting&gt;
-&lt;rr0-sighting src="temoins.json"&gt;&lt;/rr0-sighting&gt;  &lt;!-- un manifeste --&gt;</code></pre>
-    <div class="table-scroll">
-    <table>
-      <tr><th>Membre</th><th>Nature</th><th>Rôle</th></tr>
-      <tr><td><code>src</code></td><td>attribut</td><td>Un enregistrement, ou un manifeste — un tableau est l'un, un objet est l'autre</td></tr>
-      <tr><td><code>witnessUrls</code></td><td>propriété</td><td>Le manifeste comme simple tableau d'URLs, au lieu de <code>src</code></td></tr>
-      <tr><td><code>sightingData</code></td><td>propriété</td><td>Un enregistrement posé directement — pour une page qui en tient un en mémoire plutôt qu'à une URL</td></tr>
-      <tr><td><code>scene</code></td><td>propriété (lecture)</td><td>Le <code>&lt;rr0-scene&gt;</code> composé, et par <code>scene.ufoElement</code> les membres de lecture</td></tr>
-      <tr><td><code>loadFromSrc(url)</code></td><td>méthode (async)</td><td>Ce que déclenche l'attribut</td></tr>
-    </table>
-    </div>
-    <p>Un enregistrement qui ne nomme aucun témoin n'affiche aucune ligne « témoignage de » — ce qui
-      est exact pour un ciel réglé pour montrer un halo.</p>
-
-    <h2><code>&lt;rr0-sighting-editor&gt;</code> — l'éditeur</h2>
-    <p>Tout ce qui précède, plus la barre d'outils de saisie. À poser sur une page où l'on doit
-      pouvoir décrire ou corriger une observation soi-même.</p>
-    <pre><code>&lt;rr0-sighting-editor&gt;&lt;/rr0-sighting-editor&gt;
-&lt;rr0-sighting-editor src="sighting.json"&gt;&lt;/rr0-sighting-editor&gt;</code></pre>
-    <p>Son canevas est une surface d'édition : <code>enableClickToPlay</code> y est désactivé, un
-      clic sélectionne et déplace une forme au lieu de basculer la lecture. Ce que font les huit
-      groupes de sa barre d'outils est sur <a href="/editor/">la page de l'éditeur</a>.</p>
-    <div class="table-scroll">
-    <table>
-      <tr><th>Membre</th><th>Nature</th><th>Rôle</th></tr>
-      <tr><td><code>ufoElement</code></td><td>propriété (lecture)</td><td>Donne accès au canevas, à la chronologie et au travail d'apparence</td></tr>
-      <tr><td><code>sightingchange</code></td><td>événement</td><td>Émis après chaque modification — le signal unique que l'enregistrement a changé</td></tr>
-    </table>
+    <h2>Une page chacun</h2>
+    <p>Ce que chacun prend, ce à quoi il répond, ce qu'il dessine — une page par composant, parce
+      que ce dont vous avez besoin de l'un n'est jamais ce dont vous avez besoin des trois autres
+      au même moment.</p>
+    <div class="uses">
+      <a class="use" href="/docs/components/ufo/"><h3><code>&lt;rr0-ufo&gt;</code></h3><p>La forme et sa lecture, sans ciel derrière — le composant léger.</p><p class="use-more">Lire →</p></a>
+      <a class="use" href="/docs/components/scene/"><h3><code>&lt;rr0-scene&gt;</code></h3><p>La même chose, sur le vrai ciel et le vrai horizon de la date et du lieu de l'observation.</p><p class="use-more">Lire →</p></a>
+      <a class="use" href="/docs/components/sighting/"><h3><code>&lt;rr0-sighting&gt;</code></h3><p>La vue standard d'un témoignage réel : un ou plusieurs témoins, avec leur barre d'outils.</p><p class="use-more">Lire →</p></a>
+      <a class="use" href="/docs/components/editor/"><h3><code>&lt;rr0-sighting-editor&gt;</code></h3><p>Toute la barre d'outils d'écriture, pour décrire une observation ou en corriger une.</p><p class="use-more">Lire →</p></a>
     </div>
 
     <h2>Événements</h2>
