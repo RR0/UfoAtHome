@@ -10,6 +10,13 @@ interface ComponentDoc {
   lede: Said<string>
   description: Said<string>
   body: Said<string>
+  /** The export subpath and the bundle's own file name, for the reminder at the foot of the page. */
+  subpath: string
+  size: Said<string>
+  /** The events this component itself dispatches, when it dispatches any. They sat in one table on
+   * the hub, which could not say who fired them — and each of them has exactly one emitter, so the
+   * answer is the page it is on. */
+  events?: Said<string>
 }
 
 /**
@@ -44,7 +51,48 @@ export class DocsComponentPage extends DocsSection {
     return this.hero(language, this.meta.title, this.doc.lede, {
       href: "/docs/components/",
       label: { en: "The components", fr: "Les composants" }
-    }) + this.doc.body[language]
+    }) + this.doc.body[language] + this.events(language) + this.integration(language)
+  }
+
+  /** What this component fires, if anything. On its own page rather than in one table over all
+   * four, because a table of every event on the site cannot say which element to listen on — and
+   * that is the only thing a reader needs from it. */
+  private events(language: SiteLanguage): string {
+    const events = this.doc.events?.[language]
+    return events === undefined ? "" : `
+<section class="band">
+  <div class="wrap prose-wide">
+    <h2>${language === "fr" ? "Ce qu'il émet" : "What it fires"}</h2>
+    ${events}
+  </div>
+</section>
+`
+  }
+
+  /** The same two lines as everywhere else, with this component's own name filled in. Repeated on
+   * each page on purpose: somebody who came here for one component should not have to go back to
+   * the hub to find out how to load the thing they have just read about. */
+  private integration(language: SiteLanguage): string {
+    const fr = language === "fr"
+    const tag = this.doc.tag
+    return `
+<section class="band">
+  <div class="wrap prose-wide">
+    <h2>${fr ? "L'intégrer" : "Putting it in your page"}</h2>
+    <pre><code>&lt;script type="module" src="https://ufoathome.org/lib/${tag}.mjs"&gt;&lt;/script&gt;
+&lt;${tag}${tag === "rr0-sighting-editor" ? "" : ' src="sighting.json"'}&gt;&lt;/${tag}&gt;</code></pre>
+    <p>${fr
+      ? `Ou, après <code>npm install @rr0/ufoathome</code> : <code>import "@rr0/ufoathome/${this.doc.subpath}"</code>.
+         Le bundle pèse ${this.doc.size.fr} compressé et enregistre le tag lui-même — rien d'autre à appeler.
+         <a href="/docs/components/#integrer-dans-votre-application">Le hub</a> dit ce que cela suppose par ailleurs,
+         et <a href="/docs/share/">partager une observation</a> a l'exemple complet, à essayer et à copier.`
+      : `Or, after <code>npm install @rr0/ufoathome</code>: <code>import "@rr0/ufoathome/${this.doc.subpath}"</code>.
+         The bundle is ${this.doc.size.en} gzipped and registers the tag itself — nothing else to call.
+         <a href="/docs/components/#putting-one-in-your-application">The hub</a> says what else that involves, and
+         <a href="/docs/share/">sharing an observation</a> has the whole example, to try and to copy.`}</p>
+  </div>
+</section>
+`
   }
 }
 
@@ -52,6 +100,26 @@ export class DocsComponentPage extends DocsSection {
 export const COMPONENT_DOCS: ComponentDoc[] = [
   {
     slug: "docs/components/ufo",
+    subpath: "ufo",
+    size: { en: "16 KB", fr: "16 Ko" },
+    events: {
+      en: `<div class="table-scroll">
+    <table>
+      <tr><th>Event</th><th>Fires</th><th>Where to listen</th></tr>
+      <tr><td><code>ended</code></td><td>Once, when playback runs off the end without looping. Not on a pause, and not on a scrub to the end</td><td>Anywhere: it bubbles and is <i lang="en">composed</i>, so it crosses out of <code>&lt;rr0-scene&gt;</code> and <code>&lt;rr0-sighting&gt;</code> and reaches the element you put on the page. This is how you play several recordings in turn</td></tr>
+      <tr><td><code>timedisplaychange</code></td><td>When the counters switch between clock time and elapsed time</td><td>Anywhere, same as above</td></tr>
+      <tr><td><code>timeupdate</code></td><td>Every playback tick and every seek, with <code>detail.time</code></td><td>On this element only. It neither bubbles nor is composed, so a page holding an <code>&lt;rr0-scene&gt;</code> has to reach its <code>ufoElement</code> — it is meant for the elements composing this one</td></tr>
+    </table>
+    </div>`,
+      fr: `<div class="table-scroll">
+    <table>
+      <tr><th>Événement</th><th>Quand</th><th>Où l'écouter</th></tr>
+      <tr><td><code>ended</code></td><td>Une fois, quand la lecture atteint la fin sans boucler. Ni à la pause, ni à un déplacement manuel jusqu'à la fin</td><td>N'importe où : il est <i lang="en">bubbling</i> et <i lang="en">composed</i>, donc il sort de <code>&lt;rr0-scene&gt;</code> et de <code>&lt;rr0-sighting&gt;</code> et atteint l'élément que vous avez posé sur la page. C'est ainsi qu'on enchaîne plusieurs enregistrements</td></tr>
+      <tr><td><code>timedisplaychange</code></td><td>Quand les compteurs basculent entre heure et temps écoulé</td><td>N'importe où, comme ci-dessus</td></tr>
+      <tr><td><code>timeupdate</code></td><td>À chaque image de lecture et à chaque déplacement, avec <code>detail.time</code></td><td>Sur cet élément seulement. Il n'est ni <i lang="en">bubbling</i> ni <i lang="en">composed</i> : une page qui tient un <code>&lt;rr0-scene&gt;</code> doit passer par son <code>ufoElement</code> — il est destiné aux éléments qui composent celui-ci</td></tr>
+    </table>
+    </div>`
+    },
     tag: "rr0-ufo",
     lede: {
       en: "The shape, and playback",
@@ -124,6 +192,8 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
   },
   {
     slug: "docs/components/scene",
+    subpath: "scene",
+    size: { en: "238 KB", fr: "238 Ko" },
     tag: "rr0-scene",
     lede: {
       en: "The sky and the ground",
@@ -177,6 +247,8 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
   },
   {
     slug: "docs/components/sighting",
+    subpath: "sighting",
+    size: { en: "249 KB", fr: "249 Ko" },
     tag: "rr0-sighting",
     lede: {
       en: "The standard sighting view",
@@ -237,6 +309,22 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
   },
   {
     slug: "docs/components/editor",
+    subpath: "editor",
+    size: { en: "293 KB", fr: "293 Ko" },
+    events: {
+      en: `<div class="table-scroll">
+    <table>
+      <tr><th>Event</th><th>Fires</th><th>Where to listen</th></tr>
+      <tr><td><code>sightingchange</code></td><td>After an edit: a field written, an instrument chosen, a time zone derived, a shape moved along the timeline</td><td>On this element. It does not bubble, so listen on the <code>&lt;rr0-sighting-editor&gt;</code> itself — then read <code>sightingData</code> back off it</td></tr>
+    </table>
+    </div>`,
+      fr: `<div class="table-scroll">
+    <table>
+      <tr><th>Événement</th><th>Quand</th><th>Où l'écouter</th></tr>
+      <tr><td><code>sightingchange</code></td><td>Après une modification : un champ écrit, un instrument choisi, un fuseau dérivé, une forme déplacée sur la timeline</td><td>Sur cet élément. Il n'est pas <i lang="en">bubbling</i> : écoutez sur le <code>&lt;rr0-sighting-editor&gt;</code> lui-même, puis relisez son <code>sightingData</code></td></tr>
+    </table>
+    </div>`
+    },
     tag: "rr0-sighting-editor",
     lede: {
       en: "The editor",

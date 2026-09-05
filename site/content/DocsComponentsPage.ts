@@ -85,7 +85,7 @@ export class DocsComponentsPage extends DocsSection {
     </div>
     <p>Putting one on a page is <a href="/docs/share/">two lines</a>.</p>
 
-    <h2>One page each</h2>
+    <h2>Detailed documentation</h2>
     <p>What each takes, what it answers to, and what it draws — one page per component, because
       what you need from one of them is never what you need from the other three at the same
       moment.</p>
@@ -96,18 +96,7 @@ export class DocsComponentsPage extends DocsSection {
       <a class="use" href="/docs/components/editor/"><h3><code>&lt;rr0-sighting-editor&gt;</code></h3><p>The whole authoring toolbar, for describing an observation or correcting one.</p><p class="use-more">Read →</p></a>
     </div>
 
-    <h2>Events</h2>
-    <div class="table-scroll">
-    <table>
-      <tr><th>Event</th><th>Fires</th><th>Escapes the shadow root?</th></tr>
-      <tr><td><code>ended</code></td><td>Once, when playback runs off the end without looping. Not on a pause, and not on a scrub to the end</td><td><strong>Yes</strong> — bubbling and composed, so a page can listen on the outermost element. This is how you play several recordings in turn</td></tr>
-      <tr><td><code>timeupdate</code></td><td>Every playback tick and every seek, with <code>detail.time</code></td><td>No — it is meant for the composing elements</td></tr>
-      <tr><td><code>timedisplaychange</code></td><td>When the counters switch between clock time and elapsed time</td><td>Yes</td></tr>
-      <tr><td><code>sightingchange</code></td><td>After an edit in the editor</td><td>Yes</td></tr>
-    </table>
-    </div>
-
-    <h2>From a bundler, or from your own server</h2>
+    <h2>Putting one in your application</h2>
     <p>After <code>npm install @rr0/ufoathome</code>:</p>
     <pre><code>import "@rr0/ufoathome/ufo"        // registers &lt;rr0-ufo&gt;
 import "@rr0/ufoathome/scene"      // registers &lt;rr0-scene&gt;
@@ -189,7 +178,7 @@ import "@rr0/ufoathome/editor"   // registers &lt;rr0-sighting-editor&gt;</code>
     </div>
     <p>En poser un sur une page, c'est <a href="/docs/share/">deux lignes</a>.</p>
 
-    <h2>Une page chacun</h2>
+    <h2>Documentation détaillée</h2>
     <p>Ce que chacun prend, ce à quoi il répond, ce qu'il dessine — une page par composant, parce
       que ce dont vous avez besoin de l'un n'est jamais ce dont vous avez besoin des trois autres
       au même moment.</p>
@@ -200,18 +189,7 @@ import "@rr0/ufoathome/editor"   // registers &lt;rr0-sighting-editor&gt;</code>
       <a class="use" href="/docs/components/editor/"><h3><code>&lt;rr0-sighting-editor&gt;</code></h3><p>Toute la barre d'outils d'écriture, pour décrire une observation ou en corriger une.</p><p class="use-more">Lire →</p></a>
     </div>
 
-    <h2>Événements</h2>
-    <div class="table-scroll">
-    <table>
-      <tr><th>Événement</th><th>Quand</th><th>Sort-il du <i lang="en">shadow root</i> ?</th></tr>
-      <tr><td><code>ended</code></td><td>Une fois, quand la lecture atteint la fin sans boucler. Ni à la pause, ni à un déplacement manuel jusqu'à la fin</td><td><strong>Oui</strong> — <i lang="en">bubbling</i> et <i lang="en">composed</i>, une page peut donc l'écouter sur l'élément le plus extérieur. C'est ainsi qu'on enchaîne plusieurs enregistrements</td></tr>
-      <tr><td><code>timeupdate</code></td><td>À chaque image de lecture et à chaque déplacement, avec <code>detail.time</code></td><td>Non — il est destiné aux éléments composants</td></tr>
-      <tr><td><code>timedisplaychange</code></td><td>Quand les compteurs basculent entre heure et temps écoulé</td><td>Oui</td></tr>
-      <tr><td><code>sightingchange</code></td><td>Après une modification dans l'éditeur</td><td>Oui</td></tr>
-    </table>
-    </div>
-
-    <h2>Depuis un <i lang="en">bundler</i>, ou depuis votre serveur</h2>
+    <h2>Intégrer dans votre application</h2>
     <p>Après <code>npm install @rr0/ufoathome</code> :</p>
     <pre><code>import "@rr0/ufoathome/ufo"        // enregistre &lt;rr0-ufo&gt;
 import "@rr0/ufoathome/scene"      // enregistre &lt;rr0-scene&gt;
