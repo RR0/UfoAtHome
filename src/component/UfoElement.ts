@@ -9,6 +9,7 @@ import { CanvasRenderer } from "../render/CanvasRenderer.js"
 import { SightingAudio } from "../audio/SightingAudio.js"
 import { fromSightingJson, toSightingJson } from "../engine/persistence/sightingJson.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
+import { resolveMilestoneAt, sortedMilestones } from "../engine/model/Milestone.js"
 import type { Shape } from "../engine/shape/Shape.js"
 import type { SightingSound } from "../engine/model/Sound.js"
 import { ShapeHandles } from "../engine/shape/ShapeHandles.js"
@@ -57,6 +58,8 @@ export class UfoElement extends HTMLElement {
   private readonly loopButton: HTMLButtonElement
   private readonly fullscreenButton: HTMLButtonElement
   private readonly seekInput: HTMLInputElement
+  private readonly milestoneMarks: HTMLElement
+  private readonly milestoneCaption: HTMLElement
   private readonly timeStartLabel: HTMLElement
   private readonly timeEndLabel: HTMLElement
 
@@ -175,6 +178,8 @@ export class UfoElement extends HTMLElement {
     this.loopButton = this.shadow.getElementById("loop") as HTMLButtonElement
     this.fullscreenButton = this.shadow.getElementById("fullscreen") as HTMLButtonElement
     this.seekInput = this.shadow.getElementById("seek") as HTMLInputElement
+    this.milestoneMarks = this.shadow.getElementById("milestone-marks")!
+    this.milestoneCaption = this.shadow.getElementById("milestone-caption")!
     this.timeStartLabel = this.shadow.getElementById("time-start")!
     this.timeEndLabel = this.shadow.getElementById("time-end")!
     for (const label of [this.timeStartLabel, this.timeEndLabel]) {
@@ -508,7 +513,48 @@ export class UfoElement extends HTMLElement {
     // own labels reading the previous time until the whole recording was reloaded.
     this.updateTimeLabels()
     this.seekInput.max = String(this.player.seekableDuration)
+    this.refreshMilestoneMarks()
     this.player.seek(this.player.time)
+  }
+
+  /**
+   * Draws one mark per named moment on the seek bar, at its own position along the recording.
+   *
+   * Marks, not cuts: the recording plays straight through them (see Milestone). Each is a real
+   * button so it can be reached by keyboard and jumped to, and carries the account's own sentence
+   * as its accessible name — a bar of unlabelled ticks would say only that something happens here.
+   */
+  private refreshMilestoneMarks(): void {
+    const duration = this.player.seekableDuration
+    const milestones = duration > 0 ? sortedMilestones(this.sighting.milestones) : []
+    this.milestoneMarks.replaceChildren(
+      ...milestones.map(milestone => {
+        const mark = document.createElement("button")
+        mark.type = "button"
+        mark.className = "milestone-mark"
+        mark.style.left = `${Math.min(Math.max(milestone.t / duration, 0), 1) * 100}%`
+        const name = milestone.note ? `${milestone.label} — ${milestone.note}` : milestone.label
+        mark.title = name
+        mark.setAttribute("aria-label", name)
+        mark.addEventListener("click", () => this.player.seek(milestone.t))
+        return mark
+      })
+    )
+  }
+
+  /** Names the moment the recording is currently in — the last one reached, held until the next,
+   * which is how every other keyframed field in this model resolves (see resolveMilestoneAt). */
+  private showMilestoneAt(t: number): void {
+    const current = this.sighting.milestones.length > 0 ? resolveMilestoneAt(this.sighting.milestones, t) : undefined
+    this.milestoneCaption.hidden = current === undefined
+    if (!current) return
+    const label = document.createElement("b")
+    label.textContent = current.label
+    // A real separator in the DOM, not a CSS margin: the caption is read as text as often as it is
+    // looked at (a screen reader, a copied line), and "AZamora entend un rugissement" is not a
+    // sentence.
+    const note = current.note ? ` — ${current.note}` : ""
+    this.milestoneCaption.replaceChildren(label, document.createTextNode(note))
   }
 
   /**
@@ -694,6 +740,7 @@ export class UfoElement extends HTMLElement {
     }
     this.seekInput.value = String(t)
     this.timeStartLabel.textContent = this.formatPosition(t)
+    this.showMilestoneAt(t)
     // The track is heard only while actually playing: onFrame is also the seek sink, and a witness
     // dragging the bar through a keyframe shouldn't fire a burst of sound at every position they
     // pass through. A preview outlives repaints on purpose (see previewSound), and playing ends it

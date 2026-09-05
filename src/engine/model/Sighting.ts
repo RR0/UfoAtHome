@@ -9,6 +9,7 @@ import { DEFAULT_SOUND } from "./Sound.js"
 import type { SightingSound } from "./Sound.js"
 import type { People } from "./People.js"
 import type { DecorObject } from "./Decor.js"
+import type { Milestone } from "./Milestone.js"
 import { Instruments } from "../instrument/Instrument.js"
 import type { Instrument } from "../instrument/Instrument.js"
 
@@ -295,7 +296,11 @@ export class Sighting {
      * Absent falls back to the instrument's own (an Instamatic's ninetieth), and an eye has none at
      * all.
      */
-    public exposureSeconds?: number
+    public exposureSeconds?: number,
+    /** The named moments of the account — see Milestone. Not readonly, same "replaced wholesale on
+     * edit" reasoning as decor above. Empty for every recording that names none, which is most of
+     * them: a twenty-second close pass has nothing to bookmark. */
+    public milestones: Milestone[] = []
   ) {
   }
 

@@ -22,6 +22,23 @@ describe("sightingJson", () => {
     expect(restored.timeline.getShapeAt(0, "ufo-1")?.bounds).toEqual({ x: 10, y: 20, width: 40, height: 24 })
   })
 
+  it("round-trips the account's named moments, sorted, and writes nothing when there are none", () => {
+    const sighting = Sighting.create({ year: 1964 })
+    sighting.milestones = [
+      { t: 75000, label: "E", note: "Deux bruits sourds, puis un rugissement." },
+      { t: 0, label: "A", note: "Un rugissement et une flamme dans le ciel." }
+    ]
+
+    const json = toSightingJson(sighting)
+    expect(json.milestones).toHaveLength(2)
+    expect(fromSightingJson(json).milestones.map(milestone => milestone.label)).toEqual(["A", "E"])
+
+    // A recording that bookmarks nothing writes no field at all, rather than an empty array every
+    // reader would then have to know means the same thing.
+    expect(toSightingJson(Sighting.create({ year: 1964 })).milestones).toBeUndefined()
+    expect(fromSightingJson({ version: 1, timeline: { keyframes: [] } }).milestones).toEqual([])
+  })
+
   it("round-trips the shutter as one setting for the whole observation", () => {
     const sighting = Sighting.create({ year: 1975 })
     sighting.instrumentId = "slr-35mm-50"

@@ -11,6 +11,8 @@ import type { SoundTrackJson } from "../model/SoundTrack.js"
 import type { Weather, WeatherSource } from "../model/Weather.js"
 import type { People } from "../model/People.js"
 import type { DecorObject } from "../model/Decor.js"
+import type { Milestone } from "../model/Milestone.js"
+import { sortedMilestones } from "../model/Milestone.js"
 import { SightingShapes } from "./SightingShapes.js"
 
 /**
@@ -68,6 +70,9 @@ export interface SightingRecordingJson {
    * Sighting.exposureSeconds. Absent means the device's own. Recordings written while this lived on
    * each pose are read back through the first pose that stated one (see fromSightingJson). */
   exposureSeconds?: number
+  /** The named moments of the account — see Milestone. Absent/omitted means none, which is what
+   * every recording made before this field existed says. */
+  milestones?: Milestone[]
 }
 
 export function toSightingJson(sighting: Sighting): SightingRecordingJson {
@@ -94,6 +99,7 @@ export function toSightingJson(sighting: Sighting): SightingRecordingJson {
     soundTrack: sighting.soundTrack.toJSON(),
     weather: sighting.weather,
     decor: sighting.decor,
+    milestones: sighting.milestones.length > 0 ? sighting.milestones : undefined,
     weatherSource: sighting.weatherSource,
     instrument: sighting.instrumentId,
     exposureSeconds: sighting.exposureSeconds
@@ -132,7 +138,8 @@ export function fromSightingJson(json: SightingRecordingJson): Sighting {
         // Cast because ObserverPose no longer HAS the field: this reads what an older file wrote,
         // not what the model holds.
         .map(keyframe => (keyframe.pose as { exposureSeconds?: number }).exposureSeconds)
-        .find(seconds => seconds !== undefined)
+        .find(seconds => seconds !== undefined),
+    sortedMilestones(json.milestones ?? [])
   )
   // The file states an angle; the drawing has to follow it. Done here rather than in
   // Timeline.fromJSON because the projection needs the pose's own field of view, which lives on

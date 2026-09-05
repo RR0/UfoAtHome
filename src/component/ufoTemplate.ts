@@ -5,10 +5,20 @@ export const html = `
   </div>
   <div id="tooltip" class="tooltip" hidden></div>
   <button id="fullscreen" class="fullscreen-btn" type="button" title="Fullscreen" aria-label="Fullscreen">⛶</button>
+  <!-- What the account calls the moment now on screen (see Milestone) — above the controls rather
+       than inside them, because it is a sentence and the toolbar is a row of buttons. Empty and
+       hidden for the recordings that name no moment, which is most of them. -->
+  <div id="milestone-caption" class="milestone-caption" hidden></div>
   <div class="toolbar" id="toolbar">
     <button id="play-pause" type="button" title="Play" aria-label="Play">▶</button>
     <span id="time-start" class="time-label" title="Current position">0:00</span>
-    <input id="seek" type="range" min="0" max="0" value="0" step="1"/>
+    <!-- The bar and the marks over it share one box so a mark can be placed by percentage of the
+         track. The input keeps its own full width inside it; the marks sit on top and only the
+         marks themselves take a click. -->
+    <div id="seek-track" class="seek-track">
+      <input id="seek" type="range" min="0" max="0" value="0" step="1"/>
+      <div id="milestone-marks" class="milestone-marks"></div>
+    </div>
     <span id="time-end" class="time-label" title="Duration">0:00</span>
     <button id="loop" type="button" title="Auto-replay" aria-label="Auto-replay" aria-pressed="true">↻</button>
   </div>
@@ -159,6 +169,78 @@ canvas[data-cursor="rotate"] {
    bottom edge, blocking shape drag/resize there. */
 .toolbar.hidden {
   display: none;
+}
+/* Takes the width the bare <input id="seek"> used to take, so nothing else in the row moves. */
+.seek-track {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+.seek-track #seek {
+  flex: 1;
+  min-width: 0;
+}
+/* Over the bar, and transparent to the pointer except on a mark itself — dragging the bar between
+   two moments has to keep working. */
+.milestone-marks {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+.milestone-mark {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 10px;
+  padding: 0;
+  transform: translateX(-50%);
+  border: none;
+  background: none;
+  cursor: pointer;
+  pointer-events: auto;
+  color: inherit;
+  font: inherit;
+  line-height: 0;
+}
+/* The mark itself is the thin line inside that hit area: a 2 px tick is impossible to hit with a
+   finger, and a 10 px tick would hide the bar under it. */
+.milestone-mark::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 15%;
+  bottom: 15%;
+  width: 2px;
+  transform: translateX(-50%);
+  background: #fff;
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.8);
+}
+.milestone-mark:hover::before, .milestone-mark:focus-visible::before {
+  width: 4px;
+}
+.milestone-caption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 2.6em;
+  padding: 0 0.8em;
+  color: #fff;
+  font-size: 0.85em;
+  text-align: center;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+  pointer-events: none;
+}
+/* Same trap as .toolbar.hidden above and .context-menu[hidden] in the editor: a class that sets
+   its own display outranks the UA sheet's [hidden]. */
+.milestone-caption[hidden] {
+  display: none;
+}
+.milestone-caption b {
+  font-weight: 700;
 }
 .stage:hover .auto-hide {
   opacity: 1;
