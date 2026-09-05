@@ -427,6 +427,11 @@ const PRECIPITATION_RESPAWN_Y_MIN = 0
  * object floats visibly above the ground with its own cast shadow (correctly projected onto the
  * real ground plane) reading as detached from its base. */
 const DECOR_GROUND_Y = 0
+/** Where groundYUnder's downward probe starts: above anything the terrain patch can hold (its own
+ * relief is tens of meters, hundreds at most) and low enough that the ray stays short. */
+const DECOR_GROUND_PROBE_HEIGHT_M = 5000
+/** Straight down, shared by every ground probe — a Vector3 constant, never mutated. */
+const DOWN = new Vector3(0, -1, 0)
 /** RainSystem tuning — see RainSystem.ts's own doc comment for why rain gets a completely separate,
  * much tighter volume than the old shared 150m-radius CPU pool: a small, camera-hugging volume is
  * what actually reads as a dense downpour (parallax — see PrecipitationTypeConfig.radiusM's own
@@ -711,6 +716,12 @@ export class SceneRenderer {
    * per-tick allocation, unlike weatherEquals' field-by-field compare). */
   private decorObjects: DecorObject[] = []
   private readonly decorGroups = new Map<string, Group>()
+  /** Ground height under each decor object, and what it was sampled against — see groundYUnder. */
+  private readonly decorGroundY = new Map<string, { x: number; z: number; mesh: Mesh; y: number }>()
+  /** Its own raycaster, for the same reason every other purpose here has one: a shared one would
+   * carry another purpose's near/far and layer settings. */
+  private readonly decorGroundRaycaster = new Raycaster()
+  private readonly decorGroundOriginScratch = new Vector3()
   /** The real shadow-casting light standing in for whichever of the Sun/Moon is actually up (see
    * updateCelestialLight) — only one at a time, matching how real moonlight is only ever visible
    * when the (far brighter) Sun isn't: no real scene needs both casting shadows simultaneously.
@@ -1397,7 +1408,9 @@ export class SceneRenderer {
       const anchorZ = -inhabited.northM + offset.z
       shift.x = -(anchorX + worldDx)
       shift.z = -(anchorZ + worldDz)
-      this.camera.position.y = view.eyeY
+      // Above the ground the object itself stands on, not above the observer's own — see
+      // groundYUnder. A witness sitting in a car parked on a rise looks out from that rise.
+      this.camera.position.y = this.groundYUnder(inhabited.id, anchorX, anchorZ) + view.eyeY
       this.camera.rotation.set(this.indoorLookPitchDeg * DEG_TO_RAD, -(view.headingDeg + this.indoorLookYawDeg) * DEG_TO_RAD, 0, "YXZ")
     }
     for (const object of this.decorObjects) {
@@ -1408,11 +1421,9 @@ export class SceneRenderer {
       // resolveDecorPlacementAt). Altitude joins the two horizontal axes here — it is the one thing
       // ground-bound scenery never needed and a flying object cannot do without.
       const placement = resolveDecorPlacementAt(object, t)
-      group.position.set(
-        placement.eastM + offset.x + shift.x,
-        DECOR_GROUND_Y + placement.altitudeM,
-        -placement.northM + offset.z + shift.z
-      )
+      const x = placement.eastM + offset.x + shift.x
+      const z = -placement.northM + offset.z + shift.z
+      group.position.set(x, this.groundYUnder(object.id, x, z) + placement.altitudeM, z)
       if (placement.headingDeg !== undefined) group.rotation.y = -placement.headingDeg * DEG_TO_RAD
       furthestDecorM = Math.max(furthestDecorM, group.position.distanceTo(this.camera.position))
     }
@@ -1425,6 +1436,39 @@ export class SceneRenderer {
       this.camera.far = needed
       this.camera.updateProjectionMatrix()
     }
+  }
+
+  /**
+   * The height of the real ground under a decor object, so it stands ON the terrain rather than on
+   * the flat plane the observer happens to be standing on.
+   *
+   * DECOR_GROUND_Y (0) is the observer's OWN ground level, and it was enough for as long as the
+   * only ground was a flat disc. It stopped being enough the moment a recording sat on real relief:
+   * at Socorro, once the case was placed on the mesa where its own sketch puts it rather than on
+   * the flat a kilometre and a half north, the ground under the dynamite shack a hundred meters out
+   * is 2.7 m higher than under the witness — and a 2.2 m shack pinned to y=0 was entirely
+   * underground. Nothing about that is visible as a bug; the object is simply not there.
+   *
+   * Sampled by raycasting the patch itself rather than re-reading the elevation source: the patch is
+   * what is actually DRAWN, so an object placed against it can never sit at a height the viewer
+   * cannot see. Cached per object and re-sampled only when it moves or the patch is rebuilt —
+   * updateDecorAnchoring runs every frame, and a raycast against eight thousand triangles does not.
+   *
+   * Falls back to 0 with no patch (a build still in flight, a failed fetch), which is exactly where
+   * decor stood before this existed.
+   */
+  private groundYUnder(id: string, x: number, z: number): number {
+    const mesh = this.terrainMesh
+    if (!mesh) return DECOR_GROUND_Y
+    const cached = this.decorGroundY.get(id)
+    if (cached && cached.mesh === mesh && Math.abs(cached.x - x) < 0.5 && Math.abs(cached.z - z) < 0.5) return cached.y
+    // From well above the highest ground the patch can hold, straight down. `far` bounds the ray so
+    // a miss (an object beyond the patch's own edge) costs nothing.
+    this.decorGroundRaycaster.set(this.decorGroundOriginScratch.set(x, DECOR_GROUND_PROBE_HEIGHT_M, z), DOWN)
+    const hit = this.decorGroundRaycaster.intersectObject(mesh, true)[0]
+    const y = hit ? hit.point.y : DECOR_GROUND_Y
+    this.decorGroundY.set(id, { x, z, mesh, y })
+    return y
   }
 
   /** How far the witness has turned their head away from "straight out through the chosen
