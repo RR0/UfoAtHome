@@ -40,6 +40,33 @@ export class DocsCreatePage extends DocsSection {
     return this.hero(language, this.meta.title, this.lede) + (language === "fr" ? this.fr() : this.en())
   }
 
+  /**
+   * Turns the quoted example into something to type in.
+   *
+   * A format is learnt by trying it, not by reading a listing of it — and the editor already knows
+   * every key this file could have, because its completion is generated from the same types the
+   * table above describes. So the reader can take the smallest working recording and see what else
+   * would fit in it, right where they are reading about it.
+   *
+   * Nothing here plays: this page is about the file. The <pre> stays until CodeMirror arrives and
+   * stays for good if it never does, so a reader without it still has the example.
+   */
+  script(): string {
+    return `const source = document.getElementById("example-source")
+const mount = document.getElementById("example-editor")
+if (source && mount) {
+  void (async () => {
+    try {
+      const { JsonEditor } = await import("/lib/site-json-editor.mjs")
+      new JsonEditor(mount, source.textContent.trimEnd())
+      source.hidden = true
+    } catch {
+      /* No editor, then. The listing is still there and still says the same thing. */
+    }
+  })()
+}`
+  }
+
   /** The example is quoted inside a `<pre>`, so its angle brackets and ampersands have to stop
    * being markup. */
   private escape(text: string): string {
@@ -137,7 +164,11 @@ export class DocsCreatePage extends DocsSection {
     <p>The smallest recording that still states something — one silent oval crossing the sky over
       twelve seconds, on a real date at a real place. Everything else in the format is optional, and
       everything below is doing work:</p>
-    <pre><code>${this.escape(this.example)}</code></pre>
+    <pre id="example-source"><code>${this.escape(this.example)}</code></pre>
+    <div id="example-editor" class="code-view"></div>
+    <p class="small">Yours to type in: it completes on every key the format has, offers the words
+      each one accepts, and says what the model says about it. Nothing here is saved or played —
+      when you want to see one run, <a href="/player/">the player</a> takes a file.</p>
     <p>It is <a href="/demo-data/example-minimal.json"><code>/demo-data/example-minimal.json</code></a>
       on this site, so you can fetch it, and
       <a href="/player/?sighting=/demo-data/example-minimal.json">play it</a> before changing
@@ -276,7 +307,11 @@ export class DocsCreatePage extends DocsSection {
     <p>Le plus petit enregistrement qui énonce encore quelque chose — un ovale silencieux traversant
       le ciel en douze secondes, à une date réelle et en un lieu réel. Tout le reste du format est
       facultatif, et tout ce qui suit sert à quelque chose :</p>
-    <pre><code>${this.escape(this.example)}</code></pre>
+    <pre id="example-source"><code>${this.escape(this.example)}</code></pre>
+    <div id="example-editor" class="code-view"></div>
+    <p class="small">À vous d'y taper : il complète sur chaque clé du format, propose les mots que
+      chacune accepte, et dit ce que le modèle en dit. Rien n'est enregistré ni joué ici — pour en
+      voir une tourner, <a href="/player/">le lecteur</a> prend un fichier.</p>
     <p>C'est <a href="/demo-data/example-minimal.json"><code>/demo-data/example-minimal.json</code></a>
       sur ce site : vous pouvez le récupérer, et
       <a href="/player/?sighting=/demo-data/example-minimal.json">le jouer</a> avant d'y toucher.
