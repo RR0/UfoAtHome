@@ -163,6 +163,14 @@ main { display: block; }
 .wrap { max-width: var(--wide); margin: 0 auto; padding: 0 clamp(1rem, 4vw, 2.5rem); }
 .prose { max-width: var(--prose); }
 .prose-wide { max-width: 52rem; }
+/* On a section's own wrap, the measure is narrowed WITHOUT narrowing the column. The rule above
+   left it centring inside the viewport — .wrap keeps margin:0 auto — so a prose section began 8rem
+   to the right of every plain one on the same page, its heading visibly indented from the page's
+   own title. Constraining the children instead leaves the column where every other section's is,
+   and lines all the headings up. Kept as-is anywhere else (a lede, a paragraph): those have no
+   block children to constrain, and were never a column to begin with. */
+.wrap.prose-wide { max-width: var(--wide); }
+.wrap.prose-wide > * { max-width: 52rem; }
 section.band { padding: 2rem 0; border-top: 1px solid var(--line); }
 section.band:first-of-type { border-top: 0; }
 
