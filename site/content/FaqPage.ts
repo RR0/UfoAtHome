@@ -34,15 +34,11 @@ export class FaqPage implements SitePage {
     <h2>Who made it, and what it allows</h2>
 
     <div class="faq-item">
-      <h3>Who is behind UFO@home?</h3>
-      <p>It is developed and maintained by <a href="https://rr0.org">RR0</a>, a French encyclopaedia
-        of unexplained phenomena, which uses it for its own case files.</p>
-      <p>It does not need RR0 to run. The components are published on npm as
-        <code>@rr0/ufoathome</code> and served from this domain; install them or copy the built
-        <code>.mjs</code> files onto your own server, and they work with no runtime dependency on
-        rr0.org. Recordings are your own files, on your own host.</p>
-      <p>A reconstruction asserts what its recording states and nothing more — no conclusion, no
-        branding, and no case number other than one you put there yourself.</p>
+      <h3>Who wrote UFO@home?</h3>
+      <p>It is developed by <a href="https://github.com/RR0">RR0</a>, which among other things
+        built <a href="https://rr0.org">rr0.org</a>, a French encyclopaedia of unexplained
+        phenomena. That site uses UFO@home to illustrate its own case files — and RR0 has taken care
+        to keep the tool usable by anybody.</p>
     </div>
 
     <div class="faq-item">
@@ -88,7 +84,13 @@ export class FaqPage implements SitePage {
 
     <div class="faq-item">
       <h3>Can I host it entirely myself, with no external service?</h3>
-      <p>Yes. Copy the <code>.mjs</code> bundles onto your server and the reconstructions will play.
+      <p>Yes, and nothing about it depends on RR0. The components are published on npm as
+        <code>@rr0/ufoathome</code> and served from this domain; install them or copy the built
+        <code>.mjs</code> bundles onto your own server and the reconstructions will play, with no
+        runtime dependency on rr0.org. Recordings are your own files, on your own host, and a
+        reconstruction asserts what its recording states and nothing more — no conclusion, no
+        branding, no case number other than one you put there yourself.</p>
+      <p>Copy the <code>.mjs</code> bundles onto your server and the reconstructions will play.
         Skip the terrain and imagery providers (or point them at your own tile server) and the scene
         falls back to a plain horizon. The lookups exist for <em>authoring</em>; playback of a
         finished recording does not need them.</p>
@@ -99,7 +101,8 @@ export class FaqPage implements SitePage {
     <div class="faq-item">
       <h3>Why build this at all?</h3>
       <p>Because a testimony written down loses almost everything about it. In 1968, at the AAAS
-        symposium, the psychologist Roger Shepard argued that a visual reconstruction of a testimony
+        symposium, the psychologist <a href="https://rr0.org/people/s/ShepardRogerN/">Roger Shepard</a> argued, in
+        <a href="https://rr0.org/time/1/9/6/8/07/29/Symposium/Shepard/index.html">the paper he gave there</a>, that a visual reconstruction of a testimony
         is more faithful than a written or spoken one — witnesses are much better at recognising and
         adjusting a picture than at generating a description. UFO@home is that idea, built as
         software: draw it, move it, and let the witness correct it until it matches.</p>
@@ -119,9 +122,16 @@ export class FaqPage implements SitePage {
         what reached my eye, this big, moving this way. Everything else stays open — which is the
         only way a reconstruction can be used to <em>test</em> a misperception rather than to rule
         one out by construction.</p>
-      <p>It also means the tool is honest about size. A recording stores an angle, never metres.
-        Metres come back only as an inequality, and only where the object crossed something whose
-        position is known.</p>
+      <p>It also means the tool is honest about size. A recording stores an angle, never metres —
+        but it does NOT mean distance is given up on. Where the witness saw the object cross
+        something whose position is known, that crossing is stated in the recording (it passed
+        <em>behind</em> that hangar, <em>in front of</em> that tree) and the scene raycasts the exact
+        line of sight to measure it. Each crossing bounds the object's real width from one side, an
+        angle plus a distance is a size, and a size does not change as the object flies — so every
+        other instant of the recording reads back as a distance too. The editor prints the range
+        under the apparent size, reports a contradiction where the stated crossings cannot all be
+        true, and says “unknown” where nothing crosses the line of sight at all, which is the honest
+        answer for a light in an empty sky.</p>
     </div>
 
     <div class="faq-item">
@@ -256,16 +266,11 @@ export class FaqPage implements SitePage {
     <h2>Qui l'a fait, et ce qu'il autorise</h2>
 
     <div class="faq-item">
-      <h3>Qui est derrière UFO@home ?</h3>
-      <p>Il est développé et maintenu par <a href="https://rr0.org">RR0</a>, une encyclopédie
-        française des phénomènes inexpliqués, qui s'en sert pour ses propres dossiers.</p>
-      <p>Il n'a pas besoin de RR0 pour fonctionner. Les composants sont publiés sur npm sous le nom
-        <code>@rr0/ufoathome</code> et servis depuis ce domaine ; installez-les ou recopiez les
-        fichiers <code>.mjs</code> construits sur votre serveur, et ils marchent sans aucune
-        dépendance d'exécution à rr0.org. Les enregistrements sont vos fichiers, sur votre
-        hébergement.</p>
-      <p>Une reconstitution affirme ce que son enregistrement énonce, et rien de plus : aucune
-        conclusion, aucune marque, et aucun numéro de dossier autre que celui que vous y mettez.</p>
+      <h3>Qui est l'auteur de UFO@home ?</h3>
+      <p>Le projet est développé par l'organisation <a href="https://github.com/RR0">RR0</a>, qui a
+        notamment développé <a href="https://rr0.org">rr0.org</a>, une encyclopédie française des
+        phénomènes inexpliqués. Ce site utilise UFO@home pour illustrer ses propres dossiers, mais
+        RR0 a pris soin de garder l'outil utilisable par quiconque.</p>
     </div>
 
     <div class="faq-item">
@@ -314,7 +319,14 @@ export class FaqPage implements SitePage {
 
     <div class="faq-item">
       <h3>Puis-je l'héberger entièrement moi-même, sans service externe ?</h3>
-      <p>Oui. Recopiez les <i lang="en">bundles</i> <code>.mjs</code> sur votre serveur et les
+      <p>Oui, et rien là-dedans ne dépend de RR0. Les composants sont publiés sur npm sous le nom
+        <code>@rr0/ufoathome</code> et servis depuis ce domaine ; installez-les ou recopiez les
+        <i lang="en">bundles</i> <code>.mjs</code> construits sur votre serveur, et les
+        reconstitutions se joueront sans aucune dépendance d'exécution à rr0.org. Les
+        enregistrements sont vos fichiers, sur votre hébergement, et une reconstitution affirme ce
+        que son enregistrement énonce, et rien de plus : aucune conclusion, aucune marque, aucun
+        numéro de dossier autre que celui que vous y mettez.</p>
+      <p>Recopiez les <i lang="en">bundles</i> <code>.mjs</code> sur votre serveur et les
         reconstitutions se joueront. Sans fournisseur de relief ni d'imagerie (ou en les pointant
         vers votre propre serveur de tuiles), la scène retombe sur un horizon nu. Les consultations
         existent pour la <em>saisie</em> ; la lecture d'un enregistrement terminé n'en a pas
@@ -326,11 +338,12 @@ export class FaqPage implements SitePage {
     <div class="faq-item">
       <h3>Pourquoi construire ça ?</h3>
       <p>Parce qu'un témoignage mis par écrit en perd presque tout. En 1968, au symposium de l'AAAS,
-        le psychologue Roger Shepard a soutenu qu'une reconstitution visuelle d'un témoignage est
-        plus fidèle qu'une reconstitution écrite ou orale : un témoin est bien meilleur pour
-        reconnaître et corriger une image que pour engendrer une description. UFO@home, c'est cette
-        idée mise en logiciel : dessinez, faites bouger, et laissez le témoin corriger jusqu'à ce
-        que ça corresponde.</p>
+        le psychologue <a href="https://rr0.org/people/s/ShepardRogerN/">Roger Shepard</a> a soutenu, dans
+        <a href="https://rr0.org/time/1/9/6/8/07/29/Symposium/Shepard/index_fr.html">la communication qu'il y a donnée</a>, qu'une reconstitution visuelle
+        d'un témoignage est plus fidèle qu'une reconstitution écrite ou orale : un témoin est bien
+        meilleur pour reconnaître et corriger une image que pour engendrer une description.
+        UFO@home, c'est cette idée mise en logiciel : dessinez, faites bouger, et laissez le témoin
+        corriger jusqu'à ce que ça corresponde.</p>
       <p>Le projet est né en 2003 sous forme d'applet Java. Il a été réécrit intégralement en
         TypeScript en 2026, en composants web, parce que l'applet était devenue inexécutable et
         parce que la moitié manquante avait toujours été le ciel : une reconstitution sans le ciel
@@ -348,9 +361,17 @@ export class FaqPage implements SitePage {
         voilà ce qui est parvenu à mon œil, de cette taille, se déplaçant ainsi. Tout le reste reste
         ouvert — c'est la seule façon qu'une reconstitution ait de <em>tester</em> une méprise au
         lieu de l'exclure par construction.</p>
-      <p>Cela rend aussi l'outil honnête sur la taille. Un enregistrement stocke un angle, jamais des
-        mètres. Les mètres ne reviennent que sous forme d'inégalité, et seulement là où l'objet a
-        croisé quelque chose dont la position est connue.</p>
+      <p>Cela rend aussi l'outil honnête sur la taille. Un enregistrement stocke un angle, jamais
+        des mètres — mais on ne renonce pas pour autant à la distance. Là où le témoin a vu l'objet
+        croiser quelque chose dont la position est connue, ce croisement est énoncé dans
+        l'enregistrement (il est passé <em>derrière</em> ce hangar, <em>devant</em> cet arbre) et la
+        scène lance un rayon sur la ligne de visée exacte pour le mesurer. Chaque croisement borne
+        d'un côté la largeur réelle de l'objet ; or un angle plus une distance font une taille, et
+        une taille ne change pas pendant que l'objet vole — chaque autre instant de l'enregistrement
+        se relit donc en distance. L'éditeur imprime la plage sous la taille apparente, signale une
+        contradiction quand les croisements énoncés ne peuvent pas tous être vrais, et dit
+        « inconnue » quand rien ne croise la ligne de visée — la réponse honnête pour une lumière
+        dans un ciel vide.</p>
     </div>
 
     <div class="faq-item">

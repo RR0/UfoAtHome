@@ -15,7 +15,7 @@ export const html = `
   <button class="group-tab" type="button" aria-controls="group-temporal" aria-expanded="false"><span id="label-temporal-group">Moment</span></button>
   <button class="group-tab" type="button" aria-controls="group-weather" aria-expanded="false"><span id="label-weather-group">Weather</span></button>
   <button class="group-tab" type="button" aria-controls="group-sound" aria-expanded="false"><span id="label-sound-group">Sound</span></button>
-  <button class="group-tab" type="button" aria-controls="group-shape" aria-expanded="false"><span id="label-shape-group">Shape</span></button>
+  <button class="group-tab" type="button" aria-controls="group-shape" aria-expanded="false"><span id="label-shape-group">Phenomenon</span></button>
 </div>
 <section class="group-panel" id="group-observation" aria-labelledby="label-observation-group" hidden>
   <div class="toolbar">

@@ -172,6 +172,15 @@ export interface UfoRecorderMessages extends SightingLabels {
   description: string
   tagsPlaceholder: string
   weather: string
+  /**
+   * The group holding what was actually seen.
+   *
+   * "Phenomenon", not "Shape": a shape is one of the things stated in here, beside the colour, the
+   * halo, the brilliance, the blur, the apparent size and the sound of it — and the group can hold
+   * several shapes at once, a craft and its trailing flame being two. Naming the whole after one of
+   * its fields said the group was about drawing, when what it is about is the thing the witness
+   * saw. The word inside it stays "shape", because that is what a drawn outline is.
+   */
   shapeGroup: string
   /** Summary of the group holding what the sighting sounded like — see SoundTrack.ts. */
   soundGroup: string

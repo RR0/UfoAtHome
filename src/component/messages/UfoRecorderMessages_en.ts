@@ -87,7 +87,7 @@ export const ufoRecorderMessages_en: UfoRecorderMessages = {
   description: "Description",
   tagsPlaceholder: "comma-separated",
   weather: "Weather",
-  shapeGroup: "Shape",
+  shapeGroup: "Phenomenon",
   soundGroup: "Sound",
   temporalGroup: "Moment",
   timeQualifierExact: "Exact",

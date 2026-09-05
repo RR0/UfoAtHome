@@ -87,7 +87,7 @@ if (editor && requested) {
       </li>
       <li>
         <h3>Draw it</h3>
-        <p>Open the <strong>Shape</strong> group. Pick <em>Oval</em> or <em>Polygon</em>, set its
+        <p>Open the <strong>Phenomenon</strong> group. Pick <em>Oval</em> or <em>Polygon</em>, set its
           colour, its transparency, its halo, how dazzling it was and how blurred its edges looked.
           Drag its handles on the canvas to size it; a polygon's vertices can be added, moved and
           deleted individually.</p>
@@ -222,7 +222,7 @@ if (editor && requested) {
     </div>
 
     <div class="faq-item">
-      <h3>Shape</h3>
+      <h3>Phenomenon</h3>
       <p>The object itself. Oval or polygon, colour, transparency, halo, <strong>brilliance</strong>
         (how dazzling it was — a light you cannot look at washes out the field around it, throws the
         spikes its aperture makes, and clips to white, which no halo does) and <strong>blur</strong>
@@ -345,7 +345,7 @@ if (editor && requested) {
       </li>
       <li>
         <h3>Dessiner</h3>
-        <p>Ouvrez le groupe <strong>Forme</strong>. Choisissez <em>Ovale</em> ou <em>Polygone</em>,
+        <p>Ouvrez le groupe <strong>Phénomène</strong>. Choisissez <em>Ovale</em> ou <em>Polygone</em>,
           réglez couleur, transparence, halo, éclat et flou des contours. Les poignées sur le canevas
           en donnent la taille ; les sommets d'un polygone s'ajoutent, se déplacent et se
           suppriment un par un.</p>
@@ -493,7 +493,7 @@ if (editor && requested) {
     </div>
 
     <div class="faq-item">
-      <h3>Forme</h3>
+      <h3>Phénomène</h3>
       <p>L'objet lui-même. Ovale ou polygone, couleur, transparence, halo, <strong>éclat</strong>
         (à quel point il éblouissait — une lumière qu'on ne peut pas regarder délave le champ autour
         d'elle, projette les aigrettes du diaphragme et sature au blanc, ce qu'aucun halo ne fait)
