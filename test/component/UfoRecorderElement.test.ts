@@ -4283,7 +4283,10 @@ describe("UfoRecorderElement inferred weather", () => {
   // sighting's loudness came out of an archive, which is a statement about provenance, the one
   // thing here that must not be guessed.
   it("marks the summary chips a record owns, and leaves the author's own values unmarked", async () => {
-    const element = mount(recordProvider())
+    // A record that saw ice cloud, because the alignment below only means something under one:
+    // with no high deck the summary drops that chip entirely, and there is nothing left to ask
+    // about its provenance (see SightingSummary's second rule).
+    const element = mount(recordProvider({ ...ON_RECORD, highCloudCover: 0.4 }))
     stateDateAndPlace(element)
     await waitFor(() => sourceLink(element).hidden === false, 2000)
 

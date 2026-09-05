@@ -61,6 +61,23 @@ export interface SummaryContext {
  *
  * Only what is actually set appears (28 entries of a possible ~55 on a real case), so the list
  * reads as a statement about this sighting rather than as a second rendering of the form.
+ *
+ * "Actually set" means APPARENT, which is stricter than "present in the file", and the difference
+ * is the whole reason this list is readable at all. Two rules decide it, and every `add*` below
+ * obeys them rather than deciding case by case:
+ *
+ * 1. A quantity whose zero means ABSENCE goes away at zero — cloud cover, wind speed, blur, halo,
+ *    volume. "Couverture nuageuse 0 %" is not a fact about a sighting, it is an untouched default
+ *    wearing the clothes of one, and a strip of them buries the handful of chips that do say
+ *    something. Rounded first (see `shows`): what the reader sees is the chip, so a cover of
+ *    0.004 is a zero here.
+ * 2. A quantity that only QUALIFIES another goes away with it — the wind's bearing without wind,
+ *    a cloud base with no cloud, a rain's intensity without rain. This is not rule 1 applied
+ *    twice: 0° with a wind blowing is a real direction and stays, exactly as UTC+0 and a heading
+ *    of 0° stay. What removes it is the absence of the thing it qualifies, never its own value.
+ *
+ * Neither rule touches a coordinate or a bearing, where zero is a genuine value and not a gap:
+ * latitude, heading, pitch, a decor object's distance east, the UTC offset.
  */
 export class SightingSummary {
   /** `language` is needed for the catalogue entries alone — an instrument's name is data, and data
@@ -119,6 +136,32 @@ export class SightingSummary {
     return value === undefined ? undefined : String(Number(value.toFixed(decimals)))
   }
 
+  /**
+   * True when a quantity survives the rounding its own chip would apply — the test for "there is
+   * something there", as against "the field exists and holds zero".
+   *
+   * Rounded, and not compared to zero raw, because the chip is what the reader has: a cover of
+   * 0.004 prints as "0 %", and a chip stating a nothing is worse than no chip, since it reads as
+   * a fact about the sighting rather than as an untouched default.
+   */
+  private shows(value: number | undefined, decimals = 0): boolean {
+    return value !== undefined && Number(value.toFixed(decimals)) !== 0
+  }
+
+  private showsPercent(value: number | undefined): boolean {
+    return this.shows(value === undefined ? undefined : value * 100)
+  }
+
+  /** The proportion, but only while there is one to see — see `shows`. */
+  private percentShown(value: number | undefined): string | undefined {
+    return this.showsPercent(value) ? this.percent(value) : undefined
+  }
+
+  /** The number, but only while it isn't a rounded zero — see `shows`. */
+  private roundedShown(value: number | undefined, decimals = 0): string | undefined {
+    return this.shows(value, decimals) ? this.rounded(value, decimals) : undefined
+  }
+
   private addObservation(entries: SummaryEntry[], sighting: Sighting): void {
     this.push(entries, "observation", "caseId", this.labels.caseId, sighting.caseId)
     // The description is deliberately not an entry: it is prose, sometimes a paragraph of it, and
@@ -159,8 +202,7 @@ export class SightingSummary {
       this.push(entries, "witness", "focusDistance", this.labels.focusDistance, this.rounded(pose.focusDistanceM, 1), "m")
       // With the instrument, not with the place: it says how the device was held, not where the
       // witness stood. Absent or zero is one held upright, which states nothing worth a chip.
-      this.push(entries, "witness", "roll", this.labels.roll,
-        pose.rollDeg === undefined || pose.rollDeg === 0 ? undefined : this.rounded(pose.rollDeg), "°")
+      this.push(entries, "witness", "roll", this.labels.roll, this.roundedShown(pose.rollDeg), "°")
     }
   }
 
@@ -180,8 +222,7 @@ export class SightingSummary {
     // thing that can be said is the height above the ground the pose actually holds — and zero of
     // that states nothing at all, since standing on the ground is what everyone does.
     if (groundElevationM === undefined) {
-      this.push(entries, "location", "elevation", this.labels.heightAboveGround,
-        pose.elevationM === 0 ? undefined : this.rounded(pose.elevationM), "m")
+      this.push(entries, "location", "elevation", this.labels.heightAboveGround, this.roundedShown(pose.elevationM), "m")
     } else {
       this.push(entries, "location", "elevation", this.labels.elevation, this.rounded(groundElevationM + pose.elevationM), "m")
     }
@@ -208,7 +249,9 @@ export class SightingSummary {
     const placement = resolveDecorPlacementAt(selected, timeMs)
     this.push(entries, "decor", "decorEast", this.labels.decorEast, this.rounded(placement.eastM, 1), "m")
     this.push(entries, "decor", "decorNorth", this.labels.decorNorth, this.rounded(placement.northM, 1), "m")
-    this.push(entries, "decor", "decorAltitude", this.labels.decorAltitude, this.rounded(placement.altitudeM), "m")
+    // Unlike the two distances above it, which are coordinates: nought metres up is the ground,
+    // where everything stands unless something says otherwise.
+    this.push(entries, "decor", "decorAltitude", this.labels.decorAltitude, this.roundedShown(placement.altitudeM), "m")
     this.push(entries, "decor", "decorHeading", this.labels.decorHeading, this.rounded(placement.headingDeg), "°")
     if (resolveDecorLitAt(selected, timeMs)) {
       this.push(entries, "decor", "decorLit", this.labels.decorLit, "✓")
@@ -233,7 +276,7 @@ export class SightingSummary {
     this.push(entries, "temporal", "obs-time", this.labels.observationTime, event.time && formatEdtfTime(event.time))
     this.push(entries, "temporal", "obs-end-time", this.labels.observationEndTime, event.endTime && formatEdtfTime(event.endTime))
     const durationMs = sightingDurationMs(event)
-    this.push(entries, "temporal", "durationSeconds", this.labels.duration, this.rounded(durationMs && durationMs / 1000, 1), "s")
+    this.push(entries, "temporal", "durationSeconds", this.labels.duration, this.roundedShown(durationMs && durationMs / 1000, 1), "s")
     this.push(entries, "temporal", "timeZone", this.labels.utcOffset, event.timeZone)
     this.push(entries, "temporal", "utcOffsetHours", this.labels.utcOffset, this.rounded(event.utcOffsetHours, 1), "UTC±h")
   }
@@ -245,19 +288,40 @@ export class SightingSummary {
     // would have the summary claim a silent sighting's loudness came out of an archive.
     const fromSource = sighting.weatherSource !== undefined
     const owned = { fromSource }
-    this.push(entries, "weather", "cloudCover", this.labels.cloudCover, this.percent(weather.cloudCover), "", owned)
-    this.push(entries, "weather", "highCloudCover", this.labels.highCloudCover, this.percent(weather.highCloudCover), "", owned)
+    // What the sky HAS, before saying anything about it. The three decks are asked separately and
+    // not summed: they overlap, so the total is not their sum — but any one of them showing is
+    // enough for the deck's own character and height to be worth stating.
+    const clouded = this.showsPercent(weather.cloudCover)
+      || this.showsPercent(weather.lowerCloudCover)
+      || this.showsPercent(weather.highCloudCover)
+    this.push(entries, "weather", "cloudCover", this.labels.cloudCover, this.percentShown(weather.cloudCover), "", owned)
+    this.push(entries, "weather", "highCloudCover", this.labels.highCloudCover, this.percentShown(weather.highCloudCover), "", owned)
     // Never marked, whatever the record says about the clouds: what the ice crystals were doing up
     // there was measured nowhere, so this one is always the author's own (see Weather.ts).
-    this.push(entries, "weather", "iceCrystalAlignment", this.labels.iceCrystalAlignment, this.percent(weather.iceCrystalAlignment))
-    this.push(entries, "weather", "cloudDarkness", this.labels.cloudDarkness, this.percent(weather.cloudDarkness), "", owned)
-    this.push(entries, "weather", "cloudBase", this.labels.cloudBase, this.rounded(weather.cloudBaseM), "m", owned)
+    // Qualifies the HIGH deck alone — it decides which halo forms stand, and there are no crystals
+    // to lie flat under a sky of water cloud — so it goes with it, at 0 % as at any other value:
+    // tumbling crystals still ring the Sun, which is a display and not a nothing.
+    this.push(entries, "weather", "iceCrystalAlignment", this.labels.iceCrystalAlignment,
+      this.showsPercent(weather.highCloudCover) ? this.percent(weather.iceCrystalAlignment) : undefined)
+    // Both qualify the deck rather than assert it: clouds that are white (0 % dark) are as visible
+    // as black ones, and a base has a height only while something sits on it.
+    this.push(entries, "weather", "cloudDarkness", this.labels.cloudDarkness,
+      clouded ? this.percent(weather.cloudDarkness) : undefined, "", owned)
+    this.push(entries, "weather", "cloudBase", this.labels.cloudBase,
+      clouded ? this.rounded(weather.cloudBaseM) : undefined, "m", owned)
+    // Falling, not merely named: the renderer already draws nothing at zero intensity (see
+    // UfoRecorderElement's rainbow guard, which reads precipitationIntensity <= 0 as no rain), so
+    // a "Rain" chip over a dry sky would describe the file and contradict the picture beside it.
+    const precipitating = weather.precipitationType !== "none" && this.showsPercent(weather.precipitationIntensity)
     this.push(entries, "weather", "precipitationType", this.labels.precipitationType,
-      weather.precipitationType === "none" ? undefined : this.precipitationName(weather.precipitationType), "", owned)
+      precipitating ? this.precipitationName(weather.precipitationType) : undefined, "", owned)
     this.push(entries, "weather", "precipitationIntensity", this.labels.precipitationIntensity,
-      weather.precipitationType === "none" ? undefined : this.percent(weather.precipitationIntensity), "", owned)
-    this.push(entries, "weather", "windDirection", this.labels.windDirection, this.rounded(weather.windDirectionDeg), "°", owned)
-    this.push(entries, "weather", "windSpeed", this.labels.windSpeed, this.rounded(weather.windSpeed, 2), "m/s", owned)
+      precipitating ? this.percent(weather.precipitationIntensity) : undefined, "", owned)
+    // Rule 2 in its clearest case: due north is a real bearing and stays while it blows, and stops
+    // being anything at all the moment the air is still.
+    this.push(entries, "weather", "windDirection", this.labels.windDirection,
+      this.shows(weather.windSpeed, 2) ? this.rounded(weather.windDirectionDeg) : undefined, "°", owned)
+    this.push(entries, "weather", "windSpeed", this.labels.windSpeed, this.roundedShown(weather.windSpeed, 2), "m/s", owned)
     if (weather.storm) {
       this.push(entries, "weather", "storm", this.labels.storm, "✓", "", owned)
     }
@@ -269,8 +333,9 @@ export class SightingSummary {
       return
     }
     this.push(entries, "sound", "soundKind", this.labels.soundKind, this.soundKindName(sound.kind))
-    this.push(entries, "sound", "soundVolume", this.labels.soundVolume, this.percent(sound.volume))
-    this.push(entries, "sound", "soundPitch", this.labels.soundPitch, this.rounded(sound.pitchHz), "Hz")
+    // A hum at nought per cent is a silence with a name, and a nought-hertz pitch is not a pitch.
+    this.push(entries, "sound", "soundVolume", this.labels.soundVolume, this.percentShown(sound.volume))
+    this.push(entries, "sound", "soundPitch", this.labels.soundPitch, this.roundedShown(sound.pitchHz), "Hz")
     this.push(entries, "sound", "soundSrc", this.labels.soundSrc, sound.src)
   }
 
@@ -287,14 +352,12 @@ export class SightingSummary {
     }
     this.push(entries, "shape", "shapeTitle", this.labels.shapeTitle, shape.title)
     this.push(entries, "shape", "color", this.labels.color, shape.color, "", { color: shape.color })
-    this.push(entries, "shape", "transparency", this.labels.transparency, this.percent(shape.transparency))
-    this.push(entries, "shape", "haloScale", this.labels.halo, this.rounded(shape.haloScale, 2))
-    // Stated like the colour, so the summary says it like the colour. Absent means nobody said
-    // anything about the edges, which is not the same as saying they were sharp — hence no chip
-    // rather than a "0 %" one.
-    this.push(entries, "shape", "blur", this.labels.blur, shape.blur === undefined || shape.blur === 0 ? undefined : this.percent(shape.blur))
-    this.push(entries, "shape", "brightness", this.labels.brightness,
-      shape.brightness === undefined || shape.brightness === 0 ? undefined : this.percent(shape.brightness))
+    // Nought is the untouched value of all four (see Shape.ts's own constructors): opaque, no
+    // halo, sharp edges, no glow — which is to say the appearance nobody described.
+    this.push(entries, "shape", "transparency", this.labels.transparency, this.percentShown(shape.transparency))
+    this.push(entries, "shape", "haloScale", this.labels.halo, this.roundedShown(shape.haloScale, 2))
+    this.push(entries, "shape", "blur", this.labels.blur, this.percentShown(shape.blur))
+    this.push(entries, "shape", "brightness", this.labels.brightness, this.percentShown(shape.brightness))
   }
 
   /** What to call a decor object with no name of its own — the same "{kind} {n}" fallback the
