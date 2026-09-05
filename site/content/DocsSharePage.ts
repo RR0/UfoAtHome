@@ -56,6 +56,8 @@ const linkCopy = document.getElementById("share-link-copy")
 
 const embedField = document.getElementById("share-embed-url")
 const embedCode = document.getElementById("share-embed-code")
+const embedPre = document.getElementById("share-embed-pre")
+const embedMount = document.getElementById("share-embed-view")
 const embedCopy = document.getElementById("share-embed-copy")
 const embedTry = document.getElementById("share-embed-try")
 const preview = document.getElementById("share-preview")
@@ -111,15 +113,20 @@ linkField.addEventListener("input", refreshLink)
 linkCopy.addEventListener("click", () => copyFrom(linkCopy, linkOut.textContent, linkOut, messages.copyLink))
 refreshLink()
 
+/* Set once the read-only CodeMirror below has arrived; until then the plain <pre> IS the snippet,
+   so a reader with a slow connection or a blocked module still sees the code. */
+let embedView
+
 const refreshEmbed = () => {
   const url = addressOf(embedField)
+  const code = url ? embedMarkup(url) : messages.notAnAddress
   embedCode.classList.toggle("is-invalid", !url)
-  embedCode.textContent = url ? embedMarkup(url) : messages.notAnAddress
+  embedCode.textContent = code
+  if (embedView) embedView.value = code
   embedCopy.disabled = !url
   embedTry.disabled = !url
 }
 embedField.addEventListener("input", refreshEmbed)
-embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedCode.textContent, embedCode, messages.copyCode))
 // The preview is reloaded on request rather than on every keystroke: each load fetches a recording
 // and builds a sky, and doing that per character typed would be rude to the reader's machine and
 // to whoever is hosting the file.
@@ -128,7 +135,24 @@ embedTry.addEventListener("click", () => {
   if (url) preview.setAttribute("src", url)
 })
 refreshEmbed()
-preview.setAttribute("src", embedField.value.trim())`
+preview.setAttribute("src", embedField.value.trim())
+
+/* Highlighting is worth having and worth nothing to wait for, so the snippet is plain text first
+   and coloured a moment later. CodeMirror is heavier than the three lines it draws; deferring it
+   keeps that weight off the page's first paint, which the live preview below already spends. */
+void (async () => {
+  try {
+    const { HtmlView } = await import("/lib/site-html-view.mjs")
+    embedView = new HtmlView(embedMount, embedCode.textContent)
+    embedPre.hidden = true
+  } catch {
+    /* No highlighting, then. The <pre> is still there and still says the same thing. */
+  }
+})()
+
+/* The copy button reads the string the page composed, never the view showing it: CodeMirror wraps
+   long lines, and a reader copying from the rendering would get the wrap as a newline. */
+embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedField.value.trim()), embedCode, messages.copyCode))`
   }
 
   render(language: SiteLanguage): string {
@@ -140,7 +164,7 @@ preview.setAttribute("src", embedField.value.trim())`
     return `
 <section class="band">
   <div class="wrap prose-wide">
-    <h2>1. A link to ufoathome.org</h2>
+    <h2>1. A link to ufoathome's player</h2>
     <p>The simplest of the two, and the only one that needs nothing at all of the place you are
       sending it to. Anybody who follows it sees the observation played in the real sky of the date
       and place it states, in their own language.</p>
@@ -173,7 +197,8 @@ preview.setAttribute("src", embedField.value.trim())`
       <label for="share-embed-url">The address of your recording</label>
       <input id="share-embed-url" type="url" spellcheck="false" value="${sample}"
              placeholder="https://yoursite.org/my-case/sighting.json">
-      <pre><code id="share-embed-code"></code></pre>
+      <pre id="share-embed-pre"><code id="share-embed-code"></code></pre>
+      <div id="share-embed-view" class="code-view"></div>
       <p class="doc-try-actions">
         <button class="btn btn-primary" type="button" id="share-embed-copy">Copy the code</button>
         <button class="btn" type="button" id="share-embed-try">Show the result</button>
@@ -218,7 +243,7 @@ preview.setAttribute("src", embedField.value.trim())`
     return `
 <section class="band">
   <div class="wrap prose-wide">
-    <h2>1. Un lien vers ufoathome.org</h2>
+    <h2>1. Un lien vers le lecteur d'ufoathome</h2>
     <p>Le plus simple des deux, et le seul qui n'exige rien de l'endroit où vous l'envoyez. Qui le
       suit voit l'observation jouée sous le ciel réel de la date et du lieu qu'elle énonce, dans sa
       propre langue.</p>
@@ -251,7 +276,8 @@ preview.setAttribute("src", embedField.value.trim())`
       <label for="share-embed-url">L'adresse de votre enregistrement</label>
       <input id="share-embed-url" type="url" spellcheck="false" value="${sample}"
              placeholder="https://votresite.org/mon-dossier/sighting.json">
-      <pre><code id="share-embed-code"></code></pre>
+      <pre id="share-embed-pre"><code id="share-embed-code"></code></pre>
+      <div id="share-embed-view" class="code-view"></div>
       <p class="doc-try-actions">
         <button class="btn btn-primary" type="button" id="share-embed-copy">Copier le code</button>
         <button class="btn" type="button" id="share-embed-try">Voir le résultat</button>

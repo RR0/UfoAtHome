@@ -39,6 +39,11 @@
               radial-gradient(80% 50% at 85% -10%, rgba(240, 188, 68, 0.16) 0%, transparent 70%);
   --ok: #1f7a44;
   --error: #c0392b;
+  /* An attribute name in a code block, which --glow cannot be: that accent is tuned for prose at
+     1rem and measures 3.9:1 on the sunken ground, where code is set at 0.82rem and so needs MORE
+     contrast than prose, not less. Same hue, darkened until it clears 4.5:1. In dark mode --glow
+     is already a pale gold and needs no help. */
+  --code-attr: #8a5d00;
   --ok-bg: rgba(31, 122, 68, 0.12);
   --warn-bg: rgba(154, 111, 18, 0.14);
   --neutral-bg: rgba(120, 133, 155, 0.14);
@@ -76,6 +81,7 @@
                 radial-gradient(80% 50% at 85% -10%, rgba(245, 196, 81, 0.07) 0%, transparent 70%);
     --ok: #8fd7a4;
     --error: #ff8a7a;
+    --code-attr: var(--glow);
     --ok-bg: rgba(120, 200, 140, 0.14);
     --warn-bg: rgba(245, 196, 81, 0.14);
     --neutral-bg: rgba(140, 155, 185, 0.12);
@@ -369,6 +375,15 @@ h2[id], h3[id] { scroll-margin-top: 4.5rem; }
 .doc-try [aria-disabled="true"] { opacity: 0.5; pointer-events: none; }
 .doc-try button:disabled { opacity: 0.5; cursor: default; }
 .doc-try pre { margin: 0.8rem 0 0; }
+/* Wears the same frame as the <pre> it replaces once CodeMirror has loaded, so the snippet does not
+   move or change shape under the reader when the highlighting arrives. Empty until then, hence the
+   :empty rule — an 8px-tall bordered box under the field would look like a rendering failure. */
+.code-view {
+  margin: 0.8rem 0 0;
+  background: var(--ground-sunken); border: 1px solid var(--line); border-radius: 8px;
+  padding: 0.4rem 0.6rem; overflow: hidden;
+}
+.code-view:empty { display: none; }
 .doc-try-out {
   margin: 0.8rem 0 0; overflow-x: auto;
 }
