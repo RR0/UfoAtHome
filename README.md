@@ -215,8 +215,10 @@ object or atmospheric optical effect — Venus (by far the most commonly misrepo
 Moon, lens flare, or halo phenomena like sun dogs/moon dogs. `<rr0-scene>` renders the sky astronomically: real
 Sun/Moon/Venus/Mars/Jupiter/Saturn positions and the Moon's phase via
 [`astronomy-engine`](https://github.com/cosinekitty/astronomy) (see `src/engine/astronomy/CelestialPositions.ts`),
-and a real star catalog (see below) instead of a randomized field, filtered to naked-eye visibility
-(magnitude ≤ 7.5) since these are human eyewitness observations, not instrument-assisted ones. The sky's
+and a real star catalog (see below) instead of a randomized field. How deep it is drawn follows the
+INSTRUMENT rather than a constant: magnitude 6.5 is what a dark-adapted human eye reaches, and a recording made
+through a camera reaches somewhere else entirely — 4.2 through a box camera at a ninetieth of a second, 9.7
+through a 50 mm at f/2 for twenty seconds (see `src/engine/instrument/LimitingMagnitude.ts`). The sky's
 darkness/color follows the sun's altitude (day/twilight bands/night), and its dawn/dusk glow is anchored on the
 sun's real compass direction, not spread uniformly around the horizon — see `src/render3d/skyColors.ts`.
 
@@ -247,12 +249,23 @@ one static pose; an observer that moves/re-orients mid-recording still needs han
 Moon's phase currently only dims/brightens its disc's overall
 color rather than rendering a geometrically accurate crescent shape — a natural follow-up.
 
-**Regenerating the star catalog.** `src/assets/stars-mag7.5.bin` (a compact binary asset, four concatenated
-`Float32Array` sections: ra/dec/mag/ci — see `src/render3d/StarCatalog.ts` for the exact layout) is generated
-from the [HYG Database v4.1](https://github.com/astronexus/HYG-Database) (CC BY-SA), filtered to magnitude ≤ 7.5.
-To regenerate it: download `hyg/CURRENT/hygdata_v41.csv` from that repo into `scripts/data/hygdata_v41.csv`
-(gitignored — not checked in, ~34MB), then run `npm run build:stars`. The generated `.bin`/`.json` pair *is*
-checked in (~400KB) since it's small and doesn't need regenerating on every install.
+**Regenerating the star catalog.** Two tiers, both compact binary assets of four concatenated `Float32Array`
+sections (ra/dec/mag/ci — see `src/render3d/StarCatalog.ts` for the exact layout), both sorted brightest first,
+both generated from the [HYG Database v4.1](https://github.com/astronexus/HYG-Database) (CC BY-SA):
+
+- `src/assets/stars-mag7.5.bin` — 25 791 stars to magnitude 7.5, ~400KB, loaded by every scene;
+- `src/assets/stars-mag7.5-9.bin` — the 57 688 *further* stars between 7.5 and 9, ~900KB, fetched only by a
+  recording whose own optics reach past 7.5 (see `StarCatalogs.upTo`, and `deep-star-catalog-src` to host your
+  own copy). A delta, not a second catalogue: no star is downloaded twice.
+
+Nine is where HYG stops being a sky and starts being a catalogue running out — its counts multiply by 3.1 per
+magnitude up to 7, then 2.7 to 8, 2.0 to 9 and 1.3 to 10. An observation that outran it is told so on the
+editor's Sky line rather than quietly handed an emptier sky than it recorded; going deeper would mean Tycho-2 or
+Gaia, which is a different order of download.
+
+To regenerate them: download `hyg/CURRENT/hygdata_v41.csv` from that repo into `scripts/data/hygdata_v41.csv`
+(gitignored — not checked in, ~34MB), then run `npm run build:stars`. The generated `.bin`/`.json` pairs *are*
+checked in, since they don't need regenerating on every install.
 
 **What else was in that sky.** Beside the Sun, Moon, planets and stars, the scene states — and where it can,
 draws — the things that were genuinely up there and are genuinely mistaken for something else. Each is here

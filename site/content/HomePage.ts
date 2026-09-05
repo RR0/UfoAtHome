@@ -224,7 +224,10 @@ ${carousel}
           that instant and that latitude. What is drawn from it stops at 6.5, and that number is a fact
           about a <em>witness</em> rather than about the sky: it is how faint a dark-adapted human
           eye goes. Point something else at the same night and the threshold moves with it — see
-          the instrument, below. The Milky Way and the zodiacal light are integrated along
+          the instrument, below — and so does the catalogue: 57 688 more stars, down to magnitude 9,
+          are fetched only by a recording whose own optics reach that far, so a witness's sky still
+          costs 400 kB. Past 9 the data itself stops, and the tool says so rather than drawing an
+          emptier sky than the photograph held. The Milky Way and the zodiacal light are integrated along
           the line of sight, not painted as a texture. Point at any of it and it names itself:
           “Venus, mag −4, 8° above the horizon”.</p>
       </div>
@@ -370,7 +373,10 @@ ${carousel}
           placés pour cet instant et cette latitude. Ce qui en est dessiné s'arrête à 6,5, et ce nombre
           est un fait sur le <em>témoin</em>, pas sur le ciel : c'est la magnitude qu'atteint un œil
           humain accoutumé à l'obscurité. Braquez autre chose sur la même nuit et le seuil suit —
-          voir l'instrument, plus bas. La Voie lactée et la lumière zodiacale sont
+          voir l'instrument, plus bas — et le catalogue aussi : 57 688 étoiles de plus, jusqu'à la
+          magnitude 9, ne sont chargées que par un enregistrement dont les optiques vont jusque-là ;
+          le ciel d'un témoin coûte toujours 400 ko. Au-delà de 9, c'est la donnée qui s'arrête, et
+          l'outil le dit plutôt que de dessiner un ciel plus vide que la photo. La Voie lactée et la lumière zodiacale sont
           intégrées le long de la ligne de visée, non plaquées en texture. Pointez n'importe quoi et
           cela se nomme : « Vénus, mag −4, 8° au-dessus de l'horizon ».</p>
       </div>

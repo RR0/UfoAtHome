@@ -159,7 +159,7 @@ ${script ? `<script type="module">\n${script}\n</script>` : ""}
         <li><a href="https://github.com/RR0/UfoAtHome">GitHub</a></li>
         <li><a href="https://www.npmjs.com/package/@rr0/ufoathome">npm</a></li>
         <li><a href="https://github.com/RR0/UfoAtHome/issues/new">${fr ? "Proposer une amélioration" : "Request a feature"}</a></li>
-        <li><a href="https://github.com/RR0/UfoAtHome/blob/main/LICENSE">${fr ? "Licence MIT" : "MIT licence"}</a></li>
+        <li><a href="https://github.com/RR0/UfoAtHome/blob/master/LICENSE">${fr ? "Licence MIT" : "MIT licence"}</a></li>
       </ul>
     </div>
   </div>

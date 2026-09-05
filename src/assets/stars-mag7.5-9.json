@@ -1,6 +1,7 @@
 {
-  "count": 25791,
+  "count": 57688,
   "sourceVersion": "hygdata_v41",
-  "magnitudeLimit": 7.5,
+  "magnitudeFrom": 7.5,
+  "magnitudeLimit": 9,
   "generatedAt": "2026-09-05T23:23:50.247Z"
 }

@@ -2894,7 +2894,17 @@ export class SceneRenderer {
     const visibleStars: { x: number; y: number; z: number; brightness: number; phase: number; speedFactor: number }[] = []
     for (let i = 0; i < catalog.count; i++) {
       const mag = catalog.mag[i]
-      if (mag > magnitudeLimit) continue
+      // BREAK, not continue: the catalogue is sorted brightest first (see StarCatalogs), so the
+      // first star too faint to record is the end of the work rather than one row to skip. It is
+      // what lets the deeper tier be carried for the recordings that need it without every other
+      // scene paying to walk past 57 000 stars it will never draw.
+      //
+      // Measured on one recording with the whole 83 479-star catalogue in memory, so the only thing
+      // changing is the threshold: 14 ms to restate the sky at a two-hundred-and-fiftieth of a
+      // second, 19 ms for the eye, 50 ms at twenty seconds — where 3 087 star pixels are drawn
+      // against the eye's 348. The cost follows what is DRAWN, which is the only thing it should
+      // follow.
+      if (mag > magnitudeLimit) break
       const { altitudeDeg, azimuthDeg } = equatorialToHorizontal(catalog.ra[i], catalog.dec[i], date, observer)
       if (altitudeDeg < BELOW_HORIZON_CUTOFF_DEG) continue
       const { x, y, z } = horizontalToCartesian(altitudeDeg, azimuthDeg, STAR_RADIUS)

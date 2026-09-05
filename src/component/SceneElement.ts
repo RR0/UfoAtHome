@@ -6,7 +6,8 @@ import type { TerrainProviders } from "../render3d/terrain/defaultTerrainProvide
 import type { DecorModelProvider } from "../render3d/decor/DecorModelProvider.js"
 import type { DecorModelCredit } from "../engine/model/Decor.js"
 import type { SceneAstronomy, SceneComet } from "../render3d/SceneRenderer.js"
-import { loadStarCatalog } from "../render3d/StarCatalog.js"
+import { StarCatalogs, STAR_CATALOG_MAGNITUDE_LIMIT, DEEP_STAR_CATALOG_MAGNITUDE_LIMIT } from "../render3d/StarCatalog.js"
+import type { StarCatalogTier } from "../render3d/StarCatalog.js"
 import type { StarCatalog } from "../render3d/StarCatalog.js"
 import {
   computeBodyMagnitude,
@@ -34,6 +35,7 @@ import type { MeterRange } from "../engine/shape/SizeEstimate.js"
 import { ApparentSize } from "../engine/shape/ApparentSize.js"
 import { Instruments } from "../engine/instrument/Instrument.js"
 import { LimitingMagnitude } from "../engine/instrument/LimitingMagnitude.js"
+import { visibleMagnitudeLimit } from "../render3d/skyColors.js"
 import { ImageProjection } from "../engine/instrument/ImageProjection.js"
 import { SightingShapes } from "../engine/persistence/SightingShapes.js"
 import { SkyDrift } from "../engine/astronomy/SkyDrift.js"
@@ -114,6 +116,15 @@ const DECOR_KIND_NAMES: Record<DecorKind, { en: string; fr: string }> = {
  * the star-catalog-src attribute for a consuming site that hosts its own copy. */
 const DEFAULT_STAR_CATALOG_URL = new URL("../assets/stars-mag7.5.bin", import.meta.url).href
 
+/** And where the deep tier is — the stars between magnitude 7.5 and 9, which only a recording made
+ * through optics that reach past 7.5 ever asks for (see StarCatalogs.upTo). 900 kB, emitted beside
+ * the base asset and downloaded by nobody else. Overridable the same way. */
+const DEFAULT_DEEP_STAR_CATALOG_URL = new URL("../assets/stars-mag7.5-9.bin", import.meta.url).href
+
+/** The Sun far enough down that nothing it does can lower the threshold further — where
+ * visibleMagnitudeLimit flattens, and so the deepest this recording could ever be asked to draw. */
+const DARKEST_SKY_SUN_ALTITUDE_DEG = -18
+
 /** A neutral dusk-ish sky with no Moon/planets/stars, used when a sighting has no recorded
  * date+place to compute real astronomy from. */
 const DEFAULT_ASTRONOMY: SceneAstronomy = {
@@ -153,7 +164,7 @@ const DEFAULT_OBSERVER_POSE: ObserverPose = { lat: 0, lng: 0, elevationM: 0, hea
  */
 export class SceneElement extends HTMLElement {
   static get observedAttributes(): string[] {
-    return ["src", "star-catalog-src", "show-compass"]
+    return ["src", "star-catalog-src", "deep-star-catalog-src", "show-compass"]
   }
 
   private readonly shadow: ShadowRoot
@@ -189,6 +200,12 @@ export class SceneElement extends HTMLElement {
   private meteorScheduleFor?: string
   private lastTimeMs = 0
   private starCatalog?: StarCatalog
+  /** Which loadStars() call is the current one — see loadStars on why the last ASK wins rather than
+   * the last arrival. */
+  private starCatalogRequest = 0
+  /** How faint the catalogue now loaded goes — what ensureStarsDeepEnough compares this recording's
+   * own optics against. Zero until the first load, which is "nothing loaded" rather than a depth. */
+  private starCatalogDepth = 0
   /** Owned here, not by SceneRenderer — the renderer stays audio-agnostic (see its own
    * onLightningFlash callback param), this is the one place that already orchestrates a non-
    * rendering side effect alongside pure rendering (see the terrain-attribution label above). */
@@ -433,7 +450,7 @@ export class SceneElement extends HTMLElement {
     if (name === "src" && newValue && newValue !== oldValue && this.isConnected) {
       void this.loadFromSrc(newValue)
     }
-    if (name === "star-catalog-src" && newValue !== oldValue && this.isConnected) {
+    if ((name === "star-catalog-src" || name === "deep-star-catalog-src") && newValue !== oldValue && this.isConnected) {
       void this.loadStars()
     }
     if (name === "show-compass" && newValue !== oldValue) {
@@ -559,12 +576,74 @@ export class SceneElement extends HTMLElement {
     this.sceneRenderer.resize(width, height)
   }
 
-  /** Fetches the star catalog asset once (or again, if star-catalog-src changes) — rendering
-   * proceeds without stars until this resolves, then repaints at the current playback position. */
+  /**
+   * Fetches the star catalog asset once (or again, if either src attribute changes) — rendering
+   * proceeds without stars until this resolves, then repaints at the current playback position.
+   *
+   * WHICH TIER depends on the recording's own optics, not on the sky it is drawn under: the deep
+   * one is asked for whenever this instrument could reach past the base cut on the darkest night it
+   * could have (see needsDeepStars). Deliberately not "past the cut under THIS sky", which would
+   * fetch 900 kB somewhere in the middle of a dusk and rebuild the whole star field as the Sun went
+   * down.
+   */
   private async loadStars(): Promise<void> {
-    const url = this.getAttribute("star-catalog-src") ?? DEFAULT_STAR_CATALOG_URL
-    this.starCatalog = await loadStarCatalog(url)
+    const tiers: StarCatalogTier[] = [
+      {
+        magnitudeLimit: STAR_CATALOG_MAGNITUDE_LIMIT,
+        url: this.getAttribute("star-catalog-src") ?? DEFAULT_STAR_CATALOG_URL
+      },
+      {
+        magnitudeLimit: DEEP_STAR_CATALOG_MAGNITUDE_LIMIT,
+        url: this.getAttribute("deep-star-catalog-src") ?? DEFAULT_DEEP_STAR_CATALOG_URL
+      }
+    ]
+    const reach = this.instrumentReach()
+    // A second call can overtake a first (an instrument changed while the deep tier was in flight),
+    // and the one that lands must be the one that asked last rather than the one that finished
+    // last.
+    const asked = ++this.starCatalogRequest
+    // Set BEFORE awaiting: the per-tick check below would otherwise fire again on every frame drawn
+    // while the 900 kB is in flight, and each of those would start another one.
+    this.starCatalogDepth = reach > STAR_CATALOG_MAGNITUDE_LIMIT ? DEEP_STAR_CATALOG_MAGNITUDE_LIMIT : STAR_CATALOG_MAGNITUDE_LIMIT
+    const catalog = await StarCatalogs.upTo(tiers, reach)
+    if (asked !== this.starCatalogRequest) return
+    this.starCatalog = catalog
     this.updateAstronomy(this.lastTimeMs)
+  }
+
+  /**
+   * Fetches the deeper tier the moment this recording starts needing one — a loaded file, an
+   * instrument picked in the editor, a shutter opened from a two-hundred-and-fiftieth to twenty
+   * seconds.
+   *
+   * Checked here, on every astronomy tick, rather than hooked onto each of those events: they are
+   * three different code paths in two elements, and a recording that quietly draws the eye's own
+   * stars through an f/2 lens looks exactly like a recording that has nothing more to draw. Cheap,
+   * and it cannot loop — the depth only ever grows, and it stops at the deepest tier there is.
+   */
+  private ensureStarsDeepEnough(): void {
+    if (!this.starCatalog || this.starCatalogDepth >= DEEP_STAR_CATALOG_MAGNITUDE_LIMIT) return
+    if (this.instrumentReach() <= this.starCatalogDepth) return
+    void this.loadStars()
+  }
+
+  /**
+   * The faintest magnitude this recording's own optics could ever record, over the whole night.
+   *
+   * Asked against the DARKEST sky rather than the current one, because it decides which catalogue
+   * files to fetch: the answer must not change as the Sun sets, or a scene would pull 900 kB
+   * somewhere in the middle of a dusk and rebuild its whole star field mid-playback. An eye's own
+   * 6.5 never reaches the base cut, which is why every sighting made before instruments existed
+   * here still loads 400 kB and nothing more.
+   */
+  private instrumentReach(): number {
+    const sighting = this.ufoElement.sighting
+    const gain = LimitingMagnitude.gainFor(sighting.instrument, {
+      fNumber: resolveObserverPoseAt(sighting, 0)?.fNumber,
+      fieldOfViewDeg: SightingShapes.fovOf(sighting, 0),
+      exposureSeconds: sighting.exposure
+    })
+    return visibleMagnitudeLimit(DARKEST_SKY_SUN_ALTITUDE_DEG, gain)
   }
 
   /** Resolves the observer's pose and, whenever *any* date/time information is known (even just an
@@ -581,6 +660,7 @@ export class SceneElement extends HTMLElement {
    * observer's own heading/pitch/fov always applies to the camera regardless, since that part
    * doesn't need a date or a location either. */
   private updateAstronomy(t: number): void {
+    this.ensureStarsDeepEnough()
     this.applySceneAt(t)
     // How long the shutter was open, and therefore how many instants this frame is: a photograph is
     // everything that crossed the frame while it was, and over a pose of any length the thing that

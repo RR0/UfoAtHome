@@ -1,9 +1,26 @@
 /**
  * One-off build step (not part of `build`/`prepublishOnly`) that converts a locally-downloaded
  * HYG Database v4.1 CSV (https://github.com/astronexus/HYG-Database, CC BY-SA) into the compact
- * binary star catalog asset `<rr0-scene>` fetches at runtime. Filtered to magnitude <= 7.5
- * (naked-eye visibility — these are human eyewitness reports, not instrument-assisted
- * observations, so catalog entries no witness could ever have seen aren't worth carrying).
+ * binary star catalog assets `<rr0-scene>` fetches at runtime.
+ *
+ * TWO TIERS, and the split is the instrument's. What a witness could have seen stops at magnitude
+ * 6.5, so a catalog cut at 7.5 was always enough — until the threshold started following the
+ * device (see LimitingMagnitude): a 50 mm at f/2 for twenty seconds records to 9.7, and cutting at
+ * 7.5 would have drawn that photograph with the eye's own stars and called it a photograph. So the
+ * base tier stays what it was, every ordinary scene keeps paying 400 kB, and the DEEP tier — the
+ * stars between the two cuts, and nothing already in the base — is fetched only by a recording
+ * whose own optics reach past it.
+ *
+ * WHERE THE DEEP CUT IS, and why it is not deeper: HYG itself thins out. Its counts per magnitude
+ * multiply by 3.1 up to 7 — which is what a real sky does — then by 2.7 to 8, 2.0 to 9 and 1.3 to
+ * 10, which is a catalogue running out rather than a sky. Nine is therefore about as deep as this
+ * source can be taken while still drawing most of what is there, and past it the honest answer is
+ * that the DATA stops, which the scene says out loud rather than quietly drawing an emptier sky.
+ *
+ * Both tiers are written SORTED BY MAGNITUDE, brightest first — an invariant the renderer relies on
+ * to stop scanning at the faintest thing the observation could record (see SceneRenderer.
+ * buildStars), which is what keeps a catalog three times bigger from costing three times as much
+ * to draw.
  *
  * Run with: npm run build:stars
  * Expects the raw CSV at scripts/data/hygdata_v41.csv (gitignored — download it yourself from
@@ -17,9 +34,11 @@ import { readFileSync, writeFileSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 import path from "node:path"
 
-// The renderer states the same cut, because a scene has to be able to say where its data stops —
-// see STAR_CATALOG_MAGNITUDE_LIMIT in src/render3d/StarCatalog.ts, which must move with this.
+// The renderer states both cuts, because a scene has to be able to say where its data stops — see
+// STAR_CATALOG_MAGNITUDE_LIMIT and DEEP_STAR_CATALOG_MAGNITUDE_LIMIT in
+// src/render3d/StarCatalog.ts, which must move with these.
 const MAGNITUDE_LIMIT = 7.5
+const DEEP_MAGNITUDE_LIMIT = 9
 /**
  * Where naming stops, and it is the data that says where.
  *
@@ -39,6 +58,8 @@ const scriptDir = path.dirname(fileURLToPath(import.meta.url))
 const csvPath = path.join(scriptDir, "data", "hygdata_v41.csv")
 const outDir = path.join(scriptDir, "..", "src", "assets")
 const binPath = path.join(outDir, "stars-mag7.5.bin")
+const deepBinPath = path.join(outDir, "stars-mag7.5-9.bin")
+const deepJsonPath = path.join(outDir, "stars-mag7.5-9.json")
 const namedPath = path.join(scriptDir, "..", "src", "engine", "astronomy", "brightStarCatalog.ts")
 const jsonPath = path.join(outDir, "stars-mag7.5.json")
 
@@ -167,10 +188,7 @@ function main(): void {
     throw new Error("hygdata_v41.csv is missing an expected column (id/ra/dec/mag/ci/proper/bayer/flam/con)")
   }
 
-  const ra: number[] = []
-  const dec: number[] = []
-  const mag: number[] = []
-  const ci: number[] = []
+  const stars: { ra: number; dec: number; mag: number; ci: number }[] = []
   const named: { name: string; french: string; raHours: number; decDeg: number; mag: number }[] = []
 
   for (let i = 1; i < lines.length; i++) {
@@ -178,7 +196,7 @@ function main(): void {
     if (fields[idIndex] === HYG_SUN_ID) continue
 
     const magValue = Number.parseFloat(fields[magIndex])
-    if (!Number.isFinite(magValue) || magValue > MAGNITUDE_LIMIT) continue
+    if (!Number.isFinite(magValue) || magValue > DEEP_MAGNITUDE_LIMIT) continue
 
     const raValue = Number.parseFloat(fields[raIndex])
     const decValue = Number.parseFloat(fields[decIndex])
@@ -186,10 +204,7 @@ function main(): void {
 
     const ciValue = Number.parseFloat(fields[ciIndex])
 
-    ra.push(raValue)
-    dec.push(decValue)
-    mag.push(magValue)
-    ci.push(Number.isFinite(ciValue) ? ciValue : 0)
+    stars.push({ ra: raValue, dec: decValue, mag: magValue, ci: Number.isFinite(ciValue) ? ciValue : 0 })
 
     // The named table carries its own positions rather than an index into the binary above: an
     // index would have to be regenerated in lockstep with every change of MAGNITUDE_LIMIT, and
@@ -205,18 +220,45 @@ function main(): void {
     }
   }
 
-  const count = ra.length
-  const buffer = Buffer.concat([
-    Buffer.from(new Float32Array(ra).buffer),
-    Buffer.from(new Float32Array(dec).buffer),
-    Buffer.from(new Float32Array(mag).buffer),
-    Buffer.from(new Float32Array(ci).buffer)
-  ])
+  // Brightest first, once, here — so that neither tier has to be sorted at runtime and the two can
+  // simply be read one after the other and still be in order (every star of the deep tier is
+  // fainter than every star of the base one, by construction of the split below).
+  stars.sort((a, b) => a.mag - b.mag)
+  const base = stars.filter(star => star.mag <= MAGNITUDE_LIMIT)
+  const deep = stars.filter(star => star.mag > MAGNITUDE_LIMIT)
 
-  writeFileSync(binPath, buffer)
+  const pack = (rows: typeof stars): Buffer =>
+    Buffer.concat([
+      Buffer.from(new Float32Array(rows.map(row => row.ra)).buffer),
+      Buffer.from(new Float32Array(rows.map(row => row.dec)).buffer),
+      Buffer.from(new Float32Array(rows.map(row => row.mag)).buffer),
+      Buffer.from(new Float32Array(rows.map(row => row.ci)).buffer)
+    ])
+  const generatedAt = new Date().toISOString()
+
+  writeFileSync(binPath, pack(base))
   writeFileSync(
     jsonPath,
-    JSON.stringify({ count, sourceVersion: "hygdata_v41", magnitudeLimit: MAGNITUDE_LIMIT, generatedAt: new Date().toISOString() }, null, 2)
+    JSON.stringify({ count: base.length, sourceVersion: "hygdata_v41", magnitudeLimit: MAGNITUDE_LIMIT, generatedAt }, null, 2)
+  )
+  writeFileSync(deepBinPath, pack(deep))
+  writeFileSync(
+    deepJsonPath,
+    JSON.stringify(
+      {
+        count: deep.length,
+        sourceVersion: "hygdata_v41",
+        magnitudeFrom: MAGNITUDE_LIMIT,
+        magnitudeLimit: DEEP_MAGNITUDE_LIMIT,
+        generatedAt
+      },
+      null,
+      2
+    )
+  )
+  console.log(
+    `stars: ${base.length} to magnitude ${MAGNITUDE_LIMIT} (${(pack(base).length / 1024).toFixed(0)} kB), ` +
+      `${deep.length} more to ${DEEP_MAGNITUDE_LIMIT} (${(pack(deep).length / 1024).toFixed(0)} kB, fetched on demand)`
   )
 
   named.sort((a, b) => a.mag - b.mag)
@@ -249,7 +291,6 @@ ${named.map(star => `  { name: { en: ${JSON.stringify(star.name)}, fr: ${JSON.st
 `
   writeFileSync(namedPath, namedSource)
 
-  console.log(`Wrote ${count} stars (mag <= ${MAGNITUDE_LIMIT}) to ${binPath} (${buffer.byteLength} bytes)`)
   console.log(`Wrote ${named.length} named stars (mag <= ${NAMED_MAGNITUDE_LIMIT}) to ${namedPath}`)
 }
 

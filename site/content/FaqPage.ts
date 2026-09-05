@@ -43,7 +43,7 @@ export class FaqPage implements SitePage {
 
     <div class="faq-item">
       <h3>What does the licence allow?</h3>
-      <p>UFO@home is under the <a href="https://github.com/RR0/UfoAtHome/blob/main/LICENSE">MIT
+      <p>UFO@home is under the <a href="https://github.com/RR0/UfoAtHome/blob/master/LICENSE">MIT
         licence</a>. That allows you to:</p>
       <ul class="plain">
         <li>use it on any site, including a commercial one;</li>
@@ -296,7 +296,7 @@ export class FaqPage implements SitePage {
 
     <div class="faq-item">
       <h3>Qu'autorise la licence ?</h3>
-      <p>UFO@home est sous <a href="https://github.com/RR0/UfoAtHome/blob/main/LICENSE">licence
+      <p>UFO@home est sous <a href="https://github.com/RR0/UfoAtHome/blob/master/LICENSE">licence
         MIT</a>. Elle vous permet de :</p>
       <ul class="plain">
         <li>l'utiliser sur n'importe quel site, y compris commercial ;</li>

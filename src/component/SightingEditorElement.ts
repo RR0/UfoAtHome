@@ -23,7 +23,7 @@ import type { BowForm } from "../engine/atmosphere/Rainbows.js"
 import type { HaloForm } from "../engine/atmosphere/IceHalos.js"
 import { computeBodyPosition, computeMoonPhase } from "../engine/astronomy/CelestialPositions.js"
 import { LimitingMagnitude } from "../engine/instrument/LimitingMagnitude.js"
-import { STAR_CATALOG_MAGNITUDE_LIMIT } from "../render3d/StarCatalog.js"
+import { DEEP_STAR_CATALOG_MAGNITUDE_LIMIT } from "../render3d/StarCatalog.js"
 import { visibleMagnitudeLimit } from "../render3d/skyColors.js"
 import type { CometAppearance } from "../engine/astronomy/Comets.js"
 import { Compass } from "../engine/astronomy/Compass.js"
@@ -4663,9 +4663,10 @@ export class SightingEditorElement extends HTMLElement {
    * of the stars leave the scene with nothing anywhere saying why. The clause names the device and
    * the eye's own figure side by side, so the difference is the reading rather than the surprise.
    *
-   * And it states where the DATA stops. Past magnitude 7.5 the catalogue has nothing more to draw,
-   * however deep the lens went — which is a limit of what this project ships, not of the
-   * photograph, and the kind of thing a reconstruction owes the reader.
+   * And it states where the DATA stops. Past magnitude 9 there is nothing more to draw, however
+   * deep the lens went — a limit of what this project ships (and of HYG itself, see
+   * DEEP_STAR_CATALOG_MAGNITUDE_LIMIT) rather than of the photograph, and the kind of thing a
+   * reconstruction owes the reader.
    */
   private starsClause(date: Date, observer: { lat: number; lng: number; elevationM: number }): string | undefined {
     const sunAltitudeDeg = computeBodyPosition("Sun", date, observer).altitudeDeg
@@ -4686,9 +4687,9 @@ export class SightingEditorElement extends HTMLElement {
             .replace("{eye}", magnitude(visibleMagnitudeLimit(sunAltitudeDeg)))
     // Said only when it bites, and then always: past this the scene is drawing every star it has and
     // the photograph held more.
-    return limit <= STAR_CATALOG_MAGNITUDE_LIMIT
+    return limit <= DEEP_STAR_CATALOG_MAGNITUDE_LIMIT
       ? stated
-      : stated + this.messages.skyStarsCatalogue.replace("{catalogue}", magnitude(STAR_CATALOG_MAGNITUDE_LIMIT))
+      : stated + this.messages.skyStarsCatalogue.replace("{catalogue}", magnitude(DEEP_STAR_CATALOG_MAGNITUDE_LIMIT))
   }
 
   /** The strongest shower running, and what it would really have produced — or the fact that none
