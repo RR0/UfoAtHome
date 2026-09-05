@@ -24,8 +24,55 @@ export class DocsComponentsPage extends DocsSection {
       + "s'enregistre à l'import, chacun prend le même <code>src</code>, et chacun compose le précédent."
   }
 
+  /** Where each tag's own page is, by the tag itself. */
+  private static readonly PAGES: ReadonlyArray<readonly [string, string]> = [
+    ["rr0-ufo", "/docs/components/ufo/"],
+    ["rr0-scene", "/docs/components/scene/"],
+    ["rr0-sighting-editor", "/docs/components/editor/"],
+    ["rr0-sighting", "/docs/components/sighting/"]
+  ]
+
   render(language: SiteLanguage): string {
-    return this.hero(language, this.meta.title, this.lede) + (language === "fr" ? this.fr() : this.en())
+    return this.hero(language, this.meta.title, this.lede)
+      + this.linked(language === "fr" ? this.fr() : this.en())
+  }
+
+  /**
+   * Every mention of a tag on this page is a way to its own page.
+   *
+   * Written once here rather than by hand at the forty places they occur: this page's whole job is
+   * to send a reader to one of the four, and a mention that reads like the answer but cannot be
+   * clicked is the most annoying kind of prose.
+   *
+   * Two exclusions, and both matter. Inside an `<a>`, because an anchor inside an anchor is not
+   * valid HTML and a parser resolves it by closing the outer one — which is exactly how the
+   * documentation hub's cards came apart once already. Inside a `<pre>`, because that block is
+   * there to be copied, and a link is not something anybody wants in their clipboard.
+   */
+  private linked(html: string): string {
+    const spans: Array<[number, number]> = []
+    let depth = 0
+    let start = 0
+    for (const match of html.matchAll(/<\/?(?:a|pre)\b[^>]*>/gi)) {
+      if (match[0].startsWith("</")) {
+        depth = Math.max(0, depth - 1)
+        if (depth === 0) {
+          spans.push([start, match.index + match[0].length])
+        }
+      } else {
+        if (depth === 0) {
+          start = match.index
+        }
+        depth++
+      }
+    }
+    // Longest tag first: rr0-sighting is a prefix of rr0-sighting-editor, and the entity-escaped
+    // closing bracket is the only thing telling the two mentions apart.
+    return html.replace(/<code>&lt;(rr0-[a-z-]+)&gt;<\/code>/g, (whole, tag: string, offset: number) => {
+      const page = DocsComponentsPage.PAGES.find(([name]) => name === tag)?.[1]
+      const inside = spans.some(([from, to]) => offset > from && offset < to)
+      return page === undefined || inside ? whole : `<a href="${page}">${whole}</a>`
+    })
   }
 
   private en(): string {
@@ -98,8 +145,8 @@ export class DocsComponentsPage extends DocsSection {
 
     <h2>Putting one in your application</h2>
     <p>After <code>npm install @rr0/ufoathome</code>:</p>
-    <pre><code>import "@rr0/ufoathome/ufo"        // registers &lt;rr0-ufo&gt;
-import "@rr0/ufoathome/scene"      // registers &lt;rr0-scene&gt;
+    <pre><code>import "@rr0/ufoathome/ufo"      // registers &lt;rr0-ufo&gt;
+import "@rr0/ufoathome/scene"    // registers &lt;rr0-scene&gt;
 import "@rr0/ufoathome/sighting" // registers &lt;rr0-sighting&gt;
 import "@rr0/ufoathome/editor"   // registers &lt;rr0-sighting-editor&gt;</code></pre>
     <p>Or copy the contents of the package's <code>dist-embed*</code> directories onto your own
@@ -191,8 +238,8 @@ import "@rr0/ufoathome/editor"   // registers &lt;rr0-sighting-editor&gt;</code>
 
     <h2>Intégrer dans votre application</h2>
     <p>Après <code>npm install @rr0/ufoathome</code> :</p>
-    <pre><code>import "@rr0/ufoathome/ufo"        // enregistre &lt;rr0-ufo&gt;
-import "@rr0/ufoathome/scene"      // enregistre &lt;rr0-scene&gt;
+    <pre><code>import "@rr0/ufoathome/ufo"      // enregistre &lt;rr0-ufo&gt;
+import "@rr0/ufoathome/scene"    // enregistre &lt;rr0-scene&gt;
 import "@rr0/ufoathome/sighting" // enregistre &lt;rr0-sighting&gt;
 import "@rr0/ufoathome/editor"   // enregistre &lt;rr0-sighting-editor&gt;</code></pre>
     <p>Ou recopiez le contenu des répertoires <code>dist-embed*</code> du paquet sur votre serveur et

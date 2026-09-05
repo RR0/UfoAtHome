@@ -49,10 +49,10 @@ imported, no explicit setup call needed:
 or, from a bundler:
 
 ```ts
-import "@rr0/ufoathome/ufo"        // registers <rr0-ufo>
+import "@rr0/ufoathome/ufo"      // registers <rr0-ufo>
 import "@rr0/ufoathome/editor"   // registers <rr0-sighting-editor> (and <rr0-scene>, which it composes)
-import "@rr0/ufoathome/scene"      // registers <rr0-scene> (and <rr0-ufo>, which it composes)
-import "@rr0/ufoathome/eyewitness" // registers <rr0-sighting> (and <rr0-scene>, which it composes)
+import "@rr0/ufoathome/scene"    // registers <rr0-scene> (and <rr0-ufo>, which it composes)
+import "@rr0/ufoathome/sighting" // registers <rr0-sighting> (and <rr0-scene>, which it composes)
 ```
 
 Only load the one(s) a given page actually needs — `rr0-scene.mjs` and `rr0-sighting.mjs` in particular pull in
