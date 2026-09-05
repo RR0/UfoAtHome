@@ -116,8 +116,15 @@ export class FaqPage implements SitePage {
       <h3>Why is the object a flat shape rather than a 3D model?</h3>
       <p>Because a 3D object placed in the scene is already a conclusion. It asserts a size, a
         distance and a solidity that no witness could perceive — and, worse, it silently rules out
-        every explanation in which there was no object there at all: a halo, a planet, a satellite,
-        an aircraft's landing light, a lenticular cloud, a reflection on a windscreen.</p>
+        every explanation in which there was no object there at all:
+        <a href="https://rr0.org/science/crypto/ufo/enquete/meprise/optique/">a halo</a>,
+        <a href="https://rr0.org/place/systeme/solaire/planete/venus/">a planet</a>,
+        <a href="https://rr0.org/science/crypto/ufo/enquete/meprise/Satellites.html">a satellite</a>,
+        <a href="https://rr0.org/science/crypto/ufo/enquete/meprise/aeronef/avion/">an aircraft's landing light</a>,
+        <a href="https://rr0.org/science/crypto/ufo/enquete/meprise/nuage/">a lenticular cloud</a>,
+        <a href="https://rr0.org/science/crypto/ufo/enquete/meprise/optique/lens/">a reflection on a windscreen</a>. Those links go to rr0.org's own
+        <a href="https://rr0.org/science/crypto/ufo/enquete/meprise/">catalogue of misperceptions</a>, which is the reason this tool is built the
+        way it is.</p>
       <p>A flat shape on the witness's own field of view asserts exactly what they claimed: this is
         what reached my eye, this big, moving this way. Everything else stays open — which is the
         only way a reconstruction can be used to <em>test</em> a misperception rather than to rule
@@ -354,9 +361,15 @@ export class FaqPage implements SitePage {
       <h3>Pourquoi l'objet est-il une forme plate plutôt qu'un modèle 3D ?</h3>
       <p>Parce qu'un objet 3D placé dans la scène est déjà une conclusion. Il affirme une taille,
         une distance et une solidité qu'aucun témoin ne pouvait percevoir — et, pire, il écarte en
-        silence toutes les explications où il n'y avait aucun objet : un halo, une planète, un
-        satellite, le phare d'atterrissage d'un avion, un nuage lenticulaire, un reflet sur un
-        pare-brise.</p>
+        silence toutes les explications où il n'y avait aucun objet :
+        <a href="https://rr0.org/science/crypto/ufo/enquete/meprise/optique/">un halo</a>,
+        <a href="https://rr0.org/place/systeme/solaire/planete/venus/">une planète</a>,
+        <a href="https://rr0.org/science/crypto/ufo/enquete/meprise/Satellites.html">un satellite</a>,
+        <a href="https://rr0.org/science/crypto/ufo/enquete/meprise/aeronef/avion/">le phare d'atterrissage d'un avion</a>,
+        <a href="https://rr0.org/science/crypto/ufo/enquete/meprise/nuage/">un nuage lenticulaire</a>,
+        <a href="https://rr0.org/science/crypto/ufo/enquete/meprise/optique/lens/">un reflet sur un pare-brise</a>. Ces liens mènent au
+        <a href="https://rr0.org/science/crypto/ufo/enquete/meprise/">catalogue des méprises</a> de rr0.org, qui est la raison pour laquelle cet
+        outil est bâti ainsi.</p>
       <p>Une forme plate dans le champ de vision du témoin affirme exactement ce qu'il a affirmé :
         voilà ce qui est parvenu à mon œil, de cette taille, se déplaçant ainsi. Tout le reste reste
         ouvert — c'est la seule façon qu'une reconstitution ait de <em>tester</em> une méprise au

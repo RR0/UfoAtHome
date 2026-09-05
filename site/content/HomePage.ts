@@ -124,14 +124,15 @@ show(0)`
       <div class="stage">
         <div class="carousel-viewport">
           <rr0-eyewitness id="hero-stage"></rr0-eyewitness>
-          <button class="carousel-nav is-prev" type="button" data-step="-1" aria-label="${fr ? "Précédente" : "Previous"}">‹</button>
-          <button class="carousel-nav is-next" type="button" data-step="1" aria-label="${fr ? "Suivante" : "Next"}">›</button>
+          <button class="carousel-nav is-prev" type="button" data-step="-1" aria-label="${fr ? "Précédente" : "Previous"}"></button>
+          <button class="carousel-nav is-next" type="button" data-step="1" aria-label="${fr ? "Suivante" : "Next"}"></button>
         </div>
         <div class="carousel-dots" role="group" aria-label="${fr ? "Reconstitutions" : "Reconstructions"}">
           ${dots}
         </div>
         <p class="stage-caption">
           <span id="hero-caption"></span>
+          <span class="carousel-sep" aria-hidden="true"> — </span>
           <a class="carousel-edit" id="hero-edit" href="/editor/">${fr ? "Éditer cette observation" : "Edit this sighting"}</a>
         </p>
       </div>

@@ -8,6 +8,10 @@ import { PlayerPage } from "./content/PlayerPage.js"
 import { EditorPage } from "./content/EditorPage.js"
 import { DemosPage } from "./content/DemosPage.js"
 import { DocsPage } from "./content/DocsPage.js"
+import { DocsLinkPage } from "./content/DocsLinkPage.js"
+import { DocsEmbedPage } from "./content/DocsEmbedPage.js"
+import { DocsElementsPage } from "./content/DocsElementsPage.js"
+import { DocsFormatPage } from "./content/DocsFormatPage.js"
 import { FaqPage } from "./content/FaqPage.js"
 import { RoadmapPage } from "./content/RoadmapPage.js"
 
@@ -47,7 +51,10 @@ class SiteBuilder {
     const version = JSON.parse(await readFile(join(this.root, "package.json"), "utf8")).version as string
     const example = await readFile(join(this.root, "public", "demo-data", "example-minimal.json"), "utf8")
     this.pages = [
-      new HomePage(), new PlayerPage(), new EditorPage(), new DemosPage(), new DocsPage(example.trim()),
+      new HomePage(), new PlayerPage(), new EditorPage(), new DemosPage(), new DocsPage(),
+      // The four documentation pages sit under the hub above and stay out of the navigation, which
+      // names only it — see DocsSection for why they are split by question rather than by subject.
+      new DocsLinkPage(), new DocsEmbedPage(), new DocsElementsPage(), new DocsFormatPage(example.trim()),
       new FaqPage(), new RoadmapPage()
     ]
     const layout = new Layout(this.pages, version)

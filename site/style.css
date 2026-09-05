@@ -108,7 +108,7 @@ a:hover { color: var(--ink); text-decoration-color: currentColor; }
 
 h1, h2, h3, h4 { font-family: var(--serif); font-weight: 600; line-height: 1.2; letter-spacing: -0.01em; }
 h1 { font-size: clamp(2.1rem, 5.5vw, 3.4rem); margin: 0 0 0.4em; }
-h2 { font-size: clamp(1.5rem, 3.2vw, 2rem); margin: 2.5rem 0 0.6em; }
+h2 { font-size: clamp(1.5rem, 3.2vw, 2rem); margin: 2rem 0 0.5em; }
 h3 { font-size: 1.2rem; margin: 2rem 0 0.4em; }
 p { margin: 0 0 1.1em; }
 code, kbd { font-family: var(--mono); font-size: 0.875em; }
@@ -137,9 +137,13 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 3rem 0; }
 .site-header a { text-decoration: none; }
 .brand {
   font-family: var(--serif); font-size: 1.15rem; font-weight: 600; color: var(--ink);
-  display: inline-flex; align-items: baseline; gap: 0.4rem;
+  display: inline-flex; align-items: baseline;
 }
-.brand .at { color: var(--glow); }
+/* Optical spacing, not a flex gap: the @ is a letter inside the name, and a gap made it read as a
+   word between two others. Negative, because the serif's own @ is drawn well inside its advance
+   width — its side bearings alone are wider than the space this wordmark wants, so closing it
+   means eating into them. */
+.brand .at { color: var(--glow); margin: 0 -0.08em; }
 .site-nav { display: flex; gap: 1.1rem; flex-wrap: wrap; margin-left: auto; align-items: center; }
 .site-nav a { color: var(--ink-dim); font-size: 0.95rem; padding: 0.2rem 0; border-bottom: 2px solid transparent; }
 .site-nav a:hover { color: var(--ink); }
@@ -151,7 +155,7 @@ main { display: block; }
 .wrap { max-width: var(--wide); margin: 0 auto; padding: 0 clamp(1rem, 4vw, 2.5rem); }
 .prose { max-width: var(--prose); }
 .prose-wide { max-width: 52rem; }
-section.band { padding: 3rem 0; border-top: 1px solid var(--line); }
+section.band { padding: 2rem 0; border-top: 1px solid var(--line); }
 section.band:first-of-type { border-top: 0; }
 
 .lede { font-size: 1.2rem; color: var(--ink-dim); line-height: 1.6; }
@@ -160,10 +164,17 @@ section.band:first-of-type { border-top: 0; }
   text-transform: uppercase; letter-spacing: 0.14em; font-size: 0.72rem; font-weight: 600;
   color: var(--glow-dim); margin: 0 0 0.8rem;
 }
+/* The way back to the documentation hub, sitting in the eyebrow slot of every page under it.
+   Those pages are reached from the hub and the top navigation names only the hub, so without this
+   a reader has nothing but the browser's own Back button. */
+.crumb {
+  color: var(--glow-dim); text-decoration: none; letter-spacing: inherit;
+}
+.crumb:hover { color: var(--glow); text-decoration: underline; }
 
 /* ---------------------------------------------------------------- hero */
 
-.hero { padding: clamp(2.5rem, 7vw, 5rem) 0 2rem; }
+.hero { padding: clamp(1.75rem, 4vw, 3rem) 0 1.25rem; }
 .hero h1 { max-width: 16ch; }
 .hero .lede { max-width: 46ch; }
 .hero-actions { display: flex; gap: 0.8rem; flex-wrap: wrap; margin-top: 1.8rem; }
@@ -197,6 +208,11 @@ section.band:first-of-type { border-top: 0; }
   padding: 0.7rem 1rem; border-top: 1px solid var(--line); color: var(--ink-dim);
   font-size: 0.87rem; background: var(--ground-raised);
 }
+/* Inside a padded card the caption is already inset and already on the card's own ground, so it
+   needs neither the rule above it nor a background of its own. */
+.stage-padded .stage-caption, .carousel .stage-caption {
+  padding: 0.2rem 0 0; border-top: 0; background: none;
+}
 .loading { padding: 3rem 1rem; text-align: center; color: var(--ink-faint); font-size: 0.9rem; }
 
 /* ---------------------------------------------------------------- cards */
@@ -226,42 +242,64 @@ section.band:first-of-type { border-top: 0; }
 
 /* ---------------------------------------------------------------- carousel */
 
-.carousel .stage { margin-top: 0; }
+/* Padded like the editor's card, and for the same reason: the component draws its own frame, and
+   the card's border landing directly on it read as one broken line. The scene keeps a rounded
+   corner of its own so the two curves agree. */
+.carousel .stage { margin-top: 0; padding: 0.9rem; }
 /* Only the scene is the positioning context, so the chevrons sit against ITS edges and not against
    the caption's — a chevron centred on the whole card would drift as the caption's length changes
    from one reconstruction to the next. */
-.carousel-viewport { position: relative; }
+.carousel-viewport { position: relative; border-radius: 8px; overflow: hidden; }
 .carousel-viewport rr0-eyewitness { display: block; }
 .carousel-nav {
   position: absolute; top: 50%; transform: translateY(-50%);
-  cursor: pointer; font: inherit; font-size: 1.5rem; line-height: 1;
+  cursor: pointer; font: inherit; line-height: 1;
   width: 2.4rem; height: 2.4rem; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   border: 1px solid rgba(255, 255, 255, 0.25); background: rgba(7, 10, 18, 0.55);
   color: #fff; backdrop-filter: blur(4px); transition: background .15s, border-color .15s;
   z-index: 2;
 }
+/* Drawn, not typed. A "‹" carries its own side bearings and sits off the vertical centre of its
+   own line box, differently in every font — centring it in a circle by flexbox centres the BOX and
+   leaves the glyph visibly high and left. Two borders on a rotated square have no metrics to
+   disagree with. */
+.carousel-nav::before {
+  content: ""; width: 0.5rem; height: 0.5rem;
+  border-left: 2px solid currentColor; border-bottom: 2px solid currentColor;
+}
+.carousel-nav.is-prev::before { transform: rotate(45deg); margin-left: 0.18rem; }
+.carousel-nav.is-next::before { transform: rotate(-135deg); margin-right: 0.18rem; }
 .carousel-nav:hover { background: rgba(7, 10, 18, 0.8); border-color: var(--glow); }
 .carousel-nav.is-prev { left: 0.6rem; }
 .carousel-nav.is-next { right: 0.6rem; }
 
 .carousel-dots {
-  display: flex; justify-content: center; align-items: center; gap: 0.4rem; flex-wrap: wrap;
-  padding: 0.6rem 1rem 0; background: var(--ground-raised);
+  display: flex; justify-content: center; align-items: center; gap: 0.1rem; flex-wrap: wrap;
+  padding: 0.7rem 0 0.3rem;
 }
+/* The BUTTON is a comfortable target and the dot inside it is small: seventeen dots five pixels
+   apart are a row of things you cannot point at without hitting the neighbour. The visible mark
+   stays the same size; only the thing you are aiming at grew. */
 .carousel-dot {
-  cursor: pointer; width: 0.5rem; height: 0.5rem; padding: 0; border-radius: 50%;
-  border: 0; background: var(--line-strong); transition: background .15s, transform .15s;
+  cursor: pointer; width: 1.5rem; height: 1.5rem; padding: 0; border: 0; background: none;
+  display: flex; align-items: center; justify-content: center;
 }
-.carousel-dot:hover { transform: scale(1.3); }
-.carousel-dot[aria-current="true"] { background: var(--glow); transform: scale(1.3); }
+.carousel-dot::before {
+  content: ""; width: 0.5rem; height: 0.5rem; border-radius: 50%;
+  background: var(--line-strong); transition: background .15s, transform .15s;
+}
+.carousel-dot:hover::before { transform: scale(1.35); }
+.carousel-dot[aria-current="true"]::before { background: var(--glow); transform: scale(1.35); }
 /* While the reader is driving it, the sequence is visibly not. */
-.carousel[data-auto="off"] .carousel-dot[aria-current="true"] { background: var(--sky); }
+.carousel[data-auto="off"] .carousel-dot[aria-current="true"]::before { background: var(--sky); }
 
 /* The edit link ends the description rather than sitting among the dots: it is about the
    reconstruction being described, not about moving between them. */
 .carousel-edit { font-weight: 600; white-space: nowrap; }
-.carousel-edit::before { content: " — "; color: var(--ink-faint); font-weight: 400; }
+/* The dash separates the two and belongs to neither, so it is a sibling rather than the link's own
+   ::before — which would have made it part of what you click and part of what is underlined. */
+.carousel-sep { color: var(--ink-faint); }
 
 /* ---------------------------------------------------------------- demo catalogue */
 
@@ -390,7 +428,7 @@ td { color: var(--ink-dim); }
 /* ---------------------------------------------------------------- footer */
 
 .site-footer {
-  border-top: 1px solid var(--line); margin-top: 4rem; padding: 2.5rem 0 3.5rem;
+  border-top: 1px solid var(--line); margin-top: 2.5rem; padding: 2rem 0 2.5rem;
   color: var(--ink-faint); font-size: 0.88rem;
 }
 .site-footer .wrap { display: flex; gap: 2rem; flex-wrap: wrap; justify-content: space-between; }
@@ -426,7 +464,7 @@ td { color: var(--ink-dim); }
   .carousel-nav { width: 2rem; height: 2rem; font-size: 1.2rem; }
   .carousel-nav.is-prev { left: 0.3rem; }
   .carousel-nav.is-next { right: 0.3rem; }
-  .carousel-dot { width: 0.45rem; height: 0.45rem; }
+  .carousel-dot { width: 1.3rem; height: 1.3rem; }
   .stage-padded { padding: 0.5rem; }
   .stage { border-radius: 10px; }
   .cards, .uses { grid-template-columns: 1fr; }

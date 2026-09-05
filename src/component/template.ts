@@ -607,19 +607,21 @@ select.weather-field:disabled {
   cursor: pointer;
   color: inherit;
   background: transparent;
-  border: 1px solid #444;
+  /* Mixed from the host page's own text colour, like the chips below — see their rule for why.
+     A fixed #333 fill read as dark-on-dark the first time this element was put on a light page. */
+  border: 1px solid color-mix(in srgb, currentColor 30%, transparent);
   border-radius: 4px;
   padding: 0.35em 0.7em;
 }
 .group-tab:hover {
-  border-color: #777;
+  border-color: color-mix(in srgb, currentColor 55%, transparent);
 }
 /* The open group's handle reads as attached to the panel below it: same border colour, and the
    only one filled. Without it, an open panel on a narrow screen (where the handle may have wrapped
    onto another line entirely) gives no clue which of the eight it belongs to. */
 .group-tab[aria-expanded="true"] {
-  background: #333;
-  border-color: #777;
+  background: color-mix(in srgb, currentColor 12%, transparent);
+  border-color: color-mix(in srgb, currentColor 55%, transparent);
 }
 .group-tab:focus-visible {
   outline: 2px solid #4af;
