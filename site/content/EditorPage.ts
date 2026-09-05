@@ -44,6 +44,48 @@ if (editor && requested) {
     editor.scrollIntoView({ block: "start" })
   }
   load()
+}
+
+/* The manual for a strip of eight panels is itself a strip of eight panels: the section below
+   turns into the same one-open-at-a-time control the editor above it uses, so the shape of the
+   page teaches the shape of the tool. Built here rather than written into the HTML so that a
+   reader without this script still gets all eight descriptions, one after another. */
+const docs = document.querySelector(".group-docs")
+if (docs) {
+  const panels = [...docs.querySelectorAll(".group-doc")]
+  const tabs = document.createElement("div")
+  tabs.className = "group-docs-tabs"
+  tabs.setAttribute("role", "tablist")
+  const buttons = panels.map((panel, index) => {
+    const heading = panel.querySelector("h3")
+    const button = document.createElement("button")
+    button.type = "button"
+    button.className = "group-docs-tab"
+    button.setAttribute("role", "tab")
+    /* The heading's own text, so the eight names cannot drift from the eight sections, and its own
+       id as the target, so the anchor beside it still leads here. */
+    button.textContent = heading.textContent.replace("#", "").trim()
+    button.dataset.target = heading.id
+    button.addEventListener("click", () => show(index))
+    tabs.append(button)
+    return button
+  })
+  const show = index => {
+    panels.forEach((panel, i) => (panel.hidden = i !== index))
+    buttons.forEach((button, i) => button.setAttribute("aria-selected", String(i === index)))
+  }
+  docs.before(tabs)
+  docs.classList.add("is-tabbed")
+  /* A link to one group's own heading has to open the panel holding it, or it would scroll to
+     something hidden — which is the whole failure mode of putting prose behind tabs. */
+  const fromHash = () => {
+    const target = decodeURIComponent(location.hash.slice(1))
+    const index = buttons.findIndex(button => button.dataset.target === target)
+    show(index === -1 ? 0 : index)
+    if (index !== -1) panels[index].scrollIntoView({ block: "start" })
+  }
+  addEventListener("hashchange", fromHash)
+  fromHash()
 }`
   }
 
@@ -112,7 +154,8 @@ if (editor && requested) {
     <p class="lede prose-wide">One panel opens at a time, so the render stays on screen while you
       edit.</p>
 
-    <div class="faq-item">
+    <div class="group-docs">
+      <div class="group-doc">
       <h3>Observation</h3>
       <p>Load an existing recording (from a file or a URL), and state what this one is about: a
         <strong>case ID</strong>, a <strong>description</strong>, <strong>tags</strong>. The case ID
@@ -121,7 +164,7 @@ if (editor && requested) {
         witness picker.</p>
     </div>
 
-    <div class="faq-item">
+    <div class="group-doc">
       <h3>Witness</h3>
       <p>Who gave the account — and, just as importantly, <strong>what they observed it
         through</strong>. An eye is not a lens: naked-eye vision maps an angle to an angle, a camera
@@ -134,7 +177,7 @@ if (editor && requested) {
         was <em>held</em> — a camera askew, a head leaned over — not where the witness stood.</p>
     </div>
 
-    <div class="faq-item">
+    <div class="group-doc">
       <h3>Location</h3>
       <p>Testimony names a place, it does not give coordinates. So type the name and press
         <strong>Locate</strong>: latitude and longitude are filled from OpenStreetMap's own
@@ -148,7 +191,7 @@ if (editor && requested) {
         here, under the coordinates whose ground they describe.</p>
     </div>
 
-    <div class="faq-item">
+    <div class="group-doc">
       <h3>Environment</h3>
       <p>What stood around the witness, at a real distance east and north: buildings with their
         floors and windows, trees, streetlights, vehicles, aircraft — and <strong>other
@@ -173,7 +216,7 @@ if (editor && requested) {
         photograph of an airliner is told from a photograph of something that does not blink.</p>
     </div>
 
-    <div class="faq-item">
+    <div class="group-doc">
       <h3>Moment</h3>
       <p>A start, an end, a duration — and a <strong>time zone</strong>, which is the rule, not the
         number. Pick the witness's own zone and the offset is derived from that zone's rules
@@ -186,7 +229,7 @@ if (editor && requested) {
         time.</p>
     </div>
 
-    <div class="faq-item">
+    <div class="group-doc">
       <h3>Weather</h3>
       <p>The one group that is not testimony. Weather is a measurable fact about a place at an
         instant, and the two groups above already state both — so it is looked up from ERA5, the
@@ -209,7 +252,7 @@ if (editor && requested) {
         Whether any of it explains anything is the reader's conclusion, never the file's claim.</p>
     </div>
 
-    <div class="faq-item">
+    <div class="group-doc">
       <h3>Sound</h3>
       <p>Half of what makes these accounts strange is the sound — most often its absence. A
         <strong>kind</strong> (hum, whistle, rumble, crackle, or none), a <strong>loudness</strong>
@@ -221,7 +264,7 @@ if (editor && requested) {
         the witness reported hearing nothing; no sound track at all means nobody was asked.</p>
     </div>
 
-    <div class="faq-item">
+    <div class="group-doc">
       <h3>Phenomenon</h3>
       <p>The object itself. Oval or polygon, colour, transparency, halo, <strong>brilliance</strong>
         (how dazzling it was — a light you cannot look at washes out the field around it, throws the
@@ -236,6 +279,7 @@ if (editor && requested) {
         across, not the 90 an author reaches for unaided. Getting this wrong is the single most
         common way a reconstruction ends up false.</p>
       <p><strong>Sampling rate</strong> is how often the pointer is read while recording.</p>
+    </div>
     </div>
   </div>
 </section>
@@ -370,7 +414,8 @@ if (editor && requested) {
     <p class="lede prose-wide">Un seul panneau s'ouvre à la fois, pour que le rendu reste à l'écran
       pendant que vous éditez.</p>
 
-    <div class="faq-item">
+    <div class="group-docs">
+      <div class="group-doc">
       <h3>Observation</h3>
       <p>Charger un enregistrement existant (fichier ou URL), et énoncer ce dont il s'agit :
         <strong>identifiant de dossier</strong>, <strong>description</strong>,
@@ -379,7 +424,7 @@ if (editor && requested) {
         à une page de les réunir en une seule reconstitution avec un sélecteur de témoin.</p>
     </div>
 
-    <div class="faq-item">
+    <div class="group-doc">
       <h3>Témoin</h3>
       <p>Qui a livré le récit — et, tout aussi important, <strong>à travers quoi il a
         observé</strong>. Un œil n'est pas un objectif : à l'œil nu un angle reste un angle, un
@@ -394,7 +439,7 @@ if (editor && requested) {
         témoin.</p>
     </div>
 
-    <div class="faq-item">
+    <div class="group-doc">
       <h3>Lieu</h3>
       <p>Un témoignage nomme un lieu, il ne donne pas de coordonnées. Tapez donc le nom et appuyez
         sur <strong>Localiser</strong> : latitude et longitude sont remplies par le géocodeur
@@ -410,7 +455,7 @@ if (editor && requested) {
         elles décrivent le sol.</p>
     </div>
 
-    <div class="faq-item">
+    <div class="group-doc">
       <h3>Environnement</h3>
       <p>Ce qui se tenait autour du témoin, à une distance réelle vers l'est et vers le nord :
         bâtiments avec leurs étages et leurs fenêtres, arbres, lampadaires, véhicules, aéronefs —
@@ -437,7 +482,7 @@ if (editor && requested) {
         d'un avion de ligne de celle d'un objet qui ne clignote pas.</p>
     </div>
 
-    <div class="faq-item">
+    <div class="group-doc">
       <h3>Moment</h3>
       <p>Un début, une fin, une durée — et un <strong>fuseau horaire</strong>, qui est la règle et
         non le nombre. Choisissez le fuseau du témoin et le décalage est dérivé des règles de ce
@@ -450,7 +495,7 @@ if (editor && requested) {
         n'énoncent qu'une année et 17 % seulement une date avec une heure.</p>
     </div>
 
-    <div class="faq-item">
+    <div class="group-doc">
       <h3>Météo</h3>
       <p>Le seul groupe qui ne soit pas un témoignage. La météo est un fait mesurable en un lieu à
         un instant, et les deux groupes ci-dessus énoncent déjà les deux — elle est donc relevée
@@ -478,7 +523,7 @@ if (editor && requested) {
         quelque chose est la conclusion du lecteur, jamais l'affirmation du fichier.</p>
     </div>
 
-    <div class="faq-item">
+    <div class="group-doc">
       <h3>Son</h3>
       <p>La moitié de ce qui rend ces récits étranges tient au son — le plus souvent à son absence.
         Un <strong>timbre</strong> (bourdonnement, sifflement, grondement, crépitement, ou aucun),
@@ -492,7 +537,7 @@ if (editor && requested) {
         l'absence totale de piste sonore signifie que personne ne le lui a demandé.</p>
     </div>
 
-    <div class="faq-item">
+    <div class="group-doc">
       <h3>Phénomène</h3>
       <p>L'objet lui-même. Ovale ou polygone, couleur, transparence, halo, <strong>éclat</strong>
         (à quel point il éblouissait — une lumière qu'on ne peut pas regarder délave le champ autour
@@ -509,6 +554,7 @@ if (editor && requested) {
         tromper est la première cause de reconstitution fausse.</p>
       <p>La <strong>fréquence d'échantillonnage</strong> est la cadence à laquelle le curseur est lu
         pendant l'enregistrement.</p>
+    </div>
     </div>
   </div>
 </section>

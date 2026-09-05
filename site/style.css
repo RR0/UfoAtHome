@@ -464,6 +464,30 @@ ul.plain li::before { content: "·"; position: absolute; left: 0.45rem; color: v
 .faq-item > h3 { margin-top: 0; }
 .faq-item > *:last-child { margin-bottom: 0; }
 
+/* The manual for a strip of eight panels, shaped like one. Without the page's script every
+   .group-doc simply stands one after another, which is why the borders live on the block itself
+   and the tab strip is added rather than assumed. */
+.group-doc { border-top: 1px solid var(--line); padding: 1.4rem 0; }
+.group-doc:last-child { border-bottom: 1px solid var(--line); }
+.group-doc > h3 { margin-top: 0; }
+.group-doc > *:last-child { margin-bottom: 0; }
+.group-docs-tabs { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0 0 1.4rem; }
+.group-docs-tab {
+  font: inherit; font-weight: 600; font-size: 0.95rem; cursor: pointer;
+  color: var(--ink-dim); background: transparent;
+  border: 1px solid var(--line-strong); border-radius: 6px; padding: 0.4rem 0.9rem;
+}
+.group-docs-tab:hover { color: var(--ink); border-color: var(--ink-faint); }
+.group-docs-tab[aria-selected="true"] { color: var(--ink); background: var(--ground-sunken); border-color: var(--ink-faint); }
+.group-docs-tab:focus-visible { outline: 2px solid var(--glow); outline-offset: 1px; }
+/* Once a tab strip names the eight, the heading inside the open one says the same word twice. It
+   stays in the DOM all the same: it carries the id every #hash link to this section targets, and
+   the anchor beside it. */
+.group-docs.is-tabbed .group-doc { border: 0; padding: 0; }
+.group-docs.is-tabbed .group-doc > h3 {
+  position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip-path: inset(50%);
+}
+
 table { border-collapse: collapse; width: 100%; font-size: 0.9rem; margin: 0 0 1.2em; }
 .table-scroll { overflow-x: auto; margin: 0 0 1.2em; }
 .table-scroll table { margin: 0; min-width: 34rem; }
