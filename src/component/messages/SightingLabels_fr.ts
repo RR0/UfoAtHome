@@ -70,6 +70,8 @@ export const sightingLabels_fr: SightingLabels = {
   decorHeading: "Orientation",
   decorLit: "Allumé",
   decorTitle: "Nom",
+  confirmAccept: "Supprimer",
+  confirmDecline: "Annuler",
   decorWidth: "Largeur",
   decorLength: "Longueur",
   decorHeight: "Hauteur",

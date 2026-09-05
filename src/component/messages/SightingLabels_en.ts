@@ -70,6 +70,8 @@ export const sightingLabels_en: SightingLabels = {
   decorHeading: "Heading",
   decorLit: "Lit",
   decorTitle: "Name",
+  confirmAccept: "Delete",
+  confirmDecline: "Cancel",
   decorWidth: "Width",
   decorLength: "Length",
   decorHeight: "Height",

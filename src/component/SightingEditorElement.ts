@@ -507,6 +507,13 @@ export class SightingEditorElement extends HTMLElement {
   /** Which catalogue the 3D-model picker offers, and which the scene resolves a named model
    * through — chosen in Data sources like every other real-world source (see refreshSourceRows). */
   private decorModelProvider: DecorModelProvider = DECOR_MODEL_SOURCES[0].create()
+  private readonly confirmOverlay: HTMLElement
+  private readonly confirmMessage: HTMLElement
+  private readonly confirmAcceptButton: HTMLButtonElement
+  private readonly confirmDeclineButton: HTMLButtonElement
+  /** What to do if the reader accepts what askConfirm is currently asking. Absent while nothing is
+   * being asked. */
+  private confirmAnswer?: () => void
   private readonly decorWidthInput: HTMLInputElement
   private readonly decorLengthInput: HTMLInputElement
   private readonly decorHeightInput: HTMLInputElement
@@ -659,6 +666,7 @@ export class SightingEditorElement extends HTMLElement {
         // recorded as trailing motion toward the button. Escape stops in place, no side trip.
         this.toggleRecording()
       }
+      if (!this.confirmOverlay.hidden) this.answerConfirm(false)
       if (!this.contextMenu.hidden) this.hideContextMenu()
       if (!this.decorContextMenu.hidden) this.hideDecorContextMenu()
     }
@@ -926,6 +934,10 @@ export class SightingEditorElement extends HTMLElement {
     this.decorAltitudeInput = this.shadow.getElementById("decorAltitude") as HTMLInputElement
     this.labelDecorAltitude = this.shadow.getElementById("label-decor-altitude")!
     this.decorSightingUrlInput = this.shadow.getElementById("decorSightingUrl") as HTMLInputElement
+    this.confirmOverlay = this.shadow.getElementById("confirm-overlay")!
+    this.confirmMessage = this.shadow.getElementById("confirm-message")!
+    this.confirmAcceptButton = this.shadow.getElementById("confirm-ok") as HTMLButtonElement
+    this.confirmDeclineButton = this.shadow.getElementById("confirm-cancel") as HTMLButtonElement
     this.decorWidthInput = this.shadow.getElementById("decorWidth") as HTMLInputElement
     this.decorLengthInput = this.shadow.getElementById("decorLength") as HTMLInputElement
     this.decorHeightInput = this.shadow.getElementById("decorHeight") as HTMLInputElement
@@ -1083,6 +1095,12 @@ export class SightingEditorElement extends HTMLElement {
     }
     this.decorWitnessSideSelect.addEventListener("change", () => this.updateDecor())
     this.decorModelSelect.addEventListener("change", () => this.updateDecorModelChoice())
+    this.confirmAcceptButton.addEventListener("click", () => this.answerConfirm(true))
+    this.confirmDeclineButton.addEventListener("click", () => this.answerConfirm(false))
+    // Clicking the darkened area around the box declines, like every other modal.
+    this.confirmOverlay.addEventListener("click", event => {
+      if (event.target === this.confirmOverlay) this.answerConfirm(false)
+    })
     for (const side of DECOR_SIDES) {
       this.decorWindowInputs[side].addEventListener("input", () => this.updateDecorWindows())
     }
@@ -3715,11 +3733,20 @@ export class SightingEditorElement extends HTMLElement {
     const toDelete = timeline.sourceIds.filter(id => this.selectedSourceIds.has(id))
     if (toDelete.length === 0) return // nothing real to delete
     if (timeline.sourceIds.length - toDelete.length < 1) return // always keep at least one shape
-    const confirmed =
+    const question =
       toDelete.length === 1
-        ? window.confirm(this.messages.confirmDeleteShape.replace("{name}", this.shapeLabel(toDelete[0])))
-        : window.confirm(this.messages.confirmDeleteShapes.replace("{count}", String(toDelete.length)))
-    if (!confirmed) return
+        ? this.messages.confirmDeleteShape.replace("{name}", this.shapeLabel(toDelete[0]))
+        : this.messages.confirmDeleteShapes.replace("{count}", String(toDelete.length))
+    // What gets deleted is what the question NAMED, not what happens to be selected once it is
+    // answered — the selection can move while the overlay is up (a click elsewhere, the playhead
+    // advancing), and a reader who agreed to delete "Shape 2" has not agreed to delete something
+    // else.
+    this.askConfirm(question, () => this.removeShapes(toDelete))
+  }
+
+  /** The deletion itself, once confirmed — see deleteShape, which is the only caller. */
+  private removeShapes(toDelete: string[]): void {
+    const timeline = this.ufoElement.sighting.timeline
     for (const sourceId of toDelete) timeline.removeSource(sourceId)
     this.currentSourceId = timeline.sourceIds[0]
     this.selectedSourceIds = new Set([this.currentSourceId])
@@ -3729,6 +3756,36 @@ export class SightingEditorElement extends HTMLElement {
     // button state to the new currentSourceId — same idiom addShape() and every drag path use,
     // rather than duplicating that resync here.
     this.ufoElement.refresh()
+  }
+
+  /**
+   * Asks the reader to confirm something, in the component's own overlay.
+   *
+   * NOT window.confirm(). A native dialog is suppressed outright in several of the places this
+   * component is meant to run — a sandboxed iframe without allow-modals, an embedded browser view —
+   * and a suppressed confirm() returns FALSE, which is indistinguishable from the reader declining.
+   * Deleting a shape then did nothing at all, silently, with nothing in the page to show why: the
+   * exact symptom this replaced.
+   *
+   * Resolves false if something else asks while this is open, so two questions can never both be
+   * waiting on one answer.
+   */
+  private askConfirm(question: string, onAccept: () => void): void {
+    this.answerConfirm(false)
+    this.confirmMessage.textContent = question
+    this.confirmOverlay.hidden = false
+    this.confirmAcceptButton.focus()
+    this.confirmAnswer = onAccept
+  }
+
+  /** Closes the overlay and, if the reader accepted, does the thing that was asked about. A
+   * callback rather than a promise: what follows a confirmation is one step, and keeping it
+   * synchronous means nothing between the click and the deletion can interleave. */
+  private answerConfirm(accepted: boolean): void {
+    const onAccept = this.confirmAnswer
+    this.confirmAnswer = undefined
+    this.confirmOverlay.hidden = true
+    if (accepted) onAccept?.()
   }
 
   /** Staggers each successive new shape diagonally by `index` (the count of shapes that
@@ -5028,6 +5085,8 @@ export class SightingEditorElement extends HTMLElement {
     // screen reader (or a sighted hover) gets a real word, not just a symbol.
     this.addDecorBuildingButton.title = messages.addDecor
     this.addDecorBuildingButton.setAttribute("aria-label", messages.addDecor)
+    this.confirmAcceptButton.textContent = messages.confirmAccept
+    this.confirmDeclineButton.textContent = messages.confirmDecline
     this.labelDecorWidth.textContent = messages.decorWidth
     this.labelDecorLength.textContent = messages.decorLength
     this.labelDecorHeight.textContent = messages.decorHeight

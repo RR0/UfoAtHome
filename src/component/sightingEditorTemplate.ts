@@ -363,6 +363,20 @@ export const html = `
 <div class="export-row">
   <button id="export" type="button">Export</button>
 </div>
+<!-- The editor's own confirmation, NOT window.confirm(). A native dialog is suppressed outright in
+     several of the places this component is meant to run — a sandboxed iframe without allow-modals,
+     an embedded browser view — and a suppressed confirm() returns FALSE, which is indistinguishable
+     from the reader declining. Deleting a shape then did nothing at all, silently, with no way for
+     the page to know. Built from ordinary DOM, so nothing can decide not to show it. -->
+<div id="confirm-overlay" class="confirm-overlay" hidden role="alertdialog" aria-modal="true" aria-labelledby="confirm-message">
+  <div class="confirm-box">
+    <p id="confirm-message"></p>
+    <div class="confirm-actions">
+      <button id="confirm-cancel" type="button">Cancel</button>
+      <button id="confirm-ok" type="button">Delete</button>
+    </div>
+  </div>
+</div>
 <div id="context-menu" class="context-menu" hidden role="menu">
   <button id="context-group" type="button" role="menuitem">Group</button>
   <button id="context-ungroup" type="button" role="menuitem">Ungroup</button>
@@ -854,6 +868,42 @@ select.weather-field:disabled {
 /* position:fixed (viewport-relative), left/top set from the triggering pointer event's own
    clientX/clientY in JS — works the same regardless of which shadow tree this menu lives in or
    how the page has scrolled, unlike an absolutely-positioned element nested under this host. */
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.45);
+}
+/* Same trap as .context-menu[hidden] below, and for the same reason: a class selector setting its
+   own display outranks the UA sheet's [hidden] rule. */
+.confirm-overlay[hidden] {
+  display: none;
+}
+.confirm-box {
+  max-width: 26em;
+  padding: 1.2em;
+  background: #fff;
+  color: #222;
+  border-radius: 6px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  font-size: 0.95em;
+}
+.confirm-box p {
+  margin: 0 0 1em;
+}
+.confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6em;
+}
+.confirm-actions button {
+  padding: 0.4em 1em;
+  font: inherit;
+  cursor: pointer;
+}
 .context-menu {
   position: fixed;
   z-index: 10;

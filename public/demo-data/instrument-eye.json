@@ -1085,7 +1085,7 @@
         "t": 5000,
         "pose": {
           "lat": 34.058072,
-          "lng": -106.890989,
+          "lng": -106.890972,
           "elevationM": 0,
           "headingDeg": 200.0,
           "pitchDeg": -5.0,
@@ -1096,7 +1096,7 @@
         "t": 8000,
         "pose": {
           "lat": 34.058135,
-          "lng": -106.890978,
+          "lng": -106.890972,
           "elevationM": 0,
           "headingDeg": 200.0,
           "pitchDeg": -5.0,
@@ -1107,7 +1107,7 @@
         "t": 20000,
         "pose": {
           "lat": 34.058135,
-          "lng": -106.890978,
+          "lng": -106.890972,
           "elevationM": 0,
           "headingDeg": 200.0,
           "pitchDeg": -5.0,

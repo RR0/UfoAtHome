@@ -130,6 +130,11 @@ export interface SightingLabels {
    * across it, along the way its heading faces, and up. Each field's placeholder shows what the
    * built-in shape measures on its own, so leaving one empty is visibly "nobody measured this"
    * rather than a blank. */
+  /** The editor's own confirmation buttons (see the confirm-overlay in the template — a native
+   * confirm() is suppressed in a sandboxed iframe and in some embedded browser views, and a
+   * suppressed one returns false, which reads exactly like the reader declining). */
+  confirmAccept: string
+  confirmDecline: string
   decorWidth: string
   decorLength: string
   decorHeight: string
