@@ -96,23 +96,33 @@ const TWILIGHT_FALLOFF = 1.8
  * degrees down, where an eye really reaches about 4, so a scene at dusk showed twenty-nine stars
  * instead of several hundred and read as a black sky with a few dots in it. Found because a comet
  * at magnitude -0.8 sailed over the sagging limit while the whole star field fell under it.
+ *
+ * AND THE EYE IS ONLY THE DEFAULT. Every number above is human photometry — a 7 mm pupil, a tenth
+ * of a second, an arcminute of acuity — so the whole curve is what a WITNESS could see, and a
+ * sighting made through a camera is a different threshold in the same sky. `instrumentGain` is how
+ * many magnitudes that device stands from an eye (see LimitingMagnitude.gainOverEye): +3.2 for a
+ * tripod at f/2 for twenty seconds, -2.3 for an Instamatic. It shifts the curve rather than
+ * reshaping it, because the twilight it describes is the SKY's and the sky does not care what is
+ * pointed at it.
  */
-export function visibleMagnitudeLimit(sunAltitudeDeg: number): number {
-  if (sunAltitudeDeg <= ASTRONOMICAL_TWILIGHT_DEG) return NAKED_EYE_MAG_LIMIT
-  if (sunAltitudeDeg >= 0) return DAYLIGHT_MAG_LIMIT
+export function visibleMagnitudeLimit(sunAltitudeDeg: number, instrumentGain = 0): number {
+  if (sunAltitudeDeg <= ASTRONOMICAL_TWILIGHT_DEG) return NAKED_EYE_MAG_LIMIT + instrumentGain
+  if (sunAltitudeDeg >= 0) return DAYLIGHT_MAG_LIMIT + instrumentGain
   // 0 at sunset, 1 at the end of astronomical twilight.
   const darkness = sunAltitudeDeg / ASTRONOMICAL_TWILIGHT_DEG
-  return NAKED_EYE_MAG_LIMIT - (NAKED_EYE_MAG_LIMIT - DAYLIGHT_MAG_LIMIT) * (1 - darkness) ** TWILIGHT_FALLOFF
+  return (
+    NAKED_EYE_MAG_LIMIT - (NAKED_EYE_MAG_LIMIT - DAYLIGHT_MAG_LIMIT) * (1 - darkness) ** TWILIGHT_FALLOFF + instrumentGain
+  )
 }
 
 const BRIGHT_MAG_REFERENCE = -1.5 // brighter than any real star (Sirius, -1.46) maps to brightness 1
 /** What an unaided eye actually reaches on a genuinely dark night. The star catalog itself goes to
  * 7.5, which is binocular territory: rendering all of it put thousands of stars in the sky that no
  * witness ever saw, and made every night scene read as an observatory photograph rather than as a
- * testimony. Also the magnitude that maps to brightness 0 below — the two must agree, or the
- * faintest star still drawn would be drawn at something other than the faintest brightness. */
+ * testimony. Also the magnitude that maps to brightness 0 below when nothing says otherwise — the
+ * two must agree, or the faintest star still drawn would be drawn at something other than the
+ * faintest brightness. An instrument moves BOTH of them together (see magnitudeToBrightness). */
 const NAKED_EYE_MAG_LIMIT = 6.5
-const FAINT_MAG_REFERENCE = NAKED_EYE_MAG_LIMIT
 
 /** Bends the linear magnitude ramp so the faint majority stays faint instead of crowding toward
  * mid-grey — the eye's own response to a night sky, where a handful of stars dominate and the rest
@@ -128,9 +138,17 @@ const BRIGHTNESS_GAMMA = 1.6
  * thousand: every star from magnitude 2 to 6.5 came out between 0.04 and 0.0004, which
  * starColorScale's floor then rendered as one indistinguishable grey. All of them looked the same,
  * because they very nearly were.
+ *
+ * The faint end MOVES WITH THE INSTRUMENT, and it has to. The ramp's zero is whatever the faintest
+ * thing recordable was — an eye's 6.5, or the 9.7 a tripod at f/2 reaches (see LimitingMagnitude) —
+ * because a scale that stops at the eye's limit draws every star a photograph gained at brightness
+ * zero, which is to say draws the whole gain as black. That failure has a history in this project:
+ * a thing let through a threshold and then rendered invisible reads exactly like a thing that was
+ * never let through.
  */
-export function magnitudeToBrightness(mag: number): number {
-  const ramp = (FAINT_MAG_REFERENCE - mag) / (FAINT_MAG_REFERENCE - BRIGHT_MAG_REFERENCE)
+export function magnitudeToBrightness(mag: number, faintestVisibleMag = NAKED_EYE_MAG_LIMIT): number {
+  const faintest = Math.max(faintestVisibleMag, BRIGHT_MAG_REFERENCE + 1)
+  const ramp = (faintest - mag) / (faintest - BRIGHT_MAG_REFERENCE)
   return clamp(ramp, 0, 1) ** BRIGHTNESS_GAMMA
 }
 

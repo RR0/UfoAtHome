@@ -936,6 +936,10 @@ export class SceneRenderer {
   /** The lens this scene is being drawn through, or undefined for an eye and for any camera whose
    * own settings leave everything sharp. */
   private lensOptics?: { focalLengthMm: number; fNumber: number; focusDistance: number; frameHeightMm: number }
+  /** Magnitudes deeper (or shallower) than an eye that this recording's own optics reach — see
+   * setInstrumentGain. Zero until told otherwise, which is an eye, which is what a recording that
+   * says nothing was made with. */
+  private instrumentMagnitudeGain = 0
   /** The shower falling in this sky, if any — see MeteorSystem. Built once and kept: an empty
    * shower draws nothing, so there is no reason to tear it down between recordings. */
   private meteorSystem?: MeteorSystem
@@ -1560,12 +1564,17 @@ export class SceneRenderer {
     // DecorSystem.build's own doc comments on why this changed: a manually multiplied flat color
     // can never receive a real shadow, since there's no actual light for something to block).
     this.updateCelestialLight(astronomy, skyColors.zenith, groundColor)
-    this.buildStars(astronomy.stars, astronomy.sun.altitudeDeg)
     // What that sky allowed to be seen — ONE rule, applied to every body in it. The star field has
     // always gone through this; the Moon, the planets and the comet now do too, and the difference
     // is not cosmetic: a magnitude-one Mars was being drawn at two in the afternoon. The Sun is the
     // only thing exempt, for the obvious reason.
-    const magnitudeLimit = visibleMagnitudeLimit(astronomy.sun.altitudeDeg)
+    //
+    // TWO TERMS, and the second one is the instrument's: the sky says what an eye could have picked
+    // out, and the device standing in for that eye moves it (see setInstrumentGain). Computed once
+    // here and handed down, rather than each builder asking again, so that a star, a planet and the
+    // comet beside them can never be drawn against three different thresholds.
+    const magnitudeLimit = visibleMagnitudeLimit(astronomy.sun.altitudeDeg, this.instrumentMagnitudeGain)
+    this.buildStars(astronomy.stars, magnitudeLimit)
     this.setBodyMesh("sun", astronomy.sun, SUN_MOON_VISUAL_RADIUS, new Color(1, 0.96, 0.88), astronomy.sun.magnitude)
     this.setMoonMesh(astronomy.moon, magnitudeLimit)
     this.buildPlanets(astronomy.planets, magnitudeLimit)
@@ -1681,6 +1690,20 @@ export class SceneRenderer {
       this.lensFlare.uniforms.uFlareIntensity.value = artifacts
     }
     this.render()
+  }
+
+  /**
+   * How many magnitudes past a naked eye this observation could reach — the OTHER half of what an
+   * instrument decides, and the half this class was drawing as though it did not exist.
+   *
+   * Not folded into setInstrument above, because it is not a property of the device alone: the same
+   * SLR is 5.4 magnitudes apart from itself between a daylight snapshot and a twenty-second pose at
+   * f/2, and the aperture, the shutter and the focal length that settle it are the recording's (see
+   * LimitingMagnitude.gainFor). Stored rather than acted on: the sky is restated on the very next
+   * setAstronomy tick, which is where every threshold in it is decided.
+   */
+  setInstrumentGain(gain: number): void {
+    this.instrumentMagnitudeGain = Number.isFinite(gain) ? gain : 0
   }
 
   render(): void {
@@ -2631,7 +2654,7 @@ export class SceneRenderer {
     // A different apparition than last tick — two only ever overlap in the odd year, but when they
     // do the one that stops being brightest has to come down.
     if (this.cometKey && this.cometKey !== key) this.disposeComet()
-    const brightness = magnitudeToBrightness(comet.magnitude)
+    const brightness = magnitudeToBrightness(comet.magnitude, magnitudeLimit)
     const scale = starColorScale(brightness)
     this.cometKey = key
     this.setBodyMesh(key, comet.position, PLANET_VISUAL_RADIUS * (0.5 + 0.5 * brightness), new Color(scale, scale, scale), comet.magnitude)
@@ -2834,7 +2857,7 @@ export class SceneRenderer {
       // magnitude one do not, and were being drawn in broad daylight until this line.
       if (planet.magnitude > magnitudeLimit) continue
       seen.add(planet.body)
-      const brightness = magnitudeToBrightness(planet.magnitude)
+      const brightness = magnitudeToBrightness(planet.magnitude, magnitudeLimit)
       const scale = starColorScale(brightness)
       const baseColor = PLANET_COLORS[planet.body] ?? new Color(1, 1, 1)
       const color = new Color(baseColor.r * scale, baseColor.g * scale, baseColor.b * scale)
@@ -2856,7 +2879,7 @@ export class SceneRenderer {
    * surviving star's fixed RA/dec to today's alt/az via equatorialToHorizontal, and buckets by
    * magnitudeToBrightness into the same size tiers/twinkle machinery as before — only the source
    * of positions/brightness changed, not how they're rendered. */
-  private buildStars(stars: SceneAstronomy["stars"], sunAltitudeDeg: number): void {
+  private buildStars(stars: SceneAstronomy["stars"], magnitudeLimit: number): void {
     this.disposeStarTiers()
     this.namedStars = []
     if (!stars || stars.catalog.count === 0) {
@@ -2864,7 +2887,6 @@ export class SceneRenderer {
       return
     }
     const { catalog, date, observer } = stars
-    const magnitudeLimit = visibleMagnitudeLimit(sunAltitudeDeg)
     // Seeds only the twinkle jitter now (real positions/brightness come from the catalog) — kept
     // deterministic so a star's twinkle phase doesn't jump around between renders.
     const jitterRandom = mulberry32(1337)
@@ -2880,7 +2902,7 @@ export class SceneRenderer {
         x,
         y,
         z,
-        brightness: magnitudeToBrightness(mag),
+        brightness: magnitudeToBrightness(mag, magnitudeLimit),
         phase: jitterRandom() * Math.PI * 2,
         speedFactor: 0.7 + jitterRandom() * 0.6
       })

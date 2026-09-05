@@ -50,6 +50,7 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
       return {}
     }
     setInstrument(): void {}
+    setInstrumentGain(): void {}
     setLensOptics(): void {}
     setExposure(): void {}
     setMeteorShower(): void {}

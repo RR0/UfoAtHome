@@ -22,6 +22,8 @@ import { Rainbows } from "../engine/atmosphere/Rainbows.js"
 import type { BowForm } from "../engine/atmosphere/Rainbows.js"
 import type { HaloForm } from "../engine/atmosphere/IceHalos.js"
 import { computeBodyPosition, computeMoonPhase } from "../engine/astronomy/CelestialPositions.js"
+import { LimitingMagnitude } from "../engine/instrument/LimitingMagnitude.js"
+import { STAR_CATALOG_MAGNITUDE_LIMIT } from "../render3d/StarCatalog.js"
 import { visibleMagnitudeLimit } from "../render3d/skyColors.js"
 import type { CometAppearance } from "../engine/astronomy/Comets.js"
 import { Compass } from "../engine/astronomy/Compass.js"
@@ -117,6 +119,11 @@ const SAME_PLACE_DEG = 0.0002
 /** Same restraint as the reverse lookup, and for the same reason: a latitude typed digit by digit
  * would otherwise fetch a tile per keystroke. */
 const GROUND_ELEVATION_DEBOUNCE_MS = 900
+
+/** Sirius, and so the faintest threshold at which the word "star" still promises anything: under a
+ * sky this bright, nothing in the catalogue clears it and the line says so instead of offering a
+ * depth of minus three. */
+const BRIGHTEST_STAR_MAGNITUDE = -1.46
 
 /** How far a declared legal time zone may sit from its own longitude's solar time before the
  * recording is stating something no country has ever done. China's western edge, the widest real
@@ -4619,6 +4626,7 @@ export class SightingEditorElement extends HTMLElement {
     }
     const observer = { lat: place.lat, lng: place.lng, elevationM: this.groundElevationM ?? 0 }
     const parts = [
+      this.starsClause(date, observer),
       this.showerClause(date, observer),
       this.cometClause(date, observer),
       this.satelliteClause(date, observer),
@@ -4627,6 +4635,60 @@ export class SightingEditorElement extends HTMLElement {
       this.glowClause(date, observer)
     ].filter(part => part !== undefined)
     this.skyCandidatesOutput.textContent = this.messages.skyLine.replace("{parts}", parts.join(" · "))
+  }
+
+  /**
+   * How many magnitudes past a naked eye this recording's own optics reach — zero for the eye every
+   * account before instruments existed here was written with.
+   *
+   * Read at t=0 rather than along the timeline, because this line describes the sky of the
+   * observation as a whole; the scene itself asks the same question per instant, where a zoom being
+   * turned really does move the answer (see SceneElement).
+   */
+  private instrumentGain(): number {
+    const sighting = this.ufoElement.sighting
+    return LimitingMagnitude.gainFor(sighting.instrument, {
+      fNumber: resolveObserverPoseAt(sighting, 0)?.fNumber,
+      fieldOfViewDeg: SightingShapes.fovOf(sighting, 0),
+      exposureSeconds: sighting.exposure
+    })
+  }
+
+  /**
+   * How deep that sky went — the threshold every other clause on this line is settled against, said
+   * out loud instead of being left implicit.
+   *
+   * It exists because the number was invisible and instrument-dependent at the same time, which is
+   * the worst combination: an author who switched from the eye to an Instamatic watched two thirds
+   * of the stars leave the scene with nothing anywhere saying why. The clause names the device and
+   * the eye's own figure side by side, so the difference is the reading rather than the surprise.
+   *
+   * And it states where the DATA stops. Past magnitude 7.5 the catalogue has nothing more to draw,
+   * however deep the lens went — which is a limit of what this project ships, not of the
+   * photograph, and the kind of thing a reconstruction owes the reader.
+   */
+  private starsClause(date: Date, observer: { lat: number; lng: number; elevationM: number }): string | undefined {
+    const sunAltitudeDeg = computeBodyPosition("Sun", date, observer).altitudeDeg
+    const gain = this.instrumentGain()
+    const limit = visibleMagnitudeLimit(sunAltitudeDeg, gain)
+    const magnitude = (value: number): string => value.toLocaleString(undefined, { maximumFractionDigits: 1 })
+    // Below the brightest star there is no star left to promise, and "down to magnitude -3" says
+    // the opposite of what it means to a reader.
+    if (limit < BRIGHTEST_STAR_MAGNITUDE) return this.messages.skyStarsNone
+    const instrument = this.ufoElement.sighting.instrument
+    const stated =
+      Math.abs(gain) < 0.1
+        ? this.messages.skyStarsEye.replace("{limit}", magnitude(limit))
+        : (gain > 0 ? this.messages.skyStarsDeeper : this.messages.skyStarsShallower)
+            .replace("{limit}", magnitude(limit))
+            .replace("{device}", instrument.name[this.showerLanguage()])
+            .replace("{gain}", magnitude(Math.abs(gain)))
+            .replace("{eye}", magnitude(visibleMagnitudeLimit(sunAltitudeDeg)))
+    // Said only when it bites, and then always: past this the scene is drawing every star it has and
+    // the photograph held more.
+    return limit <= STAR_CATALOG_MAGNITUDE_LIMIT
+      ? stated
+      : stated + this.messages.skyStarsCatalogue.replace("{catalogue}", magnitude(STAR_CATALOG_MAGNITUDE_LIMIT))
   }
 
   /** The strongest shower running, and what it would really have produced — or the fact that none
@@ -4711,7 +4773,7 @@ export class SightingEditorElement extends HTMLElement {
       // Only worth saying against a sky somebody could have seen anything in at all.
       return sky.sunAltitudeDeg < 0 ? this.messages.skySatellitesNotYet : undefined
     }
-    const magnitudeLimit = visibleMagnitudeLimit(sky.sunAltitudeDeg)
+    const magnitudeLimit = visibleMagnitudeLimit(sky.sunAltitudeDeg, this.instrumentGain())
     const bright = sky.classes.filter(entry => entry.peakMagnitude <= magnitudeLimit)
     const named = this.listed(bright.map(entry => entry.name[this.showerLanguage()]))
     if (sky.sunAltitudeDeg >= 0) {

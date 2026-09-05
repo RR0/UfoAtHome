@@ -144,6 +144,19 @@ export interface Instrument {
    * simply looked up says they were holding a camera.
    */
   apertureBlades?: number
+  /**
+   * The finest detail its receptor keeps, micrometres on the film or the sensor.
+   *
+   * A fact about the RECEPTOR and not about the lens, which is why it is stated in millimetres of
+   * emulsion rather than in degrees of sky: the same grain behind a 50 mm lens and behind a 200 mm
+   * one covers four times less sky in the second, and that is exactly what makes a long lens record
+   * fainter stars at the same f-number (see LimitingMagnitude).
+   *
+   * Absent for an eye, which has no receptor of this kind — its own limit is retinal sampling, an
+   * arcminute of sky, and stated there. Absent too for a camera nobody identified, which falls back
+   * to an ordinary film frame's own.
+   */
+  detailUm?: number
 }
 
 /** Every instrument a recording can declare having been made through. Deliberately two entries and
@@ -188,7 +201,11 @@ export const INSTRUMENTS: Instrument[] = [
     // The line ran from 1963 to 1988, and it is what most people photographing anything in the
     // sixties and seventies were holding.
     years: { from: 1963, to: 1988 },
-    apertureBlades: 5
+    apertureBlades: 5,
+    // Colour negative of the period, printed: about 25 line pairs a millimetre, so 20 µm of detail.
+    // Behind this camera's own 43 mm lens that is 96 arcseconds — an arcminute and a half, coarser
+    // than the eye, which is half of why its stars are so much poorer than the witness's.
+    detailUm: 20
   },
   {
     // The serious camera of the same decades: 36 x 24 mm behind the 50 mm lens that came on the
@@ -211,7 +228,11 @@ export const INSTRUMENTS: Instrument[] = [
     exposureRangeSeconds: { min: 1 / 1000, max: 3600 },
     // Dated from the Nikon F, which is when an SLR became an object an ordinary witness might own.
     years: { from: 1959 },
-    apertureBlades: 6
+    apertureBlades: 6,
+    // The same 35 mm emulsion as the Instamatic's, but behind a 50 mm lens rather than a 43 mm one,
+    // and — decisively — openable to f/2. That is what puts it three magnitudes past the eye on a
+    // tripod where the box camera falls two behind it.
+    detailUm: 20
   },
   {
     // The lens a photographed light is most often taken with, and the one entry here that ZOOMS: a
@@ -229,7 +250,11 @@ export const INSTRUMENTS: Instrument[] = [
     exposureRangeSeconds: { min: 1 / 1000, max: 3600 },
     // Zooms of the period commonly had more blades than a prime.
     apertureBlades: 8,
-    years: { from: 1975 }
+    years: { from: 1975 },
+    // Same film again. Its long end is the deepest thing on this list at a given aperture, since the
+    // same grain then covers four times less sky — the star stays a point and the sky it stands on
+    // is spread thinner.
+    detailUm: 20
   },
   {
     // A modern phone's main camera, landscape: about 7.6 x 5.7 mm of sensor behind a 5.7 mm lens —
@@ -238,16 +263,25 @@ export const INSTRUMENTS: Instrument[] = [
     name: { en: "Phone, held sideways", fr: "Téléphone, tenu couché" },
     projection: "rectilinear",
     frame: { widthMm: 7.6, heightMm: 5.7, focalLengthMm: 5.7 },
-    // No diaphragm at all: the opening is fixed and round, which is why the star is absent and why
-    // its depth of field is so deep that almost everything comes out sharp. The exposure is the
-    // phone's own to choose, from a daylight thousandth to a night-mode ten seconds.
+    // No diaphragm at all — but an opening all the same, and the difference matters twice over. It
+    // is fixed and round, so there is no star and nothing to set, which is why no range stands
+    // beside it. And it is f/1.8, which is a real number of millimetres of glass (3.2 of them
+    // behind this lens) and therefore how much of a faint star it can gather (see
+    // LimitingMagnitude). Its depth of field is so deep at 5.7 mm of focal length that almost
+    // everything comes out sharp anyway. The exposure is the phone's own to choose, from a daylight
+    // thousandth to a night-mode ten seconds.
+    fNumber: 1.8,
     exposureSeconds: 1 / 120,
     exposureRangeSeconds: { min: 1 / 8000, max: 10 },
     // Dated from the first phone camera anybody would bother pointing at the sky.
     years: { from: 2007 },
     // A phone's aperture is fixed and round: no blades, and so no star on a bright light — which is
     // one way to tell a phone's photograph of the Sun from an SLR's.
-    apertureBlades: undefined
+    apertureBlades: undefined,
+    // Sensor pixels, not film grain: about 1.4 µm. Finer than the little lens in front of them can
+    // actually deliver — diffraction at 3.2 mm of opening is already 44 arcseconds against the
+    // pixel's own 51 — which is the one place on this list where the two limits nearly meet.
+    detailUm: 1.4
   },
   {
     // The same silicon, held the way people actually hold a phone. The picture is TALLER than it is
@@ -257,13 +291,20 @@ export const INSTRUMENTS: Instrument[] = [
     name: { en: "Phone, held upright", fr: "Téléphone, tenu debout" },
     projection: "rectilinear",
     frame: { widthMm: 5.7, heightMm: 7.6, focalLengthMm: 5.7 },
-    // No diaphragm at all: the opening is fixed and round, which is why the star is absent and why
-    // its depth of field is so deep that almost everything comes out sharp. The exposure is the
-    // phone's own to choose, from a daylight thousandth to a night-mode ten seconds.
+    // No diaphragm at all — but an opening all the same, and the difference matters twice over. It
+    // is fixed and round, so there is no star and nothing to set, which is why no range stands
+    // beside it. And it is f/1.8, which is a real number of millimetres of glass (3.2 of them
+    // behind this lens) and therefore how much of a faint star it can gather (see
+    // LimitingMagnitude). Its depth of field is so deep at 5.7 mm of focal length that almost
+    // everything comes out sharp anyway. The exposure is the phone's own to choose, from a daylight
+    // thousandth to a night-mode ten seconds.
+    fNumber: 1.8,
     exposureSeconds: 1 / 120,
     exposureRangeSeconds: { min: 1 / 8000, max: 10 },
     years: { from: 2007 },
-    apertureBlades: undefined
+    apertureBlades: undefined,
+    // The same silicon held the other way up: the same 1.4 µm pixels.
+    detailUm: 1.4
   }
 ]
 

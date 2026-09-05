@@ -257,6 +257,23 @@ export interface SightingEditorMessages extends SightingLabels {
   /** No shower running at all on that date — but never an empty sky: {sporadic} is the sporadic
    * background, the meteors that belong to no stream and fall on every night of the year. */
   skyNothingActive: string
+  /** How faint a star that sky allowed, for a witness's own eyes — {limit} the magnitude. First on
+   * the line because every other clause on it is settled against this number. */
+  skyStarsEye: string
+  /** The same threshold for a recording made through something other than an eye, when the device
+   * reached FURTHER: {limit} what it recorded to, {device} its name, {gain} how many magnitudes
+   * past the eye, {eye} what the witness standing beside it saw. Both figures, always — the gap
+   * between them is the whole reason a photograph is worth arguing about. */
+  skyStarsDeeper: string
+  /** And when it reached less far, which is the commoner case and the more surprising one: a
+   * snapshot camera records fewer stars than the person holding it could see. Same four values. */
+  skyStarsShallower: string
+  /** Appended when the instrument outran the shipped star catalogue — {catalogue} where the data
+   * stops. A limit of this project and not of the photograph, and said as such. */
+  skyStarsCatalogue: string
+  /** A sky so bright that not even the brightest star clears the threshold — daylight, mostly.
+   * States it as an absence rather than offering a negative magnitude nobody can read. */
+  skyStarsNone: string
   /** The date or the place is missing, so nothing can be worked out — distinct from "there was
    * nothing", the same way the weather distinguishes the two. */
   skyUnknown: string

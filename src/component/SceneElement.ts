@@ -33,6 +33,7 @@ import { SizeEstimate } from "../engine/shape/SizeEstimate.js"
 import type { MeterRange } from "../engine/shape/SizeEstimate.js"
 import { ApparentSize } from "../engine/shape/ApparentSize.js"
 import { Instruments } from "../engine/instrument/Instrument.js"
+import { LimitingMagnitude } from "../engine/instrument/LimitingMagnitude.js"
 import { ImageProjection } from "../engine/instrument/ImageProjection.js"
 import { SightingShapes } from "../engine/persistence/SightingShapes.js"
 import { SkyDrift } from "../engine/astronomy/SkyDrift.js"
@@ -667,6 +668,17 @@ export class SceneElement extends HTMLElement {
     const pose = resolveObserverPoseAt(sighting, t)
     this.sceneRenderer.setObserverPose(pose ?? DEFAULT_OBSERVER_POSE)
     this.sceneRenderer.setLensOptics(this.lensOpticsAt(t))
+    // What that instrument could actually have RECORDED, which is a second thing entirely from how
+    // it maps an angle: an Instamatic's ninetieth of a second reaches two magnitudes short of the
+    // witness holding it, and the same tripod at f/2 for twenty seconds reaches three past them.
+    // Pushed every tick like the rest, since the aperture is a pose field and a zoom moves under it.
+    this.sceneRenderer.setInstrumentGain(
+      LimitingMagnitude.gainFor(sighting.instrument, {
+        fNumber: pose?.fNumber,
+        fieldOfViewDeg: SightingShapes.fovOf(sighting, t),
+        exposureSeconds: sighting.exposure
+      })
+    )
     // Keeps decor anchored to its own real-world spot rather than sliding along with a moving
     // witness — see SceneRenderer.updateDecorAnchoring's own doc comment. The reference pose is
     // always the recording's own t=0, regardless of what t is being rendered right now.
@@ -960,9 +972,14 @@ export class SceneElement extends HTMLElement {
    * The lens this recording was made through, as the depth-of-field pass needs it — or undefined
    * where the question does not arise.
    *
-   * It arises only for a device that has BOTH a frame and a diaphragm: without a frame there is no
-   * focal length to work from (a camera nobody identified), and without a diaphragm nothing is ever
-   * out of focus in this model (an eye, a phone). Anything else would be guessing at a blur.
+   * It arises only for a device that has BOTH a frame and an aperture: without a frame there is no
+   * focal length to work from (a camera nobody identified), and without an aperture there is no
+   * depth of field at all in this model (an eye). Anything else would be guessing at a blur.
+   *
+   * A phone HAS one — fixed, round and f/1.8 — so it comes through here too. What it does not have
+   * is a noticeable blur: a 5.7 mm lens puts everything past about two metres inside its own depth
+   * of field, and the pass costs nothing to look at (see DepthOfFieldPass, whose shader drops any
+   * pixel whose circle of confusion is under three quarters of a pixel).
    */
   private lensOpticsAt(t: number):
     | { focalLengthMm: number; fNumber: number; focusDistance: number; frameHeightMm: number }

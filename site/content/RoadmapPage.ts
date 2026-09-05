@@ -42,12 +42,12 @@ export class RoadmapPage implements SitePage {
     <table>
       <tr><th>Area</th><th>What it covers</th></tr>
       <tr><td>Testimony</td><td>Shape, movement, colour, transparency, halo, brilliance, blur, sound — keyframed; angular size only, with real distances derived as inequalities from what the object crossed</td></tr>
-      <tr><td>The sky</td><td>Sun, Moon and phase, planets, stars to magnitude 7.5, twilight limiting magnitude, the Milky Way and the zodiacal light as line-of-sight integrals</td></tr>
+      <tr><td>The sky</td><td>Sun, Moon and phase, planets, stars to magnitude 7.5, a limiting magnitude that follows both the twilight and the instrument, the Milky Way and the zodiacal light as line-of-sight integrals</td></tr>
       <tr><td>Sky candidates</td><td>Meteor showers with a sporadic background, 23 naked-eye comet apparitions, the satellite illumination window with the dated SATCAT count</td></tr>
       <tr><td>Atmospheric optics</td><td>22° and 46° haloes, sundogs, tangent, circumzenithal and circumhorizontal arcs, the parhelic circle, pillars — all from ice's refractive index; rainbows and moonbows ray-traced in a spherical drop</td></tr>
       <tr><td>Weather</td><td>ERA5 lookup keyframed along the observation, cloud decks, rain, snow, hail, storms with thunder, wind, cloud attenuation of every celestial body</td></tr>
       <tr><td>The ground</td><td>Real relief and aerial imagery, buildings, trees, streetlights, vehicles, windows and other witnesses, with moving tracks and regulated flashing lights</td></tr>
-      <tr><td>The instrument</td><td>Eye vs rectilinear lens, sensor and focal length in millimetres, letterboxed frame, aperture, focus distance, roll, and a long exposure that accumulates star trails and dots a flashing lamp</td></tr>
+      <tr><td>The instrument</td><td>Eye vs rectilinear lens, sensor and focal length in millimetres, letterboxed frame, aperture, focus distance, roll, a long exposure that accumulates star trails and dots a flashing lamp, and how faint a light the device could record at all — from 4.2 through a box camera to 9.7 on a tripod at f/2</td></tr>
       <tr><td>Provenance</td><td>Place, weather, elevation, imagery and time zone all read from named, swappable sources, with the exact query kept in the file</td></tr>
     </table>
     </div>
@@ -146,6 +146,15 @@ export class RoadmapPage implements SitePage {
     </div>
 
     <div class="timeline-step">
+      <h3>A photograph or a video as the scene <span class="status status-later">planned</span></h3>
+      <p>The shape drawn over the witness's own picture rather than over a computed sky: the frame
+        they actually brought back, with <code>&lt;rr0-ufo&gt;</code> on top of it. It is the
+        shortest route from “this is what my photograph shows” to a stated angular size, and it is
+        the one case where the backdrop needs no reconstruction at all — the instrument that took
+        the picture is what sets the scale, which is exactly what the format already keeps.</p>
+    </div>
+
+    <div class="timeline-step">
       <h3>Reflections of interior lights on glazing <span class="status status-later">planned</span></h3>
       <p>A room lamp, a dashboard light, on a window or a windscreen. The last missing piece of
         “being inside” — and, on its own, the explanation of a good number of accounts.</p>
@@ -190,12 +199,12 @@ export class RoadmapPage implements SitePage {
     <table>
       <tr><th>Domaine</th><th>Ce que cela couvre</th></tr>
       <tr><td>Témoignage</td><td>Forme, mouvement, couleur, transparence, halo, éclat, flou, son — keyframés ; taille angulaire seule, les distances réelles étant déduites en inégalités de ce que l'objet a croisé</td></tr>
-      <tr><td>Le ciel</td><td>Soleil, Lune et sa phase, planètes, étoiles jusqu'à la magnitude 7,5, magnitude limite crépusculaire, Voie lactée et lumière zodiacale en intégrales le long de la ligne de visée</td></tr>
+      <tr><td>Le ciel</td><td>Soleil, Lune et sa phase, planètes, étoiles jusqu'à la magnitude 7,5, une magnitude limite qui suit à la fois le crépuscule et l'instrument, Voie lactée et lumière zodiacale en intégrales le long de la ligne de visée</td></tr>
       <tr><td>Candidats du ciel</td><td>Pluies de météores avec fond sporadique, 23 apparitions de comètes visibles à l'œil nu, fenêtre d'éclairement des satellites avec le compte SATCAT daté</td></tr>
       <tr><td>Optique atmosphérique</td><td>Halos à 22° et 46°, parhélies, arcs tangent, circumzénithal et circumhorizontal, cercle parhélique, piliers — tous issus de l'indice de la glace ; arcs-en-ciel et arcs lunaires lancés dans une goutte sphérique</td></tr>
       <tr><td>Météo</td><td>Relevé ERA5 keyframé le long de l'observation, couches nuageuses, pluie, neige, grêle, orages avec tonnerre, vent, atténuation des astres par les nuages</td></tr>
       <tr><td>Le sol</td><td>Relief réel et imagerie aérienne, bâtiments, arbres, lampadaires, véhicules, vitrages et autres témoins, avec trajectoires et feux clignotants aux cadences réglementaires</td></tr>
-      <tr><td>L'instrument</td><td>Œil ou objectif rectilinéaire, capteur et focale en millimètres, cadre letterboxé, diaphragme, distance de mise au point, roulis, et une pose longue qui accumule les filés d'étoiles et ponctue un feu clignotant</td></tr>
+      <tr><td>L'instrument</td><td>Œil ou objectif rectilinéaire, capteur et focale en millimètres, cadre letterboxé, diaphragme, distance de mise au point, roulis, une pose longue qui accumule les filés d'étoiles et ponctue un feu clignotant, et jusqu'où l'appareil pouvait enregistrer une lumière faible — de 4,2 avec un appareil-boîte à 9,7 sur trépied à f/2</td></tr>
       <tr><td>Provenance</td><td>Lieu, météo, altitude, imagerie et fuseau horaire lus dans des sources nommées et interchangeables, la requête exacte restant dans le fichier</td></tr>
     </table>
     </div>
@@ -296,6 +305,15 @@ export class RoadmapPage implements SitePage {
         largeur angulaire un montant masquait. Et le cas inverse, qui compte davantage : de vrais
         avions vus du sol et pris pour autre chose, sous l'angle et avec les reflets qu'ils donnent
         réellement.</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>Une photo ou une vidéo comme scène <span class="status status-later">planifié</span></h3>
+      <p>La forme dessinée par-dessus l'image du témoin plutôt que par-dessus un ciel calculé :
+        l'image qu'il a réellement rapportée, avec <code>&lt;rr0-ufo&gt;</code> au-dessus. C'est le
+        chemin le plus court entre « voilà ce que montre ma photo » et une taille angulaire énoncée,
+        et le seul cas où le fond n'a aucune reconstitution à faire — c'est l'appareil qui a pris
+        l'image qui donne l'échelle, ce que le format conserve déjà.</p>
     </div>
 
     <div class="timeline-step">

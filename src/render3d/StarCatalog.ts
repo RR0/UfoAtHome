@@ -9,6 +9,18 @@
  * four Float32Array sections concatenated back-to-back, each `count` elements long, in this
  * order: ra (hours), dec (degrees), mag (apparent magnitude), ci (B-V color index).
  */
+/**
+ * How deep the shipped catalogue itself goes — the cut scripts/build-star-catalog.ts makes, stated
+ * here because it is a limit a RENDER has to be able to admit to.
+ *
+ * It never mattered while every scene was drawn for an eye, which stops at 6.5 and so never reached
+ * the edge of the data. An instrument does: a tripod at f/2 records past magnitude nine (see
+ * LimitingMagnitude), and everything between here and there is missing from the picture — not
+ * because the photograph could not hold it, but because this project does not ship it. Going deeper
+ * is a download every scene would pay for; 25 791 stars are already 400 kB.
+ */
+export const STAR_CATALOG_MAGNITUDE_LIMIT = 7.5
+
 export interface StarCatalog {
   count: number
   ra: Float32Array

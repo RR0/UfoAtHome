@@ -221,7 +221,10 @@ ${carousel}
       <div class="card">
         <h3>The sky</h3>
         <p>Sun, Moon and its phase, planets, a star catalogue down to magnitude 7.5 — positioned for
-          that instant and that latitude. The Milky Way and the zodiacal light are integrated along
+          that instant and that latitude. What is drawn from it stops at 6.5, and that number is a fact
+          about a <em>witness</em> rather than about the sky: it is how faint a dark-adapted human
+          eye goes. Point something else at the same night and the threshold moves with it — see
+          the instrument, below. The Milky Way and the zodiacal light are integrated along
           the line of sight, not painted as a texture. Point at any of it and it names itself:
           “Venus, mag −4, 8° above the horizon”.</p>
       </div>
@@ -248,6 +251,10 @@ ${carousel}
         <p>Real relief and aerial imagery around the witness, and the decor that got in the way:
           buildings, trees, streetlights, vehicles, windows, other witnesses — with their lights,
           their flash rates and their tracks.</p>
+        <p>How high the witness stood is looked up from where they stood: the ground under those
+          coordinates comes from a real elevation model, so the altitude on the form is a height
+          above sea level whose floor is the ground itself. Nobody can be placed under it — and at
+          1500 m their horizon really is 1.2° lower than yours.</p>
       </div>
       <div class="card">
         <h3>The instrument</h3>
@@ -258,6 +265,13 @@ ${carousel}
         <p>Only what that device could actually have been set to is offered: an Instamatic had one
           aperture and one shutter speed, so there is nothing to choose, and a camera that did not
           exist yet is flagged against the observation's own date.</p>
+        <p>And it decides how faint a thing could be recorded at all. That same Instamatic stops at
+          magnitude 4.2, two short of the witness holding it — half of why so many “the sky was full
+          of stars” accounts come with an empty black photograph. A 50 mm at f/2 for twenty seconds
+          reaches 9.7, three magnitudes <em>past</em> them. Aperture, shutter and focal length settle
+          it against the sky's own brightness; and a longer pose stops helping once the sky has slid
+          further than the lens can resolve, which is why an hour on a tripod is no deeper than five
+          seconds on one — only longer trails.</p>
       </div>
     </div>
     <p class="small">Every source is named where its data is reported, with the attribution its
@@ -353,7 +367,10 @@ ${carousel}
       <div class="card">
         <h3>Le ciel</h3>
         <p>Soleil, Lune et sa phase, planètes, un catalogue d'étoiles jusqu'à la magnitude 7,5 —
-          placés pour cet instant et cette latitude. La Voie lactée et la lumière zodiacale sont
+          placés pour cet instant et cette latitude. Ce qui en est dessiné s'arrête à 6,5, et ce nombre
+          est un fait sur le <em>témoin</em>, pas sur le ciel : c'est la magnitude qu'atteint un œil
+          humain accoutumé à l'obscurité. Braquez autre chose sur la même nuit et le seuil suit —
+          voir l'instrument, plus bas. La Voie lactée et la lumière zodiacale sont
           intégrées le long de la ligne de visée, non plaquées en texture. Pointez n'importe quoi et
           cela se nomme : « Vénus, mag −4, 8° au-dessus de l'horizon ».</p>
       </div>
@@ -380,6 +397,11 @@ ${carousel}
         <p>Relief réel et imagerie aérienne autour du témoin, et le décor qui s'est interposé :
           bâtiments, arbres, lampadaires, véhicules, vitrages, autres témoins — avec leurs feux,
           leurs cadences de clignotement et leurs trajectoires.</p>
+        <p>À quelle hauteur le témoin se tenait se relève d'où il se tenait : le sol sous ces
+          coordonnées vient d'un modèle d'élévation réel, si bien que l'altitude du formulaire est
+          une altitude au-dessus du niveau de la mer dont le plancher est le sol lui-même. On ne peut
+          placer personne dessous — et à 1500 m son horizon est réellement 1,2° plus bas que le
+          vôtre.</p>
       </div>
       <div class="card">
         <h3>L'instrument</h3>
@@ -391,6 +413,14 @@ ${carousel}
         <p>Seuls les réglages que cet appareil pouvait réellement avoir sont proposés : un
           Instamatic avait un diaphragme et une vitesse, donc il n'y a rien à choisir, et un appareil
           qui n'existait pas encore est signalé face à la date de l'observation.</p>
+        <p>Et c'est lui qui décide de ce qui pouvait être enregistré. Ce même Instamatic s'arrête à
+          la magnitude 4,2, deux de moins que le témoin qui le tient — la moitié de la raison pour
+          laquelle tant de récits de « ciel plein d'étoiles » s'accompagnent d'une photographie noire
+          et vide. Un 50 mm à f/2 pendant vingt secondes atteint 9,7, trois magnitudes
+          <em>au-delà</em> de lui. Diaphragme, pose et focale en décident, face à la clarté du ciel
+          lui-même ; et allonger la pose cesse d'aider dès que le ciel a glissé plus loin que ce que
+          l'objectif sait séparer — une heure sur trépied ne va pas plus loin que cinq secondes, elle
+          fait seulement des filés plus longs.</p>
       </div>
     </div>
     <p class="small">Chaque source est nommée là où sa donnée est rapportée, avec l'attribution

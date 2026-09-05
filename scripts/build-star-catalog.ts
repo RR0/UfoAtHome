@@ -17,6 +17,8 @@ import { readFileSync, writeFileSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 import path from "node:path"
 
+// The renderer states the same cut, because a scene has to be able to say where its data stops —
+// see STAR_CATALOG_MAGNITUDE_LIMIT in src/render3d/StarCatalog.ts, which must move with this.
 const MAGNITUDE_LIMIT = 7.5
 /**
  * Where naming stops, and it is the data that says where.
