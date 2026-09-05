@@ -1,4 +1,15 @@
 import { describe, expect, it } from "vitest"
+
+/**
+ * The one Node API this suite reaches for — see "what it costs" below.
+ *
+ * Declared here rather than by adding `@types/node`: everything this project type-checks is browser
+ * code, deliberately (the Node-side scripts are not in tsconfig's own include at all), and pulling
+ * in a whole platform's types to name two numbers would be a poor trade.
+ */
+declare const process: {
+  cpuUsage(previous?: { user: number; system: number }): { user: number; system: number }
+}
 import { SkyGlowVisibility } from "../../../src/engine/astronomy/SkyGlowVisibility.js"
 import type { ObserverGeo } from "../../../src/engine/astronomy/CelestialPositions.js"
 
@@ -84,11 +95,41 @@ describe("the four things that take them away", () => {
 })
 
 describe("what it costs", () => {
+
+  /** A whole sky, twice, in under a frame and a half. */
+  const BUDGET_MS = 40
+  const RUNS_PER_ATTEMPT = 5
+  /** Enough that one of them lands without a collection in it — see the doc comment below. */
+  const ATTEMPTS = 3
+
+  /**
+   * How long `assess` actually costs, in milliseconds of CPU this process spent on it.
+   *
+   * NOT wall-clock, which is what this used to measure and why it kept failing a release rather
+   * than a regression. Vitest runs test files in parallel workers, so wall-clock time here is the
+   * cost of the work PLUS however long the operating system left this process waiting while the
+   * other workers ran — and on a busy machine the second term dwarfs the first. It measured the
+   * load on the machine at least as much as the price of the computation, which is not what the
+   * budget is about: `process.cpuUsage()` counts only the time this process was actually on a
+   * core, so a machine with something else on it changes how long the measurement TAKES and not
+   * what it reports.
+   */
+  const cpuMillisPerCall = (): number => {
+    const before = process.cpuUsage()
+    for (let run = 0; run < RUNS_PER_ATTEMPT; run++) glows.assess(darkNight, atacama)
+    const spent = process.cpuUsage(before)
+    return (spent.user + spent.system) / 1000 / RUNS_PER_ATTEMPT
+  }
+
   it("answers fast enough to sit on a line that is restated as somebody types", () => {
-    const started = performance.now()
-    for (let run = 0; run < 5; run++) glows.assess(darkNight, atacama)
-    // A whole sky, twice, in under a frame and a half — measured while the rest of this suite is
-    // running in parallel and stealing the machine, so the real figure is well under it.
-    expect((performance.now() - started) / 5).toBeLessThan(40)
+    // The best of a few attempts, because the one thing CPU time does NOT filter out is a garbage
+    // collection that happens to fall inside the window: it is this process's own CPU, and it is
+    // charged here. The fastest attempt is the one that ran without a collection in it, and so the
+    // closest to what the work really costs. An implementation that had genuinely got slower would
+    // fail every attempt, so nothing is being waved through.
+    const attempts = Array.from({ length: ATTEMPTS }, cpuMillisPerCall)
+    const best = Math.min(...attempts)
+
+    expect(best).toBeLessThan(BUDGET_MS)
   })
 })
