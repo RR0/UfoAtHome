@@ -3,7 +3,7 @@ import type { Said } from "../SitePage.js"
 export interface Demo {
   readonly id: string
   readonly src: string
-  /** Which recording the Edit/Open links point at, when `src` is a several-witness manifest. */
+  /** Which recording the View/Edit links point at, when `src` is a several-witness manifest. */
   readonly editSrc?: string
   readonly title: Said<string>
   readonly blurb: Said<string>

@@ -92,6 +92,50 @@ describe("SightingCompletion", () => {
     })
   })
 
+  // A Shape is a discriminated union — an oval or a polygon — and a union is where a schema read
+  // from types is easiest to get wrong: describing one branch is a lie, and giving up leaves the
+  // editor silent from `shape:` inwards, which is what it did.
+  describe("a key whose type is a union of shapes", () => {
+    const inShape = '{ "timeline": { "keyframes": [ { "shapes": [ { "shape": { | } } ] } ] } }'
+
+    it("offers what either branch allows", () => {
+      const offered = labels(inShape)
+      expect(offered).toContain('"kind"')
+      expect(offered).toContain('"color"')
+      // Only a polygon has these, and a reader typing one needs to be told so.
+      expect(offered).toContain('"points"')
+    })
+
+    it("offers the discriminant as the words that choose between the branches", () => {
+      expect(labels('{ "timeline": { "keyframes": [ { "shapes": [ { "shape": { "kind": | } } ] } ] } }'))
+        .toEqual(['"oval"', '"polygon"'])
+    })
+
+    it("keeps following the path underneath one", () => {
+      expect(labels('{ "timeline": { "keyframes": [ { "shapes": [ { "shape": { "bounds": { | } } } ] } ] } }'))
+        .toEqual(['"x"', '"y"', '"width"', '"height"'])
+    })
+  })
+
+  // Two things the shape union turned up, both older than it.
+  describe("what is not a key of a recording", () => {
+    it("offers nothing out of Array's prototype", () => {
+      // `groups` is an array of arrays, and descending into the inner one used to reach Array
+      // itself: push, map, filter and toLocaleString were all offered as keys of a recording.
+      const offered = labels('{ "timeline": { "groups": [ [ | ] ] } }')
+      for (const method of ['"push"', '"map"', '"filter"', '"toLocaleString"']) {
+        expect(offered).not.toContain(method)
+      }
+    })
+
+    it("calls a boolean a boolean, and not free text", () => {
+      // `boolean` IS a union in TypeScript, of true and false, so it fell through the union
+      // handling and came out described as a string.
+      const storm = at('{ "weather": { | } }')?.options.find(option => option.label === '"storm"')
+      expect(storm?.detail).toBe("boolean")
+    })
+  })
+
   describe("what it says about a key", () => {
     it("carries the model's own comment, so the format explains itself as it is typed", () => {
       const intensity = at('{ "weather": { | } }')?.options.find(option => option.label === '"precipitationIntensity"')

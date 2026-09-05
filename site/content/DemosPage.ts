@@ -107,7 +107,10 @@ for (const card of cards) {
     const fr = language === "fr"
     const playerPath = "/player/"
     const editorPath = "/editor/"
-    const openLabel = fr ? "Ouvrir en grand" : "Open full size"
+    // Two verbs of one word, so the pair reads as one choice: look at it, or work on it. "Open
+    // full size" said how it would be shown rather than what you were about to do, and stood
+    // beside a plain "Edit" like a caption beside a button.
+    const openLabel = fr ? "Voir" : "View"
     const editLabel = fr ? "Éditer" : "Edit"
     const loading = fr ? "Chargement du ciel…" : "Loading the sky…"
 
