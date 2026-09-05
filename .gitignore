@@ -19,3 +19,6 @@ scripts/data/
 
 dist-site/
 dist-site-lib/
+
+# Generated from the TypeScript by build:schema — never edited, and rebuilt before the site is.
+site/generated/

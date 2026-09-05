@@ -2,8 +2,8 @@
   "name": "@rr0/ufoathome",
   "type": "module",
   "version": "0.40.0",
-  "description": "UFO@home — record and replay a UFO sighting's shape, movement and appearance",
-  "author": "Jérôme Beau <rr0@rr0.org> (https://rr0.org)",
+  "description": "UFO@home \u2014 record and replay a UFO sighting's shape, movement and appearance",
+  "author": "J\u00e9r\u00f4me Beau <rr0@rr0.org> (https://rr0.org)",
   "license": "MIT",
   "homepage": "https://github.com/RR0/UfoAtHome#readme",
   "repository": {
@@ -33,7 +33,7 @@
     "build:embed-scene": "tsc --noEmit && vite build --config vite.embed-scene.config.ts",
     "build:embed-eyewitness": "tsc --noEmit && vite build --config vite.embed-eyewitness.config.ts",
     "build:all": "npm run build && npm run build:embed && npm run build:embed-ufo && npm run build:embed-scene && npm run build:embed-eyewitness",
-    "build:site": "npm run build:embed && npm run build:embed-ufo && npm run build:embed-scene && npm run build:embed-eyewitness && vite build --config vite.site.config.ts && tsx site/build.ts",
+    "build:site": "npm run build:schema && npm run build:embed && npm run build:embed-ufo && npm run build:embed-scene && npm run build:embed-eyewitness && vite build --config vite.site.config.ts && tsx site/build.ts",
     "site": "tsx site/build.ts",
     "site:watch": "node --watch-path=./site --watch-path=./public/demo-data --import tsx site/build.ts",
     "site:serve": "vite preview --outDir dist-site --port 5181 --strictPort",
@@ -43,7 +43,9 @@
     "test:watch": "vitest",
     "build:stars": "tsx scripts/build-star-catalog.ts",
     "build:comets": "tsx scripts/build-comet-catalog.ts",
-    "build:satellites": "tsx scripts/build-satellite-catalog.ts"
+    "build:satellites": "tsx scripts/build-satellite-catalog.ts",
+    "build:schema": "tsx scripts/build-sighting-schema.ts",
+    "pretest": "npm run build:schema"
   },
   "dependencies": {
     "@rr0/data": "^0.3.41",

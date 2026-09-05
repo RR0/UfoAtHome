@@ -1,7 +1,8 @@
 import { basicSetup, EditorView } from "codemirror"
-import { json, jsonParseLinter } from "@codemirror/lang-json"
+import { json, jsonLanguage, jsonParseLinter } from "@codemirror/lang-json"
 import { linter, lintGutter } from "@codemirror/lint"
 import { SiteCodeTheme } from "./codeTheme.js"
+import { SightingCompletion } from "./sightingCompletion.js"
 
 /**
  * The JSON editor behind the Player page's "paste a recording" panel.
@@ -25,6 +26,10 @@ export class JsonEditor {
         ...new SiteCodeTheme("22rem").extensions,
         basicSetup,
         json(),
+        // What turns this from a text box into a way of LEARNING the format: every key the model
+        // has, the words a key will accept, and the model's own comment about it — read out of the
+        // TypeScript at build time, so it says what the code says. See SightingCompletion.
+        jsonLanguage.data.of({ autocomplete: new SightingCompletion().source }),
         // The whole reason a code editor earns its place here: a mistyped comma is reported ON the
         // line that has it, instead of as "Unexpected token at position 1487".
         lintGutter(),
