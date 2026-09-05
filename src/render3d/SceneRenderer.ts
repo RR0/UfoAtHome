@@ -1066,6 +1066,8 @@ export class SceneRenderer {
     this.terrainMesh = undefined
     this.terrainOrigin = undefined
     this.terrainAttribution = undefined
+    // The flat disc is the only ground again until the next build lands (see applyGroundDepthWrite).
+    this.applyGroundDepthWrite()
     // Any build still in flight is about the old source now.
     this.terrainBuildToken++
   }
@@ -1092,9 +1094,9 @@ export class SceneRenderer {
         if (token !== this.terrainBuildToken) return // superseded by a newer call while this was in flight
         this.disposeMesh(this.terrainMesh)
         // Higher than groundMesh's default (0), lower than the compass labels' (see
-        // COMPASS_RENDER_ORDER) — draws after the flat disc (see TerrainMeshBuilder's own
-        // depthTest:false comment on why depth alone can't be trusted to layer them correctly at
-        // these distances) but still under the compass HUD.
+        // COMPASS_RENDER_ORDER) — draws after the flat disc it is laid over, and still under the
+        // compass HUD. The disc's own depth is what would otherwise decide that layering, and at
+        // these distances it cannot (see applyGroundDepthWrite).
         mesh.renderOrder = TERRAIN_RENDER_ORDER
         // No manual color.setRGB(...this.baseFogColor) tint here anymore (unlike before this
         // session) — the mesh is real-lit now (see TerrainMeshBuilder's own material doc comment),
@@ -1104,6 +1106,7 @@ export class SceneRenderer {
         this.terrainMesh = mesh
         this.terrainAttribution = attribution
         this.scene.add(mesh)
+        this.applyGroundDepthWrite()
         this.render()
         onSettled?.()
       })
@@ -2260,6 +2263,37 @@ export class SceneRenderer {
     this.groundMesh.position.y = 0
     this.groundMesh.receiveShadow = true
     this.scene.add(this.groundMesh)
+    // The disc is rebuilt from scratch whenever its radius changes, so whatever the current terrain
+    // patch implies about its depth has to be re-applied to the new material.
+    this.applyGroundDepthWrite()
+  }
+
+  /**
+   * Lets the flat haze disc write depth only while it is the ONLY ground there is.
+   *
+   * The disc and the real terrain patch are two versions of the same surface, laid one over the
+   * other: the patch is built at the disc's own radius and covers every direction the disc does
+   * (a square of half-side radius contains the circle of that radius — see boundsAroundObserver),
+   * so wherever a patch exists the disc contributes nothing but a colour under the patch's own
+   * alpha fade. Its DEPTH, though, was actively harmful: two coplanar ground surfaces hundreds of
+   * meters out, which the depth buffer cannot separate, so the patch lost the test in large
+   * clean-edged holes. That was worked around by taking the patch out of the depth test entirely —
+   * which fixed the holes and, in exchange, made the patch repaint every decor object standing on
+   * it (see TerrainMeshBuilder's own material comment for what that looked like).
+   *
+   * Dropping the disc's depth write instead removes the ambiguity at its source: only one ground
+   * surface writes depth, so the patch can be depth-tested like the real geometry it is, and a car
+   * eight meters away occludes the ground behind it the way it should. With no patch (a build
+   * still in flight, or a failed fetch) the disc is the real ground again and keeps its depth —
+   * which is what stops a star below the horizon showing through it.
+   */
+  private applyGroundDepthWrite(): void {
+    const material = this.groundMesh?.material as MeshLambertMaterial | undefined
+    if (!material) return
+    const depthWrite = this.terrainMesh === undefined
+    if (material.depthWrite === depthWrite) return
+    material.depthWrite = depthWrite
+    material.needsUpdate = true
   }
 
   /**

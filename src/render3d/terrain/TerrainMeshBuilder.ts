@@ -30,10 +30,10 @@ const FULL_OPACITY_FRACTION = 700 / 900
  * right where they overlap (at the observer's own position, where the patch's own elevation offset
  * is exactly 0 — see the `y = TERRAIN_BASE_Y + ...` below). */
 const TERRAIN_BASE_Y = 0
-/** A small nudge above the flat disc — purely conceptual/cosmetic now that the material's own
- * depthTest:false (see below) is what actually keeps the two from z-fighting; kept mainly so the
- * patch is never numerically exactly coplanar with the disc even in a future where something re-
- * enables depth testing. */
+/** A small nudge above the flat disc, so the patch is never numerically exactly coplanar with it.
+ * What actually keeps the two from z-fighting is that the disc stops writing depth while a patch
+ * exists (see SceneRenderer.setTerrainOrigin) — this only makes the patch unambiguously the upper
+ * of the two surfaces for anything that does compare them. */
 const TERRAIN_Y_OFFSET = 0.01
 
 export interface TerrainBuildResult {
@@ -152,18 +152,19 @@ export async function buildTerrainMesh(
     color: new Color(1, 1, 1),
     vertexColors: true,
     transparent: true,
-    fog: true,
-    // The flat disc and this patch are meant to LAYER (patch drawn over disc, blended only by the
-    // vertex-alpha fade above), not spatially compete for the same depth — at their true distances
-    // (hundreds of meters) the WebGL depth buffer's precision is far too coarse to reliably tell
-    // "patch, offset by a few meters of real relief" apart from "disc, exactly flat" apart, which
-    // without this caused real, confirmed-good terrain to lose the depth test and vanish in large,
-    // clean-edged patches wherever local relief happened to sit close to the disc's own flat plane
-    // — not a data or fetch problem, a depth-precision one. See renderOrder below for the other half
-    // of the fix (SceneRenderer sets it higher than groundMesh's default so this draws afterward).
-    // Unrelated to (and doesn't interfere with) real-time shadow mapping — that's a separate depth
-    // pass from each light's own point of view, not the main camera depth test this disables.
-    depthTest: false
+    fog: true
+    // Depth-tested like any other ground surface — this patch is REAL geometry standing between the
+    // camera and whatever is behind it, and the scenery standing ON it (a car eight meters away, a
+    // shack ninety) has to be able to win that test. It used to carry depthTest:false, so it
+    // repainted every decor object the moment the two overlapped on screen: a patrol car came out
+    // as a featureless slab with only its roof clearing the terrain's own silhouette, and a shack
+    // further out vanished outright. See SceneRenderer.setTerrainOrigin for the other half — the
+    // flat haze disc this patch is laid over stops writing depth while the patch exists, which is
+    // what depthTest:false was really working around (two coplanar ground surfaces at hundreds of
+    // meters, where the depth buffer cannot tell "patch, offset by a few meters of relief" from
+    // "disc, exactly flat", and the terrain lost in large clean-edged holes). The disc is fully
+    // covered by this patch anyway, so its depth was pure redundancy — and the only thing it was
+    // actually hiding was the scenery.
   })
 
   const mesh = new Mesh(geometry, material)
