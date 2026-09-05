@@ -1,9 +1,9 @@
 {
   "name": "@rr0/ufoathome",
   "type": "module",
-  "version": "0.41.1",
-  "description": "UFO@home \u2014 record and replay a UFO sighting's shape, movement and appearance",
-  "author": "J\u00e9r\u00f4me Beau <rr0@rr0.org> (https://rr0.org)",
+  "version": "0.42.0",
+  "description": "UFO@home — record and replay a UFO sighting's shape, movement and appearance",
+  "author": "Jérôme Beau <rr0@rr0.org> (https://rr0.org)",
   "license": "MIT",
   "homepage": "https://github.com/RR0/UfoAtHome#readme",
   "repository": {
