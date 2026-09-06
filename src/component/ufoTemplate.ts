@@ -18,6 +18,13 @@ export const html = `
   <div id="witness-map-panel" class="witness-map-panel" hidden>
     <canvas id="witness-map-canvas" width="240" height="240"></canvas>
   </div>
+  <!-- The account's own sentence and the controls, stacked from the bottom edge up. One box rather
+       than two independently-anchored ones: the caption used to sit at a fixed 2.6em from the
+       bottom, which is a guess at the toolbar's height, and a caption long enough to wrap to two
+       lines then ran under it — Socorro's (E) lost the whole of its second line. Stacked, the
+       caption sits on whatever height the toolbar actually has, in any language and at any font
+       size. -->
+  <div class="bottom-stack" id="bottom-stack">
   <!-- What the account calls the moment now on screen (see Milestone) — above the controls rather
        than inside them, because it is a sentence and the toolbar is a row of buttons. Empty and
        hidden for the recordings that name no moment, which is most of them. -->
@@ -34,6 +41,7 @@ export const html = `
     </div>
     <span id="time-end" class="time-label" title="Duration">0:00</span>
     <button id="loop" type="button" title="Auto-replay" aria-label="Auto-replay" aria-pressed="true">↻</button>
+  </div>
   </div>
 </div>
 `
@@ -154,11 +162,19 @@ canvas[data-cursor="resize-nesw"] {
 canvas[data-cursor="rotate"] {
   cursor: url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%2224%22%20height=%2224%22%3E%3Cpath%20d=%22M12%205A7%207%200%201%201%206.1%208.5%22%20fill=%22none%22%20stroke=%22%23000%22%20stroke-width=%224%22%20stroke-linecap=%22round%22/%3E%3Cpath%20d=%22M12%201.5%2012%208.5%2017%205Z%22%20fill=%22%23000%22%20stroke=%22%23000%22%20stroke-width=%223%22%20stroke-linejoin=%22round%22/%3E%3Cpath%20d=%22M12%205A7%207%200%201%201%206.1%208.5%22%20fill=%22none%22%20stroke=%22%23fff%22%20stroke-width=%221.6%22%20stroke-linecap=%22round%22/%3E%3Cpath%20d=%22M12%201.5%2012%208.5%2017%205Z%22%20fill=%22%23fff%22/%3E%3C/svg%3E") 12 12, grab;
 }
-.toolbar {
+/* Anchored once, for the caption and the controls together — see the markup. Transparent to the
+   pointer as a box; the toolbar takes its own clicks back below. */
+.bottom-stack {
   position: absolute;
   left: 0;
   right: 0;
   bottom: 0;
+  display: flex;
+  flex-direction: column;
+  pointer-events: none;
+}
+.toolbar {
+  pointer-events: auto;
   display: flex;
   align-items: center;
   gap: 0.5em;
@@ -239,11 +255,7 @@ canvas[data-cursor="rotate"] {
   width: 4px;
 }
 .milestone-caption {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 2.6em;
-  padding: 0 0.8em;
+  padding: 0 0.8em 0.35em;
   color: #fff;
   font-size: 0.85em;
   text-align: center;

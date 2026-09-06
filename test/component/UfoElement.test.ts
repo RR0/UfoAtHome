@@ -1569,6 +1569,17 @@ describe("the account's named moments", () => {
     document.body.innerHTML = ""
   })
 
+  it("stacks the caption on the controls instead of guessing their height", () => {
+    // It used to sit a fixed 2.6em from the bottom edge, which is a guess at how tall the toolbar
+    // is — and Socorro's (E), long enough to wrap to two lines, then lost its second line under it.
+    // jsdom lays nothing out, so what is guarded here is the structure that makes the layout right:
+    // one bottom-anchored box, caption first, controls second.
+    const element = mount()
+    const stack = element.shadowRoot!.getElementById("bottom-stack")!
+    const order = [...stack.children].map(child => child.id)
+    expect(order).toEqual(["milestone-caption", "toolbar"])
+  })
+
   it("offers no button to a recording that names no moment", () => {
     const element = mount()
     element.sightingData = { version: 1, timeline: { keyframes: [{ t: 0, shapes: [] }] } } as never
