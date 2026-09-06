@@ -144,7 +144,7 @@ show(0)`
     return `
 <section class="band hero">
   <div class="wrap">
-    <p class="eyebrow">Free software · MIT · embeddable anywhere</p>
+    <p class="eyebrow">Free software · embeddable anywhere</p>
     <h1>Reconstruct what the witness saw.</h1>
     <p class="lede">Draw the shape. Record how it moved. Replay it against the sky that was
       actually over that place, at that hour, on that date — the Sun, the Moon, the stars, the
@@ -179,7 +179,7 @@ ${carousel}
         <h3>Put it on your own site</h3>
         <p>Two lines of HTML place a reconstruction in an article, a case file or a report — your
           recording, on your host, under your name. No framework, no build step, no dependency on
-          this site once you hold the files. It is MIT: use it, change it, redistribute it, fork it.</p>
+          this site once you hold the files. Use it, change it, redistribute it, fork it.</p>
         <p class="use-more">Read the documentation →</p>
       </a>
     </div>
@@ -285,7 +285,7 @@ ${carousel}
       return `
   <section class="band hero">
     <div class="wrap">
-      <p class="eyebrow">Logiciel libre · MIT · intégrable partout</p>
+      <p class="eyebrow">Logiciel libre · intégrable partout</p>
       <h1>Reconstituer ce que le témoin a vu.</h1>
       <p class="lede">Dessinez la forme. Enregistrez son mouvement. Rejouez-la sous le ciel qui se
         trouvait réellement au-dessus de ce lieu, à cette heure, ce jour-là — le Soleil, la Lune, les
@@ -320,8 +320,8 @@ ${carousel}
           <h3>L'intégrer à votre site</h3>
           <p>Deux lignes de HTML posent une reconstitution dans un article, un dossier ou un rapport —
             votre enregistrement, sur votre hébergement, sous votre nom. Aucun <i lang="en">framework</i>,
-            aucune compilation, aucune dépendance à ce site dès lors que vous avez les fichiers. C'est
-            du MIT : utilisez-le, modifiez-le, redistribuez-le, forkez-le.</p>
+            aucune compilation, aucune dépendance à ce site dès lors que vous avez les fichiers.
+            Utilisez-le, modifiez-le, redistribuez-le, forkez-le.</p>
           <p class="use-more">Lire la documentation →</p>
         </a>
       </div>
