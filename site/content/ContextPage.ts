@@ -1,7 +1,11 @@
 import type { PageMeta, SiteLanguage, SitePage } from "../SitePage.js"
 
 /**
- * The long form of the home page's "Everything else is looked up or computed" cards.
+ * The long form of the home page's "Contextualise" cards.
+ *
+ * Named after the principle it belongs to rather than after the data it cites: "sources" was only
+ * half of it — half of this page is derived rather than looked up, and none of it is here to credit
+ * anybody. It is here to say what the context of an observation was.
  *
  * Those cards had grown into the detail itself — magnitudes, catalogue sizes in kilobytes, the
  * projection formula — which is the wrong place for it twice over: it buries what a first reader
@@ -11,11 +15,11 @@ import type { PageMeta, SiteLanguage, SitePage } from "../SitePage.js"
  * Every number on this page is one the tool actually applies; the point of naming them is that a
  * reconstruction's claims can be checked, so a claim that cannot be checked has no business here.
  */
-export class SourcesPage implements SitePage {
+export class ContextPage implements SitePage {
 
   readonly meta: PageMeta = {
-    slug: "sources",
-    navLabel: { en: "Sources", fr: "Sources" },
+    slug: "context",
+    navLabel: { en: "Context", fr: "Contexte" },
     title: {
       en: "Check what the scene claims",
       fr: "Vérifier ce que la scène affirme"

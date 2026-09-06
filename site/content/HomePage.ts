@@ -232,35 +232,35 @@ ${carousel}
             ephemeris for that instant and that place. What is drawn stops where the eye that was
             looking stopped — and where the data itself stops, the tool says so rather than drawing a
             sky emptier than the night was. Point at any of it and it names itself.</p>
-          <p class="card-more"><a href="/sources/#sky">Down to which magnitude →</a></p>
+          <p class="card-more"><a href="/context/#sky">Down to which magnitude →</a></p>
         </div>
         <div class="card">
           <h4>What else was up there</h4>
           <p>Comets, meteor showers, satellites — each drawn only if it could have been visible from
             there, then. Being lit is not the same as being seen, and the Earth's shadow settles that
             one.</p>
-          <p class="card-more"><a href="/sources/#space">How each is decided →</a></p>
+          <p class="card-more"><a href="/context/#space">How each is decided →</a></p>
         </div>
         <div class="card">
           <h4>Ice and water</h4>
           <p>Haloes, sundogs, pillars, tangent and circumzenithal arcs, rainbows and moonbows. Not one
             of those angles is stored: they come out of ice's refractive index and the shape of a
             drop, which is what keeps the whole display consistent with the Sun that made it.</p>
-          <p class="card-more"><a href="/sources/#ice">Which ones, and from what →</a></p>
+          <p class="card-more"><a href="/context/#ice">Which ones, and from what →</a></p>
         </div>
         <div class="card">
           <h4>The weather that day</h4>
           <p>Cloud, rain, snow, storms and wind, read from a worldwide hourly reanalysis going back to
             1940 — and keyframed along the observation, so a sky that cleared, clears. The exact query
             stays in the file: the claim is checkable decades later.</p>
-          <p class="card-more"><a href="/sources/#weather">Which record, and what it gives →</a></p>
+          <p class="card-more"><a href="/context/#weather">Which record, and what it gives →</a></p>
         </div>
         <div class="card">
           <h4>The ground</h4>
           <p>Real relief and aerial imagery around the witness, and the decor that got in the way:
             buildings, trees, streetlights, vehicles, windows, other witnesses. How high they stood is
             looked up from where they stood, and nobody can be placed under the ground.</p>
-          <p class="card-more"><a href="/sources/#ground">Why the horizon moves →</a></p>
+          <p class="card-more"><a href="/context/#ground">Why the horizon moves →</a></p>
         </div>
         <div class="card">
           <h4>The instrument</h4>
@@ -268,12 +268,12 @@ ${carousel}
             really have had are offered, one that did not exist yet is flagged against the date, and
             it — not the witness — sets how faint a thing could be recorded at all. Which is why so
             many “the sky was full of stars” accounts come with an empty black photograph.</p>
-          <p class="card-more"><a href="/sources/#instrument">The numbers behind that →</a></p>
+          <p class="card-more"><a href="/context/#instrument">The numbers behind that →</a></p>
         </div>
       </div>
       <p class="small">Every source is named where its data is reported, and can be swapped for
         another — the picker <em>is</em> the credit. Where each one comes from, what it gives and
-        where it stops: <a href="/sources/">check what the scene claims</a>. What is still missing is
+        where it stops: <a href="/context/">check what the scene claims</a>. What is still missing is
         on <a href="/roadmap/">the roadmap</a>.</p>
       </div>
     </div>
@@ -378,14 +378,14 @@ ${carousel}
             qui regardait — et là où c'est la donnée qui s'arrête, l'outil le dit plutôt que de
             dessiner un ciel plus vide que ne l'était la nuit. Pointez n'importe quoi et cela se
             nomme.</p>
-          <p class="card-more"><a href="/sources/#sky">Jusqu'à quelle magnitude →</a></p>
+          <p class="card-more"><a href="/context/#sky">Jusqu'à quelle magnitude →</a></p>
         </div>
         <div class="card">
           <h4>Ce qu'il y avait d'autre là-haut</h4>
           <p>Comètes, pluies de météores, satellites — chacun n'est dessiné que s'il pouvait être vu
             de là, à ce moment-là. Être éclairé n'est pas être vu, et c'est l'ombre de la Terre qui
             tranche.</p>
-          <p class="card-more"><a href="/sources/#space">Comment chacun est décidé →</a></p>
+          <p class="card-more"><a href="/context/#space">Comment chacun est décidé →</a></p>
         </div>
         <div class="card">
           <h4>La glace et l'eau</h4>
@@ -393,7 +393,7 @@ ${carousel}
             lunaires. Aucun de ces angles n'est stocké : ils sortent de l'indice de réfraction de la
             glace et de la forme d'une goutte, ce qui garde tout le cortège cohérent avec le Soleil
             qui l'a fait.</p>
-          <p class="card-more"><a href="/sources/#ice">Lesquels, et d'après quoi →</a></p>
+          <p class="card-more"><a href="/context/#ice">Lesquels, et d'après quoi →</a></p>
         </div>
         <div class="card">
           <h4>La météo de ce jour-là</h4>
@@ -401,14 +401,14 @@ ${carousel}
             remonte à 1940 — et keyframés le long de l'observation, si bien qu'un ciel qui s'est
             dégagé se dégage. La requête exacte reste dans le fichier : l'affirmation est vérifiable
             des décennies plus tard.</p>
-          <p class="card-more"><a href="/sources/#weather">Quelle source, et ce qu'elle donne →</a></p>
+          <p class="card-more"><a href="/context/#weather">Quelle source, et ce qu'elle donne →</a></p>
         </div>
         <div class="card">
           <h4>Le sol</h4>
           <p>Relief réel et imagerie aérienne autour du témoin, et le décor qui s'est interposé :
             bâtiments, arbres, lampadaires, véhicules, vitrages, autres témoins. À quelle hauteur il
             se tenait se relève d'où il se tenait, et on ne peut placer personne sous le sol.</p>
-          <p class="card-more"><a href="/sources/#ground">Pourquoi l'horizon se déplace →</a></p>
+          <p class="card-more"><a href="/context/#ground">Pourquoi l'horizon se déplace →</a></p>
         </div>
         <div class="card">
           <h4>L'instrument</h4>
@@ -417,12 +417,12 @@ ${carousel}
             encore est signalé face à la date, et c'est lui — non le témoin — qui fixe ce qui pouvait
             être enregistré. D'où tant de récits de « ciel plein d'étoiles » accompagnés d'une
             photographie noire et vide.</p>
-          <p class="card-more"><a href="/sources/#instrument">Les nombres derrière cela →</a></p>
+          <p class="card-more"><a href="/context/#instrument">Les nombres derrière cela →</a></p>
         </div>
       </div>
       <p class="small">Chaque source est nommée là où sa donnée est rapportée, et peut être
         remplacée par une autre — le sélecteur <em>est</em> le crédit. D'où vient chacune, ce qu'elle
-        donne et où elle s'arrête : <a href="/sources/">vérifier ce que la scène affirme</a>. Ce qui
+        donne et où elle s'arrête : <a href="/context/">vérifier ce que la scène affirme</a>. Ce qui
         manque encore est sur <a href="/roadmap/">la page du plan</a>.</p>
       </div>
     </div>
