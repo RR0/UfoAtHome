@@ -326,6 +326,13 @@ canvas[data-cursor="rotate"] {
 .witness-map-panel[hidden] {
   display: none;
 }
+/* Out of the phenomenon's way — see UfoElement.keepWitnessMapClear. The corner it normally sits in
+   is the emptiest part of most of these skies, which is exactly why it is there; when it is not,
+   the recording wins and the map moves. */
+.witness-map-panel.on-the-left {
+  right: auto;
+  left: 0.4em;
+}
 .witness-map-panel canvas {
   display: block;
   width: 100%;

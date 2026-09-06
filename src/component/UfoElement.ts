@@ -942,6 +942,7 @@ export class UfoElement extends HTMLElement {
       )
       this.canvasRenderer.paintGroupHandles(bounds)
     }
+    this.keepWitnessMapClear(instants[0].shapes)
     this.seekInput.value = String(t)
     this.timeStartLabel.textContent = this.formatPosition(t)
     this.showMilestoneAt(t)
@@ -1312,13 +1313,75 @@ export class UfoElement extends HTMLElement {
    * density — a map drawn at CSS resolution and scaled up is a map whose road markings are guesses.
    * Read here rather than on every frame: this is a layout read, and the panel only changes size
    * when the stage does. */
+  /**
+   * Moves the map out from in front of the phenomenon.
+   *
+   * The top-right corner is the emptiest part of nearly every sky this project draws, which is why
+   * the map lives there — but "nearly" is not "always", and a map that covers the very thing the
+   * reader opened it to place is worse than no map. When the drawn phenomenon reaches under it, it
+   * goes to the other corner; when both corners are covered there is nowhere better, and it stays.
+   *
+   * The two thresholds are not the same number on purpose. It leaves as soon as anything touches
+   * it and only comes back once the sky is clear by a margin, so an object drifting along its edge
+   * does not make it hop from corner to corner.
+   */
+  private keepWitnessMapClear(shapes: ReadonlyMap<string, Shape>): void {
+    if (this.witnessMapPanel.hidden) return
+    const box = this.witnessMapBoxPx
+    if (!box) return
+    const covers = (left: number, right: number, slack: number): boolean => {
+      for (const [sourceId, shape] of shapes) {
+        if (this.occludedSourceIds.has(sourceId) || shape.transparency >= 1) continue
+        if (shape.bounds.x + shape.bounds.width < left - slack || shape.bounds.x > right + slack) continue
+        if (shape.bounds.y > box.bottom + slack || shape.bounds.y + shape.bounds.height < box.top - slack) continue
+        return true
+      }
+      return false
+    }
+    const rightCorner: [number, number] = [this.canvas.width - box.width, this.canvas.width]
+    const leftCorner: [number, number] = [0, box.width]
+    const margin = UfoElement.WITNESS_MAP_CLEARANCE_PX
+    if (this.witnessMapPanel.classList.contains("on-the-left")) {
+      // Back to the corner it prefers, but only once that corner is clear by the margin — the
+      // asymmetry IS the anti-flicker: leaving costs nothing, returning has to be sure.
+      if (!covers(rightCorner[0], rightCorner[1], margin)) this.witnessMapPanel.classList.remove("on-the-left")
+      return
+    }
+    if (covers(rightCorner[0], rightCorner[1], 0) && !covers(leftCorner[0], leftCorner[1], 0)) {
+      this.witnessMapPanel.classList.add("on-the-left")
+    }
+  }
+
+  /** Where the map panel sits over the picture, in the fixed pixels shapes are drawn in — measured
+   * when the stage is sized rather than every frame, which would be a layout read per tick. */
+  private witnessMapBoxPx?: { width: number; top: number; bottom: number }
+
+  /** How far the phenomenon has to clear the map before it comes back to the corner it prefers. */
+  private static readonly WITNESS_MAP_CLEARANCE_PX = 24
+
   private sizeWitnessMapCanvas(): void {
     const side = this.witnessMapPanel.clientWidth
     if (side === 0) return
     const pixels = Math.round(side * (globalThis.devicePixelRatio ?? 1))
+    this.measureWitnessMapBox()
     if (this.witnessMapCanvas.width === pixels) return
     this.witnessMapCanvas.width = pixels
     this.witnessMapCanvas.height = pixels
+  }
+
+  /** The panel's own rectangle, expressed in the canvas's fixed drawing pixels — see
+   * witnessMapBoxPx. Both are laid out inside the same stage, so one pair of rects converts. */
+  private measureWitnessMapBox(): void {
+    const panel = this.witnessMapPanel.getBoundingClientRect()
+    const picture = this.canvas.getBoundingClientRect()
+    if (picture.width === 0 || picture.height === 0) return
+    const scaleX = this.canvas.width / picture.width
+    const scaleY = this.canvas.height / picture.height
+    this.witnessMapBoxPx = {
+      width: panel.width * scaleX,
+      top: (panel.top - picture.top) * scaleY,
+      bottom: (panel.bottom - picture.top) * scaleY
+    }
   }
 
   /**

@@ -1499,6 +1499,32 @@ describe("the witness's own map", () => {
     fetchSpy.mockRestore()
   })
 
+  it("gets out of the phenomenon's way, and comes back once the sky is clear", () => {
+    // The top-right corner is the emptiest part of nearly every sky here, which is why the map is
+    // there — but a map covering the very thing a reader opened it to place is worse than no map.
+    const element = mountWithMap(movingWitness())
+    const panel = element.shadowRoot!.getElementById("witness-map-panel")!
+    const canvas = element.canvasElement
+    // jsdom lays nothing out, so the panel's own box is stated rather than measured.
+    ;(element as unknown as { witnessMapBoxPx: unknown }).witnessMapBoxPx = { width: 200, top: 40, bottom: 240 }
+
+    const put = (x: number) => {
+      element.sighting.timeline.addKeyframe(0, [
+        {
+          sourceId: "ufo-1",
+          shape: { kind: "oval", bounds: { x, y: 100, width: 40, height: 20 }, color: "#fff", angle: 0, transparency: 0, haloScale: 0, selected: false }
+        }
+      ])
+      element.refresh()
+    }
+
+    put(canvas.width - 100) // under the map
+    expect(panel.classList.contains("on-the-left")).toBe(true)
+
+    put(canvas.width / 2 - 20) // back in the middle of the sky
+    expect(panel.classList.contains("on-the-left")).toBe(false)
+  })
+
   it("goes to a named moment on the map the way its mark on the bar does", () => {
     const element = mountWithMap(movingWitness())
     const canvas = element.shadowRoot!.getElementById("witness-map-canvas") as HTMLCanvasElement
