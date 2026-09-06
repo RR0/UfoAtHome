@@ -48,6 +48,39 @@ class SiteBuilder {
     "dist-embed-ufo", "dist-embed-scene", "dist-embed-sighting", "dist-embed-sighting-editor", "dist-site-lib"
   ]
 
+  /**
+   * Fails the build when a page prints a version that is not the one being built.
+   *
+   * The roadmap's eyebrow read "version 0.37" for eight releases — on the one page whose entire
+   * subject is what is current. That is the failure mode of a typed-in number: it is right the day
+   * it is typed and nobody ever looks at it again, least of all the person who changed the thing it
+   * describes. So no version is typed. Every one that reaches a page comes from package.json, and
+   * this is what makes that a rule instead of an intention.
+   *
+   * It reads what a page SAYS is a version — "version 0.37", "v0.37", "@rr0/ufoathome@0.37" — and
+   * anything semver-shaped, which is this project's own shape. A dependency's version is caught by
+   * the same net, deliberately: if one ever has to be printed, it has to be read from that
+   * dependency's own record too, not from a keystroke. The rendered page is what is checked rather
+   * than the source, so it covers the shell (the footer says the version) as well as the content,
+   * and cannot be fooled by a number assembled from pieces.
+   */
+  private checkPrintedVersions(html: string, page: string, version: string): void {
+    const claims = [
+      /\bversions?\s+v?(\d+(?:\.\d+)+)/gi,
+      /(?:^|[\s(>/@])v(\d+(?:\.\d+)+)\b/g,
+      /\b(\d+\.\d+\.\d+)\b/g
+    ]
+    for (const claim of claims) {
+      for (const [said, printed] of html.matchAll(claim)) {
+        if (printed !== version) {
+          throw new Error(`${page} prints "${said.trim()}" where this build is ${version}. `
+            + `A version is never typed into a page: take it from package.json — the roadmap page `
+            + `takes it through its constructor, and the layout puts it in the footer.`)
+        }
+      }
+    }
+  }
+
   async build(): Promise<void> {
     const version = JSON.parse(await readFile(join(this.root, "package.json"), "utf8")).version as string
     const example = await readFile(join(this.root, "public", "demo-data", "example-minimal.json"), "utf8")
@@ -71,8 +104,10 @@ class SiteBuilder {
     for (const page of this.pages) {
       for (const language of SITE_LANGUAGES) {
         const file = join(this.out, layout.fileName(page.meta, language))
+        const html = layout.render(page, language)
+        this.checkPrintedVersions(html, layout.fileUrl(page.meta, language), version)
         await mkdir(dirname(file), { recursive: true })
-        await writeFile(file, layout.render(page, language), "utf8")
+        await writeFile(file, html, "utf8")
         written.push(file)
       }
     }
