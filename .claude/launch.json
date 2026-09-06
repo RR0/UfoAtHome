@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "ufoathome-site",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "site:serve"],
+      "port": 5181
+    }
+  ]
+}
