@@ -37,7 +37,8 @@ export class HomePage implements SitePage {
       src: demo.src,
       edit: demo.editSrc ?? demo.src,
       title: demo.title[language],
-      blurb: demo.blurb[language]
+      blurb: demo.blurb[language],
+      witnessMap: demo.witnessMap === true
     })))
     return `const slides = ${slides}
 // A recording as long as Valensole's four and a half minutes would hold the carousel for as long
@@ -66,6 +67,9 @@ const show = async position => {
   const slide = slides[index]
   caption.innerHTML = "<strong>" + slide.title + "</strong> " + slide.blurb
   editLink.href = editorPath + "?sighting=" + encodeURIComponent(slide.edit)
+  // One stage plays every slide in turn, so this has to come OFF again for the ones that don't
+  // carry it — see Demo.witnessMap.
+  stage.toggleAttribute("show-witness-map", slide.witnessMap)
   for (const [at, dot] of dots.entries()) dot.setAttribute("aria-current", String(at === index))
   clearTimeout(slideTimer)
   try {

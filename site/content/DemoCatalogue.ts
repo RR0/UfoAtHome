@@ -5,6 +5,17 @@ export interface Demo {
   readonly src: string
   /** Which recording the View/Edit links point at, when `src` is a several-witness manifest. */
   readonly editSrc?: string
+  /**
+   * Whether to offer the map of where the witness stood — see the `show-witness-map` attribute,
+   * which is off everywhere by default.
+   *
+   * Per demo, not per page, because it is a fact about the RECONSTRUCTION and not about where it is
+   * being shown: a case whose witness never moved and whose heading nobody recorded has a map with
+   * one pin and no cone on it, which is worth less than the room it takes. Socorro is the case this
+   * was built for — eleven hundred metres of road, and a witness who turns his back on the object
+   * to run.
+   */
+  readonly witnessMap?: boolean
   readonly title: Said<string>
   readonly blurb: Said<string>
 }
@@ -53,6 +64,7 @@ export class DemoCatalogue {
         {
           id: "socorro",
           src: "/demo-data/witness-socorro.json",
+          witnessMap: true,
           title: { en: "Socorro, 1964", fr: "Socorro, 1964" },
           blurb: {
             en: "Low sun, 17:50, New Mexico. The case people argue about the phenomenon's size in — and where the reconstruction refuses to state one.",

@@ -53,6 +53,8 @@ const mount = async card => {
     unmount(victim)
   }
   const scene = document.createElement("rr0-scene")
+  // Only the reconstructions that have somewhere to point it — see Demo.witnessMap.
+  if (card.dataset.witnessMap) scene.setAttribute("show-witness-map", "")
   card.querySelector(".demo-mount").replaceChildren(scene)
   await customElements.whenDefined("rr0-scene")
   await scene.loadFromSrc(card.dataset.src)
@@ -121,7 +123,8 @@ for (const card of cards) {
       <div class="demo-grid">
         ${group.demos.map(demo => {
           const target = encodeURIComponent(demo.editSrc ?? demo.src)
-          return `<figure class="demo-card" id="${demo.id}" data-src="${demo.src}">
+          const witnessMap = demo.witnessMap ? ' data-witness-map="1"' : ""
+          return `<figure class="demo-card" id="${demo.id}" data-src="${demo.src}"${witnessMap}>
           <div class="demo-mount"><p class="loading">${loading}</p></div>
           <figcaption>
             <h3>${demo.title[language]}</h3>
