@@ -919,6 +919,11 @@ export class SceneElement extends HTMLElement {
    * shape straight off the timeline — the same interpolated position the nested `<rr0-ufo>` is
    * about to paint — converts its bounds center from the fixed 640x360 canvas drawing space to
    * NDC, and raycasts. */
+  /** Where the occlusion grid samples a shape, as fractions of its own width and height from its
+   * centre — kept inside the drawn body rather than on its very edge, where a rounding either way
+   * decides the answer. */
+  private static readonly OCCLUSION_GRID = [-0.35, 0, 0.35]
+
   private updateUfoOcclusion(t: number): void {
     const sighting = this.ufoElement.sighting
     if (sighting !== this.sizeEstimatesFor) {
@@ -931,9 +936,32 @@ export class SceneElement extends HTMLElement {
     for (const sourceId of timeline.sourceIds) {
       const shape = timeline.getInterpolatedShapeAt(t, sourceId)
       if (!shape) continue
-      const ndcX = ((shape.bounds.x + shape.bounds.width / 2) / canvas.width) * 2 - 1
-      const ndcY = -(((shape.bounds.y + shape.bounds.height / 2) / canvas.height) * 2 - 1)
-      if (this.sceneRenderer.isScreenPointOccluded(ndcX, ndcY, sourceId, shape.behindCloud)) occluded.add(sourceId)
+      const shift = this.ufoElement.lookShiftPx
+      const centreX = shape.bounds.x + shape.bounds.width / 2 + shift.x
+      const centreY = shape.bounds.y + shape.bounds.height / 2 + shift.y
+      const ndcX = (centreX / canvas.width) * 2 - 1
+      const ndcY = -((centreY / canvas.height) * 2 - 1)
+      // A GRID over the shape, not one ray through its centre. A ray answers for a point and a
+      // shape is an area: an object fourteen pixels wide straddling the edge of a patrol car had
+      // its one ray land in the clear, and came out painted whole and squarely in front of a car it
+      // was two hundred metres behind.
+      //
+      // TWO samples call it hidden, one does not: on a three-by-three grid a single sample is a
+      // graze at a corner, two is a real overlap. The overlay cannot clip, so it has to answer the
+      // whole question one way, and the two wrong answers are not equally wrong — a thing drawn
+      // over something two hundred metres nearer is a plain contradiction, while a thing briefly
+      // out of sight behind it is what the witness's own eye would have done.
+      let hidden = 0
+      for (const dx of SceneElement.OCCLUSION_GRID) {
+        for (const dy of SceneElement.OCCLUSION_GRID) {
+          const x = centreX + dx * shape.bounds.width
+          const y = centreY + dy * shape.bounds.height
+          if (this.sceneRenderer.isScreenPointOccluded((x / canvas.width) * 2 - 1, -((y / canvas.height) * 2 - 1), sourceId, shape.behindCloud)) {
+            hidden++
+          }
+        }
+      }
+      if (hidden >= 2) occluded.add(sourceId)
       // The same ray, asked the other question: not "is it hidden" but "by what, and how far
       // away". Free to ask here (the camera and the decor are already posed for exactly this
       // instant, which is the only state in which the answer is meaningful) and accumulated across
@@ -941,6 +969,28 @@ export class SceneElement extends HTMLElement {
       // that accumulation is the honest shape for this.
       const widthDeg = shape.angular?.widthDeg ?? this.projectionAt(t).pxToDeg(shape.bounds.width)
       this.sizeEstimateOf(sourceId).add(widthDeg, this.sceneRenderer.decorDistancesAt(ndcX, ndcY, sourceId))
+    }
+    // A phenomenon drawn in several parts is one thing: Socorro's red insignia is painted ON its
+    // craft, and hiding the craft behind a patrol car while leaving the insignia floating over the
+    // bodywork is worse than either answer on its own. Anything drawn wholly inside something
+    // hidden is hidden with it.
+    for (const sourceId of timeline.sourceIds) {
+      if (occluded.has(sourceId)) continue
+      const shape = timeline.getInterpolatedShapeAt(t, sourceId)
+      if (!shape) continue
+      for (const hiddenId of occluded) {
+        const over = timeline.getInterpolatedShapeAt(t, hiddenId)
+        if (!over) continue
+        const inside =
+          shape.bounds.x >= over.bounds.x &&
+          shape.bounds.y >= over.bounds.y &&
+          shape.bounds.x + shape.bounds.width <= over.bounds.x + over.bounds.width &&
+          shape.bounds.y + shape.bounds.height <= over.bounds.y + over.bounds.height
+        if (inside) {
+          occluded.add(sourceId)
+          break
+        }
+      }
     }
     this.ufoElement.setOccludedSourceIds(occluded)
   }

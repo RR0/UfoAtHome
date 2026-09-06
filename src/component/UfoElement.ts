@@ -1455,7 +1455,13 @@ export class UfoElement extends HTMLElement {
     this.refresh()
   }
 
-  /** How far the reader's own turn moves the overlay, in the pixels shapes are drawn in. */
+  /** How far the reader's own turn moves the overlay, in the pixels shapes are drawn in — public
+   * because a composing element testing what the decor hides has to ask about the point a shape is
+   * actually PAINTED at, not the one the timeline stores (see SceneElement.updateUfoOcclusion). */
+  get lookShiftPx(): { x: number; y: number } {
+    return this.lookShift
+  }
+
   private get lookShift(): { x: number; y: number } {
     if (this.lookYawDeg === 0 && this.lookPitchDeg === 0) return { x: 0, y: 0 }
     const pose = resolveObserverPoseAt(this.currentSighting, this.currentTime)
