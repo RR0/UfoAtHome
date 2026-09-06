@@ -3412,8 +3412,8 @@
         "fr": "Voiture de patrouille de Zamora",
         "en": "Zamora's patrol car"
       },
-      "eastM": -400.2,
-      "northM": -1091.4,
+      "eastM": -561.3,
+      "northM": -929.1,
       "headingDeg": 225,
       "lit": false,
       "occludesSourceIds": [
@@ -3436,61 +3436,75 @@
           "eastM": 2.6,
           "northM": 0.0,
           "altitudeM": 0,
-          "headingDeg": 200
+          "headingDeg": 200.0
         },
         {
           "t": 8000,
-          "eastM": -65.8,
-          "northM": -187.9,
+          "eastM": -60.0,
+          "northM": -171.6,
           "altitudeM": 0,
-          "headingDeg": 200
+          "headingDeg": 200.0
+        },
+        {
+          "t": 12000,
+          "eastM": -91.1,
+          "northM": -257.5,
+          "altitudeM": 0,
+          "headingDeg": 230.0
+        },
+        {
+          "t": 18000,
+          "eastM": -196.1,
+          "northM": -345.6,
+          "altitudeM": 0,
+          "headingDeg": 260.0
         },
         {
           "t": 25000,
-          "eastM": -202.6,
-          "northM": -563.8,
+          "eastM": -353.4,
+          "northM": -373.3,
           "altitudeM": 0,
-          "headingDeg": 200
+          "headingDeg": 200.0
         },
         {
           "t": 45000,
-          "eastM": -288.1,
-          "northM": -798.7,
+          "eastM": -435.6,
+          "northM": -598.8,
           "altitudeM": 0,
-          "headingDeg": 200
+          "headingDeg": 200.0
         },
         {
           "t": 52000,
-          "eastM": -324.4,
-          "northM": -898.3,
+          "eastM": -464.3,
+          "northM": -677.7,
           "altitudeM": 0,
-          "headingDeg": 200
+          "headingDeg": 200.0
         },
         {
           "t": 68000,
-          "eastM": -366.8,
-          "northM": -1014.9,
+          "eastM": -530.1,
+          "northM": -858.3,
           "altitudeM": 0,
-          "headingDeg": 200
+          "headingDeg": 200.0
         },
         {
           "t": 72000,
-          "eastM": -392.4,
-          "northM": -1085.3,
+          "eastM": -551.5,
+          "northM": -917.4,
           "altitudeM": 0,
-          "headingDeg": 200
+          "headingDeg": 200.0
         },
         {
           "t": 75000,
-          "eastM": -400.2,
-          "northM": -1091.4,
+          "eastM": -561.3,
+          "northM": -929.1,
           "altitudeM": 0,
           "headingDeg": 225
         },
         {
           "t": 120000,
-          "eastM": -400.2,
-          "northM": -1091.4,
+          "eastM": -561.3,
+          "northM": -929.1,
           "altitudeM": 0,
           "headingDeg": 225
         }
@@ -3503,8 +3517,8 @@
         "fr": "Abri à dynamite",
         "en": "Dynamite shack"
       },
-      "eastM": -473.9,
-      "northM": -1151.0,
+      "eastM": -635.0,
+      "northM": -988.7,
       "floors": 0,
       "lit": false,
       "sizeM": {

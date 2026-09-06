@@ -86,9 +86,15 @@ export class WitnessMapRenderer {
   /** Metres the scale bar may be, coarsest first — the bar takes the largest that still fits in
    * about a third of the map, so it lands on a number a reader can multiply in their head. */
   private static readonly SCALE_STEPS_M = [5000, 2000, 1000, 500, 200, 100, 50, 20, 10, 5]
-  /** Radius of a named moment's own disc, pixels — and the distance within which the witness is
-   * standing ON one rather than near it. */
-  private static readonly MARKER_RADIUS_PX = 7
+  /**
+   * Radius of a named moment's own disc, pixels — and the distance within which the witness is
+   * standing ON one rather than near it.
+   *
+   * Sized for the panel it lives in, which is a fraction of a player that is itself often a column
+   * in an article: a mark that would be discreet on a full-screen map is a speck here, and the
+   * letter inside it has to be readable at a glance or the moments may as well not be on the map.
+   */
+  private static readonly MARKER_RADIUS_PX = 10
 
   constructor(private readonly ctx: CanvasRenderingContext2D) {}
 
@@ -179,7 +185,7 @@ export class WitnessMapRenderer {
     for (const object of frame.decor) {
       const at = this.toCanvas(frame.bounds, object.lat, object.lng)
       ctx.beginPath()
-      ctx.rect(at.x - 3, at.y - 3, 6, 6)
+      ctx.rect(at.x - 4, at.y - 4, 8, 8)
       ctx.fillStyle = "rgba(120, 220, 255, 0.85)"
       ctx.fill()
       ctx.lineWidth = 1.5
@@ -191,7 +197,7 @@ export class WitnessMapRenderer {
       const angle = ((object.headingDeg - 90) * Math.PI) / 180
       ctx.beginPath()
       ctx.moveTo(at.x, at.y)
-      ctx.lineTo(at.x + Math.cos(angle) * 9, at.y + Math.sin(angle) * 9)
+      ctx.lineTo(at.x + Math.cos(angle) * 12, at.y + Math.sin(angle) * 12)
       ctx.lineWidth = 3
       ctx.strokeStyle = "rgba(0, 0, 0, 0.6)"
       ctx.stroke()
@@ -281,7 +287,7 @@ export class WitnessMapRenderer {
       ctx.arc(at.x, at.y, WitnessMapRenderer.MARKER_RADIUS_PX, 0, Math.PI * 2)
       ctx.fillStyle = marker.current ? "rgba(255, 224, 130, 0.95)" : "rgba(0, 0, 0, 0.55)"
       ctx.fill()
-      ctx.lineWidth = 1.5
+      ctx.lineWidth = 2
       ctx.strokeStyle = "rgba(255, 255, 255, 0.9)"
       ctx.stroke()
       ctx.fillStyle = marker.current ? "#1d2321" : "#fff"
@@ -308,7 +314,7 @@ export class WitnessMapRenderer {
       return Math.hypot(markerAt.x - at.x, markerAt.y - at.y) <= WitnessMapRenderer.MARKER_RADIUS_PX
     })
     ctx.beginPath()
-    ctx.arc(at.x, at.y, onMarker ? WitnessMapRenderer.MARKER_RADIUS_PX + 2.5 : 4.5, 0, Math.PI * 2)
+    ctx.arc(at.x, at.y, onMarker ? WitnessMapRenderer.MARKER_RADIUS_PX + 3 : 6.5, 0, Math.PI * 2)
     if (!onMarker) {
       ctx.fillStyle = "#ff5a3c"
       ctx.fill()
@@ -316,7 +322,7 @@ export class WitnessMapRenderer {
     ctx.lineWidth = 4
     ctx.strokeStyle = "rgba(0, 0, 0, 0.5)"
     ctx.stroke()
-    ctx.lineWidth = onMarker ? 2.5 : 2
+    ctx.lineWidth = onMarker ? 3 : 2.5
     ctx.strokeStyle = onMarker ? "#ff5a3c" : "#fff"
     ctx.stroke()
   }
