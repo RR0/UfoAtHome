@@ -76,6 +76,19 @@ export class Layout {
     return reference
   }
 
+  /**
+   * Why the module URLs carry `?v=`.
+   *
+   * The four entry modules are named without a content hash on purpose — their names are the
+   * published API, pasted into other people's pages — so the same URL means different bytes at
+   * every release. `_headers` now has them revalidated rather than held for a week (see
+   * build.ts), but a reader who visited before that change still holds the old rule in their own
+   * browser and would keep last release's component for the rest of the week. The query is a URL
+   * nobody has cached, so this site's own pages are correct from the first visit after a release.
+   *
+   * Only for the pages this site serves. The documentation's copy-paste snippet stays plain: an
+   * embedder wants the current component, not the one that was current the day they copied it.
+   */
   render(page: SitePage, language: SiteLanguage): string {
     const meta = page.meta
     const self = this.fileUrl(meta, language)
@@ -84,7 +97,7 @@ export class Layout {
       .concat(`<link rel="alternate" hreflang="x-default" href="${Layout.ORIGIN}${this.path(meta)}">`)
       .join("\n  ")
     const modules = (meta.modules ?? [])
-      .map(src => `<script type="module" src="${src}"></script>`)
+      .map(src => `<script type="module" src="${src}?v=${this.version}"></script>`)
       .join("\n  ")
     const script = page.script?.(language)
     return `<!doctype html>

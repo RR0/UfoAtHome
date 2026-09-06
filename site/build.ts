@@ -208,9 +208,23 @@ ${retired}
 # loads /lib/rr0-sighting.mjs cross-origin, and that module then fetches its own hashed assets
 # (the star catalogue, the weather audio) from beside itself. Both need this header, and so do the
 # demo recordings, which exist to be pointed at from anywhere.
+#
+# Everything under /lib except the four entry modules carries a content hash in its own name, so
+# the same name is always the same bytes and a year is as safe as a week.
 /lib/*
   Access-Control-Allow-Origin: *
   Cache-Control: public, max-age=604800
+
+# The four entry modules do NOT carry a hash — their names are the published API, pasted into other
+# people's pages — so the same name means different bytes at every release. A week of hard caching
+# on those meant a reader who had opened a dossier kept last week's components for another week:
+# 0.46.0 taught recordings to hold several languages, and an older component printed
+# "[object Object]" where the account should be, on a page whose data had already moved on. So they
+# are revalidated instead: a conditional request per visit, answered by a 304 that costs nothing
+# while the bytes are unchanged, and picked up within one visit when they change.
+/lib/*.mjs
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=0, must-revalidate
 
 /demo-data/*
   Access-Control-Allow-Origin: *
