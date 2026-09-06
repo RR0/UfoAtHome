@@ -4,9 +4,20 @@
  * Done here rather than by hand in each page because it has to hold for ALL of them, including the
  * ones written next year: a heading somebody wants to point at is not knowable in advance, and an
  * id added only where somebody happened to think of it is a link that works on four pages out of
- * ten. The id is derived from the heading's own words, so it is readable in the address bar and
+ * ten. The id is derived from a heading's own words, so it is readable in the address bar and
  * survives a page being reordered — but not a heading being reworded, which is the price of not
  * inventing opaque ones.
+ *
+ * WHOSE words, though, is the whole point: an anchor obeys the same rule as a path. `/editor/` is
+ * the editor for everybody and which translation is served is decided on arrival, so
+ * `#interpret-nothing` has to be that section for everybody too — otherwise a link shared by an
+ * English reader lands a French one at the top of the page, and the French copy of a page cannot
+ * even be linked to by someone who has only ever seen the English one. So the ids come from the
+ * FALLBACK language's headings and every translation is given the same ones, position by position:
+ * `ids` reads them off the reference copy, `withAnchors` spends them. Which also means a page's
+ * translations must have the same headings in the same order — they are translations of each
+ * other, so a mismatch is a bug, and the caller is expected to say so rather than quietly letting
+ * the two drift apart.
  *
  * A heading that already carries an id keeps it: an id written by hand is a promise made to
  * whatever links to it, and generated text must not break it. A heading INSIDE a link keeps its
@@ -22,14 +33,36 @@ export class Headings {
     [/&lt;/g, "<"], [/&gt;/g, ">"], [/&amp;/g, "&"], [/&quot;/g, '"'], [/&#39;/g, "'"], [/&nbsp;/g, " "]
   ]
 
-  withAnchors(html: string, anchorLabel: string): string {
+  /**
+   * The ids this page's headings would be given, in order — including the hand-written ones, so
+   * that a translation lines up on position and not on how many ids happened to be generated.
+   *
+   * Read off the fallback language's copy and handed back to `withAnchors` for the others.
+   */
+  ids(html: string): string[] {
+    const taken = new Set<string>()
+    const found: string[] = []
+    for (const [, , attributes, text] of html.matchAll(Headings.HEADING)) {
+      const written = /\bid\s*=\s*["']([^"']*)["']/.exec(attributes)
+      found.push(written ? written[1] : this.unique(this.slug(text), taken))
+    }
+    return found
+  }
+
+  /**
+   * @param reference The ids to use, in heading order — the fallback language's, from `ids`. Left
+   * out for the fallback language itself, which is where they come from.
+   */
+  withAnchors(html: string, anchorLabel: string, reference?: readonly string[]): string {
     const taken = new Set<string>()
     const links = this.linkSpans(html)
+    let position = -1
     return html.replace(Headings.HEADING, (whole, tag: string, attributes: string, text: string, offset: number) => {
+      position++
       if (/\bid\s*=/.test(attributes)) {
         return whole
       }
-      const id = this.unique(this.slug(text), taken)
+      const id = reference ? reference[position] ?? "" : this.unique(this.slug(text), taken)
       if (!id) {
         return whole
       }

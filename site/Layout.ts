@@ -6,12 +6,16 @@ import {
 /**
  * Wraps a page's own content in the site shell: head, header, footer.
  *
- * It owns the URL scheme, and the scheme has one rule: **a page's address does not depend on the
+ * It owns the URL scheme, and the scheme has one rule: **an address does not depend on the
  * language it is read in.** `ufoathome.org/editor/` is the editor for everybody, and which
  * translation is served is decided on arrival. So there is one directory per page, holding
  * `index.html` (English, the fallback) beside `index_fr.html` — the sibling-file convention rr0.org
  * and cosmochrony.org already use — and every link on this site, in either language, points at the
  * directory.
+ *
+ * The rule reaches past the path to the fragment: `#interpret-nothing` is that section for a
+ * French reader as much as for an English one. See `anchors` for how, and `Headings` for why it
+ * has to be that way round.
  */
 export class Layout {
 
@@ -39,6 +43,30 @@ export class Layout {
   fileName(meta: PageMeta, language: SiteLanguage): string {
     const name = language === FALLBACK_LANGUAGE ? "index.html" : `index_${language}.html`
     return `${this.path(meta)}${name}`.replace(/^\//, "")
+  }
+
+  /**
+   * The ids this page's headings take in EVERY language: the fallback language's own, which the
+   * other languages are then handed rather than slugging their own translated headings.
+   *
+   * Undefined for the fallback language, which is where they come from. A translation that has
+   * grown or lost a heading would silently shift every id after it onto the wrong section, so the
+   * counts are compared here — the page is named in the message, because that is the one thing the
+   * text of a heading cannot tell you.
+   */
+  private anchors(page: SitePage, language: SiteLanguage): readonly string[] | undefined {
+    if (language === FALLBACK_LANGUAGE) {
+      return undefined
+    }
+    const reference = this.headings.ids(page.render(FALLBACK_LANGUAGE))
+    const own = this.headings.ids(page.render(language))
+    if (own.length !== reference.length) {
+      throw new Error(`${this.fileUrl(page.meta, language)} has ${own.length} headings where `
+        + `${this.fileUrl(page.meta, FALLBACK_LANGUAGE)} has ${reference.length}: they are `
+        + `translations of each other, and every anchor after the first difference would point at `
+        + `the wrong section.`)
+    }
+    return reference
   }
 
   render(page: SitePage, language: SiteLanguage): string {
@@ -76,7 +104,7 @@ ${this.languageRedirect(meta, language)}
 <body>
 ${this.header(page, language)}
 <main>
-${this.headings.withAnchors(page.render(language), language === "fr" ? "Lien vers cette section" : "Link to this section")}
+${this.headings.withAnchors(page.render(language), language === "fr" ? "Lien vers cette section" : "Link to this section", this.anchors(page, language))}
 </main>
 ${this.siteFooter(language)}
 ${script ? `<script type="module">\n${script}\n</script>` : ""}
