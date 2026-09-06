@@ -10,5 +10,8 @@ export const ufoMessages_fr: UfoMessages = {
   switchToElapsed: "cliquer pour afficher la durée écoulée",
   switchToClockTime: "cliquer pour afficher l'heure de l'observation",
   fullscreen: "Plein écran",
-  exitFullscreen: "Quitter le plein écran"
+  exitFullscreen: "Quitter le plein écran",
+  showWitnessMap: "Voir où était le témoin",
+  hideWitnessMap: "Masquer où était le témoin",
+  mapImageryUnavailable: "Vue aérienne indisponible"
 }

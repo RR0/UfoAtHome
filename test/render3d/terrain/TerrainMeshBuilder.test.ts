@@ -25,17 +25,57 @@ class FlatElevation implements ElevationProvider {
 class BlankImagery implements ImageryProvider {
   readonly attribution = "test imagery"
 
-  async getImageryTexture(_bounds: GeoBounds, resolution: { width: number; height: number }): Promise<ImageryTexture> {
+  async getImageryTexture(bounds: GeoBounds, resolution: { width: number; height: number }): Promise<ImageryTexture> {
     const canvas = document.createElement("canvas")
     canvas.width = resolution.width
     canvas.height = resolution.height
-    return { source: canvas, width: resolution.width, height: resolution.height }
+    // The whole tile grid a real provider would have had to fetch to contain `bounds` — three
+    // times its span here, standing in for the fact that what comes back is never the box asked
+    // for (see ImageryTexture.bounds).
+    const latSpan = bounds.north - bounds.south
+    const lngSpan = bounds.east - bounds.west
+    return {
+      source: canvas,
+      width: resolution.width,
+      height: resolution.height,
+      bounds: {
+        south: bounds.south - latSpan,
+        north: bounds.north + latSpan,
+        west: bounds.west - lngSpan,
+        east: bounds.east + lngSpan
+      }
+    }
   }
 }
 
 const providers = { elevation: new FlatElevation(), imagery: new BlankImagery() }
 
 describe("buildTerrainMesh", () => {
+  it("reads the photograph at the coordinates each vertex really has, not across whatever came back", async () => {
+    // BlankImagery returns three times the span it was asked for, which is what a tiled provider
+    // does. The patch must therefore use the middle third of the image and leave the rest alone:
+    // the centre vertex at u=v=0.5, the west edge a third of the way in, the east edge two thirds.
+    // Before ImageryTexture carried its own bounds this stretched the full image across the patch
+    // (0 and 1 at the edges), which put every pixel of real ground about three times too far out
+    // from the witness — and looked perfectly convincing, since one piece of desert resembles the
+    // next.
+    const { mesh } = await buildTerrainMesh(OBSERVER_LAT, OBSERVER_LNG, providers)
+    const uv = mesh.geometry.getAttribute("uv")
+    const gridSize = Math.round(Math.sqrt(uv.count))
+    const middle = (gridSize - 1) / 2
+    expect(uv.getX(middle * gridSize + middle)).toBeCloseTo(0.5, 5)
+    // Looser than u, and that slack is itself the point: the rows are laid out evenly in LATITUDE
+    // while the image is even in mercator y, so v is off by ~7e-5 here — the two would agree
+    // exactly if this used a linear mapping, which is the bug being avoided. It grows with the
+    // span and with tan(latitude); Socorro at 34 degrees over 1.8 km is where it is negligible.
+    expect(uv.getY(middle * gridSize + middle)).toBeCloseTo(0.5, 3)
+    expect(uv.getX(0)).toBeCloseTo(1 / 3, 5)
+    expect(uv.getX(gridSize - 1)).toBeCloseTo(2 / 3, 5)
+    // North edge first (row 0), so v runs the same way the rows do.
+    expect(uv.getY(0)).toBeCloseTo(1 / 3, 3)
+    expect(uv.getY((gridSize - 1) * gridSize)).toBeCloseTo(2 / 3, 3)
+  })
+
   it("is depth-tested, so the scenery standing on it can occlude it", async () => {
     // The regression this guards: the patch used to carry depthTest:false and a renderOrder above
     // every decor group's, so it repainted whatever stood on it. A patrol car eight meters from the

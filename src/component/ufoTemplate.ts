@@ -4,7 +4,19 @@ export const html = `
     <canvas id="canvas" width="640" height="360"></canvas>
   </div>
   <div id="tooltip" class="tooltip" hidden></div>
-  <button id="fullscreen" class="fullscreen-btn" type="button" title="Fullscreen" aria-label="Fullscreen">⛶</button>
+  <!-- The corner's own row, rather than one absolutely-positioned button per corner: a second
+       button placed by its own right offset would have to hardcode the first one's width, and
+       every language names them differently the moment either grows a label. -->
+  <div class="corner-buttons" id="corner-buttons">
+    <button id="witness-map" type="button" title="Witness's position" aria-label="Witness's position" aria-pressed="false" hidden>🗺</button>
+    <button id="fullscreen" type="button" title="Fullscreen" aria-label="Fullscreen">⛶</button>
+  </div>
+  <!-- Where the witness stood and which way they faced, on real ground — see WitnessMapRenderer.
+       Under the buttons that toggle it, and inert to the pointer: the canvas beneath it is the
+       recording, and clicking it plays. -->
+  <div id="witness-map-panel" class="witness-map-panel" hidden>
+    <canvas id="witness-map-canvas" width="240" height="240"></canvas>
+  </div>
   <!-- What the account calls the moment now on screen (see Milestone) — above the controls rather
        than inside them, because it is a sentence and the toolbar is a row of buttons. Empty and
        hidden for the recordings that name no moment, which is most of them. -->
@@ -34,7 +46,7 @@ export const css = `
    definite height of its own (the normal, standalone case — .stage's height stays driven by
    .frame's content, unchanged) — but it matters when this element is embedded with a definite
    host size from outside (e.g. <rr0-scene>'s .ufo-overlay sizing this element to fill its own
-   #stage while THAT is fullscreen): it lets .toolbar/.fullscreen-btn, anchored to .stage below,
+   #stage while THAT is fullscreen): it lets .toolbar/.corner-buttons, anchored to .stage below,
    actually reach that outer element's true edges instead of only .frame's letterboxed ones.
    display:flex + centering is unconditional (not just under :fullscreen below) for the same
    nested-embedding case: this .stage is never itself the real fullscreen element when nested
@@ -61,7 +73,7 @@ export const css = `
   justify-content: center;
 }
 /* The browser's own fullscreen UA styles force the fullscreened element (.stage) to fill the
-   whole viewport (100vw/100vh) regardless of its content's aspect ratio. .toolbar/.fullscreen-btn
+   whole viewport (100vw/100vh) regardless of its content's aspect ratio. .toolbar/.corner-buttons
    are anchored to .stage itself (not .frame) specifically so they stay pinned to the true screen
    edges, full width, like a normal video player's controls — not stuck to the letterboxed
    content's own (possibly smaller, centered) box above/around them. */
@@ -246,10 +258,20 @@ canvas[data-cursor="rotate"] {
   opacity: 1;
   pointer-events: auto;
 }
-.fullscreen-btn {
+.corner-buttons {
   position: absolute;
   top: 0.4em;
   right: 0.4em;
+  display: flex;
+  gap: 0.3em;
+}
+/* Same trap as .toolbar.hidden and .milestone-caption[hidden]: a class or rule that sets its own
+   display outranks the UA sheet's [hidden], and the map button is hidden for every recording that
+   states no coordinates — which is most of them. */
+.corner-buttons button[hidden] {
+  display: none;
+}
+.corner-buttons button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -264,6 +286,34 @@ canvas[data-cursor="rotate"] {
   background: rgba(0, 0, 0, 0.55);
   color: #fff;
   transition: opacity 0.15s ease;
+}
+.corner-buttons button[aria-pressed="true"] {
+  outline: 2px solid #39f;
+}
+/* Below the buttons that open it, same right edge. A share of the stage rather than a fixed pixel
+   size, so it stays the same fraction of the picture in a 320 px embed and in fullscreen — but
+   floored, since a map too small to tell a road from a wash is not worth the tiles it costs. */
+.witness-map-panel {
+  position: absolute;
+  top: 2.7em;
+  right: 0.4em;
+  width: clamp(140px, 30%, 280px);
+  aspect-ratio: 1;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 3px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.55);
+  /* The recording underneath stays clickable through it: this is something to look at, not
+     something to operate. */
+  pointer-events: none;
+}
+.witness-map-panel[hidden] {
+  display: none;
+}
+.witness-map-panel canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 input[type=range] {
   flex: 1;

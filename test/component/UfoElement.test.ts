@@ -10,22 +10,34 @@ registerUfo()
 // jsdom's <canvas> has no real 2D context (getContext("2d") returns null without the
 // native `canvas` package) — stub it, same as test/render/CanvasRenderer.test.ts's mock.
 beforeAll(() => {
-  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({
-    save: vi.fn(),
-    restore: vi.fn(),
-    beginPath: vi.fn(),
-    closePath: vi.fn(),
-    fill: vi.fn(),
-    ellipse: vi.fn(),
-    moveTo: vi.fn(),
-    lineTo: vi.fn(),
-    translate: vi.fn(),
-    rotate: vi.fn(),
-    clearRect: vi.fn(),
-    strokeRect: vi.fn(),
-    stroke: vi.fn(),
-    fillRect: vi.fn()
-  } as unknown as CanvasRenderingContext2D)
+  // mockImplementation rather than mockReturnValue, so `ctx.canvas` is the real element this
+  // context was asked of — a renderer sizing itself from its own canvas (see WitnessMapRenderer)
+  // reads it, and a single shared stub would have every canvas claiming to be the same one.
+  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockImplementation(function (this: HTMLCanvasElement) {
+    return {
+      canvas: this,
+      save: vi.fn(),
+      restore: vi.fn(),
+      beginPath: vi.fn(),
+      closePath: vi.fn(),
+      fill: vi.fn(),
+      ellipse: vi.fn(),
+      arc: vi.fn(),
+      moveTo: vi.fn(),
+      lineTo: vi.fn(),
+      translate: vi.fn(),
+      rotate: vi.fn(),
+      clearRect: vi.fn(),
+      strokeRect: vi.fn(),
+      stroke: vi.fn(),
+      fillRect: vi.fn(),
+      fillText: vi.fn(),
+      strokeText: vi.fn(),
+      drawImage: vi.fn(),
+      createRadialGradient: vi.fn(() => ({ addColorStop: vi.fn() })),
+      measureText: vi.fn((text: string) => ({ width: text.length * 5 }))
+    } as unknown as CanvasRenderingContext2D
+  })
 })
 
 // jsdom doesn't implement the Fullscreen API at all — stub it as configurable so tests can
@@ -517,18 +529,20 @@ describe("UfoElement", () => {
     expect(element.autoReplayEnabled).toBe(false)
   })
 
-  it("the fullscreen button auto-hides alongside the toolbar", () => {
+  it("the corner buttons auto-hide alongside the toolbar", () => {
+    // The whole corner row, not the fullscreen button alone: the map button moved in beside it, and
+    // one of the two fading out while the other stayed would be a stray icon over the scene.
     const element = mount()
     element.sightingData = twoKeyframeSighting()
     const playPause = element.shadowRoot!.getElementById("play-pause") as HTMLButtonElement
-    const fullscreenButton = element.shadowRoot!.getElementById("fullscreen") as HTMLButtonElement
-    expect(fullscreenButton.classList.contains("auto-hide")).toBe(false)
+    const corner = element.shadowRoot!.getElementById("corner-buttons")!
+    expect(corner.classList.contains("auto-hide")).toBe(false)
 
     playPause.click() // play
-    expect(fullscreenButton.classList.contains("auto-hide")).toBe(true)
+    expect(corner.classList.contains("auto-hide")).toBe(true)
 
     playPause.click() // pause
-    expect(fullscreenButton.classList.contains("auto-hide")).toBe(false)
+    expect(corner.classList.contains("auto-hide")).toBe(false)
   })
 
   it("defaults fullscreenTarget to the component's own stage", () => {
@@ -1384,5 +1398,88 @@ describe("double-click on the canvas", () => {
     expect(fullscreen.requested()).toBe(0)
     expect(element.playbackState).toBe("stopped")
     element.remove()
+  })
+})
+
+describe("the witness's own map", () => {
+  /** Zamora leaving the Socorro road, cut down to what the map reads: two places, a heading and
+   * one named moment. */
+  function movingWitness(): object {
+    return {
+      version: 1 as const,
+      timeline: { keyframes: [{ t: 0, shapes: [] }, { t: 83000, shapes: [] }] },
+      witnessTrack: {
+        keyframes: [
+          { t: 0, pose: { lat: 34.052376, lng: -106.89344, elevationM: 0, headingDeg: 200, pitchDeg: -5, fovDeg: 60 } },
+          { t: 83000, pose: { lat: 34.042635, lng: -106.89775, elevationM: 0, headingDeg: 200, pitchDeg: -5, fovDeg: 60 } }
+        ]
+      },
+      milestones: [{ t: 0, label: "A" }, { t: 83000, label: "F" }]
+    }
+  }
+
+  function mapParts(element: UfoElement) {
+    const shadow = element.shadowRoot!
+    return {
+      button: shadow.getElementById("witness-map") as HTMLButtonElement,
+      panel: shadow.getElementById("witness-map-panel")!
+    }
+  }
+
+  afterEach(() => {
+    document.body.innerHTML = ""
+  })
+
+  it("is not offered for a recording that never said where it happened", () => {
+    // Most recordings in this project say nothing about coordinates, and a control that is always
+    // there and usually opens onto nothing is worse than one that appears when it has an answer.
+    const element = mount()
+    element.sightingData = { version: 1, timeline: { keyframes: [] } } as never
+    expect(mapParts(element).button.hidden).toBe(true)
+  })
+
+  it("is offered as soon as a recording names one place, tracked or not", () => {
+    const element = mount()
+    element.sightingData = { version: 1, timeline: { keyframes: [] }, place: [{ lat: 34.05, lng: -106.89 }] } as never
+    expect(mapParts(element).button.hidden).toBe(false)
+  })
+
+  it("stays shut, and costs no tile fetch, until the reader asks for it", () => {
+    // These are real requests to a third party. A page listing a dozen case dossiers would fire
+    // them all on load for maps nobody opened.
+    const fetchSpy = vi.spyOn(globalThis, "fetch")
+    const element = mount()
+    element.sightingData = movingWitness() as never
+    expect(mapParts(element).panel.hidden).toBe(true)
+    expect(fetchSpy).not.toHaveBeenCalled()
+    fetchSpy.mockRestore()
+  })
+
+  it("opens and closes on the button, and says which it will do", () => {
+    const element = mount()
+    element.sightingData = movingWitness() as never
+    const { button, panel } = mapParts(element)
+
+    button.click()
+    expect(panel.hidden).toBe(false)
+    expect(button.getAttribute("aria-pressed")).toBe("true")
+    expect(button.title).toBe("Hide where the witness was")
+
+    button.click()
+    expect(panel.hidden).toBe(true)
+    expect(button.title).toBe("Show where the witness was")
+  })
+
+  it("closes itself when the recording it was showing is replaced by one with no place", () => {
+    // A page playing several recordings in turn does exactly this. Leaving the panel up would show
+    // the previous witness's ground under the new one's recording.
+    const element = mount()
+    element.sightingData = movingWitness() as never
+    mapParts(element).button.click()
+    expect(mapParts(element).panel.hidden).toBe(false)
+
+    element.sightingData = { version: 1, timeline: { keyframes: [] } } as never
+    expect(mapParts(element).panel.hidden).toBe(true)
+    expect(mapParts(element).button.hidden).toBe(true)
   })
 })

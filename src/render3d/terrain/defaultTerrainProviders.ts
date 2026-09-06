@@ -15,5 +15,17 @@ export interface TerrainProviders {
  * reference a concrete provider class.
  */
 export function defaultTerrainProviders(): TerrainProviders {
-  return { elevation: new AwsTerrariumElevationProvider(), imagery: new EsriWorldImageryProvider() }
+  return { elevation: new AwsTerrariumElevationProvider(), imagery: defaultImageryProvider() }
+}
+
+/**
+ * The imagery half on its own — for the callers that want a photograph of the ground and nothing
+ * else, which is what the witness map (see WitnessMapRenderer) is.
+ *
+ * Here rather than in the map, so the choice of provider stays in this one file and the map gets
+ * whatever the terrain gets: the two are pictures of the same ground, and a reader comparing them
+ * should not be looking at two different surveys.
+ */
+export function defaultImageryProvider(): ImageryProvider {
+  return new EsriWorldImageryProvider()
 }

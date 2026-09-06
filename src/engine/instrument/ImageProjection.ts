@@ -77,6 +77,25 @@ export class ImageProjection {
     return this.kind === "equidistant" ? this.focalPx * rad : this.focalPx * Math.tan(rad)
   }
 
+  /**
+   * Half of what the image takes in ACROSS, degrees, for a frame `aspect` times wider than it is
+   * tall (see Instruments.aspectOf).
+   *
+   * The field is stated vertically everywhere in this project because the height is the invariant
+   * (see the class comment). The horizontal half-angle is what a map needs instead: the wedge of
+   * ground a witness had in front of them is an AZIMUTH, and how far the frame reaches to the sides
+   * is exactly what decides whether something they described could have been in it.
+   *
+   * A radius, not an extent, and derived through the projection rather than by scaling the vertical
+   * field: a lens 60 degrees tall on a 16:9 frame reaches 92 degrees across, not 107 as
+   * `fov·aspect` would say, because a rectilinear image spreads its edges. For an eye, whose
+   * mapping is uniform, `fov·aspect` happens to be right — and quietly using it for both is how a
+   * camera's cone ends up 15 degrees too wide.
+   */
+  halfWidthAngleDeg(aspect: number): number {
+    return this.radiusPxToAngleDeg((this.canvasHeightPx * aspect) / 2)
+  }
+
   /** The inverse: which direction a point that far from the centre of the image stands for. */
   radiusPxToAngleDeg(px: number): number {
     return this.kind === "equidistant" ? (px / this.focalPx) * RAD_TO_DEG : Math.atan(px / this.focalPx) * RAD_TO_DEG

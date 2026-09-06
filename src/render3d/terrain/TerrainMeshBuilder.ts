@@ -4,15 +4,17 @@ import type { ElevationProvider } from "./ElevationProvider.js"
 import type { ImageryProvider } from "./ImageryProvider.js"
 import type { GeoBounds } from "./GeoBounds.js"
 import { geoToLocalMeters, localMetersToGeo } from "./GeoProjection.js"
+import { fractionWithinBounds } from "./TileMath.js"
 
 const TERRAIN_SEGMENTS = 64
 const GRID_SIZE = TERRAIN_SEGMENTS + 1 // 65 — odd, so the center vertex lands exactly on the observer
 const IMAGERY_RESOLUTION = 512
 
 /** Full color out to this radius, fading to fully transparent by FADE_END — both kept well inside
- * the guaranteed provider coverage (a 3x3 tile grid sized so a single tile already covers the
- * requested span — see TileMath.chooseZoomForTileEdge — gives roughly 1.5 tile-widths of real data
- * from center in the worst case, well beyond FADE_END here), so the patch always blends into
+ * the guaranteed provider coverage (a 3x3 tile grid sized so a single tile covers half the
+ * requested span — see TileMath.chooseZoomForTileEdge — guarantees the whole requested span from
+ * center even with the worst tile alignment, and the UVs now follow the grid's real bounds rather
+ * than assuming they are the requested ones), so the patch always blends into
  * SceneRenderer's existing flat haze disc rather than showing a hard edge or running past real data.
  * FADE_END matches GROUND_RADIUS (SceneRenderer.ts) deliberately, not a smaller "safe" value: an
  * earlier, much smaller radius left most of a typical camera's *visible* ground area — especially
@@ -93,8 +95,16 @@ export async function buildTerrainMesh(
       positions[i * 3] = x
       positions[i * 3 + 1] = y
       positions[i * 3 + 2] = z
-      uvs[i * 2] = tCol
-      uvs[i * 2 + 1] = tRow
+      // Where this vertex's real coordinates fall on the image that actually came back, which is
+      // not the image that was asked for (see ImageryTexture.bounds). Reading tCol/tRow straight
+      // into the UVs, as this did, silently assumed the two were the same box: the photograph was
+      // stretched from the tile grid's span down to the patch's, so the ground under the witness
+      // was a piece of country several times too large, shrunk to fit and offset by however far
+      // they stood from the centre of their own tile. Nothing about it LOOKED broken — it is
+      // plausible ground either way — which is why it stood until a map asked to put a dot on it.
+      const uv = fractionWithinBounds(imageryTexture.bounds, lng, lat)
+      uvs[i * 2] = uv.x
+      uvs[i * 2 + 1] = uv.y
 
       // Chebyshev (box) distance, not Euclidean: the patch is a SQUARE of real, successfully-
       // fetched data out to fadeEndM on every side (see boundsAroundObserver) — a radial

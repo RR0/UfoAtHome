@@ -13,4 +13,10 @@ export interface UfoMessages {
   switchToClockTime: string
   fullscreen: string
   exitFullscreen: string
+  /** Names the reader's own gesture, not the feature — see the project's wording rules. */
+  showWitnessMap: string
+  hideWitnessMap: string
+  /** Shown on the map instead of the imagery when the tiles cannot be fetched — the path is still
+   * drawn, so this says what is missing rather than that the map failed. */
+  mapImageryUnavailable: string
 }

@@ -78,3 +78,26 @@ describe("ImageProjection", () => {
     expect(ImageProjection.of(Instruments.byId(undefined), H, FOV).kind).toBe("equidistant")
   })
 })
+
+describe("halfWidthAngleDeg", () => {
+  it("reaches further across a lens than scaling the vertical field would say", () => {
+    // 60 degrees tall on a 16:9 rectilinear frame is 92 degrees across, not the 107 that fov*aspect
+    // gives: the projection spreads its own edges. A cone drawn 15 degrees too wide is a cone that
+    // clears testimony it should have questioned.
+    const lens = new ImageProjection("rectilinear", 360, 60)
+    expect(2 * lens.halfWidthAngleDeg(16 / 9)).toBeCloseTo(91.5, 1)
+  })
+
+  it("is exactly proportional for an eye, whose image is uniform", () => {
+    // The equidistant mapping puts the same degrees in the same pixels everywhere, so here — and
+    // only here — fov*aspect happens to be the right answer.
+    const eye = new ImageProjection("equidistant", 360, 60)
+    expect(2 * eye.halfWidthAngleDeg(16 / 9)).toBeCloseTo(60 * (16 / 9), 6)
+  })
+
+  it("says the same thing whatever canvas it is asked on", () => {
+    const small = new ImageProjection("rectilinear", 180, 45)
+    const large = new ImageProjection("rectilinear", 1440, 45)
+    expect(small.halfWidthAngleDeg(4 / 3)).toBeCloseTo(large.halfWidthAngleDeg(4 / 3), 9)
+  })
+})

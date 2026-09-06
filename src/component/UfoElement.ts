@@ -18,6 +18,13 @@ import { SaidTexts } from "../engine/model/SaidText.js"
 import { loadUfoMessages, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
 import type { UfoLanguage } from "./messages/index.js"
 import { ufoMessages_en } from "./messages/UfoMessages_en.js"
+import { WitnessPath } from "../engine/place/WitnessPath.js"
+import { WitnessMapRenderer } from "../render/WitnessMapRenderer.js"
+import type { WitnessMapMarker } from "../render/WitnessMapRenderer.js"
+import { defaultImageryProvider } from "../render3d/terrain/defaultTerrainProviders.js"
+import type { ImageryTexture } from "../render3d/terrain/ImageryProvider.js"
+import type { GeoBounds } from "../render3d/terrain/GeoBounds.js"
+import { ImageProjection } from "../engine/instrument/ImageProjection.js"
 import type { UfoMessages } from "./messages/UfoMessages.js"
 
 /**
@@ -57,12 +64,43 @@ export class UfoElement extends HTMLElement {
   private readonly toolbar: HTMLElement
   private readonly playPauseButton: HTMLButtonElement
   private readonly loopButton: HTMLButtonElement
+  /** The smallest piece of ground the map will ever show, metres across. A witness who never moved
+   * has a path of zero span, and this is what stands in for it — about two city blocks, enough to
+   * recognise a road, a building and a field, which is what "where was this" means. */
+  private static readonly WITNESS_MAP_MIN_SPAN_M = 400
+  /** How much room to leave around the path itself, as a fraction of its own span — a track drawn
+   * edge to edge shows the journey and none of what it went past. */
+  private static readonly WITNESS_MAP_MARGIN = 0.6
+  /** The photograph is fetched once at this size and then drawn at whatever size the panel is: a
+   * request per resize would be a request per fullscreen toggle. */
+  private static readonly WITNESS_MAP_IMAGERY_PX = 768
+
   private readonly fullscreenButton: HTMLButtonElement
+  private readonly cornerButtons: HTMLElement
+  private readonly witnessMapButton: HTMLButtonElement
+  private readonly witnessMapPanel: HTMLElement
+  private readonly witnessMapCanvas: HTMLCanvasElement
+  private readonly witnessMapRenderer: WitnessMapRenderer
   private readonly seekInput: HTMLInputElement
   private readonly milestoneMarks: HTMLElement
   private readonly milestoneCaption: HTMLElement
   private readonly timeStartLabel: HTMLElement
   private readonly timeEndLabel: HTMLElement
+
+  /** The witness's own path, rebuilt whenever the recording changes — undefined for a recording
+   * that states no coordinates, which is what hides the map button entirely. */
+  private witnessPath?: WitnessPath
+  /** The ground the map covers, fixed for the whole recording rather than recentred on the witness
+   * every frame: a map that slides under a moving witness makes it impossible to see that they
+   * moved, which is the one thing it exists to show. */
+  private witnessMapBounds?: GeoBounds
+  /** The photograph, fetched at most once per recording and only once the reader asks for the map —
+   * an embed nobody opens it on costs nothing. Stays undefined when the tiles cannot be had. */
+  private witnessMapImagery?: ImageryTexture
+  private witnessMapImageryRequested = false
+  /** The licence line the map has to carry — the provider's own while its tiles are shown, and what
+   * says they are missing when they are not. */
+  private witnessMapAttribution?: string
 
   private currentSighting: Sighting = Sighting.create()
   /** The sighting's own sound (see SoundTrack), owned here rather than by SceneElement: it is part
@@ -119,7 +157,23 @@ export class UfoElement extends HTMLElement {
   private showClockTime = true
 
   /** Bound once so document.removeEventListener (disconnectedCallback) can actually find it. */
-  private readonly handleFullscreenChange = () => this.updateFullscreenButton()
+  private readonly handleFullscreenChange = () => {
+    this.updateFullscreenButton()
+    // Entering or leaving fullscreen resizes the stage under the map, and a canvas whose backing
+    // store stays at the old size comes back as a blurred enlargement of itself.
+    this.resizeWitnessMap()
+  }
+
+  /** Kept so the map follows any change of the stage's size, not only the two this element causes
+   * itself: a responsive page column, a rotated phone, a sidebar opening beside the embed. */
+  private readonly witnessMapResizeObserver =
+    typeof ResizeObserver === "undefined" ? undefined : new ResizeObserver(() => this.resizeWitnessMap())
+
+  private resizeWitnessMap(): void {
+    if (this.witnessMapPanel.hidden) return
+    this.sizeWitnessMapCanvas()
+    this.paintWitnessMap(this.currentTime)
+  }
 
   /** Whether the CSS stand-in for fullscreen is currently on — see enterSimulatedFullscreen. */
   private simulatedFullscreen = false
@@ -179,6 +233,11 @@ export class UfoElement extends HTMLElement {
     this.playPauseButton = this.shadow.getElementById("play-pause") as HTMLButtonElement
     this.loopButton = this.shadow.getElementById("loop") as HTMLButtonElement
     this.fullscreenButton = this.shadow.getElementById("fullscreen") as HTMLButtonElement
+    this.cornerButtons = this.shadow.getElementById("corner-buttons")!
+    this.witnessMapButton = this.shadow.getElementById("witness-map") as HTMLButtonElement
+    this.witnessMapPanel = this.shadow.getElementById("witness-map-panel")!
+    this.witnessMapCanvas = this.shadow.getElementById("witness-map-canvas") as HTMLCanvasElement
+    this.witnessMapRenderer = new WitnessMapRenderer(this.witnessMapCanvas.getContext("2d")!)
     this.seekInput = this.shadow.getElementById("seek") as HTMLInputElement
     this.milestoneMarks = this.shadow.getElementById("milestone-marks")!
     this.milestoneCaption = this.shadow.getElementById("milestone-caption")!
@@ -199,6 +258,7 @@ export class UfoElement extends HTMLElement {
     this.playPauseButton.addEventListener("click", () => this.togglePlayPause())
     this.loopButton.addEventListener("click", () => this.toggleLoop())
     this.fullscreenButton.addEventListener("click", () => this.toggleFullscreen())
+    this.witnessMapButton.addEventListener("click", () => this.toggleWitnessMap())
     this.seekInput.addEventListener("input", () => this.player.seek(Number(this.seekInput.value)))
     this.canvas.addEventListener("click", event => {
       if (!this.enableClickToPlay) return
@@ -221,11 +281,13 @@ export class UfoElement extends HTMLElement {
     this.canvas.addEventListener("pointermove", this.handlePointerMove)
     this.canvas.addEventListener("pointerleave", this.handlePointerLeave)
     document.addEventListener("fullscreenchange", this.handleFullscreenChange)
+    this.witnessMapResizeObserver?.observe(this.witnessMapPanel)
 
     this.player = this.createPlayer()
     this.updateTimeLabels()
     this.updatePlayPauseButton()
     this.updateFullscreenButton()
+    this.updateWitnessMapButton()
     this.refresh()
     void this.loadLocaleMessages()
   }
@@ -240,6 +302,7 @@ export class UfoElement extends HTMLElement {
 
   disconnectedCallback(): void {
     document.removeEventListener("fullscreenchange", this.handleFullscreenChange)
+    this.witnessMapResizeObserver?.disconnect()
     // Leaves the page as it was found: the stand-in holds document.body's own overflow, and an
     // element removed while it is on would otherwise leave the page unable to scroll.
     this.exitSimulatedFullscreen()
@@ -517,6 +580,7 @@ export class UfoElement extends HTMLElement {
     this.updateTimeLabels()
     this.seekInput.max = String(this.player.seekableDuration)
     this.refreshMilestoneMarks()
+    this.updateWitnessMap()
     this.player.seek(this.player.time)
   }
 
@@ -747,6 +811,7 @@ export class UfoElement extends HTMLElement {
     this.seekInput.value = String(t)
     this.timeStartLabel.textContent = this.formatPosition(t)
     this.showMilestoneAt(t)
+    this.paintWitnessMap(t)
     // The track is heard only while actually playing: onFrame is also the seek sink, and a witness
     // dragging the bar through a keyframe shouldn't fire a burst of sound at every position they
     // pass through. A preview outlives repaints on purpose (see previewSound), and playing ends it
@@ -826,7 +891,9 @@ export class UfoElement extends HTMLElement {
     // sit over the scene the whole time; always shown while paused/stopped, since that's when the
     // user is most likely to want it (e.g. right after it stopped, or to scrub before playing).
     this.toolbar.classList.toggle("auto-hide", isPlaying)
-    this.fullscreenButton.classList.toggle("auto-hide", isPlaying)
+    // The BUTTONS, not the map they opened: a map that vanished the moment the recording started
+    // playing would hide the witness exactly while they are moving.
+    this.cornerButtons.classList.toggle("auto-hide", isPlaying)
   }
 
   /** Public for the same reason as togglePlayPause — see its own doc comment. */
@@ -953,6 +1020,154 @@ export class UfoElement extends HTMLElement {
     this.updateFullscreenButton()
   }
 
+  /**
+   * Opens or closes the map of where the witness stood — see WitnessMapRenderer for what it draws
+   * and why the cone is the part that matters.
+   *
+   * Public, like togglePlayPause and toggleFullscreen, so a composing element (SceneElement's own
+   * outer stage, a case page's own control) can offer the same thing without reaching into the
+   * shadow DOM.
+   */
+  toggleWitnessMap(): void {
+    this.setWitnessMapOpen(this.witnessMapPanel.hidden)
+  }
+
+  private setWitnessMapOpen(open: boolean): void {
+    this.witnessMapPanel.hidden = !open
+    this.witnessMapButton.setAttribute("aria-pressed", String(open))
+    this.updateWitnessMapButton()
+    if (!open) return
+    this.sizeWitnessMapCanvas()
+    void this.loadWitnessMapImagery()
+    this.paintWitnessMap(this.currentTime)
+  }
+
+  private updateWitnessMapButton(): void {
+    const open = !this.witnessMapPanel.hidden
+    const label = open ? this.messages.hideWitnessMap : this.messages.showWitnessMap
+    this.witnessMapButton.title = label
+    this.witnessMapButton.setAttribute("aria-label", label)
+  }
+
+  /**
+   * Offers the map only for a recording that actually states where it happened, and works out the
+   * ground it will cover.
+   *
+   * A recording with no coordinates gets no button at all rather than a button onto an empty map:
+   * most recordings in this project have none, and a control that is always there and usually
+   * useless is worse than one that appears when it has something to show.
+   */
+  private updateWitnessMap(): void {
+    this.witnessPath = WitnessPath.of(this.currentSighting)
+    this.witnessMapButton.hidden = this.witnessPath === undefined
+    if (!this.witnessPath) {
+      this.setWitnessMapOpen(false)
+      this.witnessMapBounds = undefined
+      return
+    }
+    const bounds = this.witnessPath.boundsAround(UfoElement.WITNESS_MAP_MIN_SPAN_M, UfoElement.WITNESS_MAP_MARGIN)
+    // Only a real change of ground throws the photograph away. An editor nudging a coordinate moves
+    // these bounds by a metre on every keystroke, and refetching a tile grid for that would be one
+    // request per keypress for an image indistinguishable from the one already held.
+    if (!this.witnessMapBounds || !this.sameGround(this.witnessMapBounds, bounds)) {
+      this.witnessMapBounds = bounds
+      this.witnessMapImagery = undefined
+      this.witnessMapAttribution = undefined
+      this.witnessMapImageryRequested = false
+      if (!this.witnessMapPanel.hidden) void this.loadWitnessMapImagery()
+    }
+  }
+
+  /** Whether two boxes are the same piece of country for a reader's purposes — within a twentieth
+   * of their own width on every edge. */
+  private sameGround(a: GeoBounds, b: GeoBounds): boolean {
+    const tolerance = Math.abs(a.east - a.west) / 20
+    return (
+      Math.abs(a.north - b.north) < tolerance &&
+      Math.abs(a.south - b.south) < tolerance &&
+      Math.abs(a.west - b.west) < tolerance &&
+      Math.abs(a.east - b.east) < tolerance
+    )
+  }
+
+  /**
+   * Fetches the aerial photograph for the current map bounds, once.
+   *
+   * Only ever from the reader opening the map, never from loading a recording: these are real tile
+   * requests to a third party, and an embedded player that fired them for every case dossier a page
+   * happens to list would be spending someone else's quota on maps nobody asked to see.
+   *
+   * A failure is not an error state here. The path, the cone and the scale are drawn from the
+   * recording itself and need no network at all; the photograph is context. So a refused,
+   * offline or blocked fetch leaves the map standing and says what is missing.
+   */
+  private async loadWitnessMapImagery(): Promise<void> {
+    if (this.witnessMapImageryRequested || !this.witnessMapBounds) return
+    this.witnessMapImageryRequested = true
+    const provider = defaultImageryProvider()
+    const bounds = this.witnessMapBounds
+    try {
+      const imagery = await provider.getImageryTexture(bounds, {
+        width: UfoElement.WITNESS_MAP_IMAGERY_PX,
+        height: UfoElement.WITNESS_MAP_IMAGERY_PX
+      })
+      // The recording may have been swapped while this was in flight — a page playing several in
+      // turn does exactly that — and painting one witness's ground under another's path is worse
+      // than painting no ground at all.
+      if (this.witnessMapBounds !== bounds) return
+      this.witnessMapImagery = imagery
+      this.witnessMapAttribution = provider.attribution
+    } catch {
+      this.witnessMapAttribution = this.messages.mapImageryUnavailable
+    }
+    this.paintWitnessMap(this.currentTime)
+  }
+
+  /** Matches the drawing surface to the size CSS gave the panel, at the display's own pixel
+   * density — a map drawn at CSS resolution and scaled up is a map whose road markings are guesses.
+   * Read here rather than on every frame: this is a layout read, and the panel only changes size
+   * when the stage does. */
+  private sizeWitnessMapCanvas(): void {
+    const side = this.witnessMapPanel.clientWidth
+    if (side === 0) return
+    const pixels = Math.round(side * (globalThis.devicePixelRatio ?? 1))
+    if (this.witnessMapCanvas.width === pixels) return
+    this.witnessMapCanvas.width = pixels
+    this.witnessMapCanvas.height = pixels
+  }
+
+  /**
+   * Draws the map at the instant now on screen — called from onFrame, so it advances with playback
+   * and follows the seek bar, which is what makes it a reading of the recording rather than an
+   * illustration beside it.
+   */
+  private paintWitnessMap(t: number): void {
+    if (this.witnessMapPanel.hidden || !this.witnessPath || !this.witnessMapBounds) return
+    const pose = resolveObserverPoseAt(this.currentSighting, t)
+    const instrument = this.currentSighting.instrument
+    const markers: WitnessMapMarker[] = []
+    const current = this.currentSighting.milestones.length > 0 ? resolveMilestoneAt(this.currentSighting.milestones, t) : undefined
+    for (const milestone of sortedMilestones(this.currentSighting.milestones)) {
+      const at = resolveObserverPoseAt(this.currentSighting, milestone.t)
+      if (at?.lat === undefined || at.lng === undefined) continue
+      markers.push({ label: this.said.read(milestone.label) ?? "", lat: at.lat, lng: at.lng, current: milestone === current })
+    }
+    this.witnessMapRenderer.paint({
+      bounds: this.witnessMapBounds,
+      imagery: this.witnessMapImagery,
+      path: this.witnessPath,
+      position: pose?.lat !== undefined && pose.lng !== undefined ? { lat: pose.lat, lng: pose.lng } : undefined,
+      headingDeg: pose?.headingDeg,
+      // The instrument's real field, through its own projection — the wedge is only evidence if it
+      // is the wedge this device actually took in. See ImageProjection.halfWidthAngleDeg.
+      coneHalfAngleDeg: pose
+        ? ImageProjection.of(instrument, this.canvas.height, pose.fovDeg).halfWidthAngleDeg(Instruments.aspectOf(instrument))
+        : undefined,
+      markers,
+      attribution: this.witnessMapAttribution
+    })
+  }
+
   private updateFullscreenButton(): void {
     const isFullscreen = this.simulatedFullscreen || document.fullscreenElement === this.fullscreenTarget
     this.fullscreenButton.title = isFullscreen ? this.messages.exitFullscreen : this.messages.fullscreen
@@ -1015,6 +1230,7 @@ export class UfoElement extends HTMLElement {
     this.loopButton.setAttribute("aria-label", messages.autoReplay)
     this.updatePlayPauseButton()
     this.updateFullscreenButton()
+    this.updateWitnessMapButton()
   }
 
   /**

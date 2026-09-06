@@ -27,12 +27,11 @@ export class EsriWorldImageryProvider implements ImageryProvider {
   }
 
   async getImageryTexture(bounds: GeoBounds, resolution: { width: number; height: number }): Promise<ImageryTexture> {
-    const source = await fetchImageryRaster(
+    return fetchImageryRaster(
       bounds,
       resolution,
       tile => this.tileUrlTemplate.replace("{z}", String(tile.z)).replace("{y}", String(tile.y)).replace("{x}", String(tile.x)),
       this.fetchImpl
     )
-    return { source, width: resolution.width, height: resolution.height }
   }
 }

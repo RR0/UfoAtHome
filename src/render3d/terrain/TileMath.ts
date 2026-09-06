@@ -39,13 +39,36 @@ export function chooseZoomForTileEdge(latDeg: number, targetTileEdgeM: number): 
   return z
 }
 
+/** Where a latitude falls down the whole Web Mercator world, 0 at the north edge to 1 at the
+ * south — the projection itself, with the zoom level's tile count taken out of it. */
+function mercatorY01(latDeg: number): number {
+  const latRad = latDeg * DEG_TO_RAD
+  return (1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2
+}
+
 /** Fractional tile-space coordinates (not floored) — useful for sub-tile interpolation. */
 export function lngLatToTileFraction(lngDeg: number, latDeg: number, z: number): { x: number; y: number } {
   const n = 2 ** z
-  const x = ((lngDeg + 180) / 360) * n
-  const latRad = latDeg * DEG_TO_RAD
-  const y = ((1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2) * n
-  return { x, y }
+  return { x: ((lngDeg + 180) / 360) * n, y: mercatorY01(latDeg) * n }
+}
+
+/**
+ * Where (lngDeg, latDeg) falls inside `bounds`, as fractions from its west and north edges — 0 to 1
+ * within, beyond that outside. What turns a raster into a map: the same call places a texture's UVs
+ * over real terrain and a marker at the witness's own coordinates.
+ *
+ * MERCATOR down the north/south axis, not linear in latitude, because a raster stitched from Z/X/Y
+ * tiles is uniform in mercator y and latitude is not. The difference is under a metre across a
+ * kilometre-wide patch and grows with both the span and tan(latitude) — which is to say it is
+ * exactly zero at the equator, and so is not something a spot check near one would ever reveal.
+ */
+export function fractionWithinBounds(bounds: GeoBounds, lngDeg: number, latDeg: number): { x: number; y: number } {
+  const north = mercatorY01(bounds.north)
+  const south = mercatorY01(bounds.south)
+  return {
+    x: (lngDeg - bounds.west) / (bounds.east - bounds.west),
+    y: (mercatorY01(latDeg) - north) / (south - north)
+  }
 }
 
 export function lngLatToTile(lngDeg: number, latDeg: number, z: number): TileCoord {
