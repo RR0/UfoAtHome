@@ -10,6 +10,7 @@ import type { SightingSound } from "./Sound.js"
 import type { People } from "./People.js"
 import type { DecorObject } from "./Decor.js"
 import type { Milestone } from "./Milestone.js"
+import type { SaidText } from "./SaidText.js"
 import { Instruments } from "../instrument/Instrument.js"
 import type { Instrument } from "../instrument/Instrument.js"
 
@@ -135,7 +136,17 @@ export interface SightingEvent {
   /** The observation's reported length, in seconds — an alternative to `endTime`. Takes precedence over `endTime` if both are set. */
   durationSeconds?: number
   place?: SightingLocation[]
-  description?: string
+  /** The account itself, in prose. Translatable — see SaidText. */
+  description?: SaidText
+  /**
+    * Technical keywords, stored in ENGLISH and named for the reader by the components' own
+    * messages — "landing" is displayed "atterrissage" to a French reader, and a tag no message
+    * knows is displayed as it is stored (see SightingTags).
+    *
+    * Not SaidText, deliberately, unlike everything else an author types here: two recordings that
+    * share a tag have to match on it — that is what a tag is for — and translations do not compare
+    * equal. rr0.org's own `tag-<slug>` filtering works the same way.
+    */
   tags?: string[]
   /**
    * Hours to subtract from `time`/`endTime` to get UTC — i.e. the legal time zone the witness's

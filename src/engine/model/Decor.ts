@@ -1,3 +1,5 @@
+import type { SaidText } from "./SaidText.js"
+
 /**
  * Static scenery placed around the observer — buildings, trees, streetlights, vehicles, other
  * witnesses — for context in the 3D reconstruction. Unlike the UFO's own Timeline/Shape or the
@@ -235,8 +237,9 @@ export interface DecorObject {
   id: string
   kind: DecorKind
   /** Optional display name, same role as Shape.title — falls back to a generic "{kind} {n}"
-   * label (see SightingEditorElement.decorLabel) when absent. */
-  title?: string
+   * label (see SightingEditorElement.decorLabel) when absent. Translatable — see SaidText: "the
+   * shack" and "la cabane" are the same shack. */
+  title?: SaidText
   /**
    * Meters from the observer's own position — eastM positive = east, northM positive = north.
    * Deliberately a flat local offset, not a lat/lng: decor is scenery for a single sighting, not

@@ -24,6 +24,7 @@ import type { Weather } from "../engine/model/Weather.js"
 import type { DecorKind } from "../engine/model/Decor.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
 import { HostLocale, selectLocale } from "../i18n/locale.js"
+import { SaidTexts } from "../engine/model/SaidText.js"
 import { WeatherAudio } from "../render3d/WeatherAudio.js"
 import { Comets } from "../engine/astronomy/Comets.js"
 import { BRIGHT_COMETS } from "../engine/astronomy/cometCatalog.js"
@@ -268,7 +269,7 @@ export class SceneElement extends HTMLElement {
     const decorId = this.sceneRenderer.pickDecorAt(ndcX, ndcY)
     const decor = decorId ? this.ufoElement.sighting.decor.find(d => d.id === decorId) : undefined
     if (decor) {
-      this.showHoverTooltip(event, decor.title || DECOR_KIND_NAMES[decor.kind][language])
+      this.showHoverTooltip(event, this.said.read(decor.title) || DECOR_KIND_NAMES[decor.kind][language])
       return
     }
     // Last of the four, and deliberately: a shape is painted over everything, a planet is a better
@@ -413,7 +414,21 @@ export class SceneElement extends HTMLElement {
     this.ufoElement.canvasElement.addEventListener("pointerdown", this.handleFirstInteraction, { once: true })
   }
 
+  /**
+   * Which of a recording's languages this reader reads — see SaidText.
+   *
+   * Built on demand and cached, not at construction: it reads the nearest `[lang]` ancestor, and
+   * an element still being upgraded has none yet. Dropped on connection, so that moving this
+   * element into a section that declares another language is honoured.
+   */
+  private get said(): SaidTexts {
+    return this.saidTexts ??= new SaidTexts(HostLocale.preferencesFor(this))
+  }
+
+  private saidTexts?: SaidTexts
+
   connectedCallback(): void {
+    this.saidTexts = undefined
     this.resizeToStage()
     this.updateAstronomy(this.lastTimeMs)
     void this.loadStars()

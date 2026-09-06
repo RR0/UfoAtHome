@@ -4,6 +4,7 @@ import { sightingLabels_en } from "../../src/component/messages/SightingLabels_e
 import { Sighting } from "../../src/engine/model/Sighting.js"
 import type { Weather } from "../../src/engine/model/Weather.js"
 import { DEFAULT_WEATHER } from "../../src/engine/model/Weather.js"
+import { SaidTexts } from "../../src/engine/model/SaidText.js"
 
 /**
  * What the strip of chips under both components is allowed to say.
@@ -15,7 +16,7 @@ import { DEFAULT_WEATHER } from "../../src/engine/model/Weather.js"
  * handful that name the case, the witness and the instrument.
  */
 describe("SightingSummary", () => {
-  const summary = new SightingSummary(sightingLabels_en, "en")
+  const summary = new SightingSummary(sightingLabels_en, "en", new SaidTexts(["en"]))
 
   const withWeather = (weather: Partial<Weather>): Sighting => {
     const sighting = Sighting.create(undefined, [{ lat: 32.4, lng: -86.3 }])

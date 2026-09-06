@@ -14,6 +14,7 @@ import type { Shape } from "../engine/shape/Shape.js"
 import type { SightingSound } from "../engine/model/Sound.js"
 import { ShapeHandles } from "../engine/shape/ShapeHandles.js"
 import { HostLocale, selectLocale } from "../i18n/locale.js"
+import { SaidTexts } from "../engine/model/SaidText.js"
 import { loadUfoMessages, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
 import type { UfoLanguage } from "./messages/index.js"
 import { ufoMessages_en } from "./messages/UfoMessages_en.js"
@@ -145,11 +146,12 @@ export class UfoElement extends HTMLElement {
   private readonly handlePointerMove = (event: PointerEvent): void => {
     const point = this.canvasPointFromEvent(event)
     const hit = point && this.shapeAt(point.x, point.y)
-    if (!hit?.shape.title) {
+    const title = this.said.read(hit?.shape.title)
+    if (!title) {
       this.tooltip.hidden = true
       return
     }
-    this.tooltip.textContent = hit.shape.title
+    this.tooltip.textContent = title
     this.tooltip.hidden = false
     // Positioned relative to #stage (the tooltip's own offsetParent), not the page — clientX/Y
     // are page-relative, so subtracting the stage's own origin converts them to that local frame.
@@ -229,6 +231,7 @@ export class UfoElement extends HTMLElement {
   }
 
   connectedCallback(): void {
+    this.saidTexts = undefined
     const src = this.getAttribute("src")
     if (src) {
       void this.loadFromSrc(src)
@@ -533,7 +536,9 @@ export class UfoElement extends HTMLElement {
         mark.type = "button"
         mark.className = "milestone-mark"
         mark.style.left = `${Math.min(Math.max(milestone.t / duration, 0), 1) * 100}%`
-        const name = milestone.note ? `${milestone.label} — ${milestone.note}` : milestone.label
+        const label = this.said.read(milestone.label) ?? ""
+        const note = this.said.read(milestone.note)
+        const name = note ? `${label} — ${note}` : label
         mark.title = name
         mark.setAttribute("aria-label", name)
         mark.addEventListener("click", () => this.player.seek(milestone.t))
@@ -549,11 +554,12 @@ export class UfoElement extends HTMLElement {
     this.milestoneCaption.hidden = current === undefined
     if (!current) return
     const label = document.createElement("b")
-    label.textContent = current.label
+    label.textContent = this.said.read(current.label) ?? ""
     // A real separator in the DOM, not a CSS margin: the caption is read as text as often as it is
     // looked at (a screen reader, a copied line), and "AZamora entend un rugissement" is not a
     // sentence.
-    const note = current.note ? ` — ${current.note}` : ""
+    const said = this.said.read(current.note)
+    const note = said ? ` — ${said}` : ""
     this.milestoneCaption.replaceChildren(label, document.createTextNode(note))
   }
 
@@ -958,6 +964,19 @@ export class UfoElement extends HTMLElement {
    * English (already baked into the template) when none of their preferences are supported —
    * see selectLocale. There is deliberately no language-picker UI: this is the only mechanism.
    */
+  /**
+   * Which of a recording's languages this reader reads — see SaidText.
+   *
+   * Built on demand and cached, not at construction: it reads the nearest `[lang]` ancestor, and
+   * an element still being upgraded has no ancestors yet. Dropped on connection so that moving
+   * this element into a section declaring another language is honoured.
+   */
+  private get said(): SaidTexts {
+    return this.saidTexts ??= new SaidTexts(HostLocale.preferencesFor(this))
+  }
+
+  private saidTexts?: SaidTexts
+
   private async loadLocaleMessages(): Promise<void> {
     const language = selectLocale(HostLocale.preferencesFor(this), UFO_SUPPORTED_LANGUAGES) as UfoLanguage
     if (language === "en") return

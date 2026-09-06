@@ -12,6 +12,7 @@ import type { Weather, WeatherSource } from "../model/Weather.js"
 import type { People } from "../model/People.js"
 import type { DecorObject } from "../model/Decor.js"
 import type { Milestone } from "../model/Milestone.js"
+import type { SaidText } from "../model/SaidText.js"
 import { sortedMilestones } from "../model/Milestone.js"
 import { SightingShapes } from "./SightingShapes.js"
 
@@ -38,8 +39,8 @@ export interface SightingRecordingJson {
    * a page (e.g. SightingElement) can group and label them without a separate manifest
    * duplicating names that could drift out of sync with the actual files. */
   caseId?: string
-  /** See SightingEvent.description. */
-  description?: string
+  /** See SightingEvent.description — a plain string, or one per language. */
+  description?: SaidText
   /** See SightingEvent.tags. */
   tags?: string[]
   timeline: TimelineJson

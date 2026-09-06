@@ -16,6 +16,7 @@ import { RR0Event } from "@rr0/data"
 import { Level2Date } from "@rr0/time"
 import { Place, PlaceLocation } from "@rr0/place"
 import type { SightingEvent, SightingLocation, SightingTime } from "../model/Sighting.js"
+import { SaidTexts } from "../model/SaidText.js"
 
 export function toLevel2Date(time: SightingTime): Level2Date {
   // Level2DateSpec requires `year` (unlike month/day/hour/minute/second, which are optional);
@@ -42,10 +43,16 @@ export function fromPlace(place: Place): SightingLocation[] {
   return place.locations.map(location => ({ lat: location.lat, lng: location.lng }))
 }
 
-export function toRR0Event(event: SightingEvent): RR0Event<"sighting"> {
+/**
+ * @param languages Which language the RR0Event's single `description` should be in, best first —
+ * a recording may carry several (see SaidText) and an RR0Event has room for one. Defaults to the
+ * site's own fallback; a language the recording does not have falls back to what it does have,
+ * never to nothing.
+ */
+export function toRR0Event(event: SightingEvent, languages: readonly string[] = ["en"]): RR0Event<"sighting"> {
   const rr0Event = new RR0Event<"sighting">("sighting", event.time ? toLevel2Date(event.time) : undefined)
   rr0Event.place = event.place ? toPlace(event.place) : undefined
-  rr0Event.description = event.description
+  rr0Event.description = new SaidTexts(languages).read(event.description)
   rr0Event.tags = event.tags
   return rr0Event
 }

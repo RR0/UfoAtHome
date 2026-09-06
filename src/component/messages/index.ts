@@ -1,6 +1,7 @@
 import type { UfoMessages } from "./UfoMessages.js"
 import type { SightingEditorMessages } from "./SightingEditorMessages.js"
 import type { SightingMessages } from "./SightingMessages.js"
+import type { TagNames } from "./TagNames.js"
 
 export const UFO_SUPPORTED_LANGUAGES = ["en", "fr"] as const
 export type UfoLanguage = (typeof UFO_SUPPORTED_LANGUAGES)[number]
@@ -32,4 +33,17 @@ const sightingLoaders: Record<UfoLanguage, () => Promise<SightingMessages>> = {
 
 export function loadSightingMessages(language: UfoLanguage): Promise<SightingMessages> {
   return sightingLoaders[language]()
+}
+
+/**
+ * What tags are called in `language` — empty for English, which is the language they are stored
+ * in and therefore already shown in (see TagNames).
+ *
+ * Lazy like the message modules above, and for the same reason: a page reading in English never
+ * downloads a dictionary that would only map every term onto itself.
+ */
+export function loadTagNames(language: UfoLanguage): Promise<TagNames> {
+  return language === "fr"
+    ? import("./TagNames_fr.js").then(m => m.tagNames_fr)
+    : Promise.resolve({})
 }

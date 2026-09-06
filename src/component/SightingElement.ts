@@ -6,8 +6,10 @@ import { SceneElement, registerScene, SCENE_ELEMENT_NAME } from "./SceneElement.
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
 import type { People } from "../engine/model/People.js"
 import { HostLocale, selectLocale } from "../i18n/locale.js"
+import { SaidTexts } from "../engine/model/SaidText.js"
+import { SightingTags } from "./messages/TagNames.js"
 import { sightingTimeToDate } from "../engine/astronomy/CelestialPositions.js"
-import { loadSightingMessages, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
+import { loadSightingMessages, loadTagNames, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
 import type { UfoLanguage } from "./messages/index.js"
 import { sightingMessages_en } from "./messages/SightingMessages_en.js"
 import type { SightingMessages } from "./messages/SightingMessages.js"
@@ -88,7 +90,7 @@ export class SightingElement extends HTMLElement {
   private readonly embedCopyButton: HTMLButtonElement
   private readonly labelsToggle: HTMLButtonElement
   private readonly paramSummary: HTMLElement
-  private summaryBuilder = new SightingSummary(sightingMessages_en, "en")
+  private summaryBuilder = new SightingSummary(sightingMessages_en, "en", new SaidTexts(["en"]), new SightingTags({}))
   /** What the strip last rendered. It refreshes on every playback tick (see the timeupdate
    * listener), and replacing forty elements sixty times a second — under a reader's own text
    * selection, at that — for values that changed in none of them is not free. */
@@ -205,7 +207,8 @@ export class SightingElement extends HTMLElement {
     this.infoCloseButton.setAttribute("aria-label", this.messages.close)
     this.infoObservationHeading.textContent = this.messages.observation
     this.infoCreditsToggle.textContent = this.messages.credits
-    this.summaryBuilder = new SightingSummary(this.messages, this.language === "fr" ? "fr" : "en")
+    this.tags = new SightingTags(await loadTagNames(this.language))
+    this.summaryBuilder = new SightingSummary(this.messages, this.language === "fr" ? "fr" : "en", this.said, this.tags)
     this.syncLabelsToggle()
     this.refreshParamSummary()
     this.infoEmbedToggle.textContent = this.messages.embed
@@ -216,7 +219,25 @@ export class SightingElement extends HTMLElement {
     this.updateTestimonyLine()
   }
 
+  /**
+   * Which of a recording's languages this reader reads — see SaidText.
+   *
+   * Built on demand and cached, not at construction: it reads the nearest `[lang]` ancestor, and
+   * an element still being upgraded has none yet. Dropped on connection, so that moving this
+   * element into a section that declares another language is honoured.
+   */
+  private get said(): SaidTexts {
+    return this.saidTexts ??= new SaidTexts(HostLocale.preferencesFor(this))
+  }
+
+  private saidTexts?: SaidTexts
+
+  /** Names the recording's tags for this reader — English until the dictionary is loaded, which
+   * is exactly what an English reader keeps (see TagNames). */
+  private tags = new SightingTags({})
+
   connectedCallback(): void {
+    this.saidTexts = undefined
     const src = this.getAttribute("src")
     if (src) {
       void this.loadFromSrc(src)
@@ -704,11 +725,13 @@ export class SightingElement extends HTMLElement {
           this.appendInfoRow(this.infoObservationList, this.messages.case, entry.sighting.caseId)
         }
       }
-      if (entry.sighting.description) {
-        this.appendInfoRow(this.infoObservationList, this.messages.description, entry.sighting.description)
+      const description = this.said.read(entry.sighting.description)
+      if (description) {
+        this.appendInfoRow(this.infoObservationList, this.messages.description, description)
       }
       if (!this.labelsShown && entry.sighting.tags && entry.sighting.tags.length > 0) {
-        this.appendInfoRow(this.infoObservationList, this.messages.tags, entry.sighting.tags.join(", "))
+        this.appendInfoRow(this.infoObservationList, this.messages.tags,
+          entry.sighting.tags.map(tag => this.tags.name(tag)).join(", "))
       }
     }
 

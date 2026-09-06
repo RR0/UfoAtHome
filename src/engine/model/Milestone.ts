@@ -1,3 +1,5 @@
+import type { SaidText } from "./SaidText.js"
+
 /**
  * A named instant in an observation — what the witness's own account calls a moment.
  *
@@ -21,11 +23,13 @@ export interface Milestone {
   /** When, in milliseconds from the start of the recording — the same scale every track uses. */
   t: number
   /** Short label, shown on the seek bar: the letter or number the account itself uses ("A", "B"),
-   * or a couple of words where it uses none. */
-  label: string
+   * or a couple of words where it uses none. Translatable — see SaidText — though a letter rarely
+   * needs it. */
+  label: SaidText
   /** What happened at that moment, in the account's own words where possible. Shown on hover and
-   * as the marker's accessible name; a label alone ("C") tells a reader nothing. */
-  note?: string
+   * as the marker's accessible name; a label alone ("C") tells a reader nothing. Translatable —
+   * see SaidText. */
+  note?: SaidText
 }
 
 /** Sorted by time, defensively copied — a recording read from JSON has whatever order it was

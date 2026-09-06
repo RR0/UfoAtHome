@@ -7,6 +7,8 @@ import type { PrecipitationType } from "../engine/model/Weather.js"
 import type { SoundKind } from "../engine/model/Sound.js"
 import { Instruments } from "../engine/instrument/Instrument.js"
 import type { SightingLabels } from "./messages/SightingLabels.js"
+import type { SaidTexts } from "../engine/model/SaidText.js"
+import { SightingTags } from "./messages/TagNames.js"
 
 /** Which group of the editor's own tab strip a summary entry belongs to. The player ignores
  * these; the editor maps them onto its panels, so that clicking a chip opens the one holding
@@ -82,7 +84,15 @@ export class SightingSummary {
   /** `language` is needed for the catalogue entries alone — an instrument's name is data, and data
    * carries every language it speaks rather than only English (see Instrument.name). Everything
    * else here is named from `labels`. */
-  constructor(private readonly labels: SightingLabels, private readonly language: "en" | "fr") {
+  constructor(
+    private readonly labels: SightingLabels, private readonly language: "en" | "fr",
+    /** Reads the text the AUTHOR wrote — a decor object's own name, and every other field a
+     * recording can carry in several languages (see SaidText). Distinct from `labels` and
+     * `language` above, which name the fields rather than say what is in them. */
+    private readonly said: SaidTexts,
+    /** Names the recording's tags for this reader — they are stored in English, see TagNames. */
+    private readonly tags: SightingTags = new SightingTags({})
+  ) {
   }
 
   /** The entries for `sighting` as it stands at `timeMs` on the recording's own clock — weather,
@@ -166,7 +176,8 @@ export class SightingSummary {
     // a chip is a glance. It stays where prose belongs — the player's info panel, which is
     // exactly what it is left holding once the summary takes the fields off its hands.
     const tags = sighting.event.tags
-    this.push(entries, "observation", "tags", this.labels.tags, tags && tags.length > 0 ? tags.join(", ") : undefined)
+    this.push(entries, "observation", "tags", this.labels.tags,
+      tags && tags.length > 0 ? tags.map(tag => this.tags.name(tag)).join(", ") : undefined)
   }
 
   private addWitness(entries: SummaryEntry[], sighting: Sighting, timeMs: number): void {
@@ -243,7 +254,7 @@ export class SightingSummary {
       }
       return
     }
-    this.push(entries, "decor", "decorTitle", this.labels.decorTitle, selected.title)
+    this.push(entries, "decor", "decorTitle", this.labels.decorTitle, this.said.read(selected.title))
     const placement = resolveDecorPlacementAt(selected, timeMs)
     this.push(entries, "decor", "decorEast", this.labels.decorEast, this.rounded(placement.eastM, 1), "m")
     this.push(entries, "decor", "decorNorth", this.labels.decorNorth, this.rounded(placement.northM, 1), "m")
@@ -340,7 +351,7 @@ export class SightingSummary {
   /** What to call a decor object with no name of its own — the same "{kind} {n}" fallback the
    * recorder's picker uses, so a chip and the picker never name the same building differently. */
   private decorLabel(decor: DecorObject): string {
-    return decor.title ?? this.decorKindName(decor.kind)
+    return this.said.read(decor.title) ?? this.decorKindName(decor.kind)
   }
 
   private decorKindName(kind: DecorKind): string {

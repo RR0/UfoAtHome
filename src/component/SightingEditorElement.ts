@@ -81,9 +81,11 @@ import type { DataSource } from "../engine/source/DataSource.js"
 import type { PlaceMatch, PlaceProvider } from "../engine/place/PlaceProvider.js"
 import { sightingTimeToDate } from "../engine/astronomy/CelestialPositions.js"
 import { HostLocale, selectLocale } from "../i18n/locale.js"
+import { SaidTexts } from "../engine/model/SaidText.js"
+import { SightingTags } from "./messages/TagNames.js"
 import { TIME_ZONE_SOURCES } from "../engine/time/timeZoneSources.js"
 import type { TimeZoneProvider } from "../engine/time/TimeZoneProvider.js"
-import { loadSightingEditorMessages, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
+import { loadSightingEditorMessages, loadTagNames, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
 import type { UfoLanguage } from "./messages/index.js"
 import { sightingEditorMessages_en } from "./messages/SightingEditorMessages_en.js"
 import type { SightingEditorMessages } from "./messages/SightingEditorMessages.js"
@@ -1295,7 +1297,7 @@ export class SightingEditorElement extends HTMLElement {
       tab.addEventListener("click", () => this.toggleGroup(tab, !this.isGroupOpen(tab)))
     }
     this.paramSummary = this.shadow.getElementById("param-summary")!
-    this.paramSummaryBuilder = new SightingSummary(this.messages, this.showerLanguage())
+    this.paramSummaryBuilder = new SightingSummary(this.messages, this.showerLanguage(), this.said, this.tagNames)
     // One listener on the strip rather than one per chip: the chips are rebuilt from scratch on
     // every refresh, and re-binding 37 handlers each time is how a summary meant to be cheap stops
     // being cheap.
@@ -2073,7 +2075,8 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   private updateDescription(): void {
-    this.ufoElement.sighting.event.description = this.stringOrUndefined(this.descriptionInput.value)
+    this.ufoElement.sighting.event.description =
+      this.said.write(this.ufoElement.sighting.event.description, this.descriptionInput.value, this.writingLanguage)
     this.ufoElement.refresh()
   }
 
@@ -2085,6 +2088,10 @@ export class SightingEditorElement extends HTMLElement {
       .split(",")
       .map(tag => tag.trim())
       .filter(tag => tag.length > 0)
+      // Typed in the author's language, stored in English — see TagNames. An author writing
+      // "atterrissage" and one writing "landing" have to end up with the same tag, or their two
+      // recordings stop matching each other.
+      .map(tag => this.tagNames.stored(tag))
     this.ufoElement.sighting.event.tags = tags.length > 0 ? tags : undefined
     this.ufoElement.refresh()
   }
@@ -2825,8 +2832,8 @@ export class SightingEditorElement extends HTMLElement {
     this.witnessLastNameInput.value = sighting.witness?.lastName ?? ""
     this.witnessFirstNamesInput.value = sighting.witness?.firstNames?.join(", ") ?? ""
     this.caseIdInput.value = sighting.caseId ?? ""
-    this.descriptionInput.value = sighting.event.description ?? ""
-    this.tagsInput.value = sighting.event.tags?.join(", ") ?? ""
+    this.descriptionInput.value = this.said.read(sighting.event.description) ?? ""
+    this.showTags()
     this.instrumentSelect.value = sighting.instrument.id
   }
 
@@ -3267,7 +3274,7 @@ export class SightingEditorElement extends HTMLElement {
     // skip: this same edit path re-syncs on every keystroke (input -> refresh() -> timeupdate),
     // which would otherwise stomp whatever the user is actively typing.
     if (this.shadow.activeElement !== this.shapeTitleInput) {
-      this.shapeTitleInput.value = shape.title ?? ""
+      this.shapeTitleInput.value = this.said.read(shape.title) ?? ""
     }
     // The size/distance pair is deliberately NOT re-read from the shape here, unlike every other
     // field above: it isn't one of the shape's properties any more (see BaseShape.angular). It is
@@ -3285,7 +3292,7 @@ export class SightingEditorElement extends HTMLElement {
     const t = this.ufoElement.currentTime
     const shape = timeline.getInterpolatedShapeAt(t, this.currentSourceId)
     if (!shape) return
-    timeline.addKeyframe(t, [{ sourceId: this.currentSourceId, shape: { ...shape, title: this.stringOrUndefined(this.shapeTitleInput.value) } }])
+    timeline.addKeyframe(t, [{ sourceId: this.currentSourceId, shape: { ...shape, title: this.said.write(shape.title, this.shapeTitleInput.value, this.writingLanguage) } }])
     this.ufoElement.refresh()
     this.refreshSourceList() // keeps the dropdown's own label live as the user types
     this.updateShapeTitleValidity()
@@ -3722,7 +3729,8 @@ export class SightingEditorElement extends HTMLElement {
    * only ever shown inside this editor's own authoring UI. */
   private shapeLabel(sourceId: string): string {
     const shape = this.ufoElement.sighting.timeline.getInterpolatedShapeAt(this.ufoElement.currentTime, sourceId)
-    if (shape?.title) return shape.title
+    const title = this.said.read(shape?.title)
+    if (title) return title
     const match = /^ufo-(\d+)$/.exec(sourceId)
     return match ? `${this.messages.shape} ${match[1]}` : sourceId
   }
@@ -3855,7 +3863,8 @@ export class SightingEditorElement extends HTMLElement {
    * falls back to a generic "{kind} {n}" label, since decor has no name of its own until the
    * witness types one into the Name field. */
   private decorLabel(decor: DecorObject): string {
-    if (decor.title) return decor.title
+    const title = this.said.read(decor.title)
+    if (title) return title
     const sameKind = this.ufoElement.sighting.decor.filter(d => d.kind === decor.kind)
     const index = sameKind.indexOf(decor) + 1
     const kindLabel = this.decorKindSelect.querySelector<HTMLOptionElement>(`option[value="${decor.kind}"]`)?.textContent ?? decor.kind
@@ -4016,11 +4025,11 @@ export class SightingEditorElement extends HTMLElement {
         const t = this.ufoElement.currentTime
         const keyframe = { t, eastM, northM, altitudeM, headingDeg }
         const kept = track.filter(existing => existing.t !== t)
-        return { ...d, title: this.stringOrUndefined(this.decorTitleInput.value), track: [...kept, keyframe].sort((a, b) => a.t - b.t), sightingUrl: this.stringOrUndefined(this.decorSightingUrlInput.value), witnessSide, sizeM: this.statedDecorSize(), model: this.statedDecorModel(), floors: d.kind === "building" ? Number(this.decorFloorsInput.value) : undefined, occupiedFloor: d.kind === "building" ? Number(this.decorOccupiedFloorInput.value) : undefined }
+        return { ...d, title: this.said.write(d.title, this.decorTitleInput.value, this.writingLanguage), track: [...kept, keyframe].sort((a, b) => a.t - b.t), sightingUrl: this.stringOrUndefined(this.decorSightingUrlInput.value), witnessSide, sizeM: this.statedDecorSize(), model: this.statedDecorModel(), floors: d.kind === "building" ? Number(this.decorFloorsInput.value) : undefined, occupiedFloor: d.kind === "building" ? Number(this.decorOccupiedFloorInput.value) : undefined }
       }
       return {
         ...d,
-        title: this.stringOrUndefined(this.decorTitleInput.value),
+        title: this.said.write(undefined, this.decorTitleInput.value, this.writingLanguage),
         eastM,
         northM,
         headingDeg,
@@ -4215,7 +4224,7 @@ export class SightingEditorElement extends HTMLElement {
     const sighting = this.ufoElement.sighting
     const going = sighting.milestones.find(milestone => milestone.t === t)
     if (!going) return
-    this.askConfirm(this.messages.confirmDeleteMilestone.replace("{name}", going.label), () => {
+    this.askConfirm(this.messages.confirmDeleteMilestone.replace("{name}", this.said.read(going.label) ?? ""), () => {
       sighting.milestones = sighting.milestones.filter(milestone => milestone.t !== t)
       this.currentMilestoneT = sighting.milestones[0]?.t
       this.refreshMilestoneList()
@@ -4237,7 +4246,11 @@ export class SightingEditorElement extends HTMLElement {
     const sighting = this.ufoElement.sighting
     sighting.milestones = sighting.milestones.map(milestone =>
       milestone.t === t
-        ? { ...milestone, label: this.milestoneLabelInput.value, note: this.stringOrUndefined(this.milestoneNoteInput.value) }
+        ? {
+          ...milestone,
+          label: this.said.write(milestone.label, this.milestoneLabelInput.value, this.writingLanguage) ?? "",
+          note: this.said.write(milestone.note, this.milestoneNoteInput.value, this.writingLanguage)
+        }
         : milestone
     )
     this.refreshMilestoneList()
@@ -4253,8 +4266,8 @@ export class SightingEditorElement extends HTMLElement {
       ...milestones.map(milestone => {
         const option = document.createElement("option")
         option.value = String(milestone.t)
-        option.textContent = `${milestone.label} — ${this.formatSeconds(milestone.t)}`
-        option.title = milestone.note ?? ""
+        option.textContent = `${this.said.read(milestone.label) ?? ""} — ${this.formatSeconds(milestone.t)}`
+        option.title = this.said.read(milestone.note) ?? ""
         return option
       })
     )
@@ -4275,8 +4288,8 @@ export class SightingEditorElement extends HTMLElement {
       control.disabled = !has
       this.setRowVisible(control, has)
     }
-    this.milestoneLabelInput.value = current?.label ?? ""
-    this.milestoneNoteInput.value = current?.note ?? ""
+    this.milestoneLabelInput.value = this.said.read(current?.label) ?? ""
+    this.milestoneNoteInput.value = this.said.read(current?.note) ?? ""
   }
 
   /** Name is mandatory once a decor object exists — addDecor() always fills it with a real
@@ -4394,7 +4407,7 @@ export class SightingEditorElement extends HTMLElement {
     ]) {
       input.disabled = !hasSelection
     }
-    this.decorTitleInput.value = decor?.title ?? ""
+    this.decorTitleInput.value = this.said.read(decor?.title) ?? ""
     // Where the object actually IS at the playhead, not the static fields it may never use. An
     // object with a trajectory (an aircraft, a passing car) is somewhere quite else than the
     // eastM/northM it was created with, and a form showing those reads as a plain lie: "15 m north"
@@ -4589,6 +4602,30 @@ export class SightingEditorElement extends HTMLElement {
    * in this element is. */
   private showerLanguage(): "en" | "fr" {
     return selectLocale(HostLocale.preferencesFor(this), ["en", "fr"]) as "en" | "fr"
+  }
+
+  /**
+   * Reads the text an author wrote into the recording — see SaidText.
+   *
+   * The editor shows ONE language of it, the reader's own, and writing back touches only that one
+   * (SaidTexts.write): an editor open in French must not delete the English a co-author wrote, and
+   * it certainly cannot translate what it was just handed. Which also means this editor is how a
+   * translation gets added — open the file in the other language and type.
+   */
+  private get said(): SaidTexts {
+    return this.saidTexts ??= new SaidTexts(HostLocale.preferencesFor(this))
+  }
+
+  private saidTexts?: SaidTexts
+
+  /** Names tags for this author, and reads back what they type — see TagNames. English until the
+   * dictionary is loaded, which is what an English author keeps. */
+  private tagNames = new SightingTags({})
+
+  /** The language this author is writing in — the same one the interface is in, since that is the
+   * language they asked for. Its own key in every field they type into. */
+  private get writingLanguage(): string {
+    return this.showerLanguage()
   }
 
   /**
@@ -5166,7 +5203,17 @@ export class SightingEditorElement extends HTMLElement {
   private async loadLocaleMessages(): Promise<void> {
     const language = selectLocale(HostLocale.preferencesFor(this), UFO_SUPPORTED_LANGUAGES) as UfoLanguage
     if (language === "en") return
+    // Before the messages, because applyMessages rebuilds the summary with it — see TagNames.
+    this.tagNames = new SightingTags(await loadTagNames(language))
+    // A recording loaded before this resolved is showing its tags in English: say them again.
+    this.showTags()
     this.applyMessages(await loadSightingEditorMessages(language))
+  }
+
+  /** The recording's tags in the author's own words, in the field they edit them in — stored in
+   * English, shown translated where a translation exists (see TagNames). */
+  private showTags(): void {
+    this.tagsInput.value = this.ufoElement.sighting.event.tags?.map(tag => this.tagNames.name(tag)).join(", ") ?? ""
   }
 
   private applyMessages(messages: SightingEditorMessages): void {
@@ -5343,7 +5390,7 @@ export class SightingEditorElement extends HTMLElement {
     this.edtfModeButton.setAttribute("aria-label", messages.edtfModeTitle)
     // The chips hold translated labels, so they are rebuilt with the new ones — and the signature
     // check lets that happen without a diff, since every label changed.
-    this.paramSummaryBuilder = new SightingSummary(messages, this.showerLanguage())
+    this.paramSummaryBuilder = new SightingSummary(messages, this.showerLanguage(), this.said, this.tagNames)
     this.refreshParamSummary()
     const skyExpanded = this.skyDetailsButton.getAttribute("aria-expanded") === "true"
     this.skyDetailsButton.title = skyExpanded ? messages.skyDetailsHide : messages.skyDetails

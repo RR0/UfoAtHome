@@ -1,3 +1,5 @@
+import type { SaidText } from "../model/SaidText.js"
+
 import { ApparentSize } from "./ApparentSize.js"
 import type { AngularExtent } from "./ApparentSize.js"
 
@@ -58,7 +60,8 @@ export interface BaseShape {
    */
   brightness?: number
   selected: boolean
-  title?: string
+  /** What the witness calls it, if anything. Translatable — see SaidText. */
+  title?: SaidText
   /**
    * Whether the witness reported this shape as being behind cloud at this instant — "it
    * disappeared into a cloud", which is a thing they SAW, not something to be deduced.
