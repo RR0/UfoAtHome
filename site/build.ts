@@ -58,7 +58,7 @@ class SiteBuilder {
       new DocsCreatePage(example.trim()), new DocsSharePage(), new DocsComponentsPage(),
       // One page per component, under that hub — see DocsComponentPage.
       ...COMPONENT_DOCS.map(doc => new DocsComponentPage(doc)),
-      new FaqPage(), new RoadmapPage(),
+      new FaqPage(), new RoadmapPage(version),
       // The long form of the home page's "Contextualise" cards.
       new ContextPage()
     ]

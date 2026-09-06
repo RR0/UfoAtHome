@@ -423,7 +423,7 @@ ${carousel}
       <p class="small">Chaque source est nommée là où sa donnée est rapportée, et peut être
         remplacée par une autre — le sélecteur <em>est</em> le crédit. D'où vient chacune, ce qu'elle
         donne et où elle s'arrête : <a href="/context/">vérifier ce que la scène affirme</a>. Ce qui
-        manque encore est sur <a href="/roadmap/">la page du plan</a>.</p>
+        manque encore est sur <a href="/roadmap/">la page des futures évolutions</a>.</p>
       </div>
     </div>
   </section>

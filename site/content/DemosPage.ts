@@ -163,7 +163,7 @@ ${groups}
     <p>${fr
       ? `Les rentrées atmosphériques, un passage satellite réellement calculé pour les dates récentes,
          les nuages volumétriques, l'observation depuis un avion, les anomalies de propagation radar.
-         Le détail, et ce que chacun attend, est sur <a href="/roadmap/">la page du plan</a>.`
+         Le détail, et ce que chacun attend, est sur <a href="/roadmap/">la page des futures évolutions</a>.`
       : `Atmospheric re-entries, a satellite pass actually computed for recent dates, volumetric
          clouds, observing from an aircraft, radar propagation anomalies. What each one is waiting
          on is on <a href="/roadmap/">the roadmap</a>.`}</p>

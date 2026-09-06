@@ -238,7 +238,7 @@ export class ContextPage implements SitePage {
     <p class="small">Chaque source est nommée là où sa donnée est rapportée, avec l'attribution
       qu'exige sa licence — et peut être remplacée par une autre. Le sélecteur <em>est</em> le
       crédit. Ce qui manque encore, et ce que chaque élément attend, est sur
-      <a href="/roadmap/">la page du plan</a>.</p>
+      <a href="/roadmap/">la page des futures évolutions</a>.</p>
   </div>
 </section>
 `

@@ -1,12 +1,12 @@
 import type { PageMeta, SiteLanguage, SitePage } from "../SitePage.js"
 
-/** Where this is going — and what each item is actually waiting on. */
+/** What is coming, and what each item is actually waiting on. */
 export class RoadmapPage implements SitePage {
 
   readonly meta: PageMeta = {
     slug: "roadmap",
-    navLabel: { en: "Roadmap", fr: "Plan" },
-    title: { en: "Where this is going", fr: "Où cela va" },
+    navLabel: { en: "Roadmap", fr: "Évolutions" },
+    title: { en: "Future developments", fr: "Futures évolutions" },
     asideFromNav: true,
     description: {
       en: "What UFO@home already reproduces, what is being built next, and what each remaining item "
@@ -14,6 +14,11 @@ export class RoadmapPage implements SitePage {
       fr: "Ce qu'UFO@home reproduit déjà, ce qui vient ensuite, et ce que chaque élément restant "
         + "attend — un jeu de données, un modèle physique, ou une décision."
     }
+  }
+
+  /** @param version The one from package.json. It used to be typed into the eyebrow by hand, where
+   * it sat at 0.37 for eight releases — on the one page whose whole subject is what is current. */
+  constructor(private readonly version: string) {
   }
 
   render(language: SiteLanguage): string {
@@ -24,8 +29,8 @@ export class RoadmapPage implements SitePage {
     return `
 <section class="band hero">
   <div class="wrap">
-    <p class="eyebrow">Roadmap · version 0.37</p>
-    <h1>Where this is going.</h1>
+    <p class="eyebrow">Roadmap · version ${this.version}</p>
+    <h1>Future developments.</h1>
     <p class="lede">One rule decides the order: <strong>reproduce everything that could have been
       visible in that sky at that moment</strong> — by data where a record exists, by calculation
       where none does, and never by invention. What follows is a plan, not a promise; the order
@@ -181,8 +186,8 @@ export class RoadmapPage implements SitePage {
     return `
 <section class="band hero">
   <div class="wrap">
-    <p class="eyebrow">Plan · version 0.37</p>
-    <h1>Où cela va.</h1>
+    <p class="eyebrow">Évolutions · version ${this.version}</p>
+    <h1>Futures évolutions.</h1>
     <p class="lede">Une règle décide de l'ordre : <strong>reproduire tout ce qui a pu être visible
       dans ce ciel à ce moment-là</strong> — par la donnée là où un relevé existe, par le calcul là
       où il n'y en a pas, et jamais par l'invention. Ce qui suit est un plan, pas une promesse ;
