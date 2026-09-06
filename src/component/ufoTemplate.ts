@@ -319,12 +319,9 @@ canvas[data-cursor="rotate"] {
   border-radius: 3px;
   overflow: hidden;
   background: rgba(0, 0, 0, 0.55);
-  /* A click anywhere on it closes it. The map covers a corner of the picture it is about, so the
-     gesture a reader reaches for once they have read it is "get this out of my way" — and having
-     to find the small button that opened it is a worse answer than putting the whole panel under
-     the pointer. The recording underneath no longer takes that click, which is the trade: play/
-     pause is a button, a bar, a keypress and the rest of the canvas. */
-  cursor: pointer;
+  /* Its marks answer the pointer: hovering one names it, clicking one goes to it — a named moment
+     is an instant, everything else is a place to turn and look at. Closing it is the button that
+     opened it, which is where a reader looks for it anyway. */
 }
 .witness-map-panel[hidden] {
   display: none;

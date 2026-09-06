@@ -1026,10 +1026,14 @@ export class SceneRenderer {
     // held, so tilting it clockwise leaves the scene where it is and swings the frame: a level
     // horizon then comes out running UPHILL to the right, by the same angle.
     const rollRad = (pose.rollDeg ?? 0) * DEG_TO_RAD
+    // A reader turning to look at something is added on top of the pose, never written into it —
+    // see setLookOffset. What the witness said they faced is the record; where somebody browsing it
+    // has pointed the view is not.
+    const pitchRad = (pose.pitchDeg + this.lookPitchDeg) * DEG_TO_RAD
     if (pose.headingDeg !== undefined) {
-      this.camera.rotation.set(pose.pitchDeg * DEG_TO_RAD, -pose.headingDeg * DEG_TO_RAD, rollRad, "YXZ")
+      this.camera.rotation.set(pitchRad, -(pose.headingDeg + this.lookYawDeg) * DEG_TO_RAD, rollRad, "YXZ")
     } else {
-      this.camera.rotation.set(pose.pitchDeg * DEG_TO_RAD, this.camera.rotation.y, rollRad, "YXZ")
+      this.camera.rotation.set(pitchRad, this.camera.rotation.y, rollRad, "YXZ")
     }
     if (pose.elevationM !== this.observerElevationM) {
       this.observerElevationM = pose.elevationM
@@ -1483,6 +1487,23 @@ export class SceneRenderer {
    * doc comment) — reset to {0,0} whenever the inhabited object/side changes, so looking through
    * a newly picked window always starts centered. Applied in updateDecorAnchoring, on top of
    * (not instead of) the object/side's own base look direction. */
+  /**
+   * How far a reader has turned the view away from the pose, degrees — see setLookOffset.
+   *
+   * Distinct from indoorLookYawDeg above, which is the same gesture for a witness standing INSIDE a
+   * decor object and is applied on the occupant's own view instead. Both exist because looking
+   * round is not the same act as stating where somebody looked.
+   */
+  private lookYawDeg = 0
+  private lookPitchDeg = 0
+
+  /** Turns the view without touching the record — what a click on the witness map's own scenery
+   * does, and what returns to zero when the reader asks for the witness's own gaze again. */
+  setLookOffset(yawDeg: number, pitchDeg: number): void {
+    this.lookYawDeg = yawDeg
+    this.lookPitchDeg = pitchDeg
+  }
+
   private indoorLookYawDeg = 0
   private indoorLookPitchDeg = 0
 

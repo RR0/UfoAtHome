@@ -15,5 +15,7 @@ export const ufoMessages_en: UfoMessages = {
   hideWitnessMap: "Hide where the witness was",
   mapImageryUnavailable: "Aerial imagery unavailable",
   showMilestones: "Show the account's moments",
-  hideMilestones: "Hide the account's moments"
+  hideMilestones: "Hide the account's moments",
+  witnessHere: "The witness, here",
+  decorHere: "Scenery"
 }

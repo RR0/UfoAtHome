@@ -15,5 +15,7 @@ export const ufoMessages_fr: UfoMessages = {
   hideWitnessMap: "Masquer où était le témoin",
   mapImageryUnavailable: "Vue aérienne indisponible",
   showMilestones: "Voir les moments du récit",
-  hideMilestones: "Masquer les moments du récit"
+  hideMilestones: "Masquer les moments du récit",
+  witnessHere: "Le témoin, ici",
+  decorHere: "Élément de décor"
 }

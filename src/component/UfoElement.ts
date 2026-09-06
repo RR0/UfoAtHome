@@ -22,7 +22,7 @@ import { WitnessPath } from "../engine/place/WitnessPath.js"
 import { resolveDecorPlacementAt } from "../engine/model/Decor.js"
 import { localMetersToGeo } from "../render3d/terrain/GeoProjection.js"
 import { WitnessMapRenderer } from "../render/WitnessMapRenderer.js"
-import type { WitnessMapMarker, WitnessMapDecor } from "../render/WitnessMapRenderer.js"
+import type { WitnessMapMarker, WitnessMapDecor, WitnessMapTarget } from "../render/WitnessMapRenderer.js"
 import { defaultImageryProvider } from "../render3d/terrain/defaultTerrainProviders.js"
 import type { ImageryTexture } from "../render3d/terrain/ImageryProvider.js"
 import type { GeoBounds } from "../render3d/terrain/GeoBounds.js"
@@ -148,6 +148,18 @@ export class UfoElement extends HTMLElement {
    * "aerial imagery unavailable": that is not a credit, it is the map explaining itself.
    */
   creditShownExternally = false
+  /**
+   * How far a reader has turned the view away from the pose, degrees — set by a composing element
+   * (see SceneElement, which does the turning in 3D) so that what is painted over the scene turns
+   * with it.
+   *
+   * The overlay is the witness's own field of view, so it has to follow the eye: leaving the
+   * phenomenon painted at the same pixels while the world swings behind it is exactly the fault
+   * BaseShape.aim was added to end, and a look-around must not bring it back.
+   */
+  private lookYawDeg = 0
+  private lookPitchDeg = 0
+
   /** Whether the account's named moments are being shown — see MILESTONES_ATTRIBUTE. On unless a
    * page or a reader says otherwise, which is what a recording that took the trouble to name its
    * moments deserves. */
@@ -265,6 +277,59 @@ export class UfoElement extends HTMLElement {
     this.tooltip.style.top = `${event.clientY - stageRect.top + 12}px`
   }
 
+  /**
+   * Names whatever the pointer is over on the map, in the same tooltip the picture itself uses.
+   *
+   * The same tooltip on purpose: a reader hovering a thing and being answered in one style over the
+   * canvas and another over the map would be told, wrongly, that these are two different kinds of
+   * thing. They are the same recording, seen twice.
+   */
+  private readonly handleWitnessMapPointerMove = (event: PointerEvent): void => {
+    const target = this.witnessMapTargetFrom(event)
+    if (!target) {
+      this.tooltip.hidden = true
+      this.witnessMapCanvas.style.cursor = "default"
+      return
+    }
+    this.witnessMapCanvas.style.cursor = "pointer"
+    this.tooltip.textContent = target.label
+    this.tooltip.hidden = false
+    const stageRect = this.stageElement.getBoundingClientRect()
+    this.tooltip.style.left = `${event.clientX - stageRect.left + 12}px`
+    this.tooltip.style.top = `${event.clientY - stageRect.top + 12}px`
+  }
+
+  /**
+   * Takes the recording to whatever was clicked on the map.
+   *
+   * A named moment IS an instant, so going to it means moving the playhead — the same thing its
+   * mark on the seek bar already does. Anything else is a PLACE, and going to it means turning the
+   * view until it is in front of the reader (see lookToward), which is a reader looking round and
+   * not an edit of what the witness said they faced.
+   */
+  private readonly handleWitnessMapClick = (event: MouseEvent): void => {
+    const target = this.witnessMapTargetFrom(event)
+    if (!target) return
+    if (target.kind === "milestone" && target.t !== undefined) {
+      this.player.seek(target.t)
+      return
+    }
+    this.dispatchEvent(
+      new CustomEvent("lookat", { detail: { lat: target.lat, lng: target.lng, kind: target.kind }, bubbles: true, composed: true })
+    )
+  }
+
+  /** Which drawn mark the pointer is over, in the canvas's own pixels — the panel is displayed at
+   * whatever size CSS gives it, which is rarely the backing store's. */
+  private witnessMapTargetFrom(event: MouseEvent): WitnessMapTarget | undefined {
+    const rect = this.witnessMapCanvas.getBoundingClientRect()
+    if (rect.width === 0 || rect.height === 0) return undefined
+    return this.witnessMapRenderer.hitTest(
+      ((event.clientX - rect.left) / rect.width) * this.witnessMapCanvas.width,
+      ((event.clientY - rect.top) / rect.height) * this.witnessMapCanvas.height
+    )
+  }
+
   private readonly handlePointerLeave = (): void => {
     this.tooltip.hidden = true
   }
@@ -312,9 +377,9 @@ export class UfoElement extends HTMLElement {
     this.fullscreenButton.addEventListener("click", () => this.toggleFullscreen())
     this.witnessMapButton.addEventListener("click", () => this.toggleWitnessMap())
     this.milestonesButton.addEventListener("click", () => this.toggleMilestones())
-    // See the panel's own CSS: reading it is the whole interaction, so closing it is the only thing
-    // left to want from it.
-    this.witnessMapPanel.addEventListener("click", () => this.setWitnessMapOpen(false))
+    this.witnessMapCanvas.addEventListener("pointermove", this.handleWitnessMapPointerMove)
+    this.witnessMapCanvas.addEventListener("pointerleave", this.handlePointerLeave)
+    this.witnessMapCanvas.addEventListener("click", this.handleWitnessMapClick)
     this.seekInput.addEventListener("input", () => this.player.seek(Number(this.seekInput.value)))
     this.canvas.addEventListener("click", event => {
       if (!this.enableClickToPlay) return
@@ -851,12 +916,13 @@ export class UfoElement extends HTMLElement {
     this.canvasRenderer.setStarPoints(Instruments.starPointsOf(this.sighting.instrument))
     this.canvasRenderer.setRoll(((resolveObserverPoseAt(this.sighting, t)?.rollDeg ?? 0) * Math.PI) / 180)
     const instants = this.exposureInstants(t)
+    const shift = this.lookShift
     for (const instant of instants) {
       for (const [sourceId, shape] of instant.shapes) {
         if (this.occludedSourceIds.has(sourceId)) continue
         const share = instant.share
         const exposed = share === 1 ? shape : { ...shape, transparency: 1 - (1 - shape.transparency) * share }
-        this.canvasRenderer.paintShape(exposed)
+        this.canvasRenderer.paintShape(this.shifted(exposed, shift))
       }
     }
     // Drawn ONCE, over the finished picture, and always at the playhead's own instant — not once
@@ -899,6 +965,12 @@ export class UfoElement extends HTMLElement {
     // seek, since both funnel through this one onFrame sink. Lets SightingEditorElement know when
     // to resync its appearance toolbar to whatever's at the current playhead.
     this.dispatchEvent(new CustomEvent("timeupdate", { detail: { time: t } }))
+  }
+
+  /** The same shape, moved by however far the reader has turned the view — see lookShift. */
+  private shifted(shape: Shape, shift: { x: number; y: number }): Shape {
+    if (shift.x === 0 && shift.y === 0) return shape
+    return { ...shape, bounds: { ...shape.bounds, x: shape.bounds.x + shift.x, y: shape.bounds.y + shift.y } }
   }
 
   private createPlayer(): Player {
@@ -1260,7 +1332,14 @@ export class UfoElement extends HTMLElement {
     for (const milestone of this.milestonesShown ? sortedMilestones(this.currentSighting.milestones) : []) {
       const at = resolveObserverPoseAt(this.currentSighting, milestone.t)
       if (at?.lat === undefined || at.lng === undefined) continue
-      markers.push({ label: this.said.read(milestone.label) ?? "", lat: at.lat, lng: at.lng, current: milestone === current })
+      markers.push({
+        label: this.said.read(milestone.label) ?? "",
+        note: this.said.read(milestone.note),
+        t: milestone.t,
+        lat: at.lat,
+        lng: at.lng,
+        current: milestone === current
+      })
     }
     this.witnessMapRenderer.paint({
       bounds: this.witnessMapBounds,
@@ -1275,6 +1354,7 @@ export class UfoElement extends HTMLElement {
         : undefined,
       markers,
       decor: this.witnessMapDecorAt(t),
+      witnessLabel: this.said.read(this.currentSighting.witness?.title) ?? this.messages.witnessHere,
       nightFraction: this.witnessMapNightFraction,
       attribution: this.witnessMapFooterLine
     })
@@ -1329,7 +1409,7 @@ export class UfoElement extends HTMLElement {
     return this.currentSighting.decor.map(object => {
       const placement = resolveDecorPlacementAt(object, t)
       const { lat, lng } = localMetersToGeo(placement.eastM, -placement.northM, reference.lat!, reference.lng!)
-      return { lat, lng, headingDeg: placement.headingDeg }
+      return { lat, lng, headingDeg: placement.headingDeg, label: this.said.read(object.title) ?? this.messages.decorHere }
     })
   }
 
@@ -1358,6 +1438,23 @@ export class UfoElement extends HTMLElement {
     if (night === this.witnessMapNightFraction) return
     this.witnessMapNightFraction = night
     this.paintWitnessMap(this.currentTime)
+  }
+
+  /** Turns what is painted over the scene along with the scene — see lookYawDeg. Called by a
+   * composing element; a bare player has no way to turn the view and so never leaves zero. */
+  setLookOffset(yawDeg: number, pitchDeg: number): void {
+    if (yawDeg === this.lookYawDeg && pitchDeg === this.lookPitchDeg) return
+    this.lookYawDeg = yawDeg
+    this.lookPitchDeg = pitchDeg
+    this.refresh()
+  }
+
+  /** How far the reader's own turn moves the overlay, in the pixels shapes are drawn in. */
+  private get lookShift(): { x: number; y: number } {
+    if (this.lookYawDeg === 0 && this.lookPitchDeg === 0) return { x: 0, y: 0 }
+    const pose = resolveObserverPoseAt(this.currentSighting, this.currentTime)
+    const projection = ImageProjection.of(this.currentSighting.instrument, this.canvas.height, pose?.fovDeg ?? 60)
+    return { x: -projection.angleDegToRadiusPx(this.lookYawDeg), y: projection.angleDegToRadiusPx(this.lookPitchDeg) }
   }
 
   private updateFullscreenButton(): void {

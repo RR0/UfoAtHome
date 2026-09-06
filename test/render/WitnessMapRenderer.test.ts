@@ -123,8 +123,8 @@ describe("WitnessMapRenderer", () => {
     // the recording is actually in — not whichever happens to come later in the account.
     const { frame, context } = frameWith({
       markers: [
-        { label: "E", lat: CENTER.lat, lng: CENTER.lng, current: true },
-        { label: "F", lat: CENTER.lat, lng: CENTER.lng, current: false }
+        { label: "E", t: 0, lat: CENTER.lat, lng: CENTER.lng, current: true },
+        { label: "F", t: 0, lat: CENTER.lat, lng: CENTER.lng, current: false }
       ]
     })
     new WitnessMapRenderer(context as unknown as CanvasRenderingContext2D).paint(frame)
@@ -139,7 +139,7 @@ describe("WitnessMapRenderer", () => {
     const { frame, context } = frameWith({
       // Fifteen metres north of the marker — Zamora's own run — which at this map's scale is
       // barely two pixels and sits well inside the disc drawn for the moment.
-      markers: [{ label: "E", lat: CENTER.lat - 0.000135, lng: CENTER.lng, current: true }]
+      markers: [{ label: "E", t: 0, lat: CENTER.lat - 0.000135, lng: CENTER.lng, current: true }]
     })
     new WitnessMapRenderer(context as unknown as CanvasRenderingContext2D).paint(frame)
     const marks = context.arcs.filter(a => a.radius < 20).map(a => a.radius)
@@ -150,7 +150,7 @@ describe("WitnessMapRenderer", () => {
     // A milestone IS a moment of the witness's own account, so the playhead lands exactly on one
     // every time the recording reaches it — and a filled dot there hid the letter naming it.
     const { frame, context } = frameWith({
-      markers: [{ label: "E", lat: CENTER.lat, lng: CENTER.lng, current: true }]
+      markers: [{ label: "E", t: 0, lat: CENTER.lat, lng: CENTER.lng, current: true }]
     })
     new WitnessMapRenderer(context as unknown as CanvasRenderingContext2D).paint(frame)
     const marks = context.arcs.filter(a => a.radius < 20).map(a => a.radius)

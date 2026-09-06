@@ -17,6 +17,7 @@ import {
   TRACKED_PLANETS
 } from "../engine/astronomy/CelestialPositions.js"
 import type { ObserverGeo } from "../engine/astronomy/CelestialPositions.js"
+import { geoToLocalMeters } from "../render3d/terrain/GeoProjection.js"
 import { resolveObserverPoseAt, resolveWeatherAt } from "../engine/model/Sighting.js"
 import type { Sighting } from "../engine/model/Sighting.js"
 import type { ObserverPose } from "../engine/model/ObserverTrack.js"
@@ -405,6 +406,8 @@ export class SceneElement extends HTMLElement {
     // Attributes set before this element upgraded are already on it — attributeChangedCallback has
     // not fired for them, since the nested player did not exist yet.
     this.forwardPlayerAttributes()
+    // The map is drawn by the nested player, but only this element can turn a view: it owns the 3D.
+    this.ufoElement.addEventListener("lookat", event => this.lookToward((event as CustomEvent).detail))
     this.ufoElement.style.setProperty("--ufo-canvas-background", "transparent")
     this.ufoElement.style.setProperty("--ufo-canvas-border", "none")
     // Otherwise the nested <rr0-ufo>'s own fullscreen button would fullscreen just its own stage
@@ -494,6 +497,43 @@ export class SceneElement extends HTMLElement {
    * it's meant to change far more often (every focus/blur) than `show-compass`'s one-time setup. */
   setCompassForced(forced: boolean): void {
     this.sceneRenderer.setCompassForced(forced)
+  }
+
+  /**
+   * Turns the view until a place on the witness's map is in front of the reader.
+   *
+   * A look-around, never an edit: what the witness stated they faced stays exactly as recorded, and
+   * this is added on top of it (see SceneRenderer.setLookOffset). Clicking the witness's own dot
+   * puts it back — "show me what he was looking at" is the one thing a reader can want that has no
+   * bearing of its own.
+   *
+   * Level with the horizon rather than aimed down at the ground: everything the map carries is a
+   * thing standing ON that ground, a few metres tall at most and tens or hundreds of metres away,
+   * so the angle down to its feet is a fraction of a degree and pitching by it would only tilt the
+   * horizon for no gain.
+   */
+  private lookToward(detail: { kind: string; lat: number; lng: number }): void {
+    const pose = resolveObserverPoseAt(this.ufoElement.sighting, this.lastTimeMs)
+    if (detail.kind === "witness" || pose?.lat === undefined || pose.lng === undefined || pose.headingDeg === undefined) {
+      this.setLookOffset(0, 0)
+      return
+    }
+    const { x, z } = geoToLocalMeters(detail.lat, detail.lng, pose.lat, pose.lng)
+    if (Math.hypot(x, z) < 1) return this.setLookOffset(0, 0)
+    // Local metres are east and SOUTH-positive (see GeoProjection), so north is -z — the same
+    // conversion setObserverPose's own heading uses, read the other way round.
+    const bearingDeg = (((Math.atan2(x, -z) * 180) / Math.PI) + 360) % 360
+    this.setLookOffset(((((bearingDeg - pose.headingDeg) % 360) + 540) % 360) - 180, -pose.pitchDeg)
+  }
+
+  /** Turns the 3D view and the overlay painted on it together — one is the witness's field of view
+   * and the other is what they saw in it, so they cannot be aimed separately. */
+  private setLookOffset(yawDeg: number, pitchDeg: number): void {
+    this.sceneRenderer.setLookOffset(yawDeg, pitchDeg)
+    this.ufoElement.setLookOffset(yawDeg, pitchDeg)
+    // The scene repaints from its own tick; asking for the pose again is what makes the turn happen
+    // now rather than at whatever the next one would have been.
+    this.updateAstronomy(this.lastTimeMs)
   }
 
   /** Passthrough to SceneRenderer.setIndoorLook — see its own doc comment. `SightingEditorElement`

@@ -1499,15 +1499,49 @@ describe("the witness's own map", () => {
     fetchSpy.mockRestore()
   })
 
-  it("closes on a click anywhere on the map itself", () => {
-    // The map covers a corner of the picture it is about, so once a reader has read it the thing
-    // they reach for is "get this out of my way" — not the small button that opened it.
+  it("goes to a named moment on the map the way its mark on the bar does", () => {
     const element = mountWithMap(movingWitness())
-    const { panel } = mapParts(element)
-    expect(panel.hidden).toBe(false)
+    const canvas = element.shadowRoot!.getElementById("witness-map-canvas") as HTMLCanvasElement
+    canvas.getBoundingClientRect = () => ({ left: 0, top: 0, width: canvas.width, height: canvas.height }) as DOMRect
+    const renderer = (element as unknown as { witnessMapRenderer: { targets: Array<{ kind: string; t?: number; x: number; y: number }> } })
+      .witnessMapRenderer
+    const last = renderer.targets.find(target => target.kind === "milestone" && target.t === 83000)!
 
-    panel.dispatchEvent(new MouseEvent("click", { bubbles: true }))
-    expect(panel.hidden).toBe(true)
+    element.currentTime = 0
+    canvas.dispatchEvent(new MouseEvent("click", { bubbles: true, clientX: last.x, clientY: last.y }))
+    expect(element.currentTime).toBe(83000)
+  })
+
+  it("asks whoever owns the 3D to turn toward a place on it", () => {
+    // This element draws the map but cannot turn a view — it has no scene. So it says what was
+    // clicked and lets the element that does own one decide, which is also what keeps a bare
+    // <rr0-ufo> from pretending it can look somewhere.
+    const element = mountWithMap(movingWitness())
+    const canvas = element.shadowRoot!.getElementById("witness-map-canvas") as HTMLCanvasElement
+    canvas.getBoundingClientRect = () => ({ left: 0, top: 0, width: canvas.width, height: canvas.height }) as DOMRect
+    const renderer = (element as unknown as { witnessMapRenderer: { targets: Array<{ kind: string; x: number; y: number }> } })
+      .witnessMapRenderer
+    const witness = renderer.targets.find(target => target.kind === "witness")!
+    const asked: Array<{ kind: string }> = []
+    element.addEventListener("lookat", event => asked.push((event as CustomEvent).detail))
+
+    canvas.dispatchEvent(new MouseEvent("click", { bubbles: true, clientX: witness.x, clientY: witness.y }))
+    expect(asked).toEqual([expect.objectContaining({ kind: "witness" })])
+  })
+
+  it("asks to be looked at rather than closing, when a mark on it is clicked", () => {
+    // Clicking the map used to shut it. Its marks now answer the pointer instead: a named moment is
+    // an instant, so going to it moves the playhead, and anything else is a PLACE, so going to it
+    // means asking whatever owns the 3D to turn the view — this element cannot turn one.
+    const element = mountWithMap(movingWitness())
+    const asked: unknown[] = []
+    element.addEventListener("lookat", event => asked.push((event as CustomEvent).detail))
+    const canvas = element.shadowRoot!.getElementById("witness-map-canvas") as HTMLCanvasElement
+    canvas.getBoundingClientRect = () => ({ left: 0, top: 0, width: canvas.width, height: canvas.height }) as DOMRect
+
+    canvas.dispatchEvent(new MouseEvent("click", { bubbles: true, clientX: -50, clientY: -50 }))
+    expect(asked).toHaveLength(0) // nothing there
+    expect(mapParts(element).panel.hidden).toBe(false) // and it did NOT close
   })
 
   it("opens and closes on the button, and says which it will do", () => {

@@ -23,4 +23,8 @@ export interface UfoMessages {
    * lettered points on the map, which go together. */
   showMilestones: string
   hideMilestones: string
+  /** What the map calls the two things a recording may not have named: the witness themselves, and
+   * a piece of scenery with no title. A hover has to say something. */
+  witnessHere: string
+  decorHere: string
 }

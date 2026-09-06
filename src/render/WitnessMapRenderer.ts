@@ -9,8 +9,26 @@ export interface WitnessMapMarker {
   label: string
   lat: number
   lng: number
+  /** The instant it names, so a click on it can go there. */
+  t: number
+  /** The account's own sentence about it, which is what a hovering reader wants — the letter is
+   * already drawn. */
+  note?: string
   /** The one the playhead is currently in — drawn filled, the others hollow. */
   current: boolean
+}
+
+/** Something on the map a pointer can be over: what to call it, and what it is, so a caller can
+ * decide what a click on it should do. */
+export interface WitnessMapTarget {
+  kind: "witness" | "milestone" | "decor"
+  /** What to show the reader — already in their own language when the recording states one. */
+  label: string
+  /** Where it stands, so a caller can work out which way to look to see it. */
+  lat: number
+  lng: number
+  /** For a milestone: the instant it names, so a click can go there. */
+  t?: number
 }
 
 /** One piece of scenery the recording places on the ground — see DecorObject, whose eastM/northM
@@ -18,6 +36,8 @@ export interface WitnessMapMarker {
 export interface WitnessMapDecor {
   lat: number
   lng: number
+  /** What the recording calls it, when it says — see DecorObject.title. */
+  label?: string
   /** Which way it faces, when the recording says — a parked car and a shack are different facts. */
   headingDeg?: number
 }
@@ -56,6 +76,8 @@ export interface WitnessMapFrame {
    * and then the photograph is left as it came.
    */
   nightFraction?: number
+  /** Who was standing there — what a reader hovering the dot is asking. */
+  witnessLabel?: string
   /** What the imagery provider's own licence requires be shown wherever its tiles are (see
    * ImageryProvider.attribution) — or, when there are no tiles, what says so. Drawn on the map
    * itself rather than in a strip beneath it: a caption laid over the canvas from outside covers
@@ -106,7 +128,35 @@ export class WitnessMapRenderer {
    */
   private static readonly ON_MARKER_M = 3
 
+  /**
+   * What was drawn where, last time this painted — the map's own hit test.
+   *
+   * Recorded as it paints rather than recomputed on hover: the two would then be two answers to
+   * the same question, and a reader pointing at a mark and being told about a different one is the
+   * kind of bug nobody reports because it looks like their own aim.
+   */
+  private targets: Array<WitnessMapTarget & { x: number; y: number; radius: number }> = []
+
   constructor(private readonly ctx: CanvasRenderingContext2D) {}
+
+  /**
+   * What the pointer is over, in the canvas's own pixels — nearest first, so the witness wins over
+   * a moment they are standing on, which is what somebody pointing at the dot means.
+   */
+  hitTest(x: number, y: number): WitnessMapTarget | undefined {
+    let best: (WitnessMapTarget & { x: number; y: number; radius: number }) | undefined
+    let bestDistance = Infinity
+    for (const target of this.targets) {
+      const distance = Math.hypot(target.x - x, target.y - y)
+      // Ties go to whatever was drawn last, which is the order things are painted in: the witness
+      // over a moment they are standing on, a moment over the scenery beneath it. Somebody pointing
+      // at a stack of marks means the one on top — it is the one they can see.
+      if (distance > target.radius || distance > bestDistance) continue
+      best = target
+      bestDistance = distance
+    }
+    return best
+  }
 
   private get width(): number {
     return this.ctx.canvas.width
@@ -119,6 +169,7 @@ export class WitnessMapRenderer {
   paint(frame: WitnessMapFrame): void {
     const { ctx } = this
     ctx.save()
+    this.targets = []
     ctx.clearRect(0, 0, this.width, this.height)
     this.paintGround(frame)
     this.paintNight(frame.nightFraction)
@@ -194,6 +245,9 @@ export class WitnessMapRenderer {
     const { ctx } = this
     for (const object of frame.decor) {
       const at = this.toCanvas(frame.bounds, object.lat, object.lng)
+      if (object.label) {
+        this.targets.push({ kind: "decor", label: object.label, lat: object.lat, lng: object.lng, x: at.x, y: at.y, radius: 7 })
+      }
       ctx.beginPath()
       ctx.rect(at.x - 3.5, at.y - 3.5, 7, 7)
       ctx.fillStyle = "rgba(120, 220, 255, 0.85)"
@@ -293,6 +347,16 @@ export class WitnessMapRenderer {
     // fixed without lying is which of them is legible, and that is the one being played.
     for (const marker of [...frame.markers].sort((a, b) => Number(a.current) - Number(b.current))) {
       const at = this.toCanvas(frame.bounds, marker.lat, marker.lng)
+      this.targets.push({
+        kind: "milestone",
+        label: marker.note ? `${marker.label} — ${marker.note}` : marker.label,
+        lat: marker.lat,
+        lng: marker.lng,
+        t: marker.t,
+        x: at.x,
+        y: at.y,
+        radius: WitnessMapRenderer.MARKER_RADIUS_PX
+      })
       ctx.beginPath()
       ctx.arc(at.x, at.y, WitnessMapRenderer.MARKER_RADIUS_PX, 0, Math.PI * 2)
       ctx.fillStyle = marker.current ? "rgba(255, 224, 130, 0.95)" : "rgba(0, 0, 0, 0.55)"
@@ -323,6 +387,9 @@ export class WitnessMapRenderer {
   private paintWitness(frame: WitnessMapFrame, position: { lat: number; lng: number }): void {
     const { ctx } = this
     const at = this.toCanvas(frame.bounds, position.lat, position.lng)
+    if (frame.witnessLabel) {
+      this.targets.push({ kind: "witness", label: frame.witnessLabel, lat: position.lat, lng: position.lng, x: at.x, y: at.y, radius: 8 })
+    }
     const onMarker = frame.markers.some(marker => {
       if (!marker.current) return false
       const away = geoToLocalMeters(marker.lat, marker.lng, position.lat, position.lng)
