@@ -5,6 +5,7 @@ import { ApparentSize } from "../../src/engine/shape/ApparentSize.js"
 import { ImageProjection } from "../../src/engine/instrument/ImageProjection.js"
 import { Instruments } from "../../src/engine/instrument/Instrument.js"
 import type { Sighting } from "../../src/engine/model/Sighting.js"
+import { toSightingJson } from "../../src/engine/persistence/sightingJson.js"
 
 /**
  * What a change of instrument may and may not do to a testimony.
@@ -127,5 +128,103 @@ describe("A change of instrument, which reprojects a testimony without editing i
     // Deliberately WITHOUT the field-before map, the way the bug did it.
     SightingShapes.reproject(sighting, previous)
     expect(skyPositionOf(sighting).offsetDeg).not.toBeCloseTo(before.offsetDeg, 1)
+  })
+})
+
+
+/**
+ * What a change of HEADING may and may not do to a testimony.
+ *
+ * A recording that only ever said "so many degrees left of wherever I happened to be facing" moved
+ * the phenomenon around the sky whenever the witness's own pose was edited — a thing they described
+ * on the ground went with them when they turned away from it. What they stated is a DIRECTION; the
+ * pixels are that direction projected onto a canvas.
+ */
+describe("a shape's stated direction", () => {
+  const HEADING = 200
+  const PITCH = -5
+  const OFF_AXIS_DEG = 8
+
+  function recordingAimedAt(headingDeg: number): Sighting {
+    const projection = ImageProjection.of(Instruments.default, ApparentSize.CANVAS_HEIGHT_PX, 60)
+    const centreX = Instruments.frameWidthPx(Instruments.default, ApparentSize.CANVAS_HEIGHT_PX) / 2
+    return fromSightingJson({
+      version: 1,
+      time: { year: 1964, month: 4, day: 24, hour: 17, minute: 50 },
+      place: [{ lat: 34.05, lng: -106.89 }],
+      witnessTrack: {
+        keyframes: [{ t: 0, pose: { lat: 34.05, lng: -106.89, elevationM: 0, headingDeg, pitchDeg: PITCH, fovDeg: 60 } }]
+      },
+      timeline: {
+        keyframes: [
+          {
+            t: 0,
+            shapes: [
+              {
+                sourceId: "ufo-1",
+                shape: {
+                  kind: "oval",
+                  // Eight degrees to the right of the axis, drawn while facing HEADING.
+                  bounds: { x: centreX + projection.angleDegToRadiusPx(OFF_AXIS_DEG) - 10, y: ApparentSize.CANVAS_HEIGHT_PX / 2 - 5, width: 20, height: 10 },
+                  color: "#fff",
+                  angle: 0,
+                  transparency: 0,
+                  haloScale: 0,
+                  selected: false
+                }
+              }
+            ]
+          }
+        ]
+      }
+    } as never)
+  }
+
+  function shapeOf(sighting: Sighting) {
+    return [...sighting.timeline.allKeyframes[0].shapes][0].shape
+  }
+
+  it("is read off the drawing and the pose it was drawn at", () => {
+    const sighting = recordingAimedAt(HEADING)
+    SightingShapes.toAim(sighting)
+    const aim = shapeOf(sighting).aim!
+    expect(aim.azimuthDeg).toBeCloseTo(HEADING + OFF_AXIS_DEG, 2)
+    expect(aim.altitudeDeg).toBeCloseTo(PITCH, 2)
+  })
+
+  it("moves the drawing when the witness turns, instead of taking the sky along", () => {
+    // The whole point. Zamora turns thirty degrees; the thing on the ground does not turn with him,
+    // so it has to come thirty degrees further round his own picture.
+    const sighting = recordingAimedAt(HEADING)
+    SightingShapes.toAim(sighting)
+    const before = shapeOf(sighting).bounds.x
+
+    for (const keyframe of [...sighting.witnessTrack.allKeyframes]) {
+      sighting.witnessTrack.addKeyframe(keyframe.t, { ...keyframe.pose, headingDeg: HEADING - 30 })
+    }
+    SightingShapes.toPosition(sighting)
+
+    const projection = ImageProjection.of(Instruments.default, ApparentSize.CANVAS_HEIGHT_PX, 60)
+    const moved = projection.angleDegToRadiusPx(OFF_AXIS_DEG + 30) - projection.angleDegToRadiusPx(OFF_AXIS_DEG)
+    expect(shapeOf(sighting).bounds.x - before).toBeCloseTo(moved, 1)
+  })
+
+  it("puts a direction behind the witness frankly off the canvas", () => {
+    // A witness who has turned their back is not looking at a thing squeezed against the frame's
+    // edge by a tangent — they are not looking at it at all.
+    const sighting = recordingAimedAt(HEADING)
+    SightingShapes.toAim(sighting)
+    for (const keyframe of [...sighting.witnessTrack.allKeyframes]) {
+      sighting.witnessTrack.addKeyframe(keyframe.t, { ...keyframe.pose, headingDeg: HEADING + 180 })
+    }
+    SightingShapes.toPosition(sighting)
+    expect(Math.abs(shapeOf(sighting).bounds.x)).toBeGreaterThan(ApparentSize.CANVAS_WIDTH_PX * 10)
+  })
+
+  it("survives being written and read again", () => {
+    const sighting = recordingAimedAt(HEADING)
+    const reread = fromSightingJson(toSightingJson(sighting))
+    expect(shapeOf(reread).aim!.azimuthDeg).toBeCloseTo(HEADING + OFF_AXIS_DEG, 2)
+    expect(shapeOf(reread).bounds.x).toBeCloseTo(shapeOf(sighting).bounds.x, 1)
   })
 })

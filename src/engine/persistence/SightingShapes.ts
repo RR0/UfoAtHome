@@ -2,6 +2,7 @@ import { ApparentSize } from "../shape/ApparentSize.js"
 import { ImageProjection } from "../instrument/ImageProjection.js"
 import type { Shape } from "../shape/Shape.js"
 import { Sighting, resolveObserverPoseAt } from "../model/Sighting.js"
+import type { ObserverPose } from "../model/ObserverTrack.js"
 import { Instruments } from "../instrument/Instrument.js"
 import type { Instrument } from "../instrument/Instrument.js"
 
@@ -75,6 +76,82 @@ export class SightingShapes {
   }
 
   /**
+   * Fills in every shape's DIRECTION from where it is currently drawn and where the witness was
+   * looking — run just before writing a file, alongside toAngular, and unconditional for the same
+   * reason: between load and save `bounds` is what every editing gesture moved, so the drawing is
+   * the newer statement.
+   *
+   * Skipped for a keyframe whose pose states no heading. There is nothing to measure an azimuth
+   * from, and a shape aimed from an assumed north would be worse than one aimed from nothing.
+   */
+  static toAim(sighting: Sighting): void {
+    this.eachKeyframe(sighting, (shape, projection, pose) => {
+      if (pose?.headingDeg === undefined) return shape
+      const centre = this.frameCentre(sighting)
+      const offAxisX = projection.radiusPxToAngleDeg(shape.bounds.x + shape.bounds.width / 2 - centre.x)
+      const offAxisY = projection.radiusPxToAngleDeg(centre.y - (shape.bounds.y + shape.bounds.height / 2))
+      return {
+        ...shape,
+        aim: { azimuthDeg: (((pose.headingDeg + offAxisX) % 360) + 360) % 360, altitudeDeg: pose.pitchDeg + offAxisY }
+      }
+    })
+  }
+
+  /**
+   * Re-derives every shape's drawn POSITION from the direction it states — run just after reading a
+   * file, which is what makes the direction authoritative rather than decorative, exactly as
+   * toBounds does for the stated size.
+   *
+   * This is the step that lets a witness turn their head. Without it a recording only ever said
+   * "so many degrees left of wherever I was facing", so editing the pose swung the phenomenon
+   * around the sky along with the camera — and a thing described as sitting on the ground went with
+   * the witness when they turned away from it.
+   *
+   * A direction more than a right angle off the axis is not on this canvas at all, and is placed
+   * frankly off it rather than through a tangent that would fold it back into view. That is not a
+   * failure: it is a witness who has looked away, and it is the whole reason this exists.
+   */
+  static toPosition(sighting: Sighting): void {
+    this.eachKeyframe(sighting, (shape, projection, pose) => {
+      if (!shape.aim || pose?.headingDeg === undefined) return shape
+      const centre = this.frameCentre(sighting)
+      const offAxisX = this.shortestArc(shape.aim.azimuthDeg - pose.headingDeg)
+      const offAxisY = shape.aim.altitudeDeg - pose.pitchDeg
+      const x = centre.x + this.offAxisPx(projection, offAxisX) - shape.bounds.width / 2
+      const y = centre.y - this.offAxisPx(projection, offAxisY) - shape.bounds.height / 2
+      return { ...shape, bounds: { ...shape.bounds, x, y } }
+    })
+  }
+
+  /** Where the axis of the image falls, in the pixels every shape's bounds are expressed in. */
+  private static frameCentre(sighting: Sighting): { x: number; y: number } {
+    return {
+      x: Instruments.frameWidthPx(sighting.instrument, ApparentSize.CANVAS_HEIGHT_PX) / 2,
+      y: ApparentSize.CANVAS_HEIGHT_PX / 2
+    }
+  }
+
+  /** Shortest way round: 359 degrees to 1 is two degrees, not three hundred and fifty-eight. */
+  private static shortestArc(deg: number): number {
+    return ((((deg % 360) + 540) % 360) - 180)
+  }
+
+  /** How far off the axis that direction falls, pixels — pushed frankly off the canvas past the
+   * quarter turn where no flat projection has an answer (a rectilinear one's tangent would fold it
+   * back into view, pointing behind the witness at something in front of them). */
+  private static offAxisPx(projection: ImageProjection, offAxisDeg: number): number {
+    if (Math.abs(offAxisDeg) >= SightingShapes.OFF_CANVAS_DEG) {
+      return Math.sign(offAxisDeg) * SightingShapes.OFF_CANVAS_PX
+    }
+    return projection.angleDegToRadiusPx(offAxisDeg)
+  }
+
+  /** Past this far off the axis, a direction is simply not in the picture. */
+  private static readonly OFF_CANVAS_DEG = 89
+  /** Far enough outside any canvas this project draws that nothing of the shape reaches it. */
+  private static readonly OFF_CANVAS_PX = 100000
+
+  /**
    * Re-expresses a whole recording for a different instrument — what has to happen the moment the
    * declared instrument changes, and what the case files themselves went through when they stopped
    * being rendered as photographs.
@@ -135,14 +212,18 @@ export class SightingShapes {
    * addKeyframe rather than mutating its keyframes in place — same reason anything else does: the
    * timeline owns its ordering and its per-source merge, and a shape rewritten behind its back
    * would be the one write in the codebase that doesn't. */
-  private static eachKeyframe(sighting: Sighting, transform: (shape: Shape, projection: ImageProjection) => Shape): void {
+  private static eachKeyframe(
+    sighting: Sighting,
+    transform: (shape: Shape, projection: ImageProjection, pose: ObserverPose | undefined) => Shape
+  ): void {
     const { timeline } = sighting
     for (const keyframe of [...timeline.allKeyframes]) {
+      const pose = resolveObserverPoseAt(sighting, keyframe.t)
       const fovDeg = this.fovOf(sighting, keyframe.t)
       const projection = ImageProjection.of(sighting.instrument, ApparentSize.CANVAS_HEIGHT_PX, fovDeg)
       timeline.addKeyframe(
         keyframe.t,
-        keyframe.shapes.map(state => ({ ...state, shape: transform(state.shape, projection) }))
+        keyframe.shapes.map(state => ({ ...state, shape: transform(state.shape, projection, pose) }))
       )
     }
   }

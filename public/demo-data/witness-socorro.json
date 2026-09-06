@@ -21,8 +21,8 @@
   },
   "caseId": "socorro",
   "description": {
-    "fr": "Tout le témoignage de Lonnie Zamora, d'un seul tenant : les six moments que le croquis du dossier Blue Book lettre A à F ne sont pas six extraits mais six repères posés sur un même enregistrement de deux minutes, que le lecteur traverse sans coupure — parce que c'est ainsi que Zamora l'a vécu. Ce qui est CALCULÉ. L'objet mesure 3,36 × 1,73 m, non pas décrété mais déduit des 6,41° × 3,31° que la phase rapprochée énonçait déjà à la trentaine de mètres du croquis (100 pieds). Le même objet à 800 pieds (244 m) fait alors 0,79° de large, et les deux silhouettes 0,31° de haut : deux traits de deux pixels à côté d'un objet d'une vingtaine. C'est ce que « il les a vues à 800 pieds » veut dire, et c'est ce qu'aucune illustration de ce cas ne montre. À cinq milles, l'objet fait 0,024°. L'axe d'APPROCHE se déduit : Zamora voit l'engin au même azimut à 800 pieds qu'à 100, il a donc roulé droit dessus — mais cette déduction ne porte que la dernière ligne, celle qui va du moment où il quitte la route jusqu'à l'engin, et le fichier l'étendait à tout le trajet. Le croquis Blue Book ne montre pas une droite : il montre la route de Socorro, DEUX embranchements pris à droite, puis une sortie de route vers la GAUCHE, et c'est là que les roues dérapent sur la pente (C). Le trajet a maintenant cette forme. Les deux virages sont à 12 s et 18 s, et leurs caps — 200°, puis 230°, puis 260° — sont lus sur la FORME du croquis, pas relevés sur un plan : le croquis est réorienté et sans échelle, et les pistes de 1964 ne sont pas celles qu'une photo d'aujourd'hui montre. Ce qui est tenu, c'est le site (E/F, inchangé) et l'axe d'approche déduit ; ce qui a bougé, c'est le point de départ, de 229 m vers l'est-nord-est — il était lui aussi porté par la droite qu'on vient de retirer. Son CAP, lui, ne suit pas la route : il regarde la flamme, pas le pare-brise, et c'est ce que headingDeg déclare. Les distances viennent du croquis (800′, 100′, 5 milles). Ce qui est ASSUMÉ, et doit se lire comme tel. La répartition des six moments dans les deux minutes vient de l'ORDRE du récit, pas d'un chronomètre : aucune source ne minute cette séquence. L'élévation de l'objet à 800 pieds (−1,5°, interpolée jusqu'aux −7,7° que la phase rapprochée énonce) suppose qu'il est plus haut sur la pente qu'à la fin. Son cap suit son regard, et son regard le récit. Il fait face à l'engin à 200° pendant toute l'approche — c'est l'axe déduit plus haut — puis, au rugissement, il se retourne et court : le cap bascule sur celui de sa propre course, 10°, relevé sur les positions que la piste portait déjà et que rien ne lisait. Il revient à 191° à la seconde 84,5, et ce chiffre n'est pas choisi : c'est celui qui rend continu le saut de 9° que l'objet faisait jusqu'ici en travers du cadre à cet instant précis. Un saut de l'objet était en réalité un mouvement de tête. Pendant les six secondes où il a le dos tourné, l'objet n'est PAS dessiné, et c'est une affirmation : Zamora a dit n'avoir rien vu de la montée, et s'être retourné une fois l'engin déjà au-dessus de l'abri. Ce que la reconstitution montrait là, personne ne l'a vu. Sa voiture roule avec lui, décalée de 2,6 m sur le côté : la caméra est à son œil, et le modèle n'a pas d'intérieur où la mettre — le corps du véhicule est donc dessiné à côté de lui plutôt qu'autour, en attendant que le modèle sache dire « le témoin est à l'intérieur de cet objet » au fil du temps. Le son suit le récit et rien d'autre : le rugissement entendu de loin, qui passe de l'aigu au grave puis s'arrête (B) — un keyframe « none » est un silence ÉNONCÉ, pas un enregistrement muet ; les deux bruits sourds avant le décollage, puis le rugissement qui monte et s'éteint pendant que l'objet part. Les deux silhouettes en combinaison blanche figurent enfin, à (D) et seulement là : Zamora ne les a vues qu'au premier regard, et elles avaient disparu quand il s'est approché. La voiture de patrouille masque ce qui passe derrière elle. Ses dimensions sont celles de la Pontiac de 1964 qu'il conduisait (5,44 × 2,02 × 1,42 m, cotes publiées du modèle) ; sa FORME est un substitut assumé, une voiture de patrouille générique et stylisée (Kenney, Car Kit, CC0), le temps qu'un modèle exact existe. L'abri à dynamite, dont aucune source ne donne les cotes, est ramené à celles d'une poudrière ordinaire de l'époque (3 × 2,4 × 2,2 m) : une estimation assumée, mais qui vaut mieux que le hangar de 6 × 6 m que la forme par défaut lui donnait. Le lieu est 34°02′33″N 106°53′52″W, au sud-est de Socorro près de High School Road, identifié par la correspondance du réseau de pistes à l'ouest avec le croquis du dossier (réorienté). Le point retenu auparavant, 1,7 km au nord, était sur du plat : mesuré sur la source de relief du rendu, 23 m de dénivelé sur le carré de 1,8 km contre 64 m ici, avec le sol qui retombe d'une dizaine de mètres vers l'est et une crête 100 m au sud. Le récit exige des collines ; celui-là en a. Ce qu'on voit du feu au moment (A) est son ÉBLOUISSEMENT, pas sa taille : 1,15 m de flamme à 1200 m font 0,055°, soit un tiers de pixel. Le voile est plancherisé, exactement comme l'est déjà le rayon d'une lampe de décor — ce qui atteint un œil depuis une lumière vive, c'est sa floraison et non son contour. La taille énoncée de la flamme, elle, n'a pas bougé.",
-    "en": "Lonnie Zamora's whole testimony, of a piece: the six moments the Blue Book file's sketch letters A to F are not six clips but six markers set on one two-minute recording, which the reader crosses without a cut — because that is how Zamora lived it. What is COMPUTED. The object is 3.36 × 1.73 m, not decreed but derived from the 6.41° × 3.31° the close phase already stated at the sketch's thirty-odd metres (100 feet). The same object at 800 feet (244 m) is then 0.79° wide, and the two figures 0.31° high: two two-pixel strokes beside an object of some twenty. That is what “he saw them at 800 feet” means, and it is what no illustration of this case shows. At five miles the object is 0.024°. The line of APPROACH follows: Zamora sees the craft at the same azimuth at 800 feet as at 100, so he drove straight at it — but that deduction carries only the last leg, the one from where he leaves the road to the craft, and the file stretched it over the whole drive. The Blue Book sketch shows no straight line: it shows the road out of Socorro, TWO forks taken to the right, then leaving the road to the LEFT, which is where the wheels skid on the slope (C). The track now has that shape. The two turns are at 12 s and 18 s, and their bearings — 200°, then 230°, then 260° — are read off the SHAPE of the sketch, not surveyed: the sketch is reoriented and to no scale, and the tracks of 1964 are not the ones a photograph shows today. What is held is the site (E/F, unmoved) and the deduced approach axis; what moved is the starting point, 229 m to the east-north-east — it too was carried by the straight line that has just been taken away. His HEADING does not follow the road: he is watching the flame, not the windscreen, and that is what headingDeg states. The distances come from the sketch (800′, 100′, 5 miles). What is ASSUMED, and must be read as such. The spread of the six moments across the two minutes comes from the ORDER of the account, not from a stopwatch: no source times this sequence. The object's elevation at 800 feet (−1.5°, interpolated to the −7.7° the close phase states) assumes it is higher up the slope than at the end. His heading follows his gaze, and his gaze the account. He faces the craft at 200° for the whole approach — the axis deduced above — then, at the roar, he turns and runs: the heading swings to his own running bearing, 10°, read off the positions the track already carried and nothing had ever read. He comes back to 191° at second 84.5, and that figure is not chosen: it is the one that makes continuous the 9° jump the object made across the frame at exactly that instant. A jump of the object was really a movement of a head. For the six seconds his back is turned the object is NOT drawn, and that is a statement: Zamora said he saw nothing of the climb, and turned round only once the craft was already above the shack. What the reconstruction showed there, nobody saw. His car drives with him, offset 2.6 m to the side: the camera is at his eye, and the model has no interior to put it in — so the vehicle's body is drawn beside him rather than around him, until the model can say “the witness is inside this object” over time. The sound follows the account and nothing else: the roar heard from far off, going from high to low and then stopping (B) — a “none” keyframe is a STATED silence, not a mute recording; the two thuds before the take-off, then the roar that rises and dies away as the object leaves. The two figures in white coveralls appear at (D) and only there: Zamora saw them at the first look alone, and they were gone when he came closer. The patrol car hides whatever passes behind it. Its dimensions are those of the 1964 Pontiac he drove (5.44 × 2.02 × 1.42 m, the model's published figures); its SHAPE is an acknowledged stand-in, a generic stylised patrol car (Kenney, Car Kit, CC0), until an exact model exists. The dynamite shack, whose dimensions no source gives, is brought down to those of an ordinary powder magazine of the period (3 × 2.4 × 2.2 m): an assumed estimate, but a better one than the 6 × 6 m shed the default shape gave it. The place is 34°02′33″N 106°53′52″W, south-east of Socorro near High School Road, identified by the match between the track network to the west and the file's sketch (re-oriented). The point held before, 1.7 km north, was on the flat: measured on the render's own relief source, 23 m of drop over the 1.8 km square against 64 m here, with the ground falling ten-odd metres away to the east and a ridge 100 m to the south. The account demands hills; this one has them. What is seen of the flame at moment (A) is its GLARE, not its size: 1.15 m of flame at 1,200 m is 0.055°, a third of a pixel. The veil has a floor, exactly as a decor lamp's beam already does — what reaches an eye from a bright light is its bloom, not its outline. The stated size of the flame itself has not moved."
+    "fr": "Tout le témoignage de Lonnie Zamora, d'un seul tenant : les six moments que le croquis du dossier Blue Book lettre A à F ne sont pas six extraits mais six repères posés sur un même enregistrement de deux minutes, que le lecteur traverse sans coupure — parce que c'est ainsi que Zamora l'a vécu. Ce qui est CALCULÉ. L'objet mesure 3,36 × 1,73 m, non pas décrété mais déduit des 6,41° × 3,31° que la phase rapprochée énonçait déjà à la trentaine de mètres du croquis (100 pieds). Le même objet à 800 pieds (244 m) fait alors 0,79° de large, et les deux silhouettes 0,31° de haut : deux traits de deux pixels à côté d'un objet d'une vingtaine. C'est ce que « il les a vues à 800 pieds » veut dire, et c'est ce qu'aucune illustration de ce cas ne montre. À cinq milles, l'objet fait 0,024°. L'axe d'APPROCHE se déduit : Zamora voit l'engin au même azimut à 800 pieds qu'à 100, il a donc roulé droit dessus — mais cette déduction ne porte que la dernière ligne, celle qui va du moment où il quitte la route jusqu'à l'engin, et le fichier l'étendait à tout le trajet. Le croquis Blue Book ne montre pas une droite : il montre la route de Socorro, DEUX embranchements pris à droite, puis une sortie de route vers la GAUCHE, et c'est là que les roues dérapent sur la pente (C). Le trajet a maintenant cette forme. Les deux virages sont à 12 s et 18 s, et leurs caps — 200°, puis 230°, puis 260° — sont lus sur la FORME du croquis, pas relevés sur un plan : le croquis est réorienté et sans échelle, et les pistes de 1964 ne sont pas celles qu'une photo d'aujourd'hui montre. Ce qui est tenu, c'est le site (E/F, inchangé) et l'axe d'approche déduit ; ce qui a bougé, c'est le point de départ, de 229 m vers l'est-nord-est — il était lui aussi porté par la droite qu'on vient de retirer. Son CAP, lui, ne suit pas la route : il regarde la flamme, pas le pare-brise, et c'est ce que headingDeg déclare. Les distances viennent du croquis (800′, 100′, 5 milles). Ce qui est ASSUMÉ, et doit se lire comme tel. La répartition des six moments dans les deux minutes vient de l'ORDRE du récit, pas d'un chronomètre : aucune source ne minute cette séquence. L'élévation de l'objet à 800 pieds (−1,5°, interpolée jusqu'aux −7,7° que la phase rapprochée énonce) suppose qu'il est plus haut sur la pente qu'à la fin. Son cap suit son regard, et son regard le récit. Il fait face à l'engin à 200° pendant toute l'approche — c'est l'axe déduit plus haut — puis, au rugissement, il se retourne et court : le cap bascule sur celui de sa propre course, 10°, relevé sur les positions que la piste portait déjà et que rien ne lisait. Il revient à 191° à la seconde 84,5, et ce chiffre n'est pas choisi : c'est celui qui rend continu le saut de 9° que l'objet faisait jusqu'ici en travers du cadre à cet instant précis. Un saut de l'objet était en réalité un mouvement de tête. Pendant les six secondes où il a le dos tourné, l'objet n'est plus dans le cadre — et ce n'est plus une transparence posée à la main, c'est la GÉOMÉTRIE : chaque forme énonce maintenant sa direction (azimut et hauteur, voir BaseShape.aim), et une direction à 190° de l'axe n'est sur aucune image. C'est ce qui rend le cap éditable sans emporter le ciel avec lui, et ça dit ce que Zamora a dit : n'avoir rien vu de la montée, et s'être retourné une fois l'engin déjà au-dessus de l'abri. Sa voiture roule avec lui, décalée de 2,6 m sur le côté : la caméra est à son œil, et le modèle n'a pas d'intérieur où la mettre — le corps du véhicule est donc dessiné à côté de lui plutôt qu'autour, en attendant que le modèle sache dire « le témoin est à l'intérieur de cet objet » au fil du temps. Le son suit le récit et rien d'autre : le rugissement entendu de loin, qui passe de l'aigu au grave puis s'arrête (B) — un keyframe « none » est un silence ÉNONCÉ, pas un enregistrement muet ; les deux bruits sourds avant le décollage, puis le rugissement qui monte et s'éteint pendant que l'objet part. Les deux silhouettes en combinaison blanche figurent enfin, à (D) et seulement là : Zamora ne les a vues qu'au premier regard, et elles avaient disparu quand il s'est approché. La voiture de patrouille masque ce qui passe derrière elle. Ses dimensions sont celles de la Pontiac de 1964 qu'il conduisait (5,44 × 2,02 × 1,42 m, cotes publiées du modèle) ; sa FORME est un substitut assumé, une voiture de patrouille générique et stylisée (Kenney, Car Kit, CC0), le temps qu'un modèle exact existe. L'abri à dynamite, dont aucune source ne donne les cotes, est ramené à celles d'une poudrière ordinaire de l'époque (3 × 2,4 × 2,2 m) : une estimation assumée, mais qui vaut mieux que le hangar de 6 × 6 m que la forme par défaut lui donnait. Le lieu est 34°02′33″N 106°53′52″W, au sud-est de Socorro près de High School Road, identifié par la correspondance du réseau de pistes à l'ouest avec le croquis du dossier (réorienté). Le point retenu auparavant, 1,7 km au nord, était sur du plat : mesuré sur la source de relief du rendu, 23 m de dénivelé sur le carré de 1,8 km contre 64 m ici, avec le sol qui retombe d'une dizaine de mètres vers l'est et une crête 100 m au sud. Le récit exige des collines ; celui-là en a. Ce qu'on voit du feu au moment (A) est son ÉBLOUISSEMENT, pas sa taille : 1,15 m de flamme à 1200 m font 0,055°, soit un tiers de pixel. Le voile est plancherisé, exactement comme l'est déjà le rayon d'une lampe de décor — ce qui atteint un œil depuis une lumière vive, c'est sa floraison et non son contour. La taille énoncée de la flamme, elle, n'a pas bougé.",
+    "en": "Lonnie Zamora's whole testimony, of a piece: the six moments the Blue Book file's sketch letters A to F are not six clips but six markers set on one two-minute recording, which the reader crosses without a cut — because that is how Zamora lived it. What is COMPUTED. The object is 3.36 × 1.73 m, not decreed but derived from the 6.41° × 3.31° the close phase already stated at the sketch's thirty-odd metres (100 feet). The same object at 800 feet (244 m) is then 0.79° wide, and the two figures 0.31° high: two two-pixel strokes beside an object of some twenty. That is what “he saw them at 800 feet” means, and it is what no illustration of this case shows. At five miles the object is 0.024°. The line of APPROACH follows: Zamora sees the craft at the same azimuth at 800 feet as at 100, so he drove straight at it — but that deduction carries only the last leg, the one from where he leaves the road to the craft, and the file stretched it over the whole drive. The Blue Book sketch shows no straight line: it shows the road out of Socorro, TWO forks taken to the right, then leaving the road to the LEFT, which is where the wheels skid on the slope (C). The track now has that shape. The two turns are at 12 s and 18 s, and their bearings — 200°, then 230°, then 260° — are read off the SHAPE of the sketch, not surveyed: the sketch is reoriented and to no scale, and the tracks of 1964 are not the ones a photograph shows today. What is held is the site (E/F, unmoved) and the deduced approach axis; what moved is the starting point, 229 m to the east-north-east — it too was carried by the straight line that has just been taken away. His HEADING does not follow the road: he is watching the flame, not the windscreen, and that is what headingDeg states. The distances come from the sketch (800′, 100′, 5 miles). What is ASSUMED, and must be read as such. The spread of the six moments across the two minutes comes from the ORDER of the account, not from a stopwatch: no source times this sequence. The object's elevation at 800 feet (−1.5°, interpolated to the −7.7° the close phase states) assumes it is higher up the slope than at the end. His heading follows his gaze, and his gaze the account. He faces the craft at 200° for the whole approach — the axis deduced above — then, at the roar, he turns and runs: the heading swings to his own running bearing, 10°, read off the positions the track already carried and nothing had ever read. He comes back to 191° at second 84.5, and that figure is not chosen: it is the one that makes continuous the 9° jump the object made across the frame at exactly that instant. A jump of the object was really a movement of a head. For the six seconds his back is turned the object is no longer in the frame — and not by a transparency set by hand any more, by GEOMETRY: every shape now states its own direction (azimuth and altitude, see BaseShape.aim), and a direction 190 degrees off the axis is on no picture at all. That is what makes the heading editable without carrying the sky along with it, and it says what Zamora said: that he saw nothing of the climb, and turned round only once the craft was already above the shack. His car drives with him, offset 2.6 m to the side: the camera is at his eye, and the model has no interior to put it in — so the vehicle's body is drawn beside him rather than around him, until the model can say “the witness is inside this object” over time. The sound follows the account and nothing else: the roar heard from far off, going from high to low and then stopping (B) — a “none” keyframe is a STATED silence, not a mute recording; the two thuds before the take-off, then the roar that rises and dies away as the object leaves. The two figures in white coveralls appear at (D) and only there: Zamora saw them at the first look alone, and they were gone when he came closer. The patrol car hides whatever passes behind it. Its dimensions are those of the 1964 Pontiac he drove (5.44 × 2.02 × 1.42 m, the model's published figures); its SHAPE is an acknowledged stand-in, a generic stylised patrol car (Kenney, Car Kit, CC0), until an exact model exists. The dynamite shack, whose dimensions no source gives, is brought down to those of an ordinary powder magazine of the period (3 × 2.4 × 2.2 m): an assumed estimate, but a better one than the 6 × 6 m shed the default shape gave it. The place is 34°02′33″N 106°53′52″W, south-east of Socorro near High School Road, identified by the match between the track network to the west and the file's sketch (re-oriented). The point held before, 1.7 km north, was on the flat: measured on the render's own relief source, 23 m of drop over the 1.8 km square against 64 m here, with the ground falling ten-odd metres away to the east and a ridge 100 m to the south. The account demands hills; this one has them. What is seen of the flame at moment (A) is its GLARE, not its size: 1.15 m of flame at 1,200 m is 0.055°, a third of a pixel. The veil has a floor, exactly as a decor lamp's beam already does — what reaches an eye from a bright light is its bloom, not its outline. The stated size of the flame itself has not moved."
   },
   "tags": [
     "RR3",
@@ -54,6 +54,10 @@
               "angular": {
                 "widthDeg": 0.1603,
                 "heightDeg": 0.0827
+              },
+              "aim": {
+                "azimuthDeg": 200.0,
+                "altitudeDeg": -5.0083
               }
             }
           },
@@ -76,6 +80,10 @@
               "angular": {
                 "widthDeg": 0.1603,
                 "heightDeg": 0.0827
+              },
+              "aim": {
+                "azimuthDeg": 200.0,
+                "altitudeDeg": -5.0083
               }
             }
           },
@@ -99,7 +107,11 @@
                 "widthDeg": 0.0551,
                 "heightDeg": 0.1098
               },
-              "brightness": 0.95
+              "brightness": 0.95,
+              "aim": {
+                "azimuthDeg": 199.9917,
+                "altitudeDeg": 9.975
+              }
             }
           },
           {
@@ -122,7 +134,11 @@
                 "widthDeg": 0.0606,
                 "heightDeg": 0.0441
               },
-              "brightness": 0.85
+              "brightness": 0.85,
+              "aim": {
+                "azimuthDeg": 200.0,
+                "altitudeDeg": 9.925
+              }
             }
           },
           {
@@ -144,6 +160,10 @@
               "angular": {
                 "widthDeg": 0.05,
                 "heightDeg": 0.05
+              },
+              "aim": {
+                "azimuthDeg": 200.0083,
+                "altitudeDeg": 9.9917
               }
             }
           },
@@ -166,6 +186,10 @@
               "angular": {
                 "widthDeg": 0.05,
                 "heightDeg": 0.05
+              },
+              "aim": {
+                "azimuthDeg": 200.0083,
+                "altitudeDeg": 9.9917
               }
             }
           }
@@ -193,6 +217,10 @@
               "angular": {
                 "widthDeg": 0.1924,
                 "heightDeg": 0.0992
+              },
+              "aim": {
+                "azimuthDeg": 200.0,
+                "altitudeDeg": -5.0
               }
             }
           },
@@ -215,6 +243,10 @@
               "angular": {
                 "widthDeg": 0.1924,
                 "heightDeg": 0.0992
+              },
+              "aim": {
+                "azimuthDeg": 200.0,
+                "altitudeDeg": -5.0
               }
             }
           },
@@ -238,7 +270,11 @@
                 "widthDeg": 0.0662,
                 "heightDeg": 0.1318
               },
-              "brightness": 0.95
+              "brightness": 0.95,
+              "aim": {
+                "azimuthDeg": 200.0,
+                "altitudeDeg": 2.9833
+              }
             }
           },
           {
@@ -261,7 +297,11 @@
                 "widthDeg": 0.0728,
                 "heightDeg": 0.0529
               },
-              "brightness": 0.85
+              "brightness": 0.85,
+              "aim": {
+                "azimuthDeg": 200.0,
+                "altitudeDeg": 2.925
+              }
             }
           },
           {
@@ -283,6 +323,10 @@
               "angular": {
                 "widthDeg": 0.05,
                 "heightDeg": 0.05
+              },
+              "aim": {
+                "azimuthDeg": 200.0083,
+                "altitudeDeg": 2.9917
               }
             }
           },
@@ -305,6 +349,10 @@
               "angular": {
                 "widthDeg": 0.05,
                 "heightDeg": 0.05
+              },
+              "aim": {
+                "azimuthDeg": 200.0083,
+                "altitudeDeg": 2.9917
               }
             }
           }
@@ -332,6 +380,10 @@
               "angular": {
                 "widthDeg": 0.2025,
                 "heightDeg": 0.1045
+              },
+              "aim": {
+                "azimuthDeg": 200.0,
+                "altitudeDeg": -5.0
               }
             }
           },
@@ -354,6 +406,10 @@
               "angular": {
                 "widthDeg": 0.2025,
                 "heightDeg": 0.1045
+              },
+              "aim": {
+                "azimuthDeg": 200.0,
+                "altitudeDeg": -5.0
               }
             }
           },
@@ -376,6 +432,10 @@
               "angular": {
                 "widthDeg": 0.0696,
                 "heightDeg": 0.1387
+              },
+              "aim": {
+                "azimuthDeg": 200.0,
+                "altitudeDeg": 1.5
               }
             }
           },
@@ -398,6 +458,10 @@
               "angular": {
                 "widthDeg": 0.0766,
                 "heightDeg": 0.0557
+              },
+              "aim": {
+                "azimuthDeg": 200.0083,
+                "altitudeDeg": 1.425
               }
             }
           },
@@ -420,6 +484,10 @@
               "angular": {
                 "widthDeg": 0.05,
                 "heightDeg": 0.05
+              },
+              "aim": {
+                "azimuthDeg": 200.0083,
+                "altitudeDeg": 1.4917
               }
             }
           },
@@ -442,6 +510,10 @@
               "angular": {
                 "widthDeg": 0.05,
                 "heightDeg": 0.05
+              },
+              "aim": {
+                "azimuthDeg": 200.0083,
+                "altitudeDeg": 1.4917
               }
             }
           }
@@ -469,6 +541,10 @@
               "angular": {
                 "widthDeg": 0.6414,
                 "heightDeg": 0.3308
+              },
+              "aim": {
+                "azimuthDeg": 200.0,
+                "altitudeDeg": -5.0
               }
             }
           },
@@ -491,6 +567,10 @@
               "angular": {
                 "widthDeg": 0.6414,
                 "heightDeg": 0.3308
+              },
+              "aim": {
+                "azimuthDeg": 200.0,
+                "altitudeDeg": -5.0
               }
             }
           },
@@ -513,6 +593,10 @@
               "angular": {
                 "widthDeg": 0.2205,
                 "heightDeg": 0.4392
+              },
+              "aim": {
+                "azimuthDeg": 199.9917,
+                "altitudeDeg": 0.0
               }
             }
           },
@@ -535,6 +619,10 @@
               "angular": {
                 "widthDeg": 0.2426,
                 "heightDeg": 0.1764
+              },
+              "aim": {
+                "azimuthDeg": 200.0083,
+                "altitudeDeg": -0.225
               }
             }
           },
@@ -557,6 +645,10 @@
               "angular": {
                 "widthDeg": 0.05,
                 "heightDeg": 0.05
+              },
+              "aim": {
+                "azimuthDeg": 200.0083,
+                "altitudeDeg": -0.0083
               }
             }
           },
@@ -579,6 +671,10 @@
               "angular": {
                 "widthDeg": 0.05,
                 "heightDeg": 0.05
+              },
+              "aim": {
+                "azimuthDeg": 200.0083,
+                "altitudeDeg": -0.0083
               }
             }
           }
@@ -606,6 +702,10 @@
               "angular": {
                 "widthDeg": 0.7886,
                 "heightDeg": 0.4067
+              },
+              "aim": {
+                "azimuthDeg": 199.9917,
+                "altitudeDeg": -1.5
               }
             }
           },
@@ -628,6 +728,10 @@
               "angular": {
                 "widthDeg": 0.1717,
                 "heightDeg": 0.1378
+              },
+              "aim": {
+                "azimuthDeg": 200.0,
+                "altitudeDeg": -1.5
               }
             }
           },
@@ -650,6 +754,10 @@
               "angular": {
                 "widthDeg": 0.7886,
                 "heightDeg": 0.4067
+              },
+              "aim": {
+                "azimuthDeg": 199.9917,
+                "altitudeDeg": -5.0
               }
             }
           },
@@ -672,6 +780,10 @@
               "angular": {
                 "widthDeg": 0.7886,
                 "heightDeg": 0.4067
+              },
+              "aim": {
+                "azimuthDeg": 199.9917,
+                "altitudeDeg": -5.0
               }
             }
           },
@@ -694,6 +806,10 @@
               "angular": {
                 "widthDeg": 0.1057,
                 "heightDeg": 0.3053
+              },
+              "aim": {
+                "azimuthDeg": 199.1833,
+                "altitudeDeg": -1.55
               }
             }
           },
@@ -716,6 +832,10 @@
               "angular": {
                 "widthDeg": 0.1057,
                 "heightDeg": 0.3053
+              },
+              "aim": {
+                "azimuthDeg": 200.8167,
+                "altitudeDeg": -1.55
               }
             }
           }
@@ -743,6 +863,10 @@
               "angular": {
                 "widthDeg": 0.7886,
                 "heightDeg": 0.4067
+              },
+              "aim": {
+                "azimuthDeg": 199.9917,
+                "altitudeDeg": -1.5
               }
             }
           },
@@ -765,6 +889,10 @@
               "angular": {
                 "widthDeg": 0.1717,
                 "heightDeg": 0.1378
+              },
+              "aim": {
+                "azimuthDeg": 200.0,
+                "altitudeDeg": -1.5
               }
             }
           },
@@ -787,6 +915,10 @@
               "angular": {
                 "widthDeg": 0.7886,
                 "heightDeg": 0.4067
+              },
+              "aim": {
+                "azimuthDeg": 199.9917,
+                "altitudeDeg": -5.0
               }
             }
           },
@@ -809,6 +941,10 @@
               "angular": {
                 "widthDeg": 0.7886,
                 "heightDeg": 0.4067
+              },
+              "aim": {
+                "azimuthDeg": 199.9917,
+                "altitudeDeg": -5.0
               }
             }
           },
@@ -831,6 +967,10 @@
               "angular": {
                 "widthDeg": 0.1057,
                 "heightDeg": 0.3053
+              },
+              "aim": {
+                "azimuthDeg": 199.1833,
+                "altitudeDeg": -1.55
               }
             }
           },
@@ -853,6 +993,10 @@
               "angular": {
                 "widthDeg": 0.1057,
                 "heightDeg": 0.3053
+              },
+              "aim": {
+                "azimuthDeg": 200.8167,
+                "altitudeDeg": -1.55
               }
             }
           }
@@ -880,6 +1024,10 @@
               "angular": {
                 "widthDeg": 0.9162,
                 "heightDeg": 0.4726
+              },
+              "aim": {
+                "azimuthDeg": 200.0083,
+                "altitudeDeg": -2.4833
               }
             }
           },
@@ -902,6 +1050,10 @@
               "angular": {
                 "widthDeg": 0.1995,
                 "heightDeg": 0.1601
+              },
+              "aim": {
+                "azimuthDeg": 200.0,
+                "altitudeDeg": -2.5
               }
             }
           },
@@ -924,6 +1076,10 @@
               "angular": {
                 "widthDeg": 0.9162,
                 "heightDeg": 0.4726
+              },
+              "aim": {
+                "azimuthDeg": 200.0083,
+                "altitudeDeg": -5.0
               }
             }
           },
@@ -946,6 +1102,10 @@
               "angular": {
                 "widthDeg": 0.9162,
                 "heightDeg": 0.4726
+              },
+              "aim": {
+                "azimuthDeg": 200.0083,
+                "altitudeDeg": -5.0
               }
             }
           },
@@ -968,6 +1128,10 @@
               "angular": {
                 "widthDeg": 0.1228,
                 "heightDeg": 0.3547
+              },
+              "aim": {
+                "azimuthDeg": 199.4417,
+                "altitudeDeg": -2.5417
               }
             }
           },
@@ -990,6 +1154,10 @@
               "angular": {
                 "widthDeg": 0.1228,
                 "heightDeg": 0.3547
+              },
+              "aim": {
+                "azimuthDeg": 200.5417,
+                "altitudeDeg": -2.5417
               }
             }
           }
@@ -1017,6 +1185,10 @@
               "angular": {
                 "widthDeg": 1.6033,
                 "heightDeg": 0.827
+              },
+              "aim": {
+                "azimuthDeg": 200.0,
+                "altitudeDeg": -5.1
               }
             }
           },
@@ -1039,6 +1211,10 @@
               "angular": {
                 "widthDeg": 0.3492,
                 "heightDeg": 0.2803
+              },
+              "aim": {
+                "azimuthDeg": 200.0083,
+                "altitudeDeg": -5.1083
               }
             }
           },
@@ -1061,6 +1237,10 @@
               "angular": {
                 "widthDeg": 1.6033,
                 "heightDeg": 0.827
+              },
+              "aim": {
+                "azimuthDeg": 200.0,
+                "altitudeDeg": -5.0
               }
             }
           },
@@ -1083,6 +1263,10 @@
               "angular": {
                 "widthDeg": 1.6033,
                 "heightDeg": 0.827
+              },
+              "aim": {
+                "azimuthDeg": 200.0,
+                "altitudeDeg": -5.0
               }
             }
           },
@@ -1105,6 +1289,10 @@
               "angular": {
                 "widthDeg": 0.2149,
                 "heightDeg": 0.6207
+              },
+              "aim": {
+                "azimuthDeg": 199.4583,
+                "altitudeDeg": -5.2083
               }
             }
           },
@@ -1127,6 +1315,10 @@
               "angular": {
                 "widthDeg": 0.2149,
                 "heightDeg": 0.6207
+              },
+              "aim": {
+                "azimuthDeg": 200.5583,
+                "altitudeDeg": -5.2083
               }
             }
           }
@@ -1154,6 +1346,10 @@
               "angular": {
                 "widthDeg": 4.2739,
                 "heightDeg": 2.2051
+              },
+              "aim": {
+                "azimuthDeg": 200.0,
+                "altitudeDeg": -7.2833
               }
             }
           },
@@ -1176,6 +1372,10 @@
               "angular": {
                 "widthDeg": 0.9311,
                 "heightDeg": 0.7473
+              },
+              "aim": {
+                "azimuthDeg": 200.0,
+                "altitudeDeg": -7.275
               }
             }
           },
@@ -1198,6 +1398,10 @@
               "angular": {
                 "widthDeg": 4.2739,
                 "heightDeg": 2.2051
+              },
+              "aim": {
+                "azimuthDeg": 200.0,
+                "altitudeDeg": -5.0
               }
             }
           },
@@ -1220,6 +1424,10 @@
               "angular": {
                 "widthDeg": 4.2739,
                 "heightDeg": 2.2051
+              },
+              "aim": {
+                "azimuthDeg": 200.0,
+                "altitudeDeg": -5.0
               }
             }
           },
@@ -1242,6 +1450,10 @@
               "angular": {
                 "widthDeg": 0.573,
                 "heightDeg": 1.6551
+              },
+              "aim": {
+                "azimuthDeg": 199.45,
+                "altitudeDeg": -7.5583
               }
             }
           },
@@ -1264,6 +1476,10 @@
               "angular": {
                 "widthDeg": 0.573,
                 "heightDeg": 1.6551
+              },
+              "aim": {
+                "azimuthDeg": 200.55,
+                "altitudeDeg": -7.5583
               }
             }
           }
@@ -1291,6 +1507,10 @@
               "angular": {
                 "widthDeg": 6.4071,
                 "heightDeg": 3.3071
+              },
+              "aim": {
+                "azimuthDeg": 200.0,
+                "altitudeDeg": -7.7167
               }
             }
           },
@@ -1313,6 +1533,10 @@
               "angular": {
                 "widthDeg": 1.3966,
                 "heightDeg": 1.121
+              },
+              "aim": {
+                "azimuthDeg": 200.0167,
+                "altitudeDeg": -7.725
               }
             }
           },
@@ -1335,6 +1559,10 @@
               "angular": {
                 "widthDeg": 2.205,
                 "heightDeg": 4.3901
+              },
+              "aim": {
+                "azimuthDeg": 200.0167,
+                "altitudeDeg": -11.5417
               }
             }
           },
@@ -1357,6 +1585,10 @@
               "angular": {
                 "widthDeg": 2.4255,
                 "heightDeg": 1.7641
+              },
+              "aim": {
+                "azimuthDeg": 200.0167,
+                "altitudeDeg": -13.0
               }
             }
           },
@@ -1379,6 +1611,10 @@
               "angular": {
                 "widthDeg": 0.05,
                 "heightDeg": 0.05
+              },
+              "aim": {
+                "azimuthDeg": 200.0083,
+                "altitudeDeg": -5.0083
               }
             }
           },
@@ -1401,6 +1637,10 @@
               "angular": {
                 "widthDeg": 0.05,
                 "heightDeg": 0.05
+              },
+              "aim": {
+                "azimuthDeg": 200.0083,
+                "altitudeDeg": -5.0083
               }
             }
           }
@@ -1428,6 +1668,10 @@
               "angular": {
                 "widthDeg": 6.4071,
                 "heightDeg": 3.3071
+              },
+              "aim": {
+                "azimuthDeg": 200.0,
+                "altitudeDeg": -7.7167
               }
             }
           },
@@ -1450,6 +1694,10 @@
               "angular": {
                 "widthDeg": 1.3966,
                 "heightDeg": 1.121
+              },
+              "aim": {
+                "azimuthDeg": 200.0167,
+                "altitudeDeg": -7.725
               }
             }
           },
@@ -1472,6 +1720,10 @@
               "angular": {
                 "widthDeg": 2.205,
                 "heightDeg": 4.3901
+              },
+              "aim": {
+                "azimuthDeg": 200.0167,
+                "altitudeDeg": -11.5417
               }
             }
           },
@@ -1494,6 +1746,10 @@
               "angular": {
                 "widthDeg": 2.4255,
                 "heightDeg": 1.7641
+              },
+              "aim": {
+                "azimuthDeg": 200.0167,
+                "altitudeDeg": -13.0
               }
             }
           },
@@ -1516,6 +1772,10 @@
               "angular": {
                 "widthDeg": 0.05,
                 "heightDeg": 0.05
+              },
+              "aim": {
+                "azimuthDeg": 200.0083,
+                "altitudeDeg": -5.0083
               }
             }
           },
@@ -1538,6 +1798,10 @@
               "angular": {
                 "widthDeg": 0.05,
                 "heightDeg": 0.05
+              },
+              "aim": {
+                "azimuthDeg": 200.0083,
+                "altitudeDeg": -5.0083
               }
             }
           }
@@ -1558,13 +1822,17 @@
               },
               "color": "#e8e6df",
               "angle": 0,
-              "transparency": 1,
+              "transparency": 0.0,
               "haloScale": 0.2,
               "selected": false,
               "title": "Objet",
               "angular": {
                 "widthDeg": 5.729,
                 "heightDeg": 2.9398
+              },
+              "aim": {
+                "azimuthDeg": 198.55,
+                "altitudeDeg": -3.8
               }
             }
           },
@@ -1580,13 +1848,17 @@
               },
               "color": "#b4231f",
               "angle": 0,
-              "transparency": 1,
+              "transparency": 0.0,
               "haloScale": 0.0,
               "selected": false,
               "title": "Insigne rouge (taille rapportée, tracé approché)",
               "angular": {
                 "widthDeg": 1.2496,
                 "heightDeg": 0.9924
+              },
+              "aim": {
+                "azimuthDeg": 198.5417,
+                "altitudeDeg": -3.8167
               }
             }
           },
@@ -1602,13 +1874,17 @@
               },
               "color": "#7fc4ff",
               "angle": 0,
-              "transparency": 1,
+              "transparency": 0.15,
               "haloScale": 1.8,
               "selected": false,
               "title": "Flamme",
               "angular": {
                 "widthDeg": 1.9662,
                 "heightDeg": 3.9313
+              },
+              "aim": {
+                "azimuthDeg": 198.5333,
+                "altitudeDeg": -7.2667
               }
             }
           },
@@ -1624,13 +1900,17 @@
               },
               "color": "#ff8a2b",
               "angle": 0,
-              "transparency": 1,
+              "transparency": 0.2,
               "haloScale": 1.6,
               "selected": false,
               "title": "Base orange de la flamme",
               "angular": {
                 "widthDeg": 2.1683,
                 "heightDeg": 1.5804
+              },
+              "aim": {
+                "azimuthDeg": 198.55,
+                "altitudeDeg": -8.5583
               }
             }
           },
@@ -1646,13 +1926,17 @@
               },
               "color": "#f2f2ee",
               "angle": 0,
-              "transparency": 1,
+              "transparency": 1.0,
               "haloScale": 0.0,
               "selected": false,
               "title": "Silhouette en combinaison blanche (1)",
               "angular": {
                 "widthDeg": 0.05,
                 "heightDeg": 0.05
+              },
+              "aim": {
+                "azimuthDeg": 200.0083,
+                "altitudeDeg": -5.0083
               }
             }
           },
@@ -1668,13 +1952,17 @@
               },
               "color": "#f2f2ee",
               "angle": 0,
-              "transparency": 1,
+              "transparency": 1.0,
               "haloScale": 0.0,
               "selected": false,
               "title": "Silhouette en combinaison blanche (2)",
               "angular": {
                 "widthDeg": 0.05,
                 "heightDeg": 0.05
+              },
+              "aim": {
+                "azimuthDeg": 200.0083,
+                "altitudeDeg": -5.0083
               }
             }
           }
@@ -1695,13 +1983,17 @@
               },
               "color": "#e8e6df",
               "angle": 0,
-              "transparency": 1,
+              "transparency": 0.0,
               "haloScale": 0.2,
               "selected": false,
               "title": "Objet",
               "angular": {
                 "widthDeg": 5.1606,
                 "heightDeg": 2.6459
+              },
+              "aim": {
+                "azimuthDeg": 197.3667,
+                "altitudeDeg": -0.6583
               }
             }
           },
@@ -1717,13 +2009,17 @@
               },
               "color": "#b4231f",
               "angle": 0,
-              "transparency": 1,
+              "transparency": 0.0,
               "haloScale": 0.0,
               "selected": false,
               "title": "Insigne rouge (taille rapportée, tracé approché)",
               "angular": {
                 "widthDeg": 1.121,
                 "heightDeg": 0.9005
+              },
+              "aim": {
+                "azimuthDeg": 197.375,
+                "altitudeDeg": -0.6667
               }
             }
           },
@@ -1739,13 +2035,17 @@
               },
               "color": "#7fc4ff",
               "angle": 0,
-              "transparency": 1,
+              "transparency": 0.15,
               "haloScale": 1.8,
               "selected": false,
               "title": "Flamme",
               "angular": {
                 "widthDeg": 1.7641,
                 "heightDeg": 3.5274
+              },
+              "aim": {
+                "azimuthDeg": 197.35,
+                "altitudeDeg": -3.75
               }
             }
           },
@@ -1761,13 +2061,17 @@
               },
               "color": "#ff8a2b",
               "angle": 0,
-              "transparency": 1,
+              "transparency": 0.2,
               "haloScale": 1.6,
               "selected": false,
               "title": "Base orange de la flamme",
               "angular": {
                 "widthDeg": 1.9478,
                 "heightDeg": 1.415
+              },
+              "aim": {
+                "azimuthDeg": 197.3583,
+                "altitudeDeg": -4.9417
               }
             }
           },
@@ -1783,13 +2087,17 @@
               },
               "color": "#f2f2ee",
               "angle": 0,
-              "transparency": 1,
+              "transparency": 1.0,
               "haloScale": 0.0,
               "selected": false,
               "title": "Silhouette en combinaison blanche (1)",
               "angular": {
                 "widthDeg": 0.05,
                 "heightDeg": 0.05
+              },
+              "aim": {
+                "azimuthDeg": 200.0083,
+                "altitudeDeg": -5.0083
               }
             }
           },
@@ -1805,13 +2113,17 @@
               },
               "color": "#f2f2ee",
               "angle": 0,
-              "transparency": 1,
+              "transparency": 1.0,
               "haloScale": 0.0,
               "selected": false,
               "title": "Silhouette en combinaison blanche (2)",
               "angular": {
                 "widthDeg": 0.05,
                 "heightDeg": 0.05
+              },
+              "aim": {
+                "azimuthDeg": 200.0083,
+                "altitudeDeg": -5.0083
               }
             }
           }
@@ -1832,13 +2144,17 @@
               },
               "color": "#e8e6df",
               "angle": 0,
-              "transparency": 1,
+              "transparency": 0.0,
               "haloScale": 0.2,
               "selected": false,
               "title": "Objet",
               "angular": {
                 "widthDeg": 4.7204,
                 "heightDeg": 2.4255
+              },
+              "aim": {
+                "azimuthDeg": 196.5917,
+                "altitudeDeg": 1.9167
               }
             }
           },
@@ -1854,13 +2170,17 @@
               },
               "color": "#b4231f",
               "angle": 0,
-              "transparency": 1,
+              "transparency": 0.0,
               "haloScale": 0.0,
               "selected": false,
               "title": "Insigne rouge (taille rapportée, tracé approché)",
               "angular": {
                 "widthDeg": 1.0291,
                 "heightDeg": 0.827
+              },
+              "aim": {
+                "azimuthDeg": 196.5833,
+                "altitudeDeg": 1.9167
               }
             }
           },
@@ -1876,13 +2196,17 @@
               },
               "color": "#7fc4ff",
               "angle": 0,
-              "transparency": 1,
+              "transparency": 0.15,
               "haloScale": 1.8,
               "selected": false,
               "title": "Flamme",
               "angular": {
                 "widthDeg": 1.6171,
                 "heightDeg": 3.252
+              },
+              "aim": {
+                "azimuthDeg": 196.575,
+                "altitudeDeg": -0.8917
               }
             }
           },
@@ -1898,13 +2222,17 @@
               },
               "color": "#ff8a2b",
               "angle": 0,
-              "transparency": 1,
+              "transparency": 0.2,
               "haloScale": 1.6,
               "selected": false,
               "title": "Base orange de la flamme",
               "angular": {
                 "widthDeg": 1.7825,
                 "heightDeg": 1.3048
+              },
+              "aim": {
+                "azimuthDeg": 196.575,
+                "altitudeDeg": -1.9667
               }
             }
           },
@@ -1920,13 +2248,17 @@
               },
               "color": "#f2f2ee",
               "angle": 0,
-              "transparency": 1,
+              "transparency": 1.0,
               "haloScale": 0.0,
               "selected": false,
               "title": "Silhouette en combinaison blanche (1)",
               "angular": {
                 "widthDeg": 0.05,
                 "heightDeg": 0.05
+              },
+              "aim": {
+                "azimuthDeg": 200.0083,
+                "altitudeDeg": -5.0083
               }
             }
           },
@@ -1942,13 +2274,17 @@
               },
               "color": "#f2f2ee",
               "angle": 0,
-              "transparency": 1,
+              "transparency": 1.0,
               "haloScale": 0.0,
               "selected": false,
               "title": "Silhouette en combinaison blanche (2)",
               "angular": {
                 "widthDeg": 0.05,
                 "heightDeg": 0.05
+              },
+              "aim": {
+                "azimuthDeg": 200.0083,
+                "altitudeDeg": -5.0083
               }
             }
           }
@@ -1969,13 +2305,17 @@
               },
               "color": "#e8e6df",
               "angle": 0,
-              "transparency": 1,
+              "transparency": 0.0,
               "haloScale": 0.2,
               "selected": false,
               "title": "Objet",
               "angular": {
                 "widthDeg": 4.3534,
                 "heightDeg": 2.2418
+              },
+              "aim": {
+                "azimuthDeg": 195.925,
+                "altitudeDeg": 4.1083
               }
             }
           },
@@ -1991,13 +2331,17 @@
               },
               "color": "#b4231f",
               "angle": 0,
-              "transparency": 1,
+              "transparency": 0.0,
               "haloScale": 0.0,
               "selected": false,
               "title": "Insigne rouge (taille rapportée, tracé approché)",
               "angular": {
                 "widthDeg": 0.9556,
                 "heightDeg": 0.7535
+              },
+              "aim": {
+                "azimuthDeg": 195.9417,
+                "altitudeDeg": 4.1083
               }
             }
           },
@@ -2013,13 +2357,17 @@
               },
               "color": "#7fc4ff",
               "angle": 0,
-              "transparency": 1,
+              "transparency": 0.15,
               "haloScale": 1.8,
               "selected": false,
               "title": "Flamme",
               "angular": {
                 "widthDeg": 1.4885,
                 "heightDeg": 2.9949
+              },
+              "aim": {
+                "azimuthDeg": 195.9083,
+                "altitudeDeg": 1.55
               }
             }
           },
@@ -2035,13 +2383,17 @@
               },
               "color": "#ff8a2b",
               "angle": 0,
-              "transparency": 1,
+              "transparency": 0.2,
               "haloScale": 1.6,
               "selected": false,
               "title": "Base orange de la flamme",
               "angular": {
                 "widthDeg": 1.6355,
                 "heightDeg": 1.1945
+              },
+              "aim": {
+                "azimuthDeg": 195.9167,
+                "altitudeDeg": 0.5667
               }
             }
           },
@@ -2057,13 +2409,17 @@
               },
               "color": "#f2f2ee",
               "angle": 0,
-              "transparency": 1,
+              "transparency": 1.0,
               "haloScale": 0.0,
               "selected": false,
               "title": "Silhouette en combinaison blanche (1)",
               "angular": {
                 "widthDeg": 0.05,
                 "heightDeg": 0.05
+              },
+              "aim": {
+                "azimuthDeg": 200.0083,
+                "altitudeDeg": -5.0083
               }
             }
           },
@@ -2079,13 +2435,17 @@
               },
               "color": "#f2f2ee",
               "angle": 0,
-              "transparency": 1,
+              "transparency": 1.0,
               "haloScale": 0.0,
               "selected": false,
               "title": "Silhouette en combinaison blanche (2)",
               "angular": {
                 "widthDeg": 0.05,
                 "heightDeg": 0.05
+              },
+              "aim": {
+                "azimuthDeg": 200.0083,
+                "altitudeDeg": -5.0083
               }
             }
           }
@@ -2113,6 +2473,10 @@
               "angular": {
                 "widthDeg": 3.05,
                 "heightDeg": 1.5804
+              },
+              "aim": {
+                "azimuthDeg": 204.6417,
+                "altitudeDeg": 2.075
               }
             }
           },
@@ -2135,6 +2499,10 @@
               "angular": {
                 "widthDeg": 0.6616,
                 "heightDeg": 0.5329
+              },
+              "aim": {
+                "azimuthDeg": 204.6333,
+                "altitudeDeg": 2.0833
               }
             }
           },
@@ -2157,6 +2525,10 @@
               "angular": {
                 "widthDeg": 1.0475,
                 "heightDeg": 2.0948
+              },
+              "aim": {
+                "azimuthDeg": 204.6583,
+                "altitudeDeg": 0.2833
               }
             }
           },
@@ -2179,6 +2551,10 @@
               "angular": {
                 "widthDeg": 1.1578,
                 "heightDeg": 0.8454
+              },
+              "aim": {
+                "azimuthDeg": 204.6583,
+                "altitudeDeg": -0.4083
               }
             }
           },
@@ -2201,6 +2577,10 @@
               "angular": {
                 "widthDeg": 0.05,
                 "heightDeg": 0.05
+              },
+              "aim": {
+                "azimuthDeg": 200.0083,
+                "altitudeDeg": -5.0083
               }
             }
           },
@@ -2223,6 +2603,10 @@
               "angular": {
                 "widthDeg": 0.05,
                 "heightDeg": 0.05
+              },
+              "aim": {
+                "azimuthDeg": 200.0083,
+                "altitudeDeg": -5.0083
               }
             }
           }
@@ -2250,6 +2634,10 @@
               "angular": {
                 "widthDeg": 2.3336,
                 "heightDeg": 1.1945
+              },
+              "aim": {
+                "azimuthDeg": 209.2667,
+                "altitudeDeg": 0.9667
               }
             }
           },
@@ -2272,6 +2660,10 @@
               "angular": {
                 "widthDeg": 0.5146,
                 "heightDeg": 0.4043
+              },
+              "aim": {
+                "azimuthDeg": 209.275,
+                "altitudeDeg": 0.95
               }
             }
           },
@@ -2294,6 +2686,10 @@
               "angular": {
                 "widthDeg": 0.8086,
                 "heightDeg": 1.5988
+              },
+              "aim": {
+                "azimuthDeg": 209.2917,
+                "altitudeDeg": -0.4167
               }
             }
           },
@@ -2316,6 +2712,10 @@
               "angular": {
                 "widthDeg": 0.8821,
                 "heightDeg": 0.6432
+              },
+              "aim": {
+                "azimuthDeg": 209.275,
+                "altitudeDeg": -0.9417
               }
             }
           },
@@ -2338,6 +2738,10 @@
               "angular": {
                 "widthDeg": 0.05,
                 "heightDeg": 0.05
+              },
+              "aim": {
+                "azimuthDeg": 200.0083,
+                "altitudeDeg": -5.0083
               }
             }
           },
@@ -2360,6 +2764,10 @@
               "angular": {
                 "widthDeg": 0.05,
                 "heightDeg": 0.05
+              },
+              "aim": {
+                "azimuthDeg": 200.0083,
+                "altitudeDeg": -5.0083
               }
             }
           }
@@ -2387,6 +2795,10 @@
               "angular": {
                 "widthDeg": 0.9372,
                 "heightDeg": 0.4778
+              },
+              "aim": {
+                "azimuthDeg": 214.9,
+                "altitudeDeg": 3.1417
               }
             }
           },
@@ -2409,6 +2821,10 @@
               "angular": {
                 "widthDeg": 0.2022,
                 "heightDeg": 0.1654
+              },
+              "aim": {
+                "azimuthDeg": 214.9,
+                "altitudeDeg": 3.1333
               }
             }
           },
@@ -2431,6 +2847,10 @@
               "angular": {
                 "widthDeg": 0.3308,
                 "heightDeg": 0.6432
+              },
+              "aim": {
+                "azimuthDeg": 214.9333,
+                "altitudeDeg": 2.5917
               }
             }
           },
@@ -2453,6 +2873,10 @@
               "angular": {
                 "widthDeg": 0.3492,
                 "heightDeg": 0.2573
+              },
+              "aim": {
+                "azimuthDeg": 214.925,
+                "altitudeDeg": 2.3917
               }
             }
           },
@@ -2475,6 +2899,10 @@
               "angular": {
                 "widthDeg": 0.05,
                 "heightDeg": 0.05
+              },
+              "aim": {
+                "azimuthDeg": 200.0083,
+                "altitudeDeg": -5.0083
               }
             }
           },
@@ -2497,6 +2925,10 @@
               "angular": {
                 "widthDeg": 0.05,
                 "heightDeg": 0.05
+              },
+              "aim": {
+                "azimuthDeg": 200.0083,
+                "altitudeDeg": -5.0083
               }
             }
           }
@@ -2524,6 +2956,10 @@
               "angular": {
                 "widthDeg": 0.3492,
                 "heightDeg": 0.1838
+              },
+              "aim": {
+                "azimuthDeg": 217.1583,
+                "altitudeDeg": 4.325
               }
             }
           },
@@ -2546,6 +2982,10 @@
               "angular": {
                 "widthDeg": 0.0735,
                 "heightDeg": 0.0551
+              },
+              "aim": {
+                "azimuthDeg": 217.15,
+                "altitudeDeg": 4.3417
               }
             }
           },
@@ -2568,6 +3008,10 @@
               "angular": {
                 "widthDeg": 0.1103,
                 "heightDeg": 0.2389
+              },
+              "aim": {
+                "azimuthDeg": 217.1583,
+                "altitudeDeg": 4.1333
               }
             }
           },
@@ -2590,6 +3034,10 @@
               "angular": {
                 "widthDeg": 0.1286,
                 "heightDeg": 0.0919
+              },
+              "aim": {
+                "azimuthDeg": 217.1667,
+                "altitudeDeg": 4.05
               }
             }
           },
@@ -2612,6 +3060,10 @@
               "angular": {
                 "widthDeg": 0.05,
                 "heightDeg": 0.05
+              },
+              "aim": {
+                "azimuthDeg": 200.0083,
+                "altitudeDeg": -5.0083
               }
             }
           },
@@ -2634,6 +3086,10 @@
               "angular": {
                 "widthDeg": 0.05,
                 "heightDeg": 0.05
+              },
+              "aim": {
+                "azimuthDeg": 200.0083,
+                "altitudeDeg": -5.0083
               }
             }
           }
@@ -2661,6 +3117,10 @@
               "angular": {
                 "widthDeg": 0.1286,
                 "heightDeg": 0.0735
+              },
+              "aim": {
+                "azimuthDeg": 217.7667,
+                "altitudeDeg": 4.9667
               }
             }
           },
@@ -2683,6 +3143,10 @@
               "angular": {
                 "widthDeg": 0.0368,
                 "heightDeg": 0.0184
+              },
+              "aim": {
+                "azimuthDeg": 217.7667,
+                "altitudeDeg": 4.975
               }
             }
           },
@@ -2705,6 +3169,10 @@
               "angular": {
                 "widthDeg": 0.0551,
                 "heightDeg": 0.0919
+              },
+              "aim": {
+                "azimuthDeg": 217.775,
+                "altitudeDeg": 4.8833
               }
             }
           },
@@ -2727,6 +3195,10 @@
               "angular": {
                 "widthDeg": 0.0551,
                 "heightDeg": 0.0368
+              },
+              "aim": {
+                "azimuthDeg": 217.775,
+                "altitudeDeg": 4.85
               }
             }
           },
@@ -2749,6 +3221,10 @@
               "angular": {
                 "widthDeg": 0.05,
                 "heightDeg": 0.05
+              },
+              "aim": {
+                "azimuthDeg": 200.0083,
+                "altitudeDeg": -5.0083
               }
             }
           },
@@ -2771,6 +3247,10 @@
               "angular": {
                 "widthDeg": 0.05,
                 "heightDeg": 0.05
+              },
+              "aim": {
+                "azimuthDeg": 200.0083,
+                "altitudeDeg": -5.0083
               }
             }
           }
@@ -2798,6 +3278,10 @@
               "angular": {
                 "widthDeg": 0.0641,
                 "heightDeg": 0.0331
+              },
+              "aim": {
+                "azimuthDeg": 219.9833,
+                "altitudeDeg": 5.4833
               }
             }
           },
@@ -2820,6 +3304,10 @@
               "angular": {
                 "widthDeg": 0.014,
                 "heightDeg": 0.0112
+              },
+              "aim": {
+                "azimuthDeg": 219.975,
+                "altitudeDeg": 5.4917
               }
             }
           },
@@ -2842,6 +3330,10 @@
               "angular": {
                 "widthDeg": 0.0641,
                 "heightDeg": 0.0331
+              },
+              "aim": {
+                "azimuthDeg": 200.0,
+                "altitudeDeg": -5.0
               }
             }
           },
@@ -2864,6 +3356,10 @@
               "angular": {
                 "widthDeg": 0.0641,
                 "heightDeg": 0.0331
+              },
+              "aim": {
+                "azimuthDeg": 200.0,
+                "altitudeDeg": -5.0
               }
             }
           },
@@ -2886,6 +3382,10 @@
               "angular": {
                 "widthDeg": 0.05,
                 "heightDeg": 0.05
+              },
+              "aim": {
+                "azimuthDeg": 200.0083,
+                "altitudeDeg": -5.0083
               }
             }
           },
@@ -2908,6 +3408,10 @@
               "angular": {
                 "widthDeg": 0.05,
                 "heightDeg": 0.05
+              },
+              "aim": {
+                "azimuthDeg": 200.0083,
+                "altitudeDeg": -5.0083
               }
             }
           }
@@ -2935,6 +3439,10 @@
               "angular": {
                 "widthDeg": 0.0239,
                 "heightDeg": 0.0123
+              },
+              "aim": {
+                "azimuthDeg": 221.975,
+                "altitudeDeg": 5.9917
               }
             }
           },
@@ -2957,6 +3465,10 @@
               "angular": {
                 "widthDeg": 0.0052,
                 "heightDeg": 0.0042
+              },
+              "aim": {
+                "azimuthDeg": 221.9667,
+                "altitudeDeg": 5.9833
               }
             }
           },
@@ -2979,6 +3491,10 @@
               "angular": {
                 "widthDeg": 0.0239,
                 "heightDeg": 0.0123
+              },
+              "aim": {
+                "azimuthDeg": 199.9917,
+                "altitudeDeg": -5.0083
               }
             }
           },
@@ -3001,6 +3517,10 @@
               "angular": {
                 "widthDeg": 0.0239,
                 "heightDeg": 0.0123
+              },
+              "aim": {
+                "azimuthDeg": 199.9917,
+                "altitudeDeg": -5.0083
               }
             }
           },
@@ -3023,6 +3543,10 @@
               "angular": {
                 "widthDeg": 0.05,
                 "heightDeg": 0.05
+              },
+              "aim": {
+                "azimuthDeg": 200.0083,
+                "altitudeDeg": -5.0083
               }
             }
           },
@@ -3045,6 +3569,10 @@
               "angular": {
                 "widthDeg": 0.05,
                 "heightDeg": 0.05
+              },
+              "aim": {
+                "azimuthDeg": 200.0083,
+                "altitudeDeg": -5.0083
               }
             }
           }
@@ -3072,6 +3600,10 @@
               "angular": {
                 "widthDeg": 0.0239,
                 "heightDeg": 0.0123
+              },
+              "aim": {
+                "azimuthDeg": 222.175,
+                "altitudeDeg": 5.9917
               }
             }
           },
@@ -3094,6 +3626,10 @@
               "angular": {
                 "widthDeg": 0.0052,
                 "heightDeg": 0.0042
+              },
+              "aim": {
+                "azimuthDeg": 222.1667,
+                "altitudeDeg": 5.9833
               }
             }
           },
@@ -3116,6 +3652,10 @@
               "angular": {
                 "widthDeg": 0.0239,
                 "heightDeg": 0.0123
+              },
+              "aim": {
+                "azimuthDeg": 199.9917,
+                "altitudeDeg": -5.0083
               }
             }
           },
@@ -3138,6 +3678,10 @@
               "angular": {
                 "widthDeg": 0.0239,
                 "heightDeg": 0.0123
+              },
+              "aim": {
+                "azimuthDeg": 199.9917,
+                "altitudeDeg": -5.0083
               }
             }
           },
@@ -3160,6 +3704,10 @@
               "angular": {
                 "widthDeg": 0.05,
                 "heightDeg": 0.05
+              },
+              "aim": {
+                "azimuthDeg": 200.0083,
+                "altitudeDeg": -5.0083
               }
             }
           },
@@ -3182,6 +3730,10 @@
               "angular": {
                 "widthDeg": 0.05,
                 "heightDeg": 0.05
+              },
+              "aim": {
+                "azimuthDeg": 200.0083,
+                "altitudeDeg": -5.0083
               }
             }
           }

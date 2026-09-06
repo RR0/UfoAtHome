@@ -82,6 +82,9 @@ export function toSightingJson(sighting: Sighting): SightingRecordingJson {
   // every editing gesture moved. Mutates the live sighting on purpose — it only ADDS the angle the
   // drawing already implies, so memory and file agree from here on.
   SightingShapes.toAngular(sighting)
+  // And the direction each one was drawn in, from the pose that was current when it was drawn —
+  // see BaseShape.aim. Same rule as the angle above: the drawing is the newer statement.
+  SightingShapes.toAim(sighting)
   return {
     version: 1,
     time: sighting.event.time,
@@ -146,5 +149,8 @@ export function fromSightingJson(json: SightingRecordingJson): Sighting {
   // Timeline.fromJSON because the projection needs the pose's own field of view, which lives on
   // the sighting, not on the timeline.
   SightingShapes.toBounds(sighting)
+  // Positions follow the stated directions the way sizes follow the stated angles — and this is the
+  // step that lets a recording's witness turn their head without taking the sky with them.
+  SightingShapes.toPosition(sighting)
   return sighting
 }

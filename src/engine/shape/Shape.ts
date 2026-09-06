@@ -97,6 +97,45 @@ export interface BaseShape {
    * — freshly drawn, mid-drag. Every shape written to a file has one.
    */
   angular?: AngularExtent
+  /**
+   * Which way the witness was actually looking when the thing was there — degrees of azimuth from
+   * true north and of altitude above the horizon, the same conventions as ObserverPose.
+   *
+   * Authoritative over `bounds.x/y` exactly as `angular` is over `bounds.width/height`, and for the
+   * same reason: a pixel names a direction only once a projection is named, and the witness's own
+   * HEADING is part of that naming. Without this, a recording says "four degrees left of wherever
+   * I happened to be facing" — so turning the witness's head carried the phenomenon around the sky
+   * with it, and a witness who turned away from a thing on the ground took it with them.
+   *
+   * The pixel box saved alongside is that direction projected onto this canvas, kept so a file
+   * stays readable and so an editing gesture has something to move; if the two disagree, the
+   * direction wins (see SightingShapes.toPosition, which re-derives the box on load).
+   *
+   * Optional for the same reason `angular` is, plus one more: a recording whose pose never stated a
+   * heading has no direction to state either, and inventing one would be claiming the witness faced
+   * north.
+   */
+  aim?: ShapeAim
+}
+
+/** A direction in the witness's own sky — see BaseShape.aim. */
+export interface ShapeAim {
+  /** Degrees clockwise from true north, the same convention as ObserverPose.headingDeg. */
+  azimuthDeg: number
+  /** Degrees above (positive) or below the horizon. */
+  altitudeDeg: number
+}
+
+/** Blends two directions, or gives nothing when either end states none — the same rule
+ * ApparentSize.lerpAngular follows, and for the same reason: half of a statement nobody made is
+ * still nobody's statement. */
+function lerpAim(from: ShapeAim | undefined, to: ShapeAim | undefined, fraction: number): ShapeAim | undefined {
+  if (!from || !to) return fraction < 1 ? from : to
+  const turn = ((((to.azimuthDeg - from.azimuthDeg) % 360) + 540) % 360) - 180
+  return {
+    azimuthDeg: (((from.azimuthDeg + turn * fraction) % 360) + 360) % 360,
+    altitudeDeg: from.altitudeDeg + (to.altitudeDeg - from.altitudeDeg) * fraction
+  }
 }
 
 export interface OvalShape extends BaseShape {
@@ -239,6 +278,9 @@ export function lerpShape(from: Shape, to: Shape, fraction: number): Shape {
   // interpolated (rather than held from `from`) so the recording keeps stating a real apparent
   // size mid-flight. Undefined unless both ends document one; see ApparentSize.lerpAngular.
   const angular = ApparentSize.lerpAngular(from.angular, to.angular, fraction)
+  // The direction blends like the size does, and along the shorter arc: a phenomenon crossing due
+  // north goes 359 -> 1 through zero, not the long way round the whole sky.
+  const aim = lerpAim(from.aim, to.aim, fraction)
 
   if (from.kind === "polygon" && to.kind === "polygon" && from.points.length === to.points.length) {
     return {
@@ -251,6 +293,7 @@ export function lerpShape(from: Shape, to: Shape, fraction: number): Shape {
       brightness,
       color,
       angular,
+      aim,
       // Held, not blended — see BaseShape.behindCloud. The spread above already carries `from`'s
       // value; this is only here so the field is visibly part of the interpolation contract.
       behindCloud: fraction < 1 ? from.behindCloud : to.behindCloud,
@@ -261,5 +304,5 @@ export function lerpShape(from: Shape, to: Shape, fraction: number): Shape {
     }
   }
 
-  return { ...(fraction < 1 ? from : to), bounds, angle, transparency, haloScale, blur, brightness, color, angular }
+  return { ...(fraction < 1 ? from : to), bounds, angle, transparency, haloScale, blur, brightness, color, angular, aim }
 }
