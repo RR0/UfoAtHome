@@ -1,6 +1,6 @@
 import { html, css } from "./sceneTemplate.js"
 import { SightingFetch } from "../engine/net/SightingFetch.js"
-import { UfoElement, registerUfo, UFO_ELEMENT_NAME, WITNESS_MAP_ATTRIBUTE } from "./UfoElement.js"
+import { UfoElement, registerUfo, UFO_ELEMENT_NAME, WITNESS_MAP_ATTRIBUTE, MILESTONES_ATTRIBUTE } from "./UfoElement.js"
 import { SceneRenderer } from "../render3d/SceneRenderer.js"
 import type { TerrainProviders } from "../render3d/terrain/defaultTerrainProviders.js"
 import type { DecorModelProvider } from "../render3d/decor/DecorModelProvider.js"
@@ -165,7 +165,7 @@ const DEFAULT_OBSERVER_POSE: ObserverPose = { lat: 0, lng: 0, elevationM: 0, hea
  */
 export class SceneElement extends HTMLElement {
   static get observedAttributes(): string[] {
-    return ["src", "star-catalog-src", "deep-star-catalog-src", "show-compass", WITNESS_MAP_ATTRIBUTE]
+    return ["src", "star-catalog-src", "deep-star-catalog-src", "show-compass", WITNESS_MAP_ATTRIBUTE, MILESTONES_ATTRIBUTE]
   }
 
   private readonly shadow: ShadowRoot
@@ -404,7 +404,7 @@ export class SceneElement extends HTMLElement {
     this.ufoElement.classList.add("ufo-overlay")
     // Attributes set before this element upgraded are already on it — attributeChangedCallback has
     // not fired for them, since the nested player did not exist yet.
-    this.forwardWitnessMapAttribute()
+    this.forwardPlayerAttributes()
     this.ufoElement.style.setProperty("--ufo-canvas-background", "transparent")
     this.ufoElement.style.setProperty("--ufo-canvas-border", "none")
     // Otherwise the nested <rr0-ufo>'s own fullscreen button would fullscreen just its own stage
@@ -474,16 +474,18 @@ export class SceneElement extends HTMLElement {
     if (name === "show-compass" && newValue !== oldValue) {
       this.sceneRenderer.setShowCompass(this.hasAttribute("show-compass"))
     }
-    if (name === WITNESS_MAP_ATTRIBUTE && newValue !== oldValue) {
-      this.forwardWitnessMapAttribute()
+    if ((name === WITNESS_MAP_ATTRIBUTE || name === MILESTONES_ATTRIBUTE) && newValue !== oldValue) {
+      this.forwardPlayerAttributes()
     }
   }
 
-  /** Passes the page's own request for the witness map down to the `<rr0-ufo>` that owns it — the
-   * map lives on the nested player's stage, but a page embedding this element has never heard of
-   * that player and asks the tag it actually wrote. Same for `<rr0-sighting>` above this one. */
-  private forwardWitnessMapAttribute(): void {
-    this.ufoElement.toggleAttribute(WITNESS_MAP_ATTRIBUTE, this.hasAttribute(WITNESS_MAP_ATTRIBUTE))
+  /** Passes the page's own instructions about the player's overlays down to the `<rr0-ufo>` that
+   * owns them — they live on the nested player's stage, but a page embedding this element has never
+   * heard of that player and writes the tag it actually wrote. Same for `<rr0-sighting>` above. */
+  private forwardPlayerAttributes(): void {
+    for (const attribute of [WITNESS_MAP_ATTRIBUTE, MILESTONES_ATTRIBUTE]) {
+      this.ufoElement.toggleAttribute(attribute, this.hasAttribute(attribute))
+    }
   }
 
   /** Forces the compass labels visible independent of pointer hover — see

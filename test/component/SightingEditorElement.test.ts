@@ -84,22 +84,34 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
 // native `canvas` package) — stub it, same as test/render/CanvasRenderer.test.ts's mock,
 // so mounting the component doesn't throw when it paints its initial preview.
 beforeAll(() => {
-  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({
-    save: vi.fn(),
-    restore: vi.fn(),
-    beginPath: vi.fn(),
-    closePath: vi.fn(),
-    fill: vi.fn(),
-    ellipse: vi.fn(),
-    moveTo: vi.fn(),
-    lineTo: vi.fn(),
-    translate: vi.fn(),
-    rotate: vi.fn(),
-    clearRect: vi.fn(),
-    strokeRect: vi.fn(),
-    stroke: vi.fn(),
-    fillRect: vi.fn()
-  } as unknown as CanvasRenderingContext2D)
+  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockImplementation(function (this: HTMLCanvasElement) {
+    // mockImplementation, not mockReturnValue: a renderer that sizes itself from its own canvas
+    // (see WitnessMapRenderer) reads ctx.canvas, and one shared object makes every canvas claim to
+    // be the same one.
+    return {
+      canvas: this,
+      save: vi.fn(),
+      restore: vi.fn(),
+      beginPath: vi.fn(),
+      closePath: vi.fn(),
+      fill: vi.fn(),
+      ellipse: vi.fn(),
+      moveTo: vi.fn(),
+      lineTo: vi.fn(),
+      translate: vi.fn(),
+      rotate: vi.fn(),
+      clearRect: vi.fn(),
+      strokeRect: vi.fn(),
+      stroke: vi.fn(),
+      fillRect: vi.fn(),
+      arc: vi.fn(),
+      fillText: vi.fn(),
+      strokeText: vi.fn(),
+      drawImage: vi.fn(),
+      createRadialGradient: vi.fn(() => ({ addColorStop: vi.fn() })),
+      measureText: vi.fn((text: string) => ({ width: text.length * 5 })),
+    } as unknown as CanvasRenderingContext2D
+  })
   // The nested <rr0-scene> lazily fetches the star catalog on connect — stub a tiny valid
   // response so that fire-and-forget fetch resolves instead of rejecting (jsdom's fetch can't
   // resolve a relative URL against a real page origin anyway). Plain assignment, not

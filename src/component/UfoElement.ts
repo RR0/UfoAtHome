@@ -52,23 +52,38 @@ import type { UfoMessages } from "./messages/UfoMessages.js"
 const EMPTY_SELECTION: ReadonlySet<string> = new Set()
 
 /**
- * The attribute a page sets to offer the map of where the witness stood — absent, the button is not
- * there at all.
+ * The attribute a page sets to have the map of where the witness stood ALREADY OPEN.
  *
- * OFF BY DEFAULT, unlike everything else this element shows. A player dropped into an article is
- * there to be watched, and the map is a second thing to read: it belongs on the pages that are
- * ABOUT where a sighting happened — a case dossier, an editor — and not on every embed that happens
- * to sit beside a paragraph. It also costs real tile requests to a third party the first time it is
- * opened, which is not a page's to spend on a reader's behalf without saying so.
+ * It decides the starting state, not whether the map exists: the button is there for every
+ * recording that states a place, and a reader can always open one the page did not open for them.
+ * That distinction is the whole design. A page knows which of its reconstructions are ABOUT where
+ * they happened — a witness who drove eleven hundred metres of road, an airliner crossing a state —
+ * and can have the map up from the first frame; every other embed stays a picture to be watched,
+ * with the map one click away.
  *
- * Named the way `show-compass` and `show-labels` already are: a page deciding what its readers are
- * offered.
+ * Closed by default because opening it costs real tile requests to a third party, which is not a
+ * page's to spend on a reader's behalf without saying so.
+ *
+ * Named the way `show-compass` and `show-labels` already are: a page deciding what its readers see.
  */
 export const WITNESS_MAP_ATTRIBUTE = "show-witness-map"
 
+/**
+ * The attribute a page sets to take the account's named moments (see Milestone) OFF the player.
+ *
+ * NEGATIVE, unlike every other attribute here, and that is deliberate: the marks and the caption
+ * are the recording's own words about itself, so they belong wherever they exist. A page that wants
+ * the picture alone — a hero image, a thumbnail, a page whose own prose already tells the story beat
+ * by beat — has to say so.
+ *
+ * The button follows the same rule as the map's: it is there when there is something for it to
+ * show, which for this means a recording that names at least one moment. Most name none.
+ */
+export const MILESTONES_ATTRIBUTE = "hide-milestones"
+
 export class UfoElement extends HTMLElement {
   static get observedAttributes(): string[] {
-    return ["src", WITNESS_MAP_ATTRIBUTE]
+    return ["src", WITNESS_MAP_ATTRIBUTE, MILESTONES_ATTRIBUTE]
   }
 
   private readonly shadow: ShadowRoot
@@ -93,6 +108,7 @@ export class UfoElement extends HTMLElement {
   private readonly fullscreenButton: HTMLButtonElement
   private readonly cornerButtons: HTMLElement
   private readonly witnessMapButton: HTMLButtonElement
+  private readonly milestonesButton: HTMLButtonElement
   private readonly witnessMapPanel: HTMLElement
   private readonly witnessMapCanvas: HTMLCanvasElement
   private readonly witnessMapRenderer: WitnessMapRenderer
@@ -116,6 +132,10 @@ export class UfoElement extends HTMLElement {
   /** The licence line the map has to carry — the provider's own while its tiles are shown, and what
    * says they are missing when they are not. */
   private witnessMapAttribution?: string
+  /** Whether the account's named moments are being shown — see MILESTONES_ATTRIBUTE. On unless a
+   * page or a reader says otherwise, which is what a recording that took the trouble to name its
+   * moments deserves. */
+  private milestonesShown = true
 
   private currentSighting: Sighting = Sighting.create()
   /** The sighting's own sound (see SoundTrack), owned here rather than by SceneElement: it is part
@@ -250,6 +270,7 @@ export class UfoElement extends HTMLElement {
     this.fullscreenButton = this.shadow.getElementById("fullscreen") as HTMLButtonElement
     this.cornerButtons = this.shadow.getElementById("corner-buttons")!
     this.witnessMapButton = this.shadow.getElementById("witness-map") as HTMLButtonElement
+    this.milestonesButton = this.shadow.getElementById("milestones") as HTMLButtonElement
     this.witnessMapPanel = this.shadow.getElementById("witness-map-panel")!
     this.witnessMapCanvas = this.shadow.getElementById("witness-map-canvas") as HTMLCanvasElement
     this.witnessMapRenderer = new WitnessMapRenderer(this.witnessMapCanvas.getContext("2d")!)
@@ -274,6 +295,7 @@ export class UfoElement extends HTMLElement {
     this.loopButton.addEventListener("click", () => this.toggleLoop())
     this.fullscreenButton.addEventListener("click", () => this.toggleFullscreen())
     this.witnessMapButton.addEventListener("click", () => this.toggleWitnessMap())
+    this.milestonesButton.addEventListener("click", () => this.toggleMilestones())
     this.seekInput.addEventListener("input", () => this.player.seek(Number(this.seekInput.value)))
     this.canvas.addEventListener("click", event => {
       if (!this.enableClickToPlay) return
@@ -303,6 +325,7 @@ export class UfoElement extends HTMLElement {
     this.updatePlayPauseButton()
     this.updateFullscreenButton()
     this.updateWitnessMapButton()
+    this.updateMilestonesButton()
     this.refresh()
     void this.loadLocaleMessages()
   }
@@ -329,7 +352,10 @@ export class UfoElement extends HTMLElement {
       void this.loadFromSrc(newValue)
     }
     if (name === WITNESS_MAP_ATTRIBUTE) {
-      this.updateWitnessMap()
+      this.applyWitnessMapDefault()
+    }
+    if (name === MILESTONES_ATTRIBUTE) {
+      this.setMilestonesShown(!this.hasAttribute(MILESTONES_ATTRIBUTE))
     }
   }
 
@@ -360,6 +386,9 @@ export class UfoElement extends HTMLElement {
     this.updateTimeLabels()
     this.updatePlayPauseButton()
     this.refresh()
+    // After refresh, which is where the new recording's own path is worked out: a page's "start
+    // with the map open" is about the recording being loaded, not the one just replaced.
+    this.applyWitnessMapDefault()
   }
 
   /**
@@ -598,6 +627,7 @@ export class UfoElement extends HTMLElement {
     this.updateTimeLabels()
     this.seekInput.max = String(this.player.seekableDuration)
     this.refreshMilestoneMarks()
+    this.updateMilestonesButton()
     this.updateWitnessMap()
     this.player.seek(this.player.time)
   }
@@ -632,7 +662,8 @@ export class UfoElement extends HTMLElement {
   /** Names the moment the recording is currently in — the last one reached, held until the next,
    * which is how every other keyframed field in this model resolves (see resolveMilestoneAt). */
   private showMilestoneAt(t: number): void {
-    const current = this.sighting.milestones.length > 0 ? resolveMilestoneAt(this.sighting.milestones, t) : undefined
+    const current =
+      this.milestonesShown && this.sighting.milestones.length > 0 ? resolveMilestoneAt(this.sighting.milestones, t) : undefined
     this.milestoneCaption.hidden = current === undefined
     if (!current) return
     const label = document.createElement("b")
@@ -1050,6 +1081,18 @@ export class UfoElement extends HTMLElement {
     this.setWitnessMapOpen(this.witnessMapPanel.hidden)
   }
 
+  /**
+   * Puts the map where the page said it should START — see WITNESS_MAP_ATTRIBUTE.
+   *
+   * A DEFAULT, applied when the page states one and when a new recording arrives, and nowhere else.
+   * In particular not on every `refresh()`: the editor calls that on every keystroke, and a default
+   * re-applied there would reopen a map the author had just closed, over and over. What a reader or
+   * an author does with the map afterwards is theirs until the page or the recording changes.
+   */
+  private applyWitnessMapDefault(): void {
+    this.setWitnessMapOpen(this.hasAttribute(WITNESS_MAP_ATTRIBUTE) && this.witnessPath !== undefined)
+  }
+
   private setWitnessMapOpen(open: boolean): void {
     this.witnessMapPanel.hidden = !open
     this.witnessMapButton.setAttribute("aria-pressed", String(open))
@@ -1068,17 +1111,18 @@ export class UfoElement extends HTMLElement {
   }
 
   /**
-   * Offers the map only for a recording that actually states where it happened, and works out the
-   * ground it will cover.
+   * Offers the map for every recording that actually states where it happened, works out the ground
+   * it will cover, and leaves the open state to applyWitnessMapDefault.
    *
-   * Two conditions, and both must hold: the page has to have asked for it (see
-   * WITNESS_MAP_ATTRIBUTE) and the recording has to state where it happened. A recording with no
-   * coordinates gets no button at all rather than a button onto an empty map — most recordings in
-   * this project have none, and a control that is always there and usually useless is worse than
-   * one that appears when it has something to show.
+   * The BUTTON depends on the recording, the OPEN STATE on the page — two different questions, and
+   * conflating them was the first version's mistake. A recording with no coordinates gets no button
+   * rather than a button onto an empty map; one that has them gets a button whether or not any page
+   * thought to ask, because a reader wanting to know where this happened is not a thing a page can
+   * predict. What a page can say is which of its own reconstructions are worth opening it on from
+   * the first frame — see WITNESS_MAP_ATTRIBUTE.
    */
   private updateWitnessMap(): void {
-    this.witnessPath = this.hasAttribute(WITNESS_MAP_ATTRIBUTE) ? WitnessPath.of(this.currentSighting) : undefined
+    this.witnessPath = WitnessPath.of(this.currentSighting)
     this.witnessMapButton.hidden = this.witnessPath === undefined
     if (!this.witnessPath) {
       this.setWitnessMapOpen(false)
@@ -1167,7 +1211,7 @@ export class UfoElement extends HTMLElement {
     const instrument = this.currentSighting.instrument
     const markers: WitnessMapMarker[] = []
     const current = this.currentSighting.milestones.length > 0 ? resolveMilestoneAt(this.currentSighting.milestones, t) : undefined
-    for (const milestone of sortedMilestones(this.currentSighting.milestones)) {
+    for (const milestone of this.milestonesShown ? sortedMilestones(this.currentSighting.milestones) : []) {
       const at = resolveObserverPoseAt(this.currentSighting, milestone.t)
       if (at?.lat === undefined || at.lng === undefined) continue
       markers.push({ label: this.said.read(milestone.label) ?? "", lat: at.lat, lng: at.lng, current: milestone === current })
@@ -1186,6 +1230,37 @@ export class UfoElement extends HTMLElement {
       markers,
       attribution: this.witnessMapAttribution
     })
+  }
+
+  /**
+   * Shows or hides the account's own named moments — the marks along the bar, the caption naming the
+   * one being played, and the lettered points on the map, which are three views of the same few
+   * facts and so go together.
+   *
+   * Public for the same reason as toggleWitnessMap.
+   */
+  toggleMilestones(): void {
+    this.setMilestonesShown(!this.milestonesShown)
+  }
+
+  private setMilestonesShown(shown: boolean): void {
+    this.milestonesShown = shown
+    this.milestoneMarks.hidden = !shown
+    this.milestonesButton.setAttribute("aria-pressed", String(shown))
+    this.updateMilestonesButton()
+    // The caption is driven by the playhead, not by this — asking it again is what makes it appear
+    // and disappear on the spot instead of at the next frame.
+    this.showMilestoneAt(this.currentTime)
+    this.paintWitnessMap(this.currentTime)
+  }
+
+  /** The button is there when there is something for it to show. A recording that names no moment
+   * gets none — most name none. */
+  private updateMilestonesButton(): void {
+    this.milestonesButton.hidden = this.currentSighting.milestones.length === 0
+    const label = this.milestonesShown ? this.messages.hideMilestones : this.messages.showMilestones
+    this.milestonesButton.title = label
+    this.milestonesButton.setAttribute("aria-label", label)
   }
 
   private updateFullscreenButton(): void {
@@ -1251,6 +1326,7 @@ export class UfoElement extends HTMLElement {
     this.updatePlayPauseButton()
     this.updateFullscreenButton()
     this.updateWitnessMapButton()
+    this.updateMilestonesButton()
   }
 
   /**

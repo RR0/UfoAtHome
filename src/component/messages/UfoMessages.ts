@@ -19,4 +19,8 @@ export interface UfoMessages {
   /** Shown on the map instead of the imagery when the tiles cannot be fetched — the path is still
    * drawn, so this says what is missing rather than that the map failed. */
   mapImageryUnavailable: string
+  /** The account's own named moments (see Milestone) — the marks on the bar, the caption, and the
+   * lettered points on the map, which go together. */
+  showMilestones: string
+  hideMilestones: string
 }

@@ -154,8 +154,18 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       <tr><td><code>canvasElement</code> / <code>renderer</code></td><td>property (read)</td><td>The <code>&lt;canvas&gt;</code>, and the renderer painting on it</td></tr>
       <tr><td><code>enableClickToPlay</code></td><td>property</td><td>Whether a click toggles playback and a double-click toggles fullscreen (both, or neither). Set false where the canvas is yours for something else</td></tr>
       <tr><td><code>fullscreenTarget</code></td><td>property</td><td>Which element the fullscreen button expands. <code>&lt;rr0-scene&gt;</code> sets it to its own stage, so the sky goes fullscreen and not just the overlay</td></tr>
+      <tr><td><code>show-witness-map</code></td><td>attribute</td><td>Start with the map of where the witness stood already open. It decides the map's <em>starting state</em>, not whether it exists: the button is there for every recording that states a place, set or not</td></tr>
+      <tr><td><code>toggleWitnessMap()</code></td><td>method</td><td>What that button does</td></tr>
+      <tr><td><code>hide-milestones</code></td><td>attribute</td><td>Take the account's named moments off — the ticks along the bar, the caption naming the one being played, and the lettered points on the map. They are on wherever a recording names any, so this is the only way to say otherwise</td></tr>
+      <tr><td><code>toggleMilestones()</code></td><td>method</td><td>What that button does</td></tr>
     </table>
     </div>
+    <p>Those two are the only <em>positive</em> and <em>negative</em> defaults this element has, and
+      the difference is deliberate. A recording's named moments are its own words about itself, so
+      they show wherever they exist; the map costs tile requests to a third party the first time it
+      opens, which is not a page's to spend on a reader's behalf without saying so. Either way the
+      reader keeps both buttons, beside the fullscreen one — a page setting a default is not a page
+      forbidding the opposite.</p>
   </div>
 </section>
 `,
@@ -183,8 +193,18 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       <tr><td><code>canvasElement</code> / <code>renderer</code></td><td>propriété (lecture)</td><td>Le <code>&lt;canvas&gt;</code>, et ce qui peint dessus</td></tr>
       <tr><td><code>enableClickToPlay</code></td><td>propriété</td><td>Si un clic bascule la lecture et un double-clic le plein écran (les deux, ou aucun). À mettre à false là où le canevas vous sert à autre chose</td></tr>
       <tr><td><code>fullscreenTarget</code></td><td>propriété</td><td>Quel élément le bouton plein écran agrandit. <code>&lt;rr0-scene&gt;</code> y met sa propre scène, pour que ce soit le ciel qui s'agrandisse et non la seule surcouche</td></tr>
+      <tr><td><code>show-witness-map</code></td><td>attribut</td><td>Ouvrir d'emblée la carte d'où se tenait le témoin. Il décide de l'état de <em>départ</em> de la carte, pas de son existence : le bouton est là pour tout enregistrement qui énonce un lieu, qu'on le pose ou non</td></tr>
+      <tr><td><code>toggleWitnessMap()</code></td><td>méthode</td><td>Ce que fait ce bouton</td></tr>
+      <tr><td><code>hide-milestones</code></td><td>attribut</td><td>Retirer les moments nommés du récit — les repères sur la barre, la légende qui nomme celui qu'on joue, et les points lettrés sur la carte. Ils sont là partout où un enregistrement en nomme, donc c'est la seule façon de dire le contraire</td></tr>
+      <tr><td><code>toggleMilestones()</code></td><td>méthode</td><td>Ce que fait ce bouton</td></tr>
     </table>
     </div>
+    <p>Ces deux-là sont les seuls défauts <em>positif</em> et <em>négatif</em> de cet élément, et la
+      différence est voulue. Les moments nommés d'un enregistrement sont ses propres mots sur
+      lui-même : ils s'affichent partout où ils existent. La carte, elle, coûte des requêtes de
+      tuiles à un tiers dès la première ouverture, et ce n'est pas à une page de les dépenser au nom
+      d'un lecteur sans le dire. Dans les deux cas le lecteur garde les deux boutons, à côté de celui
+      du plein écran : une page qui pose un défaut n'interdit pas le contraire.</p>
   </div>
 </section>
 `
@@ -215,6 +235,8 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       <tr><th>Member</th><th>Kind</th><th>What it does</th></tr>
       <tr><td><code>ufoElement</code></td><td>property (read)</td><td>The <code>&lt;rr0-ufo&gt;</code> it composes — and through it every playback member above</td></tr>
       <tr><td><code>sceneRenderer</code></td><td>property (read)</td><td>The 3D renderer, for what nothing else exposes</td></tr>
+      <tr><td><code>show-compass</code></td><td>attribute</td><td>N/NE/E/… labels around the horizon. Off by default: useful while authoring a heading, noise while watching</td></tr>
+      <tr><td><code>show-witness-map</code> / <code>hide-milestones</code></td><td>attribute</td><td>Passed straight down to the <code>&lt;rr0-ufo&gt;</code> above — write them on whichever tag your page actually contains</td></tr>
     </table>
     </div>
     <p>Hovering it names what is under the pointer — a star with its magnitude and height, a planet,
@@ -235,6 +257,8 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       <tr><th>Membre</th><th>Nature</th><th>Rôle</th></tr>
       <tr><td><code>ufoElement</code></td><td>propriété (lecture)</td><td>Le <code>&lt;rr0-ufo&gt;</code> qu'il compose — et par lui tous les membres de lecture ci-dessus</td></tr>
       <tr><td><code>sceneRenderer</code></td><td>propriété (lecture)</td><td>Le moteur de rendu 3D, pour ce que rien d'autre n'expose</td></tr>
+      <tr><td><code>show-compass</code></td><td>attribut</td><td>Les repères N/NE/E/… sur l'horizon. Absent par défaut : utile pour régler un cap, du bruit pour regarder</td></tr>
+      <tr><td><code>show-witness-map</code> / <code>hide-milestones</code></td><td>attribut</td><td>Transmis tels quels au <code>&lt;rr0-ufo&gt;</code> ci-dessus — à écrire sur la balise que votre page contient réellement</td></tr>
     </table>
     </div>
     <p>Le survol nomme ce qui est sous le curseur — une étoile avec sa magnitude et sa hauteur, une
@@ -275,6 +299,8 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       <tr><td><code>sightingData</code></td><td>property</td><td>One recording, set directly — for a page holding one in memory rather than at a URL</td></tr>
       <tr><td><code>scene</code></td><td>property (read)</td><td>The composed <code>&lt;rr0-scene&gt;</code>, and through <code>scene.ufoElement</code> the playback members</td></tr>
       <tr><td><code>loadFromSrc(url)</code></td><td>method (async)</td><td>What the attribute triggers</td></tr>
+      <tr><td><code>show-labels</code></td><td>attribute</td><td>The strip of the recording's own parameters under the picture. Off by default — and a reader can open or close it themselves from the <q>?</q> panel</td></tr>
+      <tr><td><code>show-witness-map</code> / <code>hide-milestones</code></td><td>attribute</td><td>Passed down through the composed <code>&lt;rr0-scene&gt;</code> to the player that owns them</td></tr>
     </table>
     </div>
     <p>A recording that names no witness gets no “testimony by” line at all, which is the accurate
@@ -298,6 +324,8 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       <tr><td><code>sightingData</code></td><td>propriété</td><td>Un enregistrement posé directement — pour une page qui en tient un en mémoire plutôt qu'à une URL</td></tr>
       <tr><td><code>scene</code></td><td>propriété (lecture)</td><td>Le <code>&lt;rr0-scene&gt;</code> composé, et par <code>scene.ufoElement</code> les membres de lecture</td></tr>
       <tr><td><code>loadFromSrc(url)</code></td><td>méthode (async)</td><td>Ce que déclenche l'attribut</td></tr>
+      <tr><td><code>show-labels</code></td><td>attribut</td><td>Le bandeau des paramètres de l'enregistrement sous l'image. Absent par défaut — et un lecteur peut l'ouvrir ou le fermer lui-même depuis le panneau <q>?</q></td></tr>
+      <tr><td><code>show-witness-map</code> / <code>hide-milestones</code></td><td>attribut</td><td>Transmis à travers le <code>&lt;rr0-scene&gt;</code> composé jusqu'au lecteur qui les porte</td></tr>
     </table>
     </div>
     <p>Un enregistrement qui ne nomme aucun témoin n'affiche aucune ligne « témoignage de » — ce qui

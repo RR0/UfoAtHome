@@ -1438,19 +1438,41 @@ describe("the witness's own map", () => {
     document.body.innerHTML = ""
   })
 
-  it("is not offered at all until the page asks for it", () => {
-    // Off by default, unlike everything else this player shows. A recording with a full track and
-    // a heading still gets no button: a player dropped into an article is there to be watched, and
-    // the first thing a reader does with the map costs tile requests to a third party.
+  it("offers the button to every recording that states a place, asked for or not", () => {
+    // The button depends on the RECORDING, the open state on the page — two different questions.
+    // A reader wanting to know where this happened is not something a page can predict, so the
+    // button is there whether or not any page thought to ask.
     const element = mount()
     element.sightingData = movingWitness() as never
-    expect(mapParts(element).button.hidden).toBe(true)
+    const { button, panel } = mapParts(element)
+    expect(button.hidden).toBe(false)
+    expect(panel.hidden).toBe(true)
+  })
+
+  it("starts open when the page says so, and shuts again when it takes that back", () => {
+    const element = mount()
+    element.sightingData = movingWitness() as never
+    expect(mapParts(element).panel.hidden).toBe(true)
 
     element.setAttribute("show-witness-map", "")
-    expect(mapParts(element).button.hidden).toBe(false)
+    expect(mapParts(element).panel.hidden).toBe(false)
 
+    // The carousel needs this half: one stage plays every reconstruction in turn, so a page that
+    // said "open for this one" must be able to say "not for the next".
     element.removeAttribute("show-witness-map")
-    expect(mapParts(element).button.hidden).toBe(true)
+    expect(mapParts(element).panel.hidden).toBe(true)
+  })
+
+  it("leaves a map the reader opened alone while the recording is edited", () => {
+    // refresh() runs on every keystroke in the editor. A default re-applied there would slam shut
+    // a map the author had just opened, and reopen one they had just closed.
+    const element = mount()
+    element.sightingData = movingWitness() as never
+    mapParts(element).button.click()
+    expect(mapParts(element).panel.hidden).toBe(false)
+
+    element.refresh()
+    expect(mapParts(element).panel.hidden).toBe(false)
   })
 
   it("is not offered for a recording that never said where it happened, asked for or not", () => {
@@ -1458,6 +1480,7 @@ describe("the witness's own map", () => {
     // and opens onto nothing is worse than one that appears when it has an answer.
     const element = mountWithMap({ version: 1, timeline: { keyframes: [] } })
     expect(mapParts(element).button.hidden).toBe(true)
+    expect(mapParts(element).panel.hidden).toBe(true)
   })
 
   it("is offered as soon as a recording names one place, tracked or not", () => {
@@ -1465,27 +1488,20 @@ describe("the witness's own map", () => {
     expect(mapParts(element).button.hidden).toBe(false)
   })
 
-  it("stays shut, and costs no tile fetch, until the reader asks for it", () => {
+  it("costs no tile fetch until something actually opens it", () => {
     // These are real requests to a third party. A page listing a dozen case dossiers would fire
     // them all on load for maps nobody opened.
     const fetchSpy = vi.spyOn(globalThis, "fetch")
-    const element = mountWithMap(movingWitness())
+    const element = mount()
+    element.sightingData = movingWitness() as never
     expect(mapParts(element).panel.hidden).toBe(true)
     expect(fetchSpy).not.toHaveBeenCalled()
     fetchSpy.mockRestore()
   })
 
-  it("closes itself when the page withdraws the map it had opened", () => {
-    const element = mountWithMap(movingWitness())
-    mapParts(element).button.click()
-    expect(mapParts(element).panel.hidden).toBe(false)
-
-    element.removeAttribute("show-witness-map")
-    expect(mapParts(element).panel.hidden).toBe(true)
-  })
-
   it("opens and closes on the button, and says which it will do", () => {
-    const element = mountWithMap(movingWitness())
+    const element = mount()
+    element.sightingData = movingWitness() as never
     const { button, panel } = mapParts(element)
 
     button.click()
@@ -1502,11 +1518,93 @@ describe("the witness's own map", () => {
     // A page playing several recordings in turn does exactly this. Leaving the panel up would show
     // the previous witness's ground under the new one's recording.
     const element = mountWithMap(movingWitness())
-    mapParts(element).button.click()
     expect(mapParts(element).panel.hidden).toBe(false)
 
     element.sightingData = { version: 1, timeline: { keyframes: [] } } as never
     expect(mapParts(element).panel.hidden).toBe(true)
     expect(mapParts(element).button.hidden).toBe(true)
+  })
+
+  it("applies the page's default again for each recording that arrives", () => {
+    // A carousel swaps recordings under one stage. The map opening is about the recording being
+    // loaded, not the one it replaced.
+    const element = mountWithMap({ version: 1, timeline: { keyframes: [] } })
+    expect(mapParts(element).panel.hidden).toBe(true) // nowhere to point it
+
+    element.sightingData = movingWitness() as never
+    expect(mapParts(element).panel.hidden).toBe(false)
+  })
+})
+
+describe("the account's named moments", () => {
+  function withMilestones(): object {
+    return {
+      version: 1 as const,
+      timeline: { keyframes: [{ t: 0, shapes: [] }, { t: 1000, shapes: [] }] },
+      milestones: [{ t: 0, label: "A", note: "He hears a roar" }, { t: 500, label: "B", note: "The sound stops" }]
+    }
+  }
+
+  function parts(element: UfoElement) {
+    const shadow = element.shadowRoot!
+    return {
+      button: shadow.getElementById("milestones") as HTMLButtonElement,
+      marks: shadow.getElementById("milestone-marks")!,
+      caption: shadow.getElementById("milestone-caption")!
+    }
+  }
+
+  afterEach(() => {
+    document.body.innerHTML = ""
+  })
+
+  it("offers no button to a recording that names no moment", () => {
+    const element = mount()
+    element.sightingData = { version: 1, timeline: { keyframes: [{ t: 0, shapes: [] }] } } as never
+    expect(parts(element).button.hidden).toBe(true)
+  })
+
+  it("is on by default wherever there are moments to show", () => {
+    // Unlike the map: these are the recording's own words about itself, so they belong wherever
+    // they exist rather than waiting for a page to ask.
+    const element = mount()
+    element.sightingData = withMilestones() as never
+    const { button, marks, caption } = parts(element)
+    expect(button.hidden).toBe(false)
+    expect(marks.hidden).toBe(false)
+    expect(caption.hidden).toBe(false)
+    expect(button.title).toBe("Hide the account's moments")
+  })
+
+  it("takes them off on the button, marks and caption together", () => {
+    // Three views of the same few facts — the ticks on the bar, the sentence over the controls and
+    // the lettered points on the map. Hiding one and leaving another would be showing half a thing.
+    const element = mount()
+    element.sightingData = withMilestones() as never
+    const { button, marks, caption } = parts(element)
+
+    button.click()
+    expect(marks.hidden).toBe(true)
+    expect(caption.hidden).toBe(true)
+    expect(button.getAttribute("aria-pressed")).toBe("false")
+    expect(button.title).toBe("Show the account's moments")
+
+    button.click()
+    expect(marks.hidden).toBe(false)
+    expect(caption.hidden).toBe(false)
+  })
+
+  it("lets a page take them off, and put them back", () => {
+    const element = mount()
+    element.sightingData = withMilestones() as never
+
+    element.setAttribute("hide-milestones", "")
+    expect(parts(element).marks.hidden).toBe(true)
+    expect(parts(element).caption.hidden).toBe(true)
+    // Still offered: a page hiding them by default is not a page forbidding them.
+    expect(parts(element).button.hidden).toBe(false)
+
+    element.removeAttribute("hide-milestones")
+    expect(parts(element).marks.hidden).toBe(false)
   })
 })

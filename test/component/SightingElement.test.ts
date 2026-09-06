@@ -66,22 +66,34 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
 // jsdom's <canvas> has no real 2D context — stub it, same as test/component/UfoElement.test.ts's mock (the
 // nested <rr0-ufo> needs this to paint its initial frame without throwing).
 beforeAll(() => {
-  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({
-    save: vi.fn(),
-    restore: vi.fn(),
-    beginPath: vi.fn(),
-    closePath: vi.fn(),
-    fill: vi.fn(),
-    ellipse: vi.fn(),
-    moveTo: vi.fn(),
-    lineTo: vi.fn(),
-    translate: vi.fn(),
-    rotate: vi.fn(),
-    clearRect: vi.fn(),
-    strokeRect: vi.fn(),
-    stroke: vi.fn(),
-    fillRect: vi.fn()
-  } as unknown as CanvasRenderingContext2D)
+  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockImplementation(function (this: HTMLCanvasElement) {
+    // mockImplementation, not mockReturnValue: a renderer that sizes itself from its own canvas
+    // (see WitnessMapRenderer) reads ctx.canvas, and one shared object makes every canvas claim to
+    // be the same one.
+    return {
+      canvas: this,
+      save: vi.fn(),
+      restore: vi.fn(),
+      beginPath: vi.fn(),
+      closePath: vi.fn(),
+      fill: vi.fn(),
+      ellipse: vi.fn(),
+      moveTo: vi.fn(),
+      lineTo: vi.fn(),
+      translate: vi.fn(),
+      rotate: vi.fn(),
+      clearRect: vi.fn(),
+      strokeRect: vi.fn(),
+      stroke: vi.fn(),
+      fillRect: vi.fn(),
+      arc: vi.fn(),
+      fillText: vi.fn(),
+      strokeText: vi.fn(),
+      drawImage: vi.fn(),
+      createRadialGradient: vi.fn(() => ({ addColorStop: vi.fn() })),
+      measureText: vi.fn((text: string) => ({ width: text.length * 5 })),
+    } as unknown as CanvasRenderingContext2D
+  })
   // The nested <rr0-scene> lazily fetches the star catalog on connect — a safe default so that
   // fire-and-forget fetch resolves instead of rejecting whenever a test's own stubFetch() (below)
   // isn't active yet/covers other URLs. Plain assignment, not vi.stubGlobal, so per-test
@@ -719,24 +731,29 @@ describe("SightingElement parameter labels", () => {
     expect(labels(element)).toEqual([])
   })
 
-  it("hands the witness map down the two tags between the page and the player", async () => {
-    // A page writes <rr0-sighting>, and the map lives on a <rr0-ufo> two levels down that the page
-    // has never heard of. Both the attribute already on the tag when it upgrades and one set later
-    // have to arrive: the nested elements do not exist yet when the first is parsed.
-    const preset = mount()
-    preset.setAttribute("show-witness-map", "")
-    preset.witnessUrls = ["john.json"]
-    await new Promise(resolve => setTimeout(resolve, 0))
+  it("hands both player overlays down the two tags between the page and the player", async () => {
+    // A page writes <rr0-sighting>, and the map and the moments live on a <rr0-ufo> two levels down
+    // that the page has never heard of. Both the attributes already on the tag when it upgrades and
+    // those set later have to arrive: the nested elements do not exist yet when the first is parsed.
     const player = (element: SightingElement) =>
       element.shadowRoot!.querySelector("rr0-scene")!.shadowRoot!.querySelector("rr0-ufo")!
+
+    const preset = mount()
+    preset.setAttribute("show-witness-map", "")
+    preset.setAttribute("hide-milestones", "")
+    preset.witnessUrls = ["john.json"]
+    await new Promise(resolve => setTimeout(resolve, 0))
     expect(player(preset).hasAttribute("show-witness-map")).toBe(true)
+    expect(player(preset).hasAttribute("hide-milestones")).toBe(true)
 
     const later = await mounted()
-    expect(player(later).hasAttribute("show-witness-map")).toBe(false)
-    later.setAttribute("show-witness-map", "")
-    expect(player(later).hasAttribute("show-witness-map")).toBe(true)
-    later.removeAttribute("show-witness-map")
-    expect(player(later).hasAttribute("show-witness-map")).toBe(false)
+    for (const attribute of ["show-witness-map", "hide-milestones"]) {
+      expect(player(later).hasAttribute(attribute)).toBe(false)
+      later.setAttribute(attribute, "")
+      expect(player(later).hasAttribute(attribute)).toBe(true)
+      later.removeAttribute(attribute)
+      expect(player(later).hasAttribute(attribute)).toBe(false)
+    }
   })
 
   it("states the recording when the page asks with show-labels", async () => {

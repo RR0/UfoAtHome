@@ -11,9 +11,12 @@ export interface Demo {
    *
    * Per demo, not per page, because it is a fact about the RECONSTRUCTION and not about where it is
    * being shown: a case whose witness never moved and whose heading nobody recorded has a map with
-   * one pin and no cone on it, which is worth less than the room it takes. Socorro is the case this
-   * was built for — eleven hundred metres of road, and a witness who turns his back on the object
-   * to run.
+   * one pin and no cone on it, which is worth less than the room it takes. The two that carry it are
+   * the two that went somewhere — Socorro's eleven hundred metres of road, and an airliner crossing
+   * Alabama at night.
+   *
+   * It decides the map's STARTING state, not whether it exists: every reconstruction that states a
+   * place has the button (see WITNESS_MAP_ATTRIBUTE), and a reader can open one this list does not.
    */
   readonly witnessMap?: boolean
   readonly title: Said<string>
@@ -46,6 +49,7 @@ export class DemoCatalogue {
         {
           id: "chiles-whitted",
           src: "/demo-data/witness-chiles.json",
+          witnessMap: true,
           title: { en: "Chiles & Whitted, 1948", fr: "Chiles et Whitted, 1948" },
           blurb: {
             en: "Night over Alabama, 02:45. Two airline pilots described the same phenomenon differently — open it full size to switch witness.",

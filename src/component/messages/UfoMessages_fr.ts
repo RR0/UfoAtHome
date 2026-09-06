@@ -13,5 +13,7 @@ export const ufoMessages_fr: UfoMessages = {
   exitFullscreen: "Quitter le plein écran",
   showWitnessMap: "Voir où était le témoin",
   hideWitnessMap: "Masquer où était le témoin",
-  mapImageryUnavailable: "Vue aérienne indisponible"
+  mapImageryUnavailable: "Vue aérienne indisponible",
+  showMilestones: "Voir les moments du récit",
+  hideMilestones: "Masquer les moments du récit"
 }

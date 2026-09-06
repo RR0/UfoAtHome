@@ -93,22 +93,34 @@ vi.mock("../../src/render3d/WeatherAudio.js", () => ({
 }))
 
 beforeAll(() => {
-  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({
-    save: vi.fn(),
-    restore: vi.fn(),
-    beginPath: vi.fn(),
-    closePath: vi.fn(),
-    fill: vi.fn(),
-    ellipse: vi.fn(),
-    moveTo: vi.fn(),
-    lineTo: vi.fn(),
-    translate: vi.fn(),
-    rotate: vi.fn(),
-    clearRect: vi.fn(),
-    strokeRect: vi.fn(),
-    stroke: vi.fn(),
-    fillRect: vi.fn()
-  } as unknown as CanvasRenderingContext2D)
+  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockImplementation(function (this: HTMLCanvasElement) {
+    // mockImplementation, not mockReturnValue: a renderer that sizes itself from its own canvas
+    // (see WitnessMapRenderer) reads ctx.canvas, and one shared object makes every canvas claim to
+    // be the same one.
+    return {
+      canvas: this,
+      save: vi.fn(),
+      restore: vi.fn(),
+      beginPath: vi.fn(),
+      closePath: vi.fn(),
+      fill: vi.fn(),
+      ellipse: vi.fn(),
+      moveTo: vi.fn(),
+      lineTo: vi.fn(),
+      translate: vi.fn(),
+      rotate: vi.fn(),
+      clearRect: vi.fn(),
+      strokeRect: vi.fn(),
+      stroke: vi.fn(),
+      fillRect: vi.fn(),
+      arc: vi.fn(),
+      fillText: vi.fn(),
+      strokeText: vi.fn(),
+      drawImage: vi.fn(),
+      createRadialGradient: vi.fn(() => ({ addColorStop: vi.fn() })),
+      measureText: vi.fn((text: string) => ({ width: text.length * 5 })),
+    } as unknown as CanvasRenderingContext2D
+  })
   globalThis.fetch = vi.fn().mockResolvedValue({ arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)) }) as typeof fetch
   globalThis.ResizeObserver = class {
     observe(): void {}

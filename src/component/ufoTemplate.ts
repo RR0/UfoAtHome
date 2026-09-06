@@ -8,6 +8,7 @@ export const html = `
        button placed by its own right offset would have to hardcode the first one's width, and
        every language names them differently the moment either grows a label. -->
   <div class="corner-buttons" id="corner-buttons">
+    <button id="milestones" type="button" title="Named moments" aria-label="Named moments" aria-pressed="true" hidden>🔖</button>
     <button id="witness-map" type="button" title="Witness's position" aria-label="Witness's position" aria-pressed="false" hidden>🗺</button>
     <button id="fullscreen" type="button" title="Fullscreen" aria-label="Fullscreen">⛶</button>
   </div>
@@ -195,6 +196,9 @@ canvas[data-cursor="rotate"] {
 }
 /* Over the bar, and transparent to the pointer except on a mark itself — dragging the bar between
    two moments has to keep working. */
+.milestone-marks[hidden] {
+  display: none;
+}
 .milestone-marks {
   position: absolute;
   left: 0;
@@ -266,8 +270,8 @@ canvas[data-cursor="rotate"] {
   gap: 0.3em;
 }
 /* Same trap as .toolbar.hidden and .milestone-caption[hidden]: a class or rule that sets its own
-   display outranks the UA sheet's [hidden], and the map button is hidden for every recording that
-   states no coordinates — which is most of them. */
+   display outranks the UA sheet's [hidden], and both of these are hidden for the recordings that
+   have nothing for them to show — no coordinates, or no named moment. */
 .corner-buttons button[hidden] {
   display: none;
 }
