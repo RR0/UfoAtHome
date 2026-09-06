@@ -719,6 +719,26 @@ describe("SightingElement parameter labels", () => {
     expect(labels(element)).toEqual([])
   })
 
+  it("hands the witness map down the two tags between the page and the player", async () => {
+    // A page writes <rr0-sighting>, and the map lives on a <rr0-ufo> two levels down that the page
+    // has never heard of. Both the attribute already on the tag when it upgrades and one set later
+    // have to arrive: the nested elements do not exist yet when the first is parsed.
+    const preset = mount()
+    preset.setAttribute("show-witness-map", "")
+    preset.witnessUrls = ["john.json"]
+    await new Promise(resolve => setTimeout(resolve, 0))
+    const player = (element: SightingElement) =>
+      element.shadowRoot!.querySelector("rr0-scene")!.shadowRoot!.querySelector("rr0-ufo")!
+    expect(player(preset).hasAttribute("show-witness-map")).toBe(true)
+
+    const later = await mounted()
+    expect(player(later).hasAttribute("show-witness-map")).toBe(false)
+    later.setAttribute("show-witness-map", "")
+    expect(player(later).hasAttribute("show-witness-map")).toBe(true)
+    later.removeAttribute("show-witness-map")
+    expect(player(later).hasAttribute("show-witness-map")).toBe(false)
+  })
+
   it("states the recording when the page asks with show-labels", async () => {
     const element = await mounted(true)
     expect(element.shadowRoot!.getElementById("param-summary")!.hidden).toBe(false)

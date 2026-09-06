@@ -1418,6 +1418,14 @@ describe("the witness's own map", () => {
     }
   }
 
+  /** A player whose page has asked for the map — off by default, see WITNESS_MAP_ATTRIBUTE. */
+  function mountWithMap(sighting: object): UfoElement {
+    const element = mount()
+    element.setAttribute("show-witness-map", "")
+    element.sightingData = sighting as never
+    return element
+  }
+
   function mapParts(element: UfoElement) {
     const shadow = element.shadowRoot!
     return {
@@ -1430,17 +1438,30 @@ describe("the witness's own map", () => {
     document.body.innerHTML = ""
   })
 
-  it("is not offered for a recording that never said where it happened", () => {
-    // Most recordings in this project say nothing about coordinates, and a control that is always
-    // there and usually opens onto nothing is worse than one that appears when it has an answer.
+  it("is not offered at all until the page asks for it", () => {
+    // Off by default, unlike everything else this player shows. A recording with a full track and
+    // a heading still gets no button: a player dropped into an article is there to be watched, and
+    // the first thing a reader does with the map costs tile requests to a third party.
     const element = mount()
-    element.sightingData = { version: 1, timeline: { keyframes: [] } } as never
+    element.sightingData = movingWitness() as never
+    expect(mapParts(element).button.hidden).toBe(true)
+
+    element.setAttribute("show-witness-map", "")
+    expect(mapParts(element).button.hidden).toBe(false)
+
+    element.removeAttribute("show-witness-map")
+    expect(mapParts(element).button.hidden).toBe(true)
+  })
+
+  it("is not offered for a recording that never said where it happened, asked for or not", () => {
+    // Most recordings in this project say nothing about coordinates, and a control that is there
+    // and opens onto nothing is worse than one that appears when it has an answer.
+    const element = mountWithMap({ version: 1, timeline: { keyframes: [] } })
     expect(mapParts(element).button.hidden).toBe(true)
   })
 
   it("is offered as soon as a recording names one place, tracked or not", () => {
-    const element = mount()
-    element.sightingData = { version: 1, timeline: { keyframes: [] }, place: [{ lat: 34.05, lng: -106.89 }] } as never
+    const element = mountWithMap({ version: 1, timeline: { keyframes: [] }, place: [{ lat: 34.05, lng: -106.89 }] })
     expect(mapParts(element).button.hidden).toBe(false)
   })
 
@@ -1448,16 +1469,23 @@ describe("the witness's own map", () => {
     // These are real requests to a third party. A page listing a dozen case dossiers would fire
     // them all on load for maps nobody opened.
     const fetchSpy = vi.spyOn(globalThis, "fetch")
-    const element = mount()
-    element.sightingData = movingWitness() as never
+    const element = mountWithMap(movingWitness())
     expect(mapParts(element).panel.hidden).toBe(true)
     expect(fetchSpy).not.toHaveBeenCalled()
     fetchSpy.mockRestore()
   })
 
+  it("closes itself when the page withdraws the map it had opened", () => {
+    const element = mountWithMap(movingWitness())
+    mapParts(element).button.click()
+    expect(mapParts(element).panel.hidden).toBe(false)
+
+    element.removeAttribute("show-witness-map")
+    expect(mapParts(element).panel.hidden).toBe(true)
+  })
+
   it("opens and closes on the button, and says which it will do", () => {
-    const element = mount()
-    element.sightingData = movingWitness() as never
+    const element = mountWithMap(movingWitness())
     const { button, panel } = mapParts(element)
 
     button.click()
@@ -1473,8 +1501,7 @@ describe("the witness's own map", () => {
   it("closes itself when the recording it was showing is replaced by one with no place", () => {
     // A page playing several recordings in turn does exactly this. Leaving the panel up would show
     // the previous witness's ground under the new one's recording.
-    const element = mount()
-    element.sightingData = movingWitness() as never
+    const element = mountWithMap(movingWitness())
     mapParts(element).button.click()
     expect(mapParts(element).panel.hidden).toBe(false)
 

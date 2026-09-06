@@ -3,6 +3,7 @@ import { SightingFetch } from "../engine/net/SightingFetch.js"
 import { SightingSummary } from "./SightingSummary.js"
 import type { SummaryEntry } from "./SightingSummary.js"
 import { SceneElement, registerScene, SCENE_ELEMENT_NAME } from "./SceneElement.js"
+import { WITNESS_MAP_ATTRIBUTE } from "./UfoElement.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
 import type { People } from "../engine/model/People.js"
 import { HostLocale, selectLocale } from "../i18n/locale.js"
@@ -62,7 +63,7 @@ const APP_EDITOR_URL = `${APP_HOME_URL}/editor/`
  */
 export class SightingElement extends HTMLElement {
   static get observedAttributes(): string[] {
-    return ["src", "show-labels"]
+    return ["src", "show-labels", WITNESS_MAP_ATTRIBUTE]
   }
 
   private readonly shadow: ShadowRoot
@@ -125,6 +126,8 @@ export class SightingElement extends HTMLElement {
     // SightingEditorElement's constructor for why (an inline tag parsed from
     // template.content.cloneNode(true) isn't upgraded to its class instance yet at this point).
     this.sceneElement = document.createElement(SCENE_ELEMENT_NAME) as SceneElement
+    // Already-set attributes fired no callback: the scene did not exist when they were parsed.
+    this.forwardWitnessMapAttribute()
     this.shadow.getElementById("ufo-slot")!.replaceWith(this.sceneElement)
 
     this.toolbarElement = this.shadow.getElementById("toolbar")!
@@ -258,6 +261,16 @@ export class SightingElement extends HTMLElement {
     if (name === "show-labels") {
       this.applyLabels(this.hasAttribute("show-labels"))
     }
+    if (name === WITNESS_MAP_ATTRIBUTE) {
+      this.forwardWitnessMapAttribute()
+    }
+  }
+
+  /** Hands the page's request for the witness map down the stack it wrote none of — see
+   * SceneElement.forwardWitnessMapAttribute, which passes it on again to the player that owns the
+   * map. A page embedding `<rr0-sighting>` asks that tag and nothing else. */
+  private forwardWitnessMapAttribute(): void {
+    this.sceneElement.toggleAttribute(WITNESS_MAP_ATTRIBUTE, this.hasAttribute(WITNESS_MAP_ATTRIBUTE))
   }
 
   /** Fetches `url` and loads it — what the `src` attribute uses. Accepts either a witness

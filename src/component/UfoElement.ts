@@ -51,9 +51,24 @@ import type { UfoMessages } from "./messages/UfoMessages.js"
  */
 const EMPTY_SELECTION: ReadonlySet<string> = new Set()
 
+/**
+ * The attribute a page sets to offer the map of where the witness stood — absent, the button is not
+ * there at all.
+ *
+ * OFF BY DEFAULT, unlike everything else this element shows. A player dropped into an article is
+ * there to be watched, and the map is a second thing to read: it belongs on the pages that are
+ * ABOUT where a sighting happened — a case dossier, an editor — and not on every embed that happens
+ * to sit beside a paragraph. It also costs real tile requests to a third party the first time it is
+ * opened, which is not a page's to spend on a reader's behalf without saying so.
+ *
+ * Named the way `show-compass` and `show-labels` already are: a page deciding what its readers are
+ * offered.
+ */
+export const WITNESS_MAP_ATTRIBUTE = "show-witness-map"
+
 export class UfoElement extends HTMLElement {
   static get observedAttributes(): string[] {
-    return ["src"]
+    return ["src", WITNESS_MAP_ATTRIBUTE]
   }
 
   private readonly shadow: ShadowRoot
@@ -312,6 +327,9 @@ export class UfoElement extends HTMLElement {
   attributeChangedCallback(name: string, oldValue: string, newValue: string): void {
     if (name === "src" && newValue && newValue !== oldValue && this.isConnected) {
       void this.loadFromSrc(newValue)
+    }
+    if (name === WITNESS_MAP_ATTRIBUTE) {
+      this.updateWitnessMap()
     }
   }
 
@@ -1053,12 +1071,14 @@ export class UfoElement extends HTMLElement {
    * Offers the map only for a recording that actually states where it happened, and works out the
    * ground it will cover.
    *
-   * A recording with no coordinates gets no button at all rather than a button onto an empty map:
-   * most recordings in this project have none, and a control that is always there and usually
-   * useless is worse than one that appears when it has something to show.
+   * Two conditions, and both must hold: the page has to have asked for it (see
+   * WITNESS_MAP_ATTRIBUTE) and the recording has to state where it happened. A recording with no
+   * coordinates gets no button at all rather than a button onto an empty map — most recordings in
+   * this project have none, and a control that is always there and usually useless is worse than
+   * one that appears when it has something to show.
    */
   private updateWitnessMap(): void {
-    this.witnessPath = WitnessPath.of(this.currentSighting)
+    this.witnessPath = this.hasAttribute(WITNESS_MAP_ATTRIBUTE) ? WitnessPath.of(this.currentSighting) : undefined
     this.witnessMapButton.hidden = this.witnessPath === undefined
     if (!this.witnessPath) {
       this.setWitnessMapOpen(false)

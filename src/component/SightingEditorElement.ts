@@ -3,7 +3,7 @@ import { SightingFetch, SightingFetchError } from "../engine/net/SightingFetch.j
 import { html, css } from "./sightingEditorTemplate.js"
 import { SightingSummary } from "./SightingSummary.js"
 import type { SummaryEntry, SummaryGroup } from "./SightingSummary.js"
-import { UfoElement, registerUfo } from "./UfoElement.js"
+import { UfoElement, registerUfo, WITNESS_MAP_ATTRIBUTE } from "./UfoElement.js"
 import { SceneElement, registerScene, SCENE_ELEMENT_NAME } from "./SceneElement.js"
 import { Recorder } from "../engine/record/Recorder.js"
 import { RafSamplingClock } from "../engine/record/SamplingClock.js"
@@ -736,6 +736,12 @@ export class SightingEditorElement extends HTMLElement {
     // N/NE/E/SE/S/SO/O/NO reference labels on the horizon — useful while authoring a heading, not
     // meaningful in the plain playback case, so this is opt-in on SceneElement rather than always on.
     this.sceneElement.setAttribute("show-compass", "")
+    // And the map of where the witness stood, for the same reason and by the same rule: an author
+    // typing a latitude, a longitude and a heading is stating where somebody was and which way they
+    // faced, and the only way to see whether that is the right spot is to look at the ground. Opt-in
+    // everywhere else (see WITNESS_MAP_ATTRIBUTE — a page embedding a player has not asked for a
+    // second thing to read), on here, because this is the tool that writes those numbers.
+    this.sceneElement.setAttribute(WITNESS_MAP_ATTRIBUTE, "")
     // An author stating the weather has to be able to SEE it: a scene frozen until the recording
     // plays is a preview of nothing, and a recording with no duration yet cannot be played at all.
     // Replays keep the opposite rule — see SceneElement.syncAnimationsToPlayback.
