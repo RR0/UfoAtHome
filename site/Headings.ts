@@ -8,16 +8,19 @@
  * survives a page being reordered — but not a heading being reworded, which is the price of not
  * inventing opaque ones.
  *
- * WHOSE words, though, is the whole point: an anchor obeys the same rule as a path. `/editor/` is
- * the editor for everybody and which translation is served is decided on arrival, so
- * `#interpret-nothing` has to be that section for everybody too — otherwise a link shared by an
- * English reader lands a French one at the top of the page, and the French copy of a page cannot
- * even be linked to by someone who has only ever seen the English one. So the ids come from the
- * FALLBACK language's headings and every translation is given the same ones, position by position:
- * `ids` reads them off the reference copy, `withAnchors` spends them. Which also means a page's
- * translations must have the same headings in the same order — they are translations of each
- * other, so a mismatch is a bug, and the caller is expected to say so rather than quietly letting
- * the two drift apart.
+ * WHOSE words, though, is the whole point, and the answer is decided by what a link is for: one
+ * reader sending it to another. An anchor therefore obeys the same rule as a path (see `Layout`) —
+ * `#interpret-nothing` is that section for everybody, and the reader who opens it gets it in their
+ * own language. Slug the translated heading instead and the id becomes `#ne-pas-interpreter` in
+ * French: an English reader's link then drops a French one at the top of the page, a French
+ * reader's link is a dead fragment for an English one, and neither can name a section to the other
+ * at all.
+ *
+ * So the ids come from the FALLBACK language's headings and every translation is given the same
+ * ones, position by position: `ids` reads them off the reference copy, `withAnchors` spends them.
+ * Which also means a page's translations must have the same headings in the same order — they are
+ * translations of each other, so a mismatch is a bug, and the caller is expected to say so rather
+ * than quietly letting the two drift apart.
  *
  * A heading that already carries an id keeps it: an id written by hand is a promise made to
  * whatever links to it, and generated text must not break it. A heading INSIDE a link keeps its

@@ -7,15 +7,22 @@ import {
  * Wraps a page's own content in the site shell: head, header, footer.
  *
  * It owns the URL scheme, and the scheme has one rule: **an address does not depend on the
- * language it is read in.** `ufoathome.org/editor/` is the editor for everybody, and which
- * translation is served is decided on arrival. So there is one directory per page, holding
- * `index.html` (English, the fallback) beside `index_fr.html` — the sibling-file convention rr0.org
- * and cosmochrony.org already use — and every link on this site, in either language, points at the
- * directory.
+ * language it is read in.**
  *
- * The rule reaches past the path to the fragment: `#interpret-nothing` is that section for a
- * French reader as much as for an English one. See `anchors` for how, and `Headings` for why it
- * has to be that way round.
+ * The reason is what an address is FOR — one reader handing it to another. An English reader must
+ * be able to send a link to a French one and have them arrive at that page in French, and the
+ * other way round. So an address cannot carry a language: the moment it does, the sender decides
+ * what language the recipient reads in, and the two of them no longer have one thing to point at.
+ *
+ * So `ufoathome.org/editor/` is the editor for everybody, and which translation is served is
+ * decided on arrival. One directory per page, holding `index.html` (English, the fallback) beside
+ * `index_fr.html` — the sibling-file convention rr0.org and cosmochrony.org already use — and every
+ * link on this site, in either language, points at the directory.
+ *
+ * The same reason carries the rule past the path and into the fragment: two people discussing one
+ * section have to be able to name it to each other, so `#interpret-nothing` is that section for a
+ * French reader as much as for an English one. See `anchors` for how, and `Headings` for why the
+ * ids have to come from the fallback language rather than from each translation.
  */
 export class Layout {
 

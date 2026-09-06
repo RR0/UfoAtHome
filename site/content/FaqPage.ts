@@ -259,6 +259,9 @@ export class FaqPage implements SitePage {
         preferences with English as the fallback. Adding a language means adding one typed messages
         module per component — no markup changes, no build configuration. It is one of the easiest
         contributions to make.</p>
+      <p>There is no language picker, and that is the point: an address carries no language, so a
+        link you send is read by whoever opens it in <em>theirs</em>. Send someone in Lyon a section
+        of this page and they arrive at that same section, in French.</p>
     </div>
 
     <div class="faq-item">
@@ -526,6 +529,10 @@ export class FaqPage implements SitePage {
         votre navigateur, avec l'anglais en repli. Ajouter une langue consiste à ajouter un module de
         messages typé par composant — sans toucher au balisage ni à la configuration de compilation.
         C'est l'une des contributions les plus faciles à apporter.</p>
+      <p>Il n'y a pas de sélecteur de langue, et c'est tout l'intérêt : une adresse ne porte aucune
+        langue, si bien qu'un lien que vous envoyez se lit dans celle de <em>qui l'ouvre</em>.
+        Envoyez une section de cette page à quelqu'un à Londres : il arrive à cette même section,
+        en anglais.</p>
     </div>
 
     <div class="faq-item">
