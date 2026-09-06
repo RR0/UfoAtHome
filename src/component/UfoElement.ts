@@ -1186,7 +1186,10 @@ export class UfoElement extends HTMLElement {
 
   private setWitnessMapOpen(open: boolean): void {
     this.witnessMapPanel.hidden = !open
-    this.witnessMapPanel.title = this.messages.hideWitnessMap
+    // No native title on the panel: it said "hide the map", which stopped being true the moment a
+    // click started going somewhere instead of closing it — and a browser tooltip would in any case
+    // fight the map's own, which names whatever mark the pointer is actually on.
+    this.witnessMapPanel.removeAttribute("title")
     this.witnessMapButton.setAttribute("aria-pressed", String(open))
     this.updateWitnessMapButton()
     if (!open) return
@@ -1346,7 +1349,8 @@ export class UfoElement extends HTMLElement {
       imagery: this.witnessMapImagery,
       path: this.witnessPath,
       position: pose?.lat !== undefined && pose.lng !== undefined ? { lat: pose.lat, lng: pose.lng } : undefined,
-      headingDeg: pose?.headingDeg,
+      // Where the VIEW points, not merely where the record says he faced — see WitnessMapFrame.
+      headingDeg: pose?.headingDeg === undefined ? undefined : pose.headingDeg + this.lookYawDeg,
       // The instrument's real field, through its own projection — the wedge is only evidence if it
       // is the wedge this device actually took in. See ImageProjection.halfWidthAngleDeg.
       coneHalfAngleDeg: pose
@@ -1446,6 +1450,8 @@ export class UfoElement extends HTMLElement {
     if (yawDeg === this.lookYawDeg && pitchDeg === this.lookPitchDeg) return
     this.lookYawDeg = yawDeg
     this.lookPitchDeg = pitchDeg
+    // refresh() repaints both the picture and the map, which is what keeps the cone pointing where
+    // the picture is actually looking.
     this.refresh()
   }
 

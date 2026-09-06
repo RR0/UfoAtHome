@@ -55,9 +55,19 @@ export interface WitnessMapFrame {
   /** Where the witness is at the playhead — absent only for a recording whose track has coordinates
    * at some times and not at this one. */
   position?: { lat: number; lng: number }
-  /** Which way they were facing, degrees clockwise from true north. Undefined means the recording
-   * never said, and then NO cone is drawn — a cone pointing north at a witness who was never asked
-   * which way they looked would be the map inventing the one thing it is being consulted about. */
+  /**
+   * Which way the VIEW is pointing, degrees clockwise from true north — the witness's own heading,
+   * plus however far a reader has since turned to look at something (see SceneElement.lookToward).
+   *
+   * The view rather than the record, because the map's job is to explain the picture beside it: a
+   * cone still aimed where the witness looked while the picture shows somewhere else would have the
+   * two disagree, and the reader has no way to tell which is lying. They coincide until somebody
+   * turns the view, which is most of the time.
+   *
+   * Undefined means the recording never said, and then NO cone is drawn — a cone pointing north at
+   * a witness who was never asked which way they looked would be the map inventing the one thing it
+   * is being consulted about.
+   */
   headingDeg?: number
   /** Half of what the instrument takes in across, degrees of azimuth — see
    * ImageProjection.halfWidthAngleDeg. */
