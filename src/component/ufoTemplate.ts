@@ -307,9 +307,12 @@ canvas[data-cursor="rotate"] {
   border-radius: 3px;
   overflow: hidden;
   background: rgba(0, 0, 0, 0.55);
-  /* The recording underneath stays clickable through it: this is something to look at, not
-     something to operate. */
-  pointer-events: none;
+  /* A click anywhere on it closes it. The map covers a corner of the picture it is about, so the
+     gesture a reader reaches for once they have read it is "get this out of my way" — and having
+     to find the small button that opened it is a worse answer than putting the whole panel under
+     the pointer. The recording underneath no longer takes that click, which is the trade: play/
+     pause is a button, a bar, a keypress and the rest of the canvas. */
+  cursor: pointer;
 }
 .witness-map-panel[hidden] {
   display: none;

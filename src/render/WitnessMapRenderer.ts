@@ -94,7 +94,17 @@ export class WitnessMapRenderer {
    * in an article: a mark that would be discreet on a full-screen map is a speck here, and the
    * letter inside it has to be readable at a glance or the moments may as well not be on the map.
    */
-  private static readonly MARKER_RADIUS_PX = 10
+  private static readonly MARKER_RADIUS_PX = 8.5
+  /**
+   * How close the witness has to be to a named moment's own point to count as STANDING ON it —
+   * METRES, not pixels, so the answer does not change with the zoom a recording happens to get.
+   *
+   * About a person's own footprint. The ring says "he is at this moment", and testing it against
+   * the marker's drawn radius kept it up for as long as the dot was still inside the disc — a
+   * second or two of him plainly walking away, and through the whole of a run at Socorro, where
+   * fifteen metres is barely two pixels. Leaving a moment should look like leaving it, at once.
+   */
+  private static readonly ON_MARKER_M = 3
 
   constructor(private readonly ctx: CanvasRenderingContext2D) {}
 
@@ -185,7 +195,7 @@ export class WitnessMapRenderer {
     for (const object of frame.decor) {
       const at = this.toCanvas(frame.bounds, object.lat, object.lng)
       ctx.beginPath()
-      ctx.rect(at.x - 4, at.y - 4, 8, 8)
+      ctx.rect(at.x - 3.5, at.y - 3.5, 7, 7)
       ctx.fillStyle = "rgba(120, 220, 255, 0.85)"
       ctx.fill()
       ctx.lineWidth = 1.5
@@ -197,7 +207,7 @@ export class WitnessMapRenderer {
       const angle = ((object.headingDeg - 90) * Math.PI) / 180
       ctx.beginPath()
       ctx.moveTo(at.x, at.y)
-      ctx.lineTo(at.x + Math.cos(angle) * 12, at.y + Math.sin(angle) * 12)
+      ctx.lineTo(at.x + Math.cos(angle) * 10, at.y + Math.sin(angle) * 10)
       ctx.lineWidth = 3
       ctx.strokeStyle = "rgba(0, 0, 0, 0.6)"
       ctx.stroke()
@@ -304,17 +314,22 @@ export class WitnessMapRenderer {
    * on one every time the recording reaches it; a filled dot there covered the very letter that
    * says which moment it is. Ringing the marker instead says both things at once: this is where
    * they are, and this is what was happening.
+   *
+   * "Standing on" means the same PLACE, within a few metres, not merely inside the marker's disc
+   * — see ON_MARKER_M.
+   * The moment itself stays current long after he has left its spot (that is what a milestone is,
+   * held until the next), so distance is the only thing that can say he has moved off it.
    */
   private paintWitness(frame: WitnessMapFrame, position: { lat: number; lng: number }): void {
     const { ctx } = this
     const at = this.toCanvas(frame.bounds, position.lat, position.lng)
     const onMarker = frame.markers.some(marker => {
       if (!marker.current) return false
-      const markerAt = this.toCanvas(frame.bounds, marker.lat, marker.lng)
-      return Math.hypot(markerAt.x - at.x, markerAt.y - at.y) <= WitnessMapRenderer.MARKER_RADIUS_PX
+      const away = geoToLocalMeters(marker.lat, marker.lng, position.lat, position.lng)
+      return Math.hypot(away.x, away.z) <= WitnessMapRenderer.ON_MARKER_M
     })
     ctx.beginPath()
-    ctx.arc(at.x, at.y, onMarker ? WitnessMapRenderer.MARKER_RADIUS_PX + 3 : 6.5, 0, Math.PI * 2)
+    ctx.arc(at.x, at.y, onMarker ? WitnessMapRenderer.MARKER_RADIUS_PX + 2.5 : 5.5, 0, Math.PI * 2)
     if (!onMarker) {
       ctx.fillStyle = "#ff5a3c"
       ctx.fill()

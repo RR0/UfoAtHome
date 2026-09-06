@@ -1499,6 +1499,17 @@ describe("the witness's own map", () => {
     fetchSpy.mockRestore()
   })
 
+  it("closes on a click anywhere on the map itself", () => {
+    // The map covers a corner of the picture it is about, so once a reader has read it the thing
+    // they reach for is "get this out of my way" — not the small button that opened it.
+    const element = mountWithMap(movingWitness())
+    const { panel } = mapParts(element)
+    expect(panel.hidden).toBe(false)
+
+    panel.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    expect(panel.hidden).toBe(true)
+  })
+
   it("opens and closes on the button, and says which it will do", () => {
     const element = mount()
     element.sightingData = movingWitness() as never

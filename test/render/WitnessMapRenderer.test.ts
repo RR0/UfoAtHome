@@ -132,6 +132,20 @@ describe("WitnessMapRenderer", () => {
     expect(letters).toEqual(["F", "E"])
   })
 
+  it("goes back to a plain dot the moment it leaves a named moment's own spot", () => {
+    // The moment stays CURRENT long after he has left its spot — that is what a milestone is, held
+    // until the next one — so only distance can say he has moved off it. Testing against the
+    // marker's own radius kept the ring up while he was plainly walking away inside the disc.
+    const { frame, context } = frameWith({
+      // Fifteen metres north of the marker — Zamora's own run — which at this map's scale is
+      // barely two pixels and sits well inside the disc drawn for the moment.
+      markers: [{ label: "E", lat: CENTER.lat - 0.000135, lng: CENTER.lng, current: true }]
+    })
+    new WitnessMapRenderer(context as unknown as CanvasRenderingContext2D).paint(frame)
+    const marks = context.arcs.filter(a => a.radius < 20).map(a => a.radius)
+    expect(Math.max(...marks)).toBeLessThan(9) // the marker itself, no ring around the witness
+  })
+
   it("rings the moment it is standing on instead of covering its letter", () => {
     // A milestone IS a moment of the witness's own account, so the playhead lands exactly on one
     // every time the recording reaches it — and a filled dot there hid the letter naming it.

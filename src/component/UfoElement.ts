@@ -312,6 +312,9 @@ export class UfoElement extends HTMLElement {
     this.fullscreenButton.addEventListener("click", () => this.toggleFullscreen())
     this.witnessMapButton.addEventListener("click", () => this.toggleWitnessMap())
     this.milestonesButton.addEventListener("click", () => this.toggleMilestones())
+    // See the panel's own CSS: reading it is the whole interaction, so closing it is the only thing
+    // left to want from it.
+    this.witnessMapPanel.addEventListener("click", () => this.setWitnessMapOpen(false))
     this.seekInput.addEventListener("input", () => this.player.seek(Number(this.seekInput.value)))
     this.canvas.addEventListener("click", event => {
       if (!this.enableClickToPlay) return
@@ -1111,6 +1114,7 @@ export class UfoElement extends HTMLElement {
 
   private setWitnessMapOpen(open: boolean): void {
     this.witnessMapPanel.hidden = !open
+    this.witnessMapPanel.title = this.messages.hideWitnessMap
     this.witnessMapButton.setAttribute("aria-pressed", String(open))
     this.updateWitnessMapButton()
     if (!open) return
