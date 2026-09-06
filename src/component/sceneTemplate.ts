@@ -21,7 +21,16 @@ export const css = `
 .stage {
   position: relative;
   width: 100%;
-  height: 100%;
+  /* AUTO, with the aspect ratio deciding the height — never a percentage.
+     A percentage height resolves against a parent whose own height this box is producing, and that
+     cycle does not always settle the same way: in a page column 585 px wide it came out 851 px tall
+     on rr0.org's case dossiers and 329 px in a bare page of the same width, from the same CSS. A
+     portrait box for a 16:9 recording, with the overlay stretched two and a half times vertically
+     over a 3D scene that had correctly reshaped itself to match. The ratio alone has no cycle to
+     settle: the width is definite, so the height follows from it.
+     The two places a real height IS imposed override this below — fullscreen, and (in
+     ufoTemplate) an overlay stretched over an outer stage by inset:0. */
+  height: auto;
   aspect-ratio: 640 / 360;
   display: flex;
   align-items: center;
