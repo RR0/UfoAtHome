@@ -133,7 +133,21 @@ export class UfoElement extends HTMLElement {
   private witnessMapImageryRequested = false
   /** The licence line the map has to carry — the provider's own while its tiles are shown, and what
    * says they are missing when they are not. */
-  private witnessMapAttribution?: string
+  private witnessMapImageryCredit?: string
+  /** Whether the tiles were asked for and did not come. Kept apart from the credit above because
+   * they are different kinds of line: one is a licence somebody is owed, the other is the map
+   * saying what it is missing. Only the first can be moved somewhere else. */
+  private witnessMapImageryFailed = false
+  /**
+   * Set by a composing element that shows the licence line somewhere of its own — see
+   * `<rr0-sighting>`, which lists it among the credits in its info panel.
+   *
+   * The licence has to be shown, not shown TWICE. A map whose 8-pixel footer repeats what the panel
+   * beside it already says is spending the reader's smallest text on the one line they can read
+   * elsewhere, and covering ground they came to look at. What stays on the map either way is
+   * "aerial imagery unavailable": that is not a credit, it is the map explaining itself.
+   */
+  creditShownExternally = false
   /** Whether the account's named moments are being shown — see MILESTONES_ATTRIBUTE. On unless a
    * page or a reader says otherwise, which is what a recording that took the trouble to name its
    * moments deserves. */
@@ -1144,7 +1158,8 @@ export class UfoElement extends HTMLElement {
     if (!this.witnessMapBounds || !this.sameGround(this.witnessMapBounds, bounds)) {
       this.witnessMapBounds = bounds
       this.witnessMapImagery = undefined
-      this.witnessMapAttribution = undefined
+      this.witnessMapImageryCredit = undefined
+      this.witnessMapImageryFailed = false
       this.witnessMapImageryRequested = false
       if (!this.witnessMapPanel.hidden) void this.loadWitnessMapImagery()
     }
@@ -1188,11 +1203,30 @@ export class UfoElement extends HTMLElement {
       // than painting no ground at all.
       if (this.witnessMapBounds !== bounds) return
       this.witnessMapImagery = imagery
-      this.witnessMapAttribution = provider.attribution
+      this.witnessMapImageryCredit = provider.attribution
     } catch {
-      this.witnessMapAttribution = this.messages.mapImageryUnavailable
+      this.witnessMapImageryFailed = true
     }
     this.paintWitnessMap(this.currentTime)
+  }
+
+  /**
+   * What the imagery provider's licence requires be shown wherever its tiles are — undefined until
+   * a map has actually fetched some.
+   *
+   * Public so a composing element can put it where a reader will find it (see
+   * `<rr0-sighting>`'s credits, and creditShownExternally, which is how this element then stops
+   * printing it over the map itself).
+   */
+  get witnessMapCredit(): string | undefined {
+    return this.witnessMapImageryCredit
+  }
+
+  /** The line along the bottom of the map: the licence where nowhere else carries it, and the
+   * missing-imagery note either way. */
+  private get witnessMapFooterLine(): string | undefined {
+    if (this.witnessMapImageryFailed) return this.messages.mapImageryUnavailable
+    return this.creditShownExternally ? undefined : this.witnessMapImageryCredit
   }
 
   /** Matches the drawing surface to the size CSS gave the panel, at the display's own pixel
@@ -1238,7 +1272,7 @@ export class UfoElement extends HTMLElement {
       markers,
       decor: this.witnessMapDecorAt(t),
       nightFraction: this.witnessMapNightFraction,
-      attribution: this.witnessMapAttribution
+      attribution: this.witnessMapFooterLine
     })
   }
 

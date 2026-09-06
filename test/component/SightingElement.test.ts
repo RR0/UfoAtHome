@@ -731,6 +731,38 @@ describe("SightingElement parameter labels", () => {
     expect(labels(element)).toEqual([])
   })
 
+  it("brings the button it hangs off into view before opening, so the panel can be read", async () => {
+    // The panel sizes itself to the room its anchor leaves. An anchor scrolled half out of the
+    // window offers a region running past the bottom of it, and the panel then hangs off the screen
+    // with nothing to scroll — its own box was never overfull, only partly invisible, which is how
+    // a long description became unreachable.
+    const element = await mounted()
+    const button = element.shadowRoot!.getElementById("info-button")!
+    const scrolled: unknown[] = []
+    button.getBoundingClientRect = () => ({ top: 900, bottom: 1200, left: 0, right: 0, width: 0, height: 300 }) as DOMRect
+    button.scrollIntoView = (...args: unknown[]) => scrolled.push(args)
+
+    button.click()
+    expect(scrolled).toHaveLength(1)
+
+    // And nothing at all for a button the reader could already see, which is nearly every click.
+    scrolled.length = 0
+    button.getBoundingClientRect = () => ({ top: 10, bottom: 40, left: 0, right: 0, width: 0, height: 30 }) as DOMRect
+    button.click()
+    button.click()
+    expect(scrolled).toHaveLength(0)
+  })
+
+  it("takes the map's licence line off the map, because this element has a credits list", async () => {
+    // The licence has to be shown, not shown twice. This element has an info panel with credits in
+    // it, so the map need not print the same words over the ground in 8-pixel type.
+    const element = await mounted()
+    const player = element.shadowRoot!.querySelector("rr0-scene")!.shadowRoot!.querySelector("rr0-ufo")! as unknown as {
+      creditShownExternally: boolean
+    }
+    expect(player.creditShownExternally).toBe(true)
+  })
+
   it("hands both player overlays down the two tags between the page and the player", async () => {
     // A page writes <rr0-sighting>, and the map and the moments live on a <rr0-ufo> two levels down
     // that the page has never heard of. Both the attributes already on the tag when it upgrades and

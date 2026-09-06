@@ -128,6 +128,9 @@ export class SightingElement extends HTMLElement {
     this.sceneElement = document.createElement(SCENE_ELEMENT_NAME) as SceneElement
     // Already-set attributes fired no callback: the scene did not exist when they were parsed.
     this.forwardPlayerAttributes()
+    // This element has an info panel with a credits list in it, so the map need not print its own
+    // licence over the ground in 8-pixel type — see UfoElement.creditShownExternally.
+    this.sceneElement.ufoElement.creditShownExternally = true
     this.shadow.getElementById("ufo-slot")!.replaceWith(this.sceneElement)
 
     this.toolbarElement = this.shadow.getElementById("toolbar")!
@@ -172,7 +175,9 @@ export class SightingElement extends HTMLElement {
       this.infoButton.setAttribute("popovertarget", "info-panel")
       this.infoPanel.addEventListener("beforetoggle", event => {
         // Filled in before it becomes visible, never after — no flash of the previous witness.
-        if ((event as ToggleEvent).newState === "open") this.populateInfoPanel()
+        if ((event as ToggleEvent).newState !== "open") return
+        this.populateInfoPanel()
+        this.bringInfoButtonIntoView()
       })
       this.infoPanel.addEventListener("toggle", event => this.syncInfoOpen((event as ToggleEvent).newState === "open"))
     } else {
@@ -517,6 +522,7 @@ export class SightingElement extends HTMLElement {
       else if (!open && showing) this.infoPanel.hidePopover()
       return // the toggle event syncs the rest
     }
+    if (open) this.bringInfoButtonIntoView()
     this.syncInfoOpen(open)
     this.infoPanel.hidden = !open
     if (open) {
@@ -536,6 +542,27 @@ export class SightingElement extends HTMLElement {
   /** Brings this element's own state in line with whether the panel is open — driven BY the panel
    * on the popover path (it can be closed by Escape or a click anywhere outside, neither of which
    * goes through any code of ours), and by toggleInfoPanel itself otherwise. */
+  /**
+   * Scrolls the "?" button fully into view before its panel opens.
+   *
+   * The panel sizes itself to the room its own anchor leaves (`max-height: stretch`, see the
+   * template) — and a partly-scrolled-out anchor offers a region that runs past the bottom of the
+   * window. The panel then hangs off the screen with nothing to scroll: its box was never overfull,
+   * only partly invisible, which is exactly how a long description became unreachable. Put the
+   * anchor where it can be measured and the same rules do the right thing on their own.
+   *
+   * Nothing when the button is already fully visible, which is nearly always — a reader clicking it
+   * had to see it. It is the other ways in that need this: a page opening the panel from script, a
+   * keyboard user arriving on the button from a shortcut, a click that also moved the page under
+   * itself.
+   */
+  private bringInfoButtonIntoView(): void {
+    const rect = this.infoButton.getBoundingClientRect()
+    const viewportHeight = window.innerHeight || document.documentElement.clientHeight
+    if (rect.top >= 0 && rect.bottom <= viewportHeight) return
+    this.infoButton.scrollIntoView({ block: "center" })
+  }
+
   private syncInfoOpen(open: boolean): void {
     if (open === this.infoOpen) return
     this.infoOpen = open
@@ -761,6 +788,16 @@ export class SightingElement extends HTMLElement {
     if (terrainAttribution) {
       const item = document.createElement("li")
       item.textContent = terrainAttribution
+      this.infoCreditsList.appendChild(item)
+    }
+    // The witness map's own tiles, once a reader has opened it and they have arrived — the same
+    // licence, owed for a second use of the same service. Skipped when the terrain's line already
+    // carries those words: the ground patch and the map are normally drawn from the same provider,
+    // and a credits list that says one thing twice reads as a bug rather than as diligence.
+    const mapCredit = this.sceneElement.ufoElement.witnessMapCredit
+    if (mapCredit && !terrainAttribution?.includes(mapCredit)) {
+      const item = document.createElement("li")
+      item.textContent = mapCredit
       this.infoCreditsList.appendChild(item)
     }
     // Every 3D model currently standing in the decor, each named with its author and licence — the
