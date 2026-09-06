@@ -5,7 +5,7 @@
   "description": "UFO@home — record and replay a UFO sighting's shape, movement and appearance",
   "author": "Jérôme Beau <rr0@rr0.org> (https://rr0.org)",
   "license": "MIT",
-  "homepage": "https://github.com/RR0/UfoAtHome#readme",
+  "homepage": "https://ufoathome.org",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/RR0/UfoAtHome.git"

@@ -26,9 +26,12 @@ follow-up, not implemented yet. `<rr0-sighting>` (renamed from `<rr0-ufo-witness
 way to display any real sighting, whether it has one witness or several: a witness account always implies a real
 place and time, so it always composes `<rr0-scene>`, never a bare `<rr0-ufo>`.
 
-See the [Wiki](https://github.com/RR0/UfoAtHome/wiki) for the project's history, and a live example embedded in
-[rr0.org's UFO@home page](https://rr0.org/science/crypto/ufo/enquete/projet/UfoAtHome.html) and in its
-[Chiles-Whitted case reconstruction](https://rr0.org/science/crypto/ufo/enquete/dossier/ChilesWhitted/index.html).
+The project's own site is **[ufoathome.org](https://ufoathome.org)**: [the demos](https://ufoathome.org/demos/)
+(every reconstruction running side by side, including the same sighting through three different instruments),
+[the player](https://ufoathome.org/player/) for any recording you can give it an address for,
+[the editor](https://ufoathome.org/editor/), and [the documentation](https://ufoathome.org/docs/) — which quotes a
+whole recording file and hands out the two lines that embed one. See the
+[Wiki](https://github.com/RR0/UfoAtHome/wiki) for the project's history.
 
 ## Install
 
@@ -138,18 +141,18 @@ this heavier authoring component.
 ```
 
 With `src`, the editor opens on an existing recording instead of an empty canvas — the same
-attribute the three other elements take. That is what makes an editor URL per observation possible:
-rr0.org's own editor page maps its `?sighting=` parameter onto it, and
-[ufoathome.org](https://ufoathome.org) redirects any path it is given into that parameter, so
+attribute the three other elements take. That is what makes an address per observation possible:
+[ufoathome.org's editor](https://ufoathome.org/editor/) maps its own `?sighting=` parameter onto
+this attribute, and [its player](https://ufoathome.org/player/) does the same for read-only replay.
+Any path the site does not otherwise serve becomes that parameter, so
 
-- `https://ufoathome.org/science/crypto/ufo/enquete/dossier/Socorro/sighting.json`, or simply
-- `https://ufoathome.org/Socorro` for a case dossier of that site (a value with no `/` is expanded
-  to `/science/crypto/ufo/enquete/dossier/<name>/sighting.json`),
+- `https://ufoathome.org/player/?sighting=/demo-data/witness-socorro.json`, or simply
+- `https://ufoathome.org/Socorro`
 
-opens that observation for editing. The page only accepts recordings from its own origin: a shared
-link must not be able to display a recording fabricated elsewhere inside an rr0.org page. To load
-one from anywhere else, use the editor's own **Load from URL** field, which is an explicit gesture
-by whoever is sitting at the keyboard.
+open that observation. A bare name with no `/` is looked for among the site's own demos first, then
+as an rr0.org case directory — the shape the links that predate that site were written in, kept
+working. Either page also takes a full address of your own; the editor additionally has a
+**Load from URL** field, which is an explicit gesture by whoever is sitting at the keyboard.
 
 Usage: click **Record**, move the pointer over the canvas to draw the UFO's path, click **Stop**, then **Play** to
 replay it. The nested `<rr0-ufo>`'s `enableClickToPlay` is set to `false` here — a completed recording drag also
@@ -400,14 +403,17 @@ fold-outs on the right, both closed until asked for:
   replay (`<rr0-sighting>`) or as the editor (`<rr0-sighting-editor>`), with absolute URLs and a copy button:
 
   ```html
-  <script type="module" src="https://rr0.org/science/crypto/ufo/rr0-sighting.mjs"></script>
-  <rr0-sighting src="https://rr0.org/science/crypto/ufo/enquete/dossier/Socorro/sighting.json"></rr0-sighting>
+  <script type="module" src="https://ufoathome.org/lib/rr0-sighting.mjs"></script>
+  <rr0-sighting src="https://ufoathome.org/demo-data/witness-socorro.json"></rr0-sighting>
   ```
 
   The script URL is derived from where the running bundle was itself loaded from (`import.meta.url`), never
   hardcoded, so a snippet generated from a local or staging copy points back at that copy. Pasting it into a site
-  of your own needs the bundle and the recording to be readable cross-origin (rr0.org serves
-  `/science/crypto/ufo/*` with `Access-Control-Allow-Origin: *` for exactly this).
+  of your own needs the bundle and the recording to be readable cross-origin (ufoathome.org serves `/lib/*` and
+  `/demo-data/*` with `Access-Control-Allow-Origin: *` for exactly this). The four entry modules under `/lib` are
+  revalidated on every visit rather than cached for a week, because their names carry no content hash: a page that
+  kept last release's component in front of this release's recording is a page showing `[object Object]` where the
+  account should be.
 - **Credits** reveals third-party credits (the live terrain imagery attribution, once a real relief patch has
   resolved, plus the bundled thunder sound's own required attribution — see [`CREDITS.md`](CREDITS.md)).
 
