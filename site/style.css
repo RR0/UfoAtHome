@@ -241,6 +241,11 @@ section.band:first-of-type { border-top: 0; }
 .card h3 { margin: 0 0 0.35rem; font-size: 1.05rem; }
 .card p { margin: 0; font-size: 0.92rem; color: var(--ink-dim); }
 .card p + p { margin-top: 0.6rem; }
+/* The way out of a card and into the page that carries its detail. Same role as `.use-more` on the
+   two big cards above, and the same colour, but a card is not itself a link — so the anchor is. */
+.card-more { color: var(--glow); font-weight: 600; }
+.card-more a { color: inherit; text-decoration: none; }
+.card-more a:hover { text-decoration: underline; }
 
 /* ------------------------------------------------------- the two things to do with it */
 

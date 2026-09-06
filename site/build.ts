@@ -14,6 +14,7 @@ import { DocsComponentsPage } from "./content/DocsComponentsPage.js"
 import { COMPONENT_DOCS, DocsComponentPage } from "./content/DocsComponentPage.js"
 import { FaqPage } from "./content/FaqPage.js"
 import { RoadmapPage } from "./content/RoadmapPage.js"
+import { SourcesPage } from "./content/SourcesPage.js"
 
 /**
  * Builds ufoathome.org into `dist-site/`.
@@ -57,7 +58,9 @@ class SiteBuilder {
       new DocsCreatePage(example.trim()), new DocsSharePage(), new DocsComponentsPage(),
       // One page per component, under that hub — see DocsComponentPage.
       ...COMPONENT_DOCS.map(doc => new DocsComponentPage(doc)),
-      new FaqPage(), new RoadmapPage()
+      new FaqPage(), new RoadmapPage(),
+      // The long form of the home page's "everything else is looked up or computed" cards.
+      new SourcesPage()
     ]
     const layout = new Layout(this.pages, version)
 

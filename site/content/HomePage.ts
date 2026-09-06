@@ -220,66 +220,53 @@ ${carousel}
     <div class="cards">
       <div class="card">
         <h3>The sky</h3>
-        <p>Sun, Moon and its phase, planets, a star catalogue down to magnitude 7.5 — positioned for
-          that instant and that latitude. What is drawn from it stops at 6.5, and that number is a fact
-          about a <em>witness</em> rather than about the sky: it is how faint a dark-adapted human
-          eye goes. Point something else at the same night and the threshold moves with it — see
-          the instrument, below — and so does the catalogue: 57 688 more stars, down to magnitude 9,
-          are fetched only by a recording whose own optics reach that far, so a witness's sky still
-          costs 400 kB. Past 9 the data itself stops, and the tool says so rather than drawing an
-          emptier sky than the photograph held. The Milky Way and the zodiacal light are integrated along
-          the line of sight, not painted as a texture. Point at any of it and it names itself:
-          “Venus, mag −4, 8° above the horizon”.</p>
+        <p>Sun, Moon and its phase, planets, stars, the Milky Way and the zodiacal light, placed by
+          ephemeris for that instant and that place. What is drawn stops where the eye that was
+          looking stopped — and where the data itself stops, the tool says so rather than drawing a
+          sky emptier than the night was. Point at any of it and it names itself.</p>
+        <p class="card-more"><a href="/sources/#sky">Down to which magnitude →</a></p>
       </div>
       <div class="card">
         <h3>What else was up there</h3>
-        <p>Comets at their own apparition, meteor showers with their radiant and rate over a
-          sporadic background, satellites with the Earth's shadow worked out to say whether one
-          could have been lit at all.</p>
+        <p>Comets, meteor showers, satellites — each drawn only if it could have been visible from
+          there, then. Being lit is not the same as being seen, and the Earth's shadow settles that
+          one.</p>
+        <p class="card-more"><a href="/sources/#space">How each is decided →</a></p>
       </div>
       <div class="card">
         <h3>Ice and water</h3>
-        <p>22° and 46° haloes, sundogs, pillars, tangent and circumzenithal arcs — every angle
-          derived from ice's refractive index, none of them stored. Rainbows and moonbows traced
-          through a spherical drop.</p>
+        <p>Haloes, sundogs, pillars, tangent and circumzenithal arcs, rainbows and moonbows. Not one
+          of those angles is stored: they come out of ice's refractive index and the shape of a
+          drop, which is what keeps the whole display consistent with the Sun that made it.</p>
+        <p class="card-more"><a href="/sources/#ice">Which ones, and from what →</a></p>
       </div>
       <div class="card">
         <h3>The weather that day</h3>
-        <p>Cloud cover, cloud base, rain, snow, storms, wind — read from ERA5, the ECMWF reanalysis,
-          hourly and worldwide from 1940 on. The exact query is kept in the file, so the claim stays
-          checkable decades later.</p>
+        <p>Cloud, rain, snow, storms and wind, read from a worldwide hourly reanalysis going back to
+          1940 — and keyframed along the observation, so a sky that cleared, clears. The exact query
+          stays in the file: the claim is checkable decades later.</p>
+        <p class="card-more"><a href="/sources/#weather">Which record, and what it gives →</a></p>
       </div>
       <div class="card">
         <h3>The ground</h3>
         <p>Real relief and aerial imagery around the witness, and the decor that got in the way:
-          buildings, trees, streetlights, vehicles, windows, other witnesses — with their lights,
-          their flash rates and their tracks.</p>
-        <p>How high the witness stood is looked up from where they stood: the ground under those
-          coordinates comes from a real elevation model, so the altitude on the form is a height
-          above sea level whose floor is the ground itself. Nobody can be placed under it — and at
-          1500 m their horizon really is 1.2° lower than yours.</p>
+          buildings, trees, streetlights, vehicles, windows, other witnesses. How high they stood is
+          looked up from where they stood, and nobody can be placed under the ground.</p>
+        <p class="card-more"><a href="/sources/#ground">Why the horizon moves →</a></p>
       </div>
       <div class="card">
         <h3>The instrument</h3>
-        <p>An eye is not a lens. Naked-eye viewing maps an angle to an angle; a camera maps it to
-          <code>f·tan θ</code>, with a sensor, a focal length, an aperture and an exposure that
-          draws star trails and dots a flashing light. Switch the device and the whole frame changes
-          — <a href="/demos/#instrument-eye">the same sighting through three of them</a>.</p>
-        <p>Only what that device could actually have been set to is offered: an Instamatic had one
-          aperture and one shutter speed, so there is nothing to choose, and a camera that did not
-          exist yet is flagged against the observation's own date.</p>
-        <p>And it decides how faint a thing could be recorded at all. That same Instamatic stops at
-          magnitude 4.2, two short of the witness holding it — half of why so many “the sky was full
-          of stars” accounts come with an empty black photograph. A 50 mm at f/2 for twenty seconds
-          reaches 9.7, three magnitudes <em>past</em> them. Aperture, shutter and focal length settle
-          it against the sky's own brightness; and a longer pose stops helping once the sky has slid
-          further than the lens can resolve, which is why an hour on a tripod is no deeper than five
-          seconds on one — only longer trails.</p>
+        <p>An eye is not a lens, and the device decides the picture: only the settings it could
+          really have had are offered, one that did not exist yet is flagged against the date, and
+          it — not the witness — sets how faint a thing could be recorded at all. Which is why so
+          many “the sky was full of stars” accounts come with an empty black photograph.</p>
+        <p class="card-more"><a href="/sources/#instrument">The numbers behind that →</a></p>
       </div>
     </div>
-    <p class="small">Every source is named where its data is reported, with the attribution its
-      licence requires — and can be swapped for another. The picker <em>is</em> the credit. What is
-      still missing, and what each item is waiting on, is on <a href="/roadmap/">the roadmap</a>.</p>
+    <p class="small">Every source is named where its data is reported, and can be swapped for
+      another — the picker <em>is</em> the credit. Where each one comes from, what it gives and
+      where it stops: <a href="/sources/">check what the scene claims</a>. What is still missing is
+      on <a href="/roadmap/">the roadmap</a>.</p>
   </div>
 </section>
 `
@@ -369,70 +356,57 @@ ${carousel}
     <div class="cards">
       <div class="card">
         <h3>Le ciel</h3>
-        <p>Soleil, Lune et sa phase, planètes, un catalogue d'étoiles jusqu'à la magnitude 7,5 —
-          placés pour cet instant et cette latitude. Ce qui en est dessiné s'arrête à 6,5, et ce nombre
-          est un fait sur le <em>témoin</em>, pas sur le ciel : c'est la magnitude qu'atteint un œil
-          humain accoutumé à l'obscurité. Braquez autre chose sur la même nuit et le seuil suit —
-          voir l'instrument, plus bas — et le catalogue aussi : 57 688 étoiles de plus, jusqu'à la
-          magnitude 9, ne sont chargées que par un enregistrement dont les optiques vont jusque-là ;
-          le ciel d'un témoin coûte toujours 400 ko. Au-delà de 9, c'est la donnée qui s'arrête, et
-          l'outil le dit plutôt que de dessiner un ciel plus vide que la photo. La Voie lactée et la lumière zodiacale sont
-          intégrées le long de la ligne de visée, non plaquées en texture. Pointez n'importe quoi et
-          cela se nomme : « Vénus, mag −4, 8° au-dessus de l'horizon ».</p>
+        <p>Soleil, Lune et sa phase, planètes, étoiles, Voie lactée et lumière zodiacale, placés par
+          éphémérides pour cet instant et ce lieu. Ce qui est dessiné s'arrête où s'arrêtait l'œil
+          qui regardait — et là où c'est la donnée qui s'arrête, l'outil le dit plutôt que de
+          dessiner un ciel plus vide que ne l'était la nuit. Pointez n'importe quoi et cela se
+          nomme.</p>
+        <p class="card-more"><a href="/sources/#sky">Jusqu'à quelle magnitude →</a></p>
       </div>
       <div class="card">
         <h3>Ce qu'il y avait d'autre là-haut</h3>
-        <p>Les comètes à leur apparition propre, les pluies de météores avec leur radiant et leur
-          taux au-dessus d'un fond sporadique, les satellites — avec l'ombre de la Terre calculée
-          pour dire si l'un d'eux pouvait seulement être éclairé.</p>
+        <p>Comètes, pluies de météores, satellites — chacun n'est dessiné que s'il pouvait être vu
+          de là, à ce moment-là. Être éclairé n'est pas être vu, et c'est l'ombre de la Terre qui
+          tranche.</p>
+        <p class="card-more"><a href="/sources/#space">Comment chacun est décidé →</a></p>
       </div>
       <div class="card">
         <h3>La glace et l'eau</h3>
-        <p>Halos à 22° et 46°, parhélies, piliers, arcs tangents et circumzénithaux — chaque angle
-          dérivé de l'indice de réfraction de la glace, aucun n'est stocké. Arcs-en-ciel et arcs
-          lunaires tracés dans une goutte sphérique.</p>
+        <p>Halos, parhélies, piliers, arcs tangents et circumzénithaux, arcs-en-ciel et arcs
+          lunaires. Aucun de ces angles n'est stocké : ils sortent de l'indice de réfraction de la
+          glace et de la forme d'une goutte, ce qui garde tout le cortège cohérent avec le Soleil
+          qui l'a fait.</p>
+        <p class="card-more"><a href="/sources/#ice">Lesquels, et d'après quoi →</a></p>
       </div>
       <div class="card">
         <h3>La météo de ce jour-là</h3>
-        <p>Couverture nuageuse, base des nuages, pluie, neige, orages, vent — lus dans ERA5, la
-          réanalyse de l'ECMWF, horaire et mondiale depuis 1940. La requête exacte est conservée
-          dans le fichier : l'affirmation reste vérifiable des décennies plus tard.</p>
+        <p>Nuages, pluie, neige, orages et vent, lus dans une réanalyse mondiale et horaire qui
+          remonte à 1940 — et keyframés le long de l'observation, si bien qu'un ciel qui s'est
+          dégagé se dégage. La requête exacte reste dans le fichier : l'affirmation est vérifiable
+          des décennies plus tard.</p>
+        <p class="card-more"><a href="/sources/#weather">Quelle source, et ce qu'elle donne →</a></p>
       </div>
       <div class="card">
         <h3>Le sol</h3>
         <p>Relief réel et imagerie aérienne autour du témoin, et le décor qui s'est interposé :
-          bâtiments, arbres, lampadaires, véhicules, vitrages, autres témoins — avec leurs feux,
-          leurs cadences de clignotement et leurs trajectoires.</p>
-        <p>À quelle hauteur le témoin se tenait se relève d'où il se tenait : le sol sous ces
-          coordonnées vient d'un modèle d'élévation réel, si bien que l'altitude du formulaire est
-          une altitude au-dessus du niveau de la mer dont le plancher est le sol lui-même. On ne peut
-          placer personne dessous — et à 1500 m son horizon est réellement 1,2° plus bas que le
-          vôtre.</p>
+          bâtiments, arbres, lampadaires, véhicules, vitrages, autres témoins. À quelle hauteur il
+          se tenait se relève d'où il se tenait, et on ne peut placer personne sous le sol.</p>
+        <p class="card-more"><a href="/sources/#ground">Pourquoi l'horizon se déplace →</a></p>
       </div>
       <div class="card">
         <h3>L'instrument</h3>
-        <p>Un œil n'est pas un objectif. À l'œil nu, un angle reste un angle ; un appareil le
-          projette en <code>f·tan θ</code>, avec un capteur, une focale, un diaphragme et une pose
-          qui trace les filés d'étoiles et ponctue un feu clignotant. Changez d'appareil et toute
-          l'image change — <a href="/demos/#instrument-eye">la même observation à travers trois
-          d'entre eux</a>.</p>
-        <p>Seuls les réglages que cet appareil pouvait réellement avoir sont proposés : un
-          Instamatic avait un diaphragme et une vitesse, donc il n'y a rien à choisir, et un appareil
-          qui n'existait pas encore est signalé face à la date de l'observation.</p>
-        <p>Et c'est lui qui décide de ce qui pouvait être enregistré. Ce même Instamatic s'arrête à
-          la magnitude 4,2, deux de moins que le témoin qui le tient — la moitié de la raison pour
-          laquelle tant de récits de « ciel plein d'étoiles » s'accompagnent d'une photographie noire
-          et vide. Un 50 mm à f/2 pendant vingt secondes atteint 9,7, trois magnitudes
-          <em>au-delà</em> de lui. Diaphragme, pose et focale en décident, face à la clarté du ciel
-          lui-même ; et allonger la pose cesse d'aider dès que le ciel a glissé plus loin que ce que
-          l'objectif sait séparer — une heure sur trépied ne va pas plus loin que cinq secondes, elle
-          fait seulement des filés plus longs.</p>
+        <p>Un œil n'est pas un objectif, et c'est l'appareil qui décide de l'image : seuls les
+          réglages qu'il pouvait réellement avoir sont proposés, un appareil qui n'existait pas
+          encore est signalé face à la date, et c'est lui — non le témoin — qui fixe ce qui pouvait
+          être enregistré. D'où tant de récits de « ciel plein d'étoiles » accompagnés d'une
+          photographie noire et vide.</p>
+        <p class="card-more"><a href="/sources/#instrument">Les nombres derrière cela →</a></p>
       </div>
     </div>
-    <p class="small">Chaque source est nommée là où sa donnée est rapportée, avec l'attribution
-      qu'exige sa licence — et peut être remplacée par une autre. Le sélecteur <em>est</em> le
-      crédit. Ce qui manque encore, et ce que chaque élément attend, est sur
-      <a href="/roadmap/">la page du plan</a>.</p>
+    <p class="small">Chaque source est nommée là où sa donnée est rapportée, et peut être
+      remplacée par une autre — le sélecteur <em>est</em> le crédit. D'où vient chacune, ce qu'elle
+      donne et où elle s'arrête : <a href="/sources/">vérifier ce que la scène affirme</a>. Ce qui
+      manque encore est sur <a href="/roadmap/">la page du plan</a>.</p>
   </div>
 </section>
 `
