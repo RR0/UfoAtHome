@@ -13,6 +13,15 @@ export interface WitnessMapMarker {
   current: boolean
 }
 
+/** One piece of scenery the recording places on the ground — see DecorObject, whose eastM/northM
+ * are resolved against the witness's own t=0 position before they get here. */
+export interface WitnessMapDecor {
+  lat: number
+  lng: number
+  /** Which way it faces, when the recording says — a parked car and a shack are different facts. */
+  headingDeg?: number
+}
+
 /** Everything the map shows at one instant of the recording. Assembled by the component, so this
  * renderer never reaches into a Sighting and can be exercised on any canvas. */
 export interface WitnessMapFrame {
@@ -34,6 +43,19 @@ export interface WitnessMapFrame {
    * ImageProjection.halfWidthAngleDeg. */
   coneHalfAngleDeg?: number
   markers: ReadonlyArray<WitnessMapMarker>
+  /** The scenery the recording puts on this ground — the shack, the patrol car, the other
+   * witnesses. Drawn because a cone that clears a landmark is only evidence once the landmark is on
+   * the map too. */
+  decor: ReadonlyArray<WitnessMapDecor>
+  /**
+   * How dark it was, 0 in daylight to 1 well after dusk — see the night wash below.
+   *
+   * The imagery is somebody's daytime photograph of that ground, always, whatever hour the account
+   * is about. Laying it unchanged under a 02:45 sighting says the witnesses could see a sunlit
+   * countryside, which they could not. Absent means nothing has been worked out about the light,
+   * and then the photograph is left as it came.
+   */
+  nightFraction?: number
   /** What the imagery provider's own licence requires be shown wherever its tiles are (see
    * ImageryProvider.attribution) — or, when there are no tiles, what says so. Drawn on the map
    * itself rather than in a strip beneath it: a caption laid over the canvas from outside covers
@@ -83,12 +105,19 @@ export class WitnessMapRenderer {
     ctx.save()
     ctx.clearRect(0, 0, this.width, this.height)
     this.paintGround(frame)
+    this.paintNight(frame.nightFraction)
     this.paintPath(frame)
     if (frame.position) {
       this.paintCone(frame, frame.position)
+      // OVER the cone, not under it. Scenery is what the cone is checked against — "was the shack
+      // inside what they could see" — and a landmark tinted by the very wedge it is being compared
+      // with is a landmark nobody can read: cyan under that yellow wash comes out green, which is
+      // how this was drawn and invisible at first.
+      this.paintDecor(frame)
       this.paintMarkers(frame)
       this.paintWitness(frame, frame.position)
     } else {
+      this.paintDecor(frame)
       this.paintMarkers(frame)
     }
     this.paintNorth()
@@ -115,6 +144,61 @@ export class WitnessMapRenderer {
     const topLeft = this.toCanvas(frame.bounds, imagery.bounds.north, imagery.bounds.west)
     const bottomRight = this.toCanvas(frame.bounds, imagery.bounds.south, imagery.bounds.east)
     ctx.drawImage(imagery.source, topLeft.x, topLeft.y, bottomRight.x - topLeft.x, bottomRight.y - topLeft.y)
+  }
+
+  /**
+   * A wash over the photograph for the hour the account is about.
+   *
+   * Over the imagery and UNDER everything the recording itself puts on the map: the path, the cone
+   * and the moments are statements, not things a witness had to see by the available light, and
+   * dimming them would make a night sighting harder to read for no gain. What darkens is only the
+   * borrowed daytime photograph.
+   *
+   * Blue rather than grey because that is what little colour survives at night — the eye's own rods
+   * carry no colour at all, and everything painted for a dark scene in this project already leans
+   * this way.
+   */
+  private paintNight(nightFraction = 0): void {
+    if (nightFraction <= 0) return
+    const { ctx } = this
+    ctx.save()
+    ctx.fillStyle = `rgba(6, 12, 30, ${Math.min(nightFraction, 1) * 0.78})`
+    ctx.fillRect(0, 0, this.width, this.height)
+    ctx.restore()
+  }
+
+  /**
+   * The scenery, where the recording put it.
+   *
+   * Small and plain on purpose. These are the things the cone is checked AGAINST — did the shack
+   * fall inside what they could see, was the patrol car between them and it — so they have to be
+   * findable without competing with the path or the moments for attention.
+   */
+  private paintDecor(frame: WitnessMapFrame): void {
+    const { ctx } = this
+    for (const object of frame.decor) {
+      const at = this.toCanvas(frame.bounds, object.lat, object.lng)
+      ctx.beginPath()
+      ctx.rect(at.x - 3, at.y - 3, 6, 6)
+      ctx.fillStyle = "rgba(120, 220, 255, 0.85)"
+      ctx.fill()
+      ctx.lineWidth = 1.5
+      ctx.strokeStyle = "rgba(0, 0, 0, 0.7)"
+      ctx.stroke()
+      if (object.headingDeg === undefined) continue
+      // A short tick the way it faces — a parked car and a shack are different facts, and which way
+      // a vehicle was pointed is one of them.
+      const angle = ((object.headingDeg - 90) * Math.PI) / 180
+      ctx.beginPath()
+      ctx.moveTo(at.x, at.y)
+      ctx.lineTo(at.x + Math.cos(angle) * 9, at.y + Math.sin(angle) * 9)
+      ctx.lineWidth = 3
+      ctx.strokeStyle = "rgba(0, 0, 0, 0.6)"
+      ctx.stroke()
+      ctx.lineWidth = 1.5
+      ctx.strokeStyle = "rgba(120, 220, 255, 0.9)"
+      ctx.stroke()
+    }
   }
 
   /** The whole journey at once, drawn under everything else and in full from the first frame: this

@@ -19,8 +19,10 @@ import { loadUfoMessages, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
 import type { UfoLanguage } from "./messages/index.js"
 import { ufoMessages_en } from "./messages/UfoMessages_en.js"
 import { WitnessPath } from "../engine/place/WitnessPath.js"
+import { resolveDecorPlacementAt } from "../engine/model/Decor.js"
+import { localMetersToGeo } from "../render3d/terrain/GeoProjection.js"
 import { WitnessMapRenderer } from "../render/WitnessMapRenderer.js"
-import type { WitnessMapMarker } from "../render/WitnessMapRenderer.js"
+import type { WitnessMapMarker, WitnessMapDecor } from "../render/WitnessMapRenderer.js"
 import { defaultImageryProvider } from "../render3d/terrain/defaultTerrainProviders.js"
 import type { ImageryTexture } from "../render3d/terrain/ImageryProvider.js"
 import type { GeoBounds } from "../render3d/terrain/GeoBounds.js"
@@ -1122,8 +1124,14 @@ export class UfoElement extends HTMLElement {
    * the first frame — see WITNESS_MAP_ATTRIBUTE.
    */
   private updateWitnessMap(): void {
+    const hadPath = this.witnessPath !== undefined
     this.witnessPath = WitnessPath.of(this.currentSighting)
     this.witnessMapButton.hidden = this.witnessPath === undefined
+    // A recording that has just BECOME mappable is the editor's ordinary case: an author types the
+    // first latitude and longitude, and the map they asked for has somewhere to point at last. That
+    // is a new answer to the page's question, not a re-application of its default over a reader's
+    // own choice — which is why it is a transition and not something refresh() does every time.
+    if (!hadPath && this.witnessPath) this.applyWitnessMapDefault()
     if (!this.witnessPath) {
       this.setWitnessMapOpen(false)
       this.witnessMapBounds = undefined
@@ -1228,6 +1236,8 @@ export class UfoElement extends HTMLElement {
         ? ImageProjection.of(instrument, this.canvas.height, pose.fovDeg).halfWidthAngleDeg(Instruments.aspectOf(instrument))
         : undefined,
       markers,
+      decor: this.witnessMapDecorAt(t),
+      nightFraction: this.witnessMapNightFraction,
       attribution: this.witnessMapAttribution
     })
   }
@@ -1261,6 +1271,55 @@ export class UfoElement extends HTMLElement {
     const label = this.milestonesShown ? this.messages.hideMilestones : this.messages.showMilestones
     this.milestonesButton.title = label
     this.milestonesButton.setAttribute("aria-label", label)
+  }
+
+  /**
+   * Where the recording's own scenery stands, on the ground rather than in front of the camera.
+   *
+   * `DecorObject.eastM`/`northM` are metres from the witness's pose at **t=0**, not from wherever
+   * they happen to be now — the same reference the 3D scene anchors to (see
+   * SceneRenderer.updateDecorAnchoring, which exists because treating them as an offset from the
+   * CURRENT pose made every building follow the witness around). Resolving them against that one
+   * pose is what leaves the shack where the shack was while the witness drives past it.
+   *
+   * Empty for a recording whose t=0 pose has no coordinates at all: a metre offset from nowhere is
+   * not a place, and guessing one would put scenery on ground it was never on.
+   */
+  private witnessMapDecorAt(t: number): WitnessMapDecor[] {
+    const reference = resolveObserverPoseAt(this.currentSighting, 0)
+    if (reference?.lat === undefined || reference.lng === undefined) return []
+    return this.currentSighting.decor.map(object => {
+      const placement = resolveDecorPlacementAt(object, t)
+      const { lat, lng } = localMetersToGeo(placement.eastM, -placement.northM, reference.lat!, reference.lng!)
+      return { lat, lng, headingDeg: placement.headingDeg }
+    })
+  }
+
+  /**
+   * How dark it was where the map is looking, 0 to 1 — undefined until something tells this element
+   * where the Sun was.
+   *
+   * Nothing here works it out. This player carries no astronomy at all and must not start: the
+   * library that answers "where was the Sun at 02:45 on 24 July 1948" costs more than this whole
+   * bundle, and the point of `<rr0-ufo>` is that a page can drop it into an article for the price of
+   * a picture. `<rr0-scene>` already computes the real Sun for its own sky, so it is the one that
+   * says (see its updateAstronomy). A bare player is left with the photograph as it came, which is
+   * honest: it has not been told anything about the light.
+   */
+  private witnessMapNightFraction?: number
+
+  /**
+   * Told by a composing element that knows where the Sun was — see witnessMapNightFraction.
+   *
+   * Fully dark by −12°, the end of nautical twilight, rather than by 0°: the ground is still lit
+   * for a while after the Sun has set, and a map that went black the instant it crossed the horizon
+   * would be wrong about every dusk sighting this project has.
+   */
+  setSunAltitude(altitudeDeg: number | undefined): void {
+    const night = altitudeDeg === undefined ? undefined : Math.max(0, Math.min(1, -altitudeDeg / 12))
+    if (night === this.witnessMapNightFraction) return
+    this.witnessMapNightFraction = night
+    this.paintWitnessMap(this.currentTime)
   }
 
   private updateFullscreenButton(): void {

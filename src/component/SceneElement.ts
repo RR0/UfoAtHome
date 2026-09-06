@@ -841,6 +841,11 @@ export class SceneElement extends HTMLElement {
       // the zodiacal light need no catalog to arrive first (see SceneAstronomy.frame).
       frame: { date, observer }
     })
+    // The player's own map borrows a daytime photograph of this ground whatever hour the account is
+    // about, so it has to be told what hour that was — see UfoElement.setSunAltitude. Told from
+    // here because this is where the real Sun is already computed; the player carries no astronomy
+    // of its own and must not start.
+    this.ufoElement.setSunAltitude(sun.altitudeDeg)
   }
 
   /**

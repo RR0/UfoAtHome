@@ -22,6 +22,9 @@ interface ArcCall {
 class RecordingContext {
   readonly arcs: ArcCall[] = []
   readonly texts: Array<{ text: string; x: number; y: number }> = []
+  /** Every fillStyle in the order it was actually used, which is the only way to check z-order. */
+  readonly fills: unknown[] = []
+  readonly rects: Array<{ x: number; y: number; width: number; height: number }> = []
   readonly images: Array<{ x: number; y: number; width: number; height: number }> = []
   readonly canvas = { width: 200, height: 200 }
   lineWidth = 0
@@ -36,12 +39,20 @@ class RecordingContext {
   save(): void {}
   restore(): void {}
   clearRect(): void {}
-  fillRect(): void {}
+  fillRect(): void {
+    this.fills.push(this.fillStyle)
+  }
   beginPath(): void {}
   closePath(): void {}
   moveTo(): void {}
   lineTo(): void {}
-  fill(): void {}
+  fill(): void {
+    this.fills.push(this.fillStyle)
+  }
+
+  rect(x: number, y: number, width: number, height: number): void {
+    this.rects.push({ x, y, width, height })
+  }
   stroke(): void {}
   fillText(text: string, x: number, y: number): void {
     this.texts.push({ text, x, y })
@@ -78,6 +89,7 @@ function frameWith(overrides: Partial<WitnessMapFrame> = {}): { frame: WitnessMa
       headingDeg: 90,
       coneHalfAngleDeg: 20,
       markers: [],
+      decor: [],
       ...overrides
     }
   }
@@ -130,6 +142,33 @@ describe("WitnessMapRenderer", () => {
     const marks = context.arcs.filter(a => a.radius < 20).map(a => a.radius)
     expect(Math.max(...marks)).toBeGreaterThan(7) // rings the marker rather than sitting inside it
     expect(context.texts.some(t => t.text === "E")).toBe(true)
+  })
+
+  it("washes the borrowed daytime photograph down for a night sighting", () => {
+    // The imagery is somebody's daylight photograph of that ground whatever hour the account is
+    // about. Chiles & Whitted is 02:45; laying it unchanged under that says the crew could see a
+    // sunlit countryside.
+    const { frame, context } = frameWith({ nightFraction: 1 })
+    new WitnessMapRenderer(context as unknown as CanvasRenderingContext2D).paint(frame)
+    expect(context.fills.some(fill => String(fill).startsWith("rgba(6, 12, 30"))).toBe(true)
+
+    const day = frameWith({ nightFraction: 0 })
+    new WitnessMapRenderer(day.context as unknown as CanvasRenderingContext2D).paint(day.frame)
+    expect(day.context.fills.some(fill => String(fill).startsWith("rgba(6, 12, 30"))).toBe(false)
+  })
+
+  it("draws the scenery over the cone, not under it", () => {
+    // Scenery is what the cone is CHECKED AGAINST — "was the shack inside what they could see" — so
+    // it has to survive the wedge passing over it. Drawn underneath, the cyan came out green
+    // wherever the cone crossed it, which is how it shipped invisible the first time.
+    const { frame, context } = frameWith({
+      decor: [{ lat: CENTER.lat - 0.001, lng: CENTER.lng, headingDeg: 225 }]
+    })
+    new WitnessMapRenderer(context as unknown as CanvasRenderingContext2D).paint(frame)
+    const cone = context.fills.findIndex(fill => typeof fill === "object")
+    const scenery = context.fills.findIndex(fill => String(fill).startsWith("rgba(120, 220, 255"))
+    expect(scenery).toBeGreaterThan(cone)
+    expect(context.rects).toHaveLength(1)
   })
 
   it("points the cone the way the witness faced, north up", () => {
