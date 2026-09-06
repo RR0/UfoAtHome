@@ -15,14 +15,27 @@ export function selectLocale(preferences: readonly string[], supported: readonly
 /**
  * Which languages a component placed on a given page should consider, in order.
  *
- * The page's own declared language comes first. A document that says `<html lang="en">` has
- * already stated what language its reader is reading it in — and a bilingual site that serves the
- * same article at two URLs has stated it per URL, which `navigator.languages` cannot know. Reading
- * the nearest ancestor rather than only the root also lets one section of a page be marked in
- * another language and carry its widgets with it.
+ * The page's own declared language comes first, and the reason is COHERENCE OF THE PAGE. A
+ * reconstruction is not a widget standing beside an article, it is part of it — the paragraph above
+ * introduces it and the one below comments on it. So a French article showing an English
+ * simulation reads as a defect, never as a service, however well the reader happens to know
+ * English. The page decides, because the page is what is being read.
  *
- * The browser's own list follows, and remains the whole answer for a page that declares nothing —
- * which is what every consumer of this got before, so no page loses a translation by this.
+ * Which settles the case that looks like a bug and is not: rr0.org's dossiers say `lang="fr"`, so
+ * an English reader gets the French account there, while the same recording on ufoathome.org gives
+ * them the English one — that site having served them an `<html lang="en">` page in the first
+ * place. Two sites, two coherent pages, one rule. (Do not be tempted to demote this below
+ * `navigator.languages` on the grounds that `lang` describes the prose rather than the reader: it
+ * does describe the prose, and the prose is precisely what the simulation has to match.)
+ *
+ * Reading the nearest ancestor rather than only the root lets one section of a page be marked in
+ * another language and carry its widgets with it — and an embedder who wants one reconstruction to
+ * speak differently from the article around it says so on the element: `<rr0-sighting lang="en">`.
+ *
+ * The browser's own list follows, and remains the whole answer for a page that declares nothing.
+ * It is a fallback, never a restriction: a page declaring a language the recording does not have
+ * still reaches its reader in one they can read (see SaidText, which falls back again rather than
+ * showing nothing).
  *
  * "Nearest" reaches out of a shadow root and into the page: see declaredFor.
  */
