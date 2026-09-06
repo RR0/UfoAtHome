@@ -16,10 +16,13 @@
     }
   ],
   "caseId": "socorro",
-  "description": "La même observation, au reflex 24×36 avec l'objectif de 50 mm livré avec le boîtier. Le champ tombe à 27° de haut — d'où le fait qu'une lumière photographiée n'a si souvent rien de reconnaissable à côté d'elle dans le cadre. Et un objectif projette en f·tan θ : ce qui s'éloigne de l'axe est étiré, de 42 % à 33° du centre. C'est juste pour une photographie, et faux pour un œil.",
+  "description": {
+    "fr": "La même observation, au reflex 24×36 avec l'objectif de 50 mm livré avec le boîtier. Le champ tombe à 27° de haut — d'où le fait qu'une lumière photographiée n'a si souvent rien de reconnaissable à côté d'elle dans le cadre. Et un objectif projette en f·tan θ : ce qui s'éloigne de l'axe est étiré, de 42 % à 33° du centre. C'est juste pour une photographie, et faux pour un œil.",
+    "en": "The same sighting, on a 35 mm SLR with the 50 mm lens the body came with. The field drops to 27° high — which is why a photographed light so often has nothing recognisable beside it in the frame. And a lens projects in f·tan θ: whatever is off-axis is stretched, by 42% at 33° from the centre. That is right for a photograph, and wrong for an eye."
+  },
   "tags": [
     "RR3",
-    "atterrissage",
+    "landing",
     "trace",
     "Blue Book 8729"
   ],
@@ -1148,7 +1151,10 @@
     {
       "id": "patrol-car",
       "kind": "vehicle",
-      "title": "Voiture de patrouille de Zamora",
+      "title": {
+        "fr": "Voiture de patrouille de Zamora",
+        "en": "Zamora's patrol car"
+      },
       "eastM": 0,
       "northM": 8,
       "headingDeg": 225,
@@ -1171,7 +1177,10 @@
     {
       "id": "dynamite-shack",
       "kind": "building",
-      "title": "Abri à dynamite",
+      "title": {
+        "fr": "Abri à dynamite",
+        "en": "Dynamite shack"
+      },
       "eastM": -73.7,
       "northM": -51.6,
       "floors": 0,

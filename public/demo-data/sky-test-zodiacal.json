@@ -1,7 +1,10 @@
 {
   "version": 1,
   "caseId": "sky-test-zodiacal",
-  "description": "Un ciel d'essai pour la lumière zodiacale — la « fausse aurore » vue le soir. Elle demande un Soleil déjà bas sous l'horizon (16°) mais pas trop, une écliptique redressée par rapport à l'horizon (mars, sous les tropiques : Ténérife), pas de Lune, et un ciel clair. Le cône se dresse là où le Soleil s'est couché, à l'ouest, penché le long du zodiaque. C'est la lueur étrange des manuels : sans bord, immobile, disparue une heure plus tard.",
+  "description": {
+    "fr": "Un ciel d'essai pour la lumière zodiacale — la « fausse aurore » vue le soir. Elle demande un Soleil déjà bas sous l'horizon (16°) mais pas trop, une écliptique redressée par rapport à l'horizon (mars, sous les tropiques : Ténérife), pas de Lune, et un ciel clair. Le cône se dresse là où le Soleil s'est couché, à l'ouest, penché le long du zodiaque. C'est la lueur étrange des manuels : sans bord, immobile, disparue une heure plus tard.",
+    "en": "A test sky for the zodiacal light — the “false dawn”, seen here in the evening. It asks for a Sun already below the horizon (16°) but not too far below, an ecliptic standing up from the horizon (March, in the tropics: Tenerife), no Moon, and a clear sky. The cone stands where the Sun set, in the west, leaning along the zodiac. This is the strange glow of the textbooks: edgeless, motionless, gone an hour later."
+  },
   "time": {
     "year": 2020,
     "month": 3,

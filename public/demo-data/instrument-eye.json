@@ -16,10 +16,13 @@
     }
   ],
   "caseId": "socorro",
-  "description": "La même observation, à l'œil nu. Un œil perçoit un angle comme un angle où qu'il tombe : l'image est équidistante, une règle posée sur l'écran y mesure quelque chose, et le champ est celui que ce projet donne à un témoin sans appareil — 60° de haut, à peu près la moitié centrale d'un vrai champ humain, là où se trouve l'acuité. Aucun cadre, aucun format : un œil n'a pas de rectangle.",
+  "description": {
+    "fr": "La même observation, à l'œil nu. Un œil perçoit un angle comme un angle où qu'il tombe : l'image est équidistante, une règle posée sur l'écran y mesure quelque chose, et le champ est celui que ce projet donne à un témoin sans appareil — 60° de haut, à peu près la moitié centrale d'un vrai champ humain, là où se trouve l'acuité. Aucun cadre, aucun format : un œil n'a pas de rectangle.",
+    "en": "The same sighting, with the naked eye. An eye takes an angle as an angle wherever it falls: the image is equidistant, a ruler held against the screen measures something real on it, and the field is the one this project gives a witness with no device — 60° high, roughly the central half of a real human field, which is where the acuity is. No frame and no format: an eye has no rectangle."
+  },
   "tags": [
     "RR3",
-    "atterrissage",
+    "landing",
     "trace",
     "Blue Book 8729"
   ],
@@ -1148,7 +1151,10 @@
     {
       "id": "patrol-car",
       "kind": "vehicle",
-      "title": "Voiture de patrouille de Zamora",
+      "title": {
+        "fr": "Voiture de patrouille de Zamora",
+        "en": "Zamora's patrol car"
+      },
       "eastM": 0,
       "northM": 8,
       "headingDeg": 225,
@@ -1171,7 +1177,10 @@
     {
       "id": "dynamite-shack",
       "kind": "building",
-      "title": "Abri à dynamite",
+      "title": {
+        "fr": "Abri à dynamite",
+        "en": "Dynamite shack"
+      },
       "eastM": -73.7,
       "northM": -51.6,
       "floors": 0,

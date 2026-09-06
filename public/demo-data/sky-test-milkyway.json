@@ -1,7 +1,10 @@
 {
   "version": 1,
   "caseId": "sky-test-milkyway",
-  "description": "Un ciel d'essai pour la Voie lactée. Elle demande quatre choses à la fois : pas de Lune (nouvelle Lune du 20 juillet 2020), un Soleil à 65° sous l'horizon, un ciel sans nuages, et le centre de la Galaxie haut — ici à 81° de hauteur, au sud-ouest, vu du désert d'Atacama. Retirez-en une seule et il n'y a plus rien à voir : c'est exactement ce qui sépare « il n'y avait pas de Voie lactée » de « je n'aurais pas pu la voir ».",
+  "description": {
+    "fr": "Un ciel d'essai pour la Voie lactée. Elle demande quatre choses à la fois : pas de Lune (nouvelle Lune du 20 juillet 2020), un Soleil à 65° sous l'horizon, un ciel sans nuages, et le centre de la Galaxie haut — ici à 81° de hauteur, au sud-ouest, vu du désert d'Atacama. Retirez-en une seule et il n'y a plus rien à voir : c'est exactement ce qui sépare « il n'y avait pas de Voie lactée » de « je n'aurais pas pu la voir ».",
+    "en": "A test sky for the Milky Way. It asks four things at once: no Moon (the new Moon of 20 July 2020), a Sun 65° below the horizon, a cloudless sky, and the Galactic centre high — here 81° up in the south-west, seen from the Atacama desert. Take away one of them and there is nothing left to see: which is exactly what separates “there was no Milky Way” from “I could not have seen it”."
+  },
   "time": {
     "year": 2020,
     "month": 7,

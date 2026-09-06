@@ -16,10 +16,13 @@
     }
   ],
   "caseId": "socorro",
-  "description": "La même observation, photographiée sur un Instamatic à film 126. Le cadre est CARRÉ — ni le 16/9 de la scène ni le rectangle debout d'un téléphone — et il fait 36° de côté : 28 mm d'image derrière un objectif de 43 mm. Tout y est fixe : un diaphragme, une vitesse, une focale. Le témoin qui tenait cet appareil n'avait rien à régler, donc l'éditeur ne lui propose rien à régler non plus.",
+  "description": {
+    "fr": "La même observation, photographiée sur un Instamatic à film 126. Le cadre est CARRÉ — ni le 16/9 de la scène ni le rectangle debout d'un téléphone — et il fait 36° de côté : 28 mm d'image derrière un objectif de 43 mm. Tout y est fixe : un diaphragme, une vitesse, une focale. Le témoin qui tenait cet appareil n'avait rien à régler, donc l'éditeur ne lui propose rien à régler non plus.",
+    "en": "The same sighting, photographed on an Instamatic loaded with 126 film. The frame is SQUARE — neither the scene's 16:9 nor a phone's upright rectangle — and 36° to a side: 28 mm of image behind a 43 mm lens. Everything about it is fixed: one aperture, one shutter speed, one focal length. The witness holding this camera had nothing to set, so the editor offers them nothing to set either."
+  },
   "tags": [
     "RR3",
-    "atterrissage",
+    "landing",
     "trace",
     "Blue Book 8729"
   ],
@@ -1148,7 +1151,10 @@
     {
       "id": "patrol-car",
       "kind": "vehicle",
-      "title": "Voiture de patrouille de Zamora",
+      "title": {
+        "fr": "Voiture de patrouille de Zamora",
+        "en": "Zamora's patrol car"
+      },
       "eastM": 0,
       "northM": 8,
       "headingDeg": 225,
@@ -1171,7 +1177,10 @@
     {
       "id": "dynamite-shack",
       "kind": "building",
-      "title": "Abri à dynamite",
+      "title": {
+        "fr": "Abri à dynamite",
+        "en": "Dynamite shack"
+      },
       "eastM": -73.7,
       "northM": -51.6,
       "floors": 0,

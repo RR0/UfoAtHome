@@ -23,12 +23,40 @@ export function selectLocale(preferences: readonly string[], supported: readonly
  *
  * The browser's own list follows, and remains the whole answer for a page that declares nothing —
  * which is what every consumer of this got before, so no page loses a translation by this.
+ *
+ * "Nearest" reaches out of a shadow root and into the page: see declaredFor.
  */
 export class HostLocale {
 
   static preferencesFor(element: Element): readonly string[] {
     const browser = navigator.languages ?? []
-    const declared = element.closest("[lang]")?.getAttribute("lang")?.trim()
+    const declared = this.declaredFor(element)
     return declared ? [declared, ...browser] : browser
+  }
+
+  /**
+   * The nearest declared language, ACROSS shadow boundaries.
+   *
+   * `closest` stops at the shadow root it is called in, so an element inside another element's
+   * shadow DOM could never see the page around it: `<rr0-ufo>`, which lives inside
+   * `<rr0-sighting>`'s shadow root, read the page's own `lang` as absent and fell back to the
+   * browser's list alone. Which went unnoticed for as long as the two agreed — and stopped
+   * agreeing the moment a recording began carrying several languages of its own (see SaidText): on
+   * a French article read by an English browser, the outer element showed the French account and
+   * the milestone captions inside it showed the English one, in the same frame.
+   *
+   * So each root that has no `[lang]` hands the search on to its host, which is the element the
+   * document actually holds.
+   */
+  private static declaredFor(element: Element): string | undefined {
+    for (let node: Element | undefined = element; node; ) {
+      const declared = node.closest("[lang]")?.getAttribute("lang")?.trim()
+      if (declared) {
+        return declared
+      }
+      const root = node.getRootNode()
+      node = root instanceof ShadowRoot ? root.host : undefined
+    }
+    return undefined
   }
 }

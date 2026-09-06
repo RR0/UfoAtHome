@@ -1,7 +1,10 @@
 {
   "version": 1,
   "caseId": "sky-test-moonbow",
-  "description": "Le même ciel d'essai sous une pleine Lune : arc-en-ciel lunaire. Même pluie, Lune pleine à 21,6° de hauteur au sud, témoin tourné vers le point opposé (cap 10°). L'arc est vingt fois plus faible qu'au Soleil et sort BLANC, parce que c'est ce que l'œil rapporte à ce niveau de lumière.",
+  "description": {
+    "fr": "Le même ciel d'essai sous une pleine Lune : arc-en-ciel lunaire. Même pluie, Lune pleine à 21,6° de hauteur au sud, témoin tourné vers le point opposé (cap 10°). L'arc est vingt fois plus faible qu'au Soleil et sort BLANC, parce que c'est ce que l'œil rapporte à ce niveau de lumière.",
+    "en": "The same test sky under a full Moon: a moonbow. Same rain, a full Moon 21.6° up in the south, the witness turned towards the point opposite it (heading 10°). The bow is twenty times fainter than the Sun's and comes out WHITE, because that is what an eye reports at that light level."
+  },
   "time": {
     "year": 2020,
     "month": 6,

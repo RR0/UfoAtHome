@@ -118,9 +118,33 @@ if (source && mount) {
       <tr><td><code>place</code></td><td><code>[{ lat, lng, name }]</code> — <code>name</code> is the fully qualified place name the coordinates were resolved from</td></tr>
       <tr><td><code>witness</code></td><td><code>{ id, dirName, title, lastName, firstNames }</code>, all optional; omit entirely for an anonymous witness</td></tr>
       <tr><td><code>caseId</code></td><td>Shared by every witness's own file for the same case — what lets a manifest group them</td></tr>
-      <tr><td><code>description</code>, <code>tags</code></td><td>Free text, and a list of strings</td></tr>
+      <tr><td><code>description</code></td><td>The account in prose — one string, or one per language (see below)</td></tr>
+      <tr><td><code>tags</code></td><td>A list of strings, written in English: they are technical terms, and two recordings that share one have to match on it. Each reader is shown them in their own language where a translation is known</td></tr>
     </table>
     </div>
+
+    <h3>Saying it in more than one language</h3>
+    <p>A recording is handed from one reader to another, so every field an author writes can hold
+      one string per language instead of one: <code>description</code>, a shape's or a decor
+      object's <code>title</code>, and a milestone's <code>label</code> and <code>note</code>.</p>
+    <pre><code>"description": {
+  "fr": "Tout le témoignage de Lonnie Zamora, d'un seul tenant…",
+  "en": "Lonnie Zamora's whole testimony, of a piece…"
+}</code></pre>
+    <p>Keys are language tags as a browser gives them (<code>fr</code>, <code>en</code>,
+      <code>pt-BR</code>), and none of them is required. A plain string stays perfectly valid and
+      means “in whatever language it was written in” — which every recording made before this
+      is. A reader whose languages are none of the ones present gets what the file DOES have rather
+      than an empty field: a missing translation must never turn something the witness said into
+      something they did not.</p>
+    <p>Which language a reader gets is their browser's, unless the page says otherwise: a
+      <code>lang</code> on the element itself, or on anything around it, is taken first — an
+      article that declares its own language has already stated what language its reader is reading
+      it in. The browser's list is what follows, so declaring one forces a choice without throwing
+      away the others.</p>
+    <p>The editor shows one language, the reader's own, and writing back touches only that one —
+      so opening a file in the other language and typing is how a translation gets added, and one
+      author cannot delete another's.</p>
 
     <h3>What was seen</h3>
     <p><code>timeline.keyframes</code> is a list of <code>{ t, shapes }</code>, <code>t</code> in
@@ -260,9 +284,33 @@ if (source && mount) {
       <tr><td><code>place</code></td><td><code>[{ lat, lng, name }]</code> — <code>name</code> est le nom qualifié depuis lequel les coordonnées ont été résolues</td></tr>
       <tr><td><code>witness</code></td><td><code>{ id, dirName, title, lastName, firstNames }</code>, tous facultatifs ; à omettre entièrement pour un témoin anonyme</td></tr>
       <tr><td><code>caseId</code></td><td>Partagé par le fichier de chaque témoin d'un même dossier — ce qui permet à un manifeste de les réunir</td></tr>
-      <tr><td><code>description</code>, <code>tags</code></td><td>Texte libre, et une liste de chaînes</td></tr>
+      <tr><td><code>description</code></td><td>Le récit en prose — une chaîne, ou une par langue (voir plus bas)</td></tr>
+      <tr><td><code>tags</code></td><td>Une liste de chaînes, écrites en anglais : ce sont des termes techniques, et deux enregistrements qui en partagent un doivent s'y égaler. Chaque lecteur les voit dans sa langue lorsqu'une traduction est connue</td></tr>
     </table>
     </div>
+
+    <h3>Le dire en plusieurs langues</h3>
+    <p>Un enregistrement se transmet d'un lecteur à un autre : chaque champ écrit par un auteur peut
+      donc porter une chaîne par langue au lieu d'une seule — <code>description</code>, le
+      <code>title</code> d'une forme ou d'un élément de décor, le <code>label</code> et la
+      <code>note</code> d'un repère.</p>
+    <pre><code>"description": {
+  "fr": "Tout le témoignage de Lonnie Zamora, d'un seul tenant…",
+  "en": "Lonnie Zamora's whole testimony, of a piece…"
+}</code></pre>
+    <p>Les clés sont des étiquettes de langue telles qu'un navigateur les donne (<code>fr</code>,
+      <code>en</code>, <code>pt-BR</code>), et aucune n'est obligatoire. Une chaîne simple reste
+      parfaitement valide et signifie « dans la langue où cela a été écrit » — ce qu'est tout
+      enregistrement antérieur. Un lecteur dont aucune langue n'est présente reçoit ce que le
+      fichier A, plutôt qu'un champ vide : une traduction manquante ne doit jamais transformer ce
+      qu'un témoin a dit en ce qu'il n'a pas dit.</p>
+    <p>La langue reçue est celle du navigateur, sauf si la page en dit autre chose : un
+      <code>lang</code> sur l'élément lui-même, ou sur ce qui l'entoure, est pris d'abord — un
+      article qui déclare sa langue a déjà énoncé dans quelle langue son lecteur le lit. La liste du
+      navigateur vient ensuite : déclarer une langue force donc un choix sans jeter les autres.</p>
+    <p>L'éditeur montre une langue, celle du lecteur, et n'écrit que dans celle-là — ouvrir le
+      fichier dans l'autre langue et taper est donc la façon d'ajouter une traduction, et un auteur
+      ne peut pas effacer celle d'un autre.</p>
 
     <h3>Ce qui a été vu</h3>
     <p><code>timeline.keyframes</code> est une liste de <code>{ t, shapes }</code>, <code>t</code> en

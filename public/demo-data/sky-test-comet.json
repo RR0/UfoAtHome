@@ -1,7 +1,10 @@
 {
   "version": 1,
   "caseId": "sky-test-comet",
-  "description": "Un ciel d'essai pour une comète : Hale-Bopp au soir du 1er avril 1997, vue de Paris au crépuscule, à 30° de hauteur au nord-ouest, de magnitude −0,8 et la queue longue de 20°. Son orbite n'est pas stockée — elle est propagée en variables universelles depuis les éléments de son propre passage au périhélie, et la queue est projetée à partir d'une longueur physique dans l'espace, pas dessinée à une taille choisie. La ligne « Ciel : » de l'éditeur en donne la magnitude, la hauteur et la longueur de queue, et refuse de conclure quoi que ce soit à la place du lecteur.",
+  "description": {
+    "fr": "Un ciel d'essai pour une comète : Hale-Bopp au soir du 1er avril 1997, vue de Paris au crépuscule, à 30° de hauteur au nord-ouest, de magnitude −0,8 et la queue longue de 20°. Son orbite n'est pas stockée — elle est propagée en variables universelles depuis les éléments de son propre passage au périhélie, et la queue est projetée à partir d'une longueur physique dans l'espace, pas dessinée à une taille choisie. La ligne « Ciel : » de l'éditeur en donne la magnitude, la hauteur et la longueur de queue, et refuse de conclure quoi que ce soit à la place du lecteur.",
+    "en": "A test sky for a comet: Hale-Bopp on the evening of 1 April 1997, seen from Paris at dusk, 30° up in the north-west, magnitude −0.8 with a 20°-long tail. Its orbit is not stored — it is propagated in universal variables from the elements of its own perihelion passage, and the tail is projected from a physical length in space rather than drawn at a chosen size. The editor's “Sky:” line gives its magnitude, its height and its tail length, and refuses to conclude anything in the reader's place."
+  },
   "time": {
     "year": 1997,
     "month": 4,

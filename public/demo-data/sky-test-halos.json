@@ -1,7 +1,10 @@
 {
   "version": 1,
   "caseId": "sky-test-halos",
-  "description": "Un ciel d'essai pour le cortège des halos. Rien ici n'est une forme posée : un prisme hexagonal de glace et la loi de Snell suffisent à tout produire. Le Soleil est à 20° de hauteur, un voile de cirrus couvre 85 % du ciel, et les cristaux tombent bien à plat (alignement 95 %) — c'est ce dernier réglage, que nul relevé au monde ne contient, qui décide si l'on voit un simple anneau ou le cortège entier : anneau à 22°, parhélies de part et d'autre, arc tangent, circumzénithal, cercle parhélique. Aucun angle n'a été choisi : ils sortent tous de l'indice de réfraction de la glace.",
+  "description": {
+    "fr": "Un ciel d'essai pour le cortège des halos. Rien ici n'est une forme posée : un prisme hexagonal de glace et la loi de Snell suffisent à tout produire. Le Soleil est à 20° de hauteur, un voile de cirrus couvre 85 % du ciel, et les cristaux tombent bien à plat (alignement 95 %) — c'est ce dernier réglage, que nul relevé au monde ne contient, qui décide si l'on voit un simple anneau ou le cortège entier : anneau à 22°, parhélies de part et d'autre, arc tangent, circumzénithal, cercle parhélique. Aucun angle n'a été choisi : ils sortent tous de l'indice de réfraction de la glace.",
+    "en": "A test sky for the halo display. Nothing here is a placed shape: a hexagonal ice prism and Snell's law produce all of it. The Sun is 20° up, a veil of cirrus covers 85% of the sky, and the crystals fall well flat (95% alignment) — and it is that last setting, which no meteorological record in the world contains, that decides whether one sees a plain ring or the whole display: the 22° ring, sundogs on either side, the tangent arc, the circumzenithal arc, the parhelic circle. Not one angle was chosen: they all come out of ice's refractive index."
+  },
   "time": {
     "year": 2020,
     "month": 1,

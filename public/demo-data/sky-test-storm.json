@@ -1,7 +1,10 @@
 {
   "version": 1,
   "caseId": "sky-test-storm",
-  "description": "Un ciel d'essai pour la mauvaise météo : orage en fin d'après-midi, base des nuages à 600 m, pluie forte, vent de 14 m/s. La pluie a son propre shader et dérive selon le vent réel ; les éclairs illuminent la brume de la scène puis le tonnerre arrive avec son retard. Tout s'arrête avec le lecteur : une lecture en pause est un instant d'observation, pas une ambiance. Ici la météo est énoncée à la main — sur un vrai dossier daté, elle serait relevée dans ERA5 et affichée en lecture seule.",
+  "description": {
+    "fr": "Un ciel d'essai pour la mauvaise météo : orage en fin d'après-midi, base des nuages à 600 m, pluie forte, vent de 14 m/s. La pluie a son propre shader et dérive selon le vent réel ; les éclairs illuminent la brume de la scène puis le tonnerre arrive avec son retard. Tout s'arrête avec le lecteur : une lecture en pause est un instant d'observation, pas une ambiance. Ici la météo est énoncée à la main — sur un vrai dossier daté, elle serait relevée dans ERA5 et affichée en lecture seule.",
+    "en": "A test sky for bad weather: a late-afternoon storm, cloud base at 600 m, heavy rain, 14 m/s of wind. The rain has a shader of its own and drifts with the real wind; the lightning lights the scene's own haze, and the thunder then arrives with its delay. All of it stops with the player: a paused playback is an instant of an observation, not an ambience. Here the weather is stated by hand — on a real dated case it would be looked up in ERA5 and shown read-only."
+  },
   "time": {
     "year": 2021,
     "month": 7,

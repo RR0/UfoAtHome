@@ -1,7 +1,10 @@
 {
   "version": 1,
   "caseId": "sky-test-satellites",
-  "description": "Un ciel d'essai pour la question satellite. On ne prétend pas dessiner un passage : aucun élément orbital historique n'est appelable depuis un navigateur, et propager un TLE d'aujourd'hui vers une date ancienne ne donnerait rien de vrai. Ce qui est calculé, c'est la seule chose qui décide : la hauteur de l'ombre de la Terre au-dessus du témoin. Ici, au crépuscule du 20 avril 2020, elle est assez basse pour que l'orbite basse soit encore au soleil — et le compte SATCAT daté dit combien d'objets tournaient ce mois-là, trains Starlink compris. Être éclairé n'est pas être vu, mais n'être pas éclairé règle la question.",
+  "description": {
+    "fr": "Un ciel d'essai pour la question satellite. On ne prétend pas dessiner un passage : aucun élément orbital historique n'est appelable depuis un navigateur, et propager un TLE d'aujourd'hui vers une date ancienne ne donnerait rien de vrai. Ce qui est calculé, c'est la seule chose qui décide : la hauteur de l'ombre de la Terre au-dessus du témoin. Ici, au crépuscule du 20 avril 2020, elle est assez basse pour que l'orbite basse soit encore au soleil — et le compte SATCAT daté dit combien d'objets tournaient ce mois-là, trains Starlink compris. Être éclairé n'est pas être vu, mais n'être pas éclairé règle la question.",
+    "en": "A test sky for the satellite question. There is no pretence of drawing a pass: no historical orbital elements can be fetched from a browser, and propagating today's TLE back to an old date would produce nothing true. What is computed is the one thing that decides: the height of the Earth's shadow above the witness. Here, at dusk on 20 April 2020, it is low enough for low orbit to still be in sunlight — and the dated SATCAT count says how many objects were going round that month, Starlink trains included. Being lit is not being seen, but not being lit settles the question."
+  },
   "time": {
     "year": 2020,
     "month": 4,
