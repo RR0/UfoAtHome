@@ -1026,13 +1026,23 @@ export class SceneRenderer {
     // intuition, and the first attempt had it backwards. The pose states how the INSTRUMENT was
     // held, so tilting it clockwise leaves the scene where it is and swings the frame: a level
     // horizon then comes out running UPHILL to the right, by the same angle.
-    const rollRad = (pose.rollDeg ?? 0) * DEG_TO_RAD
+    //
+    // The walking cycle's own share of it is added here in all three senses — see setGait, and
+    // GaitOffset.rollDeg for why it is a fraction of a degree through an eye and the whole of it
+    // through a camera. Discarded for a witness sitting inside a decor object, whose whole camera
+    // rotation updateDecorAnchoring overwrites a moment later.
+    const rollRad = ((pose.rollDeg ?? 0) + this.gaitOffset.rollDeg) * DEG_TO_RAD
     // A reader turning to look at something is added on top of the pose, never written into it —
     // see setLookOffset. What the witness said they faced is the record; where somebody browsing it
     // has pointed the view is not.
-    const pitchRad = (pose.pitchDeg + this.lookPitchDeg) * DEG_TO_RAD
+    const pitchRad = (pose.pitchDeg + this.lookPitchDeg + this.gaitOffset.pitchDeg) * DEG_TO_RAD
     if (pose.headingDeg !== undefined) {
-      this.camera.rotation.set(pitchRad, -(pose.headingDeg + this.lookYawDeg) * DEG_TO_RAD, rollRad, "YXZ")
+      this.camera.rotation.set(
+        pitchRad,
+        -(pose.headingDeg + this.lookYawDeg + this.gaitOffset.yawDeg) * DEG_TO_RAD,
+        rollRad,
+        "YXZ"
+      )
     } else {
       this.camera.rotation.set(pitchRad, this.camera.rotation.y, rollRad, "YXZ")
     }
@@ -1537,7 +1547,7 @@ export class SceneRenderer {
     this.gaitOffset = offset
   }
 
-  private gaitOffset: GaitOffset = { eastM: 0, northM: 0, upM: 0 }
+  private gaitOffset: GaitOffset = { eastM: 0, northM: 0, upM: 0, rollDeg: 0, pitchDeg: 0, yawDeg: 0 }
 
   /** Turns the view without touching the record — what a click on the witness map's own scenery
    * does, and what returns to zero when the reader asks for the witness's own gaze again. */

@@ -14,6 +14,19 @@ export interface GaitOffset {
   eastM: number
   northM: number
   upM: number
+  /**
+   * How far the walking cycle has turned the instrument at this instant, degrees, in the same three
+   * senses and with the same signs as the pose's own headingDeg/pitchDeg/rollDeg — so a caller adds
+   * them and needs to know nothing else.
+   *
+   * WHAT REACHES THE IMAGE, not what the body did: the three translations above are the carrier's
+   * own and cannot be anything else, but a rotation can be cancelled before it is ever recorded,
+   * and in a witness's own eye it very nearly is (see Gait.of and Instrument.stabilization). An eye
+   * gets a residue of a fraction of a degree; a camera in the same hand gets the lot.
+   */
+  rollDeg: number
+  pitchDeg: number
+  yawDeg: number
 }
 
 /** One stretch of path over which the witness travelled at one speed, with the walking cycle's
@@ -101,10 +114,37 @@ export class Gait {
    */
   private static readonly FASTEST_WALK_M_PER_S = 2.2
 
-  /** What a witness who is not walking is displaced by. Frozen: it is handed out repeatedly. */
-  static readonly STILL: GaitOffset = Object.freeze({ eastM: 0, northM: 0, upM: 0 })
+  /**
+   * How far the head turns over the cycle, degrees of amplitude at the reference speed — roll and
+   * yaw once per stride, pitch twice, and all three growing with speed the way the rise does.
+   *
+   * Measured at the HEAD (Pozzo, Berthoz & Lefort, "Head stabilization during various locomotor
+   * tasks in humans", 1990, and the head-stabilization literature after it), which is exactly right
+   * for the eye in it and an approximation for a camera in the hands below it: an arm is not a neck.
+   * Held to be the same for both here because the difference is smaller than the spread between one
+   * walker and the next, and because inventing a second set of numbers for hands nobody measured
+   * would be inventing precision rather than adding it.
+   */
+  private static readonly HEAD_ROLL_DEG = 1.5
+  private static readonly HEAD_PITCH_DEG = 1.25
+  private static readonly HEAD_YAW_DEG = 1
 
-  private constructor(private readonly stretches: ReadonlyArray<GaitStretch>) {}
+  /** What a witness who is not walking is displaced by. Frozen: it is handed out repeatedly. */
+  static readonly STILL: GaitOffset = Object.freeze({
+    eastM: 0,
+    northM: 0,
+    upM: 0,
+    rollDeg: 0,
+    pitchDeg: 0,
+    yawDeg: 0
+  })
+
+  private constructor(
+    private readonly stretches: ReadonlyArray<GaitStretch>,
+    /** The share of the head's own rotation that survives as far as the image — see
+     * Instrument.stabilization, and GaitOffset.rollDeg for why the translations have no such share. */
+    private readonly rotationPassed: number
+  ) {}
 
   /**
    * The gait implied by a recording's own witness track, or undefined when the recording states no
@@ -152,7 +192,8 @@ export class Gait {
       stretches[index].rampsIn = previous === undefined || previous.stepHz === 0
       stretches[index].rampsOut = next === undefined || next.stepHz === 0
     }
-    return stretches.some(stretch => stretch.stepHz > 0) ? new Gait(stretches) : undefined
+    if (!stretches.some(stretch => stretch.stepHz > 0)) return undefined
+    return new Gait(stretches, 1 - (sighting.instrument.stabilization ?? 0))
   }
 
   /**
@@ -180,11 +221,24 @@ export class Gait {
     const stepAngle = 2 * Math.PI * steps
     const settled = this.amplitudeAt(stretch, tMs)
     const sway = Gait.SWAY_M * settled * Math.cos(stepAngle / 2)
+    // Rotations grow with speed the way the rise does, and are then cut down by whatever the
+    // instrument cancels — nearly all of it, for an eye.
+    const turn = (settled * this.rotationPassed * stretch.speedMPerS) / Gait.REFERENCE_SPEED_M_PER_S
     return {
       // To the witness's right, which is the direction of travel turned a quarter turn clockwise.
       eastM: sway * stretch.northUnit,
       northM: -sway * stretch.eastUnit,
-      upM: Gait.RISE_M_PER_M_PER_S * stretch.speedMPerS * settled * Math.cos(stepAngle)
+      upM: Gait.RISE_M_PER_M_PER_S * stretch.speedMPerS * settled * Math.cos(stepAngle),
+      // Leaning over the foot being stood on, which is the same side the body has swayed towards —
+      // the one phase relationship here that a body really does hold to, and the reason roll shares
+      // the sway's once-per-stride rhythm rather than the rise's twice.
+      rollDeg: Gait.HEAD_ROLL_DEG * turn * Math.cos(stepAngle / 2),
+      // Nodding against the rise rather than with it: a walking head pitches down as it comes up,
+      // which is most of what "the head is stabilised" means. The amplitude is the measured part;
+      // the sign is the direction the compensation runs in, and nothing in a case file could check
+      // either it or the yaw's phase below.
+      pitchDeg: -Gait.HEAD_PITCH_DEG * turn * Math.cos(stepAngle),
+      yawDeg: Gait.HEAD_YAW_DEG * turn * Math.cos(stepAngle / 2)
     }
   }
 

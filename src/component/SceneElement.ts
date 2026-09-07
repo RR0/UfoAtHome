@@ -942,7 +942,7 @@ export class SceneElement extends HTMLElement {
     for (const sourceId of timeline.sourceIds) {
       const shape = timeline.getInterpolatedShapeAt(t, sourceId)
       if (!shape) continue
-      const shift = this.ufoElement.lookShiftPx
+      const shift = this.ufoElement.frameShiftPx
       const centreX = shape.bounds.x + shape.bounds.width / 2 + shift.x
       const centreY = shape.bounds.y + shape.bounds.height / 2 + shift.y
       const ndcX = (centreX / canvas.width) * 2 - 1

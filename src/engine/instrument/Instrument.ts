@@ -157,6 +157,26 @@ export interface Instrument {
    * to an ordinary film frame's own.
    */
   detailUm?: number
+  /**
+   * How much of the holder's own involuntary rotation never reaches the image, 0 (all of it does)
+   * to 1 (none of it does).
+   *
+   * The one property here that is not about optics at all, and it belongs to the instrument all the
+   * same: an eye is not a camera that happens to be in a head, it is stabilised twice over. The head
+   * carrying it holds itself against the body's own oscillation, and the vestibulo-ocular reflex
+   * turns the eye against whatever rotation is left, at a gain near one across the one-to-five hertz
+   * a walk lives in. What survives is a fraction of a degree. A camera in the same walking hand has
+   * none of that and gets the whole of it, which is why a hand-held film of a sighting looks the way
+   * it does and why a witness's own account never mentions the world tipping from side to side.
+   *
+   * Rotation only. A body's rise and sway carry the eye bodily up and across, and no reflex can undo
+   * that: what it changes is which near thing hides which, and that really is what the witness saw
+   * (see Gait, which applies this to one and not the other).
+   *
+   * Absent means none, which is the honest default for a device in a hand. A modern phone's own
+   * optical stabilisation would be stated here, and is not claimed by any entry below.
+   */
+  stabilization?: number
 }
 
 /** Every instrument a recording can declare having been made through. Deliberately two entries and
@@ -167,7 +187,11 @@ export const INSTRUMENTS: Instrument[] = [
     id: "eye",
     name: { en: "Naked eye", fr: "Œil nu" },
     flare: 0,
-    projection: "equidistant"
+    projection: "equidistant",
+    // Not quite 1: the reflex is very good and is not perfect, and the residue it leaves is the
+    // difference between a reconstruction that is dead still because nobody thought about it and
+    // one that is nearly still because somebody did.
+    stabilization: 0.9
   },
   {
     id: "rectilinear-lens",

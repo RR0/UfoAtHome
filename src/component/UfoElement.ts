@@ -1,6 +1,8 @@
 import { html, css } from "./ufoTemplate.js"
 import { SightingFetch } from "../engine/net/SightingFetch.js"
 import { Instruments } from "../engine/instrument/Instrument.js"
+import { Gait } from "../engine/place/Gait.js"
+import type { GaitOffset } from "../engine/place/Gait.js"
 import { resolveObserverPoseAt, Sighting, resolveSoundAt, sightingDurationMs, sightingTimeToMs } from "../engine/model/Sighting.js"
 import type { SightingTime } from "../engine/model/Sighting.js"
 import { Player } from "../engine/playback/Player.js"
@@ -914,9 +916,14 @@ export class UfoElement extends HTMLElement {
     // statement SceneRenderer.setInstrument makes about the Sun, made here about the witness's own
     // object, which is painted on this overlay instead of in that scene.
     this.canvasRenderer.setStarPoints(Instruments.starPointsOf(this.sighting.instrument))
-    this.canvasRenderer.setRoll(((resolveObserverPoseAt(this.sighting, t)?.rollDeg ?? 0) * Math.PI) / 180)
+    // The witness's own walk turns the instrument a little as it carries it — a fraction of a degree
+    // through an eye, the whole of it through a camera in a walking hand (see Gait, and
+    // Instrument.stabilization). Added to the recorded roll here and to the scene's own camera in
+    // SceneRenderer.setObserverPose, from the same numbers, so the two layers cannot drift apart.
+    const roll = (resolveObserverPoseAt(this.sighting, t)?.rollDeg ?? 0) + this.gaitAt(t).rollDeg
+    this.canvasRenderer.setRoll((roll * Math.PI) / 180)
     const instants = this.exposureInstants(t)
-    const shift = this.lookShift
+    const shift = this.frameShift
     for (const instant of instants) {
       for (const [sourceId, shape] of instant.shapes) {
         if (this.occludedSourceIds.has(sourceId)) continue
@@ -968,7 +975,8 @@ export class UfoElement extends HTMLElement {
     this.dispatchEvent(new CustomEvent("timeupdate", { detail: { time: t } }))
   }
 
-  /** The same shape, moved by however far the reader has turned the view — see lookShift. */
+  /** The same shape, moved by however far the frame has moved off the recorded pose — see
+   * frameShift. */
   private shifted(shape: Shape, shift: { x: number; y: number }): Shape {
     if (shift.x === 0 && shift.y === 0) return shape
     return { ...shape, bounds: { ...shape.bounds, x: shape.bounds.x + shift.x, y: shape.bounds.y + shift.y } }
@@ -1521,15 +1529,35 @@ export class UfoElement extends HTMLElement {
   /** How far the reader's own turn moves the overlay, in the pixels shapes are drawn in — public
    * because a composing element testing what the decor hides has to ask about the point a shape is
    * actually PAINTED at, not the one the timeline stores (see SceneElement.updateUfoOcclusion). */
-  get lookShiftPx(): { x: number; y: number } {
-    return this.lookShift
+  get frameShiftPx(): { x: number; y: number } {
+    return this.frameShift
   }
 
-  private get lookShift(): { x: number; y: number } {
-    if (this.lookYawDeg === 0 && this.lookPitchDeg === 0) return { x: 0, y: 0 }
+  /**
+   * How far everything painted on this overlay has moved off the recorded pose, pixels — a reader
+   * having turned the view (see setLookOffset), and the witness's own walk having turned the
+   * instrument under them (see Gait).
+   *
+   * Read by whoever tests those shapes against the 3D scenery behind them as well as by whoever
+   * paints them (see SceneElement's occlusion sampling), which is the whole reason it is one value
+   * and not two: a shape drawn a centimetre to the left of where it is tested for occlusion comes
+   * out in front of a wall it is behind.
+   */
+  private get frameShift(): { x: number; y: number } {
+    const gait = this.gaitAt(this.currentTime)
+    const yawDeg = this.lookYawDeg + gait.yawDeg
+    const pitchDeg = this.lookPitchDeg + gait.pitchDeg
+    if (yawDeg === 0 && pitchDeg === 0) return { x: 0, y: 0 }
     const pose = resolveObserverPoseAt(this.currentSighting, this.currentTime)
     const projection = ImageProjection.of(this.currentSighting.instrument, this.canvas.height, pose?.fovDeg ?? 60)
-    return { x: -projection.angleDegToRadiusPx(this.lookYawDeg), y: projection.angleDegToRadiusPx(this.lookPitchDeg) }
+    return { x: -projection.angleDegToRadiusPx(yawDeg), y: projection.angleDegToRadiusPx(pitchDeg) }
+  }
+
+  /** What the witness's own walking is doing to the instrument at t — nothing for a witness who
+   * stood still, which is most of them. Rebuilt on demand rather than cached, for the reason
+   * Gait.of gives: an editor moves keyframes without the recording ever changing identity. */
+  private gaitAt(t: number): GaitOffset {
+    return Gait.of(this.currentSighting)?.offsetAt(t) ?? Gait.STILL
   }
 
   private updateFullscreenButton(): void {

@@ -7,8 +7,9 @@ import type { GaitOffset } from "../../src/engine/place/Gait.js"
  * south, 83.5 m in 55 s, so 1.52 m/s — an ordinary brisk walk. Then he stops. */
 const METRES_PER_DEG_LAT = 111320
 
-function walking(metresPerSecond: number, seconds: number, thenStandingSeconds = 0): Sighting {
+function walking(metresPerSecond: number, seconds: number, thenStandingSeconds = 0, instrumentId?: string): Sighting {
   const sighting = Sighting.create(undefined, [{ lat: 43.8378, lng: 5.993 }])
+  sighting.instrumentId = instrumentId
   const pose = { elevationM: 0, pitchDeg: 0, fovDeg: 60 }
   sighting.witnessTrack.addKeyframe(0, { ...pose, lat: 43.8378, lng: 5.993 })
   const southDeg = (metresPerSecond * seconds) / METRES_PER_DEG_LAT
@@ -120,6 +121,47 @@ describe("Gait", () => {
     expect(across).toBeLessThanOrEqual(worstElsewhere)
     // And the walk really is at full stride there, so the check above is not passing on zeroes.
     expect(Math.abs(gait.offsetAt(30_000).upM)).toBeGreaterThan(0.02)
+  })
+
+  it("leaves an eye almost, but not quite, still", () => {
+    // The head holds itself against the body's oscillation and the vestibulo-ocular reflex takes
+    // most of what is left, so what a walking witness sees tips by a fraction of a degree — not by
+    // nothing, and not by the couple of degrees their head really did turn through.
+    const rolls = samples(Gait.of(walking(1.52, 55))!, 20_000, 30_000).map(offset => offset.rollDeg)
+    const peakToPeak = Math.max(...rolls) - Math.min(...rolls)
+    expect(peakToPeak).toBeGreaterThan(0.1)
+    expect(peakToPeak).toBeLessThan(0.5)
+  })
+
+  it("gives a camera in the same walking hand the whole of it", () => {
+    const eye = samples(Gait.of(walking(1.52, 55, 0, "eye"))!, 20_000, 30_000)
+    const camera = samples(Gait.of(walking(1.52, 55, 0, "rectilinear-lens"))!, 20_000, 30_000)
+    const swing = (rows: GaitOffset[], key: "rollDeg" | "pitchDeg" | "yawDeg") =>
+      Math.max(...rows.map(row => row[key])) - Math.min(...rows.map(row => row[key]))
+    expect(swing(camera, "rollDeg")).toBeGreaterThan(2.5)
+    expect(swing(camera, "rollDeg")).toBeCloseTo(10 * swing(eye, "rollDeg"), 5)
+    // And it is a rotation the instrument cancels, never a displacement: both are carried bodily by
+    // the same legs, so the rise is identical whatever they were looking through.
+    expect(swing(camera, "pitchDeg")).toBeGreaterThan(swing(eye, "pitchDeg"))
+    expect(Math.max(...camera.map(row => row.upM))).toBeCloseTo(Math.max(...eye.map(row => row.upM)), 10)
+  })
+
+  it("rolls once per stride and nods twice, like the sway and the rise they follow", () => {
+    const rows = samples(Gait.of(walking(1.52, 55, 0, "rectilinear-lens"))!, 20_000, 30_000, 2)
+    const peaks = (values: number[]) => {
+      let count = 0
+      for (let index = 1; index < values.length - 1; index++) {
+        if (values[index] > values[index - 1] && values[index] >= values[index + 1]) count++
+      }
+      return count
+    }
+    const nods = peaks(rows.map(row => row.pitchDeg))
+    const rolls = peaks(rows.map(row => row.rollDeg))
+    expect(nods).toBeGreaterThanOrEqual(2 * rolls - 1)
+    expect(nods).toBeLessThanOrEqual(2 * rolls + 1)
+    // The sway the roll goes with, and the rise the nod goes with, are on those same two rhythms.
+    expect(rolls).toBe(peaks(rows.map(row => row.eastM)))
+    expect(nods).toBe(peaks(rows.map(row => row.upM)))
   })
 
   it("gives the same answer every time it is asked", () => {
