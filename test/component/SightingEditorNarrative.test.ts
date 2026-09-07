@@ -141,11 +141,20 @@ function field<T extends HTMLElement>(element: SightingEditorElement, id: string
   return element.shadowRoot!.getElementById(id) as T
 }
 
+function type(element: SightingEditorElement, id: string, value: string): void {
+  const input = field<HTMLInputElement | HTMLTextAreaElement>(element, id)
+  input.value = value
+  // Dispatched, not just assigned: the button enables itself off these events (see
+  // syncNarrativeEnabled), and a disabled button ignores click(), so a test that only assigned
+  // would press nothing and prove nothing.
+  input.dispatchEvent(new Event("input"))
+}
+
 /** Types an account and a key, then presses the button — the whole gesture, since none of it works
  * without the other parts. */
 async function draft(element: SightingEditorElement, ask: string, key = "sk-test"): Promise<void> {
-  field<HTMLTextAreaElement>(element, "narrative").value = ask
-  field<HTMLInputElement>(element, "narrativeKey").value = key
+  type(element, "narrative", ask)
+  type(element, "narrativeKey", key)
   field<HTMLButtonElement>(element, "narrative-draft").click()
   await new Promise(resolve => setTimeout(resolve, 0))
 }
@@ -279,6 +288,42 @@ describe("SightingEditorElement drafting from an account", () => {
     await draft(element, "   ")
 
     expect(asked).toEqual([])
+  })
+
+  it("offers the button only when pressing it would do something, and says what is missing", async () => {
+    // A button that silently does nothing is worse than a disabled one: a reader who forgot the key
+    // cannot tell a missing field from a broken feature.
+    const element = mount()
+    const button = field<HTMLButtonElement>(element, "narrative-draft")
+
+    expect(button.disabled).toBe(true)
+    expect(button.title).toBe(
+      sightingEditorMessages_en.narrativeNeedsKey.replace("{source}", "Test reader"))
+
+    type(element, "narrativeKey", "sk-test")
+    expect(button.disabled).toBe(true)
+    expect(button.title).toBe(sightingEditorMessages_en.narrativeNeedsAsk)
+
+    type(element, "narrative", "The account.")
+    expect(button.disabled).toBe(false)
+    expect(button.title).toBe("")
+  })
+
+  it("names the source the key is for, rather than leaving the reader to guess whose", async () => {
+    const element = mount()
+
+    expect(field(element, "label-narrative-key").textContent).toBe("Test reader API key")
+  })
+
+  it("becomes unavailable again once the box has been emptied by a draft", async () => {
+    const element = mount()
+    answer = () => Promise.resolve({ recording: { caseId: "a" }, claims: [], gaps: [] })
+
+    await draft(element, "The account.")
+
+    expect(field<HTMLButtonElement>(element, "narrative-draft").disabled).toBe(true)
+    expect(field<HTMLButtonElement>(element, "narrative-draft").title)
+      .toBe(sightingEditorMessages_en.narrativeNeedsAsk)
   })
 
   it("keeps the key only when asked to, and forgets it the moment that is unticked", async () => {

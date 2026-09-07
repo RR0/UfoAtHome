@@ -450,8 +450,15 @@ export interface SightingEditorMessages extends SightingLabels {
   /** Placeholder in that textarea, once there has been a draft: from then on what is typed there is
    * a correction of the last one, not a fresh account. */
   narrativeCorrection: string
-  /** The reader's own API key. Theirs, never the site's — see ClaudeNarrativeProvider. */
+  /** The reader's own API key. Theirs, never the site's — see ClaudeNarrativeProvider. {source} is
+   * the reader it is a key FOR, taken from the registry rather than written in: a key field that
+   * says only "API key" leaves a reader to guess whose, and the answer is a property of whichever
+   * source is registered (see narrativeSources.ts). */
   narrativeKey: string
+  /** Why the button is disabled with no key in the field. {source} as above. */
+  narrativeNeedsKey: string
+  /** Why it is disabled with nothing to send — an empty account, or an empty correction. */
+  narrativeNeedsAsk: string
   /** The checkbox that keeps that key in this browser. Off by default: storing somebody's key is
    * their decision to take, not a convenience to help them to. */
   narrativeRemember: string

@@ -1119,13 +1119,22 @@ export class SightingEditorElement extends HTMLElement {
     this.narrativeDraftButton.addEventListener("click", () => this.draftFromNarrative())
     this.narrativeStopButton.addEventListener("click", () => this.narrativeAbort?.abort())
     this.narrativeRememberInput.addEventListener("change", () => this.rememberNarrativeKey())
-    this.narrativeKeyInput.addEventListener("input", () => this.rememberNarrativeKey())
+    this.narrativeKeyInput.addEventListener("input", () => {
+      this.rememberNarrativeKey()
+      this.syncNarrativeEnabled()
+    })
+    this.narrativeInput.addEventListener("input", () => this.syncNarrativeEnabled())
     // The source names itself and credits itself in one control, the way every other data source in
     // this project does (see DataSource): a static attribution beside a field would hide that this
     // is a choice, and a name with no attribution would credit nobody.
     this.narrativeCreditLink.textContent = `${NARRATIVE_SOURCES[0].name} — ${NARRATIVE_SOURCES[0].credit}`
     this.narrativeCreditLink.href = NARRATIVE_SOURCES[0].creditUrl
+    // Said here and not only in applyMessages, which never runs for an English reader (see
+    // loadLocaleMessages): the template's baked-in default cannot carry the source's name, because
+    // which source is registered is not a fact the template has.
+    this.labelNarrativeKey.textContent = this.messages.narrativeKey.replace("{source}", NARRATIVE_SOURCES[0].name)
     this.restoreNarrativeKey()
+    this.syncNarrativeEnabled()
     this.durationInput.addEventListener("input", () => {
       this.ufoElement.durationSeconds = this.durationInput.value === "" ? undefined : Number(this.durationInput.value)
       this.ufoElement.refresh() // otherwise the seek bar's max (seekableDuration) only updates on the next tick
@@ -1541,9 +1550,10 @@ export class SightingEditorElement extends HTMLElement {
    * Namespaced like everything else this element could ever store on a host page it shares. */
   private static readonly NARRATIVE_KEY_STORAGE = "rr0-sighting-editor.narrative-key"
 
-  /** Built on the first draft, kept after it: a provider holds its loaded SDK and its client, and
-   * rebuilding one per ask would download and reconnect every time. */
-  private narrativeProvider?: NarrativeProvider
+  /** Built once, up front: constructing one is free (its SDK and its client load on the first ask,
+   * not here), and the panel has to know before any draft whether this reader needs a key at all —
+   * see NarrativeProvider.needsCredential, and syncNarrativeEnabled. */
+  private readonly narrativeProvider: NarrativeProvider = NARRATIVE_SOURCES[0].create()
 
   /** Every round so far, oldest first. The Messages API remembers nothing, so this is the memory —
    * and it dies with the page, which is deliberate: an account is somebody's testimony and has no
@@ -1569,11 +1579,10 @@ export class SightingEditorElement extends HTMLElement {
   private async draftFromNarrative(): Promise<void> {
     const ask = this.narrativeInput.value.trim()
     if (ask === "" || this.narrativeAbort) return
-    const provider = this.narrativeProvider ??= NARRATIVE_SOURCES[0].create()
     const abort = this.narrativeAbort = new AbortController()
     this.setNarrativeBusy(true)
     try {
-      const draft = await provider.draft({
+      const draft = await this.narrativeProvider.draft({
         ask,
         history: this.narrativeHistory,
         current: this.sightingData,
@@ -1609,6 +1618,7 @@ export class SightingEditorElement extends HTMLElement {
     this.narrativeInput.placeholder = this.messages.narrativeCorrection
     this.narrativeDraftButton.textContent = this.messages.narrativeCorrect
     this.showNarrativeReport(draft)
+    this.syncNarrativeEnabled()
   }
 
   /** What the draft says it read, and what it says it could not. Rendered rather than summarised:
@@ -1649,12 +1659,34 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   private setNarrativeBusy(busy: boolean): void {
-    this.narrativeDraftButton.disabled = busy
     this.narrativeInput.disabled = busy
     this.narrativeStopButton.hidden = !busy
     if (busy) {
       this.narrativeStatus.textContent = this.messages.narrativeWorking
     }
+    this.syncNarrativeEnabled()
+  }
+
+  /**
+   * Offers the button only when pressing it would do something, and says on the button itself what
+   * is missing when it wouldn't.
+   *
+   * A button that silently does nothing is the worse of the two failures: a reader who typed an
+   * account and forgot the key would press it, watch nothing happen, and have no way to tell a
+   * missing field from a broken feature. The tooltip names the field, and names the SOURCE the key
+   * is for, since "API key" alone leaves them to guess whose.
+   */
+  private syncNarrativeEnabled(): void {
+    const source = NARRATIVE_SOURCES[0].name
+    const missingKey = this.narrativeProvider.needsCredential && this.narrativeKeyInput.value.trim() === ""
+    const missingAsk = this.narrativeInput.value.trim() === ""
+    this.narrativeDraftButton.disabled = Boolean(this.narrativeAbort) || missingKey || missingAsk
+    this.narrativeDraftButton.title = missingKey
+      ? this.messages.narrativeNeedsKey.replace("{source}", source)
+      : missingAsk ? this.messages.narrativeNeedsAsk : ""
+    // A reader with nothing to authenticate is not shown a field asking them to.
+    this.narrativeKeyInput.parentElement!.hidden = !this.narrativeProvider.needsCredential
+    this.narrativeRememberInput.parentElement!.hidden = !this.narrativeProvider.needsCredential
   }
 
   private narrativeErrorFor(error: unknown): string {
@@ -5487,13 +5519,15 @@ export class SightingEditorElement extends HTMLElement {
     this.importUrlInput.placeholder = messages.importUrlPlaceholder
     this.importUrlButton.textContent = messages.importButton
     this.labelNarrative.textContent = messages.narrative
-    this.labelNarrativeKey.textContent = messages.narrativeKey
+    this.labelNarrativeKey.textContent = messages.narrativeKey.replace("{source}", NARRATIVE_SOURCES[0].name)
     this.labelNarrativeRemember.textContent = messages.narrativeRemember
     this.narrativeStopButton.textContent = messages.narrativeStop
     // Whichever of the two the button is currently offering: the panel switches to "Correct" for
     // good after the first draft, and a locale that arrives later must not send it back to "Draft".
     this.narrativeDraftButton.textContent = this.narrativeLastDraft ? messages.narrativeCorrect : messages.narrativeDraft
     this.narrativeInput.placeholder = this.narrativeLastDraft ? messages.narrativeCorrection : messages.narrativePlaceholder
+    // The tooltip is built from these too, so it has to be said again in the new language.
+    this.syncNarrativeEnabled()
     // Rebuilt rather than relabelled: the connector and every label live inside DOM this builds.
     this.refreshSourceRows()
     this.refreshTimeZoneOptions()
