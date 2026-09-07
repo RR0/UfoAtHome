@@ -17,6 +17,7 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
   SceneRenderer: class {
     resize(): void {}
     setObserverPose(): void {}
+    setGait(): void {}
     setTerrainOrigin(): void {}
     get currentTerrainAttribution(): undefined {
       return undefined

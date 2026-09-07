@@ -19,6 +19,7 @@ import {
 import type { ObserverGeo } from "../engine/astronomy/CelestialPositions.js"
 import { geoToLocalMeters } from "../render3d/terrain/GeoProjection.js"
 import { resolveObserverPoseAt, resolveWeatherAt } from "../engine/model/Sighting.js"
+import { Gait } from "../engine/place/Gait.js"
 import type { Sighting } from "../engine/model/Sighting.js"
 import type { ObserverPose } from "../engine/model/ObserverTrack.js"
 import type { Weather } from "../engine/model/Weather.js"
@@ -829,6 +830,11 @@ export class SceneElement extends HTMLElement {
         exposureSeconds: sighting.exposure
       })
     )
+    // What the witness's own legs are doing to their eye between two recorded positions — nothing
+    // for a witness who stood still, which is most of them, and a couple of centimetres of rise and
+    // sway for one who walked. Rebuilt each tick rather than cached: the editor moves keyframes
+    // under this element without the recording ever changing identity (see Gait.of).
+    this.sceneRenderer.setGait(Gait.of(sighting)?.offsetAt(t) ?? Gait.STILL)
     // Keeps decor anchored to its own real-world spot rather than sliding along with a moving
     // witness — see SceneRenderer.updateDecorAnchoring's own doc comment. The reference pose is
     // always the recording's own t=0, regardless of what t is being rendered right now.

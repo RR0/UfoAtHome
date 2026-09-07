@@ -58,6 +58,7 @@ import { equatorialToHorizontal } from "../engine/astronomy/CelestialPositions.j
 import { selectLocale } from "../i18n/locale.js"
 import type { CelestialBody, HorizontalPosition, MoonPhase, ObserverGeo } from "../engine/astronomy/CelestialPositions.js"
 import type { ObserverPose } from "../engine/model/ObserverTrack.js"
+import type { GaitOffset } from "../engine/place/Gait.js"
 import type { StarCatalog } from "./StarCatalog.js"
 import { RoundPoints } from "./RoundPoints.js"
 import { BRIGHT_STARS } from "../engine/astronomy/brightStarCatalog.js"
@@ -1056,7 +1057,10 @@ export class SceneRenderer {
         this.camera.updateProjectionMatrix()
       }
     }
-    this.camera.position.y = 1.6 + pose.elevationM
+    // Kept as its own field so the gait's rise can be added to it absolutely rather than
+    // incrementally — see setGait, applied in updateDecorAnchoring a moment later.
+    this.poseCameraY = 1.6 + pose.elevationM
+    this.camera.position.y = this.poseCameraY
     // Keeps the observer at the centre of their own sky, whatever altitude they are at — see
     // celestialGroup. x/z never move (this renderer keeps the camera on the vertical axis and
     // shifts the world around it instead — see updateDecorAnchoring), so only y is tracked.
@@ -1401,6 +1405,23 @@ export class SceneRenderer {
         ? geoToLocalMeters(referencePose.lat, referencePose.lng, currentPose.lat, currentPose.lng)
         : { x: 0, z: 0 }
     const inhabited = this.decorObjects.find(object => object.witnessSide !== undefined && canHoldWitness(object.kind))
+    if (!inhabited) {
+      // The walking eye's own displacement, turned into the same "how far has the world moved under
+      // the camera" that the drift above already is — and subtracted, not added: offset holds where
+      // the t=0 reference sits AS SEEN FROM the witness, so carrying the witness a centimetre east
+      // moves everything else a centimetre west. z is the negated north axis (see GeoProjection).
+      //
+      // Small enough to look pointless and it is not: this is the whole of the parallax that
+      // separates near scenery from far, and it is near scenery that carries it. The rise below
+      // moves a hedge two metres off by about a degree, and the horizon by nothing at all.
+      offset.x -= this.gaitOffset.eastM
+      offset.z += this.gaitOffset.northM
+      this.camera.position.y = this.poseCameraY + this.gaitOffset.upM
+      // The sky rides with the eye rather than against it: everything in celestialGroup sits on a
+      // shell around the observer, and a body's own three centimetres must not give the stars a
+      // parallax that a hundred kilometres of the Earth's own motion would barely give them.
+      this.celestialGroup.position.y = this.camera.position.y
+    }
     const shift = { x: 0, z: 0 }
     let furthestDecorM = 0
     if (inhabited) {
@@ -1496,6 +1517,27 @@ export class SceneRenderer {
    */
   private lookYawDeg = 0
   private lookPitchDeg = 0
+
+  /** Where the pose alone puts the eye, before the gait is added — see setGait. */
+  private poseCameraY = 1.6
+
+  /**
+   * How far the witness's own walking has carried their eye off the path at this instant, metres —
+   * see Gait, which derives it from the recorded path and states what it refuses to derive.
+   *
+   * On top of the pose and never written into it, exactly as setLookOffset is: a recording states
+   * where the witness was, and a body moving between two of those points is an inference from it,
+   * not a further thing the file said.
+   *
+   * Applied in updateDecorAnchoring rather than here, because that is where this renderer knows
+   * whether the witness is on their own feet at all: a witness sitting inside a decor object has no
+   * gait, and their viewpoint is that object's, not their legs' (see the inhabited branch there).
+   */
+  setGait(offset: GaitOffset): void {
+    this.gaitOffset = offset
+  }
+
+  private gaitOffset: GaitOffset = { eastM: 0, northM: 0, upM: 0 }
 
   /** Turns the view without touching the record — what a click on the witness map's own scenery
    * does, and what returns to zero when the reader asks for the witness's own gaze again. */
