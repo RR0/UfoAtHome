@@ -406,10 +406,20 @@ const CROP_ROW_SPACING_M = 1.4
  */
 function buildCrop(): Group {
   const group = new Group()
-  const clump = new SphereGeometry(CROP_CLUMP_RADIUS_M, 8, 4, 0, Math.PI * 2, 0, Math.PI / 2)
+  // Seven facets round and three up: a plant is half a metre across, and the ring after that is
+  // invisible at any distance a reader is ever looking at one from. Every segment here is paid for
+  // two hundred and seventy-two times per object.
+  const clump = new SphereGeometry(CROP_CLUMP_RADIUS_M, 7, 3, 0, Math.PI * 2, 0, Math.PI / 2)
   clump.scale(1, CROP_CLUMP_HEIGHT_M / CROP_CLUMP_RADIUS_M, 1)
   const patch = DecorSystem.repeatOnGrid(clump, CROP_CLUMPS_PER_ROW, CROP_CLUMP_SPACING_M, CROP_ROWS_PER_PATCH, CROP_ROW_SPACING_M)
-  addPart(group, patch, [0.26, 0.28, 0.22], 0)
+  const mesh = addPart(group, patch, [0.26, 0.28, 0.22], 0)
+  // The one thing in this renderer that does not cast a shadow, and the reason is arithmetic: a
+  // field is tens of thousands of plants, and a shadow map draws every one of them a second time.
+  // What it would buy is nothing anyone can see — a plant thirty centimetres tall throws a shadow
+  // into the next plant, and at the hour a witness is usually out there is no Sun above the horizon
+  // to throw one at all. They still RECEIVE shadows, which costs a shader flag and not a triangle,
+  // so a car or a shack still darkens the rows behind it.
+  mesh.castShadow = false
   clump.dispose()
   return group
 }

@@ -428,6 +428,9 @@ const PRECIPITATION_RESPAWN_Y_MIN = 0
  * object floats visibly above the ground with its own cast shadow (correctly projected onto the
  * real ground plane) reading as detached from its base. */
 const DECOR_GROUND_Y = 0
+/** How far out a cultivated field is still drawn as plants rather than left to the ground photograph
+ * underneath it — see updateDecorAnchoring, where it is applied and where the measurement is. */
+const CROP_VISIBLE_DISTANCE_M = 150
 /** RainSystem tuning — see RainSystem.ts's own doc comment for why rain gets a completely separate,
  * much tighter volume than the old shared 150m-radius CPU pool: a small, camera-hugging volume is
  * what actually reads as a dense downpour (parallax — see PrecipitationTypeConfig.radiusM's own
@@ -1452,6 +1455,13 @@ export class SceneRenderer {
       const x = placement.eastM + offset.x + shift.x
       const z = -placement.northM + offset.z + shift.z
       group.position.set(x, this.groundYUnder(x, z) + placement.altitudeM, z)
+      // A field is dropped once it is too far to read as one. Measured rather than chosen: at
+      // Valensole, hiding every patch beyond this changes three ten-thousandths of the picture,
+      // because a 55 cm plant at 150 m is a sixth of a pixel and what is left in its place is an
+      // aerial photograph of the same field. It is worth doing because a patch is ten thousand
+      // triangles: this alone is a third of the field's whole cost, and it follows the witness, so
+      // the ground they are about to walk onto is drawn by the time they get there.
+      if (object.kind === "crop") group.visible = Math.hypot(x, z) <= CROP_VISIBLE_DISTANCE_M
       if (placement.headingDeg !== undefined) group.rotation.y = -placement.headingDeg * DEG_TO_RAD
       furthestDecorM = Math.max(furthestDecorM, group.position.distanceTo(this.camera.position))
     }
@@ -2071,6 +2081,26 @@ export class SceneRenderer {
     return visible / SUN_DISC_SAMPLES.length
   }
 
+  /**
+   * The decor a ray may be asked about, which is all of it except a cultivated field.
+   *
+   * A field is excluded on two counts, and the second is what makes it a rule rather than a
+   * shortcut. It cannot hide anything anyone is looking at: it is ground cover a third of a metre
+   * tall, and a witness's eye, the Sun, and every phenomenon this project reconstructs are above it.
+   * And it is enormous — one patch is ten thousand triangles, a field is ninety of them, and this is
+   * asked nine times a frame for the Sun's own disc alone. Masse's field cost 2.4 ms a frame of
+   * being asked a question whose answer is always no.
+   */
+  private raycastableDecor(): Object3D[] {
+    const groups: Object3D[] = []
+    for (const object of this.decorObjects) {
+      if (object.kind === "crop") continue
+      const group = this.decorGroups.get(object.id)
+      if (group) groups.push(group)
+    }
+    return groups
+  }
+
   private isSunOccluded(offsetRightDeg = 0, offsetUpDeg = 0): boolean {
     // The scene's own matrices, not just the camera's. This runs BEFORE renderer.render(), which is
     // what normally refreshes them, so every object it tests would otherwise be where it was on the
@@ -2081,7 +2111,7 @@ export class SceneRenderer {
     const occluders: Object3D[] = []
     if (this.groundMesh) occluders.push(this.groundMesh)
     if (this.terrainMesh) occluders.push(this.terrainMesh)
-    for (const group of this.decorGroups.values()) occluders.push(group)
+    for (const group of this.raycastableDecor()) occluders.push(group)
     if (occluders.length === 0) return false
     const direction = this.sunOcclusionDirectionScratch.copy(this.sunWorldPosition).sub(this.camera.position)
     const distanceToSun = direction.length()
@@ -2178,6 +2208,7 @@ export class SceneRenderer {
     let behindM: number | undefined
     let inFrontM: number | undefined
     for (const object of this.decorObjects) {
+      if (object.kind === "crop") continue
       const group = this.decorGroups.get(object.id)
       if (!group) continue
       const hit = this.ufoOcclusionRaycaster.intersectObject(group, true)[0]
