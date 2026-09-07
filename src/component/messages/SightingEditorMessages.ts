@@ -440,4 +440,48 @@ export interface SightingEditorMessages extends SightingLabels {
    * SightingEditorElement's addDecorWitnessButton) — distinct from decorWitness, that dropdown
    * option's own (now-hidden) label. */
   addWitness: string
+  /** The account the recording is drafted from — the label above the textarea a reader pastes a
+   * testimony into. Names the reader's gesture and not the machinery: what happens is that a
+   * recording gets drafted from an account, and which service reads it is said by the credit
+   * beside the button. */
+  narrative: string
+  /** Placeholder in that textarea before there has been any draft. */
+  narrativePlaceholder: string
+  /** Placeholder in that textarea, once there has been a draft: from then on what is typed there is
+   * a correction of the last one, not a fresh account. */
+  narrativeCorrection: string
+  /** The reader's own API key. Theirs, never the site's — see ClaudeNarrativeProvider. */
+  narrativeKey: string
+  /** The checkbox that keeps that key in this browser. Off by default: storing somebody's key is
+   * their decision to take, not a convenience to help them to. */
+  narrativeRemember: string
+  /** The button that reads the account. */
+  narrativeDraft: string
+  /** What it says from the second round on. */
+  narrativeCorrect: string
+  /** Cancels a draft in flight. */
+  narrativeStop: string
+  /** Shown while the call is out. A draft takes tens of seconds, which is long enough that silence
+   * reads as breakage. */
+  narrativeWorking: string
+  /** What was written into the editor, {count} fields. Only what the draft CHANGED is written from
+   * the second round on (see DraftPatch), which is why this counts rather than saying "applied". */
+  narrativeApplied: string
+  /** The same, when a correction changed nothing at all — a real answer, and one worth saying out
+   * loud rather than leaving the reader to wonder whether the button worked. */
+  narrativeUnchanged: string
+  /** Heading over the quotes justifying each drafted value. */
+  narrativeClaims: string
+  /** Heading over what the account does not say. */
+  narrativeGaps: string
+  /** No key typed, or one the API refused. */
+  narrativeErrorCredential: string
+  /** Too many calls for the reader's own account, or too fast. */
+  narrativeErrorRateLimited: string
+  /** The service declined to answer at all. */
+  narrativeErrorRefused: string
+  /** An answer came back that is not a draft. */
+  narrativeErrorMalformed: string
+  /** Nothing answered. */
+  narrativeErrorUnreachable: string
 }

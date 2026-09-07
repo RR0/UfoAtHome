@@ -33,12 +33,12 @@
     "build:embed-ufo": "tsc --noEmit && vite build --config vite.embed-ufo.config.ts",
     "build:embed-scene": "tsc --noEmit && vite build --config vite.embed-scene.config.ts",
     "build:embed-sighting": "tsc --noEmit && vite build --config vite.embed-sighting.config.ts",
-    "build:all": "npm run build && npm run build:embed-sighting-editor && npm run build:embed-ufo && npm run build:embed-scene && npm run build:embed-sighting",
+    "build:all": "npm run build:schema && npm run build && npm run build:embed-sighting-editor && npm run build:embed-ufo && npm run build:embed-scene && npm run build:embed-sighting",
     "build:site": "npm run build:schema && npm run build:embed-sighting-editor && npm run build:embed-ufo && npm run build:embed-scene && npm run build:embed-sighting && vite build --config vite.site.config.ts && tsx site/build.ts",
     "site": "tsx site/build.ts",
     "site:watch": "node --watch-path=./site --watch-path=./public/demo-data --import tsx site/build.ts",
     "site:serve": "vite preview --outDir dist-site --port 5181 --strictPort",
-    "prepublishOnly": "npm run build:embed-sighting-editor && npm run build:embed-ufo && npm run build:embed-scene && npm run build:embed-sighting && npm test",
+    "prepublishOnly": "npm run build:schema && npm run build:embed-sighting-editor && npm run build:embed-ufo && npm run build:embed-scene && npm run build:embed-sighting && npm test",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -48,9 +48,10 @@
     "build:schema": "tsx scripts/build-sighting-schema.ts",
     "sync:cases": "tsx scripts/sync-case-recordings.ts",
     "pretest": "npm run build:schema",
-    "build:embed-sighting-editor": "tsc --noEmit && vite build --config vite.embed-sighting-editor.config.ts"
+    "build:embed-sighting-editor": "npm run build:schema && tsc --noEmit && vite build --config vite.embed-sighting-editor.config.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.124.0",
     "@rr0/data": "^0.3.41",
     "@rr0/place": "^0.5.4",
     "@rr0/time": "^0.11.2",

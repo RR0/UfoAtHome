@@ -1,6 +1,6 @@
 /**
  * Turns the TypeScript type of a recording into the completion data the Player page's JSON editor
- * offers, and writes it to site/generated/sightingSchema.json.
+ * offers, and writes it to src/generated/sightingSchema.json.
  *
  * Read from the types and not written by hand, for the reason every other derived thing in this
  * project is: a schema typed out beside the model is a second statement of it, free to fall behind
@@ -186,7 +186,10 @@ const program = ts.createProgram([path.join(root, "src", "engine", "persistence"
 const builder = new SchemaBuilder(program)
 const schema = builder.fieldsOf(builder.typeNamed("SightingRecordingJson"))
 
-const outDir = path.join(root, "site", "generated")
+// Under src/, not site/, because two things read it now: the Player page's JSON editor, and
+// ClaudeNarrativeProvider, which sends it as the format brief a draft has to obey. The second
+// ships in the browser bundle, so it cannot reach across into the site's own tree.
+const outDir = path.join(root, "src", "generated")
 mkdirSync(outDir, { recursive: true })
 const outPath = path.join(outDir, "sightingSchema.json")
 writeFileSync(outPath, `${JSON.stringify(schema, null, 2)}\n`)

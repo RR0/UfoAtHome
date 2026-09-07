@@ -1,7 +1,7 @@
 import { syntaxTree } from "@codemirror/language"
 import type { CompletionContext, CompletionResult, Completion } from "@codemirror/autocomplete"
 import type { SyntaxNode } from "@lezer/common"
-import schema from "../generated/sightingSchema.json"
+import schema from "../../src/generated/sightingSchema.json"
 
 /** One key of the format, as scripts/build-sighting-schema.ts writes it out of the TypeScript. */
 interface SchemaField {

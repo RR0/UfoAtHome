@@ -38,6 +38,24 @@ export const html = `
     <label><span id="label-milestone-label">Label</span> <input id="milestoneLabel" type="text" size="4"/></label>
     <label><span id="label-milestone-note">What happens</span> <input id="milestoneNote" type="text"/></label>
   </div>
+  <!-- Drafting the recording from the account it was written from — the fields above, filled in by
+       reading the testimony rather than by typing it out again. Its own row, not folded into the
+       toolbar above: an account is a paragraph, and a paragraph among a row of one-line fields
+       makes both harder to read. See SightingEditorElement.draftFromNarrative for what it does with
+       the answer, and NarrativeProvider for why an answer is more than a recording. -->
+  <div class="toolbar narrative">
+    <label class="wide"><span id="label-narrative">Draft from an account</span>
+      <textarea id="narrative" rows="4" placeholder="What the witness reported, in their own words"></textarea></label>
+    <label><span id="label-narrative-key">API key</span> <input id="narrativeKey" type="password" autocomplete="off" spellcheck="false"/></label>
+    <label class="checkbox"><input id="narrativeRemember" type="checkbox"/> <span id="label-narrative-remember">Remember on this device</span></label>
+    <button id="narrative-draft" type="button">Draft</button>
+    <button id="narrative-stop" type="button" hidden>Stop</button>
+    <a id="narrative-credit" class="inline-source" target="_blank" rel="noopener noreferrer"></a>
+    <output id="narrative-status" for="narrative"></output>
+  </div>
+  <!-- What the draft claims and what it could not: the part that makes the rest usable. Empty (and
+       so invisible) until there has been a draft. -->
+  <div id="narrative-report" class="narrative-report" hidden></div>
 </section>
 <section class="group-panel" id="group-witness" aria-labelledby="label-witness-group" hidden>
   <div class="toolbar">
@@ -604,10 +622,6 @@ input.invalid {
   max-width: 100%;
   overflow-wrap: break-word;
 }
-.place-status a {
-  color: inherit;
-  text-decoration: underline dotted;
-}
 /* Says which record the locked fields came from, and when for — quieter than the fields it
    explains, same role and styling as .apparent-size. The link goes to the exact request that
    produced them, so the claim stays checkable rather than just asserted. */
@@ -626,11 +640,14 @@ input.invalid {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-/* Takes the host page's own text color rather than its link color: this widget has no background
-   of its own (see input.invalid's comment on the same constraint), and a host's link blue against
-   a host's dark page was unreadable — the surrounding label color is legible wherever this is
-   embedded, by construction. The underline is what still reads as a link. */
-.weather-source a {
+/* Every link this widget draws — the geocoder's attribution, the weather record's, the account
+   reader's. Takes the host page's own text color rather than its link color: this widget has no
+   background of its own (see input.invalid's comment on the same constraint), and a host's link
+   blue against a host's dark page was unreadable — the surrounding label color is legible wherever
+   this is embedded, by construction. The underline is what still reads as a link. */
+.place-status a,
+.weather-source a,
+#narrative-credit {
   color: inherit;
   text-decoration: underline dotted;
 }
@@ -703,6 +720,73 @@ select.weather-field:disabled {
 }
 .group-panel > .toolbar {
   margin-bottom: 0;
+}
+/* The rule above flattens every panel toolbar's own spacing, which is right when there is one of
+   them and wrong the moment a panel has two: the Observation panel's account row would sit welded
+   to the fields above it. */
+.group-panel > .toolbar + .toolbar {
+  margin-top: 0.5em;
+}
+/* A paragraph, not a field: it takes the whole line and its label sits above it rather than
+   beside it, which is the only way a four-row textarea reads as one thing with its own name. */
+.toolbar > label.wide {
+  flex: 1 1 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.25em;
+}
+.toolbar > label.checkbox {
+  gap: 0.35em;
+}
+#narrative {
+  font: inherit;
+  resize: vertical;
+}
+#narrativeKey {
+  width: 12em;
+  font: inherit;
+}
+/* What the draft claims, and what the account never said. A table would be the obvious shape and
+   the wrong one: the quotes are sentences of wildly differing length, and a column sized for the
+   longest of them wastes the width every other row needed. */
+.narrative-report {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35em;
+  margin-top: 0.5em;
+  max-height: 14em;
+  overflow-y: auto;
+  font-size: 0.9em;
+}
+/* Stated, and not left to the UA sheet: this element sets its own display, which outranks the
+   built-in hidden rule and would leave an empty box standing open before the first draft. */
+.narrative-report[hidden] {
+  display: none;
+}
+.narrative-report .claim {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35em;
+  align-items: baseline;
+}
+/* Dimmed from whatever the host page's own text colour is, never a fixed one: this widget has no
+   background of its own and sits on light and dark pages alike (see the note above the palette). */
+.narrative-report .claim code {
+  color: color-mix(in srgb, currentColor 72%, transparent);
+  font-size: 0.95em;
+}
+.narrative-report .claim q {
+  color: color-mix(in srgb, currentColor 85%, transparent);
+}
+.narrative-report .gaps {
+  margin: 0.35em 0 0;
+  padding-left: 1.2em;
+}
+.narrative-report h4 {
+  margin: 0.25em 0 0;
+  font-size: 1em;
+  font-weight: 600;
 }
 /* flex-basis:100% on a flex-wrap:wrap container's own child forces it onto a fresh line — nothing
    else fits beside a 100%-wide item — which is what puts the Add controls below whatever decor
