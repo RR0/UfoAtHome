@@ -374,6 +374,15 @@ const CROP_CLUMP_SPACING_M = 0.9
  * end and sink at the other. Masse's own field falls about 1.2% along his walk, so a row this long
  * strays some fifteen centimetres from the soil at its ends — under half a plant. */
 const CROP_CLUMPS_PER_ROW = 34
+/** How many rows one of these objects holds, and how far apart they are — 1.4 m, which is what a
+ * field hoed by tractor leaves between rows and what the aerial photograph of this one shows.
+ *
+ * A PIECE OF FIELD rather than a single row, and that is a decision about cost rather than about
+ * shape: the rows are drawn exactly the same either way, but one object per row put five hundred and
+ * fifty objects in Masse's field, and every one of them is a placement and a ground lookup on every
+ * frame. Eight rows to an object is seventy objects for the same field and the same picture. */
+const CROP_ROWS_PER_PATCH = 8
+const CROP_ROW_SPACING_M = 1.4
 
 /**
  * One row of a cultivated field: a line of separate domed clumps along the object's own length.
@@ -399,8 +408,23 @@ function buildCrop(): Group {
   const group = new Group()
   const clump = new SphereGeometry(CROP_CLUMP_RADIUS_M, 8, 4, 0, Math.PI * 2, 0, Math.PI / 2)
   clump.scale(1, CROP_CLUMP_HEIGHT_M / CROP_CLUMP_RADIUS_M, 1)
-  addPart(group, DecorSystem.repeatAlongZ(clump, CROP_CLUMPS_PER_ROW, CROP_CLUMP_SPACING_M), [0.26, 0.28, 0.22], 0)
+  const patch = DecorSystem.repeatOnGrid(clump, CROP_CLUMPS_PER_ROW, CROP_CLUMP_SPACING_M, CROP_ROWS_PER_PATCH, CROP_ROW_SPACING_M)
+  addPart(group, patch, [0.26, 0.28, 0.22], 0)
   clump.dispose()
+  return group
+}
+
+/**
+ * A heap: a rough dome, faceted rather than smooth because it is stones and not a hill.
+ *
+ * Two metres across and one high at its natural size, which is nothing in particular — a heap has no
+ * proportions of its own worth preserving, so a recording states all three of its own (see
+ * scaleFor), and Masse's clapier states the one he gave: two metres of height.
+ */
+function buildMound(): Group {
+  const group = new Group()
+  const heap = new SphereGeometry(1, 7, 3, 0, Math.PI * 2, 0, Math.PI / 2)
+  addPart(group, heap, [0.38, 0.36, 0.32], 0)
   return group
 }
 
@@ -641,8 +665,9 @@ export class DecorSystem {
   }
 
   /**
-   * One geometry holding `count` copies of another, set `spacingM` apart along Z and centred on the
-   * origin — what turns a line of plants into a single mesh.
+   * One geometry holding a grid of copies of another, centred on the origin — what turns a piece of
+   * a planted field into a single mesh: `alongZ` plants every `spacingZM` down a row, `alongX` rows
+   * every `spacingXM` across.
    *
    * Merged here by hand rather than through three's own BufferGeometryUtils: that module lives under
    * three/examples and is imported statically nowhere in this renderer (see loadGltfScene, which
@@ -650,29 +675,41 @@ export class DecorSystem {
    * attribute arrays and an index is less code than the import would cost every reader of every
    * page.
    */
-  static repeatAlongZ(source: BufferGeometry, count: number, spacingM: number): BufferGeometry {
+  static repeatOnGrid(
+    source: BufferGeometry,
+    alongZ: number,
+    spacingZM: number,
+    alongX: number,
+    spacingXM: number
+  ): BufferGeometry {
     const position = source.getAttribute("position")
     const normal = source.getAttribute("normal")
     const index = source.getIndex()
-    if (!index) throw new Error("repeatAlongZ needs an indexed geometry")
+    if (!index) throw new Error("repeatOnGrid needs an indexed geometry")
     const vertices = position.count
-    const positions = new Float32Array(vertices * count * 3)
-    const normals = new Float32Array(vertices * count * 3)
-    const indices = new Uint32Array(index.count * count)
-    const first = -((count - 1) * spacingM) / 2
-    for (let copy = 0; copy < count; copy++) {
-      const z = first + copy * spacingM
-      for (let vertex = 0; vertex < vertices; vertex++) {
-        const at = (copy * vertices + vertex) * 3
-        positions[at] = position.getX(vertex)
-        positions[at + 1] = position.getY(vertex)
-        positions[at + 2] = position.getZ(vertex) + z
-        normals[at] = normal.getX(vertex)
-        normals[at + 1] = normal.getY(vertex)
-        normals[at + 2] = normal.getZ(vertex)
-      }
-      for (let step = 0; step < index.count; step++) {
-        indices[copy * index.count + step] = index.getX(step) + copy * vertices
+    const copies = alongZ * alongX
+    const positions = new Float32Array(vertices * copies * 3)
+    const normals = new Float32Array(vertices * copies * 3)
+    const indices = new Uint32Array(index.count * copies)
+    const firstZ = -((alongZ - 1) * spacingZM) / 2
+    const firstX = -((alongX - 1) * spacingXM) / 2
+    let copy = 0
+    for (let row = 0; row < alongX; row++) {
+      for (let step = 0; step < alongZ; step++, copy++) {
+        const x = firstX + row * spacingXM
+        const z = firstZ + step * spacingZM
+        for (let vertex = 0; vertex < vertices; vertex++) {
+          const at = (copy * vertices + vertex) * 3
+          positions[at] = position.getX(vertex) + x
+          positions[at + 1] = position.getY(vertex)
+          positions[at + 2] = position.getZ(vertex) + z
+          normals[at] = normal.getX(vertex)
+          normals[at + 1] = normal.getY(vertex)
+          normals[at + 2] = normal.getZ(vertex)
+        }
+        for (let at = 0; at < index.count; at++) {
+          indices[copy * index.count + at] = index.getX(at) + copy * vertices
+        }
       }
     }
     const merged = new BufferGeometry()
@@ -690,7 +727,9 @@ export class DecorSystem {
           ? buildTree()
           : object.kind === "crop"
             ? buildCrop()
-            : object.kind === "streetlight"
+            : object.kind === "mound"
+              ? buildMound()
+              : object.kind === "streetlight"
             ? buildStreetlight(lit)
             : object.kind === "vehicle"
               ? buildVehicle(lit, object.windows, object.witnessSide)
@@ -757,7 +796,9 @@ export class DecorSystem {
           ? buildTree()
           : kind === "crop"
             ? buildCrop()
-            : kind === "streetlight"
+            : kind === "mound"
+              ? buildMound()
+              : kind === "streetlight"
             ? buildStreetlight(false)
             : kind === "vehicle"
               ? buildVehicle(false, undefined, undefined)

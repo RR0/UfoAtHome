@@ -1477,11 +1477,18 @@ export class UfoElement extends HTMLElement {
    *
    * Empty for a recording whose t=0 pose has no coordinates at all: a metre offset from nowhere is
    * not a place, and guessing one would put scenery on ground it was never on.
+   *
+   * A cultivated field is left off it entirely (see DecorKind's own "crop"). What this map draws is
+   * what the witness's own view is checked AGAINST — was the shack inside what they could see, was
+   * the car between them and it — and the ground they walked over is neither. It is also a matter of
+   * counting: Masse's field is a hundred and forty rows, and a hundred and forty markers along his
+   * path drew two solid blue bars either side of it, which read as walls he was walking between
+   * rather than as the field he was walking through.
    */
   private witnessMapDecorAt(t: number): WitnessMapDecor[] {
     const reference = resolveObserverPoseAt(this.currentSighting, 0)
     if (reference?.lat === undefined || reference.lng === undefined) return []
-    return this.currentSighting.decor.map(object => {
+    return this.currentSighting.decor.filter(object => object.kind !== "crop").map(object => {
       const placement = resolveDecorPlacementAt(object, t)
       const { lat, lng } = localMetersToGeo(placement.eastM, -placement.northM, reference.lat!, reference.lng!)
       return { lat, lng, headingDeg: placement.headingDeg, label: this.said.read(object.title) ?? this.messages.decorHere }

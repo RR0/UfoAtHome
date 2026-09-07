@@ -428,11 +428,6 @@ const PRECIPITATION_RESPAWN_Y_MIN = 0
  * object floats visibly above the ground with its own cast shadow (correctly projected onto the
  * real ground plane) reading as detached from its base. */
 const DECOR_GROUND_Y = 0
-/** Where groundYUnder's downward probe starts: above anything the terrain patch can hold (its own
- * relief is tens of meters, hundreds at most) and low enough that the ray stays short. */
-const DECOR_GROUND_PROBE_HEIGHT_M = 5000
-/** Straight down, shared by every ground probe — a Vector3 constant, never mutated. */
-const DOWN = new Vector3(0, -1, 0)
 /** RainSystem tuning — see RainSystem.ts's own doc comment for why rain gets a completely separate,
  * much tighter volume than the old shared 150m-radius CPU pool: a small, camera-hugging volume is
  * what actually reads as a dense downpour (parallax — see PrecipitationTypeConfig.radiusM's own
@@ -717,12 +712,6 @@ export class SceneRenderer {
    * per-tick allocation, unlike weatherEquals' field-by-field compare). */
   private decorObjects: DecorObject[] = []
   private readonly decorGroups = new Map<string, Group>()
-  /** Ground height under each decor object, and what it was sampled against — see groundYUnder. */
-  private readonly decorGroundY = new Map<string, { x: number; z: number; mesh: Mesh; y: number }>()
-  /** Its own raycaster, for the same reason every other purpose here has one: a shared one would
-   * carry another purpose's near/far and layer settings. */
-  private readonly decorGroundRaycaster = new Raycaster()
-  private readonly decorGroundOriginScratch = new Vector3()
   /** The real shadow-casting light standing in for whichever of the Sun/Moon is actually up (see
    * updateCelestialLight) — only one at a time, matching how real moonlight is only ever visible
    * when the (far brighter) Sun isn't: no real scene needs both casting shadows simultaneously.
@@ -1449,7 +1438,7 @@ export class SceneRenderer {
       shift.z = -(anchorZ + worldDz)
       // Above the ground the object itself stands on, not above the observer's own — see
       // groundYUnder. A witness sitting in a car parked on a rise looks out from that rise.
-      this.camera.position.y = this.groundYUnder(inhabited.id, anchorX, anchorZ) + view.eyeY
+      this.camera.position.y = this.groundYUnder(anchorX, anchorZ) + view.eyeY
       this.camera.rotation.set(this.indoorLookPitchDeg * DEG_TO_RAD, -(view.headingDeg + this.indoorLookYawDeg) * DEG_TO_RAD, 0, "YXZ")
     }
     for (const object of this.decorObjects) {
@@ -1462,7 +1451,7 @@ export class SceneRenderer {
       const placement = resolveDecorPlacementAt(object, t)
       const x = placement.eastM + offset.x + shift.x
       const z = -placement.northM + offset.z + shift.z
-      group.position.set(x, this.groundYUnder(object.id, x, z) + placement.altitudeM, z)
+      group.position.set(x, this.groundYUnder(x, z) + placement.altitudeM, z)
       if (placement.headingDeg !== undefined) group.rotation.y = -placement.headingDeg * DEG_TO_RAD
       furthestDecorM = Math.max(furthestDecorM, group.position.distanceTo(this.camera.position))
     }
@@ -1488,26 +1477,43 @@ export class SceneRenderer {
    * is 2.7 m higher than under the witness — and a 2.2 m shack pinned to y=0 was entirely
    * underground. Nothing about that is visible as a bug; the object is simply not there.
    *
-   * Sampled by raycasting the patch itself rather than re-reading the elevation source: the patch is
-   * what is actually DRAWN, so an object placed against it can never sit at a height the viewer
-   * cannot see. Cached per object and re-sampled only when it moves or the patch is rebuilt —
-   * updateDecorAnchoring runs every frame, and a raycast against eight thousand triangles does not.
+   * Read straight off the patch that is actually DRAWN rather than out of the elevation source, so
+   * an object placed against it can never sit at a height the viewer cannot see.
    *
-   * Falls back to 0 with no patch (a build still in flight, a failed fetch), which is exactly where
-   * decor stood before this existed.
+   * READ, not raycast, and that is the whole of what makes a field possible. The patch is a regular
+   * square grid of vertices — regular in latitude and longitude, and therefore regular in metres too,
+   * since the projection scales both axes by constants (see GeoProjection) — so the height at any
+   * point is four vertices and a bilinear blend, found by arithmetic. Casting a ray at it instead
+   * meant walking thirty thousand triangles per object, and a walking witness invalidated every
+   * object's cached answer every half metre: seventy rows of lavender cost 3.7 ms a frame that way,
+   * which is what stood between this scene and a field big enough to have a far side.
+   *
+   * Falls back to 0 with no patch, and outside the patch's own edge (a building beyond it, an object
+   * placed kilometres out) — which is exactly where decor stood before any of this existed.
    */
-  private groundYUnder(id: string, x: number, z: number): number {
+  private groundYUnder(x: number, z: number): number {
     const mesh = this.terrainMesh
     if (!mesh) return DECOR_GROUND_Y
-    const cached = this.decorGroundY.get(id)
-    if (cached && cached.mesh === mesh && Math.abs(cached.x - x) < 0.5 && Math.abs(cached.z - z) < 0.5) return cached.y
-    // From well above the highest ground the patch can hold, straight down. `far` bounds the ray so
-    // a miss (an object beyond the patch's own edge) costs nothing.
-    this.decorGroundRaycaster.set(this.decorGroundOriginScratch.set(x, DECOR_GROUND_PROBE_HEIGHT_M, z), DOWN)
-    const hit = this.decorGroundRaycaster.intersectObject(mesh, true)[0]
-    const y = hit ? hit.point.y : DECOR_GROUND_Y
-    this.decorGroundY.set(id, { x, z, mesh, y })
-    return y
+    const position = mesh.geometry.getAttribute("position")
+    const side = Math.round(Math.sqrt(position.count))
+    if (side < 2 || side * side !== position.count) return DECOR_GROUND_Y
+    // The grid runs west to east along a row and north to south down the columns (see
+    // TerrainMeshBuilder), so its own two extreme vertices give the whole mapping.
+    const west = position.getX(0)
+    const east = position.getX(side - 1)
+    const north = position.getZ(0)
+    const south = position.getZ((side - 1) * side)
+    const col = ((x - west) / (east - west)) * (side - 1)
+    const row = ((z - north) / (south - north)) * (side - 1)
+    if (!(col >= 0 && col <= side - 1 && row >= 0 && row <= side - 1)) return DECOR_GROUND_Y
+    const col0 = Math.min(Math.floor(col), side - 2)
+    const row0 = Math.min(Math.floor(row), side - 2)
+    const fx = col - col0
+    const fz = row - row0
+    const at = (r: number, c: number): number => position.getY(r * side + c)
+    const top = at(row0, col0) * (1 - fx) + at(row0, col0 + 1) * fx
+    const bottom = at(row0 + 1, col0) * (1 - fx) + at(row0 + 1, col0 + 1) * fx
+    return top * (1 - fz) + bottom * fz
   }
 
   /** How far the witness has turned their head away from "straight out through the chosen

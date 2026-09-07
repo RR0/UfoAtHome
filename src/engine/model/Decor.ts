@@ -16,7 +16,13 @@ import type { SaidText } from "./SaidText.js"
  * calling one a tree, the nearest existing kind, would put a trunk and a canopy into a lavender
  * field and say so in the editor.
  */
-export type DecorKind = "building" | "tree" | "crop" | "streetlight" | "vehicle" | "witness" | "aircraft"
+/**
+ * "mound" is a heap: the clapier of stones a Provençal field is cleared into, a pile of earth, a
+ * bank. Distinct from a building because it has no walls, no floors and nobody inside it, and worth
+ * its own kind because it is exactly the sort of thing a witness hides behind — Masse's own was two
+ * metres high and is what kept the craft out of sight until he walked round it.
+ */
+export type DecorKind = "building" | "tree" | "crop" | "mound" | "streetlight" | "vehicle" | "witness" | "aircraft"
 
 /** A side of a decor object, relative to its own headingDeg ("front" is whichever way the object
  * itself faces) rather than a compass direction — a decor object can be rotated, so "north"
