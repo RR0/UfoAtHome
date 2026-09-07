@@ -1059,9 +1059,24 @@ export class SceneRenderer {
         this.camera.updateProjectionMatrix()
       }
     }
+    // The ground stays where the ground is. The patch is built around one point (see
+    // setTerrainOrigin) and everything else in this renderer is drawn relative to where the witness
+    // is NOW, so the patch has to be offset by the distance between the two exactly as decor is
+    // (see updateDecorAnchoring) — otherwise it travels with the witness while the scenery standing
+    // on it does not, and a walk of eighty metres sank Masse's own clapier four metres into ground
+    // that had quietly slid out from under it.
+    if (this.terrainMesh && this.terrainOrigin && pose.lat !== undefined && pose.lng !== undefined) {
+      const drift = geoToLocalMeters(this.terrainOrigin.lat, this.terrainOrigin.lng, pose.lat, pose.lng)
+      this.terrainMesh.position.x = drift.x
+      this.terrainMesh.position.z = drift.z
+    }
+    // And the eye stands on it: 1.6 m above whatever soil is under it, not 1.6 m above a fixed
+    // plane. The witness climbs what the ground climbs, which is a metre over Masse's own approach
+    // and eleven hundred over Zamora's drive, and is nothing at all wherever the ground is level —
+    // a patch reads zero at its own origin, so a witness who never moves is exactly where they were.
     // Kept as its own field so the gait's rise can be added to it absolutely rather than
     // incrementally — see setGait, applied in updateDecorAnchoring a moment later.
-    this.poseCameraY = 1.6 + pose.elevationM
+    this.poseCameraY = this.groundYUnder(0, 0) + 1.6 + pose.elevationM
     this.camera.position.y = this.poseCameraY
     // Keeps the observer at the centre of their own sky, whatever altitude they are at — see
     // celestialGroup. x/z never move (this renderer keeps the camera on the vertical axis and
@@ -1126,12 +1141,31 @@ export class SceneRenderer {
       // Scaled to the patch itself: 150 m matters for a 900 m patch and is meaningless for a 30 km one.
       if (Math.sqrt(x * x + z * z) < TERRAIN_REBUILD_DISTANCE_M * (radiusM / GROUND_RADIUS)) return
     }
+    const previousOrigin = this.terrainOrigin
+    const previousRadius = this.terrainRadius
     this.terrainOrigin = { lat, lng }
     this.terrainRadius = radiusM
     const token = ++this.terrainBuildToken
     buildTerrainMesh(lat, lng, this.terrainProviders, radiusM)
       .then(({ mesh, attribution }) => {
         if (token !== this.terrainBuildToken) return // superseded by a newer call while this was in flight
+        // A patch reads zero at its own origin: it is built from real elevations with the witness's
+        // own subtracted (see TerrainMeshBuilder). So a fresh patch would put the ground back at
+        // zero under a witness who has spent a kilometre climbing, and the whole world with them.
+        // Carrying the height the OUTGOING patch had at the new patch's own centre is what keeps a
+        // long drive continuous instead of stepping every hundred and fifty metres.
+        //
+        // Only across a DRIFT, never across a jump. A patch that moved because the witness walked
+        // out of the old one shares ground with it and has to line up with it; one built because the
+        // page was pointed at another recording entirely shares nothing, and carrying a height over
+        // would have opened Valensole a hundred metres up in the air on the strength of Socorro's
+        // mesa. The old patch's own reach is the test, and it is the same reach the reading below
+        // is clamped to.
+        const outgoing = this.terrainMesh
+        const centre = previousOrigin ? geoToLocalMeters(lat, lng, previousOrigin.lat, previousOrigin.lng) : undefined
+        if (outgoing && centre && Math.hypot(centre.x, centre.z) <= previousRadius) {
+          mesh.position.y = outgoing.position.y + this.groundYOfPatch(outgoing, centre.x, centre.z)
+        }
         this.disposeMesh(this.terrainMesh)
         // Higher than groundMesh's default (0), lower than the compass labels' (see
         // COMPASS_RENDER_ORDER) — draws after the flat disc it is laid over, and still under the
@@ -1504,6 +1538,14 @@ export class SceneRenderer {
   private groundYUnder(x: number, z: number): number {
     const mesh = this.terrainMesh
     if (!mesh) return DECOR_GROUND_Y
+    // The patch stands where its own origin really is relative to the witness (see setObserverPose),
+    // so a world position has to be brought into the patch's own frame before its grid can be read.
+    return mesh.position.y + this.groundYOfPatch(mesh, x - mesh.position.x, z - mesh.position.z)
+  }
+
+  /** The relief a given patch carries at a point of its OWN frame, before whatever height that patch
+   * has been placed at — see groundYUnder, which is this plus that. */
+  private groundYOfPatch(mesh: Mesh, x: number, z: number): number {
     const position = mesh.geometry.getAttribute("position")
     const side = Math.round(Math.sqrt(position.count))
     if (side < 2 || side * side !== position.count) return DECOR_GROUND_Y
@@ -1513,9 +1555,14 @@ export class SceneRenderer {
     const east = position.getX(side - 1)
     const north = position.getZ(0)
     const south = position.getZ((side - 1) * side)
-    const col = ((x - west) / (east - west)) * (side - 1)
-    const row = ((z - north) / (south - north)) * (side - 1)
-    if (!(col >= 0 && col <= side - 1 && row >= 0 && row <= side - 1)) return DECOR_GROUND_Y
+    // Clamped to the patch rather than refused outside it. The refusal was harmless while the whole
+    // world sat at zero and it stopped being so the moment the ground carried a real height: on
+    // Zamora's drive the mesa climbs thirty-two metres, and a shack half a kilometre past the
+    // patch's edge would have been dropped thirty-two metres into the air below him. The nearest
+    // ground the patch actually holds is the best answer available, and it is continuous.
+    const col = clamp(((x - west) / (east - west)) * (side - 1), 0, side - 1)
+    const row = clamp(((z - north) / (south - north)) * (side - 1), 0, side - 1)
+    if (!Number.isFinite(col) || !Number.isFinite(row)) return DECOR_GROUND_Y
     const col0 = Math.min(Math.floor(col), side - 2)
     const row0 = Math.min(Math.floor(row), side - 2)
     const fx = col - col0
