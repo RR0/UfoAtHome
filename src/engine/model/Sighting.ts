@@ -13,6 +13,7 @@ import type { Milestone } from "./Milestone.js"
 import type { SaidText } from "./SaidText.js"
 import { Instruments } from "../instrument/Instrument.js"
 import type { Instrument } from "../instrument/Instrument.js"
+import { Provenance } from "../persistence/Provenance.js"
 
 /**
  * A fuzzy date, structurally aligned with @rr0/time's Level2Date fields
@@ -314,6 +315,20 @@ export class Sighting {
     public milestones: Milestone[] = []
   ) {
   }
+
+  /**
+   * Where the values of this recording came from — what the witness said, what was worked out from
+   * it, and what was guessed so the reconstruction could run at all.
+   *
+   * Held here as one table rather than on each value, because it is a fact about the FILE and not
+   * about the model: nothing that draws, computes or plays a sighting consults it, and wrapping
+   * every number so that they could would be a change to all of them for a fact none of them use.
+   * See Provenance, which takes it off on the way in and puts it back on the way out.
+   *
+   * Empty for every recording written before it existed, which reads correctly: no entry means
+   * "stated", and stated is what those files were.
+   */
+  provenance: Provenance = Provenance.empty()
 
   /** The shutter this observation was made with, resolved — the recording's own, else the device's,
    * else none at all (an eye has no shutter). */

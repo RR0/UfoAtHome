@@ -5,6 +5,7 @@ import { NarrativeError } from "../engine/narrative/NarrativeError.js"
 import { DraftPatch } from "../engine/narrative/DraftPatch.js"
 import { DraftRecording } from "../engine/narrative/DraftRecording.js"
 import type { NarrativeDraft, NarrativeProvider } from "../engine/narrative/NarrativeProvider.js"
+import type { Basis } from "../engine/persistence/Provenance.js"
 import { html, css } from "./sightingEditorTemplate.js"
 import { SightingSummary } from "./SightingSummary.js"
 import type { SummaryEntry, SummaryGroup } from "./SightingSummary.js"
@@ -39,6 +40,7 @@ import type { Appearance, PolygonShape, Shape, ShapeBounds, ShapePresetId } from
 import { ShapeHandles, ShapeGroup, MIN_SHAPE_SIZE, MIN_POLYGON_VERTICES } from "../engine/shape/ShapeHandles.js"
 import type { HandleId, ResizeAxis } from "../engine/shape/ShapeHandles.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
+import { plainSightingJson } from "../engine/persistence/sightingJson.js"
 import { DEFAULT_ICE_CRYSTAL_ALIGNMENT } from "../engine/model/Weather.js"
 import type { PrecipitationType, Weather } from "../engine/model/Weather.js"
 import type { People } from "../engine/model/People.js"
@@ -1601,7 +1603,18 @@ export class SightingEditorElement extends HTMLElement {
     void description
     const paths = DraftPatch.stated(recording)
     if (paths.length > 0) {
-      this.sightingData = DraftPatch.apply(this.sightingData, DraftRecording.loadable(recording), paths)
+      // Applied to the PLAIN recording, never to what sightingData hands out: a value that already
+      // carries a basis is written there as {value, basis, rationale}, and a patch descending into
+      // that object would set a field of the wrapper instead of replacing it. Provenance belongs to
+      // the file; patching is arithmetic on values.
+      const before = this.ufoElement.sighting.provenance
+      const base = plainSightingJson(this.ufoElement.sighting)
+      this.sightingData = DraftPatch.apply(base, DraftRecording.loadable(recording), paths)
+      // Loading a plain recording left the table empty. What was known before this draft is still
+      // true of every value the draft did not touch — and stops being true, on its own, for the
+      // ones it did: an entry expires when the value it was said about changes (ProvenanceEntry.of).
+      this.ufoElement.sighting.provenance = before
+      this.recordNarrativeProvenance(draft, paths)
     }
     this.narrativeStatus.textContent = paths.length > 0
       ? this.messages.narrativeApplied.replace("{count}", String(paths.length))
@@ -1610,20 +1623,68 @@ export class SightingEditorElement extends HTMLElement {
     this.syncNarrativeEnabled()
   }
 
-  /** What the draft says it read, and what it says it could not. Rendered rather than summarised:
-   * a quote is the evidence, and a count of quotes is not. */
+  /**
+   * Writes each claim's basis into the recording, so that the file itself says which of its values
+   * the witness gave and which a reading supplied.
+   *
+   * Only for paths the draft actually wrote: a claim about a field that never made it in (the
+   * account, which is stripped above) has nothing to be a basis of. And only where the value is not
+   * simply the witness's own — a "stated" claim with nothing to add is the default, and writing it
+   * would put noise in every file (see Provenance.set).
+   */
+  private recordNarrativeProvenance(draft: NarrativeDraft, written: string[]): void {
+    const sighting = this.ufoElement.sighting
+    const applied = new Set(written)
+    for (const claim of draft.claims) {
+      // A claim can name a leaf inside an array the patch wrote whole ("timeline.keyframes.0.…"),
+      // so a path counts as written when the patch wrote it or wrote something it sits under.
+      if (!applied.has(claim.path) && !written.some(path => claim.path.startsWith(`${path}.`))) {
+        continue
+      }
+      sighting.provenance.set(claim.path, {
+        basis: claim.basis,
+        rationale: claim.rationale,
+        of: SightingEditorElement.valueAt(
+          plainSightingJson(this.ufoElement.sighting) as unknown as Record<string, unknown>, claim.path)
+      })
+    }
+  }
+
+  /** The value the recording currently holds at a dot-joined path, array indices included — what a
+   * provenance entry is pinned to, so it expires when an author types over it. */
+  private static valueAt(root: Record<string, unknown>, path: string): unknown {
+    let at: unknown = root
+    for (const step of path.split(".")) {
+      if (typeof at !== "object" || at === null) {
+        return undefined
+      }
+      at = (at as Record<string, unknown>)[step]
+    }
+    return at
+  }
+
+  /** What the draft says it read, how it got there, and what it could not settle. Rendered rather
+   * than summarised: a quote is the evidence, and a count of quotes is not. */
   private showNarrativeReport(draft: NarrativeDraft): void {
     this.narrativeReport.replaceChildren()
-    if (draft.claims.length > 0) {
-      this.narrativeReport.append(this.narrativeHeading(this.messages.narrativeClaims))
-      for (const claim of draft.claims) {
+    // Grouped by basis, worst first: what was guessed is what an author has to go and check, and
+    // burying it among forty quoted values is how it stops being checked.
+    for (const basis of ["assumed", "derived", "stated"] as const) {
+      const claims = draft.claims.filter(claim => claim.basis === basis)
+      if (claims.length === 0) {
+        continue
+      }
+      this.narrativeReport.append(this.narrativeHeading(this.messages[BASIS_HEADINGS[basis]]))
+      for (const claim of claims) {
         const row = document.createElement("div")
-        row.className = "claim"
+        row.className = `claim ${basis}`
         const path = document.createElement("code")
         path.textContent = claim.path
-        const quote = document.createElement("q")
-        quote.textContent = claim.quote
-        row.append(path, quote)
+        // A quotation for a quotation, plain text for a piece of reasoning: an author skimming for
+        // what was made up should not have to read to tell the two apart.
+        const why = document.createElement(basis === "stated" ? "q" : "span")
+        why.textContent = claim.rationale
+        row.append(path, why)
         this.narrativeReport.append(row)
       }
     }
@@ -6428,6 +6489,13 @@ export class SightingEditorElement extends HTMLElement {
     }
   }
 }
+
+/** Which message heads each group of the draft report — see showNarrativeReport. */
+const BASIS_HEADINGS = {
+  stated: "narrativeStated",
+  derived: "narrativeDerived",
+  assumed: "narrativeAssumed"
+} as const satisfies Record<Basis, keyof SightingEditorMessages>
 
 export const ELEMENT_NAME = "rr0-sighting-editor"
 

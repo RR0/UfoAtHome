@@ -170,7 +170,7 @@ describe("SightingEditorElement drafting from an account", () => {
     const element = mount()
     answer = () => Promise.resolve({
       recording: { caseId: "valensole", durationSeconds: 270, time: { year: 1965, month: 7, day: 1 } },
-      claims: [{ path: "time.year", quote: "le 1er juillet 1965" }],
+      claims: [{ path: "time.year", basis: "stated" as const, rationale: "le 1er juillet 1965" }],
       gaps: ["the account gives no heading"]
     })
 
@@ -178,7 +178,10 @@ describe("SightingEditorElement drafting from an account", () => {
 
     expect(element.sightingData.caseId).toBe("valensole")
     expect(element.sightingData.durationSeconds).toBe(270)
-    expect(element.sightingData.time).toMatchObject({ year: 1965, month: 7, day: 1 })
+    // Wrapped, because the claim gave that value a rationale — the file says where it came from.
+    expect(element.sightingData.time).toMatchObject({
+      year: { value: 1965, rationale: "le 1er juillet 1965" }, month: 7, day: 1
+    })
   })
 
   it("never writes the account back over itself", async () => {
@@ -224,21 +227,78 @@ describe("SightingEditorElement drafting from an account", () => {
     expect(asked[1].current?.caseId).toBe("a")
   })
 
-  it("shows the quotes behind the draft, and what the account never said", async () => {
+  it("groups the report by basis, guesses first, and marks what nothing could settle", async () => {
+    // What was guessed is what an author has to go and check; burying it among forty quoted values
+    // is how it stops being checked.
     const element = mount()
     answer = () => Promise.resolve({
-      recording: { time: { year: 1965 } },
-      claims: [{ path: "time.year", quote: "le 1er juillet 1965" }],
-      gaps: ["the direction the witness faced is never stated"]
+      recording: { time: { year: 1974 }, durationSeconds: 120, utcOffsetHours: 1 },
+      claims: [
+        { path: "time.year", basis: "stated" as const, rationale: "lundi 20 mai 1974" },
+        { path: "durationSeconds", basis: "assumed" as const, rationale: "\"quelques mn\" gives no number" },
+        { path: "utcOffsetHours", basis: "derived" as const, rationale: "France had no summer time in 1974" }
+      ],
+      gaps: ["nothing bears on the phenomenon's colour"]
     })
 
     await draft(element, "The account.")
     const report = field(element, "narrative-report")
 
     expect(report.hidden).toBe(false)
-    expect(report.querySelector("code")?.textContent).toBe("time.year")
-    expect(report.querySelector("q")?.textContent).toBe("le 1er juillet 1965")
-    expect(report.querySelector(".gaps li")?.textContent).toBe("the direction the witness faced is never stated")
+    expect([...report.querySelectorAll("h4")].map(h => h.textContent)).toEqual([
+      sightingEditorMessages_en.narrativeAssumed,
+      sightingEditorMessages_en.narrativeDerived,
+      sightingEditorMessages_en.narrativeStated,
+      sightingEditorMessages_en.narrativeGaps
+    ])
+    expect([...report.querySelectorAll(".claim code")].map(c => c.textContent))
+      .toEqual(["durationSeconds", "utcOffsetHours", "time.year"])
+    // A quotation for a quotation, plain text for a piece of reasoning.
+    expect(report.querySelector(".claim.stated q")?.textContent).toBe("lundi 20 mai 1974")
+    expect(report.querySelector(".claim.assumed q")).toBeNull()
+    expect(report.querySelector(".gaps li")?.textContent).toBe("nothing bears on the phenomenon's colour")
+  })
+
+  it("writes each basis into the recording, so the file says which values were guessed", async () => {
+    const element = mount()
+    answer = () => Promise.resolve({
+      recording: { durationSeconds: 120, utcOffsetHours: 1, caseId: "landevennec" },
+      claims: [
+        { path: "durationSeconds", basis: "assumed" as const, rationale: "\"quelques mn\" gives no number" },
+        { path: "utcOffsetHours", basis: "derived" as const, rationale: "France had no summer time in 1974" },
+        { path: "caseId", basis: "stated" as const, rationale: "boulanger à Landévennec" }
+      ],
+      gaps: []
+    })
+
+    await draft(element, "The account.")
+    const written = element.sightingData as unknown as Record<string, unknown>
+
+    expect(written.durationSeconds).toEqual({
+      value: 120, basis: "assumed", rationale: "\"quelques mn\" gives no number"
+    })
+    expect(written.utcOffsetHours).toEqual({
+      value: 1, basis: "derived", rationale: "France had no summer time in 1974"
+    })
+    // A stated value keeps its rationale, which is the account's own words, but not a "basis" that
+    // is already the default.
+    expect(written.caseId).toEqual({ value: "landevennec", rationale: "boulanger à Landévennec" })
+  })
+
+  it("lets a guess expire the moment the author types over it", async () => {
+    const element = mount()
+    answer = () => Promise.resolve({
+      recording: { durationSeconds: 120 },
+      claims: [{ path: "durationSeconds", basis: "assumed" as const, rationale: "no number given" }],
+      gaps: []
+    })
+    await draft(element, "The account.")
+
+    type(element, "durationSeconds", "300")
+
+    // Theirs now: crediting an author's own duration to a machine that guessed a different one is
+    // the confusion this whole mechanism exists to prevent.
+    expect(element.sightingData.durationSeconds).toBe(300)
   })
 
   it("says when the account yielded nothing, rather than leaving the reader guessing", async () => {

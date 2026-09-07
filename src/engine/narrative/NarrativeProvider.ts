@@ -1,4 +1,5 @@
 import type { SightingRecordingJson } from "../persistence/sightingJson.js"
+import type { Basis } from "../persistence/Provenance.js"
 
 /** One image the account came with — a photograph, or a frame pulled out of a film. */
 export interface NarrativeImage {
@@ -10,35 +11,43 @@ export interface NarrativeImage {
 }
 
 /**
- * One thing a draft asserts, and the words of the account that justify it.
+ * One value a draft proposes, and where it came from.
  *
  * This is the whole reason the interface returns something richer than a recording. A reconstruction
  * that cannot say where each of its numbers came from is indistinguishable from one that invented
- * them, and this format exists precisely so that the difference stays visible — a shape carries the
- * angle a witness stated, not a size someone found plausible. So a provider that proposes
- * `angular.widthDeg` has to be able to quote the sentence it read it in; what it cannot quote goes
- * in {@link NarrativeDraft.gaps} and stays unset.
+ * them, and this format exists precisely so that the difference stays visible.
+ *
+ * What it does NOT mean is that only quotable values may be written. A witness saying "a few
+ * minutes" has given no duration and a timeline needs one; one saying the thing barred the road has
+ * given no angle, though a carriageway's width and a plausible distance bound one within a few
+ * degrees. Leaving those empty produced a recording that could not play, which is a worse answer
+ * than a marked guess. So a draft fills what it can and says of each value which of the three it is
+ * — see Basis, whose vocabulary this shares and which is what ends up in the file.
  */
 export interface NarrativeClaim {
-  /** Where the value goes, as a path into SightingRecordingJson — "time.hour", "place.0.name",
-   * "timeline.keyframes.1.shapes.0.shape.angular.widthDeg". */
+  /** Where the value goes, as a path into SightingRecordingJson — "time.hour", "place.0.lat",
+   * "timeline.keyframes.1.shapes.0.shape.angular.widthDeg". The same vocabulary Provenance stores
+   * paths in, so a claim needs no translation to be kept. */
   path: string
-  /** The account's own words that state it, quoted verbatim so a reader can find them again. A
-   * paraphrase would defeat the point: it is the witness's sentence that is the evidence. */
-  quote: string
+  basis: Basis
+  /** Why this value and why that basis: the account's own words for a stated one, the working for a
+   * derived one ("a 5.5 m carriageway at 20-100 m spans 15 to 3 degrees; 8 taken"), what the guess
+   * was chosen for in an assumed one. Quoted verbatim where it quotes: a paraphrase would defeat
+   * the point, since it is the witness's sentence that is the evidence. */
+  rationale: string
 }
 
 /** What a provider makes of an account: a recording, why each of its values is there, and what it
  * refused to fill in. */
 export interface NarrativeDraft {
-  /** The recording as the account states it, and no further. Partial on purpose — an account that
-   * does not give the year has no `time.year`, and a draft that supplied one would be lying about
-   * where it came from. */
+  /** The recording, filled in as far as the account and honest reasoning reach. Partial still: a
+   * field nothing at all bears on is left out rather than invented, and every field that IS here
+   * has a claim saying whether the witness said it, it was worked out, or it was guessed. */
   recording: Partial<SightingRecordingJson>
   claims: NarrativeClaim[]
-  /** What the account does not say, in the reader's own language — "the account gives no duration",
-   * "the direction the witness faced is never stated". Listed rather than guessed: this is the
-   * to-do list for the person who goes back to the source, and it is worth as much as the draft. */
+  /** What nothing could settle — not even a guess worth making. Narrower than it used to be, now
+   * that an unsupported value is written and marked "assumed" rather than withheld: what is left
+   * here is what the reconstruction does not even have a shape for. */
   gaps: string[]
 }
 

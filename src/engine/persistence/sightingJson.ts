@@ -15,11 +15,18 @@ import type { Milestone } from "../model/Milestone.js"
 import type { SaidText } from "../model/SaidText.js"
 import { sortedMilestones } from "../model/Milestone.js"
 import { SightingShapes } from "./SightingShapes.js"
+import { Provenance } from "./Provenance.js"
 
 /**
  * Standalone "one JSON file per case" format (e.g. a future sighting.json
  * sitting next to the existing case.json/people.json), not merged into
  * case.json's own schema.
+ *
+ * Every field below may ALSO be written, in the file, as `{value, basis?, rationale?}` — see
+ * Provenance and StatedValue. That is deliberately not in the types here: the wrapper exists only
+ * on disk, is taken off before this interface is ever read (Provenance.strip) and put back on
+ * writing (Provenance.restore), and typing it would put a union on every field of a format whose
+ * consumers all read plain values. What the types say is what a reader gets.
  */
 export interface SightingRecordingJson {
   version: 1
@@ -77,6 +84,12 @@ export interface SightingRecordingJson {
 }
 
 export function toSightingJson(sighting: Sighting): SightingRecordingJson {
+  return Provenance.restore(plainSightingJson(sighting), sighting.provenance)
+}
+
+/** The recording without any provenance put back on — what toSightingJson wraps, and what a caller
+ * that only wants the values (a comparison, a digest) can ask for directly. */
+export function plainSightingJson(sighting: Sighting): SightingRecordingJson {
   // What gets written is the perception, not the pixels: every shape's stated angular extent is
   // refreshed from the box it is currently drawn as, since between load and save `bounds` is what
   // every editing gesture moved. Mutates the live sighting on purpose — it only ADDS the angle the
@@ -111,6 +124,15 @@ export function toSightingJson(sighting: Sighting): SightingRecordingJson {
 }
 
 export function fromSightingJson(json: SightingRecordingJson): Sighting {
+  // Off first, so that nothing below has to know a value could have arrived wrapped — see
+  // Provenance's own doc comment on why the wrapper lives no longer than the file does.
+  const { recording: plain, provenance } = Provenance.strip(json)
+  const sighting = fromPlainSightingJson(plain)
+  sighting.provenance = provenance
+  return sighting
+}
+
+function fromPlainSightingJson(json: SightingRecordingJson): Sighting {
   const sighting = new Sighting(
     {
       eventType: "sighting",

@@ -1,6 +1,7 @@
 import type Anthropic from "@anthropic-ai/sdk"
 import { NarrativeError } from "../NarrativeError.js"
 import { RecordingDigest } from "../RecordingDigest.js"
+import type { Basis } from "../../persistence/Provenance.js"
 import type {
   NarrativeDraft, NarrativeImage, NarrativeProvider, NarrativeRequest
 } from "../NarrativeProvider.js"
@@ -21,28 +22,38 @@ const DRAFT_TOOL = {
       },
       claims: {
         type: "array",
-        description: "One entry per value in `recording` that the account states. Values you derived "
-          + "arithmetically from a stated one (an angle from a comparison, a duration from two times) "
-          + "are stated values: quote the sentence you derived them from.",
+        description: "One entry per value in `recording`. EVERY value needs one: a value with no "
+          + "claim is a value nobody can check.",
         items: {
           type: "object",
           properties: {
             path: {
               type: "string",
-              description: "Where the value sits in `recording`, dot-joined: \"time.hour\", "
-                + "\"place.0.name\", \"timeline.keyframes.1.shapes.0.shape.angular.widthDeg\"."
+              description: "Where the value sits in `recording`, dot-joined, array indices as steps: "
+                + "\"time.hour\", \"place.0.lat\", "
+                + "\"timeline.keyframes.1.shapes.0.shape.angular.widthDeg\"."
             },
-            quote: {
+            basis: {
               type: "string",
-              description: "The account's own words that state it, copied verbatim. Never a paraphrase."
+              enum: ["stated", "derived", "assumed"],
+              description: "\"stated\": the witness said it. \"derived\": worked out from what they "
+                + "said plus something checkable. \"assumed\": chosen so the reconstruction has a "
+                + "value at all, on nothing they said."
+            },
+            rationale: {
+              type: "string",
+              description: "For \"stated\", the account's own words, copied verbatim, never a "
+                + "paraphrase. For \"derived\", the working, with the numbers in it. For "
+                + "\"assumed\", what the guess was chosen for and how wrong it could be."
             }
           },
-          required: ["path", "quote"]
+          required: ["path", "basis", "rationale"]
         }
       },
       gaps: {
         type: "array",
-        description: "What the account does not say, one short sentence each, in the reader's language.",
+        description: "What nothing could settle, not even a guess worth making — one short sentence "
+          + "each, in the reader's language. Usually empty.",
         items: { type: "string" }
       }
     },
@@ -56,30 +67,50 @@ const RULES = `You are reading a witness's account of an aerial sighting and rec
 recording format of UFO@home, a tool that replays what a witness reported seeing, from where they
 stood, under the real sky of that moment.
 
-The point of the format is that a reader can tell what was witnessed from what was supposed. So:
+The reconstruction has to RUN. A field left empty is a sky that cannot be computed or a phenomenon
+that cannot be drawn, so fill in everything the reconstruction needs — and say, of every single
+value, which of three things it is:
 
-1. State only what the account states. Every value you put in the recording must be traceable to a
-   sentence you can quote, and you list that sentence in \`claims\`. If you cannot quote it, leave the
-   field out and say so in \`gaps\`. An empty field is a correct answer; a plausible one is not.
-2. Sizes are ANGULAR, in degrees, and never metric. The format stores no physical size at all,
-   because a witness does not perceive one: they perceive an angle, and a size only follows from a
-   distance nobody measured. Convert the comparisons an account does give — the full Moon and the
-   Sun are both about 0.5 degrees across, a thumbnail at arm's length about 1.5, a fist about 10.
-   "As big as a car at a hundred metres" is a stated angle (about 2.5 degrees); "as big as a car" on
-   its own is not an angle at all, and goes in \`gaps\`.
-3. Directions are \`aim\`: \`azimuthDeg\` clockwise from true north (north 0, east 90, south 180,
-   west 270) and \`altitudeDeg\` above the horizon (horizon 0, zenith 90). "High in the sky" is not a
-   number — say so in \`gaps\` rather than choosing one. Cardinal points and elevations the account
-   does give ("in the north-west, about a third of the way up") are numbers: 315 and about 30.
-4. Times are the local legal time at the place, with \`utcOffsetHours\` for the offset in force there
-   THAT DAY (summer time included). Keyframe \`t\` is milliseconds from the start of the observation.
+- "stated": the witness said it. The rationale is their own words, copied verbatim.
+- "derived": you worked it out from what they said plus something checkable. The rationale is the
+  working, with the numbers in it.
+- "assumed": you chose it so the reconstruction would have a value at all, on nothing they said. The
+  rationale says what you chose it for and how wrong it could be.
+
+Getting that label right matters more than getting the value right. A wrong value marked "assumed"
+is a question for the author to answer; a guess passed off as "stated" is a fabricated testimony,
+and it is the one thing this format exists to prevent. When in doubt, mark it weaker.
+
+Then:
+
+1. Sizes are ANGULAR, in degrees, and never metric — the format stores no physical size, because a
+   witness perceives an angle and a size only follows from a distance nobody measured. Convert the
+   comparisons an account gives: the full Moon and the Sun are both about 0.5 degrees across, a
+   thumbnail at arm's length about 1.5, a fist about 10. Where the account gives no comparison, work
+   from what a scene implies and say so: something "barring the road" spans a carriageway, so a
+   5-6 m road seen from 20-100 m gives 3 to 15 degrees; take a value in that range and put the
+   range in the rationale. That is "derived", not "stated".
+2. Directions are \`aim\`: \`azimuthDeg\` clockwise from true north (north 0, east 90, south 180,
+   west 270) and \`altitudeDeg\` above the horizon (horizon 0, zenith 90). Derive them where the
+   geography allows — a witness driving towards a named village is looking along that bearing, and a
+   phenomenon "barring the road" is on it. Where nothing bears on the altitude, assume something low
+   and plausible rather than leaving the phenomenon undrawable, and mark it "assumed".
+3. Times are the local legal time at the place, with \`utcOffsetHours\` for the offset in force
+   THERE, THAT DAY. This is a fact about the country and the year, not about today: France had no
+   summer time at all between 1945 and 1976, so a May 1974 sighting in Brittany is UTC+1, not UTC+2.
+   Getting this wrong moves the whole sky by an hour.
+4. Duration: \`durationSeconds\` is a bare number and cannot say "about". So when the account gives
+   a vague length ("a few minutes"), do NOT use it — write \`endTime\` instead, whose \`raw\` takes
+   the EDTF approximation suffix: {"raw": "1974-05-20T19:02~", "year": 1974, "month": 5, "day": 20,
+   "hour": 19, "minute": 2}. The tilde is the format saying "approximately", and it is the honest
+   way to write a duration nobody timed. Use \`durationSeconds\` only for a length that was.
 5. Give a keyframe only for a moment the account actually distinguishes — where it arrived, where it
-   went, when it changed. Two to four is a normal first draft. Interpolation between them is the
-   player's job, and poses nobody described are not yours to add.
-6. For each shape give only \`kind\` ("oval" or "polygon"), \`title\` (what the witness called it, in
-   their language), \`angular\` and \`aim\`. Never a pixel box, a transparency or a halo: those are
-   how a drawing is painted, they are derived from the angle and the direction on loading, and
-   inventing them would put numbers in the file that no one observed.
+   went, when it changed. Two to four is a normal first draft, and one is right for a phenomenon
+   that never moved. Interpolation between them is the player's job.
+6. For each shape give only \`kind\` ("oval" or "polygon"), \`title\` (what the witness called it,
+   in their language), \`angular\` and \`aim\`. Never a pixel box, a transparency or a halo: those
+   are how a drawing is painted, they are derived from the angle and the direction on loading, and
+   values for them would be numbers no one observed and no one could check.
 7. NEVER write \`description\`. It is the account you were just given: it is what the witness said,
    it does not change because somebody read it, and anything you would put there instead belongs in
    the numbers the reading produced. Leave the field out of your answer entirely.
@@ -87,7 +118,10 @@ The point of the format is that a reader can tell what was witnessed from what w
    a tag have to match on it. Reuse the vocabulary already in use where it fits — landing, trace,
    aerial observation, paralysis, contact, occupants, close encounter, photograph, radar,
    electromagnetic effect — and pass classification codes and case references through unchanged
-   ("RR3", "NL", "Blue Book 8729"), which read the same in every language.`
+   ("RR3", "NL", "Blue Book 8729"), which read the same in every language.
+9. Silence is a statement. A witness who says the thing was silent is not a witness who said nothing
+   about sound: write a \`soundTrack\` whose keyframe holds a sound of kind "none", and mark it
+   "stated". An account that simply never mentions sound gets no soundTrack at all.`
 
 /**
  * Reads an account with Claude, on the reader's own account.
@@ -237,8 +271,14 @@ restate a value here that the account does not itself state:\n\n${JSON.stringify
       recording: input.recording as NarrativeDraft["recording"],
       claims: Array.isArray(input.claims)
         ? input.claims.flatMap(claim => {
-          const { path, quote } = (claim ?? {}) as { path?: unknown, quote?: unknown }
-          return typeof path === "string" && typeof quote === "string" ? [{ path, quote }] : []
+          const { path, basis, rationale } = (claim ?? {}) as { path?: unknown, basis?: unknown, rationale?: unknown }
+          if (typeof path !== "string" || typeof rationale !== "string") {
+            return []
+          }
+          // An unrecognised basis reads as "stated", the same default a file with no basis at all
+          // gets: the safe reading is that somebody said it, not that something guessed it.
+          const known = basis === "derived" || basis === "assumed" ? basis : "stated"
+          return [{ path, basis: known as Basis, rationale }]
         })
         : [],
       gaps: Array.isArray(input.gaps) ? input.gaps.filter((gap): gap is string => typeof gap === "string") : []

@@ -474,9 +474,16 @@ export interface SightingEditorMessages extends SightingLabels {
   /** When the account yielded nothing at all: a real answer, and one worth saying out loud rather
    * than leaving the reader to wonder whether the button worked. */
   narrativeUnchanged: string
-  /** Heading over the quotes justifying each drafted value. */
-  narrativeClaims: string
-  /** Heading over what the account does not say. */
+  /** Heading over the values the witness themselves gave, whose justification is their own words. */
+  narrativeStated: string
+  /** Heading over the values worked out from what they said plus something checkable — the
+   * rationale beside each is the working. */
+  narrativeDerived: string
+  /** Heading over the values chosen so the reconstruction would run at all, on nothing the witness
+   * said. Shown FIRST of the three: this group is the to-do list, and burying it under forty quoted
+   * values is how it stops being read. */
+  narrativeAssumed: string
+  /** Heading over what nothing could settle, not even a guess worth making. */
   narrativeGaps: string
   /** No key typed, or one the API refused. */
   narrativeErrorCredential: string

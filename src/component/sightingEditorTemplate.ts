@@ -775,8 +775,18 @@ select.weather-field:disabled {
   color: color-mix(in srgb, currentColor 72%, transparent);
   font-size: 0.95em;
 }
-.narrative-report .claim q {
+.narrative-report .claim q,
+.narrative-report .claim span {
   color: color-mix(in srgb, currentColor 85%, transparent);
+}
+/* A guess reads as a guess without having to find its heading again: this group is what an author
+   has to go and check, and it is the one thing in the report that is not evidence. */
+.narrative-report .claim.assumed code {
+  color: color-mix(in srgb, currentColor 90%, transparent);
+  font-weight: 600;
+}
+.narrative-report .claim.assumed span {
+  font-style: italic;
 }
 .narrative-report .gaps {
   margin: 0.35em 0 0;

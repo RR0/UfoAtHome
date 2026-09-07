@@ -1,4 +1,5 @@
 import type { SightingRecordingJson } from "../persistence/sightingJson.js"
+import { Provenance } from "../persistence/Provenance.js"
 
 /** One shape as a digest states it — what it IS and where it was seen, never how it is drawn. */
 interface ShapeDigest {
@@ -42,7 +43,10 @@ export class RecordingDigest {
   /** The digest of `recording`, or undefined for an empty editor — a recording with no moment, no
    * place and no shape says nothing worth a round trip, and sending it would only invite a model to
    * treat its emptiness as a statement. */
-  static of(recording: SightingRecordingJson): RecordingDigestJson | undefined {
+  static of(wrapped: SightingRecordingJson): RecordingDigestJson | undefined {
+    // Values, not their provenance: a reader is being told what is already settled, and a wrapper
+    // around each one would triple the digest to say something no reading of an account can check.
+    const { recording } = Provenance.strip(wrapped)
     const { timeline, ...rest } = recording
     const keyframes = (timeline?.keyframes ?? []).map(keyframe => RecordingDigest.keyframe(keyframe))
     const stated = Object.entries(rest).filter(([key, value]) => key !== "version" && value !== undefined)
