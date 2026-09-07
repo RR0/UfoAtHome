@@ -14,6 +14,7 @@ import type { SaidText } from "./SaidText.js"
 import { Instruments } from "../instrument/Instrument.js"
 import type { Instrument } from "../instrument/Instrument.js"
 import { Provenance } from "../persistence/Provenance.js"
+import type { Testimony } from "./Testimony.js"
 
 /**
  * A fuzzy date, structurally aligned with @rr0/time's Level2Date fields
@@ -329,6 +330,15 @@ export class Sighting {
    * "stated", and stated is what those files were.
    */
   provenance: Provenance = Provenance.empty()
+
+  /**
+   * Who saw it and how their account reached this file — see Testimony.
+   *
+   * A field of its own rather than more of `witness`, which is one person's identity and is
+   * structurally aligned with @rr0/data's own PeopleJson (see People). Not readonly, same
+   * "reassigned wholesale on edit" reasoning as witness and caseId above.
+   */
+  testimony?: Testimony
 
   /** The shutter this observation was made with, resolved — the recording's own, else the device's,
    * else none at all (an eye has no shutter). */

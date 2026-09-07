@@ -5713,3 +5713,70 @@ describe("how precisely the gaze fields read back", () => {
     expect(pitch.value).toBe("61.3")
   })
 })
+
+describe("SightingEditorElement testimony", () => {
+  const field = <T extends HTMLElement>(element: SightingEditorElement, id: string): T =>
+    element.shadowRoot!.getElementById(id) as T
+
+  const type = (element: SightingEditorElement, id: string, value: string, event = "input"): void => {
+    const input = field<HTMLInputElement | HTMLSelectElement>(element, id)
+    input.value = value
+    input.dispatchEvent(new Event(event))
+  }
+
+  it("writes who saw it and how the account travelled into the recording", () => {
+    // None of it is about the phenomenon, and until now a recording could state none of it — which
+    // left Poher's credibility criteria and Ballester-Guasp's information quality uncomputable from
+    // a file, by those methods' own definitions. See Testimony.
+    const element = mount()
+
+    type(element, "witnessCount", "4")
+    type(element, "witnessAge", "38")
+    type(element, "witnessOccupation", "boulanger")
+    type(element, "testimonySource", "on-site", "change")
+    type(element, "testimonyFollowedUp", "yes", "change")
+
+    expect(element.sightingData.testimony).toEqual({
+      witnessCount: 4,
+      witnessAgeYears: 38,
+      witnessOccupation: "boulanger",
+      source: "on-site",
+      followedUp: true
+    })
+  })
+
+  it("says nothing rather than zero about witnesses nobody counted", () => {
+    // "Nobody recorded how many people were there" and "one person was there" are different
+    // statements, and Poher scores them 0 and 1.
+    const element = mount()
+
+    expect(element.sightingData.testimony).toBeUndefined()
+  })
+
+  it("keeps 'not followed up' apart from 'nobody said'", () => {
+    const element = mount()
+
+    type(element, "testimonyFollowedUp", "no", "change")
+    expect(element.sightingData.testimony?.followedUp).toBe(false)
+
+    type(element, "testimonyFollowedUp", "", "change")
+    expect(element.sightingData.testimony).toBeUndefined()
+  })
+
+  it("shows back what a loaded recording states", () => {
+    const element = mount()
+
+    element.sightingData = {
+      version: 1,
+      timeline: { keyframes: [] },
+      testimony: { witnessCount: 4, witnessAgeYears: 38, witnessOccupation: "boulanger", source: "press" }
+    }
+
+    expect(field<HTMLInputElement>(element, "witnessCount").value).toBe("4")
+    expect(field<HTMLInputElement>(element, "witnessAge").value).toBe("38")
+    expect(field<HTMLInputElement>(element, "witnessOccupation").value).toBe("boulanger")
+    expect(field<HTMLSelectElement>(element, "testimonySource").value).toBe("press")
+    // Absent, not "no": the recording says nothing about follow-up.
+    expect(field<HTMLSelectElement>(element, "testimonyFollowedUp").value).toBe("")
+  })
+})

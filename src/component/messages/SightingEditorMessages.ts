@@ -509,4 +509,28 @@ export interface SightingEditorMessages extends SightingLabels {
   /** The service refused the request and said why. {detail} is its own words, which name the field
    * to fill — see NarrativeErrorKind's "rejected" on why they are shown rather than translated. */
   narrativeErrorRejected: string
+  /** How many people saw it, this recording's own witness included — the heaviest single rubric of
+   * Poher's credibility criteria, and something a recording could not state at all until now. */
+  witnessCount: string
+  /** The main witness's age AT THE TIME, not today. */
+  witnessAge: string
+  /** What they did, in prose — never a level: banding occupations is each method's own argument
+   * (see Testimony.witnessOccupation). */
+  witnessOccupation: string
+  /** How the account reached whoever wrote the recording — Ballester-Guasp's information-quality
+   * scale grades a report by that, not by what it says. */
+  testimonySource: string
+  testimonySourceUnknown: string
+  testimonySourceOnSite: string
+  testimonySourceInterview: string
+  testimonySourceTelephone: string
+  testimonySourceQuestionnaire: string
+  testimonySourceLetter: string
+  testimonySourcePress: string
+  /** Whether the witness was gone back to after the first account. Three states: a report silent
+   * about follow-up is not a report saying none happened. */
+  testimonyFollowedUp: string
+  testimonyUnknown: string
+  testimonyYes: string
+  testimonyNo: string
 }

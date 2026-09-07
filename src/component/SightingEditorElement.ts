@@ -44,6 +44,7 @@ import { plainSightingJson } from "../engine/persistence/sightingJson.js"
 import { DEFAULT_ICE_CRYSTAL_ALIGNMENT } from "../engine/model/Weather.js"
 import type { PrecipitationType, Weather } from "../engine/model/Weather.js"
 import type { People } from "../engine/model/People.js"
+import type { Testimony } from "../engine/model/Testimony.js"
 import type { DecorObject, DecorSide, DecorSize } from "../engine/model/Decor.js"
 import { sortedMilestones } from "../engine/model/Milestone.js"
 import {
@@ -361,6 +362,11 @@ export class SightingEditorElement extends HTMLElement {
   private readonly witnessTitleInput: HTMLInputElement
   private readonly witnessLastNameInput: HTMLInputElement
   private readonly witnessFirstNamesInput: HTMLInputElement
+  private readonly witnessCountInput: HTMLInputElement
+  private readonly witnessAgeInput: HTMLInputElement
+  private readonly witnessOccupationInput: HTMLInputElement
+  private readonly testimonySourceSelect: HTMLSelectElement
+  private readonly testimonyFollowedUpSelect: HTMLSelectElement
   private readonly caseIdInput: HTMLInputElement
   private readonly descriptionInput: HTMLTextAreaElement
   private readonly tagsInput: HTMLInputElement
@@ -456,6 +462,11 @@ export class SightingEditorElement extends HTMLElement {
   private readonly labelWitnessTitle: HTMLElement
   private readonly labelWitnessLastName: HTMLElement
   private readonly labelWitnessFirstNames: HTMLElement
+  private readonly labelWitnessCount: HTMLElement
+  private readonly labelWitnessAge: HTMLElement
+  private readonly labelWitnessOccupation: HTMLElement
+  private readonly labelTestimonySource: HTMLElement
+  private readonly labelTestimonyFollowedUp: HTMLElement
   private readonly labelCaseId: HTMLElement
   private readonly labelDescription: HTMLElement
   private readonly labelTags: HTMLElement
@@ -863,6 +874,11 @@ export class SightingEditorElement extends HTMLElement {
     this.witnessTitleInput = this.shadow.getElementById("witnessTitle") as HTMLInputElement
     this.witnessLastNameInput = this.shadow.getElementById("witnessLastName") as HTMLInputElement
     this.witnessFirstNamesInput = this.shadow.getElementById("witnessFirstNames") as HTMLInputElement
+    this.witnessCountInput = this.shadow.getElementById("witnessCount") as HTMLInputElement
+    this.witnessAgeInput = this.shadow.getElementById("witnessAge") as HTMLInputElement
+    this.witnessOccupationInput = this.shadow.getElementById("witnessOccupation") as HTMLInputElement
+    this.testimonySourceSelect = this.shadow.getElementById("testimonySource") as HTMLSelectElement
+    this.testimonyFollowedUpSelect = this.shadow.getElementById("testimonyFollowedUp") as HTMLSelectElement
     this.caseIdInput = this.shadow.getElementById("caseId") as HTMLInputElement
     this.descriptionInput = this.shadow.getElementById("description") as HTMLTextAreaElement
     this.tagsInput = this.shadow.getElementById("tags") as HTMLInputElement
@@ -950,6 +966,11 @@ export class SightingEditorElement extends HTMLElement {
     this.labelWitnessTitle = this.shadow.getElementById("label-witness-title")!
     this.labelWitnessLastName = this.shadow.getElementById("label-witness-last-name")!
     this.labelWitnessFirstNames = this.shadow.getElementById("label-witness-first-names")!
+    this.labelWitnessCount = this.shadow.getElementById("label-witness-count")!
+    this.labelWitnessAge = this.shadow.getElementById("label-witness-age")!
+    this.labelWitnessOccupation = this.shadow.getElementById("label-witness-occupation")!
+    this.labelTestimonySource = this.shadow.getElementById("label-testimony-source")!
+    this.labelTestimonyFollowedUp = this.shadow.getElementById("label-testimony-followed-up")!
     this.labelCaseId = this.shadow.getElementById("label-case-id")!
     this.labelDescription = this.shadow.getElementById("label-description")!
     this.labelTags = this.shadow.getElementById("label-tags")!
@@ -1126,6 +1147,8 @@ export class SightingEditorElement extends HTMLElement {
     this.exportButton.addEventListener("click", () => this.exportJson())
     this.importFileInput.addEventListener("change", () => this.importFromFile())
     this.importUrlButton.addEventListener("click", () => this.importFromUrl())
+    this.testimonySourceSelect.addEventListener("change", () => this.updateWitnessMetadata())
+    this.testimonyFollowedUpSelect.addEventListener("change", () => this.updateWitnessMetadata())
     this.narrativeDraftButton.addEventListener("click", () => this.draftFromDescription())
     this.narrativeStopButton.addEventListener("click", () => this.narrativeAbort?.abort())
     this.narrativeRememberInput.addEventListener("change", () => this.rememberNarrativeKey())
@@ -1329,6 +1352,9 @@ export class SightingEditorElement extends HTMLElement {
       this.witnessTitleInput,
       this.witnessLastNameInput,
       this.witnessFirstNamesInput,
+      this.witnessCountInput,
+      this.witnessAgeInput,
+      this.witnessOccupationInput,
       this.caseIdInput
     ]) {
       input.addEventListener("input", () => this.updateWitnessMetadata())
@@ -2418,7 +2444,31 @@ export class SightingEditorElement extends HTMLElement {
     }
     sighting.witness = Object.values(witness).some(value => value !== undefined) ? witness : undefined
     sighting.caseId = this.stringOrUndefined(this.caseIdInput.value)
+    this.updateTestimony()
     this.ufoElement.refresh()
+  }
+
+  /**
+   * Who saw it and how the account travelled — see Testimony.
+   *
+   * Written whole and dropped whole, the same as `witness` above: every field is independently
+   * optional, and a testimony none of whose fields is set is not an empty testimony, it is a
+   * recording that says nothing about its witnesses. Blank stays undefined rather than becoming 0,
+   * because the methods reading this score "unknown" and "one" differently.
+   */
+  private updateTestimony(): void {
+    const sighting = this.ufoElement.sighting
+    const followedUp = this.testimonyFollowedUpSelect.value
+    const testimony: Testimony = {
+      witnessCount: this.numberOrUndefined(this.witnessCountInput.value),
+      witnessAgeYears: this.numberOrUndefined(this.witnessAgeInput.value),
+      witnessOccupation: this.witnessOccupationInput.value.trim() === ""
+        ? undefined
+        : this.said.write(sighting.testimony?.witnessOccupation, this.witnessOccupationInput.value, this.writingLanguage),
+      source: (this.stringOrUndefined(this.testimonySourceSelect.value) as Testimony["source"]),
+      followedUp: followedUp === "" ? undefined : followedUp === "yes"
+    }
+    sighting.testimony = Object.values(testimony).some(value => value !== undefined) ? testimony : undefined
   }
 
   private updateDescription(): void {
@@ -3179,6 +3229,13 @@ export class SightingEditorElement extends HTMLElement {
     this.witnessLastNameInput.value = sighting.witness?.lastName ?? ""
     this.witnessFirstNamesInput.value = sighting.witness?.firstNames?.join(", ") ?? ""
     this.caseIdInput.value = sighting.caseId ?? ""
+    // Empty for absent, never "0": see Testimony on why unknown and one are different statements.
+    this.witnessCountInput.value = sighting.testimony?.witnessCount?.toString() ?? ""
+    this.witnessAgeInput.value = sighting.testimony?.witnessAgeYears?.toString() ?? ""
+    this.witnessOccupationInput.value = this.said.read(sighting.testimony?.witnessOccupation) ?? ""
+    this.testimonySourceSelect.value = sighting.testimony?.source ?? ""
+    this.testimonyFollowedUpSelect.value =
+      sighting.testimony?.followedUp === undefined ? "" : sighting.testimony.followedUp ? "yes" : "no"
     this.descriptionInput.value = this.said.read(sighting.event.description) ?? ""
     this.showTags()
     this.instrumentSelect.value = sighting.instrument.id
@@ -5632,6 +5689,26 @@ export class SightingEditorElement extends HTMLElement {
     this.labelImportUrl.textContent = messages.importUrl
     this.importUrlInput.placeholder = messages.importUrlPlaceholder
     this.importUrlButton.textContent = messages.importButton
+    this.labelWitnessCount.textContent = messages.witnessCount
+    this.labelWitnessAge.textContent = messages.witnessAge
+    this.labelWitnessOccupation.textContent = messages.witnessOccupation
+    this.labelTestimonySource.textContent = messages.testimonySource
+    this.labelTestimonyFollowedUp.textContent = messages.testimonyFollowedUp
+    for (const [id, text] of [
+      ["option-source-unknown", messages.testimonySourceUnknown],
+      ["option-source-on-site", messages.testimonySourceOnSite],
+      ["option-source-interview", messages.testimonySourceInterview],
+      ["option-source-telephone", messages.testimonySourceTelephone],
+      ["option-source-questionnaire", messages.testimonySourceQuestionnaire],
+      ["option-source-letter", messages.testimonySourceLetter],
+      ["option-source-press", messages.testimonySourcePress],
+      ["option-followed-unknown", messages.testimonyUnknown],
+      ["option-followed-yes", messages.testimonyYes],
+      ["option-followed-no", messages.testimonyNo]
+    ] as const) {
+      const option = this.shadow.getElementById(id)
+      if (option) option.textContent = text
+    }
     this.labelNarrativeKey.textContent = messages.narrativeKey.replace("{source}", NARRATIVE_SOURCES[0].name)
     this.labelNarrativeWorkspace.textContent = messages.narrativeWorkspace
     this.narrativeWorkspaceInput.placeholder = messages.narrativeWorkspacePlaceholder

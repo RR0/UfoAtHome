@@ -142,7 +142,13 @@ Then:
    and it is what makes a shape's azimuth mean anything — a witness driving towards a named village
    faces that bearing. \`elevationM\` is metres above sea level, \`pitchDeg\` 0 for someone looking
    level, \`fovDeg\` about 60 for the naked eye.
-11. Silence is a statement. A witness who says the thing was silent is not a witness who said nothing
+11. \`testimony\` is about the WITNESSES and how their account travelled, not about the phenomenon.
+   An account naming who was there states \`witnessCount\` ("accompagn\u00e9 de son \u00e9pouse et de ses 2
+   enfants" with the witness makes four) and \`witnessOccupation\` ("boulanger"), in their own words
+   and never as a level. But \`source\` and \`followedUp\` say how the report was OBTAINED, which no
+   account of a sighting can tell you: leave them out rather than guessing, unless the text itself
+   says an investigator came, or that it is a press cutting.
+12. Silence is a statement. A witness who says the thing was silent is not a witness who said nothing
    about sound: write a \`soundTrack\` whose keyframe holds a sound of kind "none", and mark it
    "stated". An account that simply never mentions sound gets no soundTrack at all.`
 

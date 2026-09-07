@@ -10,6 +10,7 @@ import { SoundTrack } from "../model/SoundTrack.js"
 import type { SoundTrackJson } from "../model/SoundTrack.js"
 import type { Weather, WeatherSource } from "../model/Weather.js"
 import type { People } from "../model/People.js"
+import type { Testimony } from "../model/Testimony.js"
 import type { DecorObject } from "../model/Decor.js"
 import type { Milestone } from "../model/Milestone.js"
 import type { SaidText } from "../model/SaidText.js"
@@ -42,6 +43,8 @@ export interface SightingRecordingJson {
   place?: SightingLocation[]
   /** See Sighting.witness. */
   witness?: People
+  /** Who saw it and how their account travelled — see Testimony, and Sighting.testimony. */
+  testimony?: Testimony
   /** See Sighting.caseId — shared by every witness's own sighting.json for the same case, so
    * a page (e.g. SightingElement) can group and label them without a separate manifest
    * duplicating names that could drift out of sync with the actual files. */
@@ -107,6 +110,7 @@ export function plainSightingJson(sighting: Sighting): SightingRecordingJson {
     timeZone: sighting.event.timeZone,
     place: sighting.event.place,
     witness: sighting.witness,
+    testimony: sighting.testimony,
     caseId: sighting.caseId,
     description: sighting.event.description,
     tags: sighting.event.tags,
@@ -170,6 +174,7 @@ function fromPlainSightingJson(json: SightingRecordingJson): Sighting {
   // The file states an angle; the drawing has to follow it. Done here rather than in
   // Timeline.fromJSON because the projection needs the pose's own field of view, which lives on
   // the sighting, not on the timeline.
+  sighting.testimony = json.testimony
   SightingShapes.toBounds(sighting)
   // Positions follow the stated directions the way sizes follow the stated angles — and this is the
   // step that lets a recording's witness turn their head without taking the sky with them.

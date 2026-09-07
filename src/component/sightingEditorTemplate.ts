@@ -71,6 +71,29 @@ export const html = `
     <label><span id="label-witness-title">Witness title</span> <input id="witnessTitle" type="text"/></label>
     <label><span id="label-witness-last-name">Witness last name</span> <input id="witnessLastName" type="text"/></label>
     <label><span id="label-witness-first-names">Witness first names</span> <input id="witnessFirstNames" type="text" placeholder="comma-separated"/></label>
+    <!-- Who saw it and how the account travelled — see Testimony. None of it is about the
+         phenomenon, which is why it sits with the witness and not with the shape, and why it had to
+         exist at all: Poher's credibility criteria read these four things and a recording could
+         state none of them. Blank means unknown, never zero (see each field's own doc comment). -->
+    <label><span id="label-witness-count">Witnesses</span> <input id="witnessCount" type="number" min="1" step="1" size="4" placeholder="how many"/></label>
+    <label><span id="label-witness-age">Age then</span> <input id="witnessAge" type="number" min="0" max="120" step="1" size="4" placeholder="years"/></label>
+    <label><span id="label-witness-occupation">Occupation</span> <input id="witnessOccupation" type="text" placeholder="baker, airline pilot…"/></label>
+    <label><span id="label-testimony-source">Account obtained</span> <select id="testimonySource">
+      <option id="option-source-unknown" value="">unknown</option>
+      <option id="option-source-on-site" value="on-site">on-site investigation</option>
+      <option id="option-source-interview" value="interview">interview in person</option>
+      <option id="option-source-telephone" value="telephone">by telephone</option>
+      <option id="option-source-questionnaire" value="questionnaire">questionnaire</option>
+      <option id="option-source-letter" value="letter">the witness wrote it</option>
+      <option id="option-source-press" value="press">press or broadcast</option>
+    </select></label>
+    <!-- Three states and not a checkbox: a report that says nothing about follow-up is not a report
+         that says none happened, and the methods reading this score the two differently. -->
+    <label><span id="label-testimony-followed-up">Followed up</span> <select id="testimonyFollowedUp">
+      <option id="option-followed-unknown" value="">unknown</option>
+      <option id="option-followed-yes" value="yes">yes</option>
+      <option id="option-followed-no" value="no">no</option>
+    </select></label>
     <label><span id="label-instrument">Observed through</span> <select id="instrument"></select></label>
     <!-- What the device was SET to, when it could be set at all: the lens's focal length (shown as
          the field of view for an eye, which has no focal length), how far it was stopped down, and

@@ -321,3 +321,35 @@ describe("sightingJson", () => {
     expect(restored.event.tags).toBeUndefined()
   })
 })
+
+describe("testimony", () => {
+  it("round-trips who saw it and how the account travelled", () => {
+    // None of it is about the phenomenon, and a recording carried none of it until now — which
+    // left half of every published evaluation method uncomputable from a file. See Testimony.
+    const sighting = Sighting.create({ year: 1974, month: 5, day: 20 })
+    sighting.testimony = {
+      witnessCount: 4,
+      witnessAgeYears: 38,
+      witnessOccupation: { fr: "boulanger", en: "baker" },
+      source: "on-site",
+      followedUp: true
+    }
+
+    expect(fromSightingJson(toSightingJson(sighting)).testimony).toEqual({
+      witnessCount: 4,
+      witnessAgeYears: 38,
+      witnessOccupation: { fr: "boulanger", en: "baker" },
+      source: "on-site",
+      followedUp: true
+    })
+  })
+
+  it("writes nothing for a recording that says nothing about its witnesses", () => {
+    // Absent means unknown, never zero: "nobody recorded how many people were there" and "one
+    // person was there" are different statements, and Poher scores them 0 and 1.
+    const written = toSightingJson(Sighting.create({ year: 1974 }))
+
+    expect(written.testimony).toBeUndefined()
+    expect("testimony" in written).toBe(true)
+  })
+})
