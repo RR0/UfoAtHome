@@ -80,18 +80,14 @@ The point of the format is that a reader can tell what was witnessed from what w
    their language), \`angular\` and \`aim\`. Never a pixel box, a transparency or a halo: those are
    how a drawing is painted, they are derived from the angle and the direction on loading, and
    inventing them would put numbers in the file that no one observed.
-7. Write \`description\` in the witness's own language, as prose, saying what is reconstructed and
-   naming what the reconstruction leaves out. Keep the account's vocabulary: this project says
-   "phenomenon", never "object".
+7. NEVER write \`description\`. It is the account you were just given: it is what the witness said,
+   it does not change because somebody read it, and anything you would put there instead belongs in
+   the numbers the reading produced. Leave the field out of your answer entirely.
 8. \`tags\` are stored in English whatever the account's language, because two recordings that share
    a tag have to match on it. Reuse the vocabulary already in use where it fits — landing, trace,
    aerial observation, paralysis, contact, occupants, close encounter, photograph, radar,
    electromagnetic effect — and pass classification codes and case references through unchanged
-   ("RR3", "NL", "Blue Book 8729"), which read the same in every language.
-
-When you are asked to correct an earlier draft, answer with the WHOLE recording again, not a
-fragment: change what you were asked to change, leave the rest as it was, and keep the claims for
-everything you kept. The editor works out for itself which values actually moved.`
+   ("RR3", "NL", "Blue Book 8729"), which read the same in every language.`
 
 /**
  * Reads an account with Claude, on the reader's own account.
@@ -168,51 +164,33 @@ export class ClaudeNarrativeProvider implements NarrativeProvider {
     }
   }
 
-  /** The conversation so far. The API remembers nothing between calls, so every round resends its
-   * own history — and a past draft goes back as the assistant's own words rather than as a replayed
-   * tool call, which would drag its tool_result along with it for no gain. */
+  /** The one turn there is. No conversation: an account is read whole, and reworking a draft means
+   * rewording the account and reading it again — see NarrativeRequest.ask. */
   private messages(request: NarrativeRequest): Anthropic.MessageParam[] {
-    const history = request.history ?? []
-    const messages: Anthropic.MessageParam[] = []
-    for (const exchange of history) {
-      messages.push({ role: "user", content: exchange.request })
-      messages.push({ role: "assistant", content: JSON.stringify(exchange.draft) })
-    }
-    messages.push({ role: "user", content: [{ type: "text", text: this.ask(request, history.length === 0) }] })
-    // Onto the FIRST user turn, wherever that turn now is: the images came with the account, not
-    // with the correction being asked now, and putting them anywhere else would both misplace them
-    // and move the prefix every round, costing the cache.
-    const first = messages[0]
-    const blocks = (request.images ?? []).map(image => ClaudeNarrativeProvider.imageBlock(image))
-    if (blocks.length > 0) {
-      const existing: Anthropic.ContentBlockParam[] =
-        typeof first.content === "string" ? [{ type: "text", text: first.content }] : first.content
-      first.content = [...blocks, ...existing]
-    }
-    return messages
+    return [{
+      role: "user",
+      content: [
+        ...(request.images ?? []).map(image => ClaudeNarrativeProvider.imageBlock(image)),
+        { type: "text", text: this.ask(request) }
+      ]
+    }]
   }
 
-  private ask(request: NarrativeRequest, first: boolean): string {
+  private ask(request: NarrativeRequest): string {
     const parts: string[] = []
     if (request.language) {
-      parts.push(`Write the description and the gaps in ${request.language}.`)
+      parts.push(`Write the gaps in ${request.language}.`)
     }
     const digest = request.current ? RecordingDigest.of(request.current) : undefined
     if (digest) {
-      // What the editor holds NOW, which after a hand edit is not what was last proposed. Without
-      // it a correction would be applied to a version that no longer exists, and would read as an
-      // instruction to undo whatever the author fixed in between.
+      // So a draft does not overrule what is already settled by other means — a place geocoded to
+      // the metre, an instrument chosen. An account does not carry those and cannot correct them.
       parts.push(
-        `What the editor currently holds, shapes reduced to their stated angle and direction:\n\n${
-          JSON.stringify(digest)}`
+        `What the editor already holds, shapes reduced to their stated angle and direction. Do not \
+restate a value here that the account does not itself state:\n\n${JSON.stringify(digest)}`
       )
     }
-    parts.push(
-      first
-        ? `The account:\n\n${request.ask}`
-        : `Correct the last draft:\n\n${request.ask}`,
-      "Answer by calling draft_recording."
-    )
+    parts.push(`The account:\n\n${request.ask}`, "Answer by calling draft_recording.")
     return parts.join("\n\n")
   }
 

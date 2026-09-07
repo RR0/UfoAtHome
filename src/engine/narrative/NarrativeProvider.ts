@@ -42,28 +42,20 @@ export interface NarrativeDraft {
   gaps: string[]
 }
 
-/** One earlier round, so that a correction reads as a correction of THIS and not as a fresh
- * account. Held by the caller, since the Messages API remembers nothing between calls. */
-export interface NarrativeExchange {
-  /** What was asked that round — the account itself on the first, a correction after that. */
-  request: string
-  /** The recording that answered it. */
-  draft: Partial<SightingRecordingJson>
-}
-
-/** One ask: an account, or a correction to what an earlier ask produced. */
+/** One ask: an account, read whole. */
 export interface NarrativeRequest {
-  /** The account in prose, or — when `history` is not empty — what to change about the last draft. */
+  /** The account in prose, in the witness's own words — the recording's own `description`, which
+   * is where a testimony has always belonged (see SightingEvent.description). There is no second
+   * kind of ask: reworking a draft means rewording the account and reading it again, because the
+   * account is the only thing here anybody actually witnessed. */
   ask: string
   images?: NarrativeImage[]
-  /** Earlier rounds, oldest first. Empty or absent on the first ask. */
-  history?: NarrativeExchange[]
   /**
-   * What the editor holds RIGHT NOW, which is not the same thing as the last draft: between two
-   * rounds the author may have fixed a name, moved a shape or set a time by hand, and a correction
-   * applied to the superseded draft would quietly undo all of it. Providers send a digest of this
-   * rather than the file (see RecordingDigest — Socorro's own recording is 62 KB, 44 of them
-   * keyframes, and resending it every round would pay for the timeline over and over).
+   * What the editor holds right now, so that a draft does not contradict what is already settled —
+   * coordinates geocoded to the metre, an instrument chosen, decor placed. None of that is in a
+   * testimony and none of it is the account's to overrule. Providers send a digest rather than the
+   * file (see RecordingDigest: Socorro's own recording is 62 KB, 44 of them keyframes, and none of
+   * those keyframes is something an account can be checked against).
    */
   current?: SightingRecordingJson
   /** BCP 47 tag the prose parts — `description`, and the gaps — should come back in. Defaults to
@@ -94,7 +86,8 @@ export interface NarrativeProvider {
    * one. */
   readonly needsCredential: boolean
 
-  /** Reads `request` and proposes a recording. Rejects on refusal, on a bad credential, and on an
-   * answer that is not a draft; `signal` aborts a call in flight. */
+  /** Reads `request` and proposes a recording — never its `description`, which is the account it
+   * was just handed. Rejects on refusal, on a bad credential, and on an answer that is not a draft;
+   * `signal` aborts a call in flight. */
   draft(request: NarrativeRequest, signal?: AbortSignal): Promise<NarrativeDraft>
 }

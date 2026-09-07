@@ -4,49 +4,38 @@ import type { SightingRecordingJson } from "../persistence/sightingJson.js"
 type JsonObject = Record<string, unknown>
 
 /**
- * Writes a draft into a recording without undoing the author's own edits.
+ * Writes a draft into a recording without undoing what the account never spoke about.
  *
- * The first draft can simply be applied: there is nothing yet to lose. Every draft after it is a
- * correction, and a correction comes back WHOLE — ask for the altitude to be raised and the answer
- * restates the witness, the place and the tags along with it, exactly as they were proposed the
- * round before. Applying that wholesale would silently undo the name the author fixed by hand in
- * between: the value did not change in the model's eyes, so it would arrive looking like an
- * assertion when it is only an echo.
+ * A draft states only what the account states, so applying one is not a replacement: it is writing
+ * the paths it names and leaving every other path exactly as the author left it. That distinction
+ * is the whole of this class, and it is what lets a reader reword their account and press the
+ * button again without losing a place they geocoded to the metre, an instrument they chose, or
+ * decor they placed. None of those are in a testimony, so no reading of one may touch them.
  *
- * So a correction is narrowed to what actually moved between the two drafts, and only those paths
- * are written. Everything else in the editor is left exactly as the author left it.
+ * Two rules make it tractable:
  *
- * Two rules make this tractable:
- *
- * - Objects are walked, arrays and primitives are not. A changed `timeline.keyframes` is written in
+ * - Objects are walked, arrays and primitives are not. A stated `timeline.keyframes` is written in
  *   full rather than element by element, and the same for `place`, `tags` and `milestones`. Element
- *   correspondence across two independently produced arrays is a guess, and a wrong guess here
- *   corrupts a recording rather than merely annoying somebody. The protection that matters is that
- *   a correction about the timeline leaves `witness.title` alone, and this gives it.
- * - Nothing is ever deleted. A field the new draft does not mention is not a retraction — it is far
- *   more often a field nobody was talking about this round. Removing a value asks for a keystroke
- *   in the editor, which is cheap; recovering one that vanished on its own does not.
+ *   correspondence between an array the account produced and one already in the file is a guess,
+ *   and a wrong guess here corrupts a recording rather than merely annoying somebody.
+ * - Nothing is ever deleted. Silence in a draft is the ACCOUNT's silence — the witness did not say
+ *   how long it lasted — and that is not an instruction to forget a duration somebody established
+ *   another way. Removing a value asks for a keystroke in the editor, which is cheap; recovering
+ *   one that vanished on its own does not.
  */
 export class DraftPatch {
 
-  /** The paths whose value differs between `before` and `after`, dot-joined and outermost-first
-   * ("witness.title", "timeline.keyframes"). A path stated only in `after` counts as changed; one
-   * stated only in `before` does not, per the no-deletion rule above. */
-  static changed(before: Partial<SightingRecordingJson>, after: Partial<SightingRecordingJson>): string[] {
-    return DraftPatch.changedIn(before as JsonObject, after as JsonObject, [])
-  }
-
-  /** All the paths `draft` states — what to write when there is no previous draft to compare it
-   * with, i.e. the first time. */
+  /** Every path `draft` actually states, dot-joined and outermost-first ("witness.title",
+   * "timeline.keyframes") — what {@link apply} is meant to be given. */
   static stated(draft: Partial<SightingRecordingJson>): string[] {
-    return DraftPatch.changedIn({}, draft as JsonObject, [])
+    return DraftPatch.statedIn(draft as JsonObject, [])
   }
 
   /**
    * `recording` with `paths` taken from `draft` — a new object; neither argument is touched.
    *
-   * A path `draft` does not actually state is skipped rather than written as undefined: callers pass
-   * the output of {@link changed}, which can name a path that was in the earlier draft only.
+   * A path `draft` does not actually state is skipped rather than written as undefined, so a stale
+   * path list can never blank a value out.
    */
   static apply(
     recording: SightingRecordingJson, draft: Partial<SightingRecordingJson>, paths: string[]
@@ -63,31 +52,22 @@ export class DraftPatch {
     return patched
   }
 
-  private static changedIn(before: JsonObject, after: JsonObject, at: string[]): string[] {
+  /** The leaves, never the objects holding them: naming `witness` would write the whole of it and
+   * take with it any sibling key the account happens not to mention. */
+  private static statedIn(draft: JsonObject, at: string[]): string[] {
     const paths: string[] = []
-    for (const [key, next] of Object.entries(after)) {
-      if (next === undefined) {
+    for (const [key, value] of Object.entries(draft)) {
+      if (value === undefined) {
         continue
       }
       const here = [...at, key]
-      const previous = before[key]
-      if (DraftPatch.isPlainObject(next) && DraftPatch.isPlainObject(previous)) {
-        paths.push(...DraftPatch.changedIn(previous, next, here))
-      } else if (DraftPatch.isPlainObject(next) && previous === undefined) {
-        // Wholly new object: name its leaves rather than the object, so that a later round adding a
-        // sibling key doesn't have to restate the ones already applied.
-        paths.push(...DraftPatch.changedIn({}, next, here))
-      } else if (!DraftPatch.same(previous, next)) {
+      if (DraftPatch.isPlainObject(value)) {
+        paths.push(...DraftPatch.statedIn(value, here))
+      } else {
         paths.push(here.join("."))
       }
     }
     return paths
-  }
-
-  /** Value equality, by serialisation. Fine for this format, which is JSON by definition, and it
-   * is the same comparison a reader makes when they look at two files. */
-  private static same(a: unknown, b: unknown): boolean {
-    return JSON.stringify(a ?? null) === JSON.stringify(b ?? null)
   }
 
   private static isPlainObject(value: unknown): value is JsonObject {

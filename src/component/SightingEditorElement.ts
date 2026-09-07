@@ -4,7 +4,7 @@ import { NARRATIVE_SOURCES } from "../engine/narrative/narrativeSources.js"
 import { NarrativeError } from "../engine/narrative/NarrativeError.js"
 import { DraftPatch } from "../engine/narrative/DraftPatch.js"
 import { DraftRecording } from "../engine/narrative/DraftRecording.js"
-import type { NarrativeDraft, NarrativeExchange, NarrativeProvider } from "../engine/narrative/NarrativeProvider.js"
+import type { NarrativeDraft, NarrativeProvider } from "../engine/narrative/NarrativeProvider.js"
 import { html, css } from "./sightingEditorTemplate.js"
 import { SightingSummary } from "./SightingSummary.js"
 import type { SummaryEntry, SummaryGroup } from "./SightingSummary.js"
@@ -293,7 +293,6 @@ export class SightingEditorElement extends HTMLElement {
   private readonly importFileInput: HTMLInputElement
   private readonly importUrlInput: HTMLInputElement
   private readonly importUrlButton: HTMLButtonElement
-  private readonly narrativeInput: HTMLTextAreaElement
   private readonly narrativeKeyInput: HTMLInputElement
   private readonly narrativeRememberInput: HTMLInputElement
   private readonly narrativeDraftButton: HTMLButtonElement
@@ -459,7 +458,6 @@ export class SightingEditorElement extends HTMLElement {
   private readonly labelTags: HTMLElement
   private readonly labelImportFile: HTMLElement
   private readonly labelImportUrl: HTMLElement
-  private readonly labelNarrative: HTMLElement
   private readonly labelNarrativeKey: HTMLElement
   private readonly labelNarrativeRemember: HTMLElement
   private readonly groupTabs: HTMLButtonElement[]
@@ -825,7 +823,6 @@ export class SightingEditorElement extends HTMLElement {
     this.importFileInput = this.shadow.getElementById("import-file") as HTMLInputElement
     this.importUrlInput = this.shadow.getElementById("import-url") as HTMLInputElement
     this.importUrlButton = this.shadow.getElementById("import-url-button") as HTMLButtonElement
-    this.narrativeInput = this.shadow.getElementById("narrative") as HTMLTextAreaElement
     this.narrativeKeyInput = this.shadow.getElementById("narrativeKey") as HTMLInputElement
     this.narrativeRememberInput = this.shadow.getElementById("narrativeRemember") as HTMLInputElement
     this.narrativeDraftButton = this.shadow.getElementById("narrative-draft") as HTMLButtonElement
@@ -949,7 +946,6 @@ export class SightingEditorElement extends HTMLElement {
     this.labelTags = this.shadow.getElementById("label-tags")!
     this.labelImportFile = this.shadow.getElementById("label-import-file")!
     this.labelImportUrl = this.shadow.getElementById("label-import-url")!
-    this.labelNarrative = this.shadow.getElementById("label-narrative")!
     this.labelNarrativeKey = this.shadow.getElementById("label-narrative-key")!
     this.labelNarrativeRemember = this.shadow.getElementById("label-narrative-remember")!
     this.labelShapeGroup = this.shadow.getElementById("label-shape-group")!
@@ -1116,14 +1112,13 @@ export class SightingEditorElement extends HTMLElement {
     this.exportButton.addEventListener("click", () => this.exportJson())
     this.importFileInput.addEventListener("change", () => this.importFromFile())
     this.importUrlButton.addEventListener("click", () => this.importFromUrl())
-    this.narrativeDraftButton.addEventListener("click", () => this.draftFromNarrative())
+    this.narrativeDraftButton.addEventListener("click", () => this.draftFromDescription())
     this.narrativeStopButton.addEventListener("click", () => this.narrativeAbort?.abort())
     this.narrativeRememberInput.addEventListener("change", () => this.rememberNarrativeKey())
     this.narrativeKeyInput.addEventListener("input", () => {
       this.rememberNarrativeKey()
       this.syncNarrativeEnabled()
     })
-    this.narrativeInput.addEventListener("input", () => this.syncNarrativeEnabled())
     // The source names itself and credits itself in one control, the way every other data source in
     // this project does (see DataSource): a static attribution beside a field would hide that this
     // is a choice, and a name with no attribution would credit nobody.
@@ -1321,7 +1316,12 @@ export class SightingEditorElement extends HTMLElement {
     ]) {
       input.addEventListener("input", () => this.updateWitnessMetadata())
     }
-    this.descriptionInput.addEventListener("input", () => this.updateDescription())
+    this.descriptionInput.addEventListener("input", () => {
+      this.updateDescription()
+      // The same keystrokes that write the account into the recording decide whether there is
+      // anything to draft FROM it — see syncNarrativeEnabled.
+      this.syncNarrativeEnabled()
+    })
     this.tagsInput.addEventListener("input", () => this.updateTags())
     for (const input of this.weatherFields) {
       // The crystal alignment writes itself and only itself (see applyIceAlignmentAtPlayhead): it
@@ -1555,41 +1555,34 @@ export class SightingEditorElement extends HTMLElement {
    * see NarrativeProvider.needsCredential, and syncNarrativeEnabled. */
   private readonly narrativeProvider: NarrativeProvider = NARRATIVE_SOURCES[0].create()
 
-  /** Every round so far, oldest first. The Messages API remembers nothing, so this is the memory —
-   * and it dies with the page, which is deliberate: an account is somebody's testimony and has no
-   * business surviving in a browser nobody asked to keep it. */
-  private narrativeHistory: NarrativeExchange[] = []
-
-  /** The last draft as the provider stated it, raw — what the next one is compared against to work
-   * out what actually moved (see DraftPatch). Not the same as what went into the editor, which is
-   * that intersected with what the author has done since. */
-  private narrativeLastDraft?: Partial<SightingRecordingJson>
-
   private narrativeAbort?: AbortController
 
   /**
-   * Drafts the recording from the account in the panel, or corrects the last draft with it.
+   * Reads the account in the Description field and rewrites the rest of the recording from it.
    *
-   * What comes back is applied straight away, but never wholesale after the first round. A
-   * correction restates the entire recording, including every value it was not asked about, and
-   * writing all of that back would silently undo whatever the author fixed by hand in between. So
-   * only the paths that actually moved between this draft and the last are written — see DraftPatch,
-   * which is also where the reasoning for treating arrays as indivisible lives.
+   * One direction only. The account is what the witness said and does not change; everything else
+   * is what a reader makes of it, and pressing this says "make it again". So the draft never writes
+   * `description` back — that would overwrite the very text it was asked to read — and every other
+   * field it states is applied as stated.
+   *
+   * Fields the draft is silent about are left alone, which is not the same as a merge: it is the
+   * account being silent. Coordinates geocoded by hand, an instrument chosen, decor placed — none
+   * of that is in a testimony, and none of it is a reader's to lose because they reworded a
+   * sentence.
    */
-  private async draftFromNarrative(): Promise<void> {
-    const ask = this.narrativeInput.value.trim()
+  private async draftFromDescription(): Promise<void> {
+    const ask = this.descriptionInput.value.trim()
     if (ask === "" || this.narrativeAbort) return
     const abort = this.narrativeAbort = new AbortController()
     this.setNarrativeBusy(true)
     try {
       const draft = await this.narrativeProvider.draft({
         ask,
-        history: this.narrativeHistory,
         current: this.sightingData,
         language: this.showerLanguage() === "fr" ? "French" : "English",
         credential: this.narrativeKeyInput.value.trim() || undefined
       }, abort.signal)
-      this.applyNarrativeDraft(ask, draft)
+      this.applyNarrativeDraft(draft)
     } catch (error) {
       // A reader who pressed Stop knows what happened; saying it back to them is noise.
       this.narrativeStatus.textContent = error instanceof NarrativeError && error.kind === "cancelled"
@@ -1601,22 +1594,18 @@ export class SightingEditorElement extends HTMLElement {
     }
   }
 
-  private applyNarrativeDraft(ask: string, draft: NarrativeDraft): void {
-    const paths = this.narrativeLastDraft
-      ? DraftPatch.changed(this.narrativeLastDraft, draft.recording)
-      : DraftPatch.stated(draft.recording)
+  private applyNarrativeDraft(draft: NarrativeDraft): void {
+    // Stripped rather than trusted not to be there: the account is the one thing in the recording a
+    // draft may never touch, and that has to hold whatever any provider decides to send back.
+    const { description, ...recording } = draft.recording
+    void description
+    const paths = DraftPatch.stated(recording)
     if (paths.length > 0) {
-      this.sightingData = DraftPatch.apply(this.sightingData, DraftRecording.loadable(draft.recording), paths)
+      this.sightingData = DraftPatch.apply(this.sightingData, DraftRecording.loadable(recording), paths)
     }
-    this.narrativeHistory = [...this.narrativeHistory, { request: ask, draft: draft.recording }]
-    this.narrativeLastDraft = draft.recording
     this.narrativeStatus.textContent = paths.length > 0
       ? this.messages.narrativeApplied.replace("{count}", String(paths.length))
       : this.messages.narrativeUnchanged
-    // The box is now for the NEXT thing to say about this draft, not for the account again.
-    this.narrativeInput.value = ""
-    this.narrativeInput.placeholder = this.messages.narrativeCorrection
-    this.narrativeDraftButton.textContent = this.messages.narrativeCorrect
     this.showNarrativeReport(draft)
     this.syncNarrativeEnabled()
   }
@@ -1659,7 +1648,7 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   private setNarrativeBusy(busy: boolean): void {
-    this.narrativeInput.disabled = busy
+    this.descriptionInput.disabled = busy
     this.narrativeStopButton.hidden = !busy
     if (busy) {
       this.narrativeStatus.textContent = this.messages.narrativeWorking
@@ -1679,7 +1668,7 @@ export class SightingEditorElement extends HTMLElement {
   private syncNarrativeEnabled(): void {
     const source = NARRATIVE_SOURCES[0].name
     const missingKey = this.narrativeProvider.needsCredential && this.narrativeKeyInput.value.trim() === ""
-    const missingAsk = this.narrativeInput.value.trim() === ""
+    const missingAsk = this.descriptionInput.value.trim() === ""
     this.narrativeDraftButton.disabled = Boolean(this.narrativeAbort) || missingKey || missingAsk
     this.narrativeDraftButton.title = missingKey
       ? this.messages.narrativeNeedsKey.replace("{source}", source)
@@ -5518,14 +5507,11 @@ export class SightingEditorElement extends HTMLElement {
     this.labelImportUrl.textContent = messages.importUrl
     this.importUrlInput.placeholder = messages.importUrlPlaceholder
     this.importUrlButton.textContent = messages.importButton
-    this.labelNarrative.textContent = messages.narrative
     this.labelNarrativeKey.textContent = messages.narrativeKey.replace("{source}", NARRATIVE_SOURCES[0].name)
     this.labelNarrativeRemember.textContent = messages.narrativeRemember
     this.narrativeStopButton.textContent = messages.narrativeStop
-    // Whichever of the two the button is currently offering: the panel switches to "Correct" for
-    // good after the first draft, and a locale that arrives later must not send it back to "Draft".
-    this.narrativeDraftButton.textContent = this.narrativeLastDraft ? messages.narrativeCorrect : messages.narrativeDraft
-    this.narrativeInput.placeholder = this.narrativeLastDraft ? messages.narrativeCorrection : messages.narrativePlaceholder
+    this.narrativeDraftButton.textContent = messages.narrativeDraft
+    this.descriptionInput.placeholder = messages.narrativePlaceholder
     // The tooltip is built from these too, so it has to be said again in the new language.
     this.syncNarrativeEnabled()
     // Rebuilt rather than relabelled: the connector and every label live inside DOM this builds.

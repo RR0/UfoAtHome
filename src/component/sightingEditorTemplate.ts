@@ -26,7 +26,6 @@ export const html = `
          same caseId, which is exactly what lets a page group them (see Sighting.caseId). Putting it
          beside a witness's name suggested it was theirs. -->
     <label><span id="label-case-id">Case ID</span> <input id="caseId" type="text"/></label>
-    <label><span id="label-description">Description</span> <textarea id="description" rows="2"></textarea></label>
     <label><span id="label-tags">Tags</span> <input id="tags" type="text" placeholder="comma-separated"/></label>
     <!-- The named moments of the account (see Milestone) — with the observation, because that is
          what they belong to: they are how the testimony READS, not anything about a shape. Added at
@@ -38,20 +37,24 @@ export const html = `
     <label><span id="label-milestone-label">Label</span> <input id="milestoneLabel" type="text" size="4"/></label>
     <label><span id="label-milestone-note">What happens</span> <input id="milestoneNote" type="text"/></label>
   </div>
-  <!-- Drafting the recording from the account it was written from — the fields above, filled in by
-       reading the testimony rather than by typing it out again. Its own row, not folded into the
-       toolbar above: an account is a paragraph, and a paragraph among a row of one-line fields
-       makes both harder to read. See SightingEditorElement.draftFromNarrative for what it does with
-       the answer, and NarrativeProvider for why an answer is more than a recording. -->
+  <!-- The account, and the button that reads it.
+       One field, not two. The description IS the account: a paragraph in the witness's own words,
+       which is what SightingEvent.description has always been documented to hold. What some
+       recordings put there instead — how a size was calculated, which relief source was measured —
+       belongs in the numbers those calculations produced, and saying it twice is how the two come
+       to disagree. So there is nothing to draft FROM but this, and drafting rewrites the rest of the
+       recording rather than this.
+       Its own row, pulled out of the one-line fields above, because a paragraph among a row of
+       one-line fields makes both harder to read. See SightingEditorElement.draftFromDescription. -->
   <div class="toolbar narrative">
-    <label class="wide"><span id="label-narrative">Draft from an account</span>
-      <textarea id="narrative" rows="4" placeholder="What the witness reported, in their own words"></textarea></label>
+    <label class="wide"><span id="label-description">Description</span>
+      <textarea id="description" rows="4" placeholder="What the witness reported, in their own words"></textarea></label>
     <label><span id="label-narrative-key">API key</span> <input id="narrativeKey" type="password" autocomplete="off" spellcheck="false"/></label>
     <label class="checkbox"><input id="narrativeRemember" type="checkbox"/> <span id="label-narrative-remember">Remember on this device</span></label>
-    <button id="narrative-draft" type="button">Draft</button>
+    <button id="narrative-draft" type="button">Draft the observation</button>
     <button id="narrative-stop" type="button" hidden>Stop</button>
     <a id="narrative-credit" class="inline-source" target="_blank" rel="noopener noreferrer"></a>
-    <output id="narrative-status" for="narrative"></output>
+    <output id="narrative-status" for="description"></output>
   </div>
   <!-- What the draft claims and what it could not: the part that makes the rest usable. Empty (and
        so invisible) until there has been a draft. -->
@@ -509,10 +512,6 @@ input.invalid {
     color: #fff;
   }
 }
-#description {
-  width: 16em;
-  font: inherit;
-}
 /* Reads back what the Real size / Distance pair actually produces on screen — an apparent size in
    degrees, and in full Moons, the only unit of apparent size most testimonies come with. Purely
    informative (an output, never an input), so it stays visually quieter than the fields it
@@ -739,7 +738,7 @@ select.weather-field:disabled {
 .toolbar > label.checkbox {
   gap: 0.35em;
 }
-#narrative {
+#description {
   font: inherit;
   resize: vertical;
 }

@@ -444,12 +444,8 @@ export interface SightingEditorMessages extends SightingLabels {
    * testimony into. Names the reader's gesture and not the machinery: what happens is that a
    * recording gets drafted from an account, and which service reads it is said by the credit
    * beside the button. */
-  narrative: string
-  /** Placeholder in that textarea before there has been any draft. */
+  /** Placeholder in the Description textarea, which is the account a draft is read from. */
   narrativePlaceholder: string
-  /** Placeholder in that textarea, once there has been a draft: from then on what is typed there is
-   * a correction of the last one, not a fresh account. */
-  narrativeCorrection: string
   /** The reader's own API key. Theirs, never the site's — see ClaudeNarrativeProvider. {source} is
    * the reader it is a key FOR, taken from the registry rather than written in: a key field that
    * says only "API key" leaves a reader to guess whose, and the answer is a property of whichever
@@ -462,20 +458,18 @@ export interface SightingEditorMessages extends SightingLabels {
   /** The checkbox that keeps that key in this browser. Off by default: storing somebody's key is
    * their decision to take, not a convenience to help them to. */
   narrativeRemember: string
-  /** The button that reads the account. */
+  /** The button that reads the account and rewrites the rest of the recording from it. */
   narrativeDraft: string
-  /** What it says from the second round on. */
-  narrativeCorrect: string
   /** Cancels a draft in flight. */
   narrativeStop: string
   /** Shown while the call is out. A draft takes tens of seconds, which is long enough that silence
    * reads as breakage. */
   narrativeWorking: string
-  /** What was written into the editor, {count} fields. Only what the draft CHANGED is written from
-   * the second round on (see DraftPatch), which is why this counts rather than saying "applied". */
+  /** What was written into the editor, {count} fields — a count and not just "done", because a
+   * draft states only what the account states and the number is how much that turned out to be. */
   narrativeApplied: string
-  /** The same, when a correction changed nothing at all — a real answer, and one worth saying out
-   * loud rather than leaving the reader to wonder whether the button worked. */
+  /** When the account yielded nothing at all: a real answer, and one worth saying out loud rather
+   * than leaving the reader to wonder whether the button worked. */
   narrativeUnchanged: string
   /** Heading over the quotes justifying each drafted value. */
   narrativeClaims: string

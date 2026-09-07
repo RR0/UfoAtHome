@@ -153,7 +153,7 @@ function type(element: SightingEditorElement, id: string, value: string): void {
 /** Types an account and a key, then presses the button — the whole gesture, since none of it works
  * without the other parts. */
 async function draft(element: SightingEditorElement, ask: string, key = "sk-test"): Promise<void> {
-  type(element, "narrative", ask)
+  type(element, "description", ask)
   type(element, "narrativeKey", key)
   field<HTMLButtonElement>(element, "narrative-draft").click()
   await new Promise(resolve => setTimeout(resolve, 0))
@@ -181,43 +181,46 @@ describe("SightingEditorElement drafting from an account", () => {
     expect(element.sightingData.time).toMatchObject({ year: 1965, month: 7, day: 1 })
   })
 
-  it("keeps a hand edit a correction merely restates", async () => {
-    // The reason direct application is safe at all. The first draft misspells the witness; the
-    // author fixes it; the correction is about the duration and restates the misspelling along with
-    // everything else, exactly as corrections do.
+  it("never writes the account back over itself", async () => {
+    // The field the reader typed into is the one field a draft may not touch: it is what the witness
+    // said, and it does not change because somebody read it. Stripped rather than trusted absent.
     const element = mount()
     answer = () => Promise.resolve({
-      recording: { durationSeconds: 270, witness: { title: "Maurice Mass" } },
+      recording: { caseId: "valensole", description: "A summary of the reconstruction." },
       claims: [],
       gaps: []
     })
-    await draft(element, "The account.")
 
-    field<HTMLInputElement>(element, "witnessTitle").value = "Maurice Masse"
-    field<HTMLInputElement>(element, "witnessTitle").dispatchEvent(new Event("input"))
+    await draft(element, "Maurice Masse, 1er juillet 1965.")
 
-    answer = () => Promise.resolve({
-      recording: { durationSeconds: 240, witness: { title: "Maurice Mass" } },
-      claims: [],
-      gaps: []
-    })
-    await draft(element, "It lasted four minutes, not four and a half.")
-
-    expect(element.sightingData.durationSeconds).toBe(240)
-    expect(element.sightingData.witness?.title).toBe("Maurice Masse")
+    expect(field<HTMLTextAreaElement>(element, "description").value).toBe("Maurice Masse, 1er juillet 1965.")
+    expect(element.sightingData.description).toBe("Maurice Masse, 1er juillet 1965.")
+    expect(element.sightingData.caseId).toBe("valensole")
   })
 
-  it("sends the account, then the correction with the earlier round behind it", async () => {
+  it("leaves alone what the account is silent about", async () => {
+    // A place geocoded by hand is not in a testimony, so no reading of one may take it away.
+    const element = mount()
+    type(element, "lat", "43.837")
+    type(element, "lng", "5.993")
+    answer = () => Promise.resolve({ recording: { caseId: "valensole" }, claims: [], gaps: [] })
+
+    await draft(element, "The account.")
+
+    expect(element.sightingData.place?.[0]).toMatchObject({ lat: 43.837, lng: 5.993 })
+    expect(element.sightingData.caseId).toBe("valensole")
+  })
+
+  it("reads the account whole every time, with no conversation behind it", async () => {
     const element = mount()
     answer = () => Promise.resolve({ recording: { caseId: "a" }, claims: [], gaps: [] })
     await draft(element, "The account.")
     answer = () => Promise.resolve({ recording: { caseId: "b" }, claims: [], gaps: [] })
-    await draft(element, "Not a, b.")
+    await draft(element, "The account, reworded.")
 
-    expect(asked[0].history).toEqual([])
-    expect(asked[1].history).toEqual([{ request: "The account.", draft: { caseId: "a" } }])
-    // And what the editor holds now, so the correction lands on that rather than on a superseded
-    // draft — see NarrativeRequest.current.
+    expect(asked.map(request => request.ask)).toEqual(["The account.", "The account, reworded."])
+    // What is already settled goes along, so a draft does not overrule a geocoded place or a
+    // chosen instrument — see NarrativeRequest.current.
     expect(asked[1].current?.caseId).toBe("a")
   })
 
@@ -238,24 +241,11 @@ describe("SightingEditorElement drafting from an account", () => {
     expect(report.querySelector(".gaps li")?.textContent).toBe("the direction the witness faced is never stated")
   })
 
-  it("turns the button into a correction after the first draft", async () => {
+  it("says when the account yielded nothing, rather than leaving the reader guessing", async () => {
     const element = mount()
-    answer = () => Promise.resolve({ recording: { caseId: "a" }, claims: [], gaps: [] })
+    answer = () => Promise.resolve({ recording: {}, claims: [], gaps: ["nothing datable here"] })
 
-    expect(field(element, "narrative-draft").textContent).toBe(sightingEditorMessages_en.narrativeDraft)
-    await draft(element, "The account.")
-
-    expect(field(element, "narrative-draft").textContent).toBe(sightingEditorMessages_en.narrativeCorrect)
-    expect(field<HTMLTextAreaElement>(element, "narrative").value).toBe("")
-    expect(field<HTMLTextAreaElement>(element, "narrative").placeholder)
-      .toBe(sightingEditorMessages_en.narrativeCorrection)
-  })
-
-  it("says a correction changed nothing, rather than leaving the reader guessing", async () => {
-    const element = mount()
-    answer = () => Promise.resolve({ recording: { caseId: "a" }, claims: [], gaps: [] })
-    await draft(element, "The account.")
-    await draft(element, "Same again.")
+    await draft(element, "Something went past.")
 
     expect(field(element, "narrative-status").textContent).toBe(sightingEditorMessages_en.narrativeUnchanged)
   })
@@ -304,7 +294,7 @@ describe("SightingEditorElement drafting from an account", () => {
     expect(button.disabled).toBe(true)
     expect(button.title).toBe(sightingEditorMessages_en.narrativeNeedsAsk)
 
-    type(element, "narrative", "The account.")
+    type(element, "description", "The account.")
     expect(button.disabled).toBe(false)
     expect(button.title).toBe("")
   })
@@ -315,15 +305,13 @@ describe("SightingEditorElement drafting from an account", () => {
     expect(field(element, "label-narrative-key").textContent).toBe("Test reader API key")
   })
 
-  it("becomes unavailable again once the box has been emptied by a draft", async () => {
+  it("stays available after a draft, since the account is still there to be reworded", async () => {
     const element = mount()
     answer = () => Promise.resolve({ recording: { caseId: "a" }, claims: [], gaps: [] })
 
     await draft(element, "The account.")
 
-    expect(field<HTMLButtonElement>(element, "narrative-draft").disabled).toBe(true)
-    expect(field<HTMLButtonElement>(element, "narrative-draft").title)
-      .toBe(sightingEditorMessages_en.narrativeNeedsAsk)
+    expect(field<HTMLButtonElement>(element, "narrative-draft").disabled).toBe(false)
   })
 
   it("keeps the key only when asked to, and forgets it the moment that is unticked", async () => {
