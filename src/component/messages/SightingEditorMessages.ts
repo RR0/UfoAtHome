@@ -453,6 +453,12 @@ export interface SightingEditorMessages extends SightingLabels {
   narrativeKey: string
   /** Why the button is disabled with no key in the field. {source} as above. */
   narrativeNeedsKey: string
+  /** Title on a key field holding something that cannot be one. A warning, not a refusal: see
+   * syncNarrativeEnabled on why the button stays available. */
+  narrativeKeyUnlikely: string
+  /** Which of a key's workspaces to bill — only needed by a key that reaches several. */
+  narrativeWorkspace: string
+  narrativeWorkspacePlaceholder: string
   /** Why it is disabled with nothing to send — an empty account, or an empty correction. */
   narrativeNeedsAsk: string
   /** The checkbox that keeps that key in this browser. Off by default: storing somebody's key is
@@ -495,4 +501,7 @@ export interface SightingEditorMessages extends SightingLabels {
   narrativeErrorMalformed: string
   /** Nothing answered. */
   narrativeErrorUnreachable: string
+  /** The service refused the request and said why. {detail} is its own words, which name the field
+   * to fill — see NarrativeErrorKind's "rejected" on why they are shown rather than translated. */
+  narrativeErrorRejected: string
 }

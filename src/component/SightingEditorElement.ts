@@ -296,6 +296,7 @@ export class SightingEditorElement extends HTMLElement {
   private readonly importUrlInput: HTMLInputElement
   private readonly importUrlButton: HTMLButtonElement
   private readonly narrativeKeyInput: HTMLInputElement
+  private readonly narrativeWorkspaceInput: HTMLInputElement
   private readonly narrativeRememberInput: HTMLInputElement
   private readonly narrativeDraftButton: HTMLButtonElement
   private readonly narrativeStopButton: HTMLButtonElement
@@ -461,6 +462,7 @@ export class SightingEditorElement extends HTMLElement {
   private readonly labelImportFile: HTMLElement
   private readonly labelImportUrl: HTMLElement
   private readonly labelNarrativeKey: HTMLElement
+  private readonly labelNarrativeWorkspace: HTMLElement
   private readonly labelNarrativeRemember: HTMLElement
   private readonly groupTabs: HTMLButtonElement[]
   private readonly groupPanels: HTMLElement[]
@@ -826,6 +828,7 @@ export class SightingEditorElement extends HTMLElement {
     this.importUrlInput = this.shadow.getElementById("import-url") as HTMLInputElement
     this.importUrlButton = this.shadow.getElementById("import-url-button") as HTMLButtonElement
     this.narrativeKeyInput = this.shadow.getElementById("narrativeKey") as HTMLInputElement
+    this.narrativeWorkspaceInput = this.shadow.getElementById("narrativeWorkspace") as HTMLInputElement
     this.narrativeRememberInput = this.shadow.getElementById("narrativeRemember") as HTMLInputElement
     this.narrativeDraftButton = this.shadow.getElementById("narrative-draft") as HTMLButtonElement
     this.narrativeStopButton = this.shadow.getElementById("narrative-stop") as HTMLButtonElement
@@ -949,6 +952,7 @@ export class SightingEditorElement extends HTMLElement {
     this.labelImportFile = this.shadow.getElementById("label-import-file")!
     this.labelImportUrl = this.shadow.getElementById("label-import-url")!
     this.labelNarrativeKey = this.shadow.getElementById("label-narrative-key")!
+    this.labelNarrativeWorkspace = this.shadow.getElementById("label-narrative-workspace")!
     this.labelNarrativeRemember = this.shadow.getElementById("label-narrative-remember")!
     this.labelShapeGroup = this.shadow.getElementById("label-shape-group")!
     this.labelTemporalGroup = this.shadow.getElementById("label-temporal-group")!
@@ -1117,6 +1121,7 @@ export class SightingEditorElement extends HTMLElement {
     this.narrativeDraftButton.addEventListener("click", () => this.draftFromDescription())
     this.narrativeStopButton.addEventListener("click", () => this.narrativeAbort?.abort())
     this.narrativeRememberInput.addEventListener("change", () => this.rememberNarrativeKey())
+    this.narrativeWorkspaceInput.addEventListener("input", () => this.rememberNarrativeKey())
     this.narrativeKeyInput.addEventListener("input", () => {
       this.rememberNarrativeKey()
       this.syncNarrativeEnabled()
@@ -1552,6 +1557,9 @@ export class SightingEditorElement extends HTMLElement {
    * Namespaced like everything else this element could ever store on a host page it shares. */
   private static readonly NARRATIVE_KEY_STORAGE = "rr0-sighting-editor.narrative-key"
 
+  /** And the workspace it names, kept with it — see rememberNarrativeKey. */
+  private static readonly NARRATIVE_SCOPE_STORAGE = "rr0-sighting-editor.narrative-workspace"
+
   /** Built once, up front: constructing one is free (its SDK and its client load on the first ask,
    * not here), and the panel has to know before any draft whether this reader needs a key at all —
    * see NarrativeProvider.needsCredential, and syncNarrativeEnabled. */
@@ -1582,14 +1590,15 @@ export class SightingEditorElement extends HTMLElement {
         ask,
         current: this.sightingData,
         language: this.showerLanguage() === "fr" ? "French" : "English",
-        credential: this.narrativeKeyInput.value.trim() || undefined
+        credential: this.narrativeKeyInput.value.trim() || undefined,
+        credentialScope: this.narrativeWorkspaceInput.value.trim() || undefined
       }, abort.signal)
       this.applyNarrativeDraft(draft)
     } catch (error) {
       // A reader who pressed Stop knows what happened; saying it back to them is noise.
-      this.narrativeStatus.textContent = error instanceof NarrativeError && error.kind === "cancelled"
-        ? ""
-        : this.narrativeErrorFor(error)
+      const cancelled = error instanceof NarrativeError && error.kind === "cancelled"
+      this.narrativeStatus.textContent = cancelled ? "" : this.narrativeErrorFor(error)
+      this.narrativeStatus.classList.toggle("error", !cancelled)
     } finally {
       this.narrativeAbort = undefined
       this.setNarrativeBusy(false)
@@ -1619,6 +1628,7 @@ export class SightingEditorElement extends HTMLElement {
     this.narrativeStatus.textContent = paths.length > 0
       ? this.messages.narrativeApplied.replace("{count}", String(paths.length))
       : this.messages.narrativeUnchanged
+    this.narrativeStatus.classList.remove("error")
     this.showNarrativeReport(draft)
     this.syncNarrativeEnabled()
   }
@@ -1713,6 +1723,7 @@ export class SightingEditorElement extends HTMLElement {
     this.narrativeStopButton.hidden = !busy
     if (busy) {
       this.narrativeStatus.textContent = this.messages.narrativeWorking
+      this.narrativeStatus.classList.remove("error")
     }
     this.syncNarrativeEnabled()
   }
@@ -1737,11 +1748,23 @@ export class SightingEditorElement extends HTMLElement {
     // A reader with nothing to authenticate is not shown a field asking them to.
     this.narrativeKeyInput.parentElement!.hidden = !this.narrativeProvider.needsCredential
     this.narrativeRememberInput.parentElement!.hidden = !this.narrativeProvider.needsCredential
+    this.narrativeWorkspaceInput.parentElement!.hidden = !this.narrativeProvider.acceptsCredentialScope
+    // Marked, never blocked. A key that does not start with the prefix every Anthropic key has
+    // begun with is almost certainly a paste gone wrong, and saying so beats spending a round trip
+    // to be told the same by the API. But the button stays available: the day that prefix changes,
+    // a rule of ours refusing to send the new one would be the bug, and a red border would not.
+    const typed = this.narrativeKeyInput.value.trim()
+    const unlikely = typed !== "" && !typed.startsWith("sk-ant-")
+    this.narrativeKeyInput.classList.toggle("invalid", unlikely)
+    this.narrativeKeyInput.title = unlikely ? this.messages.narrativeKeyUnlikely : ""
   }
 
   private narrativeErrorFor(error: unknown): string {
     if (!(error instanceof NarrativeError)) return this.messages.narrativeErrorMalformed
     switch (error.kind) {
+      case "rejected":
+        // The service's own words, which name the field to fill — see NarrativeErrorKind.
+        return this.messages.narrativeErrorRejected.replace("{detail}", error.detail ?? "")
       case "credential":
         return this.messages.narrativeErrorCredential
       case "rate-limited":
@@ -1768,8 +1791,12 @@ export class SightingEditorElement extends HTMLElement {
     try {
       if (this.narrativeRememberInput.checked) {
         localStorage.setItem(SightingEditorElement.NARRATIVE_KEY_STORAGE, this.narrativeKeyInput.value)
+        // With the key, because it is half of the same credential: a reader who has to retype the
+        // workspace every time has not been spared anything.
+        localStorage.setItem(SightingEditorElement.NARRATIVE_SCOPE_STORAGE, this.narrativeWorkspaceInput.value)
       } else {
         localStorage.removeItem(SightingEditorElement.NARRATIVE_KEY_STORAGE)
+        localStorage.removeItem(SightingEditorElement.NARRATIVE_SCOPE_STORAGE)
       }
     } catch {
       // Private browsing, a blocked origin, a full quota. Nothing to tell the reader: the key still
@@ -1787,6 +1814,7 @@ export class SightingEditorElement extends HTMLElement {
     }
     if (stored === null) return
     this.narrativeKeyInput.value = stored
+    this.narrativeWorkspaceInput.value = localStorage.getItem(SightingEditorElement.NARRATIVE_SCOPE_STORAGE) ?? ""
     this.narrativeRememberInput.checked = true
   }
 
@@ -5569,6 +5597,8 @@ export class SightingEditorElement extends HTMLElement {
     this.importUrlInput.placeholder = messages.importUrlPlaceholder
     this.importUrlButton.textContent = messages.importButton
     this.labelNarrativeKey.textContent = messages.narrativeKey.replace("{source}", NARRATIVE_SOURCES[0].name)
+    this.labelNarrativeWorkspace.textContent = messages.narrativeWorkspace
+    this.narrativeWorkspaceInput.placeholder = messages.narrativeWorkspacePlaceholder
     this.labelNarrativeRemember.textContent = messages.narrativeRemember
     this.narrativeStopButton.textContent = messages.narrativeStop
     this.narrativeDraftButton.textContent = messages.narrativeDraft

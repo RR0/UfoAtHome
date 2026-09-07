@@ -50,6 +50,10 @@ export const html = `
     <label class="wide"><span id="label-description">Description</span>
       <textarea id="description" rows="4" placeholder="What the witness reported, in their own words"></textarea></label>
     <label><span id="label-narrative-key">API key</span> <input id="narrativeKey" type="password" autocomplete="off" spellcheck="false"/></label>
+    <!-- Only for a key that reaches several workspaces, which the API refuses outright unless the
+         request names one. Shown to everybody because there is no way to tell from a key which sort
+         it is, and empty for the keys that do not need it. -->
+    <label><span id="label-narrative-workspace">Workspace ID</span> <input id="narrativeWorkspace" type="text" autocomplete="off" spellcheck="false" placeholder="only if your key spans several"/></label>
     <label class="checkbox"><input id="narrativeRemember" type="checkbox"/> <span id="label-narrative-remember">Remember on this device</span></label>
     <button id="narrative-draft" type="button">Generate reconstruction</button>
     <button id="narrative-stop" type="button" hidden>Stop</button>
@@ -745,6 +749,23 @@ select.weather-field:disabled {
 #narrativeKey {
   width: 12em;
   font: inherit;
+}
+#narrativeWorkspace {
+  width: 11em;
+  font: inherit;
+}
+/* A failure has to be visible without opening a console. The status line carries three quite
+   different things — working, written, refused — and only the last is a problem, so only the last
+   is coloured. Same palette as an invalid field, and the same reason it is stated rather than left
+   to a system colour: this widget has no background of its own. */
+#narrative-status.error {
+  color: #c33;
+  font-weight: 600;
+}
+@media (prefers-color-scheme: dark) {
+  #narrative-status.error {
+    color: #ff9a9a;
+  }
 }
 /* What the draft claims, and what the account never said. A table would be the obvious shape and
    the wrong one: the quotes are sentences of wildly differing length, and a column sized for the

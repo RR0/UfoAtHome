@@ -142,6 +142,10 @@ export class ClaudeNarrativeProvider implements NarrativeProvider {
 
   readonly needsCredential = true
 
+  /** A personal or service-account key can reach several workspaces, and the API refuses such a key
+   * outright unless the request names one — see NarrativeRequest.credentialScope. */
+  readonly acceptsCredentialScope = true
+
   /** Anthropic's most capable model, and the one whose refusals to guess are worth paying for:
    * everything this feature is good for depends on it leaving a field empty rather than filling it
    * plausibly. */
@@ -151,7 +155,9 @@ export class ClaudeNarrativeProvider implements NarrativeProvider {
    * substantial download and most readers never open this panel at all. Kept, so the second ask
    * does not pay for it again. */
   private client?: Anthropic
-  private clientKey?: string
+  /** The credential and scope the cached client was built for — a reader who fixes either gets a
+   * new client rather than the old one going on being refused. */
+  private clientFor_?: string
 
   /** The format, loaded beside the SDK and for the same reason: 26 KB of generated JSON that only
    * a reader who actually opens this panel ever needs, and which would otherwise ride along in the
@@ -159,7 +165,7 @@ export class ClaudeNarrativeProvider implements NarrativeProvider {
   private format?: string
 
   async draft(request: NarrativeRequest, signal?: AbortSignal): Promise<NarrativeDraft> {
-    const client = await this.clientFor(request.credential)
+    const client = await this.clientFor(request.credential, request.credentialScope)
     const format = this.format ??= JSON.stringify((await import("../../../generated/sightingSchema.json")).default)
     const stream = client.messages.stream({
       model: ClaudeNarrativeProvider.MODEL,
@@ -232,16 +238,21 @@ restate a value here that the account does not itself state:\n\n${JSON.stringify
     return { type: "image", source: { type: "base64", media_type: image.mediaType, data: image.data } }
   }
 
-  private async clientFor(credential?: string): Promise<Anthropic> {
+  private async clientFor(credential?: string, scope?: string): Promise<Anthropic> {
     if (!credential) {
       throw new NarrativeError("credential")
     }
-    if (this.client && this.clientKey === credential) {
+    const wanted = `${credential}\u0000${scope ?? ""}`
+    if (this.client && this.clientFor_ === wanted) {
       return this.client
     }
     const { default: Anthropic } = await import("@anthropic-ai/sdk")
     this.client = new Anthropic({
       apiKey: credential,
+      // Which of the key's workspaces the call belongs to. A property of the key, so it goes on the
+      // client rather than on each request; absent for a key that is already scoped to one, where
+      // sending it would be wrong rather than merely redundant.
+      ...(scope ? { defaultHeaders: { "anthropic-workspace-id": scope } } : {}),
       // The reader's own key, typed by them, in their own browser, sent to Anthropic and nowhere
       // else. See this class's own doc comment on why that is the case this flag exists for.
       dangerouslyAllowBrowser: true,
@@ -249,7 +260,7 @@ restate a value here that the account does not itself state:\n\n${JSON.stringify
       // is a long call and a reader watching a spinner deserves to be told sooner.
       maxRetries: 1
     })
-    this.clientKey = credential
+    this.clientFor_ = wanted
     return this.client
   }
 
@@ -300,6 +311,11 @@ restate a value here that the account does not itself state:\n\n${JSON.stringify
     }
     if (error instanceof Anthropic.RateLimitError) {
       return new NarrativeError("rate-limited", error)
+    }
+    // The service said what is wrong with the request, in words that name the field to fill. Passed
+    // through rather than translated: see NarrativeErrorKind's "rejected".
+    if (error instanceof Anthropic.BadRequestError || error instanceof Anthropic.NotFoundError) {
+      return new NarrativeError("rejected", error.message, error)
     }
     if (error instanceof Anthropic.APIConnectionError) {
       return new NarrativeError("unreachable", error)

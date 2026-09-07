@@ -76,6 +76,15 @@ export interface NarrativeRequest {
    * different implementation with a different name. Ignored by providers that need none.
    */
   credential?: string
+  /**
+   * Which of a credential's several accounts the call belongs to, when the service needs telling.
+   *
+   * Anthropic's own case, and the reason this exists: a key that is not scoped to a single
+   * workspace is refused outright unless the request names one. It is a property of the reader's
+   * key rather than of anything they asked, so it sits beside the credential and not in the ask.
+   * Ignored by providers, and by keys, that need none.
+   */
+  credentialScope?: string
 }
 
 /**
@@ -94,6 +103,10 @@ export interface NarrativeProvider {
    * editor asks the reader for a key on, rather than hardcoding that Claude in particular needs
    * one. */
   readonly needsCredential: boolean
+
+  /** True when {@link NarrativeRequest.credentialScope} is worth offering — what puts the field in
+   * front of a reader whose key might need it, rather than in front of everybody. */
+  readonly acceptsCredentialScope: boolean
 
   /** Reads `request` and proposes a recording — never its `description`, which is the account it
    * was just handed. Rejects on refusal, on a bad credential, and on an answer that is not a draft;

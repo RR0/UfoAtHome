@@ -19,11 +19,28 @@ export type NarrativeErrorKind =
   | "unreachable"
   /** The reader pressed Stop. Not shown as a failure. */
   | "cancelled"
+  /**
+   * The service refused the request and said why.
+   *
+   * Its own words are shown, which is unusual here and deliberate: a refusal like "this API key is
+   * not scoped to a workspace, so this request must include the anthropic-workspace-id header"
+   * names the field to fill, and no wording of ours could do better without going stale the day the
+   * API adds a reason. Carried on {@link NarrativeError.detail}.
+   */
+  | "rejected"
 
 export class NarrativeError extends Error {
 
-  constructor(readonly kind: NarrativeErrorKind, cause?: unknown) {
-    super(kind, cause === undefined ? undefined : { cause })
+  /** What the service said, for "rejected" — the only kind that carries anything. */
+  readonly detail?: string
+
+  constructor(kind: "rejected", detail: string, cause?: unknown)
+  constructor(kind: Exclude<NarrativeErrorKind, "rejected">, cause?: unknown)
+  constructor(readonly kind: NarrativeErrorKind, detailOrCause?: unknown, cause?: unknown) {
+    const detail = kind === "rejected" && typeof detailOrCause === "string" ? detailOrCause : undefined
+    const actual = kind === "rejected" ? cause : detailOrCause
+    super(detail ?? kind, actual === undefined ? undefined : { cause: actual })
     this.name = "NarrativeError"
+    this.detail = detail
   }
 }

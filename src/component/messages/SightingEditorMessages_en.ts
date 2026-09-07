@@ -177,6 +177,9 @@ export const sightingEditorMessages_en: SightingEditorMessages = {
   narrativePlaceholder: "What the witness reported, in their own words",
   narrativeKey: "{source} API key",
   narrativeNeedsKey: "Enter your own {source} API key to generate a reconstruction from the account",
+  narrativeKeyUnlikely: "This does not look like a Claude API key: they begin with sk-ant-",
+  narrativeWorkspace: "Workspace ID",
+  narrativeWorkspacePlaceholder: "only if your key spans several",
   narrativeNeedsAsk: "Nothing to send yet",
   narrativeRemember: "Remember on this device",
   narrativeDraft: "Generate reconstruction",
@@ -193,4 +196,5 @@ export const sightingEditorMessages_en: SightingEditorMessages = {
   narrativeErrorRefused: "The account was not answered. Rephrasing may help; asking again will not",
   narrativeErrorMalformed: "The answer was not a usable draft — worth asking once more",
   narrativeErrorUnreachable: "Nothing answered: check the connection",
+  narrativeErrorRejected: "Refused: {detail}",
 }

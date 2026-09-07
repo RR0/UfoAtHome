@@ -177,6 +177,9 @@ export const sightingEditorMessages_fr: SightingEditorMessages = {
   narrativePlaceholder: "Ce que le témoin a rapporté, dans ses propres mots",
   narrativeKey: "Clé d'API {source}",
   narrativeNeedsKey: "Saisissez votre propre clé d'API {source} pour générer la reconstitution d'après le récit",
+  narrativeKeyUnlikely: "Cela ne ressemble pas à une clé d'API Claude : elles commencent par sk-ant-",
+  narrativeWorkspace: "Espace de travail",
+  narrativeWorkspacePlaceholder: "seulement si votre clé en couvre plusieurs",
   narrativeNeedsAsk: "Rien à envoyer pour l'instant",
   narrativeRemember: "Retenir sur cet appareil",
   narrativeDraft: "Générer la reconstitution",
@@ -193,4 +196,5 @@ export const sightingEditorMessages_fr: SightingEditorMessages = {
   narrativeErrorRefused: "Le récit n'a pas reçu de réponse. Le reformuler peut aider, le redemander non",
   narrativeErrorMalformed: "La réponse n'était pas un brouillon exploitable : cela vaut la peine de redemander",
   narrativeErrorUnreachable: "Rien n'a répondu : vérifiez la connexion",
+  narrativeErrorRejected: "Refusé : {detail}",
 }
