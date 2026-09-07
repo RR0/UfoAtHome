@@ -160,6 +160,26 @@ describe("DraftRecording", () => {
     expect(inside.decor?.[0]).toMatchObject({ eastM: 0, northM: 0, witnessSide: "front-left" })
   })
 
+  it("glazes a drafted vehicle, so a witness seated in it can see out", () => {
+    // A side absent from `windows` has no opening there at all, so a vehicle drafted without the
+    // field is a sealed box — and the first real draft rendered exactly that: grey where the sky
+    // should have been. The editor's own Add never had the problem because it spreads
+    // defaultWindows in.
+    const drafted = DraftRecording.loadable({
+      decor: [{ id: "car", kind: "vehicle", eastM: 0, northM: 0, witnessSide: "front-left" }]
+    })
+
+    expect(Object.keys(drafted.decor?.[0].windows ?? {}).length).toBeGreaterThan(0)
+  })
+
+  it("leaves windows a draft did state alone", () => {
+    const drafted = DraftRecording.loadable({
+      decor: [{ id: "car", kind: "vehicle", eastM: 0, northM: 0, windows: { left: 0 } }]
+    })
+
+    expect(drafted.decor?.[0].windows).toEqual({ left: 0 })
+  })
+
   it("gives a decor object the id and kind nothing can be drawn without", () => {
     const drafted = DraftRecording.loadable({
       decor: [{ title: "La voiture" } as unknown as NonNullable<Partial<SightingRecordingJson>["decor"]>[number]]

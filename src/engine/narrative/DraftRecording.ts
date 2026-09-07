@@ -1,6 +1,7 @@
 import { ApparentSize } from "../shape/ApparentSize.js"
 import type { SightingRecordingJson } from "../persistence/sightingJson.js"
 import type { DecorObject } from "../model/Decor.js"
+import { DEFAULT_BUILDING_FLOORS, defaultWindows, hasWindows } from "../model/Decor.js"
 
 /** The neutral pixel box a drafted shape starts life in — one pixel at the middle of the frame.
  * Nothing about it survives loading: SightingShapes.toBounds resizes it about its own centre from
@@ -66,20 +67,29 @@ export class DraftRecording {
   }
 
   /**
-   * A decor object with the two fields nothing can be drawn without.
+   * A decor object with what it cannot be drawn without.
    *
    * `id` and `kind` have no defaults in the model because nothing ever created one without them; a
    * draft can. The PLACEMENT is deliberately left exactly as stated, including 0,0 — which looks
    * like a mistake and is not: an object the witness is inside carries `witnessSide`, and the
    * renderer then seats the camera within it (see DecorSystem.occupantView), so a car at the
    * witness's own position is a car around them rather than one drawn on the lens. Nudging it clear
-   * would have moved the vehicle out from under its own driver.
+   * would move the vehicle out from under its own driver.
+   *
+   * The WINDOWS are the reason this matters. A side absent from `windows` has no opening there at
+   * all, so a vehicle drafted without the field is a sealed box — and a witness seated inside one
+   * sees grey where the sky should be, which is exactly what the first real draft rendered. The
+   * editor's own Add never had the problem because it spreads defaultWindows in; a draft has no
+   * business inventing per-side opacities, so it gets the same defaults rather than a question.
    */
   private static decor(object: DecorObject, index: number): DecorObject {
+    const kind = object.kind ?? "vehicle"
     return {
+      ...(hasWindows(kind) ? { windows: defaultWindows(kind) } : {}),
+      ...(kind === "building" ? { floors: DEFAULT_BUILDING_FLOORS } : {}),
       ...object,
       id: object.id ?? `decor-${index + 1}`,
-      kind: object.kind ?? "vehicle",
+      kind,
       eastM: object.eastM ?? 0,
       northM: object.northM ?? 0
     }
