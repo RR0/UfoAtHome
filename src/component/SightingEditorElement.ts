@@ -1609,8 +1609,15 @@ export class SightingEditorElement extends HTMLElement {
   private applyNarrativeDraft(draft: NarrativeDraft): void {
     // Stripped rather than trusted not to be there: the account is the one thing in the recording a
     // draft may never touch, and that has to hold whatever any provider decides to send back.
-    const { description, ...recording } = draft.recording
+    // The offset goes the same way whenever a zone came with it. It is not testimony and not a
+    // reading of one: it is what that zone's own rules give at that date, and this editor already
+    // reads them out of the platform's IANA database (see applyTimeZoneOffset). A witness states
+    // where they were; nobody states that France had no summer time in 1974.
+    const { description, ...rest } = draft.recording
     void description
+    const { utcOffsetHours, ...withoutOffset } = rest
+    const recording = rest.timeZone ? withoutOffset : rest
+    void utcOffsetHours
     const paths = DraftPatch.stated(recording)
     if (paths.length > 0) {
       // Applied to the PLAIN recording, never to what sightingData hands out: a value that already
@@ -1625,6 +1632,11 @@ export class SightingEditorElement extends HTMLElement {
       // ones it did: an entry expires when the value it was said about changes (ProvenanceEntry.of).
       this.ufoElement.sighting.provenance = before
       this.recordNarrativeProvenance(draft, paths)
+      // And now the zone decides the offset, as it does after any date edit — a draft that brought
+      // one has just changed the very two things the answer depends on.
+      if (this.ufoElement.sighting.event.timeZone) {
+        this.applyTimeZoneOffset()
+      }
     }
     this.narrativeStatus.textContent = paths.length > 0
       ? this.messages.narrativeApplied.replace("{count}", String(paths.length))

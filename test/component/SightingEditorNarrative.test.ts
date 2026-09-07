@@ -301,6 +301,42 @@ describe("SightingEditorElement drafting from an account", () => {
     expect(element.sightingData.durationSeconds).toBe(300)
   })
 
+  it("lets the time zone decide the offset, ignoring one a draft states", async () => {
+    // Not testimony and not a reading of one: it is what that zone's own rules give at that date,
+    // and the editor reads them out of the platform's IANA database. France ran no summer time
+    // between 1945 and 1976, so May 1974 in Brittany is +1 however confidently a draft says +2.
+    const element = mount()
+    answer = () => Promise.resolve({
+      recording: {
+        time: { year: 1974, month: 5, day: 20, hour: 19, minute: 0 },
+        timeZone: "Europe/Paris",
+        utcOffsetHours: 2
+      },
+      claims: [{ path: "timeZone", basis: "derived" as const, rationale: "Bretagne, France" }],
+      gaps: []
+    })
+
+    await draft(element, "The account.")
+
+    // Wrapped, because the claim gave the zone a rationale — see Provenance.
+    expect(element.sightingData.timeZone).toMatchObject({ value: "Europe/Paris" })
+    // The offset is bare: the software worked it out, so there is nobody to credit it to.
+    expect(element.sightingData.utcOffsetHours).toBe(1)
+  })
+
+  it("keeps an offset a draft states when it named no zone to derive one from", async () => {
+    const element = mount()
+    answer = () => Promise.resolve({
+      recording: { time: { year: 1974 }, utcOffsetHours: 2 },
+      claims: [],
+      gaps: []
+    })
+
+    await draft(element, "The account.")
+
+    expect(element.sightingData.utcOffsetHours).toBe(2)
+  })
+
   it("says when the account yielded nothing, rather than leaving the reader guessing", async () => {
     const element = mount()
     answer = () => Promise.resolve({ recording: {}, claims: [], gaps: ["nothing datable here"] })

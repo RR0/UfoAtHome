@@ -102,10 +102,14 @@ Then:
    geography allows — a witness driving towards a named village is looking along that bearing, and a
    phenomenon "barring the road" is on it. Where nothing bears on the altitude, assume something low
    and plausible rather than leaving the phenomenon undrawable, and mark it "assumed".
-3. Times are the local legal time at the place, with \`utcOffsetHours\` for the offset in force
-   THERE, THAT DAY. This is a fact about the country and the year, not about today: France had no
-   summer time at all between 1945 and 1976, so a May 1974 sighting in Brittany is UTC+1, not UTC+2.
-   Getting this wrong moves the whole sky by an hour.
+3. Times are the local legal time at the place. State the IANA \`timeZone\` the witness's own clock
+   was on ("Europe/Paris", "America/Denver") and NEVER \`utcOffsetHours\`: the editor works the
+   offset out from that zone's own historical rules at that date, out of the platform's IANA
+   database (see TimeZones.offsetHoursAt), and it is right about summer time as it was then rather
+   than as it is now. Anything you computed there would be overwritten, and wrong more often.
+   Choosing the zone is the part that needs reading the account, because a zone's BOUNDARIES have
+   moved: Montgomery, Alabama is "America/Chicago", which observed summer time in 1948 while Alabama
+   did not, so the zone that matches the witness is not always the one their coordinates fall in.
 4. Duration: \`durationSeconds\` is a bare number and cannot say "about". So when the account gives
    a vague length ("a few minutes"), do NOT use it — write \`endTime\` instead, whose \`raw\` takes
    the EDTF approximation suffix: {"raw": "1974-05-20T19:02~", "year": 1974, "month": 5, "day": 20,
