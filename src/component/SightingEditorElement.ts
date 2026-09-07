@@ -523,6 +523,7 @@ export class SightingEditorElement extends HTMLElement {
   private readonly decorEastInput: HTMLInputElement
   private readonly decorNorthInput: HTMLInputElement
   private readonly decorHeadingInput: HTMLInputElement
+  private readonly decorColorInput: HTMLInputElement
   private readonly decorLitInput: HTMLInputElement
   /** Which set of lamps the selected decor object carries — see LightRig.ts. Rebuilt for each
    * selection, since the rigs that make sense on a tree are not the ones that make sense on an
@@ -581,6 +582,7 @@ export class SightingEditorElement extends HTMLElement {
   private readonly labelDecorEast: HTMLElement
   private readonly labelDecorNorth: HTMLElement
   private readonly labelDecorHeading: HTMLElement
+  private readonly labelDecorColor: HTMLElement
   private readonly labelDecorLit: HTMLElement
   private readonly labelDecorSightingUrl: HTMLElement
   private readonly labelMilestones: HTMLElement
@@ -987,6 +989,7 @@ export class SightingEditorElement extends HTMLElement {
     this.decorEastInput = this.shadow.getElementById("decorEast") as HTMLInputElement
     this.decorNorthInput = this.shadow.getElementById("decorNorth") as HTMLInputElement
     this.decorHeadingInput = this.shadow.getElementById("decorHeading") as HTMLInputElement
+    this.decorColorInput = this.shadow.getElementById("decorColor") as HTMLInputElement
     this.decorLitInput = this.shadow.getElementById("decorLit") as HTMLInputElement
     this.decorLightRigSelect = this.shadow.getElementById("decorLightRig") as HTMLSelectElement
     this.lookAtDecorButton = this.shadow.getElementById("look-at-decor") as HTMLButtonElement
@@ -1052,6 +1055,7 @@ export class SightingEditorElement extends HTMLElement {
     this.labelDecorEast = this.shadow.getElementById("label-decor-east")!
     this.labelDecorNorth = this.shadow.getElementById("label-decor-north")!
     this.labelDecorHeading = this.shadow.getElementById("label-decor-heading")!
+    this.labelDecorColor = this.shadow.getElementById("label-decor-color")!
     this.labelDecorLit = this.shadow.getElementById("label-decor-lit")!
     this.labelDecorSightingUrl = this.shadow.getElementById("label-decor-sighting-url")!
     this.labelMilestones = this.shadow.getElementById("label-milestones")!
@@ -1168,6 +1172,7 @@ export class SightingEditorElement extends HTMLElement {
       this.decorNorthInput,
       this.decorAltitudeInput,
       this.decorHeadingInput,
+      this.decorColorInput,
       this.decorSightingUrlInput,
       this.decorWidthInput,
       this.decorLengthInput,
@@ -4367,11 +4372,12 @@ export class SightingEditorElement extends HTMLElement {
         const t = this.ufoElement.currentTime
         const keyframe = { t, eastM, northM, altitudeM, headingDeg }
         const kept = track.filter(existing => existing.t !== t)
-        return { ...d, title: this.said.write(d.title, this.decorTitleInput.value, this.writingLanguage), track: [...kept, keyframe].sort((a, b) => a.t - b.t), sightingUrl: this.stringOrUndefined(this.decorSightingUrlInput.value), witnessSide, sizeM: this.statedDecorSize(), model: this.statedDecorModel(), floors: d.kind === "building" ? Number(this.decorFloorsInput.value) : undefined, occupiedFloor: d.kind === "building" ? Number(this.decorOccupiedFloorInput.value) : undefined }
+        return { ...d, title: this.said.write(d.title, this.decorTitleInput.value, this.writingLanguage), color: this.statedDecorColor(d), track: [...kept, keyframe].sort((a, b) => a.t - b.t), sightingUrl: this.stringOrUndefined(this.decorSightingUrlInput.value), witnessSide, sizeM: this.statedDecorSize(), model: this.statedDecorModel(), floors: d.kind === "building" ? Number(this.decorFloorsInput.value) : undefined, occupiedFloor: d.kind === "building" ? Number(this.decorOccupiedFloorInput.value) : undefined }
       }
       return {
         ...d,
         title: this.said.write(undefined, this.decorTitleInput.value, this.writingLanguage),
+        color: this.statedDecorColor(d),
         eastM,
         northM,
         headingDeg,
@@ -4502,6 +4508,16 @@ export class SightingEditorElement extends HTMLElement {
    * number, and the other two stay unmeasured rather than being filled in from the built-in
    * shape's own proportions — which the placeholder is already showing, honestly, in grey.
    */
+  /**
+   * The colour the picker is showing, or undefined when it is still showing what the object came
+   * with — so an object nobody has repainted stays uncoloured and keeps its kind's own, rather than
+   * being written out as the grey the control had to display in the meantime.
+   */
+  private statedDecorColor(decor: DecorObject): string | undefined {
+    const picked = this.decorColorInput.value
+    return picked === "#808080" && decor.color === undefined ? undefined : picked
+  }
+
   private statedDecorSize(): DecorSize | undefined {
     const widthM = this.positiveMeters(this.decorWidthInput.value)
     const lengthM = this.positiveMeters(this.decorLengthInput.value)
@@ -4750,6 +4766,9 @@ export class SightingEditorElement extends HTMLElement {
       input.disabled = !hasSelection
     }
     this.decorTitleInput.value = this.said.read(decor?.title) ?? ""
+    // Grey when the recording states none, which is what "the kind's own colour" looks like in a
+    // control that has no empty value of its own — see DecorObject.color.
+    this.decorColorInput.value = decor?.color ?? "#808080"
     // Where the object actually IS at the playhead, not the static fields it may never use. An
     // object with a trajectory (an aircraft, a passing car) is somewhere quite else than the
     // eastM/northM it was created with, and a form showing those reads as a plain lie: "15 m north"
@@ -5668,6 +5687,7 @@ export class SightingEditorElement extends HTMLElement {
     this.labelDecorEast.textContent = messages.decorEast
     this.labelDecorNorth.textContent = messages.decorNorth
     this.labelDecorHeading.textContent = messages.decorHeading
+    this.labelDecorColor.textContent = messages.decorColor
     this.labelDecorLit.textContent = messages.decorLit
     this.labelDecorSightingUrl.textContent = messages.decorSightingUrl
     this.contextViewTestimonyButton.textContent = messages.viewTestimony

@@ -141,6 +141,7 @@ export const html = `
     <label><span id="label-decor-north">Distance north</span> <input id="decorNorth" type="number" step="0.5" value="0"/> m</label>
     <label><span id="label-decor-altitude">Altitude</span> <input id="decorAltitude" type="number" step="1" value="0"/> m</label>
     <label><span id="label-decor-heading">Heading</span> <input id="decorHeading" type="number" min="0" max="360" step="1" value="0"/> &deg;</label>
+    <label><span id="label-decor-color">Colour</span> <input id="decorColor" type="color" value="#808080"/></label>
     <!-- Left EMPTY when the recording states no size, with the built-in shape's own measurement as
          the placeholder: a real number typed into a field nobody measured would be a measurement
          invented by the form, which is the one thing this project's data refuses to hold (see

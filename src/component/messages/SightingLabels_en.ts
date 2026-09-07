@@ -70,6 +70,7 @@ export const sightingLabels_en: SightingLabels = {
   decorEast: "Distance east",
   decorNorth: "Distance north",
   decorHeading: "Heading",
+  decorColor: "Colour",
   decorLit: "Lit",
   decorTitle: "Name",
   milestones: "Moments",

@@ -719,6 +719,17 @@ export class DecorSystem {
     return merged
   }
 
+  /** Repaints every part of a built body that is not a light — see DecorObject.color. */
+  private static paint(body: Object3D, color: string): void {
+    body.traverse(part => {
+      const mesh = part as Mesh
+      const userData = mesh.userData as DecorMeshUserData
+      if (!mesh.isMesh || userData?.emissive) return
+      const material = mesh.material as MeshLambertMaterial
+      if (material?.color) material.color.set(color)
+    })
+  }
+
   static build(object: DecorObject, lit: boolean): Group {
     const body =
       object.kind === "building"
@@ -741,6 +752,7 @@ export class DecorSystem {
     // parts by proportion (a headlight at -length/2, a window row per floor), so a scale on the
     // whole body moves all of it consistently and no builder can be updated and left inconsistent
     // with the others.
+    if (object.color) this.paint(body, object.color)
     const scale = this.scaleFor(object)
     const group = new Group()
     body.name = DecorSystem.BODY_NAME

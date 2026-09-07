@@ -129,8 +129,13 @@ describe("Gait", () => {
     // nothing, and not by the couple of degrees their head really did turn through.
     const rolls = samples(Gait.of(walking(1.52, 55))!, 20_000, 30_000).map(offset => offset.rollDeg)
     const peakToPeak = Math.max(...rolls) - Math.min(...rolls)
-    expect(peakToPeak).toBeGreaterThan(0.1)
-    expect(peakToPeak).toBeLessThan(0.5)
+    expect(peakToPeak).toBeGreaterThan(0.02)
+    expect(peakToPeak).toBeLessThan(0.2)
+    // And small enough that the thing being watched does not visibly bounce. This is the term that
+    // moves it up and down the frame, and Masse's craft at 84 m stands 1.7 degrees tall: under a
+    // tenth of its own height per step, against the sixth of it a gain of 0.9 was giving.
+    const nods = samples(Gait.of(walking(1.52, 55))!, 20_000, 30_000).map(offset => offset.pitchDeg)
+    expect((Math.max(...nods) - Math.min(...nods)) / 1.7).toBeLessThan(0.1)
   })
 
   it("gives a camera in the same walking hand the whole of it", () => {
@@ -139,7 +144,8 @@ describe("Gait", () => {
     const swing = (rows: GaitOffset[], key: "rollDeg" | "pitchDeg" | "yawDeg") =>
       Math.max(...rows.map(row => row[key])) - Math.min(...rows.map(row => row[key]))
     expect(swing(camera, "rollDeg")).toBeGreaterThan(2.5)
-    expect(swing(camera, "rollDeg")).toBeCloseTo(10 * swing(eye, "rollDeg"), 5)
+    // The eye keeps a thirtieth of what the lens gets: 1 - 0.97, the reflex's own shortfall.
+    expect(swing(camera, "rollDeg")).toBeCloseTo(swing(eye, "rollDeg") / 0.03, 4)
     // And it is a rotation the instrument cancels, never a displacement: both are carried bodily by
     // the same legs, so the rise is identical whatever they were looking through.
     expect(swing(camera, "pitchDeg")).toBeGreaterThan(swing(eye, "pitchDeg"))

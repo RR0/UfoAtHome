@@ -128,6 +128,8 @@ export interface SightingLabels {
   decorEast: string
   decorNorth: string
   decorHeading: string
+  /** What colour a decor object is — see DecorObject.color. */
+  decorColor: string
   decorLit: string
   decorTitle: string
   /** The three real dimensions of a decor object, in meters along its OWN axes (see DecorSize):

@@ -191,7 +191,15 @@ export const INSTRUMENTS: Instrument[] = [
     // Not quite 1: the reflex is very good and is not perfect, and the residue it leaves is the
     // difference between a reconstruction that is dead still because nobody thought about it and
     // one that is nearly still because somebody did.
-    stabilization: 0.9
+    //
+    // 0.97 and not the 0.9 this first carried, which was a number nobody had measured. The
+    // vestibulo-ocular reflex runs at a gain of 0.95 to 1.0 across the one-to-five hertz a walk
+    // lives in, and a witness WATCHING something gets the optokinetic response and smooth pursuit
+    // on top of it, all three holding the thing they are looking at still. What showed the 0.9 up
+    // was the reconstruction itself: an object 84 m off is 1.7 degrees tall, and a tenth of the
+    // head's own rotation swung it through a sixth of its own height, every step, forever. A real
+    // witness watching a light across a field does not see it bounce.
+    stabilization: 0.97
   },
   {
     id: "rectilinear-lens",

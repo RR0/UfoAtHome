@@ -314,6 +314,21 @@ export interface DecorObject {
    * Absent means the witness isn't inside this object. At most one decor object in a sighting is
    * expected to have this set at a time — the recording witness can only be in one place — but
    * that's a UI convention, not enforced here. */
+  /**
+   * What colour this object actually is, as a CSS colour — the same way a shape states its own (see
+   * Shape.color), because a recording is written and read by people and "#8f86a8" is a colour a
+   * person can type.
+   *
+   * Absent means the kind's own, which is what every recording written before this said by saying
+   * nothing. It exists because a kind cannot carry a colour honestly: "crop row" is lavender in
+   * Masse's field and green in the vine ten metres from it, and one of those two had to be wrong as
+   * long as the colour lived in the primitive.
+   *
+   * Paints the object's own body and never its lights: a streetlight's lamp head and a vehicle's
+   * headlights are light sources whose colour says whether they are ON (see setLit), and a recording
+   * repainting the car would otherwise put out its headlights.
+   */
+  color?: string
   witnessSide?: DecorSide
   /** Kind "building" only: number of upper stories above the ground floor, set when the building
    * is created (default 2, see SightingEditorElement.addDecor) and editable afterward. Drives the
