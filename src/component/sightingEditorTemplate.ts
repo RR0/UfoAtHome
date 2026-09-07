@@ -66,16 +66,16 @@ export const html = `
 </section>
 <section class="group-panel" id="group-witness" aria-labelledby="label-witness-group" hidden>
   <div class="toolbar">
-    <label><span id="label-witness-id">Witness ID</span> <input id="witnessId" type="text"/></label>
-    <label><span id="label-witness-dir-name">Witness dir name</span> <input id="witnessDirName" type="text"/></label>
-    <label><span id="label-witness-title">Witness title</span> <input id="witnessTitle" type="text"/></label>
-    <label><span id="label-witness-last-name">Witness last name</span> <input id="witnessLastName" type="text"/></label>
-    <label><span id="label-witness-first-names">Witness first names</span> <input id="witnessFirstNames" type="text" placeholder="comma-separated"/></label>
-    <!-- Who saw it and how the account travelled — see Testimony. None of it is about the
-         phenomenon, which is why it sits with the witness and not with the shape, and why it had to
-         exist at all: Poher's credibility criteria read these four things and a recording could
-         state none of them. Blank means unknown, never zero (see each field's own doc comment). -->
-    <label><span id="label-witness-count">Witnesses</span> <input id="witnessCount" type="number" min="1" step="1" size="4" placeholder="how many"/></label>
+    <label><span id="label-witness-id">ID</span> <input id="witnessId" type="text"/></label>
+    <label><span id="label-witness-dir-name">Dir name</span> <input id="witnessDirName" type="text"/></label>
+    <label><span id="label-witness-title">Title</span> <input id="witnessTitle" type="text"/></label>
+    <label><span id="label-witness-last-name">Last name</span> <input id="witnessLastName" type="text"/></label>
+    <label><span id="label-witness-first-names">First names</span> <input id="witnessFirstNames" type="text" placeholder="comma-separated"/></label>
+    <!-- Who this witness is and how their account travelled — see Testimony. None of it is about
+         the phenomenon, which is why it sits here and not with the shape, and why it had to exist:
+         Poher's credibility criteria read these and a recording could state none of them. How MANY
+         people saw the thing is not here on purpose: a recording is one person's account, and the
+         count belongs to the case that gathers them. Blank means unknown. -->
     <label><span id="label-witness-age">Age then</span> <input id="witnessAge" type="number" min="0" max="120" step="1" size="4" placeholder="years"/></label>
     <label><span id="label-witness-occupation">Occupation</span> <input id="witnessOccupation" type="text" placeholder="baker, airline pilot…"/></label>
     <label><span id="label-testimony-source">Account obtained</span> <select id="testimonySource">
@@ -110,7 +110,7 @@ export const html = `
          length and the aperture whose own spikes it turns. -->
     <label><span id="label-roll">Roll</span> <input id="roll" type="number" min="-180" max="180" step="1" value="0" title="How far the instrument was tilted about its own line of sight — positive clockwise, as the witness saw it"/> &deg;</label>
     <button id="add-decor-witness" type="button">Add witness</button>
-    <label><span id="label-decor-sighting-url">Witness's own recording URL</span> <input id="decorSightingUrl" type="url" placeholder="https://…/sighting.json"/></label>
+    <label><span id="label-decor-sighting-url">Their own recording URL</span> <input id="decorSightingUrl" type="url" placeholder="https://…/sighting.json"/></label>
   </div>
 </section>
 <section class="group-panel" id="group-location" aria-labelledby="label-location-group" hidden>

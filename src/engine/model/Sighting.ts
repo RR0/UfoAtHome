@@ -340,6 +340,28 @@ export class Sighting {
    */
   testimony?: Testimony
 
+  /**
+   * How many people THIS witness's account puts at the scene, themselves included — counted off the
+   * decor, never stored.
+   *
+   * What a testimony-level evaluation reads: Poher's heaviest credibility rubric is the number of
+   * witnesses, and this is the number this account claims. It is the witness's own belief and may
+   * be wrong, which is exactly why it belongs to their recording and not to some census.
+   *
+   * Deliberately NOT the same number as the case's. A case gathers one recording per witness who
+   * gave an account (see caseId), and four people in a car who produced one written testimony
+   * between them are four here and one there. Both are true of different things, and evaluating a
+   * case is a separate exercise from evaluating a testimony.
+   *
+   * Derived rather than stored for the reason every derived thing here is: two statements of one
+   * fact are free to disagree, and of these the placement is the better one, since it says where
+   * each of them stood rather than only how many there were.
+   */
+  get witnessCount(): number {
+    return 1 + this.decor.filter(object => object.kind === "witness").length
+  }
+
+
   /** The shutter this observation was made with, resolved — the recording's own, else the device's,
    * else none at all (an eye has no shutter). */
   get exposure(): number | undefined {

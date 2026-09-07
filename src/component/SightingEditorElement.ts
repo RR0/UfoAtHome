@@ -362,7 +362,6 @@ export class SightingEditorElement extends HTMLElement {
   private readonly witnessTitleInput: HTMLInputElement
   private readonly witnessLastNameInput: HTMLInputElement
   private readonly witnessFirstNamesInput: HTMLInputElement
-  private readonly witnessCountInput: HTMLInputElement
   private readonly witnessAgeInput: HTMLInputElement
   private readonly witnessOccupationInput: HTMLInputElement
   private readonly testimonySourceSelect: HTMLSelectElement
@@ -462,7 +461,6 @@ export class SightingEditorElement extends HTMLElement {
   private readonly labelWitnessTitle: HTMLElement
   private readonly labelWitnessLastName: HTMLElement
   private readonly labelWitnessFirstNames: HTMLElement
-  private readonly labelWitnessCount: HTMLElement
   private readonly labelWitnessAge: HTMLElement
   private readonly labelWitnessOccupation: HTMLElement
   private readonly labelTestimonySource: HTMLElement
@@ -874,7 +872,6 @@ export class SightingEditorElement extends HTMLElement {
     this.witnessTitleInput = this.shadow.getElementById("witnessTitle") as HTMLInputElement
     this.witnessLastNameInput = this.shadow.getElementById("witnessLastName") as HTMLInputElement
     this.witnessFirstNamesInput = this.shadow.getElementById("witnessFirstNames") as HTMLInputElement
-    this.witnessCountInput = this.shadow.getElementById("witnessCount") as HTMLInputElement
     this.witnessAgeInput = this.shadow.getElementById("witnessAge") as HTMLInputElement
     this.witnessOccupationInput = this.shadow.getElementById("witnessOccupation") as HTMLInputElement
     this.testimonySourceSelect = this.shadow.getElementById("testimonySource") as HTMLSelectElement
@@ -966,7 +963,6 @@ export class SightingEditorElement extends HTMLElement {
     this.labelWitnessTitle = this.shadow.getElementById("label-witness-title")!
     this.labelWitnessLastName = this.shadow.getElementById("label-witness-last-name")!
     this.labelWitnessFirstNames = this.shadow.getElementById("label-witness-first-names")!
-    this.labelWitnessCount = this.shadow.getElementById("label-witness-count")!
     this.labelWitnessAge = this.shadow.getElementById("label-witness-age")!
     this.labelWitnessOccupation = this.shadow.getElementById("label-witness-occupation")!
     this.labelTestimonySource = this.shadow.getElementById("label-testimony-source")!
@@ -1352,7 +1348,6 @@ export class SightingEditorElement extends HTMLElement {
       this.witnessTitleInput,
       this.witnessLastNameInput,
       this.witnessFirstNamesInput,
-      this.witnessCountInput,
       this.witnessAgeInput,
       this.witnessOccupationInput,
       this.caseIdInput
@@ -2460,7 +2455,6 @@ export class SightingEditorElement extends HTMLElement {
     const sighting = this.ufoElement.sighting
     const followedUp = this.testimonyFollowedUpSelect.value
     const testimony: Testimony = {
-      witnessCount: this.numberOrUndefined(this.witnessCountInput.value),
       witnessAgeYears: this.numberOrUndefined(this.witnessAgeInput.value),
       witnessOccupation: this.witnessOccupationInput.value.trim() === ""
         ? undefined
@@ -3229,8 +3223,6 @@ export class SightingEditorElement extends HTMLElement {
     this.witnessLastNameInput.value = sighting.witness?.lastName ?? ""
     this.witnessFirstNamesInput.value = sighting.witness?.firstNames?.join(", ") ?? ""
     this.caseIdInput.value = sighting.caseId ?? ""
-    // Empty for absent, never "0": see Testimony on why unknown and one are different statements.
-    this.witnessCountInput.value = sighting.testimony?.witnessCount?.toString() ?? ""
     this.witnessAgeInput.value = sighting.testimony?.witnessAgeYears?.toString() ?? ""
     this.witnessOccupationInput.value = this.said.read(sighting.testimony?.witnessOccupation) ?? ""
     this.testimonySourceSelect.value = sighting.testimony?.source ?? ""
@@ -5689,7 +5681,6 @@ export class SightingEditorElement extends HTMLElement {
     this.labelImportUrl.textContent = messages.importUrl
     this.importUrlInput.placeholder = messages.importUrlPlaceholder
     this.importUrlButton.textContent = messages.importButton
-    this.labelWitnessCount.textContent = messages.witnessCount
     this.labelWitnessAge.textContent = messages.witnessAge
     this.labelWitnessOccupation.textContent = messages.witnessOccupation
     this.labelTestimonySource.textContent = messages.testimonySource

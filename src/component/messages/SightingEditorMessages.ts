@@ -509,9 +509,6 @@ export interface SightingEditorMessages extends SightingLabels {
   /** The service refused the request and said why. {detail} is its own words, which name the field
    * to fill — see NarrativeErrorKind's "rejected" on why they are shown rather than translated. */
   narrativeErrorRejected: string
-  /** How many people saw it, this recording's own witness included — the heaviest single rubric of
-   * Poher's credibility criteria, and something a recording could not state at all until now. */
-  witnessCount: string
   /** The main witness's age AT THE TIME, not today. */
   witnessAge: string
   /** What they did, in prose — never a level: banding occupations is each method's own argument

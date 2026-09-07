@@ -328,7 +328,6 @@ describe("testimony", () => {
     // left half of every published evaluation method uncomputable from a file. See Testimony.
     const sighting = Sighting.create({ year: 1974, month: 5, day: 20 })
     sighting.testimony = {
-      witnessCount: 4,
       witnessAgeYears: 38,
       witnessOccupation: { fr: "boulanger", en: "baker" },
       source: "on-site",
@@ -336,7 +335,6 @@ describe("testimony", () => {
     }
 
     expect(fromSightingJson(toSightingJson(sighting)).testimony).toEqual({
-      witnessCount: 4,
       witnessAgeYears: 38,
       witnessOccupation: { fr: "boulanger", en: "baker" },
       source: "on-site",
@@ -351,5 +349,33 @@ describe("testimony", () => {
 
     expect(written.testimony).toBeUndefined()
     expect("testimony" in written).toBe(true)
+  })
+})
+
+describe("witness count", () => {
+  it("counts the witnesses this account puts at the scene, itself included", () => {
+    // Poher's heaviest credibility rubric, and the number a TESTIMONY-level evaluation reads.
+    const sighting = Sighting.create({ year: 1974 })
+
+    expect(sighting.witnessCount).toBe(1)
+
+    sighting.decor = [
+      { id: "epouse", kind: "witness", eastM: 1, northM: 0 },
+      { id: "enfant-1", kind: "witness", eastM: 1, northM: -1 },
+      { id: "enfant-2", kind: "witness", eastM: -1, northM: -1 },
+      { id: "voiture", kind: "vehicle", eastM: 0, northM: 0 }
+    ]
+
+    expect(sighting.witnessCount).toBe(4)
+  })
+
+  it("is never stored, so nothing can disagree with the scene", () => {
+    // Two statements of one fact are free to drift apart, and of these the placement is the better
+    // one: it says where each of them stood rather than only how many there were.
+    const sighting = Sighting.create({ year: 1974 })
+    sighting.decor = [{ id: "epouse", kind: "witness", eastM: 1, northM: 0 }]
+
+    expect("witnessCount" in toSightingJson(sighting)).toBe(false)
+    expect(JSON.stringify(toSightingJson(sighting))).not.toContain("witnessCount")
   })
 })

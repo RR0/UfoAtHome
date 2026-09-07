@@ -5730,14 +5730,12 @@ describe("SightingEditorElement testimony", () => {
     // a file, by those methods' own definitions. See Testimony.
     const element = mount()
 
-    type(element, "witnessCount", "4")
     type(element, "witnessAge", "38")
     type(element, "witnessOccupation", "boulanger")
     type(element, "testimonySource", "on-site", "change")
     type(element, "testimonyFollowedUp", "yes", "change")
 
     expect(element.sightingData.testimony).toEqual({
-      witnessCount: 4,
       witnessAgeYears: 38,
       witnessOccupation: "boulanger",
       source: "on-site",
@@ -5745,12 +5743,18 @@ describe("SightingEditorElement testimony", () => {
     })
   })
 
-  it("says nothing rather than zero about witnesses nobody counted", () => {
-    // "Nobody recorded how many people were there" and "one person was there" are different
-    // statements, and Poher scores them 0 and 1.
+  it("says nothing about a witness nobody described", () => {
     const element = mount()
 
     expect(element.sightingData.testimony).toBeUndefined()
+  })
+
+  it("offers no witness count, because a recording is one person's account", () => {
+    // Where other people stood is in the decor and is this witness's own belief about them, not a
+    // census. Two witnesses write two recordings; it is the case that has several. See Testimony.
+    const element = mount()
+
+    expect(element.shadowRoot!.getElementById("witnessCount")).toBeNull()
   })
 
   it("keeps 'not followed up' apart from 'nobody said'", () => {
@@ -5769,10 +5773,9 @@ describe("SightingEditorElement testimony", () => {
     element.sightingData = {
       version: 1,
       timeline: { keyframes: [] },
-      testimony: { witnessCount: 4, witnessAgeYears: 38, witnessOccupation: "boulanger", source: "press" }
+      testimony: { witnessAgeYears: 38, witnessOccupation: "boulanger", source: "press" }
     }
 
-    expect(field<HTMLInputElement>(element, "witnessCount").value).toBe("4")
     expect(field<HTMLInputElement>(element, "witnessAge").value).toBe("38")
     expect(field<HTMLInputElement>(element, "witnessOccupation").value).toBe("boulanger")
     expect(field<HTMLSelectElement>(element, "testimonySource").value).toBe("press")
