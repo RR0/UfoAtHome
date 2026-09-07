@@ -358,6 +358,7 @@ export class SightingSummary {
     switch (kind) {
       case "building": return this.labels.decorBuilding
       case "tree": return this.labels.decorTree
+      case "crop": return this.labels.decorCrop
       case "streetlight": return this.labels.decorStreetlight
       case "vehicle": return this.labels.decorVehicle
       case "aircraft": return this.labels.decorAircraft

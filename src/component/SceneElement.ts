@@ -107,6 +107,7 @@ const COMET_KEY_PREFIX = "comet:"
 const DECOR_KIND_NAMES: Record<DecorKind, { en: string; fr: string }> = {
   building: { en: "Building", fr: "Bâtiment" },
   tree: { en: "Tree", fr: "Arbre" },
+  crop: { en: "Crop row", fr: "Rang de culture" },
   streetlight: { en: "Streetlight", fr: "Lampadaire" },
   vehicle: { en: "Vehicle", fr: "Véhicule" },
   witness: { en: "Witness", fr: "Témoin" },

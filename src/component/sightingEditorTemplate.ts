@@ -207,6 +207,7 @@ export const html = `
       <select id="decorKind">
         <option id="option-decor-building" value="building">Building</option>
         <option id="option-decor-tree" value="tree">Tree</option>
+        <option id="option-decor-crop" value="crop">Crop row</option>
         <option id="option-decor-streetlight" value="streetlight">Streetlight</option>
         <option id="option-decor-vehicle" value="vehicle">Vehicle</option>
         <option id="option-decor-aircraft" value="aircraft">Aircraft</option>

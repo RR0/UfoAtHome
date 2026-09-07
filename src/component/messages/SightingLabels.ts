@@ -118,6 +118,8 @@ export interface SightingLabels {
   decor: string
   decorBuilding: string
   decorTree: string
+  /** One row of a cultivated field — see DecorKind's own "crop". */
+  decorCrop: string
   decorStreetlight: string
   decorVehicle: string
   decorWitness: string

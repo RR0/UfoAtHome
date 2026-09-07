@@ -9,7 +9,14 @@ import type { SaidText } from "./SaidText.js"
  * driver switching their headlights on), so it gets its own small keyframe array rather than the
  * rest of DecorObject's fields. See resolveDecorLitAt.
  */
-export type DecorKind = "building" | "tree" | "streetlight" | "vehicle" | "witness" | "aircraft"
+/**
+ * "crop" is a ROW and not a field: what a cultivated field is made of, and what a witness walking
+ * through one really has beside them. It earns its own kind because a row is the only near thing in
+ * an open field, and near is the only distance at which a witness's own movement shows (see Gait) —
+ * calling one a tree, the nearest existing kind, would put a trunk and a canopy into a lavender
+ * field and say so in the editor.
+ */
+export type DecorKind = "building" | "tree" | "crop" | "streetlight" | "vehicle" | "witness" | "aircraft"
 
 /** A side of a decor object, relative to its own headingDeg ("front" is whichever way the object
  * itself faces) rather than a compass direction — a decor object can be rotated, so "north"

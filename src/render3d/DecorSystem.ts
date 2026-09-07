@@ -1,4 +1,4 @@
-import { BackSide, Box3, BoxGeometry, Color, ConeGeometry, CylinderGeometry, Group, Mesh, MeshBasicMaterial, MeshLambertMaterial, SphereGeometry, Vector3 } from "three"
+import { BackSide, Box3, BoxGeometry, BufferGeometry, Color, ConeGeometry, CylinderGeometry, Float32BufferAttribute, Group, Mesh, MeshBasicMaterial, MeshLambertMaterial, SphereGeometry, Uint32BufferAttribute, Vector3 } from "three"
 import type { Object3D } from "three"
 import type { DecorKind, DecorLight, DecorObject, DecorSide, DecorSize, MeasuredDecorSize } from "../engine/model/Decor.js"
 import { canHoldWitness, DEFAULT_BUILDING_FLOORS, isLightOnAt, lightOnFractionBetween } from "../engine/model/Decor.js"
@@ -26,7 +26,7 @@ interface DecorMeshUserData {
   lightColor?: RgbColor
 }
 
-function addPart(group: Group, geometry: BoxGeometry | ConeGeometry | CylinderGeometry | SphereGeometry, baseColor: RgbColor, y: number, emissive = false): Mesh {
+function addPart(group: Group, geometry: BufferGeometry, baseColor: RgbColor, y: number, emissive = false): Mesh {
   const material = emissive ? new MeshBasicMaterial({ color: new Color(...baseColor) }) : new MeshLambertMaterial({ color: new Color(...baseColor) })
   const mesh = new Mesh(geometry, material)
   mesh.position.y = y
@@ -362,6 +362,48 @@ function buildTree(): Group {
   return group
 }
 
+/** One lavender clump, read off the photographs of Masse's own field: a dome about 55 cm across and
+ * 35 cm tall, and clumps set about 90 cm apart along the row, so the gaps between them are nearly as
+ * wide as the plants. */
+const CROP_CLUMP_RADIUS_M = 0.275
+const CROP_CLUMP_HEIGHT_M = 0.35
+const CROP_CLUMP_SPACING_M = 0.9
+/** Thirty metres of row, which is what one of them can be and still sit on the ground it is placed
+ * on: a decor object takes its height from a single sample under its own anchor (see
+ * SceneRenderer.groundYUnder), so a row longer than the ground stays flat over would float at one
+ * end and sink at the other. Masse's own field falls about 1.2% along his walk, so a row this long
+ * strays some fifteen centimetres from the soil at its ends — under half a plant. */
+const CROP_CLUMPS_PER_ROW = 34
+
+/**
+ * One row of a cultivated field: a line of separate domed clumps along the object's own length.
+ *
+ * SEPARATE, and that is the whole point of the shape. A row of lavender photographed in this very
+ * field is not a hedge and not a ridge — it is a line of round bushes with bare stony ground showing
+ * between them, each gap about as wide as the plant beside it. A continuous ridge was the first
+ * thing built here and it was wrong: it would have hidden the ground a witness says he walked over
+ * ("marchant parmi les rochers"), and it would have given the near foreground one long unbroken edge
+ * where the real one is a broken line of them. The edges are what the whole thing contributes: a row
+ * is the near thing a witness walking through a field has beside them, and near is the only distance
+ * at which their own movement shows (see Gait).
+ *
+ * ONE MESH, not eleven. Every clump of a row is merged into a single geometry, so a field of seventy
+ * rows costs seventy draw calls rather than seven hundred and seventy — the reason a row rather than
+ * a plant is the unit a recording places.
+ *
+ * Hemispheres rather than spheres half sunk into the ground: an open dome's own bounding box IS the
+ * plant standing above the soil, so the height a recording states is the height a reader measures
+ * (see scaleFor and naturalSize).
+ */
+function buildCrop(): Group {
+  const group = new Group()
+  const clump = new SphereGeometry(CROP_CLUMP_RADIUS_M, 8, 4, 0, Math.PI * 2, 0, Math.PI / 2)
+  clump.scale(1, CROP_CLUMP_HEIGHT_M / CROP_CLUMP_RADIUS_M, 1)
+  addPart(group, DecorSystem.repeatAlongZ(clump, CROP_CLUMPS_PER_ROW, CROP_CLUMP_SPACING_M), [0.26, 0.28, 0.22], 0)
+  clump.dispose()
+  return group
+}
+
 function buildStreetlight(lit: boolean): Group {
   const group = new Group()
   addPart(group, new CylinderGeometry(0.05, 0.08, 5, 8), [0.28, 0.28, 0.3], 2.5)
@@ -598,13 +640,57 @@ export class DecorSystem {
     return group.getObjectByName(DecorSystem.BODY_NAME) ?? group
   }
 
+  /**
+   * One geometry holding `count` copies of another, set `spacingM` apart along Z and centred on the
+   * origin — what turns a line of plants into a single mesh.
+   *
+   * Merged here by hand rather than through three's own BufferGeometryUtils: that module lives under
+   * three/examples and is imported statically nowhere in this renderer (see loadGltfScene, which
+   * pulls the GLTF loader in dynamically precisely so it stays out of the bundle). Copying two
+   * attribute arrays and an index is less code than the import would cost every reader of every
+   * page.
+   */
+  static repeatAlongZ(source: BufferGeometry, count: number, spacingM: number): BufferGeometry {
+    const position = source.getAttribute("position")
+    const normal = source.getAttribute("normal")
+    const index = source.getIndex()
+    if (!index) throw new Error("repeatAlongZ needs an indexed geometry")
+    const vertices = position.count
+    const positions = new Float32Array(vertices * count * 3)
+    const normals = new Float32Array(vertices * count * 3)
+    const indices = new Uint32Array(index.count * count)
+    const first = -((count - 1) * spacingM) / 2
+    for (let copy = 0; copy < count; copy++) {
+      const z = first + copy * spacingM
+      for (let vertex = 0; vertex < vertices; vertex++) {
+        const at = (copy * vertices + vertex) * 3
+        positions[at] = position.getX(vertex)
+        positions[at + 1] = position.getY(vertex)
+        positions[at + 2] = position.getZ(vertex) + z
+        normals[at] = normal.getX(vertex)
+        normals[at + 1] = normal.getY(vertex)
+        normals[at + 2] = normal.getZ(vertex)
+      }
+      for (let step = 0; step < index.count; step++) {
+        indices[copy * index.count + step] = index.getX(step) + copy * vertices
+      }
+    }
+    const merged = new BufferGeometry()
+    merged.setAttribute("position", new Float32BufferAttribute(positions, 3))
+    merged.setAttribute("normal", new Float32BufferAttribute(normals, 3))
+    merged.setIndex(new Uint32BufferAttribute(indices, 1))
+    return merged
+  }
+
   static build(object: DecorObject, lit: boolean): Group {
     const body =
       object.kind === "building"
         ? buildBuilding(object.floors ?? DEFAULT_BUILDING_FLOORS, object.windows, object.witnessSide, object.occupiedFloor)
         : object.kind === "tree"
           ? buildTree()
-          : object.kind === "streetlight"
+          : object.kind === "crop"
+            ? buildCrop()
+            : object.kind === "streetlight"
             ? buildStreetlight(lit)
             : object.kind === "vehicle"
               ? buildVehicle(lit, object.windows, object.witnessSide)
@@ -669,7 +755,9 @@ export class DecorSystem {
         ? buildBuilding(levels - 1, undefined, undefined, undefined)
         : kind === "tree"
           ? buildTree()
-          : kind === "streetlight"
+          : kind === "crop"
+            ? buildCrop()
+            : kind === "streetlight"
             ? buildStreetlight(false)
             : kind === "vehicle"
               ? buildVehicle(false, undefined, undefined)
