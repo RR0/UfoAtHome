@@ -459,6 +459,11 @@ export interface SightingEditorMessages extends SightingLabels {
   /** Which of a key's workspaces to bill — only needed by a key that reaches several. */
   narrativeWorkspace: string
   narrativeWorkspacePlaceholder: string
+  /** Title on that field. Names the way out rather than only the way through: a key scoped to one
+   * workspace needs no id at all, and the id of the Default Workspace is the hardest of the lot to
+   * come by — it is absent from List Workspaces and reads as null on keys and usage reports, so it
+   * takes a successful call to learn what is missing to make one. */
+  narrativeWorkspaceHint: string
   /** Why it is disabled with nothing to send — an empty account, or an empty correction. */
   narrativeNeedsAsk: string
   /** The checkbox that keeps that key in this browser. Off by default: storing somebody's key is

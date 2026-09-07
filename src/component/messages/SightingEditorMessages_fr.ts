@@ -180,6 +180,7 @@ export const sightingEditorMessages_fr: SightingEditorMessages = {
   narrativeKeyUnlikely: "Cela ne ressemble pas à une clé d'API Claude : elles commencent par sk-ant-",
   narrativeWorkspace: "Espace de travail",
   narrativeWorkspacePlaceholder: "seulement si votre clé en couvre plusieurs",
+  narrativeWorkspaceHint: "Seulement pour une clé dont la portée est l'organisation entière. Plus simple : laissez vide et créez une clé de portée « espace de travail ».",
   narrativeNeedsAsk: "Rien à envoyer pour l'instant",
   narrativeRemember: "Retenir sur cet appareil",
   narrativeDraft: "Générer la reconstitution",

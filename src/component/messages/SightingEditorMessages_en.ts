@@ -180,6 +180,7 @@ export const sightingEditorMessages_en: SightingEditorMessages = {
   narrativeKeyUnlikely: "This does not look like a Claude API key: they begin with sk-ant-",
   narrativeWorkspace: "Workspace ID",
   narrativeWorkspacePlaceholder: "only if your key spans several",
+  narrativeWorkspaceHint: "Only for a key whose scope is the whole organisation. Simpler: leave this empty and create a key scoped to one workspace instead.",
   narrativeNeedsAsk: "Nothing to send yet",
   narrativeRemember: "Remember on this device",
   narrativeDraft: "Generate reconstruction",

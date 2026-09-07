@@ -1135,6 +1135,7 @@ export class SightingEditorElement extends HTMLElement {
     // loadLocaleMessages): the template's baked-in default cannot carry the source's name, because
     // which source is registered is not a fact the template has.
     this.labelNarrativeKey.textContent = this.messages.narrativeKey.replace("{source}", NARRATIVE_SOURCES[0].name)
+    this.narrativeWorkspaceInput.title = this.messages.narrativeWorkspaceHint
     this.restoreNarrativeKey()
     this.syncNarrativeEnabled()
     this.durationInput.addEventListener("input", () => {
@@ -5599,6 +5600,7 @@ export class SightingEditorElement extends HTMLElement {
     this.labelNarrativeKey.textContent = messages.narrativeKey.replace("{source}", NARRATIVE_SOURCES[0].name)
     this.labelNarrativeWorkspace.textContent = messages.narrativeWorkspace
     this.narrativeWorkspaceInput.placeholder = messages.narrativeWorkspacePlaceholder
+    this.narrativeWorkspaceInput.title = messages.narrativeWorkspaceHint
     this.labelNarrativeRemember.textContent = messages.narrativeRemember
     this.narrativeStopButton.textContent = messages.narrativeStop
     this.narrativeDraftButton.textContent = messages.narrativeDraft
