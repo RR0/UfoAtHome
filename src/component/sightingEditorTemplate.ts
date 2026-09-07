@@ -51,7 +51,7 @@ export const html = `
       <textarea id="description" rows="4" placeholder="What the witness reported, in their own words"></textarea></label>
     <label><span id="label-narrative-key">API key</span> <input id="narrativeKey" type="password" autocomplete="off" spellcheck="false"/></label>
     <label class="checkbox"><input id="narrativeRemember" type="checkbox"/> <span id="label-narrative-remember">Remember on this device</span></label>
-    <button id="narrative-draft" type="button">Draft the observation</button>
+    <button id="narrative-draft" type="button">Generate reconstruction</button>
     <button id="narrative-stop" type="button" hidden>Stop</button>
     <a id="narrative-credit" class="inline-source" target="_blank" rel="noopener noreferrer"></a>
     <output id="narrative-status" for="description"></output>

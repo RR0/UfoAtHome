@@ -458,7 +458,10 @@ export interface SightingEditorMessages extends SightingLabels {
   /** The checkbox that keeps that key in this browser. Off by default: storing somebody's key is
    * their decision to take, not a convenience to help them to. */
   narrativeRemember: string
-  /** The button that reads the account and rewrites the rest of the recording from it. */
+  /** The button that reads the account and rewrites the rest of the recording from it. Names the
+   * result rather than the gesture, and knowingly promises a little more than one press delivers:
+   * what comes back is a first pass over what the account happens to state, and the timeline is
+   * still drawn by hand. */
   narrativeDraft: string
   /** Cancels a draft in flight. */
   narrativeStop: string
