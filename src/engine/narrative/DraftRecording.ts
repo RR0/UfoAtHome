@@ -1,5 +1,6 @@
 import { ApparentSize } from "../shape/ApparentSize.js"
 import type { SightingRecordingJson } from "../persistence/sightingJson.js"
+import type { DecorObject } from "../model/Decor.js"
 
 /** The neutral pixel box a drafted shape starts life in — one pixel at the middle of the frame.
  * Nothing about it survives loading: SightingShapes.toBounds resizes it about its own centre from
@@ -40,14 +41,17 @@ interface DraftShape {
  */
 export class DraftRecording {
 
-  /** `draft` with every shape completed, ready for fromSightingJson. Returns a new object. */
+  /** `draft` with every shape and every decor object completed, ready for fromSightingJson.
+   * Returns a new object. */
   static loadable(draft: Partial<SightingRecordingJson>): Partial<SightingRecordingJson> {
+    const decor = draft.decor ? { decor: draft.decor.map((object, index) => DraftRecording.decor(object, index)) } : {}
     const keyframes = draft.timeline?.keyframes
     if (!keyframes) {
-      return draft
+      return { ...draft, ...decor }
     }
     return {
       ...draft,
+      ...decor,
       timeline: {
         ...draft.timeline,
         keyframes: keyframes.map(keyframe => ({
@@ -59,6 +63,26 @@ export class DraftRecording {
         }))
       }
     } as Partial<SightingRecordingJson>
+  }
+
+  /**
+   * A decor object with the two fields nothing can be drawn without.
+   *
+   * `id` and `kind` have no defaults in the model because nothing ever created one without them; a
+   * draft can. The PLACEMENT is deliberately left exactly as stated, including 0,0 — which looks
+   * like a mistake and is not: an object the witness is inside carries `witnessSide`, and the
+   * renderer then seats the camera within it (see DecorSystem.occupantView), so a car at the
+   * witness's own position is a car around them rather than one drawn on the lens. Nudging it clear
+   * would have moved the vehicle out from under its own driver.
+   */
+  private static decor(object: DecorObject, index: number): DecorObject {
+    return {
+      ...object,
+      id: object.id ?? `decor-${index + 1}`,
+      kind: object.kind ?? "vehicle",
+      eastM: object.eastM ?? 0,
+      northM: object.northM ?? 0
+    }
   }
 
   private static shape(shape: DraftShape): unknown {

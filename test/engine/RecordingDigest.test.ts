@@ -145,9 +145,26 @@ describe("DraftRecording", () => {
     expect(shape.kind === "polygon" && shape.points).toHaveLength(4)
   })
 
-  it("leaves a draft with no timeline exactly as it is", () => {
-    const draft = { caseId: "valensole" }
+  it("leaves a draft with no timeline and no decor exactly as it is", () => {
+    expect(DraftRecording.loadable({ caseId: "valensole" })).toEqual({ caseId: "valensole" })
+  })
 
-    expect(DraftRecording.loadable(draft)).toBe(draft)
+  it("leaves a vehicle the witness is inside at their own position", () => {
+    // 0,0 looks like a mistake and is not: DecorSystem.occupantView seats the camera within an
+    // object that carries witnessSide, so a car there is a car AROUND the witness. Nudging it clear
+    // would move the vehicle out from under its own driver.
+    const inside = DraftRecording.loadable({
+      decor: [{ id: "car", kind: "vehicle", eastM: 0, northM: 0, witnessSide: "front-left" }]
+    })
+
+    expect(inside.decor?.[0]).toMatchObject({ eastM: 0, northM: 0, witnessSide: "front-left" })
+  })
+
+  it("gives a decor object the id and kind nothing can be drawn without", () => {
+    const drafted = DraftRecording.loadable({
+      decor: [{ title: "La voiture" } as unknown as NonNullable<Partial<SightingRecordingJson>["decor"]>[number]]
+    })
+
+    expect(drafted.decor?.[0]).toMatchObject({ id: "decor-1", kind: "vehicle", eastM: 0, northM: 0 })
   })
 })

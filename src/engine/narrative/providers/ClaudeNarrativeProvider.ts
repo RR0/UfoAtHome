@@ -79,7 +79,14 @@ value, which of three things it is:
 
 Getting that label right matters more than getting the value right. A wrong value marked "assumed"
 is a question for the author to answer; a guess passed off as "stated" is a fabricated testimony,
-and it is the one thing this format exists to prevent. When in doubt, mark it weaker.
+and it is the one thing this format exists to prevent. When in doubt, mark it weaker. In particular
+a PLACE nobody named is "assumed", however carefully you reasoned about which road it must have
+been: the arithmetic that follows from a guessed point is only ever as good as the point.
+
+Claim only what a reader could disagree with. Structural fields carry no testimony and belong in no
+list: never claim \`version\`, an \`id\`, a \`sourceId\`, or anything else that exists to make the
+file load rather than to say what was seen. The "assumed" list is the author's to-do list, and
+padding it with plumbing is how it stops being read.
 
 Then:
 
@@ -119,7 +126,19 @@ Then:
    aerial observation, paralysis, contact, occupants, close encounter, photograph, radar,
    electromagnetic effect — and pass classification codes and case references through unchanged
    ("RR3", "NL", "Blue Book 8729"), which read the same in every language.
-9. Silence is a statement. A witness who says the thing was silent is not a witness who said nothing
+9. \`decor\` is the scenery around the witness, and \`eastM\`/\`northM\` are metres from where they
+   stand. Something the witness is INSIDE — their own car, their kitchen — goes at 0,0 and carries
+   \`witnessSide\` ("front-left" for a European driver's seat), which is what puts the viewpoint
+   within it. Anything they are NOT inside must be placed away from 0,0, or it is drawn on the lens.
+   Give \`sizeM\` in metres ({widthM, lengthM, heightM}: about 1.7 x 4.2 x 1.4 for a 1970s family
+   car) or leave it out for the primitive's own size. Add decor only for what the account names: an
+   unmentioned streetlight is scenery nobody reported.
+10. \`witnessTrack\` is where the witness stood and which way they faced, over time. One pose is
+   normally enough. \`headingDeg\` is the direction they were LOOKING, same convention as \`aim\`,
+   and it is what makes a shape's azimuth mean anything — a witness driving towards a named village
+   faces that bearing. \`elevationM\` is metres above sea level, \`pitchDeg\` 0 for someone looking
+   level, \`fovDeg\` about 60 for the naked eye.
+11. Silence is a statement. A witness who says the thing was silent is not a witness who said nothing
    about sound: write a \`soundTrack\` whose keyframe holds a sound of kind "none", and mark it
    "stated". An account that simply never mentions sound gets no soundTrack at all.`
 
