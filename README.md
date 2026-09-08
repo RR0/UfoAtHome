@@ -327,9 +327,23 @@ apparitions, and the peak magnitudes and tail lengths recorded at the time, are 
 `scripts/build-comet-catalog.ts` — the orbits are looked up, the brightness is an observation, and the script's
 own doc comment explains why the two cannot come from the same place. The generated file *is* checked in.
 
-The UFO shape itself deliberately stays a 2D overlay on top of the 3D decor, never "upgraded" to a 3D object: it's
-what the witness reported — possibly a misidentification or optical effect — not something to interpret as a real
-3D shape. Only the surrounding environment, independently computable from real astronomy, is rendered in 3D.
+**The phenomenon stands in the scene, and is still only what the witness saw.** The shape used to be painted on a
+2D canvas laid over the 3D scene, so that nothing about it could be read as a claim about a solid at a distance. It
+is now a plane *in* the three.js scene (`src/render3d/PhenomenonSystem.ts`), facing the witness and scaled so that
+it subtends exactly the angle the recording states — which makes it look the same from their eye at any distance
+whatever, and is what keeps the claim where it was: the recording states angles and nothing else, and the distance
+the plane is drawn at is a parameter of the picture (`src/engine/shape/PhenomenonDepth.ts`, see *Where the shape
+is drawn* below). What the plane carries is the very picture the overlay painted — the same `CanvasRenderer` draws
+the same halo, blur, veil and spikes into its texture. What changed is who decides what hides it: the decor's own
+depth, per pixel, so a patrol car in front of it hides exactly the part of it a patrol car would, where the overlay
+sampled nine points and hid the shape whole or not at all. The ground and the terrain are kept out of that on
+purpose — the phenomena are drawn in a pass of their own, depth-tested against the decor alone — because a relief
+patch at thirty-metre resolution deciding what a witness saw would not be a reconstruction (Socorro's craft, a
+hundred feet away in the arroyo below the road, sank two metres under one). It also means the phenomenon goes
+through the instrument's own projection like everything else in the scene, and through the same long-exposure
+accumulation, instead of an approximation of each on a separate layer. The overlay keeps the pointer's business:
+selection handles, outlines, hit-testing. A body in the round — an ovoid, a real model standing in for the shape
+to test "was it a helicopter" — is a different statement, and a different object, for a recording that makes it.
 
 ## `<rr0-sighting>` — standard sighting view
 
@@ -634,12 +648,13 @@ diff shows the weather and nothing else.
 
 `behindCloud` is how a recording says "it disappeared into a cloud" — keyframed like any other
 appearance field, and held rather than blended. It is *stated*, for the same reason
-`DecorObject.occludesSourceIds` is: this format describes a 2D appearance on the witness's own field
+`DecorObject.occludesSourceIds` is: this format describes an appearance on the witness's own field
 of view, not where an object was in space, so nothing in it can deduce whether cloud came between
-them. A recording holds no distance at all (see *Apparent size* below), and the sky's own gaps are
-procedural noise — leaving the question to geometry means tuning the weather until the reported
-disappearance happens to occur. So the witness's account is the whole answer: no `behindCloud`, no
-cloud.
+them. A recording holds no distance at all (see *Apparent size* below) — the distance a shape is
+*drawn* at is a parameter of the picture, not a fact (see *Where the shape is drawn*) — and the
+sky's own gaps are procedural noise: leaving the question to geometry means tuning the weather
+until the reported disappearance happens to occur. So the witness's account is the whole answer: no
+`behindCloud`, no cloud, and a shape declared behind cloud is not drawn while the deck is up.
 
 There used to be a geometric fallback here, for a recording that stated a real distance and made no
 claim about cloud. It went when stated distances did, and it had earned it: the one case it fired on
@@ -786,8 +801,9 @@ trading one distortion for another.)
 
 three.js's camera can only do the pinhole, so `EquidistantProjectionPass` renders the scene into an offscreen
 target with a deliberately wider field and resamples it in one fullscreen pass. Everything that *aims* at the scene
-rather than drawing it — the decor raycasts behind `isScreenPointOccluded` and `decorDistancesAt` — goes through
-`directionFor`, since a point on the visible image no longer means what the pinhole camera thinks it means.
+rather than drawing it — the decor raycasts behind `decorDistancesAt`, and the direction each phenomenon is stood
+along — goes through `directionFor`, since a point on the visible image no longer means what the pinhole camera
+thinks it means.
 
 This is also why a change of instrument **moves** shapes and not just resizes them (`SightingShapes.reproject`): a
 pixel only names a direction once a projection is named. Leaving positions alone is exactly how an object drawn in
@@ -797,9 +813,9 @@ Every case file here declares `eye`, because every one of them was watched rathe
 they were all rendered as photographs, which is what made Socorro's dynamite shack read as twice the size it
 subtends.
 
-One residual worth naming: an angular extent is stored as its *on-axis* value, and applied to a shape wherever it
-sits. For an object 9° off-axis subtending 9°, that is about 2.5% out. The overlay draws axis-aligned boxes and
-cannot express more; it is a fifth of the error it replaces, and it shrinks towards the centre of the frame.
+One residual worth naming: an angular extent is stored as its *on-axis* value, and the plane that carries a
+shape is sized by that same on-axis conversion wherever it stands. For an object 9° off-axis subtending 9°, that
+is about 2.5% out; it is a fifth of the error it replaces, and it shrinks towards the centre of the frame.
 
 #### A pose long enough draws the sky
 
@@ -871,6 +887,27 @@ object's real width from one side, for the whole recording, and the narrowed wid
 every other instant. `SizeEstimate` (`src/engine/shape/SizeEstimate.ts`) accumulates that, reports a contradiction
 rather than clamping one, and the editor prints the result under the apparent size.
 
+#### Where the shape is drawn
+
+A plane facing the witness, scaled to the stated angle, looks the same from their eye at any distance — so the
+scene has to put it *somewhere*, and where is a parameter of the picture, never a fact the recording states.
+`PhenomenonDepth` (`src/engine/shape/PhenomenonDepth.ts`) is the one place that decides it, from five sources in
+the order they outrank each other: a distance the recording **states** (none does yet — the tier exists for the
+day a close encounter is written as a body in metres); a **hypothesis** the reader is trying; what the witness's
+own walk **derives** (`ShapeDistance`, see below); what the crossings **bound**, the geometric middle of the
+interval they leave, since any distance in it draws every crossing correctly; and, for the majority that
+establishes nothing, a **conventional** few metres — in front of everything that was not declared to hide it,
+which is what "not declared" has always meant here, and near rather than far so a shape drawn low in the frame
+does not go under a distant ground. A shape drawn wholly inside another stands where that one stands, a hair
+nearer: Socorro's insignia is painted on its craft, and a craft tried at five hundred metres must take its
+insignia with it.
+
+The hypothesis is the editor's **Show it at** slider — a metre to twenty kilometres, logarithmic — and it outranks
+what the data establishes on purpose: a hypothesis is tested by watching it fail. Drag the craft out to five
+hundred metres and it goes behind the patrol car it was drawn in front of; slide it back and it comes out. It is
+never saved. The line under the slider says where the shape is drawn right now and on what basis, and the cross
+withdraws the hypothesis.
+
 Most sightings constrain nothing at all — a light in an empty night sky crosses nothing — and the readout then says
 so. "Unknown" is the honest answer for a majority of cases, and saying it out loud is the entire point of not
 storing a number instead.
@@ -886,8 +923,10 @@ case's `sighting.json` from its `RR0Event`).
 - `src/engine/` — framework-agnostic core: `model/` (`Shape`, `Timeline`, `Sighting`), `record/` (`Recorder`,
   `SamplingClock`), `playback/` (`Player`), `persistence/` (JSON (de)serialization), `astronomy/` (vanilla solar
   position), `interop/` (real `@rr0/data` conversion, Node-only).
-- `src/render/CanvasRenderer.ts` — paints shapes onto a `<canvas>` 2D context.
-- `src/render3d/` — the Three.js decor renderer (`SceneRenderer`) and its pure, dependency-free color logic
+- `src/render/CanvasRenderer.ts` — paints shapes onto a `<canvas>` 2D context: the bare `<rr0-ufo>`'s own
+  picture, the editing handles on every overlay, and the texture of each plane the scene stands a shape on.
+- `src/render3d/` — the Three.js decor renderer (`SceneRenderer`), the phenomena standing in it
+  (`PhenomenonSystem.ts`, drawn in their own decor-depth-tested pass), and its pure, dependency-free color logic
   (`skyColors.ts`), kept separate so the latter is unit-testable without a WebGL context.
 - `src/component/` — the four Web Components. `UfoElement` (`<rr0-ufo>`) owns the canvas/playback; `SceneElement`
   (`<rr0-scene>`) composes it directly (via `document.createElement`, not an inline template tag — see the
