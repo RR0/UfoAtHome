@@ -3623,13 +3623,6 @@ export class SightingEditorElement extends HTMLElement {
     this.renderParamSummary()
   }
 
-  /**
-   * Marks the fields that would answer a question nothing in the recording does.
-   *
-   * Not `invalid`: a gap is not a mistake, and a red border would say the author typed something
-   * wrong where in fact the witness said nothing. It marks the panel's own tab too, so the need is
-   * visible without opening all eight to look for it.
-   */
   /** What a tab is CALLED, without the count it may also be carrying. */
   private static tabLabel(tab: HTMLElement): string {
     return (tab.querySelector<HTMLElement>("span:not(.tab-badge)") ?? tab).textContent!.trim()
@@ -3651,40 +3644,73 @@ export class SightingEditorElement extends HTMLElement {
    * REQUIRED field changes without the assessment having re-run — see updateDurationValidity. */
   private unansweredQuestions = new Set<string>()
 
+  /**
+   * Marks the fields that would answer a question nothing in the recording does, and counts the
+   * marks on each panel's own tab.
+   *
+   * Not `invalid`: a gap is not a mistake, and a red border would say the author typed something
+   * wrong where in fact the witness said nothing.
+   *
+   * The count is the number of MARKS, not of unanswered questions, and the order below follows from
+   * that: mark first, count after. Counting questions instead put badges on panels where a reader
+   * would find nothing marked at all — a question answered by drawing, or one whose field already
+   * holds an accepted default, has nothing to point at. The complete tally lives on the coverage
+   * figure in the strip, which is where a number without a place on screen belongs.
+   */
   private markUnansweredQuestions(unanswered: Set<string> = this.unansweredQuestions): void {
     this.unansweredQuestions = unanswered
-    const wantedPanels = new Set<string>()
-    const wantedFields = new Set<string>()
+    // Which fields to dash, decided before anything is counted — because the count IS the number of
+    // marks, and computing it from the questions instead produced badges pointing at panels where
+    // nothing was marked at all.
+    const dashed = new Set<string>()
     for (const id of unanswered) {
       const question = SightingEditorElement.QUESTION_FIELDS[id]
       if (!question) continue
-      wantedPanels.add(question.panel)
-      // One gap, one mark. A question is often answerable through more than one field — a length
-      // may be stated as a duration or as an end time — and when one of them already carries the
-      // solid mark, dashing its alternatives says the same absence a second time in a weaker hand.
+      // One gap, one mark. A question answerable through more than one field — a length stated as a
+      // duration or as an end time — says its absence once, in the strongest hand it has.
       if (question.fields.some(field => this.shadow.getElementById(field)?.classList.contains("missing-required"))) {
         continue
       }
-      for (const field of question.fields) wantedFields.add(field)
+      for (const id of question.fields) {
+        const field = this.shadow.getElementById(id) as HTMLInputElement | HTMLSelectElement | null
+        // Hidden: a moment is typed either as a native picker or as EDTF text and only one of the
+        // pair is on screen. Filled: "0" cloud cover and "none" for sound are accepted answers, and
+        // outlining a filled field tells a reader to fill in what is filled.
+        if (field && !field.hidden && field.value === "") dashed.add(id)
+      }
     }
-    // The panel holding the one blank the reconstruction cannot be computed around, so that its own
-    // count reads at full strength rather than being averaged in with the rest.
-    const requiredPanel = this.durationInput.classList.contains("missing-required")
-      ? SightingEditorElement.QUESTION_FIELDS["how-long"].panel
-      : undefined
-    // Counted per PANEL, and in questions rather than in fields: "where" is one thing a recording
-    // either says or does not, and counting its latitude and its longitude separately would report
-    // two gaps where a reader has one to fill. Panels answering by drawing (an apparent size, a
-    // place in the sky) count too — they have no field to point at and the gap is just as real.
-    const missingPerPanel = new Map<string, number>()
-    for (const id of unanswered) {
-      const question = SightingEditorElement.QUESTION_FIELDS[id]
-      if (!question) continue
-      missingPerPanel.set(question.panel, (missingPerPanel.get(question.panel) ?? 0) + 1)
+    for (const [id, question] of Object.entries(SightingEditorElement.QUESTION_FIELDS)) {
+      void question
+      for (const fieldId of SightingEditorElement.QUESTION_FIELDS[id].fields) {
+        const field = this.shadow.getElementById(fieldId)
+        if (!field) continue
+        const wanted = dashed.has(fieldId) && !field.classList.contains("missing-required")
+        field.classList.toggle("wanted", wanted)
+        if (wanted || field.title === this.messages.questionUnanswered) {
+          field.title = wanted ? this.messages.questionUnanswered : ""
+        }
+      }
+    }
+    // The count is exactly what a reader will find marked once the panel is open — nothing more,
+    // which is what makes it worth trusting. A question answered by DRAWING (an apparent size, a
+    // place in the sky) or already carrying an accepted default has no mark, so it is not counted
+    // here; the coverage figure on the strip is where the complete tally lives.
+    const markedPerPanel = new Map<string, number>()
+    let requiredPanel: string | undefined
+    for (const [id, question] of Object.entries(SightingEditorElement.QUESTION_FIELDS)) {
+      void id
+      for (const fieldId of question.fields) {
+        const field = this.shadow.getElementById(fieldId)
+        if (!field) continue
+        const required = field.classList.contains("missing-required")
+        if (!required && !field.classList.contains("wanted")) continue
+        if (required) requiredPanel = question.panel
+        markedPerPanel.set(question.panel, (markedPerPanel.get(question.panel) ?? 0) + 1)
+      }
     }
     for (const [index, tab] of this.groupTabs.entries()) {
       const panel = SightingEditorElement.PANEL_ORDER[index]
-      const count = missingPerPanel.get(panel) ?? 0
+      const count = markedPerPanel.get(panel) ?? 0
       const required = panel === requiredPanel
       const badge = SightingEditorElement.badgeOn(tab)
       badge.hidden = count === 0
@@ -3693,30 +3719,6 @@ export class SightingEditorElement extends HTMLElement {
       tab.title = count === 0
         ? ""
         : required ? this.messages.durationRequired : this.messages.questionsUnanswered.replace("{count}", String(count))
-    }
-    for (const id of new Set([
-      ...Object.values(SightingEditorElement.QUESTION_FIELDS).flatMap(question => question.fields)
-    ])) {
-      const field = this.shadow.getElementById(id) as HTMLInputElement | HTMLSelectElement | null
-      if (!field) continue
-      // Three things disqualify a field from being marked, and each one was a real defect:
-      //
-      // - It is HIDDEN. A moment is typed either as a native picker or as EDTF text, and only one
-      //   of the pair is on screen (see the template) — the mark went on the hidden one, so a panel
-      //   counted two gaps while showing one.
-      // - It already HOLDS a value. "0" cloud cover and "none" for sound are answers, not blanks;
-      //   the account said nothing about either, which is what the panel's count is for, but
-      //   outlining a filled field tells a reader to fill in what is already filled.
-      // - It carries the solid mark, from updateDurationValidity. Wearing both would be saying one
-      //   thing twice in two hands.
-      const wanted = wantedFields.has(id)
-        && !field.hidden
-        && field.value === ""
-        && !field.classList.contains("missing-required")
-      field.classList.toggle("wanted", wanted)
-      if (wanted || field.title === this.messages.questionUnanswered) {
-        field.title = wanted ? this.messages.questionUnanswered : ""
-      }
     }
   }
 

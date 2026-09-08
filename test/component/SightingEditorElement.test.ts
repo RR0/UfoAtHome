@@ -5846,16 +5846,34 @@ describe("SightingEditorElement assessment", () => {
       .toBe(sightingEditorMessages_en.questionUnanswered)
   })
 
-  it("counts on the tab what its panel has no answer for, visible without opening it", async () => {
-    // A number rather than a mark: "three" and "one" send somebody to different panels first.
+  it("counts exactly what a reader will find marked in that panel", async () => {
+    // A number rather than a mark: "three" and "one" send somebody to different panels first. And
+    // the number is the number of MARKS, so a badge is never a panel where nothing is highlighted.
     const element = mount()
 
     await waitFor(() => element.shadowRoot!.querySelectorAll(".tab-badge:not([hidden])").length > 0, 2000)
 
-    const location = [...element.shadowRoot!.querySelectorAll<HTMLElement>(".group-tab")]
-      .find(t => t.querySelector("span")!.textContent === "Location")!
-    // Where the witness was, and which way they faced.
-    expect(location.querySelector(".tab-badge")!.textContent).toBe("2")
+    const shadow = element.shadowRoot!
+    for (const tab of shadow.querySelectorAll<HTMLElement>(".group-tab")) {
+      const badge = tab.querySelector<HTMLElement>(".tab-badge")!
+      const panel = shadow.getElementById(tab.getAttribute("aria-controls")!)!
+      const marked = panel.querySelectorAll(".wanted, .missing-required").length
+      expect(badge.hidden ? 0 : Number(badge.textContent)).toBe(marked)
+    }
+  })
+
+  it("puts no badge on a panel whose gaps are answered by drawing or already defaulted", async () => {
+    // Phenomenon's apparent size and place in the sky are drawn; Weather's cloud cover and Sound's
+    // kind already hold accepted values. Real gaps, counted in the coverage figure, with nothing in
+    // the panel to point at — so no badge promising something to find.
+    const element = mount()
+    await waitFor(() => element.shadowRoot!.querySelectorAll(".tab-badge:not([hidden])").length > 0, 2000)
+
+    const badgeOf = (name: string) => [...element.shadowRoot!.querySelectorAll<HTMLElement>(".group-tab")]
+      .find(t => t.querySelector("span")!.textContent === name)!.querySelector<HTMLElement>(".tab-badge")!
+    for (const name of ["Phenomenon", "Weather", "Sound"]) {
+      expect(badgeOf(name).hidden).toBe(true)
+    }
   })
 
   it("unmarks a field once the recording answers its question", async () => {
