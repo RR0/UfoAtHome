@@ -856,17 +856,43 @@ select.weather-field:disabled {
    Only the DURATION is solid. Nothing else in this format has to be there: a recording with no date
    still says what was seen, and a reader who fills it in later gains coverage rather than repairs a
    fault. But playback has no pacing without a length, so an empty duration is the one blank that
-   stops the reconstruction being one. */
+   stops the reconstruction being one.
+
+   An OUTLINE and not a text-decoration, which is what the first attempt used and why nothing showed:
+   an underline underlines TEXT, and a field that is missing a value is by definition empty, so there
+   was nothing for it to draw under. An outline sits outside the border box and shifts no layout. */
 .wanted {
-  text-decoration: underline dashed;
-  text-underline-offset: 0.25em;
-  text-decoration-color: var(--rr0-alert);
+  outline: 1px dashed var(--rr0-alert);
+  outline-offset: 1px;
 }
 .missing-required {
-  text-decoration: underline solid;
-  text-decoration-thickness: 2px;
-  text-underline-offset: 0.25em;
-  text-decoration-color: var(--rr0-alert);
+  outline: 2px solid var(--rr0-alert);
+  outline-offset: 1px;
+}
+/* How many of a panel's questions it still has no answer for, on its own tab — the only thing a
+   reader sees while that panel is closed. A number rather than a mark, because "three" and "one"
+   send somebody to different panels first and a mark says neither.
+
+   Full strength when one of them is the required blank, faded when they are only what stands
+   between this recording and complete coverage. Opacity rather than a second colour: the two are
+   the same kind of statement at two strengths, and a reader should not have to learn a palette. */
+.tab-badge {
+  display: inline-block;
+  margin-left: 0.45em;
+  padding: 0 0.4em;
+  border-radius: 999px;
+  background: var(--rr0-alert);
+  color: #fff;
+  font-size: 0.8em;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  vertical-align: 0.05em;
+}
+.tab-badge.optional {
+  opacity: 0.45;
+}
+.tab-badge[hidden] {
+  display: none;
 }
 /* An assessment about the recording as a whole has nowhere to send a click, so it does not offer
    the pointer every other chip does. One that names a group it is about keeps it, and leads there

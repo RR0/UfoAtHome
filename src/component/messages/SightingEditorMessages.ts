@@ -543,6 +543,9 @@ export interface SightingEditorMessages extends SightingLabels {
   /** Marks the one blank the reconstruction cannot be computed around, and the tab holding it.
    * Stronger than questionUnanswered because the consequence is: playback has no pacing. */
   durationRequired: string
+  /** A panel's tab badge tooltip: how many of its questions this recording still answers none
+   * of. {count} of them. */
+  questionsUnanswered: string
   /** Hynek's own six classes, named for a reader — a chip saying "ce3" says nothing. Keyed
    * "hynek.<class>" so the strip can find the one an assessor concluded without a switch. */
   "hynek.nl": string

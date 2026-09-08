@@ -3517,7 +3517,9 @@ export class SightingEditorElement extends HTMLElement {
         // Assessment. An assessment is not a group of fields, so its name is its own message.
         name.textContent = chip.group === "assessment"
           ? this.messages.assessmentGroup
-          : this.groupTabs[SightingEditorElement.SUMMARY_GROUPS.indexOf(chip.group)].textContent!.trim()
+          // The tab's LABEL, not the whole button: a tab also carries its count of unanswered
+          // questions (see badgeOn), and reading the button whole named a nest "Witness3".
+          : SightingEditorElement.tabLabel(this.groupTabs[SightingEditorElement.SUMMARY_GROUPS.indexOf(chip.group)])
         box.append(name)
         openNest = { group: chip.group, element: box }
         strip.push(box)
@@ -3547,12 +3549,12 @@ export class SightingEditorElement extends HTMLElement {
    * visible without opening all eight panels to hunt for it.
    */
   private static readonly QUESTION_FIELDS: Record<string, { panel: string, fields: string[] }> = {
-    when: { panel: "temporal", fields: ["obs-time"] },
+    when: { panel: "temporal", fields: ["obs-time", "obs-time-native"] },
     where: { panel: "location", fields: ["lat", "lng"] },
     facing: { panel: "location", fields: ["heading"] },
     "apparent-size": { panel: "shape", fields: [] },
     "sky-position": { panel: "shape", fields: [] },
-    "how-long": { panel: "temporal", fields: ["durationSeconds", "obs-end-time"] },
+    "how-long": { panel: "temporal", fields: ["durationSeconds", "obs-end-time", "obs-end-time-native"] },
     appearance: { panel: "shape", fields: ["shapeTitle", "color"] },
     movement: { panel: "shape", fields: [] },
     sound: { panel: "sound", fields: ["soundKind"] },
@@ -3628,6 +3630,23 @@ export class SightingEditorElement extends HTMLElement {
    * wrong where in fact the witness said nothing. It marks the panel's own tab too, so the need is
    * visible without opening all eight to look for it.
    */
+  /** What a tab is CALLED, without the count it may also be carrying. */
+  private static tabLabel(tab: HTMLElement): string {
+    return (tab.querySelector<HTMLElement>("span:not(.tab-badge)") ?? tab).textContent!.trim()
+  }
+
+  /** The count of what a panel still has no answer for, on its own tab — created on first use, so
+   * the template stays one line per tab and nothing has to be kept in step with it. */
+  private static badgeOn(tab: HTMLElement): HTMLElement {
+    const existing = tab.querySelector<HTMLElement>(".tab-badge")
+    if (existing) return existing
+    const badge = document.createElement("span")
+    badge.className = "tab-badge"
+    badge.hidden = true
+    tab.append(badge)
+    return badge
+  }
+
   /** The last assessment's unanswered questions, kept so the marks can be laid again when the one
    * REQUIRED field changes without the assessment having re-run — see updateDurationValidity. */
   private unansweredQuestions = new Set<string>()
@@ -3640,29 +3659,60 @@ export class SightingEditorElement extends HTMLElement {
       const question = SightingEditorElement.QUESTION_FIELDS[id]
       if (!question) continue
       wantedPanels.add(question.panel)
+      // One gap, one mark. A question is often answerable through more than one field — a length
+      // may be stated as a duration or as an end time — and when one of them already carries the
+      // solid mark, dashing its alternatives says the same absence a second time in a weaker hand.
+      if (question.fields.some(field => this.shadow.getElementById(field)?.classList.contains("missing-required"))) {
+        continue
+      }
       for (const field of question.fields) wantedFields.add(field)
     }
-    // The panel holding the one blank the reconstruction cannot be computed around, so that its tab
-    // says the worst of what is inside rather than averaging it away.
+    // The panel holding the one blank the reconstruction cannot be computed around, so that its own
+    // count reads at full strength rather than being averaged in with the rest.
     const requiredPanel = this.durationInput.classList.contains("missing-required")
       ? SightingEditorElement.QUESTION_FIELDS["how-long"].panel
       : undefined
+    // Counted per PANEL, and in questions rather than in fields: "where" is one thing a recording
+    // either says or does not, and counting its latitude and its longitude separately would report
+    // two gaps where a reader has one to fill. Panels answering by drawing (an apparent size, a
+    // place in the sky) count too — they have no field to point at and the gap is just as real.
+    const missingPerPanel = new Map<string, number>()
+    for (const id of unanswered) {
+      const question = SightingEditorElement.QUESTION_FIELDS[id]
+      if (!question) continue
+      missingPerPanel.set(question.panel, (missingPerPanel.get(question.panel) ?? 0) + 1)
+    }
     for (const [index, tab] of this.groupTabs.entries()) {
       const panel = SightingEditorElement.PANEL_ORDER[index]
+      const count = missingPerPanel.get(panel) ?? 0
       const required = panel === requiredPanel
-      const wanted = !required && wantedPanels.has(panel)
-      tab.classList.toggle("missing-required", required)
-      tab.classList.toggle("wanted", wanted)
-      tab.title = required ? this.messages.durationRequired : wanted ? this.messages.questionUnanswered : ""
+      const badge = SightingEditorElement.badgeOn(tab)
+      badge.hidden = count === 0
+      badge.textContent = String(count)
+      badge.classList.toggle("optional", !required)
+      tab.title = count === 0
+        ? ""
+        : required ? this.messages.durationRequired : this.messages.questionsUnanswered.replace("{count}", String(count))
     }
     for (const id of new Set([
       ...Object.values(SightingEditorElement.QUESTION_FIELDS).flatMap(question => question.fields)
     ])) {
-      const field = this.shadow.getElementById(id)
+      const field = this.shadow.getElementById(id) as HTMLInputElement | HTMLSelectElement | null
       if (!field) continue
-      // The duration carries the solid mark instead, from updateDurationValidity, and wearing both
-      // would be saying the same thing twice in two hands.
-      const wanted = wantedFields.has(id) && !field.classList.contains("missing-required")
+      // Three things disqualify a field from being marked, and each one was a real defect:
+      //
+      // - It is HIDDEN. A moment is typed either as a native picker or as EDTF text, and only one
+      //   of the pair is on screen (see the template) — the mark went on the hidden one, so a panel
+      //   counted two gaps while showing one.
+      // - It already HOLDS a value. "0" cloud cover and "none" for sound are answers, not blanks;
+      //   the account said nothing about either, which is what the panel's count is for, but
+      //   outlining a filled field tells a reader to fill in what is already filled.
+      // - It carries the solid mark, from updateDurationValidity. Wearing both would be saying one
+      //   thing twice in two hands.
+      const wanted = wantedFields.has(id)
+        && !field.hidden
+        && field.value === ""
+        && !field.classList.contains("missing-required")
       field.classList.toggle("wanted", wanted)
       if (wanted || field.title === this.messages.questionUnanswered) {
         field.title = wanted ? this.messages.questionUnanswered : ""

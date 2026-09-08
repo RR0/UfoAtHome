@@ -5834,18 +5834,28 @@ describe("SightingEditorElement assessment", () => {
 
     const wanted = [...element.shadowRoot!.querySelectorAll(".wanted")].map(e => e.id).filter(id => id !== "")
     expect(wanted).toContain("lat")
-    expect(wanted).toContain("obs-time")
+    // The VISIBLE one of the moment's two inputs. A moment is typed either as a native picker or as
+    // EDTF text and only one of the pair is on screen; marking the hidden one showed nothing.
+    expect(wanted).toContain("obs-time-native")
+    expect(wanted).not.toContain("obs-time")
+    // And nothing that already holds a value: "0" cloud cover and "none" for sound are answers, so
+    // outlining them would tell a reader to fill in what is filled.
+    expect(wanted).not.toContain("cloudCover")
+    expect(wanted).not.toContain("soundKind")
     expect(element.shadowRoot!.getElementById("lat")!.title)
       .toBe(sightingEditorMessages_en.questionUnanswered)
   })
 
-  it("marks the tab too, so a need is visible without opening all eight panels", async () => {
+  it("counts on the tab what its panel has no answer for, visible without opening it", async () => {
+    // A number rather than a mark: "three" and "one" send somebody to different panels first.
     const element = mount()
 
-    await waitFor(() => element.shadowRoot!.querySelectorAll(".group-tab.wanted").length > 0, 2000)
+    await waitFor(() => element.shadowRoot!.querySelectorAll(".tab-badge:not([hidden])").length > 0, 2000)
 
-    const tabs = [...element.shadowRoot!.querySelectorAll(".group-tab.wanted")].map(t => t.textContent!.trim())
-    expect(tabs).toContain("Location")
+    const location = [...element.shadowRoot!.querySelectorAll<HTMLElement>(".group-tab")]
+      .find(t => t.querySelector("span")!.textContent === "Location")!
+    // Where the witness was, and which way they faced.
+    expect(location.querySelector(".tab-badge")!.textContent).toBe("2")
   })
 
   it("unmarks a field once the recording answers its question", async () => {
@@ -5870,7 +5880,10 @@ describe("SightingEditorElement missing-value marks", () => {
   const field = (element: SightingEditorElement, id: string): HTMLElement =>
     element.shadowRoot!.getElementById(id)!
   const tab = (element: SightingEditorElement, name: string): HTMLElement =>
-    [...element.shadowRoot!.querySelectorAll<HTMLElement>(".group-tab")].find(t => t.textContent!.trim() === name)!
+    [...element.shadowRoot!.querySelectorAll<HTMLElement>(".group-tab")]
+      .find(t => t.querySelector("span")!.textContent === name)!
+  const badge = (element: SightingEditorElement, name: string): HTMLElement =>
+    tab(element, name).querySelector(".tab-badge")!
 
   it("marks the one required blank differently from a question nobody answered", async () => {
     // Two marks, one vocabulary. Solid: the reconstruction cannot be computed without it. Dashed:
@@ -5885,26 +5898,59 @@ describe("SightingEditorElement missing-value marks", () => {
     expect(field(element, "lat").classList.contains("missing-required")).toBe(false)
   })
 
-  it("gives the tab the worst of what its panel holds", async () => {
-    // A closed panel's tab is the only mark a reader sees, so averaging the two away would hide the
-    // one blank that stops the reconstruction being one.
+  it("shows a panel holding the required blank at full strength, and the rest faded", async () => {
+    // Opacity rather than a second colour: the two are the same statement at two strengths, and a
+    // reader should not have to learn a palette.
     const element = mount()
-    await waitFor(() => element.shadowRoot!.querySelectorAll(".group-tab.wanted").length > 0, 2000)
+    await waitFor(() => element.shadowRoot!.querySelectorAll(".tab-badge:not([hidden])").length > 0, 2000)
 
-    expect(tab(element, "Moment").classList.contains("missing-required")).toBe(true)
-    expect(tab(element, "Moment").classList.contains("wanted")).toBe(false)
-    expect(tab(element, "Location").classList.contains("wanted")).toBe(true)
+    expect(badge(element, "Moment").classList.contains("optional")).toBe(false)
+    expect(badge(element, "Location").classList.contains("optional")).toBe(true)
   })
 
-  it("lets the tab follow the duration without waiting for another assessment", async () => {
+  it("lets the count follow the duration without waiting for another assessment", async () => {
     const element = mount()
-    await waitFor(() => tab(element, "Moment").classList.contains("missing-required"), 2000)
+    // For the ASSESSMENT to have landed, not merely for the duration to be empty: the strength of
+    // the badge is read off the duration and is right from the first frame, while its number needs
+    // the assessment, and waiting on the wrong one of the two reads a count of zero.
+    await waitFor(() => badge(element, "Moment").textContent === "2", 2000)
 
     const duration = field(element, "durationSeconds") as HTMLInputElement
     duration.value = "270"
     duration.dispatchEvent(new Event("input"))
 
     expect(duration.classList.contains("missing-required")).toBe(false)
-    expect(tab(element, "Moment").classList.contains("missing-required")).toBe(false)
+    // Faded at once, because that reads off the duration. The number still says 2 until the next
+    // assessment comes back and drops "how long" from it, which is the honest thing for it to say:
+    // nothing has re-counted yet.
+    expect(badge(element, "Moment").classList.contains("optional")).toBe(true)
+    await waitFor(() => badge(element, "Moment").textContent === "1", 2000)
+  })
+})
+
+describe("SightingEditorElement missing-value marks, in detail", () => {
+  const field = (element: SightingEditorElement, id: string): HTMLInputElement =>
+    element.shadowRoot!.getElementById(id) as HTMLInputElement
+
+  it("marks one gap once, even when two fields could answer it", async () => {
+    // A length may be stated as a duration or as an end time. The duration carries the solid mark,
+    // so dashing the end time would say the same absence a second time in a weaker hand.
+    const element = mount()
+    // Waited on the ASSESSMENT and not on the solid mark: the latter is true from the first frame,
+    // read straight off the empty field, while the dashes need the questions to have been counted.
+    await waitFor(() => field(element, "obs-time-native").classList.contains("wanted"), 2000)
+
+    expect(field(element, "durationSeconds").classList.contains("missing-required")).toBe(true)
+    expect(field(element, "obs-end-time-native").classList.contains("wanted")).toBe(false)
+  })
+
+  it("leaves a field alone once it holds an accepted value", async () => {
+    const element = mount()
+    await waitFor(() => element.shadowRoot!.querySelectorAll(".wanted").length > 0, 2000)
+
+    expect(field(element, "cloudCover").value).toBe("0")
+    expect(field(element, "cloudCover").classList.contains("wanted")).toBe(false)
+    expect(field(element, "soundKind").value).toBe("none")
+    expect(field(element, "soundKind").classList.contains("wanted")).toBe(false)
   })
 })
