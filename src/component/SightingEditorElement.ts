@@ -269,6 +269,13 @@ export class SightingEditorElement extends HTMLElement {
   private readonly apparentSizeOutput: HTMLElement
   /** Where the only meters a recording can honestly produce are shown — see refreshRealSize. */
   private readonly realSizeOutput: HTMLElement
+  /** How far along its line of sight the selected shape is drawn — see applyDistanceHypothesis. */
+  private readonly distanceHypothesisInput: HTMLInputElement
+  private readonly distanceHypothesisValue: HTMLElement
+  private readonly clearDistanceHypothesisButton: HTMLButtonElement
+  private readonly labelDistanceHypothesis: HTMLElement
+  /** Where the shape is drawn right now and on what basis — see refreshDepth. */
+  private readonly depthBasisOutput: HTMLElement
   private readonly addShapeButton: HTMLButtonElement
   private readonly deleteShapeButton: HTMLButtonElement
   private readonly contextMenu: HTMLElement
@@ -810,6 +817,11 @@ export class SightingEditorElement extends HTMLElement {
     this.objectDistanceInput = this.shadow.getElementById("objectDistance") as HTMLInputElement
     this.apparentSizeOutput = this.shadow.getElementById("apparent-size")!
     this.realSizeOutput = this.shadow.getElementById("real-size")!
+    this.distanceHypothesisInput = this.shadow.getElementById("distanceHypothesis") as HTMLInputElement
+    this.distanceHypothesisValue = this.shadow.getElementById("distance-hypothesis-value")!
+    this.clearDistanceHypothesisButton = this.shadow.getElementById("clear-distance-hypothesis") as HTMLButtonElement
+    this.labelDistanceHypothesis = this.shadow.getElementById("label-distance-hypothesis")!
+    this.depthBasisOutput = this.shadow.getElementById("depth-basis")!
     this.addShapeButton = this.shadow.getElementById("add-shape") as HTMLButtonElement
     this.deleteShapeButton = this.shadow.getElementById("delete-shape") as HTMLButtonElement
     this.contextMenu = this.shadow.getElementById("context-menu")!
@@ -1184,6 +1196,8 @@ export class SightingEditorElement extends HTMLElement {
     for (const input of [this.objectSizeInput, this.objectDistanceInput]) {
       input.addEventListener("input", () => this.applySizeHypothesis())
     }
+    this.distanceHypothesisInput.addEventListener("input", () => this.applyDistanceHypothesis())
+    this.clearDistanceHypothesisButton.addEventListener("click", () => this.clearDistanceHypothesis())
     this.addDecorWitnessButton.addEventListener("click", () => this.addDecor("witness"))
     this.addDecorBuildingButton.addEventListener("click", () => this.addDecor())
     this.deleteDecorButton.addEventListener("click", () => this.deleteDecor())
@@ -3831,6 +3845,8 @@ export class SightingEditorElement extends HTMLElement {
       this.brightnessInput,
       this.objectSizeInput,
       this.objectDistanceInput,
+      this.distanceHypothesisInput,
+      this.clearDistanceHypothesisButton,
       this.sourceSelect,
       ...Object.values(this.presetButtons)
     ]) {
@@ -4244,6 +4260,7 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   private refreshRealSize(): void {
+    this.refreshDepth()
     if (this.selectedSourceIds.size !== 1) {
       this.realSizeOutput.textContent = ""
       return
@@ -4284,6 +4301,66 @@ export class SightingEditorElement extends HTMLElement {
    * read as machine output. */
   private decimal(value: number, digits: number): string {
     return value.toLocaleString(undefined, { minimumFractionDigits: digits, maximumFractionDigits: digits })
+  }
+
+  /** The slider is logarithmic between these two, since a distance worth trying spans four
+   * decades: a thing at arm's length and an airliner on approach are the same control. */
+  private static readonly HYPOTHESIS_NEAREST_M = 1
+  private static readonly HYPOTHESIS_FURTHEST_M = 20_000
+
+  /**
+   * Draws the selected shape at the distance the slider names — a hypothesis, never a statement:
+   * the recording keeps its angles, and what changes on screen is what the decor hides of the
+   * shape (see PhenomenonDepth, and SceneElement.setDistanceHypothesis for why a hypothesis
+   * outranks what the data establishes).
+   */
+  private applyDistanceHypothesis(): void {
+    if (this.selectedSourceIds.size !== 1) return
+    this.sceneElement.setDistanceHypothesis(this.currentSourceId, this.sliderToMeters(Number(this.distanceHypothesisInput.value)))
+    this.refreshDepth()
+  }
+
+  private clearDistanceHypothesis(): void {
+    if (this.selectedSourceIds.size !== 1) return
+    this.sceneElement.setDistanceHypothesis(this.currentSourceId, undefined)
+    this.refreshDepth()
+  }
+
+  private sliderToMeters(fraction: number): number {
+    const lo = Math.log10(SightingEditorElement.HYPOTHESIS_NEAREST_M)
+    const hi = Math.log10(SightingEditorElement.HYPOTHESIS_FURTHEST_M)
+    return 10 ** (lo + Math.min(1, Math.max(0, fraction)) * (hi - lo))
+  }
+
+  private metersToSlider(distanceM: number): number {
+    const lo = Math.log10(SightingEditorElement.HYPOTHESIS_NEAREST_M)
+    const hi = Math.log10(SightingEditorElement.HYPOTHESIS_FURTHEST_M)
+    return Math.min(1, Math.max(0, (Math.log10(Math.max(distanceM, 1e-3)) - lo) / (hi - lo)))
+  }
+
+  /**
+   * Says where the selected shape is drawn and why, and sets the slider to it — so a drag starts
+   * from where the thing already stands rather than from one end of the scale.
+   */
+  private refreshDepth(): void {
+    const depth = this.selectedSourceIds.size === 1 ? this.sceneElement.depthOf(this.currentSourceId) : undefined
+    if (!depth) {
+      this.depthBasisOutput.textContent = ""
+      this.distanceHypothesisValue.textContent = ""
+      return
+    }
+    const m = this.meters(depth.distanceM)
+    this.distanceHypothesisValue.textContent = `${m} m`
+    this.distanceHypothesisInput.value = String(this.metersToSlider(depth.distanceM))
+    this.clearDistanceHypothesisButton.hidden = depth.basis !== "hypothesis"
+    const message = {
+      stated: this.messages.depthStated,
+      hypothesis: this.messages.depthHypothesis,
+      derived: this.messages.depthDerived,
+      bounded: this.messages.depthBounded,
+      conventional: this.messages.depthConventional
+    }[depth.basis]
+    this.depthBasisOutput.textContent = message.replace("{m}", m)
   }
 
   private meters(value: number): string {
@@ -5861,6 +5938,9 @@ export class SightingEditorElement extends HTMLElement {
     this.labelObjectDistance.textContent = messages.objectDistance
     this.objectSizeInput.placeholder = messages.objectSizePlaceholder
     this.objectDistanceInput.placeholder = messages.objectDistancePlaceholder
+    this.labelDistanceHypothesis.textContent = messages.distanceHypothesis
+    this.clearDistanceHypothesisButton.title = messages.clearDistanceHypothesis
+    this.clearDistanceHypothesisButton.setAttribute("aria-label", messages.clearDistanceHypothesis)
     // The read-back is a formatted sentence, not a static label — re-rendered rather than
     // assigned, so switching language refreshes the numbers already shown.
     this.refreshApparentSize()

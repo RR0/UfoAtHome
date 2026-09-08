@@ -391,6 +391,16 @@ export const html = `
       <input id="objectDistance" type="number" min="0" step="1" placeholder="assumed distance" title="The distance to try that width at. Not stored either — only the resulting angular size is."/> m</label>
     <output id="apparent-size" class="apparent-size" for="objectSize objectDistance"></output>
     <output id="real-size" class="apparent-size" for="objectSize objectDistance"></output>
+    <!-- Where the shape is DRAWN along its line of sight — a parameter of the picture and never of
+         the recording (see PhenomenonDepth): from the witness's eye it looks the same at any
+         distance, and what changes is what the decor hides of it. Slid rather than typed, because a
+         hypothesis is tested by watching it fail: drag the craft out to five hundred metres and see
+         it go behind the patrol car it was drawn in front of. -->
+    <label><span id="label-distance-hypothesis">Show it at</span>
+      <input id="distanceHypothesis" type="range" min="0" max="1" step="0.002" value="0" title="How far along its line of sight the shape is drawn — what decides what the decor hides of it. Not stored: a reader's hypothesis, never the witness's statement."/>
+      <output id="distance-hypothesis-value" class="apparent-size" for="distanceHypothesis"></output>
+      <button id="clear-distance-hypothesis" type="button" class="icon-btn" title="Back to what the recording establishes" aria-label="Back to what the recording establishes">×</button></label>
+    <output id="depth-basis" class="apparent-size" for="distanceHypothesis"></output>
     <!-- The depth of field, read backwards. The scene blurs the WORLD from its distance and leaves
          the witness's object alone, because that distance is the unknown; a blur the witness
          STATED runs the geometry the other way and bounds it. See DepthOfField's own doc comment,
