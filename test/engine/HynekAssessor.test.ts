@@ -45,37 +45,36 @@ describe("HynekAssessor", () => {
     expect(await classify({ place: evening.place })).toBeUndefined()
   })
 
-  it("puts a radar-visual above the distant classes", async () => {
-    expect(await classify({ ...evening, tags: ["radar"] })).toBe("rv")
-  })
-
-  it("ranks the close encounters above everything, and above each other", async () => {
-    // A thing seen at fifty metres is not filed by whether it was daylight.
-    expect(await classify({ ...evening, tags: ["close encounter"] })).toBe("ce1")
-    expect(await classify({ ...evening, tags: ["trace"] })).toBe("ce2")
-    expect(await classify({ ...evening, tags: ["occupants"] })).toBe("ce3")
-    expect(await classify({ ...evening, tags: ["radar", "trace", "occupants"] })).toBe("ce3")
-    expect(await classify({ ...evening, tags: ["radar", "trace"] })).toBe("ce2")
-  })
-
-  it("reads the French classification codes a recording may carry instead", async () => {
-    // "RR3" and the rest are passed through untranslated by design (see TagNames), so the assessor
-    // has to know them as well as the English words.
-    expect(await classify({ ...evening, tags: ["RR3"] })).toBe("ce3")
-    expect(await classify({ ...evening, tags: ["RR2"] })).toBe("ce2")
-  })
-
-  it("says which of its grounds was the author's word and which it worked out", async () => {
-    // A classification that hides its grounds is worse than none: proximity comes from a tag, an
-    // author's judgment, while daylight is computed from the moment and the place.
+  it("reports as unsupported what no recording could say, not as merely unanswered", async () => {
+    // Not a shortcoming of the assessor: the format has nowhere to put an observed being, no record
+    // of a physical trace, no distance at all, and no radar among its instruments. An author cannot
+    // fill those in, so saying "unanswered" would send them to do the impossible.
     const assessment = await hynek.create()
-      .assess(fromSightingJson({ version: 1, timeline: { keyframes: [] }, ...evening, tags: ["trace"] } as SightingRecordingJson))
+      .assess(fromSightingJson({ version: 1, timeline: { keyframes: [] }, ...evening } as SightingRecordingJson))
     const of = (id: string) => assessment.criteria.find(criterion => criterion.id === id)!
 
-    expect(of("traces").basis).toBe("stated")
-    expect(of("traces").paths).toEqual(["tags.0"])
-    expect(of("daylight").basis).toBe("derived")
-    expect(of("entities").basis).toBeUndefined()
+    for (const id of ["entities", "traces", "proximity", "radar"]) {
+      expect(of(id).unsupported).toBe(true)
+      expect(of(id).basis).toBeUndefined()
+    }
+    expect(of("daylight").unsupported).toBeUndefined()
+  })
+
+  it("never concludes from a tag, however plainly the tag says it", async () => {
+    // A tag is a non-authoritative note that helps somebody search, never an assertion the file
+    // makes. Valensole carries "RR3", "trace" and "paralysis" and still classifies by its data
+    // alone — which for now means by daylight.
+    expect(await classify({ ...evening, tags: ["RR3", "trace", "paralysis", "radar"] })).toBe("dd")
+    expect(await classify({ ...night, tags: ["occupants", "close encounter"] })).toBe("nl")
+  })
+
+  it("says which of its grounds it worked out", async () => {
+    const assessment = await hynek.create()
+      .assess(fromSightingJson({ version: 1, timeline: { keyframes: [] }, ...evening } as SightingRecordingJson))
+    const daylight = assessment.criteria.find(criterion => criterion.id === "daylight")!
+
+    expect(daylight.basis).toBe("derived")
+    expect(daylight.paths).toEqual(["time", "place"])
   })
 
   it("reaches no score, because it classifies rather than measures", async () => {

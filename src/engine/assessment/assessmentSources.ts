@@ -38,7 +38,7 @@ export const ASSESSMENT_SOURCES: DataSource<Assessor>[] = [
     credit: "J. Allen Hynek",
     creditUrl: "https://rr0.org/science/crypto/ufo/enquete/methode/",
     create: () => ({
-      about: "observation",
+      about: "temporal",
       assess: async (sighting: Sighting): Promise<Assessment> => {
         const { HynekAssessor } = await import("./assessors/HynekAssessor.js")
         return new HynekAssessor().assess(sighting)

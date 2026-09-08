@@ -23,6 +23,19 @@ export interface AssessmentCriterion {
   /** Where in the recording the answer was found, so a reader can go and look rather than take an
    * assessor's word for it. Empty when nothing answered. */
   paths: string[]
+  /**
+   * True when NO recording could answer this, because the format has no way to say it.
+   *
+   * Quite different from an unanswered criterion, and worth telling apart because the remedies
+   * differ entirely: an unanswered one is a gap in this account, which an author can go and fill,
+   * while this is a gap in the FORMAT, which they cannot. Marking the fields that would answer it
+   * is also impossible here, there being none — so a host that marks them has to know which it is
+   * looking at, or it marks nothing and looks broken.
+   *
+   * It is worth reporting rather than hiding: a scheme that cannot be applied says something true
+   * about the format, and quietly dropping the criterion would lose it.
+   */
+  unsupported?: boolean
 }
 
 /** What an assessor made of a recording. */

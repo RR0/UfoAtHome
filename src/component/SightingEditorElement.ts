@@ -3585,7 +3585,10 @@ export class SightingEditorElement extends HTMLElement {
       }
       if (token !== this.assessmentToken) return
       for (const criterion of assessment.criteria) {
-        if (criterion.basis === undefined) unanswered.add(criterion.id)
+        // Unsupported is not unanswered: there is no field to mark, because the format has nowhere
+        // to say it (see AssessmentCriterion.unsupported). Marking one would send a reader to fill
+        // in something they cannot.
+        if (criterion.basis === undefined && !criterion.unsupported) unanswered.add(criterion.id)
       }
       // A percentage, and nothing else: a chip is one line, and half its value is the shape of it
       // (see the strip's own CSS). What the figure cannot say — WHICH questions went unanswered —
