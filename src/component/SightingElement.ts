@@ -695,18 +695,20 @@ export class SightingElement extends HTMLElement {
     }
     this.summarySignature = signature
     // Chips describing a sub-element sit INSIDE one bearing its name — the witness who gave this
-    // testimony, and the things that stood around them — so that "Heading" inside a box saying
-    // Environment needs no other way of saying which heading it is. The summary emits its groups
-    // in one run each, so a box opens when a run starts and closes when it ends.
-    const messages = this.messages
-    const boxes: Record<string, string> = { witness: messages.witnessGroup, decor: messages.decor }
+    // testimony — so that "Heading" inside that box needs no other way of saying whose heading it
+    // is. The summary emits its groups in one run each, so a box opens when a run starts and
+    // closes when it ends.
+    //
+    // The decor is not among them: its chips are a picker, and a player has nothing to pick with
+    // (see SummaryContext.decorPicker), so the summary emits none here. What stood around the
+    // witness is in the render, where it can be looked at rather than counted.
     const strip: HTMLElement[] = []
     let open: { group: string, element: HTMLElement } | undefined
     for (const entry of entries) {
       if (open && open.group !== entry.group) {
         open = undefined
       }
-      const boxName = boxes[entry.group]
+      const boxName = entry.group === "witness" ? this.messages.witnessGroup : undefined
       if (boxName !== undefined && !open) {
         const box = document.createElement("span")
         box.className = "param-nest"

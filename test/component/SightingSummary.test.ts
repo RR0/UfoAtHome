@@ -113,4 +113,35 @@ describe("SightingSummary", () => {
       expect(valueOf(sighting, "lng")).toBe("0")
     })
   })
+
+  describe("the decor listing", () => {
+    /** A field of lavender, as Valensole's own recording holds it: eighty rows and a tractor. */
+    const inAField = (): Sighting => {
+      const sighting = Sighting.create(undefined, [{ lat: 43.83, lng: 5.98 }])
+      for (let row = 0; row < 80; row++) {
+        sighting.decor.push({ id: `row${row}`, kind: "crop", title: { en: "Lavender field" }, eastM: row * 2, northM: 12 })
+      }
+      sighting.decor.push({ id: "tractor", kind: "vehicle", title: { en: "The tractor" }, eastM: -3, northM: 1 })
+      return sighting
+    }
+
+    it("says nothing to a reader who cannot pick", () => {
+      // What the user saw in production: ninety-one chips under the render, eighty of them
+      // reading the same thing. The field is in the render, where it can be looked at.
+      expect(summary.entriesFor(inAField(), 0).filter(entry => entry.group === "decor")).toEqual([])
+    })
+
+    it("lists every object for a caller that can open one", () => {
+      const listed = summary.entriesFor(inAField(), 0, { decorPicker: true }).filter(entry => entry.group === "decor")
+      expect(listed).toHaveLength(81)
+      expect(listed.at(-1)!.field).toBe("decor:tractor")
+    })
+
+    it("describes the one object a caller points at, whether or not it can pick", () => {
+      // The selection is not the picker: the editor's chips detail what it has open, and that
+      // stays true of any caller that names one.
+      const fields = summary.entriesFor(inAField(), 0, { decorId: "tractor" }).filter(entry => entry.group === "decor")
+      expect(fields.map(entry => entry.field)).toContain("decorEast")
+    })
+  })
 })

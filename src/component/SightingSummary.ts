@@ -53,6 +53,18 @@ export interface SummaryEntry {
 export interface SummaryContext {
   decorId?: string
   groundElevationM?: number
+  /**
+   * True when a chip naming a decor object is a way INTO that object — which the editor's own
+   * picker is, and a player is not.
+   *
+   * It decides whether the unselected listing exists at all, because that listing is a picker and
+   * nothing else. On a player it was a wall: Valensole stands in a lavender field, so ninety-one
+   * chips came out of it, eighty of them reading "Champ de lavande — Rang de culture" one after
+   * another. A field of lavender is one fact about that evening, and the render already states it
+   * better than any number of identical chips could. Collapsing the repeats would only have made
+   * the wall shorter; what a reader can do nothing with does not belong on the strip.
+   */
+  decorPicker?: boolean
 }
 
 /**
@@ -109,7 +121,7 @@ export class SightingSummary {
     this.addObservation(entries, sighting)
     this.addWitness(entries, sighting, timeMs)
     this.addLocation(entries, sighting, timeMs, context.groundElevationM)
-    this.addDecor(entries, sighting, timeMs, context.decorId)
+    this.addDecor(entries, sighting, timeMs, context)
     this.addTemporal(entries, sighting)
     this.addWeather(entries, sighting, timeMs)
     this.addSound(entries, sighting, timeMs)
@@ -244,19 +256,21 @@ export class SightingSummary {
   }
 
   /**
-   * The decor: one entry per object when nothing is selected, and that object's own placement and
-   * properties when something is.
+   * The decor: that object's own placement and properties when one is selected, and otherwise the
+   * list to select one from — for a caller that can select, see SummaryContext.decorPicker.
    *
    * Because the two readers ask different questions of the same array. An editor is working on one
-   * building and wants its distance east and its floor count; a reader wants to know that there
-   * WAS a building, a car and another witness — fifteen fields for each of them would be a wall,
-   * and the fifteen fields of whichever one happened to be first would be a lie by omission.
+   * building and wants its distance east and its floor count; showing the fifteen fields of
+   * whichever object happened to be first would be a lie by omission, so the unselected state
+   * lists them all instead, one chip each, as the way to pick one.
    */
-  private addDecor(entries: SummaryEntry[], sighting: Sighting, timeMs: number, decorId: string | undefined): void {
-    const selected = sighting.decor.find(decor => decor.id === decorId)
+  private addDecor(entries: SummaryEntry[], sighting: Sighting, timeMs: number, context: SummaryContext): void {
+    const selected = sighting.decor.find(decor => decor.id === context.decorId)
     if (!selected) {
-      for (const decor of sighting.decor) {
-        this.push(entries, "decor", `decor:${decor.id}`, this.decorLabel(decor), this.decorKindName(decor.kind))
+      if (context.decorPicker === true) {
+        for (const decor of sighting.decor) {
+          this.push(entries, "decor", `decor:${decor.id}`, this.decorLabel(decor), this.decorKindName(decor.kind))
+        }
       }
       return
     }

@@ -3456,6 +3456,9 @@ export class SightingEditorElement extends HTMLElement {
   private refreshParamSummary(): void {
     const entries = this.paramSummaryBuilder.entriesFor(this.ufoElement.sighting, this.ufoElement.currentTime, {
       decorId: this.currentDecorId,
+      // A chip naming a decor object opens that object here, so the list of them is worth its
+      // room; under a player it would be a wall of chips leading nowhere. See SummaryContext.
+      decorPicker: true,
       // The one thing the file can't tell the summary: a pose's elevationM is height above the
       // GROUND, and this toolbar's "Altitude" field is height above sea level. See SummaryContext.
       // Zero rather than undefined when no terrain has resolved yet, because that is exactly what
