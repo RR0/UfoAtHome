@@ -92,6 +92,23 @@ describe("PhenomenonSystem", () => {
     expect(mesh.quaternion.equals(cam.quaternion)).toBe(true)
   })
 
+  it("stands a shape that states its direction along that direction, whatever pixel it was left at", () => {
+    const scene = new Scene()
+    const system = new PhenomenonSystem(scene)
+    const cam = camera()
+    // A pixel a hundred thousand wide off the canvas — where the overlay clamps a shape once the
+    // witness turns their back on it — and a stated direction due east, ten degrees up.
+    system.set(
+      [{ sourceId: "a", shape: oval({ x: -99697 }), distanceM: 100, renderOrder: 0, hidden: false, aim: { azimuthDeg: 90, altitudeDeg: 10 } }],
+      frame()
+    )
+    system.place(cam, pinhole(cam))
+    const mesh = meshes(scene)[0]
+    expect(mesh.position.x).toBeCloseTo(100 * Math.cos((10 * Math.PI) / 180), 5)
+    expect(mesh.position.y).toBeCloseTo(1.6 + 100 * Math.sin((10 * Math.PI) / 180), 5)
+    expect(mesh.position.z).toBeCloseTo(0, 5)
+  })
+
   it("scales the plane so its texture's box subtends what the overlay drew, whatever the distance", () => {
     const scene = new Scene()
     const system = new PhenomenonSystem(scene)
@@ -136,7 +153,7 @@ describe("PhenomenonSystem", () => {
     const f = frame()
     const small: PlacedPhenomenon = { sourceId: "a", shape: oval({ width: 10, height: 10 }), distanceM: 5, renderOrder: 0, hidden: false }
     system.set([small], f)
-    const mesh = meshes(scene)[0] as { material: { map: { image: HTMLCanvasElement } } }
+    const mesh = meshes(scene)[0] as unknown as { material: { map: { image: HTMLCanvasElement } } }
     const first = mesh.material.map
     const firstSize = [first.image.width, first.image.height]
     // Same size, another colour: the same texture, repainted.

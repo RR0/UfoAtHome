@@ -47,7 +47,9 @@ import { ShapeDistance } from "../engine/shape/ShapeDistance.js"
 import { PhenomenonDepth } from "../engine/shape/PhenomenonDepth.js"
 import type { ResolvedDepth } from "../engine/shape/PhenomenonDepth.js"
 import type { Shape } from "../engine/shape/Shape.js"
+import { PhenomenonSystem } from "../render3d/PhenomenonSystem.js"
 import type { PlacedPhenomenon } from "../render3d/PhenomenonSystem.js"
+import { Vector3 } from "three"
 
 registerUfo()
 
@@ -211,6 +213,7 @@ export class SceneElement extends HTMLElement {
   private readonly distanceHypotheses = new Map<string, number>()
   /** How far each phenomenon was last drawn, and why — see depthOf. */
   private depths = new Map<string, ResolvedDepth>()
+  private readonly directionScratch = new Vector3()
   /** The sighting the meteor fall was worked out for, so it is scheduled once per recording rather
    * than every tick — the schedule is deterministic (see MeteorFall) and must not be re-drawn
    * underneath a paused scene or a long exposure. */
@@ -969,18 +972,32 @@ export class SceneElement extends HTMLElement {
     const projection = this.projectionAt(t)
     const shapes = new Map<string, Shape>()
     const depths = new Map<string, ResolvedDepth>()
+    /** Shapes with no stated direction whose pixel is outside the picture: they were not painted
+     * before and must not be stood anywhere now. */
+    const offScreen = new Set<string>()
     for (const sourceId of timeline.sourceIds) {
       const shape = timeline.getInterpolatedShapeAt(t, sourceId)
       if (!shape) continue
       const shifted: Shape = { ...shape, bounds: { ...shape.bounds, x: shape.bounds.x + shift.x, y: shape.bounds.y + shift.y } }
       shapes.set(sourceId, shifted)
-      const ndcX = ((shifted.bounds.x + shifted.bounds.width / 2) / canvas.width) * 2 - 1
-      const ndcY = -(((shifted.bounds.y + shifted.bounds.height / 2) / canvas.height) * 2 - 1)
+      // Where on the picture the shape is: from its own stated direction when it has one, which
+      // holds behind the witness's back, where the pixel the overlay kept for it is clamped a
+      // hundred thousand wide off the canvas (see SightingShapes.toPosition) and means nothing.
+      const point = shape.aim
+        ? this.sceneRenderer.screenPointOf(PhenomenonSystem.directionOf(shape.aim, this.directionScratch))
+        : {
+            ndcX: ((shifted.bounds.x + shifted.bounds.width / 2) / canvas.width) * 2 - 1,
+            ndcY: -(((shifted.bounds.y + shifted.bounds.height / 2) / canvas.height) * 2 - 1)
+          }
+      const onScreen = point !== undefined && Math.abs(point.ndcX) <= 1 && Math.abs(point.ndcY) <= 1
       // The same ray, asked the only question a testimony can answer about distance: not "how far"
       // but "behind what, and in front of what". Accumulated across every instant the playhead
       // visits — see SizeEstimate, and sizeRangeOf's own comment on why that accumulation is the
-      // honest shape for this.
-      const crossing = this.sceneRenderer.decorDistancesAt(ndcX, ndcY, sourceId)
+      // honest shape for this. Only for a shape that is IN the picture: a thing behind the witness
+      // crosses nothing they can see, and a ray cast for it would hit whatever stood nearest.
+      const crossing = onScreen ? this.sceneRenderer.decorDistancesAt(point.ndcX, point.ndcY, sourceId) : {}
+      offScreen.add(sourceId)
+      if (onScreen || shape.aim) offScreen.delete(sourceId)
       const widthDeg = shape.angular?.widthDeg ?? projection.pxToDeg(shape.bounds.width)
       const estimate = this.sizeEstimateOf(sourceId)
       estimate.add(widthDeg, crossing)
@@ -1025,9 +1042,10 @@ export class SceneElement extends HTMLElement {
         shape,
         distanceM: depths.get(sourceId)!.distanceM,
         renderOrder: order.indexOf(sourceId),
+        aim: shape.aim,
         // Behind cloud is what the witness SAID, and the only thing that hides a shape here that
         // the depth buffer does not — see SceneRenderer.lowerCloudUp.
-        hidden: shape.behindCloud === true && cloudUp
+        hidden: (shape.behindCloud === true && cloudUp) || offScreen.has(sourceId)
       })
     }
     // The instrument's own aperture and roll, which the painter needs for a dazzling light's spikes

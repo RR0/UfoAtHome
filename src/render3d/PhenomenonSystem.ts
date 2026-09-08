@@ -16,6 +16,10 @@ export interface PlacedPhenomenon {
   shape: Shape
   /** How far along its line of sight it is drawn — see PhenomenonDepth for where that comes from. */
   distanceM: number
+  /** Which way the witness was looking when it was there, when the recording says (BaseShape.aim).
+   * Outranks the pixel: a direction is what the recording states, and it holds behind the witness's
+   * back, where the pixel the overlay kept is clamped far off the canvas and means nothing. */
+  aim?: { azimuthDeg: number; altitudeDeg: number }
   /** Back-to-front, the timeline's own paint order: what a later one covers of an earlier one. */
   renderOrder: number
   /** Not drawn at all — the witness said it was behind cloud, and the cloud deck is up. */
@@ -60,9 +64,10 @@ const MAX_TEXTURE_PX = 2048
  * change is who decides what hides it: the depth buffer, per pixel, against the decor standing in
  * the same scene — a patrol car in front of it hides exactly the part of it a patrol car would.
  *
- * The plane is placed along the ray through the shape's own centre pixel, under whichever
- * projection the recording's instrument declares (see SceneRenderer.directionAtScreenPoint), so
- * the picture lands where the overlay would have put it; and it is turned to face the camera every
+ * The plane is placed along the direction the recording states for the shape (BaseShape.aim) — or,
+ * for a recording that states none, along the ray through the shape's own centre pixel under
+ * whichever projection the instrument declares (see SceneRenderer.directionAtScreenPoint), so the
+ * picture lands where the overlay would have put it; and it is turned to face the camera every
  * frame, so it stays a picture and never becomes a claim about a shape in the round. A body of
  * revolution, a real model, anything with a back, is a different statement and a different
  * object (see the close-encounter form of a recording, when there is one).
@@ -135,10 +140,14 @@ export class PhenomenonSystem {
       if (!mesh || !mesh.visible) continue
       const extent = this.extents.get(phenomenon.sourceId)
       if (!extent) continue
-      const { bounds } = phenomenon.shape
-      const ndcX = ((bounds.x + bounds.width / 2) / frame.canvasWidthPx) * 2 - 1
-      const ndcY = -(((bounds.y + bounds.height / 2) / frame.canvasHeightPx) * 2 - 1)
-      directionAtScreenPoint(ndcX, ndcY, this.direction)
+      if (phenomenon.aim) {
+        PhenomenonSystem.directionOf(phenomenon.aim, this.direction)
+      } else {
+        const { bounds } = phenomenon.shape
+        const ndcX = ((bounds.x + bounds.width / 2) / frame.canvasWidthPx) * 2 - 1
+        const ndcY = -(((bounds.y + bounds.height / 2) / frame.canvasHeightPx) * 2 - 1)
+        directionAtScreenPoint(ndcX, ndcY, this.direction)
+      }
       mesh.position.copy(camera.position).addScaledVector(this.direction, phenomenon.distanceM)
       // Facing the camera, and rolled with it: the texture is the picture in the picture's own
       // pixels, so the plane is the image plane, wherever that is looking and however it is held.
@@ -151,6 +160,14 @@ export class PhenomenonSystem {
         1
       )
     }
+  }
+
+  /** A stated direction as a world vector, on the scene's own axes: east is +x, up is +y, north is
+   * -z — the same convention the decor is placed by (see SceneRenderer.updateDecorAnchoring). */
+  static directionOf(aim: { azimuthDeg: number; altitudeDeg: number }, into: Vector3): Vector3 {
+    const azimuth = (aim.azimuthDeg * Math.PI) / 180
+    const altitude = (aim.altitudeDeg * Math.PI) / 180
+    return into.set(Math.sin(azimuth) * Math.cos(altitude), Math.sin(altitude), -Math.cos(azimuth) * Math.cos(altitude))
   }
 
   /** Whether anything at all is standing, so a frame with no phenomenon skips their pass. */

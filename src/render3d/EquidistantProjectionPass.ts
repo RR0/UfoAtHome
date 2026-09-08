@@ -139,6 +139,23 @@ export class EquidistantProjectionPass {
   }
 
   /**
+   * The point of the output image a camera-local direction lands on — directionFor read backwards,
+   * for what has to be FOUND on the picture rather than put there (see SceneRenderer.screenPointOf).
+   * Undefined for a direction behind the camera, which lands nowhere.
+   */
+  static ndcFor(direction: { x: number; y: number; z: number }, fovDeg: number, aspect: number): { ndcX: number; ndcY: number } | undefined {
+    const length = Math.hypot(direction.x, direction.y, direction.z)
+    if (length === 0 || direction.z >= 0) return undefined
+    const halfFovRad = ((fovDeg / 2) * Math.PI) / 180
+    const theta = Math.acos(Math.min(1, -direction.z / length))
+    const sin = Math.sin(theta)
+    const stretch = sin < 1e-9 ? 1 : theta / sin
+    const ax = (direction.x / length) * stretch
+    const ay = (direction.y / length) * stretch
+    return { ndcX: ax / (aspect * halfFovRad), ndcY: ay / halfFovRad }
+  }
+
+  /**
    * The widest angle from the axis the output frame reaches: its corner. Under `r = f·θ` the image
    * is linear in angle, so the corner is simply the half-field scaled by the frame's own diagonal —
    * 61 degrees for a 60 degree vertical field on 16:9, i.e. a good deal more than the 30 degrees

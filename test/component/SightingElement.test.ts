@@ -29,6 +29,9 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     setWeather(): void {}
     setDecor(): void {}
     setPhenomena(): void {}
+    screenPointOf(): undefined {
+      return undefined
+    }
     get lowerCloudUp(): boolean {
       return false
     }

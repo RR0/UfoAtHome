@@ -24,6 +24,7 @@ import {
   PointLight,
   Points,
   PointsMaterial,
+  Quaternion,
   Raycaster,
   Scene,
   ShaderMaterial,
@@ -2152,6 +2153,32 @@ export class SceneRenderer {
     this.aimAtScreenPoint(this.ufoOcclusionRaycaster, ndcX, ndcY)
     return into.copy(this.ufoOcclusionRaycaster.ray.direction)
   }
+
+  /**
+   * The point of the visible image a world direction lands on, under whichever projection the
+   * instrument declares — the inverse of directionAtScreenPoint — or undefined for a direction
+   * behind the camera. Beyond ±1 the direction is outside the frame.
+   *
+   * What a shape that states its own direction (BaseShape.aim) is tested against the decor at: the
+   * pixel the overlay kept for it is clamped far off the canvas once the witness turns their back,
+   * and a ray through a pixel a hundred thousand wide lands anywhere at all.
+   */
+  screenPointOf(direction: Vector3): { ndcX: number; ndcY: number } | undefined {
+    this.camera.updateMatrixWorld()
+    const local = this.screenPointScratch.copy(direction).applyQuaternion(this.screenPointQuaternion.copy(this.camera.quaternion).invert())
+    if (local.z >= 0) return undefined
+    const size = this.renderer.getDrawingBufferSize(this.screenPointSize)
+    const aspect = size.x / Math.max(size.y, 1)
+    if (this.projectionKind === "equidistant" && this.equidistantPass) {
+      return EquidistantProjectionPass.ndcFor(local, this.camera.fov, aspect)
+    }
+    const tanHalf = Math.tan((this.camera.fov / 2) * DEG_TO_RAD)
+    return { ndcX: local.x / -local.z / (aspect * tanHalf), ndcY: local.y / -local.z / tanHalf }
+  }
+
+  private readonly screenPointScratch = new Vector3()
+  private readonly screenPointQuaternion = new Quaternion()
+  private readonly screenPointSize = new Vector2()
 
   /** Projects the Sun's real world position (see setBodyMesh's "sun" branch) to screen space for
    * the lens flare, every render() call — not just on setAstronomy ticks, since the camera itself
