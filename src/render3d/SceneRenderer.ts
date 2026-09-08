@@ -97,6 +97,8 @@ import type { DecorModelCredit } from "../engine/model/Decor.js"
 import type { DecorModelProvider } from "./decor/DecorModelProvider.js"
 import { DECOR_MODEL_SOURCES } from "./decor/decorModelSources.js"
 import { loadGltfScene } from "./decor/loadGltfScene.js"
+import { PhenomenonSystem, PHENOMENON_LAYER } from "./PhenomenonSystem.js"
+import type { PhenomenonFrame, PlacedPhenomenon } from "./PhenomenonSystem.js"
 
 /** Plain field-by-field comparison — see setWeather's own doc comment on why reference equality
  * stopped being enough once weather started being resolved fresh every tick from a keyframe
@@ -121,8 +123,11 @@ function weatherEquals(a: Weather, b: Weather): boolean {
 }
 
 const SKY_RADIUS = 900
-/** See isScreenPointOccluded's own doc comment — filters out a spurious near-camera
- * self-intersection with terrain geometry built close to the observer. */
+/** The layer the decor's solid parts are ALSO on, so that they alone can be drawn into the depth
+ * the phenomena are tested against — see renderPhenomenaPass. */
+const DECOR_DEPTH_LAYER = 1
+/** See decorDistancesAt — filters out a spurious near-camera self-intersection with decor
+ * geometry built close to the observer, well inside the camera's own near plane. */
 const UFO_OCCLUSION_MIN_DISTANCE_M = 0.5
 const GROUND_RADIUS = 900
 /** Mean Earth radius, for the one thing this scene needs it for: how far a witness can actually
@@ -662,6 +667,8 @@ export interface SceneAstronomy {
 export class SceneRenderer {
   private readonly renderer: WebGLRenderer
   private readonly scene = new Scene()
+  /** The witness's own phenomena, standing in the scene — see PhenomenonSystem and setPhenomena. */
+  private readonly phenomena = new PhenomenonSystem(this.scene)
   private readonly camera: PerspectiveCamera
 
   /** Everything that is, physically, at infinity: the sky dome, the stars, the Sun/Moon/planets
@@ -1885,6 +1892,14 @@ export class SceneRenderer {
    * poses long enough to move the sky existed. */
   private renderOnce(target?: WebGLRenderTarget): void {
     const pass = this.usableEquidistantPass()
+    // After the pass exists and before the camera is widened for it: a pixel names a direction
+    // under the projection the pass implements, at the field the recording states.
+    this.phenomena.place(this.camera, (ndcX, ndcY, into) => this.directionAtScreenPoint(ndcX, ndcY, into))
+    const furthestPhenomenonM = this.phenomena.furthestM * 1.2
+    if (furthestPhenomenonM > this.camera.far) {
+      this.camera.far = furthestPhenomenonM
+      this.camera.updateProjectionMatrix()
+    }
     const previousTarget = this.renderer.getRenderTarget()
     if (!pass) {
       this.updateLensFlarePosition()
@@ -1895,8 +1910,11 @@ export class SceneRenderer {
       // means the scene lands in a linear buffer instead.
       this.skyGlow?.setDestinationEncoded(target === undefined && !blur)
       if (target) this.renderer.setRenderTarget(target)
-      if (blur) blur.render(this.renderer, this.scene, this.camera)
-      else this.renderer.render(this.scene, this.camera)
+      if (blur) blur.render(this.renderer, this.scene, this.camera, () => this.renderPhenomenaPass())
+      else {
+        this.renderer.render(this.scene, this.camera)
+        this.renderPhenomenaPass()
+      }
       if (target) this.renderer.setRenderTarget(previousTarget)
       return
     }
@@ -1907,8 +1925,76 @@ export class SceneRenderer {
     // there is linear light, whatever happens to that target afterwards.
     this.skyGlow?.setDestinationEncoded(false)
     if (target) this.renderer.setRenderTarget(target)
-    pass.render(this.renderer, this.scene, this.camera, this.camera.fov, () => this.updateLensFlarePosition())
+    pass.render(
+      this.renderer,
+      this.scene,
+      this.camera,
+      this.camera.fov,
+      () => this.updateLensFlarePosition(),
+      () => this.renderPhenomenaPass()
+    )
     if (target) this.renderer.setRenderTarget(previousTarget)
+  }
+
+  /**
+   * Draws the witness's own phenomena into the picture the scene was just drawn in, hidden by the
+   * DECOR and by nothing else.
+   *
+   * The ground and the terrain must not hide them, and this is why they are not simply meshes in
+   * the main pass. A shape drawn low in the frame is a distant thing near the horizon, the ordinary
+   * way to draw one — never a thing underground — and the distance it is drawn at is a parameter
+   * of the picture (see PhenomenonDepth), so a relief patch at thirty-metre resolution winning a
+   * depth test against it would be the relief deciding what the witness saw. Socorro is the case
+   * that showed it: the craft its witness placed a hundred feet away, in the arroyo below the road,
+   * sank two metres under a terrain that cannot know the arroyo is there. What a car or a shack
+   * stood in front of, on the other hand, is exactly what the depth buffer is for.
+   *
+   * So: the depth is cleared, the decor alone is drawn again into it — colour untouched, through
+   * an override material that writes nothing but depth — and the phenomena are then drawn tested
+   * against that. Three cheap draws, since the decor is a few boxes and the phenomena a few planes.
+   * Shadow maps are not redrawn for them; they were drawn for the frame already.
+   */
+  private renderPhenomenaPass(): void {
+    if (!this.phenomena.any) return
+    const autoClear = this.renderer.autoClear
+    const shadows = this.renderer.shadowMap.autoUpdate
+    this.renderer.autoClear = false
+    this.renderer.shadowMap.autoUpdate = false
+    this.renderer.clearDepth()
+    for (const object of this.decorObjects) {
+      const group = this.decorGroups.get(object.id)
+      // A crop row is a filler laid down by the score, not a thing anybody placed (see DecorKind's
+      // "crop"), and decorDistancesAt leaves it out of every crossing for the same reason: a row
+      // that hid the feet of Masse's craft would be the generator deciding what he saw.
+      if (group) SceneRenderer.markDecorDepth(group, object.kind !== "crop")
+    }
+    this.camera.layers.set(DECOR_DEPTH_LAYER)
+    this.scene.overrideMaterial = this.decorDepthMaterial
+    this.renderer.render(this.scene, this.camera)
+    this.scene.overrideMaterial = null
+    this.camera.layers.set(PHENOMENON_LAYER)
+    this.renderer.render(this.scene, this.camera)
+    this.camera.layers.set(0)
+    this.renderer.autoClear = autoClear
+    this.renderer.shadowMap.autoUpdate = shadows
+  }
+
+  /** Writes nothing but depth — see renderPhenomenaPass. */
+  private readonly decorDepthMaterial = new MeshBasicMaterial({ colorWrite: false })
+
+  /** Puts a decor object's SOLID parts on the layer the phenomena are depth-tested against — its
+   * body, its walls, its window panes, a real model's hull — and keeps its light off it: a lamp's
+   * glow is drawn without depth and added, and a glow that hid a phenomenon would be the one thing
+   * about a lamp that is not solid. Re-walked every frame rather than once, because a real model
+   * arrives asynchronously under a group that was built before it (see DecorSystem.applyModel). */
+  private static markDecorDepth(group: Object3D, occludes: boolean): void {
+    group.traverse(object => {
+      if (!(object instanceof Mesh)) return
+      const material = Array.isArray(object.material) ? object.material[0] : object.material
+      const solid = occludes && material.depthWrite !== false && material.blending !== AdditiveBlending
+      if (solid) object.layers.enable(DECOR_DEPTH_LAYER)
+      else object.layers.disable(DECOR_DEPTH_LAYER)
+    })
   }
 
   /**
@@ -2059,6 +2145,14 @@ export class SceneRenderer {
     raycaster.camera = this.camera
   }
 
+  /** The world direction a point of the visible image stands for — aimAtScreenPoint's own answer,
+   * as a vector rather than a ray, for what has to be PUT there rather than tested there (see
+   * PhenomenonSystem.place). */
+  private directionAtScreenPoint(ndcX: number, ndcY: number, into: Vector3): Vector3 {
+    this.aimAtScreenPoint(this.ufoOcclusionRaycaster, ndcX, ndcY)
+    return into.copy(this.ufoOcclusionRaycaster.ray.direction)
+  }
+
   /** Projects the Sun's real world position (see setBodyMesh's "sun" branch) to screen space for
    * the lens flare, every render() call — not just on setAstronomy ticks, since the camera itself
    * can turn independent of astronomy (see setObserverPose) and the flare must track wherever the
@@ -2181,50 +2275,32 @@ export class SceneRenderer {
     return hit !== undefined && hit.distance < distanceToSun
   }
 
-  /** True when a decor object explicitly flagged to occlude shape `sourceId` sits between the
-   * camera and whatever's drawn at this screen point — used by SceneElement to hide a UFO shape
-   * exactly where that object would occlude it. The shape itself lives entirely outside this 3D
-   * scene (a separate 2D canvas overlay, see UfoElement/CanvasRenderer), so the GPU's own z-buffer
-   * has no idea it exists and can't hide it behind anything here — same underlying problem, and
-   * same manual-raycast fix, as isSunOccluded. Unlike isSunOccluded there's no real recorded
-   * distance for the shape to compare a hit against (its position is authored in flat screen space,
-   * not 3D world space) — so this treats it as though it's always beyond every occluder (same
-   * convention as a star), meaning ANY hit along this screen ray counts as occluded.
+  /**
+   * Whether there is a water-cloud deck up at all — what a shape the witness reported "behind
+   * cloud" (BaseShape.behindCloud) is hidden behind.
    *
-   * Deliberately NOT ground/terrain, even though they're real physical surfaces with no testimony
-   * ambiguity the way a building is (see DecorObject.occludesSourceIds's own doc comment) — found
-   * by testing that the flat ground disc extends to the horizon in every direction, so a shape a
-   * witness drew low in frame (legitimately far away, near/at the horizon, the ordinary way to
-   * depict a distant object — never literally underground) can have its screen ray dip just enough
-   * below horizontal to clip the disc, wrongly reading as occluded. There's no principled distance
-   * to test that hit against either (same root cause as decor: the shape has no real 3D position at
-   * all), so ground/terrain are simply excluded from the occluder set entirely — only a decor object
-   * a witness/recorder has explicitly opted in via occludesSourceIds can ever occlude a shape here.
+   * Cloud is answered from what the witness reported and from nothing else. There used to be a
+   * geometric fallback here for a recording that stated a real distance and made no claim about
+   * cloud — it went when stated distances did (see BaseShape.angular), and it deserved to: the
+   * only case it ever fired on turned out to be Chiles-Whitted, where "it disappeared into the
+   * cloud deck" was an interrogator's reconstruction that the witness himself denied. Deducing
+   * cloud from a distance nobody perceived is how that kind of claim gets made twice. The distance
+   * a phenomenon is now DRAWN at (see setPhenomena) changes nothing here: it is a parameter of the
+   * picture, and the deck is drawn without depth, so the statement stays the witness's alone.
+   */
+  get lowerCloudUp(): boolean {
+    return this.cloudMesh !== undefined && this.lowerCloudCover() > 0
+  }
+
+  /**
+   * Stands the witness's own phenomena in the scene — see PhenomenonSystem for what a plane there
+   * asserts and does not, and PhenomenonDepth for where its distance comes from.
    *
-   * `raycaster.near` is set to UFO_OCCLUSION_MIN_DISTANCE_M rather than left at Raycaster's own
-   * default of 0 — decor placed close to the camera could otherwise self-intersect at a few
-   * centimeters' distance (well inside the camera's own 0.1 near-clip plane, so that geometry isn't
-   * even visibly rendered), reading as permanently occluded regardless of where the shape actually
-   * is. No real decor a UFO could meaningfully vanish behind sits this close to the observer, so
-   * filtering it out only removes that artifact, never a legitimate close occlusion. */
-  isScreenPointOccluded(ndcX: number, ndcY: number, sourceId: string, behindCloud?: boolean): boolean {
-    // Cloud is answered from what the witness reported and from nothing else. There used to be a
-    // geometric fallback here for a recording that stated a real distance and made no claim about
-    // cloud — it went when stated distances did (see BaseShape.angular), and it deserved to: the
-    // only case it ever fired on turned out to be Chiles-Whitted, where "it disappeared into the
-    // cloud deck" was an interrogator's reconstruction that the witness himself denied. Deducing
-    // cloud from a distance nobody perceived is how that kind of claim gets made twice.
-    if (behindCloud && this.cloudMesh && this.lowerCloudCover() > 0) return true
-    const occluders: Object3D[] = []
-    for (const object of this.decorObjects) {
-      if (!object.occludesSourceIds?.includes(sourceId)) continue
-      const group = this.decorGroups.get(object.id)
-      if (group) occluders.push(group)
-    }
-    if (occluders.length === 0) return false
-    this.aimAtScreenPoint(this.ufoOcclusionRaycaster, ndcX, ndcY)
-    this.ufoOcclusionRaycaster.near = UFO_OCCLUSION_MIN_DISTANCE_M
-    return this.ufoOcclusionRaycaster.intersectObjects(occluders, true).length > 0
+   * Placed at render time and not here: where a pixel looks depends on the instrument's projection
+   * pass, which is built by the frame that first needs it (see renderOnce).
+   */
+  setPhenomena(placed: PlacedPhenomenon[], frame: PhenomenonFrame): void {
+    this.phenomena.set(placed, frame)
   }
 
   /**
@@ -2365,6 +2441,7 @@ export class SceneRenderer {
 
   dispose(): void {
     this.stopTwinkle()
+    this.phenomena.clear()
     this.terrainBuildToken++ // discard any terrain build still in flight
     this.disposeMesh(this.skyMesh)
     this.disposeMesh(this.groundMesh)

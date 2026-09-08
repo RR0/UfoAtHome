@@ -67,6 +67,10 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     setIndoorLook(): void {}
     setWeather(): void {}
     setDecor(): void {}
+    setPhenomena(): void {}
+    get lowerCloudUp(): boolean {
+      return false
+    }
     updateDecorAnchoring(): void {}
     updateDecorLitState(): void {}
     pickBodyAt(): undefined {
@@ -77,9 +81,6 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     }
     pickStarAt(): undefined {
       return undefined
-    }
-    isScreenPointOccluded(): boolean {
-      return false
     }
     decorDistancesAt(): { behindM?: number; inFrontM?: number } {
       return {}

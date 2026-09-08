@@ -200,7 +200,7 @@ export class DepthOfFieldPass {
     this.material.uniforms.uEncodeOutput.value = encodes ? 1 : 0
   }
 
-  render(renderer: WebGLRenderer, scene: Scene, camera: PerspectiveCamera): void {
+  render(renderer: WebGLRenderer, scene: Scene, camera: PerspectiveCamera, afterScene?: () => void): void {
     const uniforms = this.material.uniforms
     uniforms.uNear.value = camera.near
     uniforms.uFar.value = camera.far
@@ -208,6 +208,11 @@ export class DepthOfFieldPass {
     renderer.setRenderTarget(this.target)
     renderer.clear()
     renderer.render(scene, camera)
+    // The phenomena go into the same target before it is blurred (see
+    // SceneRenderer.renderPhenomenaPass), so they are blurred by the distance they are DRAWN at —
+    // which is a parameter of the picture, not a fact (see PhenomenonDepth), and the one place
+    // that parameter shows as something other than what hides the shape.
+    afterScene?.()
     renderer.setRenderTarget(originalTarget)
     renderer.render(this.quadScene, this.quadCamera)
   }

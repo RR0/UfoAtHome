@@ -186,7 +186,8 @@ export class EquidistantProjectionPass {
     scene: Scene,
     camera: PerspectiveCamera,
     fovDeg: number,
-    onCameraWidened?: () => void
+    onCameraWidened?: () => void,
+    afterScene?: () => void
   ): void {
     const aspect = this.width / this.height
     this.material.uniforms.uHalfFovRad.value = ((fovDeg / 2) * Math.PI) / 180
@@ -203,6 +204,10 @@ export class EquidistantProjectionPass {
     const originalTarget = renderer.getRenderTarget()
     renderer.setRenderTarget(this.target)
     renderer.render(scene, camera)
+    // Whatever has to be drawn INTO the same picture after the scene — the witness's own phenomena,
+    // depth-tested against the decor alone (see SceneRenderer.renderPhenomenaPass) — is drawn here,
+    // into the offscreen render the resampling reads from, through the same widened camera.
+    afterScene?.()
     renderer.setRenderTarget(originalTarget)
     camera.fov = originalFov
     camera.updateProjectionMatrix()

@@ -183,12 +183,19 @@ export class UfoElement extends HTMLElement {
    * restorePlayback. */
   private playbackBeforeClick?: { state: PlaybackState; time: number }
   private highlightedSourceIds: Set<string> = new Set()
-  /** Sources a composing SceneElement has determined sit directly behind a decor object right
-   * now (see SceneRenderer.isScreenPointOccluded) — skipped entirely on the next paint, not
-   * faded, matching how a real object disappearing behind a building looks. Stays empty (no
-   * effect) for a bare `<rr0-ufo>`/`<rr0-sighting-editor>` embed with no 3D decor to occlude
-   * against. */
-  private occludedSourceIds: ReadonlySet<string> = EMPTY_SELECTION
+  /**
+   * Whether this overlay paints the shapes themselves, or only what edits them.
+   *
+   * A composing `<rr0-scene>` sets this false: it stands every phenomenon IN its three.js scene
+   * (see PhenomenonSystem), where the decor's own depth hides it per pixel and the instrument's own
+   * projection places it, and a flat copy painted here on top would put an unoccluded ghost over
+   * the very thing that was meant to be hidden. What stays on this layer is the pointer's business
+   * — selection handles, outlines, hit-testing — because an outline is an editing affordance and
+   * belongs where the pointer works, whatever is drawn under it.
+   *
+   * A bare `<rr0-ufo>` keeps painting, as it always has: it has no scene to hand the picture to.
+   */
+  paintsShapes = true
 
   /** Set to false by composing elements that need the canvas's own click for something else
    * instead of toggling playback — see SightingEditorElement, which uses pointerdown/pointermove on
@@ -676,25 +683,14 @@ export class UfoElement extends HTMLElement {
     this.refresh()
   }
 
-  /** Called by a composing SceneElement on every playback tick/seek with whichever sources are
-   * currently occluded by decor — see its own updateUfoOcclusion. Deduped the same way as
-   * selectedSourceIds above so a steady "still occluded"/"still visible" state doesn't force a
-   * repaint every single frame. */
-  setOccludedSourceIds(ids: ReadonlySet<string>): void {
-    const unchanged =
-      ids.size === this.occludedSourceIds.size && [...ids].every(id => this.occludedSourceIds.has(id))
-    if (unchanged) return
-    this.occludedSourceIds = ids
-    this.refresh()
-  }
-
-  /** True when a currently-visible (non-occluded) shape — titled or not — sits at (x, y) in this
-   * element's own fixed 640x360 canvas drawing space, at the current playhead. Exposed so a
-   * composing SceneElement's own hover tooltip (handlePointerMove) can check this first before
-   * falling through to a celestial body or decor object's name — the shape overlay sits visually
-   * on top of the 3D scene, so whenever a visible shape is there, it (not whatever's behind it) is
-   * what the pointer is actually hovering; this element's own tooltip already handles that case
-   * (title-only, see handlePointerMove's own doc comment). */
+  /** True when a shape — titled or not — sits at (x, y) in this element's own fixed 640x360 canvas
+   * drawing space, at the current playhead. Exposed so a composing SceneElement's own hover
+   * tooltip (handlePointerMove) can check this first before falling through to a celestial body
+   * or decor object's name — whenever a shape is there, it (not whatever's behind it) is what the
+   * pointer is actually hovering; this element's own tooltip already handles that case (title-only,
+   * see handlePointerMove's own doc comment). A shape the decor hides in the scene still answers
+   * here: what is hidden per pixel is not known to this layer, and a name for a thing just out of
+   * sight behind a car is not a wrong answer. */
   hasVisibleShapeAt(x: number, y: number): boolean {
     return this.shapeAt(x, y) !== undefined
   }
@@ -838,7 +834,7 @@ export class UfoElement extends HTMLElement {
   shapeAt(
     x: number,
     y: number,
-    excludeSourceIds: ReadonlySet<string> = this.occludedSourceIds
+    excludeSourceIds?: ReadonlySet<string>
   ): { sourceId: string; shape: Shape } | undefined {
     for (const instant of this.exposureTimes()) {
       const hit = this.currentSighting.timeline.hitTest(instant, x, y, excludeSourceIds)
@@ -924,12 +920,13 @@ export class UfoElement extends HTMLElement {
     this.canvasRenderer.setRoll((roll * Math.PI) / 180)
     const instants = this.exposureInstants(t)
     const shift = this.frameShift
-    for (const instant of instants) {
-      for (const [sourceId, shape] of instant.shapes) {
-        if (this.occludedSourceIds.has(sourceId)) continue
-        const share = instant.share
-        const exposed = share === 1 ? shape : { ...shape, transparency: 1 - (1 - shape.transparency) * share }
-        this.canvasRenderer.paintShape(this.shifted(exposed, shift))
+    if (this.paintsShapes) {
+      for (const instant of instants) {
+        for (const [, shape] of instant.shapes) {
+          const share = instant.share
+          const exposed = share === 1 ? shape : { ...shape, transparency: 1 - (1 - shape.transparency) * share }
+          this.canvasRenderer.paintShape(this.shifted(exposed, shift))
+        }
       }
     }
     // Drawn ONCE, over the finished picture, and always at the playhead's own instant — not once
@@ -938,8 +935,11 @@ export class UfoElement extends HTMLElement {
     // shape stayed selectable and simply stopped LOOKING selected. Where the handles sit against
     // the streak is itself the answer to "which moment am I editing".
     for (const [sourceId, shape] of instants[0].shapes) {
-      if (this.occludedSourceIds.has(sourceId) || !selectedIds.has(sourceId)) continue
-      if (selectedIds.size === 1) this.canvasRenderer.paintShape({ ...shape, selected: true })
+      if (!selectedIds.has(sourceId)) continue
+      // A shape standing in the scene gets its handles and nothing else — paintShape would paint
+      // the fill too, a flat unoccluded copy over the solid it is meant to be selecting.
+      if (!this.paintsShapes) this.canvasRenderer.paintSelectionOnly(this.shifted(shape, shift))
+      else if (selectedIds.size === 1) this.canvasRenderer.paintShape({ ...shape, selected: true })
       else this.canvasRenderer.paintMemberOutline(shape)
     }
     void shapesBySource
@@ -1338,8 +1338,8 @@ export class UfoElement extends HTMLElement {
     const box = this.witnessMapBoxPx
     if (!box) return
     const covers = (left: number, right: number, slack: number): boolean => {
-      for (const [sourceId, shape] of shapes) {
-        if (this.occludedSourceIds.has(sourceId) || shape.transparency >= 1) continue
+      for (const shape of shapes.values()) {
+        if (shape.transparency >= 1) continue
         if (shape.bounds.x + shape.bounds.width < left - slack || shape.bounds.x > right + slack) continue
         if (shape.bounds.y > box.bottom + slack || shape.bounds.y + shape.bounds.height < box.top - slack) continue
         return true
@@ -1535,7 +1535,7 @@ export class UfoElement extends HTMLElement {
 
   /** How far the reader's own turn moves the overlay, in the pixels shapes are drawn in — public
    * because a composing element testing what the decor hides has to ask about the point a shape is
-   * actually PAINTED at, not the one the timeline stores (see SceneElement.updateUfoOcclusion). */
+   * actually PAINTED at, not the one the timeline stores (see SceneElement.pushPhenomenaAt). */
   get frameShiftPx(): { x: number; y: number } {
     return this.frameShift
   }

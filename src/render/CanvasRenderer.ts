@@ -59,6 +59,57 @@ export class CanvasRenderer {
     this.ctx.clearRect(0, 0, width, height)
   }
 
+  /**
+   * The box, in the same canvas pixels as `shape.bounds`, that paintShape actually touches — the
+   * body, plus whatever its halo, its blur, its veil and its spikes reach past it.
+   *
+   * What a texture of the shape has to be sized to (see PhenomenonSystem): a glow cut off at the
+   * body's own edge is a glow with a square hole in it. Symmetric about the body's centre, since
+   * every one of those effects is, so the box and the body share a centre and the plane carrying
+   * the texture can be placed by the body's own direction.
+   *
+   * Conservative on purpose — a CSS blur has a tail past its stated radius, and so does a canvas
+   * shadow — and a little empty margin in a texture costs nothing.
+   */
+  static paintExtent(shape: Shape): ShapeBounds {
+    const { x, y, width, height } = shape.bounds
+    const centreX = x + width / 2
+    const centreY = y + height / 2
+    // A rotated body reaches past its own axis-aligned box, as far as its half-diagonal.
+    const rotated = shape.angle % (2 * Math.PI) !== 0
+    const halfDiagonal = Math.hypot(width, height) / 2
+    const halfWidth = rotated ? halfDiagonal : width / 2
+    const halfHeight = rotated ? halfDiagonal : height / 2
+    const radius = Math.max(width, height) / 2
+    const brightness = shape.brightness ?? 0
+    const veilReach = brightness > 0
+      ? Math.max(radius * (1 + DAZZLE_VEIL_RADIUS_SCALE * brightness), MIN_DAZZLE_VEIL_PX * brightness) - radius
+      : 0
+    const spikeReach = brightness > 0 ? radius * (1 + DAZZLE_SPIKE_LENGTH_SCALE * brightness) - radius : 0
+    const soft = 3 * BLUR_RADIUS_UNIT * (shape.blur ?? 0) + 1.5 * HALO_BLUR_UNIT * shape.haloScale
+    const pad = Math.max(veilReach, spikeReach, 0) + soft + 2
+    return {
+      x: centreX - halfWidth - pad,
+      y: centreY - halfHeight - pad,
+      width: 2 * (halfWidth + pad),
+      height: 2 * (halfHeight + pad)
+    }
+  }
+
+  /**
+   * Paints the shape as paintShape would, but with the canvas's origin moved so that `extent`'s
+   * top-left corner lands at (0, 0) and every canvas pixel is `scale` device pixels — what fills a
+   * texture the size of paintExtent's box (see PhenomenonSystem). Selection handles are never
+   * painted here: they are an editing affordance and stay on the overlay the pointer works on.
+   */
+  paintInto(shape: Shape, extent: ShapeBounds, scale: number): void {
+    this.ctx.save()
+    this.ctx.scale(scale, scale)
+    this.ctx.translate(-extent.x, -extent.y)
+    this.paintShape(shape.selected ? { ...shape, selected: false } : shape)
+    this.ctx.restore()
+  }
+
   paintShape(shape: Shape): void {
     this.ctx.save()
     this.ctx.globalAlpha = 1 - shape.transparency
@@ -274,6 +325,13 @@ export class CanvasRenderer {
    * the actual resize handles live on the shared group bbox instead (see paintGroupHandles). */
   paintMemberOutline(shape: Shape): void {
     this.paintOutline(ShapeHandles.handlePointsFor(shape))
+  }
+
+  /** The selection indicator alone, with no shape under it — for a shape the 3D scene has already
+   * stood up (see UfoElement.paintsShapes). Selection is an editing affordance and lives on the
+   * overlay, where the pointer works; the shape itself is in the scene. */
+  paintSelectionOnly(shape: Shape): void {
+    this.paintSelectionHandles(shape)
   }
 
   /** The shared 8 resize-corner handles + rotate stem/circle + outline for a multi-shape

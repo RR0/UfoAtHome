@@ -43,6 +43,11 @@ import { ImageProjection } from "../engine/instrument/ImageProjection.js"
 import { SightingShapes } from "../engine/persistence/SightingShapes.js"
 import { SkyDrift } from "../engine/astronomy/SkyDrift.js"
 import { ExposureSampling } from "../engine/model/ExposureSampling.js"
+import { ShapeDistance } from "../engine/shape/ShapeDistance.js"
+import { PhenomenonDepth } from "../engine/shape/PhenomenonDepth.js"
+import type { ResolvedDepth } from "../engine/shape/PhenomenonDepth.js"
+import type { Shape } from "../engine/shape/Shape.js"
+import type { PlacedPhenomenon } from "../render3d/PhenomenonSystem.js"
 
 registerUfo()
 
@@ -200,6 +205,12 @@ export class SceneElement extends HTMLElement {
    * UfoElement's own setter), and a stale estimate carried across recordings is worse than none:
    * bounds only ever tighten, so one wrong crossing from a previous case would poison the next. */
   private sizeEstimatesFor?: Sighting
+  /** A distance a reader is trying a phenomenon at, by sourceId — see PhenomenonDepth's
+   * "hypothesis" and setDistanceHypothesis. Never part of the recording; dropped with the
+   * estimates when another recording is loaded. */
+  private readonly distanceHypotheses = new Map<string, number>()
+  /** How far each phenomenon was last drawn, and why — see depthOf. */
+  private depths = new Map<string, ResolvedDepth>()
   /** The sighting the meteor fall was worked out for, so it is scheduled once per recording rather
    * than every tick — the schedule is deterministic (see MeteorFall) and must not be re-drawn
    * underneath a paused scene or a long exposure. */
@@ -357,7 +368,6 @@ export class SceneElement extends HTMLElement {
     this.lastTimeMs = (event as CustomEvent<{ time: number }>).detail.time
     this.syncAnimationsToPlayback()
     this.updateAstronomy(this.lastTimeMs)
-    this.updateUfoOcclusion(this.lastTimeMs)
   }
 
   /**
@@ -409,6 +419,8 @@ export class SceneElement extends HTMLElement {
     // template.content.cloneNode(true) isn't upgraded to its class instance yet at this point).
     this.ufoElement = document.createElement(UFO_ELEMENT_NAME) as UfoElement
     this.ufoElement.classList.add("ufo-overlay")
+    // The phenomena stand in the scene below, not on the overlay — see UfoElement.paintsShapes.
+    this.ufoElement.paintsShapes = false
     // Attributes set before this element upgraded are already on it — attributeChangedCallback has
     // not fired for them, since the nested player did not exist yet.
     this.forwardPlayerAttributes()
@@ -752,8 +764,13 @@ export class SceneElement extends HTMLElement {
     // the sky drifts one pixel in ten seconds and would ask for two instants, while the aeroplane
     // that made the picture crosses hundreds and flashes ten times.
     const sky = SkyDrift.instants(exposureSeconds, degPerPixel)
+    // Three demands now, and the pose is drawn at the coarsest: what the SKY did, what the scene
+    // standing against it did, and what the witness's own phenomenon did — which used to have its
+    // own streak on the overlay and is now drawn in this scene like everything else, so its travel
+    // has to be sampled here too (see UfoElement.exposureTimes for how it is counted).
     const instants = Math.max(
       sky,
+      this.ufoElement.exposureTimes(t).length,
       ExposureSampling.instants(
         this.ufoElement.sighting.decor,
         resolveObserverPoseAt(this.ufoElement.sighting, t)?.elevationM ?? 0,
@@ -850,6 +867,9 @@ export class SceneElement extends HTMLElement {
     // Raw pose's own lat/lng (possibly undefined), never the astronomy fallback below — a real
     // terrain patch must only ever build from a real recorded location, never (0,0).
     this.sceneRenderer.setTerrainOrigin(pose?.lat, pose?.lng)
+    // Last, once the camera and the decor stand where this instant puts them: what the decor says
+    // along a line of sight is read from exactly that state (see pushPhenomenaAt).
+    this.pushPhenomenaAt(t)
 
     // Everything above moves with the instant and costs almost nothing; the sky below costs about
     // 8 ms to restate, and an instant that only carries an aeroplane a few pixels further has no
@@ -921,89 +941,128 @@ export class SceneElement extends HTMLElement {
     }
   }
 
-  /** Hides a UFO shape exactly where a decor object (building, tree...) sits directly between
-   * the camera and it — the shape is painted on the nested `<rr0-ufo>`'s own 2D canvas overlay,
-   * entirely outside this element's 3D scene, so the GPU depth buffer that occludes decor against
-   * itself has no way to occlude a shape it doesn't know exists (see SceneRenderer.
-   * isScreenPointOccluded's own doc comment for the full reasoning, and the near-identical
-   * problem/fix for the Sun's own lens-flare overlay, isSunOccluded). Reads each currently-visible
-   * shape straight off the timeline — the same interpolated position the nested `<rr0-ufo>` is
-   * about to paint — converts its bounds center from the fixed 640x360 canvas drawing space to
-   * NDC, and raycasts. */
-  /** Where the occlusion grid samples a shape, as fractions of its own width and height from its
-   * centre — kept inside the drawn body rather than on its very edge, where a rounding either way
-   * decides the answer. */
-  private static readonly OCCLUSION_GRID = [-0.35, 0, 0.35]
-
-  private updateUfoOcclusion(t: number): void {
+  /**
+   * Stands every phenomenon in the scene at this instant — see PhenomenonSystem for what a plane
+   * there asserts and does not, and PhenomenonDepth for where its distance comes from.
+   *
+   * This is also where the recording's crossings are read (see SizeEstimate): the camera, the
+   * witness's own position and the decor are posed for exactly this instant, which is the only
+   * state in which "what stood along that line of sight" means anything — so it runs from
+   * applySceneAt, after everything else has been posed, and once per instant of a long pose.
+   *
+   * The shapes go in as the overlay would have painted them — canvas pixels, the reader's own turn
+   * of the view and the witness's gait already applied — so the scene puts each one where the
+   * picture had it, and the decor's own depth then hides whatever part of it a car or a shack
+   * stood in front of. That is the whole of what changed hands: the picture is the same, and who
+   * decides what hides it is not.
+   */
+  private pushPhenomenaAt(t: number): void {
     const sighting = this.ufoElement.sighting
     if (sighting !== this.sizeEstimatesFor) {
       this.sizeEstimates.clear()
+      this.distanceHypotheses.clear()
       this.sizeEstimatesFor = sighting
     }
     const timeline = sighting.timeline
     const canvas = this.ufoElement.canvasElement
-    const occluded = new Set<string>()
+    const shift = this.ufoElement.frameShiftPx
+    const projection = this.projectionAt(t)
+    const shapes = new Map<string, Shape>()
+    const depths = new Map<string, ResolvedDepth>()
     for (const sourceId of timeline.sourceIds) {
       const shape = timeline.getInterpolatedShapeAt(t, sourceId)
       if (!shape) continue
-      const shift = this.ufoElement.frameShiftPx
-      const centreX = shape.bounds.x + shape.bounds.width / 2 + shift.x
-      const centreY = shape.bounds.y + shape.bounds.height / 2 + shift.y
-      const ndcX = (centreX / canvas.width) * 2 - 1
-      const ndcY = -((centreY / canvas.height) * 2 - 1)
-      // A GRID over the shape, not one ray through its centre. A ray answers for a point and a
-      // shape is an area: an object fourteen pixels wide straddling the edge of a patrol car had
-      // its one ray land in the clear, and came out painted whole and squarely in front of a car it
-      // was two hundred metres behind.
-      //
-      // TWO samples call it hidden, one does not: on a three-by-three grid a single sample is a
-      // graze at a corner, two is a real overlap. The overlay cannot clip, so it has to answer the
-      // whole question one way, and the two wrong answers are not equally wrong — a thing drawn
-      // over something two hundred metres nearer is a plain contradiction, while a thing briefly
-      // out of sight behind it is what the witness's own eye would have done.
-      let hidden = 0
-      for (const dx of SceneElement.OCCLUSION_GRID) {
-        for (const dy of SceneElement.OCCLUSION_GRID) {
-          const x = centreX + dx * shape.bounds.width
-          const y = centreY + dy * shape.bounds.height
-          if (this.sceneRenderer.isScreenPointOccluded((x / canvas.width) * 2 - 1, -((y / canvas.height) * 2 - 1), sourceId, shape.behindCloud)) {
-            hidden++
-          }
-        }
-      }
-      if (hidden >= 2) occluded.add(sourceId)
-      // The same ray, asked the other question: not "is it hidden" but "by what, and how far
-      // away". Free to ask here (the camera and the decor are already posed for exactly this
-      // instant, which is the only state in which the answer is meaningful) and accumulated across
-      // every instant the playhead visits — see SizeEstimate, and sizeRangeOf's own comment on why
-      // that accumulation is the honest shape for this.
-      const widthDeg = shape.angular?.widthDeg ?? this.projectionAt(t).pxToDeg(shape.bounds.width)
-      this.sizeEstimateOf(sourceId).add(widthDeg, this.sceneRenderer.decorDistancesAt(ndcX, ndcY, sourceId))
+      const shifted: Shape = { ...shape, bounds: { ...shape.bounds, x: shape.bounds.x + shift.x, y: shape.bounds.y + shift.y } }
+      shapes.set(sourceId, shifted)
+      const ndcX = ((shifted.bounds.x + shifted.bounds.width / 2) / canvas.width) * 2 - 1
+      const ndcY = -(((shifted.bounds.y + shifted.bounds.height / 2) / canvas.height) * 2 - 1)
+      // The same ray, asked the only question a testimony can answer about distance: not "how far"
+      // but "behind what, and in front of what". Accumulated across every instant the playhead
+      // visits — see SizeEstimate, and sizeRangeOf's own comment on why that accumulation is the
+      // honest shape for this.
+      const crossing = this.sceneRenderer.decorDistancesAt(ndcX, ndcY, sourceId)
+      const widthDeg = shape.angular?.widthDeg ?? projection.pxToDeg(shape.bounds.width)
+      const estimate = this.sizeEstimateOf(sourceId)
+      estimate.add(widthDeg, crossing)
+      // What the witness's own walk establishes, read at this instant's apparent width — see
+      // ShapeDistance, which says what it assumes.
+      const approach = ShapeDistance.of(sighting, sourceId)
+      depths.set(
+        sourceId,
+        PhenomenonDepth.resolve({
+          hypothesisM: this.distanceHypotheses.get(sourceId),
+          derivedM: approach && widthDeg > 0 ? ApparentSize.distanceMAt(approach.widthM, widthDeg) : undefined,
+          range: estimate.distanceRangeAt(widthDeg),
+          crossing
+        })
+      )
     }
     // A phenomenon drawn in several parts is one thing: Socorro's red insignia is painted ON its
-    // craft, and hiding the craft behind a patrol car while leaving the insignia floating over the
-    // bodywork is worse than either answer on its own. Anything drawn wholly inside something
-    // hidden is hidden with it.
-    for (const sourceId of timeline.sourceIds) {
-      if (occluded.has(sourceId)) continue
-      const shape = timeline.getInterpolatedShapeAt(t, sourceId)
-      if (!shape) continue
-      for (const hiddenId of occluded) {
-        const over = timeline.getInterpolatedShapeAt(t, hiddenId)
-        if (!over) continue
+    // craft, and standing the craft at five hundred metres while the insignia stayed five metres
+    // out would float it in front of the bodywork. Anything drawn wholly inside another shape
+    // stands where that shape stands — a hair nearer, so that it is drawn on it and not in it.
+    for (const [sourceId, shape] of shapes) {
+      for (const [carrierId, carrier] of shapes) {
+        if (carrierId === sourceId) continue
         const inside =
-          shape.bounds.x >= over.bounds.x &&
-          shape.bounds.y >= over.bounds.y &&
-          shape.bounds.x + shape.bounds.width <= over.bounds.x + over.bounds.width &&
-          shape.bounds.y + shape.bounds.height <= over.bounds.y + over.bounds.height
-        if (inside) {
-          occluded.add(sourceId)
-          break
-        }
+          shape.bounds.x >= carrier.bounds.x &&
+          shape.bounds.y >= carrier.bounds.y &&
+          shape.bounds.x + shape.bounds.width <= carrier.bounds.x + carrier.bounds.width &&
+          shape.bounds.y + shape.bounds.height <= carrier.bounds.y + carrier.bounds.height
+        if (!inside) continue
+        const depth = depths.get(carrierId)
+        if (depth) depths.set(sourceId, { distanceM: depth.distanceM * 0.999, basis: depth.basis })
+        break
       }
     }
-    this.ufoElement.setOccludedSourceIds(occluded)
+    this.depths = depths
+    const order = timeline.sourceIds
+    const cloudUp = this.sceneRenderer.lowerCloudUp
+    const placed: PlacedPhenomenon[] = []
+    for (const [sourceId, shape] of shapes) {
+      placed.push({
+        sourceId,
+        shape,
+        distanceM: depths.get(sourceId)!.distanceM,
+        renderOrder: order.indexOf(sourceId),
+        // Behind cloud is what the witness SAID, and the only thing that hides a shape here that
+        // the depth buffer does not — see SceneRenderer.lowerCloudUp.
+        hidden: shape.behindCloud === true && cloudUp
+      })
+    }
+    // The instrument's own aperture and roll, which the painter needs for a dazzling light's spikes
+    // — the same numbers the overlay used, so a starburst turns with the camera here as it did
+    // there (see CanvasRenderer.setRoll).
+    const pose = resolveObserverPoseAt(sighting, t)
+    const rollDeg = (pose?.rollDeg ?? 0) + (Gait.of(sighting)?.offsetAt(t) ?? Gait.STILL).rollDeg
+    this.sceneRenderer.setPhenomena(placed, {
+      projection,
+      canvasWidthPx: canvas.width,
+      canvasHeightPx: canvas.height,
+      // Painted at the picture's own resolution, so a shape is as sharp in the scene as the overlay
+      // drew it — and no sharper, since the picture is what the reader is looking at.
+      scale: Math.max(1, this.sceneCanvas.height / Math.max(1, canvas.height)),
+      starPoints: Instruments.starPointsOf(sighting.instrument),
+      rollRad: (rollDeg * Math.PI) / 180
+    })
+  }
+
+  /**
+   * Draws `sourceId` at this distance until told otherwise — a reader's hypothesis, never the
+   * recording's (see PhenomenonDepth). A hypothesis outranks what the data establishes on purpose:
+   * it is tested by watching it fail, a craft set at five hundred metres going behind the patrol
+   * car it was drawn in front of. `undefined` withdraws it.
+   */
+  setDistanceHypothesis(sourceId: string, distanceM: number | undefined): void {
+    if (distanceM === undefined || !(distanceM > 0)) this.distanceHypotheses.delete(sourceId)
+    else this.distanceHypotheses.set(sourceId, distanceM)
+    this.updateAstronomy(this.lastTimeMs)
+  }
+
+  /** How far `sourceId` is drawn right now, and on what basis — see PhenomenonDepth. Undefined
+   * for a shape not on screen at this instant. */
+  depthOf(sourceId: string): ResolvedDepth | undefined {
+    return this.depths.get(sourceId)
   }
 
   /**
