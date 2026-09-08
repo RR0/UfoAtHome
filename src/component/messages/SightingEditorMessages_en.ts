@@ -213,6 +213,6 @@ export const sightingEditorMessages_en: SightingEditorMessages = {
   testimonyYes: "yes",
   testimonyNo: "no",
   assessmentGroup: "Assessment",
-  coverageChip: "{stated} of {total} from the witness",
+  coverageName: "Witness coverage",
   questionUnanswered: "Nothing in this recording answers one of the questions a reconstruction needs settled",
 }

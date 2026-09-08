@@ -23,6 +23,7 @@ export const ASSESSMENT_SOURCES: DataSource<Assessor>[] = [
     credit: "UFO@home",
     creditUrl: "https://ufoathome.org",
     create: () => ({
+      about: "witness",
       assess: async (sighting: Sighting): Promise<Assessment> => {
         const { CoverageAssessor } = await import("./assessors/CoverageAssessor.js")
         return new CoverageAssessor().assess(sighting)

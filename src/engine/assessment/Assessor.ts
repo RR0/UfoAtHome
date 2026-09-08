@@ -29,10 +29,23 @@ export interface AssessmentCriterion {
 export interface Assessment {
   /**
    * The assessor's own conclusion as a stable id, for the ones that reach one — a classification
-   * scheme's class, say. Absent for an assessment that only profiles what is there, which is a
-   * conclusion of a different kind and is read off the criteria.
+   * scheme's class, say. Absent for an assessment that scores instead, or that could not conclude.
    */
   verdict?: string
+  /**
+   * The assessor's conclusion as a share, 0 to 1, for the ones that measure rather than classify.
+   *
+   * A single figure, which an earlier version of this file argued against and was half right to.
+   * The objection was to a ratio over a MOVING denominator: counting a recording's own claims
+   * measures how finely its fields happen to be cut, and shifts when nothing about the sighting
+   * has. A fixed list of questions answers that — ten is ten next year and ten in the next case —
+   * so the proportion means something and two recordings can be held against each other.
+   *
+   * What stays true is that the figure is not the finding: it cannot say WHICH questions went
+   * unanswered, and a reader who needs that reads the criteria. A chip is one line, so it gets the
+   * figure; the profile goes where there is room for it.
+   */
+  score?: number
   /** Every criterion, in the order the assessor means them to be read. */
   criteria: AssessmentCriterion[]
 }
@@ -56,5 +69,16 @@ export interface Assessment {
  * bundle: a reader who never opens an assessment pays for none of them.
  */
 export interface Assessor {
+  /**
+   * Which part of a recording this reading is chiefly about, as a group id the host may map onto
+   * its own panels — "witness" for one that measures what the witness gave.
+   *
+   * So that an assessment leads somewhere. A figure a reader cannot act on is a figure they stop
+   * reading; this is the difference between "20%" and "20%, and here is where you would fix it".
+   * Absent for a reading that is about the recording as a whole and has nowhere in particular to
+   * send anyone.
+   */
+  readonly about?: string
+
   assess(sighting: Sighting): Promise<Assessment>
 }

@@ -845,9 +845,10 @@ select.weather-field:disabled {
   text-underline-offset: 0.25em;
   text-decoration-color: color-mix(in srgb, currentColor 55%, transparent);
 }
-/* An assessment is not a group of fields and its chips open no panel, so they do not offer the
-   pointer that every other chip does (see onParamSummaryClick, which ignores a panel of -1). */
-.param-nest[data-group="assessment"] .param-chip {
+/* An assessment about the recording as a whole has nowhere to send a click, so it does not offer
+   the pointer every other chip does. One that names a group it is about keeps it, and leads there
+   (see Assessor.about, and onParamSummaryClick, which ignores a panel of -1). */
+.param-nest[data-group="assessment"] .param-chip[data-panel="-1"] {
   cursor: default;
 }
 .narrative-report .gaps {

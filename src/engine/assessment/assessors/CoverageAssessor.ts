@@ -49,19 +49,28 @@ const WEAKEST_FIRST: Basis[] = ["assumed", "derived", "stated"]
  * constrain, which is the axis an investigator is on when they set aside a case for lack of
  * information rather than for lack of an explanation.
  *
- * Deliberately no single number. Ten answers of different kinds do not add up, and a percentage
- * would travel without its reservations and end up quoted alone; the shape of the profile is the
- * finding — "the moment and the place are the witness's own, nothing about the sky is" is a
- * different recording from its opposite, and one figure would call them equal.
+ * The figure it reports is the share of those ten the WITNESS themselves answered, which is what
+ * the whole exercise was for. It is a share of a fixed denominator and so comparable between
+ * recordings — the thing a count of claims could never be, since that moves with how finely the
+ * fields happen to be cut. It is still not the finding: a reader who needs to know WHICH questions
+ * went unanswered reads the criteria, and the profile "the moment and the place are the witness's
+ * own, nothing about the sky is" is not the same recording as its opposite even at the same
+ * percentage.
  */
 export class CoverageAssessor implements Assessor {
+
+  /** What it measures is how much of the reconstruction came from the person who was there, so the
+   * witness is where a reader is sent to act on it — see Assessor.about. */
+  readonly about = "witness"
 
   async assess(sighting: Sighting): Promise<Assessment> {
     // The values without their wrappers, and the provenance separately: this walks paths, and a
     // wrapped value would put a `.value` step in the middle of every one of them.
     const recording = plainSightingJson(sighting) as unknown as Record<string, unknown>
+    const criteria = QUESTIONS.map(question => CoverageAssessor.answer(question, recording, sighting))
     return {
-      criteria: QUESTIONS.map(question => CoverageAssessor.answer(question, recording, sighting))
+      score: criteria.filter(criterion => criterion.basis === "stated").length / criteria.length,
+      criteria
     }
   }
 

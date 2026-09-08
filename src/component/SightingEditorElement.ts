@@ -3505,11 +3505,12 @@ export class SightingEditorElement extends HTMLElement {
         box.dataset.group = chip.group
         const name = document.createElement("span")
         name.className = "param-nest-label"
-        // A nest is named by its own panel's tab, except the one that has no panel: an assessment
-        // is not a group of fields, so its name is its own message.
-        name.textContent = chip.panel < 0
+        // Named by its GROUP, never by where its chips lead — the two are different things, and an
+        // assessment chip that sends a reader to the Witness panel still belongs in a box saying
+        // Assessment. An assessment is not a group of fields, so its name is its own message.
+        name.textContent = chip.group === "assessment"
           ? this.messages.assessmentGroup
-          : this.groupTabs[chip.panel].textContent!.trim()
+          : this.groupTabs[SightingEditorElement.SUMMARY_GROUPS.indexOf(chip.group)].textContent!.trim()
         box.append(name)
         openNest = { group: chip.group, element: box }
         strip.push(box)
@@ -3583,20 +3584,26 @@ export class SightingEditorElement extends HTMLElement {
         continue
       }
       if (token !== this.assessmentToken) return
-      const stated = assessment.criteria.filter(criterion => criterion.basis === "stated").length
       for (const criterion of assessment.criteria) {
         if (criterion.basis === undefined) unanswered.add(criterion.id)
       }
+      // A percentage, and nothing else: a chip is one line, and half its value is the shape of it
+      // (see the strip's own CSS). What the figure cannot say — WHICH questions went unanswered —
+      // is said by the marks on the fields that would answer them.
+      const value = assessment.score === undefined
+        ? assessment.verdict === undefined ? "" : this.assessmentVerdict(source.id, assessment.verdict)
+        : `${Math.round(assessment.score * 100)}%`
+      if (value === "") continue
       chips.push({
         group: "assessment",
         field: source.id,
-        label: source.name,
-        value: this.messages.coverageChip
-          .replace("{stated}", String(stated))
-          .replace("{total}", String(assessment.criteria.length)),
+        label: this.assessmentName(source.id, source.name),
+        value,
         unit: "",
         fromSource: false,
-        panel: -1
+        // The group this reading is about, so the chip leads somewhere: a figure a reader cannot
+        // act on is a figure they stop reading. -1 for a reading about the recording as a whole.
+        panel: SightingEditorElement.PANEL_ORDER.indexOf(source.create().about ?? "")
       })
     }
     this.assessmentChips = chips
@@ -3634,6 +3641,20 @@ export class SightingEditorElement extends HTMLElement {
       field.classList.toggle("wanted", wanted)
       field.title = wanted ? this.messages.questionUnanswered : ""
     }
+  }
+
+  /** What an assessment is called on its chip — its own message where one exists, so that "Witness
+   * coverage" can name what is measured rather than repeating the registry's bare id, and the
+   * registry's own name otherwise. */
+  private assessmentName(id: string, fallback: string): string {
+    return id === "coverage" ? this.messages.coverageName : fallback
+  }
+
+  /** A classifying assessor's conclusion in the reader's own words — a class id like "nl" means
+   * nothing on a chip. Falls back to the id, which is at least what the file would say. */
+  private assessmentVerdict(assessorId: string, verdict: string): string {
+    const named = (this.messages as unknown as Record<string, string>)[`${assessorId}.${verdict}`]
+    return named ?? verdict.toUpperCase()
   }
 
   private paramChip(chip: SummaryEntry & { panel: number }): HTMLButtonElement {

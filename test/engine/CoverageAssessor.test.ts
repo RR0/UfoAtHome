@@ -17,7 +17,9 @@ const of = (criteria: AssessmentCriterion[], id: string): AssessmentCriterion =>
 const landevennec = {
   version: 1,
   time: { year: 1974, month: 5, day: 20, hour: 19, raw: "1974-05-20T19:00" },
-  endTime: { year: 1974, month: 5, day: 20, hour: 19, minute: 10, raw: "1974-05-20T19:10~" },
+  // Derived, as the real draft marked it: "quelques mn" is no clock reading, so the end was worked
+  // out and written with the EDTF approximation suffix rather than as a duration.
+  endTime: { year: 1974, month: 5, day: 20, hour: 19, minute: { value: 10, basis: "derived" }, raw: { value: "1974-05-20T19:10~", basis: "derived" } },
   place: [{ lat: { value: 48.288, basis: "derived" }, lng: { value: -4.29, basis: "derived" } }],
   timeline: {
     keyframes: [{
@@ -123,10 +125,25 @@ describe("CoverageAssessor", () => {
     expect(of(criteria, "where").basis).toBeUndefined()
   })
 
-  it("gives no single figure, because ten answers of different kinds do not add up", async () => {
+  it("scores the share of questions the witness themselves answered", async () => {
+    // A share of a FIXED denominator, which is what makes it comparable at all: counting a
+    // recording's own claims moves with how finely its fields happen to be cut.
     const assessment = await ASSESSMENT_SOURCES[0].create()
       .assess(fromSightingJson(landevennec as unknown as SightingRecordingJson))
 
+    // when, appearance and sound: the three of the ten this account itself settles.
+    expect(assessment.score).toBeCloseTo(0.3, 5)
     expect(assessment.verdict).toBeUndefined()
+  })
+
+  it("scores an empty recording at nothing, not at nothing-known", async () => {
+    const assessment = await ASSESSMENT_SOURCES[0].create()
+      .assess(fromSightingJson({ version: 1, timeline: { keyframes: [] } } as SightingRecordingJson))
+
+    expect(assessment.score).toBe(0)
+  })
+
+  it("sends a reader to the witness, since that is what it measures", () => {
+    expect(ASSESSMENT_SOURCES[0].create().about).toBe("witness")
   })
 })

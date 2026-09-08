@@ -533,10 +533,10 @@ export interface SightingEditorMessages extends SightingLabels {
   /** Names the nest holding what the assessors made of the recording. Its own message rather than
    * a tab's text, because it is the one summary group with no panel behind it. */
   assessmentGroup: string
-  /** The coverage assessor's chip value: how many of its questions the witness themselves answered.
-   * {stated} of {total}. A count and not a score — ten answers of different kinds do not add up,
-   * and the rest of the profile is on the chip's own title. */
-  coverageChip: string
+  /** What the coverage assessment is called on its chip. Names what is measured — how much of the
+   * reconstruction the witness's own account settles — rather than repeating the registry's id,
+   * and the chip's value is the bare percentage beside it. */
+  coverageName: string
   /** Marks a field, and its panel's tab, that would answer a question nothing in the recording
    * does. Not an error: the witness said nothing, the author typed nothing wrong. */
   questionUnanswered: string

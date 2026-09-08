@@ -5803,13 +5803,26 @@ describe("SightingEditorElement assessment", () => {
     expect(chips[chips.length - 1]).toBe(nest(element))
   })
 
-  it("says how many questions the witness themselves answered", async () => {
+  it("says, in one line, what share of the questions the witness answered", async () => {
+    // A chip is one line and half its value is the shape of it. What the figure cannot say — WHICH
+    // questions went unanswered — is said by the marks on the fields that would answer them.
     const element = mount()
 
     await waitFor(() => nest(element) !== null, 2000)
+    const chip = nest(element)!.querySelector(".param-chip")!
 
-    expect(nest(element)!.querySelector(".param-chip")!.textContent)
-      .toContain(sightingEditorMessages_en.coverageChip.replace("{total}", "10").replace("{stated}", "2"))
+    expect(chip.querySelector(".param-chip-label")!.textContent!.trim())
+      .toBe(sightingEditorMessages_en.coverageName)
+    expect(chip.querySelector(".param-chip-value")!.textContent).toBe("20%")
+  })
+
+  it("leads to the group the reading is about, so the figure can be acted on", async () => {
+    const element = mount()
+    await waitFor(() => nest(element) !== null, 2000)
+
+    ;(nest(element)!.querySelector(".param-chip") as HTMLButtonElement).click()
+
+    expect(element.shadowRoot!.getElementById("group-witness")!.hidden).toBe(false)
   })
 
   it("marks the fields that would answer a question nothing answers", async () => {
@@ -5850,13 +5863,5 @@ describe("SightingEditorElement assessment", () => {
     expect(element.shadowRoot!.getElementById("lat")!.title).toBe("")
   })
 
-  it("leaves an assessment chip inert, since it names no field to go to", async () => {
-    const element = mount()
-    await waitFor(() => nest(element) !== null, 2000)
 
-    const before = element.shadowRoot!.querySelectorAll(".group-panel:not([hidden])").length
-    ;(nest(element)!.querySelector(".param-chip") as HTMLButtonElement).click()
-
-    expect(element.shadowRoot!.querySelectorAll(".group-panel:not([hidden])")).toHaveLength(before)
-  })
 })
