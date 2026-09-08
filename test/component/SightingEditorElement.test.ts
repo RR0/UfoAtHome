@@ -2355,20 +2355,20 @@ describe("SightingEditorElement duration input", () => {
     expect(durationInput.value).toBe("")
   })
 
-  it("flags Duration as invalid on a freshly mounted element (nothing set yet)", () => {
+  it("marks Duration missing on a freshly mounted element (nothing set yet)", () => {
     const element = mount()
     const durationInput = element.shadowRoot!.getElementById("durationSeconds") as HTMLInputElement
-    expect(durationInput.classList.contains("invalid")).toBe(true)
+    expect(durationInput.classList.contains("missing-required")).toBe(true)
     expect(durationInput.getAttribute("aria-invalid")).toBe("true")
   })
 
-  it("clears the invalid flag once a value is typed", () => {
+  it("clears the missing mark once a value is typed", () => {
     const element = mount()
     const durationInput = element.shadowRoot!.getElementById("durationSeconds") as HTMLInputElement
     durationInput.value = "45"
     durationInput.dispatchEvent(new Event("input"))
 
-    expect(durationInput.classList.contains("invalid")).toBe(false)
+    expect(durationInput.classList.contains("missing-required")).toBe(false)
     expect(durationInput.getAttribute("aria-invalid")).toBe("false")
   })
 
@@ -2380,7 +2380,7 @@ describe("SightingEditorElement duration input", () => {
     setInput(shadow, "obs-end-time", "1965-07-01T05:10")
 
     expect(durationInput.value).toBe("600") // 10 minutes
-    expect(durationInput.classList.contains("invalid")).toBe(false)
+    expect(durationInput.classList.contains("missing-required")).toBe(false)
     expect(element.sightingData.durationSeconds).toBeUndefined() // derived, not persisted as explicit
   })
 
@@ -2397,7 +2397,7 @@ describe("SightingEditorElement duration input", () => {
     expect(element.sightingData.durationSeconds).toBe(30)
   })
 
-  it("leaves Duration invalid with an explanatory title when start/end are known to different precisions", () => {
+  it("leaves Duration marked missing with an explanatory title when start/end are known to different precisions", () => {
     const element = mount()
     const shadow = element.shadowRoot!
     const durationInput = shadow.getElementById("durationSeconds") as HTMLInputElement
@@ -2405,7 +2405,7 @@ describe("SightingEditorElement duration input", () => {
     setInput(shadow, "obs-end-time", "2025-06-15T14:50")
 
     expect(durationInput.value).toBe("")
-    expect(durationInput.classList.contains("invalid")).toBe(true)
+    expect(durationInput.classList.contains("missing-required")).toBe(true)
     expect(durationInput.title).not.toBe("")
   })
 
@@ -2417,7 +2417,7 @@ describe("SightingEditorElement duration input", () => {
     setInput(shadow, "obs-end-time", "1926-08-12T10:20:30")
 
     expect(durationInput.value).toBe("150") // 2m30s
-    expect(durationInput.classList.contains("invalid")).toBe(false)
+    expect(durationInput.classList.contains("missing-required")).toBe(false)
   })
 
   it("does not clobber Duration's in-progress value while it's focused", () => {
@@ -5864,4 +5864,47 @@ describe("SightingEditorElement assessment", () => {
   })
 
 
+})
+
+describe("SightingEditorElement missing-value marks", () => {
+  const field = (element: SightingEditorElement, id: string): HTMLElement =>
+    element.shadowRoot!.getElementById(id)!
+  const tab = (element: SightingEditorElement, name: string): HTMLElement =>
+    [...element.shadowRoot!.querySelectorAll<HTMLElement>(".group-tab")].find(t => t.textContent!.trim() === name)!
+
+  it("marks the one required blank differently from a question nobody answered", async () => {
+    // Two marks, one vocabulary. Solid: the reconstruction cannot be computed without it. Dashed:
+    // the account simply never said. Neither is input.invalid's red box, which means a value was
+    // typed wrongly — here nothing was typed at all.
+    const element = mount()
+    await waitFor(() => element.shadowRoot!.querySelectorAll(".wanted").length > 0, 2000)
+
+    expect(field(element, "durationSeconds").classList.contains("missing-required")).toBe(true)
+    expect(field(element, "durationSeconds").classList.contains("wanted")).toBe(false)
+    expect(field(element, "lat").classList.contains("wanted")).toBe(true)
+    expect(field(element, "lat").classList.contains("missing-required")).toBe(false)
+  })
+
+  it("gives the tab the worst of what its panel holds", async () => {
+    // A closed panel's tab is the only mark a reader sees, so averaging the two away would hide the
+    // one blank that stops the reconstruction being one.
+    const element = mount()
+    await waitFor(() => element.shadowRoot!.querySelectorAll(".group-tab.wanted").length > 0, 2000)
+
+    expect(tab(element, "Moment").classList.contains("missing-required")).toBe(true)
+    expect(tab(element, "Moment").classList.contains("wanted")).toBe(false)
+    expect(tab(element, "Location").classList.contains("wanted")).toBe(true)
+  })
+
+  it("lets the tab follow the duration without waiting for another assessment", async () => {
+    const element = mount()
+    await waitFor(() => tab(element, "Moment").classList.contains("missing-required"), 2000)
+
+    const duration = field(element, "durationSeconds") as HTMLInputElement
+    duration.value = "270"
+    duration.dispatchEvent(new Event("input"))
+
+    expect(duration.classList.contains("missing-required")).toBe(false)
+    expect(tab(element, "Moment").classList.contains("missing-required")).toBe(false)
+  })
 })

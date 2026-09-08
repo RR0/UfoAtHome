@@ -215,6 +215,7 @@ export const sightingEditorMessages_fr: SightingEditorMessages = {
   assessmentGroup: "Évaluation",
   coverageName: "Couverture du témoin",
   questionUnanswered: "Rien dans cet enregistrement ne répond à l'une des questions qu'une reconstitution doit trancher",
+  durationRequired: "L'observation a besoin d'une longueur pour être rejouée — indiquez-la, ou une heure de fin, qui peut être approximative",
   "hynek.nl": "NL — lumière nocturne",
   "hynek.dd": "DD — disque diurne",
   "hynek.rv": "RV — radar-visuel",

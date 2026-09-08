@@ -540,6 +540,9 @@ export interface SightingEditorMessages extends SightingLabels {
   /** Marks a field, and its panel's tab, that would answer a question nothing in the recording
    * does. Not an error: the witness said nothing, the author typed nothing wrong. */
   questionUnanswered: string
+  /** Marks the one blank the reconstruction cannot be computed around, and the tab holding it.
+   * Stronger than questionUnanswered because the consequence is: playback has no pacing. */
+  durationRequired: string
   /** Hynek's own six classes, named for a reader — a chip saying "ce3" says nothing. Keyed
    * "hynek.<class>" so the strip can find the one an assessor concluded without a switch. */
   "hynek.nl": string

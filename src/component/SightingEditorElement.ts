@@ -2884,7 +2884,12 @@ export class SightingEditorElement extends HTMLElement {
    * field's title explains why instead of leaving the witness to guess. */
   private updateDurationValidity(): void {
     const missing = this.durationInput.value === ""
-    this.durationInput.classList.toggle("invalid", missing)
+    // Marked missing, not marked WRONG. input.invalid's red box says a value was typed badly, and
+    // nothing was typed here at all — see the two marks' own comment in the stylesheet. Solid rather
+    // than dashed because this is the one blank the reconstruction cannot be computed around.
+    this.durationInput.classList.toggle("missing-required", missing)
+    // The Moment tab has to follow: it is the only mark a reader sees while that panel is closed.
+    this.markUnansweredQuestions()
     this.durationInput.setAttribute("aria-invalid", String(missing))
     const blockedReason = sightingDurationBlockedReason(this.ufoElement.sighting.event)
     this.durationInput.title = blockedReason === "imprecise" ? this.messages.durationImprecise : ""
@@ -3623,7 +3628,12 @@ export class SightingEditorElement extends HTMLElement {
    * wrong where in fact the witness said nothing. It marks the panel's own tab too, so the need is
    * visible without opening all eight to look for it.
    */
-  private markUnansweredQuestions(unanswered: Set<string>): void {
+  /** The last assessment's unanswered questions, kept so the marks can be laid again when the one
+   * REQUIRED field changes without the assessment having re-run — see updateDurationValidity. */
+  private unansweredQuestions = new Set<string>()
+
+  private markUnansweredQuestions(unanswered: Set<string> = this.unansweredQuestions): void {
+    this.unansweredQuestions = unanswered
     const wantedPanels = new Set<string>()
     const wantedFields = new Set<string>()
     for (const id of unanswered) {
@@ -3632,19 +3642,31 @@ export class SightingEditorElement extends HTMLElement {
       wantedPanels.add(question.panel)
       for (const field of question.fields) wantedFields.add(field)
     }
+    // The panel holding the one blank the reconstruction cannot be computed around, so that its tab
+    // says the worst of what is inside rather than averaging it away.
+    const requiredPanel = this.durationInput.classList.contains("missing-required")
+      ? SightingEditorElement.QUESTION_FIELDS["how-long"].panel
+      : undefined
     for (const [index, tab] of this.groupTabs.entries()) {
-      const wanted = wantedPanels.has(SightingEditorElement.PANEL_ORDER[index])
+      const panel = SightingEditorElement.PANEL_ORDER[index]
+      const required = panel === requiredPanel
+      const wanted = !required && wantedPanels.has(panel)
+      tab.classList.toggle("missing-required", required)
       tab.classList.toggle("wanted", wanted)
-      tab.title = wanted ? this.messages.questionUnanswered : ""
+      tab.title = required ? this.messages.durationRequired : wanted ? this.messages.questionUnanswered : ""
     }
     for (const id of new Set([
       ...Object.values(SightingEditorElement.QUESTION_FIELDS).flatMap(question => question.fields)
     ])) {
       const field = this.shadow.getElementById(id)
       if (!field) continue
-      const wanted = wantedFields.has(id)
+      // The duration carries the solid mark instead, from updateDurationValidity, and wearing both
+      // would be saying the same thing twice in two hands.
+      const wanted = wantedFields.has(id) && !field.classList.contains("missing-required")
       field.classList.toggle("wanted", wanted)
-      field.title = wanted ? this.messages.questionUnanswered : ""
+      if (wanted || field.title === this.messages.questionUnanswered) {
+        field.title = wanted ? this.messages.questionUnanswered : ""
+      }
     }
   }
 

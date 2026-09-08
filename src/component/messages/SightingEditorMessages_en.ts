@@ -215,6 +215,7 @@ export const sightingEditorMessages_en: SightingEditorMessages = {
   assessmentGroup: "Assessment",
   coverageName: "Witness coverage",
   questionUnanswered: "Nothing in this recording answers one of the questions a reconstruction needs settled",
+  durationRequired: "The observation needs a length to be replayed at all — state one, or an end time, which may be approximate",
   "hynek.nl": "NL — nocturnal light",
   "hynek.dd": "DD — daylight disc",
   "hynek.rv": "RV — radar-visual",

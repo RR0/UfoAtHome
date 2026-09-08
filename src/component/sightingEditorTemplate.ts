@@ -532,8 +532,14 @@ button.preset[aria-pressed="true"] {
    instead of always-on. Mirrors rr0.org's own site-wide theming convention — a light-mode
    default overridden inside a prefers-color-scheme:dark media query, not a manual toggle (see
    e.g. rr0.org's own link.css/rr0.css). */
+:host {
+  /* The one alert colour, said once. input.invalid's border was the only thing wearing it, and the
+     two "something is missing" marks below now wear it too — so a reader learns one colour rather
+     than three, and changing it changes all of them. */
+  --rr0-alert: #c33;
+}
 input.invalid {
-  border-color: #c33;
+  border-color: var(--rr0-alert);
   background: #fde8e8;
   color: #611;
 }
@@ -841,10 +847,26 @@ select.weather-field:disabled {
    the witness said nothing, and the mark is an invitation rather than a complaint. A dashed
    underline in the host's own text colour says "something is missing here" without claiming
    anything is broken. */
+/* Something is missing here. Two marks, one vocabulary: the SOLID one is a value the reconstruction
+   cannot be computed without, the dashed one a question the account simply never answered. Both in
+   the alert colour, because both are the same kind of statement about the record; neither touches
+   the text's own colour or the field's background, because neither is a mistake — nobody typed
+   anything wrong, and input.invalid's red box is reserved for when they did.
+
+   Only the DURATION is solid. Nothing else in this format has to be there: a recording with no date
+   still says what was seen, and a reader who fills it in later gains coverage rather than repairs a
+   fault. But playback has no pacing without a length, so an empty duration is the one blank that
+   stops the reconstruction being one. */
 .wanted {
   text-decoration: underline dashed;
   text-underline-offset: 0.25em;
-  text-decoration-color: color-mix(in srgb, currentColor 55%, transparent);
+  text-decoration-color: var(--rr0-alert);
+}
+.missing-required {
+  text-decoration: underline solid;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.25em;
+  text-decoration-color: var(--rr0-alert);
 }
 /* An assessment about the recording as a whole has nowhere to send a click, so it does not offer
    the pointer every other chip does. One that names a group it is about keeps it, and leads there
