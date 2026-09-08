@@ -1,11 +1,16 @@
 import type { Assessment, Assessor } from "../Assessor.js"
 import type { Sighting } from "../../model/Sighting.js"
 import { computeBodyPosition, sightingTimeToDate } from "../../astronomy/CelestialPositions.js"
+import { ShapeDistance } from "../../shape/ShapeDistance.js"
 
 /** How far the Sun may be below the horizon and the sighting still count as made by daylight.
  * Civil twilight: the Sun is down, and there is still enough light to see a shape as a shape rather
  * than as a glow — which is exactly the distinction Hynek's last two classes turn on. */
 const DAYLIGHT_SUN_ALTITUDE_DEG = -6
+
+/** Hynek's own line between a close encounter and a distant sighting: about 500 feet. Under it a
+ * witness sees a thing rather than a light, and optical misperception stops being the question. */
+const CLOSE_ENCOUNTER_M = 150
 
 /**
  * Classifies a recording the way J. Allen Hynek's own scheme does — as far as a recording can be
@@ -14,17 +19,11 @@ const DAYLIGHT_SUN_ALTITUDE_DEG = -6
  * The six, in the order they outrank each other: CE3 with entities, CE2 with a physical trace, CE1
  * close enough for detail, RV radar-visual, DD a daylight disc, NL a nocturnal light.
  *
- * Three of the six are decided here — CE3, DD and NL. It reads the DATA, and for two of the rest the
- * data has nowhere to say it at all; the third is computable and simply not computed yet:
+ * Four of the six are decided here — CE3, CE1, DD and NL. It reads the DATA, and for the other two
+ * the data has nowhere to say it at all:
  *
  * - A physical trace. Nothing in the model records one — there is no trace, no burn, no stalled
  *   engine among Decor, Timeline, Weather and the rest.
- * - Proximity. Hynek draws his first tier at about 150 m, and no distance is stored — correctly, no
- *   witness measured one. But it is COMPUTABLE where the witness moved: two poses at different
- *   places looking at the same shape give two lines of sight, and where they cross is how far away
- *   it was. Masse walked from ninety metres to six, so Valensole has the baseline for it. Not done
- *   here yet, and marked unsupported until it is rather than guessed at; the assumption it rests on
- *   (that the phenomenon held still between the two instants) has to be stated when it is.
  * - Radar. No instrument in the registry is one, so no recording can state a radar-visual.
  *
  * An earlier version read all four off the recording's TAGS, which was wrong twice over: a tag is a
@@ -47,10 +46,14 @@ export class HynekAssessor implements Assessor {
     const entities = sighting.decor
       .map((object, index) => ({ object, index }))
       .filter(({ object }) => object.kind === "entity")
+    const nearestM = HynekAssessor.nearest(sighting)
+    const close = nearestM !== undefined && nearestM <= CLOSE_ENCOUNTER_M
     return {
       verdict: entities.length > 0
         ? "ce3"
-        : daylight === undefined ? undefined : daylight ? "dd" : "nl",
+        : close
+          ? "ce1"
+          : daylight === undefined ? undefined : daylight ? "dd" : "nl",
       criteria: [
         {
           id: "entities",
@@ -61,7 +64,14 @@ export class HynekAssessor implements Assessor {
         // Marked unsupported and not merely unanswered: an author cannot fill these in, because
         // there is nowhere in the format to put them. See the class comment for each.
         { id: "traces", paths: [], unsupported: true },
-        { id: "proximity", paths: [], unsupported: true },
+        {
+          id: "proximity",
+          // Derived and never stated: no witness measured a distance, and this one comes out of
+          // their own walk against the object's growing apparent size (see ShapeDistance), on an
+          // assumption about the object holding still that nothing in the file can confirm.
+          basis: nearestM === undefined ? undefined : "derived",
+          paths: nearestM === undefined ? [] : ["timeline", "witnessTrack"]
+        },
         { id: "radar", paths: [], unsupported: true },
         {
           id: "daylight",
@@ -73,6 +83,15 @@ export class HynekAssessor implements Assessor {
         }
       ]
     }
+  }
+
+  /** How close the nearest shape ever came, metres, or undefined when nothing in the recording
+   * establishes a distance at all — which is the common case and the correct answer for it. */
+  private static nearest(sighting: Sighting): number | undefined {
+    const distances = sighting.timeline.sourceIds
+      .map(sourceId => ShapeDistance.of(sighting, sourceId)?.nearestM)
+      .filter((m): m is number => m !== undefined)
+    return distances.length > 0 ? Math.min(...distances) : undefined
   }
 
   /** Whether the Sun stood high enough for a shape to be seen as a shape, or undefined when the

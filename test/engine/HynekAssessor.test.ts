@@ -53,13 +53,16 @@ describe("HynekAssessor", () => {
       .assess(fromSightingJson({ version: 1, timeline: { keyframes: [] }, ...evening } as SightingRecordingJson))
     const of = (id: string) => assessment.criteria.find(criterion => criterion.id === id)!
 
-    for (const id of ["traces", "proximity", "radar"]) {
+    for (const id of ["traces", "radar"]) {
       expect(of(id).unsupported).toBe(true)
       expect(of(id).basis).toBeUndefined()
     }
-    // Answerable now, and unanswered here: this recording places no being.
+    // Both answerable now, and both unanswered here: this recording places no being, and its
+    // witness never moved, so nothing establishes a distance.
     expect(of("entities").unsupported).toBeUndefined()
     expect(of("entities").basis).toBeUndefined()
+    expect(of("proximity").unsupported).toBeUndefined()
+    expect(of("proximity").basis).toBeUndefined()
     expect(of("daylight").unsupported).toBeUndefined()
   })
 
@@ -115,4 +118,76 @@ describe("HynekAssessor", () => {
     expect(assessment.score).toBeUndefined()
     expect(assessment.verdict).toBe("dd")
   })
+
+  it("reaches CE1 from a distance nobody stored, worked out from the witness's own walk", async () => {
+    // Valensole's approach: 83.5 m walked while the craft grows from 2.22° to 30.09°, which puts it
+    // at 90 m and then 6.5 m. Under Hynek's 150 m line, so a close encounter — from angles and a
+    // track, with no metre asserted anywhere in the file. See ShapeDistance.
+    const walk = {
+      time: { year: 1965, month: 7, day: 1, hour: 5, minute: 45 },
+      utcOffsetHours: 1,
+      place: [{ lat: 43.845508, lng: 5.9632 }],
+      timeline: {
+        keyframes: [
+          { t: 0, shapes: [shape(2.2234)] },
+          { t: 55000, shapes: [shape(30.0897)] }
+        ]
+      },
+      witnessTrack: {
+        keyframes: [
+          { t: 0, pose: pose(43.845508) },
+          { t: 55000, pose: pose(43.844758) }
+        ]
+      }
+    }
+
+    expect(await classify(walk)).toBe("ce1")
+
+    const assessment = await hynek.create()
+      .assess(fromSightingJson({ version: 1, ...walk } as unknown as SightingRecordingJson))
+    const proximity = assessment.criteria.find(criterion => criterion.id === "proximity")!
+    expect(proximity.basis).toBe("derived")
+    expect(proximity.unsupported).toBeUndefined()
+  })
+
+  it("still puts beings above proximity, since CE3 outranks CE1", async () => {
+    const walk = {
+      time: { year: 1965, month: 7, day: 1, hour: 5, minute: 45 },
+      utcOffsetHours: 1,
+      place: [{ lat: 43.845508, lng: 5.9632 }],
+      decor: [{ id: "etre-1", kind: "entity" as const, eastM: 2, northM: -6, sizeM: { heightM: 1 } }],
+      timeline: {
+        keyframes: [
+          { t: 0, shapes: [shape(2.2234)] },
+          { t: 55000, shapes: [shape(30.0897)] }
+        ]
+      },
+      witnessTrack: {
+        keyframes: [
+          { t: 0, pose: pose(43.845508) },
+          { t: 55000, pose: pose(43.844758) }
+        ]
+      }
+    }
+
+    expect(await classify(walk)).toBe("ce3")
+  })
+})
+
+const shape = (widthDeg: number) => ({
+  sourceId: "ufo-1",
+  shape: {
+    kind: "oval" as const,
+    bounds: { x: 0, y: 0, width: 1, height: 1 },
+    color: "#c9c6bd",
+    angle: 0,
+    transparency: 0,
+    haloScale: 0,
+    selected: false,
+    angular: { widthDeg, heightDeg: widthDeg / 2 }
+  }
+})
+
+const pose = (lat: number) => ({
+  lat, lng: 5.9632, elevationM: 600, headingDeg: 180, pitchDeg: 0, fovDeg: 60
 })
