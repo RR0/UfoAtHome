@@ -29,5 +29,20 @@ export const ASSESSMENT_SOURCES: DataSource<Assessor>[] = [
         return new CoverageAssessor().assess(sighting)
       }
     })
+  },
+  {
+    id: "hynek",
+    name: "Hynek",
+    // Whose scheme it is. The link goes to this project's own pages on evaluation methods rather
+    // than to a publisher, so a reader lands where the terms are explained in their language.
+    credit: "J. Allen Hynek",
+    creditUrl: "https://rr0.org/science/crypto/ufo/enquete/methode/",
+    create: () => ({
+      about: "observation",
+      assess: async (sighting: Sighting): Promise<Assessment> => {
+        const { HynekAssessor } = await import("./assessors/HynekAssessor.js")
+        return new HynekAssessor().assess(sighting)
+      }
+    })
   }
 ]

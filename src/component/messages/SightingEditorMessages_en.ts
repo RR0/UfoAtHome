@@ -215,4 +215,10 @@ export const sightingEditorMessages_en: SightingEditorMessages = {
   assessmentGroup: "Assessment",
   coverageName: "Witness coverage",
   questionUnanswered: "Nothing in this recording answers one of the questions a reconstruction needs settled",
+  "hynek.nl": "NL — nocturnal light",
+  "hynek.dd": "DD — daylight disc",
+  "hynek.rv": "RV — radar-visual",
+  "hynek.ce1": "CE1 — close encounter",
+  "hynek.ce2": "CE2 — with a physical trace",
+  "hynek.ce3": "CE3 — with entities",
 }
