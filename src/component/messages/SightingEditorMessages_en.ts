@@ -213,7 +213,7 @@ export const sightingEditorMessages_en: SightingEditorMessages = {
   testimonyYes: "yes",
   testimonyNo: "no",
   assessmentGroup: "Assessment",
-  coverageName: "Witness coverage",
+  coverageName: "Witness info",
   questionUnanswered: "Nothing in this recording answers one of the questions a reconstruction needs settled",
   durationRequired: "The observation needs a length to be replayed at all — state one, or an end time, which may be approximate",
   questionsUnanswered: "{count} of the questions a full reconstruction answers are unanswered here",

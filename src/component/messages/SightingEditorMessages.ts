@@ -535,7 +535,8 @@ export interface SightingEditorMessages extends SightingLabels {
   assessmentGroup: string
   /** What the coverage assessment is called on its chip. Names what is measured — how much of the
    * reconstruction the witness's own account settles — rather than repeating the registry's id,
-   * and the chip's value is the bare percentage beside it. */
+   * and the chip's value is the bare percentage beside it. Says "info" rather than "coverage":
+   * coverage is the measuring word, and what a reader wants named is the thing measured. */
   coverageName: string
   /** Marks a field, and its panel's tab, that would answer a question nothing in the recording
    * does. Not an error: the witness said nothing, the author typed nothing wrong. */
