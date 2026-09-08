@@ -1,6 +1,5 @@
 node_modules/
 dist/
-dist-embed-ufo/
 dist-embed-scene/
 dist-embed-sighting/
 dist-embed-sighting-editor/

@@ -211,7 +211,7 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
     </div>
 
     <p>That is a live element, not a picture — the same one those two lines would give you. Which of
-      the four components to use instead, and everything they can be told, is on
+      the three components to use instead, and everything they can be told, is on
       <a href="/docs/components/">the components page</a>.</p>
   </div>
 </section>
@@ -290,7 +290,7 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
     </div>
 
     <p>C'est un élément vivant, pas une image — celui-là même que ces deux lignes vous donneraient.
-      Lequel des quatre composants employer à la place, et tout ce qu'on peut leur dire, est sur
+      Lequel des trois composants employer à la place, et tout ce qu'on peut leur dire, est sur
       <a href="/docs/components/">la page des composants</a>.</p>
   </div>
 </section>

@@ -214,7 +214,7 @@ ${script ? `<script type="module">\n${script}\n</script>` : ""}
 </footer>`
   }
 
-  /** A title or a label as TEXT, not as markup. A component's page is called `<rr0-ufo>`, and left
+  /** A title or a label as TEXT, not as markup. A component's page is called `<rr0-scene>`, and left
    * raw the browser reads that as a tag: the heading came out empty and an unknown element was
    * created inside it. Titles are written plainly and escaped where they are placed, rather than
    * being written pre-escaped, which would have to be undone for every attribute. */

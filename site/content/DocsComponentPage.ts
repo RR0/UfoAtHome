@@ -23,11 +23,11 @@ interface ComponentDoc {
  * One page per component, under the hub at `/docs/components/`.
  *
  * They were four sections of one page, and the trouble was not the length but that everything
- * about all four was in front of you at once: somebody wanting to know what `<rr0-ufo>` answers to
- * scrolled through the sky renderer and the whole authoring toolbar to find out. What you need
- * from one of them is never what you need from the other three at the same moment.
+ * about all of them was in front of you at once: somebody wanting to know what `<rr0-scene>` answers to
+ * scrolled through the whole authoring toolbar to find out. What you need from one of them is
+ * never what you need from the other two at the same moment.
  *
- * One class rather than four: the four differ only in their prose, and four near-identical classes
+ * One class rather than three: the three differ only in their prose, and three near-identical classes
  * would be four places to keep a breadcrumb and a hero in step.
  */
 export class DocsComponentPage extends DocsSection {
@@ -96,12 +96,12 @@ export class DocsComponentPage extends DocsSection {
   }
 }
 
-/** The four, in the order they compose one another: each adds to the one before it. */
+/** The three, in the order they compose one another: each adds to the one before it. */
 export const COMPONENT_DOCS: ComponentDoc[] = [
   {
-    slug: "docs/components/ufo",
-    subpath: "ufo",
-    size: { en: "16 KB", fr: "16 Ko" },
+    slug: "docs/components/scene",
+    subpath: "scene",
+    size: { en: "238 KB", fr: "238 Ko" },
     events: {
       en: `<div class="table-scroll">
     <table>
@@ -120,22 +120,43 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
     </table>
     </div>`
     },
-    tag: "rr0-ufo",
+    tag: "rr0-scene",
     lede: {
-      en: "The shape, and playback",
-      fr: "La forme, et la lecture"
+      en: "The phenomenon, the sky and the ground",
+      fr: "Le phénomène, le ciel et le sol"
     },
     description: {
-      en: "What <rr0-ufo> draws, the markup it takes, and every attribute, property and method it answers to.",
-      fr: "Ce que <rr0-ufo> dessine, le balisage qu'il accepte, et chaque attribut, propriété et méthode auquel il répond."
+      en: "What <rr0-scene> draws — the shape in the real sky and horizon — the markup it takes, and every attribute, property and method it answers to.",
+      fr: "Ce que <rr0-scene> dessine — la forme dans le vrai ciel et le vrai horizon — le balisage qu'il accepte, et chaque attribut, propriété et méthode auquel il répond."
     },
     body: {
       en: `
 <section class="band">
   <div class="wrap prose-wide">
-    <p>The lightweight one: a canvas plus play/pause/loop/seek. Use it where a page only needs to
-      replay an already-drawn shape and wants no sky behind it.</p>
-    <pre><code>&lt;rr0-ufo src="sighting.json"&gt;&lt;/rr0-ufo&gt;</code></pre>
+    <p>The shape a witness drew, standing in the real sky, horizon, weather and ground of the
+      recording's own date, hour and place, and hidden by whatever stood in front of it — with the
+      playback controls under it. This is the element the two others build on.</p>
+    <pre><code>&lt;rr0-scene src="sighting.json"&gt;&lt;/rr0-scene&gt;</code></pre>
+    <div class="table-scroll">
+    <table>
+      <tr><th>Member</th><th>Kind</th><th>What it does</th></tr>
+      <tr><td><code>src</code></td><td>attribute</td><td>URL of a recording, fetched on connect and whenever it changes</td></tr>
+      <tr><td><code>sightingData</code></td><td>property</td><td>The recording as a plain object — read it back after editing, or set it instead of using <code>src</code></td></tr>
+      <tr><td><code>loadFromSrc(url)</code></td><td>method (async)</td><td>What the attribute triggers internally. Await it when you need the recording to be IN before doing anything else</td></tr>
+      <tr><td><code>ufoElement</code></td><td>property (read)</td><td>The playback layer it composes — the timeline, the controls, the canvas the pointer works on — and through it every playback member below</td></tr>
+      <tr><td><code>sceneRenderer</code></td><td>property (read)</td><td>The 3D renderer, for what nothing else exposes</td></tr>
+      <tr><td><code>show-compass</code></td><td>attribute</td><td>N/NE/E/… labels around the horizon. Off by default: useful while authoring a heading, noise while watching</td></tr>
+      <tr><td><code>show-witness-map</code> / <code>hide-milestones</code></td><td>attribute</td><td>Passed straight down to the playback layer below — write them on whichever tag your page actually contains</td></tr>
+    </table>
+    </div>
+    <p>Hovering it names what is under the pointer — a star with its magnitude and height, a planet,
+      a comet, a building, another witness — and says nothing where the ground hides what you are
+      pointing at.</p>
+
+    <h2>Playback, on <code>ufoElement</code></h2>
+    <p>Everything about replaying the recording lives one property down, on the playback layer —
+      <code>scene.ufoElement.play()</code> — the same layer the two other components reach through
+      their own <code>scene</code>.</p>
     <div class="table-scroll">
     <table>
       <tr><th>Member</th><th>Kind</th><th>What it does</th></tr>
@@ -172,9 +193,30 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       fr: `
 <section class="band">
   <div class="wrap prose-wide">
-    <p>Le plus léger : un canevas plus lecture/pause/boucle/déplacement. À utiliser là où une page ne
-      fait que rejouer une forme déjà dessinée et ne veut pas de ciel derrière.</p>
-    <pre><code>&lt;rr0-ufo src="sighting.json"&gt;&lt;/rr0-ufo&gt;</code></pre>
+    <p>La forme dessinée par un témoin, debout dans le ciel, l'horizon, la météo et le sol réels de
+      la date, de l'heure et du lieu de l'enregistrement, cachée par ce qui se tenait devant — avec
+      les commandes de lecture en dessous. C'est l'élément sur lequel les deux autres se construisent.</p>
+    <pre><code>&lt;rr0-scene src="sighting.json"&gt;&lt;/rr0-scene&gt;</code></pre>
+    <div class="table-scroll">
+    <table>
+      <tr><th>Membre</th><th>Nature</th><th>Rôle</th></tr>
+      <tr><td><code>src</code></td><td>attribut</td><td>URL d'un enregistrement, chargée à la connexion et à chaque changement</td></tr>
+      <tr><td><code>sightingData</code></td><td>propriété</td><td>L'enregistrement comme objet simple — à relire après modification, ou à poser au lieu d'utiliser <code>src</code></td></tr>
+      <tr><td><code>loadFromSrc(url)</code></td><td>méthode (async)</td><td>Ce que déclenche l'attribut. À attendre quand l'enregistrement doit être arrivé avant toute autre chose</td></tr>
+      <tr><td><code>ufoElement</code></td><td>propriété (lecture)</td><td>La couche de lecture qu'il compose — la chronologie, les commandes, le canevas du pointeur — et par elle tous les membres de lecture ci-dessous</td></tr>
+      <tr><td><code>sceneRenderer</code></td><td>propriété (lecture)</td><td>Le moteur de rendu 3D, pour ce que rien d'autre n'expose</td></tr>
+      <tr><td><code>show-compass</code></td><td>attribut</td><td>Les repères N/NE/E/… sur l'horizon. Absent par défaut : utile pour régler un cap, du bruit pour regarder</td></tr>
+      <tr><td><code>show-witness-map</code> / <code>hide-milestones</code></td><td>attribut</td><td>Transmis tels quels à la couche de lecture ci-dessous — à écrire sur la balise que votre page contient réellement</td></tr>
+    </table>
+    </div>
+    <p>Le survol nomme ce qui est sous le curseur — une étoile avec sa magnitude et sa hauteur, une
+      planète, une comète, un bâtiment, un autre témoin — et ne dit rien là où le sol cache ce que
+      vous pointez.</p>
+
+    <h2>La lecture, sur <code>ufoElement</code></h2>
+    <p>Tout ce qui rejoue l'enregistrement vit une propriété plus bas, sur la couche de lecture —
+      <code>scene.ufoElement.play()</code> — la même que les deux autres composants atteignent par
+      leur propre <code>scene</code>.</p>
     <div class="table-scroll">
     <table>
       <tr><th>Membre</th><th>Nature</th><th>Rôle</th></tr>
@@ -205,65 +247,6 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       tuiles à un tiers dès la première ouverture, et ce n'est pas à une page de les dépenser au nom
       d'un lecteur sans le dire. Dans les deux cas le lecteur garde les deux boutons, à côté de celui
       du plein écran : une page qui pose un défaut n'interdit pas le contraire.</p>
-  </div>
-</section>
-`
-    }
-  },
-  {
-    slug: "docs/components/scene",
-    subpath: "scene",
-    size: { en: "238 KB", fr: "238 Ko" },
-    tag: "rr0-scene",
-    lede: {
-      en: "The sky and the ground",
-      fr: "Le ciel et le sol"
-    },
-    description: {
-      en: "What <rr0-scene> adds to the shape — the real sky and horizon — and what it exposes on top.",
-      fr: "Ce que <rr0-scene> ajoute à la forme — le vrai ciel et le vrai horizon — et ce qu'il expose en plus."
-    },
-    body: {
-      en: `
-<section class="band">
-  <div class="wrap prose-wide">
-    <p>Everything <code>&lt;rr0-ufo&gt;</code> has, composited over the real sky and horizon of the
-      recording's own date, hour and place. A drop-in upgrade: same markup, same members.</p>
-    <pre><code>&lt;rr0-scene src="sighting.json"&gt;&lt;/rr0-scene&gt;</code></pre>
-    <div class="table-scroll">
-    <table>
-      <tr><th>Member</th><th>Kind</th><th>What it does</th></tr>
-      <tr><td><code>ufoElement</code></td><td>property (read)</td><td>The <code>&lt;rr0-ufo&gt;</code> it composes — and through it every playback member above</td></tr>
-      <tr><td><code>sceneRenderer</code></td><td>property (read)</td><td>The 3D renderer, for what nothing else exposes</td></tr>
-      <tr><td><code>show-compass</code></td><td>attribute</td><td>N/NE/E/… labels around the horizon. Off by default: useful while authoring a heading, noise while watching</td></tr>
-      <tr><td><code>show-witness-map</code> / <code>hide-milestones</code></td><td>attribute</td><td>Passed straight down to the <code>&lt;rr0-ufo&gt;</code> above — write them on whichever tag your page actually contains</td></tr>
-    </table>
-    </div>
-    <p>Hovering it names what is under the pointer — a star with its magnitude and height, a planet,
-      a comet, a building, another witness — and says nothing where the ground hides what you are
-      pointing at.</p>
-  </div>
-</section>
-`,
-      fr: `
-<section class="band">
-  <div class="wrap prose-wide">
-    <p>Tout ce qu'a <code>&lt;rr0-ufo&gt;</code>, composé sur le ciel et l'horizon réels de la date,
-      de l'heure et du lieu de l'enregistrement. Un remplacement direct : même balisage, mêmes
-      membres.</p>
-    <pre><code>&lt;rr0-scene src="sighting.json"&gt;&lt;/rr0-scene&gt;</code></pre>
-    <div class="table-scroll">
-    <table>
-      <tr><th>Membre</th><th>Nature</th><th>Rôle</th></tr>
-      <tr><td><code>ufoElement</code></td><td>propriété (lecture)</td><td>Le <code>&lt;rr0-ufo&gt;</code> qu'il compose — et par lui tous les membres de lecture ci-dessus</td></tr>
-      <tr><td><code>sceneRenderer</code></td><td>propriété (lecture)</td><td>Le moteur de rendu 3D, pour ce que rien d'autre n'expose</td></tr>
-      <tr><td><code>show-compass</code></td><td>attribut</td><td>Les repères N/NE/E/… sur l'horizon. Absent par défaut : utile pour régler un cap, du bruit pour regarder</td></tr>
-      <tr><td><code>show-witness-map</code> / <code>hide-milestones</code></td><td>attribut</td><td>Transmis tels quels au <code>&lt;rr0-ufo&gt;</code> ci-dessus — à écrire sur la balise que votre page contient réellement</td></tr>
-    </table>
-    </div>
-    <p>Le survol nomme ce qui est sous le curseur — une étoile avec sa magnitude et sa hauteur, une
-      planète, une comète, un bâtiment, un autre témoin — et ne dit rien là où le sol cache ce que
-      vous pointez.</p>
   </div>
 </section>
 `

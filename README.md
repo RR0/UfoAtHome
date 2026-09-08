@@ -8,23 +8,23 @@ recommendation](https://rr0.org/time/1/9/6/8/07/29/Symposium/Shepard/index_fr.ht
 testimony is more faithful than an oral or written one.
 
 Originally a Java applet (2003), the project has been rewritten from scratch in TypeScript: a small,
-dependency-light engine (keyframe timeline, recording, playback, Canvas2D rendering) wrapped in four vanilla
+dependency-light engine (keyframe timeline, recording, playback, a three.js scene) wrapped in three vanilla
 [Web Components](https://developer.mozilla.org/en-US/docs/Web/API/Web_components) — no UI framework, no build step
-required by the consuming page. Two of the four (`<rr0-scene>`, and `<rr0-sighting>` which always composes it) pull
-in [Three.js](https://threejs.org/) for the 3D backdrop — see [`<rr0-scene>`](#rr0-scene--3d-decor) below for why
-that's an isolated, opt-in bundle rather than a project-wide dependency.
+required by the consuming page. All three pull in [Three.js](https://threejs.org/): the phenomenon itself stands in
+the scene, so there is no lighter, sky-less variant — see [`<rr0-scene>`](#rr0-scene--the-scene-and-playback) below
+for what that buys.
 
 ### Naming
 
-`<rr0-ufo>` is the UFO's own 2D shape/appearance/movement layer — no "player" suffix, since read-only playback is
-its default behavior and `<rr0-sighting-editor>` is the one that needs a qualifier (it *adds* recording on top).
-`<rr0-scene>` is named without "ufo" on purpose: it only renders a generic 3D decor (sky/horizon/stars) from a
-real-world time and place, with no UFO-specific logic of its own — today it composes a nested `<rr0-ufo>` for the
-common case (see its section below), but the decor itself could back other kinds of reconstructions later. A fully
-generic version (accepting arbitrary overlay content instead of always creating its own `<rr0-ufo>`) is a natural
-follow-up, not implemented yet. `<rr0-sighting>` (renamed from `<rr0-ufo-witnesses>` — see below) is the standard
-way to display any real sighting, whether it has one witness or several: a witness account always implies a real
-place and time, so it always composes `<rr0-scene>`, never a bare `<rr0-ufo>`.
+`<rr0-scene>` is named without "ufo" on purpose: it renders a generic 3D scene (sky/horizon/stars/decor) from a
+real-world time and place, and stands the witness's own phenomenon in it. Under it lives a playback layer —
+`UfoElement`, the timeline, the controls, the canvas the pointer works on — reached as `scene.ufoElement`; it was a
+component of its own (`<rr0-ufo>`, the shape painted on a bare background) until 0.54.0, when the phenomenon moved
+into the scene and a shape with no sky stopped being a thing this project draws. Read-only playback needs no
+"player" suffix, since it is every component's default behavior, and `<rr0-sighting-editor>` is the one that needs
+a qualifier (it *adds* recording on top). `<rr0-sighting>` (renamed from `<rr0-ufo-witnesses>` — see below) is the
+standard way to display any real sighting, whether it has one witness or several: a witness account always implies
+a real place and time, so it always composes `<rr0-scene>`.
 
 The project's own site is **[ufoathome.org](https://ufoathome.org)**: [the demos](https://ufoathome.org/demos/)
 (every reconstruction running side by side, including the same sighting through three different instruments),
@@ -39,12 +39,11 @@ whole recording file and hands out the two lines that embed one. See the
 npm install @rr0/ufoathome
 ```
 
-Four self-contained, pre-built ES modules are published — each self-registers its custom element as soon as it's
+Three self-contained, pre-built ES modules are published — each self-registers its custom element as soon as it's
 imported, no explicit setup call needed:
 
 ```html
-<script type="module" src="/node_modules/@rr0/ufoathome/dist-embed-ufo/rr0-ufo.mjs"></script>
-<script type="module" src="/node_modules/@rr0/ufoathome/dist-embed/rr0-sighting-editor.mjs"></script>
+<script type="module" src="/node_modules/@rr0/ufoathome/dist-embed-sighting-editor/rr0-sighting-editor.mjs"></script>
 <script type="module" src="/node_modules/@rr0/ufoathome/dist-embed-scene/rr0-scene.mjs"></script>
 <script type="module" src="/node_modules/@rr0/ufoathome/dist-embed-sighting/rr0-sighting.mjs"></script>
 ```
@@ -52,24 +51,79 @@ imported, no explicit setup call needed:
 or, from a bundler:
 
 ```ts
-import "@rr0/ufoathome/ufo"      // registers <rr0-ufo>
 import "@rr0/ufoathome/editor"   // registers <rr0-sighting-editor> (and <rr0-scene>, which it composes)
-import "@rr0/ufoathome/scene"    // registers <rr0-scene> (and <rr0-ufo>, which it composes)
+import "@rr0/ufoathome/scene"    // registers <rr0-scene>
 import "@rr0/ufoathome/sighting" // registers <rr0-sighting> (and <rr0-scene>, which it composes)
 ```
 
-Only load the one(s) a given page actually needs — `rr0-scene.mjs` and `rr0-sighting.mjs` in particular pull in
-Three.js and are far heavier than the other two (see their sections below), so pages that just need playback of an
-already-drawn shape with no astronomy backdrop should stick to `rr0-ufo.mjs`.
+Only load the one a given page actually needs: each is self-contained and each carries Three.js and a star
+catalogue, which is what a real sky costs. A page that loaded the former `rr0-ufo.mjs` still works — ufoathome.org
+forwards that address to `rr0-scene.mjs`, whose bundle registers the tag as its own inner layer.
 
-## `<rr0-ufo>` — read-only playback
+## `<rr0-sighting-editor>` — full editor
 
-The lightweight component (~9KB): a canvas plus Play/Pause/Loop/seek controls. Use it wherever a page only needs to
-*replay* an already-recorded sighting — this is the one to embed in content pages.
+The authoring component (~540KB gzip — see below for why): everything `<rr0-scene>` has, plus a shape/appearance
+toolbar (oval/polygon presets, color, transparency, halo, and the object's real reported
+size/distance — see [Apparent size](#apparent-size)) and drag-to-record. It composes a nested
+`<rr0-scene>` internally, so the shape being drawn is always seen against the
+sighting's own real sky, computed live from whatever latitude/longitude/heading/orientation/observation-time
+fields the toolbar currently holds (see [Architecture](#architecture)). This absorbs `<rr0-scene>`'s own
+Three.js/`astronomy-engine` weight on top of the authoring-only code this element already carried (Recorder
+engine, SamplingClock, appearance toolbar) — a page that only needs to *play* a sighting (the common case: an
+rr0.org case dossier) should embed `<rr0-sighting>` (or `<rr0-scene>` alone) directly, never
+this heavier authoring component.
 
 ```html
-<rr0-ufo src="sighting.json"></rr0-ufo>
+<rr0-sighting-editor></rr0-sighting-editor>
+<rr0-sighting-editor src="sighting.json"></rr0-sighting-editor>
 ```
+
+With `src`, the editor opens on an existing recording instead of an empty canvas — the same
+attribute the three other elements take. That is what makes an address per observation possible:
+[ufoathome.org's editor](https://ufoathome.org/editor/) maps its own `?sighting=` parameter onto
+this attribute, and [its player](https://ufoathome.org/player/) does the same for read-only replay.
+Any path the site does not otherwise serve becomes that parameter, so
+
+- `https://ufoathome.org/player/?sighting=/demo-data/witness-socorro.json`, or simply
+- `https://ufoathome.org/Socorro`
+
+open that observation. A bare name with no `/` is looked for among the site's own demos first, then
+as an rr0.org case directory — the shape the links that predate that site were written in, kept
+working. Either page also takes a full address of your own; the editor additionally has a
+**Load from URL** field, which is an explicit gesture by whoever is sitting at the keyboard.
+
+Usage: click **Record**, move the pointer over the canvas to draw the UFO's path, click **Stop**, then **Play** to
+replay it. The playback layer's `enableClickToPlay` is set to `false` here — a completed recording drag also
+fires a native "click" on the canvas, which would otherwise spuriously toggle playback right after recording.
+
+All of the toolbar's own labels (shape presets, Color/Transparency/Halo, Add shape, Record/Stop, Export,
+Duration) are translated (English/French) the same way the playback layer's own labels are — based on
+the host page's own `lang` then `navigator.languages`, no picker UI.
+
+| Member | Kind | Description |
+|---|---|---|
+| `src` | attribute | URL of a `SightingRecordingJson` to open in the editor, fetched on connect and whenever the attribute changes |
+| `sightingData` | property (get/set) | Delegates to the nested scene's `sightingData` |
+| `appearance` | property (get/set, accepts a partial object on set) | `{ presetId: "oval" \| "polygon", color: string, transparency: number, haloScale: number }` — the UFO's appearance used for the next recording |
+
+## `<rr0-scene>` — the scene, and playback
+
+The element the two others build on (~530KB gzip — [Three.js](https://threejs.org/) plus
+[`astronomy-engine`](https://github.com/cosinekitty/astronomy)'s planetary/lunar position tables, which don't
+tree-shake since they're one shared data table used internally for every body): the witness's own phenomenon
+standing in a 3D sky/horizon/starfield/decor scene computed from the recording's real time and place, with the
+playback controls under it. Its own members are `src`, `sightingData`, `loadFromSrc`, `enableClickToPlay` (forwarded
+to the playback layer), `ufoElement` (that layer), `sceneRenderer`, and the attributes `show-compass`,
+`show-witness-map` and `hide-milestones`. Click-to-play/pause works anywhere on the scene (the playback layer's
+transparent canvas covers the whole stage), and the fullscreen button fullscreens the *whole* scene — it sets the
+layer's `fullscreenTarget` to its own outer stage for this.
+
+### Playback, on `ufoElement`
+
+Everything about replaying a recording lives one property down, on the playback layer every component composes —
+`scene.ufoElement.play()`, and `sighting.scene.ufoElement.play()` from the outermost. The layer is the former
+`<rr0-ufo>` (see [Naming](#naming)): the timeline, the controls, the seek bar and the canvas the pointer works on,
+which since 0.54.0 draws nothing but the editing handles — the shape itself stands in the scene.
 
 | Member | Kind | Description |
 |---|---|---|
@@ -122,63 +176,6 @@ reader is reading it in, and a bilingual site that serves the same article at tw
 `navigator.languages` cannot know. A page that declares nothing falls through to the browser's list exactly as
 before.
 
-## `<rr0-sighting-editor>` — full editor
-
-The authoring component (~540KB gzip — see below for why): everything `<rr0-ufo>` has, plus a shape/appearance
-toolbar (oval/polygon presets, color, transparency, halo, and the object's real reported
-size/distance — see [Apparent size](#apparent-size)) and drag-to-record. It composes a nested
-`<rr0-scene>` internally — not a bare `<rr0-ufo>` — so the shape being drawn is always seen against the
-sighting's own real sky, computed live from whatever latitude/longitude/heading/orientation/observation-time
-fields the toolbar currently holds (see [Architecture](#architecture)). This absorbs `<rr0-scene>`'s own
-Three.js/`astronomy-engine` weight on top of the authoring-only code this element already carried (Recorder
-engine, SamplingClock, appearance toolbar) — a page that only needs to *play* a sighting (the common case: an
-rr0.org case dossier) should still embed the much lighter `<rr0-ufo>` (or `<rr0-scene>` alone) directly, never
-this heavier authoring component.
-
-```html
-<rr0-sighting-editor></rr0-sighting-editor>
-<rr0-sighting-editor src="sighting.json"></rr0-sighting-editor>
-```
-
-With `src`, the editor opens on an existing recording instead of an empty canvas — the same
-attribute the three other elements take. That is what makes an address per observation possible:
-[ufoathome.org's editor](https://ufoathome.org/editor/) maps its own `?sighting=` parameter onto
-this attribute, and [its player](https://ufoathome.org/player/) does the same for read-only replay.
-Any path the site does not otherwise serve becomes that parameter, so
-
-- `https://ufoathome.org/player/?sighting=/demo-data/witness-socorro.json`, or simply
-- `https://ufoathome.org/Socorro`
-
-open that observation. A bare name with no `/` is looked for among the site's own demos first, then
-as an rr0.org case directory — the shape the links that predate that site were written in, kept
-working. Either page also takes a full address of your own; the editor additionally has a
-**Load from URL** field, which is an explicit gesture by whoever is sitting at the keyboard.
-
-Usage: click **Record**, move the pointer over the canvas to draw the UFO's path, click **Stop**, then **Play** to
-replay it. The nested `<rr0-ufo>`'s `enableClickToPlay` is set to `false` here — a completed recording drag also
-fires a native "click" on the canvas, which would otherwise spuriously toggle playback right after recording.
-
-All of the toolbar's own labels (shape presets, Color/Transparency/Halo, Add shape, Record/Stop, Export,
-Duration) are translated (English/French) the same way `<rr0-ufo>`'s own labels are — based on
-the host page's own `lang` then `navigator.languages`, no picker UI.
-
-| Member | Kind | Description |
-|---|---|---|
-| `src` | attribute | URL of a `SightingRecordingJson` to open in the editor, fetched on connect and whenever the attribute changes |
-| `sightingData` | property (get/set) | Delegates to the nested `<rr0-ufo>`'s `sightingData` |
-| `appearance` | property (get/set, accepts a partial object on set) | `{ presetId: "oval" \| "polygon", color: string, transparency: number, haloScale: number }` — the UFO's appearance used for the next recording |
-
-## `<rr0-scene>` — 3D decor
-
-The environmental variant (~530KB gzip — [Three.js](https://threejs.org/) plus
-[`astronomy-engine`](https://github.com/cosinekitty/astronomy)'s planetary/lunar position tables, which don't
-tree-shake since they're one shared data table used internally for every body — this is by far the heaviest
-of the four bundles, load it only on pages that want it): everything `<rr0-ufo>` has, composited over a 3D
-sky/horizon/starfield backdrop instead of a plain background. Same markup and members as `<rr0-ufo>` (`src`,
-`sightingData`, `loadFromSrc`, `enableClickToPlay`) — it's a drop-in upgrade, including click-to-play/pause
-anywhere on the scene (the nested `<rr0-ufo>`'s transparent canvas covers the whole stage). The fullscreen button
-fullscreens the *whole* scene (3D backdrop included), not just the nested `<rr0-ufo>`'s own overlay — it sets the
-nested element's `fullscreenTarget` to its own outer stage for this.
 
 ```html
 <rr0-scene src="sighting.json"></rr0-scene>
@@ -349,7 +346,7 @@ to test "was it a helicopter" — is a different statement, and a different obje
 
 The standard way to display any real sighting, whether it has one witness or several — renamed from
 `<rr0-ufo-witnesses>` once it stopped being just a multi-witness selector (see [Naming](#naming)). It composes a
-nested `<rr0-scene>` (not a bare `<rr0-ufo>`) the same way `<rr0-sighting-editor>` does, since a witness recording is
+nested `<rr0-scene>` the same way `<rr0-sighting-editor>` does, since a witness recording is
 always a real sighting and always needs the real sky/ground backdrop.
 
 ```html
@@ -358,7 +355,7 @@ always a real sighting and always needs the real sky/ground backdrop.
 
 `src` accepts either a single witness's `sighting.json` directly (the common case — no extra file needed) or, for
 a case with several witnesses, a small manifest: a plain JSON array of each witness's own `SightingRecordingJson`
-URL (typically relative to the case's own page, same as `<rr0-ufo>`'s own `src`):
+URL (typically relative to the case's own page, same as `<rr0-scene>`'s own `src`):
 
 ```json
 ["chiles-sighting.json", "whitted-sighting.json"]
@@ -432,7 +429,7 @@ fold-outs on the right, both closed until asked for:
   resolved, plus the bundled thunder sound's own required attribution — see [`CREDITS.md`](CREDITS.md)).
 
 All of this component's own labels (Testimony by, About, Close, Observation/Date/Location/Case, Credits) are
-translated (English/French) the same way as `<rr0-ufo>`'s own labels.
+translated (English/French) the same way as the playback layer's own labels.
 
 ## Data format
 
@@ -923,14 +920,15 @@ case's `sighting.json` from its `RR0Event`).
 - `src/engine/` — framework-agnostic core: `model/` (`Shape`, `Timeline`, `Sighting`), `record/` (`Recorder`,
   `SamplingClock`), `playback/` (`Player`), `persistence/` (JSON (de)serialization), `astronomy/` (vanilla solar
   position), `interop/` (real `@rr0/data` conversion, Node-only).
-- `src/render/CanvasRenderer.ts` — paints shapes onto a `<canvas>` 2D context: the bare `<rr0-ufo>`'s own
-  picture, the editing handles on every overlay, and the texture of each plane the scene stands a shape on.
+- `src/render/CanvasRenderer.ts` — paints shapes onto a `<canvas>` 2D context: the texture of each plane the
+  scene stands a shape on, the editing handles on the overlay, and the recording brush.
 - `src/render3d/` — the Three.js decor renderer (`SceneRenderer`), the phenomena standing in it
   (`PhenomenonSystem.ts`, drawn in their own decor-depth-tested pass), and its pure, dependency-free color logic
   (`skyColors.ts`), kept separate so the latter is unit-testable without a WebGL context.
-- `src/component/` — the four Web Components. `UfoElement` (`<rr0-ufo>`) owns the canvas/playback; `SceneElement`
-  (`<rr0-scene>`) composes it directly (via `document.createElement`, not an inline template tag — see the
-  comment at that call site) rather than duplicating it, adding the 3D decor on top. `SightingEditorElement` and
+- `src/component/` — the three Web Components and the playback layer under them. `UfoElement` (registered as
+  `rr0-ufo`, an inner layer and not a published component since 0.54.0) owns the timeline, the controls and the
+  pointer's canvas; `SceneElement` (`<rr0-scene>`) composes it directly (via `document.createElement`, not an inline
+  template tag — see the comment at that call site), standing the phenomena in its scene. `SightingEditorElement` and
   `SightingElement` (`<rr0-sighting>`) both compose a `SceneElement` in turn (not `UfoElement` directly) —
   the editor reaches through to its public `ufoElement` property for the actual canvas/timeline/appearance work
   (the toolbar edits the exact same `Sighting` instance the nested scene renders from, so an observer/time/
@@ -949,10 +947,9 @@ npm run dev                  # local demo (record + play), Vite dev server
 npm test                     # vitest
 npm run build                 # type-check + build the demo
 npm run build:embed            # build dist-embed/rr0-sighting-editor.mjs
-npm run build:embed-ufo         # build dist-embed-ufo/rr0-ufo.mjs
 npm run build:embed-scene       # build dist-embed-scene/rr0-scene.mjs
 npm run build:embed-sighting  # build dist-embed-sighting/rr0-sighting.mjs
-npm run build:all              # all four
+npm run build:all              # all three
 npm run build:site             # ufoathome.org, into dist-site/
 npm run build:comets           # regenerate the comet catalog from JPL Horizons
 npm run build:satellites       # regenerate the satellite catalog from CelesTrak's SATCAT

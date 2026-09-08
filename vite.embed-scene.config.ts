@@ -4,7 +4,8 @@ import pkg from "./package.json"
 /**
  * Builds the standalone, self-registering rr0-scene.mjs — the 3D-decor
  * bundle (pulls in Three.js), separate from the lightweight
- * rr0-ufo.mjs so pages that only need playback never pay for it.
+ * every page that shows a sighting; there is no lighter playback-only bundle any more, since the
+ * phenomenon itself is drawn in the scene.
  * Run via `npm run build:embed-scene`.
  *
  * Uses rollupOptions.input (not build.lib) — Vite's library mode silently

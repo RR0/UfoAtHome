@@ -16,9 +16,9 @@ export class DocsPage implements SitePage {
     navLabel: { en: "Documentation", fr: "Documentation" },
     title: { en: "Documentation", fr: "Documentation" },
     description: {
-      en: "Share a reconstruction by link, put one on your own page, drive the four elements, or "
+      en: "Share a reconstruction by link, put one on your own page, drive the three elements, or "
         + "read the recording format field by field.",
-      fr: "Partager une reconstitution par lien, en poser une sur votre page, piloter les quatre "
+      fr: "Partager une reconstitution par lien, en poser une sur votre page, piloter les trois "
         + "éléments, ou lire le format d'enregistrement champ par champ."
     }
   }
@@ -77,7 +77,7 @@ ${grid}
 npm install
 npm run dev          # ${fr ? "démo locale, serveur de développement Vite" : "local demo, Vite dev server"}
 npm test             # vitest
-npm run build:all    # ${fr ? "les quatre bundles d'intégration" : "the four embed bundles"}</code></pre>
+npm run build:all    # ${fr ? "les trois bundles d'intégration" : "the three embed bundles"}</code></pre>
     <p>${fr
       ? `Les catalogues sont engendrés, pas saisis à la main : <code>npm run build:stars</code> (HYG),
          <code>npm run build:comets</code> (JPL Horizons) et <code>npm run build:satellites</code>

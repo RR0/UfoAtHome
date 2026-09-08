@@ -25,7 +25,7 @@ export abstract class DocsSection implements SitePage {
     language: SiteLanguage, title: Said<string>, lede: Said<string>,
     crumb: { href: string, label: Said<string> } = { href: "/docs/", label: { en: "Documentation", fr: "Documentation" } }
   ): string {
-    // Escaped: a component's page is titled `<rr0-ufo>`, which a browser reads as a tag if it is
+    // Escaped: a component's page is titled `<rr0-scene>`, which a browser reads as a tag if it is
     // put in the heading raw — see Layout.text.
     const heading = title[language].replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
     const back = crumb.label[language]

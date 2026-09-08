@@ -153,7 +153,7 @@ export class RoadmapPage implements SitePage {
     <div class="timeline-step">
       <h3>A photograph or a video as the scene <span class="status status-later">planned</span></h3>
       <p>The shape drawn over the witness's own picture rather than over a computed sky: the frame
-        they actually brought back, with <code>&lt;rr0-ufo&gt;</code> on top of it. It is the
+        they actually brought back, with the phenomenon drawn over it. It is the
         shortest route from “this is what my photograph shows” to a stated angular size, and it is
         the one case where the backdrop needs no reconstruction at all — the instrument that took
         the picture is what sets the scale, which is exactly what the format already keeps.</p>
@@ -315,7 +315,7 @@ export class RoadmapPage implements SitePage {
     <div class="timeline-step">
       <h3>Une photo ou une vidéo comme scène <span class="status status-later">planifié</span></h3>
       <p>La forme dessinée par-dessus l'image du témoin plutôt que par-dessus un ciel calculé :
-        l'image qu'il a réellement rapportée, avec <code>&lt;rr0-ufo&gt;</code> au-dessus. C'est le
+        l'image qu'il a réellement rapportée, avec le phénomène dessiné par-dessus. C'est le
         chemin le plus court entre « voilà ce que montre ma photo » et une taille angulaire énoncée,
         et le seul cas où le fond n'a aucune reconstitution à faire — c'est l'appareil qui a pris
         l'image qui donne l'échelle, ce que le format conserve déjà.</p>

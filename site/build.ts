@@ -45,7 +45,7 @@ class SiteBuilder {
    * them de-duplicates instead of colliding — and `base: "./"` in each Vite config is what makes
    * the `new URL(asset, import.meta.url)` references keep working from there. */
   private readonly bundleDirs = [
-    "dist-embed-ufo", "dist-embed-scene", "dist-embed-sighting", "dist-embed-sighting-editor", "dist-site-lib"
+    "dist-embed-scene", "dist-embed-sighting", "dist-embed-sighting-editor", "dist-site-lib"
   ]
 
   /**
@@ -143,14 +143,18 @@ class SiteBuilder {
    * a page written against the old name keeps working without changing a character.
    */
   private async writeLegacyBundle(): Promise<void> {
-    const renamed: ReadonlyArray<readonly [string, string, string]> = [
+    const renamed: ReadonlyArray<readonly [string, string, string, string?]> = [
       ["rr0-eyewitness.mjs", "rr0-sighting.mjs", "0.41.0"],
-      ["rr0-ufo-recorder.mjs", "rr0-sighting-editor.mjs", "0.42.0"]
+      ["rr0-ufo-recorder.mjs", "rr0-sighting-editor.mjs", "0.42.0"],
+      // Not a rename but a withdrawal: the bare playback element stopped being a component in
+      // 0.54.0, once the phenomenon was drawn in the scene rather than over it. The scene bundle
+      // still registers the tag as its own inner layer, so a page that loaded this goes on working.
+      ["rr0-ufo.mjs", "rr0-scene.mjs", "0.54.0", "Withdrawn as a component in 0.54.0, when the phenomenon moved into the scene; served by"]
     ]
-    for (const [was, is, version] of renamed) {
+    for (const [was, is, version, note] of renamed) {
       await writeFile(
         join(this.out, "lib", was),
-        `/* Renamed to ${is} in ${version}. This address goes on working: the bundle it loads\n`
+        `/* ${note ?? `Renamed to ${is} in ${version}.`} ${note ? is + "." : ""} This address goes on working: the bundle it loads\n`
         + `   registers the old tag name as well as the new one. */\n`
         + `export * from "./${is}"\n`,
         "utf8"
