@@ -130,6 +130,26 @@ describe("PhenomenonSystem", () => {
     expect(front.visible).toBe(true)
   })
 
+  it("makes a fresh texture when the shape's picture changes size, and keeps it when it does not", () => {
+    const scene = new Scene()
+    const system = new PhenomenonSystem(scene)
+    const f = frame()
+    const small: PlacedPhenomenon = { sourceId: "a", shape: oval({ width: 10, height: 10 }), distanceM: 5, renderOrder: 0, hidden: false }
+    system.set([small], f)
+    const mesh = meshes(scene)[0] as { material: { map: { image: HTMLCanvasElement } } }
+    const first = mesh.material.map
+    const firstSize = [first.image.width, first.image.height]
+    // Same size, another colour: the same texture, repainted.
+    system.set([{ ...small, shape: oval({ width: 10, height: 10 }, { color: "#00ff00" }) }], f)
+    expect(mesh.material.map).toBe(first)
+    // An approaching object grows: the GPU storage of the first texture cannot take the bigger
+    // picture, so it has to be a new texture on a bigger canvas (see PhenomenonSystem.paint).
+    system.set([{ ...small, shape: oval({ width: 200, height: 100 }) }], f)
+    expect(mesh.material.map).not.toBe(first)
+    expect(mesh.material.map.image.width).toBeGreaterThan(firstSize[0])
+    expect(mesh.material.map.image.height).toBeGreaterThan(firstSize[1])
+  })
+
   it("reports the furthest plane for the camera's far plane", () => {
     const system = new PhenomenonSystem(new Scene())
     system.set(

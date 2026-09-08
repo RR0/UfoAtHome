@@ -177,8 +177,15 @@ export class PhenomenonSystem {
     const scale = Math.min(frame.scale, MAX_TEXTURE_PX / Math.max(extent.width, extent.height, 1))
     const width = Math.max(1, Math.ceil(extent.width * scale))
     const height = Math.max(1, Math.ceil(extent.height * scale))
-    const canvas = (mesh.material.map?.image as HTMLCanvasElement | undefined) ?? document.createElement("canvas")
-    if (canvas.width !== width || canvas.height !== height) {
+    const previous = mesh.material.map
+    const canvas = (previous?.image as HTMLCanvasElement | undefined) ?? document.createElement("canvas")
+    // A texture whose canvas changed SIZE is a new texture, not an update of the old one: the GPU
+    // storage was allocated at the first size, and a re-upload into it of a bigger picture fails
+    // silently — which is how an approaching craft, painted small at the start and large at the
+    // end, went on showing the start (or nothing) at the end, and how a shape rotated in the
+    // editor kept its old outline under new handles. Same canvas, fresh texture.
+    const resized = canvas.width !== width || canvas.height !== height
+    if (resized) {
       canvas.width = width
       canvas.height = height
     }
@@ -189,10 +196,11 @@ export class PhenomenonSystem {
     painter.setStarPoints(frame.starPoints)
     painter.setRoll(frame.rollRad)
     painter.paintInto(shape, extent, scale)
-    if (mesh.material.map) {
-      mesh.material.map.needsUpdate = true
+    if (previous && !resized) {
+      previous.needsUpdate = true
       return
     }
+    previous?.dispose()
     const texture = new CanvasTexture(canvas)
     texture.colorSpace = SRGBColorSpace
     texture.minFilter = LinearFilter
