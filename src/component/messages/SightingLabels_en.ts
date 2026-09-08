@@ -56,6 +56,7 @@ export const sightingLabels_en: SightingLabels = {
   soundSrc: "Recording",
   instrument: "Observed through",
   decorAircraft: "Aircraft",
+  decorEntity: "Being",
   decorAltitude: "Altitude",
   decorLights: "Lights",
   decorLightsNone: "none",

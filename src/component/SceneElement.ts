@@ -112,7 +112,10 @@ const DECOR_KIND_NAMES: Record<DecorKind, { en: string; fr: string }> = {
   streetlight: { en: "Streetlight", fr: "Lampadaire" },
   vehicle: { en: "Vehicle", fr: "Véhicule" },
   witness: { en: "Witness", fr: "Témoin" },
-  aircraft: { en: "Aircraft", fr: "Aéronef" }
+  aircraft: { en: "Aircraft", fr: "Aéronef" },
+  // Not "creature" and not "alien": the account says a being was there and says nothing about what
+  // it was, which is the whole of what this project is willing to assert.
+  entity: { en: "Being", fr: "Être" }
 }
 
 /** Where the star catalog asset (see scripts/build-star-catalog.ts) is fetched from by default —

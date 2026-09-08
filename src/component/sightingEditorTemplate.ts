@@ -236,6 +236,7 @@ export const html = `
         <option id="option-decor-streetlight" value="streetlight">Streetlight</option>
         <option id="option-decor-vehicle" value="vehicle">Vehicle</option>
         <option id="option-decor-aircraft" value="aircraft">Aircraft</option>
+        <option id="option-decor-entity" value="entity">Being</option>
         <!-- Other witness is added from its own dedicated button instead (Witness group's own
              "Add witness" — nothing else to configure beforehand) — hidden (not removed) so
              decorLabel() can still look up its translated kind name by id for the fallback

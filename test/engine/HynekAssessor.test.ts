@@ -46,18 +46,49 @@ describe("HynekAssessor", () => {
   })
 
   it("reports as unsupported what no recording could say, not as merely unanswered", async () => {
-    // Not a shortcoming of the assessor: the format has nowhere to put an observed being, no record
-    // of a physical trace, no distance at all, and no radar among its instruments. An author cannot
-    // fill those in, so saying "unanswered" would send them to do the impossible.
+    // Not a shortcoming of the assessor: nothing in the model records a physical trace, no distance
+    // is stored, and no instrument in the registry is a radar. An author cannot fill those in, so
+    // saying "unanswered" would send them to do the impossible.
     const assessment = await hynek.create()
       .assess(fromSightingJson({ version: 1, timeline: { keyframes: [] }, ...evening } as SightingRecordingJson))
     const of = (id: string) => assessment.criteria.find(criterion => criterion.id === id)!
 
-    for (const id of ["entities", "traces", "proximity", "radar"]) {
+    for (const id of ["traces", "proximity", "radar"]) {
       expect(of(id).unsupported).toBe(true)
       expect(of(id).basis).toBeUndefined()
     }
+    // Answerable now, and unanswered here: this recording places no being.
+    expect(of("entities").unsupported).toBeUndefined()
+    expect(of("entities").basis).toBeUndefined()
     expect(of("daylight").unsupported).toBeUndefined()
+  })
+
+  it("reaches CE3 from beings placed in the scene, over anything the daylight says", async () => {
+    // Valensole's two figures beside the craft. The account's own statement that there were any is
+    // exactly what this tier turns on, and it outranks the distant classes.
+    const withBeings = {
+      ...evening,
+      decor: [
+        { id: "etre-1", kind: "entity" as const, eastM: 5, northM: 12, sizeM: { heightM: 1 } },
+        { id: "etre-2", kind: "entity" as const, eastM: 7, northM: 12, sizeM: { heightM: 1 } }
+      ]
+    }
+
+    expect(await classify(withBeings)).toBe("ce3")
+
+    const assessment = await hynek.create()
+      .assess(fromSightingJson({ version: 1, timeline: { keyframes: [] }, ...withBeings } as SightingRecordingJson))
+    expect(assessment.criteria.find(criterion => criterion.id === "entities")!.paths)
+      .toEqual(["decor.0", "decor.1"])
+  })
+
+  it("does not take a companion for a being: same silhouette, opposite claim", async () => {
+    const withCompanion = {
+      ...evening,
+      decor: [{ id: "epouse", kind: "witness" as const, eastM: 1, northM: 0 }]
+    }
+
+    expect(await classify(withCompanion)).toBe("dd")
   })
 
   it("never concludes from a tag, however plainly the tag says it", async () => {

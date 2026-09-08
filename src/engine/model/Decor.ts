@@ -22,7 +22,32 @@ import type { SaidText } from "./SaidText.js"
  * its own kind because it is exactly the sort of thing a witness hides behind — Masse's own was two
  * metres high and is what kept the craft out of sight until he walked round it.
  */
-export type DecorKind = "building" | "tree" | "crop" | "mound" | "streetlight" | "vehicle" | "witness" | "aircraft"
+export type DecorKind =
+  | "building" | "tree" | "crop" | "mound" | "streetlight" | "vehicle" | "witness" | "aircraft"
+  /**
+   * A being the witness reported seeing — the two figures beside the craft at Valensole, the pair
+   * at Socorro.
+   *
+   * Here rather than anywhere else because the author's own words framed it as a placement: "le
+   * format ne sait pas encore PLACER d'entités observées DANS LA SCÈNE" is what Valensole's
+   * description had to say instead of showing them. Everything that makes a decor object work is
+   * exactly what an entity needs — a place in metres from the witness, a size, a heading, an
+   * occlusion relationship with the shapes — and none of it would be better for being written
+   * twice.
+   *
+   * It is its OWN kind and not a "witness" for the one reason that matters: a companion who was
+   * there and a being that was seen are the same silhouette and opposite claims, and a
+   * classification reading the scene has to tell them apart (see HynekAssessor).
+   *
+   * Why a decor object at all, when the phenomenon itself is stored as angles and never as metres:
+   * because what decides between the two representations is whether optical misperception is still
+   * on the table. Angles keep it on the table — a light at an unknown distance could be Venus, and
+   * refusing to place it in metres is what lets a reader test that. A being at arm's length is past
+   * that question: nobody mistakes a planet for two figures beside a craft, so the metres cost
+   * nothing and buy a scene that can actually be walked around. An entity in a recording therefore
+   * IMPLIES a close encounter, which is the same thing HynekAssessor concludes from it.
+   */
+  | "entity"
 
 /** A side of a decor object, relative to its own headingDeg ("front" is whichever way the object
  * itself faces) rather than a compass direction — a decor object can be rotated, so "north"

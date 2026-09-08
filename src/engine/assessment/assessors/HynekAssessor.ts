@@ -14,17 +14,17 @@ const DAYLIGHT_SUN_ALTITUDE_DEG = -6
  * The six, in the order they outrank each other: CE3 with entities, CE2 with a physical trace, CE1
  * close enough for detail, RV radar-visual, DD a daylight disc, NL a nocturnal light.
  *
- * Only the last two are decided here, and that is not a shortcoming of this file. It reads the
- * DATA, and the data cannot say the rest:
+ * Three of the six are decided here — CE3, DD and NL. It reads the DATA, and for two of the rest the
+ * data has nowhere to say it at all; the third is computable and simply not computed yet:
  *
- * - Entities. The format has nowhere to put an observed being. Valensole's own recording says so in
- *   its description: "Les 2 êtres d'environ 1 m ne sont pas représentés : le format ne sait pas
- *   encore placer d'entités observées dans la scène."
  * - A physical trace. Nothing in the model records one — there is no trace, no burn, no stalled
  *   engine among Decor, Timeline, Weather and the rest.
- * - Proximity. Hynek draws his first tier at about 150 m, and this format stores no distance at
- *   all: metres come back only as inequalities a rendered scene's crossings imply (see
- *   SizeEstimate), which needs a scene rather than a file.
+ * - Proximity. Hynek draws his first tier at about 150 m, and no distance is stored — correctly, no
+ *   witness measured one. But it is COMPUTABLE where the witness moved: two poses at different
+ *   places looking at the same shape give two lines of sight, and where they cross is how far away
+ *   it was. Masse walked from ninety metres to six, so Valensole has the baseline for it. Not done
+ *   here yet, and marked unsupported until it is rather than guessed at; the assumption it rests on
+ *   (that the phenomenon held still between the two instants) has to be stated when it is.
  * - Radar. No instrument in the registry is one, so no recording can state a radar-visual.
  *
  * An earlier version read all four off the recording's TAGS, which was wrong twice over: a tag is a
@@ -41,12 +41,25 @@ export class HynekAssessor implements Assessor {
 
   async assess(sighting: Sighting): Promise<Assessment> {
     const daylight = HynekAssessor.daylight(sighting)
+    // Beings the witness reported, placed in the scene — the account's own statement that there
+    // were any, which is exactly what this tier turns on. A decor "witness" is a companion who was
+    // there and does not count: same silhouette, opposite claim (see DecorKind's "entity").
+    const entities = sighting.decor
+      .map((object, index) => ({ object, index }))
+      .filter(({ object }) => object.kind === "entity")
     return {
-      verdict: daylight === undefined ? undefined : daylight ? "dd" : "nl",
+      verdict: entities.length > 0
+        ? "ce3"
+        : daylight === undefined ? undefined : daylight ? "dd" : "nl",
       criteria: [
+        {
+          id: "entities",
+          // Stated: a being placed in the scene is the recording asserting one was seen.
+          basis: entities.length > 0 ? "stated" : undefined,
+          paths: entities.map(({ index }) => `decor.${index}`)
+        },
         // Marked unsupported and not merely unanswered: an author cannot fill these in, because
         // there is nowhere in the format to put them. See the class comment for each.
-        { id: "entities", paths: [], unsupported: true },
         { id: "traces", paths: [], unsupported: true },
         { id: "proximity", paths: [], unsupported: true },
         { id: "radar", paths: [], unsupported: true },

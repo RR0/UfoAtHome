@@ -56,6 +56,7 @@ export const sightingLabels_fr: SightingLabels = {
   soundSrc: "Enregistrement",
   instrument: "Observé avec",
   decorAircraft: "Aéronef",
+  decorEntity: "Être",
   decorAltitude: "Altitude",
   decorLights: "Feux",
   decorLightsNone: "aucun",

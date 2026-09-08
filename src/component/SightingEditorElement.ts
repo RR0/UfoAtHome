@@ -621,6 +621,7 @@ export class SightingEditorElement extends HTMLElement {
   private readonly optionDecorStreetlight: HTMLElement
   private readonly optionDecorVehicle: HTMLElement
   private readonly optionDecorAircraft: HTMLElement
+  private readonly optionDecorEntity: HTMLElement
   private readonly labelDecorLights: HTMLElement
   private readonly optionDecorWitness: HTMLElement
 
@@ -1101,6 +1102,7 @@ export class SightingEditorElement extends HTMLElement {
     this.optionDecorStreetlight = this.shadow.getElementById("option-decor-streetlight")!
     this.optionDecorVehicle = this.shadow.getElementById("option-decor-vehicle")!
     this.optionDecorAircraft = this.shadow.getElementById("option-decor-aircraft")!
+    this.optionDecorEntity = this.shadow.getElementById("option-decor-entity")!
     this.labelDecorLights = this.shadow.getElementById("label-decor-lights")!
     this.optionDecorWitness = this.shadow.getElementById("option-decor-witness")!
 
@@ -5908,6 +5910,7 @@ export class SightingEditorElement extends HTMLElement {
     this.optionDecorStreetlight.textContent = messages.decorStreetlight
     this.optionDecorVehicle.textContent = messages.decorVehicle
     this.optionDecorAircraft.textContent = messages.decorAircraft
+    this.optionDecorEntity.textContent = messages.decorEntity
     this.labelDecorLights.textContent = messages.decorLights
     this.labelDecorAltitude.textContent = messages.decorAltitude
     this.showMeteorButton.title = messages.showMeteor

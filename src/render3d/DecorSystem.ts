@@ -583,6 +583,34 @@ function ratio(stated: number, natural: number): number {
 
 const FACE_INDICATOR_COLOR: RgbColor = [0.95, 0.9, 0.82]
 
+/** How pale a reported being stands against a companion who was simply there — see buildEntity. */
+const ENTITY_BODY_COLOR: RgbColor = [0.72, 0.74, 0.78]
+
+/**
+ * A being the witness reported — the same silhouette as a person, in a colour of its own.
+ *
+ * The silhouette is deliberately not a claim. An account that says "two beings of about a metre"
+ * says nothing about their form, so drawing anything more specific would be inventing what nobody
+ * described; a head-and-body outline is the least a figure can be while still reading as one. Its
+ * HEIGHT is where the strangeness lives, and that comes from the recording's own sizeM — a metre
+ * tall beside a car says more than any modelling would. Anything better known goes in a real model
+ * (see DecorModelRef), which is exactly the seam for it.
+ *
+ * The colour is the one thing that must differ: a companion standing beside the witness and a being
+ * standing beside the craft are the same shape and opposite claims, and a reader has to be able to
+ * see which is which without clicking.
+ */
+function buildEntity(): Group {
+  const group = new Group()
+  addPart(group, new CylinderGeometry(0.25, 0.3, 1.5, 10), ENTITY_BODY_COLOR, 0.75)
+  addPart(group, new SphereGeometry(0.26, 10, 8), ENTITY_BODY_COLOR, 1.74)
+  // Which way it faced, same convention and same reason as the witness figure's own.
+  const nose = addPart(group, new ConeGeometry(0.07, 0.16, 8), FACE_INDICATOR_COLOR, 1.74)
+  nose.rotation.x = -Math.PI / 2
+  nose.position.z = -0.22
+  return group
+}
+
 function buildWitness(): Group {
   const group = new Group()
   addPart(group, new CylinderGeometry(0.25, 0.3, 1.5, 10), [0.3, 0.3, 0.35], 0.75)
@@ -756,7 +784,9 @@ export class DecorSystem {
               ? buildVehicle(lit, object.windows, object.witnessSide)
               : object.kind === "aircraft"
                 ? buildAircraft()
-                : buildWitness()
+                : object.kind === "entity"
+                  ? buildEntity()
+                  : buildWitness()
     // The primitive is built at its own natural size and then stretched to whatever the recording
     // measured, rather than every builder taking three more parameters: the builders place their
     // parts by proportion (a headlight at -length/2, a window row per floor), so a scale on the
@@ -826,7 +856,9 @@ export class DecorSystem {
               ? buildVehicle(false, undefined, undefined)
               : kind === "aircraft"
                 ? buildAircraft()
-                : buildWitness()
+                : kind === "entity"
+                  ? buildEntity()
+                  : buildWitness()
     const box = new Box3().setFromObject(probe)
     const size: MeasuredDecorSize = {
       widthM: box.max.x - box.min.x,

@@ -78,6 +78,9 @@ export interface SightingLabels {
   /** The decor kind added by the "+" button beside it — an aircraft crossing the sky is decor like
    * any other, just decor with a trajectory. */
   decorAircraft: string
+  /** A being the witness reported seeing. Not "creature" and not "alien": the account says one
+   * was there and says nothing about what it was, which is the whole of what may be asserted. */
+  decorEntity: string
   /** Which set of lamps the selected decor object carries — see LightRig.ts. */
   decorLights: string
   /** How high above the witness the decor object sits. Zero for anything standing on the ground,
