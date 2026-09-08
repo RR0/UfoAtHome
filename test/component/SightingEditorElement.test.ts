@@ -5812,7 +5812,7 @@ describe("SightingEditorElement assessment", () => {
     const chip = nest(element)!.querySelector(".param-chip")!
 
     expect(chip.querySelector(".param-chip-label")!.textContent!.trim())
-      .toBe(sightingEditorMessages_en.coverageName)
+      .toBe(sightingEditorMessages_en.assessmentNames.coverage)
     expect(chip.querySelector(".param-chip-value")!.textContent).toBe("20%")
   })
 

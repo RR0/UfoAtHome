@@ -1,6 +1,7 @@
 import { html, css } from "./sightingTemplate.js"
 import { SightingFetch } from "../engine/net/SightingFetch.js"
 import { SightingSummary } from "./SightingSummary.js"
+import { SightingAssessments } from "./SightingAssessments.js"
 import type { SummaryEntry } from "./SightingSummary.js"
 import { SceneElement, registerScene, SCENE_ELEMENT_NAME } from "./SceneElement.js"
 import { WITNESS_MAP_ATTRIBUTE, MILESTONES_ATTRIBUTE } from "./UfoElement.js"
@@ -96,6 +97,13 @@ export class SightingElement extends HTMLElement {
    * listener), and replacing forty elements sixty times a second — under a reader's own text
    * selection, at that — for values that changed in none of them is not free. */
   private summarySignature = ""
+
+  /** What the assessors made of the recording on show, kept between renders because it arrives
+   * after it — see runAssessments. */
+  private assessmentEntries: SummaryEntry[] = []
+
+  /** Drops a reading that resolved after the recording it described was already replaced. */
+  private assessmentToken = 0
 
   /** Whether this browser has the popover API — where it does, the info panel lives in the top
    * layer and cannot be clipped by the host page; where it doesn't (anything older than 2024), it
@@ -219,6 +227,9 @@ export class SightingElement extends HTMLElement {
     this.summaryBuilder = new SightingSummary(this.messages, this.language === "fr" ? "fr" : "en", this.said, this.tags)
     this.syncLabelsToggle()
     this.refreshParamSummary()
+    // An assessment names ids ("coverage", "ce3") through these same messages, so a reading taken
+    // before they arrived is in the wrong language — read it again rather than translating chips.
+    if (this.currentSrc) void this.runAssessments()
     this.infoEmbedToggle.textContent = this.messages.embed
     this.labelEmbedReplay.textContent = this.messages.embedReplay
     this.labelEmbedEdit.textContent = this.messages.embedEdit
@@ -437,9 +448,36 @@ export class SightingElement extends HTMLElement {
     // SceneElement's own setter updates astronomy/weather/terrain for the new sighting too.
     this.sceneElement.sightingData = entry.sighting
     this.updateTestimonyLine()
-    // A different witness is a different recording: what it states changes with it.
+    // A different witness is a different recording: what it states, and what an assessor makes of
+    // it, both change with it.
     this.refreshParamSummary()
+    void this.runAssessments()
     if (this.infoOpen) this.populateInfoPanel()
+  }
+
+  /**
+   * Asks every registered assessor what it makes of the recording on show, and puts each answer on
+   * the strip inside the Assessment nest.
+   *
+   * Here as much as in the editor, through the same SightingAssessments, because what a scheme
+   * concludes is a fact about the OBSERVATION: "CE3 — with entities" is as true of a published
+   * account as of one being typed. It lived in the editor alone at first, which meant every reader
+   * on a page embedding this player saw none of it.
+   *
+   * Fired on a change of recording and never on a playback tick: an assessment reads the whole
+   * account, so it does not vary with the playhead, and the assessors arrive by dynamic import
+   * (see ASSESSMENT_SOURCES) — a reader who never opens the strip still pays for that import, once,
+   * which is the price of the chips being there when they do.
+   */
+  private async runAssessments(): Promise<void> {
+    const token = ++this.assessmentToken
+    const reading = await new SightingAssessments(this.messages).read(this.sceneElement.ufoElement.sighting)
+    if (token !== this.assessmentToken) return
+    this.assessmentEntries = reading.entries
+    // The strip redraws only when its signature changes, and that signature is over the entries —
+    // so the new readings have to be in place before it is asked to compare (see
+    // refreshParamSummary).
+    this.refreshParamSummary()
   }
 
   /**
@@ -688,7 +726,13 @@ export class SightingElement extends HTMLElement {
     // selection nobody made. No ground height either — the scene doesn't resolve one, so the
     // witness's own height is stated as height above the ground rather than as a sea-level
     // altitude that would be wrong by the whole relief (see SummaryContext).
-    const entries = this.summaryBuilder.entriesFor(sighting, this.sceneElement.ufoElement.currentTime)
+    // The assessments last: it is what was made of the recording, and reads after it. They come
+    // from the assessors rather than from the file, so they are held here and appended (see
+    // runAssessments) instead of being emitted by the summary.
+    const entries = [
+      ...this.summaryBuilder.entriesFor(sighting, this.sceneElement.ufoElement.currentTime),
+      ...this.assessmentEntries
+    ]
     const signature = entries.map(entry => `${entry.field}=${entry.label}=${entry.value}${entry.unit}${entry.fromSource ? "*" : ""}`).join("|")
     if (signature === this.summarySignature) {
       return
@@ -708,7 +752,10 @@ export class SightingElement extends HTMLElement {
       if (open && open.group !== entry.group) {
         open = undefined
       }
-      const boxName = entry.group === "witness" ? this.messages.witnessGroup : undefined
+      const boxName = entry.group === "witness" ? this.messages.witnessGroup
+        // Named by its GROUP and never by what it leads to — an assessment of the witness's own
+        // account still belongs in a box saying Assessment.
+        : entry.group === "assessment" ? this.messages.assessmentGroup : undefined
       if (boxName !== undefined && !open) {
         const box = document.createElement("span")
         box.className = "param-nest"

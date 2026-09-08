@@ -530,14 +530,6 @@ export interface SightingEditorMessages extends SightingLabels {
   testimonyUnknown: string
   testimonyYes: string
   testimonyNo: string
-  /** Names the nest holding what the assessors made of the recording. Its own message rather than
-   * a tab's text, because it is the one summary group with no panel behind it. */
-  assessmentGroup: string
-  /** What the coverage assessment is called on its chip. Names what is measured — how much of the
-   * reconstruction the witness's own account settles — rather than repeating the registry's id,
-   * and the chip's value is the bare percentage beside it. Says "info" rather than "coverage":
-   * coverage is the measuring word, and what a reader wants named is the thing measured. */
-  coverageName: string
   /** Marks a field, and its panel's tab, that would answer a question nothing in the recording
    * does. Not an error: the witness said nothing, the author typed nothing wrong. */
   questionUnanswered: string
@@ -547,12 +539,4 @@ export interface SightingEditorMessages extends SightingLabels {
   /** A panel's tab badge tooltip: how many of its questions this recording still answers none
    * of. {count} of them. */
   questionsUnanswered: string
-  /** Hynek's own six classes, named for a reader — a chip saying "ce3" says nothing. Keyed
-   * "hynek.<class>" so the strip can find the one an assessor concluded without a switch. */
-  "hynek.nl": string
-  "hynek.dd": string
-  "hynek.rv": string
-  "hynek.ce1": string
-  "hynek.ce2": string
-  "hynek.ce3": string
 }

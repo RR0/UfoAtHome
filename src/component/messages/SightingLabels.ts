@@ -4,6 +4,20 @@
  * the same summary without pulling in the editor's other ~140 strings (1.7 KB against
  * 10.6 KB), and so that "Cloud cover" is written down exactly once. */
 export interface SightingLabels {
+  /** Names the nest holding what the assessors made of the recording. Its own label rather than a
+   * tab's text, because it is the one summary group with no panel behind it — and it is HERE, with
+   * the field names both components share, because an assessment is a fact about the observation
+   * rather than about editing one (see SightingAssessments). */
+  assessmentGroup: string
+  /** What each assessor is called on its chip, by its registry id — so that "coverage" can name
+   * what is measured rather than repeating the registry's bare id. An id with no entry keeps the
+   * registry's own name. */
+  assessmentNames: Record<string, string>
+  /** A classifying assessor's conclusion in the reader's language, keyed `<assessor>.<verdict>`.
+   * An assessor states ids and never prose, exactly as a tag is stored in English and named here
+   * (see AssessmentCriterion). */
+  assessmentVerdicts: Record<string, string>
+
   color: string
   transparency: string
   halo: string

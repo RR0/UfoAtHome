@@ -35,6 +35,10 @@ export interface SummaryEntry {
   color?: string
   /** True when a real record supplied this value rather than the witness — see Sighting.weatherSource. */
   fromSource: boolean
+  /** Which group this entry is ABOUT, when that is not the group it belongs to — an assessment of
+   * the witness's own account sits in the Assessment box and leads to the Witness panel. Only a
+   * host with somewhere to lead uses it (see Assessor.about). */
+  about?: string
 }
 
 /** What the caller knows that the file itself does not.

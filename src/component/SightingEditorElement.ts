@@ -1,8 +1,7 @@
 import { BLUR_RADIUS_UNIT } from "../render/CanvasRenderer.js"
 import { SightingFetch, SightingFetchError } from "../engine/net/SightingFetch.js"
 import { NARRATIVE_SOURCES } from "../engine/narrative/narrativeSources.js"
-import { ASSESSMENT_SOURCES } from "../engine/assessment/assessmentSources.js"
-import type { Assessment } from "../engine/assessment/Assessor.js"
+import { SightingAssessments } from "./SightingAssessments.js"
 import { NarrativeError } from "../engine/narrative/NarrativeError.js"
 import { DraftPatch } from "../engine/narrative/DraftPatch.js"
 import { DraftRecording } from "../engine/narrative/DraftRecording.js"
@@ -3572,57 +3571,25 @@ export class SightingEditorElement extends HTMLElement {
   private assessmentToken = 0
 
   /**
-   * Asks every registered assessor what it makes of the recording, and turns each answer into one
-   * chip inside the Assessment nest.
+   * Asks every registered assessor what it makes of the recording, and puts each answer on the
+   * strip inside the Assessment nest.
    *
-   * One chip per assessor and not per criterion: a reader glances at what each SCHEME concluded,
-   * and the detail belongs behind it. For the coverage profile that headline is how many of its ten
-   * questions the witness themselves answered, because that is the number the whole exercise was
-   * for; the rest of the profile is on the chip's own title, and the questions nothing answered
-   * mark the fields that would answer them (see markUnansweredQuestions).
+   * The reading itself is shared with the player (see SightingAssessments) — an assessment is a
+   * fact about the observation, so it says the same thing in both, and only what a chip DOES
+   * differs: here it leads to the panel the reading is about, and the questions nothing answered
+   * mark the fields that would answer them.
    */
   private async runAssessments(): Promise<void> {
     const token = ++this.assessmentToken
-    const sighting = this.ufoElement.sighting
-    const chips: (SummaryEntry & { panel: number })[] = []
-    const unanswered = new Set<string>()
-    for (const source of ASSESSMENT_SOURCES) {
-      let assessment: Assessment
-      try {
-        assessment = await source.create().assess(sighting)
-      } catch {
-        // An assessor that cannot answer says nothing rather than breaking the strip: it is a
-        // reading of the recording, and a reading failing is not the recording failing.
-        continue
-      }
-      if (token !== this.assessmentToken) return
-      for (const criterion of assessment.criteria) {
-        // Unsupported is not unanswered: there is no field to mark, because the format has nowhere
-        // to say it (see AssessmentCriterion.unsupported). Marking one would send a reader to fill
-        // in something they cannot.
-        if (criterion.basis === undefined && !criterion.unsupported) unanswered.add(criterion.id)
-      }
-      // A percentage, and nothing else: a chip is one line, and half its value is the shape of it
-      // (see the strip's own CSS). What the figure cannot say — WHICH questions went unanswered —
-      // is said by the marks on the fields that would answer them.
-      const value = assessment.score === undefined
-        ? assessment.verdict === undefined ? "" : this.assessmentVerdict(source.id, assessment.verdict)
-        : `${Math.round(assessment.score * 100)}%`
-      if (value === "") continue
-      chips.push({
-        group: "assessment",
-        field: source.id,
-        label: this.assessmentName(source.id, source.name),
-        value,
-        unit: "",
-        fromSource: false,
-        // The group this reading is about, so the chip leads somewhere: a figure a reader cannot
-        // act on is a figure they stop reading. -1 for a reading about the recording as a whole.
-        panel: SightingEditorElement.PANEL_ORDER.indexOf(source.create().about ?? "")
-      })
-    }
-    this.assessmentChips = chips
-    this.markUnansweredQuestions(unanswered)
+    const reading = await new SightingAssessments(this.messages).read(this.ufoElement.sighting)
+    if (token !== this.assessmentToken) return
+    this.assessmentChips = reading.entries.map(entry => ({
+      ...entry,
+      // The group this reading is about, so the chip leads somewhere: a figure a reader cannot act
+      // on is a figure they stop reading. -1 for a reading about the recording as a whole.
+      panel: SightingEditorElement.PANEL_ORDER.indexOf(entry.about ?? "")
+    }))
+    this.markUnansweredQuestions(reading.unanswered)
     this.renderParamSummary()
   }
 
@@ -3723,20 +3690,6 @@ export class SightingEditorElement extends HTMLElement {
         ? ""
         : required ? this.messages.durationRequired : this.messages.questionsUnanswered.replace("{count}", String(count))
     }
-  }
-
-  /** What an assessment is called on its chip — its own message where one exists, so that "Witness
-   * coverage" can name what is measured rather than repeating the registry's bare id, and the
-   * registry's own name otherwise. */
-  private assessmentName(id: string, fallback: string): string {
-    return id === "coverage" ? this.messages.coverageName : fallback
-  }
-
-  /** A classifying assessor's conclusion in the reader's own words — a class id like "nl" means
-   * nothing on a chip. Falls back to the id, which is at least what the file would say. */
-  private assessmentVerdict(assessorId: string, verdict: string): string {
-    const named = (this.messages as unknown as Record<string, string>)[`${assessorId}.${verdict}`]
-    return named ?? verdict.toUpperCase()
   }
 
   private paramChip(chip: SummaryEntry & { panel: number }): HTMLButtonElement {

@@ -20,6 +20,16 @@ export const sightingLabels_fr: SightingLabels = {
   roll: "Roulis",
   observationTime: "Début de l'observation",
   observationEndTime: "Fin de l'observation",
+  assessmentGroup: "Évaluation",
+  assessmentNames: { coverage: "Infos du témoin" },
+  assessmentVerdicts: {
+    "hynek.nl": "NL — lumière nocturne",
+    "hynek.dd": "DD — disque diurne",
+    "hynek.rv": "RV — radar-visuel",
+    "hynek.ce1": "RR1 — rencontre rapprochée",
+    "hynek.ce2": "RR2 — avec trace physique",
+    "hynek.ce3": "RR3 — avec occupants"
+  },
   witnessGroup: "Témoin",
   witnessId: "ID",
   witnessTitle: "Titre",

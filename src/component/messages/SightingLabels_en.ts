@@ -20,6 +20,16 @@ export const sightingLabels_en: SightingLabels = {
   roll: "Roll",
   observationTime: "Observation start",
   observationEndTime: "Observation end",
+  assessmentGroup: "Assessment",
+  assessmentNames: { coverage: "Witness info" },
+  assessmentVerdicts: {
+    "hynek.nl": "NL — nocturnal light",
+    "hynek.dd": "DD — daylight disc",
+    "hynek.rv": "RV — radar-visual",
+    "hynek.ce1": "CE1 — close encounter",
+    "hynek.ce2": "CE2 — with a physical trace",
+    "hynek.ce3": "CE3 — with entities"
+  },
   witnessGroup: "Witness",
   witnessId: "ID",
   witnessTitle: "Title",

@@ -1,5 +1,6 @@
 import { describe, expect, it, afterEach, beforeAll, beforeEach, vi } from "vitest"
 import { registerSighting, SIGHTING_ELEMENT_NAME, LEGACY_ELEMENT_NAME } from "../../src/component/SightingElement.js"
+import { sightingLabels_en } from "../../src/component/messages/SightingLabels_en.js"
 import type { SightingElement } from "../../src/component/SightingElement.js"
 
 registerSighting()
@@ -867,6 +868,23 @@ describe("SightingElement parameter labels", () => {
     const element = await mounted(true)
     expect(element.shadowRoot!.querySelectorAll(".param-label button").length).toBe(0)
     expect([...element.shadowRoot!.querySelectorAll(".param-label")].every(item => item.tagName === "SPAN")).toBe(true)
+  })
+
+  /**
+   * What a scheme concludes is a fact about the observation, so it belongs where the observation is
+   * read — and for most people that is a page embedding this player, never the editor. The reading
+   * ran in the editor alone at first, which meant nobody reading a case ever saw one.
+   */
+  it("states what the assessors made of the recording, as the editor does", async () => {
+    const element = await mounted(true)
+    await waitFor(() => labels(element).some(label => label.includes(sightingLabels_en.assessmentNames.coverage)), 2000)
+
+    const nests = [...element.shadowRoot!.querySelectorAll(".param-nest")]
+    const assessment = nests.find(nest => nest.querySelector(".param-nest-label")!.textContent === sightingLabels_en.assessmentGroup)!
+    // Named by its group, and holding one line per scheme rather than one per criterion.
+    const stated = [...assessment.querySelectorAll(".param-label")].map(item => item.textContent!)
+    expect(stated.some(label => /%/.test(label))).toBe(true)
+    expect(stated.every(label => label.trim() !== "")).toBe(true)
   })
 })
 
