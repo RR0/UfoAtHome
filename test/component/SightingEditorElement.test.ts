@@ -5783,3 +5783,80 @@ describe("SightingEditorElement testimony", () => {
     expect(field<HTMLSelectElement>(element, "testimonyFollowedUp").value).toBe("")
   })
 })
+
+describe("SightingEditorElement assessment", () => {
+  const nest = (element: SightingEditorElement): HTMLElement | null =>
+    element.shadowRoot!.querySelector('.param-nest[data-group="assessment"]')
+
+  it("nests what each assessor concluded in a chip of its own, after the recording's", async () => {
+    // Its own nest and not a loose chip: the strip is what the recording states, and this is what
+    // was made OF it. Same containment the witness and the decor already use.
+    const element = mount()
+
+    await waitFor(() => nest(element) !== null, 2000)
+
+    expect(nest(element)!.querySelector(".param-nest-label")!.textContent)
+      .toBe(sightingEditorMessages_en.assessmentGroup)
+    expect(nest(element)!.querySelectorAll(".param-chip")).toHaveLength(1)
+    // Last, which is both its own run of the group and the right place to read it.
+    const chips = [...element.shadowRoot!.getElementById("param-summary")!.children]
+    expect(chips[chips.length - 1]).toBe(nest(element))
+  })
+
+  it("says how many questions the witness themselves answered", async () => {
+    const element = mount()
+
+    await waitFor(() => nest(element) !== null, 2000)
+
+    expect(nest(element)!.querySelector(".param-chip")!.textContent)
+      .toContain(sightingEditorMessages_en.coverageChip.replace("{total}", "10").replace("{stated}", "2"))
+  })
+
+  it("marks the fields that would answer a question nothing answers", async () => {
+    // A need shows where it can be met. Not `invalid`: nobody typed anything wrong, the witness
+    // said nothing.
+    const element = mount()
+
+    await waitFor(() => element.shadowRoot!.querySelectorAll(".wanted").length > 0, 2000)
+
+    const wanted = [...element.shadowRoot!.querySelectorAll(".wanted")].map(e => e.id).filter(id => id !== "")
+    expect(wanted).toContain("lat")
+    expect(wanted).toContain("obs-time")
+    expect(element.shadowRoot!.getElementById("lat")!.title)
+      .toBe(sightingEditorMessages_en.questionUnanswered)
+  })
+
+  it("marks the tab too, so a need is visible without opening all eight panels", async () => {
+    const element = mount()
+
+    await waitFor(() => element.shadowRoot!.querySelectorAll(".group-tab.wanted").length > 0, 2000)
+
+    const tabs = [...element.shadowRoot!.querySelectorAll(".group-tab.wanted")].map(t => t.textContent!.trim())
+    expect(tabs).toContain("Location")
+  })
+
+  it("unmarks a field once the recording answers its question", async () => {
+    const element = mount()
+    await waitFor(() => element.shadowRoot!.getElementById("lat")!.classList.contains("wanted"), 2000)
+
+    const shadow = element.shadowRoot!
+    for (const [id, value] of [["lat", "48.288"], ["lng", "-4.29"]] as const) {
+      const input = shadow.getElementById(id) as HTMLInputElement
+      input.value = value
+      input.dispatchEvent(new Event("input"))
+    }
+
+    await waitFor(() => !element.shadowRoot!.getElementById("lat")!.classList.contains("wanted"), 2000)
+    expect(element.shadowRoot!.getElementById("lat")!.title).toBe("")
+  })
+
+  it("leaves an assessment chip inert, since it names no field to go to", async () => {
+    const element = mount()
+    await waitFor(() => nest(element) !== null, 2000)
+
+    const before = element.shadowRoot!.querySelectorAll(".group-panel:not([hidden])").length
+    ;(nest(element)!.querySelector(".param-chip") as HTMLButtonElement).click()
+
+    expect(element.shadowRoot!.querySelectorAll(".group-panel:not([hidden])")).toHaveLength(before)
+  })
+})

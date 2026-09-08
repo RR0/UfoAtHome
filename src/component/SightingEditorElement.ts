@@ -1,6 +1,8 @@
 import { BLUR_RADIUS_UNIT } from "../render/CanvasRenderer.js"
 import { SightingFetch, SightingFetchError } from "../engine/net/SightingFetch.js"
 import { NARRATIVE_SOURCES } from "../engine/narrative/narrativeSources.js"
+import { ASSESSMENT_SOURCES } from "../engine/assessment/assessmentSources.js"
+import type { Assessment } from "../engine/assessment/Assessor.js"
 import { NarrativeError } from "../engine/narrative/NarrativeError.js"
 import { DraftPatch } from "../engine/narrative/DraftPatch.js"
 import { DraftRecording } from "../engine/narrative/DraftRecording.js"
@@ -3422,6 +3424,14 @@ export class SightingEditorElement extends HTMLElement {
     "observation", "witness", "location", "decor", "temporal", "weather", "sound"
   ]
 
+  /** The tab strip's own order, which SUMMARY_GROUPS matches for its first seven and then stops:
+   * the phenomenon's own panel has no summary group (its chips are the shape's, under
+   * "observation"), and an assessment has no panel at all. Used to mark a tab holding an
+   * unanswered question — see QUESTION_FIELDS. */
+  private static readonly PANEL_ORDER: string[] = [
+    "observation", "witness", "location", "decor", "temporal", "weather", "sound", "shape"
+  ]
+
   /**
    * Rebuilds the strip of what this recording states, under the render.
    *
@@ -3457,19 +3467,35 @@ export class SightingEditorElement extends HTMLElement {
     // every such collision was with one of these two, so the box replaced that mechanism outright
     // rather than joining it. A collision between two FLAT groups would need answering again, and
     // there is currently no pair of them that can produce one.
-    const nested = SightingEditorElement.NESTED_GROUPS
     const chips = entries.map(entry => ({ ...entry, panel: SightingEditorElement.SUMMARY_GROUPS.indexOf(entry.group) }))
     const signature = chips.map(chip => `${chip.field}=${chip.label}=${chip.value}${chip.unit}${chip.fromSource ? "*" : ""}`).join("|")
     if (signature === this.paramSummarySignature) {
       return
     }
     this.paramSummarySignature = signature
+    this.paramChips = chips
+    this.renderParamSummary()
+    // What the recording says has changed, so what an assessor makes of it has too. Fired and not
+    // awaited: an assessment arrives after the strip rather than holding it up, and re-renders it
+    // when it does.
+    void this.runAssessments()
+  }
+
+  /** The chips of what the recording states, as of the last change — the assessment's own arrive
+   * separately and later (see runAssessments), and both are drawn by renderParamSummary. */
+  private paramChips: (SummaryEntry & { panel: number })[] = []
+
+  /** Draws the strip from what is currently known: the recording's own chips, then whatever the
+   * assessors have most recently concluded. */
+  private renderParamSummary(): void {
+    const nested = SightingEditorElement.NESTED_GROUPS
     // The summary emits its groups in one run each (see SightingSummary.entriesFor's fixed call
     // order), so a nest opens when a run of one starts and closes when it ends — no sorting, and
-    // no second pass to gather scattered members.
+    // no second pass to gather scattered members. The assessment's chips come last, which is both
+    // its own run and the right place to read them: what is made of the recording, after it.
     const strip: HTMLElement[] = []
     let openNest: { group: SummaryGroup, element: HTMLElement } | undefined
-    for (const chip of chips) {
+    for (const chip of [...this.paramChips, ...this.assessmentChips]) {
       if (openNest && openNest.group !== chip.group) {
         openNest = undefined
       }
@@ -3479,7 +3505,11 @@ export class SightingEditorElement extends HTMLElement {
         box.dataset.group = chip.group
         const name = document.createElement("span")
         name.className = "param-nest-label"
-        name.textContent = this.groupTabs[chip.panel].textContent!.trim()
+        // A nest is named by its own panel's tab, except the one that has no panel: an assessment
+        // is not a group of fields, so its name is its own message.
+        name.textContent = chip.panel < 0
+          ? this.messages.assessmentGroup
+          : this.groupTabs[chip.panel].textContent!.trim()
         box.append(name)
         openNest = { group: chip.group, element: box }
         strip.push(box)
@@ -3497,7 +3527,114 @@ export class SightingEditorElement extends HTMLElement {
   /** Which summary groups describe a sub-element rather than the observation itself, and so read
    * as a chip holding chips: the witness who gave the testimony, and whichever decor object is
    * being worked on (or, with none selected, the list of them). */
-  private static readonly NESTED_GROUPS: SummaryGroup[] = ["witness", "decor"]
+  private static readonly NESTED_GROUPS: SummaryGroup[] = ["witness", "decor", "assessment"]
+
+  /**
+   * Which fields would answer each of the coverage assessor's questions, and which panel holds
+   * them — what an unanswered one marks, so that a need shows where it can be met.
+   *
+   * Two of the ten have no field to name: an apparent size and a place in the sky are DRAWN, on
+   * the canvas, from the shape's own handles. Those mark their panel's tab alone, which is enough
+   * to send a reader to the right place — and every question marks its tab anyway, so a need is
+   * visible without opening all eight panels to hunt for it.
+   */
+  private static readonly QUESTION_FIELDS: Record<string, { panel: string, fields: string[] }> = {
+    when: { panel: "temporal", fields: ["obs-time"] },
+    where: { panel: "location", fields: ["lat", "lng"] },
+    facing: { panel: "location", fields: ["heading"] },
+    "apparent-size": { panel: "shape", fields: [] },
+    "sky-position": { panel: "shape", fields: [] },
+    "how-long": { panel: "temporal", fields: ["durationSeconds", "obs-end-time"] },
+    appearance: { panel: "shape", fields: ["shapeTitle", "color"] },
+    movement: { panel: "shape", fields: [] },
+    sound: { panel: "sound", fields: ["soundKind"] },
+    conditions: { panel: "weather", fields: ["cloudCover"] }
+  }
+
+  /** Chips for what the assessors made of the recording, kept between renders because they arrive
+   * after it — see runAssessments. */
+  private assessmentChips: (SummaryEntry & { panel: number })[] = []
+
+  /** Drops a result that resolved after the recording it described was already replaced. */
+  private assessmentToken = 0
+
+  /**
+   * Asks every registered assessor what it makes of the recording, and turns each answer into one
+   * chip inside the Assessment nest.
+   *
+   * One chip per assessor and not per criterion: a reader glances at what each SCHEME concluded,
+   * and the detail belongs behind it. For the coverage profile that headline is how many of its ten
+   * questions the witness themselves answered, because that is the number the whole exercise was
+   * for; the rest of the profile is on the chip's own title, and the questions nothing answered
+   * mark the fields that would answer them (see markUnansweredQuestions).
+   */
+  private async runAssessments(): Promise<void> {
+    const token = ++this.assessmentToken
+    const sighting = this.ufoElement.sighting
+    const chips: (SummaryEntry & { panel: number })[] = []
+    const unanswered = new Set<string>()
+    for (const source of ASSESSMENT_SOURCES) {
+      let assessment: Assessment
+      try {
+        assessment = await source.create().assess(sighting)
+      } catch {
+        // An assessor that cannot answer says nothing rather than breaking the strip: it is a
+        // reading of the recording, and a reading failing is not the recording failing.
+        continue
+      }
+      if (token !== this.assessmentToken) return
+      const stated = assessment.criteria.filter(criterion => criterion.basis === "stated").length
+      for (const criterion of assessment.criteria) {
+        if (criterion.basis === undefined) unanswered.add(criterion.id)
+      }
+      chips.push({
+        group: "assessment",
+        field: source.id,
+        label: source.name,
+        value: this.messages.coverageChip
+          .replace("{stated}", String(stated))
+          .replace("{total}", String(assessment.criteria.length)),
+        unit: "",
+        fromSource: false,
+        panel: -1
+      })
+    }
+    this.assessmentChips = chips
+    this.markUnansweredQuestions(unanswered)
+    this.renderParamSummary()
+  }
+
+  /**
+   * Marks the fields that would answer a question nothing in the recording does.
+   *
+   * Not `invalid`: a gap is not a mistake, and a red border would say the author typed something
+   * wrong where in fact the witness said nothing. It marks the panel's own tab too, so the need is
+   * visible without opening all eight to look for it.
+   */
+  private markUnansweredQuestions(unanswered: Set<string>): void {
+    const wantedPanels = new Set<string>()
+    const wantedFields = new Set<string>()
+    for (const id of unanswered) {
+      const question = SightingEditorElement.QUESTION_FIELDS[id]
+      if (!question) continue
+      wantedPanels.add(question.panel)
+      for (const field of question.fields) wantedFields.add(field)
+    }
+    for (const [index, tab] of this.groupTabs.entries()) {
+      const wanted = wantedPanels.has(SightingEditorElement.PANEL_ORDER[index])
+      tab.classList.toggle("wanted", wanted)
+      tab.title = wanted ? this.messages.questionUnanswered : ""
+    }
+    for (const id of new Set([
+      ...Object.values(SightingEditorElement.QUESTION_FIELDS).flatMap(question => question.fields)
+    ])) {
+      const field = this.shadow.getElementById(id)
+      if (!field) continue
+      const wanted = wantedFields.has(id)
+      field.classList.toggle("wanted", wanted)
+      field.title = wanted ? this.messages.questionUnanswered : ""
+    }
+  }
 
   private paramChip(chip: SummaryEntry & { panel: number }): HTMLButtonElement {
     const button = document.createElement("button")
@@ -3530,8 +3667,15 @@ export class SightingEditorElement extends HTMLElement {
     if (chip === undefined || chip === null) {
       return
     }
-    const panel = this.groupPanels[Number(chip.dataset.panel)]
-    this.toggleGroup(this.groupTabs[Number(chip.dataset.panel)], true)
+    // An assessment chip names no panel: it is what was made OF the fields, not one of them, so
+    // there is nowhere for a click to go. It stays a chip for the look of the strip and does
+    // nothing (see the cursor rule its nest carries).
+    const panelIndex = Number(chip.dataset.panel)
+    if (panelIndex < 0) {
+      return
+    }
+    const panel = this.groupPanels[panelIndex]
+    this.toggleGroup(this.groupTabs[panelIndex], true)
     // A decor object the summary listed rather than one of its fields (see
     // SightingSummary.addDecor): there is no control to focus, so the click selects that object,
     // which is what makes its own fields appear in the panel just opened.

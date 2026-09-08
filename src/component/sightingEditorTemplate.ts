@@ -835,6 +835,21 @@ select.weather-field:disabled {
 .narrative-report .claim.assumed span {
   font-style: italic;
 }
+/* A field, or a tab, that would answer a question nothing in the recording does.
+   Deliberately not input.invalid's red: a gap is not a mistake. Nobody typed anything wrong here —
+   the witness said nothing, and the mark is an invitation rather than a complaint. A dashed
+   underline in the host's own text colour says "something is missing here" without claiming
+   anything is broken. */
+.wanted {
+  text-decoration: underline dashed;
+  text-underline-offset: 0.25em;
+  text-decoration-color: color-mix(in srgb, currentColor 55%, transparent);
+}
+/* An assessment is not a group of fields and its chips open no panel, so they do not offer the
+   pointer that every other chip does (see onParamSummaryClick, which ignores a panel of -1). */
+.param-nest[data-group="assessment"] .param-chip {
+  cursor: default;
+}
 .narrative-report .gaps {
   margin: 0.35em 0 0;
   padding-left: 1.2em;

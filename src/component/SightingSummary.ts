@@ -13,7 +13,13 @@ import { SightingTags } from "./messages/TagNames.js"
 /** Which group of the editor's own tab strip a summary entry belongs to. The player ignores
  * these; the editor maps them onto its panels, so that clicking a chip opens the one holding
  * the field. */
-export type SummaryGroup = "observation" | "witness" | "location" | "decor" | "temporal" | "weather" | "sound"
+export type SummaryGroup =
+  | "observation" | "witness" | "location" | "decor" | "temporal" | "weather" | "sound"
+  /** Not a group of fields at all, and the only one that is not: what an assessor made of the
+   * recording, which has no panel to open and is produced after the fact rather than gathered here
+   * (see SightingEditorElement.runAssessments). It travels as a group so that it can nest and be
+   * rendered by the same code as everything else. */
+  | "assessment"
 
 /** One thing a recording states. `field` is the name of the field it came from, which is also the
  * id the editor gives that field's own control — that coincidence is what lets a chip put the

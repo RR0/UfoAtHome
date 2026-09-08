@@ -212,4 +212,7 @@ export const sightingEditorMessages_fr: SightingEditorMessages = {
   testimonyUnknown: "on ne sait pas",
   testimonyYes: "oui",
   testimonyNo: "non",
+  assessmentGroup: "Évaluation",
+  coverageChip: "{stated} sur {total} du témoin",
+  questionUnanswered: "Rien dans cet enregistrement ne répond à l'une des questions qu'une reconstitution doit trancher",
 }
