@@ -385,22 +385,32 @@ export const html = `
     <button id="add-shape" type="button" class="icon-btn" title="Add shape" aria-label="Add shape">+</button>
     <button id="delete-shape" type="button" class="icon-btn" title="Delete shape" aria-label="Delete shape">🗑</button>
     <label><span id="label-shape-title">Name</span> <input id="shapeTitle" type="text"/></label>
-    <label><span id="label-object-size">Try a size</span>
-      <input id="objectSize" type="number" min="0" step="0.1" placeholder="assumed width" title="A real width to try, so the shape's apparent size is computed rather than eyeballed. Not stored."/> m</label>
-    <label><span id="label-object-distance">at a distance of</span>
-      <input id="objectDistance" type="number" min="0" step="1" placeholder="assumed distance" title="The distance to try that width at. Not stored either — only the resulting angular size is."/> m</label>
-    <output id="apparent-size" class="apparent-size" for="objectSize objectDistance"></output>
-    <output id="real-size" class="apparent-size" for="objectSize objectDistance"></output>
-    <!-- Where the shape is DRAWN along its line of sight — a parameter of the picture and never of
-         the recording (see PhenomenonDepth): from the witness's eye it looks the same at any
-         distance, and what changes is what the decor hides of it. Slid rather than typed, because a
-         hypothesis is tested by watching it fail: drag the craft out to five hundred metres and see
-         it go behind the patrol car it was drawn in front of. -->
-    <label><span id="label-distance-hypothesis">Show it at</span>
-      <input id="distanceHypothesis" type="range" min="0" max="1" step="0.002" value="0" title="How far along its line of sight the shape is drawn — what decides what the decor hides of it. Not stored: a reader's hypothesis, never the witness's statement."/>
-      <output id="distance-hypothesis-value" class="apparent-size" for="distanceHypothesis"></output>
+    <!-- Three readings of ONE relation, apparent width = f(real width, distance), kept in step.
+         Only the apparent width is the recording's (BaseShape.angular); the real width is derived
+         from it, and the distance is where the scene DRAWS the shape (see PhenomenonDepth), never a
+         statement. Edit any one and one of the other two follows — the held one never moves, and
+         with nothing held the apparent width stays when the distance is edited (the shape looks the
+         same, it is stood elsewhere) while the distance stays when either width is edited (the
+         shape is resized on the canvas, which is what "try a size at a distance" always did). -->
+    <label><span id="label-apparent-width">Apparent width</span>
+      <input id="apparentWidth" type="number" min="0" step="0.1" title="How wide it looked, in degrees — the recording's own statement of size"/>°
+      <output id="apparent-size" class="apparent-size inline" for="apparentWidth"></output></label>
+    <label><span id="label-real-width">Real width</span>
+      <input id="realWidth" type="number" min="0" step="0.1" title="What that angle is in metres at the distance beside it. Derived, never stored"/> m</label>
+    <label><span id="label-object-distance">Distance</span>
+      <input id="objectDistance" type="number" min="0" step="1" title="How far along its line of sight the shape is drawn — what decides what the decor hides of it. A hypothesis, never the witness's statement"/> m
       <button id="clear-distance-hypothesis" type="button" class="icon-btn" title="Back to what the recording establishes" aria-label="Back to what the recording establishes">×</button></label>
-    <output id="depth-basis" class="apparent-size" for="distanceHypothesis"></output>
+    <label><span id="label-size-lock">Hold</span>
+      <select id="sizeLock" title="Which of the three stays put while another is edited">
+        <option id="option-lock-none" value="none">nothing</option>
+        <option id="option-lock-apparent" value="apparent">the apparent width</option>
+        <option id="option-lock-real" value="real">the real width</option>
+        <option id="option-lock-distance" value="distance">the distance</option>
+      </select></label>
+    <label class="record-row"><span id="label-distance-hypothesis">Slide the distance</span>
+      <input id="distanceHypothesis" type="range" min="0" max="1" step="0.002" value="0" title="The same distance, dragged: a metre to twenty kilometres, and watch what the decor hides"/></label>
+    <output id="real-size" class="apparent-size" for="realWidth"></output>
+    <output id="depth-basis" class="apparent-size" for="objectDistance"></output>
     <!-- The depth of field, read backwards. The scene blurs the WORLD from its distance and leaves
          the witness's object alone, because that distance is the unknown; a blur the witness
          STATED runs the geometry the other way and bounds it. See DepthOfField's own doc comment,
@@ -587,13 +597,15 @@ input.invalid {
 #apparent-size {
   white-space: nowrap;
 }
-/* Inside its label beside the slider, not a flex item: reserved wide enough for "20 000 m" so the
-   slider does not slide sideways as the number under it changes length. */
-#distance-hypothesis-value {
-  display: inline-block;
-  min-width: 6.5ch;
+/* A readout inside a label, after its field, is not a flex item and takes no line of its own. */
+.apparent-size.inline {
+  display: inline;
   flex-basis: auto;
   min-height: 0;
+  margin-left: 0.4em;
+}
+#distanceHypothesis {
+  flex: 1;
 }
 /* Record and the sampling rate it records at are one control, not two: grouping them makes them a
    single flex item of the wrapping toolbar, so they stay on the same line together wherever that

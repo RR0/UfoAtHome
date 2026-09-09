@@ -673,9 +673,12 @@ of instrument, and if the two ever disagree the angle wins. `ImageProjection`
 (`src/engine/instrument/ImageProjection.ts`) owns the conversion itself.
 
 Through an eye at 60° across 360px, one degree is exactly 6px and the full Moon about 3.1px — so an object of 3.5m
-at 90m is 13px wide, not the 90px an author reaches for unaided. That is why the editor's **Try a size** / **at a distance of**
-fields exist: type a hypothesis, get the angle it implies on the canvas, and the meters are forgotten the moment
-they have been applied. They are an authoring aid, never testimony.
+at 90m is 13px wide, not the 90px an author reaches for unaided. That is why the editor shows the three readings of
+that one relation side by side — **apparent width**, **real width**, **distance** — kept in step: edit any one and
+one of the other two follows, the one the **Hold** select pins never moves, and with nothing held the distance
+moves the real width (the shape looks the same, it is stood elsewhere) while either width moves the other (the
+shape is resized on the canvas). Only the angle is kept; the metres are an authoring aid, never testimony, and
+the distance is where the scene *draws* the shape (see *Where the shape is drawn*).
 
 ### Decor that moves, and lights that blink
 
@@ -899,11 +902,11 @@ does not go under a distant ground. A shape drawn wholly inside another stands w
 nearer: Socorro's insignia is painted on its craft, and a craft tried at five hundred metres must take its
 insignia with it.
 
-The hypothesis is the editor's **Show it at** slider — a metre to twenty kilometres, logarithmic — and it outranks
-what the data establishes on purpose: a hypothesis is tested by watching it fail. Drag the craft out to five
-hundred metres and it goes behind the patrol car it was drawn in front of; slide it back and it comes out. It is
-never saved. The line under the slider says where the shape is drawn right now and on what basis, and the cross
-withdraws the hypothesis.
+The hypothesis is the editor's **Distance** field, and the slider under it — a metre to twenty kilometres,
+logarithmic — and it outranks what the data establishes on purpose: a hypothesis is tested by watching it fail.
+Drag the craft out to five hundred metres and it goes behind the patrol car it was drawn in front of; slide it
+back and it comes out. It is never saved. The line under the slider says where the shape is drawn right now and on
+what basis, and the cross withdraws the hypothesis.
 
 Most sightings constrain nothing at all — a light in an empty night sky crosses nothing — and the readout then says
 so. "Unknown" is the honest answer for a majority of cases, and saying it out loud is the entire point of not

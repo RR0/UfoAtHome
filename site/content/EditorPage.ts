@@ -272,9 +272,11 @@ if (docs) {
         (how indistinct its edges looked). Several shapes can share one timeline — a craft, a
         trailing flame, a second object — each with its own name, and grouped, reordered or deleted
         from the canvas's own context menu.</p>
-      <p><strong>Try a size</strong> / <strong>at a distance of</strong> is an authoring aid and
-        nothing more: type a hypothesis, read the angle it implies, and the metres are forgotten the
-        moment they have been applied. Through an eye at 60° across a 360-pixel canvas, one degree
+      <p><strong>Apparent width</strong>, <strong>real width</strong> and <strong>distance</strong>
+        are three readings of one relation, kept in step: edit any one and one of the other two
+        follows — the one <strong>Hold</strong> pins never moves. Only the angle is the recording's;
+        the real width is derived, and the distance is where the scene draws the shape, a hypothesis
+        to try rather than a statement. Through an eye at 60° across a 360-pixel canvas, one degree
         is exactly 6 pixels and the full Moon about 3 — so an object 3.5 m wide at 90 m is 13 pixels
         across, not the 90 an author reaches for unaided. Getting this wrong is the single most
         common way a reconstruction ends up false.</p>
@@ -530,9 +532,12 @@ if (docs) {
         formes peuvent partager une même chronologie — un engin, une flamme qui traîne, un second
         objet — chacune avec son nom, groupées, réordonnées ou supprimées depuis le menu contextuel
         du canevas.</p>
-      <p><strong>Essayer une taille</strong> / <strong>à une distance de</strong> est une aide à la
-        saisie et rien de plus : tapez une hypothèse, lisez l'angle qu'elle implique, et les mètres
-        sont oubliés dès qu'ils ont été appliqués. À l'œil nu sur 60° répartis sur un canevas de
+      <p><strong>Largeur apparente</strong>, <strong>largeur réelle</strong> et
+        <strong>distance</strong> sont trois lectures d'une même relation, tenues en accord : modifiez
+        l'une et l'une des deux autres suit — celle que <strong>Bloquer</strong> retient ne bouge
+        jamais. Seul l'angle appartient à l'enregistrement ; la largeur réelle en découle, et la
+        distance est celle à laquelle la scène dessine la forme, une hypothèse à essayer plutôt qu'un
+        énoncé. À l'œil nu sur 60° répartis sur un canevas de
         360 pixels, un degré fait exactement 6 pixels et la pleine Lune environ 3 — un objet de
         3,5 m à 90 m fait donc 13 pixels de large, et non les 90 vers lesquels va la main. S'y
         tromper est la première cause de reconstitution fausse.</p>

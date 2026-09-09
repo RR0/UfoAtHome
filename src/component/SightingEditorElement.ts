@@ -265,14 +265,17 @@ export class SightingEditorElement extends HTMLElement {
    * indistinguishable. In memory only: a saved file records the zone, not who chose it. */
   private autoFilledTimeZone?: string
   private readonly timeZones = new TimeZones()
-  private readonly objectSizeInput: HTMLInputElement
+  /** Three readings of one relation, apparent = f(real, distance) — see applyDistance for the
+   * rule that keeps them in step, and sizeLock for which one a reader has pinned. */
+  private readonly apparentWidthInput: HTMLInputElement
+  private readonly realWidthInput: HTMLInputElement
   private readonly objectDistanceInput: HTMLInputElement
+  private readonly sizeLockSelect: HTMLSelectElement
   private readonly apparentSizeOutput: HTMLElement
   /** Where the only meters a recording can honestly produce are shown — see refreshRealSize. */
   private readonly realSizeOutput: HTMLElement
   /** How far along its line of sight the selected shape is drawn — see applyDistanceHypothesis. */
   private readonly distanceHypothesisInput: HTMLInputElement
-  private readonly distanceHypothesisValue: HTMLElement
   private readonly clearDistanceHypothesisButton: HTMLButtonElement
   private readonly labelDistanceHypothesis: HTMLElement
   /** Where the shape is drawn right now and on what basis — see refreshDepth. */
@@ -445,8 +448,10 @@ export class SightingEditorElement extends HTMLElement {
   private readonly labelShape: HTMLElement
   private readonly labelShapeTitle: HTMLElement
   private readonly labelUtcOffset: HTMLElement
-  private readonly labelObjectSize: HTMLElement
+  private readonly labelApparentWidth: HTMLElement
+  private readonly labelRealWidth: HTMLElement
   private readonly labelObjectDistance: HTMLElement
+  private readonly labelSizeLock: HTMLElement
   private readonly labelSamplingRate: HTMLElement
   private readonly labelDuration: HTMLElement
   private readonly placeSourceRow: HTMLElement
@@ -814,12 +819,13 @@ export class SightingEditorElement extends HTMLElement {
     this.shapeTitleInput = this.shadow.getElementById("shapeTitle") as HTMLInputElement
     this.utcOffsetInput = this.shadow.getElementById("utcOffsetHours") as HTMLInputElement
     this.timeZoneSelect = this.shadow.getElementById("timeZone") as HTMLSelectElement
-    this.objectSizeInput = this.shadow.getElementById("objectSize") as HTMLInputElement
+    this.apparentWidthInput = this.shadow.getElementById("apparentWidth") as HTMLInputElement
+    this.realWidthInput = this.shadow.getElementById("realWidth") as HTMLInputElement
     this.objectDistanceInput = this.shadow.getElementById("objectDistance") as HTMLInputElement
+    this.sizeLockSelect = this.shadow.getElementById("sizeLock") as HTMLSelectElement
     this.apparentSizeOutput = this.shadow.getElementById("apparent-size")!
     this.realSizeOutput = this.shadow.getElementById("real-size")!
     this.distanceHypothesisInput = this.shadow.getElementById("distanceHypothesis") as HTMLInputElement
-    this.distanceHypothesisValue = this.shadow.getElementById("distance-hypothesis-value")!
     this.clearDistanceHypothesisButton = this.shadow.getElementById("clear-distance-hypothesis") as HTMLButtonElement
     this.labelDistanceHypothesis = this.shadow.getElementById("label-distance-hypothesis")!
     this.depthBasisOutput = this.shadow.getElementById("depth-basis")!
@@ -951,8 +957,10 @@ export class SightingEditorElement extends HTMLElement {
     this.labelShape = this.shadow.getElementById("label-shape")!
     this.labelShapeTitle = this.shadow.getElementById("label-shape-title")!
     this.labelUtcOffset = this.shadow.getElementById("label-utc-offset")!
-    this.labelObjectSize = this.shadow.getElementById("label-object-size")!
+    this.labelApparentWidth = this.shadow.getElementById("label-apparent-width")!
+    this.labelRealWidth = this.shadow.getElementById("label-real-width")!
     this.labelObjectDistance = this.shadow.getElementById("label-object-distance")!
+    this.labelSizeLock = this.shadow.getElementById("label-size-lock")!
     this.labelSamplingRate = this.shadow.getElementById("label-sampling-rate")!
     this.labelSoundGroup = this.shadow.getElementById("label-sound-group")!
     this.labelSoundKind = this.shadow.getElementById("label-sound-kind")!
@@ -1194,9 +1202,10 @@ export class SightingEditorElement extends HTMLElement {
     // itself already resyncs the toolbar, no separate onSelectionOrTimeChanged() call needed).
     this.sourceSelect.addEventListener("change", () => this.selectUnit(this.sourceSelect.value))
     this.shapeTitleInput.addEventListener("input", () => this.updateShapeTitle())
-    for (const input of [this.objectSizeInput, this.objectDistanceInput]) {
-      input.addEventListener("input", () => this.applySizeHypothesis())
-    }
+    this.apparentWidthInput.addEventListener("input", () => this.onApparentWidthInput())
+    this.realWidthInput.addEventListener("input", () => this.onRealWidthInput())
+    this.objectDistanceInput.addEventListener("input", () => this.onDistanceInput())
+    this.sizeLockSelect.addEventListener("change", () => this.applySizeLock())
     this.distanceHypothesisInput.addEventListener("input", () => this.applyDistanceHypothesis())
     this.clearDistanceHypothesisButton.addEventListener("click", () => this.clearDistanceHypothesis())
     this.addDecorWitnessButton.addEventListener("click", () => this.addDecor("witness"))
@@ -3844,8 +3853,10 @@ export class SightingEditorElement extends HTMLElement {
       this.haloScaleInput,
       this.blurInput,
       this.brightnessInput,
-      this.objectSizeInput,
+      this.apparentWidthInput,
+      this.realWidthInput,
       this.objectDistanceInput,
+      this.sizeLockSelect,
       this.distanceHypothesisInput,
       this.clearDistanceHypothesisButton,
       this.sourceSelect,
@@ -3911,39 +3922,107 @@ export class SightingEditorElement extends HTMLElement {
     this.updateShapeTitleValidity()
   }
 
+  /** Which of the three readings a reader has pinned — see applyDistance. */
+  private sizeLock: "none" | "apparent" | "real" | "distance" = "none"
+
   /**
-   * Resizes the selected shape to the size a real object of that width, at that distance, ACTUALLY
-   * looks — an authoring aid, and nothing more.
+   * The rule that keeps apparent width, real width and distance in step.
    *
-   * Drawing an apparent size by eye gets it wrong by a factor of five to ten, and a witness who
-   * says "it was about the size of a car, maybe ninety meters off" has given something far more
-   * usable than a freehand drag. So the pair is a way to GET to the right angle on the canvas.
-   *
-   * What it is not, any more, is something the recording keeps. The shape ends up with the angular
-   * extent this implies (see BaseShape.angular) and the meters are forgotten the moment they have
-   * been applied — because they were never an observation: the witness inferred the distance, then
-   * inferred the size from it, and a file that stored the pair would be recording that arithmetic
-   * as if it were the sighting. Real meters come back only where the scene can establish them (see
-   * SizeEstimate), which is what the readout underneath these fields shows.
-   *
-   * Resizes about the shape's own center (its position is where the witness saw it, and has
-   * nothing to do with how big it was) and keeps its aspect ratio (the width is one measurement;
-   * the outline's proportions are a separate observation this must not overwrite). A half-filled
-   * pair is simply not enough to compute anything and leaves the shape alone.
+   * They are three readings of one relation, apparent = f(real, distance), and only one of them is
+   * the recording's: the apparent width (BaseShape.angular). The real width is derived from it,
+   * and the distance is where the scene DRAWS the shape — a hypothesis, never a statement (see
+   * PhenomenonDepth). So editing any one has to move exactly one other, and which one is what the
+   * hold says. With nothing held: the distance moves the real width (the shape looks the same, it
+   * is stood elsewhere — the thing to try when asking what the decor would hide), and either width
+   * moves the other width (the shape is resized on the canvas, which is what "try a size at a
+   * distance" always did).
    */
-  private applySizeHypothesis(): void {
+  private onApparentWidthInput(): void {
+    const deg = this.numberOrUndefined(this.apparentWidthInput.value)
+    if (deg === undefined || deg <= 0 || this.selectedSourceIds.size !== 1) return
+    if (this.sizeLock === "real") {
+      const realM = this.numberOrUndefined(this.realWidthInput.value)
+      if (realM !== undefined && realM > 0) {
+        this.sceneElement.setDistanceHypothesis(this.currentSourceId, ApparentSize.distanceMAt(realM, deg))
+      }
+    }
+    this.applyApparentWidth(deg)
+  }
+
+  private onRealWidthInput(): void {
+    const realM = this.numberOrUndefined(this.realWidthInput.value)
+    if (realM === undefined || realM <= 0 || this.selectedSourceIds.size !== 1) return
+    if (this.sizeLock === "apparent") {
+      const deg = this.currentApparentWidthDeg()
+      if (deg !== undefined && deg > 0) {
+        this.sceneElement.setDistanceHypothesis(this.currentSourceId, ApparentSize.distanceMAt(realM, deg))
+        this.refreshDepth()
+      }
+      return
+    }
+    const distanceM = this.currentDistanceM()
+    if (distanceM !== undefined && distanceM > 0) {
+      this.applyApparentWidth(ApparentSize.angularWidthDeg({ sizeM: realM, distanceM }))
+    }
+  }
+
+  private onDistanceInput(): void {
+    const distanceM = this.numberOrUndefined(this.objectDistanceInput.value)
+    if (distanceM === undefined || distanceM <= 0) return
+    this.distanceHypothesisInput.value = String(this.metersToSlider(distanceM))
+    this.applyDistance(distanceM)
+  }
+
+  /** Stands the selected shape at `distanceM` — and, when the real width is held, resizes it on
+   * the canvas to what that width subtends from there. */
+  private applyDistance(distanceM: number): void {
+    if (this.selectedSourceIds.size !== 1) return
+    if (this.sizeLock === "real") {
+      const realM = this.numberOrUndefined(this.realWidthInput.value)
+      if (realM !== undefined && realM > 0) {
+        this.applyApparentWidth(ApparentSize.angularWidthDeg({ sizeM: realM, distanceM }))
+      }
+    }
+    this.sceneElement.setDistanceHypothesis(this.currentSourceId, distanceM)
+    this.refreshDepth()
+  }
+
+  /** Pins one reading: its field stops taking input, and the other two trade against each other. */
+  private applySizeLock(): void {
+    this.sizeLock = this.sizeLockSelect.value as typeof this.sizeLock
+    this.apparentWidthInput.readOnly = this.sizeLock === "apparent"
+    this.realWidthInput.readOnly = this.sizeLock === "real"
+    this.objectDistanceInput.readOnly = this.sizeLock === "distance"
+    this.distanceHypothesisInput.disabled = this.sizeLock === "distance" || this.selectedSourceIds.size !== 1
+  }
+
+  /** The selected shape's own apparent width, degrees, as the recording states it. */
+  private currentApparentWidthDeg(): number | undefined {
+    const shape = this.ufoElement.sighting.timeline.getInterpolatedShapeAt(this.ufoElement.currentTime, this.currentSourceId)
+    if (!shape) return undefined
+    return shape.angular?.widthDeg ?? this.currentProjection().pxToDeg(shape.bounds.width)
+  }
+
+  /** How far the selected shape is drawn right now, whatever decided it — see PhenomenonDepth. */
+  private currentDistanceM(): number | undefined {
+    return this.sceneElement.depthOf(this.currentSourceId)?.distanceM
+  }
+
+  /**
+   * Resizes the selected shape on the canvas to subtend `widthDeg` — about its own centre (its
+   * position is where the witness saw it, and has nothing to do with how big it was) and keeping
+   * its aspect ratio (the width is one measurement; the outline's proportions are a separate
+   * observation this must not overwrite). The angle is what the recording keeps; the metres that
+   * led to it are forgotten the moment they have been applied, because they were never an
+   * observation — the witness inferred the distance, then inferred the size from it.
+   */
+  private applyApparentWidth(widthDeg: number): void {
     const timeline = this.ufoElement.sighting.timeline
     const t = this.ufoElement.currentTime
     const shape = timeline.getInterpolatedShapeAt(t, this.currentSourceId)
     if (!shape) return
-    const sizeM = this.numberOrUndefined(this.objectSizeInput.value)
-    const distanceM = this.numberOrUndefined(this.objectDistanceInput.value)
-    if (sizeM === undefined || distanceM === undefined || sizeM <= 0 || distanceM <= 0) {
-      this.refreshApparentSize()
-      return
-    }
     const projection = this.currentProjection()
-    const width = projection.widthPx({ sizeM, distanceM })
+    const width = projection.degToPx(widthDeg)
     const height = shape.bounds.height * (shape.bounds.width === 0 ? 1 : width / shape.bounds.width)
     const bounds = {
       x: shape.bounds.x + (shape.bounds.width - width) / 2,
@@ -4179,17 +4258,29 @@ export class SightingEditorElement extends HTMLElement {
         : undefined
     if (!shape) {
       this.apparentSizeOutput.textContent = ""
+      if (!this.hasFocus(this.apparentWidthInput)) this.apparentWidthInput.value = ""
+      this.refreshRealSize()
       return
     }
-    const degrees = this.currentProjection().pxToDeg(shape.bounds.width)
+    const degrees = shape.angular?.widthDeg ?? this.currentProjection().pxToDeg(shape.bounds.width)
     const moons = ApparentSize.inMoons(degrees)
-    // Decimal separator follows the reader's own locale (a comma in French), like every other
-    // number a browser formats — the surrounding wording comes from this.messages, but a number
-    // isn't something to translate by hand.
+    // The field is a number, so it takes a plain one; the Moons are a sentence, and follow the
+    // reader's own locale (a comma in French) like every other number a browser formats.
+    if (!this.hasFocus(this.apparentWidthInput)) this.apparentWidthInput.value = this.plain(degrees, degrees < 1 ? 2 : 1)
     this.apparentSizeOutput.textContent = this.messages.apparentSize
-      .replace("{deg}", degrees.toLocaleString(undefined, { maximumFractionDigits: degrees < 1 ? 2 : 1 }))
       .replace("{moons}", moons.toLocaleString(undefined, { maximumFractionDigits: moons < 10 ? 1 : 0 }))
     this.refreshRealSize()
+  }
+
+  /** Whether the reader is typing in `input` right now — a field being typed in is never
+   * overwritten by a sync, or the digits would change under their fingers. */
+  private hasFocus(input: HTMLElement): boolean {
+    return this.shadow.activeElement === input
+  }
+
+  /** A number for a number field: a point, never a locale's comma, at the given precision. */
+  private plain(value: number, digits: number): string {
+    return String(Number(value.toFixed(digits)))
   }
 
   /**
@@ -4317,8 +4408,9 @@ export class SightingEditorElement extends HTMLElement {
    */
   private applyDistanceHypothesis(): void {
     if (this.selectedSourceIds.size !== 1) return
-    this.sceneElement.setDistanceHypothesis(this.currentSourceId, this.sliderToMeters(Number(this.distanceHypothesisInput.value)))
-    this.refreshDepth()
+    const distanceM = this.sliderToMeters(Number(this.distanceHypothesisInput.value))
+    this.objectDistanceInput.value = this.plain(distanceM, distanceM < 10 ? 1 : 0)
+    this.applyDistance(distanceM)
   }
 
   private clearDistanceHypothesis(): void {
@@ -4347,12 +4439,22 @@ export class SightingEditorElement extends HTMLElement {
     const depth = this.selectedSourceIds.size === 1 ? this.sceneElement.depthOf(this.currentSourceId) : undefined
     if (!depth) {
       this.depthBasisOutput.textContent = ""
-      this.distanceHypothesisValue.textContent = ""
+      if (!this.hasFocus(this.objectDistanceInput)) this.objectDistanceInput.value = ""
+      if (!this.hasFocus(this.realWidthInput)) this.realWidthInput.value = ""
       return
     }
     const m = this.meters(depth.distanceM)
-    this.distanceHypothesisValue.textContent = `${m} m`
-    this.distanceHypothesisInput.value = String(this.metersToSlider(depth.distanceM))
+    if (!this.hasFocus(this.objectDistanceInput)) {
+      this.objectDistanceInput.value = this.plain(depth.distanceM, depth.distanceM < 10 ? 1 : 0)
+    }
+    const deg = this.currentApparentWidthDeg()
+    if (!this.hasFocus(this.realWidthInput)) {
+      const realM = deg === undefined || deg <= 0 ? undefined : ApparentSize.sizeMAt(depth.distanceM, deg)
+      this.realWidthInput.value = realM === undefined ? "" : this.plain(realM, realM < 1 ? 2 : realM < 10 ? 1 : 0)
+    }
+    if (!this.hasFocus(this.distanceHypothesisInput)) {
+      this.distanceHypothesisInput.value = String(this.metersToSlider(depth.distanceM))
+    }
     this.clearDistanceHypothesisButton.hidden = depth.basis !== "hypothesis"
     const message = {
       stated: this.messages.depthStated,
@@ -5957,10 +6059,18 @@ export class SightingEditorElement extends HTMLElement {
     this.labelShapeTitle.textContent = messages.shapeTitle
     this.labelUtcOffset.textContent = messages.utcOffset
     this.utcOffsetInput.placeholder = messages.utcOffsetPlaceholder
-    this.labelObjectSize.textContent = messages.objectSize
-    this.labelObjectDistance.textContent = messages.objectDistance
-    this.objectSizeInput.placeholder = messages.objectSizePlaceholder
-    this.objectDistanceInput.placeholder = messages.objectDistancePlaceholder
+    this.labelApparentWidth.textContent = messages.apparentWidth
+    this.labelRealWidth.textContent = messages.realWidth
+    this.labelObjectDistance.textContent = messages.distance
+    this.labelSizeLock.textContent = messages.sizeLock
+    for (const [id, text] of [
+      ["option-lock-none", messages.lockNone],
+      ["option-lock-apparent", messages.lockApparent],
+      ["option-lock-real", messages.lockReal],
+      ["option-lock-distance", messages.lockDistance]
+    ] as const) {
+      this.shadow.getElementById(id)!.textContent = text
+    }
     this.labelDistanceHypothesis.textContent = messages.distanceHypothesis
     this.clearDistanceHypothesisButton.title = messages.clearDistanceHypothesis
     this.clearDistanceHypothesisButton.setAttribute("aria-label", messages.clearDistanceHypothesis)

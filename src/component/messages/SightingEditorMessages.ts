@@ -26,17 +26,22 @@ export interface SightingEditorMessages extends SightingLabels {
    * canvas arithmetically instead of by eye (see SightingEditorElement.applySizeHypothesis). Not
    * something the recording keeps: the shape ends up with the angle, and these meters are
    * forgotten. */
-  objectSize: string
-  /** The distance to try it at — the other half. */
-  objectDistance: string
-  /** Read-back of what Real size / Distance actually produce on screen. {deg} is the apparent
-   * width in degrees, {moons} the same width counted in full Moons — the comparison a reader
-   * can picture, and the quickest way to catch an object drawn ten times too big. */
+  apparentWidth: string
+  /** The two others of the one relation: what that angle is in metres at the distance the shape is
+   * drawn, and that distance (see SightingEditorElement.applyDistance). */
+  realWidth: string
+  distance: string
+  /** Which of the three stays put while another is edited, and its four choices. */
+  sizeLock: string
+  lockNone: string
+  lockApparent: string
+  lockReal: string
+  lockDistance: string
+  /** Beside the apparent width: the same width counted in full Moons — the comparison a reader can
+   * picture, and the quickest way to catch an object drawn ten times too big. */
   apparentSize: string
   /** utcOffset's placeholder: left empty, the time zone is approximated from the longitude. */
   utcOffsetPlaceholder: string
-  objectSizePlaceholder: string
-  objectDistancePlaceholder: string
   /** What the scene actually establishes about the object's real width, from the moments it was
    * declared to pass behind or in front of decor whose distance is known (see SizeEstimate) —
    * the only meters a recording can honestly produce. {min}/{max} are in meters. */

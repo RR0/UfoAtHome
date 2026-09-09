@@ -1496,7 +1496,7 @@ export class SceneRenderer {
       const placement = resolveDecorPlacementAt(object, t)
       const x = placement.eastM + offset.x + shift.x
       const z = -placement.northM + offset.z + shift.z
-      group.position.set(x, this.groundYUnder(x, z) + placement.altitudeM, z)
+      group.position.set(x, this.groundUnderFootprint(object, x, z, placement.headingDeg) + placement.altitudeM, z)
       // A field is dropped once it is too far to read as one. Measured rather than chosen: at
       // Valensole, hiding every patch beyond this changes three ten-thousandths of the picture,
       // because a 55 cm plant at 150 m is a sixth of a pixel and what is left in its place is an
@@ -1579,6 +1579,32 @@ export class SceneRenderer {
     const top = at(row0, col0) * (1 - fx) + at(row0, col0 + 1) * fx
     const bottom = at(row0 + 1, col0) * (1 - fx) + at(row0 + 1, col0 + 1) * fx
     return top * (1 - fz) + bottom * fz
+  }
+
+  /**
+   * The ground a decor object stands on — the HIGHEST the relief reaches under its footprint, not
+   * the height at its centre.
+   *
+   * The relief is a thirty-metre grid read bilinearly, so under a five-metre car it is a tilted
+   * plane; stood at the height of its own centre, the car had half its wheels under the uphill
+   * side of it. Standing it on the highest of five samples (the centre and the four corners of its
+   * footprint, turned to its heading) can leave the downhill wheels a few centimetres in the air,
+   * which a reader does not see, where a wheel in the ground is the one thing they do. Altitude
+   * is added on top by the caller, as before; a flying object's footprint is not on the ground.
+   */
+  private groundUnderFootprint(object: DecorObject, x: number, z: number, headingDeg: number | undefined): number {
+    const size = DecorSystem.sizeOf(object)
+    const heading = (headingDeg ?? 0) * DEG_TO_RAD
+    // The object's own axes in the scene: length runs the way it faces (north is -z), width across.
+    const alongX = Math.sin(heading) * (size.lengthM / 2)
+    const alongZ = -Math.cos(heading) * (size.lengthM / 2)
+    const acrossX = Math.cos(heading) * (size.widthM / 2)
+    const acrossZ = Math.sin(heading) * (size.widthM / 2)
+    let highest = this.groundYUnder(x, z)
+    for (const [sl, sw] of [[1, 1], [1, -1], [-1, 1], [-1, -1]]) {
+      highest = Math.max(highest, this.groundYUnder(x + sl * alongX + sw * acrossX, z + sl * alongZ + sw * acrossZ))
+    }
+    return highest
   }
 
   /** How far the witness has turned their head away from "straight out through the chosen
