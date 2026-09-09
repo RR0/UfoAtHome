@@ -71,9 +71,11 @@ export interface SightingEditorMessages extends SightingLabels {
   /** Appended to a two-sided size once it can be read back as a distance at the playhead's own
    * instant (see SizeEstimate.distanceRangeAt). {min}/{max} are in meters. */
   realDistanceHere: string
-  /** The button that withdraws the distance a reader typed — the hypothesis of where the shape is
-   * DRAWN, never the recording's (see PhenomenonDepth and SceneElement.setDistanceHypothesis). */
+  /** The button that withdraws a distance of the reader's own — the hypothesis of where the shape
+   * is DRAWN, never the recording's (see PhenomenonDepth and SceneElement.setDistanceHypothesis) —
+   * and its title, saying what comes back. */
   clearDistanceHypothesis: string
+  clearDistanceHypothesisTitle: string
   /** Where the shape is drawn right now and why, one per DepthBasis. {m} is in meters. */
   depthStated: string
   depthHypothesis: string

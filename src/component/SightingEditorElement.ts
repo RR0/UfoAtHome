@@ -6061,8 +6061,8 @@ export class SightingEditorElement extends HTMLElement {
     ] as const) {
       this.shadow.getElementById(id)!.textContent = text
     }
-    this.clearDistanceHypothesisButton.title = messages.clearDistanceHypothesis
-    this.clearDistanceHypothesisButton.setAttribute("aria-label", messages.clearDistanceHypothesis)
+    this.clearDistanceHypothesisButton.textContent = messages.clearDistanceHypothesis
+    this.clearDistanceHypothesisButton.title = messages.clearDistanceHypothesisTitle
     // The read-back is a formatted sentence, not a static label — re-rendered rather than
     // assigned, so switching language refreshes the numbers already shown.
     this.refreshApparentSize()

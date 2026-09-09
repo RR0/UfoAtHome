@@ -398,8 +398,7 @@ export const html = `
     <label><span id="label-real-width">Real width</span>
       <input id="realWidth" type="number" min="0" step="0.1" title="What that angle is in metres at the distance beside it. Derived, never stored"/> m</label>
     <label><span id="label-object-distance">Distance</span>
-      <input id="objectDistance" type="number" min="0" step="1" title="How far along its line of sight the shape is drawn — what decides what the decor hides of it. A hypothesis, never the witness's statement"/> m
-      <button id="clear-distance-hypothesis" type="button" class="icon-btn" title="Back to what the recording establishes" aria-label="Back to what the recording establishes">×</button></label>
+      <input id="objectDistance" type="number" min="0" step="1" title="How far along its line of sight the shape is drawn — what decides what the decor hides of it. A hypothesis, never the witness's statement"/> m</label>
     <label><span id="label-size-lock">Hold</span>
       <select id="sizeLock" title="Which of the three stays put while another is edited">
         <option id="option-lock-none" value="none">nothing</option>
@@ -407,6 +406,9 @@ export const html = `
         <option id="option-lock-real" value="real">the real width</option>
         <option id="option-lock-distance" value="distance">the distance</option>
       </select></label>
+    <!-- Shown only while a distance of the reader's own is in force — whichever field put it there:
+         the distance itself, or the real width with the apparent width held. -->
+    <button id="clear-distance-hypothesis" type="button" title="Back to what the recording establishes">Withdraw the distance hypothesis</button>
     <output id="real-size" class="apparent-size" for="realWidth"></output>
     <output id="depth-basis" class="apparent-size" for="objectDistance"></output>
     <!-- The depth of field, read backwards. The scene blurs the WORLD from its distance and leaves
