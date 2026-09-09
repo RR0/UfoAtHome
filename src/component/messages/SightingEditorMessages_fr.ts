@@ -13,7 +13,7 @@ export const sightingEditorMessages_fr: SightingEditorMessages = {
   apparentWidth: "Largeur apparente",
   realWidth: "Largeur réelle",
   distance: "Distance",
-  sizeLock: "Bloquer",
+  sizeLock: "Maintenir",
   lockNone: "rien",
   lockApparent: "la largeur apparente",
   lockReal: "la largeur réelle",

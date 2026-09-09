@@ -534,7 +534,7 @@ if (docs) {
         du canevas.</p>
       <p><strong>Largeur apparente</strong>, <strong>largeur réelle</strong> et
         <strong>distance</strong> sont trois lectures d'une même relation, tenues en accord : modifiez
-        l'une et l'une des deux autres suit — celle que <strong>Bloquer</strong> retient ne bouge
+        l'une et l'une des deux autres suit — celle que <strong>Maintenir</strong> retient ne bouge
         jamais. Seul l'angle appartient à l'enregistrement ; la largeur réelle en découle, et la
         distance est celle à laquelle la scène dessine la forme, une hypothèse à essayer plutôt qu'un
         énoncé. À l'œil nu sur 60° répartis sur un canevas de
