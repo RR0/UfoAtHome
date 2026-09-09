@@ -407,8 +407,6 @@ export const html = `
         <option id="option-lock-real" value="real">the real width</option>
         <option id="option-lock-distance" value="distance">the distance</option>
       </select></label>
-    <label class="record-row"><span id="label-distance-hypothesis">Slide the distance</span>
-      <input id="distanceHypothesis" type="range" min="0" max="1" step="0.002" value="0" title="The same distance, dragged: a metre to twenty kilometres, and watch what the decor hides"/></label>
     <output id="real-size" class="apparent-size" for="realWidth"></output>
     <output id="depth-basis" class="apparent-size" for="objectDistance"></output>
     <!-- The depth of field, read backwards. The scene blurs the WORLD from its distance and leaves
@@ -604,9 +602,7 @@ input.invalid {
   min-height: 0;
   margin-left: 0.4em;
 }
-#distanceHypothesis {
-  flex: 1;
-}
+
 /* Record and the sampling rate it records at are one control, not two: grouping them makes them a
    single flex item of the wrapping toolbar, so they stay on the same line together wherever that
    line happens to break, instead of the button drifting up next to whatever field precedes it.

@@ -29,7 +29,6 @@ export const sightingEditorMessages_fr: SightingEditorMessages = {
   blurBoundNotAtInfinity: "Le flou ne borne une distance que pour une mise au point à l'infini : celle-ci est à {focus} m, qui floute des deux côtés",
   realSizeContradiction: "Contradiction : les passages déclarés ne peuvent pas être vrais ensemble",
   realDistanceHere: " — soit ici entre {min} et {max} m",
-  distanceHypothesis: "Faire glisser la distance",
   clearDistanceHypothesis: "Revenir à ce que l'enregistrement établit",
   depthStated: "Dessiné à {m} m, comme l'enregistrement l'énonce",
   depthHypothesis: "Dessiné à {m} m : votre hypothèse — ce que le décor en cache est ce qu'une chose à cette distance perdrait",

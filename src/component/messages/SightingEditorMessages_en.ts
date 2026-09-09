@@ -29,7 +29,6 @@ export const sightingEditorMessages_en: SightingEditorMessages = {
   blurBoundNotAtInfinity: "Blur bounds a distance only for a lens focused at infinity: this one is focused at {focus} m, which blurs on both sides of it",
   realSizeContradiction: "Contradiction: the declared crossings cannot all be true",
   realDistanceHere: " — i.e. between {min} and {max} m here",
-  distanceHypothesis: "Slide the distance",
   clearDistanceHypothesis: "Back to what the recording establishes",
   depthStated: "Drawn at {m} m, as the recording states",
   depthHypothesis: "Drawn at {m} m: your hypothesis — what the decor hides of it is what a thing that far would lose",

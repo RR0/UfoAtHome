@@ -904,11 +904,10 @@ does not go under a distant ground. A shape drawn wholly inside another stands w
 nearer: Socorro's insignia is painted on its craft, and a craft tried at five hundred metres must take its
 insignia with it.
 
-The hypothesis is the editor's **Distance** field, and the slider under it — a metre to twenty kilometres,
-logarithmic — and it outranks what the data establishes on purpose: a hypothesis is tested by watching it fail.
-Hold the apparent width, drag the craft out to five hundred metres and it goes behind the patrol car it was drawn
-in front of; slide it back and it comes out. It is never saved. The line under the slider says where the shape is drawn right now and on
-what basis, and the cross withdraws the hypothesis.
+The hypothesis is the editor's **Distance** field, and it outranks what the data establishes on purpose: a
+hypothesis is tested by watching it fail. Hold the apparent width, put the craft at five hundred metres and it goes
+behind the patrol car it was drawn in front of; bring it back and it comes out. It is never saved. The line under
+the fields says where the shape is drawn right now and on what basis, and the cross withdraws the hypothesis.
 
 Most sightings constrain nothing at all — a light in an empty night sky crosses nothing — and the readout then says
 so. "Unknown" is the honest answer for a majority of cases, and saying it out loud is the entire point of not
