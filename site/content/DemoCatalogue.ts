@@ -61,8 +61,8 @@ export class DemoCatalogue {
           src: "/demo-data/witness-valensole.json",
           title: { en: "Valensole, 1965", fr: "Valensole, 1965" },
           blurb: {
-            en: "Dawn on the plateau, 05:45, the Sun still below the horizon — and the real relief of that field under the witness's feet.",
-            fr: "L'aube sur le plateau, 05:45, le Soleil encore sous l'horizon — et le relief réel de ce champ sous les pieds du témoin."
+            en: "Early morning on the plateau, 05:45, the Sun forty minutes up and 7° high in the north-east — and the real relief of that field under the witness's feet.",
+            fr: "Petit matin sur le plateau, 05:45, le Soleil levé depuis quarante minutes, à 7° de hauteur au nord-est — et le relief réel de ce champ sous les pieds du témoin."
           }
         },
         {
