@@ -88,7 +88,29 @@ float fbm(vec3 p) {
     amp *= 0.55;
   }
   return sum;
+}
+
+// The shape fields are noise, and noise clusters: the water deck's runs from 0.23 to 0.76 with
+// nearly everything between 0.33 and 0.67, the ice deck's tighter still. A threshold of 1 - coverage
+// on such a field drew NOTHING under a third of cover, a hundredth of the sky at 30%, and half of it
+// at 50% by coincidence alone — a recording stating 12% cloud showed a clear sky under three chips
+// saying otherwise. The threshold is the field's own quantile instead, so that a coverage IS the
+// fraction of sky covered: a logistic fit of the distribution measured over twenty thousand
+// directions (see WATER_FIELD_MEAN and the others), 0.5513 being sqrt(3)/pi, what turns a standard
+// deviation into a logistic scale.
+float coverageThreshold(float coverage, float mean, float spread) {
+  float c = clamp(coverage, 0.001, 0.999);
+  return mean - spread * 0.5513 * log(c / (1.0 - c));
 }`
+
+/** What the water deck's shape field measures, over twenty thousand directions at three layer
+ * heights (it does not depend on the height): its mean and standard deviation. What
+ * coverageThreshold needs to turn a coverage into the threshold that covers that much sky. */
+export const WATER_FIELD_MEAN = 0.495
+export const WATER_FIELD_SD = 0.075
+/** The same for the ice deck's fibrous field, which is narrower. */
+export const ICE_FIELD_MEAN = 0.5
+export const ICE_FIELD_SD = 0.047
 
 /** How much ice cloud lies along a given direction, 0 to 1 — the ice deck's own coverage field,
  * pulled out so the halo shader can multiply by it. Mirrors the fibrous branch of the fragment
@@ -104,7 +126,7 @@ float cirrusCoverAt(vec3 dir, float layerHeight, float coverage) {
   float fibre = fbm(drawnOut) * 0.5 + 0.5;
   float wisp = fbm(drawnOut * 3.1 + 7.0) * 0.5 + 0.5;
   float shape = fibre * 0.72 + wisp * 0.28;
-  float threshold = 1.0 - coverage;
+  float threshold = coverageThreshold(coverage, ${ICE_FIELD_MEAN.toFixed(3)}, ${ICE_FIELD_SD.toFixed(3)});
   float present = smoothstep(threshold - 0.10, threshold + 0.10, shape);
   // GRADED, not a mask. A pure threshold saturates to 1 everywhere once the veil is thick — which
   // is exactly the sky a reader tested, 88 per cent cover — and the halo went back to being the
@@ -208,7 +230,7 @@ void main() {
   // Below coverage's own noise threshold: a broken/patchy ceiling with real sky-colored gaps,
   // exactly like a real transition from scattered to overcast. remap-by-threshold, same technique
   // as the reference skill's own cloudDensity coverage control.
-  float threshold = 1.0 - coverage;
+  float threshold = coverageThreshold(coverage, ${WATER_FIELD_MEAN.toFixed(3)}, ${WATER_FIELD_SD.toFixed(3)});
   float alpha = smoothstep(threshold - 0.08, threshold + 0.08, shape);
   // This is what actually guarantees "total overcast, no sky visible" at cloudCover=1: force full
   // opacity everywhere as coverage approaches its max, overriding the noise field's own local value
@@ -365,6 +387,12 @@ export class CloudField {
     )
   }
 
+  /** The shader's own coverageThreshold — see CLOUD_NOISE_GLSL for why a coverage is a quantile. */
+  static thresholdFor(coverage: number, mean: number, spread: number): number {
+    const c = Math.min(0.999, Math.max(0.001, coverage))
+    return mean - spread * (Math.sqrt(3) / Math.PI) * Math.log(c / (1 - c))
+  }
+
   private static fbm(x: number, y: number, z: number): number {
     let sum = 0
     let amp = CloudField.GAIN
@@ -424,7 +452,7 @@ export class CloudField {
     const shapeFbm = CloudField.fbm(warpedX * 0.014, warpedY * 0.014, warpedZ * 0.014) * 0.5 + 0.5
     const shapeCell = 1 - CloudField.worley(warpedX * 0.011, warpedY * 0.011, warpedZ * 0.011)
     const shape = shapeFbm + (shapeCell - shapeFbm) * 0.4
-    const threshold = 1 - coverage
+    const threshold = CloudField.thresholdFor(coverage, WATER_FIELD_MEAN, WATER_FIELD_SD)
     const smoothstep = (edge0: number, edge1: number, value: number): number => {
       const t2 = Math.min(1, Math.max(0, (value - edge0) / (edge1 - edge0)))
       return t2 * t2 * (3 - 2 * t2)

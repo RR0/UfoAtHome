@@ -36,6 +36,30 @@ describe("CloudField.alphaAt", () => {
     expect(most).toBeGreaterThan(0.9)
   })
 
+  it("covers about the fraction of sky the coverage states", () => {
+    // Uniform over the sky above the deck's own cutoff, not a fixed spread: the fraction is what
+    // is being checked, so the sample must not favour any part of the field.
+    const fraction = (coverage: number) => {
+      let sum = 0
+      const count = 3000
+      for (let i = 0; i < count; i++) {
+        const altitude = Math.asin(0.05 + 0.95 * ((i * 0.618033988749895) % 1))
+        const azimuth = (i / count) * Math.PI * 2
+        sum += CloudField.alphaAt(
+          { x: Math.sin(azimuth) * Math.cos(altitude), y: Math.sin(altitude), z: -Math.cos(azimuth) * Math.cos(altitude) },
+          875,
+          coverage
+        )
+      }
+      return sum / count
+    }
+    expect(fraction(0.12)).toBeGreaterThan(0.06)
+    expect(fraction(0.12)).toBeLessThan(0.2)
+    expect(fraction(0.5)).toBeGreaterThan(0.4)
+    expect(fraction(0.5)).toBeLessThan(0.6)
+    expect(fraction(0.8)).toBeGreaterThan(0.7)
+  })
+
   it("leaves real gaps at partial coverage — a broken deck is not a lid", () => {
     let clear = 0
     for (let i = 0; i < 200; i++) {
