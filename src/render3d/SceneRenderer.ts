@@ -1895,7 +1895,11 @@ export class SceneRenderer {
     const pass = this.usableEquidistantPass()
     // After the pass exists and before the camera is widened for it: a pixel names a direction
     // under the projection the pass implements, at the field the recording states.
-    this.phenomena.place(this.camera, (ndcX, ndcY, into) => this.directionAtScreenPoint(ndcX, ndcY, into))
+    this.phenomena.place(
+      this.camera,
+      (ndcX, ndcY, into) => this.directionAtScreenPoint(ndcX, ndcY, into),
+      direction => this.screenPointOf(direction)
+    )
     const furthestPhenomenonM = this.phenomena.furthestM * 1.2
     if (furthestPhenomenonM > this.camera.far) {
       this.camera.far = furthestPhenomenonM

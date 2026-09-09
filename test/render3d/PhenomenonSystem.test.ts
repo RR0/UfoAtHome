@@ -43,6 +43,31 @@ function pinhole(cam: PerspectiveCamera) {
     into.set(ndcX, ndcY, 0.5).unproject(cam).sub(cam.position).normalize()
 }
 
+/** The pinhole's inverse: where a world direction lands on the picture, or nowhere behind it. */
+function screenPoint(cam: PerspectiveCamera) {
+  return (direction: Vector3): { ndcX: number; ndcY: number } | undefined => {
+    const local = direction.clone().applyQuaternion(cam.quaternion.clone().invert())
+    if (local.z >= 0) return undefined
+    const p = cam.position.clone().add(direction).project(cam)
+    return { ndcX: p.x, ndcY: p.y }
+  }
+}
+
+/** The patch's vertex at the middle of its middle row — the shape's centre. */
+function centreOf(mesh: ReturnType<typeof meshes>[number]): Vector3 {
+  const positions = (mesh as unknown as { geometry: { attributes: { position: { getX(i: number): number; getY(i: number): number; getZ(i: number): number; count: number } } } }).geometry.attributes.position
+  const side = Math.round(Math.sqrt(positions.count))
+  const index = Math.floor(side / 2) * side + Math.floor(side / 2)
+  return new Vector3(positions.getX(index), positions.getY(index), positions.getZ(index))
+}
+
+function verticesOf(mesh: ReturnType<typeof meshes>[number]): Vector3[] {
+  const positions = (mesh as unknown as { geometry: { attributes: { position: { getX(i: number): number; getY(i: number): number; getZ(i: number): number; count: number } } } }).geometry.attributes.position
+  const out: Vector3[] = []
+  for (let i = 0; i < positions.count; i++) out.push(new Vector3(positions.getX(i), positions.getY(i), positions.getZ(i)))
+  return out
+}
+
 function meshes(scene: Scene) {
   return scene.children.filter(child => child.type === "Mesh")
 }
@@ -84,53 +109,47 @@ describe("PhenomenonSystem", () => {
     const cam = camera()
     // Dead centre of the frame: the ray is the camera's own axis, -Z.
     system.set([{ sourceId: "a", shape: oval({ x: 310, y: 170 }), distanceM: 42, renderOrder: 0, hidden: false }], frame())
-    system.place(cam, pinhole(cam))
-    const mesh = meshes(scene)[0]
-    expect(mesh.position.x).toBeCloseTo(0, 5)
-    expect(mesh.position.y).toBeCloseTo(1.6, 5)
-    expect(mesh.position.z).toBeCloseTo(-42, 5)
-    expect(mesh.quaternion.equals(cam.quaternion)).toBe(true)
+    system.place(cam, pinhole(cam), screenPoint(cam))
+    const centre = centreOf(meshes(scene)[0])
+    expect(centre.x).toBeCloseTo(0, 5)
+    expect(centre.y).toBeCloseTo(1.6, 5)
+    expect(centre.z).toBeCloseTo(-42, 5)
   })
 
-  it("turns an off-axis plane square to its own line of sight, not parallel to the image plane", () => {
+  it("curves the patch onto the sphere of its distance, so it is square to every ray it carries", () => {
     const scene = new Scene()
     const system = new PhenomenonSystem(scene)
     const cam = camera()
-    // Forty degrees to the right: seen from the side of the frame, a plane parallel to the image
-    // plane would be foreshortened by cos 40° and come out narrower than its own handles.
     system.set(
-      [{ sourceId: "a", shape: oval(), distanceM: 50, renderOrder: 0, hidden: false, aim: { azimuthDeg: 40, altitudeDeg: 0 } }],
+      [{ sourceId: "a", shape: oval({ x: 100, width: 300, height: 200 }), distanceM: 50, renderOrder: 0, hidden: false, aim: { azimuthDeg: 40, altitudeDeg: 0 } }],
       frame()
     )
-    system.place(cam, pinhole(cam))
-    const mesh = meshes(scene)[0]
-    const normal = new Vector3(0, 0, 1).applyQuaternion(mesh.quaternion)
-    const toCamera = cam.position.clone().sub(mesh.position).normalize()
-    expect(normal.dot(toCamera)).toBeCloseTo(1, 6)
-    expect(mesh.quaternion.equals(cam.quaternion)).toBe(false)
+    system.place(cam, pinhole(cam), screenPoint(cam))
+    for (const vertex of verticesOf(meshes(scene)[0])) {
+      expect(vertex.distanceTo(cam.position)).toBeCloseTo(50, 4)
+    }
   })
 
-  it("squeezes an off-axis plane across the radial direction by sin θ/θ under an eye, and not under a lens", () => {
+  it("puts each vertex on the ray of the pixel it carries, so a wide picture lands on its own pixels", () => {
+    const scene = new Scene()
+    const system = new PhenomenonSystem(scene)
     const cam = camera()
-    const thetaRad = (40 * Math.PI) / 180
-    const worldHeight = (kind: "equidistant" | "rectilinear") => {
-      const scene = new Scene()
-      const system = new PhenomenonSystem(scene)
-      // Forty degrees to the right, so the tangent is vertical: the height is what gets squeezed.
-      system.set(
-        [{ sourceId: "a", shape: oval(), distanceM: 50, renderOrder: 0, hidden: false, aim: { azimuthDeg: 40, altitudeDeg: 0 } }],
-        { ...frame(), projection: new ImageProjection(kind, 360, 60) }
-      )
-      system.place(cam, pinhole(cam))
-      const mesh = meshes(scene)[0]
-      const column = new Vector3().setFromMatrixColumn(mesh.matrix, 1)
-      return { height: column.length(), width: new Vector3().setFromMatrixColumn(mesh.matrix, 0).length(), stated: mesh.scale.y, statedWidth: mesh.scale.x }
-    }
-    const eye = worldHeight("equidistant")
-    expect(eye.height).toBeCloseTo(eye.stated * (Math.sin(thetaRad) / thetaRad), 6)
-    expect(eye.width).toBeCloseTo(eye.statedWidth, 6)
-    const lens = worldHeight("rectilinear")
-    expect(lens.height).toBeCloseTo(lens.stated, 6)
+    // Ninety degrees wide and centred: a flat plane would spread this evenly in metres and miss the
+    // picture's own pixels by a dozen either side.
+    const shape = oval({ x: 40, y: 120, width: 560, height: 90 })
+    const f = frame()
+    system.set([{ sourceId: "a", shape, distanceM: 5, renderOrder: 0, hidden: false }], f)
+    system.place(cam, pinhole(cam), screenPoint(cam))
+    const extent = CanvasRenderer.paintExtent(shape)
+    const vertices = verticesOf(meshes(scene)[0])
+    const side = Math.round(Math.sqrt(vertices.length))
+    // The middle of the left edge carries the extent's left-middle pixel.
+    const leftMiddle = vertices[Math.floor(side / 2) * side]
+    const px = extent.x
+    const py = extent.y + extent.height / 2
+    const expected = pinhole(cam)((px / f.canvasWidthPx) * 2 - 1, -((py / f.canvasHeightPx) * 2 - 1), new Vector3())
+    const actual = leftMiddle.clone().sub(cam.position).normalize()
+    expect(actual.dot(expected)).toBeCloseTo(1, 9)
   })
 
   it("stands a shape that states its direction along that direction, whatever pixel it was left at", () => {
@@ -143,11 +162,11 @@ describe("PhenomenonSystem", () => {
       [{ sourceId: "a", shape: oval({ x: -99697 }), distanceM: 100, renderOrder: 0, hidden: false, aim: { azimuthDeg: 90, altitudeDeg: 10 } }],
       frame()
     )
-    system.place(cam, pinhole(cam))
-    const mesh = meshes(scene)[0]
-    expect(mesh.position.x).toBeCloseTo(100 * Math.cos((10 * Math.PI) / 180), 5)
-    expect(mesh.position.y).toBeCloseTo(1.6 + 100 * Math.sin((10 * Math.PI) / 180), 5)
-    expect(mesh.position.z).toBeCloseTo(0, 5)
+    system.place(cam, pinhole(cam), screenPoint(cam))
+    const centre = centreOf(meshes(scene)[0])
+    expect(centre.x).toBeCloseTo(100 * Math.cos((10 * Math.PI) / 180), 5)
+    expect(centre.y).toBeCloseTo(1.6 + 100 * Math.sin((10 * Math.PI) / 180), 5)
+    expect(centre.z).toBeCloseTo(0, 5)
   })
 
   it("scales the plane so its texture's box subtends what the overlay drew, whatever the distance", () => {
@@ -159,7 +178,7 @@ describe("PhenomenonSystem", () => {
     const f = frame()
     for (const distanceM of [2, 50, 3000]) {
       system.set([{ sourceId: "a", shape, distanceM, renderOrder: 0, hidden: false }], f)
-      system.place(cam, pinhole(cam))
+      system.place(cam, pinhole(cam), screenPoint(cam))
       const mesh = meshes(scene)[0]
       // Through an eye at 60° over 360px, one degree is 6px: the box's width in degrees, as the
       // overlay itself converts, at this distance.

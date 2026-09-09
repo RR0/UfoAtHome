@@ -1,4 +1,4 @@
-import { CanvasTexture, LinearFilter, Matrix4, Mesh, MeshBasicMaterial, PlaneGeometry, Quaternion, SRGBColorSpace, Vector3 } from "three"
+import { CanvasTexture, LinearFilter, Matrix4, Mesh, MeshBasicMaterial, PlaneGeometry, SRGBColorSpace, Vector3 } from "three"
 import type { Camera, Scene } from "three"
 import type { Shape, ShapeBounds } from "../engine/shape/Shape.js"
 import { CanvasRenderer } from "../render/CanvasRenderer.js"
@@ -82,13 +82,10 @@ export class PhenomenonSystem {
   private readonly direction = new Vector3()
   private readonly up = new Vector3()
   private readonly lookAt = new Matrix4()
-  private readonly forward = new Vector3()
-  private readonly local = new Vector3()
-  private readonly inverse = new Quaternion()
-  private readonly warp = new Matrix4()
-  private readonly spin = new Matrix4()
-  private readonly size = new Matrix4()
-  private static readonly UNIT = new Vector3(1, 1, 1)
+  private readonly vertex = new Vector3()
+  private readonly centre = new Vector3()
+  private readonly right = new Vector3()
+  private readonly above = new Vector3()
 
   constructor(private readonly scene: Scene) {}
 
@@ -109,7 +106,7 @@ export class PhenomenonSystem {
       let mesh = this.meshes.get(phenomenon.sourceId)
       if (!mesh) {
         mesh = new Mesh(
-          new PlaneGeometry(1, 1),
+          new PlaneGeometry(1, 1, PhenomenonSystem.SEGMENTS, PhenomenonSystem.SEGMENTS),
           new MeshBasicMaterial({
             transparent: true,
             // Tested against the decor's depth, never written: the plane is mostly empty around
@@ -135,13 +132,30 @@ export class PhenomenonSystem {
   }
 
   /**
-   * Stands every plane where its shape's centre pixel looks, at its distance, facing the camera.
+   * Stands every phenomenon where its picture looks, at its distance.
+   *
+   * Not a flat plane, for a reason a wide shape makes visible: a flat plane spreads its texture
+   * evenly in METRES, and the picture spreads its pixels evenly in ANGLE (an eye) or in the tangent
+   * of one (a lens). The two agree at the edges, which is how the plane was sized, and disagree
+   * everywhere between — thirteen pixels either side on a shape ninety degrees wide, an oval fatter
+   * than its own handles. So the mesh is a curved patch instead: each of its vertices is put on the
+   * exact ray the renderer gives the pixel that vertex carries (see
+   * SceneRenderer.directionAtScreenPoint, which is the same answer for every projection), at the
+   * chosen distance. The picture then lands on its own pixels, whatever its size, whatever the
+   * instrument, wherever in the field it stands — including the resampling's own stretch off-axis,
+   * which needs no separate correction since it is inside that answer.
    *
    * Called right before the scene is drawn, by whoever owns the camera and knows the instrument's
-   * projection (see SceneRenderer.renderOnce): the direction a pixel stands for depends on both,
-   * and only the renderer has both in hand.
+   * projection (see SceneRenderer.renderOnce): only the renderer has both in hand. A shape that
+   * states a direction is centred where that direction falls on the picture (screenPointOf), and a
+   * direction that falls nowhere on it — behind the witness — gets a flat plane facing them there,
+   * which nothing will see.
    */
-  place(camera: Camera, directionAtScreenPoint: (ndcX: number, ndcY: number, into: Vector3) => Vector3): void {
+  place(
+    camera: Camera,
+    directionAtScreenPoint: (ndcX: number, ndcY: number, into: Vector3) => Vector3,
+    screenPointOf: (direction: Vector3) => { ndcX: number; ndcY: number } | undefined
+  ): void {
     const frame = this.frame
     if (!frame) return
     for (const phenomenon of this.placed) {
@@ -149,56 +163,108 @@ export class PhenomenonSystem {
       if (!mesh || !mesh.visible) continue
       const extent = this.extents.get(phenomenon.sourceId)
       if (!extent) continue
+      const { bounds } = phenomenon.shape
+      // Where the picture has the shape's centre: the stated direction's own place on it, or the
+      // box the overlay kept, in the overlay's pixels.
+      let centreX = bounds.x + bounds.width / 2
+      let centreY = bounds.y + bounds.height / 2
+      let inFront = true
       if (phenomenon.aim) {
-        PhenomenonSystem.directionOf(phenomenon.aim, this.direction)
+        const ndc = screenPointOf(PhenomenonSystem.directionOf(phenomenon.aim, this.direction))
+        if (ndc && Math.abs(ndc.ndcX) < PhenomenonSystem.FURTHEST_NDC && Math.abs(ndc.ndcY) < PhenomenonSystem.FURTHEST_NDC) {
+          centreX = ((ndc.ndcX + 1) / 2) * frame.canvasWidthPx
+          centreY = ((1 - ndc.ndcY) / 2) * frame.canvasHeightPx
+        } else {
+          inFront = false
+        }
+      }
+      if (inFront) {
+        this.curve(mesh, camera, directionAtScreenPoint, frame, extent, centreX, centreY, phenomenon.distanceM)
       } else {
-        const { bounds } = phenomenon.shape
-        const ndcX = ((bounds.x + bounds.width / 2) / frame.canvasWidthPx) * 2 - 1
-        const ndcY = -(((bounds.y + bounds.height / 2) / frame.canvasHeightPx) * 2 - 1)
-        directionAtScreenPoint(ndcX, ndcY, this.direction)
+        this.flat(mesh, camera, frame, extent, phenomenon.distanceM)
       }
-      mesh.position.copy(camera.position).addScaledVector(this.direction, phenomenon.distanceM)
-      // Facing the WITNESS — square to its own line of sight — and not parallel to the image plane.
-      // The difference is nothing on the axis and everything off it: a plane parallel to the image
-      // plane is seen obliquely from the side of the frame, and a pinhole draws it foreshortened by
-      // the cosine of its angle off-axis (an oval dragged to the edge of the field came out narrower
-      // than its own handles). A plane square to the ray subtends the same angle in every direction,
-      // which is what the overlay drew and what a witness saw. Rolled with the camera, so the
-      // picture's own up stays the picture's up.
-      this.up.set(0, 1, 0).applyQuaternion(camera.quaternion)
-      this.lookAt.lookAt(camera.position, mesh.position, this.up)
-      mesh.quaternion.setFromRotationMatrix(this.lookAt)
-      // The plane subtends what its texture's box subtends — the on-axis conversion the overlay
-      // itself used, read back into metres at this distance.
-      mesh.scale.set(
-        ApparentSize.sizeMAt(phenomenon.distanceM, frame.projection.pxToDeg(extent.width)),
-        ApparentSize.sizeMAt(phenomenon.distanceM, frame.projection.pxToDeg(extent.height)),
-        1
-      )
-      // The eye's picture is a pinhole render resampled to equidistant (see EquidistantProjectionPass),
-      // and that resampling stretches anything off-axis ALONG THE TANGENT by θ/sin θ — 13% at 48°,
-      // the side of a 60° frame — while leaving the radial direction exact. A plane square to its ray
-      // therefore came out the overlay's width and that much too tall at the side of the field (or
-      // too wide at the top), spilling out of its own handles. Undone here in the plane's own axes:
-      // squeezed by sin θ/θ across the radial direction, which the resampling then stretches back to
-      // the picture the overlay drew. A lens has no resampling and gets no correction.
-      this.forward.set(0, 0, -1).applyQuaternion(camera.quaternion)
-      const theta = Math.acos(Math.min(1, Math.max(-1, this.direction.dot(this.forward))))
-      mesh.matrixAutoUpdate = false
-      mesh.matrix.compose(mesh.position, mesh.quaternion, PhenomenonSystem.UNIT)
-      if (frame.projection.kind === "equidistant" && theta > 1e-4) {
-        this.local.copy(this.direction).applyQuaternion(this.inverse.copy(camera.quaternion).invert())
-        const psi = Math.atan2(this.local.y, this.local.x)
-        this.warp.makeRotationZ(psi).multiply(this.spin.makeScale(1, Math.sin(theta) / theta, 1)).multiply(this.spin.makeRotationZ(-psi))
-        mesh.matrix.multiply(this.warp)
-      }
-      mesh.matrix.multiply(this.size.makeScale(mesh.scale.x, mesh.scale.y, 1))
-      mesh.matrixWorldNeedsUpdate = true
     }
   }
 
-  /** A stated direction as a world vector, on the scene's own axes: east is +x, up is +y, north is
-   * -z — the same convention the decor is placed by (see SceneRenderer.updateDecorAnchoring). */
+  /** How far off the picture a centre may fall and still be built from its pixels — a shape half
+   * out of the frame is still built from the frame's own rays; one behind the witness is not. */
+  private static readonly FURTHEST_NDC = 4
+
+  /** The patch: its vertices on the rays of the pixels they carry — see place. */
+  private curve(
+    mesh: Mesh<PlaneGeometry, MeshBasicMaterial>,
+    camera: Camera,
+    directionAtScreenPoint: (ndcX: number, ndcY: number, into: Vector3) => Vector3,
+    frame: PhenomenonFrame,
+    extent: ShapeBounds,
+    centreX: number,
+    centreY: number,
+    distanceM: number
+  ): void {
+    // The extent is centred on the shape's box (see CanvasRenderer.paintExtent), so its corner
+    // relative to the centre is the same wherever the centre is put.
+    const left = centreX - extent.width / 2
+    const top = centreY - extent.height / 2
+    const positions = mesh.geometry.attributes.position
+    const segments = PhenomenonSystem.SEGMENTS
+    let index = 0
+    for (let row = 0; row <= segments; row++) {
+      const py = top + (row / segments) * extent.height
+      for (let column = 0; column <= segments; column++) {
+        const px = left + (column / segments) * extent.width
+        directionAtScreenPoint((px / frame.canvasWidthPx) * 2 - 1, -((py / frame.canvasHeightPx) * 2 - 1), this.direction)
+        this.vertex.copy(camera.position).addScaledVector(this.direction, distanceM)
+        positions.setXYZ(index++, this.vertex.x, this.vertex.y, this.vertex.z)
+      }
+    }
+    positions.needsUpdate = true
+    // Vertices are in world space: the mesh itself stays at the origin, untransformed.
+    mesh.matrixAutoUpdate = false
+    mesh.matrix.identity()
+    mesh.matrixWorldNeedsUpdate = true
+    // What place() is still asked about by the tests and the far-plane check: the extent the patch
+    // spans, in metres, as a flat plane at that distance would.
+    mesh.scale.set(
+      ApparentSize.sizeMAt(distanceM, frame.projection.pxToDeg(extent.width)),
+      ApparentSize.sizeMAt(distanceM, frame.projection.pxToDeg(extent.height)),
+      1
+    )
+  }
+
+  /** The fallback for a direction behind the witness: a flat plane facing them along it, sized on
+   * axis. Nothing will see it, but it is where the thing IS. */
+  private flat(mesh: Mesh<PlaneGeometry, MeshBasicMaterial>, camera: Camera, frame: PhenomenonFrame, extent: ShapeBounds, distanceM: number): void {
+    const positions = mesh.geometry.attributes.position
+    const segments = PhenomenonSystem.SEGMENTS
+    const widthM = ApparentSize.sizeMAt(distanceM, frame.projection.pxToDeg(extent.width))
+    const heightM = ApparentSize.sizeMAt(distanceM, frame.projection.pxToDeg(extent.height))
+    this.up.set(0, 1, 0).applyQuaternion(camera.quaternion)
+    this.centre.copy(camera.position).addScaledVector(this.direction, distanceM)
+    this.lookAt.lookAt(camera.position, this.centre, this.up)
+    this.right.setFromMatrixColumn(this.lookAt, 0)
+    this.above.setFromMatrixColumn(this.lookAt, 1)
+    let index = 0
+    for (let row = 0; row <= segments; row++) {
+      const v = 0.5 - row / segments
+      for (let column = 0; column <= segments; column++) {
+        const u = column / segments - 0.5
+        this.vertex.copy(this.centre).addScaledVector(this.right, u * widthM).addScaledVector(this.above, v * heightM)
+        positions.setXYZ(index++, this.vertex.x, this.vertex.y, this.vertex.z)
+      }
+    }
+    positions.needsUpdate = true
+    mesh.matrixAutoUpdate = false
+    mesh.matrix.identity()
+    mesh.matrixWorldNeedsUpdate = true
+    mesh.scale.set(widthM, heightM, 1)
+  }
+
+  /** Vertices a side of the patch has. Sixteen keeps a ninety-degree shape within a pixel of its
+   * picture; a small shape wastes nothing worth counting. */
+  private static readonly SEGMENTS = 16
+
+  /** A stated direction as a world vector: east is +x, up is +y, north is -z — the decor's own
+   * convention (DecorObject.eastM/northM). */
   static directionOf(aim: { azimuthDeg: number; altitudeDeg: number }, into: Vector3): Vector3 {
     const azimuth = (aim.azimuthDeg * Math.PI) / 180
     const altitude = (aim.altitudeDeg * Math.PI) / 180
