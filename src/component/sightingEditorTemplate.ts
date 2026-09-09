@@ -575,9 +575,25 @@ input.invalid {
   min-width: 0;
   max-width: 100%;
   overflow-wrap: break-word;
+  /* A line of its own, always. These change on every pointer move of a resize ("i.e. 8 deg" becomes
+     "i.e. 9 deg", the real-width sentence grows a word), and as ordinary flex items their new length
+     re-wrapped the whole toolbar around them: every control below jumped, twice a frame, for as
+     long as the drag lasted. Given the full line outright, a readout can only ever change its own
+     text. Tabular figures keep even that from moving. */
+  flex-basis: 100%;
+  min-height: 1.3em;
+  font-variant-numeric: tabular-nums;
 }
 #apparent-size {
   white-space: nowrap;
+}
+/* Inside its label beside the slider, not a flex item: reserved wide enough for "20 000 m" so the
+   slider does not slide sideways as the number under it changes length. */
+#distance-hypothesis-value {
+  display: inline-block;
+  min-width: 6.5ch;
+  flex-basis: auto;
+  min-height: 0;
 }
 /* Record and the sampling rate it records at are one control, not two: grouping them makes them a
    single flex item of the wrapping toolbar, so they stay on the same line together wherever that

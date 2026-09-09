@@ -110,6 +110,29 @@ describe("PhenomenonSystem", () => {
     expect(mesh.quaternion.equals(cam.quaternion)).toBe(false)
   })
 
+  it("squeezes an off-axis plane across the radial direction by sin θ/θ under an eye, and not under a lens", () => {
+    const cam = camera()
+    const thetaRad = (40 * Math.PI) / 180
+    const worldHeight = (kind: "equidistant" | "rectilinear") => {
+      const scene = new Scene()
+      const system = new PhenomenonSystem(scene)
+      // Forty degrees to the right, so the tangent is vertical: the height is what gets squeezed.
+      system.set(
+        [{ sourceId: "a", shape: oval(), distanceM: 50, renderOrder: 0, hidden: false, aim: { azimuthDeg: 40, altitudeDeg: 0 } }],
+        { ...frame(), projection: new ImageProjection(kind, 360, 60) }
+      )
+      system.place(cam, pinhole(cam))
+      const mesh = meshes(scene)[0]
+      const column = new Vector3().setFromMatrixColumn(mesh.matrix, 1)
+      return { height: column.length(), width: new Vector3().setFromMatrixColumn(mesh.matrix, 0).length(), stated: mesh.scale.y, statedWidth: mesh.scale.x }
+    }
+    const eye = worldHeight("equidistant")
+    expect(eye.height).toBeCloseTo(eye.stated * (Math.sin(thetaRad) / thetaRad), 6)
+    expect(eye.width).toBeCloseTo(eye.statedWidth, 6)
+    const lens = worldHeight("rectilinear")
+    expect(lens.height).toBeCloseTo(lens.stated, 6)
+  })
+
   it("stands a shape that states its direction along that direction, whatever pixel it was left at", () => {
     const scene = new Scene()
     const system = new PhenomenonSystem(scene)

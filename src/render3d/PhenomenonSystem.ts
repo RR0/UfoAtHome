@@ -1,4 +1,4 @@
-import { CanvasTexture, LinearFilter, Matrix4, Mesh, MeshBasicMaterial, PlaneGeometry, SRGBColorSpace, Vector3 } from "three"
+import { CanvasTexture, LinearFilter, Matrix4, Mesh, MeshBasicMaterial, PlaneGeometry, Quaternion, SRGBColorSpace, Vector3 } from "three"
 import type { Camera, Scene } from "three"
 import type { Shape, ShapeBounds } from "../engine/shape/Shape.js"
 import { CanvasRenderer } from "../render/CanvasRenderer.js"
@@ -82,6 +82,13 @@ export class PhenomenonSystem {
   private readonly direction = new Vector3()
   private readonly up = new Vector3()
   private readonly lookAt = new Matrix4()
+  private readonly forward = new Vector3()
+  private readonly local = new Vector3()
+  private readonly inverse = new Quaternion()
+  private readonly warp = new Matrix4()
+  private readonly spin = new Matrix4()
+  private readonly size = new Matrix4()
+  private static readonly UNIT = new Vector3(1, 1, 1)
 
   constructor(private readonly scene: Scene) {}
 
@@ -168,6 +175,25 @@ export class PhenomenonSystem {
         ApparentSize.sizeMAt(phenomenon.distanceM, frame.projection.pxToDeg(extent.height)),
         1
       )
+      // The eye's picture is a pinhole render resampled to equidistant (see EquidistantProjectionPass),
+      // and that resampling stretches anything off-axis ALONG THE TANGENT by θ/sin θ — 13% at 48°,
+      // the side of a 60° frame — while leaving the radial direction exact. A plane square to its ray
+      // therefore came out the overlay's width and that much too tall at the side of the field (or
+      // too wide at the top), spilling out of its own handles. Undone here in the plane's own axes:
+      // squeezed by sin θ/θ across the radial direction, which the resampling then stretches back to
+      // the picture the overlay drew. A lens has no resampling and gets no correction.
+      this.forward.set(0, 0, -1).applyQuaternion(camera.quaternion)
+      const theta = Math.acos(Math.min(1, Math.max(-1, this.direction.dot(this.forward))))
+      mesh.matrixAutoUpdate = false
+      mesh.matrix.compose(mesh.position, mesh.quaternion, PhenomenonSystem.UNIT)
+      if (frame.projection.kind === "equidistant" && theta > 1e-4) {
+        this.local.copy(this.direction).applyQuaternion(this.inverse.copy(camera.quaternion).invert())
+        const psi = Math.atan2(this.local.y, this.local.x)
+        this.warp.makeRotationZ(psi).multiply(this.spin.makeScale(1, Math.sin(theta) / theta, 1)).multiply(this.spin.makeRotationZ(-psi))
+        mesh.matrix.multiply(this.warp)
+      }
+      mesh.matrix.multiply(this.size.makeScale(mesh.scale.x, mesh.scale.y, 1))
+      mesh.matrixWorldNeedsUpdate = true
     }
   }
 
