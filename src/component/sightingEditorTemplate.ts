@@ -389,9 +389,9 @@ export const html = `
          Only the apparent width is the recording's (BaseShape.angular); the real width is derived
          from it, and the distance is where the scene DRAWS the shape (see PhenomenonDepth), never a
          statement. Edit any one and one of the other two follows — the held one never moves, and
-         with nothing held the apparent width stays when the distance is edited (the shape looks the
-         same, it is stood elsewhere) while the distance stays when either width is edited (the
-         shape is resized on the canvas, which is what "try a size at a distance" always did). -->
+         with nothing held the real width is what a thing keeps: a distance edit changes how big it
+         looks, and a width edit changes the other width at the distance it stands (the shape is
+         resized on the canvas, which is what "try a size at a distance" always did). -->
     <label><span id="label-apparent-width">Apparent width</span>
       <input id="apparentWidth" type="number" min="0" step="0.1" title="How wide it looked, in degrees — the recording's own statement of size"/>°
       <output id="apparent-size" class="apparent-size inline" for="apparentWidth"></output></label>

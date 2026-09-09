@@ -3932,10 +3932,12 @@ export class SightingEditorElement extends HTMLElement {
    * the recording's: the apparent width (BaseShape.angular). The real width is derived from it,
    * and the distance is where the scene DRAWS the shape — a hypothesis, never a statement (see
    * PhenomenonDepth). So editing any one has to move exactly one other, and which one is what the
-   * hold says. With nothing held: the distance moves the real width (the shape looks the same, it
-   * is stood elsewhere — the thing to try when asking what the decor would hide), and either width
-   * moves the other width (the shape is resized on the canvas, which is what "try a size at a
-   * distance" always did).
+   * hold says. With nothing held the real width is what a thing keeps: moving it further makes it
+   * look smaller (the distance moves the apparent width), and either width moves the other at the
+   * distance it stands (the shape is resized on the canvas, which is what "try a size at a
+   * distance" always did). Holding the apparent width is the other reading of a distance edit:
+   * the shape looks the same and is stood elsewhere, which is what asking what the decor would
+   * hide of it needs.
    */
   private onApparentWidthInput(): void {
     const deg = this.numberOrUndefined(this.apparentWidthInput.value)
@@ -3973,11 +3975,11 @@ export class SightingEditorElement extends HTMLElement {
     this.applyDistance(distanceM)
   }
 
-  /** Stands the selected shape at `distanceM` — and, when the real width is held, resizes it on
-   * the canvas to what that width subtends from there. */
+  /** Stands the selected shape at `distanceM` — and, unless the apparent width is held, resizes it
+   * on the canvas to what its real width subtends from there. */
   private applyDistance(distanceM: number): void {
     if (this.selectedSourceIds.size !== 1) return
-    if (this.sizeLock === "real") {
+    if (this.sizeLock !== "apparent") {
       const realM = this.numberOrUndefined(this.realWidthInput.value)
       if (realM !== undefined && realM > 0) {
         this.applyApparentWidth(ApparentSize.angularWidthDeg({ sizeM: realM, distanceM }))
