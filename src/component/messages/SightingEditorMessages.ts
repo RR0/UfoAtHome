@@ -42,6 +42,9 @@ export interface SightingEditorMessages extends SightingLabels {
   apparentSize: string
   /** utcOffset's placeholder: left empty, the time zone is approximated from the longitude. */
   utcOffsetPlaceholder: string
+  /** Appended to a bound when the real width shown in the field — what the drawing distance
+   * implies — falls outside what the scene establishes. */
+  realSizeOutside: string
   /** What the scene actually establishes about the object's real width, from the moments it was
    * declared to pass behind or in front of decor whose distance is known (see SizeEstimate) —
    * the only meters a recording can honestly produce. {min}/{max} are in meters. */

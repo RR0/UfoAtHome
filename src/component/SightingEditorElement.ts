@@ -4376,6 +4376,14 @@ export class SightingEditorElement extends HTMLElement {
       this.realSizeOutput.textContent = this.messages.realSizeUnknown
       return
     }
+    // The field above shows what the DRAWING distance implies; this line says what the scene
+    // ESTABLISHES. The two are different things, and when they disagree the reader is told so
+    // rather than left to notice a number outside its own bounds.
+    const shownM = this.numberOrUndefined(this.realWidthInput.value)
+    const outside =
+      shownM !== undefined && ((minM !== undefined && shownM < minM) || (maxM !== undefined && shownM > maxM))
+        ? this.messages.realSizeOutside
+        : ""
     if (minM !== undefined && maxM !== undefined) {
       const here = this.sceneElement.distanceRangeAt(sourceId, this.ufoElement.currentTime)
       const distance =
@@ -4383,13 +4391,13 @@ export class SightingEditorElement extends HTMLElement {
           ? ""
           : this.messages.realDistanceHere.replace("{min}", this.meters(here.minM)).replace("{max}", this.meters(here.maxM))
       this.realSizeOutput.textContent =
-        this.messages.realSizeBetween.replace("{min}", this.meters(minM)).replace("{max}", this.meters(maxM)) + distance
+        this.messages.realSizeBetween.replace("{min}", this.meters(minM)).replace("{max}", this.meters(maxM)) + distance + outside
       return
     }
     this.realSizeOutput.textContent =
-      minM !== undefined
+      (minM !== undefined
         ? this.messages.realSizeAtLeast.replace("{min}", this.meters(minM))
-        : this.messages.realSizeAtMost.replace("{max}", this.meters(maxM!))
+        : this.messages.realSizeAtMost.replace("{max}", this.meters(maxM!))) + outside
   }
 
   /** A length in meters at the precision it is actually known to — two decimals under a meter, one
