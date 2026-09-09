@@ -1202,11 +1202,11 @@ export class SightingEditorElement extends HTMLElement {
     // itself already resyncs the toolbar, no separate onSelectionOrTimeChanged() call needed).
     this.sourceSelect.addEventListener("change", () => this.selectUnit(this.sourceSelect.value))
     this.shapeTitleInput.addEventListener("input", () => this.updateShapeTitle())
-    this.apparentWidthInput.addEventListener("input", () => this.onApparentWidthInput())
-    this.realWidthInput.addEventListener("input", () => this.onRealWidthInput())
-    this.objectDistanceInput.addEventListener("input", () => this.onDistanceInput())
+    this.apparentWidthInput.addEventListener("input", () => this.typing(this.apparentWidthInput, () => this.onApparentWidthInput()))
+    this.realWidthInput.addEventListener("input", () => this.typing(this.realWidthInput, () => this.onRealWidthInput()))
+    this.objectDistanceInput.addEventListener("input", () => this.typing(this.objectDistanceInput, () => this.onDistanceInput()))
     this.sizeLockSelect.addEventListener("change", () => this.applySizeLock())
-    this.distanceHypothesisInput.addEventListener("input", () => this.applyDistanceHypothesis())
+    this.distanceHypothesisInput.addEventListener("input", () => this.typing(this.distanceHypothesisInput, () => this.applyDistanceHypothesis()))
     this.clearDistanceHypothesisButton.addEventListener("click", () => this.clearDistanceHypothesis())
     this.addDecorWitnessButton.addEventListener("click", () => this.addDecor("witness"))
     this.addDecorBuildingButton.addEventListener("click", () => this.addDecor())
@@ -4272,10 +4272,26 @@ export class SightingEditorElement extends HTMLElement {
     this.refreshRealSize()
   }
 
-  /** Whether the reader is typing in `input` right now — a field being typed in is never
-   * overwritten by a sync, or the digits would change under their fingers. */
+  /** Whether `input` is the field whose own typing is being applied right now — the one field a
+   * sync must not overwrite, or the digits would change under the reader's fingers. Typing, and
+   * not focus: a field keeps the focus while the pointer goes on to resize the shape on the canvas,
+   * and a focused field that never updated was a reading that lied for as long as it was looked
+   * at. */
   private hasFocus(input: HTMLElement): boolean {
-    return this.shadow.activeElement === input
+    return this.typingIn === input
+  }
+
+  /** The field whose input event is being handled — see hasFocus. */
+  private typingIn?: HTMLElement
+
+  /** Runs one field's own input handling with that field protected from the syncs it triggers. */
+  private typing(input: HTMLElement, apply: () => void): void {
+    this.typingIn = input
+    try {
+      apply()
+    } finally {
+      this.typingIn = undefined
+    }
   }
 
   /** A number for a number field: a point, never a locale's comma, at the given precision. */
@@ -4479,11 +4495,17 @@ export class SightingEditorElement extends HTMLElement {
    */
   private commitShapes(t: number, shapes: ShapeState[]): void {
     const sighting = this.ufoElement.sighting
+    // The angle too, for the same reason as the direction: a handle drag moves the box, and the
+    // recording's own statement of size (BaseShape.angular) used to be re-derived from it only on
+    // save — so between two saves the scene stood a resized shape at the distance its OLD angle
+    // implied, and the apparent-width field went on reading the old angle under new handles.
+    const projection = ImageProjection.of(sighting.instrument, ApparentSize.CANVAS_HEIGHT_PX, SightingShapes.fovOf(sighting, t))
     sighting.timeline.addKeyframe(
       t,
       shapes.map(state => {
         const aim = SightingShapes.aimOf(sighting, t, state.shape.bounds)
-        return aim ? { ...state, shape: { ...state.shape, aim } } : state
+        const angular = projection.ofBounds(state.shape.bounds)
+        return { ...state, shape: aim ? { ...state.shape, aim, angular } : { ...state.shape, angular } }
       })
     )
   }
