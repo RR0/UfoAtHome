@@ -82,8 +82,8 @@ if (source && mount) {
       when and where, record how it moved — and the sky, the weather and the ground are looked up
       for you rather than remembered.</p>
     <p class="doc-try-actions">
-      <a class="btn btn-primary" href="/editor/">Open the editor</a>
-      <a class="btn" href="/editor/#manual">Read the manual</a>
+      <a class="btn btn-primary" href="/edit/">Open the editor</a>
+      <a class="btn" href="/edit/#manual">Read the manual</a>
     </p>
     <p>It ends with <strong>Export</strong>, which hands you a file. That file is the whole
       recording: there is no account and nothing kept here. Put it somewhere with a public address
@@ -192,10 +192,10 @@ if (source && mount) {
     <div id="example-editor" class="code-view"></div>
     <p class="small">Yours to type in: it completes on every key the format has, offers the words
       each one accepts, and says what the model says about it. Nothing here is saved or played —
-      when you want to see one run, <a href="/player/">the player</a> takes a file.</p>
+      when you want to see one run, <a href="/play/">the player</a> takes a file.</p>
     <p>It is <a href="/demo-data/example-minimal.json"><code>/demo-data/example-minimal.json</code></a>
       on this site, so you can fetch it, and
-      <a href="/player/?sighting=/demo-data/example-minimal.json">play it</a> before changing
+      <a href="/play/?sighting=/demo-data/example-minimal.json">play it</a> before changing
       anything. Note that <code>angular</code> and <code>bounds</code> both appear: the angle is what
       the file MEANS, and the pixels are re-derived from it on load — write the angle, and let a
       wrong guess at the pixels be corrected for you.</p>
@@ -247,8 +247,8 @@ if (source && mount) {
       quand et où, enregistrez le mouvement — et le ciel, la météo et le sol sont relevés pour vous
       plutôt que remémorés.</p>
     <p class="doc-try-actions">
-      <a class="btn btn-primary" href="/editor/">Ouvrir l'éditeur</a>
-      <a class="btn" href="/editor/#manual">Lire le manuel</a>
+      <a class="btn btn-primary" href="/edit/">Ouvrir l'éditeur</a>
+      <a class="btn" href="/edit/#manual">Lire le manuel</a>
     </p>
     <p>Cela se termine par <strong>Exporter</strong>, qui vous remet un fichier. Ce fichier est
       l'enregistrement complet : il n'y a pas de compte, et rien n'est conservé ici. Posez-le
@@ -359,10 +359,10 @@ if (source && mount) {
     <div id="example-editor" class="code-view"></div>
     <p class="small">À vous d'y taper : il complète sur chaque clé du format, propose les mots que
       chacune accepte, et dit ce que le modèle en dit. Rien n'est enregistré ni joué ici — pour en
-      voir une tourner, <a href="/player/">le lecteur</a> prend un fichier.</p>
+      voir une tourner, <a href="/play/">le lecteur</a> prend un fichier.</p>
     <p>C'est <a href="/demo-data/example-minimal.json"><code>/demo-data/example-minimal.json</code></a>
       sur ce site : vous pouvez le récupérer, et
-      <a href="/player/?sighting=/demo-data/example-minimal.json">le jouer</a> avant d'y toucher.
+      <a href="/play/?sighting=/demo-data/example-minimal.json">le jouer</a> avant d'y toucher.
       Remarquez que <code>angular</code> et <code>bounds</code> y figurent tous deux : l'angle est ce
       que le fichier SIGNIFIE, et les pixels en sont redérivés au chargement — écrivez l'angle, et
       laissez corriger une mauvaise estimation des pixels.</p>

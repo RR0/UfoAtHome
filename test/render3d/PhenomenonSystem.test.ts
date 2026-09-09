@@ -92,6 +92,24 @@ describe("PhenomenonSystem", () => {
     expect(mesh.quaternion.equals(cam.quaternion)).toBe(true)
   })
 
+  it("turns an off-axis plane square to its own line of sight, not parallel to the image plane", () => {
+    const scene = new Scene()
+    const system = new PhenomenonSystem(scene)
+    const cam = camera()
+    // Forty degrees to the right: seen from the side of the frame, a plane parallel to the image
+    // plane would be foreshortened by cos 40° and come out narrower than its own handles.
+    system.set(
+      [{ sourceId: "a", shape: oval(), distanceM: 50, renderOrder: 0, hidden: false, aim: { azimuthDeg: 40, altitudeDeg: 0 } }],
+      frame()
+    )
+    system.place(cam, pinhole(cam))
+    const mesh = meshes(scene)[0]
+    const normal = new Vector3(0, 0, 1).applyQuaternion(mesh.quaternion)
+    const toCamera = cam.position.clone().sub(mesh.position).normalize()
+    expect(normal.dot(toCamera)).toBeCloseTo(1, 6)
+    expect(mesh.quaternion.equals(cam.quaternion)).toBe(false)
+  })
+
   it("stands a shape that states its direction along that direction, whatever pixel it was left at", () => {
     const scene = new Scene()
     const system = new PhenomenonSystem(scene)

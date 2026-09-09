@@ -1,4 +1,4 @@
-import { CanvasTexture, LinearFilter, Mesh, MeshBasicMaterial, PlaneGeometry, SRGBColorSpace, Vector3 } from "three"
+import { CanvasTexture, LinearFilter, Matrix4, Mesh, MeshBasicMaterial, PlaneGeometry, SRGBColorSpace, Vector3 } from "three"
 import type { Camera, Scene } from "three"
 import type { Shape, ShapeBounds } from "../engine/shape/Shape.js"
 import { CanvasRenderer } from "../render/CanvasRenderer.js"
@@ -80,6 +80,8 @@ export class PhenomenonSystem {
   private placed: PlacedPhenomenon[] = []
   private frame?: PhenomenonFrame
   private readonly direction = new Vector3()
+  private readonly up = new Vector3()
+  private readonly lookAt = new Matrix4()
 
   constructor(private readonly scene: Scene) {}
 
@@ -149,9 +151,16 @@ export class PhenomenonSystem {
         directionAtScreenPoint(ndcX, ndcY, this.direction)
       }
       mesh.position.copy(camera.position).addScaledVector(this.direction, phenomenon.distanceM)
-      // Facing the camera, and rolled with it: the texture is the picture in the picture's own
-      // pixels, so the plane is the image plane, wherever that is looking and however it is held.
-      mesh.quaternion.copy(camera.quaternion)
+      // Facing the WITNESS — square to its own line of sight — and not parallel to the image plane.
+      // The difference is nothing on the axis and everything off it: a plane parallel to the image
+      // plane is seen obliquely from the side of the frame, and a pinhole draws it foreshortened by
+      // the cosine of its angle off-axis (an oval dragged to the edge of the field came out narrower
+      // than its own handles). A plane square to the ray subtends the same angle in every direction,
+      // which is what the overlay drew and what a witness saw. Rolled with the camera, so the
+      // picture's own up stays the picture's up.
+      this.up.set(0, 1, 0).applyQuaternion(camera.quaternion)
+      this.lookAt.lookAt(camera.position, mesh.position, this.up)
+      mesh.quaternion.setFromRotationMatrix(this.lookAt)
       // The plane subtends what its texture's box subtends — the on-axis conversion the overlay
       // itself used, read back into metres at this distance.
       mesh.scale.set(

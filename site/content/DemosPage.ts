@@ -107,8 +107,8 @@ for (const card of cards) {
 
   render(language: SiteLanguage): string {
     const fr = language === "fr"
-    const playerPath = "/player/"
-    const editorPath = "/editor/"
+    const playerPath = "/play/"
+    const editorPath = "/edit/"
     // Two verbs of one word, so the pair reads as one choice: look at it, or work on it. "Open
     // full size" said how it would be shown rather than what you were about to do, and stood
     // beside a plain "Edit" like a caption beside a button.

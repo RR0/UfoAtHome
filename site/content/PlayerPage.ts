@@ -10,7 +10,7 @@ import type { PageMeta, SiteLanguage, SitePage } from "../SitePage.js"
 export class PlayerPage implements SitePage {
 
   readonly meta: PageMeta = {
-    slug: "player",
+    slug: "play",
     navLabel: { en: "Player", fr: "Lecteur" },
     title: { en: "Play any reconstruction", fr: "Rejouer n'importe quelle reconstitution" },
     description: {
@@ -63,7 +63,7 @@ const pasteMount = document.getElementById("player-paste-mount")
 const pasteButton = document.getElementById("player-paste-play")
 const heading = document.getElementById("player-heading")
 const lede = document.getElementById("player-lede")
-const editorPath = "/editor/"
+const editorPath = "/edit/"
 const pasteSummary = pastePanel.querySelector("summary")
 
 /* The recording currently on the stage, as text — what the editor below should be holding, so that
@@ -290,7 +290,7 @@ if (asked) {
     <div class="stage" id="player-stage-box" hidden>
       <rr0-sighting id="player-stage"></rr0-sighting>
       <p class="stage-caption">
-        <a class="btn" id="player-edit" href="/editor/" hidden>Edit this sighting</a>
+        <a class="btn" id="player-edit" href="/edit/" hidden>Edit this sighting</a>
       </p>
     </div>
 ${this.form("en")}
@@ -301,12 +301,12 @@ ${this.form("en")}
   <div class="wrap prose-wide">
     <h2>A link that opens a sighting</h2>
     <p>Anything on this page can be reached directly:
-      <code>ufoathome.org/player/?sighting=</code> followed by the address of a reconstruction.
+      <code>ufoathome.org/play/?sighting=</code> followed by the address of a reconstruction.
       That is the link to hand someone when you want them to see an account rather than read it —
       in an email, a post, a forum that allows nothing but text.</p>
     <p>It is also what every published reconstruction's own <q>?</q> panel hands out, and what the
       older <code>ufoathome.org/&lt;name&gt;</code> links resolve to.</p>
-    <p>To change what you are looking at rather than only watch it, <a href="/editor/">the
+    <p>To change what you are looking at rather than only watch it, <a href="/edit/">the
       editor</a> takes the same parameter. To put a reconstruction on a page of your own, see
       <a href="/docs/">the documentation</a>.</p>
   </div>
@@ -330,7 +330,7 @@ ${this.form("en")}
     <div class="stage" id="player-stage-box" hidden>
       <rr0-sighting id="player-stage"></rr0-sighting>
       <p class="stage-caption">
-        <a class="btn" id="player-edit" href="/editor/" hidden>Éditer cette observation</a>
+        <a class="btn" id="player-edit" href="/edit/" hidden>Éditer cette observation</a>
       </p>
     </div>
 ${this.form("fr")}
@@ -341,13 +341,13 @@ ${this.form("fr")}
   <div class="wrap prose-wide">
     <h2>Un lien qui ouvre une observation</h2>
     <p>Tout ce que porte cette page est atteignable directement :
-      <code>ufoathome.org/player/?sighting=</code> suivi de l'adresse d'une reconstitution.
+      <code>ufoathome.org/play/?sighting=</code> suivi de l'adresse d'une reconstitution.
       C'est le lien à donner à quelqu'un quand on veut qu'il voie un récit plutôt qu'il le lise —
       dans un courriel, un message, un forum qui n'accepte que du texte.</p>
     <p>C'est aussi ce que distribue le panneau <q>?</q> de chaque reconstitution publiée, et ce vers
       quoi aboutissent les anciens liens <code>ufoathome.org/&lt;nom&gt;</code>.</p>
     <p>Pour modifier ce que vous regardez au lieu de seulement le regarder,
-      <a href="/editor/">l'éditeur</a> prend le même paramètre. Pour poser une reconstitution
+      <a href="/edit/">l'éditeur</a> prend le même paramètre. Pour poser une reconstitution
       sur une page à vous, voyez <a href="/docs/">la documentation</a>.</p>
   </div>
 </section>

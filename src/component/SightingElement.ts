@@ -33,7 +33,7 @@ const THUNDER_CREDIT_LICENSE = "CC BY 3.0"
 const APP_HOME_URL = "https://ufoathome.org"
 
 /** Where a recording is opened for editing on that site. */
-const APP_EDITOR_URL = `${APP_HOME_URL}/editor/`
+const APP_EDITOR_URL = `${APP_HOME_URL}/edit/`
 
 /**
  * Vanilla Web Component displaying one or more witnesses' recordings of the same sighting (a

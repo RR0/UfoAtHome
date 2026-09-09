@@ -238,10 +238,10 @@ export class FaqPage implements SitePage {
     <div class="faq-item">
       <h3>Can I put a reconstruction in a forum post?</h3>
       <p>If the forum allows raw HTML and a module script, yes — the two lines are on
-        <a href="/editor/">the editor page</a>, and every published reconstruction hands them out
+        <a href="/edit/">the editor page</a>, and every published reconstruction hands them out
         itself. Most forums do not allow that, for good reasons. Two things that usually work
         instead: an <code>&lt;iframe&gt;</code> pointing at a page of your own that holds the
-        component, or simply a link to <code>ufoathome.org/editor/?sighting=</code> followed by the
+        component, or simply a link to <code>ufoathome.org/edit/?sighting=</code> followed by the
         URL of your recording, which opens it here for anyone.</p>
     </div>
 
@@ -507,11 +507,11 @@ export class FaqPage implements SitePage {
     <div class="faq-item">
       <h3>Puis-je mettre une reconstitution dans un message de forum ?</h3>
       <p>Si le forum accepte du HTML brut et un script de module, oui — les deux lignes sont sur
-        <a href="/editor/">la page de l'éditeur</a>, et chaque reconstitution publiée les
+        <a href="/edit/">la page de l'éditeur</a>, et chaque reconstitution publiée les
         distribue elle-même. La plupart des forums ne l'acceptent pas, pour de bonnes raisons. Deux
         solutions qui marchent en général : une <code>&lt;iframe&gt;</code> pointant vers une page à
         vous qui porte le composant, ou tout simplement un lien vers
-        <code>ufoathome.org/editor/?sighting=</code> suivi de l'URL de votre enregistrement, qui
+        <code>ufoathome.org/edit/?sighting=</code> suivi de l'URL de votre enregistrement, qui
         l'ouvre ici pour tout le monde.</p>
     </div>
 

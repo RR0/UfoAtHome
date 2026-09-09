@@ -185,8 +185,12 @@ class SiteBuilder {
    */
   private readonly retiredFrenchPaths: ReadonlyArray<readonly [string, string]> = [
     ["/fr/", "/"],
-    ["/fr/lecteur/", "/player/"],
-    ["/fr/editeur/", "/editor/"],
+    ["/fr/lecteur/", "/play/"],
+    ["/fr/editeur/", "/edit/"],
+    // The two pages' own first addresses, shortened in 0.55.0. Netlify carries the query string of
+    // a 301 across, so a saved `/player/?sighting=…` still opens that observation.
+    ["/player/", "/play/"],
+    ["/editor/", "/edit/"],
     ["/fr/demos/", "/demos/"],
     ["/fr/documentation/", "/docs/"],
     ["/fr/faq/", "/faq/"],

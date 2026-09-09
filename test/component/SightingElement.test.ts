@@ -441,7 +441,7 @@ describe("SightingElement", () => {
     // stopped being true once that domain became a site with files of its own.
     const appLink = element.shadowRoot!.getElementById("info-app-link") as HTMLAnchorElement
     expect(appLink.href).toBe(
-      `https://ufoathome.org/editor/?sighting=${encodeURIComponent(new URL("john.json", location.href).href)}`)
+      `https://ufoathome.org/edit/?sighting=${encodeURIComponent(new URL("john.json", location.href).href)}`)
     expect(appLink.textContent).toMatch(/^UFO@home v\d+\.\d+\.\d+$/)
     const observationList = element.shadowRoot!.getElementById("info-observation-list") as HTMLElement
     expect(observationList.textContent).toContain("32.4000, -86.3000")

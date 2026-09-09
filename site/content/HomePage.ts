@@ -47,7 +47,7 @@ export class HomePage implements SitePage {
 const MAX_SLIDE_MS = 25000
 // How long the carousel stays out of the way after the reader has touched it.
 const RESUME_MS = 60000
-const editorPath = "/editor/"
+const editorPath = "/edit/"
 
 const stage = document.getElementById("hero-stage")
 const caption = document.getElementById("hero-caption")
@@ -137,7 +137,7 @@ show(0)`
         <p class="stage-caption">
           <span id="hero-caption"></span>
           <span class="carousel-sep" aria-hidden="true"> — </span>
-          <a class="carousel-edit" id="hero-edit" href="/editor/">${fr ? "Éditer cette observation" : "Edit this sighting"}</a>
+          <a class="carousel-edit" id="hero-edit" href="/edit/">${fr ? "Éditer cette observation" : "Edit this sighting"}</a>
         </p>
       </div>
     </div>`
@@ -155,7 +155,7 @@ show(0)`
       weather on record, the ground itself. Not an artist's impression: a reconstruction anyone
       can check.</p>
     <div class="hero-actions">
-      <a class="btn btn-primary" href="/editor/">Describe your own sighting</a>
+      <a class="btn btn-primary" href="/edit/">Describe your own sighting</a>
       <a class="btn" href="/demos/">See what it can do</a>
     </div>
   </div>
@@ -171,7 +171,7 @@ ${carousel}
   <div class="wrap">
     <h2>Two uses</h2>
     <div class="uses">
-      <a class="use" href="/editor/">
+      <a class="use" href="/edit/">
         <h3>Describe your own sighting</h3>
         <p>Draw what you saw and record how it moved, then say when and where — and the sky of that
           moment appears behind it, along with the weather that was on record. Correct the shape
@@ -296,7 +296,7 @@ ${carousel}
         étoiles, la météo relevée, le sol lui-même. Pas une vue d'artiste : une reconstitution que
         n'importe qui peut vérifier.</p>
       <div class="hero-actions">
-        <a class="btn btn-primary" href="/editor/">Décrire votre propre observation</a>
+        <a class="btn btn-primary" href="/edit/">Décrire votre propre observation</a>
         <a class="btn" href="/demos/">Voir ce qu'il sait faire</a>
       </div>
     </div>
@@ -312,7 +312,7 @@ ${carousel}
     <div class="wrap">
       <h2>Deux usages</h2>
       <div class="uses">
-        <a class="use" href="/editor/">
+        <a class="use" href="/edit/">
           <h3>Décrire votre propre observation</h3>
           <p>Dessinez ce que vous avez vu, enregistrez son mouvement, puis dites quand et où — et le
             ciel de cet instant apparaît derrière, avec la météo qui était relevée. Corrigez la forme

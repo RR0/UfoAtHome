@@ -265,7 +265,14 @@ export function buildCloudMaterial(
     fragmentShader: CLOUD_FRAGMENT_SHADER,
     transparent: true,
     depthWrite: false,
-    depthTest: false, // CLOUD_RADIUS's precision against the far plane is unreliable — see buildCloudGeometry's own comment
+    // Tested against depth, never written: a hill, a building, a tree in front of the deck hides
+    // it, which is what "a deck around the relief" means. Nothing the deck must be seen THROUGH
+    // writes depth — the sky dome, the stars, the glare all decline to — and the terrain, drawn
+    // after it in the transparent pass, paints over it wherever the relief rises into it. This used
+    // to be off, for a precision worry about the sky dome that stopped applying once the dome
+    // stopped writing depth; the geometric 1.5° gap below (see buildCloudGeometry) stays as the
+    // guard for the flat ground disc, which is the one surface here that still writes none.
+    depthTest: true,
     side: BackSide
   })
   return { material, uniforms }

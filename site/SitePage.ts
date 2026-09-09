@@ -22,7 +22,7 @@ export interface PageMeta {
    * Directory name under the site root; the empty string is the home page.
    *
    * ONE slug, not one per language. A page has a single address that everybody can be given —
-   * `ufoathome.org/editor/` is the editor for a French reader as much as for an English one — and
+   * `ufoathome.org/edit/` is the editor for a French reader as much as for an English one — and
    * which language they get is decided when they arrive, not by which link they were handed.
    */
   readonly slug: string

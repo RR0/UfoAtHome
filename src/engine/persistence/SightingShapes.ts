@@ -1,6 +1,6 @@
 import { ApparentSize } from "../shape/ApparentSize.js"
 import { ImageProjection } from "../instrument/ImageProjection.js"
-import type { Shape } from "../shape/Shape.js"
+import type { Shape, ShapeAim, ShapeBounds } from "../shape/Shape.js"
 import { Sighting, resolveObserverPoseAt } from "../model/Sighting.js"
 import type { ObserverPose } from "../model/ObserverTrack.js"
 import { Instruments } from "../instrument/Instrument.js"
@@ -86,15 +86,33 @@ export class SightingShapes {
    */
   static toAim(sighting: Sighting): void {
     this.eachKeyframe(sighting, (shape, projection, pose) => {
-      if (pose?.headingDeg === undefined) return shape
-      const centre = this.frameCentre(sighting)
-      const offAxisX = projection.radiusPxToAngleDeg(shape.bounds.x + shape.bounds.width / 2 - centre.x)
-      const offAxisY = projection.radiusPxToAngleDeg(centre.y - (shape.bounds.y + shape.bounds.height / 2))
-      return {
-        ...shape,
-        aim: { azimuthDeg: (((pose.headingDeg + offAxisX) % 360) + 360) % 360, altitudeDeg: pose.pitchDeg + offAxisY }
-      }
+      const aim = this.aimFrom(sighting, projection, pose, shape.bounds)
+      return aim ? { ...shape, aim } : shape
     })
+  }
+
+  /**
+   * The direction a box drawn at `bounds` states at instant `t` — what an editing gesture has to
+   * write beside the box it moved, so that the scene, which stands a shape along its stated
+   * direction, and the overlay, which draws the box, keep saying the same thing between two
+   * saves. Undefined when the pose states no heading, for toAim's own reason.
+   */
+  static aimOf(sighting: Sighting, t: number, bounds: ShapeBounds): ShapeAim | undefined {
+    const projection = ImageProjection.of(sighting.instrument, ApparentSize.CANVAS_HEIGHT_PX, this.fovOf(sighting, t))
+    return this.aimFrom(sighting, projection, resolveObserverPoseAt(sighting, t), bounds)
+  }
+
+  private static aimFrom(
+    sighting: Sighting,
+    projection: ImageProjection,
+    pose: ObserverPose | undefined,
+    bounds: ShapeBounds
+  ): ShapeAim | undefined {
+    if (pose?.headingDeg === undefined) return undefined
+    const centre = this.frameCentre(sighting)
+    const offAxisX = projection.radiusPxToAngleDeg(bounds.x + bounds.width / 2 - centre.x)
+    const offAxisY = projection.radiusPxToAngleDeg(centre.y - (bounds.y + bounds.height / 2))
+    return { azimuthDeg: (((pose.headingDeg + offAxisX) % 360) + 360) % 360, altitudeDeg: pose.pitchDeg + offAxisY }
   }
 
   /**

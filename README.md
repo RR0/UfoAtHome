@@ -28,8 +28,8 @@ a real place and time, so it always composes `<rr0-scene>`.
 
 The project's own site is **[ufoathome.org](https://ufoathome.org)**: [the demos](https://ufoathome.org/demos/)
 (every reconstruction running side by side, including the same sighting through three different instruments),
-[the player](https://ufoathome.org/player/) for any recording you can give it an address for,
-[the editor](https://ufoathome.org/editor/), and [the documentation](https://ufoathome.org/docs/) — which quotes a
+[the player](https://ufoathome.org/play/) for any recording you can give it an address for,
+[the editor](https://ufoathome.org/edit/), and [the documentation](https://ufoathome.org/docs/) — which quotes a
 whole recording file and hands out the two lines that embed one. See the
 [Wiki](https://github.com/RR0/UfoAtHome/wiki) for the project's history.
 
@@ -80,11 +80,11 @@ this heavier authoring component.
 
 With `src`, the editor opens on an existing recording instead of an empty canvas — the same
 attribute the three other elements take. That is what makes an address per observation possible:
-[ufoathome.org's editor](https://ufoathome.org/editor/) maps its own `?sighting=` parameter onto
-this attribute, and [its player](https://ufoathome.org/player/) does the same for read-only replay.
+[ufoathome.org's editor](https://ufoathome.org/edit/) maps its own `?sighting=` parameter onto
+this attribute, and [its player](https://ufoathome.org/play/) does the same for read-only replay.
 Any path the site does not otherwise serve becomes that parameter, so
 
-- `https://ufoathome.org/player/?sighting=/demo-data/witness-socorro.json`, or simply
+- `https://ufoathome.org/play/?sighting=/demo-data/witness-socorro.json`, or simply
 - `https://ufoathome.org/Socorro`
 
 open that observation. A bare name with no `/` is looked for among the site's own demos first, then

@@ -221,6 +221,8 @@ export class SceneElement extends HTMLElement {
    * Sighting itself: the editor edits ONE instance in place. */
   private meteorScheduleFor?: string
   private lastTimeMs = 0
+  /** What the sky now standing was computed from — see applySceneAt. */
+  private lastSkyKey?: string
   private starCatalog?: StarCatalog
   /** Which loadStars() call is the current one — see loadStars on why the last ASK wins rather than
    * the last arrival. */
@@ -889,6 +891,19 @@ export class SceneElement extends HTMLElement {
 
     const date = new Date(startDate.getTime() + t)
     const observer: ObserverGeo = { lat, lng, elevationM: pose?.elevationM ?? 0 }
+    // The sky is a function of the moment and the place, and restating it costs about 8 ms — which
+    // is most of a frame, and which every editing gesture was paying: a shape dragged across the
+    // canvas fires a tick per pointer move at the SAME instant, and the sky was recomputed for each.
+    // Skipped when nothing it depends on has changed; a seek, a pose edit or a new catalogue still
+    // restate it, and so does every instant of a long pose (each has its own date).
+    const skyKey = `${date.getTime()}|${lat}|${lng}|${observer.elevationM}|${this.starCatalog ? this.starCatalogDepth : 0}`
+    if (skyKey === this.lastSkyKey) {
+      // Restating the sky was also what drew the frame; everything above it — the pose, the decor,
+      // the phenomena — still has to reach the canvas.
+      this.sceneRenderer.render()
+      return
+    }
+    this.lastSkyKey = skyKey
     const sun = { ...computeBodyPosition("Sun", date, observer), magnitude: computeBodyMagnitude("Sun", date) }
     const moon = {
       ...computeBodyPosition("Moon", date, observer),
@@ -1021,6 +1036,11 @@ export class SceneElement extends HTMLElement {
     for (const [sourceId, shape] of shapes) {
       for (const [carrierId, carrier] of shapes) {
         if (carrierId === sourceId) continue
+        // A carrier is something SEEN, and bigger: an invisible shape drawn to the same box (Socorro's
+        // flame is kept at the craft's own box while it is not burning) is not something the craft
+        // is painted on, and two equal boxes would otherwise each stand where the other stands.
+        if (carrier.transparency >= 1) continue
+        if (carrier.bounds.width * carrier.bounds.height <= shape.bounds.width * shape.bounds.height) continue
         const inside =
           shape.bounds.x >= carrier.bounds.x &&
           shape.bounds.y >= carrier.bounds.y &&

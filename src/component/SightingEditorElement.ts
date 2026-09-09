@@ -38,6 +38,7 @@ import { SkyGlowVisibility } from "../engine/astronomy/SkyGlowVisibility.js"
 import { resolveDecorPlacementAt } from "../engine/model/Decor.js"
 import { SightingShapes } from "../engine/persistence/SightingShapes.js"
 import type { Appearance, PolygonShape, Shape, ShapeBounds, ShapePresetId } from "../engine/shape/Shape.js"
+import type { ShapeState } from "../engine/model/Keyframe.js"
 import { ShapeHandles, ShapeGroup, MIN_SHAPE_SIZE, MIN_POLYGON_VERTICES } from "../engine/shape/ShapeHandles.js"
 import type { HandleId, ResizeAxis } from "../engine/shape/ShapeHandles.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
@@ -3364,7 +3365,7 @@ export class SightingEditorElement extends HTMLElement {
     const t = this.ufoElement.currentTime
     const existing = timeline.getInterpolatedShapeAt(t, this.currentSourceId)
     const shape = this.buildAppearanceShape(bounds ?? existing?.bounds ?? this.defaultBounds(), existing, changingPreset)
-    timeline.addKeyframe(t, [{ sourceId: this.currentSourceId, shape }])
+    this.commitShapes(t, [{ sourceId: this.currentSourceId, shape }])
     this.ufoElement.refresh()
   }
 
@@ -3904,7 +3905,7 @@ export class SightingEditorElement extends HTMLElement {
     const t = this.ufoElement.currentTime
     const shape = timeline.getInterpolatedShapeAt(t, this.currentSourceId)
     if (!shape) return
-    timeline.addKeyframe(t, [{ sourceId: this.currentSourceId, shape: { ...shape, title: this.said.write(shape.title, this.shapeTitleInput.value, this.writingLanguage) } }])
+    this.commitShapes(t, [{ sourceId: this.currentSourceId, shape: { ...shape, title: this.said.write(shape.title, this.shapeTitleInput.value, this.writingLanguage) } }])
     this.ufoElement.refresh()
     this.refreshSourceList() // keeps the dropdown's own label live as the user types
     this.updateShapeTitleValidity()
@@ -3955,7 +3956,7 @@ export class SightingEditorElement extends HTMLElement {
       shape.kind === "oval"
         ? { ...shape, bounds, angular }
         : { ...shape, bounds, angular, points: this.scalePoints(shape, bounds) }
-    timeline.addKeyframe(t, [{ sourceId: this.currentSourceId, shape: resized }])
+    this.commitShapes(t, [{ sourceId: this.currentSourceId, shape: resized }])
     this.ufoElement.refresh()
     this.refreshApparentSize()
   }
@@ -4361,6 +4362,28 @@ export class SightingEditorElement extends HTMLElement {
       conventional: this.messages.depthConventional
     }[depth.basis]
     this.depthBasisOutput.textContent = message.replace("{m}", m)
+  }
+
+  /**
+   * The one way this editor writes shapes into the timeline.
+   *
+   * Every gesture moves a BOX — that is what the pointer has — and a box only says "so many pixels
+   * from wherever the witness faced". The recording's own statement is the DIRECTION (BaseShape.aim),
+   * which the scene stands the shape along; it used to be filled in only on save, so between two
+   * saves a shape dragged across the canvas stood in the scene where it had been and its handles
+   * went where the pointer took them. Written here, at the instant the box changes, from the same
+   * arithmetic the save uses (see SightingShapes.aimOf), so the two never disagree for longer than
+   * one frame.
+   */
+  private commitShapes(t: number, shapes: ShapeState[]): void {
+    const sighting = this.ufoElement.sighting
+    sighting.timeline.addKeyframe(
+      t,
+      shapes.map(state => {
+        const aim = SightingShapes.aimOf(sighting, t, state.shape.bounds)
+        return aim ? { ...state, shape: { ...state.shape, aim } } : state
+      })
+    )
   }
 
   private meters(value: number): string {
@@ -6527,7 +6550,7 @@ export class SightingEditorElement extends HTMLElement {
     const shape = this.ufoElement.sighting.timeline.getInterpolatedShapeAt(t, this.currentSourceId)
     if (shape?.kind !== "polygon") return
     const updated = ShapeHandles.insertVertexNear(shape, point)
-    this.ufoElement.sighting.timeline.addKeyframe(t, [{ sourceId: this.currentSourceId, shape: updated }])
+    this.commitShapes(t, [{ sourceId: this.currentSourceId, shape: updated }])
     this.ufoElement.refresh()
   }
 
@@ -6545,7 +6568,7 @@ export class SightingEditorElement extends HTMLElement {
     const vertexIndex = ShapeHandles.hitTestVertex(shape, point)
     if (vertexIndex === undefined) return
     const updated = ShapeHandles.deleteVertex(shape, vertexIndex)
-    this.ufoElement.sighting.timeline.addKeyframe(t, [{ sourceId: this.currentSourceId, shape: updated }])
+    this.commitShapes(t, [{ sourceId: this.currentSourceId, shape: updated }])
     this.ufoElement.refresh()
   }
 
@@ -6675,21 +6698,21 @@ export class SightingEditorElement extends HTMLElement {
         sourceId,
         shape: { ...original, bounds: { ...original.bounds, x: original.bounds.x + dx, y: original.bounds.y + dy } }
       }))
-      this.ufoElement.sighting.timeline.addKeyframe(t, shapes)
+      this.commitShapes(t, shapes)
     } else if (this.dragState.kind === "group-resize") {
       const { group, handle } = this.dragState
-      this.ufoElement.sighting.timeline.addKeyframe(t, group.resize(handle, point))
+      this.commitShapes(t, group.resize(handle, point))
     } else if (this.dragState.kind === "group-rotate") {
       const { group, startPointer } = this.dragState
-      this.ufoElement.sighting.timeline.addKeyframe(t, group.rotate(point, startPointer))
+      this.commitShapes(t, group.rotate(point, startPointer))
     } else if (this.dragState.kind === "vertex") {
       const { sourceId, original, vertexIndex } = this.dragState
       const shape = ShapeHandles.moveVertex(original, vertexIndex, point)
-      this.ufoElement.sighting.timeline.addKeyframe(t, [{ sourceId, shape }])
+      this.commitShapes(t, [{ sourceId, shape }])
     } else {
       const { kind, sourceId, original, handle } = this.dragState
       const shape = kind === "resize" ? ShapeHandles.resizeShape(original, handle, point) : ShapeHandles.rotateShape(original, point)
-      this.ufoElement.sighting.timeline.addKeyframe(t, [{ sourceId, shape }])
+      this.commitShapes(t, [{ sourceId, shape }])
     }
     this.ufoElement.refresh()
   }
@@ -6803,7 +6826,6 @@ export class SightingEditorElement extends HTMLElement {
    * selected shape is just the size-1 case of the same group-bounds math. */
   private moveOrResizeSelectedShapes(event: KeyboardEvent): void {
     if (this.isRecording || this.ufoElement.playbackState === "playing") return
-    const timeline = this.ufoElement.sighting.timeline
     const t = this.ufoElement.currentTime
     const members = this.selectedMembers()
     if (members.length === 0) return
@@ -6812,11 +6834,11 @@ export class SightingEditorElement extends HTMLElement {
       const { sourceId, shape } = members[0]
       // Writes straight through, spreading the original shape's appearance fields unchanged —
       // same reasoning as onDragPointerMove's own identical comment.
-      timeline.addKeyframe(t, [{ sourceId, shape: { ...shape, bounds: this.nudgeBounds(shape.bounds, event) } }])
+      this.commitShapes(t, [{ sourceId, shape: { ...shape, bounds: this.nudgeBounds(shape.bounds, event) } }])
     } else {
       const group = new ShapeGroup(members)
       const target = this.nudgeBounds(group.bounds(), event)
-      timeline.addKeyframe(t, group.scaleTo(target))
+      this.commitShapes(t, group.scaleTo(target))
     }
     this.ufoElement.refresh()
   }

@@ -355,7 +355,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
 &lt;rr0-sighting-editor src="sighting.json"&gt;&lt;/rr0-sighting-editor&gt;</code></pre>
     <p>Its canvas is an editing surface, so <code>enableClickToPlay</code> is off there: a click
       selects and drags a shape rather than toggling playback. What the eight groups of its toolbar
-      do is <a href="/editor/">the editor's own page</a>.</p>
+      do is <a href="/edit/">the editor's own page</a>.</p>
     <div class="table-scroll">
     <table>
       <tr><th>Member</th><th>Kind</th><th>What it does</th></tr>
@@ -375,7 +375,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
 &lt;rr0-sighting-editor src="sighting.json"&gt;&lt;/rr0-sighting-editor&gt;</code></pre>
     <p>Son canevas est une surface d'édition : <code>enableClickToPlay</code> y est désactivé, un
       clic sélectionne et déplace une forme au lieu de basculer la lecture. Ce que font les huit
-      groupes de sa barre d'outils est sur <a href="/editor/">la page de l'éditeur</a>.</p>
+      groupes de sa barre d'outils est sur <a href="/edit/">la page de l'éditeur</a>.</p>
     <div class="table-scroll">
     <table>
       <tr><th>Membre</th><th>Nature</th><th>Rôle</th></tr>

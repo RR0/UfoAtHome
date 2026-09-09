@@ -14,7 +14,7 @@ import {
  * other way round. So an address cannot carry a language: the moment it does, the sender decides
  * what language the recipient reads in, and the two of them no longer have one thing to point at.
  *
- * So `ufoathome.org/editor/` is the editor for everybody, and which translation is served is
+ * So `ufoathome.org/edit/` is the editor for everybody, and which translation is served is
  * decided on arrival. One directory per page, holding `index.html` (English, the fallback) beside
  * `index_fr.html` — the sibling-file convention rr0.org and cosmochrony.org already use — and every
  * link on this site, in either language, points at the directory.
@@ -142,7 +142,7 @@ ${script ? `<script type="module">\n${script}\n</script>` : ""}
    * deferred is too late.
    *
    * `location.search` and `location.hash` are carried across, which is not a nicety:
-   * `/player/?sighting=…` is the whole point of that page, and a redirect that dropped the query
+   * `/play/?sighting=…` is the whole point of that page, and a redirect that dropped the query
    * would turn every shared link into an empty player for anyone whose browser is not English.
    *
    * There is no picker, here or anywhere — same rule the components follow. And no server-side

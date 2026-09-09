@@ -4,7 +4,7 @@ import type { PageMeta, SiteLanguage, SitePage } from "../SitePage.js"
 export class EditorPage implements SitePage {
 
   readonly meta: PageMeta = {
-    slug: "editor",
+    slug: "edit",
     navLabel: { en: "Editor", fr: "Éditeur" },
     title: { en: "The editor, and how to use it", fr: "L'éditeur, et comment s'en servir" },
     description: {
@@ -112,7 +112,7 @@ if (docs) {
     </div>
     <p class="small">Opening it on an existing recording: add <code>?sighting=</code> and a URL, or
       the name of one of <a href="/demos/">the demos</a> — for instance
-      <a href="/editor/?sighting=Socorro"><code>/editor/?sighting=Socorro</code></a>.</p>
+      <a href="/edit/?sighting=Socorro"><code>/edit/?sighting=Socorro</code></a>.</p>
   </div>
 </section>
 
@@ -356,7 +356,7 @@ if (docs) {
     </div>
     <p class="small">Pour l'ouvrir sur un enregistrement existant : ajoutez <code>?sighting=</code>
       suivi d'une URL, ou du nom d'une <a href="/demos/">démo</a> — par exemple
-      <a href="/editor/?sighting=Socorro"><code>/editor/?sighting=Socorro</code></a>.</p>
+      <a href="/edit/?sighting=Socorro"><code>/edit/?sighting=Socorro</code></a>.</p>
   </div>
 </section>
 

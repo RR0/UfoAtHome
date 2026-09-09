@@ -47,7 +47,7 @@ export class DocsSharePage extends DocsSection {
         : "That is not a valid address — it needs a full one, starting with https://"
     })
     return `const messages = ${messages}
-const player = ${JSON.stringify(fr ? "/player/" : "/player/")}
+const player = ${JSON.stringify(fr ? "/play/" : "/play/")}
 
 const linkField = document.getElementById("share-link-url")
 const linkOut = document.getElementById("share-link-out")
@@ -175,7 +175,7 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
              placeholder="https://yoursite.org/my-case/sighting.json">
       <p class="doc-try-out"><code id="share-link-out"></code></p>
       <p class="doc-try-actions">
-        <a class="btn btn-primary" id="share-link-open" href="/player/" target="_blank" rel="noopener">Try it</a>
+        <a class="btn btn-primary" id="share-link-open" href="/play/" target="_blank" rel="noopener">Try it</a>
         <button class="btn" type="button" id="share-link-copy">Copy the link</button>
       </p>
     </div>
@@ -229,7 +229,7 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
       Netlify, S3 — either send it already or let you add it in a line of configuration; if the
       server is not yours, that is the single thing to ask its administrator for. The player and
       the editor both say so when they detect it, so you should not have to guess.</p>
-    <p>Nowhere to put it yet? <a href="/player/">The player</a> also takes a recording pasted
+    <p>Nowhere to put it yet? <a href="/play/">The player</a> also takes a recording pasted
       straight in, which is enough to check one before publishing it — though a pasted one cannot,
       of course, be shared by link.</p>
     <p>Don't have a recording at all? <a href="/docs/create/">Make one.</a></p>
@@ -254,7 +254,7 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
              placeholder="https://votresite.org/mon-dossier/sighting.json">
       <p class="doc-try-out"><code id="share-link-out"></code></p>
       <p class="doc-try-actions">
-        <a class="btn btn-primary" id="share-link-open" href="/player/" target="_blank" rel="noopener">Essayer</a>
+        <a class="btn btn-primary" id="share-link-open" href="/play/" target="_blank" rel="noopener">Essayer</a>
         <button class="btn" type="button" id="share-link-copy">Copier le lien</button>
       </p>
     </div>
@@ -310,7 +310,7 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
       de l'ajouter en une ligne de configuration ; si le serveur n'est pas le vôtre, c'est la seule
       chose à demander à son administrateur. Le lecteur et l'éditeur le disent quand ils le
       détectent, vous ne devriez donc pas avoir à le deviner.</p>
-    <p>Nulle part où le poser encore ? <a href="/player/">Le lecteur</a> accepte aussi un
+    <p>Nulle part où le poser encore ? <a href="/play/">Le lecteur</a> accepte aussi un
       enregistrement collé directement, ce qui suffit à en vérifier un avant de le publier — mais un
       enregistrement collé ne se partage évidemment pas par lien.</p>
     <p>Pas d'enregistrement du tout ? <a href="/docs/create/">Créez-en un.</a></p>

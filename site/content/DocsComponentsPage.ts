@@ -29,7 +29,7 @@ export class DocsComponentsPage extends DocsSection {
   /** Where each tag's own page is, by the tag itself. */
   private static readonly PAGES: ReadonlyArray<readonly [string, string]> = [
     ["rr0-scene", "/docs/components/scene/"],
-    ["rr0-sighting-editor", "/docs/components/editor/"],
+    ["rr0-sighting-editor", "/docs/components/edit/"],
     ["rr0-sighting", "/docs/components/sighting/"]
   ]
 
@@ -164,7 +164,7 @@ sighting.scene.ufoElement.play()  // so playback is two properties away</code></
     <div class="uses">
       <a class="use" href="/docs/components/scene/"><h3><code>&lt;rr0-scene&gt;</code></h3><p>The shape and its playback, in the real sky and horizon of the recording's own date and place.</p><p class="use-more">Read →</p></a>
       <a class="use" href="/docs/components/sighting/"><h3><code>&lt;rr0-sighting&gt;</code></h3><p>The standard view of a real account: one witness or several, with their toolbar.</p><p class="use-more">Read →</p></a>
-      <a class="use" href="/docs/components/editor/"><h3><code>&lt;rr0-sighting-editor&gt;</code></h3><p>The whole authoring toolbar, for describing an observation or correcting one.</p><p class="use-more">Read →</p></a>
+      <a class="use" href="/docs/components/edit/"><h3><code>&lt;rr0-sighting-editor&gt;</code></h3><p>The whole authoring toolbar, for describing an observation or correcting one.</p><p class="use-more">Read →</p></a>
     </div>
 
     <h2>Putting one in your application</h2>
@@ -280,7 +280,7 @@ sighting.scene.ufoElement.play()  // la lecture est donc à deux propriétés</c
     <div class="uses">
       <a class="use" href="/docs/components/scene/"><h3><code>&lt;rr0-scene&gt;</code></h3><p>La forme et sa lecture, dans le vrai ciel et le vrai horizon de la date et du lieu de l'observation.</p><p class="use-more">Lire →</p></a>
       <a class="use" href="/docs/components/sighting/"><h3><code>&lt;rr0-sighting&gt;</code></h3><p>La vue standard d'un témoignage réel : un ou plusieurs témoins, avec leur barre d'outils.</p><p class="use-more">Lire →</p></a>
-      <a class="use" href="/docs/components/editor/"><h3><code>&lt;rr0-sighting-editor&gt;</code></h3><p>Toute la barre d'outils d'écriture, pour décrire une observation ou en corriger une.</p><p class="use-more">Lire →</p></a>
+      <a class="use" href="/docs/components/edit/"><h3><code>&lt;rr0-sighting-editor&gt;</code></h3><p>Toute la barre d'outils d'écriture, pour décrire une observation ou en corriger une.</p><p class="use-more">Lire →</p></a>
     </div>
 
     <h2>Intégrer dans votre application</h2>
