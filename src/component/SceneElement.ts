@@ -1,3 +1,6 @@
+import { resolveCloudLayers } from "../engine/model/CloudLayer.js"
+import type { CloudRendering } from "../render3d/LayeredCloudSystem.js"
+import { cloudOffsetAt } from "../render3d/CloudMotion.js"
 import { html, css } from "./sceneTemplate.js"
 import { SightingFetch } from "../engine/net/SightingFetch.js"
 import { UfoElement, registerUfo, UFO_ELEMENT_NAME, WITNESS_MAP_ATTRIBUTE, MILESTONES_ATTRIBUTE } from "./UfoElement.js"
@@ -573,9 +576,23 @@ export class SceneElement extends HTMLElement {
    * always pass an already-resolved Weather — resolveWeatherAt itself never returns undefined, it
    * falls all the way through to DEFAULT_WEATHER — so this takes a required Weather, not an
    * optional one to default here. */
+  /** Rendering preference only; the cloud model remains on the weather timeline. */
+  setCloudRendering(mode: CloudRendering): void {
+    this.sceneRenderer.setCloudRendering(mode)
+  }
+
   setWeather(weather: Weather): void {
     this.sceneRenderer.setWeather(weather)
     this.weatherAudio.setAmbient(weather.precipitationType, weather.precipitationIntensity, weather.windSpeed)
+  }
+
+  /** Optional editing tools share the renderer's actual projection and cloud density. */
+  pickCloudAt(ndcX: number, ndcY: number) {
+    return this.sceneRenderer.pickCloudAt(ndcX, ndcY)
+  }
+
+  cloudDirectionAt(ndcX: number, ndcY: number) {
+    return this.sceneRenderer.cloudDirectionAt(ndcX, ndcY)
   }
 
   /** Finds which decor object (if any) sits under normalized device coordinates — a thin
@@ -844,6 +861,11 @@ export class SceneElement extends HTMLElement {
     this.updateMeteorShower(sighting, t)
     this.sceneRenderer.setDecor(sighting.decor)
     const pose = resolveObserverPoseAt(sighting, t)
+    const cloudOrigin = resolveObserverPoseAt(sighting, 0)
+    const initialWeather = resolveWeatherAt(sighting, 0)
+    const layerOffsets = Object.fromEntries(resolveCloudLayers(resolveWeatherAt(sighting, t)).map(layer =>
+      [layer.id, cloudOffsetAt(t, sighting.weatherTrack, initialWeather, cloudOrigin, pose, layer.id)]))
+    this.sceneRenderer.setCloudOffset(cloudOffsetAt(t, sighting.weatherTrack, initialWeather, cloudOrigin, pose), layerOffsets)
     this.sceneRenderer.setObserverPose(pose ?? DEFAULT_OBSERVER_POSE)
     this.sceneRenderer.setLensOptics(this.lensOpticsAt(t))
     // What that instrument could actually have RECORDED, which is a second thing entirely from how
@@ -1054,7 +1076,6 @@ export class SceneElement extends HTMLElement {
     }
     this.depths = depths
     const order = timeline.sourceIds
-    const cloudUp = this.sceneRenderer.lowerCloudUp
     const placed: PlacedPhenomenon[] = []
     for (const [sourceId, shape] of shapes) {
       placed.push({
@@ -1063,9 +1084,7 @@ export class SceneElement extends HTMLElement {
         distanceM: depths.get(sourceId)!.distanceM,
         renderOrder: order.indexOf(sourceId),
         aim: shape.aim,
-        // Behind cloud is what the witness SAID, and the only thing that hides a shape here that
-        // the depth buffer does not — see SceneRenderer.lowerCloudUp.
-        hidden: (shape.behindCloud === true && cloudUp) || offScreen.has(sourceId)
+        hidden: offScreen.has(sourceId)
       })
     }
     // The instrument's own aperture and roll, which the painter needs for a dazzling light's spikes

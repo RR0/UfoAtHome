@@ -1,3 +1,5 @@
+import { resolveCloudLayers } from "./CloudLayer.js"
+import type { CloudInstance, CloudLayer } from "./CloudLayer.js"
 import type { Weather } from "./Weather.js"
 
 /**
@@ -33,6 +35,50 @@ function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value))
 }
 
+function lerpInstances(a: CloudInstance[] = [], b: CloudInstance[] = [], t: number): CloudInstance[] | undefined {
+  if (!a.length && !b.length) return undefined
+  return [...new Set([...a.map(i => i.id), ...b.map(i => i.id)])].map(id => {
+    const left = a.find(i => i.id === id), right = b.find(i => i.id === id)
+    const start = left ?? { ...right!, density: 0 }, end = right ?? { ...left!, density: 0 }
+    return { ...start, eastM: lerpNumber(start.eastM, end.eastM, t), northM: lerpNumber(start.northM, end.northM, t),
+      baseM: lerpNumber(start.baseM, end.baseM, t), thicknessM: lerpNumber(start.thicknessM, end.thicknessM, t),
+      widthM: lerpNumber(start.widthM, end.widthM, t), depthM: lerpNumber(start.depthM, end.depthM, t),
+      rotationDeg: lerpAngleDeg(start.rotationDeg, end.rotationDeg, t), density: lerpNumber(start.density, end.density, t),
+      darkness: lerpNumber(start.darkness ?? 0, end.darkness ?? 0, t) }
+  })
+}
+
+/** Match by identity, never array index. Added/removed layers fade instead of popping.
+ * Type and seed remain discrete until the next keyframe; their spatial identity is preserved.
+ */
+function lerpCloudLayers(a: Weather, b: Weather, t: number): CloudLayer[] | undefined {
+  if (a.cloudLayers === undefined && b.cloudLayers === undefined) return undefined
+  const from = resolveCloudLayers(a)
+  const to = resolveCloudLayers(b)
+  if (t >= 1) return to.map(layer => ({ ...layer }))
+  const ids = new Set([...from.map(layer => layer.id), ...to.map(layer => layer.id)])
+  return [...ids].map(id => {
+    const left = from.find(layer => layer.id === id)
+    const right = to.find(layer => layer.id === id)
+    const start = left ?? { ...right!, coverage: 0 }
+    const end = right ?? { ...left!, coverage: 0 }
+    return {
+      ...start,
+      instances: lerpInstances(left?.instances, right?.instances, t),
+      baseM: lerpNumber(start.baseM, end.baseM, t),
+      thicknessM: lerpNumber(start.thicknessM, end.thicknessM, t),
+      coverage: lerpNumber(start.coverage, end.coverage, t),
+      sizeM: lerpNumber(start.sizeM, end.sizeM, t),
+      density: lerpNumber(start.density, end.density, t),
+      darkness: lerpNumber(start.darkness ?? a.cloudDarkness, end.darkness ?? b.cloudDarkness, t),
+      iceCrystalAlignment: start.iceCrystalAlignment === undefined || end.iceCrystalAlignment === undefined
+        ? undefined : lerpNumber(start.iceCrystalAlignment, end.iceCrystalAlignment, t),
+      windSpeed: lerpNumber(start.windSpeed ?? a.windSpeed, end.windSpeed ?? b.windSpeed, t),
+      windDirectionDeg: lerpAngleDeg(start.windDirectionDeg ?? a.windDirectionDeg, end.windDirectionDeg ?? b.windDirectionDeg, t)
+    }
+  })
+}
+
 /** precipitationType and storm are held (from's value until t reaches 1), not blended — there's no
  * meaningful halfway point between "raining" and "not raining", same "discrete fields are held"
  * convention as Shape.ts's own lerpShape (kind/outline/title/selected). Every continuous field
@@ -40,6 +86,7 @@ function clamp(value: number, min: number, max: number): number {
  * blends. */
 export function lerpWeather(a: Weather, b: Weather, t: number): Weather {
   return {
+    cloudLayers: lerpCloudLayers(a, b, t),
     cloudCover: lerpNumber(a.cloudCover, b.cloudCover, t),
     cloudDarkness: lerpNumber(a.cloudDarkness, b.cloudDarkness, t),
     // The ice deck blends like the rest — a cirrus veil really does thicken or clear during an

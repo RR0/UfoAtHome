@@ -239,11 +239,16 @@ if (docs) {
         looked-up values stay as a starting point, the source is dropped, and no later lookup may
         overwrite them. A recording that names a source is replayed exactly as authored and never
         looked up again, so a published case file reads identically offline.</p>
-      <p>Two things here are not in any record. <strong>Ice cloud (cirrus)</strong> is kept apart
-        from total cover because it is not about how much sky was hidden but about whether there
-        were ice crystals in it — which is what refracts a halo or a pair of sundogs into being. And
-        <strong>crystal alignment</strong> was never measured anywhere, so it is stated: tumbling
-        crystals give a bare ring, level plates and rolling columns give sundogs, arcs and a pillar.</p>
+      <p><strong>Cloud layers</strong> keep altitude, thickness, type, coverage, characteristic size,
+        optical density, darkness and an optional wind of their own. They evolve on the weather
+        timeline. Coverage and size are separate, so the same covered fraction can mean many small
+        clouds or fewer large ones. An empty layer wind inherits the general wind.</p>
+      <p><strong>Individual clouds</strong> can be added inside a layer, selected in the sky, pointed
+        at, moved and resized. They remain real volumes even at zero procedural coverage and can
+        actually hide a phenomenon. Their darkness may override the layer's or inherit it.</p>
+      <p><strong>Crystal alignment</strong> belongs only to a cirrus layer. No weather record measures
+        it, so it remains editable even with ERA5 selected: tumbling crystals give a bare ring;
+        level plates and rolling columns give sundogs, arcs and a pillar.</p>
       <p>Below sits the <strong>“Sky:”</strong> line — read-only, and not a lookup at all. A meteor
         shower is a position in Earth's orbit and a comet's orbit is a solved problem, so the date
         and the place alone decide both. It states what else was in that patch of sky: the shower
@@ -493,13 +498,19 @@ if (docs) {
         ultérieure ne peut les écraser. Un enregistrement qui nomme une source est rejoué tel qu'il
         a été composé et n'est jamais reconsulté : un dossier publié se lit à l'identique hors
         ligne.</p>
-      <p>Deux réglages ici ne figurent dans aucun relevé. Les <strong>nuages de glace
-        (cirrus)</strong> sont tenus à part de la couverture totale parce qu'il ne s'agit pas de
-        savoir quelle part du ciel était masquée, mais s'il s'y trouvait des cristaux de glace — ce
-        qui réfracte un halo ou une paire de parhélies. Et l'<strong>alignement des cristaux</strong>
-        n'a jamais été mesuré nulle part : il est donc énoncé. Des cristaux culbutant donnent un
-        anneau nu ; des plaquettes à plat et des colonnes roulantes donnent parhélies, arcs et
-        pilier.</p>
+      <p>Les <strong>couches nuageuses</strong> portent chacune altitude, épaisseur, type,
+        couverture, taille caractéristique, densité optique, obscurité et éventuellement leur propre
+        vent. Elles évoluent sur la timeline météo. Couverture et taille sont indépendantes : une
+        même fraction couverte peut contenir beaucoup de petits nuages ou moins de gros. Un vent de
+        couche vide hérite du vent général.</p>
+      <p>Des <strong>nuages individuels</strong> peuvent être ajoutés dans une couche, sélectionnés
+        dans le ciel, pointés, déplacés et redimensionnés. Ils restent de vrais volumes même avec
+        une couverture procédurale nulle et peuvent masquer effectivement un phénomène. Leur
+        obscurité peut surcharger celle de la couche ou en hériter.</p>
+      <p>L'<strong>alignement des cristaux</strong> n'appartient qu'à une couche de cirrus. Aucun
+        relevé météo ne le mesure : il reste donc modifiable avec ERA5. Des cristaux culbutant
+        donnent un anneau nu ; des plaquettes à plat et des colonnes roulantes donnent parhélies,
+        arcs et pilier.</p>
       <p>Dessous se trouve la ligne <strong>« Ciel : »</strong> — en lecture seule, et qui n'est même
         pas un relevé. Une pluie de météores est une position sur l'orbite terrestre et l'orbite
         d'une comète est un problème résolu : la date et le lieu suffisent à décider des deux. Elle

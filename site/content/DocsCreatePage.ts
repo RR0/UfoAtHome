@@ -161,7 +161,6 @@ if (source && mount) {
   "blur": 0,               // how indistinct the witness said the edges looked
   "selected": false,
   "title": "the phenomenon",
-  "behindCloud": false,    // STATED by the witness, never deduced
   "angular": { "widthDeg": 1.2, "heightDeg": 0.4 }
 }</code></pre>
     <p><strong><code>angular</code> is the authority.</strong> <code>bounds</code> is that angle
@@ -176,7 +175,7 @@ if (source && mount) {
     <table>
       <tr><th>Field</th><th>Meaning</th></tr>
       <tr><td><code>witnessTrack</code></td><td><code>{ keyframes: [{ t, pose }] }</code> — <code>pose</code> holds <code>lat</code>, <code>lng</code>, <code>elevationM</code> (above the local ground), <code>headingDeg</code>, <code>pitchDeg</code>, <code>rollDeg</code>, <code>fovDeg</code>, and for a camera <code>fNumber</code> and <code>focusDistanceM</code></td></tr>
-      <tr><td><code>weatherTrack</code></td><td><code>{ keyframes: [{ t, weather }] }</code> — cover, darkness, base, the high (icy) deck kept separate, crystal alignment, precipitation and its intensity, wind, storm</td></tr>
+      <tr><td><code>weatherTrack</code></td><td><code>{ keyframes: [{ t, weather }] }</code> — precipitation, general wind and storm, plus optional <code>cloudLayers</code>. Each layer has a stable <code>id</code>, <code>type</code>, <code>baseM</code>, <code>thicknessM</code>, <code>coverage</code>, <code>sizeM</code>, <code>density</code>, <code>darkness</code>, optional wind and, for cirrus, <code>iceCrystalAlignment</code>. Its optional <code>instances</code> place individual volumes by east/north position and dimensions</td></tr>
       <tr><td><code>weatherSource</code></td><td><code>{ id, name, url }</code> of the record the weather was looked up from. Its presence means the recording is replayed exactly as authored and never looked up again. Absent means the witness's own account</td></tr>
       <tr><td><code>soundTrack</code></td><td><code>{ keyframes: [{ t, sound }] }</code> — <code>kind</code> (none/hum/whistle/rumble/crackle), <code>volume</code>, <code>pitchHz</code>, optional <code>src</code> of a real recording</td></tr>
       <tr><td><code>instrument</code>, <code>exposureSeconds</code></td><td>What it was observed through, and how long the shutter was open. Absent means the naked eye</td></tr>
@@ -208,6 +207,7 @@ if (source && mount) {
       <tr><th>File</th><th>What to look at in it</th></tr>
       <tr><td><a href="/demo-data/witness-chiles.json"><code>witness-chiles.json</code></a></td><td>A real case: a witness, a case id shared with a second recording, ten keyframes, a looked-up <code>weatherTrack</code> with its <code>weatherSource</code></td></tr>
       <tr><td><a href="/demo-data/sky-test-halos.json"><code>sky-test-halos.json</code></a></td><td>No phenomenon at all — a sky set up by its weather, with a <code>witnessTrack</code> of four poses that pans across the display</td></tr>
+      <tr><td><a href="/demo-data/sky-test-clouds.json"><code>sky-test-clouds.json</code></a></td><td>Three stable cloud layers evolving on the weather timeline, with metre-based altitude, thickness, size, density and wind</td></tr>
       <tr><td><a href="/demo-data/sky-test-aircraft.json"><code>sky-test-aircraft.json</code></a></td><td>An <code>instrument</code> and an <code>exposureSeconds</code>, and a <code>decor</code> aircraft with a <code>track</code> and seven <code>lights</code> at their real flash rates</td></tr>
       <tr><td><a href="/demo-data/instrument-instamatic.json"><code>instrument-instamatic.json</code></a></td><td>The same sighting as <code>witness-socorro.json</code>, changed in one field. Diff the two</td></tr>
     </table>
@@ -222,8 +222,7 @@ if (source && mount) {
       <li><strong>Angles only.</strong> No real size and no real distance is stored anywhere. Metres
         are derived, as inequalities, from what the phenomenon was stated to pass behind or in front of
         (<code>decor[].occludesSourceIds</code>).</li>
-      <li><strong>Declared outranks deduced.</strong> <code>behindCloud</code> and
-        <code>occludesSourceIds</code> are statements by the witness. Nothing in this format
+      <li><strong>Declared outranks deduced.</strong> <code>occludesSourceIds</code> records statements by the witness. Nothing in this format
         <em>can</em> deduce them: it describes an appearance on a field of view, not a position in
         space.</li>
       <li><strong>Absent is not zero.</strong> No sound track means nobody was asked;
@@ -328,7 +327,6 @@ if (source && mount) {
   "blur": 0,               // à quel point le témoin a dit les contours indistincts
   "selected": false,
   "title": "le phénomène",
-  "behindCloud": false,    // ÉNONCÉ par le témoin, jamais déduit
   "angular": { "widthDeg": 1.2, "heightDeg": 0.4 }
 }</code></pre>
     <p><strong>C'est <code>angular</code> qui fait foi.</strong> <code>bounds</code> est cet angle
@@ -343,7 +341,7 @@ if (source && mount) {
     <table>
       <tr><th>Champ</th><th>Sens</th></tr>
       <tr><td><code>witnessTrack</code></td><td><code>{ keyframes: [{ t, pose }] }</code> — <code>pose</code> porte <code>lat</code>, <code>lng</code>, <code>elevationM</code> (au-dessus du sol local), <code>headingDeg</code>, <code>pitchDeg</code>, <code>rollDeg</code>, <code>fovDeg</code>, et pour un appareil <code>fNumber</code> et <code>focusDistanceM</code></td></tr>
-      <tr><td><code>weatherTrack</code></td><td><code>{ keyframes: [{ t, weather }] }</code> — couverture, noirceur, base, la couche haute (glacée) tenue à part, alignement des cristaux, précipitation et son intensité, vent, orage</td></tr>
+      <tr><td><code>weatherTrack</code></td><td><code>{ keyframes: [{ t, weather }] }</code> — précipitation, vent général et orage, plus des <code>cloudLayers</code> facultatives. Chaque couche a un <code>id</code> stable, <code>type</code>, <code>baseM</code>, <code>thicknessM</code>, <code>coverage</code>, <code>sizeM</code>, <code>density</code>, <code>darkness</code>, éventuellement son vent et, pour les cirrus, <code>iceCrystalAlignment</code>. Ses <code>instances</code> facultatives placent des volumes individuels par position est/nord et dimensions</td></tr>
       <tr><td><code>weatherSource</code></td><td><code>{ id, name, url }</code> du relevé d'où vient la météo. Sa présence signifie que l'enregistrement est rejoué tel qu'il a été composé et n'est jamais reconsulté. Absent : le récit du témoin lui-même</td></tr>
       <tr><td><code>soundTrack</code></td><td><code>{ keyframes: [{ t, sound }] }</code> — <code>kind</code> (none/hum/whistle/rumble/crackle), <code>volume</code>, <code>pitchHz</code>, et un <code>src</code> facultatif vers un vrai enregistrement</td></tr>
       <tr><td><code>instrument</code>, <code>exposureSeconds</code></td><td>À travers quoi l'observation a été faite, et combien de temps l'obturateur est resté ouvert. Absent : l'œil nu</td></tr>
@@ -375,6 +373,7 @@ if (source && mount) {
       <tr><th>Fichier</th><th>Ce qu'il faut y regarder</th></tr>
       <tr><td><a href="/demo-data/witness-chiles.json"><code>witness-chiles.json</code></a></td><td>Un vrai dossier : un témoin, un identifiant de dossier partagé avec un second enregistrement, dix keyframes, un <code>weatherTrack</code> relevé avec son <code>weatherSource</code></td></tr>
       <tr><td><a href="/demo-data/sky-test-halos.json"><code>sky-test-halos.json</code></a></td><td>Aucun phénomène — un ciel réglé par sa météo, avec un <code>witnessTrack</code> de quatre poses qui balaie le cortège</td></tr>
+      <tr><td><a href="/demo-data/sky-test-clouds.json"><code>sky-test-clouds.json</code></a></td><td>Trois couches nuageuses stables évoluant sur la timeline météo, avec altitude, épaisseur, taille, densité et vent en unités réelles</td></tr>
       <tr><td><a href="/demo-data/sky-test-aircraft.json"><code>sky-test-aircraft.json</code></a></td><td>Un <code>instrument</code> et un <code>exposureSeconds</code>, et un décor d'aéronef avec sa <code>track</code> et sept <code>lights</code> à leurs cadences réelles</td></tr>
       <tr><td><a href="/demo-data/instrument-instamatic.json"><code>instrument-instamatic.json</code></a></td><td>La même observation que <code>witness-socorro.json</code>, à un champ près. Comparez les deux</td></tr>
     </table>
@@ -389,8 +388,7 @@ if (source && mount) {
       <li><strong>Des angles, rien d'autre.</strong> Aucune taille ni distance réelle n'est stockée
         où que ce soit. Les mètres sont déduits, en inégalités, de ce que le phénomène a été déclaré
         passer derrière ou devant (<code>decor[].occludesSourceIds</code>).</li>
-      <li><strong>L'énoncé l'emporte sur le déduit.</strong> <code>behindCloud</code> et
-        <code>occludesSourceIds</code> sont des affirmations du témoin. Rien dans ce format
+      <li><strong>L'énoncé l'emporte sur le déduit.</strong> <code>occludesSourceIds</code> contient des affirmations du témoin. Rien dans ce format
         <em>ne peut</em> les déduire : il décrit une apparence dans un champ de vision, pas une
         position dans l'espace.</li>
       <li><strong>Absent n'est pas zéro.</strong> Pas de piste sonore signifie que personne n'a posé

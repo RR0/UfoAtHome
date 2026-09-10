@@ -1,3 +1,4 @@
+import { setupCloudEditor } from "./CloudEditor.js"
 import { BLUR_RADIUS_UNIT } from "../render/CanvasRenderer.js"
 import { SightingFetch, SightingFetchError } from "../engine/net/SightingFetch.js"
 import { NARRATIVE_SOURCES } from "../engine/narrative/narrativeSources.js"
@@ -378,6 +379,7 @@ export class SightingEditorElement extends HTMLElement {
   private readonly caseIdInput: HTMLInputElement
   private readonly descriptionInput: HTMLTextAreaElement
   private readonly tagsInput: HTMLInputElement
+  private readonly cloudEditor: ReturnType<typeof setupCloudEditor>
   private readonly cloudCoverInput: HTMLInputElement
   private readonly cloudDarknessInput: HTMLInputElement
   private readonly cloudBaseInput: HTMLInputElement
@@ -1431,6 +1433,18 @@ export class SightingEditorElement extends HTMLElement {
     this.updateShapeTitle()
     this.currentDecorId = this.ufoElement.sighting.decor[0]?.id
     this.refreshDecorList()
+    this.sceneElement.setCloudRendering("volume")
+    this.cloudEditor = setupCloudEditor(this.shadow.getElementById("cloud-editor")!, this.sceneElement, (detachWeatherSource = true) => {
+      if (!detachWeatherSource) return
+      this.weatherFromRecords = false
+      this.cancelWeatherLookup()
+      this.ufoElement.sighting.weatherSource = undefined
+      this.syncWeatherSourceState()
+    }, (headingDeg, pitchDeg) => {
+      this.headingInput.value = String(this.rounded(headingDeg))
+      this.pitchInput.value = String(this.rounded(pitchDeg))
+      this.updateObserver()
+    }, selectLocale(HostLocale.preferencesFor(this), UFO_SUPPORTED_LANGUAGES))
     this.currentMilestoneT = this.ufoElement.sighting.milestones[0]?.t
     this.refreshMilestoneList()
     this.onSelectionOrTimeChanged()
@@ -1478,8 +1492,17 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   disconnectedCallback(): void {
+    this.cloudEditor.stopManipulation()
     document.removeEventListener("click", this.handleOutsideContextMenuClick)
     this.endDrag()
+  }
+
+  /** Preview preferences stay outside the saved observation. */
+  setCloudRendering(mode: "surface" | "volume"): void { this.sceneElement.setCloudRendering(mode) }
+
+  showWeatherEditor(): void {
+    const index = this.groupPanels.findIndex(panel => panel.id === "group-weather")
+    if (index >= 0) this.toggleGroup(this.groupTabs[index], true)
   }
 
   get sightingData(): SightingRecordingJson {
@@ -1490,6 +1513,7 @@ export class SightingEditorElement extends HTMLElement {
     this.endDrag() // an in-progress drag references the OLD timeline's shape — don't let it
     // keep writing into the newly-loaded one
     this.ufoElement.sightingData = json
+    this.cloudEditor.reset()
     // Resets to the first source actually present in the loaded data, not the hardcoded
     // default — a loaded recording using different source ids would otherwise have the next
     // appearance edit silently create a disconnected new "ufo-1" source instead of editing
@@ -2537,6 +2561,7 @@ export class SightingEditorElement extends HTMLElement {
       this.syncWeatherSourceState()
     }
     const weather: Weather = {
+      ...resolveWeatherAt(this.ufoElement.sighting, this.ufoElement.currentTime),
       cloudCover: Number(this.cloudCoverInput.value),
       highCloudCover: Number(this.highCloudCoverInput.value),
       // Hand-authored, the cover slider IS the lower deck: it is what a reader means by "cloud",
@@ -3271,6 +3296,7 @@ export class SightingEditorElement extends HTMLElement {
    * Skips whichever field currently has focus — same "don't fight active typing/dragging"
    * reasoning as syncObserverFromTimeline's own doc comment. */
   private syncWeatherFromTimeline(): void {
+    this.cloudEditor?.sync()
     if (this.ufoElement.playbackState === "playing") return
     const weather = resolveWeatherAt(this.ufoElement.sighting, this.ufoElement.currentTime)
     const active = this.shadow.activeElement
@@ -3429,6 +3455,7 @@ export class SightingEditorElement extends HTMLElement {
    * what makes this restriction affordable.
    */
   private toggleGroup(tab: HTMLButtonElement, open: boolean): void {
+    this.cloudEditor?.stopManipulation()
     for (const [index, candidate] of this.groupTabs.entries()) {
       const nowOpen = candidate === tab && open
       candidate.setAttribute("aria-expanded", String(nowOpen))

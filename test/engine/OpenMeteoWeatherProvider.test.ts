@@ -257,4 +257,21 @@ describe("OpenMeteoWeatherProvider", () => {
 
     expect(observation).toBeUndefined()
   })
+  it("preserves the three reported cloud bands as renderable weather layers", async () => {
+    const { provider } = providerReturning(hourly({ cloud_cover: 80, cloud_cover_low: 20, cloud_cover_mid: 60, cloud_cover_high: 40 }))
+    const result = await provider.getWeather({ points: [{ lat: 43.8, lng: 6, time: AT_04 }] })
+    const layers = result!.samples[0].weather.cloudLayers!
+    expect(layers.map(layer => layer.coverage)).toEqual([0.2, 0.6, 0.4])
+    expect(layers.map(layer => layer.id)).toEqual(["record-low", "record-mid", "record-high"])
+    expect(layers[1].baseM).toBe(3500)
+    expect(layers[2].baseM).toBe(8000)
+    expect(layers.every(layer => layer.instances === undefined && layer.windSpeed === undefined)).toBe(true)
+  })
+
+  it("keeps clear bands at zero instead of inserting default cloud coverage", async () => {
+    const { provider } = providerReturning(hourly())
+    const result = await provider.getWeather({ points: [{ lat: 43.8, lng: 6, time: AT_04 }] })
+    expect(result!.samples[0].weather.cloudLayers!.map(layer => layer.coverage)).toEqual([0, 0, 0])
+  })
+
 })

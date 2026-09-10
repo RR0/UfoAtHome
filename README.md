@@ -461,7 +461,6 @@ interface SightingRecordingJson {
           haloScale: number    // 0 = no glow
           selected: boolean
           title?: string       // shown as an on-canvas tooltip when hovered
-          behindCloud?: boolean // the witness reported it behind cloud at this instant — stated, never deduced (see below)
           angular?: { widthDeg: number, heightDeg: number } // how big it LOOKED — the only size a testimony holds, see Apparent size
           points?: { x: number, y: number }[] // "polygon" shapes only
         }
@@ -512,8 +511,8 @@ The same rule governs the whole scene, not just the object's own sound: **paused
 precipitation and its splashes, twinkling stars, lightning flashes, the sun's lens flare and the weather's own
 ambient beds all stop with the player and resume with it, leaving the frozen frame on screen. A paused replay is
 one instant of a sighting — weather still going on over it would be the reader's own room, not the witness's
-evening. (The cloud deck is not in that list because it does not move at all: its noise field is fixed, with no
-time of its own. Real drifting cloud is part of the volumetric-cloud work still to come.)
+evening. Clouds likewise use the recording's timeline: wind advection stops on pause and is
+recomputed deterministically when seeking.
 
 ### Naming a place
 
@@ -599,11 +598,10 @@ values, **read-only**, above a line naming the dataset and the exact UTC instant
 wrong `utcOffsetHours` shows up there before it shows up in the rendered sky). The request that
 produced them is kept in `weatherSource.url`, so the claim stays checkable years later.
 
-Two of the fields have no direct counterpart in the record and are *derived* — `cloudDarkness`,
-which is a look rather than a measurement (weighted by which layers hold the cloud, plus rain and
-thunderstorm), and `cloudBaseM`, placed at the lowest deck holding a real share of the sky, from
-Espy's temperature/dew-point spread for a low deck. Both are documented in
-`src/engine/weather/providers/OpenMeteoWeatherProvider.ts`.
+Two inputs have no direct counterpart in the record. Layer `darkness` starts from a derived visual
+estimate weighted by cloud level, rain and thunderstorm. A low `baseM` starts from Espy's
+temperature/dew-point spread. Both derivations are documented in
+`src/engine/weather/providers/OpenMeteoWeatherProvider.ts`; crystal alignment is never inferred.
 
 Unchecking **From weather records** hands the fields back to the witness: the looked-up values stay
 as a starting point, `weatherSource` is dropped, and no later lookup may overwrite them — the same
@@ -640,23 +638,6 @@ npx tsx scripts/infer-case-weather.ts --dry-run path/to/sighting.json
 
 It rewrites only `weatherTrack` and `weatherSource`, splicing them into the file's own text so the
 diff shows the weather and nothing else.
-
-### Behind a cloud
-
-`behindCloud` is how a recording says "it disappeared into a cloud" — keyframed like any other
-appearance field, and held rather than blended. It is *stated*, for the same reason
-`DecorObject.occludesSourceIds` is: this format describes an appearance on the witness's own field
-of view, not where an object was in space, so nothing in it can deduce whether cloud came between
-them. A recording holds no distance at all (see *Apparent size* below) — the distance a shape is
-*drawn* at is a parameter of the picture, not a fact (see *Where the shape is drawn*) — and the
-sky's own gaps are procedural noise: leaving the question to geometry means tuning the weather
-until the reported disappearance happens to occur. So the witness's account is the whole answer: no
-`behindCloud`, no cloud, and a shape declared behind cloud is not drawn while the deck is up.
-
-There used to be a geometric fallback here, for a recording that stated a real distance and made no
-claim about cloud. It went when stated distances did, and it had earned it: the one case it fired on
-was Chiles-Whitted, where "it disappeared into the cloud deck" turned out to be an interrogator's
-reconstruction that Whitted himself denied to McDonald in 1968.
 
 ### Apparent size — and why there is no real one
 
@@ -980,3 +961,78 @@ engines.
 ## License
 
 MIT
+
+### Cloud layers
+
+`weatherTrack.keyframes[].weather.cloudLayers` overrides the historical cloud fields. An absent
+array adapts the old lower/cirrus values; an empty array means clear sky. Layers are matched by
+stable `id`, not array position. Added and removed layers fade their coverage; altitude, thickness,
+size, density and wind interpolate. Type and seed change at the destination keyframe.
+
+```json
+{
+  "id": "low",
+  "type": "cumulus",
+  "baseM": 1500,
+  "thicknessM": 800,
+  "coverage": 0.55,
+  "sizeM": 1400,
+  "density": 1,
+  "darkness": 0.2,
+  "seed": 17,
+  "windDirectionDeg": 90,
+  "windSpeed": 5
+}
+```
+
+Base altitude is relative to the recording's reference ground; it must not follow the observer.
+Wind overrides are optional and otherwise use the general weather wind. Advection integrates the
+weather timeline from zero; seeking and pausing reproduce the same field. Coverage controls the
+fraction of the generated horizontal field occupied by cloud, independently of characteristic
+cloud size and optical density.
+
+`SceneElement.setCloudRendering("volume")` selects volumetric rendering. `"surface"` remains the default
+and is available for comparison on the existing development page, under the cloud test controls.
+The thick layers use a 64³ byte noise texture, shared within a renderer, 48 view samples and up to
+three light samples per occupied view sample. Continuous weather changes update uniforms without
+recreating meshes or textures. Cirrus still use the lightweight surface renderer.
+
+The volume intersects concentric spherical layers around Earth and shades density along the ray,
+including from inside or above a layer. Distant detail converges toward average coverage and its
+colour toward atmospheric haze. Phenomenon textures sample the same density, stopping at each
+fragment's distance, and celestial attenuation uses a CPU twin of the field.
+
+Current limits: full-resolution rendering (no temporal reconstruction or adaptive quality yet),
+back-to-front composition of separate layers (overlapping volumes need joint integration), and
+terrain occlusion still uses the proxy shell's depth rather than a metre-based depth pre-pass.
+Thin cirrus use the lighter surface field and share that exact veil with the halo renderer. Crystal
+alignment belongs to the cirrus layer that carries it, rather than to the whole sky.
+
+Layers can also contain optional `instances`: individual volumetric clouds with stable IDs,
+east/north positions, base altitude, thickness, width, depth, rotation, density and an optional
+darkness override. They share the
+procedural noise and lighting, drift with their parent layer's wind and participate in actual
+phenomenon attenuation. They remain present at zero global coverage and use volumes even when
+comparing the global surface renderer. Instance properties interpolate on the weather timeline.
+The weather panel in the recording editor lets you add and remove layers, and add, select, edit
+and delete their individual clouds using numeric controls. Its optional
+canvas manipulation mode selects individual clouds by density and drags them in a plane parallel
+to the image, updating horizontal position and altitude. Drag increments preserve position
+differences between keyframes and use the same projection as the rendered scene. Valid edits
+save immediately and pause playback; the default scope is the current weather time. The whole-observation scope explicitly applies the
+edited property across all weather keyframes, preserving other properties and winds. Layer wind
+overrides may be left empty to inherit the general wind. Cloud edits take ownership from inferred
+weather, preventing a pending lookup from replacing the edits. The normal recording export and
+import retain the layers and instances. The development page only supplies the synthetic scenario
+and surface/volume comparison; all cloud authoring uses the recording editor.
+
+`darkness` is stored per layer. An individual cloud may override it or omit it to inherit its
+parent. `iceCrystalAlignment` is offered only on cirrus and remains author-editable when ERA5 owns
+the measured fields, because no reanalysis records crystal orientation.
+
+For inferred Open-Meteo weather, the low, middle and high cloud fractions remain three separate
+layers with stable identities. They inherit the reported wind and evolve on the weather timeline.
+The existing total-cover value remains the dataset's total rather than a sum of the bands. Low
+base altitude is estimated from the temperature/dew-point spread; other dimensions and morphology
+are rendering assumptions, not observations of individual clouds. Editing clouds manually keeps
+the established weather-ownership behavior; selecting weather records again restores inference.

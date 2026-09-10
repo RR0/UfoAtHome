@@ -1,3 +1,5 @@
+import { LayeredCloudSystem } from "./LayeredCloudSystem.js"
+import type { CloudRendering } from "./LayeredCloudSystem.js"
 // Named imports (not `import * as THREE`) so Rollup can tree-shake the unused 95% of
 // three.js — a namespace import defeats tree-shaking since property access on it isn't
 // statically analyzable, which was the difference between an ~850KB and an ~180KB bundle here.
@@ -106,6 +108,7 @@ import type { PhenomenonFrame, PlacedPhenomenon } from "./PhenomenonSystem.js"
  * track. */
 function weatherEquals(a: Weather, b: Weather): boolean {
   return (
+    JSON.stringify(a.cloudLayers) === JSON.stringify(b.cloudLayers) &&
     a.cloudCover === b.cloudCover &&
     a.cloudDarkness === b.cloudDarkness &&
     a.cloudBaseM === b.cloudBaseM &&
@@ -723,6 +726,12 @@ export class SceneRenderer {
    * per-tick allocation, unlike weatherEquals' field-by-field compare). */
   private decorObjects: DecorObject[] = []
   private readonly decorGroups = new Map<string, Group>()
+  /** Last anchoring inputs, retained because terrain arrives asynchronously. Once it does, the
+   * camera and every object must be placed again against the real mesh rather than the flat
+   * fallback they were initially shown on. */
+  private decorReferencePose?: ObserverPose
+  private decorCurrentPose?: ObserverPose
+  private decorTime = 0
   /** The real shadow-casting light standing in for whichever of the Sun/Moon is actually up (see
    * updateCelestialLight) — only one at a time, matching how real moonlight is only ever visible
    * when the (far brighter) Sun isn't: no real scene needs both casting shadows simultaneously.
@@ -763,6 +772,11 @@ export class SceneRenderer {
   /** Radius the terrain patch was last built at, so a real change of altitude refetches it at the
    * span the witness can now see, while a small drift doesn't. */
   private terrainRadius = GROUND_RADIUS
+  private cloudRendering: CloudRendering = "surface"
+  private layeredClouds?: LayeredCloudSystem
+  private cloudLayerOffsetsM: Record<string, { x: number; z: number }> = {}
+  private readonly cloudOffsetM = new Vector3()
+  private readonly cloudFieldOffset = new Vector3()
   private cloudMesh?: Mesh
   /** The ICE deck, drawn separately from the water one and never mixed with it: it sits at its own
    * height, it is translucent, and it must not take part in occlusion — a cirrus veil hides nothing
@@ -1012,6 +1026,28 @@ export class SceneRenderer {
     this.render()
   }
 
+  /** Move the sampled cloud field, in world metres, without rebuilding either deck. */
+  setCloudRendering(mode: CloudRendering): void {
+    if (mode === this.cloudRendering) return
+    this.cloudRendering = mode
+    this.layeredClouds?.dispose()
+    this.layeredClouds = undefined
+    this.buildClouds()
+    this.buildCirrus()
+    this.render()
+  }
+
+  setCloudOffset(offsetM: { x: number; z: number }, layersM: Record<string, { x: number; z: number }> = {}): void {
+    this.cloudOffsetM.set(offsetM.x, 0, offsetM.z)
+    this.cloudLayerOffsetsM = layersM
+    this.layeredClouds?.setOffsets(offsetM, layersM)
+    this.cloudFieldOffset.set(offsetM.x * CLOUD_UNITS_PER_METRE, 0, offsetM.z * CLOUD_UNITS_PER_METRE)
+    for (const uniforms of [this.cloudUniforms, this.cirrusUniforms]) {
+      uniforms?.fieldOffset.value.copy(this.cloudFieldOffset)
+    }
+    this.iceHalos?.setCloudOffset(this.layeredClouds?.cirrusMask?.offset ?? this.cloudFieldOffset)
+  }
+
   /** Orients the camera to the observer's current heading/pitch/field of view — turning the
    * witness's head changes what part of the (fixed, real-world-positioned) sky is in view, it
    * never moves any of the sky/star/body positions themselves. `elevationM` nudges the camera's
@@ -1189,6 +1225,10 @@ export class SceneRenderer {
         this.terrainAttribution = attribution
         this.scene.add(mesh)
         this.applyGroundDepthWrite()
+        if (this.decorCurrentPose) {
+          this.setObserverPose(this.decorCurrentPose)
+          this.updateDecorAnchoring(this.decorReferencePose, this.decorCurrentPose, this.decorTime)
+        }
         this.render()
         onSettled?.()
       })
@@ -1444,6 +1484,9 @@ export class SceneRenderer {
    * setIndoorLook) are added on top so the witness can still turn their head to see the room's
    * other walls/floor/ceiling, not just whatever's directly ahead through that one window. */
   updateDecorAnchoring(referencePose: ObserverPose | undefined, currentPose: ObserverPose | undefined, t = 0): void {
+    this.decorReferencePose = referencePose
+    this.decorCurrentPose = currentPose
+    this.decorTime = t
     const offset =
       referencePose?.lat !== undefined && referencePose.lng !== undefined && currentPose?.lat !== undefined && currentPose?.lng !== undefined
         ? geoToLocalMeters(referencePose.lat, referencePose.lng, currentPose.lat, currentPose.lng)
@@ -1497,14 +1540,21 @@ export class SceneRenderer {
       const x = placement.eastM + offset.x + shift.x
       const z = -placement.northM + offset.z + shift.z
       group.position.set(x, this.groundUnderFootprint(object, x, z, placement.headingDeg) + placement.altitudeM, z)
-      // A field is dropped once it is too far to read as one. Measured rather than chosen: at
-      // Valensole, hiding every patch beyond this changes three ten-thousandths of the picture,
-      // because a 55 cm plant at 150 m is a sixth of a pixel and what is left in its place is an
-      // aerial photograph of the same field. It is worth doing because a patch is ten thousand
-      // triangles: this alone is a third of the field's whole cost, and it follows the witness, so
-      // the ground they are about to walk onto is drawn by the time they get there.
-      if (object.kind === "crop") group.visible = Math.hypot(x, z) <= CROP_VISIBLE_DISTANCE_M
+      if (object.kind === "crop") {
+        const distance = Math.hypot(x, z)
+        group.visible = distance <= CROP_VISIBLE_DISTANCE_M
+      }
       if (placement.headingDeg !== undefined) group.rotation.y = -placement.headingDeg * DEG_TO_RAD
+      if (object.kind === "crop" && group.visible) {
+        const terrain = this.terrainMesh
+        const key = [terrain?.geometry.uuid, x - (terrain?.position.x ?? 0),
+          z - (terrain?.position.z ?? 0), group.position.y - (terrain?.position.y ?? 0),
+          placement.headingDeg, placement.altitudeM].map(v => typeof v === "number" ? v.toFixed(4) : v).join(":")
+        if (group.userData.cropGroundKey !== key) {
+          DecorSystem.fitCropToGround(group, (px, pz) => this.groundYUnder(px, pz) + placement.altitudeM)
+          group.userData.cropGroundKey = key
+        }
+      }
       furthestDecorM = Math.max(furthestDecorM, group.position.distanceTo(this.camera.position))
     }
     // Decor used to be local scenery, a couple of hundred meters out at most, so a far plane sized
@@ -1535,7 +1585,7 @@ export class SceneRenderer {
    * READ, not raycast, and that is the whole of what makes a field possible. The patch is a regular
    * square grid of vertices — regular in latitude and longitude, and therefore regular in metres too,
    * since the projection scales both axes by constants (see GeoProjection) — so the height at any
-   * point is four vertices and a bilinear blend, found by arithmetic. Casting a ray at it instead
+   * point is four vertices and the containing triangle, found by arithmetic. Casting a ray at it instead
    * meant walking thirty thousand triangles per object, and a walking witness invalidated every
    * object's cached answer every half metre: seventy rows of lavender cost 3.7 ms a frame that way,
    * which is what stood between this scene and a field big enough to have a far side.
@@ -1576,35 +1626,28 @@ export class SceneRenderer {
     const fx = col - col0
     const fz = row - row0
     const at = (r: number, c: number): number => position.getY(r * side + c)
-    const top = at(row0, col0) * (1 - fx) + at(row0, col0 + 1) * fx
-    const bottom = at(row0 + 1, col0) * (1 - fx) + at(row0 + 1, col0 + 1) * fx
-    return top * (1 - fz) + bottom * fz
+    // Match TerrainMeshBuilder's triangles (a,c,b) and (b,c,d), including their diagonal.
+    const a = at(row0, col0)
+    const b = at(row0, col0 + 1)
+    const c = at(row0 + 1, col0)
+    const d = at(row0 + 1, col0 + 1)
+    return fx + fz <= 1
+      ? a + (b - a) * fx + (c - a) * fz
+      : d + (c - d) * (1 - fx) + (b - d) * (1 - fz)
   }
 
-  /**
-   * The ground a decor object stands on — the HIGHEST the relief reaches under its footprint, not
-   * the height at its centre.
+  /** The highest local ground under the whole footprint of a decor object.
    *
-   * The relief is a thirty-metre grid read bilinearly, so under a five-metre car it is a tilted
-   * plane; stood at the height of its own centre, the car had half its wheels under the uphill
-   * side of it. Standing it on the highest of five samples (the centre and the four corners of its
-   * footprint, turned to its heading) can leave the downhill wheels a few centimetres in the air,
-   * which a reader does not see, where a wheel in the ground is the one thing they do. Altitude
-   * is added on top by the caller, as before; a flying object's footprint is not on the ground.
+   * Centre-and-corners sampling is insufficient on a triangulated height field: a grid vertex or
+   * triangle ridge can pass through the middle of a car between all five samples. That is exactly
+   * what happened to Zamora's moving patrol car while it climbed at 17:51:11. Sample the complete
+   * oriented footprint at sub-metre intervals, so every ground-bound object is lifted onto the
+   * terrain at its current interpolated position. The cap keeps an unusually large building cheap;
+   * its samples are then evenly spread over the full extent rather than concentrated at one end.
+   * Crops receive their finer per-plant fit immediately afterwards. Altitude is added by the caller.
    */
   private groundUnderFootprint(object: DecorObject, x: number, z: number, headingDeg: number | undefined): number {
-    const size = DecorSystem.sizeOf(object)
-    const heading = (headingDeg ?? 0) * DEG_TO_RAD
-    // The object's own axes in the scene: length runs the way it faces (north is -z), width across.
-    const alongX = Math.sin(heading) * (size.lengthM / 2)
-    const alongZ = -Math.cos(heading) * (size.lengthM / 2)
-    const acrossX = Math.cos(heading) * (size.widthM / 2)
-    const acrossZ = Math.sin(heading) * (size.widthM / 2)
-    let highest = this.groundYUnder(x, z)
-    for (const [sl, sw] of [[1, 1], [1, -1], [-1, 1], [-1, -1]]) {
-      highest = Math.max(highest, this.groundYUnder(x + sl * alongX + sw * acrossX, z + sl * alongZ + sw * acrossZ))
-    }
-    return highest
+    return DecorSystem.groundUnderFootprint(object, x, z, headingDeg, (px, pz) => this.groundYUnder(px, pz))
   }
 
   /** How far the witness has turned their head away from "straight out through the chosen
@@ -1921,6 +1964,7 @@ export class SceneRenderer {
     const pass = this.usableEquidistantPass()
     // After the pass exists and before the camera is widened for it: a pixel names a direction
     // under the projection the pass implements, at the field the recording states.
+    this.phenomena.setCloudLayers(this.layeredClouds?.volumes ?? [])
     this.phenomena.place(
       this.camera,
       (ndcX, ndcY, into) => this.directionAtScreenPoint(ndcX, ndcY, into),
@@ -2176,6 +2220,14 @@ export class SceneRenderer {
     raycaster.camera = this.camera
   }
 
+  pickCloudAt(ndcX: number, ndcY: number) {
+    return this.layeredClouds?.pickInstance(this.cloudDirectionAt(ndcX, ndcY))
+  }
+
+  cloudDirectionAt(ndcX: number, ndcY: number): Vector3 {
+    return this.directionAtScreenPoint(ndcX, ndcY, new Vector3())
+  }
+
   /** The world direction a point of the visible image stands for — aimAtScreenPoint's own answer,
    * as a vector rather than a ray, for what has to be PUT there rather than tested there (see
    * PhenomenonSystem.place). */
@@ -2330,23 +2382,6 @@ export class SceneRenderer {
     this.sunOcclusionRaycaster.set(this.camera.position, direction)
     const hit = this.sunOcclusionRaycaster.intersectObjects(occluders, true)[0]
     return hit !== undefined && hit.distance < distanceToSun
-  }
-
-  /**
-   * Whether there is a water-cloud deck up at all — what a shape the witness reported "behind
-   * cloud" (BaseShape.behindCloud) is hidden behind.
-   *
-   * Cloud is answered from what the witness reported and from nothing else. There used to be a
-   * geometric fallback here for a recording that stated a real distance and made no claim about
-   * cloud — it went when stated distances did (see BaseShape.angular), and it deserved to: the
-   * only case it ever fired on turned out to be Chiles-Whitted, where "it disappeared into the
-   * cloud deck" was an interrogator's reconstruction that the witness himself denied. Deducing
-   * cloud from a distance nobody perceived is how that kind of claim gets made twice. The distance
-   * a phenomenon is now DRAWN at (see setPhenomena) changes nothing here: it is a parameter of the
-   * picture, and the deck is drawn without depth, so the statement stays the witness's alone.
-   */
-  get lowerCloudUp(): boolean {
-    return this.cloudMesh !== undefined && this.lowerCloudCover() > 0
   }
 
   /**
@@ -2758,10 +2793,11 @@ export class SceneRenderer {
    */
   private cloudTransmission(position: HorizontalPosition): number {
     const direction = horizontalToCartesian(position.altitudeDeg, position.azimuthDeg, 1)
+    if (this.layeredClouds) return this.layeredClouds.transmissionAt(direction)
     let through = 1
     const water = this.lowerCloudCover()
     if (water > 0) {
-      through *= 1 - CloudField.alphaAt(direction, Math.abs(this.cloudLayerOffset()), water) * WATER_DECK_OPACITY
+      through *= 1 - CloudField.alphaAt(direction, Math.abs(this.cloudLayerOffset()), water, this.cloudFieldOffset) * WATER_DECK_OPACITY
     }
     const ice = this.weather.highCloudCover ?? 0
     if (ice > 0) {
@@ -2976,20 +3012,23 @@ export class SceneRenderer {
   private buildIceHalos(sun: HorizontalPosition, moon: HorizontalPosition & { magnitude: number }): void {
     if (!this.iceHalos) {
       this.iceHalos = new IceHaloEffect()
+      this.iceHalos.setCloudOffset(this.cloudFieldOffset)
       // A display is traced over a second or so of frames, and a reader who has PAUSED to look at
       // the sky is exactly the reader waiting for it — so it asks for the repaint itself rather
       // than waiting for an animation loop that only runs during playback.
       this.iceHalos.onReady = () => this.render()
       this.celestialGroup.add(this.iceHalos.object)
     }
-    const ice = this.weather.highCloudCover
+    const ice = this.highCloudCover()
+    const cirrusMask = this.layeredClouds?.cirrusMask
+    this.iceHalos.setCloudOffset(cirrusMask?.offset ?? this.cloudFieldOffset)
     if (ice === undefined) {
       this.iceHalos.update({ x: 0, y: 1, z: 0 }, -1, 0, [1, 1, 1], { cover: 0, layerHeight: CIRRUS_LAYER_HEIGHT }, 0)
       return
     }
     // The real lower decks when the record gave them, and the total cover as a stand-in when
     // nobody asked — never the total minus the ice, which the decks overlapping makes unsound.
-    const lower = this.weather.lowerCloudCover ?? this.weather.cloudCover
+    const lower = this.lowerCloudCover()
     // The Sun while the ice deck can still see it, which outlasts the witness's own sunset: the
     // crystals are eight kilometres up and stay in sunlight for minutes after the ground is in
     // shadow. That interval is exactly when pillars are photographed, so cutting the display at
@@ -3008,8 +3047,8 @@ export class SceneRenderer {
       source.altitudeDeg,
       strength,
       [tint[0], tint[1], tint[2]],
-      { cover: ice, layerHeight: CIRRUS_LAYER_HEIGHT },
-      this.weather.iceCrystalAlignment ?? DEFAULT_ICE_CRYSTAL_ALIGNMENT
+      { cover: cirrusMask?.cover ?? ice, layerHeight: cirrusMask?.layerHeight ?? CIRRUS_LAYER_HEIGHT },
+      cirrusMask?.iceCrystalAlignment ?? this.weather.iceCrystalAlignment ?? DEFAULT_ICE_CRYSTAL_ALIGNMENT
     )
   }
 
@@ -3040,7 +3079,7 @@ export class SceneRenderer {
     // is about — the same reading the ice display takes of the same field, and for the same reason:
     // the total cover would count a cirrus veil as a blocker, and a veil dims a bow rather than
     // preventing it.
-    const blocking = this.weather.lowerCloudCover ?? this.weather.cloudCover
+    const blocking = this.lowerCloudCover()
     const moonlight = MOON_DISPLAY_STRENGTH * Rainbows.moonlightShare(moon.magnitude)
     const strength = Rainbows.strength(rain, blocking, source.altitudeDeg) * (bySun ? 1 : moonlight)
     if (strength <= 0) {
@@ -3280,6 +3319,17 @@ export class SceneRenderer {
    * lighting is applied separately and continuously by updateCloudLighting, called every
    * setAstronomy tick. */
   private buildClouds(): void {
+    if (this.cloudRendering === "volume" || this.weather.cloudLayers !== undefined) {
+      if (!this.layeredClouds) {
+        this.disposeCloudSystem()
+        this.layeredClouds = new LayeredCloudSystem(this.celestialGroup, CLOUD_RADIUS, this.cloudRendering)
+      }
+      this.disposeCirrus()
+      this.layeredClouds.update(this.weather, this.observerElevationM + 1.6)
+      this.layeredClouds.setOffsets(this.cloudOffsetM, this.cloudLayerOffsetsM)
+      if (this.lastSunPosition) this.updateCloudLighting(this.lastSunPosition, this.baseFogColor)
+      return
+    }
     this.disposeCloudSystem()
     // The water deck only. Driven by the lower cover where the record gave one, because the ice now
     // has a deck of its own and adding the total would draw the cirrus twice.
@@ -3294,6 +3344,7 @@ export class SceneRenderer {
     const { material, uniforms } = buildCloudMaterial(baseColor, cover, Math.abs(this.cloudLayerOffset()))
     this.cloudMaterial = material
     this.cloudUniforms = uniforms
+    uniforms.fieldOffset.value.copy(this.cloudFieldOffset)
     // Seeds real lighting immediately from the last known sun position — see lastSunPosition's own
     // comment for why this can't just wait for the next setAstronomy tick.
     if (this.lastSunPosition) this.updateCloudLighting(this.lastSunPosition, this.baseFogColor)
@@ -3315,7 +3366,16 @@ export class SceneRenderer {
   /** How much of the sky the WATER decks covered — the record's own figure where there is one, and
    * the total as a stand-in when a scene was written by hand. */
   private lowerCloudCover(): number {
+    if (this.weather.cloudLayers) return 1 - this.weather.cloudLayers.filter(layer => layer.type !== "cirrus")
+      .reduce((clear, layer) => clear * (1 - layer.coverage), 1)
     return this.weather.lowerCloudCover ?? this.weather.cloudCover
+  }
+
+  /** Approximate aggregate for the legacy optical-effect strength model, not reported total cover. */
+  private highCloudCover(): number | undefined {
+    if (this.weather.cloudLayers) return 1 - this.weather.cloudLayers.filter(layer => layer.type === "cirrus")
+      .reduce((clear, layer) => clear * (1 - layer.coverage), 1)
+    return this.weather.highCloudCover
   }
 
   /**
@@ -3332,11 +3392,13 @@ export class SceneRenderer {
    */
   private buildCirrus(): void {
     this.disposeCirrus()
+    if (this.layeredClouds) return
     const cover = this.weather.highCloudCover ?? 0
     if (cover <= 0) return
     const { material, uniforms } = buildCloudMaterial(new Color(...CLOUD_LIGHT_COLOR), cover, CIRRUS_LAYER_HEIGHT, 1)
     this.cirrusMaterial = material
     this.cirrusUniforms = uniforms
+    uniforms.fieldOffset.value.copy(this.cloudFieldOffset)
     if (this.lastSunPosition) this.updateCloudLighting(this.lastSunPosition, this.baseFogColor)
     this.cirrusMesh = new Mesh(buildCloudGeometry(CLOUD_RADIUS * 1.04), material)
     // Behind the water deck, and behind the ice optics, so a lower cloud paints over it.
@@ -3365,6 +3427,7 @@ export class SceneRenderer {
   /** Re-aims an already-built deck at the observer's current altitude: how compressed it looks and
    * which way its shell faces, no geometry rebuild. */
   private syncCloudLayer(): void {
+    this.layeredClouds?.update(this.weather, this.observerElevationM + 1.6)
     const offset = this.cloudLayerOffset()
     if (this.cloudUniforms) this.cloudUniforms.layerHeight.value = Math.abs(offset)
     if (this.cloudMesh) this.cloudMesh.scale.y = offset < 0 ? -1 : 1
@@ -3383,7 +3446,7 @@ export class SceneRenderer {
     // Whichever decks exist, and NOT gated on the water one: a sky with cirrus and nothing below it
     // used to leave the ice deck unlit, because this returned early on the water deck's absence.
     const decks = [this.cloudUniforms, this.cirrusUniforms].filter((deck): deck is CloudUniforms => deck !== undefined)
-    if (decks.length === 0) return
+    if (decks.length === 0 && !this.layeredClouds) return
     const { x, y, z } = horizontalToCartesian(sun.altitudeDeg, sun.azimuthDeg, 1)
     const tint = atmosphericTint(sun.altitudeDeg)
     // Scaled by how high the Sun actually is, exactly as the scene's own real light already is
@@ -3393,6 +3456,9 @@ export class SceneRenderer {
     // through a 02:45 night. Below the horizon the only real light left on a cloud base is
     // moonlight and skyglow, which is what ambientColor already carries.
     const daylight = Math.max(0, Math.sin(Math.max(sun.altitudeDeg, 0) * DEG_TO_RAD))
+    this.layeredClouds?.setLighting(new Vector3(x, y, z),
+      new Color(tint[0] * daylight, 0.96 * tint[1] * daylight, 0.88 * tint[2] * daylight),
+      new Color(...groundColor), new Color(...groundColor))
     for (const deck of decks) {
       deck.sunDir.value.set(x, y, z)
       deck.sunColor.value.setRGB(tint[0] * daylight, 0.96 * tint[1] * daylight, 0.88 * tint[2] * daylight)
@@ -3402,6 +3468,8 @@ export class SceneRenderer {
 
 
   private disposeCloudSystem(): void {
+    this.layeredClouds?.dispose()
+    this.layeredClouds = undefined
     if (this.cloudMesh) {
       this.cloudMesh.removeFromParent()
       this.cloudMesh.geometry.dispose()

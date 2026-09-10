@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { Box3, BoxGeometry, Group, Mesh, type Object3D } from "three"
+import { Box3, BoxGeometry, Group, Mesh, Vector3, type Object3D } from "three"
 import { DecorSystem } from "../../src/render3d/DecorSystem.js"
 import type { DecorObject } from "../../src/engine/model/Decor.js"
 
@@ -317,5 +317,40 @@ describe("DecorSystem.applyModel", () => {
     DecorSystem.applyModel(group, object, loadedModel())
     const lamp = group.children.find(child => (child.userData as { lightId?: string }).lightId === "beacon")
     expect(lamp?.position.toArray()).toEqual([0, 3, -2])
+  })
+})
+
+describe("crop terrain anchoring", () => {
+  it("places each plant on a slope and restores its original height when the terrain changes", () => {
+    const group = DecorSystem.build({ id: "field", kind: "crop", eastM: 0, northM: 0, headingDeg: 37 }, false)
+    group.position.set(20, 3, -40)
+    const mesh = parts(group)[0] as Mesh
+    const base = mesh.userData.cropBasePositions as Float32Array
+    const count = mesh.userData.cropVerticesPerClump as number
+    const position = mesh.geometry.getAttribute("position")
+    const slope = (x: number, z: number) => 0.03 * x - 0.02 * z
+    DecorSystem.fitCropToGround(group, slope)
+    for (let first = 0; first < position.count; first += count) {
+      const point = mesh.localToWorld(new Vector3(position.getX(first), position.getY(first), position.getZ(first)))
+      expect(point.y - base[first * 3 + 1] * mesh.parent!.scale.y).toBeCloseTo(slope(point.x, point.z), 5)
+    }
+    DecorSystem.fitCropToGround(group, () => 3)
+    for (let i = 0; i < position.count; i++) expect(position.getY(i)).toBeCloseTo(base[i * 3 + 1], 5)
+  })
+})
+
+describe("decor terrain anchoring", () => {
+  it("finds an uphill ridge inside a moving vehicle footprint, between its centre and corners", () => {
+    const car = vehicle({ eastM: 0, northM: 0, headingDeg: 0, sizeM: { widthM: 2.02, lengthM: 5.44, heightM: 1.42 } })
+    const ground = (x: number, z: number) => Math.max(0, 1 - Math.hypot(x - 0.3, z - 1.2) * 3)
+    expect(ground(0, 0)).toBe(0)
+    expect(DecorSystem.groundUnderFootprint(car, 0, 0, 0, ground)).toBeGreaterThan(0.5)
+  })
+
+  it("rotates the sampled footprint with the object's current heading", () => {
+    const car = vehicle({ eastM: 0, northM: 0, sizeM: { widthM: 2, lengthM: 6, heightM: 1.5 } })
+    const eastRidge = (x: number) => Math.max(0, 2 - Math.abs(x - 2.5) * 4)
+    expect(DecorSystem.groundUnderFootprint(car, 0, 0, 0, eastRidge)).toBe(0)
+    expect(DecorSystem.groundUnderFootprint(car, 0, 0, 90, eastRidge)).toBeGreaterThan(0.9)
   })
 })

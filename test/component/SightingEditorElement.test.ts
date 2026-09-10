@@ -24,6 +24,9 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
   SceneRenderer: class {
     resize(): void {}
     setObserverPose(): void {}
+    cloudDirectionAt() { return { x: 0, y: 0.4, z: -0.9165 } }
+    setCloudRendering(): void {}
+    setCloudOffset(): void {}
     setGait(): void {}
     setTerrainOrigin(): void {}
     setTerrainProviders(): void {}
@@ -44,9 +47,6 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     setPhenomena(): void {}
     screenPointOf(): undefined {
       return undefined
-    }
-    get lowerCloudUp(): boolean {
-      return false
     }
     updateDecorAnchoring(): void {}
     updateDecorLitState(): void {}
@@ -5974,5 +5974,72 @@ describe("SightingEditorElement missing-value marks, in detail", () => {
     expect(field(element, "cloudCover").classList.contains("wanted")).toBe(false)
     expect(field(element, "soundKind").value).toBe("none")
     expect(field(element, "soundKind").classList.contains("wanted")).toBe(false)
+  })
+})
+
+describe("integrated cloud weather editor", () => {
+  it("edits at the playhead, preserves future weather, and round-trips individual clouds", async () => {
+    const { default: fixture } = await import("../../public/demo-data/sky-test-clouds.json")
+    const { fromSightingJson } = await import("../../src/engine/persistence/sightingJson.js")
+    const element = mount()
+    element.sightingData = fixture as unknown as import("../../src/engine/persistence/sightingJson.js").SightingRecordingJson
+    element.showWeatherEditor()
+    const ufo = nestedUfo(element) as import("../../src/component/UfoElement.js").UfoElement
+    const shadow = element.shadowRoot!
+    const input = (id: string, value: string) => {
+      const field = shadow.getElementById(id) as HTMLInputElement
+      field.value = value
+      field.dispatchEvent(new Event("input", { bubbles: true }))
+    }
+    ufo.currentTime = 30000
+    expect((shadow.getElementById("cloud-scope") as HTMLSelectElement).value).toBe("instant")
+    input("cloud-cover", "0")
+    expect(ufo.sighting.weatherTrack.getInterpolatedWeatherAt(30000)!.cloudLayers![0].coverage).toBe(0)
+    expect(ufo.sighting.weatherTrack.getInterpolatedWeatherAt(120000)!.cloudLayers![0].coverage).toBe(0.55)
+    expect(ufo.sighting.weatherTrack.getInterpolatedWeatherAt(30000)!.windSpeed).toBe(8.75)
+    const scope = shadow.getElementById("cloud-scope") as HTMLSelectElement
+    scope.value = "observation"
+    input("cloud-cover", "0")
+    ;(shadow.getElementById("cloud-instance-add") as HTMLButtonElement).click()
+    const addedCloudId = (shadow.getElementById("cloud-instance") as HTMLSelectElement).value
+    input("instance-width", "2345")
+    const restored = fromSightingJson(JSON.parse(JSON.stringify(element.sightingData)))
+    for (const frame of restored.weatherTrack.allKeyframes) {
+      expect(frame.weather.cloudLayers![0].coverage).toBe(0)
+      expect(frame.weather.cloudLayers![0].instances!.find(instance => instance.id === addedCloudId)!.widthM).toBe(2345)
+    }
+    ufo.currentTime = 120000
+    expect((shadow.getElementById("cloud-cover") as HTMLInputElement).value).toBe("0")
+    ;(shadow.getElementById("cloud-instance") as HTMLSelectElement).value = addedCloudId
+    ;(shadow.getElementById("cloud-instance") as HTMLSelectElement).dispatchEvent(new Event("change", { bubbles: true }))
+    expect((shadow.getElementById("instance-width") as HTMLInputElement).value).toBe("2345")
+    const { cloudOffsetAt } = await import("../../src/render3d/CloudMotion.js")
+    const { resolveObserverPoseAt, resolveWeatherAt } = await import("../../src/engine/model/Sighting.js")
+    const pose = resolveObserverPoseAt(ufo.sighting, 120000)!
+    const layer = resolveWeatherAt(ufo.sighting, 120000).cloudLayers![0]
+    const instance = layer.instances!.find(instance => instance.id === addedCloudId)!
+    const offset = cloudOffsetAt(120000, ufo.sighting.weatherTrack, resolveWeatherAt(ufo.sighting, 0), resolveObserverPoseAt(ufo.sighting, 0), pose, layer.id)
+    const east = instance.eastM - offset.x, north = instance.northM + offset.z
+    const horizontal = Math.hypot(east, north)
+    const up = instance.baseM + instance.thicknessM / 2 - (pose.elevationM ?? 0) - 1.6 - horizontal ** 2 / (2 * 6371000)
+    const weatherBeforeAim = JSON.stringify(ufo.sighting.weatherTrack.toJSON())
+    ;(shadow.getElementById("cloud-instance-point") as HTMLButtonElement).click()
+    const aimed = resolveObserverPoseAt(ufo.sighting, 120000)!
+    const heading = (Math.atan2(east, north) * 180 / Math.PI + 360) % 360
+    expect(aimed.headingDeg).toBeCloseTo(Math.round(heading * 10) / 10)
+    expect(aimed.pitchDeg).toBeCloseTo(Math.round(Math.atan2(up, horizontal) * 180 / Math.PI * 10) / 10)
+    expect(JSON.stringify(ufo.sighting.weatherTrack.toJSON())).toBe(weatherBeforeAim)
+    await new Promise(resolve => setTimeout(resolve, 100))
+  })
+  it("adds and removes layers and preserves an explicitly empty sky on export", async () => {
+    const element = mount()
+    const shadow = element.shadowRoot!
+    ;(shadow.getElementById("cloud-layer-add") as HTMLButtonElement).click()
+    const ufo = nestedUfo(element) as import("../../src/component/UfoElement.js").UfoElement
+    expect(ufo.sighting.weatherTrack.getInterpolatedWeatherAt(0)!.cloudLayers).toHaveLength(1)
+    ;(shadow.getElementById("cloud-layer-delete") as HTMLButtonElement).click()
+    expect(ufo.sighting.weatherTrack.getInterpolatedWeatherAt(0)!.cloudLayers).toEqual([])
+    expect(JSON.stringify(element.sightingData)).toContain('"cloudLayers":[]')
+    await new Promise(resolve => setTimeout(resolve, 100))
   })
 })

@@ -26,6 +26,20 @@
       {
         "t": 0,
         "weather": {
+          "cloudLayers": [
+            {
+              "id": "halo-cirrus",
+              "type": "cirrus",
+              "baseM": 8000,
+              "thicknessM": 400,
+              "coverage": 0.85,
+              "sizeM": 2200,
+              "density": 0.35,
+              "darkness": 0.05,
+              "iceCrystalAlignment": 0.95,
+              "seed": 41
+            }
+          ],
           "cloudCover": 0.6,
           "cloudDarkness": 0.05,
           "cloudBaseM": 8000,

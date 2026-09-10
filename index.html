@@ -11,6 +11,10 @@
       max-width: 720px;
       margin: 2em auto;
     }
+    #cloud-test { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin-bottom: 16px; }
+    #cloud-test p { grid-column: 1 / -1; margin: 4px 0; }
+    #cloud-test label { display: flex; flex-direction: column; gap: 5px; }
+    #cloud-test input, #cloud-test select, #cloud-test button { padding: 6px; }
     button {
       cursor: pointer;
     }
@@ -18,6 +22,7 @@
 </head>
 <body>
 <h1>UFO@home — record &amp; replay demo</h1>
+<p><a href="#cloud-test">Tester les couches nuageuses et le rendu volumétrique</a></p>
 <p>
   Click <b>Record</b>, move the pointer over the canvas to draw the UFO's path, then <b>Stop</b> and hit
   <b>Play</b>. Or load the bundled sample recording below. The backdrop is a live sky, computed from this
@@ -25,6 +30,14 @@
   toolbar — edit any of them and it updates.
 </p>
 <button id="load-sample" type="button">Load sample recording</button>
+<fieldset id="cloud-test">
+  <legend>Essai des nuages dans l’éditeur</legend>
+  <label>Rendu de l’éditeur <select id="cloud-rendering"><option value="volume">Volume (prototype)</option><option value="surface">Surface (léger)</option></select></label>
+  <button id="cloud-load" type="button">Charger le ciel d’essai</button>
+  <p>Scène synthétique de 2 minutes : le vent tourne et accélère, le témoin se déplace de 600 m.
+  Utiliser la lecture et la timeline de l’éditeur pour comparer les mêmes instants.</p>
+  <p>Le ciel d’essai s’ouvre dans Météo, dans l’éditeur ci-dessous. Les couches et nuages individuels se règlent et s’exportent avec l’observation.</p>
+</fieldset>
 <rr0-sighting-editor id="editor"></rr0-sighting-editor>
 
 <h2>Sighting view (rr0-sighting)</h2>
@@ -35,7 +48,8 @@
 </p>
 <rr0-sighting id="witnesses" src="/demo-data/witnesses-manifest.json" show-witness-map></rr0-sighting>
 
-<h2>3D decor (rr0-scene)</h2>
+<h2>3D decor (rr0-scene) — nuages</h2>
+
 <p>
   A sky/horizon/starfield backdrop computed from each sighting's real reported time and place — four real,
   documented cases spanning night, dawn, midday and dusk. Astronomically accurate: Sun/Moon/planet positions,
@@ -57,6 +71,7 @@
   and the lettered points on the map. Both tags carry <code>show-witness-map</code> here, which only
   decides that the map starts open; the button is there either way.
 </p>
+
 <select id="scene-case">
   <option value="/demo-data/witness-chiles.json">Chiles-Whitted, 1948-07-24 02:45 — Montgomery AL (night)</option>
   <option value="/demo-data/witness-valensole.json">Valensole, 1965-07-01 05:45 — France (dawn)</option>

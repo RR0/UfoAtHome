@@ -17,6 +17,8 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
   SceneRenderer: class {
     resize(): void {}
     setObserverPose(): void {}
+    setCloudRendering(): void {}
+    setCloudOffset(): void {}
     setGait(): void {}
     setTerrainOrigin(): void {}
     get currentTerrainAttribution(): undefined {
@@ -36,9 +38,6 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     setPhenomena(): void {}
     screenPointOf(): undefined {
       return undefined
-    }
-    get lowerCloudUp(): boolean {
-      return false
     }
     updateDecorAnchoring(): void {}
     updateDecorLitState(): void {}

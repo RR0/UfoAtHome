@@ -1,21 +1,9 @@
 import { BackSide, Color, ShaderMaterial, SphereGeometry, Vector3 } from "three"
 
-/**
- * A single continuous cloud-layer shell — mirrors RainSystem.ts's split of responsibility: pure,
- * deterministic builders here; all scene-graph lifecycle (add/update/dispose, RAF wiring) stays
- * owned by SceneRenderer.
- *
- * This project's earlier cloud systems (flat Sprite billboards, then a pool of InstancedMesh puff
- * clusters built from noise-eroded spheres) are both gone. The sprite pool read as flat/illustrative;
- * the puff-cluster spheres, despite several rounds of tuning (per-fragment rim fade, narrower
- * erosion band, cubic edge weighting), kept reading as scalloped "crescent/claw" fragments rather
- * than solid billows, and never actually looked like clouds. A single noise-shaded dome, sized by
- * weather.cloudCover, replaces both: it already handled partial coverage well (patchy, broken cloud
- * with real sky-colored gaps) once introduced to guarantee genuine full-sky overcast at cloudCover=1
- * (the discrete puff clusters could never promise zero gaps no matter how many were visible), so it
- * became the obvious sole cloud representation once the clusters were dropped. Lighting is a
- * hand-rolled sun-facing glow driven by the app's own real sun direction/color (see SceneRenderer's
- * updateCloudLighting) — no THREE.Light, matching SceneRenderer's own "no real light" convention.
+/** Lightweight surface clouds used by the fallback renderer and thin cirrus.
+ * VolumetricClouds provides metre-based density integration for thick layers. Both systems
+ * sample a world-anchored field; their scene-graph lifecycle is owned by SceneRenderer and
+ * LayeredCloudSystem. Lighting follows the observation's Sun and ambient sky.
  */
 
 export interface CloudUniforms {
@@ -25,11 +13,14 @@ export interface CloudUniforms {
   ambientColor: { value: Color }
   baseColor: { value: Color }
   coverage: { value: number }
+  opticalDensity: { value: number }
+  darkness: { value: number }
   /** How far the deck is from the observer, along the vertical, in this scene's own units — see
    * the shader's own use of it, and SceneRenderer.cloudLayerOffset for how a real cloud base in
    * meters becomes this. Always positive: which SIDE the deck is on is the mesh's business (it
    * gets flipped), not the shading's. */
   layerHeight: { value: number }
+  fieldOffset: { value: Vector3 }
   /**
    * How ICY the deck is, 0 to 1 — the difference between a cumulus and a cirrus.
    *
@@ -116,9 +107,9 @@ export const ICE_FIELD_SD = 0.047
  * pulled out so the halo shader can multiply by it. Mirrors the fibrous branch of the fragment
  * shader below; the two must move together. */
 export const CIRRUS_COVER_GLSL = `
-float cirrusCoverAt(vec3 dir, float layerHeight, float coverage) {
-  if (coverage <= 0.0 || dir.y <= 0.02) return 0.0;
-  vec3 planePos = dir * (layerHeight / max(dir.y, 0.04));
+float cirrusCoverAt(vec3 dir, float layerHeight, float coverage, vec3 fieldOffset) {
+  if (coverage <= 0.0 || dir.y < 0.0) return 0.0;
+  vec3 planePos = dir * (layerHeight / max(dir.y, 0.04)) + fieldOffset;
   vec3 warpPos = planePos * 0.006;
   vec3 warp = vec3(fbm(warpPos + 12.3), fbm(warpPos + 47.1), fbm(warpPos + 91.7)) * 40.0;
   vec3 warpedPos = planePos + warp;
@@ -144,6 +135,8 @@ uniform vec3 sunColor;
 uniform vec3 ambientColor;
 uniform vec3 baseColor;
 uniform float coverage;
+uniform float opticalDensity;
+uniform float darkness;
 varying vec3 vDir;
 
 // How far the flat plane that cloud noise is projected onto sits from the observer — see main()'s
@@ -153,6 +146,7 @@ varying vec3 vDir;
 // flying just under a low deck sees something very different from one standing under the same deck
 // on the ground.
 uniform float layerHeight;
+uniform vec3 fieldOffset;
 uniform float fibrous;
 
 ${CLOUD_NOISE_GLSL}
@@ -192,7 +186,7 @@ void main() {
   // (huge, fast-varying coordinates between neighboring pixels = visual compression). dir.y is
   // floored, not left to hit exactly 0, to avoid an infinite/NaN blowup right at the horizon edge.
   float t = layerHeight / max(dir.y, 0.04);
-  vec3 planePos = dir * t;
+  vec3 planePos = dir * t + fieldOffset;
 
   // Domain warp: distorts the position each noise layer below actually samples, using a slower,
   // broader noise field of its own. Without this, Worley cells (shapeCell) come out as too-regular,
@@ -219,14 +213,6 @@ void main() {
     detail = mix(detail, wisp, fibrous);
   }
 
-  // Leaves a real, unclouded gap near the horizon (see buildCloudGeometry's own thetaLength — the
-  // geometry itself stops short of the true horizon) — a soft fade across that same last few degrees
-  // so the shell's own edge doesn't read as a hard-edged rim floating in the sky. Real terrain relief
-  // near the observer can rise above the flat y=0 horizon plane in screen space, and this shell
-  // (depthTest off, see buildCloudMaterial) would otherwise paint straight over it regardless of
-  // which is really closer — see CLOUD_MIN_ALTITUDE_DEG's own comment.
-  float horizonFade = smoothstep(0.026, 0.052, dir.y); // sin(1.5deg)..sin(3deg), matches buildCloudGeometry's own cutoff
-
   // Below coverage's own noise threshold: a broken/patchy ceiling with real sky-colored gaps,
   // exactly like a real transition from scattered to overcast. remap-by-threshold, same technique
   // as the reference skill's own cloudDensity coverage control.
@@ -239,11 +225,12 @@ void main() {
   // The "force it opaque near full coverage" rule belongs to WATER and is wrong for ice. A water
   // deck at cover 1 is a ceiling; an ice deck at cover 1 is a milky veil you still read the Sun
   // through — which is the commonest halo sky there is, and it must not come out as a white lid.
-  alpha = mix(mix(alpha, 1.0, smoothstep(0.82, 1.0, coverage)), alpha, fibrous) * horizonFade;
+  alpha = mix(mix(alpha, 1.0, smoothstep(0.82, 1.0, coverage)), alpha, fibrous);
   // A cirrus veil never closes the sky. Even the thickest cirrostratus is something you see the Sun
   // THROUGH — that is the entire reason it can make a halo at all — so an ice deck is held down to
   // a fraction of the opacity a water deck reaches, however completely it covers.
   alpha *= mix(1.0, 0.38, fibrous);
+  alpha = 1.0 - pow(max(0.0, 1.0 - alpha), opticalDensity);
   if (alpha < 0.02) discard;
 
   float diff = dot(dir, L) * 0.5 + 0.5;
@@ -256,6 +243,7 @@ void main() {
   // And ice has no shadowed undersides to give it that contrast — it is a bright thin sheet lit
   // through, so the modelling is flattened right down as the deck turns icy.
   color = mix(color, baseColor * (sunColor * 0.85 + ambientColor * 0.45) * mix(0.72, 1.25, shape), fibrous * 0.75);
+  color *= mix(1.0, mix(0.32, 0.62, fibrous), darkness);
 
   gl_FragColor = vec4(color, alpha);
 }
@@ -278,7 +266,10 @@ export function buildCloudMaterial(
     ambientColor: { value: new Color(0.5, 0.5, 0.5) },
     baseColor: { value: baseColor },
     coverage: { value: coverage },
+    opticalDensity: { value: 1 },
+    darkness: { value: 0 },
     layerHeight: { value: layerHeight },
+    fieldOffset: { value: new Vector3() },
     fibrous: { value: fibrous }
   }
   const material = new ShaderMaterial({
@@ -287,46 +278,21 @@ export function buildCloudMaterial(
     fragmentShader: CLOUD_FRAGMENT_SHADER,
     transparent: true,
     depthWrite: false,
-    // Tested against depth, never written: a hill, a building, a tree in front of the deck hides
-    // it, which is what "a deck around the relief" means. Nothing the deck must be seen THROUGH
-    // writes depth — the sky dome, the stars, the glare all decline to — and the terrain, drawn
-    // after it in the transparent pass, paints over it wherever the relief rises into it. This used
-    // to be off, for a precision worry about the sky dome that stopped applying once the dome
-    // stopped writing depth; the geometric 1.5° gap below (see buildCloudGeometry) stays as the
-    // guard for the flat ground disc, which is the one surface here that still writes none.
+    // Opaque scene geometry can occlude the shell; the cloud surface itself writes no depth.
+    // Phenomena use a separate decor-depth pass and need their own cloud transmission integration.
     depthTest: true,
     side: BackSide
   })
   return { material, uniforms }
 }
 
-/** Below this altitude, the shell has no geometry at all (see buildCloudGeometry) — a flat ground
- * disc never rises above the true horizon, but real terrain *relief* near the observer can, into
- * screen space the shell would otherwise claim. depthTest is off (see buildCloudMaterial), so
- * without this gap the shell would paint straight over a terrain silhouette poking up into it,
- * regardless of the terrain being genuinely closer. Trimmed twice already (8deg, then 3deg) for
- * reading as an oversized, conspicuously empty band of sky — 1.5deg is close to the minimum that
- * still reliably clears typical nearby relief. Matched by CLOUD_FRAGMENT_SHADER's own horizonFade
- * (sin(1.5deg)=0.026, sin(3deg)=0.052), which tapers the shell's visible bottom edge across the same
- * band rather than a hard-edged rim. */
-const CLOUD_MIN_ALTITUDE_DEG = 1.5
-
-/** Fresh SphereGeometry each call (not module-cached) — this mirrors buildSky/buildGround's own
- * "rebuild from scratch, no dirty tracking" style since it's cheap (one sphere, no per-instance
- * data). `radius` is CLOUD_RADIUS, passed in rather than imported since that constant lives in
- * SceneRenderer.ts.
- *
- * three.js measures theta from the +Y pole (0=zenith, PI/2=horizon), so thetaLength stops
- * CLOUD_MIN_ALTITUDE_DEG short of the true horizon instead of reaching all the way to PI/2 — see
- * that constant's own comment. A full sphere down to the literal horizon was the actual bug behind
- * an earlier "looks like ground fog" report: with depthTest off, a full-sphere shell painted over
- * EVERY direction including downward-looking rays toward the ground, since it ignores what's really
- * closer and just overpaints in draw order. At CLOUD_RADIUS=700 against a far plane of
- * SKY_RADIUS*1.2=1080, real depth testing against the sky dome (900) isn't reliable either, which is
- * why depthTest stays off and this geometric restriction does the occlusion work instead. */
+/** A fresh hemisphere reaching the geometric horizon. Terrain occlusion uses depth testing;
+ * trimming the shell above the horizon would leave an artificial clear band under an overcast sky.
+ * The projected noise still clamps grazing rays to keep sampling finite; this is a surface
+ * approximation, not yet a volumetric cloud layer with atmospheric distance attenuation.
+ */
 export function buildCloudGeometry(radius: number): SphereGeometry {
-  const thetaLength = Math.PI / 2 - (CLOUD_MIN_ALTITUDE_DEG * Math.PI) / 180
-  return new SphereGeometry(radius, 48, 24, 0, Math.PI * 2, 0, thetaLength)
+  return new SphereGeometry(radius, 48, 24, 0, Math.PI * 2, 0, Math.PI / 2)
 }
 
 /**
@@ -334,15 +300,14 @@ export function buildCloudGeometry(radius: number): SphereGeometry {
  * direction — what tells the app whether a given line of sight actually passes through cloud or
  * through one of the deck's gaps.
  *
- * Needed because a UFO shape is painted on a 2D canvas over this scene, not in it (see
- * SceneRenderer.isScreenPointOccluded): the GPU has no idea it exists and cannot hide it behind a
- * cloud, so the app has to ask "is there cloud in this direction" itself. Reading the rendered
- * pixel back would answer "is it bright there", not "is it cloud"; sampling coverage alone would
- * answer "how much cloud in total", not "any right HERE". Only re-evaluating the field does.
+ * Used by SceneRenderer.cloudTransmission for attenuation of celestial bodies. Phenomena now
+ * use canvas textures on scene meshes (PhenomenonSystem), rendered in a separate pass against
+ * decor depth. Their cloud occlusion still needs integration into that pass; this CPU field does
+ * not currently hide them.
  *
  * Kept in this file, immediately below the GLSL it mirrors, precisely because the two must agree:
- * every constant here has a visible twin a few lines up, and changing one without the other would
- * hide a shape where the sky is plainly clear (or leave it visible through a solid deck).
+ * every constant here has a visible twin a few lines up. Diverging fields would attenuate a
+ * celestial body in clear sky or leave it bright through an opaque deck.
  */
 export class CloudField {
   /** Mirrors the shader's own fbm octave count/gain/lacunarity. */
@@ -431,18 +396,15 @@ export class CloudField {
   /**
    * How opaque the deck is along `direction` (a unit vector in the same frame the shader's own
    * vDir uses: +Y up), for a deck `layerHeight` away and a given coverage — 0 through a gap, 1
-   * through solid cloud. Returns 0 below the deck's own horizon cutoff, where it isn't drawn.
+   * through solid cloud. The caller selects the appropriate side of the layer; grazing rays remain covered.
    */
-  static alphaAt(direction: { x: number; y: number; z: number }, layerHeight: number, coverage: number): number {
+  static alphaAt(direction: { x: number; y: number; z: number }, layerHeight: number, coverage: number, fieldOffset = { x: 0, z: 0 }): number {
     if (coverage <= 0) return 0
     const dy = Math.abs(direction.y)
-    // The shader's own horizonFade, and the geometry's matching cutoff: nothing is drawn in the
-    // last couple of degrees, so nothing can hide anything there either.
-    if (dy < 0.026) return 0
     const t = layerHeight / Math.max(dy, 0.04)
-    const px = direction.x * t
+    const px = direction.x * t + fieldOffset.x
     const py = direction.y * t
-    const pz = direction.z * t
+    const pz = direction.z * t + fieldOffset.z
     const wx = px * 0.006
     const wy = py * 0.006
     const wz = pz * 0.006

@@ -319,17 +319,18 @@ export const html = `
          the comet glyph, which was only ever unambiguous while there was nothing else up there. -->
     <button id="show-meteor" type="button" class="icon-btn" title="Show me one" aria-label="Show me one" hidden>🌠</button>
     <button id="show-comet" type="button" class="icon-btn" title="Show me the comet" aria-label="Show me the comet" hidden>☄</button>
-    <label><span id="label-cloud-cover">Cloud cover</span> <input id="cloudCover" class="weather-field" type="range" min="0" max="1" step="0.05" value="0"/></label>
+    <style>#cloud-editor { flex-basis: 100%; min-width: 0; } #cloud-editor fieldset { min-width: 0; } #cloud-editor .cloud-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; } #cloud-editor .cloud-actions { display: flex; flex-wrap: wrap; gap: .4em; align-items: end; } #cloud-editor button { width: auto; min-height: 2em; padding: .25em .65em; } #cloud-editor label { display: flex; flex-direction: column; align-items: start; } #cloud-editor label[hidden] { display: none !important; } #cloud-editor input, #cloud-editor select { max-width: 100%; box-sizing: border-box; } #cloud-editor p { font-size: .85em; }</style><div id="cloud-editor"></div>
+    <label hidden><span id="label-cloud-cover">Cloud cover</span> <input id="cloudCover" class="weather-field" type="range" min="0" max="1" step="0.05" value="0"/></label>
     <!-- The HIGH deck, kept apart from the total: it is not about how much sky was hidden but about
          whether there were ICE CRYSTALS in it, which is what halos and sundogs need. See
          IceHalos.ts. -->
-    <label><span id="label-high-cloud">Ice cloud (cirrus)</span> <input id="highCloudCover" class="weather-field" type="range" min="0" max="1" step="0.05" value="0" title="How much of the sky the high, icy deck covered — what refracts a halo or a pair of sundogs into being"/></label>
+    <label hidden><span id="label-high-cloud">Ice cloud (cirrus)</span> <input id="highCloudCover" class="weather-field" type="range" min="0" max="1" step="0.05" value="0" title="How much of the sky the high, icy deck covered — what refracts a halo or a pair of sundogs into being"/></label>
     <!-- The one weather control that stays live even when a record owns every other one, because no
          record holds it: what the crystals were doing up there was never measured. See
          Weather.iceCrystalAlignment. -->
-    <label><span id="label-ice-alignment">Crystal alignment</span> <input id="iceCrystalAlignment" class="weather-field" type="range" min="0" max="1" step="0.05" value="0.65" title="How steadily the ice crystals were falling — tumbling gives a bare ring, level plates and rolling columns give sundogs, arcs, a pillar and the rest. Never recorded anywhere, so it is stated, not looked up"/></label>
-    <label><span id="label-cloud-darkness">Cloud darkness</span> <input id="cloudDarkness" class="weather-field" type="range" min="0" max="1" step="0.05" value="0"/></label>
-    <label><span id="label-cloud-base">Cloud base</span>
+    <label hidden><span id="label-ice-alignment">Crystal alignment</span> <input id="iceCrystalAlignment" class="weather-field" type="range" min="0" max="1" step="0.05" value="0.65"/></label>
+    <label hidden><span id="label-cloud-darkness">Cloud darkness</span> <input id="cloudDarkness" class="weather-field" type="range" min="0" max="1" step="0.05" value="0"/></label>
+    <label hidden><span id="label-cloud-base">Cloud base</span>
       <input id="cloudBase" class="weather-field" type="number" min="0" step="50" placeholder="1000" title="Height of the cloud layer's base above the ground — decides whether the witness is under the deck or above it"/> m</label>
     <label><span id="label-precipitation-type">Precipitation</span>
       <select id="precipitationType" class="weather-field">

@@ -100,6 +100,15 @@ export class DemoCatalogue {
       },
       demos: [
         {
+          id: "clouds",
+          src: "/demo-data/sky-test-clouds.json",
+          title: { en: "Cloud layers in motion", fr: "Couches nuageuses en mouvement" },
+          blurb: {
+            en: "Several metre-based layers, different cloud sizes and densities, wind changing over two minutes, and a witness moving 600 m. The same recording can be opened in the editor to manipulate an individual cloud.",
+            fr: "Plusieurs couches métriques, des tailles et densités différentes, un vent qui change en deux minutes et un témoin qui parcourt 600 m. Le même enregistrement s'ouvre dans l'éditeur pour manipuler un nuage individuel."
+          }
+        },
+        {
           id: "halos",
           src: "/demo-data/sky-test-halos.json",
           title: { en: "Ice haloes and sundogs", fr: "Halos de glace et parhélies" },

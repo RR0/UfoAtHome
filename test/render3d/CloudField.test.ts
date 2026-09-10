@@ -1,11 +1,7 @@
 import { describe, expect, it } from "vitest"
-import { CloudField } from "../../src/render3d/CloudSystem.js"
+import { buildCloudGeometry, CloudField } from "../../src/render3d/CloudSystem.js"
 
-/**
- * The CPU twin of the cloud shader's own coverage field — what lets the app answer "is there cloud
- * in THIS direction", which is the question hiding a UFO shape behind a cloud comes down to. Its
- * job is to agree with what the GPU draws, so these pin the properties both share.
- */
+/** CPU coverage used for celestial transmission must agree with the cloud surface. */
 describe("CloudField.alphaAt", () => {
   const up = { x: 0, y: 1, z: 0 }
   const sample = (coverage: number, layerHeight = 250) => {
@@ -70,8 +66,24 @@ describe("CloudField.alphaAt", () => {
     expect(clear).toBeGreaterThan(20)
   })
 
-  it("draws nothing in the last couple of degrees above the horizon, where the deck itself stops", () => {
-    expect(CloudField.alphaAt({ x: 1, y: 0.01, z: 0 }, 250, 1)).toBe(0)
+  it("keeps overcast coverage all the way to the horizon", () => {
+    for (const y of [0, 0.001, 0.01, 0.026, 0.052]) {
+      expect(CloudField.alphaAt({ x: Math.sqrt(1 - y * y), y, z: 0 }, 250, 1)).toBe(1)
+      expect(CloudField.alphaAt({ x: Math.sqrt(1 - y * y), y, z: 0 }, 250, 0)).toBe(0)
+    }
+  })
+
+  it("extends the cloud hemisphere to the horizon without extending below it", () => {
+    const geometry = buildCloudGeometry(700)
+    try {
+      const positions = geometry.getAttribute("position")
+      let lowest = Infinity
+      for (let i = 0; i < positions.count; i++) lowest = Math.min(lowest, positions.getY(i))
+      expect(lowest).toBeCloseTo(0, 8)
+      expect(geometry.parameters.thetaLength).toBe(Math.PI / 2)
+    } finally {
+      geometry.dispose()
+    }
   })
 
   it("is deterministic — the same direction always gives the same answer", () => {

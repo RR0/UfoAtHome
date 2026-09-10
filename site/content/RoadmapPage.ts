@@ -50,7 +50,7 @@ export class RoadmapPage implements SitePage {
       <tr><td>The sky</td><td>Sun, Moon and phase, planets, stars to magnitude 7.5 — and to 9, on demand, for optics that reach that far — a limiting magnitude that follows both the twilight and the instrument, the Milky Way and the zodiacal light as line-of-sight integrals</td></tr>
       <tr><td>Sky candidates</td><td>Meteor showers with a sporadic background, 23 naked-eye comet apparitions, the satellite illumination window with the dated SATCAT count</td></tr>
       <tr><td>Atmospheric optics</td><td>22° and 46° haloes, sundogs, tangent, circumzenithal and circumhorizontal arcs, the parhelic circle, pillars — all from ice's refractive index; rainbows and moonbows ray-traced in a spherical drop</td></tr>
-      <tr><td>Weather</td><td>ERA5 lookup keyframed along the observation, cloud decks, rain, snow, hail, storms with thunder, wind, cloud attenuation of every celestial body</td></tr>
+      <tr><td>Weather</td><td>ERA5 lookup keyframed along the observation; multiple metre-based cloud layers and manipulable individual volumes, moving with layer wind to the horizon and attenuating celestial bodies and phenomena; rain, snow, hail and storms with thunder</td></tr>
       <tr><td>The ground</td><td>Real relief and aerial imagery, buildings, trees, streetlights, vehicles, windows and other witnesses, with moving tracks and regulated flashing lights</td></tr>
       <tr><td>The instrument</td><td>Eye vs rectilinear lens, sensor and focal length in millimetres, letterboxed frame, aperture, focus distance, roll, a long exposure that accumulates star trails and dots a flashing lamp, and how faint a light the device could record at all — from 4.2 through a box camera to 9.7 on a tripod at f/2</td></tr>
       <tr><td>Provenance</td><td>Place, weather, elevation, imagery and time zone all read from named, swappable sources, with the exact query kept in the file</td></tr>
@@ -62,15 +62,6 @@ export class RoadmapPage implements SitePage {
 <section class="band">
   <div class="wrap prose-wide">
     <h2>Next</h2>
-
-    <div class="timeline-step is-next">
-      <h3>Volumetric clouds <span class="status status-next">next</span></h3>
-      <p>The current deck stops at a virtual wall of fixed height, where real cloud is visible all
-        the way to the horizon. A first attempt was abandoned on quality. Only a real 3D density
-        model will do — to fly through (aerial sightings) as well as to hide the object behind
-        (from the ground). The known cost: the cloud field is mirrored on the CPU to answer “was
-        this screen point occluded?”, and a 3D density field means rebuilding that mirror.</p>
-    </div>
 
     <div class="timeline-step is-next">
       <h3>Atmospheric re-entries <span class="status status-next">next</span></h3>
@@ -207,7 +198,7 @@ export class RoadmapPage implements SitePage {
       <tr><td>Le ciel</td><td>Soleil, Lune et sa phase, planètes, étoiles jusqu'à la magnitude 7,5 — et jusqu'à 9, à la demande, pour les optiques qui vont jusque-là — une magnitude limite qui suit à la fois le crépuscule et l'instrument, Voie lactée et lumière zodiacale en intégrales le long de la ligne de visée</td></tr>
       <tr><td>Candidats du ciel</td><td>Pluies de météores avec fond sporadique, 23 apparitions de comètes visibles à l'œil nu, fenêtre d'éclairement des satellites avec le compte SATCAT daté</td></tr>
       <tr><td>Optique atmosphérique</td><td>Halos à 22° et 46°, parhélies, arcs tangent, circumzénithal et circumhorizontal, cercle parhélique, piliers — tous issus de l'indice de la glace ; arcs-en-ciel et arcs lunaires lancés dans une goutte sphérique</td></tr>
-      <tr><td>Météo</td><td>Relevé ERA5 keyframé le long de l'observation, couches nuageuses, pluie, neige, grêle, orages avec tonnerre, vent, atténuation des astres par les nuages</td></tr>
+      <tr><td>Météo</td><td>Relevé ERA5 keyframé le long de l'observation ; plusieurs couches nuageuses métriques et volumes individuels manipulables, se déplaçant avec le vent de leur couche jusqu'à l'horizon et atténuant astres et phénomènes ; pluie, neige, grêle et orages avec tonnerre</td></tr>
       <tr><td>Le sol</td><td>Relief réel et imagerie aérienne, bâtiments, arbres, lampadaires, véhicules, vitrages et autres témoins, avec trajectoires et feux clignotants aux cadences réglementaires</td></tr>
       <tr><td>L'instrument</td><td>Œil ou objectif rectilinéaire, capteur et focale en millimètres, cadre letterboxé, diaphragme, distance de mise au point, roulis, une pose longue qui accumule les filés d'étoiles et ponctue un feu clignotant, et jusqu'où l'appareil pouvait enregistrer une lumière faible — de 4,2 avec un appareil-boîte à 9,7 sur trépied à f/2</td></tr>
       <tr><td>Provenance</td><td>Lieu, météo, altitude, imagerie et fuseau horaire lus dans des sources nommées et interchangeables, la requête exacte restant dans le fichier</td></tr>
@@ -219,16 +210,6 @@ export class RoadmapPage implements SitePage {
 <section class="band">
   <div class="wrap prose-wide">
     <h2>La suite</h2>
-
-    <div class="timeline-step is-next">
-      <h3>Nuages volumétriques <span class="status status-next">prochain</span></h3>
-      <p>La couche actuelle s'arrête à un mur virtuel de hauteur fixe, alors que de vrais nuages se
-        voient jusqu'à l'horizon. Une première tentative a été abandonnée pour cause de qualité.
-        Seul un vrai champ de densité 3D fera l'affaire — pour le traverser (observations aériennes)
-        comme pour masquer l'objet (depuis le sol). Le coût connu : le champ de nuages est miroité
-        côté processeur pour répondre à « ce point de l'écran était-il occulté ? », et un champ 3D
-        obligera à refaire ce miroir.</p>
-    </div>
 
     <div class="timeline-step is-next">
       <h3>Rentrées atmosphériques <span class="status status-next">prochain</span></h3>

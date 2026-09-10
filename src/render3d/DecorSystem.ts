@@ -368,11 +368,7 @@ function buildTree(): Group {
 const CROP_CLUMP_RADIUS_M = 0.275
 const CROP_CLUMP_HEIGHT_M = 0.35
 const CROP_CLUMP_SPACING_M = 0.9
-/** Thirty metres of row, which is what one of them can be and still sit on the ground it is placed
- * on: a decor object takes its height from a single sample under its own anchor (see
- * SceneRenderer.groundYUnder), so a row longer than the ground stays flat over would float at one
- * end and sink at the other. Masse's own field falls about 1.2% along his walk, so a row this long
- * strays some fifteen centimetres from the soil at its ends — under half a plant. */
+/** Each patch holds thirty metres of rows; individual plants follow the rendered terrain. */
 const CROP_CLUMPS_PER_ROW = 34
 /** How many rows one of these objects holds, and how far apart they are — 1.4 m, which is what a
  * field hoed by tractor leaves between rows and what the aerial photograph of this one shows.
@@ -420,6 +416,8 @@ function buildCrop(): Group {
   // to throw one at all. They still RECEIVE shadows, which costs a shader flag and not a triangle,
   // so a car or a shack still darkens the rows behind it.
   mesh.castShadow = false
+  mesh.userData.cropBasePositions = patch.getAttribute("position").array.slice()
+  mesh.userData.cropVerticesPerClump = clump.getAttribute("position").count
   clump.dispose()
   return group
 }
@@ -652,6 +650,26 @@ function buildAircraft(): Group {
  * a member list reused across a whole drag gesture — see [[rr0-code-style-no-free-functions]]).
  */
 export class DecorSystem {
+  /** Highest terrain height under an object's complete oriented footprint. */
+  static groundUnderFootprint(object: DecorObject, x: number, z: number, headingDeg: number | undefined,
+    ground: (x: number, z: number) => number): number {
+    const size = DecorSystem.sizeOf(object)
+    const heading = (headingDeg ?? 0) * Math.PI / 180
+    const lengthSamples = Math.min(21, Math.max(2, Math.ceil(size.lengthM / 0.75) + 1))
+    const widthSamples = Math.min(21, Math.max(2, Math.ceil(size.widthM / 0.75) + 1))
+    let highest = -Infinity
+    for (let alongIndex = 0; alongIndex < lengthSamples; alongIndex++) {
+      const along = (alongIndex / (lengthSamples - 1) - 0.5) * size.lengthM
+      for (let acrossIndex = 0; acrossIndex < widthSamples; acrossIndex++) {
+        const across = (acrossIndex / (widthSamples - 1) - 0.5) * size.widthM
+        const px = x + Math.sin(heading) * along + Math.cos(heading) * across
+        const pz = z - Math.cos(heading) * along + Math.sin(heading) * across
+        highest = Math.max(highest, ground(px, pz))
+      }
+    }
+    return Number.isFinite(highest) ? highest : ground(x, z)
+  }
+
   /** Where the camera should sit/face to render "from inside" `object`, at the side its
    * witnessSide names — local (x,z) offset from the object's own anchor point (before that
    * object's own headingDeg rotation/world position are applied — SceneRenderer.
@@ -755,6 +773,31 @@ export class DecorSystem {
     merged.setAttribute("normal", new Float32BufferAttribute(normals, 3))
     merged.setIndex(new Uint32BufferAttribute(indices, 1))
     return merged
+  }
+
+  /** Keep each plant upright, with its own base on the terrain, even across a sloping patch.
+   * Heights are restored from the original geometry on every update, so seeking cannot accumulate
+   * deformation. The caller caches the terrain-relative placement to avoid work during playback. */
+  static fitCropToGround(group: Group, ground: (x: number, z: number) => number): void {
+    group.updateMatrixWorld(true)
+    const point = new Vector3()
+    group.traverse(part => {
+      const mesh = part as Mesh
+      const base = mesh.userData.cropBasePositions as Float32Array | undefined
+      const count = mesh.userData.cropVerticesPerClump as number | undefined
+      if (!mesh.isMesh || !base || !count) return
+      const position = mesh.geometry.getAttribute("position")
+      for (let first = 0; first < position.count; first += count) {
+        // The first vertex is the dome's pole, directly over the plant's centre.
+        point.set(base[first * 3], 0, base[first * 3 + 2]).applyMatrix4(mesh.matrixWorld)
+        point.y = ground(point.x, point.z)
+        mesh.worldToLocal(point)
+        for (let i = first; i < first + count; i++) position.setY(i, base[i * 3 + 1] + point.y)
+      }
+      position.needsUpdate = true
+      mesh.geometry.computeBoundingBox()
+      mesh.geometry.computeBoundingSphere()
+    })
   }
 
   /** Repaints every part of a built body that is not a light — see DecorObject.color. */

@@ -63,21 +63,6 @@ export interface BaseShape {
   /** What the witness calls it, if anything. Translatable — see SaidText. */
   title?: SaidText
   /**
-   * Whether the witness reported this shape as being behind cloud at this instant — "it
-   * disappeared into a cloud", which is a thing they SAW, not something to be deduced.
-   *
-   * Stated rather than inferred on purpose, and for the same reason DecorObject.occludesSourceIds
-   * is: nothing in a recording can decide it. This format describes what reached the witness's
-   * eyes — a 2D appearance on their own field of view — not where an object was in space; a
-   * reported distance is never even stated (see BaseShape.angular), and the sky's own gaps
-   * here are procedural noise, so leaving the question to geometry means bending the weather until
-   * the reported disappearance happens to occur. The witness's own account outranks both.
-   *
-   * Keyframed like every other appearance field, and held rather than blended (see lerpShape):
-   * there is no halfway between visible and hidden behind a cloud.
-   */
-  behindCloud?: boolean
-  /**
    * How big this looked to the witness, in degrees of arc (see AngularExtent) — the recording's
    * OWN statement of size, and the one it is allowed to make.
    *
@@ -294,9 +279,6 @@ export function lerpShape(from: Shape, to: Shape, fraction: number): Shape {
       color,
       angular,
       aim,
-      // Held, not blended — see BaseShape.behindCloud. The spread above already carries `from`'s
-      // value; this is only here so the field is visibly part of the interpolation contract.
-      behindCloud: fraction < 1 ? from.behindCloud : to.behindCloud,
       points: from.points.map((point, i) => ({
         x: lerp(point.x, to.points[i].x, fraction),
         y: lerp(point.y, to.points[i].y, fraction)

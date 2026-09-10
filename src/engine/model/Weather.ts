@@ -1,13 +1,11 @@
-/**
- * The sighting's reported weather condition — a static, single value for the whole observation
- * (unlike `witnessTrack`, weather isn't keyframed: a witness reports "it was raining, stormy sky"
- * as a general condition, not something that changes second-to-second during a sighting). Kept as
- * a plain flat interface, not a class — there's no keyframe store or interpolation to encapsulate,
- * so a class would just be ceremony (compare to SightingLocation/ObserverPose, also plain).
- */
+import type { CloudLayer } from "./CloudLayer.js"
+
+/** Weather at one instant; WeatherTrack interpolates these conditions over the observation. */
 export type PrecipitationType = "none" | "rain" | "snow" | "hail"
 
 export interface Weather {
+  /** Explicit layers override the historical cloud fields; [] means no clouds. */
+  cloudLayers?: CloudLayer[]
   /** 0 = clear sky, 1 = fully overcast. */
   cloudCover: number
   /** 0 = light/clear clouds, 1 = dark/stormy character. */
@@ -68,14 +66,15 @@ export interface Weather {
   /**
    * Degrees clockwise from true north — same convention as ObserverPose.headingDeg, and the
    * direction the wind blows *toward*, not the one it comes from: SceneRenderer drifts every
-   * precipitation particle along exactly this bearing (`sin/-cos`, north = -Z), so 0 means snow
+   * precipitation particle and cloud field along exactly this bearing (`sin/-cos`, north = -Z), so 0 means snow
    * drifting northward. That is the opposite of the meteorological convention every real record
    * uses ("wind 270" = a westerly, blowing east) — OpenMeteoWeatherProvider turns one into the
    * other, and it is the only place that conversion belongs.
    */
   windDirectionDeg: number
   /** Real-world wind speed in m/s (0 = calm, ~30 = violent storm/hurricane-force) — drives both
-   * visual precipitation drift and wind audio volume directly, see SceneRenderer/WeatherAudio. */
+   * cloud advection, visual precipitation drift and wind audio volume directly. The shared wind
+   * is also used for high cloud until per-layer wind is available. */
   windSpeed: number
   /** Whether a thunderstorm was reported — drives both a scene-fog lightning flash and a delayed
    * thunderclap (see SceneRenderer's lightning-flash scheduling, named for the visual mechanism
@@ -108,8 +107,7 @@ export const DEFAULT_WEATHER: Weather = {
  * engine/weather/WeatherProvider.ts). Present on a Sighting means every weatherTrack keyframe was
  * produced by that lookup — the editor shows them read-only on that basis, since a reanalysis
  * value is a measurement to report, not a dial to tune. Absent means the opposite and the stronger
- * claim: the conditions are the WITNESS's, declared, and nothing may overwrite them — the same
- * "declared, not deduced" rule BaseShape.behindCloud follows.
+ * claim: the conditions are the WITNESS's, declared, and nothing may overwrite them.
  */
 export interface WeatherSource {
   /** Stable dataset id, e.g. "era5" — what a later reader identifies the record by. */

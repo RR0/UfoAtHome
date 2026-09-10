@@ -1,3 +1,4 @@
+import type { CloudLayer } from "../../model/CloudLayer.js"
 import type { PrecipitationType, Weather, WeatherSource } from "../../model/Weather.js"
 import type { WeatherObservation, WeatherPoint, WeatherProvider, WeatherQuery, WeatherSample } from "../WeatherProvider.js"
 
@@ -278,10 +279,24 @@ export class OpenMeteoWeatherProvider implements WeatherProvider {
     }
   }
 
+  /** Preserve the three reported altitude bands instead of collapsing low and middle cloud.
+   * Coverage comes from the dataset; geometry and high-cloud appearance are rendering estimates,
+   * not measured cloud boundaries, species or individual cloud locations. Stable IDs let the
+   * ordinary weather timeline interpolate each band without regenerating the pattern. */
+  private cloudLayersFrom(record: HourlyRecord): CloudLayer[] {
+    const lowBase = Math.round(this.clamp(METERS_PER_SPREAD_DEG * (record.temperatureC - record.dewPointC), MIN_LOW_BASE_M, MAX_LOW_BASE_M))
+    return [
+      { id: "record-low", type: "unknown", baseM: lowBase, thicknessM: 650, coverage: this.clamp(record.cloudCoverLow, 0, 1), sizeM: 1400, density: 1 },
+      { id: "record-mid", type: "unknown", baseM: MID_BASE_M, thicknessM: 800, coverage: this.clamp(record.cloudCoverMid, 0, 1), sizeM: 2500, density: 1 },
+      { id: "record-high", type: "cirrus", baseM: HIGH_BASE_M, thicknessM: 400, coverage: this.clamp(record.cloudCoverHigh, 0, 1), sizeM: 2200, density: 0.35 }
+    ]
+  }
+
   private toWeather(record: HourlyRecord): Weather {
     const storm = record.weatherCode >= STORM_CODE_MIN && record.weatherCode <= STORM_CODE_MAX
     const precipitationType = this.precipitationTypeFrom(record)
     return {
+      cloudLayers: this.cloudLayersFrom(record),
       cloudCover: this.clamp(record.cloudCover, 0, 1),
       cloudDarkness: this.cloudDarknessFrom(record, storm),
       cloudBaseM: this.cloudBaseFrom(record),

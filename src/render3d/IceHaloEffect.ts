@@ -82,6 +82,11 @@ export class IceHaloEffect {
    */
   private static readonly GAIN = 0.55
 
+  /** Keep the halo mask on the same moving cirrus field without retracing crystal optics. */
+  setCloudOffset(offset: Vector3): void {
+    this.material.uniforms.uFieldOffset.value.copy(offset)
+  }
+
   readonly object: Mesh
   private readonly material: ShaderMaterial
   private readonly sky = new HaloSky()
@@ -121,6 +126,7 @@ export class IceHaloEffect {
          * height the sky itself is drawn from, so the gaps line up with the visible veil. */
         uIceCover: { value: 0 },
         uIceHeight: { value: 1 },
+        uFieldOffset: { value: new Vector3() },
         uMap: { value: this.texture },
         uGain: { value: IceHaloEffect.GAIN }
       },
@@ -142,6 +148,7 @@ export class IceHaloEffect {
         uniform vec3 uTint;
         uniform float uIceCover;
         uniform float uIceHeight;
+        uniform vec3 uFieldOffset;
         uniform sampler2D uMap;
         uniform float uGain;
 
@@ -154,7 +161,7 @@ export class IceHaloEffect {
           // from gets all of that for free, and guarantees the gaps fall where the sky has none.
           // It also ends the display at the horizon, which is right: the crystals are eight
           // kilometres up, so a line of sight that goes down never reaches any.
-          float ice = cirrusCoverAt(dir, uIceHeight, uIceCover);
+          float ice = cirrusCoverAt(dir, uIceHeight, uIceCover, uFieldOffset);
           if (ice <= 0.0) discard;
           vec3 up = normalize(uUp);
           vec3 source = normalize(uSource);

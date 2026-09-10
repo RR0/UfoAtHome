@@ -1,0 +1,245 @@
+{
+  "version": 1,
+  "caseId": "sky-test-clouds",
+  "description": {
+    "fr": "Ciel synthétique pour comparer trois couches nuageuses et manipuler un nuage individuel. Le vent et l'obscurité changent sur deux minutes pendant que le témoin parcourt 600 m. Aucun témoignage.",
+    "en": "A synthetic sky for comparing three cloud layers and manipulating one individual cloud. Wind and darkness change over two minutes while the witness moves 600 m. No testimony."
+  },
+  "time": {
+    "year": 2020,
+    "month": 6,
+    "day": 21,
+    "hour": 14,
+    "minute": 0
+  },
+  "utcOffsetHours": 2,
+  "durationSeconds": 120,
+  "place": [
+    {
+      "lat": 45.0,
+      "lng": 5.0
+    }
+  ],
+  "weatherTrack": {
+    "keyframes": [
+      {
+        "t": 0,
+        "weather": {
+          "cloudLayers": [
+            {
+              "id": "low",
+              "type": "cumulus",
+              "baseM": 1500,
+              "thicknessM": 800,
+              "coverage": 0.55,
+              "sizeM": 1400,
+              "density": 1,
+              "darkness": 0.15,
+              "instances": [
+                {
+                  "id": "movable-cloud",
+                  "eastM": 0,
+                  "northM": 4200,
+                  "baseM": 1450,
+                  "thicknessM": 900,
+                  "widthM": 1900,
+                  "depthM": 1300,
+                  "rotationDeg": 12,
+                  "density": 1.1,
+                  "darkness": 0.25,
+                  "seed": 47
+                }
+              ],
+              "seed": 17
+            },
+            {
+              "id": "middle",
+              "type": "stratus",
+              "baseM": 4000,
+              "thicknessM": 600,
+              "coverage": 0,
+              "sizeM": 2500,
+              "density": 1,
+              "seed": 23
+            },
+            {
+              "id": "high",
+              "type": "cirrus",
+              "baseM": 8000,
+              "thicknessM": 400,
+              "coverage": 0,
+              "sizeM": 2200,
+              "density": 0.35,
+              "seed": 31
+            }
+          ],
+          "cloudCover": 0.55,
+          "cloudDarkness": 0.15,
+          "precipitationType": "none",
+          "precipitationIntensity": 0,
+          "windDirectionDeg": 90,
+          "windSpeed": 5,
+          "storm": false
+        }
+      },
+      {
+        "t": 120000,
+        "weather": {
+          "cloudLayers": [
+            {
+              "id": "low",
+              "type": "cumulus",
+              "baseM": 1500,
+              "thicknessM": 800,
+              "coverage": 0.55,
+              "sizeM": 1400,
+              "density": 1,
+              "darkness": 0.45,
+              "instances": [
+                {
+                  "id": "movable-cloud",
+                  "eastM": 900,
+                  "northM": 3500,
+                  "baseM": 1650,
+                  "thicknessM": 1100,
+                  "widthM": 2400,
+                  "depthM": 1600,
+                  "rotationDeg": 28,
+                  "density": 1.35,
+                  "darkness": 0.55,
+                  "seed": 47
+                }
+              ],
+              "seed": 17
+            },
+            {
+              "id": "middle",
+              "type": "stratus",
+              "baseM": 4000,
+              "thicknessM": 600,
+              "coverage": 0,
+              "sizeM": 2500,
+              "density": 1,
+              "seed": 23
+            },
+            {
+              "id": "high",
+              "type": "cirrus",
+              "baseM": 8000,
+              "thicknessM": 400,
+              "coverage": 0,
+              "sizeM": 2200,
+              "density": 0.35,
+              "seed": 31
+            }
+          ],
+          "cloudCover": 0.55,
+          "cloudDarkness": 0.45,
+          "precipitationType": "none",
+          "precipitationIntensity": 0,
+          "windDirectionDeg": 180,
+          "windSpeed": 20,
+          "storm": false
+        }
+      }
+    ]
+  },
+  "timeline": {
+    "keyframes": [
+      {
+        "t": 0,
+        "shapes": [
+          {
+            "sourceId": "cloud-target",
+            "shape": {
+              "kind": "oval",
+              "bounds": {
+                "x": 300,
+                "y": 150,
+                "width": 40,
+                "height": 15
+              },
+              "color": "#e54128",
+              "angle": 0,
+              "transparency": 0,
+              "haloScale": 0,
+              "selected": false,
+              "angular": {
+                "widthDeg": 6,
+                "heightDeg": 2
+              },
+              "aim": {
+                "azimuthDeg": 0,
+                "altitudeDeg": 22
+              }
+            }
+          }
+        ]
+      },
+      {
+        "t": 120000,
+        "shapes": [
+          {
+            "sourceId": "cloud-target",
+            "shape": {
+              "kind": "oval",
+              "bounds": {
+                "x": 300,
+                "y": 150,
+                "width": 40,
+                "height": 15
+              },
+              "color": "#e54128",
+              "angle": 0,
+              "transparency": 0,
+              "haloScale": 0,
+              "selected": false,
+              "angular": {
+                "widthDeg": 6,
+                "heightDeg": 2
+              },
+              "aim": {
+                "azimuthDeg": 0,
+                "altitudeDeg": 22
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "order": [
+      "cloud-target"
+    ],
+    "groups": []
+  },
+  "witnessTrack": {
+    "keyframes": [
+      {
+        "t": 0,
+        "pose": {
+          "lat": 45,
+          "lng": 5,
+          "elevationM": 0,
+          "headingDeg": 0,
+          "pitchDeg": 18,
+          "fovDeg": 90
+        }
+      },
+      {
+        "t": 120000,
+        "pose": {
+          "lat": 45,
+          "lng": 5.007622423081422,
+          "elevationM": 0,
+          "headingDeg": 0,
+          "pitchDeg": 18,
+          "fovDeg": 90
+        }
+      }
+    ]
+  },
+  "soundTrack": {
+    "keyframes": []
+  },
+  "decor": []
+}

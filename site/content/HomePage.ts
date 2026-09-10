@@ -255,8 +255,9 @@ ${carousel}
         <div class="card">
           <h4>The weather that day</h4>
           <p>Cloud, rain, snow, storms and wind, read from a worldwide hourly reanalysis going back to
-            1940 — and keyframed along the observation, so a sky that cleared, clears. The exact query
-            stays in the file: the claim is checkable decades later.</p>
+            1940 and keyframed along the observation. Clouds form separate metre-based layers with
+            their own type, thickness, size, density and motion; individual volumes can be moved to
+            test whether they really hide the phenomenon. The exact query stays checkable.</p>
           <p class="card-more"><a href="/context/#weather">Which record, and what it gives →</a></p>
         </div>
         <div class="card">
@@ -402,9 +403,10 @@ ${carousel}
         <div class="card">
           <h4>La météo de ce jour-là</h4>
           <p>Nuages, pluie, neige, orages et vent, lus dans une réanalyse mondiale et horaire qui
-            remonte à 1940 — et keyframés le long de l'observation, si bien qu'un ciel qui s'est
-            dégagé se dégage. La requête exacte reste dans le fichier : l'affirmation est vérifiable
-            des décennies plus tard.</p>
+            remonte à 1940 et keyframés le long de l'observation. Les nuages forment des couches
+            métriques distinctes avec leurs propres type, épaisseur, taille, densité et mouvement ;
+            des volumes individuels peuvent être déplacés pour vérifier s'ils masquent réellement le
+            phénomène. La requête exacte reste vérifiable.</p>
           <p class="card-more"><a href="/context/#weather">Quelle source, et ce qu'elle donne →</a></p>
         </div>
         <div class="card">

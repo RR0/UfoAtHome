@@ -1,5 +1,7 @@
+import { setupCloudDemo } from "./clouds.js"
 import { register } from "../component/SightingEditorElement.js"
 import type { SightingEditorElement } from "../component/SightingEditorElement.js"
+import type { SightingElement } from "../component/SightingElement.js"
 import { registerSighting } from "../component/SightingElement.js"
 import { registerScene } from "../component/SceneElement.js"
 import type { SceneElement } from "../component/SceneElement.js"
@@ -19,7 +21,11 @@ loadSampleButton.addEventListener("click", async () => {
 })
 
 const scene = document.getElementById("scene") as SceneElement
+scene.setCloudRendering("volume")
+;(document.getElementById("witnesses") as SightingElement).scene.setCloudRendering("volume")
 const sceneCaseSelect = document.getElementById("scene-case") as HTMLSelectElement
 sceneCaseSelect.addEventListener("change", () => {
   void scene.loadFromSrc(sceneCaseSelect.value)
 })
+
+setupCloudDemo(editor)

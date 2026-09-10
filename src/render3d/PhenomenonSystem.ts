@@ -1,3 +1,5 @@
+import { cloudTransmissionShader } from "./VolumetricClouds.js"
+import type { VolumetricCloudLayer } from "./VolumetricClouds.js"
 import { CanvasTexture, LinearFilter, Matrix4, Mesh, MeshBasicMaterial, PlaneGeometry, SRGBColorSpace, Vector3 } from "three"
 import type { Camera, Scene } from "three"
 import type { Shape, ShapeBounds } from "../engine/shape/Shape.js"
@@ -22,7 +24,7 @@ export interface PlacedPhenomenon {
   aim?: { azimuthDeg: number; altitudeDeg: number }
   /** Back-to-front, the timeline's own paint order: what a later one covers of an earlier one. */
   renderOrder: number
-  /** Not drawn at all — the witness said it was behind cloud, and the cloud deck is up. */
+  /** Not drawn because the phenomenon is outside the visible frame. */
   hidden: boolean
 }
 
@@ -73,6 +75,41 @@ const MAX_TEXTURE_PX = 2048
  * object (see the close-encounter form of a recording, when there is one).
  */
 export class PhenomenonSystem {
+  private cloudLayers: VolumetricCloudLayer[] = []
+  private cloudSignature = ""
+
+  /** Share the live layer uniforms. Only adding/removing a layer recompiles the material. */
+  setCloudLayers(layers: VolumetricCloudLayer[]): void {
+    const signature = layers.map(layer => layer.mesh.uuid).join(",")
+    if (signature === this.cloudSignature) return
+    this.cloudSignature = signature
+    this.cloudLayers = layers
+    for (const mesh of this.meshes.values()) this.configureCloudMaterial(mesh.material)
+  }
+
+  private configureCloudMaterial(material: MeshBasicMaterial): void {
+    const layers = this.cloudLayers
+    const signature = this.cloudSignature
+    material.customProgramCacheKey = () => signature
+    material.onBeforeCompile = shader => {
+      if (!layers.length) return
+      shader.vertexShader = "varying vec3 cloudPoint;\n" + shader.vertexShader
+      shader.vertexShader = shader.vertexShader.replace("#include <project_vertex>",
+        "#include <project_vertex>\ncloudPoint = (modelMatrix * vec4(transformed, 1.0)).xyz - cameraPosition;")
+      let definitions = "varying vec3 cloudPoint;\n"
+      let attenuation = ""
+      layers.forEach((layer, index) => {
+        const prefix = `cloud${index}_`
+        for (const [name, uniform] of Object.entries(layer.uniforms)) shader.uniforms[prefix + name] = uniform
+        definitions += cloudTransmissionShader(prefix)
+        attenuation += `diffuseColor.a *= ${prefix}transmissionAt(normalize(cloudPoint), length(cloudPoint));\n`
+      })
+      shader.fragmentShader = definitions + shader.fragmentShader
+      shader.fragmentShader = shader.fragmentShader.replace("#include <opaque_fragment>", attenuation + "#include <opaque_fragment>")
+    }
+    material.needsUpdate = true
+  }
+
   private readonly meshes = new Map<string, Mesh<PlaneGeometry, MeshBasicMaterial>>()
   /** What each mesh's texture was last painted from — repainted only when the picture changes. */
   private readonly signatures = new Map<string, string>()
@@ -120,6 +157,7 @@ export class PhenomenonSystem {
             toneMapped: false
           })
         )
+        this.configureCloudMaterial(mesh.material)
         mesh.frustumCulled = false
         mesh.layers.set(PHENOMENON_LAYER)
         this.scene.add(mesh)

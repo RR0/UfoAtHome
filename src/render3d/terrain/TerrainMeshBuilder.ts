@@ -89,6 +89,8 @@ export async function buildTerrainMesh(
       const lng = bounds.west + (bounds.east - bounds.west) * tCol
       const { x, z } = geoToLocalMeters(lat, lng, observerLat, observerLng)
       const elevation = elevationGrid.heights[row * GRID_SIZE + col]
+      const distance = Math.max(Math.abs(x), Math.abs(z))
+      const alpha = 1 - clamp((distance - fullOpacityM) / (fadeEndM - fullOpacityM), 0, 1)
       const y = TERRAIN_BASE_Y + TERRAIN_Y_OFFSET + (elevation - observerElevation)
 
       const i = row * GRID_SIZE + col
@@ -112,8 +114,6 @@ export async function buildTerrainMesh(
       // (the four corners), which is exactly what a viewer sees as random flat-disc patches poking
       // through valid terrain depending on camera heading. Box distance fades uniformly right up to
       // the patch's own true edge on all four sides instead, using data that was already fetched.
-      const distance = Math.max(Math.abs(x), Math.abs(z))
-      const alpha = 1 - clamp((distance - fullOpacityM) / (fadeEndM - fullOpacityM), 0, 1)
       colors[i * 4] = 1
       colors[i * 4 + 1] = 1
       colors[i * 4 + 2] = 1
