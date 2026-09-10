@@ -53,8 +53,10 @@ const mount = async card => {
     unmount(victim)
   }
   const scene = document.createElement("rr0-scene")
-  // Only the reconstructions that have somewhere to point it — see Demo.witnessMap.
-  if (card.dataset.witnessMap) scene.setAttribute("show-witness-map", "")
+  // No map open on a card, even for the reconstructions that have one worth opening (see
+  // Demo.witnessMap): the map is 140 px square in a card 181 px tall, so it covered three quarters
+  // of the sky it was meant to sit in a corner of. The button stays, and the full-size View page
+  // opens the map on its own.
   card.querySelector(".demo-mount").replaceChildren(scene)
   await customElements.whenDefined("rr0-scene")
   await scene.loadFromSrc(card.dataset.src)
@@ -123,8 +125,7 @@ for (const card of cards) {
       <div class="demo-grid">
         ${group.demos.map(demo => {
           const target = encodeURIComponent(demo.editSrc ?? demo.src)
-          const witnessMap = demo.witnessMap ? ' data-witness-map="1"' : ""
-          return `<figure class="demo-card" id="${demo.id}" data-src="${demo.src}"${witnessMap}>
+          return `<figure class="demo-card" id="${demo.id}" data-src="${demo.src}">
           <div class="demo-mount"><p class="loading">${loading}</p></div>
           <figcaption>
             <h3>${demo.title[language]}</h3>

@@ -17,6 +17,8 @@ export interface Demo {
    *
    * It decides the map's STARTING state, not whether it exists: every reconstruction that states a
    * place has the button (see WITNESS_MAP_ATTRIBUTE), and a reader can open one this list does not.
+   * Honoured by the front page's carousel and by the full-size player, not by the catalogue's cards:
+   * a map is a fixed 140 px square, and a card's sky is 181 px tall.
    */
   readonly witnessMap?: boolean
   readonly title: Said<string>
@@ -104,8 +106,8 @@ export class DemoCatalogue {
           src: "/demo-data/sky-test-clouds.json",
           title: { en: "Cloud layers in motion", fr: "Couches nuageuses en mouvement" },
           blurb: {
-            en: "Several metre-based layers, different cloud sizes and densities, wind changing over two minutes, and a witness moving 600 m. The same recording can be opened in the editor to manipulate an individual cloud.",
-            fr: "Plusieurs couches métriques, des tailles et densités différentes, un vent qui change en deux minutes et un témoin qui parcourt 600 m. Le même enregistrement s'ouvre dans l'éditeur pour manipuler un nuage individuel."
+            en: "Metre-based layers, wind changing over two minutes, and a witness moving 600 m. One cloud of the field — the one the red marker sits under — is stated in metres: open the recording in the editor to move and resize it, and it stays one of its neighbours.",
+            fr: "Des couches métriques, un vent qui change en deux minutes et un témoin qui parcourt 600 m. Un nuage du champ — celui que le repère rouge désigne — est énoncé en mètres : ouvrez l'enregistrement dans l'éditeur pour le déplacer et le redimensionner, il reste un nuage parmi les autres."
           }
         },
         {
