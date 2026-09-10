@@ -772,7 +772,10 @@ export class SceneRenderer {
   /** Radius the terrain patch was last built at, so a real change of altitude refetches it at the
    * span the witness can now see, while a small drift doesn't. */
   private terrainRadius = GROUND_RADIUS
-  private cloudRendering: CloudRendering = "surface"
+  /** Volumes by default: the flat surface deck is the lightweight option a page asks for, not what
+   * a reader gets. A recording written before there were layers (Valensole: cover, base and darkness
+   * from ERA5, no cloudLayers) is drawn as volumes too, resolveCloudLayers adapting its fields. */
+  private cloudRendering: CloudRendering = "volume"
   private layeredClouds?: LayeredCloudSystem
   private cloudLayerOffsetsM: Record<string, { x: number; z: number }> = {}
   private readonly cloudOffsetM = new Vector3()

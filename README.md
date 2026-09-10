@@ -991,8 +991,10 @@ weather timeline from zero; seeking and pausing reproduce the same field. Covera
 fraction of the generated horizontal field occupied by cloud, independently of characteristic
 cloud size and optical density.
 
-`SceneElement.setCloudRendering("volume")` selects volumetric rendering. `"surface"` remains the default
-and is available for comparison on the existing development page, under the cloud test controls.
+Volumetric rendering is the default, for recordings written before there were layers too (their
+cover, base and darkness are adapted into one layer). `SceneElement.setCloudRendering("surface")`
+selects the lightweight flat deck, available for comparison on the development page under the cloud
+test controls.
 The thick layers use a 64³ byte noise texture, shared within a renderer, 48 view samples and up to
 three light samples per occupied view sample. Continuous weather changes update uniforms without
 recreating meshes or textures. Cirrus still use the lightweight surface renderer.
