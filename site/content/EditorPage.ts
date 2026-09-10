@@ -239,15 +239,53 @@ if (docs) {
         looked-up values stay as a starting point, the source is dropped, and no later lookup may
         overwrite them. A recording that names a source is replayed exactly as authored and never
         looked up again, so a published case file reads identically offline.</p>
-      <p><strong>Cloud layers</strong> keep altitude, thickness, type, coverage, characteristic size,
-        optical density, darkness and an optional wind of their own. They evolve on the weather
-        timeline. Coverage and size are separate, so the same covered fraction can mean many small
-        clouds or fewer large ones. An empty layer wind inherits the general wind.</p>
-      <p><strong>Individual clouds</strong> can be added inside a layer, selected in the sky, pointed
-        at, moved and resized. They remain real volumes even at zero procedural coverage and can
-        actually hide a phenomenon. Their darkness may override the layer's or inherit it.</p>
-      <p><strong>Crystal alignment</strong> belongs only to a cirrus layer. No weather record measures
-        it, so it remains editable even with ERA5 selected: tumbling crystals give a bare ring;
+      <p>The clouds are the <strong>Cloud layers</strong> panel of this group. A looked-up sky
+        arrives as three of them, the low, middle and high bands of the record; a sky the witness
+        described is as many as they saw. Every number in the panel is written into the recording
+        the moment it is valid, and the first edit pauses playback, so nothing is committed at a
+        moving playhead.</p>
+      <p><strong>Edit scope</strong> decides what an edit is about. <em>Current time</em> writes a
+        weather keyframe at the playhead, or updates the one that is there: this is how a sky
+        changes during the observation — set the deck at the start, seek, set it again. <em>Whole
+        observation</em> applies the one property you change to every keyframe there is, leaving
+        the others as they were, which is what you want for “it was cumulus, not stratus”.</p>
+      <p><strong>Layer</strong> lists them by rank, type and base. <strong>Add layer</strong> puts a
+        half-covered cumulus deck at 1 500 m for you to reshape; <strong>Delete layer</strong> removes
+        the one selected. A layer keeps its identity across keyframes, so adding one at 40 seconds
+        fades it in from the previous keyframe rather than popping it.</p>
+      <p>Then the layer's own fields: <strong>Cloud type</strong> (cumulus, stratus, stratocumulus,
+        cirrus, unknown — it shapes the tops, and a cirrus is the deck that makes haloes),
+        <strong>Base</strong> and <strong>Thickness</strong> in metres above the reference ground,
+        <strong>Coverage</strong> as the percentage of sky it really covers, <strong>Cloud size</strong>
+        as the width of one cloud in metres — separate from coverage, so the same percentage can be
+        many small clouds or a few large ones — <strong>Density</strong> (0 transparent to 2) and
+        <strong>Darkness</strong> (0 white to 1). <strong>Layer wind direction</strong> and
+        <strong>speed</strong> are for a deck that moves differently from the ground wind, which the
+        high one usually does; left empty they mean the general wind. <strong>Pattern seed</strong>
+        picks another arrangement of the same numbers, when the one drawn puts a cloud where the
+        account says there was none.</p>
+      <p><strong>Individual clouds</strong> is for the one the account places: the one the phenomenon
+        went behind, the one that was there and nowhere else. <strong>Add individual cloud</strong>
+        puts one in the layer, ahead of where you are looking, at the layer's own base. It is drawn
+        as one of the layer's own — the same texture, the same edges — and differs from its
+        neighbours only in standing exactly where you say, even with the layer's coverage at 0 %.
+        <strong>Point at cloud</strong> turns the witness to it. <strong>Delete cloud</strong> removes
+        it.</p>
+      <p>Tick <strong>Select and drag clouds in the sky</strong> and the picture itself becomes the
+        control: click a cloud to select it, drag to move it — in the plane facing you, so it
+        keeps its distance while its bearing and its altitude follow the pointer, and it never goes
+        below the ground. Untick it and clicks are the player's again. The numeric fields do the
+        rest, and do it exactly: <strong>East</strong> and <strong>North position</strong> in metres
+        from where the witness started, its own <strong>base</strong>, <strong>thickness</strong>,
+        <strong>width</strong>, <strong>depth</strong> and <strong>rotation</strong>, its
+        <strong>density</strong> and a <strong>darkness</strong> that, left empty, is the layer's.
+        Keyframe it twice and it drifts, grows or darkens between the two; on top of that it rides
+        the layer's wind like every other cloud.</p>
+      <p>Any cloud edit takes the weather away from the record: the source is dropped and no later
+        lookup may overwrite what you set. Tick <strong>From weather records</strong> again and the
+        record's three layers come back, replacing yours. The one exception is
+        <strong>Crystal alignment</strong>, offered on a cirrus layer only: no weather record
+        measures it, so it stays editable with ERA5 selected. Tumbling crystals give a bare ring;
         level plates and rolling columns give sundogs, arcs and a pillar.</p>
       <p>Below sits the <strong>“Sky:”</strong> line — read-only, and not a lookup at all. A meteor
         shower is a position in Earth's orbit and a comet's orbit is a solved problem, so the date
@@ -498,19 +536,59 @@ if (docs) {
         ultérieure ne peut les écraser. Un enregistrement qui nomme une source est rejoué tel qu'il
         a été composé et n'est jamais reconsulté : un dossier publié se lit à l'identique hors
         ligne.</p>
-      <p>Les <strong>couches nuageuses</strong> portent chacune altitude, épaisseur, type,
-        couverture, taille caractéristique, densité optique, obscurité et éventuellement leur propre
-        vent. Elles évoluent sur la timeline météo. Couverture et taille sont indépendantes : une
-        même fraction couverte peut contenir beaucoup de petits nuages ou moins de gros. Un vent de
-        couche vide hérite du vent général.</p>
-      <p>Des <strong>nuages individuels</strong> peuvent être ajoutés dans une couche, sélectionnés
-        dans le ciel, pointés, déplacés et redimensionnés. Ils restent de vrais volumes même avec
-        une couverture procédurale nulle et peuvent masquer effectivement un phénomène. Leur
-        obscurité peut surcharger celle de la couche ou en hériter.</p>
-      <p>L'<strong>alignement des cristaux</strong> n'appartient qu'à une couche de cirrus. Aucun
-        relevé météo ne le mesure : il reste donc modifiable avec ERA5. Des cristaux culbutant
-        donnent un anneau nu ; des plaquettes à plat et des colonnes roulantes donnent parhélies,
-        arcs et pilier.</p>
+      <p>Les nuages sont le panneau <strong>Couches nuageuses</strong> de ce groupe. Un ciel relevé
+        arrive en trois couches, les bandes basse, moyenne et haute du relevé ; un ciel décrit par
+        le témoin en compte autant qu'il en a vu. Chaque nombre du panneau est écrit dans
+        l'enregistrement dès qu'il est valide, et la première modification met la lecture en pause :
+        rien n'est enregistré sous une tête de lecture qui bouge.</p>
+      <p>La <strong>portée des modifications</strong> décide de quoi parle une modification.
+        <em>Instant courant</em> écrit un point météo à la tête de lecture, ou met à jour celui qui
+        s'y trouve : c'est ainsi qu'un ciel change pendant l'observation — régler la nappe au
+        début, avancer, la régler à nouveau. <em>Toute l'observation</em> applique la seule
+        propriété que vous changez à chaque point existant, en laissant les autres telles quelles,
+        ce qu'il faut pour « c'était du cumulus, pas du stratus ».</p>
+      <p><strong>Couche</strong> les liste par rang, type et base. <strong>Ajouter une couche</strong>
+        pose une nappe de cumulus à moitié couvrante à 1 500 m, à remodeler ; <strong>Supprimer la
+        couche</strong> retire celle qui est sélectionnée. Une couche garde son identité d'un point
+        à l'autre : en ajouter une à 40 secondes la fait apparaître en fondu depuis le point
+        précédent plutôt que d'un coup.</p>
+      <p>Puis les champs propres à la couche : <strong>Type de nuage</strong> (cumulus, stratus,
+        stratocumulus, cirrus, inconnu — il forme les sommets, et un cirrus est la nappe qui fait
+        les halos), <strong>Base</strong> et <strong>Épaisseur</strong> en mètres au-dessus du sol de
+        référence, <strong>Couverture</strong> en pourcentage du ciel réellement couvert,
+        <strong>Taille des nuages</strong> comme largeur d'un nuage en mètres — indépendante de la
+        couverture, si bien qu'un même pourcentage peut être beaucoup de petits nuages ou quelques
+        gros — <strong>Densité</strong> (0 transparent à 2) et <strong>Obscurité</strong> (0 blanc à
+        1). <strong>Direction</strong> et <strong>vitesse du vent de la couche</strong> servent à une
+        nappe qui ne va pas comme le vent au sol, ce qui est le cas de la haute d'ordinaire ; vides,
+        elles signifient le vent général. La <strong>graine du motif</strong> choisit un autre
+        arrangement des mêmes nombres, quand celui qui est dessiné met un nuage là où le récit dit
+        qu'il n'y en avait pas.</p>
+      <p><strong>Nuages individuels</strong> sert à celui que le récit place : celui derrière lequel
+        le phénomène est passé, celui qui était là et nulle part ailleurs. <strong>Ajouter un nuage
+        individuel</strong> en pose un dans la couche, devant votre regard, à la base de la couche.
+        Il est dessiné comme un nuage de la couche — même texture, mêmes bords — et ne diffère de
+        ses voisins qu'en se tenant exactement où vous le dites, même avec la couverture de la
+        couche à 0 %. <strong>Pointer le nuage</strong> tourne le témoin vers lui.
+        <strong>Supprimer ce nuage</strong> le retire.</p>
+      <p>Cochez <strong>Sélectionner et déplacer les nuages dans le ciel</strong> et l'image
+        elle-même devient la commande : cliquez un nuage pour le sélectionner, faites-le glisser pour
+        le déplacer — dans le plan qui vous fait face, si bien qu'il garde sa distance pendant que
+        son cap et son altitude suivent le pointeur, et il ne passe jamais sous le sol. Décochez, et
+        les clics redeviennent ceux du lecteur. Les champs numériques font le reste, et le font
+        exactement : <strong>position est</strong> et <strong>nord</strong> en mètres depuis le point
+        de départ du témoin, sa propre <strong>base</strong>, son <strong>épaisseur</strong>, sa
+        <strong>largeur</strong>, sa <strong>profondeur</strong> et sa <strong>rotation</strong>, sa
+        <strong>densité</strong> et une <strong>obscurité</strong> qui, vide, est celle de la couche.
+        Posez-le à deux instants et il dérive, grossit ou s'assombrit entre les deux ; par-dessus,
+        il suit le vent de la couche comme tout autre nuage.</p>
+      <p>Toute modification des nuages retire la météo au relevé : la source est abandonnée et
+        aucune consultation ultérieure ne peut écraser ce que vous avez réglé. Recochez
+        <strong>D'après les relevés</strong> et les trois couches du relevé reviennent, à la place des
+        vôtres. La seule exception est l'<strong>alignement des cristaux</strong>, proposé sur une
+        couche de cirrus seulement : aucun relevé météo ne le mesure, il reste donc modifiable avec
+        ERA5. Des cristaux culbutant donnent un anneau nu ; des plaquettes à plat et des colonnes
+        roulantes donnent parhélies, arcs et pilier.</p>
       <p>Dessous se trouve la ligne <strong>« Ciel : »</strong> — en lecture seule, et qui n'est même
         pas un relevé. Une pluie de météores est une position sur l'orbite terrestre et l'orbite
         d'une comète est un problème résolu : la date et le lieu suffisent à décider des deux. Elle

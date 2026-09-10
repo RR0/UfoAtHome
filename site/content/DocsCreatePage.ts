@@ -175,13 +175,90 @@ if (source && mount) {
     <table>
       <tr><th>Field</th><th>Meaning</th></tr>
       <tr><td><code>witnessTrack</code></td><td><code>{ keyframes: [{ t, pose }] }</code> — <code>pose</code> holds <code>lat</code>, <code>lng</code>, <code>elevationM</code> (above the local ground), <code>headingDeg</code>, <code>pitchDeg</code>, <code>rollDeg</code>, <code>fovDeg</code>, and for a camera <code>fNumber</code> and <code>focusDistanceM</code></td></tr>
-      <tr><td><code>weatherTrack</code></td><td><code>{ keyframes: [{ t, weather }] }</code> — precipitation, general wind and storm, plus optional <code>cloudLayers</code>. Each layer has a stable <code>id</code>, <code>type</code>, <code>baseM</code>, <code>thicknessM</code>, <code>coverage</code>, <code>sizeM</code>, <code>density</code>, <code>darkness</code>, optional wind and, for cirrus, <code>iceCrystalAlignment</code>. Its optional <code>instances</code> place individual volumes by east/north position and dimensions</td></tr>
+      <tr><td><code>weatherTrack</code></td><td><code>{ keyframes: [{ t, weather }] }</code> — the sky's conditions along the recording: precipitation, wind, storm, and the clouds as layers with real heights, each able to hold individual clouds placed in metres. Every field of a <code>weather</code> is in the next section</td></tr>
       <tr><td><code>weatherSource</code></td><td><code>{ id, name, url }</code> of the record the weather was looked up from. Its presence means the recording is replayed exactly as authored and never looked up again. Absent means the witness's own account</td></tr>
       <tr><td><code>soundTrack</code></td><td><code>{ keyframes: [{ t, sound }] }</code> — <code>kind</code> (none/hum/whistle/rumble/crackle), <code>volume</code>, <code>pitchHz</code>, optional <code>src</code> of a real recording</td></tr>
       <tr><td><code>instrument</code>, <code>exposureSeconds</code></td><td>What it was observed through, and how long the shutter was open. Absent means the naked eye</td></tr>
       <tr><td><code>decor</code></td><td>Scenery at a real <code>eastM</code>/<code>northM</code> from the witness: buildings (with <code>floors</code>, <code>windows</code>), trees, streetlights, vehicles, other witnesses, aircraft — optionally with a <code>track</code> and <code>lights</code> whose <code>pattern</code> carries a real flash rate</td></tr>
     </table>
     </div>
+
+    <h3>The weather, and its clouds</h3>
+    <p>A <code>weather</code> keyframe states the sky's conditions at one moment of the recording's
+      clock; between two keyframes every number is blended, and precipitation type and storm are
+      held. It carries:</p>
+    <div class="table-scroll">
+    <table>
+      <tr><th>Field</th><th>Meaning</th></tr>
+      <tr><td><code>cloudLayers</code></td><td>The clouds, as a list of layers — see below. <strong>Absent</strong> means the older fields on this row's neighbours describe them, and they are adapted into one water layer and one cirrus veil; <strong>an empty list</strong> means a clear sky somebody looked at</td></tr>
+      <tr><td><code>cloudCover</code>, <code>lowerCloudCover</code>, <code>highCloudCover</code></td><td>Fractions of sky (0–1): the total, the water decks alone, and the icy veil alone. Written by recordings made before there were layers, and still kept in step by the editor as a summary of them</td></tr>
+      <tr><td><code>cloudBaseM</code>, <code>cloudDarkness</code></td><td>The same era's one base, in metres above the reference ground, and one shade (0 white, 1 very dark)</td></tr>
+      <tr><td><code>iceCrystalAlignment</code></td><td>0–1, how steadily the ice crystals fell — what turns a bare ring into sundogs, arcs and a pillar. No record measures it; a cirrus layer carries its own</td></tr>
+      <tr><td><code>precipitationType</code>, <code>precipitationIntensity</code></td><td>none/rain/snow/hail, and 0–1</td></tr>
+      <tr><td><code>windDirectionDeg</code>, <code>windSpeed</code></td><td>The general wind: the bearing it blows TOWARD, clockwise from north, and metres per second. It is what carries the clouds — from time zero, so seeking and replaying give the same sky</td></tr>
+      <tr><td><code>storm</code></td><td>Lightning and thunder, at the right delay</td></tr>
+    </table>
+    </div>
+    <p>Each <strong>layer</strong> of <code>cloudLayers</code> is a deck of clouds at a real
+      height, and stays itself from one keyframe to the next:</p>
+    <div class="table-scroll">
+    <table>
+      <tr><th>Field</th><th>Meaning</th></tr>
+      <tr><td><code>id</code></td><td>Stable across keyframes — layers are matched by it, never by position in the list. A layer present in one keyframe and absent from the next fades out; reordering them changes nothing</td></tr>
+      <tr><td><code>type</code></td><td><code>cumulus</code>, <code>stratus</code>, <code>stratocumulus</code>, <code>cirrus</code> or <code>unknown</code>. It decides the shape of the tops and how thin the veil is; a cirrus is also the one that refracts haloes. It switches at the keyframe, it is not blended</td></tr>
+      <tr><td><code>baseM</code>, <code>thicknessM</code></td><td>Metres. The base is above the recording's REFERENCE ground, not above a witness who climbs; a witness above the base is inside or over the deck, and the sky is drawn accordingly</td></tr>
+      <tr><td><code>coverage</code></td><td>0–1, and it means what it says: the fraction of the sky this layer covers, whatever the size of its clouds</td></tr>
+      <tr><td><code>sizeM</code></td><td>The characteristic width of one cloud, in metres. Separate from coverage: the same fraction of sky can be many small clouds or a few large ones</td></tr>
+      <tr><td><code>density</code></td><td>0–2, how opaque the cloud matter is; 0 is transparent. Separate from coverage too</td></tr>
+      <tr><td><code>darkness</code></td><td>0 white to 1 very dark. Absent means the keyframe's <code>cloudDarkness</code></td></tr>
+      <tr><td><code>seed</code></td><td>Which pattern, out of the endless ones the same numbers can draw. Absent means one derived from the id, which is why the id must not change</td></tr>
+      <tr><td><code>windDirectionDeg</code>, <code>windSpeed</code></td><td>This layer's own wind, when it differs from the general one — the high deck usually does. Absent means the general wind</td></tr>
+      <tr><td><code>iceCrystalAlignment</code></td><td>For a cirrus only</td></tr>
+      <tr><td><code>instances</code></td><td>Individual clouds inside this layer — see below</td></tr>
+    </table>
+    </div>
+    <p>An <strong>individual cloud</strong> in <code>instances</code> is one cloud of its layer that the
+      file places exactly, because the account did: the one the phenomenon went behind, the one that
+      was there and nowhere else. It is drawn as one of its layer's own — the same texture, the same
+      threshold — told apart from its neighbours by nothing but where it stands and how big it is,
+      and it stands even when the layer's <code>coverage</code> is nought. It rides the layer's wind
+      like the rest, and it hides a phenomenon it passes in front of.</p>
+    <div class="table-scroll">
+    <table>
+      <tr><th>Field</th><th>Meaning</th></tr>
+      <tr><td><code>id</code></td><td>Stable across keyframes, same rule as a layer's</td></tr>
+      <tr><td><code>eastM</code>, <code>northM</code></td><td>Where its centre was at time zero, in metres from the witness's starting point. The wind carries it from there</td></tr>
+      <tr><td><code>baseM</code>, <code>thicknessM</code></td><td>Its own base and height, metres — a cloud can sit lower or stand taller than its deck</td></tr>
+      <tr><td><code>widthM</code>, <code>depthM</code>, <code>rotationDeg</code></td><td>Its footprint, metres, and the bearing that footprint is turned to</td></tr>
+      <tr><td><code>density</code>, <code>darkness</code></td><td>Its own; darkness absent means the layer's</td></tr>
+    </table>
+    </div>
+    <pre><code>"weather": {
+  "cloudLayers": [
+    {
+      "id": "low", "type": "cumulus",
+      "baseM": 1500, "thicknessM": 800,
+      "coverage": 0.55, "sizeM": 1400, "density": 1, "darkness": 0.15,
+      "instances": [
+        { "id": "the-one", "eastM": 0, "northM": 4200,
+          "baseM": 1500, "thicknessM": 800,
+          "widthM": 1900, "depthM": 1300, "rotationDeg": 12, "density": 1 }
+      ]
+    },
+    { "id": "high", "type": "cirrus", "baseM": 8000, "thicknessM": 400,
+      "coverage": 0.2, "sizeM": 2200, "density": 0.35, "iceCrystalAlignment": 0.65 }
+  ],
+  "precipitationType": "none", "precipitationIntensity": 0,
+  "windDirectionDeg": 90, "windSpeed": 5, "storm": false
+}</code></pre>
+    <p>A recording whose weather was <strong>looked up</strong> (it has a <code>weatherSource</code>)
+      holds the record's answer, not a link to it: ERA5 gives the low, middle and high bands as three
+      layers named <code>record-low</code>, <code>record-mid</code> and <code>record-high</code>, the
+      low base estimated from the spread between temperature and dew point, the other two at 3 500 m
+      and 8 000 m. Their type is <code>unknown</code> (cirrus for the high one), their size and
+      density are drawing assumptions: a reanalysis knows how much of each band was covered, not what
+      the clouds looked like. Ask the record again from the editor and the layers are rewritten; edit
+      a layer by hand and the recording becomes the author's, the source dropped.</p>
 
     <h3>A whole file</h3>
     <p>The smallest recording that still states something — one silent oval crossing the sky over
@@ -207,7 +284,7 @@ if (source && mount) {
       <tr><th>File</th><th>What to look at in it</th></tr>
       <tr><td><a href="/demo-data/witness-chiles.json"><code>witness-chiles.json</code></a></td><td>A real case: a witness, a case id shared with a second recording, ten keyframes, a looked-up <code>weatherTrack</code> with its <code>weatherSource</code></td></tr>
       <tr><td><a href="/demo-data/sky-test-halos.json"><code>sky-test-halos.json</code></a></td><td>No phenomenon at all — a sky set up by its weather, with a <code>witnessTrack</code> of four poses that pans across the display</td></tr>
-      <tr><td><a href="/demo-data/sky-test-clouds.json"><code>sky-test-clouds.json</code></a></td><td>Three stable cloud layers evolving on the weather timeline, with metre-based altitude, thickness, size, density and wind</td></tr>
+      <tr><td><a href="/demo-data/sky-test-clouds.json"><code>sky-test-clouds.json</code></a></td><td>Three cloud layers with metre-based altitude, thickness, size, density and wind, evolving on the weather timeline — and in the first one an <code>instances</code> entry: one cloud of the field, placed and sized in metres, that grows and darkens over the two minutes</td></tr>
       <tr><td><a href="/demo-data/sky-test-aircraft.json"><code>sky-test-aircraft.json</code></a></td><td>An <code>instrument</code> and an <code>exposureSeconds</code>, and a <code>decor</code> aircraft with a <code>track</code> and seven <code>lights</code> at their real flash rates</td></tr>
       <tr><td><a href="/demo-data/instrument-instamatic.json"><code>instrument-instamatic.json</code></a></td><td>The same sighting as <code>witness-socorro.json</code>, changed in one field. Diff the two</td></tr>
     </table>
@@ -341,13 +418,91 @@ if (source && mount) {
     <table>
       <tr><th>Champ</th><th>Sens</th></tr>
       <tr><td><code>witnessTrack</code></td><td><code>{ keyframes: [{ t, pose }] }</code> — <code>pose</code> porte <code>lat</code>, <code>lng</code>, <code>elevationM</code> (au-dessus du sol local), <code>headingDeg</code>, <code>pitchDeg</code>, <code>rollDeg</code>, <code>fovDeg</code>, et pour un appareil <code>fNumber</code> et <code>focusDistanceM</code></td></tr>
-      <tr><td><code>weatherTrack</code></td><td><code>{ keyframes: [{ t, weather }] }</code> — précipitation, vent général et orage, plus des <code>cloudLayers</code> facultatives. Chaque couche a un <code>id</code> stable, <code>type</code>, <code>baseM</code>, <code>thicknessM</code>, <code>coverage</code>, <code>sizeM</code>, <code>density</code>, <code>darkness</code>, éventuellement son vent et, pour les cirrus, <code>iceCrystalAlignment</code>. Ses <code>instances</code> facultatives placent des volumes individuels par position est/nord et dimensions</td></tr>
+      <tr><td><code>weatherTrack</code></td><td><code>{ keyframes: [{ t, weather }] }</code> — l'état du ciel le long de l'enregistrement : précipitation, vent, orage, et les nuages en couches à hauteur réelle, chacune pouvant porter des nuages individuels placés en mètres. Chaque champ d'un <code>weather</code> est dans la section suivante</td></tr>
       <tr><td><code>weatherSource</code></td><td><code>{ id, name, url }</code> du relevé d'où vient la météo. Sa présence signifie que l'enregistrement est rejoué tel qu'il a été composé et n'est jamais reconsulté. Absent : le récit du témoin lui-même</td></tr>
       <tr><td><code>soundTrack</code></td><td><code>{ keyframes: [{ t, sound }] }</code> — <code>kind</code> (none/hum/whistle/rumble/crackle), <code>volume</code>, <code>pitchHz</code>, et un <code>src</code> facultatif vers un vrai enregistrement</td></tr>
       <tr><td><code>instrument</code>, <code>exposureSeconds</code></td><td>À travers quoi l'observation a été faite, et combien de temps l'obturateur est resté ouvert. Absent : l'œil nu</td></tr>
       <tr><td><code>decor</code></td><td>Le décor, à une vraie distance <code>eastM</code>/<code>northM</code> du témoin : bâtiments (avec <code>floors</code>, <code>windows</code>), arbres, lampadaires, véhicules, autres témoins, aéronefs — éventuellement avec une <code>track</code> et des <code>lights</code> dont le <code>pattern</code> porte une vraie cadence d'éclats</td></tr>
     </table>
     </div>
+
+    <h3>La météo, et ses nuages</h3>
+    <p>Un point <code>weather</code> énonce l'état du ciel à un instant de l'horloge de
+      l'enregistrement ; entre deux points chaque nombre est interpolé, le type de précipitation et
+      l'orage sont maintenus. Il porte :</p>
+    <div class="table-scroll">
+    <table>
+      <tr><th>Champ</th><th>Sens</th></tr>
+      <tr><td><code>cloudLayers</code></td><td>Les nuages, en liste de couches — voir plus bas. <strong>Absent</strong> : ce sont les anciens champs des lignes voisines qui les décrivent, adaptés en une couche d'eau et un voile de cirrus ; <strong>une liste vide</strong> : un ciel dégagé que quelqu'un a regardé</td></tr>
+      <tr><td><code>cloudCover</code>, <code>lowerCloudCover</code>, <code>highCloudCover</code></td><td>Fractions de ciel (0–1) : le total, les couches d'eau seules, le voile glacé seul. Écrits par les enregistrements d'avant les couches, et encore tenus à jour par l'éditeur comme résumé de celles-ci</td></tr>
+      <tr><td><code>cloudBaseM</code>, <code>cloudDarkness</code></td><td>La base unique de la même époque, en mètres au-dessus du sol de référence, et une teinte unique (0 blanc, 1 très sombre)</td></tr>
+      <tr><td><code>iceCrystalAlignment</code></td><td>0–1, la régularité de la chute des cristaux de glace — ce qui fait d'un anneau nu des parhélies, des arcs et un pilier. Aucun relevé ne le mesure ; une couche de cirrus porte le sien</td></tr>
+      <tr><td><code>precipitationType</code>, <code>precipitationIntensity</code></td><td>none/rain/snow/hail, et 0–1</td></tr>
+      <tr><td><code>windDirectionDeg</code>, <code>windSpeed</code></td><td>Le vent général : le cap VERS lequel il souffle, dans le sens horaire depuis le nord, et des mètres par seconde. C'est lui qui porte les nuages — depuis l'instant zéro, si bien qu'une recherche et une relecture donnent le même ciel</td></tr>
+      <tr><td><code>storm</code></td><td>Éclairs et tonnerre, au bon retard</td></tr>
+    </table>
+    </div>
+    <p>Chaque <strong>couche</strong> de <code>cloudLayers</code> est une nappe de nuages à une
+      hauteur réelle, et reste elle-même d'un point à l'autre :</p>
+    <div class="table-scroll">
+    <table>
+      <tr><th>Champ</th><th>Sens</th></tr>
+      <tr><td><code>id</code></td><td>Stable d'un point à l'autre — les couches s'apparient par lui, jamais par leur rang dans la liste. Une couche présente à un point et absente au suivant s'estompe ; les réordonner ne change rien</td></tr>
+      <tr><td><code>type</code></td><td><code>cumulus</code>, <code>stratus</code>, <code>stratocumulus</code>, <code>cirrus</code> ou <code>unknown</code>. Il décide de la forme des sommets et de la finesse du voile ; un cirrus est aussi celui qui réfracte les halos. Il bascule au point, il n'est pas interpolé</td></tr>
+      <tr><td><code>baseM</code>, <code>thicknessM</code></td><td>En mètres. La base est au-dessus du sol de RÉFÉRENCE de l'enregistrement, pas au-dessus d'un témoin qui grimpe ; un témoin plus haut que la base est dans la nappe ou au-dessus, et le ciel est dessiné en conséquence</td></tr>
+      <tr><td><code>coverage</code></td><td>0–1, et cela veut dire ce que cela dit : la fraction du ciel que cette couche couvre, quelle que soit la taille de ses nuages</td></tr>
+      <tr><td><code>sizeM</code></td><td>La largeur caractéristique d'un nuage, en mètres. Indépendante de la couverture : une même fraction de ciel peut être beaucoup de petits nuages ou quelques gros</td></tr>
+      <tr><td><code>density</code></td><td>0–2, l'opacité de la matière nuageuse ; 0 est transparent. Indépendante de la couverture elle aussi</td></tr>
+      <tr><td><code>darkness</code></td><td>0 blanc à 1 très sombre. Absent : le <code>cloudDarkness</code> du point</td></tr>
+      <tr><td><code>seed</code></td><td>Lequel des motifs, parmi les innombrables que les mêmes nombres peuvent dessiner. Absent : un motif dérivé de l'id, ce qui est la raison pour laquelle l'id ne doit pas changer</td></tr>
+      <tr><td><code>windDirectionDeg</code>, <code>windSpeed</code></td><td>Le vent propre à cette couche, lorsqu'il diffère du vent général — c'est le cas de la couche haute d'ordinaire. Absent : le vent général</td></tr>
+      <tr><td><code>iceCrystalAlignment</code></td><td>Pour un cirrus seulement</td></tr>
+      <tr><td><code>instances</code></td><td>Les nuages individuels de cette couche — voir plus bas</td></tr>
+    </table>
+    </div>
+    <p>Un <strong>nuage individuel</strong> dans <code>instances</code> est un nuage de sa couche que
+      le fichier place exactement, parce que le récit le fait : celui derrière lequel le phénomène
+      est passé, celui qui était là et nulle part ailleurs. Il est dessiné comme un nuage de sa
+      couche — même texture, même seuil — et ne se distingue de ses voisins que par sa position et sa
+      taille ; il est là même quand la <code>coverage</code> de la couche est nulle. Il suit le vent
+      de la couche comme les autres, et il masque un phénomène devant lequel il passe.</p>
+    <div class="table-scroll">
+    <table>
+      <tr><th>Champ</th><th>Sens</th></tr>
+      <tr><td><code>id</code></td><td>Stable d'un point à l'autre, même règle que pour une couche</td></tr>
+      <tr><td><code>eastM</code>, <code>northM</code></td><td>Où était son centre à l'instant zéro, en mètres depuis le point de départ du témoin. Le vent l'emporte de là</td></tr>
+      <tr><td><code>baseM</code>, <code>thicknessM</code></td><td>Sa propre base et sa propre hauteur, en mètres — un nuage peut être plus bas ou plus haut que sa nappe</td></tr>
+      <tr><td><code>widthM</code>, <code>depthM</code>, <code>rotationDeg</code></td><td>Son emprise, en mètres, et le cap vers lequel cette emprise est tournée</td></tr>
+      <tr><td><code>density</code>, <code>darkness</code></td><td>Les siens ; une obscurité absente est celle de la couche</td></tr>
+    </table>
+    </div>
+    <pre><code>"weather": {
+  "cloudLayers": [
+    {
+      "id": "low", "type": "cumulus",
+      "baseM": 1500, "thicknessM": 800,
+      "coverage": 0.55, "sizeM": 1400, "density": 1, "darkness": 0.15,
+      "instances": [
+        { "id": "the-one", "eastM": 0, "northM": 4200,
+          "baseM": 1500, "thicknessM": 800,
+          "widthM": 1900, "depthM": 1300, "rotationDeg": 12, "density": 1 }
+      ]
+    },
+    { "id": "high", "type": "cirrus", "baseM": 8000, "thicknessM": 400,
+      "coverage": 0.2, "sizeM": 2200, "density": 0.35, "iceCrystalAlignment": 0.65 }
+  ],
+  "precipitationType": "none", "precipitationIntensity": 0,
+  "windDirectionDeg": 90, "windSpeed": 5, "storm": false
+}</code></pre>
+    <p>Un enregistrement dont la météo a été <strong>relevée</strong> (il a un
+      <code>weatherSource</code>) garde la réponse du relevé, pas un lien vers lui : ERA5 donne les
+      bandes basse, moyenne et haute en trois couches nommées <code>record-low</code>,
+      <code>record-mid</code> et <code>record-high</code>, la base basse estimée depuis l'écart entre
+      température et point de rosée, les deux autres à 3 500 m et 8 000 m. Leur type est
+      <code>unknown</code> (cirrus pour la haute), leur taille et leur densité sont des hypothèses de
+      dessin : une réanalyse sait quelle part de chaque bande était couverte, pas à quoi les nuages
+      ressemblaient. Redemandez le relevé depuis l'éditeur et les couches sont réécrites ; modifiez
+      une couche à la main et l'enregistrement devient celui de l'auteur, la source retirée.</p>
 
     <h3>Un fichier entier</h3>
     <p>Le plus petit enregistrement qui énonce encore quelque chose — un ovale silencieux traversant
@@ -373,7 +528,7 @@ if (source && mount) {
       <tr><th>Fichier</th><th>Ce qu'il faut y regarder</th></tr>
       <tr><td><a href="/demo-data/witness-chiles.json"><code>witness-chiles.json</code></a></td><td>Un vrai dossier : un témoin, un identifiant de dossier partagé avec un second enregistrement, dix keyframes, un <code>weatherTrack</code> relevé avec son <code>weatherSource</code></td></tr>
       <tr><td><a href="/demo-data/sky-test-halos.json"><code>sky-test-halos.json</code></a></td><td>Aucun phénomène — un ciel réglé par sa météo, avec un <code>witnessTrack</code> de quatre poses qui balaie le cortège</td></tr>
-      <tr><td><a href="/demo-data/sky-test-clouds.json"><code>sky-test-clouds.json</code></a></td><td>Trois couches nuageuses stables évoluant sur la timeline météo, avec altitude, épaisseur, taille, densité et vent en unités réelles</td></tr>
+      <tr><td><a href="/demo-data/sky-test-clouds.json"><code>sky-test-clouds.json</code></a></td><td>Trois couches nuageuses avec altitude, épaisseur, taille, densité et vent en mètres, évoluant sur la timeline météo — et dans la première une entrée <code>instances</code> : un nuage du champ, placé et dimensionné en mètres, qui grossit et s'assombrit sur les deux minutes</td></tr>
       <tr><td><a href="/demo-data/sky-test-aircraft.json"><code>sky-test-aircraft.json</code></a></td><td>Un <code>instrument</code> et un <code>exposureSeconds</code>, et un décor d'aéronef avec sa <code>track</code> et sept <code>lights</code> à leurs cadences réelles</td></tr>
       <tr><td><a href="/demo-data/instrument-instamatic.json"><code>instrument-instamatic.json</code></a></td><td>La même observation que <code>witness-socorro.json</code>, à un champ près. Comparez les deux</td></tr>
     </table>
