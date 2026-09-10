@@ -354,7 +354,9 @@ section.band:first-of-type { border-top: 0; }
 }
 .demo-mount rr0-scene { display: block; width: 100%; height: 100%; }
 .demo-card figcaption { padding: 0.9rem 1rem 1rem; }
-.demo-card h3 { margin: 0 0 0.3rem; font-size: 1.02rem; }
+/* Balanced, so a title that wraps splits into two lines of a size rather than a full line and one
+   orphaned word — "Un avion de ligne sur une pose de 20" over "s". */
+.demo-card h3 { margin: 0 0 0.3rem; font-size: 1.02rem; text-wrap: balance; }
 .demo-card figcaption p { margin: 0; font-size: 0.88rem; color: var(--ink-dim); line-height: 1.5; }
 .demo-links { margin-top: 0.6rem !important; font-size: 0.85rem; }
 .demo-links a { font-weight: 600; }

@@ -224,7 +224,7 @@ export class DemoCatalogue {
         {
           id: "instrument-slr",
           src: "/demo-data/instrument-slr.json",
-          title: { en: "Through a 50 mm lens", fr: "Au 50 mm" },
+          title: { en: "Through a 50\u00a0mm lens", fr: "Au 50\u00a0mm" },
           blurb: {
             en: "27° tall, which is why a photographed light so often has nothing recognisable beside it. A lens maps f·tan θ: everything off-axis is stretched, 42% at 33° from the centre.",
             fr: "27° de haut — d'où le fait qu'une lumière photographiée n'a si souvent rien de reconnaissable à côté d'elle. Un objectif projette en f·tan θ : hors axe tout est étiré, de 42 % à 33° du centre."
@@ -251,7 +251,7 @@ export class DemoCatalogue {
         {
           id: "aircraft",
           src: "/demo-data/sky-test-aircraft.json",
-          title: { en: "An airliner on a 20-second exposure", fr: "Un avion de ligne sur une pose de 20 s" },
+          title: { en: "An airliner on a 20-second exposure", fr: "Un avion de ligne sur une pose de 20\u00a0s" },
           blurb: {
             en: "No phenomenon is drawn here — there isn't one. Steady lamps draw lines, flashing ones drop dots, and their spacing is the flash rate times the angular speed.",
             fr: "Aucun phénomène n'est dessiné ici — il n'y en a pas. Les feux fixes tracent des lignes, les clignotants posent des points, et leur espacement est la cadence multipliée par la vitesse angulaire."
