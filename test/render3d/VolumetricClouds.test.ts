@@ -56,7 +56,61 @@ describe("curved cloud shell", () => {
   })
 })
 
+describe("coverage", () => {
+  it("covers about the fraction of sky the coverage states", () => {
+    // Directions spread over the sky above 17°, like the surface deck's own test: what is checked is
+    // how much of the sky a ray finds less than half transparent, not any one ray.
+    const cloud = new VolumetricCloudLayer(texture, 700)
+    const fraction = (coverage: number) => {
+      cloud.update({ ...layer, type: "cumulus", coverage }, 2)
+      let covered = 0
+      const count = 2000
+      for (let i = 0; i < count; i++) {
+        const altitude = Math.asin(0.3 + 0.7 * ((i * 0.618033988749895) % 1))
+        const azimuth = (i / count) * Math.PI * 2
+        const direction = { x: Math.sin(azimuth) * Math.cos(altitude), y: Math.sin(altitude), z: -Math.cos(azimuth) * Math.cos(altitude) }
+        if (cloud.transmissionAt(direction) < 0.5) covered++
+      }
+      return covered / count
+    }
+    expect(fraction(0.12)).toBeGreaterThan(0.05)
+    expect(fraction(0.12)).toBeLessThan(0.2)
+    expect(fraction(0.55)).toBeGreaterThan(0.45)
+    expect(fraction(0.55)).toBeLessThan(0.65)
+    expect(fraction(0.8)).toBeGreaterThan(0.7)
+    cloud.dispose()
+  })
+})
+
 describe("local cloud masses", () => {
+  it("is a piece of its layer's field, and the layer leaves room for it", () => {
+    const group = new Group(), clouds = new LayeredCloudSystem(group, 700, "volume")
+    const instance = { id: "mass", eastM: 0, northM: 0, baseM: 1500, thicknessM: 800, widthM: 1000, depthM: 1000, rotationDeg: 0, density: 1 }
+    const field = { ...layer, id: "low", type: "cumulus" as const, coverage: 0.6, sizeM: 1400, seed: undefined, instances: [instance] }
+    clouds.update({ ...DEFAULT_WEATHER, cloudLayers: [field] }, 2)
+    const [deckOfField, deckOfMass] = [...clouds.volumes].sort((a, b) => a.uniforms.localSize.value.x - b.uniforms.localSize.value.x)
+    // Same noise: the layer's scale and seed, not a scale of the mass's own size.
+    expect(deckOfMass.uniforms.sizeM.value).toBe(1400)
+    expect(deckOfMass.uniforms.seedOffset.value).toEqual(deckOfField.uniforms.seedOffset.value)
+    expect(deckOfMass.uniforms.coverage.value).toBe(0.6)
+    // The layer's field is nought where the mass stands, and back to itself well past its rim.
+    expect(deckOfField.uniforms.holeCount.value).toBe(1)
+    expect(deckOfField.densityAt({ x: 0, y: 1800, z: 0 })).toBe(0)
+    expect(deckOfMass.densityAt({ x: 0, y: 1800, z: 0 })).toBeGreaterThan(0)
+    const samples = Array.from({ length: 40 }, (_, i) => ({ x: 3000 + i * 250, y: 1800, z: (i % 5) * 700 }))
+    expect(samples.some(p => deckOfField.densityAt(p) > 0)).toBe(true)
+    expect(samples.every(p => deckOfMass.densityAt(p) === 0)).toBe(true)
+    clouds.dispose()
+  })
+  it("makes a layer that holds one a volume, whichever rendering was asked for", () => {
+    const group = new Group(), clouds = new LayeredCloudSystem(group, 700, "surface")
+    const instance = { id: "mass", eastM: 0, northM: 0, baseM: 1500, thicknessM: 800, widthM: 1000, depthM: 1000, rotationDeg: 0, density: 1 }
+    clouds.update({ ...DEFAULT_WEATHER, cloudLayers: [{ ...layer, type: "cumulus", coverage: 0.6 }] }, 2)
+    expect(clouds.volumes).toHaveLength(0)
+    clouds.update({ ...DEFAULT_WEATHER, cloudLayers: [{ ...layer, type: "cumulus", coverage: 0.6, instances: [instance] }] }, 2)
+    expect(clouds.volumes).toHaveLength(2)
+    clouds.dispose()
+  })
   it("does not repeat the same density at the old texture tile interval", () => {
     const cloud = new VolumetricCloudLayer(texture, 700)
     cloud.update({ ...layer, type: "cumulus", coverage: 0.6 }, 2)

@@ -23,11 +23,14 @@ export class LayeredCloudSystem {
       const layer = { ...sourceLayer, darkness: sourceLayer.darkness ?? weather.cloudDarkness }
       return [
       { layer, parentId: layer.id, key: JSON.stringify([layer.id]), instance: undefined as CloudInstance | undefined },
+      // An individual cloud is a piece of its layer's field — the layer's type, noise scale, seed
+      // and coverage threshold, so that it is one of its neighbours and not a mass of another
+      // texture set among them (see VolumetricClouds' densityAt). Its own are where it stands, its
+      // base and thickness, its density and its darkness.
       ...(layer.instances ?? []).map(instance => ({ parentId: layer.id, key: JSON.stringify([layer.id, instance.id]), instance,
-        layer: { ...layer, id: `${layer.id}/${instance.id}`, type: "cumulus" as const, baseM: instance.baseM,
-          thicknessM: instance.thicknessM, sizeM: Math.max(instance.widthM, instance.depthM) / 2,
-          coverage: 1, density: instance.density, darkness: instance.darkness ?? layer.darkness,
-          seed: instance.seed ?? layer.seed, instances: undefined } }))
+        layer: { ...layer, id: `${layer.id}/${instance.id}`, baseM: instance.baseM, thicknessM: instance.thicknessM,
+          density: instance.density, darkness: instance.darkness ?? layer.darkness,
+          seed: instance.seed ?? cloudSeed(layer), instances: undefined } }))
     ]})
     const wanted = new Set(layers.map(entry => entry.key))
     for (const [id, deck] of this.decks) if (!wanted.has(id)) {
@@ -37,8 +40,11 @@ export class LayeredCloudSystem {
     // Back-to-front for disjoint layers. Overlapping volumes require joint integration in a later pass.
     const sorted = [...layers].sort((a, b) => Math.abs(b.layer.baseM + b.layer.thicknessM / 2 - eyeM) - Math.abs(a.layer.baseM + a.layer.thicknessM / 2 - eyeM))
     sorted.forEach(({ layer, key, instance, parentId }, index) => {
-      // Explicit masses are volumes in both comparison modes; the global field can stay lightweight.
-      const volumetric = instance !== undefined || (this.mode === "volume" && layer.type !== "cirrus")
+      // Explicit masses are volumes in both comparison modes — and so is a layer that holds any,
+      // whatever the mode: a volume set among a surface's flat texture is a thing of another kind
+      // (which is exactly how the catalogue page, which never asks for volumes, showed it).
+      const volumetric = instance !== undefined
+        || (layer.type !== "cirrus" && (this.mode === "volume" || (layer.instances?.length ?? 0) > 0))
       let deck = this.decks.get(key)
       if (deck && !!deck.volume !== volumetric) {
         this.disposeDeck(deck)
@@ -63,7 +69,8 @@ export class LayeredCloudSystem {
       deck.instance = instance
       const order = 4 + index / Math.max(1, layers.length)
       if (deck.volume) {
-        deck.volume.update(layer, eyeM, instance)
+        // A layer's deck leaves room for its own individual clouds, each drawn by its own deck.
+        deck.volume.update(layer, eyeM, instance, instance ? [] : layer.instances ?? [])
         deck.volume.mesh.renderOrder = order
       }
       if (deck.surface && deck.uniforms) {

@@ -2,8 +2,8 @@
   "version": 1,
   "caseId": "sky-test-clouds",
   "description": {
-    "fr": "Ciel synthétique pour comparer trois couches nuageuses et manipuler un nuage individuel. Le vent et l'obscurité changent sur deux minutes pendant que le témoin parcourt 600 m. Aucun témoignage.",
-    "en": "A synthetic sky for comparing three cloud layers and manipulating one individual cloud. Wind and darkness change over two minutes while the witness moves 600 m. No testimony."
+    "fr": "Ciel synthétique : trois couches nuageuses en mètres, et un nuage du champ énoncé en mètres, à déplacer et redimensionner dans l'éditeur sans cesser d'être un nuage parmi les autres. Le vent et l'obscurité changent sur deux minutes pendant que le témoin parcourt 600 m. Aucun témoignage.",
+    "en": "A synthetic sky: three metre-based cloud layers, and one cloud of the field stated in metres, to move and resize in the editor while staying one of its neighbours. Wind and darkness change over two minutes while the witness moves 600 m. No testimony."
   },
   "time": {
     "year": 2020,
@@ -40,14 +40,13 @@
                   "id": "movable-cloud",
                   "eastM": 0,
                   "northM": 4200,
-                  "baseM": 1450,
-                  "thicknessM": 900,
+                  "baseM": 1500,
+                  "thicknessM": 800,
                   "widthM": 1900,
                   "depthM": 1300,
                   "rotationDeg": 12,
-                  "density": 1.1,
-                  "darkness": 0.25,
-                  "seed": 47
+                  "density": 1,
+                  "darkness": 0.15
                 }
               ],
               "seed": 17
@@ -100,14 +99,13 @@
                   "id": "movable-cloud",
                   "eastM": 900,
                   "northM": 3500,
-                  "baseM": 1650,
-                  "thicknessM": 1100,
+                  "baseM": 1600,
+                  "thicknessM": 1000,
                   "widthM": 2400,
                   "depthM": 1600,
                   "rotationDeg": 28,
-                  "density": 1.35,
-                  "darkness": 0.55,
-                  "seed": 47
+                  "density": 1.2,
+                  "darkness": 0.55
                 }
               ],
               "seed": 17

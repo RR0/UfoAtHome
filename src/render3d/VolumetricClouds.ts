@@ -3,6 +3,11 @@ import type { CloudInstance, CloudLayer } from "../engine/model/CloudLayer.js"
 
 export const CLOUD_EARTH_RADIUS_M = 6371000
 const NOISE_SIZE = 64
+/** How many of a layer's own individual clouds its field can be carved around — a uniform array's
+ * size, fixed at compile time. */
+export const MAX_HOLES = 8
+/** The shader's SLICE: the one slice of the noise every layer reads its weather from. */
+const WEATHER_SLICE = 0.2787
 
 /** Stable hash, independent of array order or frame number. */
 export function cloudSeed(layer: CloudLayer): number {
@@ -86,7 +91,37 @@ uniform vec3 offsetM, seedOffset;
 uniform vec3 localCenter, localSize;
 uniform float localRotation;
 uniform float baseM, thicknessM, eyeM, coverage, sizeM, density, darkness, flatness;
+// Where this layer's own individual clouds stand: the field is carved out there, because each of
+// them is drawn by a deck of its own, and drawing the field under it too would sum the two.
+const int MAX_HOLES = 8;
+uniform int holeCount;
+uniform vec3 holeCenter[MAX_HOLES];
+uniform vec3 holeSize[MAX_HOLES];
+uniform float holeRotation[MAX_HOLES];
 const float R = 6371000.0;
+// The slice of the noise the weather (where cloud is) is read from — one for every seed, because
+// each slice of the small texture has a distribution of its own and the threshold below is fitted
+// to this one; a seed shifts the pattern sideways (seedOffset.xz) and picks the billows' slice.
+const float SLICE = 0.2787;
+// A coverage is the fraction of sky covered, so the threshold is a quantile — the same logistic
+// form as the surface deck's coverageThreshold (see CloudSystem), but fitted to what a RAY finds,
+// not to the field's values at a point: a ray crosses the whole thickness and every sample above
+// the threshold adds to it, then the billows erode the mass again, so the plane's own quantile
+// (mean 0.567, spread 0.21) still covered 66% at 55%. Measured instead as the fraction of three
+// thousand directions the CPU twin leaves less than half transparent, at seven thresholds: half
+// the sky at 0.645, a logistic scale of 0.23 (0.5513 being sqrt(3)/pi) — a tenth of the sky at
+// 12%, three tenths at 30%, three quarters at 80%. With 1 - coverage, 55% had covered 78%.
+float coverageThreshold(float coverage) {
+  float c = clamp(coverage, 0.001, 0.999);
+  return 0.645 - 0.23 * 0.5513 * log(c / (1.0 - c));
+}
+// How far a point is from an ellipsoid's centre in units of its semi-axes: 1 on its surface.
+float ellipsoidRadius(vec3 p, float alt, vec3 center, vec3 size, float rotation) {
+  vec3 relative = vec3(p.x + offsetM.x - center.x, alt - center.y, p.z + offsetM.z - center.z);
+  float c = cos(rotation), s = sin(rotation);
+  relative.xz = vec2(c * relative.x - s * relative.z, s * relative.x + c * relative.z);
+  return length(relative / (size * 0.5));
+}
 vec2 roots(float dy, float height) {
   float b = (R + eyeM) * dy;
   float c = (eyeM - height) * (2.0 * R + eyeM + height);
@@ -111,39 +146,54 @@ vec2 clipLocal(vec3 dir, vec2 interval) {
   if (d < 0.0) return vec2(1.0, -1.0);
   return vec2(max(interval.x, b - sqrt(d)), min(interval.y, b + sqrt(d)));
 }
+// An individual cloud (localSize set) is a piece of its layer's own field — the same noise at the
+// same scale, seed and offset, under the same threshold — told apart from its neighbours by
+// nothing but where it stands and how big it is: inside its ellipsoid the field is lifted to a
+// full cloud, and past the rim it is nothing. The layer's deck carves the same rim out (see
+// holeCenter), so the two meet without summing.
 float densityAt(vec3 p) {
-  float h = (altitude(p) - baseM) / thicknessM;
-  if (h <= 0.0 || h >= 1.0 || coverage <= 0.0) return 0.0;
+  float alt = altitude(p);
+  float h = (alt - baseM) / thicknessM;
+  bool local = localSize.x > 0.0;
+  if (h <= 0.0 || h >= 1.0 || (coverage <= 0.0 && !local)) return 0.0;
+  float radius = local ? ellipsoidRadius(p, alt, localCenter, localSize, localRotation) : 0.0;
+  if (radius > 1.3) return 0.0;
   vec3 uv = (p + offsetM) / (sizeM * 4.0) + seedOffset;
   // Independent scales and an oblique domain break the small texture's visible tiling.
-  vec3 warpUV = vec3(uv.x * 0.173, seedOffset.y, uv.z * 0.173);
+  vec3 warpUV = vec3(uv.x * 0.173, SLICE, uv.z * 0.173);
   uv.x += (texture(noiseMap, warpUV + vec3(0.13, 0.27, 0.41)).r - 0.5) * 1.3;
   uv.z += (texture(noiseMap, warpUV + vec3(0.67, 0.53, 0.19)).r - 0.5) * 1.3;
   vec2 oblique = vec2(uv.x * 0.731 + uv.z * 0.682, -uv.x * 0.682 + uv.z * 0.731) * 1.371;
   float weather = smoothstep(0.20, 0.80,
-    texture(noiseMap, vec3(uv.x, seedOffset.y, uv.z)).r * 0.65 +
-    texture(noiseMap, vec3(oblique.x, seedOffset.y + 0.37, oblique.y)).r * 0.35);
-  float mask = smoothstep(1.0 - coverage - 0.10, 1.0 - coverage + 0.10, weather);
-  mask = mix(mask, 1.0, smoothstep(0.92, 1.0, coverage));
+    texture(noiseMap, vec3(uv.x, SLICE, uv.z)).r * 0.65 +
+    texture(noiseMap, vec3(oblique.x, SLICE + 0.37, oblique.y)).r * 0.35);
   // Subpixel distant masses converge to mean cover rather than aliasing into horizontal bands.
   float distant = smoothstep(8000.0, 40000.0, length(p));
-  mask = mix(mask, coverage, distant);
-  if (mask < 0.001) return 0.0;
-  float billow = texture(noiseMap, uv * vec3(2.0, 3.0, 2.0)).r;
+  float billow = mix(texture(noiseMap, uv * vec3(2.0, 3.0, 2.0)).r, 0.5, distant);
   float detail = mix(texture(noiseMap, uv * 7.0).r, 0.5, distant);
-  billow = mix(billow, 0.5, distant);
+  float threshold = coverageThreshold(coverage);
+  float carve = 1.0, core = 0.0;
+  if (local) {
+    float r = radius + (billow - 0.5) * 0.18;
+    core = 1.0 - smoothstep(0.35, 1.0, r);
+    carve = 1.0 - smoothstep(0.85, 1.15, r);
+    weather = mix(weather, 1.0, core);
+    // A cloud someone placed is at least as full as a half-covered sky's, whatever its layer's cover.
+    threshold = min(threshold, coverageThreshold(0.5));
+  }
+  for (int i = 0; i < MAX_HOLES; i++) {
+    if (i >= holeCount) break;
+    carve *= smoothstep(0.85, 1.15, ellipsoidRadius(p, alt, holeCenter[i], holeSize[i], holeRotation[i]) + (billow - 0.5) * 0.18);
+  }
+  if (carve < 0.001) return 0.0;
+  float mask = smoothstep(threshold - 0.10, threshold + 0.10, weather);
+  mask = mix(mask, 1.0, smoothstep(0.92, 1.0, coverage));
+  mask = mix(mask, max(coverage, core), distant);
+  if (mask < 0.001) return 0.0;
   float top = mix(0.45 + 0.55 * billow, 0.96, flatness);
   float profile = smoothstep(0.0, 0.09, h) * (1.0 - smoothstep(top - 0.22, top, h));
   float erosion = mix(max(0.0, mask - (1.0 - billow) * 0.38 - (1.0 - detail) * 0.10), mask * 0.8, flatness);
-  float localMask = 1.0;
-  if (localSize.x > 0.0) {
-    vec3 relative = vec3(p.x + offsetM.x - localCenter.x, altitude(p) - localCenter.y, p.z + offsetM.z - localCenter.z);
-    float c = cos(localRotation), s = sin(localRotation);
-    relative.xz = vec2(c * relative.x - s * relative.z, s * relative.x + c * relative.z);
-    float radius = length(relative / (localSize * 0.5));
-    localMask = 1.0 - smoothstep(0.60, 1.0, radius + (billow - 0.5) * 0.18);
-  }
-  return profile * erosion * density * localMask;
+  return profile * erosion * density * carve;
 }
 void main() {
   vec3 dir = normalize(vCloudDirection);
@@ -222,7 +272,7 @@ float transmissionAt(vec3 dir, float distanceM) {
   }
   return transmission;
 }`
-  const names = /\b(noiseMap|sunDir|sunColor|ambientColor|hazeColor|offsetM|seedOffset|localCenter|localSize|localRotation|baseM|thicknessM|eyeM|coverage|sizeM|density|darkness|flatness|R|roots|altitude|clipLocal|densityAt|transmissionAt)\b/g
+  const names = /\b(noiseMap|sunDir|sunColor|ambientColor|hazeColor|offsetM|seedOffset|localCenter|localSize|localRotation|baseM|thicknessM|eyeM|coverage|sizeM|density|darkness|flatness|SLICE|MAX_HOLES|holeCount|holeCenter|holeSize|holeRotation|R|roots|altitude|coverageThreshold|ellipsoidRadius|clipLocal|densityAt|transmissionAt)\b/g
   return (definitions + body).replace(names, name => prefix + name)
 }
 
@@ -240,6 +290,10 @@ export class VolumetricCloudLayer {
       ambientColor: { value: new Color(0.4, 0.45, 0.5) }, hazeColor: { value: new Color(0.5, 0.6, 0.7) },
       offsetM: { value: new Vector3() }, seedOffset: { value: new Vector3() },
       localCenter: { value: new Vector3() }, localSize: { value: new Vector3() }, localRotation: { value: 0 },
+      holeCount: { value: 0 },
+      holeCenter: { value: Array.from({ length: MAX_HOLES }, () => new Vector3()) },
+      holeSize: { value: Array.from({ length: MAX_HOLES }, () => new Vector3()) },
+      holeRotation: { value: new Array<number>(MAX_HOLES).fill(0) },
       baseM: { value: 1000 }, thicknessM: { value: 650 }, eyeM: { value: 1.6 },
       coverage: { value: 0.5 }, sizeM: { value: 1400 }, density: { value: 1 }, darkness: { value: 0 }, flatness: { value: 0 }
     }
@@ -249,11 +303,19 @@ export class VolumetricCloudLayer {
     this.mesh.frustumCulled = false
   }
 
-  update(layer: CloudLayer, eyeM: number, instance?: CloudInstance): void {
+  /** `instance` makes this deck one individual cloud of `layer`'s field; `holes` are the individual
+   * clouds a LAYER's deck leaves room for, each drawn by a deck of its own. */
+  update(layer: CloudLayer, eyeM: number, instance?: CloudInstance, holes: readonly CloudInstance[] = []): void {
     const u = this.uniforms
     u.localSize.value.set(instance?.widthM ?? 0, instance?.thicknessM ?? 0, instance?.depthM ?? 0)
     u.localCenter.value.set(instance?.eastM ?? 0, instance ? instance.baseM + instance.thicknessM / 2 : 0, -(instance?.northM ?? 0))
     u.localRotation.value = (instance?.rotationDeg ?? 0) * Math.PI / 180
+    u.holeCount.value = Math.min(MAX_HOLES, holes.length)
+    holes.slice(0, MAX_HOLES).forEach((hole, i) => {
+      u.holeCenter.value[i].set(hole.eastM, hole.baseM + hole.thicknessM / 2, -hole.northM)
+      u.holeSize.value[i].set(hole.widthM, hole.thicknessM, hole.depthM)
+      u.holeRotation.value[i] = hole.rotationDeg * Math.PI / 180
+    })
     u.baseM.value = Math.max(0, layer.baseM)
     u.thicknessM.value = Math.max(10, layer.thicknessM)
     u.coverage.value = Math.max(0, Math.min(1, layer.coverage))
@@ -264,7 +326,14 @@ export class VolumetricCloudLayer {
     u.flatness.value = layer.type === "stratus" ? 1 : layer.type === "stratocumulus" ? 0.45 : 0
     const seed = cloudSeed(layer)
     u.seedOffset.value.set((seed % 97) / 97, (seed % 61) / 61, (seed % 37) / 37)
-    this.mesh.visible = u.coverage.value > 0 && u.density.value > 0
+    // An individual cloud stands whatever its layer's cover, nought included.
+    this.mesh.visible = u.density.value > 0 && (instance !== undefined || u.coverage.value > 0)
+  }
+
+  /** The shader's own coverageThreshold. */
+  static thresholdFor(coverage: number): number {
+    const c = Math.min(0.999, Math.max(0.001, coverage))
+    return 0.645 - 0.23 * (Math.sqrt(3) / Math.PI) * Math.log(c / (1 - c))
   }
 
   /** CPU twin of densityAt, for celestial light transmission (not colour/shadow shading). */
@@ -279,7 +348,16 @@ export class VolumetricCloudLayer {
     const delta = 2 * CLOUD_EARTH_RADIUS_M * y + point.x ** 2 + y ** 2 + point.z ** 2
     const altitude = delta / (Math.sqrt(CLOUD_EARTH_RADIUS_M ** 2 + delta) + CLOUD_EARTH_RADIUS_M)
     const h = (altitude - u.baseM.value) / u.thicknessM.value
-    if (h <= 0 || h >= 1 || u.coverage.value <= 0) return 0
+    const local = u.localSize.value.x > 0
+    if (h <= 0 || h >= 1 || (u.coverage.value <= 0 && !local)) return 0
+    const ellipsoidRadius = (center: Vector3, size: Vector3, rotation: number): number => {
+      const x = point.x + u.offsetM.value.x - center.x
+      const z = point.z + u.offsetM.value.z - center.z
+      const c = Math.cos(rotation), s = Math.sin(rotation)
+      return Math.hypot((c * x - s * z) / (size.x * 0.5), (altitude - center.y) / (size.y * 0.5), (s * x + c * z) / (size.z * 0.5))
+    }
+    const radius = local ? ellipsoidRadius(u.localCenter.value, u.localSize.value, u.localRotation.value) : 0
+    if (radius > 1.3) return 0
     const uv = [point.x, point.y, point.z].map((v, i) =>
       (v + u.offsetM.value.getComponent(i)) / (u.sizeM.value * 4) + u.seedOffset.value.getComponent(i))
     const data = u.noiseMap.value.image.data as Uint8Array
@@ -296,32 +374,36 @@ export class VolumetricCloudLayer {
       }
       return result
     }
-    const warpUV = [uv[0] * 0.173, u.seedOffset.value.y, uv[2] * 0.173]
+    const warpUV = [uv[0] * 0.173, WEATHER_SLICE, uv[2] * 0.173]
     uv[0] += (sample(warpUV[0] + 0.13, warpUV[1] + 0.27, warpUV[2] + 0.41) - 0.5) * 1.3
     uv[2] += (sample(warpUV[0] + 0.67, warpUV[1] + 0.53, warpUV[2] + 0.19) - 0.5) * 1.3
     const ox = (uv[0] * 0.731 + uv[2] * 0.682) * 1.371
     const oz = (-uv[0] * 0.682 + uv[2] * 0.731) * 1.371
-    const weather = smooth(0.2, 0.8, sample(uv[0], u.seedOffset.value.y, uv[2]) * 0.65 + sample(ox, u.seedOffset.value.y + 0.37, oz) * 0.35)
-    let mask = smooth(1 - u.coverage.value - 0.1, 1 - u.coverage.value + 0.1, weather)
-    mask = mix(mask, 1, smooth(0.92, 1, u.coverage.value))
+    let weather = smooth(0.2, 0.8, sample(uv[0], WEATHER_SLICE, uv[2]) * 0.65 + sample(ox, WEATHER_SLICE + 0.37, oz) * 0.35)
     const distant = smooth(8000, 40000, Math.hypot(point.x, point.y, point.z))
-    mask = mix(mask, u.coverage.value, distant)
-    if (mask < 0.001) return 0
     const billow = mix(sample(uv[0] * 2, uv[1] * 3, uv[2] * 2), 0.5, distant)
     const detail = mix(sample(uv[0] * 7, uv[1] * 7, uv[2] * 7), 0.5, distant)
+    let threshold = VolumetricCloudLayer.thresholdFor(u.coverage.value)
+    let carve = 1, core = 0
+    if (local) {
+      const r = radius + (billow - 0.5) * 0.18
+      core = 1 - smooth(0.35, 1, r)
+      carve = 1 - smooth(0.85, 1.15, r)
+      weather = mix(weather, 1, core)
+      threshold = Math.min(threshold, VolumetricCloudLayer.thresholdFor(0.5))
+    }
+    for (let i = 0; i < u.holeCount.value; i++) {
+      carve *= smooth(0.85, 1.15, ellipsoidRadius(u.holeCenter.value[i], u.holeSize.value[i], u.holeRotation.value[i]) + (billow - 0.5) * 0.18)
+    }
+    if (carve < 0.001) return 0
+    let mask = smooth(threshold - 0.1, threshold + 0.1, weather)
+    mask = mix(mask, 1, smooth(0.92, 1, u.coverage.value))
+    mask = mix(mask, Math.max(u.coverage.value, core), distant)
+    if (mask < 0.001) return 0
     const top = mix(0.45 + 0.55 * billow, 0.96, u.flatness.value)
     const profile = smooth(0, 0.09, h) * (1 - smooth(top - 0.22, top, h))
     const erosion = mix(Math.max(0, mask - (1 - billow) * 0.38 - (1 - detail) * 0.1), mask * 0.8, u.flatness.value)
-    let localMask = 1
-    if (u.localSize.value.x > 0) {
-      const x = point.x + u.offsetM.value.x - u.localCenter.value.x
-      const z = point.z + u.offsetM.value.z - u.localCenter.value.z
-      const c = Math.cos(u.localRotation.value), s = Math.sin(u.localRotation.value)
-      const radius = Math.hypot((c * x - s * z) / (u.localSize.value.x * 0.5),
-        (altitude - u.localCenter.value.y) / (u.localSize.value.y * 0.5), (s * x + c * z) / (u.localSize.value.z * 0.5))
-      localMask = 1 - smooth(0.6, 1, radius + (billow - 0.5) * 0.18)
-    }
-    return profile * erosion * u.density.value * localMask
+    return profile * erosion * u.density.value * carve
   }
 
   transmissionAt(direction: { x: number; y: number; z: number }, distanceM = Infinity): number {

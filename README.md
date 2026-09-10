@@ -1008,12 +1008,19 @@ terrain occlusion still uses the proxy shell's depth rather than a metre-based d
 Thin cirrus use the lighter surface field and share that exact veil with the halo renderer. Crystal
 alignment belongs to the cirrus layer that carries it, rather than to the whole sky.
 
-Layers can also contain optional `instances`: individual volumetric clouds with stable IDs,
-east/north positions, base altitude, thickness, width, depth, rotation, density and an optional
-darkness override. They share the
-procedural noise and lighting, drift with their parent layer's wind and participate in actual
-phenomenon attenuation. They remain present at zero global coverage and use volumes even when
-comparing the global surface renderer. Instance properties interpolate on the weather timeline.
+Layers can also contain optional `instances`: individual clouds with stable IDs, east/north
+positions, base altitude, thickness, width, depth, rotation, density and an optional darkness
+override. An individual cloud is a piece of its layer's own field — the same noise at the same
+scale, seed and offset, under the same coverage threshold, lifted to a full cloud inside its
+ellipsoid and carved out of the layer's deck there — so it is one of its neighbours, told apart by
+nothing but where it stands and how big it is. It drifts with its layer's wind, attenuates
+phenomena and celestial bodies, and remains present at zero layer coverage. A layer that holds
+any is drawn as a volume in both rendering modes: a volume set among a surface's flat texture is
+a thing of another kind. Instance properties interpolate on the weather timeline.
+
+The volume's coverage threshold is a quantile like the surface deck's, but fitted to what a ray
+finds rather than to the field's values at a point (see `coverageThreshold` in
+`VolumetricClouds.ts`), so a layer's coverage is about the fraction of sky it covers.
 The weather panel in the recording editor lets you add and remove layers, and add, select, edit
 and delete their individual clouds using numeric controls. Its optional
 canvas manipulation mode selects individual clouds by density and drags them in a plane parallel
