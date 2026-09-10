@@ -30,6 +30,16 @@ describe("weather cloud layers", () => {
     expect(middle.find(l => l.id === "same")!.seed).toBe(1)
     expect(lerpWeather(a, b, 1).cloudLayers).toEqual(b.cloudLayers)
   })
+  it("keeps a layer that states no wind of its own stating none between keyframes", () => {
+    const a = { ...DEFAULT_WEATHER, windSpeed: 10, windDirectionDeg: 80, cloudLayers: [layer("a")] }
+    const b = { ...DEFAULT_WEATHER, windSpeed: 20, windDirectionDeg: 100, cloudLayers: [layer("a")] }
+    const middle = lerpWeather(a, b, 0.5).cloudLayers![0]
+    expect(middle.windSpeed).toBeUndefined()
+    expect(middle.windDirectionDeg).toBeUndefined()
+    // Stated on one side only: the other side means the general wind, and the blend is real.
+    const stated = lerpWeather({ ...a, cloudLayers: [{ ...layer("a"), windSpeed: 30 }] }, b, 0.5).cloudLayers![0]
+    expect(stated.windSpeed).toBe(25)
+  })
   it("round-trips per-layer wind and integrates it independently", () => {
     const track = new WeatherTrack()
     track.addKeyframe(0, { ...DEFAULT_WEATHER, windSpeed: 20, cloudLayers: [{ ...layer("a"), windSpeed: 5, windDirectionDeg: 90 }] })

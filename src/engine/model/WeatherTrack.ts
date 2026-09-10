@@ -73,8 +73,13 @@ function lerpCloudLayers(a: Weather, b: Weather, t: number): CloudLayer[] | unde
       darkness: lerpNumber(start.darkness ?? a.cloudDarkness, end.darkness ?? b.cloudDarkness, t),
       iceCrystalAlignment: start.iceCrystalAlignment === undefined || end.iceCrystalAlignment === undefined
         ? undefined : lerpNumber(start.iceCrystalAlignment, end.iceCrystalAlignment, t),
-      windSpeed: lerpNumber(start.windSpeed ?? a.windSpeed, end.windSpeed ?? b.windSpeed, t),
-      windDirectionDeg: lerpAngleDeg(start.windDirectionDeg ?? a.windDirectionDeg, end.windDirectionDeg ?? b.windDirectionDeg, t)
+      // A layer that states no wind of its own on either side keeps stating none: it rides the
+      // general wind, which is read at use (see cloudOffsetAt), and materialising that wind here
+      // made the editor show every looked-up layer as if it carried one — to sixteen decimals.
+      windSpeed: start.windSpeed === undefined && end.windSpeed === undefined
+        ? undefined : lerpNumber(start.windSpeed ?? a.windSpeed, end.windSpeed ?? b.windSpeed, t),
+      windDirectionDeg: start.windDirectionDeg === undefined && end.windDirectionDeg === undefined
+        ? undefined : lerpAngleDeg(start.windDirectionDeg ?? a.windDirectionDeg, end.windDirectionDeg ?? b.windDirectionDeg, t)
     }
   })
 }
