@@ -42,13 +42,13 @@
               "bounds": {
                 "x": 319.5,
                 "y": 179.8,
-                "width": 1.0,
+                "width": 1,
                 "height": 0.5
               },
               "color": "#e8e6df",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Objet",
               "angular": {
@@ -56,7 +56,7 @@
                 "heightDeg": 0.0827
               },
               "aim": {
-                "azimuthDeg": 200.0,
+                "azimuthDeg": 200,
                 "altitudeDeg": -5.0083
               }
             }
@@ -68,13 +68,13 @@
               "bounds": {
                 "x": 319.5,
                 "y": 179.8,
-                "width": 1.0,
+                "width": 1,
                 "height": 0.5
               },
               "color": "#b4231f",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Insigne rouge (taille rapportée, tracé approché)",
               "angular": {
@@ -82,7 +82,7 @@
                 "heightDeg": 0.0827
               },
               "aim": {
-                "azimuthDeg": 200.0,
+                "azimuthDeg": 200,
                 "altitudeDeg": -5.0083
               }
             }
@@ -99,8 +99,8 @@
               },
               "color": "#7fc4ff",
               "angle": 0,
-              "transparency": 0.0,
-              "haloScale": 14.0,
+              "transparency": 0,
+              "haloScale": 14,
               "selected": false,
               "title": "Flamme",
               "angular": {
@@ -126,8 +126,8 @@
               },
               "color": "#ff8a2b",
               "angle": 0,
-              "transparency": 0.0,
-              "haloScale": 10.0,
+              "transparency": 0,
+              "haloScale": 10,
               "selected": false,
               "title": "Base orange de la flamme",
               "angular": {
@@ -136,7 +136,7 @@
               },
               "brightness": 0.85,
               "aim": {
-                "azimuthDeg": 200.0,
+                "azimuthDeg": 200,
                 "altitudeDeg": 9.925
               }
             }
@@ -153,8 +153,8 @@
               },
               "color": "#f2f2ee",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Silhouette en combinaison blanche (1)",
               "angular": {
@@ -179,8 +179,8 @@
               },
               "color": "#f2f2ee",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Silhouette en combinaison blanche (2)",
               "angular": {
@@ -210,8 +210,8 @@
               },
               "color": "#e8e6df",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Objet",
               "angular": {
@@ -219,8 +219,8 @@
                 "heightDeg": 0.0992
               },
               "aim": {
-                "azimuthDeg": 200.0,
-                "altitudeDeg": -5.0
+                "azimuthDeg": 200,
+                "altitudeDeg": -5
               }
             }
           },
@@ -236,8 +236,8 @@
               },
               "color": "#b4231f",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Insigne rouge (taille rapportée, tracé approché)",
               "angular": {
@@ -245,8 +245,8 @@
                 "heightDeg": 0.0992
               },
               "aim": {
-                "azimuthDeg": 200.0,
-                "altitudeDeg": -5.0
+                "azimuthDeg": 200,
+                "altitudeDeg": -5
               }
             }
           },
@@ -262,8 +262,8 @@
               },
               "color": "#7fc4ff",
               "angle": 0,
-              "transparency": 0.0,
-              "haloScale": 14.0,
+              "transparency": 0,
+              "haloScale": 14,
               "selected": false,
               "title": "Flamme",
               "angular": {
@@ -272,7 +272,7 @@
               },
               "brightness": 0.95,
               "aim": {
-                "azimuthDeg": 200.0,
+                "azimuthDeg": 200,
                 "altitudeDeg": 2.9833
               }
             }
@@ -289,8 +289,8 @@
               },
               "color": "#ff8a2b",
               "angle": 0,
-              "transparency": 0.0,
-              "haloScale": 10.0,
+              "transparency": 0,
+              "haloScale": 10,
               "selected": false,
               "title": "Base orange de la flamme",
               "angular": {
@@ -299,7 +299,7 @@
               },
               "brightness": 0.85,
               "aim": {
-                "azimuthDeg": 200.0,
+                "azimuthDeg": 200,
                 "altitudeDeg": 2.925
               }
             }
@@ -316,8 +316,8 @@
               },
               "color": "#f2f2ee",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Silhouette en combinaison blanche (1)",
               "angular": {
@@ -342,8 +342,8 @@
               },
               "color": "#f2f2ee",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Silhouette en combinaison blanche (2)",
               "angular": {
@@ -373,8 +373,8 @@
               },
               "color": "#e8e6df",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Objet",
               "angular": {
@@ -382,8 +382,8 @@
                 "heightDeg": 0.1045
               },
               "aim": {
-                "azimuthDeg": 200.0,
-                "altitudeDeg": -5.0
+                "azimuthDeg": 200,
+                "altitudeDeg": -5
               }
             }
           },
@@ -399,8 +399,8 @@
               },
               "color": "#b4231f",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Insigne rouge (taille rapportée, tracé approché)",
               "angular": {
@@ -408,8 +408,8 @@
                 "heightDeg": 0.1045
               },
               "aim": {
-                "azimuthDeg": 200.0,
-                "altitudeDeg": -5.0
+                "azimuthDeg": 200,
+                "altitudeDeg": -5
               }
             }
           },
@@ -425,8 +425,8 @@
               },
               "color": "#7fc4ff",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Flamme",
               "angular": {
@@ -434,7 +434,7 @@
                 "heightDeg": 0.1387
               },
               "aim": {
-                "azimuthDeg": 200.0,
+                "azimuthDeg": 200,
                 "altitudeDeg": 1.5
               }
             }
@@ -451,8 +451,8 @@
               },
               "color": "#ff8a2b",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Base orange de la flamme",
               "angular": {
@@ -477,8 +477,8 @@
               },
               "color": "#f2f2ee",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Silhouette en combinaison blanche (1)",
               "angular": {
@@ -503,8 +503,8 @@
               },
               "color": "#f2f2ee",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Silhouette en combinaison blanche (2)",
               "angular": {
@@ -528,14 +528,14 @@
               "kind": "oval",
               "bounds": {
                 "x": 318.1,
-                "y": 179.0,
+                "y": 179,
                 "width": 3.8,
-                "height": 2.0
+                "height": 2
               },
               "color": "#e8e6df",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Objet",
               "angular": {
@@ -543,8 +543,8 @@
                 "heightDeg": 0.3308
               },
               "aim": {
-                "azimuthDeg": 200.0,
-                "altitudeDeg": -5.0
+                "azimuthDeg": 200,
+                "altitudeDeg": -5
               }
             }
           },
@@ -554,14 +554,14 @@
               "kind": "oval",
               "bounds": {
                 "x": 318.1,
-                "y": 179.0,
+                "y": 179,
                 "width": 3.8,
-                "height": 2.0
+                "height": 2
               },
               "color": "#b4231f",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Insigne rouge (taille rapportée, tracé approché)",
               "angular": {
@@ -569,8 +569,8 @@
                 "heightDeg": 0.3308
               },
               "aim": {
-                "azimuthDeg": 200.0,
-                "altitudeDeg": -5.0
+                "azimuthDeg": 200,
+                "altitudeDeg": -5
               }
             }
           },
@@ -586,8 +586,8 @@
               },
               "color": "#7fc4ff",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Flamme",
               "angular": {
@@ -596,7 +596,7 @@
               },
               "aim": {
                 "azimuthDeg": 199.9917,
-                "altitudeDeg": 0.0
+                "altitudeDeg": 0
               }
             }
           },
@@ -612,8 +612,8 @@
               },
               "color": "#ff8a2b",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Base orange de la flamme",
               "angular": {
@@ -638,8 +638,8 @@
               },
               "color": "#f2f2ee",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Silhouette en combinaison blanche (1)",
               "angular": {
@@ -664,8 +664,8 @@
               },
               "color": "#f2f2ee",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Silhouette en combinaison blanche (2)",
               "angular": {
@@ -695,8 +695,8 @@
               },
               "color": "#e8e6df",
               "angle": 0,
-              "transparency": 0.0,
-              "haloScale": 0.0,
+              "transparency": 0,
+              "haloScale": 0,
               "selected": false,
               "title": "Objet",
               "angular": {
@@ -716,13 +716,13 @@
               "bounds": {
                 "x": 319.5,
                 "y": 158.6,
-                "width": 1.0,
+                "width": 1,
                 "height": 0.8
               },
               "color": "#b4231f",
               "angle": 0,
-              "transparency": 0.0,
-              "haloScale": 0.0,
+              "transparency": 0,
+              "haloScale": 0,
               "selected": false,
               "title": "Insigne rouge (taille rapportée, tracé approché)",
               "angular": {
@@ -730,7 +730,7 @@
                 "heightDeg": 0.1378
               },
               "aim": {
-                "azimuthDeg": 200.0,
+                "azimuthDeg": 200,
                 "altitudeDeg": -1.5
               }
             }
@@ -747,8 +747,8 @@
               },
               "color": "#7fc4ff",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Flamme",
               "angular": {
@@ -757,7 +757,7 @@
               },
               "aim": {
                 "azimuthDeg": 199.9917,
-                "altitudeDeg": -5.0
+                "altitudeDeg": -5
               }
             }
           },
@@ -773,8 +773,8 @@
               },
               "color": "#ff8a2b",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Base orange de la flamme",
               "angular": {
@@ -783,7 +783,7 @@
               },
               "aim": {
                 "azimuthDeg": 199.9917,
-                "altitudeDeg": -5.0
+                "altitudeDeg": -5
               }
             }
           },
@@ -799,8 +799,8 @@
               },
               "color": "#f2f2ee",
               "angle": 0,
-              "transparency": 0.0,
-              "haloScale": 0.0,
+              "transparency": 0,
+              "haloScale": 0,
               "selected": false,
               "title": "Silhouette en combinaison blanche (1)",
               "angular": {
@@ -825,8 +825,8 @@
               },
               "color": "#f2f2ee",
               "angle": 0,
-              "transparency": 0.0,
-              "haloScale": 0.0,
+              "transparency": 0,
+              "haloScale": 0,
               "selected": false,
               "title": "Silhouette en combinaison blanche (2)",
               "angular": {
@@ -856,8 +856,8 @@
               },
               "color": "#e8e6df",
               "angle": 0,
-              "transparency": 0.0,
-              "haloScale": 0.0,
+              "transparency": 0,
+              "haloScale": 0,
               "selected": false,
               "title": "Objet",
               "angular": {
@@ -877,13 +877,13 @@
               "bounds": {
                 "x": 319.5,
                 "y": 158.6,
-                "width": 1.0,
+                "width": 1,
                 "height": 0.8
               },
               "color": "#b4231f",
               "angle": 0,
-              "transparency": 0.0,
-              "haloScale": 0.0,
+              "transparency": 0,
+              "haloScale": 0,
               "selected": false,
               "title": "Insigne rouge (taille rapportée, tracé approché)",
               "angular": {
@@ -891,7 +891,7 @@
                 "heightDeg": 0.1378
               },
               "aim": {
-                "azimuthDeg": 200.0,
+                "azimuthDeg": 200,
                 "altitudeDeg": -1.5
               }
             }
@@ -908,8 +908,8 @@
               },
               "color": "#7fc4ff",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Flamme",
               "angular": {
@@ -918,7 +918,7 @@
               },
               "aim": {
                 "azimuthDeg": 199.9917,
-                "altitudeDeg": -5.0
+                "altitudeDeg": -5
               }
             }
           },
@@ -934,8 +934,8 @@
               },
               "color": "#ff8a2b",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Base orange de la flamme",
               "angular": {
@@ -944,7 +944,7 @@
               },
               "aim": {
                 "azimuthDeg": 199.9917,
-                "altitudeDeg": -5.0
+                "altitudeDeg": -5
               }
             }
           },
@@ -960,8 +960,8 @@
               },
               "color": "#f2f2ee",
               "angle": 0,
-              "transparency": 0.0,
-              "haloScale": 0.0,
+              "transparency": 0,
+              "haloScale": 0,
               "selected": false,
               "title": "Silhouette en combinaison blanche (1)",
               "angular": {
@@ -986,8 +986,8 @@
               },
               "color": "#f2f2ee",
               "angle": 0,
-              "transparency": 0.0,
-              "haloScale": 0.0,
+              "transparency": 0,
+              "haloScale": 0,
               "selected": false,
               "title": "Silhouette en combinaison blanche (2)",
               "angular": {
@@ -1017,8 +1017,8 @@
               },
               "color": "#e8e6df",
               "angle": 0,
-              "transparency": 0.0,
-              "haloScale": 0.0,
+              "transparency": 0,
+              "haloScale": 0,
               "selected": false,
               "title": "Objet",
               "angular": {
@@ -1039,12 +1039,12 @@
                 "x": 319.4,
                 "y": 164.5,
                 "width": 1.2,
-                "height": 1.0
+                "height": 1
               },
               "color": "#b4231f",
               "angle": 0,
-              "transparency": 0.0,
-              "haloScale": 0.0,
+              "transparency": 0,
+              "haloScale": 0,
               "selected": false,
               "title": "Insigne rouge (taille rapportée, tracé approché)",
               "angular": {
@@ -1052,7 +1052,7 @@
                 "heightDeg": 0.1601
               },
               "aim": {
-                "azimuthDeg": 200.0,
+                "azimuthDeg": 200,
                 "altitudeDeg": -2.5
               }
             }
@@ -1069,8 +1069,8 @@
               },
               "color": "#7fc4ff",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Flamme",
               "angular": {
@@ -1079,7 +1079,7 @@
               },
               "aim": {
                 "azimuthDeg": 200.0083,
-                "altitudeDeg": -5.0
+                "altitudeDeg": -5
               }
             }
           },
@@ -1095,8 +1095,8 @@
               },
               "color": "#ff8a2b",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Base orange de la flamme",
               "angular": {
@@ -1105,7 +1105,7 @@
               },
               "aim": {
                 "azimuthDeg": 200.0083,
-                "altitudeDeg": -5.0
+                "altitudeDeg": -5
               }
             }
           },
@@ -1121,8 +1121,8 @@
               },
               "color": "#f2f2ee",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Silhouette en combinaison blanche (1)",
               "angular": {
@@ -1147,8 +1147,8 @@
               },
               "color": "#f2f2ee",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Silhouette en combinaison blanche (2)",
               "angular": {
@@ -1174,12 +1174,12 @@
                 "x": 315.2,
                 "y": 178.1,
                 "width": 9.6,
-                "height": 5.0
+                "height": 5
               },
               "color": "#e8e6df",
               "angle": 0,
-              "transparency": 0.0,
-              "haloScale": 0.0,
+              "transparency": 0,
+              "haloScale": 0,
               "selected": false,
               "title": "Objet",
               "angular": {
@@ -1187,7 +1187,7 @@
                 "heightDeg": 0.827
               },
               "aim": {
-                "azimuthDeg": 200.0,
+                "azimuthDeg": 200,
                 "altitudeDeg": -5.1
               }
             }
@@ -1197,15 +1197,15 @@
             "shape": {
               "kind": "oval",
               "bounds": {
-                "x": 319.0,
+                "x": 319,
                 "y": 179.8,
                 "width": 2.1,
                 "height": 1.7
               },
               "color": "#b4231f",
               "angle": 0,
-              "transparency": 0.0,
-              "haloScale": 0.0,
+              "transparency": 0,
+              "haloScale": 0,
               "selected": false,
               "title": "Insigne rouge (taille rapportée, tracé approché)",
               "angular": {
@@ -1226,12 +1226,12 @@
                 "x": 315.2,
                 "y": 177.5,
                 "width": 9.6,
-                "height": 5.0
+                "height": 5
               },
               "color": "#7fc4ff",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Flamme",
               "angular": {
@@ -1239,8 +1239,8 @@
                 "heightDeg": 0.827
               },
               "aim": {
-                "azimuthDeg": 200.0,
-                "altitudeDeg": -5.0
+                "azimuthDeg": 200,
+                "altitudeDeg": -5
               }
             }
           },
@@ -1252,12 +1252,12 @@
                 "x": 315.2,
                 "y": 177.5,
                 "width": 9.6,
-                "height": 5.0
+                "height": 5
               },
               "color": "#ff8a2b",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Base orange de la flamme",
               "angular": {
@@ -1265,8 +1265,8 @@
                 "heightDeg": 0.827
               },
               "aim": {
-                "azimuthDeg": 200.0,
-                "altitudeDeg": -5.0
+                "azimuthDeg": 200,
+                "altitudeDeg": -5
               }
             }
           },
@@ -1282,8 +1282,8 @@
               },
               "color": "#f2f2ee",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Silhouette en combinaison blanche (1)",
               "angular": {
@@ -1308,8 +1308,8 @@
               },
               "color": "#f2f2ee",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Silhouette en combinaison blanche (2)",
               "angular": {
@@ -1339,8 +1339,8 @@
               },
               "color": "#e8e6df",
               "angle": 0,
-              "transparency": 0.0,
-              "haloScale": 0.0,
+              "transparency": 0,
+              "haloScale": 0,
               "selected": false,
               "title": "Objet",
               "angular": {
@@ -1348,7 +1348,7 @@
                 "heightDeg": 2.2051
               },
               "aim": {
-                "azimuthDeg": 200.0,
+                "azimuthDeg": 200,
                 "altitudeDeg": -7.2833
               }
             }
@@ -1365,8 +1365,8 @@
               },
               "color": "#b4231f",
               "angle": 0,
-              "transparency": 0.0,
-              "haloScale": 0.0,
+              "transparency": 0,
+              "haloScale": 0,
               "selected": false,
               "title": "Insigne rouge (taille rapportée, tracé approché)",
               "angular": {
@@ -1374,7 +1374,7 @@
                 "heightDeg": 0.7473
               },
               "aim": {
-                "azimuthDeg": 200.0,
+                "azimuthDeg": 200,
                 "altitudeDeg": -7.275
               }
             }
@@ -1391,8 +1391,8 @@
               },
               "color": "#7fc4ff",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Flamme",
               "angular": {
@@ -1400,8 +1400,8 @@
                 "heightDeg": 2.2051
               },
               "aim": {
-                "azimuthDeg": 200.0,
-                "altitudeDeg": -5.0
+                "azimuthDeg": 200,
+                "altitudeDeg": -5
               }
             }
           },
@@ -1417,8 +1417,8 @@
               },
               "color": "#ff8a2b",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Base orange de la flamme",
               "angular": {
@@ -1426,8 +1426,8 @@
                 "heightDeg": 2.2051
               },
               "aim": {
-                "azimuthDeg": 200.0,
-                "altitudeDeg": -5.0
+                "azimuthDeg": 200,
+                "altitudeDeg": -5
               }
             }
           },
@@ -1436,15 +1436,15 @@
             "shape": {
               "kind": "oval",
               "bounds": {
-                "x": 315.0,
+                "x": 315,
                 "y": 190.4,
                 "width": 3.4,
                 "height": 9.9
               },
               "color": "#f2f2ee",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Silhouette en combinaison blanche (1)",
               "angular": {
@@ -1469,8 +1469,8 @@
               },
               "color": "#f2f2ee",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Silhouette en combinaison blanche (2)",
               "angular": {
@@ -1500,8 +1500,8 @@
               },
               "color": "#e8e6df",
               "angle": 0,
-              "transparency": 0.0,
-              "haloScale": 0.0,
+              "transparency": 0,
+              "haloScale": 0,
               "selected": false,
               "title": "Objet",
               "angular": {
@@ -1509,7 +1509,7 @@
                 "heightDeg": 3.3071
               },
               "aim": {
-                "azimuthDeg": 200.0,
+                "azimuthDeg": 200,
                 "altitudeDeg": -7.7167
               }
             }
@@ -1520,14 +1520,14 @@
               "kind": "oval",
               "bounds": {
                 "x": 315.9,
-                "y": 193.0,
+                "y": 193,
                 "width": 8.4,
                 "height": 6.7
               },
               "color": "#b4231f",
               "angle": 0,
-              "transparency": 0.0,
-              "haloScale": 0.0,
+              "transparency": 0,
+              "haloScale": 0,
               "selected": false,
               "title": "Insigne rouge (taille rapportée, tracé approché)",
               "angular": {
@@ -1552,8 +1552,8 @@
               },
               "color": "#7fc4ff",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Flamme",
               "angular": {
@@ -1578,8 +1578,8 @@
               },
               "color": "#ff8a2b",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Base orange de la flamme",
               "angular": {
@@ -1588,7 +1588,7 @@
               },
               "aim": {
                 "azimuthDeg": 200.0167,
-                "altitudeDeg": -13.0
+                "altitudeDeg": -13
               }
             }
           },
@@ -1604,8 +1604,8 @@
               },
               "color": "#f2f2ee",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Silhouette en combinaison blanche (1)",
               "angular": {
@@ -1630,8 +1630,8 @@
               },
               "color": "#f2f2ee",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Silhouette en combinaison blanche (2)",
               "angular": {
@@ -1661,7 +1661,7 @@
               },
               "color": "#e8e6df",
               "angle": 0,
-              "transparency": 0.0,
+              "transparency": 0,
               "haloScale": 0.2,
               "selected": false,
               "title": "Objet",
@@ -1670,7 +1670,7 @@
                 "heightDeg": 3.3071
               },
               "aim": {
-                "azimuthDeg": 200.0,
+                "azimuthDeg": 200,
                 "altitudeDeg": -7.7167
               }
             }
@@ -1681,14 +1681,14 @@
               "kind": "oval",
               "bounds": {
                 "x": 315.9,
-                "y": 193.0,
+                "y": 193,
                 "width": 8.4,
                 "height": 6.7
               },
               "color": "#b4231f",
               "angle": 0,
-              "transparency": 0.0,
-              "haloScale": 0.0,
+              "transparency": 0,
+              "haloScale": 0,
               "selected": false,
               "title": "Insigne rouge (taille rapportée, tracé approché)",
               "angular": {
@@ -1749,7 +1749,7 @@
               },
               "aim": {
                 "azimuthDeg": 200.0167,
-                "altitudeDeg": -13.0
+                "altitudeDeg": -13
               }
             }
           },
@@ -1765,8 +1765,8 @@
               },
               "color": "#f2f2ee",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Silhouette en combinaison blanche (1)",
               "angular": {
@@ -1791,8 +1791,8 @@
               },
               "color": "#f2f2ee",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Silhouette en combinaison blanche (2)",
               "angular": {
@@ -1816,13 +1816,13 @@
               "kind": "oval",
               "bounds": {
                 "x": 294.1,
-                "y": 164.0,
+                "y": 164,
                 "width": 34.4,
                 "height": 17.6
               },
               "color": "#e8e6df",
               "angle": 0,
-              "transparency": 0.0,
+              "transparency": 0,
               "haloScale": 0.2,
               "selected": false,
               "title": "Objet",
@@ -1844,12 +1844,12 @@
                 "x": 307.5,
                 "y": 169.9,
                 "width": 7.5,
-                "height": 6.0
+                "height": 6
               },
               "color": "#b4231f",
               "angle": 0,
-              "transparency": 0.0,
-              "haloScale": 0.0,
+              "transparency": 0,
+              "haloScale": 0,
               "selected": false,
               "title": "Insigne rouge (taille rapportée, tracé approché)",
               "angular": {
@@ -1895,7 +1895,7 @@
               "bounds": {
                 "x": 304.8,
                 "y": 196.6,
-                "width": 13.0,
+                "width": 13,
                 "height": 9.5
               },
               "color": "#ff8a2b",
@@ -1926,8 +1926,8 @@
               },
               "color": "#f2f2ee",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Silhouette en combinaison blanche (1)",
               "angular": {
@@ -1952,8 +1952,8 @@
               },
               "color": "#f2f2ee",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Silhouette en combinaison blanche (2)",
               "angular": {
@@ -1977,13 +1977,13 @@
               "kind": "oval",
               "bounds": {
                 "x": 288.7,
-                "y": 146.0,
-                "width": 31.0,
+                "y": 146,
+                "width": 31,
                 "height": 15.9
               },
               "color": "#e8e6df",
               "angle": 0,
-              "transparency": 0.0,
+              "transparency": 0,
               "haloScale": 0.2,
               "selected": false,
               "title": "Objet",
@@ -2009,8 +2009,8 @@
               },
               "color": "#b4231f",
               "angle": 0,
-              "transparency": 0.0,
-              "haloScale": 0.0,
+              "transparency": 0,
+              "haloScale": 0,
               "selected": false,
               "title": "Insigne rouge (taille rapportée, tracé approché)",
               "angular": {
@@ -2087,8 +2087,8 @@
               },
               "color": "#f2f2ee",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Silhouette en combinaison blanche (1)",
               "angular": {
@@ -2113,8 +2113,8 @@
               },
               "color": "#f2f2ee",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Silhouette en combinaison blanche (2)",
               "angular": {
@@ -2144,7 +2144,7 @@
               },
               "color": "#e8e6df",
               "angle": 0,
-              "transparency": 0.0,
+              "transparency": 0,
               "haloScale": 0.2,
               "selected": false,
               "title": "Objet",
@@ -2164,14 +2164,14 @@
               "kind": "oval",
               "bounds": {
                 "x": 296.4,
-                "y": 136.0,
+                "y": 136,
                 "width": 6.2,
-                "height": 5.0
+                "height": 5
               },
               "color": "#b4231f",
               "angle": 0,
-              "transparency": 0.0,
-              "haloScale": 0.0,
+              "transparency": 0,
+              "haloScale": 0,
               "selected": false,
               "title": "Insigne rouge (taille rapportée, tracé approché)",
               "angular": {
@@ -2248,8 +2248,8 @@
               },
               "color": "#f2f2ee",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Silhouette en combinaison blanche (1)",
               "angular": {
@@ -2274,8 +2274,8 @@
               },
               "color": "#f2f2ee",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Silhouette en combinaison blanche (2)",
               "angular": {
@@ -2305,7 +2305,7 @@
               },
               "color": "#e8e6df",
               "angle": 0,
-              "transparency": 0.0,
+              "transparency": 0,
               "haloScale": 0.2,
               "selected": false,
               "title": "Objet",
@@ -2331,8 +2331,8 @@
               },
               "color": "#b4231f",
               "angle": 0,
-              "transparency": 0.0,
-              "haloScale": 0.0,
+              "transparency": 0,
+              "haloScale": 0,
               "selected": false,
               "title": "Insigne rouge (taille rapportée, tracé approché)",
               "angular": {
@@ -2350,10 +2350,10 @@
             "shape": {
               "kind": "oval",
               "bounds": {
-                "x": 291.0,
+                "x": 291,
                 "y": 131.7,
                 "width": 8.9,
-                "height": 18.0
+                "height": 18
               },
               "color": "#7fc4ff",
               "angle": 0,
@@ -2377,7 +2377,7 @@
               "kind": "oval",
               "bounds": {
                 "x": 290.6,
-                "y": 143.0,
+                "y": 143,
                 "width": 9.8,
                 "height": 7.2
               },
@@ -2409,8 +2409,8 @@
               },
               "color": "#f2f2ee",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Silhouette en combinaison blanche (1)",
               "angular": {
@@ -2435,8 +2435,8 @@
               },
               "color": "#f2f2ee",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Silhouette en combinaison blanche (2)",
               "angular": {
@@ -2466,8 +2466,8 @@
               },
               "color": "#e8e6df",
               "angle": 0,
-              "transparency": 0.0,
-              "haloScale": 0.0,
+              "transparency": 0,
+              "haloScale": 0,
               "selected": false,
               "title": "Objet",
               "angular": {
@@ -2487,13 +2487,13 @@
               "bounds": {
                 "x": 345.8,
                 "y": 135.9,
-                "width": 4.0,
+                "width": 4,
                 "height": 3.2
               },
               "color": "#b4231f",
               "angle": 0,
-              "transparency": 0.0,
-              "haloScale": 0.0,
+              "transparency": 0,
+              "haloScale": 0,
               "selected": false,
               "title": "Insigne rouge (taille rapportée, tracé approché)",
               "angular": {
@@ -2512,14 +2512,14 @@
               "kind": "oval",
               "bounds": {
                 "x": 344.8,
-                "y": 142.0,
+                "y": 142,
                 "width": 6.3,
                 "height": 12.6
               },
               "color": "#7fc4ff",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Flamme",
               "angular": {
@@ -2544,8 +2544,8 @@
               },
               "color": "#ff8a2b",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Base orange de la flamme",
               "angular": {
@@ -2570,8 +2570,8 @@
               },
               "color": "#f2f2ee",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Silhouette en combinaison blanche (1)",
               "angular": {
@@ -2596,8 +2596,8 @@
               },
               "color": "#f2f2ee",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Silhouette en combinaison blanche (2)",
               "angular": {
@@ -2622,13 +2622,13 @@
               "bounds": {
                 "x": 368.6,
                 "y": 140.6,
-                "width": 14.0,
+                "width": 14,
                 "height": 7.2
               },
               "color": "#e8e6df",
               "angle": 0,
-              "transparency": 0.0,
-              "haloScale": 0.0,
+              "transparency": 0,
+              "haloScale": 0,
               "selected": false,
               "title": "Objet",
               "angular": {
@@ -2653,8 +2653,8 @@
               },
               "color": "#b4231f",
               "angle": 0,
-              "transparency": 0.0,
-              "haloScale": 0.0,
+              "transparency": 0,
+              "haloScale": 0,
               "selected": false,
               "title": "Insigne rouge (taille rapportée, tracé approché)",
               "angular": {
@@ -2679,8 +2679,8 @@
               },
               "color": "#7fc4ff",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Flamme",
               "angular": {
@@ -2698,15 +2698,15 @@
             "shape": {
               "kind": "oval",
               "bounds": {
-                "x": 373.0,
+                "x": 373,
                 "y": 153.7,
                 "width": 5.3,
                 "height": 3.9
               },
               "color": "#ff8a2b",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Base orange de la flamme",
               "angular": {
@@ -2731,8 +2731,8 @@
               },
               "color": "#f2f2ee",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Silhouette en combinaison blanche (1)",
               "angular": {
@@ -2757,8 +2757,8 @@
               },
               "color": "#f2f2ee",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Silhouette en combinaison blanche (2)",
               "angular": {
@@ -2788,8 +2788,8 @@
               },
               "color": "#e8e6df",
               "angle": 0,
-              "transparency": 0.0,
-              "haloScale": 0.0,
+              "transparency": 0,
+              "haloScale": 0,
               "selected": false,
               "title": "Objet",
               "angular": {
@@ -2810,12 +2810,12 @@
                 "x": 408.8,
                 "y": 130.7,
                 "width": 1.2,
-                "height": 1.0
+                "height": 1
               },
               "color": "#b4231f",
               "angle": 0,
-              "transparency": 0.0,
-              "haloScale": 0.0,
+              "transparency": 0,
+              "haloScale": 0,
               "selected": false,
               "title": "Insigne rouge (taille rapportée, tracé approché)",
               "angular": {
@@ -2835,13 +2835,13 @@
               "bounds": {
                 "x": 408.6,
                 "y": 132.5,
-                "width": 2.0,
+                "width": 2,
                 "height": 3.9
               },
               "color": "#7fc4ff",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Flamme",
               "angular": {
@@ -2866,8 +2866,8 @@
               },
               "color": "#ff8a2b",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Base orange de la flamme",
               "angular": {
@@ -2892,8 +2892,8 @@
               },
               "color": "#f2f2ee",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Silhouette en combinaison blanche (1)",
               "angular": {
@@ -2918,8 +2918,8 @@
               },
               "color": "#f2f2ee",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Silhouette en combinaison blanche (2)",
               "angular": {
@@ -2950,7 +2950,7 @@
               "color": "#e8e6df",
               "angle": 0,
               "transparency": 0.35,
-              "haloScale": 0.0,
+              "haloScale": 0,
               "selected": false,
               "title": "Objet",
               "angular": {
@@ -2976,7 +2976,7 @@
               "color": "#b4231f",
               "angle": 0,
               "transparency": 0.35,
-              "haloScale": 0.0,
+              "haloScale": 0,
               "selected": false,
               "title": "Insigne rouge (taille rapportée, tracé approché)",
               "angular": {
@@ -3001,8 +3001,8 @@
               },
               "color": "#7fc4ff",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Flamme",
               "angular": {
@@ -3027,8 +3027,8 @@
               },
               "color": "#ff8a2b",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Base orange de la flamme",
               "angular": {
@@ -3053,8 +3053,8 @@
               },
               "color": "#f2f2ee",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Silhouette en combinaison blanche (1)",
               "angular": {
@@ -3079,8 +3079,8 @@
               },
               "color": "#f2f2ee",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Silhouette en combinaison blanche (2)",
               "angular": {
@@ -3104,14 +3104,14 @@
               "kind": "oval",
               "bounds": {
                 "x": 426.2,
-                "y": 120.0,
+                "y": 120,
                 "width": 0.8,
                 "height": 0.4
               },
               "color": "#e8e6df",
               "angle": 0,
               "transparency": 0.9,
-              "haloScale": 0.0,
+              "haloScale": 0,
               "selected": false,
               "title": "Objet",
               "angular": {
@@ -3137,7 +3137,7 @@
               "color": "#b4231f",
               "angle": 0,
               "transparency": 0.9,
-              "haloScale": 0.0,
+              "haloScale": 0,
               "selected": false,
               "title": "Insigne rouge (taille rapportée, tracé approché)",
               "angular": {
@@ -3162,8 +3162,8 @@
               },
               "color": "#7fc4ff",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Flamme",
               "angular": {
@@ -3188,8 +3188,8 @@
               },
               "color": "#ff8a2b",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Base orange de la flamme",
               "angular": {
@@ -3214,8 +3214,8 @@
               },
               "color": "#f2f2ee",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Silhouette en combinaison blanche (1)",
               "angular": {
@@ -3240,8 +3240,8 @@
               },
               "color": "#f2f2ee",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Silhouette en combinaison blanche (2)",
               "angular": {
@@ -3265,14 +3265,14 @@
               "kind": "oval",
               "bounds": {
                 "x": 439.7,
-                "y": 117.0,
+                "y": 117,
                 "width": 0.4,
                 "height": 0.2
               },
               "color": "#e8e6df",
               "angle": 0,
-              "transparency": 0.0,
-              "haloScale": 0.0,
+              "transparency": 0,
+              "haloScale": 0,
               "selected": false,
               "title": "Objet",
               "angular": {
@@ -3291,14 +3291,14 @@
               "kind": "oval",
               "bounds": {
                 "x": 439.8,
-                "y": 117.0,
+                "y": 117,
                 "width": 0.1,
                 "height": 0.1
               },
               "color": "#b4231f",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Insigne rouge (taille rapportée, tracé approché)",
               "angular": {
@@ -3323,8 +3323,8 @@
               },
               "color": "#7fc4ff",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Flamme",
               "angular": {
@@ -3332,8 +3332,8 @@
                 "heightDeg": 0.0331
               },
               "aim": {
-                "azimuthDeg": 200.0,
-                "altitudeDeg": -5.0
+                "azimuthDeg": 200,
+                "altitudeDeg": -5
               }
             }
           },
@@ -3349,8 +3349,8 @@
               },
               "color": "#ff8a2b",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Base orange de la flamme",
               "angular": {
@@ -3358,8 +3358,8 @@
                 "heightDeg": 0.0331
               },
               "aim": {
-                "azimuthDeg": 200.0,
-                "altitudeDeg": -5.0
+                "azimuthDeg": 200,
+                "altitudeDeg": -5
               }
             }
           },
@@ -3375,8 +3375,8 @@
               },
               "color": "#f2f2ee",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Silhouette en combinaison blanche (1)",
               "angular": {
@@ -3401,8 +3401,8 @@
               },
               "color": "#f2f2ee",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Silhouette en combinaison blanche (2)",
               "angular": {
@@ -3426,14 +3426,14 @@
               "kind": "oval",
               "bounds": {
                 "x": 451.8,
-                "y": 114.0,
+                "y": 114,
                 "width": 0.1,
                 "height": 0.1
               },
               "color": "#e8e6df",
               "angle": 0,
-              "transparency": 0.0,
-              "haloScale": 0.0,
+              "transparency": 0,
+              "haloScale": 0,
               "selected": false,
               "title": "Objet",
               "angular": {
@@ -3453,13 +3453,13 @@
               "bounds": {
                 "x": 451.8,
                 "y": 114.1,
-                "width": 0.0,
-                "height": 0.0
+                "width": 0,
+                "height": 0
               },
               "color": "#b4231f",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Insigne rouge (taille rapportée, tracé approché)",
               "angular": {
@@ -3478,14 +3478,14 @@
               "kind": "oval",
               "bounds": {
                 "x": 319.9,
-                "y": 180.0,
+                "y": 180,
                 "width": 0.1,
                 "height": 0.1
               },
               "color": "#7fc4ff",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Flamme",
               "angular": {
@@ -3504,14 +3504,14 @@
               "kind": "oval",
               "bounds": {
                 "x": 319.9,
-                "y": 180.0,
+                "y": 180,
                 "width": 0.1,
                 "height": 0.1
               },
               "color": "#ff8a2b",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Base orange de la flamme",
               "angular": {
@@ -3536,8 +3536,8 @@
               },
               "color": "#f2f2ee",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Silhouette en combinaison blanche (1)",
               "angular": {
@@ -3562,8 +3562,8 @@
               },
               "color": "#f2f2ee",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Silhouette en combinaison blanche (2)",
               "angular": {
@@ -3586,15 +3586,15 @@
             "shape": {
               "kind": "oval",
               "bounds": {
-                "x": 453.0,
-                "y": 114.0,
+                "x": 453,
+                "y": 114,
                 "width": 0.1,
                 "height": 0.1
               },
               "color": "#e8e6df",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Objet",
               "angular": {
@@ -3612,15 +3612,15 @@
             "shape": {
               "kind": "oval",
               "bounds": {
-                "x": 453.0,
+                "x": 453,
                 "y": 114.1,
-                "width": 0.0,
-                "height": 0.0
+                "width": 0,
+                "height": 0
               },
               "color": "#b4231f",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Insigne rouge (taille rapportée, tracé approché)",
               "angular": {
@@ -3639,14 +3639,14 @@
               "kind": "oval",
               "bounds": {
                 "x": 319.9,
-                "y": 180.0,
+                "y": 180,
                 "width": 0.1,
                 "height": 0.1
               },
               "color": "#7fc4ff",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Flamme",
               "angular": {
@@ -3665,14 +3665,14 @@
               "kind": "oval",
               "bounds": {
                 "x": 319.9,
-                "y": 180.0,
+                "y": 180,
                 "width": 0.1,
                 "height": 0.1
               },
               "color": "#ff8a2b",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Base orange de la flamme",
               "angular": {
@@ -3697,8 +3697,8 @@
               },
               "color": "#f2f2ee",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Silhouette en combinaison blanche (1)",
               "angular": {
@@ -3723,8 +3723,8 @@
               },
               "color": "#f2f2ee",
               "angle": 0,
-              "transparency": 1.0,
-              "haloScale": 0.0,
+              "transparency": 1,
+              "haloScale": 0,
               "selected": false,
               "title": "Silhouette en combinaison blanche (2)",
               "angular": {
@@ -3756,9 +3756,9 @@
           "lat": 34.050918,
           "lng": -106.891693,
           "elevationM": 0,
-          "headingDeg": 200.0,
-          "pitchDeg": -5.0,
-          "fovDeg": 60.0
+          "headingDeg": 200,
+          "pitchDeg": -5,
+          "fovDeg": 60
         }
       },
       {
@@ -3767,9 +3767,9 @@
           "lat": 34.049376,
           "lng": -106.892371,
           "elevationM": 0,
-          "headingDeg": 200.0,
-          "pitchDeg": -5.0,
-          "fovDeg": 60.0
+          "headingDeg": 200,
+          "pitchDeg": -5,
+          "fovDeg": 60
         }
       },
       {
@@ -3778,9 +3778,9 @@
           "lat": 34.048605,
           "lng": -106.892709,
           "elevationM": 0,
-          "headingDeg": 230.0,
-          "pitchDeg": -5.0,
-          "fovDeg": 60.0
+          "headingDeg": 230,
+          "pitchDeg": -5,
+          "fovDeg": 60
         }
       },
       {
@@ -3789,9 +3789,9 @@
           "lat": 34.047814,
           "lng": -106.893847,
           "elevationM": 0,
-          "headingDeg": 260.0,
-          "pitchDeg": -5.0,
-          "fovDeg": 60.0
+          "headingDeg": 260,
+          "pitchDeg": -5,
+          "fovDeg": 60
         }
       },
       {
@@ -3800,9 +3800,9 @@
           "lat": 34.047565,
           "lng": -106.895553,
           "elevationM": 0,
-          "headingDeg": 200.0,
-          "pitchDeg": -5.0,
-          "fovDeg": 60.0
+          "headingDeg": 200,
+          "pitchDeg": -5,
+          "fovDeg": 60
         }
       },
       {
@@ -3811,9 +3811,9 @@
           "lat": 34.045539,
           "lng": -106.896443,
           "elevationM": 0,
-          "headingDeg": 200.0,
-          "pitchDeg": -5.0,
-          "fovDeg": 60.0
+          "headingDeg": 200,
+          "pitchDeg": -5,
+          "fovDeg": 60
         }
       },
       {
@@ -3822,9 +3822,9 @@
           "lat": 34.04483,
           "lng": -106.896755,
           "elevationM": 0,
-          "headingDeg": 200.0,
-          "pitchDeg": -5.0,
-          "fovDeg": 60.0
+          "headingDeg": 200,
+          "pitchDeg": -5,
+          "fovDeg": 60
         }
       },
       {
@@ -3833,9 +3833,9 @@
           "lat": 34.043209,
           "lng": -106.897467,
           "elevationM": 0,
-          "headingDeg": 200.0,
-          "pitchDeg": -5.0,
-          "fovDeg": 60.0
+          "headingDeg": 200,
+          "pitchDeg": -5,
+          "fovDeg": 60
         }
       },
       {
@@ -3844,9 +3844,9 @@
           "lat": 34.042703,
           "lng": -106.897689,
           "elevationM": 0,
-          "headingDeg": 200.0,
-          "pitchDeg": -5.0,
-          "fovDeg": 60.0
+          "headingDeg": 200,
+          "pitchDeg": -5,
+          "fovDeg": 60
         }
       },
       {
@@ -3855,9 +3855,9 @@
           "lat": 34.0425,
           "lng": -106.897778,
           "elevationM": 0,
-          "headingDeg": 200.0,
-          "pitchDeg": -5.0,
-          "fovDeg": 60.0
+          "headingDeg": 200,
+          "pitchDeg": -5,
+          "fovDeg": 60
         }
       },
       {
@@ -3866,9 +3866,9 @@
           "lat": 34.0425,
           "lng": -106.897778,
           "elevationM": 0,
-          "headingDeg": 200.0,
-          "pitchDeg": -5.0,
-          "fovDeg": 60.0
+          "headingDeg": 200,
+          "pitchDeg": -5,
+          "fovDeg": 60
         }
       },
       {
@@ -3876,10 +3876,10 @@
         "pose": {
           "lat": 34.042536,
           "lng": -106.897764,
-          "elevationM": 0.0,
-          "headingDeg": 10.0,
-          "pitchDeg": -5.0,
-          "fovDeg": 60.0
+          "elevationM": 0,
+          "headingDeg": 10,
+          "pitchDeg": -5,
+          "fovDeg": 60
         }
       },
       {
@@ -3888,9 +3888,9 @@
           "lat": 34.042572,
           "lng": -106.89775,
           "elevationM": 0,
-          "headingDeg": 10.0,
-          "pitchDeg": -5.0,
-          "fovDeg": 60.0
+          "headingDeg": 10,
+          "pitchDeg": -5,
+          "fovDeg": 60
         }
       },
       {
@@ -3899,9 +3899,9 @@
           "lat": 34.042635,
           "lng": -106.89775,
           "elevationM": 0,
-          "headingDeg": 10.0,
-          "pitchDeg": -5.0,
-          "fovDeg": 60.0
+          "headingDeg": 10,
+          "pitchDeg": -5,
+          "fovDeg": 60
         }
       },
       {
@@ -3909,10 +3909,10 @@
         "pose": {
           "lat": 34.042635,
           "lng": -106.89775,
-          "elevationM": 0.0,
-          "headingDeg": 191.0,
-          "pitchDeg": -5.0,
-          "fovDeg": 60.0
+          "elevationM": 0,
+          "headingDeg": 191,
+          "pitchDeg": -5,
+          "fovDeg": 60
         }
       },
       {
@@ -3921,9 +3921,9 @@
           "lat": 34.042635,
           "lng": -106.89775,
           "elevationM": 0,
-          "headingDeg": 191.0,
-          "pitchDeg": -5.0,
-          "fovDeg": 60.0
+          "headingDeg": 191,
+          "pitchDeg": -5,
+          "fovDeg": 60
         }
       }
     ]
@@ -3933,8 +3933,39 @@
       {
         "t": 0,
         "weather": {
+          "cloudLayers": [
+            {
+              "id": "record-low",
+              "type": "unknown",
+              "baseM": 2500,
+              "thicknessM": 650,
+              "coverage": 0,
+              "sizeM": 1400,
+              "density": 1
+            },
+            {
+              "id": "record-mid",
+              "type": "unknown",
+              "baseM": 3500,
+              "thicknessM": 800,
+              "coverage": 0,
+              "sizeM": 2500,
+              "density": 1
+            },
+            {
+              "id": "record-high",
+              "type": "cirrus",
+              "baseM": 8000,
+              "thicknessM": 400,
+              "coverage": 0,
+              "sizeM": 2200,
+              "density": 0.35
+            }
+          ],
           "cloudCover": 0,
           "cloudDarkness": 0,
+          "highCloudCover": 0,
+          "lowerCloudCover": 0,
           "precipitationType": "none",
           "precipitationIntensity": 0,
           "windDirectionDeg": 31.5,
@@ -3943,14 +3974,45 @@
         }
       },
       {
-        "t": 20000,
+        "t": 120000,
         "weather": {
+          "cloudLayers": [
+            {
+              "id": "record-low",
+              "type": "unknown",
+              "baseM": 2500,
+              "thicknessM": 650,
+              "coverage": 0,
+              "sizeM": 1400,
+              "density": 1
+            },
+            {
+              "id": "record-mid",
+              "type": "unknown",
+              "baseM": 3500,
+              "thicknessM": 800,
+              "coverage": 0,
+              "sizeM": 2500,
+              "density": 1
+            },
+            {
+              "id": "record-high",
+              "type": "cirrus",
+              "baseM": 8000,
+              "thicknessM": 400,
+              "coverage": 0,
+              "sizeM": 2200,
+              "density": 0.35
+            }
+          ],
           "cloudCover": 0,
           "cloudDarkness": 0,
+          "highCloudCover": 0,
+          "lowerCloudCover": 0,
           "precipitationType": "none",
           "precipitationIntensity": 0,
-          "windDirectionDeg": 31.51666666666665,
-          "windSpeed": 7.881166666666666,
+          "windDirectionDeg": 31.600000000000023,
+          "windSpeed": 7.862,
           "storm": false
         }
       }
@@ -3986,65 +4048,65 @@
         {
           "t": 0,
           "eastM": 2.6,
-          "northM": 0.0,
+          "northM": 0,
           "altitudeM": 0,
-          "headingDeg": 200.0
+          "headingDeg": 200
         },
         {
           "t": 8000,
-          "eastM": -60.0,
+          "eastM": -60,
           "northM": -171.6,
           "altitudeM": 0,
-          "headingDeg": 200.0
+          "headingDeg": 200
         },
         {
           "t": 12000,
           "eastM": -91.1,
           "northM": -257.5,
           "altitudeM": 0,
-          "headingDeg": 230.0
+          "headingDeg": 230
         },
         {
           "t": 18000,
           "eastM": -196.1,
           "northM": -345.6,
           "altitudeM": 0,
-          "headingDeg": 260.0
+          "headingDeg": 260
         },
         {
           "t": 25000,
           "eastM": -353.4,
           "northM": -373.3,
           "altitudeM": 0,
-          "headingDeg": 200.0
+          "headingDeg": 200
         },
         {
           "t": 45000,
           "eastM": -435.6,
           "northM": -598.8,
           "altitudeM": 0,
-          "headingDeg": 200.0
+          "headingDeg": 200
         },
         {
           "t": 52000,
           "eastM": -464.3,
           "northM": -677.7,
           "altitudeM": 0,
-          "headingDeg": 200.0
+          "headingDeg": 200
         },
         {
           "t": 68000,
           "eastM": -530.1,
           "northM": -858.3,
           "altitudeM": 0,
-          "headingDeg": 200.0
+          "headingDeg": 200
         },
         {
           "t": 72000,
           "eastM": -551.5,
           "northM": -917.4,
           "altitudeM": 0,
-          "headingDeg": 200.0
+          "headingDeg": 200
         },
         {
           "t": 75000,
@@ -4069,12 +4131,12 @@
         "fr": "Abri à dynamite",
         "en": "Dynamite shack"
       },
-      "eastM": -635.0,
+      "eastM": -635,
       "northM": -988.7,
       "floors": 0,
       "lit": false,
       "sizeM": {
-        "widthM": 3.0,
+        "widthM": 3,
         "lengthM": 2.4,
         "heightM": 2.2
       }
@@ -4083,7 +4145,7 @@
   "weatherSource": {
     "id": "era5",
     "name": "ERA5 (Open-Meteo)",
-    "url": "https://archive-api.open-meteo.com/v1/archive?latitude=34.0425&longitude=-106.897778&start_date=1964-04-25&end_date=1964-04-25&hourly=cloud_cover%2Ccloud_cover_low%2Ccloud_cover_mid%2Ccloud_cover_high%2Cprecipitation%2Csnowfall%2Cweather_code%2Cwind_speed_10m%2Cwind_direction_10m%2Ctemperature_2m%2Cdew_point_2m&wind_speed_unit=ms&timezone=UTC"
+    "url": "https://archive-api.open-meteo.com/v1/archive?latitude=34.050918&longitude=-106.891693&start_date=1964-04-25&end_date=1964-04-25&hourly=cloud_cover%2Ccloud_cover_low%2Ccloud_cover_mid%2Ccloud_cover_high%2Cprecipitation%2Csnowfall%2Cweather_code%2Cwind_speed_10m%2Cwind_direction_10m%2Ctemperature_2m%2Cdew_point_2m&wind_speed_unit=ms&timezone=UTC"
   },
   "instrument": "eye",
   "soundTrack": {
