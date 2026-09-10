@@ -55,9 +55,11 @@ export function setupCloudEditor(controls: HTMLElement, scene: SceneElement, bef
     for (const [id, v] of Object.entries({ base: layer.baseM, thickness: layer.thicknessM, cover: layer.coverage * 100, size: layer.sizeM, density: layer.density })) {
       input(`cloud-${id}`).value = String(Math.round(v * 100) / 100)
     }
-    input("cloud-darkness").value = String(layer.darkness ?? resolveWeatherAt(scene.ufoElement.sighting, t).cloudDarkness)
+    // Two decimals, like every other field: an interpolated or looked-up shade (0.15163529774760875)
+    // is not something anyone typed, and the field is for typing.
+    input("cloud-darkness").value = String(Math.round((layer.darkness ?? resolveWeatherAt(scene.ufoElement.sighting, t).cloudDarkness) * 100) / 100)
     const alignment = input("cloud-crystal-alignment")
-    alignment.value = String(layer.iceCrystalAlignment ?? DEFAULT_ICE_CRYSTAL_ALIGNMENT)
+    alignment.value = String(Math.round((layer.iceCrystalAlignment ?? DEFAULT_ICE_CRYSTAL_ALIGNMENT) * 100) / 100)
     input("cloud-wind-direction").value = layer.windDirectionDeg === undefined ? "" : String(layer.windDirectionDeg)
     input("cloud-wind-speed").value = layer.windSpeed === undefined ? "" : String(layer.windSpeed)
     input("cloud-seed").value = layer.seed === undefined ? "" : String(layer.seed)

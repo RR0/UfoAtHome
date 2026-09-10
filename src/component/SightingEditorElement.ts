@@ -519,6 +519,8 @@ export class SightingEditorElement extends HTMLElement {
   private readonly labelWindDirection: HTMLElement
   private readonly labelWindSpeed: HTMLElement
   private readonly labelStorm: HTMLElement
+  private readonly labelPrecipitationGroup: HTMLElement
+  private readonly labelWindGroup: HTMLElement
   private readonly labelWeatherInferred: HTMLElement
   private readonly labelSoundGroup: HTMLElement
   private readonly labelSoundKind: HTMLElement
@@ -1011,6 +1013,8 @@ export class SightingEditorElement extends HTMLElement {
     this.labelWindDirection = this.shadow.getElementById("label-wind-direction")!
     this.labelWindSpeed = this.shadow.getElementById("label-wind-speed")!
     this.labelStorm = this.shadow.getElementById("label-storm")!
+    this.labelPrecipitationGroup = this.shadow.getElementById("label-precipitation-group")!
+    this.labelWindGroup = this.shadow.getElementById("label-wind-group")!
     this.labelWeatherInferred = this.shadow.getElementById("label-weather-inferred")!
     this.labelInstrument = this.shadow.getElementById("label-instrument")!
     this.optionPrecipitationNone = this.shadow.getElementById("option-precipitation-none")!
@@ -5422,6 +5426,9 @@ export class SightingEditorElement extends HTMLElement {
 
   private meteorRankFor?: string
 
+  /** What the sky line was last stated from — see refreshSkyCandidates. */
+  private skyCandidatesKey?: string
+
   /** How far down the brightness ranking the ☄ button has walked. Reset whenever the sky changes,
    * so a reader who edits the date is offered that night's best example rather than resuming at
    * rank seven of a shower that is no longer running. */
@@ -5484,6 +5491,18 @@ export class SightingEditorElement extends HTMLElement {
       place && place.lat !== undefined && place.lng !== undefined && time?.year !== undefined
         ? sightingTimeToDate(time, place.lng, sighting.event.utcOffsetHours)
         : undefined
+    // Everything below is about the observation's START — its date, its place, the weather and the
+    // instrument at time zero — and nothing about the playhead, yet this is reached from every
+    // timeupdate, sixty times a second while the recording plays. The glow clause alone integrates
+    // two lines of sight through the Galaxy and the zodiacal dust, 25 ms on a dark sky: it was half
+    // of every frame of a three-hour observation, and the answer never changed. Restated only when
+    // one of its inputs does.
+    const key = JSON.stringify([
+      date?.getTime(), place?.lat, place?.lng, this.groundElevationM, sighting.instrumentId, sighting.exposureSeconds,
+      resolveWeatherAt(sighting, 0), this.messages.skyLine, this.meteorRankFor
+    ])
+    if (key === this.skyCandidatesKey) return
+    this.skyCandidatesKey = key
     if (!date || !place || place.lat === undefined || place.lng === undefined) {
       this.showMeteorButton.hidden = true
       this.showCometButton.hidden = true
@@ -6286,6 +6305,8 @@ export class SightingEditorElement extends HTMLElement {
     this.labelWindDirection.textContent = messages.windDirection
     this.labelWindSpeed.textContent = messages.windSpeed
     this.labelStorm.textContent = messages.storm
+    this.labelPrecipitationGroup.textContent = messages.precipitationGroup
+    this.labelWindGroup.textContent = messages.windGroup
     this.labelWeatherInferred.textContent = messages.weatherInferred
     // Its own title is set by syncWeatherSourceState below, not here: which of the two messages it
     // carries depends on whether a lookup is possible at all.
