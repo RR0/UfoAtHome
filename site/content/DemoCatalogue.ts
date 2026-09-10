@@ -106,8 +106,8 @@ export class DemoCatalogue {
           src: "/demo-data/sky-test-clouds.json",
           title: { en: "Cloud layers in motion", fr: "Couches nuageuses en mouvement" },
           blurb: {
-            en: "Metre-based layers, wind changing over two minutes, and a witness moving 600 m. One cloud of the field — the one the red marker sits under — is stated in metres: open the recording in the editor to move and resize it, and it stays one of its neighbours.",
-            fr: "Des couches métriques, un vent qui change en deux minutes et un témoin qui parcourt 600 m. Un nuage du champ — celui que le repère rouge désigne — est énoncé en mètres : ouvrez l'enregistrement dans l'éditeur pour le déplacer et le redimensionner, il reste un nuage parmi les autres."
+            en: "Cloud layers you can set — altitude, thickness, coverage, size, density, wind — down to individual clouds driven one by one.",
+            fr: "Des couches nuageuses paramétrables — altitude, épaisseur, couverture, taille, densité, vent — jusqu'à des nuages individuels pilotés un par un."
           }
         },
         {
