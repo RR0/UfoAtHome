@@ -650,10 +650,17 @@ function buildAircraft(): Group {
  * a member list reused across a whole drag gesture — see [[rr0-code-style-no-free-functions]]).
  */
 export class DecorSystem {
-  /** Highest terrain height under an object's complete oriented footprint. */
+  /** Highest terrain height under an object's complete oriented footprint.
+   *
+   * Not for an object in the air: what the sweep buys is a wheel that is never in the ground, and
+   * an airliner three hundred metres up has no wheel near it. It costs 441 ground reads for a 60 m
+   * aircraft, and a twenty-second exposure restates the scene forty-odd times a frame — nearly
+   * two million reads a second, which is what made the airliner demo stutter. An object higher
+   * than it is tall stands on the ground under its centre, read once. */
   static groundUnderFootprint(object: DecorObject, x: number, z: number, headingDeg: number | undefined,
-    ground: (x: number, z: number) => number): number {
+    ground: (x: number, z: number) => number, altitudeM = 0): number {
     const size = DecorSystem.sizeOf(object)
+    if (altitudeM > size.heightM) return ground(x, z)
     const heading = (headingDeg ?? 0) * Math.PI / 180
     const lengthSamples = Math.min(21, Math.max(2, Math.ceil(size.lengthM / 0.75) + 1))
     const widthSamples = Math.min(21, Math.max(2, Math.ceil(size.widthM / 0.75) + 1))

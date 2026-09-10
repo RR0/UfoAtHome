@@ -352,5 +352,11 @@ describe("decor terrain anchoring", () => {
     const eastRidge = (x: number) => Math.max(0, 2 - Math.abs(x - 2.5) * 4)
     expect(DecorSystem.groundUnderFootprint(car, 0, 0, 0, eastRidge)).toBe(0)
     expect(DecorSystem.groundUnderFootprint(car, 0, 0, 90, eastRidge)).toBeGreaterThan(0.9)
+    // In the air, the ground under the centre and nothing more: a flying object has no wheel to
+    // keep out of a ridge, and the sweep is what a long exposure could not afford forty times a frame.
+    let reads = 0
+    const counted = (px: number) => { reads++; return eastRidge(px) }
+    expect(DecorSystem.groundUnderFootprint(car, 0, 0, 90, counted, 300)).toBe(0)
+    expect(reads).toBe(1)
   })
 })

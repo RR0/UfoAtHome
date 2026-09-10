@@ -1542,7 +1542,7 @@ export class SceneRenderer {
       const placement = resolveDecorPlacementAt(object, t)
       const x = placement.eastM + offset.x + shift.x
       const z = -placement.northM + offset.z + shift.z
-      group.position.set(x, this.groundUnderFootprint(object, x, z, placement.headingDeg) + placement.altitudeM, z)
+      group.position.set(x, this.groundUnderFootprint(object, x, z, placement.headingDeg, placement.altitudeM) + placement.altitudeM, z)
       if (object.kind === "crop") {
         const distance = Math.hypot(x, z)
         group.visible = distance <= CROP_VISIBLE_DISTANCE_M
@@ -1649,8 +1649,8 @@ export class SceneRenderer {
    * its samples are then evenly spread over the full extent rather than concentrated at one end.
    * Crops receive their finer per-plant fit immediately afterwards. Altitude is added by the caller.
    */
-  private groundUnderFootprint(object: DecorObject, x: number, z: number, headingDeg: number | undefined): number {
-    return DecorSystem.groundUnderFootprint(object, x, z, headingDeg, (px, pz) => this.groundYUnder(px, pz))
+  private groundUnderFootprint(object: DecorObject, x: number, z: number, headingDeg: number | undefined, altitudeM = 0): number {
+    return DecorSystem.groundUnderFootprint(object, x, z, headingDeg, (px, pz) => this.groundYUnder(px, pz), altitudeM)
   }
 
   /** How far the witness has turned their head away from "straight out through the chosen

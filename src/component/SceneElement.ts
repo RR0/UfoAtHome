@@ -918,7 +918,15 @@ export class SceneElement extends HTMLElement {
     // canvas fires a tick per pointer move at the SAME instant, and the sky was recomputed for each.
     // Skipped when nothing it depends on has changed; a seek, a pose edit or a new catalogue still
     // restate it, and so does every instant of a long pose (each has its own date).
-    const skyKey = `${date.getTime()}|${lat}|${lng}|${observer.elevationM}|${this.starCatalog ? this.starCatalogDepth : 0}`
+    //
+    // And skipped while the sky has not visibly moved: it turns fifteen arcseconds a second, and a
+    // frame of ordinary playback is a sixtieth of one — restating the whole star field (29 ms on a
+    // deep catalogue) for a drift of a thousandth of a pixel is what held the airliner demo to
+    // eight frames a second. The instant is quantised to a quarter of a pixel of drift, which at
+    // 1× is seconds of the recording; a pose's own sky instants are a pixel apart by construction
+    // (SkyDrift.instants) and still each get their own restatement.
+    const quantumMs = Math.max(1, Math.round((0.25 * this.degreesPerPixelAt(t)) / SkyDrift.DEG_PER_SECOND * 1000))
+    const skyKey = `${Math.floor(date.getTime() / quantumMs)}|${lat}|${lng}|${observer.elevationM}|${this.starCatalog ? this.starCatalogDepth : 0}`
     if (skyKey === this.lastSkyKey) {
       // Restating the sky was also what drew the frame; everything above it — the pose, the decor,
       // the phenomena — still has to reach the canvas.
