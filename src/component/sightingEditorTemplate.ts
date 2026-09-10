@@ -320,18 +320,33 @@ export const html = `
     <button id="show-meteor" type="button" class="icon-btn" title="Show me one" aria-label="Show me one" hidden>🌠</button>
     <button id="show-comet" type="button" class="icon-btn" title="Show me the comet" aria-label="Show me the comet" hidden>☄</button>
   </div>
-  <!-- The weather in three parts — the clouds, what falls, and what blows — as a strip of handles
+  <!-- The weather in three parts — what falls (first, and open on arrival: the user's own order), the
+       clouds, and what blows — as a strip of handles
        inside the group, one part open at a time, the same way the eight groups themselves work:
        a dozen controls in one row read as one undifferentiated dial bank. The storm sits with what
        falls, not with the clouds it is made of: a thunderstorm is what a weather CODE reports
        (Open-Meteo's, where the provider reads it from; METAR's TS beside RA and GR), a discrete
        present-weather event like hail, where a cloud layer is a continuous thing with a height. -->
   <div class="group-tabs" id="weather-tabs">
-    <button class="subgroup-tab" type="button" aria-controls="weather-clouds" aria-expanded="true"><span id="label-clouds-group">Clouds</span></button>
-    <button class="subgroup-tab" type="button" aria-controls="weather-precipitation" aria-expanded="false"><span id="label-precipitation-group">Precipitation</span></button>
+    <button class="subgroup-tab" type="button" aria-controls="weather-precipitation" aria-expanded="true"><span id="label-precipitation-group">Precipitation</span></button>
+    <button class="subgroup-tab" type="button" aria-controls="weather-clouds" aria-expanded="false"><span id="label-clouds-group">Clouds</span></button>
     <button class="subgroup-tab" type="button" aria-controls="weather-wind" aria-expanded="false"><span id="label-wind-group">Wind</span></button>
   </div>
-  <section class="subgroup-panel" id="weather-clouds" aria-labelledby="label-clouds-group">
+  <section class="subgroup-panel" id="weather-precipitation" aria-labelledby="label-precipitation-group">
+    <div class="toolbar">
+      <label><span id="label-precipitation-type">Precipitation</span>
+        <select id="precipitationType" class="weather-field">
+          <option id="option-precipitation-none" value="none">None</option>
+          <option id="option-precipitation-rain" value="rain">Rain</option>
+          <option id="option-precipitation-snow" value="snow">Snow</option>
+          <option id="option-precipitation-hail" value="hail">Hail</option>
+        </select>
+      </label>
+      <label><span id="label-precipitation-intensity">Intensity</span> <input id="precipitationIntensity" class="weather-field" type="range" min="0" max="1" step="0.05" value="0"/></label>
+      <label><span id="label-storm">Storm</span> <input id="storm" class="weather-field" type="checkbox"/></label>
+    </div>
+  </section>
+  <section class="subgroup-panel" id="weather-clouds" aria-labelledby="label-clouds-group" hidden>
     <div class="toolbar">
       <style>#cloud-editor { flex-basis: 100%; min-width: 0; } #cloud-editor .cloud-panel { min-width: 0; } #cloud-editor .cloud-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; } #cloud-editor .cloud-actions { display: flex; flex-wrap: wrap; gap: .4em; align-items: end; } #cloud-editor button { width: auto; min-height: 2em; padding: .25em .65em; } #cloud-editor label { display: flex; flex-direction: column; align-items: start; } #cloud-editor label[hidden] { display: none !important; } #cloud-editor input, #cloud-editor select { max-width: 100%; box-sizing: border-box; } #cloud-editor p { font-size: .85em; }</style><div id="cloud-editor"></div>
       <label hidden><span id="label-cloud-cover">Cloud cover</span> <input id="cloudCover" class="weather-field" type="range" min="0" max="1" step="0.05" value="0"/></label>
@@ -346,20 +361,6 @@ export const html = `
       <label hidden><span id="label-cloud-darkness">Cloud darkness</span> <input id="cloudDarkness" class="weather-field" type="range" min="0" max="1" step="0.05" value="0"/></label>
       <label hidden><span id="label-cloud-base">Cloud base</span>
         <input id="cloudBase" class="weather-field" type="number" min="0" step="50" placeholder="1000" title="Height of the cloud layer's base above the ground — decides whether the witness is under the deck or above it"/> m</label>
-    </div>
-  </section>
-  <section class="subgroup-panel" id="weather-precipitation" aria-labelledby="label-precipitation-group" hidden>
-    <div class="toolbar">
-      <label><span id="label-precipitation-type">Precipitation</span>
-        <select id="precipitationType" class="weather-field">
-          <option id="option-precipitation-none" value="none">None</option>
-          <option id="option-precipitation-rain" value="rain">Rain</option>
-          <option id="option-precipitation-snow" value="snow">Snow</option>
-          <option id="option-precipitation-hail" value="hail">Hail</option>
-        </select>
-      </label>
-      <label><span id="label-precipitation-intensity">Intensity</span> <input id="precipitationIntensity" class="weather-field" type="range" min="0" max="1" step="0.05" value="0"/></label>
-      <label><span id="label-storm">Storm</span> <input id="storm" class="weather-field" type="checkbox"/></label>
     </div>
   </section>
   <section class="subgroup-panel" id="weather-wind" aria-labelledby="label-wind-group" hidden>
