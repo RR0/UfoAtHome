@@ -519,8 +519,12 @@ export class SightingEditorElement extends HTMLElement {
   private readonly labelWindDirection: HTMLElement
   private readonly labelWindSpeed: HTMLElement
   private readonly labelStorm: HTMLElement
+  private readonly labelCloudsGroup: HTMLElement
   private readonly labelPrecipitationGroup: HTMLElement
   private readonly labelWindGroup: HTMLElement
+  /** The handles of a group's own parts (the weather's clouds, precipitation and wind) — a strip
+   * inside the panel that works like the groups' strip, one part open at a time. */
+  private readonly subgroupTabs: HTMLButtonElement[]
   private readonly labelWeatherInferred: HTMLElement
   private readonly labelSoundGroup: HTMLElement
   private readonly labelSoundKind: HTMLElement
@@ -1013,6 +1017,7 @@ export class SightingEditorElement extends HTMLElement {
     this.labelWindDirection = this.shadow.getElementById("label-wind-direction")!
     this.labelWindSpeed = this.shadow.getElementById("label-wind-speed")!
     this.labelStorm = this.shadow.getElementById("label-storm")!
+    this.labelCloudsGroup = this.shadow.getElementById("label-clouds-group")!
     this.labelPrecipitationGroup = this.shadow.getElementById("label-precipitation-group")!
     this.labelWindGroup = this.shadow.getElementById("label-wind-group")!
     this.labelWeatherInferred = this.shadow.getElementById("label-weather-inferred")!
@@ -1412,6 +1417,10 @@ export class SightingEditorElement extends HTMLElement {
     this.groupPanels = this.groupTabs.map(tab => this.shadow.getElementById(tab.getAttribute("aria-controls")!)!)
     for (const tab of this.groupTabs) {
       tab.addEventListener("click", () => this.toggleGroup(tab, !this.isGroupOpen(tab)))
+    }
+    this.subgroupTabs = [...this.shadow.querySelectorAll<HTMLButtonElement>(".subgroup-tab")]
+    for (const tab of this.subgroupTabs) {
+      tab.addEventListener("click", () => this.openSubgroup(tab))
     }
     this.paramSummary = this.shadow.getElementById("param-summary")!
     this.paramSummaryBuilder = new SightingSummary(this.messages, this.showerLanguage(), this.said, this.tagNames)
@@ -3315,8 +3324,10 @@ export class SightingEditorElement extends HTMLElement {
     if (active !== this.precipitationIntensityInput) {
       this.precipitationIntensityInput.value = String(weather.precipitationIntensity)
     }
-    if (active !== this.windDirectionInput) this.windDirectionInput.value = String(weather.windDirectionDeg)
-    if (active !== this.windSpeedInput) this.windSpeedInput.value = String(weather.windSpeed)
+    // To the fields' own steps (a degree, half a metre per second): between two hourly rows the
+    // track holds a blend to sixteen decimals, which is not a thing to show in a field for typing.
+    if (active !== this.windDirectionInput) this.windDirectionInput.value = String(Math.round(weather.windDirectionDeg))
+    if (active !== this.windSpeedInput) this.windSpeedInput.value = String(Math.round(weather.windSpeed * 2) / 2)
     if (active !== this.stormInput) this.stormInput.checked = weather.storm
   }
 
@@ -3465,6 +3476,29 @@ export class SightingEditorElement extends HTMLElement {
       candidate.setAttribute("aria-expanded", String(nowOpen))
       this.groupPanels[index].hidden = !nowOpen
     }
+  }
+
+  /** One part of a group open at a time, among the handles of the same strip — the groups' own
+   * rule (see toggleGroup), for the same reason, one level down. Never closes the last one: a
+   * part's handle is a place to go, not a switch, since a group with every part folded away
+   * would be an empty frame. */
+  private openSubgroup(tab: HTMLButtonElement): void {
+    this.cloudEditor?.stopManipulation()
+    const strip = tab.parentElement!
+    for (const candidate of this.subgroupTabs) {
+      if (candidate.parentElement !== strip) continue
+      const open = candidate === tab
+      candidate.setAttribute("aria-expanded", String(open))
+      this.shadow.getElementById(candidate.getAttribute("aria-controls")!)!.hidden = !open
+    }
+  }
+
+  /** Opens the part of a group a control stands in, when it stands in one — so that a summary chip
+   * for the wind lands on a visible field rather than on one folded under another part's handle. */
+  private revealSubgroupOf(control: Element): void {
+    const part = control.closest(".subgroup-panel")
+    const tab = part && this.subgroupTabs.find(candidate => candidate.getAttribute("aria-controls") === part.id)
+    if (tab) this.openSubgroup(tab)
   }
 
   /** The groups a chip can send you to, in the order their handles stand on the strip, which is
@@ -3801,6 +3835,7 @@ export class SightingEditorElement extends HTMLElement {
     // Focus is what actually has to happen, and it brings the field into view by itself; centring
     // it is a nicety, called as one so that an environment without scrollIntoView still lands the
     // caret rather than throwing on the way there.
+    this.revealSubgroupOf(control)
     control.focus()
     if (control instanceof HTMLInputElement && control.type !== "checkbox" && control.type !== "color" && control.type !== "range") {
       control.select()
@@ -6305,6 +6340,7 @@ export class SightingEditorElement extends HTMLElement {
     this.labelWindDirection.textContent = messages.windDirection
     this.labelWindSpeed.textContent = messages.windSpeed
     this.labelStorm.textContent = messages.storm
+    this.labelCloudsGroup.textContent = messages.cloudsGroup
     this.labelPrecipitationGroup.textContent = messages.precipitationGroup
     this.labelWindGroup.textContent = messages.windGroup
     this.labelWeatherInferred.textContent = messages.weatherInferred

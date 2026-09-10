@@ -239,12 +239,13 @@ if (docs) {
         looked-up values stay as a starting point, the source is dropped, and no later lookup may
         overwrite them. A recording that names a source is replayed exactly as authored and never
         looked up again, so a published case file reads identically offline.</p>
-      <p>The group is in three parts: <strong>Cloud layers</strong>, <strong>Precipitation</strong>
-        — its type and intensity, and the <strong>Storm</strong> box, which is where a weather code
-        reports a thunderstorm, beside rain and hail, and which turns on the lightning and the
-        thunder at its real delay — and <strong>Wind</strong>, the direction it blows toward and its
-        speed, which is what carries every cloud that has no wind of its own.</p>
-      <p>The clouds are the <strong>Cloud layers</strong> panel of this group. A looked-up sky
+      <p>The group has three handles of its own, one part open at a time like the groups
+        themselves: <strong>Clouds</strong>, <strong>Precipitation</strong> — its type and intensity,
+        and the <strong>Storm</strong> box, which is where a weather code reports a thunderstorm,
+        beside rain and hail, and which turns on the lightning and the thunder at its real delay —
+        and <strong>Wind</strong>, the direction it blows toward and its speed, which is what carries
+        every cloud that has no wind of its own.</p>
+      <p>The clouds are the <strong>Clouds</strong> part of this group. A looked-up sky
         arrives as three of them, the low, middle and high bands of the record; a sky the witness
         described is as many as they saw. Every number in the panel is written into the recording
         the moment it is valid, and the first edit pauses playback, so nothing is committed at a
@@ -541,13 +542,13 @@ if (docs) {
         ultérieure ne peut les écraser. Un enregistrement qui nomme une source est rejoué tel qu'il
         a été composé et n'est jamais reconsulté : un dossier publié se lit à l'identique hors
         ligne.</p>
-      <p>Le groupe est en trois parties : <strong>Couches nuageuses</strong>,
-        <strong>Précipitations</strong> — leur type et leur intensité, et la case
-        <strong>Orage</strong>, qui est là où un code météo signale un orage, à côté de la pluie et
-        de la grêle, et qui allume les éclairs et le tonnerre à son vrai retard — et
+      <p>Le groupe a trois onglets à lui, une partie ouverte à la fois comme les groupes eux-mêmes :
+        <strong>Nuages</strong>, <strong>Précipitations</strong> — leur type et leur intensité, et
+        la case <strong>Orage</strong>, qui est là où un code météo signale un orage, à côté de la
+        pluie et de la grêle, et qui allume les éclairs et le tonnerre à son vrai retard — et
         <strong>Vent</strong>, la direction vers laquelle il souffle et sa force, qui est ce qui
         porte tout nuage sans vent propre.</p>
-      <p>Les nuages sont le panneau <strong>Couches nuageuses</strong> de ce groupe. Un ciel relevé
+      <p>Les nuages sont la partie <strong>Nuages</strong> de ce groupe. Un ciel relevé
         arrive en trois couches, les bandes basse, moyenne et haute du relevé ; un ciel décrit par
         le témoin en compte autant qu'il en a vu. Chaque nombre du panneau est écrit dans
         l'enregistrement dès qu'il est valide, et la première modification met la lecture en pause :

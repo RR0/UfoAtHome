@@ -3,7 +3,7 @@ export function cloudEditorTemplate(language: string): string {
   const t = (en: string, fr: string) => language === "fr" ? fr : en
   const number = (id: string, label: string, min = "", max = "", placeholder = "") =>
     `<label>${label}<input id="${id}" type="number" step="any" ${min ? `min="${min}"` : ""} ${max ? `max="${max}"` : ""} placeholder="${placeholder}"></label>`
-  return `<fieldset><legend>${t("Cloud layers", "Couches nuageuses")}</legend>
+  return `<div class="cloud-panel">
     <p>${t("Weather records supply coverage and wind when available. Cloud shape, thickness and size are visual estimates; they are not measured individual clouds.","Les relevés fournissent la couverture et le vent lorsqu’ils sont disponibles. La forme, l’épaisseur et la taille des nuages sont des estimations visuelles, pas des nuages individuels mesurés.")}</p>
     <div class="cloud-fields">
     <label>${t("Edit scope", "Portée des modifications")}<select id="cloud-scope"><option value="instant">${t("Current time", "Instant courant")}</option><option value="observation">${t("Whole observation", "Toute l’observation")}</option></select></label>
@@ -39,5 +39,5 @@ export function cloudEditorTemplate(language: string): string {
     ${number("instance-density",t("Cloud density","Densité du nuage"),"0","2")}
     ${number("instance-darkness",t("Darkness","Obscurité"),"0","1",t("Layer darkness","Obscurité de la couche"))}
     </div><p>${t("Individual clouds remain present at 0% global coverage. Dragging changes position and altitude; numeric fields provide precise dimensions. Clouds follow their layer's wind.","Les nuages individuels restent présents à 0 % de couverture globale. Le glissement change la position et l’altitude ; les champs règlent précisément les dimensions. Les nuages suivent le vent de leur couche.")}</p></details>
-    <p id="cloud-status" role="status"></p></fieldset>`
+    <p id="cloud-status" role="status"></p></div>`
 }

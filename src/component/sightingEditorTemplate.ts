@@ -319,27 +319,37 @@ export const html = `
          the comet glyph, which was only ever unambiguous while there was nothing else up there. -->
     <button id="show-meteor" type="button" class="icon-btn" title="Show me one" aria-label="Show me one" hidden>🌠</button>
     <button id="show-comet" type="button" class="icon-btn" title="Show me the comet" aria-label="Show me the comet" hidden>☄</button>
-    <style>#cloud-editor { flex-basis: 100%; min-width: 0; } #cloud-editor fieldset { min-width: 0; } #cloud-editor .cloud-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; } #cloud-editor .cloud-actions { display: flex; flex-wrap: wrap; gap: .4em; align-items: end; } #cloud-editor button { width: auto; min-height: 2em; padding: .25em .65em; } #cloud-editor label { display: flex; flex-direction: column; align-items: start; } #cloud-editor label[hidden] { display: none !important; } #cloud-editor input, #cloud-editor select { max-width: 100%; box-sizing: border-box; } #cloud-editor p { font-size: .85em; }</style><div id="cloud-editor"></div>
-    <label hidden><span id="label-cloud-cover">Cloud cover</span> <input id="cloudCover" class="weather-field" type="range" min="0" max="1" step="0.05" value="0"/></label>
-    <!-- The HIGH deck, kept apart from the total: it is not about how much sky was hidden but about
-         whether there were ICE CRYSTALS in it, which is what halos and sundogs need. See
-         IceHalos.ts. -->
-    <label hidden><span id="label-high-cloud">Ice cloud (cirrus)</span> <input id="highCloudCover" class="weather-field" type="range" min="0" max="1" step="0.05" value="0" title="How much of the sky the high, icy deck covered — what refracts a halo or a pair of sundogs into being"/></label>
-    <!-- The one weather control that stays live even when a record owns every other one, because no
-         record holds it: what the crystals were doing up there was never measured. See
-         Weather.iceCrystalAlignment. -->
-    <label hidden><span id="label-ice-alignment">Crystal alignment</span> <input id="iceCrystalAlignment" class="weather-field" type="range" min="0" max="1" step="0.05" value="0.65"/></label>
-    <label hidden><span id="label-cloud-darkness">Cloud darkness</span> <input id="cloudDarkness" class="weather-field" type="range" min="0" max="1" step="0.05" value="0"/></label>
-    <label hidden><span id="label-cloud-base">Cloud base</span>
-      <input id="cloudBase" class="weather-field" type="number" min="0" step="50" placeholder="1000" title="Height of the cloud layer's base above the ground — decides whether the witness is under the deck or above it"/> m</label>
-    <!-- The weather in three parts — the clouds above (their own fieldset), what falls, and what
-         blows — because a dozen controls in one row read as one undifferentiated dial bank. The
-         storm sits with what falls, not with the clouds it is made of: a thunderstorm is what a
-         weather CODE reports (Open-Meteo's, where the provider reads it from, METAR's TS beside RA
-         and GR), a discrete present-weather event like hail, where a cloud layer is a continuous
-         thing with a height. -->
-    <fieldset class="weather-group">
-      <legend id="label-precipitation-group">Precipitation</legend>
+  </div>
+  <!-- The weather in three parts — the clouds, what falls, and what blows — as a strip of handles
+       inside the group, one part open at a time, the same way the eight groups themselves work:
+       a dozen controls in one row read as one undifferentiated dial bank. The storm sits with what
+       falls, not with the clouds it is made of: a thunderstorm is what a weather CODE reports
+       (Open-Meteo's, where the provider reads it from; METAR's TS beside RA and GR), a discrete
+       present-weather event like hail, where a cloud layer is a continuous thing with a height. -->
+  <div class="group-tabs" id="weather-tabs">
+    <button class="subgroup-tab" type="button" aria-controls="weather-clouds" aria-expanded="true"><span id="label-clouds-group">Clouds</span></button>
+    <button class="subgroup-tab" type="button" aria-controls="weather-precipitation" aria-expanded="false"><span id="label-precipitation-group">Precipitation</span></button>
+    <button class="subgroup-tab" type="button" aria-controls="weather-wind" aria-expanded="false"><span id="label-wind-group">Wind</span></button>
+  </div>
+  <section class="subgroup-panel" id="weather-clouds" aria-labelledby="label-clouds-group">
+    <div class="toolbar">
+      <style>#cloud-editor { flex-basis: 100%; min-width: 0; } #cloud-editor .cloud-panel { min-width: 0; } #cloud-editor .cloud-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; } #cloud-editor .cloud-actions { display: flex; flex-wrap: wrap; gap: .4em; align-items: end; } #cloud-editor button { width: auto; min-height: 2em; padding: .25em .65em; } #cloud-editor label { display: flex; flex-direction: column; align-items: start; } #cloud-editor label[hidden] { display: none !important; } #cloud-editor input, #cloud-editor select { max-width: 100%; box-sizing: border-box; } #cloud-editor p { font-size: .85em; }</style><div id="cloud-editor"></div>
+      <label hidden><span id="label-cloud-cover">Cloud cover</span> <input id="cloudCover" class="weather-field" type="range" min="0" max="1" step="0.05" value="0"/></label>
+      <!-- The HIGH deck, kept apart from the total: it is not about how much sky was hidden but about
+           whether there were ICE CRYSTALS in it, which is what halos and sundogs need. See
+           IceHalos.ts. -->
+      <label hidden><span id="label-high-cloud">Ice cloud (cirrus)</span> <input id="highCloudCover" class="weather-field" type="range" min="0" max="1" step="0.05" value="0" title="How much of the sky the high, icy deck covered — what refracts a halo or a pair of sundogs into being"/></label>
+      <!-- The one weather control that stays live even when a record owns every other one, because no
+           record holds it: what the crystals were doing up there was never measured. See
+           Weather.iceCrystalAlignment. -->
+      <label hidden><span id="label-ice-alignment">Crystal alignment</span> <input id="iceCrystalAlignment" class="weather-field" type="range" min="0" max="1" step="0.05" value="0.65"/></label>
+      <label hidden><span id="label-cloud-darkness">Cloud darkness</span> <input id="cloudDarkness" class="weather-field" type="range" min="0" max="1" step="0.05" value="0"/></label>
+      <label hidden><span id="label-cloud-base">Cloud base</span>
+        <input id="cloudBase" class="weather-field" type="number" min="0" step="50" placeholder="1000" title="Height of the cloud layer's base above the ground — decides whether the witness is under the deck or above it"/> m</label>
+    </div>
+  </section>
+  <section class="subgroup-panel" id="weather-precipitation" aria-labelledby="label-precipitation-group" hidden>
+    <div class="toolbar">
       <label><span id="label-precipitation-type">Precipitation</span>
         <select id="precipitationType" class="weather-field">
           <option id="option-precipitation-none" value="none">None</option>
@@ -350,13 +360,14 @@ export const html = `
       </label>
       <label><span id="label-precipitation-intensity">Intensity</span> <input id="precipitationIntensity" class="weather-field" type="range" min="0" max="1" step="0.05" value="0"/></label>
       <label><span id="label-storm">Storm</span> <input id="storm" class="weather-field" type="checkbox"/></label>
-    </fieldset>
-    <fieldset class="weather-group">
-      <legend id="label-wind-group">Wind</legend>
+    </div>
+  </section>
+  <section class="subgroup-panel" id="weather-wind" aria-labelledby="label-wind-group" hidden>
+    <div class="toolbar">
       <label><span id="label-wind-direction">Wind direction</span> <input id="windDirection" class="weather-field" type="number" min="0" max="360" step="1" value="0" title="The direction the wind blows TOWARD, clockwise from true north — the opposite of the meteorological convention a forecast uses (see Weather.windDirectionDeg)"/> &deg;</label>
       <label><span id="label-wind-speed">Wind speed</span> <input id="windSpeed" class="weather-field" type="number" min="0" max="30" step="0.5" value="0"/> m/s</label>
-    </fieldset>
-  </div>
+    </div>
+  </section>
 </section>
 <!-- Its own group rather than a row of the Shape group below: what the object sounded like is
      keyframed on the very same clock as its shape (a craft silent on the ground and heard only as
@@ -763,7 +774,7 @@ select.weather-field:disabled {
   gap: 0.35em;
   margin-bottom: 0.5em;
 }
-.group-tab {
+.group-tab, .subgroup-tab {
   font: inherit;
   font-weight: 600;
   cursor: pointer;
@@ -775,21 +786,21 @@ select.weather-field:disabled {
   border-radius: 4px;
   padding: 0.35em 0.7em;
 }
-.group-tab:hover {
+.group-tab:hover, .subgroup-tab:hover {
   border-color: color-mix(in srgb, currentColor 55%, transparent);
 }
 /* The open group's handle reads as attached to the panel below it: same border colour, and the
    only one filled. Without it, an open panel on a narrow screen (where the handle may have wrapped
    onto another line entirely) gives no clue which of the eight it belongs to. */
-.group-tab[aria-expanded="true"] {
+.group-tab[aria-expanded="true"], .subgroup-tab[aria-expanded="true"] {
   background: color-mix(in srgb, currentColor 12%, transparent);
   border-color: color-mix(in srgb, currentColor 55%, transparent);
 }
-.group-tab:focus-visible {
+.group-tab:focus-visible, .subgroup-tab:focus-visible {
   outline: 2px solid #4af;
   outline-offset: 1px;
 }
-.group-panel {
+.group-panel, .subgroup-panel {
   border: 1px solid #777;
   border-radius: 4px;
   padding: 0.5em 0.75em;
@@ -800,10 +811,10 @@ select.weather-field:disabled {
    declaration outranks the UA one and every panel is permanently open, with the attribute set and
    nothing happening. This component has already been bitten by exactly that once (.icon-btn), so
    the guard is written down. */
-.group-panel[hidden] {
+.group-panel[hidden], .subgroup-panel[hidden] {
   display: none;
 }
-.group-panel > .toolbar {
+.group-panel > .toolbar, .subgroup-panel > .toolbar {
   margin-bottom: 0;
 }
 /* The rule above flattens every panel toolbar's own spacing, which is right when there is one of
@@ -824,24 +835,9 @@ select.weather-field:disabled {
 .toolbar > label.checkbox {
   gap: 0.35em;
 }
-/* A named part of a group — the weather's clouds, precipitation and wind. The same frame as the
-   cloud layers' own fieldset (see cloudEditorTemplate), so the three read as siblings. */
-.toolbar fieldset {
-  min-width: 0;
-  margin: 0;
-  padding: 0.3em 0.6em 0.45em;
-  border: 1px solid color-mix(in srgb, currentColor 30%, transparent);
-  border-radius: 0.4em;
-}
-.toolbar fieldset > legend {
-  padding: 0 0.3em;
-  font-weight: 600;
-}
-.toolbar > fieldset.weather-group {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5em;
+/* A strip of handles inside a panel — the weather's three parts. */
+.group-panel > .group-tabs {
+  margin-top: 0.5em;
 }
 #description {
   font: inherit;

@@ -55,6 +55,7 @@ export const sightingLabels_en: SightingLabels = {
   windDirection: "Wind direction",
   windSpeed: "Wind speed",
   storm: "Storm",
+  cloudsGroup: "Clouds",
   precipitationGroup: "Precipitation",
   windGroup: "Wind",
   soundKind: "Sound",
