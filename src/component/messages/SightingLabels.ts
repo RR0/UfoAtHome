@@ -75,6 +75,10 @@ export interface SightingLabels {
   windDirection: string
   windSpeed: string
   storm: string
+  /** The weather group's parts: what falls (with the storm — a present-weather event, like hail)
+   * and what blows. The clouds' own part is named by the cloud editor. */
+  precipitationGroup: string
+  windGroup: string
   /** Which timbre the witness described, and the five values SOUND_KINDS offers — "none" being a
    * reported silence, not "unknown" (see Sound.ts). */
   soundKind: string

@@ -332,18 +332,30 @@ export const html = `
     <label hidden><span id="label-cloud-darkness">Cloud darkness</span> <input id="cloudDarkness" class="weather-field" type="range" min="0" max="1" step="0.05" value="0"/></label>
     <label hidden><span id="label-cloud-base">Cloud base</span>
       <input id="cloudBase" class="weather-field" type="number" min="0" step="50" placeholder="1000" title="Height of the cloud layer's base above the ground — decides whether the witness is under the deck or above it"/> m</label>
-    <label><span id="label-precipitation-type">Precipitation</span>
-      <select id="precipitationType" class="weather-field">
-        <option id="option-precipitation-none" value="none">None</option>
-        <option id="option-precipitation-rain" value="rain">Rain</option>
-        <option id="option-precipitation-snow" value="snow">Snow</option>
-        <option id="option-precipitation-hail" value="hail">Hail</option>
-      </select>
-    </label>
-    <label><span id="label-precipitation-intensity">Intensity</span> <input id="precipitationIntensity" class="weather-field" type="range" min="0" max="1" step="0.05" value="0"/></label>
-    <label><span id="label-wind-direction">Wind direction</span> <input id="windDirection" class="weather-field" type="number" min="0" max="360" step="1" value="0" title="The direction the wind blows TOWARD, clockwise from true north — the opposite of the meteorological convention a forecast uses (see Weather.windDirectionDeg)"/> &deg;</label>
-    <label><span id="label-wind-speed">Wind speed</span> <input id="windSpeed" class="weather-field" type="number" min="0" max="30" step="0.5" value="0"/> m/s</label>
-    <label><span id="label-storm">Storm</span> <input id="storm" class="weather-field" type="checkbox"/></label>
+    <!-- The weather in three parts — the clouds above (their own fieldset), what falls, and what
+         blows — because a dozen controls in one row read as one undifferentiated dial bank. The
+         storm sits with what falls, not with the clouds it is made of: a thunderstorm is what a
+         weather CODE reports (Open-Meteo's, where the provider reads it from, METAR's TS beside RA
+         and GR), a discrete present-weather event like hail, where a cloud layer is a continuous
+         thing with a height. -->
+    <fieldset class="weather-group">
+      <legend id="label-precipitation-group">Precipitation</legend>
+      <label><span id="label-precipitation-type">Precipitation</span>
+        <select id="precipitationType" class="weather-field">
+          <option id="option-precipitation-none" value="none">None</option>
+          <option id="option-precipitation-rain" value="rain">Rain</option>
+          <option id="option-precipitation-snow" value="snow">Snow</option>
+          <option id="option-precipitation-hail" value="hail">Hail</option>
+        </select>
+      </label>
+      <label><span id="label-precipitation-intensity">Intensity</span> <input id="precipitationIntensity" class="weather-field" type="range" min="0" max="1" step="0.05" value="0"/></label>
+      <label><span id="label-storm">Storm</span> <input id="storm" class="weather-field" type="checkbox"/></label>
+    </fieldset>
+    <fieldset class="weather-group">
+      <legend id="label-wind-group">Wind</legend>
+      <label><span id="label-wind-direction">Wind direction</span> <input id="windDirection" class="weather-field" type="number" min="0" max="360" step="1" value="0" title="The direction the wind blows TOWARD, clockwise from true north — the opposite of the meteorological convention a forecast uses (see Weather.windDirectionDeg)"/> &deg;</label>
+      <label><span id="label-wind-speed">Wind speed</span> <input id="windSpeed" class="weather-field" type="number" min="0" max="30" step="0.5" value="0"/> m/s</label>
+    </fieldset>
   </div>
 </section>
 <!-- Its own group rather than a row of the Shape group below: what the object sounded like is
@@ -811,6 +823,25 @@ select.weather-field:disabled {
 }
 .toolbar > label.checkbox {
   gap: 0.35em;
+}
+/* A named part of a group — the weather's clouds, precipitation and wind. The same frame as the
+   cloud layers' own fieldset (see cloudEditorTemplate), so the three read as siblings. */
+.toolbar fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0.3em 0.6em 0.45em;
+  border: 1px solid color-mix(in srgb, currentColor 30%, transparent);
+  border-radius: 0.4em;
+}
+.toolbar fieldset > legend {
+  padding: 0 0.3em;
+  font-weight: 600;
+}
+.toolbar > fieldset.weather-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5em;
 }
 #description {
   font: inherit;

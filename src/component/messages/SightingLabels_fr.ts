@@ -55,6 +55,8 @@ export const sightingLabels_fr: SightingLabels = {
   windDirection: "Direction du vent",
   windSpeed: "Force du vent",
   storm: "Orage",
+  precipitationGroup: "Précipitations",
+  windGroup: "Vent",
   soundKind: "Son",
   soundNone: "Aucun (silencieux)",
   soundHum: "Bourdonnement",
