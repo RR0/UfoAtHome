@@ -7,6 +7,7 @@ import type { Weather } from "../engine/model/Weather.js"
 import { buildCloudGeometry, buildCloudMaterial, CloudField } from "./CloudSystem.js"
 import type { CloudUniforms } from "./CloudSystem.js"
 import { cloudSeed, createCloudNoise, VolumetricCloudLayer } from "./VolumetricClouds.js"
+import { RainbowEffect } from "./RainbowEffect.js"
 
 export type CloudRendering = "surface" | "volume"
 type Deck = { layer: CloudLayer; parentId: string; instance?: CloudInstance; volume?: VolumetricCloudLayer; surface?: Mesh<SphereGeometry, ShaderMaterial>; uniforms?: CloudUniforms }
@@ -67,7 +68,7 @@ export class LayeredCloudSystem {
       }
       deck.layer = layer
       deck.instance = instance
-      const order = 4 + index / Math.max(1, layers.length)
+      const order = LayeredCloudSystem.deckOrder(layer.baseM < eyeM, index, layers.length)
       if (deck.volume) {
         // A layer's deck leaves room for its own individual clouds, each drawn by its own deck.
         deck.volume.update(layer, eyeM, instance, instance ? [] : layer.instances ?? [])
@@ -84,6 +85,17 @@ export class LayeredCloudSystem {
         deck.uniforms.fibrous.value = layer.type === "cirrus" ? 1 : 0
       }
     })
+  }
+
+  /**
+   * Where a deck sits among the sky's transparent draws. Decks above the eye stand behind the
+   * rainbow, which is rain fallen from them; a deck below the eye stands between the eye and that
+   * rain, and is drawn over the bow — see RainbowEffect.RENDER_ORDER. Within each group the layers
+   * keep the timeline's own order, and every deck stays under the precipitation (6).
+   */
+  static deckOrder(belowEye: boolean, index: number, count: number): number {
+    const rank = index / Math.max(1, count)
+    return belowEye ? RainbowEffect.RENDER_ORDER + 0.1 + 0.3 * rank : 4 + rank
   }
 
   setOffsets(globalM: { x: number; z: number }, layersM: Record<string, { x: number; z: number }>): void {

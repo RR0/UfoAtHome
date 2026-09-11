@@ -42,6 +42,23 @@ export class RainbowEffect {
   private static readonly RADIUS = 880
 
   /**
+   * Drawn AFTER the cloud decks the witness stands under, and BEFORE the falling rain itself.
+   *
+   * A bow is sunlit rain, and rain falls from a cloud, so along any line of sight the rain comes
+   * first and the deck that shed it stands behind: the deck is the bow's backdrop, not its veil,
+   * and a bow is at its most vivid on a dark cumulonimbus. Whether the Sun REACHES the rain is a
+   * different question, about the cloud on the Sun's side of the sky, and it is already answered in
+   * the strength this is given (see Rainbows.strength). Drawing the bow under the deck had it
+   * dimmed twice, and the second time by the wrong clouds.
+   *
+   * The exception is a deck whose base is BELOW the eye — a witness in an aircraft or on a cliff
+   * above the cloud. That deck stands between the eye and any rain under it, and it hides the bow.
+   * The cloud systems read this value to place such decks after it. Precipitation (6) stays above
+   * everything, being the nearest thing to the witness's face.
+   */
+  static readonly RENDER_ORDER = 5.5
+
+  /**
    * What the traced radiance is multiplied by to become screen light.
    *
    * The one number here that is a choice, and it is the same choice the ice display has to make: the
@@ -134,11 +151,12 @@ export class RainbowEffect {
       transparent: true,
       blending: AdditiveBlending,
       depthWrite: false,
+      depthTest: true,
       side: BackSide,
       fog: false
     })
     this.object = new Mesh(new SphereGeometry(RainbowEffect.RADIUS, 64, 32), this.material)
-    this.object.renderOrder = -1
+    this.object.renderOrder = RainbowEffect.RENDER_ORDER
     this.object.frustumCulled = false
     this.object.visible = false
   }

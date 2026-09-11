@@ -3464,8 +3464,7 @@ export class SceneRenderer {
     this.cloudMesh = new Mesh(geometry, material)
     // Above the deck? Turn the same shell upside down, so its dome opens downwards and the witness
     // looks at the TOP of the cloud layer — the one thing a ground-anchored dome could never show.
-    if (this.cloudLayerOffset() < 0) this.cloudMesh.scale.y = -1
-    this.cloudMesh.renderOrder = CLOUD_RENDER_ORDER
+    this.faceCloudDeck(this.cloudMesh, this.cloudLayerOffset())
     // In the celestial group, i.e. centred on the observer, for a reason that is the cloud
     // shader's own: it shades each vertex from the direction between the DOME'S CENTRE and that
     // vertex, then projects it onto a flat layer (see CloudSystem's CLOUD_LAYER_HEIGHT). That is
@@ -3548,7 +3547,16 @@ export class SceneRenderer {
     this.layeredClouds?.update(this.weather, this.observerElevationM + 1.6)
     const offset = this.cloudLayerOffset()
     if (this.cloudUniforms) this.cloudUniforms.layerHeight.value = Math.abs(offset)
-    if (this.cloudMesh) this.cloudMesh.scale.y = offset < 0 ? -1 : 1
+    if (this.cloudMesh) this.faceCloudDeck(this.cloudMesh, offset)
+  }
+
+  /** Which way the legacy deck's shell faces, and where it draws: under the eye it also stands
+   * between the eye and any rain beneath it, so it goes over the rainbow — the same rule the
+   * layered decks follow in LayeredCloudSystem.deckOrder. */
+  private faceCloudDeck(mesh: Mesh, offset: number): void {
+    const below = offset < 0
+    mesh.scale.y = below ? -1 : 1
+    mesh.renderOrder = below ? LayeredCloudSystem.deckOrder(true, 0, 1) : CLOUD_RENDER_ORDER
   }
 
   private cloudLayerOffset(): number {
