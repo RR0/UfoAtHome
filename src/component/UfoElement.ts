@@ -949,7 +949,9 @@ export class UfoElement extends HTMLElement {
       )
       this.canvasRenderer.paintGroupHandles(bounds)
     }
-    this.keepWitnessMapClear(instants[0].shapes)
+    this.mapShapeBounds = instants.flatMap(instant => [...instant.shapes.values()]
+      .filter(shape => shape.transparency < 1).map(shape => this.shifted(shape, shift).bounds))
+    this.keepWitnessMapClear()
     this.seekInput.value = String(t)
     this.timeStartLabel.textContent = this.formatPosition(t)
     this.showMilestoneAt(t)
@@ -1327,21 +1329,31 @@ export class UfoElement extends HTMLElement {
    * The top-right corner is the emptiest part of nearly every sky this project draws, which is why
    * the map lives there — but "nearly" is not "always", and a map that covers the very thing the
    * reader opened it to place is worse than no map. When the drawn phenomenon reaches under it, it
-   * goes to the other corner; when both corners are covered there is nowhere better, and it stays.
+   * goes to the other corner; when both corners are covered it temporarily disappears.
    *
    * The two thresholds are not the same number on purpose. It leaves as soon as anything touches
    * it and only comes back once the sky is clear by a margin, so an object drifting along its edge
    * does not make it hop from corner to corner.
    */
-  private keepWitnessMapClear(shapes: ReadonlyMap<string, Shape>): void {
+  private mapShapeBounds: Array<{ x: number; y: number; width: number; height: number }> = []
+  private mapSceneBounds: Array<{ x: number; y: number; width: number; height: number }> = []
+
+  /** Scene subjects (including an aircraft's accumulated trail), in normalized picture coordinates. */
+  setMapSubjectBounds(bounds: ReadonlyArray<{ x: number; y: number; width: number; height: number }>): void {
+    this.mapSceneBounds = bounds.map(box => ({ x: box.x * this.canvas.width, y: box.y * this.canvas.height,
+      width: box.width * this.canvas.width, height: box.height * this.canvas.height }))
+    this.keepWitnessMapClear()
+  }
+
+  private keepWitnessMapClear(): void {
     if (this.witnessMapPanel.hidden) return
     const box = this.witnessMapBoxPx
     if (!box) return
+    const subjects = [...this.mapShapeBounds, ...this.mapSceneBounds]
     const covers = (left: number, right: number, slack: number): boolean => {
-      for (const shape of shapes.values()) {
-        if (shape.transparency >= 1) continue
-        if (shape.bounds.x + shape.bounds.width < left - slack || shape.bounds.x > right + slack) continue
-        if (shape.bounds.y > box.bottom + slack || shape.bounds.y + shape.bounds.height < box.top - slack) continue
+      for (const bounds of subjects) {
+        if (bounds.x + bounds.width < left - slack || bounds.x > right + slack) continue
+        if (bounds.y > box.bottom + slack || bounds.y + bounds.height < box.top - slack) continue
         return true
       }
       return false
@@ -1349,10 +1361,13 @@ export class UfoElement extends HTMLElement {
     const rightCorner: [number, number] = [this.canvas.width - box.width, this.canvas.width]
     const leftCorner: [number, number] = [0, box.width]
     const margin = UfoElement.WITNESS_MAP_CLEARANCE_PX
+    const rightCovered = covers(...rightCorner, 0)
+    const leftCovered = covers(...leftCorner, 0)
+    this.witnessMapPanel.classList.toggle("subject-overlap", rightCovered && leftCovered)
     if (this.witnessMapPanel.classList.contains("on-the-left")) {
       // Back to the corner it prefers, but only once that corner is clear by the margin — the
       // asymmetry IS the anti-flicker: leaving costs nothing, returning has to be sure.
-      if (!covers(rightCorner[0], rightCorner[1], margin)) this.witnessMapPanel.classList.remove("on-the-left")
+      if (!rightCovered && (leftCovered || !covers(rightCorner[0], rightCorner[1], margin))) this.witnessMapPanel.classList.remove("on-the-left")
       return
     }
     if (covers(rightCorner[0], rightCorner[1], 0) && !covers(leftCorner[0], leftCorner[1], 0)) {

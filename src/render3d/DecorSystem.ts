@@ -1,4 +1,4 @@
-import { BackSide, Box3, BoxGeometry, BufferGeometry, Color, ConeGeometry, CylinderGeometry, Float32BufferAttribute, Group, Mesh, MeshBasicMaterial, MeshLambertMaterial, SphereGeometry, Uint32BufferAttribute, Vector3 } from "three"
+import { BackSide, Box3, BoxGeometry, BufferGeometry, Color, ConeGeometry, CylinderGeometry, Float32BufferAttribute, Group, Matrix4, Mesh, MeshBasicMaterial, MeshLambertMaterial, SphereGeometry, Uint32BufferAttribute, Vector3 } from "three"
 import type { Object3D } from "three"
 import type { DecorKind, DecorLight, DecorObject, DecorSide, DecorSize, MeasuredDecorSize } from "../engine/model/Decor.js"
 import { canHoldWitness, DEFAULT_BUILDING_FLOORS, isLightOnAt, lightOnFractionBetween } from "../engine/model/Decor.js"
@@ -794,11 +794,14 @@ export class DecorSystem {
       const count = mesh.userData.cropVerticesPerClump as number | undefined
       if (!mesh.isMesh || !base || !count) return
       const position = mesh.geometry.getAttribute("position")
+      // All plants in this mesh share one transform; worldToLocal would update the ancestor
+      // matrices and invert this same matrix again for every plant.
+      const inverse = new Matrix4().copy(mesh.matrixWorld).invert()
       for (let first = 0; first < position.count; first += count) {
         // The first vertex is the dome's pole, directly over the plant's centre.
         point.set(base[first * 3], 0, base[first * 3 + 2]).applyMatrix4(mesh.matrixWorld)
         point.y = ground(point.x, point.z)
-        mesh.worldToLocal(point)
+        point.applyMatrix4(inverse)
         for (let i = first; i < first + count; i++) position.setY(i, base[i * 3 + 1] + point.y)
       }
       position.needsUpdate = true

@@ -1481,6 +1481,41 @@ describe("the witness's own map", () => {
     expect(panel.classList.contains("on-the-left")).toBe(false)
   })
 
+  it("avoids both ends of a 3D exposure trail and hides when neither corner is free", () => {
+    const element = mountWithMap(movingWitness())
+    const panel = element.shadowRoot!.getElementById("witness-map-panel")!
+    const canvas = element.canvasElement
+    ;(element as unknown as { witnessMapBoxPx: unknown }).witnessMapBoxPx = { width: 200, top: 40, bottom: 240 }
+    const right = { x: 1 - 100 / canvas.width, y: 100 / canvas.height, width: 40 / canvas.width, height: 20 / canvas.height }
+    const left = { ...right, x: 50 / canvas.width }
+    element.setMapSubjectBounds([right])
+    expect(panel.classList.contains("on-the-left")).toBe(true)
+    element.setMapSubjectBounds([right, left])
+    expect(panel.classList.contains("subject-overlap")).toBe(true)
+    expect(panel.hidden).toBe(false) // user visibility preference remains enabled
+    element.setMapSubjectBounds([left])
+    expect(panel.classList.contains("subject-overlap")).toBe(false)
+    expect(panel.classList.contains("on-the-left")).toBe(false)
+    element.setMapSubjectBounds([])
+    expect(panel.classList.contains("subject-overlap")).toBe(false)
+  })
+
+  it("moves for the end of a phenomenon trail even when its first instant is clear", () => {
+    const element = mountWithMap(movingWitness())
+    const panel = element.shadowRoot!.getElementById("witness-map-panel")!
+    const canvas = element.canvasElement
+    ;(element as unknown as { witnessMapBoxPx: unknown }).witnessMapBoxPx = { width: 200, top: 40, bottom: 240 }
+    const shape = (x: number) => ({ kind: "oval", bounds: { x, y: 100, width: 40, height: 20 },
+      color: "#fff", angle: 0, transparency: 0, haloScale: 0, selected: false })
+    const internal = element as unknown as { exposureInstants: () => unknown }
+    internal.exposureInstants = () => [
+      { shapes: new Map([["ufo", shape(canvas.width / 2)]]), share: 0.5 },
+      { shapes: new Map([["ufo", shape(canvas.width - 100)]]), share: 0.5 }
+    ]
+    element.refresh()
+    expect(panel.classList.contains("on-the-left")).toBe(true)
+  })
+
   it("goes to a named moment on the map the way its mark on the bar does", () => {
     const element = mountWithMap(movingWitness())
     const canvas = element.shadowRoot!.getElementById("witness-map-canvas") as HTMLCanvasElement

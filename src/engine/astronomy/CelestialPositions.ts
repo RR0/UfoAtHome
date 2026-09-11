@@ -66,6 +66,23 @@ export function equatorialToHorizontal(
   return { altitudeDeg: horizontal.altitude, azimuthDeg: horizontal.azimuth }
 }
 
+/** One catalogue snapshot shares a time and observer. AstroTime caches the sidereal calculation;
+ * passing a Date to Horizon for every star would discard that cache for every call. */
+export class HorizontalFrame {
+  private readonly time: Astronomy.AstroTime
+  private readonly observer: Astronomy.Observer
+
+  constructor(date: Date, observer: ObserverGeo) {
+    this.time = Astronomy.MakeTime(date)
+    this.observer = toObserver(observer)
+  }
+
+  position(raHours: number, decDeg: number): HorizontalPosition {
+    const horizontal = Astronomy.Horizon(this.time, this.observer, raHours, decDeg, "normal")
+    return { altitudeDeg: horizontal.altitude, azimuthDeg: horizontal.azimuth }
+  }
+}
+
 export function computeBodyPosition(body: CelestialBody, date: Date, observer: ObserverGeo): HorizontalPosition {
   const obs = toObserver(observer)
   const equatorial = Astronomy.Equator(Astronomy.Body[body], date, obs, true, true)

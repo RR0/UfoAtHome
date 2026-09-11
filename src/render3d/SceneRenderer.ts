@@ -6,6 +6,7 @@ import type { CloudRendering } from "./LayeredCloudSystem.js"
 import {
   AdditiveBlending,
   BackSide,
+  Box3,
   BufferAttribute,
   BufferGeometry,
   CanvasTexture,
@@ -21,6 +22,7 @@ import {
   MeshBasicMaterial,
   MeshLambertMaterial,
   Object3D,
+  OrthographicCamera,
   PCFShadowMap,
   PerspectiveCamera,
   PointLight,
@@ -57,7 +59,7 @@ import {
   STAR_BRIGHTNESS_TIERS
 } from "./skyColors.js"
 import type { RgbColor } from "./skyColors.js"
-import { equatorialToHorizontal } from "../engine/astronomy/CelestialPositions.js"
+import { HorizontalFrame } from "../engine/astronomy/CelestialPositions.js"
 import { selectLocale } from "../i18n/locale.js"
 import type { CelestialBody, HorizontalPosition, MoonPhase, ObserverGeo } from "../engine/astronomy/CelestialPositions.js"
 import type { ObserverPose } from "../engine/model/ObserverTrack.js"
@@ -1317,8 +1319,12 @@ export class SceneRenderer {
 
   private updateCompassVisibility(): void {
     const visible = this.compassHovered || this.compassForced
+    if (!this.compassSprites.some(sprite => sprite.visible !== visible)) return
     for (const sprite of this.compassSprites) sprite.visible = visible
-    this.render()
+    // Hover changes a viewing aid, not the observation. Keep the film and its progress intact.
+    if (this.developingExposure) {
+      if (this.exposureInstantsDone > 0) this.presentExposure()
+    } else this.render()
   }
 
   /**
@@ -1495,6 +1501,13 @@ export class SceneRenderer {
         ? geoToLocalMeters(referencePose.lat, referencePose.lng, currentPose.lat, currentPose.lng)
         : { x: 0, z: 0 }
     const inhabited = this.decorObjects.find(object => object.witnessSide !== undefined && canHoldWitness(object.kind))
+    // Terrain and scenery share the eye's horizontal displacement. Otherwise every footstep
+    // slides the plants over the height field and needlessly deforms the entire crop geometry.
+    if (this.terrainMesh && this.terrainOrigin && currentPose?.lat !== undefined && currentPose.lng !== undefined) {
+      const drift = geoToLocalMeters(this.terrainOrigin.lat, this.terrainOrigin.lng, currentPose.lat, currentPose.lng)
+      this.terrainMesh.position.x = drift.x - (inhabited ? 0 : this.gaitOffset.eastM)
+      this.terrainMesh.position.z = drift.z + (inhabited ? 0 : this.gaitOffset.northM)
+    }
     if (!inhabited) {
       // The walking eye's own displacement, turned into the same "how far has the world moved under
       // the camera" that the drift above already is — and subtracted, not added: offset holds where
@@ -1964,6 +1977,11 @@ export class SceneRenderer {
   /** One instant, straight to the canvas — the ordinary frame, and what every recording drew before
    * poses long enough to move the sky existed. */
   private renderOnce(target?: WebGLRenderTarget): void {
+    if (this.onMapSubjectBounds) {
+      const bounds = this.mapSubjectBounds()
+      if (target) this.exposureSubjectBounds.push(...bounds)
+      else this.onMapSubjectBounds(bounds)
+    }
     const pass = this.usableEquidistantPass()
     // After the pass exists and before the camera is widened for it: a pixel names a direction
     // under the projection the pass implements, at the field the recording states.
@@ -2089,6 +2107,7 @@ export class SceneRenderer {
    */
   private startExposure(): void {
     this.cancelExposure()
+    this.exposureSubjectBounds = []
     const size = this.renderer.getDrawingBufferSize(new Vector2())
     const width = Math.max(1, Math.round(size.x))
     const height = Math.max(1, Math.round(size.y))
@@ -2110,7 +2129,14 @@ export class SceneRenderer {
     const until = performance.now() + SceneRenderer.EXPOSURE_BUDGET_MS
     do {
       this.restateAt(instantAt, this.exposureInstantsDone)
-      this.renderOnce(film.instantTarget)
+      // Compass captions belong to the viewer, never to the accumulated photograph.
+      const visibility = this.compassSprites.map(sprite => sprite.visible)
+      for (const sprite of this.compassSprites) sprite.visible = false
+      try {
+        this.renderOnce(film.instantTarget)
+      } finally {
+        this.compassSprites.forEach((sprite, i) => { sprite.visible = visibility[i] })
+      }
       film.add(this.renderer, share)
       this.exposureInstantsDone++
     } while (this.exposureInstantsDone < this.exposureInstants && performance.now() < until)
@@ -2119,10 +2145,67 @@ export class SceneRenderer {
     // SceneElement's own size estimates, the hover picks — reads the scene graph where this leaves
     // it, and between two frames of this that reader is the witness moving their pointer.
     this.restateAt(instantAt, 0)
-    film.develop(this.renderer, this.exposureInstants / this.exposureInstantsDone)
+    this.presentExposure()
     if (this.exposureInstantsDone < this.exposureInstants) {
       this.exposureFrameId = requestAnimationFrame(() => this.developExposure())
     }
+  }
+
+  /** Redisplay the existing film, then its compass captions, without sampling the scene again. */
+  private presentExposure(): void {
+    this.exposureAccumulation?.develop(this.renderer, this.exposureInstants / this.exposureInstantsDone)
+    this.onMapSubjectBounds?.(this.exposureSubjectBounds)
+    if (!this.compassSprites.some(sprite => sprite.visible)) return
+    const overlay = new Scene()
+    const camera = new OrthographicCamera(-1, 1, 1, -1, 0, 2)
+    const size = COMPASS_SPRITE_SIZE / (COMPASS_PLACEMENT_RADIUS * Math.tan(COMPASS_REFERENCE_FOV_DEG * DEG_TO_RAD / 2))
+    for (const sprite of this.compassSprites) {
+      if (!sprite.visible) continue
+      const direction = sprite.getWorldPosition(new Vector3()).sub(this.camera.position).normalize()
+      const point = this.screenPointOf(direction)
+      if (!point) continue
+      // The temporary sprite borrows the caption material; it owns no GPU resource to dispose.
+      const caption = new Sprite(sprite.material)
+      caption.position.set(point.ndcX, point.ndcY, -1)
+      caption.scale.set(size / this.camera.aspect, size, 1)
+      overlay.add(caption)
+    }
+    const autoClear = this.renderer.autoClear
+    this.renderer.autoClear = false
+    try {
+      this.renderer.render(overlay, camera)
+    } finally {
+      this.renderer.autoClear = autoClear
+    }
+  }
+
+  onMapSubjectBounds?: (bounds: ReadonlyArray<{ x: number; y: number; width: number; height: number }>) => void
+  private exposureSubjectBounds: Array<{ x: number; y: number; width: number; height: number }> = []
+
+  /** Project moving decor and vehicles as subjects, excluding scenery such as crop fields.
+   * Exposure rendering collects these same boxes at each sampled instant, including both ends. */
+  private mapSubjectBounds(): Array<{ x: number; y: number; width: number; height: number }> {
+    const bounds: Array<{ x: number; y: number; width: number; height: number }> = []
+    const box = new Box3()
+    const direction = new Vector3()
+    for (const object of this.decorObjects) {
+      if (!object.track?.length && object.kind !== "aircraft" && object.kind !== "vehicle") continue
+      const group = this.decorGroups.get(object.id)
+      if (!group?.visible) continue
+      box.setFromObject(group)
+      if (box.isEmpty()) continue
+      let left = Infinity, right = -Infinity, top = Infinity, bottom = -Infinity
+      for (const x of [box.min.x, box.max.x]) for (const y of [box.min.y, box.max.y]) for (const z of [box.min.z, box.max.z]) {
+        direction.set(x, y, z).sub(this.camera.position).normalize()
+        const point = this.screenPointOf(direction)
+        if (!point) continue
+        const px = (point.ndcX + 1) / 2, py = (1 - point.ndcY) / 2
+        left = Math.min(left, px); right = Math.max(right, px)
+        top = Math.min(top, py); bottom = Math.max(bottom, py)
+      }
+      if (Number.isFinite(left)) bounds.push({ x: left, y: top, width: right - left, height: bottom - top })
+    }
+    return bounds
   }
 
   /** Puts the scene into one instant of the pose without painting anything: restating it touches a
@@ -2694,22 +2777,25 @@ export class SceneRenderer {
   }
 
   private buildSky(sun: HorizontalPosition): void {
-    this.disposeMesh(this.skyMesh)
     // A FULL sphere, deliberately: its lower half is what the eye meets past the far edge of the
     // ground disc, and it is coloured by the same per-direction sky/ground gradient as the rest
     // (skyColorForPosition below the horizon = the ground haze), so the two meet in one continuous
     // colour. Clipping it to a hemisphere leaves a hard-edged void there instead — a finite disc
     // can never reach the horizon from any altitude at all, since a ray approaching horizontal
     // meets the ground plane arbitrarily far away.
-    const geometry = new SphereGeometry(SKY_RADIUS, 32, 16)
+    const geometry = this.skyMesh?.geometry ?? new SphereGeometry(SKY_RADIUS, 32, 16)
     const position = geometry.attributes.position
-    const colors: number[] = []
+    const colors = geometry.getAttribute("color") ?? new Float32BufferAttribute(new Float32Array(position.count * 3), 3)
     for (let i = 0; i < position.count; i++) {
       const { altitudeDeg, azimuthDeg } = cartesianToHorizontal(position.getX(i), position.getY(i), position.getZ(i))
       const color = skyColorForPosition(altitudeDeg, azimuthDeg, sun.azimuthDeg, sun.altitudeDeg)
-      colors.push(color[0], color[1], color[2])
+      colors.setXYZ(i, color[0], color[1], color[2])
     }
-    geometry.setAttribute("color", new Float32BufferAttribute(colors, 3))
+    // Astronomy changes the gradient, not the dome topology or its GPU program. In particular,
+    // successive instants of a long exposure must not dispose and recompile this material.
+    colors.needsUpdate = true
+    if (this.skyMesh) return
+    geometry.setAttribute("color", colors)
     // A BACKDROP, not a shell 900 m away. Written as ordinary geometry it filled the depth buffer
     // at its own radius, so anything further off — an aircraft at cruising altitude above all — was
     // hidden BEHIND the sky, invisible for no reason a viewer could ever guess. Drawn first and
@@ -2730,8 +2816,11 @@ export class SceneRenderer {
    * albedo — GROUND_ALBEDO's own 0.5 keeps a plain-gray "unremarkable ground" reading whether it's
    * lit by full daylight or the Moon's own dim glow. */
   private buildGround(): void {
+    const radius = groundRadiusFor(this.observerElevationM)
+    // Lighting is carried by the scene lights; only a radius change needs another disc.
+    if (this.groundMesh && radius === this.groundRadius) return
     this.disposeMesh(this.groundMesh)
-    this.groundRadius = groundRadiusFor(this.observerElevationM)
+    this.groundRadius = radius
     const geometry = new CircleGeometry(this.groundRadius, 48)
     const material = new MeshLambertMaterial({ color: new Color(GROUND_ALBEDO, GROUND_ALBEDO, GROUND_ALBEDO), fog: true })
     this.groundMesh = new Mesh(geometry, material)
@@ -3213,13 +3302,14 @@ export class SceneRenderer {
    * magnitudeToBrightness into the same size tiers/twinkle machinery as before — only the source
    * of positions/brightness changed, not how they're rendered. */
   private buildStars(stars: SceneAstronomy["stars"], magnitudeLimit: number): void {
-    this.disposeStarTiers()
     this.namedStars = []
     if (!stars || stars.catalog.count === 0) {
+      this.disposeStarTiers()
       this.syncAnimationLoop() // stars gone, but precipitation/lightning may still need the loop
       return
     }
     const { catalog, date, observer } = stars
+    const horizontalFrame = new HorizontalFrame(date, observer)
     // Seeds only the twinkle jitter now (real positions/brightness come from the catalog) — kept
     // deterministic so a star's twinkle phase doesn't jump around between renders.
     const jitterRandom = mulberry32(1337)
@@ -3238,7 +3328,7 @@ export class SceneRenderer {
       // against the eye's 348. The cost follows what is DRAWN, which is the only thing it should
       // follow.
       if (mag > magnitudeLimit) break
-      const { altitudeDeg, azimuthDeg } = equatorialToHorizontal(catalog.ra[i], catalog.dec[i], date, observer)
+      const { altitudeDeg, azimuthDeg } = horizontalFrame.position(catalog.ra[i], catalog.dec[i])
       if (altitudeDeg < BELOW_HORIZON_CUTOFF_DEG) continue
       const { x, y, z } = horizontalToCartesian(altitudeDeg, azimuthDeg, STAR_RADIUS)
       visibleStars.push({
@@ -3256,7 +3346,7 @@ export class SceneRenderer {
     // horizon, or one the daylight has washed out, must not answer to the pointer.
     for (const star of BRIGHT_STARS) {
       if (star.mag > magnitudeLimit) continue
-      const { altitudeDeg, azimuthDeg } = equatorialToHorizontal(star.raHours, star.decDeg, date, observer)
+      const { altitudeDeg, azimuthDeg } = horizontalFrame.position(star.raHours, star.decDeg)
       if (altitudeDeg < BELOW_HORIZON_CUTOFF_DEG) continue
       const { x, y, z } = horizontalToCartesian(altitudeDeg, azimuthDeg, STAR_RADIUS)
       this.namedStars.push({ star, direction: new Vector3(x, y, z).normalize(), altitudeDeg })
@@ -3280,11 +3370,18 @@ export class SceneRenderer {
       geometry.setAttribute("position", new BufferAttribute(positions, 3))
       const colorAttribute = new BufferAttribute(new Float32Array(tierStars.length * 3), 3)
       geometry.setAttribute("color", colorAttribute)
-      const material = new PointsMaterial({ vertexColors: true, size: tier.size, sizeAttenuation: false, fog: false })
-      // A star is a point source: everything visible of it is radial glare, never a square quad.
-      RoundPoints.apply(material)
-      const points = new Points(geometry, material)
-      this.celestialGroup.add(points)
+      // The stars move and may change tier, but the tier's shader stays identical. Retain its
+      // material across exposure samples so updating positions does not recompile round points.
+      let points = this.starTiers[tierIndex]?.points
+      if (points) {
+        points.geometry.dispose()
+        points.geometry = geometry
+      } else {
+        const material = new PointsMaterial({ vertexColors: true, size: tier.size, sizeAttenuation: false, fog: false })
+        RoundPoints.apply(material)
+        points = new Points(geometry, material)
+        this.celestialGroup.add(points)
+      }
       return { points, colorAttribute, brightness, phase, speedFactor }
     })
     // Populates real initial colors synchronously (single source of truth for the color
@@ -3333,17 +3430,29 @@ export class SceneRenderer {
       if (this.lastSunPosition) this.updateCloudLighting(this.lastSunPosition, this.baseFogColor)
       return
     }
-    this.disposeCloudSystem()
     // The water deck only. Driven by the lower cover where the record gave one, because the ice now
     // has a deck of its own and adding the total would draw the cirrus twice.
     const cover = this.lowerCloudCover()
-    if (cover <= 0) return
+    if (cover <= 0) {
+      this.disposeCloudSystem()
+      return
+    }
     const darkness = this.weather.cloudDarkness
     const baseColor = new Color(
       CLOUD_LIGHT_COLOR[0] + (CLOUD_DARK_COLOR[0] - CLOUD_LIGHT_COLOR[0]) * darkness,
       CLOUD_LIGHT_COLOR[1] + (CLOUD_DARK_COLOR[1] - CLOUD_LIGHT_COLOR[1]) * darkness,
       CLOUD_LIGHT_COLOR[2] + (CLOUD_DARK_COLOR[2] - CLOUD_LIGHT_COLOR[2]) * darkness
     )
+    // Interpolated weather changes on every tick. Keep the surface and its GPU program;
+    // coverage, colour and altitude are uniforms, not reasons to compile another material.
+    if (this.cloudMesh && this.cloudUniforms) {
+      this.cloudUniforms.coverage.value = cover
+      this.cloudUniforms.baseColor.value.copy(baseColor)
+      this.syncCloudLayer()
+      if (this.lastSunPosition) this.updateCloudLighting(this.lastSunPosition, this.baseFogColor)
+      return
+    }
+    this.disposeCloudSystem()
     const { material, uniforms } = buildCloudMaterial(baseColor, cover, Math.abs(this.cloudLayerOffset()))
     this.cloudMaterial = material
     this.cloudUniforms = uniforms
@@ -3394,10 +3503,16 @@ export class SceneRenderer {
    * the water shading drew it as a field of white dots that a reader took for stars at midday.
    */
   private buildCirrus(): void {
-    this.disposeCirrus()
-    if (this.layeredClouds) return
     const cover = this.weather.highCloudCover ?? 0
-    if (cover <= 0) return
+    if (this.layeredClouds || cover <= 0) {
+      this.disposeCirrus()
+      return
+    }
+    if (this.cirrusMesh && this.cirrusUniforms) {
+      this.cirrusUniforms.coverage.value = cover
+      if (this.lastSunPosition) this.updateCloudLighting(this.lastSunPosition, this.baseFogColor)
+      return
+    }
     const { material, uniforms } = buildCloudMaterial(new Color(...CLOUD_LIGHT_COLOR), cover, CIRRUS_LAYER_HEIGHT, 1)
     this.cirrusMaterial = material
     this.cirrusUniforms = uniforms

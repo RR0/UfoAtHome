@@ -5,11 +5,24 @@ import {
   computeBodyPosition,
   computeMoonPhase,
   equatorialToHorizontal,
+  HorizontalFrame,
   sightingTimeToDate,
   TRACKED_PLANETS
 } from "../../../src/engine/astronomy/CelestialPositions.js"
 
 const PARIS = { lat: 48.8566, lng: 2.3522, elevationM: 35 }
+
+it("shares the time calculation without changing refracted star positions", () => {
+  for (const lat of [-80, 0, 48.8566, 80]) {
+    const observer = { ...PARIS, lat }
+    for (const date of [new Date("1990-11-05T18:00:00Z"), new Date("2024-06-21T12:00:00Z")]) {
+      const frame = new HorizontalFrame(date, observer)
+      for (let ra = 0; ra < 24; ra += 2) for (const dec of [-89, -30, 0, 30, 89]) {
+        expect(frame.position(ra, dec)).toEqual(equatorialToHorizontal(ra, dec, date, observer))
+      }
+    }
+  }
+})
 
 describe("computeBodyPosition", () => {
   it("places the sun high in the sky around summer solar noon in Paris", () => {

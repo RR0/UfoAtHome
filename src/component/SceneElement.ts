@@ -440,6 +440,7 @@ export class SceneElement extends HTMLElement {
     // (its transparent overlay canvas + toolbar), hiding the 3D backdrop — a sibling outside it.
     this.ufoElement.fullscreenTarget = this.stageElement
     this.shadow.getElementById("ufo-slot")!.replaceWith(this.ufoElement)
+    this.sceneRenderer.onMapSubjectBounds = bounds => this.ufoElement.setMapSubjectBounds(bounds)
     this.ufoElement.addEventListener("timeupdate", this.handleTimeUpdate)
     this.ufoElement.canvasElement.addEventListener("pointermove", this.handlePointerMove)
     this.ufoElement.canvasElement.addEventListener("pointerleave", this.handlePointerLeave)
@@ -926,7 +927,12 @@ export class SceneElement extends HTMLElement {
     // 1× is seconds of the recording; a pose's own sky instants are a pixel apart by construction
     // (SkyDrift.instants) and still each get their own restatement.
     const quantumMs = Math.max(1, Math.round((0.25 * this.degreesPerPixelAt(t)) / SkyDrift.DEG_PER_SECOND * 1000))
-    const skyKey = `${Math.floor(date.getTime() / quantumMs)}|${lat}|${lng}|${observer.elevationM}|${this.starCatalog ? this.starCatalogDepth : 0}`
+    // A walking witness changes lat/lng every frame too. Exact coordinates defeat the time
+    // cache and rebuild the sky (including shader materials) for centimetres of movement.
+    // Bound each geographic angle to a tenth of a display pixel; use the actual position
+    // when refreshing. Terrain, gait, clouds and decor above still update at every instant.
+    const positionQuantumDeg = Math.max(1e-8, this.degreesPerPixelAt(t) * 0.1)
+    const skyKey = `${Math.floor(date.getTime() / quantumMs)}|${Math.round(lat / positionQuantumDeg)}|${Math.round(lng / positionQuantumDeg)}|${Math.round(observer.elevationM)}|${this.starCatalog ? this.starCatalogDepth : 0}`
     if (skyKey === this.lastSkyKey) {
       // Restating the sky was also what drew the frame; everything above it — the pose, the decor,
       // the phenomena — still has to reach the canvas.

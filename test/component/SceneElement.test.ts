@@ -13,6 +13,7 @@ const thunderPlayed: number[] = []
 /** Every sky the element hands the renderer, so a test can see whether editing the observation
  * actually rebuilt the fall or silently left the previous one standing. */
 const meteorShowersSet: { count: number; altitudeDeg: number }[] = []
+const astronomySet = vi.fn()
 
 // jsdom's <canvas> can back neither WebGL nor Web Audio, so both are stubbed whole — same reason
 // and shape as SightingElement.test.ts's identical SceneRenderer mock.
@@ -31,7 +32,7 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     get currentDecorModelCredits(): never[] {
       return []
     }
-    setAstronomy(): void {}
+    setAstronomy(): void { astronomySet() }
     setShowCompass(): void {}
     setCompassHovered(): void {}
     setCompassForced(): void {}
@@ -185,6 +186,35 @@ function mount(): SceneElement {
   meteorShowersSet.length = 0
   return element
 }
+
+it("does not rebuild astronomy for centimetres of observer motion, but follows a significant move", () => {
+  const element = mount()
+  element.sightingData = {
+    ...rainyJson,
+    time: { year: 1965, month: 7, day: 1, hour: 5, minute: 45 },
+    utcOffsetHours: 1,
+    place: [{ lat: 43.84, lng: 5.96 }]
+  }
+  const internal = element as unknown as { applySceneAt(t: number): void; lastSkyKey?: string; sceneCanvas: HTMLCanvasElement }
+  internal.sceneCanvas.height = 600
+  const location = { lat: 43.84, lng: 5.96, pitchDeg: 0, fovDeg: 60, elevationM: 0 }
+  element.ufoElement.sighting.witnessTrack.addKeyframe(0, location)
+  internal.lastSkyKey = undefined
+  internal.applySceneAt(0)
+  astronomySet.mockClear()
+  // Edit the resolved geographic position without replacing the recording or resetting its cache.
+  for (let i = 1; i <= 10; i++) {
+    location.lat += 1e-8
+    element.ufoElement.sighting.witnessTrack.addKeyframe(0, location)
+    internal.applySceneAt(0)
+  }
+  expect(astronomySet).not.toHaveBeenCalled()
+  location.lat += 1
+  element.ufoElement.sighting.witnessTrack.addKeyframe(0, location)
+  internal.applySceneAt(0)
+  expect(astronomySet).toHaveBeenCalledOnce()
+  element.remove()
+})
 
 describe("SceneElement weather follows the player", () => {
   afterEach(() => {
