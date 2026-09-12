@@ -77,17 +77,27 @@ export class Layout {
   }
 
   /**
-   * Why the module URLs carry NO `?v=` any more.
+   * Where this site's own pages load the modules from: `/lib/<version>/`, never `/lib/` itself.
    *
    * The four entry modules are named without a content hash on purpose — their names are the
-   * published API, pasted into other people's pages — and `_headers` has them revalidated on every
-   * visit (see build.ts). For a week after that rule replaced a week-long cache, the pages carried
-   * a `?v=` so that readers still holding the old rule got the new bytes; that week is over, and
-   * the query had a cost of its own: the chunks a module loads on demand (the French messages, the
-   * model loader, the assessors) import the entry by its plain name, which the browser takes for a
-   * DIFFERENT module from the one the page loaded with a query — the megabyte parsed and evaluated
-   * twice, two copies of three.js, and a chunk bound to whichever copy it found. One URL, one module.
+   * published API, pasted into other people's pages — so the same URL means different bytes at
+   * every release, and a browser holding last week's copy (a week-long cache rule served them
+   * until 0.46.0, and a phone that opened a dossier under it kept its copy for a week) runs last
+   * week's component on today's page: an information panel in the wrong language, an account
+   * printed as "[object Object]". A `?v=` query fixed the entry and broke the rest: the chunks a
+   * module loads on demand (the French messages, the model loader, the assessors) import the entry
+   * by its plain name, which the browser takes for a DIFFERENT module from the one the page loaded
+   * with a query — the megabyte parsed and evaluated twice, two copies of three.js, and a chunk
+   * bound to whichever copy it found. A directory named after the version has neither fault: no
+   * browser has it cached before the release exists, and a chunk resolved beside the entry finds
+   * the entry that loaded it. build.ts writes the copy; the documentation's copy-paste snippet
+   * stays on the plain `/lib/`, since an embedder wants the current component, not the one that
+   * was current the day they copied it.
    */
+  versioned(url: string): string {
+    return url.replace(/^\/lib(?=\/|$)/, `/lib/${this.version}`)
+  }
+
   render(page: SitePage, language: SiteLanguage): string {
     const meta = page.meta
     const self = this.fileUrl(meta, language)
@@ -96,7 +106,7 @@ export class Layout {
       .concat(`<link rel="alternate" hreflang="x-default" href="${Layout.ORIGIN}${this.path(meta)}">`)
       .join("\n  ")
     const modules = (meta.modules ?? [])
-      .map(src => `<script type="module" src="${src}"></script>`)
+      .map(src => `<script type="module" src="${this.versioned(src)}"></script>`)
       .join("\n  ")
     const script = page.script?.(language)
     return `<!doctype html>
@@ -126,7 +136,7 @@ ${this.header(page, language)}
 ${this.headings.withAnchors(page.render(language), language === "fr" ? "Lien vers cette section" : "Link to this section", this.anchors(page, language))}
 </main>
 ${this.siteFooter(language)}
-${script ? `<script type="module">\n${script}\n</script>` : ""}
+${script ? `<script type="module">\n// Where this site's own pages load their modules from — see Layout.versioned.\nconst SITE_LIB = ${JSON.stringify(this.versioned("/lib"))}\n${script}\n</script>` : ""}
 </body>
 </html>
 `

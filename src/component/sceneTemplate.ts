@@ -32,6 +32,8 @@ export const css = `
      ufoTemplate) an overlay stretched over an outer stage by inset:0. */
   height: auto;
   aspect-ratio: 640 / 360;
+  /* What lets .frame measure the stage's height in its own width rule — see .frame. */
+  container-type: size;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -57,9 +59,15 @@ export const css = `
      stage and the width follows the format, so a square or upright frame leaves space to either
      side instead of making the widget taller. Width first (100%) with a max-height cap would not
      do it — a max-height clamp does not shrink a definite width back, it just breaks the ratio. */
-  height: 100%;
-  width: auto;
-  max-width: 100%;
+  /* A contain fit, in both orientations. The stage is a size container, so the frame's width is
+     the smaller of the stage's width and the width the stage's HEIGHT allows at the frame's own
+     ratio; the height follows from the ratio. Height-first with a max-width cap, as this was,
+     kept the full height when the width capped it — a portrait phone in fullscreen had the frame
+     390 × 664 for a 16:9 recording, the scene squeezed to a third of its width. A browser without
+     container units (iOS before 16) keeps the plain width. */
+  width: 100%;
+  width: min(100%, calc(100cqh * var(--frame-aspect, 640 / 360)));
+  height: auto;
   /* The instrument's own format — see Instruments.aspectOf. An eye and an unidentified camera
      have no frame of their own, and fall back to the shape this project draws its scene in. */
   aspect-ratio: var(--frame-aspect, 640 / 360);

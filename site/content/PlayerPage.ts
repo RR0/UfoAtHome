@@ -210,7 +210,7 @@ const showInEditor = text => {
 
 pastePanel.addEventListener("toggle", async () => {
   if (!pastePanel.open || editor) return
-  const { JsonEditor } = await import("/lib/site-json-editor.mjs")
+  const { JsonEditor } = await import(SITE_LIB + "/site-json-editor.mjs")
   editorFilled = loadedText ?? pasteMount.dataset.sample ?? ""
   editor = new JsonEditor(pasteMount, editorFilled)
   editor.focus()

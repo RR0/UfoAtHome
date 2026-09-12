@@ -124,6 +124,11 @@ class SiteBuilder {
     await mkdir(join(this.out, "lib"), { recursive: true })
     for (const dir of this.bundleDirs) {
       await cp(join(this.root, dir), join(this.out, "lib"), { recursive: true })
+      // The same bundles again under the version, for this site's OWN pages (see Layout.versioned):
+      // a directory nobody has cached at each release, whose lazy chunks resolve beside the entry
+      // that loaded them. /lib itself stays the published API. The hashed files are the same bytes
+      // under both, which the host de-duplicates on upload.
+      await cp(join(this.root, dir), join(this.out, "lib", version), { recursive: true })
     }
     await this.writeLegacyBundle()
 

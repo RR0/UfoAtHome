@@ -57,7 +57,7 @@ const mount = document.getElementById("example-editor")
 if (source && mount) {
   void (async () => {
     try {
-      const { JsonEditor } = await import("/lib/site-json-editor.mjs")
+      const { JsonEditor } = await import(SITE_LIB + "/site-json-editor.mjs")
       new JsonEditor(mount, source.textContent.trimEnd())
       source.hidden = true
     } catch {

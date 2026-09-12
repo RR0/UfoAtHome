@@ -142,7 +142,7 @@ preview.setAttribute("src", embedField.value.trim())
    keeps that weight off the page's first paint, which the live preview below already spends. */
 void (async () => {
   try {
-    const { HtmlView } = await import("/lib/site-html-view.mjs")
+    const { HtmlView } = await import(SITE_LIB + "/site-html-view.mjs")
     embedView = new HtmlView(embedMount, embedCode.textContent)
     embedPre.hidden = true
   } catch {
