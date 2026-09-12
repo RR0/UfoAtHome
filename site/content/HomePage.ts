@@ -59,8 +59,15 @@ let index = 0
 let auto = true
 let slideTimer
 let resumeTimer
+// Whether the stage is in the reader's viewport — see the observer below.
+let onScreen = true
 
 const ufo = () => stage.scene?.ufoElement
+
+const armSlideTimer = () => {
+  clearTimeout(slideTimer)
+  if (auto && onScreen) slideTimer = setTimeout(() => { if (auto) show(index + 1) }, MAX_SLIDE_MS)
+}
 
 const show = async position => {
   index = (position + slides.length) % slides.length
@@ -78,15 +85,33 @@ const show = async position => {
     if (player) {
       // Looping would mean this slide never ends, and the sequence never moves.
       player.autoReplayEnabled = false
-      player.play()
+      if (onScreen) player.play()
     }
   } catch {
     // A demo that will not load must not stop the carousel — move on.
     if (auto) slideTimer = setTimeout(() => show(index + 1), 1000)
     return
   }
-  if (auto) slideTimer = setTimeout(() => { if (auto) show(index + 1) }, MAX_SLIDE_MS)
+  armSlideTimer()
 }
+
+// The stage plays only while the reader can see it. A scene nobody is looking at still asks the
+// graphics card for its clouds sixty times a second, and that is what made the rest of this page
+// stutter under the reader's own scroll. Out of view it pauses where it stands and the sequence
+// holds; back in view it picks the same slide up — unless the reader had stopped it themselves.
+new IntersectionObserver(entries => {
+  for (const entry of entries) {
+    onScreen = entry.isIntersecting
+    const player = ufo()
+    if (!onScreen) {
+      clearTimeout(slideTimer)
+      player?.pause()
+    } else if (auto) {
+      if (player && player.playbackState !== "playing") player.play()
+      armSlideTimer()
+    }
+  }
+}, { threshold: 0.05 }).observe(stage)
 
 // Fired by the recording running off its own end, and composed, so it crosses the element's shadow
 // roots to reach this page.

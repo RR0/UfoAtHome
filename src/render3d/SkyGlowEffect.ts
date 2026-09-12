@@ -48,17 +48,6 @@ export class SkyGlowEffect {
    * FURTHEST things there are, and everything else in the sky stands in front of them. */
   private static readonly RADIUS = 890
 
-  /**
-   * How long a frame is allowed to spend walking the two maps.
-   *
-   * A BUDGET AND NOT A ROW COUNT, which is the difference between a scene that stays smooth on
-   * every machine and one that stays smooth on the machine it was written on. Measured here: four
-   * rows of each map came to 39 ms in the worst frame — two and a half frames' worth of stutter,
-   * repeated thirty times — where the same total work spread by the clock never exceeds this and
-   * finishes in about two seconds, which for a background that was not there a moment ago is
-   * nothing at all.
-   */
-  private static readonly WORK_BUDGET_MS = 6
 
   /**
    * Past this the sky is too bright for either glow to be anything, and the dome is not drawn at
@@ -84,17 +73,16 @@ export class SkyGlowEffect {
 
   readonly object: Mesh
   private readonly material: ShaderMaterial
-  private readonly galaxy = new MilkyWay()
-  private readonly dust = new ZodiacalLight()
+  /** The two maps, walked once per page and shared by every scene on it — see SkyGlowMaps. */
+  private readonly maps = SkyGlowMaps.shared
   private readonly milkyWayTexture: DataTexture
   private readonly zodiacalTexture: DataTexture
   private readonly milkyWayTexels: Uint16Array
   private readonly zodiacalTexels: Uint16Array
-  private workHandle?: number
   private repaint?: () => void
 
   constructor() {
-    this.milkyWayTexels = new Uint16Array(MilkyWay.LONGITUDE_STEPS * MilkyWay.LATITUDE_STEPS * 4)
+    this.milkyWayTexels = this.maps.milkyWayTexels
     this.milkyWayTexture = SkyGlowEffect.buildTexture(
       this.milkyWayTexels,
       MilkyWay.LONGITUDE_STEPS,
@@ -104,7 +92,7 @@ export class SkyGlowEffect {
       // the near edge repeated.
       RepeatWrapping
     )
-    this.zodiacalTexels = new Uint16Array(ZodiacalLight.LONGITUDE_STEPS * ZodiacalLight.LATITUDE_STEPS * 4)
+    this.zodiacalTexels = this.maps.zodiacalTexels
     this.zodiacalTexture = SkyGlowEffect.buildTexture(
       this.zodiacalTexels,
       ZodiacalLight.LONGITUDE_STEPS,
@@ -128,7 +116,7 @@ export class SkyGlowEffect {
         uSkyColor: { value: new Vector3(0, 0, 0) },
         uMilkyWayTint: { value: new Vector3(...SkyGlowEffect.MILKY_WAY_TINT) },
         uZodiacalTint: { value: new Vector3(...SkyGlowEffect.ZODIACAL_TINT) },
-        uReady: { value: 0 },
+        uReady: { value: this.maps.done ? 1 : 0 },
         uEncodeDestination: { value: 1 }
       },
       vertexShader: `
@@ -340,10 +328,92 @@ export class SkyGlowEffect {
   }
 
   private scheduleWork(): void {
+    this.maps.request(this.publish)
+  }
+
+  private stopWork(): void {
+    this.maps.cancel(this.publish)
+  }
+
+  /**
+   * Copies both finished maps onto the textures the shader reads, in the sky's own unit.
+   *
+   * Nanolamberts rather than S10, so that the shader divides one brightness by another of the same
+   * kind and gets a plain ratio — the contrast — with no conversion left in it. Half-float rather
+   * than byte because the zodiacal cone spans two orders of magnitude between its foot and the
+   * anti-solar sky, and a byte would band the faint end into steps.
+   */
+  /** The shared maps are walked: this scene's own copies of them on the card are now stale. */
+  private readonly publish = (): void => {
+    this.milkyWayTexture.needsUpdate = true
+    this.zodiacalTexture.needsUpdate = true
+    this.material.uniforms.uReady.value = 1
+    this.repaint?.()
+  }
+
+  dispose(): void {
+    this.stopWork()
+    this.milkyWayTexture.dispose()
+    this.zodiacalTexture.dispose()
+    this.object.geometry.dispose()
+    this.material.dispose()
+  }
+}
+
+/**
+ * The Milky Way and zodiacal light maps, walked once per page.
+ *
+ * Neither depends on the scene: the band is mapped in galactic longitude and latitude, the cone in
+ * elongation from the Sun and ecliptic latitude, and each texel is a line-of-sight integral of a
+ * model of the Galaxy or of the dust cloud — some nine million steps between them, two seconds of
+ * a main thread at the budget below. Every scene used to walk its own: a catalogue page mounting
+ * a dozen skies as the reader scrolled spent eight seconds of its fourteen on this, the same
+ * numbers a dozen times over. One walk, one pair of arrays; each scene keeps its own textures over
+ * them, since each has its own graphics context to upload them into.
+ */
+export class SkyGlowMaps {
+  private static instance?: SkyGlowMaps
+
+  static get shared(): SkyGlowMaps {
+    return (SkyGlowMaps.instance ??= new SkyGlowMaps())
+  }
+
+  /**
+   * How long a frame is allowed to spend walking the two maps.
+   *
+   * A BUDGET AND NOT A ROW COUNT, which is the difference between a scene that stays smooth on
+   * every machine and one that stays smooth on the machine it was written on. Measured here: four
+   * rows of each map came to 39 ms in the worst frame — two and a half frames' worth of stutter,
+   * repeated thirty times — where the same total work spread by the clock never exceeds this and
+   * finishes in about two seconds, which for a background that was not there a moment ago is
+   * nothing at all.
+   */
+  private static readonly WORK_BUDGET_MS = 6
+
+  readonly milkyWayTexels = new Uint16Array(MilkyWay.LONGITUDE_STEPS * MilkyWay.LATITUDE_STEPS * 4)
+  readonly zodiacalTexels = new Uint16Array(ZodiacalLight.LONGITUDE_STEPS * ZodiacalLight.LATITUDE_STEPS * 4)
+  private readonly galaxy = new MilkyWay()
+  private readonly dust = new ZodiacalLight()
+  private readonly waiting = new Set<() => void>()
+  private workHandle?: number
+  private published = false
+
+  get done(): boolean {
+    return this.published
+  }
+
+  /** Walks the maps if they are not done yet, and calls `ready` once they are — at once if they
+   * already are. */
+  request(ready: () => void): void {
+    if (this.published) {
+      ready()
+      return
+    }
+    this.waiting.add(ready)
     if (this.workHandle !== undefined) return
     const step = () => {
       this.workHandle = undefined
-      const until = performance.now() + SkyGlowEffect.WORK_BUDGET_MS
+      const until = performance.now() + SkyGlowMaps.WORK_BUDGET_MS
       // A row at a time, so the budget is checked against work already done rather than work
       // guessed at. Both maps advance together: neither is any use without the other.
       while (performance.now() < until && !(this.galaxy.done && this.dust.done)) {
@@ -359,26 +429,22 @@ export class SkyGlowEffect {
     this.workHandle = requestAnimationFrame(step)
   }
 
-  private stopWork(): void {
-    if (this.workHandle !== undefined) cancelAnimationFrame(this.workHandle)
+  /** Forgets a scene that no longer wants to hear; the walk goes on for the others, or stops when
+   * nobody is left. */
+  cancel(ready: () => void): void {
+    this.waiting.delete(ready)
+    if (this.waiting.size > 0 || this.workHandle === undefined) return
+    cancelAnimationFrame(this.workHandle)
     this.workHandle = undefined
   }
 
-  /**
-   * Copies both finished maps onto the textures the shader reads, in the sky's own unit.
-   *
-   * Nanolamberts rather than S10, so that the shader divides one brightness by another of the same
-   * kind and gets a plain ratio — the contrast — with no conversion left in it. Half-float rather
-   * than byte because the zodiacal cone spans two orders of magnitude between its foot and the
-   * anti-solar sky, and a byte would band the faint end into steps.
-   */
   private publish(): void {
-    SkyGlowEffect.fill(this.milkyWayTexels, this.galaxy.harvest())
-    this.milkyWayTexture.needsUpdate = true
-    SkyGlowEffect.fill(this.zodiacalTexels, this.dust.harvest())
-    this.zodiacalTexture.needsUpdate = true
-    this.material.uniforms.uReady.value = 1
-    this.repaint?.()
+    SkyGlowMaps.fill(this.milkyWayTexels, this.galaxy.harvest())
+    SkyGlowMaps.fill(this.zodiacalTexels, this.dust.harvest())
+    this.published = true
+    const listeners = [...this.waiting]
+    this.waiting.clear()
+    for (const ready of listeners) ready()
   }
 
   private static fill(texels: Uint16Array, map: SkyBrightnessMap): void {
@@ -386,13 +452,5 @@ export class SkyGlowEffect {
       texels[at * 4] = DataUtils.toHalfFloat(NightSkyBrightness.nanolambertsOfS10(map.data[at]))
       texels[at * 4 + 3] = DataUtils.toHalfFloat(1)
     }
-  }
-
-  dispose(): void {
-    this.stopWork()
-    this.milkyWayTexture.dispose()
-    this.zodiacalTexture.dispose()
-    this.object.geometry.dispose()
-    this.material.dispose()
   }
 }

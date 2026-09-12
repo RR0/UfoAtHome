@@ -1249,6 +1249,8 @@ export class SceneRenderer {
         // don't depend on this async fetch resolving) light it correctly the instant it's added,
         // day or night, with no risk of a stale/wrong color needing a later re-tint.
         this.terrainMesh = mesh
+        // The relief's own material is new to this context: compiled off the thread, see render().
+        this.compileNextFrameOffThread()
         this.terrainAttribution = attribution
         this.scene.add(mesh)
         this.applyGroundDepthWrite()
@@ -2007,10 +2009,103 @@ export class SceneRenderer {
   /** Draws the frame that render() asked for, if any — the single place the scene is drawn from
    * outside an exposure. */
   private drawIfDirty(): void {
-    if (!this.frameDirty) return
+    if (!this.frameDirty || this.contextReleased) return
+    if (this.compileBeforeNextDraw) {
+      // See compileNextFrameOffThread: the frame stays dirty and is drawn once the programs exist.
+      this.compileBeforeNextDraw = false
+      const compiling = this.compileOffThread().then(() => {
+        if (this.compiling !== compiling) return
+        this.compiling = undefined
+        this.render()
+      })
+      this.compiling = compiling
+      return
+    }
+    if (this.compiling) return
     this.frameDirty = false
     this.renderOnce()
     if (this.developingExposure) this.startExposure()
+  }
+
+  private compileBeforeNextDraw = false
+  private compiling?: Promise<void>
+
+  /** How long a frame waits for its shaders before drawing with whatever is ready. */
+  private static readonly COMPILE_WAIT_MS = 1500
+
+  /**
+   * Compiles every program the scene needs and resolves once the browser reports them linked —
+   * three.js's own compileAsync, minus what made it unsafe here: it polls each material's program
+   * and throws on one that has gone (a body's material disposed as the sky was restated, a context
+   * given back while a card left the page), and a throw inside its timer leaves the promise pending
+   * for ever — and this renderer waiting for it, drawing nothing again. Here a material without a
+   * program counts as done, and a wait longer than COMPILE_WAIT_MS draws with what is there.
+   */
+  private compileOffThread(): Promise<void> {
+    const materials = this.renderer.compile(this.scene, this.camera)
+    if (!this.renderer.extensions.get("KHR_parallel_shader_compile")) return Promise.resolve()
+    const properties = this.renderer.properties as { get(material: Material): { currentProgram?: { isReady(): boolean } } | undefined }
+    const until = performance.now() + SceneRenderer.COMPILE_WAIT_MS
+    return new Promise(resolve => {
+      const check = () => {
+        if (this.contextReleased) return resolve()
+        for (const material of materials) {
+          const program = properties.get(material)?.currentProgram
+          if (!program || program.isReady()) materials.delete(material)
+        }
+        if (materials.size === 0 || performance.now() > until) resolve()
+        else setTimeout(check, 10)
+      }
+      check()
+    })
+  }
+
+  /**
+   * Has the next frame's shaders compiled off the main thread before it is drawn.
+   *
+   * A scene just loaded is a dozen programs to compile, the cloud volume's alone a tenth of a
+   * second, and drawing compiles them on the spot: a card of the catalogue coming into view was a
+   * quarter of a second of frozen page, and the front page's next slide most of one. Where the
+   * browser can compile in parallel (KHR_parallel_shader_compile, every current one) the frame is
+   * held until the programs are ready and the page keeps scrolling meanwhile; where it cannot,
+   * this costs one frame of delay and nothing else. Only what is in the scene when the frame is
+   * drawn: what arrives later (the relief patch, a deeper star catalogue) compiles as before, and
+   * the caller asks again for those it knows about.
+   */
+  compileNextFrameOffThread(): void {
+    this.compileBeforeNextDraw = true
+  }
+
+  private contextReleased = false
+
+  /**
+   * Gives the graphics context back to the browser while this scene is out of the document, and
+   * takes it again when it returns — see SceneElement's connection callbacks.
+   *
+   * A browser hands out about sixteen contexts and silently kills the oldest past that, and a
+   * removed element's context lived on until the garbage collector found it: a catalogue page that
+   * takes cards down as the reader scrolls (it does, see DemosPage) was still counting on that
+   * collector, and a scene the reader was looking at could go black for one they had scrolled past.
+   * Everything the context held (programs, buffers, textures, the film of a pose) is rebuilt on the
+   * first frame after restoring, which three.js does on its own for a context lost and found.
+   */
+  releaseContext(): void {
+    if (this.contextReleased) return
+    this.contextReleased = true
+    this.stopTwinkle()
+    this.cancelFlush()
+    this.cancelExposure()
+    this.compiling = undefined
+    this.renderer.forceContextLoss()
+  }
+
+  restoreContext(): void {
+    if (!this.contextReleased) return
+    this.contextReleased = false
+    this.renderer.forceContextRestore()
+    this.compileNextFrameOffThread()
+    this.syncAnimationLoop()
+    this.render()
   }
 
   private cancelFlush(): void {

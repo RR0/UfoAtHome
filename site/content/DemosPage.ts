@@ -35,9 +35,11 @@ export class DemosPage implements SitePage {
   script(language: SiteLanguage): string {
     const loading = language === "fr" ? "Chargement du ciel…" : "Loading the sky…"
     return `// A browser hands out about sixteen WebGL contexts and silently loses the oldest past that,
-// which on a page of fourteen skies blanks the ones already scrolled through. Eight alive is more
-// than fits on any screen at once, so nothing visible is ever the one taken down.
-const MAX_LIVE = 8
+// which on a page of seventeen skies blanks the ones already scrolled through. A card taken down
+// now gives its context back at once (see SceneElement's disconnection), so twelve alive stay
+// well inside that; and twelve is what a wide screen with its mounting margin actually reaches —
+// at eight, a 1440 px window mounted and took down the same cards over and over as it scrolled.
+const MAX_LIVE = 12
 const cards = [...document.querySelectorAll(".demo-card")]
 const live = []
 
@@ -78,7 +80,7 @@ const nearby = new IntersectionObserver(entries => {
   for (const entry of entries) {
     if (entry.isIntersecting) void mount(entry.target)
   }
-}, { rootMargin: "400px 0px" })
+}, { rootMargin: "200px 0px" })
 
 const onScreen = new IntersectionObserver(entries => {
   for (const entry of entries) {

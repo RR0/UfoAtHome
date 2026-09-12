@@ -77,6 +77,9 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     dispose(): void {}
     startTwinkle(): void {}
     frame(): void {}
+    compileNextFrameOffThread(): void {}
+    releaseContext(): void {}
+    restoreContext(): void {}
     stopTwinkle(): void {}
     setAnimationsRunning(running: boolean): void {
       animationsRunning.push(running)

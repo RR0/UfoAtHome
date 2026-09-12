@@ -470,6 +470,7 @@ export class SceneElement extends HTMLElement {
 
   connectedCallback(): void {
     this.saidTexts = undefined
+    this.sceneRenderer.restoreContext()
     this.resizeToStage()
     this.updateAstronomy(this.lastTimeMs)
     void this.loadStars()
@@ -500,6 +501,12 @@ export class SceneElement extends HTMLElement {
     this.sceneRenderer.stopTwinkle()
     clearTimeout(this.thunderTimeoutId)
     this.weatherAudio.dispose()
+    // The graphics context goes back to the browser once it is clear this element is not merely
+    // being moved (a move is a disconnection and a reconnection in the same task) — see
+    // SceneRenderer.releaseContext.
+    queueMicrotask(() => {
+      if (!this.isConnected) this.sceneRenderer.releaseContext()
+    })
   }
 
   attributeChangedCallback(name: string, oldValue: string, newValue: string): void {
@@ -633,6 +640,10 @@ export class SceneElement extends HTMLElement {
     // A loaded recording may have been made through something with a format of its own.
     this.applyFrameFormat()
     this.lastTimeMs = 0
+    // A recording is a new set of shaders (its clouds, its optics, its stars): compiled off the
+    // thread before the first frame rather than on it, so a page mounting scenes as it scrolls
+    // keeps scrolling — see SceneRenderer.compileNextFrameOffThread.
+    this.sceneRenderer.compileNextFrameOffThread()
     // Also resolves+applies weather at t=0 — see updateAstronomy's own doc comment.
     this.updateAstronomy(0)
   }
@@ -727,6 +738,8 @@ export class SceneElement extends HTMLElement {
     const catalog = await StarCatalogs.upTo(tiers, reach)
     if (asked !== this.starCatalogRequest) return
     this.starCatalog = catalog
+    // Three tiers of stars are three programs this context has not compiled yet.
+    this.sceneRenderer.compileNextFrameOffThread()
     this.updateAstronomy(this.lastTimeMs)
   }
 
