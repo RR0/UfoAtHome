@@ -4,6 +4,9 @@ export const html = `
     <span id="testimony-prefix">Testimony by</span>
     <span id="witness-text"></span><select id="witness" hidden></select>
   </span>
+  <!-- The playback layer's own toggles, taken out of the picture and put here — see
+       UfoElement.hostControls. -->
+  <span id="scene-controls" class="scene-controls"></span>
   <button id="info-button" class="info-btn" type="button" title="About" aria-label="About" aria-expanded="false">?</button>
   <div id="info-panel" class="info-panel" hidden>
     <button id="info-close" class="info-close" type="button" aria-label="Close">×</button>
@@ -72,11 +75,44 @@ export const css = `
 .testimony select {
   max-width: 12em;
 }
+/* The toggles the playback layer lends this toolbar (see UfoElement.hostControls): the look they
+   have in the picture's corner, at the toolbar's own scale. */
+.scene-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  margin-left: auto;
+}
+.scene-controls [hidden] {
+  display: none;
+}
+.scene-controls button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.8em;
+  height: 1.8em;
+  padding: 0;
+  border: 1px solid #999;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 1em;
+  line-height: 1;
+  background: #f0f0f0;
+  color: #333;
+}
+.scene-controls button[aria-pressed="true"] {
+  outline: 2px solid #39f;
+}
+.scene-controls input[type="range"] {
+  width: 5.5em;
+  margin: 0;
+  accent-color: #39f;
+}
 .info-btn {
   /* Named so the info panel can anchor itself to this button from the top layer — see
      .info-panel:popover-open below. */
   anchor-name: --info-button;
-  margin-left: auto;
   flex-shrink: 0;
   width: 1.6em;
   height: 1.6em;

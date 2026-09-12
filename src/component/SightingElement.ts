@@ -139,6 +139,8 @@ export class SightingElement extends HTMLElement {
     // This element has an info panel with a credits list in it, so the map need not print its own
     // licence over the ground in 8-pixel type — see UfoElement.creditShownExternally.
     this.sceneElement.ufoElement.creditShownExternally = true
+    // The toggles stand beside the info button rather than in the picture — see UfoElement.hostControls.
+    this.sceneElement.ufoElement.hostControls(this.shadow.getElementById("scene-controls")!)
     this.shadow.getElementById("ufo-slot")!.replaceWith(this.sceneElement)
 
     this.toolbarElement = this.shadow.getElementById("toolbar")!

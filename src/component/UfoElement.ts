@@ -744,6 +744,24 @@ export class UfoElement extends HTMLElement {
     this.player.seek(this.player.time)
   }
 
+  /**
+   * Takes the toggles — the account's moments, the pictures of the place and their opacity, the
+   * witness's map — out of the picture's corner and into `host`, or puts them back when `host` is
+   * undefined. The fullscreen button stays: it is the one control that belongs to the picture
+   * itself. A composing element with a toolbar of its own (see SightingElement, and the editor)
+   * uses this so that the picture shows the observation and nothing else; on its own, this element
+   * has no other place to put them. The buttons are the same elements wherever they stand, so
+   * every listener and every state they carry move with them; the host styles them.
+   */
+  hostControls(host: HTMLElement | undefined): void {
+    const controls = [this.milestonesButton, this.referenceOpacityInput, this.referencesButton, this.witnessMapButton]
+    if (host) {
+      for (const control of controls) host.appendChild(control)
+    } else {
+      for (const control of controls) this.cornerButtons.insertBefore(control, this.fullscreenButton)
+    }
+  }
+
   /** Whether the reader has the pictures of the place on — see SceneReference. */
   get referencesShown(): boolean {
     return this.referencesShownState

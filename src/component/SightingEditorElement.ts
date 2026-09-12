@@ -882,6 +882,8 @@ export class SightingEditorElement extends HTMLElement {
     // This recorder drives its own external Play/Seek/Loop row (below, not overlapping) instead.
     this.ufoElement.showToolbar = false
     this.shadow.getElementById("ufo-slot")!.replaceWith(this.sceneElement)
+    // The playback layer's toggles stand in a row of their own above the picture — see UfoElement.hostControls.
+    this.ufoElement.hostControls(this.shadow.getElementById("scene-controls")!)
 
     this.recordButton = this.shadow.getElementById("record") as HTMLButtonElement
     this.samplingRateInput = this.shadow.getElementById("samplingRate") as HTMLInputElement

@@ -502,6 +502,8 @@ export const html = `
   </div>
 </section>
 
+<!-- The playback layer's own toggles, taken out of the picture — see UfoElement.hostControls. -->
+<div id="scene-controls" class="scene-controls"></div>
 <div id="ufo-slot"></div>
 <div class="toolbar playback-row">
   <button id="play-pause" type="button" class="icon-btn" title="Play" aria-label="Play">▶</button>
@@ -690,6 +692,30 @@ input.invalid {
    flex-basis: 100% then gives them that line outright, always — the pair is wider than whatever
    the appearance fields leave at the end of theirs, so it was going to wrap anyway; taking the
    whole line makes that a deliberate row rather than a break that moves with the window width. */
+.scene-controls {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.3em;
+  margin: 0.3em 0;
+}
+.scene-controls [hidden] {
+  display: none;
+}
+.scene-controls button {
+  width: 1.8em;
+  height: 1.8em;
+  padding: 0;
+  font-size: 1em;
+  line-height: 1;
+}
+.scene-controls button[aria-pressed="true"] {
+  outline: 2px solid #39f;
+}
+.scene-controls input[type="range"] {
+  width: 5.5em;
+  margin: 0;
+}
 .record-row {
   display: flex;
   align-items: center;
