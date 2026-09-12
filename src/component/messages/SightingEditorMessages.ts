@@ -257,6 +257,36 @@ export interface SightingEditorMessages extends SightingLabels {
    * weatherNoRecord: one is a fact about the sighting, the other isn't. */
   weatherLookupFailed: string
   soundSrcPlaceholder: string
+  /** The Pictures group — pictures of the place laid over the scene, see SceneReference. */
+  referenceGroup: string
+  reference: string
+  referenceTitle: string
+  referenceSrc: string
+  referenceSrcPlaceholder: string
+  referenceKind: string
+  referencePhoto: string
+  referencePanorama: string
+  referenceCredit: string
+  referenceCreditUrl: string
+  /** The instant of the timeline the picture was taken at, for one taken during the observation. */
+  referenceT: string
+  /** Whether somebody drew on the picture — see SceneReference.drawing. */
+  referenceDrawing: string
+  referenceOpacity: string
+  referenceHeading: string
+  referencePitch: string
+  referenceRoll: string
+  referenceFov: string
+  /** Copies the witness's pose at the playhead into the picture's registration. */
+  referenceUsePose: string
+  addReferenceUrl: string
+  addReferenceFile: string
+  deleteReference: string
+  /** Under the fields, once a file has been embedded: how much it weighs, and that an address
+   * would have been lighter — {kb} is the size in kilobytes. */
+  referenceEmbedded: string
+  /** Under the fields when the picture's bytes could not be had. */
+  referenceUnreachable: string
   /** The whole "what else was in that sky" line, into which {parts} drops one clause per candidate
    * — a meteor shower, a comet, both. The prefix lives here and nowhere else, so two candidates on
    * one night read as one statement about the sky rather than as two competing announcements. */

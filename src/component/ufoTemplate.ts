@@ -9,6 +9,10 @@ export const html = `
        every language names them differently the moment either grows a label. -->
   <div class="corner-buttons" id="corner-buttons">
     <button id="milestones" type="button" title="Named moments" aria-label="Named moments" aria-pressed="true" hidden>🔖</button>
+    <!-- The pictures of the place laid over the scene (see SceneReference): how much of them shows,
+         then whether they show at all. Both hidden for the recordings that carry none. -->
+    <input id="reference-opacity" type="range" min="0" max="1" step="0.05" value="0.5" title="Picture opacity" aria-label="Picture opacity" hidden/>
+    <button id="references" type="button" title="Pictures of the place" aria-label="Pictures of the place" aria-pressed="true" hidden>🖼</button>
     <button id="witness-map" type="button" title="Witness's position" aria-label="Witness's position" aria-pressed="false" hidden>🗺</button>
     <button id="fullscreen" type="button" title="Fullscreen" aria-label="Fullscreen">⛶</button>
   </div>
@@ -306,8 +310,20 @@ canvas[data-cursor="rotate"] {
 /* Same trap as .toolbar.hidden and .milestone-caption[hidden]: a class or rule that sets its own
    display outranks the UA sheet's [hidden], and both of these are hidden for the recordings that
    have nothing for them to show — no coordinates, or no named moment. */
-.corner-buttons button[hidden] {
+.corner-buttons button[hidden],
+.corner-buttons input[hidden] {
   display: none;
+}
+/* The picture slider sits in the row like a button, at a button's height, and no wider than a
+   thumb can be dragged with any precision. */
+.corner-buttons input[type="range"] {
+  width: 5.5em;
+  height: 1.8em;
+  margin: 0;
+  padding: 0 0.3em;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.55);
+  accent-color: #39f;
 }
 .corner-buttons button {
   display: inline-flex;

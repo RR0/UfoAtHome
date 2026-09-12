@@ -15,6 +15,7 @@ export const html = `
   <button class="group-tab" type="button" aria-controls="group-temporal" aria-expanded="false"><span id="label-temporal-group">Moment</span></button>
   <button class="group-tab" type="button" aria-controls="group-weather" aria-expanded="false"><span id="label-weather-group">Weather</span></button>
   <button class="group-tab" type="button" aria-controls="group-sound" aria-expanded="false"><span id="label-sound-group">Sound</span></button>
+  <button class="group-tab" type="button" aria-controls="group-reference" aria-expanded="false"><span id="label-reference-group">Pictures</span></button>
   <button class="group-tab" type="button" aria-controls="group-shape" aria-expanded="false"><span id="label-shape-group">Phenomenon</span></button>
 </div>
 <section class="group-panel" id="group-observation" aria-labelledby="label-observation-group" hidden>
@@ -386,6 +387,40 @@ export const html = `
          synthesized description (see SightingSound.src), and the embed stops being self-contained,
          which is why nothing defaults to it. -->
     <label><span id="label-sound-src">Recording</span> <input id="soundSrc" class="sound-field" type="url" placeholder="URL of a real recording"/></label>
+  </div>
+</section>
+<!-- Pictures of the place laid over the reconstruction (see SceneReference): one dropdown of them,
+     the fields of the selected one, and two ways to add one — an address, or a file from the
+     author's own disk, which is embedded in the recording. The registration is typed here for now
+     (heading, pitch, roll, field), with the witness's own pose one click away since a picture from
+     the witness's spot most often looks where they looked; lining a picture up on the rendered
+     relief by dragging it is the next step, not this one. -->
+<section class="group-panel" id="group-reference" aria-labelledby="label-reference-group" hidden>
+  <div class="toolbar">
+    <label><span id="label-reference">Picture</span> <select id="reference"></select></label>
+    <button id="delete-reference" type="button" class="icon-btn" title="Delete picture" aria-label="Delete picture">🗑</button>
+    <label><span id="label-reference-title">Name</span> <input id="referenceTitle" class="reference-field" type="text"/></label>
+    <label><span id="label-reference-src">Address</span> <input id="referenceSrc" class="reference-field" type="text" placeholder="https://…/photo.jpg"/></label>
+    <label><span id="label-reference-kind">Kind</span>
+      <select id="referenceKind" class="reference-field">
+        <option value="photo" id="reference-kind-photo">Photo</option>
+        <option value="panorama" id="reference-kind-panorama">Panorama (360°)</option>
+      </select></label>
+    <label><span id="label-reference-credit">Credit</span> <input id="referenceCredit" class="reference-field" type="text"/></label>
+    <label><span id="label-reference-credit-url">Credit link</span> <input id="referenceCreditUrl" class="reference-field" type="url"/></label>
+    <label><span id="label-reference-t">Taken at</span> <input id="referenceT" class="reference-field" type="number" min="0" step="0.1" placeholder="—"/> s</label>
+    <label><span id="label-reference-drawing">Drawn on</span> <input id="referenceDrawing" class="reference-field" type="checkbox"/></label>
+    <label><span id="label-reference-opacity">Opacity</span> <input id="referenceOpacity" class="reference-field" type="range" min="0" max="1" step="0.05" value="0.5"/></label>
+    <label><span id="label-reference-heading">Heading</span> <input id="referenceHeading" class="reference-field" type="number" min="0" max="360" step="0.1"/> &deg;</label>
+    <label><span id="label-reference-pitch">Pitch</span> <input id="referencePitch" class="reference-field" type="number" min="-90" max="90" step="0.1"/> &deg;</label>
+    <label><span id="label-reference-roll">Roll</span> <input id="referenceRoll" class="reference-field" type="number" min="-180" max="180" step="0.1"/> &deg;</label>
+    <label><span id="label-reference-fov">Vertical field</span> <input id="referenceFov" class="reference-field" type="number" min="1" max="179" step="0.1"/> &deg;</label>
+    <button id="reference-use-pose" type="button">Use the witness's pose</button>
+    <span id="reference-status" class="apparent-size"></span>
+    <div class="decor-add-row">
+      <button id="add-reference-url" type="button">Add from an address</button>
+      <label><span id="label-add-reference-file">Add a file</span> <input id="add-reference-file" type="file" accept="image/*"/></label>
+    </div>
   </div>
 </section>
 <section class="group-panel" id="group-shape" aria-labelledby="label-shape-group" hidden>

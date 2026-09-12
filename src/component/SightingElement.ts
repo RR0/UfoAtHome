@@ -867,6 +867,23 @@ export class SightingElement extends HTMLElement {
       }
       this.infoCreditsList.appendChild(item)
     }
+    // Every picture of the place the recording lays over the scene, credited on the terms it was
+    // given on — see SceneReference.credit, and the same rule as the models above.
+    for (const reference of this.sceneElement.ufoElement.sighting.references) {
+      if (!reference.credit) continue
+      const item = document.createElement("li")
+      if (reference.creditUrl) {
+        const link = document.createElement("a")
+        link.href = reference.creditUrl
+        link.target = "_blank"
+        link.rel = "noopener"
+        link.textContent = reference.credit
+        item.appendChild(link)
+      } else {
+        item.textContent = reference.credit
+      }
+      this.infoCreditsList.appendChild(item)
+    }
     const thunderItem = document.createElement("li")
     thunderItem.textContent = `${THUNDER_CREDIT_TEXT} (`
     const licenseLink = document.createElement("a")

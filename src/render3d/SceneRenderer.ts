@@ -104,6 +104,9 @@ import type { DecorModelProvider } from "./decor/DecorModelProvider.js"
 import { DECOR_MODEL_SOURCES } from "./decor/decorModelSources.js"
 import { loadGltfScene } from "./decor/loadGltfScene.js"
 import { PhenomenonSystem, PHENOMENON_LAYER } from "./PhenomenonSystem.js"
+import { ReferenceSystem, REFERENCE_LAYER } from "./ReferenceSystem.js"
+import type { ReferenceView } from "./ReferenceSystem.js"
+import type { SceneReference } from "../engine/model/Reference.js"
 import type { PhenomenonFrame, PlacedPhenomenon } from "./PhenomenonSystem.js"
 
 /** Plain field-by-field comparison — see setWeather's own doc comment on why reference equality
@@ -676,6 +679,9 @@ export class SceneRenderer {
   private readonly scene = new Scene()
   /** The witness's own phenomena, standing in the scene — see PhenomenonSystem and setPhenomena. */
   private readonly phenomena = new PhenomenonSystem(this.scene)
+  /** The pictures of the place laid over it — see ReferenceSystem and setReferences. A picture
+   * whose bytes arrive after the frame was drawn asks for the frame again. */
+  private readonly references = new ReferenceSystem(this.scene, () => this.render())
   private readonly camera: PerspectiveCamera
 
   /** Everything that is, physically, at infinity: the sky dome, the stars, the Sun/Moon/planets
@@ -2237,7 +2243,8 @@ export class SceneRenderer {
       (ndcX, ndcY, into) => this.directionAtScreenPoint(ndcX, ndcY, into),
       direction => this.screenPointOf(direction)
     )
-    const furthestPhenomenonM = this.phenomena.furthestM * 1.2
+    this.references.place(this.camera)
+    const furthestPhenomenonM = Math.max(this.phenomena.furthestM, this.references.furthestM) * 1.2
     if (furthestPhenomenonM > this.camera.far) {
       this.camera.far = furthestPhenomenonM
       this.camera.updateProjectionMatrix()
@@ -2252,10 +2259,10 @@ export class SceneRenderer {
       // means the scene lands in a linear buffer instead.
       this.skyGlow?.setDestinationEncoded(target === undefined && !blur)
       if (target) this.renderer.setRenderTarget(target)
-      if (blur) blur.render(this.renderer, this.scene, this.camera, () => this.renderPhenomenaPass())
+      if (blur) blur.render(this.renderer, this.scene, this.camera, () => this.renderOverlayPasses())
       else {
         this.renderer.render(this.scene, this.camera)
-        this.renderPhenomenaPass()
+        this.renderOverlayPasses()
       }
       if (target) this.renderer.setRenderTarget(previousTarget)
       return
@@ -2273,7 +2280,7 @@ export class SceneRenderer {
       this.camera,
       this.camera.fov,
       () => this.updateLensFlarePosition(),
-      () => this.renderPhenomenaPass()
+      () => this.renderOverlayPasses()
     )
     if (target) this.renderer.setRenderTarget(previousTarget)
   }
@@ -2296,6 +2303,56 @@ export class SceneRenderer {
    * against that. Three cheap draws, since the decor is a few boxes and the phenomena a few planes.
    * Shadow maps are not redrawn for them; they were drawn for the frame already.
    */
+  /** What is drawn over the scene once it is drawn, in order: the pictures of the place, then the
+   * witness's own phenomena over them — see renderReferencesPass and renderPhenomenaPass. */
+  private renderOverlayPasses(): void {
+    this.renderReferencesPass()
+    this.renderPhenomenaPass()
+  }
+
+  /**
+   * Lays the pictures of the place over the picture the scene was just drawn in — over everything,
+   * hidden by nothing, at their own opacity — and under the phenomena drawn next, so that what the
+   * witness reported stands over what the place looks like (see SceneReference for why a picture
+   * is neither hidden by the scene nor hides it). One draw of a few panels, with the depth buffer
+   * left exactly as it was for the phenomena's own pass.
+   */
+  private renderReferencesPass(): void {
+    if (!this.references.any) return
+    const autoClear = this.renderer.autoClear
+    const shadows = this.renderer.shadowMap.autoUpdate
+    this.renderer.autoClear = false
+    this.renderer.shadowMap.autoUpdate = false
+    this.camera.layers.set(REFERENCE_LAYER)
+    this.renderer.render(this.scene, this.camera)
+    this.camera.layers.set(0)
+    this.renderer.autoClear = autoClear
+    this.renderer.shadowMap.autoUpdate = shadows
+  }
+
+  /** The pictures of the place to lay over the scene — see ReferenceSystem.set. Cheap to call
+   * every tick: a picture already standing at the same registration is left alone. */
+  setReferences(references: SceneReference[]): void {
+    this.references.set(references)
+  }
+
+  /** Whether a picture's bytes could not be had — see ReferenceSystem.failedToLoad. */
+  referenceFailedToLoad(src: string): boolean {
+    return this.references.failedToLoad(src)
+  }
+
+  /** Whether the reader has the pictures on at all — the player's own toggle. */
+  setReferencesShown(shown: boolean): void {
+    this.references.setShown(shown)
+    this.render()
+  }
+
+  /** The reader's own opacity for one picture — see ReferenceView. */
+  setReferenceView(id: string, view: ReferenceView): void {
+    this.references.setView(id, view)
+    this.render()
+  }
+
   private renderPhenomenaPass(): void {
     if (!this.phenomena.any) return
     const autoClear = this.renderer.autoClear
@@ -2932,6 +2989,7 @@ export class SceneRenderer {
     this.stopTwinkle()
     this.cancelFlush()
     this.phenomena.clear()
+    this.references.disposeAll()
     this.terrainBuildToken++ // discard any terrain build still in flight
     this.disposeMesh(this.skyMesh)
     this.disposeMesh(this.groundMesh)

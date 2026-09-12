@@ -113,6 +113,13 @@ export class UfoElement extends HTMLElement {
   private readonly fullscreenButton: HTMLButtonElement
   private readonly cornerButtons: HTMLElement
   private readonly witnessMapButton: HTMLButtonElement
+  /** The pictures of the place: on or off, and how much of them shows — see SceneReference. The
+   * reader's own choice, kept across recordings; the slider starts where the recording's first
+   * picture asks until the reader moves it. */
+  private readonly referencesButton: HTMLButtonElement
+  private readonly referenceOpacityInput: HTMLInputElement
+  private referencesShownState = true
+  private referenceOpacityTouched = false
   private readonly milestonesButton: HTMLButtonElement
   private readonly witnessMapPanel: HTMLElement
   private readonly witnessMapCanvas: HTMLCanvasElement
@@ -361,6 +368,8 @@ export class UfoElement extends HTMLElement {
     this.fullscreenButton = this.shadow.getElementById("fullscreen") as HTMLButtonElement
     this.cornerButtons = this.shadow.getElementById("corner-buttons")!
     this.witnessMapButton = this.shadow.getElementById("witness-map") as HTMLButtonElement
+    this.referencesButton = this.shadow.getElementById("references") as HTMLButtonElement
+    this.referenceOpacityInput = this.shadow.getElementById("reference-opacity") as HTMLInputElement
     this.milestonesButton = this.shadow.getElementById("milestones") as HTMLButtonElement
     this.witnessMapPanel = this.shadow.getElementById("witness-map-panel")!
     this.witnessMapCanvas = this.shadow.getElementById("witness-map-canvas") as HTMLCanvasElement
@@ -386,6 +395,11 @@ export class UfoElement extends HTMLElement {
     this.loopButton.addEventListener("click", () => this.toggleLoop())
     this.fullscreenButton.addEventListener("click", () => this.toggleFullscreen())
     this.witnessMapButton.addEventListener("click", () => this.toggleWitnessMap())
+    this.referencesButton.addEventListener("click", () => this.toggleReferences())
+    this.referenceOpacityInput.addEventListener("input", () => {
+      this.referenceOpacityTouched = true
+      this.dispatchReferenceView()
+    })
     this.milestonesButton.addEventListener("click", () => this.toggleMilestones())
     this.witnessMapCanvas.addEventListener("pointermove", this.handleWitnessMapPointerMove)
     this.witnessMapCanvas.addEventListener("pointerleave", this.handlePointerLeave)
@@ -419,6 +433,7 @@ export class UfoElement extends HTMLElement {
     this.updatePlayPauseButton()
     this.updateFullscreenButton()
     this.updateWitnessMapButton()
+    this.updateReferencesButton()
     this.updateMilestonesButton()
     this.refresh()
     void this.loadLocaleMessages()
@@ -712,7 +727,53 @@ export class UfoElement extends HTMLElement {
     this.refreshMilestoneMarks()
     this.updateMilestonesButton()
     this.updateWitnessMap()
+    this.updateReferences()
     this.player.seek(this.player.time)
+  }
+
+  /** Whether the reader has the pictures of the place on — see SceneReference. */
+  get referencesShown(): boolean {
+    return this.referencesShownState
+  }
+
+  /** How much of them the reader is showing, 0 to 1. */
+  get referenceOpacity(): number {
+    return Number(this.referenceOpacityInput.value)
+  }
+
+  toggleReferences(): void {
+    this.referencesShownState = !this.referencesShownState
+    this.updateReferencesButton()
+    this.dispatchReferenceView()
+  }
+
+  /**
+   * Offers the pictures for every recording that carries any, and starts the slider where the
+   * recording's first picture asks — until the reader has moved it, after which it is theirs.
+   */
+  private updateReferences(): void {
+    const references = this.currentSighting.references
+    if (!this.referenceOpacityTouched && references.length > 0) {
+      this.referenceOpacityInput.value = String(references[0]!.opacity)
+    }
+    this.updateReferencesButton()
+  }
+
+  private updateReferencesButton(): void {
+    const any = this.currentSighting.references.length > 0
+    this.referencesButton.hidden = !any
+    this.referenceOpacityInput.hidden = !any || !this.referencesShownState
+    this.referencesButton.setAttribute("aria-pressed", String(this.referencesShownState))
+    const label = this.referencesShownState ? this.messages.hideReferences : this.messages.showReferences
+    this.referencesButton.title = label
+    this.referencesButton.setAttribute("aria-label", label)
+    this.referenceOpacityInput.title = this.messages.referenceOpacity
+    this.referenceOpacityInput.setAttribute("aria-label", this.messages.referenceOpacity)
+  }
+
+  /** Tells whoever draws the scene what the reader wants of the pictures — see SceneElement. */
+  private dispatchReferenceView(): void {
+    this.dispatchEvent(new CustomEvent("referenceview", { detail: { shown: this.referencesShown, opacity: this.referenceOpacity } }))
   }
 
   /**
@@ -1647,6 +1708,7 @@ export class UfoElement extends HTMLElement {
     this.updatePlayPauseButton()
     this.updateFullscreenButton()
     this.updateWitnessMapButton()
+    this.updateReferencesButton()
     this.updateMilestonesButton()
   }
 

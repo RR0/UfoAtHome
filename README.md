@@ -476,6 +476,7 @@ interface SightingRecordingJson {
   instrument?: "eye" | "rectilinear-lens" // what it was observed THROUGH — see Instrument. Absent = the naked eye
   soundTrack?: { keyframes: Array<{ t: number, sound: { kind: "none" | "hum" | "whistle" | "rumble" | "crackle", volume: number, pitchHz: number, src?: string } }> } // what the witness heard — see What it sounded like
   decor?: DecorObject[] // buildings, trees, streetlights, vehicles, other witnesses — see src/engine/model/Decor.ts
+  references?: SceneReference[] // pictures of the place laid over the scene, each at a registered heading/pitch/roll/field — see Pictures of the place
 }
 ```
 
@@ -513,6 +514,24 @@ ambient beds all stop with the player and resume with it, leaving the frozen fra
 one instant of a sighting — weather still going on over it would be the reader's own room, not the witness's
 evening. Clouds likewise use the recording's timeline: wind advection stops on pause and is
 recomputed deterministically when seeking.
+
+### Pictures of the place
+
+Everything the scene draws is computed, and a reader has no way to tell a faithful reconstruction from a plausible
+one. A photograph of the same place does: `references` lays pictures over the render, each at the direction it was
+registered in (`registration`: heading, pitch, roll and vertical field, angles and nothing else), at an opacity the
+reader varies with the slider beside the 🖼 button — all picture, all render, and every step between, with the
+witness's own phenomenon drawn over both. A `photo` is a flat panel at its lens's field, a `panorama` an
+equirectangular sphere. `src` is an address (rr0.org's case pictures are served to any origin; the bytes must be, since
+WebGL draws them) or the picture itself as a `data:` URL when it was added from a disk, which keeps the recording
+self-contained at the price of its size. `credit` and `creditUrl` are shown in the info panel's credits, `t` says it
+was taken during the observation at that instant, and `drawing` that somebody drew on it — Cussac's own view from the
+spot carries the sphere and its spiral by hand.
+
+Nothing in the scene hides a picture and a picture hides nothing: it is a field of directions from one point, valid
+from that point alone, and the reconstruction stands it at the witness's eye. Lining it up on the rendered relief is
+typed for now (with the witness's pose one click away); dragging it into place, and reading the witness's own heading
+off a picture that fits, is the next step.
 
 ### Naming a place
 

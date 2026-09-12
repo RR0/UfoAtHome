@@ -44,6 +44,12 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     setIndoorLook(): void {}
     setWeather(): void {}
     setDecor(): void {}
+    setReferences(): void {}
+    setReferencesShown(): void {}
+    setReferenceView(): void {}
+    referenceFailedToLoad(): boolean {
+      return false
+    }
     setPhenomena(): void {}
     screenPointOf(): undefined {
       return undefined
@@ -2686,6 +2692,7 @@ describe("SightingEditorElement toolbar groups", () => {
       "label-temporal-group",
       "label-weather-group",
       "label-sound-group",
+      "label-reference-group",
       "label-shape-group"
     ])
     for (const tab of tabs(element)) {

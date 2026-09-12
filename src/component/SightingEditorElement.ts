@@ -50,6 +50,8 @@ import type { People } from "../engine/model/People.js"
 import type { Testimony } from "../engine/model/Testimony.js"
 import type { DecorObject, DecorSide, DecorSize } from "../engine/model/Decor.js"
 import { sortedMilestones } from "../engine/model/Milestone.js"
+import { DEFAULT_REFERENCE_FOV_DEG, DEFAULT_REFERENCE_OPACITY, REFERENCE_INLINE_WARNING_BYTES } from "../engine/model/Reference.js"
+import type { ReferenceKind, SceneReference } from "../engine/model/Reference.js"
 import {
   resolveDecorLitAt,
   DECOR_SIDES,
@@ -664,6 +666,44 @@ export class SightingEditorElement extends HTMLElement {
    * scenery, not something every sighting needs), unlike currentSourceId which always has at
    * least one shape. */
   private currentDecorId?: string
+  /** The Pictures group — pictures of the place laid over the scene, see SceneReference. One set of
+   * fields for whichever is selected, the same arrangement as the decor's. */
+  private currentReferenceId?: string
+  private readonly referenceSelect: HTMLSelectElement
+  private readonly deleteReferenceButton: HTMLButtonElement
+  private readonly referenceTitleInput: HTMLInputElement
+  private readonly referenceSrcInput: HTMLInputElement
+  private readonly referenceKindSelect: HTMLSelectElement
+  private readonly referenceCreditInput: HTMLInputElement
+  private readonly referenceCreditUrlInput: HTMLInputElement
+  private readonly referenceTInput: HTMLInputElement
+  private readonly referenceDrawingInput: HTMLInputElement
+  private readonly referenceOpacityInput: HTMLInputElement
+  private readonly referenceHeadingInput: HTMLInputElement
+  private readonly referencePitchInput: HTMLInputElement
+  private readonly referenceRollInput: HTMLInputElement
+  private readonly referenceFovInput: HTMLInputElement
+  private readonly referenceUsePoseButton: HTMLButtonElement
+  private readonly referenceStatus: HTMLElement
+  private readonly addReferenceUrlButton: HTMLButtonElement
+  private readonly addReferenceFileInput: HTMLInputElement
+  /** Every field the selected picture is read from — listened to as one, like the sound's. */
+  private readonly referenceFields: (HTMLInputElement | HTMLSelectElement)[]
+  private readonly labelReferenceGroup: HTMLElement
+  private readonly labelReference: HTMLElement
+  private readonly labelReferenceTitle: HTMLElement
+  private readonly labelReferenceSrc: HTMLElement
+  private readonly labelReferenceKind: HTMLElement
+  private readonly labelReferenceCredit: HTMLElement
+  private readonly labelReferenceCreditUrl: HTMLElement
+  private readonly labelReferenceT: HTMLElement
+  private readonly labelReferenceDrawing: HTMLElement
+  private readonly labelReferenceOpacity: HTMLElement
+  private readonly labelReferenceHeading: HTMLElement
+  private readonly labelReferencePitch: HTMLElement
+  private readonly labelReferenceRoll: HTMLElement
+  private readonly labelReferenceFov: HTMLElement
+  private readonly labelAddReferenceFile: HTMLElement
   /** Which decor object the DECOR context menu (right-click on the 3D canvas, distinct from the
    * SHAPE context menu's own currentSourceId) currently targets — set by onContextMenu, read by
    * viewWitnessTestimony(). Only ever set while decorContextMenu is actually open. */
@@ -970,6 +1010,21 @@ export class SightingEditorElement extends HTMLElement {
     this.labelSoundVolume = this.shadow.getElementById("label-sound-volume")!
     this.labelSoundPitch = this.shadow.getElementById("label-sound-pitch")!
     this.labelSoundSrc = this.shadow.getElementById("label-sound-src")!
+    this.labelReferenceGroup = this.shadow.getElementById("label-reference-group")!
+    this.labelReference = this.shadow.getElementById("label-reference")!
+    this.labelReferenceTitle = this.shadow.getElementById("label-reference-title")!
+    this.labelReferenceSrc = this.shadow.getElementById("label-reference-src")!
+    this.labelReferenceKind = this.shadow.getElementById("label-reference-kind")!
+    this.labelReferenceCredit = this.shadow.getElementById("label-reference-credit")!
+    this.labelReferenceCreditUrl = this.shadow.getElementById("label-reference-credit-url")!
+    this.labelReferenceT = this.shadow.getElementById("label-reference-t")!
+    this.labelReferenceDrawing = this.shadow.getElementById("label-reference-drawing")!
+    this.labelReferenceOpacity = this.shadow.getElementById("label-reference-opacity")!
+    this.labelReferenceHeading = this.shadow.getElementById("label-reference-heading")!
+    this.labelReferencePitch = this.shadow.getElementById("label-reference-pitch")!
+    this.labelReferenceRoll = this.shadow.getElementById("label-reference-roll")!
+    this.labelReferenceFov = this.shadow.getElementById("label-reference-fov")!
+    this.labelAddReferenceFile = this.shadow.getElementById("label-add-reference-file")!
     this.labelDuration = this.shadow.getElementById("label-duration")!
     this.placeSourceRow = this.shadow.getElementById("place-source-row")!
     this.weatherSourceRow = this.shadow.getElementById("weather-source-row")!
@@ -1031,6 +1086,29 @@ export class SightingEditorElement extends HTMLElement {
     this.addDecorBuildingButton = this.shadow.getElementById("add-decor-building") as HTMLButtonElement
     this.deleteDecorButton = this.shadow.getElementById("delete-decor") as HTMLButtonElement
     this.decorSelect = this.shadow.getElementById("decor") as HTMLSelectElement
+    this.referenceSelect = this.shadow.getElementById("reference") as HTMLSelectElement
+    this.deleteReferenceButton = this.shadow.getElementById("delete-reference") as HTMLButtonElement
+    this.referenceTitleInput = this.shadow.getElementById("referenceTitle") as HTMLInputElement
+    this.referenceSrcInput = this.shadow.getElementById("referenceSrc") as HTMLInputElement
+    this.referenceKindSelect = this.shadow.getElementById("referenceKind") as HTMLSelectElement
+    this.referenceCreditInput = this.shadow.getElementById("referenceCredit") as HTMLInputElement
+    this.referenceCreditUrlInput = this.shadow.getElementById("referenceCreditUrl") as HTMLInputElement
+    this.referenceTInput = this.shadow.getElementById("referenceT") as HTMLInputElement
+    this.referenceDrawingInput = this.shadow.getElementById("referenceDrawing") as HTMLInputElement
+    this.referenceOpacityInput = this.shadow.getElementById("referenceOpacity") as HTMLInputElement
+    this.referenceHeadingInput = this.shadow.getElementById("referenceHeading") as HTMLInputElement
+    this.referencePitchInput = this.shadow.getElementById("referencePitch") as HTMLInputElement
+    this.referenceRollInput = this.shadow.getElementById("referenceRoll") as HTMLInputElement
+    this.referenceFovInput = this.shadow.getElementById("referenceFov") as HTMLInputElement
+    this.referenceUsePoseButton = this.shadow.getElementById("reference-use-pose") as HTMLButtonElement
+    this.referenceStatus = this.shadow.getElementById("reference-status")!
+    this.addReferenceUrlButton = this.shadow.getElementById("add-reference-url") as HTMLButtonElement
+    this.addReferenceFileInput = this.shadow.getElementById("add-reference-file") as HTMLInputElement
+    this.referenceFields = [
+      this.referenceTitleInput, this.referenceSrcInput, this.referenceKindSelect, this.referenceCreditInput,
+      this.referenceCreditUrlInput, this.referenceTInput, this.referenceDrawingInput, this.referenceOpacityInput,
+      this.referenceHeadingInput, this.referencePitchInput, this.referenceRollInput, this.referenceFovInput
+    ]
     this.decorTitleInput = this.shadow.getElementById("decorTitle") as HTMLInputElement
     this.decorEastInput = this.shadow.getElementById("decorEast") as HTMLInputElement
     this.decorNorthInput = this.shadow.getElementById("decorNorth") as HTMLInputElement
@@ -1217,6 +1295,12 @@ export class SightingEditorElement extends HTMLElement {
     this.addDecorBuildingButton.addEventListener("click", () => this.addDecor())
     this.deleteDecorButton.addEventListener("click", () => this.deleteDecor())
     this.decorSelect.addEventListener("change", () => this.selectDecor(this.decorSelect.value))
+    this.referenceSelect.addEventListener("change", () => this.selectReference(this.referenceSelect.value))
+    this.deleteReferenceButton.addEventListener("click", () => this.deleteReference())
+    for (const field of this.referenceFields) field.addEventListener("input", () => this.updateReference())
+    this.referenceUsePoseButton.addEventListener("click", () => this.useWitnessPoseForReference())
+    this.addReferenceUrlButton.addEventListener("click", () => this.addReferenceFromAddress())
+    this.addReferenceFileInput.addEventListener("change", () => void this.addReferenceFromFile())
     for (const input of [
       this.decorTitleInput,
       this.decorEastInput,
@@ -1446,6 +1530,8 @@ export class SightingEditorElement extends HTMLElement {
     this.updateShapeTitle()
     this.currentDecorId = this.ufoElement.sighting.decor[0]?.id
     this.refreshDecorList()
+    this.currentReferenceId = this.ufoElement.sighting.references[0]?.id
+    this.refreshReferenceList()
     this.sceneElement.setCloudRendering("volume")
     this.cloudEditor = setupCloudEditor(this.shadow.getElementById("cloud-editor")!, this.sceneElement, (detachWeatherSource = true) => {
       if (!detachWeatherSource) return
@@ -1536,6 +1622,8 @@ export class SightingEditorElement extends HTMLElement {
     this.refreshSourceList()
     this.currentDecorId = this.ufoElement.sighting.decor[0]?.id
     this.refreshDecorList()
+    this.currentReferenceId = this.ufoElement.sighting.references[0]?.id
+    this.refreshReferenceList()
     this.currentMilestoneT = this.ufoElement.sighting.milestones[0]?.t
     this.refreshMilestoneList()
     this.onSelectionOrTimeChanged()
@@ -2619,6 +2707,172 @@ export class SightingEditorElement extends HTMLElement {
    * nothing else — no markup, no per-option element id (same rule the data-source pickers follow,
    * see sourcePicker). Labels are set from the current messages here and retranslated by
    * applyMessages. */
+  // ---- Pictures of the place — see SceneReference and the Pictures group of the template.
+
+  private referenceLabel(reference: SceneReference): string {
+    return this.said.read(reference.title) || reference.src.replace(/^data:.*$/, "…") || reference.id
+  }
+
+  /** Rebuilds the pictures dropdown and resyncs the fields from whichever is selected — after
+   * add/delete/load, mirroring refreshDecorList's role for the decor. */
+  private refreshReferenceList(): void {
+    const references = this.ufoElement.sighting.references
+    this.referenceSelect.innerHTML = ""
+    for (const reference of references) {
+      const option = document.createElement("option")
+      option.value = reference.id
+      option.textContent = this.referenceLabel(reference)
+      this.referenceSelect.appendChild(option)
+    }
+    if (this.currentReferenceId !== undefined) this.referenceSelect.value = this.currentReferenceId
+    this.syncReferenceFields()
+  }
+
+  private selectReference(id: string): void {
+    this.currentReferenceId = id
+    this.referenceSelect.value = id
+    this.syncReferenceFields()
+  }
+
+  private syncReferenceFields(): void {
+    const reference = this.ufoElement.sighting.references.find(candidate => candidate.id === this.currentReferenceId)
+    const hasSelection = reference !== undefined
+    this.deleteReferenceButton.disabled = !hasSelection
+    this.referenceUsePoseButton.disabled = !hasSelection
+    for (const field of [this.referenceSelect, ...this.referenceFields]) {
+      field.disabled = !hasSelection
+      this.setRowVisible(field, hasSelection)
+    }
+    this.setRowVisible(this.referenceUsePoseButton, hasSelection)
+    if (!reference) {
+      this.referenceStatus.textContent = ""
+      return
+    }
+    this.referenceTitleInput.value = this.said.read(reference.title) ?? ""
+    // A picture embedded in the recording is megabytes of base64: shown as what it is, not typed over.
+    const embedded = reference.src.startsWith("data:")
+    this.referenceSrcInput.value = embedded ? "" : reference.src
+    this.referenceSrcInput.disabled = embedded
+    this.referenceKindSelect.value = reference.kind
+    this.referenceCreditInput.value = reference.credit ?? ""
+    this.referenceCreditUrlInput.value = reference.creditUrl ?? ""
+    this.referenceTInput.value = reference.t === undefined ? "" : String(reference.t / 1000)
+    this.referenceDrawingInput.checked = reference.drawing === true
+    this.referenceOpacityInput.value = String(reference.opacity)
+    this.referenceHeadingInput.value = String(reference.registration.headingDeg)
+    this.referencePitchInput.value = String(reference.registration.pitchDeg)
+    this.referenceRollInput.value = String(reference.registration.rollDeg ?? 0)
+    this.referenceFovInput.value = String(reference.registration.fovDeg)
+    this.syncReferenceStatus(reference)
+  }
+
+  private syncReferenceStatus(reference: SceneReference): void {
+    if (reference.src.startsWith("data:")) {
+      const kb = Math.round((reference.src.length * 3) / 4 / 1024)
+      this.referenceStatus.textContent = reference.src.length > REFERENCE_INLINE_WARNING_BYTES
+        ? this.messages.referenceEmbedded.replace("{kb}", String(kb))
+        : ""
+      return
+    }
+    this.referenceStatus.textContent = this.sceneElement.referenceFailedToLoad(reference.src) ? this.messages.referenceUnreachable : ""
+  }
+
+  /** Writes the fields back onto the selected picture — the whole array replaced, as the decor's
+   * is, so that whoever holds the previous one sees a change. */
+  private updateReference(): void {
+    if (this.currentReferenceId === undefined) return
+    const sighting = this.ufoElement.sighting
+    const headingDeg = this.wrapDegrees(Number(this.referenceHeadingInput.value), this.referenceHeadingInput) ?? 0
+    const seconds = this.referenceTInput.value.trim() === "" ? undefined : Number(this.referenceTInput.value)
+    sighting.references = sighting.references.map(reference => {
+      if (reference.id !== this.currentReferenceId) return reference
+      const src = reference.src.startsWith("data:") ? reference.src : this.referenceSrcInput.value.trim()
+      return {
+        ...reference,
+        kind: this.referenceKindSelect.value as ReferenceKind,
+        src,
+        title: this.said.write(reference.title, this.referenceTitleInput.value, this.writingLanguage),
+        credit: this.stringOrUndefined(this.referenceCreditInput.value),
+        creditUrl: this.stringOrUndefined(this.referenceCreditUrlInput.value),
+        t: seconds === undefined || Number.isNaN(seconds) ? undefined : Math.round(seconds * 1000),
+        drawing: this.referenceDrawingInput.checked || undefined,
+        opacity: Number(this.referenceOpacityInput.value),
+        registration: {
+          headingDeg,
+          pitchDeg: Number(this.referencePitchInput.value) || 0,
+          rollDeg: Number(this.referenceRollInput.value) || undefined,
+          fovDeg: Math.min(179, Math.max(1, Number(this.referenceFovInput.value) || DEFAULT_REFERENCE_FOV_DEG))
+        }
+      }
+    })
+    const current = sighting.references.find(reference => reference.id === this.currentReferenceId)!
+    this.referenceSelect.options[this.referenceSelect.selectedIndex]!.textContent = this.referenceLabel(current)
+    this.syncReferenceStatus(current)
+    this.ufoElement.refresh()
+  }
+
+  /** A picture from the witness's own spot most often looks where they looked: the pose at the
+   * playhead, copied into the registration as a starting point for lining it up. */
+  private useWitnessPoseForReference(): void {
+    const pose = resolveObserverPoseAt(this.ufoElement.sighting, this.ufoElement.currentTime)
+    if (!pose) return
+    this.referenceHeadingInput.value = String(this.rounded(pose.headingDeg ?? 0))
+    this.referencePitchInput.value = String(this.rounded(pose.pitchDeg))
+    this.referenceRollInput.value = String(this.rounded(pose.rollDeg ?? 0))
+    this.referenceFovInput.value = String(this.rounded(pose.fovDeg))
+    this.updateReference()
+  }
+
+  private addReference(src: string, title?: string): void {
+    const sighting = this.ufoElement.sighting
+    const pose = resolveObserverPoseAt(this.ufoElement.sighting, this.ufoElement.currentTime)
+    const id = `picture-${sighting.references.length + 1}`
+    const reference: SceneReference = {
+      id,
+      kind: "photo",
+      src,
+      title: title ? this.said.write(undefined, title, this.writingLanguage) : undefined,
+      opacity: DEFAULT_REFERENCE_OPACITY,
+      // Where the witness looks at the playhead: the likeliest guess for a picture of what they saw.
+      registration: { headingDeg: pose?.headingDeg ?? 0, pitchDeg: pose?.pitchDeg ?? 0, fovDeg: DEFAULT_REFERENCE_FOV_DEG }
+    }
+    sighting.references = [...sighting.references, reference]
+    this.currentReferenceId = id
+    this.refreshReferenceList()
+    this.ufoElement.refresh()
+  }
+
+  /** An empty picture whose address the author then types — no native prompt, which a sandboxed
+   * embed answers with nothing (see the rule in SightingEditorElement's confirm panel). */
+  private addReferenceFromAddress(): void {
+    this.addReference("")
+    this.referenceSrcInput.focus()
+  }
+
+  /** A picture from the author's own disk, embedded in the recording as a data: URL — see
+   * SceneReference.src for the trade, and referenceEmbedded for what the author is told of it. */
+  private async addReferenceFromFile(): Promise<void> {
+    const file = this.addReferenceFileInput.files?.[0]
+    if (!file) return
+    const src = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = () => resolve(reader.result as string)
+      reader.onerror = () => reject(reader.error)
+      reader.readAsDataURL(file)
+    })
+    this.addReferenceFileInput.value = ""
+    this.addReference(src, file.name.replace(/\.[^.]+$/, ""))
+  }
+
+  private deleteReference(): void {
+    if (this.currentReferenceId === undefined) return
+    const sighting = this.ufoElement.sighting
+    sighting.references = sighting.references.filter(reference => reference.id !== this.currentReferenceId)
+    this.currentReferenceId = sighting.references[0]?.id
+    this.refreshReferenceList()
+    this.ufoElement.refresh()
+  }
+
   private buildSoundKindOptions(): void {
     for (const kind of SOUND_KINDS) {
       const option = document.createElement("option")
@@ -6354,6 +6608,28 @@ export class SightingEditorElement extends HTMLElement {
     this.labelSoundPitch.textContent = messages.soundPitch
     this.labelSoundSrc.textContent = messages.soundSrc
     this.soundSrcInput.placeholder = messages.soundSrcPlaceholder
+    this.labelReferenceGroup.textContent = messages.referenceGroup
+    this.labelReference.textContent = messages.reference
+    this.labelReferenceTitle.textContent = messages.referenceTitle
+    this.labelReferenceSrc.textContent = messages.referenceSrc
+    this.referenceSrcInput.placeholder = messages.referenceSrcPlaceholder
+    this.labelReferenceKind.textContent = messages.referenceKind
+    this.referenceKindSelect.querySelector<HTMLOptionElement>("#reference-kind-photo")!.textContent = messages.referencePhoto
+    this.referenceKindSelect.querySelector<HTMLOptionElement>("#reference-kind-panorama")!.textContent = messages.referencePanorama
+    this.labelReferenceCredit.textContent = messages.referenceCredit
+    this.labelReferenceCreditUrl.textContent = messages.referenceCreditUrl
+    this.labelReferenceT.textContent = messages.referenceT
+    this.labelReferenceDrawing.textContent = messages.referenceDrawing
+    this.labelReferenceOpacity.textContent = messages.referenceOpacity
+    this.labelReferenceHeading.textContent = messages.referenceHeading
+    this.labelReferencePitch.textContent = messages.referencePitch
+    this.labelReferenceRoll.textContent = messages.referenceRoll
+    this.labelReferenceFov.textContent = messages.referenceFov
+    this.referenceUsePoseButton.textContent = messages.referenceUsePose
+    this.addReferenceUrlButton.textContent = messages.addReferenceUrl
+    this.labelAddReferenceFile.textContent = messages.addReferenceFile
+    this.deleteReferenceButton.title = messages.deleteReference
+    this.deleteReferenceButton.setAttribute("aria-label", messages.deleteReference)
     for (const [kind, option] of this.soundKindOptions) option.textContent = this.soundKindLabel(kind, messages)
     this.labelInstrument.textContent = messages.instrument
     this.loopButton.title = messages.autoReplay

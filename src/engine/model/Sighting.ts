@@ -11,6 +11,7 @@ import type { People } from "./People.js"
 import type { DecorObject } from "./Decor.js"
 import type { Milestone } from "./Milestone.js"
 import type { SaidText } from "./SaidText.js"
+import type { SceneReference } from "./Reference.js"
 import { Instruments } from "../instrument/Instrument.js"
 import type { Instrument } from "../instrument/Instrument.js"
 import { Provenance } from "../persistence/Provenance.js"
@@ -313,7 +314,11 @@ export class Sighting {
     /** The named moments of the account — see Milestone. Not readonly, same "replaced wholesale on
      * edit" reasoning as decor above. Empty for every recording that names none, which is most of
      * them: a twenty-second close pass has nothing to bookmark. */
-    public milestones: Milestone[] = []
+    public milestones: Milestone[] = [],
+    /** Pictures of the place laid over the reconstruction — see SceneReference. Not readonly, same
+     * "reassigned wholesale on edit" reasoning as decor above. Empty for every recording made
+     * before pictures could be laid over one. */
+    public references: SceneReference[] = []
   ) {
   }
 

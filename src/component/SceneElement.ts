@@ -450,6 +450,7 @@ export class SceneElement extends HTMLElement {
     this.shadow.getElementById("ufo-slot")!.replaceWith(this.ufoElement)
     this.sceneRenderer.onMapSubjectBounds = bounds => this.ufoElement.setMapSubjectBounds(bounds)
     this.ufoElement.addEventListener("timeupdate", this.handleTimeUpdate)
+    this.ufoElement.addEventListener("referenceview", event => this.applyReferenceView((event as CustomEvent<{ shown: boolean; opacity: number }>).detail))
     this.ufoElement.canvasElement.addEventListener("pointermove", this.handlePointerMove)
     this.ufoElement.canvasElement.addEventListener("pointerleave", this.handlePointerLeave)
     this.ufoElement.canvasElement.addEventListener("pointerdown", this.handleFirstInteraction, { once: true })
@@ -652,6 +653,20 @@ export class SceneElement extends HTMLElement {
     this.sceneRenderer.compileNextFrameOffThread()
     // Also resolves+applies weather at t=0 — see updateAstronomy's own doc comment.
     this.updateAstronomy(0)
+  }
+
+  /** Whether a picture's bytes could not be had — what the editor tells its author. */
+  referenceFailedToLoad(src: string): boolean {
+    return this.sceneRenderer.referenceFailedToLoad(src)
+  }
+
+  /** What the reader wants of the pictures of the place — the player's own toggle and slider,
+   * applied to every picture the recording carries (see SceneReference and UfoElement). */
+  private applyReferenceView(view: { shown: boolean; opacity: number }): void {
+    this.sceneRenderer.setReferencesShown(view.shown)
+    for (const reference of this.ufoElement.sighting.references) {
+      this.sceneRenderer.setReferenceView(reference.id, { opacity: view.opacity })
+    }
   }
 
   /** Undefined until a real, location-accurate terrain relief patch has finished its async build
@@ -889,6 +904,7 @@ export class SceneElement extends HTMLElement {
     this.sceneRenderer.setInstrument(sighting.instrument)
     this.updateMeteorShower(sighting, t)
     this.sceneRenderer.setDecor(sighting.decor)
+    this.sceneRenderer.setReferences(sighting.references)
     const pose = resolveObserverPoseAt(sighting, t)
     const cloudOrigin = resolveObserverPoseAt(sighting, 0)
     const initialWeather = resolveWeatherAt(sighting, 0)

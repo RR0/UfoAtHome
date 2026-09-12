@@ -21,6 +21,11 @@ export interface UfoMessages {
   mapImageryUnavailable: string
   /** The account's own named moments (see Milestone) — the marks on the bar, the caption, and the
    * lettered points on the map, which go together. */
+  /** The corner button that lays the recording's pictures of the place over the scene, and the
+   * slider beside it — see SceneReference. */
+  showReferences: string
+  hideReferences: string
+  referenceOpacity: string
   showMilestones: string
   hideMilestones: string
   /** What the map calls the two things a recording may not have named: the witness themselves, and

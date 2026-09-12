@@ -30,6 +30,12 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     setCompassForced(): void {}
     setWeather(): void {}
     setDecor(): void {}
+    setReferences(): void {}
+    setReferencesShown(): void {}
+    setReferenceView(): void {}
+    referenceFailedToLoad(): boolean {
+      return false
+    }
     setPhenomena(): void {}
     screenPointOf(): undefined {
       return undefined
