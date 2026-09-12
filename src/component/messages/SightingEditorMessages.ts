@@ -298,7 +298,13 @@ export interface SightingEditorMessages extends SightingLabels {
   referenceNotLoaded: string
   /** After a fit: how many landmarks and how well they agree, {n} and {deg}. */
   referenceLandmarksFit: string
-  referenceClearLandmarks: string
+  /** The landmarks list of the Pictures group: its label, the button that arms the next two clicks
+   * to name one, the delete button, and the name field with its examples. */
+  referenceLandmarks: string
+  addReferenceLandmark: string
+  deleteReferenceLandmark: string
+  referenceLandmarkLabel: string
+  referenceLandmarkLabelPlaceholder: string
   /** Copies the picture's registration into the witness's pose at the playhead, as a measurement. */
   referenceAdoptPose: string
   /** The provenance written with it — {title}, {n} landmarks, {deg} of residual. */

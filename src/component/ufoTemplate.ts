@@ -166,6 +166,11 @@ canvas[data-cursor="vertex"] {
 canvas[data-cursor="pan"] {
   cursor: grab;
 }
+/* Naming a landmark on a picture, or the same landmark in the render — see
+   SightingEditorElement.nameLandmarkAt. */
+canvas[data-cursor="landmark"] {
+  cursor: crosshair;
+}
 canvas[data-cursor="panning"] {
   cursor: grabbing;
 }

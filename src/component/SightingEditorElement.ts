@@ -51,11 +51,11 @@ import type { Testimony } from "../engine/model/Testimony.js"
 import type { DecorObject, DecorSide, DecorSize } from "../engine/model/Decor.js"
 import { sortedMilestones } from "../engine/model/Milestone.js"
 import { DEFAULT_REFERENCE_FOV_DEG, DEFAULT_REFERENCE_OPACITY, REFERENCE_INLINE_WARNING_BYTES } from "../engine/model/Reference.js"
-import type { ReferenceKind, SceneReference } from "../engine/model/Reference.js"
+import type { PictureLandmark, ReferenceKind, SceneReference } from "../engine/model/Reference.js"
 import { PictureRegistration } from "../engine/reference/PictureRegistration.js"
 import type { Vector3 } from "three"
 import type { CanvasRenderer } from "../render/CanvasRenderer.js"
-import type { Landmark, PicturePoint } from "../engine/reference/PictureRegistration.js"
+import type { PicturePoint } from "../engine/reference/PictureRegistration.js"
 import { PanoramaxPictures } from "../engine/reference/PanoramaxPictures.js"
 import type { StreetPicture } from "../engine/reference/PanoramaxPictures.js"
 import {
@@ -183,7 +183,7 @@ const DEFAULT_APPEARANCE: Appearance = { presetId: "oval", color: "#39ff14", tra
  * ufoTemplate's own canvas[data-cursor] block) rather than by assigning style.cursor here. */
 /** What the canvas edits — see SightingEditorElement.canvasMode. */
 type CanvasMode = "picture" | "shape" | "scene"
-type CanvasCursor = "record" | "select" | "move" | "vertex" | "pan" | "panning" | "rotate" | `resize-${ResizeAxis}`
+type CanvasCursor = "record" | "select" | "move" | "vertex" | "pan" | "panning" | "landmark" | "rotate" | `resize-${ResizeAxis}`
 
 /** Best-effort reverse mapping from a recorded/loaded shape back to a preset id, so the preset
  * buttons' pressed-state stays honest after scrubbing to or selecting a shape. Every polygon —
@@ -695,7 +695,12 @@ export class SightingEditorElement extends HTMLElement {
   private readonly referenceStatus: HTMLElement
   private readonly addReferenceUrlButton: HTMLButtonElement
   private readonly addReferenceFileInput: HTMLInputElement
-  private readonly referenceClearLandmarksButton: HTMLButtonElement
+  private readonly referenceLandmarksSelect: HTMLSelectElement
+  private readonly addReferenceLandmarkButton: HTMLButtonElement
+  private readonly deleteReferenceLandmarkButton: HTMLButtonElement
+  private readonly referenceLandmarkLabelInput: HTMLInputElement
+  private readonly labelReferenceLandmarks: HTMLElement
+  private readonly labelReferenceLandmarkLabel: HTMLElement
   private readonly referenceAdoptPoseButton: HTMLButtonElement
   private readonly referenceStreetSearchButton: HTMLButtonElement
   private readonly referenceStreetSelect: HTMLSelectElement
@@ -703,12 +708,16 @@ export class SightingEditorElement extends HTMLElement {
   /** What the canvas last handed itself to — see canvasMode; kept so leaving a mode can undo
    * what entering it did (the cursor, click-to-play). */
   private lastCanvasMode: CanvasMode = "shape"
-  /** A drag turning the picture, from a fixed start so nothing drifts — see cameraDragState. */
-  private referenceDragState?: { startPointer: { x: number; y: number }; startHeadingDeg: number; startPitchDeg: number; moved: boolean }
-  /** Landmarks named so far on the selected picture, and the one whose picture half is named but
-   * not yet its render half — see PictureRegistration. */
-  private referenceLandmarks: Landmark[] = []
+  /** A drag on the picture: turning it from a fixed start so nothing drifts (see cameraDragState),
+   * or moving one end of one of its landmarks — see beginReferenceDrag. */
+  private referenceDragState?:
+    | { kind: "picture"; startPointer: { x: number; y: number }; startHeadingDeg: number; startPitchDeg: number; moved: boolean }
+    | { kind: "anchor"; landmarkId: string; end: "picture" | "scene" }
+  /** Naming a landmark is an explicit gesture: "Add a landmark" arms the next two clicks, the first
+   * on the picture (kept here until the second), the second in the render — see nameLandmarkAt. */
+  private armingLandmark = false
   private pendingLandmark?: PicturePoint
+  private currentLandmarkId?: string
   private referenceFit?: { n: number; residualDeg: number }
   /** What the street-level lookup last found, in the order the dropdown shows. */
   private streetPictures: StreetPicture[] = []
@@ -806,6 +815,7 @@ export class SightingEditorElement extends HTMLElement {
         this.toggleRecording()
       }
       if (!this.confirmOverlay.hidden) this.answerConfirm(false)
+      if (this.armingLandmark || this.pendingLandmark) this.disarmLandmark()
       if (!this.contextMenu.hidden) this.hideContextMenu()
       if (!this.decorContextMenu.hidden) this.hideDecorContextMenu()
     }
@@ -1130,7 +1140,12 @@ export class SightingEditorElement extends HTMLElement {
     this.referenceStatus = this.shadow.getElementById("reference-status")!
     this.addReferenceUrlButton = this.shadow.getElementById("add-reference-url") as HTMLButtonElement
     this.addReferenceFileInput = this.shadow.getElementById("add-reference-file") as HTMLInputElement
-    this.referenceClearLandmarksButton = this.shadow.getElementById("reference-clear-landmarks") as HTMLButtonElement
+    this.referenceLandmarksSelect = this.shadow.getElementById("reference-landmarks") as HTMLSelectElement
+    this.addReferenceLandmarkButton = this.shadow.getElementById("add-reference-landmark") as HTMLButtonElement
+    this.deleteReferenceLandmarkButton = this.shadow.getElementById("delete-reference-landmark") as HTMLButtonElement
+    this.referenceLandmarkLabelInput = this.shadow.getElementById("referenceLandmarkLabel") as HTMLInputElement
+    this.labelReferenceLandmarks = this.shadow.getElementById("label-reference-landmarks")!
+    this.labelReferenceLandmarkLabel = this.shadow.getElementById("label-reference-landmark-label")!
     this.referenceAdoptPoseButton = this.shadow.getElementById("reference-adopt-pose") as HTMLButtonElement
     this.referenceStreetSearchButton = this.shadow.getElementById("reference-street-search") as HTMLButtonElement
     this.referenceStreetSelect = this.shadow.getElementById("reference-street") as HTMLSelectElement
@@ -1332,7 +1347,10 @@ export class SightingEditorElement extends HTMLElement {
     this.referenceUsePoseButton.addEventListener("click", () => this.useWitnessPoseForReference())
     this.addReferenceUrlButton.addEventListener("click", () => this.addReferenceFromAddress())
     this.addReferenceFileInput.addEventListener("change", () => void this.addReferenceFromFile())
-    this.referenceClearLandmarksButton.addEventListener("click", () => this.clearReferenceLandmarks())
+    this.addReferenceLandmarkButton.addEventListener("click", () => this.armLandmark())
+    this.deleteReferenceLandmarkButton.addEventListener("click", () => this.deleteLandmark())
+    this.referenceLandmarksSelect.addEventListener("change", () => this.selectLandmark(this.referenceLandmarksSelect.value))
+    this.referenceLandmarkLabelInput.addEventListener("input", () => this.updateLandmarkLabel())
     this.referenceAdoptPoseButton.addEventListener("click", () => this.adoptReferencePose())
     this.referenceStreetSearchButton.addEventListener("click", () => void this.searchStreetPictures())
     this.referenceStreetAddButton.addEventListener("click", () => this.addStreetPicture())
@@ -2769,7 +2787,9 @@ export class SightingEditorElement extends HTMLElement {
   private selectReference(id: string): void {
     this.currentReferenceId = id
     this.referenceSelect.value = id
-    this.clearReferenceLandmarks()
+    this.disarmLandmark()
+    this.currentLandmarkId = undefined
+    this.referenceFit = undefined
     this.syncReferenceFields()
   }
 
@@ -2783,7 +2803,10 @@ export class SightingEditorElement extends HTMLElement {
       this.setRowVisible(field, hasSelection)
     }
     this.setRowVisible(this.referenceUsePoseButton, hasSelection)
-    this.setRowVisible(this.referenceClearLandmarksButton, hasSelection)
+    for (const control of [this.referenceLandmarksSelect, this.addReferenceLandmarkButton, this.deleteReferenceLandmarkButton, this.referenceLandmarkLabelInput]) {
+      this.setRowVisible(control, hasSelection)
+    }
+    this.refreshLandmarkList()
     this.setRowVisible(this.referenceAdoptPoseButton, hasSelection)
     this.syncCanvasMode()
     if (!reference) {
@@ -2911,16 +2934,46 @@ export class SightingEditorElement extends HTMLElement {
     this.addReference(src, file.name.replace(/\.[^.]+$/, ""))
   }
 
-  // ---- Lining a picture up on the scene — see PictureRegistration.
+  // ---- Lining a picture up on the scene — see PictureRegistration and PictureLandmark.
 
   private currentReference(): SceneReference | undefined {
     return this.ufoElement.sighting.references.find(reference => reference.id === this.currentReferenceId)
   }
 
+  private currentLandmarks(): PictureLandmark[] {
+    return this.currentReference()?.landmarks ?? []
+  }
+
+  /** Replaces the selected picture's landmarks whole — the same "new array, never mutated in
+   * place" rule as every other list of the recording. */
+  private writeLandmarks(landmarks: PictureLandmark[]): void {
+    const sighting = this.ufoElement.sighting
+    sighting.references = sighting.references.map(reference =>
+      reference.id === this.currentReferenceId ? { ...reference, landmarks: landmarks.length > 0 ? landmarks : undefined } : reference)
+  }
+
+  /**
+   * What the pointer finds on the canvas in picture mode, in order: a landmark's own end, to move
+   * it; the picture, to turn it. Naming a landmark is not a click on the picture but an armed
+   * gesture (see armLandmark), so that a click nobody meant creates nothing.
+   */
   private beginReferenceDrag(startPointer: { x: number; y: number }): void {
     const reference = this.currentReference()
     if (!reference) return
+    if (this.armingLandmark || this.pendingLandmark) {
+      this.nameLandmarkAt(startPointer)
+      return
+    }
+    const anchor = this.landmarkEndAt(startPointer)
+    if (anchor) {
+      this.selectLandmark(anchor.landmarkId)
+      this.referenceDragState = { kind: "anchor", ...anchor }
+      this.setCanvasCursor("landmark")
+      this.startDragListening()
+      return
+    }
     this.referenceDragState = {
+      kind: "picture",
       startPointer,
       startHeadingDeg: reference.registration.headingDeg,
       startPitchDeg: reference.registration.pitchDeg,
@@ -2930,13 +2983,33 @@ export class SightingEditorElement extends HTMLElement {
     this.startDragListening()
   }
 
-  /** Turns the picture with the pointer, a tenth of a degree per pixel or so — the same feel as
-   * grabbing the sky (see onCameraDragPointerMove), computed from the fixed start for the same
-   * reason. A few pixels of wobble on a click are not a drag. */
+  /** Within a handle's reach of a landmark's ring (on the picture) or dot (in the render). */
+  private landmarkEndAt(point: { x: number; y: number }): { landmarkId: string; end: "picture" | "scene" } | undefined {
+    const reference = this.currentReference()
+    const aspect = reference ? this.sceneElement.referenceAspect(reference.id) : undefined
+    if (!reference || aspect === undefined) return undefined
+    const reach = 8
+    for (const landmark of this.currentLandmarks()) {
+      const ring = this.canvasPointOfDirection(PictureRegistration.worldDirectionOf(landmark.picture, reference.registration, aspect))
+      if (ring && Math.hypot(ring.x - point.x, ring.y - point.y) <= reach) return { landmarkId: landmark.id, end: "picture" }
+      const dot = this.canvasPointOfDirection(PictureRegistration.worldDirection(landmark.scene))
+      if (dot && Math.hypot(dot.x - point.x, dot.y - point.y) <= reach) return { landmarkId: landmark.id, end: "scene" }
+    }
+    return undefined
+  }
+
+  /** Turns the picture with the pointer, or carries one end of a landmark under it. The picture
+   * is turned from the fixed start of the drag (see onCameraDragPointerMove for why); a landmark's
+   * end simply follows, and the picture is refitted to it when the pointer is released, not
+   * while it moves — a picture refitted under a moving ring runs away from the pointer. */
   private onReferenceDragPointerMove(event: PointerEvent): void {
     const state = this.referenceDragState
     const point = this.canvasPointFromEvent(event)
     if (!state || !point) return
+    if (state.kind === "anchor") {
+      this.moveLandmarkEnd(state.landmarkId, state.end, point)
+      return
+    }
     const dx = point.x - state.startPointer.x
     const dy = point.y - state.startPointer.y
     if (!state.moved && Math.hypot(dx, dy) < 3) return
@@ -2947,20 +3020,34 @@ export class SightingEditorElement extends HTMLElement {
     this.updateReference()
   }
 
+  private moveLandmarkEnd(landmarkId: string, end: "picture" | "scene", point: { x: number; y: number }): void {
+    const reference = this.currentReference()
+    const aspect = reference ? this.sceneElement.referenceAspect(reference.id) : undefined
+    if (!reference || aspect === undefined) return
+    const direction = this.directionAtCanvasPoint(point)
+    this.writeLandmarks(this.currentLandmarks().map(landmark => {
+      if (landmark.id !== landmarkId) return landmark
+      if (end === "scene") return { ...landmark, scene: PictureRegistration.aimOf(direction) }
+      const picture = PictureRegistration.picturePointOf(direction, reference.registration, aspect)
+      return picture ? { ...landmark, picture } : landmark
+    }))
+    this.ufoElement.refresh()
+  }
+
   private endReferenceDrag(): void {
     const state = this.referenceDragState
     this.referenceDragState = undefined
     this.setCanvasCursor(this.canvasMode() === "picture" ? "pan" : this.hoverCursor)
     document.removeEventListener("pointermove", this.handleDragPointerMove)
     document.removeEventListener("pointerup", this.handleDragPointerUp)
-    if (state && !state.moved) this.nameLandmarkAt(state.startPointer)
+    if (state?.kind === "anchor") this.fitReferenceToLandmarks()
   }
 
   private onReferenceWheel(event: WheelEvent): void {
     if (this.canvasMode() !== "picture") return
     event.preventDefault()
     const fov = Number(this.referenceFovInput.value) || DEFAULT_REFERENCE_FOV_DEG
-    // A notch is a tenth: fine enough to line a horizon up, quick enough to cross the range.
+    // A notch is a twentieth: fine enough to line a horizon up, quick enough to cross the range.
     const next = Math.min(179, Math.max(1, fov * Math.exp(Math.sign(event.deltaY) * 0.05)))
     this.referenceFovInput.value = String(this.rounded(next))
     this.updateReference()
@@ -2972,11 +3059,32 @@ export class SightingEditorElement extends HTMLElement {
     return this.sceneElement.directionAt((point.x / canvas.width) * 2 - 1, -((point.y / canvas.height) * 2 - 1))
   }
 
+  /** "Add a landmark": the next click names a detail on the picture, the one after names the
+   * same detail in the render. Said on the canvas itself, where the eyes are. */
+  private armLandmark(): void {
+    if (!this.currentReference()) return
+    this.armingLandmark = true
+    this.pendingLandmark = undefined
+    this.setCanvasCursor("landmark")
+    this.syncRegisterStatus()
+    this.ufoElement.refresh()
+  }
+
+  private disarmLandmark(): void {
+    this.armingLandmark = false
+    this.pendingLandmark = undefined
+    if (this.canvasMode() === "picture") {
+      this.setCanvasCursor("pan")
+      this.syncRegisterStatus()
+    }
+    this.ufoElement.refresh()
+  }
+
   /**
-   * A click while lining up names a landmark: first where it is on the picture, then where the
-   * same thing is in the render. Once two are named the picture is turned to fit them; from
-   * three, its field is fitted too. The fit is applied at once — a landmark that does not fit is
-   * seen as the picture failing to land on it, which is what a reader needs to notice it.
+   * One of the two armed clicks: the first must land on the picture and is kept until the second,
+   * which lands anywhere in the render. Together they are a landmark — appended to the picture's
+   * own, selected, and fitted at once (see fitReferenceToLandmarks): a landmark that does not fit
+   * is seen as the picture failing to land on it, which is what a reader needs to notice it.
    */
   private nameLandmarkAt(point: { x: number; y: number }): void {
     const reference = this.currentReference()
@@ -2998,50 +3106,126 @@ export class SightingEditorElement extends HTMLElement {
       this.ufoElement.refresh()
       return
     }
-    this.referenceLandmarks.push({ picture: this.pendingLandmark, scene: PictureRegistration.aimOf(direction) })
+    const landmarks = this.currentLandmarks()
+    const id = this.nextLandmarkId(landmarks)
+    this.writeLandmarks([...landmarks, { id, picture: this.pendingLandmark, scene: PictureRegistration.aimOf(direction) }])
+    this.armingLandmark = false
     this.pendingLandmark = undefined
+    this.currentLandmarkId = id
+    this.setCanvasCursor("pan")
     this.fitReferenceToLandmarks()
-    this.ufoElement.refresh()
+  }
+
+  private nextLandmarkId(landmarks: PictureLandmark[]): string {
+    let n = landmarks.length + 1
+    while (landmarks.some(landmark => landmark.id === `landmark-${n}`)) n++
+    return `landmark-${n}`
   }
 
   private fitReferenceToLandmarks(): void {
     const reference = this.currentReference()
     const aspect = reference ? this.sceneElement.referenceAspect(reference.id) : undefined
     if (!reference || aspect === undefined) return
-    const fit = PictureRegistration.solve(this.referenceLandmarks, aspect, reference.registration.fovDeg)
+    const landmarks = this.currentLandmarks()
+    const fit = PictureRegistration.solve(landmarks, aspect, reference.registration.fovDeg)
     if (fit) {
-      this.referenceFit = { n: this.referenceLandmarks.length, residualDeg: fit.residualDeg }
+      this.referenceFit = { n: landmarks.length, residualDeg: fit.residualDeg }
       this.referenceHeadingInput.value = String(this.rounded(fit.registration.headingDeg))
       this.referencePitchInput.value = String(this.rounded(fit.registration.pitchDeg))
       this.referenceRollInput.value = String(this.rounded(fit.registration.rollDeg ?? 0))
       this.referenceFovInput.value = String(this.rounded(fit.registration.fovDeg))
       this.updateReference()
+    } else {
+      this.referenceFit = undefined
     }
+    this.refreshLandmarkList()
     this.syncRegisterStatus()
+    this.ufoElement.refresh()
+  }
+
+  /** How far one landmark still is from fitting, degrees, under the picture's current registration. */
+  private landmarkResidualDeg(landmark: PictureLandmark, reference: SceneReference, aspect: number): number {
+    const onPicture = PictureRegistration.worldDirectionOf(landmark.picture, reference.registration, aspect)
+    return (onPicture.angleTo(PictureRegistration.worldDirection(landmark.scene)) * 180) / Math.PI
+  }
+
+  /** "1 · Arbre masquant · 0,4°": the row a landmark has in the list, and the label it has on the
+   * canvas is the same words without the residual. */
+  private landmarkLabel(landmark: PictureLandmark, index: number): string {
+    const name = this.said.read(landmark.label)
+    return name ? `${index + 1} · ${name}` : String(index + 1)
+  }
+
+  private refreshLandmarkList(): void {
+    const reference = this.currentReference()
+    const landmarks = this.currentLandmarks()
+    const aspect = reference ? this.sceneElement.referenceAspect(reference.id) : undefined
+    this.referenceLandmarksSelect.innerHTML = ""
+    for (const [index, landmark] of landmarks.entries()) {
+      const option = document.createElement("option")
+      option.value = landmark.id
+      const residual = reference && aspect !== undefined ? ` · ${this.landmarkResidualDeg(landmark, reference, aspect).toFixed(1)}°` : ""
+      option.textContent = this.landmarkLabel(landmark, index) + residual
+      this.referenceLandmarksSelect.appendChild(option)
+    }
+    if (this.currentLandmarkId !== undefined && !landmarks.some(landmark => landmark.id === this.currentLandmarkId)) this.currentLandmarkId = undefined
+    if (this.currentLandmarkId !== undefined) this.referenceLandmarksSelect.value = this.currentLandmarkId
+    const current = landmarks.find(landmark => landmark.id === this.currentLandmarkId)
+    this.referenceLandmarksSelect.disabled = landmarks.length === 0
+    this.deleteReferenceLandmarkButton.disabled = current === undefined
+    this.referenceLandmarkLabelInput.disabled = current === undefined
+    if (this.shadow.activeElement !== this.referenceLandmarkLabelInput) this.referenceLandmarkLabelInput.value = this.said.read(current?.label) ?? ""
+  }
+
+  /** The same selection in the list and on the canvas — see paintPictureOverlay. */
+  private selectLandmark(id: string): void {
+    this.currentLandmarkId = id
+    this.refreshLandmarkList()
+    this.ufoElement.refresh()
+  }
+
+  private updateLandmarkLabel(): void {
+    const current = this.currentLandmarkId
+    if (current === undefined) return
+    this.writeLandmarks(this.currentLandmarks().map(landmark =>
+      landmark.id === current ? { ...landmark, label: this.said.write(landmark.label, this.referenceLandmarkLabelInput.value, this.writingLanguage) } : landmark))
+    const option = this.referenceLandmarksSelect.options[this.referenceLandmarksSelect.selectedIndex]
+    const landmarks = this.currentLandmarks()
+    const index = landmarks.findIndex(landmark => landmark.id === current)
+    const reference = this.currentReference()
+    const aspect = reference ? this.sceneElement.referenceAspect(reference.id) : undefined
+    if (option && index >= 0) {
+      const residual = reference && aspect !== undefined ? ` · ${this.landmarkResidualDeg(landmarks[index]!, reference, aspect).toFixed(1)}°` : ""
+      option.textContent = this.landmarkLabel(landmarks[index]!, index) + residual
+    }
+    this.ufoElement.refresh()
+  }
+
+  private deleteLandmark(): void {
+    const current = this.currentLandmarkId
+    if (current === undefined) return
+    const remaining = this.currentLandmarks().filter(landmark => landmark.id !== current)
+    this.writeLandmarks(remaining)
+    this.currentLandmarkId = remaining[remaining.length - 1]?.id
+    this.fitReferenceToLandmarks()
+  }
+
+  /** What the next click does, said under the fields and on the canvas (see paintPictureOverlay). */
+  private landmarkHint(): string | undefined {
+    const n = this.currentLandmarks().length + 1
+    if (this.pendingLandmark) return this.messages.referenceLandmarkScene.replace("{n}", String(n))
+    if (this.armingLandmark) return this.messages.referenceLandmarkPicture.replace("{n}", String(n))
+    return undefined
   }
 
   private syncRegisterStatus(): void {
-    const messages = this.messages
-    const n = this.referenceLandmarks.length + 1
-    if (this.pendingLandmark) {
-      this.referenceStatus.textContent = messages.referenceLandmarkScene.replace("{n}", String(n))
+    const hint = this.landmarkHint()
+    if (hint) {
+      this.referenceStatus.textContent = hint
     } else if (this.referenceFit) {
-      this.referenceStatus.textContent = messages.referenceLandmarksFit.replace("{n}", String(this.referenceFit.n)).replace("{deg}", this.referenceFit.residualDeg.toFixed(1))
-        + " · " + messages.referenceLandmarkPicture.replace("{n}", String(n))
-    } else if (this.referenceLandmarks.length > 0) {
-      this.referenceStatus.textContent = messages.referenceLandmarkPicture.replace("{n}", String(n))
+      this.referenceStatus.textContent = this.messages.referenceLandmarksFit.replace("{n}", String(this.referenceFit.n)).replace("{deg}", this.referenceFit.residualDeg.toFixed(1))
     } else {
-      this.referenceStatus.textContent = messages.referenceRegisterHint
-    }
-  }
-
-  private clearReferenceLandmarks(): void {
-    this.referenceLandmarks = []
-    this.pendingLandmark = undefined
-    this.referenceFit = undefined
-    if (this.canvasMode() === "picture") {
-      this.syncRegisterStatus()
-      this.ufoElement.refresh()
+      this.referenceStatus.textContent = this.messages.referenceRegisterHint
     }
   }
 
@@ -3056,8 +3240,10 @@ export class SightingEditorElement extends HTMLElement {
   /**
    * What the canvas shows of the picture it is editing: its frame as the scene projects it, and
    * every landmark named on it — the ring where the landmark is on the picture, under the current
-   * registration, and the dot where the author said it is in the render. Painted by the playback
-   * layer at every frame (see UfoElement.overlayPainter), so it turns with the witness.
+   * registration, and the dot where the author said it is in the render, numbered or named as in
+   * the list, the selected one bolder — and, while a landmark is being named, what the next click
+   * does. Painted by the playback layer at every frame (see UfoElement.overlayPainter), so it
+   * turns with the witness.
    */
   private readonly paintPictureOverlay = (renderer: CanvasRenderer): void => {
     const reference = this.currentReference()
@@ -3067,16 +3253,24 @@ export class SightingEditorElement extends HTMLElement {
     const { registration } = reference
     const corners = [{ u: 0, v: 0 }, { u: 1, v: 0 }, { u: 1, v: 1 }, { u: 0, v: 1 }]
       .map(corner => this.canvasPointOfDirection(PictureRegistration.worldDirectionOf(corner, registration, aspect)))
-    const landmarks = this.referenceLandmarks.map(landmark => ({
+    const landmarks = this.currentLandmarks().map((landmark, index) => ({
       picture: this.canvasPointOfDirection(PictureRegistration.worldDirectionOf(landmark.picture, registration, aspect)),
-      scene: this.canvasPointOfDirection(PictureRegistration.worldDirection(landmark.scene))
+      scene: this.canvasPointOfDirection(PictureRegistration.worldDirection(landmark.scene)),
+      label: this.landmarkLabel(landmark, index),
+      selected: landmark.id === this.currentLandmarkId
     }))
     if (this.pendingLandmark) {
-      landmarks.push({ picture: this.canvasPointOfDirection(PictureRegistration.worldDirectionOf(this.pendingLandmark, registration, aspect)), scene: undefined })
+      landmarks.push({
+        picture: this.canvasPointOfDirection(PictureRegistration.worldDirectionOf(this.pendingLandmark, registration, aspect)),
+        scene: undefined,
+        label: String(this.currentLandmarks().length + 1),
+        selected: true
+      })
     }
     renderer.paintPictureFrame(
       corners.every(corner => corner !== undefined) ? (corners as { x: number; y: number }[]) : undefined,
-      landmarks.filter((landmark): landmark is { picture: { x: number; y: number }; scene: { x: number; y: number } | undefined } => landmark.picture !== undefined)
+      landmarks.filter((landmark): landmark is typeof landmark & { picture: { x: number; y: number } } => landmark.picture !== undefined),
+      this.landmarkHint()
     )
   }
 
@@ -3099,7 +3293,7 @@ export class SightingEditorElement extends HTMLElement {
     if (index < 0) return
     const rationale = this.messages.referenceAdoptRationale
       .replace("{title}", this.referenceLabel(reference))
-      .replace("{n}", String(this.referenceFit?.n ?? 0))
+      .replace("{n}", String(this.currentLandmarks().length))
       .replace("{deg}", (this.referenceFit?.residualDeg ?? 0).toFixed(1))
     const values: [string, number][] = [["headingDeg", headingDeg], ["pitchDeg", pitchDeg], ["rollDeg", rollDeg ?? 0]]
     for (const [field, value] of values) {
@@ -3108,6 +3302,13 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   // ---- Street-level pictures taken near the spot — see PanoramaxPictures.
+
+  /** Nowhere to look around without a place: the lookup waits for the Location group's own
+   * latitude and longitude. */
+  private syncStreetSearchAvailability(): void {
+    const located = this.numberOrUndefined(this.latInput.value) !== undefined && this.numberOrUndefined(this.lngInput.value) !== undefined
+    this.referenceStreetSearchButton.disabled = !located
+  }
 
   private async searchStreetPictures(): Promise<void> {
     const pose = resolveObserverPoseAt(this.ufoElement.sighting, 0)
@@ -3898,6 +4099,7 @@ export class SightingEditorElement extends HTMLElement {
    * exactly what they typed; only the *other*, not-currently-focused fields need resyncing here. */
   private syncObserverFromTimeline(): void {
     if (this.ufoElement.playbackState === "playing") return
+    this.syncStreetSearchAvailability()
     const sighting = this.ufoElement.sighting
     const pose = sighting.witnessTrack.getInterpolatedPoseAt(this.ufoElement.currentTime)
     const location = sighting.event.place?.[0]
@@ -4066,8 +4268,10 @@ export class SightingEditorElement extends HTMLElement {
     // Click-to-play is off for the whole editor already (see the constructor): the canvas is for
     // editing here, whichever mode it is in.
     if (pictureNow !== pictureBefore) this.setCanvasCursor(pictureNow ? "pan" : this.hoverCursor)
+    if (!pictureNow && (this.armingLandmark || this.pendingLandmark)) this.disarmLandmark()
     const reference = this.currentReference()
     if (reference) this.syncReferenceStatus(reference)
+    this.syncStreetSearchAvailability()
   }
 
   /** One part of a group open at a time, among the handles of the same strip — the groups' own
@@ -6968,7 +7172,12 @@ export class SightingEditorElement extends HTMLElement {
     this.labelAddReferenceFile.textContent = messages.addReferenceFile
     this.deleteReferenceButton.title = messages.deleteReference
     this.deleteReferenceButton.setAttribute("aria-label", messages.deleteReference)
-    this.referenceClearLandmarksButton.textContent = messages.referenceClearLandmarks
+    this.labelReferenceLandmarks.textContent = messages.referenceLandmarks
+    this.addReferenceLandmarkButton.textContent = messages.addReferenceLandmark
+    this.deleteReferenceLandmarkButton.title = messages.deleteReferenceLandmark
+    this.deleteReferenceLandmarkButton.setAttribute("aria-label", messages.deleteReferenceLandmark)
+    this.labelReferenceLandmarkLabel.textContent = messages.referenceLandmarkLabel
+    this.referenceLandmarkLabelInput.placeholder = messages.referenceLandmarkLabelPlaceholder
     this.referenceAdoptPoseButton.textContent = messages.referenceAdoptPose
     this.referenceStreetSearchButton.textContent = messages.referenceStreetSearch
     this.referenceStreetAddButton.textContent = messages.referenceStreetAdd

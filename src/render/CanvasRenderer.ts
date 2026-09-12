@@ -343,7 +343,11 @@ export class CanvasRenderer {
    * joined, so that a landmark that does not fit shows as a gap. A landmark whose picture half is
    * named and whose render half is not yet is a ring alone.
    */
-  paintPictureFrame(corners: { x: number; y: number }[] | undefined, landmarks: { picture: { x: number; y: number }; scene?: { x: number; y: number } }[]): void {
+  paintPictureFrame(
+    corners: { x: number; y: number }[] | undefined,
+    landmarks: { picture: { x: number; y: number }; scene?: { x: number; y: number }; label: string; selected: boolean }[],
+    hint?: string
+  ): void {
     const ctx = this.ctx
     ctx.save()
     if (corners && corners.length === 4) {
@@ -358,24 +362,46 @@ export class CanvasRenderer {
       ctx.setLineDash([])
     }
     for (const landmark of landmarks) {
+      // The selected one stands out the way a selected shape's handles do: bolder, and white.
+      const colour = landmark.selected ? "#fff" : "#ffb000"
+      const weight = landmark.selected ? 3 : 2
       if (landmark.scene) {
-        ctx.strokeStyle = "#ffb000"
+        ctx.strokeStyle = colour
         ctx.lineWidth = 1
         ctx.beginPath()
         ctx.moveTo(landmark.picture.x, landmark.picture.y)
         ctx.lineTo(landmark.scene.x, landmark.scene.y)
         ctx.stroke()
-        ctx.fillStyle = "#ffb000"
+        ctx.fillStyle = colour
         ctx.beginPath()
         ctx.ellipse(landmark.scene.x, landmark.scene.y, VERTEX_HANDLE_RADIUS, VERTEX_HANDLE_RADIUS, 0, 0, 2 * Math.PI)
         ctx.fill()
       }
-      ctx.strokeStyle = "#ffb000"
-      ctx.lineWidth = 2
+      ctx.strokeStyle = colour
+      ctx.lineWidth = weight
       ctx.beginPath()
       ctx.ellipse(landmark.picture.x, landmark.picture.y, VERTEX_HANDLE_RADIUS + 2, VERTEX_HANDLE_RADIUS + 2, 0, 0, 2 * Math.PI)
       ctx.stroke()
+      // Its number, or its name, beside the ring — what ties the ring to the list's own row.
+      this.paintLabel(landmark.label, landmark.picture.x + VERTEX_HANDLE_RADIUS + 5, landmark.picture.y - VERTEX_HANDLE_RADIUS - 2, colour)
     }
+    // What the next click does, on the canvas it does it on — a status line under the fields is
+    // not where the eyes are while pointing.
+    if (hint) this.paintLabel(hint, 8, 8, "#fff", 13)
+    ctx.restore()
+  }
+
+  /** Legible text over any picture: dark backing, light face. */
+  private paintLabel(text: string, x: number, y: number, colour: string, size = 11): void {
+    const ctx = this.ctx
+    ctx.save()
+    ctx.font = `${size}px system-ui, sans-serif`
+    ctx.textBaseline = "top"
+    const width = ctx.measureText(text).width
+    ctx.fillStyle = "rgba(0, 0, 0, 0.6)"
+    ctx.fillRect(x - 3, y - 2, width + 6, size + 4)
+    ctx.fillStyle = colour
+    ctx.fillText(text, x, y)
     ctx.restore()
   }
 

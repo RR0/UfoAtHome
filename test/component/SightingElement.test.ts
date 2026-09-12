@@ -39,9 +39,6 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     referenceAspect(): undefined {
       return undefined
     }
-    screenPointOf(): undefined {
-      return undefined
-    }
     directionAt(): { x: number; y: number; z: number } {
       return { x: 0, y: 0, z: -1 }
     }

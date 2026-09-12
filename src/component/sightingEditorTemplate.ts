@@ -420,9 +420,15 @@ export const html = `
          SightingEditorElement.canvasMode and PictureRegistration. While this group is open the
          canvas belongs to the selected picture: a drag turns it, the wheel changes its field, and
          a click names a landmark on it, then the same landmark in the render. -->
-    <button id="reference-clear-landmarks" type="button">Clear landmarks</button>
     <button id="reference-adopt-pose" type="button">Adopt as the witness's pose</button>
     <span id="reference-status" class="apparent-size"></span>
+    <!-- The details the picture is lined up on (see PictureLandmark): one row each in the dropdown
+         with how far it still is from fitting, the selected one bolder on the canvas, its name
+         editable, and a button that arms the next two clicks to name a new one. -->
+    <label><span id="label-reference-landmarks">Landmarks</span> <select id="reference-landmarks"></select></label>
+    <button id="add-reference-landmark" type="button">Add a landmark</button>
+    <button id="delete-reference-landmark" type="button" class="icon-btn" title="Delete landmark" aria-label="Delete landmark">🗑</button>
+    <label><span id="label-reference-landmark-label">Name</span> <input id="referenceLandmarkLabel" type="text" placeholder="Masking tree, fence…"/></label>
     <div class="decor-add-row">
       <button id="add-reference-url" type="button">Add from an address</button>
       <label><span id="label-add-reference-file">Add a file</span> <input id="add-reference-file" type="file" accept="image/*"/></label>

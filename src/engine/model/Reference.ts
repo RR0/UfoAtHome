@@ -42,6 +42,26 @@ export interface ReferenceRegistration {
 }
 
 /**
+ * One detail of the place named in the picture and in the rendered scene — a tree that hid the
+ * thing, a fence, a church tower: the same point, twice.
+ *
+ * What lines the picture up (see PictureRegistration): two of them turn it to fit, three or more
+ * fit its field too. Kept in the recording rather than in the editor's own memory, because they
+ * are the working of a measurement: the heading a picture gives once it fits is only as good as
+ * the landmarks it fits on, and a reader has to be able to see them, move one, and get the same
+ * answer.
+ */
+export interface PictureLandmark {
+  id: string
+  /** What the detail is — "Arbre masquant", "barrière". Translatable — see SaidText. */
+  label?: SaidText
+  /** Where it is on the picture, 0..1 from the top-left corner. */
+  picture: { u: number; v: number }
+  /** Where it is from the witness, in the scene. */
+  scene: { azimuthDeg: number; altitudeDeg: number }
+}
+
+/**
  * A picture of where it happened, laid over the reconstruction so the two can be compared.
  *
  * Why it exists: everything the scene draws is computed — the relief from an elevation model, the
@@ -104,6 +124,8 @@ export interface SceneReference {
    */
   opacity: number
   registration: ReferenceRegistration
+  /** The details it was lined up on — see PictureLandmark. Absent means none named yet. */
+  landmarks?: PictureLandmark[]
 }
 
 /** What a picture starts as before anybody registers it: level, straight ahead of the witness,
