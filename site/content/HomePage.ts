@@ -300,6 +300,14 @@ ${carousel}
             many “the sky was full of stars” accounts come with an empty black photograph.</p>
           <p class="card-more"><a href="/context/#instrument">The numbers behind that →</a></p>
         </div>
+        <div class="card">
+          <h4>A picture of the place</h4>
+          <p>Everything the scene draws is computed, and nothing tells a faithful reconstruction from
+            a plausible one. A photograph of the same place does: laid over the render at any
+            opacity, lined up on two or three landmarks, it shows every tree the relief did not know
+            — and hands back the heading the witness actually faced, as a measurement.</p>
+          <p class="card-more"><a href="/context/#pictures">How a picture is lined up →</a></p>
+        </div>
       </div>
       <p class="small">Every source is named where its data is reported, and can be swapped for
         another — the picker <em>is</em> the credit. Where each one comes from, what it gives and
@@ -449,6 +457,14 @@ ${carousel}
             être enregistré. D'où tant de récits de « ciel plein d'étoiles » accompagnés d'une
             photographie noire et vide.</p>
           <p class="card-more"><a href="/context/#instrument">Les nombres derrière cela →</a></p>
+        </div>
+        <div class="card">
+          <h4>Une photo des lieux</h4>
+          <p>Tout ce que la scène dessine est calculé, et rien ne distingue une reconstitution fidèle
+            d'une reconstitution vraisemblable. Une photo du même endroit, si : posée sur le rendu à
+            l'opacité qu'on veut, recalée sur deux ou trois repères, elle montre chaque arbre que le
+            relief ignorait — et rend le cap que le témoin avait réellement, comme une mesure.</p>
+          <p class="card-more"><a href="/context/#pictures">Comment une photo se recale →</a></p>
         </div>
       </div>
       <p class="small">Chaque source est nommée là où sa donnée est rapportée, et peut être

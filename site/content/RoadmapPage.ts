@@ -54,6 +54,7 @@ export class RoadmapPage implements SitePage {
       <tr><td>The ground</td><td>Real relief and aerial imagery, buildings, trees, streetlights, vehicles, windows and other witnesses, with moving tracks and regulated flashing lights</td></tr>
       <tr><td>The instrument</td><td>Eye vs rectilinear lens, sensor and focal length in millimetres, letterboxed frame, aperture, focus distance, roll, a long exposure that accumulates star trails and dots a flashing lamp, and how faint a light the device could record at all — from 4.2 through a box camera to 9.7 on a tripod at f/2</td></tr>
       <tr><td>Provenance</td><td>Place, weather, elevation, imagery and time zone all read from named, swappable sources, with the exact query kept in the file</td></tr>
+      <tr><td>Pictures of the place</td><td>Photographs and panoramas laid over the scene at any opacity, lined up by dragging or on named landmarks with a residual per landmark, the fitted heading adoptable as the witness's own pose with its provenance, street-level pictures fetched from Panoramax already lined up</td></tr>
     </table>
     </div>
   </div>
@@ -142,12 +143,12 @@ export class RoadmapPage implements SitePage {
     </div>
 
     <div class="timeline-step">
-      <h3>A photograph or a video as the scene <span class="status status-later">planned</span></h3>
-      <p>The shape drawn over the witness's own picture rather than over a computed sky: the frame
-        they actually brought back, with the phenomenon drawn over it. It is the
-        shortest route from “this is what my photograph shows” to a stated angular size, and it is
-        the one case where the backdrop needs no reconstruction at all — the instrument that took
-        the picture is what sets the scale, which is exactly what the format already keeps.</p>
+      <h3>A video as the scene <span class="status status-later">planned</span></h3>
+      <p>A photograph of the place is <a href="/context/#pictures">already there</a>. A video is the
+        same registration with a picture that moves: a texture locked to the timeline, the witness's
+        own footage with the reconstruction over it, frame by frame. And a horizon traced on a picture
+        that fits would hide what passed below it — metres coming back from a photograph the way they
+        come back from a decor crossing.</p>
     </div>
 
     <div class="timeline-step">
@@ -202,6 +203,7 @@ export class RoadmapPage implements SitePage {
       <tr><td>Le sol</td><td>Relief réel et imagerie aérienne, bâtiments, arbres, lampadaires, véhicules, vitrages et autres témoins, avec trajectoires et feux clignotants aux cadences réglementaires</td></tr>
       <tr><td>L'instrument</td><td>Œil ou objectif rectilinéaire, capteur et focale en millimètres, cadre letterboxé, diaphragme, distance de mise au point, roulis, une pose longue qui accumule les filés d'étoiles et ponctue un feu clignotant, et jusqu'où l'appareil pouvait enregistrer une lumière faible — de 4,2 avec un appareil-boîte à 9,7 sur trépied à f/2</td></tr>
       <tr><td>Provenance</td><td>Lieu, météo, altitude, imagerie et fuseau horaire lus dans des sources nommées et interchangeables, la requête exacte restant dans le fichier</td></tr>
+      <tr><td>Photos des lieux</td><td>Photos et panoramas posés sur la scène à toute opacité, recalés en glissant ou sur des repères nommés avec un écart par repère, le cap ajusté adoptable comme pose du témoin avec sa provenance, photos de rue Panoramax déjà recalées</td></tr>
     </table>
     </div>
   </div>
@@ -294,12 +296,12 @@ export class RoadmapPage implements SitePage {
     </div>
 
     <div class="timeline-step">
-      <h3>Une photo ou une vidéo comme scène <span class="status status-later">planifié</span></h3>
-      <p>La forme dessinée par-dessus l'image du témoin plutôt que par-dessus un ciel calculé :
-        l'image qu'il a réellement rapportée, avec le phénomène dessiné par-dessus. C'est le
-        chemin le plus court entre « voilà ce que montre ma photo » et une taille angulaire énoncée,
-        et le seul cas où le fond n'a aucune reconstitution à faire — c'est l'appareil qui a pris
-        l'image qui donne l'échelle, ce que le format conserve déjà.</p>
+      <h3>Une vidéo comme scène <span class="status status-later">planifié</span></h3>
+      <p>La photo des lieux est <a href="/context/#pictures">déjà là</a>. Une vidéo, c'est le même
+        recalage avec une image qui bouge : une texture verrouillée sur la timeline, les propres
+        images du témoin avec la reconstitution par-dessus, image par image. Et un horizon tracé sur
+        une photo qui tient cacherait ce qui est passé dessous — des mètres qui reviendraient d'une
+        photo comme ils reviennent d'un croisement de décor.</p>
     </div>
 
     <div class="timeline-step">

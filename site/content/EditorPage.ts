@@ -150,7 +150,7 @@ if (docs) {
 
 <section class="band">
   <div class="wrap">
-    <h2>The eight groups</h2>
+    <h2>The nine groups</h2>
     <p class="lede prose-wide">One panel opens at a time, so the render stays on screen while you
       edit.</p>
 
@@ -314,6 +314,27 @@ if (docs) {
     </div>
 
     <div class="group-doc">
+      <h3>Pictures</h3>
+      <p>Photographs of the place, laid over the scene so the two can be compared. <strong>Add from
+        an address</strong> takes a picture served to any origin (rr0.org's case pictures are);
+        <strong>Add a file</strong> embeds one from your disk in the recording, with a word about its
+        weight. Give it a <strong>name</strong>, a <strong>credit</strong> and its link, say whether it
+        was <strong>taken at</strong> an instant of the observation and whether somebody <strong>drew
+        on</strong> it, and set its starting <strong>opacity</strong> — the reader slides it afterwards.</p>
+      <p>While this group is open the canvas belongs to the selected picture, its frame dashed in
+        blue: <strong>drag</strong> to turn it, <strong>wheel</strong> to change its field, or type
+        <strong>heading</strong>, <strong>pitch</strong>, <strong>roll</strong> and <strong>vertical
+        field</strong>, or <strong>use the witness's pose</strong> as a start. To measure rather than
+        eyeball, <strong>Add a landmark</strong> arms two clicks: a detail on the picture, then the same
+        detail in the render. Two landmarks turn the picture to fit them, three or more fit its field
+        too; each has a name and a residual, green within a degree, orange within three, red beyond,
+        and either end of one can be dragged. <strong>Adopt as the witness's pose</strong> then writes
+        the fitted heading, pitch and roll into the pose at the playhead as a measurement, with its
+        provenance. <strong>Street-level pictures nearby</strong> asks Panoramax for pictures taken
+        within 300 m of the witness's spot, each arriving already lined up in heading.</p>
+    </div>
+
+    <div class="group-doc">
       <h3>Phenomenon</h3>
       <p>The object itself. Oval or polygon, colour, transparency, halo, <strong>brilliance</strong>
         (how dazzling it was — a light you cannot look at washes out the field around it, throws the
@@ -445,7 +466,7 @@ if (docs) {
 
 <section class="band">
   <div class="wrap">
-    <h2>Les huit groupes</h2>
+    <h2>Les neuf groupes</h2>
     <p class="lede prose-wide">Un seul panneau s'ouvre à la fois, pour que le rendu reste à l'écran
       pendant que vous éditez.</p>
 
@@ -622,6 +643,29 @@ if (docs) {
         réellement capté le son peut pointer vers le fichier audio. Notez la différence entre les
         deux silences : <em>aucun</em> signifie que le témoin a déclaré n'avoir rien entendu ;
         l'absence totale de piste sonore signifie que personne ne le lui a demandé.</p>
+    </div>
+
+    <div class="group-doc">
+      <h3>Photos</h3>
+      <p>Des photos des lieux, posées sur la scène pour comparer les deux. <strong>Ajouter depuis une
+        adresse</strong> prend une photo servie à tout site (celles des dossiers de rr0.org le sont) ;
+        <strong>Ajouter un fichier</strong> en embarque une de votre disque dans l'enregistrement, en
+        vous disant son poids. Donnez-lui un <strong>nom</strong>, un <strong>crédit</strong> et son
+        lien, dites si elle a été <strong>prise à</strong> un instant de l'observation et si quelqu'un a
+        fait un <strong>dessin par-dessus</strong>, et réglez son <strong>opacité</strong> de départ — le
+        lecteur la fera glisser ensuite.</p>
+      <p>Tant que ce groupe est ouvert, le canvas appartient à la photo sélectionnée, son cadre en
+        pointillés bleus : <strong>glissez</strong> pour la tourner, <strong>molette</strong> pour son
+        champ, ou saisissez <strong>cap</strong>, <strong>assiette</strong>, <strong>roulis</strong> et
+        <strong>champ vertical</strong>, ou <strong>prenez la pose du témoin</strong> comme point de
+        départ. Pour mesurer plutôt qu'estimer, <strong>Ajouter un repère</strong> arme deux clics : un
+        détail sur la photo, puis le même détail dans le rendu. Deux repères tournent la photo pour les
+        faire coïncider, trois ou plus ajustent aussi son champ ; chacun a un nom et un écart, vert
+        jusqu'à un degré, orange jusqu'à trois, rouge au-delà, et chaque extrémité se déplace.
+        <strong>Adopter comme pose du témoin</strong> écrit alors cap, assiette et roulis ajustés dans
+        la pose au point de lecture, comme une mesure, avec sa provenance. <strong>Photos de rue à
+        proximité</strong> demande à Panoramax les photos prises à moins de 300 m du témoin, chacune
+        arrivant déjà recalée en cap.</p>
     </div>
 
     <div class="group-doc">

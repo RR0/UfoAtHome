@@ -124,6 +124,31 @@ export class ContextPage implements SitePage {
       focal length settle it against the sky's own brightness.</p>
     <p>A longer pose stops helping once the sky has slid further than the lens can resolve, which is
       why an hour on a tripod is no deeper than five seconds on one — only longer trails.</p>
+
+    <h2 id="pictures">A picture of the place</h2>
+    <p>Everything above is computed, and a reader looking at the result has no way to tell a faithful
+      reconstruction from a plausible one. A photograph of the same place does. A recording can carry
+      pictures of where it happened — a witness's own, an investigator's, a magazine scan, a
+      street-level capture — each laid over the render at an opacity the reader slides between all
+      picture and all render, with the phenomenon drawn over both. Every tree the thirty-metre relief
+      smoothed away, every ridge, the actual hedge, is then one picture with the reconstruction.
+      <a href="/demos/#cussac">Cussac</a> carries its first: the 1968 view from the spot with the
+      sphere and its climb drawn on by hand.</p>
+    <p>A picture is a field of directions from one point, and it is lined up as one: heading, pitch,
+      roll and the lens's field, angles and nothing else. It stands in the three-dimensional scene as
+      a flat panel at that field — which is what a lens makes — and is drawn through whatever the
+      instrument declares, so the same picture is right under an eye's equidistant view and under a
+      50 mm's rectilinear one, and stays put when the reader turns. Nothing in the scene hides it and
+      it hides nothing.</p>
+    <p>Lining it up is a measurement, not a feeling. Name a landmark on the picture and the same one
+      in the render — a church tower, the end of a hedge, the horizon under a tree — and two of them
+      turn the picture to fit; three or more fit its field too. The residual says how well it fits,
+      landmark by landmark, in green, orange or red: one that will not go below a degree is telling
+      you the picture was not taken from that spot, or that the relief is wrong there. And a picture
+      that fits gives back the heading the witness actually faced — adopted into their pose with its
+      provenance written down, where a heading typed in was only their word. Street-level pictures
+      taken nearby (Panoramax, open imagery) arrive already lined up in heading, a full turn arriving
+      as a panorama.</p>
   </div>
 </section>
 
@@ -230,6 +255,31 @@ export class ContextPage implements SitePage {
     <p>Allonger la pose cesse d'aider dès que le ciel a glissé plus loin que ce que l'objectif sait
       séparer : une heure sur trépied ne va pas plus loin que cinq secondes, elle fait seulement des
       filés plus longs.</p>
+
+    <h2 id="pictures">Une photo des lieux</h2>
+    <p>Tout ce qui précède est calculé, et un lecteur devant le résultat n'a aucun moyen de
+      distinguer une reconstitution fidèle d'une reconstitution vraisemblable. Une photo du même
+      endroit, si. Un enregistrement peut porter des photos des lieux — celle du témoin, celle d'un
+      enquêteur, la page d'une revue, une capture de rue — chacune posée sur le rendu à une opacité
+      que le lecteur fait glisser entre tout photo et tout rendu, le phénomène dessiné par-dessus.
+      Chaque arbre que le relief à trente mètres avait lissé, chaque crête, la vraie haie, ne font
+      plus qu'une image avec la reconstitution. <a href="/demos/#cussac">Cussac</a> porte la
+      première : la vue de 1968 depuis le lieu, avec la sphère et son envol dessinés à la main.</p>
+    <p>Une photo est un champ de directions depuis un point, et se recale comme tel : cap, assiette,
+      roulis et champ de l'objectif, des angles et rien d'autre. Elle se tient dans la scène en trois
+      dimensions comme un panneau plan à ce champ — ce qu'un objectif produit — et se rend à travers
+      ce que l'instrument déclare, donc la même photo est juste sous la vue équidistante d'un œil et
+      sous la vue rectilinéaire d'un 50 mm, et reste en place quand le lecteur tourne. Rien dans la
+      scène ne la cache et elle ne cache rien.</p>
+    <p>Le recalage est une mesure, pas une impression. Nommez un repère sur la photo et le même
+      dans le rendu — un clocher, le bout d'une haie, l'horizon sous un arbre — et deux repères
+      tournent la photo pour les faire coïncider ; trois ou plus ajustent aussi son champ. L'écart
+      résiduel dit si elle tient, repère par repère, en vert, orange ou rouge : un repère qui ne
+      descend pas sous un degré vous dit que la photo n'a pas été prise de ce point, ou que le
+      relief est faux là. Et une photo qui tient rend le cap que le témoin avait réellement —
+      adopté dans sa pose avec sa provenance écrite, là où un cap saisi n'était que sa parole. Les
+      photos de rue prises à proximité (Panoramax, imagerie ouverte) arrivent déjà recalées en cap,
+      un tour complet arrivant comme panorama.</p>
   </div>
 </section>
 
