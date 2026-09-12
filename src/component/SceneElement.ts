@@ -182,7 +182,7 @@ const DEFAULT_OBSERVER_POSE: ObserverPose = { lat: 0, lng: 0, elevationM: 0, hea
  */
 export class SceneElement extends HTMLElement {
   static get observedAttributes(): string[] {
-    return ["src", "star-catalog-src", "deep-star-catalog-src", "show-compass", WITNESS_MAP_ATTRIBUTE, MILESTONES_ATTRIBUTE]
+    return ["src", "star-catalog-src", "deep-star-catalog-src", "show-compass", "max-pixel-ratio", WITNESS_MAP_ATTRIBUTE, MILESTONES_ATTRIBUTE]
   }
 
   private readonly shadow: ShadowRoot
@@ -518,6 +518,12 @@ export class SceneElement extends HTMLElement {
     }
     if (name === "show-compass" && newValue !== oldValue) {
       this.sceneRenderer.setShowCompass(this.hasAttribute("show-compass"))
+    }
+    // How many device pixels per CSS pixel at most — the display's own when absent. The scene
+    // adapts below it while its frames are late; see SceneRenderer.setMaxPixelRatio.
+    if (name === "max-pixel-ratio" && newValue !== oldValue) {
+      const ratio = Number(newValue)
+      this.sceneRenderer.setMaxPixelRatio(Number.isFinite(ratio) && ratio > 0 ? ratio : Math.min(window.devicePixelRatio || 1, 2))
     }
     if ((name === WITNESS_MAP_ATTRIBUTE || name === MILESTONES_ATTRIBUTE) && newValue !== oldValue) {
       this.forwardPlayerAttributes()

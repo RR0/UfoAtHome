@@ -85,6 +85,7 @@ import { CloudField } from "./CloudSystem.js"
 import { buildLensFlare } from "./LensFlareEffect.js"
 import { EquidistantProjectionPass } from "./EquidistantProjectionPass.js"
 import { DepthOfFieldPass } from "./DepthOfFieldPass.js"
+import { AdaptiveResolution } from "./AdaptiveResolution.js"
 import { IceHalos } from "../engine/atmosphere/IceHalos.js"
 import { Rainbows } from "../engine/atmosphere/Rainbows.js"
 import { CometTail } from "./CometTail.js"
@@ -761,6 +762,10 @@ export class SceneRenderer {
   /** See setCompassForced's own doc comment. */
   private compassForced = false
   private animationFrameId: number | null = null
+  /** How many device pixels the scene is drawn at — see AdaptiveResolution and applyPixelRatio. */
+  private readonly resolution: AdaptiveResolution
+  /** The canvas's own size in CSS pixels, as last told by resize(): what a change of ratio reapplies. */
+  private readonly cssSize = { width: 1, height: 1 }
   /** Whether a frame has been asked for since the last one drawn — see render(). */
   private frameDirty = false
   /** The one-shot frame request that draws a dirty frame while no loop is running — see render(). */
@@ -1005,7 +1010,9 @@ export class SceneRenderer {
     onLightningFlash?: () => void
   ) {
     this.renderer = new WebGLRenderer({ canvas, antialias: true })
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2))
+    // The display's own ratio at most, and less while the frames are late — see AdaptiveResolution.
+    this.resolution = new AdaptiveResolution(Math.min(window.devicePixelRatio || 1, 2), this.renderer.getContext())
+    this.renderer.setPixelRatio(this.resolution.pixelRatio)
     this.renderer.shadowMap.enabled = true
     // PCFSoftShadowMap (this project's original choice) is no longer its own WebGL shadow
     // algorithm in this three.js version (^0.185) — WebGLRenderer silently substitutes
@@ -1046,6 +1053,8 @@ export class SceneRenderer {
   }
 
   resize(width: number, height: number): void {
+    this.cssSize.width = width
+    this.cssSize.height = height
     this.renderer.setSize(width, height, false)
     this.camera.aspect = width / Math.max(height, 1)
     this.camera.updateProjectionMatrix()
@@ -2023,7 +2032,12 @@ export class SceneRenderer {
     }
     if (this.compiling) return
     this.frameDirty = false
-    this.renderOnce()
+    this.resolution.beginDrawing()
+    try {
+      this.renderOnce()
+    } finally {
+      this.resolution.endDrawing()
+    }
     if (this.developingExposure) this.startExposure()
   }
 
@@ -2123,31 +2137,58 @@ export class SceneRenderer {
    * and the twinkle of the same instant land in ONE drawn frame rather than two.
    */
   frame(timeMs: number): void {
-    if (this.animationsRunning && this.hasAnimations()) {
-      // Clamped, not raw (timeMs - lastTimeMs) — a backgrounded/throttled tab can deliver a huge gap
-      // between two rAF callbacks (minimized window, tab switch, OS deprioritizing a hidden tab).
-      // updatePrecipitation does per-frame Euler integration (position -= speed*dt); an unclamped
-      // multi-second dt would move every particle's Y by more than the whole fall range in one step,
-      // so all 400 would cross the ground threshold in that same frame and respawn simultaneously —
-      // permanently locking the whole pool into one Y-synchronized sheet (found by testing hail,
-      // whose fast fall speed made it reproduce fastest, but the same overshoot can hit any type).
-      // MAX_ANIMATION_DT_SECONDS keeps a single step small enough that even hail's fastest cycle
-      // can't be skipped over.
-      const dtSeconds = this.lastFrameTimeMs === undefined ? 0 : Math.min((timeMs - this.lastFrameTimeMs) / 1000, MAX_ANIMATION_DT_SECONDS)
+    if (this.animationsRunning) {
+      const intervalMs = this.lastFrameTimeMs === undefined ? 0 : timeMs - this.lastFrameTimeMs
       this.lastFrameTimeMs = timeMs
-      this.updateTwinkle(timeMs / 1000)
-      this.updatePrecipitation(timeMs / 1000, dtSeconds)
-      this.updateRain(dtSeconds)
-      this.updateLightning(timeMs / 1000, dtSeconds)
-      if (this.lensFlare) this.lensFlare.uniforms.uTime.value = timeMs / 1000
-      // Not while a pose is being developed. Everything this loop animates — a star's twinkle, a
-      // falling drop, a flash — lasts a fraction of a second, and a pose of minutes AVERAGES those
-      // away rather than showing any one of them; the film already samples them as it fills. Asking
-      // for a frame here would also restart that film sixty times a second, which is exactly how a
-      // five-minute pose left the editor redrawing forever and never finishing a picture.
-      if (!this.developingExposure) this.frameDirty = true
+      if (this.hasAnimations()) this.animate(timeMs, intervalMs)
+      // Frames coming in late is what the pixel count answers to — see AdaptiveResolution.
+      const ratio = this.resolution.update(timeMs, intervalMs)
+      if (ratio !== undefined) this.applyPixelRatio(ratio)
     }
     this.drawIfDirty()
+  }
+
+  /** Moves everything that moves on its own on to the frame's clock — see frame(). */
+  private animate(timeMs: number, intervalMs: number): void {
+    // Clamped, not raw (timeMs - lastTimeMs) — a backgrounded/throttled tab can deliver a huge gap
+    // between two rAF callbacks (minimized window, tab switch, OS deprioritizing a hidden tab).
+    // updatePrecipitation does per-frame Euler integration (position -= speed*dt); an unclamped
+    // multi-second dt would move every particle's Y by more than the whole fall range in one step,
+    // so all 400 would cross the ground threshold in that same frame and respawn simultaneously —
+    // permanently locking the whole pool into one Y-synchronized sheet (found by testing hail,
+    // whose fast fall speed made it reproduce fastest, but the same overshoot can hit any type).
+    // MAX_ANIMATION_DT_SECONDS keeps a single step small enough that even hail's fastest cycle
+    // can't be skipped over.
+    const dtSeconds = Math.min(intervalMs / 1000, MAX_ANIMATION_DT_SECONDS)
+    this.updateTwinkle(timeMs / 1000)
+    this.updatePrecipitation(timeMs / 1000, dtSeconds)
+    this.updateRain(dtSeconds)
+    this.updateLightning(timeMs / 1000, dtSeconds)
+    if (this.lensFlare) this.lensFlare.uniforms.uTime.value = timeMs / 1000
+    // Not while a pose is being developed. Everything this loop animates — a star's twinkle, a
+    // falling drop, a flash — lasts a fraction of a second, and a pose of minutes AVERAGES those
+    // away rather than showing any one of them; the film already samples them as it fills. Asking
+    // for a frame here would also restart that film sixty times a second, which is exactly how a
+    // five-minute pose left the editor redrawing forever and never finishing a picture.
+    if (!this.developingExposure) this.frameDirty = true
+  }
+
+  /**
+   * The most device pixels per CSS pixel this scene may be drawn at — the display's own by default,
+   * and never more than 2. A page may ask for less for a scene it knows to be small or many: the
+   * ratio then adapts below that, never above it. See AdaptiveResolution.
+   */
+  setMaxPixelRatio(maxRatio: number): void {
+    this.resolution.maximum = maxRatio
+    if (this.renderer.getPixelRatio() !== this.resolution.pixelRatio) this.applyPixelRatio(this.resolution.pixelRatio)
+  }
+
+  private applyPixelRatio(ratio: number): void {
+    this.renderer.setPixelRatio(ratio)
+    this.renderer.setSize(this.cssSize.width, this.cssSize.height, false)
+    // Whatever draws into a target of its own (the passes, the film) sizes it from the drawing
+    // buffer as it draws, so a new ratio reaches them with the next frame.
+    this.frameDirty = true
   }
 
   /**
@@ -2331,6 +2372,8 @@ export class SceneRenderer {
     const film = this.exposureAccumulation
     if (!instantAt || !film) return
     const share = 1 / this.exposureInstants
+    // One frame's worth of instants is one drawing to the card, as far as the ratio is concerned.
+    this.resolution.beginDrawing()
     const until = performance.now() + SceneRenderer.EXPOSURE_BUDGET_MS
     const atMost = SceneRenderer.exposureInstantsPerFrame(film.instantTarget.width * film.instantTarget.height)
     let added = 0
@@ -2354,6 +2397,7 @@ export class SceneRenderer {
     // it, and between two frames of this that reader is the witness moving their pointer.
     this.restateAt(instantAt, 0)
     this.presentExposure()
+    this.resolution.endDrawing()
     if (this.exposureInstantsDone < this.exposureInstants) {
       this.exposureFrameId = requestAnimationFrame(() => this.developExposure())
     }
@@ -2992,6 +3036,7 @@ export class SceneRenderer {
     if (running && !wasRunning) {
       this.nextLightningAtS = null
       this.lastFrameTimeMs = undefined
+      this.resolution.reset()
     } else if (!running && this.lightningFlashRemainingS > 0) {
       this.lightningFlashRemainingS = 0
       this.restoreFogColor()
