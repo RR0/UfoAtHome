@@ -150,7 +150,6 @@ export const sightingEditorMessages_fr: SightingEditorMessages = {
   deleteReference: "Supprimer la photo",
   referenceEmbedded: "{kb} ko embarqués dans l'enregistrement — une adresse le garderait léger",
   referenceUnreachable: "La photo n'a pas pu être chargée : vérifiez l'adresse, et que son site autorise les autres sites à la lire",
-  referenceRegister: "Recaler sur la scène",
   referenceRegisterHint: "Glissez pour orienter la photo, molette pour son champ ; cliquez un repère sur la photo, puis le même dans le rendu",
   referenceLandmarkPicture: "Repère {n} : cliquez le point sur la photo",
   referenceLandmarkScene: "Repère {n} : cliquez le même point dans le rendu",

@@ -150,7 +150,6 @@ export const sightingEditorMessages_en: SightingEditorMessages = {
   deleteReference: "Delete picture",
   referenceEmbedded: "{kb} kB embedded in the recording — an address would keep it light",
   referenceUnreachable: "The picture could not be loaded: check the address, and that its site allows other sites to read it",
-  referenceRegister: "Line up on the scene",
   referenceRegisterHint: "Drag to turn the picture, wheel to change its field; click a landmark on the picture, then the same one in the render",
   referenceLandmarkPicture: "Landmark {n}: click the point on the picture",
   referenceLandmarkScene: "Landmark {n}: click the same point in the render",

@@ -287,9 +287,8 @@ export interface SightingEditorMessages extends SightingLabels {
   referenceEmbedded: string
   /** Under the fields when the picture's bytes could not be had. */
   referenceUnreachable: string
-  /** The toggle that hands the canvas to the picture — see SightingEditorElement.beginReferenceDrag. */
-  referenceRegister: string
-  /** Under it while it is on: what the pointer does now. */
+  /** Under the picture's fields while its group is open: what the pointer does on the canvas now
+   * — see SightingEditorElement.canvasMode. */
   referenceRegisterHint: string
   /** Landmark prompts, {n} being the landmark's number — the point on the picture first, then the
    * same point in the render. */

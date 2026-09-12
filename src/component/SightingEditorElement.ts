@@ -179,6 +179,8 @@ const DEFAULT_APPEARANCE: Appearance = { presetId: "oval", color: "#39ff14", tra
  * attribute — the canvas's contents are drawn, not DOM, so only script can hit-test them, but
  * every one of these names is turned into an actual cursor by a plain CSS rule (see
  * ufoTemplate's own canvas[data-cursor] block) rather than by assigning style.cursor here. */
+/** What the canvas edits — see SightingEditorElement.canvasMode. */
+type CanvasMode = "picture" | "shape" | "scene"
 type CanvasCursor = "record" | "select" | "move" | "vertex" | "pan" | "panning" | "rotate" | `resize-${ResizeAxis}`
 
 /** Best-effort reverse mapping from a recorded/loaded shape back to a preset id, so the preset
@@ -691,14 +693,14 @@ export class SightingEditorElement extends HTMLElement {
   private readonly referenceStatus: HTMLElement
   private readonly addReferenceUrlButton: HTMLButtonElement
   private readonly addReferenceFileInput: HTMLInputElement
-  private readonly referenceRegisterButton: HTMLButtonElement
   private readonly referenceClearLandmarksButton: HTMLButtonElement
   private readonly referenceAdoptPoseButton: HTMLButtonElement
   private readonly referenceStreetSearchButton: HTMLButtonElement
   private readonly referenceStreetSelect: HTMLSelectElement
   private readonly referenceStreetAddButton: HTMLButtonElement
-  /** While on, the canvas belongs to the selected picture — see beginReferenceDrag. */
-  private referenceRegisterMode = false
+  /** What the canvas last handed itself to — see canvasMode; kept so leaving a mode can undo
+   * what entering it did (the cursor, click-to-play). */
+  private lastCanvasMode: CanvasMode = "shape"
   /** A drag turning the picture, from a fixed start so nothing drifts — see cameraDragState. */
   private referenceDragState?: { startPointer: { x: number; y: number }; startHeadingDeg: number; startPitchDeg: number; moved: boolean }
   /** Landmarks named so far on the selected picture, and the one whose picture half is named but
@@ -1126,7 +1128,6 @@ export class SightingEditorElement extends HTMLElement {
     this.referenceStatus = this.shadow.getElementById("reference-status")!
     this.addReferenceUrlButton = this.shadow.getElementById("add-reference-url") as HTMLButtonElement
     this.addReferenceFileInput = this.shadow.getElementById("add-reference-file") as HTMLInputElement
-    this.referenceRegisterButton = this.shadow.getElementById("reference-register") as HTMLButtonElement
     this.referenceClearLandmarksButton = this.shadow.getElementById("reference-clear-landmarks") as HTMLButtonElement
     this.referenceAdoptPoseButton = this.shadow.getElementById("reference-adopt-pose") as HTMLButtonElement
     this.referenceStreetSearchButton = this.shadow.getElementById("reference-street-search") as HTMLButtonElement
@@ -1329,7 +1330,6 @@ export class SightingEditorElement extends HTMLElement {
     this.referenceUsePoseButton.addEventListener("click", () => this.useWitnessPoseForReference())
     this.addReferenceUrlButton.addEventListener("click", () => this.addReferenceFromAddress())
     this.addReferenceFileInput.addEventListener("change", () => void this.addReferenceFromFile())
-    this.referenceRegisterButton.addEventListener("click", () => this.setReferenceRegisterMode(!this.referenceRegisterMode))
     this.referenceClearLandmarksButton.addEventListener("click", () => this.clearReferenceLandmarks())
     this.referenceAdoptPoseButton.addEventListener("click", () => this.adoptReferencePose())
     this.referenceStreetSearchButton.addEventListener("click", () => void this.searchStreetPictures())
@@ -2781,8 +2781,9 @@ export class SightingEditorElement extends HTMLElement {
       this.setRowVisible(field, hasSelection)
     }
     this.setRowVisible(this.referenceUsePoseButton, hasSelection)
-    this.setRowVisible(this.referenceRegisterButton, hasSelection)
-    if (!hasSelection) this.setReferenceRegisterMode(false)
+    this.setRowVisible(this.referenceClearLandmarksButton, hasSelection)
+    this.setRowVisible(this.referenceAdoptPoseButton, hasSelection)
+    this.syncCanvasMode()
     if (!reference) {
       this.referenceStatus.textContent = ""
       return
@@ -2806,7 +2807,7 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   private syncReferenceStatus(reference: SceneReference): void {
-    if (this.referenceRegisterMode) {
+    if (this.canvasMode() === "picture") {
       this.syncRegisterStatus()
       return
     }
@@ -2910,21 +2911,6 @@ export class SightingEditorElement extends HTMLElement {
 
   // ---- Lining a picture up on the scene — see PictureRegistration.
 
-  private setReferenceRegisterMode(on: boolean): void {
-    if (on === this.referenceRegisterMode) return
-    this.referenceRegisterMode = on
-    this.referenceRegisterButton.setAttribute("aria-pressed", String(on))
-    this.referenceClearLandmarksButton.hidden = !on
-    this.referenceAdoptPoseButton.hidden = !on
-    // The shapes' own handles would fight the drag for the canvas, and a picture being lined up
-    // is not a moment to be moving the phenomenon.
-    this.ufoElement.enableClickToPlay = !on
-    this.setCanvasCursor(on ? "pan" : this.hoverCursor)
-    if (!on) this.clearReferenceLandmarks()
-    const reference = this.currentReference()
-    if (reference) this.syncReferenceStatus(reference)
-  }
-
   private currentReference(): SceneReference | undefined {
     return this.ufoElement.sighting.references.find(reference => reference.id === this.currentReferenceId)
   }
@@ -2962,14 +2948,14 @@ export class SightingEditorElement extends HTMLElement {
   private endReferenceDrag(): void {
     const state = this.referenceDragState
     this.referenceDragState = undefined
-    this.setCanvasCursor(this.referenceRegisterMode ? "pan" : this.hoverCursor)
+    this.setCanvasCursor(this.canvasMode() === "picture" ? "pan" : this.hoverCursor)
     document.removeEventListener("pointermove", this.handleDragPointerMove)
     document.removeEventListener("pointerup", this.handleDragPointerUp)
     if (state && !state.moved) this.nameLandmarkAt(state.startPointer)
   }
 
   private onReferenceWheel(event: WheelEvent): void {
-    if (!this.referenceRegisterMode || this.currentReferenceId === undefined) return
+    if (this.canvasMode() !== "picture") return
     event.preventDefault()
     const fov = Number(this.referenceFovInput.value) || DEFAULT_REFERENCE_FOV_DEG
     // A notch is a tenth: fine enough to line a horizon up, quick enough to cross the range.
@@ -3049,7 +3035,7 @@ export class SightingEditorElement extends HTMLElement {
     this.referenceLandmarks = []
     this.pendingLandmark = undefined
     this.referenceFit = undefined
-    if (this.referenceRegisterMode) this.syncRegisterStatus()
+    if (this.canvasMode() === "picture") this.syncRegisterStatus()
   }
 
   /**
@@ -3998,6 +3984,42 @@ export class SightingEditorElement extends HTMLElement {
       candidate.setAttribute("aria-expanded", String(nowOpen))
       this.groupPanels[index].hidden = !nowOpen
     }
+    this.syncCanvasMode()
+  }
+
+  private isGroupIdOpen(id: string): boolean {
+    const tab = this.groupTabs.find(candidate => candidate.getAttribute("aria-controls") === id)
+    return tab !== undefined && this.isGroupOpen(tab)
+  }
+
+  /**
+   * What the canvas edits: what the open group describes.
+   *
+   * The canvas is one surface under eight groups of fields, and a drag on it has to mean one
+   * thing. It means the picture while the Pictures group is open and a picture is selected (turn
+   * it, change its field, name its landmarks — see beginReferenceDrag), the phenomenon's shapes
+   * while the Phenomenon group is open (their handles, their moves), and otherwise the scene
+   * itself: a click on a shape or a decor object still goes to its panel, since that is how a
+   * thing on the canvas is reached, but moving it is done from that panel, and the rest of the
+   * canvas is the landscape to turn the witness with. Before this, every mode was on at once and
+   * the picture, once handed the canvas, kept it.
+   */
+  private canvasMode(): CanvasMode {
+    if (this.isGroupIdOpen("group-reference") && this.currentReferenceId !== undefined) return "picture"
+    if (this.isGroupIdOpen("group-shape")) return "shape"
+    return "scene"
+  }
+
+  private syncCanvasMode(): void {
+    const mode = this.canvasMode()
+    const pictureNow = mode === "picture"
+    const pictureBefore = this.lastCanvasMode === "picture"
+    this.lastCanvasMode = mode
+    // Click-to-play is off for the whole editor already (see the constructor): the canvas is for
+    // editing here, whichever mode it is in.
+    if (pictureNow !== pictureBefore) this.setCanvasCursor(pictureNow ? "pan" : this.hoverCursor)
+    const reference = this.currentReference()
+    if (reference) this.syncReferenceStatus(reference)
   }
 
   /** One part of a group open at a time, among the handles of the same strip — the groups' own
@@ -6898,7 +6920,6 @@ export class SightingEditorElement extends HTMLElement {
     this.labelAddReferenceFile.textContent = messages.addReferenceFile
     this.deleteReferenceButton.title = messages.deleteReference
     this.deleteReferenceButton.setAttribute("aria-label", messages.deleteReference)
-    this.referenceRegisterButton.textContent = messages.referenceRegister
     this.referenceClearLandmarksButton.textContent = messages.referenceClearLandmarks
     this.referenceAdoptPoseButton.textContent = messages.referenceAdoptPose
     this.referenceStreetSearchButton.textContent = messages.referenceStreetSearch
@@ -6919,15 +6940,20 @@ export class SightingEditorElement extends HTMLElement {
     }
     const point = this.canvasPointFromEvent(event)
     if (!point) return
-    if (this.referenceRegisterMode && this.currentReferenceId !== undefined) {
+    const mode = this.canvasMode()
+    if (mode === "picture") {
       if (this.ufoElement.playbackState !== "playing") this.beginReferenceDrag(point)
       return
     }
     const timeline = this.ufoElement.sighting.timeline
     const t = this.ufoElement.currentTime
     const playing = this.ufoElement.playbackState === "playing"
+    // Handles and moves are the Phenomenon group's own — see canvasMode.
+    const shapeMode = mode === "shape"
 
-    if (this.selectedSourceIds.size > 1) {
+    if (!shapeMode) {
+      // Nothing to grab: a click still finds what is under it, below.
+    } else if (this.selectedSourceIds.size > 1) {
       const group = new ShapeGroup(this.selectedMembers())
       const handle = ShapeHandles.hitTestHandle({ bounds: group.bounds(), angle: 0 }, point)
       if (handle === "rotate") {
@@ -7001,7 +7027,9 @@ export class SightingEditorElement extends HTMLElement {
       // whole group, not just that one shape).
       this.selectUnit(hit.sourceId)
     }
-    if (playing) return
+    // From another group, the click has done its work: it landed on the shape's own panel, where
+    // the next one moves it (see canvasMode).
+    if (playing || !shapeMode) return
     // Covers both "just click" (a zero-delta move below, harmlessly rewriting identical bounds)
     // and click-and-drag-to-move in one gesture, for the whole current selection at once — a
     // single selected shape is just the size-1 case of the same "sources" array.
@@ -7610,10 +7638,13 @@ export class SightingEditorElement extends HTMLElement {
   private hoverCursorAt(event: PointerEvent): CanvasCursor | undefined {
     const point = this.canvasPointFromEvent(event)
     if (!point) return undefined
+    const mode = this.canvasMode()
     const timeline = this.ufoElement.sighting.timeline
     const t = this.ufoElement.currentTime
     const editable = this.ufoElement.playbackState !== "playing"
-    if (editable) {
+    if (mode === "picture") return editable ? "pan" : undefined
+    const shapeMode = mode === "shape"
+    if (editable && shapeMode) {
       if (this.selectedSourceIds.size > 1) {
         const handle = ShapeHandles.hitTestHandle({ bounds: new ShapeGroup(this.selectedMembers()).bounds(), angle: 0 }, point)
         // The group's own bounding box is never rotated (see ShapeHandles.groupBoundsFor), so its
@@ -7626,7 +7657,7 @@ export class SightingEditorElement extends HTMLElement {
         if (selected && handle) return this.cursorForHandle(handle, selected.angle)
       }
     }
-    if (timeline.hitTest(t, point.x, point.y)) return editable ? "move" : "select"
+    if (timeline.hitTest(t, point.x, point.y)) return editable && shapeMode ? "move" : "select"
     if (this.pickDecorAt(event) !== undefined) return "select"
     return editable ? "pan" : undefined
   }

@@ -2669,6 +2669,57 @@ describe("SightingEditorElement sound keyframes over time", () => {
   })
 })
 
+describe("SightingEditorElement canvas mode", () => {
+  afterEach(() => {
+    document.body.innerHTML = ""
+  })
+
+  function withPicture() {
+    return {
+      version: 1 as const,
+      timeline: { keyframes: [{ t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval" as const, bounds: { x: 300, y: 160, width: 40, height: 40 }, color: "#fff", angle: 0, transparency: 0, haloScale: 0, selected: false } }] }] },
+      witnessTrack: { keyframes: [{ t: 0, pose: { lat: 44.98, lng: 2.92, elevationM: 0, headingDeg: 288, pitchDeg: 2, fovDeg: 60 } }] },
+      references: [{ id: "vue", kind: "photo" as const, src: "https://example.org/vue.jpg", opacity: 0.5, registration: { headingDeg: 275, pitchDeg: -1, fovDeg: 27 } }]
+    }
+  }
+
+  function open(element: SightingEditorElement, groupId: string): void {
+    const tab = [...element.shadowRoot!.querySelectorAll<HTMLButtonElement>(".group-tab")].find(candidate => candidate.getAttribute("aria-controls") === groupId)!
+    if (tab.getAttribute("aria-expanded") !== "true") tab.click()
+  }
+
+  function drag(element: SightingEditorElement, from: { x: number; y: number }, to: { x: number; y: number }): void {
+    const canvas = nestedUfo(element).shadowRoot!.getElementById("canvas") as HTMLCanvasElement
+    vi.spyOn(canvas, "getBoundingClientRect").mockReturnValue({ left: 0, top: 0, width: 640, height: 360 } as DOMRect)
+    canvas.dispatchEvent(new MouseEvent("pointerdown", { clientX: from.x, clientY: from.y }))
+    document.dispatchEvent(new MouseEvent("pointermove", { clientX: to.x, clientY: to.y }))
+    document.dispatchEvent(new MouseEvent("pointerup", { clientX: to.x, clientY: to.y }))
+  }
+
+  it("hands the canvas to the picture while the Pictures group is open, and to the shapes while Phenomenon is", () => {
+    const element = mount()
+    element.sightingData = withPicture()
+    const headingOf = () => element.sightingData.references![0]!.registration.headingDeg
+    const shapeX = () => element.sightingData.timeline.keyframes[0]!.shapes[0]!.shape.bounds.x
+    // Phenomenon is open on load: a drag on the shape's body moves it and leaves the picture alone.
+    open(element, "group-shape")
+    drag(element, { x: 320, y: 180 }, { x: 340, y: 180 })
+    expect(shapeX()).toBeCloseTo(320, 6)
+    expect(headingOf()).toBe(275)
+    // Pictures open: the same drag turns the picture and leaves the shape alone.
+    open(element, "group-reference")
+    drag(element, { x: 320, y: 180 }, { x: 340, y: 180 })
+    expect(headingOf()).toBeGreaterThan(275)
+    expect(shapeX()).toBeCloseTo(320, 6)
+    // Any other group: the shape is not moved from here either — a click on it goes to its panel.
+    open(element, "group-decor")
+    const before = shapeX()
+    drag(element, { x: 320, y: 180 }, { x: 360, y: 180 })
+    expect(shapeX()).toBe(before)
+    expect(element.shadowRoot!.getElementById("group-shape")!.hidden).toBe(false)
+  })
+})
+
 describe("SightingEditorElement toolbar groups", () => {
   afterEach(() => {
     document.body.innerHTML = ""

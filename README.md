@@ -531,9 +531,9 @@ spot carries the sphere and its spiral by hand.
 Nothing in the scene hides a picture and a picture hides nothing: it is a field of directions from one point, valid
 from that point alone, and the reconstruction stands it at the witness's eye.
 
-**Lining it up.** The editor's Pictures group types the registration, copies the witness's pose into it, or hands the
-canvas to the picture (*Line up on the scene*): a drag turns it, the wheel changes its field, and a click names a
-landmark on the picture, then the same landmark in the render — two landmarks turn the picture to fit them, three or
+**Lining it up.** The editor's Pictures group types the registration, copies the witness's pose into it, and while that
+group is open the canvas belongs to the selected picture: a drag turns it, the wheel changes its field, and a click
+names a landmark on the picture, then the same landmark in the render — two landmarks turn the picture to fit them, three or
 more fit its field too (`PictureRegistration`, a triad first guess refined by Gauss-Newton on the rotation), and the
 status line says how far off the landmarks still are. *Adopt as the witness's pose* then writes the fitted heading,
 pitch and roll into the pose at the playhead as a **measurement**, with a `derived` provenance naming the picture and
