@@ -334,6 +334,51 @@ export class CanvasRenderer {
     this.paintSelectionHandles(shape)
   }
 
+  /**
+   * The outline of a picture of the place being lined up, and the landmarks named on it — the
+   * selection indicator of a picture, where a shape's is its handles (see
+   * SightingEditorElement.paintPictureOverlay). A dashed frame through the picture's four corners
+   * as the scene projects them, so that a turned or rolled picture shows its actual edge; each
+   * landmark as a ring where it is on the picture and a dot where it is in the render, the two
+   * joined, so that a landmark that does not fit shows as a gap. A landmark whose picture half is
+   * named and whose render half is not yet is a ring alone.
+   */
+  paintPictureFrame(corners: { x: number; y: number }[] | undefined, landmarks: { picture: { x: number; y: number }; scene?: { x: number; y: number } }[]): void {
+    const ctx = this.ctx
+    ctx.save()
+    if (corners && corners.length === 4) {
+      ctx.strokeStyle = "#39f"
+      ctx.lineWidth = 1.5
+      ctx.setLineDash([6, 4])
+      ctx.beginPath()
+      ctx.moveTo(corners[0]!.x, corners[0]!.y)
+      for (const corner of corners.slice(1)) ctx.lineTo(corner.x, corner.y)
+      ctx.closePath()
+      ctx.stroke()
+      ctx.setLineDash([])
+    }
+    for (const landmark of landmarks) {
+      if (landmark.scene) {
+        ctx.strokeStyle = "#ffb000"
+        ctx.lineWidth = 1
+        ctx.beginPath()
+        ctx.moveTo(landmark.picture.x, landmark.picture.y)
+        ctx.lineTo(landmark.scene.x, landmark.scene.y)
+        ctx.stroke()
+        ctx.fillStyle = "#ffb000"
+        ctx.beginPath()
+        ctx.ellipse(landmark.scene.x, landmark.scene.y, VERTEX_HANDLE_RADIUS, VERTEX_HANDLE_RADIUS, 0, 0, 2 * Math.PI)
+        ctx.fill()
+      }
+      ctx.strokeStyle = "#ffb000"
+      ctx.lineWidth = 2
+      ctx.beginPath()
+      ctx.ellipse(landmark.picture.x, landmark.picture.y, VERTEX_HANDLE_RADIUS + 2, VERTEX_HANDLE_RADIUS + 2, 0, 0, 2 * Math.PI)
+      ctx.stroke()
+    }
+    ctx.restore()
+  }
+
   /** The shared 8 resize-corner handles + rotate stem/circle + outline for a multi-shape
    * selection's bounding box — see ShapeGroup.resize/rotate for what dragging each does. */
   paintGroupHandles(bounds: ShapeBounds): void {

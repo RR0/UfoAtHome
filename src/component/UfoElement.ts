@@ -204,6 +204,19 @@ export class UfoElement extends HTMLElement {
    * A bare `<rr0-ufo>` keeps painting, as it always has: it has no scene to hand the picture to.
    */
   paintsShapes = true
+  /**
+   * Whether the selected shapes' handles are drawn at all. Off when the canvas is not editing
+   * the shapes (see SightingEditorElement.canvasMode): a handle is a promise that dragging it
+   * does something, and a promise the canvas is not keeping is worse than no handle.
+   */
+  selectionShown = true
+  /**
+   * Something else to draw over the finished picture, after the handles — what the editor shows
+   * of the thing the canvas is editing when that thing is not a shape (a picture's own frame and
+   * landmarks, see SightingEditorElement.paintPictureOverlay). Painted at every frame, so it
+   * follows the witness's turn.
+   */
+  overlayPainter?: (renderer: CanvasRenderer) => void
 
   /** Set to false by composing elements that need the canvas's own click for something else
    * instead of toggling playback — see SightingEditorElement, which uses pointerdown/pointermove on
@@ -998,7 +1011,7 @@ export class UfoElement extends HTMLElement {
     // shape stayed selectable and simply stopped LOOKING selected. Where the handles sit against
     // the streak is itself the answer to "which moment am I editing".
     for (const [sourceId, shape] of instants[0].shapes) {
-      if (!selectedIds.has(sourceId)) continue
+      if (!this.selectionShown || !selectedIds.has(sourceId)) continue
       // A shape standing in the scene gets its handles and nothing else — paintShape would paint
       // the fill too, a flat unoccluded copy over the solid it is meant to be selecting.
       if (!this.paintsShapes) this.canvasRenderer.paintSelectionOnly(this.shifted(shape, shift))
@@ -1006,12 +1019,13 @@ export class UfoElement extends HTMLElement {
       else this.canvasRenderer.paintMemberOutline(shape)
     }
     void shapesBySource
-    if (selectedIds.size > 1) {
+    if (this.selectionShown && selectedIds.size > 1) {
       const bounds = ShapeHandles.groupBoundsFor(
         [...shapesBySource].filter(([sourceId]) => selectedIds.has(sourceId)).map(([, shape]) => shape.bounds)
       )
       this.canvasRenderer.paintGroupHandles(bounds)
     }
+    this.overlayPainter?.(this.canvasRenderer)
     this.mapShapeBounds = instants.flatMap(instant => [...instant.shapes.values()]
       .filter(shape => shape.transparency < 1).map(shape => this.shifted(shape, shift).bounds))
     this.keepWitnessMapClear()

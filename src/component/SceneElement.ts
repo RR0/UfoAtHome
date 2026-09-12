@@ -661,6 +661,12 @@ export class SceneElement extends HTMLElement {
     return this.sceneRenderer.referenceAspect(id)
   }
 
+  /** Where a world direction lands on the picture, in normalised device coordinates, or undefined
+   * behind the camera — see SceneRenderer.screenPointOf. */
+  screenPointOf(direction: Vector3): { ndcX: number; ndcY: number } | undefined {
+    return this.sceneRenderer.screenPointOf(direction)
+  }
+
   /** The world direction a point of the picture names, in normalised device coordinates (-1..1,
    * +y up) — see SceneRenderer.directionAt. */
   directionAt(ndcX: number, ndcY: number): Vector3 {

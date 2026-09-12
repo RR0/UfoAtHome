@@ -53,6 +53,8 @@ import { sortedMilestones } from "../engine/model/Milestone.js"
 import { DEFAULT_REFERENCE_FOV_DEG, DEFAULT_REFERENCE_OPACITY, REFERENCE_INLINE_WARNING_BYTES } from "../engine/model/Reference.js"
 import type { ReferenceKind, SceneReference } from "../engine/model/Reference.js"
 import { PictureRegistration } from "../engine/reference/PictureRegistration.js"
+import type { Vector3 } from "three"
+import type { CanvasRenderer } from "../render/CanvasRenderer.js"
 import type { Landmark, PicturePoint } from "../engine/reference/PictureRegistration.js"
 import { PanoramaxPictures } from "../engine/reference/PanoramaxPictures.js"
 import type { StreetPicture } from "../engine/reference/PanoramaxPictures.js"
@@ -2993,11 +2995,13 @@ export class SightingEditorElement extends HTMLElement {
       }
       this.pendingLandmark = picturePoint
       this.syncRegisterStatus()
+      this.ufoElement.refresh()
       return
     }
     this.referenceLandmarks.push({ picture: this.pendingLandmark, scene: PictureRegistration.aimOf(direction) })
     this.pendingLandmark = undefined
     this.fitReferenceToLandmarks()
+    this.ufoElement.refresh()
   }
 
   private fitReferenceToLandmarks(): void {
@@ -3035,7 +3039,45 @@ export class SightingEditorElement extends HTMLElement {
     this.referenceLandmarks = []
     this.pendingLandmark = undefined
     this.referenceFit = undefined
-    if (this.canvasMode() === "picture") this.syncRegisterStatus()
+    if (this.canvasMode() === "picture") {
+      this.syncRegisterStatus()
+      this.ufoElement.refresh()
+    }
+  }
+
+  /** A canvas pixel for a world direction, or undefined behind the witness. */
+  private canvasPointOfDirection(direction: Vector3): { x: number; y: number } | undefined {
+    const ndc = this.sceneElement.screenPointOf(direction)
+    if (!ndc) return undefined
+    const canvas = this.ufoElement.canvasElement
+    return { x: ((ndc.ndcX + 1) / 2) * canvas.width, y: ((1 - ndc.ndcY) / 2) * canvas.height }
+  }
+
+  /**
+   * What the canvas shows of the picture it is editing: its frame as the scene projects it, and
+   * every landmark named on it — the ring where the landmark is on the picture, under the current
+   * registration, and the dot where the author said it is in the render. Painted by the playback
+   * layer at every frame (see UfoElement.overlayPainter), so it turns with the witness.
+   */
+  private readonly paintPictureOverlay = (renderer: CanvasRenderer): void => {
+    const reference = this.currentReference()
+    if (!reference) return
+    const aspect = this.sceneElement.referenceAspect(reference.id)
+    if (aspect === undefined) return
+    const { registration } = reference
+    const corners = [{ u: 0, v: 0 }, { u: 1, v: 0 }, { u: 1, v: 1 }, { u: 0, v: 1 }]
+      .map(corner => this.canvasPointOfDirection(PictureRegistration.worldDirectionOf(corner, registration, aspect)))
+    const landmarks = this.referenceLandmarks.map(landmark => ({
+      picture: this.canvasPointOfDirection(PictureRegistration.worldDirectionOf(landmark.picture, registration, aspect)),
+      scene: this.canvasPointOfDirection(PictureRegistration.worldDirection(landmark.scene))
+    }))
+    if (this.pendingLandmark) {
+      landmarks.push({ picture: this.canvasPointOfDirection(PictureRegistration.worldDirectionOf(this.pendingLandmark, registration, aspect)), scene: undefined })
+    }
+    renderer.paintPictureFrame(
+      corners.every(corner => corner !== undefined) ? (corners as { x: number; y: number }[]) : undefined,
+      landmarks.filter((landmark): landmark is { picture: { x: number; y: number }; scene: { x: number; y: number } | undefined } => landmark.picture !== undefined)
+    )
   }
 
   /**
@@ -4014,7 +4056,13 @@ export class SightingEditorElement extends HTMLElement {
     const mode = this.canvasMode()
     const pictureNow = mode === "picture"
     const pictureBefore = this.lastCanvasMode === "picture"
+    const changed = mode !== this.lastCanvasMode
     this.lastCanvasMode = mode
+    // What is selected on the canvas is what the canvas edits: the shapes' handles in their own
+    // group, the picture's frame and landmarks in its own, nothing elsewhere.
+    this.ufoElement.selectionShown = mode === "shape"
+    this.ufoElement.overlayPainter = pictureNow ? this.paintPictureOverlay : undefined
+    if (changed) this.ufoElement.refresh()
     // Click-to-play is off for the whole editor already (see the constructor): the canvas is for
     // editing here, whichever mode it is in.
     if (pictureNow !== pictureBefore) this.setCanvasCursor(pictureNow ? "pan" : this.hoverCursor)
