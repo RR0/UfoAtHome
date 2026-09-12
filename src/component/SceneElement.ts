@@ -806,7 +806,9 @@ export class SceneElement extends HTMLElement {
     // The shape's own trail is drawn by <rr0-ufo> on its own canvas and starts far sooner (a
     // fiftieth of a second is enough to smear a moving object); the sky needs a pose long enough to
     // move a whole pixel, which is tens of seconds.
-    const exposureSeconds = this.exposureSeconds()
+    // The pose BEHIND the instant, ending on it — see ExposureSampling.windowEndingAt.
+    const window = ExposureSampling.windowEndingAt(t, this.exposureSeconds())
+    const exposureSeconds = window.seconds
     const degPerPixel = this.degreesPerPixelAt(t)
     // Two demands, and the pose is drawn at the coarser: what the SKY did (SkyDrift) and what the
     // scene standing against it did — an aircraft crossing the frame, a strobe flashing while it
@@ -824,7 +826,7 @@ export class SceneElement extends HTMLElement {
       ExposureSampling.instants(
         this.ufoElement.sighting.decor,
         resolveObserverPoseAt(this.ufoElement.sighting, t)?.elevationM ?? 0,
-        t,
+        window.fromMs,
         exposureSeconds,
         degPerPixel
       )
@@ -833,9 +835,8 @@ export class SceneElement extends HTMLElement {
       this.sceneRenderer.setExposure(1)
       return
     }
-    const exposureMs = exposureSeconds * 1000
-    // Same convention as the shape's own accumulation: the shutter opens AT the stated instant and
-    // stays open, so a photograph timed at t holds what happened from t onward.
+    // Same convention as the shape's own accumulation (see UfoElement.exposureTimes): from the
+    // shutter's opening to the instant itself, that last one included.
     //
     // What sampling instants cannot catch, said out loud: anything SHORTER than the gap between two
     // of them — a meteor of half a second in a ten-minute pose — is drawn only if an instant happens
@@ -844,13 +845,13 @@ export class SceneElement extends HTMLElement {
     // "is it on?" (see LightRig's lightOnFractionBetween); the sky has no equivalent yet, and until
     // it does a long pose under a shower under-reports the meteors it would really hold.
     this.sceneRenderer.setExposure(instants, instant =>
-      this.applySceneAt(t + (exposureMs * instant) / instants, {
+      this.applySceneAt(window.fromMs + (window.ms * instant) / (instants - 1), {
         // The sky is restated only on the instants the SKY asks for, which is what makes a
         // scene-driven pose affordable at all: restating it costs about 8 ms and moving the decor
         // costs a twentieth of one, and a pose sampled 300 times for an aeroplane must not rebuild
         // 300 skies to draw a drift of four pixels.
         sky: Math.floor((instant * sky) / instants) !== Math.floor(((instant - 1) * sky) / instants),
-        stepMs: exposureMs / instants
+        stepMs: window.ms / instants
       })
     )
   }

@@ -66,3 +66,17 @@ describe("ExposureSampling", () => {
     expect(ExposureSampling.instants([plane], 0, 0, 10, 0.034)).toBe(Math.max(travelOnly, flashesOnly))
   })
 })
+
+describe("ExposureSampling.windowEndingAt", () => {
+  it("is the exposure BEHIND the instant, ending on it", () => {
+    expect(ExposureSampling.windowEndingAt(30000, 20)).toEqual({ fromMs: 10000, toMs: 30000, ms: 20000, seconds: 20 })
+  })
+  it("opens at the start of the observation until the pose is old enough, and is empty at that start", () => {
+    expect(ExposureSampling.windowEndingAt(5000, 20)).toEqual({ fromMs: 0, toMs: 5000, ms: 5000, seconds: 5 })
+    expect(ExposureSampling.windowEndingAt(0, 20)).toEqual({ fromMs: 0, toMs: 0, ms: 0, seconds: 0 })
+  })
+  it("is an instant for a snapshot", () => {
+    expect(ExposureSampling.windowEndingAt(5000, 0).ms).toBe(0)
+    expect(ExposureSampling.windowEndingAt(5000, undefined as unknown as number).ms).toBe(0)
+  })
+})

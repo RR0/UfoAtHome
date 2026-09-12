@@ -12,6 +12,7 @@ import { SightingAudio } from "../audio/SightingAudio.js"
 import { fromSightingJson, toSightingJson } from "../engine/persistence/sightingJson.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
 import { resolveMilestoneAt, sortedMilestones } from "../engine/model/Milestone.js"
+import { ExposureSampling } from "../engine/model/ExposureSampling.js"
 import type { Shape } from "../engine/shape/Shape.js"
 import type { SightingSound } from "../engine/model/Sound.js"
 import { ShapeHandles } from "../engine/shape/ShapeHandles.js"
@@ -796,28 +797,29 @@ export class UfoElement extends HTMLElement {
    * brightening, a colour turning).
    */
   exposureTimes(t: number = this.currentTime): number[] {
-    const exposureMs = (this.currentSighting.exposure ?? 0) * 1000
-    if (exposureMs < UfoElement.SHORTEST_VISIBLE_EXPOSURE_MS) return [t]
+    // The pose BEHIND the instant, ending on it — see ExposureSampling.windowEndingAt.
+    const window = ExposureSampling.windowEndingAt(t, this.currentSighting.exposure ?? 0)
+    if (window.ms < UfoElement.SHORTEST_VISIBLE_EXPOSURE_MS) return [t]
     const byTime = Math.min(
       UfoElement.MAX_EXPOSURE_STEPS,
-      Math.max(2, Math.round(exposureMs / UfoElement.SHORTEST_VISIBLE_EXPOSURE_MS))
+      Math.max(2, Math.round(window.ms / UfoElement.SHORTEST_VISIBLE_EXPOSURE_MS))
     )
-    const byTravel = Math.ceil(this.travelPxOver(t, exposureMs) / UfoElement.EXPOSURE_STEP_PX)
+    const byTravel = Math.ceil(this.travelPxOver(window.fromMs, window.ms) / UfoElement.EXPOSURE_STEP_PX)
     const steps = Math.min(UfoElement.MAX_TRAVEL_STEPS, Math.max(byTime, byTravel))
     const times: number[] = []
     for (let step = 0; step < steps; step++) {
-      // The shutter opens AT the stated instant and stays open: what a photograph timed at t holds
-      // is what happened from t onward, not what happened around it.
-      times.push(t + (exposureMs * step) / steps)
+      // From the shutter's opening to the instant itself, that last one included: the object's
+      // present place is the end of its own streak, and the one a pointer aimed at it must find.
+      times.push(window.fromMs + (window.ms * step) / (steps - 1))
     }
     return times
   }
 
   /** How far the furthest-travelling shape moved across the canvas while the shutter was open —
    * measured between the two ends of the pose, which is what the streak's own length is. */
-  private travelPxOver(t: number, exposureMs: number): number {
-    const start = this.shapesAt(t)
-    const end = this.shapesAt(t + exposureMs)
+  private travelPxOver(fromMs: number, exposureMs: number): number {
+    const start = this.shapesAt(fromMs)
+    const end = this.shapesAt(fromMs + exposureMs)
     let furthest = 0
     for (const [sourceId, from] of start) {
       const to = end.get(sourceId)

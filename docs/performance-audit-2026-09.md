@@ -108,11 +108,12 @@ shader compilation per frame gone. The clear-sky demos were already at the displ
 
 ## What is left
 
-- **The long pose during playback.** The picture at instant *t* is the pose [*t*, *t* + *E*],
-  so every tick starts a new film that a few frames later is discarded for the next; while
-  playing, the airliner demo shows a film that never completes. That is the design, not a leak;
-  it is now cheap enough not to stall the page, but a sliding-window accumulation or a different
-  reading of playback for a pose would be the real answer.
+- **The long pose during playback.** The picture at instant *t* is the pose [*t* − *E*, *t*]
+  (the exposure behind the playhead, ending on it — see `ExposureSampling.windowEndingAt`), so
+  every tick starts a new film that a few frames later is discarded for the next; while playing,
+  the airliner demo shows a film that never completes. It is now cheap enough not to stall the
+  page, but a sliding-window accumulation (the instants that left the window subtracted, the
+  new ones added) would be the real answer.
 - **Twinkle on the main thread.** `updateTwinkle` rewrites every star's colour per frame — about
   a millisecond per frame on a deep catalogue. A vertex-shader twinkle (phase and speed as
   attributes, time as a uniform) would move it off the thread; the intensity function has to be

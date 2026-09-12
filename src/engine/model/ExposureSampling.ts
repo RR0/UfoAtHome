@@ -42,6 +42,25 @@ export class ExposureSampling {
   static readonly MAX_INSTANTS = 512
 
   /**
+   * The span of the pose a picture timed at `tMs` holds: the `exposureSeconds` BEFORE it.
+   *
+   * A plate accumulates the light that has already reached it, so the photograph on screen at the
+   * playhead is the one whose shutter has just closed: the trail stands behind the aeroplane and
+   * ends where the aeroplane is now, the stars' arcs end where the stars are now. It used to be
+   * the other way round — the shutter opening AT the playhead — and a paused replay then showed
+   * the object at the start of its own future. Before the pose is old enough, the shutter opened
+   * at the start of the observation and the picture is what the plate has gathered so far: the
+   * trail builds up from nothing and rolls once it is whole. Its brightness follows the instants
+   * drawn, not the seconds, so a half-built picture reads as well as a whole one.
+   */
+  static windowEndingAt(tMs: number, exposureSeconds: number): { fromMs: number; toMs: number; ms: number; seconds: number } {
+    const seconds = Number.isFinite(exposureSeconds) ? Math.max(0, exposureSeconds) : 0
+    const fromMs = Math.max(0, tMs - seconds * 1000)
+    const ms = Math.max(0, tMs - fromMs)
+    return { fromMs, toMs: tMs, ms, seconds: ms / 1000 }
+  }
+
+  /**
    * How many instants the moving and flashing things in `decor` ask for, over a pose of
    * `exposureSeconds` beginning at `atMs`.
    *

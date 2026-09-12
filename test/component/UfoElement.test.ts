@@ -119,12 +119,13 @@ describe("UfoElement", () => {
       exposureSeconds: 10,
       witnessTrack: { keyframes: [{ t: 0, pose: { elevationM: 0, pitchDeg: 0, fovDeg: 60 } }] }
     }
-    element.currentTime = 0
+    // At the end of the crossing: the pose behind the playhead holds the whole of it.
+    element.currentTime = 5000
 
     // Where the object IS at the playhead — it has always been possible to hit that.
-    expect(element.shapeAt(20, 20)?.sourceId).toBe("ufo-1")
-    // ...and where the same photograph plainly shows it, five seconds into the pose.
     expect(element.shapeAt(320, 180)?.sourceId).toBe("ufo-1")
+    // ...and where the same photograph plainly shows it, at the start of the pose.
+    expect(element.shapeAt(20, 20)?.sourceId).toBe("ufo-1")
     // Sky the object never crossed stays empty, or every click would select something.
     expect(element.shapeAt(600, 20)).toBeUndefined()
   })
@@ -144,9 +145,22 @@ describe("UfoElement", () => {
       witnessTrack: { keyframes: [{ t: 0, pose: { elevationM: 0, pitchDeg: 0, fovDeg: 60 } }] }
     }
     element.sightingData = moving
-    element.currentTime = 0
+    element.currentTime = 10000
     // 300 px of travel at one painting every couple of pixels — well past the 48 the clock alone asks for.
-    expect(element.exposureTimes(0).length).toBe(150)
+    expect(element.exposureTimes(10000).length).toBe(150)
+    // The pose stands BEHIND the instant and ends on it: the object's present place is the end of
+    // its own streak (see ExposureSampling.windowEndingAt).
+    const times = element.exposureTimes(10000)
+    expect(times[0]).toBe(0)
+    expect(times[times.length - 1]).toBe(10000)
+    // Halfway through the exposure, the plate holds only what it has gathered so far.
+    const half = element.exposureTimes(5000)
+    expect(half[0]).toBe(0)
+    expect(half[half.length - 1]).toBe(5000)
+    expect(half.length).toBeLessThan(150)
+    expect(half.length).toBeGreaterThan(48)
+    // And at the very start, nothing yet: one instant.
+    expect(element.exposureTimes(0)).toEqual([0])
 
     // An object that did not move gets the old count: there is nothing to bead, and a pose can
     // still hold something changing in place.
@@ -154,8 +168,8 @@ describe("UfoElement", () => {
       ...moving,
       timeline: { keyframes: [moving.timeline.keyframes[0]] }
     }
-    element.currentTime = 0
-    expect(element.exposureTimes(0).length).toBe(48)
+    element.currentTime = 10000
+    expect(element.exposureTimes(10000).length).toBe(48)
   })
 
   it("takes a snapshot as one instant, whatever moved", () => {
