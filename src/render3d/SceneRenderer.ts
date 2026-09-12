@@ -2336,6 +2336,17 @@ export class SceneRenderer {
     this.references.set(references)
   }
 
+  /** A loaded picture's aspect — see ReferenceSystem.aspectOf. */
+  referenceAspect(id: string): number | undefined {
+    return this.references.aspectOf(id)
+  }
+
+  /** The world direction a point of the visible image stands for, under the instrument's own
+   * projection — what a click on the picture names. */
+  directionAt(ndcX: number, ndcY: number): Vector3 {
+    return this.directionAtScreenPoint(ndcX, ndcY, new Vector3())
+  }
+
   /** Whether a picture's bytes could not be had — see ReferenceSystem.failedToLoad. */
   referenceFailedToLoad(src: string): boolean {
     return this.references.failedToLoad(src)

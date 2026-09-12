@@ -287,6 +287,34 @@ export interface SightingEditorMessages extends SightingLabels {
   referenceEmbedded: string
   /** Under the fields when the picture's bytes could not be had. */
   referenceUnreachable: string
+  /** The toggle that hands the canvas to the picture — see SightingEditorElement.beginReferenceDrag. */
+  referenceRegister: string
+  /** Under it while it is on: what the pointer does now. */
+  referenceRegisterHint: string
+  /** Landmark prompts, {n} being the landmark's number — the point on the picture first, then the
+   * same point in the render. */
+  referenceLandmarkPicture: string
+  referenceLandmarkScene: string
+  referenceLandmarkOffPicture: string
+  referenceNotLoaded: string
+  /** After a fit: how many landmarks and how well they agree, {n} and {deg}. */
+  referenceLandmarksFit: string
+  referenceClearLandmarks: string
+  /** Copies the picture's registration into the witness's pose at the playhead, as a measurement. */
+  referenceAdoptPose: string
+  /** The provenance written with it — {title}, {n} landmarks, {deg} of residual. */
+  referenceAdoptRationale: string
+  /** The street-level pictures lookup (see PanoramaxPictures): the button, the wait, the empty
+   * answer with {m} the radius searched, the failure, the Add button, one entry ({distance},
+   * {bearing}, {date}, {panorama}), the 360° suffix, and the title such a picture gets. */
+  referenceStreetSearch: string
+  referenceStreetSearching: string
+  referenceStreetNone: string
+  referenceStreetFailed: string
+  referenceStreetAdd: string
+  referenceStreetItem: string
+  referenceStreetPanorama: string
+  referenceStreetTitle: string
   /** The whole "what else was in that sky" line, into which {parts} drops one clause per candidate
    * — a meteor shower, a comet, both. The prefix lives here and nowhere else, so two candidates on
    * one night read as one statement about the sky rather than as two competing announcements. */

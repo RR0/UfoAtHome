@@ -52,6 +52,10 @@ import type { DecorObject, DecorSide, DecorSize } from "../engine/model/Decor.js
 import { sortedMilestones } from "../engine/model/Milestone.js"
 import { DEFAULT_REFERENCE_FOV_DEG, DEFAULT_REFERENCE_OPACITY, REFERENCE_INLINE_WARNING_BYTES } from "../engine/model/Reference.js"
 import type { ReferenceKind, SceneReference } from "../engine/model/Reference.js"
+import { PictureRegistration } from "../engine/reference/PictureRegistration.js"
+import type { Landmark, PicturePoint } from "../engine/reference/PictureRegistration.js"
+import { PanoramaxPictures } from "../engine/reference/PanoramaxPictures.js"
+import type { StreetPicture } from "../engine/reference/PanoramaxPictures.js"
 import {
   resolveDecorLitAt,
   DECOR_SIDES,
@@ -687,6 +691,24 @@ export class SightingEditorElement extends HTMLElement {
   private readonly referenceStatus: HTMLElement
   private readonly addReferenceUrlButton: HTMLButtonElement
   private readonly addReferenceFileInput: HTMLInputElement
+  private readonly referenceRegisterButton: HTMLButtonElement
+  private readonly referenceClearLandmarksButton: HTMLButtonElement
+  private readonly referenceAdoptPoseButton: HTMLButtonElement
+  private readonly referenceStreetSearchButton: HTMLButtonElement
+  private readonly referenceStreetSelect: HTMLSelectElement
+  private readonly referenceStreetAddButton: HTMLButtonElement
+  /** While on, the canvas belongs to the selected picture — see beginReferenceDrag. */
+  private referenceRegisterMode = false
+  /** A drag turning the picture, from a fixed start so nothing drifts — see cameraDragState. */
+  private referenceDragState?: { startPointer: { x: number; y: number }; startHeadingDeg: number; startPitchDeg: number; moved: boolean }
+  /** Landmarks named so far on the selected picture, and the one whose picture half is named but
+   * not yet its render half — see PictureRegistration. */
+  private referenceLandmarks: Landmark[] = []
+  private pendingLandmark?: PicturePoint
+  private referenceFit?: { n: number; residualDeg: number }
+  /** What the street-level lookup last found, in the order the dropdown shows. */
+  private streetPictures: StreetPicture[] = []
+  private readonly streetPictures$ = new PanoramaxPictures()
   /** Every field the selected picture is read from — listened to as one, like the sound's. */
   private readonly referenceFields: (HTMLInputElement | HTMLSelectElement)[]
   private readonly labelReferenceGroup: HTMLElement
@@ -1104,6 +1126,12 @@ export class SightingEditorElement extends HTMLElement {
     this.referenceStatus = this.shadow.getElementById("reference-status")!
     this.addReferenceUrlButton = this.shadow.getElementById("add-reference-url") as HTMLButtonElement
     this.addReferenceFileInput = this.shadow.getElementById("add-reference-file") as HTMLInputElement
+    this.referenceRegisterButton = this.shadow.getElementById("reference-register") as HTMLButtonElement
+    this.referenceClearLandmarksButton = this.shadow.getElementById("reference-clear-landmarks") as HTMLButtonElement
+    this.referenceAdoptPoseButton = this.shadow.getElementById("reference-adopt-pose") as HTMLButtonElement
+    this.referenceStreetSearchButton = this.shadow.getElementById("reference-street-search") as HTMLButtonElement
+    this.referenceStreetSelect = this.shadow.getElementById("reference-street") as HTMLSelectElement
+    this.referenceStreetAddButton = this.shadow.getElementById("reference-street-add") as HTMLButtonElement
     this.referenceFields = [
       this.referenceTitleInput, this.referenceSrcInput, this.referenceKindSelect, this.referenceCreditInput,
       this.referenceCreditUrlInput, this.referenceTInput, this.referenceDrawingInput, this.referenceOpacityInput,
@@ -1301,6 +1329,14 @@ export class SightingEditorElement extends HTMLElement {
     this.referenceUsePoseButton.addEventListener("click", () => this.useWitnessPoseForReference())
     this.addReferenceUrlButton.addEventListener("click", () => this.addReferenceFromAddress())
     this.addReferenceFileInput.addEventListener("change", () => void this.addReferenceFromFile())
+    this.referenceRegisterButton.addEventListener("click", () => this.setReferenceRegisterMode(!this.referenceRegisterMode))
+    this.referenceClearLandmarksButton.addEventListener("click", () => this.clearReferenceLandmarks())
+    this.referenceAdoptPoseButton.addEventListener("click", () => this.adoptReferencePose())
+    this.referenceStreetSearchButton.addEventListener("click", () => void this.searchStreetPictures())
+    this.referenceStreetAddButton.addEventListener("click", () => this.addStreetPicture())
+    // The wheel changes the picture's field while it is being lined up — and only then, so that a
+    // page scrolls as usual over a scene nobody is registering anything on.
+    this.ufoElement.canvasElement.addEventListener("wheel", event => this.onReferenceWheel(event), { passive: false })
     for (const input of [
       this.decorTitleInput,
       this.decorEastInput,
@@ -2731,6 +2767,7 @@ export class SightingEditorElement extends HTMLElement {
   private selectReference(id: string): void {
     this.currentReferenceId = id
     this.referenceSelect.value = id
+    this.clearReferenceLandmarks()
     this.syncReferenceFields()
   }
 
@@ -2744,6 +2781,8 @@ export class SightingEditorElement extends HTMLElement {
       this.setRowVisible(field, hasSelection)
     }
     this.setRowVisible(this.referenceUsePoseButton, hasSelection)
+    this.setRowVisible(this.referenceRegisterButton, hasSelection)
+    if (!hasSelection) this.setReferenceRegisterMode(false)
     if (!reference) {
       this.referenceStatus.textContent = ""
       return
@@ -2767,6 +2806,10 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   private syncReferenceStatus(reference: SceneReference): void {
+    if (this.referenceRegisterMode) {
+      this.syncRegisterStatus()
+      return
+    }
     if (reference.src.startsWith("data:")) {
       const kb = Math.round((reference.src.length * 3) / 4 / 1024)
       this.referenceStatus.textContent = reference.src.length > REFERENCE_INLINE_WARNING_BYTES
@@ -2823,7 +2866,7 @@ export class SightingEditorElement extends HTMLElement {
     this.updateReference()
   }
 
-  private addReference(src: string, title?: string): void {
+  private addReference(src: string, title?: string, overrides: Partial<SceneReference> = {}): void {
     const sighting = this.ufoElement.sighting
     const pose = resolveObserverPoseAt(this.ufoElement.sighting, this.ufoElement.currentTime)
     const id = `picture-${sighting.references.length + 1}`
@@ -2834,7 +2877,8 @@ export class SightingEditorElement extends HTMLElement {
       title: title ? this.said.write(undefined, title, this.writingLanguage) : undefined,
       opacity: DEFAULT_REFERENCE_OPACITY,
       // Where the witness looks at the playhead: the likeliest guess for a picture of what they saw.
-      registration: { headingDeg: pose?.headingDeg ?? 0, pitchDeg: pose?.pitchDeg ?? 0, fovDeg: DEFAULT_REFERENCE_FOV_DEG }
+      registration: { headingDeg: pose?.headingDeg ?? 0, pitchDeg: pose?.pitchDeg ?? 0, fovDeg: DEFAULT_REFERENCE_FOV_DEG },
+      ...overrides
     }
     sighting.references = [...sighting.references, reference]
     this.currentReferenceId = id
@@ -2862,6 +2906,230 @@ export class SightingEditorElement extends HTMLElement {
     })
     this.addReferenceFileInput.value = ""
     this.addReference(src, file.name.replace(/\.[^.]+$/, ""))
+  }
+
+  // ---- Lining a picture up on the scene — see PictureRegistration.
+
+  private setReferenceRegisterMode(on: boolean): void {
+    if (on === this.referenceRegisterMode) return
+    this.referenceRegisterMode = on
+    this.referenceRegisterButton.setAttribute("aria-pressed", String(on))
+    this.referenceClearLandmarksButton.hidden = !on
+    this.referenceAdoptPoseButton.hidden = !on
+    // The shapes' own handles would fight the drag for the canvas, and a picture being lined up
+    // is not a moment to be moving the phenomenon.
+    this.ufoElement.enableClickToPlay = !on
+    this.setCanvasCursor(on ? "pan" : this.hoverCursor)
+    if (!on) this.clearReferenceLandmarks()
+    const reference = this.currentReference()
+    if (reference) this.syncReferenceStatus(reference)
+  }
+
+  private currentReference(): SceneReference | undefined {
+    return this.ufoElement.sighting.references.find(reference => reference.id === this.currentReferenceId)
+  }
+
+  private beginReferenceDrag(startPointer: { x: number; y: number }): void {
+    const reference = this.currentReference()
+    if (!reference) return
+    this.referenceDragState = {
+      startPointer,
+      startHeadingDeg: reference.registration.headingDeg,
+      startPitchDeg: reference.registration.pitchDeg,
+      moved: false
+    }
+    this.setCanvasCursor("panning")
+    this.startDragListening()
+  }
+
+  /** Turns the picture with the pointer, a tenth of a degree per pixel or so — the same feel as
+   * grabbing the sky (see onCameraDragPointerMove), computed from the fixed start for the same
+   * reason. A few pixels of wobble on a click are not a drag. */
+  private onReferenceDragPointerMove(event: PointerEvent): void {
+    const state = this.referenceDragState
+    const point = this.canvasPointFromEvent(event)
+    if (!state || !point) return
+    const dx = point.x - state.startPointer.x
+    const dy = point.y - state.startPointer.y
+    if (!state.moved && Math.hypot(dx, dy) < 3) return
+    state.moved = true
+    const degPerPx = this.currentFovDeg() / this.ufoElement.canvasElement.height
+    this.referenceHeadingInput.value = String(this.rounded(state.startHeadingDeg + dx * degPerPx))
+    this.referencePitchInput.value = String(this.rounded(Math.max(-90, Math.min(90, state.startPitchDeg - dy * degPerPx))))
+    this.updateReference()
+  }
+
+  private endReferenceDrag(): void {
+    const state = this.referenceDragState
+    this.referenceDragState = undefined
+    this.setCanvasCursor(this.referenceRegisterMode ? "pan" : this.hoverCursor)
+    document.removeEventListener("pointermove", this.handleDragPointerMove)
+    document.removeEventListener("pointerup", this.handleDragPointerUp)
+    if (state && !state.moved) this.nameLandmarkAt(state.startPointer)
+  }
+
+  private onReferenceWheel(event: WheelEvent): void {
+    if (!this.referenceRegisterMode || this.currentReferenceId === undefined) return
+    event.preventDefault()
+    const fov = Number(this.referenceFovInput.value) || DEFAULT_REFERENCE_FOV_DEG
+    // A notch is a tenth: fine enough to line a horizon up, quick enough to cross the range.
+    const next = Math.min(179, Math.max(1, fov * Math.exp(Math.sign(event.deltaY) * 0.05)))
+    this.referenceFovInput.value = String(this.rounded(next))
+    this.updateReference()
+  }
+
+  /** The world direction a canvas point names — through the instrument's own projection. */
+  private directionAtCanvasPoint(point: { x: number; y: number }) {
+    const canvas = this.ufoElement.canvasElement
+    return this.sceneElement.directionAt((point.x / canvas.width) * 2 - 1, -((point.y / canvas.height) * 2 - 1))
+  }
+
+  /**
+   * A click while lining up names a landmark: first where it is on the picture, then where the
+   * same thing is in the render. Once two are named the picture is turned to fit them; from
+   * three, its field is fitted too. The fit is applied at once — a landmark that does not fit is
+   * seen as the picture failing to land on it, which is what a reader needs to notice it.
+   */
+  private nameLandmarkAt(point: { x: number; y: number }): void {
+    const reference = this.currentReference()
+    if (!reference) return
+    const direction = this.directionAtCanvasPoint(point)
+    if (!this.pendingLandmark) {
+      const aspect = this.sceneElement.referenceAspect(reference.id)
+      if (aspect === undefined) {
+        this.referenceStatus.textContent = this.messages.referenceNotLoaded
+        return
+      }
+      const picturePoint = PictureRegistration.picturePointOf(direction, reference.registration, aspect)
+      if (!picturePoint) {
+        this.referenceStatus.textContent = this.messages.referenceLandmarkOffPicture
+        return
+      }
+      this.pendingLandmark = picturePoint
+      this.syncRegisterStatus()
+      return
+    }
+    this.referenceLandmarks.push({ picture: this.pendingLandmark, scene: PictureRegistration.aimOf(direction) })
+    this.pendingLandmark = undefined
+    this.fitReferenceToLandmarks()
+  }
+
+  private fitReferenceToLandmarks(): void {
+    const reference = this.currentReference()
+    const aspect = reference ? this.sceneElement.referenceAspect(reference.id) : undefined
+    if (!reference || aspect === undefined) return
+    const fit = PictureRegistration.solve(this.referenceLandmarks, aspect, reference.registration.fovDeg)
+    if (fit) {
+      this.referenceFit = { n: this.referenceLandmarks.length, residualDeg: fit.residualDeg }
+      this.referenceHeadingInput.value = String(this.rounded(fit.registration.headingDeg))
+      this.referencePitchInput.value = String(this.rounded(fit.registration.pitchDeg))
+      this.referenceRollInput.value = String(this.rounded(fit.registration.rollDeg ?? 0))
+      this.referenceFovInput.value = String(this.rounded(fit.registration.fovDeg))
+      this.updateReference()
+    }
+    this.syncRegisterStatus()
+  }
+
+  private syncRegisterStatus(): void {
+    const messages = this.messages
+    const n = this.referenceLandmarks.length + 1
+    if (this.pendingLandmark) {
+      this.referenceStatus.textContent = messages.referenceLandmarkScene.replace("{n}", String(n))
+    } else if (this.referenceFit) {
+      this.referenceStatus.textContent = messages.referenceLandmarksFit.replace("{n}", String(this.referenceFit.n)).replace("{deg}", this.referenceFit.residualDeg.toFixed(1))
+        + " · " + messages.referenceLandmarkPicture.replace("{n}", String(n))
+    } else if (this.referenceLandmarks.length > 0) {
+      this.referenceStatus.textContent = messages.referenceLandmarkPicture.replace("{n}", String(n))
+    } else {
+      this.referenceStatus.textContent = messages.referenceRegisterHint
+    }
+  }
+
+  private clearReferenceLandmarks(): void {
+    this.referenceLandmarks = []
+    this.pendingLandmark = undefined
+    this.referenceFit = undefined
+    if (this.referenceRegisterMode) this.syncRegisterStatus()
+  }
+
+  /**
+   * Makes the picture's registration the witness's own pose at the playhead — as a MEASUREMENT,
+   * which is what a heading read off a picture that fits the relief is, where the heading typed
+   * in the Witness group is the witness's word. The recording says so: each angle written gets a
+   * "derived" basis naming the picture and how well it fitted (see Provenance).
+   */
+  private adoptReferencePose(): void {
+    const reference = this.currentReference()
+    if (!reference) return
+    const { headingDeg, pitchDeg, rollDeg } = reference.registration
+    this.headingInput.value = String(this.rounded(headingDeg))
+    this.pitchInput.value = String(this.rounded(pitchDeg))
+    this.rollInput.value = String(this.rounded(rollDeg ?? 0))
+    this.updateObserver()
+    const t = this.ufoElement.currentTime
+    const index = this.ufoElement.sighting.witnessTrack.toJSON().keyframes.findIndex(keyframe => keyframe.t === t)
+    if (index < 0) return
+    const rationale = this.messages.referenceAdoptRationale
+      .replace("{title}", this.referenceLabel(reference))
+      .replace("{n}", String(this.referenceFit?.n ?? 0))
+      .replace("{deg}", (this.referenceFit?.residualDeg ?? 0).toFixed(1))
+    const values: [string, number][] = [["headingDeg", headingDeg], ["pitchDeg", pitchDeg], ["rollDeg", rollDeg ?? 0]]
+    for (const [field, value] of values) {
+      this.ufoElement.sighting.provenance.set(`witnessTrack.keyframes.${index}.pose.${field}`, { basis: "derived", rationale, of: this.rounded(value) })
+    }
+  }
+
+  // ---- Street-level pictures taken near the spot — see PanoramaxPictures.
+
+  private async searchStreetPictures(): Promise<void> {
+    const pose = resolveObserverPoseAt(this.ufoElement.sighting, 0)
+    const lat = pose?.lat ?? this.numberOrUndefined(this.latInput.value)
+    const lng = pose?.lng ?? this.numberOrUndefined(this.lngInput.value)
+    if (lat === undefined || lng === undefined) return
+    const radiusM = 300
+    this.referenceStatus.textContent = this.messages.referenceStreetSearching
+    this.referenceStreetSearchButton.disabled = true
+    try {
+      this.streetPictures = await this.streetPictures$.nearby(lat, lng, radiusM)
+    } catch {
+      this.streetPictures = []
+      this.referenceStatus.textContent = this.messages.referenceStreetFailed
+      this.referenceStreetSearchButton.disabled = false
+      return
+    }
+    this.referenceStreetSearchButton.disabled = false
+    this.referenceStreetSelect.innerHTML = ""
+    for (const [index, picture] of this.streetPictures.entries()) {
+      const option = document.createElement("option")
+      option.value = String(index)
+      option.textContent = this.streetPictureLabel(picture, this.messages.referenceStreetItem)
+      this.referenceStreetSelect.appendChild(option)
+    }
+    const any = this.streetPictures.length > 0
+    this.referenceStreetSelect.hidden = !any
+    this.referenceStreetAddButton.hidden = !any
+    this.referenceStatus.textContent = any ? "" : this.messages.referenceStreetNone.replace("{m}", String(radiusM))
+  }
+
+  private streetPictureLabel(picture: StreetPicture, pattern: string): string {
+    return pattern
+      .replace("{distance}", String(Math.round(picture.distanceM)))
+      .replace("{bearing}", String(Math.round(picture.bearingDeg)))
+      .replace("{date}", picture.takenAt.slice(0, 10))
+      .replace("{panorama}", picture.panorama ? this.messages.referenceStreetPanorama : "")
+  }
+
+  /** A street-level picture comes registered: it says which way it looked. Its field, when it is
+   * not a full turn, is the ordinary guess until somebody lines it up. */
+  private addStreetPicture(): void {
+    const picture = this.streetPictures[Number(this.referenceStreetSelect.value)]
+    if (!picture) return
+    this.addReference(picture.src, this.streetPictureLabel(picture, this.messages.referenceStreetTitle), {
+      kind: picture.panorama ? "panorama" : "photo",
+      credit: picture.credit,
+      creditUrl: picture.creditUrl,
+      registration: { headingDeg: picture.azimuthDeg ?? 0, pitchDeg: 0, fovDeg: DEFAULT_REFERENCE_FOV_DEG }
+    })
   }
 
   private deleteReference(): void {
@@ -6630,6 +6898,11 @@ export class SightingEditorElement extends HTMLElement {
     this.labelAddReferenceFile.textContent = messages.addReferenceFile
     this.deleteReferenceButton.title = messages.deleteReference
     this.deleteReferenceButton.setAttribute("aria-label", messages.deleteReference)
+    this.referenceRegisterButton.textContent = messages.referenceRegister
+    this.referenceClearLandmarksButton.textContent = messages.referenceClearLandmarks
+    this.referenceAdoptPoseButton.textContent = messages.referenceAdoptPose
+    this.referenceStreetSearchButton.textContent = messages.referenceStreetSearch
+    this.referenceStreetAddButton.textContent = messages.referenceStreetAdd
     for (const [kind, option] of this.soundKindOptions) option.textContent = this.soundKindLabel(kind, messages)
     this.labelInstrument.textContent = messages.instrument
     this.loopButton.title = messages.autoReplay
@@ -6646,6 +6919,10 @@ export class SightingEditorElement extends HTMLElement {
     }
     const point = this.canvasPointFromEvent(event)
     if (!point) return
+    if (this.referenceRegisterMode && this.currentReferenceId !== undefined) {
+      if (this.ufoElement.playbackState !== "playing") this.beginReferenceDrag(point)
+      return
+    }
     const timeline = this.ufoElement.sighting.timeline
     const t = this.ufoElement.currentTime
     const playing = this.ufoElement.playbackState === "playing"
@@ -7138,6 +7415,10 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   private onDragPointerMove(event: PointerEvent): void {
+    if (this.referenceDragState) {
+      this.onReferenceDragPointerMove(event)
+      return
+    }
     if (this.cameraDragState) {
       this.onCameraDragPointerMove(event)
       return
@@ -7214,6 +7495,10 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   private endDrag(): void {
+    if (this.referenceDragState) {
+      this.endReferenceDrag()
+      return
+    }
     if (!this.dragState && !this.cameraDragState) return
     if (this.cameraDragState && !this.cameraDragState.insideDecor) this.sceneElement.setCompassForced(false)
     this.dragState = undefined

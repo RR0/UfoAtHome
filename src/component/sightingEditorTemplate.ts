@@ -416,10 +416,24 @@ export const html = `
     <label><span id="label-reference-roll">Roll</span> <input id="referenceRoll" class="reference-field" type="number" min="-180" max="180" step="0.1"/> &deg;</label>
     <label><span id="label-reference-fov">Vertical field</span> <input id="referenceFov" class="reference-field" type="number" min="1" max="179" step="0.1"/> &deg;</label>
     <button id="reference-use-pose" type="button">Use the witness's pose</button>
+    <!-- Lining the picture up on the rendered scene, by hand and by landmarks — see
+         SightingEditorElement.beginReferenceDrag and PictureRegistration. While pressed, the
+         canvas belongs to the picture: a drag turns it, the wheel changes its field, and a click
+         names a landmark on it, then the same landmark in the render. -->
+    <button id="reference-register" type="button" aria-pressed="false">Line up on the scene</button>
+    <button id="reference-clear-landmarks" type="button" hidden>Clear landmarks</button>
+    <button id="reference-adopt-pose" type="button" hidden>Adopt as the witness's pose</button>
     <span id="reference-status" class="apparent-size"></span>
     <div class="decor-add-row">
       <button id="add-reference-url" type="button">Add from an address</button>
       <label><span id="label-add-reference-file">Add a file</span> <input id="add-reference-file" type="file" accept="image/*"/></label>
+    </div>
+    <!-- Street-level pictures somebody took near the witness's spot — see PanoramaxPictures. Each
+         comes with where it was taken from and which way it looked, a registration already made. -->
+    <div class="decor-add-row">
+      <button id="reference-street-search" type="button">Street-level pictures nearby</button>
+      <select id="reference-street" hidden></select>
+      <button id="reference-street-add" type="button" hidden>Add</button>
     </div>
   </div>
 </section>

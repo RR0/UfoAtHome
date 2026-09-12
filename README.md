@@ -529,9 +529,18 @@ was taken during the observation at that instant, and `drawing` that somebody dr
 spot carries the sphere and its spiral by hand.
 
 Nothing in the scene hides a picture and a picture hides nothing: it is a field of directions from one point, valid
-from that point alone, and the reconstruction stands it at the witness's eye. Lining it up on the rendered relief is
-typed for now (with the witness's pose one click away); dragging it into place, and reading the witness's own heading
-off a picture that fits, is the next step.
+from that point alone, and the reconstruction stands it at the witness's eye.
+
+**Lining it up.** The editor's Pictures group types the registration, copies the witness's pose into it, or hands the
+canvas to the picture (*Line up on the scene*): a drag turns it, the wheel changes its field, and a click names a
+landmark on the picture, then the same landmark in the render — two landmarks turn the picture to fit them, three or
+more fit its field too (`PictureRegistration`, a triad first guess refined by Gauss-Newton on the rotation), and the
+status line says how far off the landmarks still are. *Adopt as the witness's pose* then writes the fitted heading,
+pitch and roll into the pose at the playhead as a **measurement**, with a `derived` provenance naming the picture and
+the residual — a heading read off a picture that fits the relief, where the one typed in the Witness group is the
+witness's word. *Street-level pictures nearby* asks Panoramax (open imagery, CC BY-SA, served to any origin) for
+pictures taken within 300 m of the witness's spot; each comes with where it was taken from and which way it looked, so
+it arrives registered in heading, a full turn arriving as a panorama.
 
 ### Naming a place
 

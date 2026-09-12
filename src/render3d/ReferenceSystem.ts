@@ -147,6 +147,13 @@ export class ReferenceSystem {
     return into.applyQuaternion(ReferenceSystem.orientation(reference))
   }
 
+  /** A loaded picture's own width over its height — what lining it up needs, undefined until its
+   * bytes have arrived. */
+  aspectOf(id: string): number | undefined {
+    const image = this.images.get(id)
+    return image ? image.width / image.height : undefined
+  }
+
   /** Whether a picture's bytes could not be had — what the editor tells its author. */
   failedToLoad(src: string): boolean {
     return this.failed.has(src)

@@ -655,6 +655,18 @@ export class SceneElement extends HTMLElement {
     this.updateAstronomy(0)
   }
 
+  /** A loaded picture's width over its height, undefined until it has arrived — see
+   * SceneRenderer.referenceAspect. */
+  referenceAspect(id: string): number | undefined {
+    return this.sceneRenderer.referenceAspect(id)
+  }
+
+  /** The world direction a point of the picture names, in normalised device coordinates (-1..1,
+   * +y up) — see SceneRenderer.directionAt. */
+  directionAt(ndcX: number, ndcY: number): Vector3 {
+    return this.sceneRenderer.directionAt(ndcX, ndcY)
+  }
+
   /** Whether a picture's bytes could not be had — what the editor tells its author. */
   referenceFailedToLoad(src: string): boolean {
     return this.sceneRenderer.referenceFailedToLoad(src)
