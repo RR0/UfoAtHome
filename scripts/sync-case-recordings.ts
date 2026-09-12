@@ -46,6 +46,7 @@ const RECORDINGS: CaseRecording[] = [
   { published: "witness-socorro.json", dossier: "Socorro/sighting.json" },
   { published: "witness-valensole.json", dossier: "Valensole/sighting.json" },
   { published: "witness-wilcox.json", dossier: "Wilcox/sighting.json" },
+  { published: "witness-cussac.json", dossier: "Cussac/sighting.json" },
   { published: "witness-chiles.json", dossier: "ChilesWhitted/witness-chiles.json" },
   { published: "witness-whitted.json", dossier: "ChilesWhitted/witness-whitted.json" },
   { published: "witnesses-manifest.json", dossier: "ChilesWhitted/witnesses-manifest.json" }

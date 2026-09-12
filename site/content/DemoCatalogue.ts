@@ -44,8 +44,8 @@ export class DemoCatalogue {
     {
       heading: { en: "Real sightings", fr: "Des observations réelles" },
       intro: {
-        en: "Four documented cases, each replayed in the sky of its own reported date, time and place.",
-        fr: "Quatre dossiers documentés, chacun rejoué dans le ciel de sa propre date, heure et lieu déclarés."
+        en: "Five documented cases, each replayed in the sky of its own reported date, time and place.",
+        fr: "Cinq dossiers documentés, chacun rejoué dans le ciel de sa propre date, heure et lieu déclarés."
       },
       demos: [
         {
@@ -65,6 +65,15 @@ export class DemoCatalogue {
           blurb: {
             en: "Early morning on the plateau, 05:45, the Sun forty minutes up and 7° high in the north-east — and the real relief of that field under the witness's feet.",
             fr: "Petit matin sur le plateau, 05:45, le Soleil levé depuis quarante minutes, à 7° de hauteur au nord-est — et le relief réel de ce champ sous les pieds du témoin."
+          }
+        },
+        {
+          id: "cussac",
+          src: "/demo-data/witness-cussac.json",
+          title: { en: "Cussac, 1967", fr: "Cussac, 1967" },
+          blurb: {
+            en: "Mid-morning on a Cantal plateau, 10:30. A sphere 82 m off behind a hedge, four small black beings diving into it, a widening helix — every angle from the GEPAN's 1978 theodolite survey.",
+            fr: "Milieu de matinée sur un plateau du Cantal, 10:30. Une sphère à 82 m derrière une haie, quatre petits êtres noirs qui y plongent, une hélice qui s'élargit — chaque angle vient du relevé au théodolite du GEPAN en 1978."
           }
         },
         {
