@@ -80,6 +80,7 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     render(): void {}
     dispose(): void {}
     startTwinkle(): void {}
+    frame(): void {}
     stopTwinkle(): void {}
     setAnimationsRunning(): void {}
   }

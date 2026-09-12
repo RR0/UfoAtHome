@@ -376,6 +376,11 @@ export class SceneElement extends HTMLElement {
     this.lastTimeMs = (event as CustomEvent<{ time: number }>).detail.time
     this.syncAnimationsToPlayback()
     this.updateAstronomy(this.lastTimeMs)
+    // One drawn frame per tick of playback, once everything the tick restated is in: the setters
+    // above only mark the frame dirty (see SceneRenderer.render). A seek while paused is drawn by
+    // the renderer's own one-shot frame request instead, so that a drag's many seeks per frame
+    // still cost one drawing.
+    if (this.ufoElement.playbackState === "playing") this.sceneRenderer.frame(performance.now())
   }
 
   /**
@@ -397,8 +402,11 @@ export class SceneElement extends HTMLElement {
     // all. So the editor asks for the scene to keep moving (see animateWhilePaused), and the
     // sound follows the picture rather than diverging from it: what turned this up was hearing
     // rain fall over a still image.
-    const running = this.ufoElement.playbackState === "playing" || this.animateWhilePaused
-    this.sceneRenderer.setAnimationsRunning(running)
+    const playing = this.ufoElement.playbackState === "playing"
+    const running = playing || this.animateWhilePaused
+    // While playing, the player's own tick is the frame clock (see handleTimeUpdate) and the
+    // renderer runs no loop beside it.
+    this.sceneRenderer.setAnimationsRunning(running, playing)
     this.weatherAudio.setPaused(!running)
     // A thunderclap is deliberately delayed by the distance sound travels (see
     // handleLightningFlash); one still in flight belongs to a flash that is no longer happening.

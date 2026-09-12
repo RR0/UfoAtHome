@@ -761,6 +761,14 @@ export class SceneRenderer {
   /** See setCompassForced's own doc comment. */
   private compassForced = false
   private animationFrameId: number | null = null
+  /** Whether a frame has been asked for since the last one drawn — see render(). */
+  private frameDirty = false
+  /** The one-shot frame request that draws a dirty frame while no loop is running — see render(). */
+  private flushFrameId: number | null = null
+  /** Whether a caller advances the frames itself while the animations run — see setAnimationsRunning. */
+  private framesDriven = false
+  /** The clock of the previous animation frame, for the animations' own time step — see frame(). */
+  private lastFrameTimeMs: number | undefined
   private readonly raycaster = new Raycaster()
 
   private weather: Weather = DEFAULT_WEATHER
@@ -1935,14 +1943,83 @@ export class SceneRenderer {
     this.instrumentMagnitudeGain = Number.isFinite(gain) ? gain : 0
   }
 
+  /**
+   * Asks for the scene to be drawn — once, at the next animation frame, however many times it is
+   * asked before then.
+   *
+   * Every setter asks, and one tick of playback touches a dozen of them. Drawn on the spot, as this
+   * used to, one picture was rendered three to five times over per frame; with the volumetric
+   * clouds a picture is most of what the graphics card can do in a sixtieth of a second, so the
+   * front page's own scene ran at fifteen frames a second on a laptop. A request now only marks
+   * the frame dirty. It is drawn by frame(), which the animation loop or the player calls once per
+   * animation frame, or by a one-shot frame request when neither is running (a paused scene being
+   * resized, hovered or sought).
+   *
+   * A pose is drawn in two moves: the VIEWFINDER now (one instant, a twentieth of a millisecond)
+   * and the photograph as the scene settles (see startExposure). Drawing the whole pose here
+   * instead is what made the editor crawl — the dozen setters one tick touches would each have
+   * rebuilt a sky forty times over, at 7.8 ms a rebuild, for a picture only the last of them was
+   * going to leave on screen.
+   */
   render(): void {
     if (this.restatingExposure) return
-    // A pose is drawn in two moves: the VIEWFINDER now (one instant, a twentieth of a millisecond)
-    // and the photograph as the scene settles. Drawing the whole pose here instead is what made the
-    // editor crawl — the dozen setters one tick touches would each have rebuilt a sky forty times
-    // over, at 7.8 ms a rebuild, for a picture only the last of them was going to leave on screen.
+    this.frameDirty = true
+    if (this.animationFrameId !== null || this.framesDriven || this.flushFrameId !== null) return
+    this.flushFrameId = requestAnimationFrame(() => {
+      this.flushFrameId = null
+      this.drawIfDirty()
+    })
+  }
+
+  /** Draws the frame that render() asked for, if any — the single place the scene is drawn from
+   * outside an exposure. */
+  private drawIfDirty(): void {
+    if (!this.frameDirty) return
+    this.frameDirty = false
     this.renderOnce()
     if (this.developingExposure) this.startExposure()
+  }
+
+  private cancelFlush(): void {
+    if (this.flushFrameId === null) return
+    cancelAnimationFrame(this.flushFrameId)
+    this.flushFrameId = null
+  }
+
+  /**
+   * One animation frame: the animations advanced to `timeMs` (the frame's own clock, as
+   * requestAnimationFrame hands it out), and the scene drawn if anything asked for it.
+   *
+   * Called by this renderer's own loop while the animations run on their own, and by the player at
+   * every tick of playback (see setAnimationsRunning), so that the sky the player has just restated
+   * and the twinkle of the same instant land in ONE drawn frame rather than two.
+   */
+  frame(timeMs: number): void {
+    if (this.animationsRunning && this.hasAnimations()) {
+      // Clamped, not raw (timeMs - lastTimeMs) — a backgrounded/throttled tab can deliver a huge gap
+      // between two rAF callbacks (minimized window, tab switch, OS deprioritizing a hidden tab).
+      // updatePrecipitation does per-frame Euler integration (position -= speed*dt); an unclamped
+      // multi-second dt would move every particle's Y by more than the whole fall range in one step,
+      // so all 400 would cross the ground threshold in that same frame and respawn simultaneously —
+      // permanently locking the whole pool into one Y-synchronized sheet (found by testing hail,
+      // whose fast fall speed made it reproduce fastest, but the same overshoot can hit any type).
+      // MAX_ANIMATION_DT_SECONDS keeps a single step small enough that even hail's fastest cycle
+      // can't be skipped over.
+      const dtSeconds = this.lastFrameTimeMs === undefined ? 0 : Math.min((timeMs - this.lastFrameTimeMs) / 1000, MAX_ANIMATION_DT_SECONDS)
+      this.lastFrameTimeMs = timeMs
+      this.updateTwinkle(timeMs / 1000)
+      this.updatePrecipitation(timeMs / 1000, dtSeconds)
+      this.updateRain(dtSeconds)
+      this.updateLightning(timeMs / 1000, dtSeconds)
+      if (this.lensFlare) this.lensFlare.uniforms.uTime.value = timeMs / 1000
+      // Not while a pose is being developed. Everything this loop animates — a star's twinkle, a
+      // falling drop, a flash — lasts a fraction of a second, and a pose of minutes AVERAGES those
+      // away rather than showing any one of them; the film already samples them as it fills. Asking
+      // for a frame here would also restart that film sixty times a second, which is exactly how a
+      // five-minute pose left the editor redrawing forever and never finishing a picture.
+      if (!this.developingExposure) this.frameDirty = true
+    }
+    this.drawIfDirty()
   }
 
   /**
@@ -2619,6 +2696,7 @@ export class SceneRenderer {
 
   dispose(): void {
     this.stopTwinkle()
+    this.cancelFlush()
     this.phenomena.clear()
     this.terrainBuildToken++ // discard any terrain build still in flight
     this.disposeMesh(this.skyMesh)
@@ -2687,34 +2765,15 @@ export class SceneRenderer {
   /** Starts the shared per-frame animation loop — idempotent, and a no-op when nothing needs it
    * (see syncAnimationLoop). Originally just star twinkle; now also drives falling/drifting
    * precipitation and lightning scheduling, since all three are cheap enough to share one RAF loop
-   * rather than each running their own. Exposed (not private) so SceneElement can still call
-   * stopTwinkle() on disconnect without needing its own timer. */
+   * rather than each running their own — and, since every frame is drawn from frame(), the drawing
+   * itself. Exposed (not private) so SceneElement can still call stopTwinkle() on disconnect
+   * without needing its own timer. */
   startTwinkle(): void {
     if (this.animationFrameId !== null || !this.needsAnimationLoop()) return
-    let lastTimeMs: number | undefined
+    // The loop draws every frame from now on; a one-shot still pending would draw the same frame twice.
+    this.cancelFlush()
     const tick = (timeMs: number) => {
-      // Clamped, not raw (timeMs - lastTimeMs) — a backgrounded/throttled tab can deliver a huge gap
-      // between two rAF callbacks (minimized window, tab switch, OS deprioritizing a hidden tab).
-      // updatePrecipitation does per-frame Euler integration (position -= speed*dt); an unclamped
-      // multi-second dt would move every particle's Y by more than the whole fall range in one step,
-      // so all 400 would cross the ground threshold in that same frame and respawn simultaneously —
-      // permanently locking the whole pool into one Y-synchronized sheet (found by testing hail,
-      // whose fast fall speed made it reproduce fastest, but the same overshoot can hit any type).
-      // MAX_ANIMATION_DT_SECONDS keeps a single step small enough that even hail's fastest cycle
-      // can't be skipped over.
-      const dtSeconds = lastTimeMs === undefined ? 0 : Math.min((timeMs - lastTimeMs) / 1000, MAX_ANIMATION_DT_SECONDS)
-      lastTimeMs = timeMs
-      this.updateTwinkle(timeMs / 1000)
-      this.updatePrecipitation(timeMs / 1000, dtSeconds)
-      this.updateRain(dtSeconds)
-      this.updateLightning(timeMs / 1000, dtSeconds)
-      if (this.lensFlare) this.lensFlare.uniforms.uTime.value = timeMs / 1000
-      // Not while a pose is being developed. Everything this loop animates — a star's twinkle, a
-      // falling drop, a flash — lasts a fraction of a second, and a pose of minutes AVERAGES those
-      // away rather than showing any one of them; the film already samples them as it fills. Asking
-      // for a frame here would also restart that film sixty times a second, which is exactly how a
-      // five-minute pose left the editor redrawing forever and never finishing a picture.
-      if (!this.developingExposure) this.render()
+      this.frame(timeMs)
       this.animationFrameId = requestAnimationFrame(tick)
     }
     this.animationFrameId = requestAnimationFrame(tick)
@@ -2723,23 +2782,35 @@ export class SceneRenderer {
   /**
    * Runs or freezes every animation in the scene, following the player (see animationsRunning).
    *
+   * `driven` says that the caller will call frame() itself at every animation frame for as long as
+   * the animations run — which the player does, from its own tick — so this renderer runs no loop of
+   * its own beside it: two loops meant two drawings of every frame. Left false, this renderer's own
+   * loop advances the animations, as the editor needs when it keeps the weather moving over a
+   * paused recording (see SceneElement.animateWhilePaused).
+   *
    * Resuming re-arms the lightning schedule rather than carrying the old one over: it is kept in
    * absolute rAF seconds, so a pause of any length would leave a flash "due" and fire it on the
    * very first frame back. Pausing ends any flash in progress, since a whitened fog frozen forever
    * would read as the scene's real ambient light rather than as the instant of a strike.
    */
-  setAnimationsRunning(running: boolean): void {
-    if (running === this.animationsRunning) return
+  setAnimationsRunning(running: boolean, driven = false): void {
+    const drivenNow = running && driven
+    if (running === this.animationsRunning && drivenNow === this.framesDriven) return
+    const wasRunning = this.animationsRunning
     this.animationsRunning = running
-    if (running) {
+    this.framesDriven = drivenNow
+    if (running && !wasRunning) {
       this.nextLightningAtS = null
-    } else if (this.lightningFlashRemainingS > 0) {
+      this.lastFrameTimeMs = undefined
+    } else if (!running && this.lightningFlashRemainingS > 0) {
       this.lightningFlashRemainingS = 0
       this.restoreFogColor()
     }
     this.syncAnimationLoop()
-    // The loop is what normally repaints; with it stopped, this is what leaves a coherent still.
-    if (!running) this.render()
+    // The loop is what normally repaints; with it stopped, this is what leaves a coherent still —
+    // and a frame asked for while a loop or a driver was expected to draw it must not wait forever
+    // now that neither will.
+    if (!running || this.frameDirty) this.render()
   }
 
   stopTwinkle(): void {
@@ -2756,13 +2827,17 @@ export class SceneRenderer {
   }
 
   private needsAnimationLoop(): boolean {
+    return this.animationsRunning && !this.framesDriven && this.hasAnimations()
+  }
+
+  /** Whether anything in the scene moves on its own between two instants of the recording. */
+  private hasAnimations(): boolean {
     return (
-      this.animationsRunning &&
-      (this.starTiers.length > 0 ||
+      this.starTiers.length > 0 ||
       this.precipitationPoints !== undefined ||
       this.rainSystem !== undefined ||
       this.lightningArmed ||
-      (this.lensFlare !== undefined && this.sunVisible))
+      (this.lensFlare !== undefined && this.sunVisible)
     )
   }
 
