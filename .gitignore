@@ -22,3 +22,6 @@ dist-site-lib/
 # Generated from the TypeScript by build:schema — never edited, and rebuilt before anything
 # that reads it is built.
 src/generated/
+
+# scripts/perf output
+perf-out/
