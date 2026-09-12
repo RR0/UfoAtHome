@@ -9,8 +9,10 @@ export const html = `
        every language names them differently the moment either grows a label. -->
   <div class="corner-buttons" id="corner-buttons">
     <button id="milestones" type="button" title="Named moments" aria-label="Named moments" aria-pressed="true" hidden>🔖</button>
-    <!-- The pictures of the place laid over the scene (see SceneReference): how much of them shows,
-         then whether they show at all. Both hidden for the recordings that carry none. -->
+    <!-- The toggles below are parsed here and moved at once — into the playback bar beside the loop
+         button, or wherever a composing element hosts them (see UfoElement.hostControls). Only the
+         fullscreen button stays over the picture. The pictures of the place (see SceneReference)
+         have a slider for how much of them shows, then a button for whether they show at all. -->
     <input id="reference-opacity" type="range" min="0" max="1" step="0.05" value="0.5" title="Picture opacity" aria-label="Picture opacity" hidden/>
     <button id="references" type="button" title="Pictures of the place" aria-label="Pictures of the place" aria-pressed="true" hidden>🖼</button>
     <button id="witness-map" type="button" title="Witness's position" aria-label="Witness's position" aria-pressed="false" hidden>🗺</button>
@@ -402,6 +404,19 @@ input[type=range] {
 }
 .toolbar button[aria-pressed="true"] {
   outline: 2px solid #39f;
+}
+/* Same trap as .corner-buttons: a display of its own outranks the UA sheet's [hidden]. */
+.toolbar button[hidden],
+.toolbar input[hidden] {
+  display: none;
+}
+/* The pictures' opacity slider, beside its button: a thumb's width, no more, and never the seek
+   bar's own stretch. */
+.toolbar #reference-opacity {
+  flex: 0 0 auto;
+  width: 5.5em;
+  margin: 0;
+  accent-color: #39f;
 }
 .toolbar button:disabled {
   cursor: default;

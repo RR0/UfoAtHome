@@ -441,6 +441,8 @@ export class UfoElement extends HTMLElement {
     document.addEventListener("fullscreenchange", this.handleFullscreenChange)
     this.witnessMapResizeObserver?.observe(this.witnessMapPanel)
 
+    // Out of the picture from the start — see hostControls.
+    this.hostControls(undefined)
     this.player = this.createPlayer()
     this.updateTimeLabels()
     this.updatePlayPauseButton()
@@ -745,20 +747,21 @@ export class UfoElement extends HTMLElement {
   }
 
   /**
-   * Takes the toggles — the account's moments, the pictures of the place and their opacity, the
-   * witness's map — out of the picture's corner and into `host`, or puts them back when `host` is
-   * undefined. The fullscreen button stays: it is the one control that belongs to the picture
-   * itself. A composing element with a toolbar of its own (see SightingElement, and the editor)
-   * uses this so that the picture shows the observation and nothing else; on its own, this element
-   * has no other place to put them. The buttons are the same elements wherever they stand, so
-   * every listener and every state they carry move with them; the host styles them.
+   * Puts the toggles — the account's moments, the pictures of the place and their opacity, the
+   * witness's map — into `host`, or, when `host` is undefined, into this element's own playback
+   * bar beside the loop button. Never over the picture: the fullscreen button is the one control
+   * that belongs to the picture itself, and the corner is its alone. A composing element with a
+   * toolbar of its own (see SightingElement, and the editor) hosts them there so that they stand
+   * with the rest of what that element says about the observation. The buttons are the same
+   * elements wherever they stand, so every listener and every state they carry move with them;
+   * a host styles them, the playback bar already does.
    */
   hostControls(host: HTMLElement | undefined): void {
     const controls = [this.milestonesButton, this.referenceOpacityInput, this.referencesButton, this.witnessMapButton]
     if (host) {
       for (const control of controls) host.appendChild(control)
     } else {
-      for (const control of controls) this.cornerButtons.insertBefore(control, this.fullscreenButton)
+      for (const control of controls) this.toolbar.insertBefore(control, this.loopButton)
     }
   }
 
