@@ -417,7 +417,11 @@ export class UfoElement extends HTMLElement {
     this.witnessMapCanvas.addEventListener("pointermove", this.handleWitnessMapPointerMove)
     this.witnessMapCanvas.addEventListener("pointerleave", this.handlePointerLeave)
     this.witnessMapCanvas.addEventListener("click", this.handleWitnessMapClick)
-    this.seekInput.addEventListener("input", () => this.player.seek(Number(this.seekInput.value)))
+    this.seekInput.addEventListener("input", () => this.player.seek(this.snapSeekToMark(Number(this.seekInput.value))))
+    this.seekInput.addEventListener("pointerdown", event => { this.seekSnapArmed = true; this.nameMarkUnder(event) })
+    this.seekInput.addEventListener("pointerup", () => { this.seekSnapArmed = false })
+    this.seekInput.addEventListener("pointermove", event => this.nameMarkUnder(event))
+    this.seekInput.addEventListener("pointerleave", () => this.seekInput.removeAttribute("title"))
     this.canvas.addEventListener("click", event => {
       if (!this.enableClickToPlay) return
       // Where playback stood before this click, in case it turns out to be the first half of a
@@ -831,10 +835,52 @@ export class UfoElement extends HTMLElement {
         const name = note ? `${label} — ${note}` : label
         mark.title = name
         mark.setAttribute("aria-label", name)
+        mark.dataset.t = String(milestone.t)
         mark.addEventListener("click", () => this.player.seek(milestone.t))
         return mark
       })
     )
+  }
+
+  /** Whether the next seek from the bar may snap to a mark: only the first one of a press, so that
+   * a drag that passes a mark does not stick to it. */
+  private seekSnapArmed = false
+
+  /** Half the width of a mark's own hit area, in pixels of the bar. */
+  private static readonly MARK_SNAP_PX = 6
+
+  /** The moment whose mark stands within reach of a position along the bar, if any. */
+  private markNear(t: number): { t: number; name: string } | undefined {
+    const duration = this.player.seekableDuration
+    const width = this.seekInput.getBoundingClientRect().width
+    if (duration <= 0 || width <= 0) return undefined
+    const reachMs = (UfoElement.MARK_SNAP_PX / width) * duration
+    let nearest: { t: number; name: string } | undefined
+    for (const mark of this.milestoneMarks.children as HTMLCollectionOf<HTMLElement>) {
+      const markT = Number(mark.dataset.t)
+      if (Math.abs(markT - t) > reachMs) continue
+      if (!nearest || Math.abs(markT - t) < Math.abs(nearest.t - t)) nearest = { t: markT, name: mark.title }
+    }
+    return nearest
+  }
+
+  /** A press on the bar within a few pixels of a mark lands exactly on that moment — what
+   * clicking the mark used to do, now that the bar keeps the pointer (see .milestone-mark). */
+  private snapSeekToMark(t: number): number {
+    if (!this.seekSnapArmed) return t
+    this.seekSnapArmed = false
+    return this.markNear(t)?.t ?? t
+  }
+
+  /** The bar says which moment the pointer is over, as the mark's own tooltip used to. */
+  private nameMarkUnder(event: PointerEvent): void {
+    const rect = this.seekInput.getBoundingClientRect()
+    const duration = this.player.seekableDuration
+    if (rect.width <= 0 || duration <= 0) return
+    const t = ((event.clientX - rect.left) / rect.width) * duration
+    const mark = this.markNear(t)
+    if (mark) this.seekInput.title = mark.name
+    else this.seekInput.removeAttribute("title")
   }
 
   /** Names the moment the recording is currently in — the last one reached, held until the next,

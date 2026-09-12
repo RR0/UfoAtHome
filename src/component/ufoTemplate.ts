@@ -256,6 +256,10 @@ canvas[data-cursor="rotate"] {
   bottom: 0;
   pointer-events: none;
 }
+/* Seen, never grabbed: a mark standing over the bar took the pointer away from the thumb under it
+   — at 0 s the thumb sits under "A" and could not be dragged at all. The bar keeps the pointer and
+   snaps to a mark clicked within a few pixels (see UfoElement.snapSeekToMark); the mark stays a
+   button for the keyboard. */
 .milestone-mark {
   position: absolute;
   top: 0;
@@ -266,7 +270,7 @@ canvas[data-cursor="rotate"] {
   border: none;
   background: none;
   cursor: pointer;
-  pointer-events: auto;
+  pointer-events: none;
   color: inherit;
   font: inherit;
   line-height: 0;
