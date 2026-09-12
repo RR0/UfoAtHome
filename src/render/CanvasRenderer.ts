@@ -345,7 +345,7 @@ export class CanvasRenderer {
    */
   paintPictureFrame(
     corners: { x: number; y: number }[] | undefined,
-    landmarks: { picture: { x: number; y: number }; scene?: { x: number; y: number }; label: string; selected: boolean }[],
+    landmarks: { picture: { x: number; y: number }; scene?: { x: number; y: number }; label: string; selected: boolean; residualDeg?: number }[],
     hint?: string
   ): void {
     const ctx = this.ctx
@@ -362,9 +362,18 @@ export class CanvasRenderer {
       ctx.setLineDash([])
     }
     for (const landmark of landmarks) {
-      // The selected one stands out the way a selected shape's handles do: bolder, and white.
-      const colour = landmark.selected ? "#fff" : "#ffb000"
+      // Its colour is its fit: green within a degree, orange within three, red beyond — so that the
+      // landmark to go back to is the one that stands out. The selected one is bolder, with a white
+      // rim, the way a selected shape's handles stand out from the others.
+      const colour = CanvasRenderer.landmarkColour(landmark.residualDeg)
       const weight = landmark.selected ? 3 : 2
+      if (landmark.selected) {
+        ctx.strokeStyle = "#fff"
+        ctx.lineWidth = weight + 3
+        ctx.beginPath()
+        ctx.ellipse(landmark.picture.x, landmark.picture.y, VERTEX_HANDLE_RADIUS + 2, VERTEX_HANDLE_RADIUS + 2, 0, 0, 2 * Math.PI)
+        ctx.stroke()
+      }
       if (landmark.scene) {
         ctx.strokeStyle = colour
         ctx.lineWidth = 1
@@ -389,6 +398,15 @@ export class CanvasRenderer {
     // not where the eyes are while pointing.
     if (hint) this.paintLabel(hint, 8, 8, "#fff", 13)
     ctx.restore()
+  }
+
+  /** Within a degree the landmark fits; within three it is worth a look; beyond, it is wrong or
+   * the picture cannot fit. Unknown (a landmark still being named) reads as "worth a look". */
+  static landmarkColour(residualDeg: number | undefined): string {
+    if (residualDeg === undefined) return "#ffb000"
+    if (residualDeg <= 1) return "#3c3"
+    if (residualDeg <= 3) return "#ffb000"
+    return "#f33"
   }
 
   /** Legible text over any picture: dark backing, light face. */

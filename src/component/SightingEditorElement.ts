@@ -3257,14 +3257,16 @@ export class SightingEditorElement extends HTMLElement {
       picture: this.canvasPointOfDirection(PictureRegistration.worldDirectionOf(landmark.picture, registration, aspect)),
       scene: this.canvasPointOfDirection(PictureRegistration.worldDirection(landmark.scene)),
       label: this.landmarkLabel(landmark, index),
-      selected: landmark.id === this.currentLandmarkId
+      selected: landmark.id === this.currentLandmarkId,
+      residualDeg: this.landmarkResidualDeg(landmark, reference, aspect) as number | undefined
     }))
     if (this.pendingLandmark) {
       landmarks.push({
         picture: this.canvasPointOfDirection(PictureRegistration.worldDirectionOf(this.pendingLandmark, registration, aspect)),
         scene: undefined,
         label: String(this.currentLandmarks().length + 1),
-        selected: true
+        selected: true,
+        residualDeg: undefined
       })
     }
     renderer.paintPictureFrame(
