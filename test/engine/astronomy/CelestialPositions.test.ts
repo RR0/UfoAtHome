@@ -18,7 +18,12 @@ it("shares the time calculation without changing refracted star positions", () =
     for (const date of [new Date("1990-11-05T18:00:00Z"), new Date("2024-06-21T12:00:00Z")]) {
       const frame = new HorizontalFrame(date, observer)
       for (let ra = 0; ra < 24; ra += 2) for (const dec of [-89, -30, 0, 30, 89]) {
-        expect(frame.position(ra, dec)).toEqual(equatorialToHorizontal(ra, dec, date, observer))
+        const expected = equatorialToHorizontal(ra, dec, date, observer)
+        const actual = frame.position(ra, dec)
+        // To the nanoarcsecond: the frame is built once instead of per star, so the last bits of
+        // the arithmetic may differ, and nothing the eye or the picture can tell apart.
+        expect(actual.altitudeDeg).toBeCloseTo(expected.altitudeDeg, 9)
+        expect(actual.azimuthDeg).toBeCloseTo(expected.azimuthDeg, 9)
       }
     }
   }

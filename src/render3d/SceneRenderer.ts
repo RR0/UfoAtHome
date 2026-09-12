@@ -950,6 +950,19 @@ export class SceneRenderer {
    * progress (a sky rebuild is about 8 ms, so this is one or two of them), short enough that the
    * frame it borrows is not one the witness notices. */
   private static readonly EXPOSURE_BUDGET_MS = 12
+
+  /**
+   * How many instants one frame may add to the film, by the size of the picture.
+   *
+   * The budget above is main-thread time, and an instant costs the main thread a fifth of a
+   * millisecond: sixty of them fitted the budget, and each was a full-size drawing queued for the
+   * graphics card — a second of its time per frame at Retina hero size, which is what held the
+   * airliner demo at seven frames a second whatever the thread was doing. Three instants of a
+   * 2.7-megapixel picture, thirty of a small card's.
+   */
+  private static exposureInstantsPerFrame(pixels: number): number {
+    return Math.max(3, Math.round(6e6 / Math.max(1, pixels)))
+  }
   /** The frame request developing the pose, if one is in flight — see startExposure. */
   private exposureFrameId: number | null = null
   /** How many instants of the pose are already on the film. */
@@ -1042,6 +1055,7 @@ export class SceneRenderer {
   /** Move the sampled cloud field, in world metres, without rebuilding either deck. */
   setCloudRendering(mode: CloudRendering): void {
     if (mode === this.cloudRendering) return
+    this.cloudTransmissionMemo.clear()
     this.cloudRendering = mode
     this.layeredClouds?.dispose()
     this.layeredClouds = undefined
@@ -1348,6 +1362,7 @@ export class SceneRenderer {
    * from setAstronomy) since it must keep reacting to sunrise/sunset independent of this.
    */
   setWeather(weather: Weather): void {
+    this.cloudTransmissionMemo.clear()
     if (weatherEquals(this.weather, weather)) return
     this.weather = weather
     this.buildClouds()
@@ -1563,7 +1578,19 @@ export class SceneRenderer {
       const placement = resolveDecorPlacementAt(object, t)
       const x = placement.eastM + offset.x + shift.x
       const z = -placement.northM + offset.z + shift.z
-      group.position.set(x, this.groundUnderFootprint(object, x, z, placement.headingDeg, placement.altitudeM) + placement.altitudeM, z)
+      // Read once per resting place, not once per frame: the ground under an object depends on where
+      // it stands ON THE PATCH, and the patch is re-anchored under a walking witness together with
+      // the object (the offset above), so a still object keeps its answer while the witness moves.
+      // The four hundred ground readings a footprint takes were a tenth of every frame of Valensole.
+      const terrain = this.terrainMesh
+      const footprintKey = `${terrain?.geometry.uuid}:${(x - (terrain?.position.x ?? 0)).toFixed(3)}:`
+        + `${(z - (terrain?.position.z ?? 0)).toFixed(3)}:${(terrain?.position.y ?? 0).toFixed(3)}:`
+        + `${placement.headingDeg}:${placement.altitudeM}`
+      if (group.userData.footprintKey !== footprintKey) {
+        group.userData.footprintGroundY = this.groundUnderFootprint(object, x, z, placement.headingDeg, placement.altitudeM)
+        group.userData.footprintKey = footprintKey
+      }
+      group.position.set(x, group.userData.footprintGroundY + placement.altitudeM, z)
       if (object.kind === "crop") {
         const distance = Math.hypot(x, z)
         group.visible = distance <= CROP_VISIBLE_DISTANCE_M
@@ -1824,7 +1851,13 @@ export class SceneRenderer {
     // fog colour — a black void below the horizon at 1500 m, since that colour is the night-ground
     // colour and nothing else was left to see. Proportions kept, so the horizon haze reads the same
     // at every altitude.
-    this.scene.fog = new Fog(new Color(...groundColor), this.groundRadius * 0.2, this.groundRadius)
+    if (this.scene.fog instanceof Fog) {
+      this.scene.fog.color.setRGB(...groundColor)
+      this.scene.fog.near = this.groundRadius * 0.2
+      this.scene.fog.far = this.groundRadius
+    } else {
+      this.scene.fog = new Fog(new Color(...groundColor), this.groundRadius * 0.2, this.groundRadius)
+    }
     // buildStars() above already called syncAnimationLoop(), but that ran before setBodyMesh("sun",
     // ...) updated sunVisible — needsAnimationLoop() needs re-checking now that it's current, so the
     // loop actually starts/stops the instant the Sun crosses the horizon during pure-daylight
@@ -2204,6 +2237,8 @@ export class SceneRenderer {
     if (!instantAt || !film) return
     const share = 1 / this.exposureInstants
     const until = performance.now() + SceneRenderer.EXPOSURE_BUDGET_MS
+    const atMost = SceneRenderer.exposureInstantsPerFrame(film.instantTarget.width * film.instantTarget.height)
+    let added = 0
     do {
       this.restateAt(instantAt, this.exposureInstantsDone)
       // Compass captions belong to the viewer, never to the accumulated photograph.
@@ -2216,7 +2251,8 @@ export class SceneRenderer {
       }
       film.add(this.renderer, share)
       this.exposureInstantsDone++
-    } while (this.exposureInstantsDone < this.exposureInstants && performance.now() < until)
+      added++
+    } while (this.exposureInstantsDone < this.exposureInstants && performance.now() < until && added < atMost)
     // Back to the instant the recording is actually at, EVERY time round: everything that ASKS the
     // scene rather than drawing it — the shape occlusion raycasts, the decor distances behind
     // SceneElement's own size estimates, the hover picks — reads the scene graph where this leaves
@@ -2487,6 +2523,13 @@ export class SceneRenderer {
    * rooftop edge slice the dazzle down instead of switching it off.
    */
   private sunVisibleFraction(): number {
+    // The scene's own matrices, not just the camera's. This runs BEFORE renderer.render(), which is
+    // what normally refreshes them, so every decor object tested would otherwise be where it was on
+    // the PREVIOUS frame — fine while nothing moves, and wrong exactly while something does. The
+    // ground and the terrain are re-anchored under a moving witness every tick (see
+    // updateDecorAnchoring), so during a drag this was raycasting against a world one frame out of
+    // date. Once for all the samples: a walk of the whole scene is not free either.
+    if (this.raycastableDecor().length > 0) this.scene.updateMatrixWorld()
     let visible = 0
     for (const sample of SUN_DISC_SAMPLES) {
       if (!this.isSunOccluded(sample[0], sample[1])) visible++
@@ -2515,17 +2558,8 @@ export class SceneRenderer {
   }
 
   private isSunOccluded(offsetRightDeg = 0, offsetUpDeg = 0): boolean {
-    // The scene's own matrices, not just the camera's. This runs BEFORE renderer.render(), which is
-    // what normally refreshes them, so every object it tests would otherwise be where it was on the
-    // PREVIOUS frame — fine while nothing moves, and wrong exactly while something does. The ground
-    // and the terrain are re-anchored under a moving witness every tick (see updateDecorAnchoring),
-    // so during a drag this was raycasting against a world one frame out of date.
-    this.scene.updateMatrixWorld()
-    const occluders: Object3D[] = []
-    if (this.groundMesh) occluders.push(this.groundMesh)
-    if (this.terrainMesh) occluders.push(this.terrainMesh)
-    for (const group of this.raycastableDecor()) occluders.push(group)
-    if (occluders.length === 0) return false
+    const decor = this.raycastableDecor()
+    if (!this.groundMesh && !this.terrainMesh && decor.length === 0) return false
     const direction = this.sunOcclusionDirectionScratch.copy(this.sunWorldPosition).sub(this.camera.position)
     const distanceToSun = direction.length()
     direction.normalize()
@@ -2542,9 +2576,71 @@ export class SceneRenderer {
         .addScaledVector(up, offsetUpDeg * toRadians)
         .normalize()
     }
+    // The ground by its own height grid (see groundBlocks); only the decor, a few boxes and models,
+    // is worth a real raycast. Matrices are refreshed by the caller, see sunVisibleFraction.
+    if (this.groundBlocks(this.camera.position, direction, distanceToSun)) return true
+    if (decor.length === 0) return false
     this.sunOcclusionRaycaster.set(this.camera.position, direction)
-    const hit = this.sunOcclusionRaycaster.intersectObjects(occluders, true)[0]
+    const hit = this.sunOcclusionRaycaster.intersectObjects(decor, true)[0]
     return hit !== undefined && hit.distance < distanceToSun
+  }
+
+  /**
+   * Whether the ground — the flat disc, or the relief patch — stands between `origin` and the
+   * point `maxDistance` away along `direction`.
+   *
+   * Not a mesh raycast. The disc is a plane, so it answers exactly; the relief is a height grid
+   * (see groundYOfPatch), so the ray is walked across the patch half a cell at a time and compared
+   * with the ground under each step — a few hundred lookups, where the raycast tested each of the
+   * patch's eight thousand triangles. Nine rays per frame for the Sun's disc alone (see
+   * sunVisibleFraction) made that a third of the main thread on the Socorro demo. What a walk can
+   * miss is a ridge thinner than half a cell between two steps, which no thirty-metre relief has.
+   */
+  private groundBlocks(origin: Vector3, direction: Vector3, maxDistance: number, minDistance = 0): boolean {
+    const disc = this.groundMesh
+    if (disc && direction.y < 0) {
+      const t = (disc.position.y - origin.y) / direction.y
+      if (t > minDistance && t < maxDistance) {
+        const x = origin.x + direction.x * t - disc.position.x
+        const z = origin.z + direction.z * t - disc.position.z
+        if (Math.hypot(x, z) <= this.groundRadius) return true
+      }
+    }
+    const terrain = this.terrainMesh
+    if (!terrain) return false
+    const position = terrain.geometry.getAttribute("position")
+    const side = Math.round(Math.sqrt(position.count))
+    if (side < 2 || side * side !== position.count) return false
+    const xs = [terrain.position.x + position.getX(0), terrain.position.x + position.getX(side - 1)]
+    const zs = [terrain.position.z + position.getZ(0), terrain.position.z + position.getZ((side - 1) * side)]
+    const cellM = Math.min(Math.abs(xs[1] - xs[0]), Math.abs(zs[1] - zs[0])) / (side - 1)
+    if (!(cellM > 0)) return false
+    // Only the stretch of the ray above the patch's footprint can meet it.
+    let from = minDistance
+    let to = maxDistance
+    for (const [o, d, bounds] of [[origin.x, direction.x, xs], [origin.z, direction.z, zs]] as const) {
+      const low = Math.min(bounds[0], bounds[1])
+      const high = Math.max(bounds[0], bounds[1])
+      if (Math.abs(d) < 1e-12) {
+        if (o < low || o > high) return false
+        continue
+      }
+      const t0 = (low - o) / d
+      const t1 = (high - o) / d
+      from = Math.max(from, Math.min(t0, t1))
+      to = Math.min(to, Math.max(t0, t1))
+    }
+    if (!(to > from)) return false
+    const horizontal = Math.hypot(direction.x, direction.z)
+    const steps = Math.min(4096, Math.max(8, Math.ceil(((to - from) * horizontal) / (cellM / 2))))
+    for (let i = 0; i <= steps; i++) {
+      const t = from + ((to - from) * i) / steps
+      const x = origin.x + direction.x * t
+      const y = origin.y + direction.y * t
+      const z = origin.z + direction.z * t
+      if (y <= this.groundYUnder(x, z)) return true
+    }
+    return false
   }
 
   /**
@@ -2667,11 +2763,10 @@ export class SceneRenderer {
    * both, and it is one cast, only once a candidate has been found.
    */
   private groundHides(ndcX: number, ndcY: number): boolean {
-    const ground = [this.terrainMesh, this.groundMesh].filter((mesh): mesh is Mesh => mesh !== undefined)
-    if (ground.length === 0) return false
+    if (!this.terrainMesh && !this.groundMesh) return false
     this.aimAtScreenPoint(this.ufoOcclusionRaycaster, ndcX, ndcY)
-    this.ufoOcclusionRaycaster.near = UFO_OCCLUSION_MIN_DISTANCE_M
-    return this.ufoOcclusionRaycaster.intersectObjects(ground, true).length > 0
+    const ray = this.ufoOcclusionRaycaster.ray
+    return this.groundBlocks(ray.origin, ray.direction, Infinity, UFO_OCCLUSION_MIN_DISTANCE_M)
   }
 
   /** Finds which decor object (if any) sits under normalized device coordinates — same NDC
@@ -2959,6 +3054,24 @@ export class SceneRenderer {
    * see the Sun THROUGH cirrus, which is why it can make a halo at all.
    */
   private cloudTransmission(position: HorizontalPosition): number {
+    // A tenth of a degree of direction and ten metres of drift: the deck's structure is hundreds of
+    // metres across, and the walk through it (48 samples of a noise field per body) was a fifth of
+    // the main thread on a night whose Moon moved a pixel a frame. Forgotten with the weather (see
+    // setWeather) and when the memo outgrows a sky's worth of bodies.
+    const key = `${position.altitudeDeg.toFixed(1)}:${position.azimuthDeg.toFixed(1)}:`
+      + `${Math.round(this.cloudOffsetM.x / 10)}:${Math.round(this.cloudOffsetM.z / 10)}:${Math.round(this.observerElevationM)}:`
+      + Object.entries(this.cloudLayerOffsetsM).map(([id, o]) => `${id}=${Math.round(o.x / 10)},${Math.round(o.z / 10)}`).join(";")
+    const known = this.cloudTransmissionMemo.get(key)
+    if (known !== undefined) return known
+    if (this.cloudTransmissionMemo.size > 256) this.cloudTransmissionMemo.clear()
+    const through = this.computeCloudTransmission(position)
+    this.cloudTransmissionMemo.set(key, through)
+    return through
+  }
+
+  private readonly cloudTransmissionMemo = new Map<string, number>()
+
+  private computeCloudTransmission(position: HorizontalPosition): number {
     const direction = horizontalToCartesian(position.altitudeDeg, position.azimuthDeg, 1)
     if (this.layeredClouds) return this.layeredClouds.transmissionAt(direction)
     let through = 1
@@ -2982,13 +3095,13 @@ export class SceneRenderer {
    * (see atmosphericTint) before being applied, so it warms near the horizon the same way a real
    * low Sun/bright planet does — independent of the sky's own ambient color. */
   private setBodyMesh(key: string, position: HorizontalPosition, visualRadius: number, color: Color, magnitude: number): void {
-    this.disposeMesh(this.bodyMeshes.get(key))
-    this.disposeHitArea(key)
-    this.disposeGlare(key)
     if (position.altitudeDeg < BODY_HIDE_BELOW_DEG) {
       // Well below the horizon: skip building a mesh at all rather than pay for geometry that
       // the opaque ground plane would occlude anyway.
+      this.disposeMesh(this.bodyMeshes.get(key))
       this.bodyMeshes.delete(key)
+      this.disposeHitArea(key)
+      this.disposeGlare(key)
       if (key === "sun") this.sunVisible = false
       return
     }
@@ -2997,12 +3110,22 @@ export class SceneRenderer {
     // Dimmed by whatever cloud stands in front of it — see cloudTransmission.
     const through = this.cloudTransmission(position)
     const tintedColor = new Color(color.r * tint[0] * through, color.g * tint[1] * through, color.b * tint[2] * through)
-    const geometry = new SphereGeometry(visualRadius, 16, 16)
-    const material = new MeshBasicMaterial({ color: tintedColor, fog: false })
-    const mesh = new Mesh(geometry, material)
+    // Kept, moved and scaled, not rebuilt: the sky is restated up to once per frame, and a body
+    // rebuilt at each restatement was a material disposed and compiled again each time — one
+    // shader compilation per frame, a third of the main thread on the comet demo. A unit sphere
+    // scaled to the size of the moment, because a planet's size follows its brightness, which
+    // follows the sky's own brightness, which changes at every restatement.
+    let mesh = this.bodyMeshes.get(key)
+    if (!(mesh instanceof Mesh)) {
+      this.disposeMesh(mesh)
+      mesh = new Mesh(new SphereGeometry(1, 16, 16), new MeshBasicMaterial({ color: tintedColor, fog: false }))
+      this.celestialGroup.add(mesh)
+      this.bodyMeshes.set(key, mesh)
+    } else {
+      ;(mesh.material as MeshBasicMaterial).color.copy(tintedColor)
+    }
+    mesh.scale.setScalar(visualRadius)
     mesh.position.set(x, y, z)
-    this.celestialGroup.add(mesh)
-    this.bodyMeshes.set(key, mesh)
     this.setHitArea(key, x, y, z, visualRadius)
     // The Sun's own dazzle comes entirely from the lens-flare mesh below (its always-on glareOut
     // term — see LensFlareEffect.ts's own doc comment), not this sprite-based halo: setGlare's
@@ -3045,39 +3168,57 @@ export class SceneRenderer {
    * atmospheric tint as setBodyMesh, so a low Moon reddens the same way a real moonrise does. */
   private setMoonMesh(position: HorizontalPosition & { phase: MoonPhase; magnitude: number }, magnitudeLimit: number): void {
     const key = "moon"
-    this.disposeMesh(this.bodyMeshes.get(key))
-    this.disposeHitArea(key)
-    this.disposeGlare(key)
     // The Moon passes this at almost every phase — it is magnitude -10 at the quarter, six
     // magnitudes clear of what a daylit sky hides, which is exactly why a daytime Moon is an
     // ordinary sight. Only a sliver a day or so from new falls under it, and that one really is
     // lost next to the Sun.
     if (position.magnitude > magnitudeLimit || position.altitudeDeg < BODY_HIDE_BELOW_DEG) {
+      this.disposeMesh(this.bodyMeshes.get(key))
       this.bodyMeshes.delete(key)
+      this.disposeHitArea(key)
+      this.disposeGlare(key)
       return
     }
     const { x, y, z } = horizontalToCartesian(position.altitudeDeg, position.azimuthDeg, BODY_PLACEMENT_RADIUS)
     const tint = atmosphericTint(position.altitudeDeg)
     const tintColor = new Color(tint[0], tint[1], tint[2])
-    const material = new SpriteMaterial({ map: createMoonPhaseTexture(position.phase), color: tintColor, fog: false })
-    const sprite = new Sprite(material)
+    // The disc is drawn again only once its lit part has moved by a fifth of a percent of its
+    // width, a quarter of a pixel of the 128 px texture: the phase turns a thirtieth per day, so a
+    // recording of minutes keeps one drawing where it used to draw and upload one per restatement.
+    const phaseKey = `${position.phase.phaseFraction < 0.5}:${Math.round(clamp(position.phase.illuminatedFraction, 0, 1) * 500)}`
+    let sprite = this.bodyMeshes.get(key)
+    if (!(sprite instanceof Sprite)) {
+      this.disposeMesh(sprite)
+      sprite = new Sprite(new SpriteMaterial({ map: createMoonPhaseTexture(position.phase), color: tintColor, fog: false }))
+      sprite.userData.phaseKey = phaseKey
+      const diameter = SUN_MOON_VISUAL_RADIUS * 2
+      sprite.scale.set(diameter, diameter, 1)
+      this.celestialGroup.add(sprite)
+      this.bodyMeshes.set(key, sprite)
+    } else {
+      if (sprite.userData.phaseKey !== phaseKey) {
+        sprite.material.map?.dispose()
+        sprite.material.map = createMoonPhaseTexture(position.phase)
+        sprite.userData.phaseKey = phaseKey
+      }
+      sprite.material.color.copy(tintColor)
+    }
     sprite.position.set(x, y, z)
-    const diameter = SUN_MOON_VISUAL_RADIUS * 2
-    sprite.scale.set(diameter, diameter, 1)
-    this.celestialGroup.add(sprite)
-    this.bodyMeshes.set(key, sprite)
     this.setHitArea(key, x, y, z, SUN_MOON_VISUAL_RADIUS)
     this.setGlare(key, x, y, z, position.magnitude, tintColor)
   }
 
   private setHitArea(key: string, x: number, y: number, z: number, visualRadius: number): void {
-    const material = new SpriteMaterial({ transparent: true, opacity: 0, depthTest: false, depthWrite: false, fog: false })
-    const hitArea = new Sprite(material)
+    let hitArea = this.hitAreas.get(key)
+    if (!hitArea) {
+      const material = new SpriteMaterial({ transparent: true, opacity: 0, depthTest: false, depthWrite: false, fog: false })
+      hitArea = new Sprite(material)
+      this.celestialGroup.add(hitArea)
+      this.hitAreas.set(key, hitArea)
+    }
     hitArea.position.set(x, y, z)
     const size = visualRadius * HOVER_HIT_RADIUS_SCALE
     hitArea.scale.set(size, size, 1)
-    this.celestialGroup.add(hitArea)
-    this.hitAreas.set(key, hitArea)
   }
 
   private disposeHitArea(key: string): void {
