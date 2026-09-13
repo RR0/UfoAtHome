@@ -220,36 +220,8 @@ ${carousel}
     <h2>Two principles</h2>
 
     <div class="principle">
-      <h3>Interpret nothing</h3>
-      <p class="lede prose-wide">A testimony is an angle, not a measurement. Hold to what the
-        witness described seeing, and infer no solid body, no distance, no craft behind it. Every
-        inference laid on top is data nobody supplied — and it quietly constrains the account, or
-        rules out an explanation that had every right to stand.</p>
-      <div class="prose-wide">
-        <p>Nobody perceives metres. A witness perceives an <em>angle</em>: the thing covered a
-          thumbnail at arm's length, a fifth of the windscreen, two full Moons. “About thirty metres
-          long” is a conclusion drawn from a distance they could not perceive either, and the two
-          errors multiply.</p>
-        <p>So a UFO@home recording stores how big the object <em>looked</em>, in degrees, and stores
-          no real size and no real distance anywhere. Metres come back in one case only: when the
-          object was seen to pass behind or in front of something whose position is known. That is an
-          inequality, and the tool reports it as one — including, most of the time, “unknown”.</p>
-        <p>The object is drawn as a flat shape on the witness's field of view, never as a solid body
-          placed in space. That is deliberate. Assuming a craft at a distance is already an
-          interpretation, and it quietly rules out the explanations that matter most: a halo, a
-          planet, a satellite, an aircraft's landing light, a lenticular cloud. A 2D shape assumes
-          only what the witness actually claimed — that this is what reached their eye.</p>
-        <p>Which is why a case with several witnesses is several recordings, not one. Each states
-          what one person saw from where they stood, and a reconstruction can step from one to the
-          other — the reader through a picker, the author by placing the others in the scene and
-          opening their accounts from there. Two people a hundred metres apart did not see the same
-          thing, and the format is built so that the difference has somewhere to live.</p>
-      </div>
-    </div>
-
-    <div class="principle">
       <h3>Contextualise</h3>
-      <p class="lede prose-wide">Everything else is looked up or computed. Reproduce the checkable
+      <p class="lede prose-wide">First, what can be checked. Reproduce the checkable
         conditions of that place and that moment as faithfully as they can be reproduced, and the
         scene answers back: here is an explanation that fits what was really overhead, and here is
         one this sky has just ruled out. The witness supplies the phenomenon; nothing else is left
@@ -314,6 +286,37 @@ ${carousel}
         where it stops: <a href="/context/">check what the scene claims</a>. What is still missing is
         on <a href="/roadmap/">the roadmap</a>.</p>
       </div>
+
+    <div class="principle">
+      <h3>Bound the hypotheses</h3>
+      <p class="lede prose-wide">From what is known with enough certainty and what the witness
+        reports, narrow down what the phenomenon can have been, without taking on the witness's own
+        interpretation of it. A testimony is an angle, not a measurement: it does not say that an
+        object was there, nor how far away. Set against the scene it still says a great deal: which
+        sizes go with which distances, a distance bounded once the phenomenon passed in front of or
+        behind something whose position is known, which candidates of that sky fit it and which it
+        rules out.</p>
+      <div class="prose-wide">
+        <p>Nobody perceives metres. A witness perceives an <em>angle</em>: the thing covered a
+          thumbnail at arm's length, a fifth of the windscreen, two full Moons. “About thirty metres
+          long” is a conclusion drawn from a distance they could not perceive either, and the two
+          errors multiply.</p>
+        <p>So a UFO@home recording stores how big the object <em>looked</em>, in degrees, and stores
+          no real size and no real distance anywhere. Metres come back in one case only: when the
+          object was seen to pass behind or in front of something whose position is known. That is an
+          inequality, and the tool reports it as one — including, most of the time, “unknown”.</p>
+        <p>The object is drawn as a flat shape on the witness's field of view, never as a solid body
+          placed in space. That is deliberate. Assuming a craft at a distance is already an
+          interpretation, and it quietly rules out the explanations that matter most: a halo, a
+          planet, a satellite, an aircraft's landing light, a lenticular cloud. A 2D shape assumes
+          only what the witness actually claimed — that this is what reached their eye.</p>
+        <p>Which is why a case with several witnesses is several recordings, not one. Each states
+          what one person saw from where they stood, and a reconstruction can step from one to the
+          other — the reader through a picker, the author by placing the others in the scene and
+          opening their accounts from there. Two people a hundred metres apart did not see the same
+          thing, and the format is built so that the difference has somewhere to live.</p>
+      </div>
+    </div>
     </div>
   </section>
   `
@@ -371,39 +374,8 @@ ${carousel}
       <h2>Deux principes</h2>
 
       <div class="principle">
-        <h3>Ne pas interpréter</h3>
-        <p class="lede prose-wide">Un témoignage est un angle, pas une mesure. S'en tenir à ce que le
-          témoin décrit avoir vu, et n'en inférer ni corps solide, ni distance, ni engin derrière.
-          Chaque inférence posée par-dessus est une donnée que personne n'a fournie — et elle
-          contraint le récit en silence, ou écarte une explication qui avait tout droit de tenir.</p>
-        <div class="prose-wide">
-        <p>Personne ne perçoit des mètres. Un témoin perçoit un <em>angle</em> : la chose couvrait un
-          ongle de pouce à bout de bras, un cinquième du pare-brise, deux pleines Lunes. « Une
-          trentaine de mètres de long » est une conclusion tirée d'une distance qu'il ne percevait pas
-          davantage, et les deux erreurs se multiplient.</p>
-        <p>Un enregistrement UFO@home retient donc la taille <em>apparente</em> de l'objet, en degrés,
-          et ne stocke nulle part une taille ni une distance réelles. Les mètres ne reviennent que
-          dans un cas : quand l'objet a été vu passer derrière ou devant quelque chose dont la
-          position est connue. C'est une inégalité, et l'outil la présente comme telle — y compris,
-          le plus souvent, « inconnue ».</p>
-        <p>L'objet est dessiné comme une forme plate dans le champ de vision du témoin, jamais comme
-          un corps solide placé dans l'espace. C'est délibéré. Supposer un engin à une distance donnée
-          est déjà une interprétation, et cela écarte en silence les explications qui comptent le
-          plus : un halo, une planète, un satellite, le phare d'atterrissage d'un avion, un nuage
-          lenticulaire. Une forme 2D ne suppose que ce que le témoin a réellement affirmé : voilà ce
-          qui est parvenu à son œil.</p>
-        <p>C'est pourquoi un dossier à plusieurs témoins fait plusieurs enregistrements, et non un
-          seul. Chacun énonce ce qu'une personne a vu d'où elle se tenait, et une reconstitution
-          permet de passer de l'un à l'autre — le lecteur par un sélecteur, l'auteur en plaçant les
-          autres dans la scène et en ouvrant leur récit depuis là. Deux personnes à cent mètres l'une
-          de l'autre n'ont pas vu la même chose, et le format est fait pour que cette différence ait
-          où se loger.</p>
-        </div>
-      </div>
-
-      <div class="principle">
         <h3>Contextualiser</h3>
-        <p class="lede prose-wide">Tout le reste est relevé ou calculé. Reproduire aussi fidèlement
+        <p class="lede prose-wide">D'abord, ce qui se vérifie. Reproduire aussi fidèlement
           que possible les conditions vérifiables de ce lieu et de cet instant, et la scène répond :
           voici une explication qui s'accorde à ce qui était réellement là-haut, et voici celle que ce
           ciel vient d'exclure. Le témoin fournit le phénomène ; rien d'autre n'est laissé à la
@@ -471,6 +443,40 @@ ${carousel}
         remplacée par une autre — le sélecteur <em>est</em> le crédit. D'où vient chacune, ce qu'elle
         donne et où elle s'arrête : <a href="/context/">vérifier ce que la scène affirme</a>. Ce qui
         manque encore est sur <a href="/roadmap/">la page des futures évolutions</a>.</p>
+      </div>
+
+      <div class="principle">
+        <h3>Borner les hypothèses</h3>
+        <p class="lede prose-wide">À partir de ce qui est connu avec assez de certitude et de ce que
+          le témoin rapporte, cerner ce que le phénomène a pu être, sans adopter d'emblée
+          l'interprétation qu'en fait le témoin. Un témoignage est un angle, pas une mesure : il ne
+          dit pas qu'un objet était là, ni à quelle distance. Confronté à la scène, il en dit pourtant
+          beaucoup : quelles tailles vont avec quelles distances, une distance bornée dès que le
+          phénomène est passé devant ou derrière quelque chose dont la position est connue, quels
+          candidats de ce ciel lui conviennent et lesquels il exclut.</p>
+        <div class="prose-wide">
+        <p>Personne ne perçoit des mètres. Un témoin perçoit un <em>angle</em> : la chose couvrait un
+          ongle de pouce à bout de bras, un cinquième du pare-brise, deux pleines Lunes. « Une
+          trentaine de mètres de long » est une conclusion tirée d'une distance qu'il ne percevait pas
+          davantage, et les deux erreurs se multiplient.</p>
+        <p>Un enregistrement UFO@home retient donc la taille <em>apparente</em> de l'objet, en degrés,
+          et ne stocke nulle part une taille ni une distance réelles. Les mètres ne reviennent que
+          dans un cas : quand l'objet a été vu passer derrière ou devant quelque chose dont la
+          position est connue. C'est une inégalité, et l'outil la présente comme telle — y compris,
+          le plus souvent, « inconnue ».</p>
+        <p>L'objet est dessiné comme une forme plate dans le champ de vision du témoin, jamais comme
+          un corps solide placé dans l'espace. C'est délibéré. Supposer un engin à une distance donnée
+          est déjà une interprétation, et cela écarte en silence les explications qui comptent le
+          plus : un halo, une planète, un satellite, le phare d'atterrissage d'un avion, un nuage
+          lenticulaire. Une forme 2D ne suppose que ce que le témoin a réellement affirmé : voilà ce
+          qui est parvenu à son œil.</p>
+        <p>C'est pourquoi un dossier à plusieurs témoins fait plusieurs enregistrements, et non un
+          seul. Chacun énonce ce qu'une personne a vu d'où elle se tenait, et une reconstitution
+          permet de passer de l'un à l'autre — le lecteur par un sélecteur, l'auteur en plaçant les
+          autres dans la scène et en ouvrant leur récit depuis là. Deux personnes à cent mètres l'une
+          de l'autre n'ont pas vu la même chose, et le format est fait pour que cette différence ait
+          où se loger.</p>
+        </div>
       </div>
     </div>
   </section>
