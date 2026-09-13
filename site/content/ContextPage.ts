@@ -78,8 +78,11 @@ export class ContextPage implements SitePage {
       over the sporadic background that never stops.</p>
     <p><strong>Satellites</strong> get the harder question, because being lit is not the same as
       being seen: the Earth's shadow is computed for the date and hour to say whether one could
-      have caught the Sun at all. Without period orbital elements no individual pass is drawn for
-      historical dates — but how many objects were in orbit on that date is known, and stated.</p>
+      have caught the Sun at all, and how many objects were in orbit on that date is known, and
+      stated. Since February 2021 the tool goes further: the orbital elements saved once or twice a
+      day by Laurent Chabin (SCEAU) give every satellite's real pass, lit through the Earth's shadow
+      and as bright as it was measured to be, Starlink trains included. Before that date no
+      individual pass is drawn, because none could be drawn truthfully.</p>
 
     <h2 id="ice">Ice and water</h2>
     <p>22° and 46° haloes, sundogs, the parhelic circle, tangent, circumzenithal and circumhorizontal
@@ -204,9 +207,12 @@ export class ContextPage implements SitePage {
       nuit-là, au-dessus du fond sporadique qui, lui, ne s'arrête jamais.</p>
     <p>Les <strong>satellites</strong> reçoivent la question la plus difficile, car être éclairé
       n'est pas être vu : l'ombre de la Terre est calculée pour la date et l'heure afin de dire si
-      l'un d'eux pouvait seulement recevoir le Soleil. Faute d'éléments orbitaux d'époque, aucun
-      passage individuel n'est tracé pour les dates anciennes — mais le nombre d'objets en orbite à
-      cette date-là est connu, et il est indiqué.</p>
+      l'un d'eux pouvait seulement recevoir le Soleil, et le nombre d'objets en orbite à cette
+      date-là est connu, et il est indiqué. Depuis février 2021, l'outil va plus loin : les éléments
+      orbitaux sauvegardés une ou deux fois par jour par Laurent Chabin (SCEAU) donnent le vrai
+      passage de chaque satellite, éclairé à travers l'ombre de la Terre et aussi brillant qu'on l'a
+      mesuré, trains de Starlink compris. Avant cette date, aucun passage individuel n'est tracé,
+      faute de pouvoir l'être honnêtement.</p>
 
     <h2 id="ice">La glace et l'eau</h2>
     <p>Halos à 22° et 46°, parhélies, cercle parhélique, arcs tangents, circumzénithal et

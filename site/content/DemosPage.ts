@@ -19,9 +19,9 @@ export class DemosPage implements SitePage {
     title: { en: "What it can do", fr: "Ce qu'il sait faire" },
     description: {
       en: "Real sightings reconstructed, and skies set up for one sight at a time: haloes, rainbows, "
-        + "the Milky Way, a comet, a meteor shower, a satellite window, a storm, an airliner on a long exposure.",
+        + "the Milky Way, a comet, a meteor shower, a Starlink train, a storm, an airliner on a long exposure.",
       fr: "Des observations réelles reconstituées, et des ciels réglés pour un phénomène à la fois : "
-        + "halos, arcs-en-ciel, Voie lactée, comète, pluie de météores, fenêtre satellite, orage, avion en pose longue."
+        + "halos, arcs-en-ciel, Voie lactée, comète, pluie de météores, train de Starlink, orage, avion en pose longue."
     },
     modules: ["/lib/rr0-scene.mjs"]
   }
@@ -167,11 +167,9 @@ ${groups}
   <div class="wrap prose-wide">
     <h2>${fr ? "Ce qui n'est pas encore là" : "What is not here yet"}</h2>
     <p>${fr
-      ? `Les rentrées atmosphériques, un passage satellite réellement calculé pour les dates récentes,
-         l'observation depuis un avion, les anomalies de propagation radar.
+      ? `Les rentrées atmosphériques, l'observation depuis un avion, les anomalies de propagation radar.
          Le détail, et ce que chacun attend, est sur <a href="/roadmap/">la page des futures évolutions</a>.`
-      : `Atmospheric re-entries, a satellite pass actually computed for recent dates,
-         observing from an aircraft, radar propagation anomalies. What each one is waiting
+      : `Atmospheric re-entries, observing from an aircraft, radar propagation anomalies. What each one is waiting
          on is on <a href="/roadmap/">the roadmap</a>.`}</p>
   </div>
 </section>

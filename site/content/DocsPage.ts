@@ -82,11 +82,16 @@ npm run build:all    # ${fr ? "les trois bundles d'intégration" : "the three em
       ? `Les catalogues sont engendrés, pas saisis à la main : <code>npm run build:stars</code> (HYG),
          <code>npm run build:comets</code> (JPL Horizons) et <code>npm run build:satellites</code>
          (le SATCAT de CelesTrak) reconstruisent chacun le sien depuis sa source publique — la donnée
-         est donc reproductible autant que lisible.`
+         est donc reproductible autant que lisible. <code>npm run build:tle</code> réduit une copie
+         locale de l'archive d'éléments orbitaux de Laurent Chabin
+         (<a href="https://ufowaves.org/gp/my_tles/">ufowaves.org</a>) aux fichiers hebdomadaires
+         servis sous <code>/tle/</code>.`
       : `The catalogues are generated, not committed by hand: <code>npm run build:stars</code> (HYG),
          <code>npm run build:comets</code> (JPL Horizons) and <code>npm run build:satellites</code>
          (CelesTrak's SATCAT) each rebuild theirs from its public source, so the data is reproducible
-         as well as readable.`}</p>
+         as well as readable. <code>npm run build:tle</code> reduces a local copy of Laurent Chabin's
+         orbital element archive (<a href="https://ufowaves.org/gp/my_tles/">ufowaves.org</a>) to the
+         weekly files served under <code>/tle/</code>.`}</p>
     <p>${fr
       ? `Le <a href="https://github.com/RR0/UfoAtHome#readme">README</a> porte la référence complète,
          avec le raisonnement derrière chaque choix ; c'est lui qui fait foi si ces pages et lui

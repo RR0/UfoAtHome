@@ -886,6 +886,19 @@ export class SightingElement extends HTMLElement {
       }
       this.infoCreditsList.appendChild(item)
     }
+    // The orbital elements the satellites in this sky were propagated from, once they have arrived:
+    // an archive somebody kept for years so that exactly this could be done.
+    const satellites = this.sceneElement.satelliteState
+    if (satellites.status === "ready" && satellites.credit) {
+      const item = document.createElement("li")
+      const link = document.createElement("a")
+      link.href = satellites.creditUrl ?? ""
+      link.target = "_blank"
+      link.rel = "noopener"
+      link.textContent = satellites.credit
+      item.appendChild(link)
+      this.infoCreditsList.appendChild(item)
+    }
     const thunderItem = document.createElement("li")
     thunderItem.textContent = `${THUNDER_CREDIT_TEXT} (`
     const licenseLink = document.createElement("a")

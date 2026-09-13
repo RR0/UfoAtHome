@@ -8,10 +8,11 @@ import type { SatelliteClass } from "./satelliteCatalog.js"
  *
  * The third candidate explanation, and the one whose record is most obviously incomplete — so it is
  * worth saying at the outset what this file does NOT do. It does not know which satellites were
- * overhead. Historical orbital elements are not obtainable: CelesTrak serves only current ones, and
- * the archive that goes back to 1957 (Space-Track) needs an account and cannot be called from a
- * browser at all. Propagating today's elements back to 1965 would produce a confident, precise,
- * entirely invented pass. This project does not do that.
+ * overhead. For dates since February 2021 that is known, from an archive of element sets saved at the
+ * time (see TleArchive and SatellitePasses). Before it, historical orbital elements are not
+ * obtainable from a browser: CelesTrak serves only current ones, and the archive that goes back to
+ * 1957 (Space-Track) needs an account. Propagating today's elements back to 1965 would produce a
+ * confident, precise, entirely invented pass. This project does not do that.
  *
  * What it does instead is the part that IS complete, and it turns out to be the part that decides
  * most cases anyway: THE ILLUMINATION. A satellite shines by reflected sunlight and nothing else, so

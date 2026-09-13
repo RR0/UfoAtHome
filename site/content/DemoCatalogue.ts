@@ -185,10 +185,10 @@ export class DemoCatalogue {
         {
           id: "satellites",
           src: "/demo-data/sky-test-satellites.json",
-          title: { en: "Could a satellite have been lit?", fr: "Un satellite pouvait-il être éclairé ?" },
+          title: { en: "A Starlink train", fr: "Un train de Starlink" },
           blurb: {
-            en: "No pass is drawn — no historical orbital elements are reachable. What is computed is the height of the Earth's shadow, which settles the question.",
-            fr: "Aucun passage n'est dessiné — aucun élément orbital historique n'est joignable. Ce qui est calculé, c'est la hauteur de l'ombre de la Terre, qui tranche."
+            en: "Paris, 29 July 2025 at 11 pm, two days after a launch: the new satellites cross in a line, each propagated from the orbital elements archived that day.",
+            fr: "Paris, 29 juillet 2025 à 23 h, deux jours après un lancement : les nouveaux satellites passent en file, chacun propagé depuis les éléments orbitaux archivés ce jour-là."
           }
         }
       ]

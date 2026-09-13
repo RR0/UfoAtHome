@@ -6496,9 +6496,9 @@ export class SightingEditorElement extends HTMLElement {
    * and people really did watch them at noon; a satellite does not need a dark observer, it needs to
    * be brighter than the sky it stands in.
    *
-   * What the clause never says is WHICH satellite. Historical orbital elements cannot be obtained
-   * (see Satellites.ts), so an individual pass is placed by hand like an aircraft — this states the
-   * window, not the object.
+   * WHICH satellite is said only where the element sets of that date exist (since February 2021,
+   * see realSatelliteClause); before that, an individual pass is placed by hand like an aircraft,
+   * and this states the window, not the object.
    */
   private satelliteClause(date: Date, observer: { lat: number; lng: number; elevationM: number }): string | undefined {
     const sky = Satellites.visibilityAt(date, observer)

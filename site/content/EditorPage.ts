@@ -298,6 +298,10 @@ if (docs) {
         and the place alone decide both. It states what else was in that patch of sky: the shower
         and its rate over the sporadic background, the comet and its magnitude, whether low orbit
         was still sunlit, whether the Milky Way or the zodiacal light could have been seen at all.
+        From February 2021 it also names the satellites that really crossed that sky bright enough
+        to be seen, the brightest with the time of its pass on the witness's clock, and says when
+        some of them were a Starlink train; the 🛰 button moves the playhead to each pass in turn,
+        brightest first, and turns the witness towards it.
         Whether any of it explains anything is the reader's conclusion, never the file's claim.</p>
     </div>
 
@@ -386,7 +390,7 @@ if (docs) {
           ambient sound — all stop with the player. A paused replay is one instant of a sighting;
           weather still going on over it would be your own room, not the witness's evening.</li>
         <li><strong>Nothing is invented.</strong> Where a record does not exist — before 1940 for
-          the weather, before 1957 for satellites, historical orbital elements at all — the field
+          the weather, before 1957 for satellites, orbital elements before 2021 — the field
           stays editable and the interface says which of the two it is.</li>
       </ul>
     </div>
@@ -627,8 +631,13 @@ if (docs) {
         d'une comète est un problème résolu : la date et le lieu suffisent à décider des deux. Elle
         énonce ce qu'il y avait d'autre dans ce coin de ciel : la pluie et son taux au-dessus du fond
         sporadique, la comète et sa magnitude, si l'orbite basse était encore éclairée, si la Voie
-        lactée ou la lumière zodiacale pouvaient seulement être vues. Que cela explique ou non
-        quelque chose est la conclusion du lecteur, jamais l'affirmation du fichier.</p>
+        lactée ou la lumière zodiacale pouvaient seulement être vues. À partir de février 2021, elle
+        nomme aussi les satellites qui ont réellement traversé ce ciel assez brillants pour être vus,
+        le plus brillant avec l'heure de son passage à la montre du témoin, et dit quand certains
+        formaient un train de Starlink ; le bouton 🛰 amène la tête de lecture sur chaque passage tour
+        à tour, du plus brillant au plus faible, et tourne le témoin vers lui.
+        Que cela explique ou non quelque chose est la conclusion du lecteur, jamais l'affirmation du
+        fichier.</p>
     </div>
 
     <div class="group-doc">
@@ -725,7 +734,7 @@ if (docs) {
           en pause est un instant d'observation ; une météo qui continuerait par-dessus serait votre
           pièce, pas la soirée du témoin.</li>
         <li><strong>Rien n'est inventé.</strong> Là où le relevé n'existe pas — avant 1940 pour la
-          météo, avant 1957 pour les satellites, et les éléments orbitaux historiques en général —
+          météo, avant 1957 pour les satellites, avant 2021 pour les éléments orbitaux —
           le champ reste modifiable et l'interface dit lequel des deux cas s'applique.</li>
       </ul>
     </div>
