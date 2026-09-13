@@ -447,6 +447,35 @@ input[type=range] {
   min-width: 3em;
   text-align: center;
 }
+/* A small picture — a catalogue card, a sidebar embed. The map is not offered there: at this size
+   it would be too small to read and would cover most of the sky it is meant to explain, and its
+   button is what pushed the playback bar's last controls out of the picture. The bar itself
+   tightens so what remains fits: the photo's opacity slider goes too, and the seek bar gives up
+   its width before any button does. The stage is the container (see .stage). */
+@container (max-width: 420px) {
+  #witness-map,
+  .witness-map-panel {
+    display: none !important;
+  }
+  .toolbar {
+    gap: 0.25em;
+    padding: 0.3em 0.35em;
+  }
+  .time-label {
+    min-width: 0;
+    flex-shrink: 0;
+  }
+  /* The picture's opacity slider too: its on/off button stays, and the full-size player has both. */
+  .toolbar #reference-opacity {
+    display: none !important;
+  }
+  /* The seek bar gives up its width first: a range input keeps an intrinsic 130 px otherwise, and
+     that is what pushed a card's last buttons out of it. */
+  .seek-track,
+  .seek-track #seek {
+    min-width: 0;
+  }
+}
 .tooltip {
   position: absolute;
   z-index: 1;
