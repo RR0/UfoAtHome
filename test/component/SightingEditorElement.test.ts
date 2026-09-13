@@ -2566,6 +2566,31 @@ describe("SightingEditorElement import controls", () => {
     expect(element.sightingData.witness).toEqual({ id: "wilcox" })
   })
 
+  it("shows in the URL field the recording a src attribute opened, as a full address", async () => {
+    // The site's ?sighting= link sets src; the field is where a reader looks for which file is open.
+    const json = { version: 1, witness: { id: "zamora" }, timeline: { keyframes: [] } }
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve(json) }))
+    const element = mount()
+    element.setAttribute("src", "/demo-data/witness-socorro.json")
+    const urlInput = element.shadowRoot!.getElementById("import-url") as HTMLInputElement
+    await waitFor(() => urlInput.value !== "")
+    expect(urlInput.value).toBe(new URL("/demo-data/witness-socorro.json", location.href).href)
+    expect(element.sightingData.witness).toEqual({ id: "zamora" })
+  })
+
+  it("empties the URL field once a file from disk replaces the recording it named", async () => {
+    const json = { version: 1, witness: { id: "zamora" }, timeline: { keyframes: [] } }
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve(json) }))
+    const element = mount()
+    element.setAttribute("src", "https://example.org/sighting.json")
+    const urlInput = element.shadowRoot!.getElementById("import-url") as HTMLInputElement
+    await waitFor(() => urlInput.value !== "")
+    setFile(element.shadowRoot!.getElementById("import-file") as HTMLInputElement,
+      JSON.stringify({ version: 1, witness: { id: "chiles" }, timeline: { keyframes: [] } }))
+    await waitFor(() => urlInput.value === "")
+    expect(element.sightingData.witness).toEqual({ id: "chiles" })
+  })
+
   it("does nothing when the URL field is empty", () => {
     const element = mount()
     const fetchMock = vi.fn()

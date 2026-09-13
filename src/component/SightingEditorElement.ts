@@ -1745,6 +1745,8 @@ export class SightingEditorElement extends HTMLElement {
         reader.readAsText(file)
       })
       this.sightingData = JSON.parse(text) as SightingRecordingJson
+      // The recording now open came from a file, not from the address still sitting in the field.
+      this.importUrlInput.value = ""
     } catch {
       window.alert(this.messages.importError)
     } finally {
@@ -1764,6 +1766,10 @@ export class SightingEditorElement extends HTMLElement {
     if (!url) return
     try {
       this.sightingData = (await SightingFetch.json(url)) as SightingRecordingJson
+      // Says where the open recording came from, whichever way it was asked for: typed here, the
+      // `src` attribute (a site's `?sighting=` link), or a witness's own file. Absolute, so the
+      // address can be copied out of the field and still work, and so the field is a valid URL.
+      this.importUrlInput.value = new URL(url, location.href).href
     } catch (error) {
       window.alert(this.importErrorFor(error))
     }
