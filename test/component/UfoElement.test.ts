@@ -472,9 +472,11 @@ describe("UfoElement", () => {
     expect(toolbar.classList.contains("auto-hide")).toBe(false)
   })
 
-  it("offers no auto-replay button: looping is a property a page sets, on by default", () => {
+  it("offers no auto-replay button, and so does not loop unless a page asks it to", () => {
     const element = mount()
     expect(element.shadowRoot!.getElementById("loop")).toBeNull()
+    expect(element.autoReplayEnabled).toBe(false)
+    element.autoReplayEnabled = true
     expect(element.autoReplayEnabled).toBe(true)
   })
 
@@ -522,7 +524,7 @@ describe("UfoElement", () => {
     expect(element.playbackState).toBe("paused")
 
     element.toggleLoop()
-    expect(element.autoReplayEnabled).toBe(false)
+    expect(element.autoReplayEnabled).toBe(true)
   })
 
   it("the corner buttons auto-hide alongside the toolbar", () => {
@@ -1177,13 +1179,15 @@ describe("UfoElement sequencing API", () => {
     }
   })
 
-  it("turns auto-replay off through the same path the button uses", () => {
+  it("turns auto-replay on and off, idempotently", () => {
     const element = document.createElement("rr0-ufo") as UfoElement
     document.body.append(element)
-    expect(element.autoReplayEnabled).toBe(true)
-    element.autoReplayEnabled = false
     expect(element.autoReplayEnabled).toBe(false)
+    element.autoReplayEnabled = true
+    expect(element.autoReplayEnabled).toBe(true)
     // Idempotent: setting it to what it already is must not toggle it back.
+    element.autoReplayEnabled = true
+    expect(element.autoReplayEnabled).toBe(true)
     element.autoReplayEnabled = false
     expect(element.autoReplayEnabled).toBe(false)
     element.remove()

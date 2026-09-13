@@ -137,7 +137,7 @@ which since 0.54.0 draws nothing but the editing handles — the shape itself st
 | `enableClickToPlay` | property (get/set, default `true`) | Whether clicking the canvas toggles Play/Pause (see below). Composing elements that need the canvas's own click for something else set this to `false` — see `<rr0-sighting-editor>`. |
 | `fullscreenTarget` | property (get/set, default: the component's own stage) | The element the fullscreen button requests fullscreen on. Composing elements that need a *different* element fullscreened set this — see `<rr0-scene>`. |
 | `play()` / `pause()` | method | Start or stop playback. Alongside `togglePlayPause()` because a caller sequencing several recordings needs to say which state it wants, not flip whatever the current one happens to be |
-| `autoReplayEnabled` | property (get/set, default `true`) | Looping. A page playing recordings in turn has to turn it **off**, or the first one never ends |
+| `autoReplayEnabled` | property (get/set, default `false`) | Looping. Off by default: a replay plays once and stops, firing `ended`; a page that wants a loop turns it **on** |
 | `playbackState` | property (readonly) | `"stopped"`, `"playing"` or `"paused"` |
 | `currentTime` / `seekableDuration` | property | The playhead and its range, in the timeline's own units (see `positionLabel` for why those are not real milliseconds) |
 
@@ -155,8 +155,8 @@ given — but in the editor, editing either date clears an explicit `durationSec
 more recent edit is the one that wins rather than being silently outranked). Watching a 5-minute sighting then takes 5 real minutes, not however long the recording itself took to
 author (e.g. a quick mouse drag) — drag the seek bar directly to skip ahead. The start/end labels around the seek
 bar show real clock times when `time` has an hour (e.g. `02:45` → `02:50`); otherwise they show `0:00` → the
-duration actually available (the declared one if known, else the recording's own length). Playback loops by
-default; a page that wants it to play once and stop sets `autoReplayEnabled = false` (there is no button for it).
+duration actually available (the declared one if known, else the recording's own length). Playback plays once and
+stops by default; a page that wants it to loop sets `autoReplayEnabled = true` (there is no button for it).
 
 Clicking anywhere on the canvas also toggles Play/Pause (not just the button), and DOUBLE-clicking it toggles
 fullscreen — both matching common video-player UX. A double-click is two clicks first, so click-to-play has

@@ -169,7 +169,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       <tr><td><code>playbackState</code></td><td>property (read)</td><td><code>"stopped"</code>, <code>"playing"</code> or <code>"paused"</code></td></tr>
       <tr><td><code>currentTime</code></td><td>property</td><td>The playhead, in the timeline's own units — <em>not</em> real milliseconds, see <code>positionLabel</code></td></tr>
       <tr><td><code>seekableDuration</code></td><td>property (read)</td><td>The range <code>currentTime</code> can take</td></tr>
-      <tr><td><code>autoReplayEnabled</code></td><td>property</td><td>Looping, on by default. Turn it <strong>off</strong> if you want the <code>ended</code> event</td></tr>
+      <tr><td><code>autoReplayEnabled</code></td><td>property</td><td>Looping, off by default: a replay plays once, then fires <code>ended</code>. Turn it <strong>on</strong> for a loop</td></tr>
       <tr><td><code>positionLabel</code> / <code>durationLabel</code></td><td>property (read)</td><td>The position and length already formatted by the element — real clock time when the observation states one</td></tr>
       <tr><td><code>refresh()</code></td><td>method</td><td>Re-reads the duration and repaints — call it after mutating <code>sighting.timeline</code> from outside</td></tr>
       <tr><td><code>canvasElement</code> / <code>renderer</code></td><td>property (read)</td><td>The <code>&lt;canvas&gt;</code>, and the renderer painting on it</td></tr>
@@ -229,7 +229,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       <tr><td><code>playbackState</code></td><td>propriété (lecture)</td><td><code>"stopped"</code>, <code>"playing"</code> ou <code>"paused"</code></td></tr>
       <tr><td><code>currentTime</code></td><td>propriété</td><td>La tête de lecture, dans les unités de la chronologie — <em>pas</em> des millisecondes réelles, voir <code>positionLabel</code></td></tr>
       <tr><td><code>seekableDuration</code></td><td>propriété (lecture)</td><td>L'étendue que <code>currentTime</code> peut prendre</td></tr>
-      <tr><td><code>autoReplayEnabled</code></td><td>propriété</td><td>La lecture en boucle, active par défaut. À mettre à <strong>false</strong> si vous voulez l'événement <code>ended</code></td></tr>
+      <tr><td><code>autoReplayEnabled</code></td><td>propriété</td><td>La lecture en boucle, désactivée par défaut : une lecture se joue une fois puis émet <code>ended</code>. À mettre à <strong>true</strong> pour boucler</td></tr>
       <tr><td><code>positionLabel</code> / <code>durationLabel</code></td><td>propriété (lecture)</td><td>Position et durée déjà mises en forme — heure réelle quand l'observation en énonce une</td></tr>
       <tr><td><code>refresh()</code></td><td>méthode</td><td>Relit la durée et repeint — à appeler après avoir modifié <code>sighting.timeline</code> de l'extérieur</td></tr>
       <tr><td><code>canvasElement</code> / <code>renderer</code></td><td>propriété (lecture)</td><td>Le <code>&lt;canvas&gt;</code>, et ce qui peint dessus</td></tr>

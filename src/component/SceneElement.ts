@@ -399,7 +399,7 @@ export class SceneElement extends HTMLElement {
     this.thunderTimeoutId = window.setTimeout(() => this.weatherAudio.playThunder(), LightningSchedule.thunderDelayMs(flash))
   }
 
-  /** Unlocks weather audio on the very first interaction with the scene — needed even for a
+  /** Unlocks weather audio on the very first interaction with the scene, anywhere in it — needed even for a
    * read-only `<rr0-scene>` embed with no editing UI at all (e.g. a published case page whose
    * sighting.json already sets rain/wind), which has no "weather control" to hang resume() off of
    * the way SightingEditorElement's own updateWeather() does. Re-applies the current weather right
@@ -408,6 +408,8 @@ export class SceneElement extends HTMLElement {
    * scene loaded with rain already set would render visible rain but never actually start the
    * sound until weather changed again, which it might never do. */
   private readonly handleFirstInteraction = () => {
+    this.removeEventListener("pointerdown", this.handleFirstInteraction, true)
+    this.removeEventListener("keydown", this.handleFirstInteraction, true)
     this.weatherAudio.resume()
     this.setWeather(resolveWeatherAt(this.ufoElement.sighting, this.lastTimeMs))
   }
@@ -496,7 +498,12 @@ export class SceneElement extends HTMLElement {
     this.ufoElement.addEventListener("referenceview", event => this.applyReferenceView((event as CustomEvent<{ shown: boolean; opacity: number }>).detail))
     this.ufoElement.canvasElement.addEventListener("pointermove", this.handlePointerMove)
     this.ufoElement.canvasElement.addEventListener("pointerleave", this.handlePointerLeave)
-    this.ufoElement.canvasElement.addEventListener("pointerdown", this.handleFirstInteraction, { once: true })
+    // On the element itself and while capturing, so any press inside it counts: the play button
+    // of the playback bar above all, which is how a reader starts a replay, and which a listener on
+    // the canvas alone never heard. A storm replayed from its own button was silent. Events from the
+    // shadow trees inside are composed and reach this element retargeted.
+    this.addEventListener("pointerdown", this.handleFirstInteraction, true)
+    this.addEventListener("keydown", this.handleFirstInteraction, true)
   }
 
   /**

@@ -184,7 +184,9 @@ export class UfoElement extends HTMLElement {
    * two of any edit on a real case page — which is precisely when a preview is asked for. */
   private soundPreview?: SightingSound
   private player: Player
-  private loopEnabled = true
+  /** Off by default: a replay plays once and stops, and a page that wants a loop (a kiosk, a
+   * background) turns it on through autoReplayEnabled. There is no button for it. */
+  private loopEnabled = false
 
   /** Where playback stood before the click pair that a double-click is made of — see
    * restorePlayback. */
