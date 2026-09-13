@@ -220,7 +220,7 @@
           "elevationM": 0,
           "headingDeg": 0,
           "pitchDeg": 18,
-          "fovDeg": 90
+          "fovDeg": 60
         }
       },
       {
@@ -231,7 +231,7 @@
           "elevationM": 0,
           "headingDeg": 0,
           "pitchDeg": 18,
-          "fovDeg": 90
+          "fovDeg": 60
         }
       }
     ]

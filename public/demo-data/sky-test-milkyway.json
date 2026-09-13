@@ -59,7 +59,7 @@
           "elevationM": 0,
           "headingDeg": 200,
           "pitchDeg": 18,
-          "fovDeg": 100
+          "fovDeg": 70
         }
       },
       {
@@ -70,7 +70,7 @@
           "elevationM": 0,
           "headingDeg": 233,
           "pitchDeg": 70,
-          "fovDeg": 100
+          "fovDeg": 70
         }
       },
       {
@@ -81,7 +81,7 @@
           "elevationM": 0,
           "headingDeg": 285,
           "pitchDeg": 25,
-          "fovDeg": 100
+          "fovDeg": 70
         }
       },
       {
@@ -92,7 +92,7 @@
           "elevationM": 0,
           "headingDeg": 200,
           "pitchDeg": 18,
-          "fovDeg": 100
+          "fovDeg": 70
         }
       }
     ]

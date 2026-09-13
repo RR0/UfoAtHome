@@ -58,8 +58,8 @@
           "lng": -16.5,
           "elevationM": 0,
           "headingDeg": 268,
-          "pitchDeg": 2,
-          "fovDeg": 90
+          "pitchDeg": 20,
+          "fovDeg": 60
         }
       },
       {
@@ -69,8 +69,8 @@
           "lng": -16.5,
           "elevationM": 0,
           "headingDeg": 280,
-          "pitchDeg": 50,
-          "fovDeg": 90
+          "pitchDeg": 40,
+          "fovDeg": 60
         }
       },
       {
@@ -80,8 +80,8 @@
           "lng": -16.5,
           "elevationM": 0,
           "headingDeg": 292,
-          "pitchDeg": 2,
-          "fovDeg": 90
+          "pitchDeg": 20,
+          "fovDeg": 60
         }
       },
       {
@@ -91,8 +91,8 @@
           "lng": -16.5,
           "elevationM": 0,
           "headingDeg": 268,
-          "pitchDeg": 2,
-          "fovDeg": 90
+          "pitchDeg": 20,
+          "fovDeg": 60
         }
       }
     ]

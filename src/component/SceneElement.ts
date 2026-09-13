@@ -1424,6 +1424,7 @@ export class SceneElement extends HTMLElement {
       time?.day,
       time?.hour,
       time?.minute,
+      time?.second,
       sighting.event.utcOffsetHours,
       sighting.event.durationSeconds,
       sighting.timeline.duration

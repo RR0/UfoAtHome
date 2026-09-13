@@ -9,8 +9,9 @@
     "year": 2018,
     "month": 8,
     "day": 13,
-    "hour": 3,
-    "minute": 30
+    "hour": 4,
+    "minute": 5,
+    "second": 33
   },
   "utcOffsetHours": 2,
   "durationSeconds": 120,
@@ -60,7 +61,7 @@
           "elevationM": 0,
           "headingDeg": 20,
           "pitchDeg": 38,
-          "fovDeg": 110
+          "fovDeg": 70
         }
       },
       {
@@ -71,7 +72,7 @@
           "elevationM": 0,
           "headingDeg": 70,
           "pitchDeg": 58,
-          "fovDeg": 110
+          "fovDeg": 70
         }
       },
       {
@@ -82,7 +83,7 @@
           "elevationM": 0,
           "headingDeg": 20,
           "pitchDeg": 38,
-          "fovDeg": 110
+          "fovDeg": 70
         }
       },
       {
@@ -93,7 +94,7 @@
           "elevationM": 0,
           "headingDeg": 20,
           "pitchDeg": 38,
-          "fovDeg": 110
+          "fovDeg": 70
         }
       }
     ]

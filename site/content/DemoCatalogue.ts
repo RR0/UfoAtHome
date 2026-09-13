@@ -192,8 +192,8 @@ export class DemoCatalogue {
           src: "/demo-data/sky-test-meteors.json",
           title: { en: "A meteor shower", fr: "Une pluie de météores" },
           blurb: {
-            en: "Perseids, 13 August 2018, 03:30, radiant high and no Moon — over the sporadic background that falls every night of the year.",
-            fr: "Perséides, 13 août 2018, 03:30, radiant haut et pas de Lune — au-dessus du fond sporadique qui tombe toutes les nuits de l'année."
+            en: "Perseids, 13 August 2018, 04:05, radiant high and no Moon — over the sporadic background that falls every night of the year.",
+            fr: "Perséides, 13 août 2018, 04:05, radiant haut et pas de Lune — au-dessus du fond sporadique qui tombe toutes les nuits de l'année."
           }
         },
         {
