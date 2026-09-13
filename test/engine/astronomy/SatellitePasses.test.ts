@@ -106,6 +106,27 @@ describe("SatellitePasses", () => {
     })
   })
 
+  describe("the Earth's shadow on an object", () => {
+    it("is full behind the Earth, absent before it, and fades across the penumbra in between", () => {
+      // The Sun along +x. An object 500 km up on the day side sees all of it; one on the night side,
+      // straight behind the Earth, none; one crossing the edge of the cylinder of shadow goes through
+      // every fraction in order, over the few tens of kilometres the penumbra is deep there.
+      const sun = { x: 1, y: 0, z: 0 }
+      const r = 6378.137 + 500
+      expect(SatellitePasses.shadowFraction({ x: r, y: 0, z: 0 }, sun)).toBe(0)
+      expect(SatellitePasses.shadowFraction({ x: -r, y: 0, z: 0 }, sun)).toBe(1)
+      const fractions = [-40, -20, 0, 20, 40].map(dy => {
+        const y = 6378.137 + dy
+        return SatellitePasses.shadowFraction({ x: -Math.sqrt(r * r - y * y), y, z: 0 }, sun)
+      })
+      for (let i = 1; i < fractions.length; i++) expect(fractions[i]).toBeLessThanOrEqual(fractions[i - 1])
+      expect(fractions[0]).toBeGreaterThan(0.9)
+      expect(fractions[4]).toBeLessThan(0.1)
+      expect(fractions[2]).toBeGreaterThan(0.1)
+      expect(fractions[2]).toBeLessThan(0.9)
+    })
+  })
+
   describe("how bright it looks", () => {
     it("returns the standard magnitude at 1000 km, half lit", () => {
       const iss = objectOf(ISS_TLE, "ISS (ZARYA)", { stdMag: -2.5 })

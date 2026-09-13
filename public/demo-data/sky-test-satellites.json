@@ -2,18 +2,18 @@
   "version": 1,
   "caseId": "sky-test-satellites",
   "description": {
-    "fr": "Un ciel d'essai pour la question satellite. On ne prétend pas dessiner un passage : aucun élément orbital historique n'est appelable depuis un navigateur, et propager un TLE d'aujourd'hui vers une date ancienne ne donnerait rien de vrai. Ce qui est calculé, c'est la seule chose qui décide : la hauteur de l'ombre de la Terre au-dessus du témoin. Ici, au crépuscule du 20 avril 2020, elle est assez basse pour que l'orbite basse soit encore au soleil — et le compte SATCAT daté dit combien d'objets tournaient ce mois-là, trains Starlink compris. Être éclairé n'est pas être vu, mais n'être pas éclairé règle la question.",
-    "en": "A test sky for the satellite question. There is no pretence of drawing a pass: no historical orbital elements can be fetched from a browser, and propagating today's TLE back to an old date would produce nothing true. What is computed is the one thing that decides: the height of the Earth's shadow above the witness. Here, at dusk on 20 April 2020, it is low enough for low orbit to still be in sunlight — and the dated SATCAT count says how many objects were going round that month, Starlink trains included. Being lit is not being seen, but not being lit settles the question."
+    "fr": "Un ciel d'essai pour la question satellite, deux jours après un lancement Starlink. Le 29 juillet 2025 vers 23 h à Paris, le Soleil est à 11° sous l'horizon : le témoin est dans la nuit, l'orbite basse encore au soleil. Les satellites lancés le 27 juillet volent en file vers 260 km, pas encore montés à leur altitude de travail ni rendus plus sombres, et passent un par un vers l'ouest-nord-ouest. Chaque point est calculé depuis les éléments orbitaux archivés ce jour-là, pas posé à la main.",
+    "en": "A test sky for the satellite question, two days after a Starlink launch. On 29 July 2025 around 11 pm in Paris the Sun is 11° below the horizon: the witness is in the dark, low orbit still in sunlight. The satellites launched on 27 July fly in a line at about 260 km, not yet raised to their working height nor darkened, and cross one after another towards the west-north-west. Every point is computed from the orbital elements archived that day, not placed by hand."
   },
   "time": {
-    "year": 2020,
-    "month": 4,
-    "day": 20,
-    "hour": 21,
-    "minute": 40
+    "year": 2025,
+    "month": 7,
+    "day": 29,
+    "hour": 23,
+    "minute": 5
   },
   "utcOffsetHours": 2,
-  "durationSeconds": 24,
+  "durationSeconds": 240,
   "place": [
     {
       "lat": 48.8566,
@@ -58,30 +58,19 @@
           "lat": 48.8566,
           "lng": 2.3522,
           "elevationM": 0,
-          "headingDeg": 268,
-          "pitchDeg": 12,
+          "headingDeg": 297,
+          "pitchDeg": 25,
           "fovDeg": 100
         }
       },
       {
-        "t": 10000,
+        "t": 240000,
         "pose": {
           "lat": 48.8566,
           "lng": 2.3522,
           "elevationM": 0,
-          "headingDeg": 332,
-          "pitchDeg": 42,
-          "fovDeg": 100
-        }
-      },
-      {
-        "t": 24000,
-        "pose": {
-          "lat": 48.8566,
-          "lng": 2.3522,
-          "elevationM": 0,
-          "headingDeg": 268,
-          "pitchDeg": 12,
+          "headingDeg": 297,
+          "pitchDeg": 25,
           "fovDeg": 100
         }
       }

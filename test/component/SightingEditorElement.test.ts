@@ -5722,6 +5722,76 @@ describe("the sky under an observation being edited", () => {
     expect(heading).toBeLessThan(311)
   })
 
+  describe("real satellite passes", () => {
+    /** Paris, 29 July 2025 at 23:05, two days after a Starlink launch: the case the demo shows. */
+    function overParis(element: SightingEditorElement): void {
+      typeInto(element, "obs-time", "2025-07-29 23:05")
+      typeInto(element, "utcOffsetHours", "2")
+      typeInto(element, "lat", "48.8566")
+      typeInto(element, "lng", "2.3522")
+    }
+
+    /** A pass as SatellitePasses states one, peaking `seconds` after 21:05 UTC. */
+    function pass(name: string, seconds: number, magnitude: number, extra: { kind?: "visual" | "starlink"; launch?: string } = {}) {
+      const date = new Date(Date.UTC(2025, 6, 29, 21, 5, seconds))
+      const object = { norad: 1, name, kind: extra.kind ?? "visual", launch: extra.launch, elements: {} as never, ageDays: 0.4 }
+      const peak = { object, date, azimuthDeg: 297, altitudeDeg: 28, rangeKm: 560, heightKm: 265, sunlitFraction: 1, phaseAngleDeg: 60, magnitude }
+      return { object, start: date, end: date, peak }
+    }
+
+    /** Stands in for the scene's archive answer, so no element set is fetched. */
+    function withPasses(element: SightingEditorElement, passes: ReturnType<typeof pass>[]): void {
+      const scene = element.shadowRoot!.querySelector("rr0-scene") as unknown as Record<string, unknown> & EventTarget
+      Object.defineProperty(scene, "satelliteState", {
+        configurable: true,
+        get: () => ({ status: "ready", coverage: [{ kind: "starlink", status: "covered", from: "", to: "" }] })
+      })
+      scene.satellitePassesDuring = () => passes
+      scene.dispatchEvent(new CustomEvent("satellites-change"))
+    }
+
+    const TRAIN = [
+      pass("ARIANE 40 R/B", 80, 2.9),
+      ...[0, 10, 20].map(offset => pass(`STARLINK-347${offset}`, 60 + offset, 3.2, { kind: "starlink", launch: "2025-07-27" })),
+      pass("TOO FAINT", 90, 9)
+    ]
+
+    it("names the brightest satellite, when on the witness's clock, and the train it crossed with", async () => {
+      const fetchSpy = vi.spyOn(globalThis, "fetch").mockRejectedValue(new TypeError("no network in tests"))
+      const element = mount()
+      typeInto(element, "durationSeconds", "240")
+      overParis(element)
+      withPasses(element, TRAIN)
+      const button = element.shadowRoot!.getElementById("show-satellite") as HTMLButtonElement
+      await waitFor(() => /satellites crossed/.test(skyLine(element)))
+      // Four, not five: the magnitude-9 pass was lit and above the horizon and nobody could see it.
+      expect(skyLine(element)).toMatch(/4 satellites crossed this sky bright enough to be seen, the brightest ARIANE 40 R\/B/)
+      expect(skyLine(element)).toMatch(/23:06:20|11:06:20/)
+      expect(skyLine(element)).toMatch(/a train of 3 Starlinks launched on/)
+      expect(button.hidden).toBe(false)
+      button.click()
+      expect(Number((element.shadowRoot!.getElementById("heading") as HTMLInputElement).value)).toBe(297)
+      expect(Number((element.shadowRoot!.getElementById("pitch") as HTMLInputElement).value)).toBe(28)
+      fetchSpy.mockRestore()
+    })
+
+    it("says so in French", async () => {
+      const languages = vi.spyOn(navigator, "languages", "get").mockReturnValue(["fr-FR", "fr"])
+      const fetchSpy = vi.spyOn(globalThis, "fetch").mockRejectedValue(new TypeError("no network in tests"))
+      const element = mount()
+      await waitFor(() => (element.shadowRoot!.getElementById("add-shape") as HTMLButtonElement).title === "Ajouter une forme")
+      typeInto(element, "durationSeconds", "240")
+      overParis(element)
+      withPasses(element, TRAIN)
+      await waitFor(() => /satellites ont traversé/.test(skyLine(element)))
+      expect(skyLine(element)).toMatch(/le plus brillant ARIANE 40 R\/B/)
+      expect(skyLine(element)).toMatch(/dont un train de 3 Starlink lancés le 27 juillet 2025/)
+      expect((element.shadowRoot!.getElementById("show-satellite") as HTMLButtonElement).title).toBe("Montrer un satellite")
+      fetchSpy.mockRestore()
+      languages.mockRestore()
+    })
+  })
+
   it("says nothing about a comet that was still a telescopic smudge", async () => {
     // Valensole, 1 July 1965. Ikeya-Seki IS in the window — it reached perihelion that October and
     // became the brightest comet of the century — but on this date it was magnitude twelve and had

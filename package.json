@@ -54,7 +54,7 @@
     "@rr0/place": "^0.5.4",
     "@rr0/time": "^0.11.2",
     "astronomy-engine": "^2.1.19",
-    "satellite.js": "^7.1.0",
+    "satellite.js": "6.0.1",
     "three": "^0.185.1"
   },
   "devDependencies": {

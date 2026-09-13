@@ -1,6 +1,5 @@
 import {
-  degreesToRadians, ecfToEci, ecfToLookAngles, eciToEcf, geodeticToEcf, gstime, jday, json2satrec, propagate,
-  shadowFraction, sunPos
+  degreesToRadians, ecfToEci, ecfToLookAngles, eciToEcf, geodeticToEcf, gstime, jday, json2satrec, propagate, sunPos
 } from "satellite.js"
 import type { EciVec3, SatRec } from "satellite.js"
 import type { ObserverGeo } from "./CelestialPositions.js"
@@ -219,7 +218,8 @@ export class SatellitePasses {
       height: observer.elevationM / 1000
     }
     const observerEci = ecfToEci(geodeticToEcf(geodetic), gmst)
-    const sunEciAu = sunPos(jday(date)).rsun
+    const [x, y, z] = sunPos(jday(date)).rsun
+    const sunEciAu = { x, y, z }
     return { gmst, geodetic, observerEci, sunEciAu }
   }
 
@@ -227,9 +227,9 @@ export class SatellitePasses {
                      frame: ReturnType<SatellitePasses["frameAt"]>): SatellitePosition | undefined {
     const state = propagate(record.satrec, date)
     if (!state || !state.position || Number.isNaN(state.position.x)) return undefined
-    const eci = state.position
+    const eci = state.position as EciVec3<number>
     const look = ecfToLookAngles(frame.geodetic, eciToEcf(eci, frame.gmst))
-    const sunlitFraction = 1 - shadowFraction(frame.sunEciAu, eci)
+    const sunlitFraction = 1 - SatellitePasses.shadowFraction(eci, frame.sunEciAu)
     const phaseAngleDeg = SatellitePasses.phaseAngleDeg(eci, frame.sunEciAu, frame.observerEci)
     const heightKm = Math.hypot(eci.x, eci.y, eci.z) - 6371
     return {
@@ -242,6 +242,35 @@ export class SatellitePasses {
       phaseAngleDeg,
       magnitude: SatelliteMagnitude.of(record.object, look.rangeSat, phaseAngleDeg, sunlitFraction, heightKm)
     }
+  }
+
+  /**
+   * How much of the Sun's disc the Earth hides from an object: 0 in full sunlight, 1 in the umbra.
+   *
+   * The two discs as the object sees them — the Sun's, a quarter of a degree across, and the
+   * Earth's, most of the sky from low orbit — and the area where they overlap, as a fraction of the
+   * Sun's (Montenbruck and Gill, "Satellite Orbits", 3.4). The penumbra is what this adds to the
+   * "height of the shadow" Satellites.ts states: a few seconds of fading, not a switch. Atmospheric
+   * refraction into the shadow is left out, as it is there.
+   */
+  static shadowFraction(objectKm: EciVec3<number>, sunAu: EciVec3<number>): number {
+    const AU_KM = 149_597_870.7
+    const SUN_RADIUS_KM = 696_000
+    const EARTH_RADIUS_KM = 6378.137
+    const toSun = [sunAu.x * AU_KM - objectKm.x, sunAu.y * AU_KM - objectKm.y, sunAu.z * AU_KM - objectKm.z]
+    const sunDistance = Math.hypot(toSun[0], toSun[1], toSun[2])
+    const earthDistance = Math.hypot(objectKm.x, objectKm.y, objectKm.z)
+    const a = Math.asin(Math.min(1, SUN_RADIUS_KM / sunDistance))
+    const b = Math.asin(Math.min(1, EARTH_RADIUS_KM / earthDistance))
+    const cos = -(objectKm.x * toSun[0] + objectKm.y * toSun[1] + objectKm.z * toSun[2]) / (earthDistance * sunDistance)
+    const c = Math.acos(Math.max(-1, Math.min(1, cos)))
+    if (c >= a + b) return 0
+    if (c <= b - a) return 1
+    // Partial overlap of two circles of radii a and b whose centres are c apart.
+    const x = (c * c + a * a - b * b) / (2 * c)
+    const y = Math.sqrt(Math.max(0, a * a - x * x))
+    const overlap = a * a * Math.acos(Math.max(-1, Math.min(1, x / a))) + b * b * Math.acos(Math.max(-1, Math.min(1, (c - x) / b))) - c * y
+    return Math.min(1, Math.max(0, overlap / (Math.PI * a * a)))
   }
 
   /** The angle, at the object, between the directions to the Sun and to the witness. */
@@ -268,7 +297,7 @@ export class SatellitePasses {
     this.records.forEach((record, index) => {
       const state = propagate(record.satrec, middle)
       if (!state || !state.position || Number.isNaN(state.position.x)) return
-      const look = ecfToLookAngles(frame.geodetic, eciToEcf(state.position, frame.gmst))
+      const look = ecfToLookAngles(frame.geodetic, eciToEcf(state.position as EciVec3<number>, frame.gmst))
       if ((look.elevation * 180) / Math.PI >= SatellitePasses.CANDIDATE_BELOW_HORIZON_DEG) indices.push(index)
     })
     this.candidates = { windowStart, observerKey, indices }
