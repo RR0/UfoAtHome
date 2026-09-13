@@ -455,6 +455,10 @@ export class SightingElement extends HTMLElement {
     this.refreshParamSummary()
     void this.runAssessments()
     if (this.infoOpen) this.populateInfoPanel()
+    // For the page around the player: whatever it says about the recording on show (its
+    // description, its title) has to follow a change of witness, and `sightingData` alone cannot
+    // tell it when to look again.
+    this.dispatchEvent(new CustomEvent(WITNESS_CHANGE_EVENT, { detail: { src } }))
   }
 
   /**
@@ -922,6 +926,10 @@ export class SightingElement extends HTMLElement {
 }
 
 export const SIGHTING_ELEMENT_NAME = "rr0-sighting"
+
+/** Fired by `<rr0-sighting>` whenever the recording on show changes: loaded, set through
+ * `sightingData`, or another witness picked. Read `sightingData` back off the element. */
+export const WITNESS_CHANGE_EVENT = "witnesschange"
 
 /**
  * What this element was called until 0.41.0, still registered and still working.

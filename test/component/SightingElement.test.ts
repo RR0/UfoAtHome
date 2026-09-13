@@ -254,6 +254,23 @@ describe("SightingElement", () => {
     expect(select.hidden).toBe(true)
   })
 
+  it("tells the page which recording is on show, on load and on every change of witness", async () => {
+    stubFetch({ "chiles.json": johnSighting, "whitted.json": janeSighting })
+    const element = mount()
+    const seen: string[] = []
+    element.addEventListener("witnesschange", event => seen.push((event as CustomEvent<{ src: string }>).detail.src))
+
+    element.witnessUrls = ["chiles.json", "whitted.json"]
+    await new Promise(resolve => setTimeout(resolve, 0))
+    expect(seen).toEqual(["chiles.json"])
+
+    const select = element.shadowRoot!.getElementById("witness") as HTMLSelectElement
+    select.value = "whitted.json"
+    select.dispatchEvent(new Event("change"))
+    expect(seen).toEqual(["chiles.json", "whitted.json"])
+    expect(element.sightingData).toBe(janeSighting)
+  })
+
   it("shows the live select, not plain text, once there's more than one witness", async () => {
     stubFetch({ "chiles.json": johnSighting, "whitted.json": janeSighting })
     const element = mount()

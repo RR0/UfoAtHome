@@ -317,6 +317,20 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
   </div>
 </section>
 `
+    },
+    events: {
+      en: `<div class="table-scroll">
+    <table>
+      <tr><th>Event</th><th>Fires</th><th>Where to listen</th></tr>
+      <tr><td><code>witnesschange</code></td><td>When the recording on show changes: loaded, set through <code>sightingData</code>, or another witness picked from the list. <code>detail.src</code> is its address, empty for a recording set by script</td><td>On this element. It does not bubble: listen on the <code>&lt;rr0-sighting&gt;</code> itself, then read <code>sightingData</code> back off it (its description, its case id)</td></tr>
+    </table>
+    </div>`,
+      fr: `<div class="table-scroll">
+    <table>
+      <tr><th>Événement</th><th>Quand</th><th>Où l'écouter</th></tr>
+      <tr><td><code>witnesschange</code></td><td>Quand l'enregistrement affiché change : chargé, posé par <code>sightingData</code>, ou un autre témoin choisi dans la liste. <code>detail.src</code> est son adresse, vide pour un enregistrement posé par script</td><td>Sur cet élément. Il n'est pas <i lang="en">bubbling</i> : écoutez sur le <code>&lt;rr0-sighting&gt;</code> lui-même, puis relisez son <code>sightingData</code> (sa description, son identifiant de cas)</td></tr>
+    </table>
+    </div>`
     }
   },
   {

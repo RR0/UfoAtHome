@@ -61,6 +61,8 @@ const stage = document.getElementById("player-stage")
 const stageBox = document.getElementById("player-stage-box")
 const status = document.getElementById("player-status")
 const editLink = document.getElementById("player-edit")
+const description = document.getElementById("player-description")
+const pageLanguage = ${JSON.stringify(language)}
 const urlField = document.getElementById("player-url")
 const urlForm = document.getElementById("player-url-form")
 const pastePanel = document.getElementById("player-paste")
@@ -116,6 +118,27 @@ const announce = (sighting, source, fallbackTitle) => {
   lede.hidden = true
 }
 
+/**
+ * What the recording says about itself, above the way into the editor.
+ *
+ * Read off the player rather than off the file this page fetched: a case with several witnesses is
+ * a manifest, and each witness carries a description of their own, which has to follow the one the
+ * reader picked. The page's own language first, then English, then whatever the recording has.
+ * Plain text, cut into paragraphs on blank lines: a recording is data, not markup.
+ */
+const describe = () => {
+  const said = stage.sightingData?.description
+  const text = typeof said === "string" ? said
+    : said ? (said[pageLanguage] ?? said.en ?? Object.values(said).find(Boolean)) : undefined
+  description.replaceChildren(...(text ?? "").split(/\\n\\s*\\n/).map(part => part.trim()).filter(Boolean).map(part => {
+    const paragraph = document.createElement("p")
+    paragraph.textContent = part
+    return paragraph
+  }))
+  description.hidden = description.childElementCount === 0
+}
+stage.addEventListener("witnesschange", describe)
+
 const reveal = (source, sighting, fallbackTitle) => {
   stageBox.hidden = false
   // Off unless this is one of the site's own reconstructions that has somewhere to point it. A
@@ -130,6 +153,7 @@ const reveal = (source, sighting, fallbackTitle) => {
     editLink.hidden = true
   }
   announce(sighting, source, fallbackTitle)
+  describe()
 }
 
 /** A bare name with no slash is one of this site's own demos first, then an rr0.org case
@@ -294,9 +318,10 @@ if (asked) {
   <div class="wrap">
     <div class="stage" id="player-stage-box" hidden>
       <rr0-sighting id="player-stage"></rr0-sighting>
-      <p class="stage-caption">
+      <div class="stage-caption">
+        <div class="player-description" id="player-description" hidden></div>
         <a class="btn" id="player-edit" href="/edit/" hidden>Edit this sighting</a>
-      </p>
+      </div>
     </div>
 ${this.form("en")}
   </div>
@@ -334,9 +359,10 @@ ${this.form("en")}
   <div class="wrap">
     <div class="stage" id="player-stage-box" hidden>
       <rr0-sighting id="player-stage"></rr0-sighting>
-      <p class="stage-caption">
+      <div class="stage-caption">
+        <div class="player-description" id="player-description" hidden></div>
         <a class="btn" id="player-edit" href="/edit/" hidden>Éditer cette observation</a>
-      </p>
+      </div>
     </div>
 ${this.form("fr")}
   </div>

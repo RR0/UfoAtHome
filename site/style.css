@@ -229,6 +229,12 @@ section.band:first-of-type { border-top: 0; }
 .stage-padded .stage-caption, .carousel .stage-caption {
   padding: 0.2rem 0 0; border-top: 0; background: none;
 }
+/* The player's own recording, in its own words: body text, not a caption's small grey. */
+/* Capped at about ten lines: a long testimony scrolls inside its own box rather than pushing the
+   way into the editor, and the rest of the page, out of reach. */
+.player-description { color: var(--ink); font-size: 1rem; line-height: 1.55; max-width: 72ch; margin-bottom: 0.8rem;
+  max-height: 15.5em; overflow-y: auto; overscroll-behavior: contain; padding-right: 0.5rem; }
+.player-description p { margin: 0 0 0.6rem; }
 .loading { padding: 3rem 1rem; text-align: center; color: var(--ink-faint); font-size: 0.9rem; }
 
 /* ---------------------------------------------------------------- cards */
