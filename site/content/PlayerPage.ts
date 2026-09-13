@@ -30,15 +30,18 @@ export class PlayerPage implements SitePage {
     // Only for these — anything else is named from what the recording itself carries.
     // As they read inside the heading's sentence: a title that is not a name loses the capital it
     // only had for starting a card (see Demo.titleIsName).
+    // Under the manifest the Player is handed too (see Demo.playSrc), so a case opened with both its
+    // witnesses is still called by its name rather than by "witnesses-manifest".
     const demoTitles = JSON.stringify(Object.fromEntries(
-      this.catalogue.demos.map(demo => {
+      this.catalogue.demos.flatMap(demo => {
         const title = demo.title[language]
-        return [demo.src, demo.titleIsName ? title : title.charAt(0).toLocaleLowerCase(language) + title.slice(1)]
+        const said = demo.titleIsName ? title : title.charAt(0).toLocaleLowerCase(language) + title.slice(1)
+        return [demo.src, ...(demo.playSrc ? [demo.playSrc] : [])].map(src => [src, said])
       })))
     // Which of them are worth a map of where the witness stood — see Demo.witnessMap. Keyed the
     // same way as the titles, by the demo's own path, so both answer the same question about the
     // same thing: is what this page is showing one of ours, and which.
-    const demoWitnessMaps = JSON.stringify(this.catalogue.demos.filter(demo => demo.witnessMap).map(demo => demo.src))
+    const demoWitnessMaps = JSON.stringify(this.catalogue.demos.filter(demo => demo.witnessMap).flatMap(demo => [demo.src, ...(demo.playSrc ? [demo.playSrc] : [])]))
     const messages = JSON.stringify({
       loading: fr ? "Chargement…" : "Loading…",
       notFound: fr
@@ -137,7 +140,14 @@ const describe = () => {
   }))
   description.hidden = description.childElementCount === 0
 }
-stage.addEventListener("witnesschange", describe)
+/* The recording the player is showing, as its own address: on a case with several witnesses, the one
+   picked. The editor opens one recording and not a manifest, so this is where its button points. */
+let shownSrc
+stage.addEventListener("witnesschange", event => {
+  shownSrc = event.detail && event.detail.src ? event.detail.src : undefined
+  describe()
+  if (shownSrc && !editLink.hidden) editLink.href = editorPath + "?sighting=" + encodeURIComponent(shownSrc)
+})
 
 const reveal = (source, sighting, fallbackTitle) => {
   stageBox.hidden = false
@@ -147,7 +157,7 @@ const reveal = (source, sighting, fallbackTitle) => {
   stage.toggleAttribute("show-witness-map",
     Boolean(source) && demoWitnessMaps.has(new URL(source, location.href).pathname))
   if (source) {
-    editLink.href = editorPath + "?sighting=" + encodeURIComponent(source)
+    editLink.href = editorPath + "?sighting=" + encodeURIComponent(shownSrc || source)
     editLink.hidden = false
   } else {
     editLink.hidden = true

@@ -127,13 +127,14 @@ for (const card of cards) {
       <div class="demo-grid">
         ${group.demos.map(demo => {
           const target = encodeURIComponent(demo.editSrc ?? demo.src)
+          const played = encodeURIComponent(demo.playSrc ?? demo.editSrc ?? demo.src)
           return `<figure class="demo-card" id="${demo.id}" data-src="${demo.src}">
           <div class="demo-mount"><p class="loading">${loading}</p></div>
           <figcaption>
             <h3>${demo.title[language]}</h3>
             <p>${demo.blurb[language]}</p>
             <p class="demo-links">
-              <a href="${playerPath}?sighting=${target}">${openLabel}</a>
+              <a href="${playerPath}?sighting=${played}">${openLabel}</a>
               <span aria-hidden="true">·</span>
               <a href="${editorPath}?sighting=${target}">${editLabel}</a>
             </p>

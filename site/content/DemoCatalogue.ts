@@ -6,6 +6,14 @@ export interface Demo {
   /** Which recording the View/Edit links point at, when `src` is a several-witness manifest. */
   readonly editSrc?: string
   /**
+   * What the full-size Player opens, when it is not `src`: the several-witness manifest of a case
+   * whose card can only show one of them. A card's sky is a bare `<rr0-scene>`, which plays one
+   * recording; the Player is an `<rr0-sighting>`, whose whole point on such a case is the witness
+   * picker, so handing it one witness's file took away the very thing the card sends people there
+   * for. The editor still opens one recording (`editSrc`, or `src`).
+   */
+  readonly playSrc?: string
+  /**
    * Whether to offer the map of where the witness stood — see the `show-witness-map` attribute,
    * which is off everywhere by default.
    *
@@ -60,6 +68,7 @@ export class DemoCatalogue {
         {
           id: "chiles-whitted",
           src: "/demo-data/witness-chiles.json",
+          playSrc: "/demo-data/witnesses-manifest.json",
           witnessMap: true,
           title: { en: "Chiles & Whitted, 1948", fr: "Chiles et Whitted, 1948" },
           titleIsName: true,
