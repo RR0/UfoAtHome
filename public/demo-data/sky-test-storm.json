@@ -9,9 +9,9 @@
     "year": 2021,
     "month": 7,
     "day": 14,
-    "hour": 19,
-    "minute": 47,
-    "second": 42
+    "hour": 20,
+    "minute": 38,
+    "second": 50
   },
   "utcOffsetHours": 2,
   "durationSeconds": 24,
@@ -59,7 +59,7 @@
           "lat": 48.8566,
           "lng": 2.3522,
           "elevationM": 0,
-          "headingDeg": 230,
+          "headingDeg": 150,
           "pitchDeg": 8,
           "fovDeg": 60
         }
@@ -70,8 +70,8 @@
           "lat": 48.8566,
           "lng": 2.3522,
           "elevationM": 0,
-          "headingDeg": 272,
-          "pitchDeg": 26,
+          "headingDeg": 175,
+          "pitchDeg": 20,
           "fovDeg": 60
         }
       },
@@ -81,7 +81,7 @@
           "lat": 48.8566,
           "lng": 2.3522,
           "elevationM": 0,
-          "headingDeg": 230,
+          "headingDeg": 150,
           "pitchDeg": 8,
           "fovDeg": 60
         }

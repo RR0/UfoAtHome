@@ -27,6 +27,8 @@ export interface LightningScheduleOptions {
   durationMs: number
   /** Anything stable: the same seed must always give the same storm. */
   seed: number
+  /** How heavy the storm's rain is, 0..1 (Weather.precipitationIntensity). Defaults to moderate. */
+  intensity?: number
 }
 
 /**
@@ -38,8 +40,11 @@ export interface LightningScheduleOptions {
  * The numbers are the textbook ones for a thunderstorm seen from under or beside it (Rakov and Uman,
  * "Lightning: Physics and Effects", 2003):
  *
- * - A flash every 8 to 25 seconds within sight and earshot, and the first one anywhere in the first
- *   interval: a storm is already going when a recording starts, it does not begin with it.
+ * - A flash every 8 to 25 seconds within sight and earshot for an ordinary storm, and more often the
+ *   heavier its rain, down to every 2 to 8 seconds under the heaviest: flash rate grows with a
+ *   storm's convective strength, and its rain is the part of that strength the weather record holds.
+ *   The first one falls anywhere in the first interval: a storm is already going when a recording
+ *   starts, it does not begin with it.
  * - About one flash in four reaches the ground; the rest stay within the cloud.
  * - A ground flash is usually several return strokes, three to four on average, some 60 ms apart,
  *   which is the flicker everybody has seen; a cloud flash is a single glow.
@@ -49,6 +54,8 @@ export interface LightningScheduleOptions {
 export class LightningSchedule {
   static readonly MIN_INTERVAL_S = 8
   static readonly MAX_INTERVAL_S = 25
+  static readonly SEVERE_MIN_INTERVAL_S = 2
+  static readonly SEVERE_MAX_INTERVAL_S = 8
   static readonly CLOUD_TO_GROUND_FRACTION = 0.25
   static readonly MIN_DISTANCE_M = 1000
   static readonly MAX_DISTANCE_M = 15000
@@ -62,7 +69,8 @@ export class LightningSchedule {
   static schedule(options: LightningScheduleOptions): LightningFlash[] {
     const rng = new Rng(options.seed)
     const flashes: LightningFlash[] = []
-    let t = rng.between(0, LightningSchedule.MAX_INTERVAL_S) * 1000
+    const { minS, maxS } = LightningSchedule.intervalFor(options.intensity ?? 0.5)
+    let t = rng.between(0, maxS) * 1000
     while (t < options.durationMs) {
       const cloudToGround = rng.next() < LightningSchedule.CLOUD_TO_GROUND_FRACTION
       const near = LightningSchedule.MIN_DISTANCE_M, far = LightningSchedule.MAX_DISTANCE_M
@@ -82,9 +90,19 @@ export class LightningSchedule {
         strokes,
         channelSeed: Math.floor(rng.next() * 2 ** 31)
       })
-      t += rng.between(LightningSchedule.MIN_INTERVAL_S, LightningSchedule.MAX_INTERVAL_S) * 1000
+      t += rng.between(minS, maxS) * 1000
     }
     return flashes
+  }
+
+  /** The shortest and longest wait between two flashes for rain of that intensity: the ordinary
+   * 8 to 25 s up to moderate rain, narrowing linearly to 2 to 8 s at the heaviest. */
+  static intervalFor(intensity: number): { minS: number; maxS: number } {
+    const k = Math.min(1, Math.max(0, (intensity - 0.5) / 0.5))
+    return {
+      minS: LightningSchedule.MIN_INTERVAL_S - k * (LightningSchedule.MIN_INTERVAL_S - LightningSchedule.SEVERE_MIN_INTERVAL_S),
+      maxS: LightningSchedule.MAX_INTERVAL_S - k * (LightningSchedule.MAX_INTERVAL_S - LightningSchedule.SEVERE_MAX_INTERVAL_S)
+    }
   }
 
   /** How much of its light a flash is giving at recording time `t`, 0 when dark. */

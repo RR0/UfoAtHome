@@ -20,6 +20,14 @@ describe("LightningSchedule", () => {
     expect(Math.min(...firsts)).toBeLessThan(2000)
   })
 
+  it("flashes more often under heavier rain, and no differently below moderate rain", () => {
+    const count = (intensity: number) => LightningSchedule.schedule({ durationMs: 3_600_000, seed: 7, intensity }).length
+    expect(count(0.2)).toBe(count(0.5))
+    expect(count(1)).toBeGreaterThan(count(0.5) * 2.5)
+    const severe = LightningSchedule.schedule({ durationMs: 3_600_000, seed: 7, intensity: 1 })
+    for (let i = 1; i < severe.length; i++) expect(severe[i].t - severe[i - 1].t).toBeLessThanOrEqual(8000)
+  })
+
   it("sends about one flash in four to the ground, with several strokes, and keeps cloud flashes to one", () => {
     const ground = hour.filter(flash => flash.cloudToGround)
     expect(ground.length / hour.length).toBeGreaterThan(0.12)

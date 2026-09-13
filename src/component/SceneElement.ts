@@ -1417,7 +1417,8 @@ export class SceneElement extends HTMLElement {
   /** Works the flashes out again when the recording's start or length has changed — the same
    * inputs, and the same reasoning, as the meteors (see ensureMeteorSchedule). */
   private ensureLightningSchedule(sighting: Sighting): void {
-    const inputs = this.meteorInputsOf(sighting)
+    const intensity = resolveWeatherAt(sighting, 0).precipitationIntensity
+    const inputs = `${this.meteorInputsOf(sighting)}|${intensity}`
     if (inputs === this.lightningScheduleFor) return
     this.lightningScheduleFor = inputs
     const time = sighting.event.time
@@ -1426,7 +1427,7 @@ export class SceneElement extends HTMLElement {
     const durationMs = (sighting.event.durationSeconds ?? 0) * 1000 || sighting.timeline.duration || 20_000
     // Offset from the meteors' seed, so a stormy night's flashes are not tied to its meteors.
     const seed = Math.round((date?.getTime() ?? 0) / 1000) + Math.round((place?.lat ?? 0) * 1000) + 7
-    this.lightningFlashes = LightningSchedule.schedule({ durationMs, seed })
+    this.lightningFlashes = LightningSchedule.schedule({ durationMs, seed, intensity })
     this.sceneRenderer.setLightning(this.lightningFlashes)
   }
 
