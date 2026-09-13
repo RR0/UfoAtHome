@@ -76,6 +76,26 @@ export class SatelliteMagnitude {
    */
   static readonly STARLINK_ORBIT_RAISING = { belowKm: 357, magnitude1000Km: 4.58 }
 
+  /**
+   * Constellations McCants never measured, each with the mean 1000-km magnitude observers published,
+   * by design era (a launch date from which it applies). Matched on the catalogue name.
+   *
+   * BlueBird, AST SpaceMobile's phone-to-satellite constellation, is the brightest there is: 3.77 for
+   * the five Block 1 satellites launched on 2024-09-12, and 4.32 for BlueBird 6, the first Block 2,
+   * launched on 2025-12-24 — fainter although three and a half times larger (Mallama et al. 2026,
+   * arXiv:2608.23668, updating the 3.84 of arXiv:2505.05820). The Block 2 value is applied to the
+   * Block 2 satellites launched after it, which nobody has measured yet.
+   */
+  static readonly MEASURED_CONSTELLATIONS: { namePrefix: string; eras: { launchedFrom: string; magnitude1000Km: number }[] }[] = [
+    {
+      namePrefix: "SPACEMOBILE-",
+      eras: [
+        { launchedFrom: "2024-09-12", magnitude1000Km: 3.77 },
+        { launchedFrom: "2025-12-24", magnitude1000Km: 4.32 }
+      ]
+    }
+  ]
+
   static of(object: OrbitingObject, rangeKm: number, phaseAngleDeg: number, sunlitFraction: number, heightKm = Infinity): number | undefined {
     if (sunlitFraction <= 0) return undefined
     let magnitude: number | undefined
@@ -83,17 +103,31 @@ export class SatelliteMagnitude {
       const litFraction = (1 + Math.cos(degreesToRadians(phaseAngleDeg))) / 2
       if (litFraction <= 0) return undefined
       magnitude = object.stdMag - 15.75 + 2.5 * Math.log10((rangeKm * rangeKm) / litFraction)
-    } else if (object.kind === "starlink") {
-      const raising = SatelliteMagnitude.STARLINK_ORBIT_RAISING
-      const magnitude1000Km = heightKm < raising.belowKm ? raising.magnitude1000Km : SatelliteMagnitude.starlinkMagnitude1000Km(object.launch)
-      magnitude = magnitude1000Km + 5 * Math.log10(rangeKm / 1000)
+    } else {
+      const magnitude1000Km = SatelliteMagnitude.measured1000Km(object, heightKm)
+      // Measured by distance only, the phase averaged into the value: see the class comment.
+      if (magnitude1000Km !== undefined) magnitude = magnitude1000Km + 5 * Math.log10(rangeKm / 1000)
     }
     // Partly in the penumbra: the object receives that fraction of the Sun's light.
     return magnitude === undefined ? undefined : magnitude - 2.5 * Math.log10(sunlitFraction)
   }
 
+  /** The published mean 1000-km magnitude that applies to this object, if one does. */
+  static measured1000Km(object: OrbitingObject, heightKm = Infinity): number | undefined {
+    if (object.kind === "starlink") {
+      const raising = SatelliteMagnitude.STARLINK_ORBIT_RAISING
+      return heightKm < raising.belowKm ? raising.magnitude1000Km : SatelliteMagnitude.starlinkMagnitude1000Km(object.launch)
+    }
+    const constellation = SatelliteMagnitude.MEASURED_CONSTELLATIONS.find(entry => object.name.startsWith(entry.namePrefix))
+    return constellation ? SatelliteMagnitude.eraOf(constellation.eras, object.launch) : undefined
+  }
+
   static starlinkMagnitude1000Km(launch: string | undefined): number {
-    const eras = SatelliteMagnitude.STARLINK_ERAS
+    return SatelliteMagnitude.eraOf(SatelliteMagnitude.STARLINK_ERAS, launch)
+  }
+
+  /** The latest era started by that launch date; the latest of all when the launch is unknown. */
+  private static eraOf(eras: { launchedFrom: string; magnitude1000Km: number }[], launch: string | undefined): number {
     const era = [...eras].reverse().find(candidate => launch !== undefined && launch >= candidate.launchedFrom)
     return (era ?? eras[eras.length - 1]).magnitude1000Km
   }

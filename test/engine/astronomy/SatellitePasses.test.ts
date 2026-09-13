@@ -159,8 +159,18 @@ describe("SatellitePasses", () => {
       expect(SatelliteMagnitude.of(iss, 1000, 90, 0)).toBeUndefined()
     })
 
+    it("gives a BlueBird the magnitude measured for its own generation", () => {
+      // Block 1 (2024-09-12) at 3.77 and BlueBird 6, the first Block 2, fainter at 4.32 although
+      // larger: the order is the finding, and a single constellation value would have hidden it.
+      const block1 = objectOf(ISS_TLE, "SPACEMOBILE-003", { launch: "2024-09-12" })
+      const block2 = objectOf(ISS_TLE, "SPACEMOBILE-006", { launch: "2025-12-24" })
+      expect(SatelliteMagnitude.of(block1, 1000, 60, 1)).toBeCloseTo(3.77, 2)
+      expect(SatelliteMagnitude.of(block2, 1000, 60, 1)).toBeCloseTo(4.32, 2)
+      expect(SatelliteMagnitude.of(block1, 520, 60, 1)).toBeCloseTo(3.77 + 5 * Math.log10(0.52), 2)
+    })
+
     it("does not invent a brightness for an object nobody measured", () => {
-      const unknown = objectOf(ISS_TLE, "SPACEMOBILE-001")
+      const unknown = objectOf(ISS_TLE, "HTV-X1")
       expect(SatelliteMagnitude.of(unknown, 600, 40, 1)).toBeUndefined()
     })
   })

@@ -98,10 +98,12 @@ class TleArchiveBuilder {
 
   private readonly launches: Map<number, string>
   private readonly stdMags: Map<number, number>
+  private readonly stdMagsByName: Map<string, number[]>
 
-  constructor(launches: Map<number, string>, stdMags: Map<number, number>) {
+  constructor(launches: Map<number, string>, stdMags: Map<number, number>, stdMagsByName: Map<string, number[]>) {
     this.launches = launches
     this.stdMags = stdMags
+    this.stdMagsByName = stdMagsByName
   }
 
   build() {
@@ -289,11 +291,30 @@ class TleArchiveBuilder {
       const info: ObjectInfo = { name: set.name }
       const launch = this.launches.get(set.norad)
       if (launch) info.launch = launch
-      const stdMag = this.stdMags.get(set.norad)
+      const stdMag = this.stdMags.get(set.norad) ?? this.sameStageMagnitude(set.name)
       if (stdMag !== undefined) info.stdMag = stdMag
       objects[set.norad] = info
     }
     writeFileSync(path.join(OUT_DIR, `objects-${kind}.json`), JSON.stringify(objects))
+  }
+
+  /**
+   * A spent rocket body nobody measured, given the median of the identical stages that were.
+   *
+   * Same catalogue name, same hardware: a CZ-2C second stage is the same cylinder whichever launch
+   * left it up there, and its brightness is mostly its size. Only for rocket bodies (a payload's
+   * name says nothing of its shape) and only when at least three of them were measured, so that the
+   * median is a population rather than one object: the four CZ-2C stages Stellarium lists run from
+   * 2.5 to 3.5, and that spread is the uncertainty this carries. One measured Soyuz stage is not a
+   * population, and a stage with none stays without a magnitude.
+   */
+  private sameStageMagnitude(name: string): number | undefined {
+    if (!name.endsWith("R/B")) return undefined
+    const measured = this.stdMagsByName.get(name)
+    if (!measured || measured.length < 3) return undefined
+    const sorted = [...measured].sort((a, b) => a - b)
+    const middle = Math.floor(sorted.length / 2)
+    return sorted.length % 2 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2
   }
 
   private gaps(snapshots: number[]): [string, string][] {
@@ -308,6 +329,18 @@ class TleArchiveBuilder {
 }
 
 class ReferenceData {
+  /** Every measured standard magnitude in Stellarium's list, by catalogue name. */
+  static stdMagsByName(): Map<string, number[]> {
+    const byName = new Map<string, number[]>()
+    if (!existsSync(STELLARIUM_FILE)) return byName
+    const satellites = JSON.parse(readFileSync(STELLARIUM_FILE, "utf8")).satellites as Record<string, { name?: string; stdMag?: number }>
+    for (const satellite of Object.values(satellites)) {
+      if (!satellite.name || satellite.stdMag === undefined || satellite.stdMag === 99) continue
+      byName.get(satellite.name)?.push(satellite.stdMag) ?? byName.set(satellite.name, [satellite.stdMag])
+    }
+    return byName
+  }
+
   /** Launch date per NORAD id, from the SATCAT. */
   static launches(): Map<number, string> {
     const launches = new Map<number, string>()
@@ -346,4 +379,4 @@ class ReferenceData {
   }
 }
 
-new TleArchiveBuilder(ReferenceData.launches(), ReferenceData.stdMags()).build()
+new TleArchiveBuilder(ReferenceData.launches(), ReferenceData.stdMags(), ReferenceData.stdMagsByName()).build()
