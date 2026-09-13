@@ -48,7 +48,7 @@ export class RoadmapPage implements SitePage {
       <tr><th>Area</th><th>What it covers</th></tr>
       <tr><td>Testimony</td><td>Shape, movement, colour, transparency, halo, brilliance, blur, sound — keyframed; angular size only, with real distances derived as inequalities from what the object crossed</td></tr>
       <tr><td>The sky</td><td>Sun, Moon and phase, planets, stars to magnitude 7.5 — and to 9, on demand, for optics that reach that far — a limiting magnitude that follows both the twilight and the instrument, the Milky Way and the zodiacal light as line-of-sight integrals</td></tr>
-      <tr><td>Sky candidates</td><td>Meteor showers with a sporadic background, 23 naked-eye comet apparitions, the satellite illumination window with the dated SATCAT count, and since February 2021 the real passes, propagated from archived orbital elements, Starlink trains included</td></tr>
+      <tr><td>Sky candidates</td><td>Meteor showers with a sporadic background, 23 naked-eye comet apparitions, 32 novae and supernovae from 1006 to 2021 on their recorded light curves, the satellite illumination window with the dated SATCAT count, and since February 2021 the real passes, propagated from archived orbital elements, Starlink trains included</td></tr>
       <tr><td>Atmospheric optics</td><td>22° and 46° haloes, sundogs, tangent, circumzenithal and circumhorizontal arcs, the parhelic circle, pillars — all from ice's refractive index; rainbows and moonbows ray-traced in a spherical drop</td></tr>
       <tr><td>Weather</td><td>ERA5 lookup keyframed along the observation; multiple metre-based cloud layers and manipulable individual volumes, moving with layer wind to the horizon and attenuating celestial bodies and phenomena; rain, snow, hail and storms with thunder</td></tr>
       <tr><td>The ground</td><td>Real relief and aerial imagery, buildings, trees, streetlights, vehicles, windows and other witnesses, with moving tracks and regulated flashing lights</td></tr>
@@ -79,13 +79,6 @@ export class RoadmapPage implements SitePage {
         the temperature and humidity profile with height. Checked and ruled out: Open-Meteo does not
         serve pressure levels in archive mode. The real source is IGRA, the radiosonde archive, and
         that is what this is waiting on.</p>
-    </div>
-
-    <div class="timeline-step">
-      <h3>Historical novae and supernovae <span class="status status-later">planned</span></h3>
-      <p>A new star where there was none is a textbook misperception, and a datable one. The
-        catalogue is small and public — the same pattern as the comet and satellite catalogues
-        already generated here.</p>
     </div>
 
     <div class="timeline-step">
@@ -189,7 +182,7 @@ export class RoadmapPage implements SitePage {
       <tr><th>Domaine</th><th>Ce que cela couvre</th></tr>
       <tr><td>Témoignage</td><td>Forme, mouvement, couleur, transparence, halo, éclat, flou, son — keyframés ; taille angulaire seule, les distances réelles étant déduites en inégalités de ce que l'objet a croisé</td></tr>
       <tr><td>Le ciel</td><td>Soleil, Lune et sa phase, planètes, étoiles jusqu'à la magnitude 7,5 — et jusqu'à 9, à la demande, pour les optiques qui vont jusque-là — une magnitude limite qui suit à la fois le crépuscule et l'instrument, Voie lactée et lumière zodiacale en intégrales le long de la ligne de visée</td></tr>
-      <tr><td>Candidats du ciel</td><td>Pluies de météores avec fond sporadique, 23 apparitions de comètes visibles à l'œil nu, fenêtre d'éclairement des satellites avec le compte SATCAT daté, et depuis février 2021 les vrais passages, propagés depuis des éléments orbitaux archivés, trains de Starlink compris</td></tr>
+      <tr><td>Candidats du ciel</td><td>Pluies de météores avec fond sporadique, 23 apparitions de comètes visibles à l'œil nu, 32 novae et supernovae de 1006 à 2021 sur leurs courbes de lumière relevées, fenêtre d'éclairement des satellites avec le compte SATCAT daté, et depuis février 2021 les vrais passages, propagés depuis des éléments orbitaux archivés, trains de Starlink compris</td></tr>
       <tr><td>Optique atmosphérique</td><td>Halos à 22° et 46°, parhélies, arcs tangent, circumzénithal et circumhorizontal, cercle parhélique, piliers — tous issus de l'indice de la glace ; arcs-en-ciel et arcs lunaires lancés dans une goutte sphérique</td></tr>
       <tr><td>Météo</td><td>Relevé ERA5 keyframé le long de l'observation ; plusieurs couches nuageuses métriques et volumes individuels manipulables, se déplaçant avec le vent de leur couche jusqu'à l'horizon et atténuant astres et phénomènes ; pluie, neige, grêle et orages avec tonnerre</td></tr>
       <tr><td>Le sol</td><td>Relief réel et imagerie aérienne, bâtiments, arbres, lampadaires, véhicules, vitrages et autres témoins, avec trajectoires et feux clignotants aux cadences réglementaires</td></tr>
@@ -221,13 +214,6 @@ export class RoadmapPage implements SitePage {
         kilomètre, ce qui demande le profil de température et d'humidité avec l'altitude. Vérifié et
         écarté : Open-Meteo ne sert pas les niveaux de pression en archive. La vraie source est
         IGRA, l'archive des radiosondages, et c'est ce que cet élément attend.</p>
-    </div>
-
-    <div class="timeline-step">
-      <h3>Novae et supernovae historiques <span class="status status-later">planifié</span></h3>
-      <p>Une étoile nouvelle là où il n'y en avait pas est une méprise de manuel, et une méprise
-        datable. Le catalogue est petit et public — le même patron que les catalogues de comètes et
-        de satellites déjà engendrés ici.</p>
     </div>
 
     <div class="timeline-step">

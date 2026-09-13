@@ -54,7 +54,7 @@ export class FaqPage implements SitePage {
       <p>The one obligation is to keep the copyright notice and the licence text with the copies you
         distribute. There is no contributor licence agreement and no registration.</p>
       <p>The source is on <a href="https://github.com/RR0/UfoAtHome">GitHub</a>, including the
-        scripts that generate its star, comet and satellite catalogues from public sources — so the
+        scripts that generate its star, comet, nova and satellite catalogues from public sources — so the
         data is reproducible as well as readable.</p>
     </div>
 
@@ -74,7 +74,7 @@ export class FaqPage implements SitePage {
       </div>
       <p>Each is a picker in the interface, sitting where its data is reported and carrying the
         attribution its licence requires, so you can see what answered and choose another. The star,
-        comet and satellite catalogues are generated ahead of time and shipped inside the bundle,
+        comet, nova and satellite catalogues are generated ahead of time and shipped inside the bundle,
         so nothing is fetched for those.</p>
       <p>A page that only <em>replays</em> a finished recording (<code>&lt;rr0-scene&gt;</code>,
         <code>&lt;rr0-sighting&gt;</code>) makes no lookup at all
@@ -311,7 +311,7 @@ export class FaqPage implements SitePage {
         les copies que vous distribuez. Il n'y a ni <i lang="en">contributor licence agreement</i>,
         ni inscription.</p>
       <p>Le code est sur <a href="https://github.com/RR0/UfoAtHome">GitHub</a>, y compris les
-        scripts qui engendrent ses catalogues d'étoiles, de comètes et de satellites à partir de
+        scripts qui engendrent ses catalogues d'étoiles, de comètes, de novae et de satellites à partir de
         sources publiques : les données sont donc reproductibles autant que lisibles.</p>
     </div>
 
@@ -332,7 +332,7 @@ export class FaqPage implements SitePage {
       </div>
       <p>Chacun est un sélecteur dans l'interface, placé là où sa donnée est rapportée et portant
         l'attribution qu'exige sa licence : vous voyez qui a répondu et pouvez en choisir un autre.
-        Les catalogues d'étoiles, de comètes et de satellites sont engendrés à l'avance et embarqués
+        Les catalogues d'étoiles, de comètes, de novae et de satellites sont engendrés à l'avance et embarqués
         dans le <i lang="en">bundle</i>, donc rien n'est appelé pour eux.</p>
       <p>Une page qui ne fait que <em>rejouer</em> un enregistrement terminé
         (<code>&lt;rr0-scene&gt;</code>, <code>&lt;rr0-sighting&gt;</code>) ne fait aucune

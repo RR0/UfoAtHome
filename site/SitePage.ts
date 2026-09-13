@@ -35,6 +35,9 @@ export interface PageMeta {
   /** Kept out of the top navigation — reached from the pages that have a reason to link to it, and
    * from the footer. For something worth publishing but not worth a permanent tab. */
   readonly asideFromNav?: boolean
+  /** Kept out of the footer too: a page one hub already lists in full (the three component pages,
+   * which "The components" links), where a second list at the bottom of every page is noise. */
+  readonly asideFromFooter?: boolean
 }
 
 export interface SitePage {

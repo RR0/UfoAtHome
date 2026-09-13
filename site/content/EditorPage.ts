@@ -296,7 +296,9 @@ if (docs) {
       <p>Below sits the <strong>“Sky:”</strong> line — read-only, and not a lookup at all. A meteor
         shower is a position in Earth's orbit and a comet's orbit is a solved problem, so the date
         and the place alone decide both. It states what else was in that patch of sky: the shower
-        and its rate over the sporadic background, the comet and its magnitude, whether low orbit
+        and its rate over the sporadic background, the comet and its magnitude, any nova or
+        supernova whose recorded light curve covers that night (the 🌟 button turns the witness
+        towards it), whether low orbit
         was still sunlit, whether the Milky Way or the zodiacal light could have been seen at all.
         From February 2021 it also names the satellites that really crossed that sky bright enough
         to be seen, the brightest with the time of its pass on the witness's clock, and says when
@@ -631,7 +633,9 @@ if (docs) {
         pas un relevé. Une pluie de météores est une position sur l'orbite terrestre et l'orbite
         d'une comète est un problème résolu : la date et le lieu suffisent à décider des deux. Elle
         énonce ce qu'il y avait d'autre dans ce coin de ciel : la pluie et son taux au-dessus du fond
-        sporadique, la comète et sa magnitude, si l'orbite basse était encore éclairée, si la Voie
+        sporadique, la comète et sa magnitude, toute nova ou supernova dont la courbe de lumière
+        relevée couvre cette nuit-là (le bouton 🌟 tourne le témoin vers elle), si l'orbite basse
+        était encore éclairée, si la Voie
         lactée ou la lumière zodiacale pouvaient seulement être vues. À partir de février 2021, elle
         nomme aussi les satellites qui ont réellement traversé ce ciel assez brillants pour être vus,
         le plus brillant avec l'heure de son passage à la montre du témoin, et dit quand certains

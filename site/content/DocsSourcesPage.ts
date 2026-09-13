@@ -97,7 +97,7 @@ export class DocsSourcesPage extends DocsSection {
           provides: { en: "Positions and magnitudes of the Sun, Moon and planets; the Moon's phase; sky coordinates.", fr: "Positions et magnitudes du Soleil, de la Lune et des planètes ; phase de la Lune ; coordonnées célestes." },
           when: { en: "In the page, for every recording with a date.", fr: "Dans la page, pour tout enregistrement daté." },
           hosting: { en: "Bundled library, MIT.", fr: "Bibliothèque embarquée, MIT." },
-          choices: { en: "A full ephemeris rather than approximate formulas: the reason to reconstruct a sky is to be right about it.", fr: "Une éphéméride complète plutôt que des formules approchées : reconstituer un ciel n'a d'intérêt que s'il est juste." }
+          choices: { en: "A full ephemeris rather than approximate formulas: the reason to reconstruct a sky is to be right about it. Its precession also carries the year-2000 catalogues (stars, the Galaxy, meteor radiants, novae) to the date observed.", fr: "Une éphéméride complète plutôt que des formules approchées : reconstituer un ciel n'a d'intérêt que s'il est juste. Sa précession ramène aussi les catalogues de l'an 2000 (étoiles, Galaxie, radiants de météores, novae) à la date observée." }
         },
         {
           name: "HYG Database", url: "https://github.com/astronexus/HYG-Database",
@@ -112,6 +112,20 @@ export class DocsSourcesPage extends DocsSection {
           when: { en: "Built once (build:comets); the page propagates the orbit itself, no request.", fr: "Construit une fois (build:comets) ; la page propage l'orbite elle-même, sans requête." },
           hosting: { en: "Generated into the code. NASA/JPL.", fr: "Engendré dans le code. NASA/JPL." },
           choices: { en: "Brightness is NOT taken from JPL: its magnitude parameters put NEOWISE 4 magnitudes too faint. Peak magnitudes observed at the time are entered by hand, with their dates. A tail is drawn only where its length was recorded.", fr: "La brillance n'est PAS prise chez JPL : ses paramètres de magnitude rendent NEOWISE 4 magnitudes trop faible. Les magnitudes au pic observées à l'époque sont saisies à la main, avec leur date. Une queue n'est dessinée que si sa longueur a été relevée." }
+        },
+        {
+          name: "AAVSO, via Strope, Schaefer & Henden 2010", url: "https://cdsarc.cds.unistra.fr/ftp/J/AJ/140/34/",
+          provides: { en: "The measured light curve of every nova since 1891 that reached magnitude 5, binned from the AAVSO's observations.", fr: "La courbe de lumière mesurée de chaque nova depuis 1891 ayant atteint la magnitude 5, regroupée à partir des observations de l'AAVSO." },
+          when: { en: "Built once (build:novae) with the supernovae below; the page interpolates the curve, no request.", fr: "Construit une fois (build:novae) avec les supernovae ci-dessous ; la page interpole la courbe, sans requête." },
+          hosting: { en: "Generated into the code. VizieR catalogue J/AJ/140/34.", fr: "Engendré dans le code. Catalogue VizieR J/AJ/140/34." },
+          choices: { en: "A recorded curve rather than a decline formula: the standard laws miss most real novae, and would draw DQ Herculis bright for a year through the weeks dust had dimmed it ten magnitudes. Nothing is drawn before the first observation or after the last. RS Oph 2021 and T CrB 1866 reuse the curve of their own previous eruption, shifted onto their recorded peak.", fr: "Une courbe relevée plutôt qu'une formule de déclin : les lois usuelles ratent la plupart des vraies novae, et dessineraient DQ Herculis brillante pendant un an alors que la poussière l'avait éteinte de dix magnitudes en quelques semaines. Rien n'est dessiné avant la première observation ni après la dernière. RS Oph 2021 et T CrB 1866 reprennent la courbe de leur éruption précédente, recalée sur leur pic relevé." }
+        },
+        {
+          name: "Historical supernovae", url: "https://arxiv.org/abs/1612.07399",
+          provides: { en: "The supernovae of 1006, 1054, 1181, 1572, 1604 and 1987A: where they stood, and how bright on each night.", fr: "Les supernovae de 1006, 1054, 1181, 1572, 1604 et 1987A : où elles se tenaient, et quel était leur éclat chaque nuit." },
+          when: { en: "Built once (build:novae).", fr: "Construit une fois (build:novae)." },
+          hosting: { en: "Generated into the code. Positions from SIMBAD; 1572 and 1604 reduced by Ruiz-Lapuente (2004, 2017) from Tycho's, Kepler's and the Korean astronomers' own estimates; 1006, 1054 and 1181 from the chronicles (Stephenson & Green); 1987A from the Open Supernova Catalog.", fr: "Engendré dans le code. Positions de SIMBAD ; 1572 et 1604 réduites par Ruiz-Lapuente (2004, 2017) à partir des estimations de Tycho, de Kepler et des astronomes coréens ; 1006, 1054 et 1181 d'après les chroniques (Stephenson & Green) ; 1987A de l'Open Supernova Catalog." },
+          choices: { en: "Each curve says which kind it is, because they differ by two orders of magnitude in quality: 1054 and 1181 are a peak and the day they were last seen, and the decline of 1006 is borrowed from 1572, the same kind of explosion. Dates in the Julian calendar are read as such. V1369 Cen (2013) is left out: nothing published follows it past its peak.", fr: "Chaque courbe dit de quelle sorte elle est, car leur qualité varie de deux ordres de grandeur : 1054 et 1181 se résument à un pic et au jour où on les a vues pour la dernière fois, et le déclin de 1006 est emprunté à 1572, le même genre d'explosion. Les dates du calendrier julien sont lues comme telles. V1369 Cen (2013) est laissée de côté : rien de publié ne la suit au-delà de son pic." }
         },
         {
           name: "IMO meteor shower list", url: "https://www.imo.net/",

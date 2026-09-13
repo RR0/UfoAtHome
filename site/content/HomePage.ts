@@ -237,7 +237,7 @@ ${carousel}
         </div>
         <div class="card">
           <h4>What else was up there</h4>
-          <p>Comets, meteor showers, satellites — each drawn only if it could have been visible from
+          <p>Comets, novae and supernovae, meteor showers, satellites — each drawn only if it could have been visible from
             there, then. Being lit is not the same as being seen, and the Earth's shadow settles that
             one.</p>
           <p class="card-more"><a href="/context/#space">How each is decided →</a></p>
@@ -392,7 +392,7 @@ ${carousel}
         </div>
         <div class="card">
           <h4>Ce qu'il y avait d'autre là-haut</h4>
-          <p>Comètes, pluies de météores, satellites — chacun n'est dessiné que s'il pouvait être vu
+          <p>Comètes, novae et supernovae, pluies de météores, satellites — chacun n'est dessiné que s'il pouvait être vu
             de là, à ce moment-là. Être éclairé n'est pas être vu, et c'est l'ombre de la Terre qui
             tranche.</p>
           <p class="card-more"><a href="/context/#space">Comment chacun est décidé →</a></p>

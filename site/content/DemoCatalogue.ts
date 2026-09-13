@@ -188,6 +188,15 @@ export class DemoCatalogue {
           }
         },
         {
+          id: "nova",
+          src: "/demo-data/sky-test-nova.json",
+          title: { en: "A new star", fr: "Une étoile nouvelle" },
+          blurb: {
+            en: "Nova Aquilae over Paris, 10 June 1918, 23:30, magnitude 0.2 where nothing shone the night before. Its brightness is interpolated between the AAVSO's own observations.",
+            fr: "La nova de l'Aigle au-dessus de Paris, 10 juin 1918, 23 h 30, magnitude 0,2 là où rien ne brillait la veille. Son éclat est interpolé entre les observations de l'AAVSO."
+          }
+        },
+        {
           id: "meteors",
           src: "/demo-data/sky-test-meteors.json",
           title: { en: "A meteor shower", fr: "Une pluie de météores" },

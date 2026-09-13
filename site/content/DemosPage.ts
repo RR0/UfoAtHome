@@ -19,9 +19,9 @@ export class DemosPage implements SitePage {
     title: { en: "What it can do", fr: "Ce qu'il sait faire" },
     description: {
       en: "Real sightings reconstructed, and skies set up for one sight at a time: haloes, rainbows, "
-        + "the Milky Way, a comet, a meteor shower, a Starlink train, a storm, an airliner on a long exposure.",
+        + "the Milky Way, a comet, a new star, a meteor shower, a Starlink train, a storm, an airliner on a long exposure.",
       fr: "Des observations réelles reconstituées, et des ciels réglés pour un phénomène à la fois : "
-        + "halos, arcs-en-ciel, Voie lactée, comète, pluie de météores, train de Starlink, orage, avion en pose longue."
+        + "halos, arcs-en-ciel, Voie lactée, comète, étoile nouvelle, pluie de météores, train de Starlink, orage, avion en pose longue."
     },
     modules: ["/lib/rr0-scene.mjs"]
   }

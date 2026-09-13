@@ -64,6 +64,9 @@ export class ContextPage implements SitePage {
       7.5; 57 688 more stars, down to magnitude 9, are fetched only by a recording whose own optics
       reach that far. Past magnitude 9 it is the data that stops, and the tool reports the limit
       rather than drawing a sky emptier than the photograph held.</p>
+    <p>The catalogue is written for the year 2000, and the axis the sky turns about has moved since.
+      Every star is carried to the date of the observation: a degree in 1918, fourteen in 1006,
+      which is the difference between two constellations.</p>
     <p>The Milky Way and the zodiacal light are integrated along the line of sight rather than
       painted as a texture — which is why they move correctly with the season, the hour and the
       observer's latitude instead of merely being in the right place once.</p>
@@ -74,6 +77,12 @@ export class ContextPage implements SitePage {
     <p><strong>Comets</strong> appear at their own apparition and nowhere else. The catalogue is
       generated from JPL Horizons and the orbit is propagated, so a comet is either there on that
       date or it is not.</p>
+    <p><strong>Novae and supernovae</strong> shine only on the nights their recorded light curve
+      covers, and nowhere outside it: before the first record the star may already have been rising,
+      and nobody can say how bright. Thirty-two eruptions reached the naked eye, from the supernova of
+      1006 to RS Ophiuchi in 2021. Their brightness is measured by the AAVSO for every nova up to
+      2006, reconstructed from Tycho's and Kepler's own comparisons for 1572 and 1604, and held to a
+      few chronicled dates for 1054 and 1181; each one says which.</p>
     <p><strong>Meteor showers</strong> come with their radiant and their hourly rate for that night,
       over the sporadic background that never stops.</p>
     <p><strong>Satellites</strong> get the harder question, because being lit is not the same as
@@ -193,6 +202,9 @@ export class ContextPage implements SitePage {
       enregistrement dont les optiques vont jusque-là. Au-delà de la magnitude 9, c'est la donnée
       qui s'arrête, et l'outil signale la limite plutôt que de dessiner un ciel plus vide que ne
       l'était la photographie.</p>
+    <p>Le catalogue est écrit pour l'an 2000, et l'axe autour duquel tourne le ciel s'est déplacé
+      depuis. Chaque étoile est ramenée à la date de l'observation : un degré en 1918, quatorze en
+      1006, soit la différence entre deux constellations.</p>
     <p>La Voie lactée et la lumière zodiacale sont intégrées le long de la ligne de visée plutôt que
       plaquées en texture — c'est pourquoi elles bougent correctement avec la saison, l'heure et la
       latitude de l'observateur, au lieu d'être au bon endroit une fois pour toutes.</p>
@@ -203,6 +215,13 @@ export class ContextPage implements SitePage {
     <p>Les <strong>comètes</strong> apparaissent à leur apparition propre et nulle part ailleurs. Le
       catalogue est engendré depuis JPL Horizons et l'orbite est propagée : une comète est à cette
       date, ou elle n'y est pas.</p>
+    <p>Les <strong>novae et supernovae</strong> ne brillent que les nuits que couvre leur courbe de
+      lumière relevée, et jamais en dehors : avant le premier relevé, l'étoile montait peut-être
+      déjà, et personne ne peut dire à quel éclat. Trente-deux éruptions ont atteint l'œil nu, de la
+      supernova de 1006 à RS Ophiuchi en 2021. Leur éclat est mesuré par l'AAVSO pour toutes les
+      novae jusqu'en 2006, reconstitué d'après les comparaisons de Tycho et de Kepler eux-mêmes pour
+      1572 et 1604, et tenu à quelques dates des chroniques pour 1054 et 1181 ; chacune dit ce
+      qu'il en est.</p>
     <p>Les <strong>pluies de météores</strong> ont leur radiant et leur taux horaire pour cette
       nuit-là, au-dessus du fond sporadique qui, lui, ne s'arrête jamais.</p>
     <p>Les <strong>satellites</strong> reçoivent la question la plus difficile, car être éclairé

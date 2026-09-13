@@ -193,6 +193,7 @@ ${script ? `<script type="module">\n// Where this site's own pages load their mo
   private siteFooter(language: SiteLanguage): string {
     const fr = language === "fr"
     const nav = this.pages
+      .filter(page => !page.meta.asideFromFooter)
       .map(page => `<li><a href="${this.path(page.meta)}">${this.text(page.meta.navLabel[language])}</a></li>`)
       .join("\n      ")
     return `<footer class="site-footer">

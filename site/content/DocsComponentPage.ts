@@ -41,7 +41,8 @@ export class DocsComponentPage extends DocsSection {
       navLabel: { en: `<${doc.tag}>`, fr: `<${doc.tag}>` },
       title: { en: `<${doc.tag}>`, fr: `<${doc.tag}>` },
       description: doc.description,
-      asideFromNav: true
+      asideFromNav: true,
+      asideFromFooter: true
     }
   }
 
