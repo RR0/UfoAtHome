@@ -3433,16 +3433,6 @@ describe("SightingEditorElement playback controls", () => {
     expect(playPauseButton.title).toBe("Play")
   })
 
-  it("Loop toggles aria-pressed", () => {
-    const element = mount()
-    const loopButton = element.shadowRoot!.getElementById("loop") as HTMLButtonElement
-    expect(loopButton.getAttribute("aria-pressed")).toBe("true")
-
-    loopButton.click()
-
-    expect(loopButton.getAttribute("aria-pressed")).toBe("false")
-  })
-
   it("dragging the seek input moves the nested ufo's own currentTime", () => {
     const element = mount()
     setDuration(element, "10")

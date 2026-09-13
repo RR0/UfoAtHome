@@ -511,7 +511,6 @@ export const html = `
   <span id="time-start" class="time-label">0:00</span>
   <input id="seek" type="range" min="0" max="0" value="0" step="1"/>
   <span id="time-end" class="time-label">0:00</span>
-  <button id="loop" type="button" class="icon-btn" title="Auto-replay" aria-label="Auto-replay" aria-pressed="true">↻</button>
 </div>
 <!-- Everything this reconstruction actually asserts, on one wrapping strip: only fields that are
      SET appear (37 of 75 on a real case), so it reads as a statement rather than as a second copy

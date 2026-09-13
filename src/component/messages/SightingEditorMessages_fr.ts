@@ -42,7 +42,6 @@ export const sightingEditorMessages_fr: SightingEditorMessages = {
   play: "Lecture",
   pause: "Pause",
   noDuration: "Aucune durée d'observation",
-  autoReplay: "Lecture automatique",
   group: "Grouper",
   ungroup: "Dégrouper",
   bringToFront: "Placer devant",

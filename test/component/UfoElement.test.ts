@@ -435,8 +435,6 @@ describe("UfoElement", () => {
     // The dynamic import() of the fr messages module resolves over more than one tick under
     // Vitest's transform pipeline — poll rather than assume a single setTimeout(0) is enough.
     await waitFor(() => button.title === "Lecture")
-    const loopButton = element.shadowRoot!.getElementById("loop") as HTMLButtonElement
-    expect(loopButton.title).toBe("Lecture automatique")
     spy.mockRestore()
   })
 
@@ -474,16 +472,10 @@ describe("UfoElement", () => {
     expect(toolbar.classList.contains("auto-hide")).toBe(false)
   })
 
-  it("loop button starts pressed (loop enabled by default) and toggles on click", () => {
+  it("offers no auto-replay button: looping is a property a page sets, on by default", () => {
     const element = mount()
-    const loopButton = element.shadowRoot!.getElementById("loop") as HTMLButtonElement
-    expect(loopButton.getAttribute("aria-pressed")).toBe("true")
-
-    loopButton.click()
-    expect(loopButton.getAttribute("aria-pressed")).toBe("false")
-
-    loopButton.click()
-    expect(loopButton.getAttribute("aria-pressed")).toBe("true")
+    expect(element.shadowRoot!.getElementById("loop")).toBeNull()
+    expect(element.autoReplayEnabled).toBe(true)
   })
 
   it("showToolbar hides the overlay toolbar for a composing element with its own external controls", () => {
@@ -518,16 +510,6 @@ describe("UfoElement", () => {
 
     expect(element.currentTime).toBe(400)
     expect(seekInput.value).toBe("400")
-  })
-
-  it("autoReplayEnabled mirrors the loop button's own pressed state", () => {
-    const element = mount()
-    const loopButton = element.shadowRoot!.getElementById("loop") as HTMLButtonElement
-    expect(element.autoReplayEnabled).toBe(true)
-
-    loopButton.click()
-
-    expect(element.autoReplayEnabled).toBe(false)
   })
 
   it("togglePlayPause/toggleLoop are callable directly (public), same effect as clicking the buttons", () => {

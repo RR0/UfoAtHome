@@ -98,7 +98,6 @@ export class UfoElement extends HTMLElement {
   private readonly tooltip: HTMLElement
   private readonly toolbar: HTMLElement
   private readonly playPauseButton: HTMLButtonElement
-  private readonly loopButton: HTMLButtonElement
   /** The smallest piece of ground the map will ever show, metres across. A witness who never moved
    * has a path of zero span, and this is what stands in for it — about two city blocks, enough to
    * recognise a road, a building and a field, which is what "where was this" means. */
@@ -377,7 +376,6 @@ export class UfoElement extends HTMLElement {
     this.tooltip = this.shadow.getElementById("tooltip")!
     this.toolbar = this.shadow.getElementById("toolbar")!
     this.playPauseButton = this.shadow.getElementById("play-pause") as HTMLButtonElement
-    this.loopButton = this.shadow.getElementById("loop") as HTMLButtonElement
     this.fullscreenButton = this.shadow.getElementById("fullscreen") as HTMLButtonElement
     this.cornerButtons = this.shadow.getElementById("corner-buttons")!
     this.witnessMapButton = this.shadow.getElementById("witness-map") as HTMLButtonElement
@@ -405,7 +403,6 @@ export class UfoElement extends HTMLElement {
     this.fullscreenTarget = this.stageElement
 
     this.playPauseButton.addEventListener("click", () => this.togglePlayPause())
-    this.loopButton.addEventListener("click", () => this.toggleLoop())
     this.fullscreenButton.addEventListener("click", () => this.toggleFullscreen())
     this.witnessMapButton.addEventListener("click", () => this.toggleWitnessMap())
     this.referencesButton.addEventListener("click", () => this.toggleReferences())
@@ -753,7 +750,7 @@ export class UfoElement extends HTMLElement {
   /**
    * Puts the toggles — the account's moments, the pictures of the place and their opacity, the
    * witness's map — into `host`, or, when `host` is undefined, into this element's own playback
-   * bar beside the loop button. Never over the picture: the fullscreen button is the one control
+   * bar, at its end. Never over the picture: the fullscreen button is the one control
    * that belongs to the picture itself, and the corner is its alone. A composing element with a
    * toolbar of its own (see SightingElement, and the editor) hosts them there so that they stand
    * with the rest of what that element says about the observation. The buttons are the same
@@ -765,7 +762,7 @@ export class UfoElement extends HTMLElement {
     if (host) {
       for (const control of controls) host.appendChild(control)
     } else {
-      for (const control of controls) this.toolbar.insertBefore(control, this.loopButton)
+      for (const control of controls) this.toolbar.appendChild(control)
     }
   }
 
@@ -1194,7 +1191,6 @@ export class UfoElement extends HTMLElement {
   /** Public for the same reason as togglePlayPause — see its own doc comment. */
   toggleLoop(): void {
     this.loopEnabled = !this.loopEnabled
-    this.loopButton.setAttribute("aria-pressed", String(this.loopEnabled))
     this.player.loop = this.loopEnabled
   }
 
@@ -1784,8 +1780,6 @@ export class UfoElement extends HTMLElement {
   private applyMessages(messages: UfoMessages): void {
     this.messages = messages
     this.updateTimeLabelTitles()
-    this.loopButton.title = messages.autoReplay
-    this.loopButton.setAttribute("aria-label", messages.autoReplay)
     this.updatePlayPauseButton()
     this.updateFullscreenButton()
     this.updateWitnessMapButton()

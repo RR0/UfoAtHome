@@ -46,7 +46,6 @@ export const html = `
       <div id="milestone-marks" class="milestone-marks"></div>
     </div>
     <span id="time-end" class="time-label" title="Duration">0:00</span>
-    <button id="loop" type="button" title="Auto-replay" aria-label="Auto-replay" aria-pressed="true">↻</button>
   </div>
   </div>
 </div>

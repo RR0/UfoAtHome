@@ -90,7 +90,6 @@ export interface SightingEditorMessages extends SightingLabels {
   play: string
   pause: string
   noDuration: string
-  autoReplay: string
   group: string
   ungroup: string
   bringToFront: string

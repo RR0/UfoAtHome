@@ -156,7 +156,7 @@ more recent edit is the one that wins rather than being silently outranked). Wat
 author (e.g. a quick mouse drag) — drag the seek bar directly to skip ahead. The start/end labels around the seek
 bar show real clock times when `time` has an hour (e.g. `02:45` → `02:50`); otherwise they show `0:00` → the
 duration actually available (the declared one if known, else the recording's own length). Playback loops by
-default — click the loop button (pressed = looping) to play once and stop instead.
+default; a page that wants it to play once and stop sets `autoReplayEnabled = false` (there is no button for it).
 
 Clicking anywhere on the canvas also toggles Play/Pause (not just the button), and DOUBLE-clicking it toggles
 fullscreen — both matching common video-player UX. A double-click is two clicks first, so click-to-play has
@@ -168,7 +168,7 @@ While playing, the toolbar and the fullscreen button (top-right, semi-transparen
 only reappear on hover — always shown while paused/stopped. The fullscreen button uses the standard Fullscreen API
 (`requestFullscreen`/`exitFullscreen`); exiting with Escape is native browser behavior, nothing custom.
 
-Labels (Play/Pause, Auto-replay, Current position, Duration, Fullscreen) are translated (English/French) by
+Labels (Play/Pause, Current position, Duration, Fullscreen) are translated (English/French) by
 detection, falling back to English — there's no language-picker UI, and there deliberately isn't one. What is
 detected is the **host page's own declared language first** (the nearest `lang` attribute, so `<html lang="fr">`
 gets French labels), then `navigator.languages` — see `HostLocale.preferencesFor`. A page states what language its

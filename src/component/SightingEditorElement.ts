@@ -311,7 +311,6 @@ export class SightingEditorElement extends HTMLElement {
   private readonly seekInput: HTMLInputElement
   private readonly timeStartLabel: HTMLElement
   private readonly timeEndLabel: HTMLElement
-  private readonly loopButton: HTMLButtonElement
   private readonly durationInput: HTMLInputElement
   private readonly exportButton: HTMLButtonElement
   private readonly importFileInput: HTMLInputElement
@@ -938,7 +937,6 @@ export class SightingEditorElement extends HTMLElement {
         this.switchTimeDisplay()
       })
     }
-    this.loopButton = this.shadow.getElementById("loop") as HTMLButtonElement
     this.durationInput = this.shadow.getElementById("durationSeconds") as HTMLInputElement
     this.exportButton = this.shadow.getElementById("export") as HTMLButtonElement
     this.importFileInput = this.shadow.getElementById("import-file") as HTMLInputElement
@@ -1289,10 +1287,6 @@ export class SightingEditorElement extends HTMLElement {
     // own (hidden, here) internal toolbar already updates itself synchronously on click.
     this.playPauseButton.addEventListener("click", () => {
       this.ufoElement.togglePlayPause()
-      this.syncPlaybackControls()
-    })
-    this.loopButton.addEventListener("click", () => {
-      this.ufoElement.toggleLoop()
       this.syncPlaybackControls()
     })
     this.seekInput.addEventListener("input", () => (this.ufoElement.currentTime = Number(this.seekInput.value)))
@@ -3741,7 +3735,6 @@ export class SightingEditorElement extends HTMLElement {
     const label = !hasDuration ? this.messages.noDuration : isPlaying ? this.messages.pause : this.messages.play
     this.playPauseButton.title = label
     this.playPauseButton.setAttribute("aria-label", label)
-    this.loopButton.setAttribute("aria-pressed", String(this.ufoElement.autoReplayEnabled))
     this.seekInput.max = String(this.ufoElement.seekableDuration)
     // Skips the field while it's focused — same "don't fight active input" reasoning as
     // syncDurationField/syncObserverFromTimeline.
@@ -7332,8 +7325,6 @@ export class SightingEditorElement extends HTMLElement {
     this.referenceStreetAddButton.textContent = messages.referenceStreetAdd
     for (const [kind, option] of this.soundKindOptions) option.textContent = this.soundKindLabel(kind, messages)
     this.labelInstrument.textContent = messages.instrument
-    this.loopButton.title = messages.autoReplay
-    this.loopButton.setAttribute("aria-label", messages.autoReplay)
     this.setRecordButtonLabel(this.isRecording)
     // Refreshes the Play/Pause button's own title/aria-label, which depends on this.messages.
     this.syncPlaybackControls()

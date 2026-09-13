@@ -4,7 +4,6 @@ export interface UfoMessages {
   play: string
   pause: string
   noDuration: string
-  autoReplay: string
   currentPosition: string
   duration: string
   /** Appended to both counters' titles to say what clicking one does. Only ever shown when the
