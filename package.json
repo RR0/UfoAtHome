@@ -45,7 +45,8 @@
     "build:schema": "tsx scripts/build-sighting-schema.ts",
     "sync:cases": "tsx scripts/sync-case-recordings.ts",
     "pretest": "npm run build:schema",
-    "build:embed-sighting-editor": "npm run build:schema && tsc --noEmit && vite build --config vite.embed-sighting-editor.config.ts"
+    "build:embed-sighting-editor": "npm run build:schema && tsc --noEmit && vite build --config vite.embed-sighting-editor.config.ts",
+    "build:tle": "node scripts/build-tle-archive.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.124.0",
@@ -53,6 +54,7 @@
     "@rr0/place": "^0.5.4",
     "@rr0/time": "^0.11.2",
     "astronomy-engine": "^2.1.19",
+    "satellite.js": "^7.1.0",
     "three": "^0.185.1"
   },
   "devDependencies": {
