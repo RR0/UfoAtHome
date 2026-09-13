@@ -18,7 +18,7 @@ it("shares the time calculation without changing refracted star positions", () =
     for (const date of [new Date("1990-11-05T18:00:00Z"), new Date("2024-06-21T12:00:00Z")]) {
       const frame = new HorizontalFrame(date, observer)
       for (let ra = 0; ra < 24; ra += 2) for (const dec of [-89, -30, 0, 30, 89]) {
-        const expected = equatorialToHorizontal(ra, dec, date, observer)
+        const expected = HorizontalFrame.ofJ2000(ra, dec, date, observer)
         const actual = frame.position(ra, dec)
         // To the nanoarcsecond: the frame is built once instead of per star, so the last bits of
         // the arithmetic may differ, and nothing the eye or the picture can tell apart.
@@ -27,6 +27,39 @@ it("shares the time calculation without changing refracted star positions", () =
       }
     }
   }
+})
+
+describe("a J2000 catalogue in the sky of another century", () => {
+  /** The same star put through astronomy-engine's own star path — DefineStar, then Equator of date
+   * with aberration, then Horizon — which precesses and nutates on its own. Aberration stays in:
+   * twenty arcseconds is what the frame leaves out on purpose, and the tolerance is set above it. */
+  function throughTheLibrary(raHours: number, decDeg: number, date: Date) {
+    Astronomy.DefineStar(Astronomy.Body.Star1, raHours, decDeg, 1000)
+    const observer = new Astronomy.Observer(PARIS.lat, PARIS.lng, PARIS.elevationM)
+    const equator = Astronomy.Equator(Astronomy.Body.Star1, date, observer, true, true)
+    const horizontal = Astronomy.Horizon(date, observer, equator.ra, equator.dec, "normal")
+    return { altitudeDeg: horizontal.altitude, azimuthDeg: horizontal.azimuth }
+  }
+
+  it("puts a star where the library's own precession does, in 1006 as in 1918", () => {
+    // Regulus and Deneb, far apart in the sky so that a rotation cannot hide as a translation.
+    for (const [ra, dec] of [[10.1395, 11.967], [20.6905, 45.2803]]) {
+      for (const date of [new Date("1006-05-01T22:00:00Z"), new Date("1918-06-09T22:00:00Z")]) {
+        const frame = new HorizontalFrame(date, PARIS).position(ra, dec)
+        const library = throughTheLibrary(ra, dec, date)
+        expect(Math.abs(frame.altitudeDeg - library.altitudeDeg)).toBeLessThan(0.02)
+        expect(Math.abs(((frame.azimuthDeg - library.azimuthDeg + 540) % 360) - 180)).toBeLessThan(0.03)
+      }
+    }
+  })
+
+  it("is NOT the same as feeding the J2000 coordinates straight to the horizon — by 14 degrees in 1006", () => {
+    // The mistake this replaced, kept as a test so it cannot quietly come back.
+    const date = new Date("1006-05-01T22:00:00Z")
+    const precessed = new HorizontalFrame(date, PARIS).position(10.1395, 11.967)
+    const unprecessed = equatorialToHorizontal(10.1395, 11.967, date, PARIS)
+    expect(Math.abs(precessed.azimuthDeg - unprecessed.azimuthDeg) + Math.abs(precessed.altitudeDeg - unprecessed.altitudeDeg)).toBeGreaterThan(5)
+  })
 })
 
 describe("computeBodyPosition", () => {

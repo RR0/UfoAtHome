@@ -1,4 +1,4 @@
-import { equatorialToHorizontal } from "./CelestialPositions.js"
+import { HorizontalFrame } from "./CelestialPositions.js"
 import type { ObserverGeo } from "./CelestialPositions.js"
 
 /**
@@ -24,7 +24,7 @@ export interface MeteorShower {
    * page saying "Perseids" in the middle of a French sentence is the wart this avoids. */
   name: { en: string; fr: string }
   /** The radiant's position at the shower's peak, J2000 — right ascension in HOURS (the unit
-   * equatorialToHorizontal takes) and declination in degrees. The radiant drifts by roughly a
+   * HorizontalFrame.ofJ2000 takes) and declination in degrees. The radiant drifts by roughly a
    * degree a day across the activity period; storing its peak position is a simplification worth
    * naming, and it is well under the precision any of this is used at. */
   radiantRaHours: number
@@ -149,7 +149,7 @@ export class MeteorShowers {
   /** Where a shower's radiant stood in the observer's own sky — altitude and azimuth, through the
    * same conversion every other body in this scene goes through. */
   static radiantPosition(shower: MeteorShower, date: Date, observer: ObserverGeo) {
-    return equatorialToHorizontal(shower.radiantRaHours, shower.radiantDecDeg, date, observer)
+    return HorizontalFrame.ofJ2000(shower.radiantRaHours, shower.radiantDecDeg, date, observer)
   }
 
   /** Day of the year, 1 to 366, in UTC. */

@@ -45,8 +45,10 @@ function toObserver(observer: ObserverGeo): Astronomy.Observer {
 }
 
 /**
- * RA/dec (equatorial, as stored in the star catalog) -> alt/az for a given observer/time. Also
- * used internally by computeBodyPosition for planets/Moon. Uses astronomy-engine's own Horizon()
+ * RA/dec ON THE EQUATOR OF DATE -> alt/az for a given observer/time — what astronomy-engine's own
+ * Equator(…, ofdate=true) returns for a body. NOT for a catalogue's J2000 coordinates, which have to
+ * be precessed first: see HorizontalFrame.ofJ2000. Also used internally by computeBodyPosition for
+ * planets/Moon. Uses astronomy-engine's own Horizon()
  * rather than hand-rolling sidereal-time + spherical trig by hand: the library already carries
  * this and it's needed for the star catalog regardless of what's used for Sun/planets.
  *
@@ -66,20 +68,28 @@ export function equatorialToHorizontal(
   return { altitudeDeg: horizontal.altitude, azimuthDeg: horizontal.azimuth }
 }
 
-/** One catalogue snapshot shares a time and observer. AstroTime caches the sidereal calculation;
- * passing a Date to Horizon for every star would discard that cache for every call. */
 /**
- * The horizontal frame of one instant at one place, for converting a whole catalogue.
+ * The horizontal frame of one instant at one place, for converting a whole catalogue given in
+ * J2000 coordinates — the star catalogue, the galactic and ecliptic poles, the shower radiants, the
+ * novae.
  *
  * Astronomy.Horizon rebuilds the frame for every star it is asked about: the observer's own up,
  * north and west axes spun by the sidereal time of the instant, which only the instant and the
  * place decide, plus checks and allocations. Built once here, a star costs three dot products,
  * two arctangents and the refraction formula — ten times less, measured on a twenty-thousand-star
- * sky that a long pose restates once per instant. Same arithmetic as Horizon (its refracted
- * altitude and azimuth, to the nanoarcsecond), so what the sky shows does not change.
+ * sky that a long pose restates once per instant.
+ *
+ * PRECESSED. Horizon wants a direction on the equator OF DATE, and a catalogue is written on the
+ * equator of 2000; the axis the sky turns about has itself moved since, by about fifty arcseconds a
+ * year. Fed J2000 coordinates straight, every star in a 1918 sky stood 1.1° from where it was, and
+ * in 1006 — a supernova's sky — 13.9°, a different constellation. The rotation is folded into the
+ * axes once, so a star still costs the same three dot products. Proper motion is NOT applied: a
+ * handful of near stars have walked by up to half a degree in a thousand years (Arcturus, α
+ * Centauri), which is below this reconstruction's other errors and would need a column the
+ * catalogue does not carry.
  */
 export class HorizontalFrame {
-  /** Up, north and west of the place, in the equatorial frame of the instant. */
+  /** Up, north and west of the place, in the J2000 equatorial frame. */
   private readonly up: readonly [number, number, number]
   private readonly north: readonly [number, number, number]
   private readonly west: readonly [number, number, number]
@@ -91,12 +101,32 @@ export class HorizontalFrame {
     const sinLng = Math.sin(observer.lng * DEG2RAD)
     const cosLng = Math.cos(observer.lng * DEG2RAD)
     const spinDeg = -15 * Astronomy.SiderealTime(time)
-    this.up = HorizontalFrame.spin(spinDeg, [cosLat * cosLng, cosLat * sinLng, sinLat])
-    this.north = HorizontalFrame.spin(spinDeg, [-sinLat * cosLng, -sinLat * sinLng, cosLat])
-    this.west = HorizontalFrame.spin(spinDeg, [sinLng, -cosLng, 0])
+    // The axes are built on the true equator of date (apparent sidereal time), then carried back to
+    // J2000: a dot product with a J2000 direction is then the same as one with that direction
+    // precessed and nutated forward.
+    const toJ2000 = Astronomy.Rotation_EQD_EQJ(time)
+    this.up = HorizontalFrame.rotate(toJ2000, HorizontalFrame.spin(spinDeg, [cosLat * cosLng, cosLat * sinLng, sinLat]), time)
+    this.north = HorizontalFrame.rotate(toJ2000, HorizontalFrame.spin(spinDeg, [-sinLat * cosLng, -sinLat * sinLng, cosLat]), time)
+    this.west = HorizontalFrame.rotate(toJ2000, HorizontalFrame.spin(spinDeg, [sinLng, -cosLng, 0]), time)
   }
 
-  /** The refracted altitude and azimuth of a fixed direction — what Horizon(…, "normal") answers. */
+  /**
+   * One J2000 direction, without building a frame to keep — for the odd single object (a radiant, a
+   * nova, the axis of the Galaxy) rather than a catalogue.
+   *
+   * `refracted` is on for everything that is a POSITION in the sky, which is everything drawn. It is
+   * turned off only for the axes of a coordinate frame (see SkyFrames), where the point of the call
+   * is a rotation and a refraction would break it by bending three axes each by a different amount.
+   */
+  static ofJ2000(raHours: number, decDeg: number, date: Date, observer: ObserverGeo, refracted = true): HorizontalPosition {
+    const time = Astronomy.MakeTime(date)
+    const j2000 = Astronomy.VectorFromSphere(new Astronomy.Spherical(decDeg, raHours * 15, 1), time)
+    const ofDate = Astronomy.EquatorFromVector(Astronomy.RotateVector(Astronomy.Rotation_EQJ_EQD(time), j2000))
+    return equatorialToHorizontal(ofDate.ra, ofDate.dec, date, observer, refracted)
+  }
+
+  /** The refracted altitude and azimuth of a fixed J2000 direction — what Horizon(…, "normal")
+   * answers for that direction precessed to the date. */
   position(raHours: number, decDeg: number): HorizontalPosition {
     const sinDec = Math.sin(decDeg * DEG2RAD)
     const cosDec = Math.cos(decDeg * DEG2RAD)
@@ -122,6 +152,11 @@ export class HorizontalFrame {
     const c = Math.cos(angleDeg * DEG2RAD)
     const s = Math.sin(angleDeg * DEG2RAD)
     return [c * x + s * y, c * y - s * x, z]
+  }
+
+  private static rotate(rotation: Astronomy.RotationMatrix, [x, y, z]: readonly [number, number, number], time: Astronomy.AstroTime): [number, number, number] {
+    const v = Astronomy.RotateVector(rotation, new Astronomy.Vector(x, y, z, time))
+    return [v.x, v.y, v.z]
   }
 }
 

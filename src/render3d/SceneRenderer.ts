@@ -3755,7 +3755,7 @@ export class SceneRenderer {
 
   /** Builds the real star field: filters the catalog to what's actually visible right now (above
    * the horizon, and brighter than visibleMagnitudeLimit's sky-glare threshold), transforms each
-   * surviving star's fixed RA/dec to today's alt/az via equatorialToHorizontal, and buckets by
+   * surviving star's fixed J2000 RA/dec to today's alt/az via HorizontalFrame (precessed), and buckets by
    * magnitudeToBrightness into the same size tiers/twinkle machinery as before — only the source
    * of positions/brightness changed, not how they're rendered. */
   private buildStars(stars: SceneAstronomy["stars"], magnitudeLimit: number): void {

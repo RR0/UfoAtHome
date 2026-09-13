@@ -1,7 +1,7 @@
 import * as Astronomy from "astronomy-engine"
 import { describe, expect, it } from "vitest"
 import { SkyFrames } from "../../../src/engine/astronomy/SkyFrames.js"
-import { equatorialToHorizontal, type HorizontalPosition, type ObserverGeo } from "../../../src/engine/astronomy/CelestialPositions.js"
+import { equatorialToHorizontal, HorizontalFrame, type HorizontalPosition, type ObserverGeo } from "../../../src/engine/astronomy/CelestialPositions.js"
 import { horizontalToCartesian } from "../../../src/render3d/skyColors.js"
 
 /**
@@ -27,7 +27,7 @@ function galacticOf(raHours: number, decDeg: number, date: Date): { l: number; b
   const centre = directionOf(axes.centre)
   const rotation = directionOf(axes.rotation)
   const pole = directionOf(axes.pole)
-  const star = directionOf(equatorialToHorizontal(raHours, decDeg, date, observer, false))
+  const star = directionOf(HorizontalFrame.ofJ2000(raHours, decDeg, date, observer, false))
   const b = (Math.asin(Math.max(-1, Math.min(1, dot(star, pole)))) * 180) / Math.PI
   const l = ((Math.atan2(dot(star, rotation), dot(star, centre)) * 180) / Math.PI + 360) % 360
   return { l, b }
@@ -79,7 +79,7 @@ describe("the ecliptic pole", () => {
 
   it("stands the obliquity of the Earth's axis away from the celestial pole", () => {
     const eclipticPole = directionOf(SkyFrames.eclipticPole(date, observer))
-    const celestialPole = directionOf(equatorialToHorizontal(0, 90, date, observer, false))
+    const celestialPole = directionOf(HorizontalFrame.ofJ2000(0, 90, date, observer, false))
     const apart = (Math.acos(Math.max(-1, Math.min(1, dot(eclipticPole, celestialPole)))) * 180) / Math.PI
     expect(apart).toBeCloseTo(23.44, 1)
   })

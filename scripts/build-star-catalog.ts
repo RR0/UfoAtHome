@@ -271,7 +271,7 @@ function main(): void {
  * 179 this side of the cut can be named, against 2 726 of 5 070 at magnitude 6.
  *
  * Positions are J2000 right ascension in hours and declination in degrees, the same frame and
- * units as the binary catalog, so equatorialToHorizontal treats them identically — rounded to four
+ * units as the binary catalog, so HorizontalFrame treats them identically — rounded to four
  * decimals, which is a third of an arcsecond, against a hover threshold of nearly two degrees and
  * a binary catalog that only carries Float32 anyway.
  *

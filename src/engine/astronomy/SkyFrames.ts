@@ -1,4 +1,4 @@
-import { equatorialToHorizontal, type HorizontalPosition, type ObserverGeo } from "./CelestialPositions.js"
+import { HorizontalFrame, type HorizontalPosition, type ObserverGeo } from "./CelestialPositions.js"
 
 /**
  * Where the fixed planes of the sky stand, from where the witness is standing.
@@ -10,11 +10,11 @@ import { equatorialToHorizontal, type HorizontalPosition, type ObserverGeo } fro
  * the witness. Turning them needs the frame itself, not a position, and that is what this hands
  * back: the directions the axes of those frames point in, in the witness's own sky.
  *
- * Done by putting each axis through the very same right-ascension-to-altitude transform the star
- * field uses, rather than by composing rotation matrices by hand. That is deliberate: the
- * precession, nutation and sidereal time that decide where the galactic plane cuts a 1954 horizon
- * are already solved inside that call, and a hand-built matrix would have to solve them again and
- * could only agree with the star field by luck. Three directions through one trusted door.
+ * Done by putting each axis through the very same J2000-to-altitude transform the star field uses,
+ * rather than by composing rotation matrices by hand. That is deliberate: the precession, nutation
+ * and sidereal time that decide where the galactic plane cuts a 1954 horizon are solved inside that
+ * call (see HorizontalFrame), and a hand-built matrix would have to solve them again and could only
+ * agree with the star field by luck. Three directions through one trusted door.
  */
 export class SkyFrames {
   /**
@@ -65,6 +65,6 @@ export class SkyFrames {
    * keep their own refraction, which is where it actually shows.
    */
   private static at(equatorial: { raHours: number; decDeg: number }, date: Date, observer: ObserverGeo): HorizontalPosition {
-    return equatorialToHorizontal(equatorial.raHours, equatorial.decDeg, date, observer, false)
+    return HorizontalFrame.ofJ2000(equatorial.raHours, equatorial.decDeg, date, observer, false)
   }
 }
