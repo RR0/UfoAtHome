@@ -28,8 +28,13 @@ export class PlayerPage implements SitePage {
     const fr = language === "fr"
     // This site knows what its own demos are called; a case id like `sky-test-halos` does not.
     // Only for these — anything else is named from what the recording itself carries.
+    // As they read inside the heading's sentence: a title that is not a name loses the capital it
+    // only had for starting a card (see Demo.titleIsName).
     const demoTitles = JSON.stringify(Object.fromEntries(
-      this.catalogue.demos.map(demo => [demo.src, demo.title[language]])))
+      this.catalogue.demos.map(demo => {
+        const title = demo.title[language]
+        return [demo.src, demo.titleIsName ? title : title.charAt(0).toLocaleLowerCase(language) + title.slice(1)]
+      })))
     // Which of them are worth a map of where the witness stood — see Demo.witnessMap. Keyed the
     // same way as the titles, by the demo's own path, so both answer the same question about the
     // same thing: is what this page is showing one of ours, and which.

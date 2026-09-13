@@ -22,6 +22,15 @@ export interface Demo {
    */
   readonly witnessMap?: boolean
   readonly title: Said<string>
+  /**
+   * Whether the title is a NAME — a place, people — whose capital stays wherever the title goes.
+   *
+   * The others ("A comet", "Un train de Starlink") are capitalised only because a card title starts
+   * with them, and lose that capital once put inside a sentence: the player's heading reads
+   * "Rejouer un train de Starlink", not "Rejouer Un train de Starlink". Nothing in the text itself
+   * tells the two apart, so the catalogue says it.
+   */
+  readonly titleIsName?: boolean
   readonly blurb: Said<string>
 }
 
@@ -53,6 +62,7 @@ export class DemoCatalogue {
           src: "/demo-data/witness-chiles.json",
           witnessMap: true,
           title: { en: "Chiles & Whitted, 1948", fr: "Chiles et Whitted, 1948" },
+          titleIsName: true,
           blurb: {
             en: "Night over Alabama, 02:45. Two airline pilots described the same phenomenon differently — open it full size to switch witness.",
             fr: "Nuit au-dessus de l'Alabama, 02:45. Deux pilotes de ligne ont décrit le même phénomène différemment — ouvrez-le en grand pour changer de témoin."
@@ -62,6 +72,7 @@ export class DemoCatalogue {
           id: "valensole",
           src: "/demo-data/witness-valensole.json",
           title: { en: "Valensole, 1965", fr: "Valensole, 1965" },
+          titleIsName: true,
           blurb: {
             en: "Early morning on the plateau, 05:45, the Sun forty minutes up and 7° high in the north-east — and the real relief of that field under the witness's feet.",
             fr: "Petit matin sur le plateau, 05:45, le Soleil levé depuis quarante minutes, à 7° de hauteur au nord-est — et le relief réel de ce champ sous les pieds du témoin."
@@ -71,6 +82,7 @@ export class DemoCatalogue {
           id: "cussac",
           src: "/demo-data/witness-cussac.json",
           title: { en: "Cussac, 1967", fr: "Cussac, 1967" },
+          titleIsName: true,
           blurb: {
             en: "Mid-morning on a Cantal plateau, 10:30. A sphere 82 m off behind a hedge, four small black beings diving into it, a widening helix — every angle from the GEPAN's 1978 theodolite survey.",
             fr: "Milieu de matinée sur un plateau du Cantal, 10:30. Une sphère à 82 m derrière une haie, quatre petits êtres noirs qui y plongent, une hélice qui s'élargit — chaque angle vient du relevé au théodolite du GEPAN en 1978."
@@ -81,6 +93,7 @@ export class DemoCatalogue {
           src: "/demo-data/witness-socorro.json",
           witnessMap: true,
           title: { en: "Socorro, 1964", fr: "Socorro, 1964" },
+          titleIsName: true,
           blurb: {
             en: "Low sun, 17:50, New Mexico. The case people argue about the phenomenon's size in — and where the reconstruction refuses to state one.",
             fr: "Soleil bas, 17:50, Nouveau-Mexique. Le cas dont on discute la taille du phénomène — et où la reconstitution refuse d'en énoncer une."
@@ -90,6 +103,7 @@ export class DemoCatalogue {
           id: "wilcox",
           src: "/demo-data/witness-wilcox.json",
           title: { en: "Wilcox, 1964", fr: "Wilcox, 1964" },
+          titleIsName: true,
           blurb: {
             en: "Broad daylight, 10:00, New York State, with a cloud deck lifting from 800 m to 913 m across the two hours the record covers.",
             fr: "Plein jour, 10:00, État de New York, avec une base de nuages qui monte de 800 m à 913 m sur les deux heures que couvre le relevé."

@@ -10,10 +10,11 @@
     "month": 7,
     "day": 29,
     "hour": 23,
-    "minute": 5
+    "minute": 5,
+    "second": 18
   },
   "utcOffsetHours": 2,
-  "durationSeconds": 240,
+  "durationSeconds": 222,
   "place": [
     {
       "lat": 48.8566,
@@ -64,7 +65,7 @@
         }
       },
       {
-        "t": 240000,
+        "t": 222000,
         "pose": {
           "lat": 48.8566,
           "lng": 2.3522,
