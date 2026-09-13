@@ -259,7 +259,7 @@ export class DocsSourcesPage extends DocsSection {
           choices: { en: "No server of ours, so no account and no key held here. The draft is a proposal the author edits, never a result.", fr: "Aucun serveur de notre côté, donc ni compte ni clé conservés ici. Le jet est une proposition que l'auteur corrige, jamais un résultat." }
         },
         {
-          name: "Hynek classification", url: "https://rr0.org/science/crypto/ufo/enquete/methode/",
+          name: "Hynek classification", url: "https://rr0.org/science/crypto/ufo/observation/classification/hynek/",
           provides: { en: "The close-encounter category a recording supports, beside the tool's own coverage questions.", fr: "La catégorie de rencontre rapprochée qu'un enregistrement soutient, à côté des questions de couverture propres à l'outil." },
           when: { en: "Computed in the page.", fr: "Calculé dans la page." },
           hosting: { en: "After J. Allen Hynek.", fr: "D'après J. Allen Hynek." },

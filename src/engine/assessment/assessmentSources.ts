@@ -36,7 +36,7 @@ export const ASSESSMENT_SOURCES: DataSource<Assessor>[] = [
     // Whose scheme it is. The link goes to this project's own pages on evaluation methods rather
     // than to a publisher, so a reader lands where the terms are explained in their language.
     credit: "J. Allen Hynek",
-    creditUrl: "https://rr0.org/science/crypto/ufo/enquete/methode/",
+    creditUrl: "https://rr0.org/science/crypto/ufo/observation/classification/hynek/",
     create: () => ({
       about: "temporal",
       assess: async (sighting: Sighting): Promise<Assessment> => {
