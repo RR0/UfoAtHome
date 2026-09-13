@@ -79,7 +79,7 @@ export class ContextPage implements SitePage {
       date or it is not.</p>
     <p><strong>Novae and supernovae</strong> shine only on the nights their recorded light curve
       covers, and nowhere outside it: before the first record the star may already have been rising,
-      and nobody can say how bright. Thirty-two eruptions reached the naked eye, from the supernova of
+      and nobody can say how bright. Thirty-three eruptions reached the naked eye, from the supernova of
       1006 to RS Ophiuchi in 2021. Their brightness is measured by the AAVSO for every nova up to
       2006, reconstructed from Tycho's and Kepler's own comparisons for 1572 and 1604, and held to a
       few chronicled dates for 1054 and 1181; each one says which.</p>
@@ -217,7 +217,7 @@ export class ContextPage implements SitePage {
       date, ou elle n'y est pas.</p>
     <p>Les <strong>novae et supernovae</strong> ne brillent que les nuits que couvre leur courbe de
       lumière relevée, et jamais en dehors : avant le premier relevé, l'étoile montait peut-être
-      déjà, et personne ne peut dire à quel éclat. Trente-deux éruptions ont atteint l'œil nu, de la
+      déjà, et personne ne peut dire à quel éclat. Trente-trois éruptions ont atteint l'œil nu, de la
       supernova de 1006 à RS Ophiuchi en 2021. Leur éclat est mesuré par l'AAVSO pour toutes les
       novae jusqu'en 2006, reconstitué d'après les comparaisons de Tycho et de Kepler eux-mêmes pour
       1572 et 1604, et tenu à quelques dates des chroniques pour 1054 et 1181 ; chacune dit ce

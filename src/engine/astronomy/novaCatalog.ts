@@ -453,6 +453,20 @@ export const STELLAR_OUTBURSTS: StellarOutburst[] = [
     note: "High in the summer evening sky of the northern hemisphere, and widely photographed."
   },
   {
+    id: "v1369-cen-2013",
+    kind: "nova",
+    designation: "V1369 Cen",
+    name: { en: "Nova Centauri 2013", fr: "nova du Centaure 2013" },
+    raHours: 13.9126,
+    decDeg: -59.15114,
+    peakMagnitude: 3.48,
+    peakJd: 2456639.65,
+    startJd: 2456628.5,
+    lightCurve: [[0, 5.33], [1.57, 4.08], [2.75, 3.73], [4.57, 4.16], [5.96, 4.15], [10.26, 3.77], [11.15, 3.48], [12.14, 3.74], [14.17, 4.78], [15.46, 4.97], [23.16, 4.22], [26.25, 4.32], [27.31, 4.82], [29.56, 5.11], [32.66, 4.71], [33.84, 4.86], [36.05, 4.46], [37.15, 4.99], [41.42, 4.59], [42.37, 4.93], [43.37, 4.82], [44.54, 5.09], [49.95, 5.38], [51.99, 5.82], [54.21, 5.77]],
+    source: "AAVSO, binned by day, as plotted by Izzo 2017 (arXiv:1704.07214, figure 1)",
+    note: "Discovered on 2 December 2013 by John Seach at magnitude 5.5, it flared several times, reaching about 3.3 around 14 December: the brightest nova of the century so far, and a southern one."
+  },
+  {
     id: "rs-oph-2021",
     kind: "nova",
     designation: "RS Oph",

@@ -32,10 +32,14 @@
  *   eruptions as one, so the measured one is shifted onto the recorded peak of the other. SN 1006 was a
  *   Type Ia like SN 1572, and has only a peak on record: Tycho's curve gives it a decline.
  *
+ * - READ OUT OF A PUBLISHED FIGURE (V1369 Cen, 2013). Its AAVSO curve sits behind a browser challenge a
+ *   build script must not pass, and no table of it is published. Izzo's review (arXiv:1704.07214,
+ *   figure 1) plots the AAVSO V magnitudes binned by day, and the figure is vector: each marker is a
+ *   circle whose centre, against the plot's own tick marks, gives the day and the magnitude exactly
+ *   as drawn. Only what the figure SHOWS is kept, days 0 to 55: the PDF carries markers past the
+ *   plot's clipping rectangle too, which nobody reviewing that figure ever saw.
+ *
  * WHAT IS NOT HERE, and why:
- * - V1369 Cen (2013, magnitude 3.3): the brightest nova of the century so far, and its AAVSO curve is
- *   behind a browser challenge a build script must not pass. Nothing published gives more than its
- *   discovery and its peak, and a curve that stops at its peak would have it vanish at its brightest.
  * - T CrB: expected since 2024, and not erupted as of September 2026. When it does, it is one entry
  *   borrowing its 1946 curve.
  * - Anything before 1006. SN 185 and SN 393 are in the chronicles; their dates and brightness are too
@@ -43,6 +47,8 @@
  *
  * INPUTS, in scripts/data/novae/ (gitignored — the generated catalog is what is committed):
  * - strope2010-table1.dat, strope2010-table2.dat: https://cdsarc.cds.unistra.fr/ftp/J/AJ/140/34/
+ * - v1369cen-izzo2017-fig1.json: [days from 2 December 2013, V] read from that figure's vector markers
+ *   (source at https://arxiv.org/src/1704.07214, file lightcurve_all_epochs.pdf).
  * - sn1987a-V.csv: the Open Supernova Catalog's V photometry,
  *   https://api.astrocats.space/SN1987A/photometry/time+magnitude+band+source?band=V&format=csv
  * `curl -k` fetches all three (Node's own fetch does not go through the proxy on this machine).
@@ -85,6 +91,15 @@ interface OutburstInput extends Coordinates {
 type CurveInput =
   | { from: "strope"; nova: string }
   | { from: "recorded"; points: RecordedMagnitude[] }
+  | {
+      from: "figure"
+      /** [days since dayZero, magnitude] pairs, in scripts/data/novae/. */
+      file: string
+      /** The instant the figure's time axis counts from. */
+      dayZero: string
+      /** The last day the plot actually shows; markers beyond its clipping rectangle are dropped. */
+      lastShownDay: number
+    }
   | {
       from: "borrowed"
       /** The id of the entry whose curve is shifted. */
@@ -356,6 +371,17 @@ const OUTBURSTS: OutburstInput[] = [
     note: "Faded from sight quickly when dust formed around it, three weeks after its peak."
   },
   {
+    id: "v1369-cen-2013",
+    kind: "nova",
+    designation: "V1369 Cen",
+    name: { en: "Nova Centauri 2013", fr: "nova du Centaure 2013" },
+    ra: "13 54 45.35",
+    dec: "-59 09 04.1",
+    curve: { from: "figure", file: "v1369cen-izzo2017-fig1.json", dayZero: "2013-12-02T00:00:00Z", lastShownDay: 55 },
+    source: "AAVSO, binned by day, as plotted by Izzo 2017 (arXiv:1704.07214, figure 1)",
+    note: "Discovered on 2 December 2013 by John Seach at magnitude 5.5, it flared several times, reaching about 3.3 around 14 December: the brightest nova of the century so far, and a southern one."
+  },
+  {
     id: "v339-del-2013",
     kind: "nova",
     designation: "V339 Del",
@@ -434,7 +460,7 @@ class NovaCatalogBuilder {
       name: input.name,
       raHours: this.round(this.hoursOf(input.ra), 5),
       decDeg: this.round(this.degreesOf(input.dec), 5),
-      peakMagnitude: peak[1],
+      peakMagnitude: this.round(peak[1], 2),
       peakJd: this.round(peak[0], 2),
       startJd: this.round(startJd, 2),
       lightCurve: absolute.map(([jd, magnitude]) => [this.round(jd - startJd, 2), this.round(magnitude, 2)] as [number, number]),
@@ -452,6 +478,14 @@ class NovaCatalogBuilder {
       case "recorded":
         if (input.id === "sn-1987a") return this.thinned(this.sn1987aCurve())
         return this.mergeNearby(curve.points.map(point => [this.julianDayOf(point), point.magnitude] as [number, number]).sort((a, b) => a[0] - b[0]))
+      case "figure": {
+        const dayZero = this.julianDayOf({ on: curve.dayZero })
+        const points = JSON.parse(readFileSync(path.join(this.dataDirectory, curve.file), "utf8")) as [number, number][]
+        return this.thinned(points
+          .filter(([days]) => days <= curve.lastShownDay)
+          .map(([days, magnitude]) => [dayZero + days, magnitude] as [number, number])
+          .sort((a, b) => a[0] - b[0]))
+      }
       case "borrowed": {
         const sibling = this.curves.get(curve.sibling)
         if (!sibling) throw new Error(`${input.id} borrows from ${curve.sibling}, which is not built yet`)

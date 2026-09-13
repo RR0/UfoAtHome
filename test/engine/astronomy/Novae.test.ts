@@ -85,6 +85,14 @@ describe("the light curve", () => {
     expect(may).toBeLessThan(3.5)
   })
 
+  it("puts V1369 Cen near 3.5 at its flare of mid-December 2013, and fading past 5.5 by 22 January", () => {
+    const cen = outburst("v1369-cen-2013")
+    expect(Novae.magnitudeAt(cen, Novae.julianDayOf(new Date("2013-12-13T04:00:00Z")))!).toBeLessThan(3.8)
+    expect(Novae.magnitudeAt(cen, Novae.julianDayOf(new Date("2014-01-22T12:00:00Z")))!).toBeGreaterThan(5.5)
+    // Only what the figure shows: nothing past its 55th day.
+    expect(Novae.magnitudeAt(cen, Novae.julianDayOf(new Date("2014-02-10T00:00:00Z")))).toBeUndefined()
+  })
+
   it("interpolates in magnitude, between two points and exactly through them", () => {
     const sn1054 = outburst("sn-1054")
     const [[, first], [secondDays, second]] = sn1054.lightCurve
