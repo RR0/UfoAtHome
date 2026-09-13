@@ -89,6 +89,8 @@ import { AdaptiveResolution } from "./AdaptiveResolution.js"
 import { IceHalos } from "../engine/atmosphere/IceHalos.js"
 import { Rainbows } from "../engine/atmosphere/Rainbows.js"
 import { CometTail } from "./CometTail.js"
+import { SatelliteField } from "./SatelliteField.js"
+import type { SceneSatellite } from "./SatelliteField.js"
 import { IceHaloEffect } from "./IceHaloEffect.js"
 import { RainbowEffect } from "./RainbowEffect.js"
 import { MeteorSystem } from "./MeteorSystem.js"
@@ -997,6 +999,9 @@ export class SceneRenderer {
   private meteorSystem?: MeteorSystem
   /** The comet's tail, if this sky has ever had one — built once and kept, like the meteors. */
   private cometTail?: CometTail
+  /** The satellites standing in this sky, if the recording's date has element sets — see
+   * setSatellites. Built on first use and kept. */
+  private satelliteField?: SatelliteField
   /** What ice crystals did to the light of the Sun or Moon — see IceHaloEffect. */
   private iceHalos?: IceHaloEffect
   /** What falling water did to it — see RainbowEffect. The two are independent and a sky may
@@ -1881,6 +1886,37 @@ export class SceneRenderer {
     // scrubbing (no stars/precipitation/lightning to otherwise keep it alive).
     this.syncAnimationLoop()
     this.render()
+  }
+
+  /**
+   * Stands these satellites in the sky, at this instant.
+   *
+   * Apart from setAstronomy, and called at every frame and every instant of a pose, because a
+   * satellite moves a degree a second near the zenith while the rest of the sky is restated only
+   * once it has turned a fraction of a pixel. Settled against the same magnitude limit as the stars
+   * (the Sun of the last restatement, a fraction of a pixel old, and the instrument's own gain), so a
+   * Starlink is drawn exactly when a star of its magnitude beside it would be.
+   */
+  setSatellites(satellites: ReadonlyArray<SceneSatellite>): void {
+    if (satellites.length === 0 && !this.satelliteField?.count) return
+    if (!this.satelliteField) {
+      this.satelliteField = new SatelliteField(STAR_RADIUS)
+      // In the celestial group, at infinity with the stars: a satellite hundreds of kilometres away
+      // shows no parallax against a witness's few metres of eye height.
+      this.celestialGroup.add(this.satelliteField.object)
+    }
+    const magnitudeLimit = visibleMagnitudeLimit(this.lastSunPosition?.altitudeDeg ?? -90, this.instrumentMagnitudeGain)
+    this.satelliteField.set(satellites, magnitudeLimit, position => this.cloudTransmission(position))
+    this.render()
+  }
+
+  /** The drawn satellite under a screen point, the same angular nearest-neighbour as pickStarAt. */
+  pickSatelliteAt(ndcX: number, ndcY: number): SceneSatellite | undefined {
+    if (!this.satelliteField?.count) return undefined
+    this.aimAtScreenPoint(this.raycaster, ndcX, ndcY)
+    const thresholdCos = Math.cos((STAR_HOVER_FIELD_FRACTION * this.camera.fov * Math.PI) / 180)
+    const satellite = this.satelliteField.nearest(this.raycaster.ray.direction, thresholdCos)
+    return satellite && this.groundHides(ndcX, ndcY) ? undefined : satellite
   }
 
   /** Points the one real shadow-casting light at whichever of the Sun/Moon is currently above
@@ -3027,6 +3063,8 @@ export class SceneRenderer {
     this.exposureAccumulation = undefined
     this.cometTail?.dispose()
     this.cometTail = undefined
+    this.satelliteField?.dispose()
+    this.satelliteField = undefined
     for (const mesh of this.bodyMeshes.values()) {
       this.disposeMesh(mesh)
     }

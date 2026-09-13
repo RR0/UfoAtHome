@@ -115,6 +115,12 @@ describe("TleArchive", () => {
     expect(new Set(requests).size).toBe(requests.length)
   })
 
+  it("asks nothing of the network for a date before the archive began", async () => {
+    const requests: string[] = []
+    expect(await archive(requests).covers(new Date("1965-07-01T05:45:00Z"))).toBe(false)
+    expect(requests).toEqual([])
+  })
+
   it("answers undefined when no archive can be reached", async () => {
     const tle = new TleArchive({ fetchImpl: (async () => { throw new TypeError("offline") }) as typeof fetch, indexUrls: ["https://nowhere/index.json"] })
     expect(await tle.at(new Date())).toBeUndefined()

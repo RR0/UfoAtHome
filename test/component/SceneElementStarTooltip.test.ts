@@ -59,6 +59,10 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     pickDecorAt(): undefined {
       return undefined
     }
+    setSatellites(): void {}
+    pickSatelliteAt(): undefined {
+      return undefined
+    }
     pickStarAt(): { star: BrightStar; altitudeDeg: number } | undefined {
       return hit.star ? { star: hit.star, altitudeDeg: hit.altitudeDeg } : undefined
     }

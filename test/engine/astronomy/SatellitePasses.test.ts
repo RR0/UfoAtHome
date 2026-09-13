@@ -123,6 +123,15 @@ describe("SatellitePasses", () => {
       expect(SatelliteMagnitude.of(visorSat, 1000, 60, 1)).toBeCloseTo(7.21, 2)
     })
 
+    it("makes a Starlink still raising its orbit three magnitudes brighter, as trains are", () => {
+      // Mallama et al. 2024: below 357 km a V2 Mini averages an apparent 2.68. Overhead at 300 km
+      // that is 4.58 + 5·log10(0.3) = 1.96, where the operational average would say 4.6 and leave
+      // the train, the most reported Starlink sight of all, undrawn in any twilight.
+      const young = objectOf(STARLINK_TLE, "STARLINK-99999", { kind: "starlink", launch: "2025-01-24" })
+      expect(SatelliteMagnitude.of(young, 300, 60, 1, 300)).toBeCloseTo(1.96, 1)
+      expect(SatelliteMagnitude.of(young, 550, 60, 1, 550)).toBeCloseTo(7.21 + 5 * Math.log10(0.55), 2)
+    })
+
     it("dims an object in the penumbra and says nothing of one in the umbra", () => {
       const iss = objectOf(ISS_TLE, "ISS (ZARYA)", { stdMag: -2.5 })
       expect(SatelliteMagnitude.of(iss, 1000, 90, 0.1)).toBeCloseTo(0, 2)

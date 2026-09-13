@@ -119,8 +119,17 @@ export class TleArchive {
     return urls
   }
 
+  /**
+   * The first snapshot of the archive, known without asking it: nothing is fetched for an earlier
+   * date. Nearly every recording this project reconstructs is older, and none of them should cost
+   * a request, or wait on one, to learn that.
+   */
+  static readonly FIRST_SNAPSHOT = "2021-02-22"
+
   /** Whether the archive exists at all and could hold that date — without fetching any element set. */
   async covers(date: Date): Promise<boolean> {
+    const floor = Date.parse(`${TleArchive.FIRST_SNAPSHOT}T00:00:00Z`) - TleArchive.MAX_ELEMENT_AGE_DAYS * TleArchive.DAY_MS
+    if (date.getTime() < floor) return false
     const loaded = await this.loadIndex()
     if (!loaded) return false
     return Object.values(loaded.index.kinds).some(kind =>

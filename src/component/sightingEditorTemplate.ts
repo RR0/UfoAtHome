@@ -320,6 +320,7 @@ export const html = `
          the comet glyph, which was only ever unambiguous while there was nothing else up there. -->
     <button id="show-meteor" type="button" class="icon-btn" title="Show me one" aria-label="Show me one" hidden>🌠</button>
     <button id="show-comet" type="button" class="icon-btn" title="Show me the comet" aria-label="Show me the comet" hidden>☄</button>
+    <button id="show-satellite" type="button" class="icon-btn" title="Show me a satellite" aria-label="Show me a satellite" hidden>🛰</button>
   </div>
   <!-- The weather in three parts — what falls (first, and open on arrival: the user's own order), the
        clouds, and what blows — as a strip of handles

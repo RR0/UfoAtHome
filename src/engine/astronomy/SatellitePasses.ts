@@ -67,7 +67,17 @@ export class SatelliteMagnitude {
     { launchedFrom: "2020-08-07", magnitude1000Km: 7.21 }
   ]
 
-  static of(object: OrbitingObject, rangeKm: number, phaseAngleDeg: number, sunlitFraction: number): number | undefined {
+  /**
+   * A Starlink still raising its orbit, below the height where its brightness mitigation starts.
+   *
+   * This is the TRAIN, the Starlink sighting that gets reported, and the averages above miss it by
+   * three magnitudes: Mallama et al. (2024, arXiv:2405.12007) measured V2 Minis below 357 km at a
+   * mean 1000-km magnitude of 4.58 (an apparent 2.68), against 7.52 above. Applied to every Starlink
+   * below that height, whatever its design: the earlier trains were at least as bright.
+   */
+  static readonly STARLINK_ORBIT_RAISING = { belowKm: 357, magnitude1000Km: 4.58 }
+
+  static of(object: OrbitingObject, rangeKm: number, phaseAngleDeg: number, sunlitFraction: number, heightKm = Infinity): number | undefined {
     if (sunlitFraction <= 0) return undefined
     let magnitude: number | undefined
     if (object.stdMag !== undefined) {
@@ -75,7 +85,9 @@ export class SatelliteMagnitude {
       if (litFraction <= 0) return undefined
       magnitude = object.stdMag - 15.75 + 2.5 * Math.log10((rangeKm * rangeKm) / litFraction)
     } else if (object.kind === "starlink") {
-      magnitude = SatelliteMagnitude.starlinkMagnitude1000Km(object.launch) + 5 * Math.log10(rangeKm / 1000)
+      const raising = SatelliteMagnitude.STARLINK_ORBIT_RAISING
+      const magnitude1000Km = heightKm < raising.belowKm ? raising.magnitude1000Km : SatelliteMagnitude.starlinkMagnitude1000Km(object.launch)
+      magnitude = magnitude1000Km + 5 * Math.log10(rangeKm / 1000)
     }
     // Partly in the penumbra: the object receives that fraction of the Sun's light.
     return magnitude === undefined ? undefined : magnitude - 2.5 * Math.log10(sunlitFraction)
@@ -219,16 +231,16 @@ export class SatellitePasses {
     const look = ecfToLookAngles(frame.geodetic, eciToEcf(eci, frame.gmst))
     const sunlitFraction = 1 - shadowFraction(frame.sunEciAu, eci)
     const phaseAngleDeg = SatellitePasses.phaseAngleDeg(eci, frame.sunEciAu, frame.observerEci)
-    const radiusKm = Math.hypot(eci.x, eci.y, eci.z)
+    const heightKm = Math.hypot(eci.x, eci.y, eci.z) - 6371
     return {
       object: record.object,
       azimuthDeg: (look.azimuth * 180) / Math.PI,
       altitudeDeg: (look.elevation * 180) / Math.PI,
       rangeKm: look.rangeSat,
-      heightKm: radiusKm - 6371,
+      heightKm,
       sunlitFraction,
       phaseAngleDeg,
-      magnitude: SatelliteMagnitude.of(record.object, look.rangeSat, phaseAngleDeg, sunlitFraction)
+      magnitude: SatelliteMagnitude.of(record.object, look.rangeSat, phaseAngleDeg, sunlitFraction, heightKm)
     }
   }
 

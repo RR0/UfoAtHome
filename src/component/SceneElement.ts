@@ -36,6 +36,10 @@ import { BRIGHT_COMETS } from "../engine/astronomy/cometCatalog.js"
 import { MeteorShowers } from "../engine/astronomy/MeteorShowers.js"
 import { MeteorFall } from "../engine/astronomy/MeteorFall.js"
 import { Sporadics } from "../engine/astronomy/Sporadics.js"
+import { TleArchive } from "../engine/astronomy/TleArchive.js"
+import type { TleCoverage, TleSnapshot } from "../engine/astronomy/TleArchive.js"
+import type { SatellitePass, SatellitePasses } from "../engine/astronomy/SatellitePasses.js"
+import type { SceneSatellite } from "../render3d/SatelliteField.js"
 import { SizeEstimate } from "../engine/shape/SizeEstimate.js"
 import type { MeterRange } from "../engine/shape/SizeEstimate.js"
 import { ApparentSize } from "../engine/shape/ApparentSize.js"
@@ -96,6 +100,19 @@ const STAR_TOOLTIP: Record<string, string> = {
  * A star the ground actually hides is a different matter and never reaches this point at all: see
  * SceneRenderer.groundHides.
  */
+/** A satellite under the pointer: its catalogue name, how bright, how high. The height in
+ * kilometres, not the altitude in degrees, because the height is what tells a Starlink still
+ * raising its orbit from one on station. */
+const SATELLITE_TOOLTIP: Record<string, string> = {
+  en: "{name} — satellite, mag {mag}, {height} km up",
+  fr: "{name} — satellite, mag {mag}, à {height} km d'altitude"
+}
+
+/** Fired by a scene when the element sets of its recording have arrived, or turned out not to exist. */
+export const SATELLITES_CHANGE_EVENT = "satellites-change"
+
+export type SatelliteStatus = "none" | "loading" | "outside" | "unavailable" | "ready"
+
 const STAR_TOOLTIP_BELOW: Record<string, string> = {
   en: "{name} — mag {mag}, {alt}° below the horizontal",
   fr: "{name} — mag {mag}, {alt}° sous l'horizontale"
@@ -230,6 +247,16 @@ export class SceneElement extends HTMLElement {
   /** Which loadStars() call is the current one — see loadStars on why the last ASK wins rather than
    * the last arrival. */
   private starCatalogRequest = 0
+
+  /** One archive for every scene on the page, so two embedded recordings of the same week share
+   * the weeks they fetched. */
+  private static readonly tleArchive = new TleArchive()
+  /** The observation start the satellites below were loaded for, as a comparable value. */
+  private satellitesFor?: string
+  private satelliteRequest = 0
+  private satelliteStatus: SatelliteStatus = "none"
+  private satellites?: { snapshot: TleSnapshot; passes: SatellitePasses }
+  private satellitePassesMemo?: { key: string; passes: SatellitePass[] }
   /** How faint the catalogue now loaded goes — what ensureStarsDeepEnough compares this recording's
    * own optics against. Zero until the first load, which is "nothing loaded" rather than a depth. */
   private starCatalogDepth = 0
@@ -301,6 +328,16 @@ export class SceneElement extends HTMLElement {
     // Last of the four, and deliberately: a shape is painted over everything, a planet is a better
     // answer than the star behind it, and a building stands between the witness and the whole sky.
     // A star is what is left when nothing nearer is under the pointer.
+    // Before the stars: a satellite crossing in front of a star is the moving light the reader is
+    // most likely pointing at.
+    const satellite = this.sceneRenderer.pickSatelliteAt(ndcX, ndcY)
+    if (satellite) {
+      this.showHoverTooltip(event, SATELLITE_TOOLTIP[language]!
+        .replace("{name}", satellite.name)
+        .replace("{mag}", satellite.magnitude.toLocaleString(undefined, { maximumFractionDigits: 1 }))
+        .replace("{height}", Math.round(satellite.heightKm).toLocaleString()))
+      return
+    }
     const star = this.sceneRenderer.pickStarAt(ndcX, ndcY)
     if (star) {
       // toLocaleString with the page's own locale, like every other number this project prints —
@@ -961,21 +998,25 @@ export class SceneElement extends HTMLElement {
     // along a line of sight is read from exactly that state (see pushPhenomenaAt).
     this.pushPhenomenaAt(t)
 
+    const lat = pose?.lat ?? DEFAULT_OBSERVER_POSE.lat!
+    const lng = pose?.lng ?? DEFAULT_OBSERVER_POSE.lng!
+    const startDate = sightingTimeToDate(sighting.event.time ?? {}, lng, sighting.event.utcOffsetHours)
+    const observer: ObserverGeo = { lat, lng, elevationM: pose?.elevationM ?? 0 }
+    // Every instant, like the decor: a satellite crosses a pixel in a fraction of a frame, and a pose
+    // long enough to trail the stars trails a satellite across the whole picture.
+    this.pushSatellitesAt(startDate, t, observer)
+
     // Everything above moves with the instant and costs almost nothing; the sky below costs about
     // 8 ms to restate, and an instant that only carries an aeroplane a few pixels further has no
     // reason to pay for it — see updateAstronomy, which says which instants the sky itself asks for.
     if (instant && !instant.sky) return
 
-    const lat = pose?.lat ?? DEFAULT_OBSERVER_POSE.lat!
-    const lng = pose?.lng ?? DEFAULT_OBSERVER_POSE.lng!
-    const startDate = sightingTimeToDate(sighting.event.time ?? {}, lng, sighting.event.utcOffsetHours)
     if (!startDate) {
       this.sceneRenderer.setAstronomy(DEFAULT_ASTRONOMY)
       return
     }
 
     const date = new Date(startDate.getTime() + t)
-    const observer: ObserverGeo = { lat, lng, elevationM: pose?.elevationM ?? 0 }
     // The sky is a function of the moment and the place, and restating it costs about 8 ms — which
     // is most of a frame, and which every editing gesture was paying: a shape dragged across the
     // canvas fires a tick per pointer move at the SAME instant, and the sky was recomputed for each.
@@ -1033,6 +1074,110 @@ export class SceneElement extends HTMLElement {
     // here because this is where the real Sun is already computed; the player carries no astronomy
     // of its own and must not start.
     this.ufoElement.setSunAltitude(sun.altitudeDeg)
+  }
+
+  /**
+   * Stands the satellites of that instant in the scene — the ones in sunlight, above the horizon,
+   * with a known brightness. Loads the element sets for the observation's start first, if that has
+   * not been done for it (see ensureSatellites); until they arrive the sky simply has none.
+   */
+  private pushSatellitesAt(startDate: Date | undefined, t: number, observer: ObserverGeo): void {
+    this.ensureSatellites(startDate)
+    if (!startDate || !this.satellites) {
+      this.sceneRenderer.setSatellites([])
+      return
+    }
+    const date = new Date(startDate.getTime() + t)
+    const drawn: SceneSatellite[] = []
+    for (const position of this.satellites.passes.positionsAt(date, observer, -1)) {
+      if (position.magnitude === undefined) continue
+      drawn.push({
+        norad: position.object.norad,
+        name: position.object.name,
+        position: { altitudeDeg: position.altitudeDeg, azimuthDeg: position.azimuthDeg },
+        magnitude: position.magnitude,
+        heightKm: position.heightKm
+      })
+    }
+    this.sceneRenderer.setSatellites(drawn)
+  }
+
+  /**
+   * Fetches the element sets nearest the observation's start, once per start.
+   *
+   * The elements are those of the START for the whole recording: a set is good for days either side
+   * of its epoch, and no recording here lasts more than hours. Not keyed on the place, which the
+   * elements do not depend on; the passes computed from them are (see satellitePassesDuring).
+   */
+  private ensureSatellites(startDate: Date | undefined): void {
+    const key = startDate ? String(startDate.getTime()) : ""
+    if (key === this.satellitesFor) return
+    this.satellitesFor = key
+    this.satellites = undefined
+    this.satellitePassesMemo = undefined
+    const request = ++this.satelliteRequest
+    if (!startDate) {
+      this.satelliteStatus = "none"
+      return
+    }
+    this.satelliteStatus = "loading"
+    const settle = (status: SatelliteStatus) => {
+      if (request !== this.satelliteRequest) return
+      this.satelliteStatus = status
+      this.dispatchEvent(new CustomEvent(SATELLITES_CHANGE_EVENT))
+    }
+    const archive = SceneElement.tleArchive
+    void (async () => {
+      if (!(await archive.covers(startDate))) return settle("outside")
+      // The propagator is loaded only now, for a date the archive holds: every recording before 2021,
+      // which is nearly all of them, never downloads it.
+      const [snapshot, module] = await Promise.all([archive.at(startDate), import("../engine/astronomy/SatellitePasses.js")])
+      if (request !== this.satelliteRequest) return
+      if (!snapshot) return settle("unavailable")
+      this.satellites = { snapshot, passes: new module.SatellitePasses(snapshot.objects) }
+      settle("ready")
+      this.updateAstronomy(this.lastTimeMs)
+    })().catch(() => settle("unavailable"))
+  }
+
+  /**
+   * What is known of the satellites of this recording, for a readout.
+   *
+   * `outside` means the archive holds no element sets for that date at all (it starts in February
+   * 2021); `unavailable` that it could not be reached. Both are different answers from `ready` with
+   * no pass, which says the sets were there and nothing lit crossed this sky.
+   */
+  get satelliteState(): { status: SatelliteStatus; coverage?: TleCoverage[]; credit?: string; creditUrl?: string } {
+    const snapshot = this.satellites?.snapshot
+    return { status: this.satelliteStatus, coverage: snapshot?.coverage, credit: snapshot?.credit, creditUrl: snapshot?.creditUrl }
+  }
+
+  /**
+   * Every pass — above the horizon and in sunlight — during the observation, from its start over
+   * `durationMs`, for the place the witness stood at its start. Brightness is stated, visibility is
+   * not: that is the reader's comparison against the sky's own limit.
+   *
+   * Scanned every ten seconds, or coarser beyond a hundred minutes so a long night stays under a
+   * second of work; capped at four hours, past which "during the observation" stops meaning a moment.
+   */
+  satellitePassesDuring(durationMs: number): SatellitePass[] {
+    const satellites = this.satellites
+    const sighting = this.ufoElement.sighting
+    const pose = resolveObserverPoseAt(sighting, 0)
+    const place = sighting.event.place?.[0]
+    const lat = pose?.lat ?? place?.lat
+    const lng = pose?.lng ?? place?.lng
+    if (!satellites || lat === undefined || lng === undefined) return []
+    const startDate = sightingTimeToDate(sighting.event.time ?? {}, lng, sighting.event.utcOffsetHours)
+    if (!startDate) return []
+    const spanMs = Math.min(Math.max(durationMs, 0), 4 * 3_600_000)
+    const observer = { lat, lng, elevationM: pose?.elevationM ?? 0 }
+    const key = JSON.stringify([this.satellitesFor, startDate.getTime(), lat, lng, observer.elevationM, spanMs])
+    if (this.satellitePassesMemo?.key === key) return this.satellitePassesMemo.passes
+    const stepS = Math.max(10, Math.ceil(spanMs / 1000 / 600))
+    const passes = satellites.passes.passesDuring(startDate, new Date(startDate.getTime() + spanMs), observer, stepS)
+    this.satellitePassesMemo = { key, passes }
+    return passes
   }
 
   /**

@@ -12,7 +12,8 @@ import { html, css } from "./sightingEditorTemplate.js"
 import { SightingSummary } from "./SightingSummary.js"
 import type { SummaryEntry, SummaryGroup } from "./SightingSummary.js"
 import { UfoElement, registerUfo, WITNESS_MAP_ATTRIBUTE } from "./UfoElement.js"
-import { SceneElement, registerScene, SCENE_ELEMENT_NAME } from "./SceneElement.js"
+import { SceneElement, registerScene, SCENE_ELEMENT_NAME, SATELLITES_CHANGE_EVENT } from "./SceneElement.js"
+import type { SatellitePass } from "../engine/astronomy/SatellitePasses.js"
 import { Recorder } from "../engine/record/Recorder.js"
 import { RafSamplingClock } from "../engine/record/SamplingClock.js"
 import { createShape, moveShapeTo } from "../engine/shape/Shape.js"
@@ -404,6 +405,7 @@ export class SightingEditorElement extends HTMLElement {
   private readonly skyCandidatesOutput: HTMLElement
   private readonly showMeteorButton: HTMLButtonElement
   private readonly showCometButton: HTMLButtonElement
+  private readonly showSatelliteButton: HTMLButtonElement
   private readonly weatherSourceLink: HTMLAnchorElement
   /** Every field the weather record itself provides — the ones locked while it does, and the ones
    * whose edits write a keyframe while it doesn't. */
@@ -996,6 +998,7 @@ export class SightingEditorElement extends HTMLElement {
     this.skyCandidatesOutput = this.shadow.getElementById("sky-candidates")!
     this.showMeteorButton = this.shadow.getElementById("show-meteor") as HTMLButtonElement
     this.showCometButton = this.shadow.getElementById("show-comet") as HTMLButtonElement
+    this.showSatelliteButton = this.shadow.getElementById("show-satellite") as HTMLButtonElement
     this.weatherSourceLink = this.shadow.getElementById("weather-source-link") as HTMLAnchorElement
     this.weatherFields = [
       this.cloudCoverInput,
@@ -1406,6 +1409,13 @@ export class SightingEditorElement extends HTMLElement {
     this.lookAtDecorButton.addEventListener("click", () => this.lookAtDecor())
     this.showMeteorButton.addEventListener("click", () => this.showNextMeteor())
     this.showCometButton.addEventListener("click", () => this.lookAtComet())
+    this.showSatelliteButton.addEventListener("click", () => this.showNextSatellite())
+    // The element sets arrive after the line was first stated, or turn out not to exist: either way
+    // the satellite clause has something new to say.
+    this.sceneElement.addEventListener(SATELLITES_CHANGE_EVENT, () => {
+      this.skyCandidatesKey = undefined
+      this.refreshSkyCandidates()
+    })
     // The single funnel for "the recording changed, a consumer composing this element (e.g. a
     // live <rr0-scene> preview) should resync" — refresh() (called after every mutation: shape
     // edits, drag, observer/time edits, duration) always ends in a timeupdate on the *nested*
@@ -6334,13 +6344,15 @@ export class SightingEditorElement extends HTMLElement {
     // one of its inputs does.
     const key = JSON.stringify([
       date?.getTime(), place?.lat, place?.lng, this.groundElevationM, sighting.instrumentId, sighting.exposureSeconds,
-      resolveWeatherAt(sighting, 0), this.messages.skyLine, this.meteorRankFor
+      resolveWeatherAt(sighting, 0), this.messages.skyLine, this.meteorRankFor,
+      this.sceneElement.satelliteState.status, this.satelliteSpanMs()
     ])
     if (key === this.skyCandidatesKey) return
     this.skyCandidatesKey = key
     if (!date || !place || place.lat === undefined || place.lng === undefined) {
       this.showMeteorButton.hidden = true
       this.showCometButton.hidden = true
+      this.showSatelliteButton.hidden = true
       this.skyCandidatesOutput.textContent = this.messages.skyLine.replace("{parts}", this.messages.skyUnknown)
       return
     }
@@ -6490,6 +6502,9 @@ export class SightingEditorElement extends HTMLElement {
    */
   private satelliteClause(date: Date, observer: { lat: number; lng: number; elevationM: number }): string | undefined {
     const sky = Satellites.visibilityAt(date, observer)
+    const real = this.realSatelliteClause(sky.lowOrbitLit || sky.sunAltitudeDeg >= 0)
+    if (real !== undefined) return real
+    this.showSatelliteButton.hidden = true
     if (!sky.anythingInOrbit) {
       // Only worth saying against a sky somebody could have seen anything in at all.
       return sky.sunAltitudeDeg < 0 ? this.messages.skySatellitesNotYet : undefined
@@ -6512,6 +6527,128 @@ export class SightingEditorElement extends HTMLElement {
     if (bright.length === 0) return filled(this.messages.skySatellitesLit)
     return filled(this.messages.skySatellitesLitWith).replace("{eras}", named)
   }
+
+  /**
+   * Which satellites really crossed that sky, when the archive has element sets for the date — see
+   * TleArchive and SatellitePasses.
+   *
+   * Undefined when it has nothing to add to what Satellites.ts states from the shadow alone: no
+   * element sets for that date (before 2021, or unreachable), still loading, or a sky whose low orbit
+   * was in shadow, where the shadow clause is already the stronger statement. `lit` says whether
+   * the orbit was lit at the start at all.
+   *
+   * Visible means brighter than the limit of the sky at the pass's own peak, with this recording's
+   * instrument: the same rule as every star, applied to a moving point.
+   */
+  private realSatelliteClause(lit: boolean): string | undefined {
+    const state = this.sceneElement.satelliteState
+    if (state.status !== "ready") return undefined
+    if (state.coverage?.every(coverage => coverage.status !== "covered")) {
+      this.showSatelliteButton.hidden = true
+      return state.coverage.some(coverage => coverage.status === "gap") ? this.messages.skySatelliteElementsGap : undefined
+    }
+    const visible = this.visibleSatellitePasses()
+    const reachable = visible.filter(pass => this.passTimelineMs(pass) <= this.ufoElement.seekableDuration)
+    this.showSatelliteButton.hidden = reachable.length === 0
+    if (visible.length === 0) return lit ? this.messages.skySatellitePassesNone : undefined
+    const brightest = visible[0]
+    const peak = brightest.peak
+    const template = visible.length === 1 ? this.messages.skySatellitePassesOne : this.messages.skySatellitePasses
+    const sentence = template
+      .replace("{count}", String(visible.length))
+      .replace("{name}", peak.object.name)
+      .replace("{magnitude}", peak.magnitude!.toLocaleString(undefined, { maximumFractionDigits: 1 }))
+      .replace("{altitude}", String(Math.round(peak.altitudeDeg)))
+      .replace("{bearing}", Compass.towards(peak.azimuthDeg, this.showerLanguage()))
+      .replace("{time}", this.witnessClock(peak.date))
+    const train = this.starlinkTrain(visible)
+    return train ? `${sentence}, ${train}` : sentence
+  }
+
+  /**
+   * The passes of this observation bright enough to be seen, brightest first. A pass with no known
+   * brightness is left out: it may well have been visible, and saying so would be a guess.
+   */
+  private visibleSatellitePasses(): SatellitePass[] {
+    const gain = this.instrumentGain()
+    const observer = this.observerAtStart()
+    return this.sceneElement.satellitePassesDuring(this.satelliteSpanMs())
+      .filter(pass => {
+        const magnitude = pass.peak.magnitude
+        if (magnitude === undefined) return false
+        const sun = computeBodyPosition("Sun", pass.peak.date, observer)
+        return magnitude <= visibleMagnitudeLimit(sun.altitudeDeg, gain)
+      })
+      .sort((a, b) => a.peak.magnitude! - b.peak.magnitude!)
+  }
+
+  /** A group of Starlinks still close to their launch, which fly low and in a line: the train. */
+  private starlinkTrain(passes: SatellitePass[]): string | undefined {
+    const byLaunch = new Map<string, number>()
+    for (const pass of passes) {
+      const { kind, launch } = pass.peak.object
+      if (kind !== "starlink" || !launch) continue
+      const days = (pass.peak.date.getTime() - Date.parse(`${launch}T00:00:00Z`)) / 86_400_000
+      if (days > 60) continue
+      byLaunch.set(launch, (byLaunch.get(launch) ?? 0) + 1)
+    }
+    const [launch, count] = [...byLaunch.entries()].sort((a, b) => b[1] - a[1])[0] ?? []
+    if (!launch || !count || count < 3) return undefined
+    const date = new Date(`${launch}T00:00:00Z`).toLocaleDateString(this.showerLanguage(), { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" })
+    return this.messages.skySatelliteTrain.replace("{count}", String(count)).replace("{date}", date)
+  }
+
+  /** How much of the observation the passes are looked for in: the declared duration, or what the
+   * timeline reaches if that is longer. */
+  private satelliteSpanMs(): number {
+    const declared = (this.ufoElement.sighting.event.durationSeconds ?? 0) * 1000
+    return Math.max(declared, this.ufoElement.seekableDuration)
+  }
+
+  private observerAtStart(): { lat: number; lng: number; elevationM: number } {
+    const place = this.ufoElement.sighting.event.place?.[0]
+    const pose = resolveObserverPoseAt(this.ufoElement.sighting, 0)
+    return { lat: pose?.lat ?? place?.lat ?? 0, lng: pose?.lng ?? place?.lng ?? 0, elevationM: this.groundElevationM ?? 0 }
+  }
+
+  /** Where a pass's peak falls on the timeline — the same offset from the start the scene uses. */
+  private passTimelineMs(pass: SatellitePass): number {
+    const sighting = this.ufoElement.sighting
+    const start = sightingTimeToDate(sighting.event.time ?? {}, this.observerAtStart().lng, sighting.event.utcOffsetHours)
+    return start ? pass.peak.date.getTime() - start.getTime() : Infinity
+  }
+
+  /** An instant on the witness's own clock, which is what the rest of this recording is written in. */
+  private witnessClock(date: Date): string {
+    const sighting = this.ufoElement.sighting
+    const offsetHours = sighting.event.utcOffsetHours ?? Math.round(this.observerAtStart().lng / 15)
+    return new Date(date.getTime() + offsetHours * 3_600_000)
+      .toLocaleTimeString(this.showerLanguage(), { hour: "2-digit", minute: "2-digit", second: "2-digit", timeZone: "UTC" })
+  }
+
+  /**
+   * Seeks to the next brightest satellite the timeline reaches, at its peak, and turns the witness
+   * to it — the meteor button's behaviour, for the same reason: a satellite is somewhere for a
+   * minute, not for the whole recording.
+   */
+  private showNextSatellite(): void {
+    const reachable = this.visibleSatellitePasses().filter(pass => this.passTimelineMs(pass) <= this.ufoElement.seekableDuration)
+    if (reachable.length === 0) return
+    const ranking = reachable.map(pass => `${pass.object.norad}@${pass.peak.date.getTime()}`).join()
+    if (ranking !== this.satelliteRankFor) {
+      this.satelliteRankFor = ranking
+      this.satelliteRank = 0
+    }
+    const pass = reachable[this.satelliteRank++ % reachable.length]
+    if (this.ufoElement.playbackState === "playing") this.ufoElement.togglePlayPause()
+    this.ufoElement.currentTime = this.passTimelineMs(pass)
+    this.headingInput.value = String(Math.round(pass.peak.azimuthDeg * 10) / 10)
+    this.pitchInput.value = String(Math.round(pass.peak.altitudeDeg * 10) / 10)
+    this.updateObserver()
+  }
+
+  private satelliteRankFor?: string
+  private satelliteRank = 0
 
   /**
    * What ice crystals could have put beside the Sun or the Moon — see IceHalos.ts.
@@ -7030,6 +7167,8 @@ export class SightingEditorElement extends HTMLElement {
     this.showMeteorButton.setAttribute("aria-label", messages.showMeteor)
     this.showCometButton.title = messages.showComet
     this.showCometButton.setAttribute("aria-label", messages.showComet)
+    this.showSatelliteButton.title = messages.showSatellite
+    this.showSatelliteButton.setAttribute("aria-label", messages.showSatellite)
     this.lookAtDecorButton.title = messages.lookAtDecor
     this.lookAtDecorButton.setAttribute("aria-label", messages.lookAtDecor)
     this.optionDecorWitness.textContent = messages.decorWitness

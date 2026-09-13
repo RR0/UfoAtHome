@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs"
 import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises"
 import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
@@ -120,6 +121,12 @@ class SiteBuilder {
     // — an rr0.org case dossier embedding <rr0-scene> resolves a model named in its recording
     // straight from here (see UfoAtHomeModelCatalogue).
     await cp(join(this.root, "public", "models"), join(this.out, "models"), { recursive: true })
+    // The dated orbital elements the satellite passes are computed from (see TleArchive), when they
+    // have been built here: `npm run build:tle` from a local copy of the archive. Absent, the site
+    // is built without them and a scene falls back to the copy on ufoathome.org.
+    if (existsSync(join(this.root, "dist-tle"))) {
+      await cp(join(this.root, "dist-tle"), join(this.out, "tle"), { recursive: true })
+    }
 
     await mkdir(join(this.out, "lib"), { recursive: true })
     for (const dir of this.bundleDirs) {
@@ -248,6 +255,12 @@ ${retired}
 /models/*
   Access-Control-Allow-Origin: *
   Cache-Control: public, max-age=604800
+
+# The orbital element archive: fetched by scenes embedded anywhere. A day of cache, because a rebuild
+# adds the latest weeks under the same index.
+/tle/*
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=86400
 `, "utf8")
 
     await writeFile(join(this.out, "robots.txt"),

@@ -464,6 +464,25 @@ export interface SightingEditorMessages extends SightingLabels {
    * there for the whole recording, and for weeks either side. */
   showComet: string
   /**
+   * Real passes, from the element sets archived for that date (see TleArchive): how many satellites
+   * crossed that sky lit and brighter than its limit during the observation, and the brightest of
+   * them — {name}, {magnitude}, {altitude}, {bearing}, and {time} the witness's clock at its peak.
+   * {count} is the number of such passes.
+   */
+  skySatellitePasses: string
+  /** The same when exactly one satellite was bright enough, for the agreement of the verb. */
+  skySatellitePassesOne: string
+  /** Appended when some of those were Starlinks less than two months after their launch, flying low
+   * and close together — the "train" that gets reported. {count} of them, launched on {date}. */
+  skySatelliteTrain: string
+  /** The element sets were there, and nothing lit crossed that sky brightly enough to be seen. */
+  skySatellitePassesNone: string
+  /** Inside the archive's span, but in a hole where no element set was recent enough to use. */
+  skySatelliteElementsGap: string
+  /** Seeks to the brightest satellite pass the timeline reaches, at its peak, and turns the witness
+   * to it. The next press takes the next brightest. */
+  showSatellite: string
+  /**
    * Whether anything in orbit could have been seen — see Satellites.ts. Stated only once the Sun
    * has set, since a satellite in a daylit sky is not a candidate for anything.
    *
