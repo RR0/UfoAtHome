@@ -1,4 +1,5 @@
 import type { Sighting } from "../engine/model/Sighting.js"
+import { Compass } from "../engine/astronomy/Compass.js"
 import { formatEdtfTime, resolveObserverPoseAt, resolveSoundAt, resolveWeatherAt, sightingDurationMs } from "../engine/model/Sighting.js"
 import type { DecorKind, DecorObject, DecorSide } from "../engine/model/Decor.js"
 import { resolveDecorLitAt, resolveDecorPlacementAt } from "../engine/model/Decor.js"
@@ -246,7 +247,11 @@ export class SightingSummary {
     }
     this.push(entries, "location", "lat", this.labels.latitude, this.rounded(pose.lat, 6))
     this.push(entries, "location", "lng", this.labels.longitude, this.rounded(pose.lng, 6))
-    this.push(entries, "location", "heading", this.labels.heading, this.rounded(pose.headingDeg), "°")
+    // The compass point beside the degrees: "129°" is a number, "(SE)" is where the witness faced.
+    // In the unit, not the value, so the value stays the number the field holds.
+    const heading = this.rounded(pose.headingDeg)
+    this.push(entries, "location", "heading", this.labels.heading, heading,
+      pose.headingDeg === undefined ? "°" : `° (${Compass.point(pose.headingDeg, this.language)})`)
     this.push(entries, "location", "pitch", this.labels.pitch, this.rounded(pose.pitchDeg), "°")
     // Told apart rather than guessed at: with the terrain's height known this is an altitude above
     // sea level, which is what "Altitude" means in both components; without it, the only true

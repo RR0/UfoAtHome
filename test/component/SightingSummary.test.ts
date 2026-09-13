@@ -101,6 +101,17 @@ describe("SightingSummary", () => {
       expect(valueOf(sighting, "pitch")).toBe("0")
     })
 
+    it("says which way a heading faces, to the sixteenth of a turn, in the reader's own letters", () => {
+      const sighting = Sighting.create(undefined, [{ lat: 48.85, lng: 2.35 }])
+      sighting.witnessTrack.addKeyframe(0, { lat: 48.85, lng: 2.35, elevationM: 0, headingDeg: 157, pitchDeg: 0, fovDeg: 60 })
+      const unitOf = (reader: SightingSummary) => reader.entriesFor(sighting, 0).find(entry => entry.field === "heading")?.unit
+      expect(unitOf(summary)).toBe("° (SSE)")
+      expect(unitOf(new SightingSummary(sightingLabels_en, "fr", new SaidTexts(["fr"])))).toBe("° (SSE)")
+      sighting.witnessTrack.addKeyframe(0, { lat: 48.85, lng: 2.35, elevationM: 0, headingDeg: 250, pitchDeg: 0, fovDeg: 60 })
+      expect(unitOf(summary)).toBe("° (WSW)")
+      expect(unitOf(new SightingSummary(sightingLabels_en, "fr", new SaidTexts(["fr"])))).toBe("° (OSO)")
+    })
+
     it("keeps Greenwich's own offset", () => {
       const sighting = Sighting.create(undefined, [{ lat: 51.5, lng: 0 }])
       sighting.event.utcOffsetHours = 0

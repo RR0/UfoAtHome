@@ -346,6 +346,8 @@ export class SightingEditorElement extends HTMLElement {
   private readonly latInput: HTMLInputElement
   private readonly lngInput: HTMLInputElement
   private readonly headingInput: HTMLInputElement
+  /** The degree sign after the heading field, with the compass point it names: "° (SSE)". */
+  private readonly headingUnit: HTMLElement
   private readonly pitchInput: HTMLInputElement
   private readonly rollInput: HTMLInputElement
   private readonly elevationInput: HTMLInputElement
@@ -961,6 +963,7 @@ export class SightingEditorElement extends HTMLElement {
     this.latInput = this.shadow.getElementById("lat") as HTMLInputElement
     this.lngInput = this.shadow.getElementById("lng") as HTMLInputElement
     this.headingInput = this.shadow.getElementById("heading") as HTMLInputElement
+    this.headingUnit = this.shadow.getElementById("heading-unit") as HTMLElement
     this.pitchInput = this.shadow.getElementById("pitch") as HTMLInputElement
     this.rollInput = this.shadow.getElementById("roll") as HTMLInputElement
     this.elevationInput = this.shadow.getElementById("elevation") as HTMLInputElement
@@ -1484,6 +1487,7 @@ export class SightingEditorElement extends HTMLElement {
     // hover-only default) would make the one moment they're most needed the one moment they're
     // easiest to miss. Independent of hover, see SceneElement.setCompassForced's own doc comment.
     this.headingInput.addEventListener("focus", () => this.sceneElement.setCompassForced(true))
+    this.headingInput.addEventListener("input", () => this.refreshHeadingPoint())
     this.headingInput.addEventListener("blur", () => this.sceneElement.setCompassForced(false))
     this.instrumentSelect.addEventListener("change", () => {
       const previous = this.ufoElement.sighting.instrument
@@ -2408,6 +2412,7 @@ export class SightingEditorElement extends HTMLElement {
    * reasoning as setAppearance's identical guard: the playhead is a moving target during Play,
    * not a specific instant to keyframe. */
   private updateObserver(): void {
+    this.refreshHeadingPoint()
     if (this.ufoElement.playbackState === "playing") return
     const lat = this.numberOrUndefined(this.latInput.value)
     const lng = this.numberOrUndefined(this.lngInput.value)
@@ -4144,6 +4149,7 @@ export class SightingEditorElement extends HTMLElement {
     if (active !== this.headingInput) {
       this.headingInput.value = pose?.headingDeg !== undefined ? String(this.rounded(pose.headingDeg)) : ""
     }
+    this.refreshHeadingPoint()
     if (active !== this.pitchInput) {
       this.pitchInput.value = String(this.rounded(pose?.pitchDeg ?? 0))
       this.rollInput.value = String(this.rounded(pose?.rollDeg ?? 0))
@@ -6936,6 +6942,14 @@ export class SightingEditorElement extends HTMLElement {
     this.headingInput.value = String(this.rounded(nova.position.azimuthDeg))
     this.pitchInput.value = String(this.rounded(nova.position.altitudeDeg))
     this.updateObserver()
+  }
+
+  /** Names the compass point the heading field holds, beside its degree sign, in the reader's own
+   * letters (SSO in French). Only the sign when the heading is unknown: no point is better than a
+   * made-up north. */
+  private refreshHeadingPoint(): void {
+    const headingDeg = this.numberOrUndefined(this.headingInput.value)
+    this.headingUnit.textContent = headingDeg === undefined ? "°" : `° (${Compass.point(headingDeg, this.showerLanguage())})`
   }
 
   /** One decimal, so a placement or a gaze read back from an interpolated trajectory — or written

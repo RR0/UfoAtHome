@@ -5771,6 +5771,17 @@ describe("the sky under an observation being edited", () => {
     expect(heading).toBeLessThan(311)
   })
 
+  it("names the compass point beside the heading field, and follows the field as it changes", async () => {
+    const element = mount()
+    const unit = element.shadowRoot!.getElementById("heading-unit")!
+    typeInto(element, "lat", "48.8566")
+    typeInto(element, "lng", "2.3522")
+    typeInto(element, "heading", "157")
+    expect(unit.textContent).toMatch(/^° \(SSE\)$/)
+    typeInto(element, "heading", "250")
+    expect(unit.textContent).toMatch(/^° \((WSW|OSO)\)$/)
+  })
+
   it("names the new star shining that night, and aims at it: V603 Aql over Paris, June 1918", async () => {
     const element = mount()
     const button = element.shadowRoot!.getElementById("show-nova") as HTMLButtonElement
