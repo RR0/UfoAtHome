@@ -36,6 +36,8 @@ import { BRIGHT_COMETS } from "../engine/astronomy/cometCatalog.js"
 import { MeteorShowers } from "../engine/astronomy/MeteorShowers.js"
 import { MeteorFall } from "../engine/astronomy/MeteorFall.js"
 import { Sporadics } from "../engine/astronomy/Sporadics.js"
+import { LightningSchedule } from "../engine/weather/LightningSchedule.js"
+import type { LightningFlash } from "../engine/weather/LightningSchedule.js"
 import { TleArchive } from "../engine/astronomy/TleArchive.js"
 import type { TleCoverage, TleSnapshot } from "../engine/astronomy/TleArchive.js"
 import type { SatellitePass, SatellitePasses } from "../engine/astronomy/SatellitePasses.js"
@@ -240,6 +242,12 @@ export class SceneElement extends HTMLElement {
   /** What the standing meteor schedule was built from — see meteorInputsOf. A string, never the
    * Sighting itself: the editor edits ONE instance in place. */
   private meteorScheduleFor?: string
+  /** What the lightning schedule was last worked out from — see ensureLightningSchedule. */
+  private lightningScheduleFor?: string
+  private lightningFlashes: LightningFlash[] = []
+  /** The recording time the last ordinary frame was drawn at, to tell which flashes playback has just
+   * crossed. */
+  private lastLightningT?: number
   private lastTimeMs = 0
   /** What the sky now standing was computed from — see applySceneAt. */
   private lastSkyKey?: string
@@ -382,15 +390,13 @@ export class SceneElement extends HTMLElement {
     this.sceneRenderer.setCompassHovered(false)
   }
 
-  /** SceneRenderer's onLightningFlash fires the instant the visual flash starts — the thunder
-   * delay (simulating distance: sound travels far slower than light) is applied here, not in the
-   * renderer or WeatherAudio itself, keeping that timing decision at the one layer that already
-   * owns both the flash event and the audio object. A plain setTimeout (not the renderer's own RAF
-   * loop) is fine here: this is a one-off real-world delay, not per-frame animation state. */
-  private readonly handleLightningFlash = () => {
+  /** A flash has just started on screen: its thunder follows after the time sound takes to cover
+   * the distance it struck at (see LightningSchedule.thunderDelayMs). Applied here, where both the
+   * flash and the audio are known; a plain timeout, since it is one delay and not per-frame state,
+   * and cleared by a pause like everything else still in flight. */
+  private handleLightningFlash(flash: LightningFlash): void {
     clearTimeout(this.thunderTimeoutId)
-    const delayMs = (0.5 + Math.random() * 3.5) * 1000
-    this.thunderTimeoutId = window.setTimeout(() => this.weatherAudio.playThunder(), delayMs)
+    this.thunderTimeoutId = window.setTimeout(() => this.weatherAudio.playThunder(), LightningSchedule.thunderDelayMs(flash))
   }
 
   /** Unlocks weather audio on the very first interaction with the scene — needed even for a
@@ -464,7 +470,7 @@ export class SceneElement extends HTMLElement {
     // Resizing must track *this* element's box, not #stage's or the host's own.
     this.frameElement = this.shadow.getElementById("frame")!
     this.sceneCanvas = this.shadow.getElementById("scene-canvas") as HTMLCanvasElement
-    this.sceneRenderer = new SceneRenderer(this.sceneCanvas, undefined, this.handleLightningFlash)
+    this.sceneRenderer = new SceneRenderer(this.sceneCanvas)
     this.hoverTooltip = this.shadow.getElementById("hover-tooltip")!
 
     // Created imperatively rather than left inline in the template markup — see
@@ -958,6 +964,7 @@ export class SceneElement extends HTMLElement {
     // Instrument.ts). Cheap — SceneRenderer.setInstrument stores two numbers.
     this.sceneRenderer.setInstrument(sighting.instrument)
     this.updateMeteorShower(sighting, t)
+    this.updateLightning(sighting, t, instant !== undefined)
     this.sceneRenderer.setDecor(sighting.decor)
     this.sceneRenderer.setReferences(sighting.references)
     const pose = resolveObserverPoseAt(sighting, t)
@@ -1388,6 +1395,39 @@ export class SceneElement extends HTMLElement {
   private updateMeteorShower(sighting: Sighting, t: number): void {
     this.ensureMeteorSchedule(sighting)
     this.sceneRenderer.updateMeteors(t)
+  }
+
+  /**
+   * The storm's flashes at this instant, and the thunder of any flash playback has just reached.
+   *
+   * Only an ordinary frame hears thunder, and only while playing: a seek or one instant of a long
+   * pose does not set off a clap.
+   */
+  private updateLightning(sighting: Sighting, t: number, withinPose: boolean): void {
+    this.ensureLightningSchedule(sighting)
+    this.sceneRenderer.updateLightning(t)
+    if (withinPose) return
+    const previous = this.lastLightningT
+    this.lastLightningT = t
+    if (previous === undefined || t < previous || this.ufoElement.playbackState !== "playing") return
+    const struck = this.lightningFlashes.filter(flash => flash.t > previous && flash.t <= t).pop()
+    if (struck && resolveWeatherAt(sighting, struck.t).storm) this.handleLightningFlash(struck)
+  }
+
+  /** Works the flashes out again when the recording's start or length has changed — the same
+   * inputs, and the same reasoning, as the meteors (see ensureMeteorSchedule). */
+  private ensureLightningSchedule(sighting: Sighting): void {
+    const inputs = this.meteorInputsOf(sighting)
+    if (inputs === this.lightningScheduleFor) return
+    this.lightningScheduleFor = inputs
+    const time = sighting.event.time
+    const place = sighting.event.place?.[0]
+    const date = time?.year !== undefined ? sightingTimeToDate(time, place?.lng ?? 0, sighting.event.utcOffsetHours) : undefined
+    const durationMs = (sighting.event.durationSeconds ?? 0) * 1000 || sighting.timeline.duration || 20_000
+    // Offset from the meteors' seed, so a stormy night's flashes are not tied to its meteors.
+    const seed = Math.round((date?.getTime() ?? 0) / 1000) + Math.round((place?.lat ?? 0) * 1000) + 7
+    this.lightningFlashes = LightningSchedule.schedule({ durationMs, seed })
+    this.sceneRenderer.setLightning(this.lightningFlashes)
   }
 
   /**

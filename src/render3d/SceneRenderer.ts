@@ -90,6 +90,9 @@ import { IceHalos } from "../engine/atmosphere/IceHalos.js"
 import { Rainbows } from "../engine/atmosphere/Rainbows.js"
 import { CometTail } from "./CometTail.js"
 import { SatelliteField } from "./SatelliteField.js"
+import { LightningBolt } from "./LightningBolt.js"
+import { LightningSchedule } from "../engine/weather/LightningSchedule.js"
+import type { LightningFlash } from "../engine/weather/LightningSchedule.js"
 import type { SceneSatellite } from "./SatelliteField.js"
 import { IceHaloEffect } from "./IceHaloEffect.js"
 import { RainbowEffect } from "./RainbowEffect.js"
@@ -594,9 +597,18 @@ const MAX_ANIMATION_DT_SECONDS = 1 / 12
 /** Lightning only fires once the storm reads as one — reuses cloudDarkness rather than adding a
  * second "is it stormy" concept, since that's already what darkness encodes. */
 const LIGHTNING_MIN_DARKNESS = 0.5
-const LIGHTNING_MIN_INTERVAL_S = 8
-const LIGHTNING_MAX_INTERVAL_S = 25
-const LIGHTNING_FLASH_DURATION_S = 0.12
+/** The colour of the light a flash throws on everything: the bluish white of a hot channel. */
+const LIGHTNING_COLOR = new Color(0.82, 0.86, 1)
+/** The distance at which a flash lights the scene at full strength; nearer is no brighter (the
+ * scene is already white), further falls off as the square of the distance, down to a tenth for the
+ * furthest one worth hearing. */
+const LIGHTNING_FULL_LIGHT_M = 2500
+/** How much a flash at full strength adds: to the sky dome's colour, to the clouds' ambient light,
+ * and to the scene's lights. Calibrated to take a storm-dark scene to a pale grey for a few
+ * hundredths of a second, which is what a close flash does, and not to daylight. */
+const LIGHTNING_SKY_GAIN = 1.6
+const LIGHTNING_CLOUD_GAIN = 1.2
+const LIGHTNING_LIGHT_INTENSITY = 2.2
 
 const PLANET_COLORS: Partial<Record<CelestialBody, Color>> = {
   Venus: new Color(1, 0.96, 0.85),
@@ -870,11 +882,14 @@ export class SceneRenderer {
   private rainLastVerticalFacing = -1
   private readonly rainViewportSize = new Vector2()
   private lightningArmed = false
-  /** Absolute RAF clock (seconds) of the next scheduled flash — null while unarmed. Compared
-   * against the same requestAnimationFrame timestamp startTwinkle's own loop already receives, not
-   * the sighting's own playback time (weather isn't part of the timeline). */
-  private nextLightningAtS: number | null = null
-  private lightningFlashRemainingS = 0
+  /** The storm's flashes, on the recording's clock — see setLightning. */
+  private lightningFlashes: readonly LightningFlash[] = []
+  /** How much flash light the scene is under right now, 0 when none: added to the clouds' ambient
+   * light by updateCloudLighting, and to the sky and the lights by updateLightning. */
+  private lightningLevel = 0
+  private lightningBolt?: LightningBolt
+  /** The light a flash throws from where it struck, so the ground and the decor face it. */
+  private readonly lightningLight = new DirectionalLight(0xffffff, 0)
   /** The real (non-flashing) fog color from the most recent setAstronomy() tick — what
    * updateLightning lerps away from/restores to, since a flash must revert exactly to "whatever
    * the sky actually looks like right now", not a hardcoded color, and the RAF loop driving the
@@ -1013,12 +1028,9 @@ export class SceneRenderer {
   /** The body-mesh key of the comet currently drawn, so buildPlanets' own sweep can be told to
    * leave it alone and so a change of apparition takes the old one down. */
   private cometKey?: string
-  private readonly onLightningFlash?: () => void
-
   constructor(
     canvas: HTMLCanvasElement,
-    terrainProviders: TerrainProviders = defaultTerrainProviders(),
-    onLightningFlash?: () => void
+    terrainProviders: TerrainProviders = defaultTerrainProviders()
   ) {
     this.renderer = new WebGLRenderer({ canvas, antialias: true })
     // The display's own ratio at most, and less while the frames are late — see AdaptiveResolution.
@@ -1033,7 +1045,6 @@ export class SceneRenderer {
     this.camera = new PerspectiveCamera(60, canvas.width / Math.max(canvas.height, 1), 0.1, SKY_RADIUS * 1.2)
     this.camera.position.set(0, 1.6, 0)
     this.terrainProviders = terrainProviders
-    this.onLightningFlash = onLightningFlash
 
     // Shadow camera frustum sized around where decor/terrain relief actually sit (a sighting's
     // own local area, at most a couple hundred meters out — see DecorObject.eastM/northM's own
@@ -1053,7 +1064,8 @@ export class SceneRenderer {
     // peter-panning (a shadow visibly detached from its own caster) at this scene's scale.
     this.celestialLight.shadow.bias = -0.0015
     this.celestialLight.target = this.celestialLightTarget
-    this.scene.add(this.celestialLight, this.celestialLightTarget, this.skyLight)
+    this.lightningLight.color.copy(LIGHTNING_COLOR)
+    this.scene.add(this.celestialLight, this.celestialLightTarget, this.skyLight, this.lightningLight)
     this.scene.add(this.celestialGroup)
   }
 
@@ -1391,11 +1403,6 @@ export class SceneRenderer {
     this.buildCirrus()
     this.buildPrecipitation()
     this.lightningArmed = weather.storm && weather.cloudDarkness >= LIGHTNING_MIN_DARKNESS
-    if (!this.lightningArmed) {
-      this.nextLightningAtS = null
-      this.lightningFlashRemainingS = 0
-      this.restoreFogColor()
-    }
     this.syncAnimationLoop()
     this.render()
   }
@@ -2205,7 +2212,6 @@ export class SceneRenderer {
     this.updateTwinkle(timeMs / 1000)
     this.updatePrecipitation(timeMs / 1000, dtSeconds)
     this.updateRain(dtSeconds)
-    this.updateLightning(timeMs / 1000, dtSeconds)
     if (this.lensFlare) this.lensFlare.uniforms.uTime.value = timeMs / 1000
     // Not while a pose is being developed. Everything this loop animates — a star's twinkle, a
     // falling drop, a flash — lasts a fraction of a second, and a pose of minutes AVERAGES those
@@ -3065,6 +3071,8 @@ export class SceneRenderer {
     this.cometTail = undefined
     this.satelliteField?.dispose()
     this.satelliteField = undefined
+    this.lightningBolt?.dispose()
+    this.lightningBolt = undefined
     for (const mesh of this.bodyMeshes.values()) {
       this.disposeMesh(mesh)
     }
@@ -3129,10 +3137,7 @@ export class SceneRenderer {
    * loop advances the animations, as the editor needs when it keeps the weather moving over a
    * paused recording (see SceneElement.animateWhilePaused).
    *
-   * Resuming re-arms the lightning schedule rather than carrying the old one over: it is kept in
-   * absolute rAF seconds, so a pause of any length would leave a flash "due" and fire it on the
-   * very first frame back. Pausing ends any flash in progress, since a whitened fog frozen forever
-   * would read as the scene's real ambient light rather than as the instant of a strike.
+   * Lightning is not among these: its flashes are on the recording's clock (see setLightning).
    */
   setAnimationsRunning(running: boolean, driven = false): void {
     const drivenNow = running && driven
@@ -3141,12 +3146,8 @@ export class SceneRenderer {
     this.animationsRunning = running
     this.framesDriven = drivenNow
     if (running && !wasRunning) {
-      this.nextLightningAtS = null
       this.lastFrameTimeMs = undefined
       this.resolution.reset()
-    } else if (!running && this.lightningFlashRemainingS > 0) {
-      this.lightningFlashRemainingS = 0
-      this.restoreFogColor()
     }
     this.syncAnimationLoop()
     // The loop is what normally repaints; with it stopped, this is what leaves a coherent still —
@@ -3162,12 +3163,6 @@ export class SceneRenderer {
     }
   }
 
-  /** Puts the fog back to the sky's own current colour, undoing whatever a flash in progress had
-   * whitened it to — see updateLightning, which borrows the fog as this renderer's ambient light. */
-  private restoreFogColor(): void {
-    if (this.scene.fog) (this.scene.fog as Fog).color.setRGB(...this.baseFogColor)
-  }
-
   private needsAnimationLoop(): boolean {
     return this.animationsRunning && !this.framesDriven && this.hasAnimations()
   }
@@ -3178,7 +3173,6 @@ export class SceneRenderer {
       this.starTiers.length > 0 ||
       this.precipitationPoints !== undefined ||
       this.rainSystem !== undefined ||
-      this.lightningArmed ||
       (this.lensFlare !== undefined && this.sunVisible)
     )
   }
@@ -4045,13 +4039,16 @@ export class SceneRenderer {
     // through a 02:45 night. Below the horizon the only real light left on a cloud base is
     // moonlight and skyglow, which is what ambientColor already carries.
     const daylight = Math.max(0, Math.sin(Math.max(sun.altitudeDeg, 0) * DEG_TO_RAD))
+    // A flash lights the deck from inside and below, evenly: an ambient term, not a direction.
+    const flash = this.lightningLevel * LIGHTNING_CLOUD_GAIN
+    const ambient = new Color(groundColor[0] + LIGHTNING_COLOR.r * flash, groundColor[1] + LIGHTNING_COLOR.g * flash, groundColor[2] + LIGHTNING_COLOR.b * flash)
     this.layeredClouds?.setLighting(new Vector3(x, y, z),
       new Color(tint[0] * daylight, 0.96 * tint[1] * daylight, 0.88 * tint[2] * daylight),
-      new Color(...groundColor), new Color(...groundColor))
+      ambient, ambient)
     for (const deck of decks) {
       deck.sunDir.value.set(x, y, z)
       deck.sunColor.value.setRGB(tint[0] * daylight, 0.96 * tint[1] * daylight, 0.88 * tint[2] * daylight)
-      deck.ambientColor.value.setRGB(groundColor[0], groundColor[1], groundColor[2])
+      deck.ambientColor.value.copy(ambient)
     }
   }
 
@@ -4528,36 +4525,71 @@ export class SceneRenderer {
     lifeAttribute.needsUpdate = true
   }
 
-  /** Schedules/renders lightning flashes while armed (see setWeather's lightningArmed gate).
-   * nowSeconds is the same requestAnimationFrame absolute clock startTwinkle's loop already runs
-   * on. A flash pulses scene.fog's color toward white and back over LIGHTNING_FLASH_DURATION_S —
-   * reusing fog (the renderer's only real "ambient light" proxy, see this class's own doc comment on
-   * why there's no THREE.Light) rather than a screen-space overlay quad, so a flash reads as a real
-   * momentary change in ambient light level, not a UI effect layered on top. */
-  private updateLightning(nowSeconds: number, dtSeconds: number): void {
-    if (!this.lightningArmed) return
-    if (this.lightningFlashRemainingS > 0) {
-      this.lightningFlashRemainingS = Math.max(0, this.lightningFlashRemainingS - dtSeconds)
-      const t = this.lightningFlashRemainingS / LIGHTNING_FLASH_DURATION_S
-      if (this.scene.fog) {
-        const fog = this.scene.fog as Fog
-        fog.color.setRGB(
-          this.baseFogColor[0] + (1 - this.baseFogColor[0]) * t,
-          this.baseFogColor[1] + (1 - this.baseFogColor[1]) * t,
-          this.baseFogColor[2] + (1 - this.baseFogColor[2]) * t
-        )
+  /**
+   * The flashes of this recording's storm — see LightningSchedule. Worked out by SceneElement from
+   * the recording's own seed and length, like the meteors; drawn only while the weather at that
+   * instant is a storm dark enough to be one.
+   */
+  setLightning(flashes: readonly LightningFlash[]): void {
+    this.lightningFlashes = flashes
+  }
+
+  /**
+   * Lights the scene with whatever flash is burning at recording time `t`.
+   *
+   * A flash is first of all LIGHT: at night it shows the whole landscape and the underside of the
+   * clouds for a few hundredths of a second, and that is what people remember; the channel itself is
+   * seen only when it reaches the ground in front of them. So the light goes everywhere the scene
+   * takes light from: the clouds' ambient term (lit from inside and below), the sky dome, the fog,
+   * and a directional light from where it struck for the ground and the decor. Strength falls with
+   * the square of the distance past LIGHTNING_FULL_LIGHT_M; a flash inside the cloud lights it but
+   * shows no channel.
+   *
+   * Called at every instant, playing or not: paused on a stroke, the stroke stays lit.
+   */
+  updateLightning(t: number): void {
+    let flash: LightningFlash | undefined
+    let brightness = 0
+    if (this.lightningArmed) {
+      for (const candidate of this.lightningFlashes) {
+        if (candidate.t > t) break
+        const b = LightningSchedule.brightnessAt(candidate, t)
+        if (b > brightness) {
+          flash = candidate
+          brightness = b
+        }
       }
-      return
     }
-    if (this.nextLightningAtS === null) {
-      this.nextLightningAtS = nowSeconds + randomBetween(LIGHTNING_MIN_INTERVAL_S, LIGHTNING_MAX_INTERVAL_S)
-      return
+    const reach = flash ? Math.min(1, Math.max(0.1, (LIGHTNING_FULL_LIGHT_M / flash.distanceM) ** 2)) : 0
+    const level = brightness * reach * (flash?.cloudToGround ? 1 : 0.6)
+    if (level === this.lightningLevel && !flash?.cloudToGround) return
+    this.lightningLevel = level
+    if (this.scene.fog) {
+      const fog = this.scene.fog as Fog
+      const k = Math.min(1, level)
+      fog.color.setRGB(
+        this.baseFogColor[0] + (LIGHTNING_COLOR.r - this.baseFogColor[0]) * k,
+        this.baseFogColor[1] + (LIGHTNING_COLOR.g - this.baseFogColor[1]) * k,
+        this.baseFogColor[2] + (LIGHTNING_COLOR.b - this.baseFogColor[2]) * k
+      )
     }
-    if (nowSeconds >= this.nextLightningAtS) {
-      this.lightningFlashRemainingS = LIGHTNING_FLASH_DURATION_S
-      this.nextLightningAtS = nowSeconds + randomBetween(LIGHTNING_MIN_INTERVAL_S, LIGHTNING_MAX_INTERVAL_S)
-      this.onLightningFlash?.()
+    if (this.skyMesh) {
+      const gain = level * LIGHTNING_SKY_GAIN
+      ;(this.skyMesh.material as MeshBasicMaterial).color.setRGB(1 + gain * LIGHTNING_COLOR.r, 1 + gain * LIGHTNING_COLOR.g, 1 + gain * LIGHTNING_COLOR.b)
     }
+    if (this.lastSunPosition) this.updateCloudLighting(this.lastSunPosition, this.baseFogColor)
+    this.lightningLight.intensity = level * LIGHTNING_LIGHT_INTENSITY
+    if (flash) {
+      const { x, y, z } = horizontalToCartesian(25, flash.azimuthDeg, BODY_PLACEMENT_RADIUS)
+      this.lightningLight.position.set(x, y, z)
+    }
+    if (!this.lightningBolt) {
+      this.lightningBolt = new LightningBolt(BODY_PLACEMENT_RADIUS * 0.95)
+      this.celestialGroup.add(this.lightningBolt.object)
+    }
+    const cloudBaseM = this.weather.cloudBaseM ?? 1500
+    this.lightningBolt.set(flash, brightness, cloudBaseM)
+    this.render()
   }
 
   private buildCompassLabels(): void {

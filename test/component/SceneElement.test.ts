@@ -63,6 +63,8 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     pickDecorAt(): undefined {
       return undefined
     }
+    setLightning(): void {}
+    updateLightning(): void {}
     setSatellites(): void {}
     pickSatelliteAt(): undefined {
       return undefined
@@ -271,8 +273,9 @@ describe("SceneElement weather follows the player", () => {
     try {
       const element = mount()
       element.ufoElement.togglePlayPause()
-      // What SceneRenderer's onLightningFlash callback does, invoked as the renderer would.
-      ;(element as unknown as { handleLightningFlash: () => void }).handleLightningFlash()
+      // What playback does on reaching a flash 3.4 km away: its clap is due ten seconds later.
+      const flash = { t: 0, azimuthDeg: 0, distanceM: 3430, cloudToGround: true, strokes: [{ offsetMs: 0, intensity: 1 }], channelSeed: 1 }
+      ;(element as unknown as { handleLightningFlash: (f: typeof flash) => void }).handleLightningFlash(flash)
       element.ufoElement.togglePlayPause()
       vi.advanceTimersByTime(10_000)
       expect(thunderPlayed).toHaveLength(0)

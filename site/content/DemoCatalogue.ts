@@ -267,8 +267,8 @@ export class DemoCatalogue {
           src: "/demo-data/sky-test-storm.json",
           title: { en: "A thunderstorm", fr: "Un orage" },
           blurb: {
-            en: "Cloud base at 600 m, heavy rain drifting on a real 14 m/s wind, lightning lighting the scene's haze, thunder arriving late. Pause it: all of it stops.",
-            fr: "Base des nuages à 600 m, pluie forte dérivant sur un vent réel de 14 m/s, éclairs illuminant la brume, tonnerre en retard. Mettez en pause : tout s'arrête."
+            en: "Cloud base at 600 m, heavy rain drifting on a real 14 m/s wind, lightning lighting the clouds and the whole scene, thunder arriving as late as its distance makes it. Pause it: all of it stops.",
+            fr: "Base des nuages à 600 m, pluie forte dérivant sur un vent réel de 14 m/s, éclairs illuminant les nuages et toute la scène, tonnerre en retard selon la distance. Mettez en pause : tout s'arrête."
           }
         },
         {
