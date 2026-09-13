@@ -45,7 +45,8 @@
  * - Anything before 1006. SN 185 and SN 393 are in the chronicles; their dates and brightness are too
  *   loose to put a point in a particular night's sky.
  *
- * INPUTS, in scripts/data/novae/ (gitignored — the generated catalog is what is committed):
+ * INPUTS, in scripts/data/novae/ — versioned, unlike the rest of scripts/data/, so that the catalog
+ * can be regenerated exactly if a source moves or disappears (see the README there):
  * - strope2010-table1.dat, strope2010-table2.dat: https://cdsarc.cds.unistra.fr/ftp/J/AJ/140/34/
  * - v1369cen-izzo2017-fig1.json: [days from 2 December 2013, V] read from that figure's vector markers
  *   (source at https://arxiv.org/src/1704.07214, file lightcurve_all_epochs.pdf).

@@ -14,7 +14,11 @@ dist-embed-sighting-editor/
 # Raw HYG star catalog CSV (~120k rows, ~34MB) — only the filtered/converted output in
 # src/assets/stars-mag7.5.bin is checked in. Download from astronexus/HYG-Database's
 # hyg/CURRENT/hygdata_v41.csv (see README.md) before running `npm run build:stars`.
-scripts/data/
+# The contents are ignored rather than the folder, so that one input set can be kept: the nova
+# catalogue's (under 1 MB), which is what makes `npm run build:novae` reproducible if its sources
+# move or disappear — and V1369 Cen's points were read out of a figure by hand.
+scripts/data/*
+!scripts/data/novae/
 
 dist-site/
 dist-site-lib/
