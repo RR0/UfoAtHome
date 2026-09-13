@@ -33,7 +33,8 @@
  * Every line goes through its TLE checksum. The archive has at least one snapshot that is not text
  * at all (2026-06-12 09:43 visual) and one empty file; a checksum rejects both without a special case.
  *
- * WHAT IS WRITTEN, into dist-tle/ (gitignored — where it is served from is decided by the site):
+ * WHAT IS WRITTEN, into public/tle/, committed: ufoathome.org is built from the repository, and serves
+ * the archive at /tle/ to every page embedding a scene, the way it serves the 3D models:
  *
  * - `<kind>/<YYYY-MM-DD>.bin`: the sets whose epoch falls in the 7-day bin starting that day, as
  *   44-byte little-endian records (see RECORD_BYTES). Bins are counted from the Unix epoch.
@@ -78,7 +79,7 @@ const SATCAT_FILE = path.join(here, "data", "satcat.csv")
 const QSMAG_FILE = path.join(here, "data", "qs.mag")
 /** https://github.com/Stellarium/stellarium/blob/master/plugins/Satellites/resources/satellites.json */
 const STELLARIUM_FILE = path.join(here, "data", "stellarium-satellites.json")
-const OUT_DIR = path.join(here, "..", "dist-tle")
+const OUT_DIR = path.join(here, "..", "public", "tle")
 
 const DAY_MS = 86_400_000
 const BIN_DAYS = 7

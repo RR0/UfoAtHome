@@ -25,6 +25,3 @@ src/generated/
 
 # scripts/perf output
 perf-out/
-
-# Built from scripts/data/tle by build:tle — served, never committed.
-dist-tle/

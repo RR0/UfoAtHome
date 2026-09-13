@@ -1,4 +1,3 @@
-import { existsSync } from "node:fs"
 import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises"
 import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
@@ -121,12 +120,10 @@ class SiteBuilder {
     // — an rr0.org case dossier embedding <rr0-scene> resolves a model named in its recording
     // straight from here (see UfoAtHomeModelCatalogue).
     await cp(join(this.root, "public", "models"), join(this.out, "models"), { recursive: true })
-    // The dated orbital elements the satellite passes are computed from (see TleArchive), when they
-    // have been built here: `npm run build:tle` from a local copy of the archive. Absent, the site
-    // is built without them and a scene falls back to the copy on ufoathome.org.
-    if (existsSync(join(this.root, "dist-tle"))) {
-      await cp(join(this.root, "dist-tle"), join(this.out, "tle"), { recursive: true })
-    }
+    // The dated orbital elements the satellite passes are computed from (see TleArchive), fetched
+    // from here by every page embedding a scene, rr0.org's dossiers included. Rebuilt by
+    // `npm run build:tle` from a local copy of Laurent Chabin's archive.
+    await cp(join(this.root, "public", "tle"), join(this.out, "tle"), { recursive: true })
 
     await mkdir(join(this.out, "lib"), { recursive: true })
     for (const dir of this.bundleDirs) {
