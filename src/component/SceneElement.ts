@@ -8,7 +8,7 @@ import { SceneRenderer } from "../render3d/SceneRenderer.js"
 import type { TerrainProviders } from "../render3d/terrain/defaultTerrainProviders.js"
 import type { DecorModelProvider } from "../render3d/decor/DecorModelProvider.js"
 import type { DecorModelCredit } from "../engine/model/Decor.js"
-import type { SceneAstronomy, SceneComet } from "../render3d/SceneRenderer.js"
+import type { SceneAstronomy, SceneComet, SceneNova } from "../render3d/SceneRenderer.js"
 import { StarCatalogs, STAR_CATALOG_MAGNITUDE_LIMIT, DEEP_STAR_CATALOG_MAGNITUDE_LIMIT } from "../render3d/StarCatalog.js"
 import type { StarCatalogTier } from "../render3d/StarCatalog.js"
 import type { StarCatalog } from "../render3d/StarCatalog.js"
@@ -33,6 +33,7 @@ import { SaidTexts } from "../engine/model/SaidText.js"
 import { WeatherAudio } from "../render3d/WeatherAudio.js"
 import { Comets } from "../engine/astronomy/Comets.js"
 import { BRIGHT_COMETS } from "../engine/astronomy/cometCatalog.js"
+import { Novae } from "../engine/astronomy/Novae.js"
 import { MeteorShowers } from "../engine/astronomy/MeteorShowers.js"
 import { MeteorFall } from "../engine/astronomy/MeteorFall.js"
 import { Sporadics } from "../engine/astronomy/Sporadics.js"
@@ -124,6 +125,8 @@ const STAR_TOOLTIP_BELOW: Record<string, string> = {
  * it is used with rather than exported from the renderer, which has no interest in what the rest of
  * the key means. */
 const COMET_KEY_PREFIX = "comet:"
+/** The same, for a nova's — see SceneRenderer.buildNovae. */
+const NOVA_KEY_PREFIX = "nova:"
 
 /** Fallback hover-tooltip label for an untitled decor object — a coarse "what is this" (unlike an
  * untitled SHAPE's tooltip, which shows nothing at all — see UfoElement.handlePointerMove's own
@@ -372,7 +375,8 @@ export class SceneElement extends HTMLElement {
   private bodyName(bodyKey: string, language: "en" | "fr"): string {
     const cometId = bodyKey.startsWith(COMET_KEY_PREFIX) ? bodyKey.slice(COMET_KEY_PREFIX.length) : undefined
     const comet = cometId ? BRIGHT_COMETS.find(apparition => apparition.id === cometId) : undefined
-    return comet?.name[language] ?? BODY_NAMES[bodyKey]?.[language] ?? bodyKey
+    const nova = bodyKey.startsWith(NOVA_KEY_PREFIX) ? Novae.byId(bodyKey.slice(NOVA_KEY_PREFIX.length)) : undefined
+    return comet?.name[language] ?? nova?.name[language] ?? BODY_NAMES[bodyKey]?.[language] ?? bodyKey
   }
 
   private showHoverTooltip(event: PointerEvent, text: string): void {
@@ -1078,6 +1082,10 @@ export class SceneElement extends HTMLElement {
       // in all but a couple of dozen months of the last century there is no comet to compute at all
       // (see Comets.aroundDate).
       comet: this.cometAt(date, observer),
+      // Every one whose light curve covers the instant, not the brightest: two do overlap (HR Del
+      // was still up when LV Vul peaked), and unlike a comet a faint nova beside a bright one is not
+      // a competing claim about what was seen, just another star.
+      novae: Novae.appearancesAt(date, observer).map(({ outburst, position, magnitude }): SceneNova => ({ id: outburst.id, position, magnitude })),
       stars: this.starCatalog ? { catalog: this.starCatalog, date, observer } : undefined,
       // The same date and place again, and deliberately not folded into `stars`: the Milky Way and
       // the zodiacal light need no catalog to arrive first (see SceneAstronomy.frame).

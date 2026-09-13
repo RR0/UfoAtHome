@@ -165,7 +165,7 @@ const OUTBURSTS: OutburstInput[] = [
     id: "sn-1006",
     kind: "supernova",
     designation: "SN 1006",
-    name: { en: "supernova of 1006", fr: "supernova de 1006" },
+    name: { en: "Supernova of 1006", fr: "supernova de 1006" },
     ra: "15 02 22.1",
     dec: "-42 05 49",
     // Peak from Winkler, Gupta & Long (2003), from the remnant's distance and the chronicles. The
@@ -179,7 +179,7 @@ const OUTBURSTS: OutburstInput[] = [
     id: "sn-1054",
     kind: "supernova",
     designation: "SN 1054",
-    name: { en: "supernova of 1054", fr: "supernova de 1054" },
+    name: { en: "Supernova of 1054", fr: "supernova de 1054" },
     ra: "05 34 31.8",
     dec: "+22 01 03",
     curve: {
@@ -201,7 +201,7 @@ const OUTBURSTS: OutburstInput[] = [
     id: "sn-1181",
     kind: "supernova",
     designation: "SN 1181",
-    name: { en: "supernova of 1181", fr: "supernova de 1181" },
+    name: { en: "Supernova of 1181", fr: "supernova de 1181" },
     // Pa 30, now the accepted remnant (Ritter et al. 2021), rather than 3C 58.
     ra: "00 53 11.21",
     dec: "+67 30 02.4",
@@ -220,7 +220,7 @@ const OUTBURSTS: OutburstInput[] = [
     id: "sn-1572",
     kind: "supernova",
     designation: "SN 1572",
-    name: { en: "Tycho's supernova", fr: "supernova de Tycho" },
+    name: { en: "Tycho's Supernova", fr: "supernova de Tycho" },
     ra: "00 25 21.5",
     dec: "+64 08 27",
     curve: {
@@ -250,7 +250,7 @@ const OUTBURSTS: OutburstInput[] = [
     id: "sn-1604",
     kind: "supernova",
     designation: "SN 1604",
-    name: { en: "Kepler's supernova", fr: "supernova de Kepler" },
+    name: { en: "Kepler's Supernova", fr: "supernova de Kepler" },
     ra: "17 30 40.51",
     dec: "-21 29 14.4",
     curve: {
@@ -299,7 +299,7 @@ const OUTBURSTS: OutburstInput[] = [
     id: "sn-1987a",
     kind: "supernova",
     designation: "SN 1987A",
-    name: { en: "supernova 1987A", fr: "supernova 1987A" },
+    name: { en: "Supernova 1987A", fr: "supernova 1987A" },
     ra: "05 35 27.99",
     dec: "-69 16 11.1",
     curve: { from: "recorded", points: [] },

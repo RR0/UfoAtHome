@@ -654,6 +654,21 @@ export interface SceneComet {
   magnitude: number
 }
 
+/**
+ * A nova or supernova standing in that sky, if its light curve covers the instant.
+ *
+ * Worked out by SceneElement (see engine/astronomy/Novae), like the comet: this renderer is told
+ * where and how bright, and knows nothing about light curves. A new star is drawn as a star — a
+ * point, with the same glare as a planet of its magnitude — because that is what it looked like.
+ */
+export interface SceneNova {
+  /** The outburst's own id, so a hover can name it. */
+  id: string
+  position: HorizontalPosition
+  /** Visual magnitude on that night, interpolated from the recorded light curve. */
+  magnitude: number
+}
+
 /** Everything needed to render one instant's sky: real Sun/Moon/planet positions (already
  * resolved by SceneElement via engine/astronomy/CelestialPositions.ts) plus the star catalog and
  * the date/observer needed to place its fixed RA/dec entries in the sky right now. `stars` is
@@ -664,6 +679,8 @@ export interface SceneAstronomy {
   moon: HorizontalPosition & { phase: MoonPhase; magnitude: number }
   planets: ReadonlyArray<ScenePlanet>
   comet?: SceneComet
+  /** Usually empty: a naked-eye nova is up a few weeks in a decade. */
+  novae?: ReadonlyArray<SceneNova>
   stars?: { catalog: StarCatalog; date: Date; observer: ObserverGeo }
   /**
    * The instant and the place themselves, for the things in the sky that are not objects but whole
@@ -1028,6 +1045,9 @@ export class SceneRenderer {
   /** The body-mesh key of the comet currently drawn, so buildPlanets' own sweep can be told to
    * leave it alone and so a change of apparition takes the old one down. */
   private cometKey?: string
+  /** The body-mesh keys of the novae currently drawn — seeded into buildPlanets' sweep for the same
+   * reason as the comet's. */
+  private novaKeys = new Set<string>()
   constructor(
     canvas: HTMLCanvasElement,
     terrainProviders: TerrainProviders = defaultTerrainProviders()
@@ -1872,6 +1892,7 @@ export class SceneRenderer {
     this.setMoonMesh(astronomy.moon, magnitudeLimit)
     this.buildPlanets(astronomy.planets, magnitudeLimit)
     this.buildComet(astronomy.comet, magnitudeLimit)
+    this.buildNovae(astronomy.novae ?? [], magnitudeLimit)
     this.buildIceHalos(astronomy.sun, astronomy.moon)
     this.buildRainbow(astronomy.sun, astronomy.moon)
     this.buildSkyGlow(astronomy, skyColors.zenith)
@@ -3077,6 +3098,7 @@ export class SceneRenderer {
       this.disposeMesh(mesh)
     }
     this.bodyMeshes.clear()
+    this.novaKeys.clear()
     for (const key of [...this.hitAreas.keys()]) {
       this.disposeHitArea(key)
     }
@@ -3715,6 +3737,36 @@ export class SceneRenderer {
   }
 
   /** Takes down whatever comet was drawn, head, halo, hover target and tail. */
+  /**
+   * Places the novae standing in this sky.
+   *
+   * Through setBodyMesh like a planet, which is what a new star brighter than every star around it
+   * is owed: the same glare, the same reddening near the horizon, a hover target. White, as a nova
+   * near its peak is; the colour it takes on weeks later is too faint for an eye to see.
+   *
+   * Held to the one visibility limit of this sky, so SN 1006 at magnitude -7.5 is drawn beside a
+   * daylit Sun and a magnitude-five nova is drawn only for a dark sky or a long exposure.
+   */
+  private buildNovae(novae: ReadonlyArray<SceneNova>, magnitudeLimit: number): void {
+    const drawn = new Set<string>()
+    for (const nova of novae) {
+      if (nova.magnitude > magnitudeLimit) continue
+      const key = `nova:${nova.id}`
+      drawn.add(key)
+      const brightness = magnitudeToBrightness(nova.magnitude, magnitudeLimit)
+      const scale = starColorScale(brightness)
+      this.setBodyMesh(key, nova.position, PLANET_VISUAL_RADIUS * (0.5 + 0.5 * brightness), new Color(scale, scale, scale), nova.magnitude)
+    }
+    for (const key of this.novaKeys) {
+      if (drawn.has(key)) continue
+      this.disposeMesh(this.bodyMeshes.get(key))
+      this.bodyMeshes.delete(key)
+      this.disposeHitArea(key)
+      this.disposeGlare(key)
+    }
+    this.novaKeys = drawn
+  }
+
   private disposeComet(): void {
     this.cometTail?.set(undefined, undefined, 0)
     if (!this.cometKey) return
@@ -3729,7 +3781,7 @@ export class SceneRenderer {
     // The comet's key is seeded in because this sweep removes every body mesh it does not
     // recognise, and buildComet runs after it: without this the comet would be disposed and rebuilt
     // on every single tick, taking its glare halo with it.
-    const seen = new Set<string>(["sun", "moon", ...(this.cometKey ? [this.cometKey] : [])])
+    const seen = new Set<string>(["sun", "moon", ...(this.cometKey ? [this.cometKey] : []), ...this.novaKeys])
     for (const planet of planets) {
       // Venus at its brightest is the only planet that clears a daylit sky, which is precisely the
       // one people do report seeing by day — and take for something else. Mars and Saturn at

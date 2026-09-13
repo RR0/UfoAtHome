@@ -24,6 +24,8 @@ import type { Instrument } from "../engine/instrument/Instrument.js"
 import { LightRigs } from "../engine/model/LightRig.js"
 import { DARK_SKY_LIMITING_MAGNITUDE, MeteorShowers } from "../engine/astronomy/MeteorShowers.js"
 import { Comets } from "../engine/astronomy/Comets.js"
+import { Novae } from "../engine/astronomy/Novae.js"
+import type { OutburstAppearance } from "../engine/astronomy/Novae.js"
 import { Sporadics } from "../engine/astronomy/Sporadics.js"
 import { Satellites } from "../engine/astronomy/Satellites.js"
 import { IceHalos } from "../engine/atmosphere/IceHalos.js"
@@ -404,6 +406,7 @@ export class SightingEditorElement extends HTMLElement {
   private readonly skyCandidatesOutput: HTMLElement
   private readonly showMeteorButton: HTMLButtonElement
   private readonly showCometButton: HTMLButtonElement
+  private readonly showNovaButton: HTMLButtonElement
   private readonly showSatelliteButton: HTMLButtonElement
   private readonly weatherSourceLink: HTMLAnchorElement
   /** Every field the weather record itself provides — the ones locked while it does, and the ones
@@ -996,6 +999,7 @@ export class SightingEditorElement extends HTMLElement {
     this.skyCandidatesOutput = this.shadow.getElementById("sky-candidates")!
     this.showMeteorButton = this.shadow.getElementById("show-meteor") as HTMLButtonElement
     this.showCometButton = this.shadow.getElementById("show-comet") as HTMLButtonElement
+    this.showNovaButton = this.shadow.getElementById("show-nova") as HTMLButtonElement
     this.showSatelliteButton = this.shadow.getElementById("show-satellite") as HTMLButtonElement
     this.weatherSourceLink = this.shadow.getElementById("weather-source-link") as HTMLAnchorElement
     this.weatherFields = [
@@ -1403,6 +1407,7 @@ export class SightingEditorElement extends HTMLElement {
     this.lookAtDecorButton.addEventListener("click", () => this.lookAtDecor())
     this.showMeteorButton.addEventListener("click", () => this.showNextMeteor())
     this.showCometButton.addEventListener("click", () => this.lookAtComet())
+    this.showNovaButton.addEventListener("click", () => this.lookAtNova())
     this.showSatelliteButton.addEventListener("click", () => this.showNextSatellite())
     // The element sets arrive after the line was first stated, or turn out not to exist: either way
     // the satellite clause has something new to say.
@@ -6361,6 +6366,7 @@ export class SightingEditorElement extends HTMLElement {
     if (!date || !place || place.lat === undefined || place.lng === undefined) {
       this.showMeteorButton.hidden = true
       this.showCometButton.hidden = true
+      this.showNovaButton.hidden = true
       this.showSatelliteButton.hidden = true
       this.skyCandidatesOutput.textContent = this.messages.skyLine.replace("{parts}", this.messages.skyUnknown)
       return
@@ -6370,6 +6376,7 @@ export class SightingEditorElement extends HTMLElement {
       this.starsClause(date, observer),
       this.showerClause(date, observer),
       this.cometClause(date, observer),
+      this.novaClause(date, observer),
       this.satelliteClause(date, observer),
       this.opticsClause(date, observer),
       this.rainbowClause(date, observer),
@@ -6490,6 +6497,33 @@ export class SightingEditorElement extends HTMLElement {
     // at by looking into the ground.
     this.showCometButton.hidden = comet.position.altitudeDeg <= 0
     return this.cometText(comet)
+  }
+
+  /**
+   * The nova or supernova shining in that sky, if one was bright enough for the naked eye.
+   *
+   * The brightest only, as for the comets: two overlap now and then, but never two that an eye would
+   * have noticed at once. Silent below naked-eye brightness for the comets' reason, and silent
+   * outside the recorded light curve, which is Novae's own rule: before the first record the star
+   * may already have been rising, and nobody can say how bright.
+   */
+  private novaClause(date: Date, observer: { lat: number; lng: number; elevationM: number }): string | undefined {
+    const nova = Novae.brightestAt(date, observer)
+    if (!nova || nova.magnitude > DARK_SKY_LIMITING_MAGNITUDE) {
+      this.showNovaButton.hidden = true
+      return undefined
+    }
+    this.showNovaButton.hidden = nova.position.altitudeDeg <= 0
+    return this.novaText(nova)
+  }
+
+  private novaText(nova: OutburstAppearance): string {
+    const template = nova.position.altitudeDeg <= 0 ? this.messages.skyNovaBelowHorizon : this.messages.skyNova
+    return template
+      .replace("{name}", nova.outburst.name[this.showerLanguage()])
+      .replace("{magnitude}", nova.magnitude.toLocaleString(undefined, { maximumFractionDigits: 1 }))
+      .replace("{altitude}", String(Math.round(nova.position.altitudeDeg)))
+      .replace("{bearing}", Compass.towards(nova.position.azimuthDeg, this.showerLanguage()))
   }
 
   /**
@@ -6889,6 +6923,21 @@ export class SightingEditorElement extends HTMLElement {
     this.updateObserver()
   }
 
+  /** Turns the witness to face the nova, the comet's way: no seek, no pause, it shone all night. */
+  private lookAtNova(): void {
+    const sighting = this.ufoElement.sighting
+    const place = sighting.event.place?.[0]
+    const time = sighting.event.time
+    if (!place || place.lat === undefined || place.lng === undefined || time?.year === undefined) return
+    const date = sightingTimeToDate(time, place.lng, sighting.event.utcOffsetHours)
+    if (!date) return
+    const nova = Novae.brightestAt(date, { lat: place.lat, lng: place.lng, elevationM: this.groundElevationM ?? 0 })
+    if (!nova) return
+    this.headingInput.value = String(this.rounded(nova.position.azimuthDeg))
+    this.pitchInput.value = String(this.rounded(nova.position.altitudeDeg))
+    this.updateObserver()
+  }
+
   /** One decimal, so a placement or a gaze read back from an interpolated trajectory — or written
    * by a drag — doesn't fill the field with sixteen digits of floating point. A tenth of a degree
    * is roughly one pixel across this canvas, so nothing visible is lost. */
@@ -7176,6 +7225,8 @@ export class SightingEditorElement extends HTMLElement {
     this.showMeteorButton.setAttribute("aria-label", messages.showMeteor)
     this.showCometButton.title = messages.showComet
     this.showCometButton.setAttribute("aria-label", messages.showComet)
+    this.showNovaButton.title = messages.showNova
+    this.showNovaButton.setAttribute("aria-label", messages.showNova)
     this.showSatelliteButton.title = messages.showSatellite
     this.showSatelliteButton.setAttribute("aria-label", messages.showSatellite)
     this.lookAtDecorButton.title = messages.lookAtDecor

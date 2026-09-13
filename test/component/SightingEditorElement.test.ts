@@ -11,6 +11,7 @@ import type { Weather } from "../../src/engine/model/Weather.js"
 import { SOUND_KINDS } from "../../src/engine/model/Sound.js"
 import { sightingEditorMessages_en } from "../../src/component/messages/SightingEditorMessages_en.js"
 import { Comets } from "../../src/engine/astronomy/Comets.js"
+import { Novae } from "../../src/engine/astronomy/Novae.js"
 import type { PlaceMatch, PlaceProvider } from "../../src/engine/place/PlaceProvider.js"
 
 register()
@@ -5768,6 +5769,42 @@ describe("the sky under an observation being edited", () => {
     const heading = Number((element.shadowRoot!.getElementById("heading") as HTMLInputElement).value)
     expect(heading).toBeGreaterThan(300)
     expect(heading).toBeLessThan(311)
+  })
+
+  it("names the new star shining that night, and aims at it: V603 Aql over Paris, June 1918", async () => {
+    const element = mount()
+    const button = element.shadowRoot!.getElementById("show-nova") as HTMLButtonElement
+    expect(button.hidden).toBe(true)
+    typeInto(element, "obs-time", "1918-06-10 23:30")
+    typeInto(element, "utcOffsetHours", "1")
+    typeInto(element, "lat", "48.8566")
+    typeInto(element, "lng", "2.3522")
+
+    await waitFor(() => !button.hidden)
+    expect(skyLine(element)).toMatch(/1918/)
+    button.click()
+    const date = new Date("1918-06-10T22:30:00Z")
+    const expected = Novae.brightestAt(date, { lat: 48.8566, lng: 2.3522, elevationM: 0 })!
+    expect(expected.outburst.id).toBe("v603-aql-1918")
+    expect(expected.position.altitudeDeg).toBeGreaterThan(10)
+    // Within a degree: the button aims from the ground elevation the recorder resolved.
+    expect(Math.abs(Number((element.shadowRoot!.getElementById("pitch") as HTMLInputElement).value) - expected.position.altitudeDeg)).toBeLessThan(1)
+    expect(Math.abs(Number((element.shadowRoot!.getElementById("heading") as HTMLInputElement).value) - expected.position.azimuthDeg)).toBeLessThan(1)
+  })
+
+  it("says SN 1987A was there and below the horizon, and offers nothing to aim at, from Provence", async () => {
+    const element = mount()
+    overProvence(element, "1987-05-20 23:00", "2")
+    await waitFor(() => /1987A/.test(skyLine(element)))
+    expect((element.shadowRoot!.getElementById("show-nova") as HTMLButtonElement).hidden).toBe(true)
+  })
+
+  it("says nothing about a nova outside its recorded light curve", async () => {
+    const element = mount()
+    overProvence(element, "1918-06-01 23:00", "1")
+    await waitFor(() => skyLine(element).length > 0)
+    expect(skyLine(element)).not.toMatch(/1918/)
+    expect((element.shadowRoot!.getElementById("show-nova") as HTMLButtonElement).hidden).toBe(true)
   })
 
   describe("real satellite passes", () => {

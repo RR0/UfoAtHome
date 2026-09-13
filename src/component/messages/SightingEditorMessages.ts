@@ -380,6 +380,14 @@ export interface SightingEditorMessages extends SightingLabels {
    * daylight by people who blocked the Sun with a hand. The scene's own visibility rule decides
    * whether it is drawn; this line states the geometry that decision rests on. */
   skyCometInDaylight: string
+  /** A nova or supernova whose recorded light curve covers that night and that was bright enough
+   * for the naked eye — see Novae.ts. {name} is the eruption, with no article (French supplies it),
+   * {magnitude} its brightness interpolated from the record, {altitude} and {bearing} as for the
+   * comet. Stated as a new star, which is what a witness would have taken it for if they noticed it
+   * at all. */
+  skyNova: string
+  /** The same, for one that had not risen, or never rises from there: SN 1987A from Europe. */
+  skyNovaBelowHorizon: string
   /**
    * What ice crystals could have put beside the Sun or the Moon — see IceHalos.ts.
    *
@@ -462,6 +470,8 @@ export interface SightingEditorMessages extends SightingLabels {
   /** Turns the witness to face the comet. Unlike a meteor it does not need seeking to: it was
    * there for the whole recording, and for weeks either side. */
   showComet: string
+  /** Turns the witness to face the nova or supernova. Like the comet, it was there all night. */
+  showNova: string
   /**
    * Real passes, from the element sets archived for that date (see TleArchive): how many satellites
    * crossed that sky lit and brighter than its limit during the observation, and the brightest of
