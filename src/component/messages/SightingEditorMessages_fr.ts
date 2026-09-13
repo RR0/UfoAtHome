@@ -211,7 +211,7 @@ export const sightingEditorMessages_fr: SightingEditorMessages = {
   skyBowPossible: "pluie et soleil suffisants pour {forms}",
   skyBowMoon: "pluie sous une Lune éclairée à {lit} %, de quoi former {forms} — un arc-en-ciel lunaire, que l'œil voit blanc",
   skyGlowBand: "la Voie lactée à {contrast}× le fond du ciel, à {altitude}° de hauteur {bearing}",
-  skyGlowCone: "la lumière zodiacale à {contrast}× le fond du ciel, à {altitude}° de hauteur {bearing}, à {elongation}° du Soleil — un cône penché, sans bord, disparu dans l'heure",
+  skyGlowCone: "la lumière zodiacale à {contrast}× le fond du ciel, à {altitude}° de hauteur {bearing}, à {elongation}° du Soleil — une lueur en cône incliné, aux contours flous, disparue en moins d'une heure",
   skyGlowZodiacalBand: "la bande zodiacale à {contrast}× le fond du ciel, à {altitude}° de hauteur {bearing} — toute l'écliptique faiblement allumée, ce qui n'est pas ce que les gens rapportent",
   skyGlowMoon: "ni Voie lactée ni lumière zodiacale : une Lune éclairée à {lit} % tenait le ciel à {sky} magnitudes par seconde d'arc, là où il leur en faut 22",
   skyGlowTwilight: "ni Voie lactée ni lumière zodiacale : le crépuscule tenait encore le ciel à {sky} magnitudes par seconde d'arc, là où il leur en faut 22",

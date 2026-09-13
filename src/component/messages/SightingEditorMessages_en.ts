@@ -211,7 +211,7 @@ export const sightingEditorMessages_en: SightingEditorMessages = {
   skyBowPossible: "rain and sunlight enough for {forms}",
   skyBowMoon: "rain under a Moon {lit}% lit, enough for {forms} — a moonbow, which the eye sees as a white arc",
   skyGlowBand: "the Milky Way {contrast}× the sky behind it, {altitude}° up {bearing}",
-  skyGlowCone: "the zodiacal light {contrast}× the sky behind it, {altitude}° up {bearing}, {elongation}° from the Sun — a leaning cone with no edge, gone within the hour",
+  skyGlowCone: "the zodiacal light {contrast}× the sky behind it, {altitude}° up {bearing}, {elongation}° from the Sun — a faint tilted cone of light with blurred edges, gone within the hour",
   skyGlowZodiacalBand: "the zodiacal band {contrast}× the sky behind it, {altitude}° up {bearing} — the whole ecliptic faintly alight, which is not the sight people report",
   skyGlowMoon: "no Milky Way and no zodiacal light: a Moon {lit}% lit held the sky at {sky} magnitudes a square arcsecond, where they need 22",
   skyGlowTwilight: "no Milky Way and no zodiacal light: twilight still held the sky at {sky} magnitudes a square arcsecond, where they need 22",

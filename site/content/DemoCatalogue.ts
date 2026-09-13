@@ -174,8 +174,8 @@ export class DemoCatalogue {
           src: "/demo-data/sky-test-zodiacal.json",
           title: { en: "Zodiacal light", fr: "Lumière zodiacale" },
           blurb: {
-            en: "Sun 16° down, a steep ecliptic, no Moon: a leaning cone with no edge, gone within the hour.",
-            fr: "Soleil à 16° sous l'horizon, écliptique redressée, pas de Lune : un cône penché sans bord, disparu en une heure."
+            en: "Sun 16° below the horizon, no Moon, the Sun's path standing steep over the west: a faint tilted cone of light with blurred edges, gone within the hour.",
+            fr: "Soleil à 16° sous l'horizon, pas de Lune, la route du Soleil presque dressée au couchant : une faible lueur en cône incliné, aux contours flous, disparue en moins d'une heure."
           }
         },
         {
