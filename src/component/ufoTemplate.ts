@@ -348,9 +348,17 @@ canvas[data-cursor="rotate"] {
   cursor: pointer;
   font-size: 1em;
   line-height: 1;
-  background: rgba(0, 0, 0, 0.55);
+  /* A light veil rather than a dark square: these sit ON the picture, so the less of it they cover
+     the better — just enough shade for the white glyph to read on a pale sky, deepening under the
+     pointer, which is when a reader actually needs to find it. */
+  background: rgba(0, 0, 0, 0.22);
+  color: rgba(255, 255, 255, 0.9);
+  transition: opacity 0.15s ease, background-color 0.15s ease;
+}
+.corner-buttons button:hover,
+.corner-buttons button:focus-visible {
+  background: rgba(0, 0, 0, 0.6);
   color: #fff;
-  transition: opacity 0.15s ease;
 }
 .corner-buttons button[aria-pressed="true"] {
   outline: 2px solid #39f;

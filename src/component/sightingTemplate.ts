@@ -65,6 +65,10 @@ export const css = `
   align-items: center;
   gap: 0.5em;
   margin-bottom: 0.5em;
+  /* Room for what a button draws OUTSIDE itself — the 2px outline of a pressed toggle, a focus
+     ring. Flush against its host, that ring was cut off by any page that clips this element:
+     ufoathome.org's own player wraps it in overflow:hidden, and so can any page it is embedded in. */
+  padding: 3px 3px 0;
 }
 .testimony {
   min-width: 0;
