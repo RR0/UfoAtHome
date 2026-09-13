@@ -48,7 +48,7 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync
 import { fileURLToPath } from "node:url"
 import path from "node:path"
 
-type Kind = "visual" | "starlink"
+type Kind = "visual" | "starlink" | "catalog"
 
 interface ElementSet {
   norad: number
@@ -81,6 +81,10 @@ const QSMAG_FILE = path.join(here, "data", "qs.mag")
 const STELLARIUM_FILE = path.join(here, "data", "stellarium-satellites.json")
 const OUT_DIR = path.join(here, "..", "public", "tle")
 
+/** Names of the constellations SatelliteMagnitude.MEASURED_CONSTELLATIONS has a published magnitude
+ * for — kept in step with it by hand, since this script runs without the browser sources. */
+const MEASURED_CONSTELLATION_PREFIXES = ["ONEWEB-", "SPACEMOBILE-"]
+
 const DAY_MS = 86_400_000
 const BIN_DAYS = 7
 /** Size of one record in a bin file: u32 NORAD id, f64 epoch (Unix ms), then f32 bstar,
@@ -91,8 +95,8 @@ const STARLINK_DAILY_DAYS = 60
 const GAP_DAYS = 2
 
 class TleArchiveBuilder {
-  private readonly sets: Record<Kind, Map<string, ElementSet>> = { visual: new Map(), starlink: new Map() }
-  private readonly snapshots: Record<Kind, number[]> = { visual: [], starlink: [] }
+  private readonly sets: Record<Kind, Map<string, ElementSet>> = { visual: new Map(), starlink: new Map(), catalog: new Map() }
+  private readonly snapshots: Record<Kind, number[]> = { visual: [], starlink: [], catalog: [] }
   private rejectedLines = 0
   private unreadableFiles: string[] = []
 
@@ -110,6 +114,7 @@ class TleArchiveBuilder {
     for (const year of readdirSync(SOURCE_DIR).sort()) {
       this.readVisibleZips(path.join(SOURCE_DIR, year, "Visible"))
       this.readTleFiles(path.join(SOURCE_DIR, year, "tle"))
+      this.readFullCatalogZips(path.join(SOURCE_DIR, year, "Full Catalog"))
     }
     rmSync(OUT_DIR, { recursive: true, force: true })
     const index: Record<string, unknown> = {
@@ -120,8 +125,11 @@ class TleArchiveBuilder {
       recordBytes: RECORD_BYTES,
       kinds: {}
     }
-    for (const kind of ["visual", "starlink"] as Kind[]) {
-      const kept = kind === "starlink" ? this.thinStarlink([...this.sets[kind].values()]) : [...this.sets[kind].values()]
+    const visualObjects = new Set([...this.sets.visual.values()].map(set => set.norad))
+    for (const kind of ["visual", "starlink", "catalog"] as Kind[]) {
+      // An object on the naked-eye list is served from there, every day, and not a second time here.
+      const kept = [...this.sets[kind].values()].filter(set => kind !== "catalog" || !visualObjects.has(set.norad))
+      if (kept.length === 0) continue
       const bins = this.writeBins(kind, kept)
       this.writeObjects(kind, kept)
       const snapshots = this.snapshots[kind].sort((a, b) => a - b)
@@ -133,7 +141,7 @@ class TleArchiveBuilder {
         bins,
         gaps: this.gaps(snapshots)
       }
-      console.log(`${kind}: ${snapshots.length} snapshots, ${this.sets[kind].size} daily sets, ${kept.length} kept, ${bins.length} bins`)
+      console.log(`${kind}: ${snapshots.length} snapshots, ${kept.length} sets kept, ${bins.length} bins`)
     }
     writeFileSync(path.join(OUT_DIR, "index.json"), JSON.stringify(index, null, 1))
     console.log(`rejected ${this.rejectedLines} lines failing their checksum; unreadable: ${this.unreadableFiles.join(", ") || "none"}`)
@@ -145,8 +153,39 @@ class TleArchiveBuilder {
       const match = /(\d{8})T(\d{4})/.exec(file)
       if (!match) continue
       const text = execFileSync("unzip", ["-p", path.join(dir, file)], { maxBuffer: 64 << 20 }).toString("latin1")
-      this.readSnapshot("visual", this.snapshotTime(match[1], match[2]), text, file)
+      this.readSnapshot(["visual"], this.snapshotTime(match[1], match[2]), text, file, () => "visual")
     }
+  }
+
+  /**
+   * The full catalogue, snapshotted from February 2021 to early January 2025: every tracked object.
+   * Three quarters of it is not kept, and on purpose:
+   *
+   * - DEBRIS, over half the catalogue, is a fact about radar and not about what a witness could see.
+   * - An object with no measured brightness could only be propagated to be left undrawn.
+   * - A Starlink goes to the Starlink list, which this is the only source of before late 2024.
+   *
+   * What stays is what the naked-eye list leaves out and somebody measured: OneWeb, BlueBird, and
+   * some three thousand payloads and stages in McCants' and Stellarium's magnitudes.
+   */
+  private readFullCatalogZips(dir: string) {
+    if (!existsSync(dir)) return
+    for (const file of readdirSync(dir).filter(name => name.endsWith(".zip"))) {
+      const match = /(\d{8})T(\d{4})/.exec(file)
+      if (!match) continue
+      const text = execFileSync("unzip", ["-p", path.join(dir, file)], { maxBuffer: 256 << 20 }).toString("latin1")
+      this.readSnapshot(["starlink", "catalog"], this.snapshotTime(match[1], match[2]), text, file, set => {
+        if (set.name.includes("STARLINK")) return "starlink"
+        if (/\bDEB\b/.test(set.name)) return undefined
+        return this.hasBrightness(set) ? "catalog" : undefined
+      })
+    }
+  }
+
+  /** Whether a magnitude will be known for this object: measured, same-stage, or a measured constellation. */
+  private hasBrightness(set: ElementSet): boolean {
+    return this.stdMags.has(set.norad) || this.sameStageMagnitude(set.name) !== undefined
+      || MEASURED_CONSTELLATION_PREFIXES.some(prefix => set.name.startsWith(prefix))
   }
 
   private readTleFiles(dir: string) {
@@ -154,7 +193,8 @@ class TleArchiveBuilder {
     for (const file of readdirSync(dir)) {
       const match = /^(\d{8})_(\d{4})\d{2}_(visual|starlink)\.tle$/.exec(file)
       if (!match) continue
-      this.readSnapshot(match[3] as Kind, this.snapshotTime(match[1], match[2]), readFileSync(path.join(dir, file), "latin1"), file)
+      const kind = match[3] as Kind
+      this.readSnapshot([kind], this.snapshotTime(match[1], match[2]), readFileSync(path.join(dir, file), "latin1"), file, () => kind)
     }
   }
 
@@ -162,7 +202,7 @@ class TleArchiveBuilder {
     return Date.parse(`${yyyymmdd.slice(0, 4)}-${yyyymmdd.slice(4, 6)}-${yyyymmdd.slice(6)}T${hhmm.slice(0, 2)}:${hhmm.slice(2)}:00Z`)
   }
 
-  private readSnapshot(kind: Kind, time: number, text: string, file: string) {
+  private readSnapshot(kinds: Kind[], time: number, text: string, file: string, route: (set: ElementSet) => Kind | undefined) {
     const lines = text.split(/\r?\n/)
     let read = 0
     for (let i = 0; i < lines.length - 1; i++) {
@@ -175,7 +215,9 @@ class TleArchiveBuilder {
       }
       const nameLine = i > 0 ? lines[i - 1].trim() : ""
       const name = nameLine.startsWith("0 ") ? nameLine.slice(2).trim() : nameLine
-      this.add(kind, this.parse(name, line1, line2))
+      const set = this.parse(name, line1, line2)
+      const kind = route(set)
+      if (kind) this.add(kind, set)
       read++
       i++
     }
@@ -183,7 +225,7 @@ class TleArchiveBuilder {
       this.unreadableFiles.push(file)
       return
     }
-    this.snapshots[kind].push(time)
+    for (const kind of kinds) this.snapshots[kind].push(time)
   }
 
   /** Modulo-10 checksum of a TLE line: digits count their value, minus signs count one. */
@@ -229,30 +271,31 @@ class TleArchiveBuilder {
     }
   }
 
-  /** Keeps the latest set of each UTC day per object. */
+  /**
+   * Keeps what a pass computation needs, as the sets arrive, rather than every set of every day: the
+   * full catalogue holds millions of them.
+   *
+   * The latest set of each UTC day for the naked-eye list and for a Starlink in its first 60 days;
+   * one set a week, the nearest the middle of the week, for everything else.
+   */
   private add(kind: Kind, set: ElementSet) {
-    const key = `${set.norad}:${Math.floor(set.epochMs / DAY_MS)}`
+    const daily = kind === "visual" || (kind === "starlink" && this.isYoung(set))
+    if (daily) {
+      const key = `${set.norad}:d${Math.floor(set.epochMs / DAY_MS)}`
+      const existing = this.sets[kind].get(key)
+      if (!existing || existing.epochMs < set.epochMs) this.sets[kind].set(key, set)
+      return
+    }
+    const bin = Math.floor(set.epochMs / DAY_MS / BIN_DAYS)
+    const middle = (bin + 0.5) * BIN_DAYS * DAY_MS
+    const key = `${set.norad}:w${bin}`
     const existing = this.sets[kind].get(key)
-    if (!existing || existing.epochMs < set.epochMs) this.sets[kind].set(key, set)
+    if (!existing || Math.abs(set.epochMs - middle) < Math.abs(existing.epochMs - middle)) this.sets[kind].set(key, set)
   }
 
-  private thinStarlink(sets: ElementSet[]): ElementSet[] {
-    const weekly = new Map<string, ElementSet>()
-    const kept: ElementSet[] = []
-    for (const set of sets) {
-      const launch = this.launches.get(set.norad)
-      const young = launch !== undefined && set.epochMs - Date.parse(`${launch}T00:00:00Z`) < STARLINK_DAILY_DAYS * DAY_MS
-      if (young) {
-        kept.push(set)
-        continue
-      }
-      const bin = Math.floor(set.epochMs / DAY_MS / BIN_DAYS)
-      const middle = (bin + 0.5) * BIN_DAYS * DAY_MS
-      const key = `${set.norad}:${bin}`
-      const existing = weekly.get(key)
-      if (!existing || Math.abs(set.epochMs - middle) < Math.abs(existing.epochMs - middle)) weekly.set(key, set)
-    }
-    return kept.concat([...weekly.values()])
+  private isYoung(set: ElementSet): boolean {
+    const launch = this.launches.get(set.norad)
+    return launch !== undefined && set.epochMs - Date.parse(`${launch}T00:00:00Z`) < STARLINK_DAILY_DAYS * DAY_MS
   }
 
   private writeBins(kind: Kind, sets: ElementSet[]): string[] {

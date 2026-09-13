@@ -80,13 +80,18 @@ export class SatelliteMagnitude {
    * Constellations McCants never measured, each with the mean 1000-km magnitude observers published,
    * by design era (a launch date from which it applies). Matched on the catalogue name.
    *
-   * BlueBird, AST SpaceMobile's phone-to-satellite constellation, is the brightest there is: 3.77 for
+   * OneWeb at 7.18. BlueBird, AST SpaceMobile's phone-to-satellite constellation, is the brightest there is: 3.77 for
    * the five Block 1 satellites launched on 2024-09-12, and 4.32 for BlueBird 6, the first Block 2,
    * launched on 2025-12-24 — fainter although three and a half times larger (Mallama et al. 2026,
    * arXiv:2608.23668, updating the 3.84 of arXiv:2505.05820). The Block 2 value is applied to the
    * Block 2 satellites launched after it, which nobody has measured yet.
    */
   static readonly MEASURED_CONSTELLATIONS: { namePrefix: string; eras: { launchedFrom: string; magnitude1000Km: number }[] }[] = [
+    {
+      // Mallama 2020 (arXiv:2012.05100), from MMT-9 observations: 7.18.
+      namePrefix: "ONEWEB-",
+      eras: [{ launchedFrom: "2019-02-27", magnitude1000Km: 7.18 }]
+    },
     {
       namePrefix: "SPACEMOBILE-",
       eras: [

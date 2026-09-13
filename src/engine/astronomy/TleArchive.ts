@@ -29,8 +29,9 @@ export interface ElementSet {
   meanMotion: number
 }
 
-/** The two lists the archive keeps apart: the naked-eye objects, and every Starlink. */
-export type TleKind = "visual" | "starlink"
+/** The lists the archive keeps apart: the naked-eye objects, every Starlink, and the rest of the
+ * catalogue that has a measured brightness (to early 2025 only). */
+export type TleKind = "visual" | "starlink" | "catalog"
 
 export interface OrbitingObject {
   norad: number
