@@ -326,7 +326,8 @@ if (docs) {
         was <strong>taken at</strong> an instant of the observation and whether somebody <strong>drew
         on</strong> it, and set its starting <strong>opacity</strong> — the reader slides it afterwards.</p>
       <p>While this group is open the canvas belongs to the selected picture, its frame dashed in
-        blue: <strong>drag</strong> to turn it, <strong>wheel</strong> to change its field, or type
+        blue: <strong>drag</strong> on it to turn it (a drag outside it still turns the witness),
+        <strong>wheel</strong> to change its field, or type
         <strong>heading</strong>, <strong>pitch</strong>, <strong>roll</strong> and <strong>vertical
         field</strong>, or <strong>use the witness's pose</strong> as a start. To measure rather than
         eyeball, <strong>Add a landmark</strong> arms two clicks: a detail on the picture, then the same
@@ -664,7 +665,8 @@ if (docs) {
         fait un <strong>dessin par-dessus</strong>, et réglez son <strong>opacité</strong> de départ — le
         lecteur la fera glisser ensuite.</p>
       <p>Tant que ce groupe est ouvert, le canvas appartient à la photo sélectionnée, son cadre en
-        pointillés bleus : <strong>glissez</strong> pour la tourner, <strong>molette</strong> pour son
+        pointillés bleus : <strong>glissez</strong> dessus pour la tourner (glisser à côté tourne toujours
+        le témoin), <strong>molette</strong> pour son
         champ, ou saisissez <strong>cap</strong>, <strong>assiette</strong>, <strong>roulis</strong> et
         <strong>champ vertical</strong>, ou <strong>prenez la pose du témoin</strong> comme point de
         départ. Pour mesurer plutôt qu'estimer, <strong>Ajouter un repère</strong> arme deux clics : un

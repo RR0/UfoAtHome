@@ -2966,7 +2966,7 @@ export class SightingEditorElement extends HTMLElement {
 
   /**
    * What the pointer finds on the canvas in picture mode, in order: a landmark's own end, to move
-   * it; the picture, to turn it. Naming a landmark is not a click on the picture but an armed
+   * it; the picture, to turn it; anywhere else, the scene, to turn the witness. Naming a landmark is not a click on the picture but an armed
    * gesture (see armLandmark), so that a click nobody meant creates nothing.
    */
   private beginReferenceDrag(startPointer: { x: number; y: number }): void {
@@ -2982,6 +2982,16 @@ export class SightingEditorElement extends HTMLElement {
       this.referenceDragState = { kind: "anchor", ...anchor }
       this.setCanvasCursor("landmark")
       this.startDragListening()
+      return
+    }
+    // Outside the picture the scene is still the scene: grabbing sky or ground there turns the
+    // witness, as it does in every other group. Only the picture itself, and its landmarks, are
+    // this group's to move.
+    const aspect = this.sceneElement.referenceAspect(reference.id)
+    const onPicture = aspect !== undefined
+      && PictureRegistration.picturePointOf(this.directionAtCanvasPoint(startPointer), reference.registration, aspect) !== undefined
+    if (!onPicture) {
+      this.beginCameraDrag(startPointer)
       return
     }
     this.referenceDragState = {

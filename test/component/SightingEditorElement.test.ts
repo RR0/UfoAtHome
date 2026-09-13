@@ -1,4 +1,5 @@
 import { describe, expect, it, afterEach, beforeAll, vi } from "vitest"
+import { Vector3 } from "three"
 import { register, ELEMENT_NAME, LEGACY_ELEMENT_NAME } from "../../src/component/SightingEditorElement.js"
 import type { SightingEditorElement } from "../../src/component/SightingEditorElement.js"
 import type { PolygonShape, Shape } from "../../src/engine/shape/Shape.js"
@@ -50,8 +51,9 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     referenceFailedToLoad(): boolean {
       return false
     }
-    referenceAspect(): undefined {
-      return undefined
+    /** A loaded 3:2 photograph, so the editor can tell the picture from the scene around it. */
+    referenceAspect(): number {
+      return 1.5
     }
     directionAt(): { x: number; y: number; z: number } {
       return { x: 0, y: 0, z: -1 }
@@ -2720,6 +2722,17 @@ describe("SightingEditorElement canvas mode", () => {
     }
   }
 
+  /** Where each canvas point looks, for the witness of withPicture: facing 288° with 60° of height
+   * in 16:9. The scene double answers one fixed direction otherwise, and the picture, at 275°, is
+   * then never under the pointer. */
+  function lookingAsTheWitness(element: SightingEditorElement): void {
+    const scene = element.shadowRoot!.querySelector("rr0-scene") as unknown as { directionAt: (x: number, y: number) => Vector3 }
+    vi.spyOn(scene, "directionAt").mockImplementation((ndcX: number, ndcY: number) => {
+      const az = ((288 + ndcX * 53) * Math.PI) / 180, alt = ((2 + ndcY * 30) * Math.PI) / 180
+      return new Vector3(Math.cos(alt) * Math.sin(az), Math.sin(alt), -Math.cos(alt) * Math.cos(az))
+    })
+  }
+
   function open(element: SightingEditorElement, groupId: string): void {
     const tab = [...element.shadowRoot!.querySelectorAll<HTMLButtonElement>(".group-tab")].find(candidate => candidate.getAttribute("aria-controls") === groupId)!
     if (tab.getAttribute("aria-expanded") !== "true") tab.click()
@@ -2736,6 +2749,7 @@ describe("SightingEditorElement canvas mode", () => {
   it("hands the canvas to the picture while the Pictures group is open, and to the shapes while Phenomenon is", () => {
     const element = mount()
     element.sightingData = withPicture()
+    lookingAsTheWitness(element)
     const headingOf = () => element.sightingData.references![0]!.registration.headingDeg
     const shapeX = () => element.sightingData.timeline.keyframes[0]!.shapes[0]!.shape.bounds.x
     // Phenomenon is open on load: a drag on the shape's body moves it and leaves the picture alone.
@@ -2754,6 +2768,23 @@ describe("SightingEditorElement canvas mode", () => {
     drag(element, { x: 320, y: 180 }, { x: 360, y: 180 })
     expect(shapeX()).toBe(before)
     expect(element.shadowRoot!.getElementById("group-shape")!.hidden).toBe(false)
+  })
+
+  it("turns the witness, not the picture, when the drag starts outside the picture", () => {
+    const element = mount()
+    element.sightingData = withPicture()
+    lookingAsTheWitness(element)
+    open(element, "group-reference")
+    const pictureHeading = () => element.sightingData.references![0]!.registration.headingDeg
+    const witnessHeading = () => element.sightingData.witnessTrack!.keyframes[0]!.pose.headingDeg
+    // The witness faces 288° with 60° of height; the picture, 27° high at 275°, ends well before
+    // the right edge of the frame, which is sky and ground only.
+    drag(element, { x: 610, y: 180 }, { x: 630, y: 180 })
+    expect(pictureHeading()).toBe(275)
+    expect(witnessHeading()).not.toBe(288)
+    // On the picture itself, the same gesture still turns the picture.
+    drag(element, { x: 280, y: 180 }, { x: 300, y: 180 })
+    expect(pictureHeading()).not.toBe(275)
   })
 })
 
