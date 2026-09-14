@@ -477,6 +477,10 @@ export class SceneElement extends HTMLElement {
     this.frameElement = this.shadow.getElementById("frame")!
     this.sceneCanvas = this.shadow.getElementById("scene-canvas") as HTMLCanvasElement
     this.sceneRenderer = new SceneRenderer(this.sceneCanvas)
+    const loader = this.shadow.getElementById("scene-loader")!
+    this.sceneRenderer.onFirstFrameHold = holding => {
+      loader.hidden = !holding
+    }
     this.hoverTooltip = this.shadow.getElementById("hover-tooltip")!
 
     // Created imperatively rather than left inline in the template markup — see

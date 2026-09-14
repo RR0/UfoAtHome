@@ -44,21 +44,28 @@ export class IceHaloEffect {
   private static readonly RADIUS = 880
 
   /**
-   * How many rays a finished display is worth, and how many are traced per frame.
+   * How many rays a finished display is worth.
    *
    * The trade is noise against waiting. A tenth of this already shows every form; the rest is what
    * takes the grain off the faint ones — the big ring, the arcs that need a bounce — which are
-   * exactly the forms a reader would otherwise never be sure they were seeing. The batch is sized to
-   * fit inside a frame, so the scene keeps answering while its sky is being worked out.
+   * exactly the forms a reader would otherwise never be sure they were seeing. About half a second
+   * of work in all, measured.
    */
   private static readonly RAYS = 900_000
-  private static readonly RAYS_PER_FRAME = 4_000
-
-  /** How many rays the FIRST display of a scene shows itself after, and how much it doubles by.
-   * Only the first: once a display is standing, the next one is swapped in whole (see the step
-   * below), and watching a finished sky dissolve into a grainy one would read as the sky
-   * flickering, which is not what the sky was doing. */
-  private static readonly FIRST_GLIMPSE_RAYS = 50_000
+  /** Rays traced between two looks at the clock. */
+  private static readonly RAYS_PER_BATCH = 2_000
+  /**
+   * How much of a frame the tracing may take: a little while the scene is being drawn, so it keeps
+   * answering, and most of it while the scene's first frame is held for its sky (see setUrgent),
+   * when there is no frame to keep.
+   *
+   * By time and not by a count of rays. At 4 000 rays a frame the display took two to four seconds,
+   * and it was shown half-traced meanwhile — grainy, lopsided, the Sun apparently off-centre in its
+   * own ring — which a reader took for a fault that "corrected itself after a second". A display is
+   * now shown whole or not at all.
+   */
+  private static readonly BUDGET_MS = 6
+  private static readonly URGENT_BUDGET_MS = 40
 
   /**
    * How far the source may move, or the crystals change, before the display is worth tracing again.
@@ -98,10 +105,7 @@ export class IceHaloEffect {
   private mappedAlignment = Number.NaN
   private tracing = false
   private everDisplayed = false
-  /** True until one display has been traced right through — the only time a half-traced sky is
-   * worth showing, because the alternative is no sky at all. */
-  private refining = true
-  private nextGlimpse = IceHaloEffect.FIRST_GLIMPSE_RAYS
+  private urgent = false
   private workHandle: number | undefined
   private onRepaint?: () => void
 
@@ -195,6 +199,17 @@ export class IceHaloEffect {
     this.object.visible = false
   }
 
+  /** Whether the first display this effect will ever show is still being traced — what a scene's
+   * first frame waits for, rather than showing the sky without the display that belongs in it. */
+  get awaitingFirstDisplay(): boolean {
+    return this.tracing && !this.everDisplayed
+  }
+
+  /** See BUDGET_MS. */
+  setUrgent(urgent: boolean): void {
+    this.urgent = urgent
+  }
+
   /** What to call when a newly traced display is ready to be seen — the scene may well be paused,
    * in which case nothing else would repaint it. */
   set onReady(repaint: () => void) {
@@ -245,7 +260,6 @@ export class IceHaloEffect {
     this.pendingAlignment = alignment
     this.sky.begin(sourceAltitudeDeg, alignment)
     this.tracing = true
-    this.nextGlimpse = IceHaloEffect.FIRST_GLIMPSE_RAYS
     this.scheduleWork()
   }
 
@@ -273,14 +287,14 @@ export class IceHaloEffect {
     const step = () => {
       this.workHandle = undefined
       if (!this.tracing) return
-      this.sky.trace(IceHaloEffect.RAYS_PER_FRAME)
+      const started = performance.now()
+      const budget = this.urgent ? IceHaloEffect.URGENT_BUDGET_MS : IceHaloEffect.BUDGET_MS
+      do this.sky.trace(IceHaloEffect.RAYS_PER_BATCH)
+      while (this.sky.tracedRays < IceHaloEffect.RAYS && performance.now() - started < budget)
       const done = this.sky.tracedRays >= IceHaloEffect.RAYS
-      const glimpse = this.refining && this.sky.tracedRays >= this.nextGlimpse
-      if (glimpse) this.nextGlimpse *= 2
-      if (done || glimpse) this.publish()
       if (done) {
+        this.publish()
         this.tracing = false
-        this.refining = false
         this.mappedAltitudeDeg = this.pendingAltitudeDeg
         this.mappedAlignment = this.pendingAlignment
         return

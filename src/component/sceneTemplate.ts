@@ -2,6 +2,7 @@ export const html = `
 <div class="stage" id="stage">
   <div class="frame" id="frame">
     <canvas id="scene-canvas"></canvas>
+    <div id="scene-loader" class="scene-loader" role="progressbar" hidden></div>
   </div>
   <div id="ufo-slot"></div>
   <div id="hover-tooltip" class="hover-tooltip" hidden></div>
@@ -72,6 +73,29 @@ export const css = `
      have no frame of their own, and fall back to the shape this project draws its scene in. */
   aspect-ratio: var(--frame-aspect, 640 / 360);
   overflow: hidden;
+}
+/* Shown while the first frame waits for its sky (see SceneRenderer.onFirstFrameHold). Faded in after
+   a moment, so a sky that is ready at once never flashes a spinner. */
+.scene-loader {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 36px;
+  height: 36px;
+  margin: -18px 0 0 -18px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.25);
+  border-top-color: rgba(255, 255, 255, 0.9);
+  animation: scene-loader-spin 0.9s linear infinite, scene-loader-appear 0.2s ease-out 0.25s both;
+  pointer-events: none;
+  z-index: 1;
+}
+@keyframes scene-loader-spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes scene-loader-appear {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 #scene-canvas {
   position: absolute;

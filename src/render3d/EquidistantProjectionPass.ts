@@ -1,11 +1,17 @@
 import {
+  CubeCamera,
+  Matrix3,
   Mesh,
+  Quaternion,
+  Vector3,
   OrthographicCamera,
   PlaneGeometry,
   Scene,
   ShaderMaterial,
   Vector2,
   HalfFloatType,
+  LinearFilter,
+  WebGLCubeRenderTarget,
   WebGLRenderTarget,
   type Camera,
   type PerspectiveCamera,
@@ -32,11 +38,26 @@ import { SRGB_ENCODE_GLSL } from "./colorSpace.js"
  * than the output asks for, at equal resolution.
  */
 export class EquidistantProjectionPass {
-  /** Beyond this half-angle a single rectilinear source stops being usable — its corner would need
-   * `tan θ` of a direction approaching the horizon, i.e. an unbounded image. A field that wide
-   * needs a cubemap, which is a different piece of work; until one exists, SceneRenderer falls back
-   * to rendering straight to the canvas rather than producing a broken frame. */
+  /**
+   * Beyond this half-angle a single rectilinear source stops being usable — its corner would need
+   * `tan θ` of a direction approaching the horizon, i.e. an unbounded image — and the scene is
+   * rendered into a CUBEMAP instead, six faces of a quarter turn each, which holds every direction
+   * there is.
+   *
+   * Before the cube existed a field this wide fell back to the pinhole camera drawn straight to the
+   * canvas: the halos test sky, stated at 110° tall, came out through a rectilinear lens nearly two
+   * hundred degrees wide, with the compass letters at its edge blown up to three times their size and
+   * every angle near the frame's side stretched several times over — exactly the lens this pass
+   * exists to take away from an eye.
+   */
   static readonly MAX_HALF_ANGLE_DEG = 80
+  /** The cube's faces never finer than this, whatever the frame — six of them are drawn per frame. */
+  static readonly MAX_CUBE_FACE = 2048
+
+  private cubeTarget?: WebGLCubeRenderTarget
+  private cubeCamera?: CubeCamera
+  private cubeMaterial?: ShaderMaterial
+  private readonly cubeRotation = new Matrix3()
 
   private readonly target: WebGLRenderTarget
   private readonly quadScene = new Scene()
@@ -145,7 +166,7 @@ export class EquidistantProjectionPass {
    */
   static ndcFor(direction: { x: number; y: number; z: number }, fovDeg: number, aspect: number): { ndcX: number; ndcY: number } | undefined {
     const length = Math.hypot(direction.x, direction.y, direction.z)
-    if (length === 0 || direction.z >= 0) return undefined
+    if (length === 0 || direction.z >= length) return undefined
     const halfFovRad = ((fovDeg / 2) * Math.PI) / 180
     const theta = Math.acos(Math.min(1, -direction.z / length))
     const sin = Math.sin(theta)
@@ -204,9 +225,16 @@ export class EquidistantProjectionPass {
     camera: PerspectiveCamera,
     fovDeg: number,
     onCameraWidened?: () => void,
-    afterScene?: () => void
+    afterScene?: (camera: PerspectiveCamera) => void,
+    beforeCube?: (cube: boolean) => void
   ): void {
     const aspect = this.width / this.height
+    if (!EquidistantProjectionPass.supports(fovDeg, aspect)) {
+      beforeCube?.(true)
+      this.renderThroughCube(renderer, scene, camera, fovDeg, afterScene)
+      beforeCube?.(false)
+      return
+    }
     this.material.uniforms.uHalfFovRad.value = ((fovDeg / 2) * Math.PI) / 180
     this.material.uniforms.uSrcTanHalfFovY.value = this.sourceTanHalfFovY(fovDeg, aspect)
 
@@ -224,12 +252,151 @@ export class EquidistantProjectionPass {
     // Whatever has to be drawn INTO the same picture after the scene — the witness's own phenomena,
     // depth-tested against the decor alone (see SceneRenderer.renderPhenomenaPass) — is drawn here,
     // into the offscreen render the resampling reads from, through the same widened camera.
-    afterScene?.()
+    afterScene?.(camera)
     renderer.setRenderTarget(originalTarget)
     camera.fov = originalFov
     camera.updateProjectionMatrix()
 
     renderer.render(this.quadScene, this.quadCamera as Camera)
+  }
+
+  /**
+   * The same picture for a field too wide for one pinhole: the scene drawn onto the six faces of a
+   * cube around the eye, then read back along the direction each output pixel stands for.
+   *
+   * Faces sized so a face pixel covers about the angle an output pixel does, and each face given
+   * whatever has to be drawn into the picture after the scene, through that face's own camera. The
+   * shadow maps are drawn once, for the first face: the lights did not move between faces.
+   */
+  private renderThroughCube(
+    renderer: WebGLRenderer,
+    scene: Scene,
+    camera: PerspectiveCamera,
+    fovDeg: number,
+    afterScene?: (camera: PerspectiveCamera) => void
+  ): void {
+    const fovRad = (fovDeg * Math.PI) / 180
+    const face = Math.min(
+      EquidistantProjectionPass.MAX_CUBE_FACE,
+      renderer.capabilities.maxCubemapSize,
+      Math.max(256, Math.ceil(((this.height / fovRad) * Math.PI) / 2))
+    )
+    if (!this.cubeTarget || !this.cubeCamera || !this.cubeMaterial) {
+      this.cubeTarget = new WebGLCubeRenderTarget(face, { type: HalfFloatType, minFilter: LinearFilter, magFilter: LinearFilter, generateMipmaps: false })
+      this.cubeCamera = new CubeCamera(camera.near, camera.far, this.cubeTarget)
+      this.cubeMaterial = this.buildCubeMaterial(this.cubeTarget)
+    } else if (this.cubeTarget.width !== face) {
+      this.cubeTarget.setSize(face, face)
+    }
+    const cube = this.cubeCamera
+    camera.updateMatrixWorld()
+    cube.position.setFromMatrixPosition(camera.matrixWorld)
+    cube.updateMatrixWorld()
+    if (cube.coordinateSystem !== renderer.coordinateSystem) {
+      cube.coordinateSystem = renderer.coordinateSystem
+      cube.updateCoordinateSystem()
+    }
+    const originalTarget = renderer.getRenderTarget()
+    const shadows = renderer.shadowMap.autoUpdate
+    const forward = this.forwardScratch.set(0, 0, -1).applyQuaternion(camera.getWorldQuaternion(this.quaternionScratch))
+    const reach = EquidistantProjectionPass.cornerHalfAngleDeg(fovDeg, this.width / this.height)
+    cube.children.forEach((child, index) => {
+      const faceCamera = child as PerspectiveCamera
+      // A face no pixel of the picture looks into — behind the eye, for any field under 135° from
+      // the axis to the corner — is left as it was: nothing samples it.
+      if (!EquidistantProjectionPass.faceSeen(faceCamera, forward, reach)) return
+      if (faceCamera.near !== camera.near || faceCamera.far !== camera.far) {
+        faceCamera.near = camera.near
+        faceCamera.far = camera.far
+        faceCamera.updateProjectionMatrix()
+      }
+      renderer.setRenderTarget(this.cubeTarget!, index)
+      renderer.render(scene, faceCamera)
+      afterScene?.(faceCamera)
+      renderer.shadowMap.autoUpdate = false
+    })
+    renderer.shadowMap.autoUpdate = shadows
+    renderer.setRenderTarget(originalTarget)
+
+    const uniforms = this.cubeMaterial.uniforms
+    uniforms.uHalfFovRad.value = fovRad / 2
+    uniforms.uAspect.value = this.width / this.height
+    uniforms.uEncodeOutput.value = this.material.uniforms.uEncodeOutput.value
+    uniforms.uCameraRotation.value.setFromMatrix4(camera.matrixWorld)
+    const quad = this.quadScene.children[0] as Mesh
+    quad.material = this.cubeMaterial
+    renderer.render(this.quadScene, this.quadCamera as Camera)
+    quad.material = this.material
+  }
+
+  private readonly forwardScratch = new Vector3()
+  private readonly quaternionScratch = new Quaternion()
+
+  /**
+   * Whether any direction of a cube face lies within `reachDeg` of `forward`. The face camera looks
+   * down its own -Z through a square of half-angle 45°; the directions nearest the axis are among its
+   * centre, edges and corners, sampled on a 5 × 5 grid, with a few degrees' margin for what falls
+   * between the samples.
+   */
+  static faceSeen(faceCamera: PerspectiveCamera, forward: Vector3, reachDeg: number): boolean {
+    faceCamera.updateMatrixWorld()
+    const cosReach = Math.cos((Math.min(reachDeg + 5, 180) * Math.PI) / 180)
+    const direction = EquidistantProjectionPass.faceScratch
+    for (let i = 0; i <= 4; i++) {
+      for (let j = 0; j <= 4; j++) {
+        direction.set(-1 + i / 2, -1 + j / 2, -1).normalize().transformDirection(faceCamera.matrixWorld)
+        if (direction.dot(forward) >= cosReach) return true
+      }
+    }
+    return false
+  }
+
+  private static readonly faceScratch = new Vector3()
+
+  private buildCubeMaterial(target: WebGLCubeRenderTarget): ShaderMaterial {
+    return new ShaderMaterial({
+      uniforms: {
+        uCube: { value: target.texture },
+        uHalfFovRad: { value: 0.5236 },
+        uAspect: { value: 1 },
+        uCameraRotation: { value: this.cubeRotation },
+        uEncodeOutput: { value: 1 }
+      },
+      vertexShader: `
+        varying vec2 vNdc;
+        void main() {
+          vNdc = position.xy;
+          gl_Position = vec4(position.xy, 0.0, 1.0);
+        }
+      `,
+      fragmentShader: `
+        precision highp float;
+        ${SRGB_ENCODE_GLSL}
+        uniform samplerCube uCube;
+        uniform float uHalfFovRad;
+        uniform float uAspect;
+        uniform mat3 uCameraRotation;
+        uniform float uEncodeOutput;
+        varying vec2 vNdc;
+
+        void main() {
+          // The same mapping as the rectilinear source's, and here it may run past a quarter turn:
+          // a cube holds what is beside and behind the eye too.
+          vec2 angle = vec2(vNdc.x * uAspect, vNdc.y) * uHalfFovRad;
+          float theta = length(angle);
+          if (theta > 3.14159265) { gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); return; }
+          vec3 dir = vec3(0.0, 0.0, -1.0);
+          if (theta > 1e-6) {
+            vec2 axis = angle / theta;
+            dir = vec3(axis * sin(theta), -cos(theta));
+          }
+          vec3 colour = textureCube(uCube, uCameraRotation * dir).rgb;
+          gl_FragColor = vec4(uEncodeOutput > 0.5 ? encodeSrgb(colour) : colour, 1.0);
+        }
+      `,
+      depthTest: false,
+      depthWrite: false
+    })
   }
 
   /** The vertical field the offscreen render needs so its own corner reaches the output's — the
@@ -247,6 +414,8 @@ export class EquidistantProjectionPass {
   dispose(): void {
     this.target.dispose()
     this.material.dispose()
+    this.cubeTarget?.dispose()
+    this.cubeMaterial?.dispose()
     this.quadScene.clear()
   }
 }

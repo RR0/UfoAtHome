@@ -766,6 +766,22 @@ export class SceneRenderer {
    * for a sky that changes later.
    */
   private skyHoldUntilMs: number | null | undefined = undefined
+
+  /**
+   * Told when the scene's first frame starts and stops waiting for its sky — see skyHoldUntilMs —
+   * so the element around it can say something is being computed rather than show an empty frame.
+   */
+  onFirstFrameHold?: (holding: boolean) => void
+
+  /**
+   * Whether everything the first frame's sky is made of can be shown whole: the scattered sky and
+   * the eye's adaptation to it, and an ice display if the sky has one. Each of these used to arrive
+   * a second after the scene, visibly — a gradient replaced by the scattered sky, a grainy halo
+   * sharpening round a Sun it did not seem centred on.
+   */
+  private firstFrameReady(): boolean {
+    return (!this.scatteredSky || this.scatteredSky.ambient !== undefined) && !this.iceHalos?.awaitingFirstDisplay
+  }
   private groundMesh?: Mesh
   /** Location-accurate relief+imagery patch built by setTerrainOrigin(), layered on top of the
    * flat groundMesh disc (which keeps rendering underneath/beyond it unconditionally — see
@@ -1923,8 +1939,9 @@ export class SceneRenderer {
   setAstronomy(astronomy: SceneAstronomy): void {
     this.lastAstronomy = astronomy
     this.scatteredSky?.update(this.scatteredSkyState(astronomy))
-    if (this.skyHoldUntilMs === undefined && this.scatteredSky && !this.scatteredSky.ambient) {
+    if (this.skyHoldUntilMs === undefined) {
       this.skyHoldUntilMs = performance.now() + SKY_HOLD_MS
+      this.onFirstFrameHold?.(true)
       // The hold ends on its own even if the sky never comes (a context lost mid-build).
       setTimeout(() => this.render(), SKY_HOLD_MS + 20)
     }
@@ -2211,8 +2228,10 @@ export class SceneRenderer {
   private drawIfDirty(): void {
     if (!this.frameDirty || this.contextReleased) return
     if (this.skyHoldUntilMs) {
-      if (!this.scatteredSky?.ambient && performance.now() < this.skyHoldUntilMs) return
+      if (!this.firstFrameReady() && performance.now() < this.skyHoldUntilMs) return
       this.skyHoldUntilMs = null
+      this.iceHalos?.setUrgent(false)
+      this.onFirstFrameHold?.(false)
     }
     if (this.skyColoursStale && this.lastAstronomy) this.applySkyColours(this.lastAstronomy)
     if (this.compileBeforeNextDraw) {
@@ -2472,7 +2491,12 @@ export class SceneRenderer {
       this.camera,
       this.camera.fov,
       () => this.updateLensFlarePosition(),
-      () => this.renderOverlayPasses()
+      camera => this.renderOverlayPasses(camera),
+      // A flare is a picture of the Sun laid on ONE frame; on six faces it would be laid six times,
+      // at six wrong places. A field this wide goes without it.
+      cube => {
+        if (this.lensFlare) this.lensFlare.mesh.visible = cube ? false : this.sunVisible
+      }
     )
     if (target) this.renderer.setRenderTarget(previousTarget)
   }
@@ -2497,9 +2521,9 @@ export class SceneRenderer {
    */
   /** What is drawn over the scene once it is drawn, in order: the pictures of the place, then the
    * witness's own phenomena over them — see renderReferencesPass and renderPhenomenaPass. */
-  private renderOverlayPasses(): void {
-    this.renderReferencesPass()
-    this.renderPhenomenaPass()
+  private renderOverlayPasses(camera: PerspectiveCamera = this.camera): void {
+    this.renderReferencesPass(camera)
+    this.renderPhenomenaPass(camera)
   }
 
   /**
@@ -2509,15 +2533,15 @@ export class SceneRenderer {
    * is neither hidden by the scene nor hides it). One draw of a few panels, with the depth buffer
    * left exactly as it was for the phenomena's own pass.
    */
-  private renderReferencesPass(): void {
+  private renderReferencesPass(camera: PerspectiveCamera): void {
     if (!this.references.any) return
     const autoClear = this.renderer.autoClear
     const shadows = this.renderer.shadowMap.autoUpdate
     this.renderer.autoClear = false
     this.renderer.shadowMap.autoUpdate = false
-    this.camera.layers.set(REFERENCE_LAYER)
-    this.renderer.render(this.scene, this.camera)
-    this.camera.layers.set(0)
+    camera.layers.set(REFERENCE_LAYER)
+    this.renderer.render(this.scene, camera)
+    camera.layers.set(0)
     this.renderer.autoClear = autoClear
     this.renderer.shadowMap.autoUpdate = shadows
   }
@@ -2556,7 +2580,7 @@ export class SceneRenderer {
     this.render()
   }
 
-  private renderPhenomenaPass(): void {
+  private renderPhenomenaPass(camera: PerspectiveCamera): void {
     if (!this.phenomena.any) return
     const autoClear = this.renderer.autoClear
     const shadows = this.renderer.shadowMap.autoUpdate
@@ -2570,13 +2594,13 @@ export class SceneRenderer {
       // that hid the feet of Masse's craft would be the generator deciding what he saw.
       if (group) SceneRenderer.markDecorDepth(group, object.kind !== "crop")
     }
-    this.camera.layers.set(DECOR_DEPTH_LAYER)
+    camera.layers.set(DECOR_DEPTH_LAYER)
     this.scene.overrideMaterial = this.decorDepthMaterial
-    this.renderer.render(this.scene, this.camera)
+    this.renderer.render(this.scene, camera)
     this.scene.overrideMaterial = null
-    this.camera.layers.set(PHENOMENON_LAYER)
-    this.renderer.render(this.scene, this.camera)
-    this.camera.layers.set(0)
+    camera.layers.set(PHENOMENON_LAYER)
+    this.renderer.render(this.scene, camera)
+    camera.layers.set(0)
     this.renderer.autoClear = autoClear
     this.renderer.shadowMap.autoUpdate = shadows
   }
@@ -2784,7 +2808,6 @@ export class SceneRenderer {
   private usableEquidistantPass(): EquidistantProjectionPass | undefined {
     if (this.projectionKind !== "equidistant") return undefined
     const size = this.renderer.getDrawingBufferSize(new Vector2())
-    if (!EquidistantProjectionPass.supports(this.camera.fov, size.x / Math.max(size.y, 1))) return undefined
     if (!this.equidistantPass) this.equidistantPass = new EquidistantProjectionPass(size.x, size.y)
     else this.equidistantPass.resize(size.x, size.y)
     return this.equidistantPass
@@ -2846,12 +2869,14 @@ export class SceneRenderer {
   screenPointOf(direction: Vector3): { ndcX: number; ndcY: number } | undefined {
     this.camera.updateMatrixWorld()
     const local = this.screenPointScratch.copy(direction).applyQuaternion(this.screenPointQuaternion.copy(this.camera.quaternion).invert())
-    if (local.z >= 0) return undefined
     const size = this.renderer.getDrawingBufferSize(this.screenPointSize)
     const aspect = size.x / Math.max(size.y, 1)
+    // An eye's picture can hold what is beside and even behind the axis, once its field is wide
+    // enough to be drawn through the cube; only a pinhole's cannot.
     if (this.projectionKind === "equidistant" && this.equidistantPass) {
       return EquidistantProjectionPass.ndcFor(local, this.camera.fov, aspect)
     }
+    if (local.z >= 0) return undefined
     const tanHalf = Math.tan((this.camera.fov / 2) * DEG_TO_RAD)
     return { ndcX: local.x / -local.z / (aspect * tanHalf), ndcY: local.y / -local.z / tanHalf }
   }
@@ -3725,6 +3750,8 @@ export class SceneRenderer {
       this.iceHalos.onReady = () => this.render()
       this.celestialGroup.add(this.iceHalos.object)
     }
+    // Traced as fast as the thread allows while the first frame waits for it — there is no frame to keep.
+    this.iceHalos.setUrgent(Boolean(this.skyHoldUntilMs))
     const ice = this.highCloudCover()
     const cirrusMask = this.layeredClouds?.cirrusMask
     this.iceHalos.setCloudOffset(cirrusMask?.offset ?? this.cloudFieldOffset)
