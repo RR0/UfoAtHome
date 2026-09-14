@@ -33,8 +33,29 @@ and are worth naming, so that anyone can check what this project made of them.
 - **Moonlit sky brightness** — Krisciunas, K. & Schaefer, B. E. (1991), "A model of the brightness of
   moonlight", *PASP* 103, 1033. Used for the Moon and, with its zenith value pinned to the twilight
   measurements, for the Sun's own twilight glow.
-- **Twilight sky brightness** — the run of zenith sky brightness against solar depression follows
-  Patat, F. et al. (2006), "Optical sky brightness at Paranal during twilight".
+- **Twilight sky brightness** — the run of zenith sky brightness against solar depression is the
+  V-band fit of Patat, F., Ugolnikov, O. S. & Postylyakov, O. V. (2006), "UBVRI twilight sky
+  brightness at ESO-Paranal", *A&A* 455, 385 (table 1). It is also what the scattered sky is checked
+  against, never fitted to.
+
+### The scattered sky
+
+The daytime and twilight sky is traced through a spherical atmosphere
+(`src/engine/atmosphere/SkyScattering.ts`, and its GPU twin `src/render3d/AtmosphereTables.ts`),
+and checked against a Monte Carlo trace of the same medium
+(`test/engine/atmosphere/SkyMonteCarlo.ts`, `npm run build:sky-reference`).
+
+- **Method** — Hillaire, S. (2020), "A Scalable and Production Ready Sky and Atmosphere Rendering
+  Technique", *Computer Graphics Forum* 39(4); after Bruneton, E. & Neyret, F. (2008), "Precomputed
+  Atmospheric Scattering", *Computer Graphics Forum* 27(4).
+- **Rayleigh scattering by air** — Bodhaine, B. A. et al. (1999), "On Rayleigh optical depth
+  calculations", *J. Atmos. Oceanic Technol.* 16, 1854.
+- **Aerosol phase function** — Cornette, W. M. & Shanks, J. G. (1992), *Applied Optics* 31, 3152.
+- **Ozone absorption** — the Chappuis band after Serdyuchenko, A. et al. (2014), *Atmos. Meas. Tech.*
+  7, 625; why it makes a twilight zenith blue, Hulburt, E. O. (1953), *JOSA* 43, 113.
+- **Solar spectrum** — twenty-nanometre averages of the ASTM E-490 extraterrestrial spectrum.
+- **Colour** — the CIE 1931 colour-matching functions (multi-lobe fit) and the CIE 1951 scotopic
+  luminous efficiency (Gaussian fit).
 - **Galactic frame** — the IAU definition of the north galactic pole and the galactic centre.
 - **Galaxy structure** — the scale lengths and heights of the thin disc, the bulge and the dust
   layer are the standard star-count values; the one amplitude that is fitted is fitted to the

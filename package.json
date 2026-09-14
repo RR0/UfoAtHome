@@ -42,6 +42,7 @@
     "build:stars": "tsx scripts/build-star-catalog.ts",
     "build:comets": "tsx scripts/build-comet-catalog.ts",
     "build:novae": "node scripts/build-nova-catalog.ts",
+    "build:sky-reference": "tsx scripts/build-sky-reference.ts",
     "build:satellites": "tsx scripts/build-satellite-catalog.ts",
     "build:schema": "tsx scripts/build-sighting-schema.ts",
     "sync:cases": "tsx scripts/sync-case-recordings.ts",

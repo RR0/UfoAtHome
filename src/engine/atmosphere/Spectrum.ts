@@ -65,9 +65,48 @@ export class VisibleSpectrum {
     return spectrum
   }
 
+  /**
+   * A spectrum as an eye adds it up: CIE XYZ tristimulus values, with Y in candelas per square metre
+   * when the spectrum is a radiance in W·m⁻²·sr⁻¹·nm⁻¹ (or lux, for an irradiance).
+   *
+   * 683 lumens per watt at the photopic peak is a definition, not a measurement — it is what ties the
+   * candela to the watt.
+   */
+  static tristimulus(wavelengthsNm: readonly number[], spectrum: ArrayLike<number>, stepNm: number): [number, number, number] {
+    let x = 0
+    let y = 0
+    let z = 0
+    for (let index = 0; index < wavelengthsNm.length; index++) {
+      const [cx, cy, cz] = VisibleSpectrum.colourMatching(wavelengthsNm[index])
+      x += cx * spectrum[index]
+      y += cy * spectrum[index]
+      z += cz * spectrum[index]
+    }
+    const scale = 683 * stepNm
+    return [x * scale, y * scale, z * scale]
+  }
+
+  /**
+   * How strongly one wavelength excites the rods — the eye in the dark, which sees no colour and is
+   * most sensitive to blue-green: the CIE 1951 scotopic curve, as an approximate Gaussian peaking at
+   * 500 nm — within a few hundredths of the tabulated curve near its peak, and too low by more than half
+   * at its violet end, where the night sky has little light to give.
+   * Its efficacy is 1700 lumens per watt at the peak, against 683 for the cones in daylight.
+   */
+  static scotopic(wavelengthNm: number): number {
+    const micrometres = wavelengthNm / 1000
+    return 0.992 * Math.exp(-321.9 * (micrometres - 0.5) ** 2)
+  }
+
+  /** CIE XYZ to linear sRGB, unclamped: a colour outside the screen's gamut stays outside it here,
+   * and deciding what to do about that is the display's business. */
+  static linearSrgbOf([x, y, z]: readonly [number, number, number]): [number, number, number] {
+    return [3.2406 * x - 1.5372 * y - 0.4986 * z, -0.9689 * x + 1.8758 * y + 0.0415 * z, 0.0557 * x - 0.204 * y + 1.057 * z]
+  }
+
   /** A standard multi-lobe fit to the 1931 observer — how strongly one wavelength excites each of
    * the three responses an eye has. */
-  private static colourMatching(wavelengthNm: number): [number, number, number] {
+  static colourMatching(wavelengthNm: number): [number, number, number] {
     const lobe = (centre: number, below: number, above: number): number => {
       const t = (wavelengthNm - centre) / (wavelengthNm < centre ? below : above)
       return Math.exp(-0.5 * t * t)
