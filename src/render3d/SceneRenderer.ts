@@ -113,6 +113,7 @@ import { ReferenceSystem, REFERENCE_LAYER } from "./ReferenceSystem.js"
 import type { ReferenceView } from "./ReferenceSystem.js"
 import type { SceneReference } from "../engine/model/Reference.js"
 import type { PhenomenonFrame, PlacedPhenomenon } from "./PhenomenonSystem.js"
+import { ScatteredSky } from "./ScatteredSky.js"
 
 /** Plain field-by-field comparison — see setWeather's own doc comment on why reference equality
  * stopped being enough once weather started being resolved fresh every tick from a keyframe
@@ -253,6 +254,23 @@ const COMPASS_LABELS: Record<"en" | "fr", readonly string[]> = {
   fr: ["N", "NE", "E", "SE", "S", "SO", "O", "NO"]
 }
 const COMPASS_SUPPORTED_LANGUAGES = ["en", "fr"]
+/**
+ * Blocks of the scattered sky's multiple-scattering table drawn per frame while it is being built:
+ * four milliseconds of GPU apiece on an M3 Pro, measured, so eight a frame and about two seconds for
+ * the whole table. A count and not a clock, because the clock on this side of the GPU's queue measures
+ * nothing but how fast the draws were submitted.
+ */
+const SCATTERED_SKY_DRAWS_PER_FRAME = 2
+/** The same while the scene's very first frame is held for its sky (see skyHoldUntilMs): no frame is
+ * being drawn then, so the tables may take the whole of it. */
+const SCATTERED_SKY_DRAWS_WHILE_HELD = 16
+/**
+ * How long a scene's first frame may wait for its scattered sky before the old gradient is shown
+ * instead. A reader saw Chiles-Whitted come up with an airless gradient and the scattered sky replace
+ * it half a second later; holding the first frame turns that jump into the sky simply arriving.
+ */
+const SKY_HOLD_MS = 2500
+
 const COMPASS_PLACEMENT_RADIUS = 880 // just inside the sky dome, reading as "on the horizon"
 /** How big a compass label is drawn, in world units at COMPASS_PLACEMENT_RADIUS — sized for the
  * unaided sixty-degree field this project draws an eye through, and then held to that SIZE ON
@@ -727,6 +745,25 @@ export class SceneRenderer {
   private readonly celestialGroup = new Group()
 
   private skyMesh?: Mesh
+  /** The dome's own vertex-coloured material: the old colour table, shown until the scattered sky's
+   * tables exist, and for good on a device that cannot build them. */
+  private skyGradientMaterial?: MeshBasicMaterial
+  /**
+   * The sky drawn from scattered light — see ScatteredSky. Undefined on a device without float render
+   * targets, where the gradient stays.
+   */
+  private scatteredSky?: ScatteredSky
+  /** The astronomy last stated, for re-applying the sky's colours when the scattered sky reports new ones. */
+  private lastAstronomy?: SceneAstronomy
+  /** Set when the scattered sky has new colours or has become drawable; applied before the next draw. */
+  private skyColoursStale = false
+  private scatteredSkyFrameId: number | null = null
+  /**
+   * Until when the first frame waits for the scattered sky and the eye's adaptation to it — see
+   * SKY_HOLD_MS. Null once anything has been drawn: the hold is for the arrival of a scene, never
+   * for a sky that changes later.
+   */
+  private skyHoldUntilMs: number | null | undefined = undefined
   private groundMesh?: Mesh
   /** Location-accurate relief+imagery patch built by setTerrainOrigin(), layered on top of the
    * flat groundMesh disc (which keeps rendering underneath/beyond it unconditionally — see
@@ -1087,6 +1124,12 @@ export class SceneRenderer {
     this.lightningLight.color.copy(LIGHTNING_COLOR)
     this.scene.add(this.celestialLight, this.celestialLightTarget, this.skyLight, this.lightningLight)
     this.scene.add(this.celestialGroup)
+    const scatteredSky = new ScatteredSky(this.renderer, () => {
+      this.skyColoursStale = true
+      this.render()
+    })
+    if (scatteredSky.supported) this.scatteredSky = scatteredSky
+    else scatteredSky.dispose()
   }
 
   /** Verbatim attribution text required by the currently active imagery provider's license, once a
@@ -1863,20 +1906,17 @@ export class SceneRenderer {
   }
 
   setAstronomy(astronomy: SceneAstronomy): void {
-    const skyColors = skyColorsForAltitude(astronomy.sun.altitudeDeg)
-    const groundColor = skyColors.horizon
-    this.baseFogColor = groundColor
+    this.lastAstronomy = astronomy
+    this.scatteredSky?.update(this.scatteredSkyState(astronomy))
+    if (this.skyHoldUntilMs === undefined && this.scatteredSky && !this.scatteredSky.ambient) {
+      this.skyHoldUntilMs = performance.now() + SKY_HOLD_MS
+      // The hold ends on its own even if the sky never comes (a context lost mid-build).
+      setTimeout(() => this.render(), SKY_HOLD_MS + 20)
+    }
+    this.pumpScatteredSky()
     this.lastSunPosition = astronomy.sun
     this.buildSky(astronomy.sun)
     this.buildGround()
-    this.updateCloudLighting(astronomy.sun, groundColor)
-    // Real lights (celestialLight/skyLight, see updateCelestialLight) now carry ground/terrain/
-    // decor's day-night color grading via normal Lambertian shading — unlike before this session,
-    // groundMesh/terrainMesh/decor materials no longer need their own per-frame color.setRGB
-    // retint, since they're no longer self-illuminated MeshBasicMaterial (see buildGround/
-    // DecorSystem.build's own doc comments on why this changed: a manually multiplied flat color
-    // can never receive a real shadow, since there's no actual light for something to block).
-    this.updateCelestialLight(astronomy, skyColors.zenith, groundColor)
     // What that sky allowed to be seen — ONE rule, applied to every body in it. The star field has
     // always gone through this; the Moon, the planets and the comet now do too, and the difference
     // is not cosmetic: a magnitude-one Mars was being drawn at two in the afternoon. The Sun is the
@@ -1895,6 +1935,36 @@ export class SceneRenderer {
     this.buildNovae(astronomy.novae ?? [], magnitudeLimit)
     this.buildIceHalos(astronomy.sun, astronomy.moon)
     this.buildRainbow(astronomy.sun, astronomy.moon)
+    this.applySkyColours(astronomy)
+    // buildStars() above already called syncAnimationLoop(), but that ran before setBodyMesh("sun",
+    // ...) updated sunVisible — needsAnimationLoop() needs re-checking now that it's current, so the
+    // loop actually starts/stops the instant the Sun crosses the horizon during pure-daylight
+    // scrubbing (no stars/precipitation/lightning to otherwise keep it alive).
+    this.syncAnimationLoop()
+    this.render()
+  }
+
+  /**
+   * Everything in the scene that takes its colour from the sky: the fog, the clouds' ambient light,
+   * the skylight and the diffuse glows' reference. From the scattered sky once it has been read back,
+   * and from the old colour table until then.
+   */
+  private applySkyColours(astronomy: SceneAstronomy): void {
+    this.skyColoursStale = false
+    const skyColors = this.scatteredSky?.ambient ?? skyColorsForAltitude(astronomy.sun.altitudeDeg)
+    const groundColor = skyColors.horizon
+    this.baseFogColor = [groundColor[0], groundColor[1], groundColor[2]]
+    if (this.skyMesh && this.skyGradientMaterial) {
+      this.skyMesh.material = this.scatteredSky?.ready ? this.scatteredSky.material : this.skyGradientMaterial
+    }
+    this.updateCloudLighting(astronomy.sun, this.baseFogColor)
+    // Real lights (celestialLight/skyLight, see updateCelestialLight) now carry ground/terrain/
+    // decor's day-night color grading via normal Lambertian shading — unlike before this session,
+    // groundMesh/terrainMesh/decor materials no longer need their own per-frame color.setRGB
+    // retint, since they're no longer self-illuminated MeshBasicMaterial (see buildGround/
+    // DecorSystem.build's own doc comments on why this changed: a manually multiplied flat color
+    // can never receive a real shadow, since there's no actual light for something to block).
+    this.updateCelestialLight(astronomy, skyColors.zenith, groundColor)
     this.buildSkyGlow(astronomy, skyColors.zenith)
     // Fog reaches as far as the ground actually goes, not a fixed SKY_RADIUS: from altitude the
     // whole visible ground lies beyond 900 units, so a fog capped there turned all of it into flat
@@ -1902,18 +1972,47 @@ export class SceneRenderer {
     // colour and nothing else was left to see. Proportions kept, so the horizon haze reads the same
     // at every altitude.
     if (this.scene.fog instanceof Fog) {
-      this.scene.fog.color.setRGB(...groundColor)
+      this.scene.fog.color.setRGB(...this.baseFogColor)
       this.scene.fog.near = this.groundRadius * 0.2
       this.scene.fog.far = this.groundRadius
     } else {
-      this.scene.fog = new Fog(new Color(...groundColor), this.groundRadius * 0.2, this.groundRadius)
+      this.scene.fog = new Fog(new Color(...this.baseFogColor), this.groundRadius * 0.2, this.groundRadius)
     }
-    // buildStars() above already called syncAnimationLoop(), but that ran before setBodyMesh("sun",
-    // ...) updated sunVisible — needsAnimationLoop() needs re-checking now that it's current, so the
-    // loop actually starts/stops the instant the Sun crosses the horizon during pure-daylight
-    // scrubbing (no stars/precipitation/lightning to otherwise keep it alive).
-    this.syncAnimationLoop()
-    this.render()
+  }
+
+  /** The scattered sky's view of this astronomy: the eye's height, the Sun and the Moon. */
+  private scatteredSkyState(astronomy: SceneAstronomy) {
+    return {
+      altitudeM: this.observerElevationM + 1.6,
+      sun: { altitudeDeg: astronomy.sun.altitudeDeg, azimuthDeg: astronomy.sun.azimuthDeg, magnitude: astronomy.sun.magnitude },
+      moon: {
+        altitudeDeg: astronomy.moon.altitudeDeg,
+        azimuthDeg: astronomy.moon.azimuthDeg,
+        magnitude: astronomy.moon.magnitude,
+        phaseAngleDeg: NightSkyBrightness.phaseAngleOf(astronomy.moon.phase.illuminatedFraction)
+      }
+    }
+  }
+
+  /**
+   * Builds the scattered sky's tables a few milliseconds per frame, on a loop of its own: a paused
+   * scene runs no animation loop, and its sky must still arrive.
+   */
+  private pumpScatteredSky(): void {
+    const sky = this.scatteredSky
+    if (!sky || sky.tables.ready || this.scatteredSkyFrameId !== null || this.contextReleased) return
+    this.scatteredSkyFrameId = requestAnimationFrame(() => {
+      this.scatteredSkyFrameId = null
+      if (this.contextReleased) return
+      sky.advance(this.skyHoldUntilMs ? SCATTERED_SKY_DRAWS_WHILE_HELD : SCATTERED_SKY_DRAWS_PER_FRAME)
+      this.pumpScatteredSky()
+    })
+  }
+
+  private cancelScatteredSkyPump(): void {
+    if (this.scatteredSkyFrameId === null) return
+    cancelAnimationFrame(this.scatteredSkyFrameId)
+    this.scatteredSkyFrameId = null
   }
 
   /**
@@ -2089,6 +2188,11 @@ export class SceneRenderer {
    * outside an exposure. */
   private drawIfDirty(): void {
     if (!this.frameDirty || this.contextReleased) return
+    if (this.skyHoldUntilMs) {
+      if (!this.scatteredSky?.ambient && performance.now() < this.skyHoldUntilMs) return
+      this.skyHoldUntilMs = null
+    }
+    if (this.skyColoursStale && this.lastAstronomy) this.applySkyColours(this.lastAstronomy)
     if (this.compileBeforeNextDraw) {
       // See compileNextFrameOffThread: the frame stays dirty and is drawn once the programs exist.
       this.compileBeforeNextDraw = false
@@ -2180,6 +2284,7 @@ export class SceneRenderer {
     this.cancelFlush()
     this.cancelExposure()
     this.compiling = undefined
+    this.cancelScatteredSkyPump()
     this.renderer.forceContextLoss()
   }
 
@@ -2187,6 +2292,8 @@ export class SceneRenderer {
     if (!this.contextReleased) return
     this.contextReleased = false
     this.renderer.forceContextRestore()
+    this.scatteredSky?.invalidate()
+    this.pumpScatteredSky()
     this.compileNextFrameOffThread()
     this.syncAnimationLoop()
     this.render()
@@ -3065,6 +3172,11 @@ export class SceneRenderer {
     this.phenomena.clear()
     this.references.disposeAll()
     this.terrainBuildToken++ // discard any terrain build still in flight
+    this.cancelScatteredSkyPump()
+    // The dome may be wearing the scattered sky's material, which is not the mesh's to dispose.
+    if (this.skyMesh && this.skyGradientMaterial) this.skyMesh.material = this.skyGradientMaterial
+    this.scatteredSky?.dispose()
+    this.scatteredSky = undefined
     this.disposeMesh(this.skyMesh)
     this.disposeMesh(this.groundMesh)
     this.disposeMesh(this.terrainMesh)
@@ -3236,6 +3348,7 @@ export class SceneRenderer {
     // distance. The Sun, Moon and stars sit inside it and are unaffected: they are drawn afterwards
     // against a depth buffer the sky left untouched.
     const material = new MeshBasicMaterial({ vertexColors: true, side: BackSide, fog: false, depthWrite: false })
+    this.skyGradientMaterial = material
     this.skyMesh = new Mesh(geometry, material)
     this.skyMesh.renderOrder = -1
     this.celestialGroup.add(this.skyMesh)

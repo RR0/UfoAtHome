@@ -1,5 +1,7 @@
 import {
+  DataTexture,
   DataUtils,
+  RGBAFormat,
   FloatType,
   GLSL3,
   HalfFloatType,
@@ -43,6 +45,12 @@ import { VisibleSpectrum } from "../engine/atmosphere/Spectrum.js"
  * by hand — float textures have no guaranteed filtering. A device without float render targets gets
  * no tables at all, and the scene keeps its old gradient (see `supported`).
  */
+interface SharedTables {
+  /** Four attachments of half floats, as their raw sixteen bits. */
+  readonly transmittance: Uint16Array[]
+  readonly multiple: Float32Array[]
+}
+
 export class AtmosphereTables {
   static readonly TRANSMITTANCE_WIDTH = 256
   static readonly TRANSMITTANCE_HEIGHT = 64
@@ -73,6 +81,21 @@ export class AtmosphereTables {
   /** Texels of the multiple-scattering table per draw. */
   static readonly MULTIPLE_BLOCK = 16
 
+  /**
+   * Tables already built on this page, by medium, as plain arrays — or the mark that a scene is
+   * building them right now.
+   *
+   * Every scene has its own WebGL context and a context cannot read another's textures, but the
+   * tables depend on the air alone: twelve scenes of the demos page under the same sky were each
+   * compiling the two table shaders and spending a second of GPU on the same numbers, and that was
+   * most of what the scattered sky cost a scroll. The first scene builds and reads its tables back;
+   * the others upload them as data, and one arriving while the first is still building waits for it.
+   */
+  private static readonly shared = new Map<string, SharedTables | "building">()
+  private building = false
+  private adopted?: Texture[]
+  private readonly tableUniforms: Record<string, { value: Texture }>
+
   constructor(renderer: WebGLRenderer) {
     this.renderer = renderer
     this.supported = renderer.capabilities.isWebGL2 && renderer.extensions.has("EXT_color_buffer_float")
@@ -100,7 +123,7 @@ export class AtmosphereTables {
     this.sunView = view()
     this.moonView = view()
     const uniforms = AtmosphereTables.mediumUniforms()
-    const tables = {
+    const tables = (this.tableUniforms = {
       uT0: { value: this.transmittance.textures[0] },
       uT1: { value: this.transmittance.textures[1] },
       uT2: { value: this.transmittance.textures[2] },
@@ -109,7 +132,7 @@ export class AtmosphereTables {
       uM1: { value: this.multiple.textures[1] },
       uM2: { value: this.multiple.textures[2] },
       uM3: { value: this.multiple.textures[3] }
-    }
+    })
     const material = (fragmentShader: string, extra: Record<string, { value: unknown }> = {}) =>
       new RawShaderMaterial({
         glslVersion: GLSL3,
@@ -148,7 +171,7 @@ export class AtmosphereTables {
 
   /** Whether both air-only tables are complete and the sky views can be drawn from them. */
   get ready(): boolean {
-    return this.supported && this.transmittanceReady && this.multipleRows >= AtmosphereTables.MULTIPLE_SIZE
+    return this.supported && (this.adopted !== undefined || (this.transmittanceReady && this.multipleRows >= AtmosphereTables.MULTIPLE_SIZE))
   }
 
   /** Changes the air. Only a real change starts the tables over. */
@@ -157,6 +180,8 @@ export class AtmosphereTables {
       .map(values => Array.from(values, value => value.toPrecision(6)).join(","))
       .join("|")
     if (key === this.mediumKey) return
+    this.abandonBuilding()
+    this.releaseAdopted()
     this.mediumKey = key
     const pack = (name: string, values: Float64Array) => {
       const packed = this.transmittanceMaterial.uniforms[name].value as Vector4[]
@@ -174,25 +199,46 @@ export class AtmosphereTables {
     this.multipleColumn = 0
   }
 
+  /** Starts the tables over for the same air — after a lost context, which took their contents. */
+  invalidate(): void {
+    // Adopted tables are data textures, which three uploads again on its own.
+    if (this.adopted) return
+    this.abandonBuilding()
+    this.transmittanceReady = false
+    this.multipleRows = 0
+    this.multipleColumn = 0
+  }
+
   /**
-   * Builds what is left of the air-only tables, for at most `budgetMs` of this frame — though at least
-   * one row, so it always finishes. Returns whether the tables are ready.
+   * Builds at most `draws` more blocks of the air-only tables (the transmittance counts as one), and
+   * returns whether they are ready. A count, not a time budget: the draws are queued, and a clock on
+   * this side of the queue only measures how fast they were handed over.
    */
-  advance(budgetMs: number): boolean {
+  advance(draws: number): boolean {
     if (!this.supported || !this.mediumKey) return false
     if (this.ready) return true
-    const started = performance.now()
+    const shared = AtmosphereTables.shared.get(this.mediumKey)
+    if (shared && shared !== "building") {
+      this.adopt(shared)
+      return true
+    }
+    if (shared === "building" && !this.building) return false
+    if (!shared) {
+      AtmosphereTables.shared.set(this.mediumKey, "building")
+      this.building = true
+    }
     const previousTarget = this.renderer.getRenderTarget()
-    const previousScissorTest = this.renderer.getScissorTest()
+    let left = Math.max(1, draws)
     if (!this.transmittanceReady) {
       this.draw(this.transmittanceMaterial, this.transmittance)
       this.transmittanceReady = true
+      left--
     }
     const size = AtmosphereTables.MULTIPLE_SIZE
     // Blocks of a quarter of a row, not the whole table: a thousand directions from each of four
     // thousand texels in one draw is a stall a browser will kill the context for.
     const block = AtmosphereTables.MULTIPLE_BLOCK
-    do {
+    for (; left > 0 && this.multipleRows < size; left--) {
       this.multiple.scissor.set(this.multipleColumn, this.multipleRows, block, 1)
       this.multiple.scissorTest = true
       this.draw(this.multipleMaterial, this.multiple)
@@ -201,11 +247,68 @@ export class AtmosphereTables {
         this.multipleColumn = 0
         this.multipleRows++
       }
-    } while (this.multipleRows < size && performance.now() - started < budgetMs)
+    }
     this.multiple.scissorTest = false
     this.renderer.setRenderTarget(previousTarget)
-    this.renderer.setScissorTest(previousScissorTest)
+    if (this.ready && this.building) void this.share(this.mediumKey)
     return this.ready
+  }
+
+  /** Reads the finished tables back for the other scenes of the page. */
+  private async share(key: string): Promise<void> {
+    this.building = false
+    try {
+      const transmittance = await Promise.all([0, 1, 2, 3].map(attachment => this.readRaw(this.transmittance, attachment, Uint16Array)))
+      const multiple = await Promise.all([0, 1, 2, 3].map(attachment => this.readRaw(this.multiple, attachment, Float32Array)))
+      if (this.mediumKey === key) AtmosphereTables.shared.set(key, { transmittance, multiple })
+      else AtmosphereTables.shared.delete(key)
+    } catch {
+      AtmosphereTables.shared.delete(key)
+    }
+  }
+
+  private async readRaw<T extends Uint16Array | Float32Array>(
+    target: WebGLRenderTarget,
+    attachment: number,
+    type: { new (length: number): T }
+  ): Promise<T> {
+    const buffer = new type(target.width * target.height * 4)
+    await this.renderer.readRenderTargetPixelsAsync(target, 0, 0, target.width, target.height, buffer, undefined, attachment)
+    return buffer
+  }
+
+  /** Takes tables another scene built, as data textures filtered the way the built ones are. */
+  private adopt(tables: SharedTables): void {
+    const texture = (data: Uint16Array | Float32Array, width: number, height: number, half: boolean) => {
+      const result = new DataTexture(data, width, height, RGBAFormat, half ? HalfFloatType : FloatType)
+      result.minFilter = result.magFilter = half ? LinearFilter : NearestFilter
+      result.needsUpdate = true
+      return result
+    }
+    const transmittance = tables.transmittance.map(data =>
+      texture(data, AtmosphereTables.TRANSMITTANCE_WIDTH, AtmosphereTables.TRANSMITTANCE_HEIGHT, true)
+    )
+    const multiple = tables.multiple.map(data => texture(data, AtmosphereTables.MULTIPLE_SIZE, AtmosphereTables.MULTIPLE_SIZE, false))
+    transmittance.forEach((value, index) => (this.tableUniforms[`uT${index}`].value = value))
+    multiple.forEach((value, index) => (this.tableUniforms[`uM${index}`].value = value))
+    this.adopted = [...transmittance, ...multiple]
+  }
+
+  private releaseAdopted(): void {
+    if (!this.adopted) return
+    for (const texture of this.adopted) texture.dispose()
+    this.adopted = undefined
+    for (let index = 0; index < 4; index++) {
+      this.tableUniforms[`uT${index}`].value = this.transmittance.textures[index]
+      this.tableUniforms[`uM${index}`].value = this.multiple.textures[index]
+    }
+  }
+
+  /** A scene that stops building (disposed, context lost, air changed) must not leave the others waiting. */
+  private abandonBuilding(): void {
+    if (!this.building) return
+    this.building = false
+    if (AtmosphereTables.shared.get(this.mediumKey) === "building") AtmosphereTables.shared.delete(this.mediumKey)
   }
 
   /**
@@ -255,6 +358,18 @@ export class AtmosphereTables {
     return Float32Array.from(halves, half => DataUtils.fromHalfFloat(half))
   }
 
+  /**
+   * The same, synchronously: it waits for the GPU. Only for a scene's first frame, which is held until
+   * its sky can be shown adapted — the asynchronous read took three hundred milliseconds to come back
+   * there, most of the wait for the first frame.
+   */
+  readSkyViewNow(source: "sun" | "moon"): Float32Array {
+    const target = source === "sun" ? this.sunView : this.moonView
+    const buffer = new Float32Array(target.width * target.height * 4)
+    this.renderer.readRenderTargetPixels(target, 0, 0, target.width, target.height, buffer)
+    return buffer
+  }
+
   async readSkyView(source: "sun" | "moon"): Promise<Float32Array> {
     const target = source === "sun" ? this.sunView : this.moonView
     const buffer = new Float32Array(target.width * target.height * 4)
@@ -263,6 +378,8 @@ export class AtmosphereTables {
   }
 
   dispose(): void {
+    this.abandonBuilding()
+    this.releaseAdopted()
     this.transmittance.dispose()
     this.multiple.dispose()
     this.sunView.dispose()
