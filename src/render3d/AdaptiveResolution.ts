@@ -16,8 +16,9 @@
  * ratio is lowered on lateness and raised by PROBING: one step up now and then, kept if the frames
  * stay on time, undone otherwise, and tried again later.
  *
- * Between one and the display's own ratio, in quarter steps, and only while animations run: a
- * still is drawn once and can afford every pixel it has.
+ * Between one and the display's own ratio, in quarter steps, and only while the picture is being
+ * CHANGED: a still is drawn once and can afford every pixel it has, and so can a picture nobody is
+ * touching whose stars merely twinkle (see noteChange).
  */
 export class AdaptiveResolution {
   static readonly MIN_RATIO = 1
@@ -53,6 +54,55 @@ export class AdaptiveResolution {
   }
 
   get pixelRatio(): number {
+    return this.ratio
+  }
+
+  /** How long after the last change the picture is holding still, and drawn at every pixel. */
+  static readonly SETTLE_MS = 400
+  /** How long changes must keep coming before they are a motion worth fewer pixels. */
+  static readonly SUSTAINED_MS = 100
+
+  private lastEditMs = -Infinity
+  private editStreakStartMs = -Infinity
+  private wasChanging = false
+
+  /**
+   * Something in the picture was changed — a restated sky, a moved pose, an edit — as opposed to
+   * what moves on its own (a star's twinkle, the flare's shimmer, falling rain).
+   *
+   * Those ambient motions redraw every frame for as long as the scene is shown, and the editor
+   * keeps them running over a paused recording: the ratio came down under them and never went back
+   * up, so a picture nobody was touching stayed blurred. Only a change that keeps coming is a reason
+   * to trade pixels for frames; a single one (a click) is drawn at every pixel.
+   */
+  noteChange(nowMs: number): void {
+    if (nowMs - this.lastEditMs > AdaptiveResolution.SETTLE_MS) this.editStreakStartMs = nowMs
+    this.lastEditMs = nowMs
+  }
+
+  /** Whether changes are coming in a sustained stream right now — see noteChange. */
+  changing(nowMs: number): boolean {
+    return nowMs - this.lastEditMs <= AdaptiveResolution.SETTLE_MS
+      && this.lastEditMs - this.editStreakStartMs >= AdaptiveResolution.SUSTAINED_MS
+  }
+
+  /**
+   * The ratio to draw the next frame at: every pixel while the picture holds still, the adapted one
+   * while it changes. What frames cost while still says nothing about what they will cost moving,
+   * so the measurements are forgotten each time a motion starts.
+   */
+  ratioFor(nowMs: number, intervalMs: number): number {
+    const changing = this.changing(nowMs)
+    if (!changing) {
+      this.wasChanging = false
+      return this.maxRatio
+    }
+    if (!this.wasChanging) {
+      this.wasChanging = true
+      this.reset()
+      return this.ratio
+    }
+    this.update(nowMs, intervalMs)
     return this.ratio
   }
 

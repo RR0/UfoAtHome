@@ -2218,6 +2218,8 @@ export class SceneRenderer {
   render(): void {
     if (this.restatingExposure) return
     this.frameDirty = true
+    // A change, which the ambient motions (see animate) are not: see AdaptiveResolution.noteChange.
+    this.resolution.noteChange(performance.now())
     if (this.animationFrameId !== null || this.framesDriven || this.flushFrameId !== null) return
     this.flushFrameId = requestAnimationFrame(() => {
       this.flushFrameId = null
@@ -2361,9 +2363,11 @@ export class SceneRenderer {
       const intervalMs = this.lastFrameTimeMs === undefined ? 0 : timeMs - this.lastFrameTimeMs
       this.lastFrameTimeMs = timeMs
       if (this.hasAnimations()) this.animate(timeMs, intervalMs)
-      // Frames coming in late is what the pixel count answers to — see AdaptiveResolution.
-      const ratio = this.resolution.update(timeMs, intervalMs)
-      if (ratio !== undefined) this.applyPixelRatio(ratio)
+      // Frames coming in late is what the pixel count answers to, and only while the picture is
+      // being changed: a still one is drawn at every pixel, whatever twinkles in it — see
+      // AdaptiveResolution.ratioFor.
+      const ratio = this.resolution.ratioFor(timeMs, intervalMs)
+      if (ratio !== this.renderer.getPixelRatio()) this.applyPixelRatio(ratio)
     }
     this.drawIfDirty()
   }
@@ -2399,7 +2403,7 @@ export class SceneRenderer {
    */
   setMaxPixelRatio(maxRatio: number): void {
     this.resolution.maximum = maxRatio
-    if (this.renderer.getPixelRatio() !== this.resolution.pixelRatio) this.applyPixelRatio(this.resolution.pixelRatio)
+    if (this.renderer.getPixelRatio() > this.resolution.maximum) this.applyPixelRatio(this.resolution.maximum)
   }
 
   private applyPixelRatio(ratio: number): void {
@@ -3367,6 +3371,9 @@ export class SceneRenderer {
       this.lastFrameTimeMs = undefined
       this.resolution.reset()
     }
+    // A still is drawn once and can afford every pixel: with no loop left to raise the ratio, the
+    // one the last motion had lowered it to would otherwise stay on it for good.
+    if (!running && this.renderer.getPixelRatio() !== this.resolution.maximum) this.applyPixelRatio(this.resolution.maximum)
     this.syncAnimationLoop()
     // The loop is what normally repaints; with it stopped, this is what leaves a coherent still —
     // and a frame asked for while a loop or a driver was expected to draw it must not wait forever

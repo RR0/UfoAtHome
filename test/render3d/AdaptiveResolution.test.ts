@@ -88,3 +88,40 @@ describe("AdaptiveResolution without a card timer", () => {
     expect(resolution.pixelRatio).toBe(2)
   })
 })
+
+describe("AdaptiveResolution and what is being redrawn", () => {
+  /** A late frame every 30 ms from `from` to `until`, with a change noted at each when `changing`. */
+  function run(resolution: AdaptiveResolution, from: number, until: number, changing: boolean): number {
+    let ratio = resolution.pixelRatio
+    for (let now = from; now <= until; now += 30) {
+      if (changing) resolution.noteChange(now)
+      ratio = resolution.ratioFor(now, 30)
+    }
+    return ratio
+  }
+
+  it("keeps every pixel for a picture that only twinkles, however late its frames", () => {
+    expect(run(new AdaptiveResolution(2), 0, 10000, false)).toBe(2)
+  })
+
+  it("trades pixels for frames while changes keep coming, and gives them back once they stop", () => {
+    const resolution = new AdaptiveResolution(2)
+    expect(run(resolution, 0, 5000, true)).toBeLessThan(2)
+    expect(run(resolution, 5030, 5030 + AdaptiveResolution.SETTLE_MS + 60, false)).toBe(2)
+  })
+
+  it("draws a single change, a click, at every pixel", () => {
+    const resolution = new AdaptiveResolution(2)
+    run(resolution, 0, 5000, true)
+    run(resolution, 5030, 6000, false)
+    resolution.noteChange(7000)
+    expect(resolution.ratioFor(7010, 30)).toBe(2)
+  })
+
+  it("resumes a motion at the ratio the last one had found, not from the top", () => {
+    const resolution = new AdaptiveResolution(2)
+    const lowered = run(resolution, 0, 5000, true)
+    run(resolution, 5030, 6000, false)
+    expect(run(resolution, 7000, 7000 + AdaptiveResolution.SUSTAINED_MS + 30, true)).toBe(lowered)
+  })
+})
