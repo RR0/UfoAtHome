@@ -18,6 +18,13 @@ describe("twilight", () => {
     expect(NightSkyBrightness.moonlessMagPerArcsec2(-18) - NightSkyBrightness.moonlessMagPerArcsec2(-90)).toBeLessThan(0.2)
   })
 
+  it("is the sky Paranal measured through civil and nautical twilight", () => {
+    // Patat et al. (2006), table 1 in V. The table once said 15.6 at -6: ten times too dark.
+    expect(NightSkyBrightness.moonlessMagPerArcsec2(-6)).toBeCloseTo(13.3, 1)
+    expect(NightSkyBrightness.moonlessMagPerArcsec2(-10)).toBeCloseTo(18.0, 1)
+    expect(NightSkyBrightness.moonlessMagPerArcsec2(-12)).toBeCloseTo(19.7, 1)
+  })
+
   it("darkens monotonically as the Sun goes down, and fastest in the middle", () => {
     const run = [10, 0, -4, -6, -8, -10, -12, -14, -16, -18].map(alt => NightSkyBrightness.moonlessMagPerArcsec2(alt))
     for (let at = 1; at < run.length; at++) expect(run[at]).toBeGreaterThan(run[at - 1])

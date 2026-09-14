@@ -61,14 +61,15 @@ export class NightSkyBrightness {
     { sunAltitudeDeg: 90, magPerArcsec2: 3.5 },
     { sunAltitudeDeg: 10, magPerArcsec2: 4.2 },
     { sunAltitudeDeg: 0, magPerArcsec2: 7.5 },
-    { sunAltitudeDeg: -4, magPerArcsec2: 13 },
-    { sunAltitudeDeg: -6, magPerArcsec2: 15.6 },
-    { sunAltitudeDeg: -8, magPerArcsec2: 17.2 },
-    { sunAltitudeDeg: -10, magPerArcsec2: 18.5 },
-    { sunAltitudeDeg: -12, magPerArcsec2: 19.7 },
-    { sunAltitudeDeg: -14, magPerArcsec2: 20.8 },
-    { sunAltitudeDeg: -16, magPerArcsec2: 21.6 },
-    { sunAltitudeDeg: -18, magPerArcsec2: 21.9 },
+    // Every degree from -4 to -18 read off the paper's own V-band fit rather than off its figure.
+    // This table used to hold hand-read values that were right at -12 and two and a third
+    // magnitudes too dark at -6 (15.6 where the fit gives 13.3): a civil-twilight sky ten times
+    // fainter than the one measured. Found when a scattering model computed from first principles
+    // disagreed with the table and agreed with the paper.
+    ...Array.from({ length: 15 }, (_, index) => {
+      const sunAltitudeDeg = -4 - index
+      return { sunAltitudeDeg, magPerArcsec2: NightSkyBrightness.patatV(sunAltitudeDeg) }
+    }),
     // The floor, reached a few degrees past the textbook end of astronomical twilight rather than
     // exactly at it, because that is what the photometry shows — and reached FLAT, which matters
     // more than the exact degree: below this the table must return the floor EXACTLY, or the
@@ -76,6 +77,18 @@ export class NightSkyBrightness {
     // angular shape (see twilightExcessNanolamberts), putting a faint arch in a midnight sky.
     { sunAltitudeDeg: -24, magPerArcsec2: 22 }
   ]
+
+  /**
+   * Patat, Ugolnikov and Postylyakov (2006), table 1, V band: a0 + a1 (ζ − 95) + a2 (ζ − 95)², ζ the
+   * Sun's zenith distance in degrees. Fitted over 95° ≤ ζ ≤ 105° with a scatter of 0.18 mag, to sky
+   * within 40° of the zenith. Used a degree either side of that range, where the quadratic is still
+   * well behaved: it tops out at 21.94 with the Sun at -18.3°, which is the night sky it was fitted
+   * against and not an accident of extrapolation.
+   */
+  static patatV(sunAltitudeDeg: number): number {
+    const past = 90 - sunAltitudeDeg - 95
+    return 11.84 + 1.518 * past - 0.057 * past * past
+  }
 
   static moonlessMagPerArcsec2(sunAltitudeDeg: number): number {
     const table = NightSkyBrightness.TWILIGHT
