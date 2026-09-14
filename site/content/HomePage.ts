@@ -29,7 +29,9 @@ export class HomePage implements SitePage {
    * Auto-advance yields to the reader. Any click, key or touch inside it means they are looking at
    * THIS one — advancing out from under someone who just paused a scene to examine it would be the
    * worst thing this page could do — so the sequence stops and the arrows become theirs. It picks
-   * itself up again after a while of nothing happening.
+   * itself up again after a while of nothing happening, or as soon as the recording they were
+   * watching runs to its end: a reader who pressed play on one wants the next one after it, not a
+   * frozen last frame for a minute (a recording no longer loops by default).
    */
   script(language: SiteLanguage): string {
     const fr = language === "fr"
@@ -115,7 +117,15 @@ new IntersectionObserver(entries => {
 
 // Fired by the recording running off its own end, and composed, so it crosses the element's shadow
 // roots to reach this page.
-stage.addEventListener("ended", () => { if (auto) show(index + 1) })
+// Whoever started it: once the recording is over there is nothing left to examine, so the sequence
+// takes over again rather than leaving the reader on a stopped last frame.
+stage.addEventListener("ended", () => {
+  if (!onScreen) return
+  clearTimeout(resumeTimer)
+  auto = true
+  carousel.dataset.auto = "on"
+  show(index + 1)
+})
 
 const takeOver = () => {
   auto = false

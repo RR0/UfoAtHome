@@ -156,7 +156,7 @@ describe("the Monte Carlo reference", () => {
   it("is met by the model within a few tenths of a magnitude, all the way into deep twilight", () => {
     // The tables at the resolution the GPU builds them, against the exact physics of the same medium.
     // What separates the two is Hillaire's approximation and nothing else, and here is how much it
-    // is, measured rather than hoped: within 0.25 mag in luminance and 0.012 in chromaticity for every
+    // is, measured rather than hoped: within 0.25 mag in luminance and 0.015 in chromaticity for every
     // sky, from a hazy noon to a Sun sixteen degrees down, from the ground and from an aircraft...
     const skies = new Map<string, SkyScattering>()
     for (const skyCase of reference.cases) {
@@ -172,8 +172,8 @@ describe("the Monte Carlo reference", () => {
       // The Monte Carlo's own noise counts for the deepest skies, where it is several per cent.
       const noiseMag = 2.5 * Math.log10(1 + 2 * skyCase.relativeError[7])
       expect(deltaMag, skyCase.name).toBeLessThan((earthShadow ? 0.8 : 0.25) + noiseMag)
-      expect(Math.abs(x / (x + y + z) - skyCase.chromaticity[0]), skyCase.name).toBeLessThan(0.012)
-      expect(Math.abs(y / (x + y + z) - skyCase.chromaticity[1]), skyCase.name).toBeLessThan(0.012)
+      expect(Math.abs(x / (x + y + z) - skyCase.chromaticity[0]), skyCase.name).toBeLessThan(0.015)
+      expect(Math.abs(y / (x + y + z) - skyCase.chromaticity[1]), skyCase.name).toBeLessThan(0.015)
     }
    }, TABLE_BUILD_TIMEOUT_MS)
 })

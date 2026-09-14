@@ -55,11 +55,21 @@ export class AtmosphereTables {
   static readonly TRANSMITTANCE_WIDTH = 256
   static readonly TRANSMITTANCE_HEIGHT = 64
   static readonly MULTIPLE_SIZE = 64
+  /**
+   * Rows of the multiple-scattering table, crowded toward the ground (height = span · v²): the air,
+   * and what happens to light in it, is almost all in the lowest few tens of kilometres, and evenly
+   * spaced rows spent most of the table on near-vacuum. Measured against the Monte Carlo skies, 16
+   * crowded rows and 12 steps per ray put every sky within the same few hundredths of a magnitude as
+   * 64 even rows and 20 steps, for a seventh of the GPU time — which was most of the second a scene
+   * waited for its sky. Columns (the Sun's height) could not be cut: 48 put a -10° zenith off.
+   */
+  static readonly MULTIPLE_ROWS = 16
+  static readonly MULTIPLE_HEIGHT_POWER = 2
   static readonly MULTIPLE_DIRECTIONS = 16
   static readonly SKY_VIEW_WIDTH = 192
   static readonly SKY_VIEW_HEIGHT = 108
   static readonly STEPS = 40
-  static readonly MULTIPLE_STEPS = 20
+  static readonly MULTIPLE_STEPS = 12
   static readonly GROUND_ALBEDO = 0.3
 
   readonly supported: boolean
@@ -106,7 +116,7 @@ export class AtmosphereTables {
       magFilter: LinearFilter,
       depthBuffer: false
     })
-    this.multiple = new WebGLRenderTarget(AtmosphereTables.MULTIPLE_SIZE, AtmosphereTables.MULTIPLE_SIZE, {
+    this.multiple = new WebGLRenderTarget(AtmosphereTables.MULTIPLE_SIZE, AtmosphereTables.MULTIPLE_ROWS, {
       count: 4,
       type: FloatType,
       minFilter: NearestFilter,
@@ -171,7 +181,7 @@ export class AtmosphereTables {
 
   /** Whether both air-only tables are complete and the sky views can be drawn from them. */
   get ready(): boolean {
-    return this.supported && (this.adopted !== undefined || (this.transmittanceReady && this.multipleRows >= AtmosphereTables.MULTIPLE_SIZE))
+    return this.supported && (this.adopted !== undefined || (this.transmittanceReady && this.multipleRows >= AtmosphereTables.MULTIPLE_ROWS))
   }
 
   /** Changes the air. Only a real change starts the tables over. */
@@ -238,7 +248,7 @@ export class AtmosphereTables {
     // Blocks of a quarter of a row, not the whole table: a thousand directions from each of four
     // thousand texels in one draw is a stall a browser will kill the context for.
     const block = AtmosphereTables.MULTIPLE_BLOCK
-    for (; left > 0 && this.multipleRows < size; left--) {
+    for (; left > 0 && this.multipleRows < AtmosphereTables.MULTIPLE_ROWS; left--) {
       this.multiple.scissor.set(this.multipleColumn, this.multipleRows, block, 1)
       this.multiple.scissorTest = true
       this.draw(this.multipleMaterial, this.multiple)
@@ -288,7 +298,7 @@ export class AtmosphereTables {
     const transmittance = tables.transmittance.map(data =>
       texture(data, AtmosphereTables.TRANSMITTANCE_WIDTH, AtmosphereTables.TRANSMITTANCE_HEIGHT, true)
     )
-    const multiple = tables.multiple.map(data => texture(data, AtmosphereTables.MULTIPLE_SIZE, AtmosphereTables.MULTIPLE_SIZE, false))
+    const multiple = tables.multiple.map(data => texture(data, AtmosphereTables.MULTIPLE_SIZE, AtmosphereTables.MULTIPLE_ROWS, false))
     transmittance.forEach((value, index) => (this.tableUniforms[`uT${index}`].value = value))
     multiple.forEach((value, index) => (this.tableUniforms[`uM${index}`].value = value))
     this.adopted = [...transmittance, ...multiple]
@@ -455,7 +465,8 @@ export class AtmosphereTables {
     const int STEPS = ${AtmosphereTables.STEPS};
     const int MULTIPLE_STEPS = ${AtmosphereTables.MULTIPLE_STEPS};
     const vec2 T_SIZE = vec2(${AtmosphereTables.TRANSMITTANCE_WIDTH}.0, ${AtmosphereTables.TRANSMITTANCE_HEIGHT}.0);
-    const float M_SIZE = ${AtmosphereTables.MULTIPLE_SIZE}.0;
+    const vec2 M_SIZE = vec2(${AtmosphereTables.MULTIPLE_SIZE}.0, ${AtmosphereTables.MULTIPLE_ROWS}.0);
+    const float M_HEIGHT_POWER = ${AtmosphereTables.MULTIPLE_HEIGHT_POWER.toFixed(1)};
 
     uniform vec4 uRayleigh[4];
     uniform vec4 uAerosolScattering[4];
@@ -531,12 +542,12 @@ export class AtmosphereTables {
       #ifdef BUILDING_MULTIPLE
       for (int k = 0; k < 4; k++) m[k] = vec4(0.0);
       #else
-      vec2 uv = vec2((muSun + 1.0) * 0.5, (r - GROUND) / (TOP - GROUND));
-      vec2 size = vec2(M_SIZE);
-      m[0] = fetchBilinear(uM0, uv, size);
-      m[1] = fetchBilinear(uM1, uv, size);
-      m[2] = fetchBilinear(uM2, uv, size);
-      m[3] = fetchBilinear(uM3, uv, size);
+      float height = max(r - GROUND, 0.0) / (TOP - GROUND);
+      vec2 uv = vec2((muSun + 1.0) * 0.5, pow(height, 1.0 / M_HEIGHT_POWER));
+      m[0] = fetchBilinear(uM0, uv, M_SIZE);
+      m[1] = fetchBilinear(uM1, uv, M_SIZE);
+      m[2] = fetchBilinear(uM2, uv, M_SIZE);
+      m[3] = fetchBilinear(uM3, uv, M_SIZE);
       #endif
     }
 
@@ -644,8 +655,8 @@ export class AtmosphereTables {
     const int DIRECTIONS = ${AtmosphereTables.MULTIPLE_DIRECTIONS};
 
     void main() {
-      vec2 uv = gl_FragCoord.xy / vec2(M_SIZE);
-      float r = clamp(GROUND + uv.y * (TOP - GROUND), GROUND + 1.0, TOP - 1.0);
+      vec2 uv = gl_FragCoord.xy / M_SIZE;
+      float r = clamp(GROUND + pow(uv.y, M_HEIGHT_POWER) * (TOP - GROUND), GROUND + 1.0, TOP - 1.0);
       float muSun = uv.x * 2.0 - 1.0;
       vec3 origin = vec3(0.0, r, 0.0);
       vec3 sun = vec3(0.0, muSun, sqrt(max(1.0 - muSun * muSun, 0.0)));

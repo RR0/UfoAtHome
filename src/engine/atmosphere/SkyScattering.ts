@@ -11,6 +11,10 @@ export interface SkyScatteringOptions {
   readonly transmittanceWidth?: number
   readonly transmittanceHeight?: number
   readonly multipleSize?: number
+  /** Rows of the multiple-scattering table, when not as many as its columns. */
+  readonly multipleRows?: number
+  /** How the rows crowd toward the ground: height = span · v^power. 1 spaces them evenly. */
+  readonly multipleHeightPower?: number
   /** Directions per side of the sphere sampled around each point of the multiple-scattering table. */
   readonly multipleDirections?: number
   readonly steps?: number
@@ -48,6 +52,8 @@ export class SkyScattering {
   readonly transmittanceWidth: number
   readonly transmittanceHeight: number
   readonly multipleSize: number
+  readonly multipleRows: number
+  readonly multipleHeightPower: number
   private readonly multipleDirections: number
   private readonly steps: number
   private readonly multipleSteps: number
@@ -68,12 +74,14 @@ export class SkyScattering {
     this.transmittanceWidth = options.transmittanceWidth ?? 256
     this.transmittanceHeight = options.transmittanceHeight ?? 64
     this.multipleSize = options.multipleSize ?? 64
+    this.multipleRows = options.multipleRows ?? 16
+    this.multipleHeightPower = options.multipleHeightPower ?? 2
     this.multipleDirections = options.multipleDirections ?? 16
     this.steps = options.steps ?? 40
-    this.multipleSteps = options.multipleSteps ?? 20
+    this.multipleSteps = options.multipleSteps ?? 12
     this.groundAlbedo = options.groundAlbedo ?? 0.3
     this.transmittance = new Float64Array(this.transmittanceWidth * this.transmittanceHeight * this.count)
-    this.multiple = new Float64Array(this.multipleSize * this.multipleSize * this.count)
+    this.multiple = new Float64Array(this.multipleSize * this.multipleRows * this.count)
     this.buildTransmittance()
     // Zero asks for the transmittance alone, for a caller that does its own scattering.
     if (this.multipleSize > 0) this.buildMultiple()
@@ -187,9 +195,9 @@ export class SkyScattering {
   private buildMultiple(): void {
     const size = this.multipleSize
     const texel = new Float64Array(this.count)
-    for (let row = 0; row < size; row++) {
+    for (let row = 0; row < this.multipleRows; row++) {
       for (let column = 0; column < size; column++) {
-        this.multipleTexel(row, column, size, this.multipleDirections, texel)
+        this.multipleTexel(row, column, size, this.multipleDirections, texel, this.multipleRows, this.multipleHeightPower)
         this.multiple.set(texel, (row * size + column) * this.count)
       }
     }
@@ -200,11 +208,19 @@ export class SkyScattering {
    * rays — public so a table built elsewhere (the GPU's) can be checked a texel at a time without
    * building this one whole.
    */
-  multipleTexel(row: number, column: number, size: number, directions: number, out: Float64Array): void {
+  multipleTexel(
+    row: number,
+    column: number,
+    size: number,
+    directions: number,
+    out: Float64Array,
+    rows = size,
+    heightPower = 1
+  ): void {
     // Held a metre off the ground and a metre under the top, so no ray starts outside the shell.
     const radiusM = Math.min(
       Math.max(
-        AtmosphereProfile.GROUND_RADIUS_M + ((row + 0.5) / size) * (AtmosphereProfile.TOP_RADIUS_M - AtmosphereProfile.GROUND_RADIUS_M),
+        AtmosphereProfile.GROUND_RADIUS_M + ((row + 0.5) / rows) ** heightPower * (AtmosphereProfile.TOP_RADIUS_M - AtmosphereProfile.GROUND_RADIUS_M),
         AtmosphereProfile.GROUND_RADIUS_M + 1
       ),
       AtmosphereProfile.TOP_RADIUS_M - 1
@@ -242,8 +258,9 @@ export class SkyScattering {
 
   multipleAt(radiusM: number, muSun: number, out: Float64Array): void {
     const u = (muSun + 1) / 2
-    const v = (radiusM - AtmosphereProfile.GROUND_RADIUS_M) / (AtmosphereProfile.TOP_RADIUS_M - AtmosphereProfile.GROUND_RADIUS_M)
-    this.bilinear(this.multiple, this.multipleSize, this.multipleSize, u, v, out)
+    const height = Math.max(radiusM - AtmosphereProfile.GROUND_RADIUS_M, 0) / (AtmosphereProfile.TOP_RADIUS_M - AtmosphereProfile.GROUND_RADIUS_M)
+    const v = height ** (1 / this.multipleHeightPower)
+    this.bilinear(this.multiple, this.multipleSize, this.multipleRows, u, v, out)
   }
 
   // --- The view -----------------------------------------------------------------------------------

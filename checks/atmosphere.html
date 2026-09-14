@@ -88,8 +88,8 @@ try {
   const gpuMultiple = await Promise.all([0, 1, 2, 3].map(a => tables.readTable("multiple", a)))
   const texel = new Float64Array(15)
   result.multiple = []
-  for (const [row, column] of [[1, 40], [1, 31], [1, 28], [1, 25], [20, 30], [40, 20], [2, 50]]) {
-    cpu.multipleTexel(row, column, AtmosphereTables.MULTIPLE_SIZE, AtmosphereTables.MULTIPLE_DIRECTIONS, texel)
+  for (const [row, column] of [[1, 40], [1, 31], [1, 28], [1, 25], [8, 30], [14, 20], [2, 50]]) {
+    cpu.multipleTexel(row, column, AtmosphereTables.MULTIPLE_SIZE, AtmosphereTables.MULTIPLE_DIRECTIONS, texel, AtmosphereTables.MULTIPLE_ROWS, AtmosphereTables.MULTIPLE_HEIGHT_POWER)
     const base = (row * AtmosphereTables.MULTIPLE_SIZE + column) * 4
     const g550 = gpuMultiple[1][base + 3] // wavelength index 7 = attachment 1, channel 3
     const relative = Math.abs(g550 - texel[7]) / Math.max(texel[7], 1e-30)
