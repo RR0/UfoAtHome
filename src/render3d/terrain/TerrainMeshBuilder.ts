@@ -41,6 +41,9 @@ const TERRAIN_Y_OFFSET = 0.01
 export interface TerrainBuildResult {
   mesh: Mesh
   attribution: string
+  /** The ground's height above sea level at the patch's centre, which the patch itself subtracts out
+   * — undefined if the elevation source had nothing there. */
+  originElevationM?: number
 }
 
 function boundsAroundObserver(observerLat: number, observerLng: number, radiusM: number): GeoBounds {
@@ -180,7 +183,11 @@ export async function buildTerrainMesh(
   const mesh = new Mesh(geometry, material)
   mesh.receiveShadow = true
   mesh.castShadow = true
-  return { mesh, attribution: providers.imagery.attribution }
+  return {
+    mesh,
+    attribution: providers.imagery.attribution,
+    originElevationM: Number.isFinite(observerElevation) ? observerElevation : undefined
+  }
 }
 
 function clamp(value: number, min: number, max: number): number {

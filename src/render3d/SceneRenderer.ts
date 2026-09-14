@@ -855,6 +855,13 @@ export class SceneRenderer {
   /** The witness's own height above the ground, as last set by setObserverPose — the cloud deck is
    * the one thing that needs it beyond the camera itself (see cloudLayerOffset). */
   private observerElevationM = 0
+  /**
+   * The ground's own height above sea level where the witness stands, from the terrain patch's
+   * elevation source — zero until one has answered, or where there is no patch at all. The scene is
+   * drawn relative to the ground and never needed it; the scattered sky does, because the air above
+   * Socorro's 1 400 m mesa is a sixth thinner than the air above the sea.
+   */
+  private siteElevationM = 0
   /** Radius the ground disc was last built at — compared against groundRadiusFor on every pose so
    * a climb rebuilds it, and only a climb does. */
   private groundRadius = GROUND_RADIUS
@@ -1313,8 +1320,9 @@ export class SceneRenderer {
     this.terrainRadius = radiusM
     const token = ++this.terrainBuildToken
     buildTerrainMesh(lat, lng, this.terrainProviders, radiusM)
-      .then(({ mesh, attribution }) => {
+      .then(({ mesh, attribution, originElevationM }) => {
         if (token !== this.terrainBuildToken) return // superseded by a newer call while this was in flight
+        this.setSiteElevation(originElevationM ?? 0)
         // A patch reads zero at its own origin: it is built from real elevations with the witness's
         // own subtracted (see TerrainMeshBuilder). So a fresh patch would put the ground back at
         // zero under a witness who has spent a kilometre climbing, and the whole world with them.
@@ -1980,10 +1988,16 @@ export class SceneRenderer {
     }
   }
 
-  /** The scattered sky's view of this astronomy: the eye's height, the Sun and the Moon. */
+  private setSiteElevation(elevationM: number): void {
+    if (Math.abs(elevationM - this.siteElevationM) < 1) return
+    this.siteElevationM = elevationM
+    if (this.lastAstronomy) this.scatteredSky?.update(this.scatteredSkyState(this.lastAstronomy))
+  }
+
+  /** The scattered sky's view of this astronomy: the eye's height above sea level, the Sun and the Moon. */
   private scatteredSkyState(astronomy: SceneAstronomy) {
     return {
-      altitudeM: this.observerElevationM + 1.6,
+      altitudeM: this.siteElevationM + this.observerElevationM + 1.6,
       sun: { altitudeDeg: astronomy.sun.altitudeDeg, azimuthDeg: astronomy.sun.azimuthDeg, magnitude: astronomy.sun.magnitude },
       moon: {
         altitudeDeg: astronomy.moon.altitudeDeg,
