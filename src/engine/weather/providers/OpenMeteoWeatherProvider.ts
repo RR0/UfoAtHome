@@ -1,3 +1,4 @@
+import { HumidHaze } from "../../atmosphere/HumidHaze.js"
 import type { CloudLayer } from "../../model/CloudLayer.js"
 import type { PrecipitationType, Weather, WeatherSource } from "../../model/Weather.js"
 import type { WeatherObservation, WeatherPoint, WeatherProvider, WeatherQuery, WeatherSample } from "../WeatherProvider.js"
@@ -306,6 +307,8 @@ export class OpenMeteoWeatherProvider implements WeatherProvider {
       // Whichever of the two lower decks covers more sky: that is what stands between the witness
       // and the ice above, and it is the deck a halo has to be seen through.
       lowerCloudCover: Math.max(record.cloudCoverLow, record.cloudCoverMid),
+      // Two decimals: the haze it decides is built in steps far coarser than a hundredth.
+      relativeHumidity: Math.round(HumidHaze.relativeHumidity(record.temperatureC, record.dewPointC) * 100) / 100,
       precipitationType,
       precipitationIntensity:
         precipitationType === "none" ? 0 : this.clamp(Math.sqrt(record.precipitationMm / HEAVY_PRECIPITATION_MM), 0, 1),

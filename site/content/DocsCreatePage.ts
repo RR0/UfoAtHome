@@ -195,6 +195,7 @@ if (source && mount) {
       <tr><td><code>cloudCover</code>, <code>lowerCloudCover</code>, <code>highCloudCover</code></td><td>Fractions of sky (0–1): the total, the water decks alone, and the icy veil alone. Written by recordings made before there were layers, and still kept in step by the editor as a summary of them</td></tr>
       <tr><td><code>cloudBaseM</code>, <code>cloudDarkness</code></td><td>The same era's one base, in metres above the reference ground, and one shade (0 white, 1 very dark)</td></tr>
       <tr><td><code>iceCrystalAlignment</code></td><td>0–1, how steadily the ice crystals fell — what turns a bare ring into sundogs, arcs and a pillar. No record measures it; a cirrus layer carries its own</td></tr>
+      <tr><td><code>relativeHumidity</code></td><td>0–1, near the ground. It decides how milky the clear sky is: haze swells with water as the air nears saturation. A looked-up record carries it (from ERA5's temperature and dew point); absent means a typical haze</td></tr>
       <tr><td><code>precipitationType</code>, <code>precipitationIntensity</code></td><td>none/rain/snow/hail, and 0–1</td></tr>
       <tr><td><code>windDirectionDeg</code>, <code>windSpeed</code></td><td>The general wind: the bearing it blows TOWARD, clockwise from north, and metres per second. It is what carries the clouds — from time zero, so seeking and replaying give the same sky</td></tr>
       <tr><td><code>storm</code></td><td>Lightning and thunder, at the right delay</td></tr>
@@ -439,6 +440,7 @@ if (source && mount) {
       <tr><td><code>cloudCover</code>, <code>lowerCloudCover</code>, <code>highCloudCover</code></td><td>Fractions de ciel (0–1) : le total, les couches d'eau seules, le voile glacé seul. Écrits par les enregistrements d'avant les couches, et encore tenus à jour par l'éditeur comme résumé de celles-ci</td></tr>
       <tr><td><code>cloudBaseM</code>, <code>cloudDarkness</code></td><td>La base unique de la même époque, en mètres au-dessus du sol de référence, et une teinte unique (0 blanc, 1 très sombre)</td></tr>
       <tr><td><code>iceCrystalAlignment</code></td><td>0–1, la régularité de la chute des cristaux de glace — ce qui fait d'un anneau nu des parhélies, des arcs et un pilier. Aucun relevé ne le mesure ; une couche de cirrus porte le sien</td></tr>
+      <tr><td><code>relativeHumidity</code></td><td>0–1, près du sol. Elle décide de la blancheur du ciel clair : la brume gonfle d'eau à mesure que l'air approche de la saturation. Un relevé consulté la porte (tirée de la température et du point de rosée d'ERA5) ; absente, une brume ordinaire</td></tr>
       <tr><td><code>precipitationType</code>, <code>precipitationIntensity</code></td><td>none/rain/snow/hail, et 0–1</td></tr>
       <tr><td><code>windDirectionDeg</code>, <code>windSpeed</code></td><td>Le vent général : le cap VERS lequel il souffle, dans le sens horaire depuis le nord, et des mètres par seconde. C'est lui qui porte les nuages — depuis l'instant zéro, si bien qu'une recherche et une relecture donnent le même ciel</td></tr>
       <tr><td><code>storm</code></td><td>Éclairs et tonnerre, au bon retard</td></tr>

@@ -60,6 +60,12 @@ export interface Weather {
    * means nobody said, and DEFAULT_ICE_CRYSTAL_ALIGNMENT stands in.
    */
   iceCrystalAlignment?: number
+  /**
+   * Relative humidity near the ground, 0 to 1. What decides how milky the clear sky is: haze
+   * particles swell with water as the air nears saturation (see HumidHaze). Undefined means nobody
+   * stated it, and a typical haze stands in.
+   */
+  relativeHumidity?: number
   precipitationType: PrecipitationType
   /** 0-1; meaningless while precipitationType is "none". */
   precipitationIntensity: number

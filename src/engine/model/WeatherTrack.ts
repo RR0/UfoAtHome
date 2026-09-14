@@ -109,6 +109,8 @@ export function lerpWeather(a: Weather, b: Weather, t: number): Weather {
     // A deck really does lift or lower during an observation, so this blends like the other
     // continuous fields — undefined on either side means unstated, which has no midpoint.
     cloudBaseM: a.cloudBaseM === undefined || b.cloudBaseM === undefined ? undefined : lerpNumber(a.cloudBaseM, b.cloudBaseM, t),
+    relativeHumidity:
+      a.relativeHumidity === undefined || b.relativeHumidity === undefined ? undefined : lerpNumber(a.relativeHumidity, b.relativeHumidity, t),
     precipitationType: t < 1 ? a.precipitationType : b.precipitationType,
     precipitationIntensity: lerpNumber(a.precipitationIntensity, b.precipitationIntensity, t),
     windDirectionDeg: lerpAngleDeg(a.windDirectionDeg, b.windDirectionDeg, t),

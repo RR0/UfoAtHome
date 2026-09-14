@@ -43,6 +43,7 @@ export class ScatteredSky {
   private readonly onChange: () => void
   private state?: ScatteredSkyState
   private drawnKey = ""
+  private hasViews = false
   private adaptingLuminance = 1
   private ambientColours?: SkyAmbient
   private reading = false
@@ -156,8 +157,14 @@ export class ScatteredSky {
     return this.tables.supported
   }
 
+  /**
+   * Whether the dome can be drawn from scattered light: once sky views exist, and still while tables
+   * for different air are being built — the views drawn from the previous air stand until the new
+   * ones replace them, rather than the scene falling back to the gradient for a second every time the
+   * humidity crosses a step.
+   */
   get ready(): boolean {
-    return this.tables.ready && this.drawnKey !== ""
+    return this.hasViews
   }
 
   /** The colours the rest of the scene should take from this sky, once it has been read back. */
@@ -166,9 +173,9 @@ export class ScatteredSky {
   }
 
   setConditions(conditions: AtmosphereConditions): void {
-    const wasReady = this.tables.ready
     this.tables.setMedium(new AtmosphereProfile(conditions))
-    if (wasReady && !this.tables.ready) this.drawnKey = ""
+    // New air, new views as soon as its tables exist; the old views stay on the dome until then.
+    if (!this.tables.ready) this.drawnKey = ""
   }
 
   /** Builds at most `draws` more blocks of the tables; draws the views as soon as they exist. */
@@ -181,12 +188,15 @@ export class ScatteredSky {
   invalidate(): void {
     this.tables.invalidate()
     this.drawnKey = ""
+    this.hasViews = false
   }
 
   update(state: ScatteredSkyState): void {
     this.state = state
     if (this.tables.ready) this.draw(state)
-    else this.applyAdaptation(ScatteredSky.predictedZenithLuminance(state))
+    // Before any views, the photometry's zenith is the best guess at the eye's state; once there are
+    // views, the eye stays adapted to them until the new air's arrive.
+    else if (!this.hasViews) this.applyAdaptation(ScatteredSky.predictedZenithLuminance(state))
   }
 
   dispose(): void {
@@ -203,7 +213,8 @@ export class ScatteredSky {
     uniforms.uObserverRadius.value = AtmosphereProfile.GROUND_RADIUS_M + Math.max(state.altitudeM, 2)
     if (key !== this.drawnKey) {
       this.tables.renderSkyViews(state.altitudeM, state.sun.altitudeDeg, state.moon.altitudeDeg)
-      const first = this.drawnKey === ""
+      const first = !this.hasViews
+      this.hasViews = true
       this.drawnKey = key
       if (first && !this.ambientColours) this.adaptFromViews(this.tables.readSkyViewNow("sun"), this.tables.readSkyViewNow("moon"), state)
       // And the asynchronous read after it in every case: it is the one that cannot come back empty,

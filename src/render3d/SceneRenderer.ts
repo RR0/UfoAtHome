@@ -114,6 +114,7 @@ import type { ReferenceView } from "./ReferenceSystem.js"
 import type { SceneReference } from "../engine/model/Reference.js"
 import type { PhenomenonFrame, PlacedPhenomenon } from "./PhenomenonSystem.js"
 import { ScatteredSky } from "./ScatteredSky.js"
+import { HumidHaze } from "../engine/atmosphere/HumidHaze.js"
 
 /** Plain field-by-field comparison — see setWeather's own doc comment on why reference equality
  * stopped being enough once weather started being resolved fresh every tick from a keyframe
@@ -130,6 +131,7 @@ function weatherEquals(a: Weather, b: Weather): boolean {
     a.highCloudCover === b.highCloudCover &&
     a.iceCrystalAlignment === b.iceCrystalAlignment &&
     a.lowerCloudCover === b.lowerCloudCover &&
+    a.relativeHumidity === b.relativeHumidity &&
     a.precipitationType === b.precipitationType &&
     a.precipitationIntensity === b.precipitationIntensity &&
     a.windDirectionDeg === b.windDirectionDeg &&
@@ -1470,6 +1472,11 @@ export class SceneRenderer {
     this.cloudTransmissionMemo.clear()
     if (weatherEquals(this.weather, weather)) return
     this.weather = weather
+    this.scatteredSky?.setConditions({
+      aerosolOpticalDepth:
+        weather.relativeHumidity === undefined ? undefined : HumidHaze.steppedOpticalDepth(weather.relativeHumidity)
+    })
+    this.pumpScatteredSky()
     this.buildClouds()
     this.buildCirrus()
     this.buildPrecipitation()
