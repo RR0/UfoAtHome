@@ -2173,8 +2173,9 @@ export class SceneRenderer {
    * LimitingMagnitude.gainFor). Stored rather than acted on: the sky is restated on the very next
    * setAstronomy tick, which is where every threshold in it is decided.
    */
-  setInstrumentGain(gain: number): void {
+  setInstrumentGain(gain: number, recordsOnMedium = false): void {
     this.instrumentMagnitudeGain = Number.isFinite(gain) ? gain : 0
+    this.scatteredSky?.setInstrument(recordsOnMedium, this.instrumentMagnitudeGain)
   }
 
   /**

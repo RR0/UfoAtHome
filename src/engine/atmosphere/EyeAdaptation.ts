@@ -102,8 +102,12 @@ export class EyeAdaptation {
    * A colour on the screen, linear, for light of tristimulus `xyz` (cd/m²) and scotopic luminance
    * `scotopic`, seen by an eye adapted to `adaptingLuminance`.
    */
-  static displayOf(xyz: readonly [number, number, number], scotopic: number, adaptingLuminance: number): DisplayRgb {
-    const rods = EyeAdaptation.rodShare(adaptingLuminance)
+  static displayOf(
+    xyz: readonly [number, number, number],
+    scotopic: number,
+    adaptingLuminance: number,
+    rods = EyeAdaptation.rodShare(adaptingLuminance)
+  ): DisplayRgb {
     const luminance = (1 - rods) * xyz[1] + rods * scotopic
     const response = EyeAdaptation.response(luminance, adaptingLuminance)
     const [r, g, b] = VisibleSpectrum.linearSrgbOf(xyz)

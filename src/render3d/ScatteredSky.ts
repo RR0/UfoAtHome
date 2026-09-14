@@ -47,6 +47,10 @@ export class ScatteredSky {
   private adaptingLuminance = 1
   private ambientColours?: SkyAmbient
   private reading = false
+  /** How much more light the instrument gathers than an eye, as a factor (see setInstrument). */
+  private exposureScale = 1
+  /** Whether what is shown was seen by an eye — rods, Purkinje — or recorded by a camera. */
+  private seenByEye = true
   private readAgain = false
 
   constructor(renderer: WebGLRenderer, onChange: () => void) {
@@ -66,7 +70,8 @@ export class ScatteredSky {
         uObserverRadius: { value: AtmosphereProfile.GROUND_RADIUS_M + 2 },
         uAirglow: { value: new Vector4(...ScatteredSky.airglowXyzs()) },
         uRodShare: { value: 0 },
-        uSemiSaturationN: { value: 1 }
+        uSemiSaturationN: { value: 1 },
+        uExposureScale: { value: 1 }
       },
       vertexShader: `
         varying vec3 vDirection;
@@ -90,6 +95,7 @@ export class ScatteredSky {
         uniform vec4 uAirglow;
         uniform float uRodShare;
         uniform float uSemiSaturationN;
+        uniform float uExposureScale;
         const float PI = 3.141592653589793;
         const float GROUND = ${AtmosphereProfile.GROUND_RADIUS_M.toFixed(1)};
         const float AIRGLOW_RATIO = ${(AtmosphereProfile.GROUND_RADIUS_M / (AtmosphereProfile.GROUND_RADIUS_M + ScatteredSky.AIRGLOW_LAYER_ALTITUDE_M)).toFixed(6)};
@@ -146,6 +152,7 @@ export class ScatteredSky {
             float airMass = inversesqrt(max(1.0 - 0.96 * sinZenith2, 1e-3));
             light += uAirglow * vanRhijn * pow(10.0, -0.4 * EXTINCTION * (airMass - 1.0));
           }
+          light *= uExposureScale;
           gl_FragColor = vec4(displayOf(light.xyz, light.w), 1.0);
           #include <colorspace_fragment>
         }
@@ -170,6 +177,23 @@ export class ScatteredSky {
   /** The colours the rest of the scene should take from this sky, once it has been read back. */
   get ambient(): SkyAmbient | undefined {
     return this.ready ? this.ambientColours : undefined
+  }
+
+  /**
+   * What the sky is shown through. An EYE (`recordsOnMedium` false) sees it as EyeAdaptation says,
+   * rods and all. A CAMERA has no rods and keeps the colours an eye loses in the dark — a long
+   * exposure of a moonlit sky really is blue — and gathers `gainMagnitudes` more than an eye
+   * (LimitingMagnitude.gainFor): that light enters the same response, as if the sky were that much
+   * brighter. Automatic exposure is not modelled apart from the response's own partial adaptation.
+   */
+  setInstrument(recordsOnMedium: boolean, gainMagnitudes: number): void {
+    const scale = recordsOnMedium ? 10 ** (0.4 * gainMagnitudes) : 1
+    if (scale === this.exposureScale && this.seenByEye === !recordsOnMedium) return
+    this.exposureScale = scale
+    this.seenByEye = !recordsOnMedium
+    this.material.uniforms.uExposureScale.value = scale
+    this.applyAdaptation(this.adaptingLuminance)
+    this.onChange()
   }
 
   setConditions(conditions: AtmosphereConditions): void {
@@ -268,8 +292,10 @@ export class ScatteredSky {
     }
     this.applyAdaptation(Math.exp(logSum / weightSum))
     const displayAt = (altitudeDeg: number, azimuthDeg: number) => {
+      const scale = this.exposureScale
       const [x, y, z, s] = lightAt(altitudeDeg, azimuthDeg)
-      return EyeAdaptation.displayOf([x, y, z], s, this.adaptingLuminance)
+      const adapted = this.adaptingLuminance * scale
+      return EyeAdaptation.displayOf([x * scale, y * scale, z * scale], s * scale, adapted, this.seenByEye ? EyeAdaptation.rodShare(adapted) : 0)
     }
     const horizon: DisplayRgb = [0, 0, 0]
     for (let azimuth = 0; azimuth < 360; azimuth += 20) {
@@ -280,10 +306,12 @@ export class ScatteredSky {
     this.onChange()
   }
 
+  /** `adaptingLuminance` is the sky's own; what the eye or the film adapts to is that times the exposure. */
   private applyAdaptation(adaptingLuminance: number): void {
     this.adaptingLuminance = adaptingLuminance
-    this.material.uniforms.uRodShare.value = EyeAdaptation.rodShare(adaptingLuminance)
-    this.material.uniforms.uSemiSaturationN.value = EyeAdaptation.semiSaturation(adaptingLuminance) ** EyeAdaptation.RESPONSE_EXPONENT
+    const adapted = adaptingLuminance * this.exposureScale
+    this.material.uniforms.uRodShare.value = this.seenByEye ? EyeAdaptation.rodShare(adapted) : 0
+    this.material.uniforms.uSemiSaturationN.value = EyeAdaptation.semiSaturation(adapted) ** EyeAdaptation.RESPONSE_EXPONENT
   }
 
   /** Before anything has been read back: the zenith as the photometry has it, in cd/m². */

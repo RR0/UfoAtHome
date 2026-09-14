@@ -995,7 +995,10 @@ export class SceneElement extends HTMLElement {
         fNumber: pose?.fNumber,
         fieldOfViewDeg: SightingShapes.fovOf(sighting, t),
         exposureSeconds: sighting.exposure
-      })
+      }),
+      // A film or a sensor — anything with a grain — records the sky; an eye sees it (see
+      // ScatteredSky.setInstrument).
+      sighting.instrument.detailUm !== undefined
     )
     // What the witness's own legs are doing to their eye between two recorded positions — nothing
     // for a witness who stood still, which is most of them, and a couple of centimetres of rise and
