@@ -3850,9 +3850,11 @@ export class SightingEditorElement extends HTMLElement {
     if (!time) {
       return false
     }
-    const complete = time.year !== undefined && time.month !== undefined && time.day !== undefined &&
+    // Seconds too: a datetime-local holds them once its step is a second (see pickerValueOf). Refusing
+    // them sent any recording timed to the second — Chiles-Whitted, once its start was stated as
+    // 02:45:03 — to the bare EDTF text field, with the picker and its qualifier gone.
+    return time.year !== undefined && time.month !== undefined && time.day !== undefined &&
       time.hour !== undefined && time.minute !== undefined
-    return complete && (time.second === undefined || time.second === 0)
   }
 
   /** The value a datetime-local takes for a stated time — "" for anything it cannot hold. */
@@ -3861,7 +3863,14 @@ export class SightingEditorElement extends HTMLElement {
       return ""
     }
     const pad = (n: number, width = 2): string => String(n).padStart(width, "0")
-    return `${pad(time!.year!, 4)}-${pad(time!.month!)}-${pad(time!.day!)}T${pad(time!.hour!)}:${pad(time!.minute!)}`
+    const seconds = time!.second ? `:${pad(time!.second)}` : ""
+    return `${pad(time!.year!, 4)}-${pad(time!.month!)}-${pad(time!.day!)}T${pad(time!.hour!)}:${pad(time!.minute!)}${seconds}`
+  }
+
+  /** A picker steps by the minute unless the time it shows states a second: then by the second, or
+   * the browser would call the value out of step and the picker would show nothing. */
+  private static stepFor(time: SightingTime | undefined): string {
+    return time?.second ? "1" : "60"
   }
 
   /**
@@ -3881,7 +3890,8 @@ export class SightingEditorElement extends HTMLElement {
     if (picker.value === "" && picker.validity.badInput) {
       return
     }
-    text.value = picker.value === "" ? "" : `${picker.value}${qualifier.value}`
+    // A picker stepped to the second may report "02:45:30.000", which EDTF does not take.
+    text.value = picker.value === "" ? "" : `${picker.value.replace(/\.\d+$/, "")}${qualifier.value}`
     apply()
   }
 
@@ -3922,6 +3932,7 @@ export class SightingEditorElement extends HTMLElement {
   private syncObservationTimeFields(): void {
     const time = this.ufoElement.sighting.event.time
     this.obsTimeInput.value = time ? formatEdtfTime(time) : ""
+    this.obsTimeNativeInput.step = SightingEditorElement.stepFor(time)
     this.obsTimeNativeInput.value = this.pickerValueOf(time)
     this.obsTimeQualifier.value = this.qualifierOf(this.obsTimeInput.value)
     this.obsTimeInput.setCustomValidity("")
@@ -3933,6 +3944,7 @@ export class SightingEditorElement extends HTMLElement {
   private syncObservationEndTimeFields(): void {
     const endTime = this.ufoElement.sighting.event.endTime
     this.obsEndTimeInput.value = endTime ? formatEdtfTime(endTime) : ""
+    this.obsEndTimeNativeInput.step = SightingEditorElement.stepFor(endTime)
     this.obsEndTimeNativeInput.value = this.pickerValueOf(endTime)
     this.obsEndTimeQualifier.value = this.qualifierOf(this.obsEndTimeInput.value)
     this.obsEndTimeInput.setCustomValidity("")

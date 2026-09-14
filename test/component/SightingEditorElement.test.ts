@@ -5172,11 +5172,18 @@ describe("SightingEditorElement date picker", () => {
     expect(control<HTMLInputElement>(element, "obs-time-native").value).toBe("")
   })
 
-  // The picker is stepped to the minute, so it would drop a stated second on the first edit.
-  it("opens on the text field for a time stated to the second, which the minute-stepped picker would drop", () => {
+  // A time stated to the second keeps the picker, stepped to the second so the second survives: sent
+  // to the text field instead, Chiles-Whitted lost its picker and its qualifier.
+  it("opens on the picker for a time stated to the second, and keeps the second", () => {
     const element = mount()
     element.sightingData = { version: 1, time: { year: 1948, month: 7, day: 24, hour: 2, minute: 45, second: 30 }, timeline: { keyframes: [] }, durationSeconds: 10 }
-    expect(edtfMode(element)).toBe(true)
+    expect(edtfMode(element)).toBe(false)
+    const picker = control<HTMLInputElement>(element, "obs-time-native")
+    expect(picker.step).toBe("1")
+    // "02:45:30" or "02:45:30.000", as the browser pleases.
+    expect(picker.value).toMatch(/^1948-07-24T02:45:30(\.0+)?$/)
+    picker.dispatchEvent(new Event("change", { bubbles: true }))
+    expect(element.sightingData.time).toMatchObject({ hour: 2, minute: 45, second: 30 })
   })
 
   // A mode is a way of saying something, not a statement.
