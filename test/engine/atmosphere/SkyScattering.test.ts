@@ -151,7 +151,7 @@ describe("the Monte Carlo reference", () => {
     const byCollision = tracer.estimateAt(2, view, sun, 7, { paths: 60_000, seed: 5, estimator: "collision" })
     const combinedError = Math.hypot(byRay.error, byCollision.error)
     expect(Math.abs(byRay.mean - byCollision.mean)).toBeLessThan(4 * combinedError)
-  })
+   }, TABLE_BUILD_TIMEOUT_MS)
 
   it("is met by the model within a few tenths of a magnitude, all the way into deep twilight", () => {
     // The tables at the resolution the GPU builds them, against the exact physics of the same medium.

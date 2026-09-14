@@ -48,25 +48,29 @@ export class AtmosphereProfile {
   /**
    * Sunlight above the atmosphere, in W·m⁻²·nm⁻¹, at those wavelengths.
    *
-   * Approximate twenty-nanometre averages of the standard extraterrestrial spectrum (ASTM E-490),
-   * to about five per cent: the Fraunhofer lines are averaged away, which is right for a sky and
-   * wrong for a spectrograph. What keeps them honest is the one number they add up to — the
-   * illuminance of the Sun at the top of the atmosphere, 128 to 133 thousand lux — which a test
-   * checks without it ever being written here.
+   * Twenty-nanometre averages of the standard extraterrestrial spectrum, ASTM E 490-00a (reapproved
+   * 2006), table 3, integrated over each band from the table's own points. The Fraunhofer lines are
+   * averaged away, which is right for a sky and wrong for a spectrograph. The first version of this
+   * table was written from memory and was within 3.2 % of these everywhere; the one number they add
+   * up to — the Sun's illuminance above the atmosphere, 128 to 133 thousand lux — is checked by a
+   * test without ever being written here.
    */
   static readonly SOLAR_IRRADIANCE: readonly number[] = [
-    1.72, 1.64, 2.03, 2.05, 1.97, 1.93, 1.9, 1.86, 1.83, 1.77, 1.72, 1.66, 1.58, 1.53, 1.47
+    1.707, 1.676, 1.982, 2.02, 1.941, 1.87, 1.879, 1.856, 1.839, 1.799, 1.728, 1.668, 1.57, 1.532, 1.452
   ]
 
   /**
    * Ozone's absorption cross-section at those wavelengths, in units of 10⁻²¹ cm² per molecule.
    *
-   * The Chappuis band at room temperature (Serdyuchenko et al. 2014), approximate to about ten per
-   * cent: a broad hump that peaks near 600 nm and has all but gone by 420. Its shape is what
-   * matters — where it takes light out — and its size follows from the ozone column.
+   * The Chappuis band, a broad hump that peaks near 600 nm and has all but gone by 420: twenty-
+   * nanometre averages of the Serdyuchenko-Gorshelev cross-sections (Gorshelev et al. 2014,
+   * Serdyuchenko et al. 2014; Zenodo 5793207), at 223 K, the temperature of the stratosphere where
+   * the ozone is — the band barely depends on it, 3 % at most across 193 to 293 K. The first version
+   * of this table was written from memory and was up to 30 % too strong between 460 and 500 nm and
+   * 15 % too strong at 630: exactly the blue-green and orange a twilight zenith is made of.
    */
   static readonly OZONE_CROSS_SECTION: readonly number[] = [
-    0.01, 0.07, 0.25, 0.58, 1.1, 1.6, 2.6, 3.2, 4.5, 4.8, 5.1, 4.0, 2.8, 1.8, 1.1
+    0.021, 0.069, 0.19, 0.418, 0.827, 1.531, 2.439, 3.291, 4.468, 4.55, 4.663, 3.477, 2.447, 1.658, 1.071
   ]
 
   /** How fast air thins with height: an e-fold every eight kilometres. */

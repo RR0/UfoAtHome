@@ -51,9 +51,17 @@ and checked against a Monte Carlo trace of the same medium
 - **Rayleigh scattering by air** — Bodhaine, B. A. et al. (1999), "On Rayleigh optical depth
   calculations", *J. Atmos. Oceanic Technol.* 16, 1854.
 - **Aerosol phase function** — Cornette, W. M. & Shanks, J. G. (1992), *Applied Optics* 31, 3152.
-- **Ozone absorption** — the Chappuis band after Serdyuchenko, A. et al. (2014), *Atmos. Meas. Tech.*
-  7, 625; why it makes a twilight zenith blue, Hulburt, E. O. (1953), *JOSA* 43, 113.
-- **Solar spectrum** — twenty-nanometre averages of the ASTM E-490 extraterrestrial spectrum.
+- **Ozone absorption** — twenty-nanometre averages at 223 K of the Serdyuchenko-Gorshelev
+  cross-sections: Gorshelev, V. et al. (2014), *Atmos. Meas. Tech.* 7, 609, and Serdyuchenko, A. et
+  al. (2014), *Atmos. Meas. Tech.* 7, 625, data from IUP Bremen (Zenodo, doi:10.5281/zenodo.5793206).
+  Why it makes a twilight zenith blue: Hulburt, E. O. (1953), *JOSA* 43, 113.
+- **Solar spectrum** — twenty-nanometre averages of ASTM E 490-00a (reapproved 2006), table 3.
+- **Humid haze** — hygroscopic growth after Kasten, F. (1969), *Tellus* 21, 631, and Hänel, G.
+  (1976), *Advances in Geophysics* 19, 73; relative humidity by the Magnus form of Alduchov, O. A. &
+  Eskridge, R. E. (1996), *J. Appl. Meteor.* 35, 601.
+- **Seeing in the dark** — the Purkinje blend of Krawczyk, G., Myszkowski, K. & Seidel, H.-P. (2005),
+  and the night blue of Thompson, W. B., Shirley, P. & Ferwerda, J. A. (2002), both conventions for
+  showing scotopic vision on a screen rather than measurements.
 - **Colour** — the CIE 1931 colour-matching functions (multi-lobe fit) and the CIE 1951 scotopic
   luminous efficiency (Gaussian fit).
 - **Galactic frame** — the IAU definition of the north galactic pole and the galactic centre.
