@@ -109,11 +109,13 @@ const float SLICE = 0.2787;
 // the threshold adds to it, then the billows erode the mass again, so the plane's own quantile
 // (mean 0.567, spread 0.21) still covered 66% at 55%. Measured instead as the fraction of three
 // thousand directions the CPU twin leaves less than half transparent, at seven thresholds: half
-// the sky at 0.645, a logistic scale of 0.23 (0.5513 being sqrt(3)/pi) — a tenth of the sky at
+// the sky at 0.645 (0.564 since), a logistic scale of 0.23 (0.2516 since) (0.5513 being sqrt(3)/pi) — a tenth of the sky at
 // 12%, three tenths at 30%, three quarters at 80%. With 1 - coverage, 55% had covered 78%.
+// Refitted the same way once heaped clouds narrowed towards their tops (see dome in densityAt),
+// which took a tenth of the sky back: at the old fit 30, 55 and 80% covered 21, 39 and 67%.
 float coverageThreshold(float coverage) {
   float c = clamp(coverage, 0.001, 0.999);
-  return 0.645 - 0.23 * 0.5513 * log(c / (1.0 - c));
+  return 0.564 - 0.2516 * 0.5513 * log(c / (1.0 - c));
 }
 // How far a point is from an ellipsoid's centre in units of its semi-axes: 1 on its surface.
 float ellipsoidRadius(vec3 p, float alt, vec3 center, vec3 size, float rotation) {
@@ -186,7 +188,12 @@ float densityAt(vec3 p) {
     carve *= smoothstep(0.85, 1.15, ellipsoidRadius(p, alt, holeCenter[i], holeSize[i], holeRotation[i]) + (billow - 0.5) * 0.18);
   }
   if (carve < 0.001) return 0.0;
-  float mask = smoothstep(threshold - 0.10, threshold + 0.10, weather);
+  // A heaped cloud narrows as it rises: the threshold climbs with height, so the flat base is the
+  // widest slice and each mass rounds into a dome whose flanks the billows break. With one weather
+  // slice for every height and nothing else, each cloud was that slice extruded, walls as straight
+  // as a column's. Layered types (flatness) keep their straight sides.
+  float dome = (1.0 - flatness) * 0.3 * h * h;
+  float mask = smoothstep(threshold - 0.10 + dome, threshold + 0.10 + dome, weather + (billow - 0.5) * 0.12 * h);
   mask = mix(mask, 1.0, smoothstep(0.92, 1.0, coverage));
   mask = mix(mask, max(coverage, core), distant);
   if (mask < 0.001) return 0.0;
@@ -227,8 +234,23 @@ void main() {
         lightDepth += densityAt(p + sunDir * ((float(j) + 0.5) * lightStep)) * lightStep;
       }
       float sunTransmission = exp(-lightDepth * 0.006);
-      float forward = pow(max(0.0, dot(dir, sunDir)), 8.0);
-      vec3 lit = ambientColor * 0.65 + sunColor * (0.22 + sunTransmission * (0.55 + forward * 0.2));
+      // Cloud droplets throw most of what they scatter forward: two Henyey-Greenstein lobes (g 0.6
+      // forward, -0.3 back, 7:3), relative to an even scattering. Seen against the Sun, a cloud's
+      // thin sunward edges shine (a silver lining) while its core, which the light must cross,
+      // stays dark; the former pow(cos, 8) term gave that edge a fifth of the light, and nothing
+      // on the sunward side stood out.
+      float cosSun = dot(dir, sunDir);
+      float phase = mix(0.64 / pow(1.36 - 1.2 * cosSun, 1.5), 0.91 / pow(1.09 + 0.6 * cosSun, 1.5), 0.3);
+      // Whether the Sun is above this sample's own horizon, which dips with its height: sunColor is
+      // not scaled by the Sun's altitude (see LayeredCloudSystem.sunVisibility, its CPU twin), so a
+      // cloud keeps its sunset light a little after the ground has lost it, and loses it at night.
+      vec3 up = normalize(vec3(p.x, R + eyeM + p.y, p.z));
+      float dip = sqrt(2.0 * max(0.0, altitude(p)) / R);
+      float sunUp = smoothstep(-dip - 0.0147, -dip + 0.0052, dot(sunDir, up));
+      // The sky's own light on a cloud is a fraction of the Sun's: at 0.65 of the horizon's colour
+      // plus 0.22 of the Sun in every sample, the shaded side already reached three quarters of the
+      // lit one, and a low Sun's reddened cloud saturated to one flat cream from any side.
+      vec3 lit = ambientColor * 0.35 + sunColor * sunUp * (0.12 + sunTransmission * 0.8 * (0.5 + 0.5 * phase));
       lit = mix(hazeColor, lit, exp(-length(p) / 55000.0));
       lit *= mix(1.0, 0.32, darkness);
       float opacity = 1.0 - exp(-d * ds * 0.006);
@@ -333,7 +355,7 @@ export class VolumetricCloudLayer {
   /** The shader's own coverageThreshold. */
   static thresholdFor(coverage: number): number {
     const c = Math.min(0.999, Math.max(0.001, coverage))
-    return 0.645 - 0.23 * (Math.sqrt(3) / Math.PI) * Math.log(c / (1 - c))
+    return 0.564 - 0.2516 * (Math.sqrt(3) / Math.PI) * Math.log(c / (1 - c))
   }
 
   /** CPU twin of densityAt, for celestial light transmission (not colour/shadow shading). */
@@ -396,7 +418,8 @@ export class VolumetricCloudLayer {
       carve *= smooth(0.85, 1.15, ellipsoidRadius(u.holeCenter.value[i], u.holeSize.value[i], u.holeRotation.value[i]) + (billow - 0.5) * 0.18)
     }
     if (carve < 0.001) return 0
-    let mask = smooth(threshold - 0.1, threshold + 0.1, weather)
+    const dome = (1 - u.flatness.value) * 0.3 * h * h
+    let mask = smooth(threshold - 0.1 + dome, threshold + 0.1 + dome, weather + (billow - 0.5) * 0.12 * h)
     mask = mix(mask, 1, smooth(0.92, 1, u.coverage.value))
     mask = mix(mask, Math.max(u.coverage.value, core), distant)
     if (mask < 0.001) return 0

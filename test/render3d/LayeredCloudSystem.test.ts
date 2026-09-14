@@ -24,3 +24,17 @@ describe("LayeredCloudSystem.deckOrder", () => {
     expect(LayeredCloudSystem.deckOrder(true, 0, 3)).toBeLessThan(LayeredCloudSystem.deckOrder(true, 2, 3))
   })
 })
+
+describe("LayeredCloudSystem.sunVisibility", () => {
+  it("gives a cloud the whole Sun however low it stands, not the sine of its altitude", () => {
+    expect(LayeredCloudSystem.sunVisibility(2, 1500)).toBe(1)
+    expect(LayeredCloudSystem.sunVisibility(0.5, 0)).toBe(1)
+  })
+
+  it("keeps a high cloud lit after the Sun has set for the ground, and none at night", () => {
+    // From 1500 m the horizon dips 1.24°: a Sun a degree under still lights the cloud.
+    expect(LayeredCloudSystem.sunVisibility(-1, 0)).toBe(0)
+    expect(LayeredCloudSystem.sunVisibility(-1, 1500)).toBeGreaterThan(0.5)
+    expect(LayeredCloudSystem.sunVisibility(-23, 3000)).toBe(0)
+  })
+})

@@ -6,7 +6,7 @@ import type { CloudPick } from "./CloudManipulation.js"
 import type { Weather } from "../engine/model/Weather.js"
 import { buildCloudGeometry, buildCloudMaterial, CloudField } from "./CloudSystem.js"
 import type { CloudUniforms } from "./CloudSystem.js"
-import { cloudSeed, createCloudNoise, VolumetricCloudLayer } from "./VolumetricClouds.js"
+import { CLOUD_EARTH_RADIUS_M, cloudSeed, createCloudNoise, VolumetricCloudLayer } from "./VolumetricClouds.js"
 import { RainbowEffect } from "./RainbowEffect.js"
 
 export type CloudRendering = "surface" | "volume"
@@ -108,11 +108,32 @@ export class LayeredCloudSystem {
     }
   }
 
+  /**
+   * How much of the Sun a cloud `heightM` above the ground sees, from 0 (set for it) to 1.
+   *
+   * NOT the sine of the Sun's altitude: that is how much light a horizontal ground takes, and a
+   * cloud's side faces the Sun whatever its height. Scaled by it, a setting Sun lit Valensole's
+   * clouds with 3% of its light, and they were one flat brown on the side facing it as on the other.
+   * What really takes a low Sun away from a cloud is the Earth's own curve: from its height the
+   * horizon dips (a degree at a kilometre), so a cloud keeps its sunset glow after the ground has
+   * lost it. The fade spans the disc (0.27°) and the horizon refraction (0.57°).
+   */
+  static sunVisibility(sunAltitudeDeg: number, heightM: number): number {
+    const dipDeg = Math.acos(CLOUD_EARTH_RADIUS_M / (CLOUD_EARTH_RADIUS_M + Math.max(0, heightM))) * 180 / Math.PI
+    const t = Math.min(1, Math.max(0, (sunAltitudeDeg + dipDeg + 0.84) / 1.14))
+    return t * t * (3 - 2 * t)
+  }
+
+  /** `sunlight` is the Sun's colour on a surface facing it, NOT scaled by its altitude: each deck
+   * takes from it what its own height sees (see sunVisibility). */
   setLighting(direction: Vector3, sunlight: Color, ambient: Color, haze: Color): void {
+    const sunAltitudeDeg = Math.asin(Math.max(-1, Math.min(1, direction.y / Math.max(1e-9, direction.length())))) * 180 / Math.PI
     for (const deck of this.decks.values()) {
       const uniforms = deck.volume?.uniforms ?? deck.uniforms!
       uniforms.sunDir.value.copy(direction)
+      // A volume gates each of its samples by its own height (see VolumetricClouds); a surface by its base.
       uniforms.sunColor.value.copy(sunlight)
+      if (!deck.volume) uniforms.sunColor.value.multiplyScalar(LayeredCloudSystem.sunVisibility(sunAltitudeDeg, deck.layer.baseM))
       uniforms.ambientColor.value.copy(ambient)
       deck.volume?.uniforms.hazeColor.value.copy(haze)
     }

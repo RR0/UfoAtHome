@@ -4293,8 +4293,10 @@ export class SceneRenderer {
     // A flash lights the deck from inside and below, evenly: an ambient term, not a direction.
     const flash = this.lightningLevel * LIGHTNING_CLOUD_GAIN
     const ambient = new Color(groundColor[0] + LIGHTNING_COLOR.r * flash, groundColor[1] + LIGHTNING_COLOR.g * flash, groundColor[2] + LIGHTNING_COLOR.b * flash)
+    // The layered decks are not scaled by it: a cloud's side faces the Sun, and only the Earth's curve
+    // takes a low Sun from it (see LayeredCloudSystem.sunVisibility).
     this.layeredClouds?.setLighting(new Vector3(x, y, z),
-      new Color(tint[0] * daylight, 0.96 * tint[1] * daylight, 0.88 * tint[2] * daylight),
+      new Color(tint[0], 0.96 * tint[1], 0.88 * tint[2]),
       ambient, ambient)
     for (const deck of decks) {
       deck.sunDir.value.set(x, y, z)
