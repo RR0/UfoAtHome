@@ -144,6 +144,8 @@ const SKY_RADIUS = 900
 /** The layer the decor's solid parts are ALSO on, so that they alone can be drawn into the depth
  * the phenomena are tested against — see renderPhenomenaPass. */
 const DECOR_DEPTH_LAYER = 1
+/** The Sun's dazzle alone, for drawing it onto a picture resampled from the cube — see renderDazzleOnResample. */
+const DAZZLE_LAYER = 4
 /** See decorDistancesAt — filters out a spurious near-camera self-intersection with decor
  * geometry built close to the observer, well inside the camera's own near plane. */
 const UFO_OCCLUSION_MIN_DISTANCE_M = 0.5
@@ -2493,10 +2495,11 @@ export class SceneRenderer {
       () => this.updateLensFlarePosition(),
       camera => this.renderOverlayPasses(camera),
       // A flare is a picture of the Sun laid on ONE frame; on six faces it would be laid six times,
-      // at six wrong places. A field this wide goes without it.
+      // at six wrong places. It is kept off the faces and laid on the resampled picture instead.
       cube => {
         if (this.lensFlare) this.lensFlare.mesh.visible = cube ? false : this.sunVisible
-      }
+      },
+      () => this.renderDazzleOnResample()
     )
     if (target) this.renderer.setRenderTarget(previousTarget)
   }
@@ -2931,6 +2934,40 @@ export class SceneRenderer {
     // EquidistantProjectionPass), and this runs from inside that widened pass. Reading the
     // recording's field here instead put the dazzle's angles out by half.
     flare.uniforms.uTanHalfFov.value = Math.tan((this.camera.fov * Math.PI) / 360)
+  }
+
+  /**
+   * The Sun's dazzle on a picture drawn through the cube: placed where the equidistant picture puts
+   * the Sun, its angles read equidistantly, drawn alone into the resampled target.
+   *
+   * Not optional decoration. The dazzle IS the Sun a reader sees — the disc under it is a true-scale
+   * half degree — and leaving it off the faces, as the cube's first version did, took the Sun out of
+   * the middle of its own halo.
+   */
+  private renderDazzleOnResample(): void {
+    const flare = this.lensFlare
+    if (!flare || !this.sunVisible) return
+    const unhidden = this.sunVisibleFraction()
+    if (unhidden <= 0) return
+    this.sunUnhiddenFraction = unhidden
+    this.applyDazzleStrength()
+    const point = this.screenPointOf(this.lensFlareScratch.copy(this.sunWorldPosition).sub(this.camera.position).normalize())
+    if (!point) return
+    const size = this.renderer.getDrawingBufferSize(this.screenPointSize)
+    flare.uniforms.uLensPosition.value.set(point.ndcX, point.ndcY)
+    flare.uniforms.uResolution.value.set(size.x, size.y)
+    flare.uniforms.uEquidistant.value = 1
+    flare.uniforms.uHalfFovRad.value = (this.camera.fov * Math.PI) / 360
+    const autoClear = this.renderer.autoClear
+    this.renderer.autoClear = false
+    flare.mesh.visible = true
+    flare.mesh.layers.enable(DAZZLE_LAYER)
+    this.camera.layers.set(DAZZLE_LAYER)
+    this.renderer.render(this.scene, this.camera)
+    this.camera.layers.set(0)
+    flare.mesh.visible = false
+    flare.uniforms.uEquidistant.value = 0
+    this.renderer.autoClear = autoClear
   }
 
   /** True when the ground/terrain/decor sits between the camera and the Sun's real world

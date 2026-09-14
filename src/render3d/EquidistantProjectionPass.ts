@@ -226,12 +226,13 @@ export class EquidistantProjectionPass {
     fovDeg: number,
     onCameraWidened?: () => void,
     afterScene?: (camera: PerspectiveCamera) => void,
-    beforeCube?: (cube: boolean) => void
+    beforeCube?: (cube: boolean) => void,
+    afterResample?: () => void
   ): void {
     const aspect = this.width / this.height
     if (!EquidistantProjectionPass.supports(fovDeg, aspect)) {
       beforeCube?.(true)
-      this.renderThroughCube(renderer, scene, camera, fovDeg, afterScene)
+      this.renderThroughCube(renderer, scene, camera, fovDeg, afterScene, afterResample)
       beforeCube?.(false)
       return
     }
@@ -273,7 +274,8 @@ export class EquidistantProjectionPass {
     scene: Scene,
     camera: PerspectiveCamera,
     fovDeg: number,
-    afterScene?: (camera: PerspectiveCamera) => void
+    afterScene?: (camera: PerspectiveCamera) => void,
+    afterResample?: () => void
   ): void {
     const fovRad = (fovDeg * Math.PI) / 180
     const face = Math.min(
@@ -321,12 +323,52 @@ export class EquidistantProjectionPass {
     const uniforms = this.cubeMaterial.uniforms
     uniforms.uHalfFovRad.value = fovRad / 2
     uniforms.uAspect.value = this.width / this.height
-    uniforms.uEncodeOutput.value = this.material.uniforms.uEncodeOutput.value
     uniforms.uCameraRotation.value.setFromMatrix4(camera.matrixWorld)
     const quad = this.quadScene.children[0] as Mesh
+    // Resampled into the linear target first, not onto the canvas: what belongs on the FINISHED
+    // picture rather than in the scene — the Sun's own dazzle, a screen-wide quad that cannot be drawn
+    // on six faces — is added there, as light, and the picture then encoded once.
+    uniforms.uEncodeOutput.value = 0
+    renderer.setRenderTarget(this.target)
     quad.material = this.cubeMaterial
     renderer.render(this.quadScene, this.quadCamera as Camera)
+    afterResample?.()
+    renderer.setRenderTarget(originalTarget)
+    const copy = this.copyMaterial()
+    copy.uniforms.uEncodeOutput.value = this.material.uniforms.uEncodeOutput.value
+    quad.material = copy
+    renderer.render(this.quadScene, this.quadCamera as Camera)
     quad.material = this.material
+  }
+
+  private copy?: ShaderMaterial
+
+  /** Copies the target to wherever is being drawn, encoding it for the canvas if it is the canvas. */
+  private copyMaterial(): ShaderMaterial {
+    this.copy ??= new ShaderMaterial({
+      uniforms: { uSource: { value: this.target.texture }, uEncodeOutput: { value: 1 } },
+      vertexShader: `
+        varying vec2 vUv;
+        void main() {
+          vUv = position.xy * 0.5 + 0.5;
+          gl_Position = vec4(position.xy, 0.0, 1.0);
+        }
+      `,
+      fragmentShader: `
+        precision highp float;
+        ${SRGB_ENCODE_GLSL}
+        uniform sampler2D uSource;
+        uniform float uEncodeOutput;
+        varying vec2 vUv;
+        void main() {
+          vec3 colour = texture2D(uSource, vUv).rgb;
+          gl_FragColor = vec4(uEncodeOutput > 0.5 ? encodeSrgb(colour) : colour, 1.0);
+        }
+      `,
+      depthTest: false,
+      depthWrite: false
+    })
+    return this.copy
   }
 
   private readonly forwardScratch = new Vector3()
@@ -416,6 +458,7 @@ export class EquidistantProjectionPass {
     this.material.dispose()
     this.cubeTarget?.dispose()
     this.cubeMaterial?.dispose()
+    this.copy?.dispose()
     this.quadScene.clear()
   }
 }

@@ -39,6 +39,11 @@ export interface LensFlareUniforms {
    * point of the frame back into the direction it looks along, and so a screen distance into the
    * real angle veiling glare is a function of. */
   uTanHalfFov: { value: number }
+  /** 1 when the frame drawn into is the EQUIDISTANT one (a field too wide for a pinhole, drawn through
+   * the cube — see EquidistantProjectionPass), where a point of the frame is a direction by angle and
+   * uHalfFovRad is its scale; 0 for the rectilinear frame, read through uTanHalfFov. */
+  uEquidistant: { value: number }
+  uHalfFovRad: { value: number }
   /** The source's own angular radius, degrees: inside its disc there is no angle to divide by. */
   uSourceRadiusDeg: { value: number }
   /** The SQUARE of the angle, in degrees, at which the veil reaches full white — so the blazing
@@ -89,6 +94,8 @@ uniform vec2 uResolution;
 uniform vec3 uColorGain;
 uniform float uStarPoints;
 uniform float uTanHalfFov;
+uniform float uEquidistant;
+uniform float uHalfFovRad;
 uniform float uSourceRadiusDeg;
 uniform float uVeilStrength;
 uniform vec3 uDazzleColour;
@@ -191,6 +198,12 @@ vec3 drawflare(vec2 p, float intensity, float rnd, float speed, int id)
 vec3 lookAt(vec2 p)
 {
     float aspect = uResolution.x / max(uResolution.y, 1.0);
+    if (uEquidistant > 0.5) {
+        vec2 angle = vec2(2.0 * p.x * aspect, 2.0 * p.y * aspect) * uHalfFovRad;
+        float theta = length(angle);
+        if (theta < 1e-6) return vec3(0.0, 0.0, -1.0);
+        return vec3(angle / theta * sin(theta), -cos(theta));
+    }
     return normalize(vec3(2.0 * p.x * uTanHalfFov * aspect, 2.0 * p.y * aspect * uTanHalfFov, -1.0));
 }
 
@@ -570,6 +583,8 @@ export function buildLensFlare(): LensFlareSystem {
     // SceneRenderer.setInstrument sets the real count for anything that does have a lens.
     uStarPoints: { value: 0 },
     uTanHalfFov: { value: Math.tan(Math.PI / 6) },
+    uEquidistant: { value: 0 },
+    uHalfFovRad: { value: Math.PI / 6 },
     uSourceRadiusDeg: { value: 0.265 },
     uVeilStrength: { value: 0 },
     uDazzleColour: { value: new Color(1, 1, 1) },
