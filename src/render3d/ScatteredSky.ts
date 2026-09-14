@@ -206,7 +206,9 @@ export class ScatteredSky {
       const first = this.drawnKey === ""
       this.drawnKey = key
       if (first && !this.ambientColours) this.adaptFromViews(this.tables.readSkyViewNow("sun"), this.tables.readSkyViewNow("moon"), state)
-      else void this.readBack()
+      // And the asynchronous read after it in every case: it is the one that cannot come back empty,
+      // and it is cheap to have the first frame's adaptation confirmed a frame later.
+      void this.readBack()
     }
     this.onChange()
   }

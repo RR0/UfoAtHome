@@ -40,17 +40,18 @@ export class EyeAdaptation {
   static readonly DAYLIGHT_ANCHOR_RESPONSE = 0.42
 
   /**
-   * The second: a natural moonless zenith, 22 magnitudes per square arcsecond, is shown at 0.01 —
-   * where the colour table left the night.
+   * The second: a natural moonless zenith, 22 magnitudes per square arcsecond, is shown at 0.006 —
+   * a little darker than the colour table left the night (0.01), which under a 91 % Moon still read as
+   * a light blue sky to the reader who judged it.
    *
    * The first version anchored the day alone and chose m = 0.7 for the rest, and a reader looking at
    * Chiles-Whitted under a 91 % Moon asked why the night was light grey: measured on the screen, every
    * night sky came out two to four times brighter than before. With both ends pinned, m is whatever
-   * joins them (0.65), and every sky in between — a moonlit one included — falls where the physics
+   * joins them (0.61), and every sky in between — a moonlit one included — falls where the physics
    * puts it relative to those two.
    */
   static readonly NIGHT_ANCHOR_CD_M2 = 1.72e-4
-  static readonly NIGHT_ANCHOR_RESPONSE = 0.01
+  static readonly NIGHT_ANCHOR_RESPONSE = 0.006
 
   /** σ at an anchor adapted to itself: R = 1 / (1 + (σ/Y)^n), so σ = Y·(1/R − 1)^(1/n). */
   private static anchoredSemiSaturation(luminance: number, response: number): number {
@@ -68,13 +69,13 @@ export class EyeAdaptation {
   static readonly ROD_HALF_LUMINANCE_CD_M2 = 0.04
 
   /**
-   * The colour scotopic vision is shown in: chromaticity (0.25, 0.25), the night blue Thompson,
-   * Shirley and Ferwerda (2002) used for it, as linear sRGB of unit luminance. A convention for what
-   * reads as night on a screen, not a measurement — rods see no colour at all. Krawczyk's own tint was
-   * tried first and, once its luminance was divided out, was so nearly neutral that moonlit skies came
-   * out grey.
+   * The colour scotopic vision is shown in, as linear sRGB of unit luminance: halfway between white and
+   * the night blue (chromaticity 0.25, 0.25) Thompson, Shirley and Ferwerda (2002) used for it. A
+   * convention for what reads as night on a screen, not a measurement — rods see no colour at all.
+   * Krawczyk's own tint was tried first and, once its luminance was divided out, was so nearly neutral
+   * that moonlit skies came out grey; Thompson's full blue then made every night "very blue".
    */
-  static readonly SCOTOPIC_TINT: DisplayRgb = [0.706, 0.99, 1.966]
+  static readonly SCOTOPIC_TINT: DisplayRgb = [0.853, 0.995, 1.483]
 
   /** The K of σ = K·La^m, from the daylight anchor once m is known. */
   static get SEMI_SATURATION_SCALE(): number {

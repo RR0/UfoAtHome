@@ -10,7 +10,7 @@ describe("an eye adapted to the sky it looks at", () => {
   it("shows a clear day's zenith and a moonless night's where the colour table put them", () => {
     expect(selfAdapted(EyeAdaptation.DAYLIGHT_ANCHOR_CD_M2)).toBeCloseTo(EyeAdaptation.DAYLIGHT_ANCHOR_RESPONSE, 6)
     expect(selfAdapted(EyeAdaptation.NIGHT_ANCHOR_CD_M2)).toBeCloseTo(EyeAdaptation.NIGHT_ANCHOR_RESPONSE, 6)
-    expect(EyeAdaptation.ADAPTATION_EXPONENT).toBeGreaterThan(0.6)
+    expect(EyeAdaptation.ADAPTATION_EXPONENT).toBeGreaterThan(0.55)
     expect(EyeAdaptation.ADAPTATION_EXPONENT).toBeLessThan(0.7)
   })
 
@@ -45,7 +45,7 @@ describe("an eye adapted to the sky it looks at", () => {
     const [nightR, , nightB] = EyeAdaptation.displayOf(blueSky, 0.6, 1e-3)
     expect(dayB / dayR).toBeGreaterThan(3)
     // Night blue: plainly blue, and not the saturated blue of a day sky.
-    expect(nightB / nightR).toBeGreaterThan(2)
+    expect(nightB / nightR).toBeGreaterThan(1.4)
     expect(nightB / nightR).toBeLessThan(dayB / dayR)
   })
 })
