@@ -71,6 +71,41 @@ export class ContextPage implements SitePage {
       painted as a texture — which is why they move correctly with the season, the hour and the
       observer's latitude instead of merely being in the right place once.</p>
 
+    <h2 id="light">The light of the sky</h2>
+    <p>The sky itself is not a colour gradient. Sunlight and moonlight are traced through a
+      spherical atmosphere at fifteen wavelengths across what an eye sees, the way light really
+      reaches a witness: scattered once by the air on its way, then again and again, dimmed by
+      what stands in front of it. Three things make up that air. The molecules of the air itself,
+      which scatter blue far more than red and make the sky blue. The haze, which whitens the
+      horizon and puts a bright aureole around the Sun, and which is thicker on a humid day than a
+      dry one: its amount follows the relative humidity of the weather record. And the ozone
+      layer, which absorbs a little orange, invisible at noon and the whole reason a twilight
+      zenith is deep blue rather than a greyish yellow.</p>
+    <p>Everything a clear sky does then follows without being painted: the reddening and the
+      brighter band along the horizon at sunset, the Earth's shadow rising opposite the Sun with
+      the pink band above it, the slow darkening of twilight toward the east first, the deeper
+      blue seen from an aircraft, the thinner air above a high site, and the moonlit sky, which is
+      the same scattering of a far fainter source. The airglow of the upper atmosphere stays as the
+      floor of every moonless night, brighter near the horizon where a line of sight crosses more
+      of its layer.</p>
+    <p>The model is checked rather than trusted. A slow Monte Carlo trace of the same atmosphere,
+      with no approximation but noise, puts the sky the scene draws within a quarter of a magnitude
+      and a hundredth in colour from a hazy noon to a Sun sixteen degrees down, from the ground and
+      from an aircraft. One place is known to be too dark, by two thirds of a magnitude: the Earth's
+      shadow low in the sky during nautical twilight. And the zenith meets the twilight photometry
+      measured at the Paranal observatory to within half a magnitude, without ever having been
+      fitted to it.</p>
+    <p>What reaches the screen is what an eye adapted to that sky makes of it: a night sky is not
+      ten million times darker than a day sky to a witness standing in it, and colour gives way to
+      a dim blue-grey as the rods take over from the cones. A camera does none of this, so a
+      recording made through one keeps the blue a long exposure really shows. How bright a day and a
+      moonless night are shown are the two choices in that chain, and they are stated as choices.</p>
+    <p>What it does not do: no light pollution, no volcanic haze, no refraction of the Sun below the
+      horizon, and the clouds are drawn on their own rather than dimming the light of the sky around
+      them. How much haze a given town put in the air is unknowable from a record of 1948; only how
+      much the humidity swelled it is modelled. The sources, and the choices behind each of them, are
+      listed under <a href="/docs/sources/#air">the air</a>.</p>
+
     <h2 id="space">What else was up there</h2>
     <p>Each of these is a candidate explanation, so each must answer the same question before it is
       drawn: could it have been visible <em>from there, then</em>?</p>
@@ -208,6 +243,43 @@ export class ContextPage implements SitePage {
     <p>La Voie lactée et la lumière zodiacale sont intégrées le long de la ligne de visée plutôt que
       plaquées en texture — c'est pourquoi elles bougent correctement avec la saison, l'heure et la
       latitude de l'observateur, au lieu d'être au bon endroit une fois pour toutes.</p>
+
+    <h2 id="light">La lumière du ciel</h2>
+    <p>Le ciel lui-même n'est pas un dégradé de couleurs. La lumière du Soleil et de la Lune est
+      suivie à travers une atmosphère sphérique, à quinze longueurs d'onde couvrant ce que voit un
+      œil, comme elle atteint réellement un témoin : diffusée une fois par l'air en chemin, puis
+      encore et encore, atténuée par ce qui se trouve devant. Trois choses composent cet air. Les
+      molécules de l'air lui-même, qui diffusent bien plus le bleu que le rouge et font le ciel
+      bleu. La brume, qui blanchit l'horizon et met une auréole claire autour du Soleil, et qui est
+      plus épaisse par temps humide que par temps sec : sa quantité suit l'humidité relative du
+      relevé météo. Et la couche d'ozone, qui absorbe un peu d'orange, invisible à midi et seule
+      raison pour laquelle un zénith crépusculaire est d'un bleu profond plutôt que d'un jaune
+      grisâtre.</p>
+    <p>Tout ce que fait un ciel clair en découle sans être peint : le rougeoiement et la bande plus
+      claire le long de l'horizon au coucher, l'ombre de la Terre qui monte à l'opposé du Soleil
+      avec la bande rose au-dessus, le crépuscule qui s'assombrit d'abord à l'est, le bleu plus
+      profond vu d'avion, l'air plus mince au-dessus d'un site en altitude, et le ciel de clair de
+      lune, qui est la même diffusion d'une source bien plus faible. La lueur propre de la haute
+      atmosphère reste le plancher de toute nuit sans Lune, plus claire près de l'horizon, là où
+      une ligne de visée traverse davantage de sa couche.</p>
+    <p>Le modèle est vérifié plutôt que cru. Un lent calcul de Monte Carlo de la même atmosphère,
+      sans autre approximation que le bruit, place le ciel dessiné par la scène à un quart de
+      magnitude et un centième de couleur près, d'un midi brumeux à un Soleil seize degrés sous
+      l'horizon, depuis le sol comme depuis un avion. Un endroit est connu pour être trop sombre,
+      de deux tiers de magnitude : l'ombre de la Terre, bas dans le ciel, pendant le crépuscule
+      nautique. Et le zénith rejoint à une demi-magnitude près la photométrie du crépuscule mesurée
+      à l'observatoire de Paranal, sans jamais avoir été ajusté dessus.</p>
+    <p>Ce qui arrive à l'écran est ce qu'en fait un œil adapté à ce ciel : pour un témoin qui s'y
+      tient, un ciel nocturne n'est pas dix millions de fois plus sombre qu'un ciel de jour, et la
+      couleur cède la place à un gris-bleu sombre à mesure que les bâtonnets prennent le relais des
+      cônes. Un appareil photo ne fait rien de tout cela : un enregistrement fait à travers lui garde
+      le bleu que montre vraiment une pose longue. La luminosité donnée à un jour et à une nuit sans
+      Lune sont les deux choix de cette chaîne, et ils sont dits comme tels.</p>
+    <p>Ce qu'il ne fait pas : pas de pollution lumineuse, pas de brume volcanique, pas de réfraction
+      du Soleil sous l'horizon, et les nuages sont dessinés à part au lieu d'assombrir la lumière du
+      ciel autour d'eux. La quantité de brume qu'une ville mettait dans l'air ne peut pas se lire dans
+      un relevé de 1948 ; seul son gonflement par l'humidité est modélisé. Les sources, et les choix
+      faits pour chacune, sont listés sous <a href="/docs/sources/#air">l'air</a>.</p>
 
     <h2 id="space">Ce qu'il y avait d'autre là-haut</h2>
     <p>Chacun de ces éléments est une explication candidate, donc chacun doit répondre à la même

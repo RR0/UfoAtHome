@@ -1,0 +1,149 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Atmosphere tables check</title></head>
+<!--
+  The scattered sky's GPU tables, checked on a real graphics card against what the tests cannot run:
+  the transmittance and multiple-scattering tables texel by texel against SkyScattering (the CPU
+  reference), the sky views against the Monte Carlo reference skies
+  (test/engine/atmosphere/sky-reference.json), and the GPU cost of building them.
+
+  Served by the dev server (npm run dev) at /checks/atmosphere.html; results in window.__atmosphereCheck.
+  From a terminal: node scripts/checks/atmosphere-gpu.mjs (headed Chromium: headless draws on the CPU).
+  Run it after any change to AtmosphereProfile, SkyScattering or AtmosphereTables.
+-->
+<body>
+<canvas id="c" width="64" height="64"></canvas>
+<pre id="out">running…</pre>
+<script type="module">
+import { WebGLRenderer } from "three"
+import { AtmosphereTables } from "/src/render3d/AtmosphereTables.ts"
+import { AtmosphereProfile } from "/src/engine/atmosphere/AtmosphereProfile.ts"
+import { SkyScattering } from "/src/engine/atmosphere/SkyScattering.ts"
+
+const out = document.getElementById("out")
+const log = line => { out.textContent += "\n" + line }
+const renderer = new WebGLRenderer({ canvas: document.getElementById("c") })
+const tables = new AtmosphereTables(renderer)
+const result = { supported: tables.supported }
+window.__atmosphereCheck = result
+
+async function build(conditions) {
+  const profile = new AtmosphereProfile(conditions)
+  tables.setMedium(profile)
+  const started = performance.now()
+  let frames = 0
+  const drawTimes = []
+  while (!tables.ready) {
+    await new Promise(resolve => requestAnimationFrame(resolve))
+    const t0 = performance.now()
+    tables.advance(64)
+    renderer.getContext().finish()
+    if (renderer.getContext().isContextLost()) throw new Error("context lost")
+    drawTimes.push(performance.now() - t0)
+    frames++
+  }
+  return { profile, ms: performance.now() - started, frames, worstFrameMs: Math.max(...drawTimes) }
+}
+
+function bilinear(buffer, width, height, u, v) {
+  const x = Math.min(Math.max(u * width - 0.5, 0), width - 1)
+  const y = Math.min(Math.max(v * height - 0.5, 0), height - 1)
+  const x0 = Math.floor(x), y0 = Math.floor(y)
+  const x1 = Math.min(x0 + 1, width - 1), y1 = Math.min(y0 + 1, height - 1)
+  const fx = x - x0, fy = y - y0
+  const at = (row, col, c) => buffer[(row * width + col) * 4 + c]
+  return [0, 1, 2, 3].map(c => (at(y0, x0, c) * (1 - fx) + at(y0, x1, c) * fx) * (1 - fy) + (at(y1, x0, c) * (1 - fx) + at(y1, x1, c) * fx) * fy)
+}
+
+try {
+  if (!tables.supported) throw new Error("float render targets unsupported")
+  const built = await build({ aerosolOpticalDepth: 0.05 })
+  result.build = { ms: Math.round(built.ms), frames: built.frames, worstFrameMs: Math.round(built.worstFrameMs) }
+  log(`tables built in ${result.build.ms} ms over ${built.frames} frames, worst frame ${result.build.worstFrameMs} ms`)
+
+  // Transmittance, every texel, every wavelength.
+  const cpu = new SkyScattering(built.profile, { multipleSize: 0 })
+  let worstT = 0
+  for (let attachment = 0; attachment < 4; attachment++) {
+    const gpu = await tables.readTable("transmittance", attachment)
+    for (let texel = 0; texel < AtmosphereTables.TRANSMITTANCE_WIDTH * AtmosphereTables.TRANSMITTANCE_HEIGHT; texel++) {
+      for (let c = 0; c < 4; c++) {
+        const w = attachment * 4 + c
+        if (w >= 15) continue
+        const reference = Math.exp(-cpu.transmittance[texel * 15 + w])
+        const measured = Math.exp(-gpu[texel * 4 + c])
+        const relative = Math.abs(measured - reference) / reference
+        if (c === 0 && attachment === 0 && relative > 0.01 && reference > 1e-4) (result.badTexels ??= []).push([Math.floor(texel / 256), texel % 256, +cpu.transmittance[texel * 15].toFixed(3), gpu[texel * 4]])
+        if (reference > 1e-4 && relative > worstT) {
+          worstT = relative
+          result.worstTransmittanceTexel = { row: Math.floor(texel / 256), column: texel % 256, w, cpuDepth: cpu.transmittance[texel * 15 + w], gpuDepth: gpu[texel * 4 + c] }
+        }
+      }
+    }
+  }
+  result.transmittanceWorstRelative = worstT
+  log(`transmittance worst relative error ${worstT.toExponential(2)}`)
+
+  // Multiple scattering, sampled texels.
+  const gpuMultiple = await Promise.all([0, 1, 2, 3].map(a => tables.readTable("multiple", a)))
+  const texel = new Float64Array(15)
+  result.multiple = []
+  for (const [row, column] of [[1, 40], [1, 31], [1, 28], [1, 25], [20, 30], [40, 20], [2, 50]]) {
+    cpu.multipleTexel(row, column, AtmosphereTables.MULTIPLE_SIZE, AtmosphereTables.MULTIPLE_DIRECTIONS, texel)
+    const base = (row * AtmosphereTables.MULTIPLE_SIZE + column) * 4
+    const g550 = gpuMultiple[1][base + 3] // wavelength index 7 = attachment 1, channel 3
+    const relative = Math.abs(g550 - texel[7]) / Math.max(texel[7], 1e-30)
+    result.multiple.push({ row, column, cpu: texel[7], gpu: g550, relative })
+    log(`multiple [${row},${column}] cpu ${texel[7].toExponential(3)} gpu ${g550.toExponential(3)} rel ${relative.toExponential(2)}`)
+  }
+
+  // Sky views against the Monte Carlo reference.
+  const reference = await (await fetch("/test/engine/atmosphere/sky-reference.json", { cache: "reload" })).json()
+  result.skyView = []
+  let current = JSON.stringify({ aerosolOpticalDepth: 0.05 })
+  for (const skyCase of reference.cases) {
+    if (JSON.stringify(skyCase.conditions) !== current) {
+      await build(skyCase.conditions)
+      current = JSON.stringify(skyCase.conditions)
+    }
+    tables.renderSkyViews(skyCase.altitudeM, skyCase.sunAltitudeDeg, -90)
+    const view = await tables.readSkyView("sun")
+    const zenithAngle = ((90 - skyCase.view.altitudeDeg) * Math.PI) / 180
+    const { u, v } = AtmosphereTables.skyViewUv(skyCase.altitudeM, zenithAngle, (skyCase.view.azimuthDeg * Math.PI) / 180)
+    const [x, y, z] = bilinear(view, AtmosphereTables.SKY_VIEW_WIDTH, AtmosphereTables.SKY_VIEW_HEIGHT, u, v)
+    const deltaMag = 2.5 * Math.log10(y / skyCase.luminanceCdM2)
+    const dx = x / (x + y + z) - skyCase.chromaticity[0]
+    const dy = y / (x + y + z) - skyCase.chromaticity[1]
+    result.skyView.push({ name: skyCase.name, deltaMag, dx, dy, mcError: skyCase.relativeError[7] })
+    log(`${skyCase.name}: Δmag ${deltaMag.toFixed(2)}  Δx ${dx.toFixed(3)} Δy ${dy.toFixed(3)}  (MC ±${(skyCase.relativeError[7] * 100).toFixed(1)}%)`)
+  }
+  // GPU cost, each draw forced to finish before the clock stops.
+  {
+    const gl = renderer.getContext()
+    const pixel = new Float32Array(4)
+    const sync = () => { renderer.readRenderTargetPixels(tables["multiple"], 0, 0, 1, 1, pixel); renderer.readRenderTargetPixels(tables["sunView"], 0, 0, 1, 1, pixel) }
+    const time = action => { sync(); const t0 = performance.now(); action(); sync(); return performance.now() - t0 }
+    const profile2 = new AtmosphereProfile({ aerosolOpticalDepth: 0.2 })
+    tables.setMedium(profile2)
+    const blocks = []
+    blocks.push(time(() => tables.advance(1))) // transmittance + first block
+    for (let i = 0; i < 12; i++) blocks.push(time(() => tables.advance(1)))
+    let total = blocks.reduce((a, b) => a + b, 0)
+    let count = blocks.length
+    while (!tables.ready) { total += time(() => tables.advance(1)); count++ }
+    const views = []
+    for (let i = 0; i < 10; i++) views.push(time(() => tables.renderSkyViews(2, -6 - i * 0.1, 30)))
+    result.cost = { firstDrawMs: blocks[0], blockMs: blocks.slice(1).sort((a, b) => a - b)[6], draws: count, totalBuildMs: total, skyViewsMs: views.sort((a, b) => a - b)[5] }
+    log("cost " + JSON.stringify(result.cost))
+    tables.setMedium(built.profile)
+    while (!tables.ready) { tables.advance(256); await new Promise(resolve => setTimeout(resolve, 50)) }
+  }
+
+  result.done = true
+} catch (error) {
+  result.error = String(error?.stack ?? error)
+  log("ERROR " + result.error)
+}
+</script>
+</body>
+</html>

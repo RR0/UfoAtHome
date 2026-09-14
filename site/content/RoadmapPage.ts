@@ -40,23 +40,9 @@ export class RoadmapPage implements SitePage {
 
 <section class="band">
   <div class="wrap prose-wide">
-    <h2>Already there</h2>
-    <p>Everything below is shipped and in production. It is here because a roadmap that only lists
-      what is missing gives no sense of what the missing things are being added to.</p>
-    <div class="table-scroll">
-    <table>
-      <tr><th>Area</th><th>What it covers</th></tr>
-      <tr><td>Testimony</td><td>Shape, movement, colour, transparency, halo, brilliance, blur, sound — keyframed; angular size only, with real distances derived as inequalities from what the object crossed</td></tr>
-      <tr><td>The sky</td><td>Sun, Moon and phase, planets, stars to magnitude 7.5 — and to 9, on demand, for optics that reach that far — a limiting magnitude that follows both the twilight and the instrument, the Milky Way and the zodiacal light as line-of-sight integrals</td></tr>
-      <tr><td>Sky candidates</td><td>Meteor showers with a sporadic background, 23 naked-eye comet apparitions, 33 novae and supernovae from 1006 to 2021 on their recorded light curves, the satellite illumination window with the dated SATCAT count, and since February 2021 the real passes, propagated from archived orbital elements, Starlink trains included</td></tr>
-      <tr><td>Atmospheric optics</td><td>22° and 46° haloes, sundogs, tangent, circumzenithal and circumhorizontal arcs, the parhelic circle, pillars — all from ice's refractive index; rainbows and moonbows ray-traced in a spherical drop</td></tr>
-      <tr><td>Weather</td><td>ERA5 lookup keyframed along the observation; multiple metre-based cloud layers and manipulable individual volumes, moving with layer wind to the horizon and attenuating celestial bodies and phenomena; rain, snow, hail and storms with thunder</td></tr>
-      <tr><td>The ground</td><td>Real relief and aerial imagery, buildings, trees, streetlights, vehicles, windows and other witnesses, with moving tracks and regulated flashing lights</td></tr>
-      <tr><td>The instrument</td><td>Eye vs rectilinear lens, sensor and focal length in millimetres, letterboxed frame, aperture, focus distance, roll, a long exposure that accumulates star trails and dots a flashing lamp, and how faint a light the device could record at all — from 4.2 through a box camera to 9.7 on a tripod at f/2</td></tr>
-      <tr><td>Provenance</td><td>Place, weather, elevation, imagery and time zone all read from named, swappable sources, with the exact query kept in the file</td></tr>
-      <tr><td>Pictures of the place</td><td>Photographs and panoramas laid over the scene at any opacity, lined up by dragging or on named landmarks with a residual per landmark, the fitted heading adoptable as the witness's own pose with its provenance, street-level pictures fetched from Panoramax already lined up</td></tr>
-    </table>
-    </div>
+    <p>What the tool already reconstructs, and how each part of it is computed and checked, is on
+      <a href="/context/">the context page</a>; every source behind it is listed under
+      <a href="/docs/sources/">sources and choices</a>.</p>
   </div>
 </section>
 
@@ -81,14 +67,6 @@ export class RoadmapPage implements SitePage {
         that is what this is waiting on.</p>
     </div>
 
-    <div class="timeline-step">
-      <h3>A real atmospheric scattering model <span class="status status-later">planned</span></h3>
-      <p>The sky dome is still a gradient between colour stops — the least physical piece of the
-        whole scene, and what stands between this and a genuinely correct twilight. Half the work is
-        already done: the night-sky brightness model written for the Milky Way and the zodiacal light
-        (airglow floor, directional twilight excess, the Moon's own contribution, in nanolamberts)
-        is the same quantity, from the other end.</p>
-    </div>
 
     <div class="timeline-step">
       <h3>Weather balloons <span class="status status-later">considered</span></h3>
@@ -174,23 +152,9 @@ export class RoadmapPage implements SitePage {
 
 <section class="band">
   <div class="wrap prose-wide">
-    <h2>Déjà là</h2>
-    <p>Tout ce qui suit est livré et en production. C'est ici parce qu'un plan qui n'énumère que ce
-      qui manque ne dit rien de ce à quoi cela s'ajoute.</p>
-    <div class="table-scroll">
-    <table>
-      <tr><th>Domaine</th><th>Ce que cela couvre</th></tr>
-      <tr><td>Témoignage</td><td>Forme, mouvement, couleur, transparence, halo, éclat, flou, son — keyframés ; taille angulaire seule, les distances réelles étant déduites en inégalités de ce que l'objet a croisé</td></tr>
-      <tr><td>Le ciel</td><td>Soleil, Lune et sa phase, planètes, étoiles jusqu'à la magnitude 7,5 — et jusqu'à 9, à la demande, pour les optiques qui vont jusque-là — une magnitude limite qui suit à la fois le crépuscule et l'instrument, Voie lactée et lumière zodiacale en intégrales le long de la ligne de visée</td></tr>
-      <tr><td>Candidats du ciel</td><td>Pluies de météores avec fond sporadique, 23 apparitions de comètes visibles à l'œil nu, 33 novae et supernovae de 1006 à 2021 sur leurs courbes de lumière relevées, fenêtre d'éclairement des satellites avec le compte SATCAT daté, et depuis février 2021 les vrais passages, propagés depuis des éléments orbitaux archivés, trains de Starlink compris</td></tr>
-      <tr><td>Optique atmosphérique</td><td>Halos à 22° et 46°, parhélies, arcs tangent, circumzénithal et circumhorizontal, cercle parhélique, piliers — tous issus de l'indice de la glace ; arcs-en-ciel et arcs lunaires lancés dans une goutte sphérique</td></tr>
-      <tr><td>Météo</td><td>Relevé ERA5 keyframé le long de l'observation ; plusieurs couches nuageuses métriques et volumes individuels manipulables, se déplaçant avec le vent de leur couche jusqu'à l'horizon et atténuant astres et phénomènes ; pluie, neige, grêle et orages avec tonnerre</td></tr>
-      <tr><td>Le sol</td><td>Relief réel et imagerie aérienne, bâtiments, arbres, lampadaires, véhicules, vitrages et autres témoins, avec trajectoires et feux clignotants aux cadences réglementaires</td></tr>
-      <tr><td>L'instrument</td><td>Œil ou objectif rectilinéaire, capteur et focale en millimètres, cadre letterboxé, diaphragme, distance de mise au point, roulis, une pose longue qui accumule les filés d'étoiles et ponctue un feu clignotant, et jusqu'où l'appareil pouvait enregistrer une lumière faible — de 4,2 avec un appareil-boîte à 9,7 sur trépied à f/2</td></tr>
-      <tr><td>Provenance</td><td>Lieu, météo, altitude, imagerie et fuseau horaire lus dans des sources nommées et interchangeables, la requête exacte restant dans le fichier</td></tr>
-      <tr><td>Photos des lieux</td><td>Photos et panoramas posés sur la scène à toute opacité, recalés en glissant ou sur des repères nommés avec un écart par repère, le cap ajusté adoptable comme pose du témoin avec sa provenance, photos de rue Panoramax déjà recalées</td></tr>
-    </table>
-    </div>
+    <p>Ce que l'outil reconstitue déjà, et comment chaque partie en est calculée et vérifiée, est sur
+      <a href="/context/">la page de contexte</a> ; chaque source derrière est listée dans
+      <a href="/docs/sources/">sources et choix</a>.</p>
   </div>
 </section>
 
@@ -216,14 +180,6 @@ export class RoadmapPage implements SitePage {
         IGRA, l'archive des radiosondages, et c'est ce que cet élément attend.</p>
     </div>
 
-    <div class="timeline-step">
-      <h3>Un vrai modèle de diffusion atmosphérique <span class="status status-later">planifié</span></h3>
-      <p>Le dôme du ciel reste un dégradé entre points de couleur — la pièce la moins physique de
-        toute la scène, et ce qui sépare l'outil d'un crépuscule réellement juste. La moitié du
-        travail est faite : le modèle de brillance du ciel nocturne écrit pour la Voie lactée et la
-        lumière zodiacale (plancher d'airglow, excès crépusculaire directionnel, apport de la Lune,
-        en nanolamberts) est la même grandeur, prise par l'autre bout.</p>
-    </div>
 
     <div class="timeline-step">
       <h3>Ballons-sondes <span class="status status-later">envisagé</span></h3>

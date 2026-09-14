@@ -138,8 +138,67 @@ export class DocsSourcesPage extends DocsSection {
           name: "Milky Way, zodiacal light, sky brightness", url: "https://ufoathome.org/context/",
           provides: { en: "The glow of the Galaxy and of the zodiacal dust, and the brightness of the sky by twilight and moonlight.", fr: "La lueur de la Galaxie et de la poussière zodiacale, et la brillance du ciel au crépuscule et au clair de lune." },
           when: { en: "Computed in the page, no data fetched.", fr: "Calculé dans la page, aucune donnée chargée." },
-          hosting: { en: "Models from the literature: Leinert et al. 1998 and Hong 1985 (zodiacal light), Patat et al. 2006 and Krisciunas & Schaefer 1991 (sky brightness).", fr: "Modèles tirés de la littérature : Leinert et al. 1998 et Hong 1985 (lumière zodiacale), Patat et al. 2006 et Krisciunas & Schaefer 1991 (brillance du ciel)." },
+          hosting: { en: "Models from the literature: Leinert et al. 1998 and Hong 1985 (zodiacal light), Patat et al. 2006 and Krisciunas & Schaefer 1991 (sky brightness against which the glows are judged; the light of the sky itself is under the air).", fr: "Modèles tirés de la littérature : Leinert et al. 1998 et Hong 1985 (lumière zodiacale), Patat et al. 2006 et Krisciunas & Schaefer 1991 (brillance du ciel à laquelle les lueurs sont comparées ; la lumière du ciel lui-même est sous l'air)." },
           choices: { en: "No photograph of the Milky Way: a model Galaxy integrated along the line of sight, checked against three measurements rather than fitted to one.", fr: "Aucune photographie de la Voie lactée : une Galaxie modèle intégrée le long de la ligne de visée, confrontée à trois mesures plutôt qu'ajustée sur une seule." }
+        }
+      ]
+    },
+    {
+      id: "air",
+      heading: { en: "The air", fr: "L'air" },
+      intro: {
+        en: "The light of the sky is computed, not drawn: sunlight and moonlight traced through a spherical atmosphere of air, haze and ozone at fifteen wavelengths, then shown as an adapted eye or a camera would. Every input below is a published measurement or model; the two display anchors are the only choices.",
+        fr: "La lumière du ciel est calculée, pas dessinée : lumière du Soleil et de la Lune suivie à travers une atmosphère sphérique d'air, de brume et d'ozone à quinze longueurs d'onde, puis montrée comme la verrait un œil adapté ou un appareil photo. Chaque entrée ci-dessous est une mesure ou un modèle publié ; les deux ancres d'affichage sont les seuls choix."
+      },
+      rows: [
+        {
+          name: "Hillaire 2020; Bruneton & Neyret 2008", url: "https://sebh.github.io/publications/egsr2020.pdf",
+          provides: { en: "The method: single scattering along each line of sight, and every higher order folded into a table of the light arriving at each height for each height of the Sun.", fr: "La méthode : diffusion simple le long de chaque ligne de visée, et tous les ordres supérieurs réunis dans une table de la lumière qui arrive à chaque altitude pour chaque hauteur du Soleil." },
+          when: { en: "Tables built on the graphics card once per page and per haze level (about a second of GPU, shared by every scene of the page); the sky view redrawn when the Sun, the Moon or the witness move.", fr: "Tables construites sur la carte graphique une fois par page et par niveau de brume (environ une seconde de GPU, partagée par toutes les scènes de la page) ; la vue du ciel redessinée quand le Soleil, la Lune ou le témoin bougent." },
+          hosting: { en: "Implemented in the code, twice: a reference in TypeScript and its GPU twin.", fr: "Implémenté dans le code, deux fois : une référence en TypeScript et son jumeau GPU." },
+          choices: { en: "Chosen for being fast enough for a web page. Checked against a Monte Carlo trace of the same atmosphere: within 0.25 magnitude and 0.012 in colour from a hazy noon to a Sun at -16°, except the Earth's shadow in nautical twilight, 0.7 magnitude too dark. The table resolution was measured, not picked: coarser tables put a -10° zenith more than half a magnitude off.", fr: "Choisie parce qu'assez rapide pour une page web. Confrontée à un calcul de Monte Carlo de la même atmosphère : à 0,25 magnitude et 0,012 de couleur près d'un midi brumeux à un Soleil à -16°, sauf l'ombre de la Terre au crépuscule nautique, trop sombre de 0,7 magnitude. La résolution des tables a été mesurée, pas choisie : des tables plus grossières faussaient un zénith à -10° de plus d'une demi-magnitude." }
+        },
+        {
+          name: "Bodhaine et al. 1999", url: "https://journals.ametsoc.org/view/journals/atot/16/11/1520-0426_1999_016_1854_orodc_2_0_co_2.xml",
+          provides: { en: "How strongly air scatters light at each wavelength.", fr: "La force avec laquelle l'air diffuse la lumière à chaque longueur d'onde." },
+          when: { en: "Computed in the page.", fr: "Calculé dans la page." },
+          hosting: { en: "Formula from the paper.", fr: "Formule tirée de l'article." },
+          choices: { en: "Derived from the refractive index of air, measured to many figures: nothing to adjust.", fr: "Déduite de l'indice de réfraction de l'air, mesuré avec de nombreux chiffres : rien à ajuster." }
+        },
+        {
+          name: "Serdyuchenko-Gorshelev ozone cross-sections", url: "https://zenodo.org/records/5793207",
+          provides: { en: "Ozone's absorption across the visible (the Chappuis band), which makes a twilight zenith blue.", fr: "L'absorption de l'ozone dans le visible (la bande de Chappuis), qui rend bleu un zénith crépusculaire." },
+          when: { en: "Averaged once into the code.", fr: "Moyennées une fois dans le code." },
+          hosting: { en: "IUP Bremen, Gorshelev et al. 2014 and Serdyuchenko et al. 2014 (Atmos. Meas. Tech. 7).", fr: "IUP Brême, Gorshelev et al. 2014 et Serdyuchenko et al. 2014 (Atmos. Meas. Tech. 7)." },
+          choices: { en: "Taken at 223 K, the stratosphere's temperature; the band changes by 3 % at most between 193 and 293 K. Without it, a zenith six degrees after sunset comes out nearly white (Hulburt, 1953), and a test checks that it does.", fr: "Prises à 223 K, la température de la stratosphère ; la bande varie de 3 % au plus entre 193 et 293 K. Sans elle, un zénith six degrés après le coucher sort presque blanc (Hulburt, 1953), et un test vérifie que c'est le cas." }
+        },
+        {
+          name: "ASTM E 490-00a", url: "https://www.astm.org/e0490-00ar19.html",
+          provides: { en: "Sunlight above the atmosphere, wavelength by wavelength.", fr: "La lumière du Soleil au-dessus de l'atmosphère, longueur d'onde par longueur d'onde." },
+          when: { en: "Averaged once into the code.", fr: "Moyenné une fois dans le code." },
+          hosting: { en: "The standard's table 3.", fr: "Le tableau 3 de la norme." },
+          choices: { en: "Averaged over 20 nm, which removes the Fraunhofer lines: right for a sky, wrong for a spectrograph. It adds up to the Sun's measured illuminance, 128 to 133 thousand lux, which a test checks. The Moon's sky uses the same spectrum, scaled by the Moon's magnitude.", fr: "Moyenné sur 20 nm, ce qui efface les raies de Fraunhofer : juste pour un ciel, faux pour un spectrographe. Il redonne l'éclairement mesuré du Soleil, 128 à 133 mille lux, ce qu'un test vérifie. Le ciel de la Lune utilise le même spectre, réduit selon la magnitude de la Lune." }
+        },
+        {
+          name: "Kasten 1969; Hänel 1976", url: "https://doi.org/10.3402/tellusa.v21i5.10112",
+          provides: { en: "How milky the clear sky is: the haze's optical depth, from the relative humidity of the weather record.", fr: "La blancheur du ciel clair : l'épaisseur optique de la brume, tirée de l'humidité relative du relevé météo." },
+          when: { en: "With the weather: the humidity comes from ERA5's temperature and dew point (Magnus formula, Alduchov & Eskridge 1996).", fr: "Avec la météo : l'humidité vient de la température et du point de rosée d'ERA5 (formule de Magnus, Alduchov & Eskridge 1996)." },
+          hosting: { en: "Growth law from the literature.", fr: "Loi de croissance tirée de la littérature." },
+          choices: { en: "Haze particles swell with water as the air nears saturation; a typical continental burden swells as (1 - humidity) to the power -0.3, giving the usual 0.1 at 50 %. How many particles there were (a town, a fire, the wind's history) is in no record, and is not guessed. Capped at 95 %: beyond, it is mist.", fr: "Les particules de brume gonflent d'eau à mesure que l'air approche de la saturation ; une charge continentale typique gonfle comme (1 - humidité) à la puissance -0,3, ce qui donne le 0,1 habituel à 50 %. Le nombre de particules (une ville, un feu, l'histoire du vent) n'est dans aucun relevé et n'est pas deviné. Plafonnée à 95 % : au-delà, c'est de la brume de rosée." }
+        },
+        {
+          name: "Patat et al. 2006 (Paranal)", url: "https://arxiv.org/abs/astro-ph/0604128",
+          provides: { en: "The measured brightness of the zenith through twilight, the check a real sky gives the model.", fr: "La brillance mesurée du zénith pendant le crépuscule, la vérification qu'un vrai ciel apporte au modèle." },
+          when: { en: "In the tests, and in the page for whether the Milky Way and the zodiacal light could be seen.", fr: "Dans les tests, et dans la page pour savoir si la Voie lactée et la lumière zodiacale pouvaient être vues." },
+          hosting: { en: "The paper's V-band fit, table 1.", fr: "L'ajustement en bande V de l'article, tableau 1." },
+          choices: { en: "Never fitted to: the model meets it within half a magnitude from -6° to -16°. Reading the published fit also corrected a table in the tool that had civil twilight ten times too dark.", fr: "Jamais ajustée : le modèle la rejoint à une demi-magnitude près de -6° à -16°. Lire l'ajustement publié a aussi corrigé une table de l'outil qui rendait le crépuscule civil dix fois trop sombre." }
+        },
+        {
+          name: "Krawczyk et al. 2005; Thompson et al. 2002", url: "https://doi.org/10.1145/1090122.1090154",
+          provides: { en: "How an eye adapted to that sky shows it: a compressive response that follows the sky's own brightness, and the shift to a dim blue-grey as the rods take over.", fr: "Comment un œil adapté à ce ciel le montre : une réponse compressive qui suit la luminosité du ciel lui-même, et le passage à un gris-bleu sombre quand les bâtonnets prennent le relais." },
+          when: { en: "In the page, for every pixel of the sky.", fr: "Dans la page, pour chaque pixel du ciel." },
+          hosting: { en: "Blend of the rods from Krawczyk, Myszkowski & Seidel; night blue from Thompson, Shirley & Ferwerda, taken halfway toward white.", fr: "Mélange des bâtonnets d'après Krawczyk, Myszkowski et Seidel ; bleu nocturne d'après Thompson, Shirley et Ferwerda, pris à mi-chemin du blanc." },
+          choices: { en: "The only choices in the chain, stated as such: a clear day zenith and a moonless night zenith are pinned where the tool showed them before, and everything between follows. A camera (a recording medium) gets no rods, and its gain over an eye brightens what it records.", fr: "Les seuls choix de la chaîne, dits comme tels : le zénith d'un jour clair et celui d'une nuit sans Lune sont fixés là où l'outil les montrait avant, et tout le reste suit. Un appareil photo (un support d'enregistrement) n'a pas de bâtonnets, et son gain sur l'œil éclaircit ce qu'il enregistre." }
         }
       ]
     },
