@@ -147,8 +147,8 @@ export class DemoCatalogue {
           src: "/demo-data/sky-test-halos.json",
           title: { en: "Ice haloes and sundogs", fr: "Halos de glace et parhélies" },
           blurb: {
-            en: "A cirrus veil, a Sun 20° up, crystals falling level. Nothing is placed: a hexagonal ice prism and Snell's law give every angle.",
-            fr: "Un voile de cirrus, un Soleil à 20°, des cristaux tombant à plat. Rien n'est posé : un prisme hexagonal de glace et la loi de Snell donnent chaque angle."
+            en: "A cirrus veil, a Sun 20° up, crystals falling level: a hexagonal ice prism and Snell's law give every angle. Then the crystals tumble, the veil thins, a cumulus deck passes under it, and the display changes with each.",
+            fr: "Un voile de cirrus, un Soleil à 20°, des cristaux tombant à plat : un prisme hexagonal de glace et la loi de Snell donnent chaque angle. Puis les cristaux tourbillonnent, le voile s'amincit, des cumulus passent dessous, et le halo change avec chacun."
           }
         },
         {

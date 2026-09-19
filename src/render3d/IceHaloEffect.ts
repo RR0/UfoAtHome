@@ -76,6 +76,23 @@ export class IceHaloEffect {
    * could tell from the last one.
    */
   private static readonly ALTITUDE_STEP_DEG = 1
+  /**
+   * The same for the crystals' alignment, which a weather track may change DURING a recording — a
+   * veil whose plates stop falling flat loses its sundogs and arcs and keeps its ring.
+   *
+   * Compared exactly, as it was, every frame of such a change asked for a new display and threw
+   * away the one being traced: the display stayed frozen for as long as the change lasted, at 6 ms
+   * of tracing a frame. A twentieth: the crystals' tilt goes as a power of the alignment (see
+   * HaloSky.begin), and a step this size changes it by a quarter, below what a display shows.
+   */
+  private static readonly ALIGNMENT_STEP = 0.05
+  /**
+   * How far a request may be from the display being traced before that tracing is abandoned rather
+   * than finished first: a JUMP — the reader seeking elsewhere in the recording — and not the
+   * gradual change of a weather track, which a display half traced will still serve.
+   */
+  private static readonly LEAP_ALTITUDE_DEG = 5
+  private static readonly LEAP_ALIGNMENT = 0.25
 
   /**
    * What the traced radiance is multiplied by to become screen light.
@@ -265,8 +282,27 @@ export class IceHaloEffect {
   private requestMap(sourceAltitudeDeg: number, alignment: number): void {
     const stale =
       !(Math.abs(sourceAltitudeDeg - this.mappedAltitudeDeg) < IceHaloEffect.ALTITUDE_STEP_DEG) ||
-      alignment !== this.mappedAlignment
-    if (!stale || this.tracingFor(sourceAltitudeDeg, alignment)) return
+      !(Math.abs(alignment - this.mappedAlignment) < IceHaloEffect.ALIGNMENT_STEP)
+    if (!stale) {
+      this.next = undefined
+      return
+    }
+    if (this.tracing) {
+      if (this.tracingFor(sourceAltitudeDeg, alignment)) {
+        this.next = undefined
+        return
+      }
+      // A gradual change: the display being traced is finished and shown, and this one traced
+      // after it — the display follows the change a tracing behind, rather than never.
+      const leap =
+        !(Math.abs(sourceAltitudeDeg - this.pendingAltitudeDeg) < IceHaloEffect.LEAP_ALTITUDE_DEG) ||
+        !(Math.abs(alignment - this.pendingAlignment) < IceHaloEffect.LEAP_ALIGNMENT)
+      if (!leap) {
+        this.next = { sourceAltitudeDeg, alignment }
+        return
+      }
+    }
+    this.next = undefined
     this.pendingAltitudeDeg = sourceAltitudeDeg
     this.pendingAlignment = alignment
     this.sky.begin(sourceAltitudeDeg, alignment)
@@ -276,12 +312,14 @@ export class IceHaloEffect {
 
   private pendingAltitudeDeg = Number.NaN
   private pendingAlignment = Number.NaN
+  /** What was asked for while another display was being traced — see requestMap. */
+  private next?: { sourceAltitudeDeg: number; alignment: number }
 
   private tracingFor(sourceAltitudeDeg: number, alignment: number): boolean {
     return (
       this.tracing &&
       Math.abs(sourceAltitudeDeg - this.pendingAltitudeDeg) < IceHaloEffect.ALTITUDE_STEP_DEG &&
-      alignment === this.pendingAlignment
+      Math.abs(alignment - this.pendingAlignment) < IceHaloEffect.ALIGNMENT_STEP
     )
   }
 
@@ -308,6 +346,8 @@ export class IceHaloEffect {
         this.tracing = false
         this.mappedAltitudeDeg = this.pendingAltitudeDeg
         this.mappedAlignment = this.pendingAlignment
+        const next = this.next
+        if (next) this.requestMap(next.sourceAltitudeDeg, next.alignment)
         return
       }
       this.workHandle = requestAnimationFrame(step)
@@ -319,6 +359,7 @@ export class IceHaloEffect {
     if (this.workHandle !== undefined) cancelAnimationFrame(this.workHandle)
     this.workHandle = undefined
     this.tracing = false
+    this.next = undefined
   }
 
   /** Copies the traced sky onto the texture the shader reads. Half-float rather than byte, because

@@ -1498,6 +1498,14 @@ export class SceneRenderer {
     this.buildClouds()
     this.buildCirrus()
     this.buildPrecipitation()
+    // The ice display and the bows are the weather's as much as the clouds are — how much cirrus,
+    // how its crystals fall, whether it rains — and they were only restated with the sky: a weather
+    // track that tumbled the crystals over nine seconds reached the display at a single instant of
+    // them, whenever the sky next happened to be restated.
+    if (this.lastAstronomy) {
+      this.buildIceHalos(this.lastAstronomy.sun, this.lastAstronomy.moon)
+      this.buildRainbow(this.lastAstronomy.sun, this.lastAstronomy.moon)
+    }
     this.lightningArmed = weather.storm && weather.cloudDarkness >= LIGHTNING_MIN_DARKNESS
     this.syncAnimationLoop()
     this.render()
