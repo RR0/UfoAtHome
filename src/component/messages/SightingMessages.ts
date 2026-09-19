@@ -35,9 +35,8 @@ export interface SightingMessages extends SightingLabels {
   hideLabels: string
   /** The choice of what to replay the testimony with — see SightingElement.interpretationSelect. */
   interpretation: string
-  rawTestimony: string
-  /** The witness's own reading of what they saw — see SightingRecordingJson.interpretation. */
-  witnessInterpretation: string
+  /** The recording's own account, as the choice offers it beside the analysts' interpretations. */
+  testimony: string
   /** An analyst's, `{title}` being what the case calls it and `{by}` who claims it. */
   interpretationBy: string
   /** Heading of the lines that set the interpretation's bodies against what the witness said. */

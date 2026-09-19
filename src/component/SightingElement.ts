@@ -42,6 +42,9 @@ const APP_HOME_URL = "https://ufoathome.org"
  */
 export const COMPARE_TESTIMONY_ATTRIBUTE = "compare-testimony"
 
+/** The choice's value for the recording's own testimony — see offerInterpretations. */
+const TESTIMONY_OPTION = "testimony"
+
 /** Where a recording is opened for editing on that site. */
 const APP_EDITOR_URL = `${APP_HOME_URL}/edit/`
 
@@ -135,6 +138,8 @@ export class SightingElement extends HTMLElement {
   private interpretationLoaders = new Map<string, () => Promise<InterpretationJson | undefined>>()
   /** Bumped on every choice, so an interpretation that arrives after another was chosen is dropped. */
   private interpretationToken = 0
+  /** The recording the choice was last built for — see offerInterpretations. */
+  private offeredFor?: SightingRecordingJson
   private currentSrc?: string
   private infoOpen = false
   private creditsOpen = false
@@ -499,32 +504,35 @@ export class SightingElement extends HTMLElement {
   }
 
   /**
-   * What the testimony on show can be replayed with: itself, raw; the witness's own reading of it,
-   * when their recording states one; and every analyst's the case holds for it (see
-   * CaseFile.interpretationEvents). Back to the raw testimony on every change of witness — an
-   * interpretation is of one recording — and nothing to choose, so no choice shown, when the raw
-   * testimony is all there is.
+   * What the recording on show can be replayed as: its testimony, and every analyst's
+   * interpretation of it the case holds (see CaseFile.interpretationEvents). No choice is shown when
+   * the testimony is all there is.
+   *
+   * The testimony is ONE thing, drawn the way the witness gave it: in the round when they said what
+   * it was (their own `interpretation` — a craft on its legs, a hundred feet away), flat, as the
+   * angles they saw, when they did not. What they saw is still there in the first case, as what
+   * the comparison lays over it (see SceneElement.compareTestimony): the angles and the metres are
+   * not two versions of one account but the account and the test of it.
+   *
+   * The same recording offered again (its labels in another language) keeps what is chosen; a
+   * different one starts from its testimony.
    */
   private offerInterpretations(entry: WitnessEntry): void {
-    // What is on show stays chosen when the same recording is offered again (its labels in another
-    // language); a new recording has already dropped it (see SceneElement.sightingData).
-    const kept = this.sceneElement.interpretation ? this.interpretationSelect.value : "raw"
+    const sameRecording = this.offeredFor === entry.sighting
+    const previous = this.interpretationSelect.value
+    this.offeredFor = entry.sighting
     this.interpretationToken++
     this.interpretationLoaders = new Map()
     this.interpretationSelect.innerHTML = ""
-    const offer = (value: string, label: string, load?: () => Promise<InterpretationJson | undefined>) => {
+    const offer = (value: string, label: string, load: () => Promise<InterpretationJson | undefined>) => {
       const option = document.createElement("option")
       option.value = value
       option.textContent = label
       this.interpretationSelect.appendChild(option)
-      if (load) this.interpretationLoaders.set(value, load)
+      this.interpretationLoaders.set(value, load)
     }
-    offer("raw", this.messages.rawTestimony)
     const own = entry.sighting.interpretation
-    if (own) {
-      const title = this.said.read(own.title)
-      offer("witness", title ? `${this.messages.witnessInterpretation}${this.colon}${title}` : this.messages.witnessInterpretation, () => Promise.resolve(own))
-    }
+    offer(TESTIMONY_OPTION, this.messages.testimony, () => Promise.resolve(own))
     const source = this.caseSource
     if (source) {
       CaseFile.interpretationEvents(source.json, entry.sighting.id).forEach((event, index) => {
@@ -534,11 +542,18 @@ export class SightingElement extends HTMLElement {
           () => CaseFile.interpretationOf(event, source.url, url => SightingFetch.json(url)))
       })
     }
-    const stillOffered = [...this.interpretationSelect.options].some(option => option.value === kept)
-    this.interpretationSelect.value = stillOffered ? kept : "raw"
-    if (!stillOffered && this.sceneElement.interpretation) this.sceneElement.interpretation = undefined
+    const kept = sameRecording && [...this.interpretationSelect.options].some(option => option.value === previous)
+    const value = kept ? previous : TESTIMONY_OPTION
+    this.interpretationSelect.value = value
+    // The scene follows whatever is chosen, including when it was just emptied by the recording
+    // being read again (see SceneElement.sightingData) while the choice stayed the same.
+    if (value === TESTIMONY_OPTION) {
+      if (this.sceneElement.interpretation !== own) this.sceneElement.interpretation = own
+    } else if (!this.sceneElement.interpretation) {
+      void this.chooseInterpretation(value)
+    }
     this.interpretationChoice.hidden = this.interpretationSelect.options.length < 2
-    this.showConfrontation(this.sceneElement.interpretation ? this.sceneElement.confrontation : [])
+    this.showConfrontation(this.sceneElement.confrontation)
     this.updateCompareButton()
   }
 
@@ -579,7 +594,7 @@ export class SightingElement extends HTMLElement {
     if (token !== this.interpretationToken) return
     this.sceneElement.interpretation = interpretation
     this.updateCompareButton()
-    if (!interpretation) this.showConfrontation([])
+    this.showConfrontation(this.sceneElement.confrontation)
   }
 
   /** Who made a claim, as a reader would name them: an id is spelled out ("HynekJosefAllen" is

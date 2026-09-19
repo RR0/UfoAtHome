@@ -401,7 +401,7 @@ describe("SightingElement", () => {
     expect(element.witnessUrls).toEqual([johnUrl])
   })
 
-  it("offers the raw testimony, the witness's own interpretation and the case's, and replays the one chosen", async () => {
+  it("offers the testimony, in the round when the witness said what it was, and the case's interpretations", async () => {
     const body = { id: "craft", explains: ["ufo"], model: { id: "sphere" }, track: [{ t: 0, eastM: 0, northM: 10, onGround: true }] }
     const withId = { ...johnSighting, id: "1948-07-24-ChilesClarence", place: [{ lat: 32.4, lng: -86.3 }], interpretation: { title: "Own", bodies: [body] } }
     const johnUrl = new URL("john.json", location.href).href
@@ -413,35 +413,38 @@ describe("SightingElement", () => {
     const shadow = element.shadowRoot!
     const select = shadow.getElementById("interpretation") as HTMLSelectElement
     expect((shadow.getElementById("interpretation-choice") as HTMLElement).hidden).toBe(false)
-    expect([...select.options].map(option => option.textContent)).toEqual(["Raw testimony", "The witness's own: Own", "Balloon, by Hynek Josef Allen"])
-    expect(select.value).toBe("raw")
-    expect(element.scene.interpretation).toBeUndefined()
+    // One testimony, not a raw one and the witness's own beside it: what they said it was is how
+    // their account is drawn, and what they saw is what it is compared with.
+    expect([...select.options].map(option => option.textContent)).toEqual(["Testimony", "Balloon, by Hynek Josef Allen"])
+    expect(select.value).toBe("testimony")
+    expect(element.scene.interpretation?.title).toBe("Own")
 
     select.value = "case-0"
     select.dispatchEvent(new Event("change"))
     await new Promise(resolve => setTimeout(resolve, 0))
     expect(element.scene.interpretation?.title).toBe("Balloon")
 
-    select.value = "raw"
+    select.value = "testimony"
     select.dispatchEvent(new Event("change"))
     await new Promise(resolve => setTimeout(resolve, 0))
-    expect(element.scene.interpretation).toBeUndefined()
+    expect(element.scene.interpretation?.title).toBe("Own")
   })
 
-  it("shows an interpretation alone until the reader asks to compare it with the testimony", async () => {
+  it("draws a testimony that says nothing in metres as the angles it states, with nothing to choose or compare", async () => {
+    const element = await connect("john.json")
+    const shadow = element.shadowRoot!
+    expect(element.scene.interpretation).toBeUndefined()
+    expect((shadow.getElementById("interpretation-choice") as HTMLElement).hidden).toBe(true)
+    expect((shadow.getElementById("compare-testimony") as HTMLButtonElement).hidden).toBe(true)
+  })
+
+  it("shows the testimony in the round alone until the reader asks to compare it with what was seen", async () => {
     const body = { id: "craft", explains: ["ufo"], model: { id: "sphere" }, track: [{ t: 0, eastM: 0, northM: 10, onGround: true }] }
     stubFetch({ "john.json": { ...johnSighting, id: "x", place: [{ lat: 32.4, lng: -86.3 }], interpretation: { title: "Own", bodies: [body] } } })
     const element = await connect("john.json")
     const shadow = element.shadowRoot!
     const compare = shadow.getElementById("compare-testimony") as HTMLButtonElement
     const panel = shadow.getElementById("confrontation") as HTMLElement
-    // Nothing to compare the raw testimony with.
-    expect(compare.hidden).toBe(true)
-
-    const select = shadow.getElementById("interpretation") as HTMLSelectElement
-    select.value = "witness"
-    select.dispatchEvent(new Event("change"))
-    await new Promise(resolve => setTimeout(resolve, 0))
     expect(compare.hidden).toBe(false)
     expect(compare.getAttribute("aria-pressed")).toBe("false")
     expect(element.scene.compareTestimony).toBe(false)
@@ -459,9 +462,6 @@ describe("SightingElement", () => {
     const element = await connect("john.json")
     const shadow = element.shadowRoot!
     const select = shadow.getElementById("interpretation") as HTMLSelectElement
-    select.value = "witness"
-    select.dispatchEvent(new Event("change"))
-    await new Promise(resolve => setTimeout(resolve, 0))
 
     const french = document.createElement("div")
     french.lang = "fr"
@@ -469,13 +469,8 @@ describe("SightingElement", () => {
     french.appendChild(element)
     await new Promise(resolve => setTimeout(resolve, 20))
 
-    // Put somewhere else, it reads its recording again, which starts from the raw testimony: the
-    // choice and the scene say so together, never one without the other.
-    expect(select.value).toBe("raw")
-    expect(element.scene.interpretation).toBeUndefined()
-    select.value = "witness"
-    select.dispatchEvent(new Event("change"))
-    await new Promise(resolve => setTimeout(resolve, 0))
+    // Put somewhere else, it reads its recording again: the choice and the scene say the same thing.
+    expect(select.value).toBe("testimony")
     expect(element.scene.interpretation?.title).toBe("Own")
     expect((shadow.getElementById("compare-testimony") as HTMLButtonElement).title).toBe("Comparer au témoignage")
   })
@@ -704,12 +699,16 @@ describe("SightingElement i18n", () => {
    * that told them apart. */
   const bilingual = {
     ...johnSighting,
-    interpretation: { title: { fr: "Un engin posé sur ses pieds", en: "A craft standing on its legs" }, bodies: [] }
+    description: { fr: "Un engin posé sur ses pieds", en: "A craft standing on its legs" }
   }
 
-  function interpretationOptions(element: SightingElement): string[] {
-    const select = element.shadowRoot!.getElementById("interpretation") as HTMLSelectElement
-    return [...select.options].map(option => option.textContent ?? "")
+  /** The recording's own description, as the info panel reads it out. */
+  function description(element: SightingElement): string {
+    const shadow = element.shadowRoot!
+    if ((shadow.getElementById("info-observation-list") as HTMLElement).childElementCount === 0) {
+      ;(shadow.getElementById("info-button") as HTMLButtonElement).click()
+    }
+    return shadow.getElementById("info-observation-list")!.textContent ?? ""
   }
 
   it("reads the recording's own texts in French when navigator.languages prefers fr", async () => {
@@ -718,8 +717,8 @@ describe("SightingElement i18n", () => {
     const element = mount()
     element.witnessUrls = ["john.json"]
 
-    await waitFor(() => interpretationOptions(element)[1]?.startsWith("Celle du témoin"))
-    expect(interpretationOptions(element)).toEqual(["Témoignage brut", "Celle du témoin\u00a0: Un engin posé sur ses pieds"])
+    await waitFor(() => description(element).includes("Un engin posé sur ses pieds"))
+    expect(description(element)).not.toContain("A craft standing on its legs")
     spy.mockRestore()
   })
 
@@ -734,10 +733,10 @@ describe("SightingElement i18n", () => {
     section.appendChild(element)
     element.witnessUrls = ["john.json"]
 
-    await waitFor(() => interpretationOptions(element).length === 2)
+    await waitFor(() => description(element).length > 0)
     // Long enough for a French decision taken at construction to have landed, had it survived.
     await new Promise(resolve => setTimeout(resolve, 20))
-    expect(interpretationOptions(element)).toEqual(["Raw testimony", "The witness's own: A craft standing on its legs"])
+    expect(description(element)).toContain("A craft standing on its legs")
     expect(element.shadowRoot!.getElementById("testimony-prefix")!.textContent).toBe("Testimony by")
     spy.mockRestore()
   })

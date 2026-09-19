@@ -226,8 +226,9 @@ if (excerpts.length > 0) {
       analyst's goes in the case, as an event of type <code>interpretation</code> naming the
       recording by its <code>id</code>, with who claims it in <code>by</code>
       (<code>{ "people": id }</code>, <code>{ "org": id }</code>, or a person described in value)
-      and its bodies inline or in a file at <code>url</code>. The player offers the raw testimony
-      and each interpretation, one at a time.</p>
+      and its bodies inline or in a file at <code>url</code>. A testimony whose witness said what
+      it was is drawn in the round, as they said; one that says nothing in metres is drawn as the
+      angles it states. The player offers it and each analyst's interpretation, one at a time.</p>
     <pre data-json="none"><code>"interpretation": {
   "title": "A craft standing on its legs",
   "bodies": [{
@@ -535,8 +536,10 @@ if (excerpts.length > 0) {
       Celle d'un analyste va dans le dossier, en événement de type <code>interpretation</code>
       qui désigne l'enregistrement par son <code>id</code>, avec qui l'avance dans
       <code>by</code> (<code>{ "people": id }</code>, <code>{ "org": id }</code>, ou une personne
-      décrite en valeur) et ses corps sur place ou dans un fichier à <code>url</code>. Le lecteur
-      propose le témoignage brut et chaque interprétation, une à la fois.</p>
+      décrite en valeur) et ses corps sur place ou dans un fichier à <code>url</code>. Un
+      témoignage dont le témoin a dit ce que c'était se dessine en volume, comme il l'a dit ;
+      celui qui ne dit rien en mètres se dessine avec les angles qu'il énonce. Le lecteur le
+      propose, ainsi que chaque interprétation d'analyste, une à la fois.</p>
     <pre data-json="none"><code>"interpretation": {
   "title": "Un engin posé sur ses pieds",
   "bodies": [{
