@@ -3548,7 +3548,8 @@ export class SceneRenderer {
     }
     const ice = this.weather.highCloudCover ?? 0
     if (ice > 0) {
-      through *= 1 - CloudField.alphaAt(direction, CIRRUS_LAYER_HEIGHT, ice) * ICE_DECK_OPACITY
+      // The cirrus deck's own fibre field, where it is drawn: it drifts with the same offset as the water.
+      through *= 1 - CloudField.iceAlphaAt(direction, CIRRUS_LAYER_HEIGHT, ice, this.cloudFieldOffset) * ICE_DECK_OPACITY
     }
     return Math.max(0, Math.min(1, through))
   }

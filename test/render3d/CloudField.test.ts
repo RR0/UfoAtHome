@@ -91,3 +91,26 @@ describe("CloudField.alphaAt", () => {
     expect(CloudField.alphaAt(direction, 250, 0.6)).toBe(CloudField.alphaAt(direction, 250, 0.6))
   })
 })
+
+/** The ice deck's field, which is not the water's: narrower, and fibrous. */
+describe("CloudField.iceAlphaAt", () => {
+  const fraction = (coverage: number) => {
+    let sum = 0
+    const count = 3000
+    for (let i = 0; i < count; i++) {
+      const altitude = Math.asin(0.05 + 0.95 * ((i * 0.618033988749895) % 1))
+      const azimuth = (i / count) * Math.PI * 2
+      sum += CloudField.iceAlphaAt({ x: Math.sin(azimuth) * Math.cos(altitude), y: Math.sin(altitude), z: -Math.cos(azimuth) * Math.cos(altitude) }, 200, coverage)
+    }
+    return sum / count
+  }
+
+  it("covers about the fraction of sky the coverage states", () => {
+    // Read at the water's threshold, 12% came out 8% and 88% came out 94%; at the ice's with the
+    // water's ramp, 17% and 81%.
+    for (const coverage of [0.12, 0.3, 0.5, 0.7, 0.88]) {
+      expect(Math.abs(fraction(coverage) - coverage)).toBeLessThan(0.045)
+    }
+  })
+
+})

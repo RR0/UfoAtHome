@@ -106,6 +106,11 @@ export const WATER_FIELD_SD = 0.075
 /** The same for the ice deck's fibrous field, which is narrower. */
 export const ICE_FIELD_MEAN = 0.5
 export const ICE_FIELD_SD = 0.047
+/** Half the width of the ramp a deck's edge is drawn across, in shape units: the water deck's, and
+ * the same fraction of the ice field's narrower spread, so both edges are equally soft relative to
+ * their field and a coverage stays the fraction of sky it names (within 4% for ice, measured). */
+export const WATER_RAMP = 0.08
+export const ICE_RAMP = WATER_RAMP * ICE_FIELD_SD / WATER_FIELD_SD
 
 /** How much ice cloud lies along a given direction, 0 to 1 — the ice deck's own coverage field,
  * pulled out so the halo shader can multiply by it. Mirrors the fibrous branch of the fragment
@@ -272,8 +277,17 @@ void main() {
   // Below coverage's own noise threshold: a broken/patchy ceiling with real sky-colored gaps,
   // exactly like a real transition from scattered to overcast. remap-by-threshold, same technique
   // as the reference skill's own cloudDensity coverage control.
-  float threshold = coverageThreshold(coverage, ${WATER_FIELD_MEAN.toFixed(3)}, ${WATER_FIELD_SD.toFixed(3)});
-  float alpha = smoothstep(threshold - 0.08, threshold + 0.08, shape);
+  // Each field its own quantile, and its own ramp. The ice field is narrower than the water one
+  // (see ICE_FIELD_SD): read at the water's threshold, a cirrus deck covered 8% of the sky at a
+  // stated 12% and 94% at 88%, and its edge was not where the display — masked at the ice's own
+  // threshold — was drawn. The ramp is the same fraction of each field's spread (ICE_RAMP), or the
+  // water's ±0.08 across so narrow a field pulls every coverage towards a half: 17% at 12%.
+  float threshold = mix(
+    coverageThreshold(coverage, ${WATER_FIELD_MEAN.toFixed(3)}, ${WATER_FIELD_SD.toFixed(3)}),
+    coverageThreshold(coverage, ${ICE_FIELD_MEAN.toFixed(3)}, ${ICE_FIELD_SD.toFixed(3)}),
+    fibrous);
+  float ramp = mix(${WATER_RAMP.toFixed(4)}, ${ICE_RAMP.toFixed(4)}, fibrous);
+  float alpha = smoothstep(threshold - ramp, threshold + ramp, shape);
   // This is what actually guarantees "total overcast, no sky visible" at cloudCover=1: force full
   // opacity everywhere as coverage approaches its max, overriding the noise field's own local value
   // rather than merely biasing it (a pure threshold shift would still leave the occasional fragment
@@ -485,6 +499,33 @@ export class CloudField {
    */
   static alphaAt(direction: { x: number; y: number; z: number }, layerHeight: number, coverage: number, fieldOffset = { x: 0, z: 0 }): number {
     if (coverage <= 0) return 0
+    const [warpedX, warpedY, warpedZ] = CloudField.warpedAt(direction, layerHeight, fieldOffset)
+    const shapeFbm = CloudField.fbm(warpedX * 0.014, warpedY * 0.014, warpedZ * 0.014) * 0.5 + 0.5
+    const shapeCell = 1 - CloudField.worley(warpedX * 0.011, warpedY * 0.011, warpedZ * 0.011)
+    const shape = shapeFbm + (shapeCell - shapeFbm) * 0.4
+    const threshold = CloudField.thresholdFor(coverage, WATER_FIELD_MEAN, WATER_FIELD_SD)
+    const alpha = CloudField.smoothstep(threshold - WATER_RAMP, threshold + WATER_RAMP, shape)
+    return alpha + (1 - alpha) * CloudField.smoothstep(0.82, 1, coverage)
+  }
+
+  /**
+   * The same for an ICE deck: the fibre field the shader draws a cirrus from, with the ice field's
+   * own quantile — what the shader's fibrous branch does, before the veil is thinned to what a
+   * cirrus lets through (the caller's opacity). A cirrus deck read through the water field was
+   * another cloud altogether, holes and all, somewhere the drawn veil was not.
+   */
+  static iceAlphaAt(direction: { x: number; y: number; z: number }, layerHeight: number, coverage: number, fieldOffset = { x: 0, z: 0 }): number {
+    if (coverage <= 0) return 0
+    const [warpedX, warpedY, warpedZ] = CloudField.warpedAt(direction, layerHeight, fieldOffset)
+    const x = warpedX * 0.0016, y = warpedY * 0.02, z = warpedZ * 0.045
+    const fibre = CloudField.fbm(x, y, z) * 0.5 + 0.5
+    const wisp = CloudField.fbm(x * 3.1 + 7, y * 3.1 + 7, z * 3.1 + 7) * 0.5 + 0.5
+    const threshold = CloudField.thresholdFor(coverage, ICE_FIELD_MEAN, ICE_FIELD_SD)
+    return CloudField.smoothstep(threshold - ICE_RAMP, threshold + ICE_RAMP, fibre * 0.72 + wisp * 0.28)
+  }
+
+  /** Where along the deck's plane a direction lands, domain-warped as the shader warps it. */
+  private static warpedAt(direction: { x: number; y: number; z: number }, layerHeight: number, fieldOffset: { x: number; z: number }): [number, number, number] {
     const dy = Math.abs(direction.y)
     const t = layerHeight / Math.max(dy, 0.04)
     const px = direction.x * t + fieldOffset.x
@@ -493,18 +534,15 @@ export class CloudField {
     const wx = px * 0.006
     const wy = py * 0.006
     const wz = pz * 0.006
-    const warpedX = px + CloudField.fbm(wx + 12.3, wy + 12.3, wz + 12.3) * 40
-    const warpedY = py + CloudField.fbm(wx + 47.1, wy + 47.1, wz + 47.1) * 40
-    const warpedZ = pz + CloudField.fbm(wx + 91.7, wy + 91.7, wz + 91.7) * 40
-    const shapeFbm = CloudField.fbm(warpedX * 0.014, warpedY * 0.014, warpedZ * 0.014) * 0.5 + 0.5
-    const shapeCell = 1 - CloudField.worley(warpedX * 0.011, warpedY * 0.011, warpedZ * 0.011)
-    const shape = shapeFbm + (shapeCell - shapeFbm) * 0.4
-    const threshold = CloudField.thresholdFor(coverage, WATER_FIELD_MEAN, WATER_FIELD_SD)
-    const smoothstep = (edge0: number, edge1: number, value: number): number => {
-      const t2 = Math.min(1, Math.max(0, (value - edge0) / (edge1 - edge0)))
-      return t2 * t2 * (3 - 2 * t2)
-    }
-    const alpha = smoothstep(threshold - 0.08, threshold + 0.08, shape)
-    return alpha + (1 - alpha) * smoothstep(0.82, 1, coverage)
+    return [
+      px + CloudField.fbm(wx + 12.3, wy + 12.3, wz + 12.3) * 40,
+      py + CloudField.fbm(wx + 47.1, wy + 47.1, wz + 47.1) * 40,
+      pz + CloudField.fbm(wx + 91.7, wy + 91.7, wz + 91.7) * 40
+    ]
+  }
+
+  private static smoothstep(edge0: number, edge1: number, value: number): number {
+    const t = Math.min(1, Math.max(0, (value - edge0) / (edge1 - edge0)))
+    return t * t * (3 - 2 * t)
   }
 }

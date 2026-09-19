@@ -216,7 +216,7 @@ export class LayeredCloudSystem {
     let through = 1
     for (const deck of this.decks.values()) {
       if (deck.volume) through *= deck.volume.transmissionAt(direction)
-      else if (deck.uniforms) through *= 1 - CloudField.alphaAt(direction,
+      else if (deck.uniforms) through *= 1 - (deck.layer.type === "cirrus" ? CloudField.iceAlphaAt : CloudField.alphaAt)(direction,
         deck.uniforms.layerHeight.value, deck.layer.coverage, deck.uniforms.fieldOffset.value) * (deck.layer.type === "cirrus" ? 0.2 : 0.95)
     }
     return through
