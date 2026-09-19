@@ -3018,6 +3018,53 @@ describe("SightingEditorElement i18n", () => {
     spy.mockRestore()
   })
 
+  /** An account written in both languages — read, and written back, in the interface's one. See
+   * SightingEditorElement.loadLocaleMessages. */
+  const bilingual = { fr: "Une lumière au-dessus du champ.", en: "A light over the field." }
+
+  function withBilingualAccount(element: SightingEditorElement): void {
+    element.sightingData = { ...element.sightingData, description: bilingual }
+  }
+
+  function typeDescription(element: SightingEditorElement, value: string): void {
+    const input = element.shadowRoot!.getElementById("description") as HTMLTextAreaElement
+    input.value = value
+    input.dispatchEvent(new Event("input"))
+  }
+
+  it("reads and writes the recording's texts in French when navigator.languages prefers fr", async () => {
+    const spy = vi.spyOn(navigator, "languages", "get").mockReturnValue(["fr", "en"])
+    const element = mount()
+    await waitFor(() => (element.shadowRoot!.getElementById("add-shape") as HTMLButtonElement).title === "Ajouter une forme")
+    withBilingualAccount(element)
+
+    expect((element.shadowRoot!.getElementById("description") as HTMLTextAreaElement).value).toBe(bilingual.fr)
+    typeDescription(element, "Une lumière orange.")
+    expect(element.sightingData.description).toEqual({ ...bilingual, fr: "Une lumière orange." })
+    spy.mockRestore()
+  })
+
+  it("takes the page's language when put in it after being created, for its labels and the recording's texts alike", async () => {
+    const spy = vi.spyOn(navigator, "languages", "get").mockReturnValue(["fr", "en"])
+    const section = document.createElement("section")
+    section.lang = "en"
+    document.body.appendChild(section)
+    // Created before being put anywhere: the constructor sees no [lang] and only the browser's list.
+    const element = document.createElement(ELEMENT_NAME) as SightingEditorElement
+    element.weatherProvider = NO_RECORD_PROVIDER
+    withBilingualAccount(element)
+    section.appendChild(element)
+    // Long enough for a French decision taken at construction to have landed, had it survived.
+    await new Promise(resolve => setTimeout(resolve, 50))
+
+    expect(element.shadowRoot!.getElementById("add-shape")!.title).toBe("Add shape")
+    expect((element.shadowRoot!.getElementById("description") as HTMLTextAreaElement).value).toBe(bilingual.en)
+    // And what the author types goes back under the language it was read in, the French untouched.
+    typeDescription(element, "An orange light.")
+    expect(element.sightingData.description).toEqual({ ...bilingual, en: "An orange light." })
+    spy.mockRestore()
+  })
+
   it("falls back to the English defaults when navigator.languages has no supported match", async () => {
     const spy = vi.spyOn(navigator, "languages", "get").mockReturnValue(["de-DE", "de"])
     const element = mount()

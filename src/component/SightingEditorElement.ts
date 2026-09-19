@@ -1646,6 +1646,9 @@ export class SightingEditorElement extends HTMLElement {
     // Here and not in the constructor: a custom element may not touch its own attributes before it
     // is connected, and `tabIndex` is an attribute. Respects one already set by the page.
     if (!this.hasAttribute("tabindex")) this.tabIndex = -1
+    // The constructor could only read the browser's list if this editor was created before being put
+    // anywhere; the page it now stands in may declare a language (see HostLocale).
+    if (HostLocale.preferencesFor(this).join() !== this.preferences.join()) void this.loadLocaleMessages()
     const src = this.getAttribute("src")
     if (src) void this.importFromUrl(src)
   }
@@ -6304,10 +6307,10 @@ export class SightingEditorElement extends HTMLElement {
    * rank seven of a shower that is no longer running. */
   private meteorRank = 0
 
-  /** Which of a shower's own names to use — the reader's, resolved the same way every other label
-   * in this element is. */
+  /** Which of a shower's own names to use — the reader's, the one every other label in this element
+   * is in (see loadLocaleMessages). */
   private showerLanguage(): "en" | "fr" {
-    return selectLocale(HostLocale.preferencesFor(this), ["en", "fr"]) as "en" | "fr"
+    return this.language
   }
 
   /**
@@ -6318,11 +6321,7 @@ export class SightingEditorElement extends HTMLElement {
    * it certainly cannot translate what it was just handed. Which also means this editor is how a
    * translation gets added — open the file in the other language and type.
    */
-  private get said(): SaidTexts {
-    return this.saidTexts ??= new SaidTexts(HostLocale.preferencesFor(this))
-  }
-
-  private saidTexts?: SaidTexts
+  private said = new SaidTexts(["en"])
 
   /** Names tags for this author, and reads back what they type — see TagNames. English until the
    * dictionary is loaded, which is what an English author keeps. */
@@ -7096,15 +7095,64 @@ export class SightingEditorElement extends HTMLElement {
   /** Auto-detects the visitor's preferred UI language from `navigator.languages`, falling back
    * to English (already baked into the template) when none of their preferences are
    * supported — see selectLocale. There is deliberately no language-picker UI, matching
-   * `<rr0-ufo>`'s own approach. */
+   * `<rr0-ufo>`'s own approach.
+   *
+   * ONE decision for the interface, the tag names, the language the recording's texts are read in
+   * (said) and the one they are written back in (writingLanguage). Those were three: the messages
+   * decided here at construction, `said` cached on first read (in the constructor too), and the
+   * writing language re-read from the page on every keystroke. An editor created by
+   * `document.createElement` and then put in a `lang="en"` page therefore read and showed the
+   * French account, and wrote what the author typed over it under "en". Read again on connection
+   * (see connectedCallback), nowhere else. */
   private async loadLocaleMessages(): Promise<void> {
-    const language = selectLocale(HostLocale.preferencesFor(this), UFO_SUPPORTED_LANGUAGES) as UfoLanguage
-    if (language === "en") return
+    const token = ++this.localeToken
+    const preferences = HostLocale.preferencesFor(this)
+    this.preferences = preferences
+    const language = selectLocale(preferences, UFO_SUPPORTED_LANGUAGES) as UfoLanguage
+    const [messages, tagNames] = language === "en"
+      ? [sightingEditorMessages_en, {}]
+      : await Promise.all([loadSightingEditorMessages(language), loadTagNames(language)])
+    // Superseded by a later decision (the editor was connected while this one was loading).
+    if (token !== this.localeToken) return
+    const changed = language !== this.language
+    this.language = language
+    this.said = new SaidTexts(preferences)
     // Before the messages, because applyMessages rebuilds the summary with it — see TagNames.
-    this.tagNames = new SightingTags(await loadTagNames(language))
-    // A recording loaded before this resolved is showing its tags in English: say them again.
-    this.showTags()
-    this.applyMessages(await loadSightingEditorMessages(language))
+    this.tagNames = new SightingTags(tagNames)
+    if (messages !== this.messages) {
+      this.applyMessages(messages)
+    } else {
+      // Same interface language, but perhaps a longer list behind it ("en", then "es"): the
+      // summary reads the recording's texts through the new one.
+      this.paramSummaryBuilder = new SightingSummary(messages, this.language, this.said, this.tagNames)
+      this.refreshParamSummary()
+    }
+    // Every field and list showing the recording's own texts showed them through the previous
+    // decision, and would write them back under the new one: show them again. (A recording loaded
+    // before this resolved is showing its tags in English, at the very least.)
+    if (changed) this.showSaidTexts()
+    else this.showTags()
+  }
+
+  /** The reader's languages as loadLocaleMessages last read them — what connectedCallback compares
+   * against to tell whether being put somewhere changed the answer. */
+  private preferences: readonly string[] = []
+
+  /** The language the interface is in, as loadLocaleMessages last decided it. */
+  private language: UfoLanguage = "en"
+
+  /** Drops a language decision that resolved after a later one was taken. */
+  private localeToken = 0
+
+  /** Refills whatever shows a SaidText — the same refreshes a newly loaded recording gets (see
+   * sightingData), which are the ones that read through `said`. */
+  private showSaidTexts(): void {
+    this.refreshSourceList()
+    this.refreshDecorList()
+    this.refreshReferenceList()
+    this.refreshMilestoneList()
+    this.onSelectionOrTimeChanged()
+    this.syncWitnessMetadataFields()
   }
 
   /** The recording's tags in the author's own words, in the field they edit them in — stored in
