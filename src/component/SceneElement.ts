@@ -268,6 +268,8 @@ export class SceneElement extends HTMLElement {
   /** Whether the testimony is shown beside the interpretation, and measured against it — see
    * `compareTestimony`. */
   private comparing = false
+  /** Whether a recording is drawn the way its witness gave it — see `testimonyInTheRound`. */
+  private inTheRound = true
   /** What the sky now standing was computed from — see applySceneAt. */
   private lastSkyKey?: string
   private starCatalog?: StarCatalog
@@ -719,7 +721,8 @@ export class SceneElement extends HTMLElement {
   set sightingData(json: SightingRecordingJson) {
     this.ufoElement.sightingData = json
     // An interpretation is OF one recording: another one's bodies have nothing to stand for here.
-    this.interpretationShown = undefined
+    // What the new one starts as is its witness's own account of what it was, if they gave one.
+    this.interpretationShown = this.inTheRound ? json.interpretation : undefined
     // A loaded recording may have been made through something with a format of its own.
     this.applyFrameFormat()
     this.lastTimeMs = 0
@@ -1405,6 +1408,20 @@ export class SceneElement extends HTMLElement {
    * alone, as the world it claims — which is how it has to be looked at before it can be judged.
    * Meaningless for the raw testimony, which is always what is drawn then.
    */
+  /**
+   * Whether a recording whose witness said what it was (its own `interpretation`) is drawn that way,
+   * in the round, rather than as the angles they saw — true unless a composing element says
+   * otherwise. The editor does: what it edits is the angles, and drawing bodies over them would hide
+   * the very thing being drawn. Read when a recording is set.
+   */
+  get testimonyInTheRound(): boolean {
+    return this.inTheRound
+  }
+
+  set testimonyInTheRound(inTheRound: boolean) {
+    this.inTheRound = inTheRound
+  }
+
   get compareTestimony(): boolean {
     return this.comparing
   }

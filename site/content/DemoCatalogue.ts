@@ -100,6 +100,8 @@ export class DemoCatalogue {
         {
           id: "socorro",
           src: "/demo-data/witness-socorro.json",
+          // The case, for the player: it holds an interpretation beside the testimony to choose from.
+          playSrc: "/demo-data/case-socorro.json",
           witnessMap: true,
           title: { en: "Socorro, 1964", fr: "Socorro, 1964" },
           titleIsName: true,

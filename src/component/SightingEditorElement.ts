@@ -877,6 +877,9 @@ export class SightingEditorElement extends HTMLElement {
     // plays is a preview of nothing, and a recording with no duration yet cannot be played at all.
     // Replays keep the opposite rule — see SceneElement.syncAnimationsToPlayback.
     this.sceneElement.animateWhilePaused = true
+    // The editor draws the angles it edits, never a witness's bodies over them — see
+    // SceneElement.testimonyInTheRound.
+    this.sceneElement.testimonyInTheRound = false
     this.ufoElement = this.sceneElement.ufoElement
     // This canvas is used for drag-to-record shape placement instead — a plain click shouldn't
     // also toggle the nested player's playback (every recording drag ends in a native "click").

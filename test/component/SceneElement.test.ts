@@ -408,3 +408,24 @@ describe("which meteor gets offered", () => {
     expect(element.meteorByRank(0)).toEqual(element.meteorByRank(0))
   })
 })
+
+describe("A testimony whose witness said what it was", () => {
+  const body = { id: "craft", model: { id: "sphere" }, track: [{ t: 0, eastM: 0, northM: 10, onGround: true }] }
+  const recording = { version: 1 as const, place: [{ lat: 34, lng: -106.9 }], timeline: { keyframes: [] }, interpretation: { title: "Own", bodies: [body] } }
+
+  it("is drawn in the round, the way they gave it, by every scene", () => {
+    const element = mount()
+    element.sightingData = recording
+    expect(element.interpretation?.title).toBe("Own")
+    // And a recording that says nothing in metres, as its angles.
+    element.sightingData = { ...recording, interpretation: undefined }
+    expect(element.interpretation).toBeUndefined()
+  })
+
+  it("is drawn as its angles where the scene is told to, as the editor's is", () => {
+    const element = mount()
+    element.testimonyInTheRound = false
+    element.sightingData = recording
+    expect(element.interpretation).toBeUndefined()
+  })
+})

@@ -64,6 +64,8 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
       return undefined
     }
     updateDecorAnchoring(): void {}
+    setBodies(): void {}
+    get bodyGround() { return { heightAt: () => 0 } }
     updateDecorLitState(): void {}
     pickBodyAt(): undefined {
       return undefined
@@ -6338,5 +6340,15 @@ describe("integrated cloud weather editor", () => {
     expect(ufo.sighting.weatherTrack.getInterpolatedWeatherAt(0)!.cloudLayers).toEqual([])
     expect(JSON.stringify(element.sightingData)).toContain('"cloudLayers":[]')
     await new Promise(resolve => setTimeout(resolve, 100))
+  })
+})
+
+describe("SightingEditorElement and a witness's own interpretation", () => {
+  it("draws the angles it edits, never the witness's bodies over them", () => {
+    const element = mount()
+    const body = { id: "craft", model: { id: "sphere" }, track: [{ t: 0, eastM: 0, northM: 10, onGround: true }] }
+    element.sightingData = { version: 1, timeline: { keyframes: [] }, interpretation: { bodies: [body] } }
+    const scene = element.shadowRoot!.querySelector("rr0-scene") as unknown as { interpretation: unknown }
+    expect(scene.interpretation).toBeUndefined()
   })
 })
