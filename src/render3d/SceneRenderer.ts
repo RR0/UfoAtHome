@@ -3799,6 +3799,7 @@ export class SceneRenderer {
     const ice = this.highCloudCover()
     const cirrusMask = this.layeredClouds?.cirrusMask
     this.iceHalos.setCloudOffset(cirrusMask?.offset ?? this.cloudFieldOffset)
+    this.layeredClouds?.hostHalo(this.iceHalos)
     if (ice === undefined) {
       this.iceHalos.update({ x: 0, y: 1, z: 0 }, -1, 0, [1, 1, 1], { cover: 0, layerHeight: CIRRUS_LAYER_HEIGHT }, 0)
       return
@@ -4140,6 +4141,7 @@ export class SceneRenderer {
         this.layeredClouds = new LayeredCloudSystem(this.celestialGroup, CLOUD_RADIUS, this.cloudRendering)
       }
       this.disposeCirrus()
+      this.layeredClouds.hostHalo(this.iceHalos)
       this.layeredClouds.update(this.weather, this.observerElevationM + 1.6)
       this.layeredClouds.setOffsets(this.cloudOffsetM, this.cloudLayerOffsetsM)
       if (this.lastSunPosition) this.updateCloudLighting(this.lastSunPosition, this.baseFogColor)

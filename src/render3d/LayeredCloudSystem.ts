@@ -1,4 +1,4 @@
-import { Color, Mesh, Vector3 } from "three"
+import { Color, CustomBlending, Mesh, NormalBlending, OneFactor, OneMinusSrcAlphaFactor, Vector3 } from "three"
 import type { Group, ShaderMaterial, SphereGeometry } from "three"
 import type { CloudInstance, CloudLayer } from "../engine/model/CloudLayer.js"
 import { resolveCloudLayers } from "../engine/model/CloudLayer.js"
@@ -8,6 +8,7 @@ import { buildCloudGeometry, buildCloudMaterial, CloudField } from "./CloudSyste
 import type { CloudUniforms } from "./CloudSystem.js"
 import { CLOUD_EARTH_RADIUS_M, cloudSeed, createCloudNoise, VolumetricCloudLayer } from "./VolumetricClouds.js"
 import { RainbowEffect } from "./RainbowEffect.js"
+import type { IceHaloEffect } from "./IceHaloEffect.js"
 
 export type CloudRendering = "surface" | "volume"
 type Deck = { layer: CloudLayer; parentId: string; instance?: CloudInstance; volume?: VolumetricCloudLayer; surface?: Mesh<SphereGeometry, ShaderMaterial>; uniforms?: CloudUniforms }
@@ -16,6 +17,7 @@ type Deck = { layer: CloudLayer; parentId: string; instance?: CloudInstance; vol
 export class LayeredCloudSystem {
   private readonly decks = new Map<string, Deck>()
   private noise?: ReturnType<typeof createCloudNoise>
+  private halo?: IceHaloEffect
 
   constructor(private readonly group: Group, private readonly radius: number, private readonly mode: CloudRendering) {}
 
@@ -85,6 +87,45 @@ export class LayeredCloudSystem {
         deck.uniforms.fibrous.value = layer.type === "cirrus" ? 1 : 0
       }
     })
+    // The strongest ice deck may be another one now, or a new one.
+    if (this.halo) this.hostHalo(this.halo)
+  }
+
+  /**
+   * Has the ice deck an ice display is refracted through draw that display itself — see
+   * IceHaloEffect.hosted for why. The deck is the one the display is masked by (cirrusMask): the
+   * strongest cirrus. Without one, the display keeps drawing itself.
+   *
+   * Drawn in the same drawing as the veil, the display has to be added as light and the veil laid
+   * over it at once, which PREMULTIPLIED blending does: `veil·α + display·(1 − α) + behind·(1 − α)`
+   * is what the display drawn first and the veil laid over it gave. The one difference is what was
+   * drawn between the two: the stars and the Sun's and Moon's discs now lie under the display's
+   * light, as they lie behind the crystals that make it, where before they covered it.
+   */
+  hostHalo(halo: IceHaloEffect | undefined): void {
+    this.halo = halo
+    const host = halo ? this.cirrusDeck : undefined
+    for (const deck of this.decks.values()) {
+      if (deck.surface) LayeredCloudSystem.carryHalo(deck.surface.material, deck === host ? halo : undefined)
+    }
+    if (halo) halo.hosted = host !== undefined
+  }
+
+  private static carryHalo(material: ShaderMaterial, halo: IceHaloEffect | undefined): void {
+    const uniforms = material.uniforms
+    if (halo) {
+      if (uniforms.uHaloShown === halo.deckUniforms.uHaloShown) return
+      Object.assign(uniforms, halo.deckUniforms)
+      uniforms.uPremultiplied.value = 1
+      material.blending = CustomBlending
+      material.blendSrc = material.blendSrcAlpha = OneFactor
+      material.blendDst = material.blendDstAlpha = OneMinusSrcAlphaFactor
+    } else {
+      if (uniforms.uPremultiplied.value === 0) return
+      uniforms.uHaloShown = { value: 0 }
+      uniforms.uPremultiplied.value = 0
+      material.blending = NormalBlending
+    }
   }
 
   /**
@@ -141,10 +182,14 @@ export class LayeredCloudSystem {
 
   /** The strongest cirrus veil drives the existing single-veil halo approximation. */
   get cirrusMask(): { cover: number; layerHeight: number; offset: Vector3; iceCrystalAlignment?: number } | undefined {
-    const deck = [...this.decks.values()].filter(deck => deck.layer.type === "cirrus" && deck.uniforms)
-      .sort((a, b) => b.layer.coverage - a.layer.coverage)[0]
+    const deck = this.cirrusDeck
     return deck?.uniforms ? { cover: deck.layer.coverage, layerHeight: deck.uniforms.layerHeight.value,
       offset: deck.uniforms.fieldOffset.value, iceCrystalAlignment: deck.layer.iceCrystalAlignment } : undefined
+  }
+
+  private get cirrusDeck(): Deck | undefined {
+    return [...this.decks.values()].filter(deck => deck.layer.type === "cirrus" && deck.uniforms)
+      .sort((a, b) => b.layer.coverage - a.layer.coverage)[0]
   }
 
   get volumes(): VolumetricCloudLayer[] {
@@ -187,6 +232,9 @@ export class LayeredCloudSystem {
   }
 
   dispose(): void {
+    // The display draws itself again, whatever deck replaces this system.
+    if (this.halo) this.halo.hosted = false
+    this.halo = undefined
     for (const deck of this.decks.values()) this.disposeDeck(deck)
     this.decks.clear()
     this.noise?.dispose()

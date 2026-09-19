@@ -105,9 +105,13 @@ noise. The cost is the procedural cloud noise, evaluated per pixel of sky:
   every pixel and then mixed it away entirely, since an ice deck's shape is the fibre field alone.
   It is now skipped for a deck with no water. Pixel-identical on the deterministic scenes
   (Chiles/Whitted, halos test); whole-frame time down 15–20% where there is a cirrus deck.
-- The halo (IceHaloEffect) evaluates the very same cirrus field again, as its mask
-  (`cirrusCoverAt`, five fbm per pixel): the ice field is computed twice per pixel whenever a
-  display is up.
+- The halo (IceHaloEffect) evaluated the very same cirrus field again, as its mask
+  (`cirrusCoverAt`, five fbm per pixel). The strongest cirrus deck now draws the display itself
+  from the veil it has just worked out (`LayeredCloudSystem.hostHalo`, premultiplied blending);
+  the effect's own sphere only draws for ice with no deck. Halos test 75 → 46 ms, Cussac −12 to
+  18%. Not pixel-identical, by design: the stars and discs drawn between the two used to cover
+  the display's light and now lie under it, as they lie behind the crystals. 48 pixels of 2.7
+  million move by 3 to 5 levels of 255 on the halos test, the rest by at most 1.
 
 Valensole is not deterministic from one load to the next (126 000 pixels of 2.7 million differ
 between two runs of the same build), so it cannot be used for pixel comparisons.

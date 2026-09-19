@@ -35,9 +35,13 @@ export interface CloudUniforms {
 
 const CLOUD_VERTEX_SHADER = `
 varying vec3 vDir;
+varying vec3 vWorldDir;
 
 void main() {
   vDir = normalize(position);
+  // The direction in the world, from the eye — what an ice display this deck draws is read along
+  // (see ICE_HALO_LIGHT_GLSL), exactly as IceHaloEffect's own sphere reads it.
+  vWorldDir = normalize((modelMatrix * vec4(position, 1.0)).xyz - cameraPosition);
   gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
 }
 `
@@ -107,6 +111,16 @@ export const ICE_FIELD_SD = 0.047
  * pulled out so the halo shader can multiply by it. Mirrors the fibrous branch of the fragment
  * shader below; the two must move together. */
 export const CIRRUS_COVER_GLSL = `
+float cirrusCoverOf(float shape, float coverage) {
+  float threshold = coverageThreshold(coverage, ${ICE_FIELD_MEAN.toFixed(3)}, ${ICE_FIELD_SD.toFixed(3)});
+  float present = smoothstep(threshold - 0.10, threshold + 0.10, shape);
+  // GRADED, not a mask. A pure threshold saturates to 1 everywhere once the veil is thick — which
+  // is exactly the sky a reader tested, 88 per cent cover — and the halo went back to being the
+  // perfect circle of a diagram. A veil is not uniform just because it is complete: it has dense
+  // fibres and thin lanes, and the display follows them. Keeping the underlying shape in the answer
+  // is what makes a halo brighter along one arc than another even under total cover.
+  return present * (0.30 + 0.70 * smoothstep(0.25, 0.85, shape));
+}
 float cirrusCoverAt(vec3 dir, float layerHeight, float coverage, vec3 fieldOffset) {
   if (coverage <= 0.0 || dir.y < 0.0) return 0.0;
   vec3 planePos = dir * (layerHeight / max(dir.y, 0.04)) + fieldOffset;
@@ -116,15 +130,41 @@ float cirrusCoverAt(vec3 dir, float layerHeight, float coverage, vec3 fieldOffse
   vec3 drawnOut = vec3(warpedPos.x * 0.0016, warpedPos.y * 0.02, warpedPos.z * 0.045);
   float fibre = fbm(drawnOut) * 0.5 + 0.5;
   float wisp = fbm(drawnOut * 3.1 + 7.0) * 0.5 + 0.5;
-  float shape = fibre * 0.72 + wisp * 0.28;
-  float threshold = coverageThreshold(coverage, ${ICE_FIELD_MEAN.toFixed(3)}, ${ICE_FIELD_SD.toFixed(3)});
-  float present = smoothstep(threshold - 0.10, threshold + 0.10, shape);
-  // GRADED, not a mask. A pure threshold saturates to 1 everywhere once the veil is thick — which
-  // is exactly the sky a reader tested, 88 per cent cover — and the halo went back to being the
-  // perfect circle of a diagram. A veil is not uniform just because it is complete: it has dense
-  // fibres and thin lanes, and the display follows them. Keeping the underlying shape in the answer
-  // is what makes a halo brighter along one arc than another even under total cover.
-  return present * (0.30 + 0.70 * smoothstep(0.25, 0.85, shape));
+  return cirrusCoverOf(fibre * 0.72 + wisp * 0.28, coverage);
+}
+`
+
+/**
+ * The light of an ice display along a direction, from the map IceHaloEffect traced — its whole
+ * shading, pulled out so the ice deck can draw the display itself (see IceHaloEffect.hosted) with
+ * the veil it has just worked out, rather than the display working the same veil out again.
+ */
+export const ICE_HALO_LIGHT_GLSL = `
+uniform vec3 uSource;
+uniform vec3 uUp;
+uniform float uStrength;
+uniform vec3 uTint;
+uniform sampler2D uMap;
+uniform float uGain;
+vec3 iceHaloLight(vec3 dir, float ice) {
+  vec3 up = normalize(uUp);
+  vec3 source = normalize(uSource);
+  // The map is held in the source's own frame: how far up, and how far round from its
+  // bearing. Reading it that way is what lets one traced map serve every direction the
+  // witness may be facing and every bearing the Sun may be on.
+  float altitude = asin(clamp(dot(dir, up), -1.0, 1.0));
+  vec3 sourceLevel = source - up * dot(source, up);
+  vec3 dirLevel = dir - up * dot(dir, up);
+  float sourceLength = length(sourceLevel);
+  float dirLength = length(dirLevel);
+  float around = (sourceLength < 1e-4 || dirLength < 1e-4)
+    ? 0.0
+    : acos(clamp(dot(sourceLevel, dirLevel) / (sourceLength * dirLength), -1.0, 1.0));
+  vec2 place = vec2(around / 3.14159265, (altitude + 1.57079633) / 3.14159265);
+  vec3 light = texture2D(uMap, place).rgb * uGain * uTint;
+  // A little of the veil's own patchiness carried through rather than a hard mask, so the
+  // display fades at the edge of a fibre instead of ending on a cut line.
+  return light * uStrength * (0.25 + 0.75 * ice);
 }
 `
 
@@ -148,8 +188,16 @@ varying vec3 vDir;
 uniform float layerHeight;
 uniform vec3 fieldOffset;
 uniform float fibrous;
+varying vec3 vWorldDir;
+// 1 while this deck draws an ice display itself — see IceHaloEffect.hosted — and the display is up.
+uniform float uHaloShown;
+// 1 while this deck is blended as PREMULTIPLIED light (see LayeredCloudSystem.hostHalo), which is
+// what lets one drawing both lay the veil over what is behind it and add the display's light.
+uniform float uPremultiplied;
 
 ${CLOUD_NOISE_GLSL}
+${CIRRUS_COVER_GLSL}
+${ICE_HALO_LIGHT_GLSL}
 
 // Cellular (Worley) noise — distance to the nearest of 27 randomly-jittered cell points. Unlike
 // fbm's smooth interpolated blobs, this has genuinely sharp valleys between cells, reading as
@@ -239,7 +287,25 @@ void main() {
   // a fraction of the opacity a water deck reaches, however completely it covers.
   alpha *= mix(1.0, 0.38, fibrous);
   alpha = 1.0 - pow(max(0.0, 1.0 - alpha), opticalDensity);
-  if (alpha < 0.02) discard;
+
+  // THE ICE DISPLAY, where this deck carries one: read off the very veil just worked out, where
+  // IceHaloEffect's own sphere would have worked the same five fbm out again for every pixel. Same
+  // conditions as cirrusCoverAt's (no crystals below the horizon, none in a deck of no cover).
+  vec3 halo = vec3(0.0);
+  bool haloHere = false;
+  if (uHaloShown > 0.5 && coverage > 0.0 && dir.y >= 0.0) {
+    float ice = cirrusCoverOf(shape, coverage);
+    if (ice > 0.0) {
+      haloHere = true;
+      halo = iceHaloLight(normalize(vWorldDir), ice);
+    }
+  }
+  // Where the veil is too thin to draw, the display may still be there: the deck then adds its
+  // light alone.
+  if (alpha < 0.02) {
+    if (!haloHere) discard;
+    alpha = 0.0;
+  }
 
   float diff = dot(dir, L) * 0.5 + 0.5;
   float sunGlow = pow(max(dot(dir, L), 0.0), 6.0) * 0.6; // diffuse bright patch toward the sun, like light through an overcast layer
@@ -253,7 +319,9 @@ void main() {
   color = mix(color, baseColor * (sunColor * 0.85 + ambientColor * 0.45) * mix(0.72, 1.25, shape), fibrous * 0.75);
   color *= mix(1.0, mix(0.32, 0.62, fibrous), darkness);
 
-  gl_FragColor = vec4(color, alpha);
+  // Premultiplied, the result is the display's light seen THROUGH the veil, then the veil over
+  // what is behind: exactly what the display drawn first and the deck laid over it gave.
+  gl_FragColor = uPremultiplied > 0.5 ? vec4(color * alpha + halo * (1.0 - alpha), alpha) : vec4(color, alpha);
 }
 `
 
@@ -278,7 +346,16 @@ export function buildCloudMaterial(
     darkness: { value: 0 },
     layerHeight: { value: layerHeight },
     fieldOffset: { value: new Vector3() },
-    fibrous: { value: fibrous }
+    fibrous: { value: fibrous },
+    uHaloShown: { value: 0 },
+    uPremultiplied: { value: 0 },
+    // Stand-ins until an ice display is hosted, when they are replaced by the display's own.
+    uSource: { value: new Vector3(0, 1, 0) },
+    uUp: { value: new Vector3(0, 1, 0) },
+    uStrength: { value: 0 },
+    uTint: { value: new Vector3(1, 1, 1) },
+    uMap: { value: null },
+    uGain: { value: 0 }
   }
   const material = new ShaderMaterial({
     uniforms,

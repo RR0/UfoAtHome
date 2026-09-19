@@ -13,7 +13,7 @@ import {
   Vector3
 } from "three"
 import { HaloSky } from "../engine/atmosphere/HaloSky.js"
-import { CIRRUS_COVER_GLSL, CLOUD_NOISE_GLSL } from "./CloudSystem.js"
+import { CIRRUS_COVER_GLSL, CLOUD_NOISE_GLSL, ICE_HALO_LIGHT_GLSL } from "./CloudSystem.js"
 
 /**
  * Draws what ice crystals do to the light of the Sun or the Moon — all of it, not a chosen few.
@@ -145,16 +145,11 @@ export class IceHaloEffect {
         precision highp float;
         ${CLOUD_NOISE_GLSL}
         ${CIRRUS_COVER_GLSL}
+        ${ICE_HALO_LIGHT_GLSL}
         varying vec3 vDirection;
-        uniform vec3 uSource;
-        uniform vec3 uUp;
-        uniform float uStrength;
-        uniform vec3 uTint;
         uniform float uIceCover;
         uniform float uIceHeight;
         uniform vec3 uFieldOffset;
-        uniform sampler2D uMap;
-        uniform float uGain;
 
         void main() {
           vec3 dir = normalize(vDirection);
@@ -167,24 +162,7 @@ export class IceHaloEffect {
           // kilometres up, so a line of sight that goes down never reaches any.
           float ice = cirrusCoverAt(dir, uIceHeight, uIceCover, uFieldOffset);
           if (ice <= 0.0) discard;
-          vec3 up = normalize(uUp);
-          vec3 source = normalize(uSource);
-          // The map is held in the source's own frame: how far up, and how far round from its
-          // bearing. Reading it that way is what lets one traced map serve every direction the
-          // witness may be facing and every bearing the Sun may be on.
-          float altitude = asin(clamp(dot(dir, up), -1.0, 1.0));
-          vec3 sourceLevel = source - up * dot(source, up);
-          vec3 dirLevel = dir - up * dot(dir, up);
-          float sourceLength = length(sourceLevel);
-          float dirLength = length(dirLevel);
-          float around = (sourceLength < 1e-4 || dirLength < 1e-4)
-            ? 0.0
-            : acos(clamp(dot(sourceLevel, dirLevel) / (sourceLength * dirLength), -1.0, 1.0));
-          vec2 place = vec2(around / 3.14159265, (altitude + 1.57079633) / 3.14159265);
-          vec3 light = texture2D(uMap, place).rgb * uGain * uTint;
-          // A little of the veil's own patchiness carried through rather than a hard mask, so the
-          // display fades at the edge of a fibre instead of ending on a cut line.
-          gl_FragColor = vec4(light * uStrength * (0.25 + 0.75 * ice), 1.0);
+          gl_FragColor = vec4(iceHaloLight(dir, ice), 1.0);
         }
       `,
       transparent: true,
@@ -197,6 +175,39 @@ export class IceHaloEffect {
     this.object.renderOrder = -1
     this.object.frustumCulled = false
     this.object.visible = false
+    const uniforms = this.material.uniforms
+    this.deckUniforms = {
+      uSource: uniforms.uSource, uUp: uniforms.uUp, uStrength: uniforms.uStrength, uTint: uniforms.uTint,
+      uMap: uniforms.uMap, uGain: uniforms.uGain, uHaloShown: { value: 0 }
+    }
+  }
+
+  /**
+   * What an ice deck needs to draw this display itself — the SAME uniform objects this effect
+   * writes, so whatever it sets reaches the deck with nothing to copy.
+   */
+  readonly deckUniforms: Record<string, { value: unknown }>
+  private shown = false
+  private hostedByDeck = false
+
+  /**
+   * Whether the ice deck the display is refracted through draws it (see LayeredCloudSystem.hostHalo)
+   * rather than this effect's own sphere.
+   *
+   * The display is masked by the veil, so drawing it on its own meant working the veil out twice
+   * for every pixel of sky — five fbm, as dear as the deck itself: 3 to 9 ms of a frame at 2.7
+   * million pixels. The deck already has that veil in hand. The sphere stays for a sky whose ice has
+   * no deck to host it.
+   */
+  set hosted(hosted: boolean) {
+    this.hostedByDeck = hosted
+    this.show(this.shown)
+  }
+
+  private show(visible: boolean): void {
+    this.shown = visible
+    this.object.visible = visible && !this.hostedByDeck
+    this.deckUniforms.uHaloShown.value = visible ? 1 : 0
   }
 
   /** Whether the first display this effect will ever show is still being traced — what a scene's
@@ -236,7 +247,7 @@ export class IceHaloEffect {
       // the mesh is not drawn — but it leaves the effect REPORTING a strength it is not showing,
       // which is how a probe of the live scene ends up believing a display is up when it is not.
       uniforms.uStrength.value = 0
-      this.object.visible = false
+      this.show(false)
       this.stopWork()
       return
     }
@@ -245,7 +256,7 @@ export class IceHaloEffect {
     uniforms.uTint.value.set(tint[0], tint[1], tint[2])
     uniforms.uIceCover.value = ice.cover
     uniforms.uIceHeight.value = ice.layerHeight
-    this.object.visible = this.everDisplayed
+    this.show(this.everDisplayed)
     this.requestMap(sourceAltitudeDeg, alignment)
   }
 
@@ -324,7 +335,7 @@ export class IceHaloEffect {
     }
     this.texture.needsUpdate = true
     this.everDisplayed = true
-    this.object.visible = this.material.uniforms.uStrength.value > 0
+    this.show(this.material.uniforms.uStrength.value > 0)
     this.onRepaint?.()
   }
 
