@@ -197,10 +197,18 @@ void main() {
   vec3 warp = vec3(fbm(warpPos + 12.3), fbm(warpPos + 47.1), fbm(warpPos + 91.7)) * 40.0;
   vec3 warpedPos = planePos + warp;
 
-  float shapeFbm = fbm(warpedPos * 0.014) * 0.5 + 0.5;
-  float shapeCell = 1.0 - worley(warpedPos * 0.011);
-  float shape = mix(shapeFbm, shapeCell, 0.4);
-  float detail = fbm(warpedPos * 0.031 + 41.0) * 0.5 + 0.5;
+  // The water field is only worked out for a deck that has any water in it. An ice deck mixes it
+  // away entirely below (mix at 1 is the second term alone), and it is the dearest part of the
+  // shader — two fbm and the 27 cells of the Worley — on every pixel of the sky: 30 to 40% of the
+  // cirrus deck's time for nothing on screen.
+  float shape = 0.0;
+  float detail = 0.0;
+  if (fibrous < 1.0) {
+    float shapeFbm = fbm(warpedPos * 0.014) * 0.5 + 0.5;
+    float shapeCell = 1.0 - worley(warpedPos * 0.011);
+    shape = mix(shapeFbm, shapeCell, 0.4);
+    detail = fbm(warpedPos * 0.031 + 41.0) * 0.5 + 0.5;
+  }
 
   // ICE. Sampled through a strongly anisotropic scale — a twentieth of the frequency along one
   // axis and four times it across — so the same noise comes out as long parallel filaments instead
