@@ -102,11 +102,13 @@ export class CanvasRenderer {
    * texture the size of paintExtent's box (see PhenomenonSystem). Selection handles are never
    * painted here: they are an editing affordance and stay on the overlay the pointer works on.
    */
-  paintInto(shape: Shape, extent: ShapeBounds, scale: number): void {
+  paintInto(shape: Shape, extent: ShapeBounds, scale: number, ghost = false): void {
     this.ctx.save()
     this.ctx.scale(scale, scale)
     this.ctx.translate(-extent.x, -extent.y)
-    this.paintShape(shape.selected ? { ...shape, selected: false } : shape)
+    const unselected = shape.selected ? { ...shape, selected: false } : shape
+    if (ghost) this.paintGhost(unselected, 1.5)
+    else this.paintShape(unselected)
     this.ctx.restore()
   }
 
@@ -261,6 +263,30 @@ export class CanvasRenderer {
 
   private paintBase(shape: Shape): void {
     this.ctx.fillStyle = this.dazzledFill(shape, shape.brightness ?? 0)
+    this.tracePath(shape)
+    this.ctx.fill()
+  }
+
+  /**
+   * The witness's own outline and nothing else: a dashed line along the shape's edge, in its colour,
+   * with no fill, halo or glare.
+   *
+   * What a shape becomes when an interpretation stands a body in its place (see BodySystem): the
+   * body is what is drawn, and the testimony stays on screen as the thing it is measured against —
+   * never hidden, since hiding it would let the interpretation replace what was seen.
+   */
+  paintGhost(shape: Shape, lineWidthPx: number): void {
+    this.ctx.save()
+    this.tracePath(shape)
+    this.ctx.setLineDash([lineWidthPx * 3, lineWidthPx * 2])
+    this.ctx.lineWidth = lineWidthPx
+    this.ctx.strokeStyle = shape.color
+    this.ctx.stroke()
+    this.ctx.restore()
+  }
+
+  /** The shape's edge as the current path — its ellipse, or its polygon turned about its centre. */
+  private tracePath(shape: Shape): void {
     this.ctx.beginPath()
     if (shape.kind === "oval") {
       const { x, y, width, height } = shape.bounds
@@ -285,7 +311,6 @@ export class CanvasRenderer {
       this.ctx.closePath()
       this.ctx.restore()
     }
-    this.ctx.fill()
   }
 
   private paintHalo(shape: Shape): void {

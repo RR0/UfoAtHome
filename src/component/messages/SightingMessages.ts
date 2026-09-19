@@ -33,4 +33,18 @@ export interface SightingMessages extends SightingLabels {
    * field by field, in the same words the editor uses for the same fields. */
   showLabels: string
   hideLabels: string
+  /** The choice of what to replay the testimony with — see SightingElement.interpretationSelect. */
+  interpretation: string
+  rawTestimony: string
+  /** The witness's own reading of what they saw — see SightingRecordingJson.interpretation. */
+  witnessInterpretation: string
+  /** An analyst's, `{title}` being what the case calls it and `{by}` who claims it. */
+  interpretationBy: string
+  /** Heading of the lines that set the interpretation's bodies against what the witness said. */
+  confrontation: string
+  /** `{deg}` degrees between the direction the witness gave and the one the body is in. */
+  confrontationDirection: string
+  /** `{ratio}`: how many times wider (or taller) the body looks than the witness said. */
+  confrontationWidth: string
+  confrontationHeight: string
 }

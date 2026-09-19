@@ -104,10 +104,12 @@ import type { LensFlareSystem } from "./LensFlareEffect.js"
 import { DecorSystem } from "./DecorSystem.js"
 import type { DecorObject } from "../engine/model/Decor.js"
 import { resolveDecorLitAt, resolveDecorPlacementAt, canHoldWitness } from "../engine/model/Decor.js"
-import type { DecorModelCredit } from "../engine/model/Decor.js"
+import type { DecorModelCredit, DecorModelRef } from "../engine/model/Decor.js"
 import type { DecorModelProvider } from "./decor/DecorModelProvider.js"
 import { DECOR_MODEL_SOURCES } from "./decor/decorModelSources.js"
 import { loadGltfScene } from "./decor/loadGltfScene.js"
+import { BodySystem } from "./BodySystem.js"
+import type { BodyState, Ground } from "../engine/interpretation/BodyPlacement.js"
 import { PhenomenonSystem, PHENOMENON_LAYER } from "./PhenomenonSystem.js"
 import { ReferenceSystem, REFERENCE_LAYER } from "./ReferenceSystem.js"
 import type { ReferenceView } from "./ReferenceSystem.js"
@@ -805,6 +807,11 @@ export class SceneRenderer {
    * is the only thing that makes a licence a licence (see DataSource's own doc comment). Entries
    * appear as models land and disappear with the objects that named them. */
   private readonly decorModelCredits = new Map<string, DecorModelCredit>()
+  /** The bodies of the interpretation being replayed, if one is — see setBodies. */
+  private readonly bodySystem = new BodySystem(ref => this.loadBodyModel(ref), () => this.render())
+  /** Where the frame bodies (and the decor) are placed in stands in the world this tick — the t=0
+   * reference as seen from the witness, set by updateDecorAnchoring. */
+  private bodyOrigin = { x: 0, z: 0 }
   private starTiers: StarTier[] = []
   private readonly bodyMeshes = new Map<string, Mesh | Sprite>()
   /** Invisible (opacity 0), larger-than-the-real-disc proxies used only for pickBodyAt's hover/
@@ -1151,6 +1158,7 @@ export class SceneRenderer {
     this.lightningLight.color.copy(LIGHTNING_COLOR)
     this.scene.add(this.celestialLight, this.celestialLightTarget, this.skyLight, this.lightningLight)
     this.scene.add(this.celestialGroup)
+    this.scene.add(this.bodySystem.group)
     const scatteredSky = new ScatteredSky(this.renderer, () => {
       this.skyColoursStale = true
       this.render()
@@ -1572,7 +1580,46 @@ export class SceneRenderer {
   /** Every model credit currently on screen — what the info panel shows beside the recording's own
    * sources. Empty while nothing named a model, or while none has arrived yet. */
   get currentDecorModelCredits(): DecorModelCredit[] {
-    return [...this.decorModelCredits.values()]
+    return [...this.decorModelCredits.values(), ...this.bodySystem.modelCredits as DecorModelCredit[]]
+  }
+
+  /**
+   * The relief, as bodies are placed on it (see BodyPlacement.Ground): east and north from the
+   * recording's t=0 position, up from the ground there. Read off the same patch the decor stands
+   * on, as it stands this tick — so call it after updateDecorAnchoring.
+   */
+  get bodyGround(): Ground {
+    const { x, z } = this.bodyOrigin
+    const originY = this.groundYUnder(x, z)
+    return { heightAt: (eastM, northM) => this.groundYUnder(x + eastM, z - northM) - originY }
+  }
+
+  /**
+   * Stands the bodies of an interpretation in the scene — or none, which is the raw testimony. See
+   * BodySystem. Called every tick after updateDecorAnchoring, whose origin it shares.
+   */
+  setBodies(states: BodyState[]): void {
+    const { x, z } = this.bodyOrigin
+    this.bodySystem.set(states, { originX: x, originZ: z, originGroundY: this.groundYUnder(x, z) })
+    // Something is there to cast a shadow, whatever the decor says.
+    if (this.bodySystem.any) this.celestialLight.castShadow = true
+    // Only ever widened here, over what updateDecorAnchoring has just sized for the decor and the
+    // sky: an aircraft of an interpretation 8 km out is as far as one of the decor.
+    const needed = this.bodySystem.furthestFrom(this.camera.position) * 1.2
+    if (needed > this.camera.far) {
+      this.camera.far = needed
+      this.camera.updateProjectionMatrix()
+    }
+  }
+
+  /** A body's model, the way a decor object's is fetched (see loadDecorModel): by catalogue entry
+   * or by url, and refused without a credit. */
+  private async loadBodyModel(ref: DecorModelRef): Promise<{ scene: Object3D, credit: DecorModelCredit, headingOffsetDeg?: number } | undefined> {
+    const entry = ref.url ? undefined : ref.id ? await this.decorModelProvider.entry(ref.id) : undefined
+    const url = ref.url ?? entry?.url
+    const credit = ref.credit ?? entry?.credit
+    if (!url || !credit) return undefined
+    return { scene: await loadGltfScene(url), credit, headingOffsetDeg: ref.headingOffsetDeg ?? entry?.headingOffsetDeg }
   }
 
   /**
@@ -1701,6 +1748,7 @@ export class SceneRenderer {
       this.camera.position.y = this.groundYUnder(anchorX, anchorZ) + view.eyeY
       this.camera.rotation.set(this.indoorLookPitchDeg * DEG_TO_RAD, -(view.headingDeg + this.indoorLookYawDeg) * DEG_TO_RAD, 0, "YXZ")
     }
+    this.bodyOrigin = { x: offset.x + shift.x, z: offset.z + shift.z }
     for (const object of this.decorObjects) {
       const group = this.decorGroups.get(object.id)
       if (!group) continue

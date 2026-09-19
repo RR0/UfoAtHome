@@ -1,0 +1,110 @@
+{
+  "id": "Socorro",
+  "title": "Socorro",
+  "time": "1964-04-24 17:50",
+  "events": [
+    {
+      "type": "event",
+      "eventType": "sighting",
+      "time": "1964-04-24 17:50",
+      "title": "Lonnie Zamora",
+      "url": "witness-socorro.json"
+    },
+    {
+      "type": "event",
+      "eventType": "interpretation",
+      "sighting": "1964-04-24-ZamoraLonnie",
+      "title": {
+        "fr": "Démonstration : trois fois plus grand, trois fois plus loin",
+        "en": "Demonstration: three times as large, three times as far"
+      },
+      "by": [
+        {
+          "title": "UFO@home"
+        }
+      ],
+      "bodies": [
+        {
+          "id": "craft",
+          "explains": [
+            "ufo-1"
+          ],
+          "model": {
+            "id": "ellipsoid"
+          },
+          "track": [
+            {
+              "t": 52000,
+              "eastM": -592.23,
+              "northM": -1022.24,
+              "onGround": true,
+              "sizeM": {
+                "widthM": 10.08,
+                "lengthM": 10.08,
+                "heightM": 5.19
+              },
+              "appearance": {
+                "color": "#e8e6df",
+                "albedo": 0.7
+              }
+            },
+            {
+              "t": 77000,
+              "eastM": -592.23,
+              "northM": -1022.24,
+              "onGround": true
+            },
+            {
+              "t": 83000,
+              "azimuthDeg": 195.925,
+              "altitudeDeg": 4.1083,
+              "distanceM": 132.6
+            },
+            {
+              "t": 84500,
+              "azimuthDeg": 204.6417,
+              "altitudeDeg": 2.075,
+              "distanceM": 189.3
+            },
+            {
+              "t": 86000,
+              "azimuthDeg": 209.2667,
+              "altitudeDeg": 0.9667,
+              "distanceM": 247.5
+            },
+            {
+              "t": 89000,
+              "azimuthDeg": 214.9,
+              "altitudeDeg": 3.1417,
+              "distanceM": 616.2
+            },
+            {
+              "t": 92000,
+              "azimuthDeg": 217.1583,
+              "altitudeDeg": 4.325,
+              "distanceM": 1653.9
+            },
+            {
+              "t": 95000,
+              "azimuthDeg": 217.7667,
+              "altitudeDeg": 4.9667,
+              "distanceM": 4491.0
+            },
+            {
+              "t": 100000,
+              "azimuthDeg": 219.9833,
+              "altitudeDeg": 5.4833,
+              "distanceM": 9010.0
+            },
+            {
+              "t": 115000,
+              "azimuthDeg": 221.975,
+              "altitudeDeg": 5.9917,
+              "distanceM": 24164.9
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -213,6 +213,43 @@ if (excerpts.length > 0) {
     </table>
     </div>
 
+    <h2>What it was: interpretations</h2>
+    <p>A recording states angles, and a body in metres is never part of what was seen. It is a
+      claim about it, and it is tested by standing it in the scene and looking at it from where
+      the witness stood: it casts its shadow, the ground can hide it, and its outline is measured
+      against what the witness said at every instant. The phenomena it claims to be stay on
+      screen as dashed outlines, and the player lists how far off the direction is and how many
+      times wider and taller the body looks, in red when a witness could not have been that far
+      off.</p>
+    <p>The witness's own reading goes in the recording, as <code>interpretation</code>. An
+      analyst's goes in the case, as an event of type <code>interpretation</code> naming the
+      recording by its <code>id</code>, with who claims it in <code>by</code>
+      (<code>{ "people": id }</code>, <code>{ "org": id }</code>, or a person described in value)
+      and its bodies inline or in a file at <code>url</code>. The player offers the raw testimony
+      and each interpretation, one at a time.</p>
+    <pre data-json="none"><code>"interpretation": {
+  "title": "A craft standing on its legs",
+  "bodies": [{
+    "id": "craft",
+    "explains": ["ufo-1"],
+    "model": { "id": "ellipsoid" },
+    "track": [
+      { "t": 52000, "eastM": -571.6, "northM": -965.5, "onGround": true,
+        "sizeM": { "widthM": 3.36, "lengthM": 3.36, "heightM": 1.73 },
+        "appearance": { "color": "#e8e6df", "albedo": 0.7 } },
+      { "t": 83000, "azimuthDeg": 195.9, "altitudeDeg": 4.1, "distanceM": 44 }
+    ]
+  }]
+}</code></pre>
+    <div class="table-scroll">
+    <table>
+      <tr><th>Field</th><th>Meaning</th></tr>
+      <tr><td><code>explains</code></td><td>The <code>sourceId</code>s of the phenomena this body claims to be</td></tr>
+      <tr><td><code>model</code></td><td>A shape built here (<code>ellipsoid</code>, <code>sphere</code>, <code>disc</code>, <code>cylinder</code>, <code>cone</code>, <code>box</code>, <code>torus</code>), a model of the catalogue by <code>id</code>, or a glTF file at <code>url</code> with its <code>credit</code>. Stretched to <code>sizeM</code> whichever it is</td></tr>
+      <tr><td><code>track</code></td><td>Where it is and what it looks like at each <code>t</code>. A position is stated either in the world (<code>eastM</code>/<code>northM</code> from where the witness stood at the start, like the decor, with <code>onGround</code> or <code>altitudeAboveGroundM</code>) or from the witness at that instant (<code>azimuthDeg</code>, <code>altitudeDeg</code>, <code>distanceM</code>). A body <code>onGround</code> stands on the relief; a direction with no distance then meets the ground where that line does. <code>sizeM</code>, <code>attitude</code> (<code>headingDeg</code>, <code>pitchDeg</code>, <code>rollDeg</code>) and <code>appearance</code> (<code>color</code>, <code>albedo</code>) hold until a later keyframe restates them</td></tr>
+    </table>
+    </div>
+
     <h2>The weather, and its clouds</h2>
     <p>A <code>weather</code> keyframe states the sky's conditions at one moment of the recording's
       clock; between two keyframes every number is blended, and precipitation type and storm are
@@ -480,6 +517,43 @@ if (excerpts.length > 0) {
       <tr><td><code>references</code></td><td>Photos des lieux posées sur la scène : <code>src</code> (une adresse, ou une URL <code>data:</code> pour une photo ajoutée depuis un disque), <code>kind</code> (photo/panorama), <code>registration</code> (<code>headingDeg</code>, <code>pitchDeg</code>, <code>rollDeg</code>, <code>fovDeg</code>), <code>opacity</code>, <code>credit</code>/<code>creditUrl</code>, <code>t</code> et <code>drawing</code> facultatifs, et les <code>landmarks</code> sur lesquels elle a été recalée (<code>id</code>, <code>label</code>, <code>picture</code> en <code>{ u, v }</code> depuis le coin haut gauche, <code>scene</code> en <code>{ azimuthDeg, altitudeDeg }</code>)</td></tr>
       <tr><td><code>instrument</code>, <code>exposureSeconds</code></td><td>À travers quoi l'observation a été faite, et combien de temps l'obturateur est resté ouvert. Absent : l'œil nu</td></tr>
       <tr><td><code>decor</code></td><td>Le décor, à une vraie distance <code>eastM</code>/<code>northM</code> du témoin : bâtiments (avec <code>floors</code>, <code>windows</code>), arbres, lampadaires, véhicules, autres témoins, aéronefs — éventuellement avec une <code>track</code> et des <code>lights</code> dont le <code>pattern</code> porte une vraie cadence d'éclats</td></tr>
+    </table>
+    </div>
+
+    <h2>Ce que c'était : les interprétations</h2>
+    <p>Un enregistrement énonce des angles, et un corps en mètres ne fait jamais partie de ce qui
+      a été vu. C'est une affirmation à son sujet, et elle se met à l'épreuve en la posant dans la
+      scène et en la regardant depuis l'endroit où se tenait le témoin : elle projette son ombre,
+      le sol peut la cacher, et son contour est confronté à chaque instant à ce que le témoin a
+      dit. Les phénomènes qu'elle prétend être restent à l'écran en contours pointillés, et le
+      lecteur indique l'écart de direction et combien de fois plus large et plus haut le corps
+      paraît, en rouge quand un témoin n'aurait pas pu se tromper d'autant.</p>
+    <p>La lecture du témoin lui-même va dans l'enregistrement, en <code>interpretation</code>.
+      Celle d'un analyste va dans le dossier, en événement de type <code>interpretation</code>
+      qui désigne l'enregistrement par son <code>id</code>, avec qui l'avance dans
+      <code>by</code> (<code>{ "people": id }</code>, <code>{ "org": id }</code>, ou une personne
+      décrite en valeur) et ses corps sur place ou dans un fichier à <code>url</code>. Le lecteur
+      propose le témoignage brut et chaque interprétation, une à la fois.</p>
+    <pre data-json="none"><code>"interpretation": {
+  "title": "Un engin posé sur ses pieds",
+  "bodies": [{
+    "id": "craft",
+    "explains": ["ufo-1"],
+    "model": { "id": "ellipsoid" },
+    "track": [
+      { "t": 52000, "eastM": -571.6, "northM": -965.5, "onGround": true,
+        "sizeM": { "widthM": 3.36, "lengthM": 3.36, "heightM": 1.73 },
+        "appearance": { "color": "#e8e6df", "albedo": 0.7 } },
+      { "t": 83000, "azimuthDeg": 195.9, "altitudeDeg": 4.1, "distanceM": 44 }
+    ]
+  }]
+}</code></pre>
+    <div class="table-scroll">
+    <table>
+      <tr><th>Champ</th><th>Sens</th></tr>
+      <tr><td><code>explains</code></td><td>Les <code>sourceId</code> des phénomènes que ce corps prétend être</td></tr>
+      <tr><td><code>model</code></td><td>Une forme construite ici (<code>ellipsoid</code>, <code>sphere</code>, <code>disc</code>, <code>cylinder</code>, <code>cone</code>, <code>box</code>, <code>torus</code>), un modèle du catalogue par son <code>id</code>, ou un fichier glTF à <code>url</code> avec son <code>credit</code>. Étiré à <code>sizeM</code> dans tous les cas</td></tr>
+      <tr><td><code>track</code></td><td>Où il est et à quoi il ressemble à chaque <code>t</code>. Une position s'énonce soit dans le monde (<code>eastM</code>/<code>northM</code> depuis l'endroit où se tenait le témoin au début, comme le décor, avec <code>onGround</code> ou <code>altitudeAboveGroundM</code>), soit depuis le témoin à cet instant (<code>azimuthDeg</code>, <code>altitudeDeg</code>, <code>distanceM</code>). Un corps <code>onGround</code> est posé sur le relief ; une direction sans distance rencontre alors le sol là où cette ligne le rencontre. <code>sizeM</code>, <code>attitude</code> (<code>headingDeg</code>, <code>pitchDeg</code>, <code>rollDeg</code>) et <code>appearance</code> (<code>color</code>, <code>albedo</code>) valent jusqu'à ce qu'une keyframe suivante les énonce à nouveau</td></tr>
     </table>
     </div>
 

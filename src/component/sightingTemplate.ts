@@ -4,6 +4,11 @@ export const html = `
     <span id="testimony-prefix">Testimony by</span>
     <span id="witness-text"></span><select id="witness" hidden></select>
   </span>
+  <!-- What to replay the testimony with: the raw testimony, the witness's own reading of it, or an
+       analyst's from the case (see InterpretationJson). Only there when there is a choice. -->
+  <label id="interpretation-choice" class="interpretation-choice" hidden>
+    <span id="interpretation-label">Interpretation</span> <select id="interpretation"></select>
+  </label>
   <!-- The playback layer's own toggles, taken out of the picture and put here — see
        UfoElement.hostControls. -->
   <span id="scene-controls" class="scene-controls"></span>
@@ -41,6 +46,12 @@ export const html = `
   </div>
 </div>
 <div id="ufo-slot"></div>
+<!-- The interpretation's bodies against what the witness said, at the instant on show — see
+     BodyConfrontation. Only while an interpretation is. -->
+<div id="confrontation" class="confrontation" hidden>
+  <span id="confrontation-heading" class="confrontation-heading">Against the testimony</span>
+  <ul id="confrontation-list"></ul>
+</div>
 <!-- What this recording states, field by field, in the same words the editor uses for the same
      fields — the very same SightingSummary the editor shows under its own render. Off unless
      the page asks for it (show-labels) or the reader does (the info panel's own toggle): a player
@@ -78,6 +89,32 @@ export const css = `
 }
 .testimony select {
   max-width: 12em;
+}
+.interpretation-choice {
+  white-space: nowrap;
+}
+.interpretation-choice select {
+  max-width: 16em;
+}
+.confrontation {
+  margin-top: 0.4em;
+  font-size: 0.85em;
+}
+.confrontation ul {
+  display: inline;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.confrontation li {
+  display: inline;
+  margin-left: 0.8em;
+  font-variant-numeric: tabular-nums;
+}
+/* What the interpretation fails to reproduce. Red, and not struck through: a strike is kept for a
+   witness's word the facts contradict, and here it is the interpretation that is at fault. */
+.confrontation .disagrees {
+  color: #d33;
 }
 /* The toggles the playback layer lends this toolbar (see UfoElement.hostControls): the look they
    have in the picture's corner, at the toolbar's own scale. */

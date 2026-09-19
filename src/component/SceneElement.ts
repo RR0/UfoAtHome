@@ -60,6 +60,11 @@ import type { Shape } from "../engine/shape/Shape.js"
 import { PhenomenonSystem } from "../render3d/PhenomenonSystem.js"
 import type { PlacedPhenomenon } from "../render3d/PhenomenonSystem.js"
 import { Vector3 } from "three"
+import { BodyPlacement } from "../engine/interpretation/BodyPlacement.js"
+import type { BodyState } from "../engine/interpretation/BodyPlacement.js"
+import { BodyConfrontation } from "../engine/interpretation/BodyConfrontation.js"
+import type { ConfrontationReading } from "../engine/interpretation/BodyConfrontation.js"
+import type { InterpretationJson } from "../engine/interpretation/Interpretation.js"
 
 registerUfo()
 
@@ -113,6 +118,9 @@ const SATELLITE_TOOLTIP: Record<string, string> = {
 
 /** Fired by a scene when the element sets of its recording have arrived, or turned out not to exist. */
 export const SATELLITES_CHANGE_EVENT = "satellites-change"
+/** Fired whenever what the interpretation on show says against the testimony changes — see
+ * SceneElement.confrontation. */
+export const CONFRONTATION_EVENT = "rr0-confrontation"
 
 export type SatelliteStatus = "none" | "loading" | "outside" | "unavailable" | "ready"
 
@@ -252,6 +260,13 @@ export class SceneElement extends HTMLElement {
    * crossed. */
   private lastLightningT?: number
   private lastTimeMs = 0
+  /** The interpretation whose bodies stand in the scene, if one does — see `interpretation`. */
+  private interpretationShown?: InterpretationJson
+  /** What its bodies say against the testimony at the instant on show — see `confrontation`. */
+  private confrontationReadings: ConfrontationReading[] = []
+  private confrontationSignature = ""
+  /** The phenomena a body stands in for at this instant, drawn as their outline alone. */
+  private explainedSourceIds = new Set<string>()
   /** What the sky now standing was computed from — see applySceneAt. */
   private lastSkyKey?: string
   private starCatalog?: StarCatalog
@@ -702,6 +717,8 @@ export class SceneElement extends HTMLElement {
 
   set sightingData(json: SightingRecordingJson) {
     this.ufoElement.sightingData = json
+    // An interpretation is OF one recording: another one's bodies have nothing to stand for here.
+    this.interpretationShown = undefined
     // A loaded recording may have been made through something with a format of its own.
     this.applyFrameFormat()
     this.lastTimeMs = 0
@@ -1013,6 +1030,8 @@ export class SceneElement extends HTMLElement {
     // witness — see SceneRenderer.updateDecorAnchoring's own doc comment. The reference pose is
     // always the recording's own t=0, regardless of what t is being rendered right now.
     this.sceneRenderer.updateDecorAnchoring(resolveObserverPoseAt(sighting, 0), pose, t)
+    // On the same origin as the decor, so right after it.
+    this.placeBodiesAt(t, instant === undefined)
     // A streetlight/vehicle's own lit state can change mid-recording (a photocell at dusk, a
     // driver's headlights) — see Decor.ts's own resolveDecorLitAt.
     this.sceneRenderer.updateDecorLitState(t, instant?.stepMs ?? 0)
@@ -1334,7 +1353,9 @@ export class SceneElement extends HTMLElement {
         distanceM: depths.get(sourceId)!.distanceM,
         renderOrder: order.indexOf(sourceId),
         aim: shape.aim,
-        hidden: offScreen.has(sourceId)
+        hidden: offScreen.has(sourceId),
+        // Only what the witness saw is outlined: an unseen phenomenon has no outline to show.
+        ghost: this.explainedSourceIds.has(sourceId) && shape.transparency < 1
       })
     }
     // The instrument's own aperture and roll, which the painter needs for a dazzling light's spikes
@@ -1360,6 +1381,57 @@ export class SceneElement extends HTMLElement {
    * it is tested by watching it fail, a craft set at five hundred metres going behind the patrol
    * car it was drawn in front of. `undefined` withdraws it.
    */
+  /**
+   * The interpretation to replay the testimony with — its bodies standing in the scene, the
+   * phenomena they claim to be reduced to their outline beside them — or undefined for the raw
+   * testimony. See InterpretationJson. Never part of the recording this element shows: the player
+   * chooses it, from the recording's own or from the case's.
+   */
+  get interpretation(): InterpretationJson | undefined {
+    return this.interpretationShown
+  }
+
+  set interpretation(interpretation: InterpretationJson | undefined) {
+    this.interpretationShown = interpretation
+    this.updateAstronomy(this.lastTimeMs)
+  }
+
+  /** What the bodies of the interpretation on show look like from the witness's eye, against what
+   * the witness said, at the instant on show — see BodyConfrontation. Empty for the raw testimony. */
+  get confrontation(): ConfrontationReading[] {
+    return this.confrontationReadings
+  }
+
+  /**
+   * Stands the interpretation's bodies where it puts them at `t`, on the relief the renderer holds,
+   * and reads them against the testimony. Placed afresh every instant rather than once: the relief
+   * arrives after the recording does, and a body on the ground must stand on the ground that is
+   * there now, not the flat plane that was there before.
+   */
+  private placeBodiesAt(t: number, announce: boolean): void {
+    const interpretation = this.interpretationShown
+    const sighting = this.ufoElement.sighting
+    let states: BodyState[] = []
+    let readings: ConfrontationReading[] = []
+    if (interpretation) {
+      const ground = this.sceneRenderer.bodyGround
+      const eyeAt = (at: number) => BodyPlacement.eyeOf(sighting, at, ground)
+      states = interpretation.bodies
+        .map(body => new BodyPlacement(body, ground, eyeAt).at(t))
+        .filter((state): state is BodyState => state !== undefined)
+      const eye = eyeAt(t)
+      readings = eye ? new BodyConfrontation(sighting.timeline).at(t, states, eye) : []
+    }
+    this.sceneRenderer.setBodies(states)
+    this.explainedSourceIds = new Set(states.flatMap(state => state.explains))
+    this.confrontationReadings = readings
+    if (!announce) return
+    const signature = JSON.stringify(readings)
+    if (signature === this.confrontationSignature) return
+    this.confrontationSignature = signature
+    this.dispatchEvent(new CustomEvent(CONFRONTATION_EVENT, { detail: readings }))
+  }
+
   setDistanceHypothesis(sourceId: string, distanceM: number | undefined): void {
     if (distanceM === undefined || !(distanceM > 0)) this.distanceHypotheses.delete(sourceId)
     else this.distanceHypotheses.set(sourceId, distanceM)

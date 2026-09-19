@@ -1,3 +1,5 @@
+import type { InterpretationEventJson, InterpretationJson } from "../interpretation/Interpretation.js"
+
 /**
  * A case, as RR0 writes it: the `case.json` of a dossier.
  *
@@ -18,19 +20,23 @@ export interface CaseJson {
   events?: CaseEventJson[]
 }
 
-/** One event of a case. A `sighting` points at a witness's recording by `url`. */
+/** One event of a case. A `sighting` points at a witness's recording by `url`; an
+ * `interpretation` names the recording it interprets by its `id` (see InterpretationEventJson). */
 export interface CaseEventJson {
   type?: "event"
   eventType: string
   url?: string
   time?: string
-  title?: string
+  title?: unknown
+  /** An interpretation's: the `id` of the recording it interprets. */
+  sighting?: string
 }
 
 /** Reading a case file for what UFO@home replays of it. */
 export class CaseFile {
 
   static readonly SIGHTING_EVENT = "sighting"
+  static readonly INTERPRETATION_EVENT = "interpretation"
 
   /**
    * Whether a fetched JSON is a case rather than one witness's recording: an object with events,
@@ -50,5 +56,27 @@ export class CaseFile {
     return (json.events ?? [])
       .filter(event => event.eventType === CaseFile.SIGHTING_EVENT && typeof event.url === "string" && event.url !== "")
       .map(event => new URL(event.url!, caseUrl).href)
+  }
+
+  /** The analysts' interpretations of one recording, in the order the case lists them: its events
+   * of type `interpretation` naming that recording's `id`. A recording with no id is named by
+   * none. */
+  static interpretationEvents(json: CaseJson, sightingId: string | undefined): InterpretationEventJson[] {
+    if (!sightingId) return []
+    return (json.events ?? [])
+      .filter(event => event.eventType === CaseFile.INTERPRETATION_EVENT && event.sighting === sightingId)
+      .map(event => event as unknown as InterpretationEventJson)
+  }
+
+  /**
+   * What an interpretation event claims: its bodies where it states them itself, or the file at its
+   * `url`, read relative to the case file's own address as a sighting's is. Its title is the
+   * event's, which is what the case calls it.
+   */
+  static async interpretationOf(event: InterpretationEventJson, caseUrl: string, fetchJson: (url: string) => Promise<unknown>): Promise<InterpretationJson> {
+    if (event.bodies) return { title: event.title, bodies: event.bodies }
+    if (!event.url) return { title: event.title, bodies: [] }
+    const file = await fetchJson(new URL(event.url, caseUrl).href) as InterpretationJson
+    return { title: event.title ?? file.title, bodies: file.bodies ?? [] }
   }
 }

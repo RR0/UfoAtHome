@@ -15,6 +15,7 @@ import type { DecorObject } from "../model/Decor.js"
 import type { Milestone } from "../model/Milestone.js"
 import type { SceneReference } from "../model/Reference.js"
 import type { SaidText } from "../model/SaidText.js"
+import type { InterpretationJson } from "../interpretation/Interpretation.js"
 import { sortedMilestones } from "../model/Milestone.js"
 import { SightingShapes } from "./SightingShapes.js"
 import { Provenance } from "./Provenance.js"
@@ -88,6 +89,9 @@ export interface SightingRecordingJson {
   /** Pictures of the place, laid over the reconstruction at the direction each was registered in —
    * see SceneReference. Absent/omitted means none. */
   references?: SceneReference[]
+  /** What the witness took it to be, in metres — see InterpretationJson. Absent means they said
+   * nothing a body could be made of, which is most of them. */
+  interpretation?: InterpretationJson
 }
 
 export function toSightingJson(sighting: Sighting): SightingRecordingJson {
@@ -128,7 +132,8 @@ export function plainSightingJson(sighting: Sighting): SightingRecordingJson {
     references: sighting.references.length > 0 ? sighting.references : undefined,
     weatherSource: sighting.weatherSource,
     instrument: sighting.instrumentId,
-    exposureSeconds: sighting.exposureSeconds
+    exposureSeconds: sighting.exposureSeconds,
+    interpretation: sighting.interpretation
   }
 }
 
@@ -188,6 +193,7 @@ function fromPlainSightingJson(json: SightingRecordingJson): Sighting {
   // Timeline.fromJSON because the projection needs the pose's own field of view, which lives on
   // the sighting, not on the timeline.
   sighting.testimony = json.testimony
+  sighting.interpretation = json.interpretation
   SightingShapes.toBounds(sighting)
   // Positions follow the stated directions the way sizes follow the stated angles — and this is the
   // step that lets a recording's witness turn their head without taking the sky with them.

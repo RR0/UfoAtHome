@@ -1,10 +1,13 @@
 import { html, css } from "./sightingTemplate.js"
 import { SightingFetch } from "../engine/net/SightingFetch.js"
 import { CaseFile } from "../engine/persistence/caseJson.js"
+import type { CaseJson } from "../engine/persistence/caseJson.js"
+import type { AgentRef, InterpretationJson } from "../engine/interpretation/Interpretation.js"
+import type { ConfrontationReading } from "../engine/interpretation/BodyConfrontation.js"
 import { SightingSummary } from "./SightingSummary.js"
 import { SightingAssessments } from "./SightingAssessments.js"
 import type { SummaryEntry } from "./SightingSummary.js"
-import { SceneElement, registerScene, SCENE_ELEMENT_NAME } from "./SceneElement.js"
+import { SceneElement, registerScene, SCENE_ELEMENT_NAME, CONFRONTATION_EVENT } from "./SceneElement.js"
 import { WITNESS_MAP_ATTRIBUTE, MILESTONES_ATTRIBUTE } from "./UfoElement.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
 import type { People } from "../engine/model/People.js"
@@ -110,9 +113,21 @@ export class SightingElement extends HTMLElement {
   private readonly supportsPopover = typeof (HTMLElement.prototype as { showPopover?: unknown }).showPopover === "function"
 
   private entries: WitnessEntry[] = []
-  /** How the case these recordings were read from names itself, when they were read from one: the
-   * recordings cannot say, since a testimony does not name its case (see Sighting.id). */
-  private caseTitle?: string
+  /** The case these recordings were read from, when they were, and its own address: what names
+   * them as a case (a recording cannot say, see Sighting.id) and what holds the analysts'
+   * interpretations of each. */
+  private caseSource?: { json: CaseJson, url: string }
+  private readonly interpretationChoice: HTMLElement
+  private readonly interpretationLabel: HTMLElement
+  private readonly interpretationSelect: HTMLSelectElement
+  private readonly confrontationElement: HTMLElement
+  private readonly confrontationHeading: HTMLElement
+  private readonly confrontationList: HTMLElement
+  /** How to get each interpretation the choice offers, by option value — fetched only once chosen,
+   * since an analyst's may be a file of its own. */
+  private interpretationLoaders = new Map<string, () => Promise<InterpretationJson | undefined>>()
+  /** Bumped on every choice, so an interpretation that arrives after another was chosen is dropped. */
+  private interpretationToken = 0
   private currentSrc?: string
   private infoOpen = false
   private creditsOpen = false
@@ -170,7 +185,17 @@ export class SightingElement extends HTMLElement {
     this.embedMarkup = this.shadow.getElementById("embed-markup") as HTMLTextAreaElement
     this.embedCopyButton = this.shadow.getElementById("embed-copy") as HTMLButtonElement
 
+    this.interpretationChoice = this.shadow.getElementById("interpretation-choice")!
+    this.interpretationLabel = this.shadow.getElementById("interpretation-label")!
+    this.interpretationSelect = this.shadow.getElementById("interpretation") as HTMLSelectElement
+    this.confrontationElement = this.shadow.getElementById("confrontation")!
+    this.confrontationHeading = this.shadow.getElementById("confrontation-heading")!
+    this.confrontationList = this.shadow.getElementById("confrontation-list")!
+
     this.witnessSelect.addEventListener("change", () => this.selectWitness(this.witnessSelect.value))
+    this.interpretationSelect.addEventListener("change", () => void this.chooseInterpretation(this.interpretationSelect.value))
+    this.sceneElement.addEventListener(CONFRONTATION_EVENT, event =>
+      this.showConfrontation((event as CustomEvent<ConfrontationReading[]>).detail))
     // Weather, sound and the witness's own pose are keyframed, so what the recording states at
     // one instant isn't what it states at another — a strip frozen on the opening frame would be
     // wrong for the rest of the replay. Cheap: refreshParamSummary does nothing at all while the
@@ -222,6 +247,10 @@ export class SightingElement extends HTMLElement {
     if (this.language === "en") return
     this.messages = await loadSightingMessages(this.language)
     this.testimonyPrefix.textContent = this.messages.testimonyBy
+    this.interpretationLabel.textContent = this.messages.interpretation
+    this.confrontationHeading.textContent = this.messages.confrontation
+    const shown = this.entries.find(entry => entry.src === this.currentSrc)
+    if (shown) this.offerInterpretations(shown)
     this.infoButton.title = this.messages.about
     this.infoButton.setAttribute("aria-label", this.messages.about)
     this.infoCloseButton.setAttribute("aria-label", this.messages.close)
@@ -309,7 +338,7 @@ export class SightingElement extends HTMLElement {
       // the same case.json works read from its dossier's page and from anywhere else.
       const urls = CaseFile.sightingUrls(json, new URL(url, location.href).href)
       if (urls.length === 0) throw new Error(`${url} is a case with no sighting event: no recording to show`)
-      await this.loadWitnessUrls(urls, json.title ?? json.id)
+      await this.loadWitnessUrls(urls, { json, url: new URL(url, location.href).href })
     } else {
       this.setEntries([{ src: url, sighting: json as SightingRecordingJson }], undefined)
     }
@@ -341,18 +370,18 @@ export class SightingElement extends HTMLElement {
     void this.loadWitnessUrls(urls)
   }
 
-  private async loadWitnessUrls(urls: string[], caseTitle?: string): Promise<void> {
+  private async loadWitnessUrls(urls: string[], caseSource?: { json: CaseJson, url: string }): Promise<void> {
     const entries = await Promise.all(
       urls.map(async (src): Promise<WitnessEntry> => (
         { src, sighting: (await SightingFetch.json(src)) as SightingRecordingJson }
       ))
     )
-    this.setEntries(entries, caseTitle)
+    this.setEntries(entries, caseSource)
   }
 
-  private setEntries(entries: WitnessEntry[], caseTitle: string | undefined): void {
+  private setEntries(entries: WitnessEntry[], caseSource: { json: CaseJson, url: string } | undefined): void {
     this.entries = entries
-    this.caseTitle = caseTitle
+    this.caseSource = caseSource
 
     this.toolbarElement.hidden = entries.length === 0
     const showSelect = entries.length > 1
@@ -433,6 +462,103 @@ export class SightingElement extends HTMLElement {
     }
   }
 
+  /**
+   * What the testimony on show can be replayed with: itself, raw; the witness's own reading of it,
+   * when their recording states one; and every analyst's the case holds for it (see
+   * CaseFile.interpretationEvents). Back to the raw testimony on every change of witness — an
+   * interpretation is of one recording — and nothing to choose, so no choice shown, when the raw
+   * testimony is all there is.
+   */
+  private offerInterpretations(entry: WitnessEntry): void {
+    this.interpretationToken++
+    this.interpretationLoaders = new Map()
+    this.interpretationSelect.innerHTML = ""
+    const offer = (value: string, label: string, load?: () => Promise<InterpretationJson | undefined>) => {
+      const option = document.createElement("option")
+      option.value = value
+      option.textContent = label
+      this.interpretationSelect.appendChild(option)
+      if (load) this.interpretationLoaders.set(value, load)
+    }
+    offer("raw", this.messages.rawTestimony)
+    const own = entry.sighting.interpretation
+    if (own) {
+      const title = this.said.read(own.title)
+      offer("witness", title ? `${this.messages.witnessInterpretation}${this.colon}${title}` : this.messages.witnessInterpretation, () => Promise.resolve(own))
+    }
+    const source = this.caseSource
+    if (source) {
+      CaseFile.interpretationEvents(source.json, entry.sighting.id).forEach((event, index) => {
+        const title = this.said.read(event.title) ?? `#${index + 1}`
+        const by = (event.by ?? []).map(agent => this.agentName(agent)).filter(Boolean).join(", ")
+        offer(`case-${index}`, by ? this.messages.interpretationBy.replace("{title}", title).replace("{by}", by) : title,
+          () => CaseFile.interpretationOf(event, source.url, url => SightingFetch.json(url)))
+      })
+    }
+    this.interpretationSelect.value = "raw"
+    this.interpretationChoice.hidden = this.interpretationSelect.options.length < 2
+    this.showConfrontation([])
+  }
+
+  /** A colon as the reader's language writes one: French puts a no-break space before it. */
+  private get colon(): string {
+    return this.language === "fr" ? "\u00a0: " : ": "
+  }
+
+  private async chooseInterpretation(value: string): Promise<void> {
+    const token = ++this.interpretationToken
+    const load = this.interpretationLoaders.get(value)
+    const interpretation = load ? await load().catch(error => {
+      console.warn(`<rr0-sighting>: could not read interpretation "${value}":`, error)
+      return undefined
+    }) : undefined
+    if (token !== this.interpretationToken) return
+    this.sceneElement.interpretation = interpretation
+    if (!interpretation) this.showConfrontation([])
+  }
+
+  /** Who made a claim, as a reader would name them: an id is spelled out ("HynekJosefAllen" is
+   * "Hynek Josef Allen"), a description is read like a witness's. */
+  private agentName(agent: AgentRef): string {
+    if ("people" in agent) return agent.people.replace(/([a-z])([A-Z])/g, "$1 $2")
+    if ("org" in agent) return agent.org.replace(/([a-z])([A-Z])/g, "$1 $2")
+    return this.witnessDisplayName(agent) ?? ""
+  }
+
+  /**
+   * One line per phenomenon a body claims to be: how far off the direction the witness gave it is,
+   * and how many times wider and taller than they said it looks — each in red when it is further
+   * off than a witness could be (see BodyConfrontation). Hidden for the raw testimony.
+   */
+  private showConfrontation(readings: ConfrontationReading[]): void {
+    this.confrontationList.innerHTML = ""
+    this.confrontationElement.hidden = !this.sceneElement.interpretation
+    const degrees = new Intl.NumberFormat(this.language, { maximumFractionDigits: 1, minimumFractionDigits: 1 })
+    const times = new Intl.NumberFormat(this.language, { maximumFractionDigits: 2, minimumFractionDigits: 2 })
+    for (const reading of readings) {
+      const item = document.createElement("li")
+      item.append(`${this.said.read(reading.title) ?? reading.sourceId}${this.colon}`)
+      const parts: [string, boolean][] = []
+      if (reading.separationDeg !== undefined) {
+        parts.push([this.messages.confrontationDirection.replace("{deg}", degrees.format(reading.separationDeg)), reading.disagreements.includes("direction")])
+      }
+      if (reading.widthRatio !== undefined) {
+        parts.push([this.messages.confrontationWidth.replace("{ratio}", times.format(reading.widthRatio)), reading.disagreements.includes("width")])
+      }
+      if (reading.heightRatio !== undefined) {
+        parts.push([this.messages.confrontationHeight.replace("{ratio}", times.format(reading.heightRatio)), reading.disagreements.includes("height")])
+      }
+      parts.forEach(([text, disagrees], index) => {
+        if (index > 0) item.append(" · ")
+        const span = document.createElement("span")
+        span.textContent = text
+        if (disagrees) span.className = "disagrees"
+        item.append(span)
+      })
+      this.confrontationList.appendChild(item)
+    }
+  }
+
   private selectWitness(src: string): void {
     const entry = this.entries.find(e => e.src === src)
     if (!entry) return
@@ -441,6 +567,7 @@ export class SightingElement extends HTMLElement {
     // Already fetched by loadWitnessUrls — no need to re-fetch on every selection change.
     // SceneElement's own setter updates astronomy/weather/terrain for the new sighting too.
     this.sceneElement.sightingData = entry.sighting
+    this.offerInterpretations(entry)
     this.updateTestimonyLine()
     // A different witness is a different recording: what it states, and what an assessor makes of
     // it, both change with it.
@@ -799,8 +926,9 @@ export class SightingElement extends HTMLElement {
     this.infoObservationList.innerHTML = ""
     if (entry) {
       // The case always: the strip reads a recording, and a recording does not name its case.
-      if (this.caseTitle) {
-        this.appendInfoRow(this.infoObservationList, this.messages.case, this.caseTitle)
+      const caseTitle = this.caseSource && (this.caseSource.json.title ?? this.caseSource.json.id)
+      if (caseTitle) {
+        this.appendInfoRow(this.infoObservationList, this.messages.case, caseTitle)
       }
       // Date, place and tags only while the strip under the render isn't already stating them —
       // see toggleLabels. The description is never dropped: it is the one thing the strip refuses

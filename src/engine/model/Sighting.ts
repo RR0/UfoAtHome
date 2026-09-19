@@ -15,6 +15,7 @@ import type { SceneReference } from "./Reference.js"
 import { Instruments } from "../instrument/Instrument.js"
 import type { Instrument } from "../instrument/Instrument.js"
 import { Provenance } from "../persistence/Provenance.js"
+import type { InterpretationJson } from "../interpretation/Interpretation.js"
 import type { Testimony } from "./Testimony.js"
 
 /**
@@ -351,6 +352,13 @@ export class Sighting {
    * "reassigned wholesale on edit" reasoning as id and witness above.
    */
   testimony?: Testimony
+
+  /**
+   * What the witness took it to be, in metres — see InterpretationJson. The witness's own claim
+   * about their testimony, and so part of it; an analyst's lives in the case instead. Not readonly,
+   * same "reassigned wholesale" reasoning as testimony above.
+   */
+  interpretation?: InterpretationJson
 
   /**
    * How many people THIS witness's account puts at the scene, themselves included — counted off the

@@ -47,6 +47,8 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
       return undefined
     }
     updateDecorAnchoring(): void {}
+    setBodies(): void {}
+    get bodyGround() { return { heightAt: () => 0 } }
     updateDecorLitState(): void {}
     pickBodyAt(): undefined {
       return undefined
@@ -397,6 +399,38 @@ describe("SightingElement", () => {
     const element = await connect("case.json")
 
     expect(element.witnessUrls).toEqual([johnUrl])
+  })
+
+  it("offers the raw testimony, the witness's own interpretation and the case's, and replays the one chosen", async () => {
+    const body = { id: "craft", explains: ["ufo"], model: { id: "sphere" }, track: [{ t: 0, eastM: 0, northM: 10, onGround: true }] }
+    const withId = { ...johnSighting, id: "1948-07-24-ChilesClarence", place: [{ lat: 32.4, lng: -86.3 }], interpretation: { title: "Own", bodies: [body] } }
+    const johnUrl = new URL("john.json", location.href).href
+    stubFetch({
+      "case.json": { events: [sightingEvent("john.json"), { type: "event", eventType: "interpretation", sighting: "1948-07-24-ChilesClarence", title: "Balloon", by: [{ people: "HynekJosefAllen" }], bodies: [body] }] },
+      [johnUrl]: withId
+    })
+    const element = await connect("case.json")
+    const shadow = element.shadowRoot!
+    const select = shadow.getElementById("interpretation") as HTMLSelectElement
+    expect((shadow.getElementById("interpretation-choice") as HTMLElement).hidden).toBe(false)
+    expect([...select.options].map(option => option.textContent)).toEqual(["Raw testimony", "The witness's own: Own", "Balloon, by Hynek Josef Allen"])
+    expect(select.value).toBe("raw")
+    expect(element.scene.interpretation).toBeUndefined()
+
+    select.value = "case-0"
+    select.dispatchEvent(new Event("change"))
+    await new Promise(resolve => setTimeout(resolve, 0))
+    expect(element.scene.interpretation?.title).toBe("Balloon")
+
+    select.value = "raw"
+    select.dispatchEvent(new Event("change"))
+    await new Promise(resolve => setTimeout(resolve, 0))
+    expect(element.scene.interpretation).toBeUndefined()
+  })
+
+  it("shows no choice where the raw testimony is all there is", async () => {
+    const element = await connect("john.json")
+    expect((element.shadowRoot!.getElementById("interpretation-choice") as HTMLElement).hidden).toBe(true)
   })
 
   it("names the case in the info panel by the case's own title, since no recording names its case", async () => {

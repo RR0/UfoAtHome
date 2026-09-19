@@ -26,6 +26,9 @@ export interface PlacedPhenomenon {
   renderOrder: number
   /** Not drawn because the phenomenon is outside the visible frame. */
   hidden: boolean
+  /** Drawn as its outline alone, because a body of the interpretation on show stands in its place
+   * — see CanvasRenderer.paintGhost. */
+  ghost?: boolean
 }
 
 /** The picture the phenomena are drawn into — the same projection the overlay used, so a shape's
@@ -325,9 +328,12 @@ export class PhenomenonSystem {
    * moving across the sky is the same picture in a different place. */
   private paint(mesh: Mesh<PlaneGeometry, MeshBasicMaterial>, phenomenon: PlacedPhenomenon, frame: PhenomenonFrame): void {
     const { shape } = phenomenon
-    const extent = CanvasRenderer.paintExtent(shape)
+    const painted = CanvasRenderer.paintExtent(shape)
+    // A ghost is a line ON the edge, half of which would fall outside an extent that ends there.
+    const margin = phenomenon.ghost ? 3 : 0
+    const extent = { x: painted.x - margin, y: painted.y - margin, width: painted.width + 2 * margin, height: painted.height + 2 * margin }
     this.extents.set(phenomenon.sourceId, extent)
-    const signature = PhenomenonSystem.signatureOf(shape, frame)
+    const signature = `${PhenomenonSystem.signatureOf(shape, frame)}|${phenomenon.ghost ? "ghost" : ""}`
     if (this.signatures.get(phenomenon.sourceId) === signature && mesh.material.map) return
     this.signatures.set(phenomenon.sourceId, signature)
     const scale = Math.min(frame.scale, MAX_TEXTURE_PX / Math.max(extent.width, extent.height, 1))
@@ -351,7 +357,7 @@ export class PhenomenonSystem {
     const painter = new CanvasRenderer(context)
     painter.setStarPoints(frame.starPoints)
     painter.setRoll(frame.rollRad)
-    painter.paintInto(shape, extent, scale)
+    painter.paintInto(shape, extent, scale, phenomenon.ghost)
     if (previous && !resized) {
       previous.needsUpdate = true
       return

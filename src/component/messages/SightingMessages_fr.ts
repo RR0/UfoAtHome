@@ -20,5 +20,13 @@ export const sightingMessages_fr: SightingMessages = {
   embedCopy: "Copier",
   embedCopied: "Copié",
   showLabels: "Afficher ce qu'elle indique",
+  interpretation: "Interprétation",
+  rawTestimony: "Témoignage brut",
+  witnessInterpretation: "Celle du témoin",
+  interpretationBy: "{title}, par {by}",
+  confrontation: "Face au témoignage",
+  confrontationDirection: "écart de {deg}°",
+  confrontationWidth: "largeur ×{ratio}",
+  confrontationHeight: "hauteur ×{ratio}",
   hideLabels: "Masquer ce qu'elle indique"
 }
