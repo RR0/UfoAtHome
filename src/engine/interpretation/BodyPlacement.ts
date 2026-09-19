@@ -27,6 +27,8 @@ export interface BodyState {
   id: string
   model: DecorModelRef
   explains: string[]
+  /** See BodyJson.outlineNode. */
+  outlineNode?: string
   eastM: number
   northM: number
   upM: number
@@ -186,6 +188,7 @@ export class BodyPlacement {
       id: this.body.id,
       model: this.body.model,
       explains: this.body.explains ?? [],
+      outlineNode: this.body.outlineNode,
       eastM,
       northM,
       upM,
@@ -205,7 +208,8 @@ export class BodyPlacement {
    * interval before — an exhaust catches, it does not dawn; one is put out by stating
    * `luminanceCdM2: 0`, and dies down over the interval that leads to that. */
   private static flameBetween(from: BodyFlame | undefined, to: BodyFlame | undefined, fraction: number): BodyFlame | undefined {
-    if (!from) return fraction >= 1 && to && to.luminanceCdM2 > 0 ? to : undefined
+    // A flame already out is no flame: one lit again later catches at its keyframe, as the first did.
+    if (!from || from.luminanceCdM2 <= 0) return fraction >= 1 && to && to.luminanceCdM2 > 0 ? to : undefined
     const start = from
     const end = to ?? from
     const flame = {

@@ -27,6 +27,19 @@ export interface InterpretationJson {
   /** What the claim is, in a few words — "Craft on its legs", "Weather balloon at 3 km". */
   title?: SaidText
   bodies: BodyJson[]
+  /** Fires the interpretation lights on the ground, as their smoke — see SmokeSource. */
+  smoke?: SmokeSource[]
+}
+
+/**
+ * Something burning on the ground from an instant on — brush a flame set alight — seen by its
+ * smoke, carried off by the wind. Where, and from when, in the recording's own frame and time.
+ */
+export interface SmokeSource {
+  eastM: number
+  northM: number
+  fromT: number
+  untilT?: number
 }
 
 /**
@@ -58,6 +71,7 @@ export interface InterpretationEventJson {
   title?: SaidText
   url?: string
   bodies?: BodyJson[]
+  smoke?: SmokeSource[]
 }
 
 /** The shapes this project builds itself. Anything else a model names is a catalogue entry or a
@@ -88,6 +102,12 @@ export interface BodyJson {
    * to have been made at it.
    */
   model: DecorModelRef
+  /**
+   * The node of the model that IS what the witness drew — "hull" for a craft on legs the witness
+   * drew as an oval — and so what its outline is measured by (see BodyConfrontation). The whole
+   * model when absent, and always for a primitive.
+   */
+  outlineNode?: string
   track: BodyKeyframe[]
 }
 
@@ -155,6 +175,9 @@ export interface BodyFlame {
   /** Its colour at its far end; the same as `color` when absent. */
   tipColor?: string
   luminanceCdM2: number
+  /** Whether it raises dust where it meets the ground — a flame reaching loose, dry soil does, the
+   * more the nearer it gets. */
+  raisesDust?: boolean
 }
 
 /** Metres along its own three axes: across, fore and aft, and up. */

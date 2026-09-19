@@ -110,6 +110,7 @@ import { DECOR_MODEL_SOURCES } from "./decor/decorModelSources.js"
 import { loadGltfScene } from "./decor/loadGltfScene.js"
 import { BodySystem } from "./BodySystem.js"
 import type { BodyState, Ground } from "../engine/interpretation/BodyPlacement.js"
+import type { SmokeSource } from "../engine/interpretation/Interpretation.js"
 import { PhenomenonSystem, PHENOMENON_LAYER } from "./PhenomenonSystem.js"
 import { ReferenceSystem, REFERENCE_LAYER } from "./ReferenceSystem.js"
 import type { ReferenceView } from "./ReferenceSystem.js"
@@ -1614,11 +1615,14 @@ export class SceneRenderer {
    * Stands the bodies of an interpretation in the scene — or none, which is the raw testimony. See
    * BodySystem. Called every tick after updateDecorAnchoring, whose origin it shares.
    */
-  setBodies(states: BodyState[], seconds = 0, ids: readonly string[] = states.map(state => state.id)): void {
+  setBodies(states: BodyState[], seconds = 0, ids: readonly string[] = states.map(state => state.id), smoke: readonly SmokeSource[] = [], wind?: { x: number, z: number }): void {
     const { x, z } = this.bodyOrigin
     const sky = this.scatteredSky
-    this.bodySystem.set(states, { originX: x, originZ: z, originGroundY: this.groundYUnder(x, z), eye: this.camera.position }, seconds,
-      sky ? (rgb, luminance) => sky.displayOfLuminance(rgb, luminance) : undefined, ids)
+    this.bodySystem.set(states, {
+      originX: x, originZ: z, originGroundY: this.groundYUnder(x, z), eye: this.camera.position,
+      groundYAt: (px, pz) => this.groundYUnder(px, pz), wind
+    }, seconds, sky ? (rgb, luminance) => sky.displayOfLuminance(rgb, luminance) : undefined, ids)
+    this.bodySystem.setSmoke(smoke, seconds)
     // Something is there to cast a shadow, whatever the decor says.
     if (this.bodySystem.any) this.celestialLight.castShadow = true
     // Only ever widened here, over what updateDecorAnchoring has just sized for the decor and the
@@ -1628,6 +1632,11 @@ export class SceneRenderer {
       this.camera.far = needed
       this.camera.updateProjectionMatrix()
     }
+  }
+
+  /** Points of a node of a body's model, in the bodies' own frame — see BodySystem.outlineOf. */
+  bodyOutline(id: string, node: string): { eastM: number, northM: number, upM: number }[] | undefined {
+    return this.bodySystem.outlineOf(id, node)
   }
 
   /** A body's model, the way a decor object's is fetched (see loadDecorModel): by catalogue entry

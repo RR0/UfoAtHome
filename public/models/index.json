@@ -104,9 +104,23 @@
       "name": "Socorro craft, after Lonnie Zamora's account (stand-in)",
       "file": "ufoathome-socorro-craft/craft.gltf",
       "headingOffsetDeg": 0,
-      "sizeM": { "widthM": 3.36, "lengthM": 3.38, "heightM": 2.33 },
+      "sizeM": { "widthM": 4.07, "lengthM": 4.65, "heightM": 2.8 },
       "credit": {
         "title": "Socorro craft, a stand-in after Lonnie Zamora's account",
+        "author": "UFO@home",
+        "license": "CC0 1.0",
+        "sourceUrl": "https://github.com/RR0/UfoAtHome/blob/main/scripts/build-socorro-craft.ts"
+      }
+    },
+    {
+      "id": "ufoathome-socorro-craft-stanford",
+      "kind": "aircraft",
+      "name": "Socorro craft with the inverted-V insignia Ray Stanford holds was the real one (stand-in)",
+      "file": "ufoathome-socorro-craft/craft-stanford.gltf",
+      "headingOffsetDeg": 0,
+      "sizeM": { "widthM": 4.07, "lengthM": 4.65, "heightM": 2.8 },
+      "credit": {
+        "title": "Socorro craft, a stand-in after Lonnie Zamora's account, with the inverted-V insignia",
         "author": "UFO@home",
         "license": "CC0 1.0",
         "sourceUrl": "https://github.com/RR0/UfoAtHome/blob/main/scripts/build-socorro-craft.ts"

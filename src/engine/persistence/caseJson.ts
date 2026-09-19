@@ -1,4 +1,5 @@
 import type { InterpretationEventJson, InterpretationJson } from "../interpretation/Interpretation.js"
+import { Provenance } from "./Provenance.js"
 
 /**
  * A case, as RR0 writes it: the `case.json` of a dossier.
@@ -74,9 +75,11 @@ export class CaseFile {
    * event's, which is what the case calls it.
    */
   static async interpretationOf(event: InterpretationEventJson, caseUrl: string, fetchJson: (url: string) => Promise<unknown>): Promise<InterpretationJson> {
-    if (event.bodies) return { title: event.title, bodies: event.bodies }
+    // Any value may be written with its provenance beside it, as in a recording (see Provenance);
+    // what the scene reads is the bare value.
+    if (event.bodies) return Provenance.strip({ title: event.title, bodies: event.bodies, smoke: event.smoke }).recording
     if (!event.url) return { title: event.title, bodies: [] }
     const file = await fetchJson(new URL(event.url, caseUrl).href) as InterpretationJson
-    return { title: event.title ?? file.title, bodies: file.bodies ?? [] }
+    return Provenance.strip({ title: event.title ?? file.title, bodies: file.bodies ?? [], smoke: file.smoke }).recording
   }
 }

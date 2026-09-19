@@ -7,6 +7,8 @@ import { BODY_PRIMITIVES } from "../engine/interpretation/Interpretation.js"
 import type { BodyPrimitive } from "../engine/interpretation/Interpretation.js"
 import type { DecorModelRef } from "../engine/model/Decor.js"
 import { FlameEffect } from "./FlameEffect.js"
+import { GroundPlume } from "./GroundPlume.js"
+import type { SmokeSource } from "../engine/interpretation/Interpretation.js"
 
 const DEG_TO_RAD = Math.PI / 180
 
@@ -26,6 +28,10 @@ export interface BodyFrame {
   originGroundY: number
   /** Where the eye is, for what depends on how far away a body is (a flame's glare). */
   eye?: Vector3
+  /** The ground's height at a point of the scene — where a flame's dust rises from. */
+  groundYAt?: (x: number, z: number) => number
+  /** The wind, m/s along the scene's x (east) and z (south) — what carries dust and smoke. */
+  wind?: { x: number, z: number }
 }
 
 /**
@@ -53,7 +59,13 @@ export class BodySystem {
   private readonly credits = new Map<string, unknown>()
   /** The flames being thrown, by body id — see BodyFlame. */
   private readonly flames = new Map<string, FlameEffect>()
+  /** The dust each flame raises, by body id. */
+  private readonly dust = new Map<string, GroundPlume>()
+  /** The smoke of what burns on the ground, one plume per source. */
+  private smoke: GroundPlume[] = []
   private readonly scratch = new Vector3()
+  /** The frame of the last `set` — what turns the scene's coordinates back into the bodies' own. */
+  private frame?: BodyFrame
 
   /**
    * @param sceneUnitsPerLux What a lux of illuminance is in this scene's own light units — how the
@@ -78,6 +90,7 @@ export class BodySystem {
    * the instant it appears. Only a body the interpretation no longer has is removed.
    */
   set(states: BodyState[], frame: BodyFrame, seconds = 0, display?: LuminanceDisplay, ids: readonly string[] = states.map(state => state.id)): void {
+    this.frame = frame
     const seen = new Set<string>()
     for (const state of states) {
       seen.add(state.id)
@@ -125,6 +138,7 @@ export class BodySystem {
     const flame = state.flame
     if (!flame) {
       effect.putOut()
+      this.dust.get(state.id)?.set(0, 0, 0, seconds, { x: 0, z: 0 }, 0)
       return
     }
     holder.updateMatrixWorld(true)
@@ -143,6 +157,56 @@ export class BodySystem {
     const mixed = new Color(flame.color).lerp(new Color(flame.tipColor ?? flame.color), 0.5)
     const rgb: [number, number, number] = [mixed.r, mixed.g, mixed.b]
     effect.shine(glow.radiusM, display ? display(rgb, glow.luminanceCdM2) : BodySystem.withoutPhotometry(rgb, glow.luminanceCdM2))
+    this.raiseDust(state.id, flame, seconds)
+  }
+
+  /**
+   * Dust where a flame meets the ground: from the point under its nozzle, as thick as the flame is
+   * near — none at all when the ground is further than the flame reaches and a metre more.
+   */
+  private raiseDust(id: string, flame: { lengthM: number, raisesDust?: boolean }, seconds: number): void {
+    const frame = this.frame
+    if (!flame.raisesDust || !frame?.groundYAt) {
+      this.dust.get(id)?.set(0, 0, 0, seconds, { x: 0, z: 0 }, 0)
+      return
+    }
+    let plume = this.dust.get(id)
+    if (!plume) {
+      plume = new GroundPlume(GroundPlume.DUST)
+      this.dust.set(id, plume)
+      this.group.add(plume.points)
+    }
+    const { x, y, z } = this.scratch
+    const groundY = frame.groundYAt(x, z)
+    const strength = Math.max(0, Math.min(1, 1 - (y - groundY) / (flame.lengthM + 1)))
+    plume.set(x, groundY, z, seconds, frame.wind ?? { x: 0, z: 0 }, strength)
+  }
+
+  /**
+   * The smoke of what an interpretation sets burning, at `seconds` into the recording — each source
+   * a plume from its own instant on (see SmokeSource).
+   */
+  setSmoke(sources: readonly SmokeSource[], seconds: number): void {
+    const frame = this.frame
+    while (this.smoke.length < sources.length) {
+      const plume = new GroundPlume(GroundPlume.SMOKE)
+      this.smoke.push(plume)
+      this.group.add(plume.points)
+    }
+    this.smoke.forEach((plume, index) => {
+      const source = sources[index]
+      const t = seconds * 1000
+      const burning = source !== undefined && frame !== undefined && t >= source.fromT && (source.untilT === undefined || t < source.untilT)
+      if (!burning) {
+        plume.set(0, 0, 0, seconds, { x: 0, z: 0 }, 0)
+        return
+      }
+      const x = frame.originX + source.eastM
+      const z = frame.originZ - source.northM
+      // Catching over its first two seconds.
+      const strength = Math.min(1, (t - source.fromT) / 2000)
+      plume.set(x, frame.groundYAt ? frame.groundYAt(x, z) : frame.originGroundY, z, seconds, frame.wind ?? { x: 0, z: 0 }, strength)
+    })
   }
 
   /**
@@ -183,6 +247,37 @@ export class BodySystem {
     effect.glow.removeFromParent()
     effect.dispose()
     this.flames.delete(id)
+    const dust = this.dust.get(id)
+    if (dust) {
+      dust.points.removeFromParent()
+      dust.dispose()
+      this.dust.delete(id)
+    }
+  }
+
+  /**
+   * Points of the surface of `node` of a body's model, in the frame bodies are placed in (east,
+   * north, up from the origin's ground) — what the confrontation measures its outline by. Undefined
+   * until the model is there, or when it has no such node. Thinned to a few hundred points: an
+   * outline needs its extremes, not every vertex.
+   */
+  outlineOf(id: string, node: string): { eastM: number, northM: number, upM: number }[] | undefined {
+    const holder = this.built.get(id)?.holder
+    const frame = this.frame
+    const part = holder?.getObjectByName(node)
+    if (!holder || !frame || !part) return undefined
+    holder.updateMatrixWorld(true)
+    const points: { eastM: number, northM: number, upM: number }[] = []
+    part.traverse(child => {
+      if (!(child instanceof Mesh)) return
+      const position = child.geometry.getAttribute("position")
+      const step = Math.max(1, Math.floor(position.count / 400))
+      for (let i = 0; i < position.count; i += step) {
+        this.scratch.fromBufferAttribute(position, i).applyMatrix4(child.matrixWorld)
+        points.push({ eastM: this.scratch.x - frame.originX, northM: frame.originZ - this.scratch.z, upM: this.scratch.y - frame.originGroundY })
+      }
+    })
+    return points.length > 0 ? points : undefined
   }
 
   /** How far the furthest body on show stands from `from` — what the camera's far plane must reach. */

@@ -94,4 +94,16 @@ describe("BodyPlacement", () => {
     expect(placement.at(2500)?.flame?.luminanceCdM2).toBe(10000)
     expect(placement.at(3000)?.flame).toBeUndefined()
   })
+
+  it("lights a flame put out earlier again at the keyframe that relights it, not over the wait before", () => {
+    const flame = { lengthM: 2, widthM: 1, color: "#7fc4ff", luminanceCdM2: 20000 }
+    const placement = new BodyPlacement(craft([
+      { t: 0, eastM: 0, northM: 10, onGround: true, flame },
+      { t: 1000, flame: { ...flame, luminanceCdM2: 0 } },
+      { t: 5000 },
+      { t: 9000, flame }
+    ]), flat, eyeAtOrigin(flat))
+    expect(placement.at(7000)?.flame).toBeUndefined()
+    expect(placement.at(9000)?.flame?.luminanceCdM2).toBe(20000)
+  })
 })

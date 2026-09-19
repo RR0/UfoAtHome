@@ -1,28 +1,39 @@
 /**
- * Builds the stand-in model of the Socorro craft, as Lonnie Zamora's own account and the recording
- * made of it describe it, and writes it to public/models/ufoathome-socorro-craft/craft.gltf.
+ * Builds the stand-in models of the Socorro craft, as Lonnie Zamora's own account and the documents
+ * of the Project Blue Book file describe it, and writes them to public/models/ufoathome-socorro-craft/.
  *
  * UFO@home does not design models (see public/models/README.md): it references and places them. This
  * is not an exception but the lack of anything to reference — nobody has published a model of this
  * craft that follows the account rather than a later illustration of it — and so it is built the way
- * the star catalogue is: by a script, from sources that can be checked, into a file that any better
- * model can replace by taking its id. Everything it states comes from somewhere:
+ * the star catalogue is: by a script, from sources that can be checked, into files that any better
+ * model can replace by taking their ids. Page numbers are those of the Blue Book file's scan
+ * (documents.theblackvault.com/bluebookdesk/pbb-socorro.pdf).
  *
- * - The hull is an ellipsoid 3.36 m across and 1.73 m high, round in plan: the "oval" Zamora drew,
- *   at the size its 6.41° × 3.31° make at the hundred feet he gave (see witness-socorro.json).
- *   Round in plan is ASSUMED: he saw it from one side.
- * - The insignia is the red oval the recording draws on it (1.40° × 1.12° at a hundred feet, so
- *   0.74 × 0.60 m), centred on the side he saw — the model's front, -Z. Its outline is the
- *   recording's approximate one; the figure inside it, which the sources disagree about, is not
- *   drawn.
- * - The legs are there because he said it stood on legs; four, splayed, because four landing marks
- *   were measured on the site. Their height (0.6 m) and shape are ASSUMED.
- * - A node named "exhaust" marks the middle of the underside, where the flame he saw came out (see
- *   BodyFlame), so that where a flame comes from is the model's to say.
+ * - The hull is an ellipsoid 3.36 m across and 1.73 m high: the "oval" Zamora drew, at the size its
+ *   6.41° × 3.31° make at the hundred feet he gave (see witness-socorro.json). Round in plan is
+ *   ASSUMED: he saw it from one side.
+ * - It stands "about three and a half feet from the ground" (his statement, p. 88): 1.07 m.
+ * - On legs "slanted outwards to the ground" (p. 88). He saw two; four are built, because four
+ *   imprints were measured, and each ends where Holder measured one (p. 84: sides 13′2½″, 9′7½″,
+ *   14′7½″, 11′10½″, diagonals 14′5½″ and 14′6½″, meeting at 89°). Those six lengths do not quite
+ *   close into one quadrilateral: the four feet are the best fit, 0.34 m out on average. Each rests
+ *   on a pad the size of an imprint, 16 by 6 inches (FBI, Byrnes), its long side outwards, as an
+ *   imprint "made by an object going into the earth at an angle" would be. Where the quadrilateral
+ *   points is not recorded: turning the model turns it.
+ * - The insignia is drawn in strokes on the hull, centred on the side he saw (the model's front,
+ *   -Z), red, 2 feet wide (Holder, p. 77; FBI): "craft.gltf" carries the figure he signed (p. 85),
+ *   a horseshoe arc, an inverted V inside it, a stroke under the V's apex and a bar beneath, its
+ *   strokes measured on the scan; "craft-stanford.gltf" the inverted V with three bars beneath that
+ *   the dispatcher and the press reported and Ray Stanford holds was the real one, the signed figure
+ *   being a decoy Holder asked for. The drawing is wider than tall (0.72), which the stated 2 × 2½
+ *   feet contradict: its proportions are kept, at its stated width.
+ * - A node named "exhaust" marks the middle of the underside, where the flame came out (see
+ *   BodyFlame), and the hull is a node named "hull", which is what is measured against the object
+ *   he drew (see BodyJson.outlineNode) — not the legs, which are not in his drawing of it.
  *
  * Run with: node --import tsx scripts/build-socorro-craft.ts
  */
-import { BufferGeometry, CylinderGeometry, Float32BufferAttribute, Quaternion, SphereGeometry, Vector3 } from "three"
+import { BufferGeometry, CylinderGeometry, BoxGeometry, Float32BufferAttribute, Quaternion, SphereGeometry, Vector3 } from "three"
 import { mkdirSync, writeFileSync } from "node:fs"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
@@ -38,17 +49,48 @@ interface GltfMaterial {
   pbrMetallicRoughness: { baseColorFactor: number[], metallicFactor: number, roughnessFactor: number }
 }
 
+/** A figure in strokes, in units of its own width, y downwards from its top — as measured on a scan. */
+type Strokes = [number, number][][]
+
+/** Which insignia a model carries — see the file comment. */
+type Insignia = "signed" | "stanford"
+
 /** The craft itself: its parts in metres, standing on the ground at y = 0, its front towards -Z. */
 class SocorroCraft {
   static readonly HULL_RADIUS_M = 1.68
   static readonly HULL_HALF_HEIGHT_M = 0.865
-  static readonly LEG_HEIGHT_M = 0.6
-  static readonly INSIGNIA_HALF_WIDTH_M = 0.37
-  static readonly INSIGNIA_HALF_HEIGHT_M = 0.30
+  static readonly HULL_ABOVE_GROUND_M = 1.07
+  /** Where the four feet stand, x and z around the hull's axis — the fit to Holder's six lengths. */
+  static readonly FEET: [number, number][] = [[-1.59, 1.258], [-1.834, -1.305], [1.838, -2.094], [1.586, 2.142]]
+  static readonly PAD_M = { length: 0.41, width: 0.15, thickness: 0.05 }
+  /** Where a leg meets the underside, from the axis. */
+  static readonly LEG_TOP_RADIUS_M = 1.0
+  static readonly INSIGNIA_WIDTH_M = 0.61
+  /** How wide the painted strokes are: no source says. 6 cm is chosen so that each stroke still
+   * covers two pixels at the hundred feet he saw it from; at 3.5 cm a horizontal stroke could fall
+   * between two rows of pixels and vanish, as the bars under the V did. */
+  static readonly STROKE_WIDTH_M = 0.06
   /** How far the insignia stands proud of the hull, so the two never fight for the same pixels. */
   static readonly INSIGNIA_LIFT_M = 0.008
 
-  private readonly hullCentreY = SocorroCraft.LEG_HEIGHT_M + SocorroCraft.HULL_HALF_HEIGHT_M
+  /** The signed figure (p. 85), its strokes measured on the scan. The small break a pen left in the
+   * arc's right side is not reproduced. */
+  static readonly SIGNED: Strokes = [
+    [[0, 0.45], [0.01, 0.3], [0.06, 0.14], [0.18, 0.04], [0.33, 0.005], [0.49, 0], [0.65, 0.01], [0.8, 0.05], [0.92, 0.15], [0.98, 0.3], [1.0, 0.45]],
+    [[0.22, 0.42], [0.48, 0.12], [0.69, 0.44]],
+    [[0.46, 0.22], [0.44, 0.47]],
+    [[0.14, 0.72], [0.93, 0.67]]
+  ]
+  /** The inverted V with three lines beneath it ("un 'V' invertido, con tres líneas debajo"): its
+   * proportions are nobody's measurement, only the description's. */
+  static readonly STANFORD: Strokes = [
+    [[0.1, 0.45], [0.5, 0], [0.9, 0.45]],
+    [[0.1, 0.6], [0.9, 0.6]],
+    [[0.1, 0.78], [0.9, 0.78]],
+    [[0.1, 0.96], [0.9, 0.96]]
+  ]
+
+  private readonly hullCentreY = SocorroCraft.HULL_ABOVE_GROUND_M + SocorroCraft.HULL_HALF_HEIGHT_M
 
   readonly materials: GltfMaterial[] = [
     // "White, like aluminium": a light, barely metallic surface. A strongly metallic one reflects its
@@ -58,18 +100,20 @@ class SocorroCraft {
     SocorroCraft.material("legs", "#8a8a86", 0.2, 0.5)
   ]
 
+  constructor(private readonly insignia: Insignia) {
+  }
+
   parts(): Part[] {
     return [
       { name: "hull", geometry: this.hull(), material: 0 },
-      { name: "insignia", geometry: this.insignia(), material: 1 },
-      // Each leg is followed by its pad.
+      { name: "insignia", geometry: this.figure(this.insignia === "signed" ? SocorroCraft.SIGNED : SocorroCraft.STANFORD), material: 1 },
       ...this.legs().map((geometry, index) => ({ name: `${index % 2 === 0 ? "leg" : "pad"}-${Math.floor(index / 2) + 1}`, geometry, material: 2 }))
     ]
   }
 
   /** Where the flame comes out: the middle of the underside. */
   get exhaust(): [number, number, number] {
-    return [0, SocorroCraft.LEG_HEIGHT_M, 0]
+    return [0, SocorroCraft.HULL_ABOVE_GROUND_M, 0]
   }
 
   private hull(): BufferGeometry {
@@ -88,32 +132,42 @@ class SocorroCraft {
     return -a * Math.sqrt(Math.max(inside, 0))
   }
 
-  /** The red oval: a disc of rings and spokes, each of its points put on the curved hull. */
-  private insignia(): BufferGeometry {
-    const rings = 12
-    const spokes = 48
+  /**
+   * A figure's strokes as ribbons laid on the hull's front: each segment a strip STROKE_WIDTH_M
+   * wide, finely divided so that every one of its points sits on the curved surface, the figure
+   * centred on the middle of the side.
+   */
+  private figure(strokes: Strokes): BufferGeometry {
+    const scale = SocorroCraft.INSIGNIA_WIDTH_M
+    const height = Math.max(...strokes.flat().map(([, y]) => y))
+    const half = SocorroCraft.STROKE_WIDTH_M / 2
     const positions: number[] = []
     const indices: number[] = []
-    const add = (r: number, angle: number) => {
-      const x = SocorroCraft.INSIGNIA_HALF_WIDTH_M * r * Math.cos(angle)
-      const y = this.hullCentreY + SocorroCraft.INSIGNIA_HALF_HEIGHT_M * r * Math.sin(angle)
-      positions.push(x, y, this.frontZ(x, y) - SocorroCraft.INSIGNIA_LIFT_M)
-    }
-    add(0, 0)
-    for (let ring = 1; ring <= rings; ring++) {
-      for (let spoke = 0; spoke < spokes; spoke++) add(ring / rings, (spoke / spokes) * 2 * Math.PI)
-    }
-    const at = (ring: number, spoke: number) => ring === 0 ? 0 : 1 + (ring - 1) * spokes + (spoke % spokes)
-    for (let ring = 0; ring < rings; ring++) {
-      for (let spoke = 0; spoke < spokes; spoke++) {
-        // Wound clockwise as seen from +Z, i.e. counter-clockwise from the front (-Z) it faces: a
-        // glTF material is single-sided, and the other way round it faced into the hull and was
-        // culled from every point of view outside it.
-        if (ring === 0) {
-          indices.push(at(0, 0), at(1, spoke + 1), at(1, spoke))
-        } else {
-          indices.push(at(ring, spoke), at(ring, spoke + 1), at(ring + 1, spoke))
-          indices.push(at(ring, spoke + 1), at(ring + 1, spoke + 1), at(ring + 1, spoke))
+    const onHull = (x: number, y: number) => positions.push(x, y, this.frontZ(x, y) - SocorroCraft.INSIGNIA_LIFT_M)
+    for (const stroke of strokes) {
+      const points = stroke.map(([u, v]) => [(u - 0.5) * scale, this.hullCentreY + (height / 2 - v) * scale])
+      for (let i = 0; i + 1 < points.length; i++) {
+        const [x0, y0] = points[i]
+        const [x1, y1] = points[i + 1]
+        const length = Math.hypot(x1 - x0, y1 - y0)
+        const nx = -(y1 - y0) / length * half
+        const ny = (x1 - x0) / length * half
+        const steps = Math.max(1, Math.ceil(length / 0.02))
+        const first = positions.length / 3
+        for (let step = 0; step <= steps; step++) {
+          const f = step / steps
+          const x = x0 + (x1 - x0) * f
+          const y = y0 + (y1 - y0) * f
+          // Past the ends by half a width, so that two segments of one stroke join without a notch.
+          const ex = step === 0 ? -(x1 - x0) / length * half : step === steps ? (x1 - x0) / length * half : 0
+          const ey = step === 0 ? -(y1 - y0) / length * half : step === steps ? (y1 - y0) / length * half : 0
+          onHull(x + ex + nx, y + ey + ny)
+          onHull(x + ex - nx, y + ey - ny)
+        }
+        for (let step = 0; step < steps; step++) {
+          const a = first + step * 2
+          // Counter-clockwise from the front (-Z) it faces: a glTF material is single-sided.
+          indices.push(a, a + 1, a + 2, a + 1, a + 3, a + 2)
         }
       }
     }
@@ -121,27 +175,40 @@ class SocorroCraft {
     geometry.setAttribute("position", new Float32BufferAttribute(positions, 3))
     geometry.setIndex(indices)
     geometry.computeVertexNormals()
+    // Every face of a ribbon should face -Z; one that came out the other way round is flipped.
+    const normal = geometry.getAttribute("normal")
+    if (normal.getZ(0) > 0) {
+      const index = geometry.getIndex()!
+      for (let i = 0; i < index.count; i += 3) {
+        const b = index.getX(i + 1)
+        index.setX(i + 1, index.getX(i + 2))
+        index.setX(i + 2, b)
+      }
+      geometry.computeVertexNormals()
+    }
     return geometry
   }
 
-  /** Four splayed legs from the underside to the ground, each on a round pad. */
+  /** Four legs from the underside out to the measured feet, each on a pad the size of an imprint. */
   private legs(): BufferGeometry[] {
     const legs: BufferGeometry[] = []
-    const topRadius = 0.9
-    const footRadius = 1.25
-    const topY = this.hullCentreY - SocorroCraft.HULL_HALF_HEIGHT_M * Math.sqrt(1 - (topRadius / SocorroCraft.HULL_RADIUS_M) ** 2)
-    for (let index = 0; index < 4; index++) {
-      const angle = Math.PI / 4 + (index * Math.PI) / 2
-      const top = new Vector3(Math.cos(angle) * topRadius, topY, Math.sin(angle) * topRadius)
-      const foot = new Vector3(Math.cos(angle) * footRadius, 0.05, Math.sin(angle) * footRadius)
+    const a = SocorroCraft.HULL_RADIUS_M
+    const topRadius = SocorroCraft.LEG_TOP_RADIUS_M
+    const topY = this.hullCentreY - SocorroCraft.HULL_HALF_HEIGHT_M * Math.sqrt(1 - (topRadius / a) ** 2)
+    const pad = SocorroCraft.PAD_M
+    for (const [fx, fz] of SocorroCraft.FEET) {
+      const outward = Math.atan2(fz, fx)
+      const top = new Vector3(Math.cos(outward) * topRadius, topY, Math.sin(outward) * topRadius)
+      const foot = new Vector3(fx, pad.thickness, fz)
       const leg = new CylinderGeometry(0.05, 0.05, top.distanceTo(foot), 12)
       // A cylinder stands along +Y: turned onto the line from foot to top, then set between them.
       leg.applyQuaternion(new Quaternion().setFromUnitVectors(new Vector3(0, 1, 0), new Vector3().subVectors(top, foot).normalize()))
       leg.translate((top.x + foot.x) / 2, (top.y + foot.y) / 2, (top.z + foot.z) / 2)
       legs.push(leg)
-      const pad = new CylinderGeometry(0.16, 0.18, 0.05, 20)
-      pad.translate(foot.x, 0.025, foot.z)
-      legs.push(pad)
+      const footPad = new BoxGeometry(pad.length, pad.thickness, pad.width)
+      footPad.rotateY(-outward)
+      footPad.translate(fx, pad.thickness / 2, fz)
+      legs.push(footPad)
     }
     return legs
   }
@@ -230,13 +297,18 @@ class GltfWriter {
   }
 }
 
-const craft = new SocorroCraft()
-const writer = new GltfWriter(craft.materials)
-for (const part of craft.parts()) writer.addMesh(part)
-writer.addNode("exhaust", craft.exhaust)
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)))
 const directory = path.join(root, "public", "models", "ufoathome-socorro-craft")
 mkdirSync(directory, { recursive: true })
-const file = path.join(directory, "craft.gltf")
-writeFileSync(file, JSON.stringify(writer.toJSON("UFO@home scripts/build-socorro-craft.ts")) + "\n")
-console.log(`Wrote ${path.relative(root, file)}`)
+for (const [insignia, name] of [["signed", "craft.gltf"], ["stanford", "craft-stanford.gltf"]] as [Insignia, string][]) {
+  const craft = new SocorroCraft(insignia)
+  const writer = new GltfWriter(craft.materials)
+  for (const part of craft.parts()) writer.addMesh(part)
+  writer.addNode("exhaust", craft.exhaust)
+  const file = path.join(directory, name)
+  const gltf = writer.toJSON("UFO@home scripts/build-socorro-craft.ts") as { accessors: { min?: number[], max?: number[] }[] }
+  writeFileSync(file, JSON.stringify(gltf) + "\n")
+  const bounds = gltf.accessors.filter(accessor => accessor.min && accessor.max)
+  const size = [0, 1, 2].map(axis => Math.max(...bounds.map(b => b.max![axis])) - Math.min(...bounds.map(b => b.min![axis])))
+  console.log(`Wrote ${path.relative(root, file)}: ${size.map(m => m.toFixed(2)).join(" × ")} m (x, y, z)`)
+}

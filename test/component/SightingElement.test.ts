@@ -415,7 +415,7 @@ describe("SightingElement", () => {
     expect((shadow.getElementById("interpretation-choice") as HTMLElement).hidden).toBe(false)
     // One testimony, not a raw one and the witness's own beside it: what they said it was is how
     // their account is drawn, and what they saw is what it is compared with.
-    expect([...select.options].map(option => option.textContent)).toEqual(["Testimony", "Balloon, by Hynek Josef Allen"])
+    expect([...select.options].map(option => option.textContent)).toEqual(["Testimony", "Balloon, by Josef Allen Hynek"])
     expect(select.value).toBe("testimony")
     expect(element.scene.interpretation?.title).toBe("Own")
 

@@ -77,7 +77,7 @@ One or more stylised low-poly models for every decor kind:
 | tree | broadleaf, conifer | Kenney, City Kit Suburban / Survival Kit (CC0) |
 | streetlight | curved-arm street lamp | Kenney, City Kit Roads 2.0 (CC0) |
 | aircraft | narrow-body airliner | Poly by Google (CC BY 3.0) |
-| aircraft | the Socorro craft, a stand-in after Lonnie Zamora's account | UFO@home (CC0), built by `scripts/build-socorro-craft.ts` |
+| aircraft | the Socorro craft, a stand-in after Lonnie Zamora's account, with either insignia | UFO@home (CC0), built by `scripts/build-socorro-craft.ts` |
 
 Every one of them is a placeholder and the picker says so: right KIND, no particular model, make or
 year. What they buy is a silhouette that reads as what it is at forty metres in evening light, where
@@ -87,10 +87,11 @@ Each is kept in its own directory, because a kit's models reference a texture SH
 kit (`Textures/colormap.png`), and two kits' colormaps are different files under the same name.
 
 The Socorro craft is the one model here that was MADE rather than taken: nothing published follows
-the account rather than a later illustration of it, so it is built by a script from what the
-recording states (its size, its insignia, where its flame comes out, which is a node named
-`exhaust`), and says in that script which of its details are assumed. Any better model replaces it
-by taking its id.
+the account rather than a later illustration of it, so it is built by a script from the Blue Book
+file (its size, its height on its legs, the four imprints its feet stand in, its insignia, where its
+flame comes out, which is a node named `exhaust`), and says in that script which of its details are
+assumed. It comes in two, one per insignia: the figure Zamora signed, and the inverted V with three
+bars Ray Stanford holds was the real one. Any better model replaces either by taking its id.
 
 ## Which way a model faces
 

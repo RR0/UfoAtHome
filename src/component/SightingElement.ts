@@ -531,7 +531,9 @@ export class SightingElement extends HTMLElement {
       this.interpretationSelect.appendChild(option)
       this.interpretationLoaders.set(value, load)
     }
-    const own = entry.sighting.interpretation
+    // The recording's own, as the scene read it: its values with their provenance taken off (see
+    // Provenance), the same object the scene is showing.
+    const own = entry === this.entries.find(e => e.src === this.currentSrc) ? this.sceneElement.ufoElement.sighting.interpretation : undefined
     offer(TESTIMONY_OPTION, this.messages.testimony, () => Promise.resolve(own))
     const source = this.caseSource
     if (source) {
@@ -597,10 +599,14 @@ export class SightingElement extends HTMLElement {
     this.showConfrontation(this.sceneElement.confrontation)
   }
 
-  /** Who made a claim, as a reader would name them: an id is spelled out ("HynekJosefAllen" is
-   * "Hynek Josef Allen"), a description is read like a witness's. */
+  /** Who made a claim, as a reader would name them: a person's id, which RR0 writes last name first
+   * ("StanfordRay"), is spelled out first names first ("Ray Stanford"); an organisation's is only
+   * spelled out; a description is read like a witness's. */
   private agentName(agent: AgentRef): string {
-    if ("people" in agent) return agent.people.replace(/([a-z])([A-Z])/g, "$1 $2")
+    if ("people" in agent) {
+      const [last, ...first] = agent.people.replace(/([a-z])([A-Z])/g, "$1 $2").split(" ")
+      return [...first, last].join(" ")
+    }
     if ("org" in agent) return agent.org.replace(/([a-z])([A-Z])/g, "$1 $2")
     return this.witnessDisplayName(agent) ?? ""
   }

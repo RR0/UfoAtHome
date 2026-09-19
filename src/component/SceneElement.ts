@@ -722,7 +722,7 @@ export class SceneElement extends HTMLElement {
     this.ufoElement.sightingData = json
     // An interpretation is OF one recording: another one's bodies have nothing to stand for here.
     // What the new one starts as is its witness's own account of what it was, if they gave one.
-    this.interpretationShown = this.inTheRound ? json.interpretation : undefined
+    this.interpretationShown = this.inTheRound ? this.ufoElement.sighting.interpretation : undefined
     // A loaded recording may have been made through something with a format of its own.
     this.applyFrameFormat()
     this.lastTimeMs = 0
@@ -1449,16 +1449,25 @@ export class SceneElement extends HTMLElement {
     const sighting = this.ufoElement.sighting
     let states: BodyState[] = []
     let readings: ConfrontationReading[] = []
+    const ground = this.sceneRenderer.bodyGround
+    const eyeAt = (at: number) => BodyPlacement.eyeOf(sighting, at, ground)
     if (interpretation) {
-      const ground = this.sceneRenderer.bodyGround
-      const eyeAt = (at: number) => BodyPlacement.eyeOf(sighting, at, ground)
       states = interpretation.bodies
         .map(body => new BodyPlacement(body, ground, eyeAt).at(t))
         .filter((state): state is BodyState => state !== undefined)
-      const eye = this.comparing ? eyeAt(t) : undefined
-      readings = eye ? new BodyConfrontation(sighting.timeline).at(t, states, eye) : []
     }
-    this.sceneRenderer.setBodies(states, t / 1000, interpretation?.bodies.map(body => body.id) ?? [])
+    // Stood first, so that the outline read below is the one of this instant.
+    // What carries dust and smoke: the recording's wind at this instant, which blows TOWARDS its
+    // direction (see Weather.windDirectionDeg), in the scene's axes (x east, z south).
+    const weather = resolveWeatherAt(sighting, t)
+    const towards = (weather.windDirectionDeg * Math.PI) / 180
+    const wind = { x: weather.windSpeed * Math.sin(towards), z: -weather.windSpeed * Math.cos(towards) }
+    this.sceneRenderer.setBodies(states, t / 1000, interpretation?.bodies.map(body => body.id) ?? [], interpretation?.smoke ?? [], wind)
+    const eye = interpretation && this.comparing ? eyeAt(t) : undefined
+    if (eye) {
+      readings = new BodyConfrontation(sighting.timeline).at(t, states, eye,
+        state => state.outlineNode ? this.sceneRenderer.bodyOutline?.(state.id, state.outlineNode) : undefined)
+    }
     this.confrontationReadings = readings
     if (!announce) return
     const signature = JSON.stringify(readings)

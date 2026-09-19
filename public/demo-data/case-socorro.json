@@ -39,9 +39,9 @@
               "northM": -1022.24,
               "onGround": true,
               "sizeM": {
-                "widthM": 10.08,
-                "lengthM": 10.14,
-                "heightM": 6.99
+                "widthM": 12.21,
+                "lengthM": 13.95,
+                "heightM": 8.4
               },
               "attitude": {
                 "headingDeg": 20
@@ -54,7 +54,8 @@
                 "widthM": 3.51,
                 "color": "#7fc4ff",
                 "tipColor": "#ff8a2b",
-                "luminanceCdM2": 20000
+                "luminanceCdM2": 20000,
+                "raisesDust": true
               }
             },
             {
@@ -97,7 +98,8 @@
                 "widthM": 3.51,
                 "color": "#7fc4ff",
                 "tipColor": "#ff8a2b",
-                "luminanceCdM2": 0
+                "luminanceCdM2": 0,
+                "raisesDust": true
               }
             },
             {
@@ -136,9 +138,239 @@
               "altitudeDeg": 5.9917,
               "distanceM": 24165.0
             }
-          ]
+          ],
+          "outlineNode": "hull"
         }
       ]
+    },
+    {
+      "type": "event",
+      "eventType": "interpretation",
+      "sighting": "1964-04-24-ZamoraLonnie",
+      "title": {
+        "fr": "Le récit de Zamora, avec l'insigne que Ray Stanford tient pour le vrai",
+        "en": "Zamora's account, with the insignia Ray Stanford holds was the real one"
+      },
+      "by": [
+        {
+          "people": "StanfordRay"
+        }
+      ],
+      "bodies": [
+        {
+          "id": "craft",
+          "title": {
+            "fr": "L'engin",
+            "en": "The craft"
+          },
+          "explains": [
+            "ufo-1"
+          ],
+          "model": {
+            "id": "ufoathome-socorro-craft-stanford"
+          },
+          "track": [
+            {
+              "t": 0,
+              "azimuthDeg": 210.6,
+              "altitudeDeg": 9.975,
+              "distanceM": 1195.8,
+              "sizeM": {
+                "widthM": 4.07,
+                "lengthM": 4.65,
+                "heightM": 2.8
+              },
+              "attitude": {
+                "headingDeg": 20
+              },
+              "flame": {
+                "lengthM": 2.43,
+                "widthM": 1.17,
+                "color": "#7fc4ff",
+                "tipColor": "#ff8a2b",
+                "luminanceCdM2": {
+                  "value": 200000,
+                  "basis": "assumed",
+                  "rationale": "Nobody measured it. 20 000 cd/m² (a bright gas flame) was the first guess, and drawn through the scene's own photometry it gives a flame 1.15 m across, 1.2 km away in the daylight of 17:50, a glow of two or three pixels fainter than the sky around it: nothing a driver notices. Zamora noticed it from his car, which a flame ten times brighter, 200 000 cd/m² (the order of a rocket motor's exhaust), accounts for. So 200 000 is chosen to fit the account, and it is the account, not a measurement, that sets it."
+                },
+                "raisesDust": true
+              }
+            },
+            {
+              "t": 6000,
+              "azimuthDeg": 212.1,
+              "altitudeDeg": 2.9833,
+              "distanceM": 995.3
+            },
+            {
+              "t": 10000,
+              "eastM": -571.57,
+              "northM": -965.47,
+              "altitudeAboveGroundM": 10
+            },
+            {
+              "t": 14000,
+              "eastM": -571.57,
+              "northM": -965.47,
+              "onGround": true
+            },
+            {
+              "t": 15000,
+              "flame": {
+                "lengthM": 2.43,
+                "widthM": 1.17,
+                "color": "#7fc4ff",
+                "tipColor": "#ff8a2b",
+                "luminanceCdM2": 0,
+                "raisesDust": true
+              }
+            },
+            {
+              "t": 52000,
+              "eastM": -571.57,
+              "northM": -965.47,
+              "onGround": true
+            },
+            {
+              "t": 76000,
+              "flame": {
+                "lengthM": 2.43,
+                "widthM": 1.17,
+                "color": "#7fc4ff",
+                "tipColor": "#ff8a2b",
+                "luminanceCdM2": {
+                  "value": 200000,
+                  "basis": "assumed",
+                  "rationale": "Nobody measured it. 20 000 cd/m² (a bright gas flame) was the first guess, and drawn through the scene's own photometry it gives a flame 1.15 m across, 1.2 km away in the daylight of 17:50, a glow of two or three pixels fainter than the sky around it: nothing a driver notices. Zamora noticed it from his car, which a flame ten times brighter, 200 000 cd/m² (the order of a rocket motor's exhaust), accounts for. So 200 000 is chosen to fit the account, and it is the account, not a measurement, that sets it."
+                },
+                "raisesDust": true
+              }
+            },
+            {
+              "t": 79000,
+              "eastM": -571.57,
+              "northM": -965.47,
+              "onGround": true
+            },
+            {
+              "t": 81000,
+              "azimuthDeg": 198.55,
+              "altitudeDeg": -3.8,
+              "distanceM": 33.6
+            },
+            {
+              "t": 82500,
+              "azimuthDeg": 197.3667,
+              "altitudeDeg": -0.6583,
+              "distanceM": 37.3
+            },
+            {
+              "t": 84000,
+              "azimuthDeg": 196.5917,
+              "altitudeDeg": 1.9167,
+              "distanceM": 40.8
+            },
+            {
+              "t": 85500,
+              "azimuthDeg": 195.925,
+              "altitudeDeg": 4.1083,
+              "distanceM": 44.2,
+              "flame": {
+                "lengthM": 2.43,
+                "widthM": 1.17,
+                "color": "#7fc4ff",
+                "tipColor": "#ff8a2b",
+                "luminanceCdM2": {
+                  "value": 200000,
+                  "basis": "assumed",
+                  "rationale": "Nobody measured it. 20 000 cd/m² (a bright gas flame) was the first guess, and drawn through the scene's own photometry it gives a flame 1.15 m across, 1.2 km away in the daylight of 17:50, a glow of two or three pixels fainter than the sky around it: nothing a driver notices. Zamora noticed it from his car, which a flame ten times brighter, 200 000 cd/m² (the order of a rocket motor's exhaust), accounts for. So 200 000 is chosen to fit the account, and it is the account, not a measurement, that sets it."
+                },
+                "raisesDust": true
+              }
+            },
+            {
+              "t": 86500,
+              "flame": {
+                "lengthM": 2.43,
+                "widthM": 1.17,
+                "color": "#7fc4ff",
+                "tipColor": "#ff8a2b",
+                "luminanceCdM2": 0,
+                "raisesDust": true
+              }
+            },
+            {
+              "t": 87000,
+              "azimuthDeg": 204.6417,
+              "altitudeDeg": 2.075,
+              "distanceM": 63.1
+            },
+            {
+              "t": 88000,
+              "azimuthDeg": 209.2667,
+              "altitudeDeg": 0.9667,
+              "distanceM": 82.5
+            },
+            {
+              "t": 90500,
+              "azimuthDeg": 214.9,
+              "altitudeDeg": 3.1417,
+              "distanceM": 205.4
+            },
+            {
+              "t": 93000,
+              "azimuthDeg": 217.1583,
+              "altitudeDeg": 4.325,
+              "distanceM": 551.3
+            },
+            {
+              "t": 95500,
+              "azimuthDeg": 217.7667,
+              "altitudeDeg": 4.9667,
+              "distanceM": 1497.0
+            },
+            {
+              "t": 100000,
+              "azimuthDeg": 219.9833,
+              "altitudeDeg": 5.4833,
+              "distanceM": 3003.3
+            },
+            {
+              "t": 115000,
+              "azimuthDeg": 221.975,
+              "altitudeDeg": 5.9917,
+              "distanceM": 8055.0
+            }
+          ],
+          "outlineNode": "hull"
+        }
+      ],
+      "smoke": {
+        "value": [
+          {
+            "eastM": -570.89,
+            "northM": -965.08,
+            "fromT": 77000
+          },
+          {
+            "eastM": -572.33,
+            "northM": -965.51,
+            "fromT": 77000
+          },
+          {
+            "eastM": -571.76,
+            "northM": -966.57,
+            "fromT": 77000
+          },
+          {
+            "eastM": -568.23,
+            "northM": -964.77,
+            "fromT": 77000
+          }
+        ],
+        "basis": "assumed",
+        "rationale": "Byrnes (FBI) found three burned patches of grass clumps inside the four imprints and one outside, still smouldering when the officers arrived, and Zamora saw \"the brush was burning in several places\" once the craft had gone. Where each patch lay is not recorded, so they are spread inside and outside the imprints by hand; that they caught during the take-off rather than the landing is assumed too."
+      }
     }
   ]
 }

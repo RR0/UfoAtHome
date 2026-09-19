@@ -66,11 +66,17 @@ export class BodyConfrontation {
   constructor(private readonly timeline: Timeline) {
   }
 
-  /** Every phenomenon a body explains that the testimony draws at `t`, set against that body. */
-  at(t: number, bodies: BodyState[], eye: LocalPoint): ConfrontationReading[] {
+  /**
+   * Every phenomenon a body explains that the testimony draws at `t`, set against that body.
+   *
+   * @param outlineOf Points of a body's actual surface, where whoever draws it has them — the
+   *   node of a model its `outlineNode` names, which a box round the whole model (legs spread wider
+   *   than the hull) would overstate. The ellipsoid or the box when it has none.
+   */
+  at(t: number, bodies: BodyState[], eye: LocalPoint, outlineOf?: (body: BodyState) => LocalPoint[] | undefined): ConfrontationReading[] {
     const readings: ConfrontationReading[] = []
     for (const body of bodies) {
-      const predicted = BodyConfrontation.projectionOf(body, eye)
+      const predicted = BodyConfrontation.projectionOf(body, eye, outlineOf?.(body))
       if (!predicted) continue
       for (const sourceId of body.explains) {
         const shape = this.timeline.getInterpolatedShapeAt(t, sourceId)
@@ -104,15 +110,17 @@ export class BodyConfrontation {
    * What a body looks like from `eye`: its centre's direction, and the angles its outline spans
    * across and up, measured about that direction. Undefined when the eye is inside it.
    */
-  static projectionOf(body: BodyState, eye: LocalPoint): Projection | undefined {
-    const forward = BodyConfrontation.normalized({ eastM: body.eastM - eye.eastM, northM: body.northM - eye.northM, upM: body.upM - eye.upM })
+  static projectionOf(body: BodyState, eye: LocalPoint, outline?: LocalPoint[]): Projection | undefined {
+    const points = outline && outline.length > 0 ? outline : BodyConfrontation.outlineOf(body)
+    const centre = outline && outline.length > 0 ? BodyConfrontation.centreOf(outline) : body
+    const forward = BodyConfrontation.normalized({ eastM: centre.eastM - eye.eastM, northM: centre.northM - eye.northM, upM: centre.upM - eye.upM })
     if (!forward) return undefined
     // Across is horizontal and to the right of the line of sight; up completes the frame. Looking
     // straight up or down there is no "right", and any horizontal will do.
     const right = BodyConfrontation.normalized({ eastM: forward.northM, northM: -forward.eastM, upM: 0 }) ?? { eastM: 1, northM: 0, upM: 0 }
     const up = BodyConfrontation.cross(right, forward)
     let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity
-    for (const point of BodyConfrontation.outlineOf(body)) {
+    for (const point of points) {
       const ray = { eastM: point.eastM - eye.eastM, northM: point.northM - eye.northM, upM: point.upM - eye.upM }
       const depth = BodyConfrontation.dot(ray, forward)
       if (depth <= 0) return undefined
@@ -130,6 +138,12 @@ export class BodyConfrontation {
       },
       angular: { widthDeg: (maxX - minX) * RAD_TO_DEG, heightDeg: (maxY - minY) * RAD_TO_DEG }
     }
+  }
+
+  /** The middle of a cloud of points: the midpoint of its extent on each axis. */
+  private static centreOf(points: LocalPoint[]): LocalPoint {
+    const middle = (axis: keyof LocalPoint) => (Math.min(...points.map(p => p[axis])) + Math.max(...points.map(p => p[axis]))) / 2
+    return { eastM: middle("eastM"), northM: middle("northM"), upM: middle("upM") }
   }
 
   /** Degrees between two directions of the sky. */
