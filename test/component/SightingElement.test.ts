@@ -428,6 +428,40 @@ describe("SightingElement", () => {
     expect(element.scene.interpretation).toBeUndefined()
   })
 
+  it("shows an interpretation alone until the reader asks to compare it with the testimony", async () => {
+    const body = { id: "craft", explains: ["ufo"], model: { id: "sphere" }, track: [{ t: 0, eastM: 0, northM: 10, onGround: true }] }
+    stubFetch({ "john.json": { ...johnSighting, id: "x", place: [{ lat: 32.4, lng: -86.3 }], interpretation: { title: "Own", bodies: [body] } } })
+    const element = await connect("john.json")
+    const shadow = element.shadowRoot!
+    const compare = shadow.getElementById("compare-testimony") as HTMLButtonElement
+    const panel = shadow.getElementById("confrontation") as HTMLElement
+    // Nothing to compare the raw testimony with.
+    expect(compare.hidden).toBe(true)
+
+    const select = shadow.getElementById("interpretation") as HTMLSelectElement
+    select.value = "witness"
+    select.dispatchEvent(new Event("change"))
+    await new Promise(resolve => setTimeout(resolve, 0))
+    expect(compare.hidden).toBe(false)
+    expect(compare.getAttribute("aria-pressed")).toBe("false")
+    expect(element.scene.compareTestimony).toBe(false)
+    expect(panel.hidden).toBe(true)
+
+    compare.click()
+    expect(element.scene.compareTestimony).toBe(true)
+    expect(compare.getAttribute("aria-pressed")).toBe("true")
+    expect(panel.hidden).toBe(false)
+  })
+
+  it("starts comparing where the page asks, and lets the reader stop", async () => {
+    const element = document.createElement(SIGHTING_ELEMENT_NAME) as SightingElement
+    element.setAttribute("compare-testimony", "")
+    document.body.appendChild(element)
+    expect(element.scene.compareTestimony).toBe(true)
+    ;(element.shadowRoot!.getElementById("compare-testimony") as HTMLButtonElement).click()
+    expect(element.scene.compareTestimony).toBe(false)
+  })
+
   it("shows no choice where the raw testimony is all there is", async () => {
     const element = await connect("john.json")
     expect((element.shadowRoot!.getElementById("interpretation-choice") as HTMLElement).hidden).toBe(true)
@@ -635,6 +669,49 @@ describe("SightingElement i18n", () => {
 
     await waitFor(() => element.shadowRoot!.getElementById("testimony-prefix")!.textContent === "Témoignage de")
 
+    spy.mockRestore()
+  })
+
+  /** A recording's own texts are read in the language the interface is in — see
+   * SightingElement.loadLocaleMessages, and the "Celle du témoin : A craft standing on its legs"
+   * that told them apart. */
+  const bilingual = {
+    ...johnSighting,
+    interpretation: { title: { fr: "Un engin posé sur ses pieds", en: "A craft standing on its legs" }, bodies: [] }
+  }
+
+  function interpretationOptions(element: SightingElement): string[] {
+    const select = element.shadowRoot!.getElementById("interpretation") as HTMLSelectElement
+    return [...select.options].map(option => option.textContent ?? "")
+  }
+
+  it("reads the recording's own texts in French when navigator.languages prefers fr", async () => {
+    const spy = vi.spyOn(navigator, "languages", "get").mockReturnValue(["fr", "en"])
+    stubFetch({ "john.json": bilingual })
+    const element = mount()
+    element.witnessUrls = ["john.json"]
+
+    await waitFor(() => interpretationOptions(element)[1]?.startsWith("Celle du témoin"))
+    expect(interpretationOptions(element)).toEqual(["Témoignage brut", "Celle du témoin\u00a0: Un engin posé sur ses pieds"])
+    spy.mockRestore()
+  })
+
+  it("takes the page's language when put in it after being created, for its messages and the recording's texts alike", async () => {
+    const spy = vi.spyOn(navigator, "languages", "get").mockReturnValue(["fr", "en"])
+    stubFetch({ "john.json": bilingual })
+    const section = document.createElement("section")
+    section.lang = "en"
+    document.body.appendChild(section)
+    // Created before being put anywhere: the constructor sees no [lang] and only the browser's list.
+    const element = document.createElement(SIGHTING_ELEMENT_NAME) as SightingElement
+    section.appendChild(element)
+    element.witnessUrls = ["john.json"]
+
+    await waitFor(() => interpretationOptions(element).length === 2)
+    // Long enough for a French decision taken at construction to have landed, had it survived.
+    await new Promise(resolve => setTimeout(resolve, 20))
+    expect(interpretationOptions(element)).toEqual(["Raw testimony", "The witness's own: A craft standing on its legs"])
+    expect(element.shadowRoot!.getElementById("testimony-prefix")!.textContent).toBe("Testimony by")
     spy.mockRestore()
   })
 

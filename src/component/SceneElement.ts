@@ -265,8 +265,9 @@ export class SceneElement extends HTMLElement {
   /** What its bodies say against the testimony at the instant on show — see `confrontation`. */
   private confrontationReadings: ConfrontationReading[] = []
   private confrontationSignature = ""
-  /** The phenomena a body stands in for at this instant, drawn as their outline alone. */
-  private explainedSourceIds = new Set<string>()
+  /** Whether the testimony is shown beside the interpretation, and measured against it — see
+   * `compareTestimony`. */
+  private comparing = false
   /** What the sky now standing was computed from — see applySceneAt. */
   private lastSkyKey?: string
   private starCatalog?: StarCatalog
@@ -1353,9 +1354,11 @@ export class SceneElement extends HTMLElement {
         distanceM: depths.get(sourceId)!.distanceM,
         renderOrder: order.indexOf(sourceId),
         aim: shape.aim,
-        hidden: offScreen.has(sourceId),
-        // Only what the witness saw is outlined: an unseen phenomenon has no outline to show.
-        ghost: this.explainedSourceIds.has(sourceId) && shape.transparency < 1
+        // With an interpretation on show, the testimony is not what is drawn: it is either absent,
+        // or beside it as outlines to compare with — and then all of it, what no body claims to be
+        // included (an insignia, a flame), since that too is what the interpretation must answer.
+        hidden: offScreen.has(sourceId) || (this.interpretationShown !== undefined && !this.comparing),
+        ghost: this.interpretationShown !== undefined && this.comparing
       })
     }
     // The instrument's own aperture and roll, which the painter needs for a dazzling light's spikes
@@ -1382,9 +1385,9 @@ export class SceneElement extends HTMLElement {
    * car it was drawn in front of. `undefined` withdraws it.
    */
   /**
-   * The interpretation to replay the testimony with — its bodies standing in the scene, the
-   * phenomena they claim to be reduced to their outline beside them — or undefined for the raw
-   * testimony. See InterpretationJson. Never part of the recording this element shows: the player
+   * The interpretation to replay the testimony with — its bodies standing in the scene in place of
+   * the testimony's phenomena, which come back as outlines only when compared with (see
+   * `compareTestimony`) — or undefined for the raw testimony. See InterpretationJson. Never part of the recording this element shows: the player
    * chooses it, from the recording's own or from the case's.
    */
   get interpretation(): InterpretationJson | undefined {
@@ -1396,8 +1399,24 @@ export class SceneElement extends HTMLElement {
     this.updateAstronomy(this.lastTimeMs)
   }
 
+  /**
+   * Whether the testimony stands beside the interpretation on show, as the outlines of what the
+   * witness saw, and is measured against it (see `confrontation`). Off, the interpretation is shown
+   * alone, as the world it claims — which is how it has to be looked at before it can be judged.
+   * Meaningless for the raw testimony, which is always what is drawn then.
+   */
+  get compareTestimony(): boolean {
+    return this.comparing
+  }
+
+  set compareTestimony(comparing: boolean) {
+    this.comparing = comparing
+    this.updateAstronomy(this.lastTimeMs)
+  }
+
   /** What the bodies of the interpretation on show look like from the witness's eye, against what
-   * the witness said, at the instant on show — see BodyConfrontation. Empty for the raw testimony. */
+   * the witness said, at the instant on show — see BodyConfrontation. Empty for the raw testimony,
+   * and while the testimony is not being compared with. */
   get confrontation(): ConfrontationReading[] {
     return this.confrontationReadings
   }
@@ -1419,11 +1438,10 @@ export class SceneElement extends HTMLElement {
       states = interpretation.bodies
         .map(body => new BodyPlacement(body, ground, eyeAt).at(t))
         .filter((state): state is BodyState => state !== undefined)
-      const eye = eyeAt(t)
+      const eye = this.comparing ? eyeAt(t) : undefined
       readings = eye ? new BodyConfrontation(sighting.timeline).at(t, states, eye) : []
     }
     this.sceneRenderer.setBodies(states)
-    this.explainedSourceIds = new Set(states.flatMap(state => state.explains))
     this.confrontationReadings = readings
     if (!announce) return
     const signature = JSON.stringify(readings)

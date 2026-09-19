@@ -28,5 +28,7 @@ export const sightingMessages_en: SightingMessages = {
   confrontationDirection: "{deg}° off",
   confrontationWidth: "width ×{ratio}",
   confrontationHeight: "height ×{ratio}",
+  showComparison: "Compare with the testimony",
+  hideComparison: "Stop comparing with the testimony",
   hideLabels: "Hide what it states"
 }

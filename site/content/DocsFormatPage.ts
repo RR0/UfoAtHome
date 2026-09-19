@@ -217,10 +217,11 @@ if (excerpts.length > 0) {
     <p>A recording states angles, and a body in metres is never part of what was seen. It is a
       claim about it, and it is tested by standing it in the scene and looking at it from where
       the witness stood: it casts its shadow, the ground can hide it, and its outline is measured
-      against what the witness said at every instant. The phenomena it claims to be stay on
-      screen as dashed outlines, and the player lists how far off the direction is and how many
-      times wider and taller the body looks, in red when a witness could not have been that far
-      off.</p>
+      against what the witness said at every instant. An interpretation is shown alone, as the
+      world it claims; asked to compare (the ◌ button, or <code>compare-testimony</code> on
+      <code>&lt;rr0-sighting&gt;</code>), the player draws everything the witness saw beside it as
+      dashed outlines and lists how far off the direction is and how many times wider and taller
+      each body looks, in red when a witness could not have been that far off.</p>
     <p>The witness's own reading goes in the recording, as <code>interpretation</code>. An
       analyst's goes in the case, as an event of type <code>interpretation</code> naming the
       recording by its <code>id</code>, with who claims it in <code>by</code>
@@ -525,9 +526,11 @@ if (excerpts.length > 0) {
       a été vu. C'est une affirmation à son sujet, et elle se met à l'épreuve en la posant dans la
       scène et en la regardant depuis l'endroit où se tenait le témoin : elle projette son ombre,
       le sol peut la cacher, et son contour est confronté à chaque instant à ce que le témoin a
-      dit. Les phénomènes qu'elle prétend être restent à l'écran en contours pointillés, et le
-      lecteur indique l'écart de direction et combien de fois plus large et plus haut le corps
-      paraît, en rouge quand un témoin n'aurait pas pu se tromper d'autant.</p>
+      dit. Une interprétation s'affiche seule, comme le monde qu'elle affirme ; quand on demande
+      la comparaison (le bouton ◌, ou <code>compare-testimony</code> sur
+      <code>&lt;rr0-sighting&gt;</code>), le lecteur dessine à côté tout ce que le témoin a vu, en
+      contours pointillés, et indique l'écart de direction et combien de fois plus large et plus
+      haut chaque corps paraît, en rouge quand un témoin n'aurait pas pu se tromper d'autant.</p>
     <p>La lecture du témoin lui-même va dans l'enregistrement, en <code>interpretation</code>.
       Celle d'un analyste va dans le dossier, en événement de type <code>interpretation</code>
       qui désigne l'enregistrement par son <code>id</code>, avec qui l'avance dans

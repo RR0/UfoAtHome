@@ -11,7 +11,11 @@ export const html = `
   </label>
   <!-- The playback layer's own toggles, taken out of the picture and put here — see
        UfoElement.hostControls. -->
-  <span id="scene-controls" class="scene-controls"></span>
+  <span id="scene-controls" class="scene-controls">
+    <!-- Whether the testimony is shown beside the interpretation on show, as outlines, and
+         measured against it — see SceneElement.compareTestimony. Only while an interpretation is. -->
+    <button id="compare-testimony" type="button" title="Compare with the testimony" aria-label="Compare with the testimony" aria-pressed="false" hidden>◌</button>
+  </span>
   <button id="info-button" class="info-btn" type="button" title="About" aria-label="About" aria-expanded="false">?</button>
   <div id="info-panel" class="info-panel" hidden>
     <button id="info-close" class="info-close" type="button" aria-label="Close">×</button>

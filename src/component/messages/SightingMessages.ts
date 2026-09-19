@@ -47,4 +47,7 @@ export interface SightingMessages extends SightingLabels {
   /** `{ratio}`: how many times wider (or taller) the body looks than the witness said. */
   confrontationWidth: string
   confrontationHeight: string
+  /** The toggle that shows the testimony beside an interpretation, as it reads each way. */
+  showComparison: string
+  hideComparison: string
 }

@@ -271,9 +271,9 @@ export class CanvasRenderer {
    * The witness's own outline and nothing else: a dashed line along the shape's edge, in its colour,
    * with no fill, halo or glare.
    *
-   * What a shape becomes when an interpretation stands a body in its place (see BodySystem): the
-   * body is what is drawn, and the testimony stays on screen as the thing it is measured against —
-   * never hidden, since hiding it would let the interpretation replace what was seen.
+   * What a shape becomes when the testimony is compared with an interpretation (see BodySystem and
+   * SceneElement.compareTestimony): the bodies are what is drawn, and the testimony stands beside
+   * them as the thing they are measured against, without covering them.
    */
   paintGhost(shape: Shape, lineWidthPx: number): void {
     this.ctx.save()

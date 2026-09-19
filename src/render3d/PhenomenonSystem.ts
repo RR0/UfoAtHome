@@ -26,8 +26,8 @@ export interface PlacedPhenomenon {
   renderOrder: number
   /** Not drawn because the phenomenon is outside the visible frame. */
   hidden: boolean
-  /** Drawn as its outline alone, because a body of the interpretation on show stands in its place
-   * — see CanvasRenderer.paintGhost. */
+  /** Drawn as its outline alone, because it is shown beside an interpretation to be compared with
+   * — see CanvasRenderer.paintGhost and SceneElement.compareTestimony. */
   ghost?: boolean
 }
 

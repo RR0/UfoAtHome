@@ -36,6 +36,12 @@ const THUNDER_CREDIT_LICENSE = "CC BY 3.0"
 
 const APP_HOME_URL = "https://ufoathome.org"
 
+/**
+ * Asks the player to start with the testimony shown beside any interpretation chosen, and measured
+ * against it — see SceneElement.compareTestimony. A reader can still turn it off, as with the map.
+ */
+export const COMPARE_TESTIMONY_ATTRIBUTE = "compare-testimony"
+
 /** Where a recording is opened for editing on that site. */
 const APP_EDITOR_URL = `${APP_HOME_URL}/edit/`
 
@@ -66,7 +72,7 @@ const APP_EDITOR_URL = `${APP_HOME_URL}/edit/`
  */
 export class SightingElement extends HTMLElement {
   static get observedAttributes(): string[] {
-    return ["src", "show-labels", WITNESS_MAP_ATTRIBUTE, MILESTONES_ATTRIBUTE]
+    return ["src", "show-labels", WITNESS_MAP_ATTRIBUTE, MILESTONES_ATTRIBUTE, COMPARE_TESTIMONY_ATTRIBUTE]
   }
 
   private readonly shadow: ShadowRoot
@@ -123,6 +129,7 @@ export class SightingElement extends HTMLElement {
   private readonly confrontationElement: HTMLElement
   private readonly confrontationHeading: HTMLElement
   private readonly confrontationList: HTMLElement
+  private readonly compareButton: HTMLButtonElement
   /** How to get each interpretation the choice offers, by option value — fetched only once chosen,
    * since an analyst's may be a file of its own. */
   private interpretationLoaders = new Map<string, () => Promise<InterpretationJson | undefined>>()
@@ -191,6 +198,8 @@ export class SightingElement extends HTMLElement {
     this.confrontationElement = this.shadow.getElementById("confrontation")!
     this.confrontationHeading = this.shadow.getElementById("confrontation-heading")!
     this.confrontationList = this.shadow.getElementById("confrontation-list")!
+    this.compareButton = this.shadow.getElementById("compare-testimony") as HTMLButtonElement
+    this.compareButton.addEventListener("click", () => this.setComparing(!this.sceneElement.compareTestimony))
 
     this.witnessSelect.addEventListener("change", () => this.selectWitness(this.witnessSelect.value))
     this.interpretationSelect.addEventListener("change", () => void this.chooseInterpretation(this.interpretationSelect.value))
@@ -241,11 +250,32 @@ export class SightingElement extends HTMLElement {
   /** Auto-detects the visitor's preferred UI language from `navigator.languages`, falling back
    * to English (already baked into the template) when none of their preferences are
    * supported — see selectLocale. There is deliberately no language-picker UI, matching
-   * `<rr0-ufo>`'s own approach. */
+   * `<rr0-ufo>`'s own approach.
+   *
+   * ONE decision for everything this element says: its own messages, the tag names, and which of
+   * the recording's languages it reads (see said). They were taken apart once — the messages here
+   * at construction, the recording's texts lazily on first read — and an element created by
+   * `document.createElement` before being put in a `lang="en"` page decided French for the first
+   * (it had no `[lang]` ancestor yet, so only the browser's list) and English for the second:
+   * "Celle du témoin : A craft standing on its legs". Hence the preferences are read once, here,
+   * and read again on connection (see connectedCallback) rather than anywhere else.
+   */
   private async loadLocaleMessages(): Promise<void> {
-    this.language = selectLocale(HostLocale.preferencesFor(this), UFO_SUPPORTED_LANGUAGES) as UfoLanguage
-    if (this.language === "en") return
-    this.messages = await loadSightingMessages(this.language)
+    const token = ++this.localeToken
+    const preferences = HostLocale.preferencesFor(this)
+    this.preferences = preferences
+    const language = selectLocale(preferences, UFO_SUPPORTED_LANGUAGES) as UfoLanguage
+    const [messages, tagNames] = language === "en"
+      ? [sightingMessages_en, {}]
+      : await Promise.all([loadSightingMessages(language), loadTagNames(language)])
+    // Superseded by a later decision (the element was connected while this one was loading).
+    if (token !== this.localeToken) return
+    const changed = language !== this.language
+    this.language = language
+    this.messages = messages
+    this.tags = new SightingTags(tagNames)
+    this.said = new SaidTexts(preferences)
+    this.summaryBuilder = new SightingSummary(this.messages, this.language === "fr" ? "fr" : "en", this.said, this.tags)
     this.testimonyPrefix.textContent = this.messages.testimonyBy
     this.interpretationLabel.textContent = this.messages.interpretation
     this.confrontationHeading.textContent = this.messages.confrontation
@@ -256,13 +286,11 @@ export class SightingElement extends HTMLElement {
     this.infoCloseButton.setAttribute("aria-label", this.messages.close)
     this.infoObservationHeading.textContent = this.messages.observation
     this.infoCreditsToggle.textContent = this.messages.credits
-    this.tags = new SightingTags(await loadTagNames(this.language))
-    this.summaryBuilder = new SightingSummary(this.messages, this.language === "fr" ? "fr" : "en", this.said, this.tags)
     this.syncLabelsToggle()
     this.refreshParamSummary()
     // An assessment names ids ("coverage", "ce3") through these same messages, so a reading taken
     // before they arrived is in the wrong language — read it again rather than translating chips.
-    if (this.currentSrc) void this.runAssessments()
+    if (changed && this.currentSrc) void this.runAssessments()
     this.infoEmbedToggle.textContent = this.messages.embed
     this.labelEmbedReplay.textContent = this.messages.embedReplay
     this.labelEmbedEdit.textContent = this.messages.embedEdit
@@ -271,25 +299,29 @@ export class SightingElement extends HTMLElement {
     this.updateTestimonyLine()
   }
 
+  /** The reader's languages as loadLocaleMessages last read them — what connectedCallback compares
+   * against to tell whether being put somewhere changed the answer. */
+  private preferences: readonly string[] = []
+
+  /** Drops a language decision that resolved after a later one was taken. */
+  private localeToken = 0
+
   /**
    * Which of a recording's languages this reader reads — see SaidText.
    *
-   * Built on demand and cached, not at construction: it reads the nearest `[lang]` ancestor, and
-   * an element still being upgraded has none yet. Dropped on connection, so that moving this
-   * element into a section that declares another language is honoured.
+   * Set by loadLocaleMessages together with the messages, never on its own: the interface and the
+   * account it frames must be in the same language.
    */
-  private get said(): SaidTexts {
-    return this.saidTexts ??= new SaidTexts(HostLocale.preferencesFor(this))
-  }
-
-  private saidTexts?: SaidTexts
+  private said = new SaidTexts(["en"])
 
   /** Names the recording's tags for this reader — English until the dictionary is loaded, which
    * is exactly what an English reader keeps (see TagNames). */
   private tags = new SightingTags({})
 
   connectedCallback(): void {
-    this.saidTexts = undefined
+    // The constructor could only read the browser's list if this element was created before being
+    // put anywhere; the page it now stands in may declare a language (see HostLocale).
+    if (HostLocale.preferencesFor(this).join() !== this.preferences.join()) void this.loadLocaleMessages()
     const src = this.getAttribute("src")
     if (src) {
       void this.loadFromSrc(src)
@@ -312,6 +344,9 @@ export class SightingElement extends HTMLElement {
     }
     if (name === WITNESS_MAP_ATTRIBUTE || name === MILESTONES_ATTRIBUTE) {
       this.forwardPlayerAttributes()
+    }
+    if (name === COMPARE_TESTIMONY_ATTRIBUTE) {
+      this.setComparing(this.hasAttribute(COMPARE_TESTIMONY_ATTRIBUTE))
     }
   }
 
@@ -498,6 +533,29 @@ export class SightingElement extends HTMLElement {
     this.interpretationSelect.value = "raw"
     this.interpretationChoice.hidden = this.interpretationSelect.options.length < 2
     this.showConfrontation([])
+    this.updateCompareButton()
+  }
+
+  /** Shows the testimony beside the interpretation, or not — see SceneElement.compareTestimony. The
+   * choice holds across interpretations and witnesses, like the map's: it is the reader's way of
+   * looking, not a property of what is looked at. */
+  private setComparing(comparing: boolean): void {
+    this.sceneElement.compareTestimony = comparing
+    this.updateCompareButton()
+    // The scene has just measured (or stopped measuring) at the instant on show; what it found is
+    // shown now rather than on its next change, which a paused player may never make.
+    this.showConfrontation(this.sceneElement.confrontation)
+  }
+
+  /** Offered only while an interpretation is on show: the raw testimony has nothing to be compared
+   * with. */
+  private updateCompareButton(): void {
+    const comparing = this.sceneElement.compareTestimony
+    this.compareButton.hidden = !this.sceneElement.interpretation
+    this.compareButton.setAttribute("aria-pressed", String(comparing))
+    const label = comparing ? this.messages.hideComparison : this.messages.showComparison
+    this.compareButton.title = label
+    this.compareButton.setAttribute("aria-label", label)
   }
 
   /** A colon as the reader's language writes one: French puts a no-break space before it. */
@@ -514,6 +572,7 @@ export class SightingElement extends HTMLElement {
     }) : undefined
     if (token !== this.interpretationToken) return
     this.sceneElement.interpretation = interpretation
+    this.updateCompareButton()
     if (!interpretation) this.showConfrontation([])
   }
 
@@ -532,7 +591,7 @@ export class SightingElement extends HTMLElement {
    */
   private showConfrontation(readings: ConfrontationReading[]): void {
     this.confrontationList.innerHTML = ""
-    this.confrontationElement.hidden = !this.sceneElement.interpretation
+    this.confrontationElement.hidden = !this.sceneElement.interpretation || !this.sceneElement.compareTestimony
     const degrees = new Intl.NumberFormat(this.language, { maximumFractionDigits: 1, minimumFractionDigits: 1 })
     const times = new Intl.NumberFormat(this.language, { maximumFractionDigits: 2, minimumFractionDigits: 2 })
     for (const reading of readings) {
