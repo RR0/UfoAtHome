@@ -26,6 +26,13 @@ export class SightingCompletion {
 
   private static readonly FIELDS = schema as Record<string, SchemaField>
 
+  /** `at`: where in a recording the edited text's own top-level object stands, as the keys leading
+   * to it (arrays contribute nothing, see pathTo) — empty for a whole recording, and for an excerpt
+   * such as one weather keyframe, `["weatherTrack", "keyframes"]`, so that it is offered the keys a
+   * weather keyframe has rather than a recording's. */
+  constructor(private readonly at: readonly string[] = []) {
+  }
+
   /** Fields of the object at `path`, or undefined when the path leads nowhere the format knows —
    * a misspelt key, or one of the Record-typed objects whose keys are the author's own. */
   private fieldsAt(path: string[]): Record<string, SchemaField> | undefined {
@@ -50,7 +57,9 @@ export class SightingCompletion {
         }
       }
     }
-    return path
+    // The excerpt's own place in a recording comes first: the path above is built outward from the
+    // caret, so it is the part that goes after.
+    return [...this.at, ...path]
   }
 
   private keyCompletions(fields: Record<string, SchemaField>): Completion[] {

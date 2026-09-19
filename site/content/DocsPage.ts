@@ -29,32 +29,40 @@ export class DocsPage implements SitePage {
 
   render(language: SiteLanguage): string {
     const fr = language === "fr"
-    const cards: ReadonlyArray<readonly [string, string, string]> = fr
+    type Card = readonly [string, string, string]
+    // What anybody with an observation asks first, then what somebody building with the components
+    // or writing files by hand needs.
+    const essentials: ReadonlyArray<Card> = fr
       ? [
         ["/docs/create/", "Créer une observation",
           "Dans l'éditeur, ou en écrivant le fichier vous-même. Les deux produisent la même chose : un fichier JSON qui est le vôtre."],
-        ["/docs/format/", "Le fichier d'observation",
-          "Ce que contient ce fichier, champ par champ : l'observation, les témoins, ce qui a été vu, la météo. Avec un exemple entier à taper."],
         ["/docs/share/", "Partager une observation",
           "Un lien à envoyer, ou deux lignes de HTML sur votre propre page. Les deux avec un exemple qui marche, à essayer et à copier."],
-        ["/docs/components/", "Les composants",
-          "Quatre éléments standards, une page chacun : lequel vous voulez, ce qu'il dessine, et tout ce à quoi il répond."],
         ["/docs/sources/", "Les sources et les choix",
           "D'où vient chaque donnée, quand elle est lue, d'où elle est servie, et pourquoi cette source plutôt qu'une autre."]
       ]
       : [
         ["/docs/create/", "Create an observation",
           "In the editor, or by writing the file yourself. Both produce the same thing: one JSON file that is yours."],
-        ["/docs/format/", "The sighting file",
-          "What that file holds, field by field: the observation, the witnesses, what was seen, the weather. With a whole example to type in."],
         ["/docs/share/", "Share an observation",
           "A link to send, or two lines of HTML on your own page. Both with a working example you can try and copy."],
-        ["/docs/components/", "The components",
-          "Four standard elements, one page each: which one you want, what it draws, and everything it answers to."],
         ["/docs/sources/", "Sources and choices",
           "Where each piece of data comes from, when it is read, where it is served from, and why that source over another."]
       ]
-    const grid = cards.map(([href, title, blurb]) => `      <a class="use" href="${href}">
+    const technical: ReadonlyArray<Card> = fr
+      ? [
+        ["/docs/components/", "Les composants",
+          "Quatre éléments standards, une page chacun : lequel vous voulez, ce qu'il dessine, et tout ce à quoi il répond."],
+        ["/docs/format/", "Le fichier d'observation",
+          "Ce que contient ce fichier, champ par champ : l'observation, les témoins, ce qui a été vu, la météo. Avec un exemple entier."]
+      ]
+      : [
+        ["/docs/components/", "The components",
+          "Four standard elements, one page each: which one you want, what it draws, and everything it answers to."],
+        ["/docs/format/", "The sighting file",
+          "What that file holds, field by field: the observation, the witnesses, what was seen, the weather. With a whole example."]
+      ]
+    const grid = (cards: ReadonlyArray<Card>) => cards.map(([href, title, blurb]) => `      <a class="use" href="${href}">
         <h3>${title}</h3>
         <p>${blurb}</p>
         <p class="use-more">${fr ? "Lire" : "Read"} →</p>
@@ -74,7 +82,11 @@ export class DocsPage implements SitePage {
 <section class="band">
   <div class="wrap">
     <div class="uses">
-${grid}
+${grid(essentials)}
+    </div>
+    <h2>${fr ? "La technique" : "Technical"}</h2>
+    <div class="uses">
+${grid(technical)}
     </div>
   </div>
 </section>
