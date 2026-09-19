@@ -208,7 +208,7 @@ if (docs) {
         The <strong>🎯</strong> button does the smaller version of the same thing: it turns the
         current witness to face whatever is selected.</p>
       <p>Published together, those recordings become the witness picker a reader gets — see
-        <a href="/docs/components/">the documentation</a> on manifests.</p>
+        <a href="/docs/format/#several-witnesses-the-case">the case</a> that lists them.</p>
       <p>Decor can also <strong>move</strong> (an aircraft crossing the sky, a car driving past) and
         carry <strong>lights</strong> with real, regulated flash rates — anticollision beacons at
         40–100 a minute, hazard flashers at 60–120. On a long exposure that rate is drawn: steady
@@ -537,7 +537,7 @@ if (docs) {
         quelque chose à vérifier. Le bouton <strong>🎯</strong> en fait la version réduite : il
         tourne le témoin courant vers ce qui est sélectionné.</p>
       <p>Publiés ensemble, ces enregistrements deviennent le sélecteur de témoin que voit un
-        lecteur — voir <a href="/docs/components/">la documentation</a> sur les manifestes.</p>
+        lecteur — voir <a href="/docs/format/#several-witnesses-the-case">le dossier</a> qui les liste.</p>
       <p>Un décor peut aussi <strong>se déplacer</strong> (un avion qui traverse le ciel, une
         voiture qui passe) et porter des <strong>feux</strong> aux cadences réelles et
         réglementaires : anticollision de 40 à 100 éclats par minute, feux de détresse de 60 à 120.

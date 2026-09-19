@@ -21,7 +21,7 @@ const width = Number(process.env.W || 1100), height = Number(process.env.H || 62
 const lib = process.env.LIB || "/lib/rr0-scene.mjs"
 let demos = process.argv.slice(2)
 if (!demos.length) {
-  demos = (await readdir(new URL("../../public/demo-data", import.meta.url))).filter(f => f.endsWith(".json") && !f.startsWith("example") && !f.startsWith("instrument") && f !== "witnesses-manifest.json").map(f => f.replace(".json", ""))
+  demos = (await readdir(new URL("../../public/demo-data", import.meta.url))).filter(f => f.endsWith(".json") && !f.startsWith("example") && !f.startsWith("instrument") && !f.startsWith("case-")).map(f => f.replace(".json", ""))
 }
 
 await mkdir(outDir, { recursive: true })

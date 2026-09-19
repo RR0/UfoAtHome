@@ -3,10 +3,10 @@ import type { Said } from "../SitePage.js"
 export interface Demo {
   readonly id: string
   readonly src: string
-  /** Which recording the View/Edit links point at, when `src` is a several-witness manifest. */
+  /** Which recording the View/Edit links point at, when `src` is a several-witness case. */
   readonly editSrc?: string
   /**
-   * What the full-size Player opens, when it is not `src`: the several-witness manifest of a case
+   * What the full-size Player opens, when it is not `src`: the case.json of a several-witness case
    * whose card can only show one of them. A card's sky is a bare `<rr0-scene>`, which plays one
    * recording; the Player is an `<rr0-sighting>`, whose whole point on such a case is the witness
    * picker, so handing it one witness's file took away the very thing the card sends people there
@@ -68,7 +68,7 @@ export class DemoCatalogue {
         {
           id: "chiles-whitted",
           src: "/demo-data/witness-chiles.json",
-          playSrc: "/demo-data/witnesses-manifest.json",
+          playSrc: "/demo-data/case-chiles-whitted.json",
           witnessMap: true,
           title: { en: "Chiles & Whitted, 1948", fr: "Chiles et Whitted, 1948" },
           titleIsName: true,

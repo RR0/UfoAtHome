@@ -30,8 +30,8 @@ export class PlayerPage implements SitePage {
     // Only for these — anything else is named from what the recording itself carries.
     // As they read inside the heading's sentence: a title that is not a name loses the capital it
     // only had for starting a card (see Demo.titleIsName).
-    // Under the manifest the Player is handed too (see Demo.playSrc), so a case opened with both its
-    // witnesses is still called by its name rather than by "witnesses-manifest".
+    // Under the case the Player is handed too (see Demo.playSrc), so a case opened with all its
+    // witnesses is called by this site's name for it.
     const demoTitles = JSON.stringify(Object.fromEntries(
       this.catalogue.demos.flatMap(demo => {
         const title = demo.title[language]
@@ -101,6 +101,8 @@ const say = (text, kind) => {
 const titleOf = (sighting, source) => {
   const known = source && demoTitles[new URL(source, location.href).pathname]
   if (known) return known
+  // A case (a case.json with its events, and no timeline of its own) is named by its title.
+  if (sighting && Array.isArray(sighting.events) && !sighting.timeline) return sighting.title || sighting.id || undefined
   const witness = sighting && sighting.witness
   const fullName = witness && [...(witness.firstNames || []), witness.lastName].filter(Boolean).join(" ")
   return (sighting && sighting.caseId)
@@ -125,7 +127,7 @@ const announce = (sighting, source, fallbackTitle) => {
  * What the recording says about itself, above the way into the editor.
  *
  * Read off the player rather than off the file this page fetched: a case with several witnesses is
- * a manifest, and each witness carries a description of their own, which has to follow the one the
+ * a case.json, and each witness carries a description of their own, which has to follow the one the
  * reader picked. The page's own language first, then English, then whatever the recording has.
  * Plain text, cut into paragraphs on blank lines: a recording is data, not markup.
  */
@@ -141,7 +143,7 @@ const describe = () => {
   description.hidden = description.childElementCount === 0
 }
 /* The recording the player is showing, as its own address: on a case with several witnesses, the one
-   picked. The editor opens one recording and not a manifest, so this is where its button points. */
+   picked. The editor opens one recording and not a case, so this is where its button points. */
 let shownSrc
 stage.addEventListener("witnesschange", event => {
   shownSrc = event.detail && event.detail.src ? event.detail.src : undefined
@@ -167,16 +169,16 @@ const reveal = (source, sighting, fallbackTitle) => {
 }
 
 /** A bare name with no slash is one of this site's own demos first, then an rr0.org case
- * directory — the shape the links that predate this site were written in. A dossier is tried
- * BOTH ways round: a case with several witnesses publishes a manifest rather than a single
- * recording (Chiles-Whitted does), and the manifest names the files beside it, so it works read
- * from here exactly as it does read from the dossier's own page. */
+ * directory — the shape the links that predate this site were written in. A dossier is read
+ * through its case.json, whose sighting events name the recordings beside it, so it works read
+ * from here exactly as it does from the dossier's own page; its sighting.json after that, for a
+ * dossier whose case does not list it yet. */
 const resolve = requested => requested.includes("/")
   ? [requested]
   : [\`/demo-data/witness-\${requested.toLowerCase()}.json\`,
      \`/demo-data/sky-test-\${requested.toLowerCase()}.json\`,
      \`/demo-data/\${requested.toLowerCase()}.json\`,
-     \`https://rr0.org/science/crypto/ufo/enquete/dossier/\${requested}/witnesses-manifest.json\`,
+     \`https://rr0.org/science/crypto/ufo/enquete/dossier/\${requested}/case.json\`,
      \`https://rr0.org/science/crypto/ufo/enquete/dossier/\${requested}/sighting.json\`]
 
 /**
@@ -209,7 +211,7 @@ const openUrl = async requested => {
       const sighting = await response.json() // fail here rather than inside the element
       await stage.loadFromSrc(candidate)
       showInEditor(JSON.stringify(sighting, null, 2))
-      reveal(new URL(candidate, location.href).href, Array.isArray(sighting) ? undefined : sighting, requested)
+      reveal(new URL(candidate, location.href).href, sighting, requested)
       say("")
       const next = new URL(location.href)
       next.searchParams.set("sighting", requested)

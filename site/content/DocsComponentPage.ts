@@ -274,12 +274,12 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       <code>&lt;rr0-scene&gt;</code> and adds the toolbar: who is testifying, and the <q>?</q> panel
       with the observation's own metadata, its credits and its embed lines.</p>
     <pre><code>&lt;rr0-sighting src="sighting.json"&gt;&lt;/rr0-sighting&gt;
-&lt;rr0-sighting src="witnesses.json"&gt;&lt;/rr0-sighting&gt;  &lt;!-- a manifest --&gt;</code></pre>
+&lt;rr0-sighting src="case.json"&gt;&lt;/rr0-sighting&gt;  &lt;!-- a case, and all its witnesses --&gt;</code></pre>
     <div class="table-scroll">
     <table>
       <tr><th>Member</th><th>Kind</th><th>What it does</th></tr>
-      <tr><td><code>src</code></td><td>attribute</td><td>A single recording, or a manifest — an array is one, an object is the other</td></tr>
-      <tr><td><code>witnessUrls</code></td><td>property</td><td>The manifest as a plain array of URLs, instead of <code>src</code></td></tr>
+      <tr><td><code>src</code></td><td>attribute</td><td>A single recording, or a <a href="/docs/format/#several-witnesses-the-case">case</a> whose sighting events list several — told apart by their shape</td></tr>
+      <tr><td><code>witnessUrls</code></td><td>property</td><td>The recordings to show, as a plain array of URLs, instead of <code>src</code></td></tr>
       <tr><td><code>sightingData</code></td><td>property</td><td>One recording, set directly — for a page holding one in memory rather than at a URL</td></tr>
       <tr><td><code>scene</code></td><td>property (read)</td><td>The composed <code>&lt;rr0-scene&gt;</code>, and through <code>scene.ufoElement</code> the playback members</td></tr>
       <tr><td><code>loadFromSrc(url)</code></td><td>method (async)</td><td>What the attribute triggers</td></tr>
@@ -299,12 +299,12 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       <code>&lt;rr0-scene&gt;</code> et ajoute la barre d'outils : qui témoigne, et le panneau
       <q>?</q> avec les métadonnées de l'observation, ses crédits et ses lignes d'intégration.</p>
     <pre><code>&lt;rr0-sighting src="sighting.json"&gt;&lt;/rr0-sighting&gt;
-&lt;rr0-sighting src="temoins.json"&gt;&lt;/rr0-sighting&gt;  &lt;!-- un manifeste --&gt;</code></pre>
+&lt;rr0-sighting src="case.json"&gt;&lt;/rr0-sighting&gt;  &lt;!-- un dossier, et tous ses témoins --&gt;</code></pre>
     <div class="table-scroll">
     <table>
       <tr><th>Membre</th><th>Nature</th><th>Rôle</th></tr>
-      <tr><td><code>src</code></td><td>attribut</td><td>Un enregistrement, ou un manifeste — un tableau est l'un, un objet est l'autre</td></tr>
-      <tr><td><code>witnessUrls</code></td><td>propriété</td><td>Le manifeste comme simple tableau d'URLs, au lieu de <code>src</code></td></tr>
+      <tr><td><code>src</code></td><td>attribut</td><td>Un enregistrement, ou un <a href="/docs/format/#several-witnesses-the-case">dossier</a> dont les événements sighting en listent plusieurs — reconnus à leur forme</td></tr>
+      <tr><td><code>witnessUrls</code></td><td>propriété</td><td>Les enregistrements à montrer, comme simple tableau d'URLs, au lieu de <code>src</code></td></tr>
       <tr><td><code>sightingData</code></td><td>propriété</td><td>Un enregistrement posé directement — pour une page qui en tient un en mémoire plutôt qu'à une URL</td></tr>
       <tr><td><code>scene</code></td><td>propriété (lecture)</td><td>Le <code>&lt;rr0-scene&gt;</code> composé, et par <code>scene.ufoElement</code> les membres de lecture</td></tr>
       <tr><td><code>loadFromSrc(url)</code></td><td>méthode (async)</td><td>Ce que déclenche l'attribut</td></tr>

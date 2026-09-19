@@ -15,10 +15,10 @@ export class DocsFormatPage extends DocsSection {
     navLabel: { en: "The JSON format", fr: "Le format JSON" },
     title: { en: "The JSON format", fr: "Le format JSON" },
     description: {
-      en: "What a recording file holds, field by field: the observation, several witnesses, what was "
-        + "seen, the weather and its clouds, and a whole working example to type in.",
-      fr: "Ce que contient un fichier d'enregistrement, champ par champ : l'observation, plusieurs "
-        + "témoins, ce qui a été vu, la météo et ses nuages, et un exemple entier à taper."
+      en: "What a recording file holds, field by field: the observation, what was seen, the weather "
+        + "and its clouds, the case that lists several witnesses, and a whole working example to type in.",
+      fr: "Ce que contient un fichier d'enregistrement, champ par champ : l'observation, ce qui a été "
+        + "vu, la météo et ses nuages, le dossier qui liste plusieurs témoins, et un exemple entier à taper."
     },
     asideFromNav: true
   }
@@ -91,25 +91,41 @@ if (source && mount) {
       <tr><td><code>utcOffsetHours</code></td><td>The LEGAL time the witness's clock was on (+1 for France in 1965). Absent means it is approximated from the longitude, which cannot know legal time or a daylight-saving switch</td></tr>
       <tr><td><code>place</code></td><td><code>[{ lat, lng, name }]</code> — <code>name</code> is the fully qualified place name the coordinates were resolved from</td></tr>
       <tr><td><code>witness</code></td><td><code>{ id, dirName, title, lastName, firstNames }</code>, all optional; omit entirely for an anonymous witness</td></tr>
-      <tr><td><code>caseId</code></td><td>Shared by every witness's own file for the same case — what lets a manifest group them</td></tr>
+      <tr><td><code>caseId</code></td><td>The <code>id</code> of the case this is a testimony of, shared by every witness's own file for it (see below)</td></tr>
       <tr><td><code>description</code></td><td>The account in prose — one string, or one per language (see below)</td></tr>
       <tr><td><code>tags</code></td><td>A list of strings, written in English: they are technical terms, and two recordings that share one have to match on it. Each reader is shown them in their own language where a translation is known</td></tr>
     </table>
     </div>
 
-    <h2>Several witnesses: the manifest</h2>
+    <h2>Several witnesses: the case</h2>
     <p>Each witness has a recording of their own, and the recordings of one case share its
-      <code>caseId</code>. What shows them together is a <strong>manifest</strong>: a JSON array of
-      their addresses, read relative to the manifest's own address rather than the page's, so it
-      works wherever it is served from.</p>
-    <pre><code>[
-  "witness-chiles.json",
-  "witness-whitted.json"
-]</code></pre>
-    <p>Give it to <code>&lt;rr0-sighting src&gt;</code> or to the player as it is, and each witness
-      can be picked from a list. One witness needs no manifest: the same <code>src</code> takes a
-      recording directly, told apart by its shape (an array is a manifest, an object a recording).
-      Try it with <a href="/demo-data/witnesses-manifest.json"><code>witnesses-manifest.json</code></a>.</p>
+      <code>caseId</code>. What shows them together is the <strong>case</strong> itself: the
+      <code>case.json</code> of an <a href="https://rr0.org">RR0</a> dossier, which states the case's
+      title, date and classification, and lists everything that happened in it as
+      <code>events</code>. Its events of type <code>sighting</code> are its testimonies, each pointing
+      at one witness's recording:</p>
+    <pre><code>{
+  "id": "ChilesWhitted",
+  "title": "Chiles et Whitted",
+  "time": "1948-07-24 02:45",
+  "events": [
+    { "type": "event", "eventType": "sighting", "url": "witness-chiles.json" },
+    { "type": "event", "eventType": "sighting", "url": "witness-whitted.json" }
+  ]
+}</code></pre>
+    <div class="table-scroll">
+    <table>
+      <tr><th>Field</th><th>Meaning</th></tr>
+      <tr><td><code>id</code></td><td>What every recording of the case carries as its <code>caseId</code>. On rr0.org it is the dossier's directory and may be left out; a case file standing alone states it</td></tr>
+      <tr><td><code>title</code>, <code>time</code></td><td>The case's name, and when it happened as RR0 writes a time (<code>"1948-07-24 02:45"</code>, <code>"1954"</code>). The player names a case it opens by its title</td></tr>
+      <tr><td><code>events</code></td><td>The case's chronology. Only the <code>sighting</code> ones are replayed, each by its <code>url</code>, read relative to the case file's own address (so the same case works from its dossier's page and from anywhere else); the others (an analysis, an article, a film, a confession) are RR0's</td></tr>
+    </table>
+    </div>
+    <p>Give it to <code>&lt;rr0-sighting src&gt;</code> or to the player, and each witness can be
+      picked from a list. One recording can be given directly, with no case, but a case with one
+      sighting works the same way and names what it shows. Try it with
+      <a href="/demo-data/case-chiles-whitted.json"><code>case-chiles-whitted.json</code></a>
+      (<a href="/play/?sighting=/demo-data/case-chiles-whitted.json">play it</a>).</p>
 
     <h2>Saying it in more than one language</h2>
     <p>A recording is handed from one reader to another, so every field an author writes can hold
@@ -323,26 +339,41 @@ if (source && mount) {
       <tr><td><code>utcOffsetHours</code></td><td>L'heure LÉGALE de la montre du témoin (+1 pour la France en 1965). Absent, elle est approchée depuis la longitude, qui ne peut connaître ni l'heure légale ni un changement d'heure</td></tr>
       <tr><td><code>place</code></td><td><code>[{ lat, lng, name }]</code> — <code>name</code> est le nom qualifié depuis lequel les coordonnées ont été résolues</td></tr>
       <tr><td><code>witness</code></td><td><code>{ id, dirName, title, lastName, firstNames }</code>, tous facultatifs ; à omettre entièrement pour un témoin anonyme</td></tr>
-      <tr><td><code>caseId</code></td><td>Partagé par le fichier de chaque témoin d'un même dossier — ce qui permet à un manifeste de les réunir</td></tr>
+      <tr><td><code>caseId</code></td><td>L'<code>id</code> du dossier dont c'est un témoignage, partagé par le fichier de chaque témoin (voir plus bas)</td></tr>
       <tr><td><code>description</code></td><td>Le récit en prose — une chaîne, ou une par langue (voir plus bas)</td></tr>
       <tr><td><code>tags</code></td><td>Une liste de chaînes, écrites en anglais : ce sont des termes techniques, et deux enregistrements qui en partagent un doivent s'y égaler. Chaque lecteur les voit dans sa langue lorsqu'une traduction est connue</td></tr>
     </table>
     </div>
 
-    <h2>Plusieurs témoins : le manifeste</h2>
+    <h2>Plusieurs témoins : le dossier</h2>
     <p>Chaque témoin a son propre enregistrement, et les enregistrements d'un même dossier partagent
-      son <code>caseId</code>. Ce qui les montre ensemble est un <strong>manifeste</strong> : un
-      tableau JSON de leurs adresses, lues relativement à l'adresse du manifeste lui-même et non à
-      celle de la page, si bien qu'il marche d'où qu'on le serve.</p>
-    <pre><code>[
-  "witness-chiles.json",
-  "witness-whitted.json"
-]</code></pre>
-    <p>Donnez-le tel quel à <code>&lt;rr0-sighting src&gt;</code> ou au lecteur, et chaque témoin se
-      choisit dans une liste. Un seul témoin n'a pas besoin de manifeste : le même <code>src</code>
-      prend directement un enregistrement, reconnu à sa forme (un tableau est un manifeste, un objet
-      un enregistrement). Essayez avec
-      <a href="/demo-data/witnesses-manifest.json"><code>witnesses-manifest.json</code></a>.</p>
+      son <code>caseId</code>. Ce qui les montre ensemble est le <strong>dossier</strong> lui-même :
+      le <code>case.json</code> d'un dossier <a href="https://rr0.org">RR0</a>, qui énonce le titre,
+      la date et la classification du cas, et liste tout ce qui lui est arrivé en
+      <code>events</code>. Ses événements de type <code>sighting</code> sont ses témoignages, chacun
+      pointant vers l'enregistrement d'un témoin :</p>
+    <pre><code>{
+  "id": "ChilesWhitted",
+  "title": "Chiles et Whitted",
+  "time": "1948-07-24 02:45",
+  "events": [
+    { "type": "event", "eventType": "sighting", "url": "witness-chiles.json" },
+    { "type": "event", "eventType": "sighting", "url": "witness-whitted.json" }
+  ]
+}</code></pre>
+    <div class="table-scroll">
+    <table>
+      <tr><th>Champ</th><th>Sens</th></tr>
+      <tr><td><code>id</code></td><td>Ce que chaque enregistrement du cas porte comme <code>caseId</code>. Sur rr0.org c'est le répertoire du dossier, et il peut être omis ; un fichier de cas isolé l'énonce</td></tr>
+      <tr><td><code>title</code>, <code>time</code></td><td>Le nom du cas, et sa date comme RR0 l'écrit (<code>"1948-07-24 02:45"</code>, <code>"1954"</code>). Le lecteur nomme un cas qu'il ouvre par son titre</td></tr>
+      <tr><td><code>events</code></td><td>La chronologie du cas. Seuls les <code>sighting</code> sont rejoués, chacun par son <code>url</code>, lue relativement à l'adresse du fichier de cas (si bien que le même cas marche depuis la page de son dossier comme depuis n'importe où) ; les autres (une analyse, un article, un film, un aveu) sont ceux de RR0</td></tr>
+    </table>
+    </div>
+    <p>Donnez-le à <code>&lt;rr0-sighting src&gt;</code> ou au lecteur, et chaque témoin se choisit
+      dans une liste. Un enregistrement peut être donné directement, sans dossier, mais un dossier à
+      un seul témoignage marche de la même façon et nomme ce qu'il montre. Essayez avec
+      <a href="/demo-data/case-chiles-whitted.json"><code>case-chiles-whitted.json</code></a>
+      (<a href="/play/?sighting=/demo-data/case-chiles-whitted.json">le jouer</a>).</p>
 
     <h2>Le dire en plusieurs langues</h2>
     <p>Un enregistrement se transmet d'un lecteur à un autre : chaque champ écrit par un auteur peut

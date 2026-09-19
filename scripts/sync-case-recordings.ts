@@ -38,9 +38,9 @@ interface CaseRecording {
  * (several may share a case), while a dossier names it after what the page beside it embeds. Only
  * the bytes have to match.
  *
- * Chiles-Whitted is the case with two witnesses, so what the dossier embeds is the manifest, and
- * the manifest names the files beside it — the same relative names on both hosts, which is what
- * lets that file be copied rather than translated (see SightingElement.loadFromSrc).
+ * A case.json is NOT copied: it is RR0's record of the case (its title, its classification, its
+ * events), written on rr0.org. What each host's case lists are these recordings, by the same
+ * relative names on both, so the recordings are what must not drift.
  */
 const RECORDINGS: CaseRecording[] = [
   { published: "witness-socorro.json", dossier: "Socorro/sighting.json" },
@@ -48,8 +48,7 @@ const RECORDINGS: CaseRecording[] = [
   { published: "witness-wilcox.json", dossier: "Wilcox/sighting.json" },
   { published: "witness-cussac.json", dossier: "Cussac/sighting.json" },
   { published: "witness-chiles.json", dossier: "ChilesWhitted/witness-chiles.json" },
-  { published: "witness-whitted.json", dossier: "ChilesWhitted/witness-whitted.json" },
-  { published: "witnesses-manifest.json", dossier: "ChilesWhitted/witnesses-manifest.json" }
+  { published: "witness-whitted.json", dossier: "ChilesWhitted/witness-whitted.json" }
 ]
 
 class CaseRecordingSync {

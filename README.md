@@ -368,16 +368,25 @@ always a real sighting and always needs the real sky/ground backdrop.
 <rr0-sighting src="sighting.json"></rr0-sighting>
 ```
 
-`src` accepts either a single witness's `sighting.json` directly (the common case — no extra file needed) or, for
-a case with several witnesses, a small manifest: a plain JSON array of each witness's own `SightingRecordingJson`
-URL (typically relative to the case's own page, same as `<rr0-scene>`'s own `src`):
+`src` accepts either a single witness's `sighting.json` directly or a **case**: RR0's own `case.json`, whose
+`events` of `eventType: "sighting"` each point at one witness's `SightingRecordingJson` by `url`, read relative to
+the case file itself (so the same case works from its dossier's page and from anywhere else). A case's other events
+(analyses, articles, films, confessions) are not replayed. See `CaseJson` in `src/engine/persistence/caseJson.ts`:
 
 ```json
-["chiles-sighting.json", "whitted-sighting.json"]
+{
+  "id": "ChilesWhitted",
+  "title": "Chiles et Whitted",
+  "events": [
+    { "type": "event", "eventType": "sighting", "url": "witness-chiles.json" },
+    { "type": "event", "eventType": "sighting", "url": "witness-whitted.json" }
+  ]
+}
 ```
 
-The two shapes are told apart automatically — a fetched JSON array is a manifest, a plain object is one witness's
-own recording. No labels or ids are duplicated in a manifest itself — each witness's display name and the shared
+The two shapes are told apart automatically — an object with `events` and no `timeline` is a case, anything else
+one witness's own recording. A bare JSON array (the witness manifest read before cases) is refused with an error
+naming `case.json`. No labels are duplicated in the case — each witness's display name and the shared
 case id grouping them together are read from that witness's *own* file (`witness`/`caseId`, see
 [Data format](#data-format)), so there's a single source of truth and nothing to drift out of sync. This means
 every listed witness's recording is fetched upfront (to read its name), not lazily on selection — fine at the
@@ -396,8 +405,8 @@ cross-check). Each file now carries its own witness's account.
 
 | Member | Kind | Description |
 |---|---|---|
-| `src` | attribute | URL of a single `sighting.json` or a witness manifest (above), fetched automatically on connect and whenever the attribute changes |
-| `witnessUrls` | property (get/set) | The manifest as a plain array of URLs, for programmatic use instead of `src` |
+| `src` | attribute | URL of a single `sighting.json` or a `case.json` (above), fetched automatically on connect and whenever the attribute changes |
+| `witnessUrls` | property (get/set) | The recordings to show as a plain array of URLs, for programmatic use instead of `src` |
 | `sightingData` | property (get/set) | One witness's recording, set directly instead of fetched — for a page holding one in memory (text pasted into a form, a file the reader picked). Its entry carries no URL, so the info panel's editor link and embed lines fall back to the bare application, which is the honest answer for something published nowhere |
 | `scene` | property (readonly) | The `<rr0-scene>` this composes — and through `scene.ufoElement`, the playback members above |
 | `loadFromSrc(url)` | method (async) | What the `src` attribute triggers internally; can be called directly too |
@@ -407,7 +416,7 @@ button on the right. The witness portion is plain text for a single witness (a o
 pointless); once there's more than one, it becomes the live `<select>` instead — but the sentence itself, and the
 info button, stay visible either way. The first witness loads automatically once the list is known; switching the
 selector loads that witness's already-fetched recording into the nested `<rr0-scene>` (no re-fetch). Setting
-`witnessUrls` again (e.g. a manifest refresh) keeps the current selection if that witness is still present, instead
+`witnessUrls` again (e.g. a case re-read) keeps the current selection if that witness is still present, instead
 of resetting back to the first.
 
 Clicking "?" opens a panel anchored under the button (it never shifts the canvas below it). Where the browser has

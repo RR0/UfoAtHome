@@ -1,5 +1,6 @@
 import { html, css } from "./sightingTemplate.js"
 import { SightingFetch } from "../engine/net/SightingFetch.js"
+import { CaseFile } from "../engine/persistence/caseJson.js"
 import { SightingSummary } from "./SightingSummary.js"
 import { SightingAssessments } from "./SightingAssessments.js"
 import type { SummaryEntry } from "./SightingSummary.js"
@@ -45,13 +46,11 @@ const APP_EDITOR_URL = `${APP_HOME_URL}/edit/`
  * recorded shape, no astronomy) would misrepresent what the witness actually reported seeing.
  * Read-only playback only, no recording/editing UI.
  *
- * The `src` attribute (or `witnessUrls` property) accepts either a witness manifest (a plain
- * JSON array of each witness's own `sighting.json` URL) or, for the common single-witness case,
- * a `sighting.json` URL directly — no manifest file needs to exist just to describe one entry.
- * No separately-maintained labels either way, since a witness's display name
- * (`SightingRecordingJson.witness`) and the shared `caseId` linking them together already
- * live inside each witness's own file (single source of truth: an external manifest duplicating
- * those would risk drifting out of sync with the actual data). Every listed witness's recording
+ * The `src` attribute accepts either a CASE (RR0's `case.json`, whose events of type `sighting`
+ * point at each witness's recording — see CaseFile) or one witness's `sighting.json` directly.
+ * The `witnessUrls` property takes the list of recordings itself. No separately-maintained labels
+ * either way, since a witness's display name (`SightingRecordingJson.witness`) and the shared
+ * `caseId` linking them together already live inside each witness's own file. Every listed witness's recording
  * is fetched upfront (to read its name), not lazily on selection — fine at the scale a case's
  * witness list actually has (a handful of small JSON files).
  *
@@ -293,23 +292,23 @@ export class SightingElement extends HTMLElement {
     }
   }
 
-  /** Fetches `url` and loads it — what the `src` attribute uses. Accepts either a witness
-   * manifest (a plain JSON array of each witness's own `sighting.json` URL) or a single
-   * `sighting.json` directly (detected by shape: an array is a manifest, an object is one
-   * witness's own recording) — the common single-witness case needs no manifest file at all. */
+  /** Fetches `url` and loads it — what the `src` attribute uses. Accepts a case (`case.json`),
+   * whose sighting events name the recordings to show, or one witness's recording directly: told
+   * apart by shape (see CaseFile.isCase). A bare JSON array, the witness list this element read
+   * before cases, is refused by name rather than misread. */
   async loadFromSrc(url: string): Promise<void> {
-    const json = (await SightingFetch.json(url)) as string[] | SightingRecordingJson
+    const json = await SightingFetch.json(url)
     if (Array.isArray(json)) {
-      // Resolved against the MANIFEST's own address, not the page's: a manifest lists the
-      // recordings that sit beside it, so "witness-chiles.json" has to mean "beside this file"
-      // wherever the file is read from. Without that a manifest could only ever be written for one
-      // host — which is what forced this project's own copy to spell out /demo-data/... while the
-      // identical manifest in an rr0.org case dossier spelled out neither, and left two files that
-      // say the same thing byte-differently. An absolute entry is untouched (new URL ignores the
-      // base for one), so nothing already published moves.
-      await this.loadWitnessUrls(json.map(entry => new URL(entry, new URL(url, location.href)).href))
+      throw new Error(`${url} is a bare list of recordings, which is no longer read: list them as the sighting events of a case.json`)
+    }
+    if (CaseFile.isCase(json)) {
+      // Resolved against the CASE's own address, not the page's: the recordings sit beside it, so
+      // the same case.json works read from its dossier's page and from anywhere else.
+      const urls = CaseFile.sightingUrls(json, new URL(url, location.href).href)
+      if (urls.length === 0) throw new Error(`${url} is a case with no sighting event: no recording to show`)
+      await this.loadWitnessUrls(urls)
     } else {
-      this.setEntries([{ src: url, sighting: json }])
+      this.setEntries([{ src: url, sighting: json as SightingRecordingJson }])
     }
   }
 
@@ -368,8 +367,8 @@ export class SightingElement extends HTMLElement {
       this.witnessSelect.appendChild(option)
     }
 
-    // Keeps the current witness selected if the new list still has them (e.g. a manifest
-    // refresh), otherwise falls back to the first witness.
+    // Keeps the current witness selected if the new list still has them (e.g. a case
+    // re-read), otherwise falls back to the first witness.
     const next = entries.find(entry => entry.src === this.currentSrc) ?? entries[0]
     if (next) {
       this.selectWitness(next.src)
