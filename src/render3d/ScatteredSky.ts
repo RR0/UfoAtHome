@@ -306,6 +306,30 @@ export class ScatteredSky {
     this.onChange()
   }
 
+  /**
+   * What a surface giving out `luminanceCdM2` of light of this colour looks like on the screen,
+   * linear — seen through the same response, and adapted to the same sky, as the sky itself. What
+   * lets something that glows (a flame, see BodySystem) be as bright as it would be against THIS sky:
+   * a flame that reads white-hot at dusk is a pale smudge at noon, and so it should be.
+   *
+   * The colour sets the chromaticity only; the luminance sets how much of it there is. Scotopic
+   * luminance is taken equal to photopic, which is what a warm-to-white source is near enough.
+   */
+  displayOfLuminance(linearRgb: readonly [number, number, number], luminanceCdM2: number): DisplayRgb {
+    const [r, g, b] = linearRgb
+    const y = 0.2126 * r + 0.7152 * g + 0.0722 * b
+    const k = y > 0 ? luminanceCdM2 / y : 0
+    const xyz: [number, number, number] = [
+      k * (0.4124 * r + 0.3576 * g + 0.1805 * b),
+      luminanceCdM2,
+      k * (0.0193 * r + 0.1192 * g + 0.9505 * b)
+    ]
+    const scale = this.exposureScale
+    const adapted = this.adaptingLuminance * scale
+    return EyeAdaptation.displayOf(
+      [xyz[0] * scale, xyz[1] * scale, xyz[2] * scale], xyz[1] * scale, adapted, this.seenByEye ? EyeAdaptation.rodShare(adapted) : 0)
+  }
+
   /** `adaptingLuminance` is the sky's own; what the eye or the film adapts to is that times the exposure. */
   private applyAdaptation(adaptingLuminance: number): void {
     this.adaptingLuminance = adaptingLuminance

@@ -78,4 +78,20 @@ describe("BodyPlacement", () => {
     expect(middle.attitude.headingDeg).toBeCloseTo(0, 6)
     expect(middle.upM).toBeCloseTo(25 + 1, 6)
   })
+
+  it("lights a flame at the keyframe that states it, holds it, and puts it out when told to", () => {
+    const flame = { lengthM: 2, widthM: 1, color: "#7fc4ff", luminanceCdM2: 20000 }
+    const placement = new BodyPlacement(craft([
+      { t: 0, eastM: 0, northM: 10, onGround: true },
+      { t: 1000, flame },
+      { t: 2000 },
+      { t: 3000, flame: { ...flame, luminanceCdM2: 0 } }
+    ]), flat, eyeAtOrigin(flat))
+    // Not fading in over the second before it catches.
+    expect(placement.at(500)?.flame).toBeUndefined()
+    expect(placement.at(1000)?.flame?.luminanceCdM2).toBe(20000)
+    expect(placement.at(2000)?.flame?.luminanceCdM2).toBe(20000)
+    expect(placement.at(2500)?.flame?.luminanceCdM2).toBe(10000)
+    expect(placement.at(3000)?.flame).toBeUndefined()
+  })
 })

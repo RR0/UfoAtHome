@@ -127,6 +127,34 @@ export interface BodyKeyframe {
   sizeM?: BodySize
   attitude?: BodyAttitude
   appearance?: BodyAppearance
+  /** A flame coming out of it, from here on — see BodyFlame. `luminanceCdM2: 0` puts it out. */
+  flame?: BodyFlame
+}
+
+/**
+ * A flame a body throws: an exhaust, a jet, a flare.
+ *
+ * Not a part of the body and not a shape of its own: an effect, anchored to a NAMED NODE of the
+ * body's model (`node`, "exhaust" by default), so that the model says where it comes out and the
+ * track says when and how strongly. A primitive has no nodes, and throws it from the middle of its
+ * underside. It points along the body's own downward axis, turning with it.
+ *
+ * Seen by the light it gives out, not by any it receives: `luminanceCdM2` is what the scene's own
+ * photometry turns into how bright it looks against the sky of that instant (see
+ * EyeAdaptation.displayOf). A flame bright enough to read clearly in daylight is some tens of
+ * thousands; a candle's is ten thousand, a gas flame's blue a few thousand.
+ */
+export interface BodyFlame {
+  node?: string
+  /** How far it reaches from the node, metres. */
+  lengthM: number
+  /** How wide it is at its widest, metres. */
+  widthM: number
+  /** Its colour where it leaves the node, CSS. */
+  color: string
+  /** Its colour at its far end; the same as `color` when absent. */
+  tipColor?: string
+  luminanceCdM2: number
 }
 
 /** Metres along its own three axes: across, fore and aft, and up. */

@@ -6,12 +6,17 @@ import type { BodyState } from "../engine/interpretation/BodyPlacement.js"
 import { BODY_PRIMITIVES } from "../engine/interpretation/Interpretation.js"
 import type { BodyPrimitive } from "../engine/interpretation/Interpretation.js"
 import type { DecorModelRef } from "../engine/model/Decor.js"
+import { FlameEffect } from "./FlameEffect.js"
 
 const DEG_TO_RAD = Math.PI / 180
 
 /** Loads the glTF scene a model reference names, with the credit it must be shown with — or nothing,
  * when it cannot be had. Supplied by the renderer, which already resolves the decor's. */
 export type BodyModelLoader = (ref: DecorModelRef) => Promise<{ scene: Object3D, credit: unknown, headingOffsetDeg?: number } | undefined>
+
+/** How a light of this colour and luminance looks on screen, as the scene's own photometry has it
+ * (see ScatteredSky.displayOfLuminance). */
+export type LuminanceDisplay = (linearRgb: readonly [number, number, number], luminanceCdM2: number) => readonly [number, number, number]
 
 /** Where the frame bodies are placed in stands in the scene: its origin's position, and the ground
  * height there that the bodies' own heights are counted from (see BodyPlacement.Ground). */
@@ -44,8 +49,15 @@ export class BodySystem {
    * dropped. */
   private token = 0
   private readonly credits = new Map<string, unknown>()
+  /** The flames being thrown, by body id — see BodyFlame. */
+  private readonly flames = new Map<string, FlameEffect>()
+  private readonly scratch = new Vector3()
 
-  constructor(private readonly loadModel: BodyModelLoader, private readonly onModelArrived: () => void) {
+  /**
+   * @param sceneUnitsPerLux What a lux of illuminance is in this scene's own light units — how the
+   *   luminous intensity of a flame becomes a light of the same scene as the sun's (see throwFlame).
+   */
+  constructor(private readonly loadModel: BodyModelLoader, private readonly onModelArrived: () => void, private readonly sceneUnitsPerLux = 0) {
     this.group.name = "bodies"
   }
 
@@ -54,8 +66,16 @@ export class BodySystem {
     return [...this.credits.values()]
   }
 
-  /** Stands every body where its state says, building what is new and removing what is gone. */
-  set(states: BodyState[], frame: BodyFrame): void {
+  /**
+   * Stands every body where its state says, lights the flames they throw at `seconds` into the
+   * recording, as bright as `display` says, and builds what is new.
+   *
+   * `ids` are ALL the bodies of the interpretation, including those that do not exist at this
+   * instant (before their first keyframe): those are hidden, not taken down, so that a body whose
+   * model took a second to arrive does not fetch and build it again every time the playhead crosses
+   * the instant it appears. Only a body the interpretation no longer has is removed.
+   */
+  set(states: BodyState[], frame: BodyFrame, seconds = 0, display?: LuminanceDisplay, ids: readonly string[] = states.map(state => state.id)): void {
     const seen = new Set<string>()
     for (const state of states) {
       seen.add(state.id)
@@ -68,25 +88,108 @@ export class BodySystem {
         this.group.add(entry.holder)
       }
       const { holder, material } = entry
+      holder.visible = true
       holder.position.set(frame.originX + state.eastM, frame.originGroundY + state.upM, frame.originZ - state.northM)
       holder.rotation.set(state.attitude.pitchDeg * DEG_TO_RAD, -state.attitude.headingDeg * DEG_TO_RAD, -state.attitude.rollDeg * DEG_TO_RAD, "YXZ")
       holder.scale.set(state.sizeM.widthM, state.sizeM.heightM, state.sizeM.lengthM)
       if (material) BodySystem.paint(material, state)
+      this.throwFlame(state, holder, seconds, display)
     }
-    for (const id of [...this.built.keys()]) {
-      if (!seen.has(id)) this.remove(id)
+    const kept = new Set(ids)
+    for (const [id, { holder }] of [...this.built]) {
+      if (seen.has(id)) continue
+      if (kept.has(id)) {
+        holder.visible = false
+        this.flames.get(id)?.putOut()
+      } else {
+        this.remove(id)
+      }
     }
   }
 
-  /** How far the furthest body stands from `from` — what the camera's far plane must reach. */
+  /**
+   * Puts a body's flame on the node its model names for it, pointing the way the body points — or
+   * puts it out. Not a child of the body: the body is stretched to its size axis by axis, and a
+   * flame stated in metres must not be stretched with it.
+   */
+  private throwFlame(state: BodyState, holder: Group, seconds: number, display: LuminanceDisplay | undefined): void {
+    let effect = this.flames.get(state.id)
+    if (!effect && state.throwsFlame) {
+      effect = new FlameEffect()
+      this.flames.set(state.id, effect)
+      this.group.add(effect.mesh, effect.light)
+    }
+    if (!effect) return
+    const flame = state.flame
+    if (!flame) {
+      effect.putOut()
+      return
+    }
+    holder.updateMatrixWorld(true)
+    const node = holder.getObjectByName(flame.node ?? BodySystem.EXHAUST_NODE)
+    if (node) node.getWorldPosition(this.scratch)
+    else holder.localToWorld(this.scratch.set(0, -0.5, 0))
+    effect.place(this.scratch, holder.quaternion, flame.lengthM, flame.widthM)
+    const light = (css: string): readonly [number, number, number] => {
+      const colour = new Color(css)
+      const rgb: [number, number, number] = [colour.r, colour.g, colour.b]
+      return display ? display(rgb, flame.luminanceCdM2) : BodySystem.withoutPhotometry(rgb, flame.luminanceCdM2)
+    }
+    effect.set(light(flame.color), light(flame.tipColor ?? flame.color), seconds)
+    effect.illuminate(BodySystem.luminousIntensityCd(flame) * this.sceneUnitsPerLux, BodySystem.lightColourOf(flame))
+  }
+
+  /**
+   * A flame's luminous intensity, candela: its luminance times the area it shows, which for a plume
+   * of this outline (see FlameEffect) is some seven tenths of the width-by-length rectangle around
+   * it. Seen side-on, which is how the ground around it sees it.
+   */
+  static luminousIntensityCd(flame: { lengthM: number, widthM: number, luminanceCdM2: number }): number {
+    return flame.luminanceCdM2 * 0.7 * flame.widthM * flame.lengthM
+  }
+
+  /** The colour of the light a flame gives: its two colours averaged, scaled to a luminance of one
+   * so that the intensity alone says how much. */
+  private static lightColourOf(flame: { color: string, tipColor?: string }): [number, number, number] {
+    const a = new Color(flame.color)
+    const b = new Color(flame.tipColor ?? flame.color)
+    const rgb: [number, number, number] = [(a.r + b.r) / 2, (a.g + b.g) / 2, (a.b + b.b) / 2]
+    const luminance = 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2]
+    return luminance > 0 ? [rgb[0] / luminance, rgb[1] / luminance, rgb[2] / luminance] : [1, 1, 1]
+  }
+
+  /** Where a model says a flame comes out, unless the flame names another node. */
+  static readonly EXHAUST_NODE = "exhaust"
+
+  /** When the scene has no photometry to ask (no scattered sky on this device): the colour at a
+   * brightness that grows with the luminance and saturates, against a daylight-ish ten thousand. */
+  private static withoutPhotometry(rgb: readonly [number, number, number], luminanceCdM2: number): readonly [number, number, number] {
+    const response = luminanceCdM2 / (luminanceCdM2 + 1e4)
+    return [rgb[0] * response, rgb[1] * response, rgb[2] * response]
+  }
+
+  /** Takes a body's flame and its light out of the scene — only when the body itself goes. */
+  private dropFlame(id: string): void {
+    const effect = this.flames.get(id)
+    if (!effect) return
+    effect.mesh.removeFromParent()
+    effect.light.removeFromParent()
+    effect.dispose()
+    this.flames.delete(id)
+  }
+
+  /** How far the furthest body on show stands from `from` — what the camera's far plane must reach. */
   furthestFrom(from: Vector3): number {
     let furthest = 0
-    for (const { holder } of this.built.values()) furthest = Math.max(furthest, holder.position.distanceTo(from))
+    for (const { holder } of this.built.values()) {
+      if (holder.visible) furthest = Math.max(furthest, holder.position.distanceTo(from))
+    }
     return furthest
   }
 
+  /** Whether any body is on show. */
   get any(): boolean {
-    return this.built.size > 0
+    return [...this.built.values()].some(({ holder }) => holder.visible)
   }
 
   clear(): void {
@@ -236,5 +339,6 @@ export class BodySystem {
     })
     this.built.delete(id)
     this.credits.delete(id)
+    this.dropFlame(id)
   }
 }

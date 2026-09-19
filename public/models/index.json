@@ -97,6 +97,20 @@
         "license": "CC BY 3.0",
         "sourceUrl": "https://poly.pizza/m/8ciDd9k8wha"
       }
+    },
+    {
+      "id": "ufoathome-socorro-craft",
+      "kind": "aircraft",
+      "name": "Socorro craft, after Lonnie Zamora's account (stand-in)",
+      "file": "ufoathome-socorro-craft/craft.gltf",
+      "headingOffsetDeg": 0,
+      "sizeM": { "widthM": 3.36, "lengthM": 3.38, "heightM": 2.33 },
+      "credit": {
+        "title": "Socorro craft, a stand-in after Lonnie Zamora's account",
+        "author": "UFO@home",
+        "license": "CC0 1.0",
+        "sourceUrl": "https://github.com/RR0/UfoAtHome/blob/main/scripts/build-socorro-craft.ts"
+      }
     }
   ]
 }

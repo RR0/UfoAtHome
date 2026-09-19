@@ -15,7 +15,8 @@ const sphereAt = (northM: number, diameterM: number, id = "sphere"): BodyState =
   upM: 0,
   sizeM: { widthM: diameterM, lengthM: diameterM, heightM: diameterM },
   attitude: { headingDeg: 0, pitchDeg: 0, rollDeg: 0 },
-  appearance: { color: "#fff", albedo: 0.5 }
+  appearance: { color: "#fff", albedo: 0.5 },
+  throwsFlame: false
 })
 
 const degrees = (radians: number) => radians * 180 / Math.PI

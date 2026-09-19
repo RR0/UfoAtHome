@@ -1458,7 +1458,7 @@ export class SceneElement extends HTMLElement {
       const eye = this.comparing ? eyeAt(t) : undefined
       readings = eye ? new BodyConfrontation(sighting.timeline).at(t, states, eye) : []
     }
-    this.sceneRenderer.setBodies(states)
+    this.sceneRenderer.setBodies(states, t / 1000, interpretation?.bodies.map(body => body.id) ?? [])
     this.confrontationReadings = readings
     if (!announce) return
     const signature = JSON.stringify(readings)

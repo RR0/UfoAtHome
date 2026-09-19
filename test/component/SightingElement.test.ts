@@ -467,12 +467,13 @@ describe("SightingElement", () => {
     french.lang = "fr"
     document.body.appendChild(french)
     french.appendChild(element)
-    await new Promise(resolve => setTimeout(resolve, 20))
+    const compare = shadow.getElementById("compare-testimony") as HTMLButtonElement
+    // The French messages arrive by a dynamic import, which takes what it takes under load.
+    await waitFor(() => compare.title === "Comparer au témoignage")
 
     // Put somewhere else, it reads its recording again: the choice and the scene say the same thing.
     expect(select.value).toBe("testimony")
     expect(element.scene.interpretation?.title).toBe("Own")
-    expect((shadow.getElementById("compare-testimony") as HTMLButtonElement).title).toBe("Comparer au témoignage")
   })
 
   it("starts comparing where the page asks, and lets the reader stop", async () => {

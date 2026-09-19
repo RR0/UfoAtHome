@@ -1,4 +1,4 @@
-import type { BodyAppearance, BodyAttitude, BodyJson, BodyKeyframe, BodySize } from "./Interpretation.js"
+import type { BodyAppearance, BodyAttitude, BodyFlame, BodyJson, BodyKeyframe, BodySize } from "./Interpretation.js"
 import type { DecorModelRef } from "../model/Decor.js"
 import type { Sighting } from "../model/Sighting.js"
 import { resolveObserverPoseAt } from "../model/Sighting.js"
@@ -33,6 +33,11 @@ export interface BodyState {
   sizeM: BodySize
   attitude: Required<BodyAttitude>
   appearance: Required<BodyAppearance>
+  /** The flame it is throwing at this instant, if any is lit. */
+  flame?: BodyFlame
+  /** Whether it throws one at any instant at all — what lets a renderer ready the light once rather
+   * than add and remove it as the flame comes and goes (see FlameEffect). */
+  throwsFlame: boolean
 }
 
 /** Where a keyframe's vertical position comes from: the ground under it, or a fixed height. */
@@ -47,6 +52,7 @@ interface PlacedKey {
   sizeM: BodySize
   attitude: Required<BodyAttitude>
   appearance: BodyState["appearance"]
+  flame?: BodyFlame
 }
 
 /**
@@ -188,8 +194,27 @@ export class BodyPlacement {
       appearance: {
         color: (fraction < 1 ? from : to).appearance.color,
         albedo: BodyPlacement.lerp(from.appearance.albedo, to.appearance.albedo, fraction)
-      }
+      },
+      flame: BodyPlacement.flameBetween(from.flame, to.flame, fraction),
+      throwsFlame: this.body.track.some(key => key.flame !== undefined && key.flame.luminanceCdM2 > 0)
     }
+  }
+
+  /** A flame between two keyframes: its sizes and brightness blended, its colours and node those of
+   * the nearer end. A flame is lit AT the keyframe that first states it, not faded in over the
+   * interval before — an exhaust catches, it does not dawn; one is put out by stating
+   * `luminanceCdM2: 0`, and dies down over the interval that leads to that. */
+  private static flameBetween(from: BodyFlame | undefined, to: BodyFlame | undefined, fraction: number): BodyFlame | undefined {
+    if (!from) return fraction >= 1 && to && to.luminanceCdM2 > 0 ? to : undefined
+    const start = from
+    const end = to ?? from
+    const flame = {
+      ...(fraction < 1 ? start : end),
+      lengthM: BodyPlacement.lerp(start.lengthM, end.lengthM, fraction),
+      widthM: BodyPlacement.lerp(start.widthM, end.widthM, fraction),
+      luminanceCdM2: BodyPlacement.lerp(start.luminanceCdM2, end.luminanceCdM2, fraction)
+    }
+    return flame.luminanceCdM2 > 0 ? flame : undefined
   }
 
   /** The height of a key's centre, whichever way its vertical was stated. */
@@ -239,7 +264,8 @@ export class BodyPlacement {
         vertical: this.verticalOf(key) ?? previous.vertical
       })
       if (!position) continue
-      previous = { t: key.t, ...position, sizeM, attitude, appearance }
+      const flame = key.flame ?? previous?.flame
+      previous = { t: key.t, ...position, sizeM, attitude, appearance, flame }
       placed.push(previous)
     }
     return placed

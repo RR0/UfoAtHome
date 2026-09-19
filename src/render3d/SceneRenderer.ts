@@ -244,6 +244,11 @@ const CELESTIAL_LIGHT_MIN_ALTITUDE_DEG = BODY_HIDE_BELOW_DEG
  * enough to cast a crisp, high-contrast shadow; Moon is a faint, barely-there secondary light —
  * real moonlight shadows are famously subtle, not a rendering bug if they're hard to spot. */
 const SUN_LIGHT_INTENSITY = 3
+/** What SUN_LIGHT_INTENSITY stands for: the sun's direct illuminance on a surface facing it, lux —
+ * about a hundred thousand through a clear atmosphere. Not something this renderer was calibrated
+ * against (see above); what lets a light OF THE SCENE (a flame, see BodySystem), whose intensity is
+ * known in candela, be put on the same scale as the sun rather than on a scale of its own. */
+const SUN_ILLUMINANCE_LUX = 100000
 const MOON_LIGHT_INTENSITY = 0.15
 /** The HemisphereLight's own intensity — deliberately modest relative to SUN_LIGHT_INTENSITY so
  * the shadow side of an object still reads as visibly darker (real contrast, not just a faint
@@ -815,7 +820,7 @@ export class SceneRenderer {
    * appear as models land and disappear with the objects that named them. */
   private readonly decorModelCredits = new Map<string, DecorModelCredit>()
   /** The bodies of the interpretation being replayed, if one is — see setBodies. */
-  private readonly bodySystem = new BodySystem(ref => this.loadBodyModel(ref), () => this.render())
+  private readonly bodySystem = new BodySystem(ref => this.loadBodyModel(ref), () => this.render(), SUN_LIGHT_INTENSITY / SUN_ILLUMINANCE_LUX)
   /** Where the frame bodies (and the decor) are placed in stands in the world this tick — the t=0
    * reference as seen from the witness, set by updateDecorAnchoring. */
   private bodyOrigin = { x: 0, z: 0 }
@@ -1609,9 +1614,11 @@ export class SceneRenderer {
    * Stands the bodies of an interpretation in the scene — or none, which is the raw testimony. See
    * BodySystem. Called every tick after updateDecorAnchoring, whose origin it shares.
    */
-  setBodies(states: BodyState[]): void {
+  setBodies(states: BodyState[], seconds = 0, ids: readonly string[] = states.map(state => state.id)): void {
     const { x, z } = this.bodyOrigin
-    this.bodySystem.set(states, { originX: x, originZ: z, originGroundY: this.groundYUnder(x, z) })
+    const sky = this.scatteredSky
+    this.bodySystem.set(states, { originX: x, originZ: z, originGroundY: this.groundYUnder(x, z) }, seconds,
+      sky ? (rgb, luminance) => sky.displayOfLuminance(rgb, luminance) : undefined, ids)
     // Something is there to cast a shadow, whatever the decor says.
     if (this.bodySystem.any) this.celestialLight.castShadow = true
     // Only ever widened here, over what updateDecorAnchoring has just sized for the decor and the

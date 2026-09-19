@@ -30,7 +30,7 @@
             "ufo-1"
           ],
           "model": {
-            "id": "ellipsoid"
+            "id": "ufoathome-socorro-craft"
           },
           "track": [
             {
@@ -40,19 +40,25 @@
               "onGround": true,
               "sizeM": {
                 "widthM": 10.08,
-                "lengthM": 10.08,
-                "heightM": 5.19
+                "lengthM": 10.14,
+                "heightM": 6.99
               },
-              "appearance": {
-                "color": "#e8e6df",
-                "albedo": 0.7
+              "attitude": {
+                "headingDeg": 20
               }
             },
             {
               "t": 77000,
               "eastM": -592.23,
               "northM": -1022.24,
-              "onGround": true
+              "onGround": true,
+              "flame": {
+                "lengthM": 7.29,
+                "widthM": 3.51,
+                "color": "#7fc4ff",
+                "tipColor": "#ff8a2b",
+                "luminanceCdM2": 20000
+              }
             },
             {
               "t": 83000,
@@ -64,7 +70,14 @@
               "t": 84500,
               "azimuthDeg": 204.6417,
               "altitudeDeg": 2.075,
-              "distanceM": 189.3
+              "distanceM": 189.3,
+              "flame": {
+                "lengthM": 7.29,
+                "widthM": 3.51,
+                "color": "#7fc4ff",
+                "tipColor": "#ff8a2b",
+                "luminanceCdM2": 0
+              }
             },
             {
               "t": 86000,
