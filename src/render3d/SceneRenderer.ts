@@ -187,6 +187,13 @@ const STAR_RADIUS = 850
  */
 const STAR_HOVER_FIELD_FRACTION = 0.03
 const BODY_PLACEMENT_RADIUS = 850
+/** How far in front of and behind the shadow box's centre the sun's shadow map records depth,
+ * metres — enough for the ±120 m box at any angle and the relief standing in it. */
+const SHADOW_DEPTH_HALF_RANGE_M = 300
+/** How far a surface is pushed towards the light before it is tested against the shadow map. */
+const SHADOW_BIAS_M = 0.03
+/** And how far along its own normal, which is what keeps grazing relief from shadowing itself. */
+const SHADOW_NORMAL_BIAS_M = 0.04
 /** Sized to match the Sun/Moon's real ~0.53deg angular diameter at BODY_PLACEMENT_RADIUS
  * (radius = R*tan(0.265deg) =~ 3.9) — this is a simulation, not an illustration: rendering them
  * bigger or artificially brighter than they'd really appear would defeat the actual point (e.g.
@@ -1148,12 +1155,16 @@ export class SceneRenderer {
     this.celestialLight.shadow.camera.right = 120
     this.celestialLight.shadow.camera.top = 120
     this.celestialLight.shadow.camera.bottom = -120
-    this.celestialLight.shadow.camera.near = 1
-    this.celestialLight.shadow.camera.far = 1000
-    // Slight negative bias to fight shadow acne (a surface incorrectly self-shadowing in a
-    // moire/striped pattern from its own depth-map quantization) without introducing visible
-    // peter-panning (a shadow visibly detached from its own caster) at this scene's scale.
-    this.celestialLight.shadow.bias = -0.0015
+    // Depth only as deep as what can cast or receive: the box above, seen from the light's own
+    // distance. The bias below is a fraction of THIS range, and over the thousand metres it used to
+    // span, -0.0015 was a metre and a half along the light: under a low sun every shadow started a
+    // metre past what cast it — a tyre's a hand-span from the tyre, a craft's a metre from the craft.
+    this.celestialLight.shadow.camera.near = BODY_PLACEMENT_RADIUS - SHADOW_DEPTH_HALF_RANGE_M
+    this.celestialLight.shadow.camera.far = BODY_PLACEMENT_RADIUS + SHADOW_DEPTH_HALF_RANGE_M
+    // A few centimetres of depth, and a few along the surface's own normal: what keeps a surface
+    // from shadowing itself in stripes (acne) without detaching a shadow from its caster.
+    this.celestialLight.shadow.bias = -SHADOW_BIAS_M / (2 * SHADOW_DEPTH_HALF_RANGE_M)
+    this.celestialLight.shadow.normalBias = SHADOW_NORMAL_BIAS_M
     this.celestialLight.target = this.celestialLightTarget
     this.lightningLight.color.copy(LIGHTNING_COLOR)
     this.scene.add(this.celestialLight, this.celestialLightTarget, this.skyLight, this.lightningLight)
@@ -1558,7 +1569,7 @@ export class SceneRenderer {
     // Toggled here too (not just in updateCelestialLight, which only runs on the next
     // setAstronomy tick): adding the sighting's first-ever decor object shouldn't have to wait an
     // extra tick before it starts actually casting a shadow.
-    this.celestialLight.castShadow = this.decorGroups.size > 0
+    this.celestialLight.castShadow = this.decorGroups.size > 0 || this.bodySystem.any
   }
 
   /**
@@ -2171,7 +2182,7 @@ export class SceneRenderer {
     // frustum edges — fading it out approaching the horizon sidesteps both at once.
     const altitudeFactor = Math.max(0, Math.sin(Math.max(body.altitudeDeg, 0) * DEG_TO_RAD))
     this.celestialLight.intensity = (useSun ? SUN_LIGHT_INTENSITY : MOON_LIGHT_INTENSITY) * altitudeFactor
-    this.celestialLight.castShadow = this.decorGroups.size > 0
+    this.celestialLight.castShadow = this.decorGroups.size > 0 || this.bodySystem.any
   }
 
   /**
