@@ -24,6 +24,8 @@ export interface BodyFrame {
   originX: number
   originZ: number
   originGroundY: number
+  /** Where the eye is, for what depends on how far away a body is (a flame's glare). */
+  eye?: Vector3
 }
 
 /**
@@ -93,7 +95,7 @@ export class BodySystem {
       holder.rotation.set(state.attitude.pitchDeg * DEG_TO_RAD, -state.attitude.headingDeg * DEG_TO_RAD, -state.attitude.rollDeg * DEG_TO_RAD, "YXZ")
       holder.scale.set(state.sizeM.widthM, state.sizeM.heightM, state.sizeM.lengthM)
       if (material) BodySystem.paint(material, state)
-      this.throwFlame(state, holder, seconds, display)
+      this.throwFlame(state, holder, seconds, display, frame.eye)
     }
     const kept = new Set(ids)
     for (const [id, { holder }] of [...this.built]) {
@@ -112,12 +114,12 @@ export class BodySystem {
    * puts it out. Not a child of the body: the body is stretched to its size axis by axis, and a
    * flame stated in metres must not be stretched with it.
    */
-  private throwFlame(state: BodyState, holder: Group, seconds: number, display: LuminanceDisplay | undefined): void {
+  private throwFlame(state: BodyState, holder: Group, seconds: number, display: LuminanceDisplay | undefined, eye: Vector3 | undefined): void {
     let effect = this.flames.get(state.id)
     if (!effect && state.throwsFlame) {
       effect = new FlameEffect()
       this.flames.set(state.id, effect)
-      this.group.add(effect.mesh, effect.light)
+      this.group.add(effect.mesh, effect.light, effect.glow)
     }
     if (!effect) return
     const flame = state.flame
@@ -137,6 +139,10 @@ export class BodySystem {
     }
     effect.set(light(flame.color), light(flame.tipColor ?? flame.color), seconds)
     effect.illuminate(BodySystem.luminousIntensityCd(flame) * this.sceneUnitsPerLux, BodySystem.lightColourOf(flame))
+    const glow = FlameEffect.glowFor(flame, eye ? effect.mesh.position.distanceTo(eye) : 0)
+    const mixed = new Color(flame.color).lerp(new Color(flame.tipColor ?? flame.color), 0.5)
+    const rgb: [number, number, number] = [mixed.r, mixed.g, mixed.b]
+    effect.shine(glow.radiusM, display ? display(rgb, glow.luminanceCdM2) : BodySystem.withoutPhotometry(rgb, glow.luminanceCdM2))
   }
 
   /**
@@ -174,6 +180,7 @@ export class BodySystem {
     if (!effect) return
     effect.mesh.removeFromParent()
     effect.light.removeFromParent()
+    effect.glow.removeFromParent()
     effect.dispose()
     this.flames.delete(id)
   }

@@ -1617,7 +1617,7 @@ export class SceneRenderer {
   setBodies(states: BodyState[], seconds = 0, ids: readonly string[] = states.map(state => state.id)): void {
     const { x, z } = this.bodyOrigin
     const sky = this.scatteredSky
-    this.bodySystem.set(states, { originX: x, originZ: z, originGroundY: this.groundYUnder(x, z) }, seconds,
+    this.bodySystem.set(states, { originX: x, originZ: z, originGroundY: this.groundYUnder(x, z), eye: this.camera.position }, seconds,
       sky ? (rgb, luminance) => sky.displayOfLuminance(rgb, luminance) : undefined, ids)
     // Something is there to cast a shadow, whatever the decor says.
     if (this.bodySystem.any) this.celestialLight.castShadow = true
