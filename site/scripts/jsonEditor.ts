@@ -1,4 +1,5 @@
 import { basicSetup, EditorView } from "codemirror"
+import { EditorState } from "@codemirror/state"
 import { json, jsonLanguage, jsonParseLinter } from "@codemirror/lang-json"
 import { linter, lintGutter } from "@codemirror/lint"
 import { SiteCodeTheme } from "./codeTheme.js"
@@ -19,11 +20,12 @@ export class JsonEditor {
   private readonly view: EditorView
 
   /**
-   * `at` says where in a recording the text stands — see SightingCompletion — for an excerpt of one
-   * rather than a whole one; `null` for JSON that is not a recording at all (a case), which is then
-   * checked but offered nothing.
+   * `readOnly` for text with nothing to show what a change would do: an excerpt on a page of
+   * documentation is read, copied and folded, and changing it would only have misled the reader into
+   * thinking something had taken effect. Only an editor with a preview (the Player's) is typed into,
+   * and only there is completion offered.
    */
-  constructor(parent: HTMLElement, initialValue: string, at: readonly string[] | null = []) {
+  constructor(parent: HTMLElement, initialValue: string, { readOnly = false }: { readOnly?: boolean } = {}) {
     this.view = new EditorView({
       parent,
       doc: initialValue,
@@ -34,7 +36,9 @@ export class JsonEditor {
         // What turns this from a text box into a way of LEARNING the format: every key the model
         // has, the words a key will accept, and the model's own comment about it — read out of the
         // TypeScript at build time, so it says what the code says. See SightingCompletion.
-        ...(at ? [jsonLanguage.data.of({ autocomplete: new SightingCompletion(at).source })] : []),
+        ...(readOnly ? [] : [jsonLanguage.data.of({ autocomplete: new SightingCompletion().source })]),
+        // The caret would blink in a document nobody can change — see the Share page's HtmlView.
+        ...(readOnly ? [EditorView.editable.of(false), EditorState.readOnly.of(true)] : []),
         // The whole reason a code editor earns its place here: a mistyped comma is reported ON the
         // line that has it, instead of as "Unexpected token at position 1487".
         lintGutter(),

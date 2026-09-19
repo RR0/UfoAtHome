@@ -41,16 +41,12 @@ export class DocsFormatPage extends DocsSection {
   }
 
   /**
-   * Turns every JSON excerpt on the page — the whole example and each fragment — into something to
-   * type in.
+   * Shows every JSON excerpt on the page — the whole example and each fragment — in the site's code
+   * view: coloured, numbered, foldable, and checked. Read-only, because nothing here plays what
+   * would be typed; the Player is where a recording is changed and seen at once.
    *
-   * A format is learnt by trying it, not by reading a listing of it — and the editor already knows
-   * every key this file could have, because its completion is generated from the same types the
-   * table above describes. So the reader can take the smallest working recording and see what else
-   * would fit in it, right where they are reading about it.
-   *
-   * Nothing here plays: this page is about the file. The <pre> stays until CodeMirror arrives and
-   * stays for good if it never does, so a reader without it still has the example.
+   * The <pre> stays until CodeMirror arrives and stays for good if it never does, so a reader
+   * without it still has the excerpts.
    */
   script(): string {
     return `const excerpts = [...document.querySelectorAll("pre[data-json]")]
@@ -63,10 +59,8 @@ if (excerpts.length > 0) {
         const mount = document.createElement("div")
         mount.className = "code-view"
         pre.after(mount)
-        // Where in a recording the excerpt stands, for what its completion offers; "none" for JSON
-        // that is not a recording.
-        const at = pre.dataset.json
-        new JsonEditor(mount, pre.textContent.trimEnd(), at === "none" ? null : at ? at.split(".") : [])
+        // Read-only: nothing on this page plays what would be typed (see JsonEditor).
+        new JsonEditor(mount, pre.textContent.trimEnd(), { readOnly: true })
         pre.hidden = true
       }
     } catch {
@@ -113,7 +107,7 @@ if (excerpts.length > 0) {
       title, date and classification, and lists everything that happened in it as
       <code>events</code>. Its events of type <code>sighting</code> are its testimonies, each pointing
       at one witness's recording:</p>
-    <pre data-json="none"><code>{
+    <pre data-json><code>{
   "id": "ChilesWhitted",
   "title": "Chiles et Whitted",
   "time": "1948-07-24 02:45",
@@ -140,7 +134,7 @@ if (excerpts.length > 0) {
     <p>A recording is handed from one reader to another, so every field an author writes can hold
       one string per language instead of one: <code>description</code>, a shape's or a decor
       object's <code>title</code>, and a milestone's <code>label</code> and <code>note</code>.</p>
-    <pre data-json=""><code>{
+    <pre data-json><code>{
   "description": {
     "fr": "Tout le témoignage de Lonnie Zamora, d'un seul tenant…",
     "en": "Lonnie Zamora's whole testimony, of a piece…"
@@ -165,7 +159,7 @@ if (excerpts.length > 0) {
     <p><code>timeline.keyframes</code> is a list of <code>{ t, shapes }</code>, <code>t</code> in
       milliseconds from the start. Each shape carries a <code>sourceId</code> — several shapes can
       share one timeline (the phenomenon, a trailing flame, a second light) — and a <code>shape</code>:</p>
-    <pre data-json="timeline.keyframes.shapes.shape"><code>{
+    <pre data-json><code>{
   "kind": "oval",
   "bounds": { "x": 0, "y": 0, "width": 0, "height": 0 },
   "color": "#39ff14",
@@ -263,7 +257,7 @@ if (excerpts.length > 0) {
       <tr><td><code>density</code>, <code>darkness</code></td><td>Its own; darkness absent means the layer's</td></tr>
     </table>
     </div>
-    <pre data-json="weatherTrack.keyframes"><code>{
+    <pre data-json><code>{
   "weather": {
     "cloudLayers": [
       {
@@ -296,10 +290,10 @@ if (excerpts.length > 0) {
     <p>The smallest recording that still states something — one silent oval crossing the sky over
       twelve seconds, on a real date at a real place. Everything else in the format is optional, and
       everything below is doing work:</p>
-    <pre data-json=""><code>${this.escape(this.example)}</code></pre>
-    <p class="small">Yours to type in: it completes on every key the format has, offers the words
-      each one accepts, and says what the model says about it. Nothing here is saved or played —
-      when you want to see one run, <a href="/play/">the player</a> takes a file.</p>
+    <pre data-json><code>${this.escape(this.example)}</code></pre>
+    <p class="small">To change it and see it play, paste it into <a href="/play/">the player</a>,
+      whose editor completes on every key the format has, offers the words each one accepts, and
+      says what the model says about it.</p>
     <p>It is <a href="/demo-data/example-minimal.json"><code>/demo-data/example-minimal.json</code></a>
       on this site, so you can fetch it, and
       <a href="/play/?sighting=/demo-data/example-minimal.json">play it</a> before changing
@@ -377,7 +371,7 @@ if (excerpts.length > 0) {
       la date et la classification du cas, et liste tout ce qui lui est arrivé en
       <code>events</code>. Ses événements de type <code>sighting</code> sont ses témoignages, chacun
       pointant vers l'enregistrement d'un témoin :</p>
-    <pre data-json="none"><code>{
+    <pre data-json><code>{
   "id": "ChilesWhitted",
   "title": "Chiles et Whitted",
   "time": "1948-07-24 02:45",
@@ -405,7 +399,7 @@ if (excerpts.length > 0) {
       donc porter une chaîne par langue au lieu d'une seule — <code>description</code>, le
       <code>title</code> d'une forme ou d'un élément de décor, le <code>label</code> et la
       <code>note</code> d'un repère.</p>
-    <pre data-json=""><code>{
+    <pre data-json><code>{
   "description": {
     "fr": "Tout le témoignage de Lonnie Zamora, d'un seul tenant…",
     "en": "Lonnie Zamora's whole testimony, of a piece…"
@@ -430,7 +424,7 @@ if (excerpts.length > 0) {
       millisecondes depuis le début. Chaque forme porte un <code>sourceId</code> — plusieurs formes
       peuvent partager une chronologie (le phénomène, une flamme qui traîne, une seconde lumière) — et
       une <code>shape</code> :</p>
-    <pre data-json="timeline.keyframes.shapes.shape"><code>{
+    <pre data-json><code>{
   "kind": "oval",
   "bounds": { "x": 0, "y": 0, "width": 0, "height": 0 },
   "color": "#39ff14",
@@ -528,7 +522,7 @@ if (excerpts.length > 0) {
       <tr><td><code>density</code>, <code>darkness</code></td><td>Les siens ; une obscurité absente est celle de la couche</td></tr>
     </table>
     </div>
-    <pre data-json="weatherTrack.keyframes"><code>{
+    <pre data-json><code>{
   "weather": {
     "cloudLayers": [
       {
@@ -562,10 +556,10 @@ if (excerpts.length > 0) {
     <p>Le plus petit enregistrement qui énonce encore quelque chose — un ovale silencieux traversant
       le ciel en douze secondes, à une date réelle et en un lieu réel. Tout le reste du format est
       facultatif, et tout ce qui suit sert à quelque chose :</p>
-    <pre data-json=""><code>${this.escape(this.example)}</code></pre>
-    <p class="small">À vous d'y taper : il complète sur chaque clé du format, propose les mots que
-      chacune accepte, et dit ce que le modèle en dit. Rien n'est enregistré ni joué ici — pour en
-      voir une tourner, <a href="/play/">le lecteur</a> prend un fichier.</p>
+    <pre data-json><code>${this.escape(this.example)}</code></pre>
+    <p class="small">Pour le modifier et le voir jouer, collez-le dans <a href="/play/">le lecteur</a>,
+      dont l'éditeur complète sur chaque clé du format, propose les mots que chacune accepte, et dit
+      ce que le modèle en dit.</p>
     <p>C'est <a href="/demo-data/example-minimal.json"><code>/demo-data/example-minimal.json</code></a>
       sur ce site : vous pouvez le récupérer, et
       <a href="/play/?sighting=/demo-data/example-minimal.json">le jouer</a> avant d'y toucher.

@@ -153,27 +153,4 @@ describe("SightingCompletion", () => {
   it("keeps quiet where nothing was asked and nothing obviously follows", () => {
     expect(at('{ "version": 1, "caseId": "x" |}', false)).toBe(null)
   })
-
-  describe("in an excerpt of a recording", () => {
-    const labelsAt = (at: string[], marked: string): string[] => {
-      const pos = marked.indexOf("|")
-      const doc = marked.slice(0, pos) + marked.slice(pos + 1)
-      const state = EditorState.create({ doc, extensions: [json()] })
-      return (new SightingCompletion(at).source(new CompletionContext(state, pos, true))?.options ?? []).map(option => option.label)
-    }
-
-    it("offers what a shape has, in a shape shown on its own", () => {
-      const offered = labelsAt(["timeline", "keyframes", "shapes", "shape"], "{ | }")
-      expect(offered).toContain('"angular"')
-      expect(offered).toContain('"haloScale"')
-      expect(offered).not.toContain('"timeline"')
-    })
-
-    it("offers a weather keyframe's keys under its weather, not a recording's", () => {
-      const offered = labelsAt(["weatherTrack", "keyframes"], '{ "weather": { "cloudLayers": [ { | } ] } }')
-      expect(offered).toContain('"iceCrystalAlignment"')
-      expect(offered).toContain('"coverage"')
-    })
-  })
 })
-
