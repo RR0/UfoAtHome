@@ -221,6 +221,30 @@ describe("a shape's stated direction", () => {
     expect(Math.abs(shapeOf(sighting).bounds.x)).toBeGreaterThan(ApparentSize.CANVAS_WIDTH_PX * 10)
   })
 
+  it("keeps a direction behind the witness through a save, instead of reading it back off the pixel it is parked at", () => {
+    // Every direction past the quarter turn is parked at the same pixel, so that pixel says nothing
+    // about which one it was: read back, 170° off came out as 90° off. Anything serialising the
+    // recording (a player's assessors did, on load) rewrote the file's direction with that.
+    const sighting = recordingAimedAt(HEADING)
+    SightingShapes.toAim(sighting)
+    for (const keyframe of [...sighting.witnessTrack.allKeyframes]) {
+      sighting.witnessTrack.addKeyframe(keyframe.t, { ...keyframe.pose, headingDeg: HEADING + 170 })
+    }
+    SightingShapes.toPosition(sighting)
+    const written = toSightingJson(sighting)
+    expect(written.timeline.keyframes[0].shapes[0].shape.aim!.azimuthDeg).toBeCloseTo(HEADING + OFF_AXIS_DEG, 6)
+  })
+
+  it("still reads a direction off a shape that has been moved", () => {
+    const sighting = recordingAimedAt(HEADING)
+    SightingShapes.toAim(sighting)
+    const keyframe = sighting.timeline.allKeyframes[0]
+    const state = [...keyframe.shapes][0]
+    sighting.timeline.addKeyframe(keyframe.t, [{ ...state, shape: { ...state.shape, bounds: { ...state.shape.bounds, x: state.shape.bounds.x + 40 } } }])
+    SightingShapes.toAim(sighting)
+    expect(shapeOf(sighting).aim!.azimuthDeg).toBeGreaterThan(HEADING + OFF_AXIS_DEG + 1)
+  })
+
   it("survives being written and read again", () => {
     const sighting = recordingAimedAt(HEADING)
     const reread = fromSightingJson(toSightingJson(sighting))

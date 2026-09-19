@@ -83,13 +83,29 @@ export class SightingShapes {
    *
    * Skipped for a keyframe whose pose states no heading. There is nothing to measure an azimuth
    * from, and a shape aimed from an assumed north would be worse than one aimed from nothing.
+   *
+   * And skipped for a shape still drawn exactly where its own stated direction puts it, which is
+   * every shape nobody has moved. The drawing is only the newer statement once it has been moved;
+   * until then it is a copy of the direction, and a lossy one: a direction off the side of the
+   * picture is drawn at a fixed OFF_CANVAS_PX, the same pixel for 100° off and for 170°, and reading
+   * a direction back from that pixel turned Zamora's craft, behind him while he ran, from 197° to
+   * 263°. Since anything that serialises the recording runs this — an assessor reading the plain
+   * values did, the moment a player loaded — that was a file corrupted by being looked at.
    */
   static toAim(sighting: Sighting): void {
     this.eachKeyframe(sighting, (shape, projection, pose) => {
+      const stated = shape.aim && this.positionOf(sighting, shape.aim, shape.bounds, projection, pose)
+      if (stated && Math.abs(stated.x - shape.bounds.x) < SightingShapes.UNMOVED_PX && Math.abs(stated.y - shape.bounds.y) < SightingShapes.UNMOVED_PX) {
+        return shape
+      }
       const aim = this.aimFrom(sighting, projection, pose, shape.bounds)
       return aim ? { ...shape, aim } : shape
     })
   }
+
+  /** Under this, a box is where its direction put it and has not been moved — a gesture is whole
+   * pixels, a round trip through the projection is a rounding error. */
+  private static readonly UNMOVED_PX = 0.01
 
   /**
    * The direction a box drawn at `bounds` states at instant `t` — what an editing gesture has to
@@ -131,14 +147,23 @@ export class SightingShapes {
    */
   static toPosition(sighting: Sighting): void {
     this.eachKeyframe(sighting, (shape, projection, pose) => {
-      if (!shape.aim || pose?.headingDeg === undefined) return shape
-      const centre = this.frameCentre(sighting)
-      const offAxisX = this.shortestArc(shape.aim.azimuthDeg - pose.headingDeg)
-      const offAxisY = shape.aim.altitudeDeg - pose.pitchDeg
-      const x = centre.x + this.offAxisPx(projection, offAxisX) - shape.bounds.width / 2
-      const y = centre.y - this.offAxisPx(projection, offAxisY) - shape.bounds.height / 2
-      return { ...shape, bounds: { ...shape.bounds, x, y } }
+      const position = shape.aim && this.positionOf(sighting, shape.aim, shape.bounds, projection, pose)
+      return position ? { ...shape, bounds: { ...shape.bounds, ...position } } : shape
     })
+  }
+
+  /** Where a box of these dimensions is drawn when it states this direction, or undefined when the
+   * pose states no heading to draw it from. */
+  private static positionOf(sighting: Sighting, aim: ShapeAim, bounds: ShapeBounds, projection: ImageProjection, pose: ObserverPose | undefined):
+    { x: number; y: number } | undefined {
+    if (pose?.headingDeg === undefined) return undefined
+    const centre = this.frameCentre(sighting)
+    const offAxisX = this.shortestArc(aim.azimuthDeg - pose.headingDeg)
+    const offAxisY = aim.altitudeDeg - pose.pitchDeg
+    return {
+      x: centre.x + this.offAxisPx(projection, offAxisX) - bounds.width / 2,
+      y: centre.y - this.offAxisPx(projection, offAxisY) - bounds.height / 2
+    }
   }
 
   /** Where the axis of the image falls, in the pixels every shape's bounds are expressed in. */
