@@ -453,6 +453,33 @@ describe("SightingElement", () => {
     expect(panel.hidden).toBe(false)
   })
 
+  it("keeps the choice and the scene in step when moved into a page of another language, and relabels its toggle", async () => {
+    const body = { id: "craft", explains: ["ufo"], model: { id: "sphere" }, track: [{ t: 0, eastM: 0, northM: 10, onGround: true }] }
+    stubFetch({ "john.json": { ...johnSighting, id: "x", place: [{ lat: 32.4, lng: -86.3 }], interpretation: { title: "Own", bodies: [body] } } })
+    const element = await connect("john.json")
+    const shadow = element.shadowRoot!
+    const select = shadow.getElementById("interpretation") as HTMLSelectElement
+    select.value = "witness"
+    select.dispatchEvent(new Event("change"))
+    await new Promise(resolve => setTimeout(resolve, 0))
+
+    const french = document.createElement("div")
+    french.lang = "fr"
+    document.body.appendChild(french)
+    french.appendChild(element)
+    await new Promise(resolve => setTimeout(resolve, 20))
+
+    // Put somewhere else, it reads its recording again, which starts from the raw testimony: the
+    // choice and the scene say so together, never one without the other.
+    expect(select.value).toBe("raw")
+    expect(element.scene.interpretation).toBeUndefined()
+    select.value = "witness"
+    select.dispatchEvent(new Event("change"))
+    await new Promise(resolve => setTimeout(resolve, 0))
+    expect(element.scene.interpretation?.title).toBe("Own")
+    expect((shadow.getElementById("compare-testimony") as HTMLButtonElement).title).toBe("Comparer au témoignage")
+  })
+
   it("starts comparing where the page asks, and lets the reader stop", async () => {
     const element = document.createElement(SIGHTING_ELEMENT_NAME) as SightingElement
     element.setAttribute("compare-testimony", "")

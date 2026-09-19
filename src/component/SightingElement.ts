@@ -281,6 +281,7 @@ export class SightingElement extends HTMLElement {
     this.confrontationHeading.textContent = this.messages.confrontation
     const shown = this.entries.find(entry => entry.src === this.currentSrc)
     if (shown) this.offerInterpretations(shown)
+    this.updateCompareButton()
     this.infoButton.title = this.messages.about
     this.infoButton.setAttribute("aria-label", this.messages.about)
     this.infoCloseButton.setAttribute("aria-label", this.messages.close)
@@ -505,6 +506,9 @@ export class SightingElement extends HTMLElement {
    * testimony is all there is.
    */
   private offerInterpretations(entry: WitnessEntry): void {
+    // What is on show stays chosen when the same recording is offered again (its labels in another
+    // language); a new recording has already dropped it (see SceneElement.sightingData).
+    const kept = this.sceneElement.interpretation ? this.interpretationSelect.value : "raw"
     this.interpretationToken++
     this.interpretationLoaders = new Map()
     this.interpretationSelect.innerHTML = ""
@@ -530,9 +534,11 @@ export class SightingElement extends HTMLElement {
           () => CaseFile.interpretationOf(event, source.url, url => SightingFetch.json(url)))
       })
     }
-    this.interpretationSelect.value = "raw"
+    const stillOffered = [...this.interpretationSelect.options].some(option => option.value === kept)
+    this.interpretationSelect.value = stillOffered ? kept : "raw"
+    if (!stillOffered && this.sceneElement.interpretation) this.sceneElement.interpretation = undefined
     this.interpretationChoice.hidden = this.interpretationSelect.options.length < 2
-    this.showConfrontation([])
+    this.showConfrontation(this.sceneElement.interpretation ? this.sceneElement.confrontation : [])
     this.updateCompareButton()
   }
 
