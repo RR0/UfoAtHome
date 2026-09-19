@@ -147,6 +147,7 @@ const NOVA_KEY_PREFIX = "nova:"
 const DECOR_KIND_NAMES: Record<DecorKind, { en: string; fr: string }> = {
   building: { en: "Building", fr: "Bâtiment" },
   tree: { en: "Tree", fr: "Arbre" },
+  shrub: { en: "Shrub", fr: "Buisson" },
   crop: { en: "Crop row", fr: "Rang de culture" },
   mound: { en: "Stone heap", fr: "Tas de pierres" },
   streetlight: { en: "Streetlight", fr: "Lampadaire" },

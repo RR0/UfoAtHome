@@ -1620,7 +1620,7 @@ export class SceneRenderer {
     const sky = this.scatteredSky
     this.bodySystem.set(states, {
       originX: x, originZ: z, originGroundY: this.groundYUnder(x, z), eye: this.camera.position,
-      groundYAt: (px, pz) => this.groundYUnder(px, pz), wind
+      groundYAt: (px, pz) => this.groundYUnder(px, pz), wind, light: this.plumeLight()
     }, seconds, sky ? (rgb, luminance) => sky.displayOfLuminance(rgb, luminance) : undefined, ids)
     this.bodySystem.setSmoke(smoke, seconds)
     // Something is there to cast a shadow, whatever the decor says.
@@ -1632,6 +1632,22 @@ export class SceneRenderer {
       this.camera.far = needed
       this.camera.updateProjectionMatrix()
     }
+  }
+
+  /**
+   * What the scene's sun and sky make of a white matt surface at this instant, linear: what dust and
+   * smoke are multiplied by (see GroundPlume). The same arithmetic three.js applies to a Lambert
+   * surface — each light's irradiance times the albedo over π — for a puff lit on half its surface
+   * by the sun and all round by the sky and the ground.
+   */
+  private plumeLight(): [number, number, number] {
+    const sun = this.celestialLight.color
+    const sunI = this.celestialLight.intensity * 0.5
+    const sky = this.skyLight.color
+    const ground = this.skyLight.groundColor
+    const skyI = this.skyLight.intensity
+    const channel = (s: number, a: number, g: number) => (s * sunI + ((a + g) / 2) * skyI) / Math.PI
+    return [channel(sun.r, sky.r, ground.r), channel(sun.g, sky.g, ground.g), channel(sun.b, sky.b, ground.b)]
   }
 
   /** Points of a node of a body's model, in the bodies' own frame — see BodySystem.outlineOf. */

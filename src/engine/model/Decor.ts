@@ -24,6 +24,9 @@ import type { SaidText } from "./SaidText.js"
  */
 export type DecorKind =
   | "building" | "tree" | "crop" | "mound" | "streetlight" | "vehicle" | "witness" | "aircraft"
+  /** A low bush: the greasewood of a New Mexico wash, the scrub of a garrigue — a clump of rounded
+   * crowns on the ground, with no trunk. */
+  | "shrub"
   /**
    * A being the witness reported seeing — the two figures beside the craft at Valensole, the pair
    * at Socorro.

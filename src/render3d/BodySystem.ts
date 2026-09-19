@@ -7,6 +7,8 @@ import { BODY_PRIMITIVES } from "../engine/interpretation/Interpretation.js"
 import type { BodyPrimitive } from "../engine/interpretation/Interpretation.js"
 import type { DecorModelRef } from "../engine/model/Decor.js"
 import { FlameEffect } from "./FlameEffect.js"
+import { DecorSystem } from "./DecorSystem.js"
+import type { DecorObject } from "../engine/model/Decor.js"
 import { GroundPlume } from "./GroundPlume.js"
 import type { SmokeSource } from "../engine/interpretation/Interpretation.js"
 
@@ -32,6 +34,9 @@ export interface BodyFrame {
   groundYAt?: (x: number, z: number) => number
   /** The wind, m/s along the scene's x (east) and z (south) — what carries dust and smoke. */
   wind?: { x: number, z: number }
+  /** What the scene's lights make of a white matt surface, linear — what dust and smoke, which
+   * are not lit by the scene's own shading, are multiplied by (see SceneRenderer.plumeLight). */
+  light?: readonly [number, number, number]
 }
 
 /**
@@ -179,7 +184,7 @@ export class BodySystem {
     const { x, y, z } = this.scratch
     const groundY = frame.groundYAt(x, z)
     const strength = Math.max(0, Math.min(1, 1 - (y - groundY) / (flame.lengthM + 1)))
-    plume.set(x, groundY, z, seconds, frame.wind ?? { x: 0, z: 0 }, strength)
+    plume.set(x, groundY, z, seconds, frame.wind ?? { x: 0, z: 0 }, strength, frame.light)
   }
 
   /**
@@ -203,9 +208,10 @@ export class BodySystem {
       }
       const x = frame.originX + source.eastM
       const z = frame.originZ - source.northM
-      // Catching over its first two seconds.
-      const strength = Math.min(1, (t - source.fromT) / 2000)
-      plume.set(x, frame.groundYAt ? frame.groundYAt(x, z) : frame.originGroundY, z, seconds, frame.wind ?? { x: 0, z: 0 }, strength)
+      // Catching over its first two seconds, then dying down to a smoulder.
+      const ageS = (t - source.fromT) / 1000
+      const strength = Math.min(1, ageS / 2) * (0.1 + 0.9 * Math.pow(2, -ageS / (source.halfLifeS ?? 20)))
+      plume.set(x, frame.groundYAt ? frame.groundYAt(x, z) : frame.originGroundY, z, seconds, frame.wind ?? { x: 0, z: 0 }, strength, frame.light)
     })
   }
 
@@ -304,6 +310,21 @@ export class BodySystem {
     holder.name = `body:${state.id}`
     const signature = BodySystem.signatureOf(state.model)
     const primitive = BodySystem.primitiveOf(state.model)
+    if (primitive === "figure") {
+      // The decor's own figure, fitted into the unit cube like a model and painted in one colour:
+      // what a witness saw at a distance is a silhouette in coveralls, not a face.
+      const material = new MeshStandardMaterial({ roughness: 0.7, metalness: 0 })
+      BodySystem.paint(material, state)
+      const figure = DecorSystem.build({ id: state.id, kind: "entity", eastM: 0, northM: 0 } as DecorObject, false)
+      figure.traverse(child => {
+        if (!(child instanceof Mesh)) return
+        child.material = material
+        child.castShadow = true
+        child.receiveShadow = true
+      })
+      holder.add(BodySystem.fit(figure, 0))
+      return { holder, signature, material }
+    }
     if (primitive) {
       const material = new MeshStandardMaterial({ roughness: 0.45, metalness: 0 })
       BodySystem.paint(material, state)
@@ -417,6 +438,10 @@ export class BodySystem {
       case "torus":
         geometry = new TorusGeometry(0.35, 0.15, 24, 64)
         geometry.rotateX(Math.PI / 2)
+        break
+      case "figure":
+        // Built from the decor's own (see build); an ellipsoid wherever a bare geometry is asked for.
+        geometry = new SphereGeometry(0.5, 24, 12)
         break
     }
     geometry.computeBoundingBox()

@@ -355,6 +355,23 @@ function buildBuilding(floors: number, windows: DecorObject["windows"], witnessS
   return group
 }
 
+/**
+ * A shrub: five rounded crowns of foliage in a clump, sitting on the ground with no trunk, about
+ * 1.4 m across and 1 m high before it is sized — the shape of a greasewood in a New Mexico wash, dark
+ * olive and matt.
+ */
+function buildShrub(): Group {
+  const group = new Group()
+  const crowns: [number, number, number, number][] = [[0, 0, 0.55, 0.5], [0.4, 0.1, 0.35, 0.4], [-0.35, -0.2, 0.4, 0.38], [0.1, -0.4, 0.35, 0.36], [-0.15, 0.4, 0.3, 0.34]]
+  for (const [x, z, radius, y] of crowns) {
+    const crown = new SphereGeometry(radius, 10, 7)
+    crown.scale(1, 0.85, 1)
+    crown.translate(x, 0, z)
+    addPart(group, crown, [0.26, 0.28, 0.17], y)
+  }
+  return group
+}
+
 function buildTree(): Group {
   const group = new Group()
   addPart(group, new CylinderGeometry(0.15, 0.22, 2, 8), [0.32, 0.22, 0.14], 1)
@@ -827,6 +844,8 @@ export class DecorSystem {
         ? buildBuilding(object.floors ?? DEFAULT_BUILDING_FLOORS, object.windows, object.witnessSide, object.occupiedFloor)
         : object.kind === "tree"
           ? buildTree()
+          : object.kind === "shrub"
+            ? buildShrub()
           : object.kind === "crop"
             ? buildCrop()
             : object.kind === "mound"
@@ -899,6 +918,8 @@ export class DecorSystem {
         ? buildBuilding(levels - 1, undefined, undefined, undefined)
         : kind === "tree"
           ? buildTree()
+          : kind === "shrub"
+            ? buildShrub()
           : kind === "crop"
             ? buildCrop()
             : kind === "mound"

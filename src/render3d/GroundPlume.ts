@@ -28,8 +28,9 @@ export interface PlumeKind {
  * (i / count) of the life and dies a life later, over and over, along a direction and at a speed
  * of its own drawn once from its index.
  *
- * Seen by the light around it only as far as its colour says: it is not lit by the scene, which for
- * a thin haze of pale dust against a lit ground is close, and for a plume in shadow is too bright.
+ * Lit as a whole rather than puff by puff: its colour (an albedo) is multiplied by what the scene's
+ * sun and sky make of a white matt surface at that instant (see SceneRenderer.plumeLight), so it is
+ * pale in the sun, dim at dusk and dark at night, with no shading of its own and no shadow cast.
  */
 export class GroundPlume {
   static readonly DUST: PlumeKind = {
@@ -62,7 +63,7 @@ export class GroundPlume {
       0.6 + 0.8 * GroundPlume.hash(i * 3 + 3)
     ])
     const material = new ShaderMaterial({
-      uniforms: { uColour: { value: new Color(kind.colour[0], kind.colour[1], kind.colour[2]) }, uHalfHeight: { value: 500 } },
+      uniforms: { uColour: { value: new Color(kind.colour[0], kind.colour[1], kind.colour[2]) }, uLight: { value: new Color(1, 1, 1) }, uHalfHeight: { value: 500 } },
       vertexShader: GroundPlume.VERTEX,
       fragmentShader: GroundPlume.FRAGMENT,
       transparent: true,
@@ -88,10 +89,11 @@ export class GroundPlume {
    * The plume at `seconds` into the recording, from a source at (x, y, z) of the scene, blown by
    * `wind` (m/s, scene axes), at `strength` 0-1 of its full density.
    */
-  set(x: number, y: number, z: number, seconds: number, wind: { x: number, z: number }, strength: number): void {
+  set(x: number, y: number, z: number, seconds: number, wind: { x: number, z: number }, strength: number, light: readonly [number, number, number] = [1, 1, 1]): void {
     const kind = this.kind
     this.points.visible = strength > 0
     if (!this.points.visible) return
+    ;(this.points.material.uniforms.uLight.value as Color).setRGB(light[0], light[1], light[2])
     for (let i = 0; i < kind.count; i++) {
       const [direction, speed, rise] = this.seeds[i]
       const age = ((seconds + (i / kind.count) * kind.lifeS) % kind.lifeS + kind.lifeS) % kind.lifeS
@@ -138,12 +140,13 @@ export class GroundPlume {
 
   private static readonly FRAGMENT = /* glsl */ `
     uniform vec3 uColour;
+    uniform vec3 uLight;
     varying float vAlpha;
     void main() {
       vec2 offset = gl_PointCoord * 2.0 - 1.0;
       float d2 = dot(offset, offset);
       if (d2 > 1.0) discard;
-      gl_FragColor = vec4(uColour, vAlpha * exp(-3.0 * d2));
+      gl_FragColor = vec4(uColour * uLight, vAlpha * exp(-3.0 * d2));
     }
   `
 }

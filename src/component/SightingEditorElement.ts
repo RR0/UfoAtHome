@@ -647,6 +647,7 @@ export class SightingEditorElement extends HTMLElement {
   private readonly optionWitnessSideNone: HTMLOptionElement
   private readonly optionDecorBuilding: HTMLElement
   private readonly optionDecorTree: HTMLElement
+  private readonly optionDecorShrub: HTMLElement
   private readonly optionDecorCrop: HTMLElement
   private readonly optionDecorMound: HTMLElement
   private readonly optionDecorStreetlight: HTMLElement
@@ -1256,6 +1257,7 @@ export class SightingEditorElement extends HTMLElement {
     this.labelDecorWindows = this.shadow.getElementById("label-decor-windows")!
     this.optionDecorBuilding = this.shadow.getElementById("option-decor-building")!
     this.optionDecorTree = this.shadow.getElementById("option-decor-tree")!
+    this.optionDecorShrub = this.shadow.getElementById("option-decor-shrub")!
     this.optionDecorCrop = this.shadow.getElementById("option-decor-crop")!
     this.optionDecorMound = this.shadow.getElementById("option-decor-mound")!
     this.optionDecorStreetlight = this.shadow.getElementById("option-decor-streetlight")!
@@ -7283,6 +7285,7 @@ export class SightingEditorElement extends HTMLElement {
     this.labelDecorGroup.textContent = messages.decor
     this.optionDecorBuilding.textContent = messages.decorBuilding
     this.optionDecorTree.textContent = messages.decorTree
+    this.optionDecorShrub.textContent = messages.decorShrub
     this.optionDecorCrop.textContent = messages.decorCrop
     this.optionDecorMound.textContent = messages.decorMound
     this.optionDecorStreetlight.textContent = messages.decorStreetlight

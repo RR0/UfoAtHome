@@ -40,6 +40,9 @@ export interface SmokeSource {
   northM: number
   fromT: number
   untilT?: number
+  /** How fast it dies down, seconds to half its thickness — brush flares and smoulders. 20 when
+   * absent; it never quite stops before `untilT`, a tenth of it lingering. */
+  halfLifeS?: number
 }
 
 /**
@@ -74,9 +77,10 @@ export interface InterpretationEventJson {
   smoke?: SmokeSource[]
 }
 
-/** The shapes this project builds itself. Anything else a model names is a catalogue entry or a
+/** The shapes this project builds itself. "figure" is a standing human silhouette — the decor's own
+ * (see DecorKind "entity"), for a being an interpretation places: the pair at Socorro. Anything else a model names is a catalogue entry or a
  * file — see BodyJson.model. */
-export const BODY_PRIMITIVES = ["ellipsoid", "sphere", "disc", "cylinder", "cone", "box", "torus"] as const
+export const BODY_PRIMITIVES = ["ellipsoid", "sphere", "disc", "cylinder", "cone", "box", "torus", "figure"] as const
 export type BodyPrimitive = typeof BODY_PRIMITIVES[number]
 
 /**
@@ -142,6 +146,9 @@ export interface BodyKeyframe {
   distanceM?: number
   /** Standing on the ground. */
   onGround?: boolean
+  /** Gone from here on — `false` — or back — `true`. A being seen at first glance and not there a
+   * minute later is a body whose track says so. */
+  present?: boolean
   /** Metres between the ground under it and its lowest point. Ignored with `onGround`. */
   altitudeAboveGroundM?: number
   sizeM?: BodySize

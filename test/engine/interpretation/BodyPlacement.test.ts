@@ -95,6 +95,17 @@ describe("BodyPlacement", () => {
     expect(placement.at(3000)?.flame).toBeUndefined()
   })
 
+  it("is gone from the keyframe that says so, and back from the one that says that", () => {
+    const placement = new BodyPlacement(craft([
+      { t: 0, eastM: 0, northM: 10, onGround: true },
+      { t: 1000, present: false },
+      { t: 2000, present: true }
+    ]), flat, eyeAtOrigin(flat))
+    expect(placement.at(500)).toBeDefined()
+    expect(placement.at(1500)).toBeUndefined()
+    expect(placement.at(2500)?.northM).toBe(10)
+  })
+
   it("lights a flame put out earlier again at the keyframe that relights it, not over the wait before", () => {
     const flame = { lengthM: 2, widthM: 1, color: "#7fc4ff", luminanceCdM2: 20000 }
     const placement = new BodyPlacement(craft([

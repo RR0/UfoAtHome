@@ -55,6 +55,7 @@ interface PlacedKey {
   attitude: Required<BodyAttitude>
   appearance: BodyState["appearance"]
   flame?: BodyFlame
+  present: boolean
 }
 
 /**
@@ -162,6 +163,7 @@ export class BodyPlacement {
     let index = keys.length - 1
     while (index > 0 && keys[index].t > t) index--
     const from = keys[index]
+    if (!from.present) return undefined
     const to = keys[Math.min(index + 1, keys.length - 1)]
     const fraction = to === from || to.t === from.t ? 0 : Math.min(1, (t - from.t) / (to.t - from.t))
     const eastM = BodyPlacement.lerp(from.eastM, to.eastM, fraction)
@@ -269,7 +271,8 @@ export class BodyPlacement {
       })
       if (!position) continue
       const flame = key.flame ?? previous?.flame
-      previous = { t: key.t, ...position, sizeM, attitude, appearance, flame }
+      const present = key.present ?? previous?.present ?? true
+      previous = { t: key.t, ...position, sizeM, attitude, appearance, flame, present }
       placed.push(previous)
     }
     return placed
