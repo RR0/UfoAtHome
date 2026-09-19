@@ -248,7 +248,7 @@ export class FaqPage implements SitePage {
     <div class="faq-item">
       <h3>What if I don't know the exact date, or the exact time?</h3>
       <p>Say so, and the tool will say so too. Dates are stored in EDTF, so “1954”, “June 2025”,
-        “around 05:00” and “uncertain” are all things the format can state. What you lose is only
+        “around 05:00” and “uncertain” are all things <a href="/docs/format/">the format</a> can state. What you lose is only
         what genuinely depends on the missing part: with no full date and place there is no sky to
         compute, and the interface says that rather than drawing a plausible one.</p>
     </div>
@@ -518,7 +518,7 @@ export class FaqPage implements SitePage {
     <div class="faq-item">
       <h3>Et si je ne connais pas la date exacte, ou l'heure exacte ?</h3>
       <p>Dites-le, et l'outil le dira aussi. Les dates sont stockées en EDTF : « 1954 », « juin
-        2025 », « vers 05:00 » et « incertain » sont des choses que le format sait énoncer. Vous ne
+        2025 », « vers 05:00 » et « incertain » sont des choses que <a href="/docs/format/">le format</a> sait énoncer. Vous ne
         perdez que ce qui dépend réellement de la partie manquante : sans date complète ni lieu, il
         n'y a pas de ciel à calculer, et l'interface le dit au lieu d'en dessiner un vraisemblable.</p>
     </div>

@@ -80,7 +80,7 @@ export class RoadmapPage implements SitePage {
       <h3>Textures on shapes <span class="status status-later">planned</span></h3>
       <p>Blended with the colour rather than replacing it, keyframed and serialized like every other
         appearance field. Witnesses describe surfaces — ribbed, matte, mirror-like — and today the
-        format cannot hold that.</p>
+        <a href="/docs/format/">format</a> cannot hold that.</p>
     </div>
 
     <div class="timeline-step">
@@ -193,7 +193,7 @@ export class RoadmapPage implements SitePage {
       <h3>Textures sur les formes <span class="status status-later">planifié</span></h3>
       <p>Mêlées à la couleur plutôt que la remplaçant, keyframées et sérialisées comme tout autre
         champ d'apparence. Les témoins décrivent des surfaces — nervurée, mate, comme un miroir — et
-        le format ne sait pas encore le retenir.</p>
+        le <a href="/docs/format/">format</a> ne sait pas encore le retenir.</p>
     </div>
 
     <div class="timeline-step">

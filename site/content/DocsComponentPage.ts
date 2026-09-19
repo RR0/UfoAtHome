@@ -83,11 +83,11 @@ export class DocsComponentPage extends DocsSection {
     <pre><code>&lt;script type="module" src="https://ufoathome.org/lib/${tag}.mjs"&gt;&lt;/script&gt;
 &lt;${tag}${tag === "rr0-sighting-editor" ? "" : ' src="sighting.json"'}&gt;&lt;/${tag}&gt;</code></pre>
     <p>${fr
-      ? `Ou, après <code>npm install @rr0/ufoathome</code> : <code>import "@rr0/ufoathome/${this.doc.subpath}"</code>.
+      ? `${tag === "rr0-sighting-editor" ? "" : `<code>sighting.json</code> est un enregistrement au <a href="/docs/format/">format JSON</a>. `}Ou, après <code>npm install @rr0/ufoathome</code> : <code>import "@rr0/ufoathome/${this.doc.subpath}"</code>.
          Le bundle pèse ${this.doc.size.fr} compressé et enregistre le tag lui-même — rien d'autre à appeler.
          <a href="/docs/components/#integrer-dans-votre-application">Le hub</a> dit ce que cela suppose par ailleurs,
          et <a href="/docs/share/">partager une observation</a> a l'exemple complet, à essayer et à copier.`
-      : `Or, after <code>npm install @rr0/ufoathome</code>: <code>import "@rr0/ufoathome/${this.doc.subpath}"</code>.
+      : `${tag === "rr0-sighting-editor" ? "" : `<code>sighting.json</code> is one recording in <a href="/docs/format/">the JSON format</a>. `}Or, after <code>npm install @rr0/ufoathome</code>: <code>import "@rr0/ufoathome/${this.doc.subpath}"</code>.
          The bundle is ${this.doc.size.en} gzipped and registers the tag itself — nothing else to call.
          <a href="/docs/components/#putting-one-in-your-application">The hub</a> says what else that involves, and
          <a href="/docs/share/">sharing an observation</a> has the whole example, to try and to copy.`}</p>
@@ -142,7 +142,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
     <table>
       <tr><th>Member</th><th>Kind</th><th>What it does</th></tr>
       <tr><td><code>src</code></td><td>attribute</td><td>URL of a recording, fetched on connect and whenever it changes</td></tr>
-      <tr><td><code>sightingData</code></td><td>property</td><td>The recording as a plain object — read it back after editing, or set it instead of using <code>src</code></td></tr>
+      <tr><td><code>sightingData</code></td><td>property</td><td>The recording as a plain object (see <a href="/docs/format/">the format</a>) — read it back after editing, or set it instead of using <code>src</code></td></tr>
       <tr><td><code>loadFromSrc(url)</code></td><td>method (async)</td><td>What the attribute triggers internally. Await it when you need the recording to be IN before doing anything else</td></tr>
       <tr><td><code>ufoElement</code></td><td>property (read)</td><td>The playback layer it composes — the timeline, the controls, the canvas the pointer works on — and through it every playback member below</td></tr>
       <tr><td><code>sceneRenderer</code></td><td>property (read)</td><td>The 3D renderer, for what nothing else exposes</td></tr>
@@ -162,7 +162,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
     <table>
       <tr><th>Member</th><th>Kind</th><th>What it does</th></tr>
       <tr><td><code>src</code></td><td>attribute</td><td>URL of a recording, fetched on connect and whenever it changes</td></tr>
-      <tr><td><code>sightingData</code></td><td>property</td><td>The recording as a plain object — read it back after editing, or set it instead of using <code>src</code></td></tr>
+      <tr><td><code>sightingData</code></td><td>property</td><td>The recording as a plain object (see <a href="/docs/format/">the format</a>) — read it back after editing, or set it instead of using <code>src</code></td></tr>
       <tr><td><code>sighting</code></td><td>property (read)</td><td>The live model: real-world time and place plus the recording's timeline</td></tr>
       <tr><td><code>loadFromSrc(url)</code></td><td>method (async)</td><td>What the attribute triggers internally. Await it when you need the recording to be IN before doing anything else — playing before it resolves finds a zero-length timeline</td></tr>
       <tr><td><code>play()</code> / <code>pause()</code></td><td>method</td><td>Say which state you want, rather than flipping the current one</td></tr>
@@ -202,7 +202,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
     <table>
       <tr><th>Membre</th><th>Nature</th><th>Rôle</th></tr>
       <tr><td><code>src</code></td><td>attribut</td><td>URL d'un enregistrement, chargée à la connexion et à chaque changement</td></tr>
-      <tr><td><code>sightingData</code></td><td>propriété</td><td>L'enregistrement comme objet simple — à relire après modification, ou à poser au lieu d'utiliser <code>src</code></td></tr>
+      <tr><td><code>sightingData</code></td><td>propriété</td><td>L'enregistrement comme objet simple (voir <a href="/docs/format/">le format</a>) — à relire après modification, ou à poser au lieu d'utiliser <code>src</code></td></tr>
       <tr><td><code>loadFromSrc(url)</code></td><td>méthode (async)</td><td>Ce que déclenche l'attribut. À attendre quand l'enregistrement doit être arrivé avant toute autre chose</td></tr>
       <tr><td><code>ufoElement</code></td><td>propriété (lecture)</td><td>La couche de lecture qu'il compose — la chronologie, les commandes, le canevas du pointeur — et par elle tous les membres de lecture ci-dessous</td></tr>
       <tr><td><code>sceneRenderer</code></td><td>propriété (lecture)</td><td>Le moteur de rendu 3D, pour ce que rien d'autre n'expose</td></tr>
@@ -222,7 +222,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
     <table>
       <tr><th>Membre</th><th>Nature</th><th>Rôle</th></tr>
       <tr><td><code>src</code></td><td>attribut</td><td>URL d'un enregistrement, chargée à la connexion et à chaque changement</td></tr>
-      <tr><td><code>sightingData</code></td><td>propriété</td><td>L'enregistrement comme objet simple — à relire après modification, ou à poser au lieu d'utiliser <code>src</code></td></tr>
+      <tr><td><code>sightingData</code></td><td>propriété</td><td>L'enregistrement comme objet simple (voir <a href="/docs/format/">le format</a>) — à relire après modification, ou à poser au lieu d'utiliser <code>src</code></td></tr>
       <tr><td><code>sighting</code></td><td>propriété (lecture)</td><td>Le modèle vivant : date et lieu réels, plus la chronologie de l'enregistrement</td></tr>
       <tr><td><code>loadFromSrc(url)</code></td><td>méthode (async)</td><td>Ce que déclenche l'attribut. À attendre quand l'enregistrement doit être arrivé avant toute autre chose — jouer avant sa résolution trouve une chronologie de longueur nulle</td></tr>
       <tr><td><code>play()</code> / <code>pause()</code></td><td>méthode</td><td>Dire quel état on veut, plutôt que basculer l'état courant</td></tr>

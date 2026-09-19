@@ -9,6 +9,7 @@ import { EditorPage } from "./content/EditorPage.js"
 import { DemosPage } from "./content/DemosPage.js"
 import { DocsPage } from "./content/DocsPage.js"
 import { DocsCreatePage } from "./content/DocsCreatePage.js"
+import { DocsFormatPage } from "./content/DocsFormatPage.js"
 import { DocsSharePage } from "./content/DocsSharePage.js"
 import { DocsSourcesPage } from "./content/DocsSourcesPage.js"
 import { DocsComponentsPage } from "./content/DocsComponentsPage.js"
@@ -89,7 +90,7 @@ class SiteBuilder {
       new HomePage(), new PlayerPage(), new EditorPage(), new DemosPage(), new DocsPage(),
       // The documentation pages sit under the hub above and stay out of the navigation, which names
       // only it — see DocsSection for why they are split by question rather than by subject.
-      new DocsCreatePage(example.trim()), new DocsSharePage(), new DocsComponentsPage(), new DocsSourcesPage(),
+      new DocsCreatePage(), new DocsFormatPage(example.trim()), new DocsSharePage(), new DocsComponentsPage(), new DocsSourcesPage(),
       // One page per component, under that hub — see DocsComponentPage.
       ...COMPONENT_DOCS.map(doc => new DocsComponentPage(doc)),
       new FaqPage(), new RoadmapPage(version),

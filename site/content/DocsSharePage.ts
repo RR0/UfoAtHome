@@ -232,7 +232,8 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
     <p>Nowhere to put it yet? <a href="/play/">The player</a> also takes a recording pasted
       straight in, which is enough to check one before publishing it — though a pasted one cannot,
       of course, be shared by link.</p>
-    <p>Don't have a recording at all? <a href="/docs/create/">Make one.</a></p>
+    <p>Don't have a recording at all? <a href="/docs/create/">Make one</a>; what goes in the file
+      is on <a href="/docs/format/">the JSON format</a>'s page.</p>
   </div>
 </section>
 `
@@ -313,7 +314,8 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
     <p>Nulle part où le poser encore ? <a href="/play/">Le lecteur</a> accepte aussi un
       enregistrement collé directement, ce qui suffit à en vérifier un avant de le publier — mais un
       enregistrement collé ne se partage évidemment pas par lien.</p>
-    <p>Pas d'enregistrement du tout ? <a href="/docs/create/">Créez-en un.</a></p>
+    <p>Pas d'enregistrement du tout ? <a href="/docs/create/">Créez-en un</a> ; ce que contient le
+      fichier est sur la page du <a href="/docs/format/">format JSON</a>.</p>
   </div>
 </section>
 `

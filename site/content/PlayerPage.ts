@@ -305,8 +305,8 @@ if (asked) {
           <div id="player-paste-mount" class="player-paste-mount" data-sample='{"version": 1, "timeline": {"keyframes": []}}'></div>
           <button class="btn" type="button" id="player-paste-play">${fr ? "Jouer ce texte" : "Play this"}</button>
           <p class="small">${fr
-            ? "Rien ne quitte votre navigateur. Le format est décrit dans <a href=\"/docs/\">la documentation</a>."
-            : "Nothing leaves your browser. The format is described in <a href=\"/docs/\">the documentation</a>."}</p>
+            ? "Rien ne quitte votre navigateur. Le format est décrit dans <a href=\"/docs/format/\">la documentation du format JSON</a>."
+            : "Nothing leaves your browser. The format is described in <a href=\"/docs/format/\">the JSON format's documentation</a>."}</p>
         </div>
       </details>
     </div>

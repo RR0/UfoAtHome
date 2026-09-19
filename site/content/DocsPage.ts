@@ -5,21 +5,25 @@ import type { PageMeta, SiteLanguage, SitePage } from "../SitePage.js"
  *
  * It used to be one page, and the trouble with that was not its length but that length was the
  * only way through it: somebody who had a recording and wanted a link to send had to scroll past
- * the component bundles and the whole recording format to find two sentences. The four pages below
+ * the component bundles and the whole recording format to find two sentences. The pages below
  * are split by the QUESTION being asked, not by subject — which is why sharing a link and putting
  * it on a page are separate although both are two lines long. They are asked by different people.
+ *
+ * The format is the exception, a page about a THING: every other one talks about the same file, and
+ * needs somewhere to send the reader for what is in it (see DocsFormatPage).
  */
 export class DocsPage implements SitePage {
 
   readonly meta: PageMeta = {
     slug: "docs",
     navLabel: { en: "Documentation", fr: "Documentation" },
+    // The tab reads "Documentation — UFO@home" already (see Layout); the heading names it in full.
     title: { en: "Documentation", fr: "Documentation" },
     description: {
-      en: "Share a reconstruction by link, put one on your own page, drive the three elements, or "
-        + "read the recording format field by field.",
-      fr: "Partager une reconstitution par lien, en poser une sur votre page, piloter les trois "
-        + "éléments, ou lire le format d'enregistrement champ par champ."
+      en: "Create a recording, read its JSON format field by field, share a reconstruction by link "
+        + "or on your own page, drive the components, and see where every piece of data comes from.",
+      fr: "Créer un enregistrement, lire son format JSON champ par champ, partager une reconstitution "
+        + "par lien ou sur votre page, piloter les composants, et voir d'où vient chaque donnée."
     }
   }
 
@@ -29,6 +33,8 @@ export class DocsPage implements SitePage {
       ? [
         ["/docs/create/", "Créer une observation",
           "Dans l'éditeur, ou en écrivant le fichier vous-même. Les deux produisent la même chose : un fichier JSON qui est le vôtre."],
+        ["/docs/format/", "Le format JSON",
+          "Ce que contient ce fichier, champ par champ : l'observation, les témoins, ce qui a été vu, la météo. Avec un exemple entier à taper."],
         ["/docs/share/", "Partager une observation",
           "Un lien à envoyer, ou deux lignes de HTML sur votre propre page. Les deux avec un exemple qui marche, à essayer et à copier."],
         ["/docs/components/", "Les composants",
@@ -39,6 +45,8 @@ export class DocsPage implements SitePage {
       : [
         ["/docs/create/", "Create an observation",
           "In the editor, or by writing the file yourself. Both produce the same thing: one JSON file that is yours."],
+        ["/docs/format/", "The JSON format",
+          "What that file holds, field by field: the observation, the witnesses, what was seen, the weather. With a whole example to type in."],
         ["/docs/share/", "Share an observation",
           "A link to send, or two lines of HTML on your own page. Both with a working example you can try and copy."],
         ["/docs/components/", "The components",
@@ -55,11 +63,11 @@ export class DocsPage implements SitePage {
     return `
 <section class="band hero">
   <div class="wrap">
-    <p class="eyebrow">Documentation</p>
-    <h1>${fr ? "Quatre questions, quatre pages." : "Four questions, four pages."}</h1>
+    <p class="eyebrow">${fr ? "Cinq pages" : "Five pages"}</p>
+    <h1>${fr ? "Documentation d'UFO@home" : "UFO@home documentation"}</h1>
     <p class="lede">${fr
-      ? "Rangées par la question posée plutôt que par sujet. Prenez celle qui est la vôtre."
-      : "Arranged by the question being asked rather than by subject. Take the one that is yours."}</p>
+      ? "Comment créer une observation, ce que contient son fichier, comment la partager ou l'intégrer, et d'où viennent ses données. Rangées par la question posée : prenez celle qui est la vôtre."
+      : "How to create an observation, what its file holds, how to share or embed it, and where its data comes from. Arranged by the question being asked: take the one that is yours."}</p>
   </div>
 </section>
 

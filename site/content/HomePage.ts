@@ -324,7 +324,7 @@ ${carousel}
           what one person saw from where they stood, and a reconstruction can step from one to the
           other — the reader through a picker, the author by placing the others in the scene and
           opening their accounts from there. Two people a hundred metres apart did not see the same
-          thing, and the format is built so that the difference has somewhere to live.</p>
+          thing, and <a href="/docs/format/#several-witnesses-the-manifest">the format</a> is built so that the difference has somewhere to live.</p>
       </div>
     </div>
     </div>
@@ -484,7 +484,7 @@ ${carousel}
           seul. Chacun énonce ce qu'une personne a vu d'où elle se tenait, et une reconstitution
           permet de passer de l'un à l'autre — le lecteur par un sélecteur, l'auteur en plaçant les
           autres dans la scène et en ouvrant leur récit depuis là. Deux personnes à cent mètres l'une
-          de l'autre n'ont pas vu la même chose, et le format est fait pour que cette différence ait
+          de l'autre n'ont pas vu la même chose, et <a href="/docs/format/#several-witnesses-the-manifest">le format</a> est fait pour que cette différence ait
           où se loger.</p>
         </div>
       </div>
