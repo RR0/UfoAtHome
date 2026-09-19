@@ -195,14 +195,14 @@ describe("SightingEditorElement drafting from an account", () => {
   it("writes what a first draft states into the editor", async () => {
     const element = mount()
     answer = () => Promise.resolve({
-      recording: { caseId: "valensole", durationSeconds: 270, time: { year: 1965, month: 7, day: 1 } },
+      recording: { id: "valensole", durationSeconds: 270, time: { year: 1965, month: 7, day: 1 } },
       claims: [{ path: "time.year", basis: "stated" as const, rationale: "le 1er juillet 1965" }],
       gaps: ["the account gives no heading"]
     })
 
     await draft(element, "Maurice Masse, 1er juillet 1965, 4 minutes 30.")
 
-    expect(element.sightingData.caseId).toBe("valensole")
+    expect(element.sightingData.id).toBe("valensole")
     expect(element.sightingData.durationSeconds).toBe(270)
     // Wrapped, because the claim gave that value a rationale — the file says where it came from.
     expect(element.sightingData.time).toMatchObject({
@@ -215,7 +215,7 @@ describe("SightingEditorElement drafting from an account", () => {
     // said, and it does not change because somebody read it. Stripped rather than trusted absent.
     const element = mount()
     answer = () => Promise.resolve({
-      recording: { caseId: "valensole", description: "A summary of the reconstruction." },
+      recording: { id: "valensole", description: "A summary of the reconstruction." },
       claims: [],
       gaps: []
     })
@@ -224,7 +224,7 @@ describe("SightingEditorElement drafting from an account", () => {
 
     expect(field<HTMLTextAreaElement>(element, "description").value).toBe("Maurice Masse, 1er juillet 1965.")
     expect(element.sightingData.description).toBe("Maurice Masse, 1er juillet 1965.")
-    expect(element.sightingData.caseId).toBe("valensole")
+    expect(element.sightingData.id).toBe("valensole")
   })
 
   it("leaves alone what the account is silent about", async () => {
@@ -232,25 +232,25 @@ describe("SightingEditorElement drafting from an account", () => {
     const element = mount()
     type(element, "lat", "43.837")
     type(element, "lng", "5.993")
-    answer = () => Promise.resolve({ recording: { caseId: "valensole" }, claims: [], gaps: [] })
+    answer = () => Promise.resolve({ recording: { id: "valensole" }, claims: [], gaps: [] })
 
     await draft(element, "The account.")
 
     expect(element.sightingData.place?.[0]).toMatchObject({ lat: 43.837, lng: 5.993 })
-    expect(element.sightingData.caseId).toBe("valensole")
+    expect(element.sightingData.id).toBe("valensole")
   })
 
   it("reads the account whole every time, with no conversation behind it", async () => {
     const element = mount()
-    answer = () => Promise.resolve({ recording: { caseId: "a" }, claims: [], gaps: [] })
+    answer = () => Promise.resolve({ recording: { id: "a" }, claims: [], gaps: [] })
     await draft(element, "The account.")
-    answer = () => Promise.resolve({ recording: { caseId: "b" }, claims: [], gaps: [] })
+    answer = () => Promise.resolve({ recording: { id: "b" }, claims: [], gaps: [] })
     await draft(element, "The account, reworded.")
 
     expect(asked.map(request => request.ask)).toEqual(["The account.", "The account, reworded."])
     // What is already settled goes along, so a draft does not overrule a geocoded place or a
     // chosen instrument — see NarrativeRequest.current.
-    expect(asked[1].current?.caseId).toBe("a")
+    expect(asked[1].current?.id).toBe("a")
   })
 
   it("groups the report by basis, guesses first, and marks what nothing could settle", async () => {
@@ -288,11 +288,11 @@ describe("SightingEditorElement drafting from an account", () => {
   it("writes each basis into the recording, so the file says which values were guessed", async () => {
     const element = mount()
     answer = () => Promise.resolve({
-      recording: { durationSeconds: 120, utcOffsetHours: 1, caseId: "landevennec" },
+      recording: { durationSeconds: 120, utcOffsetHours: 1, id: "landevennec" },
       claims: [
         { path: "durationSeconds", basis: "assumed" as const, rationale: "\"quelques mn\" gives no number" },
         { path: "utcOffsetHours", basis: "derived" as const, rationale: "France had no summer time in 1974" },
-        { path: "caseId", basis: "stated" as const, rationale: "boulanger à Landévennec" }
+        { path: "id", basis: "stated" as const, rationale: "boulanger à Landévennec" }
       ],
       gaps: []
     })
@@ -308,7 +308,7 @@ describe("SightingEditorElement drafting from an account", () => {
     })
     // A stated value keeps its rationale, which is the account's own words, but not a "basis" that
     // is already the default.
-    expect(written.caseId).toEqual({ value: "landevennec", rationale: "boulanger à Landévennec" })
+    expect(written.id).toEqual({ value: "landevennec", rationale: "boulanger à Landévennec" })
   })
 
   it("lets a guess expire the moment the author types over it", async () => {
@@ -429,7 +429,7 @@ describe("SightingEditorElement drafting from an account", () => {
 
   it("stays available after a draft, since the account is still there to be reworded", async () => {
     const element = mount()
-    answer = () => Promise.resolve({ recording: { caseId: "a" }, claims: [], gaps: [] })
+    answer = () => Promise.resolve({ recording: { id: "a" }, claims: [], gaps: [] })
 
     await draft(element, "The account.")
 

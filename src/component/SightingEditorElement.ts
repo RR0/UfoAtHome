@@ -382,7 +382,6 @@ export class SightingEditorElement extends HTMLElement {
   private edtfMode = false
   private readonly obsEndTimeInput: HTMLInputElement
   private readonly witnessIdInput: HTMLInputElement
-  private readonly witnessDirNameInput: HTMLInputElement
   private readonly witnessTitleInput: HTMLInputElement
   private readonly witnessLastNameInput: HTMLInputElement
   private readonly witnessFirstNamesInput: HTMLInputElement
@@ -390,7 +389,7 @@ export class SightingEditorElement extends HTMLElement {
   private readonly witnessOccupationInput: HTMLInputElement
   private readonly testimonySourceSelect: HTMLSelectElement
   private readonly testimonyFollowedUpSelect: HTMLSelectElement
-  private readonly caseIdInput: HTMLInputElement
+  private readonly sightingIdInput: HTMLInputElement
   private readonly descriptionInput: HTMLTextAreaElement
   private readonly tagsInput: HTMLInputElement
   private readonly cloudEditor: ReturnType<typeof setupCloudEditor>
@@ -486,7 +485,6 @@ export class SightingEditorElement extends HTMLElement {
   private readonly labelObservationTime: HTMLElement
   private readonly labelObservationEndTime: HTMLElement
   private readonly labelWitnessId: HTMLElement
-  private readonly labelWitnessDirName: HTMLElement
   private readonly labelWitnessTitle: HTMLElement
   private readonly labelWitnessLastName: HTMLElement
   private readonly labelWitnessFirstNames: HTMLElement
@@ -494,7 +492,7 @@ export class SightingEditorElement extends HTMLElement {
   private readonly labelWitnessOccupation: HTMLElement
   private readonly labelTestimonySource: HTMLElement
   private readonly labelTestimonyFollowedUp: HTMLElement
-  private readonly labelCaseId: HTMLElement
+  private readonly labelSightingId: HTMLElement
   private readonly labelDescription: HTMLElement
   private readonly labelTags: HTMLElement
   private readonly labelImportFile: HTMLElement
@@ -976,7 +974,6 @@ export class SightingEditorElement extends HTMLElement {
     this.obsEndTimeQualifier = this.shadow.getElementById("obs-end-time-qualifier") as HTMLSelectElement
     this.edtfModeButton = this.shadow.getElementById("edtf-mode") as HTMLButtonElement
     this.witnessIdInput = this.shadow.getElementById("witnessId") as HTMLInputElement
-    this.witnessDirNameInput = this.shadow.getElementById("witnessDirName") as HTMLInputElement
     this.witnessTitleInput = this.shadow.getElementById("witnessTitle") as HTMLInputElement
     this.witnessLastNameInput = this.shadow.getElementById("witnessLastName") as HTMLInputElement
     this.witnessFirstNamesInput = this.shadow.getElementById("witnessFirstNames") as HTMLInputElement
@@ -984,7 +981,7 @@ export class SightingEditorElement extends HTMLElement {
     this.witnessOccupationInput = this.shadow.getElementById("witnessOccupation") as HTMLInputElement
     this.testimonySourceSelect = this.shadow.getElementById("testimonySource") as HTMLSelectElement
     this.testimonyFollowedUpSelect = this.shadow.getElementById("testimonyFollowedUp") as HTMLSelectElement
-    this.caseIdInput = this.shadow.getElementById("caseId") as HTMLInputElement
+    this.sightingIdInput = this.shadow.getElementById("sightingId") as HTMLInputElement
     this.descriptionInput = this.shadow.getElementById("description") as HTMLTextAreaElement
     this.tagsInput = this.shadow.getElementById("tags") as HTMLInputElement
     this.cloudCoverInput = this.shadow.getElementById("cloudCover") as HTMLInputElement
@@ -1086,7 +1083,6 @@ export class SightingEditorElement extends HTMLElement {
     this.labelObservationTime = this.shadow.getElementById("label-observation-time")!
     this.labelObservationEndTime = this.shadow.getElementById("label-observation-end-time")!
     this.labelWitnessId = this.shadow.getElementById("label-witness-id")!
-    this.labelWitnessDirName = this.shadow.getElementById("label-witness-dir-name")!
     this.labelWitnessTitle = this.shadow.getElementById("label-witness-title")!
     this.labelWitnessLastName = this.shadow.getElementById("label-witness-last-name")!
     this.labelWitnessFirstNames = this.shadow.getElementById("label-witness-first-names")!
@@ -1094,7 +1090,7 @@ export class SightingEditorElement extends HTMLElement {
     this.labelWitnessOccupation = this.shadow.getElementById("label-witness-occupation")!
     this.labelTestimonySource = this.shadow.getElementById("label-testimony-source")!
     this.labelTestimonyFollowedUp = this.shadow.getElementById("label-testimony-followed-up")!
-    this.labelCaseId = this.shadow.getElementById("label-case-id")!
+    this.labelSightingId = this.shadow.getElementById("label-sighting-id")!
     this.labelDescription = this.shadow.getElementById("label-description")!
     this.labelTags = this.shadow.getElementById("label-tags")!
     this.labelImportFile = this.shadow.getElementById("label-import-file")!
@@ -1531,13 +1527,12 @@ export class SightingEditorElement extends HTMLElement {
     this.obsEndTimeInput.addEventListener("blur", () => this.validateEdtfTimeInput(this.obsEndTimeInput))
     for (const input of [
       this.witnessIdInput,
-      this.witnessDirNameInput,
       this.witnessTitleInput,
       this.witnessLastNameInput,
       this.witnessFirstNamesInput,
       this.witnessAgeInput,
       this.witnessOccupationInput,
-      this.caseIdInput
+      this.sightingIdInput
     ]) {
       input.addEventListener("input", () => this.updateWitnessMetadata())
     }
@@ -2642,7 +2637,7 @@ export class SightingEditorElement extends HTMLElement {
     })
   }
 
-  /** Builds a People object from the 5 witness inputs and writes it (plus caseId) straight onto
+  /** Builds a People object from the 4 witness inputs and writes it (plus the sighting's own id) straight onto
    * the sighting — legal since Sighting.ts made these fields non-readonly for exactly this
    * purpose (see its own doc comment). firstNames is comma-separated free text, parsed exactly
    * like updateTags(). If every witness field ends up empty, `witness` is cleared to `undefined`
@@ -2656,13 +2651,12 @@ export class SightingEditorElement extends HTMLElement {
       .filter(name => name.length > 0)
     const witness: People = {
       id: this.stringOrUndefined(this.witnessIdInput.value),
-      dirName: this.stringOrUndefined(this.witnessDirNameInput.value),
       title: this.stringOrUndefined(this.witnessTitleInput.value),
       lastName: this.stringOrUndefined(this.witnessLastNameInput.value),
       firstNames: firstNames.length > 0 ? firstNames : undefined
     }
     sighting.witness = Object.values(witness).some(value => value !== undefined) ? witness : undefined
-    sighting.caseId = this.stringOrUndefined(this.caseIdInput.value)
+    sighting.id = this.stringOrUndefined(this.sightingIdInput.value)
     this.updateTestimony()
     this.ufoElement.refresh()
   }
@@ -4078,11 +4072,10 @@ export class SightingEditorElement extends HTMLElement {
   private syncWitnessMetadataFields(): void {
     const sighting = this.ufoElement.sighting
     this.witnessIdInput.value = sighting.witness?.id ?? ""
-    this.witnessDirNameInput.value = sighting.witness?.dirName ?? ""
     this.witnessTitleInput.value = sighting.witness?.title ?? ""
     this.witnessLastNameInput.value = sighting.witness?.lastName ?? ""
     this.witnessFirstNamesInput.value = sighting.witness?.firstNames?.join(", ") ?? ""
-    this.caseIdInput.value = sighting.caseId ?? ""
+    this.sightingIdInput.value = sighting.id ?? ""
     this.witnessAgeInput.value = sighting.testimony?.witnessAgeYears?.toString() ?? ""
     this.witnessOccupationInput.value = this.said.read(sighting.testimony?.witnessOccupation) ?? ""
     this.testimonySourceSelect.value = sighting.testimony?.source ?? ""
@@ -7318,12 +7311,11 @@ export class SightingEditorElement extends HTMLElement {
     }
     this.refreshDecorList() // decor option labels embed decorKindSelect's own text, just updated above
     this.labelWitnessId.textContent = messages.witnessId
-    this.labelWitnessDirName.textContent = messages.witnessDirName
     this.labelWitnessTitle.textContent = messages.witnessTitle
     this.labelWitnessLastName.textContent = messages.witnessLastName
     this.labelWitnessFirstNames.textContent = messages.witnessFirstNames
     this.witnessFirstNamesInput.placeholder = messages.tagsPlaceholder
-    this.labelCaseId.textContent = messages.caseId
+    this.labelSightingId.textContent = messages.sightingId
     this.labelDescription.textContent = messages.description
     this.labelTags.textContent = messages.tags
     this.tagsInput.placeholder = messages.tagsPlaceholder

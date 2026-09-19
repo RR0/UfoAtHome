@@ -49,8 +49,8 @@ const APP_EDITOR_URL = `${APP_HOME_URL}/edit/`
  * The `src` attribute accepts either a CASE (RR0's `case.json`, whose events of type `sighting`
  * point at each witness's recording — see CaseFile) or one witness's `sighting.json` directly.
  * The `witnessUrls` property takes the list of recordings itself. No separately-maintained labels
- * either way, since a witness's display name (`SightingRecordingJson.witness`) and the shared
- * `caseId` linking them together already live inside each witness's own file. Every listed witness's recording
+ * either way, since a witness's display name (`SightingRecordingJson.witness`) lives inside each
+ * witness's own file, and what gathers them is the case, which a recording never names. Every listed witness's recording
  * is fetched upfront (to read its name), not lazily on selection — fine at the scale a case's
  * witness list actually has (a handful of small JSON files).
  *
@@ -110,6 +110,9 @@ export class SightingElement extends HTMLElement {
   private readonly supportsPopover = typeof (HTMLElement.prototype as { showPopover?: unknown }).showPopover === "function"
 
   private entries: WitnessEntry[] = []
+  /** How the case these recordings were read from names itself, when they were read from one: the
+   * recordings cannot say, since a testimony does not name its case (see Sighting.id). */
+  private caseTitle?: string
   private currentSrc?: string
   private infoOpen = false
   private creditsOpen = false
@@ -306,9 +309,9 @@ export class SightingElement extends HTMLElement {
       // the same case.json works read from its dossier's page and from anywhere else.
       const urls = CaseFile.sightingUrls(json, new URL(url, location.href).href)
       if (urls.length === 0) throw new Error(`${url} is a case with no sighting event: no recording to show`)
-      await this.loadWitnessUrls(urls)
+      await this.loadWitnessUrls(urls, json.title ?? json.id)
     } else {
-      this.setEntries([{ src: url, sighting: json as SightingRecordingJson }])
+      this.setEntries([{ src: url, sighting: json as SightingRecordingJson }], undefined)
     }
   }
 
@@ -327,7 +330,7 @@ export class SightingElement extends HTMLElement {
 
   set sightingData(sighting: SightingRecordingJson) {
     this.currentSrc = ""
-    this.setEntries([{ src: "", sighting }])
+    this.setEntries([{ src: "", sighting }], undefined)
   }
 
   get witnessUrls(): string[] {
@@ -338,18 +341,18 @@ export class SightingElement extends HTMLElement {
     void this.loadWitnessUrls(urls)
   }
 
-  private async loadWitnessUrls(urls: string[]): Promise<void> {
+  private async loadWitnessUrls(urls: string[], caseTitle?: string): Promise<void> {
     const entries = await Promise.all(
       urls.map(async (src): Promise<WitnessEntry> => (
         { src, sighting: (await SightingFetch.json(src)) as SightingRecordingJson }
       ))
     )
-    this.setEntries(entries)
+    this.setEntries(entries, caseTitle)
   }
 
-  private setEntries(entries: WitnessEntry[]): void {
+  private setEntries(entries: WitnessEntry[], caseTitle: string | undefined): void {
     this.entries = entries
-    this.warnOnMismatchedCaseIds(entries)
+    this.caseTitle = caseTitle
 
     this.toolbarElement.hidden = entries.length === 0
     const showSelect = entries.length > 1
@@ -430,16 +433,6 @@ export class SightingElement extends HTMLElement {
     }
   }
 
-  /** Cases are grouped by listing several witnesses together — warns (doesn't block) if their
-   * declared caseIds actually disagree, since that likely means the page author listed
-   * unrelated recordings together by mistake. Witnesses with no caseId at all are ignored. */
-  private warnOnMismatchedCaseIds(entries: WitnessEntry[]): void {
-    const caseIds = new Set(entries.map(entry => entry.sighting.caseId).filter((id): id is string => id !== undefined))
-    if (caseIds.size > 1) {
-      console.warn(`<rr0-sighting>: witnesses declare different case ids (${[...caseIds].join(", ")}) — they may not belong to the same case.`)
-    }
-  }
-
   private selectWitness(src: string): void {
     const entry = this.entries.find(e => e.src === src)
     if (!entry) return
@@ -510,14 +503,14 @@ export class SightingElement extends HTMLElement {
   /** Picks the best available display string out of a People reference — a full name (built from
    * firstNames+lastName) reads more naturally than a raw title in the common case, but `title` is
    * honored first since it's the field a caller sets when they explicitly want a specific display
-   * string (e.g. a name that doesn't decompose cleanly into first/last). `id`/`dirName` are
-   * last-resort, machine-oriented fallbacks — better than nothing, not meant to be end-user
+   * string (e.g. a name that doesn't decompose cleanly into first/last). `id` is the
+   * last-resort, machine-oriented fallback — better than nothing, not meant to be end-user
    * copy. Returns undefined (letting the caller fall back to entry.src) only when witness itself
    * is undefined or empty. */
   private witnessDisplayName(witness?: People): string | undefined {
     if (!witness) return undefined
     const fullName = [...(witness.firstNames ?? []), witness.lastName].filter(Boolean).join(" ")
-    return witness.title || fullName || witness.id || witness.dirName
+    return witness.title || fullName || witness.id
   }
 
   /**
@@ -805,9 +798,13 @@ export class SightingElement extends HTMLElement {
     const entry = this.entries.find(e => e.src === this.currentSrc)
     this.infoObservationList.innerHTML = ""
     if (entry) {
-      // Date, place, case and tags only while the strip under the render isn't already stating
-      // them — see toggleLabels. The description is never dropped: it is the one thing the strip
-      // refuses to carry, because prose doesn't fit on a chip.
+      // The case always: the strip reads a recording, and a recording does not name its case.
+      if (this.caseTitle) {
+        this.appendInfoRow(this.infoObservationList, this.messages.case, this.caseTitle)
+      }
+      // Date, place and tags only while the strip under the render isn't already stating them —
+      // see toggleLabels. The description is never dropped: it is the one thing the strip refuses
+      // to carry, because prose doesn't fit on a chip.
       if (!this.labelsShown) {
         const date = this.formatDate(entry.sighting)
         if (date) {
@@ -816,9 +813,6 @@ export class SightingElement extends HTMLElement {
         const location = this.formatLocation(entry.sighting)
         if (location) {
           this.appendInfoRow(this.infoObservationList, this.messages.location, location)
-        }
-        if (entry.sighting.caseId) {
-          this.appendInfoRow(this.infoObservationList, this.messages.case, entry.sighting.caseId)
         }
       }
       const description = this.said.read(entry.sighting.description)

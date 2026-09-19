@@ -36,7 +36,7 @@ export type TestimonySource =
  * stored number beside them would be free to disagree with them.
  *
  * That count is the account's own claim and may be wrong. It is also not the CASE's count: a case
- * gathers one recording per witness who gave an account (see Sighting.caseId), so four people in a
+ * gathers one recording per witness who gave an account (see CaseFile), so four people in a
  * car who produced one testimony between them are four in this recording and one in that case.
  * Evaluating a case is a separate exercise from evaluating a testimony, and each reads its own.
  *

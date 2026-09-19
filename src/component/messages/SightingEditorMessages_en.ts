@@ -100,7 +100,6 @@ export const sightingEditorMessages_en: SightingEditorMessages = {
   observationEndTimeHint:
     "EDTF — e.g. 1965-07-01T05:10, 2025-06? (uncertain), 2025~ (approximate), or just 05:10 if the date isn't known",
   presetsGroupLabel: "UFO shape",
-  witnessDirName: "Dir name",
   description: "Description",
   tagsPlaceholder: "comma-separated",
   weather: "Weather",

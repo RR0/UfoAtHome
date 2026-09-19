@@ -23,10 +23,9 @@ export const html = `
     <label><span id="label-import-file">Load JSON file</span> <input id="import-file" type="file" accept="application/json,.json"/></label>
     <label><span id="label-import-url">Or load from URL</span> <input id="import-url" type="url" placeholder="https://…/sighting.json"/></label>
     <button id="import-url-button" type="button">Load</button>
-    <!-- The case, not the witness: every witness's own recording of the same sighting carries the
-         same caseId, which is exactly what lets a page group them (see Sighting.caseId). Putting it
-         beside a witness's name suggested it was theirs. -->
-    <label><span id="label-case-id">Case ID</span> <input id="caseId" type="text"/></label>
+    <!-- The observation's own id, not the witness's nor the case's: what a case and the
+         interpretations filed in it name this testimony by (see Sighting.id). -->
+    <label><span id="label-sighting-id">ID</span> <input id="sightingId" type="text" placeholder="1964-04-24-ZamoraLonnie"/></label>
     <label><span id="label-tags">Tags</span> <input id="tags" type="text" placeholder="comma-separated"/></label>
     <!-- The named moments of the account (see Milestone) — with the observation, because that is
          what they belong to: they are how the testimony READS, not anything about a shape. Added at
@@ -68,7 +67,6 @@ export const html = `
 <section class="group-panel" id="group-witness" aria-labelledby="label-witness-group" hidden>
   <div class="toolbar">
     <label><span id="label-witness-id">ID</span> <input id="witnessId" type="text"/></label>
-    <label><span id="label-witness-dir-name">Dir name</span> <input id="witnessDirName" type="text"/></label>
     <label><span id="label-witness-title">Title</span> <input id="witnessTitle" type="text"/></label>
     <label><span id="label-witness-last-name">Last name</span> <input id="witnessLastName" type="text"/></label>
     <label><span id="label-witness-first-names">First names</span> <input id="witnessFirstNames" type="text" placeholder="comma-separated"/></label>
@@ -607,7 +605,7 @@ button.preset[aria-pressed="true"] {
 #milestoneNote {
   min-width: 22em;
 }
-#witnessId, #witnessDirName, #witnessTitle, #witnessLastName, #witnessFirstNames, #caseId, #tags, #shapeTitle, #decorTitle {
+#witnessId, #witnessTitle, #witnessLastName, #witnessFirstNames, #sightingId, #tags, #shapeTitle, #decorTitle {
   width: 10em;
 }
 /* The whole disclosure sits on its own line: five stacked rows inside a row of inline labels

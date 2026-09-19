@@ -202,7 +202,6 @@ export interface SightingEditorMessages extends SightingLabels {
   observationEndTimeHint: string
   /** aria-label on the Oval/Polygon preset button group. */
   presetsGroupLabel: string
-  witnessDirName: string
   description: string
   tagsPlaceholder: string
   weather: string

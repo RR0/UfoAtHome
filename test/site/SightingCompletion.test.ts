@@ -82,7 +82,7 @@ describe("SightingCompletion", () => {
 
     it("declines where the value is free — a number, a name, a URL", () => {
       expect(at('{ "weather": { "cloudCover": | } }')).toBe(null)
-      expect(at('{ "caseId": "|" }')).toBe(null)
+      expect(at('{ "id": "|" }')).toBe(null)
     })
 
     it("tells a value position from a key position by the colon behind the caret", () => {
@@ -151,7 +151,7 @@ describe("SightingCompletion", () => {
   // Typing prose in a string, or sitting mid-object with nothing to go on, should not throw a
   // popup over the line being written — only an explicit Ctrl-Space asks for one there.
   it("keeps quiet where nothing was asked and nothing obviously follows", () => {
-    expect(at('{ "version": 1, "caseId": "x" |}', false)).toBe(null)
+    expect(at('{ "version": 1, "id": "x" |}', false)).toBe(null)
   })
 
   describe("in an excerpt of a recording", () => {

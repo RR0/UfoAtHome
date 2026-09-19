@@ -251,17 +251,20 @@ export function sightingDurationBlockedReason(event: SightingEvent): "imprecise"
 /**
  * A recorded UFO sighting: the real-world metadata (time/place) plus a
  * Timeline (the recording's own internal millisecond clock), a witness
- * reference, and — for cases with several witnesses, each with their own
- * recording — a shared case id so a page can group and label them (see
- * SightingElement).
+ * reference, and an id of its own.
+ *
+ * A recording knows nothing of the case it belongs to. The case names its testimonies (its
+ * `sighting` events, see CaseFile), and the analyses of them name them too, by this id: a
+ * reference points from what interprets to what is interpreted, never back. A testimony written
+ * before anyone filed it, or filed in two places, is the same file either way.
  *
  * `witness` is a lightweight `People` reference (deliberately no PII beyond
- * an id/dirName/title/name — no email/phone/address; see
+ * an id/title/name — no email/phone/address; see
  * cms/src/people/witness/WitnessReplacer.ts for the site's existing
  * anonymization pattern for anything more sensitive). Omit it for anonymous
  * witnesses.
  *
- * `witness`/`caseId` are not readonly, unlike `event`/`timeline`/`witnessTrack`
+ * `id`/`witness` are not readonly, unlike `event`/`timeline`/`witnessTrack`
  * above — same reasoning as `weather` below: SightingEditorElement's metadata toolbar edits these
  * directly, field-by-field, rather than replacing the whole Sighting.
  */
@@ -275,7 +278,11 @@ export class Sighting {
      * recording that says nothing about sound, which is most of them: see resolveSoundAt. */
     readonly soundTrack: SoundTrack,
     public witness?: People,
-    public caseId?: string,
+    /** Which testimony this is, unique across every recording anywhere, so that a case and the
+     * interpretations filed in it can name it: the day it happened, then who saw it
+     * ("1964-04-24-ZamoraLonnie"), or where when the witness is anonymous ("1964-04-24-Socorro").
+     * Absent for a recording nobody has referred to yet. */
+    public id?: string,
     /** Legacy fallback only, kept for old recordings made before weatherTrack existed — see
      * resolveWeatherAt, which prefers weatherTrack (interpolated) and only falls back to this
      * static field when the track has no keyframes at all. Not readonly, same "reassigned
@@ -283,7 +290,7 @@ export class Sighting {
      * carry instead (see SightingEditorElement.applyWeatherAtPlayhead). */
     public weather?: Weather,
     /** Static scenery (buildings/trees/streetlights/vehicles/other witnesses) — see Decor.ts.
-     * Not readonly, same "reassigned wholesale on edit" reasoning as witness/caseId above:
+     * Not readonly, same "reassigned wholesale on edit" reasoning as id/witness above:
      * SightingEditorElement's Decor group adds/removes/edits entries by replacing this array. */
     public decor: DecorObject[] = [],
     /** Set when every weatherTrack keyframe came from a real meteorological record looked up from
@@ -341,7 +348,7 @@ export class Sighting {
    *
    * A field of its own rather than more of `witness`, which is one person's identity and is
    * structurally aligned with @rr0/data's own PeopleJson (see People). Not readonly, same
-   * "reassigned wholesale on edit" reasoning as witness and caseId above.
+   * "reassigned wholesale on edit" reasoning as id and witness above.
    */
   testimony?: Testimony
 
@@ -354,7 +361,7 @@ export class Sighting {
    * be wrong, which is exactly why it belongs to their recording and not to some census.
    *
    * Deliberately NOT the same number as the case's. A case gathers one recording per witness who
-   * gave an account (see caseId), and four people in a car who produced one written testimony
+   * gave an account (see CaseFile), and four people in a car who produced one written testimony
    * between them are four here and one there. Both are true of different things, and evaluating a
    * case is a separate exercise from evaluating a testimony.
    *

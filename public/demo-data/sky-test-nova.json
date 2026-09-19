@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "caseId": "sky-test-nova",
+  "id": "sky-test-nova",
   "description": {
     "fr": "Un ciel d'essai pour une étoile nouvelle : la nova de l'Aigle, vue de Paris le 10 juin 1918 à 23 h 30, à 29° de hauteur au sud-est, de magnitude 0,2, presque aussi brillante que Véga. La veille, rien ne brillait à cet endroit. Son éclat n'est pas calculé par une formule : il est interpolé entre les observations de l'AAVSO regroupées par Strope, Schaefer et Henden (2010), et rien n'est dessiné avant la première ni après la dernière. La ligne « Ciel : » de l'éditeur la nomme, donne sa magnitude et sa position, et le bouton 🌟 tourne le témoin vers elle.",
     "en": "A test sky for a new star: Nova Aquilae, seen from Paris on 10 June 1918 at 23:30, 29° up in the south-east, magnitude 0.2, almost as bright as Vega. The night before, nothing shone there. Its brightness is not computed from a formula: it is interpolated between the AAVSO observations binned by Strope, Schaefer and Henden (2010), and nothing is drawn before the first of them or after the last. The editor's “Sky:” line names it and gives its magnitude and position, and the 🌟 button turns the witness towards it."

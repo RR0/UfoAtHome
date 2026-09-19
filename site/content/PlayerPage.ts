@@ -93,9 +93,9 @@ const say = (text, kind) => {
 /**
  * What to call the observation now on screen.
  *
- * The case id first, because that is the name a case is filed and argued under; the witness's own
- * name next, since a single-witness recording is known by them; and the file's own name last,
- * which at least distinguishes one recording from another. A recording that says none of the three
+ * A case by its title, because that is the name a case is filed and argued under; a recording by
+ * its witness's name, since a testimony is known by who gave it (it does not name its case); then
+ * its own id, and the file's own name last, which at least distinguishes one recording from another. A recording that says none of these
  * keeps the page's general title, which is then the accurate one.
  */
 const titleOf = (sighting, source) => {
@@ -105,8 +105,8 @@ const titleOf = (sighting, source) => {
   if (sighting && Array.isArray(sighting.events) && !sighting.timeline) return sighting.title || sighting.id || undefined
   const witness = sighting && sighting.witness
   const fullName = witness && [...(witness.firstNames || []), witness.lastName].filter(Boolean).join(" ")
-  return (sighting && sighting.caseId)
-    || (witness && (witness.title || fullName || witness.id))
+  return (witness && (witness.title || fullName || witness.id))
+    || (sighting && sighting.id)
     || (source && decodeURIComponent(source.split("/").pop() || "").replace(/\.json$/, ""))
     || undefined
 }

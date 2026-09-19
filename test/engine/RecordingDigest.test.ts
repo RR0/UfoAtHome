@@ -7,7 +7,7 @@ import type { SightingRecordingJson } from "../../src/engine/persistence/sightin
 const recording = (): SightingRecordingJson => ({
   version: 1,
   time: { year: 1964, month: 4, day: 24, hour: 17, minute: 45 },
-  caseId: "socorro",
+  id: "socorro",
   witness: { id: "zamora", title: "Lonnie Zamora" },
   timeline: {
     keyframes: [
@@ -40,7 +40,7 @@ describe("RecordingDigest", () => {
     const digest = RecordingDigest.of(recording())
 
     expect(digest?.time).toEqual({ year: 1964, month: 4, day: 24, hour: 17, minute: 45 })
-    expect(digest?.caseId).toBe("socorro")
+    expect(digest?.id).toBe("socorro")
     expect(digest?.witness).toEqual({ id: "zamora", title: "Lonnie Zamora" })
   })
 
@@ -146,7 +146,7 @@ describe("DraftRecording", () => {
   })
 
   it("leaves a draft with no timeline and no decor exactly as it is", () => {
-    expect(DraftRecording.loadable({ caseId: "valensole" })).toEqual({ caseId: "valensole" })
+    expect(DraftRecording.loadable({ id: "valensole" })).toEqual({ id: "valensole" })
   })
 
   it("leaves a vehicle the witness is inside at their own position", () => {

@@ -32,6 +32,10 @@ import { Provenance } from "./Provenance.js"
  */
 export interface SightingRecordingJson {
   version: 1
+  /** Which testimony this is, unique across every recording anywhere: the day it happened, then
+   * who saw it ("1964-04-24-ZamoraLonnie"), or where for an anonymous witness. What a case and its
+   * interpretations name it by — see Sighting.id. */
+  id?: string
   time?: SightingTime
   /** See SightingEvent.endTime. */
   endTime?: SightingTime
@@ -46,10 +50,6 @@ export interface SightingRecordingJson {
   witness?: People
   /** Who saw it and how their account travelled — see Testimony, and Sighting.testimony. */
   testimony?: Testimony
-  /** See Sighting.caseId — shared by every witness's own sighting.json for the same case, so
-   * a page (e.g. SightingElement) can group and label them — the case's own `id` (see
-   * CaseJson), whose sighting events list them. */
-  caseId?: string
   /** See SightingEvent.description — a plain string, or one per language. */
   description?: SaidText
   /** See SightingEvent.tags. */
@@ -107,6 +107,7 @@ export function plainSightingJson(sighting: Sighting): SightingRecordingJson {
   SightingShapes.toAim(sighting)
   return {
     version: 1,
+    id: sighting.id,
     time: sighting.event.time,
     endTime: sighting.event.endTime,
     durationSeconds: sighting.event.durationSeconds,
@@ -115,7 +116,6 @@ export function plainSightingJson(sighting: Sighting): SightingRecordingJson {
     place: sighting.event.place,
     witness: sighting.witness,
     testimony: sighting.testimony,
-    caseId: sighting.caseId,
     description: sighting.event.description,
     tags: sighting.event.tags,
     timeline: sighting.timeline.toJSON(),
@@ -158,8 +158,15 @@ function fromPlainSightingJson(json: SightingRecordingJson): Sighting {
     json.witnessTrack ? ObserverTrack.fromJSON(json.witnessTrack) : new ObserverTrack(),
     json.weatherTrack ? WeatherTrack.fromJSON(json.weatherTrack) : new WeatherTrack(),
     json.soundTrack ? SoundTrack.fromJSON(json.soundTrack) : new SoundTrack(),
-    json.witness,
-    json.caseId,
+    // Only the fields a person reference has: what older files also wrote there (an RR0 directory
+    // beside the id) is not read, so that saving one does not carry it on.
+    json.witness && {
+      id: json.witness.id,
+      title: json.witness.title,
+      lastName: json.witness.lastName,
+      firstNames: json.witness.firstNames
+    },
+    json.id,
     json.weather,
     json.decor ?? [],
     json.weatherSource,

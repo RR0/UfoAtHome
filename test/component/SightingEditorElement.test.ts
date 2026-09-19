@@ -603,24 +603,30 @@ describe("SightingEditorElement metadata fields", () => {
     expect(element.sightingData.endTime).toBeUndefined()
   })
 
-  it("writes the 5 witness fields and caseId into a single witness object", () => {
+  it("writes the 4 witness fields into a single witness object, and the sighting's own id beside it", () => {
     const element = mount()
     const shadow = element.shadowRoot!
-    setInput(shadow, "witnessId", "chiles")
-    setInput(shadow, "witnessDirName", "people/c/ChilesClarence")
+    setInput(shadow, "witnessId", "ChilesClarence")
     setInput(shadow, "witnessTitle", "Clarence Chiles")
     setInput(shadow, "witnessLastName", "Chiles")
     setInput(shadow, "witnessFirstNames", "Clarence")
-    setInput(shadow, "caseId", "chiles-whitted")
+    setInput(shadow, "sightingId", "1948-07-24-ChilesClarence")
 
     expect(element.sightingData.witness).toEqual({
-      id: "chiles",
-      dirName: "people/c/ChilesClarence",
+      id: "ChilesClarence",
       title: "Clarence Chiles",
       lastName: "Chiles",
       firstNames: ["Clarence"]
     })
-    expect(element.sightingData.caseId).toBe("chiles-whitted")
+    expect(element.sightingData.id).toBe("1948-07-24-ChilesClarence")
+  })
+
+  it("writes no case: a testimony does not name the case it belongs to", () => {
+    const element = mount()
+    expect(element.shadowRoot!.getElementById("caseId")).toBe(null)
+    expect(element.shadowRoot!.getElementById("witnessDirName")).toBe(null)
+    setInput(element.shadowRoot!, "sightingId", "1948-07-24-ChilesClarence")
+    expect(Object.keys(element.sightingData)).not.toContain("caseId")
   })
 
   it("splits witnessFirstNames on commas, trimming whitespace and dropping empties", () => {
@@ -671,8 +677,8 @@ describe("SightingEditorElement metadata fields", () => {
     element.sightingData = {
       version: 1,
       endTime: { year: 1948, month: 7, day: 24, hour: 3, minute: 0 },
-      witness: { id: "chiles", dirName: "people/c/ChilesClarence", title: "Clarence Chiles", lastName: "Chiles", firstNames: ["Clarence"] },
-      caseId: "chiles-whitted",
+      id: "1948-07-24-ChilesClarence",
+      witness: { id: "ChilesClarence", title: "Clarence Chiles", lastName: "Chiles", firstNames: ["Clarence"] },
       description: "Bright light hovering over the field.",
       tags: ["hovering", "night"],
       timeline: { keyframes: [] }
@@ -680,12 +686,11 @@ describe("SightingEditorElement metadata fields", () => {
 
     const shadow = element.shadowRoot!
     expect((shadow.getElementById("obs-end-time") as HTMLInputElement).value).toBe("1948-07-24T03:00")
-    expect((shadow.getElementById("witnessId") as HTMLInputElement).value).toBe("chiles")
-    expect((shadow.getElementById("witnessDirName") as HTMLInputElement).value).toBe("people/c/ChilesClarence")
+    expect((shadow.getElementById("witnessId") as HTMLInputElement).value).toBe("ChilesClarence")
     expect((shadow.getElementById("witnessTitle") as HTMLInputElement).value).toBe("Clarence Chiles")
     expect((shadow.getElementById("witnessLastName") as HTMLInputElement).value).toBe("Chiles")
     expect((shadow.getElementById("witnessFirstNames") as HTMLInputElement).value).toBe("Clarence")
-    expect((shadow.getElementById("caseId") as HTMLInputElement).value).toBe("chiles-whitted")
+    expect((shadow.getElementById("sightingId") as HTMLInputElement).value).toBe("1948-07-24-ChilesClarence")
     expect((shadow.getElementById("description") as HTMLTextAreaElement).value).toBe("Bright light hovering over the field.")
     expect((shadow.getElementById("tags") as HTMLInputElement).value).toBe("hovering, night")
   })
@@ -2899,11 +2904,11 @@ describe("SightingEditorElement parameter summary", () => {
 
   it("states only what is set, so it reads as a statement rather than a second copy of the form", () => {
     const element = mount()
-    setInput(element.shadowRoot!, "caseId", "")
-    expect(chips(element).some(chip => chip.dataset.field === "caseId")).toBe(false)
-    setInput(element.shadowRoot!, "caseId", "valensole")
-    const chip = chips(element).find(c => c.dataset.field === "caseId")!
-    expect(chip.textContent).toContain("valensole")
+    setInput(element.shadowRoot!, "tags", "")
+    expect(chips(element).some(chip => chip.dataset.field === "tags")).toBe(false)
+    setInput(element.shadowRoot!, "tags", "landing")
+    const chip = chips(element).find(c => c.dataset.field === "tags")!
+    expect(chip.textContent).toContain("landing")
   })
 
   it("says what the field it points at says — same label, same value, same unit", async () => {
@@ -2941,9 +2946,9 @@ describe("SightingEditorElement parameter summary", () => {
 
   it("leaves what describes the observation itself unboxed", () => {
     const element = mount()
-    setInput(element.shadowRoot!, "caseId", "socorro")
+    setInput(element.shadowRoot!, "tags", "landing")
     setInput(element.shadowRoot!, "cloudCover", "0.4")
-    for (const field of ["caseId", "cloudCover"]) {
+    for (const field of ["tags", "cloudCover"]) {
       expect(chips(element).find(c => c.dataset.field === field)!.closest(".param-nest")).toBe(null)
     }
   })
@@ -4432,7 +4437,7 @@ describe("SightingEditorElement src attribute", () => {
   const recording = {
     version: 1 as const,
     durationSeconds: 4,
-    caseId: "socorro",
+    id: "1964-04-24-ZamoraLonnie",
     timeline: {
       keyframes: [
         { t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval" as const, bounds: { x: 1, y: 2, width: 10, height: 6 }, color: "#fff", angle: 0, transparency: 0, haloScale: 0, selected: false } }] }
@@ -4451,7 +4456,7 @@ describe("SightingEditorElement src attribute", () => {
     await new Promise(resolve => setTimeout(resolve, 0))
 
     expect(fetchMock).toHaveBeenCalledWith("/science/crypto/ufo/enquete/dossier/Socorro/sighting.json")
-    expect(element.sightingData.caseId).toBe("socorro")
+    expect(element.sightingData.id).toBe("1964-04-24-ZamoraLonnie")
     expect(element.sightingData.timeline.keyframes[0].shapes[0].shape.bounds.width).toBe(10)
   })
 

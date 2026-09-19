@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 import { Sighting } from "../../src/engine/model/Sighting.js"
 import { fromSightingJson, toSightingJson } from "../../src/engine/persistence/sightingJson.js"
+import type { SightingRecordingJson } from "../../src/engine/persistence/sightingJson.js"
 import { createOval } from "../../src/engine/shape/Shape.js"
 
 describe("sightingJson", () => {
@@ -161,11 +162,11 @@ describe("sightingJson", () => {
     expect(restored.event.place).toBeUndefined()
   })
 
-  it("round-trips witness (id+title) and caseId", () => {
+  it("round-trips witness (id+title) and the sighting's own id", () => {
     const json = {
       version: 1 as const,
+      id: "1948-07-24-ChilesClarence",
       witness: { id: "chiles", title: "Clarence Chiles" },
-      caseId: "chiles-whitted",
       timeline: { keyframes: [] },
       witnessTrack: { keyframes: [] },
       weatherTrack: { keyframes: [] }
@@ -174,7 +175,7 @@ describe("sightingJson", () => {
     const restored = fromSightingJson(json)
 
     expect(restored.witness).toEqual({ id: "chiles", title: "Clarence Chiles" })
-    expect(restored.caseId).toBe("chiles-whitted")
+    expect(restored.id).toBe("1948-07-24-ChilesClarence")
     // timeline.order/groups are new (z-order support, multi-select grouping) — empty here since
     // there are no shapes/sources at all, but always present now, unlike the hand-written input
     // above. decor is likewise new (see Decor.ts) and always present, empty here since none was
@@ -186,6 +187,20 @@ describe("sightingJson", () => {
       soundTrack: { keyframes: [] },
       decor: []
     })
+  })
+
+  it("neither reads nor writes back the case or the RR0 directory an older recording named", () => {
+    const json = {
+      version: 1 as const,
+      caseId: "ChilesWhitted",
+      witness: { id: "ChilesClarence", dirName: "people/c/ChilesClarence" },
+      timeline: { keyframes: [] }
+    } as SightingRecordingJson
+
+    const written = toSightingJson(fromSightingJson(json))
+
+    expect(written).not.toHaveProperty("caseId")
+    expect(written.witness).toEqual({ id: "ChilesClarence" })
   })
 
   it("round-trips witness (lastName+firstNames)", () => {

@@ -35,7 +35,7 @@ export const sightingLabels_en: SightingLabels = {
   witnessTitle: "Title",
   witnessLastName: "Last name",
   witnessFirstNames: "First names",
-  caseId: "Case ID",
+  sightingId: "ID",
   tags: "Tags",
   cloudCover: "Cloud cover",
   highCloudCover: "Ice cloud (cirrus)",

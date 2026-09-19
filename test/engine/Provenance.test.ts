@@ -51,16 +51,16 @@ describe("Provenance", () => {
   })
 
   it("drops a bare \"stated\", which is the default and would be noise in every file", () => {
-    const { recording, provenance } = Provenance.strip({ caseId: { value: "landevennec", basis: "stated" } })
+    const { recording, provenance } = Provenance.strip({ id: { value: "landevennec", basis: "stated" } })
 
     expect(provenance.size).toBe(0)
-    expect(Provenance.restore(recording, provenance)).toEqual({ caseId: "landevennec" })
+    expect(Provenance.restore(recording, provenance)).toEqual({ id: "landevennec" })
   })
 
   it("keeps a \"stated\" that carries a rationale, since that is not the default", () => {
-    const { provenance } = Provenance.strip({ caseId: { value: "x", rationale: "the witness named the hamlet" } })
+    const { provenance } = Provenance.strip({ id: { value: "x", rationale: "the witness named the hamlet" } })
 
-    expect(provenance.at("caseId")).toMatchObject({ basis: "stated", rationale: "the witness named the hamlet" })
+    expect(provenance.at("id")).toMatchObject({ basis: "stated", rationale: "the witness named the hamlet" })
   })
 
   it("forgets a guess whose value the author has taken over", () => {
@@ -84,7 +84,7 @@ describe("Provenance", () => {
   it("drops provenance for a path the recording no longer has", () => {
     // A shape deleted, a keyframe removed: its provenance goes with it rather than resurrecting an
     // empty wrapper where the value used to be.
-    const { provenance } = Provenance.strip({ caseId: { value: "x", basis: "assumed" }, version: 1 })
+    const { provenance } = Provenance.strip({ id: { value: "x", basis: "assumed" }, version: 1 })
 
     expect(Provenance.restore({ version: 1 }, provenance)).toEqual({ version: 1 })
   })

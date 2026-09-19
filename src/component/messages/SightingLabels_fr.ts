@@ -35,7 +35,7 @@ export const sightingLabels_fr: SightingLabels = {
   witnessTitle: "Titre",
   witnessLastName: "Nom de famille",
   witnessFirstNames: "Prénoms",
-  caseId: "ID de l'affaire",
+  sightingId: "ID",
   tags: "Mots-clés",
   cloudCover: "Couverture nuageuse",
   highCloudCover: "Nuages de glace (cirrus)",

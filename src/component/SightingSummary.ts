@@ -194,7 +194,6 @@ export class SightingSummary {
   }
 
   private addObservation(entries: SummaryEntry[], sighting: Sighting): void {
-    this.push(entries, "observation", "caseId", this.labels.caseId, sighting.caseId)
     // The description is deliberately not an entry: it is prose, sometimes a paragraph of it, and
     // a chip is a glance. It stays where prose belongs — the player's info panel, which is
     // exactly what it is left holding once the summary takes the fields off its hands.

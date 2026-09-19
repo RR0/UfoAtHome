@@ -185,13 +185,11 @@ async function waitFor(check: () => boolean, timeoutMs = 500): Promise<void> {
 const johnSighting = {
   version: 1 as const,
   witness: { id: "john", title: "Clarence Chiles" },
-  caseId: "chiles-whitted",
   timeline: { keyframes: [{ t: 0, shapes: [] }] }
 }
 const janeSighting = {
   version: 1 as const,
   witness: { id: "jane", title: "John Whitted" },
-  caseId: "chiles-whitted",
   timeline: { keyframes: [{ t: 100, shapes: [] }] }
 }
 
@@ -319,7 +317,7 @@ describe("SightingElement", () => {
   it("says nothing at all where a single recording names no witness", async () => {
     // A sky with no witness is not a testimony, so the whole "Testimony by …" line goes — the ?
     // button that carries the observation's own metadata stays either way.
-    const noWitness = { version: 1 as const, caseId: "sky-test-halos", timeline: { keyframes: [] } }
+    const noWitness = { version: 1 as const, id: "sky-test-halos", timeline: { keyframes: [] } }
     stubFetch({ "sky.json": noWitness, "john.json": johnSighting })
     const element = mount()
 
@@ -381,20 +379,6 @@ describe("SightingElement", () => {
     expect(select.value).toBe("jane.json")
   })
 
-  it("warns (without blocking) when listed witnesses declare different case ids", async () => {
-    const otherCase = { ...janeSighting, caseId: "some-other-case" }
-    stubFetch({ "john.json": johnSighting, "jane.json": otherCase })
-    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {})
-    const element = mount()
-
-    element.witnessUrls = ["john.json", "jane.json"]
-    await new Promise(resolve => setTimeout(resolve, 0))
-
-    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("chiles-whitted"))
-    const select = element.shadowRoot!.getElementById("witness") as HTMLSelectElement
-    expect(select.options.length).toBe(2) // still shown, just warned about
-    warnSpy.mockRestore()
-  })
 
   const connect = async (src: string) => {
     const element = document.createElement(SIGHTING_ELEMENT_NAME) as SightingElement
@@ -413,6 +397,25 @@ describe("SightingElement", () => {
     const element = await connect("case.json")
 
     expect(element.witnessUrls).toEqual([johnUrl])
+  })
+
+  it("names the case in the info panel by the case's own title, since no recording names its case", async () => {
+    const johnUrl = new URL("john.json", location.href).href
+    stubFetch({ "case.json": { id: "Case", title: "A case", events: [sightingEvent("john.json")] }, [johnUrl]: johnSighting, "john.json": johnSighting })
+    const element = await connect("case.json")
+    const shadow = element.shadowRoot!
+    const rows = (): string[] => [...shadow.querySelectorAll("#info-observation-list dd")].map(dd => dd.textContent!)
+    ;(shadow.getElementById("info-button") as HTMLButtonElement).click()
+    expect(rows()).toContain("A case")
+    // Even while the strip states the rest: the strip reads the recording, which cannot say it.
+    ;(shadow.getElementById("info-labels-toggle") as HTMLButtonElement).click()
+    expect(rows()).toContain("A case")
+
+    // The same recording given directly belongs to no case at all.
+    element.setAttribute("src", "john.json")
+    await new Promise(resolve => setTimeout(resolve, 0))
+    ;(shadow.getElementById("info-labels-toggle") as HTMLButtonElement).click()
+    expect(rows()).not.toContain("A case")
   })
 
   it("reads a case's recordings as sitting BESIDE it, not beside the page — which is what lets one case file serve two hosts unchanged", async () => {
@@ -499,7 +502,6 @@ describe("SightingElement", () => {
     expect(appLink.textContent).toMatch(/^UFO@home v\d+\.\d+\.\d+$/)
     const observationList = element.shadowRoot!.getElementById("info-observation-list") as HTMLElement
     expect(observationList.textContent).toContain("32.4000, -86.3000")
-    expect(observationList.textContent).toContain("chiles-whitted")
     expect(observationList.textContent).not.toContain("Clarence Chiles") // already in the testimony line, not repeated here
 
     infoButton.click()
@@ -849,9 +851,10 @@ describe("SightingElement parameter labels", () => {
   })
 
   it("states the recording when the page asks with show-labels", async () => {
+    stubFetch({ "john.json": { ...johnSighting, place: [{ lat: 32.4, lng: -86.3 }] } })
     const element = await mounted(true)
     expect(element.shadowRoot!.getElementById("param-summary")!.hidden).toBe(false)
-    expect(labels(element).some(text => text.includes("chiles-whitted"))).toBe(true)
+    expect(labels(element).some(text => text.includes("32.4"))).toBe(true)
   })
 
   it("takes the same instruction from a script as from the markup", async () => {
@@ -903,14 +906,15 @@ describe("SightingElement parameter labels", () => {
    * refuses to carry, because prose doesn't fit on a chip.
    */
   it("stops the info panel repeating what the strip already states, and leaves it the description", async () => {
+    stubFetch({ "john.json": { ...johnSighting, place: [{ lat: 32.4, lng: -86.3 }] } })
     const element = await mounted()
     const shadow = element.shadowRoot!
     ;(shadow.getElementById("info-button") as HTMLButtonElement).click()
     const rows = (): string[] => [...shadow.querySelectorAll("#info-observation-list dt")].map(dt => dt.textContent!)
-    expect(rows()).toContain("Case")
+    expect(rows()).toContain("Location")
 
     ;(shadow.getElementById("info-labels-toggle") as HTMLButtonElement).click()
-    expect(rows()).not.toContain("Case")
+    expect(rows()).not.toContain("Location")
     expect(rows()).not.toContain("Date")
     // Nothing is left here at all only because this fixture states no description; a recording
     // that does keeps it, which is the whole point of leaving that one row alone.
@@ -918,7 +922,7 @@ describe("SightingElement parameter labels", () => {
     // And gives them back. The toggle lives inside the panel it re-cuts, so an earlier version
     // that only repopulated "while the panel is open" left these rows gone for good.
     ;(shadow.getElementById("info-labels-toggle") as HTMLButtonElement).click()
-    expect(rows()).toContain("Case")
+    expect(rows()).toContain("Location")
   })
 
   // Read-only: there is no form behind a player to send anyone back to.

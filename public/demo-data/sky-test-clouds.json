@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "caseId": "sky-test-clouds",
+  "id": "sky-test-clouds",
   "description": {
     "fr": "Ciel synthétique : trois couches nuageuses en mètres, et un nuage du champ énoncé en mètres, à déplacer et redimensionner dans l'éditeur sans cesser d'être un nuage parmi les autres. Le vent et l'obscurité changent sur deux minutes pendant que le témoin parcourt 600 m. Aucun témoignage.",
     "en": "A synthetic sky: three metre-based cloud layers, and one cloud of the field stated in metres, to move and resize in the editor while staying one of its neighbours. Wind and darkness change over two minutes while the witness moves 600 m. No testimony."

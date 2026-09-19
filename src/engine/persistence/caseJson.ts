@@ -8,8 +8,9 @@
  * each pointing at one witness's recording.
  */
 export interface CaseJson {
-  /** The case's identifier, which every recording of it carries as its `caseId`. On rr0.org it is
-   * the dossier's directory name and may be left out; a case file standing alone states it. */
+  /** The case's identifier. On rr0.org it is the dossier's directory name and may be left out; a
+   * case file standing alone states it. No recording carries it: a case names its testimonies, a
+   * testimony does not name its case (see Sighting.id). */
   id?: string
   title?: string
   /** When it happened, as RR0 writes a time ("1948-07-24 02:45", "1954"). */

@@ -59,7 +59,7 @@ export interface SightingLabels {
   witnessTitle: string
   witnessLastName: string
   witnessFirstNames: string
-  caseId: string
+  sightingId: string
   tags: string
   cloudCover: string
   /** The high, icy deck — distinct from the total cover, because it is the one ingredient the ice

@@ -100,7 +100,6 @@ export const sightingEditorMessages_fr: SightingEditorMessages = {
   observationEndTimeHint:
     "EDTF — ex. 1965-07-01T05:10, 2025-06? (incertain), 2025~ (approximatif), ou juste 05:10 si la date est inconnue",
   presetsGroupLabel: "Forme de l'ovni",
-  witnessDirName: "Répertoire",
   description: "Description",
   tagsPlaceholder: "séparés par des virgules",
   weather: "Météo",

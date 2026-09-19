@@ -32,12 +32,12 @@ describe("DraftPatch", () => {
       instrument: "instamatic-104",
       durationSeconds: 270
     }
-    const draft = { time: { year: 1965 }, caseId: "valensole" }
+    const draft = { time: { year: 1965 }, id: "valensole" }
 
     const patched = DraftPatch.apply(editor, draft, DraftPatch.stated(draft))
 
     expect(patched.time).toEqual({ year: 1965 })
-    expect(patched.caseId).toBe("valensole")
+    expect(patched.id).toBe("valensole")
     expect(patched.place).toEqual([{ lat: 43.837, lng: 5.993 }])
     expect(patched.instrument).toBe("instamatic-104")
     expect(patched.durationSeconds).toBe(270)
@@ -51,21 +51,21 @@ describe("DraftPatch", () => {
   })
 
   it("leaves both arguments untouched", () => {
-    const editor: SightingRecordingJson = { ...empty(), caseId: "before" }
-    const draft = { caseId: "after" }
+    const editor: SightingRecordingJson = { ...empty(), id: "before" }
+    const draft = { id: "after" }
 
-    const patched = DraftPatch.apply(editor, draft, ["caseId"])
+    const patched = DraftPatch.apply(editor, draft, ["id"])
 
-    expect(editor.caseId).toBe("before")
-    expect(patched.caseId).toBe("after")
+    expect(editor.id).toBe("before")
+    expect(patched.id).toBe("after")
     patched.timeline.keyframes.push({ t: 0, shapes: [] })
     expect(editor.timeline.keyframes).toEqual([])
   })
 
   it("skips a path the draft does not actually state, rather than blanking the value", () => {
-    const editor: SightingRecordingJson = { ...empty(), caseId: "valensole" }
+    const editor: SightingRecordingJson = { ...empty(), id: "valensole" }
 
-    expect(DraftPatch.apply(editor, {}, ["caseId"]).caseId).toBe("valensole")
+    expect(DraftPatch.apply(editor, {}, ["id"]).id).toBe("valensole")
   })
 
   it("creates the object a stated leaf needs, when the recording has none", () => {
