@@ -41,7 +41,8 @@ export class DocsFormatPage extends DocsSection {
   }
 
   /**
-   * Turns the quoted example into something to type in.
+   * Turns every JSON excerpt on the page — the whole example and each fragment — into something to
+   * type in.
    *
    * A format is learnt by trying it, not by reading a listing of it — and the editor already knows
    * every key this file could have, because its completion is generated from the same types the
@@ -52,16 +53,24 @@ export class DocsFormatPage extends DocsSection {
    * stays for good if it never does, so a reader without it still has the example.
    */
   script(): string {
-    return `const source = document.getElementById("example-source")
-const mount = document.getElementById("example-editor")
-if (source && mount) {
+    return `const excerpts = [...document.querySelectorAll("pre[data-json]")]
+if (excerpts.length > 0) {
   void (async () => {
     try {
       const { JsonEditor } = await import(SITE_LIB + "/site-json-editor.mjs")
-      new JsonEditor(mount, source.textContent.trimEnd())
-      source.hidden = true
+      // One module for them all: once it is in, each further excerpt is an editor for nothing.
+      for (const pre of excerpts) {
+        const mount = document.createElement("div")
+        mount.className = "code-view"
+        pre.after(mount)
+        // Where in a recording the excerpt stands, for what its completion offers; "none" for JSON
+        // that is not a recording.
+        const at = pre.dataset.json
+        new JsonEditor(mount, pre.textContent.trimEnd(), at === "none" ? null : at ? at.split(".") : [])
+        pre.hidden = true
+      }
     } catch {
-      /* No editor, then. The listing is still there and still says the same thing. */
+      /* No editor, then. The listings are still there and still say the same thing. */
     }
   })()
 }`
@@ -104,7 +113,7 @@ if (source && mount) {
       title, date and classification, and lists everything that happened in it as
       <code>events</code>. Its events of type <code>sighting</code> are its testimonies, each pointing
       at one witness's recording:</p>
-    <pre><code>{
+    <pre data-json="none"><code>{
   "id": "ChilesWhitted",
   "title": "Chiles et Whitted",
   "time": "1948-07-24 02:45",
@@ -131,9 +140,11 @@ if (source && mount) {
     <p>A recording is handed from one reader to another, so every field an author writes can hold
       one string per language instead of one: <code>description</code>, a shape's or a decor
       object's <code>title</code>, and a milestone's <code>label</code> and <code>note</code>.</p>
-    <pre><code>"description": {
-  "fr": "Tout le témoignage de Lonnie Zamora, d'un seul tenant…",
-  "en": "Lonnie Zamora's whole testimony, of a piece…"
+    <pre data-json=""><code>{
+  "description": {
+    "fr": "Tout le témoignage de Lonnie Zamora, d'un seul tenant…",
+    "en": "Lonnie Zamora's whole testimony, of a piece…"
+  }
 }</code></pre>
     <p>Keys are language tags as a browser gives them (<code>fr</code>, <code>en</code>,
       <code>pt-BR</code>), and none of them is required. A plain string stays perfectly valid and
@@ -154,19 +165,32 @@ if (source && mount) {
     <p><code>timeline.keyframes</code> is a list of <code>{ t, shapes }</code>, <code>t</code> in
       milliseconds from the start. Each shape carries a <code>sourceId</code> — several shapes can
       share one timeline (the phenomenon, a trailing flame, a second light) — and a <code>shape</code>:</p>
-    <pre><code>{
-  "kind": "oval",          // or "polygon", which then also takes "points"
+    <pre data-json="timeline.keyframes.shapes.shape"><code>{
+  "kind": "oval",
   "bounds": { "x": 0, "y": 0, "width": 0, "height": 0 },
-  "color": "#39ff14",      // any CSS colour
-  "angle": 0,              // radians
-  "transparency": 0,       // 0 opaque .. 1 invisible
-  "haloScale": 1.5,        // 0 = no glow
-  "brightness": 0,         // how dazzling: a veil, aperture spikes, a core clipped to white
-  "blur": 0,               // how indistinct the witness said the edges looked
+  "color": "#39ff14",
+  "angle": 0,
+  "transparency": 0,
+  "haloScale": 1.5,
+  "brightness": 0,
+  "blur": 0,
   "selected": false,
   "title": "the phenomenon",
   "angular": { "widthDeg": 1.2, "heightDeg": 0.4 }
 }</code></pre>
+    <div class="table-scroll">
+    <table>
+      <tr><th>Field</th><th>Meaning</th></tr>
+      <tr><td><code>kind</code></td><td><code>oval</code>, or <code>polygon</code>, which then also takes <code>points</code></td></tr>
+      <tr><td><code>color</code></td><td>Any CSS colour</td></tr>
+      <tr><td><code>angle</code></td><td>Radians</td></tr>
+      <tr><td><code>transparency</code></td><td>0 opaque to 1 invisible</td></tr>
+      <tr><td><code>haloScale</code></td><td>The glow around it; 0 is none</td></tr>
+      <tr><td><code>brightness</code></td><td>How dazzling: a veil, aperture spikes, a core clipped to white</td></tr>
+      <tr><td><code>blur</code></td><td>How indistinct the witness said the edges looked</td></tr>
+      <tr><td><code>angular</code></td><td>Its apparent size in degrees — see below</td></tr>
+    </table>
+    </div>
     <p><strong><code>angular</code> is the authority.</strong> <code>bounds</code> is that angle
       projected onto the fixed 640×360 canvas at the pose's own field of view and through the
       recording's own instrument; it is re-derived on load, so a file survives a change of canvas,
@@ -239,23 +263,25 @@ if (source && mount) {
       <tr><td><code>density</code>, <code>darkness</code></td><td>Its own; darkness absent means the layer's</td></tr>
     </table>
     </div>
-    <pre><code>"weather": {
-  "cloudLayers": [
-    {
-      "id": "low", "type": "cumulus",
-      "baseM": 1500, "thicknessM": 800,
-      "coverage": 0.55, "sizeM": 1400, "density": 1, "darkness": 0.15,
-      "instances": [
-        { "id": "the-one", "eastM": 0, "northM": 4200,
-          "baseM": 1500, "thicknessM": 800,
-          "widthM": 1900, "depthM": 1300, "rotationDeg": 12, "density": 1 }
-      ]
-    },
-    { "id": "high", "type": "cirrus", "baseM": 8000, "thicknessM": 400,
-      "coverage": 0.2, "sizeM": 2200, "density": 0.35, "iceCrystalAlignment": 0.65 }
-  ],
-  "precipitationType": "none", "precipitationIntensity": 0,
-  "windDirectionDeg": 90, "windSpeed": 5, "storm": false
+    <pre data-json="weatherTrack.keyframes"><code>{
+  "weather": {
+    "cloudLayers": [
+      {
+        "id": "low", "type": "cumulus",
+        "baseM": 1500, "thicknessM": 800,
+        "coverage": 0.55, "sizeM": 1400, "density": 1, "darkness": 0.15,
+        "instances": [
+          { "id": "the-one", "eastM": 0, "northM": 4200,
+            "baseM": 1500, "thicknessM": 800,
+            "widthM": 1900, "depthM": 1300, "rotationDeg": 12, "density": 1 }
+        ]
+      },
+      { "id": "high", "type": "cirrus", "baseM": 8000, "thicknessM": 400,
+        "coverage": 0.2, "sizeM": 2200, "density": 0.35, "iceCrystalAlignment": 0.65 }
+    ],
+    "precipitationType": "none", "precipitationIntensity": 0,
+    "windDirectionDeg": 90, "windSpeed": 5, "storm": false
+  }
 }</code></pre>
     <p>A recording whose weather was <strong>looked up</strong> (it has a <code>weatherSource</code>)
       holds the record's answer, not a link to it: ERA5 gives the low, middle and high bands as three
@@ -270,8 +296,7 @@ if (source && mount) {
     <p>The smallest recording that still states something — one silent oval crossing the sky over
       twelve seconds, on a real date at a real place. Everything else in the format is optional, and
       everything below is doing work:</p>
-    <pre id="example-source"><code>${this.escape(this.example)}</code></pre>
-    <div id="example-editor" class="code-view"></div>
+    <pre data-json=""><code>${this.escape(this.example)}</code></pre>
     <p class="small">Yours to type in: it completes on every key the format has, offers the words
       each one accepts, and says what the model says about it. Nothing here is saved or played —
       when you want to see one run, <a href="/play/">the player</a> takes a file.</p>
@@ -352,7 +377,7 @@ if (source && mount) {
       la date et la classification du cas, et liste tout ce qui lui est arrivé en
       <code>events</code>. Ses événements de type <code>sighting</code> sont ses témoignages, chacun
       pointant vers l'enregistrement d'un témoin :</p>
-    <pre><code>{
+    <pre data-json="none"><code>{
   "id": "ChilesWhitted",
   "title": "Chiles et Whitted",
   "time": "1948-07-24 02:45",
@@ -380,9 +405,11 @@ if (source && mount) {
       donc porter une chaîne par langue au lieu d'une seule — <code>description</code>, le
       <code>title</code> d'une forme ou d'un élément de décor, le <code>label</code> et la
       <code>note</code> d'un repère.</p>
-    <pre><code>"description": {
-  "fr": "Tout le témoignage de Lonnie Zamora, d'un seul tenant…",
-  "en": "Lonnie Zamora's whole testimony, of a piece…"
+    <pre data-json=""><code>{
+  "description": {
+    "fr": "Tout le témoignage de Lonnie Zamora, d'un seul tenant…",
+    "en": "Lonnie Zamora's whole testimony, of a piece…"
+  }
 }</code></pre>
     <p>Les clés sont des étiquettes de langue telles qu'un navigateur les donne (<code>fr</code>,
       <code>en</code>, <code>pt-BR</code>), et aucune n'est obligatoire. Une chaîne simple reste
@@ -403,19 +430,32 @@ if (source && mount) {
       millisecondes depuis le début. Chaque forme porte un <code>sourceId</code> — plusieurs formes
       peuvent partager une chronologie (le phénomène, une flamme qui traîne, une seconde lumière) — et
       une <code>shape</code> :</p>
-    <pre><code>{
-  "kind": "oval",          // ou "polygon", qui prend alors aussi "points"
+    <pre data-json="timeline.keyframes.shapes.shape"><code>{
+  "kind": "oval",
   "bounds": { "x": 0, "y": 0, "width": 0, "height": 0 },
-  "color": "#39ff14",      // n'importe quelle couleur CSS
-  "angle": 0,              // radians
-  "transparency": 0,       // 0 opaque .. 1 invisible
-  "haloScale": 1.5,        // 0 = aucune lueur
-  "brightness": 0,         // l'éblouissement : un voile, les aigrettes du diaphragme, un cœur saturé au blanc
-  "blur": 0,               // à quel point le témoin a dit les contours indistincts
+  "color": "#39ff14",
+  "angle": 0,
+  "transparency": 0,
+  "haloScale": 1.5,
+  "brightness": 0,
+  "blur": 0,
   "selected": false,
   "title": "le phénomène",
   "angular": { "widthDeg": 1.2, "heightDeg": 0.4 }
 }</code></pre>
+    <div class="table-scroll">
+    <table>
+      <tr><th>Champ</th><th>Sens</th></tr>
+      <tr><td><code>kind</code></td><td><code>oval</code>, ou <code>polygon</code>, qui prend alors aussi <code>points</code></td></tr>
+      <tr><td><code>color</code></td><td>N'importe quelle couleur CSS</td></tr>
+      <tr><td><code>angle</code></td><td>En radians</td></tr>
+      <tr><td><code>transparency</code></td><td>De 0 opaque à 1 invisible</td></tr>
+      <tr><td><code>haloScale</code></td><td>La lueur autour ; 0 pour aucune</td></tr>
+      <tr><td><code>brightness</code></td><td>L'éblouissement : un voile, les aigrettes du diaphragme, un cœur saturé au blanc</td></tr>
+      <tr><td><code>blur</code></td><td>À quel point le témoin a dit les contours indistincts</td></tr>
+      <tr><td><code>angular</code></td><td>Sa taille apparente en degrés — voir plus bas</td></tr>
+    </table>
+    </div>
     <p><strong>C'est <code>angular</code> qui fait foi.</strong> <code>bounds</code> est cet angle
       projeté sur le canevas fixe de 640×360 au champ de la pose et à travers l'instrument de
       l'enregistrement ; il est redérivé au chargement, si bien qu'un fichier survit à un changement
@@ -488,23 +528,25 @@ if (source && mount) {
       <tr><td><code>density</code>, <code>darkness</code></td><td>Les siens ; une obscurité absente est celle de la couche</td></tr>
     </table>
     </div>
-    <pre><code>"weather": {
-  "cloudLayers": [
-    {
-      "id": "low", "type": "cumulus",
-      "baseM": 1500, "thicknessM": 800,
-      "coverage": 0.55, "sizeM": 1400, "density": 1, "darkness": 0.15,
-      "instances": [
-        { "id": "the-one", "eastM": 0, "northM": 4200,
-          "baseM": 1500, "thicknessM": 800,
-          "widthM": 1900, "depthM": 1300, "rotationDeg": 12, "density": 1 }
-      ]
-    },
-    { "id": "high", "type": "cirrus", "baseM": 8000, "thicknessM": 400,
-      "coverage": 0.2, "sizeM": 2200, "density": 0.35, "iceCrystalAlignment": 0.65 }
-  ],
-  "precipitationType": "none", "precipitationIntensity": 0,
-  "windDirectionDeg": 90, "windSpeed": 5, "storm": false
+    <pre data-json="weatherTrack.keyframes"><code>{
+  "weather": {
+    "cloudLayers": [
+      {
+        "id": "low", "type": "cumulus",
+        "baseM": 1500, "thicknessM": 800,
+        "coverage": 0.55, "sizeM": 1400, "density": 1, "darkness": 0.15,
+        "instances": [
+          { "id": "the-one", "eastM": 0, "northM": 4200,
+            "baseM": 1500, "thicknessM": 800,
+            "widthM": 1900, "depthM": 1300, "rotationDeg": 12, "density": 1 }
+        ]
+      },
+      { "id": "high", "type": "cirrus", "baseM": 8000, "thicknessM": 400,
+        "coverage": 0.2, "sizeM": 2200, "density": 0.35, "iceCrystalAlignment": 0.65 }
+    ],
+    "precipitationType": "none", "precipitationIntensity": 0,
+    "windDirectionDeg": 90, "windSpeed": 5, "storm": false
+  }
 }</code></pre>
     <p>Un enregistrement dont la météo a été <strong>relevée</strong> (il a un
       <code>weatherSource</code>) garde la réponse du relevé, pas un lien vers lui : ERA5 donne les
@@ -520,8 +562,7 @@ if (source && mount) {
     <p>Le plus petit enregistrement qui énonce encore quelque chose — un ovale silencieux traversant
       le ciel en douze secondes, à une date réelle et en un lieu réel. Tout le reste du format est
       facultatif, et tout ce qui suit sert à quelque chose :</p>
-    <pre id="example-source"><code>${this.escape(this.example)}</code></pre>
-    <div id="example-editor" class="code-view"></div>
+    <pre data-json=""><code>${this.escape(this.example)}</code></pre>
     <p class="small">À vous d'y taper : il complète sur chaque clé du format, propose les mots que
       chacune accepte, et dit ce que le modèle en dit. Rien n'est enregistré ni joué ici — pour en
       voir une tourner, <a href="/play/">le lecteur</a> prend un fichier.</p>

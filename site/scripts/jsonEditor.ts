@@ -18,7 +18,12 @@ export class JsonEditor {
 
   private readonly view: EditorView
 
-  constructor(parent: HTMLElement, initialValue: string) {
+  /**
+   * `at` says where in a recording the text stands — see SightingCompletion — for an excerpt of one
+   * rather than a whole one; `null` for JSON that is not a recording at all (a case), which is then
+   * checked but offered nothing.
+   */
+  constructor(parent: HTMLElement, initialValue: string, at: readonly string[] | null = []) {
     this.view = new EditorView({
       parent,
       doc: initialValue,
@@ -29,7 +34,7 @@ export class JsonEditor {
         // What turns this from a text box into a way of LEARNING the format: every key the model
         // has, the words a key will accept, and the model's own comment about it — read out of the
         // TypeScript at build time, so it says what the code says. See SightingCompletion.
-        jsonLanguage.data.of({ autocomplete: new SightingCompletion().source }),
+        ...(at ? [jsonLanguage.data.of({ autocomplete: new SightingCompletion(at).source })] : []),
         // The whole reason a code editor earns its place here: a mistyped comma is reported ON the
         // line that has it, instead of as "Unexpected token at position 1487".
         lintGutter(),
