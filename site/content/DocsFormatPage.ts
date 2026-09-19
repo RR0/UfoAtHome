@@ -12,8 +12,8 @@ export class DocsFormatPage extends DocsSection {
 
   readonly meta: PageMeta = {
     slug: "docs/format",
-    navLabel: { en: "The JSON format", fr: "Le format JSON" },
-    title: { en: "The JSON format", fr: "Le format JSON" },
+    navLabel: { en: "The sighting file", fr: "Le fichier d'observation" },
+    title: { en: "The sighting file", fr: "Le fichier d'observation" },
     description: {
       en: "What a recording file holds, field by field: the observation, what was seen, the weather "
         + "and its clouds, the case that lists several witnesses, and a whole working example to type in.",
@@ -86,7 +86,7 @@ if (source && mount) {
     <table>
       <tr><th>Field</th><th>Meaning</th></tr>
       <tr><td><code>version</code></td><td>Always <code>1</code></td></tr>
-      <tr><td><code>time</code>, <code>endTime</code></td><td><code>{ year, month, day, hour, minute, second }</code>, every part optional — that is how the format states “1954” or “around 05:00”</td></tr>
+      <tr><td><code>time</code>, <code>endTime</code></td><td><code>{ year, month, day, hour, minute, second, raw }</code>, every part optional — that is how the format states “1954” or “around 05:00”. <code>raw</code> is the date as written in <a href="https://www.loc.gov/standards/datetime/">EDTF</a>, and it is what the date means: <code>"1948-07-24T02:45~"</code> (approximate), <code>"2025-06?"</code> (uncertain), <code>"1965-07-01%"</code> (both), <code>"19XX"</code> (a masked year), or <code>"05:00"</code> alone for a time of day remembered without its date. The numbers are kept in step with it for what computes (the sky, the clock). It is a subset of EDTF (level 0, these qualifiers on the whole date, masked years); <a href="https://www.npmjs.com/package/@rr0/time"><code>@rr0/time</code></a> is RR0's full EDTF model, into which UFO@home's own tooling converts a recording's dates</td></tr>
       <tr><td><code>durationSeconds</code></td><td>An alternative to <code>endTime</code>, and it wins if both are given</td></tr>
       <tr><td><code>utcOffsetHours</code></td><td>The LEGAL time the witness's clock was on (+1 for France in 1965). Absent means it is approximated from the longitude, which cannot know legal time or a daylight-saving switch</td></tr>
       <tr><td><code>place</code></td><td><code>[{ lat, lng, name }]</code> — <code>name</code> is the fully qualified place name the coordinates were resolved from</td></tr>
@@ -334,7 +334,7 @@ if (source && mount) {
     <table>
       <tr><th>Champ</th><th>Sens</th></tr>
       <tr><td><code>version</code></td><td>Toujours <code>1</code></td></tr>
-      <tr><td><code>time</code>, <code>endTime</code></td><td><code>{ year, month, day, hour, minute, second }</code>, chaque partie facultative — c'est ainsi que le format énonce « 1954 » ou « vers 05:00 »</td></tr>
+      <tr><td><code>time</code>, <code>endTime</code></td><td><code>{ year, month, day, hour, minute, second, raw }</code>, chaque partie facultative — c'est ainsi que le format énonce « 1954 » ou « vers 05:00 ». <code>raw</code> est la date telle qu'écrite en <a href="https://www.loc.gov/standards/datetime/">EDTF</a>, et c'est elle qui fait foi : <code>"1948-07-24T02:45~"</code> (approximative), <code>"2025-06?"</code> (incertaine), <code>"1965-07-01%"</code> (les deux), <code>"19XX"</code> (une année masquée), ou <code>"05:00"</code> seul pour une heure dont on a oublié la date. Les nombres sont tenus en accord avec elle pour ce qui calcule (le ciel, l'horloge). C'est un sous-ensemble d'EDTF (niveau 0, ces qualificatifs sur la date entière, années masquées) ; <a href="https://www.npmjs.com/package/@rr0/time"><code>@rr0/time</code></a> est le modèle EDTF complet de RR0, dans lequel l'outillage d'UFO@home convertit les dates d'un enregistrement</td></tr>
       <tr><td><code>durationSeconds</code></td><td>Une alternative à <code>endTime</code>, et c'est elle qui l'emporte si les deux sont là</td></tr>
       <tr><td><code>utcOffsetHours</code></td><td>L'heure LÉGALE de la montre du témoin (+1 pour la France en 1965). Absent, elle est approchée depuis la longitude, qui ne peut connaître ni l'heure légale ni un changement d'heure</td></tr>
       <tr><td><code>place</code></td><td><code>[{ lat, lng, name }]</code> — <code>name</code> est le nom qualifié depuis lequel les coordonnées ont été résolues</td></tr>

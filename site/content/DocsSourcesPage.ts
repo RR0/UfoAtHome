@@ -380,8 +380,8 @@ ${sections}
       ? "Le détail de chaque choix, avec les mesures qui l'ont décidé, est dans le <a href=\"https://github.com/RR0/UfoAtHome#readme\">README</a> et dans les commentaires du code de chaque source."
       : "The detail of each choice, with the measurements that settled it, is in the <a href=\"https://github.com/RR0/UfoAtHome#readme\">README</a> and in the code comments of each source."}</p>
     <p>${fr
-      ? "Ce qu'une valeur relevée devient dans le fichier (<code>weatherSource</code>, les couches <code>record-low</code>, <code>record-mid</code> et <code>record-high</code>) est décrit sur la page du <a href=\"/docs/format/\">format JSON</a>."
-      : "What a looked-up value becomes in the file (<code>weatherSource</code>, the <code>record-low</code>, <code>record-mid</code> and <code>record-high</code> layers) is described on <a href=\"/docs/format/\">the JSON format</a>'s page."}</p>
+      ? "Ce qu'une valeur relevée devient dans le fichier (<code>weatherSource</code>, les couches <code>record-low</code>, <code>record-mid</code> et <code>record-high</code>) est décrit sur la page du <a href=\"/docs/format/\">fichier d'observation</a>."
+      : "What a looked-up value becomes in the file (<code>weatherSource</code>, the <code>record-low</code>, <code>record-mid</code> and <code>record-high</code> layers) is described on <a href=\"/docs/format/\">the sighting file</a>'s page."}</p>
   </div>
 </section>
 `

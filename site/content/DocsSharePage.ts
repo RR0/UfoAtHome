@@ -233,7 +233,7 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
       straight in, which is enough to check one before publishing it — though a pasted one cannot,
       of course, be shared by link.</p>
     <p>Don't have a recording at all? <a href="/docs/create/">Make one</a>; what goes in the file
-      is on <a href="/docs/format/">the JSON format</a>'s page.</p>
+      is described on <a href="/docs/format/">the sighting file</a>'s page.</p>
   </div>
 </section>
 `
@@ -315,7 +315,7 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
       enregistrement collé directement, ce qui suffit à en vérifier un avant de le publier — mais un
       enregistrement collé ne se partage évidemment pas par lien.</p>
     <p>Pas d'enregistrement du tout ? <a href="/docs/create/">Créez-en un</a> ; ce que contient le
-      fichier est sur la page du <a href="/docs/format/">format JSON</a>.</p>
+      fichier est décrit sur la page du <a href="/docs/format/">fichier d'observation</a>.</p>
   </div>
 </section>
 `

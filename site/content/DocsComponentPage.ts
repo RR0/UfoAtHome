@@ -83,11 +83,11 @@ export class DocsComponentPage extends DocsSection {
     <pre><code>&lt;script type="module" src="https://ufoathome.org/lib/${tag}.mjs"&gt;&lt;/script&gt;
 &lt;${tag}${tag === "rr0-sighting-editor" ? "" : ' src="sighting.json"'}&gt;&lt;/${tag}&gt;</code></pre>
     <p>${fr
-      ? `${tag === "rr0-sighting-editor" ? "" : `<code>sighting.json</code> est un enregistrement au <a href="/docs/format/">format JSON</a>. `}Ou, après <code>npm install @rr0/ufoathome</code> : <code>import "@rr0/ufoathome/${this.doc.subpath}"</code>.
+      ? `${tag === "rr0-sighting-editor" ? "" : `<code>sighting.json</code> est un <a href="/docs/format/">fichier d'observation</a>. `}Ou, après <code>npm install @rr0/ufoathome</code> : <code>import "@rr0/ufoathome/${this.doc.subpath}"</code>.
          Le bundle pèse ${this.doc.size.fr} compressé et enregistre le tag lui-même — rien d'autre à appeler.
          <a href="/docs/components/#integrer-dans-votre-application">Le hub</a> dit ce que cela suppose par ailleurs,
          et <a href="/docs/share/">partager une observation</a> a l'exemple complet, à essayer et à copier.`
-      : `${tag === "rr0-sighting-editor" ? "" : `<code>sighting.json</code> is one recording in <a href="/docs/format/">the JSON format</a>. `}Or, after <code>npm install @rr0/ufoathome</code>: <code>import "@rr0/ufoathome/${this.doc.subpath}"</code>.
+      : `${tag === "rr0-sighting-editor" ? "" : `<code>sighting.json</code> is a <a href="/docs/format/">sighting file</a>. `}Or, after <code>npm install @rr0/ufoathome</code>: <code>import "@rr0/ufoathome/${this.doc.subpath}"</code>.
          The bundle is ${this.doc.size.en} gzipped and registers the tag itself — nothing else to call.
          <a href="/docs/components/#putting-one-in-your-application">The hub</a> says what else that involves, and
          <a href="/docs/share/">sharing an observation</a> has the whole example, to try and to copy.`}</p>

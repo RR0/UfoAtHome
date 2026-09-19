@@ -62,24 +62,22 @@ export class FaqPage implements SitePage {
       <h3>What does it send over the network?</h3>
       <p>Recordings stay in your browser: there is no account and no server-side storage.
         <strong>Export</strong> writes a file to your disk, and that file is the whole recording.</p>
-      <p>What the editor fetches, and when:</p>
-      <div class="table-scroll">
-      <table>
-        <tr><th>Service</th><th>What for</th><th>When</th></tr>
-        <tr><td>Nominatim (OpenStreetMap)</td><td>Turning a place name into coordinates, and back</td><td>Only when you press <strong>Locate</strong> or move a coordinate — never per keystroke</td></tr>
-        <tr><td>Open-Meteo (ERA5, ECMWF)</td><td>The weather record for that date, hour and place; and the time zone at a location</td><td>Once a full date and a place are known</td></tr>
-        <tr><td>AWS Terrain Tiles</td><td>The ground's real relief around the witness</td><td>When a location is set</td></tr>
-        <tr><td>Esri World Imagery, or EOX Sentinel-2 cloudless</td><td>The aerial imagery draped over that relief</td><td>Same</td></tr>
-      </table>
-      </div>
-      <p>Each is a picker in the interface, sitting where its data is reported and carrying the
-        attribution its licence requires, so you can see what answered and choose another. The star,
-        comet, nova and satellite catalogues are generated ahead of time and shipped inside the bundle,
-        so nothing is fetched for those.</p>
-      <p>A page that only <em>replays</em> a finished recording (<code>&lt;rr0-scene&gt;</code>,
-        <code>&lt;rr0-sighting&gt;</code>) makes no lookup at all
-        beyond the terrain and imagery tiles — a published recording carries its own weather and is
-        never looked up again, which is also why it reads identically years later.</p>
+      <p>Everything that is fetched — from where, when, and under which licence — is listed source by
+        source on <a href="/docs/sources/">Sources and choices</a>, the one list there is, so that
+        this answer does not have to keep a second copy of it. In short:</p>
+      <ul>
+        <li><strong>While you author</strong>, the editor looks things up for you: a place's
+          coordinates when you press <strong>Locate</strong>, the weather record once a full date and
+          a place are known, the relief and aerial imagery around the witness. Each lookup is a picker
+          in the interface, where its data is reported, with the attribution its licence requires.
+          Drafting a recording from its description sends that text to the model you chose, with your
+          own key, and only when you ask.</li>
+        <li><strong>A page that only replays</strong> a finished recording (<code>&lt;rr0-scene&gt;</code>,
+          <code>&lt;rr0-sighting&gt;</code>) asks for the relief and imagery tiles, what this site serves
+          itself (satellite elements, 3D models), and what the recording itself points at (a photo of the
+          place, a sound). A published recording carries its own weather and is never looked up again,
+          which is also why it reads identically years later.</li>
+      </ul>
     </div>
 
     <div class="faq-item">
@@ -320,25 +318,24 @@ export class FaqPage implements SitePage {
       <p>Les enregistrements restent dans votre navigateur : il n'y a ni compte ni stockage côté
         serveur. <strong>Exporter</strong> écrit un fichier sur votre disque, et ce fichier est
         l'enregistrement complet.</p>
-      <p>Ce que va chercher l'éditeur, et quand :</p>
-      <div class="table-scroll">
-      <table>
-        <tr><th>Service</th><th>Pour quoi</th><th>Quand</th></tr>
-        <tr><td>Nominatim (OpenStreetMap)</td><td>Transformer un nom de lieu en coordonnées, et l'inverse</td><td>Seulement quand vous appuyez sur <strong>Localiser</strong> ou déplacez une coordonnée — jamais à chaque frappe</td></tr>
-        <tr><td>Open-Meteo (ERA5, ECMWF)</td><td>Le relevé météo de cette date, heure et lieu ; et le fuseau horaire d'un point</td><td>Dès qu'une date complète et un lieu sont connus</td></tr>
-        <tr><td>AWS Terrain Tiles</td><td>Le relief réel du sol autour du témoin</td><td>Dès qu'un lieu est posé</td></tr>
-        <tr><td>Esri World Imagery, ou EOX Sentinel-2 cloudless</td><td>L'imagerie aérienne drapée sur ce relief</td><td>De même</td></tr>
-      </table>
-      </div>
-      <p>Chacun est un sélecteur dans l'interface, placé là où sa donnée est rapportée et portant
-        l'attribution qu'exige sa licence : vous voyez qui a répondu et pouvez en choisir un autre.
-        Les catalogues d'étoiles, de comètes, de novae et de satellites sont engendrés à l'avance et embarqués
-        dans le <i lang="en">bundle</i>, donc rien n'est appelé pour eux.</p>
-      <p>Une page qui ne fait que <em>rejouer</em> un enregistrement terminé
-        (<code>&lt;rr0-scene&gt;</code>, <code>&lt;rr0-sighting&gt;</code>) ne fait aucune
-        consultation, hors les tuiles de relief
-        et d'imagerie : un enregistrement publié porte sa propre météo et n'est jamais reconsulté —
-        c'est aussi pourquoi il se lit à l'identique des années plus tard.</p>
+      <p>Tout ce qui est appelé — d'où, quand, et sous quelle licence — est listé source par source
+        sur <a href="/docs/sources/">Les sources et les choix</a>, la seule liste qui existe, pour que
+        cette réponse n'ait pas à en tenir une seconde copie. En bref :</p>
+      <ul>
+        <li><strong>Pendant la saisie</strong>, l'éditeur relève les choses pour vous : les
+          coordonnées d'un lieu quand vous appuyez sur <strong>Localiser</strong>, le relevé météo dès
+          qu'une date complète et un lieu sont connus, le relief et l'imagerie aérienne autour du
+          témoin. Chaque consultation est un sélecteur dans l'interface, là où sa donnée est
+          rapportée, avec l'attribution qu'exige sa licence. Rédiger un enregistrement depuis sa
+          description envoie ce texte au modèle que vous avez choisi, avec votre propre clé, et
+          seulement quand vous le demandez.</li>
+        <li><strong>Une page qui ne fait que rejouer</strong> un enregistrement terminé
+          (<code>&lt;rr0-scene&gt;</code>, <code>&lt;rr0-sighting&gt;</code>) demande les tuiles de relief
+          et d'imagerie, ce que ce site sert lui-même (éléments orbitaux des satellites, modèles 3D), et
+          ce vers quoi l'enregistrement pointe (une photo du lieu, un son). Un enregistrement publié
+          porte sa propre météo et n'est jamais reconsulté — c'est aussi pourquoi il se lit à
+          l'identique des années plus tard.</li>
+      </ul>
     </div>
 
     <div class="faq-item">

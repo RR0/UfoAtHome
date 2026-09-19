@@ -406,7 +406,7 @@ if (docs) {
     <div class="prose-wide">
       <p><strong>Export</strong> gives you a JSON file. That file <em>is</em> the whole recording —
         there is no account, no database, and no copy kept here. Host it wherever you like. What is
-        in it, field by field, is on <a href="/docs/format/">the JSON format</a>'s page.</p>
+        in it, field by field, is on <a href="/docs/format/">the sighting file</a>'s page.</p>
       <p>What to do with it next has its own pages, with examples you can run and copy:
         <a href="/docs/share/">sharing an observation</a>, which is a link to send or two lines of
         HTML in a page of your own, and <a href="/docs/components/">the components</a>, if you want
@@ -755,7 +755,7 @@ if (docs) {
       <p><strong>Exporter</strong> vous remet un fichier JSON. Ce fichier <em>est</em>
         l'enregistrement complet : il n'y a ni compte, ni base de données, ni copie conservée ici.
         Hébergez-le où vous voulez. Ce qu'il contient, champ par champ, est sur la page du
-        <a href="/docs/format/">format JSON</a>.</p>
+        <a href="/docs/format/">fichier d'observation</a>.</p>
       <p>Ce que vous en faites ensuite a ses propres pages, avec des exemples à essayer et à
         copier : <a href="/docs/share/">partager une observation</a>, c'est-à-dire un lien à envoyer
         ou deux lignes de HTML dans votre page, et <a href="/docs/components/">les composants</a>,

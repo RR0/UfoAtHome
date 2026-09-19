@@ -65,7 +65,7 @@ export class DocsCreatePage extends DocsSection {
 <section class="band">
   <div class="wrap prose-wide">
     <p>Everything the editor writes, field by field, with a whole file to type in and the demos
-      worth reading, is on its own page: <a href="/docs/format/">the JSON format</a>.</p>
+      worth reading, is on its own page: <a href="/docs/format/">the sighting file</a>.</p>
     <p class="doc-try-actions"><a class="btn btn-primary" href="/docs/format/">Read the format</a></p>
   </div>
 </section>
@@ -103,7 +103,7 @@ export class DocsCreatePage extends DocsSection {
 <section class="band">
   <div class="wrap prose-wide">
     <p>Tout ce que l'éditeur écrit, champ par champ, avec un fichier entier à taper et les démos qui
-      valent la lecture, est sur sa propre page : <a href="/docs/format/">le format JSON</a>.</p>
+      valent la lecture, est sur sa propre page : <a href="/docs/format/">le fichier d'observation</a>.</p>
     <p class="doc-try-actions"><a class="btn btn-primary" href="/docs/format/">Lire le format</a></p>
   </div>
 </section>
