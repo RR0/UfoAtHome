@@ -4935,9 +4935,14 @@ export class SceneRenderer {
         this.baseFogColor[2] + (LIGHTNING_COLOR.b - this.baseFogColor[2]) * k
       )
     }
-    if (this.skyMesh) {
+    // Only a sky that IS a colour: the scattered sky is a shader computing its own radiance, and
+    // has no colour to raise (a flash does not light it yet — it lights the fog, the ground and the
+    // decor below). Reading one off it threw on every frame of a storm, which is what
+    // sky-test-storm did.
+    const skyColour = (this.skyMesh?.material as MeshBasicMaterial | undefined)?.color
+    if (skyColour) {
       const gain = level * LIGHTNING_SKY_GAIN
-      ;(this.skyMesh.material as MeshBasicMaterial).color.setRGB(1 + gain * LIGHTNING_COLOR.r, 1 + gain * LIGHTNING_COLOR.g, 1 + gain * LIGHTNING_COLOR.b)
+      skyColour.setRGB(1 + gain * LIGHTNING_COLOR.r, 1 + gain * LIGHTNING_COLOR.g, 1 + gain * LIGHTNING_COLOR.b)
     }
     if (this.lastSunPosition) this.updateCloudLighting(this.lastSunPosition, this.baseFogColor)
     this.lightningLight.intensity = level * LIGHTNING_LIGHT_INTENSITY
