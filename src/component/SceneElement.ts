@@ -775,6 +775,13 @@ export class SceneElement extends HTMLElement {
     return this.sceneRenderer.currentTerrainAttribution
   }
 
+  /** The same, for the roads laid on that patch — and it is owed for more than a licence: it is
+   * where a reader is told that those roads are a survey of TODAY and not of the day the account
+   * is about (see RoadProvider.contemporary). Undefined while none has been drawn. */
+  get currentRoadAttribution(): string | undefined {
+    return this.sceneRenderer.currentRoadAttribution
+  }
+
   /** Relays a change of terrain source through to the renderer — see its setTerrainProviders.
    * Same "expose the nested renderer to a composing wrapper" arrangement as the getters above. */
   setTerrainProviders(providers: TerrainProviders): void {

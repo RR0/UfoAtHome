@@ -1,11 +1,16 @@
 import type { ElevationProvider } from "./ElevationProvider.js"
 import type { ImageryProvider } from "./ImageryProvider.js"
+import type { RoadProvider } from "./RoadProvider.js"
 import { AwsTerrariumElevationProvider } from "./providers/AwsTerrariumElevationProvider.js"
 import { EsriWorldImageryProvider } from "./providers/EsriWorldImageryProvider.js"
+import { OverpassRoadProvider } from "./providers/OverpassRoadProvider.js"
 
 export interface TerrainProviders {
   elevation: ElevationProvider
   imagery: ImageryProvider
+  /** Optional, and absent is a real answer: a scene with no road provider draws no roads, which is
+   * what every scene did before this existed. */
+  roads?: RoadProvider
 }
 
 /**
@@ -15,7 +20,7 @@ export interface TerrainProviders {
  * reference a concrete provider class.
  */
 export function defaultTerrainProviders(): TerrainProviders {
-  return { elevation: new AwsTerrariumElevationProvider(), imagery: defaultImageryProvider() }
+  return { elevation: new AwsTerrariumElevationProvider(), imagery: defaultImageryProvider(), roads: new OverpassRoadProvider() }
 }
 
 /**

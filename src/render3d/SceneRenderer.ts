@@ -70,7 +70,8 @@ import { BRIGHT_STARS } from "../engine/astronomy/brightStarCatalog.js"
 import type { BrightStar } from "../engine/astronomy/brightStarCatalog.js"
 import { defaultTerrainProviders } from "./terrain/defaultTerrainProviders.js"
 import type { TerrainProviders } from "./terrain/defaultTerrainProviders.js"
-import { buildTerrainMesh } from "./terrain/TerrainMeshBuilder.js"
+import { boundsAroundObserver, buildTerrainMesh } from "./terrain/TerrainMeshBuilder.js"
+import { RoadSystem } from "./RoadSystem.js"
 import { geoToLocalMeters } from "./terrain/GeoProjection.js"
 import { DEFAULT_CLOUD_BASE_M, DEFAULT_ICE_CRYSTAL_ALIGNMENT, DEFAULT_WEATHER } from "../engine/model/Weather.js"
 import type { PrecipitationType, Weather } from "../engine/model/Weather.js"
@@ -809,6 +810,9 @@ export class SceneRenderer {
   private terrainOrigin?: { lat: number; lng: number }
   private terrainBuildToken = 0
   private terrainAttribution?: string
+  /** The roads laid on the patch, and the credit their survey requires — see RoadSystem. */
+  private readonly roadSystem = new RoadSystem()
+  private roadAttribution?: string
   /** Which catalogue resolves a recording's named 3D models — swappable exactly like the terrain's
    * own providers (see setDecorModelProvider), and built from the registry's first entry by
    * default so nothing has to configure it. */
@@ -1176,6 +1180,7 @@ export class SceneRenderer {
     this.scene.add(this.celestialLight, this.celestialLightTarget, this.skyLight, this.lightningLight)
     this.scene.add(this.celestialGroup)
     this.scene.add(this.bodySystem.group)
+    this.scene.add(this.roadSystem.group)
     const scatteredSky = new ScatteredSky(this.renderer, () => {
       this.skyColoursStale = true
       this.render()
@@ -1188,6 +1193,13 @@ export class SceneRenderer {
    * real terrain patch has been built — undefined until then (see setTerrainOrigin). */
   get currentTerrainAttribution(): string | undefined {
     return this.terrainAttribution
+  }
+
+  /** The same, for the roads drawn on that patch — and it carries more than a licence: it is where
+   * a reader is told that the roads they are looking at are a survey of TODAY, not of the day the
+   * account is about (see RoadProvider.contemporary). Undefined while no road has been drawn. */
+  get currentRoadAttribution(): string | undefined {
+    return this.roadAttribution
   }
 
   resize(width: number, height: number): void {
@@ -1339,6 +1351,8 @@ export class SceneRenderer {
     this.terrainMesh = undefined
     this.terrainOrigin = undefined
     this.terrainAttribution = undefined
+    this.roadSystem.clear()
+    this.roadAttribution = undefined
     // The flat disc is the only ground again until the next build lands (see applyGroundDepthWrite).
     this.applyGroundDepthWrite()
     // Any build still in flight is about the old source now.
@@ -1406,12 +1420,49 @@ export class SceneRenderer {
           this.setObserverPose(this.decorCurrentPose)
           this.updateDecorAnchoring(this.decorReferencePose, this.decorCurrentPose, this.decorTime)
         }
+        // After the patch, never before: a road is laid on the relief, and there is no relief to
+        // lay it on until this point.
+        this.buildRoads(lat, lng, radiusM)
         this.render()
         onSettled?.()
       })
       .catch(error => {
         console.warn("Terrain build failed, keeping the flat ground fallback:", error)
         onSettled?.()
+      })
+  }
+
+  /**
+   * Asks the road provider for the ways over the patch just built, and lays them on it.
+   *
+   * Separate from the terrain build and awaited by nobody: a scene whose roads are still in flight
+   * is a scene with no roads, which is what every scene was until now. A refusal, an offline
+   * browser or a busy Overpass endpoint is therefore not an error state — it is one fewer thing
+   * drawn, reported once to the console and never to the reader.
+   */
+  private buildRoads(lat: number, lng: number, radiusM: number): void {
+    const provider = this.terrainProviders.roads
+    if (!provider) {
+      this.roadSystem.clear()
+      this.roadAttribution = undefined
+      return
+    }
+    provider.getRoads(boundsAroundObserver(lat, lng, radiusM))
+      .then(ways => {
+        // Against the PLACE, not against the build token. A patch is rebuilt for reasons that have
+        // nothing to do with where it is — a change of source, a witness walking a hundred and
+        // fifty metres — and a fetch that takes Overpass twenty seconds would lose every one of
+        // those races and quietly draw nothing. What makes these roads wrong is the scene having
+        // moved somewhere else, and that is what this asks.
+        if (this.terrainOrigin?.lat !== lat || this.terrainOrigin?.lng !== lng) return
+        this.roadSystem.set(ways, lat, lng, (x, z) => this.groundYUnder(x, z), provider.contemporary,
+          `${lat},${lng},${radiusM},${ways.length}`)
+        this.roadAttribution = ways.length > 0 ? provider.attribution : undefined
+        this.compileNextFrameOffThread()
+        this.render()
+      })
+      .catch(error => {
+        console.warn("Roads unavailable, drawing none:", error)
       })
   }
 
@@ -3367,6 +3418,7 @@ export class SceneRenderer {
     this.disposeMesh(this.skyMesh)
     this.disposeMesh(this.groundMesh)
     this.disposeMesh(this.terrainMesh)
+    this.roadSystem.dispose()
     this.disposeCloudSystem()
     this.disposeCirrus()
     this.disposePrecipitationPoints()

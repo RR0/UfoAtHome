@@ -70,7 +70,9 @@ export interface TerrainBuildResult {
   originElevationM?: number
 }
 
-function boundsAroundObserver(observerLat: number, observerLng: number, radiusM: number): GeoBounds {
+/** The square of ground a patch of `radiusM` covers, centred on the observer — also what anything
+ * else laid over that same ground has to ask for (see RoadProvider). */
+export function boundsAroundObserver(observerLat: number, observerLng: number, radiusM: number): GeoBounds {
   return {
     north: localMetersToGeo(0, -radiusM, observerLat, observerLng).lat,
     south: localMetersToGeo(0, radiusM, observerLat, observerLng).lat,

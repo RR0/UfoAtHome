@@ -1052,6 +1052,14 @@ export class SightingElement extends HTMLElement {
       item.textContent = terrainAttribution
       this.infoCreditsList.appendChild(item)
     }
+    // The roads, whose credit carries the warning as well as the licence: they are today's network,
+    // and the account is of another day (see RoadProvider.contemporary).
+    const roadAttribution = this.sceneElement.currentRoadAttribution
+    if (roadAttribution) {
+      const item = document.createElement("li")
+      item.textContent = roadAttribution
+      this.infoCreditsList.appendChild(item)
+    }
     // The witness map's own tiles, once a reader has opened it and they have arrived — the same
     // licence, owed for a second use of the same service. Skipped when the terrain's line already
     // carries those words: the ground patch and the map are normally drawn from the same provider,
