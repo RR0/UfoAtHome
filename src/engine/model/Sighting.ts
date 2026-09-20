@@ -10,6 +10,7 @@ import type { SightingSound } from "./Sound.js"
 import type { People } from "./People.js"
 import type { DecorObject } from "./Decor.js"
 import type { Milestone } from "./Milestone.js"
+import type { StatedRoad } from "./Road.js"
 import type { SaidText } from "./SaidText.js"
 import type { SceneReference } from "./Reference.js"
 import { Instruments } from "../instrument/Instrument.js"
@@ -326,7 +327,12 @@ export class Sighting {
     /** Pictures of the place laid over the reconstruction — see SceneReference. Not readonly, same
      * "reassigned wholesale on edit" reasoning as decor above. Empty for every recording made
      * before pictures could be laid over one. */
-    public references: SceneReference[] = []
+    public references: SceneReference[] = [],
+    /** The roads the account's own plan draws, in metres from the witness's place — see Road.ts.
+     * Not readonly, same "reassigned wholesale on edit" reasoning as decor above. Empty for every
+     * recording that states none, which is every recording made before a plan could be read into
+     * one; those still get the roads a survey of today reports, drawn faint. */
+    public roads: StatedRoad[] = []
   ) {
   }
 

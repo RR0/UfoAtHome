@@ -18,8 +18,17 @@ function straight(id: string, surface: RoadWay["surface"], widthM: number, metre
   }
 }
 
+/** The surveyed layer's meshes — the group now holds one child group per kind (see RoadSystem). */
 function meshes(system: RoadSystem): Mesh<BufferGeometry>[] {
-  return system.group.children as Mesh<BufferGeometry>[]
+  return layer(system, "roads surveyed")
+}
+
+function stated(system: RoadSystem): Mesh<BufferGeometry>[] {
+  return layer(system, "roads stated")
+}
+
+function layer(system: RoadSystem, name: string): Mesh<BufferGeometry>[] {
+  return (system.group.children.find(child => child.name === name)?.children ?? []) as Mesh<BufferGeometry>[]
 }
 
 describe("RoadSystem", () => {
@@ -61,14 +70,34 @@ describe("RoadSystem", () => {
     expect(across).toBeCloseTo(7, 1)
   })
 
-  it("draws a contemporary road faint, and one the case file states at full presence", () => {
-    const stated = new RoadSystem()
-    stated.set([straight("a", "gravel", 4, 100)], LAT, LNG, () => 0, false)
-    const today = new RoadSystem()
-    today.set([straight("a", "gravel", 4, 100)], LAT, LNG, () => 0, true)
-    const opacityOf = (system: RoadSystem): number => (meshes(system)[0].material as { opacity: number }).opacity
-    expect(opacityOf(stated)).toBe(1)
-    expect(opacityOf(today)).toBe(RoadSystem.CONTEMPORARY_OPACITY)
+  it("draws a surveyed road faint, and one the case file states at full presence", () => {
+    // The two are not the same claim: one is the ground the witness was on, measured by the people
+    // who went there; the other is a survey taken sixty years later.
+    const system = new RoadSystem()
+    system.set([straight("a", "gravel", 4, 100)], LAT, LNG, () => 0, true)
+    system.setStated([{ id: "plan", surface: "gravel", widthM: 4, path: [{ eastM: 0, northM: 0 }, { eastM: 100, northM: 0 }] }], () => 0)
+    const opacityOf = (mesh: Mesh<BufferGeometry>): number => (mesh.material as unknown as { opacity: number }).opacity
+    expect(opacityOf(stated(system)[0])).toBe(1)
+    expect(opacityOf(meshes(system)[0])).toBe(RoadSystem.CONTEMPORARY_OPACITY)
+  })
+
+  it("keeps a stated road when no survey answers — it depends on nobody", () => {
+    const system = new RoadSystem()
+    system.setStated([{ id: "plan", surface: "gravel", widthM: 4, path: [{ eastM: 0, northM: 0 }, { eastM: 100, northM: 0 }] }], () => 0)
+    system.set([straight("a", "paved", 7, 100)], LAT, LNG, () => 0, true)
+    system.clear()
+    expect(meshes(system)).toHaveLength(0)
+    expect(stated(system)).toHaveLength(1)
+  })
+
+  it("lays a stated road in the account's own metres, east and north of the witness's place", () => {
+    const system = new RoadSystem()
+    system.setStated([{ id: "plan", surface: "dirt", widthM: 4, path: [{ eastM: 0, northM: 0 }, { eastM: 0, northM: 100 }] }], () => 0)
+    const position = stated(system)[0].geometry.getAttribute("position")
+    // North is the NEGATED z axis, the convention decor is placed under.
+    let furthestNorth = 0
+    for (let i = 0; i < position.count; i++) furthestNorth = Math.min(furthestNorth, position.getZ(i))
+    expect(furthestNorth).toBeCloseTo(-100, 1)
   })
 
   it("re-drapes on every call, because a carriageway belongs to the relief it was laid on", () => {

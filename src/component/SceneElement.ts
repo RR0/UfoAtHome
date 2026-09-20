@@ -1050,6 +1050,9 @@ export class SceneElement extends HTMLElement {
     // Raw pose's own lat/lng (possibly undefined), never the astronomy fallback below — a real
     // terrain patch must only ever build from a real recorded location, never (0,0).
     this.sceneRenderer.setTerrainOrigin(pose?.lat, pose?.lng)
+    // What the account's own plan draws, as opposed to what a survey of today reports — see
+    // StatedRoad. Cheap to call every tick: the renderer keeps the array it was last given.
+    this.sceneRenderer.setStatedRoads(sighting.roads)
     // Last, once the camera and the decor stand where this instant puts them: what the decor says
     // along a line of sight is read from exactly that state (see pushPhenomenaAt).
     this.pushPhenomenaAt(t)

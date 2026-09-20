@@ -1,6 +1,7 @@
 // Named imports only — see SceneRenderer.ts's own top-of-file comment on why (tree-shaking).
 import { BufferAttribute, BufferGeometry, Color, Group, Mesh, MeshLambertMaterial } from "three"
 import type { RoadSurface, RoadWay } from "./terrain/RoadProvider.js"
+import type { StatedRoad } from "../engine/model/Road.js"
 import { geoToLocalMeters } from "./terrain/GeoProjection.js"
 
 /** Where the ground is, in world units, under a point of the scene — SceneRenderer.groundYUnder. */
@@ -45,9 +46,18 @@ export class RoadSystem {
   }
 
   readonly group = new Group()
+  /** What a survey of today reports, drawn faint, and what the case file states, drawn whole. Two
+   * groups rather than one, because they arrive at different times and from different places: the
+   * stated ones the moment a recording is loaded, the surveyed ones whenever the archive or the
+   * service answers. */
+  private readonly surveyed = new Group()
+  private readonly stated = new Group()
 
   constructor() {
     this.group.name = "roads"
+    this.surveyed.name = "roads surveyed"
+    this.stated.name = "roads stated"
+    this.group.add(this.surveyed, this.stated)
   }
 
   /**
@@ -60,7 +70,7 @@ export class RoadSystem {
    * caller's business (see SceneRenderer.buildRoads); deciding not to drape is nobody's.
    */
   set(ways: RoadWay[], originLat: number, originLng: number, groundYAt: GroundYAt, contemporary: boolean): void {
-    this.clear()
+    RoadSystem.empty(this.surveyed)
     // One mesh per SURFACE, not per way. A town's network is five hundred ways — around Socorro it
     // is 490 — and five hundred draw calls to put down what is, visually, three materials would
     // cost more than everything else in the frame put together. They share a material anyway, so
@@ -73,14 +83,42 @@ export class RoadSystem {
     }
     for (const [surface, batch] of bySurface) {
       const mesh = this.meshOf(surface, batch, contemporary)
-      if (mesh) this.group.add(mesh)
+      if (mesh) this.surveyed.add(mesh)
     }
   }
 
-  /** Nothing to draw — an unreached provider, or a scene that has moved somewhere else. */
+  /**
+   * The roads the case file itself draws, in metres from the witness's place — see StatedRoad.
+   *
+   * Drawn whole rather than faint, and that is the whole point of telling them apart: this is the
+   * ground the witness was on, measured by the people who went there, not a survey taken sixty
+   * years later.
+   */
+  setStated(roads: StatedRoad[], groundYAt: GroundYAt): void {
+    RoadSystem.empty(this.stated)
+    const bySurface = new Map<RoadSurface, { positions: number[]; indices: number[] }>()
+    for (const road of roads) {
+      const batch = bySurface.get(road.surface) ?? { positions: [], indices: [] }
+      bySurface.set(road.surface, batch)
+      // z is the negated north axis, the same convention decor is placed under (see
+      // GeoProjection, and SceneRenderer's own eastM/northM handling).
+      this.appendPath(road.path.map(point => ({ x: point.eastM, z: -point.northM })), road.widthM, groundYAt, batch)
+    }
+    for (const [surface, batch] of bySurface) {
+      const mesh = this.meshOf(surface, batch, false)
+      if (mesh) this.stated.add(mesh)
+    }
+  }
+
+  /** Nothing surveyed to draw — an unreached provider, or a scene that has moved somewhere else.
+   * What the case file states is not touched: it does not depend on anybody answering. */
   clear(): void {
-    for (const child of [...this.group.children]) {
-      this.group.remove(child)
+    RoadSystem.empty(this.surveyed)
+  }
+
+  private static empty(group: Group): void {
+    for (const child of [...group.children]) {
+      group.remove(child)
       const mesh = child as Mesh<BufferGeometry, MeshLambertMaterial>
       mesh.geometry?.dispose()
       mesh.material?.dispose()
@@ -88,7 +126,8 @@ export class RoadSystem {
   }
 
   dispose(): void {
-    this.clear()
+    RoadSystem.empty(this.surveyed)
+    RoadSystem.empty(this.stated)
   }
 
   /**
@@ -100,12 +139,14 @@ export class RoadSystem {
    * corner, and a road is mostly corners.
    */
   private appendRibbon(way: RoadWay, originLat: number, originLng: number, groundYAt: GroundYAt, batch: { positions: number[]; indices: number[] }): void {
-    const centre = this.resample(way.points.map(point => {
-      const { x, z } = geoToLocalMeters(point.lat, point.lng, originLat, originLng)
-      return { x, z }
-    }))
+    this.appendPath(way.points.map(point => geoToLocalMeters(point.lat, point.lng, originLat, originLng)), way.widthM, groundYAt, batch)
+  }
+
+  /** One centre line, already in the patch's own metres, as a strip of quads — see appendRibbon. */
+  private appendPath(points: { x: number; z: number }[], widthM: number, groundYAt: GroundYAt, batch: { positions: number[]; indices: number[] }): void {
+    const centre = this.resample(points)
     if (centre.length < 2) return
-    const half = Math.max(0.5, way.widthM / 2)
+    const half = Math.max(0.5, widthM / 2)
     const base = batch.positions.length / 3
     for (let i = 0; i < centre.length; i++) {
       const before = centre[Math.max(0, i - 1)]

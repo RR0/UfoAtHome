@@ -25,6 +25,7 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     setCloudOffset(): void {}
     setGait(): void {}
     setTerrainOrigin(): void {}
+    setStatedRoads(): void {}
     get currentTerrainAttribution(): undefined {
       return undefined
     }

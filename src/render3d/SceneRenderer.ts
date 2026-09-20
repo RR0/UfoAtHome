@@ -73,6 +73,7 @@ import type { TerrainProviders } from "./terrain/defaultTerrainProviders.js"
 import { boundsAroundObserver, buildTerrainMesh } from "./terrain/TerrainMeshBuilder.js"
 import { RoadSystem } from "./RoadSystem.js"
 import type { RoadWay } from "./terrain/RoadProvider.js"
+import type { StatedRoad } from "../engine/model/Road.js"
 import { geoToLocalMeters } from "./terrain/GeoProjection.js"
 import { DEFAULT_CLOUD_BASE_M, DEFAULT_ICE_CRYSTAL_ALIGNMENT, DEFAULT_WEATHER } from "../engine/model/Weather.js"
 import type { PrecipitationType, Weather } from "../engine/model/Weather.js"
@@ -818,6 +819,8 @@ export class SceneRenderer {
    * than a witness moves to another county, and Overpass is a free service answering in tens of
    * seconds: the same square of ground is asked for once. */
   private roadWays?: { lat: number; lng: number; radiusM: number; ways: RoadWay[] }
+  /** The roads the recording itself states — held so a rebuilt patch can be re-draped with them. */
+  private statedRoads: StatedRoad[] = []
   /** Which catalogue resolves a recording's named 3D models — swappable exactly like the terrain's
    * own providers (see setDecorModelProvider), and built from the registry's first entry by
    * default so nothing has to configure it. */
@@ -1437,6 +1440,8 @@ export class SceneRenderer {
         // After the patch, never before: a road is laid on the relief, and there is no relief to
         // lay it on until this point.
         this.buildRoads(lat, lng, radiusM)
+        // The stated ones need no fetch and no permission: they are in the file already.
+        this.drapeStatedRoads()
         this.render()
         onSettled?.()
       })
@@ -1495,8 +1500,33 @@ export class SceneRenderer {
 
   /** Lays ways already in hand on the relief as it stands right now — see RoadSystem.set on why
    * this is done again for every patch rather than skipped when nothing about the roads changed. */
+  /**
+   * The roads the recording's own plan draws — see StatedRoad.
+   *
+   * Laid as soon as there is relief to lay them on, and re-laid with every patch, exactly like the
+   * surveyed ones: a carriageway belongs to the ground under it.
+   */
+  setStatedRoads(roads: StatedRoad[]): void {
+    if (roads === this.statedRoads) return
+    this.statedRoads = roads
+    this.drapeStatedRoads()
+    this.render()
+  }
+
+  private drapeStatedRoads(): void {
+    const patch = this.terrainMesh
+    if (!patch) return
+    this.roadSystem.group.position.copy(patch.position)
+    this.roadSystem.setStated(this.statedRoads, (x, z) => this.groundYOfPatch(patch, x, z))
+  }
+
   private drapeRoads(ways: RoadWay[], lat: number, lng: number, contemporary: boolean): void {
-    this.roadSystem.set(ways, lat, lng, (x, z) => this.groundYUnder(x, z), contemporary)
+    const patch = this.terrainMesh
+    if (!patch) return
+    // In the PATCH's own frame, not the world's: see the doc comment on the line that carries the
+    // patch's position over to the road group.
+    this.roadSystem.group.position.copy(patch.position)
+    this.roadSystem.set(ways, lat, lng, (x, z) => this.groundYOfPatch(patch, x, z), contemporary)
     this.roadAttribution = ways.length > 0 ? this.terrainProviders.roads?.attribution : undefined
     this.compileNextFrameOffThread()
     this.render()
@@ -1840,6 +1870,11 @@ export class SceneRenderer {
       const drift = geoToLocalMeters(this.terrainOrigin.lat, this.terrainOrigin.lng, currentPose.lat, currentPose.lng)
       this.terrainMesh.position.x = drift.x - (inhabited ? 0 : this.gaitOffset.eastM)
       this.terrainMesh.position.z = drift.z + (inhabited ? 0 : this.gaitOffset.northM)
+      // A carriageway is part of the ground it is laid on, so it rides with the patch rather than
+      // being rebuilt: the ribbons are built in the patch's OWN frame (see drapeRoads), which is
+      // what makes carrying its position over enough. Without this, a witness who walks eleven
+      // hundred metres drags the whole network out from under the relief it was draped on.
+      this.roadSystem.group.position.copy(this.terrainMesh.position)
     }
     if (!inhabited) {
       // The walking eye's own displacement, turned into the same "how far has the world moved under

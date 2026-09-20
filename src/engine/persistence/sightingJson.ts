@@ -12,6 +12,7 @@ import type { Weather, WeatherSource } from "../model/Weather.js"
 import type { People } from "../model/People.js"
 import type { Testimony } from "../model/Testimony.js"
 import type { DecorObject } from "../model/Decor.js"
+import type { StatedRoad } from "../model/Road.js"
 import type { Milestone } from "../model/Milestone.js"
 import type { SceneReference } from "../model/Reference.js"
 import type { SaidText } from "../model/SaidText.js"
@@ -72,6 +73,9 @@ export interface SightingRecordingJson {
   soundTrack?: SoundTrackJson
   /** See Sighting.decor. Absent/omitted means no decor — older recordings default to []. */
   decor?: DecorObject[]
+  /** The roads the account's own plan draws — see Sighting.roads and Road.ts. Absent means none is
+   * stated, and the scene then shows only what a survey of today reports, drawn faint. */
+  roads?: StatedRoad[]
   /** Which meteorological record `weatherTrack` was looked up from, when it wasn't the witness who
    * stated the conditions — see Sighting.weatherSource. Absent means they ARE the witness's (or
    * predate this field), and a reader must not treat them as measurements. */
@@ -130,6 +134,7 @@ export function plainSightingJson(sighting: Sighting): SightingRecordingJson {
     decor: sighting.decor,
     milestones: sighting.milestones.length > 0 ? sighting.milestones : undefined,
     references: sighting.references.length > 0 ? sighting.references : undefined,
+    roads: sighting.roads.length > 0 ? sighting.roads : undefined,
     weatherSource: sighting.weatherSource,
     instrument: sighting.instrumentId,
     exposureSeconds: sighting.exposureSeconds,
@@ -187,7 +192,8 @@ function fromPlainSightingJson(json: SightingRecordingJson): Sighting {
         .map(keyframe => (keyframe.pose as { exposureSeconds?: number }).exposureSeconds)
         .find(seconds => seconds !== undefined),
     sortedMilestones(json.milestones ?? []),
-    json.references ?? []
+    json.references ?? [],
+    json.roads ?? []
   )
   // The file states an angle; the drawing has to follow it. Done here rather than in
   // Timeline.fromJSON because the projection needs the pose's own field of view, which lives on

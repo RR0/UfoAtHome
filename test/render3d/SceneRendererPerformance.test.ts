@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest"
 import { BoxGeometry, BufferGeometry, Float32BufferAttribute, Group, Mesh, PerspectiveCamera, Sprite, Vector3 } from "three"
 import { SceneRenderer } from "../../src/render3d/SceneRenderer.js"
 import { DecorSystem } from "../../src/render3d/DecorSystem.js"
+import { RoadSystem } from "../../src/render3d/RoadSystem.js"
 
 // Exercise the CPU scene updates without constructing a WebGL context.
 function renderer() {
@@ -12,7 +13,10 @@ function renderer() {
     compassHovered: false, compassForced: false,
     gaitOffset: { eastM: 0, northM: 0, upM: 0 }, poseCameraY: 1.6,
     // What the real constructor builds from the card — see AdaptiveResolution; nothing here has a card.
-    resolution: { beginDrawing(): void {}, endDrawing(): void {}, update(): undefined { return undefined }, reset(): void {} }
+    resolution: { beginDrawing(): void {}, endDrawing(): void {}, update(): undefined { return undefined }, reset(): void {} },
+    // Also built by the constructor: the roads ride with the patch, so anchoring the decor moves
+    // them too (see SceneRenderer.updateDecorAnchoring).
+    roadSystem: new RoadSystem()
   })
 }
 
