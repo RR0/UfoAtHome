@@ -14,7 +14,7 @@
  * named "exhaust", which is turned so that it trails ASTERN rather than downwards.
  *
  * Chiles's craft ("chiles.gltf"): a slim cigar tapered at both ends, with no porthole at all, and
- * at the front the light area he annotated "cockpit windshield?". Its proportions are his drawing
+ * round the front the light area he annotated "cockpit windshield?". Its proportions are his drawing
  * read through witness-chiles.json's own angles: 9.388° by 0.992° broadside, which at the 30 m of
  * the account is 30 m by 3.17, and a windshield 3 m long at the nose. The cross ribs of his sketch
  * are not reproduced: this format draws shapes, not a surface finish.
@@ -101,8 +101,11 @@ class SurfacePatch {
 class ChilesCraft {
   static readonly HALF_WIDTH_M = Reported.CHILES_DIAMETER_M / 2
   static readonly HALF_LENGTH_M = Reported.LENGTH_M / 2
-  /** The light area he annotated "cockpit windshield?", drawn 3 m long at the nose. */
-  static readonly WINDSHIELD_Z_M: [number, number] = [-14.2, -11.2]
+  /** The light area he annotated "cockpit windshield?", drawn 3 m long at the nose. It goes right
+   * round the nose rather than sitting on one side of it: he drew it from one side and said
+   * nothing about the other, and a lit patch put on the top alone is invisible from an aeroplane
+   * flying level beside it, which is the one place it has to be seen from. */
+  static readonly WINDSHIELD_Z_M: [number, number] = [-14.4, -11.4]
 
   readonly materials: GltfMaterial[] = [
     { ...GltfWriter.material("hull", "#1a2340", 0.1, 0.45), emissiveFactor: GltfWriter.linear("#1c3f9c").map(c => c * 0.35) },
@@ -113,7 +116,7 @@ class ChilesCraft {
     const patch = new SurfacePatch(z => ChilesCraft.HALF_WIDTH_M * Math.sqrt(Math.max(1 - (z / ChilesCraft.HALF_LENGTH_M) ** 2, 0)))
     return [
       { name: "hull", geometry: this.hull(), material: 0 },
-      { name: "windshield", geometry: patch.build(...ChilesCraft.WINDSHIELD_Z_M, 0, (140 * Math.PI) / 180), material: 1 }
+      { name: "windshield", geometry: patch.build(...ChilesCraft.WINDSHIELD_Z_M, 0, Math.PI * 2), material: 1 }
     ]
   }
 

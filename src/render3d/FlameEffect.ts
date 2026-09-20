@@ -1,4 +1,5 @@
-import { AdditiveBlending, Color, DoubleSide, LatheGeometry, Mesh, PlaneGeometry, PointLight, ShaderMaterial, Vector2 } from "three"
+import { AdditiveBlending, Color, DoubleSide, LatheGeometry, Mesh, PointLight, ShaderMaterial, Vector2, Vector3 } from "three"
+import { Glare } from "./Glare.js"
 
 /**
  * A flame thrown by a body of an interpretation — see BodyFlame.
@@ -35,22 +36,20 @@ export class FlameEffect {
   /** Where in the flame its light is, down its length from the node: the middle of its brightest
    * part rather than its tip. */
   static readonly LIGHT_AT = 0.35
-
-  /** The angular radius the glow is never drawn smaller than — the same floor as a decor lamp's
-   * (see DecorSystem's LAMP_MIN_ANGULAR_RADIUS_RAD), and for the same reason: what reaches an eye
-   * from a small bright source far off is its bloom, not its outline. Zamora's flame in the sky at
-   * a kilometre and more is a third of a pixel; its glare is what he saw. */
-  static readonly GLOW_MIN_ANGLE_RAD = 0.002
-  /** How much of a disc of radius r a glow falling as exp(-4 (d/r)²) actually fills. */
-  static readonly GLOW_FILL = (1 - Math.exp(-4)) / 4
-  /** The glow round a flame close enough to be seen for itself is a bloom, not the flame: never
-   * brighter than this share of the flame's own luminance. */
-  static readonly GLOW_MAX_SHARE = 0.3
+  /** The floor angle, the fill and the bloom cap a flame's glare shares with every other glare in
+   * the scene — they live on Glare, and are named here because a flame is where they were first
+   * measured (Zamora's flame at a kilometre is a third of a pixel; its glare is what he saw). */
+  static readonly GLOW_MIN_ANGLE_RAD = Glare.MIN_ANGLE_RAD
+  static readonly GLOW_FILL = Glare.FILL
+  static readonly GLOW_MAX_SHARE = Glare.MAX_SHARE
 
   readonly mesh: Mesh<LatheGeometry, ShaderMaterial>
   readonly light = new PointLight(0xffffff, 0, 0, 2)
-  /** The flame's glare, facing the eye — see glowFor. */
-  readonly glow: Mesh<PlaneGeometry, ShaderMaterial>
+  /** The flame's glare, facing the eye — see glowFor and Glare, whose floor angle and bloom cap
+   * this shares with every other thing in the scene that gives out light. */
+  private readonly glare = new Glare("flame-glow", FlameEffect.RENDER_ORDER)
+  /** Where the glare stands, reused frame after frame. */
+  private readonly scratch = new Vector3()
 
   constructor() {
     const profile: Vector2[] = []
@@ -81,19 +80,11 @@ export class FlameEffect {
     this.mesh.frustumCulled = false
     this.mesh.renderOrder = FlameEffect.RENDER_ORDER
     this.mesh.visible = false
-    this.glow = new Mesh(new PlaneGeometry(2, 2), new ShaderMaterial({
-      uniforms: { uColor: { value: new Color(0, 0, 0) }, uRadius: { value: 1 } },
-      vertexShader: FlameEffect.GLOW_VERTEX,
-      fragmentShader: FlameEffect.GLOW_FRAGMENT,
-      transparent: true,
-      depthWrite: false,
-      blending: AdditiveBlending,
-      toneMapped: false
-    }))
-    this.glow.name = "flame-glow"
-    this.glow.frustumCulled = false
-    this.glow.renderOrder = FlameEffect.RENDER_ORDER
-    this.glow.visible = false
+  }
+
+  /** The glare's own mesh, for whoever puts it in the scene beside the flame. */
+  get glow(): Mesh {
+    return this.glare.mesh
   }
 
   /**
@@ -102,24 +93,19 @@ export class FlameEffect {
    * is what conserves it — and a faint bloom when it is not.
    */
   static glowFor(flame: { lengthM: number, widthM: number, luminanceCdM2: number }, distanceM: number): { radiusM: number, luminanceCdM2: number } {
-    const radiusM = Math.max(flame.widthM * 0.6, distanceM * FlameEffect.GLOW_MIN_ANGLE_RAD)
-    const flameArea = 0.7 * flame.widthM * flame.lengthM
-    const glowArea = FlameEffect.GLOW_FILL * Math.PI * radiusM * radiusM
-    return { radiusM, luminanceCdM2: flame.luminanceCdM2 * Math.min(FlameEffect.GLOW_MAX_SHARE, flameArea / glowArea) }
+    return Glare.spread(flame.widthM * 0.6, 0.7 * flame.widthM * flame.lengthM, flame.luminanceCdM2, distanceM)
   }
 
   /** Stands the glare on the middle of the flame, this big and this colour (linear, on screen). */
   shine(radiusM: number, colour: readonly [number, number, number]): void {
-    this.glow.visible = true
-    this.glow.position.set(0, -0.5, 0).applyMatrix4(this.mesh.matrixWorld)
-    this.glow.material.uniforms.uRadius.value = radiusM
-    ;(this.glow.material.uniforms.uColor.value as Color).setRGB(colour[0], colour[1], colour[2])
+    this.scratch.set(0, -0.5, 0).applyMatrix4(this.mesh.matrixWorld)
+    this.glare.shine(this.scratch, radiusM, colour)
   }
 
   /** Puts the flame out without taking its light out of the scene — see the class comment. */
   putOut(): void {
     this.mesh.visible = false
-    this.glow.visible = false
+    this.glare.hide()
     this.light.intensity = 0
   }
 
@@ -157,33 +143,10 @@ export class FlameEffect {
   dispose(): void {
     this.mesh.geometry.dispose()
     this.mesh.material.dispose()
-    this.glow.geometry.dispose()
-    this.glow.material.dispose()
+    this.glare.dispose()
   }
 
   /** A square turned to face the eye, of the radius given in metres. */
-  private static readonly GLOW_VERTEX = /* glsl */ `
-    uniform float uRadius;
-    varying vec2 vOffset;
-    void main() {
-      vOffset = position.xy;
-      vec4 centre = modelViewMatrix * vec4(0.0, 0.0, 0.0, 1.0);
-      centre.xy += position.xy * uRadius;
-      gl_Position = projectionMatrix * centre;
-    }
-  `
-
-  private static readonly GLOW_FRAGMENT = /* glsl */ `
-    uniform vec3 uColor;
-    varying vec2 vOffset;
-    void main() {
-      float d2 = dot(vOffset, vOffset);
-      if (d2 > 1.0) discard;
-      float weight = exp(-4.0 * d2);
-      gl_FragColor = vec4(uColor * weight, weight);
-    }
-  `
-
   private static readonly VERTEX = /* glsl */ `
     varying vec3 vLocal;
     varying vec3 vViewNormal;

@@ -9,6 +9,7 @@ import type { DecorModelRef } from "../engine/model/Decor.js"
 import { FlameEffect } from "./FlameEffect.js"
 import { DecorSystem } from "./DecorSystem.js"
 import type { DecorObject } from "../engine/model/Decor.js"
+import { Glare } from "./Glare.js"
 import { GroundPlume } from "./GroundPlume.js"
 import type { SmokeSource } from "../engine/interpretation/Interpretation.js"
 
@@ -79,6 +80,8 @@ export class BodySystem {
   private readonly credits = new Map<string, unknown>()
   /** The flames being thrown, by body id — see BodyFlame. */
   private readonly flames = new Map<string, FlameEffect>()
+  /** The bloom round each body that gives out light of its own — see BodyAppearance.luminanceCdM2. */
+  private readonly glares = new Map<string, Glare>()
   /** The dust each flame raises, by body id. */
   private readonly dust = new Map<string, GroundPlume>()
   /** The smoke of what burns on the ground, one plume per source. */
@@ -132,6 +135,7 @@ export class BodySystem {
       holder.scale.set(state.sizeM.widthM, state.sizeM.heightM, state.sizeM.lengthM)
       if (material) BodySystem.paint(material, state, display)
       if (glowing) BodySystem.light(glowing, state, display)
+      this.shine(state, holder, glowing, display, frame.eye)
       this.throwFlame(state, holder, seconds, display, frame.eye)
     }
     const kept = new Set(ids)
@@ -140,10 +144,53 @@ export class BodySystem {
       if (kept.has(id)) {
         holder.visible = false
         this.flames.get(id)?.putOut()
+        this.glares.get(id)?.hide()
       } else {
         this.remove(id)
       }
     }
+  }
+
+  /**
+   * The bloom round a body that gives out light of its own, or none.
+   *
+   * The same glare a flame wears, and for the same reason: what reaches an eye from something
+   * bright is its glare as much as its outline, and a sphere as bright as the Sun with a hard edge
+   * and nothing around it does not read as bright at all, it reads as a white disc.
+   *
+   * How far it reaches is what says HOW bright, because the screen cannot: past a certain luminance
+   * every colour is already at the top of the scale and a brighter thing cannot be painted brighter,
+   * only wider. So the bloom runs from about the body's own size, where what it gives out barely
+   * tells against the sky, out to the width that carries its whole light at the cap, where it is
+   * all the eye has left — which is what a witness means by "we could not look at it".
+   */
+  private shine(state: BodyState, holder: Group, glowing: Glow[] | undefined, display: LuminanceDisplay | undefined, eye: Vector3 | undefined): void {
+    const luminanceCdM2 = state.appearance.luminanceCdM2
+    let glare = this.glares.get(state.id)
+    if (!(luminanceCdM2 > 0) || !eye) {
+      glare?.hide()
+      return
+    }
+    if (!glare) {
+      glare = new Glare(`body-glare:${state.id}`, FlameEffect.RENDER_ORDER)
+      this.glares.set(state.id, glare)
+      this.group.add(glare.mesh)
+    }
+    const radiusM = Math.max(state.sizeM.widthM, state.sizeM.heightM) / 2
+    const areaM2 = Math.PI * radiusM * radiusM
+    // How far up the scale of what can be shown this body already is, 0 to 1.
+    const shown = BodySystem.shown([1, 1, 1], luminanceCdM2, display)
+    const dazzle = Math.min(1, 0.2126 * shown[0] + 0.7152 * shown[1] + 0.0722 * shown[2])
+    const widest = Glare.conserving(areaM2)
+    const spread = Glare.spread(radiusM + (widest - radiusM) * dazzle, areaM2, luminanceCdM2, holder.position.distanceTo(eye))
+    // A model's own brightest glowing part says what colour the bloom is; a primitive's own colour does.
+    const hue = glowing?.find(glow => glow.share >= 1)?.hue ?? BodySystem.rgbOf(state.appearance.color)
+    glare.shine(holder.position, spread.radiusM, BodySystem.shown(hue, spread.luminanceCdM2, display))
+  }
+
+  private static rgbOf(css: string): [number, number, number] {
+    const colour = new Color(css)
+    return [colour.r, colour.g, colour.b]
   }
 
   /**
@@ -176,15 +223,13 @@ export class BodySystem {
     effect.place(this.scratch, node ? BodySystem.pointing(node, this.down, this.aim) : holder.quaternion, flame.lengthM, flame.widthM)
     const light = (css: string): readonly [number, number, number] => {
       const colour = new Color(css)
-      const rgb: [number, number, number] = [colour.r, colour.g, colour.b]
-      return display ? display(rgb, flame.luminanceCdM2) : BodySystem.withoutPhotometry(rgb, flame.luminanceCdM2)
+      return BodySystem.shown([colour.r, colour.g, colour.b], flame.luminanceCdM2, display)
     }
     effect.set(light(flame.color), light(flame.tipColor ?? flame.color), seconds)
     effect.illuminate(BodySystem.luminousIntensityCd(flame) * this.sceneUnitsPerLux, BodySystem.lightColourOf(flame))
     const glow = FlameEffect.glowFor(flame, eye ? effect.mesh.position.distanceTo(eye) : 0)
     const mixed = new Color(flame.color).lerp(new Color(flame.tipColor ?? flame.color), 0.5)
-    const rgb: [number, number, number] = [mixed.r, mixed.g, mixed.b]
-    effect.shine(glow.radiusM, display ? display(rgb, glow.luminanceCdM2) : BodySystem.withoutPhotometry(rgb, glow.luminanceCdM2))
+    effect.shine(glow.radiusM, BodySystem.shown([mixed.r, mixed.g, mixed.b], glow.luminanceCdM2, display))
     this.raiseDust(state.id, flame, seconds)
   }
 
@@ -273,6 +318,15 @@ export class BodySystem {
   private static withoutPhotometry(rgb: readonly [number, number, number], luminanceCdM2: number): readonly [number, number, number] {
     const response = luminanceCdM2 / (luminanceCdM2 + 1e4)
     return [rgb[0] * response, rgb[1] * response, rgb[2] * response]
+  }
+
+  /** Takes a body's bloom out of the scene — only when the body itself goes. */
+  private dropGlare(id: string): void {
+    const glare = this.glares.get(id)
+    if (!glare) return
+    this.group.remove(glare.mesh)
+    glare.dispose()
+    this.glares.delete(id)
   }
 
   /** Takes a body's flame and its light out of the scene — only when the body itself goes. */
@@ -441,17 +495,35 @@ export class BodySystem {
     for (const { material, hue, share } of glowing) BodySystem.glow(material, hue, state.appearance.luminanceCdM2 * share, display)
   }
 
-  /** Sets what a surface gives out: nothing at all below a candela, and otherwise the colour the
-   * scene's own photometry makes of that many candela per square metre. The colour it is handed is
-   * read for its hue only — the photometry decides how bright that hue comes out — which is why a
-   * part that glows less than another is given less LUMINANCE rather than a darker colour. */
+  /** Sets what a surface gives out: nothing at all below a candela, and otherwise its own colour at
+   * the brightness the scene's photometry makes of that many candela per square metre. A part that
+   * glows less than another is given less LUMINANCE, never a darker colour: the colour is the
+   * account's. */
   private static glow(material: MeshStandardMaterial, hue: readonly [number, number, number], luminanceCdM2: number, display?: LuminanceDisplay): void {
     if (!(luminanceCdM2 > 0)) {
       if (material.emissive.r !== 0 || material.emissive.g !== 0 || material.emissive.b !== 0) material.emissive.setRGB(0, 0, 0)
       return
     }
-    const rgb = display ? display(hue, luminanceCdM2) : BodySystem.withoutPhotometry(hue, luminanceCdM2)
+    const rgb = BodySystem.shown(hue, luminanceCdM2, display)
     material.emissive.setRGB(rgb[0], rgb[1], rgb[2])
+  }
+
+  /**
+   * What a surface of this colour and this luminance looks like: the colour the account states, at
+   * the brightness the scene's photometry gives that many candela per square metre.
+   *
+   * The photometry is asked about a WHITE of that luminance and not about the colour itself,
+   * because what it answers is what a light of that brightness looks like to an eye adapted to this
+   * sky — and at night that is nearly white whatever went in. Handing it Chiles's deep blue came
+   * back as a white sliver, which is the one thing his drawing is not. So the scene decides how
+   * bright, and the witness decides what colour, which is the division of labour everywhere else
+   * in this format.
+   */
+  static shown(colour: readonly [number, number, number], luminanceCdM2: number, display?: LuminanceDisplay): [number, number, number] {
+    const white = display ? display([1, 1, 1], luminanceCdM2) : BodySystem.withoutPhotometry([1, 1, 1], luminanceCdM2)
+    const brightness = 0.2126 * white[0] + 0.7152 * white[1] + 0.0722 * white[2]
+    const peak = Math.max(colour[0], colour[1], colour[2]) || 1
+    return [(colour[0] / peak) * brightness, (colour[1] / peak) * brightness, (colour[2] / peak) * brightness]
   }
 
   /**
@@ -554,5 +626,6 @@ export class BodySystem {
     this.built.delete(id)
     this.credits.delete(id)
     this.dropFlame(id)
+    this.dropGlare(id)
   }
 }
