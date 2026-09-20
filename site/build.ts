@@ -255,6 +255,15 @@ ${retired}
   Access-Control-Allow-Origin: *
   Cache-Control: public, max-age=604800
 
+# The catalogue itself is the exception, for the same reason as /lib/*.mjs above: its name never
+# changes but its contents gain an entry at every release, so a week of hard caching left readers
+# with a catalogue from before a model existed — the scene fell back to its placeholder shape with
+# nothing in the console to say why. Revalidated instead; the components also ask for it under
+# their own version, so this costs one 304 per visit at most.
+/models/index.json
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=0, must-revalidate
+
 # The orbital element archive: fetched by scenes embedded anywhere. A day of cache, because a rebuild
 # adds the latest weeks under the same index.
 /tle/*

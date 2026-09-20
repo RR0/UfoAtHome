@@ -91,8 +91,17 @@ export class UfoAtHomeModelCatalogue implements DecorModelProvider {
 }
 
 /** Beside the page first, then this project's own host. Guarded for a non-browser context (tests,
- * SSR), where there is no page to look beside. */
+ * SSR), where there is no page to look beside.
+ *
+ * Each address carries the version of the components asking, because the catalogue is served with a
+ * week of hard caching — right for the model files, whose id IS their content, wrong for the index,
+ * which gains an entry at every release. A reader who had opened a dossier kept a catalogue from
+ * before Zamora's craft existed, and the scene fell back to its placeholder ellipsoid: no insignia
+ * on the hull, and nothing in the console to say why. The version makes a release's index a
+ * different address, fetched once and then cached as hard as before. */
 function defaultIndexUrls(): string[] {
+  const version = `?v=${encodeURIComponent(__APP_VERSION__)}`
   const here = typeof location === "undefined" ? undefined : new URL("/models/index.json", location.href).href
-  return here && here !== UFOATHOME_MODEL_INDEX_URL ? [here, UFOATHOME_MODEL_INDEX_URL] : [UFOATHOME_MODEL_INDEX_URL]
+  return (here && here !== UFOATHOME_MODEL_INDEX_URL ? [here, UFOATHOME_MODEL_INDEX_URL] : [UFOATHOME_MODEL_INDEX_URL])
+    .map(url => url + version)
 }

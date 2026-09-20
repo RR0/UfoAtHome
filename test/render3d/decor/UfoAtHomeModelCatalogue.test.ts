@@ -95,6 +95,17 @@ describe("UfoAtHomeModelCatalogue", () => {
     expect(await catalogue.entries()).toEqual([])
   })
 
+  it("asks for the catalogue under the version of the components asking, so a week-old copy is not reused", async () => {
+    // ufoathome.org serves /models/* with a week of hard caching, which is right for the model
+    // files and wrong for the index: readers who had opened a dossier kept a catalogue from before
+    // Zamora's craft existed, and the scene drew its placeholder shape instead.
+    const fetchImpl = respondingWith({})
+    await new UfoAtHomeModelCatalogue({ fetchImpl }).entries()
+    const asked = (fetchImpl as unknown as ReturnType<typeof vi.fn>).mock.calls.map(call => String(call[0]))
+    expect(asked.length).toBeGreaterThan(0)
+    for (const url of asked) expect(url).toMatch(/\/models\/index\.json\?v=\d+\.\d+\.\d+/)
+  })
+
   it("fetches the catalogue once however often it is asked — the editor asks on every decor selection", async () => {
     const fetchImpl = respondingWith({ "https://example.test/models/index.json": CATALOGUE })
     const catalogue = new UfoAtHomeModelCatalogue({ indexUrls: ["https://example.test/models/index.json"], fetchImpl })
