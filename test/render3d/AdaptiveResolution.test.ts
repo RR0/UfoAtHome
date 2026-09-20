@@ -26,10 +26,26 @@ describe("AdaptiveResolution without a card timer", () => {
     expect(resolution.pixelRatio).toBe(2)
   })
 
-  it("comes down a step at a time while the frames are late, and no further than one", () => {
+  it("comes down a step at a time while the frames are late, and no further than three quarters of the display", () => {
     const resolution = new AdaptiveResolution(2)
     const changes = frames(resolution, 0, 6000, 40)
-    expect(changes).toEqual([1.75, 1.5, 1.25, 1])
+    expect(changes).toEqual([1.75, 1.5])
+    expect(resolution.pixelRatio).toBe(1.5)
+  })
+
+  it("never halves the picture, however late the frames stay", () => {
+    // An eye sees no staircase, so buying frames by drawing a quarter of the pixels buys the wrong
+    // thing: a reader watching a replay on a Retina display had the whole replay at a quarter.
+    const resolution = new AdaptiveResolution(2)
+    frames(resolution, 0, 60000, 200)
+    expect(resolution.pixelRatio).toBe(resolution.minimum)
+    expect(resolution.minimum).toBe(1.5)
+  })
+
+  it("asks nothing of a display that has only one device pixel per CSS pixel", () => {
+    const resolution = new AdaptiveResolution(1)
+    expect(resolution.minimum).toBe(1)
+    frames(resolution, 0, 60000, 200)
     expect(resolution.pixelRatio).toBe(1)
   })
 
@@ -43,18 +59,18 @@ describe("AdaptiveResolution without a card timer", () => {
   it("probes a step back up once the frames are on time, and keeps it when they stay so", () => {
     const resolution = new AdaptiveResolution(2)
     frames(resolution, 0, 6000, 40)
-    expect(resolution.pixelRatio).toBe(1)
+    expect(resolution.pixelRatio).toBe(1.5)
     const changes = frames(resolution, 6100, 60000, 16.7)
-    expect(changes[0]).toBe(1.25)
+    expect(changes[0]).toBe(1.75)
     expect(resolution.pixelRatio).toBe(2)
     // Only upward, since the frames stayed on time throughout.
-    expect(changes).toEqual([1.25, 1.5, 1.75, 2])
+    expect(changes).toEqual([1.75, 2])
   })
 
   it("undoes a probe that made the frames late, and does not try again for a long while", () => {
     const resolution = new AdaptiveResolution(2)
     frames(resolution, 0, 6000, 40)
-    expect(resolution.pixelRatio).toBe(1)
+    expect(resolution.pixelRatio).toBe(1.5)
     // On time long enough for a probe up...
     let now = 6100
     let probed: number | undefined
@@ -62,19 +78,21 @@ describe("AdaptiveResolution without a card timer", () => {
       probed = resolution.update(now, 16.7)
       now += 16.7
     }
-    expect(probed).toBe(1.25)
+    expect(probed).toBe(1.75)
     // ...then late again at once: back down, and quiet for the backoff.
     const reverted = frames(resolution, now, now + 1000, 40)
-    expect(reverted).toEqual([1])
+    expect(reverted).toEqual([1.5])
     const quiet = frames(resolution, now + 1000, now + AdaptiveResolution.PROBE_BACKOFF_MS - 1000, 16.7)
     expect(quiet).toEqual([])
-    expect(resolution.pixelRatio).toBe(1)
+    expect(resolution.pixelRatio).toBe(1.5)
   })
 
   it("never rises above a maximum lowered by the page, and drops to it at once", () => {
     const resolution = new AdaptiveResolution(2)
     resolution.maximum = 1.5
     expect(resolution.pixelRatio).toBe(1.5)
+    // A page asking for 1.5 puts the floor at 1 — three quarters of it is 1.125, and the floor is
+    // taken DOWN to the step grid so it is never stricter than the share it states.
     frames(resolution, 0, 6000, 40)
     expect(resolution.pixelRatio).toBe(1)
     frames(resolution, 6100, 60000, 16.7)

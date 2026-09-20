@@ -16,13 +16,26 @@
  * ratio is lowered on lateness and raised by PROBING: one step up now and then, kept if the frames
  * stay on time, undone otherwise, and tried again later.
  *
- * Between one and the display's own ratio, in quarter steps, and only while the picture is being
+ * Between three quarters of the display's own ratio (see MIN_SHARE_OF_DISPLAY) and all of it, in
+ * quarter steps, and only while the picture is being
  * CHANGED: a still is drawn once and can afford every pixel it has, and so can a picture nobody is
  * touching whose stars merely twinkle (see noteChange).
  */
 export class AdaptiveResolution {
   static readonly MIN_RATIO = 1
   static readonly STEP = 0.25
+  /**
+   * The least of the display's own ratio a scene may be drawn at, however late its frames are.
+   *
+   * There was no such floor: on a Retina display the ratio came all the way down to one, which is a
+   * QUARTER of the pixels, and a playing recording changes continuously — so the whole replay ran
+   * at a quarter, and the staircase a reader saw along a ridge was partly that. An eye sees no
+   * staircase, so halving the picture to save frames buys the wrong thing. Three quarters of the
+   * display's ratio still saves 44 % of the pixels, which is most of what the deepest step ever
+   * bought, and MIN_RATIO remains the absolute floor beneath it: a display that is already at one
+   * device pixel per CSS pixel has nothing to give up here.
+   */
+  static readonly MIN_SHARE_OF_DISPLAY = 0.75
   /** Graphics time per drawing above which the ratio comes down — three quarters of a frame at 60 Hz. */
   static readonly GPU_LATE_MS = 12
   /** Graphics time per drawing below which a step up costs nothing visible: the step multiplies the
@@ -115,6 +128,15 @@ export class AdaptiveResolution {
   set maximum(maxRatio: number) {
     this.maxRatio = AdaptiveResolution.clamp(maxRatio)
     if (this.ratio > this.maxRatio) this.ratio = this.maxRatio
+    if (this.ratio < this.minimum) this.ratio = Math.min(this.maxRatio, this.minimum)
+  }
+
+  /** The least this scene may be drawn at, read off the display it is on — see
+   * MIN_SHARE_OF_DISPLAY. On the STEP grid, rounded DOWN so the floor is never stricter than the
+   * share it states. */
+  get minimum(): number {
+    const share = Math.floor((this.maxRatio * AdaptiveResolution.MIN_SHARE_OF_DISPLAY) / AdaptiveResolution.STEP) * AdaptiveResolution.STEP
+    return Math.max(AdaptiveResolution.MIN_RATIO, share)
   }
 
   get maximum(): number {
@@ -188,8 +210,8 @@ export class AdaptiveResolution {
   }
 
   private lower(nowMs: number, cooldownMs: number): number | undefined {
-    if (this.ratio <= AdaptiveResolution.MIN_RATIO || nowMs - this.lastChangeMs < cooldownMs) return undefined
-    this.ratio = AdaptiveResolution.clamp(this.ratio - AdaptiveResolution.STEP)
+    if (this.ratio <= this.minimum || nowMs - this.lastChangeMs < cooldownMs) return undefined
+    this.ratio = Math.max(this.minimum, AdaptiveResolution.clamp(this.ratio - AdaptiveResolution.STEP))
     this.lastChangeMs = nowMs
     return this.ratio
   }
