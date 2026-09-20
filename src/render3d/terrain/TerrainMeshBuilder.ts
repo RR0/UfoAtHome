@@ -6,8 +6,20 @@ import type { GeoBounds } from "./GeoBounds.js"
 import { geoToLocalMeters, localMetersToGeo } from "./GeoProjection.js"
 import { fractionWithinBounds } from "./TileMath.js"
 
-const TERRAIN_SEGMENTS = 64
-const GRID_SIZE = TERRAIN_SEGMENTS + 1 // 65 — odd, so the center vertex lands exactly on the observer
+/**
+ * How many quads across the patch, and so how far apart its vertices stand: 900 m of radius over
+ * 256 of them is one every 7 metres.
+ *
+ * It used to be 64, which is 28 metres, and the ridge a witness sees was drawn as a flight of
+ * steps — the widest of them nearly two degrees of sky at the patch's own edge, tens of screen
+ * pixels wide. Nothing an eye does; nothing the mesa does either. The elevation source was
+ * measured before this was changed: around Socorro the tiles are served at zoom 14, 7.9 m to the
+ * raster pixel, and adjacent pixels differ — the detail was there all along and the mesh was
+ * quantising it away. So the vertices are put where the data is, and no finer: 256 postings match
+ * the source, and asking for more would be inventing relief nobody measured.
+ */
+const TERRAIN_SEGMENTS = 256
+const GRID_SIZE = TERRAIN_SEGMENTS + 1 // 257 — odd, so the center vertex lands exactly on the observer
 const IMAGERY_RESOLUTION = 512
 
 /** Full color out to this radius, fading to fully transparent by FADE_END — both kept well inside
@@ -124,7 +136,8 @@ export async function buildTerrainMesh(
     }
   }
 
-  const indices = new Uint16Array(TERRAIN_SEGMENTS * TERRAIN_SEGMENTS * 6)
+  // 32-bit: a 257 x 257 grid holds 66 049 vertices, past what a 16-bit index can name.
+  const indices = new Uint32Array(TERRAIN_SEGMENTS * TERRAIN_SEGMENTS * 6)
   let idx = 0
   for (let row = 0; row < TERRAIN_SEGMENTS; row++) {
     for (let col = 0; col < TERRAIN_SEGMENTS; col++) {
