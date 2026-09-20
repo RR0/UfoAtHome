@@ -2,8 +2,8 @@
   "name": "@rr0/ufoathome",
   "type": "module",
   "version": "0.64.3",
-  "description": "UFO@home — record and replay a UFO sighting's shape, movement and appearance",
-  "author": "Jérôme Beau <rr0@rr0.org> (https://rr0.org)",
+  "description": "UFO@home \u2014 record and replay a UFO sighting's shape, movement and appearance",
+  "author": "J\u00e9r\u00f4me Beau <rr0@rr0.org> (https://rr0.org)",
   "license": "MIT",
   "homepage": "https://ufoathome.org",
   "repository": {
@@ -48,7 +48,8 @@
     "sync:cases": "tsx scripts/sync-case-recordings.ts",
     "pretest": "npm run build:schema",
     "build:embed-sighting-editor": "npm run build:schema && tsc --noEmit && vite build --config vite.embed-sighting-editor.config.ts",
-    "build:tle": "node scripts/build-tle-archive.ts"
+    "build:tle": "node scripts/build-tle-archive.ts",
+    "build:roads": "tsx scripts/build-road-archive.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.124.0",

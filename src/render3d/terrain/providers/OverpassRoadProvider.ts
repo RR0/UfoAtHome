@@ -8,7 +8,7 @@ export interface OverpassRoadProviderOptions {
 }
 
 /** What Overpass answers with, reduced to the parts read here. */
-interface OverpassResponse {
+export interface OverpassResponse {
   elements?: {
     type?: string
     id?: number
@@ -77,7 +77,12 @@ export class OverpassRoadProvider implements RoadProvider {
   async getRoads(bounds: GeoBounds): Promise<RoadWay[]> {
     const box = `${bounds.south},${bounds.west},${bounds.north},${bounds.east}`
     const query = `[out:json][timeout:30];way["highway"~"^(${OverpassRoadProvider.DRIVABLE.join("|")})$"](${box});out geom;`
-    const body = await this.queued(() => this.ask(query))
+    return this.waysFrom(await this.queued(() => this.ask(query)))
+  }
+
+  /** One Overpass answer as roads — exposed so a build step can read an answer fetched by other
+   * means (see scripts/build-road-archive.ts). */
+  waysFrom(body: OverpassResponse): RoadWay[] {
     const ways: RoadWay[] = []
     for (const element of body.elements ?? []) {
       const geometry = element.geometry

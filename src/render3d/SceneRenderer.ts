@@ -1454,9 +1454,19 @@ export class SceneRenderer {
    * browser or a busy Overpass endpoint is therefore not an error state — it is one fewer thing
    * drawn, reported once to the console and never to the reader.
    */
+  /**
+   * Past this much ground, a patch gets no roads at all.
+   *
+   * A witness in an aircraft sees thirty kilometres of it, on which a carriageway is a hairline
+   * nobody reported — and asking for a whole county's streets to draw them would be a large
+   * download and a mess. What that reader is looking at is the pattern of the ground, which the
+   * photograph under the scene already shows.
+   */
+  private static readonly ROADS_MAX_RADIUS_M = 5000
+
   private buildRoads(lat: number, lng: number, radiusM: number): void {
     const provider = this.terrainProviders.roads
-    if (!provider) {
+    if (!provider || radiusM > SceneRenderer.ROADS_MAX_RADIUS_M) {
       this.roadSystem.clear()
       this.roadAttribution = undefined
       return

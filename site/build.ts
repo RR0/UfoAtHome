@@ -126,6 +126,11 @@ class SiteBuilder {
     // from here by every page embedding a scene, rr0.org's dossiers included. Rebuilt by
     // `npm run build:tle` from a local copy of Laurent Chabin's archive.
     await cp(join(this.root, "public", "tle"), join(this.out, "tle"), { recursive: true })
+    // The roads each published recording stands on, frozen so no reader's browser has to ask
+    // Overpass for them — see ArchivedRoadProvider, and `npm run build:roads`. Absent until that
+    // script has been run at least once, which is not a failure: a scene then draws no roads.
+    await cp(join(this.root, "public", "roads"), join(this.out, "roads"), { recursive: true })
+      .catch(() => undefined)
 
     await mkdir(join(this.out, "lib"), { recursive: true })
     for (const dir of this.bundleDirs) {
@@ -269,6 +274,18 @@ ${retired}
 /tle/*
   Access-Control-Allow-Origin: *
   Cache-Control: public, max-age=86400
+
+# The frozen road networks, one file per published place. Cached hard for the same reason as the
+# models: a place's file is rewritten only when its roads are re-frozen, which is a deliberate act.
+/roads/*
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=604800
+
+# Its index is the exception, as it is for the models: the name never changes and the contents gain
+# an entry every time a case is published.
+/roads/index.json
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=0, must-revalidate
 `, "utf8")
 
     await writeFile(join(this.out, "robots.txt"),
