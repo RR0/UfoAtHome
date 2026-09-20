@@ -1,6 +1,6 @@
 import {
   Box3, BoxGeometry, BufferGeometry, Color, ConeGeometry, CylinderGeometry, Group, LatheGeometry, Mesh,
-  MeshStandardMaterial, Object3D, SphereGeometry, TorusGeometry, Vector2, Vector3
+  MeshStandardMaterial, Object3D, Quaternion, SphereGeometry, TorusGeometry, Vector2, Vector3
 } from "three"
 import type { BodyState } from "../engine/interpretation/BodyPlacement.js"
 import { BODY_PRIMITIVES } from "../engine/interpretation/Interpretation.js"
@@ -21,6 +21,21 @@ export type BodyModelLoader = (ref: DecorModelRef) => Promise<{ scene: Object3D,
 /** How a light of this colour and luminance looks on screen, as the scene's own photometry has it
  * (see ScatteredSky.displayOfLuminance). */
 export type LuminanceDisplay = (linearRgb: readonly [number, number, number], luminanceCdM2: number) => readonly [number, number, number]
+
+/** A material of a loaded model that glows of itself: what a body's stated luminance sets the
+ * brightness of (see BodyAppearance.luminanceCdM2). */
+interface Glow {
+  material: MeshStandardMaterial
+  /** The colour the model gave it, which is read for its hue alone. */
+  hue: readonly [number, number, number]
+  /**
+   * How bright it is beside the brightest thing this model says glows, 0-1 — and so what share of
+   * the ONE luminance the recording states is its own. A model saying its windows are lit and its
+   * hull faintly aglow keeps saying it: the recording states the windows' luminance, and the hull
+   * burns at its own fraction of it.
+   */
+  share: number
+}
 
 /** Where the frame bodies are placed in stands in the scene: its origin's position, and the ground
  * height there that the bodies' own heights are counted from (see BodyPlacement.Ground). */
@@ -57,7 +72,7 @@ export interface BodyFrame {
  */
 export class BodySystem {
   readonly group = new Group()
-  private readonly built = new Map<string, { holder: Group, signature: string, material?: MeshStandardMaterial }>()
+  private readonly built = new Map<string, { holder: Group, signature: string, material?: MeshStandardMaterial, glowing?: Glow[] }>()
   /** Bumped whenever the set of bodies is replaced, so a model arriving for a previous one is
    * dropped. */
   private token = 0
@@ -69,6 +84,9 @@ export class BodySystem {
   /** The smoke of what burns on the ground, one plume per source. */
   private smoke: GroundPlume[] = []
   private readonly scratch = new Vector3()
+  /** Which way a flame's node points, and the direction it was read from, reused frame after frame. */
+  private readonly aim = new Quaternion()
+  private readonly down = new Vector3()
   /** The frame of the last `set` — what turns the scene's coordinates back into the bodies' own. */
   private frame?: BodyFrame
 
@@ -107,12 +125,13 @@ export class BodySystem {
         this.built.set(state.id, entry)
         this.group.add(entry.holder)
       }
-      const { holder, material } = entry
+      const { holder, material, glowing } = entry
       holder.visible = true
       holder.position.set(frame.originX + state.eastM, frame.originGroundY + state.upM, frame.originZ - state.northM)
       holder.rotation.set(state.attitude.pitchDeg * DEG_TO_RAD, -state.attitude.headingDeg * DEG_TO_RAD, -state.attitude.rollDeg * DEG_TO_RAD, "YXZ")
       holder.scale.set(state.sizeM.widthM, state.sizeM.heightM, state.sizeM.lengthM)
-      if (material) BodySystem.paint(material, state)
+      if (material) BodySystem.paint(material, state, display)
+      if (glowing) BodySystem.light(glowing, state, display)
       this.throwFlame(state, holder, seconds, display, frame.eye)
     }
     const kept = new Set(ids)
@@ -150,7 +169,11 @@ export class BodySystem {
     const node = holder.getObjectByName(flame.node ?? BodySystem.EXHAUST_NODE)
     if (node) node.getWorldPosition(this.scratch)
     else holder.localToWorld(this.scratch.set(0, -0.5, 0))
-    effect.place(this.scratch, holder.quaternion, flame.lengthM, flame.widthM)
+    // A flame leaves its node the way that node points: a model whose exhaust faces astern throws
+    // its flame astern, where one that says nothing throws it down the body, as an underside does.
+    // Taken as the direction the node's own down comes out at rather than as its rotation, because
+    // a body stretched to a size its model was not built at has no rotation to read.
+    effect.place(this.scratch, node ? BodySystem.pointing(node, this.down, this.aim) : holder.quaternion, flame.lengthM, flame.widthM)
     const light = (css: string): readonly [number, number, number] => {
       const colour = new Color(css)
       const rgb: [number, number, number] = [colour.r, colour.g, colour.b]
@@ -233,6 +256,14 @@ export class BodySystem {
     const luminance = 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2]
     return luminance > 0 ? [rgb[0] / luminance, rgb[1] / luminance, rgb[2] / luminance] : [1, 1, 1]
   }
+
+  /** Which way a node's own downward axis comes out in the world, as a turn from straight down. */
+  private static pointing(node: Object3D, direction: Vector3, into: Quaternion): Quaternion {
+    direction.set(0, -1, 0).transformDirection(node.matrixWorld).normalize()
+    return into.setFromUnitVectors(BodySystem.DOWN, direction)
+  }
+
+  private static readonly DOWN = new Vector3(0, -1, 0)
 
   /** Where a model says a flame comes out, unless the flame names another node. */
   static readonly EXHAUST_NODE = "exhaust"
@@ -351,7 +382,10 @@ export class BodySystem {
       holder.add(BodySystem.fit(loaded.scene, loaded.headingOffsetDeg ?? state.model.headingOffsetDeg ?? 0))
       this.credits.set(state.id, loaded.credit)
       const entry = this.built.get(state.id)
-      if (entry) entry.material = undefined
+      if (entry) {
+        entry.material = undefined
+        entry.glowing = BodySystem.glowingOf(loaded.scene)
+      }
       this.onModelArrived()
     }).catch(error => console.warn(`Keeping the ellipsoid for body "${state.id}":`, error))
     return { holder, signature, material }
@@ -386,7 +420,7 @@ export class BodySystem {
    * that its luminance IS the albedo. A white albedo 0.1 hull is a dark grey, and a red one is a
    * dark red, which is what a reflectance means.
    */
-  private static paint(material: MeshStandardMaterial, state: BodyState): void {
+  private static paint(material: MeshStandardMaterial, state: BodyState, display?: LuminanceDisplay): void {
     const color = new Color(state.appearance.color)
     const luminance = 0.2126 * color.r + 0.7152 * color.g + 0.0722 * color.b
     if (luminance > 0) color.multiplyScalar(state.appearance.albedo / luminance)
@@ -394,6 +428,59 @@ export class BodySystem {
     color.g = Math.min(1, color.g)
     color.b = Math.min(1, color.b)
     if (!material.color.equals(color)) material.color.copy(color)
+    // And what it gives out of itself, if it gives out anything: its own colour at the brightness
+    // stated, read through the scene's photometry exactly as a flame's is.
+    const hue = new Color(state.appearance.color)
+    const brightest = Math.max(hue.r, hue.g, hue.b)
+    BodySystem.glow(material, brightest > 0 ? [hue.r / brightest, hue.g / brightest, hue.b / brightest] : [1, 1, 1],
+      state.appearance.luminanceCdM2, display)
+  }
+
+  /** The brightness a body's stated luminance gives whatever its model already says glows. */
+  private static light(glowing: Glow[], state: BodyState, display?: LuminanceDisplay): void {
+    for (const { material, hue, share } of glowing) BodySystem.glow(material, hue, state.appearance.luminanceCdM2 * share, display)
+  }
+
+  /** Sets what a surface gives out: nothing at all below a candela, and otherwise the colour the
+   * scene's own photometry makes of that many candela per square metre. The colour it is handed is
+   * read for its hue only — the photometry decides how bright that hue comes out — which is why a
+   * part that glows less than another is given less LUMINANCE rather than a darker colour. */
+  private static glow(material: MeshStandardMaterial, hue: readonly [number, number, number], luminanceCdM2: number, display?: LuminanceDisplay): void {
+    if (!(luminanceCdM2 > 0)) {
+      if (material.emissive.r !== 0 || material.emissive.g !== 0 || material.emissive.b !== 0) material.emissive.setRGB(0, 0, 0)
+      return
+    }
+    const rgb = display ? display(hue, luminanceCdM2) : BodySystem.withoutPhotometry(hue, luminanceCdM2)
+    material.emissive.setRGB(rgb[0], rgb[1], rgb[2])
+  }
+
+  /**
+   * Every material of a loaded model that glows of itself, with the colour the model gave it,
+   * scaled against the brightest of them.
+   *
+   * Each with its share of the brightest, because the photometry keeps a colour's HUE and decides
+   * its brightness itself: handing it a darker blue would not make the hull glow less than the
+   * windows, only make it bluer. What makes it glow less is being given less of the luminance.
+   */
+  private static glowingOf(scene: Object3D): Glow[] {
+    const materials: MeshStandardMaterial[] = []
+    const seen = new Set<MeshStandardMaterial>()
+    scene.traverse(child => {
+      if (!(child instanceof Mesh)) return
+      for (const material of Array.isArray(child.material) ? child.material : [child.material]) {
+        if (!(material instanceof MeshStandardMaterial) || seen.has(material)) continue
+        seen.add(material)
+        if (Math.max(material.emissive.r, material.emissive.g, material.emissive.b) > 0) materials.push(material)
+      }
+    })
+    const magnitude = (m: MeshStandardMaterial) => Math.max(m.emissive.r, m.emissive.g, m.emissive.b)
+    const brightest = Math.max(...materials.map(magnitude), 0)
+    if (brightest <= 0) return []
+    return materials.map(material => ({
+      material,
+      hue: [material.emissive.r, material.emissive.g, material.emissive.b] as const,
+      share: magnitude(material) / brightest
+    }))
   }
 
   private static primitiveOf(model: DecorModelRef): BodyPrimitive | undefined {

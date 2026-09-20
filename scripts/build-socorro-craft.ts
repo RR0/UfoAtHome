@@ -37,17 +37,8 @@ import { BufferGeometry, CylinderGeometry, BoxGeometry, Float32BufferAttribute, 
 import { mkdirSync, writeFileSync } from "node:fs"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
-
-interface Part {
-  name: string
-  geometry: BufferGeometry
-  material: number
-}
-
-interface GltfMaterial {
-  name: string
-  pbrMetallicRoughness: { baseColorFactor: number[], metallicFactor: number, roughnessFactor: number }
-}
+import { GltfBounds, GltfWriter } from "./GltfWriter.js"
+import type { GltfMaterial, Part } from "./GltfWriter.js"
 
 /** A figure in strokes, in units of its own width, y downwards from its top — as measured on a scan. */
 type Strokes = [number, number][][]
@@ -95,9 +86,9 @@ class SocorroCraft {
   readonly materials: GltfMaterial[] = [
     // "White, like aluminium": a light, barely metallic surface. A strongly metallic one reflects its
     // surroundings and little else, and with no environment map to reflect it rendered near black.
-    SocorroCraft.material("hull", "#e8e6df", 0.15, 0.4),
-    SocorroCraft.material("insignia", "#b4231f", 0, 0.6),
-    SocorroCraft.material("legs", "#8a8a86", 0.2, 0.5)
+    GltfWriter.material("hull", "#e8e6df", 0.15, 0.4),
+    GltfWriter.material("insignia", "#b4231f", 0, 0.6),
+    GltfWriter.material("legs", "#8a8a86", 0.2, 0.5)
   ]
 
   constructor(private readonly insignia: Insignia) {
@@ -212,89 +203,6 @@ class SocorroCraft {
     }
     return legs
   }
-
-  /** A glTF material from an sRGB colour, which glTF wants linear. */
-  private static material(name: string, css: string, metallic: number, roughness: number): GltfMaterial {
-    const value = parseInt(css.slice(1), 16)
-    const linear = [(value >> 16) & 255, (value >> 8) & 255, value & 255]
-      .map(channel => channel / 255)
-      .map(c => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4))
-    return { name, pbrMetallicRoughness: { baseColorFactor: [...linear, 1], metallicFactor: metallic, roughnessFactor: roughness } }
-  }
-}
-
-/**
- * A glTF 2.0 file with its one buffer embedded: meshes of positions, normals and indices, their
- * materials, and nodes. Written by hand because three's own exporter needs a browser's FileReader,
- * and a static model needs nothing it offers.
- */
-class GltfWriter {
-  private readonly chunks: Buffer[] = []
-  private byteLength = 0
-  private readonly bufferViews: object[] = []
-  private readonly accessors: object[] = []
-  private readonly meshes: object[] = []
-  private readonly nodes: object[] = []
-
-  constructor(private readonly materials: GltfMaterial[]) {
-  }
-
-  addMesh(part: Part): void {
-    const geometry = part.geometry
-    const position = geometry.getAttribute("position")
-    const normal = geometry.getAttribute("normal")
-    const positions = new Float32Array(position.array)
-    const min = [Infinity, Infinity, Infinity]
-    const max = [-Infinity, -Infinity, -Infinity]
-    for (let i = 0; i < position.count; i++) {
-      for (let axis = 0; axis < 3; axis++) {
-        min[axis] = Math.min(min[axis], positions[i * 3 + axis])
-        max[axis] = Math.max(max[axis], positions[i * 3 + axis])
-      }
-    }
-    const POSITION = this.addAccessor(positions, 34962, 5126, "VEC3", position.count, { min, max })
-    const NORMAL = this.addAccessor(new Float32Array(normal.array), 34962, 5126, "VEC3", normal.count)
-    const index = geometry.index!
-    const indices = new Uint32Array(index.array)
-    const indicesAccessor = this.addAccessor(indices, 34963, 5125, "SCALAR", index.count)
-    this.meshes.push({ name: part.name, primitives: [{ attributes: { POSITION, NORMAL }, indices: indicesAccessor, material: part.material }] })
-    this.nodes.push({ name: part.name, mesh: this.meshes.length - 1 })
-  }
-
-  addNode(name: string, translation: [number, number, number]): void {
-    this.nodes.push({ name, translation })
-  }
-
-  toJSON(generator: string): object {
-    const buffer = Buffer.concat(this.chunks)
-    return {
-      asset: { version: "2.0", generator },
-      scene: 0,
-      scenes: [{ nodes: this.nodes.map((_, index) => index) }],
-      nodes: this.nodes,
-      meshes: this.meshes,
-      materials: this.materials,
-      accessors: this.accessors,
-      bufferViews: this.bufferViews,
-      buffers: [{ byteLength: buffer.length, uri: `data:application/octet-stream;base64,${buffer.toString("base64")}` }]
-    }
-  }
-
-  private addAccessor(data: Float32Array | Uint32Array, target: number, componentType: number, type: string, count: number, bounds: object = {}): number {
-    const bytes = Buffer.from(data.buffer, data.byteOffset, data.byteLength)
-    const offset = this.byteLength
-    this.chunks.push(bytes)
-    this.byteLength += bytes.length
-    // Every view starts on a four-byte boundary, which glTF requires.
-    const padding = (4 - (this.byteLength % 4)) % 4
-    if (padding > 0) {
-      this.chunks.push(Buffer.alloc(padding))
-      this.byteLength += padding
-    }
-    this.bufferViews.push({ buffer: 0, byteOffset: offset, byteLength: bytes.length, target })
-    this.accessors.push({ bufferView: this.bufferViews.length - 1, componentType, count, type, ...bounds })
-    return this.accessors.length - 1
-  }
 }
 
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)))
@@ -306,9 +214,7 @@ for (const [insignia, name] of [["signed", "craft.gltf"], ["stanford", "craft-st
   for (const part of craft.parts()) writer.addMesh(part)
   writer.addNode("exhaust", craft.exhaust)
   const file = path.join(directory, name)
-  const gltf = writer.toJSON("UFO@home scripts/build-socorro-craft.ts") as { accessors: { min?: number[], max?: number[] }[] }
+  const gltf = writer.toJSON("UFO@home scripts/build-socorro-craft.ts")
   writeFileSync(file, JSON.stringify(gltf) + "\n")
-  const bounds = gltf.accessors.filter(accessor => accessor.min && accessor.max)
-  const size = [0, 1, 2].map(axis => Math.max(...bounds.map(b => b.max![axis])) - Math.min(...bounds.map(b => b.min![axis])))
-  console.log(`Wrote ${path.relative(root, file)}: ${size.map(m => m.toFixed(2)).join(" × ")} m (x, y, z)`)
+  console.log(`Wrote ${path.relative(root, file)}: ${GltfBounds.sizeOf(gltf).map(m => m.toFixed(2)).join(" × ")} m (x, y, z)`)
 }

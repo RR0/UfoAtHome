@@ -202,12 +202,26 @@ export interface BodyAttitude {
   rollDeg?: number
 }
 
-/** What its surface is like. It sends back the light that falls on it and none of its own: a
- * glowing body needs the scene's exposure to say what a candela per square metre looks like, which
- * comes with lights. */
+/** What its surface is like: what it sends back of the light that falls on it, and what it gives
+ * out of itself. */
 export interface BodyAppearance {
   /** Its surface colour, CSS. */
   color?: string
   /** How much of the light falling on it it sends back, 0-1: aluminium ~0.7, a matt dark hull ~0.1. */
   albedo?: number
+  /**
+   * What it gives out of itself, candela per square metre — read through the scene's own photometry
+   * exactly as a flame's is (see BodyFlame), so that the same figure is a lamp at night and nothing
+   * at all against a noon sky.
+   *
+   * Absent or zero means it glows not at all and is seen only by the light that falls on it, which
+   * is what most bodies are. A witness who says a thing was "as bright as the Sun at noon" has said
+   * something about this number and not about `albedo`: sunlit snow is some 20 000 cd/m², an
+   * overcast sky 2 000, a fluorescent tube 10 000, and the Sun's own disc 1.6 × 10⁹.
+   *
+   * On a model rather than a primitive it sets the brightness of whatever the model already says
+   * glows — its lit windows, its glowing hull — keeping each one's own colour, and leaves the rest
+   * of it dark.
+   */
+  luminanceCdM2?: number
 }

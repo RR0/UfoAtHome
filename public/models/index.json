@@ -125,6 +125,48 @@
         "license": "CC0 1.0",
         "sourceUrl": "https://github.com/RR0/UfoAtHome/blob/main/scripts/build-socorro-craft.ts"
       }
+    },
+    {
+      "id": "ufoathome-valensole-craft",
+      "kind": "aircraft",
+      "name": "Valensole craft, after Maurice Masse's account (stand-in)",
+      "file": "ufoathome-valensole-craft/craft.gltf",
+      "headingOffsetDeg": 0,
+      "sizeM": { "widthM": 3.49, "lengthM": 3.49, "heightM": 2.42 },
+      "credit": {
+        "title": "Valensole craft, a stand-in after Maurice Masse's account",
+        "author": "UFO@home",
+        "license": "CC0 1.0",
+        "sourceUrl": "https://github.com/RR0/UfoAtHome/blob/main/scripts/build-valensole-craft.ts"
+      }
+    },
+    {
+      "id": "ufoathome-chiles-craft",
+      "kind": "aircraft",
+      "name": "Chiles-Whitted object as Clarence Chiles drew it: a tapered cigar with no porthole (stand-in)",
+      "file": "ufoathome-chiles-whitted-craft/chiles.gltf",
+      "headingOffsetDeg": 0,
+      "sizeM": { "widthM": 3.17, "lengthM": 30, "heightM": 3.17 },
+      "credit": {
+        "title": "Chiles-Whitted object, a stand-in after Clarence Chiles's own drawing",
+        "author": "UFO@home",
+        "license": "CC0 1.0",
+        "sourceUrl": "https://github.com/RR0/UfoAtHome/blob/main/scripts/build-chiles-whitted-craft.ts"
+      }
+    },
+    {
+      "id": "ufoathome-whitted-craft",
+      "kind": "aircraft",
+      "name": "Chiles-Whitted object as John Whitted drew it: a blunt cylinder with two rows of windows (stand-in)",
+      "file": "ufoathome-chiles-whitted-craft/whitted.gltf",
+      "headingOffsetDeg": 0,
+      "sizeM": { "widthM": 5.4, "lengthM": 30, "heightM": 5.43 },
+      "credit": {
+        "title": "Chiles-Whitted object, a stand-in after John Whitted's own drawing",
+        "author": "UFO@home",
+        "license": "CC0 1.0",
+        "sourceUrl": "https://github.com/RR0/UfoAtHome/blob/main/scripts/build-chiles-whitted-craft.ts"
+      }
     }
   ]
 }
