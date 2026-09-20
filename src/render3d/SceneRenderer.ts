@@ -2901,6 +2901,15 @@ export class SceneRenderer {
   onMapSubjectBounds?: (bounds: ReadonlyArray<{ x: number; y: number; width: number; height: number }>) => void
   private exposureSubjectBounds: Array<{ x: number; y: number; width: number; height: number }> = []
 
+  /**
+   * Nothing a reader is looking AT stands this close. Past it, the object is what the witness is
+   * standing beside — and at Socorro that is Zamora's own patrol car, two and a half metres away,
+   * whose box covers two and a half frames and therefore both corners at once. The map read that
+   * as "the subject is everywhere" and hid itself for the whole account, coming back only at the
+   * end when he had run from the car.
+   */
+  private static readonly MAP_SUBJECT_NEAREST_M = 8
+
   /** Project moving decor and vehicles as subjects, excluding scenery such as crop fields.
    * Exposure rendering collects these same boxes at each sampled instant, including both ends. */
   private mapSubjectBounds(): Array<{ x: number; y: number; width: number; height: number }> {
@@ -2913,6 +2922,9 @@ export class SceneRenderer {
       if (!group?.visible) continue
       box.setFromObject(group)
       if (box.isEmpty()) continue
+      // See MAP_SUBJECT_NEAREST_M: the box's nearest point, so a long vehicle counts by the end
+      // that is closest.
+      if (box.distanceToPoint(this.camera.position) < SceneRenderer.MAP_SUBJECT_NEAREST_M) continue
       let left = Infinity, right = -Infinity, top = Infinity, bottom = -Infinity
       for (const x of [box.min.x, box.max.x]) for (const y of [box.min.y, box.max.y]) for (const z of [box.min.z, box.max.z]) {
         direction.set(x, y, z).sub(this.camera.position).normalize()
