@@ -54,6 +54,19 @@ export class EquidistantProjectionPass {
   /** The cube's faces never finer than this, whatever the frame — six of them are drawn per frame. */
   static readonly MAX_CUBE_FACE = 2048
 
+  /**
+   * How many samples an edge is drawn from in the offscreen render this resamples.
+   *
+   * The canvas is asked for `antialias: true`, and for a photograph — drawn straight onto it —
+   * that is the whole answer. A WITNESS is not: an eye perceives an angle as an angle, so the
+   * scene goes into the target below and is resampled out of it, and a plain render target has one
+   * sample per pixel however the canvas was asked for. The horizon a reader sees is then a
+   * staircase, and the resampling can only smear it, never undo it — the steps are already in the
+   * bytes being read. Four samples is the usual place to stop: the edge is shaded once whatever
+   * the count, so this buys coverage, not shading, and the resolve is one blit per frame.
+   */
+  static readonly SAMPLES = 4
+
   private cubeTarget?: WebGLCubeRenderTarget
   private cubeCamera?: CubeCamera
   private cubeMaterial?: ShaderMaterial
@@ -75,7 +88,7 @@ export class EquidistantProjectionPass {
     // to blaze out to two and a half degrees came out blazing to one: it had been flattened to white
     // at the buffer and then blurred back down by the resampling. The clip belongs at the end of the
     // chain, where the canvas is written, and nowhere before it.
-    this.target = new WebGLRenderTarget(this.width, this.height, { type: HalfFloatType })
+    this.target = new WebGLRenderTarget(this.width, this.height, { type: HalfFloatType, samples: EquidistantProjectionPass.SAMPLES })
     this.material = new ShaderMaterial({
       uniforms: {
         uSource: { value: this.target.texture },
