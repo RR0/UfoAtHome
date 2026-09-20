@@ -8,18 +8,22 @@ import { fractionWithinBounds } from "./TileMath.js"
 
 /**
  * How many quads across the patch, and so how far apart its vertices stand: 900 m of radius over
- * 256 of them is one every 7 metres.
+ * 64 of them is one every 28 metres.
  *
- * It used to be 64, which is 28 metres, and the ridge a witness sees was drawn as a flight of
- * steps — the widest of them nearly two degrees of sky at the patch's own edge, tens of screen
- * pixels wide. Nothing an eye does; nothing the mesa does either. The elevation source was
- * measured before this was changed: around Socorro the tiles are served at zoom 14, 7.9 m to the
- * raster pixel, and adjacent pixels differ — the detail was there all along and the mesh was
- * quantising it away. So the vertices are put where the data is, and no finer: 256 postings match
- * the source, and asking for more would be inventing relief nobody measured.
+ * This was briefly raised to 256 on the strength of a bad measurement. What had been counted was
+ * how many screen columns in a row the horizon stayed on the same pixel ROW, which a smooth,
+ * nearly level skyline does for hundreds of columns whatever the mesh — it said nothing about the
+ * mesh at all. The source was then measured properly: on the Terrarium tiles around Socorro, a
+ * posting differs from the straight line between its neighbours 7.9 m away by 2.7 CENTIMETRES, and
+ * by 23 cm at 28 m. So a vertex every 28 metres loses about a fifth of a metre of relief, which is
+ * nothing at the hundreds of metres a witness is looking across — while four times the postings is
+ * sixteen times the triangles, in the shadow map as well as in the frame.
+ *
+ * Going finer is worth doing where a finer SOURCE exists (USGS 3DEP publishes 1 m for the United
+ * States), not by interpolating this one more densely.
  */
-const TERRAIN_SEGMENTS = 256
-const GRID_SIZE = TERRAIN_SEGMENTS + 1 // 257 — odd, so the center vertex lands exactly on the observer
+const TERRAIN_SEGMENTS = 64
+const GRID_SIZE = TERRAIN_SEGMENTS + 1 // 65 — odd, so the center vertex lands exactly on the observer
 const IMAGERY_RESOLUTION = 512
 
 /** Full color out to this radius, fading to fully transparent by FADE_END — both kept well inside
@@ -136,8 +140,7 @@ export async function buildTerrainMesh(
     }
   }
 
-  // 32-bit: a 257 x 257 grid holds 66 049 vertices, past what a 16-bit index can name.
-  const indices = new Uint32Array(TERRAIN_SEGMENTS * TERRAIN_SEGMENTS * 6)
+  const indices = new Uint16Array(TERRAIN_SEGMENTS * TERRAIN_SEGMENTS * 6)
   let idx = 0
   for (let row = 0; row < TERRAIN_SEGMENTS; row++) {
     for (let col = 0; col < TERRAIN_SEGMENTS; col++) {
