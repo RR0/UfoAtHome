@@ -80,7 +80,8 @@ export class ArchivedRoadProvider implements RoadProvider {
   }
 
   /** Whatever the file that answered says it is. An archive of OSM is still today's network, frozen
-   * on the day it was taken — freezing it does not make it 1964 (see RoadProvider). */
+   * on the day it was taken — freezing it does not make it the night of the account (see
+   * RoadProvider). */
   get contemporary(): boolean {
     return this.contemporaryRead ?? this.fallback?.contemporary ?? true
   }

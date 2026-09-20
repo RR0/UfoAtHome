@@ -2,6 +2,8 @@ import { describe, expect, it, vi } from "vitest"
 import { OverpassRoadProvider } from "../../../../src/render3d/terrain/providers/OverpassRoadProvider.js"
 
 const BOUNDS = { north: 34.059, south: 34.043, east: -106.882, west: -106.902 }
+/** One instance, so a test is not at the mercy of which of several answered. */
+const ENDPOINT = "https://overpass.test/api/interpreter"
 
 function answering(body: unknown): typeof fetch {
   return vi.fn(async () => ({ ok: true, status: 200, json: async () => body }) as Response) as unknown as typeof fetch
@@ -14,7 +16,7 @@ function way(id: number, tags: Record<string, string>) {
 describe("OverpassRoadProvider", () => {
   it("asks only for ways somebody could drive", async () => {
     const fetchImpl = answering({ elements: [] })
-    await new OverpassRoadProvider({ fetchImpl }).getRoads(BOUNDS)
+    await new OverpassRoadProvider({ fetchImpl, endpoints: [ENDPOINT] }).getRoads(BOUNDS)
     const url = decodeURIComponent(String((fetchImpl as unknown as ReturnType<typeof vi.fn>).mock.calls[0][0]))
     // A town's footways outnumber its roads five to one, and none of them is what a reader asking
     // where the road went is looking for.
@@ -32,6 +34,7 @@ describe("OverpassRoadProvider", () => {
 
   it("takes a stated width over a counted one, and a counted one over the class's own", async () => {
     const provider = new OverpassRoadProvider({
+      endpoints: [ENDPOINT],
       fetchImpl: answering({ elements: [
         way(1, { highway: "residential", width: "6.5" }),
         way(2, { highway: "residential", lanes: "4" }),
@@ -43,6 +46,7 @@ describe("OverpassRoadProvider", () => {
 
   it("reads a track as unsealed even when nothing says so — which is the road Zamora turned onto", async () => {
     const provider = new OverpassRoadProvider({
+      endpoints: [ENDPOINT],
       fetchImpl: answering({ elements: [
         way(1, { highway: "track" }),
         way(2, { highway: "residential" }),
@@ -55,6 +59,7 @@ describe("OverpassRoadProvider", () => {
 
   it("drops what cannot be drawn rather than drawing it wrong", async () => {
     const provider = new OverpassRoadProvider({
+      endpoints: [ENDPOINT],
       fetchImpl: answering({ elements: [
         { type: "way", id: 1, tags: { highway: "residential" }, geometry: [{ lat: 34.05, lon: -106.89 }] },
         { type: "way", id: 2, tags: { highway: "residential" } },
@@ -69,6 +74,7 @@ describe("OverpassRoadProvider", () => {
   it("throws on a refusal, so the caller can decide that no roads is not an error", async () => {
     // A real refusal, not a busy one: 429 and 504 are waited out instead (see the politeness tests).
     const provider = new OverpassRoadProvider({
+      endpoints: [ENDPOINT],
       fetchImpl: (async () => ({ ok: false, status: 403, json: async () => ({}) }) as Response) as unknown as typeof fetch
     })
     await expect(provider.getRoads(BOUNDS)).rejects.toThrow("403")
@@ -86,7 +92,7 @@ describe("OverpassRoadProvider politeness", () => {
           ? ({ ok: false, status: 504, json: async () => ({}) } as Response)
           : ({ ok: true, status: 200, json: async () => ({ elements: [way(1, { highway: "residential" })] }) } as Response)
       }) as unknown as typeof fetch
-      const roads = new OverpassRoadProvider({ fetchImpl }).getRoads(BOUNDS)
+      const roads = new OverpassRoadProvider({ fetchImpl, endpoints: [ENDPOINT] }).getRoads(BOUNDS)
       await vi.advanceTimersByTimeAsync(OverpassRoadProvider["RETRY_MS"] + 100)
       expect(await roads).toHaveLength(1)
       expect(call).toBe(2)
@@ -99,7 +105,7 @@ describe("OverpassRoadProvider politeness", () => {
     vi.useFakeTimers()
     try {
       const fetchImpl = vi.fn(async () => ({ ok: false, status: 429, json: async () => ({}) }) as Response) as unknown as typeof fetch
-      const roads = new OverpassRoadProvider({ fetchImpl }).getRoads(BOUNDS)
+      const roads = new OverpassRoadProvider({ fetchImpl, endpoints: [ENDPOINT] }).getRoads(BOUNDS)
       const caught = roads.catch(error => String(error))
       await vi.advanceTimersByTimeAsync(OverpassRoadProvider["RETRY_MS"] * 3)
       expect(await caught).toContain("429")
@@ -121,7 +127,31 @@ describe("OverpassRoadProvider politeness", () => {
       inFlight--
       return { ok: true, status: 200, json: async () => ({ elements: [] }) } as Response
     }) as unknown as typeof fetch
-    await Promise.all([1, 2, 3, 4].map(() => new OverpassRoadProvider({ fetchImpl }).getRoads(BOUNDS)))
+    await Promise.all([1, 2, 3, 4].map(() => new OverpassRoadProvider({ fetchImpl, endpoints: [ENDPOINT] }).getRoads(BOUNDS)))
     expect(most).toBe(1)
+  })
+})
+
+describe("OverpassRoadProvider mirrors", () => {
+  it("asks the next instance when the first will not answer at all", async () => {
+    // The main instance stopped accepting connections from one address partway through a day of
+    // asking, and every scene lost its roads at once. They are independent servers over the same
+    // data, so the second answers what the first will not.
+    const asked: string[] = []
+    const fetchImpl = (async (input: RequestInfo | URL) => {
+      const url = String(input)
+      asked.push(new URL(url).host)
+      if (asked.length === 1) throw new TypeError("fetch failed")
+      return { ok: true, status: 200, json: async () => ({ elements: [way(1, { highway: "residential" })] }) } as Response
+    }) as unknown as typeof fetch
+    const provider = new OverpassRoadProvider({ fetchImpl, endpoints: ["https://first.test/api", "https://second.test/api"] })
+    expect(await provider.getRoads(BOUNDS)).toHaveLength(1)
+    expect(asked).toEqual(["first.test", "second.test"])
+  })
+
+  it("says which instance refused and why, rather than printing the query back", async () => {
+    const fetchImpl = (async () => ({ ok: false, status: 403, json: async () => ({}) }) as Response) as unknown as typeof fetch
+    const provider = new OverpassRoadProvider({ fetchImpl, endpoints: ["https://only.test/api"] })
+    await expect(provider.getRoads(BOUNDS)).rejects.toThrow("only.test refused (403)")
   })
 })

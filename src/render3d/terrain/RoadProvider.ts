@@ -29,10 +29,10 @@ export interface RoadWay {
  * roads is the scene every scene had until now, so there is nothing to throw.
  *
  * What a provider must NOT do is pretend. Every road it returns is the road network of the day it
- * was surveyed, and a recording is of some other day: the interstate beside Socorro was not there
- * when Zamora drove, and the gravel track he turned onto may not be there now. That is why
- * `contemporary` exists rather than being assumed — see RoadSystem, which draws a contemporary road
- * differently from one the case file states, and says so.
+ * was surveyed, and a recording is of some other day — sixty years apart, for the cases this was
+ * built on, over which roads are widened, realigned and abandoned, and an unsealed track is the
+ * first to go. That is why `contemporary` exists rather than being assumed: see RoadSystem, which
+ * draws a contemporary road differently from one the case file states, and says so.
  */
 export interface RoadProvider {
   /** Shown to the reader wherever these roads are (see ImageryProvider.attribution). */

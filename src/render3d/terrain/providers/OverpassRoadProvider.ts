@@ -3,8 +3,8 @@ import type { RoadProvider, RoadSurface, RoadWay } from "../RoadProvider.js"
 
 export interface OverpassRoadProviderOptions {
   fetchImpl?: typeof fetch
-  /** Where to send the query. Mainly for tests, and for a mirror when the main one is busy. */
-  endpoint?: string
+  /** Where to send the query, in order. Mainly for tests, and for pointing at one instance only. */
+  endpoints?: string[]
 }
 
 /** What Overpass answers with, reduced to the parts read here. */
@@ -52,14 +52,28 @@ export class OverpassRoadProvider implements RoadProvider {
   }
   private static readonly DEFAULT_WIDTH_M = 5
 
+  /**
+   * The instances asked, in order.
+   *
+   * Several, because one is a single point of failure in the most literal way: the main instance
+   * stopped accepting connections from the address this was written on partway through a day of
+   * asking, and every scene lost its roads at once. They are independent servers run by different
+   * people over the same data, so the second answers what the first will not.
+   */
+  private static readonly ENDPOINTS = [
+    "https://overpass-api.de/api/interpreter",
+    "https://overpass.kumi.systems/api/interpreter",
+    "https://overpass.private.coffee/api/interpreter"
+  ]
+
   private readonly fetchImpl: typeof fetch
-  private readonly endpoint: string
+  private readonly endpoints: string[]
 
   constructor(options: OverpassRoadProviderOptions = {}) {
     // fetch.bind(globalThis) — an unbound fetch loses the `this` it requires once called as a
     // field (see AwsTerrariumElevationProvider, which learned the same thing).
     this.fetchImpl = options.fetchImpl ?? fetch.bind(globalThis)
-    this.endpoint = options.endpoint ?? "https://overpass-api.de/api/interpreter"
+    this.endpoints = options.endpoints ?? OverpassRoadProvider.ENDPOINTS
   }
 
   /**
@@ -116,13 +130,25 @@ export class OverpassRoadProvider implements RoadProvider {
    * is passed on as one, for the caller to turn into a scene with no roads.
    */
   private async ask(query: string): Promise<OverpassResponse> {
-    for (let attempt = 0; ; attempt++) {
-      const response = await this.fetchImpl(`${this.endpoint}?data=${encodeURIComponent(query)}`)
-      if (response.ok) return (await response.json()) as OverpassResponse
-      const busy = response.status === 429 || response.status === 504
-      if (!busy || attempt > 0) throw new Error(`Overpass refused (${response.status})`)
-      await new Promise(resolve => setTimeout(resolve, OverpassRoadProvider.RETRY_MS))
+    let last: Error | undefined
+    for (const endpoint of this.endpoints) {
+      for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+          const response = await this.fetchImpl(`${endpoint}?data=${encodeURIComponent(query)}`)
+          if (response.ok) return (await response.json()) as OverpassResponse
+          last = new Error(`${new URL(endpoint).host} refused (${response.status})`)
+          if (response.status !== 429 && response.status !== 504) break
+        } catch (error) {
+          // Not answering at all — down, or refusing this address's connections outright, which is
+          // what a day of asking earns. The next instance is a different server run by different
+          // people, so it is worth asking; waiting first is not.
+          last = new Error(`${new URL(endpoint).host} unreachable (${String(error)})`)
+          break
+        }
+        await new Promise(resolve => setTimeout(resolve, OverpassRoadProvider.RETRY_MS))
+      }
     }
+    throw last ?? new Error("No Overpass instance answered")
   }
 
   /** What OSM says, where it says anything; what the class implies otherwise — see WIDTH_M. */

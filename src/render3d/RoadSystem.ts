@@ -19,9 +19,10 @@ export type GroundYAt = (x: number, z: number) => number
  * Two kinds of road are drawn here and they are NOT drawn alike. One is stated by the case file —
  * measured at the time, by the people who were there — and is the ground the witness was actually
  * on. The other comes from a survey of today (see RoadProvider.contemporary): useful for placing
- * oneself, and an anachronism, since the interstate beside Socorro was built after 1964 and the
- * track Zamora turned onto may be gone. So a contemporary road is drawn faint, and the credit says
- * whose survey and of when.
+ * oneself, and not evidence of anything, because a road network is not what it was. Sixty years of
+ * widening, realignment and abandonment stand between today's survey and the night of an account,
+ * and an unsealed ranch track is the first thing to go. So a contemporary road is drawn faint, and
+ * the credit says whose survey it is and that it is of today.
  */
 export class RoadSystem {
   /** How far apart a ribbon's rungs are, metres: close enough to follow a wash or a bank, far

@@ -27,8 +27,10 @@
  * every file says so in `contemporary`, and the player draws a contemporary road faint and credits
  * it as a survey of today (see RoadSystem).
  */
+import { execFile } from "node:child_process"
 import { readdir, readFile, mkdir, writeFile } from "node:fs/promises"
 import { join } from "node:path"
+import { promisify } from "node:util"
 import { fileURLToPath } from "node:url"
 import { OverpassRoadProvider } from "../src/render3d/terrain/providers/OverpassRoadProvider.js"
 import type { RoadWay } from "../src/render3d/terrain/RoadProvider.js"
@@ -52,9 +54,15 @@ const COURTESY_MS = 5000
  * exchange for a mess. */
 const MAX_RADIUS_M = 5000
 
+/** Who is asking, as Overpass's own usage policy expects. */
+const USER_AGENT = "UfoAtHome archive build (https://ufoathome.org)"
+const run = promisify(execFile)
+
 class RoadArchiveBuilder {
   private readonly root = fileURLToPath(new URL("..", import.meta.url))
-  private readonly provider = new OverpassRoadProvider()
+  private readonly provider = new OverpassRoadProvider({ fetchImpl: RoadArchiveBuilder.fetchOrCurl })
+  /** Said once, the first time the fallback is taken — see fetchOrCurl. */
+  private static saidCurl = false
 
   async build(): Promise<void> {
     const places = await this.places()
@@ -181,6 +189,38 @@ class RoadArchiveBuilder {
       // No saved answer for this place: ask.
     }
     return this.provider.getRoads(bounds)
+  }
+
+  /**
+   * `fetch`, and `curl` when that cannot get out.
+   *
+   * Node's own fetch does not authenticate to a proxy declared only in the environment, which is
+   * how a good many development machines reach the internet — including the one this was written
+   * on, and the one it was first run on, both of which answered `TypeError: fetch failed` to every
+   * query while `curl` to the same address went straight through. curl reads HTTPS_PROXY and its
+   * credentials for itself.
+   *
+   * A build step may reach for the system's own tools; the RUNTIME provider may not, and does not.
+   */
+  private static fetchOrCurl = async (input: RequestInfo | URL): Promise<Response> => {
+    const url = String(input)
+    try {
+      return await fetch(url, { headers: { "User-Agent": USER_AGENT } })
+    } catch {
+      if (!RoadArchiveBuilder.saidCurl) {
+        RoadArchiveBuilder.saidCurl = true
+        console.log("(node's fetch cannot get out here — falling back to curl)")
+      }
+      // 256 MB: a county's every drivable way with its full geometry is a few megabytes, and the
+      // default 1 MB would truncate it into a parse error that says nothing about why.
+      const { stdout } = await run("curl", ["-s", "--compressed", "--fail", "--max-time", "180", "-A", USER_AGENT, url],
+        { maxBuffer: 256 * 1024 * 1024 })
+      return {
+        ok: true,
+        status: 200,
+        json: async () => JSON.parse(stdout)
+      } as Response
+    }
   }
 
   private static pointsIn(ways: RoadWay[]): number {

@@ -1,0 +1,109 @@
+{
+ "version": 1,
+ "entries": [
+  {
+   "file": "1964-04-24-WilcoxGary.json",
+   "north": 42.237651040603666,
+   "south": 42.220510959396336,
+   "east": -76.16953550528503,
+   "west": -76.19246449471497,
+   "about": "1964-04-24-WilcoxGary"
+  },
+  {
+   "file": "1964-04-24-ZamoraLonnie.json",
+   "north": 34.059407040603666,
+   "south": 34.03401095939633,
+   "east": -106.88144772981833,
+   "west": -106.90802327018167,
+   "about": "1964-04-24-ZamoraLonnie"
+  },
+  {
+   "file": "1965-07-01-MasseMaurice.json",
+   "north": 43.853997040603666,
+   "south": 43.836268959396335,
+   "east": 5.974970474935113,
+   "west": 5.951429525064886,
+   "about": "1965-07-01-MasseMaurice"
+  },
+  {
+   "file": "1967-08-29-DelpeuchFrancois.json",
+   "north": 45.01493870283866,
+   "south": 44.94760129716134,
+   "east": 2.964983178546031,
+   "west": 2.8697848214539694,
+   "about": "1967-08-29-DelpeuchFrancois"
+  },
+  {
+   "file": "example-minimal.json",
+   "north": 45.19848904060366,
+   "south": 45.181510959396334,
+   "east": 5.732045326324051,
+   "west": 5.707954673675949,
+   "about": "example-minimal"
+  },
+  {
+   "file": "example-sighting.json",
+   "north": 45.197018040603666,
+   "south": 45.18003995939634,
+   "east": 5.736569015028998,
+   "west": 5.712478984971002,
+   "about": "example-sighting"
+  },
+  {
+   "file": "instrument-eye.json",
+   "north": 34.05112404060366,
+   "south": 34.03401095939633,
+   "east": -106.88750523015797,
+   "west": -106.90802276984203,
+   "about": "instrument-eye"
+  },
+  {
+   "file": "sky-test-aircraft.json",
+   "north": 48.942389040603665,
+   "south": 48.92541095939634,
+   "east": 2.311522305276416,
+   "west": 2.285677694723584,
+   "about": "sky-test-aircraft"
+  },
+  {
+   "file": "sky-test-clouds.json",
+   "north": 45.00848904060366,
+   "south": 44.99151095939634,
+   "east": 5.019627739434661,
+   "west": 4.987994683646761,
+   "about": "sky-test-clouds"
+  },
+  {
+   "file": "sky-test-comet.json",
+   "north": 48.865089040603664,
+   "south": 48.84811095939634,
+   "east": 2.3651023390934207,
+   "west": 2.339297660906579,
+   "about": "sky-test-comet"
+  },
+  {
+   "file": "sky-test-meteors.json",
+   "north": 45.708489040603666,
+   "south": 45.69151095939634,
+   "east": 4.812154717659746,
+   "west": 4.787845282340253,
+   "about": "sky-test-meteors"
+  },
+  {
+   "file": "sky-test-milkyway.json",
+   "north": -23.991510959396336,
+   "south": -24.008489040603664,
+   "east": -69.99070758818551,
+   "west": -70.00929241181449,
+   "about": "sky-test-milkyway"
+  },
+  {
+   "file": "sky-test-zodiacal.json",
+   "north": 28.308489040603664,
+   "south": 28.291510959396337,
+   "east": -16.490358592904368,
+   "west": -16.509641407095632,
+   "about": "sky-test-zodiacal"
+  }
+ ]
+}
