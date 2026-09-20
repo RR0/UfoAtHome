@@ -44,7 +44,6 @@ export class RoadSystem {
   }
 
   readonly group = new Group()
-  private builtKey?: string
 
   constructor() {
     this.group.name = "roads"
@@ -53,15 +52,14 @@ export class RoadSystem {
   /**
    * Lays `ways` on the ground around an observer at (originLat, originLng).
    *
-   * Cheap to call again with the same roads: a build is keyed on what went into it, since the
-   * caller has no more idea than this does whether the relief under them has just been rebuilt.
+   * Always rebuilds, and that is not laziness. A carriageway is drawn at the height of the ground
+   * under each of its rungs, so it belongs to the relief it was laid on: the first version of this
+   * skipped a rebuild whose roads and place were unchanged, and a patch rebuilt under them left a
+   * whole network hanging at the heights of the patch before. Deciding not to fetch is the
+   * caller's business (see SceneRenderer.buildRoads); deciding not to drape is nobody's.
    */
-  set(ways: RoadWay[], originLat: number, originLng: number, groundYAt: GroundYAt, contemporary: boolean, key: string): void {
-    if (key === this.builtKey) return
-    // After clear(), which forgets the key it is told to forget — setting it first meant every
-    // build ended with no key at all, and the next identical call rebuilt the lot.
+  set(ways: RoadWay[], originLat: number, originLng: number, groundYAt: GroundYAt, contemporary: boolean): void {
     this.clear()
-    this.builtKey = key
     // One mesh per SURFACE, not per way. A town's network is five hundred ways — around Socorro it
     // is 490 — and five hundred draw calls to put down what is, visually, three materials would
     // cost more than everything else in the frame put together. They share a material anyway, so
@@ -86,7 +84,6 @@ export class RoadSystem {
       mesh.geometry?.dispose()
       mesh.material?.dispose()
     }
-    this.builtKey = undefined
   }
 
   dispose(): void {

@@ -72,6 +72,7 @@ import { defaultTerrainProviders } from "./terrain/defaultTerrainProviders.js"
 import type { TerrainProviders } from "./terrain/defaultTerrainProviders.js"
 import { boundsAroundObserver, buildTerrainMesh } from "./terrain/TerrainMeshBuilder.js"
 import { RoadSystem } from "./RoadSystem.js"
+import type { RoadWay } from "./terrain/RoadProvider.js"
 import { geoToLocalMeters } from "./terrain/GeoProjection.js"
 import { DEFAULT_CLOUD_BASE_M, DEFAULT_ICE_CRYSTAL_ALIGNMENT, DEFAULT_WEATHER } from "../engine/model/Weather.js"
 import type { PrecipitationType, Weather } from "../engine/model/Weather.js"
@@ -813,6 +814,10 @@ export class SceneRenderer {
   /** The roads laid on the patch, and the credit their survey requires — see RoadSystem. */
   private readonly roadSystem = new RoadSystem()
   private roadAttribution?: string
+  /** The ways last fetched, and the place they were fetched for. A patch is rebuilt far more often
+   * than a witness moves to another county, and Overpass is a free service answering in tens of
+   * seconds: the same square of ground is asked for once. */
+  private roadWays?: { lat: number; lng: number; radiusM: number; ways: RoadWay[] }
   /** Which catalogue resolves a recording's named 3D models — swappable exactly like the terrain's
    * own providers (see setDecorModelProvider), and built from the registry's first entry by
    * default so nothing has to configure it. */
@@ -1353,6 +1358,7 @@ export class SceneRenderer {
     this.terrainAttribution = undefined
     this.roadSystem.clear()
     this.roadAttribution = undefined
+    this.roadWays = undefined
     // The flat disc is the only ground again until the next build lands (see applyGroundDepthWrite).
     this.applyGroundDepthWrite()
     // Any build still in flight is about the old source now.
@@ -1375,6 +1381,14 @@ export class SceneRenderer {
     }
     const previousOrigin = this.terrainOrigin
     const previousRadius = this.terrainRadius
+    // Whatever roads are standing belong to the patch about to be replaced, and if this build is
+    // for somewhere else they are another county's network. Taken down now rather than when the
+    // new ones arrive: Overpass answers in tens of seconds, and a reader should not spend those
+    // looking at the streets of the last recording they opened.
+    if (!previousOrigin || previousOrigin.lat !== lat || previousOrigin.lng !== lng) {
+      this.roadSystem.clear()
+      this.roadAttribution = undefined
+    }
     this.terrainOrigin = { lat, lng }
     this.terrainRadius = radiusM
     const token = ++this.terrainBuildToken
@@ -1447,6 +1461,12 @@ export class SceneRenderer {
       this.roadAttribution = undefined
       return
     }
+    const held = this.roadWays
+    if (held && held.lat === lat && held.lng === lng && held.radiusM === radiusM) {
+      // Same ground, new relief: re-drape what is already in hand rather than ask again.
+      this.drapeRoads(held.ways, lat, lng, provider.contemporary)
+      return
+    }
     provider.getRoads(boundsAroundObserver(lat, lng, radiusM))
       .then(ways => {
         // Against the PLACE, not against the build token. A patch is rebuilt for reasons that have
@@ -1455,15 +1475,21 @@ export class SceneRenderer {
         // those races and quietly draw nothing. What makes these roads wrong is the scene having
         // moved somewhere else, and that is what this asks.
         if (this.terrainOrigin?.lat !== lat || this.terrainOrigin?.lng !== lng) return
-        this.roadSystem.set(ways, lat, lng, (x, z) => this.groundYUnder(x, z), provider.contemporary,
-          `${lat},${lng},${radiusM},${ways.length}`)
-        this.roadAttribution = ways.length > 0 ? provider.attribution : undefined
-        this.compileNextFrameOffThread()
-        this.render()
+        this.roadWays = { lat, lng, radiusM, ways }
+        this.drapeRoads(ways, lat, lng, provider.contemporary)
       })
       .catch(error => {
         console.warn("Roads unavailable, drawing none:", error)
       })
+  }
+
+  /** Lays ways already in hand on the relief as it stands right now — see RoadSystem.set on why
+   * this is done again for every patch rather than skipped when nothing about the roads changed. */
+  private drapeRoads(ways: RoadWay[], lat: number, lng: number, contemporary: boolean): void {
+    this.roadSystem.set(ways, lat, lng, (x, z) => this.groundYUnder(x, z), contemporary)
+    this.roadAttribution = ways.length > 0 ? this.terrainProviders.roads?.attribution : undefined
+    this.compileNextFrameOffThread()
+    this.render()
   }
 
   /** Enables/disables the N/NE/E/SE/S/SO/O/NO horizon labels feature — a fixed compass reference,

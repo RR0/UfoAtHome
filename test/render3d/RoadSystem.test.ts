@@ -27,7 +27,7 @@ describe("RoadSystem", () => {
     const system = new RoadSystem()
     system.set([
       straight("a", "paved", 7, 200), straight("b", "paved", 5, 200), straight("c", "gravel", 4, 200)
-    ], LAT, LNG, () => 0, true, "k")
+    ], LAT, LNG, () => 0, true)
     expect(meshes(system).map(mesh => mesh.name).sort()).toEqual(["roads gravel", "roads paved"])
   })
 
@@ -35,7 +35,7 @@ describe("RoadSystem", () => {
     // OSM states a straight kilometre as two points. Laid flat between them, a road would cut
     // through every rise in between.
     const system = new RoadSystem()
-    system.set([straight("a", "paved", 7, 200)], LAT, LNG, SLOPE, false, "k")
+    system.set([straight("a", "paved", 7, 200)], LAT, LNG, SLOPE, false)
     const position = meshes(system)[0].geometry.getAttribute("position")
     let worst = 0
     for (let i = 0; i < position.count; i++) {
@@ -46,7 +46,7 @@ describe("RoadSystem", () => {
 
   it("puts a rung at least every STEP_M along a way, however few points the survey gave it", () => {
     const system = new RoadSystem()
-    system.set([straight("a", "paved", 7, 200)], LAT, LNG, () => 0, false, "k")
+    system.set([straight("a", "paved", 7, 200)], LAT, LNG, () => 0, false)
     const position = meshes(system)[0].geometry.getAttribute("position")
     // Two vertices a rung, and 200 m at 8 m a step is 25 steps — 26 rungs.
     expect(position.count / 2).toBeGreaterThanOrEqual(200 / RoadSystem.STEP_M)
@@ -54,7 +54,7 @@ describe("RoadSystem", () => {
 
   it("draws the carriageway at the width it was given", () => {
     const system = new RoadSystem()
-    system.set([straight("a", "paved", 7, 200)], LAT, LNG, () => 0, false, "k")
+    system.set([straight("a", "paved", 7, 200)], LAT, LNG, () => 0, false)
     const position = meshes(system)[0].geometry.getAttribute("position")
     // The first rung: its two ends are the road's two edges, so they are a width apart.
     const across = Math.hypot(position.getX(0) - position.getX(1), position.getZ(0) - position.getZ(1))
@@ -63,20 +63,22 @@ describe("RoadSystem", () => {
 
   it("draws a contemporary road faint, and one the case file states at full presence", () => {
     const stated = new RoadSystem()
-    stated.set([straight("a", "gravel", 4, 100)], LAT, LNG, () => 0, false, "k")
+    stated.set([straight("a", "gravel", 4, 100)], LAT, LNG, () => 0, false)
     const today = new RoadSystem()
-    today.set([straight("a", "gravel", 4, 100)], LAT, LNG, () => 0, true, "k")
+    today.set([straight("a", "gravel", 4, 100)], LAT, LNG, () => 0, true)
     const opacityOf = (system: RoadSystem): number => (meshes(system)[0].material as { opacity: number }).opacity
     expect(opacityOf(stated)).toBe(1)
     expect(opacityOf(today)).toBe(RoadSystem.CONTEMPORARY_OPACITY)
   })
 
-  it("does not rebuild what it already holds, and drops everything when asked", () => {
+  it("re-drapes on every call, because a carriageway belongs to the relief it was laid on", () => {
+    // Skipping a rebuild whose roads and place were unchanged left a whole network hanging at the
+    // heights of the patch before, once the patch under it was rebuilt.
     const system = new RoadSystem()
-    system.set([straight("a", "paved", 7, 100)], LAT, LNG, () => 0, false, "k")
-    const before = meshes(system)[0]
-    system.set([straight("b", "gravel", 4, 100)], LAT, LNG, () => 0, false, "k")
-    expect(meshes(system)[0]).toBe(before)
+    system.set([straight("a", "paved", 7, 100)], LAT, LNG, () => 0, false)
+    const flat = meshes(system)[0].geometry.getAttribute("position").getY(4)
+    system.set([straight("a", "paved", 7, 100)], LAT, LNG, () => 20, false)
+    expect(meshes(system)[0].geometry.getAttribute("position").getY(4)).toBeCloseTo(flat + 20, 5)
     system.clear()
     expect(meshes(system)).toHaveLength(0)
   })
