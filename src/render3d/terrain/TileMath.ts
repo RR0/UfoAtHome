@@ -10,6 +10,8 @@ const DEG_TO_RAD = Math.PI / 180
 const RAD_TO_DEG = 180 / Math.PI
 const TILE_SIZE_PX = 256
 const MAX_ZOOM = 19
+/** See chooseZoomForPixelSize. */
+const PIXEL_SIZE_TOLERANCE = 1.25
 
 export interface TileCoord {
   x: number
@@ -36,6 +38,30 @@ function tileEdgeMeters(latDeg: number, z: number): number {
 export function chooseZoomForTileEdge(latDeg: number, targetTileEdgeM: number): number {
   let z = 0
   while (z < MAX_ZOOM && tileEdgeMeters(latDeg, z + 1) >= targetTileEdgeM) z++
+  return z
+}
+
+/** How wide one tile is on the ground, in metres, at a latitude and zoom. */
+export function tileEdgeM(latDeg: number, z: number): number {
+  return tileEdgeMeters(latDeg, z)
+}
+
+/**
+ * The coarsest zoom whose pixels are still no larger on the ground than `targetMPerPixel` — i.e.
+ * the least detail that still answers what was asked for.
+ *
+ * The counterpart of chooseZoomForTileEdge, which answers "how far does one tile reach". This one
+ * answers "how fine is one pixel", which is what a caller asking for an image of a known span at a
+ * known size really needs: finer than that is thrown away in the resize, coarser than that is
+ * invented there.
+ */
+export function chooseZoomForPixelSize(latDeg: number, targetMPerPixel: number): number {
+  // A quarter coarser than asked is accepted, because one zoom level apart is a FACTOR OF TWO in
+  // pixels and four in tiles: a target falling a few percent under a level's own pixel size would
+  // otherwise buy a whole level, and four times the fetches, for those few percent.
+  const acceptable = targetMPerPixel * PIXEL_SIZE_TOLERANCE
+  let z = 0
+  while (z < MAX_ZOOM && metersPerPixel(latDeg, z) > acceptable) z++
   return z
 }
 

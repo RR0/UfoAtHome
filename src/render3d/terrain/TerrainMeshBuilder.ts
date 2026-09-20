@@ -24,7 +24,15 @@ import { fractionWithinBounds } from "./TileMath.js"
  */
 const TERRAIN_SEGMENTS = 64
 const GRID_SIZE = TERRAIN_SEGMENTS + 1 // 65 — odd, so the center vertex lands exactly on the observer
-const IMAGERY_RESOLUTION = 512
+/**
+ * The most texels the ground photograph may hold on a side — a ceiling, not an order: the provider
+ * gives what its tiles really carry and no more (see fetchImageryRaster).
+ *
+ * It was 512 over an 1800 m patch, so six metres to the texel: a road is six metres wide, and the
+ * ground under the scene was a smear in which neither the highway nor the track a car turned off
+ * onto could be made out. At 2048 the same patch is under a metre, which is what the survey holds.
+ */
+const IMAGERY_RESOLUTION = 2048
 
 /** Full color out to this radius, fading to fully transparent by FADE_END — both kept well inside
  * the guaranteed provider coverage (a 3x3 tile grid sized so a single tile covers half the
@@ -171,6 +179,11 @@ export async function buildTerrainMesh(
 
   const texture = new CanvasTexture(imageryTexture.source)
   texture.flipY = false // our uv.v=0 is already the raster's own top (north) row — see the loop above
+  // The ground is looked at almost edge-on: a witness stands ON it, so a texel a metre across is
+  // many metres deep in the frame. Without this, the mipmap chosen for that compression is the one
+  // that suits the DEEP direction, and a road a reader could now make out is blurred away in the
+  // one direction it runs. Three clamps this to what the card allows.
+  texture.anisotropy = 8
 
   const material = new MeshLambertMaterial({
     map: texture,
