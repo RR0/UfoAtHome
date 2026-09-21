@@ -124,6 +124,10 @@ import { HumidHaze } from "../engine/atmosphere/HumidHaze.js"
 import { AerialPerspective } from "../engine/atmosphere/AerialPerspective.js"
 import type { Rgb } from "../engine/atmosphere/AerialPerspective.js"
 import { AerialFog } from "./AerialFog.js"
+import { ForwardDiffraction } from "../engine/atmosphere/ForwardDiffraction.js"
+import { AtmosphereProfile } from "../engine/atmosphere/AtmosphereProfile.js"
+import { SourceDiffraction } from "./SourceDiffraction.js"
+import { Photometry } from "./Photometry.js"
 
 /** Plain field-by-field comparison — see setWeather's own doc comment on why reference equality
  * stopped being enough once weather started being resolved fresh every tick from a keyframe
@@ -1137,6 +1141,10 @@ export class SceneRenderer {
   private satelliteField?: SatelliteField
   /** What ice crystals did to the light of the Sun or Moon — see IceHaloEffect. */
   private iceHalos?: IceHaloEffect
+  /** The aureole and corona round the Moon — see SourceDiffraction. */
+  private lunarDiffraction?: SourceDiffraction
+  /** What the Moon's glow was last worked out for, so it is only worked out again when that changes. */
+  private lunarDiffractionKey = ""
   /** What falling water did to it — see RainbowEffect. The two are independent and a sky may
    * honestly show both: a shower under a cirrus veil is an ordinary afternoon. */
   private rainbow?: RainbowEffect
@@ -1656,6 +1664,9 @@ export class SceneRenderer {
     if (this.lastAstronomy) {
       this.buildIceHalos(this.lastAstronomy.sun, this.lastAstronomy.moon)
       this.buildRainbow(this.lastAstronomy.sun, this.lastAstronomy.moon)
+      // And the Moon's corona, which is the new cloud's as much as the Moon's: without this, a veil
+      // that arrived after the sky was last restated left the glow of the sky before it.
+      this.buildLunarDiffraction(this.lastAstronomy.moon)
     }
     this.lightningArmed = weather.storm && weather.cloudDarkness >= LIGHTNING_MIN_DARKNESS
     this.syncAnimationLoop()
@@ -2238,6 +2249,62 @@ export class SceneRenderer {
     // The air between the eye and everything real, with the horizon this sky has just been given
     // as the light it lays over a distant thing — see AerialFog.
     this.applyAir()
+    // After the sky's adaptation, which decides how bright the Moon's glow comes out.
+    this.buildLunarDiffraction(astronomy.moon)
+  }
+
+  /**
+   * The Moon's aureole and corona: its light diffracted by the haze's coarse particles and by the
+   * droplets of whatever thin water cloud lies across it — see ForwardDiffraction.
+   *
+   * The Moon's own illuminance from its magnitude, the haze's depth from the humidity the sky uses
+   * (thinner over a high site, as the sky's is), and the cloud's from the water decks alone along
+   * the Moon's own line: the cirrus that makes a halo does not make a corona. What the eye sees of
+   * it is the scene's photometry of that many candela, in the colour the diffraction gives: the
+   * corona's rings keep their red and blue at night, as a bright one does to an eye.
+   *
+   * The Sun's would follow from the same code and is not drawn: its glare already covers the
+   * degrees where an aureole is, and a corona round it is seen only with the Sun hidden.
+   */
+  private buildLunarDiffraction(moon: HorizontalPosition & { magnitude: number }): void {
+    const display = this.scatteredSky?.ready ? this.scatteredSky : undefined
+    if (moon.altitudeDeg < -0.5 || !display) {
+      this.lunarDiffraction?.show(undefined)
+      this.lunarDiffractionKey = ""
+      return
+    }
+    const humidity = this.weather.relativeHumidity
+    const haze = (humidity === undefined ? AtmosphereProfile.DEFAULT_AEROSOL_OPTICAL_DEPTH : HumidHaze.opticalDepth(humidity))
+      * AtmosphereProfile.aerosolDensity(this.siteElevationM + this.observerElevationM)
+    const throughAll = this.cloudTransmission(moon)
+    const cloud = -Math.log(Math.max(this.cloudTransmission(moon, true), 1e-4))
+    const aureole = ForwardDiffraction.aureoleScale(haze, ForwardDiffraction.airMass(moon.altitudeDeg)) * throughAll
+    const corona = ForwardDiffraction.coronaScale(cloud)
+    const illuminance = ForwardDiffraction.illuminanceOf(moon.magnitude)
+    const key = [moon.altitudeDeg.toFixed(1), moon.azimuthDeg.toFixed(1), moon.magnitude.toFixed(2), aureole.toExponential(2),
+      corona.toExponential(2), Math.log10(Math.max(display.adaptation, 1e-12)).toFixed(2)].join(":")
+    if (key === this.lunarDiffractionKey) return
+    this.lunarDiffractionKey = key
+    if (!this.lunarDiffraction) {
+      this.lunarDiffraction = new SourceDiffraction()
+      this.celestialGroup.add(this.lunarDiffraction.object)
+    }
+    const hazeProfile = ForwardDiffraction.profile(ForwardDiffraction.HAZE_COARSE_MODE)
+    const cloudProfile = ForwardDiffraction.profile(ForwardDiffraction.CLOUD_DROPLETS)
+    const tint = atmosphericTint(moon.altitudeDeg)
+    const shown = new Float32Array(ForwardDiffraction.STEPS * 3)
+    let brightest = 0
+    for (let step = 0; step < ForwardDiffraction.STEPS; step++) {
+      const at = step * 3
+      const light: [number, number, number] = [0, 1, 2].map(channel =>
+        illuminance * tint[channel] * (aureole * hazeProfile[at + channel] + corona * cloudProfile[at + channel])) as [number, number, number]
+      const colour = Photometry.shown(light, Photometry.luminanceOf(light), (rgb, luminance) => display.displayOfLuminance(rgb, luminance))
+      shown.set(colour, at)
+      brightest = Math.max(brightest, colour[0], colour[1], colour[2])
+    }
+    const { x, y, z } = horizontalToCartesian(moon.altitudeDeg, moon.azimuthDeg, 1)
+    // Under a two-hundredth of the screen's scale it is nothing anyone would see, and not drawn.
+    this.lunarDiffraction.show(brightest > 1 / 200 ? { x, y, z } : undefined, shown)
   }
 
   /**
@@ -3791,7 +3858,7 @@ export class SceneRenderer {
    * The ice deck attenuates too, but only slightly, and that is the point of it being separate: you
    * see the Sun THROUGH cirrus, which is why it can make a halo at all.
    */
-  private cloudTransmission(position: HorizontalPosition): number {
+  private cloudTransmission(position: HorizontalPosition, waterOnly = false): number {
     // A tenth of a degree of direction and ten metres of drift: the deck's structure is hundreds of
     // metres across, and the walk through it (48 samples of a noise field per body) was a fifth of
     // the main thread on a night whose Moon moved a pixel a frame. Forgotten with the weather (see
@@ -3799,25 +3866,27 @@ export class SceneRenderer {
     const key = `${position.altitudeDeg.toFixed(1)}:${position.azimuthDeg.toFixed(1)}:`
       + `${Math.round(this.cloudOffsetM.x / 10)}:${Math.round(this.cloudOffsetM.z / 10)}:${Math.round(this.observerElevationM)}:`
       + Object.entries(this.cloudLayerOffsetsM).map(([id, o]) => `${id}=${Math.round(o.x / 10)},${Math.round(o.z / 10)}`).join(";")
+      + (waterOnly ? ":water" : "")
     const known = this.cloudTransmissionMemo.get(key)
     if (known !== undefined) return known
     if (this.cloudTransmissionMemo.size > 256) this.cloudTransmissionMemo.clear()
-    const through = this.computeCloudTransmission(position)
+    const through = this.computeCloudTransmission(position, waterOnly)
     this.cloudTransmissionMemo.set(key, through)
     return through
   }
 
   private readonly cloudTransmissionMemo = new Map<string, number>()
 
-  private computeCloudTransmission(position: HorizontalPosition): number {
+  /** @param waterOnly Through the water decks alone, leaving the ice out — what a corona needs. */
+  private computeCloudTransmission(position: HorizontalPosition, waterOnly = false): number {
     const direction = horizontalToCartesian(position.altitudeDeg, position.azimuthDeg, 1)
-    if (this.layeredClouds) return this.layeredClouds.transmissionAt(direction)
+    if (this.layeredClouds) return this.layeredClouds.transmissionAt(direction, waterOnly)
     let through = 1
     const water = this.lowerCloudCover()
     if (water > 0) {
       through *= 1 - CloudField.alphaAt(direction, Math.abs(this.cloudLayerOffset()), water, this.cloudFieldOffset) * WATER_DECK_OPACITY
     }
-    const ice = this.weather.highCloudCover ?? 0
+    const ice = waterOnly ? 0 : this.weather.highCloudCover ?? 0
     if (ice > 0) {
       // The cirrus deck's own fibre field, where it is drawn: it drifts with the same offset as the water.
       through *= 1 - CloudField.iceAlphaAt(direction, CIRRUS_LAYER_HEIGHT, ice, this.cloudFieldOffset) * ICE_DECK_OPACITY

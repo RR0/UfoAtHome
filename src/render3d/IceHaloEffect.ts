@@ -41,7 +41,7 @@ import { CIRRUS_COVER_GLSL, CLOUD_NOISE_GLSL, ICE_HALO_LIGHT_GLSL } from "./Clou
  */
 export class IceHaloEffect {
   /** Just inside the sky dome, so it is painted over the sky and under everything else. */
-  private static readonly RADIUS = 880
+  static readonly RADIUS = 880
 
   /**
    * How many rays a finished display is worth.

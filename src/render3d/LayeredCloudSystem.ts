@@ -212,9 +212,11 @@ export class LayeredCloudSystem {
     return picked
   }
 
-  transmissionAt(direction: { x: number; y: number; z: number }): number {
+  /** @param waterOnly Through the water decks alone, leaving the cirrus out. */
+  transmissionAt(direction: { x: number; y: number; z: number }, waterOnly = false): number {
     let through = 1
     for (const deck of this.decks.values()) {
+      if (waterOnly && deck.layer.type === "cirrus") continue
       if (deck.volume) through *= deck.volume.transmissionAt(direction)
       else if (deck.uniforms) through *= 1 - (deck.layer.type === "cirrus" ? CloudField.iceAlphaAt : CloudField.alphaAt)(direction,
         deck.uniforms.layerHeight.value, deck.layer.coverage, deck.uniforms.fieldOffset.value) * (deck.layer.type === "cirrus" ? 0.2 : 0.95)

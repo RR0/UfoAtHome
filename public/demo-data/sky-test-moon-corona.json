@@ -1,0 +1,91 @@
+{
+  "version": 1,
+  "id": "sky-test-moon-corona",
+  "description": {
+    "fr": "Ciel d'essai : la couronne de la pleine Lune. La même Lune, derrière un voile d'altocumulus mince et continu à 3 000 m, d'une épaisseur optique de 0,3 devant elle : ses gouttelettes, presque toutes de la même taille, diffractent sa lumière en un disque bleuté entouré d'un anneau rouge vers deux degrés et demi. Plus épais, le voile la noierait dans sa propre lueur, et au-delà d'une épaisseur de 3 il n'en resterait rien. Les halos de 22° sont l'affaire de la glace, pas de l'eau : il n'y en a pas ici.",
+    "en": "Test sky: the full Moon's corona. The same Moon behind a thin, unbroken veil of altocumulus at 3,000 m, of optical depth 0.3 across it: its droplets, nearly all of one size, diffract its light into a bluish disc ringed with red near two and a half degrees. A thicker veil would drown it in its own glow, and past an optical depth of 3 nothing of it would be left. The 22° halos are ice's doing, not water's: there are none here."
+  },
+  "time": {
+    "year": 2020,
+    "month": 6,
+    "day": 6,
+    "hour": 2,
+    "minute": 30
+  },
+  "utcOffsetHours": 2,
+  "durationSeconds": 12,
+  "place": [
+    {
+      "lat": 45,
+      "lng": 5
+    }
+  ],
+  "weatherTrack": {
+    "keyframes": [
+      {
+        "t": 0,
+        "weather": {
+          "windDirectionDeg": 240,
+          "windSpeed": 2,
+          "storm": false,
+          "precipitationType": "none",
+          "precipitationIntensity": 0,
+          "cloudCover": 1,
+          "cloudDarkness": 0.15,
+          "cloudBaseM": 3000,
+          "lowerCloudCover": 1,
+          "highCloudCover": 0,
+          "relativeHumidity": 0.8,
+          "cloudLayers": [
+            {
+              "id": "veil",
+              "type": "stratocumulus",
+              "baseM": 3000,
+              "thicknessM": 150,
+              "coverage": 1,
+              "sizeM": 900,
+              "density": 0.25
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "timeline": {
+    "keyframes": [
+      {
+        "t": 0,
+        "shapes": []
+      }
+    ],
+    "order": [],
+    "groups": []
+  },
+  "witnessTrack": {
+    "keyframes": [
+      {
+        "t": 0,
+        "pose": {
+          "lat": 45,
+          "lng": 5,
+          "elevationM": 0,
+          "headingDeg": 189.6,
+          "pitchDeg": 20,
+          "fovDeg": 40
+        }
+      },
+      {
+        "t": 12000,
+        "pose": {
+          "lat": 45,
+          "lng": 5,
+          "elevationM": 0,
+          "headingDeg": 189.6,
+          "pitchDeg": 20,
+          "fovDeg": 40
+        }
+      }
+    ]
+  },
+  "decor": []
+}

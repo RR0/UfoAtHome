@@ -11,6 +11,9 @@ import { DecorSystem } from "./DecorSystem.js"
 import type { DecorObject } from "../engine/model/Decor.js"
 import { Glare } from "./Glare.js"
 import { GroundPlume } from "./GroundPlume.js"
+import { Photometry } from "./Photometry.js"
+import type { LuminanceDisplay } from "./Photometry.js"
+export type { LuminanceDisplay } from "./Photometry.js"
 import type { SmokeSource } from "../engine/interpretation/Interpretation.js"
 
 const DEG_TO_RAD = Math.PI / 180
@@ -19,9 +22,6 @@ const DEG_TO_RAD = Math.PI / 180
  * when it cannot be had. Supplied by the renderer, which already resolves the decor's. */
 export type BodyModelLoader = (ref: DecorModelRef) => Promise<{ scene: Object3D, credit: unknown, headingOffsetDeg?: number } | undefined>
 
-/** How a light of this colour and luminance looks on screen, as the scene's own photometry has it
- * (see ScatteredSky.displayOfLuminance). */
-export type LuminanceDisplay = (linearRgb: readonly [number, number, number], luminanceCdM2: number) => readonly [number, number, number]
 
 /** A material of a loaded model that glows of itself: what a body's stated luminance sets the
  * brightness of (see BodyAppearance.luminanceCdM2). */
@@ -327,13 +327,6 @@ export class BodySystem {
   /** Where a model says a flame comes out, unless the flame names another node. */
   static readonly EXHAUST_NODE = "exhaust"
 
-  /** When the scene has no photometry to ask (no scattered sky on this device): the colour at a
-   * brightness that grows with the luminance and saturates, against a daylight-ish ten thousand. */
-  private static withoutPhotometry(rgb: readonly [number, number, number], luminanceCdM2: number): readonly [number, number, number] {
-    const response = luminanceCdM2 / (luminanceCdM2 + 1e4)
-    return [rgb[0] * response, rgb[1] * response, rgb[2] * response]
-  }
-
   /** Takes a body's bloom out of the scene — only when the body itself goes. */
   private dropGlare(id: string): void {
     const glare = this.glares.get(id)
@@ -522,22 +515,9 @@ export class BodySystem {
     material.emissive.setRGB(rgb[0], rgb[1], rgb[2])
   }
 
-  /**
-   * What a surface of this colour and this luminance looks like: the colour the account states, at
-   * the brightness the scene's photometry gives that many candela per square metre.
-   *
-   * The photometry is asked about a WHITE of that luminance and not about the colour itself,
-   * because what it answers is what a light of that brightness looks like to an eye adapted to this
-   * sky — and at night that is nearly white whatever went in. Handing it Chiles's deep blue came
-   * back as a white sliver, which is the one thing his drawing is not. So the scene decides how
-   * bright, and the witness decides what colour, which is the division of labour everywhere else
-   * in this format.
-   */
+  /** See Photometry.shown — kept here under its old name for the callers of this class. */
   static shown(colour: readonly [number, number, number], luminanceCdM2: number, display?: LuminanceDisplay): [number, number, number] {
-    const white = display ? display([1, 1, 1], luminanceCdM2) : BodySystem.withoutPhotometry([1, 1, 1], luminanceCdM2)
-    const brightness = 0.2126 * white[0] + 0.7152 * white[1] + 0.0722 * white[2]
-    const peak = Math.max(colour[0], colour[1], colour[2]) || 1
-    return [(colour[0] / peak) * brightness, (colour[1] / peak) * brightness, (colour[2] / peak) * brightness]
+    return Photometry.shown(colour, luminanceCdM2, display)
   }
 
   /**

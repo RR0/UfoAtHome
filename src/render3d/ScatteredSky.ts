@@ -53,6 +53,12 @@ export class ScatteredSky {
   private drawnKey = ""
   private hasViews = false
   private adaptingLuminance = 1
+
+  /** The luminance the eye is adapted to, cd/m² — what decides how bright anything that glows
+   * comes out, and so what a glow worked out ahead of time has to be worked out again for. */
+  get adaptation(): number {
+    return this.adaptingLuminance * this.exposureScale
+  }
   private ambientColours?: SkyAmbient
   private reading = false
   /** How much more light the instrument gathers than an eye, as a factor (see setInstrument). */
