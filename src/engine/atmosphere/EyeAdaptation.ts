@@ -29,7 +29,10 @@ export type DisplayRgb = [number, number, number]
  */
 export class EyeAdaptation {
   /** The compressive exponent of the response, in the range measured for primate cones. */
-  static readonly RESPONSE_EXPONENT = 0.74
+  static readonly CONE_EXPONENT = 0.74
+  /** The exponent the picture is drawn with: the cones' own, unless a display variant under trial
+   * steepens it (see FINISH_VARIANTS). */
+  static RESPONSE_EXPONENT = EyeAdaptation.CONE_EXPONENT
 
   /**
    * The first anchor: a clear zenith at 3 000 cd/m², seen by an eye adapted to it, is shown at a
@@ -55,7 +58,22 @@ export class EyeAdaptation {
 
   /** σ at an anchor adapted to itself: R = 1 / (1 + (σ/Y)^n), so σ = Y·(1/R − 1)^(1/n). */
   private static anchoredSemiSaturation(luminance: number, response: number): number {
-    return luminance * (1 / response - 1) ** (1 / EyeAdaptation.RESPONSE_EXPONENT)
+    const r = EyeAdaptation.anchorResponse(response)
+    return luminance * (1 / r - 1) ** (1 / EyeAdaptation.RESPONSE_EXPONENT)
+  }
+
+  /**
+   * The response an anchor stands for, from the screen luminance it was judged at. The anchors were
+   * chosen by looking at the screen; a display that shows a response otherwise than as a luminance
+   * (see FINISH_VARIANTS) keeps them where they were seen by asking for the response that it shows
+   * at that luminance. Identity for a display that shows the response as a luminance.
+   */
+  static anchorResponse: (screenLuminance: number) => number = response => response
+
+  /** CIE's lightness, 0 to 1, of a luminance 0 to 1. */
+  static lightnessOf(luminance: number): number {
+    const y = Math.max(luminance, 0)
+    return (y > 216 / 24389 ? 116 * Math.cbrt(y) - 16 : (24389 / 27) * y) / 100
   }
 
   /** The m of σ = K·La^m, joining the two anchors. */

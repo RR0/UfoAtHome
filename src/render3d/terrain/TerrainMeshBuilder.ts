@@ -1,5 +1,5 @@
 // Named imports only — see SceneRenderer.ts's own top-of-file comment on why (tree-shaking).
-import { BufferAttribute, BufferGeometry, CanvasTexture, Color, Mesh, MeshLambertMaterial } from "three"
+import { BufferAttribute, BufferGeometry, CanvasTexture, Color, Mesh, MeshLambertMaterial, SRGBColorSpace } from "three"
 import type { ElevationProvider } from "./ElevationProvider.js"
 import type { ImageryProvider } from "./ImageryProvider.js"
 import type { GeoBounds } from "./GeoBounds.js"
@@ -181,6 +181,11 @@ export async function buildTerrainMesh(
 
   const texture = new CanvasTexture(imageryTexture.source)
   texture.flipY = false // our uv.v=0 is already the raster's own top (north) row — see the loop above
+  // A photograph's pixels are sRGB, not light: read as they are, a field's green of 0.35 was an
+  // albedo of 0.35 where it is 0.1, and every ground came out three times too light and washed of
+  // its colour — which the old hand-set lights happened to hide, and a scene lit by the Sun's own
+  // lux did not.
+  texture.colorSpace = SRGBColorSpace
   // The ground is looked at almost edge-on: a witness stands ON it, so a texel a metre across is
   // many metres deep in the frame. Without this, the mipmap chosen for that compression is the one
   // that suits the DEEP direction, and a road a reader could now make out is blurred away in the
