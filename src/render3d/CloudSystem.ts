@@ -85,6 +85,31 @@ float fbm(vec3 p) {
   return sum;
 }
 
+/**
+ * The same, band-limited to what the pixel can show. An octave finer than two pixels is not a
+ * detail but a flicker: it lands on a pixel at random, and the smallest move of the eye — a step of
+ * the witness — redraws the veil differently. Each octave is faded out, to its mean of nought, as
+ * its period comes down from four pixels to two, the footprint of a pixel in the noise's own
+ * coordinates read off the screen-space derivatives. Only in a fragment shader, and only under
+ * uniform control flow, where derivatives exist.
+ */
+float fbmFiltered(vec3 p) {
+  vec3 dx = dFdx(p);
+  vec3 dy = dFdy(p);
+  float footprint = max(length(dx), length(dy));
+  float sum = 0.0;
+  float amp = 0.55;
+  float frequency = 1.0;
+  for (int i = 0; i < 4; i++) {
+    float shown = 1.0 - smoothstep(0.25, 0.5, footprint * frequency);
+    sum += noise3D(p) * amp * shown;
+    p *= 2.03;
+    frequency *= 2.03;
+    amp *= 0.55;
+  }
+  return sum;
+}
+
 // The shape fields are noise, and noise clusters: the water deck's runs from 0.23 to 0.76 with
 // nearly everything between 0.33 and 0.67, the ice deck's tighter still. A threshold of 1 - coverage
 // on such a field drew NOTHING under a third of cover, a hundredth of the sky at 30%, and half of it
@@ -257,10 +282,10 @@ void main() {
   float shape = 0.0;
   float detail = 0.0;
   if (fibrous < 1.0) {
-    float shapeFbm = fbm(warpedPos * 0.014) * 0.5 + 0.5;
+    float shapeFbm = fbmFiltered(warpedPos * 0.014) * 0.5 + 0.5;
     float shapeCell = 1.0 - worley(warpedPos * 0.011);
     shape = mix(shapeFbm, shapeCell, 0.4);
-    detail = fbm(warpedPos * 0.031 + 41.0) * 0.5 + 0.5;
+    detail = fbmFiltered(warpedPos * 0.031 + 41.0) * 0.5 + 0.5;
   }
 
   // ICE. Sampled through a strongly anisotropic scale — a twentieth of the frequency along one
@@ -268,8 +293,9 @@ void main() {
   // of blobs. No Worley at all: cells are what billowing looks like, and ice does not billow.
   if (fibrous > 0.0) {
     vec3 drawnOut = vec3(warpedPos.x * 0.0016, warpedPos.y * 0.02, warpedPos.z * 0.045);
-    float fibre = fbm(drawnOut) * 0.5 + 0.5;
-    float wisp = fbm(drawnOut * 3.1 + 7.0) * 0.5 + 0.5;
+    // Filtered: its fibres are a few pixels across where the deck is near the horizon, and less.
+    float fibre = fbmFiltered(drawnOut) * 0.5 + 0.5;
+    float wisp = fbmFiltered(drawnOut * 3.1 + 7.0) * 0.5 + 0.5;
     shape = mix(shape, fibre * 0.72 + wisp * 0.28, fibrous);
     detail = mix(detail, wisp, fibrous);
   }
