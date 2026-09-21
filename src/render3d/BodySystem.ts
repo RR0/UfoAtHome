@@ -167,7 +167,11 @@ export class BodySystem {
   private shine(state: BodyState, holder: Group, glowing: Glow[] | undefined, display: LuminanceDisplay | undefined, eye: Vector3 | undefined): void {
     const luminanceCdM2 = state.appearance.luminanceCdM2
     let glare = this.glares.get(state.id)
-    if (!(luminanceCdM2 > 0) || !eye) {
+    // Only a body that glows WHOLE blooms from its middle. A model whose windows alone are lit would
+    // wear a smudge at the centre of its hull, where nothing glows: its parts are too small to
+    // bloom at the distances they are seen from, and a bloom per window is not worth what it would
+    // claim.
+    if (!(luminanceCdM2 > 0) || !eye || (glowing && glowing.length > 0)) {
       glare?.hide()
       return
     }

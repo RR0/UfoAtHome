@@ -1049,7 +1049,17 @@ export class SceneElement extends HTMLElement {
     this.sceneRenderer.updateDecorLitState(t, instant?.stepMs ?? 0)
     // Raw pose's own lat/lng (possibly undefined), never the astronomy fallback below — a real
     // terrain patch must only ever build from a real recorded location, never (0,0).
-    this.sceneRenderer.setTerrainOrigin(pose?.lat, pose?.lng)
+    //
+    // And once it is built, the bodies are stood again on it. They were placed just above, on
+    // whatever relief was there before this one arrived — the flat plane, or the LAST recording's
+    // patch — and a paused reader gets no further tick to put them right: Valensole's machine
+    // opened hanging two and a half metres over its field after Wilcox, and came down only when
+    // play was pressed. The decor is re-anchored by the renderer itself at that moment (see
+    // SceneRenderer.setTerrainOrigin); the bodies are this element's, so this is where it happens.
+    this.sceneRenderer.setTerrainOrigin(pose?.lat, pose?.lng, () => {
+      this.placeBodiesAt(this.lastTimeMs, true)
+      this.sceneRenderer.render()
+    })
     // What the account's own plan draws, as opposed to what a survey of today reports — see
     // StatedRoad. Cheap to call every tick: the renderer keeps the array it was last given.
     this.sceneRenderer.setStatedRoads(sighting.roads)
