@@ -86,27 +86,37 @@ float fbm(vec3 p) {
 }
 
 /**
- * The same, band-limited to what the pixel can show. An octave finer than two pixels is not a
- * detail but a flicker: it lands on a pixel at random, and the smallest move of the eye — a step of
- * the witness — redraws the veil differently. Each octave is faded out, to its mean of nought, as
- * its period comes down from four pixels to two, the footprint of a pixel in the noise's own
- * coordinates read off the screen-space derivatives. Only in a fragment shader, and only under
- * uniform control flow, where derivatives exist.
+ * The same, band-limited to what the pixel can show. An octave finer than a pixel is not a detail
+ * but a flicker: it lands on a pixel at random, and the smallest move of the eye — a step of the
+ * witness — redraws the veil differently. Each octave is faded out, to its mean of nought, as its
+ * period comes down from two pixels to one, the footprint of a pixel in the noise's own coordinates
+ * read off the screen-space derivatives. Only in a fragment shader, and only under uniform control
+ * flow, where derivatives exist.
+ *
+ * What is faded out is handed back as \`lost\`, the standard deviation of the field it took away: a
+ * pixel covers that much variation it can no longer show, and the deck's edge is widened by it (see
+ * main) so that the pixel is covered by the share of cloud it holds — not left all or nothing at a
+ * field flattened to its mean. The first version dropped that: a cirrus deck came out a uniform veil
+ * wherever its fibres were finer than four pixels.
  */
-float fbmFiltered(vec3 p) {
+float fbmFiltered(vec3 p, out float lost) {
   vec3 dx = dFdx(p);
   vec3 dy = dFdy(p);
   float footprint = max(length(dx), length(dy));
   float sum = 0.0;
   float amp = 0.55;
   float frequency = 1.0;
+  float lostVariance = 0.0;
   for (int i = 0; i < 4; i++) {
-    float shown = 1.0 - smoothstep(0.25, 0.5, footprint * frequency);
+    float shown = 1.0 - smoothstep(0.5, 1.0, footprint * frequency);
     sum += noise3D(p) * amp * shown;
+    // Gradient noise has a standard deviation of about a fifth.
+    lostVariance += (amp * (1.0 - shown) * 0.2) * (amp * (1.0 - shown) * 0.2);
     p *= 2.03;
     frequency *= 2.03;
     amp *= 0.55;
   }
+  lost = sqrt(lostVariance);
   return sum;
 }
 
@@ -281,11 +291,16 @@ void main() {
   // cirrus deck's time for nothing on screen.
   float shape = 0.0;
   float detail = 0.0;
+  // How much of the shape field a pixel holds that it cannot show (see fbmFiltered).
+  float unresolved = 0.0;
+  float lostA = 0.0;
+  float lostB = 0.0;
   if (fibrous < 1.0) {
-    float shapeFbm = fbmFiltered(warpedPos * 0.014) * 0.5 + 0.5;
+    float shapeFbm = fbmFiltered(warpedPos * 0.014, lostA) * 0.5 + 0.5;
     float shapeCell = 1.0 - worley(warpedPos * 0.011);
     shape = mix(shapeFbm, shapeCell, 0.4);
-    detail = fbmFiltered(warpedPos * 0.031 + 41.0) * 0.5 + 0.5;
+    detail = fbmFiltered(warpedPos * 0.031 + 41.0, lostB) * 0.5 + 0.5;
+    unresolved = 0.5 * 0.6 * lostA;
   }
 
   // ICE. Sampled through a strongly anisotropic scale — a twentieth of the frequency along one
@@ -294,9 +309,10 @@ void main() {
   if (fibrous > 0.0) {
     vec3 drawnOut = vec3(warpedPos.x * 0.0016, warpedPos.y * 0.02, warpedPos.z * 0.045);
     // Filtered: its fibres are a few pixels across where the deck is near the horizon, and less.
-    float fibre = fbmFiltered(drawnOut) * 0.5 + 0.5;
-    float wisp = fbmFiltered(drawnOut * 3.1 + 7.0) * 0.5 + 0.5;
+    float fibre = fbmFiltered(drawnOut, lostA) * 0.5 + 0.5;
+    float wisp = fbmFiltered(drawnOut * 3.1 + 7.0, lostB) * 0.5 + 0.5;
     shape = mix(shape, fibre * 0.72 + wisp * 0.28, fibrous);
+    unresolved = mix(unresolved, 0.5 * length(vec2(0.72 * lostA, 0.28 * lostB)), fibrous);
     detail = mix(detail, wisp, fibrous);
   }
 
@@ -312,7 +328,9 @@ void main() {
     coverageThreshold(coverage, ${WATER_FIELD_MEAN.toFixed(3)}, ${WATER_FIELD_SD.toFixed(3)}),
     coverageThreshold(coverage, ${ICE_FIELD_MEAN.toFixed(3)}, ${ICE_FIELD_SD.toFixed(3)}),
     fibrous);
-  float ramp = mix(${WATER_RAMP.toFixed(4)}, ${ICE_RAMP.toFixed(4)}, fibrous);
+  // Widened by what the pixel holds and cannot show: a logistic's half-width is about 1.7 of its
+  // standard deviations.
+  float ramp = length(vec2(mix(${WATER_RAMP.toFixed(4)}, ${ICE_RAMP.toFixed(4)}, fibrous), 1.7 * unresolved));
   float alpha = smoothstep(threshold - ramp, threshold + ramp, shape);
   // This is what actually guarantees "total overcast, no sky visible" at cloudCover=1: force full
   // opacity everywhere as coverage approaches its max, overriding the noise field's own local value

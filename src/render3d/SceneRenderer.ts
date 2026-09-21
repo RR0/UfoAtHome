@@ -3259,9 +3259,14 @@ export class SceneRenderer {
     const bounds: Array<{ x: number; y: number; width: number; height: number }> = []
     const box = new Box3()
     const direction = new Vector3()
-    for (const object of this.decorObjects) {
-      if (!object.track?.length && object.kind !== "aircraft" && object.kind !== "vehicle") continue
-      const group = this.decorGroups.get(object.id)
+    // What moves: a decor object on a track, an aircraft or a vehicle — and every body of the
+    // interpretation, which is the phenomenon itself in 3D (Socorro's craft went behind the map
+    // before it was hidden, the map knowing only of the decor).
+    const moving = this.decorObjects
+      .filter(object => object.track?.length || object.kind === "aircraft" || object.kind === "vehicle")
+      .map(object => this.decorGroups.get(object.id))
+    const bodies = this.bodySystem.reflectors.map(reflector => reflector.holder)
+    for (const group of [...moving, ...bodies]) {
       if (!group?.visible) continue
       box.setFromObject(group)
       if (box.isEmpty()) continue

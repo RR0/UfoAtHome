@@ -425,13 +425,13 @@ function buildCrop(): Group {
   clump.scale(1, CROP_CLUMP_HEIGHT_M / CROP_CLUMP_RADIUS_M, 1)
   const patch = DecorSystem.repeatOnGrid(clump, CROP_CLUMPS_PER_ROW, CROP_CLUMP_SPACING_M, CROP_ROWS_PER_PATCH, CROP_ROW_SPACING_M)
   const mesh = addPart(group, patch, [0.26, 0.28, 0.22], 0)
-  // The one thing in this renderer that does not cast a shadow, and the reason is arithmetic: a
-  // field is tens of thousands of plants, and a shadow map draws every one of them a second time.
-  // What it would buy is nothing anyone can see — a plant thirty centimetres tall throws a shadow
-  // into the next plant, and at the hour a witness is usually out there is no Sun above the horizon
-  // to throw one at all. They still RECEIVE shadows, which costs a shader flag and not a triangle,
-  // so a car or a shack still darkens the rows behind it.
-  mesh.castShadow = false
+  // Casts, as a plant does. It was once left out for its cost — a field is tens of thousands of
+  // plants drawn a second time into the shadow map — on the argument that nobody would see it; a
+  // reader did, at once: under a Sun a few degrees up, a thirty-five-centimetre clump throws a
+  // shadow three metres long across the bare row beside it, and domes shaded on one side with no
+  // shadow behind them read as lit by nothing. The shadow map only draws the patches its own
+  // frustum takes in.
+  mesh.castShadow = true
   mesh.userData.cropBasePositions = patch.getAttribute("position").array.slice()
   mesh.userData.cropVerticesPerClump = clump.getAttribute("position").count
   clump.dispose()
