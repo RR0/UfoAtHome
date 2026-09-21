@@ -86,7 +86,7 @@ import { buildLensFlare } from "./LensFlareEffect.js"
 import { EquidistantProjectionPass } from "./EquidistantProjectionPass.js"
 import { DepthOfFieldPass } from "./DepthOfFieldPass.js"
 import { FinishPass } from "./FinishPass.js"
-import { EYE_UNIFORMS, FINISH_VARIANTS, type UnfinishedFrame } from "./colorSpace.js"
+import { EYE_UNIFORMS, type UnfinishedFrame } from "./colorSpace.js"
 import { AdaptiveResolution } from "./AdaptiveResolution.js"
 import { IceHalos } from "../engine/atmosphere/IceHalos.js"
 import { Rainbows } from "../engine/atmosphere/Rainbows.js"
@@ -2977,9 +2977,6 @@ export class SceneRenderer {
     // This scene's eye, for the finish every picture of the page shares (see EYE_UNIFORMS).
     EYE_UNIFORMS.uRodShare.value = this.scatteredSky?.rodShare ?? 0
     EYE_UNIFORMS.uRelativeScale.value = this.relativeScale
-    EYE_UNIFORMS.uContrast.value = SceneRenderer.TRIAL.contrast
-    EYE_UNIFORMS.uLightness.value = SceneRenderer.TRIAL.lightness
-    EYE_UNIFORMS.uExposure.value = SceneRenderer.TRIAL.exposure
     const overlaid = this.references.any || this.phenomena.any || this.compassSprites.some(sprite => sprite.visible)
     EYE_UNIFORMS.uHasOverlay.value = overlaid ? 1 : 0
     const overlays = overlaid ? (camera?: PerspectiveCamera) => this.renderOverlayPasses(camera) : undefined
@@ -3218,9 +3215,6 @@ export class SceneRenderer {
     // The film's overlay layer was cleared and added up with the rest: it is always read.
     EYE_UNIFORMS.uHasOverlay.value = 1
     EYE_UNIFORMS.uRelativeScale.value = this.relativeScale
-    EYE_UNIFORMS.uContrast.value = SceneRenderer.TRIAL.contrast
-    EYE_UNIFORMS.uLightness.value = SceneRenderer.TRIAL.lightness
-    EYE_UNIFORMS.uExposure.value = SceneRenderer.TRIAL.exposure
     this.exposureAccumulation?.develop(this.renderer, this.exposureInstants / this.exposureInstantsDone)
     this.onMapSubjectBounds?.(this.exposureSubjectBounds)
     if (!this.compassSprites.some(sprite => sprite.visible)) return
@@ -4268,15 +4262,6 @@ export class SceneRenderer {
     return SceneRenderer.litScratch.setRGB(shade.r * horizon[0], shade.g * horizon[1], shade.b * horizon[2])
   }
   private static readonly litScratch = new Color()
-
-  /** The display variant under trial, from ?finish= (see FINISH_VARIANTS). */
-  static TRIAL = (() => {
-    const asked = typeof location === "undefined" ? null : new URLSearchParams(location.search).get("finish")
-    const variant = FINISH_VARIANTS[asked?.toUpperCase() ?? "A"] ?? FINISH_VARIANTS.A
-    if (variant.anchored) EyeAdaptation.anchorResponse = luminance => EyeAdaptation.lightnessOf(luminance)
-    EyeAdaptation.RESPONSE_EXPONENT = EyeAdaptation.CONE_EXPONENT * variant.contrast
-    return variant
-  })()
 
   /** The most a pixel is ever given, relative: under a half float's largest, which is 65 504. */
   private static readonly BRIGHTEST_RELATIVE = 60000

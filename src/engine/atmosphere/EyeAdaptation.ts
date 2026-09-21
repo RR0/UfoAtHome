@@ -29,10 +29,7 @@ export type DisplayRgb = [number, number, number]
  */
 export class EyeAdaptation {
   /** The compressive exponent of the response, in the range measured for primate cones. */
-  static readonly CONE_EXPONENT = 0.74
-  /** The exponent the picture is drawn with: the cones' own, unless a display variant under trial
-   * steepens it (see FINISH_VARIANTS). */
-  static RESPONSE_EXPONENT = EyeAdaptation.CONE_EXPONENT
+  static readonly RESPONSE_EXPONENT = 0.74
 
   /**
    * The first anchor: a clear zenith at 3 000 cd/m², seen by an eye adapted to it, is shown at a
@@ -64,11 +61,19 @@ export class EyeAdaptation {
 
   /**
    * The response an anchor stands for, from the screen luminance it was judged at. The anchors were
-   * chosen by looking at the screen; a display that shows a response otherwise than as a luminance
-   * (see FINISH_VARIANTS) keeps them where they were seen by asking for the response that it shows
-   * at that luminance. Identity for a display that shows the response as a luminance.
+   * chosen by looking at a screen that showed the response as a luminance; the picture now shows
+   * it as a lightness (see EYE_RESPONSE_GLSL), and keeps each where it was seen by asking for the
+   * response whose lightness gives that luminance.
    */
-  static anchorResponse: (screenLuminance: number) => number = response => response
+  static anchorResponse(screenLuminance: number): number {
+    return EyeAdaptation.lightnessOf(screenLuminance)
+  }
+
+  /** CIE's lightness scale undone: the luminance, 0 to 1, that looks this light (0 to 1). */
+  static fromLightness(lightness: number): number {
+    const f = (100 * lightness + 16) / 116
+    return f > 6 / 29 ? f ** 3 : 3 * (6 / 29) ** 2 * (f - 4 / 29)
+  }
 
   /** CIE's lightness, 0 to 1, of a luminance 0 to 1. */
   static lightnessOf(luminance: number): number {
@@ -203,12 +208,13 @@ export class EyeAdaptation {
     return (r / (1 - r)) ** (1 / EyeAdaptation.RESPONSE_EXPONENT)
   }
 
-  /** A linear display colour for a relative one, its chromaticity kept, and desaturated towards its
-   * own grey where it would not fit on the screen — EYE_RESPONSE_GLSL's own arithmetic. */
+  /** A linear display colour for a relative one: the response shown as a lightness, its
+   * chromaticity kept, and desaturated towards its own grey where it would not fit on the screen —
+   * EYE_RESPONSE_GLSL's own arithmetic, Purkinje's shift aside. */
   static finish(relative: readonly [number, number, number]): DisplayRgb {
     const y = 0.2126 * relative[0] + 0.7152 * relative[1] + 0.0722 * relative[2]
     if (!(y > 0)) return [0, 0, 0]
-    const response = EyeAdaptation.respond(y)
+    const response = EyeAdaptation.fromLightness(EyeAdaptation.respond(y))
     const k = response / y
     const shown: DisplayRgb = [relative[0] * k, relative[1] * k, relative[2] * k]
     const top = Math.max(...shown)

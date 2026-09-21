@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest"
 import { EyeAdaptation } from "../../../src/engine/atmosphere/EyeAdaptation.js"
 
-/** A sky adapted to itself, as a luminance on the screen. */
+/** A sky adapted to itself, as a luminance on the screen: its response, shown as a lightness. */
 function selfAdapted(luminance: number): number {
-  return EyeAdaptation.response(luminance, luminance)
+  return EyeAdaptation.fromLightness(EyeAdaptation.response(luminance, luminance))
 }
 
 describe("an eye adapted to the sky it looks at", () => {

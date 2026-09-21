@@ -7,22 +7,29 @@ import { Veil } from "../../src/render3d/Veil.js"
 import { EYE_RESPONSE_GLSL } from "../../src/render3d/colorSpace.js"
 
 describe("rendering in luminance", () => {
-  it("finishes a relative light into what the eye made of it before", () => {
-    // Drawn as light and responded to once at the end, the sky comes out as it did when each pixel
-    // went through the response itself — to the rounding of the XYZ-to-sRGB matrix, whose rows sum
-    // to Y within a ten-thousandth.
+  it("finishes a relative light into what the eye made of it, shown as a lightness", () => {
+    // Drawn as light and responded to once at the end, the sky keeps the colour it had when each
+    // pixel went through the response itself, and its response is shown as the luminance of that
+    // lightness — to the rounding of the XYZ-to-sRGB matrix, whose rows sum to Y within 1e-4.
     for (const adapted of [1e-4, 3.5e-3, 1, 3000]) {
       const xyz: [number, number, number] = [0.9 * adapted, adapted, 1.1 * adapted]
-      const direct = EyeAdaptation.displayOf(xyz, adapted, adapted)
-      const finished = EyeAdaptation.finish(EyeAdaptation.relativeOf(xyz, adapted, adapted))
-      for (let c = 0; c < 3; c++) expect(finished[c]).toBeCloseTo(direct[c], 4)
+      const direct = EyeAdaptation.displayOf(xyz, adapted, adapted, 0)
+      const response = Photometry.luminanceOf(direct)
+      const finished = EyeAdaptation.finish(EyeAdaptation.relativeOf(xyz, adapted, adapted, 0))
+      const shown = EyeAdaptation.fromLightness(response) / response
+      for (let c = 0; c < 3; c++) expect(finished[c]).toBeCloseTo(direct[c] * shown, 3)
     }
+  })
+
+  it("shows the eye's half response as a photograph's middle grey", () => {
+    expect(EyeAdaptation.fromLightness(0.5)).toBeCloseTo(0.184, 3)
+    expect(EyeAdaptation.lightnessOf(EyeAdaptation.fromLightness(0.3))).toBeCloseTo(0.3, 9)
   })
 
   it("fits a colour too saturated for its brightness by desaturating it, not by clipping", () => {
     const shown = EyeAdaptation.finish([30, 5, 0.5])
     expect(Math.max(...shown)).toBeCloseTo(1, 9)
-    expect(Photometry.luminanceOf(shown)).toBeCloseTo(EyeAdaptation.respond(Photometry.luminanceOf([30, 5, 0.5])), 9)
+    expect(Photometry.luminanceOf(shown)).toBeCloseTo(EyeAdaptation.fromLightness(EyeAdaptation.respond(Photometry.luminanceOf([30, 5, 0.5]))), 9)
     // Still orange: red over green over blue.
     expect(shown[0]).toBeGreaterThan(shown[1])
     expect(shown[1]).toBeGreaterThan(shown[2])
@@ -37,7 +44,7 @@ describe("rendering in luminance", () => {
   it("draws a glowing colour at the brightness a white of that luminance is seen at", () => {
     const display = (rgb: readonly [number, number, number], luminance: number) =>
       EyeAdaptation.relativeOf([rgb[0] * luminance, luminance, rgb[2] * luminance], luminance, 1, 0)
-    const white = EyeAdaptation.respond(Photometry.luminanceOf(display([1, 1, 1], 5)))
+    const white = EyeAdaptation.fromLightness(EyeAdaptation.respond(Photometry.luminanceOf(display([1, 1, 1], 5))))
     const blue: [number, number, number] = [0.1, 0.2, 1]
     const shown = EyeAdaptation.finish(Photometry.shown(blue, 5, display))
     // The same as the display-space rule it replaces: the hue over its peak, times the white's brightness.

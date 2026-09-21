@@ -42,15 +42,11 @@ vec3 encodeSrgb(vec3 linear) {
  * the sky, the ground it lights, a lamp.
  */
 export const EYE_RESPONSE_GLSL = `
-const float EYE_RESPONSE_EXPONENT = ${EyeAdaptation.CONE_EXPONENT.toFixed(4)};
+const float EYE_RESPONSE_EXPONENT = ${EyeAdaptation.RESPONSE_EXPONENT.toFixed(4)};
 const vec3 SCOTOPIC_TINT = vec3(${EyeAdaptation.SCOTOPIC_TINT.map(value => value.toFixed(4)).join(", ")});
 /** The share of the seeing the rods do, and what one relative unit is in cd/m²: see EYE_UNIFORMS. */
 uniform float uRodShare;
 uniform float uRelativeScale;
-/** The display variant under trial: see EYE_UNIFORMS. */
-uniform float uContrast;
-uniform float uLightness;
-uniform float uExposure;
 
 /** CIE's lightness scale undone: the luminance, 0 to 1, that looks this light (0 to 1) to a viewer. */
 float fromLightness(float lightness) {
@@ -84,11 +80,13 @@ vec3 respond(vec3 relative) {
   vec3 clamped = purkinje(clamp(relative, vec3(0.0), vec3(60000.0)));
   float y = dot(clamped, vec3(0.2126, 0.7152, 0.0722));
   if (y <= 0.0) return vec3(0.0);
-  float power = pow(y * max(uExposure, 1e-6), EYE_RESPONSE_EXPONENT * max(uContrast, 0.01));
+  float power = pow(y, EYE_RESPONSE_EXPONENT);
   float response = power / (power + 1.0);
   // The response is how light the witness saw it. Shown as a luminance, the reader's own eye
-  // compresses it again; shown as the luminance that LOOKS that light, it does not.
-  if (uLightness > 0.5) response = fromLightness(response);
+  // compressed it a second time and every scene came out pastel, a sunlit ground as pale as the
+  // sky; shown as the luminance that LOOKS that light (CIE L*), it is seen once. Chosen by the
+  // reader over four steeper responses on 2026-09-21, as the one right both by day and by night.
+  response = fromLightness(response);
   vec3 shown = clamped / y * response;
   // A colour too saturated for its brightness to fit on the screen — a cloud lit orange by a Sun a
   // few degrees up — is taken towards the grey of its own brightness until its brightest channel
@@ -103,46 +101,22 @@ vec3 respond(vec3 relative) {
 `
 
 /**
+ * What the finish needs beyond the picture: the rods' share of the seeing and what a relative unit
+ * is worth, for Purkinje's shift; and whether anything is laid over the picture — with nothing
+ * (no photographs, no phenomena, no compass) the overlay layer is neither cleared nor read, which
+ * saves resolving a multisampled target a frame. One object, shared by every material that
+ * finishes a picture, set by the scene that is about to finish one (see SceneRenderer.renderOnce):
+ * the pictures of a page are finished one at a time.
+ */
+export const EYE_UNIFORMS = { uRodShare: { value: 0 }, uRelativeScale: { value: 1 }, uHasOverlay: { value: 1 } }
+
+/**
  * The finished picture: the scene's luminance through the eye's response, and over it what is laid
  * on the screen rather than seen in the world — the pictures of the place, the witness's own
  * phenomena, the compass — premultiplied, as three leaves anything blended onto a cleared target.
  * Those are laid on AFTER the response because they are already what an eye sees: a phenomenon half
  * faded over a night sky is half faded on the screen, not a half share of a luminance nobody stated.
  */
-/**
- * VARIANTS UNDER TRIAL (2026-09-21): uContrast raises the luminance to a power before the response,
- * steepening the picture about the eye's semi-saturation, which it leaves where it is — a scene
- * drawn as the eye's response and then looked at by another eye is compressed twice, and read as
- * washed out. Picked by ?contrast= in the page's address until one is chosen.
- *
- * What the finish needs beyond the picture: the rods' share of the seeing and what a relative unit
- * is worth, for Purkinje's shift; and whether anything is laid over the picture — with nothing
- * (no photographs, no phenomena, no compass) the overlay layer is neither cleared nor read, which
- * saves resolving a multisampled target a frame. One object, shared by every material that finishes a picture, set by the scene that is
- * about to finish one (see SceneRenderer.renderOnce) — the pictures of a page are finished one at a
- * time.
- */
-export const EYE_UNIFORMS = {
-  uRodShare: { value: 0 }, uRelativeScale: { value: 1 }, uHasOverlay: { value: 1 },
-  uContrast: { value: 1 }, uLightness: { value: 0 }, uExposure: { value: 1 }
-}
-
-/**
- * The display variants under trial, by letter (?finish= in the page's address). A is as before:
- * the response, with the cones' exponent 0.74, shown as a luminance. B, C and D steepen it to an
- * exponent of 1, 1.5 and 2, the three anchors (day zenith, moonlit and moonless nights) re-fitted
- * so that each still shows where it was judged: the skies stay put, and what is darker or brighter
- * than them moves further off — the ground under a low Sun, a shadow beside a lit wall. L shows the
- * response as the luminance that looks that light (CIE L*), anchors kept on screen too.
- */
-export const FINISH_VARIANTS: Record<string, { contrast: number, lightness: number, exposure: number, anchored: boolean }> = {
-  A: { contrast: 1, lightness: 0, exposure: 1, anchored: false },
-  B: { contrast: 1 / 0.74, lightness: 0, exposure: 1, anchored: false },
-  C: { contrast: 1.5 / 0.74, lightness: 0, exposure: 1, anchored: false },
-  D: { contrast: 2 / 0.74, lightness: 0, exposure: 1, anchored: false },
-  L: { contrast: 1, lightness: 1, exposure: 1, anchored: true }
-}
-
 export const FINISH_GLSL = `
 ${SRGB_ENCODE_GLSL}
 ${EYE_RESPONSE_GLSL}
