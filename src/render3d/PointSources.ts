@@ -1,4 +1,4 @@
-import { AdditiveBlending, PointsMaterial } from "three"
+import { AdditiveBlending, PointsMaterial, Vector4, type Object3D, type WebGLRenderer } from "three"
 import { RoundPoints } from "./RoundPoints.js"
 
 /**
@@ -6,15 +6,18 @@ import { RoundPoints } from "./RoundPoints.js"
  * light they SEND, their illuminance at the eye, rather than from a brightness chosen for them.
  *
  * A point source has no luminance of its own to draw: what an eye gets from it is an illuminance,
- * lux, spread over whatever the eye cannot resolve it from. The eye's own acuity decides that — a
- * minute of arc in daylight, several at night when the rods do the seeing. So a point is drawn at
- * its illuminance over the eye's acuity cell (see acuitySolidAngle), on a disc of its tier's size
- * (a first version widened faint stars to the rods' ten-minute cell, and the sky filled with
- * blobs): it keeps the contrast the eye gave it against the sky, which is what
- * decides whether it was seen at all — a sixth-magnitude star by night stands a quarter above the
- * sky behind it, Venus by day half again. Where a pixel is coarser than the cell, which is nearly
- * always by day, the disc is a pixel or so wide and carries more light than the star sent: the
- * contrast is kept, not the flux, because the contrast is what the witness saw.
+ * lux, spread over what the eye cannot resolve it from — its acuity cell, a minute of arc for the
+ * cones, several for the rods (see acuitySolidAngle). A reader looking at the screen resolves one
+ * pixel much as the witness resolved that cell, so ONE pixel's worth of the drawn disc carries the
+ * contrast the witness had against the sky, and the rest of the disc shares that light rather than
+ * adding to it: the tiers' larger discs show a brighter point larger, at the same total light. Where
+ * the frame's pixels are finer than the eye's cell (a long focal length), the light is conserved over
+ * the whole disc.
+ *
+ * Two versions were tried first. Every point at its light over the acuity cell, whatever its disc:
+ * stars and planets came out too big and too bright, a comet's head a lamp in front of its tail.
+ * Every point's light conserved over its disc in the scene's own angles: most stars faded under the
+ * sky, the screen's pixel being five times the eye's cell.
  *
  * Added to what is behind it, as light is: a star seen through the sky's own glow is both.
 
@@ -37,7 +40,18 @@ export class PointSources {
    * fovea takes over at (relative). */
   private static readonly shared = {
     uRodSolidAngle: { value: 1e-7 },
-    uConeThreshold: { value: 0 }
+    uConeThreshold: { value: 0 },
+    uViewportHeight: { value: 1 }
+  }
+  private static readonly viewport = new Vector4()
+
+  /** Has `object` tell the shared uniforms which viewport it is being drawn into: the frame's
+   * pixel is what the drawn disc's solid angle comes from, and it differs on every path (the canvas,
+   * a widened camera, the faces of a cube, a reflection probe). */
+  static track(object: Object3D): void {
+    object.onBeforeRender = (renderer: WebGLRenderer) => {
+      PointSources.shared.uViewportHeight.value = Math.max(1, renderer.getCurrentViewport(PointSources.viewport).w)
+    }
   }
 
   /**
@@ -63,6 +77,7 @@ export class PointSources {
       round.call(material, shader, renderer)
       shader.uniforms.uRodSolidAngle = PointSources.shared.uRodSolidAngle
       shader.uniforms.uConeThreshold = PointSources.shared.uConeThreshold
+      shader.uniforms.uViewportHeight = PointSources.shared.uViewportHeight
       shader.vertexShader = PointSources.patch(shader.vertexShader)
     }
     material.customProgramCacheKey = () => "point-sources"
@@ -80,21 +95,28 @@ export class PointSources {
   }
 
   /**
-   * The patched vertex shader: each point drawn at its tier's size, at its illuminance over the
-   * eye's acuity cell — the luminance the eye gives it. The cell is the
-   * cones' for a point bright enough for the fovea and the dim-light eye's for one too faint for it,
-   * from one to the other over the factor of four under the fovea's threshold.
+   * The patched vertex shader: each point drawn at its tier's size, its illuminance spread over
+   * what that disc covers on this frame, or over the eye's acuity cell where the disc is finer. The
+   * cell is the cones' for a point bright enough for the fovea and the dim-light eye's for one too
+   * faint for it, from one to the other over the factor of four under the fovea's threshold.
    */
   static patch(vertexShader: string): string {
     return vertexShader
-      .replace("void main() {", `uniform float uRodSolidAngle;\nuniform float uConeThreshold;\nvoid main() {`)
+      .replace("void main() {", `uniform float uRodSolidAngle;\nuniform float uConeThreshold;\nuniform float uViewportHeight;\nvoid main() {`)
       .replace(
         "gl_PointSize = size;",
         `gl_PointSize = size;
         float light = max(max(vColor.r, vColor.g), vColor.b);
         float foveal = smoothstep(0.25 * uConeThreshold, uConeThreshold, light);
         float uAcuitySolidAngle = mix(uRodSolidAngle, ${PointSources.CONE_SOLID_ANGLE.toExponential(6)}, foveal);
-        vColor.rgb /= uAcuitySolidAngle;`
+        float pixelAngle = 2.0 / (projectionMatrix[1][1] * uViewportHeight);
+        float drawn = ${PointSources.COVERAGE.toFixed(6)} * gl_PointSize * gl_PointSize * pixelAngle * pixelAngle;
+        // The eye's contrast on one pixel, the light conserved over the rest of the disc: a reader
+        // resolves a pixel as the witness resolved his acuity cell, and a disc wider than a pixel
+        // is there to show a brighter point as a larger one, not to add light to it.
+        float pixels = max(1.0, ${PointSources.COVERAGE.toFixed(6)} * gl_PointSize * gl_PointSize);
+        float pixel = pixelAngle * pixelAngle;
+        vColor.rgb /= pixel >= uAcuitySolidAngle ? uAcuitySolidAngle * pixels : max(drawn, uAcuitySolidAngle);`
       )
   }
 

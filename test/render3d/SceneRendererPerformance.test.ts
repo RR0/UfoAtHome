@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest"
-import { BoxGeometry, BufferGeometry, Float32BufferAttribute, Group, Mesh, PerspectiveCamera, Sprite, Vector3 } from "three"
+import { BoxGeometry, BufferGeometry, DirectionalLight, Float32BufferAttribute, Group, Mesh, Object3D, PerspectiveCamera, Sprite, Vector3 } from "three"
 import { SceneRenderer } from "../../src/render3d/SceneRenderer.js"
 import { DecorSystem } from "../../src/render3d/DecorSystem.js"
 import { RoadSystem } from "../../src/render3d/RoadSystem.js"
@@ -21,7 +21,10 @@ function renderer() {
     // The air a star's light crosses (see SceneRenderer.arrivingIlluminance).
     air: new AerialPerspective(), siteElevationM: 0,
     // The interpretation's bodies, which the map must not cover either.
-    bodySystem: { reflectors: [] }
+    bodySystem: { reflectors: [] },
+    // The Sun's light and the scratch its shadow frustum is placed with (see placeShadowFrustum).
+    celestialLight: new DirectionalLight(), celestialLightTarget: new Object3D(), lightDirection: new Vector3(0, 1, 0),
+    shadowUp: new Vector3(0, 1, 0), shadowAxisX: new Vector3(), shadowAxisY: new Vector3(), shadowWorld: new Vector3()
   })
 }
 
@@ -213,5 +216,36 @@ describe("scene playback resource reuse", () => {
     fit.mockRestore()
     DecorSystem.dispose(group)
     geometry.dispose()
+  })
+})
+
+describe("the Sun's shadow as the witness walks", () => {
+  it("keeps each shadow texel on the same ground while the world slides under the eye", () => {
+    const light = new DirectionalLight()
+    light.shadow.mapSize.set(1024, 1024)
+    Object.assign(light.shadow.camera, { left: -120, right: 120, top: 120, bottom: -120 })
+    const r = Object.assign(Object.create(SceneRenderer.prototype), {
+      celestialLight: light, celestialLightTarget: new Object3D(), lightDirection: new Vector3(0.3, 0.12, -0.9).normalize(),
+      shadowUp: new Vector3(0, 1, 0), shadowAxisX: new Vector3(), shadowAxisY: new Vector3(), shadowWorld: new Vector3(),
+      bodyOrigin: { x: 0, z: 0 }
+    })
+    const texel = 240 / 1024
+    // Where a fixed point of the world falls on the shadow map, in texels, for a world slid by (x, z).
+    const texelOf = (x: number, z: number) => {
+      r.bodyOrigin = { x, z }
+      r.placeShadowFrustum()
+      light.shadow.camera.position.copy(light.position)
+      light.shadow.camera.lookAt(r.celestialLightTarget.position)
+      light.shadow.camera.updateMatrixWorld()
+      const point = new Vector3(5 + x, 0, -7 + z).applyMatrix4(light.shadow.camera.matrixWorldInverse)
+      return [point.x / texel, point.y / texel]
+    }
+    const [x0, y0] = texelOf(0, 0)
+    for (const [x, z] of [[0.013, 0.004], [0.37, -1.2], [11.1, 7.45]]) {
+      const [x1, y1] = texelOf(x, z)
+      // The same fraction of a texel: the world moved by whole texels as far as the map is concerned.
+      expect(Math.abs(((x1 - x0) % 1 + 1.5) % 1 - 0.5)).toBeLessThan(1e-3)
+      expect(Math.abs(((y1 - y0) % 1 + 1.5) % 1 - 0.5)).toBeLessThan(1e-3)
+    }
   })
 })

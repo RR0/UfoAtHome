@@ -73,7 +73,7 @@ describe("rendering in luminance", () => {
     const { ShaderLib } = await import("three")
     const patched = PointSources.patch(ShaderLib.points.vertexShader)
     expect(patched).toContain("uniform float uRodSolidAngle;")
-    expect(patched).toContain("vColor.rgb /= uAcuitySolidAngle;")
+    expect(patched).toContain("uAcuitySolidAngle * pixels")
   })
 
   it("veils as far as the law stays above a thousandth of the eye's semi-saturation", () => {

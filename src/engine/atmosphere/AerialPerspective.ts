@@ -69,7 +69,11 @@ export class AerialPerspective {
     // Precipitation is spread over the haze's scale height from the ground up, so that at the
     // ground it is exactly the extinction stated.
     this.aerosol = [haze(red) + precipitationPerM, haze(green) + precipitationPerM, haze(blue) + precipitationPerM]
+    this.precipitationPerM = precipitationPerM
   }
+
+  /** What is falling, per metre at the ground — carried in `aerosol` too. */
+  readonly precipitationPerM: number
 
   /** The air of a recording's weather at an instant: its humidity and what is falling. */
   static of(weather: Pick<Weather, "relativeHumidity" | "precipitationType" | "precipitationIntensity">): AerialPerspective {
@@ -101,6 +105,10 @@ export class AerialPerspective {
    * `altitudeM`, per channel, when it stands `elevationDeg` above the horizon: the columns of air
    * and haze above the eye, times the air mass of that slant (Kasten and Young's, which stays finite
    * at the horizon). Ozone's weak Chappuis absorption is left out, a few per cent at most.
+   *
+   * Without what is falling: a shower is a thing seen, not a lid over the whole sky, and the Sun of
+   * a sunshower reaches the rain and the ground past it — which is what makes a rainbow at all. Taken
+   * over the haze's whole column, a shower put the Sun out a thousandfold and the bow with it.
    */
   transmittanceFromSpace(altitudeM: number, elevationDeg: number): Rgb {
     const elevation = Math.max(elevationDeg, 0)
@@ -108,7 +116,7 @@ export class AerialPerspective {
     const air = AtmosphereProfile.RAYLEIGH_SCALE_HEIGHT_M * AtmosphereProfile.rayleighDensity(altitudeM)
     const haze = AtmosphereProfile.AEROSOL_SCALE_HEIGHT_M * AtmosphereProfile.aerosolDensity(altitudeM)
     return [0, 1, 2].map(channel =>
-      Math.exp(-(this.rayleigh[channel] * air + this.aerosol[channel] * haze) * airMass)) as Rgb
+      Math.exp(-(this.rayleigh[channel] * air + (this.aerosol[channel] - this.precipitationPerM) * haze) * airMass)) as Rgb
   }
 
   /**

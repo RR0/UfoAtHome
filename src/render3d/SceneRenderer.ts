@@ -240,6 +240,14 @@ const BODY_HIDE_BELOW_DEG = -4
  * night decides how much of it is still seen, as it does for everything else.
  */
 const BENT_LIGHT_REFERENCE = 2
+/**
+ * The same for a bow, ten times higher, and measured rather than argued. A bow stands on a rain
+ * curtain the Sun lights as a whole — the bow is that curtain's own light gathered to one angle —
+ * and the scene draws the drops' streaks but not the curtain's glow: against the dark rain cloud
+ * left behind it, at the halo's reference the test sky's primary burned to white at four times
+ * the brightness round it. Here it doubles it, the contrast a bow has on a lit shower.
+ */
+const BOW_LIGHT_REFERENCE = 20
 
 /** How far above the witness the ice deck is projected, in this scene's own units. Cirrus lives
  * between six and twelve kilometres; what matters here is only that it is several times the water
@@ -1911,6 +1919,7 @@ export class SceneRenderer {
       this.camera.rotation.set(this.indoorLookPitchDeg * DEG_TO_RAD, -(view.headingDeg + this.indoorLookYawDeg) * DEG_TO_RAD, 0, "YXZ")
     }
     this.bodyOrigin = { x: offset.x + shift.x, z: offset.z + shift.z }
+    this.placeShadowFrustum()
     for (const object of this.decorObjects) {
       const group = this.decorGroups.get(object.id)
       if (!group) continue
@@ -2509,13 +2518,50 @@ export class SceneRenderer {
       this.celestialLight.intensity = 0
       return
     }
-    const { x, y, z } = horizontalToCartesian(body.altitudeDeg, body.azimuthDeg, BODY_PLACEMENT_RADIUS)
-    this.celestialLight.position.set(x, y, z)
+    const { x, y, z } = horizontalToCartesian(body.altitudeDeg, body.azimuthDeg, 1)
+    this.lightDirection.set(x, y, z)
+    this.placeShadowFrustum()
     const peak = Math.max(beam[0], beam[1], beam[2], 1e-30)
     this.celestialLight.color.setRGB(beam[0] / peak, beam[1] / peak, beam[2] / peak)
     this.celestialLight.intensity = peak
     this.celestialLight.castShadow = this.decorGroups.size > 0 || this.bodySystem.any
   }
+
+  /** Where the Sun or the Moon lighting the scene stands, a unit vector. */
+  private readonly lightDirection = new Vector3(0, 1, 0)
+
+  /**
+   * Stands the shadow camera round the witness, its grid of texels fixed to the WORLD.
+   *
+   * The world moves under the eye as a witness walks (see updateDecorAnchoring), and a shadow
+   * camera left still round the origin saw it slide by a fraction of a texel at every step: every
+   * shadow edge was rasterised afresh each frame, and a field of lavender twinkled as Masse walked
+   * towards the craft. So the frustum is moved with the world by the fraction of a texel it has
+   * slid, across the light's own two axes, and each texel keeps covering the same ground.
+   */
+  private placeShadowFrustum(): void {
+    const direction = this.lightDirection
+    const camera = this.celestialLight.shadow.camera
+    const texel = (camera.right - camera.left) / this.celestialLight.shadow.mapSize.x
+    // The light camera's own axes, as three's lookAt builds them from the up vector.
+    const right = this.shadowAxisX.crossVectors(this.shadowUp, direction)
+    if (right.lengthSq() < 1e-8) right.set(1, 0, 0)
+    right.normalize()
+    const up = this.shadowAxisY.crossVectors(direction, right).normalize()
+    const world = this.shadowWorld.set(this.bodyOrigin.x, 0, this.bodyOrigin.z)
+    const along = (axis: Vector3) => {
+      const units = world.dot(axis) / texel
+      return (units - Math.round(units)) * texel
+    }
+    const centre = this.celestialLightTarget.position.set(0, 0, 0)
+      .addScaledVector(right, along(right)).addScaledVector(up, along(up))
+    this.celestialLightTarget.updateMatrixWorld()
+    this.celestialLight.position.copy(centre).addScaledVector(direction, BODY_PLACEMENT_RADIUS)
+  }
+  private readonly shadowUp = new Vector3(0, 1, 0)
+  private readonly shadowAxisX = new Vector3()
+  private readonly shadowAxisY = new Vector3()
+  private readonly shadowWorld = new Vector3()
 
   /** How much of the clear sky's light on a level surface the clouds let through: their
    * transmission over the upper hemisphere, weighted as the light on a level surface is. */
@@ -2813,8 +2859,12 @@ export class SceneRenderer {
       ...[...this.glareSprites.values()].map(veil => veil.mesh)]
     // The points the eye resolves stars and planets to carry more light than they send (see
     // PointSources): kept out of the photograph the eye's surroundings are measured on.
+    // Nor what is falling: in a probe of a hundred and twenty-eight pixels a side, the drops within
+    // a metre of the eye cover the whole sky, and a moonbow night measured as a lit wall of rain
+    // adapted the eye to three candela, three hundred times the night it was.
     const eyeHidden: Object3D[] = [...this.starTiers.map(tier => tier.points),
-      ...[...this.bodyMeshes.values()].filter(mesh => mesh instanceof Points)]
+      ...[...this.bodyMeshes.values()].filter(mesh => mesh instanceof Points),
+      ...[this.rainSystem?.points, this.precipitationPoints, this.rainSplashSystem?.points].filter((object): object is Points => object !== undefined)]
     const scale = this.relativeScale
     const waiting = this.reflections.refresh(this.renderer, this.scene, this.camera.position, this.bodySystem.reflectors,
       screenOnly, [...this.decorGroups.values()], this.sceneVersion, eyeHidden, photograph => this.measureSurroundings(photograph, scale))
@@ -4155,6 +4205,7 @@ export class SceneRenderer {
         geometry.setAttribute("position", new BufferAttribute(new Float32Array(3), 3))
         geometry.setAttribute("color", new BufferAttribute(new Float32Array(3), 3))
         mesh = new Points(geometry, PointSources.material(STAR_BRIGHTNESS_TIERS[STAR_BRIGHTNESS_TIERS.length - 1].size))
+        PointSources.track(mesh)
         this.celestialGroup.add(mesh)
         this.bodyMeshes.set(key, mesh)
       }
@@ -4255,10 +4306,10 @@ export class SceneRenderer {
    * The light a halo or a bow bends, from its source: how much, as a share of the light the
    * displays' gains were set for (see BENT_LIGHT_REFERENCE), and its colour through the air.
    */
-  private bentLight(source: HorizontalPosition, magnitude: number): { scale: number, tint: [number, number, number] } {
+  private bentLight(source: HorizontalPosition, magnitude: number, reference = BENT_LIGHT_REFERENCE): { scale: number, tint: [number, number, number] } {
     const [r, g, b] = this.arrivingIlluminance(source, magnitude, 1)
     const green = Math.max(g, 1e-30)
-    return { scale: g / BENT_LIGHT_REFERENCE, tint: [r / green, 1, b / green] }
+    return { scale: g / reference, tint: [r / green, 1, b / green] }
   }
 
   /** A colour of what is falling as the scene draws it: its shade times the light round it — the
@@ -4461,7 +4512,7 @@ export class SceneRenderer {
     // the total cover would count a cirrus veil as a blocker, and a veil dims a bow rather than
     // preventing it.
     const blocking = this.lowerCloudCover()
-    const light = this.bentLight(source, bySun ? ScatteredSky.SUN_MAGNITUDE : moon.magnitude)
+    const light = this.bentLight(source, bySun ? ScatteredSky.SUN_MAGNITUDE : moon.magnitude, BOW_LIGHT_REFERENCE)
     const strength = Rainbows.strength(rain, blocking, source.altitudeDeg) * light.scale
     if (strength <= 0) {
       this.rainbow.update({ x: 0, y: 1, z: 0 }, 0, [1, 1, 1], true)
@@ -4700,6 +4751,7 @@ export class SceneRenderer {
         points.geometry = geometry
       } else {
         points = new Points(geometry, PointSources.material(tier.size))
+        PointSources.track(points)
         this.celestialGroup.add(points)
       }
       return { points, colorAttribute, brightness, illuminance, phase, speedFactor }
