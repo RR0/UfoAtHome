@@ -458,18 +458,18 @@ describe("UfoElement", () => {
     expect(button.title).toBe("Play")
   })
 
-  it("the toolbar auto-hides while playing and stays shown while paused/stopped", () => {
+  it("the toolbar shows only under the pointer, playing or paused", () => {
     const element = mount()
     element.sightingData = twoKeyframeSighting()
     const button = element.shadowRoot!.getElementById("play-pause") as HTMLButtonElement
     const toolbar = element.shadowRoot!.getElementById("toolbar") as HTMLElement
-    expect(toolbar.classList.contains("auto-hide")).toBe(false)
+    expect(toolbar.classList.contains("auto-hide")).toBe(true)
 
     button.click() // play
     expect(toolbar.classList.contains("auto-hide")).toBe(true)
 
     button.click() // pause
-    expect(toolbar.classList.contains("auto-hide")).toBe(false)
+    expect(toolbar.classList.contains("auto-hide")).toBe(true)
   })
 
   it("offers no auto-replay button, and so does not loop unless a page asks it to", () => {
@@ -534,13 +534,13 @@ describe("UfoElement", () => {
     element.sightingData = twoKeyframeSighting()
     const playPause = element.shadowRoot!.getElementById("play-pause") as HTMLButtonElement
     const corner = element.shadowRoot!.getElementById("corner-buttons")!
-    expect(corner.classList.contains("auto-hide")).toBe(false)
+    expect(corner.classList.contains("auto-hide")).toBe(true)
 
     playPause.click() // play
     expect(corner.classList.contains("auto-hide")).toBe(true)
 
     playPause.click() // pause
-    expect(corner.classList.contains("auto-hide")).toBe(false)
+    expect(corner.classList.contains("auto-hide")).toBe(true)
   })
 
   it("defaults fullscreenTarget to the component's own stage", () => {

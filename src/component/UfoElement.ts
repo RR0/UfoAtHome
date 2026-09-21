@@ -110,7 +110,6 @@ export class UfoElement extends HTMLElement {
   private static readonly WITNESS_MAP_IMAGERY_PX = 768
 
   private readonly fullscreenButton: HTMLButtonElement
-  private readonly cornerButtons: HTMLElement
   private readonly witnessMapButton: HTMLButtonElement
   /** The pictures of the place: on or off, and how much of them shows — see SceneReference. The
    * reader's own choice, kept across recordings; the slider starts where the recording's first
@@ -379,7 +378,6 @@ export class UfoElement extends HTMLElement {
     this.toolbar = this.shadow.getElementById("toolbar")!
     this.playPauseButton = this.shadow.getElementById("play-pause") as HTMLButtonElement
     this.fullscreenButton = this.shadow.getElementById("fullscreen") as HTMLButtonElement
-    this.cornerButtons = this.shadow.getElementById("corner-buttons")!
     this.witnessMapButton = this.shadow.getElementById("witness-map") as HTMLButtonElement
     this.referencesButton = this.shadow.getElementById("references") as HTMLButtonElement
     this.referenceOpacityInput = this.shadow.getElementById("reference-opacity") as HTMLInputElement
@@ -1047,8 +1045,7 @@ export class UfoElement extends HTMLElement {
 
   private onFrame(t: number, shapesBySource: Map<string, Shape>): void {
     this.canvasRenderer.clear(this.canvas.width, this.canvas.height)
-    // Selection handles are an editing affordance — hidden while actively playing, matching
-    // the toolbar's own auto-hide-while-playing convention.
+    // Selection handles are an editing affordance — hidden while actively playing.
     const selectedIds = this.playbackState !== "playing" ? this.highlightedSourceIds : EMPTY_SELECTION
     // The instrument's own aperture decides whether a dazzling light wears a star — the same
     // statement SceneRenderer.setInstrument makes about the Sun, made here about the witness's own
@@ -1181,13 +1178,6 @@ export class UfoElement extends HTMLElement {
     const label = !hasDuration ? this.messages.noDuration : isPlaying ? this.messages.pause : this.messages.play
     this.playPauseButton.title = label
     this.playPauseButton.setAttribute("aria-label", label)
-    // Auto-hides the toolbar while playing (reappears on hover/focus — see the CSS) so it doesn't
-    // sit over the scene the whole time; always shown while paused/stopped, since that's when the
-    // user is most likely to want it (e.g. right after it stopped, or to scrub before playing).
-    this.toolbar.classList.toggle("auto-hide", isPlaying)
-    // The BUTTONS, not the map they opened: a map that vanished the moment the recording started
-    // playing would hide the witness exactly while they are moving.
-    this.cornerButtons.classList.toggle("auto-hide", isPlaying)
   }
 
   /** Public for the same reason as togglePlayPause — see its own doc comment. */

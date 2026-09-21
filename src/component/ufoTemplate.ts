@@ -7,7 +7,7 @@ export const html = `
   <!-- The corner's own row, rather than one absolutely-positioned button per corner: a second
        button placed by its own right offset would have to hardcode the first one's width, and
        every language names them differently the moment either grows a label. -->
-  <div class="corner-buttons" id="corner-buttons">
+  <div class="corner-buttons auto-hide" id="corner-buttons">
     <button id="milestones" type="button" title="Named moments" aria-label="Named moments" aria-pressed="true" hidden>🔖</button>
     <!-- The toggles below are parsed here and moved at once — into the playback bar beside the loop
          button, or wherever a composing element hosts them (see UfoElement.hostControls). Only the
@@ -35,7 +35,7 @@ export const html = `
        than inside them, because it is a sentence and the toolbar is a row of buttons. Empty and
        hidden for the recordings that name no moment, which is most of them. -->
   <div id="milestone-caption" class="milestone-caption" hidden></div>
-  <div class="toolbar" id="toolbar">
+  <div class="toolbar auto-hide" id="toolbar">
     <button id="play-pause" type="button" title="Play" aria-label="Play">▶</button>
     <span id="time-start" class="time-label" title="Current position">0:00</span>
     <!-- The bar and the marks over it share one box so a mark can be placed by percentage of the
@@ -214,14 +214,16 @@ canvas[data-cursor="rotate"] {
   background: rgba(0, 0, 0, 0.55);
   transition: opacity 0.15s ease;
 }
-/* While playing, the toolbar and fullscreen button auto-hide and only reappear on hover — kept
-   always visible while paused/stopped, since that's when the user is most likely to want them.
-   Deliberately hover-only, not :focus-within: a clicked button/range input keeps keyboard focus
-   after the pointer moves away, which would otherwise keep them stuck visible indefinitely after
-   any interaction. */
-.auto-hide {
-  opacity: 0;
-  pointer-events: none;
+/* The toolbar and the corner buttons show only while the pointer is over the picture, playing or
+   paused. Not :focus-within: a clicked button or range keeps focus after the pointer leaves, and
+   would keep them stuck on screen; :focus-visible is only set when the keyboard moved the focus,
+   which is exactly when a reader needs to see where it went. A touch screen has no hover to reveal
+   them by, and keeps them shown. */
+@media (hover: hover) {
+  .auto-hide {
+    opacity: 0;
+    pointer-events: none;
+  }
 }
 /* A compound class selector (0,2,0) so this reliably beats the plain .toolbar rule above (0,1,0)
    regardless of declaration order — set via UfoElement's showToolbar setter by a composing
@@ -306,7 +308,8 @@ canvas[data-cursor="rotate"] {
 .milestone-caption b {
   font-weight: 700;
 }
-.stage:hover .auto-hide {
+.stage:hover .auto-hide,
+.stage:has(:focus-visible) .auto-hide {
   opacity: 1;
   pointer-events: auto;
 }
