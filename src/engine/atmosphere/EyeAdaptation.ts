@@ -87,8 +87,38 @@ export class EyeAdaptation {
     return EyeAdaptation.ROD_HALF_LUMINANCE_CD_M2 / (EyeAdaptation.ROD_HALF_LUMINANCE_CD_M2 + Math.max(adaptingLuminance, 0))
   }
 
+  /**
+   * A third anchor, between the other two: a sky under a nearly full Moon, as a reader judges it
+   * should look. Absent, the two anchors alone decide it, and a moonlit sky falls wherever the one
+   * power law joining them puts it — which, under Chiles and Whitted's 90 % Moon, was a zenith of
+   * sRGB 33-46 and a horizon of 61-80: the horizon read as a light grey band to the reader.
+   *
+   * 0.0035 cd/m² is what the eye adapts to under that Moon (the sky's own log-mean, measured in the
+   * scene). The response it is shown at is a judgement of what a moonlit night looks like, not a
+   * measurement, which is why it is stated here, by itself, where it can be changed.
+   */
+  static readonly MOONLIT_ANCHOR_CD_M2 = 3.5e-3
+  static MOONLIT_ANCHOR_RESPONSE: number | undefined = undefined
+
+  /**
+   * The semi-saturation σ an eye adapted to `adaptingLuminance` has: a straight line in log σ
+   * against log La through the anchors, extended past the ends along the last stretch. Two anchors
+   * make it the single power law σ = K·La^m; with the moonlit one it bends there.
+   */
   static semiSaturation(adaptingLuminance: number): number {
-    return EyeAdaptation.SEMI_SATURATION_SCALE * Math.max(adaptingLuminance, 1e-9) ** EyeAdaptation.ADAPTATION_EXPONENT
+    const moonlit = EyeAdaptation.MOONLIT_ANCHOR_RESPONSE
+    const la = Math.max(adaptingLuminance, 1e-9)
+    if (moonlit === undefined) return EyeAdaptation.SEMI_SATURATION_SCALE * la ** EyeAdaptation.ADAPTATION_EXPONENT
+    const anchors: [number, number][] = [
+      [EyeAdaptation.NIGHT_ANCHOR_CD_M2, EyeAdaptation.NIGHT_ANCHOR_RESPONSE],
+      [EyeAdaptation.MOONLIT_ANCHOR_CD_M2, moonlit],
+      [EyeAdaptation.DAYLIGHT_ANCHOR_CD_M2, EyeAdaptation.DAYLIGHT_ANCHOR_RESPONSE]
+    ]
+    const points = anchors.map(([luminance, response]) =>
+      [Math.log(luminance), Math.log(EyeAdaptation.anchoredSemiSaturation(luminance, response))])
+    const x = Math.log(la)
+    const [from, to] = x < points[1][0] ? [points[0], points[1]] : [points[1], points[2]]
+    return Math.exp(from[1] + ((to[1] - from[1]) * (x - from[0])) / (to[0] - from[0]))
   }
 
   /** The response to a luminance, 0 to 1, for an eye adapted to `adaptingLuminance`. */

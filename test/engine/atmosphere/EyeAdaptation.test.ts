@@ -31,6 +31,22 @@ describe("an eye adapted to the sky it looks at", () => {
     expect(shown[shown.length - 1]).toBeGreaterThan(0)
   })
 
+  it("bends at a moonlit anchor when one is stated, and leaves both ends where they were", () => {
+    const unanchored = selfAdapted(EyeAdaptation.MOONLIT_ANCHOR_CD_M2)
+    EyeAdaptation.MOONLIT_ANCHOR_RESPONSE = unanchored * 0.7
+    try {
+      expect(selfAdapted(EyeAdaptation.MOONLIT_ANCHOR_CD_M2)).toBeCloseTo(unanchored * 0.7, 6)
+      expect(selfAdapted(EyeAdaptation.DAYLIGHT_ANCHOR_CD_M2)).toBeCloseTo(EyeAdaptation.DAYLIGHT_ANCHOR_RESPONSE, 6)
+      expect(selfAdapted(EyeAdaptation.NIGHT_ANCHOR_CD_M2)).toBeCloseTo(EyeAdaptation.NIGHT_ANCHOR_RESPONSE, 6)
+      // Still darker at every step down, whichever side of the bend.
+      const skies = [3000, 100, 0.8, 1e-2, 3.5e-3, 1.4e-3, 3e-4, 1.7e-4]
+      const shown = skies.map(selfAdapted)
+      for (let at = 1; at < shown.length; at++) expect(shown[at]).toBeLessThan(shown[at - 1])
+    } finally {
+      EyeAdaptation.MOONLIT_ANCHOR_RESPONSE = undefined
+    }
+  })
+
   it("keeps contrast inside the sky it is adapted to", () => {
     const adapted = 0.8
     expect(EyeAdaptation.response(3 * adapted, adapted)).toBeGreaterThan(EyeAdaptation.response(adapted, adapted) * 1.3)
