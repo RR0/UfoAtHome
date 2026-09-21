@@ -93,6 +93,17 @@ flame comes out, which is a node named `exhaust`), and says in that script which
 assumed. It comes in two, one per insignia: the figure Zamora signed, and the inverted V with three
 bars Ray Stanford holds was the real one. Any better model replaces either by taking its id.
 
+## Parts that move
+
+A model says what of it moves, as glTF animations: a named movement of named nodes, over its own
+seconds. A recording plays them by name from a body's track (`motions` in a keyframe, see the
+format page): 0 is a movement's start, 1 its end, past 1 for one that repeats, blended between the
+keyframes that state it. The Valensole craft carries two, built by its script: `pivot-retract`
+(the central tube drawn up into the hull) and `legs-turn` (one turn of the six legs about the
+upright axis, which is assumed). A model from elsewhere that has animations is played the same
+way, by the names its file gives them. `scripts/GltfWriter.ts` writes them for a model built here
+(`addGroup` for nodes that move together, `addAnimation` for the keyframed movement).
+
 ## Which way a model faces
 
 `headingOffsetDeg` turns it so its nose points −Z, this scene's heading-0 direction. Every Kenney
