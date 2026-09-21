@@ -6,12 +6,64 @@ export const html = `
   </div>
   <div id="ufo-slot"></div>
   <div id="hover-tooltip" class="hover-tooltip" hidden></div>
+  <button id="credits-button" class="credits-btn" type="button" popovertarget="credits-panel" aria-label="Credits" title="Credits">©</button>
+  <div id="credits-panel" class="credits-panel" popover>
+    <ul id="credits-list" class="credits-list"></ul>
+  </div>
 </div>
 `
 
 export const css = `
 :host {
   display: block;
+}
+/* What this scene owes for what it shows, behind a small button in its corner — the terrain's
+   imagery, the map's, the models, the pictures of the place, a sound. Not printed over the picture:
+   a licence in small type across the witness's map was in the way of what the map is for. Hidden
+   when a composing element lists them in its own info panel (see ownCredits). */
+.credits-btn {
+  anchor-name: --credits-button;
+  position: absolute;
+  top: 0.5em;
+  left: 0.5em;
+  z-index: 3;
+  width: 1.6em;
+  height: 1.6em;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  background: rgba(0, 0, 0, 0.35);
+  color: rgba(255, 255, 255, 0.85);
+  cursor: pointer;
+  font-size: 0.85em;
+  line-height: 1;
+  padding: 0;
+}
+.credits-btn[hidden] {
+  display: none;
+}
+.credits-panel {
+  padding: 0.5em 0.8em;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #fff;
+  color: #222;
+  max-width: 28em;
+  max-height: 60vh;
+  overflow-y: auto;
+  font-size: 0.8em;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+@supports (position-area: bottom span-right) {
+  .credits-panel:popover-open {
+    position-anchor: --credits-button;
+    inset: auto;
+    position-area: bottom span-right;
+    margin: 0.3em 0 0 0;
+  }
+}
+.credits-list {
+  margin: 0;
+  padding-left: 1.2em;
 }
 /* The WIDGET's own box, which does not move when the instrument does. A camera's format changes
    the shape of the PICTURE, not the shape of the page: a square 126 frame or a phone held upright

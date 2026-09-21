@@ -153,6 +153,9 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
     <p>Hovering it names what is under the pointer — a star with its magnitude and height, a planet,
       a comet, a building, another witness — and says nothing where the ground hides what you are
       pointing at.</p>
+    <p>The <q>©</q> button in its corner lists the credits of what it shows — the imagery under the
+      ground and on the map, the models, the pictures of the place, the sounds. Inside
+      <code>&lt;rr0-sighting&gt;</code> the button is hidden: they are in its <q>?</q> panel.</p>
 
     <h2>Playback, on <code>ufoElement</code></h2>
     <p>Everything about replaying the recording lives one property down, on the playback layer —
@@ -213,6 +216,9 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
     <p>Le survol nomme ce qui est sous le curseur — une étoile avec sa magnitude et sa hauteur, une
       planète, une comète, un bâtiment, un autre témoin — et ne dit rien là où le sol cache ce que
       vous pointez.</p>
+    <p>Le bouton <q>©</q> dans son coin liste les crédits de ce qu'il montre — l'imagerie du sol et
+      de la carte, les modèles, les photos du lieu, les sons. Dans <code>&lt;rr0-sighting&gt;</code>,
+      ce bouton est masqué : ils sont dans son panneau <q>?</q>.</p>
 
     <h2>La lecture, sur <code>ufoElement</code></h2>
     <p>Tout ce qui rejoue l'enregistrement vit une propriété plus bas, sur la couche de lecture —

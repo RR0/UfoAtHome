@@ -5,6 +5,7 @@ import type { CaseJson } from "../engine/persistence/caseJson.js"
 import type { AgentRef, InterpretationJson } from "../engine/interpretation/Interpretation.js"
 import type { ConfrontationReading } from "../engine/interpretation/BodyConfrontation.js"
 import { SightingSummary } from "./SightingSummary.js"
+import { SceneCredits } from "./SceneCredits.js"
 import { SightingAssessments } from "./SightingAssessments.js"
 import type { SummaryEntry } from "./SightingSummary.js"
 import { SceneElement, registerScene, SCENE_ELEMENT_NAME, CONFRONTATION_EVENT } from "./SceneElement.js"
@@ -27,12 +28,6 @@ interface WitnessEntry {
   sighting: SightingRecordingJson
 }
 
-/** The only bundled audio asset that actually requires attribution (rain.ogg/wind.ogg are CC0)
- * — see CREDITS.md. Always listed (the asset is always bundled, regardless of whether this
- * particular sighting's weather ever triggers a lightning flash). */
-const THUNDER_CREDIT_TEXT = '“Thunder” by Jerimee'
-const THUNDER_CREDIT_LICENSE_URL = "https://creativecommons.org/licenses/by/3.0/"
-const THUNDER_CREDIT_LICENSE = "CC BY 3.0"
 
 const APP_HOME_URL = "https://ufoathome.org"
 
@@ -168,6 +163,8 @@ export class SightingElement extends HTMLElement {
     // This element has an info panel with a credits list in it, so the map need not print its own
     // licence over the ground in 8-pixel type — see UfoElement.creditShownExternally.
     this.sceneElement.ufoElement.creditShownExternally = true
+    // Listed in this element's own info panel: the scene's own credits button would say it twice.
+    this.sceneElement.ownCredits = false
     // The toggles stand beside the info button rather than in the picture — see UfoElement.hostControls.
     this.sceneElement.ufoElement.hostControls(this.shadow.getElementById("scene-controls")!)
     this.shadow.getElementById("ufo-slot")!.replaceWith(this.sceneElement)
@@ -1045,89 +1042,7 @@ export class SightingElement extends HTMLElement {
     this.infoAppLink.title = this.messages.editThisObservation
     this.infoAppLink.setAttribute("aria-label", this.messages.editThisObservation)
 
-    this.infoCreditsList.innerHTML = ""
-    const terrainAttribution = this.sceneElement.currentTerrainAttribution
-    if (terrainAttribution) {
-      const item = document.createElement("li")
-      item.textContent = terrainAttribution
-      this.infoCreditsList.appendChild(item)
-    }
-    // The roads, whose credit carries the warning as well as the licence: they are today's network,
-    // and the account is of another day (see RoadProvider.contemporary).
-    const roadAttribution = this.sceneElement.currentRoadAttribution
-    if (roadAttribution) {
-      const item = document.createElement("li")
-      item.textContent = roadAttribution
-      this.infoCreditsList.appendChild(item)
-    }
-    // The witness map's own tiles, once a reader has opened it and they have arrived — the same
-    // licence, owed for a second use of the same service. Skipped when the terrain's line already
-    // carries those words: the ground patch and the map are normally drawn from the same provider,
-    // and a credits list that says one thing twice reads as a bug rather than as diligence.
-    const mapCredit = this.sceneElement.ufoElement.witnessMapCredit
-    if (mapCredit && !terrainAttribution?.includes(mapCredit)) {
-      const item = document.createElement("li")
-      item.textContent = mapCredit
-      this.infoCreditsList.appendChild(item)
-    }
-    // Every 3D model currently standing in the decor, each named with its author and licence — the
-    // condition on which they are shown at all (see DecorModelRef.credit, and DataSource's own doc
-    // comment on why a credit that isn't displayed isn't a licence).
-    for (const credit of this.sceneElement.decorModelCredits) {
-      const item = document.createElement("li")
-      const author = credit.author ? ` — ${credit.author}` : ""
-      if (credit.sourceUrl) {
-        const link = document.createElement("a")
-        link.href = credit.sourceUrl
-        link.target = "_blank"
-        link.rel = "noopener"
-        link.textContent = credit.title
-        item.append(link, document.createTextNode(`${author} (${credit.license})`))
-      } else {
-        item.textContent = `${credit.title}${author} (${credit.license})`
-      }
-      this.infoCreditsList.appendChild(item)
-    }
-    // Every picture of the place the recording lays over the scene, credited on the terms it was
-    // given on — see SceneReference.credit, and the same rule as the models above.
-    for (const reference of this.sceneElement.ufoElement.sighting.references) {
-      if (!reference.credit) continue
-      const item = document.createElement("li")
-      if (reference.creditUrl) {
-        const link = document.createElement("a")
-        link.href = reference.creditUrl
-        link.target = "_blank"
-        link.rel = "noopener"
-        link.textContent = reference.credit
-        item.appendChild(link)
-      } else {
-        item.textContent = reference.credit
-      }
-      this.infoCreditsList.appendChild(item)
-    }
-    // The orbital elements the satellites in this sky were propagated from, once they have arrived:
-    // an archive somebody kept for years so that exactly this could be done.
-    const satellites = this.sceneElement.satelliteState
-    if (satellites.status === "ready" && satellites.credit) {
-      const item = document.createElement("li")
-      const link = document.createElement("a")
-      link.href = satellites.creditUrl ?? ""
-      link.target = "_blank"
-      link.rel = "noopener"
-      link.textContent = satellites.credit
-      item.appendChild(link)
-      this.infoCreditsList.appendChild(item)
-    }
-    const thunderItem = document.createElement("li")
-    thunderItem.textContent = `${THUNDER_CREDIT_TEXT} (`
-    const licenseLink = document.createElement("a")
-    licenseLink.href = THUNDER_CREDIT_LICENSE_URL
-    licenseLink.target = "_blank"
-    licenseLink.rel = "noopener"
-    licenseLink.textContent = THUNDER_CREDIT_LICENSE
-    thunderItem.appendChild(licenseLink)
-    thunderItem.appendChild(document.createTextNode(")"))
-    this.infoCreditsList.appendChild(thunderItem)
+    SceneCredits.fill(this.infoCreditsList, this.sceneElement)
   }
 
   private appendInfoRow(list: HTMLElement, label: string, value: string): void {

@@ -29,6 +29,7 @@ import type { Weather } from "../engine/model/Weather.js"
 import type { DecorKind } from "../engine/model/Decor.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
 import { HostLocale, selectLocale } from "../i18n/locale.js"
+import { SceneCredits } from "./SceneCredits.js"
 import { SaidTexts } from "../engine/model/SaidText.js"
 import { WeatherAudio } from "../render3d/WeatherAudio.js"
 import { Comets } from "../engine/astronomy/Comets.js"
@@ -212,6 +213,16 @@ const DEFAULT_OBSERVER_POSE: ObserverPose = { lat: 0, lng: 0, elevationM: 0, hea
  * both follow the observer as they change over the sighting's timeline.
  */
 export class SceneElement extends HTMLElement {
+  private creditsButton!: HTMLButtonElement
+
+  /**
+   * Whether this scene shows its credits behind its own button — true alone, false inside an
+   * element that lists them in a panel of its own (`<rr0-sighting>`'s info panel).
+   */
+  set ownCredits(own: boolean) {
+    this.creditsButton.hidden = !own
+  }
+
   static get observedAttributes(): string[] {
     return ["src", "star-catalog-src", "deep-star-catalog-src", "show-compass", "max-pixel-ratio", WITNESS_MAP_ATTRIBUTE, MILESTONES_ATTRIBUTE]
   }
@@ -520,6 +531,18 @@ export class SceneElement extends HTMLElement {
     // (its transparent overlay canvas + toolbar), hiding the 3D backdrop — a sibling outside it.
     this.ufoElement.fullscreenTarget = this.stageElement
     this.shadow.getElementById("ufo-slot")!.replaceWith(this.ufoElement)
+    // The credits: this element lists them behind its own button (see ownCredits), so the map
+    // never prints its licence over the ground.
+    this.ufoElement.creditShownExternally = true
+    this.creditsButton = this.shadow.getElementById("credits-button") as HTMLButtonElement
+    const creditsPanel = this.shadow.getElementById("credits-panel")!
+    const creditsList = this.shadow.getElementById("credits-list")!
+    creditsPanel.addEventListener("beforetoggle", event => {
+      if ((event as ToggleEvent).newState === "open") SceneCredits.fill(creditsList, this)
+    })
+    const creditsLabel = selectLocale(HostLocale.preferencesFor(this), ["en", "fr"]) === "fr" ? "Crédits" : "Credits"
+    this.creditsButton.title = creditsLabel
+    this.creditsButton.setAttribute("aria-label", creditsLabel)
     this.sceneRenderer.onMapSubjectBounds = bounds => this.ufoElement.setMapSubjectBounds(bounds)
     this.ufoElement.addEventListener("timeupdate", this.handleTimeUpdate)
     this.ufoElement.addEventListener("referenceview", event => this.applyReferenceView((event as CustomEvent<{ shown: boolean; opacity: number }>).detail))
