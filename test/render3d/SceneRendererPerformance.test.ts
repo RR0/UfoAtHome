@@ -19,7 +19,9 @@ function renderer() {
     // them too (see SceneRenderer.updateDecorAnchoring).
     roadSystem: new RoadSystem(),
     // The air a star's light crosses (see SceneRenderer.arrivingIlluminance).
-    air: new AerialPerspective(), siteElevationM: 0
+    air: new AerialPerspective(), siteElevationM: 0,
+    // The interpretation's bodies, which the map must not cover either.
+    bodySystem: { reflectors: [] }
   })
 }
 
@@ -43,6 +45,19 @@ describe("scene playback resource reuse", () => {
     aircraft.position.z = 10
     expect(r.mapSubjectBounds()).toEqual([])
     DecorSystem.dispose(aircraft)
+  })
+  it("counts the interpretation's bodies as subjects the map must not cover", () => {
+    const r = renderer()
+    const craft = new Group()
+    craft.add(new Mesh(new BoxGeometry(2, 2, 2)))
+    craft.position.set(-6, 2, -10)
+    r.decorObjects = []
+    r.bodySystem = { reflectors: [{ id: "craft", holder: craft, shiny: false }] }
+    r.screenPointOf = (direction: Vector3) => direction.z < 0
+      ? { ndcX: direction.x / -direction.z, ndcY: direction.y / -direction.z } : undefined
+    const bounds = r.mapSubjectBounds()
+    expect(bounds).toHaveLength(1)
+    expect(bounds[0].x + bounds[0].width).toBeLessThan(0.5)
   })
   it("keeps compass captions out of the accumulated exposure samples", () => {
     const r = renderer()
