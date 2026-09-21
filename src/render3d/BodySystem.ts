@@ -13,7 +13,7 @@ import { Glare } from "./Glare.js"
 import { GroundPlume } from "./GroundPlume.js"
 import { Photometry } from "./Photometry.js"
 import { GlassMaterial } from "./GlassMaterial.js"
-import { SkyReflection } from "./SkyReflection.js"
+import type { Reflector } from "./Reflections.js"
 import type { LuminanceDisplay } from "./Photometry.js"
 export type { LuminanceDisplay } from "./Photometry.js"
 import type { SmokeSource } from "../engine/interpretation/Interpretation.js"
@@ -405,6 +405,31 @@ export class BodySystem {
     return furthest
   }
 
+  /** Every body on show, for the reflections to photograph its surroundings from (see Reflections). */
+  get reflectors(): Reflector[] {
+    return [...this.built.entries()].filter(([, { holder }]) => holder.visible)
+      .map(([id, { holder }]) => ({ id, holder, shiny: BodySystem.isShiny(holder) }))
+  }
+
+  /** Glass, or a surface smooth or metallic enough to mirror a shape rather than a blur — see
+   * Reflector.shiny. */
+  private static isShiny(holder: Object3D): boolean {
+    let shiny = false
+    holder.traverse(child => {
+      const material = (child as { material?: unknown }).material
+      for (const each of Array.isArray(material) ? material : [material]) {
+        if (each instanceof GlassMaterial) shiny = true
+        else if (each instanceof MeshStandardMaterial && (each.roughness < BodySystem.SHINY_ROUGHNESS || each.metalness > BodySystem.SHINY_METALNESS)) shiny = true
+      }
+    })
+    return shiny
+  }
+
+  /** Below this roughness a mirrored lamp or cloud keeps a shape; above this metalness a surface is
+   * mostly mirror whatever its roughness. */
+  private static readonly SHINY_ROUGHNESS = 0.6
+  private static readonly SHINY_METALNESS = 0.3
+
   /** Whether any body is on show. */
   get any(): boolean {
     return [...this.built.values()].some(({ holder }) => holder.visible)
@@ -425,7 +450,6 @@ export class BodySystem {
       // what a witness saw at a distance is a silhouette in coveralls, not a face.
       const material = new MeshStandardMaterial({ roughness: 0.7, metalness: 0 })
       BodySystem.paint(material, state)
-      SkyReflection.reflect(material)
       const figure = DecorSystem.build({ id: state.id, kind: "entity", eastM: 0, northM: 0 } as DecorObject, false)
       figure.traverse(child => {
         if (!(child instanceof Mesh)) return
@@ -439,7 +463,6 @@ export class BodySystem {
     if (primitive) {
       const material = new MeshStandardMaterial({ roughness: 0.45, metalness: 0 })
       BodySystem.paint(material, state)
-      SkyReflection.reflect(material)
       const mesh = new Mesh(BodySystem.unitGeometry(primitive), material)
       mesh.castShadow = true
       mesh.receiveShadow = true
@@ -461,7 +484,6 @@ export class BodySystem {
       placeholder.geometry.dispose()
       material.dispose()
       BodySystem.glaze(loaded.scene)
-      SkyReflection.reflectOn(loaded.scene)
       holder.add(BodySystem.fit(loaded.scene, loaded.headingOffsetDeg ?? state.model.headingOffsetDeg ?? 0))
       this.credits.set(state.id, loaded.credit)
       const entry = this.built.get(state.id)

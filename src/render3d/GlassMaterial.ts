@@ -1,8 +1,5 @@
-import {
-  CustomBlending, DataTexture, DataUtils, DoubleSide, HalfFloatType, LinearFilter, OneFactor, OneMinusSrcAlphaFactor,
-  ClampToEdgeWrapping, RGBAFormat, RepeatWrapping, ShaderMaterial
-} from "three"
-import { ScatteredSky } from "./ScatteredSky.js"
+import { CustomBlending, DoubleSide, OneFactor, OneMinusSrcAlphaFactor, ShaderMaterial, Texture } from "three"
+import { EyeAdaptation } from "../engine/atmosphere/EyeAdaptation.js"
 
 /**
  * Clear glass: a thin wall that mirrors the sky by Fresnel's law and lets through what it does not
@@ -13,14 +10,22 @@ import { ScatteredSky } from "./ScatteredSky.js"
  * a share R of the light that meets it — 4 % head-on for an index of 1.5, all of it at grazing
  * incidence. Light bouncing between the two faces adds up to 2R/(1+R) for the wall. That is the whole
  * of what makes glass read as glass: nearly clear where it faces the eye, a mirror of the sky towards
- * its rim, and whatever lies behind veiled by that mirror and not by a tint. What is mirrored is the
- * sky of this very instant (ScatteredSky.panorama), in the reflected direction, so a dome at dawn
- * holds the dawn on the side it faces.
+ * its rim, and whatever lies behind veiled by that mirror and not by a tint. What is mirrored is what
+ * stands round the glass at this very instant (ReflectionProbe: the sky, its clouds, the Sun and the
+ * Moon, the stars, a lamp, a car's lights, the decor), in the reflected direction.
+ *
+ * THROUGH THE EYE, not by a product. The scene is on the screen as the eye's response to it
+ * (EyeAdaptation), which is steeply compressive, and a reflection is a luminance times R, not a
+ * response times R: a street lamp that the night-adapted eye sees at the top of its range still sees
+ * its eight-per-cent reflection in a windscreen at nearly the top of it, where 8 % of the lamp's
+ * pixel would have been a dim grey smudge — and a reflected lamp is exactly what a windscreen
+ * misidentification is made of. Taking a response r back to its luminance, multiplying by R and
+ * responding again comes out, whatever the eye is adapted to, as Rⁿr / (Rⁿr + 1 − r), n the
+ * response's exponent; that is what is applied, to the luminance of what is mirrored, its colour kept.
  *
  * WHAT IT DOES NOT, and why that is right or said. A thin wall shifts what is behind it by a
  * fraction of its own thickness: seen through a cupola a few millimetres thick, a cloud does not
- * bend, and drawing it bent would be drawing thick glass or a solid lens. The clouds and the Sun are
- * not in the panorama, which holds the scattered sky alone, so neither is mirrored. The glass absorbs
+ * bend, and drawing it bent would be drawing thick glass or a solid lens. The glass absorbs
  * ABSORPTION of what crosses a wall, as ordinary window glass does, grey rather than tinted.
  *
  * Blended premultiplied: what is behind is kept in the share the wall lets through, and the
@@ -32,15 +37,13 @@ export class GlassMaterial extends ShaderMaterial {
   /** What a wall of window glass absorbs of the light that crosses it. */
   static readonly ABSORPTION = 0.03
 
-  /** The sky every glass mirrors, shared by all of them and restated with the sky. */
-  static readonly sky = GlassMaterial.buildSky()
-
   constructor(indexOfRefraction = 1.5) {
     super({
       uniforms: {
-        uSky: { value: GlassMaterial.sky },
+        uSurroundings: { value: null },
         uIndex: { value: indexOfRefraction },
-        uAbsorption: { value: GlassMaterial.ABSORPTION }
+        uAbsorption: { value: GlassMaterial.ABSORPTION },
+        uResponse: { value: EyeAdaptation.RESPONSE_EXPONENT }
       },
       vertexShader: `
         varying vec3 vWorldPosition;
@@ -56,12 +59,12 @@ export class GlassMaterial extends ShaderMaterial {
       `,
       fragmentShader: `
         precision highp float;
-        uniform sampler2D uSky;
+        uniform samplerCube uSurroundings;
         uniform float uIndex;
         uniform float uAbsorption;
+        uniform float uResponse;
         varying vec3 vWorldPosition;
         varying vec3 vWorldNormal;
-        const float PI = 3.141592653589793;
 
         // One face, air to glass: unpolarised Fresnel reflectance.
         float face(float cosIn, float index) {
@@ -79,12 +82,15 @@ export class GlassMaterial extends ShaderMaterial {
           float cosIn = clamp(-dot(view, normal), 0.0, 1.0);
           float once = face(cosIn, uIndex);
           float wall = 2.0 * once / (1.0 + once);
-          vec3 mirrored = reflect(view, normal);
-          // North is -z and east +x, as everywhere in this scene.
-          float azimuth = atan(mirrored.x, -mirrored.z);
-          vec2 at = vec2(fract(azimuth / (2.0 * PI) + 1.0), asin(clamp(mirrored.y, -1.0, 1.0)) / PI + 0.5);
-          vec3 sky = texture2D(uSky, at).rgb;
-          gl_FragColor = vec4(sky * wall, wall + (1.0 - wall) * uAbsorption);
+          vec3 around = textureCube(uSurroundings, reflect(view, normal)).rgb;
+          // Through the eye's response rather than times it: see the class comment. Above the top
+          // of the range (a lamp is drawn brighter than white) it is as bright as a response gets.
+          float shown = dot(around, vec3(0.2126, 0.7152, 0.0722));
+          float response = clamp(shown, 1e-5, 0.999);
+          float dimmed = pow(wall, uResponse) * response;
+          float reflected = dimmed / (dimmed + 1.0 - response);
+          vec3 colour = shown > 1e-5 ? around / shown : vec3(0.0);
+          gl_FragColor = vec4(colour * reflected, wall + (1.0 - wall) * uAbsorption);
         }
       `,
       transparent: true,
@@ -104,21 +110,16 @@ export class GlassMaterial extends ShaderMaterial {
     return (2 * once) / (1 + once)
   }
 
-  /** Restates the sky every glass mirrors, from the scattered sky's panorama. */
-  static setSky(panorama: Float32Array): void {
-    const texels = GlassMaterial.sky.image.data as Uint16Array
-    for (let i = 0; i < panorama.length; i++) texels[i] = DataUtils.toHalfFloat(panorama[i])
-    GlassMaterial.sky.needsUpdate = true
+  /** What stands round this glass, as a probe photographed it — see ReflectionProbe. */
+  setSurroundings(texture: Texture): void {
+    this.uniforms.uSurroundings.value = texture
   }
 
-  private static buildSky(): DataTexture {
-    const { WIDTH: width, HEIGHT: height } = ScatteredSky.PANORAMA
-    const texture = new DataTexture(new Uint16Array(width * height * 4), width, height, RGBAFormat, HalfFloatType)
-    texture.minFilter = LinearFilter
-    texture.magFilter = LinearFilter
-    texture.wrapS = RepeatWrapping
-    texture.wrapT = ClampToEdgeWrapping
-    texture.needsUpdate = true
-    return texture
+  /** What an eye is shown of a reflection, from what it is shown of the thing reflected (a response,
+   * 0 to 1) and the share reflected — the shader's own arithmetic, for checking it. */
+  static reflectedResponse(response: number, share: number): number {
+    const r = Math.min(Math.max(response, 1e-5), 0.999)
+    const dimmed = share ** EyeAdaptation.RESPONSE_EXPONENT * r
+    return dimmed / (dimmed + 1 - r)
   }
 }

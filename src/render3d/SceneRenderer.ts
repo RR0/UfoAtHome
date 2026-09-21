@@ -127,8 +127,7 @@ import { AerialFog } from "./AerialFog.js"
 import { ForwardDiffraction } from "../engine/atmosphere/ForwardDiffraction.js"
 import { AtmosphereProfile } from "../engine/atmosphere/AtmosphereProfile.js"
 import { SourceDiffraction } from "./SourceDiffraction.js"
-import { GlassMaterial } from "./GlassMaterial.js"
-import { SkyReflection } from "./SkyReflection.js"
+import { Reflections } from "./Reflections.js"
 import { Photometry } from "./Photometry.js"
 
 /** Plain field-by-field comparison — see setWeather's own doc comment on why reference equality
@@ -1831,8 +1830,8 @@ export class SceneRenderer {
       if (token !== this.decorModelToken) return
       const group = this.decorGroups.get(object.id)
       if (!group) return
-      // The sky it stands under, for whatever of it is shiny — see SkyReflection.
-      SkyReflection.reflectOn(scene)
+      // What stands round it, for whatever of it is shiny — see Reflections.
+      Reflections.reflectOn(scene)
       DecorSystem.applyModel(group, object, scene, {
         headingOffsetDeg: ref.headingOffsetDeg ?? entry?.headingOffsetDeg,
         // Only the catalogue can say what the real thing is; a bare url states a file and nothing
@@ -2255,26 +2254,16 @@ export class SceneRenderer {
     this.applyAir()
     // After the sky's adaptation, which decides how bright the Moon's glow comes out.
     this.buildLunarDiffraction(astronomy.moon)
-    // And the sky every piece of glass mirrors, when it has been worked out again.
-    const sky = this.scatteredSky
-    if (sky?.panorama && sky.panoramaVersion !== this.mirroredSkyVersion) {
-      GlassMaterial.setSky(sky.panorama)
-      this.mirroredSkyVersion = sky.panoramaVersion
-      // And the same sky, blurred for every roughness, for every other surface — see SkyReflection.
-      const first = !SkyReflection.texture
-      this.skyReflection ??= new SkyReflection(this.renderer)
-      this.skyReflection.update(sky.panorama)
-      // What was built before there was a sky to mirror is handed it now; what is built after takes
-      // it as it is built.
-      if (first) SkyReflection.reflectOn(this.scene)
-    }
   }
 
-  /** Filters the sky for the surfaces that mirror it — see SkyReflection. */
-  private skyReflection?: SkyReflection
+  /** What every shiny surface of the scene mirrors — see Reflections. Made with the first frame. */
+  private reflections?: Reflections
+  /** Bumped by every change asked for (see render()): a probe photographed at this count has
+   * nothing new to photograph. */
+  private sceneVersion = 0
+  /** A redraw asked for by a probe still waiting its turn, while the scene itself is still. */
+  private reflectionTimer?: ReturnType<typeof setTimeout>
 
-  /** Which of the sky's panoramas the glass of the scene mirrors — see GlassMaterial. */
-  private mirroredSkyVersion = -1
 
   /**
    * The Moon's aureole and corona: its light diffracted by the haze's coarse particles and by the
@@ -2562,6 +2551,7 @@ export class SceneRenderer {
    */
   render(): void {
     if (this.restatingExposure) return
+    this.sceneVersion++
     this.frameDirty = true
     // A change, which the ambient motions (see animate) are not: see AdaptiveResolution.noteChange.
     this.resolution.noteChange(performance.now())
@@ -2596,6 +2586,7 @@ export class SceneRenderer {
     }
     if (this.compiling) return
     this.frameDirty = false
+    this.refreshReflections()
     this.resolution.beginDrawing()
     try {
       this.renderOnce()
@@ -2715,6 +2706,28 @@ export class SceneRenderer {
       if (ratio !== this.renderer.getPixelRatio()) this.applyPixelRatio(ratio)
     }
     this.drawIfDirty()
+  }
+
+  /**
+   * Photographs the one reflection probe that is most out of date, if any is — see Reflections —
+   * and, while others are still waiting their turn on a scene that has stopped changing, asks for
+   * the frames that give it to them. A still scene whose probes have all seen it asks for nothing.
+   */
+  private refreshReflections(): void {
+    this.reflections ??= new Reflections(this.renderer)
+    const screenOnly: Object3D[] = [...this.compassSprites, ...(this.lensFlare ? [this.lensFlare.mesh] : [])]
+    const waiting = this.reflections.refresh(this.renderer, this.scene, this.camera.position, this.bodySystem.reflectors,
+      screenOnly, [...this.decorGroups.values()], this.sceneVersion)
+    if (waiting === undefined || this.reflectionTimer) return
+    this.reflectionTimer = setTimeout(() => {
+      this.reflectionTimer = undefined
+      this.frameDirty = true
+      if (this.animationFrameId !== null || this.framesDriven || this.flushFrameId !== null) return
+      this.flushFrameId = requestAnimationFrame(() => {
+        this.flushFrameId = null
+        this.drawIfDirty()
+      })
+    }, waiting)
   }
 
   /** Moves everything that moves on its own on to the frame's clock — see frame(). */

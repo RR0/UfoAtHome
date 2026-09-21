@@ -14,4 +14,17 @@ describe("a thin wall of glass", () => {
     expect(at(80)).toBeGreaterThan(0.5)
     expect(at(89.5)).toBeGreaterThan(0.95)
   })
+
+  it("shows a lamp's reflection nearly as bright as the lamp, through the eye rather than times it", () => {
+    const headOn = GlassMaterial.wallReflectance(1, 1.5, Fresnel.reflectance)
+    // A lamp at the top of the eye's range: its 8 % is still near the top, not 8 % of it.
+    expect(GlassMaterial.reflectedResponse(0.999, headOn)).toBeGreaterThan(0.9)
+    // A day sky shown at 0.42: its reflection is well above 8 % of it, and below the sky itself.
+    const sky = GlassMaterial.reflectedResponse(0.42, headOn)
+    expect(sky).toBeGreaterThan(0.42 * headOn * 2)
+    expect(sky).toBeLessThan(0.42)
+    // A darker thing makes a darker reflection, and a mirror gives the thing back.
+    expect(GlassMaterial.reflectedResponse(0.1, headOn)).toBeLessThan(sky)
+    expect(GlassMaterial.reflectedResponse(0.42, 1)).toBeCloseTo(0.42, 6)
+  })
 })
