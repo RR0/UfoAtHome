@@ -322,7 +322,53 @@ export class ScatteredSky {
       }
     }
     this.ambientColours = { zenith: displayAt(90, 0), horizon, airlight }
+    this.panoramaColours = this.panoramaOf(displayAt, airlight)
+    this.panoramaVersion++
     this.onChange()
+  }
+
+  /**
+   * The whole sky as the eye is shown it, coarsely: what a smooth surface mirrors (see GlassMaterial).
+   * Rows of altitude from the nadir to the zenith, columns of azimuth from north through east.
+   *
+   * Below the horizon there is no sky to show but ground, which the scene draws and this does not
+   * know: it is given the air's own light at the horizon, darkening to a fifth of it straight down —
+   * a stand-in for a field seen at grazing angles, where a mirror rarely looks anyway.
+   */
+  private panoramaOf(displayAt: (altitudeDeg: number, azimuthDeg: number) => readonly number[], airlight: DisplayRgb): Float32Array {
+    const { WIDTH: width, HEIGHT: height } = ScatteredSky.PANORAMA
+    const out = new Float32Array(width * height * 4)
+    for (let row = 0; row < height; row++) {
+      const altitude = -90 + ((row + 0.5) / height) * 180
+      for (let column = 0; column < width; column++) {
+        const azimuth = ((column + 0.5) / width) * 360
+        const at = (row * width + column) * 4
+        if (altitude >= 0) {
+          const colour = displayAt(altitude, azimuth)
+          out[at] = colour[0]
+          out[at + 1] = colour[1]
+          out[at + 2] = colour[2]
+        } else {
+          const fade = 1 - 0.8 * Math.min(1, -altitude / 90)
+          out[at] = airlight[0] * fade
+          out[at + 1] = airlight[1] * fade
+          out[at + 2] = airlight[2] * fade
+        }
+        out[at + 3] = 1
+      }
+    }
+    return out
+  }
+
+  /** The panorama's size: a column every 7.5° of azimuth, a row every 7.5° of altitude. */
+  static readonly PANORAMA = { WIDTH: 48, HEIGHT: 24 } as const
+  private panoramaColours?: Float32Array
+  /** Bumped every time the panorama is worked out again, so a copy of it knows it is stale. */
+  panoramaVersion = 0
+
+  /** The sky as a mirror would show it, once it has been read back — see panoramaOf. */
+  get panorama(): Float32Array | undefined {
+    return this.panoramaColours
   }
 
   /**

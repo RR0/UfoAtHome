@@ -14,7 +14,7 @@
  * - A transparent cupola on top, through which he saw two seated beings. The recording draws it
  *   1.47 m across and 0.72 m high, overlapping the hull's crown: what stands proud of the hull is
  *   therefore a shallow cap, 0.32 m of it, and that is what is built. Its glass is ASSUMED to be
- *   glass: he said he saw through it, not what it was made of.
+ *   glass, thin and clear, of index 1.5: he said he saw through it, not what it was made of.
  * - Six legs slanting outwards from under the hull, and a central pivot — the one that bored the
  *   hole found in the field and turned on itself as the machine left. The pivot is 0.18 m across,
  *   the width of that hole; where the six feet stood was never surveyed, so they are set on a
@@ -53,14 +53,16 @@ class ValensoleCraft {
   readonly materials: GltfMaterial[] = [
     // Matte and neutral, the colour the recording draws it: nothing here reflects a landscape.
     GltfWriter.material("hull", "#b8b3a6", 0.05, 0.85),
-    // Glass: seen through, so it is drawn as glass — smooth, barely coloured, half transparent.
-    { ...GltfWriter.material("cupola", "#cfd6da", 0, 0.08), alphaMode: "BLEND", doubleSided: true },
+    // Glass: seen through, so it is said to BE glass, in glTF's own terms — it transmits all it does
+    // not reflect, at the index of window glass — and the renderer draws it as glass: a mirror of the
+    // sky towards its rim, nearly clear where it faces the eye (see GlassMaterial).
+    {
+      ...GltfWriter.material("cupola", "#f4f7f8", 0, 0.02),
+      doubleSided: true,
+      extensions: { KHR_materials_transmission: { transmissionFactor: 1 }, KHR_materials_ior: { ior: 1.5 } }
+    },
     GltfWriter.material("legs", "#8d8779", 0.1, 0.7)
   ]
-
-  constructor() {
-    this.materials[1].pbrMetallicRoughness.baseColorFactor[3] = 0.45
-  }
 
   parts(): Part[] {
     return [

@@ -27,6 +27,8 @@ export interface GltfMaterial {
   /** Whether it lets the light through, and how: glTF's own "OPAQUE" or "BLEND". */
   alphaMode?: string
   doubleSided?: boolean
+  /** glTF material extensions, by name — KHR_materials_transmission and KHR_materials_ior for glass. */
+  extensions?: Record<string, object>
 }
 
 export class GltfWriter {
@@ -74,8 +76,10 @@ export class GltfWriter {
 
   toJSON(generator: string): object {
     const buffer = Buffer.concat(this.chunks)
+    const extensionsUsed = [...new Set(this.materials.flatMap(material => Object.keys(material.extensions ?? {})))]
     return {
       asset: { version: "2.0", generator },
+      ...(extensionsUsed.length > 0 ? { extensionsUsed } : {}),
       scene: 0,
       scenes: [{ nodes: this.nodes.map((_, index) => index) }],
       nodes: this.nodes,

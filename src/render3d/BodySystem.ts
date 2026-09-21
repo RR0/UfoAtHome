@@ -1,6 +1,6 @@
 import {
   Box3, BoxGeometry, BufferGeometry, Color, ConeGeometry, CylinderGeometry, Group, LatheGeometry, Mesh,
-  MeshStandardMaterial, Object3D, Quaternion, SphereGeometry, TorusGeometry, Vector2, Vector3
+  MeshPhysicalMaterial, MeshStandardMaterial, Object3D, Quaternion, SphereGeometry, TorusGeometry, Vector2, Vector3
 } from "three"
 import type { BodyState } from "../engine/interpretation/BodyPlacement.js"
 import { BODY_PRIMITIVES } from "../engine/interpretation/Interpretation.js"
@@ -12,6 +12,8 @@ import type { DecorObject } from "../engine/model/Decor.js"
 import { Glare } from "./Glare.js"
 import { GroundPlume } from "./GroundPlume.js"
 import { Photometry } from "./Photometry.js"
+import { GlassMaterial } from "./GlassMaterial.js"
+import { SkyReflection } from "./SkyReflection.js"
 import type { LuminanceDisplay } from "./Photometry.js"
 export type { LuminanceDisplay } from "./Photometry.js"
 import type { SmokeSource } from "../engine/interpretation/Interpretation.js"
@@ -194,6 +196,22 @@ export class BodySystem {
     // A model's own brightest glowing part says what colour the bloom is; a primitive's own colour does.
     const hue = glowing?.find(glow => glow.share >= 1)?.hue ?? BodySystem.rgbOf(state.appearance.color)
     glare.shine(holder.position, spread.radiusM, this.throughAir(BodySystem.shown(hue, spread.luminanceCdM2, display), holder.position))
+  }
+
+  /**
+   * Draws as glass whatever a model says transmits light (KHR_materials_transmission, which three
+   * reads into a MeshPhysicalMaterial's `transmission`) — see GlassMaterial on why not three's own.
+   * Glass that thin casts next to no shadow, so it casts none.
+   */
+  private static glaze(scene: Object3D): void {
+    scene.traverse(child => {
+      if (!(child instanceof Mesh)) return
+      const material = child.material
+      if (!(material instanceof MeshPhysicalMaterial) || !(material.transmission > 0)) return
+      child.material = new GlassMaterial(material.ior)
+      material.dispose()
+      child.castShadow = false
+    })
   }
 
   /** A colour a light at `at` gives out, as it arrives at the eye through the air. */
@@ -407,6 +425,7 @@ export class BodySystem {
       // what a witness saw at a distance is a silhouette in coveralls, not a face.
       const material = new MeshStandardMaterial({ roughness: 0.7, metalness: 0 })
       BodySystem.paint(material, state)
+      SkyReflection.reflect(material)
       const figure = DecorSystem.build({ id: state.id, kind: "entity", eastM: 0, northM: 0 } as DecorObject, false)
       figure.traverse(child => {
         if (!(child instanceof Mesh)) return
@@ -420,6 +439,7 @@ export class BodySystem {
     if (primitive) {
       const material = new MeshStandardMaterial({ roughness: 0.45, metalness: 0 })
       BodySystem.paint(material, state)
+      SkyReflection.reflect(material)
       const mesh = new Mesh(BodySystem.unitGeometry(primitive), material)
       mesh.castShadow = true
       mesh.receiveShadow = true
@@ -440,6 +460,8 @@ export class BodySystem {
       holder.remove(placeholder)
       placeholder.geometry.dispose()
       material.dispose()
+      BodySystem.glaze(loaded.scene)
+      SkyReflection.reflectOn(loaded.scene)
       holder.add(BodySystem.fit(loaded.scene, loaded.headingOffsetDeg ?? state.model.headingOffsetDeg ?? 0))
       this.credits.set(state.id, loaded.credit)
       const entry = this.built.get(state.id)
