@@ -62,6 +62,7 @@ import type { GaitOffset } from "../engine/place/Gait.js"
 import type { StarCatalog } from "./StarCatalog.js"
 import { PointSources } from "./PointSources.js"
 import { Veil } from "./Veil.js"
+import { ProbeIrradiance } from "./ProbeIrradiance.js"
 import { BRIGHT_STARS } from "../engine/astronomy/brightStarCatalog.js"
 import type { BrightStar } from "../engine/astronomy/brightStarCatalog.js"
 import { defaultTerrainProviders } from "./terrain/defaultTerrainProviders.js"
@@ -2159,6 +2160,11 @@ export class SceneRenderer {
   }
 
   setAstronomy(astronomy: SceneAstronomy): void {
+    // A jump — another scene, a seek — makes what was measured round the witness someone else's.
+    if (!this.lastAstronomy || Math.abs(this.lastAstronomy.sun.altitudeDeg - astronomy.sun.altitudeDeg) > 2) {
+      this.surroundings = undefined
+      this.scatteredSky?.resetSurroundings()
+    }
     this.lastAstronomy = astronomy
     this.scatteredSky?.update(this.scatteredSkyState(astronomy))
     if (this.skyHoldUntilMs === undefined) {
@@ -2235,15 +2241,28 @@ export class SceneRenderer {
     if (this.bodiesScale !== this.relativeScale) {
       this.placeBodies(astronomy, visibleMagnitudeLimit(astronomy.sun.altitudeDeg, this.instrumentMagnitudeGain))
       this.applyDazzleStrength()
+      // The halos and the bows are the bodies' light too (see bentLight): drawn at a stale scale,
+      // a halo worked out before the sky was first read back came out four thousand times too
+      // bright, and the eye measured on it adapted to a sky of three million candela.
+      this.buildIceHalos(astronomy.sun, astronomy.moon)
+      this.buildRainbow(astronomy.sun, astronomy.moon)
     }
     const sky = this.scatteredSky?.ambient ?? SceneRenderer.relativeSkyOf(skyColorsForAltitude(astronomy.sun.altitudeDeg), this.relativeScale)
     const skyColors = sky
-    const groundColor = skyColors.horizon
-    this.baseFogColor = [groundColor[0], groundColor[1], groundColor[2]]
-    // Until the scattered sky has been read back there is only the old colour table, whose horizon
-    // is all there is to go on.
-    const air = skyColors.airlight
-    this.airlight = [air[0], air[1], air[2]]
+    // The air's own light is what it scatters of what falls on it: the Sun's beam as the clear sky
+    // was worked out with, as far as the clouds let the beam through, and under the clouds the light
+    // they send down — measured round the witness (see measureSurroundings), a level surface's
+    // irradiance over π being the radiance of an evenly lit sky. An overcast day's haze is the grey
+    // of its deck, not the glare of the clear sky above it.
+    const underClouds = this.lightUnderClouds(astronomy)
+    const shade = (colour: readonly number[]): [number, number, number] => underClouds
+      ? [0, 1, 2].map(c => colour[c] * underClouds.through + underClouds.radiance[c] * (1 - underClouds.through)) as [number, number, number]
+      : [colour[0], colour[1], colour[2]]
+    // The air only: the clouds' own shading keeps the clear sky's horizon for its ambient and haze.
+    // Handed the measured light too, a deck lit by what the probe saw of the deck fed itself, and
+    // an overcast Cussac ran away to ten million lux in a few photographs.
+    this.baseFogColor = [skyColors.horizon[0], skyColors.horizon[1], skyColors.horizon[2]]
+    this.airlight = shade(skyColors.airlight)
     if (this.skyMesh && this.skyGradientMaterial) {
       this.skyMesh.material = this.scatteredSky?.ready ? this.scatteredSky.material : this.skyGradientMaterial
     }
@@ -2469,15 +2488,24 @@ export class SceneRenderer {
       const { x, y, z } = horizontalToCartesian(body.altitudeDeg, body.azimuthDeg, 1)
       this.cloudBeamDirection.set(x, y, z)
     } else this.cloudBeam.fill(0)
-    // The clear sky's own light comes down through the clouds as their holes and thin parts let it.
-    const skyThrough = this.skyCloudTransmission()
-    const clear = sky.skyIrradiance
-    const irradiance = [0, 1, 2].map(c => clear[c] * skyThrough + diffuse[c]) as [number, number, number]
-    this.skyLight.color.setRGB(irradiance[0], irradiance[1], irradiance[2])
-    // A level ground of the sky's own albedo, lit by the sky and the beam, lights what faces down.
-    const albedo = AtmosphereTables.GROUND_ALBEDO
-    this.skyLight.groundColor.setRGB(
-      albedo * (irradiance[0] + beam[0] * level), albedo * (irradiance[1] + beam[1] * level), albedo * (irradiance[2] + beam[2] * level))
+    const around = this.surroundings
+    if (around) {
+      // What is drawn round the witness, measured (see measureSurroundings): the clouds as they are,
+      // the ground as it is lit.
+      this.skyLight.color.setRGB(around.up[0] * scale, around.up[1] * scale, around.up[2] * scale)
+      this.skyLight.groundColor.setRGB(around.down[0] * scale, around.down[1] * scale, around.down[2] * scale)
+    } else {
+      // Until the eye's surroundings have been photographed: the clear sky's own light, coming down
+      // through the clouds as their holes and thin parts let it, and what they scatter.
+      const skyThrough = this.skyCloudTransmission()
+      const clear = sky.skyIrradiance
+      const irradiance = [0, 1, 2].map(c => clear[c] * skyThrough + diffuse[c]) as [number, number, number]
+      this.skyLight.color.setRGB(irradiance[0], irradiance[1], irradiance[2])
+      // A level ground of the sky's own albedo, lit by the sky and the beam, lights what faces down.
+      const albedo = AtmosphereTables.GROUND_ALBEDO
+      this.skyLight.groundColor.setRGB(
+        albedo * (irradiance[0] + beam[0] * level), albedo * (irradiance[1] + beam[1] * level), albedo * (irradiance[2] + beam[2] * level))
+    }
     this.skyLight.intensity = 1
     if (!useSun && !useMoon) {
       this.celestialLight.intensity = 0
@@ -2782,9 +2810,16 @@ export class SceneRenderer {
    */
   private refreshReflections(): void {
     this.reflections ??= new Reflections(this.renderer)
-    const screenOnly: Object3D[] = [...this.compassSprites, ...(this.lensFlare ? [this.lensFlare.mesh] : [])]
+    // The veils are in the eye, not in the world: nothing mirrors them.
+    const screenOnly: Object3D[] = [...this.compassSprites, ...(this.lensFlare ? [this.lensFlare.mesh] : []),
+      ...[...this.glareSprites.values()].map(veil => veil.mesh)]
+    // The points the eye resolves stars and planets to carry more light than they send (see
+    // PointSources): kept out of the photograph the eye's surroundings are measured on.
+    const eyeHidden: Object3D[] = [...this.starTiers.map(tier => tier.points),
+      ...[...this.bodyMeshes.values()].filter(mesh => mesh instanceof Points)]
+    const scale = this.relativeScale
     const waiting = this.reflections.refresh(this.renderer, this.scene, this.camera.position, this.bodySystem.reflectors,
-      screenOnly, [...this.decorGroups.values()], this.sceneVersion)
+      screenOnly, [...this.decorGroups.values()], this.sceneVersion, eyeHidden, photograph => this.measureSurroundings(photograph, scale))
     if (waiting === undefined || this.reflectionTimer) return
     this.reflectionTimer = setTimeout(() => {
       this.reflectionTimer = undefined
@@ -2796,6 +2831,55 @@ export class SceneRenderer {
       })
     }, waiting)
   }
+
+  /**
+   * Measures the light round the witness on the eye's photograph (see ProbeIrradiance): the
+   * hemisphere light takes it, and the eye adapts to it. Kept in candela, lux — the photograph was
+   * taken at `scale` — so that it stays right however the eye adapts after.
+   */
+  private measureSurroundings(photograph: Texture, scale: number): void {
+    const astronomy = this.lastAstronomy
+    if (!astronomy) return
+    this.probeIrradiance ??= new ProbeIrradiance()
+    const sources = [astronomy.sun, astronomy.moon]
+      .filter(body => body.altitudeDeg > -2)
+      .map(body => horizontalToCartesian(body.altitudeDeg, body.azimuthDeg, 1))
+    this.probeIrradiance.measure(this.renderer, photograph, sources, light => {
+      const physical = (rgb: readonly number[]) => rgb.map(value => value / scale) as [number, number, number]
+      const before = this.surroundings
+      const next = { up: physical(light.up), down: physical(light.down) }
+      // Redrawn only for a change an eye would see: a redraw is a new photograph, and a photograph
+      // that changed nothing must not ask for another.
+      const moved = (a: readonly number[], b: readonly number[]) =>
+        a.some((value, c) => Math.abs(value - b[c]) > 0.03 * Math.max(Math.abs(value), Math.abs(b[c]), 1e-12))
+      const lit = !before || moved(before.up, next.up) || moved(before.down, next.down)
+      if (lit) this.surroundings = next
+      const adapted = this.scatteredSky?.adaptToSurroundings(Math.exp(light.logAverage) / scale) ?? false
+      if (!lit && !adapted) return
+      this.skyColoursStale = true
+      this.render()
+    })
+  }
+
+  /**
+   * Under clouds, what the air is lit by: the share of the beam they let through, and the radiance
+   * of the light they send down in its place, relative. Nothing to say before the surroundings have
+   * been measured, or with no Sun or Moon up to be hidden.
+   */
+  private lightUnderClouds(astronomy: SceneAstronomy): { through: number, radiance: [number, number, number] } | undefined {
+    const around = this.surroundings
+    if (!around) return undefined
+    const body = astronomy.sun.altitudeDeg >= CELESTIAL_LIGHT_MIN_ALTITUDE_DEG ? astronomy.sun
+      : astronomy.moon.altitudeDeg >= CELESTIAL_LIGHT_MIN_ALTITUDE_DEG ? astronomy.moon : undefined
+    if (!body) return undefined
+    const scale = this.relativeScale / Math.PI
+    return { through: this.cloudTransmission(body), radiance: [around.up[0] * scale, around.up[1] * scale, around.up[2] * scale] }
+  }
+
+  private probeIrradiance?: ProbeIrradiance
+  /** The light round the witness as last measured on the eye's photograph, lux — see
+   * measureSurroundings. */
+  private surroundings?: { up: [number, number, number], down: [number, number, number] }
 
   /** Moves everything that moves on its own on to the frame's clock — see frame(). */
   private animate(timeMs: number, intervalMs: number): void {
@@ -4058,7 +4142,6 @@ export class SceneRenderer {
         geometry.setAttribute("position", new BufferAttribute(new Float32Array(3), 3))
         geometry.setAttribute("color", new BufferAttribute(new Float32Array(3), 3))
         mesh = new Points(geometry, PointSources.material(STAR_BRIGHTNESS_TIERS[STAR_BRIGHTNESS_TIERS.length - 1].size))
-        PointSources.track(mesh)
         this.celestialGroup.add(mesh)
         this.bodyMeshes.set(key, mesh)
       }
@@ -4080,7 +4163,8 @@ export class SceneRenderer {
       this.sunCloudTransmission = through
       this.sunArriving = arriving
     }
-    if (key !== "sun") this.setGlare(key, x, y, z, arriving, (visualRadius / BODY_PLACEMENT_RADIUS) * (180 / Math.PI))
+    // A planet, a comet's head, a nova: points, whose veil begins where the law does.
+    if (key !== "sun") this.setGlare(key, x, y, z, arriving, (visualRadius / BODY_PLACEMENT_RADIUS) * (180 / Math.PI), 1)
     if (key === "sun") {
       this.sunVisible = true
       const celestialScale = this.celestialGroup.scale.x
@@ -4215,8 +4299,8 @@ export class SceneRenderer {
 
   /** Stands (or removes) the veiling glare round a body in the eye — see Veil. `illuminance` is
    * what arrives of its light, relative; `sourceDeg` its disc's own angular radius. */
-  private setGlare(key: string, x: number, y: number, z: number, illuminance: readonly [number, number, number], sourceDeg: number): void {
-    if (Veil.radiusDeg(Veil.K * Math.max(...illuminance)) <= sourceDeg) {
+  private setGlare(key: string, x: number, y: number, z: number, illuminance: readonly [number, number, number], sourceDeg: number, innerDeg = 0): void {
+    if (Veil.radiusDeg(Veil.K * Math.max(...illuminance)) <= Math.max(sourceDeg, innerDeg)) {
       this.disposeGlare(key)
       return
     }
@@ -4227,7 +4311,7 @@ export class SceneRenderer {
       this.celestialGroup.add(veil.mesh)
       this.glareSprites.set(key, veil)
     }
-    veil.shine({ x, y, z }, illuminance, sourceDeg)
+    veil.shine({ x, y, z }, illuminance, sourceDeg, innerDeg)
   }
 
   private disposeGlare(key: string): void {
@@ -4604,7 +4688,6 @@ export class SceneRenderer {
         points.geometry = geometry
       } else {
         points = new Points(geometry, PointSources.material(tier.size))
-        PointSources.track(points)
         this.celestialGroup.add(points)
       }
       return { points, colorAttribute, brightness, illuminance, phase, speedFactor }

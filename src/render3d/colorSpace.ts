@@ -56,7 +56,8 @@ vec3 respond(vec3 relative) {
   // shading. Brightness is kept, and hue; only saturation gives, as it does for an eye near
   // the top of its range.
   float top = max(shown.r, max(shown.g, shown.b));
-  if (top > 1.0) shown = vec3(response) + (shown - vec3(response)) * (1.0 - response) / (top - response);
+  // At the very top the response rounds to one and there is no room left for any colour: white.
+  if (top > 1.0) shown = response >= 0.9999 ? vec3(1.0) : vec3(response) + (shown - vec3(response)) * (1.0 - response) / max(top - response, 1e-6);
   return shown;
 }
 `

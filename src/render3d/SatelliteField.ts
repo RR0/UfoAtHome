@@ -41,7 +41,6 @@ export class SatelliteField {
     this.object.name = "satellites"
     this.tiers = STAR_BRIGHTNESS_TIERS.map(tier => {
       const points = new Points(new BufferGeometry(), PointSources.material(tier.size))
-      PointSources.track(points)
       // Positions change every frame and the bounds with them: a stale bounding sphere would cull a
       // satellite that has moved out of it.
       points.frustumCulled = false

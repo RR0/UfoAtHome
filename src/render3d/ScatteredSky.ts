@@ -290,7 +290,35 @@ export class ScatteredSky {
     }
   }
 
+  /**
+   * What an eye standing in the scene as DRAWN adapts to, cd/m² — the log-average of the upper
+   * hemisphere measured on the eye's own photograph (see ProbeIrradiance), clouds and all. Kept as a
+   * factor on the clear sky's, so that it follows the clear sky between two photographs as the Sun
+   * moves. Returns whether the eye's state changed enough to be worth redrawing.
+   */
+  adaptToSurroundings(luminance: number): boolean {
+    if (!(luminance > 0) || !(this.clearAdaptation > 0)) return false
+    const factor = luminance / this.clearAdaptation
+    if (Math.abs(Math.log(factor / this.surroundingsFactor)) < 0.05) return false
+    this.surroundingsFactor = factor
+    if (this.views && this.state) this.adaptFromViews(this.views.sun, this.views.moon, this.state)
+    else this.applyAdaptation(this.clearAdaptation * factor)
+    return true
+  }
+
+  /** Forgets the drawn scene's own adaptation — a different scene, or a jump in time. */
+  resetSurroundings(): void {
+    this.surroundingsFactor = 1
+  }
+
+  /** See adaptToSurroundings. */
+  private surroundingsFactor = 1
+  /** What the clear sky alone would adapt an eye to, cd/m². */
+  private clearAdaptation = 0
+  private views?: { sun: Float32Array, moon: Float32Array }
+
   private adaptFromViews(sun: Float32Array, moon: Float32Array, state: ScatteredSkyState): void {
+    this.views = { sun, moon }
     const moonScale = 10 ** (-0.4 * (state.moon.magnitude - ScatteredSky.SUN_MAGNITUDE))
     const airglow = ScatteredSky.airglowXyzs()
     const lightAt = (altitudeDeg: number, azimuthDeg: number, withAirglow = true): [number, number, number, number] => {
@@ -312,7 +340,8 @@ export class ScatteredSky {
         weightSum += weight
       }
     }
-    this.applyAdaptation(Math.exp(logSum / weightSum))
+    this.clearAdaptation = Math.exp(logSum / weightSum)
+    this.applyAdaptation(this.clearAdaptation * this.surroundingsFactor)
     const relative = ([x, y, z, s]: readonly number[]) => {
       const scale = this.exposureScale
       const adapted = this.adaptingLuminance * scale

@@ -9,9 +9,9 @@ import type { DecorModelRef } from "../engine/model/Decor.js"
 import { FlameEffect } from "./FlameEffect.js"
 import { DecorSystem } from "./DecorSystem.js"
 import type { DecorObject } from "../engine/model/Decor.js"
-import { Glare } from "./Glare.js"
 import { GroundPlume } from "./GroundPlume.js"
 import { Photometry } from "./Photometry.js"
+import { Veil } from "./Veil.js"
 import { GlassMaterial } from "./GlassMaterial.js"
 import type { Reflector } from "./Reflections.js"
 import type { LuminanceDisplay } from "./Photometry.js"
@@ -87,7 +87,7 @@ export class BodySystem {
   /** The flames being thrown, by body id — see BodyFlame. */
   private readonly flames = new Map<string, FlameEffect>()
   /** The bloom round each body that gives out light of its own — see BodyAppearance.luminanceCdM2. */
-  private readonly glares = new Map<string, Glare>()
+  private readonly glares = new Map<string, Veil>()
   /** The dust each flame raises, by body id. */
   private readonly dust = new Map<string, GroundPlume>()
   /** The smoke of what burns on the ground, one plume per source. */
@@ -172,31 +172,33 @@ export class BodySystem {
    */
   private shine(state: BodyState, holder: Group, glowing: Glow[] | undefined, display: LuminanceDisplay | undefined, eye: Vector3 | undefined): void {
     const luminanceCdM2 = state.appearance.luminanceCdM2
-    let glare = this.glares.get(state.id)
-    // Only a body that glows WHOLE blooms from its middle. A model whose windows alone are lit would
-    // wear a smudge at the centre of its hull, where nothing glows: its parts are too small to
-    // bloom at the distances they are seen from, and a bloom per window is not worth what it would
-    // claim.
+    let veil = this.glares.get(state.id)
+    // Only a body that glows WHOLE throws a veil from its middle. A model whose windows alone are
+    // lit would wear one at the centre of its hull, where nothing glows: its parts are too small to
+    // matter at the distances they are seen from.
     if (!(luminanceCdM2 > 0) || !eye || (glowing && glowing.length > 0)) {
-      glare?.hide()
+      veil?.hide()
       return
     }
-    if (!glare) {
-      glare = new Glare(`body-glare:${state.id}`, FlameEffect.RENDER_ORDER)
-      this.glares.set(state.id, glare)
-      this.group.add(glare.mesh)
+    if (!veil) {
+      veil = new Veil(`body-veil:${state.id}`)
+      this.glares.set(state.id, veil)
+      this.group.add(veil.mesh)
     }
+    // The veiling glare in the eye (see Veil): what the body sends, its luminance over the solid
+    // angle it fills, as an illuminance at the eye — held over the body's own disc, which is drawn
+    // for itself at its luminance. It used to be a bloom whose width grew with how close to white
+    // the body was, and in light that bloom was a white ball several times the body's size.
     const radiusM = Math.max(state.sizeM.widthM, state.sizeM.heightM) / 2
-    const areaM2 = Math.PI * radiusM * radiusM
-    // How far up the scale of what can be shown this body already is, 0 to 1.
-    const shown = BodySystem.shown([1, 1, 1], luminanceCdM2, display)
-    const dazzle = Photometry.response(shown)
-    const widest = Glare.conserving(areaM2)
-    const spread = Glare.spread(radiusM + (widest - radiusM) * dazzle, areaM2, luminanceCdM2, holder.position.distanceTo(eye))
-    // A model's own brightest glowing part says what colour the bloom is; a primitive's own colour does.
+    const distanceM = Math.max(holder.position.distanceTo(eye), radiusM * 1.01)
+    const angularRadius = Math.asin(radiusM / distanceM)
+    const solidAngle = 2 * Math.PI * (1 - Math.cos(angularRadius))
+    // A model's own brightest glowing part says what colour the veil is; a primitive's own colour does.
     const hue = glowing?.find(glow => glow.share >= 1)?.hue ?? BodySystem.rgbOf(state.appearance.color)
-    glare.shine(holder.position, spread.radiusM, this.throughAir(BodySystem.shown(hue, spread.luminanceCdM2, display), holder.position))
+    const light = this.throughAir(BodySystem.shown(hue, luminanceCdM2, display), holder.position)
+    veil.shine(holder.position, [light[0] * solidAngle, light[1] * solidAngle, light[2] * solidAngle], (angularRadius * 180) / Math.PI)
   }
+
 
   /**
    * Draws as glass whatever a model says transmits light (KHR_materials_transmission, which three

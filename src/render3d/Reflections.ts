@@ -56,12 +56,15 @@ export class Reflections {
    *
    * @param screenOnly What is drawn with the scene but belongs to the screen (the compass, the lens
    *   flare), hidden from every probe.
+   * @param eyeHidden What is also kept out of the eye's own probe: what is drawn for the eye alone
+   *   and would be counted as light round it if photographed (see ProbeIrradiance).
+   * @param onEye Called with the eye's photograph each time it is taken.
    * @returns In how many ms another probe will be due, if one is still waiting for this version of
    *   the scene — the caller asks for a frame then, since a still scene asks for none — or
    *   undefined once every probe has seen it.
    */
   refresh(renderer: WebGLRenderer, scene: Scene, eye: Vector3, reflectors: readonly Reflector[], screenOnly: readonly Object3D[],
-    decor: readonly Object3D[], version: number): number | undefined {
+    decor: readonly Object3D[], version: number, eyeHidden: readonly Object3D[] = [], onEye?: (photograph: Texture) => void): number | undefined {
     for (const id of [...this.probes.keys()]) {
       if (reflectors.some(reflector => reflector.id === id && reflector.shiny)) continue
       this.probes.get(id)!.dispose()
@@ -87,7 +90,8 @@ export class Reflections {
         stalest.probe.capture(renderer, scene, position, [stalest.reflector.holder, ...screenOnly])
         Reflections.reflectOn(stalest.reflector.holder, stalest.probe)
       } else {
-        stalest.probe.capture(renderer, scene, eye, screenOnly)
+        stalest.probe.capture(renderer, scene, eye, [...screenOnly, ...eyeHidden])
+        onEye?.(stalest.probe.sharp)
         Reflections.decor = stalest.probe.filtered
         for (const object of decor) Reflections.reflectOn(object, stalest.probe)
         for (const reflector of reflectors) if (!reflector.shiny) Reflections.reflectOn(reflector.holder, stalest.probe)

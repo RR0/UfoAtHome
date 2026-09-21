@@ -28,7 +28,8 @@ export class Veil {
       uniforms: {
         uColor: { value: new Color(0, 0, 0) },
         uTanRadius: { value: 0.1 },
-        uSourceDeg: { value: 0.25 }
+        uSourceDeg: { value: 0.25 },
+        uInnerDeg: { value: 0 }
       },
       vertexShader: Veil.VERTEX,
       fragmentShader: Veil.FRAGMENT,
@@ -54,11 +55,14 @@ export class Veil {
    * @param illuminance The source's illuminance at the eye, per channel, relative like the scene's
    *   light (see ScatteredSky.relativeScale).
    * @param sourceDeg The source's own angular radius, degrees: the veil is held inside it.
+   * @param innerDeg For a point: where the law begins, degrees. Stiles and Holladay measured it
+   *   from a degree out; nearer than that is the point's own image, which is drawn as a point
+   *   (see PointSources), and a veil there too was a planet wearing a disc of light.
    */
-  shine(position: { x: number, y: number, z: number }, illuminance: readonly [number, number, number], sourceDeg: number): void {
+  shine(position: { x: number, y: number, z: number }, illuminance: readonly [number, number, number], sourceDeg: number, innerDeg = 0): void {
     const strength = Veil.K * Math.max(illuminance[0], illuminance[1], illuminance[2])
     const radiusDeg = Veil.radiusDeg(strength)
-    if (radiusDeg <= sourceDeg) {
+    if (radiusDeg <= Math.max(sourceDeg, innerDeg)) {
       this.mesh.visible = false
       return
     }
@@ -68,6 +72,7 @@ export class Veil {
     ;(uniforms.uColor.value as Color).setRGB(Veil.K * illuminance[0], Veil.K * illuminance[1], Veil.K * illuminance[2])
     uniforms.uTanRadius.value = Math.tan((radiusDeg * Math.PI) / 180)
     uniforms.uSourceDeg.value = sourceDeg
+    uniforms.uInnerDeg.value = innerDeg
   }
 
   hide(): void {
@@ -94,6 +99,7 @@ export class Veil {
     uniform vec3 uColor;
     uniform float uTanRadius;
     uniform float uSourceDeg;
+    uniform float uInnerDeg;
     varying vec2 vOffset;
     void main() {
       float reach = length(vOffset);
@@ -102,6 +108,7 @@ export class Veil {
       float edge = degrees(atan(uTanRadius));
       // Less the veil at the edge, so the quad ends where the veil is already at its faintest.
       float veil = max(1.0 / (theta * theta) - 1.0 / (edge * edge), 0.0);
+      if (uInnerDeg > 0.0) veil *= smoothstep(0.5 * uInnerDeg, uInnerDeg, theta);
       gl_FragColor = vec4(uColor * veil, 1.0);
     }
   `

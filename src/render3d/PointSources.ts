@@ -1,4 +1,4 @@
-import { AdditiveBlending, PointsMaterial, Vector4, type Object3D, type WebGLRenderer } from "three"
+import { AdditiveBlending, PointsMaterial } from "three"
 import { RoundPoints } from "./RoundPoints.js"
 
 /**
@@ -8,17 +8,16 @@ import { RoundPoints } from "./RoundPoints.js"
  * A point source has no luminance of its own to draw: what an eye gets from it is an illuminance,
  * lux, spread over whatever the eye cannot resolve it from. The eye's own acuity decides that — a
  * minute of arc in daylight, several at night when the rods do the seeing. So a point is drawn at
- * its illuminance over the eye's acuity cell (see acuitySolidAngle), on a disc at least as wide as
- * that cell on this frame: it keeps the contrast the eye gave it against the sky, which is what
+ * its illuminance over the eye's acuity cell (see acuitySolidAngle), on a disc of its tier's size
+ * (a first version widened faint stars to the rods' ten-minute cell, and the sky filled with
+ * blobs): it keeps the contrast the eye gave it against the sky, which is what
  * decides whether it was seen at all — a sixth-magnitude star by night stands a quarter above the
  * sky behind it, Venus by day half again. Where a pixel is coarser than the cell, which is nearly
  * always by day, the disc is a pixel or so wide and carries more light than the star sent: the
  * contrast is kept, not the flux, because the contrast is what the witness saw.
  *
  * Added to what is behind it, as light is: a star seen through the sky's own glow is both.
- *
- * The frame's pixel is read in the vertex shader from the projection and from the viewport being
- * drawn, so it is right on every path: the canvas, a widened camera, the six faces of a cube.
+
  */
 export class PointSources {
   /** What one of RoundPoints' discs actually fills, as a share of its square: its glare falloff
@@ -34,14 +33,12 @@ export class PointSources {
    */
   static readonly CONE_THRESHOLD_LUX = 10 ** ((-14.18 - 4) / 2.5)
 
-  /** Shared by every point source: the dim-light eye's acuity cell (sr), the illuminance the fovea
-   * takes over at (relative), and the viewport being drawn to. */
+  /** Shared by every point source: the dim-light eye's acuity cell (sr), and the illuminance the
+   * fovea takes over at (relative). */
   private static readonly shared = {
     uRodSolidAngle: { value: 1e-7 },
-    uConeThreshold: { value: 0 },
-    uViewportHeight: { value: 1 }
+    uConeThreshold: { value: 0 }
   }
-  private static readonly viewport = new Vector4()
 
   /**
    * The eye as it is adapted now: the acuity cell of its dim-light seeing (see acuitySolidAngle),
@@ -66,18 +63,10 @@ export class PointSources {
       round.call(material, shader, renderer)
       shader.uniforms.uRodSolidAngle = PointSources.shared.uRodSolidAngle
       shader.uniforms.uConeThreshold = PointSources.shared.uConeThreshold
-      shader.uniforms.uViewportHeight = PointSources.shared.uViewportHeight
       shader.vertexShader = PointSources.patch(shader.vertexShader)
     }
     material.customProgramCacheKey = () => "point-sources"
     return material
-  }
-
-  /** Has `object` tell the shared uniforms which viewport it is being drawn into. */
-  static track(object: Object3D): void {
-    object.onBeforeRender = (renderer: WebGLRenderer) => {
-      PointSources.shared.uViewportHeight.value = Math.max(1, renderer.getCurrentViewport(PointSources.viewport).w)
-    }
   }
 
   /**
@@ -91,23 +80,20 @@ export class PointSources {
   }
 
   /**
-   * The patched vertex shader: each point drawn at least as wide as the eye's acuity cell on this
-   * frame, at its illuminance over that cell — the luminance the eye gives it. The cell is the
+   * The patched vertex shader: each point drawn at its tier's size, at its illuminance over the
+   * eye's acuity cell — the luminance the eye gives it. The cell is the
    * cones' for a point bright enough for the fovea and the dim-light eye's for one too faint for it,
    * from one to the other over the factor of four under the fovea's threshold.
    */
   static patch(vertexShader: string): string {
     return vertexShader
-      .replace("void main() {", `uniform float uRodSolidAngle;\nuniform float uConeThreshold;\nuniform float uViewportHeight;\nvoid main() {`)
+      .replace("void main() {", `uniform float uRodSolidAngle;\nuniform float uConeThreshold;\nvoid main() {`)
       .replace(
         "gl_PointSize = size;",
         `gl_PointSize = size;
         float light = max(max(vColor.r, vColor.g), vColor.b);
         float foveal = smoothstep(0.25 * uConeThreshold, uConeThreshold, light);
         float uAcuitySolidAngle = mix(uRodSolidAngle, ${PointSources.CONE_SOLID_ANGLE.toExponential(6)}, foveal);
-        float pixelAngle = 2.0 / (projectionMatrix[1][1] * uViewportHeight);
-        float pixelSolidAngle = ${PointSources.COVERAGE.toFixed(6)} * pixelAngle * pixelAngle;
-        gl_PointSize = max(gl_PointSize, sqrt(uAcuitySolidAngle / pixelSolidAngle));
         vColor.rgb /= uAcuitySolidAngle;`
       )
   }
