@@ -199,11 +199,7 @@ float densityAt(vec3 p) {
   if (mask < 0.001) return 0.0;
   float top = mix(0.45 + 0.55 * billow, 0.96, flatness);
   float profile = smoothstep(0.0, 0.09, h) * (1.0 - smoothstep(top - 0.22, top, h));
-  // The billows' and the detail's bite goes with them into the distance: taken off a mask already
-  // averaged to the cover, it took more than the cover left (0.095 − 0.19 at Valensole), and a deck
-  // stopped dead thirty kilometres out — a line of cloud with clear sky under it to the horizon.
-  float bite = 1.0 - distant;
-  float erosion = mix(max(0.0, mask - ((1.0 - billow) * 0.38 + (1.0 - detail) * 0.10) * bite), mask * 0.8, flatness);
+  float erosion = mix(max(0.0, mask - (1.0 - billow) * 0.38 - (1.0 - detail) * 0.10), mask * 0.8, flatness);
   return profile * erosion * density * carve;
 }
 void main() {
@@ -429,8 +425,7 @@ export class VolumetricCloudLayer {
     if (mask < 0.001) return 0
     const top = mix(0.45 + 0.55 * billow, 0.96, u.flatness.value)
     const profile = smooth(0, 0.09, h) * (1 - smooth(top - 0.22, top, h))
-    const bite = 1 - distant
-    const erosion = mix(Math.max(0, mask - ((1 - billow) * 0.38 + (1 - detail) * 0.1) * bite), mask * 0.8, u.flatness.value)
+    const erosion = mix(Math.max(0, mask - (1 - billow) * 0.38 - (1 - detail) * 0.1), mask * 0.8, u.flatness.value)
     return profile * erosion * u.density.value * carve
   }
 
