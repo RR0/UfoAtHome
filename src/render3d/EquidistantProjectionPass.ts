@@ -301,16 +301,33 @@ export class EquidistantProjectionPass {
     quad.material = previous
   }
 
-  /** Clears a target to nothing at all — no colour, no coverage, no depth — for an overlay to be
-   * drawn onto. */
+  /**
+   * Clears a target to nothing at all — no colour, no coverage, no depth — for an overlay to be
+   * drawn onto.
+   *
+   * And resolves it at once. A multisampled target is cleared in its samples, and three.js copies
+   * those into the texture only at the end of a render() into it: an overlay with nothing to draw
+   * (no photographs, no phenomena) made no render(), and the texture kept whatever the last demo
+   * had put there — Cussac's photograph laid over every demo opened after it. Rendering an empty
+   * scene into it is that copy and nothing else.
+   */
   static clearTransparent(renderer: WebGLRenderer, target: WebGLRenderTarget, face?: number): void {
     const colour = renderer.getClearColor(EquidistantProjectionPass.clearScratch)
     const alpha = renderer.getClearAlpha()
+    const autoClear = renderer.autoClear
     renderer.setRenderTarget(target, face)
     renderer.setClearColor(0x000000, 0)
     renderer.clear(true, true, true)
     renderer.setClearColor(colour, alpha)
+    if (target.samples > 0) {
+      renderer.autoClear = false
+      renderer.render(EquidistantProjectionPass.nothing, EquidistantProjectionPass.nothingCamera)
+      renderer.autoClear = autoClear
+    }
   }
+
+  private static readonly nothing = new Scene()
+  private static readonly nothingCamera = new OrthographicCamera()
 
   private static readonly clearScratch = new Color()
 

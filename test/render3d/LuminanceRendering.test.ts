@@ -19,6 +19,15 @@ describe("rendering in luminance", () => {
     }
   })
 
+  it("fits a colour too saturated for its brightness by desaturating it, not by clipping", () => {
+    const shown = EyeAdaptation.finish([30, 5, 0.5])
+    expect(Math.max(...shown)).toBeCloseTo(1, 9)
+    expect(Photometry.luminanceOf(shown)).toBeCloseTo(EyeAdaptation.respond(Photometry.luminanceOf([30, 5, 0.5])), 9)
+    // Still orange: red over green over blue.
+    expect(shown[0]).toBeGreaterThan(shown[1])
+    expect(shown[1]).toBeGreaterThan(shown[2])
+  })
+
   it("undoes its own response", () => {
     for (const response of [0.01, 0.3, 0.5, 0.9]) {
       expect(EyeAdaptation.respond(EyeAdaptation.relativeOfResponse(response))).toBeCloseTo(response, 9)

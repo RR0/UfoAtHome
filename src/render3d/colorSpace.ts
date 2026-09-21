@@ -48,7 +48,16 @@ vec3 respond(vec3 relative) {
   float y = dot(clamped, vec3(0.2126, 0.7152, 0.0722));
   if (y <= 0.0) return vec3(0.0);
   float power = pow(y, EYE_RESPONSE_EXPONENT);
-  return clamped / y * (power / (power + 1.0));
+  float response = power / (power + 1.0);
+  vec3 shown = clamped / y * response;
+  // A colour too saturated for its brightness to fit on the screen — a cloud lit orange by a Sun a
+  // few degrees up — is taken towards the grey of its own brightness until its brightest channel
+  // fits, rather than clipped channel by channel, which turned orange flat yellow and lost the
+  // shading. Brightness is kept, and hue; only saturation gives, as it does for an eye near
+  // the top of its range.
+  float top = max(shown.r, max(shown.g, shown.b));
+  if (top > 1.0) shown = vec3(response) + (shown - vec3(response)) * (1.0 - response) / (top - response);
+  return shown;
 }
 `
 

@@ -185,11 +185,17 @@ export class EyeAdaptation {
     return (r / (1 - r)) ** (1 / EyeAdaptation.RESPONSE_EXPONENT)
   }
 
-  /** A linear display colour for a relative one, its chromaticity kept — EYE_RESPONSE_GLSL's own arithmetic. */
+  /** A linear display colour for a relative one, its chromaticity kept, and desaturated towards its
+   * own grey where it would not fit on the screen — EYE_RESPONSE_GLSL's own arithmetic. */
   static finish(relative: readonly [number, number, number]): DisplayRgb {
     const y = 0.2126 * relative[0] + 0.7152 * relative[1] + 0.0722 * relative[2]
     if (!(y > 0)) return [0, 0, 0]
-    const k = EyeAdaptation.respond(y) / y
-    return [relative[0] * k, relative[1] * k, relative[2] * k]
+    const response = EyeAdaptation.respond(y)
+    const k = response / y
+    const shown: DisplayRgb = [relative[0] * k, relative[1] * k, relative[2] * k]
+    const top = Math.max(...shown)
+    if (top <= 1) return shown
+    const share = (1 - response) / (top - response)
+    return shown.map(value => response + (value - response) * share) as DisplayRgb
   }
 }
