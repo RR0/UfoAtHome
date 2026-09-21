@@ -59,6 +59,7 @@ export class LayeredCloudSystem {
         if (volumetric) {
           this.noise ??= createCloudNoise()
           deck.volume = new VolumetricCloudLayer(this.noise, this.radius)
+          deck.volume.uniforms.airExtinction.value.copy(this.air)
           this.group.add(deck.volume.mesh)
         } else {
           const built = buildCloudMaterial(new Color(1, 1, 1), layer.coverage, Math.max(1, Math.abs(layer.baseM - eyeM) * 0.25 * 1400 / Math.max(50, layer.sizeM)), layer.type === "cirrus" ? 1 : 0)
@@ -179,6 +180,16 @@ export class LayeredCloudSystem {
       deck.volume?.uniforms.hazeColor.value.copy(haze)
     }
   }
+
+  /**
+   * The air the decks are seen through: the air's and the haze's extinction at sea level, per
+   * metre, and the ground's height above the sea — see VolumetricCloudLayer's airTransmission.
+   */
+  setAir(rayleighPerM: number, aerosolPerM: number, groundAltitudeM: number): void {
+    this.air.set(rayleighPerM, aerosolPerM, groundAltitudeM)
+    for (const deck of this.decks.values()) deck.volume?.uniforms.airExtinction.value.copy(this.air)
+  }
+  private readonly air = new Vector3(1.2e-5, 8e-5, 0)
 
   /** The strongest cirrus veil drives the existing single-veil halo approximation. */
   get cirrusMask(): { cover: number; layerHeight: number; offset: Vector3; iceCrystalAlignment?: number } | undefined {

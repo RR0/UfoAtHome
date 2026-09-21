@@ -1,3 +1,4 @@
+import { AtmosphereProfile } from "../engine/atmosphere/AtmosphereProfile.js"
 import { BackSide, Color, Data3DTexture, LinearFilter, Mesh, RedFormat, RepeatWrapping, ShaderMaterial, SphereGeometry, Vector3 } from "three"
 import type { CloudInstance, CloudLayer } from "../engine/model/CloudLayer.js"
 
@@ -8,12 +9,6 @@ const NOISE_SIZE = 64
 export const MAX_HOLES = 8
 /** The shader's SLICE: the one slice of the noise every layer reads its weather from. */
 const WEATHER_SLICE = 0.2787
-/**
- * How far into the air a cloud is seen before the air in front of it has hidden all but 1/e of it,
- * metres: a visibility of about a hundred kilometres, the four times that Koschmieder gives. One that far
- * fades out into the sky it stands in (see the fragment shader).
- */
-const CLOUD_HAZE_LENGTH_M = 25000
 
 /** Stable hash, independent of array order or frame number. */
 export function cloudSeed(layer: CloudLayer): number {
@@ -93,6 +88,9 @@ precision highp sampler3D;
 varying vec3 vCloudDirection;
 uniform sampler3D noiseMap;
 uniform vec3 sunDir, sunColor, ambientColor, hazeColor;
+/** The air between the eye and a cloud (see setAir): the air's and the haze's extinction at sea
+ * level, per metre, and the ground under the eye above the sea, metres. */
+uniform vec3 airExtinction;
 uniform vec3 offsetM, seedOffset;
 uniform vec3 localCenter, localSize;
 uniform float localRotation;
@@ -218,6 +216,21 @@ float densityAt(vec3 p) {
   float erosion = mix(max(0.0, mask - ((1.0 - billow) * 0.38 + (1.0 - detail) * 0.10) * bite), mask * 0.8, flatness);
   return profile * erosion * density * carve;
 }
+/** The mean of exp(-h/H) along a line from one height above the sea to another. */
+float meanDensity(float from, float to, float scale) {
+  float a = max(from, 0.0), b = max(to, 0.0);
+  if (abs(b - a) < 0.01) return exp(-a / scale);
+  return scale * (exp(-a / scale) - exp(-b / scale)) / (b - a);
+}
+/** What reaches the eye of a cloud at p through the air in front of it — AerialPerspective's own
+ * law, the one the ground and the decor are seen through (see AerialFog). */
+float airTransmission(vec3 p) {
+  float from = airExtinction.z + eyeM;
+  float to = airExtinction.z + altitude(p);
+  float depth = airExtinction.x * meanDensity(from, to, ${AtmosphereProfile.RAYLEIGH_SCALE_HEIGHT_M.toFixed(1)})
+    + airExtinction.y * meanDensity(from, to, ${AtmosphereProfile.AEROSOL_SCALE_HEIGHT_M.toFixed(1)});
+  return exp(-depth * length(p));
+}
 void main() {
   vec3 dir = normalize(vCloudDirection);
   vec2 outer = roots(dir.y, baseM + thicknessM);
@@ -270,10 +283,10 @@ void main() {
       lit *= mix(1.0, 0.32, darkness);
       // The air in front of a far cloud: it hides the cloud and shows the sky's own light instead —
       // which the sky dome behind already draws, airlight and all. So a far cloud fades OUT, into the
-      // sky it stands in, rather than being repainted the horizon's average colour: that colour is
-      // the dawn's cream all round, and a deck of scattered cumulus stood as a cream bank over the
-      // last degrees above the horizon, however thin.
-      float opacity = (1.0 - exp(-d * ds * 0.006)) * exp(-length(p) / ${CLOUD_HAZE_LENGTH_M.toFixed(1)});
+      // sky it stands in, as much as the day's air and haze take of it (see airTransmission), rather
+      // than being repainted the horizon's average colour: that colour is the dawn's cream all
+      // round, and a deck of scattered cumulus stood as a cream bank above the horizon.
+      float opacity = (1.0 - exp(-d * ds * 0.006)) * airTransmission(p);
       radiance += transmission * opacity * lit;
       transmission *= 1.0 - opacity;
       if (transmission < 0.015) break;
@@ -330,6 +343,7 @@ export class VolumetricCloudLayer {
       noiseMap: { value: texture },
       sunDir: { value: new Vector3(0, 1, 0) }, sunColor: { value: new Color(1, 1, 1) },
       ambientColor: { value: new Color(0.4, 0.45, 0.5) }, hazeColor: { value: new Color(0.5, 0.6, 0.7) },
+      airExtinction: { value: new Vector3(1.2e-5, 8e-5, 0) },
       offsetM: { value: new Vector3() }, seedOffset: { value: new Vector3() },
       localCenter: { value: new Vector3() }, localSize: { value: new Vector3() }, localRotation: { value: 0 },
       holeCount: { value: 0 },
