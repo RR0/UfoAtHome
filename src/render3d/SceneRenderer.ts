@@ -2364,7 +2364,6 @@ export class SceneRenderer {
   private applyAir(): void {
     if (!(this.scene.fog instanceof AerialFog)) this.scene.fog = new AerialFog()
     ;(this.scene.fog as AerialFog).setAir(this.air, this.siteElevationM, this.airlight)
-    this.layeredClouds?.setAir(this.air.rayleigh[1], this.air.aerosol[1], this.siteElevationM)
     this.horizonColour.setRGB(this.baseFogColor[0], this.baseFogColor[1], this.baseFogColor[2])
   }
 
