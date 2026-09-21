@@ -200,7 +200,12 @@ float densityAt(vec3 p) {
   float top = mix(0.45 + 0.55 * billow, 0.96, flatness);
   float profile = smoothstep(0.0, 0.09, h) * (1.0 - smoothstep(top - 0.22, top, h));
   float erosion = mix(max(0.0, mask - (1.0 - billow) * 0.38 - (1.0 - detail) * 0.10), mask * 0.8, flatness);
-  return profile * erosion * density * carve;
+  // A deck thins away with the distance rather than stopping where its averaged cover can no longer
+  // pay for the billows' bite, which left a hard line of cloud at thirty kilometres (Valensole). A
+  // deck closing up to overcast keeps its far part: that is a ceiling, and a ceiling reaches the
+  // horizon.
+  float fade = mix(1.0 - distant, 1.0, smoothstep(0.5, 0.92, coverage));
+  return profile * erosion * density * carve * fade;
 }
 void main() {
   vec3 dir = normalize(vCloudDirection);
@@ -426,7 +431,8 @@ export class VolumetricCloudLayer {
     const top = mix(0.45 + 0.55 * billow, 0.96, u.flatness.value)
     const profile = smooth(0, 0.09, h) * (1 - smooth(top - 0.22, top, h))
     const erosion = mix(Math.max(0, mask - (1 - billow) * 0.38 - (1 - detail) * 0.1), mask * 0.8, u.flatness.value)
-    return profile * erosion * u.density.value * carve
+    const fade = mix(1 - distant, 1, smooth(0.5, 0.92, u.coverage.value))
+    return profile * erosion * u.density.value * carve * fade
   }
 
   transmissionAt(direction: { x: number; y: number; z: number }, distanceM = Infinity): number {
