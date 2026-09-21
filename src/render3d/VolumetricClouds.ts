@@ -195,13 +195,7 @@ float densityAt(vec3 p) {
   float dome = (1.0 - flatness) * 0.3 * h * h;
   float mask = smoothstep(threshold - 0.10 + dome, threshold + 0.10 + dome, weather + (billow - 0.5) * 0.12 * h);
   mask = mix(mask, 1.0, smoothstep(0.92, 1.0, coverage));
-  // What a far stretch of the deck averages to is not its cover but what a line of sight meets of
-  // it: clouds some sizeM across, each opaque, covering that share of the sky, stop a line at a rate
-  // of cover over size — a sixteenth of the cover itself at 2.5 km. Averaged to the cover, a
-  // Valensole sky of 9.5 % scattered cumulus stood as a solid wall over the last ten degrees above
-  // the horizon. A deck closing up towards overcast is the veil its cover says.
-  float farCover = mix(min(coverage, coverage / (sizeM * 0.006)), coverage, smoothstep(0.5, 0.92, coverage));
-  mask = mix(mask, max(farCover, core), distant);
+  mask = mix(mask, max(coverage, core), distant);
   if (mask < 0.001) return 0.0;
   float top = mix(0.45 + 0.55 * billow, 0.96, flatness);
   float profile = smoothstep(0.0, 0.09, h) * (1.0 - smoothstep(top - 0.22, top, h));
@@ -431,9 +425,7 @@ export class VolumetricCloudLayer {
     const dome = (1 - u.flatness.value) * 0.3 * h * h
     let mask = smooth(threshold - 0.1 + dome, threshold + 0.1 + dome, weather + (billow - 0.5) * 0.12 * h)
     mask = mix(mask, 1, smooth(0.92, 1, u.coverage.value))
-    const cover = u.coverage.value
-    const farCover = mix(Math.min(cover, cover / (u.sizeM.value * 0.006)), cover, smooth(0.5, 0.92, cover))
-    mask = mix(mask, Math.max(farCover, core), distant)
+    mask = mix(mask, Math.max(u.coverage.value, core), distant)
     if (mask < 0.001) return 0
     const top = mix(0.45 + 0.55 * billow, 0.96, u.flatness.value)
     const profile = smooth(0, 0.09, h) * (1 - smooth(top - 0.22, top, h))
