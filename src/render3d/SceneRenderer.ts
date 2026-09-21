@@ -4210,7 +4210,12 @@ export class SceneRenderer {
         this.bodyMeshes.set(key, mesh)
       }
       const colours = mesh.geometry.getAttribute("color") as BufferAttribute
-      colours.setXYZ(0, hue[0] * arriving[0], hue[1] * arriving[1], hue[2] * arriving[2])
+      // A comet's head is not a point: its magnitude is a coma's, spread over minutes of arc at the
+      // least, and it gets no fovea's contrast — its light over the frame's pixel, not over the
+      // eye's minute (see PointSources, which divides by the latter). Drawn as a point, Ikeya-Seki's
+      // head was a lamp at the end of its tail.
+      const extended = key.startsWith("comet:") ? this.pointToPixel() : 1
+      colours.setXYZ(0, hue[0] * arriving[0] * extended, hue[1] * arriving[1] * extended, hue[2] * arriving[2] * extended)
       colours.needsUpdate = true
     }
     mesh.position.set(x, y, z)
@@ -4226,8 +4231,10 @@ export class SceneRenderer {
     if (key === "sun") {
       this.sunArriving = arriving
     }
-    // A planet, a comet's head, a nova: points, whose veil begins where the law does.
-    if (key !== "sun") this.setGlare(key, x, y, z, arriving, (visualRadius / BODY_PLACEMENT_RADIUS) * (180 / Math.PI), 1)
+    // A planet, a comet's head, a nova: points, whose veil is held over the point's own image.
+    // Nor does a coma throw a point's veil: its light is spread over the head itself.
+    if (key.startsWith("comet:")) this.disposeGlare(key)
+    else if (key !== "sun") this.setGlare(key, x, y, z, arriving, (visualRadius / BODY_PLACEMENT_RADIUS) * (180 / Math.PI), SceneRenderer.POINT_VEIL_HOLD_DEG)
     if (key === "sun") {
       this.sunVisible = true
       const celestialScale = this.celestialGroup.scale.x
@@ -4318,6 +4325,19 @@ export class SceneRenderer {
     return SceneRenderer.litScratch.setRGB(shade.r * horizon[0], shade.g * horizon[1], shade.b * horizon[2])
   }
   private static readonly litScratch = new Color()
+
+  /** What turns a point's light over the fovea's minute of arc into the same light over one pixel
+   * of this frame: the ratio of the two solid angles, the pixel's read off the field and the
+   * drawing buffer's height. */
+  private pointToPixel(): number {
+    const height = Math.max(1, this.renderer.getDrawingBufferSize(this.pointScratch).y)
+    const pixel = ((this.camera.fov * Math.PI) / 180 / height) ** 2
+    return Math.min(1, PointSources.CONE_SOLID_ANGLE / pixel)
+  }
+  private readonly pointScratch = new Vector2()
+
+  /** How far round a point its veil is held, degrees: about the point's own drawn disc. */
+  private static readonly POINT_VEIL_HOLD_DEG = 0.25
 
   /** The most a pixel is ever given, relative: under a half float's largest, which is 65 504. */
   private static readonly BRIGHTEST_RELATIVE = 60000

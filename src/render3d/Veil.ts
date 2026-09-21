@@ -55,9 +55,9 @@ export class Veil {
    * @param illuminance The source's illuminance at the eye, per channel, relative like the scene's
    *   light (see ScatteredSky.relativeScale).
    * @param sourceDeg The source's own angular radius, degrees: the veil is held inside it.
-   * @param innerDeg For a point: where the law begins, degrees. Stiles and Holladay measured it
-   *   from a degree out; nearer than that is the point's own image, which is drawn as a point
-   *   (see PointSources), and a veil there too was a planet wearing a disc of light.
+   * @param innerDeg For a point: the angle inside which the veil is held, degrees — the point's own
+   *   image, drawn for itself (see PointSources). A first version faded the veil out inside a
+   *   degree instead, and Venus wore a dark ring between its point and its glow, like a Moon.
    */
   shine(position: { x: number, y: number, z: number }, illuminance: readonly [number, number, number], sourceDeg: number, innerDeg = 0): void {
     const strength = Veil.K * Math.max(illuminance[0], illuminance[1], illuminance[2])
@@ -104,11 +104,10 @@ export class Veil {
     void main() {
       float reach = length(vOffset);
       if (reach > 1.0) discard;
-      float theta = max(degrees(atan(reach * uTanRadius)), uSourceDeg);
+      float theta = max(degrees(atan(reach * uTanRadius)), max(uSourceDeg, uInnerDeg));
       float edge = degrees(atan(uTanRadius));
       // Less the veil at the edge, so the quad ends where the veil is already at its faintest.
       float veil = max(1.0 / (theta * theta) - 1.0 / (edge * edge), 0.0);
-      if (uInnerDeg > 0.0) veil *= smoothstep(0.5 * uInnerDeg, uInnerDeg, theta);
       gl_FragColor = vec4(uColor * veil, 1.0);
     }
   `

@@ -98,6 +98,8 @@ export class BodySystem {
   private readonly down = new Vector3()
   /** The frame of the last `set` — what turns the scene's coordinates back into the bodies' own. */
   private frame?: BodyFrame
+  /** The last instant set, to set again when a model arrives. */
+  private lastSet?: [BodyState[], BodyFrame, number, LuminanceDisplay | undefined, readonly string[]]
 
   /**
    * @param sceneUnitsPerLux What a lux of illuminance is in this scene's own light units — how the
@@ -123,6 +125,7 @@ export class BodySystem {
    */
   set(states: BodyState[], frame: BodyFrame, seconds = 0, display?: LuminanceDisplay, ids: readonly string[] = states.map(state => state.id)): void {
     this.frame = frame
+    this.lastSet = [states, frame, seconds, display, ids]
     const seen = new Set<string>()
     for (const state of states) {
       seen.add(state.id)
@@ -493,6 +496,10 @@ export class BodySystem {
         entry.material = undefined
         entry.glowing = BodySystem.glowingOf(loaded.scene)
       }
+      // The instant is set again on the model that has just arrived: its exhaust node turns the
+      // flame astern and its lit parts glow, and until this the first frame kept the flame the
+      // ellipsoid had thrown down its underside — Chiles's craft a "T" until playback moved on.
+      if (this.lastSet) this.set(...this.lastSet)
       this.onModelArrived()
     }).catch(error => console.warn(`Keeping the ellipsoid for body "${state.id}":`, error))
     return { holder, signature, material }
