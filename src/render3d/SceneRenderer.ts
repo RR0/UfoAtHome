@@ -228,14 +228,17 @@ const HOVER_HIT_RADIUS_SCALE = 6
  * the opaque ground plane would occlude them anyway, so there's no point paying for the geometry. */
 const BODY_HIDE_BELOW_DEG = -4
 
-/** How much fainter a lunar display is than a solar one — the ice one and the water one alike. The
- * source's own light is what is being bent, and the Moon at its brightest is some fourteen
- * magnitudes down on the Sun — but the eye is dark adapted and the sky behind it is black, so a ring
- * or a bow is not fourteen magnitudes harder to see. A fifth is the honest middle: plainly there,
- * plainly fainter. The bow scales this by the Moon's PHASE on top (see Rainbows.moonlightShare); the
- * halo does not, because a ring round a half moon is an ordinary sight while a moonbow under one is
- * not a sight at all. */
-const MOON_DISPLAY_STRENGTH = 0.2
+/**
+ * The light a halo's or a bow's gain was set for, relative (see ScatteredSky.relativeScale): those
+ * gains were chosen in screen terms, against a daylit sky, and this turns them into light — a
+ * source giving this illuminance draws the display as it was drawn before. A tenth of the day's
+ * Sun, and the factor the eye's response steepens by near a daylit sky's brightness, together.
+ *
+ * It replaces the share a lunar display used to be given (a fifth, "the honest middle"): a lunar
+ * display is now as much fainter than a solar one as the Moon is, and the eye's adaptation to the
+ * night decides how much of it is still seen, as it does for everything else.
+ */
+const BENT_LIGHT_REFERENCE = 2
 
 /** How far above the witness the ice deck is projected, in this scene's own units. Cirrus lives
  * between six and twelve kilometres; what matters here is only that it is several times the water
@@ -601,12 +604,15 @@ const LIGHTNING_COLOR = new Color(0.82, 0.86, 1)
  * scene is already white), further falls off as the square of the distance, down to a tenth for the
  * furthest one worth hearing. */
 const LIGHTNING_FULL_LIGHT_M = 2500
-/** How much a flash at full strength adds: to the sky dome's colour, to the clouds' ambient light,
- * and to the scene's lights. Calibrated to take a storm-dark scene to a pale grey for a few
- * hundredths of a second, which is what a close flash does, and not to daylight. */
+/** How much a flash at full strength adds to the old colour-table sky dome's colour, as a factor. */
 const LIGHTNING_SKY_GAIN = 1.6
-const LIGHTNING_CLOUD_GAIN = 1.2
-const LIGHTNING_LIGHT_INTENSITY = 2.2
+/**
+ * What a flash at full strength puts on the ground, lux: a return stroke peaks at the order of a
+ * hundred million candela, and at LIGHTNING_FULL_LIGHT_M that is some fifteen lux — a hundred times
+ * a full Moon for a few hundredths of a second, which is what takes a storm-dark landscape to a
+ * pale grey, and nothing an eye adapted to daylight notices.
+ */
+const LIGHTNING_ILLUMINANCE_LUX = 15
 
 const PLANET_COLORS: Partial<Record<CelestialBody, Color>> = {
   Venus: new Color(1, 0.96, 0.85),
@@ -2114,14 +2120,15 @@ export class SceneRenderer {
           lampGroup.position.distanceTo(this.camera.position),
           // Zero for an ordinary frame (a blink stays a blink); an instant of a pose passes its own
           // length, so the lamp is INTEGRATED over it — see DecorSystem.setLights.
-          stepMs
+          stepMs,
+          this.relativeScale
         )
       }
       if (object.kind !== "streetlight" && object.kind !== "vehicle") continue
       const group = this.decorGroups.get(object.id)
       if (!group) continue
       const lit = resolveDecorLitAt(object, t)
-      DecorSystem.setLit(group, object.kind, lit)
+      DecorSystem.setLit(group, object.kind, lit, this.relativeScale)
       const light = this.streetlightLights.get(object.id)
       if (light) light.visible = lit
     }
@@ -2410,7 +2417,8 @@ export class SceneRenderer {
       this.celestialGroup.add(this.satelliteField.object)
     }
     const magnitudeLimit = visibleMagnitudeLimit(this.lastSunPosition?.altitudeDeg ?? -90, this.instrumentMagnitudeGain)
-    this.satelliteField.set(satellites, magnitudeLimit, position => this.cloudTransmission(position))
+    this.satelliteField.set(satellites, magnitudeLimit, position => this.cloudTransmission(position),
+      (position, magnitude) => this.arrivingIlluminance(position, magnitude, 1))
     this.render()
   }
 
@@ -4147,6 +4155,23 @@ export class SceneRenderer {
     this.setGlare(key, x, y, z, arriving, (SUN_MOON_VISUAL_RADIUS / BODY_PLACEMENT_RADIUS) * (180 / Math.PI))
   }
 
+  /**
+   * The light a halo or a bow bends, from its source: how much, as a share of the light the
+   * displays' gains were set for (see BENT_LIGHT_REFERENCE), and its colour through the air.
+   */
+  private bentLight(source: HorizontalPosition, magnitude: number): { scale: number, tint: [number, number, number] } {
+    const [r, g, b] = this.arrivingIlluminance(source, magnitude, 1)
+    const green = Math.max(g, 1e-30)
+    return { scale: g / BENT_LIGHT_REFERENCE, tint: [r / green, 1, b / green] }
+  }
+
+  /** A colour of what is falling as the scene draws it: its shade times the light round it — the
+   * horizon's, which is what a drop or a flake has most of around it. */
+  private static litBySky(shade: Color, horizon: readonly [number, number, number]): Color {
+    return SceneRenderer.litScratch.setRGB(shade.r * horizon[0], shade.g * horizon[1], shade.b * horizon[2])
+  }
+  private static readonly litScratch = new Color()
+
   /** The most a pixel is ever given, relative: under a half float's largest, which is 65 504. */
   private static readonly BRIGHTEST_RELATIVE = 60000
 
@@ -4298,15 +4323,15 @@ export class SceneRenderer {
     // an hour of pillar off the end of the day.
     IceHalos.deckLitUntilDeg(IceHalos.DECK_HEIGHT_M)
     const source = sun.altitudeDeg > -lit ? sun : moon
-    const strength = IceHalos.strength(ice, lower, source.altitudeDeg, lit) * (source === sun ? 1 : MOON_DISPLAY_STRENGTH)
+    const light = this.bentLight(source, source === sun ? ScatteredSky.SUN_MAGNITUDE : moon.magnitude)
+    const strength = IceHalos.strength(ice, lower, source.altitudeDeg, lit) * light.scale
     const { x, y, z } = horizontalToCartesian(source.altitudeDeg, source.azimuthDeg, 1)
-    const tint = atmosphericTint(source.altitudeDeg)
     // The very veil that is drawn, so the display is broken exactly where the sky is clear.
     this.iceHalos.update(
       { x, y, z },
       source.altitudeDeg,
       strength,
-      [tint[0], tint[1], tint[2]],
+      light.tint,
       { cover: cirrusMask?.cover ?? ice, layerHeight: cirrusMask?.layerHeight ?? CIRRUS_LAYER_HEIGHT },
       cirrusMask?.iceCrystalAlignment ?? this.weather.iceCrystalAlignment ?? DEFAULT_ICE_CRYSTAL_ALIGNMENT
     )
@@ -4340,15 +4365,14 @@ export class SceneRenderer {
     // the total cover would count a cirrus veil as a blocker, and a veil dims a bow rather than
     // preventing it.
     const blocking = this.lowerCloudCover()
-    const moonlight = MOON_DISPLAY_STRENGTH * Rainbows.moonlightShare(moon.magnitude)
-    const strength = Rainbows.strength(rain, blocking, source.altitudeDeg) * (bySun ? 1 : moonlight)
+    const light = this.bentLight(source, bySun ? ScatteredSky.SUN_MAGNITUDE : moon.magnitude)
+    const strength = Rainbows.strength(rain, blocking, source.altitudeDeg) * light.scale
     if (strength <= 0) {
       this.rainbow.update({ x: 0, y: 1, z: 0 }, 0, [1, 1, 1], true)
       return
     }
     const { x, y, z } = horizontalToCartesian(source.altitudeDeg, source.azimuthDeg, 1)
-    const tint = atmosphericTint(source.altitudeDeg)
-    this.rainbow.update({ x, y, z }, strength, [tint[0], tint[1], tint[2]], bySun)
+    this.rainbow.update({ x, y, z }, strength, light.tint, bySun)
   }
 
   /**
@@ -4785,7 +4809,8 @@ export class SceneRenderer {
     // night (see updateCelestialLight) — Chiles-Whitted's clouds are lit by the Moon or by nothing.
     const [r, g, b] = this.cloudBeam.map(value => value / Math.PI)
     // A flash lights the deck from inside and below, evenly: an ambient term, not a direction.
-    const flash = this.lightningLevel * LIGHTNING_CLOUD_GAIN
+    // Lit from inside and below: the flash's light on a white surface, E/π.
+    const flash = (this.lightningLevel * LIGHTNING_ILLUMINANCE_LUX * this.relativeScale) / Math.PI
     const ambient = new Color(groundColor[0] + LIGHTNING_COLOR.r * flash, groundColor[1] + LIGHTNING_COLOR.g * flash, groundColor[2] + LIGHTNING_COLOR.b * flash)
     // The layered decks are not scaled by the height of the source: a cloud's side faces it, and
     // only the Earth's curve takes a low Sun from it (see LayeredCloudSystem.sunVisibility).
@@ -4902,7 +4927,7 @@ export class SceneRenderer {
       // A shared/cached procedural texture per type (see getPrecipitationTexture) — snow a soft
       // fluffy puff, hail a small bright hard-ish drop — reads as real precipitation instead of a
       // uniform flat square.
-      uColor: { value: config.color },
+      uColor: { value: config.color.clone() },
       uHazeColor: { value: new Color(...this.baseFogColor) },
       uTexture: { value: getPrecipitationTexture(type) },
       uNearFocusDistance: { value: PRECIPITATION_NEAR_FOCUS_DISTANCE_M },
@@ -4954,10 +4979,12 @@ export class SceneRenderer {
     // comment. Refreshed even when dtSeconds<=0 (the very first tick), unlike the fall/drift work
     // below, since it's cheap and shouldn't wait an extra frame.
     this.precipitationUniforms?.uHazeColor.value.setRGB(...this.baseFogColor)
-    if (dtSeconds <= 0) return
     const type = this.weather.precipitationType
     if (type === "none" || type === "rain") return
     const config = PRECIPITATION_CONFIG[type]
+    // A flake or a hailstone gives out nothing: it is the light around it, the sky's, thrown back.
+    this.precipitationUniforms?.uColor.value.copy(SceneRenderer.litBySky(config.color, this.baseFogColor))
+    if (dtSeconds <= 0) return
     const windRad = this.weather.windDirectionDeg * DEG_TO_RAD
     const driftX = Math.sin(windRad) * this.weather.windSpeed * config.driftSensitivity
     const driftZ = -Math.cos(windRad) * this.weather.windSpeed * config.driftSensitivity
@@ -5092,7 +5119,7 @@ export class SceneRenderer {
       heightM: RAIN_HEIGHT_M,
       bottomYM: RAIN_BOTTOM_Y_M,
       overallSpeed: RAIN_OVERALL_SPEED,
-      color: RAIN_COLOR,
+      color: RAIN_COLOR.clone(),
       opacity: 0.85,
       visibleCount: precipitationVisibleCount(RAIN_POOL_SIZE, this.weather.precipitationIntensity),
       speedStreak: speedStreakFactor(fallSpeedMPerS),
@@ -5144,7 +5171,7 @@ export class SceneRenderer {
       uniforms: {
         uMaxSize: { value: RAIN_SPLASH_MAX_SIZE_M },
         uScale: { value: 0.5 * this.renderer.domElement.height },
-        uColor: { value: RAIN_SPLASH_COLOR },
+        uColor: { value: RAIN_SPLASH_COLOR.clone() },
         uTexture: { value: getRainSplashTexture() }
       },
       vertexShader: RAIN_SPLASH_VERTEX_SHADER,
@@ -5225,6 +5252,10 @@ export class SceneRenderer {
     // setAstronomy tick, e.g. as a sighting's playhead moves through dusk) — cheap (one Color write),
     // so refreshed unconditionally every frame rather than only when setAstronomy itself ticks.
     rain.uniforms.uHazeColor.value.setRGB(...this.baseFogColor)
+    // A drop gives out nothing: it is the light around it, the sky's, bent and thrown back.
+    rain.uniforms.uColor.value.copy(SceneRenderer.litBySky(RAIN_COLOR, this.baseFogColor))
+    const splash = (this.rainSplashSystem?.points.material as ShaderMaterial | undefined)?.uniforms?.uColor
+    if (splash) splash.value.copy(SceneRenderer.litBySky(RAIN_SPLASH_COLOR, this.baseFogColor))
 
     const windRad = this.weather.windDirectionDeg * DEG_TO_RAD
     const driftX = Math.sin(windRad) * this.weather.windSpeed
@@ -5313,13 +5344,14 @@ export class SceneRenderer {
     this.lightningLevel = level
     if (this.scene.fog) {
       const fog = this.scene.fog as Fog
-      const k = Math.min(1, level)
       // From the air's own light, not the horizon's, which at night is far brighter than the air:
-      // a flash lights the air for an instant, and between flashes it goes back to what it was.
+      // a flash lights the air for an instant — its light scattered back, E/π — and between flashes
+      // it goes back to what it was.
+      const lit = (level * LIGHTNING_ILLUMINANCE_LUX * this.relativeScale) / Math.PI
       fog.color.setRGB(
-        this.airlight[0] + (LIGHTNING_COLOR.r - this.airlight[0]) * k,
-        this.airlight[1] + (LIGHTNING_COLOR.g - this.airlight[1]) * k,
-        this.airlight[2] + (LIGHTNING_COLOR.b - this.airlight[2]) * k
+        this.airlight[0] + LIGHTNING_COLOR.r * lit,
+        this.airlight[1] + LIGHTNING_COLOR.g * lit,
+        this.airlight[2] + LIGHTNING_COLOR.b * lit
       )
     }
     // Only a sky that IS a colour: the scattered sky is a shader computing its own radiance, and
@@ -5332,7 +5364,7 @@ export class SceneRenderer {
       skyColour.setRGB(1 + gain * LIGHTNING_COLOR.r, 1 + gain * LIGHTNING_COLOR.g, 1 + gain * LIGHTNING_COLOR.b)
     }
     if (this.lastSunPosition) this.updateCloudLighting(this.lastSunPosition, this.baseFogColor)
-    this.lightningLight.intensity = level * LIGHTNING_LIGHT_INTENSITY
+    this.lightningLight.intensity = level * LIGHTNING_ILLUMINANCE_LUX * this.relativeScale
     if (flash) {
       const { x, y, z } = horizontalToCartesian(25, flash.azimuthDeg, BODY_PLACEMENT_RADIUS)
       this.lightningLight.position.set(x, y, z)

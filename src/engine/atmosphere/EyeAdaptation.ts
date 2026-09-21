@@ -178,9 +178,10 @@ export class EyeAdaptation {
     return y / (y + 1)
   }
 
-  /** The relative luminance whose response is `response`: respond, undone. */
+  /** The relative luminance whose response is `response`: respond, undone. Held under 0.995 of
+   * the top, which is white already, so that what it gives stays well inside a half float. */
   static relativeOfResponse(response: number): number {
-    const r = Math.min(Math.max(response, 0), 0.9999)
+    const r = Math.min(Math.max(response, 0), 0.995)
     return (r / (1 - r)) ** (1 / EyeAdaptation.RESPONSE_EXPONENT)
   }
 

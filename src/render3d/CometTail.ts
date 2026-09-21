@@ -1,3 +1,4 @@
+import { EyeAdaptation } from "../engine/atmosphere/EyeAdaptation.js"
 import { AdditiveBlending, BufferAttribute, BufferGeometry, DoubleSide, Mesh, MeshBasicMaterial } from "three"
 import { horizontalToCartesian } from "./skyColors.js"
 
@@ -152,7 +153,8 @@ export class CometTail {
     this.positions[i] = point.x
     this.positions[i + 1] = point.y
     this.positions[i + 2] = point.z
-    const value = Math.max(0, Math.min(1, brightness))
+    // A share of white (see MeteorSystem.push), drawn as the light the eye shows it for.
+    const value = EyeAdaptation.relativeOfResponse(Math.max(0, Math.min(1, brightness)))
     // Blue, and for a real reason: an ion tail's light is fluorescence from carbon monoxide ions in
     // the blue, which is why it photographs blue against a dust tail's warm white.
     this.colors[i] = value * 0.55

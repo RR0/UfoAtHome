@@ -63,26 +63,25 @@ const LAMP_RADIUS_M = 0.25
 const LAMP_MIN_ANGULAR_RADIUS_RAD = 0.002
 
 /**
- * How much brighter than white a lamp of intensity 1 really is.
+ * What a declared lamp of intensity 1 gives out, candela: an aircraft's navigation light is about a
+ * hundred, and DecorLight.intensity is a ratio of peak candela — a position light some tenths of
+ * one, an anticollision beacon a few, a wingtip strobe a couple of dozen.
  *
- * A lamp is a LIGHT, and a light is not a shade of grey: an aircraft's navigation light is about a
- * hundred candela, so at a few kilometres it puts some 3e-6 lux on the lens, and spread over the
- * 1.3e-5 steradian this draws it at that is about 0.2 cd/m² against a moonless sky's 2e-4 — a
- * thousandfold, where this renderer draws that sky at roughly 0.02 of white. Twenty, then, for a
- * lamp of intensity 1, and proportionally more for a brighter one (DecorLight.intensity is a ratio
- * of peak candela: a position light is some tens, an anticollision beacon some hundreds, a wingtip
- * strobe a couple of thousand). The
- * half-float targets carry it (see EquidistantProjectionPass, which takes HalfFloatType for exactly
- * this reason: everything additive here is written in units where one means white and brighter
- * things are simply more).
- *
- * On an ordinary frame it changes nothing — the canvas clips it back to white, which is what a lamp
- * looks like. What it changes is the POSE, where a lamp crossing the frame lays its light over
- * hundreds of pixels and each of them receives a fraction of it: at white, an aircraft's trail came
- * out at a thousandth of white, i.e. invisible, which is not what the Gennevilliers photograph
- * shows.
+ * A lamp is drawn as its light spread over the disc drawn for it (see LAMP_MIN_ANGULAR_RADIUS_RAD):
+ * its intensity over that disc's area is its luminance, relative like every light in the scene. On
+ * a POSE a lamp crossing the frame lays that light over hundreds of pixels, each receiving its
+ * share — the trail an aircraft leaves in the Gennevilliers photograph — and on an ordinary frame
+ * the eye's response, which keeps a colour's hue, shows a red light red however bright it burns.
  */
-const LAMP_RADIANCE = 20
+const LAMP_CANDELA = 100
+/** A streetlamp's head: a ten-thousand-lumen road lamp, some 1 500 candela, from a globe of the
+ * lamp head's size. */
+const STREETLIGHT_HEAD_CANDELA = 1500
+const STREETLIGHT_HEAD_RADIUS_M = 0.25
+/** A car's headlamp seen off its beam, where a witness beside the road stands: a thousand candela
+ * (twenty times that straight down the beam), from a lamp of the headlight's size. */
+const HEADLIGHT_CANDELA = 1000
+const HEADLIGHT_RADIUS_M = 0.15
 
 /** `#rrggbb` to the 0-1 triple every material here takes. Falls back to white rather than throwing:
  * a lamp of an unparseable colour should still light up. */
@@ -1072,11 +1071,14 @@ export class DecorSystem {
     lights: DecorLight[] | undefined,
     t: number,
     distanceM: number,
-    stepMs = 0
+    stepMs = 0,
+    relativeScale = 1
   ): void {
     if (!lights || lights.length === 0) return
     const byId = new Map(lights.map(light => [light.id, light]))
     const scale = Math.max(1, (distanceM * LAMP_MIN_ANGULAR_RADIUS_RAD) / LAMP_RADIUS_M)
+    const radiusM = LAMP_RADIUS_M * scale
+    const luminancePerCandela = relativeScale / (Math.PI * radiusM * radiusM)
     for (const child of group.children) {
       if (!(child instanceof Mesh)) continue
       const lightId = (child.userData as DecorMeshUserData).lightId
@@ -1094,12 +1096,7 @@ export class DecorSystem {
       const material = child.material as MeshBasicMaterial
       const base = (child.userData as DecorMeshUserData).lightColor
       if (base) {
-        // Its real magnitude only where there is room for it. A pose divides a lamp's light among
-        // the hundreds of pixels it crosses, so the number that matters there is how far above
-        // white it really burns; a single frame has no such room, and multiplying there would only
-        // clip — and clipping a red navigation light channel by channel turns it YELLOW, which is
-        // a worse lie than drawing it at its own colour.
-        const emitted = stepMs > 0 ? share * LAMP_RADIANCE * (light.intensity ?? 1) : share
+        const emitted = share * LAMP_CANDELA * (light.intensity ?? 1) * luminancePerCandela
         material.color.setRGB(base[0] * emitted, base[1] * emitted, base[2] * emitted)
       }
       child.scale.setScalar(scale)
@@ -1112,8 +1109,13 @@ export class DecorSystem {
    * vehicle's two headlights always switch together) without needing to track parts individually.
    * A no-op for building/tree/witness: they have no emissive children (see addPart's own
    * `emissive` flag), so the loop below simply finds nothing to retint. */
-  static setLit(group: Group, kind: DecorKind, lit: boolean): void {
-    const color = kind === "streetlight" ? (lit ? LIT_LAMP_COLOR : UNLIT_LAMP_COLOR) : lit ? LIT_HEADLIGHT_COLOR : UNLIT_HEADLIGHT_COLOR
+  static setLit(group: Group, kind: DecorKind, lit: boolean, relativeScale = 1): void {
+    // Lit, its light over its own disc (see LAMP_CANDELA); dark, a glass that gives out nothing.
+    const [candela, radiusM, hue] = kind === "streetlight"
+      ? [STREETLIGHT_HEAD_CANDELA, STREETLIGHT_HEAD_RADIUS_M, LIT_LAMP_COLOR]
+      : [HEADLIGHT_CANDELA, HEADLIGHT_RADIUS_M, LIT_HEADLIGHT_COLOR]
+    const luminance = lit ? (candela * relativeScale) / (Math.PI * radiusM * radiusM) : 0
+    const color: RgbColor = [hue[0] * luminance, hue[1] * luminance, hue[2] * luminance]
     // Traversed, not iterated over the direct children: a headlight sits inside the body group the
     // stated size scales (see build), a rung below where it used to be.
     group.traverse(child => {

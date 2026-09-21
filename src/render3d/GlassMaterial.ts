@@ -14,14 +14,14 @@ import { EyeAdaptation } from "../engine/atmosphere/EyeAdaptation.js"
  * stands round the glass at this very instant (ReflectionProbe: the sky, its clouds, the Sun and the
  * Moon, the stars, a lamp, a car's lights, the decor), in the reflected direction.
  *
- * THROUGH THE EYE, not by a product. The scene is on the screen as the eye's response to it
- * (EyeAdaptation), which is steeply compressive, and a reflection is a luminance times R, not a
- * response times R: a street lamp that the night-adapted eye sees at the top of its range still sees
- * its eight-per-cent reflection in a windscreen at nearly the top of it, where 8 % of the lamp's
- * pixel would have been a dim grey smudge — and a reflected lamp is exactly what a windscreen
- * misidentification is made of. Taking a response r back to its luminance, multiplying by R and
- * responding again comes out, whatever the eye is adapted to, as Rⁿr / (Rⁿr + 1 − r), n the
- * response's exponent; that is what is applied, to the luminance of what is mirrored, its colour kept.
+ * AS LIGHT, and the eye after. The scene is drawn as light and the eye's response applied once to
+ * the whole frame (see FINISH_GLSL), so a reflection is simply the light mirrored times R — and the
+ * response, steeply compressive, does the rest: a street lamp that the night-adapted eye sees at the
+ * top of its range still sees its eight-per-cent reflection in a windscreen at nearly the top of it,
+ * where 8 % of the lamp's pixel would have been a dim grey smudge. A reflected lamp is exactly what a
+ * windscreen misidentification is made of. (Before the scene was drawn as light, the shader had to
+ * take each response back to its luminance and respond again; reflectedResponse keeps that
+ * arithmetic, which is what the frame's last pass now does.)
  *
  * WHAT IT DOES NOT, and why that is right or said. A thin wall shifts what is behind it by a
  * fraction of its own thickness: seen through a cupola a few millimetres thick, a cloud does not
@@ -42,8 +42,7 @@ export class GlassMaterial extends ShaderMaterial {
       uniforms: {
         uSurroundings: { value: null },
         uIndex: { value: indexOfRefraction },
-        uAbsorption: { value: GlassMaterial.ABSORPTION },
-        uResponse: { value: EyeAdaptation.RESPONSE_EXPONENT }
+        uAbsorption: { value: GlassMaterial.ABSORPTION }
       },
       vertexShader: `
         varying vec3 vWorldPosition;
@@ -62,7 +61,6 @@ export class GlassMaterial extends ShaderMaterial {
         uniform samplerCube uSurroundings;
         uniform float uIndex;
         uniform float uAbsorption;
-        uniform float uResponse;
         varying vec3 vWorldPosition;
         varying vec3 vWorldNormal;
 
@@ -83,14 +81,7 @@ export class GlassMaterial extends ShaderMaterial {
           float once = face(cosIn, uIndex);
           float wall = 2.0 * once / (1.0 + once);
           vec3 around = textureCube(uSurroundings, reflect(view, normal)).rgb;
-          // Through the eye's response rather than times it: see the class comment. Above the top
-          // of the range (a lamp is drawn brighter than white) it is as bright as a response gets.
-          float shown = dot(around, vec3(0.2126, 0.7152, 0.0722));
-          float response = clamp(shown, 1e-5, 0.999);
-          float dimmed = pow(wall, uResponse) * response;
-          float reflected = dimmed / (dimmed + 1.0 - response);
-          vec3 colour = shown > 1e-5 ? around / shown : vec3(0.0);
-          gl_FragColor = vec4(colour * reflected, wall + (1.0 - wall) * uAbsorption);
+          gl_FragColor = vec4(around * wall, wall + (1.0 - wall) * uAbsorption);
         }
       `,
       transparent: true,
@@ -116,10 +107,9 @@ export class GlassMaterial extends ShaderMaterial {
   }
 
   /** What an eye is shown of a reflection, from what it is shown of the thing reflected (a response,
-   * 0 to 1) and the share reflected — the shader's own arithmetic, for checking it. */
+   * 0 to 1) and the share reflected: the light behind that response, times the share, responded to
+   * — what the frame's last pass makes of the shader's product. */
   static reflectedResponse(response: number, share: number): number {
-    const r = Math.min(Math.max(response, 1e-5), 0.999)
-    const dimmed = share ** EyeAdaptation.RESPONSE_EXPONENT * r
-    return dimmed / (dimmed + 1 - r)
+    return EyeAdaptation.respond(share * EyeAdaptation.relativeOfResponse(Math.max(response, 1e-5)))
   }
 }

@@ -29,6 +29,8 @@ export class LightningBolt {
   static readonly CORE_WIDTH_DEG = 0.06
   static readonly GLOW_WIDTH_DEG = 0.5
   private static readonly SEGMENTS = 28
+  /** The channel's light, relative: past where the eye's response is white. */
+  private static readonly CORE_RELATIVE = 1000
 
   constructor(radius: number) {
     this.radius = radius
@@ -50,8 +52,13 @@ export class LightningBolt {
     }
     const key = `${flash.channelSeed}:${Math.round(cloudBaseM)}`
     if (key !== this.flashKey) this.build(flash, cloudBaseM, key)
-    this.core.opacity = Math.min(1, brightness * 1.4)
-    this.glow.opacity = brightness * 0.35
+    // A lightning channel is some ten million candela per square metre, beyond anything an eye
+    // adapted to a storm shows as other than white: drawn as a light that far up the response,
+    // and its glow a tenth of it.
+    this.core.color.setHex(0xeef2ff).multiplyScalar(LightningBolt.CORE_RELATIVE * Math.min(1, brightness * 1.4))
+    this.glow.color.setHex(0x9fb4ff).multiplyScalar(0.1 * LightningBolt.CORE_RELATIVE * brightness * 0.35)
+    this.core.opacity = 1
+    this.glow.opacity = 1
     this.object.visible = true
   }
 

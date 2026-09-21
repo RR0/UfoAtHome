@@ -1,10 +1,7 @@
 import { BufferAttribute, BufferGeometry, Group, Points, PointsMaterial, Vector3 } from "three"
 import type { HorizontalPosition } from "../engine/astronomy/CelestialPositions.js"
-import { RoundPoints } from "./RoundPoints.js"
-import {
-  atmosphericTint, horizontalToCartesian, magnitudeToBrightness, STAR_BRIGHTNESS_TIERS, starBrightnessTierIndex,
-  starColorScale
-} from "./skyColors.js"
+import { PointSources } from "./PointSources.js"
+import { horizontalToCartesian, magnitudeToBrightness, STAR_BRIGHTNESS_TIERS, starBrightnessTierIndex } from "./skyColors.js"
 
 /**
  * One satellite as the renderer is told about it: where, how bright, and a name for the pointer.
@@ -43,9 +40,8 @@ export class SatelliteField {
     this.radius = radius
     this.object.name = "satellites"
     this.tiers = STAR_BRIGHTNESS_TIERS.map(tier => {
-      const material = new PointsMaterial({ vertexColors: true, size: tier.size, sizeAttenuation: false, fog: false })
-      RoundPoints.apply(material)
-      const points = new Points(new BufferGeometry(), material)
+      const points = new Points(new BufferGeometry(), PointSources.material(tier.size))
+      PointSources.track(points)
       // Positions change every frame and the bounds with them: a stale bounding sphere would cull a
       // satellite that has moved out of it.
       points.frustumCulled = false
@@ -60,8 +56,12 @@ export class SatelliteField {
    * `transmission` is how much light the clouds let through in a direction, the same dimming every
    * body in this sky already takes; it is applied to the magnitude before the limit is, so a
    * satellite behind a deck is not drawn at all rather than drawn faint.
+   *
+   * `light` is what arrives at the eye of a light of that magnitude in that direction, relative, per
+   * channel (see PointSources): the satellite is drawn from it.
    */
-  set(satellites: ReadonlyArray<SceneSatellite>, magnitudeLimit: number, transmission: (position: HorizontalPosition) => number): void {
+  set(satellites: ReadonlyArray<SceneSatellite>, magnitudeLimit: number, transmission: (position: HorizontalPosition) => number,
+    light: (position: HorizontalPosition, magnitude: number) => readonly [number, number, number]): void {
     const byTier: { x: number; y: number; z: number; r: number; g: number; b: number }[][] = this.tiers.map(() => [])
     this.drawn = []
     for (const satellite of satellites) {
@@ -72,9 +72,8 @@ export class SatelliteField {
       const brightness = magnitudeToBrightness(magnitude, magnitudeLimit)
       const tier = starBrightnessTierIndex(brightness)
       const { x, y, z } = horizontalToCartesian(satellite.position.altitudeDeg, satellite.position.azimuthDeg, this.radius)
-      const tint = atmosphericTint(satellite.position.altitudeDeg)
-      const scale = starColorScale(brightness)
-      byTier[tier].push({ x, y, z, r: scale * tint[0], g: scale * tint[1], b: scale * tint[2] })
+      const [r, g, b] = light(satellite.position, magnitude)
+      byTier[tier].push({ x, y, z, r, g, b })
       this.drawn.push({ satellite, direction: new Vector3(x, y, z).normalize() })
     }
     this.tiers.forEach((points, index) => {

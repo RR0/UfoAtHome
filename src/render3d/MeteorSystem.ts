@@ -1,3 +1,4 @@
+import { EyeAdaptation } from "../engine/atmosphere/EyeAdaptation.js"
 import { AdditiveBlending, BufferAttribute, BufferGeometry, DoubleSide, Mesh, MeshBasicMaterial } from "three"
 import { MeteorFall } from "../engine/astronomy/MeteorFall.js"
 import type { Meteor } from "../engine/astronomy/MeteorFall.js"
@@ -214,7 +215,9 @@ export class MeteorSystem {
     this.positions[i] = point.x
     this.positions[i + 1] = point.y
     this.positions[i + 2] = point.z
-    const value = Math.max(0, Math.min(1, brightness))
+    // Its brightness is a share of white, chosen for a streak on a dark sky: drawn as the light the
+    // eye would show that share of white for, which the frame's last pass turns back into it.
+    const value = EyeAdaptation.relativeOfResponse(Math.max(0, Math.min(1, brightness)))
     // Faintly blue-white, which is what most of them are: the colours that mark a fireball's own
     // chemistry are not something an averaged rate can claim.
     this.colors[i] = value * 0.9
