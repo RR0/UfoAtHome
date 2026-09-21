@@ -1,5 +1,5 @@
 import {
-  Box3, BoxGeometry, BufferGeometry, Color, ConeGeometry, CylinderGeometry, Group, LatheGeometry, Mesh,
+  AnimationAction, AnimationMixer, LoopOnce, Box3, BoxGeometry, BufferGeometry, Color, ConeGeometry, CylinderGeometry, Group, LatheGeometry, Mesh,
   MeshPhysicalMaterial, MeshStandardMaterial, Object3D, Quaternion, SphereGeometry, TorusGeometry, Vector2, Vector3
 } from "three"
 import type { BodyState } from "../engine/interpretation/BodyPlacement.js"
@@ -79,7 +79,7 @@ export interface BodyFrame {
  */
 export class BodySystem {
   readonly group = new Group()
-  private readonly built = new Map<string, { holder: Group, signature: string, material?: MeshStandardMaterial, glowing?: Glow[] }>()
+  private readonly built = new Map<string, { holder: Group, signature: string, material?: MeshStandardMaterial, glowing?: Glow[], motions?: Map<string, AnimationAction> }>()
   /** Bumped whenever the set of bodies is replaced, so a model arriving for a previous one is
    * dropped. */
   private token = 0
@@ -144,6 +144,7 @@ export class BodySystem {
       holder.scale.set(state.sizeM.widthM, state.sizeM.heightM, state.sizeM.lengthM)
       if (material) BodySystem.paint(material, state, display)
       if (glowing) BodySystem.light(glowing, state, display)
+      if (entry.motions) BodySystem.move(entry.motions, state.motions ?? {})
       this.shine(state, holder, glowing, display, frame.eye)
       this.throwFlame(state, holder, seconds, display, frame.eye)
     }
@@ -495,6 +496,7 @@ export class BodySystem {
       if (entry) {
         entry.material = undefined
         entry.glowing = BodySystem.glowingOf(loaded.scene)
+        entry.motions = BodySystem.motionsOf(loaded.scene)
       }
       // The instant is set again on the model that has just arrived: its exhaust node turns the
       // flame astern and its lit parts glow, and until this the first frame kept the flame the
@@ -566,6 +568,44 @@ export class BodySystem {
     }
     const rgb = BodySystem.shown(hue, luminanceCdM2, display)
     material.emissive.setRGB(rgb[0], rgb[1], rgb[2])
+  }
+
+  /**
+   * The movements a model carries (its glTF animations), each ready to be put at any point along
+   * itself: held there rather than played, since the recording's clock and not the renderer's says
+   * where it is (see move).
+   */
+  private static motionsOf(scene: Object3D): Map<string, AnimationAction> | undefined {
+    if (scene.animations.length === 0) return undefined
+    const mixer = new AnimationMixer(scene)
+    const actions = new Map<string, AnimationAction>()
+    for (const clip of scene.animations) {
+      const action = mixer.clipAction(clip)
+      // Once and held at its end: set to the end of a clip that repeats, a movement would wrap
+      // round to its start (see move, which does the repeating itself).
+      action.setLoop(LoopOnce, 1)
+      action.clampWhenFinished = true
+      action.play()
+      action.paused = true
+      actions.set(clip.name, action)
+    }
+    return actions
+  }
+
+  /**
+   * Puts each movement where the track says (see BodyKeyframe.motions): a progress of 0 to 1 along
+   * it, and on past 1 for one that repeats — whose whole turns are its end, not its start again.
+   */
+  private static move(actions: Map<string, AnimationAction>, motions: Record<string, number>): void {
+    let mixer: AnimationMixer | undefined
+    for (const [name, action] of actions) {
+      const progress = Math.max(0, motions[name] ?? 0)
+      const along = progress - Math.floor(progress)
+      const share = progress > 0 && along === 0 ? 1 : along
+      action.time = share * action.getClip().duration
+      mixer = action.getMixer()
+    }
+    mixer?.update(0)
   }
 
   /** See Photometry.shown — kept here under its old name for the callers of this class. */

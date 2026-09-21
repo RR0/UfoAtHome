@@ -20,7 +20,9 @@ export async function loadGltfScene(url: string): Promise<Object3D> {
   return new Promise<Object3D>((resolve, reject) => {
     loader.load(
       url,
-      gltf => resolve(gltf.scene),
+      // The file's movements travel with its scene, on Object3D's own `animations`: a body plays
+      // them at the times its track states (see BodyKeyframe.motions).
+      gltf => resolve(Object.assign(gltf.scene, { animations: gltf.animations })),
       undefined,
       // GLTFLoader reports failures as an ErrorEvent or an Error depending on where they happened
       // (network vs parse), and rejecting with a bare one of those loses the address entirely —

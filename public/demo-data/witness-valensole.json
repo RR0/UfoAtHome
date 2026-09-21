@@ -25,8 +25,8 @@
   "title": "Maurice Masse"
  },
  "description": {
-  "fr": "Vue de Maurice Masse depuis sa sortie de derrière le clapier (engin à 90 m) jusqu'au départ. Il s'approche en longeant la vigne jusqu'à 6 m, est immobilisé, puis l'engin se soulève, ses 6 pieds se mettent à tourner et il part en oblique — que le témoin suit des yeux sur quelques dizaines de mètres avant qu'il ne disparaisse « pire qu'un éclair ». Dimensions rapportées : 3,5 m de large pour 2,5 m de haut, « du volume d'une Renault Dauphine », de couleur neutre et mate — jamais décrit comme lumineux. Le témoignage est joué en 3D : la machine est un modèle bâti d'après l'énoncé (coque ovale de 3,49 m, coupole transparente, six pieds obliques et le pivot central qui a percé le trou), sa distance déduite de sa largeur — 90 m au premier instant, 6,5 m quand il s'arrête —, et les 2 êtres d'environ 1 m se tiennent à côté d'elle jusqu'à ce qu'ils y remontent. Ce qui est comparé à l'ovale qu'il a dessiné est la coque seule, ni les pieds ni la coupole, qu'il a dessinés à part. Le lieu figuré est celui du mémorial, en bordure de la D6A : le point de poser exact est en retrait, dans des parcelles privées toujours cultivées.",
-  "en": "Maurice Masse's view, from coming out from behind the rabbit hutch (the craft 90 m off) to the departure. He walks up along the vine to within 6 m, is held motionless, then the craft lifts, its 6 legs begin to turn and it goes off at a slant — which the witness follows with his eyes over a few tens of metres before it vanishes “worse than a flash of lightning”. Reported dimensions: 3.5 m wide by 2.5 m high, “the size of a Renault Dauphine”, a neutral matte colour — never described as luminous. The testimony is played in 3D: the machine is a model built to the account (an oval hull 3.49 m across, a transparent cupola, six slanting legs and the central pivot that bored the hole), its distance read off its width — 90 m at the first instant, 6.5 m where he stops — and the 2 beings of about 1 m stand beside it until they climb back in. What is measured against the oval he drew is the hull alone, neither the legs nor the cupola, which he drew separately. The place shown is the memorial's, at the edge of the D6A: the exact landing spot is set back, in private parcels still under cultivation."
+  "fr": "Vue de Maurice Masse depuis sa sortie de derrière le clapier (engin à 90 m) jusqu'au départ. Il s'approche en longeant la vigne jusqu'à 6 m, est immobilisé, puis le tube central rentre dans l'engin, ses 6 pieds se mettent à tourner, il s'élève et part en oblique — que le témoin suit des yeux sur quelques dizaines de mètres avant qu'il ne disparaisse « pire qu'un éclair ». Dimensions rapportées : 3,5 m de large pour 2,5 m de haut, « du volume d'une Renault Dauphine », de couleur neutre et mate — jamais décrit comme lumineux. Le témoignage est joué en 3D : la machine est un modèle bâti d'après l'énoncé (coque ovale de 3,49 m, coupole transparente, six pieds obliques et le pivot central qui a percé le trou), sa distance déduite de sa largeur — 90 m au premier instant, 6,5 m quand il s'arrête —, et les 2 êtres d'environ 1 m se tiennent à côté d'elle jusqu'à ce qu'ils y remontent. Ce qui est comparé à l'ovale qu'il a dessiné est la coque seule, ni les pieds ni la coupole, qu'il a dessinés à part. Le lieu figuré est celui du mémorial, en bordure de la D6A : le point de poser exact est en retrait, dans des parcelles privées toujours cultivées.",
+  "en": "Maurice Masse's view, from coming out from behind the rabbit hutch (the craft 90 m off) to the departure. He walks up along the vine to within 6 m, is held motionless, then the central tube is drawn back into the craft, its 6 legs begin to turn, it rises and goes off at a slant — which the witness follows with his eyes over a few tens of metres before it vanishes “worse than a flash of lightning”. Reported dimensions: 3.5 m wide by 2.5 m high, “the size of a Renault Dauphine”, a neutral matte colour — never described as luminous. The testimony is played in 3D: the machine is a model built to the account (an oval hull 3.49 m across, a transparent cupola, six slanting legs and the central pivot that bored the hole), its distance read off its width — 90 m at the first instant, 6.5 m where he stops — and the 2 beings of about 1 m stand beside it until they climb back in. What is measured against the oval he drew is the hull alone, neither the legs nor the cupola, which he drew separately. The place shown is the memorial's, at the edge of the D6A: the exact landing spot is set back, in private parcels still under cultivation."
  },
  "tags": [
   "RR3",
@@ -5805,10 +5805,26 @@
        }
       },
       {
+       "t": 246000,
+       "motions": {
+        "pivot-retract": 0
+       }
+      },
+      {
+       "t": 248000,
+       "motions": {
+        "pivot-retract": 1,
+        "legs-turn": 0
+       }
+      },
+      {
        "t": 250000,
        "eastM": 0,
        "northM": -89.9,
-       "onGround": true
+       "onGround": true,
+       "motions": {
+        "legs-turn": 1
+       }
       },
       {
        "t": 254000,
@@ -5838,7 +5854,10 @@
        "t": 262000,
        "azimuthDeg": 255.3,
        "altitudeDeg": 38.61,
-       "distanceM": 38.9
+       "distanceM": 38.9,
+       "motions": {
+        "legs-turn": 7
+       }
       },
       {
        "t": 262500,

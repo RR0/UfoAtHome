@@ -4,7 +4,8 @@
  *
  * By hand because three's own exporter needs a browser's FileReader, and a static model needs
  * nothing it offers. One buffer, embedded: meshes of positions, normals and indices, their
- * materials, and nodes.
+ * materials, nodes — some of them groups of others — and the movements of those nodes, which glTF
+ * calls animations (see BodyKeyframe.motions for how a recording plays them).
  */
 import type { BufferGeometry } from "three"
 
@@ -13,6 +14,16 @@ export interface Part {
   name: string
   geometry: BufferGeometry
   material: number
+}
+
+/** One moving property of one node, keyframed: glTF's channel and sampler together. */
+export interface GltfChannel {
+  node: number
+  path: "translation" | "rotation" | "scale"
+  /** Seconds. */
+  times: number[]
+  /** Three numbers per time for a translation or a scale, four (a quaternion) for a rotation. */
+  values: number[]
 }
 
 export interface GltfMaterial {
@@ -37,12 +48,16 @@ export class GltfWriter {
   private readonly bufferViews: object[] = []
   private readonly accessors: object[] = []
   private readonly meshes: object[] = []
-  private readonly nodes: object[] = []
+  private readonly nodes: { name: string, children?: number[], [key: string]: unknown }[] = []
+  /** Nodes that are some other node's child, and so not roots of the scene. */
+  private readonly children = new Set<number>()
+  private readonly animations: object[] = []
 
   constructor(private readonly materials: GltfMaterial[]) {
   }
 
-  addMesh(part: Part): void {
+  /** A mesh, under `parent` if given. Returns its node. */
+  addMesh(part: Part, parent?: number): number {
     const geometry = part.geometry
     const position = geometry.getAttribute("position")
     const normal = geometry.getAttribute("normal")
@@ -62,6 +77,37 @@ export class GltfWriter {
     const indicesAccessor = this.addAccessor(indices, 34963, 5125, "SCALAR", index.count)
     this.meshes.push({ name: part.name, primitives: [{ attributes: { POSITION, NORMAL }, indices: indicesAccessor, material: part.material }] })
     this.nodes.push({ name: part.name, mesh: this.meshes.length - 1 })
+    return this.attach(this.nodes.length - 1, parent)
+  }
+
+  /** A node that holds others, so that they move as one. Returns it. */
+  addGroup(name: string, translation: [number, number, number] = [0, 0, 0], parent?: number): number {
+    this.nodes.push({ name, translation })
+    return this.attach(this.nodes.length - 1, parent)
+  }
+
+  /** A movement, by the name a recording calls it by: its nodes' properties over its own seconds. */
+  addAnimation(name: string, channels: GltfChannel[]): void {
+    const samplers: object[] = []
+    const targets: object[] = []
+    for (const channel of channels) {
+      const input = this.addAccessor(new Float32Array(channel.times), undefined, 5126, "SCALAR", channel.times.length,
+        { min: [Math.min(...channel.times)], max: [Math.max(...channel.times)] })
+      const type = channel.path === "rotation" ? "VEC4" : "VEC3"
+      const output = this.addAccessor(new Float32Array(channel.values), undefined, 5126, type, channel.times.length)
+      samplers.push({ input, output, interpolation: "LINEAR" })
+      targets.push({ sampler: samplers.length - 1, target: { node: channel.node, path: channel.path } })
+    }
+    this.animations.push({ name, channels: targets, samplers })
+  }
+
+  private attach(node: number, parent?: number): number {
+    if (parent !== undefined) {
+      const holder = this.nodes[parent]
+      holder.children = [...(holder.children ?? []), node]
+      this.children.add(node)
+    }
+    return node
   }
 
   /**
@@ -81,8 +127,9 @@ export class GltfWriter {
       asset: { version: "2.0", generator },
       ...(extensionsUsed.length > 0 ? { extensionsUsed } : {}),
       scene: 0,
-      scenes: [{ nodes: this.nodes.map((_, index) => index) }],
+      scenes: [{ nodes: this.nodes.map((_, index) => index).filter(index => !this.children.has(index)) }],
       nodes: this.nodes,
+      ...(this.animations.length > 0 ? { animations: this.animations } : {}),
       meshes: this.meshes,
       materials: this.materials,
       accessors: this.accessors,
@@ -104,7 +151,7 @@ export class GltfWriter {
       .map(c => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4))
   }
 
-  private addAccessor(data: Float32Array | Uint32Array, target: number, componentType: number, type: string, count: number, bounds: object = {}): number {
+  private addAccessor(data: Float32Array | Uint32Array, target: number | undefined, componentType: number, type: string, count: number, bounds: object = {}): number {
     const bytes = Buffer.from(data.buffer, data.byteOffset, data.byteLength)
     const offset = this.byteLength
     this.chunks.push(bytes)
@@ -115,7 +162,7 @@ export class GltfWriter {
       this.chunks.push(Buffer.alloc(padding))
       this.byteLength += padding
     }
-    this.bufferViews.push({ buffer: 0, byteOffset: offset, byteLength: bytes.length, target })
+    this.bufferViews.push(target === undefined ? { buffer: 0, byteOffset: offset, byteLength: bytes.length } : { buffer: 0, byteOffset: offset, byteLength: bytes.length, target })
     this.accessors.push({ bufferView: this.bufferViews.length - 1, componentType, count, type, ...bounds })
     return this.accessors.length - 1
   }
@@ -124,7 +171,8 @@ export class GltfWriter {
 /** What a builder writes out: the file's size along each axis, for the catalogue entry. */
 export class GltfBounds {
   static sizeOf(gltf: object): number[] {
-    const accessors = (gltf as { accessors: { min?: number[], max?: number[] }[] }).accessors.filter(a => a.min && a.max)
+    // Positions only: an animation's times carry bounds of their own, of one number.
+    const accessors = (gltf as { accessors: { min?: number[], max?: number[] }[] }).accessors.filter(a => a.min?.length === 3 && a.max?.length === 3)
     return [0, 1, 2].map(axis => Math.max(...accessors.map(a => a.max![axis])) - Math.min(...accessors.map(a => a.min![axis])))
   }
 }

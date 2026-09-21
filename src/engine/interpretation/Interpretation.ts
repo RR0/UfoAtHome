@@ -156,6 +156,14 @@ export interface BodyKeyframe {
   appearance?: BodyAppearance
   /** A flame coming out of it, from here on — see BodyFlame. `luminanceCdM2: 0` puts it out. */
   flame?: BodyFlame
+  /**
+   * How far along each of its model's own movements it is, by the movement's name in the model
+   * (a glTF animation): 0 at its start, 1 at its end, and on past 1 for one that repeats — a turn
+   * made three times is 3. The model says WHAT moves and how (a pivot drawn up into the hull, a set
+   * of legs turning); the track says when, and how far: blended between two keyframes that state
+   * it, held at the last one that did.
+   */
+  motions?: Record<string, number>
 }
 
 /**

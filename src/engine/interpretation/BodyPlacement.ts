@@ -37,6 +37,9 @@ export interface BodyState {
   appearance: Required<BodyAppearance>
   /** The flame it is throwing at this instant, if any is lit. */
   flame?: BodyFlame
+  /** How far along each of its model's movements it is — see BodyKeyframe.motions. None stated,
+   * none played: the model stands as it was built. */
+  motions?: Record<string, number>
   /** Whether it throws one at any instant at all — what lets a renderer ready the light once rather
    * than add and remove it as the flame comes and goes (see FlameEffect). */
   throwsFlame: boolean
@@ -90,7 +93,38 @@ export class BodyPlacement {
    * @param eyeAt Where the witness's eye is at an instant, in the same frame — see eyeOf.
    */
   constructor(private readonly body: BodyJson, private readonly ground: Ground, eyeAt: (t: number) => (LocalPoint & { headingDeg?: number }) | undefined) {
-    this.keys = this.place([...body.track].sort((a, b) => a.t - b.t), eyeAt)
+    const track = [...body.track].sort((a, b) => a.t - b.t)
+    this.keys = this.place(track, eyeAt)
+    // Each movement from the keyframes that state IT: one stated at 248 s and again at 262 s turns
+    // all the way between, whatever keyframes moved the body in the meantime.
+    for (const key of track) {
+      for (const [name, progress] of Object.entries(key.motions ?? {})) {
+        const stated = this.motionKeys.get(name) ?? []
+        stated.push({ t: key.t, progress })
+        this.motionKeys.set(name, stated)
+      }
+    }
+  }
+
+  private readonly motionKeys = new Map<string, { t: number, progress: number }[]>()
+
+  /** Every movement at `t`: blended between the keyframes that state it, held after the last,
+   * nought before the first. */
+  private motionsAt(t: number): Record<string, number> {
+    const motions: Record<string, number> = {}
+    for (const [name, stated] of this.motionKeys) {
+      let index = stated.length - 1
+      while (index >= 0 && stated[index].t > t) index--
+      if (index < 0) {
+        motions[name] = 0
+        continue
+      }
+      const from = stated[index]
+      const to = stated[Math.min(index + 1, stated.length - 1)]
+      const fraction = to === from || to.t === from.t ? 0 : Math.min(1, (t - from.t) / (to.t - from.t))
+      motions[name] = BodyPlacement.lerp(from.progress, to.progress, fraction)
+    }
+    return motions
   }
 
   /**
@@ -203,6 +237,7 @@ export class BodyPlacement {
         luminanceCdM2: BodyPlacement.lerp(from.appearance.luminanceCdM2, to.appearance.luminanceCdM2, fraction)
       },
       flame: BodyPlacement.flameBetween(from.flame, to.flame, fraction),
+      motions: this.motionsAt(t),
       throwsFlame: this.body.track.some(key => key.flame !== undefined && key.flame.luminanceCdM2 > 0)
     }
   }

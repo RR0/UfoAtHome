@@ -16,6 +16,25 @@ describe("BodyPlacement", () => {
     expect(placement.at(0)).toMatchObject({ eastM: 10, northM: 20, upM: 1 })
   })
 
+  it("plays its model's movements where the track says: blended, held, and at nought before stated", () => {
+    // Valensole's departure: the pivot drawn up, then the legs turning, the craft still on the ground.
+    const placement = new BodyPlacement(craft([
+      { t: 0, eastM: 0, northM: 90, onGround: true },
+      { t: 246000, motions: { "pivot-retract": 0 } },
+      { t: 248000, motions: { "pivot-retract": 1, "legs-turn": 0 } },
+      { t: 250000, motions: { "legs-turn": 1 } },
+      // A keyframe that moves the body says nothing about its movements, which go on turning.
+      { t: 254000, eastM: 0, northM: 80, altitudeAboveGroundM: 5 },
+      { t: 262000, motions: { "legs-turn": 7 } }
+    ]), flat, eyeAtOrigin(flat))
+    expect(placement.at(100000)?.motions).toEqual({ "pivot-retract": 0, "legs-turn": 0 })
+    expect(placement.at(247000)?.motions?.["pivot-retract"]).toBeCloseTo(0.5, 9)
+    expect(placement.at(249000)?.motions).toMatchObject({ "pivot-retract": 1, "legs-turn": 0.5 })
+    expect(placement.at(256000)?.motions?.["legs-turn"]).toBeCloseTo(4, 9)
+    // A keyframe that states only movements leaves the body where it stood.
+    expect(placement.at(247000)?.northM).toBe(90)
+  })
+
   it("does not exist before its first keyframe, and stays as its last one left it", () => {
     const placement = new BodyPlacement(craft([{ t: 1000, eastM: 0, northM: 5, onGround: true }]), flat, eyeAtOrigin(flat))
     expect(placement.at(999)).toBeUndefined()

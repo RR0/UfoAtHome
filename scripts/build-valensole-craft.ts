@@ -16,9 +16,15 @@
  *   therefore a shallow cap, 0.32 m of it, and that is what is built. Its glass is ASSUMED to be
  *   glass, thin and clear, of index 1.5: he said he saw through it, not what it was made of.
  * - Six legs slanting outwards from under the hull, and a central pivot — the one that bored the
- *   hole found in the field and turned on itself as the machine left. The pivot is 0.18 m across,
- *   the width of that hole; where the six feet stood was never surveyed, so they are set on a
- *   circle 3.2 m across, inside the hull's own width, which is ASSUMED.
+ *   hole found in the field. The pivot is 0.18 m across, the width of that hole; where the six feet
+ *   stood was never surveyed, so they are set on a circle 3.2 m across, inside the hull's own width,
+ *   which is ASSUMED.
+ * - Two MOVEMENTS, as he told the departure: the central tube drawn up into the machine first
+ *   ("pivot-retract", from the ground to inside the hull), then the six legs turning
+ *   ("legs-turn", one full turn of the six together about the machine's upright axis) before it
+ *   rose. That the legs turn as one set about that axis, and which way, is ASSUMED: he said they
+ *   turned, not about what. The recording says when each happens and how far (see
+ *   BodyKeyframe.motions); the model only says what moves.
  * - "A neutral matte colour, never described as luminous": no emission, a rough surface, the grey
  *   the recording itself draws it in.
  * - The hull is a node named "hull", which is what the oval he drew is measured against (see
@@ -64,13 +70,24 @@ class ValensoleCraft {
     GltfWriter.material("legs", "#8d8779", 0.1, 0.7)
   ]
 
-  parts(): Part[] {
-    return [
-      { name: "hull", geometry: this.hull(), material: 0 },
-      { name: "cupola", geometry: this.cupola(), material: 1 },
-      { name: "pivot", geometry: this.pivot(), material: 2 },
-      ...this.legs()
-    ]
+  /** How far the pivot is drawn up: its own length, from the ground to the hull's underside. */
+  static readonly PIVOT_LENGTH_M = ValensoleCraft.HULL_CENTRE_M - ValensoleCraft.HULL_HALF_HEIGHT_M
+
+  /** Writes the machine: the hull and cupola, the pivot, and the legs under one node that turns. */
+  write(writer: GltfWriter): void {
+    writer.addMesh({ name: "hull", geometry: this.hull(), material: 0 })
+    writer.addMesh({ name: "cupola", geometry: this.cupola(), material: 1 })
+    const pivot = writer.addMesh({ name: "pivot", geometry: this.pivot(), material: 2 })
+    const legs = writer.addGroup("legs")
+    for (const part of this.legs()) writer.addMesh(part, legs)
+    writer.addAnimation("pivot-retract", [
+      { node: pivot, path: "translation", times: [0, 1], values: [0, 0, 0, 0, ValensoleCraft.PIVOT_LENGTH_M, 0] }
+    ])
+    // A quarter turn a sample, so that no step between two is ever the long way round.
+    const turn = [0, 0.25, 0.5, 0.75, 1]
+    writer.addAnimation("legs-turn", [
+      { node: legs, path: "rotation", times: turn, values: turn.flatMap(share => [0, Math.sin(share * Math.PI), 0, Math.cos(share * Math.PI)]) }
+    ])
   }
 
   private hull(): BufferGeometry {
@@ -137,7 +154,7 @@ const directory = path.join(root, "public", "models", "ufoathome-valensole-craft
 mkdirSync(directory, { recursive: true })
 const craft = new ValensoleCraft()
 const writer = new GltfWriter(craft.materials)
-for (const part of craft.parts()) writer.addMesh(part)
+craft.write(writer)
 const file = path.join(directory, "craft.gltf")
 const gltf = writer.toJSON("UFO@home scripts/build-valensole-craft.ts")
 writeFileSync(file, JSON.stringify(gltf) + "\n")
