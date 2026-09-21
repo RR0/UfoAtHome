@@ -11,7 +11,9 @@ export interface ScatteredSkyState {
   readonly moon: { readonly altitudeDeg: number; readonly azimuthDeg: number; readonly magnitude: number; readonly phaseAngleDeg: number }
 }
 
-/** The colours the rest of the scene takes from the sky: its ambient light, and the air's. */
+/** The colours the rest of the scene takes from the sky: its ambient light, and the air's — all of it
+ * as light relative to the eye's semi-saturation (see EyeAdaptation.relativeOf), which is how
+ * everything is drawn before the frame is finished. */
 export interface SkyAmbient {
   readonly zenith: DisplayRgb
   readonly horizon: DisplayRgb
@@ -23,6 +25,14 @@ export interface SkyAmbient {
    * the air a few kilometres off has nothing to send back.
    */
   readonly airlight: DisplayRgb
+  /**
+   * The sky's light falling on a level surface, ∫ L cos θ dω over the upper hemisphere, relative
+   * like the rest: what a HemisphereLight's sky colour is, three.js dividing it by π on a white
+   * Lambertian surface as the physics does.
+   */
+  readonly skyIrradiance: DisplayRgb
+  /** What the eye's relative units are, in candela per square metre: σ over the exposure. */
+  readonly scale: number
 }
 
 /**
@@ -84,7 +94,7 @@ export class ScatteredSky {
         uObserverRadius: { value: AtmosphereProfile.GROUND_RADIUS_M + 2 },
         uAirglow: { value: new Vector4(...ScatteredSky.airglowXyzs()) },
         uRodShare: { value: 0 },
-        uSemiSaturationN: { value: 1 },
+        uInverseSemiSaturation: { value: 1 },
         uExposureScale: { value: 1 }
       },
       vertexShader: `
@@ -108,14 +118,13 @@ export class ScatteredSky {
         uniform float uObserverRadius;
         uniform vec4 uAirglow;
         uniform float uRodShare;
-        uniform float uSemiSaturationN;
+        uniform float uInverseSemiSaturation;
         uniform float uExposureScale;
         const float PI = 3.141592653589793;
         const float GROUND = ${AtmosphereProfile.GROUND_RADIUS_M.toFixed(1)};
         const float AIRGLOW_RATIO = ${(AtmosphereProfile.GROUND_RADIUS_M / (AtmosphereProfile.GROUND_RADIUS_M + ScatteredSky.AIRGLOW_LAYER_ALTITUDE_M)).toFixed(6)};
         const float EXTINCTION = ${NightSkyBrightness.EXTINCTION_PER_AIR_MASS.toFixed(4)};
         const vec2 VIEW_SIZE = vec2(${AtmosphereTables.SKY_VIEW_WIDTH}.0, ${AtmosphereTables.SKY_VIEW_HEIGHT}.0);
-        const float RESPONSE_EXPONENT = ${EyeAdaptation.RESPONSE_EXPONENT.toFixed(4)};
         const vec3 SCOTOPIC_TINT = vec3(${EyeAdaptation.SCOTOPIC_TINT.map(value => value.toFixed(4)).join(", ")});
 
         /** AtmosphereTables.skyViewUv, for a source standing at \`sourceAzimuth\` (a unit vector in x, z). */
@@ -147,11 +156,10 @@ export class ScatteredSky {
           );
         }
 
-        /** EyeAdaptation.displayOf. */
-        vec3 displayOf(vec3 xyz, float scotopic) {
+        /** EyeAdaptation.relativeOf. */
+        vec3 relativeOf(vec3 xyz, float scotopic) {
           float luminance = (1.0 - uRodShare) * xyz.y + uRodShare * scotopic;
-          float y = pow(max(luminance, 0.0), RESPONSE_EXPONENT);
-          float response = y / (y + uSemiSaturationN);
+          float response = max(luminance, 0.0) * uInverseSemiSaturation;
           vec3 rgb = mat3(3.2406, -0.9689, 0.0557, -1.5372, 1.8758, -0.2040, -0.4986, 0.0415, 1.0570) * xyz;
           vec3 tint = SCOTOPIC_TINT / dot(SCOTOPIC_TINT, vec3(0.2126, 0.7152, 0.0722));
           return max(vec3(0.0), (1.0 - uRodShare) * rgb / max(xyz.y, 1e-12) + uRodShare * tint) * response;
@@ -167,7 +175,7 @@ export class ScatteredSky {
             light += uAirglow * vanRhijn * pow(10.0, -0.4 * EXTINCTION * (airMass - 1.0));
           }
           light *= uExposureScale;
-          gl_FragColor = vec4(displayOf(light.xyz, light.w), 1.0);
+          gl_FragColor = vec4(relativeOf(light.xyz, light.w), 1.0);
           #include <colorspace_fragment>
         }
       `
@@ -305,11 +313,24 @@ export class ScatteredSky {
       }
     }
     this.applyAdaptation(Math.exp(logSum / weightSum))
-    const displayAt = (altitudeDeg: number, azimuthDeg: number, withAirglow = true) => {
+    const relative = ([x, y, z, s]: readonly number[]) => {
       const scale = this.exposureScale
-      const [x, y, z, s] = lightAt(altitudeDeg, azimuthDeg, withAirglow)
       const adapted = this.adaptingLuminance * scale
-      return EyeAdaptation.displayOf([x * scale, y * scale, z * scale], s * scale, adapted, this.seenByEye ? EyeAdaptation.rodShare(adapted) : 0)
+      return EyeAdaptation.relativeOf([x * scale, y * scale, z * scale], s * scale, adapted, this.seenByEye ? EyeAdaptation.rodShare(adapted) : 0)
+    }
+    const displayAt = (altitudeDeg: number, azimuthDeg: number, withAirglow = true) => relative(lightAt(altitudeDeg, azimuthDeg, withAirglow))
+    // The sky on a level surface: every direction of the upper hemisphere, weighted by its solid
+    // angle and by the cosine of its slant onto the surface.
+    const irradiance = [0, 0, 0, 0]
+    const step = (5 * Math.PI) / 180
+    const azimuthStep = (20 * Math.PI) / 180
+    for (let altitude = 2.5; altitude < 90; altitude += 5) {
+      const radians = (altitude * Math.PI) / 180
+      const weight = Math.sin(radians) * Math.cos(radians) * step * azimuthStep
+      for (let azimuth = 10; azimuth < 360; azimuth += 20) {
+        const light = lightAt(altitude, azimuth)
+        for (let c = 0; c < 4; c++) irradiance[c] += light[c] * weight
+      }
     }
     const horizon: DisplayRgb = [0, 0, 0]
     const airlight: DisplayRgb = [0, 0, 0]
@@ -321,21 +342,21 @@ export class ScatteredSky {
         airlight[c] += scattered[c] / 18
       }
     }
-    this.ambientColours = { zenith: displayAt(90, 0), horizon, airlight }
+    this.ambientColours = { zenith: displayAt(90, 0), horizon, airlight, skyIrradiance: relative(irradiance), scale: this.relativeScale }
     this.onChange()
   }
 
 
   /**
-   * What a surface giving out `luminanceCdM2` of light of this colour looks like on the screen,
-   * linear — seen through the same response, and adapted to the same sky, as the sky itself. What
+   * A surface giving out `luminanceCdM2` of light of this colour, as the scene draws light: relative
+   * to the same eye, adapted to the same sky, as the sky itself (see EyeAdaptation.relativeOf). What
    * lets something that glows (a flame, see BodySystem) be as bright as it would be against THIS sky:
    * a flame that reads white-hot at dusk is a pale smudge at noon, and so it should be.
    *
    * The colour sets the chromaticity only; the luminance sets how much of it there is. Scotopic
    * luminance is taken equal to photopic, which is what a warm-to-white source is near enough.
    */
-  displayOfLuminance(linearRgb: readonly [number, number, number], luminanceCdM2: number): DisplayRgb {
+  relativeOfLuminance(linearRgb: readonly [number, number, number], luminanceCdM2: number): DisplayRgb {
     const [r, g, b] = linearRgb
     const y = 0.2126 * r + 0.7152 * g + 0.0722 * b
     const k = y > 0 ? luminanceCdM2 / y : 0
@@ -346,8 +367,21 @@ export class ScatteredSky {
     ]
     const scale = this.exposureScale
     const adapted = this.adaptingLuminance * scale
-    return EyeAdaptation.displayOf(
+    return EyeAdaptation.relativeOf(
       [xyz[0] * scale, xyz[1] * scale, xyz[2] * scale], xyz[1] * scale, adapted, this.seenByEye ? EyeAdaptation.rodShare(adapted) : 0)
+  }
+
+  /** The share of the seeing the rods do, for the eye as adapted now; none for a camera. */
+  get rodShare(): number {
+    const adapted = this.adaptingLuminance * this.exposureScale
+    return this.seenByEye ? EyeAdaptation.rodShare(adapted) : 0
+  }
+
+  /** What one relative unit of the scene's light is worth in lux or candela: the exposure over the
+   * eye's semi-saturation. A light of the scene given in physical units is multiplied by this. */
+  get relativeScale(): number {
+    const adapted = this.adaptingLuminance * this.exposureScale
+    return this.exposureScale / EyeAdaptation.semiSaturation(adapted)
   }
 
   /** `adaptingLuminance` is the sky's own; what the eye or the film adapts to is that times the exposure. */
@@ -355,7 +389,7 @@ export class ScatteredSky {
     this.adaptingLuminance = adaptingLuminance
     const adapted = adaptingLuminance * this.exposureScale
     this.material.uniforms.uRodShare.value = this.seenByEye ? EyeAdaptation.rodShare(adapted) : 0
-    this.material.uniforms.uSemiSaturationN.value = EyeAdaptation.semiSaturation(adapted) ** EyeAdaptation.RESPONSE_EXPONENT
+    this.material.uniforms.uInverseSemiSaturation.value = 1 / EyeAdaptation.semiSaturation(adapted)
   }
 
   /** Before anything has been read back: the zenith as the photometry has it, in cd/m². */

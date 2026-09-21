@@ -28,6 +28,8 @@ export class RoundPoints {
    * faintest stars stay a visible dot rather than a smudge of almost-nothing. */
   private static readonly CORE = 0.18
   private static readonly RIM = 0.5
+  /** The same two radii, for whoever has to integrate the disc (see PointSources.COVERAGE). */
+  static readonly FALLOFF = { core: RoundPoints.CORE, rim: RoundPoints.RIM }
 
   static apply(material: PointsMaterial): void {
     material.transparent = true

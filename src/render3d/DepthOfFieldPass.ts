@@ -13,7 +13,9 @@ import {
   type PerspectiveCamera,
   type WebGLRenderer
 } from "three"
-import { SRGB_ENCODE_GLSL } from "./colorSpace.js"
+import { FINISH_BY_MODE_GLSL, FINISH_GLSL, FinishMode } from "./colorSpace.js"
+import { EquidistantProjectionPass } from "./EquidistantProjectionPass.js"
+import type { UnfinishedFrame } from "./colorSpace.js"
 
 /**
  * Blurs the scene the way a lens does — by how far away each thing is.
@@ -50,6 +52,9 @@ export class DepthOfFieldPass {
   private static readonly TAPS = 32
 
   private readonly target: WebGLRenderTarget
+  /** The overlays, with a depth of their own — the phenomena's, drawn at their stated distance —
+   * blurred as the scene is and finished over it (see FINISH_GLSL). */
+  private readonly overlayTarget: WebGLRenderTarget
   private readonly quadScene = new Scene()
   private readonly quadCamera = new OrthographicCamera(-1, 1, 1, -1, 0, 1)
   private readonly material: ShaderMaterial
@@ -66,6 +71,10 @@ export class DepthOfFieldPass {
     // dazzle is written in real units where white is one and brighter things are more, and a byte
     // target would flatten that before anything downstream could use it.
     this.target = new WebGLRenderTarget(this.width, this.height, { type: HalfFloatType, depthTexture })
+    const overlayDepth = new DepthTexture(this.width, this.height, UnsignedIntType)
+    overlayDepth.minFilter = NearestFilter
+    overlayDepth.magFilter = NearestFilter
+    this.overlayTarget = new WebGLRenderTarget(this.width, this.height, { type: HalfFloatType, depthTexture: overlayDepth })
     this.material = new ShaderMaterial({
       uniforms: {
         uColour: { value: this.target.texture },
@@ -81,9 +90,10 @@ export class DepthOfFieldPass {
         /** Pixels per millimetre of frame, which is what turns a circle of confusion into a blur. */
         uPixelsPerMm: { value: 0 },
         uMaxRadius: { value: DepthOfFieldPass.MAX_RADIUS_PX },
-        /** 1 when this pass writes the canvas, 0 when it writes a target somebody else will still
-         * add to — see setEncodesOutput. */
-        uEncodeOutput: { value: 1 }
+        uOverlay: { value: this.overlayTarget.texture },
+        uOverlayDepth: { value: overlayDepth },
+        /** See FinishMode. */
+        uMode: { value: FinishMode.Finished }
       },
       vertexShader: `
         varying vec2 vUv;
@@ -94,10 +104,12 @@ export class DepthOfFieldPass {
       `,
       fragmentShader: `
         precision highp float;
-        ${SRGB_ENCODE_GLSL}
+        ${FINISH_GLSL}
         varying vec2 vUv;
         uniform sampler2D uColour;
         uniform sampler2D uDepth;
+        uniform sampler2D uOverlay;
+        uniform sampler2D uOverlayDepth;
         uniform vec2 uResolution;
         uniform float uNear;
         uniform float uFar;
@@ -106,16 +118,11 @@ export class DepthOfFieldPass {
         uniform float uFocalLengthMm;
         uniform float uPixelsPerMm;
         uniform float uMaxRadius;
-        uniform float uEncodeOutput;
-
-        /** The curve, or not — see setEncodesOutput. */
-        vec3 forDestination(vec3 linear) {
-          return uEncodeOutput > 0.5 ? encodeSrgb(linear) : linear;
-        }
+        uniform float uMode;
 
         /** How far away, in the scene's own units, whatever was drawn at this pixel stands. */
-        float distanceAt(vec2 uv) {
-          float depth = texture2D(uDepth, uv).x;
+        float distanceAt(sampler2D depthMap, vec2 uv) {
+          float depth = texture2D(depthMap, uv).x;
           float ndc = depth * 2.0 - 1.0;
           return (2.0 * uNear * uFar) / (uFar + uNear - ndc * (uFar - uNear));
         }
@@ -134,16 +141,15 @@ export class DepthOfFieldPass {
           return min(uMaxRadius, circleMm * uPixelsPerMm * 0.5);
         }
 
-        void main() {
-          float here = distanceAt(vUv);
-          float radius = blurRadius(here);
-          vec4 colour = texture2D(uColour, vUv);
-          if (radius < 0.75) {
-            gl_FragColor = vec4(forDestination(colour.rgb), colour.a);
-            return;
-          }
+        /** One layer through the lens: every channel, coverage included, averaged over the disc of
+         * confusion of the distance its own depth gives. Averaged in LINEAR light, which is what a
+         * lens does — it adds photons, not screen values. */
+        vec4 throughLens(sampler2D colourMap, sampler2D depthMap) {
+          vec4 colour = texture2D(colourMap, vUv);
+          float radius = blurRadius(distanceAt(depthMap, vUv));
+          if (radius < 0.75) return colour;
           vec2 texel = 1.0 / uResolution;
-          vec3 total = colour.rgb;
+          vec4 total = colour;
           float weight = 1.0;
           for (int tap = 0; tap < ${DepthOfFieldPass.TAPS}; tap++) {
             // Golden angle, with the radius growing as the square root of the index so the samples
@@ -155,13 +161,20 @@ export class DepthOfFieldPass {
             // A sample only lends its light to this pixel if it is at least as blurred as the
             // distance it would have to cross — otherwise a sharp foreground would bleed into the
             // background behind it, which a lens never does.
-            float share = step(spread, blurRadius(distanceAt(at)) + 0.5);
-            total += texture2D(uColour, at).rgb * share;
+            float share = step(spread, blurRadius(distanceAt(depthMap, at)) + 0.5);
+            total += texture2D(colourMap, at) * share;
             weight += share;
           }
-          // Averaged in LINEAR light, which is what a lens does — it adds photons, not screen
-          // values — and encoded only at the very end. See colorSpace.ts.
-          gl_FragColor = vec4(forDestination(total / weight), colour.a);
+          return total / weight;
+        }
+
+        void main() {
+          vec3 scene = throughLens(uColour, uDepth).rgb;
+          // The phenomena are blurred by the distance they are DRAWN at — a parameter of the
+          // picture, not a fact (see PhenomenonDepth), and the one place it shows as something
+          // other than what hides the shape.
+          vec4 overlay = throughLens(uOverlay, uOverlayDepth);
+          ${FINISH_BY_MODE_GLSL}
         }
       `,
       depthTest: false,
@@ -174,6 +187,7 @@ export class DepthOfFieldPass {
     this.width = Math.max(1, width)
     this.height = Math.max(1, height)
     this.target.setSize(this.width, this.height)
+    this.overlayTarget.setSize(this.width, this.height)
     this.material.uniforms.uResolution.value.set(this.width, this.height)
   }
 
@@ -196,11 +210,11 @@ export class DepthOfFieldPass {
   /** Whether the frame this pass produces is finished, or is one instant of a longer exposure —
    * see EquidistantProjectionPass.setEncodesOutput, which draws the same distinction for the same
    * reason. */
-  setEncodesOutput(encodes: boolean): void {
-    this.material.uniforms.uEncodeOutput.value = encodes ? 1 : 0
-  }
-
-  render(renderer: WebGLRenderer, scene: Scene, camera: PerspectiveCamera, afterScene?: () => void): void {
+  /**
+   * Renders the scene and its overlays, then puts both through the lens — finished onto whatever is
+   * being drawn to, or, given `into`, left as its two layers there (see UnfinishedFrame).
+   */
+  render(renderer: WebGLRenderer, scene: Scene, camera: PerspectiveCamera, overlays?: () => void, into?: UnfinishedFrame): void {
     const uniforms = this.material.uniforms
     uniforms.uNear.value = camera.near
     uniforms.uFar.value = camera.far
@@ -208,18 +222,28 @@ export class DepthOfFieldPass {
     renderer.setRenderTarget(this.target)
     renderer.clear()
     renderer.render(scene, camera)
-    // The phenomena go into the same target before it is blurred (see
-    // SceneRenderer.renderPhenomenaPass), so they are blurred by the distance they are DRAWN at —
-    // which is a parameter of the picture, not a fact (see PhenomenonDepth), and the one place
-    // that parameter shows as something other than what hides the shape.
-    afterScene?.()
+    EquidistantProjectionPass.clearTransparent(renderer, this.overlayTarget)
+    overlays?.()
+    if (into) {
+      uniforms.uMode.value = FinishMode.Scene
+      renderer.setRenderTarget(into.scene)
+      renderer.render(this.quadScene, this.quadCamera)
+      uniforms.uMode.value = FinishMode.Overlay
+      renderer.setRenderTarget(into.overlay)
+      renderer.render(this.quadScene, this.quadCamera)
+    } else {
+      uniforms.uMode.value = FinishMode.Finished
+      renderer.setRenderTarget(originalTarget)
+      renderer.render(this.quadScene, this.quadCamera)
+    }
     renderer.setRenderTarget(originalTarget)
-    renderer.render(this.quadScene, this.quadCamera)
   }
 
   dispose(): void {
     this.target.depthTexture?.dispose()
     this.target.dispose()
+    this.overlayTarget.depthTexture?.dispose()
+    this.overlayTarget.dispose()
     this.material.dispose()
   }
 }

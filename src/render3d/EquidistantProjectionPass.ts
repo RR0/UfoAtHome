@@ -1,4 +1,5 @@
 import {
+  Color,
   CubeCamera,
   Matrix3,
   Mesh,
@@ -17,7 +18,8 @@ import {
   type PerspectiveCamera,
   type WebGLRenderer
 } from "three"
-import { SRGB_ENCODE_GLSL } from "./colorSpace.js"
+import { FINISH_BY_MODE_GLSL, FINISH_GLSL, FinishMode } from "./colorSpace.js"
+import type { UnfinishedFrame } from "./colorSpace.js"
 
 /**
  * Renders the scene the way an eye sees it rather than the way a lens photographs it.
@@ -73,6 +75,9 @@ export class EquidistantProjectionPass {
   private readonly cubeRotation = new Matrix3()
 
   private readonly target: WebGLRenderTarget
+  /** What is laid over the scene rather than seen in it, drawn through the same camera — see FINISH_GLSL. */
+  private readonly overlayTarget: WebGLRenderTarget
+  private overlayCubeTarget?: WebGLCubeRenderTarget
   private readonly quadScene = new Scene()
   private readonly quadCamera = new OrthographicCamera(-1, 1, 1, -1, 0, 1)
   private readonly material: ShaderMaterial
@@ -89,6 +94,7 @@ export class EquidistantProjectionPass {
     // at the buffer and then blurred back down by the resampling. The clip belongs at the end of the
     // chain, where the canvas is written, and nowhere before it.
     this.target = new WebGLRenderTarget(this.width, this.height, { type: HalfFloatType, samples: EquidistantProjectionPass.SAMPLES })
+    this.overlayTarget = new WebGLRenderTarget(this.width, this.height, { type: HalfFloatType, samples: EquidistantProjectionPass.SAMPLES })
     this.material = new ShaderMaterial({
       uniforms: {
         uSource: { value: this.target.texture },
@@ -100,9 +106,9 @@ export class EquidistantProjectionPass {
          * pinhole render this samples from. */
         uSrcTanHalfFovY: { value: 1 },
         uResolution: { value: new Vector2(this.width, this.height) },
-        /** 1 when this pass writes the canvas, 0 when it writes a target somebody else will still
-         * add to — see setEncodesOutput. */
-        uEncodeOutput: { value: 1 }
+        uOverlay: { value: this.overlayTarget.texture },
+        /** See FinishMode. */
+        uMode: { value: FinishMode.Finished }
       },
       vertexShader: `
         varying vec2 vNdc;
@@ -113,12 +119,13 @@ export class EquidistantProjectionPass {
       `,
       fragmentShader: `
         precision highp float;
-        ${SRGB_ENCODE_GLSL}
+        ${FINISH_GLSL}
         uniform sampler2D uSource;
+        uniform sampler2D uOverlay;
         uniform float uHalfFovRad;
         uniform float uAspect;
         uniform float uSrcTanHalfFovY;
-        uniform float uEncodeOutput;
+        uniform float uMode;
         varying vec2 vNdc;
 
         void main() {
@@ -136,14 +143,19 @@ export class EquidistantProjectionPass {
             dir = vec3(axis * sin(theta), -cos(theta));
           }
           // Behind the observer: nothing the source could possibly hold.
-          if (dir.z >= -1e-6) { gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); return; }
-          vec2 src = vec2(dir.x / -dir.z / (uSrcTanHalfFovY * uAspect), dir.y / -dir.z / uSrcTanHalfFovY);
-          if (any(greaterThan(abs(src), vec2(1.0)))) { gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); return; }
-          // Encoded here because this pass draws to the CANVAS, which three.js would have encoded
-          // for itself had the scene gone there directly — see colorSpace.ts. Not encoded when the
-          // frame is on its way into a longer exposure's accumulation, which has to add up light.
-          vec3 colour = texture2D(uSource, src * 0.5 + 0.5).rgb;
-          gl_FragColor = vec4(uEncodeOutput > 0.5 ? encodeSrgb(colour) : colour, 1.0);
+          vec3 scene = vec3(0.0);
+          vec4 overlay = vec4(0.0);
+          if (dir.z < -1e-6) {
+            vec2 src = vec2(dir.x / -dir.z / (uSrcTanHalfFovY * uAspect), dir.y / -dir.z / uSrcTanHalfFovY);
+            if (all(lessThanEqual(abs(src), vec2(1.0)))) {
+              scene = texture2D(uSource, src * 0.5 + 0.5).rgb;
+              overlay = texture2D(uOverlay, src * 0.5 + 0.5);
+            }
+          }
+          // Finished here because this pass draws to the CANVAS, which three.js would have encoded
+          // for itself had the scene gone there directly — see colorSpace.ts. Left as its two layers
+          // when the frame is on its way into a longer exposure, which has to add up light.
+          ${FINISH_BY_MODE_GLSL}
         }
       `,
       depthTest: false,
@@ -204,33 +216,26 @@ export class EquidistantProjectionPass {
     return this.cornerHalfAngleDeg(fovDeg, aspect) <= this.MAX_HALF_ANGLE_DEG
   }
 
-  /**
-   * Whether the frame this pass produces is finished, or is one instant of a longer exposure.
-   *
-   * A pass that draws to the canvas must bend the light through the sRGB curve itself, since it has
-   * stepped around the moment three.js would have done it (see colorSpace.ts). A pass that draws
-   * into a target somebody is still going to ADD to must not: light adds in linear units, and
-   * averaging curve-bent numbers is the very mistake that comment warns about.
-   */
-  setEncodesOutput(encodes: boolean): void {
-    this.material.uniforms.uEncodeOutput.value = encodes ? 1 : 0
-  }
-
   resize(width: number, height: number): void {
     this.width = Math.max(1, width)
     this.height = Math.max(1, height)
     this.target.setSize(this.width, this.height)
+    this.overlayTarget.setSize(this.width, this.height)
     this.material.uniforms.uResolution.value.set(this.width, this.height)
     this.material.uniforms.uAspect.value = this.width / this.height
   }
 
   /**
-   * Renders `scene` through `camera` and resamples the result.
+   * Renders `scene` through `camera` and resamples the result — finished onto whatever is being
+   * drawn to, or, given `into`, left as its two layers there (see UnfinishedFrame).
    *
    * Widens the camera for the offscreen pass and puts it back afterwards, so nothing else in the
    * renderer has to know this happened — but see SceneRenderer.toSourceNdc, which does have to
    * know: a raycast aimed at a point on the VISIBLE image is aimed at a different direction of the
    * widened camera, and would otherwise test the wrong part of the scene.
+   *
+   * @param overlays Draws what is laid over the scene rather than seen in it (the pictures of the
+   *   place, the witness's own phenomena), through the camera given, onto a cleared target of its own.
    */
   render(
     renderer: WebGLRenderer,
@@ -238,14 +243,15 @@ export class EquidistantProjectionPass {
     camera: PerspectiveCamera,
     fovDeg: number,
     onCameraWidened?: () => void,
-    afterScene?: (camera: PerspectiveCamera) => void,
+    overlays?: (camera: PerspectiveCamera) => void,
     beforeCube?: (cube: boolean) => void,
-    afterResample?: () => void
+    afterResample?: () => void,
+    into?: UnfinishedFrame
   ): void {
     const aspect = this.width / this.height
     if (!EquidistantProjectionPass.supports(fovDeg, aspect)) {
       beforeCube?.(true)
-      this.renderThroughCube(renderer, scene, camera, fovDeg, afterScene, afterResample)
+      this.renderThroughCube(renderer, scene, camera, fovDeg, overlays, afterResample, into)
       beforeCube?.(false)
       return
     }
@@ -263,32 +269,67 @@ export class EquidistantProjectionPass {
     const originalTarget = renderer.getRenderTarget()
     renderer.setRenderTarget(this.target)
     renderer.render(scene, camera)
-    // Whatever has to be drawn INTO the same picture after the scene — the witness's own phenomena,
-    // depth-tested against the decor alone (see SceneRenderer.renderPhenomenaPass) — is drawn here,
-    // into the offscreen render the resampling reads from, through the same widened camera.
-    afterScene?.(camera)
+    // What is laid over the picture — the witness's own phenomena, depth-tested against the decor
+    // alone (see SceneRenderer.renderPhenomenaPass) — onto a target of its own, through the same
+    // widened camera, so that it is resampled the same way and finished over the eye's response.
+    EquidistantProjectionPass.clearTransparent(renderer, this.overlayTarget)
+    overlays?.(camera)
     renderer.setRenderTarget(originalTarget)
     camera.fov = originalFov
     camera.updateProjectionMatrix()
 
-    renderer.render(this.quadScene, this.quadCamera as Camera)
+    this.resample(renderer, this.quadScene.children[0] as Mesh, this.material, originalTarget, into)
   }
+
+  /** Draws `material` onto the destination: finished, or into the two layers of `into`. */
+  private resample(renderer: WebGLRenderer, quad: Mesh, material: ShaderMaterial, destination: WebGLRenderTarget | null, into?: UnfinishedFrame): void {
+    const previous = quad.material
+    quad.material = material
+    if (into) {
+      material.uniforms.uMode.value = FinishMode.Scene
+      renderer.setRenderTarget(into.scene)
+      renderer.render(this.quadScene, this.quadCamera as Camera)
+      material.uniforms.uMode.value = FinishMode.Overlay
+      renderer.setRenderTarget(into.overlay)
+      renderer.render(this.quadScene, this.quadCamera as Camera)
+      renderer.setRenderTarget(destination)
+    } else {
+      material.uniforms.uMode.value = FinishMode.Finished
+      renderer.setRenderTarget(destination)
+      renderer.render(this.quadScene, this.quadCamera as Camera)
+    }
+    quad.material = previous
+  }
+
+  /** Clears a target to nothing at all — no colour, no coverage, no depth — for an overlay to be
+   * drawn onto. */
+  static clearTransparent(renderer: WebGLRenderer, target: WebGLRenderTarget, face?: number): void {
+    const colour = renderer.getClearColor(EquidistantProjectionPass.clearScratch)
+    const alpha = renderer.getClearAlpha()
+    renderer.setRenderTarget(target, face)
+    renderer.setClearColor(0x000000, 0)
+    renderer.clear(true, true, true)
+    renderer.setClearColor(colour, alpha)
+  }
+
+  private static readonly clearScratch = new Color()
 
   /**
    * The same picture for a field too wide for one pinhole: the scene drawn onto the six faces of a
-   * cube around the eye, then read back along the direction each output pixel stands for.
+   * cube around the eye, then read back along the direction each output pixel stands for — and the
+   * overlays onto six faces of their own, read back the same way.
    *
-   * Faces sized so a face pixel covers about the angle an output pixel does, and each face given
-   * whatever has to be drawn into the picture after the scene, through that face's own camera. The
-   * shadow maps are drawn once, for the first face: the lights did not move between faces.
+   * Faces sized so a face pixel covers about the angle an output pixel does. The shadow maps are
+   * drawn once, for the first face: the lights did not move between faces.
    */
   private renderThroughCube(
     renderer: WebGLRenderer,
     scene: Scene,
     camera: PerspectiveCamera,
     fovDeg: number,
-    afterScene?: (camera: PerspectiveCamera) => void,
-    afterResample?: () => void
+    overlays?: (camera: PerspectiveCamera) => void,
+    afterResample?: () => void,
+    into?: UnfinishedFrame
   ): void {
     const fovRad = (fovDeg * Math.PI) / 180
     const face = Math.min(
@@ -296,12 +337,15 @@ export class EquidistantProjectionPass {
       renderer.capabilities.maxCubemapSize,
       Math.max(256, Math.ceil(((this.height / fovRad) * Math.PI) / 2))
     )
-    if (!this.cubeTarget || !this.cubeCamera || !this.cubeMaterial) {
-      this.cubeTarget = new WebGLCubeRenderTarget(face, { type: HalfFloatType, minFilter: LinearFilter, magFilter: LinearFilter, generateMipmaps: false })
+    const options = { type: HalfFloatType, minFilter: LinearFilter, magFilter: LinearFilter, generateMipmaps: false }
+    if (!this.cubeTarget || !this.cubeCamera || !this.cubeMaterial || !this.overlayCubeTarget) {
+      this.cubeTarget = new WebGLCubeRenderTarget(face, options)
+      this.overlayCubeTarget = new WebGLCubeRenderTarget(face, options)
       this.cubeCamera = new CubeCamera(camera.near, camera.far, this.cubeTarget)
-      this.cubeMaterial = this.buildCubeMaterial(this.cubeTarget)
+      this.cubeMaterial = this.buildCubeMaterial(this.cubeTarget, this.overlayCubeTarget)
     } else if (this.cubeTarget.width !== face) {
       this.cubeTarget.setSize(face, face)
+      this.overlayCubeTarget.setSize(face, face)
     }
     const cube = this.cubeCamera
     camera.updateMatrixWorld()
@@ -327,39 +371,32 @@ export class EquidistantProjectionPass {
       }
       renderer.setRenderTarget(this.cubeTarget!, index)
       renderer.render(scene, faceCamera)
-      afterScene?.(faceCamera)
+      EquidistantProjectionPass.clearTransparent(renderer, this.overlayCubeTarget!, index)
+      overlays?.(faceCamera)
       renderer.shadowMap.autoUpdate = false
     })
     renderer.shadowMap.autoUpdate = shadows
-    renderer.setRenderTarget(originalTarget)
 
     const uniforms = this.cubeMaterial.uniforms
     uniforms.uHalfFovRad.value = fovRad / 2
     uniforms.uAspect.value = this.width / this.height
     uniforms.uCameraRotation.value.setFromMatrix4(camera.matrixWorld)
     const quad = this.quadScene.children[0] as Mesh
-    // Resampled into the linear target first, not onto the canvas: what belongs on the FINISHED
-    // picture rather than in the scene — the Sun's own dazzle, a screen-wide quad that cannot be drawn
-    // on six faces — is added there, as light, and the picture then encoded once.
-    uniforms.uEncodeOutput.value = 0
+    // Resampled into the targets first, not onto the canvas: what belongs on the FINISHED picture
+    // rather than in the scene — the Sun's own dazzle, a screen-wide quad that cannot be drawn on six
+    // faces — is added to the scene's there, as light, and the picture then finished once.
+    this.resample(renderer, quad, this.cubeMaterial, originalTarget, { scene: this.target, overlay: this.overlayTarget })
     renderer.setRenderTarget(this.target)
-    quad.material = this.cubeMaterial
-    renderer.render(this.quadScene, this.quadCamera as Camera)
     afterResample?.()
-    renderer.setRenderTarget(originalTarget)
-    const copy = this.copyMaterial()
-    copy.uniforms.uEncodeOutput.value = this.material.uniforms.uEncodeOutput.value
-    quad.material = copy
-    renderer.render(this.quadScene, this.quadCamera as Camera)
-    quad.material = this.material
+    this.resample(renderer, quad, this.copyMaterial(), originalTarget, into)
   }
 
   private copy?: ShaderMaterial
 
-  /** Copies the target to wherever is being drawn, encoding it for the canvas if it is the canvas. */
+  /** Copies the two targets to wherever is being drawn: finished for the canvas, or as they are. */
   private copyMaterial(): ShaderMaterial {
     this.copy ??= new ShaderMaterial({
-      uniforms: { uSource: { value: this.target.texture }, uEncodeOutput: { value: 1 } },
+      uniforms: { uSource: { value: this.target.texture }, uOverlay: { value: this.overlayTarget.texture }, uMode: { value: FinishMode.Finished } },
       vertexShader: `
         varying vec2 vUv;
         void main() {
@@ -369,13 +406,15 @@ export class EquidistantProjectionPass {
       `,
       fragmentShader: `
         precision highp float;
-        ${SRGB_ENCODE_GLSL}
+        ${FINISH_GLSL}
         uniform sampler2D uSource;
-        uniform float uEncodeOutput;
+        uniform sampler2D uOverlay;
+        uniform float uMode;
         varying vec2 vUv;
         void main() {
-          vec3 colour = texture2D(uSource, vUv).rgb;
-          gl_FragColor = vec4(uEncodeOutput > 0.5 ? encodeSrgb(colour) : colour, 1.0);
+          vec3 scene = texture2D(uSource, vUv).rgb;
+          vec4 overlay = texture2D(uOverlay, vUv);
+          ${FINISH_BY_MODE_GLSL}
         }
       `,
       depthTest: false,
@@ -408,14 +447,15 @@ export class EquidistantProjectionPass {
 
   private static readonly faceScratch = new Vector3()
 
-  private buildCubeMaterial(target: WebGLCubeRenderTarget): ShaderMaterial {
+  private buildCubeMaterial(target: WebGLCubeRenderTarget, overlay: WebGLCubeRenderTarget): ShaderMaterial {
     return new ShaderMaterial({
       uniforms: {
         uCube: { value: target.texture },
+        uOverlayCube: { value: overlay.texture },
         uHalfFovRad: { value: 0.5236 },
         uAspect: { value: 1 },
         uCameraRotation: { value: this.cubeRotation },
-        uEncodeOutput: { value: 1 }
+        uMode: { value: FinishMode.Finished }
       },
       vertexShader: `
         varying vec2 vNdc;
@@ -426,12 +466,13 @@ export class EquidistantProjectionPass {
       `,
       fragmentShader: `
         precision highp float;
-        ${SRGB_ENCODE_GLSL}
+        ${FINISH_GLSL}
         uniform samplerCube uCube;
+        uniform samplerCube uOverlayCube;
         uniform float uHalfFovRad;
         uniform float uAspect;
         uniform mat3 uCameraRotation;
-        uniform float uEncodeOutput;
+        uniform float uMode;
         varying vec2 vNdc;
 
         void main() {
@@ -439,14 +480,18 @@ export class EquidistantProjectionPass {
           // a cube holds what is beside and behind the eye too.
           vec2 angle = vec2(vNdc.x * uAspect, vNdc.y) * uHalfFovRad;
           float theta = length(angle);
-          if (theta > 3.14159265) { gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); return; }
-          vec3 dir = vec3(0.0, 0.0, -1.0);
-          if (theta > 1e-6) {
-            vec2 axis = angle / theta;
-            dir = vec3(axis * sin(theta), -cos(theta));
+          vec3 scene = vec3(0.0);
+          vec4 overlay = vec4(0.0);
+          if (theta <= 3.14159265) {
+            vec3 dir = vec3(0.0, 0.0, -1.0);
+            if (theta > 1e-6) {
+              vec2 axis = angle / theta;
+              dir = vec3(axis * sin(theta), -cos(theta));
+            }
+            scene = textureCube(uCube, uCameraRotation * dir).rgb;
+            overlay = textureCube(uOverlayCube, uCameraRotation * dir);
           }
-          vec3 colour = textureCube(uCube, uCameraRotation * dir).rgb;
-          gl_FragColor = vec4(uEncodeOutput > 0.5 ? encodeSrgb(colour) : colour, 1.0);
+          ${FINISH_BY_MODE_GLSL}
         }
       `,
       depthTest: false,
@@ -468,8 +513,10 @@ export class EquidistantProjectionPass {
 
   dispose(): void {
     this.target.dispose()
+    this.overlayTarget.dispose()
     this.material.dispose()
     this.cubeTarget?.dispose()
+    this.overlayCubeTarget?.dispose()
     this.cubeMaterial?.dispose()
     this.copy?.dispose()
     this.quadScene.clear()

@@ -3,6 +3,7 @@ import { BoxGeometry, BufferGeometry, Float32BufferAttribute, Group, Mesh, Persp
 import { SceneRenderer } from "../../src/render3d/SceneRenderer.js"
 import { DecorSystem } from "../../src/render3d/DecorSystem.js"
 import { RoadSystem } from "../../src/render3d/RoadSystem.js"
+import { AerialPerspective } from "../../src/engine/atmosphere/AerialPerspective.js"
 
 // Exercise the CPU scene updates without constructing a WebGL context.
 function renderer() {
@@ -16,7 +17,9 @@ function renderer() {
     resolution: { beginDrawing(): void {}, endDrawing(): void {}, update(): undefined { return undefined }, reset(): void {} },
     // Also built by the constructor: the roads ride with the patch, so anchoring the decor moves
     // them too (see SceneRenderer.updateDecorAnchoring).
-    roadSystem: new RoadSystem()
+    roadSystem: new RoadSystem(),
+    // The air a star's light crosses (see SceneRenderer.arrivingIlluminance).
+    air: new AerialPerspective(), siteElevationM: 0
   })
 }
 
@@ -48,7 +51,7 @@ describe("scene playback resource reuse", () => {
     r.exposureInstants = 1
     r.exposureInstantsDone = 0
     r.exposureInstantAt = vi.fn()
-    r.exposureAccumulation = { instantTarget: {}, add: vi.fn() }
+    r.exposureAccumulation = { instantTarget: { scene: { width: 1, height: 1 } }, add: vi.fn() }
     r.renderOnce = vi.fn(() => expect(sprite.visible).toBe(false))
     r.presentExposure = vi.fn()
     r.developExposure()

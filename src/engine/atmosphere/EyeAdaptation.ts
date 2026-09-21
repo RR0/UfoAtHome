@@ -149,4 +149,46 @@ export class EyeAdaptation {
     const channel = (value: number, tinted: number) => Math.max(0, ((1 - rods) * value) / photopic + (rods * tinted) / tintLuminance) * response
     return [channel(r, tint[0]), channel(g, tint[1]), channel(b, tint[2])]
   }
+
+  /**
+   * The same light as it is drawn into the scene before the eye has seen it: its luminance over
+   * the semi-saturation σ of an eye adapted to `adaptingLuminance`, in the colour displayOf gives it.
+   * The eye's response to this, applied once to the whole frame (see respond and EYE_RESPONSE_GLSL),
+   * is displayOf; and lights added together here add as light, which responses do not.
+   */
+  static relativeOf(
+    xyz: readonly [number, number, number],
+    scotopic: number,
+    adaptingLuminance: number,
+    rods = EyeAdaptation.rodShare(adaptingLuminance)
+  ): DisplayRgb {
+    const luminance = (1 - rods) * xyz[1] + rods * scotopic
+    const relative = Math.max(luminance, 0) / EyeAdaptation.semiSaturation(adaptingLuminance)
+    const [r, g, b] = VisibleSpectrum.linearSrgbOf(xyz)
+    const photopic = Math.max(xyz[1], 1e-12)
+    const tint = EyeAdaptation.SCOTOPIC_TINT
+    const tintLuminance = 0.2126 * tint[0] + 0.7152 * tint[1] + 0.0722 * tint[2]
+    const channel = (value: number, tinted: number) => Math.max(0, ((1 - rods) * value) / photopic + (rods * tinted) / tintLuminance) * relative
+    return [channel(r, tint[0]), channel(g, tint[1]), channel(b, tint[2])]
+  }
+
+  /** The response, 0 to 1, to a luminance given relative to σ — what the frame's last pass does. */
+  static respond(relative: number): number {
+    const y = Math.max(relative, 0) ** EyeAdaptation.RESPONSE_EXPONENT
+    return y / (y + 1)
+  }
+
+  /** The relative luminance whose response is `response`: respond, undone. */
+  static relativeOfResponse(response: number): number {
+    const r = Math.min(Math.max(response, 0), 0.9999)
+    return (r / (1 - r)) ** (1 / EyeAdaptation.RESPONSE_EXPONENT)
+  }
+
+  /** A linear display colour for a relative one, its chromaticity kept — EYE_RESPONSE_GLSL's own arithmetic. */
+  static finish(relative: readonly [number, number, number]): DisplayRgb {
+    const y = 0.2126 * relative[0] + 0.7152 * relative[1] + 0.0722 * relative[2]
+    if (!(y > 0)) return [0, 0, 0]
+    const k = EyeAdaptation.respond(y) / y
+    return [relative[0] * k, relative[1] * k, relative[2] * k]
+  }
 }

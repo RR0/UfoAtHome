@@ -97,6 +97,21 @@ export class AerialPerspective {
   }
 
   /**
+   * How much of a light from outside the atmosphere — the Sun's, the Moon's — reaches an eye at
+   * `altitudeM`, per channel, when it stands `elevationDeg` above the horizon: the columns of air
+   * and haze above the eye, times the air mass of that slant (Kasten and Young's, which stays finite
+   * at the horizon). Ozone's weak Chappuis absorption is left out, a few per cent at most.
+   */
+  transmittanceFromSpace(altitudeM: number, elevationDeg: number): Rgb {
+    const elevation = Math.max(elevationDeg, 0)
+    const airMass = 1 / (Math.sin((elevation * Math.PI) / 180) + 0.50572 * (elevation + 6.07995) ** -1.6364)
+    const air = AtmosphereProfile.RAYLEIGH_SCALE_HEIGHT_M * AtmosphereProfile.rayleighDensity(altitudeM)
+    const haze = AtmosphereProfile.AEROSOL_SCALE_HEIGHT_M * AtmosphereProfile.aerosolDensity(altitudeM)
+    return [0, 1, 2].map(channel =>
+      Math.exp(-(this.rayleigh[channel] * air + this.aerosol[channel] * haze) * airMass)) as Rgb
+  }
+
+  /**
    * The extinction at 550 nm of the air and of the haze, per metre, at a given altitude — what a
    * renderer that counts heights from the ground of the scene needs, rather than from the sea.
    */

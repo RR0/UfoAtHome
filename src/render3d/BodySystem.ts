@@ -103,7 +103,7 @@ export class BodySystem {
    * @param sceneUnitsPerLux What a lux of illuminance is in this scene's own light units — how the
    *   luminous intensity of a flame becomes a light of the same scene as the sun's (see throwFlame).
    */
-  constructor(private readonly loadModel: BodyModelLoader, private readonly onModelArrived: () => void, private readonly sceneUnitsPerLux = 0) {
+  constructor(private readonly loadModel: BodyModelLoader, private readonly onModelArrived: () => void, private readonly sceneUnitsPerLux: () => number = () => 0) {
     this.group.name = "bodies"
   }
 
@@ -190,7 +190,7 @@ export class BodySystem {
     const areaM2 = Math.PI * radiusM * radiusM
     // How far up the scale of what can be shown this body already is, 0 to 1.
     const shown = BodySystem.shown([1, 1, 1], luminanceCdM2, display)
-    const dazzle = Math.min(1, 0.2126 * shown[0] + 0.7152 * shown[1] + 0.0722 * shown[2])
+    const dazzle = Photometry.response(shown)
     const widest = Glare.conserving(areaM2)
     const spread = Glare.spread(radiusM + (widest - radiusM) * dazzle, areaM2, luminanceCdM2, holder.position.distanceTo(eye))
     // A model's own brightest glowing part says what colour the bloom is; a primitive's own colour does.
@@ -258,7 +258,7 @@ export class BodySystem {
       return this.throughAir(BodySystem.shown([colour.r, colour.g, colour.b], flame.luminanceCdM2, display), this.scratch)
     }
     effect.set(light(flame.color), light(flame.tipColor ?? flame.color), seconds)
-    effect.illuminate(BodySystem.luminousIntensityCd(flame) * this.sceneUnitsPerLux, BodySystem.lightColourOf(flame))
+    effect.illuminate(BodySystem.luminousIntensityCd(flame) * this.sceneUnitsPerLux(), BodySystem.lightColourOf(flame))
     const glow = FlameEffect.glowFor(flame, eye ? effect.mesh.position.distanceTo(eye) : 0)
     const mixed = new Color(flame.color).lerp(new Color(flame.tipColor ?? flame.color), 0.5)
     effect.shine(glow.radiusM, this.throughAir(BodySystem.shown([mixed.r, mixed.g, mixed.b], glow.luminanceCdM2, display), this.scratch))

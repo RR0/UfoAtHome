@@ -27,7 +27,6 @@ import {
   PerspectiveCamera,
   PointLight,
   Points,
-  PointsMaterial,
   Quaternion,
   Raycaster,
   Scene,
@@ -39,18 +38,14 @@ import {
   Vector3,
   WebGLRenderer
 } from "three"
-import type { Material, Texture, WebGLRenderTarget } from "three"
+import type { Material, Texture } from "three"
 import { ExposureAccumulation } from "./ExposureAccumulation.js"
 import {
   atmosphericTint,
   cartesianToHorizontal,
-  glareOpacity,
-  glareRadius,
-  glareStrength,
   horizontalToCartesian,
   magnitudeToBrightness,
   skyColorForPosition,
-  atmosphericTransmission,
   skyColorsForAltitude,
   starBrightnessTierIndex,
   starColorScale,
@@ -65,7 +60,8 @@ import type { CelestialBody, HorizontalPosition, MoonPhase, ObserverGeo } from "
 import type { ObserverPose } from "../engine/model/ObserverTrack.js"
 import type { GaitOffset } from "../engine/place/Gait.js"
 import type { StarCatalog } from "./StarCatalog.js"
-import { RoundPoints } from "./RoundPoints.js"
+import { PointSources } from "./PointSources.js"
+import { Veil } from "./Veil.js"
 import { BRIGHT_STARS } from "../engine/astronomy/brightStarCatalog.js"
 import type { BrightStar } from "../engine/astronomy/brightStarCatalog.js"
 import { defaultTerrainProviders } from "./terrain/defaultTerrainProviders.js"
@@ -88,6 +84,8 @@ import { CloudField } from "./CloudSystem.js"
 import { buildLensFlare } from "./LensFlareEffect.js"
 import { EquidistantProjectionPass } from "./EquidistantProjectionPass.js"
 import { DepthOfFieldPass } from "./DepthOfFieldPass.js"
+import { FinishPass } from "./FinishPass.js"
+import type { UnfinishedFrame } from "./colorSpace.js"
 import { AdaptiveResolution } from "./AdaptiveResolution.js"
 import { IceHalos } from "../engine/atmosphere/IceHalos.js"
 import { Rainbows } from "../engine/atmosphere/Rainbows.js"
@@ -119,7 +117,9 @@ import { ReferenceSystem, REFERENCE_LAYER } from "./ReferenceSystem.js"
 import type { ReferenceView } from "./ReferenceSystem.js"
 import type { SceneReference } from "../engine/model/Reference.js"
 import type { PhenomenonFrame, PlacedPhenomenon } from "./PhenomenonSystem.js"
-import { ScatteredSky } from "./ScatteredSky.js"
+import { ScatteredSky, type SkyAmbient } from "./ScatteredSky.js"
+import { AtmosphereTables } from "./AtmosphereTables.js"
+import { EyeAdaptation } from "../engine/atmosphere/EyeAdaptation.js"
 import { HumidHaze } from "../engine/atmosphere/HumidHaze.js"
 import { AerialPerspective } from "../engine/atmosphere/AerialPerspective.js"
 import type { Rgb } from "../engine/atmosphere/AerialPerspective.js"
@@ -160,6 +160,9 @@ const SKY_RADIUS = 900
 const DECOR_DEPTH_LAYER = 1
 /** The Sun's dazzle alone, for drawing it onto a picture resampled from the cube — see renderDazzleOnResample. */
 const DAZZLE_LAYER = 4
+/** The compass: the screen's, not the world's — drawn with the overlays, over the eye's response to
+ * the scene rather than in it (see FINISH_GLSL), and never in a reflection. */
+const HUD_LAYER = 5
 /** See decorDistancesAt — filters out a spurious near-camera self-intersection with decor
  * geometry built close to the observer, well inside the camera's own near plane. */
 const UFO_OCCLUSION_MIN_DISTANCE_M = 0.5
@@ -249,29 +252,10 @@ const ICE_DECK_OPACITY = 0.38
 /** Same threshold as BODY_HIDE_BELOW_DEG, named separately for updateCelestialLight's own use —
  * a body that isn't even rendered shouldn't be lighting anything either. */
 const CELESTIAL_LIGHT_MIN_ALTITUDE_DEG = BODY_HIDE_BELOW_DEG
-/** Tuned by eye (see the shadow-mapping session's own verification via gl.readPixels, not real
- * photometric units — modern three.js's light intensities are physically-scaled, but "physically
- * correct" only matters when trying to match a real-world lux reading, not for a stylized scene
- * that was already using hand-tuned fake colors everywhere else, see skyColors.ts). Sun is bright
- * enough to cast a crisp, high-contrast shadow; Moon is a faint, barely-there secondary light —
- * real moonlight shadows are famously subtle, not a rendering bug if they're hard to spot. */
-const SUN_LIGHT_INTENSITY = 3
-/** What SUN_LIGHT_INTENSITY stands for: the sun's direct illuminance on a surface facing it, lux —
- * about a hundred thousand through a clear atmosphere. Not something this renderer was calibrated
- * against (see above); what lets a light OF THE SCENE (a flame, see BodySystem), whose intensity is
- * known in candela, be put on the same scale as the sun rather than on a scale of its own. */
-const SUN_ILLUMINANCE_LUX = 100000
-const MOON_LIGHT_INTENSITY = 0.15
-/** The HemisphereLight's own intensity — deliberately modest relative to SUN_LIGHT_INTENSITY so
- * the shadow side of an object still reads as visibly darker (real contrast, not just a faint
- * variation) while never going fully black. */
-const SKY_LIGHT_INTENSITY = 0.6
-/** A single streetlight lamp, tuned by eye — bright enough nearby to cast a real shadow off
- * decor/terrain, falling off to nothing well before the edge of a typical decor layout (see
- * PointLight's own distance/decay: modern three.js always uses real inverse-square falloff,
- * `distance` just caps it rather than computing contributions past a point no one would see). */
-const STREETLIGHT_LIGHT_INTENSITY = 40
-const STREETLIGHT_LIGHT_DISTANCE = 30
+/** A streetlight's lamp, candela below it: a 10 000 lumen road lamp throws about this much down. */
+const STREETLIGHT_CANDELA = 1500
+/** Where a streetlight's light is let go of: under a hundredth of a lux, well under a full Moon's. */
+const STREETLIGHT_LIGHT_DISTANCE = 400
 
 /** Clockwise from north, matching this project's own azimuth convention (0deg = north, increasing
  * clockwise). Shown on the horizon in "edit mode" (see SceneElement's show-compass attribute, set
@@ -338,40 +322,6 @@ const LENS_FLARE_BASE_GAIN = 55
 /** The dazzle's own uOpacity. Fixed: how bright the Sun's blaze reads is the Sun's photometry
  * (see applyDazzleStrength), not a dial. */
 const LENS_FLARE_BASE_OPACITY = 0.5
-
-/**
- * How wide the Sun's blazing white core is, in degrees of RADIUS, with the Sun high in a clear sky.
- *
- * MEASURED OFF PHOTOGRAPHS, and measurable because those photographs came with their own ruler: a
- * 22-degree halo is a known angle, so the ratio of the white blob to the ring gives the blob in
- * degrees without knowing anything about the camera. Two independent halo photographs put it at
- * about two and a half degrees, which is five times the Sun's own disc and about a fifth of what
- * this scene was drawing.
- *
- * Everything else follows from it rather than being set beside it: the veil goes as the inverse
- * square of the angle (see LensFlareEffect), so this radius IS the calibration, and it shrinks as
- * the square root of however much of the Sun's light is actually arriving.
- *
- * Set UNDER the measured two and a half, because the sky helps: a veil reaching one is white on its
- * own and it is being added to a sky already some way there, so the blob that actually READS as
- * white runs wider than this number. HOW MUCH wider was first guessed and is now measured, the same
- * frame rendered both ways with the Sun at 66 degrees in a clear sky: at 2.2 the white core came out
- * at 2.75 degrees of radius against the photographs' 2.5, and at this value it comes out at 2.55.
- * The white radius is linear in this constant — the veil goes as its square over the angle's, so it
- * reaches one at exactly this radius divided by the root of what the sky has not already supplied —
- * and the two measurements agree with that to half a per cent, which is what says the number was
- * moved along the law rather than away from it.
- *
- * WHAT IS NOT DONE THIS WAY IS THE LAW, and that distinction was learned the hard way. Measured as
- * a rendered radius, with the sky and the resampling in the way, the calibration once came out
- * wrong by a factor of nearly four — and that factor was then multiplied into the WHOLE profile,
- * wings and all, so the core matched the photographs while the Sun went on reading as a ball ten
- * degrees across. The law is measured instead from the same frame rendered with the dazzle off and
- * on, differenced, which nothing else can get into: it reproduces the inverse square to within a
- * tenth from two degrees out to sixteen. This number only says where that law crosses white.
- */
-const GLARE_SATURATION_RADIUS_DEG = 2.05
-
 
 /**
  * Where the Sun's disc is sampled to ask what is standing in front of it — its centre and eight
@@ -669,6 +619,8 @@ interface StarTier {
   readonly points: Points
   readonly colorAttribute: BufferAttribute
   readonly brightness: Float32Array
+  /** Each star's illuminance at the eye, lux, per channel, through the air above it. */
+  readonly illuminance: Float32Array
   readonly phase: Float32Array
   readonly speedFactor: Float32Array
 }
@@ -841,12 +793,12 @@ export class SceneRenderer {
    * appear as models land and disappear with the objects that named them. */
   private readonly decorModelCredits = new Map<string, DecorModelCredit>()
   /** The bodies of the interpretation being replayed, if one is — see setBodies. */
-  private readonly bodySystem = new BodySystem(ref => this.loadBodyModel(ref), () => this.render(), SUN_LIGHT_INTENSITY / SUN_ILLUMINANCE_LUX)
+  private readonly bodySystem = new BodySystem(ref => this.loadBodyModel(ref), () => this.render(), () => this.relativeScale)
   /** Where the frame bodies (and the decor) are placed in stands in the world this tick — the t=0
    * reference as seen from the witness, set by updateDecorAnchoring. */
   private bodyOrigin = { x: 0, z: 0 }
   private starTiers: StarTier[] = []
-  private readonly bodyMeshes = new Map<string, Mesh | Sprite>()
+  private readonly bodyMeshes = new Map<string, Mesh | Sprite | Points>()
   /** Invisible (opacity 0), larger-than-the-real-disc proxies used only for pickBodyAt's hover/
    * click hit-testing — see HOVER_HIT_RADIUS_SCALE. Never rendered/visible, so this doesn't
    * change how anything looks, only how forgiving it is to point at. */
@@ -855,7 +807,7 @@ export class SceneRenderer {
    * its true magnitude (see glareStrength in skyColors.ts). Only ever non-empty for the Sun,
    * a bright-enough Moon, or Venus at its historical brightest — everything else's glareStrength
    * is 0, so no sprite is built for it at all. */
-  private readonly glareSprites = new Map<string, Sprite>()
+  private readonly glareSprites = new Map<string, Veil>()
   /** The last decor list actually built — reference-checked in setDecor to skip a needless rebuild
    * (SceneElement calls setDecor every setAstronomy tick, same as setWeather/setTerrainOrigin,
    * but unlike weather's per-tick-resolved keyframe track, decor is a static list: the editor
@@ -1084,6 +1036,8 @@ export class SceneRenderer {
   /** Built the first time a lens is stopped somewhere that actually blurs something — see
    * setLensOptics. An eye never builds one. */
   private depthOfFieldPass?: DepthOfFieldPass
+  /** The frame no lens reshapes or blurs — see FinishPass. */
+  private finishPass?: FinishPass
   /** The film a long pose is added up on — built the first time a recording states an exposure long
    * enough for the sky to move a pixel, which is a rare and deliberate thing (see ExposureAccumulation). */
   private exposureAccumulation?: ExposureAccumulation
@@ -1586,15 +1540,29 @@ export class SceneRenderer {
    * it shrinks tenfold, which is the sunset a reader was asking for and the opposite of a light
    * being switched off.
    */
+  /**
+   * The Sun's veil, from the light arriving: Stiles and Holladay's k·E/θ² (see Veil), E what the
+   * air, the cloud and the ground in front of the disc let through.
+   *
+   * CHECKED AGAINST PHOTOGRAPHS, which came with their own ruler: a 22-degree halo is a known
+   * angle, and two halo photographs put the Sun's white core at about two and a half degrees of
+   * radius. With the Sun high in a clear sky, a hundred thousand lux, the law reaches nine tenths of
+   * the eye's response at three degrees and nineteen twentieths at under two: the same core, with
+   * no number chosen for it. The display-space calibration this replaces (a veil reaching white at
+   * 2.05 degrees) was set to that same measurement.
+   */
   private applyDazzleStrength(): void {
     if (!this.lensFlare) return
-    const altitudeDeg = this.lastSunPosition?.altitudeDeg ?? -90
-    const arriving =
-      atmosphericTransmission(altitudeDeg) * this.sunCloudTransmission * this.sunUnhiddenFraction
-    const tint = atmosphericTint(altitudeDeg)
-    this.lensFlare.uniforms.uDazzleColour.value.setRGB(tint[0], tint[1], tint[2])
-    this.lensFlare.uniforms.uVeilStrength.value = GLARE_SATURATION_RADIUS_DEG ** 2 * Math.max(0, arriving)
+    // Already through the air and the cloud (see setBodyMesh); what the ground or a roof hides of
+    // the disc is taken here.
+    const [r, g, b] = this.sunArriving
+    const green = Math.max(g, 1e-30)
+    this.lensFlare.uniforms.uDazzleColour.value.setRGB(r / green, 1, b / green)
+    this.lensFlare.uniforms.uVeilStrength.value = Veil.K * g * this.sunUnhiddenFraction
   }
+
+  /** What arrives of the Sun's light at the eye, relative, per channel — see arrivingIlluminance. */
+  private sunArriving: [number, number, number] = [0, 0, 0]
 
   /** Shows/hides the compass labels built by setShowCompass — cheap visibility toggle, never
    * rebuilds the sprites. A witness's heading matters while actively pointing at the canvas to set
@@ -1760,7 +1728,7 @@ export class SceneRenderer {
       originX: x, originZ: z, originGroundY: this.groundYUnder(x, z), eye: this.camera.position,
       groundYAt: (px, pz) => this.groundYUnder(px, pz), wind, light: this.plumeLight(),
       transmittance: (px, py, pz) => this.transmittanceTo(px, py, pz)
-    }, seconds, sky ? (rgb, luminance) => sky.displayOfLuminance(rgb, luminance) : undefined, ids)
+    }, seconds, sky ? (rgb, luminance) => sky.relativeOfLuminance(rgb, luminance) : undefined, ids)
     this.bodySystem.setSmoke(smoke, seconds)
     // Something is there to cast a shadow, whatever the decor says.
     if (this.bodySystem.any) this.celestialLight.castShadow = true
@@ -2174,7 +2142,7 @@ export class SceneRenderer {
     const body = DecorSystem.bodyOf(group)
     const lampHead = body.children.find(child => child.userData.emissive)
     if (!lampHead) return
-    const light = new PointLight(0xffcc66, STREETLIGHT_LIGHT_INTENSITY, STREETLIGHT_LIGHT_DISTANCE)
+    const light = new PointLight(0xffcc66, STREETLIGHT_CANDELA * this.relativeScale, STREETLIGHT_LIGHT_DISTANCE)
     light.position.copy(lampHead.position).multiply(body.scale)
     light.castShadow = true
     light.shadow.mapSize.set(512, 512)
@@ -2207,11 +2175,7 @@ export class SceneRenderer {
     // comet beside them can never be drawn against three different thresholds.
     const magnitudeLimit = visibleMagnitudeLimit(astronomy.sun.altitudeDeg, this.instrumentMagnitudeGain)
     this.buildStars(astronomy.stars, magnitudeLimit)
-    this.setBodyMesh("sun", astronomy.sun, SUN_MOON_VISUAL_RADIUS, new Color(1, 0.96, 0.88), astronomy.sun.magnitude)
-    this.setMoonMesh(astronomy.moon, magnitudeLimit)
-    this.buildPlanets(astronomy.planets, magnitudeLimit)
-    this.buildComet(astronomy.comet, magnitudeLimit)
-    this.buildNovae(astronomy.novae ?? [], magnitudeLimit)
+    this.placeBodies(astronomy, magnitudeLimit)
     this.buildIceHalos(astronomy.sun, astronomy.moon)
     this.buildRainbow(astronomy.sun, astronomy.moon)
     this.applySkyColours(astronomy)
@@ -2224,30 +2188,69 @@ export class SceneRenderer {
   }
 
   /**
+   * The old colour table's sky, drawn as the scene now draws light: each colour the light whose
+   * response it is (see EyeAdaptation.relativeOfResponse), and the level surface under it lit as by a
+   * uniform sky of its zenith, π times its radiance. Only what a device with no scattered sky gets.
+   */
+  private static relativeSkyOf(colours: { zenith: RgbColor; horizon: RgbColor }, scale: number): SkyAmbient {
+    const relative = (rgb: RgbColor): [number, number, number] => {
+      const luminance = Photometry.luminanceOf(rgb)
+      if (!(luminance > 0)) return [0, 0, 0]
+      const k = EyeAdaptation.relativeOfResponse(luminance) / luminance
+      return [rgb[0] * k, rgb[1] * k, rgb[2] * k]
+    }
+    const zenith = relative(colours.zenith)
+    const horizon = relative(colours.horizon)
+    return { zenith, horizon, airlight: horizon, skyIrradiance: [zenith[0] * Math.PI, zenith[1] * Math.PI, zenith[2] * Math.PI], scale }
+  }
+
+  /**
    * Everything in the scene that takes its colour from the sky: the fog, the clouds' ambient light,
    * the skylight and the diffuse glows' reference. From the scattered sky once it has been read back,
    * and from the old colour table until then.
    */
+  /** The Sun, the Moon, the planets, a comet and any nova, at what arrives of their light. */
+  private placeBodies(astronomy: SceneAstronomy, magnitudeLimit: number): void {
+    this.bodiesScale = this.relativeScale
+    this.setBodyMesh("sun", astronomy.sun, SUN_MOON_VISUAL_RADIUS, new Color(1, 0.96, 0.88), astronomy.sun.magnitude)
+    this.setMoonMesh(astronomy.moon, magnitudeLimit)
+    this.buildPlanets(astronomy.planets, magnitudeLimit)
+    this.buildComet(astronomy.comet, magnitudeLimit)
+    this.buildNovae(astronomy.novae ?? [], magnitudeLimit)
+  }
+
+  /** The relative scale the bodies were last placed at: a body is drawn from its light in the
+   * scene's relative units, so an eye adapting anew redraws them. */
+  private bodiesScale = 0
+
   private applySkyColours(astronomy: SceneAstronomy): void {
     this.skyColoursStale = false
-    const skyColors = this.scatteredSky?.ambient ?? skyColorsForAltitude(astronomy.sun.altitudeDeg)
+    if (this.bodiesScale !== this.relativeScale) {
+      this.placeBodies(astronomy, visibleMagnitudeLimit(astronomy.sun.altitudeDeg, this.instrumentMagnitudeGain))
+      this.applyDazzleStrength()
+    }
+    const sky = this.scatteredSky?.ambient ?? SceneRenderer.relativeSkyOf(skyColorsForAltitude(astronomy.sun.altitudeDeg), this.relativeScale)
+    const skyColors = sky
     const groundColor = skyColors.horizon
     this.baseFogColor = [groundColor[0], groundColor[1], groundColor[2]]
     // Until the scattered sky has been read back there is only the old colour table, whose horizon
     // is all there is to go on.
-    const air = "airlight" in skyColors ? skyColors.airlight : skyColors.horizon
+    const air = skyColors.airlight
     this.airlight = [air[0], air[1], air[2]]
     if (this.skyMesh && this.skyGradientMaterial) {
       this.skyMesh.material = this.scatteredSky?.ready ? this.scatteredSky.material : this.skyGradientMaterial
     }
-    this.updateCloudLighting(astronomy.sun, this.baseFogColor)
     // Real lights (celestialLight/skyLight, see updateCelestialLight) now carry ground/terrain/
     // decor's day-night color grading via normal Lambertian shading — unlike before this session,
     // groundMesh/terrainMesh/decor materials no longer need their own per-frame color.setRGB
     // retint, since they're no longer self-illuminated MeshBasicMaterial (see buildGround/
     // DecorSystem.build's own doc comments on why this changed: a manually multiplied flat color
     // can never receive a real shadow, since there's no actual light for something to block).
-    this.updateCelestialLight(astronomy, skyColors.zenith, groundColor)
+    this.updateCelestialLight(astronomy, sky)
+    this.updateCloudLighting(astronomy.sun, this.baseFogColor)
+    PointSources.setEye(this.scatteredSky?.rodShare ?? 0, this.relativeScale)
+    this.updateTwinkle(this.twinkleSeconds)
+    for (const light of this.streetlightLights.values()) light.intensity = STREETLIGHT_CANDELA * this.relativeScale
     this.buildSkyGlow(astronomy, skyColors.zenith)
     // The air between the eye and everything real, with the horizon this sky has just been given
     // as the light it lays over a distant thing — see AerialFog.
@@ -2310,9 +2313,9 @@ export class SceneRenderer {
       const at = step * 3
       const light: [number, number, number] = [0, 1, 2].map(channel =>
         illuminance * tint[channel] * (aureole * hazeProfile[at + channel] + corona * cloudProfile[at + channel])) as [number, number, number]
-      const colour = Photometry.shown(light, Photometry.luminanceOf(light), (rgb, luminance) => display.displayOfLuminance(rgb, luminance))
+      const colour = Photometry.shown(light, Photometry.luminanceOf(light), (rgb, luminance) => display.relativeOfLuminance(rgb, luminance))
       shown.set(colour, at)
-      brightest = Math.max(brightest, colour[0], colour[1], colour[2])
+      brightest = Math.max(brightest, Photometry.response(colour))
     }
     const { x, y, z } = horizontalToCartesian(moon.altitudeDeg, moon.azimuthDeg, 1)
     // Under a two-hundredth of the screen's scale it is nothing anyone would see, and not drawn.
@@ -2428,29 +2431,85 @@ export class SceneRenderer {
    * ambient-lit sky/ground bounce instead of pure black — real skylight does exactly this for a
    * real witness. `castShadow` is gated on there being any decor at all: an empty sighting has
    * nothing to receive or cast a real shadow, so it costs nothing extra. */
-  private updateCelestialLight(astronomy: SceneAstronomy, skyZenith: RgbColor, groundColor: RgbColor): void {
-    this.skyLight.color.setRGB(skyZenith[0], skyZenith[1], skyZenith[2])
-    this.skyLight.groundColor.setRGB(groundColor[0], groundColor[1], groundColor[2])
-    this.skyLight.intensity = SKY_LIGHT_INTENSITY
-
+  /**
+   * The lights of the sky, in the scene's relative units (see ScatteredSky.relativeScale): the Sun's
+   * or the Moon's beam from its magnitude through the air above the eye, and the sky's own light on
+   * a level surface, with the ground's light thrown back up from below.
+   */
+  private updateCelestialLight(astronomy: SceneAstronomy, sky: SkyAmbient): void {
+    const scale = this.relativeScale
     const useSun = astronomy.sun.altitudeDeg >= CELESTIAL_LIGHT_MIN_ALTITUDE_DEG
     const useMoon = !useSun && astronomy.moon.altitudeDeg >= CELESTIAL_LIGHT_MIN_ALTITUDE_DEG
+    const body = useSun ? astronomy.sun : astronomy.moon
+    const beam: [number, number, number] = [0, 0, 0]
+    const level = Math.max(0, Math.sin(Math.max(body.altitudeDeg, 0) * DEG_TO_RAD))
+    // What the clouds take out of the beam they send down again, scattered: the two-stream answer
+    // for a deck of that optical depth, whose total transmission is 1 / (1 + ¾(1 − g)τ) with the
+    // droplets' forward asymmetry g = 0.85, less the beam that went straight through.
+    const direct = useSun || useMoon ? this.cloudTransmission(body) : 1
+    const depth = -Math.log(Math.max(direct, 1e-6))
+    const scattered = Math.max(0, 1 / (1 + 0.1125 * depth) - direct)
+    const diffuse: [number, number, number] = [0, 0, 0]
+    if (useSun || useMoon) {
+      const illuminance = ForwardDiffraction.illuminanceOf(body.magnitude) * scale
+      const through = this.air.transmittanceFromSpace(this.siteElevationM + this.observerElevationM, body.altitudeDeg)
+      for (let c = 0; c < 3; c++) {
+        beam[c] = illuminance * through[c] * direct
+        diffuse[c] = illuminance * through[c] * scattered * level
+        this.cloudBeam[c] = illuminance * through[c]
+      }
+      const { x, y, z } = horizontalToCartesian(body.altitudeDeg, body.azimuthDeg, 1)
+      this.cloudBeamDirection.set(x, y, z)
+    } else this.cloudBeam.fill(0)
+    // The clear sky's own light comes down through the clouds as their holes and thin parts let it.
+    const skyThrough = this.skyCloudTransmission()
+    const clear = sky.skyIrradiance
+    const irradiance = [0, 1, 2].map(c => clear[c] * skyThrough + diffuse[c]) as [number, number, number]
+    this.skyLight.color.setRGB(irradiance[0], irradiance[1], irradiance[2])
+    // A level ground of the sky's own albedo, lit by the sky and the beam, lights what faces down.
+    const albedo = AtmosphereTables.GROUND_ALBEDO
+    this.skyLight.groundColor.setRGB(
+      albedo * (irradiance[0] + beam[0] * level), albedo * (irradiance[1] + beam[1] * level), albedo * (irradiance[2] + beam[2] * level))
+    this.skyLight.intensity = 1
     if (!useSun && !useMoon) {
       this.celestialLight.intensity = 0
       return
     }
-    const body = useSun ? astronomy.sun : astronomy.moon
     const { x, y, z } = horizontalToCartesian(body.altitudeDeg, body.azimuthDeg, BODY_PLACEMENT_RADIUS)
     this.celestialLight.position.set(x, y, z)
-    const tint = atmosphericTint(body.altitudeDeg)
-    this.celestialLight.color.setRGB(tint[0], tint[1], tint[2])
-    // Grazing-angle light is both dimmer in reality (more atmosphere to pass through) and, more
-    // importantly here, would cast absurdly long/noisy shadows right at the shadow camera's own
-    // frustum edges — fading it out approaching the horizon sidesteps both at once.
-    const altitudeFactor = Math.max(0, Math.sin(Math.max(body.altitudeDeg, 0) * DEG_TO_RAD))
-    this.celestialLight.intensity = (useSun ? SUN_LIGHT_INTENSITY : MOON_LIGHT_INTENSITY) * altitudeFactor
+    const peak = Math.max(beam[0], beam[1], beam[2], 1e-30)
+    this.celestialLight.color.setRGB(beam[0] / peak, beam[1] / peak, beam[2] / peak)
+    this.celestialLight.intensity = peak
     this.celestialLight.castShadow = this.decorGroups.size > 0 || this.bodySystem.any
   }
+
+  /** How much of the clear sky's light on a level surface the clouds let through: their
+   * transmission over the upper hemisphere, weighted as the light on a level surface is. */
+  private skyCloudTransmission(): number {
+    let through = this.cloudTransmission({ altitudeDeg: 90, azimuthDeg: 0 })
+    let weight = 1
+    for (const altitudeDeg of [20, 45, 70]) {
+      const radians = altitudeDeg * DEG_TO_RAD
+      const w = Math.sin(radians) * Math.cos(radians) * 2
+      for (let azimuthDeg = 0; azimuthDeg < 360; azimuthDeg += 60) {
+        through += w * this.cloudTransmission({ altitudeDeg, azimuthDeg })
+        weight += w
+      }
+    }
+    return through / weight
+  }
+
+  /** The beam lighting the clouds, relative: the Sun's or the Moon's through the air alone — a
+   * deck shades itself (see VolumetricClouds). Its direction beside it. */
+  private readonly cloudBeam: [number, number, number] = [0, 0, 0]
+  private readonly cloudBeamDirection = new Vector3(0, 1, 0)
+
+  /** What a lux or a candela is in the scene's own light — see ScatteredSky.relativeScale. Without
+   * the scattered sky (a device with no float targets), an eye adapted to a day sky. */
+  private get relativeScale(): number {
+    return this.scatteredSky?.relativeScale ?? 1 / EyeAdaptation.semiSaturation(EyeAdaptation.DAYLIGHT_ANCHOR_CD_M2)
+  }
+
 
   /**
    * The meteor shower falling in this sky, and where its radiant stands.
@@ -2742,7 +2801,8 @@ export class SceneRenderer {
     // MAX_ANIMATION_DT_SECONDS keeps a single step small enough that even hail's fastest cycle
     // can't be skipped over.
     const dtSeconds = Math.min(intervalMs / 1000, MAX_ANIMATION_DT_SECONDS)
-    this.updateTwinkle(timeMs / 1000)
+    this.twinkleSeconds = timeMs / 1000
+    this.updateTwinkle(this.twinkleSeconds)
     this.updatePrecipitation(timeMs / 1000, dtSeconds)
     this.updateRain(dtSeconds)
     if (this.lensFlare) this.lensFlare.uniforms.uTime.value = timeMs / 1000
@@ -2803,7 +2863,7 @@ export class SceneRenderer {
 
   /** One instant, straight to the canvas — the ordinary frame, and what every recording drew before
    * poses long enough to move the sky existed. */
-  private renderOnce(target?: WebGLRenderTarget): void {
+  private renderOnce(target?: UnfinishedFrame): void {
     if (this.onMapSubjectBounds) {
       const bounds = this.mapSubjectBounds()
       if (target) this.exposureSubjectBounds.push(...bounds)
@@ -2824,31 +2884,18 @@ export class SceneRenderer {
       this.camera.far = furthestPhenomenonM
       this.camera.updateProjectionMatrix()
     }
-    const previousTarget = this.renderer.getRenderTarget()
+    // Every path draws light into targets of its own and finishes it once (see FinishPass); the
+    // sky's glow is therefore always added to linear light, never to an encoded canvas.
+    this.skyGlow?.setDestinationEncoded(false)
     if (!pass) {
       this.updateLensFlarePosition()
       const blur = this.usableDepthOfFieldPass()
-      blur?.setEncodesOutput(target === undefined)
-      // The only path that draws the scene itself onto the canvas, where three.js has already
-      // encoded everything else — see SkyGlowEffect.setDestinationEncoded. A blur or a film target
-      // means the scene lands in a linear buffer instead.
-      this.skyGlow?.setDestinationEncoded(target === undefined && !blur)
-      if (target) this.renderer.setRenderTarget(target)
-      if (blur) blur.render(this.renderer, this.scene, this.camera, () => this.renderOverlayPasses())
-      else {
-        this.renderer.render(this.scene, this.camera)
-        this.renderOverlayPasses()
-      }
-      if (target) this.renderer.setRenderTarget(previousTarget)
+      if (blur) blur.render(this.renderer, this.scene, this.camera, () => this.renderOverlayPasses(), target)
+      else this.usableFinishPass().render(this.renderer, this.scene, this.camera, () => this.renderOverlayPasses(), undefined, target)
       return
     }
     // The flare is repositioned from inside, once the camera has been widened for the offscreen
     // render — see the pass's own onCameraWidened.
-    pass.setEncodesOutput(target === undefined)
-    // The projection renders the scene into its own target first, so what the glow is added to
-    // there is linear light, whatever happens to that target afterwards.
-    this.skyGlow?.setDestinationEncoded(false)
-    if (target) this.renderer.setRenderTarget(target)
     pass.render(
       this.renderer,
       this.scene,
@@ -2861,9 +2908,9 @@ export class SceneRenderer {
       cube => {
         if (this.lensFlare) this.lensFlare.mesh.visible = cube ? false : this.sunVisible
       },
-      () => this.renderDazzleOnResample()
+      () => this.renderDazzleOnResample(),
+      target
     )
-    if (target) this.renderer.setRenderTarget(previousTarget)
   }
 
   /**
@@ -2889,6 +2936,20 @@ export class SceneRenderer {
   private renderOverlayPasses(camera: PerspectiveCamera = this.camera): void {
     this.renderReferencesPass(camera)
     this.renderPhenomenaPass(camera)
+    this.renderHudPass(camera)
+  }
+
+  private renderHudPass(camera: PerspectiveCamera): void {
+    if (!this.compassSprites.some(sprite => sprite.visible)) return
+    const autoClear = this.renderer.autoClear
+    const shadows = this.renderer.shadowMap.autoUpdate
+    this.renderer.autoClear = false
+    this.renderer.shadowMap.autoUpdate = false
+    camera.layers.set(HUD_LAYER)
+    this.renderer.render(this.scene, camera)
+    camera.layers.set(0)
+    this.renderer.autoClear = autoClear
+    this.renderer.shadowMap.autoUpdate = shadows
   }
 
   /**
@@ -3024,7 +3085,7 @@ export class SceneRenderer {
     // One frame's worth of instants is one drawing to the card, as far as the ratio is concerned.
     this.resolution.beginDrawing()
     const until = performance.now() + SceneRenderer.EXPOSURE_BUDGET_MS
-    const atMost = SceneRenderer.exposureInstantsPerFrame(film.instantTarget.width * film.instantTarget.height)
+    const atMost = SceneRenderer.exposureInstantsPerFrame(film.instantTarget.scene.width * film.instantTarget.scene.height)
     let added = 0
     do {
       this.restateAt(instantAt, this.exposureInstantsDone)
@@ -3182,6 +3243,12 @@ export class SceneRenderer {
     return this.depthOfFieldPass
   }
 
+  private usableFinishPass(): FinishPass {
+    const size = this.renderer.getDrawingBufferSize(new Vector2())
+    if (!this.finishPass) this.finishPass = new FinishPass(size.x, size.y)
+    else this.finishPass.resize(size.x, size.y)
+    return this.finishPass
+  }
   private usableEquidistantPass(): EquidistantProjectionPass | undefined {
     if (this.projectionKind !== "equidistant") return undefined
     const size = this.renderer.getDrawingBufferSize(new Vector2())
@@ -3655,6 +3722,7 @@ export class SceneRenderer {
     this.skyGlow?.dispose()
     this.skyGlow = undefined
     this.depthOfFieldPass?.dispose()
+    this.finishPass?.dispose()
     this.depthOfFieldPass = undefined
     this.cancelExposure()
     this.exposureAccumulation?.dispose()
@@ -3951,24 +4019,45 @@ export class SceneRenderer {
     }
     const { x, y, z } = horizontalToCartesian(position.altitudeDeg, position.azimuthDeg, BODY_PLACEMENT_RADIUS)
     const tint = atmosphericTint(position.altitudeDeg)
-    // Dimmed by whatever cloud stands in front of it — see cloudTransmission.
+    // What arrives of its light: through the air above the eye and whatever cloud stands in front
+    // of it (see cloudTransmission), in the scene's own relative units.
     const through = this.cloudTransmission(position)
-    const tintedColor = new Color(color.r * tint[0] * through, color.g * tint[1] * through, color.b * tint[2] * through)
+    const arriving = this.arrivingIlluminance(position, magnitude, through)
+    const hue = SceneRenderer.unitLuminance(color)
     // Kept, moved and scaled, not rebuilt: the sky is restated up to once per frame, and a body
     // rebuilt at each restatement was a material disposed and compiled again each time — one
     // shader compilation per frame, a third of the main thread on the comet demo. A unit sphere
     // scaled to the size of the moment, because a planet's size follows its brightness, which
     // follows the sky's own brightness, which changes at every restatement.
     let mesh = this.bodyMeshes.get(key)
-    if (!(mesh instanceof Mesh)) {
-      this.disposeMesh(mesh)
-      mesh = new Mesh(new SphereGeometry(1, 16, 16), new MeshBasicMaterial({ color: tintedColor, fog: false }))
-      this.celestialGroup.add(mesh)
-      this.bodyMeshes.set(key, mesh)
+    if (key === "sun") {
+      // The Sun's disc is resolved: its illuminance over its own solid angle is its luminance.
+      const solidAngle = Math.PI * (visualRadius / BODY_PLACEMENT_RADIUS) ** 2
+      const shown = [0, 1, 2].map(c => Math.min(SceneRenderer.BRIGHTEST_RELATIVE, (hue[c] * arriving[c]) / solidAngle))
+      if (!(mesh instanceof Mesh)) {
+        this.disposeMesh(mesh)
+        mesh = new Mesh(new SphereGeometry(1, 16, 16), new MeshBasicMaterial({ fog: false }))
+        this.celestialGroup.add(mesh)
+        this.bodyMeshes.set(key, mesh)
+      }
+      ;(mesh.material as MeshBasicMaterial).color.setRGB(shown[0], shown[1], shown[2])
+      mesh.scale.setScalar(visualRadius)
     } else {
-      ;(mesh.material as MeshBasicMaterial).color.copy(tintedColor)
+      // Everything else is a point to the eye, drawn from its illuminance (see PointSources).
+      if (!(mesh instanceof Points)) {
+        this.disposeMesh(mesh)
+        const geometry = new BufferGeometry()
+        geometry.setAttribute("position", new BufferAttribute(new Float32Array(3), 3))
+        geometry.setAttribute("color", new BufferAttribute(new Float32Array(3), 3))
+        mesh = new Points(geometry, PointSources.material(STAR_BRIGHTNESS_TIERS[STAR_BRIGHTNESS_TIERS.length - 1].size))
+        PointSources.track(mesh)
+        this.celestialGroup.add(mesh)
+        this.bodyMeshes.set(key, mesh)
+      }
+      const colours = mesh.geometry.getAttribute("color") as BufferAttribute
+      colours.setXYZ(0, hue[0] * arriving[0], hue[1] * arriving[1], hue[2] * arriving[2])
+      colours.needsUpdate = true
     }
-    mesh.scale.setScalar(visualRadius)
     mesh.position.set(x, y, z)
     this.setHitArea(key, x, y, z, visualRadius)
     // The Sun's own dazzle comes entirely from the lens-flare mesh below (its always-on glareOut
@@ -3979,9 +4068,11 @@ export class SceneRenderer {
     // The glare goes with the light that causes it: a magnitude of cloud is a magnitude less dazzle.
     // Adding 2.5·log10 rather than scaling the colour, because that is what the halo's own strength
     // function is written in terms of.
-    const dimmedMagnitude = magnitude - 2.5 * Math.log10(Math.max(through, 1e-3))
-    if (key === "sun") this.sunCloudTransmission = through
-    if (key !== "sun") this.setGlare(key, x, y, z, dimmedMagnitude, tintedColor)
+    if (key === "sun") {
+      this.sunCloudTransmission = through
+      this.sunArriving = arriving
+    }
+    if (key !== "sun") this.setGlare(key, x, y, z, arriving, (visualRadius / BODY_PLACEMENT_RADIUS) * (180 / Math.PI))
     if (key === "sun") {
       this.sunVisible = true
       const celestialScale = this.celestialGroup.scale.x
@@ -4024,8 +4115,12 @@ export class SceneRenderer {
       return
     }
     const { x, y, z } = horizontalToCartesian(position.altitudeDeg, position.azimuthDeg, BODY_PLACEMENT_RADIUS)
-    const tint = atmosphericTint(position.altitudeDeg)
-    const tintColor = new Color(tint[0], tint[1], tint[2])
+    // Resolved like the Sun's: what arrives of its light over the solid angle of its LIT part, which
+    // is what its magnitude already counts, is the luminance of that part.
+    const through = this.cloudTransmission(position)
+    const arriving = this.arrivingIlluminance(position, position.magnitude, through)
+    const lit = Math.max(clamp(position.phase.illuminatedFraction, 0, 1), 0.01) * Math.PI * (SUN_MOON_VISUAL_RADIUS / BODY_PLACEMENT_RADIUS) ** 2
+    const tintColor = new Color(...arriving.map(value => Math.min(SceneRenderer.BRIGHTEST_RELATIVE, value / lit)) as [number, number, number])
     // The disc is drawn again only once its lit part has moved by a fifth of a percent of its
     // width, a quarter of a pixel of the 128 px texture: the phase turns a thirtieth per day, so a
     // recording of minutes keeps one drawing where it used to draw and upload one per restatement.
@@ -4049,7 +4144,27 @@ export class SceneRenderer {
     }
     sprite.position.set(x, y, z)
     this.setHitArea(key, x, y, z, SUN_MOON_VISUAL_RADIUS)
-    this.setGlare(key, x, y, z, position.magnitude, tintColor)
+    this.setGlare(key, x, y, z, arriving, (SUN_MOON_VISUAL_RADIUS / BODY_PLACEMENT_RADIUS) * (180 / Math.PI))
+  }
+
+  /** The most a pixel is ever given, relative: under a half float's largest, which is 65 504. */
+  private static readonly BRIGHTEST_RELATIVE = 60000
+
+  /**
+   * A body's illuminance at the eye, per channel and relative (see relativeScale), from its
+   * magnitude above the atmosphere: through the air above the eye at its altitude, and the share
+   * `through` the clouds let past.
+   */
+  private arrivingIlluminance(position: HorizontalPosition, magnitude: number, through: number): [number, number, number] {
+    const air = this.air.transmittanceFromSpace(this.siteElevationM + this.observerElevationM, position.altitudeDeg)
+    const illuminance = ForwardDiffraction.illuminanceOf(magnitude) * through * this.relativeScale
+    return [air[0] * illuminance, air[1] * illuminance, air[2] * illuminance]
+  }
+
+  /** A colour scaled to a luminance of one: the hue alone. */
+  private static unitLuminance(color: Color): [number, number, number] {
+    const luminance = Photometry.luminanceOf([color.r, color.g, color.b])
+    return luminance > 0 ? [color.r / luminance, color.g / luminance, color.b / luminance] : [1, 1, 1]
   }
 
   private setHitArea(key: string, x: number, y: number, z: number, visualRadius: number): void {
@@ -4073,41 +4188,31 @@ export class SceneRenderer {
     this.hitAreas.delete(key)
   }
 
-  /** Builds (or removes) a body's additive-blended glare halo — see glareStrength's own doc
-   * comment in skyColors.ts for why this is a realism concern, not an artistic one. A no-op
-   * (removes any existing halo and returns) whenever the body isn't bright enough to produce real
-   * glare at all, which is true for every ordinary star/planet. `color` is the body's own already
-   * atmosphere-tinted color, so the halo warms near the horizon along with the disc itself. */
-  private setGlare(key: string, x: number, y: number, z: number, magnitude: number, color: Color): void {
-    const strength = glareStrength(magnitude)
-    if (strength <= 0) {
+  /** Stands (or removes) the veiling glare round a body in the eye — see Veil. `illuminance` is
+   * what arrives of its light, relative; `sourceDeg` its disc's own angular radius. */
+  private setGlare(key: string, x: number, y: number, z: number, illuminance: readonly [number, number, number], sourceDeg: number): void {
+    if (Veil.radiusDeg(Veil.K * Math.max(...illuminance)) <= sourceDeg) {
       this.disposeGlare(key)
       return
     }
-    const radius = glareRadius(strength)
-    // Updated in place rather than disposed and rebuilt. This runs on every astronomy tick, and a
-    // drag fires one per pointer move: throwing the sprite and its material away that often meant
-    // the Sun's dazzle was a brand-new GPU object several times a second, for a halo whose only
-    // changing properties are four numbers and a colour.
-    const existing = this.glareSprites.get(key)
-    const sprite = existing ?? new Sprite(new SpriteMaterial({ map: getGlareTexture(), transparent: true, blending: AdditiveBlending, depthWrite: false, fog: false }))
-    sprite.material.color.copy(color)
-    sprite.material.opacity = glareOpacity(strength)
-    sprite.position.set(x, y, z)
-    sprite.scale.set(radius * 2, radius * 2, 1)
-    if (!existing) {
-      this.celestialGroup.add(sprite)
-      this.glareSprites.set(key, sprite)
+    // Updated in place rather than disposed and rebuilt: this runs on every astronomy tick.
+    let veil = this.glareSprites.get(key)
+    if (!veil) {
+      veil = new Veil(`veil:${key}`)
+      this.celestialGroup.add(veil.mesh)
+      this.glareSprites.set(key, veil)
     }
+    veil.shine({ x, y, z }, illuminance, sourceDeg)
   }
 
   private disposeGlare(key: string): void {
-    const sprite = this.glareSprites.get(key)
-    if (!sprite) return
-    sprite.removeFromParent()
-    sprite.material.dispose()
+    const veil = this.glareSprites.get(key)
+    if (!veil) return
+    veil.mesh.removeFromParent()
+    veil.dispose()
     this.glareSprites.delete(key)
   }
+
 
   /**
    * Places the comet standing in this sky, head and tail.
@@ -4407,7 +4512,8 @@ export class SceneRenderer {
     // deterministic so a star's twinkle phase doesn't jump around between renders.
     const jitterRandom = mulberry32(1337)
 
-    const visibleStars: { x: number; y: number; z: number; brightness: number; phase: number; speedFactor: number }[] = []
+    const visibleStars: { x: number; y: number; z: number; brightness: number; illuminance: readonly number[]; phase: number; speedFactor: number }[] = []
+    const eyeAltitudeM = this.siteElevationM + this.observerElevationM
     for (let i = 0; i < catalog.count; i++) {
       const mag = catalog.mag[i]
       // BREAK, not continue: the catalogue is sorted brightest first (see StarCatalogs), so the
@@ -4429,6 +4535,7 @@ export class SceneRenderer {
         y,
         z,
         brightness: magnitudeToBrightness(mag, magnitudeLimit),
+        illuminance: this.air.transmittanceFromSpace(eyeAltitudeM, altitudeDeg).map(through => through * ForwardDiffraction.illuminanceOf(mag)),
         phase: jitterRandom() * Math.PI * 2,
         speedFactor: 0.7 + jitterRandom() * 0.6
       })
@@ -4449,6 +4556,7 @@ export class SceneRenderer {
       const tierStars = visibleStars.filter(star => starBrightnessTierIndex(star.brightness) === tierIndex)
       const positions = new Float32Array(tierStars.length * 3)
       const brightness = new Float32Array(tierStars.length)
+      const illuminance = new Float32Array(tierStars.length * 3)
       const phase = new Float32Array(tierStars.length)
       const speedFactor = new Float32Array(tierStars.length)
       tierStars.forEach((star, i) => {
@@ -4456,6 +4564,7 @@ export class SceneRenderer {
         positions[i * 3 + 1] = star.y
         positions[i * 3 + 2] = star.z
         brightness[i] = star.brightness
+        illuminance.set(star.illuminance, i * 3)
         phase[i] = star.phase
         speedFactor[i] = star.speedFactor
       })
@@ -4470,12 +4579,11 @@ export class SceneRenderer {
         points.geometry.dispose()
         points.geometry = geometry
       } else {
-        const material = new PointsMaterial({ vertexColors: true, size: tier.size, sizeAttenuation: false, fog: false })
-        RoundPoints.apply(material)
-        points = new Points(geometry, material)
+        points = new Points(geometry, PointSources.material(tier.size))
+        PointSources.track(points)
         this.celestialGroup.add(points)
       }
-      return { points, colorAttribute, brightness, phase, speedFactor }
+      return { points, colorAttribute, brightness, illuminance, phase, speedFactor }
     })
     // Populates real initial colors synchronously (single source of truth for the color
     // formula — see updateTwinkle) before the very first render(), which setAstronomy() calls
@@ -4487,7 +4595,11 @@ export class SceneRenderer {
   /** Rewrites each star tier's per-vertex color buffer for the current time — the CPU-side
    * "twinkle": no shader needed at these star counts (a few thousand Math.sin calls and a
    * small buffer re-upload per frame, well under a millisecond of work). */
+  /** Where the twinkle last was, so a change of adaptation redraws the stars at the same instant. */
+  private twinkleSeconds = 0
+
   private updateTwinkle(timeSeconds: number): void {
+    const relative = this.relativeScale
     for (const tier of this.starTiers) {
       const colors = tier.colorAttribute.array as Float32Array
       for (let i = 0; i < tier.brightness.length; i++) {
@@ -4496,10 +4608,10 @@ export class SceneRenderer {
           { phase: tier.phase[i], speedFactor: tier.speedFactor[i] },
           timeSeconds
         )
-        const scale = starColorScale(tier.brightness[i]) * intensity
-        colors[i * 3] = scale
-        colors[i * 3 + 1] = scale
-        colors[i * 3 + 2] = scale
+        const scale = relative * intensity
+        colors[i * 3] = tier.illuminance[i * 3] * scale
+        colors[i * 3 + 1] = tier.illuminance[i * 3 + 1] * scale
+        colors[i * 3 + 2] = tier.illuminance[i * 3 + 2] * scale
       }
       tier.colorAttribute.needsUpdate = true
     }
@@ -4662,34 +4774,30 @@ export class SceneRenderer {
   /** Cheap per-tick uniform refresh (no geometry rebuild) — updates only the time-varying lighting
    * terms (sun direction/color, ambient) on cloudUniforms, driven by the app's real current sun
    * position/atmosphericTint instead of a hardcoded time-of-day color table. */
-  private updateCloudLighting(sun: HorizontalPosition, groundColor: [number, number, number]): void {
+  private updateCloudLighting(_sun: HorizontalPosition, groundColor: [number, number, number]): void {
     // Whichever decks exist, and NOT gated on the water one: a sky with cirrus and nothing below it
     // used to leave the ice deck unlit, because this returned early on the water deck's absence.
     const decks = [this.cloudUniforms, this.cirrusUniforms].filter((deck): deck is CloudUniforms => deck !== undefined)
     if (decks.length === 0 && !this.layeredClouds) return
-    const { x, y, z } = horizontalToCartesian(sun.altitudeDeg, sun.azimuthDeg, 1)
-    const tint = atmosphericTint(sun.altitudeDeg)
-    // Scaled by how high the Sun actually is, exactly as the scene's own real light already is
-    // (see updateCelestialLight's altitudeFactor): atmosphericTint only says what COLOUR sunlight
-    // has at that altitude, never how much of it there is, so feeding it raw lit the deck at full
-    // daylight strength with the Sun 23 degrees below the horizon — Chiles-Whitted's clouds glowed
-    // through a 02:45 night. Below the horizon the only real light left on a cloud base is
-    // moonlight and skyglow, which is what ambientColor already carries.
-    const daylight = Math.max(0, Math.sin(Math.max(sun.altitudeDeg, 0) * DEG_TO_RAD))
+    const direction = this.cloudBeamDirection
+    // The beam as light on a white surface facing it, E/π, in the scene's relative units: what the
+    // decks' own shading, written for a light of one, multiplies. The Sun's by day, the Moon's by
+    // night (see updateCelestialLight) — Chiles-Whitted's clouds are lit by the Moon or by nothing.
+    const [r, g, b] = this.cloudBeam.map(value => value / Math.PI)
     // A flash lights the deck from inside and below, evenly: an ambient term, not a direction.
     const flash = this.lightningLevel * LIGHTNING_CLOUD_GAIN
     const ambient = new Color(groundColor[0] + LIGHTNING_COLOR.r * flash, groundColor[1] + LIGHTNING_COLOR.g * flash, groundColor[2] + LIGHTNING_COLOR.b * flash)
-    // The layered decks are not scaled by it: a cloud's side faces the Sun, and only the Earth's curve
-    // takes a low Sun from it (see LayeredCloudSystem.sunVisibility).
-    this.layeredClouds?.setLighting(new Vector3(x, y, z),
-      new Color(tint[0], 0.96 * tint[1], 0.88 * tint[2]),
-      ambient, ambient)
+    // The layered decks are not scaled by the height of the source: a cloud's side faces it, and
+    // only the Earth's curve takes a low Sun from it (see LayeredCloudSystem.sunVisibility).
+    this.layeredClouds?.setLighting(direction.clone(), new Color(r, g, b), ambient, ambient)
+    const level = Math.max(0, direction.y)
     for (const deck of decks) {
-      deck.sunDir.value.set(x, y, z)
-      deck.sunColor.value.setRGB(tint[0] * daylight, 0.96 * tint[1] * daylight, 0.88 * tint[2] * daylight)
+      deck.sunDir.value.copy(direction)
+      deck.sunColor.value.setRGB(r * level, g * level, b * level)
       deck.ambientColor.value.copy(ambient)
     }
   }
+
 
 
   private disposeCloudSystem(): void {
@@ -5251,6 +5359,7 @@ export class SceneRenderer {
       sprite.position.set(x, y, z)
       sprite.scale.set(COMPASS_SPRITE_SIZE, COMPASS_SPRITE_SIZE, 1)
       sprite.renderOrder = COMPASS_RENDER_ORDER
+      sprite.layers.set(HUD_LAYER)
       sprite.visible = this.compassHovered || this.compassForced
       this.celestialGroup.add(sprite)
       return sprite
@@ -5533,29 +5642,6 @@ interface CpuPrecipitationUniforms {
   uHazeDistance: { value: number }
 }
 
-let sharedGlareTexture: CanvasTexture | undefined
-
-/** One shared soft radial-gradient sprite texture for every body's glare halo (see setGlare) —
- * unlike the Moon's phase texture, its drawn content never differs between bodies/instants, only
- * the SpriteMaterial's own color/scale/opacity do, so a single cached canvas suffices instead of
- * generating one per body per update. */
-function getGlareTexture(): CanvasTexture {
-  if (sharedGlareTexture) return sharedGlareTexture
-  const size = 128
-  const canvas = document.createElement("canvas")
-  canvas.width = size
-  canvas.height = size
-  const context = canvas.getContext("2d")!
-  const gradient = context.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2)
-  gradient.addColorStop(0, "rgba(255,255,255,1)")
-  gradient.addColorStop(0.4, "rgba(255,255,255,0.35)")
-  gradient.addColorStop(1, "rgba(255,255,255,0)")
-  context.fillStyle = gradient
-  context.fillRect(0, 0, size, size)
-  sharedGlareTexture = new CanvasTexture(canvas)
-  return sharedGlareTexture
-}
-
 /**
  * Draws the Moon's real crescent/gibbous silhouette (not just a dimmed flat disc) using the
  * standard two-arc terminator technique: a fixed half-circle for the permanently-facing-the-
@@ -5574,7 +5660,9 @@ function createMoonPhaseTexture(phase: MoonPhase): CanvasTexture {
   const r = size / 2 - 2
   const cx = size / 2
   const cy = size / 2
-  const DARK = "#2e2b26"
+  // The unlit part is lit only by the Earth, a few ten-thousandths of the sunlit part: the least an
+  // eight-bit canvas holds. A grey here would glow at night once the disc is drawn as light.
+  const DARK = "#010101"
   const LIGHT = "#f4f1e2"
 
   context.fillStyle = DARK
