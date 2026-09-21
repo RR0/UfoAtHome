@@ -2364,13 +2364,10 @@ export class SceneRenderer {
   private applyAir(): void {
     if (!(this.scene.fog instanceof AerialFog)) this.scene.fog = new AerialFog()
     ;(this.scene.fog as AerialFog).setAir(this.air, this.siteElevationM, this.airlight)
-    this.horizonColour.setRGB(this.baseFogColor[0], this.baseFogColor[1], this.baseFogColor[2])
   }
 
   /** The light the air lays over a distant thing, on screen — see applyAir. */
   private airlight: [number, number, number] = [0, 0, 0]
-  /** The sky just under the horizon, which the ground disc's rim fades into — see AerialFog.fadeRim. */
-  private readonly horizonColour = new Color(0, 0, 0)
 
 
   /**
@@ -4055,8 +4052,8 @@ export class SceneRenderer {
     const geometry = new CircleGeometry(this.groundRadius, 48)
     const material = new MeshLambertMaterial({ color: new Color(GROUND_ALBEDO, GROUND_ALBEDO, GROUND_ALBEDO), fog: true })
     // The air no longer hides the disc's edge — at 900 m it takes a tenth of the light, not all of
-    // it — so the disc fades into the horizon over its last quarter by itself.
-    AerialFog.fadeRim(material, this.groundRadius * 0.75, this.groundRadius, this.horizonColour)
+    // it — so the disc fades out over its last quarter by itself, into the sky drawn behind it.
+    AerialFog.fadeRim(material, this.groundRadius * 0.75, this.groundRadius)
     this.groundMesh = new Mesh(geometry, material)
     this.groundMesh.rotation.x = -Math.PI / 2
     // World y=0 is real ground level — the camera's own y=1.6 (see the constructor/

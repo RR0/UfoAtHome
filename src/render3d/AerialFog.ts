@@ -50,26 +50,23 @@ export class AerialFog extends Fog {
   }
 
   /**
-   * Fades a flat disc laid out to `endM` into `horizon` over its last stretch, from `startM` —
-   * what the stock fog was really doing for the ground disc, whose edge would otherwise stand out
-   * against the sky below the horizon as a line. Into the HORIZON, not into the air's light: the two
-   * are one colour by day, and by night the sky under the horizon is the brighter airglow the air
-   * does not share (see SceneRenderer.applyAir), which is what the disc has to meet without a seam.
-   * The only surface that needs it: the relief fades out on its own (see TerrainMeshBuilder), and
-   * nothing else ends at the edge of the world.
-   *
-   * @param horizon Read at every frame: whoever holds it keeps it current.
+   * Fades a flat disc laid out to `endM` out over its last stretch, from `startM`, so the sky drawn
+   * behind it shows through: its edge would otherwise stand out against the sky below the horizon as
+   * a line. It used to fade into one horizon colour, the sky's average all around; the sky under the
+   * horizon is not one colour (at dawn the Sun's side is far brighter than the other), so the rim
+   * stood out as a light or dark line wherever the relief let it through, and blinked with each of
+   * a walking witness's steps as the relief's own edge rose and fell over it (Valensole). What is
+   * behind the rim is the sky itself, so fading to transparent meets it exactly, whatever the
+   * direction and the hour. The only surface that needs it: the relief fades out on its own (see
+   * TerrainMeshBuilder), and nothing else ends at the edge of the world.
    */
-  static fadeRim(material: Material, startM: number, endM: number, horizon: Color): void {
+  static fadeRim(material: Material, startM: number, endM: number): void {
+    material.transparent = true
     material.onBeforeCompile = shader => {
-      shader.uniforms.aerialHorizon = { value: horizon }
       shader.fragmentShader = shader.fragmentShader
-        .replace("#include <fog_pars_fragment>", `#include <fog_pars_fragment>
-          uniform vec3 aerialHorizon;`)
         .replace("#include <fog_fragment>", `#include <fog_fragment>
           #ifdef USE_FOG
-            float aerialRim = smoothstep(${startM.toFixed(1)}, ${endM.toFixed(1)}, length(vAerialWorld.xz - cameraPosition.xz));
-            gl_FragColor.rgb = mix(gl_FragColor.rgb, aerialHorizon, aerialRim);
+            gl_FragColor.a *= 1.0 - smoothstep(${startM.toFixed(1)}, ${endM.toFixed(1)}, length(vAerialWorld.xz - cameraPosition.xz));
           #endif`)
     }
     material.customProgramCacheKey = () => `aerial-rim-${startM.toFixed(1)}-${endM.toFixed(1)}`
