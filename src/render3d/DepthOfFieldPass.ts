@@ -13,7 +13,7 @@ import {
   type PerspectiveCamera,
   type WebGLRenderer
 } from "three"
-import { FINISH_BY_MODE_GLSL, FINISH_GLSL, FinishMode } from "./colorSpace.js"
+import { FINISH_BY_MODE_GLSL, EYE_UNIFORMS, FINISH_GLSL, FinishMode } from "./colorSpace.js"
 import { EquidistantProjectionPass } from "./EquidistantProjectionPass.js"
 import type { UnfinishedFrame } from "./colorSpace.js"
 
@@ -77,6 +77,7 @@ export class DepthOfFieldPass {
     this.overlayTarget = new WebGLRenderTarget(this.width, this.height, { type: HalfFloatType, depthTexture: overlayDepth })
     this.material = new ShaderMaterial({
       uniforms: {
+        ...EYE_UNIFORMS,
         uColour: { value: this.target.texture },
         uDepth: { value: depthTexture },
         uResolution: { value: new Vector2(this.width, this.height) },
@@ -222,8 +223,10 @@ export class DepthOfFieldPass {
     renderer.setRenderTarget(this.target)
     renderer.clear()
     renderer.render(scene, camera)
-    EquidistantProjectionPass.clearTransparent(renderer, this.overlayTarget)
-    overlays?.()
+    if (overlays) {
+      EquidistantProjectionPass.clearTransparent(renderer, this.overlayTarget)
+      overlays()
+    }
     if (into) {
       uniforms.uMode.value = FinishMode.Scene
       renderer.setRenderTarget(into.scene)

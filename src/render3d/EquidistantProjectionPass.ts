@@ -18,7 +18,7 @@ import {
   type PerspectiveCamera,
   type WebGLRenderer
 } from "three"
-import { FINISH_BY_MODE_GLSL, FINISH_GLSL, FinishMode } from "./colorSpace.js"
+import { FINISH_BY_MODE_GLSL, EYE_UNIFORMS, FINISH_GLSL, FinishMode } from "./colorSpace.js"
 import type { UnfinishedFrame } from "./colorSpace.js"
 
 /**
@@ -97,6 +97,7 @@ export class EquidistantProjectionPass {
     this.overlayTarget = new WebGLRenderTarget(this.width, this.height, { type: HalfFloatType, samples: EquidistantProjectionPass.SAMPLES })
     this.material = new ShaderMaterial({
       uniforms: {
+        ...EYE_UNIFORMS,
         uSource: { value: this.target.texture },
         /** Half of the OUTPUT's vertical field, in radians: the whole mapping's scale, since the
          * image's half-height is exactly this many radians of arc. */
@@ -272,8 +273,10 @@ export class EquidistantProjectionPass {
     // What is laid over the picture — the witness's own phenomena, depth-tested against the decor
     // alone (see SceneRenderer.renderPhenomenaPass) — onto a target of its own, through the same
     // widened camera, so that it is resampled the same way and finished over the eye's response.
-    EquidistantProjectionPass.clearTransparent(renderer, this.overlayTarget)
-    overlays?.(camera)
+    if (overlays) {
+      EquidistantProjectionPass.clearTransparent(renderer, this.overlayTarget)
+      overlays(camera)
+    }
     renderer.setRenderTarget(originalTarget)
     camera.fov = originalFov
     camera.updateProjectionMatrix()
@@ -388,8 +391,10 @@ export class EquidistantProjectionPass {
       }
       renderer.setRenderTarget(this.cubeTarget!, index)
       renderer.render(scene, faceCamera)
-      EquidistantProjectionPass.clearTransparent(renderer, this.overlayCubeTarget!, index)
-      overlays?.(faceCamera)
+      if (overlays) {
+        EquidistantProjectionPass.clearTransparent(renderer, this.overlayCubeTarget!, index)
+        overlays(faceCamera)
+      }
       renderer.shadowMap.autoUpdate = false
     })
     renderer.shadowMap.autoUpdate = shadows
@@ -413,7 +418,8 @@ export class EquidistantProjectionPass {
   /** Copies the two targets to wherever is being drawn: finished for the canvas, or as they are. */
   private copyMaterial(): ShaderMaterial {
     this.copy ??= new ShaderMaterial({
-      uniforms: { uSource: { value: this.target.texture }, uOverlay: { value: this.overlayTarget.texture }, uMode: { value: FinishMode.Finished } },
+      uniforms: {
+        ...EYE_UNIFORMS, uSource: { value: this.target.texture }, uOverlay: { value: this.overlayTarget.texture }, uMode: { value: FinishMode.Finished } },
       vertexShader: `
         varying vec2 vUv;
         void main() {
@@ -467,6 +473,7 @@ export class EquidistantProjectionPass {
   private buildCubeMaterial(target: WebGLCubeRenderTarget, overlay: WebGLCubeRenderTarget): ShaderMaterial {
     return new ShaderMaterial({
       uniforms: {
+        ...EYE_UNIFORMS,
         uCube: { value: target.texture },
         uOverlayCube: { value: overlay.texture },
         uHalfFovRad: { value: 0.5236 },

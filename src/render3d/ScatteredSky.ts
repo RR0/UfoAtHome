@@ -345,7 +345,8 @@ export class ScatteredSky {
     const relative = ([x, y, z, s]: readonly number[]) => {
       const scale = this.exposureScale
       const adapted = this.adaptingLuminance * scale
-      return EyeAdaptation.relativeOf([x * scale, y * scale, z * scale], s * scale, adapted, this.seenByEye ? EyeAdaptation.rodShare(adapted) : 0)
+      // Photopic: the rods' shift is the finish's, on the whole picture (see EYE_RESPONSE_GLSL).
+      return EyeAdaptation.relativeOf([x * scale, y * scale, z * scale], s * scale, adapted, 0)
     }
     const displayAt = (altitudeDeg: number, azimuthDeg: number, withAirglow = true) => relative(lightAt(altitudeDeg, azimuthDeg, withAirglow))
     // The sky on a level surface: every direction of the upper hemisphere, weighted by its solid
@@ -397,7 +398,7 @@ export class ScatteredSky {
     const scale = this.exposureScale
     const adapted = this.adaptingLuminance * scale
     return EyeAdaptation.relativeOf(
-      [xyz[0] * scale, xyz[1] * scale, xyz[2] * scale], xyz[1] * scale, adapted, this.seenByEye ? EyeAdaptation.rodShare(adapted) : 0)
+      [xyz[0] * scale, xyz[1] * scale, xyz[2] * scale], xyz[1] * scale, adapted, 0)
   }
 
   /** The share of the seeing the rods do, for the eye as adapted now; none for a camera. */
@@ -417,7 +418,8 @@ export class ScatteredSky {
   private applyAdaptation(adaptingLuminance: number): void {
     this.adaptingLuminance = adaptingLuminance
     const adapted = adaptingLuminance * this.exposureScale
-    this.material.uniforms.uRodShare.value = this.seenByEye ? EyeAdaptation.rodShare(adapted) : 0
+    // The rods' shift is the finish's (see EYE_RESPONSE_GLSL): the dome writes photopic light.
+    this.material.uniforms.uRodShare.value = 0
     this.material.uniforms.uInverseSemiSaturation.value = 1 / EyeAdaptation.semiSaturation(adapted)
   }
 

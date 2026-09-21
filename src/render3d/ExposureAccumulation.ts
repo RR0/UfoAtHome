@@ -12,7 +12,7 @@ import {
   type Camera,
   type WebGLRenderer
 } from "three"
-import { FINISH_GLSL } from "./colorSpace.js"
+import { EYE_UNIFORMS, FINISH_GLSL } from "./colorSpace.js"
 import type { UnfinishedFrame } from "./colorSpace.js"
 
 /**
@@ -86,6 +86,7 @@ export class ExposureAccumulation {
     })
     this.developMaterial = new ShaderMaterial({
       uniforms: {
+        ...EYE_UNIFORMS,
         uFilm: { value: this.film.scene.texture },
         uOverlay: { value: this.film.overlay.texture },
         /** What a film holding only SOME of the pose has to be multiplied by to be exposed as

@@ -86,7 +86,7 @@ import { buildLensFlare } from "./LensFlareEffect.js"
 import { EquidistantProjectionPass } from "./EquidistantProjectionPass.js"
 import { DepthOfFieldPass } from "./DepthOfFieldPass.js"
 import { FinishPass } from "./FinishPass.js"
-import type { UnfinishedFrame } from "./colorSpace.js"
+import { EYE_UNIFORMS, type UnfinishedFrame } from "./colorSpace.js"
 import { AdaptiveResolution } from "./AdaptiveResolution.js"
 import { IceHalos } from "../engine/atmosphere/IceHalos.js"
 import { Rainbows } from "../engine/atmosphere/Rainbows.js"
@@ -326,6 +326,9 @@ const LENS_FLARE_BASE_GAIN = 55
 /** The dazzle's own uOpacity. Fixed: how bright the Sun's blaze reads is the Sun's photometry
  * (see applyDazzleStrength), not a dial. */
 const LENS_FLARE_BASE_OPACITY = 0.5
+/** The Sun's light, relative, that the lens flare's gain was set against: a high Sun on a clear
+ * day, a hundred thousand lux, to an eye adapted to that day. */
+const LENS_FLARE_REFERENCE = 17
 
 /**
  * Where the Sun's disc is sampled to ask what is standing in front of it — its centre and eight
@@ -990,10 +993,6 @@ export class SceneRenderer {
    * stays built (just hidden via updateLensFlarePosition whenever the Sun isn't visible) rather
    * than being torn down and rebuilt on every horizon crossing. */
   private lensFlare?: LensFlareSystem
-  /** What fraction of the Sun's light the cloud is letting through, from the last time it was
-   * placed — see cloudTransmission. Held because the lens flare is retinted from more than one
-   * place and every one of them needs it. */
-  private sunCloudTransmission = 1
   /** How much of the Sun's disc is clear of the ground, the terrain and any building, 0 to 1 — see
    * sunVisibleFraction. */
   private sunUnhiddenFraction = 1
@@ -1524,11 +1523,10 @@ export class SceneRenderer {
    * tint, changes. A no-op if the flare hasn't been built yet. */
   private applyLensFlareTint(tint: RgbColor): void {
     if (!this.lensFlare) return
-    // Times whatever fraction of the Sun's light the cloud lets past. The dazzle is the Sun's own
-    // light scattered in the eye, so cloud that takes the light takes the dazzle with it — an
-    // overcast sky that still threw a full lens flare was the most obviously impossible thing left
-    // in this scene.
-    const gain = LENS_FLARE_BASE_GAIN * this.sunCloudTransmission
+    // A lens's ghosts are a share of the Sun's light sent elsewhere in the frame: as the light that
+    // arrives — through the air and the cloud, so an overcast sky throws no flare — against the
+    // high Sun of a clear day the gain was set on (LENS_FLARE_REFERENCE).
+    const gain = LENS_FLARE_BASE_GAIN * (this.sunArriving[1] / LENS_FLARE_REFERENCE)
     this.lensFlare.uniforms.uColorGain.value.setRGB(gain * tint[0], gain * tint[1], gain * tint[2])
     this.applyDazzleStrength()
   }
@@ -2976,14 +2974,20 @@ export class SceneRenderer {
       this.camera.far = furthestPhenomenonM
       this.camera.updateProjectionMatrix()
     }
+    // This scene's eye, for the finish every picture of the page shares (see EYE_UNIFORMS).
+    EYE_UNIFORMS.uRodShare.value = this.scatteredSky?.rodShare ?? 0
+    EYE_UNIFORMS.uRelativeScale.value = this.relativeScale
+    const overlaid = this.references.any || this.phenomena.any || this.compassSprites.some(sprite => sprite.visible)
+    EYE_UNIFORMS.uHasOverlay.value = overlaid ? 1 : 0
+    const overlays = overlaid ? (camera?: PerspectiveCamera) => this.renderOverlayPasses(camera) : undefined
     // Every path draws light into targets of its own and finishes it once (see FinishPass); the
     // sky's glow is therefore always added to linear light, never to an encoded canvas.
     this.skyGlow?.setDestinationEncoded(false)
     if (!pass) {
       this.updateLensFlarePosition()
       const blur = this.usableDepthOfFieldPass()
-      if (blur) blur.render(this.renderer, this.scene, this.camera, () => this.renderOverlayPasses(), target)
-      else this.usableFinishPass().render(this.renderer, this.scene, this.camera, () => this.renderOverlayPasses(), undefined, target)
+      if (blur) blur.render(this.renderer, this.scene, this.camera, overlays, target)
+      else this.usableFinishPass().render(this.renderer, this.scene, this.camera, overlays, undefined, target)
       return
     }
     // The flare is repositioned from inside, once the camera has been widened for the offscreen
@@ -2994,7 +2998,7 @@ export class SceneRenderer {
       this.camera,
       this.camera.fov,
       () => this.updateLensFlarePosition(),
-      camera => this.renderOverlayPasses(camera),
+      overlays,
       // A flare is a picture of the Sun laid on ONE frame; on six faces it would be laid six times,
       // at six wrong places. It is kept off the faces and laid on the resampled picture instead.
       cube => {
@@ -3207,6 +3211,10 @@ export class SceneRenderer {
 
   /** Redisplay the existing film, then its compass captions, without sampling the scene again. */
   private presentExposure(): void {
+    EYE_UNIFORMS.uRodShare.value = this.scatteredSky?.rodShare ?? 0
+    // The film's overlay layer was cleared and added up with the rest: it is always read.
+    EYE_UNIFORMS.uHasOverlay.value = 1
+    EYE_UNIFORMS.uRelativeScale.value = this.relativeScale
     this.exposureAccumulation?.develop(this.renderer, this.exposureInstants / this.exposureInstantsDone)
     this.onMapSubjectBounds?.(this.exposureSubjectBounds)
     if (!this.compassSprites.some(sprite => sprite.visible)) return
@@ -4160,7 +4168,6 @@ export class SceneRenderer {
     // Adding 2.5·log10 rather than scaling the colour, because that is what the halo's own strength
     // function is written in terms of.
     if (key === "sun") {
-      this.sunCloudTransmission = through
       this.sunArriving = arriving
     }
     // A planet, a comet's head, a nova: points, whose veil begins where the law does.

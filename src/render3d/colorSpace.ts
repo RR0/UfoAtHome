@@ -38,13 +38,40 @@ vec3 encodeSrgb(vec3 linear) {
  * the picture added the results, which is not what light does: a lamp's 8 % reflection in glass
  * came out a grey smudge, where an eye sees it nearly as bright as the lamp.
  *
- * Purkinje's shift is still each source's own, where it was (the sky's): it is folded into the
- * luminance and colour it writes.
+ * Purkinje's shift is the finish's too (see purkinje): every light in the picture shifts together,
+ * the sky, the ground it lights, a lamp.
  */
 export const EYE_RESPONSE_GLSL = `
 const float EYE_RESPONSE_EXPONENT = ${EyeAdaptation.RESPONSE_EXPONENT.toFixed(4)};
+const vec3 SCOTOPIC_TINT = vec3(${EyeAdaptation.SCOTOPIC_TINT.map(value => value.toFixed(4)).join(", ")});
+/** The share of the seeing the rods do, and what one relative unit is in cd/m²: see EYE_UNIFORMS. */
+uniform float uRodShare;
+uniform float uRelativeScale;
+const float ROD_HALF_LUMINANCE = ${EyeAdaptation.ROD_HALF_LUMINANCE_CD_M2.toFixed(4)};
+
+/**
+ * Purkinje's shift, on the whole picture at once: the luminance the eye goes by moves towards the
+ * rods' (scotopic) one, and the colour towards the night's blue grey, by the rods' share. The
+ * scotopic luminance of a linear colour is Larson, Rushmeier and Piatko's estimate from its XYZ
+ * (1997), which is what a colour without its spectrum allows.
+ */
+vec3 purkinje(vec3 rgb) {
+  if (uRodShare <= 0.0) return rgb;
+  vec3 xyz = mat3(0.4124, 0.2126, 0.0193, 0.3576, 0.7152, 0.1192, 0.1805, 0.0722, 0.9505) * rgb;
+  float y = xyz.y;
+  if (y <= 0.0 || xyz.x <= 0.0) return rgb;
+  float scotopic = max(0.0, y * (1.33 * (1.0 + (y + xyz.z) / xyz.x) - 1.68));
+  // No more than a light this bright would leave the rods: a lamp, a bright star, the Moon's disc
+  // are seen by the cones even by an eye adapted to the dark, and keep their colour.
+  float luminance = y / max(uRelativeScale, 1e-30);
+  float rods = min(uRodShare, ROD_HALF_LUMINANCE / (ROD_HALF_LUMINANCE + luminance));
+  float seen = mix(y, scotopic, rods);
+  vec3 tint = SCOTOPIC_TINT / dot(SCOTOPIC_TINT, vec3(0.2126, 0.7152, 0.0722));
+  return mix(rgb / y, tint, rods) * seen;
+}
+
 vec3 respond(vec3 relative) {
-  vec3 clamped = clamp(relative, vec3(0.0), vec3(60000.0));
+  vec3 clamped = purkinje(clamp(relative, vec3(0.0), vec3(60000.0)));
   float y = dot(clamped, vec3(0.2126, 0.7152, 0.0722));
   if (y <= 0.0) return vec3(0.0);
   float power = pow(y, EYE_RESPONSE_EXPONENT);
@@ -69,9 +96,21 @@ vec3 respond(vec3 relative) {
  * Those are laid on AFTER the response because they are already what an eye sees: a phenomenon half
  * faded over a night sky is half faded on the screen, not a half share of a luminance nobody stated.
  */
+/**
+ * What the finish needs beyond the picture: the rods' share of the seeing and what a relative unit
+ * is worth, for Purkinje's shift; and whether anything is laid over the picture — with nothing
+ * (no photographs, no phenomena, no compass) the overlay layer is neither cleared nor read, which
+ * saves resolving a multisampled target a frame. One object, shared by every material that finishes a picture, set by the scene that is
+ * about to finish one (see SceneRenderer.renderOnce) — the pictures of a page are finished one at a
+ * time.
+ */
+export const EYE_UNIFORMS = { uRodShare: { value: 0 }, uRelativeScale: { value: 1 }, uHasOverlay: { value: 1 } }
+
 export const FINISH_GLSL = `
 ${SRGB_ENCODE_GLSL}
 ${EYE_RESPONSE_GLSL}
+/** Whether anything is laid over the picture at all: see EYE_UNIFORMS. */
+uniform float uHasOverlay;
 vec3 finish(vec3 relative, vec4 overlay) {
   return encodeSrgb(respond(relative) * (1.0 - overlay.a) + overlay.rgb);
 }
@@ -95,6 +134,8 @@ export const enum FinishMode {
 
 /** The body of a finishing shader's main() once it has `scene` and `overlay` in hand — see FinishMode. */
 export const FINISH_BY_MODE_GLSL = `
+  // A picture with nothing laid over it does not even clear its overlay (see EYE_UNIFORMS).
+  overlay *= uHasOverlay;
   if (uMode < 0.5) gl_FragColor = vec4(finish(scene, overlay), 1.0);
   else if (uMode < 1.5) gl_FragColor = vec4(scene, 1.0);
   else gl_FragColor = overlay;

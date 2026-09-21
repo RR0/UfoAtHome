@@ -2,7 +2,7 @@ import {
   HalfFloatType, Mesh, OrthographicCamera, PlaneGeometry, Scene, ShaderMaterial, WebGLRenderTarget,
   type Camera, type WebGLRenderer
 } from "three"
-import { FINISH_BY_MODE_GLSL, FINISH_GLSL, FinishMode, type UnfinishedFrame } from "./colorSpace.js"
+import { FINISH_BY_MODE_GLSL, EYE_UNIFORMS, FINISH_GLSL, FinishMode, type UnfinishedFrame } from "./colorSpace.js"
 import { EquidistantProjectionPass } from "./EquidistantProjectionPass.js"
 
 /**
@@ -30,7 +30,8 @@ export class FinishPass {
     this.scene = new WebGLRenderTarget(Math.max(1, width), Math.max(1, height), options)
     this.overlay = new WebGLRenderTarget(Math.max(1, width), Math.max(1, height), options)
     this.material = new ShaderMaterial({
-      uniforms: { uSource: { value: this.scene.texture }, uOverlay: { value: this.overlay.texture }, uMode: { value: FinishMode.Finished } },
+      uniforms: {
+        ...EYE_UNIFORMS, uSource: { value: this.scene.texture }, uOverlay: { value: this.overlay.texture }, uMode: { value: FinishMode.Finished } },
       vertexShader: `
         varying vec2 vUv;
         void main() {
@@ -69,8 +70,11 @@ export class FinishPass {
     renderer.setRenderTarget(frame.scene)
     renderer.render(scene, camera)
     afterScene?.()
-    EquidistantProjectionPass.clearTransparent(renderer, frame.overlay)
-    overlays?.()
+    // A longer exposure adds its overlay layer up whatever the finish does with it: cleared always.
+    if (overlays || into) {
+      EquidistantProjectionPass.clearTransparent(renderer, frame.overlay)
+      overlays?.()
+    }
     renderer.setRenderTarget(destination)
     if (into) return
     this.material.uniforms.uMode.value = FinishMode.Finished
