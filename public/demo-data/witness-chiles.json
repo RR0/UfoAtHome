@@ -825,9 +825,9 @@
               },
               "appearance": {
                 "luminanceCdM2": {
-                  "value": 12,
+                  "value": 2,
                   "basis": "assumed",
-                  "rationale": "Neither man gave a brightness. What they gave is a colour, and that is what sets this: against the sky of 02:45 and an eye adapted to it, the scene shows their deep blue only while the hull stays under about two candela per square metre, and washes it to a white neither of them described above that. Twelve is the luminance of the brightest thing the model says glows — the light area at the nose he annotated \"cockpit windshield?\" — and the fuselage burns at an eighth of it, which is the ratio the model carries, so the fuselage sits just under that edge. It is a small figure for a lit window, some twentieth of a fluorescent tube's, and it is chosen for the colour it reproduces and not from anything measured: it is the colour, not the number, that is the testimony."
+                  "rationale": "Neither man gave a brightness. What they gave is a colour, and that is what sets this: against the sky of 02:45 and an eye adapted to it, the scene shows their deep blue only while the hull stays under about a quarter of a candela per square metre, and washes it to a white neither of them described above that. Two is the luminance of the brightest thing the model says glows — the light area at the nose he annotated \"cockpit windshield?\" — and the fuselage burns at an eighth of it, which is the ratio the model carries, so the fuselage sits just under that edge. It is a small figure for a lit window, some hundred-and-twentieth of a fluorescent tube's, and it is chosen for the colour it reproduces and not from anything measured: it is the colour, not the number, that is the testimony. It was twelve while the scene showed the eye's response as a luminance on the screen; shown as a lightness since (see EYE_RESPONSE_GLSL), the same colour needs a sixth of the light, and a hull left at twelve came out a vivid blue no night shows."
                 }
               },
               "flame": {

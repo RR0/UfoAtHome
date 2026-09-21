@@ -19,7 +19,8 @@
  * the account is 30 m by 3.17, and a windshield 3 m long at the nose. The cross ribs of his sketch
  * are not reproduced: this format draws shapes, not a surface finish.
  *
- * Whitted's craft ("whitted.gltf"): a distinctly thicker cylinder with blunt ends — 9.388° by
+ * Whitted's craft ("whitted.gltf"): a distinctly thicker cylinder, rounded at the nose and cut
+ * square at the tail the flame leaves from — 9.388° by
  * 1.691°, so 30 m by 5.40 — carrying two rows of three openings he annotated "windows with white
  * light", each 1.9 m across and 8.5 m apart, the rows 2.6 m one above the other, over an underside
  * he marked "black". He drew one side; the other is ASSUMED to match, as a thing seen from one
@@ -134,8 +135,9 @@ class ChilesCraft {
   }
 }
 
-/** Whitted's drawing: a thicker cylinder with blunt ends, two rows of three lit windows, and a
- * black underside. */
+/** Whitted's drawing: a thicker cylinder, its nose rounded and its tail square, two rows of three
+ * lit windows, and a black underside. The first version cut both ends square, and a reader who had
+ * his drawing before him saw at once that its front is round. */
 class WhittedCraft {
   static readonly RADIUS_M = Reported.WHITTED_DIAMETER_M / 2
   static readonly HALF_LENGTH_M = Reported.LENGTH_M / 2
@@ -154,22 +156,37 @@ class WhittedCraft {
   parts(): Part[] {
     return [
       { name: "hull", geometry: this.hull(), material: 0 },
-      { name: "nose", geometry: this.cap(-WhittedCraft.HALF_LENGTH_M), material: 0 },
+      { name: "nose", geometry: this.nose(), material: 0 },
       { name: "tail", geometry: this.cap(WhittedCraft.HALF_LENGTH_M), material: 0 },
       { name: "underside", geometry: this.underside(), material: 2 },
       ...this.windows()
     ]
   }
 
+  /** Where the cylinder ends and the round nose begins: a radius back from the front, so the whole
+   * stays the 30 m both accounts give. */
+  static readonly NOSE_Z_M = -WhittedCraft.HALF_LENGTH_M + WhittedCraft.RADIUS_M
+
   private hull(): BufferGeometry {
-    const geometry = new CylinderGeometry(WhittedCraft.RADIUS_M, WhittedCraft.RADIUS_M, Reported.LENGTH_M, 48, 1, true)
-    // A cylinder stands along +Y; this one lies along Z.
+    const length = WhittedCraft.HALF_LENGTH_M - WhittedCraft.NOSE_Z_M
+    const geometry = new CylinderGeometry(WhittedCraft.RADIUS_M, WhittedCraft.RADIUS_M, length, 48, 1, true)
+    // A cylinder stands along +Y; this one lies along Z, from the nose's base to the tail.
     geometry.rotateX(Math.PI / 2)
+    geometry.translate(0, 0, (WhittedCraft.NOSE_Z_M + WhittedCraft.HALF_LENGTH_M) / 2)
     geometry.computeVertexNormals()
     return geometry
   }
 
-  /** One blunt end. */
+  /** The rounded front: a half sphere of the hull's own radius, its pole forward, to -Z. */
+  private nose(): BufferGeometry {
+    const geometry = new SphereGeometry(WhittedCraft.RADIUS_M, 48, 16, 0, Math.PI * 2, 0, Math.PI / 2)
+    geometry.rotateX(-Math.PI / 2)
+    geometry.translate(0, 0, WhittedCraft.NOSE_Z_M)
+    geometry.computeVertexNormals()
+    return geometry
+  }
+
+  /** The square tail. */
   private cap(z: number): BufferGeometry {
     const geometry = new CircleGeometry(WhittedCraft.RADIUS_M, 48)
     geometry.rotateY(z > 0 ? 0 : Math.PI)
@@ -181,7 +198,7 @@ class WhittedCraft {
   /** The black he marked below the windows: a shell over the lower third of the hull. */
   private underside(): BufferGeometry {
     const patch = new SurfacePatch(() => WhittedCraft.RADIUS_M)
-    return patch.build(-WhittedCraft.HALF_LENGTH_M + 0.01, WhittedCraft.HALF_LENGTH_M - 0.01, Math.PI, (150 * Math.PI) / 180)
+    return patch.build(WhittedCraft.NOSE_Z_M + 0.01, WhittedCraft.HALF_LENGTH_M - 0.01, Math.PI, (150 * Math.PI) / 180)
   }
 
   /** Two rows of three, on each side. */

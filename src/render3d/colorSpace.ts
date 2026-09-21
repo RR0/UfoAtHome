@@ -66,7 +66,11 @@ vec3 purkinje(vec3 rgb) {
   vec3 xyz = mat3(0.4124, 0.2126, 0.0193, 0.3576, 0.7152, 0.1192, 0.1805, 0.0722, 0.9505) * rgb;
   float y = xyz.y;
   if (y <= 0.0 || xyz.x <= 0.0) return rgb;
-  float scotopic = max(0.0, y * (1.33 * (1.0 + (y + xyz.z) / xyz.x) - 1.68));
+  // Held to four times the photopic, above a clear sky's two and a half: Larson's estimate runs
+  // away on a colour as saturated as a display's blue primary (twenty times and more), and a
+  // deep-blue glow at night came out a pale, bright blue no one described. Four leaves the night
+  // skies where the anchors put them; two and a half darkened them by a quarter.
+  float scotopic = clamp(y * (1.33 * (1.0 + (y + xyz.z) / xyz.x) - 1.68), 0.0, 4.0 * y);
   // No more than a light this bright would leave the rods: a lamp, a bright star, the Moon's disc
   // are seen by the cones even by an eye adapted to the dark, and keep their colour.
   float luminance = y / max(uRelativeScale, 1e-30);
