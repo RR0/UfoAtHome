@@ -41,6 +41,20 @@ export const css = `
 .credits-btn[hidden] {
   display: none;
 }
+/* Only while the pointer is over the scene, as the playback controls are, or while it is in use:
+   focused from the keyboard, or with its panel open. A touch screen has no hover to reveal it by,
+   and keeps it shown. */
+@media (hover: hover) {
+  .credits-btn {
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .stage:hover .credits-btn,
+  .credits-btn:focus-visible,
+  .stage:has(.credits-panel:popover-open) .credits-btn {
+    opacity: 1;
+  }
+}
 .credits-panel {
   padding: 0.5em 0.8em;
   border: 1px solid #ccc;
