@@ -8,6 +8,12 @@ const NOISE_SIZE = 64
 export const MAX_HOLES = 8
 /** The shader's SLICE: the one slice of the noise every layer reads its weather from. */
 const WEATHER_SLICE = 0.2787
+/**
+ * How far into the air a cloud is seen before the air in front of it has hidden all but 1/e of it,
+ * metres: a visibility of about a hundred kilometres, the four times that Koschmieder gives. One that far
+ * fades out into the sky it stands in (see the fragment shader).
+ */
+const CLOUD_HAZE_LENGTH_M = 25000
 
 /** Stable hash, independent of array order or frame number. */
 export function cloudSeed(layer: CloudLayer): number {
@@ -261,9 +267,13 @@ void main() {
       // plus 0.22 of the Sun in every sample, the shaded side already reached three quarters of the
       // lit one, and a low Sun's reddened cloud saturated to one flat cream from any side.
       vec3 lit = ambientColor * 0.35 + sunColor * sunUp * (0.12 + sunTransmission * 0.8 * (0.5 + 0.5 * phase));
-      lit = mix(hazeColor, lit, exp(-length(p) / 55000.0));
       lit *= mix(1.0, 0.32, darkness);
-      float opacity = 1.0 - exp(-d * ds * 0.006);
+      // The air in front of a far cloud: it hides the cloud and shows the sky's own light instead —
+      // which the sky dome behind already draws, airlight and all. So a far cloud fades OUT, into the
+      // sky it stands in, rather than being repainted the horizon's average colour: that colour is
+      // the dawn's cream all round, and a deck of scattered cumulus stood as a cream bank over the
+      // last degrees above the horizon, however thin.
+      float opacity = (1.0 - exp(-d * ds * 0.006)) * exp(-length(p) / ${CLOUD_HAZE_LENGTH_M.toFixed(1)});
       radiance += transmission * opacity * lit;
       transmission *= 1.0 - opacity;
       if (transmission < 0.015) break;
