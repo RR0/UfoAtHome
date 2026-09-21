@@ -31,10 +31,17 @@ describe("an eye adapted to the sky it looks at", () => {
     expect(shown[shown.length - 1]).toBeGreaterThan(0)
   })
 
-  it("bends at a moonlit anchor when one is stated, and leaves both ends where they were", () => {
-    const unanchored = selfAdapted(EyeAdaptation.MOONLIT_ANCHOR_CD_M2)
-    EyeAdaptation.MOONLIT_ANCHOR_RESPONSE = unanchored * 0.7
+  it("shows a nearly full Moon's sky where the reader chose, variant C of the three measured", () => {
+    expect(EyeAdaptation.MOONLIT_ANCHOR_RESPONSE).toBe(0.0075)
+    expect(selfAdapted(EyeAdaptation.MOONLIT_ANCHOR_CD_M2)).toBeCloseTo(0.0075, 6)
+  })
+
+  it("bends at the moonlit anchor, and leaves both ends where they were", () => {
+    const chosen = EyeAdaptation.MOONLIT_ANCHOR_RESPONSE
     try {
+      EyeAdaptation.MOONLIT_ANCHOR_RESPONSE = undefined
+      const unanchored = selfAdapted(EyeAdaptation.MOONLIT_ANCHOR_CD_M2)
+      EyeAdaptation.MOONLIT_ANCHOR_RESPONSE = unanchored * 0.7
       expect(selfAdapted(EyeAdaptation.MOONLIT_ANCHOR_CD_M2)).toBeCloseTo(unanchored * 0.7, 6)
       expect(selfAdapted(EyeAdaptation.DAYLIGHT_ANCHOR_CD_M2)).toBeCloseTo(EyeAdaptation.DAYLIGHT_ANCHOR_RESPONSE, 6)
       expect(selfAdapted(EyeAdaptation.NIGHT_ANCHOR_CD_M2)).toBeCloseTo(EyeAdaptation.NIGHT_ANCHOR_RESPONSE, 6)
@@ -43,7 +50,7 @@ describe("an eye adapted to the sky it looks at", () => {
       const shown = skies.map(selfAdapted)
       for (let at = 1; at < shown.length; at++) expect(shown[at]).toBeLessThan(shown[at - 1])
     } finally {
-      EyeAdaptation.MOONLIT_ANCHOR_RESPONSE = undefined
+      EyeAdaptation.MOONLIT_ANCHOR_RESPONSE = chosen
     }
   })
 

@@ -95,10 +95,12 @@ export class EyeAdaptation {
    *
    * 0.0035 cd/m² is what the eye adapts to under that Moon (the sky's own log-mean, measured in the
    * scene). The response it is shown at is a judgement of what a moonlit night looks like, not a
-   * measurement, which is why it is stated here, by itself, where it can be changed.
+   * measurement, which is why it is stated here, by itself, where it can be changed. Three were
+   * measured on that scene and shown to the reader — 0.0141 (the two-anchor law: zenith sRGB 33-46,
+   * horizon 61-80), 0.0100 (27-38, 51-67) and 0.0075 (22-32, 44-59) — who chose the last.
    */
   static readonly MOONLIT_ANCHOR_CD_M2 = 3.5e-3
-  static MOONLIT_ANCHOR_RESPONSE: number | undefined = undefined
+  static MOONLIT_ANCHOR_RESPONSE: number | undefined = 0.0075
 
   /**
    * The semi-saturation σ an eye adapted to `adaptingLuminance` has: a straight line in log σ
