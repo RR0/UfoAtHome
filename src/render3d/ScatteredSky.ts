@@ -11,10 +11,18 @@ export interface ScatteredSkyState {
   readonly moon: { readonly altitudeDeg: number; readonly azimuthDeg: number; readonly magnitude: number; readonly phaseAngleDeg: number }
 }
 
-/** The two colours the rest of the scene takes from the sky: its ambient light, fog and haze. */
+/** The colours the rest of the scene takes from the sky: its ambient light, and the air's. */
 export interface SkyAmbient {
   readonly zenith: DisplayRgb
   readonly horizon: DisplayRgb
+  /**
+   * The horizon as the low air makes it: the Sun's and the Moon's light scattered into the line of
+   * sight, without the upper atmosphere's own glow. What the air between an eye and a distant thing
+   * lays over it (see AerialFog) — the same as the horizon by day, when scattering is all there is,
+   * and far darker on a moonless night, when the horizon's glow is emitted ninety kilometres up and
+   * the air a few kilometres off has nothing to send back.
+   */
+  readonly airlight: DisplayRgb
 }
 
 /**
@@ -271,13 +279,13 @@ export class ScatteredSky {
   private adaptFromViews(sun: Float32Array, moon: Float32Array, state: ScatteredSkyState): void {
     const moonScale = 10 ** (-0.4 * (state.moon.magnitude - ScatteredSky.SUN_MAGNITUDE))
     const airglow = ScatteredSky.airglowXyzs()
-    const lightAt = (altitudeDeg: number, azimuthDeg: number): [number, number, number, number] => {
+    const lightAt = (altitudeDeg: number, azimuthDeg: number, withAirglow = true): [number, number, number, number] => {
       const zenith = ((90 - altitudeDeg) * Math.PI) / 180
       const sunUv = AtmosphereTables.skyViewUv(state.altitudeM, zenith, ScatteredSky.azimuthBetween(azimuthDeg, state.sun.azimuthDeg))
       const moonUv = AtmosphereTables.skyViewUv(state.altitudeM, zenith, ScatteredSky.azimuthBetween(azimuthDeg, state.moon.azimuthDeg))
       const s = ScatteredSky.bilinear(sun, sunUv.u, sunUv.v)
       const m = ScatteredSky.bilinear(moon, moonUv.u, moonUv.v)
-      const glow = altitudeDeg > 0 ? ScatteredSky.airglowFactor(altitudeDeg) : 0
+      const glow = withAirglow && altitudeDeg > 0 ? ScatteredSky.airglowFactor(altitudeDeg) : 0
       return [0, 1, 2, 3].map(c => s[c] + moonScale * m[c] + airglow[c] * glow) as [number, number, number, number]
     }
     // The eye adapts to the upper hemisphere, weighted by solid angle, in log.
@@ -291,18 +299,23 @@ export class ScatteredSky {
       }
     }
     this.applyAdaptation(Math.exp(logSum / weightSum))
-    const displayAt = (altitudeDeg: number, azimuthDeg: number) => {
+    const displayAt = (altitudeDeg: number, azimuthDeg: number, withAirglow = true) => {
       const scale = this.exposureScale
-      const [x, y, z, s] = lightAt(altitudeDeg, azimuthDeg)
+      const [x, y, z, s] = lightAt(altitudeDeg, azimuthDeg, withAirglow)
       const adapted = this.adaptingLuminance * scale
       return EyeAdaptation.displayOf([x * scale, y * scale, z * scale], s * scale, adapted, this.seenByEye ? EyeAdaptation.rodShare(adapted) : 0)
     }
     const horizon: DisplayRgb = [0, 0, 0]
+    const airlight: DisplayRgb = [0, 0, 0]
     for (let azimuth = 0; azimuth < 360; azimuth += 20) {
       const colour = displayAt(2, azimuth)
-      for (let c = 0; c < 3; c++) horizon[c] += colour[c] / 18
+      const scattered = displayAt(2, azimuth, false)
+      for (let c = 0; c < 3; c++) {
+        horizon[c] += colour[c] / 18
+        airlight[c] += scattered[c] / 18
+      }
     }
-    this.ambientColours = { zenith: displayAt(90, 0), horizon }
+    this.ambientColours = { zenith: displayAt(90, 0), horizon, airlight }
     this.onChange()
   }
 

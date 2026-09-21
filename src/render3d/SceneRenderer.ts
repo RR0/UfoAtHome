@@ -121,6 +121,9 @@ import type { SceneReference } from "../engine/model/Reference.js"
 import type { PhenomenonFrame, PlacedPhenomenon } from "./PhenomenonSystem.js"
 import { ScatteredSky } from "./ScatteredSky.js"
 import { HumidHaze } from "../engine/atmosphere/HumidHaze.js"
+import { AerialPerspective } from "../engine/atmosphere/AerialPerspective.js"
+import type { Rgb } from "../engine/atmosphere/AerialPerspective.js"
+import { AerialFog } from "./AerialFog.js"
 
 /** Plain field-by-field comparison — see setWeather's own doc comment on why reference equality
  * stopped being enough once weather started being resolved fresh every tick from a keyframe
@@ -914,6 +917,8 @@ export class SceneRenderer {
    * Socorro's 1 400 m mesa is a sixth thinner than the air above the sea.
    */
   private siteElevationM = 0
+  /** The air between the eye and the scene, from the weather of this instant — see AerialFog. */
+  private air = new AerialPerspective()
   /** Radius the ground disc was last built at — compared against groundRadiusFor on every pose so
    * a climb rebuilds it, and only a climb does. */
   private groundRadius = GROUND_RADIUS
@@ -1632,6 +1637,10 @@ export class SceneRenderer {
     this.cloudTransmissionMemo.clear()
     if (weatherEquals(this.weather, weather)) return
     this.weather = weather
+    // The same humidity that makes the sky milky makes the distance pale, and what is falling
+    // thins it further: one air for both.
+    this.air = AerialPerspective.of(weather)
+    this.applyAir()
     this.scatteredSky?.setConditions({
       aerosolOpticalDepth:
         weather.relativeHumidity === undefined ? undefined : HumidHaze.steppedOpticalDepth(weather.relativeHumidity)
@@ -1737,7 +1746,8 @@ export class SceneRenderer {
     const sky = this.scatteredSky
     this.bodySystem.set(states, {
       originX: x, originZ: z, originGroundY: this.groundYUnder(x, z), eye: this.camera.position,
-      groundYAt: (px, pz) => this.groundYUnder(px, pz), wind, light: this.plumeLight()
+      groundYAt: (px, pz) => this.groundYUnder(px, pz), wind, light: this.plumeLight(),
+      transmittance: (px, py, pz) => this.transmittanceTo(px, py, pz)
     }, seconds, sky ? (rgb, luminance) => sky.displayOfLuminance(rgb, luminance) : undefined, ids)
     this.bodySystem.setSmoke(smoke, seconds)
     // Something is there to cast a shadow, whatever the decor says.
@@ -2209,6 +2219,10 @@ export class SceneRenderer {
     const skyColors = this.scatteredSky?.ambient ?? skyColorsForAltitude(astronomy.sun.altitudeDeg)
     const groundColor = skyColors.horizon
     this.baseFogColor = [groundColor[0], groundColor[1], groundColor[2]]
+    // Until the scattered sky has been read back there is only the old colour table, whose horizon
+    // is all there is to go on.
+    const air = "airlight" in skyColors ? skyColors.airlight : skyColors.horizon
+    this.airlight = [air[0], air[1], air[2]]
     if (this.skyMesh && this.skyGradientMaterial) {
       this.skyMesh.material = this.scatteredSky?.ready ? this.scatteredSky.material : this.skyGradientMaterial
     }
@@ -2221,23 +2235,43 @@ export class SceneRenderer {
     // can never receive a real shadow, since there's no actual light for something to block).
     this.updateCelestialLight(astronomy, skyColors.zenith, groundColor)
     this.buildSkyGlow(astronomy, skyColors.zenith)
-    // Fog reaches as far as the ground actually goes, not a fixed SKY_RADIUS: from altitude the
-    // whole visible ground lies beyond 900 units, so a fog capped there turned all of it into flat
-    // fog colour — a black void below the horizon at 1500 m, since that colour is the night-ground
-    // colour and nothing else was left to see. Proportions kept, so the horizon haze reads the same
-    // at every altitude.
-    if (this.scene.fog instanceof Fog) {
-      this.scene.fog.color.setRGB(...this.baseFogColor)
-      this.scene.fog.near = this.groundRadius * 0.2
-      this.scene.fog.far = this.groundRadius
-    } else {
-      this.scene.fog = new Fog(new Color(...this.baseFogColor), this.groundRadius * 0.2, this.groundRadius)
-    }
+    // The air between the eye and everything real, with the horizon this sky has just been given
+    // as the light it lays over a distant thing — see AerialFog.
+    this.applyAir()
+  }
+
+  /**
+   * Hands the scene's fog the air of this instant, and the light the air lays over a distant thing:
+   * the horizon as the low air makes it (see SkyAmbient.airlight) — the horizon itself by day, and
+   * on a moonless night almost nothing, since what makes that horizon glow is emitted ninety
+   * kilometres up and the air a few kilometres from the eye does not share it.
+   */
+  private applyAir(): void {
+    if (!(this.scene.fog instanceof AerialFog)) this.scene.fog = new AerialFog()
+    ;(this.scene.fog as AerialFog).setAir(this.air, this.siteElevationM, this.airlight)
+    this.horizonColour.setRGB(this.baseFogColor[0], this.baseFogColor[1], this.baseFogColor[2])
+  }
+
+  /** The light the air lays over a distant thing, on screen — see applyAir. */
+  private airlight: [number, number, number] = [0, 0, 0]
+  /** The sky just under the horizon, which the ground disc's rim fades into — see AerialFog.fadeRim. */
+  private readonly horizonColour = new Color(0, 0, 0)
+
+
+  /**
+   * How much of a light at this point of the scene reaches the eye, per channel: the air of
+   * AerialFog, for what draws itself without it — a flame, a glare — being additive, and so taking
+   * the airlight from whatever is already behind it.
+   */
+  transmittanceTo(x: number, y: number, z: number): Rgb {
+    const eye = this.camera.position
+    return this.air.transmittance(this.siteElevationM + eye.y, this.siteElevationM + y, Math.hypot(x - eye.x, y - eye.y, z - eye.z))
   }
 
   private setSiteElevation(elevationM: number): void {
     if (Math.abs(elevationM - this.siteElevationM) < 1) return
     this.siteElevationM = elevationM
+    this.applyAir()
     if (this.lastAstronomy) this.scatteredSky?.update(this.scatteredSkyState(this.lastAstronomy))
   }
 
@@ -3694,6 +3728,9 @@ export class SceneRenderer {
     this.groundRadius = radius
     const geometry = new CircleGeometry(this.groundRadius, 48)
     const material = new MeshLambertMaterial({ color: new Color(GROUND_ALBEDO, GROUND_ALBEDO, GROUND_ALBEDO), fog: true })
+    // The air no longer hides the disc's edge — at 900 m it takes a tenth of the light, not all of
+    // it — so the disc fades into the horizon over its last quarter by itself.
+    AerialFog.fadeRim(material, this.groundRadius * 0.75, this.groundRadius, this.horizonColour)
     this.groundMesh = new Mesh(geometry, material)
     this.groundMesh.rotation.x = -Math.PI / 2
     // World y=0 is real ground level — the camera's own y=1.6 (see the constructor/
@@ -5064,10 +5101,12 @@ export class SceneRenderer {
     if (this.scene.fog) {
       const fog = this.scene.fog as Fog
       const k = Math.min(1, level)
+      // From the air's own light, not the horizon's, which at night is far brighter than the air:
+      // a flash lights the air for an instant, and between flashes it goes back to what it was.
       fog.color.setRGB(
-        this.baseFogColor[0] + (LIGHTNING_COLOR.r - this.baseFogColor[0]) * k,
-        this.baseFogColor[1] + (LIGHTNING_COLOR.g - this.baseFogColor[1]) * k,
-        this.baseFogColor[2] + (LIGHTNING_COLOR.b - this.baseFogColor[2]) * k
+        this.airlight[0] + (LIGHTNING_COLOR.r - this.airlight[0]) * k,
+        this.airlight[1] + (LIGHTNING_COLOR.g - this.airlight[1]) * k,
+        this.airlight[2] + (LIGHTNING_COLOR.b - this.airlight[2]) * k
       )
     }
     // Only a sky that IS a colour: the scattered sky is a shader computing its own radiance, and

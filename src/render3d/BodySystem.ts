@@ -53,6 +53,10 @@ export interface BodyFrame {
   /** What the scene's lights make of a white matt surface, linear — what dust and smoke, which
    * are not lit by the scene's own shading, are multiplied by (see SceneRenderer.plumeLight). */
   light?: readonly [number, number, number]
+  /** How much of a light at a point of the scene reaches the eye, per channel — the air between
+   * (see AerialFog). What draws itself additively, outside the fog, is dimmed by it here: a flame
+   * and a glare take their airlight from what is already behind them, and need only lose theirs. */
+  transmittance?: (x: number, y: number, z: number) => readonly [number, number, number]
 }
 
 /**
@@ -189,7 +193,13 @@ export class BodySystem {
     const spread = Glare.spread(radiusM + (widest - radiusM) * dazzle, areaM2, luminanceCdM2, holder.position.distanceTo(eye))
     // A model's own brightest glowing part says what colour the bloom is; a primitive's own colour does.
     const hue = glowing?.find(glow => glow.share >= 1)?.hue ?? BodySystem.rgbOf(state.appearance.color)
-    glare.shine(holder.position, spread.radiusM, BodySystem.shown(hue, spread.luminanceCdM2, display))
+    glare.shine(holder.position, spread.radiusM, this.throughAir(BodySystem.shown(hue, spread.luminanceCdM2, display), holder.position))
+  }
+
+  /** A colour a light at `at` gives out, as it arrives at the eye through the air. */
+  private throughAir(rgb: readonly [number, number, number], at: Vector3): [number, number, number] {
+    const transmittance = this.frame?.transmittance?.(at.x, at.y, at.z) ?? [1, 1, 1]
+    return [rgb[0] * transmittance[0], rgb[1] * transmittance[1], rgb[2] * transmittance[2]]
   }
 
   private static rgbOf(css: string): [number, number, number] {
@@ -227,13 +237,13 @@ export class BodySystem {
     effect.place(this.scratch, node ? BodySystem.pointing(node, this.down, this.aim) : holder.quaternion, flame.lengthM, flame.widthM)
     const light = (css: string): readonly [number, number, number] => {
       const colour = new Color(css)
-      return BodySystem.shown([colour.r, colour.g, colour.b], flame.luminanceCdM2, display)
+      return this.throughAir(BodySystem.shown([colour.r, colour.g, colour.b], flame.luminanceCdM2, display), this.scratch)
     }
     effect.set(light(flame.color), light(flame.tipColor ?? flame.color), seconds)
     effect.illuminate(BodySystem.luminousIntensityCd(flame) * this.sceneUnitsPerLux, BodySystem.lightColourOf(flame))
     const glow = FlameEffect.glowFor(flame, eye ? effect.mesh.position.distanceTo(eye) : 0)
     const mixed = new Color(flame.color).lerp(new Color(flame.tipColor ?? flame.color), 0.5)
-    effect.shine(glow.radiusM, BodySystem.shown([mixed.r, mixed.g, mixed.b], glow.luminanceCdM2, display))
+    effect.shine(glow.radiusM, this.throughAir(BodySystem.shown([mixed.r, mixed.g, mixed.b], glow.luminanceCdM2, display), this.scratch))
     this.raiseDust(state.id, flame, seconds)
   }
 

@@ -51,8 +51,8 @@ const LAMP_RADIUS_M = 0.25
  * lamps came out under a pixel each, so turning the lights on changed nothing at all on screen.
  * That is not fidelity — a strobe at five kilometres is unmistakable in life, because what reaches
  * the eye is its bloom and not its bulb, and a bulb rendered true to size reaches nobody. Tuned by
- * eye against what a bright point really spreads to at night; the honest caveat is that real
- * atmospheric extinction, which would dim it with distance and haze, is still not modelled.
+ * eye against what a bright point really spreads to at night; the air between dims it with
+ * distance and haze like everything else real in the scene (see AerialFog).
  *
  * The SAME size for every lamp, whatever it emits: this is the size of a bloom the optics make, not
  * of a bulb, and a brighter lamp is brighter rather than bigger (see LAMP_RADIANCE). It used to
@@ -875,7 +875,9 @@ export class DecorSystem {
     group.add(body)
     if (object.headingDeg !== undefined) group.rotation.y = -object.headingDeg * DEG_TO_RAD
     this.addLights(group, object.lights)
-    if (object.kind === "aircraft") this.exemptFromFog(group)
+    // No longer taken out of the fog, as aircraft had to be: the fog was a disguise for the ground
+    // disc's rim that erased anything past 900 m. It is the air now (see AerialFog), and an
+    // aircraft ten kilometres off is dimmed and blued by it, as one is.
     return group
   }
 
@@ -1038,28 +1040,6 @@ export class DecorSystem {
       lengthM: object.sizeM?.lengthM ?? natural.lengthM,
       heightM: object.sizeM?.heightM ?? natural.heightM
     }
-  }
-
-  /**
-   * Takes an aircraft out of the scene's fog.
-   *
-   * That fog is not an atmosphere: it is sized to the GROUND disc's own radius, so the disc fades
-   * out at its rim instead of ending at a visible edge (see SceneRenderer's own Fog construction).
-   * At ground level that radius is 900 m — which quietly erased anything further, and an aircraft is
-   * five to ten kilometres away. It was invisible for a reason no viewer could have guessed.
-   *
-   * Real atmospheric extinction over those distances is NOT modelled by this, and it is real: a
-   * distant strobe genuinely does dim, and more so through haze. But erasing an aircraft completely
-   * is a far worse answer than not attenuating it at all, and doing it properly means a visibility
-   * model the weather feeds — which belongs with the exposure work, not here.
-   */
-  private static exemptFromFog(group: Group): void {
-    group.traverse(child => {
-      if (!(child instanceof Mesh)) return
-      const material = child.material as MeshBasicMaterial | MeshLambertMaterial
-      material.fog = false
-      material.needsUpdate = true
-    })
   }
 
   /** One small emissive sphere per declared lamp, at its own place on the body. Built dark: every
