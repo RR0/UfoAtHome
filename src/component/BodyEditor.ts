@@ -28,6 +28,8 @@ export interface BodyEditorHost {
   currentTime(): number
   /** The body as it stands at `t` — see SceneElement.bodyReading. */
   readingOf(body: BodyJson, t: number): BodyReading | undefined
+  /** How far along a line of sight from the eye at `t` the ground is — see SceneElement.groundAlong. */
+  groundAlong(azimuthDeg: number, altitudeDeg: number, t: number): number | undefined
 }
 
 /**
@@ -362,6 +364,74 @@ export class BodyEditor {
         : { ...key, sizeM }
     })
     this.write({ ...this.interpretation!, bodies: this.bodies.map(other => other === body ? { ...body, track } : other) }, true)
+  }
+
+  /** Puts a body on show in the fields, as a press on it in the picture does. */
+  show(id: string): void {
+    if (!this.bodies.some(body => body.id === id) || id === this.currentId) return
+    this.currentId = id
+    this.sync()
+  }
+
+  /** The body on show where it stands at the playhead — where a drag on the picture starts from. */
+  readingNow(): BodyReading | undefined {
+    const body = this.current
+    return body && this.host.readingOf(body, this.host.currentTime())
+  }
+
+  /**
+   * Moves the body on show to a direction from the witness, at the playhead — what dragging it on
+   * the picture does, written through the same fields as typing (see updateKeyframe), which then
+   * show where it went. On the ground it slides over the relief: its distance becomes where the
+   * line of sight meets the ground, when it does. In the air it keeps its distance, and in the
+   * world's terms its level distance, the drag raising or lowering it over the ground.
+   */
+  dragTo(azimuthDeg: number, altitudeDeg: number): void {
+    const reading = this.readingNow()
+    if (!reading) return
+    const t = this.host.currentTime()
+    const onGround = this.input("body-key-ground").checked
+    const groundM = onGround ? this.host.groundAlong(azimuthDeg, altitudeDeg, t) : undefined
+    const rad = Math.PI / 180
+    const set = (id: string, value: number) => { this.input(id).value = String(Number(value.toFixed(2))) }
+    if (this.select("body-key-mode").value === "world") {
+      // The eye, from the body and the line joining them.
+      const cosAlt = Math.cos(reading.altitudeDeg * rad)
+      const eyeEast = reading.eastM - Math.sin(reading.azimuthDeg * rad) * cosAlt * reading.distanceM
+      const eyeNorth = reading.northM - Math.cos(reading.azimuthDeg * rad) * cosAlt * reading.distanceM
+      const kept = Math.hypot(reading.eastM - eyeEast, reading.northM - eyeNorth)
+      const level = groundM !== undefined ? groundM * Math.cos(altitudeDeg * rad) : kept
+      set("body-key-east", eyeEast + Math.sin(azimuthDeg * rad) * level)
+      set("body-key-north", eyeNorth + Math.cos(azimuthDeg * rad) * level)
+      if (!onGround) {
+        const clamp = (deg: number) => Math.max(-89, Math.min(89, deg)) * rad
+        set("body-key-above", Math.max(0, reading.aboveGroundM + level * (Math.tan(clamp(altitudeDeg)) - Math.tan(clamp(reading.altitudeDeg)))))
+      }
+    } else {
+      set("body-key-azimuth", ((azimuthDeg % 360) + 360) % 360)
+      set("body-key-elevation", Math.max(-90, Math.min(90, altitudeDeg)))
+      if (groundM !== undefined) set("body-key-distance", groundM)
+    }
+    this.updateKeyframe()
+  }
+
+  /** Takes the body on show nearer or further along its line of sight, by `factor` — what the wheel
+   * over it does. Its direction from the witness stays. */
+  scaleDistance(factor: number): void {
+    const reading = this.readingNow()
+    if (!reading) return
+    const set = (id: string, value: number) => { this.input(id).value = String(Number(value.toFixed(2))) }
+    if (this.select("body-key-mode").value === "world") {
+      const rad = Math.PI / 180
+      const cosAlt = Math.cos(reading.altitudeDeg * rad)
+      const eyeEast = reading.eastM - Math.sin(reading.azimuthDeg * rad) * cosAlt * reading.distanceM
+      const eyeNorth = reading.northM - Math.cos(reading.azimuthDeg * rad) * cosAlt * reading.distanceM
+      set("body-key-east", eyeEast + (reading.eastM - eyeEast) * factor)
+      set("body-key-north", eyeNorth + (reading.northM - eyeNorth) * factor)
+    } else {
+      set("body-key-distance", Math.max(0.1, reading.distanceM * factor))
+    }
+    this.updateKeyframe()
   }
 
   /** The fields of an instant, written as a keyframe at the playhead: position, size, attitude.

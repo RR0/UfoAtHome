@@ -738,6 +738,12 @@ export class SceneElement extends HTMLElement {
     return this.sceneRenderer.pickDecorAt(ndcX, ndcY)
   }
 
+  /** Which of the interpretation's bodies stands under a point of the picture — see
+   * SceneRenderer.pickPlacedBodyAt. */
+  pickPlacedBodyAt(ndcX: number, ndcY: number): string | undefined {
+    return this.sceneRenderer.pickPlacedBodyAt(ndcX, ndcY)
+  }
+
   /** Unlocks weather audio — see WeatherAudio.resume's own doc comment on why this needs a real
    * user gesture. SightingEditorElement calls this from its own weather toolbar's first interaction
    * (handleFirstInteraction covers the other case: a read-only embed with no editing UI at all). */

@@ -27,6 +27,7 @@ class Fixture {
   changes = 0
   lookedAt?: string
   time = 0
+  groundM: number | undefined = undefined
   start: ReturnType<BodyEditorHost["newBodyStart"]> = { sourceId: "flame", label: "Flame", keyframe: { t: 2000, azimuthDeg: 120, altitudeDeg: 5, distanceM: 100, sizeM: { widthM: 3, lengthM: 3, heightM: 1 } } }
   readonly editor: BodyEditor
 
@@ -43,6 +44,7 @@ class Fixture {
       newBodyStart: () => this.start,
       lookAt: body => { this.lookedAt = body.id },
       currentTime: () => this.time,
+      groundAlong: () => this.groundM,
       readingOf: () => ({ azimuthDeg: 10, altitudeDeg: 2, distanceM: 100, eastM: 17.36, northM: 98.48, aboveGroundM: 1.5, sizeM: { widthM: 4, lengthM: 5, heightM: 2 }, attitude: { headingDeg: 30, pitchDeg: 0, rollDeg: 0 } })
     }
     this.editor = new BodyEditor(this.container, host, "en")
@@ -232,5 +234,42 @@ describe("The Bodies part of the editor", () => {
     fixture.type("body-model", "catalogue-airliner")
     await new Promise(resolve => setTimeout(resolve))
     expect(fixture.sighting.interpretation!.bodies[0].track).toEqual([{ t: 0, azimuthDeg: 90, altitudeDeg: 0, distanceM: 100, sizeM: { widthM: 35, lengthM: 37, heightM: 12 } }])
+  })
+
+  it("moves a body stated from the witness to the direction it is dragged to, keeping its distance", () => {
+    const fixture = new Fixture(null)
+    fixture.start = { keyframe: { t: 0, azimuthDeg: 10, altitudeDeg: 2, distanceM: 100 } }
+    fixture.container.querySelector<HTMLButtonElement>("#body-add")!.click()
+    fixture.editor.dragTo(25, 7)
+    expect(fixture.sighting.interpretation!.bodies[0].track[0]).toMatchObject({ t: 0, azimuthDeg: 25, altitudeDeg: 7, distanceM: 100 })
+  })
+
+  it("slides a body on the ground over the relief, to where the line of sight meets it", () => {
+    const fixture = new Fixture(null)
+    fixture.start = { keyframe: { t: 0, azimuthDeg: 10, altitudeDeg: -1, distanceM: 100, onGround: true } }
+    fixture.container.querySelector<HTMLButtonElement>("#body-add")!.click()
+    fixture.groundM = 64
+    fixture.editor.dragTo(12, -2)
+    expect(fixture.sighting.interpretation!.bodies[0].track[0]).toMatchObject({ azimuthDeg: 12, altitudeDeg: -2, distanceM: 64, onGround: true })
+  })
+
+  it("moves a body stated in the world by as much as its direction turns, at the same level distance", () => {
+    const fixture = new Fixture()
+    // The reading: 100 m away at azimuth 10°, elevation 2°, standing at 17.36 E, 98.48 N.
+    fixture.editor.dragTo(100, 2)
+    const key = fixture.sighting.interpretation!.bodies[0].track.find(k => k.t === 0)!
+    const rad = Math.PI / 180
+    const level = 100 * Math.cos(2 * rad)
+    const eyeEast = 17.36 - Math.sin(10 * rad) * level, eyeNorth = 98.48 - Math.cos(10 * rad) * level
+    expect(key.eastM).toBeCloseTo(eyeEast + Math.sin(100 * rad) * level, 1)
+    expect(key.northM).toBeCloseTo(eyeNorth + Math.cos(100 * rad) * level, 1)
+  })
+
+  it("takes a body nearer or further along its line of sight", () => {
+    const fixture = new Fixture(null)
+    fixture.start = { keyframe: { t: 0, azimuthDeg: 10, altitudeDeg: 2, distanceM: 100 } }
+    fixture.container.querySelector<HTMLButtonElement>("#body-add")!.click()
+    fixture.editor.scaleDistance(1.5)
+    expect(fixture.sighting.interpretation!.bodies[0].track[0]).toMatchObject({ azimuthDeg: 10, altitudeDeg: 2, distanceM: 150 })
   })
 })

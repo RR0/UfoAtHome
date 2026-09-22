@@ -373,7 +373,10 @@ if (docs) {
         witness, or in the world), size and attitude are shown as they are at that instant; editing
         one writes a keyframe there, which is how a body is given its movement: move the playhead,
         edit again. Such a keyframe states nothing else, so the body's light, flame and moving parts
-        go on as before. A body's
+        go on as before. With this part open, a body can also be taken on the picture itself: dragging
+        it moves it by as much as the pointer turns (over the relief when it stands on the ground,
+        at the same distance when it flies), and the wheel over it takes it nearer or further. Both
+        write the same keyframe as the fields, which show where it went. A body's
         movement is stated in the file, and shown here. The picture draws the bodies, with the shapes
         beside them as outlines to read them against, whichever group is open, except in the Shapes
         part, where the shapes are drawn alone and in full.</p>
@@ -739,7 +742,10 @@ if (docs) {
         monde), sa taille et son attitude sont affichées telles qu'elles sont à cet instant ; en
         modifier une écrit une image clé là, et c'est ainsi qu'un corps reçoit son mouvement :
         déplacer la tête de lecture, modifier de nouveau. Une telle image clé ne dit rien d'autre :
-        la lumière, la flamme et les parties mobiles du corps continuent comme avant. Le mouvement d'un corps est donné par le fichier, et
+        la lumière, la flamme et les parties mobiles du corps continuent comme avant. Cette partie ouverte, un corps se prend aussi sur l'image : le glisser le
+        déplace d'autant que le pointeur tourne (sur le relief s'il est au sol, à la même distance
+        s'il vole), et la molette au-dessus de lui le rapproche ou l'éloigne. Les deux écrivent la
+        même image clé que les champs, qui montrent où il est allé. Le mouvement d'un corps est donné par le fichier, et
         affiché ici. L'image dessine les corps, avec les formes à côté en contours pour les
         confronter, quel que soit le groupe ouvert, sauf dans la partie Formes, où les formes sont
         dessinées seules et en entier.</p>

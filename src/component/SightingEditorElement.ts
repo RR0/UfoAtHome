@@ -191,7 +191,7 @@ const DEFAULT_APPEARANCE: Appearance = { presetId: "oval", color: "#39ff14", tra
  * every one of these names is turned into an actual cursor by a plain CSS rule (see
  * ufoTemplate's own canvas[data-cursor] block) rather than by assigning style.cursor here. */
 /** What the canvas edits — see SightingEditorElement.canvasMode. */
-type CanvasMode = "picture" | "shape" | "scene"
+type CanvasMode = "picture" | "shape" | "body" | "scene"
 type CanvasCursor = "record" | "select" | "move" | "vertex" | "pan" | "panning" | "landmark" | "rotate" | `resize-${ResizeAxis}`
 
 /** Best-effort reverse mapping from a recorded/loaded shape back to a preset id, so the preset
@@ -778,6 +778,7 @@ export class SightingEditorElement extends HTMLElement {
     | { kind: "move"; sources: Array<{ sourceId: string; original: Shape }>; startPointer: { x: number; y: number } }
     | { kind: "resize" | "rotate"; sourceId: string; original: Shape; handle: HandleId; startPointer: { x: number; y: number } }
     | { kind: "vertex"; sourceId: string; original: PolygonShape; vertexIndex: number }
+    | { kind: "body"; pointerAzimuthDeg: number; pointerAltitudeDeg: number; bodyAzimuthDeg: number; bodyAltitudeDeg: number }
     | { kind: "group-resize"; group: ShapeGroup; handle: Exclude<HandleId, "rotate"> }
     | { kind: "group-rotate"; group: ShapeGroup; startPointer: { x: number; y: number } }
 
@@ -1377,6 +1378,7 @@ export class SightingEditorElement extends HTMLElement {
     // The wheel changes the picture's field while it is being lined up — and only then, so that a
     // page scrolls as usual over a scene nobody is registering anything on.
     this.ufoElement.canvasElement.addEventListener("wheel", event => this.onReferenceWheel(event), { passive: false })
+    this.ufoElement.canvasElement.addEventListener("wheel", event => this.onBodyWheel(event), { passive: false })
     for (const input of [
       this.decorTitleInput,
       this.decorEastInput,
@@ -4315,6 +4317,8 @@ export class SightingEditorElement extends HTMLElement {
    */
   private canvasMode(): CanvasMode {
     if (this.isGroupIdOpen("group-reference") && this.currentReferenceId !== undefined) return "picture"
+    // The Bodies part of the group moves the bodies (see beginBodyDrag); the Shapes part the shapes.
+    if (this.isGroupIdOpen("group-shape") && this.shadow.getElementById("shape-bodies")?.hidden === false) return "body"
     if (this.isGroupIdOpen("group-shape")) return "shape"
     return "scene"
   }
@@ -4373,7 +4377,8 @@ export class SightingEditorElement extends HTMLElement {
     }
     // The shapes it offers to stand for may have been renamed, added or deleted meanwhile.
     if (tab.getAttribute("aria-controls") === "shape-bodies") void this.loadBodyEditor().then(editor => editor.sync())
-    this.syncBodiesShown()
+    // What the canvas edits follows the part (see canvasMode), and with it whether bodies are drawn.
+    this.syncCanvasMode()
   }
 
   /** Opens the part of a group a control stands in, when it stands in one — so that a summary chip
@@ -5421,7 +5426,8 @@ export class SightingEditorElement extends HTMLElement {
         newBodyStart: () => this.newBodyStart(),
         lookAt: body => this.lookAtBody(body),
         currentTime: () => this.ufoElement.currentTime,
-        readingOf: (body, t) => this.sceneElement.bodyReading(body, t)
+        readingOf: (body, t) => this.sceneElement.bodyReading(body, t),
+        groundAlong: (azimuthDeg, altitudeDeg, t) => this.sceneElement.groundAlong(azimuthDeg, altitudeDeg, t)
       }, this.language)
       return this.bodyEditor
     })
@@ -7591,6 +7597,11 @@ export class SightingEditorElement extends HTMLElement {
       if (this.ufoElement.playbackState !== "playing") this.beginReferenceDrag(point)
       return
     }
+    if (mode === "body") {
+      if (this.ufoElement.playbackState === "playing") return
+      if (!this.beginBodyDrag(event)) this.beginCameraDrag(point)
+      return
+    }
     const timeline = this.ufoElement.sighting.timeline
     const t = this.ufoElement.currentTime
     const playing = this.ufoElement.playbackState === "playing"
@@ -8042,6 +8053,75 @@ export class SightingEditorElement extends HTMLElement {
    * visible for the duration, same reasoning as the heading input's own focus/blur (see
    * SceneElement.setCompassForced): reading the heading off the compass is the point of dragging
    * to set it. */
+  /** Where a pointer event stands on the picture, in normalised device coordinates. */
+  private ndcOf(event: MouseEvent): { x: number; y: number } | undefined {
+    const rect = this.ufoElement.canvasElement.getBoundingClientRect()
+    if (rect.width === 0 || rect.height === 0) return undefined
+    return { x: ((event.clientX - rect.left) / rect.width) * 2 - 1, y: -(((event.clientY - rect.top) / rect.height) * 2 - 1) }
+  }
+
+  /** The direction from the witness a point of the picture names, as an azimuth and an elevation
+   * (the scene's axes: x east, y up, z south). */
+  private skyDirectionOf(event: MouseEvent): { azimuthDeg: number; altitudeDeg: number } | undefined {
+    const ndc = this.ndcOf(event)
+    if (!ndc) return undefined
+    const d = this.sceneElement.directionAt(ndc.x, ndc.y)
+    return {
+      azimuthDeg: ((Math.atan2(d.x, -d.z) * 180) / Math.PI + 360) % 360,
+      altitudeDeg: (Math.asin(Math.max(-1, Math.min(1, d.y))) * 180) / Math.PI
+    }
+  }
+
+  /**
+   * Grabs the body under the pointer, if one is there: it is put on show in the Bodies part, and
+   * moving the pointer moves it (see onBodyDragPointerMove). What the drag keeps is where it was
+   * grabbed: the body moves by as much as the pointer turns, rather than jumping its middle under
+   * the pointer. False when there is no body there to grab.
+   */
+  private beginBodyDrag(event: PointerEvent): boolean {
+    const ndc = this.ndcOf(event)
+    const editor = this.bodyEditor
+    const id = ndc && editor ? this.sceneElement.pickPlacedBodyAt(ndc.x, ndc.y) : undefined
+    if (!id || !editor) return false
+    editor.show(id)
+    const reading = editor.readingNow()
+    const pointer = this.skyDirectionOf(event)
+    if (!reading || !pointer) return false
+    this.dragState = {
+      kind: "body",
+      pointerAzimuthDeg: pointer.azimuthDeg,
+      pointerAltitudeDeg: pointer.altitudeDeg,
+      bodyAzimuthDeg: reading.azimuthDeg,
+      bodyAltitudeDeg: reading.altitudeDeg
+    }
+    this.setCanvasCursor("move")
+    this.startDragListening()
+    return true
+  }
+
+  private onBodyDragPointerMove(event: PointerEvent): void {
+    const drag = this.dragState
+    if (drag?.kind !== "body") return
+    const pointer = this.skyDirectionOf(event)
+    if (!pointer) return
+    // The shorter way round: across north, 359° to 1° is two degrees, not 358.
+    const turn = ((pointer.azimuthDeg - drag.pointerAzimuthDeg + 540) % 360) - 180
+    this.bodyEditor?.dragTo(drag.bodyAzimuthDeg + turn, drag.bodyAltitudeDeg + pointer.altitudeDeg - drag.pointerAltitudeDeg)
+  }
+
+  /** The wheel over a body takes it nearer or further, a tenth a notch; elsewhere it does what it
+   * did (see onReferenceWheel). */
+  private onBodyWheel(event: WheelEvent): void {
+    if (this.canvasMode() !== "body" || this.ufoElement.playbackState === "playing") return
+    const ndc = this.ndcOf(event)
+    const editor = this.bodyEditor
+    const id = ndc && editor ? this.sceneElement.pickPlacedBodyAt(ndc.x, ndc.y) : undefined
+    if (!id || !editor) return
+    event.preventDefault()
+    editor.show(id)
+    editor.scaleDistance(Math.exp(Math.sign(event.deltaY) * 0.1))
+  }
+
   private beginCameraDrag(startPointer: { x: number; y: number }): void {
     const insideDecor = this.isWitnessInsideDecor()
     this.cameraDragState = {
@@ -8095,6 +8175,10 @@ export class SightingEditorElement extends HTMLElement {
   private onDragPointerMove(event: PointerEvent): void {
     if (this.referenceDragState) {
       this.onReferenceDragPointerMove(event)
+      return
+    }
+    if (this.dragState?.kind === "body") {
+      this.onBodyDragPointerMove(event)
       return
     }
     if (this.cameraDragState) {
@@ -8293,6 +8377,11 @@ export class SightingEditorElement extends HTMLElement {
     const t = this.ufoElement.currentTime
     const editable = this.ufoElement.playbackState !== "playing"
     if (mode === "picture") return editable ? "pan" : undefined
+    if (mode === "body") {
+      const ndc = this.ndcOf(event)
+      const over = ndc && this.bodyEditor ? this.sceneElement.pickPlacedBodyAt(ndc.x, ndc.y) : undefined
+      return editable && over ? "move" : editable ? "pan" : undefined
+    }
     const shapeMode = mode === "shape"
     if (editable && shapeMode) {
       if (this.selectedSourceIds.size > 1) {

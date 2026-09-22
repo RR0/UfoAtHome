@@ -66,6 +66,7 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     }
     updateDecorAnchoring(): void {}
     setBodies(): void {}
+    pickPlacedBodyAt(): undefined { return undefined }
     get bodyGround() { return { heightAt: () => 0 } }
     updateDecorLitState(): void {}
     pickBodyAt(): undefined {

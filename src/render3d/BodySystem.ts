@@ -1,6 +1,6 @@
 import {
   AnimationAction, AnimationMixer, LoopOnce, Box3, BoxGeometry, BufferGeometry, Color, ConeGeometry, CylinderGeometry, Group, LatheGeometry, Mesh,
-  MeshPhysicalMaterial, MeshStandardMaterial, Object3D, Quaternion, SphereGeometry, TorusGeometry, Vector2, Vector3
+  MeshPhysicalMaterial, MeshStandardMaterial, Object3D, Quaternion, Raycaster, SphereGeometry, TorusGeometry, Vector2, Vector3
 } from "three"
 import type { BodyState } from "../engine/interpretation/BodyPlacement.js"
 import { BODY_PRIMITIVES } from "../engine/interpretation/Interpretation.js"
@@ -403,6 +403,16 @@ export class BodySystem {
   }
 
   /** How far the furthest body on show stands from `from` — what the camera's far plane must reach. */
+  /** The body on show a ray meets first, by id — what a press on the editor's picture grabs. */
+  pick(raycaster: Raycaster): string | undefined {
+    const shown = [...this.built.entries()].filter(([, { holder }]) => holder.visible)
+    const hit = raycaster.intersectObjects(shown.map(([, { holder }]) => holder), true)[0]
+    if (!hit) return undefined
+    let object: Object3D | null = hit.object
+    while (object && !shown.some(([, { holder }]) => holder === object)) object = object.parent
+    return shown.find(([, { holder }]) => holder === object)?.[0]
+  }
+
   /** How far from `from`, level, the bodies on show reach: the furthest centre plus half its
    * largest side — what the sun's shadow box has to take in (see SceneRenderer.fitShadowToBodies). */
   reachFrom(from: Vector3): number {

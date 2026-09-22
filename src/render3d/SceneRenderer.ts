@@ -3890,6 +3890,13 @@ export class SceneRenderer {
    * a tiny true-to-scale astronomical disc needing a more forgiving target) and walks back up from
    * whichever part was actually hit (e.g. a building's own wall mesh) to the top-level group
    * stored in decorGroups, since that's what carries the DecorObject's own id. */
+  /** Which of the interpretation's bodies stands under a point of the picture, by id — see
+   * BodySystem.pick. */
+  pickPlacedBodyAt(ndcX: number, ndcY: number): string | undefined {
+    this.aimAtScreenPoint(this.raycaster, ndcX, ndcY)
+    return this.bodySystem.pick(this.raycaster)
+  }
+
   pickDecorAt(ndcX: number, ndcY: number): string | undefined {
     this.aimAtScreenPoint(this.raycaster, ndcX, ndcY)
     const entries = [...this.decorGroups.entries()]
