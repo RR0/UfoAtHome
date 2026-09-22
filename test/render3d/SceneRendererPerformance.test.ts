@@ -227,7 +227,7 @@ describe("the Sun's shadow as the witness walks", () => {
     const r = Object.assign(Object.create(SceneRenderer.prototype), {
       celestialLight: light, celestialLightTarget: new Object3D(), lightDirection: new Vector3(0.3, 0.12, -0.9).normalize(),
       shadowUp: new Vector3(0, 1, 0), shadowAxisX: new Vector3(), shadowAxisY: new Vector3(), shadowWorld: new Vector3(),
-      bodyOrigin: { x: 0, z: 0 }
+      bodyOrigin: { x: 0, z: 0 }, shadowLightDistanceM: 850
     })
     const texel = 240 / 1024
     // Where a fixed point of the world falls on the shadow map, in texels, for a world slid by (x, z).
@@ -247,5 +247,31 @@ describe("the Sun's shadow as the witness walks", () => {
       expect(Math.abs(((x1 - x0) % 1 + 1.5) % 1 - 0.5)).toBeLessThan(1e-3)
       expect(Math.abs(((y1 - y0) % 1 + 1.5) % 1 - 0.5)).toBeLessThan(1e-3)
     }
+  })
+})
+
+describe("the Sun's shadow box", () => {
+  it("takes in a body standing past the decor's couple of hundred metres, and narrows back", () => {
+    const light = new DirectionalLight()
+    light.shadow.mapSize.set(1024, 1024)
+    Object.assign(light.shadow.camera, { left: -120, right: 120, top: 120, bottom: -120 })
+    let reach = 270
+    const r = Object.assign(Object.create(SceneRenderer.prototype), {
+      celestialLight: light, celestialLightTarget: new Object3D(), lightDirection: new Vector3(0.3, 0.12, -0.9).normalize(),
+      shadowUp: new Vector3(0, 1, 0), shadowAxisX: new Vector3(), shadowAxisY: new Vector3(), shadowWorld: new Vector3(),
+      bodyOrigin: { x: 0, z: 0 }, shadowLightDistanceM: 850, shadowHalfExtentM: 120,
+      camera: { position: new Vector3() }, bodySystem: { reachFrom: () => reach }
+    })
+    r.fitShadowToBodies()
+    const camera = light.shadow.camera
+    expect(camera.right).toBeGreaterThanOrEqual(270)
+    expect(light.shadow.mapSize.x).toBe(2048)
+    // Deep enough for the box seen from the light, which stands beyond that depth.
+    expect(camera.far - camera.near).toBeGreaterThanOrEqual(2 * camera.right)
+    expect(camera.near).toBeGreaterThan(0)
+    reach = 40
+    r.fitShadowToBodies()
+    expect(camera.right).toBe(120)
+    expect(light.shadow.mapSize.x).toBe(1024)
   })
 })

@@ -403,6 +403,18 @@ export class BodySystem {
   }
 
   /** How far the furthest body on show stands from `from` — what the camera's far plane must reach. */
+  /** How far from `from`, level, the bodies on show reach: the furthest centre plus half its
+   * largest side — what the sun's shadow box has to take in (see SceneRenderer.fitShadowToBodies). */
+  reachFrom(from: Vector3): number {
+    let reach = 0
+    for (const { holder } of this.built.values()) {
+      if (!holder.visible) continue
+      const level = Math.hypot(holder.position.x - from.x, holder.position.z - from.z)
+      reach = Math.max(reach, level + Math.max(holder.scale.x, holder.scale.y, holder.scale.z) / 2)
+    }
+    return reach
+  }
+
   furthestFrom(from: Vector3): number {
     let furthest = 0
     for (const { holder } of this.built.values()) {

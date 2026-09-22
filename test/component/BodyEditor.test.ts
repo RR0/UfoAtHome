@@ -223,4 +223,14 @@ describe("The Bodies part of the editor", () => {
     await new Promise(resolve => setTimeout(resolve))
     expect(fixture.field("body-model-url").value).toBe("")
   })
+
+  it("gives a catalogue model's real size to a body that had none", async () => {
+    const fixture = new Fixture(null)
+    fixture.start = { keyframe: { t: 0, azimuthDeg: 90, altitudeDeg: 0, distanceM: 100 } }
+    fixture.container.querySelector<HTMLButtonElement>("#body-add")!.click()
+    await new Promise(resolve => setTimeout(resolve))
+    fixture.type("body-model", "catalogue-airliner")
+    await new Promise(resolve => setTimeout(resolve))
+    expect(fixture.sighting.interpretation!.bodies[0].track).toEqual([{ t: 0, azimuthDeg: 90, altitudeDeg: 0, distanceM: 100, sizeM: { widthM: 35, lengthM: 37, heightM: 12 } }])
+  })
 })

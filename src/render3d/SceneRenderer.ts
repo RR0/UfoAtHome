@@ -206,6 +206,11 @@ const BODY_PLACEMENT_RADIUS = 850
 /** How far in front of and behind the shadow box's centre the sun's shadow map records depth,
  * metres — enough for the ±120 m box at any angle and the relief standing in it. */
 const SHADOW_DEPTH_HALF_RANGE_M = 300
+/** Half the side of the sun's shadow box, metres, round the witness: where decor and relief sit. */
+const SHADOW_HALF_EXTENT_M = 120
+/** How far it is widened, at most, for the bodies of an interpretation standing further out — past
+ * this their shadows would be too coarse to read, and a map this wide already costs 2048². */
+const SHADOW_MAX_HALF_EXTENT_M = 700
 /** How far a surface is pushed towards the light before it is tested against the shadow map. */
 const SHADOW_BIAS_M = 0.03
 /** And how far along its own normal, which is what keeps grazing relief from shadowing itself. */
@@ -1151,10 +1156,10 @@ export class SceneRenderer {
     // span the light's own placement distance (up to BODY_PLACEMENT_RADIUS, ~850) down to just
     // past the origin, since celestialLight.position sits at the real Sun/Moon distance away.
     this.celestialLight.shadow.mapSize.set(1024, 1024)
-    this.celestialLight.shadow.camera.left = -120
-    this.celestialLight.shadow.camera.right = 120
-    this.celestialLight.shadow.camera.top = 120
-    this.celestialLight.shadow.camera.bottom = -120
+    this.celestialLight.shadow.camera.left = -SHADOW_HALF_EXTENT_M
+    this.celestialLight.shadow.camera.right = SHADOW_HALF_EXTENT_M
+    this.celestialLight.shadow.camera.top = SHADOW_HALF_EXTENT_M
+    this.celestialLight.shadow.camera.bottom = -SHADOW_HALF_EXTENT_M
     // Depth only as deep as what can cast or receive: the box above, seen from the light's own
     // distance. The bias below is a fraction of THIS range, and over the thousand metres it used to
     // span, -0.0015 was a metre and a half along the light: under a low sun every shadow started a
@@ -1745,6 +1750,7 @@ export class SceneRenderer {
     this.bodySystem.setSmoke(smoke, seconds)
     // Something is there to cast a shadow, whatever the decor says.
     if (this.bodySystem.any) this.celestialLight.castShadow = true
+    this.fitShadowToBodies()
     // Only ever widened here, over what updateDecorAnchoring has just sized for the decor and the
     // sky: an aircraft of an interpretation 8 km out is as far as one of the decor.
     const needed = this.bodySystem.furthestFrom(this.camera.position) * 1.2
@@ -2570,8 +2576,45 @@ export class SceneRenderer {
     const centre = this.celestialLightTarget.position.set(0, 0, 0)
       .addScaledVector(right, along(right)).addScaledVector(up, along(up))
     this.celestialLightTarget.updateMatrixWorld()
-    this.celestialLight.position.copy(centre).addScaledVector(direction, BODY_PLACEMENT_RADIUS)
+    this.celestialLight.position.copy(centre).addScaledVector(direction, this.shadowLightDistanceM)
   }
+
+  /**
+   * Widens the sun's shadow box to take in the bodies standing further out than the decor does,
+   * and narrows it back when they go. Sized for the decor's couple of hundred metres, it left an
+   * airliner 250 m off without a shadow at all. The depth range and the light's distance follow
+   * the box (a body's shadow falls up to a box's diagonal away under a low sun), the map doubles
+   * past twice the decor's box so a texel stays under a third of a metre up to 320 m, and the
+   * bias stays the same few centimetres (see SHADOW_BIAS_M).
+   */
+  private fitShadowToBodies(): void {
+    const reach = this.bodySystem.reachFrom(this.camera.position)
+    const half = Math.min(SHADOW_MAX_HALF_EXTENT_M, Math.max(SHADOW_HALF_EXTENT_M, Math.ceil((reach * 1.25) / 20) * 20))
+    if (half === this.shadowHalfExtentM) return
+    this.shadowHalfExtentM = half
+    const shadow = this.celestialLight.shadow
+    const camera = shadow.camera
+    camera.left = -half
+    camera.right = half
+    camera.top = half
+    camera.bottom = -half
+    const depth = Math.max(SHADOW_DEPTH_HALF_RANGE_M, half * (SHADOW_DEPTH_HALF_RANGE_M / SHADOW_HALF_EXTENT_M))
+    this.shadowLightDistanceM = Math.max(BODY_PLACEMENT_RADIUS, depth + 10)
+    camera.near = this.shadowLightDistanceM - depth
+    camera.far = this.shadowLightDistanceM + depth
+    camera.updateProjectionMatrix()
+    shadow.bias = -SHADOW_BIAS_M / (2 * depth)
+    const size = half > 2 * SHADOW_HALF_EXTENT_M ? 2048 : 1024
+    if (shadow.mapSize.x !== size) {
+      shadow.mapSize.set(size, size)
+      shadow.map?.dispose()
+      shadow.map = null
+    }
+    this.placeShadowFrustum()
+  }
+
+  private shadowHalfExtentM = SHADOW_HALF_EXTENT_M
+  private shadowLightDistanceM = BODY_PLACEMENT_RADIUS
   private readonly shadowUp = new Vector3(0, 1, 0)
   private readonly shadowAxisX = new Vector3()
   private readonly shadowAxisY = new Vector3()

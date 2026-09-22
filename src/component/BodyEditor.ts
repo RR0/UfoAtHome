@@ -342,6 +342,15 @@ export class BodyEditor {
     const real = entry?.sizeM
     const body = this.current
     if (!real || !body || body.model.id !== id) return
+    // A body no keyframe gives a size to (one added with no shape to stand for) is drawn a metre
+    // across: it takes the real size on its first keyframe, where it has no angle to keep.
+    if (!body.track.some(key => key.sizeM) && body.track.length > 0) {
+      const [first, ...rest] = [...body.track].sort((a, b) => a.t - b.t)
+      const sizeM = { widthM: real.widthM ?? 1, lengthM: real.lengthM ?? real.widthM ?? 1, heightM: real.heightM ?? 1 }
+      const track = [{ ...first, sizeM }, ...rest]
+      this.write({ ...this.interpretation!, bodies: this.bodies.map(other => other === body ? { ...body, track } : other) }, true)
+      return
+    }
     const track = body.track.map(key => {
       const width = key.sizeM?.widthM
       const realWidth = real.widthM ?? width
