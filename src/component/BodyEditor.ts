@@ -5,6 +5,7 @@ import type { Sighting } from "../engine/model/Sighting.js"
 import type { SaidTexts } from "../engine/model/SaidText.js"
 import type { DecorModelEntry, DecorModelProvider } from "../render3d/decor/DecorModelProvider.js"
 import type { BodyReading } from "./SceneElement.js"
+import { NumberFields } from "./NumberFields.js"
 import type { BodyEditorMessages } from "./messages/BodyEditorMessages.js"
 import { BodyEditorTexts } from "./messages/BodyEditorMessages.js"
 
@@ -158,8 +159,10 @@ export class BodyEditor {
 
   private render(): void {
     const m = this.messages
-    const field = (id: string, label: string, type = "text", placeholder = "") =>
-      `<label><span>${label}</span> <input id="${id}" type="${type}" placeholder="${placeholder}" autocomplete="off"/></label>`
+    // The unit stands AFTER the field, never in the label before it, and a field is as wide as the
+    // values it takes (see the CSS) — the user's own rules for every form field here.
+    const field = (id: string, label: string, type = "text", placeholder = "", unit = "", bounds = "") =>
+      `<label><span>${label}</span> <input id="${id}" type="${type}" placeholder="${placeholder}" ${bounds} autocomplete="off"/>${unit ? ` ${unit}` : ""}</label>`
     this.container.innerHTML = `<div class="body-editor">
       <p class="body-intro">${m.intro}</p>
       ${field("body-interpretation-title", m.interpretationTitle)}
@@ -189,22 +192,22 @@ export class BodyEditor {
           <legend id="body-key-legend"></legend>
           <p id="body-key-note" class="body-intro"></p>
           <label><span>${m.placement}</span> <select id="body-key-mode"><option value="witness">${m.fromWitness}</option><option value="world">${m.inWorld}</option></select></label>
-          ${field("body-key-azimuth", m.azimuth, "number")}
-          ${field("body-key-elevation", m.elevation, "number")}
-          ${field("body-key-distance", m.distance, "number")}
-          ${field("body-key-east", m.east, "number")}
-          ${field("body-key-north", m.north, "number")}
+          ${field("body-key-azimuth", m.azimuth, "number", "", "°", 'min="0" max="360" step="0.01"')}
+          ${field("body-key-elevation", m.elevation, "number", "", "°", 'min="-90" max="90" step="0.01"')}
+          ${field("body-key-distance", m.distance, "number", "", "m", 'min="0.1" max="30000" step="0.1"')}
+          ${field("body-key-east", m.east, "number", "", "m", 'min="-30000" max="30000" step="0.1"')}
+          ${field("body-key-north", m.north, "number", "", "m", 'min="-30000" max="30000" step="0.1"')}
           <label><input id="body-key-ground" type="checkbox"/> <span>${m.onGround}</span></label>
-          ${field("body-key-above", m.aboveGround, "number")}
-          ${field("body-key-width", m.width, "number")}
-          ${field("body-key-length", m.length, "number")}
-          ${field("body-key-height", m.height, "number")}
-          ${field("body-key-heading", m.heading, "number")}
-          ${field("body-key-pitch", m.pitch, "number")}
-          ${field("body-key-roll", m.roll, "number")}
+          ${field("body-key-above", m.aboveGround, "number", "", "m", 'min="0" max="30000" step="0.1"')}
+          ${field("body-key-width", m.width, "number", "", "m", 'min="0.01" max="1000" step="0.01"')}
+          ${field("body-key-length", m.length, "number", "", "m", 'min="0.01" max="1000" step="0.01"')}
+          ${field("body-key-height", m.height, "number", "", "m", 'min="0.01" max="1000" step="0.01"')}
+          ${field("body-key-heading", m.heading, "number", "", "°", 'min="0" max="360" step="0.1"')}
+          ${field("body-key-pitch", m.pitch, "number", "", "°", 'min="-90" max="90" step="0.1"')}
+          ${field("body-key-roll", m.roll, "number", "", "°", 'min="-180" max="180" step="0.1"')}
           <label><span>${m.colour}</span> <input id="body-key-colour" type="color"/></label>
-          ${field("body-key-albedo", m.albedo, "number")}
-          ${field("body-key-luminance", m.luminance, "number")}
+          ${field("body-key-albedo", m.albedo, "number", "0 – 1", "", 'min="0" max="1" step="0.01"')}
+          ${field("body-key-luminance", m.luminance, "number", "", "cd/m²", 'min="0" max="100000" step="0.1"')}
           <p class="body-intro">${m.appearanceNote}</p>
           <button id="body-key-delete" type="button">${m.deleteKeyframe}</button>
           <p class="body-intro">${m.pictureHint}</p>
@@ -244,6 +247,7 @@ export class BodyEditor {
     }
     this.select("body-key-mode").addEventListener("change", () => this.updateKeyframe())
     this.element("body-key-delete").addEventListener("click", () => this.deleteKeyframe())
+    NumberFields.fit(this.container)
     this.sync()
   }
 

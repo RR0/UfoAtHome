@@ -127,8 +127,8 @@ export const html = `
            a settings drawer: who answered is part of the answer. See DataSource.ts. -->
       <output id="place-status" class="place-status" for="placeName"><span id="place-status-text"></span><span id="place-source-row" class="inline-source" hidden></span></output>
     </div>
-    <label><span id="label-lat">Latitude</span> <input id="lat" type="number" min="-90" max="90" step="0.0001" placeholder="lat"/></label>
-    <label><span id="label-lng">Longitude</span> <input id="lng" type="number" min="-180" max="180" step="0.0001" placeholder="lng"/></label>
+    <label><span id="label-lat">Latitude</span> <input id="lat" type="number" min="-90" max="90" step="0.000001" placeholder="lat"/></label>
+    <label><span id="label-lng">Longitude</span> <input id="lng" type="number" min="-180" max="180" step="0.000001" placeholder="lng"/></label>
     <label><span id="label-heading">Heading</span> <input id="heading" type="number" min="0" max="360" step="1" placeholder="unknown"/> <span id="heading-unit">&deg;</span></label>
     <label><span id="label-pitch">Tilt</span> <input id="pitch" type="number" min="-90" max="90" step="1" value="0"/> &deg;</label>
     <!-- Above SEA LEVEL, not above the ground: "0 m" is simply false for a witness in the Alps, and
@@ -513,7 +513,7 @@ export const html = `
   </section>
   <section class="subgroup-panel" id="shape-bodies" aria-labelledby="label-bodies-subgroup" hidden>
     <div class="toolbar">
-      <style>#body-editor { flex-basis: 100%; min-width: 0; } #body-editor .body-editor, #body-editor .body-fields { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; } #body-editor .body-fields { flex-basis: 100%; min-width: 0; } #body-editor .body-fields[hidden], #body-editor [hidden] { display: none !important; } #body-editor select { min-width: 0; width: 100%; } #body-editor .body-intro { flex-basis: 100%; font-size: .85em; margin: 0; } #body-editor .body-explains { flex-basis: 100%; min-width: 0; box-sizing: border-box; margin: 0; } #body-editor #body-explains { display: flex; flex-wrap: wrap; gap: .3em 1em; } #body-editor #body-explains label { white-space: normal; } #body-editor .body-track { margin: 0; } #body-editor details { flex-basis: 100%; min-width: 0; } #body-editor details[open] { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; } #body-editor details > summary { flex-basis: 100%; } #body-editor input, #body-editor select { max-width: 100%; box-sizing: border-box; } #body-editor input[type="number"] { width: 7em; } #body-editor input[type="color"] { width: 3em; padding: 0; } #body-editor #body-id, #body-editor #body-outline-node { width: 10em; } #body-editor #body-title, #body-editor #body-interpretation-title { width: 18em; } #body-editor label { min-width: 0; max-width: 100%; }</style><div id="body-editor"></div>
+      <style>#body-editor { flex-basis: 100%; min-width: 0; } #body-editor .body-editor, #body-editor .body-fields { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; } #body-editor .body-fields { flex-basis: 100%; min-width: 0; } #body-editor .body-fields[hidden], #body-editor [hidden] { display: none !important; } #body-editor select { min-width: 0; width: 100%; } #body-editor .body-intro { flex-basis: 100%; font-size: .85em; margin: 0; } #body-editor .body-explains { flex-basis: 100%; min-width: 0; box-sizing: border-box; margin: 0; } #body-editor #body-explains { display: flex; flex-wrap: wrap; gap: .3em 1em; } #body-editor #body-explains label { white-space: normal; } #body-editor .body-track { margin: 0; } #body-editor details { flex-basis: 100%; min-width: 0; } #body-editor details[open] { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; } #body-editor details > summary { flex-basis: 100%; } #body-editor input, #body-editor select { max-width: 100%; box-sizing: border-box; } #body-editor input[type="color"] { width: 3em; padding: 0; } #body-editor #body-id, #body-editor #body-outline-node { width: 10em; } #body-editor #body-title, #body-editor #body-interpretation-title { width: 18em; } #body-editor label { min-width: 0; max-width: 100%; }</style><div id="body-editor"></div>
     </div>
   </section>
 </section>
@@ -587,18 +587,15 @@ export const css = `
   margin-bottom: 0.5em;
   flex-wrap: wrap;
 }
-/* A field as wide as what it holds: a heading is four characters, and a number field stretched to
-   fit a sentence reads as one waiting for a sentence (the user's own remark). */
+/* A field as wide as what it holds, from its own min/max/step — see NumberFields, which sets each
+   one's width. What stands here is only what a field with no bounds of its own falls back to, and
+   the colour swatches, which hold no text at all. */
 .toolbar input[type="number"] {
   width: 7em;
 }
 .toolbar input[type="color"] {
   width: 3em;
   padding: 0;
-}
-/* The exceptions: a longitude runs to eleven characters, a duration in seconds to six. */
-#lat, #lng, #durationSeconds {
-  width: 10em;
 }
 .presets {
   display: flex;

@@ -1,5 +1,6 @@
 import { setupCloudEditor } from "./CloudEditor.js"
 import type { BodyEditor } from "./BodyEditor.js"
+import { NumberFields } from "./NumberFields.js"
 import type { BodyJson, BodyKeyframe } from "../engine/interpretation/Interpretation.js"
 import { BLUR_RADIUS_UNIT } from "../render/CanvasRenderer.js"
 import { SightingFetch, SightingFetchError } from "../engine/net/SightingFetch.js"
@@ -1600,6 +1601,8 @@ export class SightingEditorElement extends HTMLElement {
     for (const tab of this.subgroupTabs) {
       tab.addEventListener("click", () => this.openSubgroup(tab))
     }
+    // Every number field as wide as the values it takes, from its own bounds — see NumberFields.
+    NumberFields.fit(this.shadow)
     this.paramSummary = this.shadow.getElementById("param-summary")!
     this.paramSummaryBuilder = new SightingSummary(this.messages, this.showerLanguage(), this.said, this.tagNames)
     // One listener on the strip rather than one per chip: the chips are rebuilt from scratch on
