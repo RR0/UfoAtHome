@@ -167,7 +167,16 @@ beforeAll(() => {
  * substitute their own answers. */
 const NO_RECORD_PROVIDER: WeatherProvider = { getWeather: () => Promise.resolve(undefined) }
 
+/** An editor holding one shape, "ufo-1", added with + as an author would: a new editor starts
+ * empty (see mountEmpty), and most of these tests are about editing a shape. */
 function mount(weatherProvider: WeatherProvider = NO_RECORD_PROVIDER): SightingEditorElement {
+  const element = mountEmpty(weatherProvider)
+  ;(element.shadowRoot!.getElementById("add-shape") as HTMLButtonElement).click()
+  return element
+}
+
+/** An editor as it opens: no shape at all. */
+function mountEmpty(weatherProvider: WeatherProvider = NO_RECORD_PROVIDER): SightingEditorElement {
   const element = document.createElement(ELEMENT_NAME) as SightingEditorElement
   element.weatherProvider = weatherProvider
   document.body.appendChild(element)
@@ -1921,13 +1930,14 @@ describe("SightingEditorElement Delete/Backspace key", () => {
     expect(sourceIds).toEqual(["ufo-1", "ufo-2"])
   })
 
-  it("refuses to delete the only remaining shape, even via the confirmed keyboard path", () => {
+  it("deletes the only remaining shape too, once confirmed", () => {
     const element = mount() // just "ufo-1"
 
     pressKey(element, "Delete")
+    answerConfirm(element, true)
 
     const sourceIds = element.sightingData.timeline.keyframes.flatMap(k => k.shapes.map(s => s.sourceId))
-    expect(sourceIds).toEqual(["ufo-1"])
+    expect(sourceIds).toEqual([])
   })
 
   it("does nothing when Delete/Backspace originates from a focused text input", () => {
@@ -6384,5 +6394,34 @@ describe("SightingEditorElement bodies", () => {
     tab("shape-shapes", ".subgroup-tab").click()
     expect(scene.interpretation).toBeUndefined()
     expect(scene.compareTestimony).toBe(false)
+  })
+})
+
+describe("SightingEditorElement new recording", () => {
+  afterEach(() => {
+    document.body.innerHTML = ""
+  })
+
+  it("starts with no shape at all, and + adds the first one as Shape 1", () => {
+    const element = mountEmpty()
+    const shadow = element.shadowRoot!
+    const picker = shadow.getElementById("source") as HTMLSelectElement
+    expect(element.sightingData.timeline.keyframes.flatMap(k => k.shapes)).toEqual([])
+    expect(picker.options).toHaveLength(0)
+    ;(shadow.getElementById("add-shape") as HTMLButtonElement).click()
+    expect(element.sightingData.timeline.keyframes.flatMap(k => k.shapes.map(shape => shape.sourceId))).toEqual(["ufo-1"])
+    expect([...picker.options].map(option => option.value)).toEqual(["ufo-1"])
+  })
+
+  it("keeps an appearance chosen before any shape for the next one, drawing nothing", () => {
+    const element = mountEmpty()
+    const shadow = element.shadowRoot!
+    const color = shadow.getElementById("color") as HTMLInputElement
+    color.value = "#ff0000"
+    color.dispatchEvent(new Event("input"))
+    color.dispatchEvent(new Event("change"))
+    expect(element.sightingData.timeline.keyframes.flatMap(k => k.shapes)).toEqual([])
+    ;(shadow.getElementById("add-shape") as HTMLButtonElement).click()
+    expect(element.sightingData.timeline.keyframes[0].shapes[0].shape.color).toBe("#ff0000")
   })
 })

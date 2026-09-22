@@ -1600,16 +1600,10 @@ export class SightingEditorElement extends HTMLElement {
 
     this.updatePresetButtons()
     this.setRecordButtonLabel(false)
-    // Places a real, immediately selectable keyframe from the start (rather than a
-    // disconnected canvas-only preview) — otherwise the very first shape shown couldn't be
-    // clicked/selected, since click-to-select hit-tests against the Timeline, not the canvas.
-    this.applyAppearanceAtPlayhead()
-    // Named right away too, same as every shape addShape() creates afterward (see its own doc
-    // comment) — this very first one is the one case that doesn't go through addShape() at all,
-    // so it needs the same fill done explicitly here. updateShapeTitle() refreshes the source
-    // list itself, so no separate call is needed right after.
-    this.shapeTitleInput.value = this.shapeLabel(this.currentSourceId)
-    this.updateShapeTitle()
+    // A new recording starts empty: no shape until one is added (+) or recorded. It used to start
+    // with a green oval already placed, which every recording then had to delete once the last
+    // shape could be deleted and a recording could hold only bodies.
+    this.refreshSourceList()
     this.currentDecorId = this.ufoElement.sighting.decor[0]?.id
     this.refreshDecorList()
     this.currentReferenceId = this.ufoElement.sighting.references[0]?.id
@@ -4227,6 +4221,9 @@ export class SightingEditorElement extends HTMLElement {
     // duration. While playing, the playhead is a moving target, not a specific instant to
     // edit — editing here would just get stomped by the next timeupdate-driven resync.
     if (this.isRecording || this.ufoElement.playbackState === "playing") return
+    // With no shape yet, it is the next one's appearance (+ or a recording): a colour picked in an
+    // empty recording is not a shape drawn.
+    if (!this.ufoElement.sighting.timeline.sourceIds.includes(this.currentSourceId)) return
     this.applyAppearanceAtPlayhead(undefined, changingPreset)
   }
 
@@ -5533,10 +5530,13 @@ export class SightingEditorElement extends HTMLElement {
   private addShape(): void {
     if (this.isRecording) return
     const timeline = this.ufoElement.sighting.timeline
-    const taken = new Set([...timeline.sourceIds, this.currentSourceId])
-    let n = taken.size + 1
-    while (taken.has(`ufo-${n}`)) n++
-    this.currentSourceId = `ufo-${n}`
+    // The first shape of an empty recording takes the id that was waiting for it ("ufo-1").
+    if (timeline.sourceIds.length > 0 || this.currentSourceId === undefined) {
+      const taken = new Set([...timeline.sourceIds, this.currentSourceId])
+      let n = taken.size + 1
+      while (taken.has(`ufo-${n}`)) n++
+      this.currentSourceId = `ufo-${n}`
+    }
     this.selectedSourceIds = new Set([this.currentSourceId])
     this.applyAppearanceAtPlayhead(this.offsetDefaultBounds(timeline.sourceIds.length))
     // Filled with a real generated name from the start — same "never leave Name empty by
@@ -5635,7 +5635,8 @@ export class SightingEditorElement extends HTMLElement {
 
   private refreshSourceList(): void {
     const timeline = this.ufoElement.sighting.timeline
-    const ids = [...new Set([...timeline.sourceIds, this.currentSourceId])]
+    // The id waiting for a first shape is not a shape: an empty recording lists none.
+    const ids = timeline.sourceIds.length > 0 ? [...new Set([...timeline.sourceIds, this.currentSourceId])] : []
     this.sourceSelect.innerHTML = ""
     for (const id of ids) {
       const option = document.createElement("option")
