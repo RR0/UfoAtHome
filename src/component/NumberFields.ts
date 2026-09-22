@@ -20,7 +20,12 @@ export class NumberFields {
   static fit(root: ParentNode): number {
     const fields = [...root.querySelectorAll<HTMLInputElement>('input[type="number"]')]
     for (const field of fields) {
+      // Sized again at every call, since a field whose bounds change with what it is showing (the
+      // focal length, which is a field of view for an eye) is re-fitted then; listened to once.
       field.style.width = `calc(${NumberFields.charsFor(field)}ch + ${NumberFields.CHROME})`
+      NumberFields.hold(field, true)
+      if (field.dataset.held === "") continue
+      field.dataset.held = ""
       field.addEventListener("input", () => NumberFields.hold(field))
       // Its floor only once the field is left: held as it is typed, a "5" on its way to "50" would
       // be pushed straight up to a minimum of ten.

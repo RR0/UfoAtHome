@@ -6494,3 +6494,21 @@ describe("SightingEditorElement body handles", () => {
     expect(attitude.rollDeg).toBeGreaterThan(0)
   })
 })
+
+describe("SightingEditorElement optics bounds", () => {
+  afterEach(() => {
+    document.body.innerHTML = ""
+  })
+
+  it("holds the one field to what it is showing: a field of view, not a focal length", () => {
+    const element = mount()
+    const shadow = element.shadowRoot!
+    const field = shadow.getElementById("focalLength") as HTMLInputElement
+    // A naked eye: the field states a field of view, which cannot reach a half-turn.
+    expect(shadow.getElementById("unit-focal-length")!.textContent).toBe("°")
+    expect(field.max).toBe("179")
+    field.value = "1810.2"
+    field.dispatchEvent(new Event("input", { bubbles: true }))
+    expect(field.value).toBe("179")
+  })
+})

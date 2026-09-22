@@ -5114,8 +5114,12 @@ export class SightingEditorElement extends HTMLElement {
     // A fixed lens may be read but not set. An eye's field is always the reader's to state: it is
     // not a device setting at all, it is how much of their surroundings the witness took in.
     this.focalLengthInput.disabled = frame !== undefined && frame.focalRangeMm === undefined
-    this.focalLengthInput.min = String(frame?.focalRangeMm?.minMm ?? 1)
-    this.focalLengthInput.max = String(frame?.focalRangeMm?.maxMm ?? 2000)
+    // One field for two things (see the label above), so its bounds are the ones it is showing:
+    // a lens's own millimetres, or a field of view, which cannot reach a half-turn. Without this an
+    // eye was offered a field of 1810°.
+    this.focalLengthInput.min = String(frame ? frame.focalRangeMm?.minMm ?? 1 : 1)
+    this.focalLengthInput.max = String(frame ? frame.focalRangeMm?.maxMm ?? 2000 : 179)
+    NumberFields.fit(this.focalLengthInput.parentElement ?? this.shadow)
 
     const fNumber = pose?.fNumber ?? instrument.fNumber
     if (this.fNumberInput !== this.shadow.activeElement) {
