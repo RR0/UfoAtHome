@@ -99,7 +99,8 @@ export const html = `
          how long its shutter stayed open. Each falls back to the instrument's own value and each is
          disabled when the device fixes it — an Instamatic's owner had nothing to choose. See
          Instrument.ts and ObserverPose.fNumber/exposureSeconds. -->
-    <label><span id="label-focal-length">Focal length</span> <input id="focalLength" type="number" min="1" max="2000" step="0.1"/> <span id="unit-focal-length">mm</span></label>
+    <label><span id="label-focal-length">Focal length</span> <input id="focalLength" type="number" min="1" max="2000" step="0.1"/> <span id="unit-focal-length">mm</span>
+      <output id="focal-fov" class="apparent-size inline" for="focalLength"></output></label>
     <label><span id="label-f-number">Aperture</span> f/<input id="fNumber" type="number" min="0.7" max="64" step="0.1"/></label>
     <label><span id="label-exposure">Exposure</span> <input id="exposureSeconds" type="text" inputmode="decimal" size="7" placeholder="1/250"/> s</label>
     <label><span id="label-focus-distance">Focused at</span> <input id="focusDistance" type="number" min="0.1" max="30000" step="0.1" placeholder="&#8734;"/> m</label>

@@ -126,6 +126,7 @@ export const sightingEditorMessages_en: SightingEditorMessages = {
   instrumentOutOfPeriod: "{name} — not of this date",
   unitMillimetres: "mm",
   unitDegrees: "°",
+  fieldOfViewReadout: "{deg}° of field",
   soundSrcPlaceholder: "URL of a real recording",
   referenceGroup: "Pictures",
   reference: "Picture",

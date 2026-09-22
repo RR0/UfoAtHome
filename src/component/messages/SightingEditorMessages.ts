@@ -427,6 +427,8 @@ export interface SightingEditorMessages extends SightingLabels {
   /** The two units the focal row switches between. */
   unitMillimetres: string
   unitDegrees: string
+  /** Beside a focal length: the field of view it gives on that device, {deg} in degrees. */
+  fieldOfViewReadout: string
   /** No ice cloud at all, so none of it could have happened. The commonest answer. */
   skyOpticsNoIce: string
   /** Ice above, but a lower deck between it and the witness. */

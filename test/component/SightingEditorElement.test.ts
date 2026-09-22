@@ -6510,5 +6510,21 @@ describe("SightingEditorElement optics bounds", () => {
     field.value = "1810.2"
     field.dispatchEvent(new Event("input", { bubbles: true }))
     expect(field.value).toBe("179")
+    // An eye states its field itself: nothing to read beside it.
+    expect(shadow.getElementById("focal-fov")!.textContent).toBe("")
+  })
+
+  it("reads out the field a device's own lens takes in, beside its millimetres", () => {
+    const element = mount()
+    const shadow = element.shadowRoot!
+    const instrument = shadow.getElementById("instrument") as HTMLSelectElement
+    instrument.value = "slr-35mm-50"
+    instrument.dispatchEvent(new Event("change"))
+    const field = shadow.getElementById("focalLength") as HTMLInputElement
+    expect(shadow.getElementById("unit-focal-length")!.textContent).toBe("mm")
+    // Fixed at 50 mm on 24x36: nothing to type, and 27° of field (its height) to read.
+    expect(field.disabled).toBe(true)
+    expect(field.max).toBe("2000")
+    expect(shadow.getElementById("focal-fov")!.textContent).toBe("27° of field")
   })
 })

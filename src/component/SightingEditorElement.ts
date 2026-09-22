@@ -461,6 +461,8 @@ export class SightingEditorElement extends HTMLElement {
    * syncOpticsFromInstrument. */
   private readonly focalLengthInput: HTMLInputElement
   private readonly labelFocalLength: HTMLElement
+  /** What field a fixed lens takes in, read beside its millimetres — see syncOpticsFromInstrument. */
+  private readonly focalFovOutput: HTMLOutputElement
   private readonly unitFocalLength: HTMLElement
   private readonly labelFNumber: HTMLElement
   private readonly labelExposure: HTMLElement
@@ -1051,6 +1053,7 @@ export class SightingEditorElement extends HTMLElement {
     this.instrumentSelect = this.shadow.getElementById("instrument") as HTMLSelectElement
     this.focalLengthInput = this.shadow.getElementById("focalLength") as HTMLInputElement
     this.labelFocalLength = this.shadow.getElementById("label-focal-length")!
+    this.focalFovOutput = this.shadow.getElementById("focal-fov") as HTMLOutputElement
     this.unitFocalLength = this.shadow.getElementById("unit-focal-length")!
     this.labelFNumber = this.shadow.getElementById("label-f-number")!
     this.labelExposure = this.shadow.getElementById("label-exposure")!
@@ -5120,6 +5123,11 @@ export class SightingEditorElement extends HTMLElement {
     this.focalLengthInput.min = String(frame ? frame.focalRangeMm?.minMm ?? 1 : 1)
     this.focalLengthInput.max = String(frame ? frame.focalRangeMm?.maxMm ?? 2000 : 179)
     NumberFields.fit(this.focalLengthInput.parentElement ?? this.shadow)
+    // A device that fixes its lens leaves nothing to type, but what it takes in is still worth
+    // reading: the field it gives, beside the millimetres it is stated in.
+    this.focalFovOutput.textContent = frame && fovDeg !== undefined
+      ? this.messages.fieldOfViewReadout.replace("{deg}", this.plain(fovDeg, fovDeg < 10 ? 1 : 0))
+      : ""
 
     const fNumber = pose?.fNumber ?? instrument.fNumber
     if (this.fNumberInput !== this.shadow.activeElement) {
