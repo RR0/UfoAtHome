@@ -136,9 +136,11 @@ export class BodyEditor {
     }
     this.select("body-model").addEventListener("change", () => {
       // Picking a built-in shape or a catalogue entry is choosing it over any address typed below.
-      if (this.select("body-model").value !== "") this.input("body-model-url").value = ""
+      const id = this.select("body-model").value
+      if (id !== "") this.input("body-model-url").value = ""
       this.updateCurrent()
       void this.syncModelOptions(this.current!)
+      if (id !== "") void this.adoptCatalogueSize(id)
     })
     this.element("body-explains").addEventListener("change", () => this.updateCurrent())
     this.sync()
@@ -228,6 +230,31 @@ export class BodyEditor {
     this.currentId = body.id
     const interpretation = this.interpretation ?? { bodies: [] }
     this.write({ ...interpretation, bodies: [...this.bodies, body] }, true)
+  }
+
+  /**
+   * A catalogue model that knows how big the real thing is (see DecorModelEntry.sizeM) gives the
+   * body that size, and moves it along its line of sight so that it keeps the angle it spans: an
+   * airliner is 36 m across whoever draws it, and what the witness saw was an angle, so a 36 m
+   * airliner seen as wide as a 70 cm one five metres off is 250 m away. Only keyframes stating
+   * their size and a distance along a direction move; a body placed in metres keeps its place.
+   */
+  private async adoptCatalogueSize(id: string): Promise<void> {
+    const entry = await this.host.modelProvider().entry(id).catch(() => undefined)
+    const real = entry?.sizeM
+    const body = this.current
+    if (!real || !body || body.model.id !== id) return
+    const track = body.track.map(key => {
+      const width = key.sizeM?.widthM
+      const realWidth = real.widthM ?? width
+      if (!key.sizeM || width === undefined || realWidth === undefined || width <= 0) return key
+      const ratio = realWidth / width
+      const sizeM = { widthM: real.widthM ?? key.sizeM.widthM * ratio, lengthM: real.lengthM ?? key.sizeM.lengthM * ratio, heightM: real.heightM ?? key.sizeM.heightM * ratio }
+      return key.distanceM !== undefined && key.azimuthDeg !== undefined
+        ? { ...key, sizeM, distanceM: Number((key.distanceM * ratio).toFixed(1)) }
+        : { ...key, sizeM }
+    })
+    this.write({ ...this.interpretation!, bodies: this.bodies.map(other => other === body ? { ...body, track } : other) }, true)
   }
 
   private deleteCurrent(): void {

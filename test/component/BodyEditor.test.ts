@@ -14,10 +14,11 @@ const interpretation: InterpretationJson = {
   ]
 }
 
+const airliner = { id: "catalogue-airliner", kind: "aircraft" as const, name: "Airliner", url: "https://x/airliner.glb", credit: { title: "Airliner", license: "CC0 1.0" }, sizeM: { widthM: 35, lengthM: 37, heightM: 12 } }
 const provider: DecorModelProvider = {
   attribution: "",
-  entries: async () => [{ id: "catalogue-craft", kind: "aircraft", name: "Catalogue craft", url: "https://x/craft.gltf", credit: { title: "Craft", license: "CC0 1.0" } }],
-  entry: async () => undefined
+  entries: async () => [{ id: "catalogue-craft", kind: "aircraft", name: "Catalogue craft", url: "https://x/craft.gltf", credit: { title: "Craft", license: "CC0 1.0" } }, airliner],
+  entry: async id => id === airliner.id ? airliner : undefined
 }
 
 class Fixture {
@@ -144,5 +145,15 @@ describe("The Bodies part of the editor", () => {
     fixture.type("body-select", "figure-1")
     fixture.container.querySelector<HTMLButtonElement>("#body-look")!.click()
     expect(fixture.lookedAt).toBe("figure-1")
+  })
+
+  it("gives a body a catalogue model's real size, farther along its line of sight so it spans the same angle", async () => {
+    const fixture = new Fixture(null)
+    fixture.start = { keyframe: { t: 0, azimuthDeg: 90, altitudeDeg: 10, distanceM: 5, sizeM: { widthM: 0.7, lengthM: 0.7, heightM: 0.4 } } }
+    fixture.container.querySelector<HTMLButtonElement>("#body-add")!.click()
+    await new Promise(resolve => setTimeout(resolve))
+    fixture.type("body-model", "catalogue-airliner")
+    await new Promise(resolve => setTimeout(resolve))
+    expect(fixture.sighting.interpretation!.bodies[0].track).toEqual([{ t: 0, azimuthDeg: 90, altitudeDeg: 10, distanceM: 250, sizeM: { widthM: 35, lengthM: 37, heightM: 12 } }])
   })
 })

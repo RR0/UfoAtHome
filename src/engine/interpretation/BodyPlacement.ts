@@ -129,23 +129,23 @@ export class BodyPlacement {
 
   /**
    * Where the witness's eye is at `t`, in the frame bodies are placed in — the recording's own
-   * track, from where it started, at eye height above the ground there. Undefined for a recording
-   * with no position at all: without one there is no world to stand a body in.
+   * track, from where it started, at eye height above the ground there. A recording with no
+   * position yet keeps its witness where the scene stands them, at the origin, on the flat ground
+   * its decor stands on: undefined here left no body drawn at all, and nothing for "Look at it" to
+   * aim at, in a recording just begun (an airliner added before the place was typed).
    */
   static eyeOf(sighting: Sighting, t: number, ground: Ground): (LocalPoint & { headingDeg?: number }) | undefined {
     const origin = resolveObserverPoseAt(sighting, 0)
     const pose = resolveObserverPoseAt(sighting, t)
-    if (origin?.lat === undefined || origin.lng === undefined || pose?.lat === undefined || pose.lng === undefined) {
-      return undefined
-    }
-    const local = geoToLocalMeters(pose.lat, pose.lng, origin.lat, origin.lng)
-    const eastM = local.x
-    const northM = -local.z
+    const located = origin?.lat !== undefined && origin.lng !== undefined && pose?.lat !== undefined && pose.lng !== undefined
+    const local = located ? geoToLocalMeters(pose.lat!, pose.lng!, origin.lat!, origin.lng!) : undefined
+    const eastM = local ? local.x : 0
+    const northM = local ? -local.z : 0
     return {
       eastM,
       northM,
-      upM: ground.heightAt(eastM, northM) + BodyPlacement.EYE_HEIGHT_M + pose.elevationM,
-      headingDeg: pose.headingDeg
+      upM: ground.heightAt(eastM, northM) + BodyPlacement.EYE_HEIGHT_M + (pose?.elevationM ?? 0),
+      headingDeg: pose?.headingDeg
     }
   }
 
