@@ -58,6 +58,11 @@ export interface BodyEditorMessages {
   heading: string
   pitch: string
   roll: string
+  colour: string
+  albedo: string
+  luminance: string
+  /** Under the appearance fields. */
+  appearanceNote: string
   deleteKeyframe: string
   /** What the picture does to the body on show. */
   pictureHint: string
@@ -117,6 +122,10 @@ export class BodyEditorTexts {
     heading: "Heading (°)",
     pitch: "Pitch (°)",
     roll: "Roll (°)",
+    colour: "Colour",
+    albedo: "Albedo (0-1)",
+    luminance: "Light of its own (cd/m²)",
+    appearanceNote: "The colour and the albedo paint the built-in shapes; a model of its own keeps its materials. Light of its own is what it gives out, lit or not.",
     deleteKeyframe: "Delete this keyframe",
     pictureHint: "On the picture: drag the body to move it, the wheel takes it nearer or further, the corners and sides size it, the stem turns it (with Shift: up and down pitches it, sideways rolls it).",
     notPlaced: "Not in the scene at this instant",
@@ -177,6 +186,10 @@ export class BodyEditorTexts {
     heading: "Cap (°)",
     pitch: "Tangage (°)",
     roll: "Roulis (°)",
+    colour: "Couleur",
+    albedo: "Albédo (0-1)",
+    luminance: "Lumière propre (cd/m²)",
+    appearanceNote: "La couleur et l'albédo peignent les formes de base ; un modèle garde ses propres matériaux. La lumière propre est ce qu'il émet, éclairé ou non.",
     deleteKeyframe: "Supprimer cette image clé",
     pictureHint: "Sur l'image : glisser le corps le déplace, la molette le rapproche ou l'éloigne, les coins et les côtés le dimensionnent, la tige le tourne (avec Maj : haut et bas le cabrent, les côtés le font rouler).",
     notPlaced: "Pas dans la scène à cet instant",

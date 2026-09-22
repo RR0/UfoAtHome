@@ -182,6 +182,7 @@ export const html = `
       <label><span id="label-decor-model-author">Author</span> <input id="decorModelAuthor" type="text"/></label>
       <label><span id="label-decor-model-license">Licence</span> <input id="decorModelLicense" type="text" placeholder="CC0 1.0"/></label>
       <label><span id="label-decor-model-source">Where it came from</span> <input id="decorModelSource" type="url" placeholder="https://…"/></label>
+      <p id="decor-model-catalogue" class="decor-model-note" hidden></p>
     </details>
     <label><span id="label-decor-lit">Lit</span> <input id="decorLit" type="checkbox"/></label>
     <label><span id="label-decor-lights">Lights</span> <select id="decorLightRig"></select></label>
@@ -512,7 +513,7 @@ export const html = `
   </section>
   <section class="subgroup-panel" id="shape-bodies" aria-labelledby="label-bodies-subgroup" hidden>
     <div class="toolbar">
-      <style>#body-editor { flex-basis: 100%; min-width: 0; } #body-editor .body-editor, #body-editor .body-fields { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; } #body-editor .body-fields { flex-basis: 100%; min-width: 0; } #body-editor .body-fields[hidden], #body-editor [hidden] { display: none !important; } #body-editor select { min-width: 0; width: 100%; } #body-editor .body-intro { flex-basis: 100%; font-size: .85em; margin: 0; } #body-editor .body-explains { flex-basis: 100%; min-width: 0; box-sizing: border-box; margin: 0; } #body-editor #body-explains { display: flex; flex-wrap: wrap; gap: .3em 1em; } #body-editor #body-explains label { white-space: normal; } #body-editor .body-track { margin: 0; } #body-editor details { flex-basis: 100%; min-width: 0; } #body-editor details[open] { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; } #body-editor details > summary { flex-basis: 100%; } #body-editor input, #body-editor select { max-width: 100%; box-sizing: border-box; } #body-editor label { min-width: 0; max-width: 100%; }</style><div id="body-editor"></div>
+      <style>#body-editor { flex-basis: 100%; min-width: 0; } #body-editor .body-editor, #body-editor .body-fields { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; } #body-editor .body-fields { flex-basis: 100%; min-width: 0; } #body-editor .body-fields[hidden], #body-editor [hidden] { display: none !important; } #body-editor select { min-width: 0; width: 100%; } #body-editor .body-intro { flex-basis: 100%; font-size: .85em; margin: 0; } #body-editor .body-explains { flex-basis: 100%; min-width: 0; box-sizing: border-box; margin: 0; } #body-editor #body-explains { display: flex; flex-wrap: wrap; gap: .3em 1em; } #body-editor #body-explains label { white-space: normal; } #body-editor .body-track { margin: 0; } #body-editor details { flex-basis: 100%; min-width: 0; } #body-editor details[open] { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; } #body-editor details > summary { flex-basis: 100%; } #body-editor input, #body-editor select { max-width: 100%; box-sizing: border-box; } #body-editor input[type="number"] { width: 7em; } #body-editor input[type="color"] { width: 3em; padding: 0; } #body-editor #body-id, #body-editor #body-outline-node { width: 10em; } #body-editor #body-title, #body-editor #body-interpretation-title { width: 18em; } #body-editor label { min-width: 0; max-width: 100%; }</style><div id="body-editor"></div>
     </div>
   </section>
 </section>
@@ -586,6 +587,19 @@ export const css = `
   margin-bottom: 0.5em;
   flex-wrap: wrap;
 }
+/* A field as wide as what it holds: a heading is four characters, and a number field stretched to
+   fit a sentence reads as one waiting for a sentence (the user's own remark). */
+.toolbar input[type="number"] {
+  width: 7em;
+}
+.toolbar input[type="color"] {
+  width: 3em;
+  padding: 0;
+}
+/* The exceptions: a longitude runs to eleven characters, a duration in seconds to six. */
+#lat, #lng, #durationSeconds {
+  width: 10em;
+}
 .presets {
   display: flex;
   gap: 0.25em;
@@ -625,6 +639,11 @@ button.preset[aria-pressed="true"] {
 }
 /* The whole disclosure sits on its own line: five stacked rows inside a row of inline labels
    would otherwise be laid out beside the field before it. */
+.decor-model-note {
+  flex-basis: 100%;
+  font-size: .85em;
+  margin: 0;
+}
 .decor-model-advanced {
   flex-basis: 100%;
 }

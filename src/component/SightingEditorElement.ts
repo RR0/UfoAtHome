@@ -96,7 +96,7 @@ import { SOUND_KINDS } from "../engine/model/Sound.js"
 import type { SightingSound, SoundKind } from "../engine/model/Sound.js"
 import { ELEVATION_SOURCES, IMAGERY_SOURCES } from "../render3d/terrain/terrainSources.js"
 import { DECOR_MODEL_SOURCES } from "../render3d/decor/decorModelSources.js"
-import type { DecorModelProvider } from "../render3d/decor/DecorModelProvider.js"
+import type { DecorModelEntry, DecorModelProvider } from "../render3d/decor/DecorModelProvider.js"
 import { DecorSystem } from "../render3d/DecorSystem.js"
 import { GroundElevation } from "../render3d/terrain/ElevationProvider.js"
 import { TimeZones } from "../engine/time/TimeZones.js"
@@ -132,8 +132,9 @@ const SOUND_PREVIEW_MS = 2500
 const MIN_BODY_FRAME_PX = 40
 
 /** Where a new body stands along its shape's line of sight when the scene draws that shape at no
- * particular distance: a guess to be moved, the same order as a nearby craft. */
-const DEFAULT_NEW_BODY_DISTANCE_M = 100
+ * particular distance: close enough to be looked over before it is sent out to where it belongs,
+ * which is how an author works (the user's own instruction). */
+const DEFAULT_NEW_BODY_DISTANCE_M = 10
 
 /** How long a date/place edit must settle before the weather record is looked up again. Long
  * enough that typing a latitude digit by digit is one request, not six — the values it asks about
@@ -613,6 +614,7 @@ export class SightingEditorElement extends HTMLElement {
   private readonly decorHeightInput: HTMLInputElement
   private readonly decorModelSelect: HTMLSelectElement
   private readonly decorModelAdvanced: HTMLDetailsElement
+  private readonly decorModelCatalogueNote: HTMLElement
   private readonly decorModelUrlInput: HTMLInputElement
   private readonly decorModelTitleInput: HTMLInputElement
   private readonly decorModelAuthorInput: HTMLInputElement
@@ -1209,6 +1211,7 @@ export class SightingEditorElement extends HTMLElement {
     this.decorHeightInput = this.shadow.getElementById("decorHeight") as HTMLInputElement
     this.decorModelSelect = this.shadow.getElementById("decorModel") as HTMLSelectElement
     this.decorModelAdvanced = this.shadow.getElementById("decor-model-advanced") as HTMLDetailsElement
+    this.decorModelCatalogueNote = this.shadow.getElementById("decor-model-catalogue")!
     this.decorModelUrlInput = this.shadow.getElementById("decorModelUrl") as HTMLInputElement
     this.decorModelTitleInput = this.shadow.getElementById("decorModelTitle") as HTMLInputElement
     this.decorModelAuthorInput = this.shadow.getElementById("decorModelAuthor") as HTMLInputElement
@@ -5907,7 +5910,31 @@ export class SightingEditorElement extends HTMLElement {
     this.decorModelLicenseInput.value = decor?.model?.credit?.license ?? ""
     this.decorModelSourceInput.value = decor?.model?.credit?.sourceUrl ?? ""
     this.decorModelAdvanced.open = decor?.model?.url !== undefined
+    void this.showDecorCatalogueModel(decor)
   }
+
+  /**
+   * Fills the decor's address block with what the catalogue says of the model it names — where the
+   * file is and whose it is — as the bodies' own does (see BodyEditor.showCatalogueModel). The
+   * recording still names it by its id; only a changed field makes the address its own.
+   */
+  private async showDecorCatalogueModel(decor: DecorObject | undefined): Promise<void> {
+    const id = decor?.model?.url === undefined ? decor?.model?.id : undefined
+    const entry = id === undefined ? undefined : await this.decorModelProvider.entry(id).catch(() => undefined)
+    // The selection may have moved on while the catalogue answered.
+    if (decor?.id !== this.currentDecorId) return
+    this.shownDecorEntry = entry
+    this.decorModelCatalogueNote.hidden = entry === undefined
+    if (!entry) return
+    this.decorModelUrlInput.value = entry.url
+    this.decorModelTitleInput.value = entry.credit.title
+    this.decorModelAuthorInput.value = entry.credit.author ?? ""
+    this.decorModelLicenseInput.value = entry.credit.license
+    this.decorModelSourceInput.value = entry.credit.sourceUrl ?? ""
+  }
+
+  /** The catalogue model the decor's address block is showing, if it is showing one. */
+  private shownDecorEntry?: DecorModelEntry
 
   /** The catalogue's own entries for this kind, plus the "no model" option that heads the list.
    * Asked on every decor selection and answered from the provider's own cache (see
@@ -6005,6 +6032,14 @@ export class SightingEditorElement extends HTMLElement {
    * (see SceneRenderer.loadDecorModel), which is what makes the missing field visible. */
   private statedDecorModel(): DecorObject["model"] {
     const url = this.stringOrUndefined(this.decorModelUrlInput.value)
+    // The block showing the catalogue's own entry, untouched, is still that entry.
+    const entry = this.shownDecorEntry
+    if (entry && url === entry.url && this.stringOrUndefined(this.decorModelTitleInput.value) === entry.credit.title
+      && this.stringOrUndefined(this.decorModelAuthorInput.value) === entry.credit.author
+      && this.stringOrUndefined(this.decorModelLicenseInput.value) === entry.credit.license
+      && this.stringOrUndefined(this.decorModelSourceInput.value) === entry.credit.sourceUrl) {
+      return { id: entry.id }
+    }
     if (url) {
       const title = this.stringOrUndefined(this.decorModelTitleInput.value)
       const license = this.stringOrUndefined(this.decorModelLicenseInput.value)
@@ -7463,6 +7498,7 @@ export class SightingEditorElement extends HTMLElement {
     this.labelDecorHeight.textContent = messages.decorHeight
     this.labelDecorModel.textContent = messages.decorModel
     this.labelDecorModelAdvanced.textContent = messages.decorModelAdvanced
+    this.decorModelCatalogueNote.textContent = messages.decorModelFromCatalogue
     this.labelDecorModelUrl.textContent = messages.decorModelUrl
     this.labelDecorModelTitle.textContent = messages.decorModelTitle
     this.labelDecorModelAuthor.textContent = messages.decorModelAuthor

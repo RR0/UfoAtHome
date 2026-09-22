@@ -51,6 +51,17 @@ export class BodyEditor {
   private shownEntry?: DecorModelEntry
   /** The body the fields were last filled for. */
   private syncedId?: string
+  /** What the appearance fields were last filled from, to tell an edit from what they could only
+   * show (see syncKeyframe). */
+  private shownAppearance?: { color: string, albedo: number, luminanceCdM2: number }
+
+  /** A colour as a colour field can hold it: #rgb spelt out, anything else it cannot show left as
+   * a mid grey, which only stands in the swatch until the author picks a colour of their own. */
+  private static swatchOf(colour: string): string {
+    const short = /^#([0-9a-f])([0-9a-f])([0-9a-f])$/i.exec(colour)
+    if (short) return `#${short[1]}${short[1]}${short[2]}${short[2]}${short[3]}${short[3]}`.toLowerCase()
+    return /^#[0-9a-f]{6}$/i.test(colour) ? colour.toLowerCase() : "#c8c8c8"
+  }
 
   constructor(private readonly container: HTMLElement, private readonly host: BodyEditorHost, language: string) {
     this.messages = BodyEditorTexts.of(language)
@@ -133,8 +144,13 @@ export class BodyEditor {
       "body-key-azimuth": reading.azimuthDeg, "body-key-elevation": reading.altitudeDeg, "body-key-distance": reading.distanceM,
       "body-key-east": reading.eastM, "body-key-north": reading.northM, "body-key-above": reading.aboveGroundM,
       "body-key-width": reading.sizeM.widthM, "body-key-length": reading.sizeM.lengthM, "body-key-height": reading.sizeM.heightM,
-      "body-key-heading": reading.attitude.headingDeg, "body-key-pitch": reading.attitude.pitchDeg, "body-key-roll": reading.attitude.rollDeg
+      "body-key-heading": reading.attitude.headingDeg, "body-key-pitch": reading.attitude.pitchDeg, "body-key-roll": reading.attitude.rollDeg,
+      "body-key-albedo": reading.appearance.albedo, "body-key-luminance": reading.appearance.luminanceCdM2
     }
+    // A colour field can only hold #rrggbb; what a recording states ("#fff", "silver") is kept as
+    // it stands until the author picks another, and the swatch shows the nearest it can.
+    this.shownAppearance = reading.appearance
+    if (this.input("body-key-colour") !== active) this.input("body-key-colour").value = BodyEditor.swatchOf(reading.appearance.color)
     for (const [id, value] of Object.entries(values)) {
       if (this.input(id) !== active) this.input(id).value = String(Number(value.toFixed(2)))
     }
@@ -186,6 +202,10 @@ export class BodyEditor {
           ${field("body-key-heading", m.heading, "number")}
           ${field("body-key-pitch", m.pitch, "number")}
           ${field("body-key-roll", m.roll, "number")}
+          <label><span>${m.colour}</span> <input id="body-key-colour" type="color"/></label>
+          ${field("body-key-albedo", m.albedo, "number")}
+          ${field("body-key-luminance", m.luminance, "number")}
+          <p class="body-intro">${m.appearanceNote}</p>
           <button id="body-key-delete" type="button">${m.deleteKeyframe}</button>
           <p class="body-intro">${m.pictureHint}</p>
         </fieldset>
@@ -216,7 +236,12 @@ export class BodyEditor {
       ;(this.element("body-model-advanced") as HTMLDetailsElement).open = id !== "" && !(BODY_PRIMITIVES as readonly string[]).includes(id)
     })
     this.element("body-explains").addEventListener("change", () => this.updateCurrent())
-    for (const id of BodyEditor.KEY_FIELDS) this.input(id).addEventListener("change", () => this.updateKeyframe())
+    // On every keystroke and every drag of the colour picker, not only when the field is left: a
+    // setting is judged by what it does to the picture, and that has to happen as it is made.
+    for (const id of BodyEditor.KEY_FIELDS) {
+      this.input(id).addEventListener("input", () => this.updateKeyframe())
+      this.input(id).addEventListener("change", () => this.updateKeyframe())
+    }
     this.select("body-key-mode").addEventListener("change", () => this.updateKeyframe())
     this.element("body-key-delete").addEventListener("click", () => this.deleteKeyframe())
     this.sync()
@@ -459,11 +484,12 @@ export class BodyEditor {
     this.updateKeyframe()
   }
 
-  /** The fields of an instant, written as a keyframe at the playhead: position, size, attitude.
-   * Nothing else — a keyframe's colour, light, flame and movements hold from the one before, and a
-   * movement is only read from keyframes that state it (see BodyKeyframe.motions), so an added
-   * keyframe moves the body and changes nothing else. One already at this instant keeps the rest
-   * of what it states. */
+  /** The fields of an instant, written as a keyframe at the playhead: where it is, how big, how
+   * turned, and what it looks like. Nothing else — its flame and its movements hold from the
+   * keyframe before, and a movement is only read from keyframes that state it (see
+   * BodyKeyframe.motions), so an added keyframe moves the body and leaves those alone. Its
+   * appearance is written as it already was there, which changes nothing until a field is. One
+   * already at this instant keeps the rest of what it states. */
   private updateKeyframe(): void {
     const body = this.current
     if (!body) return
@@ -477,11 +503,24 @@ export class BodyEditor {
       ? { t, eastM: number("body-key-east"), northM: number("body-key-north"), ...(onGround ? { onGround: true } : { altitudeAboveGroundM: number("body-key-above") }) }
       : { t, azimuthDeg: number("body-key-azimuth"), altitudeDeg: number("body-key-elevation"), distanceM: Math.max(0.1, number("body-key-distance")), ...(onGround ? { onGround: true } : {}) }
     const size = (id: string) => Math.max(0.01, number(id))
+    // Its look is written only when it is this instant's own: one the author has just changed, or
+    // one this keyframe already stated. A move must not fix a colour the body was only holding.
+    const stated = {
+      color: this.input("body-key-colour").value,
+      albedo: Math.max(0, Math.min(1, number("body-key-albedo"))),
+      luminanceCdM2: Math.max(0, number("body-key-luminance"))
+    }
+    const shown = this.shownAppearance
+    const changed = !shown || BodyEditor.swatchOf(shown.color) !== stated.color.toLowerCase()
+      || Math.abs(shown.albedo - stated.albedo) > 1e-6 || Math.abs(shown.luminanceCdM2 - stated.luminanceCdM2) > 1e-6
+    const here = body.track.find(key => key.t === t)?.appearance
+    const appearance = changed ? stated : here ?? undefined
     const keyframe: BodyKeyframe = {
       ...BodyEditor.withoutPlacement(body.track.find(key => key.t === t)),
       ...position,
       sizeM: { widthM: size("body-key-width"), lengthM: size("body-key-length"), heightM: size("body-key-height") },
-      attitude: { headingDeg: number("body-key-heading"), pitchDeg: number("body-key-pitch"), rollDeg: number("body-key-roll") }
+      attitude: { headingDeg: number("body-key-heading"), pitchDeg: number("body-key-pitch"), rollDeg: number("body-key-roll") },
+      ...(appearance ? { appearance } : {})
     }
     const track = [...body.track.filter(key => key.t !== t), keyframe].sort((a, b) => a.t - b.t)
     this.write({ ...this.interpretation!, bodies: this.bodies.map(other => other === body ? { ...body, track } : other) })
@@ -499,12 +538,13 @@ export class BodyEditor {
   }
 
   private static readonly KEY_FIELDS = ["body-key-azimuth", "body-key-elevation", "body-key-distance", "body-key-east", "body-key-north",
-    "body-key-ground", "body-key-above", "body-key-width", "body-key-length", "body-key-height", "body-key-heading", "body-key-pitch", "body-key-roll"]
+    "body-key-ground", "body-key-above", "body-key-width", "body-key-length", "body-key-height", "body-key-heading", "body-key-pitch", "body-key-roll",
+    "body-key-colour", "body-key-albedo", "body-key-luminance"]
 
   /** A keyframe's statements other than where it is, how big and how turned. */
   private static withoutPlacement(key: BodyKeyframe | undefined): Partial<BodyKeyframe> {
     if (!key) return {}
-    const { eastM, northM, azimuthDeg, altitudeDeg, distanceM, onGround, altitudeAboveGroundM, sizeM, attitude, ...rest } = key
+    const { eastM, northM, azimuthDeg, altitudeDeg, distanceM, onGround, altitudeAboveGroundM, sizeM, attitude, appearance, ...rest } = key
     return rest
   }
 

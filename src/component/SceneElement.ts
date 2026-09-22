@@ -65,7 +65,7 @@ import { BodyPlacement } from "../engine/interpretation/BodyPlacement.js"
 import type { BodyState } from "../engine/interpretation/BodyPlacement.js"
 import { BodyConfrontation } from "../engine/interpretation/BodyConfrontation.js"
 import type { ConfrontationReading } from "../engine/interpretation/BodyConfrontation.js"
-import type { BodyAttitude, BodyJson, BodySize, InterpretationJson } from "../engine/interpretation/Interpretation.js"
+import type { BodyAppearance, BodyAttitude, BodyJson, BodySize, InterpretationJson } from "../engine/interpretation/Interpretation.js"
 
 registerUfo()
 
@@ -198,6 +198,7 @@ export interface BodyReading {
   aboveGroundM: number
   sizeM: BodySize
   attitude: Required<BodyAttitude>
+  appearance: Required<BodyAppearance>
 }
 
 /**
@@ -1552,7 +1553,8 @@ export class SceneElement extends HTMLElement {
       northM: state.northM,
       aboveGroundM: state.upM - state.sizeM.heightM / 2 - ground.heightAt(state.eastM, state.northM),
       sizeM: state.sizeM,
-      attitude: state.attitude
+      attitude: state.attitude,
+      appearance: state.appearance
     }
   }
 

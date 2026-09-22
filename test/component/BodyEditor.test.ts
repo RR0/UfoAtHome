@@ -45,7 +45,7 @@ class Fixture {
       lookAt: body => { this.lookedAt = body.id },
       currentTime: () => this.time,
       groundAlong: () => this.groundM,
-      readingOf: () => ({ azimuthDeg: 10, altitudeDeg: 2, distanceM: 100, eastM: 17.36, northM: 98.48, aboveGroundM: 1.5, sizeM: { widthM: 4, lengthM: 5, heightM: 2 }, attitude: { headingDeg: 30, pitchDeg: 0, rollDeg: 0 } })
+      readingOf: body => ({ azimuthDeg: 10, altitudeDeg: 2, distanceM: 100, eastM: 17.36, northM: 98.48, aboveGroundM: 1.5, sizeM: { widthM: 4, lengthM: 5, heightM: 2 }, attitude: { headingDeg: 30, pitchDeg: 0, rollDeg: 0 }, appearance: { color: "#c8c8c8", albedo: 0.5, luminanceCdM2: 0, ...body.track.find(key => key.t === this.time)?.appearance } })
     }
     this.editor = new BodyEditor(this.container, host, "en")
   }
@@ -271,5 +271,15 @@ describe("The Bodies part of the editor", () => {
     fixture.container.querySelector<HTMLButtonElement>("#body-add")!.click()
     fixture.editor.scaleDistance(1.5)
     expect(fixture.sighting.interpretation!.bodies[0].track[0]).toMatchObject({ azimuthDeg: 10, altitudeDeg: 2, distanceM: 150 })
+  })
+
+  it("paints a built-in shape at the playhead", () => {
+    const fixture = new Fixture()
+    fixture.time = 0
+    fixture.editor.syncKeyframe()
+    expect(fixture.field("body-key-colour").value).toBe("#c8c8c8")
+    fixture.type("body-key-colour", "#33aa77")
+    fixture.type("body-key-luminance", "12")
+    expect(fixture.sighting.interpretation!.bodies[0].track[0].appearance).toEqual({ color: "#33aa77", albedo: 0.5, luminanceCdM2: 12 })
   })
 })

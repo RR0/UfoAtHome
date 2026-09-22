@@ -185,6 +185,8 @@ export interface SightingLabels {
    * catalogue has yet. Collapsed by default because naming a file by hand, with the credit that
    * has to travel with it, is the rare case — see DecorModelRef.url. */
   decorModelAdvanced: string
+  /** Under the decor's address block, when it shows a catalogue model. */
+  decorModelFromCatalogue: string
   /** Address of a glTF/GLB file to use directly, taking precedence over the picker above. */
   decorModelUrl: string
   /** The credit a directly-addressed model cannot be shown without — what it is, who made it,
