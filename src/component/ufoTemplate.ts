@@ -15,7 +15,7 @@ export const html = `
          have a slider for how much of them shows, then a button for whether they show at all. -->
     <input id="reference-opacity" type="range" min="0" max="1" step="0.05" value="0.5" title="Picture opacity" aria-label="Picture opacity" hidden/>
     <button id="references" type="button" title="Pictures of the place" aria-label="Pictures of the place" aria-pressed="true" hidden>🖼</button>
-    <button id="witness-map" type="button" title="Witness's position" aria-label="Witness's position" aria-pressed="false" hidden>🗺</button>
+    <button id="witness-map" type="button" title="Observer's position" aria-label="Observer's position" aria-pressed="false" hidden>🗺</button>
     <button id="fullscreen" type="button" title="Fullscreen" aria-label="Fullscreen">⛶</button>
   </div>
   <!-- Where the observer stood and which way they faced, on real ground — see WitnessMapRenderer.
@@ -368,7 +368,7 @@ canvas[data-cursor="rotate"] {
 /* Below the buttons that open it, same right edge. A share of the stage rather than a fixed pixel
    size, so it stays the same fraction of the picture in a 320 px embed and in fullscreen — but
    floored, since a map too small to tell a road from a wash is not worth the tiles it costs. */
-.observer-map-panel {
+.witness-map-panel {
   position: absolute;
   top: 2.7em;
   right: 0.4em;
@@ -382,21 +382,21 @@ canvas[data-cursor="rotate"] {
      is an instant, everything else is a place to turn and look at. Closing it is the button that
      opened it, which is where a reader looks for it anyway. */
 }
-.observer-map-panel[hidden] {
+.witness-map-panel[hidden] {
   display: none;
 }
 /* Out of the phenomenon's way — see UfoElement.keepWitnessMapClear. The corner it normally sits in
    is the emptiest part of most of these skies, which is exactly why it is there; when it is not,
    the recording wins and the map moves. */
-.observer-map-panel.subject-overlap {
+.witness-map-panel.subject-overlap {
   visibility: hidden;
   pointer-events: none;
 }
-.observer-map-panel.on-the-left {
+.witness-map-panel.on-the-left {
   right: auto;
   left: 0.4em;
 }
-.observer-map-panel canvas {
+.witness-map-panel canvas {
   display: block;
   width: 100%;
   height: 100%;
@@ -456,8 +456,8 @@ input[type=range] {
    tightens so what remains fits: the photo's opacity slider goes too, and the seek bar gives up
    its width before any button does. The stage is the container (see .stage). */
 @container (max-width: 420px) {
-  #observer-map,
-  .observer-map-panel {
+  #witness-map,
+  .witness-map-panel {
     display: none !important;
   }
   .toolbar {
