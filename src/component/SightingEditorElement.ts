@@ -1,5 +1,6 @@
 import { setupCloudEditor } from "./CloudEditor.js"
 import { BodyEditor } from "./BodyEditor.js"
+import type { BodyKeyframe } from "../engine/interpretation/Interpretation.js"
 import { BLUR_RADIUS_UNIT } from "../render/CanvasRenderer.js"
 import { SightingFetch, SightingFetchError } from "../engine/net/SightingFetch.js"
 import { NARRATIVE_SOURCES } from "../engine/narrative/narrativeSources.js"
@@ -126,6 +127,10 @@ const DEFAULT_SHAPE_SIZE = { width: 48, height: 28 }
  * rest of the editor. Playback itself is unaffected: this only bounds the preview that plays while
  * paused (see UfoElement.previewSound). */
 const SOUND_PREVIEW_MS = 2500
+
+/** Where a new body stands along its shape's line of sight when the scene draws that shape at no
+ * particular distance: a guess to be moved, the same order as a nearby craft. */
+const DEFAULT_NEW_BODY_DISTANCE_M = 100
 
 /** How long a date/place edit must settle before the weather record is looked up again. Long
  * enough that typing a latitude digit by digit is one request, not six — the values it asks about
@@ -1630,7 +1635,8 @@ export class SightingEditorElement extends HTMLElement {
       changed: () => {
         this.ufoElement.refresh()
         this.refreshParamSummary()
-      }
+      },
+      newBodyStart: () => this.newBodyStart()
     }, this.language)
     this.currentMilestoneT = this.ufoElement.sighting.milestones[0]?.t
     this.refreshMilestoneList()
@@ -5351,6 +5357,34 @@ export class SightingEditorElement extends HTMLElement {
     if (this.selectedSourceIds.size !== 1) return
     this.sceneElement.setDistanceHypothesis(this.currentSourceId, undefined)
     this.refreshDepth()
+  }
+
+  /**
+   * Where a body standing for the selected shape starts (see BodyEditor.addBody): at the playhead,
+   * in the shape's direction — the one it states, else the one the witness faced — at the distance
+   * the scene draws it, and as big as its apparent width is there. A shape that states no size
+   * leaves the body its default one.
+   */
+  private newBodyStart(): { sourceId: string, label: string, keyframe: BodyKeyframe } | undefined {
+    const sourceId = this.currentSourceId
+    const t = this.ufoElement.currentTime
+    const shape = this.ufoElement.sighting.timeline.getInterpolatedShapeAt(t, sourceId)
+    if (!shape) return undefined
+    // To the decimetre, the centimetre and the hundredth of a degree: a starting point typed into a
+    // file, not a float's last bits.
+    const round = (value: number, decimals: number) => Number(value.toFixed(decimals))
+    const distanceM = round(this.sceneElement.depthOf(sourceId)?.distanceM ?? DEFAULT_NEW_BODY_DISTANCE_M, 1)
+    const aim = shape.aim ?? { azimuthDeg: Number(this.headingInput.value) || 0, altitudeDeg: Number(this.pitchInput.value) || 0 }
+    const widthDeg = shape.angular?.widthDeg
+    const heightDeg = shape.angular?.heightDeg
+    const sizeM = widthDeg !== undefined && heightDeg !== undefined && widthDeg > 0 && heightDeg > 0
+      ? { widthM: round(ApparentSize.sizeMAt(distanceM, widthDeg), 2), lengthM: round(ApparentSize.sizeMAt(distanceM, widthDeg), 2), heightM: round(ApparentSize.sizeMAt(distanceM, heightDeg), 2) }
+      : undefined
+    return {
+      sourceId,
+      label: this.shapeLabel(sourceId),
+      keyframe: { t, azimuthDeg: round(aim.azimuthDeg, 2), altitudeDeg: round(aim.altitudeDeg, 2), distanceM, ...(sizeM ? { sizeM } : {}) }
+    }
   }
 
   /**

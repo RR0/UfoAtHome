@@ -1,4 +1,4 @@
-import type { BodyJson, InterpretationJson } from "../engine/interpretation/Interpretation.js"
+import type { BodyJson, BodyKeyframe, InterpretationJson } from "../engine/interpretation/Interpretation.js"
 import { BODY_PRIMITIVES } from "../engine/interpretation/Interpretation.js"
 import type { DecorModelRef } from "../engine/model/Decor.js"
 import type { Sighting } from "../engine/model/Sighting.js"
@@ -18,6 +18,9 @@ export interface BodyEditorHost {
   shapes(): { id: string, label: string }[]
   /** An edit was written onto the recording. */
   changed(): void
+  /** Where a new body starts: the selected shape and the first keyframe that stands it where the
+   * scene draws that shape at the playhead. Undefined when no shape is selected. */
+  newBodyStart(): { sourceId: string, label: string, keyframe: BodyKeyframe } | undefined
 }
 
 /**
@@ -57,6 +60,11 @@ export class BodyEditor {
     const select = this.select("body-select")
     select.replaceChildren(...bodies.map(body => new Option(this.labelOf(body), body.id)))
     if (this.currentId !== undefined) select.value = this.currentId
+    const start = this.host.newBodyStart()
+    const add = this.element("body-add") as HTMLButtonElement
+    add.disabled = start === undefined
+    add.title = start ? this.messages.addBodyHint.replace("{shape}", start.label) : this.messages.addBody
+    this.select("body-select").closest("label")!.hidden = bodies.length === 0
     const body = this.current
     this.element("body-none").hidden = bodies.length > 0
     this.element("body-fields").hidden = body === undefined
@@ -86,6 +94,7 @@ export class BodyEditor {
       ${field("body-interpretation-title", m.interpretationTitle)}
       <p id="body-none" class="body-intro">${m.none}</p>
       <label><span>${m.body}</span> <select id="body-select"></select></label>
+      <button id="body-add" type="button" class="icon-btn" title="${m.addBody}" aria-label="${m.addBody}">+</button>
       <div id="body-fields" class="body-fields">
         <button id="body-delete" type="button" class="icon-btn" title="${m.deleteBody}" aria-label="${m.deleteBody}">🗑</button>
         ${field("body-id", m.id)}
@@ -111,6 +120,7 @@ export class BodyEditor {
     })
     this.input("body-interpretation-title").addEventListener("change", () => this.updateInterpretationTitle())
     this.element("body-delete").addEventListener("click", () => this.deleteCurrent())
+    this.element("body-add").addEventListener("click", () => this.addBody())
     for (const id of ["body-id", "body-title", "body-outline-node", "body-model-url", "body-model-title", "body-model-author", "body-model-license", "body-model-source"]) {
       this.input(id).addEventListener("change", () => this.updateCurrent())
     }
@@ -190,6 +200,25 @@ export class BodyEditor {
     this.write({ ...this.interpretation!, bodies: this.bodies.map(other => other === body ? edited : other) })
   }
 
+  /**
+   * A new body, standing for the selected shape where the scene draws it now: its direction, the
+   * distance it is drawn at, and the real size its apparent width makes there. A starting point
+   * for the interpretation, not a claim: an ellipsoid until a model is chosen, and a single
+   * keyframe, so it stays where it was put. The witness's interpretation is created with it when
+   * the recording has none.
+   */
+  private addBody(): void {
+    const start = this.host.newBodyStart()
+    if (!start) return
+    const ids = new Set(this.bodies.map(body => body.id))
+    let n = ids.size + 1
+    while (ids.has(`body-${n}`)) n++
+    const body: BodyJson = { id: `body-${n}`, explains: [start.sourceId], model: { id: "ellipsoid" }, track: [start.keyframe] }
+    this.currentId = body.id
+    const interpretation = this.interpretation ?? { bodies: [] }
+    this.write({ ...interpretation, bodies: [...this.bodies, body] }, true)
+  }
+
   private deleteCurrent(): void {
     const body = this.current
     if (!body) return
@@ -220,7 +249,10 @@ export class BodyEditor {
    * Filled back from the recording, a credit being typed field by field was erased at the first
    * one, since a credit without its name and licence is not stored (see statedModel). */
   private write(interpretation: InterpretationJson, refill = false): void {
-    this.host.sighting().interpretation = interpretation
+    // An interpretation left with no body and no title says nothing, and is not kept as an empty
+    // statement.
+    const empty = interpretation.bodies.length === 0 && interpretation.title === undefined && interpretation.smoke === undefined
+    this.host.sighting().interpretation = empty ? undefined : interpretation
     this.host.changed()
     if (refill) {
       this.sync()
@@ -240,6 +272,7 @@ export class BodyEditor {
     const times = body.track.map(key => key.t)
     if (times.length === 0) return this.messages.trackEmpty
     const seconds = (ms: number) => `${Math.round(ms / 100) / 10} s`
+    if (times.length === 1) return this.messages.trackSingle.replace("{at}", seconds(times[0]))
     return this.messages.trackSpan.replace("{n}", String(times.length))
       .replace("{from}", seconds(Math.min(...times))).replace("{to}", seconds(Math.max(...times)))
   }

@@ -22,11 +22,12 @@ const provider: DecorModelProvider = {
 
 class Fixture {
   readonly container = document.createElement("div")
-  readonly sighting = { interpretation: structuredClone(interpretation) } as Sighting
+  readonly sighting: Sighting
   changes = 0
   readonly editor: BodyEditor
 
-  constructor() {
+  constructor(stated: InterpretationJson | null = interpretation) {
+    this.sighting = { interpretation: stated === null ? undefined : structuredClone(stated) } as Sighting
     document.body.append(this.container)
     const host: BodyEditorHost = {
       sighting: () => this.sighting,
@@ -34,7 +35,8 @@ class Fixture {
       writingLanguage: () => "en",
       modelProvider: () => provider,
       shapes: () => [{ id: "ufo-1", label: "Object" }, { id: "flame", label: "Flame" }],
-      changed: () => { this.changes++ }
+      changed: () => { this.changes++ },
+      newBodyStart: () => ({ sourceId: "flame", label: "Flame", keyframe: { t: 2000, azimuthDeg: 120, altitudeDeg: 5, distanceM: 100, sizeM: { widthM: 3, lengthM: 3, heightM: 1 } } })
     }
     this.editor = new BodyEditor(this.container, host, "en")
   }
@@ -99,5 +101,23 @@ describe("The Bodies part of the editor", () => {
     fixture.container.querySelector<HTMLButtonElement>("#body-delete")!.click()
     expect(fixture.sighting.interpretation!.bodies.map(body => body.id)).toEqual(["figure-1"])
     expect(fixture.field("body-id").value).toBe("figure-1")
+  })
+
+  it("adds a body standing for the selected shape, creating the interpretation a recording lacks", () => {
+    const fixture = new Fixture(null)
+    expect(fixture.container.querySelector<HTMLElement>("#body-none")!.hidden).toBe(false)
+    fixture.container.querySelector<HTMLButtonElement>("#body-add")!.click()
+    expect(fixture.sighting.interpretation).toEqual({
+      bodies: [{ id: "body-1", explains: ["flame"], model: { id: "ellipsoid" }, track: [{ t: 2000, azimuthDeg: 120, altitudeDeg: 5, distanceM: 100, sizeM: { widthM: 3, lengthM: 3, heightM: 1 } }] }]
+    })
+    expect(fixture.field("body-id").value).toBe("body-1")
+    fixture.container.querySelector<HTMLButtonElement>("#body-add")!.click()
+    expect(fixture.sighting.interpretation!.bodies.map(body => body.id)).toEqual(["body-1", "body-2"])
+  })
+
+  it("drops an interpretation left with no body and no title", () => {
+    const fixture = new Fixture({ bodies: [interpretation.bodies[0]] })
+    fixture.container.querySelector<HTMLButtonElement>("#body-delete")!.click()
+    expect(fixture.sighting.interpretation).toBeUndefined()
   })
 })

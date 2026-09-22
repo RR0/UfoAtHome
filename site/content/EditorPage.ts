@@ -363,7 +363,10 @@ if (docs) {
         the shapes it stands for and the model it is drawn as, a built-in shape, a model of the
         catalogue, or a glTF file at an address. The address can be relative to the recording's own
         file, so a <code>sighting.json</code> and the <code>craft.gltf</code> beside it work together
-        from any page; its credit (name and licence) is required before it is drawn. A body's
+        from any page; its credit (name and licence) is required before it is drawn.
+        <strong>+</strong> adds a body (and the interpretation, when the recording has none): it
+        stands for the selected shape, in its direction, at the distance the scene draws it and as
+        big as its apparent width makes it there, in a single keyframe at the playhead. A body's
         movement is stated in the file, and shown here.</p>
     </div>
     </div>
@@ -717,8 +720,11 @@ if (docs) {
         modèle du catalogue, ou un fichier glTF à une adresse. Cette adresse peut être relative au
         fichier de l'enregistrement : un <code>sighting.json</code> et le <code>craft.gltf</code> posé
         à côté fonctionnent ensemble depuis n'importe quelle page ; son crédit (nom et licence) est
-        exigé avant qu'il soit dessiné. Le mouvement d'un corps est donné par le fichier, et affiché
-        ici.</p>
+        exigé avant qu'il soit dessiné. <strong>+</strong> ajoute un corps (et l'interprétation, si
+        l'enregistrement n'en a pas) : il représente la forme sélectionnée, dans sa direction, à la
+        distance où la scène la dessine et à la taille que sa largeur apparente donne là, en une
+        seule image clé à la tête de lecture. Le mouvement d'un corps est donné par le fichier, et
+        affiché ici.</p>
     </div>
     </div>
   </div>

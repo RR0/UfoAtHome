@@ -7,6 +7,9 @@ export interface BodyEditorMessages {
   body: string
   none: string
   deleteBody: string
+  addBody: string
+  /** {shape} is the selected shape's name. */
+  addBodyHint: string
   id: string
   title: string
   explains: string
@@ -28,6 +31,8 @@ export interface BodyEditorMessages {
   trackEmpty: string
   /** {n} keyframes, {from} and {to} in seconds. */
   trackSpan: string
+  /** {at} in seconds. */
+  trackSingle: string
   primitive: Record<BodyPrimitive, string>
 }
 
@@ -36,8 +41,10 @@ export class BodyEditorTexts {
     intro: "What the witness said the phenomenon was, in 3D: each body stands for one or more of the shapes drawn. Its movement comes from the file.",
     interpretationTitle: "Interpretation",
     body: "Body",
-    none: "No body: the witness said nothing of what it was",
+    none: "No body yet: the witness said nothing of what it was, or it is still to be entered",
     deleteBody: "Delete body",
+    addBody: "Add a body",
+    addBodyHint: "Standing for the shape \"{shape}\", where the scene draws it now",
     id: "ID",
     title: "Name",
     explains: "Stands for the shapes",
@@ -58,6 +65,7 @@ export class BodyEditorTexts {
     track: "Movement",
     trackEmpty: "No keyframe",
     trackSpan: "{n} keyframes, from {from} to {to}",
+    trackSingle: "1 keyframe, at {at}",
     primitive: {
       ellipsoid: "Ellipsoid", sphere: "Sphere", disc: "Disc", cylinder: "Cylinder", cone: "Cone",
       box: "Box", torus: "Torus", figure: "Human figure"
@@ -68,8 +76,10 @@ export class BodyEditorTexts {
     intro: "Ce que le témoin a dit que le phénomène était, en 3D : chaque corps représente une ou plusieurs des formes dessinées. Son mouvement vient du fichier.",
     interpretationTitle: "Interprétation",
     body: "Corps",
-    none: "Aucun corps : le témoin n'a rien dit de ce que c'était",
+    none: "Aucun corps pour l'instant : le témoin n'a rien dit de ce que c'était, ou c'est encore à saisir",
     deleteBody: "Supprimer le corps",
+    addBody: "Ajouter un corps",
+    addBodyHint: "Représentant la forme « {shape} », là où la scène la dessine à cet instant",
     id: "Identifiant",
     title: "Nom",
     explains: "Représente les formes",
@@ -90,6 +100,7 @@ export class BodyEditorTexts {
     track: "Mouvement",
     trackEmpty: "Aucune image clé",
     trackSpan: "{n} images clés, de {from} à {to}",
+    trackSingle: "1 image clé, à {at}",
     primitive: {
       ellipsoid: "Ellipsoïde", sphere: "Sphère", disc: "Disque", cylinder: "Cylindre", cone: "Cône",
       box: "Boîte", torus: "Tore", figure: "Silhouette humaine"
