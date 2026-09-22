@@ -367,7 +367,9 @@ if (docs) {
         <strong>+</strong> adds a body (and the interpretation, when the recording has none): it
         stands for the selected shape, in its direction, at the distance the scene draws it and as
         big as its apparent width makes it there, in a single keyframe at the playhead. A body's
-        movement is stated in the file, and shown here.</p>
+        movement is stated in the file, and shown here. While this part is open the picture draws
+        the bodies, with the shapes beside them as outlines to read them against; in the Shapes
+        part, the shapes are drawn alone and in full.</p>
     </div>
     </div>
   </div>
@@ -724,7 +726,9 @@ if (docs) {
         l'enregistrement n'en a pas) : il représente la forme sélectionnée, dans sa direction, à la
         distance où la scène la dessine et à la taille que sa largeur apparente donne là, en une
         seule image clé à la tête de lecture. Le mouvement d'un corps est donné par le fichier, et
-        affiché ici.</p>
+        affiché ici. Tant que cette partie est ouverte, l'image dessine les corps, avec les formes à
+        côté en contours pour les confronter ; dans la partie Formes, les formes sont dessinées
+        seules et en entier.</p>
     </div>
     </div>
   </div>

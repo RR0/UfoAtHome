@@ -6353,3 +6353,33 @@ describe("SightingEditorElement and a witness's own interpretation", () => {
     expect(scene.interpretation).toBeUndefined()
   })
 })
+
+describe("SightingEditorElement bodies", () => {
+  afterEach(() => {
+    document.body.innerHTML = ""
+  })
+
+  it("draws the witness's bodies, beside the shapes' outlines, while the Bodies part is open, and only then", () => {
+    const element = mount()
+    const interpretation = { title: "A craft", bodies: [{ id: "craft", explains: ["ufo-1"], model: { id: "ellipsoid" }, track: [{ t: 0, eastM: 0, northM: 50, onGround: true }] }] }
+    element.sightingData = { version: 1, timeline: { keyframes: [] }, interpretation }
+    const shadow = element.shadowRoot!
+    const scene = shadow.querySelector("rr0-scene") as unknown as { interpretation?: unknown, compareTestimony: boolean }
+    const tab = (id: string, selector: string) => [...shadow.querySelectorAll<HTMLButtonElement>(selector)].find(t => t.getAttribute("aria-controls") === id)!
+    expect(scene.interpretation).toBeUndefined()
+    // The group's handle opens and closes it: opened here only if it is not already.
+    if (shadow.getElementById("group-shape")!.hidden) tab("group-shape", ".group-tab").click()
+    expect(scene.interpretation).toBeUndefined()
+    tab("shape-bodies", ".subgroup-tab").click()
+    expect(scene.interpretation).toEqual(interpretation)
+    expect(scene.compareTestimony).toBe(true)
+    // An edit of a body is drawn at once.
+    const title = shadow.getElementById("body-title") as HTMLInputElement
+    title.value = "The craft"
+    title.dispatchEvent(new Event("change"))
+    expect((scene.interpretation as typeof interpretation).bodies[0]).toMatchObject({ title: "The craft" })
+    tab("shape-shapes", ".subgroup-tab").click()
+    expect(scene.interpretation).toBeUndefined()
+    expect(scene.compareTestimony).toBe(false)
+  })
+})

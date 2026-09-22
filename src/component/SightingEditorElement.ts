@@ -1635,6 +1635,7 @@ export class SightingEditorElement extends HTMLElement {
       changed: () => {
         this.ufoElement.refresh()
         this.refreshParamSummary()
+        this.syncBodiesShown()
       },
       newBodyStart: () => this.newBodyStart()
     }, this.language)
@@ -1711,6 +1712,7 @@ export class SightingEditorElement extends HTMLElement {
     this.ufoElement.sightingData = json
     this.cloudEditor.reset()
     this.bodyEditor.sync()
+    this.syncBodiesShown()
     // Resets to the first source actually present in the loaded data, not the hardcoded
     // default — a loaded recording using different source ids would otherwise have the next
     // appearance edit silently create a disconnected new "ufo-1" source instead of editing
@@ -4349,6 +4351,23 @@ export class SightingEditorElement extends HTMLElement {
     const reference = this.currentReference()
     if (reference) this.syncReferenceStatus(reference)
     this.syncStreetSearchAvailability()
+    this.syncBodiesShown()
+  }
+
+  /**
+   * Draws the witness's bodies while their part of the Phenomenon group is open, with the shapes
+   * beside them as outlines — the player's comparison (see SceneElement.compareTestimony), so what
+   * the witness drew stays in view and the body is read against it. Anywhere else the shapes are
+   * drawn in full and alone: their colour, halo and brilliance are what the Shapes part edits, and
+   * a body over them would hide the very thing being edited (see SceneElement.testimonyInTheRound).
+   * Re-read after every edit of a body, and after a recording is loaded, since the scene holds the
+   * interpretation it was last handed.
+   */
+  private syncBodiesShown(): void {
+    const shown = this.isGroupIdOpen("group-shape") && this.shadow.getElementById("shape-bodies")?.hidden === false
+    const interpretation = shown ? this.ufoElement.sighting.interpretation : undefined
+    this.sceneElement.compareTestimony = interpretation !== undefined
+    if (this.sceneElement.interpretation !== interpretation) this.sceneElement.interpretation = interpretation
   }
 
   /** One part of a group open at a time, among the handles of the same strip — the groups' own
@@ -4366,6 +4385,7 @@ export class SightingEditorElement extends HTMLElement {
     }
     // The shapes it offers to stand for may have been renamed, added or deleted meanwhile.
     if (tab.getAttribute("aria-controls") === "shape-bodies") this.bodyEditor.sync()
+    this.syncBodiesShown()
   }
 
   /** Opens the part of a group a control stands in, when it stands in one — so that a summary chip
