@@ -783,7 +783,7 @@ export class SightingEditorElement extends HTMLElement {
     | { kind: "vertex"; sourceId: string; original: PolygonShape; vertexIndex: number }
     | { kind: "body"; pointerAzimuthDeg: number; pointerAltitudeDeg: number; bodyAzimuthDeg: number; bodyAltitudeDeg: number }
     | { kind: "body-resize"; handle: Exclude<HandleId, "rotate">; centre: { x: number; y: number }; startPointer: { x: number; y: number }; startSizeM: { widthM: number; lengthM: number; heightM: number } }
-    | { kind: "body-rotate"; startPointer: { x: number; y: number }; startHeadingDeg: number }
+    | { kind: "body-rotate"; startPointer: { x: number; y: number }; startAttitude: { headingDeg: number; pitchDeg: number; rollDeg: number } }
     | { kind: "group-resize"; group: ShapeGroup; handle: Exclude<HandleId, "rotate"> }
     | { kind: "group-rotate"; group: ShapeGroup; startPointer: { x: number; y: number } }
 
@@ -8141,7 +8141,8 @@ export class SightingEditorElement extends HTMLElement {
    * Grabs a handle of the body on show, if the press is on one: a corner sizes it as a whole, a
    * side stretches it level (width and length), the top or bottom raises it, each by how much
    * further from its middle the pointer goes; the rotation handle turns it about the vertical as
-   * the pointer goes left or right, as the landscape turns under a drag (see beginCameraDrag).
+   * the pointer goes left or right, as the landscape turns under a drag (see beginCameraDrag), and
+   * with Shift held pitches it as the pointer goes up or down and rolls it as it goes sideways.
    */
   private beginBodyHandleDrag(point: { x: number; y: number }): boolean {
     const bounds = this.bodyCanvasBounds()
@@ -8150,7 +8151,7 @@ export class SightingEditorElement extends HTMLElement {
     const handle = ShapeHandles.hitTestHandle({ bounds, angle: 0 }, point)
     if (!handle) return false
     if (handle === "rotate") {
-      this.dragState = { kind: "body-rotate", startPointer: point, startHeadingDeg: reading.attitude.headingDeg }
+      this.dragState = { kind: "body-rotate", startPointer: point, startAttitude: { ...reading.attitude } }
     } else {
       const centre = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 }
       this.dragState = { kind: "body-resize", handle, centre, startPointer: point, startSizeM: { ...reading.sizeM } }
@@ -8165,7 +8166,14 @@ export class SightingEditorElement extends HTMLElement {
     const point = this.canvasPointFromEvent(event)
     if (!point || !drag) return
     if (drag.kind === "body-rotate") {
-      this.bodyEditor?.turnTo(drag.startHeadingDeg + (point.x - drag.startPointer.x) * CAMERA_DRAG_DEG_PER_PX)
+      // From the attitude it was grabbed at, every move: pressing or letting go of Shift mid-drag
+      // switches axes without the body jumping by what the other axis had been given.
+      const dx = (point.x - drag.startPointer.x) * CAMERA_DRAG_DEG_PER_PX
+      const dy = (drag.startPointer.y - point.y) * CAMERA_DRAG_DEG_PER_PX
+      const start = drag.startAttitude
+      this.bodyEditor?.turnTo(event.shiftKey
+        ? { headingDeg: start.headingDeg, pitchDeg: start.pitchDeg + dy, rollDeg: start.rollDeg + dx }
+        : { headingDeg: start.headingDeg + dx, pitchDeg: start.pitchDeg, rollDeg: start.rollDeg })
       return
     }
     if (drag.kind !== "body-resize") return

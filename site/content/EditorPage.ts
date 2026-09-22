@@ -377,7 +377,8 @@ if (docs) {
         it moves it by as much as the pointer turns (over the relief when it stands on the ground,
         at the same distance when it flies), and the wheel over it takes it nearer or further. The
         body on show is framed with handles: a corner sizes it as a whole, a side stretches it level,
-        the top or bottom raises it, and the stem above turns it as the pointer goes left or right.
+        the top or bottom raises it, and the stem above turns it as the pointer goes left or right, and with Shift held pitches it
+        as the pointer goes up or down and rolls it as it goes sideways.
         All of these write the same keyframe as the fields, which show where it went. A body's
         movement is stated in the file, and shown here. The picture draws the bodies, with the shapes
         beside them as outlines to read them against, whichever group is open, except in the Shapes
@@ -749,7 +750,8 @@ if (docs) {
         s'il vole), et la molette au-dessus de lui le rapproche ou l'éloigne. Le corps affiché
         est encadré de poignées : un coin le dimensionne en entier, un côté l'étire à l'horizontale,
         le haut ou le bas le grandit, et la tige au-dessus le tourne quand le pointeur va à gauche ou
-        à droite. Tout cela écrit la même image clé que les champs, qui montrent où il est allé. Le mouvement d'un corps est donné par le fichier, et
+        à droite ; avec Maj, elle le cabre quand le pointeur monte ou descend et le fait rouler
+        quand il va de côté. Tout cela écrit la même image clé que les champs, qui montrent où il est allé. Le mouvement d'un corps est donné par le fichier, et
         affiché ici. L'image dessine les corps, avec les formes à côté en contours pour les
         confronter, quel que soit le groupe ouvert, sauf dans la partie Formes, où les formes sont
         dessinées seules et en entier.</p>

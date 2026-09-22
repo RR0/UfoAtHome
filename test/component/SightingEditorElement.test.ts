@@ -6482,4 +6482,15 @@ describe("SightingEditorElement body handles", () => {
     expect(keyOf(element).attitude!.headingDeg).toBeGreaterThan(0)
     expect(keyOf(element).sizeM).toEqual({ widthM: 4, lengthM: 6, heightM: 2 })
   })
+
+  it("pitches it up and rolls it from the rotation handle with Shift held, leaving its heading", async () => {
+    const { element, canvas } = await withBody()
+    canvas.dispatchEvent(new MouseEvent("pointerdown", { clientX: 320, clientY: 136 }))
+    document.dispatchEvent(new MouseEvent("pointermove", { clientX: 340, clientY: 106, shiftKey: true }))
+    document.dispatchEvent(new MouseEvent("pointerup", { clientX: 340, clientY: 106, shiftKey: true }))
+    const attitude = keyOf(element).attitude!
+    expect(attitude.headingDeg).toBe(0)
+    expect(attitude.pitchDeg).toBeGreaterThan(0)
+    expect(attitude.rollDeg).toBeGreaterThan(0)
+  })
 })

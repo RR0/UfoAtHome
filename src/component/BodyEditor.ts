@@ -187,6 +187,7 @@ export class BodyEditor {
           ${field("body-key-pitch", m.pitch, "number")}
           ${field("body-key-roll", m.roll, "number")}
           <button id="body-key-delete" type="button">${m.deleteKeyframe}</button>
+          <p class="body-intro">${m.pictureHint}</p>
         </fieldset>
       </div>
     </div>`
@@ -380,9 +381,13 @@ export class BodyEditor {
     this.updateKeyframe()
   }
 
-  /** Turns the body on show to this heading at the playhead — what its rotation handle does. */
-  turnTo(headingDeg: number): void {
-    this.input("body-key-heading").value = String(Number((((headingDeg % 360) + 360) % 360).toFixed(1)))
+  /** Turns the body on show to this attitude at the playhead — what its rotation handle does. The
+   * heading wraps round; pitch and roll are kept within a half-turn either way. */
+  turnTo(attitude: { headingDeg: number, pitchDeg: number, rollDeg: number }): void {
+    const half = (deg: number) => ((((deg + 180) % 360) + 360) % 360) - 180
+    this.input("body-key-heading").value = String(Number((((attitude.headingDeg % 360) + 360) % 360).toFixed(1)))
+    this.input("body-key-pitch").value = String(Number(Math.max(-90, Math.min(90, attitude.pitchDeg)).toFixed(1)))
+    this.input("body-key-roll").value = String(Number(half(attitude.rollDeg).toFixed(1)))
     this.updateKeyframe()
   }
 

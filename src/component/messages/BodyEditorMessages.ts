@@ -59,6 +59,8 @@ export interface BodyEditorMessages {
   pitch: string
   roll: string
   deleteKeyframe: string
+  /** What the picture does to the body on show. */
+  pictureHint: string
   notPlaced: string
   primitive: Record<BodyPrimitive, string>
 }
@@ -116,6 +118,7 @@ export class BodyEditorTexts {
     pitch: "Pitch (°)",
     roll: "Roll (°)",
     deleteKeyframe: "Delete this keyframe",
+    pictureHint: "On the picture: drag the body to move it, the wheel takes it nearer or further, the corners and sides size it, the stem turns it (with Shift: up and down pitches it, sideways rolls it).",
     notPlaced: "Not in the scene at this instant",
     primitive: {
       ellipsoid: "Ellipsoid", sphere: "Sphere", disc: "Disc", cylinder: "Cylinder", cone: "Cone",
@@ -175,6 +178,7 @@ export class BodyEditorTexts {
     pitch: "Tangage (°)",
     roll: "Roulis (°)",
     deleteKeyframe: "Supprimer cette image clé",
+    pictureHint: "Sur l'image : glisser le corps le déplace, la molette le rapproche ou l'éloigne, les coins et les côtés le dimensionnent, la tige le tourne (avec Maj : haut et bas le cabrent, les côtés le font rouler).",
     notPlaced: "Pas dans la scène à cet instant",
     primitive: {
       ellipsoid: "Ellipsoïde", sphere: "Sphère", disc: "Disque", cylinder: "Cylindre", cone: "Cône",
