@@ -1,10 +1,10 @@
 export const html = `
 <div class="toolbar" id="toolbar" hidden>
   <span id="testimony" class="testimony">
-    <span id="testimony-prefix">Testimony by</span>
+    <span id="testimony-prefix">Account by</span>
     <span id="witness-text"></span><select id="witness" hidden></select>
   </span>
-  <!-- What to replay the testimony with: the raw testimony, the witness's own reading of it, or an
+  <!-- What to replay the account with: the raw account, the observer's own reading of it, or an
        analyst's from the case (see InterpretationJson). Only there when there is a choice. -->
   <label id="interpretation-choice" class="interpretation-choice" hidden>
     <span id="interpretation-label">Interpretation</span> <select id="interpretation"></select>
@@ -12,7 +12,7 @@ export const html = `
   <!-- The playback layer's own toggles, taken out of the picture and put here — see
        UfoElement.hostControls. -->
   <span id="scene-controls" class="scene-controls">
-    <!-- Whether the testimony is shown beside the interpretation on show, as outlines, and
+    <!-- Whether the account is shown beside the interpretation on show, as outlines, and
          measured against it — see SceneElement.compareTestimony. Only while an interpretation is. -->
     <button id="compare-testimony" type="button" title="Compare with the testimony" aria-label="Compare with the testimony" aria-pressed="false" hidden>◌</button>
   </span>
@@ -50,10 +50,10 @@ export const html = `
   </div>
 </div>
 <div id="ufo-slot"></div>
-<!-- The interpretation's bodies against what the witness said, at the instant on show — see
+<!-- The interpretation's bodies against what the observer said, at the instant on show — see
      BodyConfrontation. Only while an interpretation is. -->
 <div id="confrontation" class="confrontation" hidden>
-  <span id="confrontation-heading" class="confrontation-heading">Against the testimony</span>
+  <span id="confrontation-heading" class="confrontation-heading">Against the account</span>
   <ul id="confrontation-list"></ul>
 </div>
 <!-- What this recording states, field by field, in the same words the editor uses for the same
@@ -85,13 +85,13 @@ export const css = `
      ufoathome.org's own player wraps it in overflow:hidden, and so can any page it is embedded in. */
   padding: 3px 3px 0;
 }
-.testimony {
+.account {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.testimony select {
+.account select {
   max-width: 12em;
 }
 .interpretation-choice {
@@ -116,7 +116,7 @@ export const css = `
   font-variant-numeric: tabular-nums;
 }
 /* What the interpretation fails to reproduce. Red, and not struck through: a strike is kept for a
-   witness's word the facts contradict, and here it is the interpretation that is at fault. */
+   observer's word the facts contradict, and here it is the interpretation that is at fault. */
 .confrontation .disagrees {
   color: #d33;
 }
@@ -187,7 +187,7 @@ export const css = `
 .param-summary[hidden] {
   display: none;
 }
-/* A chip holding chips: everything said about ONE sub-element — the witness, a decor object —
+/* A chip holding chips: everything said about ONE sub-element — the observer, a decor object —
    boxed under its name, so a Heading inside a box saying Environment needs no prefix to say which
    heading it is. Drawn as a frame rather than as a filled pill: the members already carry an
    outline each, and a second solid shape around them would read as a button they sit on. */
@@ -223,7 +223,7 @@ export const css = `
 .param-label .param-label-value {
   font-weight: 600;
 }
-/* A value no witness gave: read from a record (ERA5's weather, a terrain provider's ground) — the
+/* A value no observer gave: read from a record (ERA5's weather, a terrain provider's ground) — the
    distinction this whole project turns on, and the one thing a plain list of numbers loses. */
 .param-label.from-source .param-label-value {
   color: color-mix(in srgb, #3a9fd8 72%, currentColor);

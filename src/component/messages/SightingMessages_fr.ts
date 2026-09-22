@@ -3,8 +3,8 @@ import { sightingLabels_fr } from "./SightingLabels_fr.js"
 
 export const sightingMessages_fr: SightingMessages = {
   ...sightingLabels_fr,
-  testimonyBy: "Témoignage de",
-  unnamedWitness: "Témoin {n}",
+  testimonyBy: "Compte rendu de",
+  unnamedWitness: "Observateur {n}",
   about: "À propos",
   close: "Fermer",
   observation: "Observation",
@@ -21,13 +21,13 @@ export const sightingMessages_fr: SightingMessages = {
   embedCopied: "Copié",
   showLabels: "Afficher ce qu'elle indique",
   interpretation: "Interprétation",
-  testimony: "Témoignage",
+  testimony: "Compte rendu",
   interpretationBy: "{title}, par {by}",
-  confrontation: "Face au témoignage",
+  confrontation: "Face au compte rendu",
   confrontationDirection: "écart de {deg}°",
   confrontationWidth: "largeur ×{ratio}",
   confrontationHeight: "hauteur ×{ratio}",
-  showComparison: "Comparer au témoignage",
-  hideComparison: "Ne plus comparer au témoignage",
+  showComparison: "Comparer au compte rendu",
+  hideComparison: "Ne plus comparer au compte rendu",
   hideLabels: "Masquer ce qu'elle indique"
 }

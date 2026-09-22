@@ -9,13 +9,13 @@ export class HomePage implements SitePage {
     slug: "",
     navLabel: { en: "Home", fr: "Accueil" },
     title: {
-      en: "Reconstruct what the witness saw",
-      fr: "Reconstituer ce que le témoin a vu"
+      en: "Reconstruct what the observer saw",
+      fr: "Reconstituer ce que l'observateur a vu"
     },
     description: {
-      en: "UFO@home is a free, open-source tool that replays a UFO sighting as its witness described it — "
+      en: "UFO@home is a free, open-source tool that replays a UFO sighting as its observer described it — "
         + "the shape, its movement, and the real sky of that date, time and place.",
-      fr: "UFO@home est un outil libre qui rejoue une observation d'ovni telle que son témoin l'a décrite — "
+      fr: "UFO@home est un outil libre qui rejoue une observation d'ovni telle que son observateur l'a décrite — "
         + "la forme, son mouvement, et le ciel réel de cette date, de cette heure et de ce lieu."
     },
     modules: ["/lib/rr0-sighting.mjs"]
@@ -184,7 +184,7 @@ show(0)`
 <section class="band hero">
   <div class="wrap">
     <p class="eyebrow">Free software · embeddable anywhere</p>
-    <h1>Reconstruct what the witness saw.</h1>
+    <h1>Reconstruct what the observer saw.</h1>
     <p class="lede">Draw the shape. Record how it moved. Replay it against the sky that was
       actually over that place, at that hour, on that date — the Sun, the Moon, the stars, the
       weather on record, the ground itself. Not an artist's impression: a reconstruction anyone
@@ -234,7 +234,7 @@ ${carousel}
       <p class="lede prose-wide">First, what can be checked. Reproduce the checkable
         conditions of that place and that moment as faithfully as they can be reproduced, and the
         scene answers back: here is an explanation that fits what was really overhead, and here is
-        one this sky has just ruled out. The witness supplies the phenomenon; nothing else is left
+        one this sky has just ruled out. The observer supplies the phenomenon; nothing else is left
         to memory.</p>
       <div class="cards">
         <div class="card">
@@ -269,8 +269,8 @@ ${carousel}
         </div>
         <div class="card">
           <h4>The ground</h4>
-          <p>Real relief and aerial imagery around the witness, and the decor that got in the way:
-            buildings, trees, streetlights, vehicles, windows, other witnesses. How high they stood is
+          <p>Real relief and aerial imagery around the observer, and the decor that got in the way:
+            buildings, trees, streetlights, vehicles, windows, other observers. How high they stood is
             looked up from where they stood, and nobody can be placed under the ground.</p>
           <p class="card-more"><a href="/context/#ground">Why the horizon moves →</a></p>
         </div>
@@ -278,7 +278,7 @@ ${carousel}
           <h4>The instrument</h4>
           <p>An eye is not a lens, and the device decides the picture: only the settings it could
             really have had are offered, one that did not exist yet is flagged against the date, and
-            it — not the witness — sets how faint a thing could be recorded at all. Which is why so
+            it — not the observer — sets how faint a thing could be recorded at all. Which is why so
             many “the sky was full of stars” accounts come with an empty black photograph.</p>
           <p class="card-more"><a href="/context/#instrument">The numbers behind that →</a></p>
         </div>
@@ -287,7 +287,7 @@ ${carousel}
           <p>Everything the scene draws is computed, and nothing tells a faithful reconstruction from
             a plausible one. A photograph of the same place does: laid over the render at any
             opacity, lined up on two or three landmarks, it shows every tree the relief did not know
-            — and hands back the heading the witness actually faced, as a measurement.</p>
+            — and hands back the heading the observer actually faced, as a measurement.</p>
           <p class="card-more"><a href="/context/#pictures">How a picture is lined up →</a></p>
         </div>
       </div>
@@ -299,15 +299,15 @@ ${carousel}
 
     <div class="principle">
       <h3>Bound the hypotheses</h3>
-      <p class="lede prose-wide">From what is known with enough certainty and what the witness
-        reports, narrow down what the phenomenon can have been, without taking on the witness's own
-        interpretation of it. A testimony is an angle, not a measurement: it does not say that an
+      <p class="lede prose-wide">From what is known with enough certainty and what the observer
+        reports, narrow down what the phenomenon can have been, without taking on the observer's own
+        interpretation of it. A account is an angle, not a measurement: it does not say that an
         object was there, nor how far away. Set against the scene it still says a great deal: which
         sizes go with which distances, a distance bounded once the phenomenon passed in front of or
         behind something whose position is known, which candidates of that sky fit it and which it
         rules out.</p>
       <div class="prose-wide">
-        <p>Nobody perceives metres. A witness perceives an <em>angle</em>: the thing covered a
+        <p>Nobody perceives metres. An observer perceives an <em>angle</em>: the thing covered a
           thumbnail at arm's length, a fifth of the windscreen, two full Moons. “About thirty metres
           long” is a conclusion drawn from a distance they could not perceive either, and the two
           errors multiply.</p>
@@ -315,16 +315,16 @@ ${carousel}
           no real size and no real distance anywhere. Metres come back in one case only: when the
           object was seen to pass behind or in front of something whose position is known. That is an
           inequality, and the tool reports it as one — including, most of the time, “unknown”.</p>
-        <p>The object is drawn as a flat shape on the witness's field of view, never as a solid body
+        <p>The object is drawn as a flat shape on the observer's field of view, never as a solid body
           placed in space. That is deliberate. Assuming a craft at a distance is already an
           interpretation, and it quietly rules out the explanations that matter most: a halo, a
           planet, a satellite, an aircraft's landing light, a lenticular cloud. A 2D shape assumes
-          only what the witness actually claimed — that this is what reached their eye.</p>
-        <p>Which is why a case with several witnesses is several recordings, not one. Each states
+          only what the observer actually claimed — that this is what reached their eye.</p>
+        <p>Which is why a case with several observers is several recordings, not one. Each states
           what one person saw from where they stood, and a reconstruction can step from one to the
           other — the reader through a picker, the author by placing the others in the scene and
           opening their accounts from there. Two people a hundred metres apart did not see the same
-          thing, and <a href="/docs/format/#several-witnesses-the-case">the format</a> is built so that the difference has somewhere to live.</p>
+          thing, and <a href="/docs/format/#several-observers-the-case">the format</a> is built so that the difference has somewhere to live.</p>
       </div>
     </div>
     </div>
@@ -337,7 +337,7 @@ ${carousel}
   <section class="band hero">
     <div class="wrap">
       <p class="eyebrow">Logiciel libre · intégrable partout</p>
-      <h1>Reconstituer ce que le témoin a vu.</h1>
+      <h1>Reconstituer ce que l'observateur a vu.</h1>
       <p class="lede">Dessinez la forme. Enregistrez son mouvement. Rejouez-la sous le ciel qui se
         trouvait réellement au-dessus de ce lieu, à cette heure, ce jour-là — le Soleil, la Lune, les
         étoiles, la météo relevée, le sol lui-même. Pas une vue d'artiste : une reconstitution que
@@ -388,7 +388,7 @@ ${carousel}
         <p class="lede prose-wide">D'abord, ce qui se vérifie. Reproduire aussi fidèlement
           que possible les conditions vérifiables de ce lieu et de cet instant, et la scène répond :
           voici une explication qui s'accorde à ce qui était réellement là-haut, et voici celle que ce
-          ciel vient d'exclure. Le témoin fournit le phénomène ; rien d'autre n'est laissé à la
+          ciel vient d'exclure. L'observateur fournit le phénomène ; rien d'autre n'est laissé à la
           mémoire.</p>
       <div class="cards">
         <div class="card">
@@ -426,8 +426,8 @@ ${carousel}
         </div>
         <div class="card">
           <h4>Le sol</h4>
-          <p>Relief réel et imagerie aérienne autour du témoin, et le décor qui s'est interposé :
-            bâtiments, arbres, lampadaires, véhicules, vitrages, autres témoins. À quelle hauteur il
+          <p>Relief réel et imagerie aérienne autour de l'observateur, et le décor qui s'est interposé :
+            bâtiments, arbres, lampadaires, véhicules, vitrages, autres observateurs. À quelle hauteur il
             se tenait se relève d'où il se tenait, et on ne peut placer personne sous le sol.</p>
           <p class="card-more"><a href="/context/#ground">Pourquoi l'horizon se déplace →</a></p>
         </div>
@@ -435,7 +435,7 @@ ${carousel}
           <h4>L'instrument</h4>
           <p>Un œil n'est pas un objectif, et c'est l'appareil qui décide de l'image : seuls les
             réglages qu'il pouvait réellement avoir sont proposés, un appareil qui n'existait pas
-            encore est signalé face à la date, et c'est lui — non le témoin — qui fixe ce qui pouvait
+            encore est signalé face à la date, et c'est lui — non l'observateur — qui fixe ce qui pouvait
             être enregistré. D'où tant de récits de « ciel plein d'étoiles » accompagnés d'une
             photographie noire et vide.</p>
           <p class="card-more"><a href="/context/#instrument">Les nombres derrière cela →</a></p>
@@ -445,7 +445,7 @@ ${carousel}
           <p>Tout ce que la scène dessine est calculé, et rien ne distingue une reconstitution fidèle
             d'une reconstitution vraisemblable. Une photo du même endroit, si : posée sur le rendu à
             l'opacité qu'on veut, recalée sur deux ou trois repères, elle montre chaque arbre que le
-            relief ignorait — et rend le cap que le témoin avait réellement, comme une mesure.</p>
+            relief ignorait — et rend le cap que l'observateur avait réellement, comme une mesure.</p>
           <p class="card-more"><a href="/context/#pictures">Comment une photo se recale →</a></p>
         </div>
       </div>
@@ -458,14 +458,14 @@ ${carousel}
       <div class="principle">
         <h3>Borner les hypothèses</h3>
         <p class="lede prose-wide">À partir de ce qui est connu avec assez de certitude et de ce que
-          le témoin rapporte, cerner ce que le phénomène a pu être, sans adopter d'emblée
-          l'interprétation qu'en fait le témoin. Un témoignage est un angle, pas une mesure : il ne
+          l'observateur rapporte, cerner ce que le phénomène a pu être, sans adopter d'emblée
+          l'interprétation qu'en fait l'observateur. Un compte rendu est un angle, pas une mesure : il ne
           dit pas qu'un objet était là, ni à quelle distance. Confronté à la scène, il en dit pourtant
           beaucoup : quelles tailles vont avec quelles distances, une distance bornée dès que le
           phénomène est passé devant ou derrière quelque chose dont la position est connue, quels
           candidats de ce ciel lui conviennent et lesquels il exclut.</p>
         <div class="prose-wide">
-        <p>Personne ne perçoit des mètres. Un témoin perçoit un <em>angle</em> : la chose couvrait un
+        <p>Personne ne perçoit des mètres. Un observateur perçoit un <em>angle</em> : la chose couvrait un
           ongle de pouce à bout de bras, un cinquième du pare-brise, deux pleines Lunes. « Une
           trentaine de mètres de long » est une conclusion tirée d'une distance qu'il ne percevait pas
           davantage, et les deux erreurs se multiplient.</p>
@@ -474,17 +474,17 @@ ${carousel}
           dans un cas : quand l'objet a été vu passer derrière ou devant quelque chose dont la
           position est connue. C'est une inégalité, et l'outil la présente comme telle — y compris,
           le plus souvent, « inconnue ».</p>
-        <p>L'objet est dessiné comme une forme plate dans le champ de vision du témoin, jamais comme
+        <p>L'objet est dessiné comme une forme plate dans le champ de vision de l'observateur, jamais comme
           un corps solide placé dans l'espace. C'est délibéré. Supposer un engin à une distance donnée
           est déjà une interprétation, et cela écarte en silence les explications qui comptent le
           plus : un halo, une planète, un satellite, le phare d'atterrissage d'un avion, un nuage
-          lenticulaire. Une forme 2D ne suppose que ce que le témoin a réellement affirmé : voilà ce
+          lenticulaire. Une forme 2D ne suppose que ce que l'observateur a réellement affirmé : voilà ce
           qui est parvenu à son œil.</p>
-        <p>C'est pourquoi un dossier à plusieurs témoins fait plusieurs enregistrements, et non un
+        <p>C'est pourquoi un dossier à plusieurs observateurs fait plusieurs enregistrements, et non un
           seul. Chacun énonce ce qu'une personne a vu d'où elle se tenait, et une reconstitution
           permet de passer de l'un à l'autre — le lecteur par un sélecteur, l'auteur en plaçant les
           autres dans la scène et en ouvrant leur récit depuis là. Deux personnes à cent mètres l'une
-          de l'autre n'ont pas vu la même chose, et <a href="/docs/format/#several-witnesses-the-case">le format</a> est fait pour que cette différence ait
+          de l'autre n'ont pas vu la même chose, et <a href="/docs/format/#several-observers-the-case">le format</a> est fait pour que cette différence ait
           où se loger.</p>
         </div>
       </div>

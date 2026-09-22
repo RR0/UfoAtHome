@@ -31,14 +31,14 @@ export class PlayerPage implements SitePage {
     // As they read inside the heading's sentence: a title that is not a name loses the capital it
     // only had for starting a card (see Demo.titleIsName).
     // Under the case the Player is handed too (see Demo.playSrc), so a case opened with all its
-    // witnesses is called by this site's name for it.
+    // observers is called by this site's name for it.
     const demoTitles = JSON.stringify(Object.fromEntries(
       this.catalogue.demos.flatMap(demo => {
         const title = demo.title[language]
         const said = demo.titleIsName ? title : title.charAt(0).toLocaleLowerCase(language) + title.slice(1)
         return [demo.src, ...(demo.playSrc ? [demo.playSrc] : [])].map(src => [src, said])
       })))
-    // Which of them are worth a map of where the witness stood — see Demo.witnessMap. Keyed the
+    // Which of them are worth a map of where the observer stood — see Demo.witnessMap. Keyed the
     // same way as the titles, by the demo's own path, so both answer the same question about the
     // same thing: is what this page is showing one of ours, and which.
     const demoWitnessMaps = JSON.stringify(this.catalogue.demos.filter(demo => demo.witnessMap).flatMap(demo => [demo.src, ...(demo.playSrc ? [demo.playSrc] : [])]))
@@ -94,7 +94,7 @@ const say = (text, kind) => {
  * What to call the observation now on screen.
  *
  * A case by its title, because that is the name a case is filed and argued under; a recording by
- * its witness's name, since a testimony is known by who gave it (it does not name its case); then
+ * its observer's name, since an account is known by who gave it (it does not name its case); then
  * its own id, and the file's own name last, which at least distinguishes one recording from another. A recording that says none of these
  * keeps the page's general title, which is then the accurate one.
  */
@@ -103,9 +103,9 @@ const titleOf = (sighting, source) => {
   if (known) return known
   // A case (a case.json with its events, and no timeline of its own) is named by its title.
   if (sighting && Array.isArray(sighting.events) && !sighting.timeline) return sighting.title || sighting.id || undefined
-  const witness = sighting && sighting.witness
-  const fullName = witness && [...(witness.firstNames || []), witness.lastName].filter(Boolean).join(" ")
-  return (witness && (witness.title || fullName || witness.id))
+  const observer = sighting && sighting.observer
+  const fullName = observer && [...(observer.firstNames || []), observer.lastName].filter(Boolean).join(" ")
+  return (observer && (observer.title || fullName || observer.id))
     || (sighting && sighting.id)
     || (source && decodeURIComponent(source.split("/").pop() || "").replace(/\.json$/, ""))
     || undefined
@@ -126,8 +126,8 @@ const announce = (sighting, source, fallbackTitle) => {
 /**
  * What the recording says about itself, above the way into the editor.
  *
- * Read off the player rather than off the file this page fetched: a case with several witnesses is
- * a case.json, and each witness carries a description of their own, which has to follow the one the
+ * Read off the player rather than off the file this page fetched: a case with several observers is
+ * a case.json, and each observer carries a description of their own, which has to follow the one the
  * reader picked. The page's own language first, then English, then whatever the recording has.
  * Plain text, cut into paragraphs on blank lines: a recording is data, not markup.
  */
@@ -142,7 +142,7 @@ const describe = () => {
   }))
   description.hidden = description.childElementCount === 0
 }
-/* The recording the player is showing, as its own address: on a case with several witnesses, the one
+/* The recording the player is showing, as its own address: on a case with several observers, the one
    picked. The editor opens one recording and not a case, so this is where its button points. */
 let shownSrc
 stage.addEventListener("witnesschange", event => {
@@ -175,7 +175,7 @@ const reveal = (source, sighting, fallbackTitle) => {
  * dossier whose case does not list it yet. */
 const resolve = requested => requested.includes("/")
   ? [requested]
-  : [\`/demo-data/witness-\${requested.toLowerCase()}.json\`,
+  : [\`/demo-data/observer-\${requested.toLowerCase()}.json\`,
      \`/demo-data/sky-test-\${requested.toLowerCase()}.json\`,
      \`/demo-data/\${requested.toLowerCase()}.json\`,
      \`https://rr0.org/science/crypto/ufo/enquete/dossier/\${requested}/case.json\`,

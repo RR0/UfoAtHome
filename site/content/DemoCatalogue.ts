@@ -3,22 +3,22 @@ import type { Said } from "../SitePage.js"
 export interface Demo {
   readonly id: string
   readonly src: string
-  /** Which recording the View/Edit links point at, when `src` is a several-witness case. */
+  /** Which recording the View/Edit links point at, when `src` is a several-observer case. */
   readonly editSrc?: string
   /**
-   * What the full-size Player opens, when it is not `src`: the case.json of a several-witness case
+   * What the full-size Player opens, when it is not `src`: the case.json of a several-observer case
    * whose card can only show one of them. A card's sky is a bare `<rr0-scene>`, which plays one
-   * recording; the Player is an `<rr0-sighting>`, whose whole point on such a case is the witness
-   * picker, so handing it one witness's file took away the very thing the card sends people there
+   * recording; the Player is an `<rr0-sighting>`, whose whole point on such a case is the observer
+   * picker, so handing it one observer's file took away the very thing the card sends people there
    * for. The editor still opens one recording (`editSrc`, or `src`).
    */
   readonly playSrc?: string
   /**
-   * Whether to offer the map of where the witness stood — see the `show-witness-map` attribute,
+   * Whether to offer the map of where the observer stood — see the `show-witness-map` attribute,
    * which is off everywhere by default.
    *
    * Per demo, not per page, because it is a fact about the RECONSTRUCTION and not about where it is
-   * being shown: a case whose witness never moved and whose heading nobody recorded has a map with
+   * being shown: a case whose observer never moved and whose heading nobody recorded has a map with
    * one pin and no cone on it, which is worth less than the room it takes. The two that carry it are
    * the two that went somewhere — Socorro's eleven hundred metres of road, and an airliner crossing
    * Alabama at night.
@@ -73,8 +73,8 @@ export class DemoCatalogue {
           title: { en: "Chiles & Whitted, 1948", fr: "Chiles et Whitted, 1948" },
           titleIsName: true,
           blurb: {
-            en: "Night over Alabama, 02:45. Two airline pilots described the same phenomenon differently — open it full size to switch witness.",
-            fr: "Nuit au-dessus de l'Alabama, 02:45. Deux pilotes de ligne ont décrit le même phénomène différemment — ouvrez-le en grand pour changer de témoin."
+            en: "Night over Alabama, 02:45. Two airline pilots described the same phenomenon differently — open it full size to switch observer.",
+            fr: "Nuit au-dessus de l'Alabama, 02:45. Deux pilotes de ligne ont décrit le même phénomène différemment — ouvrez-le en grand pour changer d'observateur."
           }
         },
         {
@@ -83,8 +83,8 @@ export class DemoCatalogue {
           title: { en: "Valensole, 1965", fr: "Valensole, 1965" },
           titleIsName: true,
           blurb: {
-            en: "Early morning on the plateau, 05:45, the Sun forty minutes up and 7° high in the north-east — and the real relief of that field under the witness's feet.",
-            fr: "Petit matin sur le plateau, 05:45, le Soleil levé depuis quarante minutes, à 7° de hauteur au nord-est — et le relief réel de ce champ sous les pieds du témoin."
+            en: "Early morning on the plateau, 05:45, the Sun forty minutes up and 7° high in the north-east — and the real relief of that field under the observer's feet.",
+            fr: "Petit matin sur le plateau, 05:45, le Soleil levé depuis quarante minutes, à 7° de hauteur au nord-est — et le relief réel de ce champ sous les pieds de l'observateur."
           }
         },
         {
@@ -100,7 +100,7 @@ export class DemoCatalogue {
         {
           id: "socorro",
           src: "/demo-data/witness-socorro.json",
-          // The case, for the player: it holds an interpretation beside the testimony to choose from.
+          // The case, for the player: it holds an interpretation beside the account to choose from.
           playSrc: "/demo-data/case-socorro.json",
           witnessMap: true,
           title: { en: "Socorro, 1964", fr: "Socorro, 1964" },
@@ -158,8 +158,8 @@ export class DemoCatalogue {
           src: "/demo-data/sky-test-rainbow.json",
           title: { en: "Rainbow", fr: "Arc-en-ciel" },
           blurb: {
-            en: "Rain, a Sun 9° up, a gap in the cloud, a witness facing away from it — all four, or nothing. Primary, secondary reversed, Alexander's band between.",
-            fr: "De la pluie, un Soleil à 9°, une trouée dans les nuages, un témoin tournant le dos — les quatre, ou rien. Primaire, secondaire inversé, bande d'Alexandre entre les deux."
+            en: "Rain, a Sun 9° up, a gap in the cloud, an observer facing away from it — all four, or nothing. Primary, secondary reversed, Alexander's band between.",
+            fr: "De la pluie, un Soleil à 9°, une trouée dans les nuages, un observateur tournant le dos — les quatre, ou rien. Primaire, secondaire inversé, bande d'Alexandre entre les deux."
           }
         },
         {
@@ -167,8 +167,8 @@ export class DemoCatalogue {
           src: "/demo-data/sky-test-moonbow.json",
           title: { en: "Moonbow", fr: "Arc lunaire" },
           blurb: {
-            en: "The same geometry under a full Moon 22° up. Too faint for colour vision, so the eye sees a white arc — which is what witnesses describe.",
-            fr: "La même géométrie sous une pleine Lune à 22°. Trop faible pour la vision des couleurs : l'œil voit un arc blanc — c'est ce que décrivent les témoins."
+            en: "The same geometry under a full Moon 22° up. Too faint for colour vision, so the eye sees a white arc — which is what observers describe.",
+            fr: "La même géométrie sous une pleine Lune à 22°. Trop faible pour la vision des couleurs : l'œil voit un arc blanc — c'est ce que décrivent les observateurs."
           }
         },
         {

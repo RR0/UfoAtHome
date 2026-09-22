@@ -134,7 +134,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       en: `
 <section class="band">
   <div class="wrap prose-wide">
-    <p>The shape a witness drew, standing in the real sky, horizon, weather and ground of the
+    <p>The shape an observer drew, standing in the real sky, horizon, weather and ground of the
       recording's own date, hour and place, and hidden by whatever stood in front of it — with the
       playback controls under it. This is the element the two others build on.</p>
     <pre><code>&lt;rr0-scene src="sighting.json"&gt;&lt;/rr0-scene&gt;</code></pre>
@@ -151,7 +151,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
     </table>
     </div>
     <p>Hovering it names what is under the pointer — a star with its magnitude and height, a planet,
-      a comet, a building, another witness — and says nothing where the ground hides what you are
+      a comet, a building, another observer — and says nothing where the ground hides what you are
       pointing at.</p>
     <p>The <q>©</q> button in its corner lists the credits of what it shows — the imagery under the
       ground and on the map, the models, the pictures of the place, the sounds. Inside
@@ -179,7 +179,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       <tr><td><code>canvasElement</code> / <code>renderer</code></td><td>property (read)</td><td>The <code>&lt;canvas&gt;</code>, and the renderer painting on it</td></tr>
       <tr><td><code>enableClickToPlay</code></td><td>property</td><td>Whether a click toggles playback and a double-click toggles fullscreen (both, or neither). Set false where the canvas is yours for something else</td></tr>
       <tr><td><code>fullscreenTarget</code></td><td>property</td><td>Which element the fullscreen button expands. <code>&lt;rr0-scene&gt;</code> sets it to its own stage, so the sky goes fullscreen and not just the overlay</td></tr>
-      <tr><td><code>show-witness-map</code></td><td>attribute</td><td>Start with the map of where the witness stood already open. It decides the map's <em>starting state</em>, not whether it exists: the button is there for every recording that states a place, set or not</td></tr>
+      <tr><td><code>show-witness-map</code></td><td>attribute</td><td>Start with the map of where the observer stood already open. It decides the map's <em>starting state</em>, not whether it exists: the button is there for every recording that states a place, set or not</td></tr>
       <tr><td><code>toggleWitnessMap()</code></td><td>method</td><td>What that button does</td></tr>
       <tr><td><code>hide-milestones</code></td><td>attribute</td><td>Take the account's named moments off — the ticks along the bar, the caption naming the one being played, and the lettered points on the map. They are on wherever a recording names any, so this is the only way to say otherwise</td></tr>
       <tr><td><code>toggleMilestones()</code></td><td>method</td><td>What that button does</td></tr>
@@ -197,7 +197,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       fr: `
 <section class="band">
   <div class="wrap prose-wide">
-    <p>La forme dessinée par un témoin, debout dans le ciel, l'horizon, la météo et le sol réels de
+    <p>La forme dessinée par un observateur, debout dans le ciel, l'horizon, la météo et le sol réels de
       la date, de l'heure et du lieu de l'enregistrement, cachée par ce qui se tenait devant — avec
       les commandes de lecture en dessous. C'est l'élément sur lequel les deux autres se construisent.</p>
     <pre><code>&lt;rr0-scene src="sighting.json"&gt;&lt;/rr0-scene&gt;</code></pre>
@@ -214,7 +214,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
     </table>
     </div>
     <p>Le survol nomme ce qui est sous le curseur — une étoile avec sa magnitude et sa hauteur, une
-      planète, une comète, un bâtiment, un autre témoin — et ne dit rien là où le sol cache ce que
+      planète, une comète, un bâtiment, un autre observateur — et ne dit rien là où le sol cache ce que
       vous pointez.</p>
     <p>Le bouton <q>©</q> dans son coin liste les crédits de ce qu'il montre — l'imagerie du sol et
       de la carte, les modèles, les photos du lieu, les sons. Dans <code>&lt;rr0-sighting&gt;</code>,
@@ -242,7 +242,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       <tr><td><code>canvasElement</code> / <code>renderer</code></td><td>propriété (lecture)</td><td>Le <code>&lt;canvas&gt;</code>, et ce qui peint dessus</td></tr>
       <tr><td><code>enableClickToPlay</code></td><td>propriété</td><td>Si un clic bascule la lecture et un double-clic le plein écran (les deux, ou aucun). À mettre à false là où le canevas vous sert à autre chose</td></tr>
       <tr><td><code>fullscreenTarget</code></td><td>propriété</td><td>Quel élément le bouton plein écran agrandit. <code>&lt;rr0-scene&gt;</code> y met sa propre scène, pour que ce soit le ciel qui s'agrandisse et non la seule surcouche</td></tr>
-      <tr><td><code>show-witness-map</code></td><td>attribut</td><td>Ouvrir d'emblée la carte d'où se tenait le témoin. Il décide de l'état de <em>départ</em> de la carte, pas de son existence : le bouton est là pour tout enregistrement qui énonce un lieu, qu'on le pose ou non</td></tr>
+      <tr><td><code>show-witness-map</code></td><td>attribut</td><td>Ouvrir d'emblée la carte d'où se tenait l'observateur. Il décide de l'état de <em>départ</em> de la carte, pas de son existence : le bouton est là pour tout enregistrement qui énonce un lieu, qu'on le pose ou non</td></tr>
       <tr><td><code>toggleWitnessMap()</code></td><td>méthode</td><td>Ce que fait ce bouton</td></tr>
       <tr><td><code>hide-milestones</code></td><td>attribut</td><td>Retirer les moments nommés du récit — les repères sur la barre, la légende qui nomme celui qu'on joue, et les points lettrés sur la carte. Ils sont là partout où un enregistrement en nomme, donc c'est la seule façon de dire le contraire</td></tr>
       <tr><td><code>toggleMilestones()</code></td><td>méthode</td><td>Ce que fait ce bouton</td></tr>
@@ -269,14 +269,14 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       fr: "La vue standard d'une observation"
     },
     description: {
-      en: "The standard view of a real account: one witness or several, its toolbar and its members.",
-      fr: "La vue standard d'un témoignage réel : un ou plusieurs témoins, sa barre d'outils et ses membres."
+      en: "The standard view of a real account: one observer or several, its toolbar and its members.",
+      fr: "La vue standard d'un compte rendu réel : un ou plusieurs observateurs, sa barre d'outils et ses membres."
     },
     body: {
       en: `
 <section class="band">
   <div class="wrap prose-wide">
-    <p>The default for a real sighting, one witness or several. It composes an
+    <p>The default for a real sighting, one observer or several. It composes an
       <code>&lt;rr0-scene&gt;</code> and adds the toolbar: who is testifying, and the <q>?</q> panel
       with the observation's own metadata, its credits and its embed lines.</p>
     <pre><code>&lt;rr0-sighting src="sighting.json"&gt;&lt;/rr0-sighting&gt;
@@ -284,7 +284,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
     <div class="table-scroll">
     <table>
       <tr><th>Member</th><th>Kind</th><th>What it does</th></tr>
-      <tr><td><code>src</code></td><td>attribute</td><td>A single recording, or a <a href="/docs/format/#several-witnesses-the-case">case</a> whose sighting events list several — told apart by their shape</td></tr>
+      <tr><td><code>src</code></td><td>attribute</td><td>A single recording, or a <a href="/docs/format/#several-observers-the-case">case</a> whose sighting events list several — told apart by their shape</td></tr>
       <tr><td><code>witnessUrls</code></td><td>property</td><td>The recordings to show, as a plain array of URLs, instead of <code>src</code></td></tr>
       <tr><td><code>sightingData</code></td><td>property</td><td>One recording, set directly — for a page holding one in memory rather than at a URL</td></tr>
       <tr><td><code>scene</code></td><td>property (read)</td><td>The composed <code>&lt;rr0-scene&gt;</code>, and through <code>scene.ufoElement</code> the playback members</td></tr>
@@ -293,7 +293,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       <tr><td><code>show-witness-map</code> / <code>hide-milestones</code></td><td>attribute</td><td>Passed down through the composed <code>&lt;rr0-scene&gt;</code> to the player that owns them</td></tr>
     </table>
     </div>
-    <p>A recording that names no witness gets no “testimony by” line at all, which is the accurate
+    <p>A recording that names no observer gets no “account by” line at all, which is the accurate
       thing to say of a sky set up to show a halo.</p>
   </div>
 </section>
@@ -301,7 +301,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       fr: `
 <section class="band">
   <div class="wrap prose-wide">
-    <p>Le choix par défaut pour une observation réelle, à un témoin ou plusieurs. Il compose un
+    <p>Le choix par défaut pour une observation réelle, à un observateur ou plusieurs. Il compose un
       <code>&lt;rr0-scene&gt;</code> et ajoute la barre d'outils : qui témoigne, et le panneau
       <q>?</q> avec les métadonnées de l'observation, ses crédits et ses lignes d'intégration.</p>
     <pre><code>&lt;rr0-sighting src="sighting.json"&gt;&lt;/rr0-sighting&gt;
@@ -309,7 +309,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
     <div class="table-scroll">
     <table>
       <tr><th>Membre</th><th>Nature</th><th>Rôle</th></tr>
-      <tr><td><code>src</code></td><td>attribut</td><td>Un enregistrement, ou un <a href="/docs/format/#several-witnesses-the-case">dossier</a> dont les événements sighting en listent plusieurs — reconnus à leur forme</td></tr>
+      <tr><td><code>src</code></td><td>attribut</td><td>Un enregistrement, ou un <a href="/docs/format/#several-observers-the-case">dossier</a> dont les événements sighting en listent plusieurs — reconnus à leur forme</td></tr>
       <tr><td><code>witnessUrls</code></td><td>propriété</td><td>Les enregistrements à montrer, comme simple tableau d'URLs, au lieu de <code>src</code></td></tr>
       <tr><td><code>sightingData</code></td><td>propriété</td><td>Un enregistrement posé directement — pour une page qui en tient un en mémoire plutôt qu'à une URL</td></tr>
       <tr><td><code>scene</code></td><td>propriété (lecture)</td><td>Le <code>&lt;rr0-scene&gt;</code> composé, et par <code>scene.ufoElement</code> les membres de lecture</td></tr>
@@ -318,7 +318,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       <tr><td><code>show-witness-map</code> / <code>hide-milestones</code></td><td>attribut</td><td>Transmis à travers le <code>&lt;rr0-scene&gt;</code> composé jusqu'au lecteur qui les porte</td></tr>
     </table>
     </div>
-    <p>Un enregistrement qui ne nomme aucun témoin n'affiche aucune ligne « témoignage de » — ce qui
+    <p>Un enregistrement qui ne nomme aucun observateur n'affiche aucune ligne « compte rendu de » — ce qui
       est exact pour un ciel réglé pour montrer un halo.</p>
   </div>
 </section>
@@ -328,13 +328,13 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       en: `<div class="table-scroll">
     <table>
       <tr><th>Event</th><th>Fires</th><th>Where to listen</th></tr>
-      <tr><td><code>witnesschange</code></td><td>When the recording on show changes: loaded, set through <code>sightingData</code>, or another witness picked from the list. <code>detail.src</code> is its address, empty for a recording set by script</td><td>On this element. It does not bubble: listen on the <code>&lt;rr0-sighting&gt;</code> itself, then read <code>sightingData</code> back off it (its description, its case id)</td></tr>
+      <tr><td><code>witnesschange</code></td><td>When the recording on show changes: loaded, set through <code>sightingData</code>, or another observer picked from the list. <code>detail.src</code> is its address, empty for a recording set by script</td><td>On this element. It does not bubble: listen on the <code>&lt;rr0-sighting&gt;</code> itself, then read <code>sightingData</code> back off it (its description, its case id)</td></tr>
     </table>
     </div>`,
       fr: `<div class="table-scroll">
     <table>
       <tr><th>Événement</th><th>Quand</th><th>Où l'écouter</th></tr>
-      <tr><td><code>witnesschange</code></td><td>Quand l'enregistrement affiché change : chargé, posé par <code>sightingData</code>, ou un autre témoin choisi dans la liste. <code>detail.src</code> est son adresse, vide pour un enregistrement posé par script</td><td>Sur cet élément. Il n'est pas <i lang="en">bubbling</i> : écoutez sur le <code>&lt;rr0-sighting&gt;</code> lui-même, puis relisez son <code>sightingData</code> (sa description, son identifiant de cas)</td></tr>
+      <tr><td><code>witnesschange</code></td><td>Quand l'enregistrement affiché change : chargé, posé par <code>sightingData</code>, ou un autre observateur choisi dans la liste. <code>detail.src</code> est son adresse, vide pour un enregistrement posé par script</td><td>Sur cet élément. Il n'est pas <i lang="en">bubbling</i> : écoutez sur le <code>&lt;rr0-sighting&gt;</code> lui-même, puis relisez son <code>sightingData</code> (sa description, son identifiant de cas)</td></tr>
     </table>
     </div>`
     }

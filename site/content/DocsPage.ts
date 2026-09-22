@@ -54,13 +54,13 @@ export class DocsPage implements SitePage {
         ["/docs/components/", "Les composants",
           "Quatre éléments standards, une page chacun : lequel vous voulez, ce qu'il dessine, et tout ce à quoi il répond."],
         ["/docs/format/", "Le fichier d'observation",
-          "Ce que contient ce fichier, champ par champ : l'observation, les témoins, ce qui a été vu, la météo. Avec un exemple entier."]
+          "Ce que contient ce fichier, champ par champ : l'observation, les observateurs, ce qui a été vu, la météo. Avec un exemple entier."]
       ]
       : [
         ["/docs/components/", "The components",
           "Four standard elements, one page each: which one you want, what it draws, and everything it answers to."],
         ["/docs/format/", "The sighting file",
-          "What that file holds, field by field: the observation, the witnesses, what was seen, the weather. With a whole example."]
+          "What that file holds, field by field: the observation, the observers, what was seen, the weather. With a whole example."]
       ]
     const grid = (cards: ReadonlyArray<Card>) => cards.map(([href, title, blurb]) => `      <a class="use" href="${href}">
         <h3>${title}</h3>

@@ -10,14 +10,14 @@ export const ufoMessages_fr: UfoMessages = {
   switchToClockTime: "cliquer pour afficher l'heure de l'observation",
   fullscreen: "Plein écran",
   exitFullscreen: "Quitter le plein écran",
-  showWitnessMap: "Voir où était le témoin",
-  hideWitnessMap: "Masquer où était le témoin",
+  showWitnessMap: "Voir où était l'observateur",
+  hideWitnessMap: "Masquer où était l'observateur",
   mapImageryUnavailable: "Vue aérienne indisponible",
   showReferences: "Voir les photos des lieux",
   hideReferences: "Masquer les photos des lieux",
   referenceOpacity: "Opacité des photos",
   showMilestones: "Voir les moments du récit",
   hideMilestones: "Masquer les moments du récit",
-  witnessHere: "Le témoin, ici",
+  witnessHere: "L'observateur, ici",
   decorHere: "Élément de décor"
 }

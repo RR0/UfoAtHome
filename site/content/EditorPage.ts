@@ -32,7 +32,7 @@ const requested = new URLSearchParams(location.search).get("sighting")
 if (editor && requested) {
   const url = requested.includes("/")
     ? requested
-    : \`/demo-data/witness-\${requested.toLowerCase()}.json\`
+    : \`/demo-data/observer-\${requested.toLowerCase()}.json\`
   const fallback = \`https://rr0.org/science/crypto/ufo/enquete/dossier/\${requested}/sighting.json\`
   const load = async () => {
     if (!requested.includes("/")) {
@@ -159,13 +159,13 @@ if (docs) {
       <h3>Observation</h3>
       <p>Load an existing recording (from a file or a URL), and state what this one is about: a
         <strong>case ID</strong>, a <strong>description</strong>, <strong>tags</strong>. The case ID
-        is the case's, not the witness's: every witness's own recording of the same sighting carries
+        is the case's, not the observer's: every observer's own recording of the same sighting carries
         the same one, which is what lets a page group them into a single reconstruction with a
-        witness picker.</p>
+        observer picker.</p>
     </div>
 
     <div class="group-doc">
-      <h3>Witness</h3>
+      <h3>Observer</h3>
       <p>Who gave the account — and, just as importantly, <strong>what they observed it
         through</strong>. An eye is not a lens: naked-eye vision maps an angle to an angle, a camera
         maps it to <code>f·tan θ</code>, and the two draw genuinely different frames. Pick a camera
@@ -174,41 +174,41 @@ if (docs) {
         it, because the owner of a fixed-focus snapshot camera had nothing to choose. Instruments
         outside the observation's own date are flagged.</p>
       <p><strong>Roll</strong> sits here rather than with the place, because it is how the device
-        was <em>held</em> — a camera askew, a head leaned over — not where the witness stood.</p>
+        was <em>held</em> — a camera askew, a head leaned over — not where the observer stood.</p>
     </div>
 
     <div class="group-doc">
       <h3>Location</h3>
-      <p>Testimony names a place, it does not give coordinates. So type the name and press
+      <p>Account names a place, it does not give coordinates. So type the name and press
         <strong>Locate</strong>: latitude and longitude are filled from OpenStreetMap's own
-        geocoder, every candidate stays listed, and picking another moves the witness. What is
+        geocoder, every candidate stays listed, and picking another moves the observer. What is
         stored is the <em>qualified</em> name that was resolved, so a later reader lands on the same
         spot. Move a coordinate by hand and the name is re-derived, or cleared — a name describing
         somewhere the sighting is no longer at would be a written false statement.</p>
       <p><strong>Heading</strong> is the direction faced, <strong>Tilt</strong> how far up or down,
         and <strong>Altitude</strong> is above sea level, floored by the ground's own height at that
-        location: a witness in the Alps is not at 0 m. Relief and imagery sources are chosen right
+        location: an observer in the Alps is not at 0 m. Relief and imagery sources are chosen right
         here, under the coordinates whose ground they describe.</p>
     </div>
 
     <div class="group-doc">
       <h3>Environment</h3>
-      <p>What stood around the witness, at a real distance east and north: buildings with their
+      <p>What stood around the observer, at a real distance east and north: buildings with their
         floors and windows, trees, streetlights, vehicles, aircraft — and <strong>other
-        witnesses</strong>. This is the only thing that can put a number on a distance: if the object
+        observers</strong>. This is the only thing that can put a number on a distance: if the object
         passed <em>behind</em> that hangar it was at least that far, if <em>in front of</em> that
         tree, at most. Each crossing narrows the object's real width from one side for the whole
         recording; the result appears under the apparent size, and reads “unknown” when nothing
         crosses its line of sight, which is the honest answer for most sightings.</p>
-      <p><strong>Several witnesses, and their points of view.</strong> A witness placed here can
+      <p><strong>Several observers, and their points of view.</strong> An observer placed here can
         carry the URL of their <em>own</em> recording, and right-clicking them in the scene offers
         to view it — which loads their account and puts you where they stood, looking the way they
         looked. Two people a hundred metres apart did not see the same thing, and being able to step
         from one to the other is how that stops being an assertion and becomes something to check.
         The <strong>🎯</strong> button does the smaller version of the same thing: it turns the
-        current witness to face whatever is selected.</p>
-      <p>Published together, those recordings become the witness picker a reader gets — see
-        <a href="/docs/format/#several-witnesses-the-case">the case</a> that lists them.</p>
+        current observer to face whatever is selected.</p>
+      <p>Published together, those recordings become the observer picker a reader gets — see
+        <a href="/docs/format/#several-observers-the-case">the case</a> that lists them.</p>
       <p>Decor can also <strong>move</strong> (an aircraft crossing the sky, a car driving past) and
         carry <strong>lights</strong> with real, regulated flash rates — anticollision beacons at
         40–100 a minute, hazard flashers at 60–120. On a long exposure that rate is drawn: steady
@@ -219,7 +219,7 @@ if (docs) {
     <div class="group-doc">
       <h3>Moment</h3>
       <p>A start, an end, a duration — and a <strong>time zone</strong>, which is the rule, not the
-        number. Pick the witness's own zone and the offset is derived from that zone's rules
+        number. Pick the observer's own zone and the offset is derived from that zone's rules
         <em>at the observation's date</em>: Valensole in July 1965 resolves to UTC+1, not today's
         UTC+2, because France only reintroduced summer time in 1976.</p>
       <p>The <strong>EDTF</strong> button switches both date fields to text, for everything a
@@ -231,11 +231,11 @@ if (docs) {
 
     <div class="group-doc">
       <h3>Weather</h3>
-      <p>The one group that is not testimony. Weather is a measurable fact about a place at an
+      <p>The one group that is not account. Weather is a measurable fact about a place at an
         instant, and the two groups above already state both — so it is looked up from ERA5, the
         ECMWF reanalysis, and shown <em>read-only</em> above a line naming the dataset and the exact
         UTC instant described. A wrong time zone shows up there before it shows up in the sky.</p>
-      <p>Unchecking <strong>From weather records</strong> hands the fields back to the witness: the
+      <p>Unchecking <strong>From weather records</strong> hands the fields back to the observer: the
         looked-up values stay as a starting point, the source is dropped, and no later lookup may
         overwrite them. A recording that names a source is replayed exactly as authored and never
         looked up again, so a published case file reads identically offline.</p>
@@ -246,7 +246,7 @@ if (docs) {
         <strong>Clouds</strong>, and <strong>Wind</strong>, the direction it blows toward and its
         speed, which is what carries every cloud that has no wind of its own.</p>
       <p>The clouds are the <strong>Clouds</strong> part of this group. A looked-up sky
-        arrives as three of them, the low, middle and high bands of the record; a sky the witness
+        arrives as three of them, the low, middle and high bands of the record; a sky the observer
         described is as many as they saw. Every number in the panel is written into the recording
         the moment it is valid, and the first edit pauses playback, so nothing is committed at a
         moving playhead.</p>
@@ -275,14 +275,14 @@ if (docs) {
         puts one in the layer, ahead of where you are looking, at the layer's own base. It is drawn
         as one of the layer's own — the same texture, the same edges — and differs from its
         neighbours only in standing exactly where you say, even with the layer's coverage at 0 %.
-        <strong>Point at cloud</strong> turns the witness to it. <strong>Delete cloud</strong> removes
+        <strong>Point at cloud</strong> turns the observer to it. <strong>Delete cloud</strong> removes
         it.</p>
       <p>Tick <strong>Select and drag clouds in the sky</strong> and the picture itself becomes the
         control: click a cloud to select it, drag to move it — in the plane facing you, so it
         keeps its distance while its bearing and its altitude follow the pointer, and it never goes
         below the ground. Untick it and clicks are the player's again. The numeric fields do the
         rest, and do it exactly: <strong>East</strong> and <strong>North position</strong> in metres
-        from where the witness started, its own <strong>base</strong>, <strong>thickness</strong>,
+        from where the observer started, its own <strong>base</strong>, <strong>thickness</strong>,
         <strong>width</strong>, <strong>depth</strong> and <strong>rotation</strong>, its
         <strong>density</strong> and a <strong>darkness</strong> that, left empty, is the layer's.
         Keyframe it twice and it drifts, grows or darkens between the two; on top of that it rides
@@ -297,13 +297,13 @@ if (docs) {
         shower is a position in Earth's orbit and a comet's orbit is a solved problem, so the date
         and the place alone decide both. It states what else was in that patch of sky: the shower
         and its rate over the sporadic background, the comet and its magnitude, any nova or
-        supernova whose recorded light curve covers that night (the 🌟 button turns the witness
+        supernova whose recorded light curve covers that night (the 🌟 button turns the observer
         towards it), whether low orbit
         was still sunlit, whether the Milky Way or the zodiacal light could have been seen at all.
         From February 2021 it also names the satellites that really crossed that sky bright enough
-        to be seen, the brightest with the time of its pass on the witness's clock, and says when
+        to be seen, the brightest with the time of its pass on the observer's clock, and says when
         some of them were a Starlink train; the 🛰 button moves the playhead to each pass in turn,
-        brightest first, and turns the witness towards it.
+        brightest first, and turns the observer towards it.
         Whether any of it explains anything is the reader's conclusion, never the file's claim.</p>
     </div>
 
@@ -316,7 +316,7 @@ if (docs) {
       <p>The sound is <em>synthesized</em> from that description, exactly as the shape is drawn from
         its own, at no cost in bundled audio. A recording that actually captured the sound can point
         at the audio file instead. Note the difference between the two silences: <em>none</em> means
-        the witness reported hearing nothing; no sound track at all means nobody was asked.</p>
+        the observer reported hearing nothing; no sound track at all means nobody was asked.</p>
     </div>
 
     <div class="group-doc">
@@ -328,17 +328,17 @@ if (docs) {
         was <strong>taken at</strong> an instant of the observation and whether somebody <strong>drew
         on</strong> it, and set its starting <strong>opacity</strong> — the reader slides it afterwards.</p>
       <p>While this group is open the canvas belongs to the selected picture, its frame dashed in
-        blue: <strong>drag</strong> on it to turn it (a drag outside it still turns the witness),
+        blue: <strong>drag</strong> on it to turn it (a drag outside it still turns the observer),
         <strong>wheel</strong> to change its field, or type
         <strong>heading</strong>, <strong>pitch</strong>, <strong>roll</strong> and <strong>vertical
-        field</strong>, or <strong>use the witness's pose</strong> as a start. To measure rather than
+        field</strong>, or <strong>use the observer's pose</strong> as a start. To measure rather than
         eyeball, <strong>Add a landmark</strong> arms two clicks: a detail on the picture, then the same
         detail in the render. Two landmarks turn the picture to fit them, three or more fit its field
         too; each has a name and a residual, green within a degree, orange within three, red beyond,
-        and either end of one can be dragged. <strong>Adopt as the witness's pose</strong> then writes
+        and either end of one can be dragged. <strong>Adopt as the observer's pose</strong> then writes
         the fitted heading, pitch and roll into the pose at the playhead as a measurement, with its
         provenance. <strong>Street-level pictures nearby</strong> asks Panoramax for pictures taken
-        within 300 m of the witness's spot, each arriving already lined up in heading.</p>
+        within 300 m of the observer's spot, each arriving already lined up in heading.</p>
     </div>
 
     <div class="group-doc">
@@ -358,8 +358,8 @@ if (docs) {
         across, not the 90 an author reaches for unaided. Getting this wrong is the single most
         common way a reconstruction ends up false.</p>
       <p><strong>Sampling rate</strong> is how often the pointer is read while recording.</p>
-      <p>Those are the group's <strong>Shapes</strong>: what the witness drew. Its
-        <strong>Bodies</strong> are what the witness said those shapes were, in 3D: each body names
+      <p>Those are the group's <strong>Shapes</strong>: what the observer drew. Its
+        <strong>Bodies</strong> are what the observer said those shapes were, in 3D: each body names
         the shapes it stands for and the model it is drawn as, a built-in shape, a model of the
         catalogue, or a glTF file at an address. The address can be relative to the recording's own
         file, so a <code>sighting.json</code> and the <code>craft.gltf</code> beside it work together
@@ -367,10 +367,10 @@ if (docs) {
         <strong>+</strong> adds a body (and the interpretation, when the recording has none): it
         stands for the selected shape, in its direction, at the distance the scene draws it and as
         big as its apparent width makes it there, in a single keyframe at the playhead; on the ground
-        at that distance when the line of sight goes into it first; with no shape, where the witness
-        is looking. 🎯 turns the witness towards the body. A recording may hold only bodies: its
+        at that distance when the line of sight goes into it first; with no shape, where the observer
+        is looking. 🎯 turns the observer towards the body. A recording may hold only bodies: its
         last shape can be deleted. <strong>At</strong> the playhead, the body's position (from the
-        witness, or in the world), size and attitude are shown as they are at that instant; editing
+        observer, or in the world), size and attitude are shown as they are at that instant; editing
         one writes a keyframe there, which is how a body is given its movement: move the playhead,
         edit again. Such a keyframe states nothing else, so the body's light, flame and moving parts
         go on as before. With this part open, a body can also be taken on the picture itself: dragging
@@ -395,10 +395,10 @@ if (docs) {
       how high it stood — “Venus, mag −4, 8° above the horizon” answers a report of a bright light
       near the horizon on its own, where a bare name would not. The Sun, the Moon, the planets and
       any comet up that night answer the same way, and so does everything in the environment: a
-      building, a tree, another witness.</p>
+      building, a tree, another observer.</p>
     <p>What the ground hides does not answer. A star behind a hill is as unseeable as one below the
       horizon, so neither is offered — a reconstruction is not a list of what is in the sky, it is
-      what could have been seen from where the witness stood.</p>
+      what could have been seen from where the observer stood.</p>
   </div>
 </section>
 
@@ -411,12 +411,12 @@ if (docs) {
           stays as it was; one whose first keyframe is at five seconds is already painted, in that
           state, from zero. To make something stop being visible, keyframe it at transparency 1.</li>
         <li><strong>Declared outranks deduced.</strong> “It went into a cloud” is stated by the
-          witness, never worked out by geometry — this format describes an appearance on a field of
+          observer, never worked out by geometry — this format describes an appearance on a field of
           view, not a position in space, so nothing in it <em>can</em> know whether cloud came
           between them.</li>
         <li><strong>Paused is paused.</strong> Falling rain, twinkling stars, lightning, lens flare,
           ambient sound — all stop with the player. A paused replay is one instant of a sighting;
-          weather still going on over it would be your own room, not the witness's evening.</li>
+          weather still going on over it would be your own room, not the observer's evening.</li>
         <li><strong>Nothing is invented.</strong> Where a record does not exist — before 1940 for
           the weather, before 1957 for satellites, orbital elements before 2021 — the field
           stays editable and the interface says which of the two it is.</li>
@@ -508,13 +508,13 @@ if (docs) {
       <h3>Observation</h3>
       <p>Charger un enregistrement existant (fichier ou URL), et énoncer ce dont il s'agit :
         <strong>identifiant de dossier</strong>, <strong>description</strong>,
-        <strong>mots-clés</strong>. L'identifiant est celui du dossier, pas celui du témoin : chaque
-        témoin d'une même observation porte le même dans son propre fichier, et c'est ce qui permet
-        à une page de les réunir en une seule reconstitution avec un sélecteur de témoin.</p>
+        <strong>mots-clés</strong>. L'identifiant est celui du dossier, pas celui de l'observateur : chaque
+        observateur d'une même observation porte le même dans son propre fichier, et c'est ce qui permet
+        à une page de les réunir en une seule reconstitution avec un sélecteur d'observateur.</p>
     </div>
 
     <div class="group-doc">
-      <h3>Témoin</h3>
+      <h3>Observateur</h3>
       <p>Qui a livré le récit — et, tout aussi important, <strong>à travers quoi il a
         observé</strong>. Un œil n'est pas un objectif : à l'œil nu un angle reste un angle, un
         appareil le projette en <code>f·tan θ</code>, et les deux dessinent des images réellement
@@ -525,44 +525,44 @@ if (docs) {
         étranger à la date de l'observation est signalé.</p>
       <p>Le <strong>roulis</strong> est ici et non avec le lieu, parce qu'il dit comment l'appareil
         était <em>tenu</em> — un appareil de travers, une tête penchée — et non où se tenait le
-        témoin.</p>
+        observateur.</p>
     </div>
 
     <div class="group-doc">
       <h3>Lieu</h3>
-      <p>Un témoignage nomme un lieu, il ne donne pas de coordonnées. Tapez donc le nom et appuyez
+      <p>Un compte rendu nomme un lieu, il ne donne pas de coordonnées. Tapez donc le nom et appuyez
         sur <strong>Localiser</strong> : latitude et longitude sont remplies par le géocodeur
         d'OpenStreetMap, tous les candidats restent listés, et en choisir un autre déplace le
-        témoin. Ce qui est stocké est le nom <em>qualifié</em> qui a été résolu, pour qu'un lecteur
+        observateur. Ce qui est stocké est le nom <em>qualifié</em> qui a été résolu, pour qu'un lecteur
         ultérieur retombe au même endroit. Déplacez une coordonnée à la main et le nom est redérivé,
         ou effacé — un nom décrivant un endroit où l'observation n'a plus lieu serait une fausse
         déclaration écrite.</p>
       <p><strong>Cap</strong> est la direction regardée, <strong>Inclinaison</strong> de combien
         vers le haut ou le bas, et <strong>Altitude</strong> s'entend au-dessus du niveau de la mer,
-        plancher fixé par la hauteur du sol à cet endroit : un témoin dans les Alpes n'est pas à
+        plancher fixé par la hauteur du sol à cet endroit : un observateur dans les Alpes n'est pas à
         0 m. Les sources de relief et d'imagerie se choisissent ici même, sous les coordonnées dont
         elles décrivent le sol.</p>
     </div>
 
     <div class="group-doc">
       <h3>Environnement</h3>
-      <p>Ce qui se tenait autour du témoin, à une distance réelle vers l'est et vers le nord :
+      <p>Ce qui se tenait autour de l'observateur, à une distance réelle vers l'est et vers le nord :
         bâtiments avec leurs étages et leurs fenêtres, arbres, lampadaires, véhicules, aéronefs —
-        et <strong>d'autres témoins</strong>. C'est la seule chose qui puisse mettre un nombre sur
+        et <strong>d'autres observateurs</strong>. C'est la seule chose qui puisse mettre un nombre sur
         une distance : si l'objet est passé <em>derrière</em> ce hangar il était au moins aussi
         loin, <em>devant</em> cet arbre, au plus. Chaque croisement resserre d'un côté la largeur
         réelle de l'objet, pour tout l'enregistrement ; le résultat s'affiche sous la taille
         apparente, et dit « inconnue » quand rien ne croise sa ligne de visée — la réponse honnête
         pour la plupart des observations.</p>
-      <p><strong>Plusieurs témoins, et leurs points de vue.</strong> Un témoin placé ici peut porter
+      <p><strong>Plusieurs observateurs, et leurs points de vue.</strong> Un observateur placé ici peut porter
         l'URL de son <em>propre</em> enregistrement, et un clic droit sur lui dans la scène propose
         de le consulter — ce qui charge son récit et vous place là où il se tenait, regardant où il
         regardait. Deux personnes à cent mètres l'une de l'autre n'ont pas vu la même chose, et
         pouvoir passer de l'une à l'autre est ce qui fait cesser d'être une affirmation pour devenir
         quelque chose à vérifier. Le bouton <strong>🎯</strong> en fait la version réduite : il
-        tourne le témoin courant vers ce qui est sélectionné.</p>
-      <p>Publiés ensemble, ces enregistrements deviennent le sélecteur de témoin que voit un
-        lecteur — voir <a href="/docs/format/#several-witnesses-the-case">le dossier</a> qui les liste.</p>
+        tourne l'observateur courant vers ce qui est sélectionné.</p>
+      <p>Publiés ensemble, ces enregistrements deviennent le sélecteur d'observateur que voit un
+        lecteur — voir <a href="/docs/format/#several-observers-the-case">le dossier</a> qui les liste.</p>
       <p>Un décor peut aussi <strong>se déplacer</strong> (un avion qui traverse le ciel, une
         voiture qui passe) et porter des <strong>feux</strong> aux cadences réelles et
         réglementaires : anticollision de 40 à 100 éclats par minute, feux de détresse de 60 à 120.
@@ -574,7 +574,7 @@ if (docs) {
     <div class="group-doc">
       <h3>Moment</h3>
       <p>Un début, une fin, une durée — et un <strong>fuseau horaire</strong>, qui est la règle et
-        non le nombre. Choisissez le fuseau du témoin et le décalage est dérivé des règles de ce
+        non le nombre. Choisissez le fuseau de l'observateur et le décalage est dérivé des règles de ce
         fuseau <em>à la date de l'observation</em> : Valensole en juillet 1965 donne UTC+1, pas
         l'UTC+2 d'aujourd'hui, la France n'ayant rétabli l'heure d'été qu'en 1976.</p>
       <p>Le bouton <strong>EDTF</strong> bascule les deux champs de date en texte, pour tout ce
@@ -586,12 +586,12 @@ if (docs) {
 
     <div class="group-doc">
       <h3>Météo</h3>
-      <p>Le seul groupe qui ne soit pas un témoignage. La météo est un fait mesurable en un lieu à
+      <p>Le seul groupe qui ne soit pas un compte rendu. La météo est un fait mesurable en un lieu à
         un instant, et les deux groupes ci-dessus énoncent déjà les deux — elle est donc relevée
         dans ERA5, la réanalyse de l'ECMWF, et affichée <em>en lecture seule</em> au-dessus d'une
         ligne nommant le jeu de données et l'instant UTC exact décrit. Un mauvais fuseau horaire s'y
         voit avant de se voir dans le ciel.</p>
-      <p>Décocher <strong>D'après les relevés</strong> rend les champs au témoin : les valeurs
+      <p>Décocher <strong>D'après les relevés</strong> rend les champs à l'observateur : les valeurs
         relevées restent comme point de départ, la source est retirée, et aucune consultation
         ultérieure ne peut les écraser. Un enregistrement qui nomme une source est rejoué tel qu'il
         a été composé et n'est jamais reconsulté : un dossier publié se lit à l'identique hors
@@ -604,7 +604,7 @@ if (docs) {
         sa force, qui est ce qui porte tout nuage sans vent propre.</p>
       <p>Les nuages sont la partie <strong>Nuages</strong> de ce groupe. Un ciel relevé
         arrive en trois couches, les bandes basse, moyenne et haute du relevé ; un ciel décrit par
-        le témoin en compte autant qu'il en a vu. Chaque nombre du panneau est écrit dans
+        l'observateur en compte autant qu'il en a vu. Chaque nombre du panneau est écrit dans
         l'enregistrement dès qu'il est valide, et la première modification met la lecture en pause :
         rien n'est enregistré sous une tête de lecture qui bouge.</p>
       <p>La <strong>portée des modifications</strong> décide de quoi parle une modification.
@@ -635,7 +635,7 @@ if (docs) {
         individuel</strong> en pose un dans la couche, devant votre regard, à la base de la couche.
         Il est dessiné comme un nuage de la couche — même texture, mêmes bords — et ne diffère de
         ses voisins qu'en se tenant exactement où vous le dites, même avec la couverture de la
-        couche à 0 %. <strong>Pointer le nuage</strong> tourne le témoin vers lui.
+        couche à 0 %. <strong>Pointer le nuage</strong> tourne l'observateur vers lui.
         <strong>Supprimer ce nuage</strong> le retire.</p>
       <p>Cochez <strong>Sélectionner et déplacer les nuages dans le ciel</strong> et l'image
         elle-même devient la commande : cliquez un nuage pour le sélectionner, faites-le glisser pour
@@ -643,7 +643,7 @@ if (docs) {
         son cap et son altitude suivent le pointeur, et il ne passe jamais sous le sol. Décochez, et
         les clics redeviennent ceux du lecteur. Les champs numériques font le reste, et le font
         exactement : <strong>position est</strong> et <strong>nord</strong> en mètres depuis le point
-        de départ du témoin, sa propre <strong>base</strong>, son <strong>épaisseur</strong>, sa
+        de départ de l'observateur, sa propre <strong>base</strong>, son <strong>épaisseur</strong>, sa
         <strong>largeur</strong>, sa <strong>profondeur</strong> et sa <strong>rotation</strong>, sa
         <strong>densité</strong> et une <strong>obscurité</strong> qui, vide, est celle de la couche.
         Posez-le à deux instants et il dérive, grossit ou s'assombrit entre les deux ; par-dessus,
@@ -660,13 +660,13 @@ if (docs) {
         d'une comète est un problème résolu : la date et le lieu suffisent à décider des deux. Elle
         énonce ce qu'il y avait d'autre dans ce coin de ciel : la pluie et son taux au-dessus du fond
         sporadique, la comète et sa magnitude, toute nova ou supernova dont la courbe de lumière
-        relevée couvre cette nuit-là (le bouton 🌟 tourne le témoin vers elle), si l'orbite basse
+        relevée couvre cette nuit-là (le bouton 🌟 tourne l'observateur vers elle), si l'orbite basse
         était encore éclairée, si la Voie
         lactée ou la lumière zodiacale pouvaient seulement être vues. À partir de février 2021, elle
         nomme aussi les satellites qui ont réellement traversé ce ciel assez brillants pour être vus,
-        le plus brillant avec l'heure de son passage à la montre du témoin, et dit quand certains
+        le plus brillant avec l'heure de son passage à la montre de l'observateur, et dit quand certains
         formaient un train de Starlink ; le bouton 🛰 amène la tête de lecture sur chaque passage tour
-        à tour, du plus brillant au plus faible, et tourne le témoin vers lui.
+        à tour, du plus brillant au plus faible, et tourne l'observateur vers lui.
         Que cela explique ou non quelque chose est la conclusion du lecteur, jamais l'affirmation du
         fichier.</p>
     </div>
@@ -681,7 +681,7 @@ if (docs) {
       <p>Le son est <em>synthétisé</em> à partir de cette description, exactement comme la forme est
         dessinée à partir de la sienne, sans un octet d'audio embarqué. Un enregistrement qui a
         réellement capté le son peut pointer vers le fichier audio. Notez la différence entre les
-        deux silences : <em>aucun</em> signifie que le témoin a déclaré n'avoir rien entendu ;
+        deux silences : <em>aucun</em> signifie que l'observateur a déclaré n'avoir rien entendu ;
         l'absence totale de piste sonore signifie que personne ne le lui a demandé.</p>
     </div>
 
@@ -696,16 +696,16 @@ if (docs) {
         lecteur la fera glisser ensuite.</p>
       <p>Tant que ce groupe est ouvert, le canvas appartient à la photo sélectionnée, son cadre en
         pointillés bleus : <strong>glissez</strong> dessus pour la tourner (glisser à côté tourne toujours
-        le témoin), <strong>molette</strong> pour son
+        l'observateur), <strong>molette</strong> pour son
         champ, ou saisissez <strong>cap</strong>, <strong>assiette</strong>, <strong>roulis</strong> et
-        <strong>champ vertical</strong>, ou <strong>prenez la pose du témoin</strong> comme point de
+        <strong>champ vertical</strong>, ou <strong>prenez la pose de l'observateur</strong> comme point de
         départ. Pour mesurer plutôt qu'estimer, <strong>Ajouter un repère</strong> arme deux clics : un
         détail sur la photo, puis le même détail dans le rendu. Deux repères tournent la photo pour les
         faire coïncider, trois ou plus ajustent aussi son champ ; chacun a un nom et un écart, vert
         jusqu'à un degré, orange jusqu'à trois, rouge au-delà, et chaque extrémité se déplace.
-        <strong>Adopter comme pose du témoin</strong> écrit alors cap, assiette et roulis ajustés dans
+        <strong>Adopter comme pose de l'observateur</strong> écrit alors cap, assiette et roulis ajustés dans
         la pose au point de lecture, comme une mesure, avec sa provenance. <strong>Photos de rue à
-        proximité</strong> demande à Panoramax les photos prises à moins de 300 m du témoin, chacune
+        proximité</strong> demande à Panoramax les photos prises à moins de 300 m de l'observateur, chacune
         arrivant déjà recalée en cap.</p>
     </div>
 
@@ -729,8 +729,8 @@ if (docs) {
         tromper est la première cause de reconstitution fausse.</p>
       <p>La <strong>fréquence d'échantillonnage</strong> est la cadence à laquelle le curseur est lu
         pendant l'enregistrement.</p>
-      <p>Voilà pour les <strong>Formes</strong> du groupe : ce que le témoin a dessiné. Ses
-        <strong>Corps</strong> sont ce que le témoin a dit que ces formes étaient, en 3D : chaque
+      <p>Voilà pour les <strong>Formes</strong> du groupe : ce que l'observateur a dessiné. Ses
+        <strong>Corps</strong> sont ce que l'observateur a dit que ces formes étaient, en 3D : chaque
         corps désigne les formes qu'il représente et le modèle qui le dessine, une forme de base, un
         modèle du catalogue, ou un fichier glTF à une adresse. Cette adresse peut être relative au
         fichier de l'enregistrement : un <code>sighting.json</code> et le <code>craft.gltf</code> posé
@@ -739,9 +739,9 @@ if (docs) {
         l'enregistrement n'en a pas) : il représente la forme sélectionnée, dans sa direction, à la
         distance où la scène la dessine et à la taille que sa largeur apparente donne là, en une
         seule image clé à la tête de lecture ; posé au sol à cette distance quand la ligne de visée y
-        entre avant ; sans forme, là où le témoin regarde. 🎯 tourne le témoin vers le corps. Un
+        entre avant ; sans forme, là où l'observateur regarde. 🎯 tourne l'observateur vers le corps. Un
         enregistrement peut ne tenir que des corps : sa dernière forme se supprime.
-        <strong>À</strong> la tête de lecture, la position du corps (depuis le témoin, ou dans le
+        <strong>À</strong> la tête de lecture, la position du corps (depuis l'observateur, ou dans le
         monde), sa taille et son attitude sont affichées telles qu'elles sont à cet instant ; en
         modifier une écrit une image clé là, et c'est ainsi qu'un corps reçoit son mouvement :
         déplacer la tête de lecture, modifier de nouveau. Une telle image clé ne dit rien d'autre :
@@ -767,10 +767,10 @@ if (docs) {
       sa hauteur — « Vénus, mag −4, 8° au-dessus de l'horizon » répond à lui seul à un signalement
       de lumière vive près de l'horizon, là où un nom seul ne répondrait pas. Le Soleil, la Lune, les
       planètes et toute comète levée cette nuit-là répondent de même, et tout l'environnement
-      aussi : un bâtiment, un arbre, un autre témoin.</p>
+      aussi : un bâtiment, un arbre, un autre observateur.</p>
     <p>Ce que le sol cache ne répond pas. Une étoile derrière une colline est aussi invisible qu'une
       étoile sous l'horizon : ni l'une ni l'autre n'est proposée — une reconstitution n'est pas la
-      liste de ce qu'il y a dans le ciel, c'est ce qui pouvait être vu d'où se tenait le témoin.</p>
+      liste de ce qu'il y a dans le ciel, c'est ce qui pouvait être vu d'où se tenait l'observateur.</p>
   </div>
 </section>
 
@@ -784,13 +784,13 @@ if (docs) {
           déjà peinte, dans cet état, dès zéro. Pour qu'une chose cesse d'être visible, posez-lui un
           keyframe à transparence 1.</li>
         <li><strong>L'énoncé l'emporte sur le déduit.</strong> « Il est entré dans un nuage » est
-          énoncé par le témoin, jamais calculé par la géométrie : ce format décrit une apparence
+          énoncé par l'observateur, jamais calculé par la géométrie : ce format décrit une apparence
           dans un champ de vision, pas une position dans l'espace, donc rien en lui <em>ne peut</em>
           savoir si un nuage s'est interposé.</li>
         <li><strong>En pause, tout est en pause.</strong> Pluie qui tombe, scintillement des étoiles,
           éclairs, reflets d'objectif, ambiances sonores — tout s'arrête avec le lecteur. Une lecture
           en pause est un instant d'observation ; une météo qui continuerait par-dessus serait votre
-          pièce, pas la soirée du témoin.</li>
+          pièce, pas la soirée de l'observateur.</li>
         <li><strong>Rien n'est inventé.</strong> Là où le relevé n'existe pas — avant 1940 pour la
           météo, avant 1957 pour les satellites, avant 2021 pour les éléments orbitaux —
           le champ reste modifiable et l'interface dit lequel des deux cas s'applique.</li>

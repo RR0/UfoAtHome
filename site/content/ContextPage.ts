@@ -26,9 +26,9 @@ export class ContextPage implements SitePage {
     },
     asideFromNav: true,
     description: {
-      en: "Every part of a reconstruction that is not the witness's own testimony: where its data "
+      en: "Every part of a reconstruction that is not the observer's own account: where its data "
         + "comes from, how it is computed, and the point at which it stops and says so.",
-      fr: "Chaque partie d'une reconstitution qui n'est pas le témoignage lui-même : d'où vient sa "
+      fr: "Chaque partie d'une reconstitution qui n'est pas le compte rendu lui-même : d'où vient sa "
         + "donnée, comment elle est calculée, et le point où elle s'arrête et le dit."
     }
   }
@@ -43,7 +43,7 @@ export class ContextPage implements SitePage {
   <div class="wrap">
     <p class="eyebrow"><a class="crumb" href="/">← Home</a></p>
     <h1>Check what the scene claims.</h1>
-    <p class="lede">The witness supplies the phenomenon. Everything else is looked up in a named
+    <p class="lede">The observer supplies the phenomenon. Everything else is looked up in a named
       record or computed from physics — and where neither can answer, the tool says so instead of
       drawing something plausible. This is that, part by part, with the numbers it actually
       applies.</p>
@@ -57,7 +57,7 @@ export class ContextPage implements SitePage {
       that latitude and that longitude. Nothing is a picture of a sky: point at any of it and it
       names itself — “Venus, mag −4, 8° above the horizon”.</p>
     <p>What is drawn from the catalogue stops at magnitude 6.5, and that number is a fact about a
-      <em>witness</em> rather than about the sky: it is how faint a dark-adapted human eye goes.
+      <em>observer</em> rather than about the sky: it is how faint a dark-adapted human eye goes.
       Put something else in front of the same night and the threshold moves with it — see
       <a href="#instrument">the instrument</a>.</p>
     <p>The catalogue follows the same threshold. A naked-eye sky costs 400 kB, down to magnitude
@@ -74,7 +74,7 @@ export class ContextPage implements SitePage {
     <h2 id="light">The light of the sky</h2>
     <p>The sky itself is not a colour gradient. Sunlight and moonlight are traced through a
       spherical atmosphere at fifteen wavelengths across what an eye sees, the way light really
-      reaches a witness: scattered once by the air on its way, then again and again, dimmed by
+      reaches an observer: scattered once by the air on its way, then again and again, dimmed by
       what stands in front of it. Three things make up that air. The molecules of the air itself,
       which scatter blue far more than red and make the sky blue. The haze, which whitens the
       horizon and puts a bright aureole around the Sun, and which is thicker on a humid day than a
@@ -96,7 +96,7 @@ export class ContextPage implements SitePage {
       measured at the Paranal observatory to within half a magnitude, without ever having been
       fitted to it.</p>
     <p>What reaches the screen is what an eye adapted to that sky makes of it: a night sky is not
-      ten million times darker than a day sky to a witness standing in it, and colour gives way to
+      ten million times darker than a day sky to an observer standing in it, and colour gives way to
       a dim blue-grey as the rods take over from the cones. A camera does none of this, so a
       recording made through one keeps the blue a long exposure really shows. How bright a day and a
       moonless night are shown are the two choices in that chain, and they are stated as choices.</p>
@@ -147,10 +147,10 @@ export class ContextPage implements SitePage {
       checkable decades later, by someone who does not trust this tool.</p>
 
     <h2 id="ground">The ground</h2>
-    <p>Real relief and aerial imagery are fetched around the witness, along with the decor that got
-      in the way: buildings, trees, streetlights, vehicles, windows and other witnesses — with
+    <p>Real relief and aerial imagery are fetched around the observer, along with the decor that got
+      in the way: buildings, trees, streetlights, vehicles, windows and other observers — with
       their lights, their flash rates and their tracks.</p>
-    <p>How high the witness stood is looked up from where they stood. The ground under those
+    <p>How high the observer stood is looked up from where they stood. The ground under those
       coordinates comes from a real elevation model, so the altitude on the form is a height above
       sea level whose floor is the ground itself: nobody can be placed under it. And it is not a
       detail — at 1500 m the horizon really is 1.2° lower than it is at sea level, which is enough
@@ -165,9 +165,9 @@ export class ContextPage implements SitePage {
       aperture and one shutter speed, so there is nothing to choose, and a camera that did not exist
       yet is flagged against the observation's own date.</p>
     <p>And the instrument decides how faint a thing could be recorded at all. That same Instamatic
-      stops at magnitude 4.2 — two short of the witness holding it, which is half of why so many
+      stops at magnitude 4.2 — two short of the observer holding it, which is half of why so many
       “the sky was full of stars” accounts come with an empty black photograph. A 50 mm at f/2 for
-      twenty seconds reaches 9.7, three magnitudes <em>past</em> that witness. Aperture, shutter and
+      twenty seconds reaches 9.7, three magnitudes <em>past</em> that observer. Aperture, shutter and
       focal length settle it against the sky's own brightness.</p>
     <p>A longer pose stops helping once the sky has slid further than the lens can resolve, which is
       why an hour on a tripod is no deeper than five seconds on one — only longer trails.</p>
@@ -175,7 +175,7 @@ export class ContextPage implements SitePage {
     <h2 id="pictures">A picture of the place</h2>
     <p>Everything above is computed, and a reader looking at the result has no way to tell a faithful
       reconstruction from a plausible one. A photograph of the same place does. A recording can carry
-      pictures of where it happened — a witness's own, an investigator's, a magazine scan, a
+      pictures of where it happened — an observer's own, an investigator's, a magazine scan, a
       street-level capture — each laid over the render at an opacity the reader slides between all
       picture and all render, with the phenomenon drawn over both. Every tree the thirty-metre relief
       smoothed away, every ridge, the actual hedge, is then one picture with the reconstruction.
@@ -192,7 +192,7 @@ export class ContextPage implements SitePage {
       turn the picture to fit; three or more fit its field too. The residual says how well it fits,
       landmark by landmark, in green, orange or red: one that will not go below a degree is telling
       you the picture was not taken from that spot, or that the relief is wrong there. And a picture
-      that fits gives back the heading the witness actually faced — adopted into their pose with its
+      that fits gives back the heading the observer actually faced — adopted into their pose with its
       provenance written down, where a heading typed in was only their word. Street-level pictures
       taken nearby (Panoramax, open imagery) arrive already lined up in heading, a full turn arriving
       as a panorama.</p>
@@ -215,7 +215,7 @@ export class ContextPage implements SitePage {
   <div class="wrap">
     <p class="eyebrow"><a class="crumb" href="/">← Accueil</a></p>
     <h1>Vérifier ce que la scène affirme.</h1>
-    <p class="lede">Le témoin fournit le phénomène. Tout le reste est relevé dans une source nommée
+    <p class="lede">L'observateur fournit le phénomène. Tout le reste est relevé dans une source nommée
       ou calculé depuis la physique — et là où ni l'un ni l'autre ne répond, l'outil le dit plutôt
       que de dessiner quelque chose de vraisemblable. Voici cela, élément par élément, avec les
       nombres qu'il applique réellement.</p>
@@ -229,7 +229,7 @@ export class ContextPage implements SitePage {
       cette latitude et cette longitude. Rien n'est une image de ciel : pointez n'importe quoi et
       cela se nomme — « Vénus, mag −4, 8° au-dessus de l'horizon ».</p>
     <p>Ce qui en est dessiné s'arrête à la magnitude 6,5, et ce nombre est un fait sur le
-      <em>témoin</em>, pas sur le ciel : c'est la magnitude qu'atteint un œil humain accoutumé à
+      <em>observateur</em>, pas sur le ciel : c'est la magnitude qu'atteint un œil humain accoutumé à
       l'obscurité. Placez autre chose devant la même nuit et le seuil suit — voir
       <a href="#instrument">l'instrument</a>.</p>
     <p>Le catalogue suit ce même seuil. Un ciel vu à l'œil nu coûte 400 ko, jusqu'à la magnitude
@@ -247,7 +247,7 @@ export class ContextPage implements SitePage {
     <h2 id="light">La lumière du ciel</h2>
     <p>Le ciel lui-même n'est pas un dégradé de couleurs. La lumière du Soleil et de la Lune est
       suivie à travers une atmosphère sphérique, à quinze longueurs d'onde couvrant ce que voit un
-      œil, comme elle atteint réellement un témoin : diffusée une fois par l'air en chemin, puis
+      œil, comme elle atteint réellement un observateur : diffusée une fois par l'air en chemin, puis
       encore et encore, atténuée par ce qui se trouve devant. Trois choses composent cet air. Les
       molécules de l'air lui-même, qui diffusent bien plus le bleu que le rouge et font le ciel
       bleu. La brume, qui blanchit l'horizon et met une auréole claire autour du Soleil, et qui est
@@ -269,7 +269,7 @@ export class ContextPage implements SitePage {
       de deux tiers de magnitude : l'ombre de la Terre, bas dans le ciel, pendant le crépuscule
       nautique. Et le zénith rejoint à une demi-magnitude près la photométrie du crépuscule mesurée
       à l'observatoire de Paranal, sans jamais avoir été ajusté dessus.</p>
-    <p>Ce qui arrive à l'écran est ce qu'en fait un œil adapté à ce ciel : pour un témoin qui s'y
+    <p>Ce qui arrive à l'écran est ce qu'en fait un œil adapté à ce ciel : pour un observateur qui s'y
       tient, un ciel nocturne n'est pas dix millions de fois plus sombre qu'un ciel de jour, et la
       couleur cède la place à un gris-bleu sombre à mesure que les bâtonnets prennent le relais des
       cônes. Un appareil photo ne fait rien de tout cela : un enregistrement fait à travers lui garde
@@ -326,10 +326,10 @@ export class ContextPage implements SitePage {
       confiance à cet outil.</p>
 
     <h2 id="ground">Le sol</h2>
-    <p>Relief réel et imagerie aérienne sont chargés autour du témoin, avec le décor qui s'est
-      interposé : bâtiments, arbres, lampadaires, véhicules, vitrages et autres témoins — avec leurs
+    <p>Relief réel et imagerie aérienne sont chargés autour de l'observateur, avec le décor qui s'est
+      interposé : bâtiments, arbres, lampadaires, véhicules, vitrages et autres observateurs — avec leurs
       feux, leurs cadences de clignotement et leurs trajectoires.</p>
-    <p>À quelle hauteur le témoin se tenait se relève d'où il se tenait. Le sol sous ces coordonnées
+    <p>À quelle hauteur l'observateur se tenait se relève d'où il se tenait. Le sol sous ces coordonnées
       vient d'un modèle d'élévation réel, si bien que l'altitude du formulaire est une altitude
       au-dessus du niveau de la mer dont le plancher est le sol lui-même : on ne peut placer
       personne dessous. Et ce n'est pas un détail — à 1500 m, l'horizon est réellement 1,2° plus bas
@@ -344,10 +344,10 @@ export class ContextPage implements SitePage {
       avait un diaphragme et une vitesse, donc il n'y a rien à choisir, et un appareil qui n'existait
       pas encore est signalé face à la date de l'observation.</p>
     <p>Et c'est l'instrument qui décide de ce qui pouvait être enregistré. Ce même Instamatic
-      s'arrête à la magnitude 4,2 — deux de moins que le témoin qui le tient, ce qui est la moitié de
+      s'arrête à la magnitude 4,2 — deux de moins que l'observateur qui le tient, ce qui est la moitié de
       la raison pour laquelle tant de récits de « ciel plein d'étoiles » s'accompagnent d'une
       photographie noire et vide. Un 50 mm à f/2 pendant vingt secondes atteint 9,7, trois
-      magnitudes <em>au-delà</em> de ce témoin. Diaphragme, pose et focale en décident, face à la
+      magnitudes <em>au-delà</em> de cet observateur. Diaphragme, pose et focale en décident, face à la
       clarté du ciel lui-même.</p>
     <p>Allonger la pose cesse d'aider dès que le ciel a glissé plus loin que ce que l'objectif sait
       séparer : une heure sur trépied ne va pas plus loin que cinq secondes, elle fait seulement des
@@ -356,7 +356,7 @@ export class ContextPage implements SitePage {
     <h2 id="pictures">Une photo des lieux</h2>
     <p>Tout ce qui précède est calculé, et un lecteur devant le résultat n'a aucun moyen de
       distinguer une reconstitution fidèle d'une reconstitution vraisemblable. Une photo du même
-      endroit, si. Un enregistrement peut porter des photos des lieux — celle du témoin, celle d'un
+      endroit, si. Un enregistrement peut porter des photos des lieux — celle de l'observateur, celle d'un
       enquêteur, la page d'une revue, une capture de rue — chacune posée sur le rendu à une opacité
       que le lecteur fait glisser entre tout photo et tout rendu, le phénomène dessiné par-dessus.
       Chaque arbre que le relief à trente mètres avait lissé, chaque crête, la vraie haie, ne font
@@ -373,7 +373,7 @@ export class ContextPage implements SitePage {
       tournent la photo pour les faire coïncider ; trois ou plus ajustent aussi son champ. L'écart
       résiduel dit si elle tient, repère par repère, en vert, orange ou rouge : un repère qui ne
       descend pas sous un degré vous dit que la photo n'a pas été prise de ce point, ou que le
-      relief est faux là. Et une photo qui tient rend le cap que le témoin avait réellement —
+      relief est faux là. Et une photo qui tient rend le cap que l'observateur avait réellement —
       adopté dans sa pose avec sa provenance écrite, là où un cap saisi n'était que sa parole. Les
       photos de rue prises à proximité (Panoramax, imagerie ouverte) arrivent déjà recalées en cap,
       un tour complet arrivant comme panorama.</p>

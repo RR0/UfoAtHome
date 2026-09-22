@@ -9,7 +9,7 @@ export const html = `
      parameter summary under the render. -->
 <div id="group-tabs" class="group-tabs">
   <button class="group-tab" type="button" aria-controls="group-observation" aria-expanded="false"><span id="label-observation-group">Observation</span></button>
-  <button class="group-tab" type="button" aria-controls="group-witness" aria-expanded="false"><span id="label-witness-group">Witness</span></button>
+  <button class="group-tab" type="button" aria-controls="group-witness" aria-expanded="false"><span id="label-witness-group">Observer</span></button>
   <button class="group-tab" type="button" aria-controls="group-location" aria-expanded="false"><span id="label-location-group">Location</span></button>
   <button class="group-tab" type="button" aria-controls="group-decor" aria-expanded="false"><span id="label-decor-group">Environment</span></button>
   <button class="group-tab" type="button" aria-controls="group-temporal" aria-expanded="false"><span id="label-temporal-group">Moment</span></button>
@@ -23,12 +23,12 @@ export const html = `
     <label><span id="label-import-file">Load JSON file</span> <input id="import-file" type="file" accept="application/json,.json"/></label>
     <label><span id="label-import-url">Or load from URL</span> <input id="import-url" type="url" placeholder="https://…/sighting.json"/></label>
     <button id="import-url-button" type="button">Load</button>
-    <!-- The observation's own id, not the witness's nor the case's: what a case and the
-         interpretations filed in it name this testimony by (see Sighting.id). -->
+    <!-- The observation's own id, not the observer's nor the case's: what a case and the
+         interpretations filed in it name this account by (see Sighting.id). -->
     <label><span id="label-sighting-id">ID</span> <input id="sightingId" type="text" placeholder="1964-04-24-ZamoraLonnie"/></label>
     <label><span id="label-tags">Tags</span> <input id="tags" type="text" placeholder="comma-separated"/></label>
     <!-- The named moments of the account (see Milestone) — with the observation, because that is
-         what they belong to: they are how the testimony READS, not anything about a shape. Added at
+         what they belong to: they are how the account READS, not anything about a shape. Added at
          the playhead, which is the only instant a reader has in mind when they name one. -->
     <span id="label-milestones">Moments</span>
     <button id="add-milestone" type="button" class="icon-btn" title="Add" aria-label="Add">+</button>
@@ -38,7 +38,7 @@ export const html = `
     <label><span id="label-milestone-note">What happens</span> <input id="milestoneNote" type="text"/></label>
   </div>
   <!-- The account, and the button that reads it.
-       One field, not two. The description IS the account: a paragraph in the witness's own words,
+       One field, not two. The description IS the account: a paragraph in the observer's own words,
        which is what SightingEvent.description has always been documented to hold. What some
        recordings put there instead — how a size was calculated, which relief source was measured —
        belongs in the numbers those calculations produced, and saying it twice is how the two come
@@ -48,7 +48,7 @@ export const html = `
        one-line fields makes both harder to read. See SightingEditorElement.draftFromDescription. -->
   <div class="toolbar narrative">
     <label class="wide"><span id="label-description">Description</span>
-      <textarea id="description" rows="4" placeholder="What the witness reported, in their own words"></textarea></label>
+      <textarea id="description" rows="4" placeholder="What the observer reported, in their own words"></textarea></label>
     <label><span id="label-narrative-key">API key</span> <input id="narrativeKey" type="password" autocomplete="off" spellcheck="false"/></label>
     <!-- Only for a key that reaches several workspaces, which the API refuses outright unless the
          request names one. Shown to everybody because there is no way to tell from a key which sort
@@ -70,7 +70,7 @@ export const html = `
     <label><span id="label-witness-title">Title</span> <input id="witnessTitle" type="text"/></label>
     <label><span id="label-witness-last-name">Last name</span> <input id="witnessLastName" type="text"/></label>
     <label><span id="label-witness-first-names">First names</span> <input id="witnessFirstNames" type="text" placeholder="comma-separated"/></label>
-    <!-- Who this witness is and how their account travelled — see Testimony. None of it is about
+    <!-- Who this observer is and how their account travelled — see Testimony. None of it is about
          the phenomenon, which is why it sits here and not with the shape, and why it had to exist:
          Poher's credibility criteria read these and a recording could state none of them. How MANY
          people saw the thing is not here on purpose: a recording is one person's account, and the
@@ -83,7 +83,7 @@ export const html = `
       <option id="option-source-interview" value="interview">interview in person</option>
       <option id="option-source-telephone" value="telephone">by telephone</option>
       <option id="option-source-questionnaire" value="questionnaire">questionnaire</option>
-      <option id="option-source-letter" value="letter">the witness wrote it</option>
+      <option id="option-source-letter" value="letter">the observer wrote it</option>
       <option id="option-source-press" value="press">press or broadcast</option>
     </select></label>
     <!-- Three states and not a checkbox: a report that says nothing about follow-up is not a report
@@ -104,18 +104,18 @@ export const html = `
     <label><span id="label-f-number">Aperture</span> f/<input id="fNumber" type="number" min="0.7" max="64" step="0.1"/></label>
     <label><span id="label-exposure">Exposure</span> <input id="exposureSeconds" type="text" inputmode="decimal" size="7" placeholder="1/250"/> s</label>
     <label><span id="label-focus-distance">Focused at</span> <input id="focusDistance" type="number" min="0.1" max="30000" step="0.1" placeholder="&#8734;"/> m</label>
-    <!-- With the instrument and not with the place: latitude and heading say where the witness
+    <!-- With the instrument and not with the place: latitude and heading say where the observer
          stood and which way they faced, and this says nothing about either. It is how the device
          was HELD — a camera askew, a head leaned over — which is why it belongs beside the focal
          length and the aperture whose own spikes it turns. -->
     <label><span id="label-roll">Roll</span> <input id="roll" type="number" min="-180" max="180" step="1" value="0" title="How far the instrument was tilted about its own line of sight — positive clockwise, as the witness saw it"/> &deg;</label>
-    <button id="add-decor-witness" type="button">Add witness</button>
+    <button id="add-decor-witness" type="button">Add observer</button>
     <label><span id="label-decor-sighting-url">Their own recording URL</span> <input id="decorSightingUrl" type="url" placeholder="https://…/sighting.json"/></label>
   </div>
 </section>
 <section class="group-panel" id="group-location" aria-labelledby="label-location-group" hidden>
   <div class="toolbar">
-    <!-- Testimony names a place, it doesn't give coordinates ("on the Valensole plateau", never
+    <!-- An account names a place, it doesn't give coordinates ("on the Valensole plateau", never
          43.8379 / 5.9840) — so the name is what this group asks for first, and the latitude and
          longitude below are what answering it produces. Searched only on Enter or the button, never
          per keystroke: see NominatimPlaceProvider's own doc comment on why that restraint matters. -->
@@ -132,7 +132,7 @@ export const html = `
     <label><span id="label-lng">Longitude</span> <input id="lng" type="number" min="-180" max="180" step="0.000001" placeholder="lng"/></label>
     <label><span id="label-heading">Heading</span> <input id="heading" type="number" min="0" max="360" step="1" placeholder="unknown"/> <span id="heading-unit">&deg;</span></label>
     <label><span id="label-pitch">Tilt</span> <input id="pitch" type="number" min="-90" max="90" step="1" value="0"/> &deg;</label>
-    <!-- Above SEA LEVEL, not above the ground: "0 m" is simply false for a witness in the Alps, and
+    <!-- Above SEA LEVEL, not above the ground: "0 m" is simply false for an observer in the Alps, and
          an editor that offers it invites a recording that says so. The ground's own height at the
          location becomes the field's floor and its default the moment the location is known — see
          SightingEditorElement.applyGroundElevation. -->
@@ -144,7 +144,7 @@ export const html = `
     <div id="terrain-source-rows" class="terrain-source-rows"></div>
   </div>
 </section>
-<!-- Its own group, no longer a fieldset nested inside Location. What stands around the witness is
+<!-- Its own group, no longer a fieldset nested inside Location. What stands around the observer is
      the single largest thing this editor asks for — 34 controls against Location's own 8 — so
      folded in there it made Location the tallest panel by far (313px) and, with one panel open at
      a time, the one that alone still overflowed a phone. Split out, neither half does. The two
@@ -206,7 +206,7 @@ export const html = `
     <label><span id="label-decor-window-front-right">Front-right</span> <input id="decorWindowFrontRight" type="number" min="0" max="100" step="5" placeholder="none" autocomplete="off"/> %</label>
     <label><span id="label-decor-window-behind-left">Behind-left</span> <input id="decorWindowBehindLeft" type="number" min="0" max="100" step="5" placeholder="none" autocomplete="off"/> %</label>
     <label><span id="label-decor-window-behind-right">Behind-right</span> <input id="decorWindowBehindRight" type="number" min="0" max="100" step="5" placeholder="none" autocomplete="off"/> %</label>
-    <label><span id="label-decor-witness-side">Witness location</span>
+    <label><span id="label-decor-witness-side">Observer location</span>
       <select id="decorWitnessSide">
         <option id="option-witness-side-none" value="">Not present</option>
         <option id="option-witness-side-front" value="front">Front</option>
@@ -215,7 +215,7 @@ export const html = `
         <option id="option-witness-side-right" value="right">Right</option>
         <!-- Vehicle only — the 4 seat/door positions replace front/behind/left/right above for
              that kind (see witnessSidesFor's own doc comment: you sit AT a door, never "at the
-             windshield"). Hidden by default, same technique as decorKind's own hidden "witness"
+             windshield"). Hidden by default, same technique as decorKind's own hidden "observer"
              option — toggled per kind in syncDecorVisibility. -->
         <option id="option-witness-side-front-left" value="front-left" hidden>Front-left</option>
         <option id="option-witness-side-front-right" value="front-right" hidden>Front-right</option>
@@ -239,11 +239,11 @@ export const html = `
         <option id="option-decor-vehicle" value="vehicle">Vehicle</option>
         <option id="option-decor-aircraft" value="aircraft">Aircraft</option>
         <option id="option-decor-entity" value="entity">Being</option>
-        <!-- Other witness is added from its own dedicated button instead (Witness group's own
-             "Add witness" — nothing else to configure beforehand) — hidden (not removed) so
+        <!-- Other observer is added from its own dedicated button instead (Observer group's own
+             "Add observer" — nothing else to configure beforehand) — hidden (not removed) so
              decorLabel() can still look up its translated kind name by id for the fallback
              "{kind} {n}" label, see SightingEditorElement.decorLabel. -->
-        <option id="option-decor-witness" value="witness" hidden>Other witness</option>
+        <option id="option-decor-witness" value="observer" hidden>Other observer</option>
       </select>
     </div>
   </div>
@@ -290,11 +290,11 @@ export const html = `
 </section>
 <section class="group-panel" id="group-weather" aria-labelledby="label-weather-group" hidden>
   <div class="toolbar">
-    <!-- Weather is the one thing in this editor that isn't testimony: it's a measurable fact about
+    <!-- Weather is the one thing in this editor that isn't account: it's a measurable fact about
          a place at an instant, and the Location and Temporal groups above already state both. So
          it's looked up from a real record by default (see SightingEditorElement.inferWeather) and
          shown read-only on that basis — a reanalysis value is a measurement to report, not a dial
-         to tune. Unchecking hands the fields back to the witness, whose account then outranks the
+         to tune. Unchecking hands the fields back to the observer, whose account then outranks the
          record and is never overwritten by it (Sighting.weatherSource). -->
     <div class="weather-source-row">
       <label><input id="weatherInferred" type="checkbox" checked/> <span id="label-weather-inferred">From weather records</span></label>
@@ -305,7 +305,7 @@ export const html = `
            of it on a phone, where the render then no longer fitted under the panel at all. -->
       <output id="weather-source" class="weather-source clamped" for="lat lng obs-time"><span id="weather-source-text"></span><span id="weather-source-row" class="inline-source" hidden></span><a id="weather-source-link" target="_blank" rel="noopener noreferrer" hidden></a></output>
     </div>
-    <!-- Not testimony either, and not even a lookup: a meteor shower is a position in the Earth's
+    <!-- Not account either, and not even a lookup: a meteor shower is a position in the Earth's
          own orbit and a comet's orbit is a solved problem, so the date and the place alone decide
          both. Read-only on purpose — it states what else was in that patch of sky, and whether that
          explains anything is the reader's conclusion, never the file's claim. See MeteorShowers.ts
@@ -395,8 +395,8 @@ export const html = `
 <!-- Pictures of the place laid over the reconstruction (see SceneReference): one dropdown of them,
      the fields of the selected one, and two ways to add one — an address, or a file from the
      author's own disk, which is embedded in the recording. The registration is typed here for now
-     (heading, pitch, roll, field), with the witness's own pose one click away since a picture from
-     the witness's spot most often looks where they looked; lining a picture up on the rendered
+     (heading, pitch, roll, field), with the observer's own pose one click away since a picture from
+     the observer's spot most often looks where they looked; lining a picture up on the rendered
      relief by dragging it is the next step, not this one. -->
 <section class="group-panel" id="group-reference" aria-labelledby="label-reference-group" hidden>
   <div class="toolbar">
@@ -418,12 +418,12 @@ export const html = `
     <label><span id="label-reference-pitch">Pitch</span> <input id="referencePitch" class="reference-field" type="number" min="-90" max="90" step="0.1"/> &deg;</label>
     <label><span id="label-reference-roll">Roll</span> <input id="referenceRoll" class="reference-field" type="number" min="-180" max="180" step="0.1"/> &deg;</label>
     <label><span id="label-reference-fov">Vertical field</span> <input id="referenceFov" class="reference-field" type="number" min="1" max="179" step="0.1"/> &deg;</label>
-    <button id="reference-use-pose" type="button">Use the witness's pose</button>
+    <button id="reference-use-pose" type="button">Use the observer's pose</button>
     <!-- Lining the picture up on the rendered scene, by hand and by landmarks — see
          SightingEditorElement.canvasMode and PictureRegistration. While this group is open the
          canvas belongs to the selected picture: a drag turns it, the wheel changes its field, and
          a click names a landmark on it, then the same landmark in the render. -->
-    <button id="reference-adopt-pose" type="button">Adopt as the witness's pose</button>
+    <button id="reference-adopt-pose" type="button">Adopt as the observer's pose</button>
     <span id="reference-status" class="apparent-size"></span>
     <!-- The details the picture is lined up on (see PictureLandmark): one row each in the dropdown
          with how far it still is from fitting, the selected one bolder on the canvas, its name
@@ -436,7 +436,7 @@ export const html = `
       <button id="add-reference-url" type="button">Add from an address</button>
       <label><span id="label-add-reference-file">Add a file</span> <input id="add-reference-file" type="file" accept="image/*"/></label>
     </div>
-    <!-- Street-level pictures somebody took near the witness's spot — see PanoramaxPictures. Each
+    <!-- Street-level pictures somebody took near the observer's spot — see PanoramaxPictures. Each
          comes with where it was taken from and which way it looked, a registration already made. -->
     <div class="decor-add-row">
       <button id="reference-street-search" type="button">Street-level pictures nearby</button>
@@ -446,8 +446,8 @@ export const html = `
   </div>
 </section>
 <section class="group-panel" id="group-shape" aria-labelledby="label-shape-group" hidden>
-  <!-- In two parts: the shapes the witness DREW (angles on their image, the testimony), and the
-       bodies the witness said those shapes WERE (the 3D interpretation, see BodyEditor). The shapes
+  <!-- In two parts: the shapes the observer DREW (angles on their image, the account), and the
+       bodies the observer said those shapes WERE (the 3D interpretation, see BodyEditor). The shapes
        come first and open on arrival: they are what the rest of this editor draws and records. -->
   <div class="group-tabs" id="shape-tabs">
     <button class="subgroup-tab" type="button" aria-controls="shape-shapes" aria-expanded="true"><span id="label-shapes-subgroup">Shapes</span></button>
@@ -502,7 +502,7 @@ export const html = `
     <output id="real-size" class="apparent-size" for="realWidth"></output>
     <output id="depth-basis" class="apparent-size" for="objectDistance"></output>
     <!-- The depth of field, read backwards. The scene blurs the WORLD from its distance and leaves
-         the witness's object alone, because that distance is the unknown; a blur the witness
+         the observer's object alone, because that distance is the unknown; a blur the observer
          STATED runs the geometry the other way and bounds it. See DepthOfField's own doc comment,
          which says so before anything existed to say it with. -->
     <output id="blur-bound" class="apparent-size" for="blur"></output>
@@ -568,7 +568,7 @@ export const html = `
   <button id="context-delete" type="button" role="menuitem" class="context-delete">Delete</button>
 </div>
 <div id="decor-context-menu" class="context-menu" hidden role="menu">
-  <button id="context-view-testimony" type="button" role="menuitem">View testimony</button>
+  <button id="context-view-testimony" type="button" role="menuitem">View account</button>
   <div class="submenu-trigger">
     <span id="label-context-masks" class="submenu-label" role="menuitem" aria-haspopup="true">Masks &#9656;</span>
     <div id="context-masks-submenu" class="submenu" role="menu"></div>
@@ -754,7 +754,7 @@ input.invalid {
   flex-basis: 100%;
 }
 /* Same "one control, its own line" treatment as .record-row above, and for a stronger reason: this
-   row states whether everything below it in the group is the witness's word or a looked-up record,
+   row states whether everything below it in the group is the observer's word or a looked-up record,
    so it has to read as a heading for them rather than as one more field wrapped in among them. */
 .weather-source-row {
   display: flex;
@@ -1020,7 +1020,7 @@ select.weather-field:disabled {
 }
 /* A field, or a tab, that would answer a question nothing in the recording does.
    Deliberately not input.invalid's red: a gap is not a mistake. Nobody typed anything wrong here —
-   the witness said nothing, and the mark is an invitation rather than a complaint. A dashed
+   the observer said nothing, and the mark is an invitation rather than a complaint. A dashed
    underline in the host's own text colour says "something is missing here" without claiming
    anything is broken. */
 /* Something is missing here. Two marks, one vocabulary: the SOLID one is a value the reconstruction
@@ -1113,7 +1113,7 @@ select.weather-field:disabled {
 .param-summary:empty {
   display: none;
 }
-/* A chip holding chips: everything said about ONE sub-element — the witness, a decor object —
+/* A chip holding chips: everything said about ONE sub-element — the observer, a decor object —
    boxed under its name, so a Heading inside a box saying Environment needs no prefix to say which
    heading it is. Drawn as a frame rather than as a filled pill: the members already carry an
    outline each, and a second solid shape around them would read as a button they sit on. */
@@ -1185,7 +1185,7 @@ select.weather-field:disabled {
 /* A value nobody typed: read from a record (ERA5's weather, Nominatim's coordinates, the terrain
    provider's ground height) or computed from one. The form shows this by disabling the field,
    which is invisible the moment the field is — so the distinction that matters most to this
-   project, what the witness said versus what the archives say, gets its own mark here. */
+   project, what the observer said versus what the archives say, gets its own mark here. */
 .param-chip.from-source .param-chip-value {
   /* Blended with the host's own text colour so the blue lightens on a dark page and darkens on a
      light one; the italic is what carries the distinction where the hue cannot. */

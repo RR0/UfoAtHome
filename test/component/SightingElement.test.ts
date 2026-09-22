@@ -297,14 +297,14 @@ describe("SightingElement", () => {
     await new Promise(resolve => setTimeout(resolve, 0))
 
     const testimony = element.shadowRoot!.getElementById("testimony") as HTMLElement
-    expect(testimony.textContent).toContain("Testimony by")
+    expect(testimony.textContent).toContain("Account by")
     expect(testimony.textContent).toContain("Clarence Chiles")
   })
 
   it("falls back to witness.id, and then to a place in the list — never to the URL", async () => {
     // The URL used to be the last resort, and it was a bad one: several recordings this component
     // is pointed at have no witness at all (a sky set up to show a halo is not testimony), and
-    // "Testimony by /demo-data/sky-test-halos.json" read as a fault rather than as a name.
+    // "Account by /demo-data/sky-test-halos.json" read as a fault rather than as a name.
     const anonymousById = { version: 1 as const, witness: { id: "w2" }, timeline: { keyframes: [] } }
     const anonymousNoId = { version: 1 as const, timeline: { keyframes: [] } }
     stubFetch({ "a.json": johnSighting, "b.json": anonymousById, "c.json": anonymousNoId })
@@ -314,11 +314,11 @@ describe("SightingElement", () => {
     await new Promise(resolve => setTimeout(resolve, 0))
 
     const select = element.shadowRoot!.getElementById("witness") as HTMLSelectElement
-    expect([...select.options].map(o => o.textContent)).toEqual(["Clarence Chiles", "w2", "Witness 3"])
+    expect([...select.options].map(o => o.textContent)).toEqual(["Clarence Chiles", "w2", "Observer 3"])
   })
 
   it("says nothing at all where a single recording names no witness", async () => {
-    // A sky with no witness is not a testimony, so the whole "Testimony by …" line goes — the ?
+    // A sky with no observer is not an account, so the whole "Account by …" line goes — the ?
     // button that carries the observation's own metadata stays either way.
     const noWitness = { version: 1 as const, id: "sky-test-halos", timeline: { keyframes: [] } }
     stubFetch({ "sky.json": noWitness, "john.json": johnSighting })
@@ -416,7 +416,7 @@ describe("SightingElement", () => {
     expect((shadow.getElementById("interpretation-choice") as HTMLElement).hidden).toBe(false)
     // One testimony, not a raw one and the witness's own beside it: what they said it was is how
     // their account is drawn, and what they saw is what it is compared with.
-    expect([...select.options].map(option => option.textContent)).toEqual(["Testimony", "Balloon, by Josef Allen Hynek"])
+    expect([...select.options].map(option => option.textContent)).toEqual(["Account", "Balloon, by Josef Allen Hynek"])
     expect(select.value).toBe("testimony")
     expect(element.scene.interpretation?.title).toBe("Own")
 
@@ -470,7 +470,7 @@ describe("SightingElement", () => {
     french.appendChild(element)
     const compare = shadow.getElementById("compare-testimony") as HTMLButtonElement
     // The French messages arrive by a dynamic import, which takes what it takes under load.
-    await waitFor(() => compare.title === "Comparer au témoignage")
+    await waitFor(() => compare.title === "Comparer au compte rendu")
 
     // Put somewhere else, it reads its recording again: the choice and the scene say the same thing.
     expect(select.value).toBe("testimony")
@@ -687,11 +687,11 @@ describe("SightingElement i18n", () => {
     vi.unstubAllGlobals()
   })
 
-  it("loads the French 'Témoignage de' prefix when navigator.languages prefers fr", async () => {
+  it("loads the French 'Compte rendu de' prefix when navigator.languages prefers fr", async () => {
     const spy = vi.spyOn(navigator, "languages", "get").mockReturnValue(["fr-FR", "fr"])
     const element = mount()
 
-    await waitFor(() => element.shadowRoot!.getElementById("testimony-prefix")!.textContent === "Témoignage de")
+    await waitFor(() => element.shadowRoot!.getElementById("testimony-prefix")!.textContent === "Compte rendu de")
 
     spy.mockRestore()
   })
@@ -739,16 +739,16 @@ describe("SightingElement i18n", () => {
     // Long enough for a French decision taken at construction to have landed, had it survived.
     await new Promise(resolve => setTimeout(resolve, 20))
     expect(description(element)).toContain("A craft standing on its legs")
-    expect(element.shadowRoot!.getElementById("testimony-prefix")!.textContent).toBe("Testimony by")
+    expect(element.shadowRoot!.getElementById("testimony-prefix")!.textContent).toBe("Account by")
     spy.mockRestore()
   })
 
-  it("falls back to the English 'Testimony by' prefix when navigator.languages has no supported match", async () => {
+  it("falls back to the English 'Account by' prefix when navigator.languages has no supported match", async () => {
     const spy = vi.spyOn(navigator, "languages", "get").mockReturnValue(["de-DE", "de"])
     const element = mount()
     await new Promise(resolve => setTimeout(resolve, 20))
 
-    expect(element.shadowRoot!.getElementById("testimony-prefix")!.textContent).toBe("Testimony by")
+    expect(element.shadowRoot!.getElementById("testimony-prefix")!.textContent).toBe("Account by")
     spy.mockRestore()
   })
 })

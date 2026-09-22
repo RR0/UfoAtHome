@@ -52,7 +52,7 @@ export class RoadmapPage implements SitePage {
 
     <div class="timeline-step is-next">
       <h3>Atmospheric re-entries <span class="status status-next">next</span></h3>
-      <p>A staple misidentification, and one of the few that leaves a testimony everybody
+      <p>A staple misidentification, and one of the few that leaves an account everybody
         recognises: a slow train of fragments, then “it went out all at once”. No usable record
         exists per event, so this is an object placed by hand — but with the real extinction as it
         enters the Earth's shadow, which is the part that makes the account fit.</p>
@@ -79,22 +79,22 @@ export class RoadmapPage implements SitePage {
     <div class="timeline-step">
       <h3>Textures on shapes <span class="status status-later">planned</span></h3>
       <p>Blended with the colour rather than replacing it, keyframed and serialized like every other
-        appearance field. Witnesses describe surfaces — ribbed, matte, mirror-like — and today the
+        appearance field. Observers describe surfaces — ribbed, matte, mirror-like — and today the
         <a href="/docs/format/">format</a> cannot hold that.</p>
     </div>
 
     <div class="timeline-step">
       <h3>Observed entities <span class="status status-later">design open</span></h3>
       <p>Three of the four shipped case files involve one. The open question is whether an entity is
-        a 2D shape (testimony, like the object) or a 3D decor object. The model says “what reached
-        the witness's eye”, which argues for the shape.</p>
+        a 2D shape (account, like the object) or a 3D decor object. The model says “what reached
+        the observer's eye”, which argues for the shape.</p>
     </div>
 
     <h2>On the environment's side</h2>
 
     <div class="timeline-step">
       <h3>Observing from an aircraft <span class="status status-later">planned</span></h3>
-      <p>As already supported from a building or a car. Half of aviation testimony is given from a
+      <p>As already supported from a building or a car. Half of aviation account is given from a
         cockpit, and a window frame that hides fifteen degrees of sky is part of the account.</p>
     </div>
 
@@ -108,7 +108,7 @@ export class RoadmapPage implements SitePage {
     <div class="timeline-step">
       <h3>A video as the scene <span class="status status-later">planned</span></h3>
       <p>A photograph of the place is <a href="/context/#pictures">already there</a>. A video is the
-        same registration with a picture that moves: a texture locked to the timeline, the witness's
+        same registration with a picture that moves: a texture locked to the timeline, the observer's
         own footage with the reconstruction over it, frame by frame. And a horizon traced on a picture
         that fits would hide what passed below it — metres coming back from a photograph the way they
         come back from a decor crossing.</p>
@@ -164,7 +164,7 @@ export class RoadmapPage implements SitePage {
 
     <div class="timeline-step is-next">
       <h3>Rentrées atmosphériques <span class="status status-next">prochain</span></h3>
-      <p>Une méprise classique, et l'une des rares qui laisse un témoignage que tout le monde
+      <p>Une méprise classique, et l'une des rares qui laisse un compte rendu que tout le monde
         reconnaît : un train lent de fragments, puis « ça s'est éteint d'un coup ». Aucun relevé
         exploitable n'existe par événement : ce sera donc un objet posé à la main — mais avec
         l'extinction réelle à l'entrée dans l'ombre de la Terre, qui est précisément ce qui fait
@@ -192,22 +192,22 @@ export class RoadmapPage implements SitePage {
     <div class="timeline-step">
       <h3>Textures sur les formes <span class="status status-later">planifié</span></h3>
       <p>Mêlées à la couleur plutôt que la remplaçant, keyframées et sérialisées comme tout autre
-        champ d'apparence. Les témoins décrivent des surfaces — nervurée, mate, comme un miroir — et
+        champ d'apparence. Les observateurs décrivent des surfaces — nervurée, mate, comme un miroir — et
         le <a href="/docs/format/">format</a> ne sait pas encore le retenir.</p>
     </div>
 
     <div class="timeline-step">
       <h3>Entités observées <span class="status status-later">conception ouverte</span></h3>
       <p>Trois des quatre dossiers livrés en comportent une. La question ouverte est de savoir si une
-        entité est une forme 2D (un témoignage, comme l'objet) ou un objet de décor 3D. Le modèle dit
-        « ce qui a atteint l'œil du témoin », ce qui plaide pour la forme.</p>
+        entité est une forme 2D (un compte rendu, comme l'objet) ou un objet de décor 3D. Le modèle dit
+        « ce qui a atteint l'œil de l'observateur », ce qui plaide pour la forme.</p>
     </div>
 
     <h2>Du côté de l'environnement</h2>
 
     <div class="timeline-step">
       <h3>Observer depuis un avion <span class="status status-later">planifié</span></h3>
-      <p>Comme c'est déjà possible depuis un bâtiment ou une voiture. La moitié des témoignages
+      <p>Comme c'est déjà possible depuis un bâtiment ou une voiture. La moitié des comptes rendus
         aéronautiques sont donnés depuis un cockpit, et un montant de hublot qui masque quinze degrés
         de ciel fait partie du récit.</p>
     </div>
@@ -224,7 +224,7 @@ export class RoadmapPage implements SitePage {
       <h3>Une vidéo comme scène <span class="status status-later">planifié</span></h3>
       <p>La photo des lieux est <a href="/context/#pictures">déjà là</a>. Une vidéo, c'est le même
         recalage avec une image qui bouge : une texture verrouillée sur la timeline, les propres
-        images du témoin avec la reconstitution par-dessus, image par image. Et un horizon tracé sur
+        images de l'observateur avec la reconstitution par-dessus, image par image. Et un horizon tracé sur
         une photo qui tient cacherait ce qui est passé dessous — des mètres qui reviendraient d'une
         photo comme ils reviennent d'un croisement de décor.</p>
     </div>

@@ -154,7 +154,7 @@ export class DocsSourcesPage extends DocsSection {
         {
           name: "Hillaire 2020; Bruneton & Neyret 2008", url: "https://sebh.github.io/publications/egsr2020.pdf",
           provides: { en: "The method: single scattering along each line of sight, and every higher order folded into a table of the light arriving at each height for each height of the Sun.", fr: "La méthode : diffusion simple le long de chaque ligne de visée, et tous les ordres supérieurs réunis dans une table de la lumière qui arrive à chaque altitude pour chaque hauteur du Soleil." },
-          when: { en: "Tables built on the graphics card once per page and per haze level (about a second of GPU, shared by every scene of the page); the sky view redrawn when the Sun, the Moon or the witness move.", fr: "Tables construites sur la carte graphique une fois par page et par niveau de brume (environ une seconde de GPU, partagée par toutes les scènes de la page) ; la vue du ciel redessinée quand le Soleil, la Lune ou le témoin bougent." },
+          when: { en: "Tables built on the graphics card once per page and per haze level (about a second of GPU, shared by every scene of the page); the sky view redrawn when the Sun, the Moon or the observer move.", fr: "Tables construites sur la carte graphique une fois par page et par niveau de brume (environ une seconde de GPU, partagée par toutes les scènes de la page) ; la vue du ciel redessinée quand le Soleil, la Lune ou l'observateur bougent." },
           hosting: { en: "Implemented in the code, twice: a reference in TypeScript and its GPU twin.", fr: "Implémenté dans le code, deux fois : une référence en TypeScript et son jumeau GPU." },
           choices: { en: "Chosen for being fast enough for a web page. Checked against a Monte Carlo trace of the same atmosphere: within 0.25 magnitude and 0.012 in colour from a hazy noon to a Sun at -16°, except the Earth's shadow in nautical twilight, 0.7 magnitude too dark. The table resolution was measured, not picked: coarser tables put a -10° zenith more than half a magnitude off.", fr: "Choisie parce qu'assez rapide pour une page web. Confrontée à un calcul de Monte Carlo de la même atmosphère : à 0,25 magnitude et 0,012 de couleur près d'un midi brumeux à un Soleil à -16°, sauf l'ombre de la Terre au crépuscule nautique, trop sombre de 0,7 magnitude. La résolution des tables a été mesurée, pas choisie : des tables plus grossières faussaient un zénith à -10° de plus d'une demi-magnitude." }
         },
@@ -249,7 +249,7 @@ export class DocsSourcesPage extends DocsSection {
           provides: { en: "Hourly cloud cover by level, precipitation, snow, weather code, wind, temperature and dew point, at the place and hour of the observation.", fr: "Couverture nuageuse horaire par étage, précipitations, neige, code météo, vent, température et point de rosée, au lieu et à l'heure de l'observation." },
           when: { en: "Fetched by the editor once a date and a place are known, from 1940 only.", fr: "Chargé par l'éditeur dès qu'une date et un lieu sont connus, à partir de 1940 seulement." },
           hosting: { en: "Open-Meteo archive API, keyless. © Copernicus/ECMWF.", fr: "API d'archive Open-Meteo, sans clé. © Copernicus/ECMWF." },
-          choices: { en: "A reanalysis on a ~28 km grid, not a station: a local shower can be missing. Cloud bases are derived (temperature and dew point for the low deck), not measured. Every field can be unlocked and replaced by the testimony. No vertical profile is available in archive mode, which is what radar propagation anomalies would need.", fr: "Une réanalyse sur une grille de ~28 km, pas une station : une averse locale peut manquer. Les bases des nuages sont déduites (température et point de rosée pour l'étage bas), pas mesurées. Chaque champ peut être déverrouillé et remplacé par le témoignage. Aucun profil vertical n'est disponible en archive, ce qu'il faudrait pour les anomalies de propagation radar." }
+          choices: { en: "A reanalysis on a ~28 km grid, not a station: a local shower can be missing. Cloud bases are derived (temperature and dew point for the low deck), not measured. Every field can be unlocked and replaced by the account. No vertical profile is available in archive mode, which is what radar propagation anomalies would need.", fr: "Une réanalyse sur une grille de ~28 km, pas une station : une averse locale peut manquer. Les bases des nuages sont déduites (température et point de rosée pour l'étage bas), pas mesurées. Chaque champ peut être déverrouillé et remplacé par le compte rendu. Aucun profil vertical n'est disponible en archive, ce qu'il faudrait pour les anomalies de propagation radar." }
         }
       ]
     },
@@ -259,14 +259,14 @@ export class DocsSourcesPage extends DocsSection {
       rows: [
         {
           name: "AWS Terrain Tiles (SRTM, ETOPO1)", url: "https://registry.opendata.aws/terrain-tiles/",
-          provides: { en: "Relief around the witness.", fr: "Le relief autour du témoin." },
+          provides: { en: "Relief around the observer.", fr: "Le relief autour de l'observateur." },
           when: { en: "Fetched when a scene has a real place.", fr: "Chargé quand une scène a un lieu réel." },
           hosting: { en: "Amazon S3, keyless. © AWS Open Data.", fr: "Amazon S3, sans clé. © AWS Open Data." },
           choices: { en: "No key and no rate limit, which an embeddable component needs. The relief model is too coarse for trees and buildings: a picture of the place lined up in the scene is the way to state those.", fr: "Ni clé ni limite de débit, ce qu'exige un composant intégrable. Le modèle de relief est trop grossier pour les arbres et bâtiments : une photo des lieux recalée dans la scène est le moyen de les énoncer." }
         },
         {
           name: "Esri World Imagery", url: "https://www.arcgis.com/home/item.html?id=10df2279f9684e4a9f6a7f08febac2a9",
-          provides: { en: "Aerial imagery draped on the relief, and the witness map.", fr: "L'imagerie aérienne posée sur le relief, et la carte du témoin." },
+          provides: { en: "Aerial imagery draped on the relief, and the observer map.", fr: "L'imagerie aérienne posée sur le relief, et la carte de l'observateur." },
           when: { en: "Fetched with the relief, and when the map is opened.", fr: "Chargée avec le relief, et à l'ouverture de la carte." },
           hosting: { en: "Esri tiles, keyless. © Esri, Maxar, Earthstar Geographics.", fr: "Tuiles Esri, sans clé. © Esri, Maxar, Earthstar Geographics." },
           choices: { en: "Today's photograph of the ground, whatever the year of the account; the scene darkens it to the hour. EOX Sentinel-2 cloudless can be picked instead.", fr: "Une photographie actuelle du sol, quelle que soit l'année du récit ; la scène l'assombrit selon l'heure. EOX Sentinel-2 sans nuages peut être choisi à la place." }

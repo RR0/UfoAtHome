@@ -68,7 +68,7 @@ export class FaqPage implements SitePage {
       <ul>
         <li><strong>While you author</strong>, the editor looks things up for you: a place's
           coordinates when you press <strong>Locate</strong>, the weather record once a full date and
-          a place are known, the relief and aerial imagery around the witness. Each lookup is a picker
+          a place are known, the relief and aerial imagery around the observer. Each lookup is a picker
           in the interface, where its data is reported, with the attribution its licence requires.
           Drafting a recording from its description sends that text to the model you chose, with your
           own key, and only when you ask.</li>
@@ -98,12 +98,12 @@ export class FaqPage implements SitePage {
 
     <div class="faq-item">
       <h3>Why build this at all?</h3>
-      <p>Because a testimony written down loses almost everything about it. In 1968, at the AAAS
+      <p>Because an account written down loses almost everything about it. In 1968, at the AAAS
         symposium, the psychologist <a href="https://rr0.org/people/s/ShepardRogerN/">Roger Shepard</a> argued, in
-        <a href="https://rr0.org/time/1/9/6/8/07/29/Symposium/Shepard/index.html">the paper he gave there</a>, that a visual reconstruction of a testimony
-        is more faithful than a written or spoken one — witnesses are much better at recognising and
+        <a href="https://rr0.org/time/1/9/6/8/07/29/Symposium/Shepard/index.html">the paper he gave there</a>, that a visual reconstruction of an account
+        is more faithful than a written or spoken one — observers are much better at recognising and
         adjusting a picture than at generating a description. UFO@home is that idea, built as
-        software: draw it, move it, and let the witness correct it until it matches.</p>
+        software: draw it, move it, and let the observer correct it until it matches.</p>
       <p>The project began in 2003 as a Java applet. It was rewritten from scratch in TypeScript in
         2026, as web components, because the applet had become unrunnable and because the missing
         half had always been the sky: a reconstruction without the real sky of that night cannot be
@@ -113,7 +113,7 @@ export class FaqPage implements SitePage {
     <div class="faq-item">
       <h3>Why is the object a flat shape rather than a 3D model?</h3>
       <p>Because a 3D object placed in the scene is already a conclusion. It asserts a size, a
-        distance and a solidity that no witness could perceive — and, worse, it silently rules out
+        distance and a solidity that no observer could perceive — and, worse, it silently rules out
         every explanation in which there was no object there at all:
         <a href="https://rr0.org/science/crypto/ufo/enquete/meprise/optique/">a halo</a>,
         <a href="https://rr0.org/place/systeme/solaire/planete/venus/">a planet</a>,
@@ -123,12 +123,12 @@ export class FaqPage implements SitePage {
         <a href="https://rr0.org/science/crypto/ufo/enquete/meprise/optique/lens/">a reflection on a windscreen</a>. Those links go to rr0.org's own
         <a href="https://rr0.org/science/crypto/ufo/enquete/meprise/">catalogue of misperceptions</a>, which is the reason this tool is built the
         way it is.</p>
-      <p>A flat shape on the witness's own field of view asserts exactly what they claimed: this is
+      <p>A flat shape on the observer's own field of view asserts exactly what they claimed: this is
         what reached my eye, this big, moving this way. Everything else stays open — which is the
         only way a reconstruction can be used to <em>test</em> a misperception rather than to rule
         one out by construction.</p>
       <p>It also means the tool is honest about size. A recording stores an angle, never metres —
-        but it does NOT mean distance is given up on. Where the witness saw the phenomenon cross
+        but it does NOT mean distance is given up on. Where the observer saw the phenomenon cross
         something whose position is known, that crossing is stated in the recording (it passed
         <em>behind</em> that hangar, <em>in front of</em> that tree) and the scene raycasts the exact
         line of sight to measure it. Each crossing bounds its real width from one side, an
@@ -141,10 +141,10 @@ export class FaqPage implements SitePage {
 
     <div class="faq-item">
       <h3>Is a reconstruction evidence?</h3>
-      <p>No. It is a way of stating a testimony precisely enough that it can be laid beside the
+      <p>No. It is a way of stating an account precisely enough that it can be laid beside the
         record — and the record is what does the work: the Moon's phase that night, whether the sky
         was overcast, whether a comet was up, whether low orbit was even sunlit.</p>
-      <p><strong>What a reconstruction is trying to do is agree with the witness.</strong> Not to
+      <p><strong>What a reconstruction is trying to do is agree with the observer.</strong> Not to
         illustrate their account, and not to correct it: to converge on it, one correction at a
         time, until they say that is what they saw. Every step of that convergence adds something
         that can be checked, so the closer it gets, the more there is to explain the sighting
@@ -153,13 +153,13 @@ export class FaqPage implements SitePage {
         phenomenon — <a href="https://rr0.org/place/systeme/solaire/planete/venus/">a planet</a>,
         <a href="https://rr0.org/science/crypto/ufo/enquete/meprise/optique/">a halo</a>,
         <a href="https://rr0.org/science/crypto/ufo/enquete/meprise/aeronef/avion/">an aircraft</a> —
-        in the exact place the witness saw something, at the right size, at the right hour. Show it
+        in the exact place the observer saw something, at the right size, at the right hour. Show it
         to them and ask the only question that matters: <em>does that look like what you saw?</em>
-        If the answer is yes, investigator and witness have converged on the facts rather than
+        If the answer is yes, investigator and observer have converged on the facts rather than
         argued about the conclusion, and the explanation stands on something firmer than anyone's
         opinion of the other.</p>
       <p>If the answer is no, that is a result too, and a better one than a written note saying the
-        witness disagreed — because the thing they are rejecting is on screen, at the right place
+        observer disagreed — because the thing they are rejecting is on screen, at the right place
         and the right size, and the next person can look at it.</p>
     </div>
 
@@ -173,7 +173,7 @@ export class FaqPage implements SitePage {
         elements — and reconstructs the geometry that could have produced that footage. It is the
         right tool when there is footage.</p>
       <p>UFO@home starts where there is none: a person, an account, and a date. It reconstructs what
-        a <em>witness</em> described, and it is built around what a testimony can and cannot say —
+        a <em>observer</em> described, and it is built around what an account can and cannot say —
         angles rather than metres, a stated appearance rather than a placed object, and an explicit
         record of who supplied every non-testimonial fact.</p>
       <p>Their licences differ too. Sitrec was MIT-licensed; it was archived in March 2026 in
@@ -186,10 +186,10 @@ export class FaqPage implements SitePage {
       <h3>Isn't this what SIMOVNI did?</h3>
       <p>It is the same idea, fifty years earlier and in hardware. <strong>SIMOVNI</strong> was an
         optical simulator built in 1976 within France's GEPAN (the CNES's own UFO study group) by
-        Jean-Jacques Velasco: the witness looked through a viewfinder at the real landscape with a
+        Jean-Jacques Velasco: the observer looked through a viewfinder at the real landscape with a
         virtual UFO superimposed, whose shape (on slides), colour, brightness and size could be
         adjusted until it matched. It is, as far as we know, the first serious attempt at visual
-        rather than written testimony. It was also a single physical bench in Toulouse, it was used
+        rather than written account. It was also a single physical bench in Toulouse, it was used
         on only one or two occasions, and Dominique Caudron — who had built his own simulators
         earlier — thought its results unreliable.</p>
       <p><strong>SimOvni 2</strong>, presented by Laurent Chabin at CAIPAN 2 in 2022, revives the
@@ -203,7 +203,7 @@ export class FaqPage implements SitePage {
       <h3>Why not just use Stellarium?</h3>
       <p>Stellarium is a planetarium, and a very good one — we have read its source to learn how it
         does things. But it answers “what was in the sky?”, not “what did this person see, and could
-        the sky account for it?”. It has no testimony format, no witnessed phenomenon, no weather, no
+        the sky account for it?”. It has no account format, no witnessed phenomenon, no weather, no
         decor around the observer, no long-exposure instrument, and nothing to embed in a page.</p>
       <p>Where the two overlap, UFO@home sometimes takes the harder road on purpose: the Milky Way
         is a texture in Stellarium and a line-of-sight integral here, which is why its dark rift
@@ -219,7 +219,7 @@ export class FaqPage implements SitePage {
         A GitHub account is free and takes a minute.</p>
       <p>What makes a request easy to act on:</p>
       <ul class="plain">
-        <li><strong>A real case, if there is one.</strong> “Witnesses often say it was behind a
+        <li><strong>A real case, if there is one.</strong> “Observers often say it was behind a
           hill” is a feature; “here is a sighting where that matters, dated, placed and sourced” is
           a feature that gets built right.</li>
         <li><strong>What the record says.</strong> If the thing you want reconstructed is measured
@@ -325,7 +325,7 @@ export class FaqPage implements SitePage {
         <li><strong>Pendant la saisie</strong>, l'éditeur relève les choses pour vous : les
           coordonnées d'un lieu quand vous appuyez sur <strong>Localiser</strong>, le relevé météo dès
           qu'une date complète et un lieu sont connus, le relief et l'imagerie aérienne autour du
-          témoin. Chaque consultation est un sélecteur dans l'interface, là où sa donnée est
+          observateur. Chaque consultation est un sélecteur dans l'interface, là où sa donnée est
           rapportée, avec l'attribution qu'exige sa licence. Rédiger un enregistrement depuis sa
           description envoie ce texte au modèle que vous avez choisi, avec votre propre clé, et
           seulement quand vous le demandez.</li>
@@ -358,12 +358,12 @@ export class FaqPage implements SitePage {
 
     <div class="faq-item">
       <h3>Pourquoi construire ça ?</h3>
-      <p>Parce qu'un témoignage mis par écrit en perd presque tout. En 1968, au symposium de l'AAAS,
+      <p>Parce qu'un compte rendu mis par écrit en perd presque tout. En 1968, au symposium de l'AAAS,
         le psychologue <a href="https://rr0.org/people/s/ShepardRogerN/">Roger Shepard</a> a soutenu, dans
         <a href="https://rr0.org/time/1/9/6/8/07/29/Symposium/Shepard/index_fr.html">la communication qu'il y a donnée</a>, qu'une reconstitution visuelle
-        d'un témoignage est plus fidèle qu'une reconstitution écrite ou orale : un témoin est bien
+        d'un compte rendu est plus fidèle qu'une reconstitution écrite ou orale : un observateur est bien
         meilleur pour reconnaître et corriger une image que pour engendrer une description.
-        UFO@home, c'est cette idée mise en logiciel : dessinez, faites bouger, et laissez le témoin
+        UFO@home, c'est cette idée mise en logiciel : dessinez, faites bouger, et laissez l'observateur
         corriger jusqu'à ce que ça corresponde.</p>
       <p>Le projet est né en 2003 sous forme d'applet Java. Il a été réécrit intégralement en
         TypeScript en 2026, en composants web, parce que l'applet était devenue inexécutable et
@@ -374,7 +374,7 @@ export class FaqPage implements SitePage {
     <div class="faq-item">
       <h3>Pourquoi l'objet est-il une forme plate plutôt qu'un modèle 3D ?</h3>
       <p>Parce qu'un objet 3D placé dans la scène est déjà une conclusion. Il affirme une taille,
-        une distance et une solidité qu'aucun témoin ne pouvait percevoir — et, pire, il écarte en
+        une distance et une solidité qu'aucun observateur ne pouvait percevoir — et, pire, il écarte en
         silence toutes les explications où il n'y avait aucun objet :
         <a href="https://rr0.org/science/crypto/ufo/enquete/meprise/optique/">un halo</a>,
         <a href="https://rr0.org/place/systeme/solaire/planete/venus/">une planète</a>,
@@ -384,12 +384,12 @@ export class FaqPage implements SitePage {
         <a href="https://rr0.org/science/crypto/ufo/enquete/meprise/optique/lens/">un reflet sur un pare-brise</a>. Ces liens mènent au
         <a href="https://rr0.org/science/crypto/ufo/enquete/meprise/">catalogue des méprises</a> de rr0.org, qui est la raison pour laquelle cet
         outil est bâti ainsi.</p>
-      <p>Une forme plate dans le champ de vision du témoin affirme exactement ce qu'il a affirmé :
+      <p>Une forme plate dans le champ de vision de l'observateur affirme exactement ce qu'il a affirmé :
         voilà ce qui est parvenu à mon œil, de cette taille, se déplaçant ainsi. Tout le reste reste
         ouvert — c'est la seule façon qu'une reconstitution ait de <em>tester</em> une méprise au
         lieu de l'exclure par construction.</p>
       <p>Cela rend aussi l'outil honnête sur la taille. Un enregistrement stocke un angle, jamais
-        des mètres — mais on ne renonce pas pour autant à la distance. Là où le témoin a vu le phénomène
+        des mètres — mais on ne renonce pas pour autant à la distance. Là où l'observateur a vu le phénomène
         croiser quelque chose dont la position est connue, ce croisement est énoncé dans
         l'enregistrement (il est passé <em>derrière</em> ce hangar, <em>devant</em> cet arbre) et la
         scène lance un rayon sur la ligne de visée exacte pour le mesurer. Chaque croisement borne
@@ -403,11 +403,11 @@ export class FaqPage implements SitePage {
 
     <div class="faq-item">
       <h3>Une reconstitution est-elle une preuve ?</h3>
-      <p>Non. C'est une façon d'énoncer un témoignage assez précisément pour pouvoir le poser à côté
+      <p>Non. C'est une façon d'énoncer un compte rendu assez précisément pour pouvoir le poser à côté
         des relevés — et ce sont les relevés qui font le travail : la phase de la Lune cette
         nuit-là, si le ciel était couvert, si une comète était levée, si l'orbite basse était
         seulement éclairée.</p>
-      <p><strong>Ce que cherche une reconstitution, c'est à s'accorder avec le témoin.</strong> Ni
+      <p><strong>Ce que cherche une reconstitution, c'est à s'accorder avec l'observateur.</strong> Ni
         illustrer son récit, ni le corriger : converger vers lui, correction après correction,
         jusqu'à ce qu'il dise que c'est bien ce qu'il a vu. Chaque pas de cette convergence ajoute
         quelque chose de vérifiable — plus on s'approche, plus on a de quoi expliquer
@@ -416,13 +416,13 @@ export class FaqPage implements SitePage {
         phénomène connu — <a href="https://rr0.org/place/systeme/solaire/planete/venus/">une
         planète</a>, <a href="https://rr0.org/science/crypto/ufo/enquete/meprise/optique/">un
         halo</a>, <a href="https://rr0.org/science/crypto/ufo/enquete/meprise/aeronef/avion/">un
-        avion</a> — à l'endroit exact où le témoin a vu quelque chose, à la bonne taille, à la bonne
+        avion</a> — à l'endroit exact où l'observateur a vu quelque chose, à la bonne taille, à la bonne
         heure. Montrez-le-lui et posez la seule question qui compte : <em>est-ce que cela ressemble
-        à ce que vous avez vu ?</em> Si la réponse est oui, l'enquêteur et le témoin ont convergé sur
+        à ce que vous avez vu ?</em> Si la réponse est oui, l'enquêteur et l'observateur ont convergé sur
         les faits au lieu de se disputer la conclusion, et l'hypothèse d'explication repose sur
         quelque chose de plus solide que l'opinion que l'un a de l'autre.</p>
       <p>Si la réponse est non, c'est un résultat aussi, et meilleur qu'une note écrite disant que le
-        témoin n'était pas d'accord : ce qu'il rejette est à l'écran, au bon endroit et à la bonne
+        observateur n'était pas d'accord : ce qu'il rejette est à l'écran, au bon endroit et à la bonne
         taille, et le suivant pourra le regarder.</p>
     </div>
 
@@ -436,7 +436,7 @@ export class FaqPage implements SitePage {
         métadonnées d'un capteur, des éléments orbitaux — et reconstitue la géométrie qui a pu
         produire ces images. C'est le bon outil quand il y a des images.</p>
       <p>UFO@home commence là où il n'y en a pas : une personne, un récit, une date. Il reconstitue
-        ce qu'un <em>témoin</em> a décrit, et il est bâti autour de ce qu'un témoignage peut et ne
+        ce qu'un <em>observateur</em> a décrit, et il est bâti autour de ce qu'un compte rendu peut et ne
         peut pas dire — des angles plutôt que des mètres, une apparence énoncée plutôt qu'un objet
         placé, et la trace explicite de qui a fourni chaque fait non testimonial.</p>
       <p>Leurs licences diffèrent aussi. Sitrec était sous licence MIT ; il a été archivé en mars
@@ -449,10 +449,10 @@ export class FaqPage implements SitePage {
       <h3>N'est-ce pas ce que faisait SIMOVNI ?</h3>
       <p>C'est la même idée, cinquante ans plus tôt et en matériel. <strong>SIMOVNI</strong> était un
         simulateur optique réalisé en 1976 au sein du GEPAN (le groupe d'étude du CNES) par
-        Jean-Jacques Velasco : le témoin regardait le paysage réel dans un viseur, avec l'image
+        Jean-Jacques Velasco : l'observateur regardait le paysage réel dans un viseur, avec l'image
         virtuelle d'un ovni surimposée, dont on ajustait la forme (par diapositives), la couleur, la
         luminosité et la taille jusqu'à ce que cela corresponde. C'est, à notre connaissance, la
-        première tentative sérieuse de témoignage visuel plutôt qu'écrit. C'était aussi un unique
+        première tentative sérieuse de compte rendu visuel plutôt qu'écrit. C'était aussi un unique
         banc physique à Toulouse, il n'a servi qu'à une ou deux occasions, et Dominique Caudron —
         qui avait construit ses propres simulateurs auparavant — en jugeait les résultats peu
         fiables.</p>
@@ -469,7 +469,7 @@ export class FaqPage implements SitePage {
       <p>Stellarium est un planétarium, et un très bon — nous en avons lu le code source pour
         apprendre comment il s'y prend. Mais il répond à « qu'y avait-il dans le ciel ? », pas à
         « qu'a vu cette personne, et le ciel peut-il en rendre compte ? ». Il n'a pas de format de
-        témoignage, pas de phénomène témoigné, pas de météo, pas de décor autour de l'observateur, pas
+        compte rendu, pas de phénomène témoigné, pas de météo, pas de décor autour de l'observateur, pas
         d'instrument à pose longue, et rien à intégrer dans une page.</p>
       <p>Là où les deux se recoupent, UFO@home prend parfois le chemin le plus dur exprès : la Voie
         lactée est une texture chez Stellarium et une intégrale le long de la ligne de visée ici,
@@ -486,7 +486,7 @@ export class FaqPage implements SitePage {
         Un compte GitHub est gratuit et prend une minute.</p>
       <p>Ce qui rend une demande facile à traiter :</p>
       <ul class="plain">
-        <li><strong>Un cas réel, s'il y en a un.</strong> « Les témoins disent souvent que c'était
+        <li><strong>Un cas réel, s'il y en a un.</strong> « Les observateurs disent souvent que c'était
           derrière une colline » est une fonctionnalité ; « voici une observation où cela compte,
           datée, située et sourcée » est une fonctionnalité qui sera bien faite.</li>
         <li><strong>Ce que dit le relevé.</strong> Si ce que vous voulez voir reconstitué est mesuré

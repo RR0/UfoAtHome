@@ -19,7 +19,7 @@ export const css = `
 }
 /* What this scene owes for what it shows, behind a small button in its corner — the terrain's
    imagery, the map's, the models, the pictures of the place, a sound. Not printed over the picture:
-   a licence in small type across the witness's map was in the way of what the map is for. Hidden
+   a licence in small type across the observer's map was in the way of what the map is for. Hidden
    when a composing element lists them in its own info panel (see ownCredits). */
 .credits-btn {
   anchor-name: --credits-button;

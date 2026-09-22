@@ -105,13 +105,13 @@ export class DocsComponentsPage extends DocsSection {
     <h2>What each one is for</h2>
     <ul class="plain">
       <li><strong><code>&lt;rr0-scene&gt;</code> — the phenomenon in the world around it.</strong> The
-        shape a witness drew, its colour and halo and movement, standing in the real sky, horizon,
+        shape an observer drew, its colour and halo and movement, standing in the real sky, horizon,
         weather and ground of a stated date, hour and place — hidden by what stood in front of it.
         Useful on its own too, for a sky with nothing in it at all.</li>
-      <li><strong><code>&lt;rr0-sighting&gt;</code> — the testimony, to watch.</strong>
+      <li><strong><code>&lt;rr0-sighting&gt;</code> — the account, to watch.</strong>
         A scene plus who is testifying, the observation's own metadata, its credits, and the lines
         that let a reader take it elsewhere. This is what a published sighting looks like.</li>
-      <li><strong><code>&lt;rr0-sighting-editor&gt;</code> — the testimony, to reconstruct.</strong>
+      <li><strong><code>&lt;rr0-sighting-editor&gt;</code> — the account, to reconstruct.</strong>
         Everything above plus the authoring toolbar: describe an observation, or correct one.</li>
     </ul>
 
@@ -163,7 +163,7 @@ sighting.scene.ufoElement.play()  // so playback is two properties away</code></
       moment.</p>
     <div class="uses">
       <a class="use" href="/docs/components/scene/"><h3><code>&lt;rr0-scene&gt;</code></h3><p>The shape and its playback, in the real sky and horizon of the recording's own date and place.</p><p class="use-more">Read →</p></a>
-      <a class="use" href="/docs/components/sighting/"><h3><code>&lt;rr0-sighting&gt;</code></h3><p>The standard view of a real account: one witness or several, with their toolbar.</p><p class="use-more">Read →</p></a>
+      <a class="use" href="/docs/components/sighting/"><h3><code>&lt;rr0-sighting&gt;</code></h3><p>The standard view of a real account: one observer or several, with their toolbar.</p><p class="use-more">Read →</p></a>
       <a class="use" href="/docs/components/edit/"><h3><code>&lt;rr0-sighting-editor&gt;</code></h3><p>The whole authoring toolbar, for describing an observation or correcting one.</p><p class="use-more">Read →</p></a>
     </div>
 
@@ -219,13 +219,13 @@ import "@rr0/ufoathome/editor"   // registers &lt;rr0-sighting-editor&gt;</code>
     <h2>À quoi sert chacun</h2>
     <ul class="plain">
       <li><strong><code>&lt;rr0-scene&gt;</code> — le phénomène dans le monde autour.</strong> La
-        forme dessinée par un témoin, sa couleur, son halo, son mouvement, debout dans le ciel,
+        forme dessinée par un observateur, sa couleur, son halo, son mouvement, debout dans le ciel,
         l'horizon, la météo et le sol réels d'une date, d'une heure et d'un lieu énoncés — cachée par
         ce qui se tenait devant. Utile seul aussi, pour un ciel où il n'y a rien du tout.</li>
-      <li><strong><code>&lt;rr0-sighting&gt;</code> — le témoignage, à regarder.</strong> Une scène, plus
+      <li><strong><code>&lt;rr0-sighting&gt;</code> — le compte rendu, à regarder.</strong> Une scène, plus
         qui témoigne, les métadonnées de l'observation, ses crédits, et les lignes qui permettent à
         un lecteur de l'emporter ailleurs. C'est à cela que ressemble une observation publiée.</li>
-      <li><strong><code>&lt;rr0-sighting-editor&gt;</code> — le témoignage, à reconstruire.</strong> Tout ce qui
+      <li><strong><code>&lt;rr0-sighting-editor&gt;</code> — le compte rendu, à reconstruire.</strong> Tout ce qui
         précède, plus la barre d'outils de saisie : décrire une observation, ou en corriger une.</li>
     </ul>
 
@@ -279,7 +279,7 @@ sighting.scene.ufoElement.play()  // la lecture est donc à deux propriétés</c
       au même moment.</p>
     <div class="uses">
       <a class="use" href="/docs/components/scene/"><h3><code>&lt;rr0-scene&gt;</code></h3><p>La forme et sa lecture, dans le vrai ciel et le vrai horizon de la date et du lieu de l'observation.</p><p class="use-more">Lire →</p></a>
-      <a class="use" href="/docs/components/sighting/"><h3><code>&lt;rr0-sighting&gt;</code></h3><p>La vue standard d'un témoignage réel : un ou plusieurs témoins, avec leur barre d'outils.</p><p class="use-more">Lire →</p></a>
+      <a class="use" href="/docs/components/sighting/"><h3><code>&lt;rr0-sighting&gt;</code></h3><p>La vue standard d'un compte rendu réel : un ou plusieurs observateurs, avec leur barre d'outils.</p><p class="use-more">Lire →</p></a>
       <a class="use" href="/docs/components/edit/"><h3><code>&lt;rr0-sighting-editor&gt;</code></h3><p>Toute la barre d'outils d'écriture, pour décrire une observation ou en corriger une.</p><p class="use-more">Lire →</p></a>
     </div>
 
