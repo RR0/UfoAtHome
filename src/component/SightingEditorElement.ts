@@ -4341,16 +4341,18 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   /**
-   * Draws the witness's bodies while their part of the Phenomenon group is open, with the shapes
-   * beside them as outlines — the player's comparison (see SceneElement.compareTestimony), so what
-   * the witness drew stays in view and the body is read against it. Anywhere else the shapes are
-   * drawn in full and alone: their colour, halo and brilliance are what the Shapes part edits, and
-   * a body over them would hide the very thing being edited (see SceneElement.testimonyInTheRound).
+   * Draws the witness's bodies, with the shapes beside them as outlines — the player's comparison
+   * (see SceneElement.compareTestimony), so what the witness drew stays in view and the body is
+   * read against it — everywhere but in the Shapes part of the Phenomenon group. There the shapes
+   * are drawn in full and alone: their colour, halo and brilliance are what that part edits, and a
+   * body over them would hide the very thing being edited (see SceneElement.testimonyInTheRound).
+   * Drawn only in the Bodies part at first, an airliner vanished as soon as another group was
+   * opened, which read as an edit not kept.
    * Re-read after every edit of a body, and after a recording is loaded, since the scene holds the
    * interpretation it was last handed.
    */
   private syncBodiesShown(): void {
-    const shown = this.isGroupIdOpen("group-shape") && this.shadow.getElementById("shape-bodies")?.hidden === false
+    const shown = !(this.isGroupIdOpen("group-shape") && this.shadow.getElementById("shape-shapes")?.hidden === false)
     const interpretation = shown ? this.ufoElement.sighting.interpretation : undefined
     this.sceneElement.compareTestimony = interpretation !== undefined
     if (this.sceneElement.interpretation !== interpretation) this.sceneElement.interpretation = interpretation

@@ -374,9 +374,9 @@ if (docs) {
         one writes a keyframe there, which is how a body is given its movement: move the playhead,
         edit again. Such a keyframe states nothing else, so the body's light, flame and moving parts
         go on as before. A body's
-        movement is stated in the file, and shown here. While this part is open the picture draws
-        the bodies, with the shapes beside them as outlines to read them against; in the Shapes
-        part, the shapes are drawn alone and in full.</p>
+        movement is stated in the file, and shown here. The picture draws the bodies, with the shapes
+        beside them as outlines to read them against, whichever group is open, except in the Shapes
+        part, where the shapes are drawn alone and in full.</p>
     </div>
     </div>
   </div>
@@ -740,9 +740,9 @@ if (docs) {
         modifier une écrit une image clé là, et c'est ainsi qu'un corps reçoit son mouvement :
         déplacer la tête de lecture, modifier de nouveau. Une telle image clé ne dit rien d'autre :
         la lumière, la flamme et les parties mobiles du corps continuent comme avant. Le mouvement d'un corps est donné par le fichier, et
-        affiché ici. Tant que cette partie est ouverte, l'image dessine les corps, avec les formes à
-        côté en contours pour les confronter ; dans la partie Formes, les formes sont dessinées
-        seules et en entier.</p>
+        affiché ici. L'image dessine les corps, avec les formes à côté en contours pour les
+        confronter, quel que soit le groupe ouvert, sauf dans la partie Formes, où les formes sont
+        dessinées seules et en entier.</p>
     </div>
     </div>
   </div>

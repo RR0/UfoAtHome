@@ -6372,7 +6372,7 @@ describe("SightingEditorElement bodies", () => {
     document.body.innerHTML = ""
   })
 
-  it("draws the witness's bodies, beside the shapes' outlines, while the Bodies part is open, and only then", async () => {
+  it("draws the witness's bodies, beside the shapes' outlines, everywhere but in the Shapes part", async () => {
     const element = mount()
     const interpretation = { title: "A craft", bodies: [{ id: "craft", explains: ["ufo-1"], model: { id: "ellipsoid" }, track: [{ t: 0, eastM: 0, northM: 50, onGround: true }] }] }
     element.sightingData = { version: 1, timeline: { keyframes: [] }, interpretation }
@@ -6396,6 +6396,10 @@ describe("SightingEditorElement bodies", () => {
     tab("shape-shapes", ".subgroup-tab").click()
     expect(scene.interpretation).toBeUndefined()
     expect(scene.compareTestimony).toBe(false)
+    // Another group is not where shapes are edited: the bodies stay drawn there.
+    tab("group-temporal", ".group-tab").click()
+    expect(scene.interpretation).toMatchObject({ bodies: [{ id: "craft" }] })
+    expect(scene.compareTestimony).toBe(true)
   })
 })
 
