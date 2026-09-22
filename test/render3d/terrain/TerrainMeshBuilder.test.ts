@@ -57,7 +57,7 @@ describe("buildTerrainMesh", () => {
     // the centre vertex at u=v=0.5, the west edge a third of the way in, the east edge two thirds.
     // Before ImageryTexture carried its own bounds this stretched the full image across the patch
     // (0 and 1 at the edges), which put every pixel of real ground about three times too far out
-    // from the witness — and looked perfectly convincing, since one piece of desert resembles the
+    // from the observer — and looked perfectly convincing, since one piece of desert resembles the
     // next.
     const { mesh } = await buildTerrainMesh(OBSERVER_LAT, OBSERVER_LNG, providers)
     const uv = mesh.geometry.getAttribute("uv")
@@ -79,8 +79,8 @@ describe("buildTerrainMesh", () => {
   it("is depth-tested, so the scenery standing on it can occlude it", async () => {
     // The regression this guards: the patch used to carry depthTest:false and a renderOrder above
     // every decor group's, so it repainted whatever stood on it. A patrol car eight meters from the
-    // witness came out as a featureless slab with only its roof clearing the terrain's silhouette,
-    // and a shack ninety meters out disappeared altogether — which is exactly the ground a witness
+    // observer came out as a featureless slab with only its roof clearing the terrain's silhouette,
+    // and a shack ninety meters out disappeared altogether — which is exactly the ground a observer
     // reports things happening ON. See SceneRenderer.applyGroundDepthWrite for the other half: the
     // flat haze disc underneath stops writing depth while this patch exists, which is what
     // depthTest:false was really working around.

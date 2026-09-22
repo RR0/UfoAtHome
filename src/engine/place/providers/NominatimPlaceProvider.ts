@@ -22,7 +22,7 @@ export interface NominatimPlaceProviderOptions {
 /**
  * Place-name search against OpenStreetMap's Nominatim — keyless, CORS-open (verified against
  * rr0.org's own origin), and, unlike the gazetteer-style geocoders, it knows more than populated
- * places: the hamlets, farms, airfields and stretches of road that testimony actually names.
+ * places: the hamlets, farms, airfields and stretches of road that account actually names.
  *
  * Nominatim's usage policy allows exactly this kind of use — a search a person asked for, one at a
  * time — and rules out per-keystroke autocomplete and bulk work. That is why the editor searches
@@ -97,7 +97,7 @@ export class NominatimPlaceProvider implements PlaceProvider {
   }
 
   /** undefined for a result missing a name or usable coordinates — dropped rather than offered as
-   * a candidate that would put the witness somewhere they never were. */
+   * a candidate that would put the observer somewhere they never were. */
   private toMatch(result: NominatimResult): PlaceMatch | undefined {
     const name = result.display_name ?? result.name
     const lat = this.coordinate(result.lat)
@@ -106,7 +106,7 @@ export class NominatimPlaceProvider implements PlaceProvider {
   }
 
   /** Guards the empty string specially: `Number("")` is 0, not NaN, so a result with a blank
-   * latitude would otherwise pass every plausibility check and drop the witness into the Gulf of
+   * latitude would otherwise pass every plausibility check and drop the observer into the Gulf of
    * Guinea. */
   private coordinate(raw: string | undefined): number | undefined {
     if (raw === undefined || raw.trim() === "") return undefined

@@ -6,7 +6,7 @@ import { SurfaceBrightness } from "../../../src/engine/astronomy/SurfaceBrightne
  * The point of these: MilkyWay is told nothing about the Milky Way. It knows an exponential disc of
  * stars, a bulge, a thinner disc of dust, and how to walk a line of sight. Every named feature of
  * the band has to fall out of that walk on its own — and the ones checked here are the ones a
- * witness would describe: a band, brighter toward Sagittarius, split down the middle by something
+ * observer would describe: a band, brighter toward Sagittarius, split down the middle by something
  * dark.
  */
 const galaxy = new MilkyWay()

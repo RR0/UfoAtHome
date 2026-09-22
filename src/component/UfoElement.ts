@@ -21,11 +21,11 @@ import { SaidTexts } from "../engine/model/SaidText.js"
 import { loadUfoMessages, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
 import type { UfoLanguage } from "./messages/index.js"
 import { ufoMessages_en } from "./messages/UfoMessages_en.js"
-import { WitnessPath } from "../engine/place/WitnessPath.js"
+import { ObserverPath } from "../engine/place/ObserverPath.js"
 import { resolveDecorPlacementAt } from "../engine/model/Decor.js"
 import { localMetersToGeo } from "../render3d/terrain/GeoProjection.js"
-import { WitnessMapRenderer } from "../render/WitnessMapRenderer.js"
-import type { WitnessMapMarker, WitnessMapDecor, WitnessMapTarget } from "../render/WitnessMapRenderer.js"
+import { ObserverMapRenderer } from "../render/ObserverMapRenderer.js"
+import type { ObserverMapMarker, ObserverMapDecor, ObserverMapTarget } from "../render/ObserverMapRenderer.js"
 import { defaultImageryProvider } from "../render3d/terrain/defaultTerrainProviders.js"
 import type { ImageryTexture } from "../render3d/terrain/ImageryProvider.js"
 import type { GeoBounds } from "../render3d/terrain/GeoBounds.js"
@@ -57,12 +57,12 @@ import type { UfoMessages } from "./messages/UfoMessages.js"
 const EMPTY_SELECTION: ReadonlySet<string> = new Set()
 
 /**
- * The attribute a page sets to have the map of where the witness stood ALREADY OPEN.
+ * The attribute a page sets to have the map of where the observer stood ALREADY OPEN.
  *
  * It decides the starting state, not whether the map exists: the button is there for every
  * recording that states a place, and a reader can always open one the page did not open for them.
  * That distinction is the whole design. A page knows which of its reconstructions are ABOUT where
- * they happened — a witness who drove eleven hundred metres of road, an airliner crossing a state —
+ * they happened — a observer who drove eleven hundred metres of road, an airliner crossing a state —
  * and can have the map up from the first frame; every other embed stays a picture to be watched,
  * with the map one click away.
  *
@@ -71,7 +71,7 @@ const EMPTY_SELECTION: ReadonlySet<string> = new Set()
  *
  * Named the way `show-compass` and `show-labels` already are: a page deciding what its readers see.
  */
-export const WITNESS_MAP_ATTRIBUTE = "show-witness-map"
+export const OBSERVER_MAP_ATTRIBUTE = "show-observer-map"
 
 /**
  * The attribute a page sets to take the account's named moments (see Milestone) OFF the player.
@@ -88,7 +88,7 @@ export const MILESTONES_ATTRIBUTE = "hide-milestones"
 
 export class UfoElement extends HTMLElement {
   static get observedAttributes(): string[] {
-    return ["src", WITNESS_MAP_ATTRIBUTE, MILESTONES_ATTRIBUTE]
+    return ["src", OBSERVER_MAP_ATTRIBUTE, MILESTONES_ATTRIBUTE]
   }
 
   private readonly shadow: ShadowRoot
@@ -98,19 +98,19 @@ export class UfoElement extends HTMLElement {
   private readonly tooltip: HTMLElement
   private readonly toolbar: HTMLElement
   private readonly playPauseButton: HTMLButtonElement
-  /** The smallest piece of ground the map will ever show, metres across. A witness who never moved
+  /** The smallest piece of ground the map will ever show, metres across. A observer who never moved
    * has a path of zero span, and this is what stands in for it — about two city blocks, enough to
    * recognise a road, a building and a field, which is what "where was this" means. */
-  private static readonly WITNESS_MAP_MIN_SPAN_M = 400
+  private static readonly OBSERVER_MAP_MIN_SPAN_M = 400
   /** How much room to leave around the path itself, as a fraction of its own span — a track drawn
    * edge to edge shows the journey and none of what it went past. */
-  private static readonly WITNESS_MAP_MARGIN = 0.6
+  private static readonly OBSERVER_MAP_MARGIN = 0.6
   /** The photograph is fetched once at this size and then drawn at whatever size the panel is: a
    * request per resize would be a request per fullscreen toggle. */
-  private static readonly WITNESS_MAP_IMAGERY_PX = 768
+  private static readonly OBSERVER_MAP_IMAGERY_PX = 768
 
   private readonly fullscreenButton: HTMLButtonElement
-  private readonly witnessMapButton: HTMLButtonElement
+  private readonly observerMapButton: HTMLButtonElement
   /** The pictures of the place: on or off, and how much of them shows — see SceneReference. The
    * reader's own choice, kept across recordings; the slider starts where the recording's first
    * picture asks until the reader moves it. */
@@ -119,33 +119,33 @@ export class UfoElement extends HTMLElement {
   private referencesShownState = true
   private referenceOpacityTouched = false
   private readonly milestonesButton: HTMLButtonElement
-  private readonly witnessMapPanel: HTMLElement
-  private readonly witnessMapCanvas: HTMLCanvasElement
-  private readonly witnessMapRenderer: WitnessMapRenderer
+  private readonly observerMapPanel: HTMLElement
+  private readonly observerMapCanvas: HTMLCanvasElement
+  private readonly observerMapRenderer: ObserverMapRenderer
   private readonly seekInput: HTMLInputElement
   private readonly milestoneMarks: HTMLElement
   private readonly milestoneCaption: HTMLElement
   private readonly timeStartLabel: HTMLElement
   private readonly timeEndLabel: HTMLElement
 
-  /** The witness's own path, rebuilt whenever the recording changes — undefined for a recording
+  /** The observer's own path, rebuilt whenever the recording changes — undefined for a recording
    * that states no coordinates, which is what hides the map button entirely. */
-  private witnessPath?: WitnessPath
-  /** The ground the map covers, fixed for the whole recording rather than recentred on the witness
-   * every frame: a map that slides under a moving witness makes it impossible to see that they
+  private observerPath?: ObserverPath
+  /** The ground the map covers, fixed for the whole recording rather than recentred on the observer
+   * every frame: a map that slides under a moving observer makes it impossible to see that they
    * moved, which is the one thing it exists to show. */
-  private witnessMapBounds?: GeoBounds
+  private observerMapBounds?: GeoBounds
   /** The photograph, fetched at most once per recording and only once the reader asks for the map —
    * an embed nobody opens it on costs nothing. Stays undefined when the tiles cannot be had. */
-  private witnessMapImagery?: ImageryTexture
-  private witnessMapImageryRequested = false
+  private observerMapImagery?: ImageryTexture
+  private observerMapImageryRequested = false
   /** The licence line the map has to carry — the provider's own while its tiles are shown, and what
    * says they are missing when they are not. */
-  private witnessMapImageryCredit?: string
+  private observerMapImageryCredit?: string
   /** Whether the tiles were asked for and did not come. Kept apart from the credit above because
    * they are different kinds of line: one is a licence somebody is owed, the other is the map
    * saying what it is missing. Only the first can be moved somewhere else. */
-  private witnessMapImageryFailed = false
+  private observerMapImageryFailed = false
   /**
    * Set by a composing element that shows the licence line somewhere of its own — see
    * `<rr0-sighting>`, which lists it among the credits in its info panel.
@@ -161,7 +161,7 @@ export class UfoElement extends HTMLElement {
    * (see SceneElement, which does the turning in 3D) so that what is painted over the scene turns
    * with it.
    *
-   * The overlay is the witness's own field of view, so it has to follow the eye: leaving the
+   * The overlay is the observer's own field of view, so it has to follow the eye: leaving the
    * phenomenon painted at the same pixels while the world swings behind it is exactly the fault
    * BaseShape.aim was added to end, and a look-around must not bring it back.
    */
@@ -214,7 +214,7 @@ export class UfoElement extends HTMLElement {
    * Something else to draw over the finished picture, after the handles — what the editor shows
    * of the thing the canvas is editing when that thing is not a shape (a picture's own frame and
    * landmarks, see SightingEditorElement.paintPictureOverlay). Painted at every frame, so it
-   * follows the witness's turn.
+   * follows the observer's turn.
    */
   overlayPainter?: (renderer: CanvasRenderer) => void
 
@@ -240,7 +240,7 @@ export class UfoElement extends HTMLElement {
    * Whether the two counters read as a time of day or as time elapsed.
    *
    * Both are wanted, and which one is wanted changes with the question being asked. "The object
-   * crossed the road at 17:50:12" is how a testimony is written and how it is checked against
+   * crossed the road at 17:50:12" is how a account is written and how it is checked against
    * anything else that happened that evening; "eight seconds in" is how a recording is discussed
    * while it is being edited. Deriving one from the other in one's head means holding the start
    * time and doing arithmetic on every glance.
@@ -254,18 +254,18 @@ export class UfoElement extends HTMLElement {
     this.updateFullscreenButton()
     // Entering or leaving fullscreen resizes the stage under the map, and a canvas whose backing
     // store stays at the old size comes back as a blurred enlargement of itself.
-    this.resizeWitnessMap()
+    this.resizeObserverMap()
   }
 
   /** Kept so the map follows any change of the stage's size, not only the two this element causes
    * itself: a responsive page column, a rotated phone, a sidebar opening beside the embed. */
-  private readonly witnessMapResizeObserver =
-    typeof ResizeObserver === "undefined" ? undefined : new ResizeObserver(() => this.resizeWitnessMap())
+  private readonly observerMapResizeObserver =
+    typeof ResizeObserver === "undefined" ? undefined : new ResizeObserver(() => this.resizeObserverMap())
 
-  private resizeWitnessMap(): void {
-    if (this.witnessMapPanel.hidden) return
-    this.sizeWitnessMapCanvas()
-    this.paintWitnessMap(this.currentTime)
+  private resizeObserverMap(): void {
+    if (this.observerMapPanel.hidden) return
+    this.sizeObserverMapCanvas()
+    this.paintObserverMap(this.currentTime)
   }
 
   /** Whether the CSS stand-in for fullscreen is currently on — see enterSimulatedFullscreen. */
@@ -314,14 +314,14 @@ export class UfoElement extends HTMLElement {
    * canvas and another over the map would be told, wrongly, that these are two different kinds of
    * thing. They are the same recording, seen twice.
    */
-  private readonly handleWitnessMapPointerMove = (event: PointerEvent): void => {
-    const target = this.witnessMapTargetFrom(event)
+  private readonly handleObserverMapPointerMove = (event: PointerEvent): void => {
+    const target = this.observerMapTargetFrom(event)
     if (!target) {
       this.tooltip.hidden = true
-      this.witnessMapCanvas.style.cursor = "default"
+      this.observerMapCanvas.style.cursor = "default"
       return
     }
-    this.witnessMapCanvas.style.cursor = "pointer"
+    this.observerMapCanvas.style.cursor = "pointer"
     this.tooltip.textContent = target.label
     this.tooltip.hidden = false
     const stageRect = this.stageElement.getBoundingClientRect()
@@ -335,10 +335,10 @@ export class UfoElement extends HTMLElement {
    * A named moment IS an instant, so going to it means moving the playhead — the same thing its
    * mark on the seek bar already does. Anything else is a PLACE, and going to it means turning the
    * view until it is in front of the reader (see lookToward), which is a reader looking round and
-   * not an edit of what the witness said they faced.
+   * not an edit of what the observer said they faced.
    */
-  private readonly handleWitnessMapClick = (event: MouseEvent): void => {
-    const target = this.witnessMapTargetFrom(event)
+  private readonly handleObserverMapClick = (event: MouseEvent): void => {
+    const target = this.observerMapTargetFrom(event)
     if (!target) return
     if (target.kind === "milestone" && target.t !== undefined) {
       this.player.seek(target.t)
@@ -351,12 +351,12 @@ export class UfoElement extends HTMLElement {
 
   /** Which drawn mark the pointer is over, in the canvas's own pixels — the panel is displayed at
    * whatever size CSS gives it, which is rarely the backing store's. */
-  private witnessMapTargetFrom(event: MouseEvent): WitnessMapTarget | undefined {
-    const rect = this.witnessMapCanvas.getBoundingClientRect()
+  private observerMapTargetFrom(event: MouseEvent): ObserverMapTarget | undefined {
+    const rect = this.observerMapCanvas.getBoundingClientRect()
     if (rect.width === 0 || rect.height === 0) return undefined
-    return this.witnessMapRenderer.hitTest(
-      ((event.clientX - rect.left) / rect.width) * this.witnessMapCanvas.width,
-      ((event.clientY - rect.top) / rect.height) * this.witnessMapCanvas.height
+    return this.observerMapRenderer.hitTest(
+      ((event.clientX - rect.left) / rect.width) * this.observerMapCanvas.width,
+      ((event.clientY - rect.top) / rect.height) * this.observerMapCanvas.height
     )
   }
 
@@ -378,13 +378,13 @@ export class UfoElement extends HTMLElement {
     this.toolbar = this.shadow.getElementById("toolbar")!
     this.playPauseButton = this.shadow.getElementById("play-pause") as HTMLButtonElement
     this.fullscreenButton = this.shadow.getElementById("fullscreen") as HTMLButtonElement
-    this.witnessMapButton = this.shadow.getElementById("witness-map") as HTMLButtonElement
+    this.observerMapButton = this.shadow.getElementById("observer-map") as HTMLButtonElement
     this.referencesButton = this.shadow.getElementById("references") as HTMLButtonElement
     this.referenceOpacityInput = this.shadow.getElementById("reference-opacity") as HTMLInputElement
     this.milestonesButton = this.shadow.getElementById("milestones") as HTMLButtonElement
-    this.witnessMapPanel = this.shadow.getElementById("witness-map-panel")!
-    this.witnessMapCanvas = this.shadow.getElementById("witness-map-canvas") as HTMLCanvasElement
-    this.witnessMapRenderer = new WitnessMapRenderer(this.witnessMapCanvas.getContext("2d")!)
+    this.observerMapPanel = this.shadow.getElementById("observer-map-panel")!
+    this.observerMapCanvas = this.shadow.getElementById("observer-map-canvas") as HTMLCanvasElement
+    this.observerMapRenderer = new ObserverMapRenderer(this.observerMapCanvas.getContext("2d")!)
     this.seekInput = this.shadow.getElementById("seek") as HTMLInputElement
     this.milestoneMarks = this.shadow.getElementById("milestone-marks")!
     this.milestoneCaption = this.shadow.getElementById("milestone-caption")!
@@ -404,16 +404,16 @@ export class UfoElement extends HTMLElement {
 
     this.playPauseButton.addEventListener("click", () => this.togglePlayPause())
     this.fullscreenButton.addEventListener("click", () => this.toggleFullscreen())
-    this.witnessMapButton.addEventListener("click", () => this.toggleWitnessMap())
+    this.observerMapButton.addEventListener("click", () => this.toggleObserverMap())
     this.referencesButton.addEventListener("click", () => this.toggleReferences())
     this.referenceOpacityInput.addEventListener("input", () => {
       this.referenceOpacityTouched = true
       this.dispatchReferenceView()
     })
     this.milestonesButton.addEventListener("click", () => this.toggleMilestones())
-    this.witnessMapCanvas.addEventListener("pointermove", this.handleWitnessMapPointerMove)
-    this.witnessMapCanvas.addEventListener("pointerleave", this.handlePointerLeave)
-    this.witnessMapCanvas.addEventListener("click", this.handleWitnessMapClick)
+    this.observerMapCanvas.addEventListener("pointermove", this.handleObserverMapPointerMove)
+    this.observerMapCanvas.addEventListener("pointerleave", this.handlePointerLeave)
+    this.observerMapCanvas.addEventListener("click", this.handleObserverMapClick)
     this.seekInput.addEventListener("input", () => this.player.seek(this.snapSeekToMark(Number(this.seekInput.value))))
     this.seekInput.addEventListener("pointerdown", event => { this.seekSnapArmed = true; this.nameMarkUnder(event) })
     this.seekInput.addEventListener("pointerup", () => { this.seekSnapArmed = false })
@@ -440,7 +440,7 @@ export class UfoElement extends HTMLElement {
     this.canvas.addEventListener("pointermove", this.handlePointerMove)
     this.canvas.addEventListener("pointerleave", this.handlePointerLeave)
     document.addEventListener("fullscreenchange", this.handleFullscreenChange)
-    this.witnessMapResizeObserver?.observe(this.witnessMapPanel)
+    this.observerMapResizeObserver?.observe(this.observerMapPanel)
 
     // Out of the picture from the start — see hostControls.
     this.hostControls(undefined)
@@ -448,7 +448,7 @@ export class UfoElement extends HTMLElement {
     this.updateTimeLabels()
     this.updatePlayPauseButton()
     this.updateFullscreenButton()
-    this.updateWitnessMapButton()
+    this.updateObserverMapButton()
     this.updateReferencesButton()
     this.updateMilestonesButton()
     this.refresh()
@@ -465,7 +465,7 @@ export class UfoElement extends HTMLElement {
 
   disconnectedCallback(): void {
     document.removeEventListener("fullscreenchange", this.handleFullscreenChange)
-    this.witnessMapResizeObserver?.disconnect()
+    this.observerMapResizeObserver?.disconnect()
     // Leaves the page as it was found: the stand-in holds document.body's own overflow, and an
     // element removed while it is on would otherwise leave the page unable to scroll.
     this.exitSimulatedFullscreen()
@@ -476,8 +476,8 @@ export class UfoElement extends HTMLElement {
     if (name === "src" && newValue && newValue !== oldValue && this.isConnected) {
       void this.loadFromSrc(newValue)
     }
-    if (name === WITNESS_MAP_ATTRIBUTE) {
-      this.applyWitnessMapDefault()
+    if (name === OBSERVER_MAP_ATTRIBUTE) {
+      this.applyObserverMapDefault()
     }
     if (name === MILESTONES_ATTRIBUTE) {
       this.setMilestonesShown(!this.hasAttribute(MILESTONES_ATTRIBUTE))
@@ -494,11 +494,11 @@ export class UfoElement extends HTMLElement {
   }
 
   set sightingData(json: SightingRecordingJson) {
-    // Without this, switching sightings mid-playback (e.g. SightingElement's witness picker)
+    // Without this, switching sightings mid-playback (e.g. SightingElement's observer picker)
     // orphans the old Player: its requestAnimationFrame loop was never cancelled, so it keeps
     // ticking in the background — calling this same onFrame with the *old* timeline's positions
     // and fighting the new player for the canvas/seek bar/labels. Symptom: after switching
-    // witnesses mid-play, clicking to pause only pauses the new player while the old one keeps
+    // observers mid-play, clicking to pause only pauses the new player while the old one keeps
     // looping underneath it, which looks exactly like "pause resets to the start" since the old
     // player's loop keeps repainting frame 0 onward.
     this.player.stop()
@@ -513,7 +513,7 @@ export class UfoElement extends HTMLElement {
     this.refresh()
     // After refresh, which is where the new recording's own path is worked out: a page's "start
     // with the map open" is about the recording being loaded, not the one just replaced.
-    this.applyWitnessMapDefault()
+    this.applyObserverMapDefault()
   }
 
   /**
@@ -526,7 +526,7 @@ export class UfoElement extends HTMLElement {
   }
 
   /**
-   * Plays a sound right now, outside playback — how SightingEditorElement lets a witness HEAR the
+   * Plays a sound right now, outside playback — how SightingEditorElement lets a observer HEAR the
    * sound they are describing while they tune its kind/loudness/pitch. Tuning a synthesized sound
    * blind would be like drawing a shape with the canvas covered.
    *
@@ -742,14 +742,14 @@ export class UfoElement extends HTMLElement {
     this.seekInput.max = String(this.player.seekableDuration)
     this.refreshMilestoneMarks()
     this.updateMilestonesButton()
-    this.updateWitnessMap()
+    this.updateObserverMap()
     this.updateReferences()
     this.player.seek(this.player.time)
   }
 
   /**
    * Puts the toggles — the account's moments, the pictures of the place and their opacity, the
-   * witness's map — into `host`, or, when `host` is undefined, into this element's own playback
+   * observer's map — into `host`, or, when `host` is undefined, into this element's own playback
    * bar, at its end. Never over the picture: the fullscreen button is the one control
    * that belongs to the picture itself, and the corner is its alone. A composing element with a
    * toolbar of its own (see SightingElement, and the editor) hosts them there so that they stand
@@ -758,7 +758,7 @@ export class UfoElement extends HTMLElement {
    * a host styles them, the playback bar already does.
    */
   hostControls(host: HTMLElement | undefined): void {
-    const controls = [this.milestonesButton, this.referenceOpacityInput, this.referencesButton, this.witnessMapButton]
+    const controls = [this.milestonesButton, this.referenceOpacityInput, this.referencesButton, this.observerMapButton]
     if (host) {
       for (const control of controls) host.appendChild(control)
     } else {
@@ -903,7 +903,7 @@ export class UfoElement extends HTMLElement {
    * A photograph is not a moment: it is everything that crossed the frame while the shutter was
    * open, added together. A light that moved becomes a STREAK, and one that was blinking becomes a
    * dashed streak — which is how an aircraft's strobe signs its own picture, and one of the
-   * commonest things a witness's photograph turns out to show. So a long exposure is drawn as what
+   * commonest things a observer's photograph turns out to show. So a long exposure is drawn as what
    * it is: the object painted at every instant the shutter was open, each contributing its share.
    *
    * Only for exposures long enough to be seen — a thousandth of a second moves nothing, and paying
@@ -1013,7 +1013,7 @@ export class UfoElement extends HTMLElement {
    * Gives the canvas the shape of the picture this recording was actually made in — see
    * Instruments.frameWidthPx.
    *
-   * The height never moves, so one degree stays the same number of pixels and nothing a witness
+   * The height never moves, so one degree stays the same number of pixels and nothing a observer
    * drew shifts up or down; only how much sky stands to either side changes. A square 126 frame is
    * as tall as an eye's and half as wide; a phone held upright is narrower still.
    *
@@ -1048,10 +1048,10 @@ export class UfoElement extends HTMLElement {
     // Selection handles are an editing affordance — hidden while actively playing.
     const selectedIds = this.playbackState !== "playing" ? this.highlightedSourceIds : EMPTY_SELECTION
     // The instrument's own aperture decides whether a dazzling light wears a star — the same
-    // statement SceneRenderer.setInstrument makes about the Sun, made here about the witness's own
+    // statement SceneRenderer.setInstrument makes about the Sun, made here about the observer's own
     // object, which is painted on this overlay instead of in that scene.
     this.canvasRenderer.setStarPoints(Instruments.starPointsOf(this.sighting.instrument))
-    // The witness's own walk turns the instrument a little as it carries it — a fraction of a degree
+    // The observer's own walk turns the instrument a little as it carries it — a fraction of a degree
     // through an eye, the whole of it through a camera in a walking hand (see Gait, and
     // Instrument.stabilization). Added to the recorded roll here and to the scene's own camera in
     // SceneRenderer.setObserverPose, from the same numbers, so the two layers cannot drift apart.
@@ -1091,12 +1091,12 @@ export class UfoElement extends HTMLElement {
     this.overlayPainter?.(this.canvasRenderer)
     this.mapShapeBounds = instants.flatMap(instant => [...instant.shapes.values()]
       .filter(shape => shape.transparency < 1).map(shape => this.shifted(shape, shift).bounds))
-    this.keepWitnessMapClear()
+    this.keepObserverMapClear()
     this.seekInput.value = String(t)
     this.timeStartLabel.textContent = this.formatPosition(t)
     this.showMilestoneAt(t)
-    this.paintWitnessMap(t)
-    // The track is heard only while actually playing: onFrame is also the seek sink, and a witness
+    this.paintObserverMap(t)
+    // The track is heard only while actually playing: onFrame is also the seek sink, and a observer
     // dragging the bar through a keyframe shouldn't fire a burst of sound at every position they
     // pass through. A preview outlives repaints on purpose (see previewSound), and playing ends it
     // — the recording itself is what should be heard from then on.
@@ -1304,86 +1304,86 @@ export class UfoElement extends HTMLElement {
   }
 
   /**
-   * Opens or closes the map of where the witness stood — see WitnessMapRenderer for what it draws
+   * Opens or closes the map of where the observer stood — see ObserverMapRenderer for what it draws
    * and why the cone is the part that matters.
    *
    * Public, like togglePlayPause and toggleFullscreen, so a composing element (SceneElement's own
    * outer stage, a case page's own control) can offer the same thing without reaching into the
    * shadow DOM.
    */
-  toggleWitnessMap(): void {
-    this.setWitnessMapOpen(this.witnessMapPanel.hidden)
+  toggleObserverMap(): void {
+    this.setObserverMapOpen(this.observerMapPanel.hidden)
   }
 
   /**
-   * Puts the map where the page said it should START — see WITNESS_MAP_ATTRIBUTE.
+   * Puts the map where the page said it should START — see OBSERVER_MAP_ATTRIBUTE.
    *
    * A DEFAULT, applied when the page states one and when a new recording arrives, and nowhere else.
    * In particular not on every `refresh()`: the editor calls that on every keystroke, and a default
    * re-applied there would reopen a map the author had just closed, over and over. What a reader or
    * an author does with the map afterwards is theirs until the page or the recording changes.
    */
-  private applyWitnessMapDefault(): void {
-    this.setWitnessMapOpen(this.hasAttribute(WITNESS_MAP_ATTRIBUTE) && this.witnessPath !== undefined)
+  private applyObserverMapDefault(): void {
+    this.setObserverMapOpen(this.hasAttribute(OBSERVER_MAP_ATTRIBUTE) && this.observerPath !== undefined)
   }
 
-  private setWitnessMapOpen(open: boolean): void {
-    this.witnessMapPanel.hidden = !open
+  private setObserverMapOpen(open: boolean): void {
+    this.observerMapPanel.hidden = !open
     // No native title on the panel: it said "hide the map", which stopped being true the moment a
     // click started going somewhere instead of closing it — and a browser tooltip would in any case
     // fight the map's own, which names whatever mark the pointer is actually on.
-    this.witnessMapPanel.removeAttribute("title")
-    this.witnessMapButton.setAttribute("aria-pressed", String(open))
-    this.updateWitnessMapButton()
+    this.observerMapPanel.removeAttribute("title")
+    this.observerMapButton.setAttribute("aria-pressed", String(open))
+    this.updateObserverMapButton()
     if (!open) return
-    this.sizeWitnessMapCanvas()
-    void this.loadWitnessMapImagery()
-    this.paintWitnessMap(this.currentTime)
+    this.sizeObserverMapCanvas()
+    void this.loadObserverMapImagery()
+    this.paintObserverMap(this.currentTime)
   }
 
-  private updateWitnessMapButton(): void {
-    const open = !this.witnessMapPanel.hidden
-    const label = open ? this.messages.hideWitnessMap : this.messages.showWitnessMap
-    this.witnessMapButton.title = label
-    this.witnessMapButton.setAttribute("aria-label", label)
+  private updateObserverMapButton(): void {
+    const open = !this.observerMapPanel.hidden
+    const label = open ? this.messages.hideObserverMap : this.messages.showObserverMap
+    this.observerMapButton.title = label
+    this.observerMapButton.setAttribute("aria-label", label)
   }
 
   /**
    * Offers the map for every recording that actually states where it happened, works out the ground
-   * it will cover, and leaves the open state to applyWitnessMapDefault.
+   * it will cover, and leaves the open state to applyObserverMapDefault.
    *
    * The BUTTON depends on the recording, the OPEN STATE on the page — two different questions, and
    * conflating them was the first version's mistake. A recording with no coordinates gets no button
    * rather than a button onto an empty map; one that has them gets a button whether or not any page
    * thought to ask, because a reader wanting to know where this happened is not a thing a page can
    * predict. What a page can say is which of its own reconstructions are worth opening it on from
-   * the first frame — see WITNESS_MAP_ATTRIBUTE.
+   * the first frame — see OBSERVER_MAP_ATTRIBUTE.
    */
-  private updateWitnessMap(): void {
-    const hadPath = this.witnessPath !== undefined
-    this.witnessPath = WitnessPath.of(this.currentSighting)
-    this.witnessMapButton.hidden = this.witnessPath === undefined
+  private updateObserverMap(): void {
+    const hadPath = this.observerPath !== undefined
+    this.observerPath = ObserverPath.of(this.currentSighting)
+    this.observerMapButton.hidden = this.observerPath === undefined
     // A recording that has just BECOME mappable is the editor's ordinary case: an author types the
     // first latitude and longitude, and the map they asked for has somewhere to point at last. That
     // is a new answer to the page's question, not a re-application of its default over a reader's
     // own choice — which is why it is a transition and not something refresh() does every time.
-    if (!hadPath && this.witnessPath) this.applyWitnessMapDefault()
-    if (!this.witnessPath) {
-      this.setWitnessMapOpen(false)
-      this.witnessMapBounds = undefined
+    if (!hadPath && this.observerPath) this.applyObserverMapDefault()
+    if (!this.observerPath) {
+      this.setObserverMapOpen(false)
+      this.observerMapBounds = undefined
       return
     }
-    const bounds = this.witnessPath.boundsAround(UfoElement.WITNESS_MAP_MIN_SPAN_M, UfoElement.WITNESS_MAP_MARGIN)
+    const bounds = this.observerPath.boundsAround(UfoElement.OBSERVER_MAP_MIN_SPAN_M, UfoElement.OBSERVER_MAP_MARGIN)
     // Only a real change of ground throws the photograph away. An editor nudging a coordinate moves
     // these bounds by a metre on every keystroke, and refetching a tile grid for that would be one
     // request per keypress for an image indistinguishable from the one already held.
-    if (!this.witnessMapBounds || !this.sameGround(this.witnessMapBounds, bounds)) {
-      this.witnessMapBounds = bounds
-      this.witnessMapImagery = undefined
-      this.witnessMapImageryCredit = undefined
-      this.witnessMapImageryFailed = false
-      this.witnessMapImageryRequested = false
-      if (!this.witnessMapPanel.hidden) void this.loadWitnessMapImagery()
+    if (!this.observerMapBounds || !this.sameGround(this.observerMapBounds, bounds)) {
+      this.observerMapBounds = bounds
+      this.observerMapImagery = undefined
+      this.observerMapImageryCredit = undefined
+      this.observerMapImageryFailed = false
+      this.observerMapImageryRequested = false
+      if (!this.observerMapPanel.hidden) void this.loadObserverMapImagery()
     }
   }
 
@@ -1410,26 +1410,26 @@ export class UfoElement extends HTMLElement {
    * recording itself and need no network at all; the photograph is context. So a refused,
    * offline or blocked fetch leaves the map standing and says what is missing.
    */
-  private async loadWitnessMapImagery(): Promise<void> {
-    if (this.witnessMapImageryRequested || !this.witnessMapBounds) return
-    this.witnessMapImageryRequested = true
+  private async loadObserverMapImagery(): Promise<void> {
+    if (this.observerMapImageryRequested || !this.observerMapBounds) return
+    this.observerMapImageryRequested = true
     const provider = defaultImageryProvider()
-    const bounds = this.witnessMapBounds
+    const bounds = this.observerMapBounds
     try {
       const imagery = await provider.getImageryTexture(bounds, {
-        width: UfoElement.WITNESS_MAP_IMAGERY_PX,
-        height: UfoElement.WITNESS_MAP_IMAGERY_PX
+        width: UfoElement.OBSERVER_MAP_IMAGERY_PX,
+        height: UfoElement.OBSERVER_MAP_IMAGERY_PX
       })
       // The recording may have been swapped while this was in flight — a page playing several in
-      // turn does exactly that — and painting one witness's ground under another's path is worse
+      // turn does exactly that — and painting one observer's ground under another's path is worse
       // than painting no ground at all.
-      if (this.witnessMapBounds !== bounds) return
-      this.witnessMapImagery = imagery
-      this.witnessMapImageryCredit = provider.attribution
+      if (this.observerMapBounds !== bounds) return
+      this.observerMapImagery = imagery
+      this.observerMapImageryCredit = provider.attribution
     } catch {
-      this.witnessMapImageryFailed = true
+      this.observerMapImageryFailed = true
     }
-    this.paintWitnessMap(this.currentTime)
+    this.paintObserverMap(this.currentTime)
   }
 
   /**
@@ -1440,15 +1440,15 @@ export class UfoElement extends HTMLElement {
    * `<rr0-sighting>`'s credits, and creditShownExternally, which is how this element then stops
    * printing it over the map itself).
    */
-  get witnessMapCredit(): string | undefined {
-    return this.witnessMapImageryCredit
+  get observerMapCredit(): string | undefined {
+    return this.observerMapImageryCredit
   }
 
   /** The line along the bottom of the map: the licence where nowhere else carries it, and the
    * missing-imagery note either way. */
-  private get witnessMapFooterLine(): string | undefined {
-    if (this.witnessMapImageryFailed) return this.messages.mapImageryUnavailable
-    return this.creditShownExternally ? undefined : this.witnessMapImageryCredit
+  private get observerMapFooterLine(): string | undefined {
+    if (this.observerMapImageryFailed) return this.messages.mapImageryUnavailable
+    return this.creditShownExternally ? undefined : this.observerMapImageryCredit
   }
 
   /** Matches the drawing surface to the size CSS gave the panel, at the display's own pixel
@@ -1474,12 +1474,12 @@ export class UfoElement extends HTMLElement {
   setMapSubjectBounds(bounds: ReadonlyArray<{ x: number; y: number; width: number; height: number }>): void {
     this.mapSceneBounds = bounds.map(box => ({ x: box.x * this.canvas.width, y: box.y * this.canvas.height,
       width: box.width * this.canvas.width, height: box.height * this.canvas.height }))
-    this.keepWitnessMapClear()
+    this.keepObserverMapClear()
   }
 
-  private keepWitnessMapClear(): void {
-    if (this.witnessMapPanel.hidden) return
-    const box = this.witnessMapBoxPx
+  private keepObserverMapClear(): void {
+    if (this.observerMapPanel.hidden) return
+    const box = this.observerMapBoxPx
     if (!box) return
     const subjects = [...this.mapShapeBounds, ...this.mapSceneBounds]
     const covers = (left: number, right: number, slack: number): boolean => {
@@ -1492,47 +1492,47 @@ export class UfoElement extends HTMLElement {
     }
     const rightCorner: [number, number] = [this.canvas.width - box.width, this.canvas.width]
     const leftCorner: [number, number] = [0, box.width]
-    const margin = UfoElement.WITNESS_MAP_CLEARANCE_PX
+    const margin = UfoElement.OBSERVER_MAP_CLEARANCE_PX
     const rightCovered = covers(...rightCorner, 0)
     const leftCovered = covers(...leftCorner, 0)
-    this.witnessMapPanel.classList.toggle("subject-overlap", rightCovered && leftCovered)
-    if (this.witnessMapPanel.classList.contains("on-the-left")) {
+    this.observerMapPanel.classList.toggle("subject-overlap", rightCovered && leftCovered)
+    if (this.observerMapPanel.classList.contains("on-the-left")) {
       // Back to the corner it prefers, but only once that corner is clear by the margin — the
       // asymmetry IS the anti-flicker: leaving costs nothing, returning has to be sure.
-      if (!rightCovered && (leftCovered || !covers(rightCorner[0], rightCorner[1], margin))) this.witnessMapPanel.classList.remove("on-the-left")
+      if (!rightCovered && (leftCovered || !covers(rightCorner[0], rightCorner[1], margin))) this.observerMapPanel.classList.remove("on-the-left")
       return
     }
     if (covers(rightCorner[0], rightCorner[1], 0) && !covers(leftCorner[0], leftCorner[1], 0)) {
-      this.witnessMapPanel.classList.add("on-the-left")
+      this.observerMapPanel.classList.add("on-the-left")
     }
   }
 
   /** Where the map panel sits over the picture, in the fixed pixels shapes are drawn in — measured
    * when the stage is sized rather than every frame, which would be a layout read per tick. */
-  private witnessMapBoxPx?: { width: number; top: number; bottom: number }
+  private observerMapBoxPx?: { width: number; top: number; bottom: number }
 
   /** How far the phenomenon has to clear the map before it comes back to the corner it prefers. */
-  private static readonly WITNESS_MAP_CLEARANCE_PX = 24
+  private static readonly OBSERVER_MAP_CLEARANCE_PX = 24
 
-  private sizeWitnessMapCanvas(): void {
-    const side = this.witnessMapPanel.clientWidth
+  private sizeObserverMapCanvas(): void {
+    const side = this.observerMapPanel.clientWidth
     if (side === 0) return
     const pixels = Math.round(side * (globalThis.devicePixelRatio ?? 1))
-    this.measureWitnessMapBox()
-    if (this.witnessMapCanvas.width === pixels) return
-    this.witnessMapCanvas.width = pixels
-    this.witnessMapCanvas.height = pixels
+    this.measureObserverMapBox()
+    if (this.observerMapCanvas.width === pixels) return
+    this.observerMapCanvas.width = pixels
+    this.observerMapCanvas.height = pixels
   }
 
   /** The panel's own rectangle, expressed in the canvas's fixed drawing pixels — see
-   * witnessMapBoxPx. Both are laid out inside the same stage, so one pair of rects converts. */
-  private measureWitnessMapBox(): void {
-    const panel = this.witnessMapPanel.getBoundingClientRect()
+   * observerMapBoxPx. Both are laid out inside the same stage, so one pair of rects converts. */
+  private measureObserverMapBox(): void {
+    const panel = this.observerMapPanel.getBoundingClientRect()
     const picture = this.canvas.getBoundingClientRect()
     if (picture.width === 0 || picture.height === 0) return
     const scaleX = this.canvas.width / picture.width
     const scaleY = this.canvas.height / picture.height
-    this.witnessMapBoxPx = {
+    this.observerMapBoxPx = {
       width: panel.width * scaleX,
       top: (panel.top - picture.top) * scaleY,
       bottom: (panel.bottom - picture.top) * scaleY
@@ -1544,11 +1544,11 @@ export class UfoElement extends HTMLElement {
    * and follows the seek bar, which is what makes it a reading of the recording rather than an
    * illustration beside it.
    */
-  private paintWitnessMap(t: number): void {
-    if (this.witnessMapPanel.hidden || !this.witnessPath || !this.witnessMapBounds) return
+  private paintObserverMap(t: number): void {
+    if (this.observerMapPanel.hidden || !this.observerPath || !this.observerMapBounds) return
     const pose = resolveObserverPoseAt(this.currentSighting, t)
     const instrument = this.currentSighting.instrument
-    const markers: WitnessMapMarker[] = []
+    const markers: ObserverMapMarker[] = []
     const current = this.currentSighting.milestones.length > 0 ? resolveMilestoneAt(this.currentSighting.milestones, t) : undefined
     for (const milestone of this.milestonesShown ? sortedMilestones(this.currentSighting.milestones) : []) {
       const at = resolveObserverPoseAt(this.currentSighting, milestone.t)
@@ -1562,12 +1562,12 @@ export class UfoElement extends HTMLElement {
         current: milestone === current
       })
     }
-    this.witnessMapRenderer.paint({
-      bounds: this.witnessMapBounds,
-      imagery: this.witnessMapImagery,
-      path: this.witnessPath,
+    this.observerMapRenderer.paint({
+      bounds: this.observerMapBounds,
+      imagery: this.observerMapImagery,
+      path: this.observerPath,
       position: pose?.lat !== undefined && pose.lng !== undefined ? { lat: pose.lat, lng: pose.lng } : undefined,
-      // Where the VIEW points, not merely where the record says he faced — see WitnessMapFrame.
+      // Where the VIEW points, not merely where the record says he faced — see ObserverMapFrame.
       headingDeg: pose?.headingDeg === undefined ? undefined : pose.headingDeg + this.lookYawDeg,
       // The instrument's real field, through its own projection — the wedge is only evidence if it
       // is the wedge this device actually took in. See ImageProjection.halfWidthAngleDeg.
@@ -1575,10 +1575,10 @@ export class UfoElement extends HTMLElement {
         ? ImageProjection.of(instrument, this.canvas.height, pose.fovDeg).halfWidthAngleDeg(Instruments.aspectOf(instrument))
         : undefined,
       markers,
-      decor: this.witnessMapDecorAt(t),
-      witnessLabel: this.said.read(this.currentSighting.witness?.title) ?? this.messages.witnessHere,
-      nightFraction: this.witnessMapNightFraction,
-      attribution: this.witnessMapFooterLine
+      decor: this.observerMapDecorAt(t),
+      observerLabel: this.said.read(this.currentSighting.observer?.title) ?? this.messages.observerHere,
+      nightFraction: this.observerMapNightFraction,
+      attribution: this.observerMapFooterLine
     })
   }
 
@@ -1587,7 +1587,7 @@ export class UfoElement extends HTMLElement {
    * one being played, and the lettered points on the map, which are three views of the same few
    * facts and so go together.
    *
-   * Public for the same reason as toggleWitnessMap.
+   * Public for the same reason as toggleObserverMap.
    */
   toggleMilestones(): void {
     this.setMilestonesShown(!this.milestonesShown)
@@ -1601,7 +1601,7 @@ export class UfoElement extends HTMLElement {
     // The caption is driven by the playhead, not by this — asking it again is what makes it appear
     // and disappear on the spot instead of at the next frame.
     this.showMilestoneAt(this.currentTime)
-    this.paintWitnessMap(this.currentTime)
+    this.paintObserverMap(this.currentTime)
   }
 
   /** The button is there when there is something for it to show. A recording that names no moment
@@ -1616,23 +1616,23 @@ export class UfoElement extends HTMLElement {
   /**
    * Where the recording's own scenery stands, on the ground rather than in front of the camera.
    *
-   * `DecorObject.eastM`/`northM` are metres from the witness's pose at **t=0**, not from wherever
+   * `DecorObject.eastM`/`northM` are metres from the observer's pose at **t=0**, not from wherever
    * they happen to be now — the same reference the 3D scene anchors to (see
    * SceneRenderer.updateDecorAnchoring, which exists because treating them as an offset from the
-   * CURRENT pose made every building follow the witness around). Resolving them against that one
-   * pose is what leaves the shack where the shack was while the witness drives past it.
+   * CURRENT pose made every building follow the observer around). Resolving them against that one
+   * pose is what leaves the shack where the shack was while the observer drives past it.
    *
    * Empty for a recording whose t=0 pose has no coordinates at all: a metre offset from nowhere is
    * not a place, and guessing one would put scenery on ground it was never on.
    *
    * A cultivated field is left off it entirely (see DecorKind's own "crop"). What this map draws is
-   * what the witness's own view is checked AGAINST — was the shack inside what they could see, was
+   * what the observer's own view is checked AGAINST — was the shack inside what they could see, was
    * the car between them and it — and the ground they walked over is neither. It is also a matter of
    * counting: Masse's field is a hundred and forty rows, and a hundred and forty markers along his
    * path drew two solid blue bars either side of it, which read as walls he was walking between
    * rather than as the field he was walking through.
    */
-  private witnessMapDecorAt(t: number): WitnessMapDecor[] {
+  private observerMapDecorAt(t: number): ObserverMapDecor[] {
     const reference = resolveObserverPoseAt(this.currentSighting, 0)
     if (reference?.lat === undefined || reference.lng === undefined) return []
     return this.currentSighting.decor.filter(object => object.kind !== "crop").map(object => {
@@ -1653,10 +1653,10 @@ export class UfoElement extends HTMLElement {
    * says (see its updateAstronomy). A bare player is left with the photograph as it came, which is
    * honest: it has not been told anything about the light.
    */
-  private witnessMapNightFraction?: number
+  private observerMapNightFraction?: number
 
   /**
-   * Told by a composing element that knows where the Sun was — see witnessMapNightFraction.
+   * Told by a composing element that knows where the Sun was — see observerMapNightFraction.
    *
    * Fully dark by −12°, the end of nautical twilight, rather than by 0°: the ground is still lit
    * for a while after the Sun has set, and a map that went black the instant it crossed the horizon
@@ -1664,9 +1664,9 @@ export class UfoElement extends HTMLElement {
    */
   setSunAltitude(altitudeDeg: number | undefined): void {
     const night = altitudeDeg === undefined ? undefined : Math.max(0, Math.min(1, -altitudeDeg / 12))
-    if (night === this.witnessMapNightFraction) return
-    this.witnessMapNightFraction = night
-    this.paintWitnessMap(this.currentTime)
+    if (night === this.observerMapNightFraction) return
+    this.observerMapNightFraction = night
+    this.paintObserverMap(this.currentTime)
   }
 
   /** Turns what is painted over the scene along with the scene — see lookYawDeg. Called by a
@@ -1689,7 +1689,7 @@ export class UfoElement extends HTMLElement {
 
   /**
    * How far everything painted on this overlay has moved off the recorded pose, pixels — a reader
-   * having turned the view (see setLookOffset), and the witness's own walk having turned the
+   * having turned the view (see setLookOffset), and the observer's own walk having turned the
    * instrument under them (see Gait).
    *
    * Read by whoever tests those shapes against the 3D scenery behind them as well as by whoever
@@ -1707,7 +1707,7 @@ export class UfoElement extends HTMLElement {
     return { x: -projection.angleDegToRadiusPx(yawDeg), y: projection.angleDegToRadiusPx(pitchDeg) }
   }
 
-  /** What the witness's own walking is doing to the instrument at t — nothing for a witness who
+  /** What the observer's own walking is doing to the instrument at t — nothing for a observer who
    * stood still, which is most of them. Rebuilt on demand rather than cached, for the reason
    * Gait.of gives: an editor moves keyframes without the recording ever changing identity. */
   private gaitAt(t: number): GaitOffset {
@@ -1774,7 +1774,7 @@ export class UfoElement extends HTMLElement {
     this.updateTimeLabelTitles()
     this.updatePlayPauseButton()
     this.updateFullscreenButton()
-    this.updateWitnessMapButton()
+    this.updateObserverMapButton()
     this.updateReferencesButton()
     this.updateMilestonesButton()
   }

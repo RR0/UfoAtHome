@@ -9,7 +9,7 @@ import { SceneCredits } from "./SceneCredits.js"
 import { SightingAssessments } from "./SightingAssessments.js"
 import type { SummaryEntry } from "./SightingSummary.js"
 import { SceneElement, registerScene, SCENE_ELEMENT_NAME, CONFRONTATION_EVENT } from "./SceneElement.js"
-import { WITNESS_MAP_ATTRIBUTE, MILESTONES_ATTRIBUTE } from "./UfoElement.js"
+import { OBSERVER_MAP_ATTRIBUTE, MILESTONES_ATTRIBUTE } from "./UfoElement.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
 import type { People } from "../engine/model/People.js"
 import { HostLocale, selectLocale } from "../i18n/locale.js"
@@ -23,7 +23,7 @@ import type { SightingMessages } from "./messages/SightingMessages.js"
 
 registerScene()
 
-interface WitnessEntry {
+interface ObserverEntry {
   src: string
   sighting: SightingRecordingJson
 }
@@ -32,54 +32,54 @@ interface WitnessEntry {
 const APP_HOME_URL = "https://ufoathome.org"
 
 /**
- * Asks the player to start with the testimony shown beside any interpretation chosen, and measured
- * against it — see SceneElement.compareTestimony. A reader can still turn it off, as with the map.
+ * Asks the player to start with the account shown beside any interpretation chosen, and measured
+ * against it — see SceneElement.compareAccount. A reader can still turn it off, as with the map.
  */
-export const COMPARE_TESTIMONY_ATTRIBUTE = "compare-testimony"
+export const COMPARE_ACCOUNT_ATTRIBUTE = "compare-account"
 
-/** The choice's value for the recording's own testimony — see offerInterpretations. */
-const TESTIMONY_OPTION = "testimony"
+/** The choice's value for the recording's own account — see offerInterpretations. */
+const ACCOUNT_OPTION = "account"
 
 /** Where a recording is opened for editing on that site. */
 const APP_EDITOR_URL = `${APP_HOME_URL}/edit/`
 
 /**
- * Vanilla Web Component displaying one or more witnesses' recordings of the same sighting (a
- * case can have more than one `sighting.json`, one per witness) — composes a nested `<rr0-scene>`
+ * Vanilla Web Component displaying one or more observers' recordings of the same sighting (a
+ * case can have more than one `sighting.json`, one per observer) — composes a nested `<rr0-scene>`
  * for the actual canvas/playback instead of duplicating it, the same way `<rr0-sighting-editor>`
- * does. This is the standard way to display *any* real sighting, whether it has one witness or
- * several: a witness recording is always a real sighting (real date/time/location), so it always
+ * does. This is the standard way to display *any* real sighting, whether it has one observer or
+ * several: a observer recording is always a real sighting (real date/time/location), so it always
  * needs the real sky/ground backdrop `<rr0-scene>` provides — a bare `<rr0-ufo>` (just the
- * recorded shape, no astronomy) would misrepresent what the witness actually reported seeing.
+ * recorded shape, no astronomy) would misrepresent what the observer actually reported seeing.
  * Read-only playback only, no recording/editing UI.
  *
  * The `src` attribute accepts either a CASE (RR0's `case.json`, whose events of type `sighting`
- * point at each witness's recording — see CaseFile) or one witness's `sighting.json` directly.
- * The `witnessUrls` property takes the list of recordings itself. No separately-maintained labels
- * either way, since a witness's display name (`SightingRecordingJson.witness`) lives inside each
- * witness's own file, and what gathers them is the case, which a recording never names. Every listed witness's recording
+ * point at each observer's recording — see CaseFile) or one observer's `sighting.json` directly.
+ * The `observerUrls` property takes the list of recordings itself. No separately-maintained labels
+ * either way, since a observer's display name (`SightingRecordingJson.observer`) lives inside each
+ * observer's own file, and what gathers them is the case, which a recording never names. Every listed observer's recording
  * is fetched upfront (to read its name), not lazily on selection — fine at the scale a case's
- * witness list actually has (a handful of small JSON files).
+ * observer list actually has (a handful of small JSON files).
  *
- * The toolbar (testimony line + the "about" info button) is hidden only when nothing has loaded
- * yet. The testimony line itself — "Testimony by <witness>" — is always shown once something has
- * loaded, even for a single witness: the `<select>` only replaces the plain witness name once
+ * The toolbar (account line + the "about" info button) is hidden only when nothing has loaded
+ * yet. The account line itself — "Account by <observer>" — is always shown once something has
+ * loaded, even for a single observer: the `<select>` only replaces the plain observer name once
  * there's actually more than one to choose between (a one-option dropdown would be pointless), but
  * the sentence around it never disappears. Date/location/case live only in the info panel's own
  * Observation section, not duplicated here.
  */
 export class SightingElement extends HTMLElement {
   static get observedAttributes(): string[] {
-    return ["src", "show-labels", WITNESS_MAP_ATTRIBUTE, MILESTONES_ATTRIBUTE, COMPARE_TESTIMONY_ATTRIBUTE]
+    return ["src", "show-labels", OBSERVER_MAP_ATTRIBUTE, MILESTONES_ATTRIBUTE, COMPARE_ACCOUNT_ATTRIBUTE]
   }
 
   private readonly shadow: ShadowRoot
   private readonly sceneElement: SceneElement
   private readonly toolbarElement: HTMLElement
-  private readonly testimonyElement: HTMLElement
-  private readonly testimonyPrefix: HTMLElement
-  private readonly witnessText: HTMLElement
-  private readonly witnessSelect: HTMLSelectElement
+  private readonly accountElement: HTMLElement
+  private readonly accountPrefix: HTMLElement
+  private readonly observerText: HTMLElement
+  private readonly observerSelect: HTMLSelectElement
   private readonly infoButton: HTMLButtonElement
   private readonly infoPanel: HTMLElement
   private readonly infoAppLink: HTMLAnchorElement
@@ -116,7 +116,7 @@ export class SightingElement extends HTMLElement {
    * stays the absolutely-positioned overlay it has always been. */
   private readonly supportsPopover = typeof (HTMLElement.prototype as { showPopover?: unknown }).showPopover === "function"
 
-  private entries: WitnessEntry[] = []
+  private entries: ObserverEntry[] = []
   /** The case these recordings were read from, when they were, and its own address: what names
    * them as a case (a recording cannot say, see Sighting.id) and what holds the analysts'
    * interpretations of each. */
@@ -170,10 +170,10 @@ export class SightingElement extends HTMLElement {
     this.shadow.getElementById("ufo-slot")!.replaceWith(this.sceneElement)
 
     this.toolbarElement = this.shadow.getElementById("toolbar")!
-    this.testimonyElement = this.shadow.getElementById("testimony")!
-    this.testimonyPrefix = this.shadow.getElementById("testimony-prefix")!
-    this.witnessText = this.shadow.getElementById("witness-text")!
-    this.witnessSelect = this.shadow.getElementById("witness") as HTMLSelectElement
+    this.accountElement = this.shadow.getElementById("account")!
+    this.accountPrefix = this.shadow.getElementById("account-prefix")!
+    this.observerText = this.shadow.getElementById("observer-text")!
+    this.observerSelect = this.shadow.getElementById("observer") as HTMLSelectElement
     this.infoButton = this.shadow.getElementById("info-button") as HTMLButtonElement
     this.infoPanel = this.shadow.getElementById("info-panel")!
     this.infoAppLink = this.shadow.getElementById("info-app-link") as HTMLAnchorElement
@@ -200,14 +200,14 @@ export class SightingElement extends HTMLElement {
     this.confrontationElement = this.shadow.getElementById("confrontation")!
     this.confrontationHeading = this.shadow.getElementById("confrontation-heading")!
     this.confrontationList = this.shadow.getElementById("confrontation-list")!
-    this.compareButton = this.shadow.getElementById("compare-testimony") as HTMLButtonElement
-    this.compareButton.addEventListener("click", () => this.setComparing(!this.sceneElement.compareTestimony))
+    this.compareButton = this.shadow.getElementById("compare-account") as HTMLButtonElement
+    this.compareButton.addEventListener("click", () => this.setComparing(!this.sceneElement.compareAccount))
 
-    this.witnessSelect.addEventListener("change", () => this.selectWitness(this.witnessSelect.value))
+    this.observerSelect.addEventListener("change", () => this.selectObserver(this.observerSelect.value))
     this.interpretationSelect.addEventListener("change", () => void this.chooseInterpretation(this.interpretationSelect.value))
     this.sceneElement.addEventListener(CONFRONTATION_EVENT, event =>
       this.showConfrontation((event as CustomEvent<ConfrontationReading[]>).detail))
-    // Weather, sound and the witness's own pose are keyframed, so what the recording states at
+    // Weather, sound and the observer's own pose are keyframed, so what the recording states at
     // one instant isn't what it states at another — a strip frozen on the opening frame would be
     // wrong for the rest of the replay. Cheap: refreshParamSummary does nothing at all while the
     // strip is hidden, which is the default.
@@ -222,7 +222,7 @@ export class SightingElement extends HTMLElement {
       this.infoPanel.removeAttribute("hidden")
       this.infoButton.setAttribute("popovertarget", "info-panel")
       this.infoPanel.addEventListener("beforetoggle", event => {
-        // Filled in before it becomes visible, never after — no flash of the previous witness.
+        // Filled in before it becomes visible, never after — no flash of the previous observer.
         if ((event as ToggleEvent).newState !== "open") return
         this.populateInfoPanel()
         this.bringInfoButtonIntoView()
@@ -259,7 +259,7 @@ export class SightingElement extends HTMLElement {
    * at construction, the recording's texts lazily on first read — and an element created by
    * `document.createElement` before being put in a `lang="en"` page decided French for the first
    * (it had no `[lang]` ancestor yet, so only the browser's list) and English for the second:
-   * "Celle du témoin : A craft standing on its legs". Hence the preferences are read once, here,
+   * "Celle du observateur : A craft standing on its legs". Hence the preferences are read once, here,
    * and read again on connection (see connectedCallback) rather than anywhere else.
    */
   private async loadLocaleMessages(): Promise<void> {
@@ -278,7 +278,7 @@ export class SightingElement extends HTMLElement {
     this.tags = new SightingTags(tagNames)
     this.said = new SaidTexts(preferences)
     this.summaryBuilder = new SightingSummary(this.messages, this.language === "fr" ? "fr" : "en", this.said, this.tags)
-    this.testimonyPrefix.textContent = this.messages.testimonyBy
+    this.accountPrefix.textContent = this.messages.accountBy
     this.interpretationLabel.textContent = this.messages.interpretation
     this.confrontationHeading.textContent = this.messages.confrontation
     const shown = this.entries.find(entry => entry.src === this.currentSrc)
@@ -299,7 +299,7 @@ export class SightingElement extends HTMLElement {
     this.labelEmbedEdit.textContent = this.messages.embedEdit
     this.embedCopyButton.textContent = this.messages.embedCopy
     if (this.infoOpen) this.populateInfoPanel()
-    this.updateTestimonyLine()
+    this.updateAccountLine()
   }
 
   /** The reader's languages as loadLocaleMessages last read them — what connectedCallback compares
@@ -345,11 +345,11 @@ export class SightingElement extends HTMLElement {
     if (name === "show-labels") {
       this.applyLabels(this.hasAttribute("show-labels"))
     }
-    if (name === WITNESS_MAP_ATTRIBUTE || name === MILESTONES_ATTRIBUTE) {
+    if (name === OBSERVER_MAP_ATTRIBUTE || name === MILESTONES_ATTRIBUTE) {
       this.forwardPlayerAttributes()
     }
-    if (name === COMPARE_TESTIMONY_ATTRIBUTE) {
-      this.setComparing(this.hasAttribute(COMPARE_TESTIMONY_ATTRIBUTE))
+    if (name === COMPARE_ACCOUNT_ATTRIBUTE) {
+      this.setComparing(this.hasAttribute(COMPARE_ACCOUNT_ATTRIBUTE))
     }
   }
 
@@ -357,14 +357,14 @@ export class SightingElement extends HTMLElement {
    * see SceneElement.forwardPlayerAttributes, which passes them on again to the player that owns
    * them. A page embedding `<rr0-sighting>` writes that tag and nothing else. */
   private forwardPlayerAttributes(): void {
-    for (const attribute of [WITNESS_MAP_ATTRIBUTE, MILESTONES_ATTRIBUTE]) {
+    for (const attribute of [OBSERVER_MAP_ATTRIBUTE, MILESTONES_ATTRIBUTE]) {
       this.sceneElement.toggleAttribute(attribute, this.hasAttribute(attribute))
     }
   }
 
   /** Fetches `url` and loads it — what the `src` attribute uses. Accepts a case (`case.json`),
-   * whose sighting events name the recordings to show, or one witness's recording directly: told
-   * apart by shape (see CaseFile.isCase). A bare JSON array, the witness list this element read
+   * whose sighting events name the recordings to show, or one observer's recording directly: told
+   * apart by shape (see CaseFile.isCase). A bare JSON array, the observer list this element read
    * before cases, is refused by name rather than misread. */
   async loadFromSrc(url: string): Promise<void> {
     const json = await SightingFetch.json(url)
@@ -376,14 +376,14 @@ export class SightingElement extends HTMLElement {
       // the same case.json works read from its dossier's page and from anywhere else.
       const urls = CaseFile.sightingUrls(json, new URL(url, location.href).href)
       if (urls.length === 0) throw new Error(`${url} is a case with no sighting event: no recording to show`)
-      await this.loadWitnessUrls(urls, { json, url: new URL(url, location.href).href })
+      await this.loadObserverUrls(urls, { json, url: new URL(url, location.href).href })
     } else {
       this.setEntries([{ src: url, sighting: json as SightingRecordingJson }], undefined)
     }
   }
 
   /**
-   * One witness's recording, set directly instead of fetched.
+   * One observer's recording, set directly instead of fetched.
    *
    * The same door `<rr0-ufo>` and `<rr0-scene>` already offer, and what a page holding a recording
    * in memory needs — text pasted into a form, a file the reader picked, a recording just built by
@@ -400,50 +400,50 @@ export class SightingElement extends HTMLElement {
     this.setEntries([{ src: "", sighting }], undefined)
   }
 
-  get witnessUrls(): string[] {
+  get observerUrls(): string[] {
     return this.entries.map(entry => entry.src)
   }
 
-  set witnessUrls(urls: string[]) {
-    void this.loadWitnessUrls(urls)
+  set observerUrls(urls: string[]) {
+    void this.loadObserverUrls(urls)
   }
 
-  private async loadWitnessUrls(urls: string[], caseSource?: { json: CaseJson, url: string }): Promise<void> {
+  private async loadObserverUrls(urls: string[], caseSource?: { json: CaseJson, url: string }): Promise<void> {
     const entries = await Promise.all(
-      urls.map(async (src): Promise<WitnessEntry> => (
+      urls.map(async (src): Promise<ObserverEntry> => (
         { src, sighting: (await SightingFetch.json(src)) as SightingRecordingJson }
       ))
     )
     this.setEntries(entries, caseSource)
   }
 
-  private setEntries(entries: WitnessEntry[], caseSource: { json: CaseJson, url: string } | undefined): void {
+  private setEntries(entries: ObserverEntry[], caseSource: { json: CaseJson, url: string } | undefined): void {
     this.entries = entries
     this.caseSource = caseSource
 
     this.toolbarElement.hidden = entries.length === 0
     const showSelect = entries.length > 1
-    this.witnessSelect.hidden = !showSelect
-    this.witnessText.hidden = showSelect
-    this.witnessSelect.innerHTML = ""
+    this.observerSelect.hidden = !showSelect
+    this.observerText.hidden = showSelect
+    this.observerSelect.innerHTML = ""
     for (const entry of entries) {
       const option = document.createElement("option")
       option.value = entry.src
       // Never the URL: a recording that names nobody is listed by its place in the list, which at
-      // least says what it is. `/demo-data/sky-test-halos.json` as a witness's name said nothing
+      // least says what it is. `/demo-data/sky-test-halos.json` as a observer's name said nothing
       // and looked like a fault.
-      option.textContent = this.witnessDisplayName(entry.sighting.witness)
-        ?? this.messages.unnamedWitness.replace("{n}", String(entries.indexOf(entry) + 1))
-      this.witnessSelect.appendChild(option)
+      option.textContent = this.observerDisplayName(entry.sighting.observer)
+        ?? this.messages.unnamedObserver.replace("{n}", String(entries.indexOf(entry) + 1))
+      this.observerSelect.appendChild(option)
     }
 
-    // Keeps the current witness selected if the new list still has them (e.g. a case
-    // re-read), otherwise falls back to the first witness.
+    // Keeps the current observer selected if the new list still has them (e.g. a case
+    // re-read), otherwise falls back to the first observer.
     const next = entries.find(entry => entry.src === this.currentSrc) ?? entries[0]
     if (next) {
-      this.selectWitness(next.src)
+      this.selectObserver(next.src)
     } else {
-      this.updateTestimonyLine()
+      this.updateAccountLine()
     }
   }
 
@@ -455,7 +455,7 @@ export class SightingElement extends HTMLElement {
    * Always the explicit `?sighting=` form, with an absolute URL. It used to shorten a same-origin
    * recording to a bare path on the app's own domain, relying on that domain redirecting any
    * unknown path into the editor — which stopped being true the day ufoathome.org became a site
-   * with files of its own: `/demo-data/witness-socorro.json` now resolves to the recording itself,
+   * with files of its own: `/demo-data/observer-socorro.json` now resolves to the recording itself,
    * and the reader would have been handed raw JSON instead of an editor. The parameter names the
    * recording whatever the host does with its paths.
    */
@@ -501,20 +501,20 @@ export class SightingElement extends HTMLElement {
   }
 
   /**
-   * What the recording on show can be replayed as: its testimony, and every analyst's
+   * What the recording on show can be replayed as: its account, and every analyst's
    * interpretation of it the case holds (see CaseFile.interpretationEvents). No choice is shown when
-   * the testimony is all there is.
+   * the account is all there is.
    *
-   * The testimony is ONE thing, drawn the way the witness gave it: in the round when they said what
+   * The account is ONE thing, drawn the way the observer gave it: in the round when they said what
    * it was (their own `interpretation` — a craft on its legs, a hundred feet away), flat, as the
    * angles they saw, when they did not. What they saw is still there in the first case, as what
-   * the comparison lays over it (see SceneElement.compareTestimony): the angles and the metres are
+   * the comparison lays over it (see SceneElement.compareAccount): the angles and the metres are
    * not two versions of one account but the account and the test of it.
    *
    * The same recording offered again (its labels in another language) keeps what is chosen; a
-   * different one starts from its testimony.
+   * different one starts from its account.
    */
-  private offerInterpretations(entry: WitnessEntry): void {
+  private offerInterpretations(entry: ObserverEntry): void {
     const sameRecording = this.offeredFor === entry.sighting
     const previous = this.interpretationSelect.value
     this.offeredFor = entry.sighting
@@ -531,7 +531,7 @@ export class SightingElement extends HTMLElement {
     // The recording's own, as the scene read it: its values with their provenance taken off (see
     // Provenance), the same object the scene is showing.
     const own = entry === this.entries.find(e => e.src === this.currentSrc) ? this.sceneElement.ufoElement.sighting.interpretation : undefined
-    offer(TESTIMONY_OPTION, this.messages.testimony, () => Promise.resolve(own))
+    offer(ACCOUNT_OPTION, this.messages.account, () => Promise.resolve(own))
     const source = this.caseSource
     if (source) {
       CaseFile.interpretationEvents(source.json, entry.sighting.id).forEach((event, index) => {
@@ -542,11 +542,11 @@ export class SightingElement extends HTMLElement {
       })
     }
     const kept = sameRecording && [...this.interpretationSelect.options].some(option => option.value === previous)
-    const value = kept ? previous : TESTIMONY_OPTION
+    const value = kept ? previous : ACCOUNT_OPTION
     this.interpretationSelect.value = value
     // The scene follows whatever is chosen, including when it was just emptied by the recording
     // being read again (see SceneElement.sightingData) while the choice stayed the same.
-    if (value === TESTIMONY_OPTION) {
+    if (value === ACCOUNT_OPTION) {
       if (this.sceneElement.interpretation !== own) this.sceneElement.interpretation = own
     } else if (!this.sceneElement.interpretation) {
       void this.chooseInterpretation(value)
@@ -556,21 +556,21 @@ export class SightingElement extends HTMLElement {
     this.updateCompareButton()
   }
 
-  /** Shows the testimony beside the interpretation, or not — see SceneElement.compareTestimony. The
-   * choice holds across interpretations and witnesses, like the map's: it is the reader's way of
+  /** Shows the account beside the interpretation, or not — see SceneElement.compareAccount. The
+   * choice holds across interpretations and observers, like the map's: it is the reader's way of
    * looking, not a property of what is looked at. */
   private setComparing(comparing: boolean): void {
-    this.sceneElement.compareTestimony = comparing
+    this.sceneElement.compareAccount = comparing
     this.updateCompareButton()
     // The scene has just measured (or stopped measuring) at the instant on show; what it found is
     // shown now rather than on its next change, which a paused player may never make.
     this.showConfrontation(this.sceneElement.confrontation)
   }
 
-  /** Offered only while an interpretation is on show: the raw testimony has nothing to be compared
+  /** Offered only while an interpretation is on show: the raw account has nothing to be compared
    * with. */
   private updateCompareButton(): void {
-    const comparing = this.sceneElement.compareTestimony
+    const comparing = this.sceneElement.compareAccount
     this.compareButton.hidden = !this.sceneElement.interpretation
     this.compareButton.setAttribute("aria-pressed", String(comparing))
     const label = comparing ? this.messages.hideComparison : this.messages.showComparison
@@ -598,24 +598,24 @@ export class SightingElement extends HTMLElement {
 
   /** Who made a claim, as a reader would name them: a person's id, which RR0 writes last name first
    * ("StanfordRay"), is spelled out first names first ("Ray Stanford"); an organisation's is only
-   * spelled out; a description is read like a witness's. */
+   * spelled out; a description is read like a observer's. */
   private agentName(agent: AgentRef): string {
     if ("people" in agent) {
       const [last, ...first] = agent.people.replace(/([a-z])([A-Z])/g, "$1 $2").split(" ")
       return [...first, last].join(" ")
     }
     if ("org" in agent) return agent.org.replace(/([a-z])([A-Z])/g, "$1 $2")
-    return this.witnessDisplayName(agent) ?? ""
+    return this.observerDisplayName(agent) ?? ""
   }
 
   /**
-   * One line per phenomenon a body claims to be: how far off the direction the witness gave it is,
+   * One line per phenomenon a body claims to be: how far off the direction the observer gave it is,
    * and how many times wider and taller than they said it looks — each in red when it is further
-   * off than a witness could be (see BodyConfrontation). Hidden for the raw testimony.
+   * off than a observer could be (see BodyConfrontation). Hidden for the raw account.
    */
   private showConfrontation(readings: ConfrontationReading[]): void {
     this.confrontationList.innerHTML = ""
-    this.confrontationElement.hidden = !this.sceneElement.interpretation || !this.sceneElement.compareTestimony
+    this.confrontationElement.hidden = !this.sceneElement.interpretation || !this.sceneElement.compareAccount
     const degrees = new Intl.NumberFormat(this.language, { maximumFractionDigits: 1, minimumFractionDigits: 1 })
     const times = new Intl.NumberFormat(this.language, { maximumFractionDigits: 2, minimumFractionDigits: 2 })
     for (const reading of readings) {
@@ -642,28 +642,28 @@ export class SightingElement extends HTMLElement {
     }
   }
 
-  private selectWitness(src: string): void {
+  private selectObserver(src: string): void {
     const entry = this.entries.find(e => e.src === src)
     if (!entry) return
     this.currentSrc = src
-    this.witnessSelect.value = src
-    // Already fetched by loadWitnessUrls — no need to re-fetch on every selection change.
+    this.observerSelect.value = src
+    // Already fetched by loadObserverUrls — no need to re-fetch on every selection change.
     // SceneElement's own setter updates astronomy/weather/terrain for the new sighting too.
     // A recording read from an address states its models' addresses relative to it; one set in
     // memory (src "") has none, and the page's own address is all its relative ones can mean.
     this.sceneElement.documentUrl = entry.src ? new URL(entry.src, location.href).href : undefined
     this.sceneElement.sightingData = entry.sighting
     this.offerInterpretations(entry)
-    this.updateTestimonyLine()
-    // A different witness is a different recording: what it states, and what an assessor makes of
+    this.updateAccountLine()
+    // A different observer is a different recording: what it states, and what an assessor makes of
     // it, both change with it.
     this.refreshParamSummary()
     void this.runAssessments()
     if (this.infoOpen) this.populateInfoPanel()
     // For the page around the player: whatever it says about the recording on show (its
-    // description, its title) has to follow a change of witness, and `sightingData` alone cannot
+    // description, its title) has to follow a change of observer, and `sightingData` alone cannot
     // tell it when to look again.
-    this.dispatchEvent(new CustomEvent(WITNESS_CHANGE_EVENT, { detail: { src } }))
+    this.dispatchEvent(new CustomEvent(OBSERVER_CHANGE_EVENT, { detail: { src } }))
   }
 
   /**
@@ -692,25 +692,25 @@ export class SightingElement extends HTMLElement {
   }
 
   /**
-   * Keeps the toolbar's "Testimony by <witness>" line in sync — and takes it away entirely when
-   * there is no witness to name.
+   * Keeps the toolbar's "Account by <observer>" line in sync — and takes it away entirely when
+   * there is no observer to name.
    *
-   * Several of the recordings this component is pointed at are not testimony at all: a sky set up
-   * to show what a halo or a comet looked like on a given night has no witness, and "Testimony by
-   * /demo-data/sky-test-halos.json" was three wrong things at once — it claimed a testimony, it
-   * claimed a witness, and it named them with a URL. Saying nothing is the accurate answer, and the
+   * Several of the recordings this component is pointed at are not account at all: a sky set up
+   * to show what a halo or a comet looked like on a given night has no observer, and "Account by
+   * /demo-data/sky-test-halos.json" was three wrong things at once — it claimed a account, it
+   * claimed a observer, and it named them with a URL. Saying nothing is the accurate answer, and the
    * ? button that carries the observation's own metadata stays either way.
    */
-  private updateTestimonyLine(): void {
+  private updateAccountLine(): void {
     const entry = this.entries.find(e => e.src === this.currentSrc)
-    const name = entry ? this.witnessDisplayName(entry.sighting.witness) : undefined
+    const name = entry ? this.observerDisplayName(entry.sighting.observer) : undefined
     // With several listed, the picker is the point even where one of them is unnamed.
     const named = name !== undefined || this.entries.length > 1
-    this.testimonyElement.hidden = !named
-    // Cleared rather than left alone: a hidden node holding the PREVIOUS witness's name is one
+    this.accountElement.hidden = !named
+    // Cleared rather than left alone: a hidden node holding the PREVIOUS observer's name is one
     // stylesheet away from being read out, and a screen reader does not need the stylesheet's
     // permission to reach it.
-    this.witnessText.textContent = name ?? ""
+    this.observerText.textContent = name ?? ""
   }
 
   /** Picks the best available display string out of a People reference — a full name (built from
@@ -718,16 +718,16 @@ export class SightingElement extends HTMLElement {
    * honored first since it's the field a caller sets when they explicitly want a specific display
    * string (e.g. a name that doesn't decompose cleanly into first/last). `id` is the
    * last-resort, machine-oriented fallback — better than nothing, not meant to be end-user
-   * copy. Returns undefined (letting the caller fall back to entry.src) only when witness itself
+   * copy. Returns undefined (letting the caller fall back to entry.src) only when observer itself
    * is undefined or empty. */
-  private witnessDisplayName(witness?: People): string | undefined {
-    if (!witness) return undefined
-    const fullName = [...(witness.firstNames ?? []), witness.lastName].filter(Boolean).join(" ")
-    return witness.title || fullName || witness.id
+  private observerDisplayName(observer?: People): string | undefined {
+    if (!observer) return undefined
+    const fullName = [...(observer.firstNames ?? []), observer.lastName].filter(Boolean).join(" ")
+    return observer.title || fullName || observer.id
   }
 
   /**
-   * The date and time the WITNESS reported, on their own clock — never converted into the
+   * The date and time the OBSERVER reported, on their own clock — never converted into the
    * reader's time zone. `sighting.time` is already a local wall-clock reading ("02:45" over
    * Montgomery), so it is formatted as UTC here purely to stop the platform from shifting it:
    * rendered through the reader's zone instead, Chiles and Whitted's 02:45 sighting reads
@@ -747,7 +747,7 @@ export class SightingElement extends HTMLElement {
 
   /** The offset sightingTimeToDate itself applied — declared when the recording knows it, else
    * the same longitude approximation that function falls back to (see SightingEvent.
-   * utcOffsetHours). Undoing exactly it is what recovers the witness's own wall clock. */
+   * utcOffsetHours). Undoing exactly it is what recovers the observer's own wall clock. */
   private utcOffsetHoursOf(sighting: SightingRecordingJson, lng: number): number {
     return sighting.utcOffsetHours ?? Math.round(lng / 15)
   }
@@ -869,13 +869,13 @@ export class SightingElement extends HTMLElement {
     block.scrollIntoView?.({ block: "nearest" })
   }
 
-  /** Fills the info panel in one pass: the currently-selected witness's observation metadata
+  /** Fills the info panel in one pass: the currently-selected observer's observation metadata
    * (the primary content, shown first), then the smaller footer row below it — app identity
    * (linking to the tool's own home, not this specific recording) and the credits toggle. The
    * credits list itself (live terrain imagery attribution once a real patch has resolved, plus
    * the always-bundled thunder sound credit) is populated here too but stays collapsed until
    * toggleCredits() reveals it — no point building visible DOM for content nobody asked to see
-   * yet. Re-run on open and whenever the selected witness changes while the panel is already
+   * yet. Re-run on open and whenever the selected observer changes while the panel is already
    * open — cheap enough not to bother with a more granular per-section update path. */
   /**
    * Whether the parameter strip under the render is showing — what the recording states, field by
@@ -910,7 +910,7 @@ export class SightingElement extends HTMLElement {
     this.syncLabelsToggle()
     this.refreshParamSummary()
     // Unconditionally, not just while the panel happens to be open: the toggle that changes what
-    // the panel should hold is IN the panel, so guarding on infoOpen (as selectWitness does, for a
+    // the panel should hold is IN the panel, so guarding on infoOpen (as selectObserver does, for a
     // change that comes from outside it) left the rows the strip had taken over missing after the
     // strip was turned back off.
     this.populateInfoPanel()
@@ -935,7 +935,7 @@ export class SightingElement extends HTMLElement {
     // No decorId and no sourceId: a reader isn't pointing at one building or one shape, so the
     // summary describes the observation and lists what stood around rather than detailing a
     // selection nobody made. No ground height either — the scene doesn't resolve one, so the
-    // witness's own height is stated as height above the ground rather than as a sea-level
+    // observer's own height is stated as height above the ground rather than as a sea-level
     // altitude that would be wrong by the whole relief (see SummaryContext).
     // The assessments last: it is what was made of the recording, and reads after it. They come
     // from the assessors rather than from the file, so they are held here and appended (see
@@ -949,22 +949,22 @@ export class SightingElement extends HTMLElement {
       return
     }
     this.summarySignature = signature
-    // Chips describing a sub-element sit INSIDE one bearing its name — the witness who gave this
-    // testimony — so that "Heading" inside that box needs no other way of saying whose heading it
+    // Chips describing a sub-element sit INSIDE one bearing its name — the observer who gave this
+    // account — so that "Heading" inside that box needs no other way of saying whose heading it
     // is. The summary emits its groups in one run each, so a box opens when a run starts and
     // closes when it ends.
     //
     // The decor is not among them: its chips are a picker, and a player has nothing to pick with
     // (see SummaryContext.decorPicker), so the summary emits none here. What stood around the
-    // witness is in the render, where it can be looked at rather than counted.
+    // observer is in the render, where it can be looked at rather than counted.
     const strip: HTMLElement[] = []
     let open: { group: string, element: HTMLElement } | undefined
     for (const entry of entries) {
       if (open && open.group !== entry.group) {
         open = undefined
       }
-      const boxName = entry.group === "witness" ? this.messages.witnessGroup
-        // Named by its GROUP and never by what it leads to — an assessment of the witness's own
+      const boxName = entry.group === "observer" ? this.messages.observerGroup
+        // Named by its GROUP and never by what it leads to — an assessment of the observer's own
         // account still belongs in a box saying Assessment.
         : entry.group === "assessment" ? this.messages.assessmentGroup : undefined
       if (boxName !== undefined && !open) {
@@ -1061,20 +1061,20 @@ export class SightingElement extends HTMLElement {
 export const SIGHTING_ELEMENT_NAME = "rr0-sighting"
 
 /** Fired by `<rr0-sighting>` whenever the recording on show changes: loaded, set through
- * `sightingData`, or another witness picked. Read `sightingData` back off the element. */
-export const WITNESS_CHANGE_EVENT = "witnesschange"
+ * `sightingData`, or another observer picked. Read `sightingData` back off the element. */
+export const OBSERVER_CHANGE_EVENT = "observerchange"
 
 /**
  * What this element was called until 0.41.0, still registered and still working.
  *
- * The name was wrong by then: the element takes several witnesses and lets a reader move between
- * their points of view, so it is not AN eyewitness, it is the sighting seen through whichever one
+ * The name was wrong by then: the element takes several observers and lets a reader move between
+ * their points of view, so it is not AN eyeobserver, it is the sighting seen through whichever one
  * you pick — and everything around it already said so (a sighting.json, a ?sighting= parameter, a
  * `sighting` attribute on <rr0-ufo>). But pages were loading it under the old name before the new
  * one existed, and a rename that breaks them is a rename that punishes the people who used the
  * thing early. Both names, one element, indefinitely.
  */
-export const LEGACY_ELEMENT_NAME = "rr0-eyewitness"
+export const LEGACY_ELEMENT_NAME = "rr0-eyeobserver"
 
 /** Only so that the legacy name has a constructor of its own to be defined with: customElements
  * refuses the same class twice, and there is nothing to add. */

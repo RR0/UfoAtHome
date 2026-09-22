@@ -88,8 +88,8 @@ export class ExposureSampling {
   /**
    * The widest angle any decor object crossed while the shutter was open, degrees.
    *
-   * Measured from the witness standing at the local origin, which is where decor's own eastM/northM
-   * are measured from (see DecorObject) — a witness who ALSO moved during the pose shifts it a
+   * Measured from the observer standing at the local origin, which is where decor's own eastM/northM
+   * are measured from (see DecorObject) — a observer who ALSO moved during the pose shifts it a
    * little, and that is a rounding error in a sampling rate rather than a claim about the picture.
    */
   static travelDegOver(
@@ -121,7 +121,7 @@ export class ExposureSampling {
     return (fastest / 60) * exposureSeconds
   }
 
-  /** Which way an object lies from the witness at that instant, as a unit vector. */
+  /** Which way an object lies from the observer at that instant, as a unit vector. */
   private static directionAt(
     object: DecorObject,
     observerElevationM: number,

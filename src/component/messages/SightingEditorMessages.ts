@@ -168,7 +168,7 @@ export interface SightingEditorMessages extends SightingLabels {
   /** The button (and Enter) that runs the search. */
   searchPlace: string
   /** Label of the candidate list a search fills — a place name is often ambiguous, and only the
-   * witness knows which one it was. */
+   * observer knows which one it was. */
   placeMatch: string
   placeSearching: string
   /** Completed in code with the number of candidates: "3 {placeMatchesFound}". Singular has its
@@ -211,7 +211,7 @@ export interface SightingEditorMessages extends SightingLabels {
    * "Phenomenon", not "Shape": a shape is one of the things stated in here, beside the colour, the
    * halo, the brilliance, the blur, the apparent size and the sound of it — and the group can hold
    * several shapes at once, a craft and its trailing flame being two. Naming the whole after one of
-   * its fields said the group was about drawing, when what it is about is the thing the witness
+   * its fields said the group was about drawing, when what it is about is the thing the observer
    * saw. The word inside it stays "shape", because that is what a drawn outline is.
    */
   shapeGroup: string
@@ -224,7 +224,7 @@ export interface SightingEditorMessages extends SightingLabels {
    * The group holding when the observation happened.
    *
    * "Moment" rather than "Date/time", which named two form fields; the group holds a start, an end,
-   * a duration and the witness's own time zone, and what all four are for is fixing the instant the
+   * a duration and the observer's own time zone, and what all four are for is fixing the instant the
    * sky is computed at.
    */
   temporalGroup: string
@@ -240,7 +240,7 @@ export interface SightingEditorMessages extends SightingLabels {
   locationGroup: string
   observationGroup: string
   /** Label of the checkbox that decides whether the weather fields are looked up from a real
-   * record (checked, and then read-only) or stated by the witness (unchecked, and then never
+   * record (checked, and then read-only) or stated by the observer (unchecked, and then never
    * overwritten) — see SightingEditorElement.inferWeather. */
   /** Why the weather fields are unavailable mid-playback: the instant they would be written at is
    * moving, and the next tick would overwrite the field being dragged. */
@@ -278,7 +278,7 @@ export interface SightingEditorMessages extends SightingLabels {
   referencePitch: string
   referenceRoll: string
   referenceFov: string
-  /** Copies the witness's pose at the playhead into the picture's registration. */
+  /** Copies the observer's pose at the playhead into the picture's registration. */
   referenceUsePose: string
   addReferenceUrl: string
   addReferenceFile: string
@@ -306,7 +306,7 @@ export interface SightingEditorMessages extends SightingLabels {
   deleteReferenceLandmark: string
   referenceLandmarkLabel: string
   referenceLandmarkLabelPlaceholder: string
-  /** Copies the picture's registration into the witness's pose at the playhead, as a measurement. */
+  /** Copies the picture's registration into the observer's pose at the playhead, as a measurement. */
   referenceAdoptPose: string
   /** The provenance written with it — {title}, {n} landmarks, {deg} of residual. */
   referenceAdoptRationale: string
@@ -340,12 +340,12 @@ export interface SightingEditorMessages extends SightingLabels {
   /** No shower running at all on that date — but never an empty sky: {sporadic} is the sporadic
    * background, the meteors that belong to no stream and fall on every night of the year. */
   skyNothingActive: string
-  /** How faint a star that sky allowed, for a witness's own eyes — {limit} the magnitude. First on
+  /** How faint a star that sky allowed, for a observer's own eyes — {limit} the magnitude. First on
    * the line because every other clause on it is settled against this number. */
   skyStarsEye: string
   /** The same threshold for a recording made through something other than an eye, when the device
    * reached FURTHER: {limit} what it recorded to, {device} its name, {gain} how many magnitudes
-   * past the eye, {eye} what the witness standing beside it saw. Both figures, always — the gap
+   * past the eye, {eye} what the observer standing beside it saw. Both figures, always — the gap
    * between them is the whole reason a photograph is worth arguing about. */
   skyStarsDeeper: string
   /** And when it reached less far, which is the commoner case and the more surprising one: a
@@ -360,7 +360,7 @@ export interface SightingEditorMessages extends SightingLabels {
   /** The date or the place is missing, so nothing can be worked out — distinct from "there was
    * nothing", the same way the weather distinguishes the two. */
   skyUnknown: string
-  /** Jumps the playhead to the next meteor of the shower and turns the witness to face it. Stating
+  /** Jumps the playhead to the next meteor of the shower and turns the observer to face it. Stating
    * that a shower was running without offering this is half a feature: a one-second streak
    * somewhere in sixty degrees of sky is not findable by hand. */
   showMeteor: string
@@ -385,7 +385,7 @@ export interface SightingEditorMessages extends SightingLabels {
   /** A nova or supernova whose recorded light curve covers that night and that was bright enough
    * for the naked eye — see Novae.ts. {name} is the eruption, with no article (French supplies it),
    * {magnitude} its brightness interpolated from the record, {altitude} and {bearing} as for the
-   * comet. Stated as a new star, which is what a witness would have taken it for if they noticed it
+   * comet. Stated as a new star, which is what a observer would have taken it for if they noticed it
    * at all. */
   skyNova: string
   /** The same, for one that had not risen, or never rises from there: SN 1987A from Europe. */
@@ -421,7 +421,7 @@ export interface SightingEditorMessages extends SightingLabels {
   skyOpticsCircumhorizontal: string
   skyOpticsPillar: string
   /** A device the recording names although its own dates exclude it — offered anyway, and said to
-   * be out of period rather than dropped: dropping it would silently re-instrument a testimony.
+   * be out of period rather than dropped: dropping it would silently re-instrument a account.
    * {name} is the device's own name. */
   instrumentOutOfPeriod: string
   /** The two units the focal row switches between. */
@@ -431,7 +431,7 @@ export interface SightingEditorMessages extends SightingLabels {
   fieldOfViewReadout: string
   /** No ice cloud at all, so none of it could have happened. The commonest answer. */
   skyOpticsNoIce: string
-  /** Ice above, but a lower deck between it and the witness. */
+  /** Ice above, but a lower deck between it and the observer. */
   skyOpticsHidden: string
   /** How the two messages above name whichever light source is making the display — the Sun by day,
    * the Moon by night. Separate strings because French wants "du Soleil" and "de la Lune". */
@@ -442,7 +442,7 @@ export interface SightingEditorMessages extends SightingLabels {
    *
    * Said only when rain was reported, unlike the ice line: everybody knows whether it was raining,
    * so the clause exists to answer the question that rain RAISES rather than to list an absent
-   * ingredient. {forms} is every bow that could have cleared the witness's own horizon.
+   * ingredient. {forms} is every bow that could have cleared the observer's own horizon.
    */
   skyBowPossible: string
   /** The same under a Moon, which is the version worth reporting: a moonbow is white to the eye,
@@ -471,15 +471,15 @@ export interface SightingEditorMessages extends SightingLabels {
   skyBowHidden: string
   /** Rain in the dark, with neither Sun nor Moon up to be bent. */
   skyBowNoSource: string
-  /** Turns the witness to face the comet. Unlike a meteor it does not need seeking to: it was
+  /** Turns the observer to face the comet. Unlike a meteor it does not need seeking to: it was
    * there for the whole recording, and for weeks either side. */
   showComet: string
-  /** Turns the witness to face the nova or supernova. Like the comet, it was there all night. */
+  /** Turns the observer to face the nova or supernova. Like the comet, it was there all night. */
   showNova: string
   /**
    * Real passes, from the element sets archived for that date (see TleArchive): how many satellites
    * crossed that sky lit and brighter than its limit during the observation, and the brightest of
-   * them — {name}, {magnitude}, {altitude}, {bearing}, and {time} the witness's clock at its peak.
+   * them — {name}, {magnitude}, {altitude}, {bearing}, and {time} the observer's clock at its peak.
    * {count} is the number of such passes.
    */
   skySatellitePasses: string
@@ -492,14 +492,14 @@ export interface SightingEditorMessages extends SightingLabels {
   skySatellitePassesNone: string
   /** Inside the archive's span, but in a hole where no element set was recent enough to use. */
   skySatelliteElementsGap: string
-  /** Seeks to the brightest satellite pass the timeline reaches, at its peak, and turns the witness
+  /** Seeks to the brightest satellite pass the timeline reaches, at its peak, and turns the observer
    * to it. The next press takes the next brightest. */
   showSatellite: string
   /**
    * Whether anything in orbit could have been seen — see Satellites.ts. Stated only once the Sun
    * has set, since a satellite in a daylit sky is not a candidate for anything.
    *
-   * {height} is how far above the witness the Earth's own shadow stood, which is the number the
+   * {height} is how far above the observer the Earth's own shadow stood, which is the number the
    * whole verdict rests on and is worth showing rather than hiding behind a yes or no. {count} is
    * how many tracked objects were in orbit THAT MONTH — the wording says "that month" because the
    * catalogue is monthly, and claiming a figure for one particular night would be precision it does
@@ -520,7 +520,7 @@ export interface SightingEditorMessages extends SightingLabels {
    * class of report rather than a technicality: an Iridium flare reached magnitude -8 and those were
    * genuinely watched in broad daylight.
    *
-   * Everything in orbit is sunlit by day (the Earth's shadow is behind the witness, not above), so
+   * Everything in orbit is sunlit by day (the Earth's shadow is behind the observer, not above), so
    * what the clause states is the CONTRAST: {eras} are the classes that outshone that sky.
    */
   skySatellitesDaylight: string
@@ -529,7 +529,7 @@ export interface SightingEditorMessages extends SightingLabels {
    * produced — and no amount of care in the list formatter fixes a verb outside it. English needs
    * no such split and carries the same sentence twice. */
   skySatellitesDaylightOne: string
-  /** Turns the witness to face the selected decor object — the only practical way to find an
+  /** Turns the observer to face the selected decor object — the only practical way to find an
    * aircraft in an otherwise empty sky. */
   lookAtDecor: string
   /** The accessible name/tooltip for the "+" button that adds a new decor object of whichever
@@ -540,22 +540,22 @@ export interface SightingEditorMessages extends SightingLabels {
   addDecor: string
   deleteDecor: string
   decorSightingUrl: string
-  /** Right-click menu item on a witness decor object that has a sightingUrl — loads that
-   * recording (see SightingEditorElement.viewWitnessTestimony). */
-  viewTestimony: string
-  /** viewTestimony's own disabled title when the right-clicked witness has no sightingUrl set. */
-  noWitnessRecording: string
+  /** Right-click menu item on a observer decor object that has a sightingUrl — loads that
+   * recording (see SightingEditorElement.viewObserverAccount). */
+  viewAccount: string
+  /** viewAccount's own disabled title when the right-clicked observer has no sightingUrl set. */
+  noObserverRecording: string
   /** Decor context menu's "Masks ▸" flyout trigger — the arrow itself is appended in code, not
    * part of this translated string (see SightingEditorElement.applyMessages). Its submenu lists every
    * shape/source as a checkbox (see DecorObject.occludesSourceIds), which needs no translation of
    * its own since each entry is just that shape's own name/sourceId. */
   masks: string
-  /** Button in the Witness group that adds a new "other witness" decor object (see
-   * SightingEditorElement's addDecorWitnessButton) — distinct from decorWitness, that dropdown
+  /** Button in the Observer group that adds a new "other observer" decor object (see
+   * SightingEditorElement's addDecorObserverButton) — distinct from decorObserver, that dropdown
    * option's own (now-hidden) label. */
-  addWitness: string
+  addObserver: string
   /** The account the recording is drafted from — the label above the textarea a reader pastes a
-   * testimony into. Names the reader's gesture and not the machinery: what happens is that a
+   * account into. Names the reader's gesture and not the machinery: what happens is that a
    * recording gets drafted from an account, and which service reads it is said by the credit
    * beside the button. */
   /** Placeholder in the Description textarea, which is the account a draft is read from. */
@@ -599,12 +599,12 @@ export interface SightingEditorMessages extends SightingLabels {
   /** When the account yielded nothing at all: a real answer, and one worth saying out loud rather
    * than leaving the reader to wonder whether the button worked. */
   narrativeUnchanged: string
-  /** Heading over the values the witness themselves gave, whose justification is their own words. */
+  /** Heading over the values the observer themselves gave, whose justification is their own words. */
   narrativeStated: string
   /** Heading over the values worked out from what they said plus something checkable — the
    * rationale beside each is the working. */
   narrativeDerived: string
-  /** Heading over the values chosen so the reconstruction would run at all, on nothing the witness
+  /** Heading over the values chosen so the reconstruction would run at all, on nothing the observer
    * said. Shown FIRST of the three: this group is the to-do list, and burying it under forty quoted
    * values is how it stops being read. */
   narrativeAssumed: string
@@ -623,29 +623,29 @@ export interface SightingEditorMessages extends SightingLabels {
   /** The service refused the request and said why. {detail} is its own words, which name the field
    * to fill — see NarrativeErrorKind's "rejected" on why they are shown rather than translated. */
   narrativeErrorRejected: string
-  /** The main witness's age AT THE TIME, not today. */
-  witnessAge: string
+  /** The main observer's age AT THE TIME, not today. */
+  observerAge: string
   /** What they did, in prose — never a level: banding occupations is each method's own argument
-   * (see Testimony.witnessOccupation). */
-  witnessOccupation: string
+   * (see Account.observerOccupation). */
+  observerOccupation: string
   /** How the account reached whoever wrote the recording — Ballester-Guasp's information-quality
    * scale grades a report by that, not by what it says. */
-  testimonySource: string
-  testimonySourceUnknown: string
-  testimonySourceOnSite: string
-  testimonySourceInterview: string
-  testimonySourceTelephone: string
-  testimonySourceQuestionnaire: string
-  testimonySourceLetter: string
-  testimonySourcePress: string
-  /** Whether the witness was gone back to after the first account. Three states: a report silent
+  accountSource: string
+  accountSourceUnknown: string
+  accountSourceOnSite: string
+  accountSourceInterview: string
+  accountSourceTelephone: string
+  accountSourceQuestionnaire: string
+  accountSourceLetter: string
+  accountSourcePress: string
+  /** Whether the observer was gone back to after the first account. Three states: a report silent
    * about follow-up is not a report saying none happened. */
-  testimonyFollowedUp: string
-  testimonyUnknown: string
-  testimonyYes: string
-  testimonyNo: string
+  accountFollowedUp: string
+  accountUnknown: string
+  accountYes: string
+  accountNo: string
   /** Marks a field, and its panel's tab, that would answer a question nothing in the recording
-   * does. Not an error: the witness said nothing, the author typed nothing wrong. */
+   * does. Not an error: the observer said nothing, the author typed nothing wrong. */
   questionUnanswered: string
   /** Marks the one blank the reconstruction cannot be computed around, and the tab holding it.
    * Stronger than questionUnanswered because the consequence is: playback has no pacing. */

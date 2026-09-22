@@ -11,7 +11,7 @@
  *
  * Only the weather track and its source are rewritten, into the file's own text — nothing else in
  * the recording is round-tripped, so a refresh is a diff a reviewer can read. And only a recording
- * whose weather IS a record's is touched: one with no weatherSource holds what the witness said,
+ * whose weather IS a record's is touched: one with no weatherSource holds what the observer said,
  * which no lookup may replace (the editor's own gate, see WeatherInference.applyTo).
  *
  * Usage: npx tsx scripts/refresh-case-weather.ts
@@ -33,12 +33,12 @@ class CaseWeatherRefresh {
 
   async run(): Promise<number> {
     let failures = 0
-    for (const name of fs.readdirSync(this.directory).filter(name => /^witness-.*\.json$/.test(name)).sort()) {
+    for (const name of fs.readdirSync(this.directory).filter(name => /^observer-.*\.json$/.test(name)).sort()) {
       const file = path.join(this.directory, name)
       const text = fs.readFileSync(file, "utf8")
       const json = JSON.parse(text) as SightingRecordingJson
       if (!json.weatherSource) {
-        console.log(`${name}: the witness's own weather, left alone`)
+        console.log(`${name}: the observer's own weather, left alone`)
         continue
       }
       const result = await this.inference.infer(fromSightingJson(json))

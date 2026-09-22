@@ -46,7 +46,7 @@ const valensole = (): SightingRecordingJson => ({
       { t: 270000, shapes: [shape(4.26)] }
     ]
   },
-  witnessTrack: {
+  observerTrack: {
     keyframes: [
       { t: 0, pose: pose(43.845508, 180) },
       { t: 15000, pose: pose(43.845304, 180) },
@@ -74,7 +74,7 @@ describe("ShapeDistance", () => {
   it("says which two instants it measured between, so the working can be checked by hand", () => {
     const estimate = ShapeDistance.of(fromSightingJson(valensole()), "ufo-1")!
 
-    // The walk ends at 55 s and the craft only lifts off at 254 s, so the pair the witness moved
+    // The walk ends at 55 s and the craft only lifts off at 254 s, so the pair the observer moved
     // most between is also a pair the object was still through — which is the assumption the whole
     // derivation rests on, and the one nothing here can verify.
     expect(estimate.fromT).toBe(0)
@@ -84,7 +84,7 @@ describe("ShapeDistance", () => {
 
   it("follows the object back out once it leaves", () => {
     // Its real width does not change, so every later instant's distance falls out of its apparent
-    // size — including instants after the witness stopped walking, where there is no baseline.
+    // size — including instants after the observer stopped walking, where there is no baseline.
     const estimate = ShapeDistance.of(fromSightingJson(valensole()), "ufo-1")!
     const departing = estimate.distanceM.find(instant => instant.t === 270000)!
 
@@ -92,12 +92,12 @@ describe("ShapeDistance", () => {
     expect(departing.m).toBeLessThan(60)
   })
 
-  it("establishes nothing when the witness never moved", () => {
+  it("establishes nothing when the observer never moved", () => {
     // A driver who stopped their car has established nothing about distance, which is exactly why a
     // light in an empty sky stays a light at an unknown distance.
     const still = valensole()
-    still.witnessTrack = {
-      keyframes: still.witnessTrack!.keyframes.map(keyframe => ({ ...keyframe, pose: pose(43.845508, 180) }))
+    still.observerTrack = {
+      keyframes: still.observerTrack!.keyframes.map(keyframe => ({ ...keyframe, pose: pose(43.845508, 180) }))
     }
 
     expect(ShapeDistance.of(fromSightingJson(still), "ufo-1")).toBeUndefined()
@@ -105,10 +105,10 @@ describe("ShapeDistance", () => {
 
   it("establishes nothing from a walk that never changed how big it looked", () => {
     // Strolling past a thing at a constant distance covers ground and settles nothing: it is the
-    // component TOWARDS it that changes the angle. Here the witness walks south while looking east.
+    // component TOWARDS it that changes the angle. Here the observer walks south while looking east.
     const past = valensole()
-    past.witnessTrack = {
-      keyframes: past.witnessTrack!.keyframes.map(keyframe => ({ ...keyframe, pose: { ...keyframe.pose, headingDeg: 90 } }))
+    past.observerTrack = {
+      keyframes: past.observerTrack!.keyframes.map(keyframe => ({ ...keyframe, pose: { ...keyframe.pose, headingDeg: 90 } }))
     }
 
     expect(ShapeDistance.of(fromSightingJson(past), "ufo-1")).toBeUndefined()

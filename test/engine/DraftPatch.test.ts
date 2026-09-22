@@ -6,14 +6,14 @@ const empty = (): SightingRecordingJson => ({ version: 1, timeline: { keyframes:
 
 describe("DraftPatch", () => {
   it("names every leaf a draft states, and none of the objects holding them", () => {
-    // Naming `witness` would write the whole of it and take with it any sibling key the account
+    // Naming `observer` would write the whole of it and take with it any sibling key the account
     // happens not to mention.
     const paths = DraftPatch.stated({
       time: { year: 1965, month: 7, day: 1 },
-      witness: { id: "masse", title: "Maurice Masse" }
+      observer: { id: "masse", title: "Maurice Masse" }
     })
 
-    expect(paths).toEqual(["time.year", "time.month", "time.day", "witness.id", "witness.title"])
+    expect(paths).toEqual(["time.year", "time.month", "time.day", "observer.id", "observer.title"])
   })
 
   it("treats an array as one value, so a stated timeline is written whole", () => {
@@ -25,7 +25,7 @@ describe("DraftPatch", () => {
 
   it("leaves alone what the account is silent about", () => {
     // The case the class exists for: a place geocoded to the metre, an instrument chosen, decor
-    // placed — none of that is in a testimony, so no reading of one may touch it.
+    // placed — none of that is in a account, so no reading of one may touch it.
     const editor: SightingRecordingJson = {
       ...empty(),
       place: [{ lat: 43.837, lng: 5.993 }],
@@ -69,9 +69,9 @@ describe("DraftPatch", () => {
   })
 
   it("creates the object a stated leaf needs, when the recording has none", () => {
-    const draft = { witness: { title: "Maurice Masse" } }
+    const draft = { observer: { title: "Maurice Masse" } }
 
-    expect(DraftPatch.apply(empty(), draft, DraftPatch.stated(draft)).witness)
+    expect(DraftPatch.apply(empty(), draft, DraftPatch.stated(draft)).observer)
       .toEqual({ title: "Maurice Masse" })
   })
 })

@@ -13,7 +13,7 @@ export type StatedRoadSurface = "paved" | "gravel" | "dirt"
  * realigned and abandoned, and an unsealed track is the first to go. So a stated road is drawn at
  * full presence and a surveyed one faint (see RoadSystem), and a reader can tell which is which.
  *
- * In metres from the witness's own place, exactly like DecorObject.eastM/northM and for the same
+ * In metres from the observer's own place, exactly like DecorObject.eastM/northM and for the same
  * reason: this is scenery for ONE account, drawn from that account's own plan, and the plan gives
  * distances from the things on it — not latitudes.
  */
@@ -24,7 +24,7 @@ export interface StatedRoad {
   surface: StatedRoadSurface
   /** Carriageway width, metres. A 1960s New Mexico ranch track is about four. */
   widthM: number
-  /** The centre line, in metres east and north of the witness's place at t=0. */
+  /** The centre line, in metres east and north of the observer's place at t=0. */
   path: { eastM: number; northM: number }[]
   /** Where this line comes from — the plan, the survey, the report it was read off. Shown with the
    * other credits, because a road nobody can trace back to a document is an illustration. */

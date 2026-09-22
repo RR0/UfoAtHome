@@ -14,7 +14,7 @@ export interface DepthInputs {
   statedM?: number
   /** What a reader is trying out — an editor's slider, never saved. */
   hypothesisM?: number
-  /** What the witness's own walk establishes — see ShapeDistance. */
+  /** What the observer's own walk establishes — see ShapeDistance. */
   derivedM?: number
   /** What the whole recording's crossings leave possible at this instant — see
    * SizeEstimate.distanceRangeAt. */
@@ -33,7 +33,7 @@ export interface ResolvedDepth {
  * How far along its line of sight a phenomenon is DRAWN — which is not the same question as how
  * far away it was, and this class exists to keep the two apart.
  *
- * A shape facing the witness, scaled to the angle the recording states, looks exactly the same from
+ * A shape facing the observer, scaled to the angle the recording states, looks exactly the same from
  * their eye at any distance whatever. So the recording goes on stating angles and nothing else, and
  * the distance is a parameter of the picture: the one thing it changes is what the depth buffer
  * hides the shape behind, per pixel, which is precisely what a flat overlay could never do and the
@@ -45,7 +45,7 @@ export interface ResolvedDepth {
  * - A HYPOTHESIS the reader is trying: "show it at five hundred metres". Above everything the data
  *   establishes ON PURPOSE, because a hypothesis is tested by seeing it fail — set the craft at
  *   five hundred metres and watch it go behind a patrol car it was drawn in front of.
- * - DERIVED from the witness's walk (ShapeDistance), where they walked.
+ * - DERIVED from the observer's walk (ShapeDistance), where they walked.
  * - BOUNDED by what it crossed: behind that hangar is at least this far, in front of that tree is
  *   at most that far. Any distance in the interval draws every crossing correctly, so the middle
  *   of it (geometrically, since distances span decades) is taken, and a contradiction is drawn as
@@ -80,7 +80,7 @@ export class PhenomenonDepth {
     const hi = ceiling === undefined ? undefined : ceiling / PhenomenonDepth.MARGIN
     if (lo !== undefined && hi !== undefined) {
       // A contradiction — behind something far and in front of something near — is drawn behind:
-      // the witness's own "it went behind that" outranks a crossing nobody declared.
+      // the observer's own "it went behind that" outranks a crossing nobody declared.
       return { distanceM: PhenomenonDepth.atLeastNearest(lo <= hi ? Math.sqrt(lo * hi) : lo), basis: "bounded" }
     }
     if (lo !== undefined) {

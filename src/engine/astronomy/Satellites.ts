@@ -20,7 +20,7 @@ import type { SatelliteClass } from "./satelliteCatalog.js"
  * needs no catalogue, and it holds for every date since Sputnik.
  *
  * And it cuts both ways hard, which is the point. Deep in the night the Earth's shadow stands
- * thousands of kilometres above the witness, and NOTHING in low orbit is lit — so a light crossing
+ * thousands of kilometres above the observer, and NOTHING in low orbit is lit — so a light crossing
  * the sky at two in the morning was not a satellite, whatever else it was. That single fact
  * disposes of a great many attributions, and it is available for every report this project will
  * ever reconstruct.
@@ -50,7 +50,7 @@ export interface SatelliteVisibility {
   /** The Sun's real altitude, degrees. Negative once it has set. */
   sunAltitudeDeg: number
   /**
-   * How high above the witness the Earth's own shadow stood, in kilometres — the lowest an object
+   * How high above the observer the Earth's own shadow stood, in kilometres — the lowest an object
    * directly overhead could be and still be in sunlight.
    *
    * ZERO while the Sun is up, and that is the physical answer rather than a placeholder: an
@@ -143,7 +143,7 @@ export class Satellites {
    * How many tracked objects were in orbit that month.
    *
    * Payloads and spent rocket bodies, never debris — a fragment is a fact about radar, not about
-   * what a witness could have seen. Undefined before the first launch, which says "there was no
+   * what a observer could have seen. Undefined before the first launch, which says "there was no
    * such thing" rather than "none that month".
    *
    * Monthly, and the readout says so: the count moves by a handful over a fortnight, and quoting it

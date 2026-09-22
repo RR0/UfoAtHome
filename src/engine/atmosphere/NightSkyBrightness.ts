@@ -11,14 +11,14 @@
  * behind it rose past it.
  *
  * So this file is the denominator. It answers "what was the sky worth, in the same unit", from the
- * two things that actually raise it for a witness standing outside at night: the Sun still being not
+ * two things that actually raise it for a observer standing outside at night: the Sun still being not
  * far enough down, and the Moon being up.
  *
  * MOONLIGHT IS THE PART THAT SURPRISES PEOPLE, and it is why it is modelled properly here rather
  * than as a flat penalty. A full Moon puts the sky at about eighteenth magnitude a square
  * arcsecond — four magnitudes, forty times, above a natural dark sky — and there is simply no Milky
  * Way on such a night, anywhere in the sky, for anybody. Half the "I have never seen the Milky Way
- * from here" of a witness's account is the Moon and not the town. And the glow is not uniform: the
+ * from here" of a observer's account is the Moon and not the town. And the glow is not uniform: the
  * sky within twenty degrees of the Moon is several times brighter again than the sky opposite it,
  * which is why the model below is a function of the angle from the Moon and not a single number.
  */
@@ -201,7 +201,7 @@ export class NightSkyBrightness {
    * the first by the second is what turns a table into a sky. It matters more than it looks: a
    * glow low in the west an hour after sunset is standing in the brightest part of the sky there
    * is, and dividing it by the zenith instead — which is what this file did before the twilight was
-   * given a shape — overstates what a witness could have seen there several times over.
+   * given a shape — overstates what a observer could have seen there several times over.
    */
   static twilightOutput(sunAltitudeDeg: number): number {
     const atZenith = NightSkyBrightness.scatteringAt(90 - sunAltitudeDeg) * NightSkyBrightness.scatteredFraction(90)
@@ -228,7 +228,7 @@ export class NightSkyBrightness {
     )
   }
 
-  /** Everything about the Moon that does not depend on which way the witness is looking: what it
+  /** Everything about the Moon that does not depend on which way the observer is looking: what it
    * puts out at that phase, less what the air between it and them takes away. A Moon that has set
    * puts out nothing — there is no glow from below the horizon. */
   static moonOutput(phaseAngleDeg: number, moonAltitudeDeg: number): number {

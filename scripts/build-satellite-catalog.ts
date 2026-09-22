@@ -35,7 +35,7 @@ const SATCAT_URL = "https://celestrak.org/pub/satcat.csv"
  * metal and tumbling — so leaving it out would understate what was up there. DEBRIS is excluded,
  * and that is the whole reason this filter is named rather than implied: there are hundreds of
  * thousands of catalogued fragments, almost none of them visible to anybody, and counting them
- * would turn a fact about what a witness could have seen into a fact about radar.
+ * would turn a fact about what a observer could have seen into a fact about radar.
  */
 const VISIBLE_OBJECT_TYPES = new Set(["PAY", "R/B"])
 
@@ -269,7 +269,7 @@ export const FIRST_TRACKED_MONTH = ${firstMonth}
  *
  * The one number about satellites with complete historical coverage, and it carries more than it
  * looks: two the month Sputnik went up, a hundred and sixty-one by the end of the month of the Socorro landing,
- * two hundred and eighty-one for Valensole, and tens of thousands now. What a witness in 1964 could
+ * two hundred and eighty-one for Valensole, and tens of thousands now. What a observer in 1964 could
  * possibly have mistaken for something else is a different sky from the one overhead today.
  */
 export const TRACKED_OBJECTS_BY_MONTH: number[] = [

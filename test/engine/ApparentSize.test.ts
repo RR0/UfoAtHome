@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest"
 import { ApparentSize } from "../../src/engine/shape/ApparentSize.js"
 
 describe("ApparentSize", () => {
-  it("computes the angular width a witness's own reported size and distance imply", () => {
+  it("computes the angular width a observer's own reported size and distance imply", () => {
     // Valensole: "du volume d'une Renault Dauphine" (3.5 m), landed 90 m away.
     expect(ApparentSize.angularWidthDeg({ sizeM: 3.5, distanceM: 90 })).toBeCloseTo(2.23, 2)
     // Chiles-Whitted: a ~30 m fuselage passing a few hundred meters from the DC-3.
@@ -15,7 +15,7 @@ describe("ApparentSize", () => {
     expect(ApparentSize.angularWidthDeg({ sizeM: 6, distanceM: 0.3 })).toBeCloseTo(168.6, 1)
   })
 
-  it("counts a width in full Moons — the only unit of apparent size testimonies come with", () => {
+  it("counts a width in full Moons — the only unit of apparent size accounts come with", () => {
     expect(ApparentSize.inMoons(ApparentSize.MOON_ANGULAR_WIDTH_DEG)).toBeCloseTo(1, 6)
     expect(ApparentSize.inMoons(6.41)).toBeGreaterThan(12)
   })

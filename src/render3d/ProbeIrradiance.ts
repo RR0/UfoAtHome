@@ -3,7 +3,7 @@ import {
   type Texture, type WebGLRenderer
 } from "three"
 
-/** What the eye's probe says about the light round the witness, in the scene's relative units. */
+/** What the eye's probe says about the light round the observer, in the scene's relative units. */
 export interface ProbeLight {
   /** The light falling on a level surface from the upper hemisphere, ∫ L cos θ dω. */
   readonly up: [number, number, number]
@@ -14,10 +14,10 @@ export interface ProbeLight {
 }
 
 /**
- * The light that surrounds the witness, measured on what is actually drawn round them.
+ * The light that surrounds the observer, measured on what is actually drawn round them.
  *
  * The eye's reflection probe (see Reflections) is a photograph of the whole scene in every direction
- * from the witness, in light: the scattered sky, and over it the clouds as drawn, the ground as lit,
+ * from the observer, in light: the scattered sky, and over it the clouds as drawn, the ground as lit,
  * the decor, the lamps. Integrated over each hemisphere it is the light a level surface receives
  * from above and from below — what three's hemisphere light needs — and its log-average over the
  * upper one is what an eye standing there adapts to. So an overcast day lights the ground with the
@@ -30,7 +30,7 @@ export interface ProbeLight {
  * the probe when it is taken.
  *
  * Done on the GPU into four texels, read back without waiting: a frame late costs nothing a
- * witness could see.
+ * observer could see.
  */
 export class ProbeIrradiance {
   /** Directions sampled, spread evenly over the sphere. */

@@ -126,7 +126,7 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
 beforeAll(() => {
   vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockImplementation(function (this: HTMLCanvasElement) {
     // mockImplementation, not mockReturnValue: a renderer that sizes itself from its own canvas
-    // (see WitnessMapRenderer) reads ctx.canvas, and one shared object makes every canvas claim to
+    // (see ObserverMapRenderer) reads ctx.canvas, and one shared object makes every canvas claim to
     // be the same one.
     return {
       canvas: this,
@@ -214,7 +214,7 @@ describe("SightingEditorElement drafting from an account", () => {
   })
 
   it("never writes the account back over itself", async () => {
-    // The field the reader typed into is the one field a draft may not touch: it is what the witness
+    // The field the reader typed into is the one field a draft may not touch: it is what the observer
     // said, and it does not change because somebody read it. Stripped rather than trusted absent.
     const element = mount()
     answer = () => Promise.resolve({
@@ -231,7 +231,7 @@ describe("SightingEditorElement drafting from an account", () => {
   })
 
   it("leaves alone what the account is silent about", async () => {
-    // A place geocoded by hand is not in a testimony, so no reading of one may take it away.
+    // A place geocoded by hand is not in a account, so no reading of one may take it away.
     const element = mount()
     type(element, "lat", "43.837")
     type(element, "lng", "5.993")
@@ -331,7 +331,7 @@ describe("SightingEditorElement drafting from an account", () => {
   })
 
   it("lets the time zone decide the offset, ignoring one a draft states", async () => {
-    // Not testimony and not a reading of one: it is what that zone's own rules give at that date,
+    // Not account and not a reading of one: it is what that zone's own rules give at that date,
     // and the editor reads them out of the platform's IANA database. France ran no summer time
     // between 1945 and 1976, so May 1974 in Brittany is +1 however confidently a draft says +2.
     const element = mount()

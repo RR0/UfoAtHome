@@ -3,7 +3,7 @@
  * HYG Database v4.1 CSV (https://github.com/astronexus/HYG-Database, CC BY-SA) into the compact
  * binary star catalog assets `<rr0-scene>` fetches at runtime.
  *
- * TWO TIERS, and the split is the instrument's. What a witness could have seen stops at magnitude
+ * TWO TIERS, and the split is the instrument's. What a observer could have seen stops at magnitude
  * 6.5, so a catalog cut at 7.5 was always enough — until the threshold started following the
  * device (see LimitingMagnitude): a 50 mm at f/2 for twenty seconds records to 9.7, and cutting at
  * 7.5 would have drawn that photograph with the eye's own stars and called it a photograph. So the
@@ -45,7 +45,7 @@ const DEEP_MAGNITUDE_LIMIT = 9
  * Of the 25 791 stars this catalog carries, only 377 have a proper name at all. Counted per
  * magnitude: at 3.0, 178 of 179 stars can be named or designated; at 4.0, 499 of 523; at 6.0 only
  * 2 726 of 5 070, the rest having nothing to be called but a catalog number, which answers nothing
- * for a witness asking what that bright thing was.
+ * for a observer asking what that bright thing was.
  *
  * Cut at 3.0 rather than 4.0 — the brightest 179, which is what "a big star" means to someone
  * reporting one. The 344 between the two are visible but unremarkable, and carrying them cost

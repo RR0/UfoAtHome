@@ -5,7 +5,7 @@ import { writeFile } from "node:fs/promises"
 const require = createRequire(import.meta.url)
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || "playwright")
 const origin = process.env.PROFILE_ORIGIN || "http://127.0.0.1:5173"
-const recording = process.argv[2] || "witness-valensole"
+const recording = process.argv[2] || "observer-valensole"
 if (!/^[a-z0-9-]+$/.test(recording)) throw new Error("Expected a demo file name without extension")
 const output = process.argv[3] || `/tmp/ufo-${recording}`
 const browser = await chromium.launch({

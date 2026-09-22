@@ -21,7 +21,7 @@ export type Rgb = [number, number, number]
  * kilometre — because no field of Weather holds one, and HumidHaze stops at 95 % for that reason.
  *
  * The density of both falls exponentially with altitude above SEA LEVEL, as it does in the sky's own
- * tables, so a witness on the Socorro mesa looks through thinner air than one in the Cantal, and a
+ * tables, so a observer on the Socorro mesa looks through thinner air than one in the Cantal, and a
  * crew at 1 500 m through thinner air still.
  */
 export class AerialPerspective {

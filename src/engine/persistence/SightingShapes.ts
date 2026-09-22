@@ -10,14 +10,14 @@ import type { Instrument } from "../instrument/Instrument.js"
  * Reconciles a recording's stated angular sizes with the pixel boxes it is drawn as — the one
  * place the two representations of a shape's size ever meet.
  *
- * A file states an angle (see BaseShape.angular): that is what the witness perceived, and it is
+ * A file states an angle (see BaseShape.angular): that is what the observer perceived, and it is
  * independent of the canvas it was authored on or the field of view it was authored at. A drawing
  * needs pixels. So the angle is projected to pixels on the way IN and recovered from them on the
  * way OUT, and nothing in between has to think about it: every editing gesture, hit-test and
  * renderer keeps working on `bounds` exactly as before.
  *
  * The projection runs against the pose's own field of view AT THAT KEYFRAME's instant, not a fixed
- * 60 degrees — a recording whose witness zooms (or one authored at another fov entirely) then
+ * 60 degrees — a recording whose observer zooms (or one authored at another fov entirely) then
  * still draws each instant at the size its own angle implies — and through the sighting's own
  * INSTRUMENT, since an eye and a camera lens turn the same angle into different pixels (see
  * ImageProjection).
@@ -26,7 +26,7 @@ export class SightingShapes {
   /** What a recording without any observer track is assumed to have been seen through: its own
    * INSTRUMENT's field (see Instruments.fieldOfViewDeg), which for an eye is the unaided sixty
    * degrees and for a 50 mm lens is twenty-seven. Only ever reached by a file too old to carry a
-   * witnessTrack, or one that never stated a pose. */
+   * observerTrack, or one that never stated a pose. */
   static fovOf(sighting: Sighting, t: number): number {
     return resolveObserverPoseAt(sighting, t)?.fovDeg ?? Instruments.fieldOfViewDeg(sighting.instrument)
   }
@@ -76,7 +76,7 @@ export class SightingShapes {
   }
 
   /**
-   * Fills in every shape's DIRECTION from where it is currently drawn and where the witness was
+   * Fills in every shape's DIRECTION from where it is currently drawn and where the observer was
    * looking — run just before writing a file, alongside toAngular, and unconditional for the same
    * reason: between load and save `bounds` is what every editing gesture moved, so the drawing is
    * the newer statement.
@@ -136,14 +136,14 @@ export class SightingShapes {
    * file, which is what makes the direction authoritative rather than decorative, exactly as
    * toBounds does for the stated size.
    *
-   * This is the step that lets a witness turn their head. Without it a recording only ever said
+   * This is the step that lets a observer turn their head. Without it a recording only ever said
    * "so many degrees left of wherever I was facing", so editing the pose swung the phenomenon
    * around the sky along with the camera — and a thing described as sitting on the ground went with
-   * the witness when they turned away from it.
+   * the observer when they turned away from it.
    *
    * A direction more than a right angle off the axis is not on this canvas at all, and is placed
    * frankly off it rather than through a tangent that would fold it back into view. That is not a
-   * failure: it is a witness who has looked away, and it is the whole reason this exists.
+   * failure: it is a observer who has looked away, and it is the whole reason this exists.
    */
   static toPosition(sighting: Sighting): void {
     this.eachKeyframe(sighting, (shape, projection, pose) => {
@@ -181,7 +181,7 @@ export class SightingShapes {
 
   /** How far off the axis that direction falls, pixels — pushed frankly off the canvas past the
    * quarter turn where no flat projection has an answer (a rectilinear one's tangent would fold it
-   * back into view, pointing behind the witness at something in front of them). */
+   * back into view, pointing behind the observer at something in front of them). */
   private static offAxisPx(projection: ImageProjection, offAxisDeg: number): number {
     if (Math.abs(offAxisDeg) >= SightingShapes.OFF_CANVAS_DEG) {
       return Math.sign(offAxisDeg) * SightingShapes.OFF_CANVAS_PX
@@ -213,7 +213,7 @@ export class SightingShapes {
     // of projection — the same silicon held upright is 270 pixels wide where an eye's frame is 640 —
     // and every stored bound is measured from its own frame's left edge. So a shape is taken out of
     // the old centre and put back around the new one; leaving the centre where it was would slide
-    // every shape sideways by half the difference, which is a testimony being edited by a picker.
+    // every shape sideways by half the difference, which is a account being edited by a picker.
     // The HEIGHT never moves (see Instruments.frameWidthPx), so nothing shifts vertically.
     const fromHalfWidth = Instruments.frameWidthPx(previous, ApparentSize.CANVAS_HEIGHT_PX) / 2
     const toHalfWidth = Instruments.frameWidthPx(sighting.instrument, ApparentSize.CANVAS_HEIGHT_PX) / 2
@@ -224,7 +224,7 @@ export class SightingShapes {
       // this runs the recording may already state a different one than the pixels were drawn under.
       // The old pixels have to be read under the OLD field and written under the new: read both
       // under the new one and a shape 19 degrees off-axis comes out at 9, which is the reconstruction
-      // quietly moving what a witness drew.
+      // quietly moving what a observer drew.
       const toFovDeg = this.fovOf(sighting, keyframe.t)
       const fromFovDeg = fieldBefore?.get(keyframe.t) ?? toFovDeg
       const from = ImageProjection.of(previous, ApparentSize.CANVAS_HEIGHT_PX, fromFovDeg)

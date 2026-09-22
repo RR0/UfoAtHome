@@ -8,10 +8,10 @@ import type { Sighting } from "../../src/engine/model/Sighting.js"
 import { toSightingJson } from "../../src/engine/persistence/sightingJson.js"
 
 /**
- * What a change of instrument may and may not do to a testimony.
+ * What a change of instrument may and may not do to a account.
  *
  * It may change every pixel — a square 126 frame is 360 wide where an eye's is 640, and a 50 mm
- * lens spreads 27 degrees across a height that held 60. It may NOT change where the witness said
+ * lens spreads 27 degrees across a height that held 60. It may NOT change where the observer said
  * the thing was, or how big they said it looked. Those are the record; the rest is a projection of
  * it.
  */
@@ -57,7 +57,7 @@ function sightingWithShapeOffCentre(): Sighting {
   } as never)
 }
 
-/** Where the shape stands in the sky, as the witness's own frame says: how far off the axis, and
+/** Where the shape stands in the sky, as the observer's own frame says: how far off the axis, and
  * which way round. Both are read through whatever instrument and field the sighting states NOW. */
 function skyPositionOf(sighting: Sighting): { offsetDeg: number; bearingDeg: number; widthDeg: number } {
   const bounds = sighting.timeline.allKeyframes[0].shapes[0].shape.bounds
@@ -87,8 +87,8 @@ function switchInstrument(sighting: Sighting, id: string): void {
   SightingShapes.reproject(sighting, previous, fieldBefore)
 }
 
-describe("A change of instrument, which reprojects a testimony without editing it", () => {
-  it("leaves the object exactly where the witness put it in the sky", () => {
+describe("A change of instrument, which reprojects a account without editing it", () => {
+  it("leaves the object exactly where the observer put it in the sky", () => {
     const sighting = sightingWithShapeOffCentre()
     const before = skyPositionOf(sighting)
     expect(before.offsetDeg).toBeGreaterThan(15)
@@ -96,7 +96,7 @@ describe("A change of instrument, which reprojects a testimony without editing i
     for (const id of ["slr-35mm-50", "instamatic-126", "phone-portrait", "eye"]) {
       switchInstrument(sighting, id)
       const after = skyPositionOf(sighting)
-      // The two numbers a witness actually gave: how far off their line of sight the thing stood,
+      // The two numbers a observer actually gave: how far off their line of sight the thing stood,
       // and how big it looked. Neither is the picker's to change.
       expect(after.offsetDeg).toBeCloseTo(before.offsetDeg, 3)
       expect(after.bearingDeg).toBeCloseTo(before.bearingDeg, 3)
@@ -133,10 +133,10 @@ describe("A change of instrument, which reprojects a testimony without editing i
 
 
 /**
- * What a change of HEADING may and may not do to a testimony.
+ * What a change of HEADING may and may not do to a account.
  *
  * A recording that only ever said "so many degrees left of wherever I happened to be facing" moved
- * the phenomenon around the sky whenever the witness's own pose was edited — a thing they described
+ * the phenomenon around the sky whenever the observer's own pose was edited — a thing they described
  * on the ground went with them when they turned away from it. What they stated is a DIRECTION; the
  * pixels are that direction projected onto a canvas.
  */
@@ -152,7 +152,7 @@ describe("a shape's stated direction", () => {
       version: 1,
       time: { year: 1964, month: 4, day: 24, hour: 17, minute: 50 },
       place: [{ lat: 34.05, lng: -106.89 }],
-      witnessTrack: {
+      observerTrack: {
         keyframes: [{ t: 0, pose: { lat: 34.05, lng: -106.89, elevationM: 0, headingDeg, pitchDeg: PITCH, fovDeg: 60 } }]
       },
       timeline: {
@@ -192,15 +192,15 @@ describe("a shape's stated direction", () => {
     expect(aim.altitudeDeg).toBeCloseTo(PITCH, 2)
   })
 
-  it("moves the drawing when the witness turns, instead of taking the sky along", () => {
+  it("moves the drawing when the observer turns, instead of taking the sky along", () => {
     // The whole point. Zamora turns thirty degrees; the thing on the ground does not turn with him,
     // so it has to come thirty degrees further round his own picture.
     const sighting = recordingAimedAt(HEADING)
     SightingShapes.toAim(sighting)
     const before = shapeOf(sighting).bounds.x
 
-    for (const keyframe of [...sighting.witnessTrack.allKeyframes]) {
-      sighting.witnessTrack.addKeyframe(keyframe.t, { ...keyframe.pose, headingDeg: HEADING - 30 })
+    for (const keyframe of [...sighting.observerTrack.allKeyframes]) {
+      sighting.observerTrack.addKeyframe(keyframe.t, { ...keyframe.pose, headingDeg: HEADING - 30 })
     }
     SightingShapes.toPosition(sighting)
 
@@ -209,26 +209,26 @@ describe("a shape's stated direction", () => {
     expect(shapeOf(sighting).bounds.x - before).toBeCloseTo(moved, 1)
   })
 
-  it("puts a direction behind the witness frankly off the canvas", () => {
-    // A witness who has turned their back is not looking at a thing squeezed against the frame's
+  it("puts a direction behind the observer frankly off the canvas", () => {
+    // A observer who has turned their back is not looking at a thing squeezed against the frame's
     // edge by a tangent — they are not looking at it at all.
     const sighting = recordingAimedAt(HEADING)
     SightingShapes.toAim(sighting)
-    for (const keyframe of [...sighting.witnessTrack.allKeyframes]) {
-      sighting.witnessTrack.addKeyframe(keyframe.t, { ...keyframe.pose, headingDeg: HEADING + 180 })
+    for (const keyframe of [...sighting.observerTrack.allKeyframes]) {
+      sighting.observerTrack.addKeyframe(keyframe.t, { ...keyframe.pose, headingDeg: HEADING + 180 })
     }
     SightingShapes.toPosition(sighting)
     expect(Math.abs(shapeOf(sighting).bounds.x)).toBeGreaterThan(ApparentSize.CANVAS_WIDTH_PX * 10)
   })
 
-  it("keeps a direction behind the witness through a save, instead of reading it back off the pixel it is parked at", () => {
+  it("keeps a direction behind the observer through a save, instead of reading it back off the pixel it is parked at", () => {
     // Every direction past the quarter turn is parked at the same pixel, so that pixel says nothing
     // about which one it was: read back, 170° off came out as 90° off. Anything serialising the
     // recording (a player's assessors did, on load) rewrote the file's direction with that.
     const sighting = recordingAimedAt(HEADING)
     SightingShapes.toAim(sighting)
-    for (const keyframe of [...sighting.witnessTrack.allKeyframes]) {
-      sighting.witnessTrack.addKeyframe(keyframe.t, { ...keyframe.pose, headingDeg: HEADING + 170 })
+    for (const keyframe of [...sighting.observerTrack.allKeyframes]) {
+      sighting.observerTrack.addKeyframe(keyframe.t, { ...keyframe.pose, headingDeg: HEADING + 170 })
     }
     SightingShapes.toPosition(sighting)
     const written = toSightingJson(sighting)

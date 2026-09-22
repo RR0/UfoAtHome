@@ -183,7 +183,7 @@ export function computeMoonPhase(date: Date): MoonPhase {
   return { phaseFraction: longitudeDeg / 360, illuminatedFraction: illumination.phase_fraction }
 }
 
-/** Year/month/day substituted when a time-of-day is known but no date at all is (e.g. a witness
+/** Year/month/day substituted when a time-of-day is known but no date at all is (e.g. a observer
  * recalls "around 2am" but not the date) — a fixed spring equinox instant, not "today", so day/
  * night balance isn't skewed by an arbitrary/seasonal guess and the same sighting always previews
  * the same way regardless of when someone happens to view it. This is a *rendering* fallback only,
@@ -194,7 +194,7 @@ const REFERENCE_MONTH_FOR_TIME_ONLY = 3
 const REFERENCE_DAY_FOR_TIME_ONLY = 20
 
 /**
- * Approximates the real UTC instant a witness's local clock reading corresponds to, by inferring
+ * Approximates the real UTC instant a observer's local clock reading corresponds to, by inferring
  * a timezone from longitude (round(lng/15) hours) — the same crude approximation SunPosition.ts
  * documents and uses (historical sightings essentially never record a UTC offset, and
  * reconstructing the exact historical timezone/DST rules for a given date/place is its own can of
@@ -205,7 +205,7 @@ const REFERENCE_DAY_FOR_TIME_ONLY = 20
  * `Level2Date`/EDTF are — this function's job is turning that fuzziness into *some* renderable
  * instant, not modeling the fuzziness itself. A known year still anchors month/day to Jan 1 when
  * they're missing (unchanged, existing behavior); only when there's no year at all does a missing
- * month/day fall back to the reference equinox above, so a witness's known hour still renders a
+ * month/day fall back to the reference equinox above, so a observer's known hour still renders a
  * plausible day/night sky instead of nothing. undefined only when literally no date/time field at
  * all is known — there's nothing left to approximate from.
  */
@@ -222,7 +222,7 @@ export function sightingTimeToDate(
   const month = time.month ?? (yearKnown ? 1 : REFERENCE_MONTH_FOR_TIME_ONLY)
   const day = time.day ?? (yearKnown ? 1 : REFERENCE_DAY_FOR_TIME_ONLY)
   // The recording's own declared offset when it has one, since only it can know the LEGAL time
-  // the witness's clock was on (see SightingEvent.utcOffsetHours); the longitude is just the
+  // the observer's clock was on (see SightingEvent.utcOffsetHours); the longitude is just the
   // best guess available when it doesn't.
   const timezoneOffsetHours = utcOffsetHours ?? Math.round(lngForTimezoneApprox / 15)
   return new Date(

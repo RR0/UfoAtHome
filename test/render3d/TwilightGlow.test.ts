@@ -10,7 +10,7 @@ describe("the glow the Sun leaves on the horizon after it has set", () => {
   const towardTheSun = (altitude: number, sunAltitude: number) => skyColorForPosition(altitude, 0, 0, sunAltitude)
   const awayFromIt = (altitude: number, sunAltitude: number) => skyColorForPosition(altitude, 180, 0, sunAltitude)
 
-  it("is far brighter toward the Sun's bearing than behind the witness", () => {
+  it("is far brighter toward the Sun's bearing than behind the observer", () => {
     // What was missing: the sky went uniformly dark at sunset, with no sign of which way the Sun had
     // gone. It used to blend toward the horizon colour OF THAT SAME INSTANT, which is a colour the
     // horizon already had — so there was nothing to see.

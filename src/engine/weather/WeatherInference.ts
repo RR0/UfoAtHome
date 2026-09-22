@@ -16,13 +16,13 @@ const MAX_SAMPLES = 25
  * - `incomplete`: the sighting doesn't yet say enough (no place, or no full calendar date) to ask.
  * - `unavailable`: asked, and the record genuinely doesn't cover that place/date (pre-1940).
  * - `failed`: the lookup itself couldn't be made (offline, HTTP error) — says nothing about the
- *   sighting, and the difference matters to a witness reading the answer.
+ *   sighting, and the difference matters to a observer reading the answer.
  */
 export type WeatherInferenceStatus = "inferred" | "incomplete" | "unavailable" | "failed"
 
 export interface WeatherInferenceResult {
   status: WeatherInferenceStatus
-  /** The observation's own start instant (UTC), stated back so the witness can check the lookup
+  /** The observation's own start instant (UTC), stated back so the observer can check the lookup
    * used the time they meant — a wrong utcOffsetHours shows up here first. */
   at?: Date
   source?: WeatherSource
@@ -32,9 +32,9 @@ export interface WeatherInferenceResult {
 
 /**
  * Turns a sighting's own date/time and place into its weather, by asking a WeatherProvider for the
- * real record instead of leaving a witness (or an author reconstructing a case decades later) to
+ * real record instead of leaving a observer (or an author reconstructing a case decades later) to
  * set a cloud-cover slider from memory. The reasoning behind the whole feature: unlike the shape,
- * the movement or the direction of gaze, weather is not testimony — it is a measurable fact about
+ * the movement or the direction of gaze, weather is not account — it is a measurable fact about
  * a place at an instant, and the recording already states both.
  *
  * An observation spanning more than an hour gets one keyframe per hour of record, not a single
@@ -73,8 +73,8 @@ export class WeatherInference {
 
   /** Replaces the sighting's whole weather track with the inferred one and records what produced
    * it. Deliberately destructive: this only ever runs on a sighting whose weather is inferred (the
-   * editor's own gate — a track the witness declared has no `weatherSource` and is never handed
-   * here), so what it discards is a previous lookup's answer, not testimony. */
+   * editor's own gate — a track the observer declared has no `weatherSource` and is never handed
+   * here), so what it discards is a previous lookup's answer, not account. */
   applyTo(sighting: Sighting, result: WeatherInferenceResult): void {
     if (result.status !== "inferred" || !result.keyframes || !result.source) return
     sighting.weatherTrack.clear()
@@ -126,7 +126,7 @@ export class WeatherInference {
   }
 
   /**
-   * Where the observation started, from the witnessTrack if it says, otherwise from the sighting's
+   * Where the observation started, from the observerTrack if it says, otherwise from the sighting's
    * own `place`. resolveObserverPoseAt prefers the track and only falls back to `place` when the
    * track is entirely EMPTY — but a pose may perfectly well state a heading and no coordinates
    * (SightingEditorElement.updateObserver writes one deliberately, so that setting a heading before
@@ -167,10 +167,10 @@ export class WeatherInference {
     return lat === undefined || lng === undefined ? undefined : { lat, lng }
   }
 
-  /** Where the witness was at that instant, read off their own witnessTrack — so an aircraft under
+  /** Where the observer was at that instant, read off their own observerTrack — so an aircraft under
    * observation for an hour is asked about the air it is in *now*, not the airfield it left. Falls
    * back to where the observation started for a pose that states no coordinates (heading-only
-   * keyframes, which is how a witness turning to follow an object is usually recorded). */
+   * keyframes, which is how a observer turning to follow an object is usually recorded). */
   private pointAt(sighting: Sighting, timing: SampleTiming, origin: { lat: number; lng: number }): WeatherPoint {
     const pose = resolveObserverPoseAt(sighting, timing.t)
     return { lat: pose?.lat ?? origin.lat, lng: pose?.lng ?? origin.lng, time: timing.time }

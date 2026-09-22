@@ -10,7 +10,7 @@ const ERA5_EPOCH_MS = Date.UTC(1940, 0, 1)
 const HOUR_MS = 3_600_000
 
 /** ERA5's own grid step. Two positions inside one cell read the exact same numbers whatever their
- * precise coordinates, so they are one query: a witness has to travel some 28 km before the record
+ * precise coordinates, so they are one query: a observer has to travel some 28 km before the record
  * has anything different to say about them. */
 const ERA5_GRID_DEG = 0.25
 
@@ -28,7 +28,7 @@ const STORM_DARKENING = 0.2
  * since the field saturates the renderer well before that. */
 const HEAVY_PRECIPITATION_MM = 8
 
-/** Sky fraction at which a layer is the deck a witness would describe, rather than a wisp. */
+/** Sky fraction at which a layer is the deck a observer would describe, rather than a wisp. */
 const SIGNIFICANT_LAYER_COVER = 0.125
 /** Below this total cover there is no deck to give an altitude to at all. */
 const VISIBLE_COVER = 0.05
@@ -110,16 +110,16 @@ export interface OpenMeteoWeatherProviderOptions {
  *
  * Reanalysis, not a station reading: ERA5 assimilates the observations that DO exist (stations,
  * ships, radiosondes, later satellites) into a physical model on a ~28 km grid, so it states what
- * the atmosphere was doing over the witness's valley, not what a thermometer in it read. For a
+ * the atmosphere was doing over the observer's valley, not what a thermometer in it read. For a
  * 1965 sighting in rural Provence that is the only kind of record there is, and it is a far better
- * starting point than a witness — or an author reconstructing the case decades later — guessing at
+ * starting point than a observer — or an author reconstructing the case decades later — guessing at
  * a cloud cover slider.
  *
  * Two of this project's fields have no direct counterpart in the record and are DERIVED here, in
  * the one place that knows the dataset (see cloudDarknessFrom/cloudBaseFrom): "cloud darkness" is
  * a look, not a measurement, and a cloud BASE altitude isn't an ERA5 hourly variable at all. Both
  * derivations are documented at their own constants above; both are honest approximations, and
- * both are exactly the kind of thing a witness may overrule by unlocking the field.
+ * both are exactly the kind of thing a observer may overrule by unlocking the field.
  */
 export class OpenMeteoWeatherProvider implements WeatherProvider {
   private readonly fetchImpl: typeof fetch
@@ -142,7 +142,7 @@ export class OpenMeteoWeatherProvider implements WeatherProvider {
     if (startMs < ERA5_EPOCH_MS) return undefined
 
     // One entry per grid cell the observer passed through, in the order first reached — a
-    // stationary witness (nearly all of them) yields exactly one, and the request below is then
+    // stationary observer (nearly all of them) yields exactly one, and the request below is then
     // the same single-location one it always was.
     const cells = new Map<string, { lat: number; lng: number; index: number }>()
     for (const point of query.points) {
@@ -180,7 +180,7 @@ export class OpenMeteoWeatherProvider implements WeatherProvider {
   }
 
   /** Comma-separated coordinate lists are how the archive takes several locations in ONE request —
-   * which keeps `WeatherSource.url` a single, replayable request even for a witness who moved,
+   * which keeps `WeatherSource.url` a single, replayable request even for a observer who moved,
    * rather than a lookup nobody could re-run in full. */
   private requestUrl(cells: { lat: number; lng: number }[], start: Date, end: Date): string {
     const params = new URLSearchParams({
@@ -304,7 +304,7 @@ export class OpenMeteoWeatherProvider implements WeatherProvider {
       // The ice deck, carried through rather than only folded into the darkness: it is the one
       // ingredient the halos need, and the record has it (see Weather.highCloudCover).
       highCloudCover: record.cloudCoverHigh,
-      // Whichever of the two lower decks covers more sky: that is what stands between the witness
+      // Whichever of the two lower decks covers more sky: that is what stands between the observer
       // and the ice above, and it is the deck a halo has to be seen through.
       lowerCloudCover: Math.max(record.cloudCoverLow, record.cloudCoverMid),
       // Two decimals: the haze it decides is built in steps far coarser than a hundredth.
@@ -345,7 +345,7 @@ export class OpenMeteoWeatherProvider implements WeatherProvider {
     return this.clamp(perLayer + WET_DECK_DARKENING * wet + (storm ? STORM_DARKENING : 0), 0, 1)
   }
 
-  /** ERA5 hourly has no cloud-base variable, so this places the deck the witness would actually be
+  /** ERA5 hourly has no cloud-base variable, so this places the deck the observer would actually be
    * describing: the LOWEST layer holding a real share of the sky, at that layer's own altitude —
    * the low deck's from Espy's temperature/dew-point spread (it forms at the condensation level,
    * which the record does let us compute), mid and high decks at their typical bases, which no

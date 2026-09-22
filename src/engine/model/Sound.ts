@@ -1,9 +1,9 @@
 /**
- * A sound the witness reported hearing, at one instant of the observation.
+ * A sound the observer reported hearing, at one instant of the observation.
  *
- * Testimony, not measurement — the exact counterpart of Shape: what reached the witness's ears,
+ * Account, not measurement — the exact counterpart of Shape: what reached the observer's ears,
  * the way Shape holds what reached their eyes. Which is why `kind` is a described timbre rather
- * than a waveform, and why "none" is a real value: a witness stating an object was SILENT (as most
+ * than a waveform, and why "none" is a real value: a observer stating an object was SILENT (as most
  * do — the reported absence of any engine noise is half of what makes these accounts strange) is
  * saying something, and something quite different from a recording that never mentions sound at
  * all. A SoundTrack with no keyframes is the second case; a keyframe with kind "none" is the first.
@@ -11,7 +11,7 @@
  * Sound lives on its own track (see SoundTrack/Sighting.soundTrack), not on Shape, even though it
  * is keyframed on the very same clock: an object drawn in several parts (Chiles-Whitted's fuselage
  * and its six windows are six separate sources) makes ONE noise, and hanging it off one arbitrary
- * part of the drawing would be an accident of how the witness happened to draw it.
+ * part of the drawing would be an accident of how the observer happened to draw it.
  */
 export type SoundKind =
   /** No sound at all — reported silence, not "unknown" (see this file's own doc comment). */
@@ -40,7 +40,7 @@ export const DEFAULT_PITCH_HZ = 100
 export interface SightingSound {
   kind: SoundKind
   /**
-   * How loud it was, 0 (inaudible) to 1 (as loud as the witness could describe) — deliberately
+   * How loud it was, 0 (inaudible) to 1 (as loud as the observer could describe) — deliberately
    * relative rather than a dB SPL figure: nobody reports a sound level in decibels, and inventing
    * one would claim a measurement where there is only an impression. Loudness is what makes a
    * sound start partway through an observation (an object silent on the ground, heard only once it
@@ -55,10 +55,10 @@ export interface SightingSound {
    */
   pitchHz: number
   /**
-   * An actual audio recording of the sound, when one exists (a witness who filmed the event, a
+   * An actual audio recording of the sound, when one exists (a observer who filmed the event, a
    * later recording of the same phenomenon) — replaces synthesis entirely while it is set, with
    * `volume` still scaling it. Absent is the ordinary case, and not a lesser one: a described
-   * sound synthesized from that description is exactly as much testimony as a described shape
+   * sound synthesized from that description is exactly as much account as a described shape
    * drawn from that description.
    *
    * Any URL, so cross-origin ones must be CORS-readable — and an embed carrying one is no longer

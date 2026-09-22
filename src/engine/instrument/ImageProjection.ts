@@ -70,7 +70,7 @@ export class ImageProjection {
    * position only means a direction once a projection is named, so when the projection changes the
    * pixels have to follow — otherwise an object drawn in several parts (a fuselage and its row of
    * windows) comes apart, each part resized about a centre that no longer stands for where the
-   * witness was looking.
+   * observer was looking.
    */
   angleDegToRadiusPx(deg: number): number {
     const rad = deg * DEG_TO_RAD
@@ -83,7 +83,7 @@ export class ImageProjection {
    *
    * The field is stated vertically everywhere in this project because the height is the invariant
    * (see the class comment). The horizontal half-angle is what a map needs instead: the wedge of
-   * ground a witness had in front of them is an AZIMUTH, and how far the frame reaches to the sides
+   * ground a observer had in front of them is an AZIMUTH, and how far the frame reaches to the sides
    * is exactly what decides whether something they described could have been in it.
    *
    * A radius, not an extent, and derived through the projection rather than by scaling the vertical

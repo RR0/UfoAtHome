@@ -11,7 +11,7 @@ describe("PhenomenonDepth.resolve", () => {
     expect(depth).toEqual({ distanceM: 500, basis: "hypothesis" })
   })
 
-  it("prefers the witness's own walk to a crossing", () => {
+  it("prefers the observer's own walk to a crossing", () => {
     const depth = PhenomenonDepth.resolve({ derivedM: 6.5, range: { minM: 100 } })
     expect(depth).toEqual({ distanceM: 6.5, basis: "derived" })
   })

@@ -171,7 +171,7 @@ describe("OpenMeteoWeatherProvider", () => {
     )
     const weather = (await provider.getWeather({ points: [{ lat: 0, lng: 0, time: AT_04 }] }))!.samples[0].weather
 
-    // What a witness under it would describe is the 30% deck overhead, not the cirrus above it.
+    // What a observer under it would describe is the 30% deck overhead, not the cirrus above it.
     expect(weather.cloudBaseM).toBe(500)
   })
 
@@ -216,7 +216,7 @@ describe("OpenMeteoWeatherProvider", () => {
     expect(observation?.samples[0].weather.windDirectionDeg).toBeCloseTo(180)
   })
 
-  it("asks about every grid cell a moving witness passed through, in one request", async () => {
+  it("asks about every grid cell a moving observer passed through, in one request", async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
       json: () => Promise.resolve([{ hourly: hourly({ cloud_cover: 10 }) }, { hourly: hourly({ cloud_cover: 90 }) }])
@@ -236,7 +236,7 @@ describe("OpenMeteoWeatherProvider", () => {
     expect(observation?.samples[1].weather.cloudCover).toBeCloseTo(0.9)
   })
 
-  it("asks once for a witness who never left one grid cell", async () => {
+  it("asks once for a observer who never left one grid cell", async () => {
     const { provider, fetchMock } = providerReturning(hourly())
     // ~1 km apart: ERA5 has exactly one answer for both, so asking twice would be waste.
     await provider.getWeather({

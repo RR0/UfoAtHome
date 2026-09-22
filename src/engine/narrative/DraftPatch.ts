@@ -10,7 +10,7 @@ type JsonObject = Record<string, unknown>
  * the paths it names and leaving every other path exactly as the author left it. That distinction
  * is the whole of this class, and it is what lets a reader reword their account and press the
  * button again without losing a place they geocoded to the metre, an instrument they chose, or
- * decor they placed. None of those are in a testimony, so no reading of one may touch them.
+ * decor they placed. None of those are in a account, so no reading of one may touch them.
  *
  * Two rules make it tractable:
  *
@@ -18,14 +18,14 @@ type JsonObject = Record<string, unknown>
  *   full rather than element by element, and the same for `place`, `tags` and `milestones`. Element
  *   correspondence between an array the account produced and one already in the file is a guess,
  *   and a wrong guess here corrupts a recording rather than merely annoying somebody.
- * - Nothing is ever deleted. Silence in a draft is the ACCOUNT's silence — the witness did not say
+ * - Nothing is ever deleted. Silence in a draft is the ACCOUNT's silence — the observer did not say
  *   how long it lasted — and that is not an instruction to forget a duration somebody established
  *   another way. Removing a value asks for a keystroke in the editor, which is cheap; recovering
  *   one that vanished on its own does not.
  */
 export class DraftPatch {
 
-  /** Every path `draft` actually states, dot-joined and outermost-first ("witness.title",
+  /** Every path `draft` actually states, dot-joined and outermost-first ("observer.title",
    * "timeline.keyframes") — what {@link apply} is meant to be given. */
   static stated(draft: Partial<SightingRecordingJson>): string[] {
     return DraftPatch.statedIn(draft as JsonObject, [])
@@ -52,7 +52,7 @@ export class DraftPatch {
     return patched
   }
 
-  /** The leaves, never the objects holding them: naming `witness` would write the whole of it and
+  /** The leaves, never the objects holding them: naming `observer` would write the whole of it and
    * take with it any sibling key the account happens not to mention. */
   private static statedIn(draft: JsonObject, at: string[]): string[] {
     const paths: string[] = []

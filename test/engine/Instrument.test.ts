@@ -88,7 +88,7 @@ describe("Instruments", () => {
 
     it("still resolves a device a file names out of its own time, since the record is the record", () => {
       // availableAt narrows a CHOICE. byId reports what the file claims; correcting it silently
-      // would be this project editing testimony.
+      // would be this project editing account.
       expect(Instruments.byId("phone-portrait").id).toBe("phone-portrait")
     })
   })

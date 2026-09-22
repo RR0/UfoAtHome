@@ -2,8 +2,8 @@
   "version": 1,
   "id": "sky-test-moon-aureole",
   "description": {
-    "fr": "Ciel d'essai : l'auréole de la pleine Lune. Lune pleine à 21,6° de hauteur au sud, air très humide (90 %) et aucun nuage, témoin tourné vers elle. La lueur qui l'entoure sur une dizaine de degrés est sa lumière diffractée par les plus grosses particules de la brume, qui gonflent avec l'humidité : blanchâtre, sans anneau, parce que ces particules ont toutes les tailles.",
-    "en": "Test sky: the full Moon's aureole. A full Moon 21.6° up in the south, very humid air (90 %) and no cloud, the witness facing it. The glow round it over ten degrees or so is its light diffracted by the haze's largest particles, which swell with the humidity: whitish and without rings, because those particles come in every size."
+    "fr": "Ciel d'essai : l'auréole de la pleine Lune. Lune pleine à 21,6° de hauteur au sud, air très humide (90 %) et aucun nuage, observateur tourné vers elle. La lueur qui l'entoure sur une dizaine de degrés est sa lumière diffractée par les plus grosses particules de la brume, qui gonflent avec l'humidité : blanchâtre, sans anneau, parce que ces particules ont toutes les tailles.",
+    "en": "Test sky: the full Moon's aureole. A full Moon 21.6° up in the south, very humid air (90 %) and no cloud, the observer facing it. The glow round it over ten degrees or so is its light diffracted by the haze's largest particles, which swell with the humidity: whitish and without rings, because those particles come in every size."
   },
   "time": {
     "year": 2020,
@@ -49,7 +49,7 @@
     "order": [],
     "groups": []
   },
-  "witnessTrack": {
+  "observerTrack": {
     "keyframes": [
       {
         "t": 0,

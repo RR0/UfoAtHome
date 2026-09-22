@@ -28,11 +28,11 @@ export interface RecordingDigestJson extends Omit<Partial<SightingRecordingJson>
  * The Messages API remembers nothing, so every round of corrections resends the state of things,
  * and the state of things is large: Socorro's recording runs 62 KB, 44 of them keyframes whose
  * every shape carries a pixel box, a colour, a transparency, a halo scale and a selection flag.
- * None of that is testimony. It is how the drawing happens to be drawn today, derived on load from
- * the angles and directions that ARE the testimony (see SightingShapes.toBounds/toPosition), and
+ * None of that is account. It is how the drawing happens to be drawn today, derived on load from
+ * the angles and directions that ARE the account (see SightingShapes.toBounds/toPosition), and
  * sending it round after round would pay for the timeline again on every correction.
  *
- * So a digest keeps the account whole — time, place, witness, description, tags, decor, weather,
+ * So a digest keeps the account whole — time, place, observer, description, tags, decor, weather,
  * instrument, the named moments — and reduces the timeline to what each shape looked like and
  * which way it was, at each moment there is a pose for. That is exactly the vocabulary a correction
  * is phrased in ("it was higher than that", "it was two Moons wide, not one"), and nothing else in

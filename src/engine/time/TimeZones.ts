@@ -1,7 +1,7 @@
 import type { SightingTime } from "../model/Sighting.js"
 
 /**
- * Resolves a witness's wall-clock reading into a real UTC offset, using the named time zone's own
+ * Resolves a observer's wall-clock reading into a real UTC offset, using the named time zone's own
  * rules AT THE DATE OF THE SIGHTING — summer time included, and as it was then rather than as it is
  * now. That distinction is the whole reason this exists: France ran on UTC+1 in July 1965 (summer
  * time was only reintroduced in 1976) and runs on UTC+2 in July today; New Mexico was on UTC-7 on
@@ -11,7 +11,7 @@ import type { SightingTime } from "../model/Sighting.js"
  * The rules come from the platform's own IANA database, via Intl — no table shipped here, and no
  * table to go stale. What it cannot fix is a zone whose BOUNDARIES have moved: Montgomery, Alabama
  * is `America/Chicago`, which observed summer time in 1948 while Alabama did not. That is why the
- * zone is chosen by the witness rather than derived from the coordinates.
+ * zone is chosen by the observer rather than derived from the coordinates.
  */
 export class TimeZones {
   /** Every IANA zone the platform knows, sorted. Empty on a platform without

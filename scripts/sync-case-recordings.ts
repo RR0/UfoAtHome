@@ -34,7 +34,7 @@ interface CaseRecording {
 /**
  * Every file that exists on both hosts.
  *
- * The names differ between them and always will: this project names a file after the WITNESS
+ * The names differ between them and always will: this project names a file after the OBSERVER
  * (several may share a case), while a dossier names it after what the page beside it embeds. Only
  * the bytes have to match.
  *
@@ -43,12 +43,12 @@ interface CaseRecording {
  * relative names on both, so the recordings are what must not drift.
  */
 const RECORDINGS: CaseRecording[] = [
-  { published: "witness-socorro.json", dossier: "Socorro/sighting.json" },
-  { published: "witness-valensole.json", dossier: "Valensole/sighting.json" },
-  { published: "witness-wilcox.json", dossier: "Wilcox/sighting.json" },
-  { published: "witness-cussac.json", dossier: "Cussac/sighting.json" },
-  { published: "witness-chiles.json", dossier: "ChilesWhitted/witness-chiles.json" },
-  { published: "witness-whitted.json", dossier: "ChilesWhitted/witness-whitted.json" }
+  { published: "observer-socorro.json", dossier: "Socorro/sighting.json" },
+  { published: "observer-valensole.json", dossier: "Valensole/sighting.json" },
+  { published: "observer-wilcox.json", dossier: "Wilcox/sighting.json" },
+  { published: "observer-cussac.json", dossier: "Cussac/sighting.json" },
+  { published: "observer-chiles.json", dossier: "ChilesWhitted/observer-chiles.json" },
+  { published: "observer-whitted.json", dossier: "ChilesWhitted/observer-whitted.json" }
 ]
 
 class CaseRecordingSync {

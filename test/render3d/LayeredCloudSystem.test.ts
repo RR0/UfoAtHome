@@ -5,7 +5,7 @@ import { RainbowEffect } from "../../src/render3d/RainbowEffect.js"
 const PRECIPITATION_RENDER_ORDER = 6
 
 describe("LayeredCloudSystem.deckOrder", () => {
-  it("draws a deck the witness stands under behind the rainbow, which is rain fallen from it", () => {
+  it("draws a deck the observer stands under behind the rainbow, which is rain fallen from it", () => {
     for (let index = 0; index < 3; index++) {
       expect(LayeredCloudSystem.deckOrder(false, index, 3)).toBeLessThan(RainbowEffect.RENDER_ORDER)
     }

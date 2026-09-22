@@ -102,7 +102,7 @@ describe("the light curve", () => {
   })
 })
 
-describe("in the witness's sky", () => {
+describe("in the observer's sky", () => {
   it("has nothing at all in almost every night: none in the spring of 1950", () => {
     expect(Novae.aroundDate(new Date("1950-04-01T21:00:00Z"))).toEqual([])
   })

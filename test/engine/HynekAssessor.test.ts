@@ -58,7 +58,7 @@ describe("HynekAssessor", () => {
       expect(of(id).basis).toBeUndefined()
     }
     // Both answerable now, and both unanswered here: this recording places no being, and its
-    // witness never moved, so nothing establishes a distance.
+    // observer never moved, so nothing establishes a distance.
     expect(of("entities").unsupported).toBeUndefined()
     expect(of("entities").basis).toBeUndefined()
     expect(of("proximity").unsupported).toBeUndefined()
@@ -88,7 +88,7 @@ describe("HynekAssessor", () => {
   it("does not take a companion for a being: same silhouette, opposite claim", async () => {
     const withCompanion = {
       ...evening,
-      decor: [{ id: "epouse", kind: "witness" as const, eastM: 1, northM: 0 }]
+      decor: [{ id: "epouse", kind: "observer" as const, eastM: 1, northM: 0 }]
     }
 
     expect(await classify(withCompanion)).toBe("dd")
@@ -119,7 +119,7 @@ describe("HynekAssessor", () => {
     expect(assessment.verdict).toBe("dd")
   })
 
-  it("reaches CE1 from a distance nobody stored, worked out from the witness's own walk", async () => {
+  it("reaches CE1 from a distance nobody stored, worked out from the observer's own walk", async () => {
     // Valensole's approach: 83.5 m walked while the craft grows from 2.22° to 30.09°, which puts it
     // at 90 m and then 6.5 m. Under Hynek's 150 m line, so a close encounter — from angles and a
     // track, with no metre asserted anywhere in the file. See ShapeDistance.
@@ -133,7 +133,7 @@ describe("HynekAssessor", () => {
           { t: 55000, shapes: [shape(30.0897)] }
         ]
       },
-      witnessTrack: {
+      observerTrack: {
         keyframes: [
           { t: 0, pose: pose(43.845508) },
           { t: 55000, pose: pose(43.844758) }
@@ -162,7 +162,7 @@ describe("HynekAssessor", () => {
           { t: 55000, shapes: [shape(30.0897)] }
         ]
       },
-      witnessTrack: {
+      observerTrack: {
         keyframes: [
           { t: 0, pose: pose(43.845508) },
           { t: 55000, pose: pose(43.844758) }

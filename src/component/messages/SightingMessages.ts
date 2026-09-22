@@ -6,11 +6,11 @@ import type { SightingLabels } from "./SightingLabels.js"
 /* `tags` is not repeated here: SightingLabels already names that field, and one string with two
  * homes is one string that can end up translated two ways. */
 export interface SightingMessages extends SightingLabels {
-  testimonyBy: string
-  /** A listed witness with no name of any kind in their own recording, `{n}` being their place in
-   * the list. Only ever needed for a MANIFEST — a single unnamed witness gets no line at all, see
-   * SightingElement.updateTestimonyLine. */
-  unnamedWitness: string
+  accountBy: string
+  /** A listed observer with no name of any kind in their own recording, `{n}` being their place in
+   * the list. Only ever needed for a MANIFEST — a single unnamed observer gets no line at all, see
+   * SightingElement.updateAccountLine. */
+  unnamedObserver: string
   about: string
   close: string
   observation: string
@@ -33,20 +33,20 @@ export interface SightingMessages extends SightingLabels {
    * field by field, in the same words the editor uses for the same fields. */
   showLabels: string
   hideLabels: string
-  /** The choice of what to replay the testimony with — see SightingElement.interpretationSelect. */
+  /** The choice of what to replay the account with — see SightingElement.interpretationSelect. */
   interpretation: string
   /** The recording's own account, as the choice offers it beside the analysts' interpretations. */
-  testimony: string
+  account: string
   /** An analyst's, `{title}` being what the case calls it and `{by}` who claims it. */
   interpretationBy: string
-  /** Heading of the lines that set the interpretation's bodies against what the witness said. */
+  /** Heading of the lines that set the interpretation's bodies against what the observer said. */
   confrontation: string
-  /** `{deg}` degrees between the direction the witness gave and the one the body is in. */
+  /** `{deg}` degrees between the direction the observer gave and the one the body is in. */
   confrontationDirection: string
-  /** `{ratio}`: how many times wider (or taller) the body looks than the witness said. */
+  /** `{ratio}`: how many times wider (or taller) the body looks than the observer said. */
   confrontationWidth: string
   confrontationHeight: string
-  /** The toggle that shows the testimony beside an interpretation, as it reads each way. */
+  /** The toggle that shows the account beside an interpretation, as it reads each way. */
   showComparison: string
   hideComparison: string
 }

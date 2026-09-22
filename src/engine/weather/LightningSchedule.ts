@@ -7,13 +7,13 @@ export interface LightningStroke {
   intensity: number
 }
 
-/** One lightning flash as a witness under the storm experiences it. */
+/** One lightning flash as a observer under the storm experiences it. */
 export interface LightningFlash {
   /** Recording time of the first stroke, milliseconds. */
   t: number
   /** Where it struck or lit up, degrees clockwise from true north. */
   azimuthDeg: number
-  /** How far from the witness, metres. */
+  /** How far from the observer, metres. */
   distanceM: number
   /** Whether the channel reaches the ground, and can therefore be seen below the cloud base. The
    * others stay inside the cloud and only light it from within. */
@@ -122,7 +122,7 @@ export class LightningSchedule {
     return flash.t + last.offsetMs + LightningSchedule.STROKE_DECAY_MS * 6
   }
 
-  /** How long after the flash its thunder reaches the witness, milliseconds. */
+  /** How long after the flash its thunder reaches the observer, milliseconds. */
   static thunderDelayMs(flash: LightningFlash): number {
     return (flash.distanceM / LightningSchedule.SOUND_SPEED_M_S) * 1000
   }

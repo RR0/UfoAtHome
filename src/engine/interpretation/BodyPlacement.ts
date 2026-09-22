@@ -8,7 +8,7 @@ const DEG_TO_RAD = Math.PI / 180
 
 /**
  * The height of the ground, metres, in the frame bodies are placed in: east and north from where the
- * witness stood at the start of the recording, up from the ground THERE. Supplied by whoever holds
+ * observer stood at the start of the recording, up from the ground THERE. Supplied by whoever holds
  * the relief — the renderer, which already stands the decor on it.
  */
 export interface Ground {
@@ -64,8 +64,8 @@ interface PlacedKey {
 /**
  * Where a body stands at any instant — the one place its keyframes become metres in the world.
  *
- * A keyframe stated FROM THE WITNESS is fixed in the world with their pose at its own instant, and
- * only then blended with its neighbours: a craft the witness walked around does not walk with them.
+ * A keyframe stated FROM THE OBSERVER is fixed in the world with their pose at its own instant, and
+ * only then blended with its neighbours: a craft the observer walked around does not walk with them.
  *
  * A body on the ground is SUBJECT TO THE RELIEF. It stands on the highest of five readings under its
  * footprint (its centre and four corners — at its centre alone, the uphill half of a wide thing is
@@ -78,7 +78,7 @@ interface PlacedKey {
  * checkable on the first.
  */
 export class BodyPlacement {
-  /** Where a witness's eye is above the ground they stand on — the renderer's own figure. */
+  /** Where a observer's eye is above the ground they stand on — the renderer's own figure. */
   static readonly EYE_HEIGHT_M = 1.6
   /** No line of sight is followed further than this looking for the ground, metres. */
   static readonly MAX_RANGE_M = 30000
@@ -90,7 +90,7 @@ export class BodyPlacement {
   private readonly keys: PlacedKey[]
 
   /**
-   * @param eyeAt Where the witness's eye is at an instant, in the same frame — see eyeOf.
+   * @param eyeAt Where the observer's eye is at an instant, in the same frame — see eyeOf.
    */
   constructor(private readonly body: BodyJson, private readonly ground: Ground, eyeAt: (t: number) => (LocalPoint & { headingDeg?: number }) | undefined) {
     const track = [...body.track].sort((a, b) => a.t - b.t)
@@ -128,9 +128,9 @@ export class BodyPlacement {
   }
 
   /**
-   * Where the witness's eye is at `t`, in the frame bodies are placed in — the recording's own
+   * Where the observer's eye is at `t`, in the frame bodies are placed in — the recording's own
    * track, from where it started, at eye height above the ground there. A recording with no
-   * position yet keeps its witness where the scene stands them, at the origin, on the flat ground
+   * position yet keeps its observer where the scene stands them, at the origin, on the flat ground
    * its decor stands on: undefined here left no body drawn at all, and nothing for "Look at it" to
    * aim at, in a recording just begun (an airliner added before the place was typed).
    */
@@ -337,7 +337,7 @@ export class BodyPlacement {
     const direction = BodyPlacement.directionOf(key.azimuthDeg, key.altitudeDeg)
     const eastM = eye.eastM + direction.eastM * distanceM
     const northM = eye.northM + direction.northM * distanceM
-    // Where the witness said it was, the line of sight passes through its centre — unless it is
+    // Where the observer said it was, the line of sight passes through its centre — unless it is
     // on the ground, which then decides its height whatever the line said.
     return {
       eastM,

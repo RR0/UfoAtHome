@@ -14,12 +14,12 @@ import type { ImageProjection } from "../engine/instrument/ImageProjection.js"
 export interface PlacedPhenomenon {
   sourceId: string
   /** The shape as the overlay would have painted it: canvas pixels, the reader's own turn of the
-   * view and the witness's gait already applied (see UfoElement.frameShiftPx). */
+   * view and the observer's gait already applied (see UfoElement.frameShiftPx). */
   shape: Shape
   /** How far along its line of sight it is drawn — see PhenomenonDepth for where that comes from. */
   distanceM: number
-  /** Which way the witness was looking when it was there, when the recording says (BaseShape.aim).
-   * Outranks the pixel: a direction is what the recording states, and it holds behind the witness's
+  /** Which way the observer was looking when it was there, when the recording says (BaseShape.aim).
+   * Outranks the pixel: a direction is what the recording states, and it holds behind the observer's
    * back, where the pixel the overlay kept is clamped far off the canvas and means nothing. */
   aim?: { azimuthDeg: number; altitudeDeg: number }
   /** Back-to-front, the timeline's own paint order: what a later one covers of an earlier one. */
@@ -27,7 +27,7 @@ export interface PlacedPhenomenon {
   /** Not drawn because the phenomenon is outside the visible frame. */
   hidden: boolean
   /** Drawn as its outline alone, because it is shown beside an interpretation to be compared with
-   * — see CanvasRenderer.paintGhost and SceneElement.compareTestimony. */
+   * — see CanvasRenderer.paintGhost and SceneElement.compareAccount. */
   ghost?: boolean
 }
 
@@ -59,10 +59,10 @@ const PHENOMENON_RENDER_ORDER = 5
 const MAX_TEXTURE_PX = 2048
 
 /**
- * The witness's own phenomena, standing IN the three.js scene rather than painted over it.
+ * The observer's own phenomena, standing IN the three.js scene rather than painted over it.
  *
- * Each is a plane facing the witness, at the distance PhenomenonDepth chose, scaled so that it
- * subtends exactly the angle the recording states — which makes it look the same from the witness's
+ * Each is a plane facing the observer, at the distance PhenomenonDepth chose, scaled so that it
+ * subtends exactly the angle the recording states — which makes it look the same from the observer's
  * eye at any distance, and is what lets the distance be a parameter. What the plane carries is the
  * very picture the 2D overlay used to paint: the same CanvasRenderer draws the same halo, blur,
  * veil and spikes into a texture, so nothing about the shape's appearance changed hands. What did
@@ -189,7 +189,7 @@ export class PhenomenonSystem {
    * Called right before the scene is drawn, by whoever owns the camera and knows the instrument's
    * projection (see SceneRenderer.renderOnce): only the renderer has both in hand. A shape that
    * states a direction is centred where that direction falls on the picture (screenPointOf), and a
-   * direction that falls nowhere on it — behind the witness — gets a flat plane facing them there,
+   * direction that falls nowhere on it — behind the observer — gets a flat plane facing them there,
    * which nothing will see.
    */
   place(
@@ -228,7 +228,7 @@ export class PhenomenonSystem {
   }
 
   /** How far off the picture a centre may fall and still be built from its pixels — a shape half
-   * out of the frame is still built from the frame's own rays; one behind the witness is not. */
+   * out of the frame is still built from the frame's own rays; one behind the observer is not. */
   private static readonly FURTHEST_NDC = 4
 
   /** The patch: its vertices on the rays of the pixels they carry — see place. */
@@ -272,7 +272,7 @@ export class PhenomenonSystem {
     )
   }
 
-  /** The fallback for a direction behind the witness: a flat plane facing them along it, sized on
+  /** The fallback for a direction behind the observer: a flat plane facing them along it, sized on
    * axis. Nothing will see it, but it is where the thing IS. */
   private flat(mesh: Mesh<PlaneGeometry, MeshBasicMaterial>, camera: Camera, frame: PhenomenonFrame, extent: ShapeBounds, distanceM: number): void {
     const positions = mesh.geometry.attributes.position

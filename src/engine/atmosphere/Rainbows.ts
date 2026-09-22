@@ -2,13 +2,13 @@ import { WaterRefraction } from "./WaterDrop.js"
 
 /**
  * The bows falling water puts opposite the Sun — where they stand, when they can stand at all, and
- * what it takes for a witness to have seen one.
+ * what it takes for a observer to have seen one.
  *
  * This family belongs beside the halos as an explanation, and for the opposite reason. A halo is a
  * sight most people have never knowingly seen; a rainbow is the one everybody has, which is exactly
  * why the sightings it accounts for are not the ordinary ones. What gets reported is a bow with
  * something wrong with it: a fragment of one standing in a clear patch of sky with no rain visible
- * anywhere near the witness, a piece of colour hanging beside a low Sun, a bow at NIGHT under a full
+ * anywhere near the observer, a piece of colour hanging beside a low Sun, a bow at NIGHT under a full
  * Moon — which is the same physics on a source four hundred thousand times fainter, comes out white
  * to the eye rather than coloured, and is reported by people who have no idea such a thing exists.
  *
@@ -31,7 +31,7 @@ import { WaterRefraction } from "./WaterDrop.js"
  */
 export interface BowForm {
   id: "primary" | "secondary"
-  /** How far from the point opposite the Sun the bow stands, degrees — the radius a witness would
+  /** How far from the point opposite the Sun the bow stands, degrees — the radius a observer would
    * measure. */
   radiusDeg: number
   /** Where its red and its violet edges are. The separation IS the colour, and it is nearly two
@@ -39,7 +39,7 @@ export interface BowForm {
    * colourful sight by far even though water disperses light no more strongly than ice. */
   redRadiusDeg: number
   violetRadiusDeg: number
-  /** How high its top stood above the witness's horizon, degrees. Negative means the whole bow was
+  /** How high its top stood above the observer's horizon, degrees. Negative means the whole bow was
    * below it — see formsAt. */
   topAltitudeDeg: number
 }
@@ -73,7 +73,7 @@ export class Rainbows {
     let scattering = deviation % turn
     if (scattering < 0) scattering += turn
     if (scattering > Math.PI) scattering = turn - scattering
-    // Measured from the point opposite the source, which is where a witness's own shadow points and
+    // Measured from the point opposite the source, which is where a observer's own shadow points and
     // the only landmark a bow is ever described against.
     return 180 - (scattering * 180) / Math.PI
   }
@@ -119,13 +119,13 @@ export class Rainbows {
   }
 
   /**
-   * Which bows could have stood above the witness's own horizon, with the source that high.
+   * Which bows could have stood above the observer's own horizon, with the source that high.
    *
    * The strong statement here is the negative one, and it is a real test of a report: with the Sun
    * above 42 degrees there is no primary bow to be seen from the ground AT ALL, whatever the rain is
-   * doing — which rules out every midday rainbow at a summer latitude. A witness ABOVE the rain (an
+   * doing — which rules out every midday rainbow at a summer latitude. A observer ABOVE the rain (an
    * aircraft, a cliff over a shower, a waterfall's spray) is the exception that proves it: they see
-   * the part of the circle that a ground witness has the ground in front of, and a complete circular
+   * the part of the circle that a ground observer has the ground in front of, and a complete circular
    * rainbow is a real and regularly photographed sight from an aeroplane.
    */
   static formsAt(sourceAltitudeDeg: number): BowForm[] {
@@ -153,7 +153,7 @@ export class Rainbows {
   }
 
   /**
-   * How strongly a bow could have shown, 0 to 1, given the sky that was over the witness.
+   * How strongly a bow could have shown, 0 to 1, given the sky that was over the observer.
    *
    * Two ingredients, and unlike the ice family BOTH of them are in the record. There has to be water
    * falling, which is the reported precipitation; and the source has to reach it, which is what an
@@ -163,14 +163,14 @@ export class Rainbows {
    *
    * MONOTONIC in each, deliberately. It would be easy to write a curve that peaked at half cover on
    * the reasoning that a bow needs both cloud and clear sky, and it would be wrong twice over: the
-   * cloud that makes the rain need not be the cloud between the witness and the Sun, and a curve
+   * cloud that makes the rain need not be the cloud between the observer and the Sun, and a curve
    * that falls back to nothing at the setting a reader would most naturally reach for is how the ice
    * family's first strength function came to hand back zero for the classic halo sky.
    *
    * What the record does not hold is where the shower stood — a bow is drawn by the drops in that
    * one direction, and "it was raining at the station" is not "it was raining forty-two degrees from
    * the antisolar point". So this says the ingredients were there, not that a bow was seen; whether
-   * the witness saw one is, as ever, the reader's conclusion.
+   * the observer saw one is, as ever, the reader's conclusion.
    */
   static strength(rainIntensity: number, cloudCover: number, sourceAltitudeDeg: number): number {
     if (sourceAltitudeDeg <= 0) return 0

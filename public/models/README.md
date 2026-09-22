@@ -115,11 +115,11 @@ is not obvious in a still.
 
 ## Looking out from inside one
 
-Not yet. A recording can place the witness INSIDE a building or a vehicle (`witnessSide`), and what
+Not yet. A recording can place the observer INSIDE a building or a vehicle (`observerSide`), and what
 the camera then looks at is the room the built-in shape builds around it — its walls, its window
 openings sized from the data, the pillar between two door windows. A downloaded model has none of
 that: it is a hull, and from inside a hull with front-facing materials you see straight through it
-and the object simply is not there. So while the witness is inside an object, the built-in shape is
+and the object simply is not there. So while the observer is inside an object, the built-in shape is
 kept and the model is not applied (see `SceneRenderer.loadDecorModel`).
 
 Being able to look out through a real model IS the objective — it is what makes "how much of the sky

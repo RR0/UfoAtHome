@@ -20,7 +20,7 @@ function vehicle(overrides: Partial<DecorObject> = {}): DecorObject {
 describe("DecorSystem.build window rendering", () => {
   it("adds no window mesh at all for a side with no windows entry", () => {
     const group = DecorSystem.build(building(), false)
-    // Just the body box, no window panes, no occupant (no witnessSide) — no entries on any side
+    // Just the body box, no window panes, no occupant (no observerSide) — no entries on any side
     // adds nothing.
     expect(parts(group)).toHaveLength(1)
   })
@@ -33,14 +33,14 @@ describe("DecorSystem.build window rendering", () => {
     expect(parts(group)).toHaveLength(7)
   })
 
-  it("adds a room enclosure (plain walls on windowless sides, floor+ceiling always) plus the occupant figure once witnessSide is set", () => {
-    const noWindows = DecorSystem.build(building({ witnessSide: "front" }), false)
+  it("adds a room enclosure (plain walls on windowless sides, floor+ceiling always) plus the occupant figure once observerSide is set", () => {
+    const noWindows = DecorSystem.build(building({ observerSide: "front" }), false)
     // body (1) + occupant figure group (1) + room: 4 plain walls (all sides absent) + floor + ceiling = 6
     expect(parts(noWindows)).toHaveLength(1 + 1 + 6)
   })
 
   it("frames a windowed side (4 panels around the gap) instead of skipping its wall entirely — the real bug this fixes: an earlier version left the WHOLE side open (not just the window's own rectangle), reading as a giant unintended hole straight through to the sky rather than a wall with one window in it", () => {
-    const oneWindow = DecorSystem.build(building({ witnessSide: "front", windows: { front: 0 } }), false)
+    const oneWindow = DecorSystem.build(building({ observerSide: "front", windows: { front: 0 } }), false)
     // body (1) + front window pane * 3 levels (3) + occupant (1) + room: front framed (4 panels) +
     // behind/left/right plain (3) + floor + ceiling (2) = 9
     expect(parts(oneWindow)).toHaveLength(1 + 3 + 1 + 9)
@@ -71,7 +71,7 @@ describe("DecorSystem.build vehicle door-window rendering", () => {
 
   it("frames a wall with TWO window gaps (front-door + rear-door) as caps + 3 strips (before/between-pillar/after), not the single-gap 4-panel decomposition a building's own wall uses", () => {
     const group = DecorSystem.build(
-      vehicle({ witnessSide: "front-left", windows: { "front-left": 50, "behind-left": 30 } }),
+      vehicle({ observerSide: "front-left", windows: { "front-left": 50, "behind-left": 30 } }),
       false
     )
     // base (8) + occupant (1) + 2 door panes (front-left, behind-left) + room:
@@ -83,25 +83,25 @@ describe("DecorSystem.build vehicle door-window rendering", () => {
 })
 
 describe("DecorSystem.occupantView", () => {
-  it("throws when witnessSide is unset", () => {
+  it("throws when observerSide is unset", () => {
     expect(() => DecorSystem.occupantView(building())).toThrow()
   })
 
   it("places the camera at a standing eye height (1.6m) above the occupied floor's own ground level, facing outward through the given side combined with the building's own heading", () => {
-    const view = DecorSystem.occupantView(building({ witnessSide: "left", headingDeg: 40, occupiedFloor: 1 }))
+    const view = DecorSystem.occupantView(building({ observerSide: "left", headingDeg: 40, occupiedFloor: 1 }))
     expect(view.eyeY).toBe(3 + 1.6) // occupiedFloor 1 * BUILDING_FLOOR_HEIGHT (3) + EYE_HEIGHT_M (1.6)
     expect(view.headingDeg).toBe(40 - 90) // heading - SIDE_YAW_DEG.left(90)
   })
 
   it("places the camera at a fixed eye height matching the cabin's own vertical center (not a standing eye height, and not the visible figure's own base) regardless of occupiedFloor (meaningless for a vehicle)", () => {
-    const view = DecorSystem.occupantView(vehicle({ witnessSide: "right", headingDeg: 90 }))
-    expect(view.eyeY).toBe(1.7) // VEHICLE_CABIN_Y, i.e. VEHICLE_EYE_Y — NOT VEHICLE_WITNESS_Y (0.75, the figure's own base)
+    const view = DecorSystem.occupantView(vehicle({ observerSide: "right", headingDeg: 90 }))
+    expect(view.eyeY).toBe(1.7) // VEHICLE_CABIN_Y, i.e. VEHICLE_EYE_Y — NOT VEHICLE_OBSERVER_Y (0.75, the figure's own base)
     expect(view.headingDeg).toBe(90 - -90) // heading - SIDE_YAW_DEG.right(-90)
   })
 
   it("seats a front-left/behind-left occupant at the same left-side yaw as plain 'left', but at their own door's Z offset — a real car's own front and rear seats sit at different points along the cabin, not both dead-center", () => {
-    const front = DecorSystem.occupantView(vehicle({ witnessSide: "front-left", headingDeg: 0 }))
-    const rear = DecorSystem.occupantView(vehicle({ witnessSide: "behind-left", headingDeg: 0 }))
+    const front = DecorSystem.occupantView(vehicle({ observerSide: "front-left", headingDeg: 0 }))
+    const rear = DecorSystem.occupantView(vehicle({ observerSide: "behind-left", headingDeg: 0 }))
     expect(front.headingDeg).toBe(rear.headingDeg) // same side, same yaw looking out
     expect(front.z).toBeLessThan(0)
     expect(rear.z).toBeGreaterThan(0)
@@ -159,11 +159,11 @@ describe("DecorSystem stated size", () => {
     expect(box.min.y).toBeCloseTo(0, 6)
   })
 
-  it("moves the seat with the body, so a witness inside a longer car still looks out of it", () => {
+  it("moves the seat with the body, so a observer inside a longer car still looks out of it", () => {
     const natural = DecorSystem.naturalSize("vehicle")
-    const plain = DecorSystem.occupantView(vehicle({ witnessSide: "front-left" }))
+    const plain = DecorSystem.occupantView(vehicle({ observerSide: "front-left" }))
     const longer = DecorSystem.occupantView(
-      vehicle({ witnessSide: "front-left", sizeM: { ...natural, lengthM: natural.lengthM * 2 } })
+      vehicle({ observerSide: "front-left", sizeM: { ...natural, lengthM: natural.lengthM * 2 } })
     )
     expect(longer.z).toBeCloseTo(plain.z * 2, 6)
     expect(longer.x).toBeCloseTo(plain.x, 6)
@@ -190,16 +190,16 @@ describe("DecorSystem.usesModel", () => {
     expect(DecorSystem.usesModel(vehicle({ model }))).toBe(true)
   })
 
-  it("does not, while the witness is inside the object", () => {
+  it("does not, while the observer is inside the object", () => {
     // A downloaded model is a hull. From inside one, with front-facing materials, you see straight
-    // through it and the object simply is not there — where what the recording placed the witness
+    // through it and the object simply is not there — where what the recording placed the observer
     // to look at is the room the built-in shape builds around them, window openings and all.
-    expect(DecorSystem.usesModel(vehicle({ model, witnessSide: "front-left" }))).toBe(false)
-    expect(DecorSystem.usesModel(building({ model, witnessSide: "front" }))).toBe(false)
+    expect(DecorSystem.usesModel(vehicle({ model, observerSide: "front-left" }))).toBe(false)
+    expect(DecorSystem.usesModel(building({ model, observerSide: "front" }))).toBe(false)
   })
 
-  it("still does for a kind nobody can be inside of, whatever witnessSide says", () => {
-    const tree: DecorObject = { id: "t", kind: "tree", eastM: 0, northM: 0, model, witnessSide: "front" }
+  it("still does for a kind nobody can be inside of, whatever observerSide says", () => {
+    const tree: DecorObject = { id: "t", kind: "tree", eastM: 0, northM: 0, model, observerSide: "front" }
     expect(DecorSystem.usesModel(tree)).toBe(true)
   })
 })
@@ -247,7 +247,7 @@ describe("DecorSystem.applyModel", () => {
   })
 
   it("fits to whichever axis the recording measured, not always the length", () => {
-    // A witness who gave only the height of a lamp post measured the thing about it that matters.
+    // A observer who gave only the height of a lamp post measured the thing about it that matters.
     const object: DecorObject = { id: "l", kind: "streetlight", eastM: 0, northM: 0, sizeM: { heightM: 4.5 } }
     const group = DecorSystem.build(object, false)
     DecorSystem.applyModel(group, object, loadedModel())

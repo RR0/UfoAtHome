@@ -2,21 +2,21 @@
  * Where a value in a recording came from.
  *
  * "stated" is the default and the reason there IS a default: for the whole life of this format
- * every value was the witness's own, so a file that says nothing says "stated", and every recording
+ * every value was the observer's own, so a file that says nothing says "stated", and every recording
  * ever written stays true without being touched.
  *
- * The other two are what let a reconstruction be run at all. A witness who says "a few minutes"
+ * The other two are what let a reconstruction be run at all. A observer who says "a few minutes"
  * has not given a duration, and a timeline needs one; one who says the thing barred the road has
  * not given an angle, though a road's width and a plausible distance bound one. Refusing to write
  * those left a recording that could not play, which is a worse answer than a marked guess.
  */
 export type Basis =
-  /** The witness said it. The default when a file states no basis at all. */
+  /** The observer said it. The default when a file states no basis at all. */
   | "stated"
-  /** Worked out from what the witness said plus something checkable — a road's width, a place's
+  /** Worked out from what the observer said plus something checkable — a road's width, a place's
    * coordinates, the geometry of a bend. `rationale` carries the working. */
   | "derived"
-  /** Chosen so the reconstruction has a value at all, on nothing the witness said. The list of
+  /** Chosen so the reconstruction has a value at all, on nothing the observer said. The list of
    * these IS the list of what to go back to the source for. */
   | "assumed"
 

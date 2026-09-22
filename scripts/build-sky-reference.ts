@@ -60,7 +60,7 @@ const CASES: SkyReferenceCase[] = [
       paths: pathsFor(sunAltitudeDeg)
     }))
   ),
-  // A witness in an aircraft: less air above, and a horizon below eye level.
+  // A observer in an aircraft: less air above, and a horizon below eye level.
   ...[90, -2].map(altitudeDeg => ({
     name: `10 km up, looking at ${altitudeDeg}° toward a Sun at -6°`,
     conditions: HAZY_SEA_LEVEL,

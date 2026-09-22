@@ -8,23 +8,23 @@ import type { SaidText } from "../model/SaidText.js"
 const DEG_TO_RAD = Math.PI / 180
 const RAD_TO_DEG = 180 / Math.PI
 
-/** What a body looks like from the witness's eye: the direction of its centre and how much of the
+/** What a body looks like from the observer's eye: the direction of its centre and how much of the
  * sky it takes up. */
 export interface Projection {
   aim: ShapeAim
   angular: AngularExtent
 }
 
-/** Which part of the testimony an interpretation fails to reproduce. */
+/** Which part of the account an interpretation fails to reproduce. */
 export type Disagreement = "direction" | "width" | "height"
 
-/** One phenomenon of the testimony, set beside the body that claims to be it, at one instant. */
+/** One phenomenon of the account, set beside the body that claims to be it, at one instant. */
 export interface ConfrontationReading {
   sourceId: string
-  /** What the testimony calls that phenomenon, when it names it. */
+  /** What the account calls that phenomenon, when it names it. */
   title?: SaidText
   bodyId: string
-  /** What the witness said: their own direction and angles, when the recording states them. */
+  /** What the observer said: their own direction and angles, when the recording states them. */
   stated: { aim?: ShapeAim, angular?: AngularExtent }
   /** What the body, standing where the interpretation puts it, would have looked like. */
   predicted: Projection
@@ -37,17 +37,17 @@ export interface ConfrontationReading {
 }
 
 /**
- * Sets an interpretation against the testimony it interprets, one instant at a time.
+ * Sets an interpretation against the account it interprets, one instant at a time.
  *
- * The testimony is angles, and a body in metres standing in the world IMPLIES angles: stand it
- * where the interpreter says, look at it from where the witness stood, and it has a direction and
- * an apparent size. When those are not what the witness said, the interpretation is contradicted
- * — not the testimony, which is the one thing here nobody gets to correct. Where it holds, it is
+ * The account is angles, and a body in metres standing in the world IMPLIES angles: stand it
+ * where the interpreter says, look at it from where the observer stood, and it has a direction and
+ * an apparent size. When those are not what the observer said, the interpretation is contradicted
+ * — not the account, which is the one thing here nobody gets to correct. Where it holds, it is
  * only consistent: many bodies at many distances project the same way, which is exactly why a
  * reading that agrees proves little and one that disagrees proves something.
  *
  * The outline is taken from the body's bounding ellipsoid (or box, for a box), turned by its
- * attitude, and measured across and up in the witness's own view of it — the same two axes the
+ * attitude, and measured across and up in the observer's own view of it — the same two axes the
  * recording's `angular` states. A model is measured by its box: close enough to test a claim, and
  * no closer than the claim itself.
  */
@@ -55,7 +55,7 @@ export class BodyConfrontation {
   /** A direction is contradicted beyond this many degrees, or half the thing's own width, whichever
    * is larger: pointing at a disc a degree across from half a degree off is still pointing at it. */
   static readonly DIRECTION_TOLERANCE_DEG = 1
-  /** An apparent size is contradicted beyond this factor either way — a witness who said "the size
+  /** An apparent size is contradicted beyond this factor either way — a observer who said "the size
    * of a coin at arm's length" is not wrong about a thing a third larger. */
   static readonly SIZE_TOLERANCE = 1.5
 
@@ -67,7 +67,7 @@ export class BodyConfrontation {
   }
 
   /**
-   * Every phenomenon a body explains that the testimony draws at `t`, set against that body.
+   * Every phenomenon a body explains that the account draws at `t`, set against that body.
    *
    * @param outlineOf Points of a body's actual surface, where whoever draws it has them — the
    *   node of a model its `outlineNode` names, which a box round the whole model (legs spread wider
@@ -80,7 +80,7 @@ export class BodyConfrontation {
       if (!predicted) continue
       for (const sourceId of body.explains) {
         const shape = this.timeline.getInterpolatedShapeAt(t, sourceId)
-        // A phenomenon the witness did not see at this instant (fully transparent) states nothing
+        // A phenomenon the observer did not see at this instant (fully transparent) states nothing
         // to measure a body against.
         if (!shape || shape.transparency >= 1) continue
         readings.push({

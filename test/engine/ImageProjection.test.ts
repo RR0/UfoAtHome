@@ -83,7 +83,7 @@ describe("halfWidthAngleDeg", () => {
   it("reaches further across a lens than scaling the vertical field would say", () => {
     // 60 degrees tall on a 16:9 rectilinear frame is 92 degrees across, not the 107 that fov*aspect
     // gives: the projection spreads its own edges. A cone drawn 15 degrees too wide is a cone that
-    // clears testimony it should have questioned.
+    // clears account it should have questioned.
     const lens = new ImageProjection("rectilinear", 360, 60)
     expect(2 * lens.halfWidthAngleDeg(16 / 9)).toBeCloseTo(91.5, 1)
   })

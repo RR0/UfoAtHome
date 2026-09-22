@@ -7,13 +7,13 @@ import { Provenance } from "./Provenance.js"
  * Only what UFO@home reads is declared. A case holds far more (its classification, its place, an
  * image, sources) and is RR0's to define; those fields pass through here unread. What matters here
  * is its EVENTS: a case is a chronology — the sightings, then the analyses, the articles and films,
- * the confessions — and the testimonies a reconstruction replays are its events of type `sighting`,
- * each pointing at one witness's recording.
+ * the confessions — and the accounts a reconstruction replays are its events of type `sighting`,
+ * each pointing at one observer's recording.
  */
 export interface CaseJson {
   /** The case's identifier. On rr0.org it is the dossier's directory name and may be left out; a
-   * case file standing alone states it. No recording carries it: a case names its testimonies, a
-   * testimony does not name its case (see Sighting.id). */
+   * case file standing alone states it. No recording carries it: a case names its accounts, a
+   * account does not name its case (see Sighting.id). */
   id?: string
   title?: string
   /** When it happened, as RR0 writes a time ("1948-07-24 02:45", "1954"). */
@@ -21,7 +21,7 @@ export interface CaseJson {
   events?: CaseEventJson[]
 }
 
-/** One event of a case. A `sighting` points at a witness's recording by `url`; an
+/** One event of a case. A `sighting` points at a observer's recording by `url`; an
  * `interpretation` names the recording it interprets by its `id` (see InterpretationEventJson). */
 export interface CaseEventJson {
   type?: "event"
@@ -40,7 +40,7 @@ export class CaseFile {
   static readonly INTERPRETATION_EVENT = "interpretation"
 
   /**
-   * Whether a fetched JSON is a case rather than one witness's recording: an object with events,
+   * Whether a fetched JSON is a case rather than one observer's recording: an object with events,
    * and no timeline (which every recording has, and a case never does).
    */
   static isCase(json: unknown): json is CaseJson {
@@ -50,7 +50,7 @@ export class CaseFile {
 
   /**
    * The addresses of the recordings a case holds, in the order its events list them, read relative
-   * to the case file's own address: a case lists the recordings beside it, so "witness-chiles.json"
+   * to the case file's own address: a case lists the recordings beside it, so "observer-chiles.json"
    * means the file next to it wherever the case is served from. An absolute address is untouched.
    */
   static sightingUrls(json: CaseJson, caseUrl: string): string[] {

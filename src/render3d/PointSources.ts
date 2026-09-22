@@ -8,8 +8,8 @@ import { RoundPoints } from "./RoundPoints.js"
  * A point source has no luminance of its own to draw: what an eye gets from it is an illuminance,
  * lux, spread over what the eye cannot resolve it from — its acuity cell, a minute of arc for the
  * cones, several for the rods (see acuitySolidAngle). A reader looking at the screen resolves one
- * pixel much as the witness resolved that cell, so ONE pixel's worth of the drawn disc carries the
- * contrast the witness had against the sky, and the rest of the disc shares that light rather than
+ * pixel much as the observer resolved that cell, so ONE pixel's worth of the drawn disc carries the
+ * contrast the observer had against the sky, and the rest of the disc shares that light rather than
  * adding to it: the tiers' larger discs show a brighter point larger, at the same total light. Where
  * the frame's pixels are finer than the eye's cell (a long focal length), the light is conserved over
  * the whole disc.
@@ -112,7 +112,7 @@ export class PointSources {
         float pixelAngle = 2.0 / (projectionMatrix[1][1] * uViewportHeight);
         float drawn = ${PointSources.COVERAGE.toFixed(6)} * gl_PointSize * gl_PointSize * pixelAngle * pixelAngle;
         // The eye's contrast on one pixel, the light conserved over the rest of the disc: a reader
-        // resolves a pixel as the witness resolved his acuity cell, and a disc wider than a pixel
+        // resolves a pixel as the observer resolved his acuity cell, and a disc wider than a pixel
         // is there to show a brighter point as a larger one, not to add light to it.
         float pixels = max(1.0, ${PointSources.COVERAGE.toFixed(6)} * gl_PointSize * gl_PointSize);
         float pixel = pixelAngle * pixelAngle;

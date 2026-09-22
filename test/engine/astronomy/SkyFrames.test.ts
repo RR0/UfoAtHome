@@ -6,7 +6,7 @@ import { horizontalToCartesian } from "../../../src/render3d/skyColors.js"
 
 /**
  * The point of these: the band is not placed star by star, it is a whole coordinate system turned
- * to face the witness. A rotation that is a degree out puts the Milky Way through the wrong
+ * to face the observer. A rotation that is a degree out puts the Milky Way through the wrong
  * constellations, and nothing about the picture would say so — a glowing band across a night sky
  * looks equally plausible wherever it is. So the frame is checked against stars whose galactic
  * coordinates are published, END TO END: right ascension in, altitude and azimuth through the same

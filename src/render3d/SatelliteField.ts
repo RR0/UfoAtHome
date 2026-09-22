@@ -21,7 +21,7 @@ export interface SceneSatellite {
 /**
  * The satellites in the sky, drawn exactly as stars are.
  *
- * A satellite is a point source like a star, sunlit rather than self-luminous, and what a witness
+ * A satellite is a point source like a star, sunlit rather than self-luminous, and what a observer
  * sees of it is the same spread point: so the same round points, the same three size tiers and the
  * same brightness ramp against the same magnitude limit. What differs is only that it MOVES, a
  * degree a second at the zenith, which is why this is its own field restated at every frame instead

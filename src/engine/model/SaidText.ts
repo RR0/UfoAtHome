@@ -13,13 +13,13 @@
  * A bare string stays valid and means "in whatever language it was written in" — every recording
  * ever made is one, and there is no migration. The map form states the language:
  *
- *     "description": { "fr": "Tout le témoignage de Lonnie Zamora…", "en": "Lonnie Zamora's…" }
+ *     "description": { "fr": "Tout le compte rendu de Lonnie Zamora…", "en": "Lonnie Zamora's…" }
  *
  * Keys are language tags as `navigator.languages` gives them ("fr", "en", "pt-BR"), and no set of
  * them is required: a file that has only French is a file that has only French, and a reader whose
  * languages are none of the ones present reads what is there rather than nothing.
  *
- * What is NOT in here: the witness's name and the case id (proper nouns and identifiers), and the
+ * What is NOT in here: the observer's name and the case id (proper nouns and identifiers), and the
  * tags, which are stored in English as the technical terms they are and named by the components'
  * own messages (see SightingTags).
  */
@@ -48,7 +48,7 @@ export class SaidTexts {
    * Falling back to another language rather than to nothing is the whole point. A missing
    * translation must never turn a stated fact into an unstated one: an English reader in front of
    * a French-only account is a reader who can copy it into a translator, while an empty field
-   * tells them the witness said nothing.
+   * tells them the observer said nothing.
    */
   read(text: SaidText | undefined): string | undefined {
     if (text === undefined || typeof text === "string") {

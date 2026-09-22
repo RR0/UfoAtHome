@@ -64,10 +64,10 @@ export interface BodyFrame {
 /**
  * The bodies of an interpretation, standing in the scene — see InterpretationJson.
  *
- * Unlike the testimony's phenomena (PhenomenonSystem), these are real objects of the scene: they
+ * Unlike the account's phenomena (PhenomenonSystem), these are real objects of the scene: they
  * are drawn in the main pass, lit by the sun, casting shadows and receiving them, and hidden by
  * whatever stands in front of them, the ground included. That is the point of them. A plane facing
- * the witness asserts nothing about what is behind it; a body in metres asserts everything, and the
+ * the observer asserts nothing about what is behind it; a body in metres asserts everything, and the
  * scene gets to say what follows.
  *
  * Every body is built at one metre in each direction and stretched to its size each frame, so a
@@ -172,7 +172,7 @@ export class BodySystem {
    * every colour is already at the top of the scale and a brighter thing cannot be painted brighter,
    * only wider. So the bloom runs from about the body's own size, where what it gives out barely
    * tells against the sky, out to the width that carries its whole light at the cap, where it is
-   * all the eye has left — which is what a witness means by "we could not look at it".
+   * all the eye has left — which is what a observer means by "we could not look at it".
    */
   private shine(state: BodyState, holder: Group, glowing: Glow[] | undefined, display: LuminanceDisplay | undefined, eye: Vector3 | undefined): void {
     const luminanceCdM2 = state.appearance.luminanceCdM2
@@ -482,7 +482,7 @@ export class BodySystem {
     const primitive = BodySystem.primitiveOf(state.model)
     if (primitive === "figure") {
       // The decor's own figure, fitted into the unit cube like a model and painted in one colour:
-      // what a witness saw at a distance is a silhouette in coveralls, not a face.
+      // what a observer saw at a distance is a silhouette in coveralls, not a face.
       const material = new MeshStandardMaterial({ roughness: 0.7, metalness: 0 })
       BodySystem.paint(material, state)
       const figure = DecorSystem.build({ id: state.id, kind: "entity", eastM: 0, northM: 0 } as DecorObject, false)

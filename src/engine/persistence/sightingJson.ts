@@ -10,7 +10,7 @@ import { SoundTrack } from "../model/SoundTrack.js"
 import type { SoundTrackJson } from "../model/SoundTrack.js"
 import type { Weather, WeatherSource } from "../model/Weather.js"
 import type { People } from "../model/People.js"
-import type { Testimony } from "../model/Testimony.js"
+import type { Account } from "../model/Account.js"
 import type { DecorObject } from "../model/Decor.js"
 import type { StatedRoad } from "../model/Road.js"
 import type { Milestone } from "../model/Milestone.js"
@@ -34,8 +34,8 @@ import { Provenance } from "./Provenance.js"
  */
 export interface SightingRecordingJson {
   version: 1
-  /** Which testimony this is, unique across every recording anywhere: the day it happened, then
-   * who saw it ("1964-04-24-ZamoraLonnie"), or where for an anonymous witness. What a case and its
+  /** Which account this is, unique across every recording anywhere: the day it happened, then
+   * who saw it ("1964-04-24-ZamoraLonnie"), or where for an anonymous observer. What a case and its
    * interpretations name it by — see Sighting.id. */
   id?: string
   time?: SightingTime
@@ -48,18 +48,18 @@ export interface SightingRecordingJson {
   /** See SightingEvent.timeZone — the IANA rule `utcOffsetHours` was derived from, when it was. */
   timeZone?: string
   place?: SightingLocation[]
-  /** See Sighting.witness. */
-  witness?: People
-  /** Who saw it and how their account travelled — see Testimony, and Sighting.testimony. */
-  testimony?: Testimony
+  /** See Sighting.observer. */
+  observer?: People
+  /** Who saw it and how their account travelled — see Account, and Sighting.account. */
+  account?: Account
   /** See SightingEvent.description — a plain string, or one per language. */
   description?: SaidText
   /** See SightingEvent.tags. */
   tags?: string[]
   timeline: TimelineJson
-  /** The witness's position/elevation/orientation over time — absent for older recordings, which
+  /** The observer's position/elevation/orientation over time — absent for older recordings, which
    * fall back to the legacy static place[0] (see Sighting.ts's resolveObserverPoseAt). */
-  witnessTrack?: ObserverTrackJson
+  observerTrack?: ObserverTrackJson
   /** Weather over time — absent for older recordings, which fall back to the legacy static
    * `weather` field below (see Sighting.ts's resolveWeatherAt). */
   weatherTrack?: WeatherTrackJson
@@ -69,15 +69,15 @@ export interface SightingRecordingJson {
   weather?: Weather
   /** What the sighting sounded like over time — see SoundTrack. Absent means the recording says
    * nothing about sound at all, which replays as silence; a track holding a kind "none" keyframe
-   * is the stronger, deliberate statement that the witness heard nothing (see Sound.ts). */
+   * is the stronger, deliberate statement that the observer heard nothing (see Sound.ts). */
   soundTrack?: SoundTrackJson
   /** See Sighting.decor. Absent/omitted means no decor — older recordings default to []. */
   decor?: DecorObject[]
   /** The roads the account's own plan draws — see Sighting.roads and Road.ts. Absent means none is
    * stated, and the scene then shows only what a survey of today reports, drawn faint. */
   roads?: StatedRoad[]
-  /** Which meteorological record `weatherTrack` was looked up from, when it wasn't the witness who
-   * stated the conditions — see Sighting.weatherSource. Absent means they ARE the witness's (or
+  /** Which meteorological record `weatherTrack` was looked up from, when it wasn't the observer who
+   * stated the conditions — see Sighting.weatherSource. Absent means they ARE the observer's (or
    * predate this field), and a reader must not treat them as measurements. */
   weatherSource?: WeatherSource
   /** Which INSTRUMENTS entry this was observed through — see Sighting.instrumentId. Absent means
@@ -93,7 +93,7 @@ export interface SightingRecordingJson {
   /** Pictures of the place, laid over the reconstruction at the direction each was registered in —
    * see SceneReference. Absent/omitted means none. */
   references?: SceneReference[]
-  /** What the witness took it to be, in metres — see InterpretationJson. Absent means they said
+  /** What the observer took it to be, in metres — see InterpretationJson. Absent means they said
    * nothing a body could be made of, which is most of them. */
   interpretation?: InterpretationJson
 }
@@ -122,12 +122,12 @@ export function plainSightingJson(sighting: Sighting): SightingRecordingJson {
     utcOffsetHours: sighting.event.utcOffsetHours,
     timeZone: sighting.event.timeZone,
     place: sighting.event.place,
-    witness: sighting.witness,
-    testimony: sighting.testimony,
+    observer: sighting.observer,
+    account: sighting.account,
     description: sighting.event.description,
     tags: sighting.event.tags,
     timeline: sighting.timeline.toJSON(),
-    witnessTrack: sighting.witnessTrack.toJSON(),
+    observerTrack: sighting.observerTrack.toJSON(),
     weatherTrack: sighting.weatherTrack.toJSON(),
     soundTrack: sighting.soundTrack.toJSON(),
     weather: sighting.weather,
@@ -165,16 +165,16 @@ function fromPlainSightingJson(json: SightingRecordingJson): Sighting {
       tags: json.tags
     },
     Timeline.fromJSON(json.timeline),
-    json.witnessTrack ? ObserverTrack.fromJSON(json.witnessTrack) : new ObserverTrack(),
+    json.observerTrack ? ObserverTrack.fromJSON(json.observerTrack) : new ObserverTrack(),
     json.weatherTrack ? WeatherTrack.fromJSON(json.weatherTrack) : new WeatherTrack(),
     json.soundTrack ? SoundTrack.fromJSON(json.soundTrack) : new SoundTrack(),
     // Only the fields a person reference has: what older files also wrote there (an RR0 directory
     // beside the id) is not read, so that saving one does not carry it on.
-    json.witness && {
-      id: json.witness.id,
-      title: json.witness.title,
-      lastName: json.witness.lastName,
-      firstNames: json.witness.firstNames
+    json.observer && {
+      id: json.observer.id,
+      title: json.observer.title,
+      lastName: json.observer.lastName,
+      firstNames: json.observer.firstNames
     },
     json.id,
     json.weather,
@@ -186,7 +186,7 @@ function fromPlainSightingJson(json: SightingRecordingJson): Sighting {
     // what keeps those files saying what they said, and writing it back moves them to where it now
     // belongs. A pose's own leftover field is simply ignored: ObserverPose no longer has one.
     json.exposureSeconds ??
-      json.witnessTrack?.keyframes
+      json.observerTrack?.keyframes
         // Cast because ObserverPose no longer HAS the field: this reads what an older file wrote,
         // not what the model holds.
         .map(keyframe => (keyframe.pose as { exposureSeconds?: number }).exposureSeconds)
@@ -198,11 +198,11 @@ function fromPlainSightingJson(json: SightingRecordingJson): Sighting {
   // The file states an angle; the drawing has to follow it. Done here rather than in
   // Timeline.fromJSON because the projection needs the pose's own field of view, which lives on
   // the sighting, not on the timeline.
-  sighting.testimony = json.testimony
+  sighting.account = json.account
   sighting.interpretation = json.interpretation
   SightingShapes.toBounds(sighting)
   // Positions follow the stated directions the way sizes follow the stated angles — and this is the
-  // step that lets a recording's witness turn their head without taking the sky with them.
+  // step that lets a recording's observer turn their head without taking the sky with them.
   SightingShapes.toPosition(sighting)
   return sighting
 }

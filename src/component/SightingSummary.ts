@@ -15,7 +15,7 @@ import { SightingTags } from "./messages/TagNames.js"
  * these; the editor maps them onto its panels, so that clicking a chip opens the one holding
  * the field. */
 export type SummaryGroup =
-  | "observation" | "witness" | "location" | "decor" | "temporal" | "weather" | "sound"
+  | "observation" | "observer" | "location" | "decor" | "temporal" | "weather" | "sound"
   /** Not a group of fields at all, and the only one that is not: what an assessor made of the
    * recording, which has no panel to open and is produced after the fact rather than gathered here
    * (see SightingEditorElement.runAssessments). It travels as a group so that it can nest and be
@@ -34,10 +34,10 @@ export interface SummaryEntry {
   unit: string
   /** A colour to show as a swatch beside the value, when the value IS a colour. */
   color?: string
-  /** True when a real record supplied this value rather than the witness — see Sighting.weatherSource. */
+  /** True when a real record supplied this value rather than the observer — see Sighting.weatherSource. */
   fromSource: boolean
   /** Which group this entry is ABOUT, when that is not the group it belongs to — an assessment of
-   * the witness's own account sits in the Assessment box and leads to the Witness panel. Only a
+   * the observer's own account sits in the Assessment box and leads to the Observer panel. Only a
    * host with somewhere to lead uses it (see Assessor.about). */
   about?: string
 }
@@ -51,7 +51,7 @@ export interface SummaryEntry {
  * `groundElevationM` is not a convenience. A pose's own `elevationM` is height ABOVE THE GROUND,
  * while the field both components label "Altitude" is height above SEA LEVEL — the difference
  * being the terrain's own height there, which is a lookup and lives nowhere in the file. Without
- * it this summary read 0 m for a witness standing 220 m up, contradicting the very editor it sits
+ * it this summary read 0 m for a observer standing 220 m up, contradicting the very editor it sits
  * under. Absent, the entry falls back to the raw value, which is the same number only at sea
  * level.
  */
@@ -124,7 +124,7 @@ export class SightingSummary {
   entriesFor(sighting: Sighting, timeMs: number, context: SummaryContext = {}): SummaryEntry[] {
     const entries: SummaryEntry[] = []
     this.addObservation(entries, sighting)
-    this.addWitness(entries, sighting, timeMs)
+    this.addObserver(entries, sighting, timeMs)
     this.addLocation(entries, sighting, timeMs, context.groundElevationM)
     this.addDecor(entries, sighting, timeMs, context)
     this.addTemporal(entries, sighting)
@@ -202,21 +202,21 @@ export class SightingSummary {
       tags && tags.length > 0 ? tags.map(tag => this.tags.name(tag)).join(", ") : undefined)
   }
 
-  private addWitness(entries: SummaryEntry[], sighting: Sighting, timeMs: number): void {
-    const witness = sighting.witness
-    this.push(entries, "witness", "witnessId", this.labels.witnessId, witness?.id)
-    this.push(entries, "witness", "witnessTitle", this.labels.witnessTitle, witness?.title)
-    this.push(entries, "witness", "witnessLastName", this.labels.witnessLastName, witness?.lastName)
-    const firstNames = witness?.firstNames
-    this.push(entries, "witness", "witnessFirstNames", this.labels.witnessFirstNames,
+  private addObserver(entries: SummaryEntry[], sighting: Sighting, timeMs: number): void {
+    const observer = sighting.observer
+    this.push(entries, "observer", "observerId", this.labels.observerId, observer?.id)
+    this.push(entries, "observer", "observerTitle", this.labels.observerTitle, observer?.title)
+    this.push(entries, "observer", "observerLastName", this.labels.observerLastName, observer?.lastName)
+    const firstNames = observer?.firstNames
+    this.push(entries, "observer", "observerFirstNames", this.labels.observerFirstNames,
       firstNames && firstNames.length > 0 ? firstNames.join(", ") : undefined)
 
     const instrument = sighting.instrument
-    this.push(entries, "witness", "instrument", this.labels.instrument, instrument.name[this.language])
+    this.push(entries, "observer", "instrument", this.labels.instrument, instrument.name[this.language])
     // The recording's own, not the instant's: one observation was photographed one way (see
     // Sighting.exposureSeconds), so this stands whether or not there is a pose to read.
     const exposure = sighting.exposure
-    this.push(entries, "witness", "exposureSeconds", this.labels.exposure,
+    this.push(entries, "observer", "exposureSeconds", this.labels.exposure,
       exposure === undefined ? undefined : (exposure < 1 ? `1/${Math.round(1 / exposure)}` : this.rounded(exposure, 2)), "s")
     const pose = resolveObserverPoseAt(sighting, timeMs)
     if (pose) {
@@ -225,15 +225,15 @@ export class SightingSummary {
       // syncOpticsFromInstrument applies to the very same value.
       const focalLengthMm = Instruments.focalLengthMmFor(instrument, pose.fovDeg)
       if (focalLengthMm === undefined) {
-        this.push(entries, "witness", "focalLength", this.labels.fieldOfView, this.rounded(pose.fovDeg, 1), "°")
+        this.push(entries, "observer", "focalLength", this.labels.fieldOfView, this.rounded(pose.fovDeg, 1), "°")
       } else {
-        this.push(entries, "witness", "focalLength", this.labels.focalLength, this.rounded(focalLengthMm, 1), "mm")
+        this.push(entries, "observer", "focalLength", this.labels.focalLength, this.rounded(focalLengthMm, 1), "mm")
       }
-      this.push(entries, "witness", "fNumber", this.labels.aperture, this.rounded(pose.fNumber ?? instrument.fNumber, 1))
-      this.push(entries, "witness", "focusDistance", this.labels.focusDistance, this.rounded(pose.focusDistanceM, 1), "m")
+      this.push(entries, "observer", "fNumber", this.labels.aperture, this.rounded(pose.fNumber ?? instrument.fNumber, 1))
+      this.push(entries, "observer", "focusDistance", this.labels.focusDistance, this.rounded(pose.focusDistanceM, 1), "m")
       // With the instrument, not with the place: it says how the device was held, not where the
-      // witness stood. Absent or zero is one held upright, which states nothing worth a chip.
-      this.push(entries, "witness", "roll", this.labels.roll, this.roundedShown(pose.rollDeg), "°")
+      // observer stood. Absent or zero is one held upright, which states nothing worth a chip.
+      this.push(entries, "observer", "roll", this.labels.roll, this.roundedShown(pose.rollDeg), "°")
     }
   }
 
@@ -246,7 +246,7 @@ export class SightingSummary {
     }
     this.push(entries, "location", "lat", this.labels.latitude, this.rounded(pose.lat, 6))
     this.push(entries, "location", "lng", this.labels.longitude, this.rounded(pose.lng, 6))
-    // The compass point beside the degrees: "129°" is a number, "(SE)" is where the witness faced.
+    // The compass point beside the degrees: "129°" is a number, "(SE)" is where the observer faced.
     // In the unit, not the value, so the value stays the number the field holds.
     const heading = this.rounded(pose.headingDeg)
     this.push(entries, "location", "heading", this.labels.heading, heading,
@@ -301,7 +301,7 @@ export class SightingSummary {
     this.push(entries, "decor", "decorLightRig", this.labels.decorLights, rig?.name)
     this.push(entries, "decor", "decorFloors", this.labels.decorFloors, selected.floors)
     this.push(entries, "decor", "decorOccupiedFloor", this.labels.decorOccupiedFloor, selected.occupiedFloor)
-    this.push(entries, "decor", "decorWitnessSide", this.labels.decorWitnessSide, this.decorSideName(selected.witnessSide))
+    this.push(entries, "decor", "decorObserverSide", this.labels.decorObserverSide, this.decorSideName(selected.observerSide))
     for (const [side, opacity] of Object.entries(selected.windows ?? {})) {
       this.push(entries, "decor", `decorWindow${this.capitalise(side)}`,
         `${this.labels.decorWindows} ${this.decorSideName(side as DecorSide)}`, opacity, "%")
@@ -392,7 +392,7 @@ export class SightingSummary {
       case "streetlight": return this.labels.decorStreetlight
       case "vehicle": return this.labels.decorVehicle
       case "aircraft": return this.labels.decorAircraft
-      default: return this.labels.decorWitness
+      default: return this.labels.decorObserver
     }
   }
 

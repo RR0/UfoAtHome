@@ -57,10 +57,10 @@ describe("SatellitePasses", () => {
     })
   })
 
-  describe("where an object stands in the witness's sky", () => {
+  describe("where an object stands in the observer's sky", () => {
     it("points its azimuth at the ground under the satellite", () => {
       // Independent of the library's own topocentric transform: the bearing of the great circle
-      // from the witness to the sub-satellite point, by the textbook formula.
+      // from the observer to the sub-satellite point, by the textbook formula.
       const iss = objectOf(ISS_TLE, "ISS (ZARYA)")
       const passes = new SatellitePasses([iss])
       const satrec = SatellitePasses.satrecOf(iss)!
@@ -86,7 +86,7 @@ describe("SatellitePasses", () => {
 
     it("puts the station in the Earth's shadow exactly where the shadow-height formula does", () => {
       // Two separate models of the same fact: Satellites.shadowHeightKm (a cylinder above the
-      // witness, from the Sun's altitude alone) and satellite.js's umbra and penumbra from the
+      // observer, from the Sun's altitude alone) and satellite.js's umbra and penumbra from the
       // object's own position. Close to the zenith they must agree, except in the few tens of
       // kilometres of penumbra the cylinder does not have.
       const iss = objectOf(ISS_TLE, "ISS (ZARYA)")

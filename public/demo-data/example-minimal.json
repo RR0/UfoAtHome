@@ -45,7 +45,7 @@
       }
     ]
   },
-  "witnessTrack": {
+  "observerTrack": {
     "keyframes": [
       {
         "t": 0,

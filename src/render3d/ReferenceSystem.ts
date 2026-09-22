@@ -33,7 +33,7 @@ export interface ReferenceView {
  * exactly its registered vertical field at its distance, and its horizontal field follows from
  * its pixels' own aspect: that IS a rectilinear picture, which is what a lens makes. Rendered under
  * whatever projection the instrument declares, the panel is resampled the same way everything else
- * in the scene is, so an eye-witness recording (equidistant) and a photographer's (rectilinear)
+ * in the scene is, so an eye-observer recording (equidistant) and a photographer's (rectilinear)
  * both lay the picture over their own picture correctly — that is the reason to stand it in the
  * scene rather than lay an <img> over the canvas, which would only ever be right for the one
  * projection and the one heading the picture happened to share with the current view.
@@ -42,8 +42,8 @@ export interface ReferenceView {
  * altitude, with its centre column at the registered heading.
  *
  * Both are anchored to the eye: a picture is a field of directions from where it was taken, and
- * the reconstruction stands it at the witness's own eye, which is where a picture of "what the
- * witness saw" is worth comparing. A witness who walks away from the spot takes the picture with
+ * the reconstruction stands it at the observer's own eye, which is where a picture of "what the
+ * observer saw" is worth comparing. A observer who walks away from the spot takes the picture with
  * them, which is right for the far landscape and wrong for the near — a limitation stated rather
  * than hidden, since a picture from one spot cannot say what another spot saw.
  */
@@ -117,7 +117,7 @@ export class ReferenceSystem {
 
   /**
    * Stands every picture at the eye — called right before the scene is drawn, by whoever owns the
-   * camera (see SceneRenderer.renderOnce), since the eye moves with the witness.
+   * camera (see SceneRenderer.renderOnce), since the eye moves with the observer.
    */
   place(camera: Camera): void {
     for (const mesh of this.meshes.values()) {

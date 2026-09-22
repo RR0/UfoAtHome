@@ -11,7 +11,7 @@ const THUNDER_CREDIT_LICENSE = "CC BY 3.0"
 /**
  * Every credit a scene owes for what it is showing, as a list — the one place it is written, read
  * by `<rr0-sighting>`'s info panel and by the panel a bare `<rr0-scene>` opens from its own button:
- * a licence is honoured by being shown, and one printed in small type over the witness's map was in
+ * a licence is honoured by being shown, and one printed in small type over the observer's map was in
  * the way of the thing the map is for.
  */
 export class SceneCredits {
@@ -25,11 +25,11 @@ export class SceneCredits {
     // and the account is of another day (see RoadProvider.contemporary).
     const roadAttribution = scene.currentRoadAttribution
     if (roadAttribution) add(SceneCredits.text(roadAttribution))
-    // The witness map's own tiles, once a reader has opened it and they have arrived — the same
+    // The observer map's own tiles, once a reader has opened it and they have arrived — the same
     // licence, owed for a second use of the same service. Skipped when the terrain's line already
     // carries those words: the ground patch and the map are normally drawn from the same provider,
     // and a credits list that says one thing twice reads as a bug rather than as diligence.
-    const mapCredit = scene.ufoElement.witnessMapCredit
+    const mapCredit = scene.ufoElement.observerMapCredit
     if (mapCredit && !terrainAttribution?.includes(mapCredit)) add(SceneCredits.text(mapCredit))
     // Every 3D model currently standing in the decor, each named with its author and licence — the
     // condition on which they are shown at all (see DecorModelRef.credit, and DataSource's own doc

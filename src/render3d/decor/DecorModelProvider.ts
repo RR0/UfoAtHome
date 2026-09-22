@@ -39,7 +39,7 @@ export interface DecorModelEntry {
  * the part of a reconstruction most likely to be provisional. A recording says a 1964 patrol car
  * stood eight meters away; whether it is drawn today as a box, tomorrow as somebody's approximate
  * sedan, and later as a real Catalina somebody modelled properly is a question about the CATALOGUE,
- * not about the testimony. Naming the model by id keeps that question out of the data — and lets a
+ * not about the account. Naming the model by id keeps that question out of the data — and lets a
  * source that turns out not to be permanent be re-hosted here without touching a single recording.
  */
 export interface DecorModelProvider {

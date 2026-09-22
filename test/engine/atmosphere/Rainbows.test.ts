@@ -44,7 +44,7 @@ describe("Rainbows, derived from the refractive index of water and nothing else"
     })
   })
 
-  describe("whether a witness on the ground could have seen one", () => {
+  describe("whether a observer on the ground could have seen one", () => {
     it("stands the bow highest at sunrise and takes it away by mid-morning", () => {
       const low = Rainbows.formsAt(2)
       expect(low.map(bow => bow.id)).toEqual(["primary", "secondary"])

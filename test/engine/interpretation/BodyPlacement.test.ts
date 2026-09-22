@@ -58,7 +58,7 @@ describe("BodyPlacement", () => {
     expect(placement.at(500)?.upM).toBeCloseTo(10.5, 6)
   })
 
-  it("puts a direction from the witness with a distance at that distance along it", () => {
+  it("puts a direction from the observer with a distance at that distance along it", () => {
     const placement = new BodyPlacement(craft([{ t: 0, azimuthDeg: 90, altitudeDeg: 30, distanceM: 100 }]), flat, eyeAtOrigin(flat))
     const state = placement.at(0)!
     expect(state.eastM).toBeCloseTo(100 * Math.cos(Math.PI / 6), 6)
@@ -73,8 +73,8 @@ describe("BodyPlacement", () => {
     expect(placement.at(0)?.northM).toBeCloseTo(16, 3)
   })
 
-  it("fixes a keyframe stated from the witness with their pose at its own instant, not the one being drawn", () => {
-    // The witness walks 10 m north between the two instants; a body stated 20 m north of them at
+  it("fixes a keyframe stated from the observer with their pose at its own instant, not the one being drawn", () => {
+    // The observer walks 10 m north between the two instants; a body stated 20 m north of them at
     // t=0 is 20 m north of the start, wherever they walk to afterwards.
     const walking = (t: number): LocalPoint => ({ eastM: 0, northM: t / 100, upM: BodyPlacement.EYE_HEIGHT_M })
     const placement = new BodyPlacement(craft([{ t: 0, azimuthDeg: 0, altitudeDeg: 0, distanceM: 20 }]), flat, walking)
@@ -138,7 +138,7 @@ describe("BodyPlacement", () => {
   })
 })
 
-describe("The witness's eye", () => {
+describe("The observer's eye", () => {
   it("stands at the origin, over the ground there, in a recording with no place yet", async () => {
     const { fromSightingJson } = await import("../../../src/engine/persistence/sightingJson.js")
     const sighting = fromSightingJson({ version: 1, timeline: { keyframes: [] } })

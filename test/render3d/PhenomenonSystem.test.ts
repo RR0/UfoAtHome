@@ -157,7 +157,7 @@ describe("PhenomenonSystem", () => {
     const system = new PhenomenonSystem(scene)
     const cam = camera()
     // A pixel a hundred thousand wide off the canvas — where the overlay clamps a shape once the
-    // witness turns their back on it — and a stated direction due east, ten degrees up.
+    // observer turns their back on it — and a stated direction due east, ten degrees up.
     system.set(
       [{ sourceId: "a", shape: oval({ x: -99697 }), distanceM: 100, renderOrder: 0, hidden: false, aim: { azimuthDeg: 90, altitudeDeg: 10 } }],
       frame()
@@ -190,7 +190,7 @@ describe("PhenomenonSystem", () => {
     }
   })
 
-  it("keeps the timeline's paint order and hides what the witness put behind cloud", () => {
+  it("keeps the timeline's paint order and hides what the observer put behind cloud", () => {
     const scene = new Scene()
     const system = new PhenomenonSystem(scene)
     system.set(

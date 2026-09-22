@@ -204,7 +204,7 @@ export class Comets {
    * a degree across the span this catalog covers, and a comet is a single object somebody is being
    * pointed at by name rather than a background of ten thousand that all shift together.
    *
-   * TOPOCENTRIC, from where the witness stood rather than from the Earth's center — the same thing
+   * TOPOCENTRIC, from where the observer stood rather than from the Earth's center — the same thing
    * astronomy-engine already does for the Moon and the planets. Ordinarily that is arcseconds and
    * would not be worth the line, but a comet can pass very much closer than a planet ever does:
    * IRAS-Araki-Alcock came by at 0.031 au, where the two viewpoints differ by nearly a tenth of a

@@ -14,7 +14,7 @@ export interface Demo {
    */
   readonly playSrc?: string
   /**
-   * Whether to offer the map of where the observer stood — see the `show-witness-map` attribute,
+   * Whether to offer the map of where the observer stood — see the `show-observer-map` attribute,
    * which is off everywhere by default.
    *
    * Per demo, not per page, because it is a fact about the RECONSTRUCTION and not about where it is
@@ -24,11 +24,11 @@ export interface Demo {
    * Alabama at night.
    *
    * It decides the map's STARTING state, not whether it exists: every reconstruction that states a
-   * place has the button (see WITNESS_MAP_ATTRIBUTE), and a reader can open one this list does not.
+   * place has the button (see OBSERVER_MAP_ATTRIBUTE), and a reader can open one this list does not.
    * Honoured by the front page's carousel and by the full-size player, not by the catalogue's cards:
    * a map is a fixed 140 px square, and a card's sky is 181 px tall.
    */
-  readonly witnessMap?: boolean
+  readonly observerMap?: boolean
   readonly title: Said<string>
   /**
    * Whether the title is a NAME — a place, people — whose capital stays wherever the title goes.
@@ -67,9 +67,9 @@ export class DemoCatalogue {
       demos: [
         {
           id: "chiles-whitted",
-          src: "/demo-data/witness-chiles.json",
+          src: "/demo-data/observer-chiles.json",
           playSrc: "/demo-data/case-chiles-whitted.json",
-          witnessMap: true,
+          observerMap: true,
           title: { en: "Chiles & Whitted, 1948", fr: "Chiles et Whitted, 1948" },
           titleIsName: true,
           blurb: {
@@ -79,7 +79,7 @@ export class DemoCatalogue {
         },
         {
           id: "valensole",
-          src: "/demo-data/witness-valensole.json",
+          src: "/demo-data/observer-valensole.json",
           title: { en: "Valensole, 1965", fr: "Valensole, 1965" },
           titleIsName: true,
           blurb: {
@@ -89,7 +89,7 @@ export class DemoCatalogue {
         },
         {
           id: "cussac",
-          src: "/demo-data/witness-cussac.json",
+          src: "/demo-data/observer-cussac.json",
           title: { en: "Cussac, 1967", fr: "Cussac, 1967" },
           titleIsName: true,
           blurb: {
@@ -99,10 +99,10 @@ export class DemoCatalogue {
         },
         {
           id: "socorro",
-          src: "/demo-data/witness-socorro.json",
+          src: "/demo-data/observer-socorro.json",
           // The case, for the player: it holds an interpretation beside the account to choose from.
           playSrc: "/demo-data/case-socorro.json",
-          witnessMap: true,
+          observerMap: true,
           title: { en: "Socorro, 1964", fr: "Socorro, 1964" },
           titleIsName: true,
           blurb: {
@@ -112,7 +112,7 @@ export class DemoCatalogue {
         },
         {
           id: "wilcox",
-          src: "/demo-data/witness-wilcox.json",
+          src: "/demo-data/observer-wilcox.json",
           title: { en: "Wilcox, 1964", fr: "Wilcox, 1964" },
           titleIsName: true,
           blurb: {

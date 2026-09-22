@@ -9,7 +9,7 @@ import { BRIGHT_STARS } from "../../src/engine/astronomy/brightStarCatalog.js"
 describe("bright star catalog", () => {
   it("carries every star this side of magnitude 3 that can be named at all", () => {
     // 179 stars are brighter than magnitude 3; exactly one of them has neither a proper name nor a
-    // Bayer or Flamsteed designation, and a catalog row number identifies nothing for a witness.
+    // Bayer or Flamsteed designation, and a catalog row number identifies nothing for a observer.
     expect(BRIGHT_STARS.length).toBe(178)
     expect(BRIGHT_STARS.every(star => star.mag <= 3)).toBe(true)
   })

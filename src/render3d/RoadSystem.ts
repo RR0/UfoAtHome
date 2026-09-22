@@ -10,7 +10,7 @@ export type GroundYAt = (x: number, z: number) => number
 /**
  * The roads under a scene, drawn as real carriageways lying on the real relief.
  *
- * Drawn rather than photographed, and the reason is arithmetic. The ground is seen from a witness's
+ * Drawn rather than photographed, and the reason is arithmetic. The ground is seen from a observer's
  * eye at 1.70 m, so almost edge-on: on a 720 x 405 frame over a 60 degree field, one metre of
  * ground a hundred metres out is an eighth of a pixel, and a seven-metre road is four fifths of
  * one. Sharpening the photograph under it does not help — the whole road is thinner than a pixel
@@ -18,7 +18,7 @@ export type GroundYAt = (x: number, z: number) => number
  * the texture, so it survives the same perspective that flattens the photograph.
  *
  * Two kinds of road are drawn here and they are NOT drawn alike. One is stated by the case file —
- * measured at the time, by the people who were there — and is the ground the witness was actually
+ * measured at the time, by the people who were there — and is the ground the observer was actually
  * on. The other comes from a survey of today (see RoadProvider.contemporary): useful for placing
  * oneself, and not evidence of anything, because a road network is not what it was. Sixty years of
  * widening, realignment and abandonment stand between today's survey and the night of an account,
@@ -88,10 +88,10 @@ export class RoadSystem {
   }
 
   /**
-   * The roads the case file itself draws, in metres from the witness's place — see StatedRoad.
+   * The roads the case file itself draws, in metres from the observer's place — see StatedRoad.
    *
    * Drawn whole rather than faint, and that is the whole point of telling them apart: this is the
-   * ground the witness was on, measured by the people who went there, not a survey taken sixty
+   * ground the observer was on, measured by the people who went there, not a survey taken sixty
    * years later.
    */
   setStated(roads: StatedRoad[], groundYAt: GroundYAt): void {

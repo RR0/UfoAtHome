@@ -2,10 +2,10 @@ import type { GeoBounds } from "../render3d/terrain/GeoBounds.js"
 import type { ImageryTexture } from "../render3d/terrain/ImageryProvider.js"
 import { fractionWithinBounds } from "../render3d/terrain/TileMath.js"
 import { geoToLocalMeters } from "../render3d/terrain/GeoProjection.js"
-import type { WitnessPath } from "../engine/place/WitnessPath.js"
+import type { ObserverPath } from "../engine/place/ObserverPath.js"
 
-/** A named moment of the account (see Milestone) at the place the witness had reached by then. */
-export interface WitnessMapMarker {
+/** A named moment of the account (see Milestone) at the place the observer had reached by then. */
+export interface ObserverMapMarker {
   label: string
   lat: number
   lng: number
@@ -20,8 +20,8 @@ export interface WitnessMapMarker {
 
 /** Something on the map a pointer can be over: what to call it, and what it is, so a caller can
  * decide what a click on it should do. */
-export interface WitnessMapTarget {
-  kind: "witness" | "milestone" | "decor"
+export interface ObserverMapTarget {
+  kind: "observer" | "milestone" | "decor"
   /** What to show the reader — already in their own language when the recording states one. */
   label: string
   /** Where it stands, so a caller can work out which way to look to see it. */
@@ -32,8 +32,8 @@ export interface WitnessMapTarget {
 }
 
 /** One piece of scenery the recording places on the ground — see DecorObject, whose eastM/northM
- * are resolved against the witness's own t=0 position before they get here. */
-export interface WitnessMapDecor {
+ * are resolved against the observer's own t=0 position before they get here. */
+export interface ObserverMapDecor {
   lat: number
   lng: number
   /** What the recording calls it, when it says — see DecorObject.title. */
@@ -44,50 +44,50 @@ export interface WitnessMapDecor {
 
 /** Everything the map shows at one instant of the recording. Assembled by the component, so this
  * renderer never reaches into a Sighting and can be exercised on any canvas. */
-export interface WitnessMapFrame {
+export interface ObserverMapFrame {
   /** The ground the canvas covers, north up. */
   bounds: GeoBounds
   /** The photograph under it, with its OWN bounds — normally larger than `bounds`, and placed by
    * them rather than stretched to fit (see ImageryTexture.bounds). Absent when the tiles could not
    * be fetched, which the map survives: the path is the point, the photograph is the context. */
   imagery?: ImageryTexture
-  path: WitnessPath
-  /** Where the witness is at the playhead — absent only for a recording whose track has coordinates
+  path: ObserverPath
+  /** Where the observer is at the playhead — absent only for a recording whose track has coordinates
    * at some times and not at this one. */
   position?: { lat: number; lng: number }
   /**
-   * Which way the VIEW is pointing, degrees clockwise from true north — the witness's own heading,
+   * Which way the VIEW is pointing, degrees clockwise from true north — the observer's own heading,
    * plus however far a reader has since turned to look at something (see SceneElement.lookToward).
    *
    * The view rather than the record, because the map's job is to explain the picture beside it: a
-   * cone still aimed where the witness looked while the picture shows somewhere else would have the
+   * cone still aimed where the observer looked while the picture shows somewhere else would have the
    * two disagree, and the reader has no way to tell which is lying. They coincide until somebody
    * turns the view, which is most of the time.
    *
    * Undefined means the recording never said, and then NO cone is drawn — a cone pointing north at
-   * a witness who was never asked which way they looked would be the map inventing the one thing it
+   * a observer who was never asked which way they looked would be the map inventing the one thing it
    * is being consulted about.
    */
   headingDeg?: number
   /** Half of what the instrument takes in across, degrees of azimuth — see
    * ImageProjection.halfWidthAngleDeg. */
   coneHalfAngleDeg?: number
-  markers: ReadonlyArray<WitnessMapMarker>
+  markers: ReadonlyArray<ObserverMapMarker>
   /** The scenery the recording puts on this ground — the shack, the patrol car, the other
-   * witnesses. Drawn because a cone that clears a landmark is only evidence once the landmark is on
+   * observers. Drawn because a cone that clears a landmark is only evidence once the landmark is on
    * the map too. */
-  decor: ReadonlyArray<WitnessMapDecor>
+  decor: ReadonlyArray<ObserverMapDecor>
   /**
    * How dark it was, 0 in daylight to 1 well after dusk — see the night wash below.
    *
    * The imagery is somebody's daytime photograph of that ground, always, whatever hour the account
-   * is about. Laying it unchanged under a 02:45 sighting says the witnesses could see a sunlit
+   * is about. Laying it unchanged under a 02:45 sighting says the observers could see a sunlit
    * countryside, which they could not. Absent means nothing has been worked out about the light,
    * and then the photograph is left as it came.
    */
   nightFraction?: number
   /** Who was standing there — what a reader hovering the dot is asking. */
-  witnessLabel?: string
+  observerLabel?: string
   /** What the imagery provider's own licence requires be shown wherever its tiles are (see
    * ImageryProvider.attribution) — or, when there are no tiles, what says so. Drawn on the map
    * itself rather than in a strip beneath it: a caption laid over the canvas from outside covers
@@ -96,30 +96,30 @@ export interface WitnessMapFrame {
 }
 
 /**
- * The witness's own position and gaze, drawn from above on real aerial imagery, in step with the
+ * The observer's own position and gaze, drawn from above on real aerial imagery, in step with the
  * frame being played.
  *
  * The reconstruction answers "what did they see"; this answers the question underneath it — "from
  * where, and looking at what". Those are different pieces of evidence and the second is the one a
  * reader can check against a road, a canyon rim, a hangar or a runway, none of which the view from
- * inside the witness's eyes can show.
+ * inside the observer's eyes can show.
  *
  * The CONE is why this is worth building rather than a pin on a map. It is the instrument's real
- * horizontal field (see WitnessMapFrame.coneHalfAngleDeg) laid over the ground, so a testimony
- * placing something over a landmark that falls outside it is a testimony with a problem — and one
+ * horizontal field (see ObserverMapFrame.coneHalfAngleDeg) laid over the ground, so a account
+ * placing something over a landmark that falls outside it is a account with a problem — and one
  * placing it squarely inside is one more thing that holds together. A map that drew a fixed
  * decorative wedge would answer neither way.
  *
  * NORTH IS UP, always, and the cone turns within it. The alternative — turning the map with the
- * witness — costs the reader the one frame of reference they can carry between this and every other
+ * observer — costs the reader the one frame of reference they can carry between this and every other
  * map of the site they will ever look at.
  */
-export class WitnessMapRenderer {
+export class ObserverMapRenderer {
   /** Metres the scale bar may be, coarsest first — the bar takes the largest that still fits in
    * about a third of the map, so it lands on a number a reader can multiply in their head. */
   private static readonly SCALE_STEPS_M = [5000, 2000, 1000, 500, 200, 100, 50, 20, 10, 5]
   /**
-   * Radius of a named moment's own disc, pixels — and the distance within which the witness is
+   * Radius of a named moment's own disc, pixels — and the distance within which the observer is
    * standing ON one rather than near it.
    *
    * Sized for the panel it lives in, which is a fraction of a player that is itself often a column
@@ -128,7 +128,7 @@ export class WitnessMapRenderer {
    */
   private static readonly MARKER_RADIUS_PX = 8.5
   /**
-   * How close the witness has to be to a named moment's own point to count as STANDING ON it —
+   * How close the observer has to be to a named moment's own point to count as STANDING ON it —
    * METRES, not pixels, so the answer does not change with the zoom a recording happens to get.
    *
    * About a person's own footprint. The ring says "he is at this moment", and testing it against
@@ -145,20 +145,20 @@ export class WitnessMapRenderer {
    * the same question, and a reader pointing at a mark and being told about a different one is the
    * kind of bug nobody reports because it looks like their own aim.
    */
-  private targets: Array<WitnessMapTarget & { x: number; y: number; radius: number }> = []
+  private targets: Array<ObserverMapTarget & { x: number; y: number; radius: number }> = []
 
   constructor(private readonly ctx: CanvasRenderingContext2D) {}
 
   /**
-   * What the pointer is over, in the canvas's own pixels — nearest first, so the witness wins over
+   * What the pointer is over, in the canvas's own pixels — nearest first, so the observer wins over
    * a moment they are standing on, which is what somebody pointing at the dot means.
    */
-  hitTest(x: number, y: number): WitnessMapTarget | undefined {
-    let best: (WitnessMapTarget & { x: number; y: number; radius: number }) | undefined
+  hitTest(x: number, y: number): ObserverMapTarget | undefined {
+    let best: (ObserverMapTarget & { x: number; y: number; radius: number }) | undefined
     let bestDistance = Infinity
     for (const target of this.targets) {
       const distance = Math.hypot(target.x - x, target.y - y)
-      // Ties go to whatever was drawn last, which is the order things are painted in: the witness
+      // Ties go to whatever was drawn last, which is the order things are painted in: the observer
       // over a moment they are standing on, a moment over the scenery beneath it. Somebody pointing
       // at a stack of marks means the one on top — it is the one they can see.
       if (distance > target.radius || distance > bestDistance) continue
@@ -176,7 +176,7 @@ export class WitnessMapRenderer {
     return this.ctx.canvas.height
   }
 
-  paint(frame: WitnessMapFrame): void {
+  paint(frame: ObserverMapFrame): void {
     const { ctx } = this
     ctx.save()
     this.targets = []
@@ -192,7 +192,7 @@ export class WitnessMapRenderer {
       // how this was drawn and invisible at first.
       this.paintDecor(frame)
       this.paintMarkers(frame)
-      this.paintWitness(frame, frame.position)
+      this.paintObserver(frame, frame.position)
     } else {
       this.paintDecor(frame)
       this.paintMarkers(frame)
@@ -212,7 +212,7 @@ export class WitnessMapRenderer {
   /** The photograph, placed by its own extent — and a plain dark field when there is none, which is
    * what an embed with no network, a blocked tile host, or a test gets. Drawn either way rather
    * than left blank: everything above needs something to be legible against. */
-  private paintGround(frame: WitnessMapFrame): void {
+  private paintGround(frame: ObserverMapFrame): void {
     const { ctx } = this
     ctx.fillStyle = "#1d2321"
     ctx.fillRect(0, 0, this.width, this.height)
@@ -227,7 +227,7 @@ export class WitnessMapRenderer {
    * A wash over the photograph for the hour the account is about.
    *
    * Over the imagery and UNDER everything the recording itself puts on the map: the path, the cone
-   * and the moments are statements, not things a witness had to see by the available light, and
+   * and the moments are statements, not things a observer had to see by the available light, and
    * dimming them would make a night sighting harder to read for no gain. What darkens is only the
    * borrowed daytime photograph.
    *
@@ -251,7 +251,7 @@ export class WitnessMapRenderer {
    * fall inside what they could see, was the patrol car between them and it — so they have to be
    * findable without competing with the path or the moments for attention.
    */
-  private paintDecor(frame: WitnessMapFrame): void {
+  private paintDecor(frame: ObserverMapFrame): void {
     const { ctx } = this
     for (const object of frame.decor) {
       const at = this.toCanvas(frame.bounds, object.lat, object.lng)
@@ -282,9 +282,9 @@ export class WitnessMapRenderer {
   }
 
   /** The whole journey at once, drawn under everything else and in full from the first frame: this
-   * is the recording's own statement about where the witness went, not a trail growing behind them,
+   * is the recording's own statement about where the observer went, not a trail growing behind them,
    * and a reader asking "where does this road go" should not have to play to the end to find out. */
-  private paintPath(frame: WitnessMapFrame): void {
+  private paintPath(frame: ObserverMapFrame): void {
     if (!frame.path.moved) return
     const { ctx } = this
     const points = frame.path.points.map(point => this.toCanvas(frame.bounds, point.lat, point.lng))
@@ -309,15 +309,15 @@ export class WitnessMapRenderer {
    *
    * FADED OUT WITH DISTANCE AND STOPPED NOWHERE. It has no range and must not appear to claim one:
    * this project stores angles, never distances (see the note on ObserverPose and the angular-only
-   * testimony it keeps), so how far away the phenomenon was is exactly what is unknown. A wedge
+   * account it keeps), so how far away the phenomenon was is exactly what is unknown. A wedge
    * ending in a clean arc would draw a boundary the record does not contain; one that dissolves
    * says "somewhere along here" — which is the truth.
    *
-   * Drawn at the horizon, ignoring how far up or down they were looking. A witness craning their
+   * Drawn at the horizon, ignoring how far up or down they were looking. A observer craning their
    * neck sweeps a wider piece of ground than this, and one looking at their feet sweeps a narrower
    * one; both are refinements on an azimuth this already gets right.
    */
-  private paintCone(frame: WitnessMapFrame, position: { lat: number; lng: number }): void {
+  private paintCone(frame: ObserverMapFrame, position: { lat: number; lng: number }): void {
     const { headingDeg, coneHalfAngleDeg } = frame
     if (headingDeg === undefined || coneHalfAngleDeg === undefined) return
     const { ctx } = this
@@ -342,16 +342,16 @@ export class WitnessMapRenderer {
     ctx.restore()
   }
 
-  /** The named moments, each at the place the witness had reached by then — which is what turns the
+  /** The named moments, each at the place the observer had reached by then — which is what turns the
    * seek bar's own marks into geography: "C" is not a time here, it is the point where he left the
    * road. */
-  private paintMarkers(frame: WitnessMapFrame): void {
+  private paintMarkers(frame: ObserverMapFrame): void {
     const { ctx } = this
     ctx.textAlign = "center"
     ctx.textBaseline = "middle"
     ctx.font = "bold 10px sans-serif"
     // The one the recording is currently in goes on top, and the rest keep their own order. Two
-    // named moments at the same place is not a drawing fault to be nudged apart — a witness who
+    // named moments at the same place is not a drawing fault to be nudged apart — a observer who
     // stopped where they stood really did have several things happen at one spot, and moving a
     // marker off its coordinates to make room would be the map lying about where. What can be
     // fixed without lying is which of them is legible, and that is the one being played.
@@ -365,10 +365,10 @@ export class WitnessMapRenderer {
         t: marker.t,
         x: at.x,
         y: at.y,
-        radius: WitnessMapRenderer.MARKER_RADIUS_PX
+        radius: ObserverMapRenderer.MARKER_RADIUS_PX
       })
       ctx.beginPath()
-      ctx.arc(at.x, at.y, WitnessMapRenderer.MARKER_RADIUS_PX, 0, Math.PI * 2)
+      ctx.arc(at.x, at.y, ObserverMapRenderer.MARKER_RADIUS_PX, 0, Math.PI * 2)
       ctx.fillStyle = marker.current ? "rgba(255, 224, 130, 0.95)" : "rgba(0, 0, 0, 0.55)"
       ctx.fill()
       ctx.lineWidth = 2
@@ -384,7 +384,7 @@ export class WitnessMapRenderer {
    * moves while the recording plays.
    *
    * A RING when they are standing on a named moment, a disc otherwise — and that is not a
-   * decoration. A milestone is a moment in the witness's own account, so the playhead sits exactly
+   * decoration. A milestone is a moment in the observer's own account, so the playhead sits exactly
    * on one every time the recording reaches it; a filled dot there covered the very letter that
    * says which moment it is. Ringing the marker instead says both things at once: this is where
    * they are, and this is what was happening.
@@ -394,19 +394,19 @@ export class WitnessMapRenderer {
    * The moment itself stays current long after he has left its spot (that is what a milestone is,
    * held until the next), so distance is the only thing that can say he has moved off it.
    */
-  private paintWitness(frame: WitnessMapFrame, position: { lat: number; lng: number }): void {
+  private paintObserver(frame: ObserverMapFrame, position: { lat: number; lng: number }): void {
     const { ctx } = this
     const at = this.toCanvas(frame.bounds, position.lat, position.lng)
-    if (frame.witnessLabel) {
-      this.targets.push({ kind: "witness", label: frame.witnessLabel, lat: position.lat, lng: position.lng, x: at.x, y: at.y, radius: 8 })
+    if (frame.observerLabel) {
+      this.targets.push({ kind: "observer", label: frame.observerLabel, lat: position.lat, lng: position.lng, x: at.x, y: at.y, radius: 8 })
     }
     const onMarker = frame.markers.some(marker => {
       if (!marker.current) return false
       const away = geoToLocalMeters(marker.lat, marker.lng, position.lat, position.lng)
-      return Math.hypot(away.x, away.z) <= WitnessMapRenderer.ON_MARKER_M
+      return Math.hypot(away.x, away.z) <= ObserverMapRenderer.ON_MARKER_M
     })
     ctx.beginPath()
-    ctx.arc(at.x, at.y, onMarker ? WitnessMapRenderer.MARKER_RADIUS_PX + 2.5 : 5.5, 0, Math.PI * 2)
+    ctx.arc(at.x, at.y, onMarker ? ObserverMapRenderer.MARKER_RADIUS_PX + 2.5 : 5.5, 0, Math.PI * 2)
     if (!onMarker) {
       ctx.fillStyle = "#ff5a3c"
       ctx.fill()
@@ -451,7 +451,7 @@ export class WitnessMapRenderer {
    * The scale is the difference between an illustration and a measurement. "He was four hundred
    * metres from the object" is a claim a reader can hold against this only if the map states its
    * own scale, and the scale changes with every recording, since the box is fitted to each
-   * witness's own path.
+   * observer's own path.
    */
   private paintFooter(bounds: GeoBounds, attribution?: string): void {
     const { ctx } = this
@@ -467,7 +467,7 @@ export class WitnessMapRenderer {
     const centerLat = (bounds.south + bounds.north) / 2
     const widthM = Math.abs(geoToLocalMeters(centerLat, bounds.east, centerLat, bounds.west).x)
     const metersPerPx = widthM / this.width
-    const barM = WitnessMapRenderer.SCALE_STEPS_M.find(step => step / metersPerPx <= this.width / 3)
+    const barM = ObserverMapRenderer.SCALE_STEPS_M.find(step => step / metersPerPx <= this.width / 3)
     if (barM === undefined) return
     const barPx = barM / metersPerPx
     const x = 8

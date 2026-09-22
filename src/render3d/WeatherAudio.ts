@@ -62,7 +62,7 @@ export class WeatherAudio {
   /** Whether the observation's clock is stopped. Weather is something that was happening at an
    * instant of the sighting, so it is heard only while that instant is advancing — a paused replay
    * is one frozen moment, and rain going on over it would be the room's own weather, not the
-   * witness's. Mirrors SceneRenderer.animationsRunning, which freezes the same weather visually.
+   * observer's. Mirrors SceneRenderer.animationsRunning, which freezes the same weather visually.
    *
    * Starts true: nothing has been played yet, and setAmbient is a no-op before resume() anyway. */
   private paused = true

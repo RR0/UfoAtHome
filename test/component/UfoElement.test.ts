@@ -11,7 +11,7 @@ registerUfo()
 // native `canvas` package) — stub it, same as test/render/CanvasRenderer.test.ts's mock.
 beforeAll(() => {
   // mockImplementation rather than mockReturnValue, so `ctx.canvas` is the real element this
-  // context was asked of — a renderer sizing itself from its own canvas (see WitnessMapRenderer)
+  // context was asked of — a renderer sizing itself from its own canvas (see ObserverMapRenderer)
   // reads it, and a single shared stub would have every canvas claiming to be the same one.
   vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockImplementation(function (this: HTMLCanvasElement) {
     return {
@@ -73,13 +73,13 @@ const sampleJson = {
   version: 1 as const,
   time: { year: 1948, month: 7, day: 24 },
   place: [{ lat: 32.3792, lng: -86.3077 }],
-  witness: { id: "ChilesWhitted" },
+  observer: { id: "ChilesWhitted" },
   timeline: {
     keyframes: [
       { t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval" as const, bounds: { x: 0, y: 0, width: 10, height: 10 }, color: "#163a8f", angle: 0, transparency: 0, haloScale: 1, selected: false } }] }
     ]
   },
-  witnessTrack: { keyframes: [] },
+  observerTrack: { keyframes: [] },
   weatherTrack: { keyframes: [] }
 }
 
@@ -117,7 +117,7 @@ describe("UfoElement", () => {
         ]
       },
       exposureSeconds: 10,
-      witnessTrack: { keyframes: [{ t: 0, pose: { elevationM: 0, pitchDeg: 0, fovDeg: 60 } }] }
+      observerTrack: { keyframes: [{ t: 0, pose: { elevationM: 0, pitchDeg: 0, fovDeg: 60 } }] }
     }
     // At the end of the crossing: the pose behind the playhead holds the whole of it.
     element.currentTime = 5000
@@ -142,7 +142,7 @@ describe("UfoElement", () => {
         ]
       },
       exposureSeconds: 10,
-      witnessTrack: { keyframes: [{ t: 0, pose: { elevationM: 0, pitchDeg: 0, fovDeg: 60 } }] }
+      observerTrack: { keyframes: [{ t: 0, pose: { elevationM: 0, pitchDeg: 0, fovDeg: 60 } }] }
     }
     element.sightingData = moving
     element.currentTime = 10000
@@ -210,7 +210,7 @@ describe("UfoElement", () => {
     await new Promise(resolve => setTimeout(resolve, 0))
 
     expect(fetchMock).toHaveBeenCalledWith("sighting.json")
-    expect(element.sightingData.witness?.id).toBe("ChilesWhitted")
+    expect(element.sightingData.observer?.id).toBe("ChilesWhitted")
     expect(element.sightingData.timeline.keyframes).toHaveLength(1)
   })
 
@@ -802,10 +802,10 @@ describe("UfoElement", () => {
 
   it("switching sightingData mid-playback cancels the old player's animation loop instead of leaking it", () => {
     // Regression: SightingElement assigns a new sightingData when the visitor switches
-    // witnesses. Doing that mid-playback used to leave the *old* Player's requestAnimationFrame
+    // observers. Doing that mid-playback used to leave the *old* Player's requestAnimationFrame
     // loop running — nothing had ever paused/stopped it, so it kept ticking in the background,
     // calling this same onFrame with the *old* timeline's positions and fighting the new player
-    // for the canvas/seek bar. Symptom: after switching witnesses mid-play, clicking to pause
+    // for the canvas/seek bar. Symptom: after switching observers mid-play, clicking to pause
     // only paused the *new* player while the old one kept looping underneath it — which looked
     // exactly like "pause resets to the start," since the old player's loop kept repainting
     // frame 0 onward once the new player's own (correct) pause had gone still.
@@ -825,7 +825,7 @@ describe("UfoElement", () => {
     now += 300
     frame?.(now) // one tick — schedules the next pending frame
 
-    element.sightingData = twoKeyframeSighting() // simulates switching witnesses mid-play
+    element.sightingData = twoKeyframeSighting() // simulates switching observers mid-play
 
     expect(cancelSpy).toHaveBeenCalled() // the old player's pending frame was actually cancelled
   })
@@ -869,7 +869,7 @@ describe("UfoElement sound", () => {
 
   // The regression this exists for: a preview used to be silenced by the very next repaint, and on
   // a real case page a repaint follows an edit within a frame or two — so it was audible for about
-  // a tenth of a second, exactly where the witness needed to hear it.
+  // a tenth of a second, exactly where the observer needed to hear it.
   it("keeps a preview alive across repaints", () => {
     const element = mount()
     element.sightingData = humming
@@ -1114,7 +1114,7 @@ describe("switching the counters between clock time and elapsed time", () => {
     return { start: shadow.getElementById("time-start")!, end: shadow.getElementById("time-end")! }
   }
 
-  it("starts on the clock, which is how a testimony is written", () => {
+  it("starts on the clock, which is how a account is written", () => {
     const element = mountUfo(timedSighting)
     const { start, end } = counters(element)
     expect(start.textContent).toBe("17:50")
@@ -1357,14 +1357,14 @@ describe("double-click on the canvas", () => {
   })
 })
 
-describe("the witness's own map", () => {
+describe("the observer's own map", () => {
   /** Zamora leaving the Socorro road, cut down to what the map reads: two places, a heading and
    * one named moment. */
-  function movingWitness(): object {
+  function movingObserver(): object {
     return {
       version: 1 as const,
       timeline: { keyframes: [{ t: 0, shapes: [] }, { t: 83000, shapes: [] }] },
-      witnessTrack: {
+      observerTrack: {
         keyframes: [
           { t: 0, pose: { lat: 34.052376, lng: -106.89344, elevationM: 0, headingDeg: 200, pitchDeg: -5, fovDeg: 60 } },
           { t: 83000, pose: { lat: 34.042635, lng: -106.89775, elevationM: 0, headingDeg: 200, pitchDeg: -5, fovDeg: 60 } }
@@ -1374,10 +1374,10 @@ describe("the witness's own map", () => {
     }
   }
 
-  /** A player whose page has asked for the map — off by default, see WITNESS_MAP_ATTRIBUTE. */
+  /** A player whose page has asked for the map — off by default, see OBSERVER_MAP_ATTRIBUTE. */
   function mountWithMap(sighting: object): UfoElement {
     const element = mount()
-    element.setAttribute("show-witness-map", "")
+    element.setAttribute("show-observer-map", "")
     element.sightingData = sighting as never
     return element
   }
@@ -1385,8 +1385,8 @@ describe("the witness's own map", () => {
   function mapParts(element: UfoElement) {
     const shadow = element.shadowRoot!
     return {
-      button: shadow.getElementById("witness-map") as HTMLButtonElement,
-      panel: shadow.getElementById("witness-map-panel")!
+      button: shadow.getElementById("observer-map") as HTMLButtonElement,
+      panel: shadow.getElementById("observer-map-panel")!
     }
   }
 
@@ -1399,7 +1399,7 @@ describe("the witness's own map", () => {
     // A reader wanting to know where this happened is not something a page can predict, so the
     // button is there whether or not any page thought to ask.
     const element = mount()
-    element.sightingData = movingWitness() as never
+    element.sightingData = movingObserver() as never
     const { button, panel } = mapParts(element)
     expect(button.hidden).toBe(false)
     expect(panel.hidden).toBe(true)
@@ -1407,15 +1407,15 @@ describe("the witness's own map", () => {
 
   it("starts open when the page says so, and shuts again when it takes that back", () => {
     const element = mount()
-    element.sightingData = movingWitness() as never
+    element.sightingData = movingObserver() as never
     expect(mapParts(element).panel.hidden).toBe(true)
 
-    element.setAttribute("show-witness-map", "")
+    element.setAttribute("show-observer-map", "")
     expect(mapParts(element).panel.hidden).toBe(false)
 
     // The carousel needs this half: one stage plays every reconstruction in turn, so a page that
     // said "open for this one" must be able to say "not for the next".
-    element.removeAttribute("show-witness-map")
+    element.removeAttribute("show-observer-map")
     expect(mapParts(element).panel.hidden).toBe(true)
   })
 
@@ -1423,7 +1423,7 @@ describe("the witness's own map", () => {
     // refresh() runs on every keystroke in the editor. A default re-applied there would slam shut
     // a map the author had just opened, and reopen one they had just closed.
     const element = mount()
-    element.sightingData = movingWitness() as never
+    element.sightingData = movingObserver() as never
     mapParts(element).button.click()
     expect(mapParts(element).panel.hidden).toBe(false)
 
@@ -1449,7 +1449,7 @@ describe("the witness's own map", () => {
     // them all on load for maps nobody opened.
     const fetchSpy = vi.spyOn(globalThis, "fetch")
     const element = mount()
-    element.sightingData = movingWitness() as never
+    element.sightingData = movingObserver() as never
     expect(mapParts(element).panel.hidden).toBe(true)
     expect(fetchSpy).not.toHaveBeenCalled()
     fetchSpy.mockRestore()
@@ -1458,11 +1458,11 @@ describe("the witness's own map", () => {
   it("gets out of the phenomenon's way, and comes back once the sky is clear", () => {
     // The top-right corner is the emptiest part of nearly every sky here, which is why the map is
     // there — but a map covering the very thing a reader opened it to place is worse than no map.
-    const element = mountWithMap(movingWitness())
-    const panel = element.shadowRoot!.getElementById("witness-map-panel")!
+    const element = mountWithMap(movingObserver())
+    const panel = element.shadowRoot!.getElementById("observer-map-panel")!
     const canvas = element.canvasElement
     // jsdom lays nothing out, so the panel's own box is stated rather than measured.
-    ;(element as unknown as { witnessMapBoxPx: unknown }).witnessMapBoxPx = { width: 200, top: 40, bottom: 240 }
+    ;(element as unknown as { observerMapBoxPx: unknown }).observerMapBoxPx = { width: 200, top: 40, bottom: 240 }
 
     const put = (x: number) => {
       element.sighting.timeline.addKeyframe(0, [
@@ -1482,10 +1482,10 @@ describe("the witness's own map", () => {
   })
 
   it("avoids both ends of a 3D exposure trail and hides when neither corner is free", () => {
-    const element = mountWithMap(movingWitness())
-    const panel = element.shadowRoot!.getElementById("witness-map-panel")!
+    const element = mountWithMap(movingObserver())
+    const panel = element.shadowRoot!.getElementById("observer-map-panel")!
     const canvas = element.canvasElement
-    ;(element as unknown as { witnessMapBoxPx: unknown }).witnessMapBoxPx = { width: 200, top: 40, bottom: 240 }
+    ;(element as unknown as { observerMapBoxPx: unknown }).observerMapBoxPx = { width: 200, top: 40, bottom: 240 }
     const right = { x: 1 - 100 / canvas.width, y: 100 / canvas.height, width: 40 / canvas.width, height: 20 / canvas.height }
     const left = { ...right, x: 50 / canvas.width }
     element.setMapSubjectBounds([right])
@@ -1501,10 +1501,10 @@ describe("the witness's own map", () => {
   })
 
   it("moves for the end of a phenomenon trail even when its first instant is clear", () => {
-    const element = mountWithMap(movingWitness())
-    const panel = element.shadowRoot!.getElementById("witness-map-panel")!
+    const element = mountWithMap(movingObserver())
+    const panel = element.shadowRoot!.getElementById("observer-map-panel")!
     const canvas = element.canvasElement
-    ;(element as unknown as { witnessMapBoxPx: unknown }).witnessMapBoxPx = { width: 200, top: 40, bottom: 240 }
+    ;(element as unknown as { observerMapBoxPx: unknown }).observerMapBoxPx = { width: 200, top: 40, bottom: 240 }
     const shape = (x: number) => ({ kind: "oval", bounds: { x, y: 100, width: 40, height: 20 },
       color: "#fff", angle: 0, transparency: 0, haloScale: 0, selected: false })
     const internal = element as unknown as { exposureInstants: () => unknown }
@@ -1517,11 +1517,11 @@ describe("the witness's own map", () => {
   })
 
   it("goes to a named moment on the map the way its mark on the bar does", () => {
-    const element = mountWithMap(movingWitness())
-    const canvas = element.shadowRoot!.getElementById("witness-map-canvas") as HTMLCanvasElement
+    const element = mountWithMap(movingObserver())
+    const canvas = element.shadowRoot!.getElementById("observer-map-canvas") as HTMLCanvasElement
     canvas.getBoundingClientRect = () => ({ left: 0, top: 0, width: canvas.width, height: canvas.height }) as DOMRect
-    const renderer = (element as unknown as { witnessMapRenderer: { targets: Array<{ kind: string; t?: number; x: number; y: number }> } })
-      .witnessMapRenderer
+    const renderer = (element as unknown as { observerMapRenderer: { targets: Array<{ kind: string; t?: number; x: number; y: number }> } })
+      .observerMapRenderer
     const last = renderer.targets.find(target => target.kind === "milestone" && target.t === 83000)!
 
     element.currentTime = 0
@@ -1533,27 +1533,27 @@ describe("the witness's own map", () => {
     // This element draws the map but cannot turn a view — it has no scene. So it says what was
     // clicked and lets the element that does own one decide, which is also what keeps a bare
     // <rr0-ufo> from pretending it can look somewhere.
-    const element = mountWithMap(movingWitness())
-    const canvas = element.shadowRoot!.getElementById("witness-map-canvas") as HTMLCanvasElement
+    const element = mountWithMap(movingObserver())
+    const canvas = element.shadowRoot!.getElementById("observer-map-canvas") as HTMLCanvasElement
     canvas.getBoundingClientRect = () => ({ left: 0, top: 0, width: canvas.width, height: canvas.height }) as DOMRect
-    const renderer = (element as unknown as { witnessMapRenderer: { targets: Array<{ kind: string; x: number; y: number }> } })
-      .witnessMapRenderer
-    const witness = renderer.targets.find(target => target.kind === "witness")!
+    const renderer = (element as unknown as { observerMapRenderer: { targets: Array<{ kind: string; x: number; y: number }> } })
+      .observerMapRenderer
+    const observer = renderer.targets.find(target => target.kind === "observer")!
     const asked: Array<{ kind: string }> = []
     element.addEventListener("lookat", event => asked.push((event as CustomEvent).detail))
 
-    canvas.dispatchEvent(new MouseEvent("click", { bubbles: true, clientX: witness.x, clientY: witness.y }))
-    expect(asked).toEqual([expect.objectContaining({ kind: "witness" })])
+    canvas.dispatchEvent(new MouseEvent("click", { bubbles: true, clientX: observer.x, clientY: observer.y }))
+    expect(asked).toEqual([expect.objectContaining({ kind: "observer" })])
   })
 
   it("asks to be looked at rather than closing, when a mark on it is clicked", () => {
     // Clicking the map used to shut it. Its marks now answer the pointer instead: a named moment is
     // an instant, so going to it moves the playhead, and anything else is a PLACE, so going to it
     // means asking whatever owns the 3D to turn the view — this element cannot turn one.
-    const element = mountWithMap(movingWitness())
+    const element = mountWithMap(movingObserver())
     const asked: unknown[] = []
     element.addEventListener("lookat", event => asked.push((event as CustomEvent).detail))
-    const canvas = element.shadowRoot!.getElementById("witness-map-canvas") as HTMLCanvasElement
+    const canvas = element.shadowRoot!.getElementById("observer-map-canvas") as HTMLCanvasElement
     canvas.getBoundingClientRect = () => ({ left: 0, top: 0, width: canvas.width, height: canvas.height }) as DOMRect
 
     canvas.dispatchEvent(new MouseEvent("click", { bubbles: true, clientX: -50, clientY: -50 }))
@@ -1563,7 +1563,7 @@ describe("the witness's own map", () => {
 
   it("opens and closes on the button, and says which it will do", () => {
     const element = mount()
-    element.sightingData = movingWitness() as never
+    element.sightingData = movingObserver() as never
     const { button, panel } = mapParts(element)
 
     button.click()
@@ -1578,8 +1578,8 @@ describe("the witness's own map", () => {
 
   it("closes itself when the recording it was showing is replaced by one with no place", () => {
     // A page playing several recordings in turn does exactly this. Leaving the panel up would show
-    // the previous witness's ground under the new one's recording.
-    const element = mountWithMap(movingWitness())
+    // the previous observer's ground under the new one's recording.
+    const element = mountWithMap(movingObserver())
     expect(mapParts(element).panel.hidden).toBe(false)
 
     element.sightingData = { version: 1, timeline: { keyframes: [] } } as never
@@ -1593,7 +1593,7 @@ describe("the witness's own map", () => {
     const element = mountWithMap({ version: 1, timeline: { keyframes: [] } })
     expect(mapParts(element).panel.hidden).toBe(true) // nowhere to point it
 
-    element.sightingData = movingWitness() as never
+    element.sightingData = movingObserver() as never
     expect(mapParts(element).panel.hidden).toBe(false)
   })
 })

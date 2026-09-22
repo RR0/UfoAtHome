@@ -31,7 +31,7 @@ describe("SaidTexts", () => {
 
     it("falls back to what the recording DOES have rather than to nothing", () => {
       // The whole point: an English reader in front of a French-only account can still read it into
-      // a translator, where an empty field would tell them the witness said nothing.
+      // a translator, where an empty field would tell them the observer said nothing.
       expect(new SaidTexts(["en"]).read({ fr: "Une lueur orange" })).toBe("Une lueur orange")
     })
 

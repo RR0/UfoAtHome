@@ -2,16 +2,16 @@
  * What the observation was made THROUGH — an eye, a camera, a camcorder — and, for now, the one
  * property of it that changes the geometry of every recorded shape: how an angle becomes a pixel.
  *
- * This exists because "the witness saw it" and "the witness filmed it" are not the same claim, and
+ * This exists because "the observer saw it" and "the observer filmed it" are not the same claim, and
  * the difference is not decoration. A camera lens really does map a direction to the sensor as
  * `tan θ`, which stretches everything away from the axis — a building 33 degrees off-centre is
  * rendered 42% wider than the angle it subtends. That is *correct* for a photograph and *wrong* for
  * an eye, which perceives an angle as an angle wherever it falls in the visual field. Rendering
  * every sighting through a camera lens, as this project did until now, silently turned every naked
- * eye witness into a photographer.
+ * eye observer into a photographer.
  *
  * A recording states angles (see BaseShape.angular) and nothing else about size, which is precisely
- * what makes an instrument swappable: the same testimony can be projected through any of them. Had
+ * what makes an instrument swappable: the same account can be projected through any of them. Had
  * it still stored pixels, changing instrument would have meant nothing.
  *
  * Later slices add the rest of what an instrument determines — depth of field (whose blur puts real
@@ -43,7 +43,7 @@ export type ProjectionKind =
  *
  * AS THE DEVICE IS HELD, which is why holding a phone upright is a different entry rather than a
  * flag: the sensor is the same silicon either way, but what was photographed is not the same
- * picture, and the frame a witness's photograph has is part of the record.
+ * picture, and the frame a observer's photograph has is part of the record.
  */
 export interface InstrumentFrame {
   /** The exposed image's width and height, millimetres, as held. */
@@ -58,7 +58,7 @@ export interface InstrumentFrame {
 }
 
 /**
- * When a device of this kind could have been in a witness's hands.
+ * When a device of this kind could have been in a observer's hands.
  *
  * A dated catalogue, in the same spirit as the satellite classes: it lets the picker offer what
  * existed and refuse what did not, which is one more of the negative statements this project is
@@ -116,7 +116,7 @@ export interface Instrument {
   exposureRangeSeconds?: { min: number; max: number }
   /**
    * How strongly this device's own glass throws the ghosts, streaks and veils that a photograph of
-   * a bright light shows around it, and a witness's account of one does not.
+   * a bright light shows around it, and a observer's account of one does not.
    *
    * ZERO IS AN EYE, and it is the whole reason this is stated rather than inferred: those artefacts
    * are made by reflections between the surfaces of a LENS, so what decides them is whether the
@@ -140,7 +140,7 @@ export interface Instrument {
    * Absent means there is no aperture with edges: the naked eye, and any lens shot wide open where
    * the blades have swung clear of the beam. An eye is round, and the faint rays people do see
    * around a bright light come from the lens's own suture lines and the film of tears, which are
-   * not straight edges and do not make a clean star. Drawing a six-pointed star for a witness who
+   * not straight edges and do not make a clean star. Drawing a six-pointed star for a observer who
    * simply looked up says they were holding a camera.
    */
   apertureBlades?: number
@@ -167,10 +167,10 @@ export interface Instrument {
    * turns the eye against whatever rotation is left, at a gain near one across the one-to-five hertz
    * a walk lives in. What survives is a fraction of a degree. A camera in the same walking hand has
    * none of that and gets the whole of it, which is why a hand-held film of a sighting looks the way
-   * it does and why a witness's own account never mentions the world tipping from side to side.
+   * it does and why a observer's own account never mentions the world tipping from side to side.
    *
    * Rotation only. A body's rise and sway carry the eye bodily up and across, and no reflex can undo
-   * that: what it changes is which near thing hides which, and that really is what the witness saw
+   * that: what it changes is which near thing hides which, and that really is what the observer saw
    * (see Gait, which applies this to one and not the other).
    *
    * Absent means none, which is the honest default for a device in a hand. A modern phone's own
@@ -194,11 +194,11 @@ export const INSTRUMENTS: Instrument[] = [
     //
     // 0.97 and not the 0.9 this first carried, which was a number nobody had measured. The
     // vestibulo-ocular reflex runs at a gain of 0.95 to 1.0 across the one-to-five hertz a walk
-    // lives in, and a witness WATCHING something gets the optokinetic response and smooth pursuit
+    // lives in, and a observer WATCHING something gets the optokinetic response and smooth pursuit
     // on top of it, all three holding the thing they are looking at still. What showed the 0.9 up
     // was the reconstruction itself: an object 84 m off is 1.7 degrees tall, and a tenth of the
     // head's own rotation swung it through a sixth of its own height, every step, forever. A real
-    // witness watching a light across a field does not see it bounce.
+    // observer watching a light across a field does not see it bounce.
     stabilization: 0.97
   },
   {
@@ -227,7 +227,7 @@ export const INSTRUMENTS: Instrument[] = [
     projection: "rectilinear",
     frame: { widthMm: 28, heightMm: 28, focalLengthMm: 43 },
     // Everything about this camera is fixed, which is the point of it: one aperture, one shutter
-    // speed, one focal length. A witness holding one had nothing to set and nothing to get wrong.
+    // speed, one focal length. A observer holding one had nothing to set and nothing to get wrong.
     fNumber: 11,
     exposureSeconds: 1 / 90,
     // The line ran from 1963 to 1988, and it is what most people photographing anything in the
@@ -236,7 +236,7 @@ export const INSTRUMENTS: Instrument[] = [
     apertureBlades: 5,
     // Colour negative of the period, printed: about 25 line pairs a millimetre, so 20 µm of detail.
     // Behind this camera's own 43 mm lens that is 96 arcseconds — an arcminute and a half, coarser
-    // than the eye, which is half of why its stars are so much poorer than the witness's.
+    // than the eye, which is half of why its stars are so much poorer than the observer's.
     detailUm: 20
   },
   {
@@ -247,7 +247,7 @@ export const INSTRUMENTS: Instrument[] = [
     name: { en: "35 mm SLR, 50 mm lens", fr: "Reflex 35 mm, objectif 50 mm" },
     projection: "rectilinear",
     frame: { widthMm: 36, heightMm: 24, focalLengthMm: 50 },
-    // The one device here where a witness chose: a fast normal lens stopping down to f/16, and a
+    // The one device here where a observer chose: a fast normal lens stopping down to f/16, and a
     // shutter from a thousandth to a long pose on B.
     fNumber: 8,
     fNumberRange: { min: 2, max: 16 },
@@ -258,7 +258,7 @@ export const INSTRUMENTS: Instrument[] = [
     // arcs by the turning Earth (see SkyDrift), which is one of the commonest things a photograph of
     // "lights that moved" turns out to be.
     exposureRangeSeconds: { min: 1 / 1000, max: 3600 },
-    // Dated from the Nikon F, which is when an SLR became an object an ordinary witness might own.
+    // Dated from the Nikon F, which is when an SLR became an object an ordinary observer might own.
     years: { from: 1959 },
     apertureBlades: 6,
     // The same 35 mm emulsion as the Instamatic's, but behind a 50 mm lens rather than a 43 mm one,
@@ -317,7 +317,7 @@ export const INSTRUMENTS: Instrument[] = [
   },
   {
     // The same silicon, held the way people actually hold a phone. The picture is TALLER than it is
-    // wide — 67 degrees up and down against 53 across — and a witness who filmed a light rising had
+    // wide — 67 degrees up and down against 53 across — and a observer who filmed a light rising had
     // rather more sky above it and rather less horizon than the landscape entry would draw.
     id: "phone-portrait",
     name: { en: "Phone, held upright", fr: "Téléphone, tenu debout" },
@@ -342,7 +342,7 @@ export const INSTRUMENTS: Instrument[] = [
 
 export class Instruments {
   /** The instrument a recording that says nothing is assumed to have used. An eye: every sighting
-   * in this project's own files is one, and a witness who filmed says so. */
+   * in this project's own files is one, and a observer who filmed says so. */
   static get default(): Instrument {
     return INSTRUMENTS[0]
   }
@@ -354,7 +354,7 @@ export class Instruments {
   }
 
   /**
-   * The vertical field this project draws an UNAIDED witness through, degrees.
+   * The vertical field this project draws an UNAIDED observer through, degrees.
    *
    * A choice, and the one place it is now stated. A human field is about 130 degrees tall and 200
    * wide; this shows the middle of it, which is the part where acuity is real (past thirty degrees
@@ -363,7 +363,7 @@ export class Instruments {
    * 16:9 frame before its own source would need a cubemap.
    *
    * It is a DEFAULT, not a law: a recording states its own field per keyframe (ObserverPose.fovDeg),
-   * which is what a witness with binoculars, or a camera zooming, actually needs.
+   * which is what a observer with binoculars, or a camera zooming, actually needs.
    */
   static readonly UNAIDED_FIELD_DEG = 60
 
@@ -474,7 +474,7 @@ export class Instruments {
    * lens's ordinary share, or nothing at all for something with no glass in it.
    *
    * This replaced a slider. How much flare a photograph carries is not a preference: it is whether
-   * the witness was holding a camera, which the instrument already says.
+   * the observer was holding a camera, which the instrument already says.
    */
   static flareArtifactsOf(instrument: Instrument): number {
     return instrument.flare ?? Instruments.LENS_FLARE_ARTIFACTS

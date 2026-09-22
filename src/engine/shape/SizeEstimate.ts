@@ -19,12 +19,12 @@ export interface MeterRange {
 }
 
 /**
- * How big an object really was, accumulated from the only evidence a testimony can offer for it:
+ * How big an object really was, accumulated from the only evidence a account can offer for it:
  * the moments it crossed something whose distance is known.
  *
  * The chain is short and each link is honest. The recording states how wide the object LOOKED at
  * an instant (BaseShape.angular). The scene states how far a piece of decor stood along that same
- * line of sight. The witness stated which of the two was in front (DecorObject.occludesSourceIds).
+ * line of sight. The observer stated which of the two was in front (DecorObject.occludesSourceIds).
  * Together those give an inequality on distance at that instant, and an angle plus a distance is a
  * size — so every crossing narrows the object's real width from one side.
  *
@@ -87,7 +87,7 @@ export class SizeEstimate {
    * How far the object must have been at an instant where it looked `angularWidthDeg` wide —
    * reading the accumulated size back through the same relation, in the other direction.
    *
-   * This is the "dynamic estimate" a testimony is allowed to produce: not a distance it stated,
+   * This is the "dynamic estimate" a account is allowed to produce: not a distance it stated,
    * but the range of distances its own stated angles and crossings leave possible. A bigger object
    * subtending the same angle has to be further away, so the size bounds map straight onto
    * distance bounds without swapping ends.

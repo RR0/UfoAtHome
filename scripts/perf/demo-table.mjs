@@ -3,7 +3,7 @@
 // ratio the scene settled at, and the top of a CPU profile.
 //
 //   node scripts/perf/demo-table.mjs                    # every recording of public/demo-data
-//   node scripts/perf/demo-table.mjs witness-chiles     # one or more
+//   node scripts/perf/demo-table.mjs observer-chiles     # one or more
 //
 // Same requirements as page-scroll.mjs. ORIGIN names the served site (default localhost:5182),
 // LIB the scene module to load (default /lib/rr0-scene.mjs), W and H the stage in CSS pixels

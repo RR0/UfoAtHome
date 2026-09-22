@@ -105,7 +105,7 @@ import type { Instrument, ProjectionKind } from "../engine/instrument/Instrument
 import type { LensFlareSystem } from "./LensFlareEffect.js"
 import { DecorSystem } from "./DecorSystem.js"
 import type { DecorObject } from "../engine/model/Decor.js"
-import { resolveDecorLitAt, resolveDecorPlacementAt, canHoldWitness } from "../engine/model/Decor.js"
+import { resolveDecorLitAt, resolveDecorPlacementAt, canHoldObserver } from "../engine/model/Decor.js"
 import type { DecorModelCredit, DecorModelRef } from "../engine/model/Decor.js"
 import type { DecorModelProvider } from "./decor/DecorModelProvider.js"
 import { DECOR_MODEL_SOURCES } from "./decor/decorModelSources.js"
@@ -168,7 +168,7 @@ const HUD_LAYER = 5
  * geometry built close to the observer, well inside the camera's own near plane. */
 const UFO_OCCLUSION_MIN_DISTANCE_M = 0.5
 const GROUND_RADIUS = 900
-/** Mean Earth radius, for the one thing this scene needs it for: how far a witness can actually
+/** Mean Earth radius, for the one thing this scene needs it for: how far a observer can actually
  * see the ground from a given height. */
 const EARTH_RADIUS_M = 6_371_000
 /** How far the ground stays worth drawing through real air — a clear day's visibility. Beyond it
@@ -176,15 +176,15 @@ const EARTH_RADIUS_M = 6_371_000
 const MAX_GROUND_VISIBILITY_M = 30_000
 
 /**
- * How far the ground disc has to reach for a witness at `elevationM`: their real horizon distance
+ * How far the ground disc has to reach for a observer at `elevationM`: their real horizon distance
  * (sqrt(2Rh) — 4.5 km at eye height, 138 km at a DC-3's 1500 m), capped by what air lets anyone
  * see anyway, and never smaller than the 900 m this always used at ground level.
  *
- * A fixed 900-unit disc was fine for a witness standing on it and nothing else: from a few hundred
+ * A fixed 900-unit disc was fine for a observer standing on it and nothing else: from a few hundred
  * metres up its own rim curved away into view with a void beyond — the "fish-eye ground" of a
- * witness in an aircraft. Deliberately NOT an attempt to render Earth's curvature: the horizon
+ * observer in an aircraft. Deliberately NOT an attempt to render Earth's curvature: the horizon
  * only starts visibly bending around 10-15 km up, and at the altitudes a sighting is reported from
- * the real correction is the 1.24deg horizon dip at 1500 m, well under what any witness could
+ * the real correction is the 1.24deg horizon dip at 1500 m, well under what any observer could
  * judge, while the missing ground was impossible to miss.
  */
 function groundRadiusFor(elevationM: number): number {
@@ -206,7 +206,7 @@ const BODY_PLACEMENT_RADIUS = 850
 /** How far in front of and behind the shadow box's centre the sun's shadow map records depth,
  * metres — enough for the ±120 m box at any angle and the relief standing in it. */
 const SHADOW_DEPTH_HALF_RANGE_M = 300
-/** Half the side of the sun's shadow box, metres, round the witness: where decor and relief sit. */
+/** Half the side of the sun's shadow box, metres, round the observer: where decor and relief sit. */
 const SHADOW_HALF_EXTENT_M = 120
 /** How far it is widened, at most, for the bodies of an interpretation standing further out — past
  * this their shadows would be too coarse to read, and a map this wide already costs 2048². */
@@ -219,7 +219,7 @@ const SHADOW_NORMAL_BIAS_M = 0.04
  * (radius = R*tan(0.265deg) =~ 3.9) — this is a simulation, not an illustration: rendering them
  * bigger or artificially brighter than they'd really appear would defeat the actual point (e.g.
  * judging whether a reported light could realistically have been Venus). If they end up small and
- * easy to miss on screen, that's accurate, not a bug — a real witness can misjudge/miss them too. */
+ * easy to miss on screen, that's accurate, not a bug — a real observer can misjudge/miss them too. */
 const SUN_MOON_VISUAL_RADIUS = 4
 /** Real planets are angularly far smaller than this (arcseconds, genuinely point-like to the naked
  * eye) — this is already a floor for basic renderability (three.js can't usefully rasterize a
@@ -254,14 +254,14 @@ const BENT_LIGHT_REFERENCE = 2
  */
 const BOW_LIGHT_REFERENCE = 20
 
-/** How far above the witness the ice deck is projected, in this scene's own units. Cirrus lives
+/** How far above the observer the ice deck is projected, in this scene's own units. Cirrus lives
  * between six and twelve kilometres; what matters here is only that it is several times the water
  * deck's height, so its features come out correspondingly larger and slower across the sky. */
 const CIRRUS_LAYER_HEIGHT = 2600
 
 
 /** How much of the light a fully covered patch of each deck stops. A water deck is very nearly
- * opaque — a witness under overcast sees a bright patch where the Sun is and no disc at all — while
+ * opaque — a observer under overcast sees a bright patch where the Sun is and no disc at all — while
  * an ice veil takes only a little, which is exactly why a halo can form behind one. Mirrors the two
  * decks' own alphas in the cloud shader. */
 const WATER_DECK_OPACITY = 0.97
@@ -276,7 +276,7 @@ const STREETLIGHT_LIGHT_DISTANCE = 400
 
 /** Clockwise from north, matching this project's own azimuth convention (0deg = north, increasing
  * clockwise). Shown on the horizon in "edit mode" (see SceneElement's show-compass attribute, set
- * by SightingEditorElement) so a witness's heading can be set/checked against a real compass
+ * by SightingEditorElement) so a observer's heading can be set/checked against a real compass
  * reference instead of a bare number. Localized the same way as SceneElement's own body-name
  * tooltip (small inline en/fr dict via selectLocale, not a full Messages file — too few strings). */
 const COMPASS_AZIMUTHS: readonly number[] = [0, 45, 90, 135, 180, 225, 270, 315]
@@ -367,19 +367,19 @@ const CLOUD_RADIUS = 700 // inside STAR_RADIUS/BODY_PLACEMENT_RADIUS (850) so cl
  * real meters terrain and decor are placed in. */
 const CLOUD_UNITS_PER_METRE = 250 / DEFAULT_CLOUD_BASE_M
 /** Never lets the deck collapse onto the observer: at a vertical distance of zero the projection
- * that gives it its perspective degenerates, and a witness INSIDE cloud is a whiteout this renderer
+ * that gives it its perspective degenerates, and a observer INSIDE cloud is a whiteout this renderer
  * doesn't model anyway. */
 const CLOUD_MIN_LAYER_UNITS = 12
 /** How solid the deck has to be in a given direction before it hides what's behind it. Matches the
  * shader's own alpha for "cloud rather than gap" — below it you are looking through the thin,
- * ragged edge of a billow, which a real witness sees through too. */
+ * ragged edge of a billow, which a real observer sees through too. */
 /** Between TERRAIN_RENDER_ORDER (1) and COMPASS_RENDER_ORDER (10) — clouds are part of the
  * astronomically-positioned scene (unlike the compass HUD), but must never be hidden behind the
  * ground/terrain (irrelevant since they're always above it) and must stay under the compass labels. */
 const CLOUD_RENDER_ORDER = 5
 /**
  * Above the terrain patch (1) and the cloud deck (5), below the compass HUD (10) — because falling
- * precipitation is, by construction, the nearest thing in the scene to the witness's face.
+ * precipitation is, by construction, the nearest thing in the scene to the observer's face.
  *
  * Not a nicety: the terrain patch's own material is `transparent` (it fades out at the patch edge,
  * see TerrainMeshBuilder), so it lands in three.js's transparent pass alongside every precipitation
@@ -707,7 +707,7 @@ export interface SceneAstronomy {
   stars?: { catalog: StarCatalog; date: Date; observer: ObserverGeo }
   /**
    * The instant and the place themselves, for the things in the sky that are not objects but whole
-   * planes — the Milky Way and the zodiacal light, which are turned to face the witness rather than
+   * planes — the Milky Way and the zodiacal light, which are turned to face the observer rather than
    * placed (see SkyFrames).
    *
    * Separate from `stars` even though that field already carries the same pair, because `stars` is
@@ -731,7 +731,7 @@ export interface SceneAstronomy {
 export class SceneRenderer {
   private readonly renderer: WebGLRenderer
   private readonly scene = new Scene()
-  /** The witness's own phenomena, standing in the scene — see PhenomenonSystem and setPhenomena. */
+  /** The observer's own phenomena, standing in the scene — see PhenomenonSystem and setPhenomena. */
   private readonly phenomena = new PhenomenonSystem(this.scene)
   /** The pictures of the place laid over it — see ReferenceSystem and setReferences. A picture
    * whose bytes arrive after the frame was drawn asks for the frame again. */
@@ -743,7 +743,7 @@ export class SceneRenderer {
    * around ITS OWN CENTRE, so that centre has to travel with the observer — otherwise an observer
    * high enough above the ground ends up OUTSIDE the shell, and since the sky sphere is drawn
    * BackSide-only and every star sits on a 850-unit sphere around the origin, both simply vanish:
-   * Chiles-Whitted's own witnesses, at their DC-3's real 1500 m, were left with a pure black sky
+   * Chiles-Whitted's own observers, at their DC-3's real 1500 m, were left with a pure black sky
    * (measured: not one lit pixel in the upper half of the canvas, against 583k at ground level).
    * The ground, terrain, decor and weather stay in world space, where they belong — from up there
    * they really are far below. */
@@ -799,7 +799,7 @@ export class SceneRenderer {
   private readonly roadSystem = new RoadSystem()
   private roadAttribution?: string
   /** The ways last fetched, and the place they were fetched for. A patch is rebuilt far more often
-   * than a witness moves to another county, and Overpass is a free service answering in tens of
+   * than a observer moves to another county, and Overpass is a free service answering in tens of
    * seconds: the same square of ground is asked for once. */
   private roadWays?: { lat: number; lng: number; radiusM: number; ways: RoadWay[] }
   /** The roads the recording itself states — held so a rebuilt patch can be re-draped with them. */
@@ -818,7 +818,7 @@ export class SceneRenderer {
   /** The bodies of the interpretation being replayed, if one is — see setBodies. */
   private readonly bodySystem = new BodySystem(ref => this.loadBodyModel(ref), () => this.render(), () => this.relativeScale)
   /** Where the frame bodies (and the decor) are placed in stands in the world this tick — the t=0
-   * reference as seen from the witness, set by updateDecorAnchoring. */
+   * reference as seen from the observer, set by updateDecorAnchoring. */
   private bodyOrigin = { x: 0, z: 0 }
   private starTiers: StarTier[] = []
   private readonly bodyMeshes = new Map<string, Mesh | Sprite | Points>()
@@ -857,7 +857,7 @@ export class SceneRenderer {
   private readonly celestialLightTarget = new Object3D()
   /** Soft, non-shadow-casting ambient fill (sky color above / ground-reflected color below) so
    * decor's shadowed side doesn't read as pure black — real skylight does exactly this job for a
-   * real witness. Color/intensity driven by the same sky/ground colors setAstronomy already
+   * real observer. Color/intensity driven by the same sky/ground colors setAstronomy already
    * computes for the sky dome and flat ground disc (see updateCelestialLight). */
   private readonly skyLight = new HemisphereLight(0xffffff, 0x000000, 0)
   /** One real PointLight per currently-lit streetlight decor object, keyed by DecorObject.id —
@@ -887,11 +887,11 @@ export class SceneRenderer {
 
   private weather: Weather = DEFAULT_WEATHER
   /** The cloud-layer shell (see buildCloudMaterial) — undefined whenever weather.cloudCover is 0. */
-  /** The witness's own height above the ground, as last set by setObserverPose — the cloud deck is
+  /** The observer's own height above the ground, as last set by setObserverPose — the cloud deck is
    * the one thing that needs it beyond the camera itself (see cloudLayerOffset). */
   private observerElevationM = 0
   /**
-   * The ground's own height above sea level where the witness stands, from the terrain patch's
+   * The ground's own height above sea level where the observer stands, from the terrain patch's
    * elevation source — zero until one has answered, or where there is no patch at all. The scene is
    * drawn relative to the ground and never needed it; the scattered sky does, because the air above
    * Socorro's 1 400 m mesa is a sixth thinner than the air above the sea.
@@ -903,7 +903,7 @@ export class SceneRenderer {
    * a climb rebuilds it, and only a climb does. */
   private groundRadius = GROUND_RADIUS
   /** Radius the terrain patch was last built at, so a real change of altitude refetches it at the
-   * span the witness can now see, while a small drift doesn't. */
+   * span the observer can now see, while a small drift doesn't. */
   private terrainRadius = GROUND_RADIUS
   /** Volumes by default: the flat surface deck is the lightweight option a page asks for, not what
    * a reader gets. A recording written before there were layers (Valensole: cover, base and darkness
@@ -975,7 +975,7 @@ export class SceneRenderer {
    * it's undefined exactly whenever rainSystem is. */
   private rainSplashSystem?: RainSplashSystem
   /** Scratch vector reused every updateRain call (avoids a per-frame allocation) — holds the
-   * camera's current look direction, used to detect how steeply the witness is looking up/down. */
+   * camera's current look direction, used to detect how steeply the observer is looking up/down. */
   private readonly rainCameraDirection = new Vector3()
   private rainLastVerticalFacing = -1
   private readonly rainViewportSize = new Vector2()
@@ -1072,7 +1072,7 @@ export class SceneRenderer {
 
   /** How long one animation frame may spend adding instants to the film. Long enough to make real
    * progress (a sky rebuild is about 8 ms, so this is one or two of them), short enough that the
-   * frame it borrows is not one the witness notices. */
+   * frame it borrows is not one the observer notices. */
   private static readonly EXPOSURE_BUDGET_MS = 12
 
   /**
@@ -1230,9 +1230,9 @@ export class SceneRenderer {
   }
 
   /** Orients the camera to the observer's current heading/pitch/field of view — turning the
-   * witness's head changes what part of the (fixed, real-world-positioned) sky is in view, it
+   * observer's head changes what part of the (fixed, real-world-positioned) sky is in view, it
    * never moves any of the sky/star/body positions themselves. `elevationM` nudges the camera's
-   * own world-space height, since a witness standing higher up plausibly sees a lower horizon.
+   * own world-space height, since a observer standing higher up plausibly sees a lower horizon.
    * `headingDeg` undefined (unknown heading) leaves the camera's current yaw untouched rather
    * than snapping it to a default. */
   setObserverPose(pose: ObserverPose): void {
@@ -1246,11 +1246,11 @@ export class SceneRenderer {
     //
     // The walking cycle's own share of it is added here in all three senses — see setGait, and
     // GaitOffset.rollDeg for why it is a fraction of a degree through an eye and the whole of it
-    // through a camera. Discarded for a witness sitting inside a decor object, whose whole camera
+    // through a camera. Discarded for a observer sitting inside a decor object, whose whole camera
     // rotation updateDecorAnchoring overwrites a moment later.
     const rollRad = ((pose.rollDeg ?? 0) + this.gaitOffset.rollDeg) * DEG_TO_RAD
     // A reader turning to look at something is added on top of the pose, never written into it —
-    // see setLookOffset. What the witness said they faced is the record; where somebody browsing it
+    // see setLookOffset. What the observer said they faced is the record; where somebody browsing it
     // has pointed the view is not.
     const pitchRad = (pose.pitchDeg + this.lookPitchDeg + this.gaitOffset.pitchDeg) * DEG_TO_RAD
     if (pose.headingDeg !== undefined) {
@@ -1265,7 +1265,7 @@ export class SceneRenderer {
     }
     if (pose.elevationM !== this.observerElevationM) {
       this.observerElevationM = pose.elevationM
-      // Climbing changes where the deck is relative to the witness — and possibly which side of it
+      // Climbing changes where the deck is relative to the observer — and possibly which side of it
       // they are on — without the weather itself changing at all, so buildClouds (driven by
       // setWeather) would never hear about it.
       this.syncCloudLayer()
@@ -1285,9 +1285,9 @@ export class SceneRenderer {
       }
     }
     // The ground stays where the ground is. The patch is built around one point (see
-    // setTerrainOrigin) and everything else in this renderer is drawn relative to where the witness
+    // setTerrainOrigin) and everything else in this renderer is drawn relative to where the observer
     // is NOW, so the patch has to be offset by the distance between the two exactly as decor is
-    // (see updateDecorAnchoring) — otherwise it travels with the witness while the scenery standing
+    // (see updateDecorAnchoring) — otherwise it travels with the observer while the scenery standing
     // on it does not, and a walk of eighty metres sank Masse's own clapier four metres into ground
     // that had quietly slid out from under it.
     if (this.terrainMesh && this.terrainOrigin && pose.lat !== undefined && pose.lng !== undefined) {
@@ -1296,9 +1296,9 @@ export class SceneRenderer {
       this.terrainMesh.position.z = drift.z
     }
     // And the eye stands on it: 1.6 m above whatever soil is under it, not 1.6 m above a fixed
-    // plane. The witness climbs what the ground climbs, which is a metre over Masse's own approach
+    // plane. The observer climbs what the ground climbs, which is a metre over Masse's own approach
     // and eleven hundred over Zamora's drive, and is nothing at all wherever the ground is level —
-    // a patch reads zero at its own origin, so a witness who never moves is exactly where they were.
+    // a patch reads zero at its own origin, so a observer who never moves is exactly where they were.
     // Kept as its own field so the gait's rise can be added to it absolutely rather than
     // incrementally — see setGait, applied in updateDecorAnchoring a moment later.
     this.poseCameraY = this.groundYUnder(0, 0) + 1.6 + pose.elevationM
@@ -1338,7 +1338,7 @@ export class SceneRenderer {
   /** Points the terrain at a different elevation/imagery source, and drops the patch already
    * built so the next setTerrainOrigin() rebuilds from it — otherwise the new source would only
    * take effect once the observer happened to move far enough to trigger a rebuild anyway (see
-   * setTerrainOrigin's own distance check), which for a stationary witness is never. Not readonly
+   * setTerrainOrigin's own distance check), which for a stationary observer is never. Not readonly
    * for exactly this: the editor now lets the sources be chosen (see its Data sources group). */
   setTerrainProviders(providers: TerrainProviders): void {
     this.terrainProviders = providers
@@ -1357,7 +1357,7 @@ export class SceneRenderer {
 
   setTerrainOrigin(lat?: number, lng?: number, onSettled?: () => void): void {
     if (lat === undefined || lng === undefined) return
-    // How much ground the witness can actually see is what the patch has to cover: 900 m standing
+    // How much ground the observer can actually see is what the patch has to cover: 900 m standing
     // on it, tens of kilometres from an aircraft. Built at the flat disc's own radius (see
     // groundRadiusFor), so real relief and imagery reach the horizon instead of stopping a few
     // hundred metres out and leaving the rest of the visible ground a flat haze — the providers
@@ -1386,13 +1386,13 @@ export class SceneRenderer {
       .then(({ mesh, attribution, originElevationM }) => {
         if (token !== this.terrainBuildToken) return // superseded by a newer call while this was in flight
         this.setSiteElevation(originElevationM ?? 0)
-        // A patch reads zero at its own origin: it is built from real elevations with the witness's
+        // A patch reads zero at its own origin: it is built from real elevations with the observer's
         // own subtracted (see TerrainMeshBuilder). So a fresh patch would put the ground back at
-        // zero under a witness who has spent a kilometre climbing, and the whole world with them.
+        // zero under a observer who has spent a kilometre climbing, and the whole world with them.
         // Carrying the height the OUTGOING patch had at the new patch's own centre is what keeps a
         // long drive continuous instead of stepping every hundred and fifty metres.
         //
-        // Only across a DRIFT, never across a jump. A patch that moved because the witness walked
+        // Only across a DRIFT, never across a jump. A patch that moved because the observer walked
         // out of the old one shares ground with it and has to line up with it; one built because the
         // page was pointed at another recording entirely shares nothing, and carrying a height over
         // would have opened Valensole a hundred metres up in the air on the strength of Socorro's
@@ -1449,7 +1449,7 @@ export class SceneRenderer {
   /**
    * Past this much ground, a patch gets no roads at all.
    *
-   * A witness in an aircraft sees thirty kilometres of it, on which a carriageway is a hairline
+   * A observer in an aircraft sees thirty kilometres of it, on which a carriageway is a hairline
    * nobody reported — and asking for a whole county's streets to draw them would be a large
    * download and a mess. What that reader is looking at is the pattern of the ground, which the
    * photograph under the scene already shows.
@@ -1472,7 +1472,7 @@ export class SceneRenderer {
     provider.getRoads(boundsAroundObserver(lat, lng, radiusM))
       .then(ways => {
         // Against the PLACE, not against the build token. A patch is rebuilt for reasons that have
-        // nothing to do with where it is — a change of source, a witness walking a hundred and
+        // nothing to do with where it is — a change of source, a observer walking a hundred and
         // fifty metres — and a fetch that takes Overpass twenty seconds would lose every one of
         // those races and quietly draw nothing. What makes these roads wrong is the scene having
         // moved somewhere else, and that is what this asks.
@@ -1583,7 +1583,7 @@ export class SceneRenderer {
   private sunArriving: [number, number, number] = [0, 0, 0]
 
   /** Shows/hides the compass labels built by setShowCompass — cheap visibility toggle, never
-   * rebuilds the sprites. A witness's heading matters while actively pointing at the canvas to set
+   * rebuilds the sprites. A observer's heading matters while actively pointing at the canvas to set
    * it, not as a permanent overlay competing with the scene the rest of the time — so the labels
    * only appear while the pointer hovers the canvas (see SceneElement's pointermove/pointerleave
    * handlers), same spirit as the body-identification tooltip's own hover-only visibility. See
@@ -1660,7 +1660,7 @@ export class SceneRenderer {
     this.render()
   }
 
-  /** Rebuilds the decor scenery (buildings/trees/streetlights/vehicles/other witnesses) whenever
+  /** Rebuilds the decor scenery (buildings/trees/streetlights/vehicles/other observers) whenever
    * the list itself changes — see decorObjects' own doc comment on why reference equality is
    * enough here, unlike setWeather. Full rebuild rather than diffing add/remove/edit individually:
    * decor lists are small (a handful of objects at most) and this is only called when the list
@@ -1736,7 +1736,7 @@ export class SceneRenderer {
   }
 
   /**
-   * Stands the bodies of an interpretation in the scene — or none, which is the raw testimony. See
+   * Stands the bodies of an interpretation in the scene — or none, which is the raw account. See
    * BodySystem. Called every tick after updateDecorAnchoring, whose origin it shares.
    */
   setBodies(states: BodyState[], seconds = 0, ids: readonly string[] = states.map(state => state.id), smoke: readonly SmokeSource[] = [], wind?: { x: number, z: number }): void {
@@ -1819,7 +1819,7 @@ export class SceneRenderer {
    */
   private async loadDecorModel(object: DecorObject, token: number): Promise<void> {
     const ref = object.model
-    // usesModel, not just "does it name one": a model is the EXTERIOR, and an object the witness is
+    // usesModel, not just "does it name one": a model is the EXTERIOR, and an object the observer is
     // inside of is being looked at from within. See its own doc comment.
     if (!ref || !DecorSystem.usesModel(object)) return
     try {
@@ -1849,16 +1849,16 @@ export class SceneRenderer {
     }
   }
 
-  /** Keeps every decor object anchored to its own fixed real-world spot as the witness moves,
+  /** Keeps every decor object anchored to its own fixed real-world spot as the observer moves,
    * instead of sliding along with them — the bug this fixes: every other part of this renderer
    * treats the *camera* as sitting permanently at local (0, elevation, 0), re-centering the whole
    * 3D world on the observer's CURRENT position each tick (see setObserverPose's own doc comment
    * and setTerrainOrigin's rebuild-on-drift logic) — decor's own (eastM, northM), if applied
    * as a raw fixed local offset the way it used to be, would then implicitly move WITH that
-   * re-centering too, i.e. visibly follow the witness around like scenery glued to the camera
+   * re-centering too, i.e. visibly follow the observer around like scenery glued to the camera
    * instead of a real building would.
    *
-   * The fix: eastM/northM are authored relative to the witness's pose at the *start* of the
+   * The fix: eastM/northM are authored relative to the observer's pose at the *start* of the
    * recording (t=0), not the origin of "wherever the camera happens to sit right now". Every
    * tick, this re-derives how far the current pose has drifted from that t=0 reference — in real
    * local meters via geoToLocalMeters, only possible when BOTH poses have a real lat/lng — and
@@ -1867,9 +1867,9 @@ export class SceneRenderer {
    * translates in that case either (setObserverPose only ever touches rotation/elevation), so
    * decor staying at its raw authored offset is already correct, not a fallback approximation.
    *
-   * Also handles "being inside a decor object" (a decor object with witnessSide set — see
+   * Also handles "being inside a decor object" (a decor object with observerSide set — see
    * Decor.ts's own doc comment): the SAME anchoring trick that keeps decor fixed under a drifting
-   * witness also lets the witness's own viewpoint move INTO a decor object, without the camera
+   * observer also lets the observer's own viewpoint move INTO a decor object, without the camera
    * itself ever moving off its permanently-fixed local (0, elevation, 0) — see setObserverPose's
    * own doc comment on why camera x/z never move. Instead, once the inhabited object's own exact
    * standing spot (DecorSystem.occupantView, world-rotated by the object's headingDeg) is known,
@@ -1877,11 +1877,11 @@ export class SceneRenderer {
    * itself included — that lands that exact spot at world (0, z=0), i.e. exactly where the camera
    * already permanently sits. The camera's own heading/pitch/height are overridden to match
    * (overwriting whatever setObserverPose, called just before this each tick, set from the
-   * witness's own OUTSIDE pose) — view.eyeY is set directly (not "1.6 + something", the OUTSIDE
+   * observer's own OUTSIDE pose) — view.eyeY is set directly (not "1.6 + something", the OUTSIDE
    * convention setObserverPose itself uses — see occupantView's own doc comment on why building/
    * vehicle can't share that formula); view.headingDeg/0 pitch is only the CENTERED look direction
    * (straight out through the chosen window); indoorLookYawDeg/indoorLookPitchDeg (see
-   * setIndoorLook) are added on top so the witness can still turn their head to see the room's
+   * setIndoorLook) are added on top so the observer can still turn their head to see the room's
    * other walls/floor/ceiling, not just whatever's directly ahead through that one window. */
   updateDecorAnchoring(referencePose: ObserverPose | undefined, currentPose: ObserverPose | undefined, t = 0): void {
     this.decorReferencePose = referencePose
@@ -1891,7 +1891,7 @@ export class SceneRenderer {
       referencePose?.lat !== undefined && referencePose.lng !== undefined && currentPose?.lat !== undefined && currentPose?.lng !== undefined
         ? geoToLocalMeters(referencePose.lat, referencePose.lng, currentPose.lat, currentPose.lng)
         : { x: 0, z: 0 }
-    const inhabited = this.decorObjects.find(object => object.witnessSide !== undefined && canHoldWitness(object.kind))
+    const inhabited = this.decorObjects.find(object => object.observerSide !== undefined && canHoldObserver(object.kind))
     // Terrain and scenery share the eye's horizontal displacement. Otherwise every footstep
     // slides the plants over the height field and needlessly deforms the entire crop geometry.
     if (this.terrainMesh && this.terrainOrigin && currentPose?.lat !== undefined && currentPose.lng !== undefined) {
@@ -1900,14 +1900,14 @@ export class SceneRenderer {
       this.terrainMesh.position.z = drift.z + (inhabited ? 0 : this.gaitOffset.northM)
       // A carriageway is part of the ground it is laid on, so it rides with the patch rather than
       // being rebuilt: the ribbons are built in the patch's OWN frame (see drapeRoads), which is
-      // what makes carrying its position over enough. Without this, a witness who walks eleven
+      // what makes carrying its position over enough. Without this, a observer who walks eleven
       // hundred metres drags the whole network out from under the relief it was draped on.
       this.roadSystem.group.position.copy(this.terrainMesh.position)
     }
     if (!inhabited) {
       // The walking eye's own displacement, turned into the same "how far has the world moved under
       // the camera" that the drift above already is — and subtracted, not added: offset holds where
-      // the t=0 reference sits AS SEEN FROM the witness, so carrying the witness a centimetre east
+      // the t=0 reference sits AS SEEN FROM the observer, so carrying the observer a centimetre east
       // moves everything else a centimetre west. z is the negated north axis (see GeoProjection).
       //
       // Small enough to look pointless and it is not: this is the whole of the parallax that
@@ -1937,7 +1937,7 @@ export class SceneRenderer {
       shift.x = -(anchorX + worldDx)
       shift.z = -(anchorZ + worldDz)
       // Above the ground the object itself stands on, not above the observer's own — see
-      // groundYUnder. A witness sitting in a car parked on a rise looks out from that rise.
+      // groundYUnder. A observer sitting in a car parked on a rise looks out from that rise.
       this.camera.position.y = this.groundYUnder(anchorX, anchorZ) + view.eyeY
       this.camera.rotation.set(this.indoorLookPitchDeg * DEG_TO_RAD, -(view.headingDeg + this.indoorLookYawDeg) * DEG_TO_RAD, 0, "YXZ")
     }
@@ -1954,8 +1954,8 @@ export class SceneRenderer {
       const x = placement.eastM + offset.x + shift.x
       const z = -placement.northM + offset.z + shift.z
       // Read once per resting place, not once per frame: the ground under an object depends on where
-      // it stands ON THE PATCH, and the patch is re-anchored under a walking witness together with
-      // the object (the offset above), so a still object keeps its answer while the witness moves.
+      // it stands ON THE PATCH, and the patch is re-anchored under a walking observer together with
+      // the object (the offset above), so a still object keeps its answer while the observer moves.
       // The four hundred ground readings a footprint takes were a tenth of every frame of Valensole.
       const terrain = this.terrainMesh
       const footprintKey = `${terrain?.geometry.uuid}:${(x - (terrain?.position.x ?? 0)).toFixed(3)}:`
@@ -1986,7 +1986,7 @@ export class SceneRenderer {
     // Decor used to be local scenery, a couple of hundred meters out at most, so a far plane sized
     // for the sky and the ground was always enough. An aircraft is 5 to 10 km away, and would be
     // clipped away entirely. Widened here rather than in setObserverPose because a moving object's
-    // distance changes every tick, not only when the witness does.
+    // distance changes every tick, not only when the observer does.
     const needed = Math.max(SKY_RADIUS * 1.2, this.groundRadius * 2.5, furthestDecorM * 1.2)
     if (Math.abs(this.camera.far - needed) > 1) {
       this.camera.far = needed
@@ -2002,7 +2002,7 @@ export class SceneRenderer {
    * only ground was a flat disc. It stopped being enough the moment a recording sat on real relief:
    * at Socorro, once the case was placed on the mesa where its own sketch puts it rather than on
    * the flat a kilometre and a half north, the ground under the dynamite shack a hundred meters out
-   * is 2.7 m higher than under the witness — and a 2.2 m shack pinned to y=0 was entirely
+   * is 2.7 m higher than under the observer — and a 2.2 m shack pinned to y=0 was entirely
    * underground. Nothing about that is visible as a bug; the object is simply not there.
    *
    * Read straight off the patch that is actually DRAWN rather than out of the elevation source, so
@@ -2012,7 +2012,7 @@ export class SceneRenderer {
    * square grid of vertices — regular in latitude and longitude, and therefore regular in metres too,
    * since the projection scales both axes by constants (see GeoProjection) — so the height at any
    * point is four vertices and the containing triangle, found by arithmetic. Casting a ray at it instead
-   * meant walking thirty thousand triangles per object, and a walking witness invalidated every
+   * meant walking thirty thousand triangles per object, and a walking observer invalidated every
    * object's cached answer every half metre: seventy rows of lavender cost 3.7 ms a frame that way,
    * which is what stood between this scene and a field big enough to have a far side.
    *
@@ -2022,7 +2022,7 @@ export class SceneRenderer {
   private groundYUnder(x: number, z: number): number {
     const mesh = this.terrainMesh
     if (!mesh) return DECOR_GROUND_Y
-    // The patch stands where its own origin really is relative to the witness (see setObserverPose),
+    // The patch stands where its own origin really is relative to the observer (see setObserverPose),
     // so a world position has to be brought into the patch's own frame before its grid can be read.
     return mesh.position.y + this.groundYOfPatch(mesh, x - mesh.position.x, z - mesh.position.z)
   }
@@ -2076,18 +2076,18 @@ export class SceneRenderer {
     return DecorSystem.groundUnderFootprint(object, x, z, headingDeg, (px, pz) => this.groundYUnder(px, pz), altitudeM)
   }
 
-  /** How far the witness has turned their head away from "straight out through the chosen
+  /** How far the observer has turned their head away from "straight out through the chosen
    * window" while inside a decor object — transient, in-memory only (never written into the
-   * sighting's own witnessTrack, which represents the witness's real OUTSIDE recorded gaze, a
+   * sighting's own observerTrack, which represents the observer's real OUTSIDE recorded gaze, a
    * different reference frame entirely). Set by SightingEditorElement's own camera-drag handling
-   * when it detects the witness is currently inside a decor object (see its own cameraDragState
+   * when it detects the observer is currently inside a decor object (see its own cameraDragState
    * doc comment) — reset to {0,0} whenever the inhabited object/side changes, so looking through
    * a newly picked window always starts centered. Applied in updateDecorAnchoring, on top of
    * (not instead of) the object/side's own base look direction. */
   /**
    * How far a reader has turned the view away from the pose, degrees — see setLookOffset.
    *
-   * Distinct from indoorLookYawDeg above, which is the same gesture for a witness standing INSIDE a
+   * Distinct from indoorLookYawDeg above, which is the same gesture for a observer standing INSIDE a
    * decor object and is applied on the occupant's own view instead. Both exist because looking
    * round is not the same act as stating where somebody looked.
    */
@@ -2098,15 +2098,15 @@ export class SceneRenderer {
   private poseCameraY = 1.6
 
   /**
-   * How far the witness's own walking has carried their eye off the path at this instant, metres —
+   * How far the observer's own walking has carried their eye off the path at this instant, metres —
    * see Gait, which derives it from the recorded path and states what it refuses to derive.
    *
    * On top of the pose and never written into it, exactly as setLookOffset is: a recording states
-   * where the witness was, and a body moving between two of those points is an inference from it,
+   * where the observer was, and a body moving between two of those points is an inference from it,
    * not a further thing the file said.
    *
    * Applied in updateDecorAnchoring rather than here, because that is where this renderer knows
-   * whether the witness is on their own feet at all: a witness sitting inside a decor object has no
+   * whether the observer is on their own feet at all: a observer sitting inside a decor object has no
    * gait, and their viewpoint is that object's, not their legs' (see the inhabited branch there).
    */
   setGait(offset: GaitOffset): void {
@@ -2115,8 +2115,8 @@ export class SceneRenderer {
 
   private gaitOffset: GaitOffset = { eastM: 0, northM: 0, upM: 0, rollDeg: 0, pitchDeg: 0, yawDeg: 0 }
 
-  /** Turns the view without touching the record — what a click on the witness map's own scenery
-   * does, and what returns to zero when the reader asks for the witness's own gaze again. */
+  /** Turns the view without touching the record — what a click on the observer map's own scenery
+   * does, and what returns to zero when the reader asks for the observer's own gaze again. */
   setLookOffset(yawDeg: number, pitchDeg: number): void {
     this.lookYawDeg = yawDeg
     this.lookPitchDeg = pitchDeg
@@ -2168,7 +2168,7 @@ export class SceneRenderer {
   /** Places a real PointLight at a lit streetlight's own lamp-head position, as a CHILD of the
    * decor group rather than a direct scene child at a one-time-computed world position — parented
    * this way, it automatically tracks the group's own position every time updateDecorAnchoring
-   * moves it (a plain world-space snapshot would otherwise go stale the moment the witness moves
+   * moves it (a plain world-space snapshot would otherwise go stale the moment the observer moves
    * away from their t=0 reference position). local position, not world: `light.position` is
    * interpreted relative to whichever object it's added to, so copying the lamp mesh's own
    * (already-local) position is correct without any conversion. */
@@ -2190,7 +2190,7 @@ export class SceneRenderer {
   }
 
   setAstronomy(astronomy: SceneAstronomy): void {
-    // A jump — another scene, a seek — makes what was measured round the witness someone else's.
+    // A jump — another scene, a seek — makes what was measured round the observer someone else's.
     if (!this.lastAstronomy || Math.abs(this.lastAstronomy.sun.altitudeDeg - astronomy.sun.altitudeDeg) > 2) {
       this.surroundings = undefined
       this.scatteredSky?.resetSurroundings()
@@ -2281,7 +2281,7 @@ export class SceneRenderer {
     const skyColors = sky
     // The air's own light is what it scatters of what falls on it: the Sun's beam as the clear sky
     // was worked out with, as far as the clouds let the beam through, and under the clouds the light
-    // they send down — measured round the witness (see measureSurroundings), a level surface's
+    // they send down — measured round the observer (see measureSurroundings), a level surface's
     // irradiance over π being the radiance of an evenly lit sky. An overcast day's haze is the grey
     // of its deck, not the glare of the clear sky above it.
     const underClouds = this.lightUnderClouds(astronomy)
@@ -2459,7 +2459,7 @@ export class SceneRenderer {
     if (!this.satelliteField) {
       this.satelliteField = new SatelliteField(STAR_RADIUS)
       // In the celestial group, at infinity with the stars: a satellite hundreds of kilometres away
-      // shows no parallax against a witness's few metres of eye height.
+      // shows no parallax against a observer's few metres of eye height.
       this.celestialGroup.add(this.satelliteField.object)
     }
     const magnitudeLimit = visibleMagnitudeLimit(this.lastSunPosition?.altitudeDeg ?? -90, this.instrumentMagnitudeGain)
@@ -2483,7 +2483,7 @@ export class SceneRenderer {
    * has set. `skyZenith`/`groundColor` (the same colors the sky dome/flat ground disc are built
    * from) feed the non-shadow-casting HemisphereLight, so a decor object's shadowed side reads as
    * ambient-lit sky/ground bounce instead of pure black — real skylight does exactly this for a
-   * real witness. `castShadow` is gated on there being any decor at all: an empty sighting has
+   * real observer. `castShadow` is gated on there being any decor at all: an empty sighting has
    * nothing to receive or cast a real shadow, so it costs nothing extra. */
   /**
    * The lights of the sky, in the scene's relative units (see ScatteredSky.relativeScale): the Sun's
@@ -2517,7 +2517,7 @@ export class SceneRenderer {
     } else this.cloudBeam.fill(0)
     const around = this.surroundings
     if (around) {
-      // What is drawn round the witness, measured (see measureSurroundings): the clouds as they are,
+      // What is drawn round the observer, measured (see measureSurroundings): the clouds as they are,
       // the ground as it is lit.
       this.skyLight.color.setRGB(around.up[0] * scale, around.up[1] * scale, around.up[2] * scale)
       this.skyLight.groundColor.setRGB(around.down[0] * scale, around.down[1] * scale, around.down[2] * scale)
@@ -2551,9 +2551,9 @@ export class SceneRenderer {
   private readonly lightDirection = new Vector3(0, 1, 0)
 
   /**
-   * Stands the shadow camera round the witness, its grid of texels fixed to the WORLD.
+   * Stands the shadow camera round the observer, its grid of texels fixed to the WORLD.
    *
-   * The world moves under the eye as a witness walks (see updateDecorAnchoring), and a shadow
+   * The world moves under the eye as a observer walks (see updateDecorAnchoring), and a shadow
    * camera left still round the origin saw it slide by a fraction of a texel at every step: every
    * shadow edge was rasterised afresh each frame, and a field of lavender twinkled as Masse walked
    * towards the craft. So the frustum is moved with the world by the fraction of a texel it has
@@ -2658,7 +2658,7 @@ export class SceneRenderer {
   setMeteorShower(meteors: Meteor[], radiantAltitudeDeg: number, radiantAzimuthDeg: number): void {
     if (!this.meteorSystem) {
       this.meteorSystem = new MeteorSystem()
-      // In the celestial group, so it follows the witness's own eye height like the stars do.
+      // In the celestial group, so it follows the observer's own eye height like the stars do.
       this.celestialGroup.add(this.meteorSystem.object)
     }
     this.meteorSystem.setShower(meteors, radiantAltitudeDeg, radiantAzimuthDeg)
@@ -2691,7 +2691,7 @@ export class SceneRenderer {
    * it belongs to the thing that has an aperture: six spikes through a six-bladed lens, ten through
    * a five-bladed one, and NONE at all through an eye, which is round and has no edges to diffract
    * at. Drawing the same star whatever the sighting was made with is the same mistake as rendering
-   * every witness through a camera lens, which this class already stopped making.
+   * every observer through a camera lens, which this class already stopped making.
    */
   setInstrument(instrument: Instrument): void {
     this.projectionKind = instrument.projection
@@ -2938,7 +2938,7 @@ export class SceneRenderer {
   }
 
   /**
-   * Measures the light round the witness on the eye's photograph (see ProbeIrradiance): the
+   * Measures the light round the observer on the eye's photograph (see ProbeIrradiance): the
    * hemisphere light takes it, and the eye adapts to it. Kept in candela, lux — the photograph was
    * taken at `scale` — so that it stays right however the eye adapts after.
    */
@@ -2982,7 +2982,7 @@ export class SceneRenderer {
   }
 
   private probeIrradiance?: ProbeIrradiance
-  /** The light round the witness as last measured on the eye's photograph, lux — see
+  /** The light round the observer as last measured on the eye's photograph, lux — see
    * measureSurroundings. */
   private surroundings?: { up: [number, number, number], down: [number, number, number] }
 
@@ -3117,15 +3117,15 @@ export class SceneRenderer {
   }
 
   /**
-   * Draws the witness's own phenomena into the picture the scene was just drawn in, hidden by the
+   * Draws the observer's own phenomena into the picture the scene was just drawn in, hidden by the
    * DECOR and by nothing else.
    *
    * The ground and the terrain must not hide them, and this is why they are not simply meshes in
    * the main pass. A shape drawn low in the frame is a distant thing near the horizon, the ordinary
    * way to draw one — never a thing underground — and the distance it is drawn at is a parameter
    * of the picture (see PhenomenonDepth), so a relief patch at thirty-metre resolution winning a
-   * depth test against it would be the relief deciding what the witness saw. Socorro is the case
-   * that showed it: the craft its witness placed a hundred feet away, in the arroyo below the road,
+   * depth test against it would be the relief deciding what the observer saw. Socorro is the case
+   * that showed it: the craft its observer placed a hundred feet away, in the arroyo below the road,
    * sank two metres under a terrain that cannot know the arroyo is there. What a car or a shack
    * stood in front of, on the other hand, is exactly what the depth buffer is for.
    *
@@ -3135,7 +3135,7 @@ export class SceneRenderer {
    * Shadow maps are not redrawn for them; they were drawn for the frame already.
    */
   /** What is drawn over the scene once it is drawn, in order: the pictures of the place, then the
-   * witness's own phenomena over them — see renderReferencesPass and renderPhenomenaPass. */
+   * observer's own phenomena over them — see renderReferencesPass and renderPhenomenaPass. */
   private renderOverlayPasses(camera: PerspectiveCamera = this.camera): void {
     this.renderReferencesPass(camera)
     this.renderPhenomenaPass(camera)
@@ -3158,7 +3158,7 @@ export class SceneRenderer {
   /**
    * Lays the pictures of the place over the picture the scene was just drawn in — over everything,
    * hidden by nothing, at their own opacity — and under the phenomena drawn next, so that what the
-   * witness reported stands over what the place looks like (see SceneReference for why a picture
+   * observer reported stands over what the place looks like (see SceneReference for why a picture
    * is neither hidden by the scene nor hides it). One draw of a few panels, with the depth buffer
    * left exactly as it was for the phenomena's own pass.
    */
@@ -3262,7 +3262,7 @@ export class SceneRenderer {
    * apiece, and doing that inside one call froze the editor for a third of a second every time
    * anything at all asked for a frame. Now the film is shown as it fills, gained up to stay properly
    * exposed (see develop), so the picture goes from beady to smooth rather than from black to
-   * bright — and anything the witness does interrupts it and starts it again.
+   * bright — and anything the observer does interrupts it and starts it again.
    */
   private startExposure(): void {
     this.cancelExposure()
@@ -3307,7 +3307,7 @@ export class SceneRenderer {
     // Back to the instant the recording is actually at, EVERY time round: everything that ASKS the
     // scene rather than drawing it — the shape occlusion raycasts, the decor distances behind
     // SceneElement's own size estimates, the hover picks — reads the scene graph where this leaves
-    // it, and between two frames of this that reader is the witness moving their pointer.
+    // it, and between two frames of this that reader is the observer moving their pointer.
     this.restateAt(instantAt, 0)
     this.presentExposure()
     this.resolution.endDrawing()
@@ -3352,7 +3352,7 @@ export class SceneRenderer {
   private exposureSubjectBounds: Array<{ x: number; y: number; width: number; height: number }> = []
 
   /**
-   * Nothing a reader is looking AT stands this close. Past it, the object is what the witness is
+   * Nothing a reader is looking AT stands this close. Past it, the object is what the observer is
    * standing beside — and at Socorro that is Zamora's own patrol car, two and a half metres away,
    * whose box covers two and a half frames and therefore both corners at once. The map read that
    * as "the subject is everywhere" and hid itself for the whole account, coming back only at the
@@ -3519,7 +3519,7 @@ export class SceneRenderer {
    * behind the camera. Beyond ±1 the direction is outside the frame.
    *
    * What a shape that states its own direction (BaseShape.aim) is tested against the decor at: the
-   * pixel the overlay kept for it is clamped far off the canvas once the witness turns their back,
+   * pixel the overlay kept for it is clamped far off the canvas once the observer turns their back,
    * and a ray through a pixel a hundred thousand wide lands anywhere at all.
    */
   screenPointOf(direction: Vector3): { ndcX: number; ndcY: number } | undefined {
@@ -3640,7 +3640,7 @@ export class SceneRenderer {
     // The scene's own matrices, not just the camera's. This runs BEFORE renderer.render(), which is
     // what normally refreshes them, so every decor object tested would otherwise be where it was on
     // the PREVIOUS frame — fine while nothing moves, and wrong exactly while something does. The
-    // ground and the terrain are re-anchored under a moving witness every tick (see
+    // ground and the terrain are re-anchored under a moving observer every tick (see
     // updateDecorAnchoring), so during a drag this was raycasting against a world one frame out of
     // date. Once for all the samples: a walk of the whole scene is not free either.
     if (this.raycastableDecor().length > 0) this.scene.updateMatrixWorld()
@@ -3656,7 +3656,7 @@ export class SceneRenderer {
    *
    * A field is excluded on two counts, and the second is what makes it a rule rather than a
    * shortcut. It cannot hide anything anyone is looking at: it is ground cover a third of a metre
-   * tall, and a witness's eye, the Sun, and every phenomenon this project reconstructs are above it.
+   * tall, and a observer's eye, the Sun, and every phenomenon this project reconstructs are above it.
    * And it is enormous — one patch is ten thousand triangles, a field is ninety of them, and this is
    * asked nine times a frame for the Sun's own disc alone. Masse's field cost 2.4 ms a frame of
    * being asked a question whose answer is always no.
@@ -3758,7 +3758,7 @@ export class SceneRenderer {
   }
 
   /**
-   * Stands the witness's own phenomena in the scene — see PhenomenonSystem for what a plane there
+   * Stands the observer's own phenomena in the scene — see PhenomenonSystem for what a plane there
    * asserts and does not, and PhenomenonDepth for where its distance comes from.
    *
    * Placed at render time and not here: where a pixel looks depends on the instrument's projection
@@ -3771,10 +3771,10 @@ export class SceneRenderer {
   /**
    * How far the decor stands along the exact line of sight to this screen point, split by which
    * side of the shape each piece of it is on — the raw material of the only distance statement a
-   * testimony can make.
+   * account can make.
    *
    * A recording holds no distance (see BaseShape.angular). What it can hold is a relationship the
-   * witness actually saw: the object passed BEHIND that hangar, or in FRONT of that tree. Since
+   * observer actually saw: the object passed BEHIND that hangar, or in FRONT of that tree. Since
    * the decor's own position is known (DecorObject.eastM/northM, built into real geometry here),
    * each such crossing turns into an inequality — at least this far, or at most that far — and
    * that is the entire basis on which meters are ever attached to an object (see SizeEstimate).
@@ -3786,7 +3786,7 @@ export class SceneRenderer {
    * be wrong.
    *
    * Which side a crossing is on is NOT geometry's to decide — it is DecorObject.occludesSourceIds,
-   * i.e. what the witness reported, for exactly the reasons that field's own comment gives. Decor
+   * i.e. what the observer reported, for exactly the reasons that field's own comment gives. Decor
    * this shape is not listed as hidden by, but whose silhouette it crosses, is decor it passed in
    * front of.
    */
@@ -3838,7 +3838,7 @@ export class SceneRenderer {
    * sky is one Points cloud of up to 25 791 vertices, and giving each an invisible hit proxy the
    * way the six bodies have one is out of the question. Tested against the named list alone, which
    * is also what makes it cheap — and what makes the answer meaningful, since a star with no name
-   * has nothing to tell a witness anyway.
+   * has nothing to tell a observer anyway.
    *
    * Returns the star and how high it stood, because a name alone identifies without explaining:
    * what makes a bright point a candidate for a misidentification is that it was low, or bright,
@@ -3862,7 +3862,7 @@ export class SceneRenderer {
   }
 
   /**
-   * Whether the ground stands between the witness and whatever this screen point aims at.
+   * Whether the ground stands between the observer and whatever this screen point aims at.
    *
    * The hover tests are pure direction arithmetic — a star is picked by how close the pointer comes
    * to the direction it is DRAWN in, which says nothing about whether anything is in front of it.
@@ -3884,7 +3884,7 @@ export class SceneRenderer {
   }
 
   /** Finds which decor object (if any) sits under normalized device coordinates — same NDC
-   * convention as pickBodyAt, for the editor's own right-click "view this witness's testimony"
+   * convention as pickBodyAt, for the editor's own right-click "view this observer's account"
    * menu (see SightingEditorElement.onContextMenu). Tests every real mesh recursively (decor has no
    * separate oversized hit-area sprite the way bodies do — its parts are already human-sized, not
    * a tiny true-to-scale astronomical disc needing a more forgiving target) and walks back up from
@@ -4005,7 +4005,7 @@ export class SceneRenderer {
   /**
    * Whether the observation's own clock is running. Everything animated here — falling rain, a
    * drifting cloud deck, twinkling stars, lightning, the lens flare — is part of the observed
-   * scene, and an observation that is paused did not go on happening: a witness who stops the
+   * scene, and an observation that is paused did not go on happening: a observer who stops the
    * replay to look at a frame is looking at ONE instant, not at a still object under live weather.
    * So the whole loop stops with playback (see needsAnimationLoop), and the last frame stays on
    * screen; every state change repaints through render() as it already did.
@@ -4191,10 +4191,10 @@ export class SceneRenderer {
   }
 
   /**
-   * How much of a body's light reaches the witness through the cloud between them, 0 to 1.
+   * How much of a body's light reaches the observer through the cloud between them, 0 to 1.
    *
    * A gap the whole scene had: an overcast deck was drawn, and the Sun went on blazing through it at
-   * full strength with its dazzle intact — a sky that could not happen. Cloud is what a witness
+   * full strength with its dazzle intact — a sky that could not happen. Cloud is what a observer
    * mostly does NOT see through, and for a project about what somebody could have seen that is not
    * a detail.
    *
@@ -4246,7 +4246,7 @@ export class SceneRenderer {
    * instead of accumulating duplicates. Also places a matching invisible hitArea (see
    * HOVER_HIT_RADIUS_SCALE) and, when the body is bright enough, a real glare halo (see setGlare)
    * so it stays practical to hover/click despite being small, and reads with the same dazzle a
-   * human witness would actually perceive. `color` is tinted by the body's own current altitude
+   * human observer would actually perceive. `color` is tinted by the body's own current altitude
    * (see atmosphericTint) before being applied, so it warms near the horizon the same way a real
    * low Sun/bright planet does — independent of the sky's own ambient color. */
   private setBodyMesh(key: string, position: HorizontalPosition, visualRadius: number, color: Color, magnitude: number): void {
@@ -4524,7 +4524,7 @@ export class SceneRenderer {
     this.setBodyMesh(key, comet.position, PLANET_VISUAL_RADIUS * (0.5 + 0.5 * brightness), new Color(scale, scale, scale), comet.magnitude)
     if (!this.cometTail) {
       this.cometTail = new CometTail(BODY_PLACEMENT_RADIUS)
-      // In the celestial group with everything else at infinity, so it follows the witness's own
+      // In the celestial group with everything else at infinity, so it follows the observer's own
       // eye height the way the stars do.
       this.celestialGroup.add(this.cometTail.object)
     }
@@ -4542,7 +4542,7 @@ export class SceneRenderer {
    * solar ones because a ring around the Moon at night is a stranger sight than one around the Sun.
    *
    * Driven by the weather that was looked up: the high deck is the ice, the lower decks are what
-   * stands between it and the witness. A sky with no cirrus draws nothing at all, which is most
+   * stands between it and the observer. A sky with no cirrus draws nothing at all, which is most
    * skies, and a hand-authored sky that never stated its ice cloud also draws nothing rather than
    * inventing some.
    */
@@ -4569,7 +4569,7 @@ export class SceneRenderer {
     // The real lower decks when the record gave them, and the total cover as a stand-in when
     // nobody asked — never the total minus the ice, which the decks overlapping makes unsound.
     const lower = this.lowerCloudCover()
-    // The Sun while the ice deck can still see it, which outlasts the witness's own sunset: the
+    // The Sun while the ice deck can still see it, which outlasts the observer's own sunset: the
     // crystals are eight kilometres up and stay in sunlight for minutes after the ground is in
     // shadow. That interval is exactly when pillars are photographed, so cutting the display at
     // the observer's horizon would throw away the sight the form is famous for.
@@ -4631,7 +4631,7 @@ export class SceneRenderer {
   }
 
   /**
-   * Turns the Galaxy and the dust of the Solar System to face the witness, and says how bright the
+   * Turns the Galaxy and the dust of the Solar System to face the observer, and says how bright the
    * sky they stand in was.
    *
    * Nothing is placed here and nothing is decided here — see SkyGlowEffect, which owns both models
@@ -4693,7 +4693,7 @@ export class SceneRenderer {
       // exactly as many times brighter than its background as the physics says, whatever the colour
       // table happens to be doing. Taken at the zenith and used over the whole dome — a band low
       // down therefore reads weaker against a horizon the table paints brighter, which is also what
-      // a witness sees, and the extinction the shader applies pushes the same way.
+      // a observer sees, and the extinction the shader applies pushes the same way.
       skyColor: new Vector3(skyZenith[0], skyZenith[1], skyZenith[2])
     })
   }
@@ -4947,13 +4947,13 @@ export class SceneRenderer {
     if (this.lastSunPosition) this.updateCloudLighting(this.lastSunPosition, this.baseFogColor)
     const geometry = buildCloudGeometry(CLOUD_RADIUS)
     this.cloudMesh = new Mesh(geometry, material)
-    // Above the deck? Turn the same shell upside down, so its dome opens downwards and the witness
+    // Above the deck? Turn the same shell upside down, so its dome opens downwards and the observer
     // looks at the TOP of the cloud layer — the one thing a ground-anchored dome could never show.
     this.faceCloudDeck(this.cloudMesh, this.cloudLayerOffset())
     // In the celestial group, i.e. centred on the observer, for a reason that is the cloud
     // shader's own: it shades each vertex from the direction between the DOME'S CENTRE and that
     // vertex, then projects it onto a flat layer (see CloudSystem's CLOUD_LAYER_HEIGHT). That is
-    // only the view ray if the camera sits at that centre. Left at ground level, a witness merely
+    // only the view ray if the camera sits at that centre. Left at ground level, a observer merely
     // climbing a few hundred metres broke the assumption and the layer came out bent into a
     // fish-eye arc, then vanished entirely once past the dome's own 700-unit radius.
     this.celestialGroup.add(this.cloudMesh)
@@ -5021,10 +5021,10 @@ export class SceneRenderer {
 
   /**
    * Where the cloud deck sits relative to the observer's own eye, in scene units: positive when the
-   * deck is overhead (the usual case), negative when the witness is above it — an aircraft, a
+   * deck is overhead (the usual case), negative when the observer is above it — an aircraft, a
    * mountain top. Both the deck's own perspective compression (the shader's layerHeight) and which
    * way its shell has to face come from this one number, so a recording stating a real cloud base
-   * and a real witness altitude gets the right side of the deck for free.
+   * and a real observer altitude gets the right side of the deck for free.
    */
   /** Re-aims an already-built deck at the observer's current altitude: how compressed it looks and
    * which way its shell faces, no geometry rebuild. */
@@ -5660,7 +5660,7 @@ export class SceneRenderer {
    *
    * They are not in the sky. Everything else this scene draws is a thing at an angle — a star, a
    * cloud, a building — and a narrow field is SUPPOSED to magnify all of it, which is what a
-   * telephoto lens does. A cardinal point is a caption: it says which way the witness is facing,
+   * telephoto lens does. A cardinal point is a caption: it says which way the observer is facing,
    * and a caption that grew ninefold when the recording changed to a 210 mm lens (as this one did)
    * was reading as part of the picture instead of as a note on it.
    *
@@ -5756,7 +5756,7 @@ function getPrecipitationTexture(type: CpuPrecipitationType): CanvasTexture {
 }
 
 /** A single soft, fluffy radial blob — real snowflakes read as diffuse puffs at any distance a
- * witness would view them from, not sharp discs. */
+ * observer would view them from, not sharp discs. */
 function getSnowflakeTexture(): CanvasTexture {
   if (sharedSnowflakeTexture) return sharedSnowflakeTexture
   const size = 64

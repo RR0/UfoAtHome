@@ -8,7 +8,7 @@
  * the same way, by a script, from figures anyone can check.
  *
  * - An ovoid "the size of a Renault Dauphine", 3.5 m across and 2.5 m high overall. The hull is
- *   drawn in witness-valensole.json at 2.223° by 1.139° from 90 m, which is 3.49 by 1.79 m, its
+ *   drawn in observer-valensole.json at 2.223° by 1.139° from 90 m, which is 3.49 by 1.79 m, its
  *   centre 1.25 m above the ground: those are the numbers used here, so that the model and the
  *   drawing say one thing.
  * - A transparent cupola on top, through which he saw two seated beings. The recording draws it

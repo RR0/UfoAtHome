@@ -76,7 +76,7 @@ export class MeteorFall {
    *
    * The count is the rate times the recording's length — a Perseid night at 68 an hour drops about
    * one every 53 seconds, so a twenty-second reconstruction usually shows NONE. That is the honest
-   * answer and the useful one: a witness who watched for twenty seconds and saw a single streak did
+   * answer and the useful one: a observer who watched for twenty seconds and saw a single streak did
    * not see a typical shower meteor, they saw something at the rate of a hundred an hour.
    *
    * Arrivals are spread evenly rather than drawn from a Poisson process. Meteors really do arrive

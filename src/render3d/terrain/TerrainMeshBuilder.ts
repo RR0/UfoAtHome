@@ -16,7 +16,7 @@ import { fractionWithinBounds } from "./TileMath.js"
  * mesh at all. The source was then measured properly: on the Terrarium tiles around Socorro, a
  * posting differs from the straight line between its neighbours 7.9 m away by 2.7 CENTIMETRES, and
  * by 23 cm at 28 m. So a vertex every 28 metres loses about a fifth of a metre of relief, which is
- * nothing at the hundreds of metres a witness is looking across — while four times the postings is
+ * nothing at the hundreds of metres a observer is looking across — while four times the postings is
  * sixteen times the triangles, in the shadow map as well as in the frame.
  *
  * Going finer is worth doing where a finer SOURCE exists (USGS 3DEP publishes 1 m for the United
@@ -129,7 +129,7 @@ export async function buildTerrainMesh(
       // Where this vertex's real coordinates fall on the image that actually came back, which is
       // not the image that was asked for (see ImageryTexture.bounds). Reading tCol/tRow straight
       // into the UVs, as this did, silently assumed the two were the same box: the photograph was
-      // stretched from the tile grid's span down to the patch's, so the ground under the witness
+      // stretched from the tile grid's span down to the patch's, so the ground under the observer
       // was a piece of country several times too large, shrunk to fit and offset by however far
       // they stood from the centre of their own tile. Nothing about it LOOKED broken — it is
       // plausible ground either way — which is why it stood until a map asked to put a dot on it.
@@ -186,7 +186,7 @@ export async function buildTerrainMesh(
   // its colour — which the old hand-set lights happened to hide, and a scene lit by the Sun's own
   // lux did not.
   texture.colorSpace = SRGBColorSpace
-  // The ground is looked at almost edge-on: a witness stands ON it, so a texel a metre across is
+  // The ground is looked at almost edge-on: a observer stands ON it, so a texel a metre across is
   // many metres deep in the frame. Without this, the mipmap chosen for that compression is the one
   // that suits the DEEP direction, and a road a reader could now make out is blurred away in the
   // one direction it runs. Three clamps this to what the card allows.

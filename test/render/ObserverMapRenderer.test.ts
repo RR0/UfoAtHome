@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
-import { WitnessMapRenderer } from "../../src/render/WitnessMapRenderer.js"
-import type { WitnessMapFrame } from "../../src/render/WitnessMapRenderer.js"
-import { WitnessPath } from "../../src/engine/place/WitnessPath.js"
+import { ObserverMapRenderer } from "../../src/render/ObserverMapRenderer.js"
+import type { ObserverMapFrame } from "../../src/render/ObserverMapRenderer.js"
+import { ObserverPath } from "../../src/engine/place/ObserverPath.js"
 import { Sighting } from "../../src/engine/model/Sighting.js"
 
 const CENTER = { lat: 34.0475, lng: -106.8956 }
@@ -77,9 +77,9 @@ class RecordingContext {
   }
 }
 
-function frameWith(overrides: Partial<WitnessMapFrame> = {}): { frame: WitnessMapFrame; context: RecordingContext } {
+function frameWith(overrides: Partial<ObserverMapFrame> = {}): { frame: ObserverMapFrame; context: RecordingContext } {
   const sighting = Sighting.create(undefined, [CENTER])
-  const path = WitnessPath.of(sighting)!
+  const path = ObserverPath.of(sighting)!
   return {
     context: new RecordingContext(),
     frame: {
@@ -95,19 +95,19 @@ function frameWith(overrides: Partial<WitnessMapFrame> = {}): { frame: WitnessMa
   }
 }
 
-/** The cone is the widest arc drawn — the milestone dots and the witness are arcs too, at a few
+/** The cone is the widest arc drawn — the milestone dots and the observer are arcs too, at a few
  * pixels' radius. */
 function coneOf(context: RecordingContext): ArcCall | undefined {
   return context.arcs.slice().sort((a, b) => b.radius - a.radius)[0]
 }
 
-describe("WitnessMapRenderer", () => {
+describe("ObserverMapRenderer", () => {
   it("keeps the licence line and the scale clear of each other", () => {
     // They shared the bottom strip, and whichever was drawn second covered the other — which is how
     // the scale disappeared under a two-line Esri credit. The bar and its own label must sit above
     // every wrapped line of the credit, not on top of one.
     const { frame, context } = frameWith()
-    new WitnessMapRenderer(context as unknown as CanvasRenderingContext2D).paint({
+    new ObserverMapRenderer(context as unknown as CanvasRenderingContext2D).paint({
       ...frame,
       attribution: "Imagery © Esri, Maxar, Earthstar Geographics, and the GIS User Community"
     })
@@ -127,7 +127,7 @@ describe("WitnessMapRenderer", () => {
         { label: "F", t: 0, lat: CENTER.lat, lng: CENTER.lng, current: false }
       ]
     })
-    new WitnessMapRenderer(context as unknown as CanvasRenderingContext2D).paint(frame)
+    new ObserverMapRenderer(context as unknown as CanvasRenderingContext2D).paint(frame)
     const letters = context.texts.filter(t => t.text === "E" || t.text === "F").map(t => t.text)
     expect(letters).toEqual(["F", "E"])
   })
@@ -141,18 +141,18 @@ describe("WitnessMapRenderer", () => {
       // barely two pixels and sits well inside the disc drawn for the moment.
       markers: [{ label: "E", t: 0, lat: CENTER.lat - 0.000135, lng: CENTER.lng, current: true }]
     })
-    new WitnessMapRenderer(context as unknown as CanvasRenderingContext2D).paint(frame)
+    new ObserverMapRenderer(context as unknown as CanvasRenderingContext2D).paint(frame)
     const marks = context.arcs.filter(a => a.radius < 20).map(a => a.radius)
-    expect(Math.max(...marks)).toBeLessThan(9) // the marker itself, no ring around the witness
+    expect(Math.max(...marks)).toBeLessThan(9) // the marker itself, no ring around the observer
   })
 
   it("rings the moment it is standing on instead of covering its letter", () => {
-    // A milestone IS a moment of the witness's own account, so the playhead lands exactly on one
+    // A milestone IS a moment of the observer's own account, so the playhead lands exactly on one
     // every time the recording reaches it — and a filled dot there hid the letter naming it.
     const { frame, context } = frameWith({
       markers: [{ label: "E", t: 0, lat: CENTER.lat, lng: CENTER.lng, current: true }]
     })
-    new WitnessMapRenderer(context as unknown as CanvasRenderingContext2D).paint(frame)
+    new ObserverMapRenderer(context as unknown as CanvasRenderingContext2D).paint(frame)
     const marks = context.arcs.filter(a => a.radius < 20).map(a => a.radius)
     expect(Math.max(...marks)).toBeGreaterThan(7) // rings the marker rather than sitting inside it
     expect(context.texts.some(t => t.text === "E")).toBe(true)
@@ -163,11 +163,11 @@ describe("WitnessMapRenderer", () => {
     // about. Chiles & Whitted is 02:45; laying it unchanged under that says the crew could see a
     // sunlit countryside.
     const { frame, context } = frameWith({ nightFraction: 1 })
-    new WitnessMapRenderer(context as unknown as CanvasRenderingContext2D).paint(frame)
+    new ObserverMapRenderer(context as unknown as CanvasRenderingContext2D).paint(frame)
     expect(context.fills.some(fill => String(fill).startsWith("rgba(6, 12, 30"))).toBe(true)
 
     const day = frameWith({ nightFraction: 0 })
-    new WitnessMapRenderer(day.context as unknown as CanvasRenderingContext2D).paint(day.frame)
+    new ObserverMapRenderer(day.context as unknown as CanvasRenderingContext2D).paint(day.frame)
     expect(day.context.fills.some(fill => String(fill).startsWith("rgba(6, 12, 30"))).toBe(false)
   })
 
@@ -178,20 +178,20 @@ describe("WitnessMapRenderer", () => {
     const { frame, context } = frameWith({
       decor: [{ lat: CENTER.lat - 0.001, lng: CENTER.lng, headingDeg: 225 }]
     })
-    new WitnessMapRenderer(context as unknown as CanvasRenderingContext2D).paint(frame)
+    new ObserverMapRenderer(context as unknown as CanvasRenderingContext2D).paint(frame)
     const cone = context.fills.findIndex(fill => typeof fill === "object")
     const scenery = context.fills.findIndex(fill => String(fill).startsWith("rgba(120, 220, 255"))
     expect(scenery).toBeGreaterThan(cone)
     expect(context.rects).toHaveLength(1)
   })
 
-  it("points the cone the way the witness faced, north up", () => {
+  it("points the cone the way the observer faced, north up", () => {
     // Due east, on a north-up map, is straight to the right of screen — mid-arc angle 0 in canvas
     // terms. Getting this wrong is a quiet, plausible-looking error: a cone mirrored or turned a
     // quarter is still a cone over a landscape, and would silently clear or convict whatever
     // landmark it happened to land on.
     const { frame, context } = frameWith({ headingDeg: 90 })
-    new WitnessMapRenderer(context as unknown as CanvasRenderingContext2D).paint(frame)
+    new ObserverMapRenderer(context as unknown as CanvasRenderingContext2D).paint(frame)
     const cone = coneOf(context)!
     expect((cone.from + cone.to) / 2).toBeCloseTo(0, 6)
     expect(cone.to - cone.from).toBeCloseTo((40 * Math.PI) / 180, 6)
@@ -199,7 +199,7 @@ describe("WitnessMapRenderer", () => {
 
   it("puts north at the top", () => {
     const { frame, context } = frameWith({ headingDeg: 0 })
-    new WitnessMapRenderer(context as unknown as CanvasRenderingContext2D).paint(frame)
+    new ObserverMapRenderer(context as unknown as CanvasRenderingContext2D).paint(frame)
     expect((coneOf(context)!.from + coneOf(context)!.to) / 2).toBeCloseTo(-Math.PI / 2, 6)
   })
 
@@ -207,7 +207,7 @@ describe("WitnessMapRenderer", () => {
     // An undefined heading is "nobody wrote it down" (see ObserverPose.headingDeg). Drawing a cone
     // due north for it would have the map assert the very thing it is being consulted about.
     const { frame, context } = frameWith({ headingDeg: undefined })
-    new WitnessMapRenderer(context as unknown as CanvasRenderingContext2D).paint(frame)
+    new ObserverMapRenderer(context as unknown as CanvasRenderingContext2D).paint(frame)
     expect(coneOf(context)!.radius).toBeLessThan(20)
   })
 
@@ -218,7 +218,7 @@ describe("WitnessMapRenderer", () => {
     const { frame, context } = frameWith()
     const latSpan = frame.bounds.north - frame.bounds.south
     const lngSpan = frame.bounds.east - frame.bounds.west
-    new WitnessMapRenderer(context as unknown as CanvasRenderingContext2D).paint({
+    new ObserverMapRenderer(context as unknown as CanvasRenderingContext2D).paint({
       ...frame,
       imagery: {
         source: {} as CanvasImageSource,
@@ -243,7 +243,7 @@ describe("WitnessMapRenderer", () => {
     // What an offline embed, a blocked tile host and a test all get. The path, the cone and the
     // scale come from the recording itself, so the map still says everything it is for.
     const { frame, context } = frameWith()
-    expect(() => new WitnessMapRenderer(context as unknown as CanvasRenderingContext2D).paint(frame)).not.toThrow()
+    expect(() => new ObserverMapRenderer(context as unknown as CanvasRenderingContext2D).paint(frame)).not.toThrow()
     expect(context.images).toHaveLength(0)
     expect(coneOf(context)!.radius).toBeGreaterThan(200)
   })

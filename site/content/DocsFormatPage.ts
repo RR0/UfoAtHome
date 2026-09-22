@@ -100,7 +100,7 @@ if (excerpts.length > 0) {
       <tr><td><code>durationSeconds</code></td><td>An alternative to <code>endTime</code>, and it wins if both are given</td></tr>
       <tr><td><code>utcOffsetHours</code></td><td>The LEGAL time the observer's clock was on (+1 for France in 1965). Absent means it is approximated from the longitude, which cannot know legal time or a daylight-saving switch</td></tr>
       <tr><td><code>place</code></td><td><code>[{ lat, lng, name }]</code> — <code>name</code> is the fully qualified place name the coordinates were resolved from</td></tr>
-      <tr><td><code>witness</code></td><td><code>{ id, title, lastName, firstNames }</code>, all optional; omit entirely for an anonymous observer. <code>id</code> is a reference to the person (on RR0, their directory: <code>"ZamoraLonnie"</code>); the other fields describe them when nobody has given them one</td></tr>
+      <tr><td><code>observer</code></td><td><code>{ id, title, lastName, firstNames }</code>, all optional; omit entirely for an anonymous observer. <code>id</code> is a reference to the person (on RR0, their directory: <code>"ZamoraLonnie"</code>); the other fields describe them when nobody has given them one</td></tr>
       <tr><td><code>description</code></td><td>The account in prose — one string, or one per language (see below)</td></tr>
       <tr><td><code>tags</code></td><td>A list of strings, written in English: they are technical terms, and two recordings that share one have to match on it. Each reader is shown them in their own language where a translation is known</td></tr>
     </table>
@@ -119,8 +119,8 @@ if (excerpts.length > 0) {
   "title": "Chiles et Whitted",
   "time": "1948-07-24 02:45",
   "events": [
-    { "type": "event", "eventType": "sighting", "url": "witness-chiles.json" },
-    { "type": "event", "eventType": "sighting", "url": "witness-whitted.json" }
+    { "type": "event", "eventType": "sighting", "url": "observer-chiles.json" },
+    { "type": "event", "eventType": "sighting", "url": "observer-whitted.json" }
   ]
 }</code></pre>
     <div class="table-scroll">
@@ -143,8 +143,8 @@ if (excerpts.length > 0) {
       object's <code>title</code>, and a milestone's <code>label</code> and <code>note</code>.</p>
     <pre data-json=""><code>{
   "description": {
-    "fr": "Tout le témoignage de Lonnie Zamora, d'un seul tenant…",
-    "en": "Lonnie Zamora's whole testimony, of a piece…"
+    "fr": "Tout le compte rendu de Lonnie Zamora, d'un seul tenant…",
+    "en": "Lonnie Zamora's whole account, of a piece…"
   }
 }</code></pre>
     <p>Keys are language tags as a browser gives them (<code>fr</code>, <code>en</code>,
@@ -203,7 +203,7 @@ if (excerpts.length > 0) {
     <div class="table-scroll">
     <table>
       <tr><th>Field</th><th>Meaning</th></tr>
-      <tr><td><code>witnessTrack</code></td><td><code>{ keyframes: [{ t, pose }] }</code> — <code>pose</code> holds <code>lat</code>, <code>lng</code>, <code>elevationM</code> (above the local ground), <code>headingDeg</code>, <code>pitchDeg</code>, <code>rollDeg</code>, <code>fovDeg</code>, and for a camera <code>fNumber</code> and <code>focusDistanceM</code></td></tr>
+      <tr><td><code>observerTrack</code></td><td><code>{ keyframes: [{ t, pose }] }</code> — <code>pose</code> holds <code>lat</code>, <code>lng</code>, <code>elevationM</code> (above the local ground), <code>headingDeg</code>, <code>pitchDeg</code>, <code>rollDeg</code>, <code>fovDeg</code>, and for a camera <code>fNumber</code> and <code>focusDistanceM</code></td></tr>
       <tr><td><code>weatherTrack</code></td><td><code>{ keyframes: [{ t, weather }] }</code> — the sky's conditions along the recording: precipitation, wind, storm, and the clouds as layers with real heights, each able to hold individual clouds placed in metres. Every field of a <code>weather</code> is in the next section</td></tr>
       <tr><td><code>weatherSource</code></td><td><code>{ id, name, url }</code> of the record the weather was looked up from. Its presence means the recording is replayed exactly as authored and never looked up again. Absent means the observer's own account</td></tr>
       <tr><td><code>soundTrack</code></td><td><code>{ keyframes: [{ t, sound }] }</code> — <code>kind</code> (none/hum/whistle/rumble/crackle), <code>volume</code>, <code>pitchHz</code>, optional <code>src</code> of a real recording</td></tr>
@@ -218,7 +218,7 @@ if (excerpts.length > 0) {
       claim about it, and it is tested by standing it in the scene and looking at it from where
       the observer stood: it casts its shadow, the ground can hide it, and its outline is measured
       against what the observer said at every instant. An interpretation is shown alone, as the
-      world it claims; asked to compare (the ◌ button, or <code>compare-testimony</code> on
+      world it claims; asked to compare (the ◌ button, or <code>compare-account</code> on
       <code>&lt;rr0-sighting&gt;</code>), the player draws everything the observer saw beside it as
       dashed outlines and lists how far off the direction is and how many times wider and taller
       each body looks, in red when an observer could not have been that far off.</p>
@@ -356,11 +356,11 @@ if (excerpts.length > 0) {
     <div class="table-scroll">
     <table>
       <tr><th>File</th><th>What to look at in it</th></tr>
-      <tr><td><a href="/demo-data/witness-chiles.json"><code>witness-chiles.json</code></a></td><td>A real case: an observer, a case id shared with a second recording, ten keyframes, a looked-up <code>weatherTrack</code> with its <code>weatherSource</code></td></tr>
-      <tr><td><a href="/demo-data/sky-test-halos.json"><code>sky-test-halos.json</code></a></td><td>No phenomenon at all — a sky set up by a <code>weatherTrack</code> whose keyframes change the crystals' alignment, the cirrus cover and a cumulus deck, watched through a <code>witnessTrack</code> that pans across the display and then holds</td></tr>
+      <tr><td><a href="/demo-data/observer-chiles.json"><code>observer-chiles.json</code></a></td><td>A real case: an observer, a case id shared with a second recording, ten keyframes, a looked-up <code>weatherTrack</code> with its <code>weatherSource</code></td></tr>
+      <tr><td><a href="/demo-data/sky-test-halos.json"><code>sky-test-halos.json</code></a></td><td>No phenomenon at all — a sky set up by a <code>weatherTrack</code> whose keyframes change the crystals' alignment, the cirrus cover and a cumulus deck, watched through a <code>observerTrack</code> that pans across the display and then holds</td></tr>
       <tr><td><a href="/demo-data/sky-test-clouds.json"><code>sky-test-clouds.json</code></a></td><td>Three cloud layers with metre-based altitude, thickness, size, density and wind, evolving on the weather timeline — and in the first one an <code>instances</code> entry: one cloud of the field, placed and sized in metres, that grows and darkens over the two minutes</td></tr>
       <tr><td><a href="/demo-data/sky-test-aircraft.json"><code>sky-test-aircraft.json</code></a></td><td>An <code>instrument</code> and an <code>exposureSeconds</code>, and a <code>decor</code> aircraft with a <code>track</code> and seven <code>lights</code> at their real flash rates</td></tr>
-      <tr><td><a href="/demo-data/instrument-instamatic.json"><code>instrument-instamatic.json</code></a></td><td>The same sighting as <code>witness-socorro.json</code>, changed in one field. Diff the two</td></tr>
+      <tr><td><a href="/demo-data/instrument-instamatic.json"><code>instrument-instamatic.json</code></a></td><td>The same sighting as <code>observer-socorro.json</code>, changed in one field. Diff the two</td></tr>
     </table>
     </div>
 
@@ -411,7 +411,7 @@ if (excerpts.length > 0) {
       <tr><td><code>durationSeconds</code></td><td>Une alternative à <code>endTime</code>, et c'est elle qui l'emporte si les deux sont là</td></tr>
       <tr><td><code>utcOffsetHours</code></td><td>L'heure LÉGALE de la montre de l'observateur (+1 pour la France en 1965). Absent, elle est approchée depuis la longitude, qui ne peut connaître ni l'heure légale ni un changement d'heure</td></tr>
       <tr><td><code>place</code></td><td><code>[{ lat, lng, name }]</code> — <code>name</code> est le nom qualifié depuis lequel les coordonnées ont été résolues</td></tr>
-      <tr><td><code>witness</code></td><td><code>{ id, title, lastName, firstNames }</code>, tous facultatifs ; à omettre entièrement pour un observateur anonyme. <code>id</code> est une référence à la personne (sur RR0, son répertoire : <code>"ZamoraLonnie"</code>) ; les autres champs la décrivent quand personne ne lui en a encore donné</td></tr>
+      <tr><td><code>observer</code></td><td><code>{ id, title, lastName, firstNames }</code>, tous facultatifs ; à omettre entièrement pour un observateur anonyme. <code>id</code> est une référence à la personne (sur RR0, son répertoire : <code>"ZamoraLonnie"</code>) ; les autres champs la décrivent quand personne ne lui en a encore donné</td></tr>
       <tr><td><code>description</code></td><td>Le récit en prose — une chaîne, ou une par langue (voir plus bas)</td></tr>
       <tr><td><code>tags</code></td><td>Une liste de chaînes, écrites en anglais : ce sont des termes techniques, et deux enregistrements qui en partagent un doivent s'y égaler. Chaque lecteur les voit dans sa langue lorsqu'une traduction est connue</td></tr>
     </table>
@@ -430,8 +430,8 @@ if (excerpts.length > 0) {
   "title": "Chiles et Whitted",
   "time": "1948-07-24 02:45",
   "events": [
-    { "type": "event", "eventType": "sighting", "url": "witness-chiles.json" },
-    { "type": "event", "eventType": "sighting", "url": "witness-whitted.json" }
+    { "type": "event", "eventType": "sighting", "url": "observer-chiles.json" },
+    { "type": "event", "eventType": "sighting", "url": "observer-whitted.json" }
   ]
 }</code></pre>
     <div class="table-scroll">
@@ -455,8 +455,8 @@ if (excerpts.length > 0) {
       <code>note</code> d'un repère.</p>
     <pre data-json=""><code>{
   "description": {
-    "fr": "Tout le témoignage de Lonnie Zamora, d'un seul tenant…",
-    "en": "Lonnie Zamora's whole testimony, of a piece…"
+    "fr": "Tout le compte rendu de Lonnie Zamora, d'un seul tenant…",
+    "en": "Lonnie Zamora's whole account, of a piece…"
   }
 }</code></pre>
     <p>Les clés sont des étiquettes de langue telles qu'un navigateur les donne (<code>fr</code>,
@@ -515,7 +515,7 @@ if (excerpts.length > 0) {
     <div class="table-scroll">
     <table>
       <tr><th>Champ</th><th>Sens</th></tr>
-      <tr><td><code>witnessTrack</code></td><td><code>{ keyframes: [{ t, pose }] }</code> — <code>pose</code> porte <code>lat</code>, <code>lng</code>, <code>elevationM</code> (au-dessus du sol local), <code>headingDeg</code>, <code>pitchDeg</code>, <code>rollDeg</code>, <code>fovDeg</code>, et pour un appareil <code>fNumber</code> et <code>focusDistanceM</code></td></tr>
+      <tr><td><code>observerTrack</code></td><td><code>{ keyframes: [{ t, pose }] }</code> — <code>pose</code> porte <code>lat</code>, <code>lng</code>, <code>elevationM</code> (au-dessus du sol local), <code>headingDeg</code>, <code>pitchDeg</code>, <code>rollDeg</code>, <code>fovDeg</code>, et pour un appareil <code>fNumber</code> et <code>focusDistanceM</code></td></tr>
       <tr><td><code>weatherTrack</code></td><td><code>{ keyframes: [{ t, weather }] }</code> — l'état du ciel le long de l'enregistrement : précipitation, vent, orage, et les nuages en couches à hauteur réelle, chacune pouvant porter des nuages individuels placés en mètres. Chaque champ d'un <code>weather</code> est dans la section suivante</td></tr>
       <tr><td><code>weatherSource</code></td><td><code>{ id, name, url }</code> du relevé d'où vient la météo. Sa présence signifie que l'enregistrement est rejoué tel qu'il a été composé et n'est jamais reconsulté. Absent : le récit de l'observateur lui-même</td></tr>
       <tr><td><code>soundTrack</code></td><td><code>{ keyframes: [{ t, sound }] }</code> — <code>kind</code> (none/hum/whistle/rumble/crackle), <code>volume</code>, <code>pitchHz</code>, et un <code>src</code> facultatif vers un vrai enregistrement</td></tr>
@@ -531,7 +531,7 @@ if (excerpts.length > 0) {
       scène et en la regardant depuis l'endroit où se tenait l'observateur : elle projette son ombre,
       le sol peut la cacher, et son contour est confronté à chaque instant à ce que l'observateur a
       dit. Une interprétation s'affiche seule, comme le monde qu'elle affirme ; quand on demande
-      la comparaison (le bouton ◌, ou <code>compare-testimony</code> sur
+      la comparaison (le bouton ◌, ou <code>compare-account</code> sur
       <code>&lt;rr0-sighting&gt;</code>), le lecteur dessine à côté tout ce que l'observateur a vu, en
       contours pointillés, et indique l'écart de direction et combien de fois plus large et plus
       haut chaque corps paraît, en rouge quand un observateur n'aurait pas pu se tromper d'autant.</p>
@@ -671,11 +671,11 @@ if (excerpts.length > 0) {
     <div class="table-scroll">
     <table>
       <tr><th>Fichier</th><th>Ce qu'il faut y regarder</th></tr>
-      <tr><td><a href="/demo-data/witness-chiles.json"><code>witness-chiles.json</code></a></td><td>Un vrai dossier : un observateur, un identifiant de dossier partagé avec un second enregistrement, dix keyframes, un <code>weatherTrack</code> relevé avec son <code>weatherSource</code></td></tr>
-      <tr><td><a href="/demo-data/sky-test-halos.json"><code>sky-test-halos.json</code></a></td><td>Aucun phénomène — un ciel réglé par un <code>weatherTrack</code> dont les images clés font varier l'alignement des cristaux, la couverture de cirrus et une couche de cumulus, vu par un <code>witnessTrack</code> qui balaie le cortège puis s'arrête</td></tr>
+      <tr><td><a href="/demo-data/observer-chiles.json"><code>observer-chiles.json</code></a></td><td>Un vrai dossier : un observateur, un identifiant de dossier partagé avec un second enregistrement, dix keyframes, un <code>weatherTrack</code> relevé avec son <code>weatherSource</code></td></tr>
+      <tr><td><a href="/demo-data/sky-test-halos.json"><code>sky-test-halos.json</code></a></td><td>Aucun phénomène — un ciel réglé par un <code>weatherTrack</code> dont les images clés font varier l'alignement des cristaux, la couverture de cirrus et une couche de cumulus, vu par un <code>observerTrack</code> qui balaie le cortège puis s'arrête</td></tr>
       <tr><td><a href="/demo-data/sky-test-clouds.json"><code>sky-test-clouds.json</code></a></td><td>Trois couches nuageuses avec altitude, épaisseur, taille, densité et vent en mètres, évoluant sur la timeline météo — et dans la première une entrée <code>instances</code> : un nuage du champ, placé et dimensionné en mètres, qui grossit et s'assombrit sur les deux minutes</td></tr>
       <tr><td><a href="/demo-data/sky-test-aircraft.json"><code>sky-test-aircraft.json</code></a></td><td>Un <code>instrument</code> et un <code>exposureSeconds</code>, et un décor d'aéronef avec sa <code>track</code> et sept <code>lights</code> à leurs cadences réelles</td></tr>
-      <tr><td><a href="/demo-data/instrument-instamatic.json"><code>instrument-instamatic.json</code></a></td><td>La même observation que <code>witness-socorro.json</code>, à un champ près. Comparez les deux</td></tr>
+      <tr><td><a href="/demo-data/instrument-instamatic.json"><code>instrument-instamatic.json</code></a></td><td>La même observation que <code>observer-socorro.json</code>, à un champ près. Comparez les deux</td></tr>
     </table>
     </div>
 

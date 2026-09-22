@@ -12,7 +12,7 @@ const assess = (json: unknown): Promise<AssessmentCriterion[]> =>
 const of = (criteria: AssessmentCriterion[], id: string): AssessmentCriterion =>
   criteria.find(criterion => criterion.id === id)!
 
-/** Landévennec as the first real draft wrote it: a moment the witness gave, a place worked out, an
+/** Landévennec as the first real draft wrote it: a moment the observer gave, a place worked out, an
  * altitude nobody could know. */
 const landevennec = {
   version: 1,
@@ -36,7 +36,7 @@ const landevennec = {
       }]
     }]
   },
-  witnessTrack: { keyframes: [{ t: 0, pose: { lat: 48.288, lng: -4.29, elevationM: { value: 40, basis: "assumed" }, headingDeg: { value: 73, basis: "derived" }, pitchDeg: 3, fovDeg: 60 } }] },
+  observerTrack: { keyframes: [{ t: 0, pose: { lat: 48.288, lng: -4.29, elevationM: { value: 40, basis: "assumed" }, headingDeg: { value: 73, basis: "derived" }, pitchDeg: 3, fovDeg: 60 } }] },
   soundTrack: { keyframes: [{ t: 0, sound: { kind: "none", volume: 0 } }] }
 }
 
@@ -58,7 +58,7 @@ describe("CoverageAssessor", () => {
     expect(criteria.every(criterion => criterion.paths.length === 0)).toBe(true)
   })
 
-  it("reads a moment the witness gave as stated", async () => {
+  it("reads a moment the observer gave as stated", async () => {
     const criteria = await assess(landevennec)
 
     expect(of(criteria, "when").basis).toBe("stated")
@@ -97,7 +97,7 @@ describe("CoverageAssessor", () => {
   })
 
   it("counts silence as an answer about sound", async () => {
-    // A witness who says it was silent has said something; one who never mentions sound has not.
+    // A observer who says it was silent has said something; one who never mentions sound has not.
     const said = await assess(landevennec)
     expect(of(said, "sound").basis).toBe("stated")
 
@@ -125,7 +125,7 @@ describe("CoverageAssessor", () => {
     expect(of(criteria, "where").basis).toBeUndefined()
   })
 
-  it("scores the share of questions the witness themselves answered", async () => {
+  it("scores the share of questions the observer themselves answered", async () => {
     // A share of a FIXED denominator, which is what makes it comparable at all: counting a
     // recording's own claims moves with how finely its fields happen to be cut.
     const assessment = await ASSESSMENT_SOURCES[0].create()
@@ -143,7 +143,7 @@ describe("CoverageAssessor", () => {
     expect(assessment.score).toBe(0)
   })
 
-  it("sends a reader to the witness, since that is what it measures", () => {
-    expect(ASSESSMENT_SOURCES[0].create().about).toBe("witness")
+  it("sends a reader to the observer, since that is what it measures", () => {
+    expect(ASSESSMENT_SOURCES[0].create().about).toBe("observer")
   })
 })

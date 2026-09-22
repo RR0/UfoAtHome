@@ -3,7 +3,7 @@ import { Gait } from "../../src/engine/place/Gait.js"
 import { Sighting } from "../../src/engine/model/Sighting.js"
 import type { GaitOffset } from "../../src/engine/place/Gait.js"
 
-/** Masse's own walk at Valensole, as public/demo-data/witness-valensole.json records it: due
+/** Masse's own walk at Valensole, as public/demo-data/observer-valensole.json records it: due
  * south, 83.5 m in 55 s, so 1.52 m/s — an ordinary brisk walk. Then he stops. */
 const METRES_PER_DEG_LAT = 111320
 
@@ -11,11 +11,11 @@ function walking(metresPerSecond: number, seconds: number, thenStandingSeconds =
   const sighting = Sighting.create(undefined, [{ lat: 43.8378, lng: 5.993 }])
   sighting.instrumentId = instrumentId
   const pose = { elevationM: 0, pitchDeg: 0, fovDeg: 60 }
-  sighting.witnessTrack.addKeyframe(0, { ...pose, lat: 43.8378, lng: 5.993 })
+  sighting.observerTrack.addKeyframe(0, { ...pose, lat: 43.8378, lng: 5.993 })
   const southDeg = (metresPerSecond * seconds) / METRES_PER_DEG_LAT
-  sighting.witnessTrack.addKeyframe(seconds * 1000, { ...pose, lat: 43.8378 - southDeg, lng: 5.993 })
+  sighting.observerTrack.addKeyframe(seconds * 1000, { ...pose, lat: 43.8378 - southDeg, lng: 5.993 })
   if (thenStandingSeconds > 0) {
-    sighting.witnessTrack.addKeyframe((seconds + thenStandingSeconds) * 1000, {
+    sighting.observerTrack.addKeyframe((seconds + thenStandingSeconds) * 1000, {
       ...pose,
       lat: 43.8378 - southDeg,
       lng: 5.993
@@ -36,7 +36,7 @@ describe("Gait", () => {
     expect(Gait.of(Sighting.create())).toBeUndefined()
   })
 
-  it("is nothing for a witness who never left one spot", () => {
+  it("is nothing for a observer who never left one spot", () => {
     const sighting = walking(0, 60)
     expect(Gait.of(sighting)).toBeUndefined()
   })
@@ -67,7 +67,7 @@ describe("Gait", () => {
     expect(Math.max(...east) - Math.min(...east)).toBeLessThan(0.04)
   })
 
-  it("rises further the faster the witness walks", () => {
+  it("rises further the faster the observer walks", () => {
     const strolling = samples(Gait.of(walking(0.8, 55))!, 20_000, 30_000)
     const brisk = samples(Gait.of(walking(1.9, 55))!, 20_000, 30_000)
     expect(Math.max(...brisk.map(offset => offset.upM))).toBeGreaterThan(
@@ -82,7 +82,7 @@ describe("Gait", () => {
     expect(Math.max(...middle.map(offset => Math.abs(offset.eastM)))).toBeGreaterThan(0.015)
   })
 
-  it("says nothing about a witness moving faster than anyone walks", () => {
+  it("says nothing about a observer moving faster than anyone walks", () => {
     // A run (Zamora's own, at Socorro) and a vehicle are both gaits this does not claim to know.
     expect(Gait.of(walking(4, 20))).toBeUndefined()
     expect(Gait.of(walking(20, 20))).toBeUndefined()
@@ -99,15 +99,15 @@ describe("Gait", () => {
     expect(Math.abs(gait.offsetAt(54_999).upM - gait.offsetAt(55_001).upM)).toBeLessThan(1e-4)
   })
 
-  it("keeps counting steps across a keyframe the witness walked straight through", () => {
+  it("keeps counting steps across a keyframe the observer walked straight through", () => {
     // Two stretches at one speed: the second must pick the cycle up where the first left it, not
-    // restart it — a witness does not break step because somebody wrote a keyframe down.
+    // restart it — a observer does not break step because somebody wrote a keyframe down.
     const sighting = Sighting.create(undefined, [{ lat: 43.8378, lng: 5.993 }])
     const pose = { elevationM: 0, pitchDeg: 0, fovDeg: 60 }
     const perSecond = 1.52 / METRES_PER_DEG_LAT
-    sighting.witnessTrack.addKeyframe(0, { ...pose, lat: 43.8378, lng: 5.993 })
-    sighting.witnessTrack.addKeyframe(30_000, { ...pose, lat: 43.8378 - perSecond * 30, lng: 5.993 })
-    sighting.witnessTrack.addKeyframe(60_000, { ...pose, lat: 43.8378 - perSecond * 60, lng: 5.993 })
+    sighting.observerTrack.addKeyframe(0, { ...pose, lat: 43.8378, lng: 5.993 })
+    sighting.observerTrack.addKeyframe(30_000, { ...pose, lat: 43.8378 - perSecond * 30, lng: 5.993 })
+    sighting.observerTrack.addKeyframe(60_000, { ...pose, lat: 43.8378 - perSecond * 60, lng: 5.993 })
     const gait = Gait.of(sighting)!
     // Crossing that keyframe must be no more of an event than any other two milliseconds of the
     // walk — which is a stronger statement than any threshold picked by hand, and the one that
@@ -125,7 +125,7 @@ describe("Gait", () => {
 
   it("leaves an eye almost, but not quite, still", () => {
     // The head holds itself against the body's oscillation and the vestibulo-ocular reflex takes
-    // most of what is left, so what a walking witness sees tips by a fraction of a degree — not by
+    // most of what is left, so what a walking observer sees tips by a fraction of a degree — not by
     // nothing, and not by the couple of degrees their head really did turn through.
     const rolls = samples(Gait.of(walking(1.52, 55))!, 20_000, 30_000).map(offset => offset.rollDeg)
     const peakToPeak = Math.max(...rolls) - Math.min(...rolls)

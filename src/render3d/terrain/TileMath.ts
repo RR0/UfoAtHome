@@ -81,7 +81,7 @@ export function lngLatToTileFraction(lngDeg: number, latDeg: number, z: number):
 /**
  * Where (lngDeg, latDeg) falls inside `bounds`, as fractions from its west and north edges — 0 to 1
  * within, beyond that outside. What turns a raster into a map: the same call places a texture's UVs
- * over real terrain and a marker at the witness's own coordinates.
+ * over real terrain and a marker at the observer's own coordinates.
  *
  * MERCATOR down the north/south axis, not linear in latitude, because a raster stitched from Z/X/Y
  * tiles is uniform in mercator y and latitude is not. The difference is under a metre across a

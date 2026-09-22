@@ -38,11 +38,11 @@ describe("BodyConfrontation", () => {
     expect(broadside.angular.widthDeg).toBeGreaterThan(endOn.angular.widthDeg * 5)
   })
 
-  it("agrees with a testimony the body reproduces, and says where one it does not reproduce departs", () => {
+  it("agrees with a account the body reproduces, and says where one it does not reproduce departs", () => {
     const stated = { aim: { azimuthDeg: 0, altitudeDeg: 0 }, angular: { widthDeg: 5.7, heightDeg: 5.7 } }
     const agrees = BodyConfrontation.compare("ufo", "craft", stated, BodyConfrontation.projectionOf(sphereAt(100, 10), eye)!)
     expect(agrees.disagreements).toEqual([])
-    // The same claim, ten times further: the witness said it filled six degrees, and this would be
+    // The same claim, ten times further: the observer said it filled six degrees, and this would be
     // a spark.
     const far = BodyConfrontation.compare("ufo", "craft", stated, BodyConfrontation.projectionOf(sphereAt(1000, 10), eye)!)
     expect(far.disagreements).toEqual(["width", "height"])
@@ -56,7 +56,7 @@ describe("BodyConfrontation", () => {
     expect(reading.disagreements).toEqual(["direction"])
   })
 
-  it("reads the testimony's own shape at the instant, for every phenomenon a body explains", () => {
+  it("reads the account's own shape at the instant, for every phenomenon a body explains", () => {
     const timeline = new Timeline()
     timeline.addKeyframe(0, [{ sourceId: "ufo", shape: { ...createOval({ x: 0, y: 0, width: 10, height: 10 }), aim: { azimuthDeg: 0, altitudeDeg: 0 }, angular: { widthDeg: 5.7, heightDeg: 5.7 } } }])
     const readings = new BodyConfrontation(timeline).at(0, [sphereAt(100, 10)], eye)
@@ -64,7 +64,7 @@ describe("BodyConfrontation", () => {
     expect(readings[0]).toMatchObject({ sourceId: "ufo", bodyId: "craft", disagreements: [] })
   })
 
-  it("measures nothing against a phenomenon the witness did not see at that instant", () => {
+  it("measures nothing against a phenomenon the observer did not see at that instant", () => {
     const timeline = new Timeline()
     timeline.addKeyframe(0, [{ sourceId: "ufo", shape: { ...createOval({ x: 0, y: 0, width: 10, height: 10 }), transparency: 1, aim: { azimuthDeg: 90, altitudeDeg: 0 } } }])
     expect(new BodyConfrontation(timeline).at(0, [sphereAt(100, 10)], eye)).toEqual([])

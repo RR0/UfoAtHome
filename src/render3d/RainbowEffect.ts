@@ -31,9 +31,9 @@ import { RainbowSky } from "../engine/atmosphere/RainbowSky.js"
  * knows everything.
  *
  * Drawn on a sphere for the same reason the ice display is: a bow is an angle, not a place, so a
- * shader working from directions is right under every projection this scene has, the witness's own
+ * shader working from directions is right under every projection this scene has, the observer's own
  * eye included. The part of the circle below the horizon is drawn and then hidden by the ground that
- * stands in front of it — which is why a witness raised above the rain, in an aircraft or on a cliff
+ * stands in front of it — which is why a observer raised above the rain, in an aircraft or on a cliff
  * over a shower, sees more of it, exactly as they do in life.
  */
 export class RainbowEffect {
@@ -42,7 +42,7 @@ export class RainbowEffect {
   private static readonly RADIUS = 880
 
   /**
-   * Drawn AFTER the cloud decks the witness stands under, and BEFORE the falling rain itself.
+   * Drawn AFTER the cloud decks the observer stands under, and BEFORE the falling rain itself.
    *
    * A bow is sunlit rain, and rain falls from a cloud, so along any line of sight the rain comes
    * first and the deck that shed it stands behind: the deck is the bow's backdrop, not its veil,
@@ -51,10 +51,10 @@ export class RainbowEffect {
    * the strength this is given (see Rainbows.strength). Drawing the bow under the deck had it
    * dimmed twice, and the second time by the wrong clouds.
    *
-   * The exception is a deck whose base is BELOW the eye — a witness in an aircraft or on a cliff
+   * The exception is a deck whose base is BELOW the eye — a observer in an aircraft or on a cliff
    * above the cloud. That deck stands between the eye and any rain under it, and it hides the bow.
    * The cloud systems read this value to place such decks after it. Precipitation (6) stays above
-   * everything, being the nearest thing to the witness's face.
+   * everything, being the nearest thing to the observer's face.
    */
   static readonly RENDER_ORDER = 5.5
 
@@ -89,7 +89,7 @@ export class RainbowEffect {
    * A moonbow is the same spectrum as a rainbow — the drops do not know what is lighting them — and
    * yet people who have watched one describe a WHITE arc. That is not the sky, it is the eye: at a
    * few thousandths of the light of a daylit bow, colour vision has nothing to work with and the
-   * rods answer alone. Since this project draws what reached the witness rather than what was in the
+   * rods answer alone. Since this project draws what reached the observer rather than what was in the
    * air, the colour is taken out here rather than left in for a viewer to enjoy.
    */
   private static readonly MOON_SATURATION = 0.15

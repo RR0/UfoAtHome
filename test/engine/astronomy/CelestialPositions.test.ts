@@ -109,7 +109,7 @@ describe("sightingTimeToDate", () => {
     expect(date?.getUTCDate()).toBe(1)
   })
 
-  it("still renders an hour-only witness memory (no date at all) via a fixed reference date, not undefined", () => {
+  it("still renders an hour-only observer memory (no date at all) via a fixed reference date, not undefined", () => {
     const date = sightingTimeToDate({ hour: 2 }, 0)
     expect(date).toBeDefined()
     expect(date?.getUTCHours()).toBe(2)
@@ -174,7 +174,7 @@ describe("computeMoonPhase", () => {
 })
 
 /**
- * A witness's clock shows LEGAL time, which no longitude can derive: France was on UTC+1 in July
+ * A observer's clock shows LEGAL time, which no longitude can derive: France was on UTC+1 in July
  * 1965 (summer time only came back in 1976) while 6 degrees east approximates to UTC+0, and the
  * United States' own summer-time switch fell two days after Socorro. An hour of error puts the
  * Sun in the wrong place, which for a dawn or dusk sighting is the whole scene.

@@ -10,7 +10,7 @@ export interface PicturePoint {
   v: number
 }
 
-/** A direction from the witness — the scene's own way of naming a point of the view. */
+/** A direction from the observer — the scene's own way of naming a point of the view. */
 export interface Aim {
   azimuthDeg: number
   altitudeDeg: number
@@ -39,9 +39,9 @@ export interface RegistrationFit {
  * landmarks enough to say anything about it (three, since a field changes how far apart landmarks
  * stand and two can be made to fit at any field by turning).
  *
- * Why this exists rather than a heading typed in: a heading typed in is the witness's word, and a
+ * Why this exists rather than a heading typed in: a heading typed in is the observer's word, and a
  * heading read off a picture that fits the horizon and two church towers is a measurement. The
- * same rotation, adopted as the witness's own pose, is what lets a recording say where they looked
+ * same rotation, adopted as the observer's own pose, is what lets a recording say where they looked
  * on better grounds than their memory of it (see SightingEditorElement.adoptReferencePose).
  *
  * Solved as three's own rotation problem is: a first guess from two landmarks (the classic triad —
@@ -67,7 +67,7 @@ export class PictureRegistration {
     return { u: (x + 1) / 2, v: (1 - y) / 2 }
   }
 
-  /** A direction from the witness as a world vector: east +x, up +y, north -z — the decor's own
+  /** A direction from the observer as a world vector: east +x, up +y, north -z — the decor's own
    * convention (see PhenomenonSystem.directionOf, which this repeats so as not to depend on the
    * renderer from the engine). */
   static worldDirection(aim: Aim, into = new Vector3()): Vector3 {

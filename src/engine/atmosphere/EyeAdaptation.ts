@@ -8,7 +8,7 @@ export type DisplayRgb = [number, number, number]
  *
  * A physical sky spans ten million to one between noon and midnight, and a screen spans a few
  * hundred. Neither end can simply be scaled onto the other: shown linearly, the night would be black
- * and a Moon-lit landscape invisible, which is not what a witness standing in it saw. An eye ADAPTS,
+ * and a Moon-lit landscape invisible, which is not what a observer standing in it saw. An eye ADAPTS,
  * and it does so only partly — a night sky looks darker than a day sky to a fully dark-adapted
  * observer, just nowhere near ten million times darker. Three things, then:
  *
@@ -25,7 +25,7 @@ export type DisplayRgb = [number, number, number]
  *   (2005), "Perceptual effects in real-time tone mapping" — and the colour toward a night blue.
  *
  * A camera does none of this: it has no rods and no adaptation but the exposure it was given. This is
- * the eye's model, used for a witness's view.
+ * the eye's model, used for a observer's view.
  */
 export class EyeAdaptation {
   /** The compressive exponent of the response, in the range measured for primate cones. */

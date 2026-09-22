@@ -10,7 +10,7 @@ export interface BodyEditorMessages {
   addBody: string
   /** {shape} is the selected shape's name. */
   addBodyHint: string
-  /** A body added with no shape to stand for: where the witness is looking. */
+  /** A body added with no shape to stand for: where the observer is looking. */
   addBodyHintView: string
   lookAtBody: string
   id: string
@@ -43,7 +43,7 @@ export interface BodyEditorMessages {
   keyframeHere: string
   keyframeAdded: string
   placement: string
-  fromWitness: string
+  fromObserver: string
   inWorld: string
   azimuth: string
   elevation: string
@@ -107,7 +107,7 @@ export class BodyEditorTexts {
     keyframeHere: "A keyframe stands here: editing changes it",
     keyframeAdded: "Editing adds a keyframe here",
     placement: "Position",
-    fromWitness: "From the observer",
+    fromObserver: "From the observer",
     inWorld: "In the world",
     azimuth: "Azimuth",
     elevation: "Elevation",
@@ -136,13 +136,13 @@ export class BodyEditorTexts {
   }
 
   static readonly fr: BodyEditorMessages = {
-    intro: "Ce que le témoin a dit que le phénomène était, en 3D : chaque corps représente une ou plusieurs des formes dessinées. Son mouvement vient du fichier.",
+    intro: "Ce que le observateur a dit que le phénomène était, en 3D : chaque corps représente une ou plusieurs des formes dessinées. Son mouvement vient du fichier.",
     interpretationTitle: "Interprétation",
     body: "Corps",
-    none: "Aucun corps pour l'instant : le témoin n'a rien dit de ce que c'était, ou c'est encore à saisir",
+    none: "Aucun corps pour l'instant : le observateur n'a rien dit de ce que c'était, ou c'est encore à saisir",
     deleteBody: "Supprimer le corps",
     addBody: "Ajouter un corps",
-    addBodyHintView: "Là où le témoin regarde à cet instant",
+    addBodyHintView: "Là où le observateur regarde à cet instant",
     lookAtBody: "Le regarder",
     addBodyHint: "Représentant la forme « {shape} », là où la scène la dessine à cet instant",
     id: "Identifiant",
@@ -161,7 +161,7 @@ export class BodyEditorTexts {
     modelSource: "Provenance",
     modelIncomplete: "Pas dessiné tant que le nom et la licence du modèle manquent",
     modelFromCatalogue: "Du catalogue, par lequel l'enregistrement le nomme. Modifiez un champ et il devient l'adresse propre à cet enregistrement.",
-    outlineNode: "Partie dessinée par le témoin",
+    outlineNode: "Partie dessinée par le observateur",
     outlineNodeHint: "Nœud du modèle, par ex. hull",
     track: "Mouvement",
     trackEmpty: "Aucune image clé",
@@ -171,7 +171,7 @@ export class BodyEditorTexts {
     keyframeHere: "Une image clé est ici : l'éditer la modifie",
     keyframeAdded: "Éditer ajoute une image clé ici",
     placement: "Position",
-    fromWitness: "Depuis le témoin",
+    fromObserver: "Depuis le observateur",
     inWorld: "Dans le monde",
     azimuth: "Azimut",
     elevation: "Hauteur",

@@ -12,7 +12,7 @@
  * serve it from somewhere that will last.
  *
  * WHAT IS ASKED FOR. Each recording's own place, over the square its scene builds a terrain patch
- * on: GROUND_RADIUS around the witness, which is 900 m at eye level and grows with the observer's
+ * on: GROUND_RADIUS around the observer, which is 900 m at eye level and grows with the observer's
  * altitude the way SceneRenderer.groundRadiusFor does. One query per place, in sequence, with a
  * wait between them — the whole point is to be a considerate client once rather than a thoughtless
  * one forever.
@@ -48,7 +48,7 @@ const MARGIN = 1.05
 /** Between two queries. Overpass asks for a few seconds between requests from one address, and
  * this script is the one place that can afford to give it more than that. */
 const COURTESY_MS = 5000
-/** Past this, a patch gets no roads at all — see SceneRenderer.ROADS_MAX_RADIUS_M. A witness in an
+/** Past this, a patch gets no roads at all — see SceneRenderer.ROADS_MAX_RADIUS_M. A observer in an
  * aircraft sees thirty kilometres of ground, on which individual carriageways are hairlines nobody
  * reported, and asking Overpass for a county's every street to draw them would be a rudeness in
  * exchange for a mess. */
@@ -122,7 +122,7 @@ class RoadArchiveBuilder {
   /**
    * The square each demo recording's scene will ever build a patch on.
    *
-   * Not simply the recording's stated place: a witness MOVES, and the patch is rebuilt every time
+   * Not simply the recording's stated place: a observer MOVES, and the patch is rebuilt every time
    * they have walked a hundred and fifty metres from the last one's centre. Zamora covers eleven
    * hundred, so an archive frozen around his starting point would stop answering halfway through
    * his own drive. Every pose in the track is taken in, and the radius is added to the box they
@@ -136,16 +136,16 @@ class RoadArchiveBuilder {
       const recording = JSON.parse(await readFile(join(dir, name), "utf8")) as {
         id?: string
         place?: { lat?: number; lng?: number }[]
-        witnessTrack?: { keyframes?: { pose?: { lat?: number; lng?: number; elevationM?: number } }[] }
+        observerTrack?: { keyframes?: { pose?: { lat?: number; lng?: number; elevationM?: number } }[] }
       }
-      const poses = (recording.witnessTrack?.keyframes ?? [])
+      const poses = (recording.observerTrack?.keyframes ?? [])
         .map(keyframe => keyframe.pose)
         .filter((pose): pose is { lat: number; lng: number; elevationM?: number } =>
           typeof pose?.lat === "number" && typeof pose?.lng === "number")
       const stated = recording.place?.[0]
       if (typeof stated?.lat === "number" && typeof stated?.lng === "number") poses.push({ lat: stated.lat, lng: stated.lng })
       if (poses.length === 0) continue
-      // groundRadiusFor's own rule, at the highest the witness ever gets: the distance to the
+      // groundRadiusFor's own rule, at the highest the observer ever gets: the distance to the
       // horizon from up there, held between the eye-level square and what a clear day shows.
       const elevationM = Math.max(0, ...poses.map(pose => pose.elevationM ?? 0))
       const horizonM = Math.sqrt(2 * EARTH_RADIUS_M * elevationM)

@@ -12,8 +12,8 @@ export interface Weather {
   cloudDarkness: number
   /**
    * Height of the cloud layer's BASE above the ground, in meters — 600 to 2000 m covers most real
-   * low cloud. It decides which side of the deck the witness is on: below it (the usual case) they
-   * see it overhead, compressed toward the horizon; above it (a witness in an aircraft, on a
+   * low cloud. It decides which side of the deck the observer is on: below it (the usual case) they
+   * see it overhead, compressed toward the horizon; above it (a observer in an aircraft, on a
    * mountain) they look down on its top. Absent means unstated, and DEFAULT_CLOUD_BASE_M stands
    * in — a real observation always had a real cloud base, so there is no meaningful "no altitude"
    * rendering, only an unrecorded one.
@@ -31,7 +31,7 @@ export interface Weather {
   highCloudCover?: number
   /**
    * How much of the sky the LOW and MIDDLE decks covered, 0 to 1 — the cloud that stands between a
-   * witness and anything higher up.
+   * observer and anything higher up.
    *
    * Carried separately rather than derived from the total, because the decks OVERLAP and the
    * subtraction is not sound: a sky reported as fully covered with sixty per cent cirrus does not
@@ -108,12 +108,12 @@ export const DEFAULT_WEATHER: Weather = {
 }
 
 /**
- * Where a recording's weather values came from, when they weren't stated by the witness but
+ * Where a recording's weather values came from, when they weren't stated by the observer but
  * looked up from a real meteorological record for the observation's own date/time and place (see
  * engine/weather/WeatherProvider.ts). Present on a Sighting means every weatherTrack keyframe was
  * produced by that lookup — the editor shows them read-only on that basis, since a reanalysis
  * value is a measurement to report, not a dial to tune. Absent means the opposite and the stronger
- * claim: the conditions are the WITNESS's, declared, and nothing may overwrite them.
+ * claim: the conditions are the OBSERVER's, declared, and nothing may overwrite them.
  */
 export interface WeatherSource {
   /** Stable dataset id, e.g. "era5" — what a later reader identifies the record by. */

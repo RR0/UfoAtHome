@@ -3,7 +3,7 @@ import { ExposureSampling } from "../../src/engine/model/ExposureSampling.js"
 import type { DecorObject } from "../../src/engine/model/Decor.js"
 import { LIGHT_RIGS } from "../../src/engine/model/LightRig.js"
 
-/** An airliner crossing at 3 km, from 3 km west of the witness to 3 km east, over `seconds`. */
+/** An airliner crossing at 3 km, from 3 km west of the observer to 3 km east, over `seconds`. */
 function crossing(seconds: number, lights = LIGHT_RIGS.find(rig => rig.id === "airliner")!.create()): DecorObject {
   return {
     id: "plane",

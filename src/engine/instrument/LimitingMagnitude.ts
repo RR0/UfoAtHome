@@ -8,7 +8,7 @@ import { SkyDrift } from "../astronomy/SkyDrift.js"
  *
  * The sky field was drawn to magnitude 6.5 whatever the recording said it was made through. That
  * number is not a property of the sky: it is what a dark-adapted human eye reaches, and the whole
- * point of stating an instrument is that a witness who photographed did not see what a witness who
+ * point of stating an instrument is that a observer who photographed did not see what a observer who
  * looked saw. A twenty-second pose at f/2 records stars three magnitudes fainter than anybody
  * standing beside the tripod could see — that is most of what makes a photograph worth arguing
  * about — and an Instamatic at a ninetieth of a second records two magnitudes LESS than the eye,
@@ -48,7 +48,7 @@ import { SkyDrift } from "../astronomy/SkyDrift.js"
  *
  * The reference is the eye, deliberately, so that the existing twilight curve keeps answering the
  * question it was calibrated for (see visibleMagnitudeLimit) and this only ever says how far the
- * device stands from a witness's own eyes.
+ * device stands from a observer's own eyes.
  */
 export class LimitingMagnitude {
 
@@ -158,8 +158,8 @@ export class LimitingMagnitude {
    * renderer, from the other side: a first-magnitude trail peaked at 181 in a snapshot, 52 at ten
    * minutes and 35 at an hour, against a sky of 30.5.
    *
-   * A witness tracking the sky would break this, and no recording here can say so yet — a driven
-   * mount is not something an eyewitness account has ever mentioned.
+   * A observer tracking the sky would break this, and no recording here can say so yet — a driven
+   * mount is not something an eyeobserver account has ever mentioned.
    */
   static trailLimitedSeconds(resolutionArcsec: number): number {
     return resolutionArcsec / LimitingMagnitude.skyDriftArcsecPerSecond
@@ -174,7 +174,7 @@ export class LimitingMagnitude {
    * one statement about the device. Zero for an eye, by construction.
    *
    * What it gives, and none of it was dialled: an Instamatic at f/11 and a ninetieth, −2.3 (a
-   * snapshot camera records fewer stars than the witness holding it saw); the same 35 mm SLR, −2.2
+   * snapshot camera records fewer stars than the observer holding it saw); the same 35 mm SLR, −2.2
    * at a two-hundred-and-fiftieth and f/8, +3.2 at f/2 for twenty seconds on a tripod — which puts
    * it at magnitude 9.7, where a fixed-camera shot of that exposure really does land; a phone in
    * daylight −2.1, and the same phone at ten seconds +1.2.

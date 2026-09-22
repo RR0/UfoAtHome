@@ -11,7 +11,7 @@ import { AtmosphereProfile } from "../engine/atmosphere/AtmosphereProfile.js"
  * Replaces, rather than adds a pass, because every material that stands for something real
  * already takes the fog (the ground, the relief, the decor, the roads, the bodies of an
  * interpretation, whatever glTF they arrive as), and everything that must not (the sky, which is
- * that same air seen whole; the stars; the testimony's own phenomena, which are what the witness
+ * that same air seen whole; the stars; the account's own phenomena, which are what the observer
  * SAW and already hold whatever haze was in the way) already says `fog: false`. So one change
  * reaches all of them, and a model loaded tomorrow is hazed without anyone remembering to.
  *
@@ -55,7 +55,7 @@ export class AerialFog extends Fog {
    * a line. It used to fade into one horizon colour, the sky's average all around; the sky under the
    * horizon is not one colour (at dawn the Sun's side is far brighter than the other), so the rim
    * stood out as a light or dark line wherever the relief let it through, and blinked with each of
-   * a walking witness's steps as the relief's own edge rose and fell over it (Valensole). What is
+   * a walking observer's steps as the relief's own edge rose and fell over it (Valensole). What is
    * behind the rim is the sky itself, so fading to transparent meets it exactly, whatever the
    * direction and the hour. The only surface that needs it: the relief fades out on its own (see
    * TerrainMeshBuilder), and nothing else ends at the edge of the world.

@@ -5,7 +5,7 @@
 Start `npm run dev`. With Playwright available, run:
 
 ```sh
-node scripts/perf/profile-scene.mjs witness-valensole /tmp/valensole
+node scripts/perf/profile-scene.mjs observer-valensole /tmp/valensole
 ```
 
 `PLAYWRIGHT_MODULE` can point to an existing Playwright installation and `CHROME_PATH`

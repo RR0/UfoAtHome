@@ -33,7 +33,7 @@ import { KeplerOrbit } from "../src/engine/astronomy/Orbit.js"
 import type { OrbitalElements, Vector3 } from "../src/engine/astronomy/Orbit.js"
 
 /**
- * What a witness could have seen, and when somebody wrote it down.
+ * What a observer could have seen, and when somebody wrote it down.
  *
  * `query` is what Horizons is asked for, and it is not always the plain designation: a comet that
  * split has one record per fragment (C/1965 S1-A and -B for Ikeya-Seki), and the API refuses an
@@ -85,7 +85,7 @@ interface ApparitionInput {
  * no warning could have looked up and seen them.
  *
  * The list is deliberately not "every comet": a magnitude-8 comet is a fact about a telescope, not
- * about a witness. It starts at Halley 1910 because that is about as far back as this project ever
+ * about a observer. It starts at Halley 1910 because that is about as far back as this project ever
  * reconstructs a report, and every entry is one apparition — 1P/Halley appears twice, with the
  * orbit it was actually on each time.
  */

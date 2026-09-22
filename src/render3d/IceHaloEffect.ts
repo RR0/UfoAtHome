@@ -36,7 +36,7 @@ import { CIRRUS_COVER_GLSL, CLOUD_NOISE_GLSL, ICE_HALO_LIGHT_GLSL } from "./Clou
  * Drawn on a SPHERE rather than as a screen-space overlay, which is the whole reason this stays
  * simple. Every feature of a display is an angle from the source, not a distance in pixels, so a
  * shader working from the direction of each fragment is right under every projection this scene
- * has, the witness's own equidistant eye included, with no reconstruction of view rays and no
+ * has, the observer's own equidistant eye included, with no reconstruction of view rays and no
  * special case.
  */
 export class IceHaloEffect {

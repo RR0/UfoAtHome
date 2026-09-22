@@ -21,7 +21,7 @@
  * a thin water cloud, all of which are interference, and it makes the bow's own bright edge
  * infinitely sharp instead of about a degree wide. What it does get right is where the bows are,
  * which way their colours run, how much brighter the first is than the second, and that the sky
- * between them is dark — and those are the things a witness describes.
+ * between them is dark — and those are the things a observer describes.
  */
 
 import { Fresnel } from "./Fresnel.js"

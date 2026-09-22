@@ -122,7 +122,7 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
 beforeAll(() => {
   vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockImplementation(function (this: HTMLCanvasElement) {
     // mockImplementation, not mockReturnValue: a renderer that sizes itself from its own canvas
-    // (see WitnessMapRenderer) reads ctx.canvas, and one shared object makes every canvas claim to
+    // (see ObserverMapRenderer) reads ctx.canvas, and one shared object makes every canvas claim to
     // be the same one.
     return {
       canvas: this,
@@ -338,7 +338,7 @@ describe("SightingEditorElement observer/time fields", () => {
     input.dispatchEvent(new Event("input"))
   }
 
-  it("writes lat/lng/heading into both place and a t=0 witnessTrack keyframe", () => {
+  it("writes lat/lng/heading into both place and a t=0 observerTrack keyframe", () => {
     const element = mount()
     const shadow = element.shadowRoot!
     setInput(shadow, "lat", "43.837")
@@ -346,7 +346,7 @@ describe("SightingEditorElement observer/time fields", () => {
     setInput(shadow, "heading", "270")
 
     expect(element.sightingData.place).toEqual([{ lat: 43.837, lng: 5.993 }])
-    expect(element.sightingData.witnessTrack?.keyframes).toEqual([
+    expect(element.sightingData.observerTrack?.keyframes).toEqual([
       { t: 0, pose: { lat: 43.837, lng: 5.993, elevationM: 0, headingDeg: 270, pitchDeg: 0, fovDeg: 60 } }
     ])
   })
@@ -357,10 +357,10 @@ describe("SightingEditorElement observer/time fields", () => {
     setInput(shadow, "lat", "43.837")
     setInput(shadow, "lng", "5.993")
 
-    expect(element.sightingData.witnessTrack?.keyframes[0].pose.headingDeg).toBeUndefined()
+    expect(element.sightingData.observerTrack?.keyframes[0].pose.headingDeg).toBeUndefined()
   })
 
-  it("clearing every field removes both place and the witnessTrack keyframe", () => {
+  it("clearing every field removes both place and the observerTrack keyframe", () => {
     const element = mount()
     const shadow = element.shadowRoot!
     setInput(shadow, "lat", "43.837")
@@ -369,10 +369,10 @@ describe("SightingEditorElement observer/time fields", () => {
     setInput(shadow, "lng", "")
 
     expect(element.sightingData.place).toBeUndefined()
-    expect(element.sightingData.witnessTrack?.keyframes).toEqual([])
+    expect(element.sightingData.observerTrack?.keyframes).toEqual([])
   })
 
-  it("clearing only lat drops place (needs both) but keeps a partial witnessTrack pose (lng alone is still meaningful)", () => {
+  it("clearing only lat drops place (needs both) but keeps a partial observerTrack pose (lng alone is still meaningful)", () => {
     const element = mount()
     const shadow = element.shadowRoot!
     setInput(shadow, "lat", "43.837")
@@ -380,23 +380,23 @@ describe("SightingEditorElement observer/time fields", () => {
     setInput(shadow, "lat", "")
 
     expect(element.sightingData.place).toBeUndefined()
-    expect(element.sightingData.witnessTrack?.keyframes).toEqual([
+    expect(element.sightingData.observerTrack?.keyframes).toEqual([
       { t: 0, pose: { lat: undefined, lng: 5.993, elevationM: 0, headingDeg: undefined, pitchDeg: 0, fovDeg: 60 } }
     ])
   })
 
-  it("setting only heading (no lat/lng at all) still writes an witnessTrack keyframe, not silently discarded", () => {
+  it("setting only heading (no lat/lng at all) still writes an observerTrack keyframe, not silently discarded", () => {
     const element = mount()
     const shadow = element.shadowRoot!
     setInput(shadow, "heading", "270")
 
     expect(element.sightingData.place).toBeUndefined()
-    expect(element.sightingData.witnessTrack?.keyframes).toEqual([
+    expect(element.sightingData.observerTrack?.keyframes).toEqual([
       { t: 0, pose: { lat: undefined, lng: undefined, elevationM: 0, headingDeg: 270, pitchDeg: 0, fovDeg: 60 } }
     ])
   })
 
-  it("keeps a ten-second exposure stated on its own, with nothing else about the witness set — it used to be discarded the instant it was typed, the field snapping back to the camera's 1/250", () => {
+  it("keeps a ten-second exposure stated on its own, with nothing else about the observer set — it used to be discarded the instant it was typed, the field snapping back to the camera's 1/250", () => {
     const element = mount()
     const shadow = element.shadowRoot!
     const instrument = shadow.getElementById("instrument") as HTMLSelectElement
@@ -417,7 +417,7 @@ describe("SightingEditorElement observer/time fields", () => {
     setInput(shadow, "exposureSeconds", "10")
     setInput(shadow, "exposureSeconds", "1/250")
 
-    expect(element.sightingData.witnessTrack?.keyframes).toEqual([])
+    expect(element.sightingData.observerTrack?.keyframes).toEqual([])
   })
 
   it("holds an exposure to what the device could actually do, and shows what it held", () => {
@@ -429,7 +429,7 @@ describe("SightingEditorElement observer/time fields", () => {
     const exposure = shadow.getElementById("exposureSeconds") as HTMLInputElement
     setInput(shadow, "exposureSeconds", "600")
 
-    // A phone's night mode stops at ten seconds; a ten-minute pose on one is not a testimony.
+    // A phone's night mode stops at ten seconds; a ten-minute pose on one is not a account.
     expect(element.sightingData.exposureSeconds).toBe(10)
     expect(exposure.value).toBe("10")
 
@@ -570,7 +570,7 @@ describe("SightingEditorElement observer/time fields", () => {
       version: 1,
       time: { year: 1948, month: 7, day: 24, hour: 2, minute: 45 },
       place: [{ lat: 32.3792, lng: -86.3077 }],
-      witnessTrack: { keyframes: [{ t: 0, pose: { lat: 32.3792, lng: -86.3077, elevationM: 0, headingDeg: 45, pitchDeg: 0, fovDeg: 60 } }] },
+      observerTrack: { keyframes: [{ t: 0, pose: { lat: 32.3792, lng: -86.3077, elevationM: 0, headingDeg: 45, pitchDeg: 0, fovDeg: 60 } }] },
       timeline: { keyframes: [] }
     }
 
@@ -618,16 +618,16 @@ describe("SightingEditorElement metadata fields", () => {
     expect(element.sightingData.endTime).toBeUndefined()
   })
 
-  it("writes the 4 witness fields into a single witness object, and the sighting's own id beside it", () => {
+  it("writes the 4 observer fields into a single observer object, and the sighting's own id beside it", () => {
     const element = mount()
     const shadow = element.shadowRoot!
-    setInput(shadow, "witnessId", "ChilesClarence")
-    setInput(shadow, "witnessTitle", "Clarence Chiles")
-    setInput(shadow, "witnessLastName", "Chiles")
-    setInput(shadow, "witnessFirstNames", "Clarence")
+    setInput(shadow, "observerId", "ChilesClarence")
+    setInput(shadow, "observerTitle", "Clarence Chiles")
+    setInput(shadow, "observerLastName", "Chiles")
+    setInput(shadow, "observerFirstNames", "Clarence")
     setInput(shadow, "sightingId", "1948-07-24-ChilesClarence")
 
-    expect(element.sightingData.witness).toEqual({
+    expect(element.sightingData.observer).toEqual({
       id: "ChilesClarence",
       title: "Clarence Chiles",
       lastName: "Chiles",
@@ -636,30 +636,30 @@ describe("SightingEditorElement metadata fields", () => {
     expect(element.sightingData.id).toBe("1948-07-24-ChilesClarence")
   })
 
-  it("writes no case: a testimony does not name the case it belongs to", () => {
+  it("writes no case: a account does not name the case it belongs to", () => {
     const element = mount()
     expect(element.shadowRoot!.getElementById("caseId")).toBe(null)
-    expect(element.shadowRoot!.getElementById("witnessDirName")).toBe(null)
+    expect(element.shadowRoot!.getElementById("observerDirName")).toBe(null)
     setInput(element.shadowRoot!, "sightingId", "1948-07-24-ChilesClarence")
     expect(Object.keys(element.sightingData)).not.toContain("caseId")
   })
 
-  it("splits witnessFirstNames on commas, trimming whitespace and dropping empties", () => {
+  it("splits observerFirstNames on commas, trimming whitespace and dropping empties", () => {
     const element = mount()
     const shadow = element.shadowRoot!
-    setInput(shadow, "witnessLastName", "Chiles")
-    setInput(shadow, "witnessFirstNames", "Clarence,  Édouard , ")
+    setInput(shadow, "observerLastName", "Chiles")
+    setInput(shadow, "observerFirstNames", "Clarence,  Édouard , ")
 
-    expect(element.sightingData.witness?.firstNames).toEqual(["Clarence", "Édouard"])
+    expect(element.sightingData.observer?.firstNames).toEqual(["Clarence", "Édouard"])
   })
 
-  it("clearing every witness field back to empty clears witness to undefined", () => {
+  it("clearing every observer field back to empty clears observer to undefined", () => {
     const element = mount()
     const shadow = element.shadowRoot!
-    setInput(shadow, "witnessTitle", "Clarence Chiles")
-    setInput(shadow, "witnessTitle", "")
+    setInput(shadow, "observerTitle", "Clarence Chiles")
+    setInput(shadow, "observerTitle", "")
 
-    expect(element.sightingData.witness).toBeUndefined()
+    expect(element.sightingData.observer).toBeUndefined()
   })
 
   it("writes description", () => {
@@ -693,7 +693,7 @@ describe("SightingEditorElement metadata fields", () => {
       version: 1,
       endTime: { year: 1948, month: 7, day: 24, hour: 3, minute: 0 },
       id: "1948-07-24-ChilesClarence",
-      witness: { id: "ChilesClarence", title: "Clarence Chiles", lastName: "Chiles", firstNames: ["Clarence"] },
+      observer: { id: "ChilesClarence", title: "Clarence Chiles", lastName: "Chiles", firstNames: ["Clarence"] },
       description: "Bright light hovering over the field.",
       tags: ["hovering", "night"],
       timeline: { keyframes: [] }
@@ -701,10 +701,10 @@ describe("SightingEditorElement metadata fields", () => {
 
     const shadow = element.shadowRoot!
     expect((shadow.getElementById("obs-end-time") as HTMLInputElement).value).toBe("1948-07-24T03:00")
-    expect((shadow.getElementById("witnessId") as HTMLInputElement).value).toBe("ChilesClarence")
-    expect((shadow.getElementById("witnessTitle") as HTMLInputElement).value).toBe("Clarence Chiles")
-    expect((shadow.getElementById("witnessLastName") as HTMLInputElement).value).toBe("Chiles")
-    expect((shadow.getElementById("witnessFirstNames") as HTMLInputElement).value).toBe("Clarence")
+    expect((shadow.getElementById("observerId") as HTMLInputElement).value).toBe("ChilesClarence")
+    expect((shadow.getElementById("observerTitle") as HTMLInputElement).value).toBe("Clarence Chiles")
+    expect((shadow.getElementById("observerLastName") as HTMLInputElement).value).toBe("Chiles")
+    expect((shadow.getElementById("observerFirstNames") as HTMLInputElement).value).toBe("Clarence")
     expect((shadow.getElementById("sightingId") as HTMLInputElement).value).toBe("1948-07-24-ChilesClarence")
     expect((shadow.getElementById("description") as HTMLTextAreaElement).value).toBe("Bright light hovering over the field.")
     expect((shadow.getElementById("tags") as HTMLInputElement).value).toBe("hovering, night")
@@ -732,7 +732,7 @@ describe("SightingEditorElement observer keyframes over time", () => {
     const element = mount()
     element.sightingData = {
       version: 1,
-      witnessTrack: { keyframes: [{ t: 0, pose: { lat: 43.837, lng: 5.993, elevationM: 0, headingDeg: undefined, pitchDeg: 0, fovDeg: 60 } }] },
+      observerTrack: { keyframes: [{ t: 0, pose: { lat: 43.837, lng: 5.993, elevationM: 0, headingDeg: undefined, pitchDeg: 0, fovDeg: 60 } }] },
       timeline: { keyframes: [] },
       durationSeconds: 5
     }
@@ -741,7 +741,7 @@ describe("SightingEditorElement observer keyframes over time", () => {
     setInput(shadow, "lat", "44.0")
     setInput(shadow, "lng", "6.5")
 
-    expect(element.sightingData.witnessTrack?.keyframes).toEqual([
+    expect(element.sightingData.observerTrack?.keyframes).toEqual([
       { t: 0, pose: { lat: 43.837, lng: 5.993, elevationM: 0, headingDeg: undefined, pitchDeg: 0, fovDeg: 60 } },
       { t: 2000, pose: { lat: 44.0, lng: 6.5, elevationM: 0, headingDeg: undefined, pitchDeg: 0, fovDeg: 60 } }
     ])
@@ -759,7 +759,7 @@ describe("SightingEditorElement observer keyframes over time", () => {
     setInput(shadow, "lat", "43.9")
     setInput(shadow, "lng", "6.1")
 
-    expect(element.sightingData.witnessTrack?.keyframes.map(k => k.t)).toEqual([0, 3000])
+    expect(element.sightingData.observerTrack?.keyframes.map(k => k.t)).toEqual([0, 3000])
   })
 
   it("blanking fields at a scrubbed instant removes just that keyframe, leaving others intact", () => {
@@ -776,7 +776,7 @@ describe("SightingEditorElement observer keyframes over time", () => {
     setInput(shadow, "lat", "")
     setInput(shadow, "lng", "")
 
-    expect(element.sightingData.witnessTrack?.keyframes).toEqual([
+    expect(element.sightingData.observerTrack?.keyframes).toEqual([
       { t: 0, pose: { lat: 43.837, lng: 5.993, elevationM: 0, headingDeg: undefined, pitchDeg: 0, fovDeg: 60 } }
     ])
   })
@@ -785,7 +785,7 @@ describe("SightingEditorElement observer keyframes over time", () => {
     const element = mount()
     element.sightingData = {
       version: 1,
-      witnessTrack: {
+      observerTrack: {
         keyframes: [
           { t: 0, pose: { lat: 40, lng: 0, elevationM: 0, headingDeg: 0, pitchDeg: 0, fovDeg: 60 } },
           { t: 1000, pose: { lat: 42, lng: 2, elevationM: 0, headingDeg: 90, pitchDeg: 0, fovDeg: 60 } }
@@ -806,7 +806,7 @@ describe("SightingEditorElement observer keyframes over time", () => {
     const element = mount()
     element.sightingData = {
       version: 1,
-      witnessTrack: { keyframes: [{ t: 0, pose: { lat: 43.837, lng: 5.993, elevationM: 0, headingDeg: undefined, pitchDeg: 0, fovDeg: 60 } }] },
+      observerTrack: { keyframes: [{ t: 0, pose: { lat: 43.837, lng: 5.993, elevationM: 0, headingDeg: undefined, pitchDeg: 0, fovDeg: 60 } }] },
       timeline: {
         keyframes: [
           { t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 0, y: 0, width: 10, height: 10 }, color: "#39ff14", angle: 0, transparency: 0, haloScale: 1.5, selected: false } }] },
@@ -831,7 +831,7 @@ describe("SightingEditorElement observer keyframes over time", () => {
     const element = mount()
     element.sightingData = {
       version: 1,
-      witnessTrack: { keyframes: [{ t: 0, pose: { lat: 40, lng: 0, elevationM: 0, headingDeg: undefined, pitchDeg: 0, fovDeg: 60 } }] },
+      observerTrack: { keyframes: [{ t: 0, pose: { lat: 40, lng: 0, elevationM: 0, headingDeg: undefined, pitchDeg: 0, fovDeg: 60 } }] },
       timeline: { keyframes: [] }
     }
     const shadow = element.shadowRoot!
@@ -854,7 +854,7 @@ describe("SightingEditorElement observer keyframes over time", () => {
 
     const headingInput = shadow.getElementById("heading") as HTMLInputElement
     expect(headingInput.value).toBe("0")
-    expect(element.sightingData.witnessTrack?.keyframes[0].pose.headingDeg).toBe(0)
+    expect(element.sightingData.observerTrack?.keyframes[0].pose.headingDeg).toBe(0)
   })
 })
 
@@ -994,7 +994,7 @@ describe("SightingEditorElement composes a nested rr0-ufo", () => {
           { t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval" as const, bounds: { x: 1, y: 2, width: 3, height: 4 }, color: "#fff", angle: 0, transparency: 0, haloScale: 0, selected: false } }] }
         ]
       },
-      witnessTrack: { keyframes: [] },
+      observerTrack: { keyframes: [] },
       weatherTrack: { keyframes: [] }
     }
     element.sightingData = json
@@ -1082,7 +1082,7 @@ describe("SightingEditorElement post-hoc appearance editing + multi-shape author
       version: 1,
       timeline: {
         keyframes: [
-          { t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 0, y: 0, width: 10, height: 10 }, color: "#39ff14", angle: 0, transparency: 0, haloScale: 1.5, selected: false, title: "Witness A" } }] }
+          { t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 0, y: 0, width: 10, height: 10 }, color: "#39ff14", angle: 0, transparency: 0, haloScale: 1.5, selected: false, title: "Observer A" } }] }
         ]
       }
     }
@@ -1090,7 +1090,7 @@ describe("SightingEditorElement post-hoc appearance editing + multi-shape author
     colorInput.value = "#abcdef"
     colorInput.dispatchEvent(new Event("input"))
 
-    expect(element.sightingData.timeline.keyframes[0].shapes[0].shape.title).toBe("Witness A")
+    expect(element.sightingData.timeline.keyframes[0].shapes[0].shape.title).toBe("Observer A")
   })
 
   it("writes the Name field into the shape's title at the current playhead", () => {
@@ -1144,11 +1144,11 @@ describe("SightingEditorElement post-hoc appearance editing + multi-shape author
     element.sightingData = {
       version: 1,
       timeline: {
-        keyframes: [{ t: 0, shapes: [{ sourceId: "witness-drawing", shape: { kind: "oval", bounds: { x: 0, y: 0, width: 10, height: 10 }, color: "#39ff14", angle: 0, transparency: 0, haloScale: 0, selected: false } }] }]
+        keyframes: [{ t: 0, shapes: [{ sourceId: "observer-drawing", shape: { kind: "oval", bounds: { x: 0, y: 0, width: 10, height: 10 }, color: "#39ff14", angle: 0, transparency: 0, haloScale: 0, selected: false } }] }]
       }
     }
     const sourceSelect = element.shadowRoot!.getElementById("source") as HTMLSelectElement
-    expect(sourceSelect.options[0].textContent).toBe("witness-drawing")
+    expect(sourceSelect.options[0].textContent).toBe("observer-drawing")
   })
 
   it("keeps the exact same dropdown label after clearing an auto-filled title — no jarring jump to the raw sourceId", () => {
@@ -1461,19 +1461,19 @@ describe("SightingEditorElement post-hoc appearance editing + multi-shape author
       version: 1,
       timeline: {
         keyframes: [
-          { t: 0, shapes: [{ sourceId: "witness-a", shape: { kind: "oval", bounds: { x: 5, y: 5, width: 10, height: 10 }, color: "#123456", angle: 0, transparency: 0, haloScale: 1, selected: false } }] }
+          { t: 0, shapes: [{ sourceId: "observer-a", shape: { kind: "oval", bounds: { x: 5, y: 5, width: 10, height: 10 }, color: "#123456", angle: 0, transparency: 0, haloScale: 1, selected: false } }] }
         ]
       }
     }
     const sourceSelect = element.shadowRoot!.getElementById("source") as HTMLSelectElement
-    expect(sourceSelect.value).toBe("witness-a")
+    expect(sourceSelect.value).toBe("observer-a")
 
     const colorInput = element.shadowRoot!.getElementById("color") as HTMLInputElement
     colorInput.value = "#abcdef"
     colorInput.dispatchEvent(new Event("input"))
 
     const sourceIds = element.sightingData.timeline.keyframes.flatMap(k => k.shapes.map(s => s.sourceId))
-    expect(sourceIds).toEqual(["witness-a"])
+    expect(sourceIds).toEqual(["observer-a"])
     expect(element.sightingData.timeline.keyframes[0].shapes[0].shape.color).toBe("#abcdef")
   })
 
@@ -2213,7 +2213,7 @@ describe("SightingEditorElement drag-to-move/resize/rotate", () => {
 
     dragFromTo(canvas, { x: 300, y: 300 }, { x: 400, y: 250 }) // dx=+100 (right), dy=-50 (up)
 
-    expect(element.sightingData.witnessTrack?.keyframes).toEqual([{ t: 0, pose: { lat: undefined, lng: undefined, elevationM: 0, headingDeg: 20, pitchDeg: 10, fovDeg: 60 } }])
+    expect(element.sightingData.observerTrack?.keyframes).toEqual([{ t: 0, pose: { lat: undefined, lng: undefined, elevationM: 0, headingDeg: 20, pitchDeg: 10, fovDeg: 60 } }])
     // The shape itself must be untouched — this was a landscape drag, not a shape drag.
     expect(element.sightingData.timeline.keyframes[0].shapes[0].shape.bounds).toEqual({ x: 100, y: 100, width: 20, height: 20 })
   })
@@ -2222,14 +2222,14 @@ describe("SightingEditorElement drag-to-move/resize/rotate", () => {
     const element = mount()
     element.sightingData = {
       version: 1,
-      witnessTrack: { keyframes: [{ t: 0, pose: { lat: undefined, lng: undefined, elevationM: 0, headingDeg: 350, pitchDeg: 0, fovDeg: 60 } }] },
+      observerTrack: { keyframes: [{ t: 0, pose: { lat: undefined, lng: undefined, elevationM: 0, headingDeg: 350, pitchDeg: 0, fovDeg: 60 } }] },
       timeline: { keyframes: [] }
     }
     const canvas = nestedCanvas(element)
 
     dragFromTo(canvas, { x: 300, y: 300 }, { x: 400, y: 300 }) // +100px right = +20deg: 350 -> 370 -> wraps to 10
 
-    expect(element.sightingData.witnessTrack?.keyframes[0].pose.headingDeg).toBe(10)
+    expect(element.sightingData.observerTrack?.keyframes[0].pose.headingDeg).toBe(10)
   })
 
   it("a landscape drag clamps pitch to [-90, 90]", () => {
@@ -2238,14 +2238,14 @@ describe("SightingEditorElement drag-to-move/resize/rotate", () => {
 
     dragFromTo(canvas, { x: 300, y: 300 }, { x: 300, y: -300 }) // dy=-600 (far up) = +120deg, clamped to 90
 
-    expect(element.sightingData.witnessTrack?.keyframes[0].pose.pitchDeg).toBe(90)
+    expect(element.sightingData.observerTrack?.keyframes[0].pose.pitchDeg).toBe(90)
   })
 
   it("does not start a landscape drag while playing", () => {
     const element = mount()
     element.sightingData = {
       version: 1,
-      witnessTrack: { keyframes: [{ t: 0, pose: { lat: undefined, lng: undefined, elevationM: 0, headingDeg: 0, pitchDeg: 0, fovDeg: 60 } }] },
+      observerTrack: { keyframes: [{ t: 0, pose: { lat: undefined, lng: undefined, elevationM: 0, headingDeg: 0, pitchDeg: 0, fovDeg: 60 } }] },
       timeline: {
         keyframes: [
           { t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 0, y: 0, width: 10, height: 10 }, color: "#39ff14", angle: 0, transparency: 0, haloScale: 1.5, selected: false } }] },
@@ -2261,7 +2261,7 @@ describe("SightingEditorElement drag-to-move/resize/rotate", () => {
     const canvas = nestedCanvas(element)
     dragFromTo(canvas, { x: 300, y: 300 }, { x: 400, y: 250 })
 
-    expect(element.sightingData.witnessTrack?.keyframes[0].pose.headingDeg).toBe(0)
+    expect(element.sightingData.observerTrack?.keyframes[0].pose.headingDeg).toBe(0)
   })
 })
 
@@ -2490,11 +2490,11 @@ describe("SightingEditorElement export button", () => {
     vi.unstubAllGlobals()
   })
 
-  it("downloads the current sightingData as a JSON file, named from the witness reference", () => {
+  it("downloads the current sightingData as a JSON file, named from the observer reference", () => {
     const element = mount()
     element.sightingData = {
       version: 1,
-      witness: { id: "chiles" },
+      observer: { id: "chiles" },
       timeline: { keyframes: [{ t: 0, shapes: [] }] }
     }
 
@@ -2528,7 +2528,7 @@ describe("SightingEditorElement export button", () => {
     clickSpy.mockRestore()
   })
 
-  it("falls back to a generic file name when there's no witness", () => {
+  it("falls back to a generic file name when there's no observer", () => {
     const element = mount()
     vi.stubGlobal("URL", { ...URL, createObjectURL: vi.fn().mockReturnValue("blob:fake-url"), revokeObjectURL: vi.fn() })
     let downloadedName: string | undefined
@@ -2561,12 +2561,12 @@ describe("SightingEditorElement import controls", () => {
   it("loads a sighting from a picked file, then resets the input", async () => {
     const element = mount()
     const fileInput = element.shadowRoot!.getElementById("import-file") as HTMLInputElement
-    setFile(fileInput, JSON.stringify({ version: 1, witness: { id: "chiles" }, timeline: { keyframes: [] } }))
+    setFile(fileInput, JSON.stringify({ version: 1, observer: { id: "chiles" }, timeline: { keyframes: [] } }))
     // FileReader.readAsText is genuinely async (a task, not a microtask) — a single setTimeout(0)
     // isn't reliably enough ticks for it to have fired its "load" event yet.
-    await waitFor(() => element.sightingData.witness !== undefined)
+    await waitFor(() => element.sightingData.observer !== undefined)
 
-    expect(element.sightingData.witness).toEqual({ id: "chiles" })
+    expect(element.sightingData.observer).toEqual({ id: "chiles" })
     expect(fileInput.value).toBe("")
   })
 
@@ -2584,7 +2584,7 @@ describe("SightingEditorElement import controls", () => {
 
   it("loads a sighting fetched from the URL field", async () => {
     const element = mount()
-    const json = { version: 1, witness: { id: "wilcox" }, timeline: { keyframes: [] } }
+    const json = { version: 1, observer: { id: "wilcox" }, timeline: { keyframes: [] } }
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve(json) }))
     const urlInput = element.shadowRoot!.getElementById("import-url") as HTMLInputElement
     urlInput.value = "https://example.org/sighting.json"
@@ -2592,32 +2592,32 @@ describe("SightingEditorElement import controls", () => {
     loadButton.click()
     await new Promise(resolve => setTimeout(resolve, 0))
 
-    expect(element.sightingData.witness).toEqual({ id: "wilcox" })
+    expect(element.sightingData.observer).toEqual({ id: "wilcox" })
   })
 
   it("shows in the URL field the recording a src attribute opened, as a full address", async () => {
     // The site's ?sighting= link sets src; the field is where a reader looks for which file is open.
-    const json = { version: 1, witness: { id: "zamora" }, timeline: { keyframes: [] } }
+    const json = { version: 1, observer: { id: "zamora" }, timeline: { keyframes: [] } }
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve(json) }))
     const element = mount()
-    element.setAttribute("src", "/demo-data/witness-socorro.json")
+    element.setAttribute("src", "/demo-data/observer-socorro.json")
     const urlInput = element.shadowRoot!.getElementById("import-url") as HTMLInputElement
     await waitFor(() => urlInput.value !== "")
-    expect(urlInput.value).toBe(new URL("/demo-data/witness-socorro.json", location.href).href)
-    expect(element.sightingData.witness).toEqual({ id: "zamora" })
+    expect(urlInput.value).toBe(new URL("/demo-data/observer-socorro.json", location.href).href)
+    expect(element.sightingData.observer).toEqual({ id: "zamora" })
   })
 
   it("empties the URL field once a file from disk replaces the recording it named", async () => {
-    const json = { version: 1, witness: { id: "zamora" }, timeline: { keyframes: [] } }
+    const json = { version: 1, observer: { id: "zamora" }, timeline: { keyframes: [] } }
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve(json) }))
     const element = mount()
     element.setAttribute("src", "https://example.org/sighting.json")
     const urlInput = element.shadowRoot!.getElementById("import-url") as HTMLInputElement
     await waitFor(() => urlInput.value !== "")
     setFile(element.shadowRoot!.getElementById("import-file") as HTMLInputElement,
-      JSON.stringify({ version: 1, witness: { id: "chiles" }, timeline: { keyframes: [] } }))
+      JSON.stringify({ version: 1, observer: { id: "chiles" }, timeline: { keyframes: [] } }))
     await waitFor(() => urlInput.value === "")
-    expect(element.sightingData.witness).toEqual({ id: "chiles" })
+    expect(element.sightingData.observer).toEqual({ id: "chiles" })
   })
 
   it("does nothing when the URL field is empty", () => {
@@ -2742,15 +2742,15 @@ describe("SightingEditorElement canvas mode", () => {
     return {
       version: 1 as const,
       timeline: { keyframes: [{ t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval" as const, bounds: { x: 300, y: 160, width: 40, height: 40 }, color: "#fff", angle: 0, transparency: 0, haloScale: 0, selected: false } }] }] },
-      witnessTrack: { keyframes: [{ t: 0, pose: { lat: 44.98, lng: 2.92, elevationM: 0, headingDeg: 288, pitchDeg: 2, fovDeg: 60 } }] },
+      observerTrack: { keyframes: [{ t: 0, pose: { lat: 44.98, lng: 2.92, elevationM: 0, headingDeg: 288, pitchDeg: 2, fovDeg: 60 } }] },
       references: [{ id: "vue", kind: "photo" as const, src: "https://example.org/vue.jpg", opacity: 0.5, registration: { headingDeg: 275, pitchDeg: -1, fovDeg: 27 } }]
     }
   }
 
-  /** Where each canvas point looks, for the witness of withPicture: facing 288° with 60° of height
+  /** Where each canvas point looks, for the observer of withPicture: facing 288° with 60° of height
    * in 16:9. The scene double answers one fixed direction otherwise, and the picture, at 275°, is
    * then never under the pointer. */
-  function lookingAsTheWitness(element: SightingEditorElement): void {
+  function lookingAsTheObserver(element: SightingEditorElement): void {
     const scene = element.shadowRoot!.querySelector("rr0-scene") as unknown as { directionAt: (x: number, y: number) => Vector3 }
     vi.spyOn(scene, "directionAt").mockImplementation((ndcX: number, ndcY: number) => {
       const az = ((288 + ndcX * 53) * Math.PI) / 180, alt = ((2 + ndcY * 30) * Math.PI) / 180
@@ -2774,7 +2774,7 @@ describe("SightingEditorElement canvas mode", () => {
   it("hands the canvas to the picture while the Pictures group is open, and to the shapes while Phenomenon is", () => {
     const element = mount()
     element.sightingData = withPicture()
-    lookingAsTheWitness(element)
+    lookingAsTheObserver(element)
     const headingOf = () => element.sightingData.references![0]!.registration.headingDeg
     const shapeX = () => element.sightingData.timeline.keyframes[0]!.shapes[0]!.shape.bounds.x
     // Phenomenon is open on load: a drag on the shape's body moves it and leaves the picture alone.
@@ -2795,18 +2795,18 @@ describe("SightingEditorElement canvas mode", () => {
     expect(element.shadowRoot!.getElementById("group-shape")!.hidden).toBe(false)
   })
 
-  it("turns the witness, not the picture, when the drag starts outside the picture", () => {
+  it("turns the observer, not the picture, when the drag starts outside the picture", () => {
     const element = mount()
     element.sightingData = withPicture()
-    lookingAsTheWitness(element)
+    lookingAsTheObserver(element)
     open(element, "group-reference")
     const pictureHeading = () => element.sightingData.references![0]!.registration.headingDeg
-    const witnessHeading = () => element.sightingData.witnessTrack!.keyframes[0]!.pose.headingDeg
-    // The witness faces 288° with 60° of height; the picture, 27° high at 275°, ends well before
+    const observerHeading = () => element.sightingData.observerTrack!.keyframes[0]!.pose.headingDeg
+    // The observer faces 288° with 60° of height; the picture, 27° high at 275°, ends well before
     // the right edge of the frame, which is sky and ground only.
     drag(element, { x: 610, y: 180 }, { x: 630, y: 180 })
     expect(pictureHeading()).toBe(275)
-    expect(witnessHeading()).not.toBe(288)
+    expect(observerHeading()).not.toBe(288)
     // On the picture itself, the same gesture still turns the picture.
     drag(element, { x: 280, y: 180 }, { x: 300, y: 180 })
     expect(pictureHeading()).not.toBe(275)
@@ -2830,7 +2830,7 @@ describe("SightingEditorElement toolbar groups", () => {
     const element = mount()
     expect(tabs(element).map(tab => tab.querySelector("span")!.id)).toEqual([
       "label-observation-group",
-      "label-witness-group",
+      "label-observer-group",
       "label-location-group",
       "label-decor-group",
       "label-temporal-group",
@@ -2937,7 +2937,7 @@ describe("SightingEditorElement parameter summary", () => {
     expect(chip.textContent).toBe(`${element.shadowRoot!.getElementById("label-elevation")!.textContent} 220 m`)
   })
 
-  // A label shared across groups says two different things under one word — the witness's own
+  // A label shared across groups says two different things under one word — the observer's own
   // height above the sea, and a building's. Containment is the answer: the building's chips are
   // inside one that says Environment, so neither Altitude needs a word of explanation.
   it("boxes a sub-element's chips inside a chip bearing its name", () => {
@@ -2955,12 +2955,12 @@ describe("SightingEditorElement parameter summary", () => {
     expect(chips(element).find(c => c.dataset.field === "decorAltitude")!.textContent).not.toContain("·")
   })
 
-  it("boxes what is said about the witness under the witness", () => {
+  it("boxes what is said about the observer under the observer", () => {
     const element = mount()
-    setInput(element.shadowRoot!, "witnessTitle", "Lonnie Zamora")
-    const nest = chips(element).find(c => c.dataset.field === "witnessTitle")!.closest(".param-nest")!
+    setInput(element.shadowRoot!, "observerTitle", "Lonnie Zamora")
+    const nest = chips(element).find(c => c.dataset.field === "observerTitle")!.closest(".param-nest")!
     expect(nest.querySelector(".param-nest-label")!.textContent)
-      .toBe(element.shadowRoot!.getElementById("label-witness-group")!.textContent)
+      .toBe(element.shadowRoot!.getElementById("label-observer-group")!.textContent)
   })
 
   it("leaves what describes the observation itself unboxed", () => {
@@ -3605,7 +3605,7 @@ describe("SightingEditorElement decor group", () => {
 
   it("shows what the built-in shape measures as a PLACEHOLDER, leaving the size unstated", () => {
     // The distinction the whole field exists for: grey text saying "this is what you are looking
-    // at" is not the same claim as a value saying "a witness measured this".
+    // at" is not the same claim as a value saying "a observer measured this".
     const element = mount()
     const shadow = element.shadowRoot!
     ;(shadow.getElementById("decorKind") as HTMLSelectElement).value = "vehicle"
@@ -3661,22 +3661,22 @@ describe("SightingEditorElement decor group", () => {
     expect((shadow.getElementById("decorModelLicense") as HTMLInputElement).value).toBe("CC0 1.0")
   })
 
-  it("hides only 'other witness' from the generic Decor group's own kind dropdown", () => {
+  it("hides only 'other observer' from the generic Decor group's own kind dropdown", () => {
     const element = mount()
     const shadow = element.shadowRoot!
     expect((shadow.getElementById("option-decor-building") as HTMLOptionElement).hidden).toBe(false)
-    expect((shadow.getElementById("option-decor-witness") as HTMLOptionElement).hidden).toBe(true)
+    expect((shadow.getElementById("option-decor-observer") as HTMLOptionElement).hidden).toBe(true)
     expect((shadow.getElementById("option-decor-tree") as HTMLOptionElement).hidden).toBe(false)
   })
 
-  it("adds a witness decor object from the Witness group's own button, not the generic dropdown", () => {
+  it("adds a observer decor object from the Observer group's own button, not the generic dropdown", () => {
     const element = mount()
     const shadow = element.shadowRoot!
-    ;(shadow.getElementById("add-decor-witness") as HTMLButtonElement).click()
+    ;(shadow.getElementById("add-decor-observer") as HTMLButtonElement).click()
 
     const decor = element.sightingData.decor!
     expect(decor).toHaveLength(1)
-    expect(decor[0].kind).toBe("witness")
+    expect(decor[0].kind).toBe("observer")
   })
 
   it("adds a building decor object (with its default floor count) when Building is picked in the Kind dropdown", () => {
@@ -3855,16 +3855,16 @@ describe("SightingEditorElement decor group", () => {
     expect(decorSelect.options[0].textContent).toBe("Streetlight on Elm St")
   })
 
-  it("round-trips a witness's own sightingUrl via the Witness group's URL field", () => {
+  it("round-trips a observer's own sightingUrl via the Observer group's URL field", () => {
     const element = mount()
     const shadow = element.shadowRoot!
-    ;(shadow.getElementById("add-decor-witness") as HTMLButtonElement).click()
+    ;(shadow.getElementById("add-decor-observer") as HTMLButtonElement).click()
 
     const urlInput = shadow.getElementById("decorSightingUrl") as HTMLInputElement
-    urlInput.value = "https://example.org/witness-2/sighting.json"
+    urlInput.value = "https://example.org/observer-2/sighting.json"
     urlInput.dispatchEvent(new Event("input"))
 
-    expect(element.sightingData.decor![0].sightingUrl).toBe("https://example.org/witness-2/sighting.json")
+    expect(element.sightingData.decor![0].sightingUrl).toBe("https://example.org/observer-2/sighting.json")
   })
 
   it("gives a freshly created building/vehicle real windows on every side by default (50%, or FIXED_WINDOW_MIN_OPACITY_PERCENT on a fixed side) instead of starting as a windowless box", () => {
@@ -3935,7 +3935,7 @@ describe("SightingEditorElement decor group", () => {
     })
   })
 
-  it("shows the Occupied floor row alongside Floors as soon as it's a building, even before a witness location is picked", () => {
+  it("shows the Occupied floor row alongside Floors as soon as it's a building, even before a observer location is picked", () => {
     const element = mount()
     const shadow = element.shadowRoot!
     const kindSelect = shadow.getElementById("decorKind") as HTMLSelectElement
@@ -3949,16 +3949,16 @@ describe("SightingEditorElement decor group", () => {
     occupiedFloorInput.dispatchEvent(new Event("input"))
     expect(element.sightingData.decor![0].occupiedFloor).toBe(1)
 
-    const witnessSideSelect = shadow.getElementById("decorWitnessSide") as HTMLSelectElement
-    witnessSideSelect.value = "front"
-    witnessSideSelect.dispatchEvent(new Event("change"))
+    const observerSideSelect = shadow.getElementById("decorObserverSide") as HTMLSelectElement
+    observerSideSelect.value = "front"
+    observerSideSelect.dispatchEvent(new Event("change"))
 
     expect(occupiedFloorInput.closest("label")!.hidden).toBe(false)
-    expect(element.sightingData.decor![0].witnessSide).toBe("front")
+    expect(element.sightingData.decor![0].observerSide).toBe("front")
     expect(element.sightingData.decor![0].occupiedFloor).toBe(1) // the pre-set floor survives picking a location
   })
 
-  it("never writes floors/occupiedFloor/witnessSide onto a non-building/non-witness-holding kind, even if the shared inputs still display a leftover value from a previously selected building", () => {
+  it("never writes floors/occupiedFloor/observerSide onto a non-building/non-observer-holding kind, even if the shared inputs still display a leftover value from a previously selected building", () => {
     // Regression test: editing an unrelated field (heading) on a freshly added vehicle right
     // after a building was selected used to silently write the building's own leftover `floors`
     // value onto the vehicle too, since decorFloorsInput/decorOccupiedFloorInput are single shared
@@ -4000,12 +4000,12 @@ describe("SightingEditorElement decor context menu", () => {
     canvas.dispatchEvent(new MouseEvent("contextmenu", { bubbles: true, composed: true, clientX: 400, clientY: 300 }))
   }
 
-  it("opens the decor menu (not the shape one) when the 3D pick hits a witness", () => {
+  it("opens the decor menu (not the shape one) when the 3D pick hits a observer", () => {
     const element = mount()
     element.sightingData = {
       version: 1,
       timeline: { keyframes: [] },
-      decor: [{ id: "decor-1", kind: "witness", eastM: 0, northM: 10, sightingUrl: "https://example.org/w.json" }]
+      decor: [{ id: "decor-1", kind: "observer", eastM: 0, northM: 10, sightingUrl: "https://example.org/w.json" }]
     }
     const sceneEl = element.shadowRoot!.querySelector("rr0-scene") as unknown as { pickDecorAt: () => string }
     sceneEl.pickDecorAt = () => "decor-1"
@@ -4014,28 +4014,28 @@ describe("SightingEditorElement decor context menu", () => {
 
     expect((element.shadowRoot!.getElementById("decor-context-menu") as HTMLElement).hidden).toBe(false)
     expect((element.shadowRoot!.getElementById("context-menu") as HTMLElement).hidden).toBe(true)
-    const viewButton = element.shadowRoot!.getElementById("context-view-testimony") as HTMLButtonElement
+    const viewButton = element.shadowRoot!.getElementById("context-view-account") as HTMLButtonElement
     expect(viewButton.disabled).toBe(false)
   })
 
-  it("disables 'view testimony' (with an explanatory title) for a witness with no sightingUrl", () => {
+  it("disables 'view account' (with an explanatory title) for a observer with no sightingUrl", () => {
     const element = mount()
     element.sightingData = {
       version: 1,
       timeline: { keyframes: [] },
-      decor: [{ id: "decor-1", kind: "witness", eastM: 0, northM: 10 }]
+      decor: [{ id: "decor-1", kind: "observer", eastM: 0, northM: 10 }]
     }
     const sceneEl = element.shadowRoot!.querySelector("rr0-scene") as unknown as { pickDecorAt: () => string }
     sceneEl.pickDecorAt = () => "decor-1"
 
     rightClickCanvas(element)
 
-    const viewButton = element.shadowRoot!.getElementById("context-view-testimony") as HTMLButtonElement
+    const viewButton = element.shadowRoot!.getElementById("context-view-account") as HTMLButtonElement
     expect(viewButton.disabled).toBe(true)
     expect(viewButton.title).not.toBe("")
   })
 
-  it("opens the decor menu for a non-witness decor kind too, but disables 'view testimony'", () => {
+  it("opens the decor menu for a non-observer decor kind too, but disables 'view account'", () => {
     const element = mount()
     element.sightingData = {
       version: 1,
@@ -4048,7 +4048,7 @@ describe("SightingEditorElement decor context menu", () => {
     rightClickCanvas(element)
 
     expect((element.shadowRoot!.getElementById("decor-context-menu") as HTMLElement).hidden).toBe(false)
-    const viewButton = element.shadowRoot!.getElementById("context-view-testimony") as HTMLButtonElement
+    const viewButton = element.shadowRoot!.getElementById("context-view-account") as HTMLButtonElement
     expect(viewButton.disabled).toBe(true)
   })
 
@@ -4101,24 +4101,24 @@ describe("SightingEditorElement decor context menu", () => {
     expect((element.shadowRoot!.getElementById("decor-context-menu") as HTMLElement).hidden).toBe(false)
   })
 
-  it("loads the witness's own recording when 'view testimony' is clicked", async () => {
+  it("loads the observer's own recording when 'view account' is clicked", async () => {
     const element = mount()
     element.sightingData = {
       version: 1,
       timeline: { keyframes: [] },
-      decor: [{ id: "decor-1", kind: "witness", eastM: 0, northM: 10, sightingUrl: "https://example.org/w.json" }]
+      decor: [{ id: "decor-1", kind: "observer", eastM: 0, northM: 10, sightingUrl: "https://example.org/w.json" }]
     }
     const sceneEl = element.shadowRoot!.querySelector("rr0-scene") as unknown as { pickDecorAt: () => string }
     sceneEl.pickDecorAt = () => "decor-1"
-    const witnessJson = { version: 1 as const, witness: { id: "other-witness" }, timeline: { keyframes: [] } }
-    const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue({ ok: true, json: async () => witnessJson } as Response)
+    const observerJson = { version: 1 as const, observer: { id: "other-observer" }, timeline: { keyframes: [] } }
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue({ ok: true, json: async () => observerJson } as Response)
 
     rightClickCanvas(element)
-    ;(element.shadowRoot!.getElementById("context-view-testimony") as HTMLButtonElement).click()
+    ;(element.shadowRoot!.getElementById("context-view-account") as HTMLButtonElement).click()
     await new Promise(resolve => setTimeout(resolve, 0))
 
     expect(fetchSpy).toHaveBeenCalledWith("https://example.org/w.json")
-    expect(element.sightingData.witness).toEqual({ id: "other-witness" })
+    expect(element.sightingData.observer).toEqual({ id: "other-observer" })
     expect((element.shadowRoot!.getElementById("decor-context-menu") as HTMLElement).hidden).toBe(true)
     fetchSpy.mockRestore()
   })
@@ -4539,12 +4539,12 @@ describe("SightingEditorElement src attribute", () => {
 })
 
 /**
- * How high the witness was decides which part of the sky they are even inside — a DC-3's 1500 m
+ * How high the observer was decides which part of the sky they are even inside — a DC-3's 1500 m
  * puts them above the cloud layer and, before this was rendered properly, outside the star shell
  * altogether. The field also has to READ back: writing 0 unconditionally, as this did, flattened
  * an imported recording's own altitude the moment anything else in the panel was touched.
  */
-describe("SightingEditorElement witness altitude", () => {
+describe("SightingEditorElement observer altitude", () => {
   afterEach(() => {
     document.body.innerHTML = ""
   })
@@ -4555,13 +4555,13 @@ describe("SightingEditorElement witness altitude", () => {
     input.dispatchEvent(new Event("input"))
   }
 
-  it("records the altitude the witness was at", () => {
+  it("records the altitude the observer was at", () => {
     const element = mount()
     setField(element, "lat", "32.3792")
     setField(element, "lng", "-86.3077")
     setField(element, "elevation", "1500")
 
-    const pose = element.sightingData.witnessTrack!.keyframes[0].pose
+    const pose = element.sightingData.observerTrack!.keyframes[0].pose
     expect(pose.elevationM).toBe(1500)
     expect(pose.lat).toBeCloseTo(32.3792)
   })
@@ -4571,7 +4571,7 @@ describe("SightingEditorElement witness altitude", () => {
     setField(element, "elevation", "1500")
     setField(element, "heading", "40")
 
-    const keyframes = element.sightingData.witnessTrack!.keyframes
+    const keyframes = element.sightingData.observerTrack!.keyframes
     expect(keyframes[keyframes.length - 1].pose.elevationM).toBe(1500)
   })
 
@@ -4581,7 +4581,7 @@ describe("SightingEditorElement witness altitude", () => {
       version: 1,
       durationSeconds: 10,
       timeline: { keyframes: [{ t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 0, y: 0, width: 10, height: 10 }, color: "#fff", angle: 0, transparency: 0, haloScale: 0, selected: false } }] }] },
-      witnessTrack: { keyframes: [{ t: 0, pose: { lat: 32.3792, lng: -86.3077, elevationM: 1500, headingDeg: 40, pitchDeg: 0, fovDeg: 60 } }] }
+      observerTrack: { keyframes: [{ t: 0, pose: { lat: 32.3792, lng: -86.3077, elevationM: 1500, headingDeg: 40, pitchDeg: 0, fovDeg: 60 } }] }
     }
 
     expect((element.shadowRoot!.getElementById("elevation") as HTMLInputElement).value).toBe("1500")
@@ -4589,10 +4589,10 @@ describe("SightingEditorElement witness altitude", () => {
 })
 
 /**
- * The Circumstances group is the one part of this editor that isn't testimony: weather is a
+ * The Circumstances group is the one part of this editor that isn't account: weather is a
  * measurable fact about a place at an instant, and the Location and Temporal groups already state
  * both. So it is looked up from a real record and shown read-only on that basis — unless the
- * witness takes the fields back, in which case their account outranks the record for good. See
+ * observer takes the fields back, in which case their account outranks the record for good. See
  * SightingEditorElement.inferWeather and engine/weather/WeatherInference.ts.
  */
 describe("SightingEditorElement inferred weather", () => {
@@ -4713,7 +4713,7 @@ describe("SightingEditorElement inferred weather", () => {
   })
 
   it("keeps the record when the crystal alignment is the only thing stated", async () => {
-    // Typing into any OTHER weather field is a witness taking their account back, and rightly
+    // Typing into any OTHER weather field is a observer taking their account back, and rightly
     // discards the record. This one contradicts no record, so it must not.
     const element = mount(recordProvider())
     stateDateAndPlace(element)
@@ -4788,9 +4788,9 @@ describe("SightingEditorElement inferred weather", () => {
     expect(checkbox.checked).toBe(false)
   })
 
-  // Ticking itself back on must not undo a decision the witness made: their account outranks the
+  // Ticking itself back on must not undo a decision the observer made: their account outranks the
   // record for good (see Sighting.weatherSource).
-  // The regression this exists for: a witness described the weather BEFORE saying when and where,
+  // The regression this exists for: a observer described the weather BEFORE saying when and where,
   // watched the box tick itself the moment they typed those, and the record replaced their
   // account — with no way to stop it, since the only control that could was disabled until then.
   it("treats typing a weather value as taking the fields back, even before a lookup is possible", async () => {
@@ -4812,7 +4812,7 @@ describe("SightingEditorElement inferred weather", () => {
     expect((weatherField(element, "precipitationType") as HTMLSelectElement).value).toBe("rain")
   })
 
-  it("never re-ticks itself over a witness who turned it off", async () => {
+  it("never re-ticks itself over a observer who turned it off", async () => {
     const element = mount(recordProvider())
     const shadow = element.shadowRoot!
     const checkbox = shadow.getElementById("weatherInferred") as HTMLInputElement
@@ -4841,7 +4841,7 @@ describe("SightingEditorElement inferred weather", () => {
     expect((shadow.getElementById("weatherInferred") as HTMLInputElement).disabled).toBe(true)
   })
 
-  it("hands the fields back to the witness on demand, keeping the record's values as a start", async () => {
+  it("hands the fields back to the observer on demand, keeping the record's values as a start", async () => {
     const element = mount(recordProvider())
     stateDateAndPlace(element)
     await waitFor(() => element.sightingData.weatherSource !== undefined, 2000)
@@ -4856,7 +4856,7 @@ describe("SightingEditorElement inferred weather", () => {
     expect(element.sightingData.weatherSource).toBeUndefined()
   })
 
-  it("never re-derives weather a witness declared", async () => {
+  it("never re-derives weather a observer declared", async () => {
     const provider = recordProvider()
     const getWeather = vi.spyOn(provider, "getWeather")
     const element = mount(provider)
@@ -4899,7 +4899,7 @@ describe("SightingEditorElement inferred weather", () => {
 })
 
 /**
- * Testimony names a place, it never gives coordinates — so the Location group leads with the name,
+ * Account names a place, it never gives coordinates — so the Location group leads with the name,
  * and the latitude/longitude below are what searching it produces. See
  * SightingEditorElement.searchPlace and engine/place/PlaceProvider.ts.
  */
@@ -4967,7 +4967,7 @@ describe("SightingEditorElement place search", () => {
     const element = mountWith([VALENSOLE])
     await searchFor(element, "Valensole")
 
-    expect(element.sightingData.witnessTrack?.keyframes[0].pose.lat).toBe(43.8379283)
+    expect(element.sightingData.observerTrack?.keyframes[0].pose.lat).toBe(43.8379283)
   })
 
   it("offers every candidate when a name is ambiguous, and applies the best one", async () => {
@@ -4981,7 +4981,7 @@ describe("SightingEditorElement place search", () => {
     expect((field(element, "lat") as HTMLInputElement).value).toBe("39.8")
   })
 
-  it("moves the witness when another candidate is picked", async () => {
+  it("moves the observer when another candidate is picked", async () => {
     const element = mountWith(SPRINGFIELDS)
     await searchFor(element, "Springfield")
 
@@ -5083,7 +5083,7 @@ describe("SightingEditorElement instrument roll", () => {
   }
 
   function pose(element: SightingEditorElement): { rollDeg?: number } {
-    return element.sightingData.witnessTrack!.keyframes[0].pose as { rollDeg?: number }
+    return element.sightingData.observerTrack!.keyframes[0].pose as { rollDeg?: number }
   }
 
   it("states how the instrument was held, alongside where it pointed", () => {
@@ -5142,8 +5142,8 @@ describe("SightingEditorElement stated blur", () => {
   /*
    * The point of the whole thing, and what DepthOfField's own doc comment asked for before there
    * was anything to state it with: the scene's depth of field blurs the WORLD from its distance
-   * and leaves the witness's object alone, because that distance is the unknown. A blur the
-   * witness stated runs the same geometry backwards and bounds it.
+   * and leaves the observer's object alone, because that distance is the unknown. A blur the
+   * observer stated runs the same geometry backwards and bounds it.
    */
   it("reads a stated blur back as a bound on distance, through the lens the recording names", () => {
     const element = mount()
@@ -5274,7 +5274,7 @@ describe("SightingEditorElement date picker", () => {
   /*
    * A datetime-local reports "" while it is still half typed, and applyEdtfTimeInput reads "" as
    * "no time at all" — so without this guard, entering a date and moving on to type its hour
-   * erased the date. badInput is what tells a field in mid-entry from one a witness has actually
+   * erased the date. badInput is what tells a field in mid-entry from one a observer has actually
    * cleared.
    */
   it("does not erase the date while the picker is still half typed", () => {
@@ -5581,7 +5581,7 @@ describe("SightingEditorElement location coherence", () => {
     expect(element.sightingData.place?.[0].name).toBeUndefined()
   })
 
-  it("leaves a name the witness typed themselves alone", async () => {
+  it("leaves a name the observer typed themselves alone", async () => {
     const reverse = vi.fn().mockResolvedValue(RIEZ)
     const element = mount()
     element.placeSearchProvider = {
@@ -5596,7 +5596,7 @@ describe("SightingEditorElement location coherence", () => {
     setInput(element, "lng", "6.093")
     await new Promise(resolve => setTimeout(resolve, 1200))
 
-    // Their words describe a place no gazetteer lists; replacing them would lose the testimony.
+    // Their words describe a place no gazetteer lists; replacing them would lose the account.
     expect(reverse).not.toHaveBeenCalled()
     expect(placeName(element).value).toBe("the lavender field east of the farm")
   })
@@ -5677,7 +5677,7 @@ describe("SightingEditorElement time zone picker", () => {
     pickZone(element, "")
 
     expect(offset(element).readOnly).toBe(false)
-    // The zone's last answer stays as the witness's starting point.
+    // The zone's last answer stays as the observer's starting point.
     expect(element.sightingData.utcOffsetHours).toBe(1)
     expect(element.sightingData.timeZone).toBeUndefined()
   })
@@ -5930,7 +5930,7 @@ describe("the sky under an observation being edited", () => {
       pass("TOO FAINT", 90, 9)
     ]
 
-    it("names the brightest satellite, when on the witness's clock, and the train it crossed with", async () => {
+    it("names the brightest satellite, when on the observer's clock, and the train it crossed with", async () => {
       const fetchSpy = vi.spyOn(globalThis, "fetch").mockRejectedValue(new TypeError("no network in tests"))
       const element = mount()
       typeInto(element, "durationSeconds", "240")
@@ -5970,7 +5970,7 @@ describe("the sky under an observation being edited", () => {
     // Valensole, 1 July 1965. Ikeya-Seki IS in the window — it reached perihelion that October and
     // became the brightest comet of the century — but on this date it was magnitude twelve and had
     // not even been discovered yet. A readout that named it would be offering a candidate no
-    // witness could possibly have seen, which is the opposite of what this line is for.
+    // observer could possibly have seen, which is the opposite of what this line is for.
     const element = mount()
     overProvence(element, "1965-07-01 05:45", "1")
     await waitFor(() => skyLine(element).length > 0)
@@ -6020,7 +6020,7 @@ describe("how precisely the gaze fields read back", () => {
       durationSeconds: 10,
       timeline: { keyframes: [] },
       weatherTrack: { keyframes: [] },
-      witnessTrack: {
+      observerTrack: {
         keyframes: [
           { t: 0, pose: { headingDeg: 312.7835073245701, pitchDeg: 61.13732147026157 } },
           { t: 10_000, pose: { headingDeg: 313.9112223334445, pitchDeg: 61.55566677788899 } }
@@ -6034,7 +6034,7 @@ describe("how precisely the gaze fields read back", () => {
   })
 })
 
-describe("SightingEditorElement testimony", () => {
+describe("SightingEditorElement account", () => {
   const field = <T extends HTMLElement>(element: SightingEditorElement, id: string): T =>
     element.shadowRoot!.getElementById(id) as T
 
@@ -6047,44 +6047,44 @@ describe("SightingEditorElement testimony", () => {
   it("writes who saw it and how the account travelled into the recording", () => {
     // None of it is about the phenomenon, and until now a recording could state none of it — which
     // left Poher's credibility criteria and Ballester-Guasp's information quality uncomputable from
-    // a file, by those methods' own definitions. See Testimony.
+    // a file, by those methods' own definitions. See Account.
     const element = mount()
 
-    type(element, "witnessAge", "38")
-    type(element, "witnessOccupation", "boulanger")
-    type(element, "testimonySource", "on-site", "change")
-    type(element, "testimonyFollowedUp", "yes", "change")
+    type(element, "observerAge", "38")
+    type(element, "observerOccupation", "boulanger")
+    type(element, "accountSource", "on-site", "change")
+    type(element, "accountFollowedUp", "yes", "change")
 
-    expect(element.sightingData.testimony).toEqual({
-      witnessAgeYears: 38,
-      witnessOccupation: "boulanger",
+    expect(element.sightingData.account).toEqual({
+      observerAgeYears: 38,
+      observerOccupation: "boulanger",
       source: "on-site",
       followedUp: true
     })
   })
 
-  it("says nothing about a witness nobody described", () => {
+  it("says nothing about a observer nobody described", () => {
     const element = mount()
 
-    expect(element.sightingData.testimony).toBeUndefined()
+    expect(element.sightingData.account).toBeUndefined()
   })
 
-  it("offers no witness count, because a recording is one person's account", () => {
-    // Where other people stood is in the decor and is this witness's own belief about them, not a
-    // census. Two witnesses write two recordings; it is the case that has several. See Testimony.
+  it("offers no observer count, because a recording is one person's account", () => {
+    // Where other people stood is in the decor and is this observer's own belief about them, not a
+    // census. Two observers write two recordings; it is the case that has several. See Account.
     const element = mount()
 
-    expect(element.shadowRoot!.getElementById("witnessCount")).toBeNull()
+    expect(element.shadowRoot!.getElementById("observerCount")).toBeNull()
   })
 
   it("keeps 'not followed up' apart from 'nobody said'", () => {
     const element = mount()
 
-    type(element, "testimonyFollowedUp", "no", "change")
-    expect(element.sightingData.testimony?.followedUp).toBe(false)
+    type(element, "accountFollowedUp", "no", "change")
+    expect(element.sightingData.account?.followedUp).toBe(false)
 
-    type(element, "testimonyFollowedUp", "", "change")
-    expect(element.sightingData.testimony).toBeUndefined()
+    type(element, "accountFollowedUp", "", "change")
+    expect(element.sightingData.account).toBeUndefined()
   })
 
   it("shows back what a loaded recording states", () => {
@@ -6093,14 +6093,14 @@ describe("SightingEditorElement testimony", () => {
     element.sightingData = {
       version: 1,
       timeline: { keyframes: [] },
-      testimony: { witnessAgeYears: 38, witnessOccupation: "boulanger", source: "press" }
+      account: { observerAgeYears: 38, observerOccupation: "boulanger", source: "press" }
     }
 
-    expect(field<HTMLInputElement>(element, "witnessAge").value).toBe("38")
-    expect(field<HTMLInputElement>(element, "witnessOccupation").value).toBe("boulanger")
-    expect(field<HTMLSelectElement>(element, "testimonySource").value).toBe("press")
+    expect(field<HTMLInputElement>(element, "observerAge").value).toBe("38")
+    expect(field<HTMLInputElement>(element, "observerOccupation").value).toBe("boulanger")
+    expect(field<HTMLSelectElement>(element, "accountSource").value).toBe("press")
     // Absent, not "no": the recording says nothing about follow-up.
-    expect(field<HTMLSelectElement>(element, "testimonyFollowedUp").value).toBe("")
+    expect(field<HTMLSelectElement>(element, "accountFollowedUp").value).toBe("")
   })
 })
 
@@ -6110,7 +6110,7 @@ describe("SightingEditorElement assessment", () => {
 
   it("nests what each assessor concluded in a chip of its own, after the recording's", async () => {
     // Its own nest and not a loose chip: the strip is what the recording states, and this is what
-    // was made OF it. Same containment the witness and the decor already use.
+    // was made OF it. Same containment the observer and the decor already use.
     const element = mount()
 
     await waitFor(() => nest(element) !== null, 2000)
@@ -6123,7 +6123,7 @@ describe("SightingEditorElement assessment", () => {
     expect(chips[chips.length - 1]).toBe(nest(element))
   })
 
-  it("says, in one line, what share of the questions the witness answered", async () => {
+  it("says, in one line, what share of the questions the observer answered", async () => {
     // A chip is one line and half its value is the shape of it. What the figure cannot say — WHICH
     // questions went unanswered — is said by the marks on the fields that would answer them.
     const element = mount()
@@ -6142,11 +6142,11 @@ describe("SightingEditorElement assessment", () => {
 
     ;(nest(element)!.querySelector(".param-chip") as HTMLButtonElement).click()
 
-    expect(element.shadowRoot!.getElementById("group-witness")!.hidden).toBe(false)
+    expect(element.shadowRoot!.getElementById("group-observer")!.hidden).toBe(false)
   })
 
   it("marks the fields that would answer a question nothing answers", async () => {
-    // A need shows where it can be met. Not `invalid`: nobody typed anything wrong, the witness
+    // A need shows where it can be met. Not `invalid`: nobody typed anything wrong, the observer
     // said nothing.
     const element = mount()
 
@@ -6360,8 +6360,8 @@ describe("integrated cloud weather editor", () => {
   })
 })
 
-describe("SightingEditorElement and a witness's own interpretation", () => {
-  it("draws the angles it edits, never the witness's bodies over them", () => {
+describe("SightingEditorElement and a observer's own interpretation", () => {
+  it("draws the angles it edits, never the observer's bodies over them", () => {
     const element = mount()
     const body = { id: "craft", model: { id: "sphere" }, track: [{ t: 0, eastM: 0, northM: 10, onGround: true }] }
     element.sightingData = { version: 1, timeline: { keyframes: [] }, interpretation: { bodies: [body] } }
@@ -6375,12 +6375,12 @@ describe("SightingEditorElement bodies", () => {
     document.body.innerHTML = ""
   })
 
-  it("draws the witness's bodies, beside the shapes' outlines, everywhere but in the Shapes part", async () => {
+  it("draws the observer's bodies, beside the shapes' outlines, everywhere but in the Shapes part", async () => {
     const element = mount()
     const interpretation = { title: "A craft", bodies: [{ id: "craft", explains: ["ufo-1"], model: { id: "ellipsoid" }, track: [{ t: 0, eastM: 0, northM: 50, onGround: true }] }] }
     element.sightingData = { version: 1, timeline: { keyframes: [] }, interpretation }
     const shadow = element.shadowRoot!
-    const scene = shadow.querySelector("rr0-scene") as unknown as { interpretation?: unknown, compareTestimony: boolean }
+    const scene = shadow.querySelector("rr0-scene") as unknown as { interpretation?: unknown, compareAccount: boolean }
     const tab = (id: string, selector: string) => [...shadow.querySelectorAll<HTMLButtonElement>(selector)].find(t => t.getAttribute("aria-controls") === id)!
     expect(scene.interpretation).toBeUndefined()
     // The group's handle opens and closes it: opened here only if it is not already.
@@ -6390,7 +6390,7 @@ describe("SightingEditorElement bodies", () => {
     expect(scene.interpretation).toEqual(interpretation)
     // Its fields are a chunk of their own, fetched on this first opening.
     await waitFor(() => shadow.getElementById("body-title") !== null, 2000)
-    expect(scene.compareTestimony).toBe(true)
+    expect(scene.compareAccount).toBe(true)
     // An edit of a body is drawn at once.
     const title = shadow.getElementById("body-title") as HTMLInputElement
     title.value = "The craft"
@@ -6398,11 +6398,11 @@ describe("SightingEditorElement bodies", () => {
     expect((scene.interpretation as typeof interpretation).bodies[0]).toMatchObject({ title: "The craft" })
     tab("shape-shapes", ".subgroup-tab").click()
     expect(scene.interpretation).toBeUndefined()
-    expect(scene.compareTestimony).toBe(false)
+    expect(scene.compareAccount).toBe(false)
     // Another group is not where shapes are edited: the bodies stay drawn there.
     tab("group-temporal", ".group-tab").click()
     expect(scene.interpretation).toMatchObject({ bodies: [{ id: "craft" }] })
-    expect(scene.compareTestimony).toBe(true)
+    expect(scene.compareAccount).toBe(true)
   })
 })
 

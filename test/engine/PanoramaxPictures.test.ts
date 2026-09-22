@@ -37,7 +37,7 @@ describe("PanoramaxPictures", () => {
     expect(asked[0]).toContain("https://api.panoramax.xyz/api/search?bbox=")
     expect(found.map(picture => picture.id)).toEqual(["near"])
     const near = found[0]!
-    // 8.9 m north and 56.3 m east of the witness, by the flat approximation.
+    // 8.9 m north and 56.3 m east of the observer, by the flat approximation.
     expect(near.distanceM).toBeCloseTo(57.0, 0)
     expect(near.bearingDeg).toBeCloseTo(81.0, 0)
     expect(near.azimuthDeg).toBe(260)

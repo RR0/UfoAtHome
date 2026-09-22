@@ -38,10 +38,10 @@ export class PlayerPage implements SitePage {
         const said = demo.titleIsName ? title : title.charAt(0).toLocaleLowerCase(language) + title.slice(1)
         return [demo.src, ...(demo.playSrc ? [demo.playSrc] : [])].map(src => [src, said])
       })))
-    // Which of them are worth a map of where the observer stood — see Demo.witnessMap. Keyed the
+    // Which of them are worth a map of where the observer stood — see Demo.observerMap. Keyed the
     // same way as the titles, by the demo's own path, so both answer the same question about the
     // same thing: is what this page is showing one of ours, and which.
-    const demoWitnessMaps = JSON.stringify(this.catalogue.demos.filter(demo => demo.witnessMap).flatMap(demo => [demo.src, ...(demo.playSrc ? [demo.playSrc] : [])]))
+    const demoObserverMaps = JSON.stringify(this.catalogue.demos.filter(demo => demo.observerMap).flatMap(demo => [demo.src, ...(demo.playSrc ? [demo.playSrc] : [])]))
     const messages = JSON.stringify({
       loading: fr ? "Chargement…" : "Loading…",
       notFound: fr
@@ -59,7 +59,7 @@ export class PlayerPage implements SitePage {
     })
     return `const messages = ${messages}
 const demoTitles = ${demoTitles}
-const demoWitnessMaps = new Set(${demoWitnessMaps})
+const demoObserverMaps = new Set(${demoObserverMaps})
 const stage = document.getElementById("player-stage")
 const stageBox = document.getElementById("player-stage-box")
 const status = document.getElementById("player-status")
@@ -145,7 +145,7 @@ const describe = () => {
 /* The recording the player is showing, as its own address: on a case with several observers, the one
    picked. The editor opens one recording and not a case, so this is where its button points. */
 let shownSrc
-stage.addEventListener("witnesschange", event => {
+stage.addEventListener("observerchange", event => {
   shownSrc = event.detail && event.detail.src ? event.detail.src : undefined
   describe()
   if (shownSrc && !editLink.hidden) editLink.href = editorPath + "?sighting=" + encodeURIComponent(shownSrc)
@@ -156,8 +156,8 @@ const reveal = (source, sighting, fallbackTitle) => {
   // Off unless this is one of the site's own reconstructions that has somewhere to point it. A
   // recording pasted in has no source at all, so it never gets one: the site cannot know whether
   // there is a path and a heading in there worth drawing.
-  stage.toggleAttribute("show-witness-map",
-    Boolean(source) && demoWitnessMaps.has(new URL(source, location.href).pathname))
+  stage.toggleAttribute("show-observer-map",
+    Boolean(source) && demoObserverMaps.has(new URL(source, location.href).pathname))
   if (source) {
     editLink.href = editorPath + "?sighting=" + encodeURIComponent(shownSrc || source)
     editLink.hidden = false

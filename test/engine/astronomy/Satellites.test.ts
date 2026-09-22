@@ -6,7 +6,7 @@ import { SATELLITE_CLASSES, TRACKED_OBJECTS_BY_MONTH } from "../../../src/engine
 const PROVENCE = { lat: 43.8379, lng: 5.9822, elevationM: 591 }
 
 describe("Satellites", () => {
-  describe("the Earth's shadow above the witness", () => {
+  describe("the Earth's shadow above the observer", () => {
     it("matches the heights the standard twilights are known to put it at", () => {
       // Independent reference points, not this formula restated: the shadow reaches about 35 km at
       // the end of civil twilight, 140 at the end of nautical and 330 at the end of astronomical.

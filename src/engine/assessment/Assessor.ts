@@ -74,7 +74,7 @@ export interface Assessment {
  *
  * Why a seam and not a function, here of all places: because these schemes disagree with each
  * other on purpose. Hynek classifies by what was seen and how close; Vallée by what it did; Poher
- * and Ballester-Guasp score the witness and the enquiry rather than the sighting at all, and say so
+ * and Ballester-Guasp score the observer and the enquiry rather than the sighting at all, and say so
  * explicitly. None of them is the right answer, and a recording that could only be read one way
  * would be taking a side the format has no business taking.
  *
@@ -84,7 +84,7 @@ export interface Assessment {
 export interface Assessor {
   /**
    * Which part of a recording this reading is chiefly about, as a group id the host may map onto
-   * its own panels — "witness" for one that measures what the witness gave.
+   * its own panels — "observer" for one that measures what the observer gave.
    *
    * So that an assessment leads somewhere. A figure a reader cannot act on is a figure they stop
    * reading; this is the difference between "20%" and "20%, and here is where you would fix it".

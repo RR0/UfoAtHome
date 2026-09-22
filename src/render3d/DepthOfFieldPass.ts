@@ -23,7 +23,7 @@ import type { UnfinishedFrame } from "./colorSpace.js"
  * The point is not the look. A photograph that shows an object sharp says the object stood inside
  * the lens's depth of field, which is a real bound on its distance (see DepthOfField.ts), and a
  * reconstruction that draws everything sharp quietly throws that evidence away. Drawn, the same
- * statement becomes something a reader can SEE: the witness's own fence blurred while the light
+ * statement becomes something a reader can SEE: the observer's own fence blurred while the light
  * above it is not, or the light itself a soft disc against a sharp horizon — which is the picture
  * of something much closer than it was said to be.
  *

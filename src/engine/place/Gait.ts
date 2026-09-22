@@ -1,9 +1,9 @@
 import type { Sighting } from "../model/Sighting.js"
 import { geoToLocalMeters } from "../../render3d/terrain/GeoProjection.js"
-import { WitnessPath } from "./WitnessPath.js"
+import { ObserverPath } from "./ObserverPath.js"
 
 /**
- * Where the witness's eye is, relative to where the path alone would put it — metres, east/north
+ * Where the observer's eye is, relative to where the path alone would put it — metres, east/north
  * on the ground and up.
  *
  * A DISPLACEMENT and not a pose: it is added on top of whatever the recording states, the same way
@@ -21,7 +21,7 @@ export interface GaitOffset {
    *
    * WHAT REACHES THE IMAGE, not what the body did: the three translations above are the carrier's
    * own and cannot be anything else, but a rotation can be cancelled before it is ever recorded,
-   * and in a witness's own eye it very nearly is (see Gait.of and Instrument.stabilization). An eye
+   * and in a observer's own eye it very nearly is (see Gait.of and Instrument.stabilization). An eye
    * gets a residue of a fraction of a degree; a camera in the same hand gets the lot.
    */
   rollDeg: number
@@ -29,7 +29,7 @@ export interface GaitOffset {
   yawDeg: number
 }
 
-/** One stretch of path over which the witness travelled at one speed, with the walking cycle's
+/** One stretch of path over which the observer travelled at one speed, with the walking cycle's
  * own state at its start. Precomputed because the phase at any instant depends on every stretch
  * before it: a walk is a count of steps taken, not a function of the clock. */
 interface GaitStretch {
@@ -50,13 +50,13 @@ interface GaitStretch {
 }
 
 /**
- * The small movement of walking, derived from the path the witness is already recorded as having
+ * The small movement of walking, derived from the path the observer is already recorded as having
  * taken.
  *
- * A witness who walks is carried up and down, and side to side, by their own legs: the head rises
+ * A observer who walks is carried up and down, and side to side, by their own legs: the head rises
  * and falls about five centimetres twice per stride, and sways a few centimetres once per stride.
  * It is a real displacement of the eye, so it is a real parallax — near scenery shifts against far
- * scenery, exactly as it does when the witness covers ground, only faster and much smaller.
+ * scenery, exactly as it does when the observer covers ground, only faster and much smaller.
  *
  * WHY IT IS WORTH RENDERING AT ALL, given the size of it: because parallax is the one cue that
  * separates something a few metres away from something far off, and it is the near foreground that
@@ -66,13 +66,13 @@ interface GaitStretch {
  * claiming the foreground was as far off as the phenomenon.
  *
  * WHAT IT DELIBERATELY DOES NOT DO is rotate anything. A walking head is stabilised, and the eye in
- * it is stabilised again by the vestibulo-ocular reflex, so the image a witness gets does NOT roll
+ * it is stabilised again by the vestibulo-ocular reflex, so the image a observer gets does NOT roll
  * with their gait the way a hand-held camera's does. Rolling an eye's view would be reproducing a
  * convention of cinema rather than an observation. Rotation is a separate question with a separate
  * answer per instrument, and it is not this class's.
  *
  * DERIVED, NEVER RECORDED: nothing here is stored in a case file, and no case file can state it.
- * A recording says where the witness was and when; that they had legs is not a further claim.
+ * A recording says where the observer was and when; that they had legs is not a further claim.
  */
 export class Gait {
   /** The speed the cadence law below is anchored at, and the cadence there — an ordinary adult
@@ -83,7 +83,7 @@ export class Gait {
   /** Walking faster is done mostly with longer steps and only partly with quicker ones, which is
    * why this is well under 1: cadence goes as about the 0.43 power of speed and stride length as
    * the rest (Grieve, "Gait patterns and the speed of walking", 1968). Getting the split wrong is
-   * not cosmetic — a linear-in-speed cadence would have a witness at 2 m/s stepping half again as
+   * not cosmetic — a linear-in-speed cadence would have a observer at 2 m/s stepping half again as
    * fast as they really do, and the whole oscillation is at that frequency. */
   private static readonly CADENCE_EXPONENT = 0.43
 
@@ -99,14 +99,14 @@ export class Gait {
    * stays around three and a half centimetres across the ordinary range. */
   private static readonly SWAY_M = 0.0175
 
-  /** Under this the witness is not walking anywhere — they are standing, and a standing body's own
+  /** Under this the observer is not walking anywhere — they are standing, and a standing body's own
    * sway is a different phenomenon on a different time scale, not a slow walk. */
   private static readonly SLOWEST_WALK_M_PER_S = 0.2
 
   /**
    * Over this it is not a walk either, and this class says nothing rather than guessing.
    *
-   * A witness above it is running (Zamora, at Socorro, ran) or is being carried by something — and
+   * A observer above it is running (Zamora, at Socorro, ran) or is being carried by something — and
    * running is not this cycle scaled up: the body leaves the ground, the rise roughly doubles, and
    * the phase relationship between rise and sway is not the one used here. A vehicle has no gait at
    * all and its own vibration is not a body's. Returning nothing for both is the only honest
@@ -129,7 +129,7 @@ export class Gait {
   private static readonly HEAD_PITCH_DEG = 1.25
   private static readonly HEAD_YAW_DEG = 1
 
-  /** What a witness who is not walking is displaced by. Frozen: it is handed out repeatedly. */
+  /** What a observer who is not walking is displaced by. Frozen: it is handed out repeatedly. */
   static readonly STILL: GaitOffset = Object.freeze({
     eastM: 0,
     northM: 0,
@@ -147,7 +147,7 @@ export class Gait {
   ) {}
 
   /**
-   * The gait implied by a recording's own witness track, or undefined when the recording states no
+   * The gait implied by a recording's own observer track, or undefined when the recording states no
    * path to walk along — one point, or none, which is most recordings.
    *
    * Built fresh by every caller that needs it rather than cached on the sighting: the editor mutates
@@ -155,7 +155,7 @@ export class Gait {
    * handing out the walk from before the edit. It is a few dozen keyframes of arithmetic.
    */
   static of(sighting: Sighting): Gait | undefined {
-    const path = WitnessPath.of(sighting)
+    const path = ObserverPath.of(sighting)
     if (!path || path.points.length < 2) return undefined
     const stretches: GaitStretch[] = []
     let stepsBefore = 0
@@ -182,7 +182,7 @@ export class Gait {
         rampsIn: true,
         rampsOut: true
       })
-      // Only a walk advances the cycle. A witness who stood still for a minute did not come out of
+      // Only a walk advances the cycle. A observer who stood still for a minute did not come out of
       // it mid-step, and which foot they set off on again is not in any file.
       stepsBefore += stepHz * seconds
     }
@@ -197,7 +197,7 @@ export class Gait {
   }
 
   /**
-   * How fast the witness is stepping at a given speed, or zero when what they are doing is not
+   * How fast the observer is stepping at a given speed, or zero when what they are doing is not
    * walking — see SLOWEST_WALK_M_PER_S and FASTEST_WALK_M_PER_S for both refusals.
    */
   private static stepHzFor(speedMPerS: number): number {
@@ -206,7 +206,7 @@ export class Gait {
   }
 
   /**
-   * Where the witness's eye sits at t, relative to the path's own answer.
+   * Where the observer's eye sits at t, relative to the path's own answer.
    *
    * Phase zero is midstance on the right foot: the head is at the top of its rise and furthest over
    * to that side, which is the one instant of the cycle where the two are locked together. Which
@@ -225,7 +225,7 @@ export class Gait {
     // instrument cancels — nearly all of it, for an eye.
     const turn = (settled * this.rotationPassed * stretch.speedMPerS) / Gait.REFERENCE_SPEED_M_PER_S
     return {
-      // To the witness's right, which is the direction of travel turned a quarter turn clockwise.
+      // To the observer's right, which is the direction of travel turned a quarter turn clockwise.
       eastM: sway * stretch.northUnit,
       northM: -sway * stretch.eastUnit,
       upM: Gait.RISE_M_PER_M_PER_S * stretch.speedMPerS * settled * Math.cos(stepAngle),
@@ -247,11 +247,11 @@ export class Gait {
    * and last step of a walk.
    *
    * Not smoothing for its own sake. Without it the eye would jump by the full amplitude at the
-   * instant a recording's keyframes say the witness set off or stopped, and a jump in POSITION is
+   * instant a recording's keyframes say the observer set off or stopped, and a jump in POSITION is
    * an artifact of a kind the path itself never produces (a track states positions, so the eye's
    * own place is continuous even where its speed is not). A body starting and stopping really does
    * take about a step to reach and leave a steady gait, so the shape of the fix is the shape of the
-   * thing. Applied only where the walk actually begins or ends: a witness crossing a keyframe at
+   * thing. Applied only where the walk actually begins or ends: a observer crossing a keyframe at
    * the same speed keeps stepping, and tapering there would invent a stumble every few seconds.
    */
   private amplitudeAt(stretch: GaitStretch, tMs: number): number {

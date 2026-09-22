@@ -2,7 +2,7 @@ import type { SaidText } from "./SaidText.js"
 
 /**
  * Static scenery placed around the observer — buildings, trees, streetlights, vehicles, other
- * witnesses — for context in the 3D reconstruction. Unlike the UFO's own Timeline/Shape or the
+ * observers — for context in the 3D reconstruction. Unlike the UFO's own Timeline/Shape or the
  * observer's own ObserverTrack, decor doesn't MOVE over time via keyframes (real buildings/trees
  * don't move during a sighting, so a flat list on Sighting is enough — see Sighting.decor) — but
  * `lit` alone can still change mid-recording (a streetlight's photocell triggering at dusk, a
@@ -10,35 +10,35 @@ import type { SaidText } from "./SaidText.js"
  * rest of DecorObject's fields. See resolveDecorLitAt.
  */
 /**
- * "crop" is a ROW and not a field: what a cultivated field is made of, and what a witness walking
+ * "crop" is a ROW and not a field: what a cultivated field is made of, and what a observer walking
  * through one really has beside them. It earns its own kind because a row is the only near thing in
- * an open field, and near is the only distance at which a witness's own movement shows (see Gait) —
+ * an open field, and near is the only distance at which a observer's own movement shows (see Gait) —
  * calling one a tree, the nearest existing kind, would put a trunk and a canopy into a lavender
  * field and say so in the editor.
  */
 /**
  * "mound" is a heap: the clapier of stones a Provençal field is cleared into, a pile of earth, a
  * bank. Distinct from a building because it has no walls, no floors and nobody inside it, and worth
- * its own kind because it is exactly the sort of thing a witness hides behind — Masse's own was two
+ * its own kind because it is exactly the sort of thing a observer hides behind — Masse's own was two
  * metres high and is what kept the craft out of sight until he walked round it.
  */
 export type DecorKind =
-  | "building" | "tree" | "crop" | "mound" | "streetlight" | "vehicle" | "witness" | "aircraft"
+  | "building" | "tree" | "crop" | "mound" | "streetlight" | "vehicle" | "observer" | "aircraft"
   /** A low bush: the greasewood of a New Mexico wash, the scrub of a garrigue — a clump of rounded
    * crowns on the ground, with no trunk. */
   | "shrub"
   /**
-   * A being the witness reported seeing — the two figures beside the craft at Valensole, the pair
+   * A being the observer reported seeing — the two figures beside the craft at Valensole, the pair
    * at Socorro.
    *
    * Here rather than anywhere else because the author's own words framed it as a placement: "le
    * format ne sait pas encore PLACER d'entités observées DANS LA SCÈNE" is what Valensole's
    * description had to say instead of showing them. Everything that makes a decor object work is
-   * exactly what an entity needs — a place in metres from the witness, a size, a heading, an
+   * exactly what an entity needs — a place in metres from the observer, a size, a heading, an
    * occlusion relationship with the shapes — and none of it would be better for being written
    * twice.
    *
-   * It is its OWN kind and not a "witness" for the one reason that matters: a companion who was
+   * It is its OWN kind and not a "observer" for the one reason that matters: a companion who was
    * there and a being that was seen are the same silhouette and opposite claims, and a
    * classification reading the scene has to tell them apart (see HynekAssessor).
    *
@@ -55,19 +55,19 @@ export type DecorKind =
 /** A side of a decor object, relative to its own headingDeg ("front" is whichever way the object
  * itself faces) rather than a compass direction — a decor object can be rotated, so "north"
  * wouldn't stay meaningful. Used both for which side a window sits on and which side the recording
- * witness is positioned at inside the object — see hasWindows/isWindowOpenable/canHoldWitness
+ * observer is positioned at inside the object — see hasWindows/isWindowOpenable/canHoldObserver
  * below for which kinds each concept applies to.
  *
  * The 4 "front-X"/"behind-X" corners exist because a vehicle's LEFT (or right) side actually has
  * TWO windows in real life — a front-door window and a rear-door window, one per seat — not one:
- * "left" alone couldn't say which of the two a witness sitting inside was actually looking
- * through. A building has no such split (see decorSidesFor/witnessSidesFor below) — a wall is a
+ * "left" alone couldn't say which of the two a observer sitting inside was actually looking
+ * through. A building has no such split (see decorSidesFor/observerSidesFor below) — a wall is a
  * wall, its own left/right side isn't naturally divided into two separately-seated positions the
  * way a car's is. */
 export type DecorSide = "front" | "behind" | "left" | "right" | "front-left" | "front-right" | "behind-left" | "behind-right"
 
 /** Every DecorSide value, kind-agnostic — used where a field (e.g. DecorObject.windows,
- * DecorObject.witnessSide) needs to be resynced/cleared regardless of which of them the current
+ * DecorObject.observerSide) needs to be resynced/cleared regardless of which of them the current
  * kind actually uses; a side outside decorSidesFor(kind) is simply unused/hidden for that kind,
  * not invalid to iterate. See decorSidesFor for which subset is actually meaningful per kind. */
 export const DECOR_SIDES: DecorSide[] = ["front", "behind", "left", "right", "front-left", "front-right", "behind-left", "behind-right"]
@@ -84,13 +84,13 @@ export function decorSidesFor(kind: DecorKind): DecorSide[] {
     : ["front", "behind", "left", "right"]
 }
 
-/** Which DecorSide values the recording witness can actually be positioned AT for this kind — a
+/** Which DecorSide values the recording observer can actually be positioned AT for this kind — a
  * subset of decorSidesFor: a vehicle's occupant sits in one of its 4 door/seat positions
  * (front-left/front-right/behind-left/behind-right), never "at the windshield" or "at the rear
  * window" the way decorSidesFor's own front/behind entries name a fixed pane, not a seat. Every
  * other kind (today: building) has no such distinction — every side decorSidesFor returns for it
  * is equally "a wall you could stand next to" — so this is identical to decorSidesFor there. */
-export function witnessSidesFor(kind: DecorKind): DecorSide[] {
+export function observerSidesFor(kind: DecorKind): DecorSide[] {
   return kind === "vehicle" ? ["front-left", "front-right", "behind-left", "behind-right"] : decorSidesFor(kind)
 }
 
@@ -131,7 +131,7 @@ export function defaultWindows(kind: DecorKind): Partial<Record<DecorSide, numbe
  * two can never drift apart. */
 export const DEFAULT_BUILDING_FLOORS = 2
 
-/** Which kinds have any window at all — a tree/streetlight/other-witness has none. Shared by the
+/** Which kinds have any window at all — a tree/streetlight/other-observer has none. Shared by the
  * recorder UI (which fields to show) and DecorSystem (what geometry to build). */
 export function hasWindows(kind: DecorKind): boolean {
   return kind === "building" || kind === "vehicle"
@@ -148,9 +148,9 @@ export function isWindowOpenable(kind: DecorKind, side: DecorSide): boolean {
   return false
 }
 
-/** Which kinds the recording witness can be positioned inside of — a tree/streetlight/other-
- * witness can't be "inside". */
-export function canHoldWitness(kind: DecorKind): boolean {
+/** Which kinds the recording observer can be positioned inside of — a tree/streetlight/other-
+ * observer can't be "inside". */
+export function canHoldObserver(kind: DecorKind): boolean {
   return kind === "building" || kind === "vehicle"
 }
 
@@ -158,8 +158,8 @@ export function canHoldWitness(kind: DecorKind): boolean {
  * A decor object's real size in meters — the one thing the scenery was missing.
  *
  * Every building used to be six meters square, every car the same 1.8 x 4.2 box, whatever the
- * testimony said they were. In a project that refuses to draw an angle by eye (see Shape.angular,
- * which stores what reached the witness's eye and nothing else), that was the last place a number
+ * account said they were. In a project that refuses to draw an angle by eye (see Shape.angular,
+ * which stores what reached the observer's eye and nothing else), that was the last place a number
  * was invented rather than stated: Zamora's patrol car and a delivery van were the same object, and
  * "the dynamite shack" was a six-by-six warehouse.
  *
@@ -182,7 +182,7 @@ export interface DecorSize {
 /** A size with every axis known — what the built-in shape itself measures (see
  * DecorSystem.naturalSize), and what a DecorSize resolves to once its unmeasured axes fall back to
  * it (see DecorSystem.sizeOf). Distinct from DecorSize above precisely because that one is allowed
- * to be partial: a witness who paced out the length of a shed and not its width has stated one
+ * to be partial: a observer who paced out the length of a shed and not its width has stated one
  * number, and writing the other two in beside it would turn the primitive's own arbitrary
  * proportions into a measurement nobody made. */
 export type MeasuredDecorSize = Required<DecorSize>
@@ -290,9 +290,9 @@ export interface DecorObject {
   eastM: number
   northM: number
   /** Degrees clockwise from true north, same convention as ObserverPose.headingDeg — which way a
-   * vehicle is facing, or a witness looking. Ignored for building/tree/streetlight. */
+   * vehicle is facing, or a observer looking. Ignored for building/tree/streetlight. */
   headingDeg?: number
-  /** Streetlight lamp / vehicle headlights switched on. Ignored for building/tree/witness. Also
+  /** Streetlight lamp / vehicle headlights switched on. Ignored for building/tree/observer. Also
    * the fallback used when litKeyframes is empty/absent — see resolveDecorLitAt — and the value a
    * freshly added decor object starts with before its first keyframe, if any, is ever recorded. */
   lit?: boolean
@@ -314,10 +314,10 @@ export interface DecorObject {
    *
    * This is what turns a lamp into a streak: a flash rate alone draws dots on top of each other. */
   track?: DecorPlacementKeyframe[]
-  /** For kind "witness" only: the URL of that witness's own sighting.json recording, if known —
-   * lets the 3D scene's own context menu offer "view this witness's testimony" (loading it the
+  /** For kind "observer" only: the URL of that observer's own sighting.json recording, if known —
+   * lets the 3D scene's own context menu offer "view this observer's account" (loading it the
    * same way SightingEditorElement.importFromUrl already does). Undefined means no known recording
-   * for that witness, or not applicable for any other kind. */
+   * for that observer, or not applicable for any other kind. */
   sightingUrl?: string
   /** Per-side window opacity, 0 (fully open — the pane is invisible, and DecorSystem.addRoom's own
    * interior wall panel is skipped there too, same as no window at all) to 100 (fully closed — a
@@ -334,13 +334,13 @@ export interface DecorObject {
    * FIXED_WINDOW_MIN_OPACITY_PERCENT). Not keyframed (unlike lit): a window doesn't change during
    * a sighting the way a streetlight's photocell does. */
   windows?: Partial<Record<DecorSide, number>>
-  /** Which side of this object the recording witness is positioned at, looking outward through
-   * that side, if they're inside this object at all — see canHoldWitness above for which kinds
-   * this applies to (building/vehicle; a tree/streetlight/other-witness can't be "inside"), and
-   * witnessSidesFor for which DecorSide values are actually valid seats/positions for that kind
+  /** Which side of this object the recording observer is positioned at, looking outward through
+   * that side, if they're inside this object at all — see canHoldObserver above for which kinds
+   * this applies to (building/vehicle; a tree/streetlight/other-observer can't be "inside"), and
+   * observerSidesFor for which DecorSide values are actually valid seats/positions for that kind
    * (a vehicle's occupant is always at one of its 4 door positions, never "at the windshield").
-   * Absent means the witness isn't inside this object. At most one decor object in a sighting is
-   * expected to have this set at a time — the recording witness can only be in one place — but
+   * Absent means the observer isn't inside this object. At most one decor object in a sighting is
+   * expected to have this set at a time — the recording observer can only be in one place — but
    * that's a UI convention, not enforced here. */
   /**
    * What colour this object actually is, as a CSS colour — the same way a shape states its own (see
@@ -357,24 +357,24 @@ export interface DecorObject {
    * repainting the car would otherwise put out its headlights.
    */
   color?: string
-  witnessSide?: DecorSide
+  observerSide?: DecorSide
   /** Kind "building" only: number of upper stories above the ground floor, set when the building
    * is created (default 2, see SightingEditorElement.addDecor) and editable afterward. Drives the
    * window rows in the 3D model and the valid range for occupiedFloor (0 = ground floor, up to and
    * including this value). Ignored for every other kind. */
   floors?: number
-  /** Kind "building" only, meaningful once witnessSide is set: which floor the witness is on, 0
-   * (ground floor) up to floors. Ignored for every other kind, and while witnessSide is absent. */
+  /** Kind "building" only, meaningful once observerSide is set: which floor the observer is on, 0
+   * (ground floor) up to floors. Ignored for every other kind, and while observerSide is absent. */
   occupiedFloor?: number
   /** Shape sourceIds (see Timeline.sourceIds/Shape) this decor object sits in front of, from the
-   * witness's own reported viewpoint — occluding that shape wherever their screen positions line
+   * observer's own reported viewpoint — occluding that shape wherever their screen positions line
    * up (see SceneRenderer.isScreenPointOccluded). Absent/empty (what every new decor object starts
    * at) means this decor object never occludes anything: every shape stays visible in front of it,
    * the same as before this field existed. Per-shape, not a single "in front of the UFO" flag,
    * because a recording can have more than one shape (see Timeline.sourceIds) and the same building
    * might genuinely pass in front of one and behind another — e.g. two independently moving lights
-   * reported by the same witness. There's also no way to derive this from geometry alone: the same
-   * testimony could equally report either physical relationship for a given shape, a judgment call
+   * reported by the same observer. There's also no way to derive this from geometry alone: the same
+   * account could equally report either physical relationship for a given shape, a judgment call
    * that isn't recorded anywhere else in the data model — so it's a deliberate per-shape choice set
    * by hand (see SightingEditorElement's own "masks" checkbox list) rather than an automatic rule. */
   occludesSourceIds?: string[]

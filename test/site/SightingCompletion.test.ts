@@ -51,7 +51,7 @@ describe("SightingCompletion", () => {
     })
 
     it("follows a path several objects deep", () => {
-      const offered = labels('{ "witnessTrack": { "keyframes": [ { "pose": { | } } ] } }')
+      const offered = labels('{ "observerTrack": { "keyframes": [ { "pose": { | } } ] } }')
       expect(offered).toContain('"headingDeg"')
       expect(offered).toContain('"fovDeg"')
     })

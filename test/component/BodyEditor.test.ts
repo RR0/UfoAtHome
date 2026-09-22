@@ -137,7 +137,7 @@ describe("The Bodies part of the editor", () => {
     expect(fixture.field("body-interpretation-title").closest("label")!.hidden).toBe(false)
   })
 
-  it("adds a body where the witness is looking when no shape is drawn", () => {
+  it("adds a body where the observer is looking when no shape is drawn", () => {
     const fixture = new Fixture(null)
     fixture.start = { keyframe: { t: 0, azimuthDeg: 90, altitudeDeg: -2, onGround: true } }
     fixture.container.querySelector<HTMLButtonElement>("#body-add")!.click()
@@ -145,7 +145,7 @@ describe("The Bodies part of the editor", () => {
     expect(fixture.sighting.interpretation!.bodies[0].track).toEqual([{ t: 0, azimuthDeg: 90, altitudeDeg: -2, onGround: true }])
   })
 
-  it("turns the witness towards the body on show", () => {
+  it("turns the observer towards the body on show", () => {
     const fixture = new Fixture()
     fixture.type("body-select", "figure-1")
     fixture.container.querySelector<HTMLButtonElement>("#body-look")!.click()
@@ -195,12 +195,12 @@ describe("The Bodies part of the editor", () => {
     expect(fixture.sighting.interpretation!.bodies[0].track.map(key => key.t)).toEqual([0, 2500])
   })
 
-  it("states a position from the witness in the witness's terms", () => {
+  it("states a position from the observer in the observer's terms", () => {
     const fixture = new Fixture(null)
     fixture.container.querySelector<HTMLButtonElement>("#body-add")!.click()
     fixture.time = 2000
     fixture.editor.syncKeyframe()
-    expect((fixture.container.querySelector("#body-key-mode") as HTMLSelectElement).value).toBe("witness")
+    expect((fixture.container.querySelector("#body-key-mode") as HTMLSelectElement).value).toBe("observer")
     fixture.type("body-key-distance", "250")
     expect(fixture.sighting.interpretation!.bodies[0].track[0]).toEqual({ t: 2000, azimuthDeg: 10, altitudeDeg: 2, distanceM: 250, sizeM: { widthM: 4, lengthM: 5, heightM: 2 }, attitude: { headingDeg: 30, pitchDeg: 0, rollDeg: 0 } })
   })
@@ -236,7 +236,7 @@ describe("The Bodies part of the editor", () => {
     expect(fixture.sighting.interpretation!.bodies[0].track).toEqual([{ t: 0, azimuthDeg: 90, altitudeDeg: 0, distanceM: 100, sizeM: { widthM: 35, lengthM: 37, heightM: 12 } }])
   })
 
-  it("moves a body stated from the witness to the direction it is dragged to, keeping its distance", () => {
+  it("moves a body stated from the observer to the direction it is dragged to, keeping its distance", () => {
     const fixture = new Fixture(null)
     fixture.start = { keyframe: { t: 0, azimuthDeg: 10, altitudeDeg: 2, distanceM: 100 } }
     fixture.container.querySelector<HTMLButtonElement>("#body-add")!.click()

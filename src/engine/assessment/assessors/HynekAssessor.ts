@@ -9,7 +9,7 @@ import { ShapeDistance } from "../../shape/ShapeDistance.js"
 const DAYLIGHT_SUN_ALTITUDE_DEG = -6
 
 /** Hynek's own line between a close encounter and a distant sighting: about 500 feet. Under it a
- * witness sees a thing rather than a light, and optical misperception stops being the question. */
+ * observer sees a thing rather than a light, and optical misperception stops being the question. */
 const CLOSE_ENCOUNTER_M = 150
 
 /**
@@ -35,13 +35,13 @@ const CLOSE_ENCOUNTER_M = 150
 export class HynekAssessor implements Assessor {
 
   /** What it can decide turns on when and where the sighting happened, so a reader is sent to the
-   * moment rather than to the witness — see Assessor.about. */
+   * moment rather than to the observer — see Assessor.about. */
   readonly about = "temporal"
 
   async assess(sighting: Sighting): Promise<Assessment> {
     const daylight = HynekAssessor.daylight(sighting)
-    // Beings the witness reported, placed in the scene — the account's own statement that there
-    // were any, which is exactly what this tier turns on. A decor "witness" is a companion who was
+    // Beings the observer reported, placed in the scene — the account's own statement that there
+    // were any, which is exactly what this tier turns on. A decor "observer" is a companion who was
     // there and does not count: same silhouette, opposite claim (see DecorKind's "entity").
     const entities = sighting.decor
       .map((object, index) => ({ object, index }))
@@ -66,11 +66,11 @@ export class HynekAssessor implements Assessor {
         { id: "traces", paths: [], unsupported: true },
         {
           id: "proximity",
-          // Derived and never stated: no witness measured a distance, and this one comes out of
+          // Derived and never stated: no observer measured a distance, and this one comes out of
           // their own walk against the object's growing apparent size (see ShapeDistance), on an
           // assumption about the object holding still that nothing in the file can confirm.
           basis: nearestM === undefined ? undefined : "derived",
-          paths: nearestM === undefined ? [] : ["timeline", "witnessTrack"]
+          paths: nearestM === undefined ? [] : ["timeline", "observerTrack"]
         },
         { id: "radar", paths: [], unsupported: true },
         {

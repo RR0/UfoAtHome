@@ -9,7 +9,7 @@ import type { ObserverGeo } from "./CelestialPositions.js"
  * ever reconstruct. Aircraft are traceable from about 2013, satellites from 1957 — but showers
  * recur every year on the same dates, so the Perseids of 1948 are the Perseids of today. A sighting
  * in mid-August, or mid-November, or the night of 13 December, is a sighting during a shower, and
- * that is a fact about the sky rather than an opinion about the witness.
+ * that is a fact about the sky rather than an opinion about the observer.
  *
  * It cuts both ways, which is what makes it worth having: a radiant BELOW THE HORIZON is a shower
  * that cannot have produced anything at all, and saying so is as useful as saying the opposite.

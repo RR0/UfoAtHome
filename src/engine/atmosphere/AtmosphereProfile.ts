@@ -1,5 +1,5 @@
 /**
- * What the air above a witness is made of, wavelength by wavelength — the medium a sky is scattered
+ * What the air above a observer is made of, wavelength by wavelength — the medium a sky is scattered
  * in, and nothing about any particular sky.
  *
  * Three constituents, because three are enough to give a clear sky every colour it has:

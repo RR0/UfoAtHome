@@ -115,7 +115,7 @@ describe("HaloSky, which traces light through crystals and is told no angles at 
       // from the traced position rather than taken from the same function, since agreeing with
       // itself is what the old code did.
       expect(separationOf(altitude, altitude, swing)).toBeCloseTo(separation, 6)
-      // A sundog is far brighter than the ring it sits beside: the thing that makes a witness
+      // A sundog is far brighter than the ring it sits beside: the thing that makes a observer
       // report two objects flanking the Sun rather than a ring round it.
       expect(justOutside).toBeGreaterThan(radianceFromSource(map, altitude, separation, 0) * 5)
     })
@@ -166,7 +166,7 @@ describe("HaloSky, which traces light through crystals and is told no angles at 
     })
 
     it("runs a circle right round the sky at the source's own height", () => {
-      // The parhelic circle, off the vertical faces of level plates — the form that makes a witness
+      // The parhelic circle, off the vertical faces of level plates — the form that makes a observer
       // say the light "followed" them, since it reaches all the way round behind.
       const altitude = 25
       const map = new HaloSky().compute(altitude, 0.95, RAYS)

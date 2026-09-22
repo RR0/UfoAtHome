@@ -24,11 +24,11 @@ export interface BaseShape {
   /** 0 = no halo/glow, >1 = larger glow radius */
   haloScale: number
   /**
-   * How indistinct the witness said its edges were — 0 for a hard outline, 1 for a shape with no
+   * How indistinct the observer said its edges were — 0 for a hard outline, 1 for a shape with no
    * edge at all. What they SAW, in the same sense as its colour: not a consequence of the optics.
    *
    * The depth of field this project draws (see DepthOfFieldPass) deliberately does not touch the
-   * witness's own object, because the object's distance is the very unknown a reconstruction is
+   * observer's own object, because the object's distance is the very unknown a reconstruction is
    * about and blurring it from a distance would assert the answer. This runs the other way, and is
    * worth more: a stated blur, read back through the instrument's own thin-lens geometry, BOUNDS
    * that distance — an object photographed as a disc through a lens focused at infinity was near.
@@ -42,7 +42,7 @@ export interface BaseShape {
    */
   blur?: number
   /**
-   * How dazzling the witness said it was — 0 for a light you can look at, 1 for one you cannot.
+   * How dazzling the observer said it was — 0 for a light you can look at, 1 for one you cannot.
    *
    * Not a bigger halo, which is what it will be reached for instead. A halo is a coloured fringe
    * around a shape; brilliance is not a colour at all, because a screen cannot go brighter than
@@ -50,23 +50,23 @@ export interface BaseShape {
    * whatever its own hue, a wide faint veil spreads far past it (light scattered in the eye, or in
    * the lens), and a straight-bladed aperture throws spikes. This project already renders all
    * three — for the Sun, from its real photometry (see SceneRenderer's glare and
-   * applyDazzleStrength). The witness's own object got none of them, because it is painted on the
+   * applyDazzleStrength). The observer's own object got none of them, because it is painted on the
    * 2D overlay above the 3D scene where that machinery lives; CanvasRenderer draws the same three
    * behaviours from this one stated number.
    *
    * Stated, not derived, and there is no reading it back: unlike a blur, which the lens's own
    * thin-lens geometry turns into a bound on distance, nothing here models what a film or a retina
-   * saturates at. What the witness said is all this is.
+   * saturates at. What the observer said is all this is.
    */
   brightness?: number
   selected: boolean
-  /** What the witness calls it, if anything. Translatable — see SaidText. */
+  /** What the observer calls it, if anything. Translatable — see SaidText. */
   title?: SaidText
   /**
-   * How big this looked to the witness, in degrees of arc (see AngularExtent) — the recording's
+   * How big this looked to the observer, in degrees of arc (see AngularExtent) — the recording's
    * OWN statement of size, and the one it is allowed to make.
    *
-   * A testimony never contains a real size: "about 30 m long" is a conclusion the witness drew
+   * A account never contains a real size: "about 30 m long" is a conclusion the observer drew
    * from a distance they could not perceive either, and storing it would freeze one person's
    * arithmetic as if it were their observation. What they did perceive is how much of their view
    * the thing filled, which is exactly this. Real meters are DERIVED, at read time and only where
@@ -83,27 +83,27 @@ export interface BaseShape {
    */
   angular?: AngularExtent
   /**
-   * Which way the witness was actually looking when the thing was there — degrees of azimuth from
+   * Which way the observer was actually looking when the thing was there — degrees of azimuth from
    * true north and of altitude above the horizon, the same conventions as ObserverPose.
    *
    * Authoritative over `bounds.x/y` exactly as `angular` is over `bounds.width/height`, and for the
-   * same reason: a pixel names a direction only once a projection is named, and the witness's own
+   * same reason: a pixel names a direction only once a projection is named, and the observer's own
    * HEADING is part of that naming. Without this, a recording says "four degrees left of wherever
-   * I happened to be facing" — so turning the witness's head carried the phenomenon around the sky
-   * with it, and a witness who turned away from a thing on the ground took it with them.
+   * I happened to be facing" — so turning the observer's head carried the phenomenon around the sky
+   * with it, and a observer who turned away from a thing on the ground took it with them.
    *
    * The pixel box saved alongside is that direction projected onto this canvas, kept so a file
    * stays readable and so an editing gesture has something to move; if the two disagree, the
    * direction wins (see SightingShapes.toPosition, which re-derives the box on load).
    *
    * Optional for the same reason `angular` is, plus one more: a recording whose pose never stated a
-   * heading has no direction to state either, and inventing one would be claiming the witness faced
+   * heading has no direction to state either, and inventing one would be claiming the observer faced
    * north.
    */
   aim?: ShapeAim
 }
 
-/** A direction in the witness's own sky — see BaseShape.aim. */
+/** A direction in the observer's own sky — see BaseShape.aim. */
 export interface ShapeAim {
   /** Degrees clockwise from true north, the same convention as ObserverPose.headingDeg. */
   azimuthDeg: number

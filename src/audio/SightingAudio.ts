@@ -132,7 +132,7 @@ export class SightingAudio {
   }
 
   /** What identifies the voice `sound` needs — undefined when it needs none at all. A real
-   * recording wins over the kind: a witness who has the actual sound has no use for an imitation
+   * recording wins over the kind: a observer who has the actual sound has no use for an imitation
    * of it. */
   private keyFor(sound: SightingSound): string | undefined {
     if (sound.volume <= 0) return undefined

@@ -2,7 +2,7 @@ import { ApparentSize } from "./ApparentSize.js"
 import type { Sighting } from "../model/Sighting.js"
 import { resolveObserverPoseAt } from "../model/Sighting.js"
 
-/** Metres per degree of latitude. Equirectangular, like GeoProjection's own: a witness's walk is
+/** Metres per degree of latitude. Equirectangular, like GeoProjection's own: a observer's walk is
  * tens of metres, and no projection error at that scale reaches the first decimal. */
 const METERS_PER_DEG_LAT = 111320
 const DEG_TO_RAD = Math.PI / 180
@@ -12,8 +12,8 @@ const DEG_TO_RAD = Math.PI / 180
  * runs away to infinity on rounding alone. */
 const MIN_ANGULAR_RATIO = 1.02
 
-/** How far the witness must have closed for the baseline to mean anything, metres. A witness who
- * shifted their weight is not a witness who walked. */
+/** How far the observer must have closed for the baseline to mean anything, metres. A observer who
+ * shifted their weight is not a observer who walked. */
 const MIN_CLOSED_M = 1
 
 /** What the approach establishes. */
@@ -25,7 +25,7 @@ export interface ApproachEstimate {
   distanceM: { t: number, m: number }[]
   /** The closest it ever came, metres — what a close-encounter tier turns on. */
   nearestM: number
-  /** The two instants the baseline was measured between, and how far the witness closed along the
+  /** The two instants the baseline was measured between, and how far the observer closed along the
    * line of sight in that time. Reported so the whole derivation can be checked by hand. */
   fromT: number
   toT: number
@@ -33,11 +33,11 @@ export interface ApproachEstimate {
 }
 
 /**
- * How far away a phenomenon was, worked out from the witness walking towards it.
+ * How far away a phenomenon was, worked out from the observer walking towards it.
  *
  * The one thing this format has always refused to store, and it turns out not to need storing. A
  * thing of unchanging real width subtends an angle inversely proportional to its distance, so two
- * instants give the RATIO of two distances; the witness's own track gives the DIFFERENCE between
+ * instants give the RATIO of two distances; the observer's own track gives the DIFFERENCE between
  * them in metres; and a ratio plus a difference is both distances. No metre is asserted anywhere,
  * and the result is checkable against the account by anyone who cares to.
  *
@@ -47,13 +47,13 @@ export interface ApproachEstimate {
  * Two assumptions, both stated rather than hidden, and both false in cases this must not be used on:
  *
  * - The object kept its size. Anything that swelled or shrank breaks the proportionality outright.
- * - The object held still while the witness moved. Otherwise the closing distance is not the
- *   witness's alone and the difference is somebody else's. The baseline is taken across the pair of
- *   instants the witness moved most between, which is usually the approach and before anything
+ * - The object held still while the observer moved. Otherwise the closing distance is not the
+ *   observer's alone and the difference is somebody else's. The baseline is taken across the pair of
+ *   instants the observer moved most between, which is usually the approach and before anything
  *   departs — at Valensole the craft lifts off at 254 s and the walk ends at 55 s — but nothing here
  *   can verify it, so what comes out is derived and never stated.
  *
- * Where the witness never moved there is no baseline and the answer is undefined, which is correct
+ * Where the observer never moved there is no baseline and the answer is undefined, which is correct
  * and common: a driver who stopped their car has established nothing about distance, and that is
  * exactly why a light in an empty sky stays a light at an unknown distance.
  */
@@ -97,7 +97,7 @@ export class ShapeDistance {
     }
   }
 
-  /** Every instant that states both an apparent width and where the witness was, in time order. */
+  /** Every instant that states both an apparent width and where the observer was, in time order. */
   private static sightings(
     sighting: Sighting, sourceId: string
   ): { t: number, widthDeg: number, lat: number, lng: number, sightAzimuthDeg?: number }[] {
@@ -114,8 +114,8 @@ export class ShapeDistance {
           widthDeg,
           lat: pose.lat,
           lng: pose.lng,
-          // Where the witness was looking AT the object. Its own stated direction when it has one,
-          // and otherwise the way the witness faced — which is where a shape they drew in front of
+          // Where the observer was looking AT the object. Its own stated direction when it has one,
+          // and otherwise the way the observer faced — which is where a shape they drew in front of
           // themselves was. Only used to project their walk onto the line of sight, so a few
           // degrees of error costs a cosine's worth and nothing more.
           sightAzimuthDeg: shape?.aim?.azimuthDeg ?? pose.headingDeg
@@ -125,10 +125,10 @@ export class ShapeDistance {
   }
 
   /**
-   * The pair of instants the witness closed the most distance between — the longest baseline the
+   * The pair of instants the observer closed the most distance between — the longest baseline the
    * recording offers, and so the best-conditioned answer it can give.
    *
-   * Closed ALONG THE LINE OF SIGHT, not walked: a witness strolling past a thing at a constant
+   * Closed ALONG THE LINE OF SIGHT, not walked: a observer strolling past a thing at a constant
    * distance has covered ground and established nothing, and it is the component towards the object
    * that changes how big it looks.
    */
@@ -140,7 +140,7 @@ export class ShapeDistance {
       for (const to of seen) {
         if (from.t >= to.t) continue
         const closedM = ShapeDistance.closedAlongSight(from, to)
-        // Positive means the witness got nearer between the two, which is the only direction the
+        // Positive means the observer got nearer between the two, which is the only direction the
         // arithmetic below reads; a retreat is the same pair the other way round.
         const [near, far, m] = closedM >= 0 ? [to, from, closedM] : [from, to, -closedM]
         if (m < MIN_CLOSED_M || near.widthDeg <= far.widthDeg) continue
@@ -152,7 +152,7 @@ export class ShapeDistance {
     return best
   }
 
-  /** How much nearer the witness got between two instants, along the direction they were looking
+  /** How much nearer the observer got between two instants, along the direction they were looking
    * at the object — the projection of their displacement onto that line. */
   private static closedAlongSight(
     from: { lat: number, lng: number, sightAzimuthDeg?: number },

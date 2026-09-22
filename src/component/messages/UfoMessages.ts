@@ -13,8 +13,8 @@ export interface UfoMessages {
   fullscreen: string
   exitFullscreen: string
   /** Names the reader's own gesture, not the feature — see the project's wording rules. */
-  showWitnessMap: string
-  hideWitnessMap: string
+  showObserverMap: string
+  hideObserverMap: string
   /** Shown on the map instead of the imagery when the tiles cannot be fetched — the path is still
    * drawn, so this says what is missing rather than that the map failed. */
   mapImageryUnavailable: string
@@ -27,8 +27,8 @@ export interface UfoMessages {
   referenceOpacity: string
   showMilestones: string
   hideMilestones: string
-  /** What the map calls the two things a recording may not have named: the witness themselves, and
+  /** What the map calls the two things a recording may not have named: the observer themselves, and
    * a piece of scenery with no title. A hover has to say something. */
-  witnessHere: string
+  observerHere: string
   decorHere: string
 }

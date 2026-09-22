@@ -20,7 +20,7 @@ export interface ElevationProvider {
 
 /** The ground's height above sea level at one point, read off whichever provider is live — what
  * makes "altitude" a real number in an editor rather than a height above an unstated datum: a
- * witness in the Alps is not at 0 m, and the field has to say so before they wonder why. Kept as a
+ * observer in the Alps is not at 0 m, and the field has to say so before they wonder why. Kept as a
  * helper over the grid API rather than a second interface method so a provider only ever has one
  * thing to implement (see ElevationProvider's own doc comment). */
 export class GroundElevation {
@@ -44,7 +44,7 @@ export class GroundElevation {
       return Number.isFinite(height) ? height : undefined
     } catch {
       // Offline, a CORS failure, a tile that doesn't exist: the editor simply doesn't learn the
-      // ground's height, exactly as it didn't before. Never an error the witness has to dismiss.
+      // ground's height, exactly as it didn't before. Never an error the observer has to dismiss.
       return undefined
     }
   }

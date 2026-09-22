@@ -1,5 +1,5 @@
 /**
- * The observer's (witness's) own pose over time — geographic position, elevation, and viewing
+ * The observer's (observer's) own pose over time — geographic position, elevation, and viewing
  * orientation — as a keyframe track alongside the UFO's Timeline. Kept as its own class rather
  * than folded into Timeline/Keyframe: an ObserverPose isn't a ShapeState (no sourceId dimension,
  * exactly one observer per recording), so reusing Timeline's per-source merge logic would only
@@ -10,7 +10,7 @@
 export interface ObserverPose {
   /**
    * Decimal degrees. undefined means no real location is known yet (e.g. an editor where the
-   * witness's heading/pitch was set before a lat/lng) — callers needing an actual position for
+   * observer's heading/pitch was set before a lat/lng) — callers needing an actual position for
    * astronomy math must supply their own fallback (never silently default to 0,0 as if that were
    * a real place); camera orientation alone (heading/pitch/fov) doesn't need lat/lng at all.
    */
@@ -24,13 +24,13 @@ export interface ObserverPose {
    */
   headingDeg?: number
   /** Degrees above (positive) or below (negative) the local horizontal — how far up/down the
-   * witness was looking, e.g. craning their neck to look overhead. */
+   * observer was looking, e.g. craning their neck to look overhead. */
   pitchDeg: number
   /**
    * How far the instrument itself was tilted about its own line of sight, degrees, positive
-   * clockwise as the witness saw it — a camera held askew, a head leaned over.
+   * clockwise as the observer saw it — a camera held askew, a head leaned over.
    *
-   * A property of the INSTRUMENT, not of the place. Latitude and heading say where the witness
+   * A property of the INSTRUMENT, not of the place. Latitude and heading say where the observer
    * stood and which way they faced; this says nothing about either, only how the device was held —
    * which is why the editor keeps it beside the focal length and the aperture whose own spikes it
    * turns, and not beside the coordinates.
@@ -57,7 +57,7 @@ export interface ObserverPose {
    * about the device: the same camera is stopped down differently from one photograph to the next,
    * and a recording that keeps it can say the lens was opened up as the light failed. HELD rather
    * than blended between keyframes — an aperture does not pass through the values between two
-   * settings on its way from one to the other, unlike a witness turning round.
+   * settings on its way from one to the other, unlike a observer turning round.
    *
    * The SHUTTER is not here, and that is a statement: it belongs to the recording as a whole
    * (see Sighting.exposureSeconds). One observation was photographed one way.

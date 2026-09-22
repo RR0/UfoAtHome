@@ -21,7 +21,7 @@ import { SurfaceBrightness, type SkyBrightnessMap } from "./SurfaceBrightness.js
  *
  * What is deliberately absent: spiral arms, the bar, and the clumpiness of real dust. This is a
  * smooth axisymmetric Galaxy, so it gives the Scutum and Sagittarius clouds as one broad
- * brightening rather than as separate clouds, and the Coalsack not at all. For a witness's account
+ * brightening rather than as separate clouds, and the Coalsack not at all. For a observer's account
  * of "a strange glowing band" that is the right amount of Galaxy: the question such an account
  * raises is whether the band was there and how bright, never which star cloud it was.
  */
@@ -127,7 +127,7 @@ export class MilkyWay {
    * clouds are quoted at, and stating it next to the dark-sky background it competes with is the
    * more useful way to read it: a natural moonless sky is 22.0, so the brightest of the Milky Way
    * is ONE magnitude above the sky it stands on. Two and a half times, no more. That is why it
-   * disappears from a town, and why a witness who has only ever seen it from one is entitled to
+   * disappears from a town, and why a observer who has only ever seen it from one is entitled to
    * find it strange.
    */
   static readonly PEAK_MAG_PER_ARCSEC2 = 21
@@ -242,7 +242,7 @@ export class MilkyWay {
    * barely varies along it.
    *
    * Fixed forever once finished: the Galaxy does not move, so this is walked once for the life of
-   * the page and turned toward the witness's own horizon by a rotation — never rewalked for a new
+   * the page and turned toward the observer's own horizon by a rotation — never rewalked for a new
    * date, a new place or a new sighting.
    */
   private readonly values = new Float32Array(MilkyWay.LONGITUDE_STEPS * MilkyWay.LATITUDE_STEPS)

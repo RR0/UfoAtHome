@@ -1,14 +1,14 @@
 import { HorizontalFrame, type HorizontalPosition, type ObserverGeo } from "./CelestialPositions.js"
 
 /**
- * Where the fixed planes of the sky stand, from where the witness is standing.
+ * Where the fixed planes of the sky stand, from where the observer is standing.
  *
  * Every star this project draws is placed one at a time, by its own right ascension and
  * declination. The Milky Way and the zodiacal light cannot be placed that way — they are not
  * objects but whole coordinate systems' worth of brightness, computed once in the frame they are
  * naturally still in (the plane of the Galaxy; the plane of the planets) and then TURNED to face
- * the witness. Turning them needs the frame itself, not a position, and that is what this hands
- * back: the directions the axes of those frames point in, in the witness's own sky.
+ * the observer. Turning them needs the frame itself, not a position, and that is what this hands
+ * back: the directions the axes of those frames point in, in the observer's own sky.
  *
  * Done by putting each axis through the very same J2000-to-altitude transform the star field uses,
  * rather than by composing rotation matrices by hand. That is deliberate: the precession, nutation

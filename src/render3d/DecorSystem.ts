@@ -1,7 +1,7 @@
 import { BackSide, Box3, BoxGeometry, BufferGeometry, Color, ConeGeometry, CylinderGeometry, Float32BufferAttribute, Group, Matrix4, Mesh, MeshBasicMaterial, MeshLambertMaterial, SphereGeometry, Uint32BufferAttribute, Vector3 } from "three"
 import type { Object3D } from "three"
 import type { DecorKind, DecorLight, DecorObject, DecorSide, DecorSize, MeasuredDecorSize } from "../engine/model/Decor.js"
-import { canHoldWitness, DEFAULT_BUILDING_FLOORS, isLightOnAt, lightOnFractionBetween } from "../engine/model/Decor.js"
+import { canHoldObserver, DEFAULT_BUILDING_FLOORS, isLightOnAt, lightOnFractionBetween } from "../engine/model/Decor.js"
 import type { RgbColor } from "./skyColors.js"
 
 const DEG_TO_RAD = Math.PI / 180
@@ -78,7 +78,7 @@ const LAMP_CANDELA = 100
  * lamp head's size. */
 const STREETLIGHT_HEAD_CANDELA = 1500
 const STREETLIGHT_HEAD_RADIUS_M = 0.25
-/** A car's headlamp seen off its beam, where a witness beside the road stands: a thousand candela
+/** A car's headlamp seen off its beam, where a observer beside the road stands: a thousand candela
  * (twenty times that straight down the beam), from a lamp of the headlight's size. */
 const HEADLIGHT_CANDELA = 1000
 const HEADLIGHT_RADIUS_M = 0.15
@@ -112,7 +112,7 @@ const WINDOW_COLOR: RgbColor = [0.55, 0.68, 0.72]
 const WINDOW_MARGIN = 0.03
 const WINDOW_THICKNESS = 0.05
 
-/** Rotation.y that makes buildWitness's own "nose" (see its own doc comment — points -Z by
+/** Rotation.y that makes buildObserver's own "nose" (see its own doc comment — points -Z by
  * default) face outward through the given side of the object it's placed inside, matching the
  * front=-Z/behind=+Z/right=+X/left=-X convention buildVehicle's own body/headlights already use.
  * The 4 vehicle-only corners share their plain left/right counterpart's own yaw — looking out the
@@ -212,12 +212,12 @@ function addFramedRoomWall(
   panel(tailMain, windowHeight, cursor + tailMain / 2, 0)
 }
 
-/** The enclosure of the room the witness stands inside, visible only from within (BackSide
+/** The enclosure of the room the observer stands inside, visible only from within (BackSide
  * materials — the object's own exterior shell already covers the outside view, this would just
  * double up on top of it there): 4 side walls plus a floor and ceiling. A side passed an empty
  * window list gets one plain solid panel; a non-empty one (any opacity, even 0 — still an opening,
  * not a wall) gets a framed wall instead (see addFramedRoomWall) so the rest of that side, outside
- * the window gap(s), still reads as a wall rather than a void. Only ever built when witnessSide is
+ * the window gap(s), still reads as a wall rather than a void. Only ever built when observerSide is
  * set — see buildBuilding/buildVehicle's own call sites — a room nobody stands in is never
  * rendered from its own inside. `windowHeight` is shared by every gap on a given wall (true for
  * every caller today — even a vehicle's own front-door/rear-door pair are always the same
@@ -283,12 +283,12 @@ function sideOffset(side: DecorSide, halfWidth: number, halfDepth: number, inset
   }
 }
 
-/** Places a scaled-down buildWitness figure inside `group`, standing/sitting at `y` (local, i.e.
+/** Places a scaled-down buildObserver figure inside `group`, standing/sitting at `y` (local, i.e.
  * the occupied floor's own ground level for a building, roughly seat height for a vehicle), offset
  * from center toward `side` so it reads as standing near that side's window, and rotated to look
  * outward through it. `halfExtentAlongSide`/`inset` control how close to the wall it stands. */
 function addOccupant(group: Group, side: DecorSide, y: number, scale: number, halfWidth: number, halfDepth: number, inset: number): void {
-  const figure = buildWitness()
+  const figure = buildObserver()
   figure.scale.setScalar(scale)
   figure.rotation.y = SIDE_YAW_RAD[side]
   const { x, z } = sideOffset(side, halfWidth, halfDepth, inset)
@@ -301,23 +301,23 @@ const BUILDING_DEPTH = 6
 const BUILDING_FLOOR_HEIGHT = 3
 const BUILDING_WINDOW_WIDTH = 1.4
 const BUILDING_WINDOW_HEIGHT = BUILDING_FLOOR_HEIGHT * 0.5
-const BUILDING_WITNESS_INSET = 1.2
-const VEHICLE_WITNESS_INSET = 0.35
+const BUILDING_OBSERVER_INSET = 1.2
+const VEHICLE_OBSERVER_INSET = 0.35
 /** Where the visible occupant FIGURE's own base (feet) sits — a plausible seated pose relative to
- * the vehicle body, chosen purely by how the scaled-down buildWitness figure looks there. Not the
+ * the vehicle body, chosen purely by how the scaled-down buildObserver figure looks there. Not the
  * same thing as the camera's own eye height (VEHICLE_EYE_Y, defined near the vehicle's other
  * cabin constants below) — occupantView used to reuse this single value for BOTH, which put the
  * camera's eye above the cabin's own ceiling (addRoom's room spans VEHICLE_CABIN_Y ±
  * VEHICLE_CABIN_HEIGHT/2, nowhere near 0.75) — a real bug caught by a user testing the vehicle
  * interior view, seeing only the cabin's own roof from above instead of being inside the cabin at
  * all. */
-const VEHICLE_WITNESS_Y = 0.75
-/** Eye height a standing witness has above whatever floor they're on — building's own
+const VEHICLE_OBSERVER_Y = 0.75
+/** Eye height a standing observer has above whatever floor they're on — building's own
  * occupantView adds this to the occupied floor's own ground level. Not reused for the vehicle
  * case (see VEHICLE_EYE_Y) — nobody stands fully upright inside a car-sized cabin. */
 const EYE_HEIGHT_M = 1.6
 
-function buildBuilding(floors: number, windows: DecorObject["windows"], witnessSide: DecorSide | undefined, occupiedFloor: number | undefined): Group {
+function buildBuilding(floors: number, windows: DecorObject["windows"], observerSide: DecorSide | undefined, occupiedFloor: number | undefined): Group {
   const group = new Group()
   // "floors" counts upper stories above the ground floor (French "étages", not counting the "rez-
   // de-chaussée") — a building with floors=2 has 3 levels total, matching the previous fixed
@@ -334,9 +334,9 @@ function buildBuilding(floors: number, windows: DecorObject["windows"], witnessS
     addWindowPane(group, WINDOW_THICKNESS, BUILDING_WINDOW_HEIGHT, BUILDING_WINDOW_WIDTH, -halfWidth - WINDOW_MARGIN, y, 0, windowOpacityPercent(windows, "left"))
     addWindowPane(group, WINDOW_THICKNESS, BUILDING_WINDOW_HEIGHT, BUILDING_WINDOW_WIDTH, halfWidth + WINDOW_MARGIN, y, 0, windowOpacityPercent(windows, "right"))
   }
-  if (witnessSide) {
+  if (observerSide) {
     const level = Math.min(Math.max(occupiedFloor ?? 0, 0), levels - 1)
-    addOccupant(group, witnessSide, level * BUILDING_FLOOR_HEIGHT, 0.72, halfWidth, halfDepth, BUILDING_WITNESS_INSET)
+    addOccupant(group, observerSide, level * BUILDING_FLOOR_HEIGHT, 0.72, halfWidth, halfDepth, BUILDING_OBSERVER_INSET)
     const wallWindow = (side: DecorSide): WallWindow[] => (windowOpacityPercent(windows, side) !== undefined ? [{ main: BUILDING_WINDOW_WIDTH, center: 0 }] : [])
     addRoom(
       group,
@@ -402,10 +402,10 @@ const CROP_ROW_SPACING_M = 1.4
  * SEPARATE, and that is the whole point of the shape. A row of lavender photographed in this very
  * field is not a hedge and not a ridge — it is a line of round bushes with bare stony ground showing
  * between them, each gap about as wide as the plant beside it. A continuous ridge was the first
- * thing built here and it was wrong: it would have hidden the ground a witness says he walked over
+ * thing built here and it was wrong: it would have hidden the ground a observer says he walked over
  * ("marchant parmi les rochers"), and it would have given the near foreground one long unbroken edge
  * where the real one is a broken line of them. The edges are what the whole thing contributes: a row
- * is the near thing a witness walking through a field has beside them, and near is the only distance
+ * is the near thing a observer walking through a field has beside them, and near is the only distance
  * at which their own movement shows (see Gait).
  *
  * ONE MESH, not eleven. Every clump of a row is merged into a single geometry, so a field of seventy
@@ -485,12 +485,12 @@ const VEHICLE_DOOR_WINDOW_Z = 0.5
 /** The camera's own absolute eye height while inside a vehicle — set to VEHICLE_CABIN_Y itself
  * (the cabin's own vertical center, which is also where every window pane is centered), well
  * within the room addRoom builds (VEHICLE_CABIN_Y +/- VEHICLE_CABIN_HEIGHT/2). Deliberately NOT
- * EYE_HEIGHT_M (a standing witness's eye height) — nobody stands upright inside a car-sized cabin
- * — and deliberately NOT VEHICLE_WITNESS_Y either (see that constant's own doc comment on why a
+ * EYE_HEIGHT_M (a standing observer's eye height) — nobody stands upright inside a car-sized cabin
+ * — and deliberately NOT VEHICLE_OBSERVER_Y either (see that constant's own doc comment on why a
  * figure's visual base and the camera's own eye height are different concerns). */
 const VEHICLE_EYE_Y = VEHICLE_CABIN_Y
 
-function buildVehicle(lit: boolean, windows: DecorObject["windows"], witnessSide: DecorSide | undefined): Group {
+function buildVehicle(lit: boolean, windows: DecorObject["windows"], observerSide: DecorSide | undefined): Group {
   const group = new Group()
   // BoxGeometry(width=X, height=Y, depth=Z) — the car's LENGTH must be along Z, not X: heading 0
   // faces -Z (see DecorSystem's own module doc comment on headingDeg / GeoProjection's "north
@@ -534,8 +534,8 @@ function buildVehicle(lit: boolean, windows: DecorObject["windows"], witnessSide
   addWindowPane(group, WINDOW_THICKNESS, VEHICLE_WINDOW_HEIGHT, VEHICLE_DOOR_WINDOW_LENGTH, -VEHICLE_CABIN_HALF_WIDTH - WINDOW_MARGIN, VEHICLE_CABIN_Y, VEHICLE_DOOR_WINDOW_Z, windowOpacityPercent(windows, "behind-left"))
   addWindowPane(group, WINDOW_THICKNESS, VEHICLE_WINDOW_HEIGHT, VEHICLE_DOOR_WINDOW_LENGTH, VEHICLE_CABIN_HALF_WIDTH + WINDOW_MARGIN, VEHICLE_CABIN_Y, -VEHICLE_DOOR_WINDOW_Z, windowOpacityPercent(windows, "front-right"))
   addWindowPane(group, WINDOW_THICKNESS, VEHICLE_WINDOW_HEIGHT, VEHICLE_DOOR_WINDOW_LENGTH, VEHICLE_CABIN_HALF_WIDTH + WINDOW_MARGIN, VEHICLE_CABIN_Y, VEHICLE_DOOR_WINDOW_Z, windowOpacityPercent(windows, "behind-right"))
-  if (witnessSide) {
-    addOccupant(group, witnessSide, VEHICLE_WITNESS_Y, 0.5, VEHICLE_CABIN_HALF_WIDTH, VEHICLE_CABIN_HALF_DEPTH, VEHICLE_WITNESS_INSET)
+  if (observerSide) {
+    addOccupant(group, observerSide, VEHICLE_OBSERVER_Y, 0.5, VEHICLE_CABIN_HALF_WIDTH, VEHICLE_CABIN_HALF_DEPTH, VEHICLE_OBSERVER_INSET)
     const doorWindow = (frontSide: DecorSide, behindSide: DecorSide): WallWindow[] => {
       const result: WallWindow[] = []
       if (windowOpacityPercent(windows, frontSide) !== undefined) result.push({ main: VEHICLE_DOOR_WINDOW_LENGTH, center: -VEHICLE_DOOR_WINDOW_Z })
@@ -601,7 +601,7 @@ const FACE_INDICATOR_COLOR: RgbColor = [0.95, 0.9, 0.82]
 const ENTITY_BODY_COLOR: RgbColor = [0.72, 0.74, 0.78]
 
 /**
- * A being the witness reported — the same silhouette as a person, in a colour of its own.
+ * A being the observer reported — the same silhouette as a person, in a colour of its own.
  *
  * The silhouette is deliberately not a claim. An account that says "two beings of about a metre"
  * says nothing about their form, so drawing anything more specific would be inventing what nobody
@@ -610,7 +610,7 @@ const ENTITY_BODY_COLOR: RgbColor = [0.72, 0.74, 0.78]
  * tall beside a car says more than any modelling would. Anything better known goes in a real model
  * (see DecorModelRef), which is exactly the seam for it.
  *
- * The colour is the one thing that must differ: a companion standing beside the witness and a being
+ * The colour is the one thing that must differ: a companion standing beside the observer and a being
  * standing beside the craft are the same shape and opposite claims, and a reader has to be able to
  * see which is which without clicking.
  */
@@ -618,18 +618,18 @@ function buildEntity(): Group {
   const group = new Group()
   addPart(group, new CylinderGeometry(0.25, 0.3, 1.5, 10), ENTITY_BODY_COLOR, 0.75)
   addPart(group, new SphereGeometry(0.26, 10, 8), ENTITY_BODY_COLOR, 1.74)
-  // Which way it faced, same convention and same reason as the witness figure's own.
+  // Which way it faced, same convention and same reason as the observer figure's own.
   const nose = addPart(group, new ConeGeometry(0.07, 0.16, 8), FACE_INDICATOR_COLOR, 1.74)
   nose.rotation.x = -Math.PI / 2
   nose.position.z = -0.22
   return group
 }
 
-function buildWitness(): Group {
+function buildObserver(): Group {
   const group = new Group()
   addPart(group, new CylinderGeometry(0.25, 0.3, 1.5, 10), [0.3, 0.3, 0.35], 0.75)
   addPart(group, new SphereGeometry(0.22, 10, 8), [0.62, 0.52, 0.46], 1.72)
-  // A small "nose" marking which way the witness is facing/looking (headingDeg) — otherwise a
+  // A small "nose" marking which way the observer is facing/looking (headingDeg) — otherwise a
   // plain cylinder+sphere silhouette reads as facing every direction at once. Bright/pale rather
   // than skin-toned so it stays legible against the head at a glance, not just on close zoom.
   // ConeGeometry's apex points +Y by default; rotating -90deg around X tips that onto -Z, the
@@ -661,7 +661,7 @@ function buildAircraft(): Group {
 
 /**
  * Builds/lights the compound Three.js primitive objects for decor (buildings/trees/streetlights/
- * vehicles/other witnesses) — static methods, not an instance class: each call is a single,
+ * vehicles/other observers) — static methods, not an instance class: each call is a single,
  * independent build with no state shared across decor objects (unlike e.g. ShapeGroup, which holds
  * a member list reused across a whole drag gesture — see [[rr0-code-style-no-free-functions]]).
  */
@@ -694,9 +694,9 @@ export class DecorSystem {
   }
 
   /** Where the camera should sit/face to render "from inside" `object`, at the side its
-   * witnessSide names — local (x,z) offset from the object's own anchor point (before that
+   * observerSide names — local (x,z) offset from the object's own anchor point (before that
    * object's own headingDeg rotation/world position are applied — SceneRenderer.
-   * updateDecorAnchoring does that part, the same way it already anchors decor to the witness's
+   * updateDecorAnchoring does that part, the same way it already anchors decor to the observer's
    * real-world drift), the camera's own ABSOLUTE eye height (not an offset — SceneRenderer sets
    * camera.position.y to this value directly, no "+1.6" added on top; see EYE_HEIGHT_M's own doc
    * comment for why building/vehicle can't share that formula), and the heading (same convention
@@ -704,32 +704,32 @@ export class DecorSystem {
    * sideOffset — the exact same numbers addOccupant places the visible figure at — so the camera
    * always renders from exactly where that figure appears to stand, never a different spot; eyeY
    * is deliberately its OWN number for vehicle (VEHICLE_EYE_Y), not tied to the figure's own base
-   * position (VEHICLE_WITNESS_Y) — a figure's visual "feet" placement and a camera's own eye
+   * position (VEHICLE_OBSERVER_Y) — a figure's visual "feet" placement and a camera's own eye
    * height serve different purposes and don't need to be the same value. Throws if
-   * object.witnessSide is unset — callers (SceneRenderer) only call this after finding an object
+   * object.observerSide is unset — callers (SceneRenderer) only call this after finding an object
    * that has one. */
   static occupantView(object: DecorObject): { x: number; z: number; eyeY: number; headingDeg: number } {
-    const side = object.witnessSide
-    if (!side) throw new Error("occupantView requires object.witnessSide to be set")
+    const side = object.observerSide
+    if (!side) throw new Error("occupantView requires object.observerSide to be set")
     const { x, z } =
       object.kind === "vehicle"
-        ? sideOffset(side, VEHICLE_CABIN_HALF_WIDTH, VEHICLE_CABIN_HALF_DEPTH, VEHICLE_WITNESS_INSET)
-        : sideOffset(side, BUILDING_WIDTH / 2, BUILDING_DEPTH / 2, BUILDING_WITNESS_INSET)
+        ? sideOffset(side, VEHICLE_CABIN_HALF_WIDTH, VEHICLE_CABIN_HALF_DEPTH, VEHICLE_OBSERVER_INSET)
+        : sideOffset(side, BUILDING_WIDTH / 2, BUILDING_DEPTH / 2, BUILDING_OBSERVER_INSET)
     const eyeY = object.kind === "vehicle" ? VEHICLE_EYE_Y : (object.occupiedFloor ?? 0) * BUILDING_FLOOR_HEIGHT + EYE_HEIGHT_M
     const headingDeg = (object.headingDeg ?? 0) - SIDE_YAW_RAD[side] / DEG_TO_RAD
     // Scaled the same way the body is (see build/scaleFor): the seat is a place ON the object, so
     // in a car stated a meter longer than the primitive, the driver sits a proportionate distance
     // further forward and the camera has to follow. Without this the viewpoint stayed at the
-    // primitive's own seat and the witness ended up looking out through their own door.
+    // primitive's own seat and the observer ended up looking out through their own door.
     const scale = this.scaleFor(object)
     return { x: x * scale.x, z: z * scale.z, eyeY: eyeY * scale.y, headingDeg }
   }
 
   /** headingDeg rotates the whole group around Y, same "-heading, clockwise from north" convention
-   * as SceneRenderer.setObserverPose's camera yaw — meaningful for vehicle/witness, a harmless
+   * as SceneRenderer.setObserverPose's camera yaw — meaningful for vehicle/observer, a harmless
    * no-op on a rotationally-symmetric building/tree/streetlight. Takes the whole DecorObject
    * (rather than each field as its own parameter, as this used to) now that building/vehicle need
-   * several more fields (windows/witnessSide/floors/occupiedFloor) — `lit` alone stays a
+   * several more fields (windows/observerSide/floors/occupiedFloor) — `lit` alone stays a
    * separate parameter since callers pass a time-resolved value (resolveDecorLitAt), not the
    * object's own static `lit` field. */
   /** Name of the sub-group holding whatever currently stands for the object — the primitive's own
@@ -840,7 +840,7 @@ export class DecorSystem {
   static build(object: DecorObject, lit: boolean): Group {
     const body =
       object.kind === "building"
-        ? buildBuilding(object.floors ?? DEFAULT_BUILDING_FLOORS, object.windows, object.witnessSide, object.occupiedFloor)
+        ? buildBuilding(object.floors ?? DEFAULT_BUILDING_FLOORS, object.windows, object.observerSide, object.occupiedFloor)
         : object.kind === "tree"
           ? buildTree()
           : object.kind === "shrub"
@@ -852,12 +852,12 @@ export class DecorSystem {
               : object.kind === "streetlight"
             ? buildStreetlight(lit)
             : object.kind === "vehicle"
-              ? buildVehicle(lit, object.windows, object.witnessSide)
+              ? buildVehicle(lit, object.windows, object.observerSide)
               : object.kind === "aircraft"
                 ? buildAircraft()
                 : object.kind === "entity"
                   ? buildEntity()
-                  : buildWitness()
+                  : buildObserver()
     // The primitive is built at its own natural size and then stretched to whatever the recording
     // measured, rather than every builder taking three more parameters: the builders place their
     // parts by proportion (a headlight at -length/2, a window row per floor), so a scale on the
@@ -933,7 +933,7 @@ export class DecorSystem {
                 ? buildAircraft()
                 : kind === "entity"
                   ? buildEntity()
-                  : buildWitness()
+                  : buildObserver()
     const box = new Box3().setFromObject(probe)
     const size: MeasuredDecorSize = {
       widthM: box.max.x - box.min.x,
@@ -948,9 +948,9 @@ export class DecorSystem {
   /**
    * Whether this object may be drawn as a loaded model at all.
    *
-   * No, once the recording places the witness INSIDE it (see DecorObject.witnessSide). A downloaded
+   * No, once the recording places the observer INSIDE it (see DecorObject.observerSide). A downloaded
    * model is a hull: from inside one, with front-facing materials, you see straight through it and
-   * the object simply is not there — where what the recording placed the witness to look at is the
+   * the object simply is not there — where what the recording placed the observer to look at is the
    * room the built-in shape builds around them, its window openings sized from the data and the
    * pillar between two door windows included. Looking out through a real model is the objective,
    * and it needs three things nothing here has yet: models with a modelled interior, glazing made
@@ -958,7 +958,7 @@ export class DecorSystem {
    * instead of from the primitive's own seat.
    */
   static usesModel(object: DecorObject): boolean {
-    return object.model !== undefined && !(object.witnessSide !== undefined && canHoldWitness(object.kind))
+    return object.model !== undefined && !(object.observerSide !== undefined && canHoldObserver(object.kind))
   }
 
   /**
@@ -975,7 +975,7 @@ export class DecorSystem {
    * the object, which is a curation problem and not something to hide by squashing it. Which axis
    * decides is whichever the recording actually measured, in the order length, height, width —
    * length first because it is the axis the heading is defined by and the one a vehicle, an
-   * airframe or a building is most reliably described by, but a witness who gave only the height of
+   * airframe or a building is most reliably described by, but a observer who gave only the height of
    * a lamp post has measured the thing about it that matters, and that is what should set its size.
    *
    * Failing all three, the catalogue's own statement of what the real object DEPICTED measures is
@@ -1107,7 +1107,7 @@ export class DecorSystem {
    * changes mid-recording (see Decor.ts's own resolveDecorLitAt) — every emissive part in the
    * group gets the same on/off color, which is correct today (a streetlight has one lamp, a
    * vehicle's two headlights always switch together) without needing to track parts individually.
-   * A no-op for building/tree/witness: they have no emissive children (see addPart's own
+   * A no-op for building/tree/observer: they have no emissive children (see addPart's own
    * `emissive` flag), so the loop below simply finds nothing to retint. */
   static setLit(group: Group, kind: DecorKind, lit: boolean, relativeScale = 1): void {
     // Lit, its light over its own disc (see LAMP_CANDELA); dark, a glass that gives out nothing.

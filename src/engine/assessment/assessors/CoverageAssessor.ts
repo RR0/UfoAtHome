@@ -26,13 +26,13 @@ interface Question {
  */
 const QUESTIONS: Question[] = [
   { id: "when", paths: ["time.year", "time.month", "time.day", "time.hour", "time.minute", "time.raw"] },
-  { id: "where", paths: ["place.*.lat", "place.*.lng", "witnessTrack.keyframes.*.pose.lat", "witnessTrack.keyframes.*.pose.lng"] },
-  { id: "facing", paths: ["witnessTrack.keyframes.*.pose.headingDeg"] },
+  { id: "where", paths: ["place.*.lat", "place.*.lng", "observerTrack.keyframes.*.pose.lat", "observerTrack.keyframes.*.pose.lng"] },
+  { id: "facing", paths: ["observerTrack.keyframes.*.pose.headingDeg"] },
   { id: "apparent-size", paths: ["timeline.keyframes.*.shapes.*.shape.angular.widthDeg", "timeline.keyframes.*.shapes.*.shape.angular.heightDeg"] },
   { id: "sky-position", paths: ["timeline.keyframes.*.shapes.*.shape.aim.azimuthDeg", "timeline.keyframes.*.shapes.*.shape.aim.altitudeDeg"] },
   { id: "how-long", paths: ["durationSeconds", "endTime.hour", "endTime.minute", "endTime.raw"] },
   { id: "appearance", paths: ["timeline.keyframes.*.shapes.*.shape.kind", "timeline.keyframes.*.shapes.*.shape.title", "timeline.keyframes.*.shapes.*.shape.color", "timeline.keyframes.*.shapes.*.shape.brightness"] },
-  { id: "movement", paths: ["timeline.keyframes.1.t", "witnessTrack.keyframes.1.t"] },
+  { id: "movement", paths: ["timeline.keyframes.1.t", "observerTrack.keyframes.1.t"] },
   { id: "sound", paths: ["soundTrack.keyframes.*.sound.kind"] },
   { id: "conditions", paths: ["weatherTrack.keyframes.*.weather.*", "weather.*"] }
 ]
@@ -44,24 +44,24 @@ const WEAKEST_FIRST: Basis[] = ["assumed", "derived", "stated"]
  * Says how much of a reconstruction the account actually settles, and how much of it was worked out
  * or guessed.
  *
- * Not a reliability score, and the distinction is not pedantry: a witness may be impeccable and
+ * Not a reliability score, and the distinction is not pedantry: a observer may be impeccable and
  * their account still fail to pin down a single angle. What this measures is the RECORD's power to
  * constrain, which is the axis an investigator is on when they set aside a case for lack of
  * information rather than for lack of an explanation.
  *
- * The figure it reports is the share of those ten the WITNESS themselves answered, which is what
+ * The figure it reports is the share of those ten the OBSERVER themselves answered, which is what
  * the whole exercise was for. It is a share of a fixed denominator and so comparable between
  * recordings — the thing a count of claims could never be, since that moves with how finely the
  * fields happen to be cut. It is still not the finding: a reader who needs to know WHICH questions
- * went unanswered reads the criteria, and the profile "the moment and the place are the witness's
+ * went unanswered reads the criteria, and the profile "the moment and the place are the observer's
  * own, nothing about the sky is" is not the same recording as its opposite even at the same
  * percentage.
  */
 export class CoverageAssessor implements Assessor {
 
   /** What it measures is how much of the reconstruction came from the person who was there, so the
-   * witness is where a reader is sent to act on it — see Assessor.about. */
-  readonly about = "witness"
+   * observer is where a reader is sent to act on it — see Assessor.about. */
+  readonly about = "observer"
 
   async assess(sighting: Sighting): Promise<Assessment> {
     // The values without their wrappers, and the provenance separately: this walks paths, and a

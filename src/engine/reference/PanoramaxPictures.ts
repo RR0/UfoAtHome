@@ -1,5 +1,5 @@
 /**
- * A street-level picture somebody took near the witness's spot, as Panoramax serves it.
+ * A street-level picture somebody took near the observer's spot, as Panoramax serves it.
  *
  * Panoramax (IGN and OpenStreetMap France) is the one street-level imagery this project can lay
  * over a scene: its catalogue is open, its API answers any origin, its pictures are served with the
@@ -11,7 +11,7 @@ export interface StreetPicture {
   id: string
   lat: number
   lng: number
-  /** From the witness's spot, metres, and which way from it. */
+  /** From the observer's spot, metres, and which way from it. */
   distanceM: number
   bearingDeg: number
   /** Which way the picture's centre looked, degrees clockwise from north, when the camera said. */

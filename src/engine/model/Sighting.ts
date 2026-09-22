@@ -17,7 +17,7 @@ import { Instruments } from "../instrument/Instrument.js"
 import type { Instrument } from "../instrument/Instrument.js"
 import { Provenance } from "../persistence/Provenance.js"
 import type { InterpretationJson } from "../interpretation/Interpretation.js"
-import type { Testimony } from "./Testimony.js"
+import type { Account } from "./Account.js"
 
 /**
  * A fuzzy date, structurally aligned with @rr0/time's Level2Date fields
@@ -47,7 +47,7 @@ export interface SightingTime {
  * obvious garbage in the editor's date fields and (b) recover the numeric components
  * SightingTime's other consumers need. The second alternative (own group names, to avoid relying
  * on duplicate-named-group support) is a deliberate departure from real EDTF: a bare hh:mm[:ss]
- * with no date at all, for a witness who remembers a time of day but not (or not precisely) which
+ * with no date at all, for a observer who remembers a time of day but not (or not precisely) which
  * date it was — sightingTimeOffsetMs already treats a year-less SightingTime as "compare
  * hour/minute/second only" for duration purposes, so this needs no changes downstream. */
 const EDTF_TIME_PATTERN =
@@ -110,7 +110,7 @@ export interface SightingLocation {
   lng: number
   /** The place as it is named, fully qualified — "Valensole, Alpes-de-Haute-Provence, …, France".
    * How the coordinates were arrived at in the first place (see engine/place/PlaceProvider.ts:
-   * testimony says "on the Valensole plateau", never 43.8379 / 5.9840), and what a reader needs
+   * account says "on the Valensole plateau", never 43.8379 / 5.9840), and what a reader needs
    * to land on the same spot rather than on one of the four other villages of that name. Absent
    * on recordings whose coordinates were typed in directly. */
   name?: string
@@ -136,7 +136,7 @@ export interface SightingLocation {
 export interface SightingEvent {
   eventType: "sighting"
   time?: SightingTime
-  /** The observation's reported end time — an alternative to `durationSeconds` when the witness gave a clock time rather than a length. */
+  /** The observation's reported end time — an alternative to `durationSeconds` when the observer gave a clock time rather than a length. */
   endTime?: SightingTime
   /** The observation's reported length, in seconds — an alternative to `endTime`. Takes precedence over `endTime` if both are set. */
   durationSeconds?: number
@@ -154,18 +154,18 @@ export interface SightingEvent {
     */
   tags?: string[]
   /**
-   * Hours to subtract from `time`/`endTime` to get UTC — i.e. the legal time zone the witness's
+   * Hours to subtract from `time`/`endTime` to get UTC — i.e. the legal time zone the observer's
    * own clock was on, +1 for France in 1965, -7 for New Mexico in April 1964. Absent means
    * "unknown", and astronomy falls back to approximating it from the longitude (see
    * sightingTimeToDate), which is right often enough but cannot know legal time: France in July
    * 1965 was on UTC+1 while its longitude says UTC+0 (summer time was only reintroduced in 1976),
    * so a dawn sighting there renders an hour of sky too late — the Sun 17 degrees up instead of
-   * the 7 the witness actually had. Daylight-saving transitions are the same problem: Socorro's
+   * the 7 the observer actually had. Daylight-saving transitions are the same problem: Socorro's
    * own 1964-04-24 falls two days before that year's US summer-time switch.
    */
   utcOffsetHours?: number
   /**
-   * The witness's own legal time zone, as an IANA name ("Europe/Paris", "America/Denver") — the
+   * The observer's own legal time zone, as an IANA name ("Europe/Paris", "America/Denver") — the
    * RULE, where `utcOffsetHours` is only the number that rule produced for this sighting's date.
    * Both are stored: the offset is what every consumer reads (no consumer needs a tz database),
    * and the zone is what lets an editor recompute it correctly when the date changes, summer time
@@ -182,7 +182,7 @@ export function sightingTimeToMs(time: SightingTime): number | undefined {
 }
 
 /** A `SightingTime`'s day/hour/minute/second offset in ms, ignoring year/month — used only by
- * sightingDurationMs's fallback, for a witness who gave a start/end without a full calendar date
+ * sightingDurationMs's fallback, for a observer who gave a start/end without a full calendar date
  * (e.g. just "start 0 min, end 10 min"). Not a substitute for sightingTimeToMs's real absolute
  * timestamp elsewhere (astronomy, real clock display): this can't detect a day/month/year
  * rollover, so it's only trusted when at least one side lacks a `year` — see sightingDurationMs. */
@@ -213,7 +213,7 @@ function timeShape(t: SightingTime, fields: readonly (keyof SightingTime)[]): st
  * independent of `timeline.duration` (how long the recording itself took to author, e.g. a quick
  * mouse drag) — see UfoElement, which uses this to scale playback to match it.
  *
- * `time`/`endTime` don't both need a full calendar date to compute a duration — a witness often
+ * `time`/`endTime` don't both need a full calendar date to compute a duration — a observer often
  * only knows "it started around 0 past the hour, ended around 10 past" without a real date at
  * all. Prefers the real absolute-timestamp difference (correctly handles a day/month/year
  * rollover, e.g. 23:58 -> 00:02) when both sides have a `year`; otherwise falls back to a same-day
@@ -242,7 +242,7 @@ export function sightingDurationMs(event: SightingEvent): number | undefined {
 }
 
 /** Distinguishes "nothing entered" (nothing to explain) from "entered on both sides, but too
- * imprecise/mismatched to compute an exact duration" (the UI needs to tell the witness why and
+ * imprecise/mismatched to compute an exact duration" (the UI needs to tell the observer why and
  * that they must enter a duration manually) — see sightingDurationMs and its own timeShape check. */
 export function sightingDurationBlockedReason(event: SightingEvent): "imprecise" | undefined {
   if (event.durationSeconds !== undefined) return undefined
@@ -252,21 +252,21 @@ export function sightingDurationBlockedReason(event: SightingEvent): "imprecise"
 
 /**
  * A recorded UFO sighting: the real-world metadata (time/place) plus a
- * Timeline (the recording's own internal millisecond clock), a witness
+ * Timeline (the recording's own internal millisecond clock), a observer
  * reference, and an id of its own.
  *
- * A recording knows nothing of the case it belongs to. The case names its testimonies (its
+ * A recording knows nothing of the case it belongs to. The case names its accounts (its
  * `sighting` events, see CaseFile), and the analyses of them name them too, by this id: a
- * reference points from what interprets to what is interpreted, never back. A testimony written
+ * reference points from what interprets to what is interpreted, never back. A account written
  * before anyone filed it, or filed in two places, is the same file either way.
  *
- * `witness` is a lightweight `People` reference (deliberately no PII beyond
+ * `observer` is a lightweight `People` reference (deliberately no PII beyond
  * an id/title/name — no email/phone/address; see
- * cms/src/people/witness/WitnessReplacer.ts for the site's existing
+ * cms/src/people/observer/ObserverReplacer.ts for the site's existing
  * anonymization pattern for anything more sensitive). Omit it for anonymous
- * witnesses.
+ * observers.
  *
- * `id`/`witness` are not readonly, unlike `event`/`timeline`/`witnessTrack`
+ * `id`/`observer` are not readonly, unlike `event`/`timeline`/`observerTrack`
  * above — same reasoning as `weather` below: SightingEditorElement's metadata toolbar edits these
  * directly, field-by-field, rather than replacing the whole Sighting.
  */
@@ -274,15 +274,15 @@ export class Sighting {
   constructor(
     readonly event: SightingEvent,
     readonly timeline: Timeline,
-    readonly witnessTrack: ObserverTrack,
+    readonly observerTrack: ObserverTrack,
     readonly weatherTrack: WeatherTrack,
     /** What the sighting sounded like over time — see SoundTrack. Empty (not silent) for every
      * recording that says nothing about sound, which is most of them: see resolveSoundAt. */
     readonly soundTrack: SoundTrack,
-    public witness?: People,
-    /** Which testimony this is, unique across every recording anywhere, so that a case and the
+    public observer?: People,
+    /** Which account this is, unique across every recording anywhere, so that a case and the
      * interpretations filed in it can name it: the day it happened, then who saw it
-     * ("1964-04-24-ZamoraLonnie"), or where when the witness is anonymous ("1964-04-24-Socorro").
+     * ("1964-04-24-ZamoraLonnie"), or where when the observer is anonymous ("1964-04-24-Socorro").
      * Absent for a recording nobody has referred to yet. */
     public id?: string,
     /** Legacy fallback only, kept for old recordings made before weatherTrack existed — see
@@ -291,25 +291,25 @@ export class Sighting {
      * wholesale, never mutated field-by-field" reasoning WeatherTrack keyframes themselves now
      * carry instead (see SightingEditorElement.applyWeatherAtPlayhead). */
     public weather?: Weather,
-    /** Static scenery (buildings/trees/streetlights/vehicles/other witnesses) — see Decor.ts.
-     * Not readonly, same "reassigned wholesale on edit" reasoning as id/witness above:
+    /** Static scenery (buildings/trees/streetlights/vehicles/other observers) — see Decor.ts.
+     * Not readonly, same "reassigned wholesale on edit" reasoning as id/observer above:
      * SightingEditorElement's Decor group adds/removes/edits entries by replacing this array. */
     public decor: DecorObject[] = [],
     /** Set when every weatherTrack keyframe came from a real meteorological record looked up from
-     * this sighting's own date/time and place, rather than from the witness — see WeatherSource
+     * this sighting's own date/time and place, rather than from the observer — see WeatherSource
      * and engine/weather/WeatherInference.ts. Absent is the stronger statement of the two: the
-     * conditions are the witness's own, and nothing may overwrite them. */
+     * conditions are the observer's own, and nothing may overwrite them. */
     public weatherSource?: WeatherSource,
     /** Which INSTRUMENTS entry this observation was made through — an eye, a camera — by id, so a
      * file names a registry entry rather than carrying a copy of its settings that could drift out
      * of date with it. Absent means the naked eye, which is what every recording made before this
-     * existed was: a witness who filmed says so, a witness who looked says nothing. See
+     * existed was: a observer who filmed says so, a observer who looked says nothing. See
      * Instrument.ts for why it changes the geometry of every shape. */
     public instrumentId?: string,
     /**
      * How long the shutter stayed open, seconds — one value for the whole observation.
      *
-     * NOT keyframed, unlike the aperture and the focus beside it on each pose: a witness
+     * NOT keyframed, unlike the aperture and the focus beside it on each pose: a observer
      * photographs a sighting the way they set the camera, and a shutter speed that changed halfway
      * through would be a second photograph rather than a moment of this one. It is also what the
      * picture is MADE of here — the object's streak and the sky's own trails are drawn from it (see
@@ -328,7 +328,7 @@ export class Sighting {
      * "reassigned wholesale on edit" reasoning as decor above. Empty for every recording made
      * before pictures could be laid over one. */
     public references: SceneReference[] = [],
-    /** The roads the account's own plan draws, in metres from the witness's place — see Road.ts.
+    /** The roads the account's own plan draws, in metres from the observer's place — see Road.ts.
      * Not readonly, same "reassigned wholesale on edit" reasoning as decor above. Empty for every
      * recording that states none, which is every recording made before a plan could be read into
      * one; those still get the roads a survey of today reports, drawn faint. */
@@ -337,7 +337,7 @@ export class Sighting {
   }
 
   /**
-   * Where the values of this recording came from — what the witness said, what was worked out from
+   * Where the values of this recording came from — what the observer said, what was worked out from
    * it, and what was guessed so the reconstruction could run at all.
    *
    * Held here as one table rather than on each value, because it is a fact about the FILE and not
@@ -351,40 +351,40 @@ export class Sighting {
   provenance: Provenance = Provenance.empty()
 
   /**
-   * Who saw it and how their account reached this file — see Testimony.
+   * Who saw it and how their account reached this file — see Account.
    *
-   * A field of its own rather than more of `witness`, which is one person's identity and is
+   * A field of its own rather than more of `observer`, which is one person's identity and is
    * structurally aligned with @rr0/data's own PeopleJson (see People). Not readonly, same
-   * "reassigned wholesale on edit" reasoning as id and witness above.
+   * "reassigned wholesale on edit" reasoning as id and observer above.
    */
-  testimony?: Testimony
+  account?: Account
 
   /**
-   * What the witness took it to be, in metres — see InterpretationJson. The witness's own claim
-   * about their testimony, and so part of it; an analyst's lives in the case instead. Not readonly,
-   * same "reassigned wholesale" reasoning as testimony above.
+   * What the observer took it to be, in metres — see InterpretationJson. The observer's own claim
+   * about their account, and so part of it; an analyst's lives in the case instead. Not readonly,
+   * same "reassigned wholesale" reasoning as account above.
    */
   interpretation?: InterpretationJson
 
   /**
-   * How many people THIS witness's account puts at the scene, themselves included — counted off the
+   * How many people THIS observer's account puts at the scene, themselves included — counted off the
    * decor, never stored.
    *
-   * What a testimony-level evaluation reads: Poher's heaviest credibility rubric is the number of
-   * witnesses, and this is the number this account claims. It is the witness's own belief and may
+   * What a account-level evaluation reads: Poher's heaviest credibility rubric is the number of
+   * observers, and this is the number this account claims. It is the observer's own belief and may
    * be wrong, which is exactly why it belongs to their recording and not to some census.
    *
-   * Deliberately NOT the same number as the case's. A case gathers one recording per witness who
-   * gave an account (see CaseFile), and four people in a car who produced one written testimony
+   * Deliberately NOT the same number as the case's. A case gathers one recording per observer who
+   * gave an account (see CaseFile), and four people in a car who produced one written account
    * between them are four here and one there. Both are true of different things, and evaluating a
-   * case is a separate exercise from evaluating a testimony.
+   * case is a separate exercise from evaluating a account.
    *
    * Derived rather than stored for the reason every derived thing here is: two statements of one
    * fact are free to disagree, and of these the placement is the better one, since it says where
    * each of them stood rather than only how many there were.
    */
-  get witnessCount(): number {
-    return 1 + this.decor.filter(object => object.kind === "witness").length
+  get observerCount(): number {
+    return 1 + this.decor.filter(object => object.kind === "observer").length
   }
 
 
@@ -400,28 +400,28 @@ export class Sighting {
     return Instruments.byId(this.instrumentId)
   }
 
-  static create(time?: SightingTime, place?: SightingLocation[], witness?: People): Sighting {
+  static create(time?: SightingTime, place?: SightingLocation[], observer?: People): Sighting {
     return new Sighting(
       { eventType: "sighting", time, place },
       new Timeline(),
       new ObserverTrack(),
       new WeatherTrack(),
       new SoundTrack(),
-      witness
+      observer
     )
   }
 }
 
-/** Fallback pose used when a sighting has no witnessTrack entry at t — the legacy static
+/** Fallback pose used when a sighting has no observerTrack entry at t — the legacy static
  * place[0] (lat/lng only), with no known heading (renderers must treat this as azimuth-agnostic,
  * not "facing north"). Mirrors DEFAULT_ALTITUDE_DEG's role as SceneElement's existing fallback. */
 const DEFAULT_ELEVATION_M = 0
 const DEFAULT_PITCH_DEG = 0
 
-/** Resolves the observer's pose at t: prefers witnessTrack (interpolated), falls back to the
+/** Resolves the observer's pose at t: prefers observerTrack (interpolated), falls back to the
  * legacy static place[0] when the track has no keyframes. undefined only when neither exists. */
 export function resolveObserverPoseAt(sighting: Sighting, t: number): ObserverPose | undefined {
-  const trackPose = sighting.witnessTrack.getInterpolatedPoseAt(t)
+  const trackPose = sighting.observerTrack.getInterpolatedPoseAt(t)
   if (trackPose) return trackPose
   const location = sighting.event.place?.[0]
   if (!location) return undefined
@@ -448,9 +448,9 @@ export function resolveWeatherAt(sighting: Sighting, t: number): Weather {
 
 /** Resolves the sound at t (interpolated, see SoundTrack), falling back to DEFAULT_SOUND —
  * silence — for a recording whose track is empty, which is every recording made before the track
- * existed and every one whose witness was never asked. Silence is the only safe fallback: unlike
+ * existed and every one whose observer was never asked. Silence is the only safe fallback: unlike
  * weather, whose DEFAULT_WEATHER stands for "unremarkable conditions", inventing a noise nobody
- * reported would be putting words in a witness's mouth. Playing nothing says nothing. */
+ * reported would be putting words in a observer's mouth. Playing nothing says nothing. */
 export function resolveSoundAt(sighting: Sighting, t: number): SightingSound {
   return sighting.soundTrack.getInterpolatedSoundAt(t) ?? DEFAULT_SOUND
 }

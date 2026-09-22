@@ -30,8 +30,8 @@ import { VisibleSpectrum } from "../engine/atmosphere/Spectrum.js"
  *   its ozone. Built once per atmosphere, which is to say once per recording or weather change. The
  *   second is the expensive one — 1 024 directions marched from every texel — so it is built a few
  *   rows per frame against a time budget, the way the Milky Way's maps are.
- * - The SKY VIEW (192 × 108) is the whole sky seen from the witness, for the Sun where it stands and
- *   separately for the Moon. Rebuilt whenever either moves or the witness climbs: a single cheap draw.
+ * - The SKY VIEW (192 × 108) is the whole sky seen from the observer, for the Sun where it stands and
+ *   separately for the Moon. Rebuilt whenever either moves or the observer climbs: a single cheap draw.
  *
  * Sixty-four rows and columns are not a matter of taste: measured on the reference, with 32 the zenith
  * of a Sun ten degrees down came out more than half a magnitude too dark. Sixteen directions a side
@@ -167,7 +167,7 @@ export class AtmosphereTables {
     return this.transmittance.textures
   }
 
-  /** The sky as seen from the witness for a Sun of the real solar spectrum and irradiance: rgb = CIE
+  /** The sky as seen from the observer for a Sun of the real solar spectrum and irradiance: rgb = CIE
    * XYZ in cd/m², alpha = scotopic luminance in scotopic cd/m². */
   get sunViewTexture(): Texture {
     return this.sunView.texture
@@ -322,7 +322,7 @@ export class AtmosphereTables {
   }
 
   /**
-   * Redraws the two sky views, for a witness `altitudeM` above the ground and the Sun and Moon at
+   * Redraws the two sky views, for a observer `altitudeM` above the ground and the Sun and Moon at
    * those altitudes. Each view is laid out round its own source's azimuth, so only altitudes matter.
    */
   renderSkyViews(altitudeM: number, sunAltitudeDeg: number, moonAltitudeDeg: number): void {
@@ -693,7 +693,7 @@ export class AtmosphereTables {
   /**
    * The sky view, laid out as Hillaire's: across, the azimuth away from the source, 0 to 180° (a
    * clear sky is symmetric about the source's vertical); up, the angle from the zenith, with the rows
-   * crowded quadratically on the horizon — which here is where it really is for the witness's height,
+   * crowded quadratically on the horizon — which here is where it really is for the observer's height,
    * below level for an aircraft.
    */
   private static readonly SKY_VIEW_FRAGMENT = `

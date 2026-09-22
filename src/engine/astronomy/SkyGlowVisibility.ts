@@ -15,7 +15,7 @@ export interface GlowSighting {
   /** Its own surface brightness there, in magnitudes per square arcsecond. */
   magPerArcsec2: number
   /** How far round from the Sun it stood. For the zodiacal light this is the whole difference
-   * between the two sights it can be: a leaning CONE close in, which is the one witnesses report,
+   * between the two sights it can be: a leaning CONE close in, which is the one observers report,
    * and the faint BAND that runs on round the rest of the ecliptic, which nobody has ever mistaken
    * for anything because nobody notices it. */
   sunSeparationDeg: number
@@ -24,7 +24,7 @@ export interface GlowSighting {
 }
 
 /**
- * Whether a witness standing there, then, could have seen the Milky Way or the zodiacal light —
+ * Whether a observer standing there, then, could have seen the Milky Way or the zodiacal light —
  * and if not, which of the four things that hide them was in the way.
  *
  * The renderer draws both onto a whole sky and lets a reader look; this answers the same question in
@@ -84,18 +84,18 @@ export class SkyGlowVisibility {
   private readonly dust = new ZodiacalLight()
 
   /**
-   * Sweeps the sky above the witness and keeps, for each glow, the patch that stood out most
+   * Sweeps the sky above the observer and keeps, for each glow, the patch that stood out most
    * against the sky it was on.
    *
    * The best CONTRAST and not the brightest patch, which are not the same question and where they
    * differ the contrast is the one that decides what was seen: the foot of the zodiacal cone is by
    * far the brightest thing either model puts in the sky, and it stands in the brightest part of a
-   * twilit sky, so it is often not the part a witness would have picked out.
+   * twilit sky, so it is often not the part a observer would have picked out.
    */
   assess(date: Date, observer: ObserverGeo): {
     milkyWay?: GlowSighting
     zodiacal?: GlowSighting
-    /** The faintest the sky got anywhere the sweep looked — what a witness had to work against at
+    /** The faintest the sky got anywhere the sweep looked — what a observer had to work against at
      * best. It is what says WHY, when the answer is that there was nothing to see: past 21 or so it
      * is the sky that was in the way, and under it something else was. */
     darkestSkyMagPerArcsec2: number

@@ -36,7 +36,7 @@ const DRAFT_TOOL = {
             basis: {
               type: "string",
               enum: ["stated", "derived", "assumed"],
-              description: "\"stated\": the witness said it. \"derived\": worked out from what they "
+              description: "\"stated\": the observer said it. \"derived\": worked out from what they "
                 + "said plus something checkable. \"assumed\": chosen so the reconstruction has a "
                 + "value at all, on nothing they said."
             },
@@ -63,27 +63,27 @@ const DRAFT_TOOL = {
 
 /** What a draft has to obey. Sent as the first system block, ahead of the format, and stable
  * across every call — which is what lets the format behind it be cached. */
-const RULES = `You are reading a witness's account of an aerial sighting and reconstructing it in the
-recording format of UFO@home, a tool that replays what a witness reported seeing, from where they
+const RULES = `You are reading a observer's account of an aerial sighting and reconstructing it in the
+recording format of UFO@home, a tool that replays what a observer reported seeing, from where they
 stood, under the real sky of that moment.
 
 The reconstruction has to RUN. A field left empty is a sky that cannot be computed or a phenomenon
 that cannot be drawn, so fill in everything the reconstruction needs — and say, of every single
 value, which of three things it is:
 
-- "stated": the witness said it. The rationale is their own words, copied verbatim.
+- "stated": the observer said it. The rationale is their own words, copied verbatim.
 - "derived": you worked it out from what they said plus something checkable. The rationale is the
   working, with the numbers in it.
 - "assumed": you chose it so the reconstruction would have a value at all, on nothing they said. The
   rationale says what you chose it for and how wrong it could be.
 
 Getting that label right matters more than getting the value right. A wrong value marked "assumed"
-is a question for the author to answer; a guess passed off as "stated" is a fabricated testimony,
+is a question for the author to answer; a guess passed off as "stated" is a fabricated account,
 and it is the one thing this format exists to prevent. When in doubt, mark it weaker. In particular
 a PLACE nobody named is "assumed", however carefully you reasoned about which road it must have
 been: the arithmetic that follows from a guessed point is only ever as good as the point.
 
-Claim only what a reader could disagree with. Structural fields carry no testimony and belong in no
+Claim only what a reader could disagree with. Structural fields carry no account and belong in no
 list: never claim \`version\`, an \`id\`, a \`sourceId\`, or anything else that exists to make the
 file load rather than to say what was seen. The "assumed" list is the author's to-do list, and
 padding it with plumbing is how it stops being read.
@@ -91,7 +91,7 @@ padding it with plumbing is how it stops being read.
 Then:
 
 1. Sizes are ANGULAR, in degrees, and never metric — the format stores no physical size, because a
-   witness perceives an angle and a size only follows from a distance nobody measured. Convert the
+   observer perceives an angle and a size only follows from a distance nobody measured. Convert the
    comparisons an account gives: the full Moon and the Sun are both about 0.5 degrees across, a
    thumbnail at arm's length about 1.5, a fist about 10. Where the account gives no comparison, work
    from what a scene implies and say so: something "barring the road" spans a carriageway, so a
@@ -99,17 +99,17 @@ Then:
    range in the rationale. That is "derived", not "stated".
 2. Directions are \`aim\`: \`azimuthDeg\` clockwise from true north (north 0, east 90, south 180,
    west 270) and \`altitudeDeg\` above the horizon (horizon 0, zenith 90). Derive them where the
-   geography allows — a witness driving towards a named village is looking along that bearing, and a
+   geography allows — a observer driving towards a named village is looking along that bearing, and a
    phenomenon "barring the road" is on it. Where nothing bears on the altitude, assume something low
    and plausible rather than leaving the phenomenon undrawable, and mark it "assumed".
-3. Times are the local legal time at the place. State the IANA \`timeZone\` the witness's own clock
+3. Times are the local legal time at the place. State the IANA \`timeZone\` the observer's own clock
    was on ("Europe/Paris", "America/Denver") and NEVER \`utcOffsetHours\`: the editor works the
    offset out from that zone's own historical rules at that date, out of the platform's IANA
    database (see TimeZones.offsetHoursAt), and it is right about summer time as it was then rather
    than as it is now. Anything you computed there would be overwritten, and wrong more often.
    Choosing the zone is the part that needs reading the account, because a zone's BOUNDARIES have
    moved: Montgomery, Alabama is "America/Chicago", which observed summer time in 1948 while Alabama
-   did not, so the zone that matches the witness is not always the one their coordinates fall in.
+   did not, so the zone that matches the observer is not always the one their coordinates fall in.
 4. Duration: \`durationSeconds\` is a bare number and cannot say "about". So when the account gives
    a vague length ("a few minutes"), do NOT use it — write \`endTime\` instead, whose \`raw\` takes
    the EDTF approximation suffix: {"raw": "1974-05-20T19:02~", "year": 1974, "month": 5, "day": 20,
@@ -118,11 +118,11 @@ Then:
 5. Give a keyframe only for a moment the account actually distinguishes — where it arrived, where it
    went, when it changed. Two to four is a normal first draft, and one is right for a phenomenon
    that never moved. Interpolation between them is the player's job.
-6. For each shape give only \`kind\` ("oval" or "polygon"), \`title\` (what the witness called it,
+6. For each shape give only \`kind\` ("oval" or "polygon"), \`title\` (what the observer called it,
    in their language), \`angular\` and \`aim\`. Never a pixel box, a transparency or a halo: those
    are how a drawing is painted, they are derived from the angle and the direction on loading, and
    values for them would be numbers no one observed and no one could check.
-7. NEVER write \`description\`. It is the account you were just given: it is what the witness said,
+7. NEVER write \`description\`. It is the account you were just given: it is what the observer said,
    it does not change because somebody read it, and anything you would put there instead belongs in
    the numbers the reading produced. Leave the field out of your answer entirely.
 8. \`tags\` are stored in English whatever the account's language, because two recordings that share
@@ -130,25 +130,25 @@ Then:
    aerial observation, paralysis, contact, occupants, close encounter, photograph, radar,
    electromagnetic effect — and pass classification codes and case references through unchanged
    ("RR3", "NL", "Blue Book 8729"), which read the same in every language.
-9. \`decor\` is the scenery around the witness, and \`eastM\`/\`northM\` are metres from where they
-   stand. Something the witness is INSIDE — their own car, their kitchen — goes at 0,0 and carries
-   \`witnessSide\` ("front-left" for a European driver's seat), which is what puts the viewpoint
+9. \`decor\` is the scenery around the observer, and \`eastM\`/\`northM\` are metres from where they
+   stand. Something the observer is INSIDE — their own car, their kitchen — goes at 0,0 and carries
+   \`observerSide\` ("front-left" for a European driver's seat), which is what puts the viewpoint
    within it. Anything they are NOT inside must be placed away from 0,0, or it is drawn on the lens.
    Give \`sizeM\` in metres ({widthM, lengthM, heightM}: about 1.7 x 4.2 x 1.4 for a 1970s family
    car) or leave it out for the primitive's own size. Add decor only for what the account names: an
    unmentioned streetlight is scenery nobody reported.
-10. \`witnessTrack\` is where the witness stood and which way they faced, over time. One pose is
+10. \`observerTrack\` is where the observer stood and which way they faced, over time. One pose is
    normally enough. \`headingDeg\` is the direction they were LOOKING, same convention as \`aim\`,
-   and it is what makes a shape's azimuth mean anything — a witness driving towards a named village
+   and it is what makes a shape's azimuth mean anything — a observer driving towards a named village
    faces that bearing. \`elevationM\` is metres above sea level, \`pitchDeg\` 0 for someone looking
    level, \`fovDeg\` about 60 for the naked eye.
-11. \`testimony\` is about the WITNESSES and how their account travelled, not about the phenomenon.
-   An account naming who was there states \`witnessCount\` ("accompagn\u00e9 de son \u00e9pouse et de ses 2
-   enfants" with the witness makes four) and \`witnessOccupation\` ("boulanger"), in their own words
+11. \`account\` is about the OBSERVERES and how their account travelled, not about the phenomenon.
+   An account naming who was there states \`observerCount\` ("accompagn\u00e9 de son \u00e9pouse et de ses 2
+   enfants" with the observer makes four) and \`observerOccupation\` ("boulanger"), in their own words
    and never as a level. But \`source\` and \`followedUp\` say how the report was OBTAINED, which no
    account of a sighting can tell you: leave them out rather than guessing, unless the text itself
    says an investigator came, or that it is a press cutting.
-12. Silence is a statement. A witness who says the thing was silent is not a witness who said nothing
+12. Silence is a statement. A observer who says the thing was silent is not a observer who said nothing
    about sound: write a \`soundTrack\` whose keyframe holds a sound of kind "none", and mark it
    "stated". An account that simply never mentions sound gets no soundTrack at all.`
 

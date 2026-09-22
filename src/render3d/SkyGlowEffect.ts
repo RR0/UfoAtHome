@@ -27,7 +27,7 @@ import { SRGB_ENCODE_GLSL } from "./colorSpace.js"
  * Both are computed, not drawn — see MilkyWay.ts and ZodiacalLight.ts, which walk a line of sight
  * through a Galaxy and through the dust of the Solar System and hand back how bright the sky is in
  * every direction. This file is what turns those two answers into light on a screen, and almost all
- * of it is one question: could the witness have seen it.
+ * of it is one question: could the observer have seen it.
  *
  * THAT QUESTION IS THE POINT, and it is why the sky's own brightness is modelled here alongside the
  * glows (see NightSkyBrightness). A star is seen or not seen by its magnitude. A glow has no

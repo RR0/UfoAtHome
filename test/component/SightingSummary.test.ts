@@ -13,7 +13,7 @@ import { SaidTexts } from "../../src/engine/model/SaidText.js"
  * what the file happens to hold. Every weather field of a recording that says nothing about the
  * weather is a zero (see DEFAULT_WEATHER), so without the rule the summary opens with four chips
  * — cover, darkness, wind bearing, wind speed — all of them announcing nothing, ahead of the
- * handful that name the case, the witness and the instrument.
+ * handful that name the case, the observer and the instrument.
  */
 describe("SightingSummary", () => {
   const summary = new SightingSummary(sightingLabels_en, "en", new SaidTexts(["en"]))
@@ -96,18 +96,18 @@ describe("SightingSummary", () => {
   describe("a coordinate, where zero is a value and not a gap", () => {
     it("keeps a heading of due north", () => {
       const sighting = Sighting.create(undefined, [{ lat: 32.4, lng: -86.3 }])
-      sighting.witnessTrack.addKeyframe(0, { lat: 32.4, lng: -86.3, elevationM: 0, headingDeg: 0, pitchDeg: 0, fovDeg: 60 })
+      sighting.observerTrack.addKeyframe(0, { lat: 32.4, lng: -86.3, elevationM: 0, headingDeg: 0, pitchDeg: 0, fovDeg: 60 })
       expect(valueOf(sighting, "heading")).toBe("0")
       expect(valueOf(sighting, "pitch")).toBe("0")
     })
 
     it("says which way a heading faces, to the sixteenth of a turn, in the reader's own letters", () => {
       const sighting = Sighting.create(undefined, [{ lat: 48.85, lng: 2.35 }])
-      sighting.witnessTrack.addKeyframe(0, { lat: 48.85, lng: 2.35, elevationM: 0, headingDeg: 157, pitchDeg: 0, fovDeg: 60 })
+      sighting.observerTrack.addKeyframe(0, { lat: 48.85, lng: 2.35, elevationM: 0, headingDeg: 157, pitchDeg: 0, fovDeg: 60 })
       const unitOf = (reader: SightingSummary) => reader.entriesFor(sighting, 0).find(entry => entry.field === "heading")?.unit
       expect(unitOf(summary)).toBe("° (SSE)")
       expect(unitOf(new SightingSummary(sightingLabels_en, "fr", new SaidTexts(["fr"])))).toBe("° (SSE)")
-      sighting.witnessTrack.addKeyframe(0, { lat: 48.85, lng: 2.35, elevationM: 0, headingDeg: 250, pitchDeg: 0, fovDeg: 60 })
+      sighting.observerTrack.addKeyframe(0, { lat: 48.85, lng: 2.35, elevationM: 0, headingDeg: 250, pitchDeg: 0, fovDeg: 60 })
       expect(unitOf(summary)).toBe("° (WSW)")
       expect(unitOf(new SightingSummary(sightingLabels_en, "fr", new SaidTexts(["fr"])))).toBe("° (OSO)")
     })
@@ -120,7 +120,7 @@ describe("SightingSummary", () => {
 
     it("keeps a longitude on the prime meridian", () => {
       const sighting = Sighting.create(undefined, [{ lat: 51.5, lng: 0 }])
-      sighting.witnessTrack.addKeyframe(0, { lat: 51.5, lng: 0, elevationM: 0, headingDeg: 12, pitchDeg: 3, fovDeg: 60 })
+      sighting.observerTrack.addKeyframe(0, { lat: 51.5, lng: 0, elevationM: 0, headingDeg: 12, pitchDeg: 3, fovDeg: 60 })
       expect(valueOf(sighting, "lng")).toBe("0")
     })
   })

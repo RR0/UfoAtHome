@@ -1,5 +1,5 @@
 /**
- * A lightweight, plain reference to a real-world person (the witness), structurally aligned with
+ * A lightweight, plain reference to a real-world person (the observer), structurally aligned with
  * @rr0/data's PeopleJson (id/title/lastName/firstNames) but dependency-free — same reason and same
  * pattern as SightingTime/SightingLocation in Sighting.ts: importing the real People class would
  * drag its Node-only glob/fs-based export barrel into the browser bundle (see

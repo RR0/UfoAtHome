@@ -1,7 +1,7 @@
 import type { GeoBounds } from "./GeoBounds.js"
 
 /** An assembled image (e.g. a stitched-tiles canvas) ready to use as a three.js texture source —
- * or to be drawn straight onto a 2D canvas, which is what the witness map does with it. */
+ * or to be drawn straight onto a 2D canvas, which is what the observer map does with it. */
 export interface ImageryTexture {
   source: CanvasImageSource
   width: number
@@ -13,7 +13,7 @@ export interface ImageryTexture {
    *
    * Part of the interface because an image without it is not a map. Every consumer that puts
    * anything at a known place on this image — a texture's UVs over real terrain, a marker at the
-   * witness's coordinates — needs the real extent to do it, and a consumer that assumes it got the
+   * observer's coordinates — needs the real extent to do it, and a consumer that assumes it got the
    * bounds it asked for silently misplaces everything by the difference (see TerrainMeshBuilder,
    * which did exactly that, and fetchImageryRaster, which returns roughly three times the requested
    * span).

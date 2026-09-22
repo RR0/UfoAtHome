@@ -15,11 +15,11 @@ import {
  * scene draws is in it, whatever draws it.
  *
  * FROM WHERE the reflection is seen matters when the source is near: a lamp beside a craft ninety
- * metres off is on the other side of it seen from the craft than seen from the witness. So a body of
+ * metres off is on the other side of it seen from the craft than seen from the observer. So a body of
  * an interpretation gets a probe at its own centre, itself hidden while it is photographed — a
- * convex mirror does not show itself — and the decor shares one taken at the witness's eye.
+ * convex mirror does not show itself — and the decor shares one taken at the observer's eye.
  *
- * NOT IN IT: what is not in the world. The phenomena the witness drew are what they SAW, not a
+ * NOT IN IT: what is not in the world. The phenomena the observer drew are what they SAW, not a
  * thing standing there to be mirrored, and the pictures of the place are laid over the view: both
  * live on layers of their own (PHENOMENON_LAYER, REFERENCE_LAYER), and the probe's six cameras see
  * only the scene's. The compass and the lens's own flare are the screen's too but are drawn with

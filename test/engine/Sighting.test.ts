@@ -76,7 +76,7 @@ describe("sightingDurationMs", () => {
     expect(sightingDurationMs(event)).toBe(30 * 60 * 1000)
   })
 
-  it("treats a missing second as :00 rather than blocking — a witness typing seconds on only one side shouldn't lose the duration", () => {
+  it("treats a missing second as :00 rather than blocking — a observer typing seconds on only one side shouldn't lose the duration", () => {
     const event = {
       eventType: "sighting" as const,
       time: { year: 1926, month: 8, day: 12, hour: 10, minute: 18 },

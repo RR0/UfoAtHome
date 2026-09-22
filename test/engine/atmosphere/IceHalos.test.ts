@@ -42,7 +42,7 @@ describe("IceHalos", () => {
     })
   })
 
-  describe("the deck outliving the witness's own sunset", () => {
+  describe("the deck outliving the observer's own sunset", () => {
     it("keeps ice at eight kilometres in sunlight for nearly three degrees past the horizon", () => {
       // The Earth's own shadow, as an angle: acos(R/(R+h)). It is why a pillar is a sunset sight —
       // the crystals are still lit for a quarter of an hour after the ground is not.
@@ -144,7 +144,7 @@ describe("IceHalos", () => {
       }
     })
 
-    it("is put out by a lower deck between the witness and the crystals", () => {
+    it("is put out by a lower deck between the observer and the crystals", () => {
       // Cirrus is above six kilometres. A layer of stratocumulus under it hides the whole display,
       // and this is the difference between "the ingredients were there" and "somebody saw it".
       expect(IceHalos.strength(0.5, 1)).toBe(0)

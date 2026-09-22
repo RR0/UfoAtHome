@@ -1,15 +1,15 @@
 import type { SaidText } from "./SaidText.js"
 
 /**
- * A named instant in an observation — what the witness's own account calls a moment.
+ * A named instant in an observation — what the observer's own account calls a moment.
  *
- * Every case file that reproduces a testimony arrives with these already written: Blue Book's own
+ * Every case file that reproduces a account arrives with these already written: Blue Book's own
  * sketch of Socorro letters six of them (A: hears a roar and sees a flame in the sky; B: the sound
  * changes from high to low and stops; C: the wheels skid on the steep slope; D: sees the object and
  * the small figures; E: two dull thuds, a roar, a red insignia, and he runs; F: it goes off over the
  * shack and the canyon). They are how the account is READ.
  *
- * They are deliberately NOT cuts. A testimony is one continuous thing that happened to somebody,
+ * They are deliberately NOT cuts. A account is one continuous thing that happened to somebody,
  * and splitting it into clips would state, falsely, that the reader is looking at six observations
  * rather than at one. A milestone is a bookmark ON the single timeline — it says "this is the
  * moment the sound stopped", and the recording plays straight through it.

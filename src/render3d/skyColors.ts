@@ -98,7 +98,7 @@ const TWILIGHT_FALLOFF = 1.8
  * at magnitude -0.8 sailed over the sagging limit while the whole star field fell under it.
  *
  * AND THE EYE IS ONLY THE DEFAULT. Every number above is human photometry — a 7 mm pupil, a tenth
- * of a second, an arcminute of acuity — so the whole curve is what a WITNESS could see, and a
+ * of a second, an arcminute of acuity — so the whole curve is what a OBSERVER could see, and a
  * sighting made through a camera is a different threshold in the same sky. `instrumentGain` is how
  * many magnitudes that device stands from an eye (see LimitingMagnitude.gainOverEye): +3.2 for a
  * tripod at f/2 for twenty seconds, -2.3 for an Instamatic. It shifts the curve rather than
@@ -118,8 +118,8 @@ export function visibleMagnitudeLimit(sunAltitudeDeg: number, instrumentGain = 0
 const BRIGHT_MAG_REFERENCE = -1.5 // brighter than any real star (Sirius, -1.46) maps to brightness 1
 /** What an unaided eye actually reaches on a genuinely dark night. The star catalog itself goes to
  * 7.5, which is binocular territory: rendering all of it put thousands of stars in the sky that no
- * witness ever saw, and made every night scene read as an observatory photograph rather than as a
- * testimony. Also the magnitude that maps to brightness 0 below when nothing says otherwise — the
+ * observer ever saw, and made every night scene read as an observatory photograph rather than as a
+ * account. Also the magnitude that maps to brightness 0 below when nothing says otherwise — the
  * two must agree, or the faintest star still drawn would be drawn at something other than the
  * faintest brightness. An instrument moves BOTH of them together (see magnitudeToBrightness). */
 const NAKED_EYE_MAG_LIMIT = 6.5
@@ -218,7 +218,7 @@ const GLOW_AZIMUTH_SPREAD_DEG = 90
 const GLOW_HEIGHT_SCALE_DEG = 12
 /** Above this the Sun is simply up and the sky is simply day. */
 const GLOW_FADES_ABOVE_DEG = 8
-/** Where the glow is strongest: a couple of degrees under, when the Sun has gone for the witness
+/** Where the glow is strongest: a couple of degrees under, when the Sun has gone for the observer
  * and the air in front of them is still lit. */
 const GLOW_PEAK_ALTITUDE_DEG = 2
 /** And how far under it survives — the end of nautical twilight, where the horizon's last colour
@@ -263,7 +263,7 @@ export function skyColorForPosition(altitudeDeg: number, vertexAzimuthDeg: numbe
   return lerpColor(base, target, glow)
 }
 
-/** How much higher the Sun stands over the air the glow is coming from than over the witness — a
+/** How much higher the Sun stands over the air the glow is coming from than over the observer — a
  * few hundred kilometres away along the line of sight, which is a few degrees of the Earth. */
 const GLOW_LOOK_AHEAD_DEG = 6
 
@@ -281,8 +281,8 @@ export function starColorScale(brightness: number): number {
  * bright light source, distinct from the source's own tiny true-scale disc (see
  * SUN_MOON_VISUAL_RADIUS's own doc comment in SceneRenderer.ts on why the disc itself must stay
  * true-to-scale). This *is* part of realistic rendering, not an artistic legibility boost: a
- * human witness genuinely can't look near the Sun without a real perceived glow around it, and
- * omitting that would under-render what a witness actually saw.
+ * human observer genuinely can't look near the Sun without a real perceived glow around it, and
+ * omitting that would under-render what a observer actually saw.
  *
  * Driven purely by the body's own real apparent magnitude (already computed for every tracked
  * body — see ScenePlanet.magnitude, and Sun/Moon get the same treatment) rather than any

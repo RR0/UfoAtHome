@@ -144,7 +144,7 @@ const RECORD_PROVIDER: WeatherProvider = {
 beforeAll(() => {
   vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockImplementation(function (this: HTMLCanvasElement) {
     // mockImplementation, not mockReturnValue: a renderer that sizes itself from its own canvas
-    // (see WitnessMapRenderer) reads ctx.canvas, and one shared object makes every canvas claim to
+    // (see ObserverMapRenderer) reads ctx.canvas, and one shared object makes every canvas claim to
     // be the same one.
     return {
       canvas: this,
@@ -220,7 +220,7 @@ describe("SightingEditorElement ground elevation", () => {
     expect(weatherLookups).toBeLessThanOrEqual(2)
   }, 10_000)
 
-  it("asks again when the witness is somewhere else", async () => {
+  it("asks again when the observer is somewhere else", async () => {
     const element = mount()
     stateDateAndPlace(element)
     await settle(1600)

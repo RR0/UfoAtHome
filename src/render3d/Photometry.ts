@@ -17,7 +17,7 @@ export class Photometry {
    * because what it answers is what a light of that brightness looks like to an eye adapted to this
    * sky — and at night that is nearly white whatever went in. Handing it Chiles's deep blue came
    * back as a white sliver, which is the one thing his drawing is not. So the scene decides how
-   * bright, and the witness — or the diffraction that coloured a corona's rings — decides what
+   * bright, and the observer — or the diffraction that coloured a corona's rings — decides what
    * colour.
    */
   static shown(colour: readonly [number, number, number], luminanceCdM2: number, display?: LuminanceDisplay): [number, number, number] {

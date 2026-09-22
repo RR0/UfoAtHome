@@ -42,7 +42,7 @@
  * The other job is to say, in a sentence, what the sky ALLOWED — which forms could have stood at
  * that source height, and at what angles. That is not the same as what was seen: whether the
  * oriented-crystal forms actually appeared depends on how steadily the crystals were falling, which
- * no record of any sighting holds (see Weather.iceCrystalAlignment). Whether the witness saw one
+ * no record of any sighting holds (see Weather.iceCrystalAlignment). Whether the observer saw one
  * is, as ever, the reader's conclusion.
  */
 export interface HaloForm {
@@ -202,8 +202,8 @@ export class IceHalos {
    *
    * Nearly three degrees for cirrus at eight kilometres, which is a quarter of an hour of a
    * mid-latitude evening. It is exactly the interval that puts a shaft of light over a Sun that has
-   * already set for the witness, and it is why pillars are a sunset sight rather than a daylight
-   * one. Ending the display at the witness's own horizon would lose the sight the form is known for.
+   * already set for the observer, and it is why pillars are a sunset sight rather than a daylight
+   * one. Ending the display at the observer's own horizon would lose the sight the form is known for.
    */
   /**
    * How high the ice deck really is, in metres.
@@ -247,7 +247,7 @@ export class IceHalos {
   }
 
   /**
-   * How strongly the ice forms could have shown, 0 to 1, given the sky that was over the witness.
+   * How strongly the ice forms could have shown, 0 to 1, given the sky that was over the observer.
    *
    * MONOTONIC in the ice cover, and that is a correction. The first version peaked at half cover
    * and fell back to nothing at full, on the reasoning that a solidly covered sky has ground the
@@ -273,7 +273,7 @@ export class IceHalos {
   ): number {
     const ice = Math.max(0, Math.min(1, highCloudCover))
     const throughLowerDecks = Math.max(0, 1 - Math.max(0, Math.min(1, lowerCloudCover)))
-    // Once the source has set for the WITNESS the deck is still lit, and then the Earth's shadow
+    // Once the source has set for the OBSERVER the deck is still lit, and then the Earth's shadow
     // climbs through it: the display does not switch off at the horizon, it goes out from below
     // over the few minutes the shadow takes to reach eight kilometres.
     const lit =
@@ -296,7 +296,7 @@ export class IceHalos {
    */
   static formsAt(sourceAltitudeDeg: number, deckLitUntilDeg = 0): HaloForm[] {
     // Not "has the source set", but "is the ice still in sunlight" — the same question the scene
-    // asks (see IceHalos.deckLitUntilDeg). A line that went quiet at the witness's own sunset while
+    // asks (see IceHalos.deckLitUntilDeg). A line that went quiet at the observer's own sunset while
     // the sky still had a pillar standing in it would be the text and the picture disagreeing,
     // which is the one failure a line like this exists to prevent.
     if (sourceAltitudeDeg <= -deckLitUntilDeg) return []
@@ -319,7 +319,7 @@ export class IceHalos {
     forms.push({ id: "tangentArc", angleDeg: IceHalos.halo22().angleDeg })
     // The white circle that runs right round the sky at the source's own height, off the vertical
     // faces of level plates. No refraction, so no colour and no angle of its own: it is everywhere
-    // at that altitude, and it is what makes a witness say the light "followed" them.
+    // at that altitude, and it is what makes a observer say the light "followed" them.
     if (sourceAltitudeDeg > 0) forms.push({ id: "parhelicCircle", angleDeg: sourceAltitudeDeg })
     const circumzenithal = IceHalos.circumzenithalAltitudeDeg(sourceAltitudeDeg)
     if (circumzenithal !== undefined) forms.push({ id: "circumzenithal", angleDeg: circumzenithal })

@@ -10,7 +10,7 @@ export interface PlaceMatch {
 }
 
 export interface PlaceSearchOptions {
-  /** How many candidates to return at most — a name is often ambiguous, and the witness is the
+  /** How many candidates to return at most — a name is often ambiguous, and the observer is the
    * one who knows which Springfield it was. */
   limit?: number
   /** BCP-47 tag the results should be named in, when the source can (e.g. "fr" for "Londres"). */
@@ -27,7 +27,7 @@ export interface PlaceAttribution {
 
 /**
  * Turns a place NAME into coordinates — the missing half of the Location group, which until now
- * could only be filled by someone who already had a latitude and a longitude to hand. Testimony
+ * could only be filled by someone who already had a latitude and a longitude to hand. Account
  * never comes that way: it says "on the Valensole plateau", "near Socorro", "over Montgomery".
  *
  * Same "one interface, interchangeable implementations" arrangement as ElevationProvider and

@@ -64,7 +64,7 @@ export class RainbowSky {
    * The two bows nobody sees are the honest cost. The third and the fourth stand 40 and 45 degrees
    * from the Sun rather than opposite it, and they are cut. That is very nearly why they go unseen
    * in life as well — they are lost in exactly the glare this refuses to draw — and putting them on
-   * a screen that has none of that glare would show a reader something no witness could report.
+   * a screen that has none of that glare would show a reader something no observer could report.
    */
   private static readonly FULL_UNTIL_DEG = 60
   private static readonly FADED_BY_DEG = 90

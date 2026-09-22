@@ -88,7 +88,7 @@ float fbm(vec3 p) {
 /**
  * The same, band-limited to what the pixel can show. An octave finer than a pixel is not a detail
  * but a flicker: it lands on a pixel at random, and the smallest move of the eye — a step of the
- * witness — redraws the veil differently. Each octave is faded out, to its mean of nought, as its
+ * observer — redraws the veil differently. Each octave is faded out, to its mean of nought, as its
  * period comes down from two pixels to one, the footprint of a pixel in the noise's own coordinates
  * read off the screen-space derivatives. Only in a fragment shader, and only under uniform control
  * flow, where derivatives exist.
@@ -191,7 +191,7 @@ vec3 iceHaloLight(vec3 dir, float ice) {
   vec3 source = normalize(uSource);
   // The map is held in the source's own frame: how far up, and how far round from its
   // bearing. Reading it that way is what lets one traced map serve every direction the
-  // witness may be facing and every bearing the Sun may be on.
+  // observer may be facing and every bearing the Sun may be on.
   float altitude = asin(clamp(dot(dir, up), -1.0, 1.0));
   vec3 sourceLevel = source - up * dot(source, up);
   vec3 dirLevel = dir - up * dot(dir, up);
@@ -221,8 +221,8 @@ varying vec3 vDir;
 
 // How far the flat plane that cloud noise is projected onto sits from the observer — see main()'s
 // own comment for why there is a plane at all. A uniform rather than a constant since a recording
-// states its own cloud base (Weather.cloudBaseM) and the witness their own altitude: the distance
-// between the two is what decides how compressed the deck looks toward the horizon, and a witness
+// states its own cloud base (Weather.cloudBaseM) and the observer their own altitude: the distance
+// between the two is what decides how compressed the deck looks toward the horizon, and a observer
 // flying just under a low deck sees something very different from one standing under the same deck
 // on the ground.
 uniform float layerHeight;

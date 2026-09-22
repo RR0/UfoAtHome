@@ -22,7 +22,7 @@ loadSampleButton.addEventListener("click", async () => {
 
 const scene = document.getElementById("scene") as SceneElement
 scene.setCloudRendering("volume")
-;(document.getElementById("witnesses") as SightingElement).scene.setCloudRendering("volume")
+;(document.getElementById("observers") as SightingElement).scene.setCloudRendering("volume")
 const sceneCaseSelect = document.getElementById("scene-case") as HTMLSelectElement
 sceneCaseSelect.addEventListener("change", () => {
   void scene.loadFromSrc(sceneCaseSelect.value)

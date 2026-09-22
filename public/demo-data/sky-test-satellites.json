@@ -2,8 +2,8 @@
   "version": 1,
   "id": "sky-test-satellites",
   "description": {
-    "fr": "Un ciel d'essai pour la question satellite, deux jours après un lancement Starlink. Le 29 juillet 2025 vers 23 h à Paris, le Soleil est à 11° sous l'horizon : le témoin est dans la nuit, l'orbite basse encore au soleil. Les satellites lancés le 27 juillet volent en file vers 260 km, pas encore montés à leur altitude de travail ni rendus plus sombres, et passent un par un vers l'ouest-nord-ouest. Chaque point est calculé depuis les éléments orbitaux archivés ce jour-là, pas posé à la main.",
-    "en": "A test sky for the satellite question, two days after a Starlink launch. On 29 July 2025 around 11 pm in Paris the Sun is 11° below the horizon: the witness is in the dark, low orbit still in sunlight. The satellites launched on 27 July fly in a line at about 260 km, not yet raised to their working height nor darkened, and cross one after another towards the west-north-west. Every point is computed from the orbital elements archived that day, not placed by hand."
+    "fr": "Un ciel d'essai pour la question satellite, deux jours après un lancement Starlink. Le 29 juillet 2025 vers 23 h à Paris, le Soleil est à 11° sous l'horizon : le observateur est dans la nuit, l'orbite basse encore au soleil. Les satellites lancés le 27 juillet volent en file vers 260 km, pas encore montés à leur altitude de travail ni rendus plus sombres, et passent un par un vers l'ouest-nord-ouest. Chaque point est calculé depuis les éléments orbitaux archivés ce jour-là, pas posé à la main.",
+    "en": "A test sky for the satellite question, two days after a Starlink launch. On 29 July 2025 around 11 pm in Paris the Sun is 11° below the horizon: the observer is in the dark, low orbit still in sunlight. The satellites launched on 27 July fly in a line at about 260 km, not yet raised to their working height nor darkened, and cross one after another towards the west-north-west. Every point is computed from the orbital elements archived that day, not placed by hand."
   },
   "time": {
     "year": 2025,
@@ -51,7 +51,7 @@
     "order": [],
     "groups": []
   },
-  "witnessTrack": {
+  "observerTrack": {
     "keyframes": [
       {
         "t": 0,

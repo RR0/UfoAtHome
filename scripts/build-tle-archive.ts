@@ -161,7 +161,7 @@ class TleArchiveBuilder {
    * The full catalogue, snapshotted from February 2021 to early January 2025: every tracked object.
    * Three quarters of it is not kept, and on purpose:
    *
-   * - DEBRIS, over half the catalogue, is a fact about radar and not about what a witness could see.
+   * - DEBRIS, over half the catalogue, is a fact about radar and not about what a observer could see.
    * - An object with no measured brightness could only be propagated to be left undrawn.
    * - A Starlink goes to the Starlink list, which this is the only source of before late 2024.
    *

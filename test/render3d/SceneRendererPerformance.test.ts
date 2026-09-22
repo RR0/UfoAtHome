@@ -219,7 +219,7 @@ describe("scene playback resource reuse", () => {
   })
 })
 
-describe("the Sun's shadow as the witness walks", () => {
+describe("the Sun's shadow as the observer walks", () => {
   it("keeps each shadow texel on the same ground while the world slides under the eye", () => {
     const light = new DirectionalLight()
     light.shadow.mapSize.set(1024, 1024)

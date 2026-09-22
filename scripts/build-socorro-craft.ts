@@ -10,7 +10,7 @@
  * (documents.theblackvault.com/bluebookdesk/pbb-socorro.pdf).
  *
  * - The hull is an ellipsoid 3.36 m across and 1.73 m high: the "oval" Zamora drew, at the size its
- *   6.41° × 3.31° make at the hundred feet he gave (see witness-socorro.json). Round in plan is
+ *   6.41° × 3.31° make at the hundred feet he gave (see observer-socorro.json). Round in plan is
  *   ASSUMED: he saw it from one side.
  * - It stands "about three and a half feet from the ground" (his statement, p. 88): 1.07 m.
  * - On legs "slanted outwards to the ground" (p. 88). He saw two; four are built, because four

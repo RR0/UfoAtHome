@@ -3,10 +3,10 @@ import {
   resolveDecorLitAt,
   hasWindows,
   isWindowOpenable,
-  canHoldWitness,
+  canHoldObserver,
   defaultWindows,
   decorSidesFor,
-  witnessSidesFor,
+  observerSidesFor,
   DECOR_SIDES,
   DEFAULT_WINDOW_OPACITY_PERCENT,
   FIXED_WINDOW_MIN_OPACITY_PERCENT
@@ -61,7 +61,7 @@ describe("resolveDecorLitAt", () => {
   })
 })
 
-const NON_WINDOWED_KINDS: DecorKind[] = ["tree", "streetlight", "witness"]
+const NON_WINDOWED_KINDS: DecorKind[] = ["tree", "streetlight", "observer"]
 
 describe("hasWindows", () => {
   it("is true only for building and vehicle", () => {
@@ -102,21 +102,21 @@ describe("decorSidesFor", () => {
   })
 })
 
-describe("witnessSidesFor", () => {
-  it("a building's witness can stand at any of its own decorSidesFor", () => {
-    expect(witnessSidesFor("building")).toEqual(decorSidesFor("building"))
+describe("observerSidesFor", () => {
+  it("a building's observer can stand at any of its own decorSidesFor", () => {
+    expect(observerSidesFor("building")).toEqual(decorSidesFor("building"))
   })
 
-  it("a vehicle's witness can only sit at one of its 4 door/seat positions, never at the fixed windshield/rear window", () => {
-    expect(witnessSidesFor("vehicle")).toEqual(["front-left", "front-right", "behind-left", "behind-right"])
+  it("a vehicle's observer can only sit at one of its 4 door/seat positions, never at the fixed windshield/rear window", () => {
+    expect(observerSidesFor("vehicle")).toEqual(["front-left", "front-right", "behind-left", "behind-right"])
   })
 })
 
-describe("canHoldWitness", () => {
+describe("canHoldObserver", () => {
   it("is true only for building and vehicle", () => {
-    expect(canHoldWitness("building")).toBe(true)
-    expect(canHoldWitness("vehicle")).toBe(true)
-    for (const kind of NON_WINDOWED_KINDS) expect(canHoldWitness(kind)).toBe(false)
+    expect(canHoldObserver("building")).toBe(true)
+    expect(canHoldObserver("vehicle")).toBe(true)
+    for (const kind of NON_WINDOWED_KINDS) expect(canHoldObserver(kind)).toBe(false)
   })
 })
 

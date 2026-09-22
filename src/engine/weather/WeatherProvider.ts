@@ -9,13 +9,13 @@ export interface WeatherPoint {
 
 /**
  * The instants to describe, each with the observer's own position at it — not one place and a list
- * of times. Half of aviation testimony is given from a cockpit, and an aircraft under observation
+ * of times. Half of aviation account is given from a cockpit, and an aircraft under observation
  * for an hour is a long way from where it started: asking about its take-off coordinates for the
- * whole span would describe weather the witness had already left behind.
+ * whole span would describe weather the observer had already left behind.
  */
 export interface WeatherQuery {
   /** Sorted by time, ascending — see WeatherInference, which builds them from the sighting's own
-   * date, duration and witnessTrack. */
+   * date, duration and observerTrack. */
   points: WeatherPoint[]
 }
 
@@ -42,7 +42,7 @@ export interface WeatherObservation {
  * `undefined` means the provider has no record for that place/instant (before its dataset's own
  * epoch, typically) — a normal, expected answer the UI states as such. A network or HTTP failure
  * throws instead: "we couldn't ask" and "there is nothing to find" are different things to tell a
- * witness, and only the second one is a fact about their sighting.
+ * observer, and only the second one is a fact about their sighting.
  */
 export interface WeatherProvider {
   getWeather(query: WeatherQuery): Promise<WeatherObservation | undefined>

@@ -6,7 +6,7 @@
  * report no. 14, case 5), and the whole interest of the case is that the captain and his first
  * officer, sitting a metre apart, did not draw the same craft: a model that averaged them would
  * erase the one fact the file most firmly holds. So each man's drawing is built as its own model,
- * and each recording places the one its own witness drew.
+ * and each recording places the one its own observer drew.
  *
  * What is shared: a fuselage about 30 m long — the length both accounts report — and, at the rear,
  * the flame Whitted annotated "ORANGE & RED FLAME 40' LONG" beside "100' LENGTH". The flame itself
@@ -15,7 +15,7 @@
  *
  * Chiles's craft ("chiles.gltf"): a slim cigar tapered at both ends, with no porthole at all, and
  * round the front the light area he annotated "cockpit windshield?". Its proportions are his drawing
- * read through witness-chiles.json's own angles: 9.388° by 0.992° broadside, which at the 30 m of
+ * read through observer-chiles.json's own angles: 9.388° by 0.992° broadside, which at the 30 m of
  * the account is 30 m by 3.17, and a windshield 3 m long at the nose. The cross ribs of his sketch
  * are not reproduced: this format draws shapes, not a surface finish.
  *

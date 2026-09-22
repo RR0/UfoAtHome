@@ -94,7 +94,7 @@ describe("SoundTrack", () => {
 })
 
 describe("resolveSoundAt", () => {
-  // Silence, not an invented noise: a recording that says nothing about sound has a witness who
+  // Silence, not an invented noise: a recording that says nothing about sound has a observer who
   // was never asked, and playing something would put words in their mouth (see Sound.ts).
   it("falls back to silence when the track is empty", () => {
     expect(resolveSoundAt(Sighting.create(), 0)).toEqual(DEFAULT_SOUND)

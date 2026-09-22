@@ -203,7 +203,7 @@ export class FaqPage implements SitePage {
       <h3>Why not just use Stellarium?</h3>
       <p>Stellarium is a planetarium, and a very good one — we have read its source to learn how it
         does things. But it answers “what was in the sky?”, not “what did this person see, and could
-        the sky account for it?”. It has no account format, no witnessed phenomenon, no weather, no
+        the sky account for it?”. It has no account format, no observered phenomenon, no weather, no
         decor around the observer, no long-exposure instrument, and nothing to embed in a page.</p>
       <p>Where the two overlap, UFO@home sometimes takes the harder road on purpose: the Milky Way
         is a texture in Stellarium and a line-of-sight integral here, which is why its dark rift

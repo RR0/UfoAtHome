@@ -86,7 +86,7 @@ vec3 respond(vec3 relative) {
   if (y <= 0.0) return vec3(0.0);
   float power = pow(y, EYE_RESPONSE_EXPONENT);
   float response = power / (power + 1.0);
-  // The response is how light the witness saw it. Shown as a luminance, the reader's own eye
+  // The response is how light the observer saw it. Shown as a luminance, the reader's own eye
   // compressed it a second time and every scene came out pastel, a sunlit ground as pale as the
   // sky; shown as the luminance that LOOKS that light (CIE L*), it is seen once. Chosen by the
   // reader over four steeper responses on 2026-09-21, as the one right both by day and by night.
@@ -116,7 +116,7 @@ export const EYE_UNIFORMS = { uRodShare: { value: 0 }, uRelativeScale: { value: 
 
 /**
  * The finished picture: the scene's luminance through the eye's response, and over it what is laid
- * on the screen rather than seen in the world — the pictures of the place, the witness's own
+ * on the screen rather than seen in the world — the pictures of the place, the observer's own
  * phenomena, the compass — premultiplied, as three leaves anything blended onto a cleared target.
  * Those are laid on AFTER the response because they are already what an eye sees: a phenomenon half
  * faded over a night sky is half faded on the screen, not a half share of a luminance nobody stated.

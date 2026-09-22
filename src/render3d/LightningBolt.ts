@@ -8,14 +8,14 @@ import { horizontalToCartesian } from "./skyColors.js"
  * base down to the ground, drawn only while the flash is lit.
  *
  * Placed by ANGLE, like everything at the sky's distance in this scene: a channel five kilometres
- * away shows no parallax across a witness's few metres, so its top stands at the altitude of the
+ * away shows no parallax across a observer's few metres, so its top stands at the altitude of the
  * cloud base seen from there and its foot on the horizon, and the terrain in front hides it the
  * way it hides a setting star.
  *
  * Drawn as two ribbons (WebGL ignores line width): a narrow core at the channel's apparent width and
  * a wide, faint glow around it, both additive, so a strike brightens what is behind it rather than
- * painting over it. Each ribbon is turned to face the witness when it is built, which it keeps: the
- * witness is at the centre of the sphere it is drawn on.
+ * painting over it. Each ribbon is turned to face the observer when it is built, which it keeps: the
+ * observer is at the centre of the sphere it is drawn on.
  */
 export class LightningBolt {
   readonly object = new Group()
@@ -43,7 +43,7 @@ export class LightningBolt {
   }
 
   /**
-   * Shows `flash` at `brightness` (0 hides it), with the cloud base at `cloudBaseM` above the witness.
+   * Shows `flash` at `brightness` (0 hides it), with the cloud base at `cloudBaseM` above the observer.
    */
   set(flash: LightningFlash | undefined, brightness: number, cloudBaseM: number): void {
     if (!flash || !flash.cloudToGround || brightness <= 0.01) {

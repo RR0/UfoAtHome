@@ -10,7 +10,7 @@
  *
  * SORTED BRIGHTEST FIRST, and that is load-bearing rather than tidy: the renderer stops scanning at
  * the faintest magnitude the observation could record instead of walking the whole file (see
- * SceneRenderer.buildStars), so a witness's own sky costs what a witness's own sky is worth even
+ * SceneRenderer.buildStars), so a observer's own sky costs what a observer's own sky is worth even
  * when a camera's deeper one is carried beside it.
  */
 export interface StarCatalog {

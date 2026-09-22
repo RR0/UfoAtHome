@@ -5,7 +5,7 @@ import type { EciVec3, SatRec } from "satellite.js"
 import type { ObserverGeo } from "./CelestialPositions.js"
 import type { OrbitingObject } from "./TleArchive.js"
 
-/** Where one object stood, seen from the witness, at one instant. */
+/** Where one object stood, seen from the observer, at one instant. */
 export interface SatellitePosition {
   object: OrbitingObject
   /** Degrees clockwise from true north. */
@@ -17,7 +17,7 @@ export interface SatellitePosition {
   heightKm: number
   /** How much of the Sun's disc the object sees: 1 in full sunlight, 0 in the Earth's umbra. */
   sunlitFraction: number
-  /** Sun–object–witness angle. 0 is the object seen fully lit, 180 is seen from its night side. */
+  /** Sun–object–observer angle. 0 is the object seen fully lit, 180 is seen from its night side. */
   phaseAngleDeg: number
   /** Apparent visual magnitude, when the object has a known brightness and is lit at all. */
   magnitude?: number
@@ -312,7 +312,7 @@ export class SatellitePasses {
     return Math.min(1, Math.max(0, overlap / (Math.PI * a * a)))
   }
 
-  /** The angle, at the object, between the directions to the Sun and to the witness. */
+  /** The angle, at the object, between the directions to the Sun and to the observer. */
   static phaseAngleDeg(objectKm: EciVec3<number>, sunAu: EciVec3<number>, observerKm: EciVec3<number>): number {
     const AU_KM = 149_597_870.7
     const toSun = [sunAu.x * AU_KM - objectKm.x, sunAu.y * AU_KM - objectKm.y, sunAu.z * AU_KM - objectKm.z]

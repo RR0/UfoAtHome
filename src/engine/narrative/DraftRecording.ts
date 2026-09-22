@@ -27,10 +27,10 @@ interface DraftShape {
 /**
  * Turns what a provider proposes into something the editor can actually load.
  *
- * A recording's shapes carry two quite different kinds of field. There is what the witness said —
+ * A recording's shapes carry two quite different kinds of field. There is what the observer said —
  * the angle it spanned, the direction it was in, what to call it — and there is how the thing gets
  * painted: a pixel box, a transparency, a halo scale, a selection flag. Only the first kind is
- * testimony, so it is the only kind a draft is asked for; the second is derived on load from the
+ * account, so it is the only kind a draft is asked for; the second is derived on load from the
  * first (see SightingShapes.toBounds and toPosition) and would be pure invention coming from an
  * account.
  *
@@ -71,13 +71,13 @@ export class DraftRecording {
    *
    * `id` and `kind` have no defaults in the model because nothing ever created one without them; a
    * draft can. The PLACEMENT is deliberately left exactly as stated, including 0,0 — which looks
-   * like a mistake and is not: an object the witness is inside carries `witnessSide`, and the
+   * like a mistake and is not: an object the observer is inside carries `observerSide`, and the
    * renderer then seats the camera within it (see DecorSystem.occupantView), so a car at the
-   * witness's own position is a car around them rather than one drawn on the lens. Nudging it clear
+   * observer's own position is a car around them rather than one drawn on the lens. Nudging it clear
    * would move the vehicle out from under its own driver.
    *
    * The WINDOWS are the reason this matters. A side absent from `windows` has no opening there at
-   * all, so a vehicle drafted without the field is a sealed box — and a witness seated inside one
+   * all, so a vehicle drafted without the field is a sealed box — and a observer seated inside one
    * sees grey where the sky should be, which is exactly what the first real draft rendered. The
    * editor's own Add never had the problem because it spreads defaultWindows in; a draft has no
    * business inventing per-side opacities, so it gets the same defaults rather than a question.

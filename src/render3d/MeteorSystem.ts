@@ -14,7 +14,7 @@ interface Vector {
  * Draws a shower's meteors: short streaks that all run away from one point of the sky.
  *
  * The radiating is the whole signature. A meteor shower does not look like scattered streaks — every
- * one of them, traced backwards, meets at the radiant, and that is exactly what tells a witness (and
+ * one of them, traced backwards, meets at the radiant, and that is exactly what tells a observer (and
  * a reader) that a streak belonged to the shower rather than to something else. Rendering them any
  * other way would lose the one feature worth reproducing.
  *

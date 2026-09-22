@@ -1,8 +1,8 @@
 export const html = `
 <div class="toolbar" id="toolbar" hidden>
-  <span id="testimony" class="testimony">
-    <span id="testimony-prefix">Account by</span>
-    <span id="witness-text"></span><select id="witness" hidden></select>
+  <span id="account" class="account">
+    <span id="account-prefix">Account by</span>
+    <span id="observer-text"></span><select id="observer" hidden></select>
   </span>
   <!-- What to replay the account with: the raw account, the observer's own reading of it, or an
        analyst's from the case (see InterpretationJson). Only there when there is a choice. -->
@@ -13,8 +13,8 @@ export const html = `
        UfoElement.hostControls. -->
   <span id="scene-controls" class="scene-controls">
     <!-- Whether the account is shown beside the interpretation on show, as outlines, and
-         measured against it — see SceneElement.compareTestimony. Only while an interpretation is. -->
-    <button id="compare-testimony" type="button" title="Compare with the account" aria-label="Compare with the account" aria-pressed="false" hidden>◌</button>
+         measured against it — see SceneElement.compareAccount. Only while an interpretation is. -->
+    <button id="compare-account" type="button" title="Compare with the account" aria-label="Compare with the account" aria-pressed="false" hidden>◌</button>
   </span>
   <button id="info-button" class="info-btn" type="button" title="About" aria-label="About" aria-expanded="false">?</button>
   <div id="info-panel" class="info-panel" hidden>
@@ -85,13 +85,13 @@ export const css = `
      ufoathome.org's own player wraps it in overflow:hidden, and so can any page it is embedded in. */
   padding: 3px 3px 0;
 }
-.testimony {
+.account {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.testimony select {
+.account select {
   max-width: 12em;
 }
 .interpretation-choice {

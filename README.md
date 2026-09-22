@@ -2,10 +2,10 @@
 
 # UFO@home
 
-**UFO@home** lets a UFO witness record the shape, appearance and movement of what they saw — and replay it like a VCR —
+**UFO@home** lets a UFO observer record the shape, appearance and movement of what they saw — and replay it like a VCR —
 instead of relying only on a written or spoken account. The approach follows [Roger Shepard's
 recommendation](https://rr0.org/time/1/9/6/8/07/29/Symposium/Shepard/index_fr.html) that a visual reconstruction of a
-testimony is more faithful than an oral or written one.
+account is more faithful than an oral or written one.
 
 Originally a Java applet (2003), the project has been rewritten from scratch in TypeScript: a small,
 dependency-light engine (keyframe timeline, recording, playback, a three.js scene) wrapped in three vanilla
@@ -17,13 +17,13 @@ for what that buys.
 ### Naming
 
 `<rr0-scene>` is named without "ufo" on purpose: it renders a generic 3D scene (sky/horizon/stars/decor) from a
-real-world time and place, and stands the witness's own phenomenon in it. Under it lives a playback layer —
+real-world time and place, and stands the observer's own phenomenon in it. Under it lives a playback layer —
 `UfoElement`, the timeline, the controls, the canvas the pointer works on — reached as `scene.ufoElement`; it was a
 component of its own (`<rr0-ufo>`, the shape painted on a bare background) until 0.54.0, when the phenomenon moved
 into the scene and a shape with no sky stopped being a thing this project draws. Read-only playback needs no
 "player" suffix, since it is every component's default behavior, and `<rr0-sighting-editor>` is the one that needs
-a qualifier (it *adds* recording on top). `<rr0-sighting>` (renamed from `<rr0-ufo-witnesses>` — see below) is the
-standard way to display any real sighting, whether it has one witness or several: a witness account always implies
+a qualifier (it *adds* recording on top). `<rr0-sighting>` (renamed from `<rr0-ufo-observers>` — see below) is the
+standard way to display any real sighting, whether it has one observer or several: a observer account always implies
 a real place and time, so it always composes `<rr0-scene>`.
 
 The project's own site is **[ufoathome.org](https://ufoathome.org)**: [the demos](https://ufoathome.org/demos/)
@@ -84,7 +84,7 @@ attribute the three other elements take. That is what makes an address per obser
 this attribute, and [its player](https://ufoathome.org/play/) does the same for read-only replay.
 Any path the site does not otherwise serve becomes that parameter, so
 
-- `https://ufoathome.org/play/?sighting=/demo-data/witness-socorro.json`, or simply
+- `https://ufoathome.org/play/?sighting=/demo-data/observer-socorro.json`, or simply
 - `https://ufoathome.org/Socorro`
 
 open that observation. A bare name with no `/` is looked for among the site's own demos first, then
@@ -110,11 +110,11 @@ the host page's own `lang` then `navigator.languages`, no picker UI.
 
 The element the two others build on (~530KB gzip — [Three.js](https://threejs.org/) plus
 [`astronomy-engine`](https://github.com/cosinekitty/astronomy)'s planetary/lunar position tables, which don't
-tree-shake since they're one shared data table used internally for every body): the witness's own phenomenon
+tree-shake since they're one shared data table used internally for every body): the observer's own phenomenon
 standing in a 3D sky/horizon/starfield/decor scene computed from the recording's real time and place, with the
 playback controls under it. Its own members are `src`, `sightingData`, `loadFromSrc`, `enableClickToPlay` (forwarded
 to the playback layer), `ufoElement` (that layer), `sceneRenderer`, and the attributes `show-compass`,
-`show-witness-map` and `hide-milestones`. Click-to-play/pause works anywhere on the scene (the playback layer's
+`show-observer-map` and `hide-milestones`. Click-to-play/pause works anywhere on the scene (the playback layer's
 transparent canvas covers the whole stage), and the fullscreen button fullscreens the *whole* scene — it sets the
 layer's `fullscreenTarget` to its own outer stage for this.
 
@@ -206,7 +206,7 @@ blurred one in a sharp frame was close.
 The frame is letterboxed inside the widget's own box rather than resizing it, and the field it
 implies becomes the recording's default — a recording that states its own (a zoom, binoculars) keeps
 it. An eye has no rectangle and no format, and neither has a camera nobody identified: both fall back
-to the scene's own 16:9 at the 60° vertical field this project draws an unaided witness through
+to the scene's own 16:9 at the 60° vertical field this project draws an unaided observer through
 (about the middle half of a real human field, which is where acuity actually is). The catalogue is
 dated, so the picker offers what existed: no telephone in 1964.
 
@@ -222,13 +222,13 @@ through a 50 mm at f/2 for twenty seconds (see `src/engine/instrument/LimitingMa
 darkness/color follows the sun's altitude (day/twilight bands/night), and its dawn/dusk glow is anchored on the
 sun's real compass direction, not spread uniformly around the horizon — see `src/render3d/skyColors.ts`.
 
-The witness's own pose — geographic position, elevation, and viewing heading/pitch/field of view — can vary over
-the sighting's timeline via `witnessTrack` in the sighting JSON (a keyframe array of `{ t, pose }` alongside
-`timeline` — the model class is `ObserverTrack`, but the serialized key is `witnessTrack`, and writing the class's
+The observer's own pose — geographic position, elevation, and viewing heading/pitch/field of view — can vary over
+the sighting's timeline via `observerTrack` in the sighting JSON (a keyframe array of `{ t, pose }` alongside
+`timeline` — the model class is `ObserverTrack`, but the serialized key is `observerTrack`, and writing the class's
 name into a file is a mistake that costs an afternoon; same
 hold-last/interpolated-lookup shape — see `src/engine/model/ObserverTrack.ts`), driving both the camera's own
 orientation and which real-world instant the astronomy is computed for as playback advances. Older recordings
-with no `witnessTrack` fall back to the legacy static `place[0]` (see `resolveObserverPoseAt` in
+with no `observerTrack` fall back to the legacy static `place[0]` (see `resolveObserverPoseAt` in
 `src/engine/model/Sighting.ts`) — usable for sky darkness/color and camera pitch/fov, but with no compass heading
 to orient the camera by.
 
@@ -237,14 +237,14 @@ approximation) stays in the repo, tested, and still backs `skyBrightness()`'s tw
 the live rendering path now uses `astronomy-engine` for the Sun too, for a single source of truth and to get the
 Sun's azimuth from the same call used for the sky's directional glow.
 
-`<rr0-sighting-editor>` has editor fields for the witness's latitude/longitude/heading and the observation's start
-date/time (all optional) — filling in lat+lng writes both the legacy `place` and a single t=0 `witnessTrack`
+`<rr0-sighting-editor>` has editor fields for the observer's latitude/longitude/heading and the observation's start
+date/time (all optional) — filling in lat+lng writes both the legacy `place` and a single t=0 `observerTrack`
 keyframe (elevation/pitch/field of view stay at neutral defaults; there's no UI yet for authoring the observer
 *moving* over time, only a single static pose per recording).
 
 Not yet done: a mirage, the supernumerary arcs crowded inside a bright rainbow and the corona round a Sun seen
 through a thin water cloud (all three are interference, and nothing here models the wave — see `WaterDrop.ts`),
-and a multi-keyframe `witnessTrack` authoring UI (today the editor can only set
+and a multi-keyframe `observerTrack` authoring UI (today the editor can only set
 one static pose; an observer that moves/re-orients mid-recording still needs hand-authored or scripted JSON). The
 Moon's phase currently only dims/brightens its disc's overall
 color rather than rendering a geometrically accurate crescent shape — a natural follow-up.
@@ -283,7 +283,7 @@ coverage floor:
   recorded tail length and are drawn with no tail at all.
 
 - **Satellites** (`src/engine/astronomy/Satellites.ts`). For every date, the ILLUMINATION: `h = R(sec B - 1)` gives how high the Earth's shadow stood
-  above the witness, so deep in the night nothing in low orbit is lit and a light crossing the sky
+  above the observer, so deep in the night nothing in low orbit is lit and a light crossing the sky
   then was not a satellite. Being lit and being seen are kept apart — everything in orbit is sunlit
   by day, and an Iridium flare at magnitude -8 was genuinely watched at noon. Also complete, and
   from CelesTrak's SATCAT: how many tracked objects were in orbit that month, and when each named
@@ -309,10 +309,10 @@ coverage floor:
   family keeps a second, independent derivation in closed form (`IceHalos.ts`, `Rainbows.ts`) whose only job is to
   disagree with the trace; that check has already caught one shipped error.
 
-All of them appear in the editor's read-only "Sky:" line, with a button to turn the witness toward
+All of them appear in the editor's read-only "Sky:" line, with a button to turn the observer toward
 the meteor or the comet. The bow line is said only when rain was reported — everybody knows whether it was
 raining, so the interesting answers are the negative ones: a Sun higher than 42° puts every bow below a ground
-witness's horizon, and an unbroken deck between the Sun and the rain is the missing half of the famous
+observer's horizon, and an unbroken deck between the Sun and the rain is the missing half of the famous
 condition.
 
 **Regenerating the satellite catalog.** `src/engine/astronomy/satelliteCatalog.ts` is generated by
@@ -339,9 +339,9 @@ apparitions, and the peak magnitudes and tail lengths recorded at the time, are 
 `scripts/build-comet-catalog.ts` — the orbits are looked up, the brightness is an observation, and the script's
 own doc comment explains why the two cannot come from the same place. The generated file *is* checked in.
 
-**The phenomenon stands in the scene, and is still only what the witness saw.** The shape used to be painted on a
+**The phenomenon stands in the scene, and is still only what the observer saw.** The shape used to be painted on a
 2D canvas laid over the 3D scene, so that nothing about it could be read as a claim about a solid at a distance. It
-is now a plane *in* the three.js scene (`src/render3d/PhenomenonSystem.ts`), facing the witness and scaled so that
+is now a plane *in* the three.js scene (`src/render3d/PhenomenonSystem.ts`), facing the observer and scaled so that
 it subtends exactly the angle the recording states — which makes it look the same from their eye at any distance
 whatever, and is what keeps the claim where it was: the recording states angles and nothing else, and the distance
 the plane is drawn at is a parameter of the picture (`src/engine/shape/PhenomenonDepth.ts`, see *Where the shape
@@ -350,7 +350,7 @@ the same halo, blur, veil and spikes into its texture. What changed is who decid
 depth, per pixel, so a patrol car in front of it hides exactly the part of it a patrol car would, where the overlay
 sampled nine points and hid the shape whole or not at all. The ground and the terrain are kept out of that on
 purpose — the phenomena are drawn in a pass of their own, depth-tested against the decor alone — because a relief
-patch at thirty-metre resolution deciding what a witness saw would not be a reconstruction (Socorro's craft, a
+patch at thirty-metre resolution deciding what a observer saw would not be a reconstruction (Socorro's craft, a
 hundred feet away in the arroyo below the road, sank two metres under one). It also means the phenomenon goes
 through the instrument's own projection like everything else in the scene, and through the same long-exposure
 accumulation, instead of an approximation of each on a separate layer. The overlay keeps the pointer's business:
@@ -359,17 +359,17 @@ to test "was it a helicopter" — is a different statement, and a different obje
 
 ## `<rr0-sighting>` — standard sighting view
 
-The standard way to display any real sighting, whether it has one witness or several — renamed from
-`<rr0-ufo-witnesses>` once it stopped being just a multi-witness selector (see [Naming](#naming)). It composes a
-nested `<rr0-scene>` the same way `<rr0-sighting-editor>` does, since a witness recording is
+The standard way to display any real sighting, whether it has one observer or several — renamed from
+`<rr0-ufo-observers>` once it stopped being just a multi-observer selector (see [Naming](#naming)). It composes a
+nested `<rr0-scene>` the same way `<rr0-sighting-editor>` does, since a observer recording is
 always a real sighting and always needs the real sky/ground backdrop.
 
 ```html
 <rr0-sighting src="sighting.json"></rr0-sighting>
 ```
 
-`src` accepts either a single witness's `sighting.json` directly or a **case**: RR0's own `case.json`, whose
-`events` of `eventType: "sighting"` each point at one witness's `SightingRecordingJson` by `url`, read relative to
+`src` accepts either a single observer's `sighting.json` directly or a **case**: RR0's own `case.json`, whose
+`events` of `eventType: "sighting"` each point at one observer's `SightingRecordingJson` by `url`, read relative to
 the case file itself (so the same case works from its dossier's page and from anywhere else). A case's other events
 (analyses, articles, films, confessions) are not replayed. See `CaseJson` in `src/engine/persistence/caseJson.ts`:
 
@@ -378,45 +378,45 @@ the case file itself (so the same case works from its dossier's page and from an
   "id": "ChilesWhitted",
   "title": "Chiles et Whitted",
   "events": [
-    { "type": "event", "eventType": "sighting", "url": "witness-chiles.json" },
-    { "type": "event", "eventType": "sighting", "url": "witness-whitted.json" }
+    { "type": "event", "eventType": "sighting", "url": "observer-chiles.json" },
+    { "type": "event", "eventType": "sighting", "url": "observer-whitted.json" }
   ]
 }
 ```
 
 The two shapes are told apart automatically — an object with `events` and no `timeline` is a case, anything else
-one witness's own recording. A bare JSON array (the witness manifest read before cases) is refused with an error
-naming `case.json`. No labels are duplicated in the case — each witness's display name and the shared
-case id grouping them together are read from that witness's *own* file (`witness`/`caseId`, see
+one observer's own recording. A bare JSON array (the observer manifest read before cases) is refused with an error
+naming `case.json`. No labels are duplicated in the case — each observer's display name and the shared
+case id grouping them together are read from that observer's *own* file (`observer`/`caseId`, see
 [Data format](#data-format)), so there's a single source of truth and nothing to drift out of sync. This means
-every listed witness's recording is fetched upfront (to read its name), not lazily on selection — fine at the
-scale a case's witness list actually has. If a witness has no `witness.title`, its `witness.id` is shown instead, or
-the URL itself as a last resort. A mismatched `caseId` across the listed witnesses logs a console warning (doesn't
+every listed observer's recording is fetched upfront (to read its name), not lazily on selection — fine at the
+scale a case's observer list actually has. If a observer has no `observer.title`, its `observer.id` is shown instead, or
+the URL itself as a last resort. A mismatched `caseId` across the listed observers logs a console warning (doesn't
 block) — likely means unrelated recordings got listed together by mistake.
 
-**Where two witnesses described different things, the recordings have to show it.** Not that they
-must differ — witnesses often agree, and two matching recordings are then simply true. But a
-difference that exists in the record and not in the files makes the witness picker a control that
-does nothing, and nothing *looks* broken. Chiles-Whitted shipped that way for months: one testimony
+**Where two observers described different things, the recordings have to show it.** Not that they
+must differ — observers often agree, and two matching recordings are then simply true. But a
+difference that exists in the record and not in the files makes the observer picker a control that
+does nothing, and nothing *looks* broken. Chiles-Whitted shipped that way for months: one account
 under two names. Its two pilots drew the object differently for Project Sign — the captain a slim
 ribbed cigar with a pointed nose and no windows, the co-pilot a blunt cylinder with two rows of
 lit windows — and only the co-pilot, in the right seat, saw the terminal phase (McDonald's 1968
-cross-check). Each file now carries its own witness's account.
+cross-check). Each file now carries its own observer's account.
 
 | Member | Kind | Description |
 |---|---|---|
 | `src` | attribute | URL of a single `sighting.json` or a `case.json` (above), fetched automatically on connect and whenever the attribute changes |
-| `witnessUrls` | property (get/set) | The recordings to show as a plain array of URLs, for programmatic use instead of `src` |
-| `sightingData` | property (get/set) | One witness's recording, set directly instead of fetched — for a page holding one in memory (text pasted into a form, a file the reader picked). Its entry carries no URL, so the info panel's editor link and embed lines fall back to the bare application, which is the honest answer for something published nowhere |
+| `observerUrls` | property (get/set) | The recordings to show as a plain array of URLs, for programmatic use instead of `src` |
+| `sightingData` | property (get/set) | One observer's recording, set directly instead of fetched — for a page holding one in memory (text pasted into a form, a file the reader picked). Its entry carries no URL, so the info panel's editor link and embed lines fall back to the bare application, which is the honest answer for something published nowhere |
 | `scene` | property (readonly) | The `<rr0-scene>` this composes — and through `scene.ufoElement`, the playback members above |
 | `loadFromSrc(url)` | method (async) | What the `src` attribute triggers internally; can be called directly too |
 
-A toolbar row sits above the scene: a "Testimony by &lt;witness&gt;" sentence on the left, and a round "?" info
-button on the right. The witness portion is plain text for a single witness (a one-option `<select>` would be
+A toolbar row sits above the scene: a "Account by &lt;observer&gt;" sentence on the left, and a round "?" info
+button on the right. The observer portion is plain text for a single observer (a one-option `<select>` would be
 pointless); once there's more than one, it becomes the live `<select>` instead — but the sentence itself, and the
-info button, stay visible either way. The first witness loads automatically once the list is known; switching the
-selector loads that witness's already-fetched recording into the nested `<rr0-scene>` (no re-fetch). Setting
-`witnessUrls` again (e.g. a case re-read) keeps the current selection if that witness is still present, instead
+info button, stay visible either way. The first observer loads automatically once the list is known; switching the
+selector loads that observer's already-fetched recording into the nested `<rr0-scene>` (no re-fetch). Setting
+`observerUrls` again (e.g. a case re-read) keeps the current selection if that observer is still present, instead
 of resetting back to the first.
 
 Clicking "?" opens a panel anchored under the button (it never shifts the canvas below it). Where the browser has
@@ -425,9 +425,9 @@ wrapper cannot clip, which is what rr0.org's layout was doing to it — kept und
 positioning, flipping above it or centring in the viewport when that side is too short, and closing on Escape or a
 click outside. Browsers without the API get the plain absolutely-positioned overlay instead.
 
-Its main content is the currently-selected witness's observation metadata (date, location, case id, description,
-tags — whichever are actually present in that witness's own `sighting.json`; the witness's own name isn't repeated
-here, since it's already in the toolbar's testimony line). The date is shown on the WITNESS's own clock, never
+Its main content is the currently-selected observer's observation metadata (date, location, case id, description,
+tags — whichever are actually present in that observer's own `sighting.json`; the observer's own name isn't repeated
+here, since it's already in the toolbar's account line). The date is shown on the OBSERVER's own clock, never
 converted into the reader's time zone (see `utcOffsetHours` in [Data format](#data-format)).
 
 A footer row holds the app's own name/version on the left — linking to that very observation in the editor (see
@@ -439,7 +439,7 @@ fold-outs on the right, both closed until asked for:
 
   ```html
   <script type="module" src="https://ufoathome.org/lib/rr0-sighting.mjs"></script>
-  <rr0-sighting src="https://ufoathome.org/demo-data/witness-socorro.json"></rr0-sighting>
+  <rr0-sighting src="https://ufoathome.org/demo-data/observer-socorro.json"></rr0-sighting>
   ```
 
   The script URL is derived from where the running bundle was itself loaded from (`import.meta.url`), never
@@ -452,7 +452,7 @@ fold-outs on the right, both closed until asked for:
 - **Credits** reveals third-party credits (the live terrain imagery attribution, once a real relief patch has
   resolved, plus the bundled thunder sound's own required attribution — see [`CREDITS.md`](CREDITS.md)).
 
-All of this component's own labels (Testimony by, About, Close, Observation/Date/Location/Case, Credits) are
+All of this component's own labels (Account by, About, Close, Observation/Date/Location/Case, Credits) are
 translated (English/French) the same way as the playback layer's own labels.
 
 ## Data format
@@ -465,10 +465,10 @@ interface SightingRecordingJson {
   time?: { year?: number, month?: number, day?: number, hour?: number, minute?: number, second?: number }
   endTime?: { year?: number, month?: number, day?: number, hour?: number, minute?: number, second?: number } // alternative to durationSeconds
   durationSeconds?: number // alternative to endTime; takes precedence if both are set
-  utcOffsetHours?: number // the LEGAL time zone the witness's clock was on (+1 for France in 1965, -7 for New Mexico in April 1964). Absent = approximated from the longitude, which cannot know legal time or a daylight-saving switch
+  utcOffsetHours?: number // the LEGAL time zone the observer's clock was on (+1 for France in 1965, -7 for New Mexico in April 1964). Absent = approximated from the longitude, which cannot know legal time or a daylight-saving switch
   place?: { lat: number, lng: number, name?: string }[] // `name` is the fully qualified place name the coordinates were resolved from — see Naming a place
-  witness?: { id?: string, dirName?: string, title?: string, lastName?: string, firstNames?: string[] } // every field optional — supply whichever is known; omit entirely for an anonymous witness
-  caseId?: string // shared by every witness's own sighting.json for the same case — see <rr0-sighting>
+  observer?: { id?: string, dirName?: string, title?: string, lastName?: string, firstNames?: string[] } // every field optional — supply whichever is known; omit entirely for an anonymous observer
+  caseId?: string // shared by every observer's own sighting.json for the same case — see <rr0-sighting>
   description?: string
   tags?: string[]
   timeline: {
@@ -485,7 +485,7 @@ interface SightingRecordingJson {
           haloScale: number    // 0 = no glow
           selected: boolean
           title?: string       // shown as an on-canvas tooltip when hovered
-          angular?: { widthDeg: number, heightDeg: number } // how big it LOOKED — the only size a testimony holds, see Apparent size
+          angular?: { widthDeg: number, heightDeg: number } // how big it LOOKED — the only size a account holds, see Apparent size
           points?: { x: number, y: number }[] // "polygon" shapes only
         }
       }>
@@ -493,13 +493,13 @@ interface SightingRecordingJson {
     order?: string[]     // back-to-front paint/hit-test order; absent = first-appearance order
     groups?: string[][]  // each inner array is one group's member sourceIds
   }
-  witnessTrack?: { keyframes: Array<{ t: number, pose: { lat?: number, lng?: number, elevationM: number, headingDeg?: number, pitchDeg: number, fovDeg: number } }> }
+  observerTrack?: { keyframes: Array<{ t: number, pose: { lat?: number, lng?: number, elevationM: number, headingDeg?: number, pitchDeg: number, fovDeg: number } }> }
   weatherTrack?: { keyframes: Array<{ t: number, weather: Weather }> }
   weather?: Weather // legacy static fallback for recordings predating weatherTrack
-  weatherSource?: { id: string, name: string, url: string } // the meteorological record weatherTrack was looked up from — see Weather is looked up, not remembered. Absent = the witness's own account
+  weatherSource?: { id: string, name: string, url: string } // the meteorological record weatherTrack was looked up from — see Weather is looked up, not remembered. Absent = the observer's own account
   instrument?: "eye" | "rectilinear-lens" // what it was observed THROUGH — see Instrument. Absent = the naked eye
-  soundTrack?: { keyframes: Array<{ t: number, sound: { kind: "none" | "hum" | "whistle" | "rumble" | "crackle", volume: number, pitchHz: number, src?: string } }> } // what the witness heard — see What it sounded like
-  decor?: DecorObject[] // buildings, trees, streetlights, vehicles, other witnesses — see src/engine/model/Decor.ts
+  soundTrack?: { keyframes: Array<{ t: number, sound: { kind: "none" | "hum" | "whistle" | "rumble" | "crackle", volume: number, pitchHz: number, src?: string } }> } // what the observer heard — see What it sounded like
+  decor?: DecorObject[] // buildings, trees, streetlights, vehicles, other observers — see src/engine/model/Decor.ts
   references?: SceneReference[] // pictures of the place laid over the scene, each at a registered heading/pitch/roll/field — see Pictures of the place
 }
 ```
@@ -515,12 +515,12 @@ same clock as the shapes, because a sound rarely starts when the object does: a 
 ground and heard only as it lifts off is two keyframes, `kind: "none"` at the start and a hum at the instant it
 took off.
 
-`volume` (0..1, how loud the witness could describe it, never a dB figure) and `pitchHz` blend between keyframes;
+`volume` (0..1, how loud the observer could describe it, never a dB figure) and `pitchHz` blend between keyframes;
 `kind` and `src` are **held**, like every other discrete field in this format — so the example above really is
 silent right up to that second keyframe. To record a sound emerging gradually instead, give it two keyframes of
 its own kind (hum at volume 0, then hum at full).
 
-`kind: "none"` is a statement — the witness reported hearing nothing. A recording with no `soundTrack` at all is
+`kind: "none"` is a statement — the observer reported hearing nothing. A recording with no `soundTrack` at all is
 the different, weaker case: nobody was asked. Both replay as silence, and neither invents a noise.
 
 Sounds are **synthesized** from that description (a drone, a whistle, a rumble, a crackle — `pitchHz` is the tone
@@ -535,7 +535,7 @@ audio without one.
 The same rule governs the whole scene, not just the object's own sound: **paused is paused**. Falling
 precipitation and its splashes, twinkling stars, lightning flashes, the sun's lens flare and the weather's own
 ambient beds all stop with the player and resume with it, leaving the frozen frame on screen. A paused replay is
-one instant of a sighting — weather still going on over it would be the reader's own room, not the witness's
+one instant of a sighting — weather still going on over it would be the reader's own room, not the observer's
 evening. Clouds likewise use the recording's timeline: wind advection stops on pause and is
 recomputed deterministically when seeking.
 
@@ -545,7 +545,7 @@ Everything the scene draws is computed, and a reader has no way to tell a faithf
 one. A photograph of the same place does: `references` lays pictures over the render, each at the direction it was
 registered in (`registration`: heading, pitch, roll and vertical field, angles and nothing else), at an opacity the
 reader varies with the slider beside the 🖼 button — all picture, all render, and every step between, with the
-witness's own phenomenon drawn over both. A `photo` is a flat panel at its lens's field, a `panorama` an
+observer's own phenomenon drawn over both. A `photo` is a flat panel at its lens's field, a `panorama` an
 equirectangular sphere. `src` is an address (rr0.org's case pictures are served to any origin; the bytes must be, since
 WebGL draws them) or the picture itself as a `data:` URL when it was added from a disk, which keeps the recording
 self-contained at the price of its size. `credit` and `creditUrl` are shown in the info panel's credits, `t` says it
@@ -553,30 +553,30 @@ was taken during the observation at that instant, and `drawing` that somebody dr
 spot carries the sphere and its spiral by hand.
 
 Nothing in the scene hides a picture and a picture hides nothing: it is a field of directions from one point, valid
-from that point alone, and the reconstruction stands it at the witness's eye.
+from that point alone, and the reconstruction stands it at the observer's eye.
 
-**Lining it up.** The editor's Pictures group types the registration, copies the witness's pose into it, and while that
+**Lining it up.** The editor's Pictures group types the registration, copies the observer's pose into it, and while that
 group is open the canvas belongs to the selected picture: a drag turns it, the wheel changes its field, and *Add a
 landmark* arms two clicks that name a detail on the picture, then the same detail in the render. Landmarks are kept in
 the recording with a name ("Arbre masquant", "barrière") and listed with how far each still is from fitting; either end
 of one can be dragged, and the selected one is bolder on the canvas — two landmarks turn the picture to fit them, three
 or more fit its field too (`PictureRegistration`, a triad first guess refined by Gauss-Newton on the rotation), and the
-status line says how far off the landmarks still are. *Adopt as the witness's pose* then writes the fitted heading,
+status line says how far off the landmarks still are. *Adopt as the observer's pose* then writes the fitted heading,
 pitch and roll into the pose at the playhead as a **measurement**, with a `derived` provenance naming the picture and
-the residual — a heading read off a picture that fits the relief, where the one typed in the Witness group is the
-witness's word. *Street-level pictures nearby* asks Panoramax (open imagery, CC BY-SA, served to any origin) for
-pictures taken within 300 m of the witness's spot; each comes with where it was taken from and which way it looked, so
+the residual — a heading read off a picture that fits the relief, where the one typed in the Observer group is the
+observer's word. *Street-level pictures nearby* asks Panoramax (open imagery, CC BY-SA, served to any origin) for
+pictures taken within 300 m of the observer's spot; each comes with where it was taken from and which way it looked, so
 it arrives registered in heading, a full turn arriving as a panorama.
 
 ### Naming a place
 
-Testimony names a place. It says "on the Valensole plateau", "near Socorro", "over Montgomery" —
+Account names a place. It says "on the Valensole plateau", "near Socorro", "over Montgomery" —
 never 43.8379 / 5.9840. So the Location group leads with a **Place** field: type a name, press Enter
 (or **Locate**), and the latitude and longitude below are filled from
 [Nominatim](https://nominatim.openstreetmap.org/), OpenStreetMap's own geocoder — which, unlike the
 gazetteer-style services, knows the hamlets, farms and airfields that cases actually happen at.
 A name is often ambiguous, so every candidate stays listed in **Matches** and the best one is
-applied straight away; picking another moves the witness. Results are named in the reader's own
+applied straight away; picking another moves the observer. Results are named in the reader's own
 language, and credited as their licence requires.
 
 What gets stored is the *qualified* name the search resolved (`place[].name`), not the two words
@@ -587,9 +587,9 @@ recording can still say "the lavender field east of the farm" beside coordinates
 The field reads both ways: move the latitude or longitude by hand and a resolved name is re-derived
 from the new coordinates, or cleared if there is no place there. A name left describing somewhere
 the sighting is no longer at is worse than no name — the recording would state, in writing, that it
-happened there. A name the witness typed themselves is never replaced.
+happened there. A name the observer typed themselves is never replaced.
 
-**Altitude is above sea level**, and the ground at the location sets its floor: a witness in the
+**Altitude is above sea level**, and the ground at the location sets its floor: a observer in the
 Alps is not at 0 m, and an editor that offers it invites a recording that says so. The ground's own
 height is read from whichever elevation source is live and shown beside the field. What gets stored
 is unchanged — `ObserverPose.elevationM` stays a height above the local ground, which is what the
@@ -598,7 +598,7 @@ terrain patch is built around.
 ### Time zones
 
 An hour of `utcOffsetHours` is an hour of Earth's rotation *and* a different row of the weather
-record. Pick the witness's own zone (`Europe/Paris`, `America/Denver`, …) and the offset is derived
+record. Pick the observer's own zone (`Europe/Paris`, `America/Denver`, …) and the offset is derived
 from that zone's rules **at the observation's date**: Valensole in July 1965 resolves to UTC+1, not
 the UTC+2 the same place gives today — France only reintroduced summer time in 1976. Change the date
 and it is derived again. The recording stores both: `timeZone` is the rule, `utcOffsetHours` is the
@@ -606,7 +606,7 @@ number it produced, and every consumer keeps reading only the number.
 
 The rules come from the platform's own IANA database. What it cannot fix is a zone whose
 *boundaries* are coarse: Montgomery, Alabama is `America/Chicago`, which observed summer time in
-1948 while Alabama did not. That is why the zone is chosen by the witness rather than derived from
+1948 while Alabama did not. That is why the zone is chosen by the observer rather than derived from
 the coordinates — and why the plain entered offset remains available for exactly those cases.
 
 The search runs only when asked, never per keystroke: Nominatim's usage policy allows the first and
@@ -638,14 +638,14 @@ the declared longitude is flagged on the field, with the meridian's own solar ti
 Deliberately a wide net rather than a precise one. Legal time genuinely departs from solar time,
 sometimes by hours (all of China runs on UTC+8), and the historical rules are worse — the check must
 never cry wolf at a correct "France on UTC+1 in 1965". It flags only what no country has ever done,
-and only as a warning: the recording states the witness's clock, and nothing here knows better than
-the witness.
+and only as a warning: the recording states the observer's clock, and nothing here knows better than
+the observer.
 
 ### Weather is looked up, not remembered
 
-The Circumstances group is the one part of this editor that isn't testimony. Weather is a
+The Circumstances group is the one part of this editor that isn't account. Weather is a
 measurable fact about a place at an instant, and the recording already states both — so instead of
-leaving a witness (or an author reconstructing a case decades later) to set a cloud-cover slider
+leaving a observer (or an author reconstructing a case decades later) to set a cloud-cover slider
 from memory, the editor looks the conditions up from [ERA5](https://open-meteo.com/en/docs/historical-weather-api),
 the ECMWF reanalysis, hourly and worldwide from 1940 on. The fields then show the record's own
 values, **read-only**, above a line naming the dataset and the exact UTC instant they describe (a
@@ -657,7 +657,7 @@ estimate weighted by cloud level, rain and thunderstorm. A low `baseM` starts fr
 temperature/dew-point spread. Both derivations are documented in
 `src/engine/weather/providers/OpenMeteoWeatherProvider.ts`; crystal alignment is never inferred.
 
-Unchecking **From weather records** hands the fields back to the witness: the looked-up values stay
+Unchecking **From weather records** hands the fields back to the observer: the looked-up values stay
 as a starting point, `weatherSource` is dropped, and no later lookup may overwrite them — the same
 "declared outranks deduced" rule [Behind a cloud](#behind-a-cloud) follows. A recording that names
 a `weatherSource` is replayed exactly as authored and never looked up again, so a published case
@@ -678,11 +678,11 @@ first recorded shape turns a fifteen-hour span into a few seconds, so the track 
 whenever it does. Getting either half wrong looks the same from outside — a sighting whose weather
 never changes.
 
-It follows the witness too, not just the clock. Half of aviation testimony is given from a cockpit,
+It follows the observer too, not just the clock. Half of aviation account is given from a cockpit,
 and an aircraft under observation for an hour is a long way from where it started — so each sample
-is looked up at the position the `witnessTrack` puts the witness at that instant. Positions inside
+is looked up at the position the `observerTrack` puts the observer at that instant. Positions inside
 one ERA5 grid cell (~28 km) are one query, and several cells still travel in a single request, so
-a stationary witness costs exactly what it always did.
+a stationary observer costs exactly what it always did.
 
 `scripts/infer-case-weather.ts` runs the same lookup over case files on disk:
 
@@ -695,7 +695,7 @@ diff shows the weather and nothing else.
 
 ### Apparent size — and why there is no real one
 
-A witness never perceives meters. They perceive an angle: the thing covered a thumbnail at arm's length, or a fifth
+A observer never perceives meters. They perceive an angle: the thing covered a thumbnail at arm's length, or a fifth
 of the windshield, or two full Moons. "About thirty meters long" is a conclusion they drew from a distance they
 could not perceive either, and the two errors multiply. So a recording stores `angular` — how wide and how tall the
 object *looked*, in degrees — and stores no real size and no real distance anywhere.
@@ -714,7 +714,7 @@ one of the other two follows, and the one the **Hold** select pins never moves. 
 is what a thing keeps: moving it further makes it look smaller, and editing either width moves the other at the
 distance it stands (the shape is resized on the canvas). Hold the apparent width instead and a distance edit
 leaves the shape looking the same, stood elsewhere — which is what asking what the decor would hide of it needs.
-Only the angle is kept; the metres are an authoring aid, never testimony, and the distance is where the scene
+Only the angle is kept; the metres are an authoring aid, never account, and the distance is where the scene
 *draws* the shape (see *Where the shape is drawn*).
 
 ### Decor that moves, and lights that blink
@@ -752,14 +752,14 @@ dot from the next rather than dotting the line at the sampler's own rate). A lam
 candela (a wingtip strobe really is some twenty times one) — because a pose spreads a lamp's light over hundreds
 of pixels, and at white a whole aircraft trail came out at a thousandth of white, i.e. invisible.
 
-An aircraft in a scene is a **hypothesis**, not testimony — "here is what a flight at that altitude and heading
+An aircraft in a scene is a **hypothesis**, not account — "here is what a flight at that altitude and heading
 would have looked like" — and belongs to the decor for that reason, next to the buildings and trees whose
 positions are likewise known rather than reported.
 
 ### How big it was, and what it looked like
 
 `DecorObject` used to have no size at all. Every building was a six-metre cube per storey, every vehicle the same
-1.8 × 4.35 × 2.0 box, whatever the testimony said. In a project that will not store an angle nobody perceived (see
+1.8 × 4.35 × 2.0 box, whatever the account said. In a project that will not store an angle nobody perceived (see
 *Apparent size*, above), that was the last place a number was invented rather than stated: Zamora's Pontiac and a
 delivery van were the same object, and "the dynamite shack" was a warehouse.
 
@@ -807,10 +807,10 @@ and it is worth making: a car-shaped silhouette at forty metres in evening light
 prism reads as a building, which is where this started. Socorro's own patrol car uses one of them, at the real
 Pontiac's dimensions and with the substitution stated in the recording's description.
 
-One thing a model does NOT yet do is let the witness look out from inside it. A recording can place them inside a
+One thing a model does NOT yet do is let the observer look out from inside it. A recording can place them inside a
 building or a vehicle, and what they then look at is the room the built-in shape builds around them — walls, window
 openings sized from the data, the pillar between two door windows. A downloaded model is a hull with none of that, so
-while the witness is inside an object the built-in shape is kept. Looking out through a real model is the objective
+while the observer is inside an object the built-in shape is kept. Looking out through a real model is the objective
 (it is what makes "how much of the sky did the windscreen pillar hide?" answerable) and needs models with interiors,
 glazing made genuinely transparent, and the viewpoint taken from the model rather than from the primitive's seat.
 
@@ -881,7 +881,7 @@ on each pose is read back through the first pose that stated one.
 A pose is drawn in two moves, because a sky costs about 8 ms to rebuild and a five-minute pose is 37 of them: the
 **viewfinder** immediately (one instant, a twentieth of a millisecond) and the **photograph** as the scene settles,
 a dozen milliseconds of instants per animation frame, shown as the film fills and gained up to stay properly
-exposed — so it goes from beady to smooth rather than from black to bright. Anything the witness does interrupts it
+exposed — so it goes from beady to smooth rather than from black to bright. Anything the observer does interrupts it
 and starts it again, which is why the editor stays answerable while a long pose is on. Doing it all inside one call
 is what made it crawl: the dozen setters a single tick touches would each rebuild the whole pose, and the per-frame
 animation loop (twinkle, rain, lightning — none of which survives a pose of minutes anyway) restarted it sixty
@@ -913,7 +913,7 @@ Two consequences of drawing a pose rather than an instant, both of which cost an
 
 #### Where meters do come back
 
-The only real distance a testimony can support is an **inequality**, and only where the witness saw the object
+The only real distance a account can support is an **inequality**, and only where the observer saw the object
 cross something whose position is known: it passed *behind* that hangar (at least that far), or *in front of* that
 tree (at most that far). `DecorObject.eastM/northM` give the decor its real position, `occludesSourceIds` says
 which side of it the object was on, and `SceneRenderer.decorDistancesAt` raycasts the exact line of sight to
@@ -926,11 +926,11 @@ rather than clamping one, and the editor prints the result under the apparent si
 
 #### Where the shape is drawn
 
-A plane facing the witness, scaled to the stated angle, looks the same from their eye at any distance — so the
+A plane facing the observer, scaled to the stated angle, looks the same from their eye at any distance — so the
 scene has to put it *somewhere*, and where is a parameter of the picture, never a fact the recording states.
 `PhenomenonDepth` (`src/engine/shape/PhenomenonDepth.ts`) is the one place that decides it, from five sources in
 the order they outrank each other: a distance the recording **states** (none does yet — the tier exists for the
-day a close encounter is written as a body in metres); a **hypothesis** the reader is trying; what the witness's
+day a close encounter is written as a body in metres); a **hypothesis** the reader is trying; what the observer's
 own walk **derives** (`ShapeDistance`, see below); what the crossings **bound**, the geometric middle of the
 interval they leave, since any distance in it draws every crossing correctly; and, for the majority that
 establishes nothing, a **conventional** few metres — in front of everything that was not declared to hide it,
@@ -972,7 +972,7 @@ case's `sighting.json` from its `RR0Event`).
   the editor reaches through to its public `ufoElement` property for the actual canvas/timeline/appearance work
   (the toolbar edits the exact same `Sighting` instance the nested scene renders from, so an observer/time/
   appearance change needs no separate sync step to reach the sky), while `SightingElement` reaches through to
-  its public `sightingData`/`currentTerrainAttribution` for its own toolbar (witness picker) and info panel.
+  its public `sightingData`/`currentTerrainAttribution` for its own toolbar (observer picker) and info panel.
 - Playback linearly interpolates shapes between a source's surrounding keyframes for smooth motion
   (`Timeline.getInterpolatedShapeAt`/`Shape.lerpShape`), holding at the ends of its recorded range.
 - Recording samples the pointer position at a configurable rate via `requestAnimationFrame`, not on every

@@ -14,7 +14,7 @@ import type { Basis } from "../engine/persistence/Provenance.js"
 import { html, css } from "./sightingEditorTemplate.js"
 import { SightingSummary } from "./SightingSummary.js"
 import type { SummaryEntry, SummaryGroup } from "./SightingSummary.js"
-import { UfoElement, registerUfo, WITNESS_MAP_ATTRIBUTE } from "./UfoElement.js"
+import { UfoElement, registerUfo, OBSERVER_MAP_ATTRIBUTE } from "./UfoElement.js"
 import { SceneElement, registerScene, SCENE_ELEMENT_NAME, SATELLITES_CHANGE_EVENT } from "./SceneElement.js"
 import type { SatellitePass } from "../engine/astronomy/SatellitePasses.js"
 import { Recorder } from "../engine/record/Recorder.js"
@@ -53,7 +53,7 @@ import { plainSightingJson } from "../engine/persistence/sightingJson.js"
 import { DEFAULT_ICE_CRYSTAL_ALIGNMENT } from "../engine/model/Weather.js"
 import type { PrecipitationType, Weather } from "../engine/model/Weather.js"
 import type { People } from "../engine/model/People.js"
-import type { Testimony } from "../engine/model/Testimony.js"
+import type { Account } from "../engine/model/Account.js"
 import type { DecorObject, DecorSide, DecorSize } from "../engine/model/Decor.js"
 import { sortedMilestones } from "../engine/model/Milestone.js"
 import { DEFAULT_REFERENCE_FOV_DEG, DEFAULT_REFERENCE_OPACITY, REFERENCE_INLINE_WARNING_BYTES } from "../engine/model/Reference.js"
@@ -71,10 +71,10 @@ import {
   FIXED_WINDOW_MIN_OPACITY_PERCENT,
   defaultWindows,
   decorSidesFor,
-  witnessSidesFor,
+  observerSidesFor,
   hasWindows,
   isWindowOpenable,
-  canHoldWitness
+  canHoldObserver
 } from "../engine/model/Decor.js"
 import {
   sightingDurationMs,
@@ -124,7 +124,7 @@ registerScene()
 
 const DEFAULT_SHAPE_SIZE = { width: 48, height: 28 }
 /** How long a tuned sound keeps playing after the last edit to it — long enough to judge the
- * timbre against what was heard, short enough that a hum doesn't follow the witness around the
+ * timbre against what was heard, short enough that a hum doesn't follow the observer around the
  * rest of the editor. Playback itself is unaffected: this only bounds the preview that plays while
  * paused (see UfoElement.previewSound). */
 const SOUND_PREVIEW_MS = 2500
@@ -173,7 +173,7 @@ const CAMERA_DRAG_DEG_PER_PX = 0.2
  * meant, so that changing the instrument may retune the first and must never touch the second. */
 const SAME_FIELD_EPSILON_DEG = 0.01
 
-/** A standing witness's eye height, the same 1.6 m SceneRenderer puts the camera at — what a pitch
+/** A standing observer's eye height, the same 1.6 m SceneRenderer puts the camera at — what a pitch
  * towards a decor object has to be measured FROM (see lookAtDecor). */
 const EYE_HEIGHT_M = 1.6
 
@@ -273,7 +273,7 @@ export class SightingEditorElement extends HTMLElement {
   private readonly blurBoundOutput: HTMLElement
   private readonly sourceSelect: HTMLSelectElement
   private readonly shapeTitleInput: HTMLInputElement
-  /** The witness's own reported size/distance for the selected shape — the pair that makes
+  /** The observer's own reported size/distance for the selected shape — the pair that makes
    * its on-screen size computable instead of eyeballed (see ApparentSize/applySizeHypothesis).
    * apparentSizeOutput reads back what they actually produce. */
   private readonly utcOffsetInput: HTMLInputElement
@@ -313,7 +313,7 @@ export class SightingEditorElement extends HTMLElement {
   private readonly contextAddVertexButton: HTMLButtonElement
   private readonly contextDeleteVertexButton: HTMLButtonElement
   private readonly decorContextMenu: HTMLElement
-  private readonly contextViewTestimonyButton: HTMLButtonElement
+  private readonly contextViewAccountButton: HTMLButtonElement
   /** The "Masks ▸" flyout's own container — rebuilt fresh (refreshContextMasksSubmenu) every time
    * the decor context menu opens, see DecorObject.occludesSourceIds's own doc comment. */
   private readonly contextMasksSubmenu: HTMLElement
@@ -367,12 +367,12 @@ export class SightingEditorElement extends HTMLElement {
    * Altitude field is measured from (see applyGroundElevation). Undefined while it isn't known, and
    * then the field is a plain height above an unstated datum, exactly as it always was. */
   /**
-   * Whether the weather SHOULD be read from records, as last decided — by the witness's own toggle,
+   * Whether the weather SHOULD be read from records, as last decided — by the observer's own toggle,
    * or by what a loaded recording says (see syncWeatherOwnership). Deliberately distinct from the
    * checkbox's own state, which is this AND whether a lookup is possible at all: a sighting with no
    * date or no place shows it unchecked, because a ticked box there would claim a record is being
    * read when nothing has been asked. It ticks itself again the moment the sighting says enough,
-   * without forgetting a witness who had turned it off.
+   * without forgetting a observer who had turned it off.
    */
   private weatherFromRecords = true
   private groundElevationM?: number
@@ -392,14 +392,14 @@ export class SightingEditorElement extends HTMLElement {
    * author when a recording loads (see chooseTimeInputMode) and theirs to change afterwards. */
   private edtfMode = false
   private readonly obsEndTimeInput: HTMLInputElement
-  private readonly witnessIdInput: HTMLInputElement
-  private readonly witnessTitleInput: HTMLInputElement
-  private readonly witnessLastNameInput: HTMLInputElement
-  private readonly witnessFirstNamesInput: HTMLInputElement
-  private readonly witnessAgeInput: HTMLInputElement
-  private readonly witnessOccupationInput: HTMLInputElement
-  private readonly testimonySourceSelect: HTMLSelectElement
-  private readonly testimonyFollowedUpSelect: HTMLSelectElement
+  private readonly observerIdInput: HTMLInputElement
+  private readonly observerTitleInput: HTMLInputElement
+  private readonly observerLastNameInput: HTMLInputElement
+  private readonly observerFirstNamesInput: HTMLInputElement
+  private readonly observerAgeInput: HTMLInputElement
+  private readonly observerOccupationInput: HTMLInputElement
+  private readonly accountSourceSelect: HTMLSelectElement
+  private readonly accountFollowedUpSelect: HTMLSelectElement
   private readonly sightingIdInput: HTMLInputElement
   private readonly descriptionInput: HTMLTextAreaElement
   private readonly tagsInput: HTMLInputElement
@@ -500,14 +500,14 @@ export class SightingEditorElement extends HTMLElement {
   private readonly labelElevation: HTMLElement
   private readonly labelObservationTime: HTMLElement
   private readonly labelObservationEndTime: HTMLElement
-  private readonly labelWitnessId: HTMLElement
-  private readonly labelWitnessTitle: HTMLElement
-  private readonly labelWitnessLastName: HTMLElement
-  private readonly labelWitnessFirstNames: HTMLElement
-  private readonly labelWitnessAge: HTMLElement
-  private readonly labelWitnessOccupation: HTMLElement
-  private readonly labelTestimonySource: HTMLElement
-  private readonly labelTestimonyFollowedUp: HTMLElement
+  private readonly labelObserverId: HTMLElement
+  private readonly labelObserverTitle: HTMLElement
+  private readonly labelObserverLastName: HTMLElement
+  private readonly labelObserverFirstNames: HTMLElement
+  private readonly labelObserverAge: HTMLElement
+  private readonly labelObserverOccupation: HTMLElement
+  private readonly labelAccountSource: HTMLElement
+  private readonly labelAccountFollowedUp: HTMLElement
   private readonly labelSightingId: HTMLElement
   private readonly labelDescription: HTMLElement
   private readonly labelTags: HTMLElement
@@ -530,7 +530,7 @@ export class SightingEditorElement extends HTMLElement {
   private readonly labelTemporalGroup: HTMLElement
   private readonly labelLocationGroup: HTMLElement
   private readonly labelObservationGroup: HTMLElement
-  private readonly labelWitnessGroup: HTMLElement
+  private readonly labelObserverGroup: HTMLElement
   private readonly skyDetailsButton: HTMLButtonElement
   /** The two prose lines the button unclamps: which record answered, and what else was in that
    * patch of sky. */
@@ -569,12 +569,12 @@ export class SightingEditorElement extends HTMLElement {
   private readonly optionPrecipitationSnow: HTMLElement
   private readonly optionPrecipitationHail: HTMLElement
   private readonly decorKindSelect: HTMLSelectElement
-  private readonly addDecorWitnessButton: HTMLButtonElement
+  private readonly addDecorObserverButton: HTMLButtonElement
   /** A plain "+" glyph (its accessible name/tooltip is "Add decor", not "Add building" — see
    * template's own comment on this rename) that adds whatever kind decorKindSelect currently
    * shows, building included now that it's no longer hidden from that dropdown — the ONLY way to
-   * add a building/tree/streetlight/vehicle. Only "other witness" still gets its own dedicated
-   * button (addDecorWitnessButton) and stays hidden from the dropdown, since a witness has no
+   * add a building/tree/streetlight/vehicle. Only "other observer" still gets its own dedicated
+   * button (addDecorObserverButton) and stays hidden from the dropdown, since a observer has no
    * other fields to configure via it beforehand. */
   private readonly addDecorBuildingButton: HTMLButtonElement
   private readonly deleteDecorButton: HTMLButtonElement
@@ -625,7 +625,7 @@ export class SightingEditorElement extends HTMLElement {
   private readonly decorModelSourceInput: HTMLInputElement
   private readonly decorFloorsInput: HTMLInputElement
   private readonly decorOccupiedFloorInput: HTMLInputElement
-  private readonly decorWitnessSideSelect: HTMLSelectElement
+  private readonly decorObserverSideSelect: HTMLSelectElement
   /** One 0-100 opacity number input per DecorSide (empty = no window at all on that side), keyed
    * the same way as DecorObject.windows itself — see syncDecorFields/updateDecorWindows, which
    * iterate DECOR_SIDES rather than one branch per side. Each input's own `min` is raised to
@@ -633,7 +633,7 @@ export class SightingEditorElement extends HTMLElement {
    * rear window are fixed — see syncDecorVisibility). */
   private readonly decorWindowInputs: Record<DecorSide, HTMLInputElement>
   private readonly labelDecorSide: Record<DecorSide, HTMLElement>
-  private readonly optionWitnessSide: Record<DecorSide, HTMLOptionElement>
+  private readonly optionObserverSide: Record<DecorSide, HTMLOptionElement>
   private readonly labelDecor: HTMLElement
   /** The Decor group's own handle in the tab strip — reuses the same "Decor" text as labelDecor
    * (the object-picker's own label), just on a different element, so no separate message key is
@@ -661,9 +661,9 @@ export class SightingEditorElement extends HTMLElement {
   private readonly labelDecorModelSource: HTMLElement
   private readonly labelDecorFloors: HTMLElement
   private readonly labelDecorOccupiedFloor: HTMLElement
-  private readonly labelDecorWitnessSide: HTMLElement
+  private readonly labelDecorObserverSide: HTMLElement
   private readonly labelDecorWindows: HTMLElement
-  private readonly optionWitnessSideNone: HTMLOptionElement
+  private readonly optionObserverSideNone: HTMLOptionElement
   private readonly optionDecorBuilding: HTMLElement
   private readonly optionDecorTree: HTMLElement
   private readonly optionDecorShrub: HTMLElement
@@ -674,7 +674,7 @@ export class SightingEditorElement extends HTMLElement {
   private readonly optionDecorAircraft: HTMLElement
   private readonly optionDecorEntity: HTMLElement
   private readonly labelDecorLights: HTMLElement
-  private readonly optionDecorWitness: HTMLElement
+  private readonly optionDecorObserver: HTMLElement
 
   private recorder?: Recorder
   private isRecording = false
@@ -765,7 +765,7 @@ export class SightingEditorElement extends HTMLElement {
   private readonly labelAddReferenceFile: HTMLElement
   /** Which decor object the DECOR context menu (right-click on the 3D canvas, distinct from the
    * SHAPE context menu's own currentSourceId) currently targets — set by onContextMenu, read by
-   * viewWitnessTestimony(). Only ever set while decorContextMenu is actually open. */
+   * viewObserverAccount(). Only ever set while decorContextMenu is actually open. */
   private contextMenuDecorId?: string
   /** The canvas-space point the SHAPE context menu was opened at — read by
    * addVertexAtContextMenu/deleteVertexAtContextMenu (both take canvas-space points, same as
@@ -803,12 +803,12 @@ export class SightingEditorElement extends HTMLElement {
     startPointer: { x: number; y: number }
     startHeadingDeg: number
     startPitchDeg: number
-    /** Whether this drag started while the witness is inside a decor object (see
-     * isWitnessInsideDecor) — routes the drag into indoorLookYawDeg/PitchDeg + SceneElement.
-     * setIndoorLook instead of witnessTrack/updateObserver, since the outside witnessTrack pose
+    /** Whether this drag started while the observer is inside a decor object (see
+     * isObserverInsideDecor) — routes the drag into indoorLookYawDeg/PitchDeg + SceneElement.
+     * setIndoorLook instead of observerTrack/updateObserver, since the outside observerTrack pose
      * is a different reference frame entirely (see SceneRenderer.setIndoorLook's own doc
      * comment) — checked once at drag-start rather than every pointermove so a drag that happens
-     * to cross the moment witnessSide gets cleared mid-drag doesn't switch targets partway. */
+     * to cross the moment observerSide gets cleared mid-drag doesn't switch targets partway. */
     insideDecor: boolean
   }
 
@@ -819,13 +819,13 @@ export class SightingEditorElement extends HTMLElement {
    * pre-drag answer rather than a fresh hit test the pointer may not have moved to trigger. */
   private hoverCursor?: CanvasCursor
 
-  /** How far the witness has turned their head from center while looking through a decor
+  /** How far the observer has turned their head from center while looking through a decor
    * object's window — mirrors cameraDragState's own startHeadingDeg/startPitchDeg role, just for
    * the indoor-look case (see SceneRenderer.setIndoorLook). Reset to 0 by syncIndoorLookReset
    * whenever the inhabited object/side changes. */
   private indoorLookYawDeg = 0
   private indoorLookPitchDeg = 0
-  /** `${decor.id}:${witnessSide}` of whichever decor object is currently inhabited, or undefined
+  /** `${decor.id}:${observerSide}` of whichever decor object is currently inhabited, or undefined
    * — compared against on every syncIndoorLookReset tick purely to detect a CHANGE (a different
    * object, a different side, or no longer inhabited at all) worth resetting indoorLookYawDeg/
    * PitchDeg for; the value itself is never read for anything else. */
@@ -890,19 +890,19 @@ export class SightingEditorElement extends HTMLElement {
     // N/NE/E/SE/S/SO/O/NO reference labels on the horizon — useful while authoring a heading, not
     // meaningful in the plain playback case, so this is opt-in on SceneElement rather than always on.
     this.sceneElement.setAttribute("show-compass", "")
-    // And the map of where the witness stood, for the same reason and by the same rule: an author
+    // And the map of where the observer stood, for the same reason and by the same rule: an author
     // typing a latitude, a longitude and a heading is stating where somebody was and which way they
     // faced, and the only way to see whether that is the right spot is to look at the ground. Opt-in
-    // everywhere else (see WITNESS_MAP_ATTRIBUTE — a page embedding a player has not asked for a
+    // everywhere else (see OBSERVER_MAP_ATTRIBUTE — a page embedding a player has not asked for a
     // second thing to read), on here, because this is the tool that writes those numbers.
-    this.sceneElement.setAttribute(WITNESS_MAP_ATTRIBUTE, "")
+    this.sceneElement.setAttribute(OBSERVER_MAP_ATTRIBUTE, "")
     // An author stating the weather has to be able to SEE it: a scene frozen until the recording
     // plays is a preview of nothing, and a recording with no duration yet cannot be played at all.
     // Replays keep the opposite rule — see SceneElement.syncAnimationsToPlayback.
     this.sceneElement.animateWhilePaused = true
-    // The editor draws the angles it edits, never a witness's bodies over them — see
-    // SceneElement.testimonyInTheRound.
-    this.sceneElement.testimonyInTheRound = false
+    // The editor draws the angles it edits, never a observer's bodies over them — see
+    // SceneElement.accountInTheRound.
+    this.sceneElement.accountInTheRound = false
     this.ufoElement = this.sceneElement.ufoElement
     // This canvas is used for drag-to-record shape placement instead — a plain click shouldn't
     // also toggle the nested player's playback (every recording drag ends in a native "click").
@@ -951,7 +951,7 @@ export class SightingEditorElement extends HTMLElement {
     this.contextAddVertexButton = this.shadow.getElementById("context-add-vertex") as HTMLButtonElement
     this.contextDeleteVertexButton = this.shadow.getElementById("context-delete-vertex") as HTMLButtonElement
     this.decorContextMenu = this.shadow.getElementById("decor-context-menu")!
-    this.contextViewTestimonyButton = this.shadow.getElementById("context-view-testimony") as HTMLButtonElement
+    this.contextViewAccountButton = this.shadow.getElementById("context-view-account") as HTMLButtonElement
     this.contextMasksSubmenu = this.shadow.getElementById("context-masks-submenu")!
     this.labelContextMasks = this.shadow.getElementById("label-context-masks")!
     this.playPauseButton = this.shadow.getElementById("play-pause") as HTMLButtonElement
@@ -999,14 +999,14 @@ export class SightingEditorElement extends HTMLElement {
     this.obsTimeQualifier = this.shadow.getElementById("obs-time-qualifier") as HTMLSelectElement
     this.obsEndTimeQualifier = this.shadow.getElementById("obs-end-time-qualifier") as HTMLSelectElement
     this.edtfModeButton = this.shadow.getElementById("edtf-mode") as HTMLButtonElement
-    this.witnessIdInput = this.shadow.getElementById("witnessId") as HTMLInputElement
-    this.witnessTitleInput = this.shadow.getElementById("witnessTitle") as HTMLInputElement
-    this.witnessLastNameInput = this.shadow.getElementById("witnessLastName") as HTMLInputElement
-    this.witnessFirstNamesInput = this.shadow.getElementById("witnessFirstNames") as HTMLInputElement
-    this.witnessAgeInput = this.shadow.getElementById("witnessAge") as HTMLInputElement
-    this.witnessOccupationInput = this.shadow.getElementById("witnessOccupation") as HTMLInputElement
-    this.testimonySourceSelect = this.shadow.getElementById("testimonySource") as HTMLSelectElement
-    this.testimonyFollowedUpSelect = this.shadow.getElementById("testimonyFollowedUp") as HTMLSelectElement
+    this.observerIdInput = this.shadow.getElementById("observerId") as HTMLInputElement
+    this.observerTitleInput = this.shadow.getElementById("observerTitle") as HTMLInputElement
+    this.observerLastNameInput = this.shadow.getElementById("observerLastName") as HTMLInputElement
+    this.observerFirstNamesInput = this.shadow.getElementById("observerFirstNames") as HTMLInputElement
+    this.observerAgeInput = this.shadow.getElementById("observerAge") as HTMLInputElement
+    this.observerOccupationInput = this.shadow.getElementById("observerOccupation") as HTMLInputElement
+    this.accountSourceSelect = this.shadow.getElementById("accountSource") as HTMLSelectElement
+    this.accountFollowedUpSelect = this.shadow.getElementById("accountFollowedUp") as HTMLSelectElement
     this.sightingIdInput = this.shadow.getElementById("sightingId") as HTMLInputElement
     this.descriptionInput = this.shadow.getElementById("description") as HTMLTextAreaElement
     this.tagsInput = this.shadow.getElementById("tags") as HTMLInputElement
@@ -1109,14 +1109,14 @@ export class SightingEditorElement extends HTMLElement {
     this.labelElevation = this.shadow.getElementById("label-elevation")!
     this.labelObservationTime = this.shadow.getElementById("label-observation-time")!
     this.labelObservationEndTime = this.shadow.getElementById("label-observation-end-time")!
-    this.labelWitnessId = this.shadow.getElementById("label-witness-id")!
-    this.labelWitnessTitle = this.shadow.getElementById("label-witness-title")!
-    this.labelWitnessLastName = this.shadow.getElementById("label-witness-last-name")!
-    this.labelWitnessFirstNames = this.shadow.getElementById("label-witness-first-names")!
-    this.labelWitnessAge = this.shadow.getElementById("label-witness-age")!
-    this.labelWitnessOccupation = this.shadow.getElementById("label-witness-occupation")!
-    this.labelTestimonySource = this.shadow.getElementById("label-testimony-source")!
-    this.labelTestimonyFollowedUp = this.shadow.getElementById("label-testimony-followed-up")!
+    this.labelObserverId = this.shadow.getElementById("label-observer-id")!
+    this.labelObserverTitle = this.shadow.getElementById("label-observer-title")!
+    this.labelObserverLastName = this.shadow.getElementById("label-observer-last-name")!
+    this.labelObserverFirstNames = this.shadow.getElementById("label-observer-first-names")!
+    this.labelObserverAge = this.shadow.getElementById("label-observer-age")!
+    this.labelObserverOccupation = this.shadow.getElementById("label-observer-occupation")!
+    this.labelAccountSource = this.shadow.getElementById("label-account-source")!
+    this.labelAccountFollowedUp = this.shadow.getElementById("label-account-followed-up")!
     this.labelSightingId = this.shadow.getElementById("label-sighting-id")!
     this.labelDescription = this.shadow.getElementById("label-description")!
     this.labelTags = this.shadow.getElementById("label-tags")!
@@ -1129,7 +1129,7 @@ export class SightingEditorElement extends HTMLElement {
     this.labelTemporalGroup = this.shadow.getElementById("label-temporal-group")!
     this.labelLocationGroup = this.shadow.getElementById("label-location-group")!
     this.labelObservationGroup = this.shadow.getElementById("label-observation-group")!
-    this.labelWitnessGroup = this.shadow.getElementById("label-witness-group")!
+    this.labelObserverGroup = this.shadow.getElementById("label-observer-group")!
     this.labelWeatherGroup = this.shadow.getElementById("label-weather-group")!
     this.labelCloudCover = this.shadow.getElementById("label-cloud-cover")!
     this.labelHighCloud = this.shadow.getElementById("label-high-cloud")!
@@ -1153,7 +1153,7 @@ export class SightingEditorElement extends HTMLElement {
     this.optionPrecipitationSnow = this.shadow.getElementById("option-precipitation-snow")!
     this.optionPrecipitationHail = this.shadow.getElementById("option-precipitation-hail")!
     this.decorKindSelect = this.shadow.getElementById("decorKind") as HTMLSelectElement
-    this.addDecorWitnessButton = this.shadow.getElementById("add-decor-witness") as HTMLButtonElement
+    this.addDecorObserverButton = this.shadow.getElementById("add-decor-observer") as HTMLButtonElement
     this.addDecorBuildingButton = this.shadow.getElementById("add-decor-building") as HTMLButtonElement
     this.deleteDecorButton = this.shadow.getElementById("delete-decor") as HTMLButtonElement
     this.decorSelect = this.shadow.getElementById("decor") as HTMLSelectElement
@@ -1223,7 +1223,7 @@ export class SightingEditorElement extends HTMLElement {
     this.decorModelSourceInput = this.shadow.getElementById("decorModelSource") as HTMLInputElement
     this.decorFloorsInput = this.shadow.getElementById("decorFloors") as HTMLInputElement
     this.decorOccupiedFloorInput = this.shadow.getElementById("decorOccupiedFloor") as HTMLInputElement
-    this.decorWitnessSideSelect = this.shadow.getElementById("decorWitnessSide") as HTMLSelectElement
+    this.decorObserverSideSelect = this.shadow.getElementById("decorObserverSide") as HTMLSelectElement
     this.decorWindowInputs = {
       front: this.shadow.getElementById("decorWindowFront") as HTMLInputElement,
       behind: this.shadow.getElementById("decorWindowBehind") as HTMLInputElement,
@@ -1244,17 +1244,17 @@ export class SightingEditorElement extends HTMLElement {
       "behind-left": this.shadow.getElementById("label-decor-window-behind-left")!,
       "behind-right": this.shadow.getElementById("label-decor-window-behind-right")!
     }
-    this.optionWitnessSide = {
-      front: this.shadow.getElementById("option-witness-side-front") as HTMLOptionElement,
-      behind: this.shadow.getElementById("option-witness-side-behind") as HTMLOptionElement,
-      left: this.shadow.getElementById("option-witness-side-left") as HTMLOptionElement,
-      right: this.shadow.getElementById("option-witness-side-right") as HTMLOptionElement,
-      "front-left": this.shadow.getElementById("option-witness-side-front-left") as HTMLOptionElement,
-      "front-right": this.shadow.getElementById("option-witness-side-front-right") as HTMLOptionElement,
-      "behind-left": this.shadow.getElementById("option-witness-side-behind-left") as HTMLOptionElement,
-      "behind-right": this.shadow.getElementById("option-witness-side-behind-right") as HTMLOptionElement
+    this.optionObserverSide = {
+      front: this.shadow.getElementById("option-observer-side-front") as HTMLOptionElement,
+      behind: this.shadow.getElementById("option-observer-side-behind") as HTMLOptionElement,
+      left: this.shadow.getElementById("option-observer-side-left") as HTMLOptionElement,
+      right: this.shadow.getElementById("option-observer-side-right") as HTMLOptionElement,
+      "front-left": this.shadow.getElementById("option-observer-side-front-left") as HTMLOptionElement,
+      "front-right": this.shadow.getElementById("option-observer-side-front-right") as HTMLOptionElement,
+      "behind-left": this.shadow.getElementById("option-observer-side-behind-left") as HTMLOptionElement,
+      "behind-right": this.shadow.getElementById("option-observer-side-behind-right") as HTMLOptionElement
     }
-    this.optionWitnessSideNone = this.shadow.getElementById("option-witness-side-none") as HTMLOptionElement
+    this.optionObserverSideNone = this.shadow.getElementById("option-observer-side-none") as HTMLOptionElement
     this.labelDecor = this.shadow.getElementById("label-decor")!
     this.labelDecorGroup = this.shadow.getElementById("label-decor-group")!
     this.labelDecorTitle = this.shadow.getElementById("label-decor-title")!
@@ -1279,7 +1279,7 @@ export class SightingEditorElement extends HTMLElement {
     this.labelDecorModelSource = this.shadow.getElementById("label-decor-model-source")!
     this.labelDecorFloors = this.shadow.getElementById("label-decor-floors")!
     this.labelDecorOccupiedFloor = this.shadow.getElementById("label-decor-occupied-floor")!
-    this.labelDecorWitnessSide = this.shadow.getElementById("label-decor-witness-side")!
+    this.labelDecorObserverSide = this.shadow.getElementById("label-decor-observer-side")!
     this.labelDecorWindows = this.shadow.getElementById("label-decor-windows")!
     this.optionDecorBuilding = this.shadow.getElementById("option-decor-building")!
     this.optionDecorTree = this.shadow.getElementById("option-decor-tree")!
@@ -1291,7 +1291,7 @@ export class SightingEditorElement extends HTMLElement {
     this.optionDecorAircraft = this.shadow.getElementById("option-decor-aircraft")!
     this.optionDecorEntity = this.shadow.getElementById("option-decor-entity")!
     this.labelDecorLights = this.shadow.getElementById("label-decor-lights")!
-    this.optionDecorWitness = this.shadow.getElementById("option-decor-witness")!
+    this.optionDecorObserver = this.shadow.getElementById("option-decor-observer")!
 
     this.ufoElement.canvasElement.addEventListener("pointerdown", event => {
       // Touching the canvas is working in the editor, so the editor takes the focus — which is what
@@ -1313,7 +1313,7 @@ export class SightingEditorElement extends HTMLElement {
     })
     this.contextAddVertexButton.addEventListener("click", () => this.addVertexAtContextMenu())
     this.contextDeleteVertexButton.addEventListener("click", () => this.deleteVertexAtContextMenu())
-    this.contextViewTestimonyButton.addEventListener("click", () => this.viewWitnessTestimony())
+    this.contextViewAccountButton.addEventListener("click", () => this.viewObserverAccount())
     // Syncs synchronously right after each call rather than waiting for the next "timeupdate" —
     // play()/toggleLoop() take effect immediately but the first actual frame/tick (what
     // "timeupdate" fires on) is scheduled via requestAnimationFrame, so without this the button's
@@ -1330,8 +1330,8 @@ export class SightingEditorElement extends HTMLElement {
     this.exportButton.addEventListener("click", () => this.exportJson())
     this.importFileInput.addEventListener("change", () => this.importFromFile())
     this.importUrlButton.addEventListener("click", () => this.importFromUrl())
-    this.testimonySourceSelect.addEventListener("change", () => this.updateWitnessMetadata())
-    this.testimonyFollowedUpSelect.addEventListener("change", () => this.updateWitnessMetadata())
+    this.accountSourceSelect.addEventListener("change", () => this.updateObserverMetadata())
+    this.accountFollowedUpSelect.addEventListener("change", () => this.updateObserverMetadata())
     this.narrativeDraftButton.addEventListener("click", () => this.draftFromDescription())
     this.narrativeStopButton.addEventListener("click", () => this.narrativeAbort?.abort())
     this.narrativeRememberInput.addEventListener("change", () => this.rememberNarrativeKey())
@@ -1370,14 +1370,14 @@ export class SightingEditorElement extends HTMLElement {
     this.objectDistanceInput.addEventListener("input", () => this.typing(this.objectDistanceInput, () => this.onDistanceInput()))
     this.sizeLockSelect.addEventListener("change", () => this.applySizeLock())
     this.clearDistanceHypothesisButton.addEventListener("click", () => this.clearDistanceHypothesis())
-    this.addDecorWitnessButton.addEventListener("click", () => this.addDecor("witness"))
+    this.addDecorObserverButton.addEventListener("click", () => this.addDecor("observer"))
     this.addDecorBuildingButton.addEventListener("click", () => this.addDecor())
     this.deleteDecorButton.addEventListener("click", () => this.deleteDecor())
     this.decorSelect.addEventListener("change", () => this.selectDecor(this.decorSelect.value))
     this.referenceSelect.addEventListener("change", () => this.selectReference(this.referenceSelect.value))
     this.deleteReferenceButton.addEventListener("click", () => this.deleteReference())
     for (const field of this.referenceFields) field.addEventListener("input", () => this.updateReference())
-    this.referenceUsePoseButton.addEventListener("click", () => this.useWitnessPoseForReference())
+    this.referenceUsePoseButton.addEventListener("click", () => this.useObserverPoseForReference())
     this.addReferenceUrlButton.addEventListener("click", () => this.addReferenceFromAddress())
     this.addReferenceFileInput.addEventListener("change", () => void this.addReferenceFromFile())
     this.addReferenceLandmarkButton.addEventListener("click", () => this.armLandmark())
@@ -1412,7 +1412,7 @@ export class SightingEditorElement extends HTMLElement {
     ]) {
       input.addEventListener("input", () => this.updateDecor())
     }
-    this.decorWitnessSideSelect.addEventListener("change", () => this.updateDecor())
+    this.decorObserverSideSelect.addEventListener("change", () => this.updateDecor())
     this.decorModelSelect.addEventListener("change", () => this.updateDecorModelChoice())
     this.addMilestoneButton.addEventListener("click", () => this.addMilestone())
     this.deleteMilestoneButton.addEventListener("click", () => this.deleteMilestone())
@@ -1558,15 +1558,15 @@ export class SightingEditorElement extends HTMLElement {
     this.obsTimeInput.addEventListener("blur", () => this.validateEdtfTimeInput(this.obsTimeInput))
     this.obsEndTimeInput.addEventListener("blur", () => this.validateEdtfTimeInput(this.obsEndTimeInput))
     for (const input of [
-      this.witnessIdInput,
-      this.witnessTitleInput,
-      this.witnessLastNameInput,
-      this.witnessFirstNamesInput,
-      this.witnessAgeInput,
-      this.witnessOccupationInput,
+      this.observerIdInput,
+      this.observerTitleInput,
+      this.observerLastNameInput,
+      this.observerFirstNamesInput,
+      this.observerAgeInput,
+      this.observerOccupationInput,
       this.sightingIdInput
     ]) {
-      input.addEventListener("input", () => this.updateWitnessMetadata())
+      input.addEventListener("input", () => this.updateObserverMetadata())
     }
     this.descriptionInput.addEventListener("input", () => {
       this.updateDescription()
@@ -1731,7 +1731,7 @@ export class SightingEditorElement extends HTMLElement {
     this.syncObservationEndTimeFields()
     // After the two syncs above, which is what it reads to decide.
     this.chooseTimeInputMode()
-    this.syncWitnessMetadataFields()
+    this.syncObserverMetadataFields()
     this.refreshTimeZoneOptions()
     this.utcOffsetInput.readOnly = this.ufoElement.sighting.event.timeZone !== undefined
     this.syncUtcOffsetField()
@@ -1745,11 +1745,11 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   /** Downloads the current recording as a standalone SightingRecordingJson file — a plain
-   * Blob-and-anchor download, no server round-trip needed. Named from the witness reference
+   * Blob-and-anchor download, no server round-trip needed. Named from the observer reference
    * when known (e.g. "chiles-sighting.json"), falling back to a generic name otherwise. */
   private exportJson(): void {
     const json = this.sightingData
-    const fileName = `${json.witness?.id ?? "sighting"}-sighting.json`
+    const fileName = `${json.observer?.id ?? "sighting"}-sighting.json`
     const blob = new Blob([JSON.stringify(json, null, 2)], { type: "application/json" })
     const url = URL.createObjectURL(blob)
     const link = document.createElement("a")
@@ -1792,7 +1792,7 @@ export class SightingEditorElement extends HTMLElement {
    * importFromFile(). Does nothing on an empty URL rather than firing a request at the page's own
    * origin. */
   /** `url` defaults to the Observation group's own "load from URL" field — explicit callers
-   * (viewWitnessTestimony) pass a witness decor object's own sightingUrl instead. */
+   * (viewObserverAccount) pass a observer decor object's own sightingUrl instead. */
   /** Fetches a recording and loads it into the editor — shared by the "Load from URL" field and
    * by the `src` attribute above. Failure is reported to the user rather than thrown: a bad URL
    * in a shared link should leave a usable empty editor, not a broken page. */
@@ -1804,7 +1804,7 @@ export class SightingEditorElement extends HTMLElement {
       this.sceneElement.documentUrl = new URL(url, location.href).href
       this.sightingData = json
       // Says where the open recording came from, whichever way it was asked for: typed here, the
-      // `src` attribute (a site's `?sighting=` link), or a witness's own file. Absolute, so the
+      // `src` attribute (a site's `?sighting=` link), or a observer's own file. Absolute, so the
       // address can be copied out of the field and still work, and so the field is a valid URL.
       this.importUrlInput.value = new URL(url, location.href).href
     } catch (error) {
@@ -1858,14 +1858,14 @@ export class SightingEditorElement extends HTMLElement {
   /**
    * Reads the account in the Description field and rewrites the rest of the recording from it.
    *
-   * One direction only. The account is what the witness said and does not change; everything else
+   * One direction only. The account is what the observer said and does not change; everything else
    * is what a reader makes of it, and pressing this says "make it again". So the draft never writes
    * `description` back — that would overwrite the very text it was asked to read — and every other
    * field it states is applied as stated.
    *
    * Fields the draft is silent about are left alone, which is not the same as a merge: it is the
    * account being silent. Coordinates geocoded by hand, an instrument chosen, decor placed — none
-   * of that is in a testimony, and none of it is a reader's to lose because they reworded a
+   * of that is in a account, and none of it is a reader's to lose because they reworded a
    * sentence.
    */
   private async draftFromDescription(): Promise<void> {
@@ -1896,9 +1896,9 @@ export class SightingEditorElement extends HTMLElement {
   private applyNarrativeDraft(draft: NarrativeDraft): void {
     // Stripped rather than trusted not to be there: the account is the one thing in the recording a
     // draft may never touch, and that has to hold whatever any provider decides to send back.
-    // The offset goes the same way whenever a zone came with it. It is not testimony and not a
+    // The offset goes the same way whenever a zone came with it. It is not account and not a
     // reading of one: it is what that zone's own rules give at that date, and this editor already
-    // reads them out of the platform's IANA database (see applyTimeZoneOffset). A witness states
+    // reads them out of the platform's IANA database (see applyTimeZoneOffset). A observer states
     // where they were; nobody states that France had no summer time in 1974.
     const { description, ...rest } = draft.recording
     void description
@@ -1935,11 +1935,11 @@ export class SightingEditorElement extends HTMLElement {
 
   /**
    * Writes each claim's basis into the recording, so that the file itself says which of its values
-   * the witness gave and which a reading supplied.
+   * the observer gave and which a reading supplied.
    *
    * Only for paths the draft actually wrote: a claim about a field that never made it in (the
    * account, which is stripped above) has nothing to be a basis of. And only where the value is not
-   * simply the witness's own — a "stated" claim with nothing to add is the default, and writing it
+   * simply the observer's own — a "stated" claim with nothing to add is the default, and writing it
    * would put noise in every file (see Provenance.set).
    */
   private recordNarrativeProvenance(draft: NarrativeDraft, written: string[]): void {
@@ -2317,7 +2317,7 @@ export class SightingEditorElement extends HTMLElement {
     this.latInput.value = String(match.lat)
     this.lngInput.value = String(match.lng)
     // Recorded before updateObserver() runs, so the coordinate change this is about to make isn't
-    // mistaken for the witness moving and answered with a reverse lookup of the name we just used.
+    // mistaken for the observer moving and answered with a reverse lookup of the name we just used.
     this.namedCoordinates = { lat: match.lat, lng: match.lng }
     this.updateObserver()
   }
@@ -2331,19 +2331,19 @@ export class SightingEditorElement extends HTMLElement {
     this.placeStatusText.textContent = ""
     this.placeSourceRow.hidden = true
     this.placeNameInput.title = this.placeNameInput.value
-    // Typed by hand, so it now describes whatever the witness means by it, not the coordinates —
+    // Typed by hand, so it now describes whatever the observer means by it, not the coordinates —
     // and must not be replaced by a reverse lookup of them.
     this.namedCoordinates = undefined
     this.updateObserver()
   }
 
   /**
-   * Re-derives the displayed place name from coordinates the witness has moved by hand — the same
+   * Re-derives the displayed place name from coordinates the observer has moved by hand — the same
    * relation the search reads the other way, so the two halves of the Location group can never
    * drift apart. A name left describing somewhere the sighting is no longer at is worse than no
    * name: the recording would state, in writing, that it happened there.
    *
-   * Only when a name resolved from a search is actually on display: a name the witness typed
+   * Only when a name resolved from a search is actually on display: a name the observer typed
    * themselves is theirs (a farm, a stretch of road, whatever no gazetteer lists), and an empty
    * field is not a question anyone asked. That restraint is also what keeps this inside Nominatim's
    * usage policy, together with the debounce and the same-spot threshold.
@@ -2361,7 +2361,7 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   /**
-   * Asks which legal time zone the witness's own coordinates fall in, and picks it.
+   * Asks which legal time zone the observer's own coordinates fall in, and picks it.
    *
    * A place decides a zone — nobody states "Europe/Paris" by hand when they have already said
    * Valensole — and until now the picker sat on "manual" while the offset had to be typed. What is
@@ -2421,10 +2421,10 @@ export class SightingEditorElement extends HTMLElement {
     this.updateObserver()
   }
 
-  /** Writes the witness's lat/lng into the legacy `event.place` (kept in sync for any consumer
+  /** Writes the observer's lat/lng into the legacy `event.place` (kept in sync for any consumer
    * that only reads that field, e.g. an older `<rr0-scene>` build, always mirroring whichever edit
    * happened most recently regardless of when on the timeline it landed) — but records the real
-   * pose as a `witnessTrack` keyframe **at the current playhead position**, exactly like
+   * pose as a `observerTrack` keyframe **at the current playhead position**, exactly like
    * applyAppearanceAtPlayhead()/onDragPointerMove() already do for the UFO's own shape. This is
    * what lets an observer move/re-orient over the course of a recording (position, pitch, heading
    * all independently keyframed over time) instead of only ever describing one fixed vantage
@@ -2440,7 +2440,7 @@ export class SightingEditorElement extends HTMLElement {
    *
    * Blanking every field removes just the keyframe at *this* instant (removeKeyframeAt), not the
    * observer's whole recorded path — mirrors "no edit recorded here", not "erase everything ever
-   * entered". EVERY field counts there, the optics included: a witness who says nothing about
+   * entered". EVERY field counts there, the optics included: a observer who says nothing about
    * where they stood but does say the shutter was open ten seconds has stated something, and a
    * removal here would throw it away the moment it was typed. Bails out while playing, same
    * reasoning as setAppearance's identical guard: the playhead is a moving target during Play,
@@ -2460,11 +2460,11 @@ export class SightingEditorElement extends HTMLElement {
     // local ground (the terrain patch is built with the observer's own ground at y=0, see
     // TerrainMeshBuilder). Subtracting the ground's own height is the whole conversion — and while
     // that height isn't known the two coincide, which is exactly the behaviour this had before.
-    // Never negative: a witness cannot be underneath the ground they are standing on.
+    // Never negative: a observer cannot be underneath the ground they are standing on.
     const altitudeM = this.numberOrUndefined(this.elevationInput.value) ?? this.groundElevationM ?? 0
     const elevationM = Math.max(0, altitudeM - (this.groundElevationM ?? 0))
     const event = this.ufoElement.sighting.event
-    const witnessTrack = this.ufoElement.sighting.witnessTrack
+    const observerTrack = this.ufoElement.sighting.observerTrack
     const t = this.ufoElement.currentTime
 
     const name = this.stringOrUndefined(this.placeNameInput.value.trim())
@@ -2490,7 +2490,7 @@ export class SightingEditorElement extends HTMLElement {
     const focusDistanceM = this.numberOrUndefined(this.focusDistanceInput.value)
     // Same distinction retuneFieldOfView draws, for the same reason: these fields are PREFILLED
     // from the instrument (see syncOpticsFromInstrument), so a value equal to the device's own is
-    // one nobody stated, and only a departure from it is a witness talking. The focus distance has
+    // one nobody stated, and only a departure from it is a observer talking. The focus distance has
     // no device default at all, so any value there is theirs.
     const opticsStated =
       Math.abs(fovDeg - Instruments.fieldOfViewDeg(instrument)) > 0.01 ||
@@ -2500,9 +2500,9 @@ export class SightingEditorElement extends HTMLElement {
       lat === undefined && lng === undefined && headingDeg === undefined && pitchDeg === 0 && rollDeg === 0 &&
       elevationM === 0 && !opticsStated
     if (nothingSet) {
-      witnessTrack.removeKeyframeAt(t)
+      observerTrack.removeKeyframeAt(t)
     } else {
-      witnessTrack.addKeyframe(t, {
+      observerTrack.addKeyframe(t, {
         lat,
         lng,
         elevationM,
@@ -2521,7 +2521,7 @@ export class SightingEditorElement extends HTMLElement {
     // it's what makes this edit surface as a "timeupdate" (see the constructor's listener), the
     // signal a composed live preview (e.g. a <rr0-scene>) needs to resync.
     this.ufoElement.refresh()
-    // Moving the witness moves which weather record describes them — see scheduleWeatherLookup.
+    // Moving the observer moves which weather record describes them — see scheduleWeatherLookup.
     this.scheduleWeatherLookup()
     // ...and moves them out of the place whose name is on display — see schedulePlaceReverse.
     this.schedulePlaceReverse()
@@ -2586,11 +2586,11 @@ export class SightingEditorElement extends HTMLElement {
     this.ufoElement.durationSeconds = undefined
   }
 
-  /** Diagnoses `input`'s EDTF text as invalid only now, on blur — never while the witness is
+  /** Diagnoses `input`'s EDTF text as invalid only now, on blur — never while the observer is
    * still mid-typing (see applyEdtfTimeInput's own doc comment: a live "you're wrong" on every
    * character of e.g. "1965-07-01T05:00" is both illegible against the shared `.invalid` styling
    * and just distracting). Blur only fires once the field was actually focused, so a field the
-   * witness never touched can never end up flagged. A no-op when the text is empty or already
+   * observer never touched can never end up flagged. A no-op when the text is empty or already
    * valid (applyEdtfTimeInput already cleared the flag in that case). */
   private validateEdtfTimeInput(input: HTMLInputElement): void {
     const value = input.value.trim()
@@ -2601,7 +2601,7 @@ export class SightingEditorElement extends HTMLElement {
 
   /** Writes the sighting's reported observation-start time (event.time) from the EDTF text field. */
   /** Writes the observation's own legal time zone (event.utcOffsetHours) — what turns the
-   * witness's wall-clock time into a real instant, and so which sky the scene renders. Empty
+   * observer's wall-clock time into a real instant, and so which sky the scene renders. Empty
    * means unknown, falling back to approximating it from the longitude (see
    * SightingEvent.utcOffsetHours). Refreshes right away since every celestial body in the 3D
    * scene moves with it. */
@@ -2625,7 +2625,7 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   /** Picking a zone hands the offset over to that zone's own rules; picking the manual entry hands
-   * it back to the witness, keeping whatever number the zone last produced as their starting
+   * it back to the observer, keeping whatever number the zone last produced as their starting
    * point. */
   private updateTimeZone(): void {
     const zone = this.stringOrUndefined(this.timeZoneSelect.value)
@@ -2637,14 +2637,14 @@ export class SightingEditorElement extends HTMLElement {
    * Re-derives `utcOffsetHours` from the chosen zone for the observation's OWN date — which is why
    * this runs again on every date edit, not just when the zone changes: the same zone gives a
    * different answer in January and July, and gave different answers in 1965 and today (see
-   * TimeZones). A no-op while the offset is the witness's to state.
+   * TimeZones). A no-op while the offset is the observer's to state.
    */
   private applyTimeZoneOffset(): void {
     const event = this.ufoElement.sighting.event
     const derived = event.timeZone && event.time ? this.timeZones.offsetHoursAt(event.timeZone, event.time) : undefined
     if (derived !== undefined) event.utcOffsetHours = derived
     // Read-only, not disabled: the number is still the thing that matters and still worth reading,
-    // it just isn't the witness's to type while a zone is deciding it.
+    // it just isn't the observer's to type while a zone is deciding it.
     this.utcOffsetInput.readOnly = event.timeZone !== undefined
     this.syncUtcOffsetField()
     this.ufoElement.refresh()
@@ -2655,7 +2655,7 @@ export class SightingEditorElement extends HTMLElement {
     this.ufoElement.sighting.event.utcOffsetHours = this.numberOrUndefined(this.utcOffsetInput.value)
     this.updateUtcOffsetValidity()
     this.ufoElement.refresh()
-    // The offset is what turns the witness's wall clock into a real instant, so it decides which
+    // The offset is what turns the observer's wall clock into a real instant, so it decides which
     // hour of record the sighting even falls in — an hour out is a different sky AND a different
     // weather row (see SightingEvent.utcOffsetHours).
     this.scheduleWeatherLookup()
@@ -2676,50 +2676,50 @@ export class SightingEditorElement extends HTMLElement {
     })
   }
 
-  /** Builds a People object from the 4 witness inputs and writes it (plus the sighting's own id) straight onto
+  /** Builds a People object from the 4 observer inputs and writes it (plus the sighting's own id) straight onto
    * the sighting — legal since Sighting.ts made these fields non-readonly for exactly this
    * purpose (see its own doc comment). firstNames is comma-separated free text, parsed exactly
-   * like updateTags(). If every witness field ends up empty, `witness` is cleared to `undefined`
+   * like updateTags(). If every observer field ends up empty, `observer` is cleared to `undefined`
    * rather than storing an all-empty object — same "blank everything clears it" convention used
    * everywhere else in this file. */
-  private updateWitnessMetadata(): void {
+  private updateObserverMetadata(): void {
     const sighting = this.ufoElement.sighting
-    const firstNames = this.witnessFirstNamesInput.value
+    const firstNames = this.observerFirstNamesInput.value
       .split(",")
       .map(name => name.trim())
       .filter(name => name.length > 0)
-    const witness: People = {
-      id: this.stringOrUndefined(this.witnessIdInput.value),
-      title: this.stringOrUndefined(this.witnessTitleInput.value),
-      lastName: this.stringOrUndefined(this.witnessLastNameInput.value),
+    const observer: People = {
+      id: this.stringOrUndefined(this.observerIdInput.value),
+      title: this.stringOrUndefined(this.observerTitleInput.value),
+      lastName: this.stringOrUndefined(this.observerLastNameInput.value),
       firstNames: firstNames.length > 0 ? firstNames : undefined
     }
-    sighting.witness = Object.values(witness).some(value => value !== undefined) ? witness : undefined
+    sighting.observer = Object.values(observer).some(value => value !== undefined) ? observer : undefined
     sighting.id = this.stringOrUndefined(this.sightingIdInput.value)
-    this.updateTestimony()
+    this.updateAccount()
     this.ufoElement.refresh()
   }
 
   /**
-   * Who saw it and how the account travelled — see Testimony.
+   * Who saw it and how the account travelled — see Account.
    *
-   * Written whole and dropped whole, the same as `witness` above: every field is independently
-   * optional, and a testimony none of whose fields is set is not an empty testimony, it is a
-   * recording that says nothing about its witnesses. Blank stays undefined rather than becoming 0,
+   * Written whole and dropped whole, the same as `observer` above: every field is independently
+   * optional, and a account none of whose fields is set is not an empty account, it is a
+   * recording that says nothing about its observers. Blank stays undefined rather than becoming 0,
    * because the methods reading this score "unknown" and "one" differently.
    */
-  private updateTestimony(): void {
+  private updateAccount(): void {
     const sighting = this.ufoElement.sighting
-    const followedUp = this.testimonyFollowedUpSelect.value
-    const testimony: Testimony = {
-      witnessAgeYears: this.numberOrUndefined(this.witnessAgeInput.value),
-      witnessOccupation: this.witnessOccupationInput.value.trim() === ""
+    const followedUp = this.accountFollowedUpSelect.value
+    const account: Account = {
+      observerAgeYears: this.numberOrUndefined(this.observerAgeInput.value),
+      observerOccupation: this.observerOccupationInput.value.trim() === ""
         ? undefined
-        : this.said.write(sighting.testimony?.witnessOccupation, this.witnessOccupationInput.value, this.writingLanguage),
-      source: (this.stringOrUndefined(this.testimonySourceSelect.value) as Testimony["source"]),
+        : this.said.write(sighting.account?.observerOccupation, this.observerOccupationInput.value, this.writingLanguage),
+      source: (this.stringOrUndefined(this.accountSourceSelect.value) as Account["source"]),
       followedUp: followedUp === "" ? undefined : followedUp === "yes"
     }
-    sighting.testimony = Object.values(testimony).some(value => value !== undefined) ? testimony : undefined
+    sighting.account = Object.values(account).some(value => value !== undefined) ? account : undefined
   }
 
   private updateDescription(): void {
@@ -2760,9 +2760,9 @@ export class SightingEditorElement extends HTMLElement {
     // AudioContext.resume() requires (see SceneElement.resumeWeatherAudio/WeatherAudio.resume).
     this.sceneElement.resumeWeatherAudio()
     // Typing into these fields IS taking them back. They are only ever editable when no record
-    // owns their values (see syncWeatherSourceState), so an edit here is the witness's own
+    // owns their values (see syncWeatherSourceState), so an edit here is the observer's own
     // account, and no later lookup may overwrite it — the same guarantee unticking the box gives,
-    // reached the other way round. Without this, a witness who described the weather BEFORE
+    // reached the other way round. Without this, a observer who described the weather BEFORE
     // stating the date and place watched it vanish the moment they typed them: the box, which is
     // unavailable until there is something to ask, ticked itself and the record replaced their
     // account. They had no way to prevent it, since the only control that could was disabled.
@@ -2798,7 +2798,7 @@ export class SightingEditorElement extends HTMLElement {
    *
    * Deliberately not applyWeatherAtPlayhead. That one rebuilds the whole weather from the visible
    * inputs and, in doing so, takes the recording away from whatever record it was looked up from —
-   * which is exactly right for a witness overruling a cloud cover, and exactly wrong here. Nobody
+   * which is exactly right for a observer overruling a cloud cover, and exactly wrong here. Nobody
    * measured what the crystals were doing, so stating it contradicts no record and must not discard
    * one; and rebuilding from the inputs would also throw away the fields a record fills that have no
    * control of their own, the lower decks among them.
@@ -2935,9 +2935,9 @@ export class SightingEditorElement extends HTMLElement {
     this.ufoElement.refresh()
   }
 
-  /** A picture from the witness's own spot most often looks where they looked: the pose at the
+  /** A picture from the observer's own spot most often looks where they looked: the pose at the
    * playhead, copied into the registration as a starting point for lining it up. */
-  private useWitnessPoseForReference(): void {
+  private useObserverPoseForReference(): void {
     const pose = resolveObserverPoseAt(this.ufoElement.sighting, this.ufoElement.currentTime)
     if (!pose) return
     this.referenceHeadingInput.value = String(this.rounded(pose.headingDeg ?? 0))
@@ -2957,7 +2957,7 @@ export class SightingEditorElement extends HTMLElement {
       src,
       title: title ? this.said.write(undefined, title, this.writingLanguage) : undefined,
       opacity: DEFAULT_REFERENCE_OPACITY,
-      // Where the witness looks at the playhead: the likeliest guess for a picture of what they saw.
+      // Where the observer looks at the playhead: the likeliest guess for a picture of what they saw.
       registration: { headingDeg: pose?.headingDeg ?? 0, pitchDeg: pose?.pitchDeg ?? 0, fovDeg: DEFAULT_REFERENCE_FOV_DEG },
       ...overrides
     }
@@ -3009,7 +3009,7 @@ export class SightingEditorElement extends HTMLElement {
 
   /**
    * What the pointer finds on the canvas in picture mode, in order: a landmark's own end, to move
-   * it; the picture, to turn it; anywhere else, the scene, to turn the witness. Naming a landmark is not a click on the picture but an armed
+   * it; the picture, to turn it; anywhere else, the scene, to turn the observer. Naming a landmark is not a click on the picture but an armed
    * gesture (see armLandmark), so that a click nobody meant creates nothing.
    */
   private beginReferenceDrag(startPointer: { x: number; y: number }): void {
@@ -3028,7 +3028,7 @@ export class SightingEditorElement extends HTMLElement {
       return
     }
     // Outside the picture the scene is still the scene: grabbing sky or ground there turns the
-    // witness, as it does in every other group. Only the picture itself, and its landmarks, are
+    // observer, as it does in every other group. Only the picture itself, and its landmarks, are
     // this group's to move.
     const aspect = this.sceneElement.referenceAspect(reference.id)
     const onPicture = aspect !== undefined
@@ -3294,7 +3294,7 @@ export class SightingEditorElement extends HTMLElement {
     }
   }
 
-  /** A canvas pixel for a world direction, or undefined behind the witness. */
+  /** A canvas pixel for a world direction, or undefined behind the observer. */
   private canvasPointOfDirection(direction: Vector3): { x: number; y: number } | undefined {
     const ndc = this.sceneElement.screenPointOf(direction)
     if (!ndc) return undefined
@@ -3308,7 +3308,7 @@ export class SightingEditorElement extends HTMLElement {
    * registration, and the dot where the author said it is in the render, numbered or named as in
    * the list, the selected one bolder — and, while a landmark is being named, what the next click
    * does. Painted by the playback layer at every frame (see UfoElement.overlayPainter), so it
-   * turns with the witness.
+   * turns with the observer.
    */
   private readonly paintPictureOverlay = (renderer: CanvasRenderer): void => {
     const reference = this.currentReference()
@@ -3342,9 +3342,9 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   /**
-   * Makes the picture's registration the witness's own pose at the playhead — as a MEASUREMENT,
+   * Makes the picture's registration the observer's own pose at the playhead — as a MEASUREMENT,
    * which is what a heading read off a picture that fits the relief is, where the heading typed
-   * in the Witness group is the witness's word. The recording says so: each angle written gets a
+   * in the Observer group is the observer's word. The recording says so: each angle written gets a
    * "derived" basis naming the picture and how well it fitted (see Provenance).
    */
   private adoptReferencePose(): void {
@@ -3356,7 +3356,7 @@ export class SightingEditorElement extends HTMLElement {
     this.rollInput.value = String(this.rounded(rollDeg ?? 0))
     this.updateObserver()
     const t = this.ufoElement.currentTime
-    const index = this.ufoElement.sighting.witnessTrack.toJSON().keyframes.findIndex(keyframe => keyframe.t === t)
+    const index = this.ufoElement.sighting.observerTrack.toJSON().keyframes.findIndex(keyframe => keyframe.t === t)
     if (index < 0) return
     const rationale = this.messages.referenceAdoptRationale
       .replace("{title}", this.referenceLabel(reference))
@@ -3364,7 +3364,7 @@ export class SightingEditorElement extends HTMLElement {
       .replace("{deg}", (this.referenceFit?.residualDeg ?? 0).toFixed(1))
     const values: [string, number][] = [["headingDeg", headingDeg], ["pitchDeg", pitchDeg], ["rollDeg", rollDeg ?? 0]]
     for (const [field, value] of values) {
-      this.ufoElement.sighting.provenance.set(`witnessTrack.keyframes.${index}.pose.${field}`, { basis: "derived", rationale, of: this.rounded(value) })
+      this.ufoElement.sighting.provenance.set(`observerTrack.keyframes.${index}.pose.${field}`, { basis: "derived", rationale, of: this.rounded(value) })
     }
   }
 
@@ -3485,7 +3485,7 @@ export class SightingEditorElement extends HTMLElement {
     this.previewSound(sound)
   }
 
-  /** Lets the witness hear what they are describing while they tune it — an input event on a
+  /** Lets the observer hear what they are describing while they tune it — an input event on a
    * sound field IS the user gesture an AudioContext needs. Bounded by its own timer so a hum
    * doesn't outlive the edit that started it (see SOUND_PREVIEW_MS). */
   private previewSound(sound: SightingSound): void {
@@ -3546,7 +3546,7 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   /** Checked hands the Circumstances fields to the meteorological record; unchecked hands them
-   * back to the witness. Unchecking keeps the values exactly as they are — a real record is the
+   * back to the observer. Unchecking keeps the values exactly as they are — a real record is the
    * best starting point a correction can have — but drops the claim that they were measured, and
    * with it any right of a later lookup to overwrite them (see Sighting.weatherSource). */
   private onWeatherInferredToggled(): void {
@@ -3561,7 +3561,7 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   /** Coalesces the burst of edits a single date or coordinate produces into one lookup — see
-   * WEATHER_LOOKUP_DEBOUNCE_MS. A no-op while the witness owns these fields: their account is
+   * WEATHER_LOOKUP_DEBOUNCE_MS. A no-op while the observer owns these fields: their account is
    * never re-derived behind their back. */
   private scheduleWeatherLookup(): void {
     if (!this.weatherFromRecords) return
@@ -3570,7 +3570,7 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   /** Drops a pending lookup AND disowns any answer already in flight (see inferWeather's token) —
-   * needed wherever the question itself stops applying: the witness has taken the fields back, or
+   * needed wherever the question itself stops applying: the observer has taken the fields back, or
    * a whole different recording has just been loaded over the one that asked. Without it, an
    * answer about the previous sighting lands on the new one seconds later. */
   private cancelWeatherLookup(): void {
@@ -3590,7 +3590,7 @@ export class SightingEditorElement extends HTMLElement {
     this.weatherLookupPending = true
     this.syncWeatherSourceState()
     const result = await this.weatherInference.infer(this.ufoElement.sighting)
-    // A newer edit already asked a newer question, or the witness took the fields back mid-flight.
+    // A newer edit already asked a newer question, or the observer took the fields back mid-flight.
     if (token !== this.weatherLookupToken || !this.weatherFromRecords) return
     this.weatherLookupPending = false
     this.weatherLookupResult = result
@@ -3615,11 +3615,11 @@ export class SightingEditorElement extends HTMLElement {
    * duration (Player.durationOverrideMs), and the moment a first shape is recorded it becomes the
    * recording's own — often a few seconds. A fifteen-hour track laid out over 54 000 000 ms then
    * sits entirely past the end of a 6 000 ms seek bar, so every position on it resolves to the
-   * first keyframe and the weather appears frozen for the whole observation. That is what a witness
+   * first keyframe and the weather appears frozen for the whole observation. That is what a observer
    * sees as "the weather never changes"; nothing about the lookup itself is wrong.
    *
    * Cheap to re-run: the provider answers an identical query from its own cache, so this costs no
-   * request. Only ever for a track the record owns — a witness's own account is never re-derived.
+   * request. Only ever for a track the record owns — a observer's own account is never re-derived.
    */
   private ensureWeatherTrackSpan(): void {
     if (!this.weatherFromRecords || this.ufoElement.sighting.weatherSource === undefined) return
@@ -3661,7 +3661,7 @@ export class SightingEditorElement extends HTMLElement {
     // ("a full date and a place are needed") is its tooltip instead: an explanation of why a
     // control is unavailable belongs ON that control, not in the space reserved for what a record
     // answered. The requirement itself is WeatherInference's own (canInfer), never re-decided here;
-    // the box ticks itself again as soon as one can be asked, unless the witness has turned it off.
+    // the box ticks itself again as soon as one can be asked, unless the observer has turned it off.
     const canLookUp = this.weatherInference.canInfer(this.ufoElement.sighting)
     this.weatherInferredInput.disabled = !canLookUp
     this.weatherInferredInput.checked = canLookUp && this.weatherFromRecords
@@ -3718,7 +3718,7 @@ export class SightingEditorElement extends HTMLElement {
 
   /** Decides, for a freshly loaded recording, who owns its weather: the record when the file names
    * one (its keyframes came from there, and are kept as-is rather than looked up again — a case
-   * file must replay identically offline and years later), the witness when it has weather but no
+   * file must replay identically offline and years later), the observer when it has weather but no
    * source, and the record again for a file with no weather at all, which is what makes an
    * imported case pick up its real conditions the moment it states a date and a place. */
   private syncWeatherOwnership(): void {
@@ -3754,7 +3754,7 @@ export class SightingEditorElement extends HTMLElement {
    * as missing rather than just left blank. Clears automatically the moment a value exists,
    * whether typed directly or derived from start/end dates. When start/end are both given but too
    * imprecise/mismatched to derive an exact duration from (see sightingDurationBlockedReason), the
-   * field's title explains why instead of leaving the witness to guess. */
+   * field's title explains why instead of leaving the observer to guess. */
   private updateDurationValidity(): void {
     const missing = this.durationInput.value === ""
     // Marked missing, not marked WRONG. input.invalid's red box says a value was typed badly, and
@@ -3915,7 +3915,7 @@ export class SightingEditorElement extends HTMLElement {
    * returns it verbatim, and would otherwise show a stale string over fresh numbers).
    *
    * An empty picker is two different statements, told apart by badInput: genuinely cleared, which
-   * is a witness withdrawing a time and must be recorded; or half typed, which is nothing yet and
+   * is a observer withdrawing a time and must be recorded; or half typed, which is nothing yet and
    * must NOT be, since applyEdtfTimeInput reads an empty string as "no time at all" and would
    * erase the date between a date being entered and its hour.
    */
@@ -3984,7 +3984,7 @@ export class SightingEditorElement extends HTMLElement {
     this.obsEndTimeInput.classList.remove("invalid")
   }
 
-  /** Resyncs witness/case/description/tags from a freshly loaded sighting — same role as
+  /** Resyncs observer/case/description/tags from a freshly loaded sighting — same role as
    * syncObservationTimeFields(): these are sighting-wide metadata, not per-instant keyframes, so
    * this only needs to run once on load. */
   /** Resyncs the time-zone field from a freshly loaded recording — sighting-wide metadata like the
@@ -4008,8 +4008,8 @@ export class SightingEditorElement extends HTMLElement {
    * the historical rules are worse still — this must never cry wolf at a correct
    * "France on UTC+1 in 1965" or "Alabama on UTC-6 in 1948". Only an offset no country has ever
    * placed on that meridian is flagged, and even then as a warning on the field, never as a
-   * correction: the recording states the witness's clock, and this cannot know better than the
-   * witness. Rendered with the same `.invalid` styling as an unparseable date.
+   * correction: the recording states the observer's clock, and this cannot know better than the
+   * observer. Rendered with the same `.invalid` styling as an unparseable date.
    */
   private updateUtcOffsetValidity(): void {
     const declared = this.ufoElement.sighting.event.utcOffsetHours
@@ -4023,12 +4023,12 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   /** Restores the place name from a freshly loaded recording — sighting-wide metadata, like the
-   * observation date, not a per-instant keyframe (the witnessTrack's poses carry coordinates only,
-   * deliberately: a witness who moves is still at the same named place). */
+   * observation date, not a per-instant keyframe (the observerTrack's poses carry coordinates only,
+   * deliberately: a observer who moves is still at the same named place). */
   /**
    * Looks up the ground's own height above sea level at the current location, and re-anchors the
-   * Altitude field to it: the field's floor becomes the ground (a witness in the Alps cannot be at
-   * 0 m, and an editor that offers it invites a recording that says so), and a witness who was
+   * Altitude field to it: the field's floor becomes the ground (a observer in the Alps cannot be at
+   * 0 m, and an editor that offers it invites a recording that says so), and a observer who was
    * standing on that ground reads their real altitude rather than a zero.
    *
    * The stored pose is untouched by the move: ObserverPose.elevationM stays a height above the
@@ -4073,7 +4073,7 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   /** Shows `heightAboveGroundM` as what it is in the world: an altitude above sea level, floored at
-   * the ground the witness is standing on. */
+   * the ground the observer is standing on. */
   private syncElevationField(heightAboveGroundM: number): void {
     const ground = this.groundElevationM
     this.elevationInput.value = String(Math.round((ground ?? 0) + heightAboveGroundM))
@@ -4108,18 +4108,18 @@ export class SightingEditorElement extends HTMLElement {
     this.placeStatusText.textContent = ""
   }
 
-  private syncWitnessMetadataFields(): void {
+  private syncObserverMetadataFields(): void {
     const sighting = this.ufoElement.sighting
-    this.witnessIdInput.value = sighting.witness?.id ?? ""
-    this.witnessTitleInput.value = sighting.witness?.title ?? ""
-    this.witnessLastNameInput.value = sighting.witness?.lastName ?? ""
-    this.witnessFirstNamesInput.value = sighting.witness?.firstNames?.join(", ") ?? ""
+    this.observerIdInput.value = sighting.observer?.id ?? ""
+    this.observerTitleInput.value = sighting.observer?.title ?? ""
+    this.observerLastNameInput.value = sighting.observer?.lastName ?? ""
+    this.observerFirstNamesInput.value = sighting.observer?.firstNames?.join(", ") ?? ""
     this.sightingIdInput.value = sighting.id ?? ""
-    this.witnessAgeInput.value = sighting.testimony?.witnessAgeYears?.toString() ?? ""
-    this.witnessOccupationInput.value = this.said.read(sighting.testimony?.witnessOccupation) ?? ""
-    this.testimonySourceSelect.value = sighting.testimony?.source ?? ""
-    this.testimonyFollowedUpSelect.value =
-      sighting.testimony?.followedUp === undefined ? "" : sighting.testimony.followedUp ? "yes" : "no"
+    this.observerAgeInput.value = sighting.account?.observerAgeYears?.toString() ?? ""
+    this.observerOccupationInput.value = this.said.read(sighting.account?.observerOccupation) ?? ""
+    this.accountSourceSelect.value = sighting.account?.source ?? ""
+    this.accountFollowedUpSelect.value =
+      sighting.account?.followedUp === undefined ? "" : sighting.account.followedUp ? "yes" : "no"
     this.descriptionInput.value = this.said.read(sighting.event.description) ?? ""
     this.showTags()
     this.instrumentSelect.value = sighting.instrument.id
@@ -4128,7 +4128,7 @@ export class SightingEditorElement extends HTMLElement {
   /** Keeps the weather toolbar honest as the playhead moves or a different keyframe region is
    * scrubbed to — same role/timing and the same playing-state bailout as syncObserverFromTimeline
    * (merely scrubbing must never itself write a keyframe). Reads resolveWeatherAt (interpolated,
-   * not hold-last) so the fields reflect what a witness would actually have reported *between* two
+   * not hold-last) so the fields reflect what a observer would actually have reported *between* two
    * weather keyframes, matching what SceneElement itself renders at that instant — it already
    * falls back through the legacy static sighting.weather, then DEFAULT_WEATHER, when the track
    * has no keyframes at all yet (e.g. a sighting loaded from older data, or before the very first
@@ -4162,7 +4162,7 @@ export class SightingEditorElement extends HTMLElement {
   /** Keeps the lat/lng/heading/pitch fields honest as the playhead moves or a different keyframe
    * region is scrubbed to — same role and the same playing-state bailout as
    * syncAppearanceFromTimeline (merely scrubbing must never itself write a keyframe). Reads
-   * getInterpolatedPoseAt (not hold-last) so the fields reflect what a witness would see *between*
+   * getInterpolatedPoseAt (not hold-last) so the fields reflect what a observer would see *between*
    * two observer keyframes, matching what SceneElement itself renders at that instant. Falls back
    * to the legacy static event.place when the track has no keyframes at all yet (e.g. a sighting
    * loaded from older data, or before the very first observer edit), mirroring
@@ -4178,7 +4178,7 @@ export class SightingEditorElement extends HTMLElement {
     if (this.ufoElement.playbackState === "playing") return
     this.syncStreetSearchAvailability()
     const sighting = this.ufoElement.sighting
-    const pose = sighting.witnessTrack.getInterpolatedPoseAt(this.ufoElement.currentTime)
+    const pose = sighting.observerTrack.getInterpolatedPoseAt(this.ufoElement.currentTime)
     const location = sighting.event.place?.[0]
     const active = this.shadow.activeElement
     if (active !== this.latInput) {
@@ -4326,7 +4326,7 @@ export class SightingEditorElement extends HTMLElement {
    * while the Phenomenon group is open (their handles, their moves), and otherwise the scene
    * itself: a click on a shape or a decor object still goes to its panel, since that is how a
    * thing on the canvas is reached, but moving it is done from that panel, and the rest of the
-   * canvas is the landscape to turn the witness with. Before this, every mode was on at once and
+   * canvas is the landscape to turn the observer with. Before this, every mode was on at once and
    * the picture, once handed the canvas, kept it.
    */
   private canvasMode(): CanvasMode {
@@ -4359,11 +4359,11 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   /**
-   * Draws the witness's bodies, with the shapes beside them as outlines — the player's comparison
-   * (see SceneElement.compareTestimony), so what the witness drew stays in view and the body is
+   * Draws the observer's bodies, with the shapes beside them as outlines — the player's comparison
+   * (see SceneElement.compareAccount), so what the observer drew stays in view and the body is
    * read against it — everywhere but in the Shapes part of the Phenomenon group. There the shapes
    * are drawn in full and alone: their colour, halo and brilliance are what that part edits, and a
-   * body over them would hide the very thing being edited (see SceneElement.testimonyInTheRound).
+   * body over them would hide the very thing being edited (see SceneElement.accountInTheRound).
    * Drawn only in the Bodies part at first, an airliner vanished as soon as another group was
    * opened, which read as an edit not kept.
    * Re-read after every edit of a body, and after a recording is loaded, since the scene holds the
@@ -4372,7 +4372,7 @@ export class SightingEditorElement extends HTMLElement {
   private syncBodiesShown(): void {
     const shown = !(this.isGroupIdOpen("group-shape") && this.shadow.getElementById("shape-shapes")?.hidden === false)
     const interpretation = shown ? this.ufoElement.sighting.interpretation : undefined
-    this.sceneElement.compareTestimony = interpretation !== undefined
+    this.sceneElement.compareAccount = interpretation !== undefined
     if (this.sceneElement.interpretation !== interpretation) this.sceneElement.interpretation = interpretation
   }
 
@@ -4412,7 +4412,7 @@ export class SightingEditorElement extends HTMLElement {
    * about the sighting, and one that changed under the reader as they clicked. The way to a
    * shape's fields is the shape itself: clicking one opens that panel (see revealShapePanel). */
   private static readonly SUMMARY_GROUPS: SummaryGroup[] = [
-    "observation", "witness", "location", "decor", "temporal", "weather", "sound"
+    "observation", "observer", "location", "decor", "temporal", "weather", "sound"
   ]
 
   /** The tab strip's own order, which SUMMARY_GROUPS matches for its first seven and then stops:
@@ -4420,7 +4420,7 @@ export class SightingEditorElement extends HTMLElement {
    * "observation"), and an assessment has no panel at all. Used to mark a tab holding an
    * unanswered question — see QUESTION_FIELDS. */
   private static readonly PANEL_ORDER: string[] = [
-    "observation", "witness", "location", "decor", "temporal", "weather", "sound", "shape"
+    "observation", "observer", "location", "decor", "temporal", "weather", "sound", "shape"
   ]
 
   /**
@@ -4450,11 +4450,11 @@ export class SightingEditorElement extends HTMLElement {
       // back to a field, so it has to say what that field says.
       groundElevationM: this.groundElevationM ?? 0
     })
-    // "Altitude 220 m" and "Altitude 0 m" side by side are the witness's own height above the sea
+    // "Altitude 220 m" and "Altitude 0 m" side by side are the observer's own height above the sea
     // and a building's — two different assertions under one word, which is fine inside a panel
     // that names its subject and misleading on a strip that doesn't.
     //
-    // Containment is what tells them apart. A group describing a sub-element — the witness, one
+    // Containment is what tells them apart. A group describing a sub-element — the observer, one
     // decor object — puts its chips inside a chip of its own bearing its name, so a Heading in a
     // box saying Environment needs nothing further to say which heading it is. An earlier version
     // prefixed the label instead ("Environment · Heading") whenever one was shared across groups;
@@ -4500,12 +4500,12 @@ export class SightingEditorElement extends HTMLElement {
         const name = document.createElement("span")
         name.className = "param-nest-label"
         // Named by its GROUP, never by where its chips lead — the two are different things, and an
-        // assessment chip that sends a reader to the Witness panel still belongs in a box saying
+        // assessment chip that sends a reader to the Observer panel still belongs in a box saying
         // Assessment. An assessment is not a group of fields, so its name is its own message.
         name.textContent = chip.group === "assessment"
           ? this.messages.assessmentGroup
           // The tab's LABEL, not the whole button: a tab also carries its count of unanswered
-          // questions (see badgeOn), and reading the button whole named a nest "Witness3".
+          // questions (see badgeOn), and reading the button whole named a nest "Observer3".
           : SightingEditorElement.tabLabel(this.groupTabs[SightingEditorElement.SUMMARY_GROUPS.indexOf(chip.group)])
         box.append(name)
         openNest = { group: chip.group, element: box }
@@ -4522,9 +4522,9 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   /** Which summary groups describe a sub-element rather than the observation itself, and so read
-   * as a chip holding chips: the witness who gave the testimony, and whichever decor object is
+   * as a chip holding chips: the observer who gave the account, and whichever decor object is
    * being worked on (or, with none selected, the list of them). */
-  private static readonly NESTED_GROUPS: SummaryGroup[] = ["witness", "decor", "assessment"]
+  private static readonly NESTED_GROUPS: SummaryGroup[] = ["observer", "decor", "assessment"]
 
   /**
    * Which fields would answer each of the coverage assessor's questions, and which panel holds
@@ -4604,7 +4604,7 @@ export class SightingEditorElement extends HTMLElement {
    * marks on each panel's own tab.
    *
    * Not `invalid`: a gap is not a mistake, and a red border would say the author typed something
-   * wrong where in fact the witness said nothing.
+   * wrong where in fact the observer said nothing.
    *
    * The count is the number of MARKS, not of unanswered questions, and the order below follows from
    * that: mark first, count after. Counting questions instead put badges on panels where a reader
@@ -4971,11 +4971,11 @@ export class SightingEditorElement extends HTMLElement {
 
   /**
    * Resizes the selected shape on the canvas to subtend `widthDeg` — about its own centre (its
-   * position is where the witness saw it, and has nothing to do with how big it was) and keeping
+   * position is where the observer saw it, and has nothing to do with how big it was) and keeping
    * its aspect ratio (the width is one measurement; the outline's proportions are a separate
    * observation this must not overwrite). The angle is what the recording keeps; the metres that
    * led to it are forgotten the moment they have been applied, because they were never an
-   * observation — the witness inferred the distance, then inferred the size from it.
+   * observation — the observer inferred the distance, then inferred the size from it.
    */
   private applyApparentWidth(widthDeg: number): void {
     const timeline = this.ufoElement.sighting.timeline
@@ -5020,7 +5020,7 @@ export class SightingEditorElement extends HTMLElement {
    *
    * A device the recording ALREADY names is always offered even when its own dates exclude it, and
    * said to be out of its period rather than dropped. Dropping it would silently re-instrument a
-   * testimony; saying so leaves the reader to judge, which is this project's whole posture.
+   * account; saying so leaves the reader to judge, which is this project's whole posture.
    */
   private refreshInstrumentOptions(): void {
     const sighting = this.ufoElement.sighting
@@ -5045,7 +5045,7 @@ export class SightingEditorElement extends HTMLElement {
   /**
    * A shutter speed as photography writes it — "1/250" rather than "0.004".
    *
-   * Not decoration: a witness's own account of a photograph says "a five-second exposure" or "a
+   * Not decoration: a observer's own account of a photograph says "a five-second exposure" or "a
    * five-hundredth", and a field that answers in thousandths of a second is a field nobody can
    * check against what they were told. Long poses stay decimal, because that is how those are said
    * too.
@@ -5059,11 +5059,11 @@ export class SightingEditorElement extends HTMLElement {
    * What the field says the shutter did, as long as the device could do it.
    *
    * A camera is not a wish: a phone's night mode stops at ten seconds and an Instamatic had exactly
-   * one speed, so a pose typed past what the device offered is not a testimony this recording can
+   * one speed, so a pose typed past what the device offered is not a account this recording can
    * hold — it would put a trail in the picture that the camera named on the same recording could
    * never have drawn. The value is brought back inside the device's own range, and the field then
    * shows what the recording holds (see syncOpticsFromInstrument, which rewrites it as soon as the
-   * witness leaves the field): the correction is visible rather than announced, the same way the
+   * observer leaves the field): the correction is visible rather than announced, the same way the
    * focal length shows the millimetres a field really works out to.
    *
    * A device with no range at all is one with nothing to set — its own single speed stands.
@@ -5095,7 +5095,7 @@ export class SightingEditorElement extends HTMLElement {
    *
    * READ-ONLY IS THE COMMON CASE, and saying so is the point: an Instamatic's owner had one
    * aperture, one shutter speed and one focal length, so the three fields show 43 mm, f/11 and a
-   * ninetieth of a second and refuse to be touched. A witness's testimony is not improved by
+   * ninetieth of a second and refuse to be touched. A observer's account is not improved by
    * offering them settings their camera never had.
    *
    * The focal length is shown in millimetres for anything with a frame and in DEGREES for an eye,
@@ -5115,7 +5115,7 @@ export class SightingEditorElement extends HTMLElement {
     this.unitFocalLength.textContent = frame ? this.messages.unitMillimetres : this.messages.unitDegrees
     this.labelFocalLength.textContent = frame ? this.messages.focalLength : this.messages.fieldOfView
     // A fixed lens may be read but not set. An eye's field is always the reader's to state: it is
-    // not a device setting at all, it is how much of their surroundings the witness took in.
+    // not a device setting at all, it is how much of their surroundings the observer took in.
     this.focalLengthInput.disabled = frame !== undefined && frame.focalRangeMm === undefined
     // One field for two things (see the label above), so its bounds are the ones it is showing:
     // a lens's own millimetres, or a field of view, which cannot reach a half-turn. Without this an
@@ -5150,7 +5150,7 @@ export class SightingEditorElement extends HTMLElement {
     this.exposureInput.disabled = instrument.exposureRangeSeconds === undefined
 
     // Only ever askable of something that can be focused at all, which is to say something with a
-    // lens and a diaphragm: an eye is not focused BY the witness, and its depth of field is not
+    // lens and a diaphragm: an eye is not focused BY the observer, and its depth of field is not
     // what a reconstruction turns on.
     if (this.focusDistanceInput !== this.shadow.activeElement) {
       this.focusDistanceInput.value = pose?.focusDistanceM === undefined ? "" : String(pose.focusDistanceM)
@@ -5164,16 +5164,16 @@ export class SightingEditorElement extends HTMLElement {
    * The rule, and it is the whole reason this is not a blanket overwrite: a field that still reads
    * as the OLD instrument's is one nobody chose — this recorder wrote it from that instrument's
    * optics — so it follows the change. Any other value was meant by somebody (a zoom, binoculars,
-   * a hand-authored file), and a picker must not quietly edit a testimony. Same distinction the
-   * weather fields draw between a looked-up reading and a witness's own declaration.
+   * a hand-authored file), and a picker must not quietly edit a account. Same distinction the
+   * weather fields draw between a looked-up reading and a observer's own declaration.
    */
   private retuneFieldOfView(previous: Instrument): void {
     const sighting = this.ufoElement.sighting
     const was = Instruments.fieldOfViewDeg(previous)
     const now = Instruments.fieldOfViewDeg(sighting.instrument)
-    for (const keyframe of [...sighting.witnessTrack.allKeyframes]) {
+    for (const keyframe of [...sighting.observerTrack.allKeyframes]) {
       if (Math.abs(keyframe.pose.fovDeg - was) > SAME_FIELD_EPSILON_DEG) continue
-      sighting.witnessTrack.addKeyframe(keyframe.t, { ...keyframe.pose, fovDeg: now })
+      sighting.observerTrack.addKeyframe(keyframe.t, { ...keyframe.pose, fovDeg: now })
     }
   }
 
@@ -5198,7 +5198,7 @@ export class SightingEditorElement extends HTMLElement {
     sighting.exposureSeconds = Math.min(range.max, Math.max(range.min, stated))
   }
 
-  /** The field of view the witness's own pose declares at the current playhead, falling back to
+  /** The field of view the observer's own pose declares at the current playhead, falling back to
    * whatever the INSTRUMENT takes in — what the apparent-size math must project through, rather
    * than a fixed sixty degrees, so a recording that states a different field (a zoom, a pair of
    * binoculars) stays self-consistent. */
@@ -5273,10 +5273,10 @@ export class SightingEditorElement extends HTMLElement {
    * Says what the recording can actually establish about the object's real width — and, far more
    * often, that it cannot establish anything.
    *
-   * This is the other half of dropping stored sizes (see BaseShape.angular). A testimony states an
+   * This is the other half of dropping stored sizes (see BaseShape.angular). A account states an
    * angle; meters only ever follow from the object being seen to cross something whose distance is
    * known, which is an inequality, not a measurement — so what shows here is a range, a one-sided
-   * bound, or an honest "unknown". A witness alone under an empty night sky has crossed nothing,
+   * bound, or an honest "unknown". A observer alone under an empty night sky has crossed nothing,
    * and no amount of confidence in their "about a hundred feet" changes that.
    *
    * Blank for a multiple selection, like the apparent size above it: a range belongs to one object.
@@ -5285,9 +5285,9 @@ export class SightingEditorElement extends HTMLElement {
    * What the stated blur is worth as a distance, through the instrument the recording names.
    *
    * The depth of field this scene draws runs one way: the recording states a lens, and the world
-   * is blurred by how far each thing stands. It deliberately leaves the witness's own object
+   * is blurred by how far each thing stands. It deliberately leaves the observer's own object
    * sharp, because that object's distance is the very unknown a reconstruction is about. A blur
-   * the witness STATED runs the same geometry backwards and bounds it — which DepthOfField's own
+   * the observer STATED runs the same geometry backwards and bounds it — which DepthOfField's own
    * doc comment called for before there was anything to state it with: "an object photographed as
    * a blur, in a picture whose horizon is sharp, was CLOSE".
    *
@@ -5397,9 +5397,9 @@ export class SightingEditorElement extends HTMLElement {
 
   /**
    * Where a new body starts (see BodyEditor.addBody), at the playhead: standing for the selected
-   * shape, in its direction (the one it states, else the one the witness faced), at the distance
+   * shape, in its direction (the one it states, else the one the observer faced), at the distance
    * the scene draws it and as big as its apparent width is there; or, with no shape drawn at this
-   * instant, where the witness is looking. When that line of sight goes into the ground before that
+   * instant, where the observer is looking. When that line of sight goes into the ground before that
    * distance, the body stands on the ground at that distance: placed in the air along it, it was
    * under the relief and nothing of it showed (a craft in the hollow at Socorro).
    */
@@ -5422,7 +5422,7 @@ export class SightingEditorElement extends HTMLElement {
       : undefined
     const direction = { azimuthDeg: round(aim.azimuthDeg, 2), altitudeDeg: round(aim.altitudeDeg, 2) }
     // On the ground at that distance, not where the line first meets it: that can be the slope
-    // under the witness's own feet, fifteen metres off, which made an 11 cm body (see BodyKeyframe).
+    // under the observer's own feet, fifteen metres off, which made an 11 cm body (see BodyKeyframe).
     const keyframe: BodyKeyframe = { t, ...direction, distanceM, ...(onGround ? { onGround: true } : {}), ...(sizeM ? { sizeM } : {}) }
     return shape
       ? { sourceId, label: this.shapeLabel(sourceId), keyframe }
@@ -5457,7 +5457,7 @@ export class SightingEditorElement extends HTMLElement {
     return this.bodyEditorLoading
   }
 
-  /** Turns the witness towards a body — see BodyEditorHost.lookAt, and lookAtDecor for the decor's. */
+  /** Turns the observer towards a body — see BodyEditorHost.lookAt, and lookAtDecor for the decor's. */
   private lookAtBody(body: BodyJson): void {
     const direction = this.sceneElement.directionToBody(body, this.ufoElement.currentTime)
     if (!direction) return
@@ -5502,7 +5502,7 @@ export class SightingEditorElement extends HTMLElement {
    * The one way this editor writes shapes into the timeline.
    *
    * Every gesture moves a BOX — that is what the pointer has — and a box only says "so many pixels
-   * from wherever the witness faced". The recording's own statement is the DIRECTION (BaseShape.aim),
+   * from wherever the observer faced". The recording's own statement is the DIRECTION (BaseShape.aim),
    * which the scene stands the shape along; it used to be filled in only on save, so between two
    * saves a shape dragged across the canvas stood in the scene where it had been and its handles
    * went where the pointer took them. Written here, at the instant the box changes, from the same
@@ -5560,7 +5560,7 @@ export class SightingEditorElement extends HTMLElement {
    * to the raw sourceId itself, same as before. Used for the source dropdown and the
    * delete-confirmation prompt; NOT used for the on-canvas hover tooltip (UfoElement.ts), which
    * deliberately shows nothing rather than any generated label for a genuinely title-less shape —
-   * that surface is end-user-facing (a real rr0.org sighting page), where a witness who never
+   * that surface is end-user-facing (a real rr0.org sighting page), where a observer who never
    * named a shape shouldn't have one invented for them; this method's own generated fallback is
    * only ever shown inside this editor's own authoring UI. */
   private shapeLabel(sourceId: string): string {
@@ -5700,7 +5700,7 @@ export class SightingEditorElement extends HTMLElement {
    * individually identified). */
   /** decor.title wins when given (same "shape?.title || sourceId" precedence as shapeLabel) —
    * falls back to a generic "{kind} {n}" label, since decor has no name of its own until the
-   * witness types one into the Name field. */
+   * observer types one into the Name field. */
   private decorLabel(decor: DecorObject): string {
     const title = this.said.read(decor.title)
     if (title) return title
@@ -5714,14 +5714,14 @@ export class SightingEditorElement extends HTMLElement {
    * exist so a run of "Add" clicks doesn't stack everything at the same spot — same "immediately
    * visible/distinguishable" reasoning as addShape's own diagonal offset. `kind` defaults to
    * whatever's picked in decorKindSelect (addDecorBuildingButton, the Location group's "Add
-   * decor" button — every kind but "other witness" is added this way now that building is no
-   * longer hidden from that dropdown); addDecorWitnessButton (in the Witness group) instead calls
-   * this with an explicit "witness" kind, skipping the dropdown entirely since a witness has
+   * decor" button — every kind but "other observer" is added this way now that building is no
+   * longer hidden from that dropdown); addDecorObserverButton (in the Observer group) instead calls
+   * this with an explicit "observer" kind, skipping the dropdown entirely since a observer has
    * nothing else to pick beforehand. northM is positive (north, +15) rather than negative:
    * a fresh recording's camera starts at rotation.y=0, looking toward -Z — the same direction
    * heading 0 ("facing north") points, per this project's own azimuth convention (see
    * GeoProjection.ts) — so a newly added decor object should land in front of that default view,
-   * not behind it where the witness would have to turn around just to see what they just added.
+   * not behind it where the observer would have to turn around just to see what they just added.
    * Always reassigns sighting.decor to a new array (never mutates the existing one in place) —
    * see SceneRenderer.setDecor's own doc comment on why that reference-equality check depends on
    * it. */
@@ -5747,8 +5747,8 @@ export class SightingEditorElement extends HTMLElement {
       // An aircraft placed 15 m away on the ground would just look broken. It starts as what it
       // actually is: a crossing, at a cruising altitude, with the lights an airliner is required
       // to carry — which is the whole reason to have one in a scene. Every number of it is then
-      // editable, and none of it is testimony (see the Decor group's own doc): this is a
-      // hypothesis about what the witness might have been looking at.
+      // editable, and none of it is account (see the Decor group's own doc): this is a
+      // hypothesis about what the observer might have been looking at.
       ...(kind === "aircraft" ? this.defaultAircraft() : {}),
       // Only a building has floors at all — see DecorObject.floors's own doc comment.
       ...(kind === "building" ? { floors: DEFAULT_BUILDING_FLOORS } : {}),
@@ -5762,13 +5762,13 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   /**
-   * A straight, level pass in front of the witness — an airliner at 1500 m, a kilometre out,
+   * A straight, level pass in front of the observer — an airliner at 1500 m, a kilometre out,
    * crossing four kilometres of sky over the recording's own length.
    *
    * Lower and nearer than a first attempt at cruising altitude and four kilometres out, which was
    * just as real and completely unusable: 35 m of aeroplane at 5.8 km is four pixels, so it read as
    * a speck nobody could tell from a stuck pixel. This is an aircraft on approach, which is both
-   * honest and the case a witness is actually near enough to describe. Every number of it is
+   * honest and the case a observer is actually near enough to describe. Every number of it is
    * editable, at any instant of the pass.
    *
    * What matters most is that it MOVES: a flash rate with no motion draws all its dots in one spot.
@@ -5823,7 +5823,7 @@ export class SightingEditorElement extends HTMLElement {
     this.syncDecorFields()
   }
 
-  /** Writes the East/North/Heading/Name/URL/Floors/Occupied-floor/Witness-location fields back
+  /** Writes the East/North/Heading/Name/URL/Floors/Occupied-floor/Observer-location fields back
    * onto the currently selected decor object — "spread and overwrite one field" style, same as
    * onDragPointerMove's shape-bounds edits (see that method's own doc comment) — replacing the
    * whole decor array with a new one (not mutating the existing entry in place) for the same
@@ -5832,10 +5832,10 @@ export class SightingEditorElement extends HTMLElement {
    * plain static field; `windowsOpen` isn't touched here either — see updateDecorWindows, its own
    * dedicated write path for that nested record. Resyncs visibility (not values — see
    * syncDecorVisibility's own doc comment on why not the fuller syncDecorFields) since a
-   * floors/witness-location edit can change which rows apply.
+   * floors/observer-location edit can change which rows apply.
    *
-   * witnessSide/floors/occupiedFloor are only ever WRITTEN when the current object's own kind
-   * actually supports them (canHoldWitness/kind==="building") — never just whatever the shared
+   * observerSide/floors/occupiedFloor are only ever WRITTEN when the current object's own kind
+   * actually supports them (canHoldObserver/kind==="building") — never just whatever the shared
    * input elements happen to currently display. Those inputs are reused across every decor object
    * (there's one <select>/<input> in the toolbar, not one per object), and syncDecorFields fills
    * them with a fallback value (e.g. floors defaults to DEFAULT_BUILDING_FLOORS) purely for
@@ -5847,10 +5847,10 @@ export class SightingEditorElement extends HTMLElement {
     if (this.currentDecorId === undefined) return
     const sighting = this.ufoElement.sighting
     const headingDeg = this.wrapDegrees(Number(this.decorHeadingInput.value), this.decorHeadingInput) ?? 0
-    const witnessSideValue = this.decorWitnessSideSelect.value
+    const observerSideValue = this.decorObserverSideSelect.value
     sighting.decor = sighting.decor.map(d => {
       if (d.id !== this.currentDecorId) return d
-      const witnessSide = canHoldWitness(d.kind) && witnessSideValue !== "" ? (witnessSideValue as DecorSide) : undefined
+      const observerSide = canHoldObserver(d.kind) && observerSideValue !== "" ? (observerSideValue as DecorSide) : undefined
       const eastM = Number(this.decorEastInput.value)
       const northM = Number(this.decorNorthInput.value)
       const altitudeM = Number(this.decorAltitudeInput.value)
@@ -5864,7 +5864,7 @@ export class SightingEditorElement extends HTMLElement {
         const t = this.ufoElement.currentTime
         const keyframe = { t, eastM, northM, altitudeM, headingDeg }
         const kept = track.filter(existing => existing.t !== t)
-        return { ...d, title: this.said.write(d.title, this.decorTitleInput.value, this.writingLanguage), color: this.statedDecorColor(d), track: [...kept, keyframe].sort((a, b) => a.t - b.t), sightingUrl: this.stringOrUndefined(this.decorSightingUrlInput.value), witnessSide, sizeM: this.statedDecorSize(), model: this.statedDecorModel(), floors: d.kind === "building" ? Number(this.decorFloorsInput.value) : undefined, occupiedFloor: d.kind === "building" ? Number(this.decorOccupiedFloorInput.value) : undefined }
+        return { ...d, title: this.said.write(d.title, this.decorTitleInput.value, this.writingLanguage), color: this.statedDecorColor(d), track: [...kept, keyframe].sort((a, b) => a.t - b.t), sightingUrl: this.stringOrUndefined(this.decorSightingUrlInput.value), observerSide, sizeM: this.statedDecorSize(), model: this.statedDecorModel(), floors: d.kind === "building" ? Number(this.decorFloorsInput.value) : undefined, occupiedFloor: d.kind === "building" ? Number(this.decorOccupiedFloorInput.value) : undefined }
       }
       return {
         ...d,
@@ -5874,11 +5874,11 @@ export class SightingEditorElement extends HTMLElement {
         northM,
         headingDeg,
         sightingUrl: this.stringOrUndefined(this.decorSightingUrlInput.value),
-        witnessSide,
+        observerSide,
         sizeM: this.statedDecorSize(),
         model: this.statedDecorModel(),
         floors: d.kind === "building" ? Number(this.decorFloorsInput.value) : undefined,
-        // Written whenever it's a building, not gated on witnessSide too (unlike witnessSide
+        // Written whenever it's a building, not gated on observerSide too (unlike observerSide
         // itself) — see syncDecorVisibility's own doc comment on why the field is shown that
         // early: picking a floor is part of configuring the building, before or after a location
         // is chosen, not locked behind having picked one first.
@@ -5896,7 +5896,7 @@ export class SightingEditorElement extends HTMLElement {
    * shape measures as PLACEHOLDERS.
    *
    * The distinction is the whole point. A field showing 4.35 in grey says "this is what you are
-   * looking at, and nobody measured it"; the same 4.35 as a value would say a witness reported it.
+   * looking at, and nobody measured it"; the same 4.35 as a value would say a observer reported it.
    * See DecorSize — this is the one field where the difference between drawn and measured had been
    * lost, and it is the difference the rest of this data model is built on.
    */
@@ -5982,7 +5982,7 @@ export class SightingEditorElement extends HTMLElement {
    * A catalogue entry can carry the real object's measurements (see DecorModelEntry.sizeM): a 1964
    * Catalina is 5.4 m of car whoever draws it. Adopting that when the recording says nothing is
    * strictly better than the built-in shape's own arbitrary 4.35, and it is sourced rather than
-   * invented. It never overwrites a size the recording already states — a witness who measured
+   * invented. It never overwrites a size the recording already states — a observer who measured
    * their own car outranks a catalogue describing a similar one.
    */
   private updateDecorModelChoice(): void {
@@ -6176,7 +6176,7 @@ export class SightingEditorElement extends HTMLElement {
 
   /** Name is mandatory once a decor object exists — addDecor() always fills it with a real
    * generated label from the start (see its own doc comment), so an empty field here only ever
-   * means the witness/recorder cleared it afterward, which decorLabel()'s own fallback then
+   * means the observer/recorder cleared it afterward, which decorLabel()'s own fallback then
    * papers back over with a plain, unnumbered kind name wherever it's displayed (the dropdown,
    * the "Masks" flyout, SceneElement's own hover tooltip) — exactly the ambiguous "Lampadaire"
    * vs. "Lampadaire 1" mismatch this flag exists to steer away from. Same "flagged, not blocked"
@@ -6282,7 +6282,7 @@ export class SightingEditorElement extends HTMLElement {
       this.decorModelSourceInput,
       this.decorFloorsInput,
       this.decorOccupiedFloorInput,
-      this.decorWitnessSideSelect,
+      this.decorObserverSideSelect,
       this.decorLightRigSelect,
       this.decorAltitudeInput,
       this.lookAtDecorButton
@@ -6297,7 +6297,7 @@ export class SightingEditorElement extends HTMLElement {
     // object with a trajectory (an aircraft, a passing car) is somewhere quite else than the
     // eastM/northM it was created with, and a form showing those reads as a plain lie: "15 m north"
     // beside an aeroplane three kilometres up. Same principle as every other keyframed field in
-    // this toolbar — the weather, the lit state, the witness's own pose all show the instant.
+    // this toolbar — the weather, the lit state, the observer's own pose all show the instant.
     this.showDecorPlacement(decor)
     this.decorLitInput.checked = decor ? resolveDecorLitAt(decor, this.ufoElement.currentTime) : false
     this.refreshDecorLightRigOptions(decor)
@@ -6306,7 +6306,7 @@ export class SightingEditorElement extends HTMLElement {
     this.syncDecorModelFields(decor)
     this.decorFloorsInput.value = String(decor?.floors ?? DEFAULT_BUILDING_FLOORS)
     this.decorOccupiedFloorInput.value = String(decor?.occupiedFloor ?? 0)
-    this.decorWitnessSideSelect.value = decor?.witnessSide ?? ""
+    this.decorObserverSideSelect.value = decor?.observerSide ?? ""
     for (const side of DECOR_SIDES) {
       const opacity = decor?.windows?.[side]
       this.decorWindowInputs[side].value = opacity === undefined ? "" : String(opacity)
@@ -6325,8 +6325,8 @@ export class SightingEditorElement extends HTMLElement {
     ;(row as HTMLElement).hidden = !visible
   }
 
-  /** Shows/hides/enables the kind-dependent decor rows (Windows, Witness location, Floors,
-   * Occupied floor) per hasWindows/isWindowOpenable/canHoldWitness — deliberately never touches
+  /** Shows/hides/enables the kind-dependent decor rows (Windows, Observer location, Floors,
+   * Occupied floor) per hasWindows/isWindowOpenable/canHoldObserver — deliberately never touches
    * any input's own .value/.checked, only .hidden/.disabled/.max, so it's safe to call after
    * every keystroke from updateDecor/updateDecorWindows without the same bug lat/lng's own live
    * resync once hit (overwriting a field the user is actively typing into on every input event —
@@ -6379,19 +6379,19 @@ export class SightingEditorElement extends HTMLElement {
       this.decorWindowInputs[side].min = String(kind !== undefined && isWindowOpenable(kind, side) ? 0 : FIXED_WINDOW_MIN_OPACITY_PERCENT)
       this.setRowVisible(this.decorWindowInputs[side], showWindows && applicableSides.includes(side))
     }
-    const showWitnessSide = hasSelection && kind !== undefined && canHoldWitness(kind)
-    this.setRowVisible(this.decorWitnessSideSelect, showWitnessSide)
+    const showObserverSide = hasSelection && kind !== undefined && canHoldObserver(kind)
+    this.setRowVisible(this.decorObserverSideSelect, showObserverSide)
     // Which of the 8 DecorSide values are valid SEATS for this kind (a subset of applicableSides
-    // — see witnessSidesFor's own doc comment: a vehicle's occupant sits at one of its 4 doors,
+    // — see observerSidesFor's own doc comment: a vehicle's occupant sits at one of its 4 doors,
     // never "at the windshield", even though the windshield itself is a valid WINDOW side above).
-    const seatSides = kind !== undefined ? witnessSidesFor(kind) : []
+    const seatSides = kind !== undefined ? observerSidesFor(kind) : []
     for (const side of DECOR_SIDES) {
-      this.optionWitnessSide[side].hidden = !seatSides.includes(side)
+      this.optionObserverSide[side].hidden = !seatSides.includes(side)
     }
     // Shown together, both as soon as the decor object is a building — occupiedFloor doesn't wait
-    // on witnessSide being set first (a building's own floor count is part of specifying it, same
-    // as picking which floor the witness would be on if/when they're placed inside), even though
-    // DecorSystem only actually USES occupiedFloor once witnessSide is also set (see its own doc
+    // on observerSide being set first (a building's own floor count is part of specifying it, same
+    // as picking which floor the observer would be on if/when they're placed inside), even though
+    // DecorSystem only actually USES occupiedFloor once observerSide is also set (see its own doc
     // comment) — pre-setting it here just means it's already right the moment a location IS set.
     const showFloors = hasSelection && kind === "building"
     this.setRowVisible(this.decorFloorsInput, showFloors)
@@ -6400,7 +6400,7 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   /**
-   * Turns the witness to face the selected decor object, at the playhead's own instant.
+   * Turns the observer to face the selected decor object, at the playhead's own instant.
    *
    * Placing something by typing three numbers and then hunting for it by dragging the sky is
    * unreasonable at any distance, and impossible for an aircraft: five kilometres away it is a
@@ -6408,7 +6408,7 @@ export class SightingEditorElement extends HTMLElement {
    *
    * Goes through the same heading/pitch fields a drag does (see onCameraDragPointerMove), so it
    * keyframes the pose exactly as any other look would — turning to watch something IS part of what
-   * the witness did, not a camera convenience layered on top.
+   * the observer did, not a camera convenience layered on top.
    */
   /** Writes where the object stands at the playhead into the four placement fields. Skips any the
    * user is currently typing in, the same "don't fight active interaction" rule the rest of this
@@ -6440,7 +6440,7 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   /**
-   * Jumps to the next meteor and turns the witness to face it.
+   * Jumps to the next meteor and turns the observer to face it.
    *
    * The half of the feature that was missing. Knowing a shower was running is a fact; a streak that
    * lasts a second, somewhere in sixty degrees of sky, at one instant of a recording, is not
@@ -6674,7 +6674,7 @@ export class SightingEditorElement extends HTMLElement {
    * Silent below naked-eye brightness, and that is the useful filter: every apparition in the
    * catalog was a naked-eye comet at its best, but its window runs two hundred days either side of
    * perihelion and for most of that it was a telescopic smudge. A magnitude-eleven comet is a fact
-   * about an observatory, not a candidate for what a witness saw.
+   * about an observatory, not a candidate for what a observer saw.
    */
   private cometClause(date: Date, observer: { lat: number; lng: number; elevationM: number }): string | undefined {
     const comet = Comets.brightestAt(date, observer)
@@ -6719,7 +6719,7 @@ export class SightingEditorElement extends HTMLElement {
    * Whether anything in orbit could have been seen from there — see Satellites.ts.
    *
    * Two questions, kept apart, because merging them is how this got written wrong the first time.
-   * WAS IT LIT is geometry: where the Earth's shadow stood, which by day is behind the witness so
+   * WAS IT LIT is geometry: where the Earth's shadow stood, which by day is behind the observer so
    * that everything above them is in sunlight. COULD IT BE PICKED OUT is contrast, and it is
    * settled here against the same visibleMagnitudeLimit the star field is drawn by — the identical
    * rule that lets Ikeya-Seki be drawn beside the Sun and leaves an ordinary comet out of it.
@@ -6792,7 +6792,7 @@ export class SightingEditorElement extends HTMLElement {
       .replace("{magnitude}", peak.magnitude!.toLocaleString(undefined, { maximumFractionDigits: 1 }))
       .replace("{altitude}", String(Math.round(peak.altitudeDeg)))
       .replace("{bearing}", Compass.towards(peak.azimuthDeg, this.showerLanguage()))
-      .replace("{time}", this.witnessClock(peak.date))
+      .replace("{time}", this.observerClock(peak.date))
     const train = this.starlinkTrain(visible)
     return train ? `${sentence}, ${train}` : sentence
   }
@@ -6850,8 +6850,8 @@ export class SightingEditorElement extends HTMLElement {
     return start ? pass.peak.date.getTime() - start.getTime() : Infinity
   }
 
-  /** An instant on the witness's own clock, which is what the rest of this recording is written in. */
-  private witnessClock(date: Date): string {
+  /** An instant on the observer's own clock, which is what the rest of this recording is written in. */
+  private observerClock(date: Date): string {
     const sighting = this.ufoElement.sighting
     const offsetHours = sighting.event.utcOffsetHours ?? Math.round(this.observerAtStart().lng / 15)
     return new Date(date.getTime() + offsetHours * 3_600_000)
@@ -6859,7 +6859,7 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   /**
-   * Seeks to the next brightest satellite the timeline reaches, at its peak, and turns the witness
+   * Seeks to the next brightest satellite the timeline reaches, at its peak, and turns the observer
    * to it — the meteor button's behaviour, for the same reason: a satellite is somewhere for a
    * minute, not for the whole recording.
    */
@@ -7022,7 +7022,7 @@ export class SightingEditorElement extends HTMLElement {
   /**
    * Names one bow, with the radius it stands at and how high its top reached.
    *
-   * The height is the number worth having, and it is the one a witness's account can be checked
+   * The height is the number worth having, and it is the one a observer's account can be checked
    * against: a bow's top is its radius minus the source's altitude, so an account of a HIGH bow is
    * an account of a low Sun, whatever hour the file claims.
    */
@@ -7092,7 +7092,7 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   /**
-   * Turns the witness to face the comet.
+   * Turns the observer to face the comet.
    *
    * No seeking, unlike the meteor button, and no pausing either: a comet was there for the whole
    * recording and for weeks either side, so there is no instant to be caught at. The same aim the
@@ -7112,7 +7112,7 @@ export class SightingEditorElement extends HTMLElement {
     this.updateObserver()
   }
 
-  /** Turns the witness to face the nova, the comet's way: no seek, no pause, it shone all night. */
+  /** Turns the observer to face the nova, the comet's way: no seek, no pause, it shone all night. */
   private lookAtNova(): void {
     const sighting = this.ufoElement.sighting
     const place = sighting.event.place?.[0]
@@ -7147,7 +7147,7 @@ export class SightingEditorElement extends HTMLElement {
     if (!decor) return
     const { eastM, northM, altitudeM } = resolveDecorPlacementAt(decor, this.ufoElement.currentTime)
     const horizontalM = Math.hypot(eastM, northM)
-    // Nothing to aim at: the object is exactly where the witness stands.
+    // Nothing to aim at: the object is exactly where the observer stands.
     if (horizontalM === 0 && altitudeM === 0) return
     const headingDeg = (Math.atan2(eastM, northM) * 180) / Math.PI
     const pitchDeg = (Math.atan2(altitudeM - EYE_HEIGHT_M, horizontalM) * 180) / Math.PI
@@ -7331,7 +7331,7 @@ export class SightingEditorElement extends HTMLElement {
     this.refreshReferenceList()
     this.refreshMilestoneList()
     this.onSelectionOrTimeChanged()
-    this.syncWitnessMetadataFields()
+    this.syncObserverMetadataFields()
   }
 
   /** The recording's tags in the author's own words, in the field they edit them in — stored in
@@ -7405,21 +7405,21 @@ export class SightingEditorElement extends HTMLElement {
     this.labelImportUrl.textContent = messages.importUrl
     this.importUrlInput.placeholder = messages.importUrlPlaceholder
     this.importUrlButton.textContent = messages.importButton
-    this.labelWitnessAge.textContent = messages.witnessAge
-    this.labelWitnessOccupation.textContent = messages.witnessOccupation
-    this.labelTestimonySource.textContent = messages.testimonySource
-    this.labelTestimonyFollowedUp.textContent = messages.testimonyFollowedUp
+    this.labelObserverAge.textContent = messages.observerAge
+    this.labelObserverOccupation.textContent = messages.observerOccupation
+    this.labelAccountSource.textContent = messages.accountSource
+    this.labelAccountFollowedUp.textContent = messages.accountFollowedUp
     for (const [id, text] of [
-      ["option-source-unknown", messages.testimonySourceUnknown],
-      ["option-source-on-site", messages.testimonySourceOnSite],
-      ["option-source-interview", messages.testimonySourceInterview],
-      ["option-source-telephone", messages.testimonySourceTelephone],
-      ["option-source-questionnaire", messages.testimonySourceQuestionnaire],
-      ["option-source-letter", messages.testimonySourceLetter],
-      ["option-source-press", messages.testimonySourcePress],
-      ["option-followed-unknown", messages.testimonyUnknown],
-      ["option-followed-yes", messages.testimonyYes],
-      ["option-followed-no", messages.testimonyNo]
+      ["option-source-unknown", messages.accountSourceUnknown],
+      ["option-source-on-site", messages.accountSourceOnSite],
+      ["option-source-interview", messages.accountSourceInterview],
+      ["option-source-telephone", messages.accountSourceTelephone],
+      ["option-source-questionnaire", messages.accountSourceQuestionnaire],
+      ["option-source-letter", messages.accountSourceLetter],
+      ["option-source-press", messages.accountSourcePress],
+      ["option-followed-unknown", messages.accountUnknown],
+      ["option-followed-yes", messages.accountYes],
+      ["option-followed-no", messages.accountNo]
     ] as const) {
       const option = this.shadow.getElementById(id)
       if (option) option.textContent = text
@@ -7478,7 +7478,7 @@ export class SightingEditorElement extends HTMLElement {
     this.showSatelliteButton.setAttribute("aria-label", messages.showSatellite)
     this.lookAtDecorButton.title = messages.lookAtDecor
     this.lookAtDecorButton.setAttribute("aria-label", messages.lookAtDecor)
-    this.optionDecorWitness.textContent = messages.decorWitness
+    this.optionDecorObserver.textContent = messages.decorObserver
     this.deleteDecorButton.title = messages.deleteDecor
     this.deleteDecorButton.setAttribute("aria-label", messages.deleteDecor)
     this.labelDecorTitle.textContent = messages.decorTitle
@@ -7488,11 +7488,11 @@ export class SightingEditorElement extends HTMLElement {
     this.labelDecorColor.textContent = messages.decorColor
     this.labelDecorLit.textContent = messages.decorLit
     this.labelDecorSightingUrl.textContent = messages.decorSightingUrl
-    this.contextViewTestimonyButton.textContent = messages.viewTestimony
+    this.contextViewAccountButton.textContent = messages.viewAccount
     // The arrow is appended here, not part of the translated string — see SightingEditorMessages.
     // masks's own doc comment.
     this.labelContextMasks.textContent = `${messages.masks} ▸`
-    this.addDecorWitnessButton.textContent = messages.addWitness
+    this.addDecorObserverButton.textContent = messages.addObserver
     // The visible glyph itself is a plain "+" (baked into the template, not translated — see
     // addDecorBuildingButton's own field doc comment) since the adjacent Kind dropdown already
     // says what's being added; messages.addDecor still drives the accessible name/tooltip so a
@@ -7521,9 +7521,9 @@ export class SightingEditorElement extends HTMLElement {
     this.labelDecorModelSource.textContent = messages.decorModelSource
     this.labelDecorFloors.textContent = messages.decorFloors
     this.labelDecorOccupiedFloor.textContent = messages.decorOccupiedFloor
-    this.labelDecorWitnessSide.textContent = messages.decorWitnessSide
+    this.labelDecorObserverSide.textContent = messages.decorObserverSide
     this.labelDecorWindows.textContent = messages.decorWindows
-    this.optionWitnessSideNone.textContent = messages.decorWitnessSideNone
+    this.optionObserverSideNone.textContent = messages.decorObserverSideNone
     const decorSideMessages: Record<DecorSide, string> = {
       front: messages.decorSideFront,
       behind: messages.decorSideBehind,
@@ -7536,14 +7536,14 @@ export class SightingEditorElement extends HTMLElement {
     }
     for (const side of DECOR_SIDES) {
       this.labelDecorSide[side].textContent = decorSideMessages[side]
-      this.optionWitnessSide[side].textContent = decorSideMessages[side]
+      this.optionObserverSide[side].textContent = decorSideMessages[side]
     }
     this.refreshDecorList() // decor option labels embed decorKindSelect's own text, just updated above
-    this.labelWitnessId.textContent = messages.witnessId
-    this.labelWitnessTitle.textContent = messages.witnessTitle
-    this.labelWitnessLastName.textContent = messages.witnessLastName
-    this.labelWitnessFirstNames.textContent = messages.witnessFirstNames
-    this.witnessFirstNamesInput.placeholder = messages.tagsPlaceholder
+    this.labelObserverId.textContent = messages.observerId
+    this.labelObserverTitle.textContent = messages.observerTitle
+    this.labelObserverLastName.textContent = messages.observerLastName
+    this.labelObserverFirstNames.textContent = messages.observerFirstNames
+    this.observerFirstNamesInput.placeholder = messages.tagsPlaceholder
     this.labelSightingId.textContent = messages.sightingId
     this.labelDescription.textContent = messages.description
     this.labelTags.textContent = messages.tags
@@ -7555,7 +7555,7 @@ export class SightingEditorElement extends HTMLElement {
     this.labelTemporalGroup.textContent = messages.temporalGroup
     this.labelLocationGroup.textContent = messages.locationGroup
     this.labelObservationGroup.textContent = messages.observationGroup
-    this.labelWitnessGroup.textContent = messages.witnessGroup
+    this.labelObserverGroup.textContent = messages.observerGroup
     // The group's own handle now carries the caption that used to stand inside it, so the one
     // message serves both and "Circumstances" — which never named what the group actually holds —
     // is gone.
@@ -7720,7 +7720,7 @@ export class SightingEditorElement extends HTMLElement {
         return
       }
       // Nothing at all under the pointer to select/move — the "landscape" itself becomes the drag
-      // target instead of this being a no-op, letting a witness set their own heading/pitch by
+      // target instead of this being a no-op, letting a observer set their own heading/pitch by
       // dragging the sky/ground the same way they'd drag a shape. Selection is left untouched.
       if (!playing) this.beginCameraDrag(point)
       return
@@ -7824,11 +7824,11 @@ export class SightingEditorElement extends HTMLElement {
    * pointer — selecting it first, same as a left click would, so all 3 actions below act on
    * the shape the menu was actually opened for rather than some unrelated prior selection.
    * Suppresses the browser's own native context menu unconditionally (even over empty canvas —
-   * a witness right-clicking the sky shouldn't see the page's ordinary menu either), but only
+   * a observer right-clicking the sky shouldn't see the page's ordinary menu either), but only
    * shows ours when there's an actual shape to act on. */
   /** Right-clicking a 2D shape opens the SHAPE menu (group/ungroup/reorder/delete); right-clicking
-   * a witness decor object — which lives in the 3D scene BEHIND the 2D canvas, not on it — opens
-   * the separate DECOR menu instead (currently just "view testimony"). Both start from the same
+   * a observer decor object — which lives in the 3D scene BEHIND the 2D canvas, not on it — opens
+   * the separate DECOR menu instead (currently just "view account"). Both start from the same
    * contextmenu event on the 2D canvas since that transparent overlay always sits on top and
    * would otherwise swallow the event before the 3D layer underneath ever saw it (same reasoning
    * as SceneElement's own handlePointerMove). Neither menu can ever be open at the same time as
@@ -7867,9 +7867,9 @@ export class SightingEditorElement extends HTMLElement {
     }
     const decorId = this.pickDecorAt(event)
     const decor = decorId ? this.ufoElement.sighting.decor.find(d => d.id === decorId) : undefined
-    // Every kind, not just "witness" (this menu's original and, until now, only reason to open —
+    // Every kind, not just "observer" (this menu's original and, until now, only reason to open —
     // see showDecorContextMenu's own doc comment) — the "Masks" flyout applies just as much to a
-    // building/tree/streetlight/vehicle as to another witness marker.
+    // building/tree/streetlight/vehicle as to another observer marker.
     if (decor) this.showDecorContextMenu(event.clientX, event.clientY, decor)
   }
 
@@ -7956,14 +7956,14 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   /** The DECOR menu's own show/hide — see onContextMenu's own doc comment for why this is a
-   * separate menu from the SHAPE one rather than folding a witness-only item into it. */
+   * separate menu from the SHAPE one rather than folding a observer-only item into it. */
   private showDecorContextMenu(clientX: number, clientY: number, decor: DecorObject): void {
     this.contextMenuDecorId = decor.id
     this.decorContextMenu.style.left = `${clientX}px`
     this.decorContextMenu.style.top = `${clientY}px`
     this.decorContextMenu.hidden = false
-    this.contextViewTestimonyButton.disabled = !decor.sightingUrl
-    this.contextViewTestimonyButton.title = decor.sightingUrl ? "" : this.messages.noWitnessRecording
+    this.contextViewAccountButton.disabled = !decor.sightingUrl
+    this.contextViewAccountButton.title = decor.sightingUrl ? "" : this.messages.noObserverRecording
     this.refreshContextMasksSubmenu(decor)
     document.addEventListener("click", this.handleOutsideContextMenuClick)
   }
@@ -8011,10 +8011,10 @@ export class SightingEditorElement extends HTMLElement {
     this.ufoElement.refresh()
   }
 
-  /** Loads the right-clicked witness's own sighting.json — replacing this recording entirely,
+  /** Loads the right-clicked observer's own sighting.json — replacing this recording entirely,
    * same as typing its URL into the Observation group's "load from URL" field and clicking Load
    * (see importFromUrl, reused here with an explicit url rather than reading importUrlInput). */
-  private viewWitnessTestimony(): void {
+  private viewObserverAccount(): void {
     const decor = this.ufoElement.sighting.decor.find(d => d.id === this.contextMenuDecorId)
     this.hideDecorContextMenu()
     if (decor?.sightingUrl) void this.importFromUrl(decor.sightingUrl)
@@ -8116,7 +8116,7 @@ export class SightingEditorElement extends HTMLElement {
     return { x: ((event.clientX - rect.left) / rect.width) * 2 - 1, y: -(((event.clientY - rect.top) / rect.height) * 2 - 1) }
   }
 
-  /** The direction from the witness a point of the picture names, as an azimuth and an elevation
+  /** The direction from the observer a point of the picture names, as an azimuth and an elevation
    * (the scene's axes: x east, y up, z south). */
   private skyDirectionOf(event: MouseEvent): { azimuthDeg: number; altitudeDeg: number } | undefined {
     const ndc = this.ndcOf(event)
@@ -8256,14 +8256,14 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   private beginCameraDrag(startPointer: { x: number; y: number }): void {
-    const insideDecor = this.isWitnessInsideDecor()
+    const insideDecor = this.isObserverInsideDecor()
     this.cameraDragState = {
       startPointer,
       startHeadingDeg: insideDecor ? this.indoorLookYawDeg : (this.numberOrUndefined(this.headingInput.value) ?? 0),
       startPitchDeg: insideDecor ? this.indoorLookPitchDeg : (this.numberOrUndefined(this.pitchInput.value) ?? 0),
       insideDecor
     }
-    // The compass reads the OUTSIDE witnessTrack heading — meaningless while looking around
+    // The compass reads the OUTSIDE observerTrack heading — meaningless while looking around
     // inside a decor object (a different reference frame, see SceneRenderer.setIndoorLook), so
     // it's only forced visible for an outside drag.
     if (!insideDecor) this.sceneElement.setCompassForced(true)
@@ -8273,23 +8273,23 @@ export class SightingEditorElement extends HTMLElement {
     this.startDragListening()
   }
 
-  /** Whether the recording witness is currently positioned inside a decor object — see
-   * DecorObject.witnessSide's own doc comment. Mirrors SceneRenderer.updateDecorAnchoring's own
-   * `inhabited` lookup exactly (same canHoldWitness gate) so this always agrees with which view
+  /** Whether the recording observer is currently positioned inside a decor object — see
+   * DecorObject.observerSide's own doc comment. Mirrors SceneRenderer.updateDecorAnchoring's own
+   * `inhabited` lookup exactly (same canHoldObserver gate) so this always agrees with which view
    * is actually being rendered. */
-  private isWitnessInsideDecor(): boolean {
-    return this.ufoElement.sighting.decor.some(d => d.witnessSide !== undefined && canHoldWitness(d.kind))
+  private isObserverInsideDecor(): boolean {
+    return this.ufoElement.sighting.decor.some(d => d.observerSide !== undefined && canHoldObserver(d.kind))
   }
 
   /** Resets indoorLookYawDeg/PitchDeg (and pushes the reset into SceneRenderer) whenever which
    * decor object/side is inhabited changes — a different window, or no longer inside one at all,
-   * should always start centered rather than carrying over wherever the witness last happened to
+   * should always start centered rather than carrying over wherever the observer last happened to
    * be looking through a DIFFERENT window. Called every tick from onSelectionOrTimeChanged, same
    * "cheap enough not to need a dedicated dedup trigger" reasoning as syncDecorLitFromTimeline —
    * the string comparison below is what actually dedupes, so most ticks are a no-op. */
   private syncIndoorLookReset(): void {
-    const inhabited = this.ufoElement.sighting.decor.find(d => d.witnessSide !== undefined && canHoldWitness(d.kind))
-    const key = inhabited ? `${inhabited.id}:${inhabited.witnessSide}` : undefined
+    const inhabited = this.ufoElement.sighting.decor.find(d => d.observerSide !== undefined && canHoldObserver(d.kind))
+    const key = inhabited ? `${inhabited.id}:${inhabited.observerSide}` : undefined
     if (key === this.lastInhabitedKey) return
     this.lastInhabitedKey = key
     this.indoorLookYawDeg = 0
@@ -8368,8 +8368,8 @@ export class SightingEditorElement extends HTMLElement {
     const headingDeg = startHeadingDeg + (point.x - startPointer.x) * CAMERA_DRAG_DEG_PER_PX
     const pitchDeg = Math.max(-90, Math.min(90, startPitchDeg - (point.y - startPointer.y) * CAMERA_DRAG_DEG_PER_PX))
     if (insideDecor) {
-      // Never touches witnessTrack/updateObserver — a different reference frame entirely (the
-      // witness's real OUTSIDE recorded gaze), see SceneRenderer.setIndoorLook's own doc comment.
+      // Never touches observerTrack/updateObserver — a different reference frame entirely (the
+      // observer's real OUTSIDE recorded gaze), see SceneRenderer.setIndoorLook's own doc comment.
       this.indoorLookYawDeg = headingDeg
       this.indoorLookPitchDeg = pitchDeg
       this.sceneElement.setIndoorLook(headingDeg, pitchDeg)

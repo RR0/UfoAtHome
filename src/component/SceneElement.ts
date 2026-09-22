@@ -3,7 +3,7 @@ import type { CloudRendering } from "../render3d/LayeredCloudSystem.js"
 import { cloudOffsetAt } from "../render3d/CloudMotion.js"
 import { html, css } from "./sceneTemplate.js"
 import { SightingFetch } from "../engine/net/SightingFetch.js"
-import { UfoElement, registerUfo, UFO_ELEMENT_NAME, WITNESS_MAP_ATTRIBUTE, MILESTONES_ATTRIBUTE } from "./UfoElement.js"
+import { UfoElement, registerUfo, UFO_ELEMENT_NAME, OBSERVER_MAP_ATTRIBUTE, MILESTONES_ATTRIBUTE } from "./UfoElement.js"
 import { SceneRenderer } from "../render3d/SceneRenderer.js"
 import type { TerrainProviders } from "../render3d/terrain/defaultTerrainProviders.js"
 import type { DecorModelProvider } from "../render3d/decor/DecorModelProvider.js"
@@ -87,7 +87,7 @@ const BODY_TOOLTIP_SUPPORTED_LANGUAGES = ["en", "fr"]
  * What a star's tooltip says, and why it says three things rather than one.
  *
  * A name alone identifies without explaining. What makes a bright point a candidate for a
- * misidentification is how bright it was and how low it stood — a witness reporting a light near
+ * misidentification is how bright it was and how low it stood — a observer reporting a light near
  * the horizon has been answered the moment they read "Venus, magnitude -4, 8 degrees up", and not
  * at all by a bare name.
  */
@@ -100,11 +100,11 @@ const STAR_TOOLTIP: Record<string, string> = {
  * The same sentence for a star standing BELOW the horizontal, which is not the contradiction it
  * looks like.
  *
- * The sky is built a little under the level of the eye on purpose, and for a witness who is high up
+ * The sky is built a little under the level of the eye on purpose, and for a observer who is high up
  * that patch is genuinely in view: from a DC-3 at 1500 m the horizon has dropped 1.24°, so a star
  * at −0.6° is above it and plainly visible. Saying "−1° above the horizon" of it was simply the
  * wrong words for a real sight — it reads as a fault in the tool, and it buries the one fact that
- * explains the geometry, which is that the witness was looking DOWN at it.
+ * explains the geometry, which is that the observer was looking DOWN at it.
  *
  * A star the ground actually hides is a different matter and never reaches this point at all: see
  * SceneRenderer.groundHides.
@@ -119,7 +119,7 @@ const SATELLITE_TOOLTIP: Record<string, string> = {
 
 /** Fired by a scene when the element sets of its recording have arrived, or turned out not to exist. */
 export const SATELLITES_CHANGE_EVENT = "satellites-change"
-/** Fired whenever what the interpretation on show says against the testimony changes — see
+/** Fired whenever what the interpretation on show says against the account changes — see
  * SceneElement.confrontation. */
 export const CONFRONTATION_EVENT = "rr0-confrontation"
 
@@ -153,7 +153,7 @@ const DECOR_KIND_NAMES: Record<DecorKind, { en: string; fr: string }> = {
   mound: { en: "Stone heap", fr: "Tas de pierres" },
   streetlight: { en: "Streetlight", fr: "Lampadaire" },
   vehicle: { en: "Vehicle", fr: "Véhicule" },
-  witness: { en: "Witness", fr: "Témoin" },
+  observer: { en: "Observer", fr: "Observateur" },
   aircraft: { en: "Aircraft", fr: "Aéronef" },
   // Not "creature" and not "alien": the account says a being was there and says nothing about what
   // it was, which is the whole of what this project is willing to assert.
@@ -184,7 +184,7 @@ const DEFAULT_ASTRONOMY: SceneAstronomy = {
 }
 
 /** Applied to the camera when a sighting has no resolvable observer pose at all (no
- * witnessTrack and no place[0]) — leaves heading undefined so setObserverPose doesn't snap the
+ * observerTrack and no place[0]) — leaves heading undefined so setObserverPose doesn't snap the
  * camera to a default compass direction. */
 const DEFAULT_OBSERVER_POSE: ObserverPose = { lat: 0, lng: 0, elevationM: 0, headingDeg: undefined, pitchDeg: 0, fovDeg: 60 }
 
@@ -207,7 +207,7 @@ export interface BodyReading {
  * itself has nothing UFO-specific about it; it could back other kinds of
  * reconstructions later. For now it composes a nested, transparent-
  * background `<rr0-ufo>` on top for the common case (see this project's
- * README: the shape is what the witness reported, possibly a
+ * README: the shape is what the observer reported, possibly a
  * misidentification or optical effect, so it's deliberately never
  * "upgraded" to a 3D-interpreted object; only the surrounding environment,
  * which is independently computable from real astronomy, gets rendered in
@@ -220,7 +220,7 @@ export interface BodyReading {
  * Astronomy (Sun/Moon/planet positions, real star catalog, sky color) is derived from the
  * sighting's own `time` plus the observer's pose at the current playback instant — see
  * engine/astronomy/CelestialPositions.ts and resolveObserverPoseAt (engine/model/Sighting.ts),
- * which prefers the sighting's `witnessTrack` and falls back to the legacy static `place[0]`.
+ * which prefers the sighting's `observerTrack` and falls back to the legacy static `place[0]`.
  * Recomputed on every playback tick/seek (via the nested `<rr0-ufo>`'s own `timeupdate` event,
  * not a separate animation loop of its own), so the sky, and the camera's own heading/pitch/fov,
  * both follow the observer as they change over the sighting's timeline.
@@ -237,7 +237,7 @@ export class SceneElement extends HTMLElement {
   }
 
   static get observedAttributes(): string[] {
-    return ["src", "star-catalog-src", "deep-star-catalog-src", "show-compass", "max-pixel-ratio", WITNESS_MAP_ATTRIBUTE, MILESTONES_ATTRIBUTE]
+    return ["src", "star-catalog-src", "deep-star-catalog-src", "show-compass", "max-pixel-ratio", OBSERVER_MAP_ATTRIBUTE, MILESTONES_ATTRIBUTE]
   }
 
   private readonly shadow: ShadowRoot
@@ -287,13 +287,13 @@ export class SceneElement extends HTMLElement {
   private lastTimeMs = 0
   /** The interpretation whose bodies stand in the scene, if one does — see `interpretation`. */
   private interpretationShown?: InterpretationJson
-  /** What its bodies say against the testimony at the instant on show — see `confrontation`. */
+  /** What its bodies say against the account at the instant on show — see `confrontation`. */
   private confrontationReadings: ConfrontationReading[] = []
   private confrontationSignature = ""
-  /** Whether the testimony is shown beside the interpretation, and measured against it — see
-   * `compareTestimony`. */
+  /** Whether the account is shown beside the interpretation, and measured against it — see
+   * `compareAccount`. */
   private comparing = false
-  /** Whether a recording is drawn the way its witness gave it — see `testimonyInTheRound`. */
+  /** Whether a recording is drawn the way its observer gave it — see `accountInTheRound`. */
   private inTheRound = true
   /** What the sky now standing was computed from — see applySceneAt. */
   private lastSkyKey?: string
@@ -380,7 +380,7 @@ export class SceneElement extends HTMLElement {
       return
     }
     // Last of the four, and deliberately: a shape is painted over everything, a planet is a better
-    // answer than the star behind it, and a building stands between the witness and the whole sky.
+    // answer than the star behind it, and a building stands between the observer and the whole sky.
     // A star is what is left when nothing nearer is under the pointer.
     // Before the stars: a satellite crossing in front of a star is the moving light the reader is
     // most likely pointing at.
@@ -479,7 +479,7 @@ export class SceneElement extends HTMLElement {
    * Makes the weather follow the player: rain falls, clouds drift, lightning strikes and the beds
    * are heard only while the observation's own clock is running. Pause a replay and it is one
    * frozen instant of a sighting — weather still going on over it would be the reader's own room,
-   * not the witness's evening.
+   * not the observer's evening.
    *
    * Driven from timeupdate rather than from a playback-state event of its own because every
    * transition already produces one: a play tick, a seek, and pause's own forced repaint all funnel
@@ -639,7 +639,7 @@ export class SceneElement extends HTMLElement {
       const ratio = Number(newValue)
       this.sceneRenderer.setMaxPixelRatio(Number.isFinite(ratio) && ratio > 0 ? ratio : Math.min(window.devicePixelRatio || 1, 2))
     }
-    if ((name === WITNESS_MAP_ATTRIBUTE || name === MILESTONES_ATTRIBUTE) && newValue !== oldValue) {
+    if ((name === OBSERVER_MAP_ATTRIBUTE || name === MILESTONES_ATTRIBUTE) && newValue !== oldValue) {
       this.forwardPlayerAttributes()
     }
   }
@@ -648,7 +648,7 @@ export class SceneElement extends HTMLElement {
    * owns them — they live on the nested player's stage, but a page embedding this element has never
    * heard of that player and writes the tag it actually wrote. Same for `<rr0-sighting>` above. */
   private forwardPlayerAttributes(): void {
-    for (const attribute of [WITNESS_MAP_ATTRIBUTE, MILESTONES_ATTRIBUTE]) {
+    for (const attribute of [OBSERVER_MAP_ATTRIBUTE, MILESTONES_ATTRIBUTE]) {
       this.ufoElement.toggleAttribute(attribute, this.hasAttribute(attribute))
     }
   }
@@ -662,10 +662,10 @@ export class SceneElement extends HTMLElement {
   }
 
   /**
-   * Turns the view until a place on the witness's map is in front of the reader.
+   * Turns the view until a place on the observer's map is in front of the reader.
    *
-   * A look-around, never an edit: what the witness stated they faced stays exactly as recorded, and
-   * this is added on top of it (see SceneRenderer.setLookOffset). Clicking the witness's own dot
+   * A look-around, never an edit: what the observer stated they faced stays exactly as recorded, and
+   * this is added on top of it (see SceneRenderer.setLookOffset). Clicking the observer's own dot
    * puts it back — "show me what he was looking at" is the one thing a reader can want that has no
    * bearing of its own.
    *
@@ -676,7 +676,7 @@ export class SceneElement extends HTMLElement {
    */
   private lookToward(detail: { kind: string; lat: number; lng: number }): void {
     const pose = resolveObserverPoseAt(this.ufoElement.sighting, this.lastTimeMs)
-    if (detail.kind === "witness" || pose?.lat === undefined || pose.lng === undefined || pose.headingDeg === undefined) {
+    if (detail.kind === "observer" || pose?.lat === undefined || pose.lng === undefined || pose.headingDeg === undefined) {
       this.setLookOffset(0, 0)
       return
     }
@@ -688,7 +688,7 @@ export class SceneElement extends HTMLElement {
     this.setLookOffset(((((bearingDeg - pose.headingDeg) % 360) + 540) % 360) - 180, -pose.pitchDeg)
   }
 
-  /** Turns the 3D view and the overlay painted on it together — one is the witness's field of view
+  /** Turns the 3D view and the overlay painted on it together — one is the observer's field of view
    * and the other is what they saw in it, so they cannot be aimed separately. */
   private setLookOffset(yawDeg: number, pitchDeg: number): void {
     this.sceneRenderer.setLookOffset(yawDeg, pitchDeg)
@@ -699,8 +699,8 @@ export class SceneElement extends HTMLElement {
   }
 
   /** Passthrough to SceneRenderer.setIndoorLook — see its own doc comment. `SightingEditorElement`
-   * calls this from its camera-drag handling instead of updateObserver()/witnessTrack whenever
-   * the witness is currently inside a decor object. */
+   * calls this from its camera-drag handling instead of updateObserver()/observerTrack whenever
+   * the observer is currently inside a decor object. */
   setIndoorLook(yawDeg: number, pitchDeg: number): void {
     this.sceneRenderer.setIndoorLook(yawDeg, pitchDeg)
   }
@@ -734,7 +734,7 @@ export class SceneElement extends HTMLElement {
   /** Finds which decor object (if any) sits under normalized device coordinates — a thin
    * passthrough to SceneRenderer.pickDecorAt, same "expose one method, not the whole renderer"
    * convention as setWeather/currentTerrainAttribution above. Used by SightingEditorElement's own
-   * right-click handler (see its onContextMenu) to offer "view this witness's testimony". */
+   * right-click handler (see its onContextMenu) to offer "view this observer's account". */
   pickDecorAt(ndcX: number, ndcY: number): string | undefined {
     return this.sceneRenderer.pickDecorAt(ndcX, ndcY)
   }
@@ -782,7 +782,7 @@ export class SceneElement extends HTMLElement {
   set sightingData(json: SightingRecordingJson) {
     this.ufoElement.sightingData = json
     // An interpretation is OF one recording: another one's bodies have nothing to stand for here.
-    // What the new one starts as is its witness's own account of what it was, if they gave one.
+    // What the new one starts as is its observer's own account of what it was, if they gave one.
     this.interpretationShown = this.inTheRound ? this.ufoElement.sighting.interpretation : undefined
     // A loaded recording may have been made through something with a format of its own.
     this.applyFrameFormat()
@@ -971,7 +971,7 @@ export class SceneElement extends HTMLElement {
    * itself advance during playback). Falls back to a neutral DEFAULT_ASTRONOMY sky only when
    * there's nothing at all to compute from. Partial information renders a "good enough" preview
    * rather than nothing: a known time but no real lat/lng yet (e.g. mid-authoring in
-   * `<rr0-sighting-editor>`, where the witness's heading/time might be set before their location is)
+   * `<rr0-sighting-editor>`, where the observer's heading/time might be set before their location is)
    * still renders real astronomy, using DEFAULT_OBSERVER_POSE's lat/lng (0,0) purely as a
    * *rendering* fallback — this is never written back into the sighting's own data, it just means
    * a date/time or heading edit gives live visual feedback before a location is entered. The
@@ -997,7 +997,7 @@ export class SceneElement extends HTMLElement {
     // that made the picture crosses hundreds and flashes ten times.
     const sky = SkyDrift.instants(exposureSeconds, degPerPixel)
     // Three demands now, and the pose is drawn at the coarsest: what the SKY did, what the scene
-    // standing against it did, and what the witness's own phenomenon did — which used to have its
+    // standing against it did, and what the observer's own phenomenon did — which used to have its
     // own streak on the overlay and is now drawn in this scene like everything else, so its travel
     // has to be sampled here too (see UfoElement.exposureTimes for how it is counted).
     const instants = Math.max(
@@ -1081,7 +1081,7 @@ export class SceneElement extends HTMLElement {
     this.sceneRenderer.setLensOptics(this.lensOpticsAt(t))
     // What that instrument could actually have RECORDED, which is a second thing entirely from how
     // it maps an angle: an Instamatic's ninetieth of a second reaches two magnitudes short of the
-    // witness holding it, and the same tripod at f/2 for twenty seconds reaches three past them.
+    // observer holding it, and the same tripod at f/2 for twenty seconds reaches three past them.
     // Pushed every tick like the rest, since the aperture is a pose field and a zoom moves under it.
     this.sceneRenderer.setInstrumentGain(
       LimitingMagnitude.gainFor(sighting.instrument, {
@@ -1093,13 +1093,13 @@ export class SceneElement extends HTMLElement {
       // ScatteredSky.setInstrument).
       sighting.instrument.detailUm !== undefined
     )
-    // What the witness's own legs are doing to their eye between two recorded positions — nothing
-    // for a witness who stood still, which is most of them, and a couple of centimetres of rise and
+    // What the observer's own legs are doing to their eye between two recorded positions — nothing
+    // for a observer who stood still, which is most of them, and a couple of centimetres of rise and
     // sway for one who walked. Rebuilt each tick rather than cached: the editor moves keyframes
     // under this element without the recording ever changing identity (see Gait.of).
     this.sceneRenderer.setGait(Gait.of(sighting)?.offsetAt(t) ?? Gait.STILL)
     // Keeps decor anchored to its own real-world spot rather than sliding along with a moving
-    // witness — see SceneRenderer.updateDecorAnchoring's own doc comment. The reference pose is
+    // observer — see SceneRenderer.updateDecorAnchoring's own doc comment. The reference pose is
     // always the recording's own t=0, regardless of what t is being rendered right now.
     this.sceneRenderer.updateDecorAnchoring(resolveObserverPoseAt(sighting, 0), pose, t)
     // On the same origin as the decor, so right after it.
@@ -1159,7 +1159,7 @@ export class SceneElement extends HTMLElement {
     // 1× is seconds of the recording; a pose's own sky instants are a pixel apart by construction
     // (SkyDrift.instants) and still each get their own restatement.
     const quantumMs = Math.max(1, Math.round((0.25 * this.degreesPerPixelAt(t)) / SkyDrift.DEG_PER_SECOND * 1000))
-    // A walking witness changes lat/lng every frame too. Exact coordinates defeat the time
+    // A walking observer changes lat/lng every frame too. Exact coordinates defeat the time
     // cache and rebuild the sky (including shader materials) for centimetres of movement.
     // Bound each geographic angle to a tenth of a display pixel; use the actual position
     // when refreshing. Terrain, gait, clouds and decor above still update at every instant.
@@ -1287,7 +1287,7 @@ export class SceneElement extends HTMLElement {
 
   /**
    * Every pass — above the horizon and in sunlight — during the observation, from its start over
-   * `durationMs`, for the place the witness stood at its start. Brightness is stated, visibility is
+   * `durationMs`, for the place the observer stood at its start. Brightness is stated, visibility is
    * not: that is the reader's comparison against the sky's own limit.
    *
    * Scanned every ten seconds, or coarser beyond a hundred minutes so a long night stays under a
@@ -1317,7 +1317,7 @@ export class SceneElement extends HTMLElement {
    * The brightest comet standing in that sky, if any was — in the form the renderer wants it.
    *
    * The brightest rather than a list: two apparitions overlap only in the odd year (1957, 1970),
-   * and a scene showing both would be stating that a witness could have confused either, which is a
+   * and a scene showing both would be stating that a observer could have confused either, which is a
    * conclusion rather than a fact. The one that was actually conspicuous is the one to draw.
    *
    * Nothing is filtered on here — not the horizon, not the twilight. Whether the comet was
@@ -1340,12 +1340,12 @@ export class SceneElement extends HTMLElement {
    * there asserts and does not, and PhenomenonDepth for where its distance comes from.
    *
    * This is also where the recording's crossings are read (see SizeEstimate): the camera, the
-   * witness's own position and the decor are posed for exactly this instant, which is the only
+   * observer's own position and the decor are posed for exactly this instant, which is the only
    * state in which "what stood along that line of sight" means anything — so it runs from
    * applySceneAt, after everything else has been posed, and once per instant of a long pose.
    *
    * The shapes go in as the overlay would have painted them — canvas pixels, the reader's own turn
-   * of the view and the witness's gait already applied — so the scene puts each one where the
+   * of the view and the observer's gait already applied — so the scene puts each one where the
    * picture had it, and the decor's own depth then hides whatever part of it a car or a shack
    * stood in front of. That is the whole of what changed hands: the picture is the same, and who
    * decides what hides it is not.
@@ -1372,7 +1372,7 @@ export class SceneElement extends HTMLElement {
       const shifted: Shape = { ...shape, bounds: { ...shape.bounds, x: shape.bounds.x + shift.x, y: shape.bounds.y + shift.y } }
       shapes.set(sourceId, shifted)
       // Where on the picture the shape is: from its own stated direction when it has one, which
-      // holds behind the witness's back, where the pixel the overlay kept for it is clamped a
+      // holds behind the observer's back, where the pixel the overlay kept for it is clamped a
       // hundred thousand wide off the canvas (see SightingShapes.toPosition) and means nothing.
       const point = shape.aim
         ? this.sceneRenderer.screenPointOf(PhenomenonSystem.directionOf(shape.aim, this.directionScratch))
@@ -1381,10 +1381,10 @@ export class SceneElement extends HTMLElement {
             ndcY: -(((shifted.bounds.y + shifted.bounds.height / 2) / canvas.height) * 2 - 1)
           }
       const onScreen = point !== undefined && Math.abs(point.ndcX) <= 1 && Math.abs(point.ndcY) <= 1
-      // The same ray, asked the only question a testimony can answer about distance: not "how far"
+      // The same ray, asked the only question a account can answer about distance: not "how far"
       // but "behind what, and in front of what". Accumulated across every instant the playhead
       // visits — see SizeEstimate, and sizeRangeOf's own comment on why that accumulation is the
-      // honest shape for this. Only for a shape that is IN the picture: a thing behind the witness
+      // honest shape for this. Only for a shape that is IN the picture: a thing behind the observer
       // crosses nothing they can see, and a ray cast for it would hit whatever stood nearest.
       const crossing = onScreen ? this.sceneRenderer.decorDistancesAt(point.ndcX, point.ndcY, sourceId) : {}
       offScreen.add(sourceId)
@@ -1392,7 +1392,7 @@ export class SceneElement extends HTMLElement {
       const widthDeg = shape.angular?.widthDeg ?? projection.pxToDeg(shape.bounds.width)
       const estimate = this.sizeEstimateOf(sourceId)
       estimate.add(widthDeg, crossing)
-      // What the witness's own walk establishes, read at this instant's apparent width — see
+      // What the observer's own walk establishes, read at this instant's apparent width — see
       // ShapeDistance, which says what it assumes.
       const approach = ShapeDistance.of(sighting, sourceId)
       depths.set(
@@ -1438,7 +1438,7 @@ export class SceneElement extends HTMLElement {
         distanceM: depths.get(sourceId)!.distanceM,
         renderOrder: order.indexOf(sourceId),
         aim: shape.aim,
-        // With an interpretation on show, the testimony is not what is drawn: it is either absent,
+        // With an interpretation on show, the account is not what is drawn: it is either absent,
         // or beside it as outlines to compare with — and then all of it, what no body claims to be
         // included (an insignia, a flame), since that too is what the interpretation must answer.
         hidden: offScreen.has(sourceId) || (this.interpretationShown !== undefined && !this.comparing),
@@ -1469,9 +1469,9 @@ export class SceneElement extends HTMLElement {
    * car it was drawn in front of. `undefined` withdraws it.
    */
   /**
-   * The interpretation to replay the testimony with — its bodies standing in the scene in place of
-   * the testimony's phenomena, which come back as outlines only when compared with (see
-   * `compareTestimony`) — or undefined for the raw testimony. See InterpretationJson. Never part of the recording this element shows: the player
+   * The interpretation to replay the account with — its bodies standing in the scene in place of
+   * the account's phenomena, which come back as outlines only when compared with (see
+   * `compareAccount`) — or undefined for the raw account. See InterpretationJson. Never part of the recording this element shows: the player
    * chooses it, from the recording's own or from the case's.
    */
   get interpretation(): InterpretationJson | undefined {
@@ -1484,43 +1484,43 @@ export class SceneElement extends HTMLElement {
   }
 
   /**
-   * Whether the testimony stands beside the interpretation on show, as the outlines of what the
-   * witness saw, and is measured against it (see `confrontation`). Off, the interpretation is shown
+   * Whether the account stands beside the interpretation on show, as the outlines of what the
+   * observer saw, and is measured against it (see `confrontation`). Off, the interpretation is shown
    * alone, as the world it claims — which is how it has to be looked at before it can be judged.
-   * Meaningless for the raw testimony, which is always what is drawn then.
+   * Meaningless for the raw account, which is always what is drawn then.
    */
   /**
-   * Whether a recording whose witness said what it was (its own `interpretation`) is drawn that way,
+   * Whether a recording whose observer said what it was (its own `interpretation`) is drawn that way,
    * in the round, rather than as the angles they saw — true unless a composing element says
    * otherwise. The editor does: what it edits is the angles, and drawing bodies over them would hide
    * the very thing being drawn. Read when a recording is set.
    */
-  get testimonyInTheRound(): boolean {
+  get accountInTheRound(): boolean {
     return this.inTheRound
   }
 
-  set testimonyInTheRound(inTheRound: boolean) {
+  set accountInTheRound(inTheRound: boolean) {
     this.inTheRound = inTheRound
   }
 
-  get compareTestimony(): boolean {
+  get compareAccount(): boolean {
     return this.comparing
   }
 
-  set compareTestimony(comparing: boolean) {
+  set compareAccount(comparing: boolean) {
     this.comparing = comparing
     this.updateAstronomy(this.lastTimeMs)
   }
 
-  /** What the bodies of the interpretation on show look like from the witness's eye, against what
-   * the witness said, at the instant on show — see BodyConfrontation. Empty for the raw testimony,
-   * and while the testimony is not being compared with. */
+  /** What the bodies of the interpretation on show look like from the observer's eye, against what
+   * the observer said, at the instant on show — see BodyConfrontation. Empty for the raw account,
+   * and while the account is not being compared with. */
   get confrontation(): ConfrontationReading[] {
     return this.confrontationReadings
   }
 
   /**
-   * How far along a line of sight from the witness's eye at `t` the ground is, on the relief the
+   * How far along a line of sight from the observer's eye at `t` the ground is, on the relief the
    * scene holds — undefined when the line clears it. What stands a body on the ground rather than
    * under it (see SightingEditorElement.newBodyStart).
    */
@@ -1532,8 +1532,8 @@ export class SceneElement extends HTMLElement {
 
   /**
    * A body as it stands at `t`, in both of the forms a keyframe can state it (see BodyKeyframe):
-   * from the witness's eye (direction and distance to its middle) and in the world (east and north
-   * of where the witness started, and how high its base is over the ground there) — with its size
+   * from the observer's eye (direction and distance to its middle) and in the world (east and north
+   * of where the observer started, and how high its base is over the ground there) — with its size
    * and attitude. What the editor's fields show at the playhead. Undefined when it is not placed.
    */
   bodyReading(body: BodyJson, t: number): BodyReading | undefined {
@@ -1559,7 +1559,7 @@ export class SceneElement extends HTMLElement {
   }
 
   /**
-   * The direction from the witness's eye to the middle of a body at `t`, or at its first keyframe
+   * The direction from the observer's eye to the middle of a body at `t`, or at its first keyframe
    * when it is not there at `t` — where to turn to look at it. Undefined for a body with no
    * keyframe, or one the eye stands inside.
    */
@@ -1583,7 +1583,7 @@ export class SceneElement extends HTMLElement {
 
   /**
    * Stands the interpretation's bodies where it puts them at `t`, on the relief the renderer holds,
-   * and reads them against the testimony. Placed afresh every instant rather than once: the relief
+   * and reads them against the account. Placed afresh every instant rather than once: the relief
    * arrives after the recording does, and a body on the ground must stand on the ground that is
    * there now, not the flat plane that was there before.
    */
@@ -1636,7 +1636,7 @@ export class SceneElement extends HTMLElement {
    * able to establish — empty ranges included, which is the usual answer and the correct one.
    *
    * Accumulated from the instants the playhead has actually visited rather than scanned ahead: a
-   * crossing only means anything with the camera, the witness's own position and the decor all
+   * crossing only means anything with the camera, the observer's own position and the decor all
    * posed for that exact instant, which is the state render() puts them in and nothing else does.
    * Playing a recording through therefore establishes everything it can establish; scrubbing
    * establishes what was scrubbed past. Bounds only ever tighten, so nothing is lost by arriving
@@ -1757,7 +1757,7 @@ export class SceneElement extends HTMLElement {
    * Works out what falls during this recording — the shower, if one is running, and the sporadic
    * background, which is always.
    *
-   * Both go into ONE list, because a witness does not see two skies. The shower's meteors radiate
+   * Both go into ONE list, because a observer does not see two skies. The shower's meteors radiate
    * from its radiant; each sporadic carries its own (see MeteorFall.scheduleSporadic), and the
    * renderer reads whichever applies.
    *

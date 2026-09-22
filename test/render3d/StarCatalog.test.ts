@@ -81,7 +81,7 @@ describe("StarCatalogs.upTo, which is how an instrument picks its own catalogue"
   }
 
   it("fetches the base tier alone for an eye, which is what most recordings are", async () => {
-    // The whole point of tiering: a witness who looked up must not download 900 kB of stars nobody
+    // The whole point of tiering: a observer who looked up must not download 900 kB of stars nobody
     // standing there could have seen.
     const fetchMock = serve()
     const catalog = await StarCatalogs.upTo(freshTiers(), 6.5)

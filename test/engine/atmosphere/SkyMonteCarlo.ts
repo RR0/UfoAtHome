@@ -33,14 +33,14 @@ export interface MonteCarloEstimate {
  * Too slow to draw anything with, which is not its job. It exists to say how wrong the real-time
  * model is. Hillaire's isotropic, geometric-series treatment of every order past the first is at its
  * weakest in deep twilight, where there is nothing BUT multiple scattering, and no photometry covers
- * a witness in an aircraft or the sky opposite a Sun sixteen degrees down. This covers all of it,
+ * a observer in an aircraft or the sky opposite a Sun sixteen degrees down. This covers all of it,
  * from the same medium, so any difference is the approximation's alone.
  *
  * Traced backward from the eye. Free paths by delta tracking against a majorant (the medium thins
  * with height, and delta tracking needs no optical-depth inversion to cope with that); absorption as
  * a weight rather than an end; the ground Lambertian; Russian roulette for paths carrying little.
  *
- * WHY THE RAY ESTIMATOR. With the Sun ten degrees down, the zenith above a witness is in the Earth's
+ * WHY THE RAY ESTIMATOR. With the Sun ten degrees down, the zenith above a observer is in the Earth's
  * shadow up to a hundred and forty kilometres. Light reaches it only after scattering somewhere far
  * off toward the Sun that is still lit, so a path counting sunlight only where it happens to collide
  * almost never collides anywhere lit: twenty thousand of them found nothing at all. Integrating the

@@ -5,11 +5,11 @@ import type { SightingRecordingJson } from "../../src/engine/persistence/sightin
 import { createOval } from "../../src/engine/shape/Shape.js"
 
 describe("sightingJson", () => {
-  it("round-trips time, place, witness and timeline through JSON", () => {
+  it("round-trips time, place, observer and timeline through JSON", () => {
     const sighting = Sighting.create(
       { year: 1987, month: 6, day: 12 },
       [{ lat: 45.188529, lng: 5.724524 }],
-      { id: "witness-1" }
+      { id: "observer-1" }
     )
     sighting.timeline.addKeyframe(0, [
       { sourceId: "ufo-1", shape: createOval({ x: 10, y: 20, width: 40, height: 24 }) }
@@ -19,7 +19,7 @@ describe("sightingJson", () => {
 
     expect(restored.event.time).toEqual({ year: 1987, month: 6, day: 12 })
     expect(restored.event.place).toEqual([{ lat: 45.188529, lng: 5.724524 }])
-    expect(restored.witness).toEqual({ id: "witness-1" })
+    expect(restored.observer).toEqual({ id: "observer-1" })
     expect(restored.timeline.getShapeAt(0, "ufo-1")?.bounds).toEqual({ x: 10, y: 20, width: 40, height: 24 })
   })
 
@@ -65,7 +65,7 @@ describe("sightingJson", () => {
       version: 1,
       timeline: { keyframes: [] },
       instrument: "slr-35mm-50",
-      witnessTrack: {
+      observerTrack: {
         keyframes: [
           { t: 0, pose: { elevationM: 0, pitchDeg: 0, fovDeg: 27 } },
           { t: 5000, pose: { elevationM: 0, pitchDeg: 0, fovDeg: 27, exposureSeconds: 4 } as never }
@@ -119,7 +119,7 @@ describe("sightingJson", () => {
                 sourceId: "ufo-1",
                 shape: {
                   ...createOval({ x: 300, y: 170, width: 10, height: 10 }),
-                  // Deliberately inconsistent with the box above: the angle is what a witness
+                  // Deliberately inconsistent with the box above: the angle is what a observer
                   // stated, the box is a projection of it, and the angle is what must win.
                   angular: { widthDeg: 8.5333, heightDeg: 1.1333 }
                 }
@@ -162,19 +162,19 @@ describe("sightingJson", () => {
     expect(restored.event.place).toBeUndefined()
   })
 
-  it("round-trips witness (id+title) and the sighting's own id", () => {
+  it("round-trips observer (id+title) and the sighting's own id", () => {
     const json = {
       version: 1 as const,
       id: "1948-07-24-ChilesClarence",
-      witness: { id: "chiles", title: "Clarence Chiles" },
+      observer: { id: "chiles", title: "Clarence Chiles" },
       timeline: { keyframes: [] },
-      witnessTrack: { keyframes: [] },
+      observerTrack: { keyframes: [] },
       weatherTrack: { keyframes: [] }
     }
 
     const restored = fromSightingJson(json)
 
-    expect(restored.witness).toEqual({ id: "chiles", title: "Clarence Chiles" })
+    expect(restored.observer).toEqual({ id: "chiles", title: "Clarence Chiles" })
     expect(restored.id).toBe("1948-07-24-ChilesClarence")
     // timeline.order/groups are new (z-order support, multi-select grouping) — empty here since
     // there are no shapes/sources at all, but always present now, unlike the hand-written input
@@ -193,31 +193,31 @@ describe("sightingJson", () => {
     const json = {
       version: 1 as const,
       caseId: "ChilesWhitted",
-      witness: { id: "ChilesClarence", dirName: "people/c/ChilesClarence" },
+      observer: { id: "ChilesClarence", dirName: "people/c/ChilesClarence" },
       timeline: { keyframes: [] }
     } as SightingRecordingJson
 
     const written = toSightingJson(fromSightingJson(json))
 
     expect(written).not.toHaveProperty("caseId")
-    expect(written.witness).toEqual({ id: "ChilesClarence" })
+    expect(written.observer).toEqual({ id: "ChilesClarence" })
   })
 
-  it("round-trips witness (lastName+firstNames)", () => {
+  it("round-trips observer (lastName+firstNames)", () => {
     const json = {
       version: 1 as const,
-      witness: { lastName: "Chiles", firstNames: ["Clarence"] },
+      observer: { lastName: "Chiles", firstNames: ["Clarence"] },
       timeline: { keyframes: [] }
     }
 
     const restored = fromSightingJson(json)
 
-    expect(restored.witness).toEqual({ lastName: "Chiles", firstNames: ["Clarence"] })
+    expect(restored.observer).toEqual({ lastName: "Chiles", firstNames: ["Clarence"] })
   })
 
-  it("round-trips an witnessTrack", () => {
+  it("round-trips an observerTrack", () => {
     const sighting = Sighting.create({ year: 1948, month: 7, day: 24 }, [{ lat: 35.0, lng: -90.0 }])
-    sighting.witnessTrack.addKeyframe(0, {
+    sighting.observerTrack.addKeyframe(0, {
       lat: 35.0,
       lng: -90.0,
       elevationM: 1500,
@@ -228,7 +228,7 @@ describe("sightingJson", () => {
 
     const restored = fromSightingJson(toSightingJson(sighting))
 
-    expect(restored.witnessTrack.getLatestPoseAt(0)).toEqual({
+    expect(restored.observerTrack.getLatestPoseAt(0)).toEqual({
       lat: 35.0,
       lng: -90.0,
       elevationM: 1500,
@@ -238,9 +238,9 @@ describe("sightingJson", () => {
     })
   })
 
-  it("defaults to an empty witnessTrack when absent from JSON", () => {
+  it("defaults to an empty observerTrack when absent from JSON", () => {
     const restored = fromSightingJson({ version: 1, timeline: { keyframes: [] } })
-    expect(restored.witnessTrack.allKeyframes).toEqual([])
+    expect(restored.observerTrack.allKeyframes).toEqual([])
   })
 
   it("round-trips a weatherTrack", () => {
@@ -337,60 +337,60 @@ describe("sightingJson", () => {
   })
 })
 
-describe("testimony", () => {
+describe("account", () => {
   it("round-trips who saw it and how the account travelled", () => {
     // None of it is about the phenomenon, and a recording carried none of it until now — which
-    // left half of every published evaluation method uncomputable from a file. See Testimony.
+    // left half of every published evaluation method uncomputable from a file. See Account.
     const sighting = Sighting.create({ year: 1974, month: 5, day: 20 })
-    sighting.testimony = {
-      witnessAgeYears: 38,
-      witnessOccupation: { fr: "boulanger", en: "baker" },
+    sighting.account = {
+      observerAgeYears: 38,
+      observerOccupation: { fr: "boulanger", en: "baker" },
       source: "on-site",
       followedUp: true
     }
 
-    expect(fromSightingJson(toSightingJson(sighting)).testimony).toEqual({
-      witnessAgeYears: 38,
-      witnessOccupation: { fr: "boulanger", en: "baker" },
+    expect(fromSightingJson(toSightingJson(sighting)).account).toEqual({
+      observerAgeYears: 38,
+      observerOccupation: { fr: "boulanger", en: "baker" },
       source: "on-site",
       followedUp: true
     })
   })
 
-  it("writes nothing for a recording that says nothing about its witnesses", () => {
+  it("writes nothing for a recording that says nothing about its observers", () => {
     // Absent means unknown, never zero: "nobody recorded how many people were there" and "one
     // person was there" are different statements, and Poher scores them 0 and 1.
     const written = toSightingJson(Sighting.create({ year: 1974 }))
 
-    expect(written.testimony).toBeUndefined()
-    expect("testimony" in written).toBe(true)
+    expect(written.account).toBeUndefined()
+    expect("account" in written).toBe(true)
   })
 })
 
-describe("witness count", () => {
-  it("counts the witnesses this account puts at the scene, itself included", () => {
-    // Poher's heaviest credibility rubric, and the number a TESTIMONY-level evaluation reads.
+describe("observer count", () => {
+  it("counts the observers this account puts at the scene, itself included", () => {
+    // Poher's heaviest credibility rubric, and the number a ACCOUNT-level evaluation reads.
     const sighting = Sighting.create({ year: 1974 })
 
-    expect(sighting.witnessCount).toBe(1)
+    expect(sighting.observerCount).toBe(1)
 
     sighting.decor = [
-      { id: "epouse", kind: "witness", eastM: 1, northM: 0 },
-      { id: "enfant-1", kind: "witness", eastM: 1, northM: -1 },
-      { id: "enfant-2", kind: "witness", eastM: -1, northM: -1 },
+      { id: "epouse", kind: "observer", eastM: 1, northM: 0 },
+      { id: "enfant-1", kind: "observer", eastM: 1, northM: -1 },
+      { id: "enfant-2", kind: "observer", eastM: -1, northM: -1 },
       { id: "voiture", kind: "vehicle", eastM: 0, northM: 0 }
     ]
 
-    expect(sighting.witnessCount).toBe(4)
+    expect(sighting.observerCount).toBe(4)
   })
 
   it("is never stored, so nothing can disagree with the scene", () => {
     // Two statements of one fact are free to drift apart, and of these the placement is the better
     // one: it says where each of them stood rather than only how many there were.
     const sighting = Sighting.create({ year: 1974 })
-    sighting.decor = [{ id: "epouse", kind: "witness", eastM: 1, northM: 0 }]
+    sighting.decor = [{ id: "epouse", kind: "observer", eastM: 1, northM: 0 }]
 
-    expect("witnessCount" in toSightingJson(sighting)).toBe(false)
-    expect(JSON.stringify(toSightingJson(sighting))).not.toContain("witnessCount")
+    expect("observerCount" in toSightingJson(sighting)).toBe(false)
+    expect(JSON.stringify(toSightingJson(sighting))).not.toContain("observerCount")
   })
 })

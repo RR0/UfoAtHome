@@ -26,7 +26,7 @@ describe("what the model was not shown", () => {
 
   it("makes a dark natural sky out of itself at right angles to the Sun", () => {
     // 200 S10 is 22.0 magnitudes a square arcsecond, which is the whole natural night sky. Half of
-    // what a witness calls "the darkness" is this dust.
+    // what a observer calls "the darkness" is this dust.
     expect(SurfaceBrightness.toMagPerArcsec2(brightness(90, 0))).toBeCloseTo(22, 1)
   })
 })

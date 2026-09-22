@@ -3,8 +3,8 @@ import { sightingLabels_en } from "./SightingLabels_en.js"
 
 export const sightingMessages_en: SightingMessages = {
   ...sightingLabels_en,
-  testimonyBy: "Account by",
-  unnamedWitness: "Observer {n}",
+  accountBy: "Account by",
+  unnamedObserver: "Observer {n}",
   about: "About",
   close: "Close",
   observation: "Observation",
@@ -21,7 +21,7 @@ export const sightingMessages_en: SightingMessages = {
   embedCopied: "Copied",
   showLabels: "Show what it states",
   interpretation: "Interpretation",
-  testimony: "Account",
+  account: "Account",
   interpretationBy: "{title}, by {by}",
   confrontation: "Against the account",
   confrontationDirection: "{deg}° off",

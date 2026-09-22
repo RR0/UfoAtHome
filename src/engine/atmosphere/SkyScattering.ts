@@ -1,6 +1,6 @@
 import { AtmosphereProfile } from "./AtmosphereProfile.js"
 
-/** A direction or a position in the planet's frame: origin at its centre, y through the witness. */
+/** A direction or a position in the planet's frame: origin at its centre, y through the observer. */
 export interface Vector3Like {
   readonly x: number
   readonly y: number
@@ -24,7 +24,7 @@ export interface SkyScatteringOptions {
 }
 
 /**
- * The light a clear sky sends a witness, traced through a spherical atmosphere — the reference
+ * The light a clear sky sends a observer, traced through a spherical atmosphere — the reference
  * implementation, in plain numbers, of what the sky shaders compute on the GPU.
  *
  * Hillaire (2020), "A Scalable and Production Ready Sky and Atmosphere Rendering Technique", which
@@ -266,7 +266,7 @@ export class SkyScattering {
   // --- The view -----------------------------------------------------------------------------------
 
   /**
-   * Spectral radiance arriving at a witness `altitudeM` above the ground, looking along `view`,
+   * Spectral radiance arriving at a observer `altitudeM` above the ground, looking along `view`,
    * with the Sun in direction `sun` (both unit vectors, y up), for a Sun of unit irradiance.
    */
   radiance(altitudeM: number, view: Vector3Like, sun: Vector3Like, out: Float64Array): void {
@@ -280,7 +280,7 @@ export class SkyScattering {
 
   /**
    * One march along a ray. `view` true: the real phase functions and the multiple-scattering table,
-   * which is a witness's line of sight. `view` false: isotropic scattering and single scattering
+   * which is a observer's line of sight. `view` false: isotropic scattering and single scattering
    * only, which is what the multiple-scattering table is built from — and then `scattered` receives,
    * per wavelength, the share of light that ray scatters before it leaves.
    */

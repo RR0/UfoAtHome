@@ -125,7 +125,7 @@ vi.mock("../../src/render3d/WeatherAudio.js", () => ({
 beforeAll(() => {
   vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockImplementation(function (this: HTMLCanvasElement) {
     // mockImplementation, not mockReturnValue: a renderer that sizes itself from its own canvas
-    // (see WitnessMapRenderer) reads ctx.canvas, and one shared object makes every canvas claim to
+    // (see ObserverMapRenderer) reads ctx.canvas, and one shared object makes every canvas claim to
     // be the same one.
     return {
       canvas: this,
@@ -223,19 +223,19 @@ it("does not rebuild astronomy for centimetres of observer motion, but follows a
   const internal = element as unknown as { applySceneAt(t: number): void; lastSkyKey?: string; sceneCanvas: HTMLCanvasElement }
   internal.sceneCanvas.height = 600
   const location = { lat: 43.84, lng: 5.96, pitchDeg: 0, fovDeg: 60, elevationM: 0 }
-  element.ufoElement.sighting.witnessTrack.addKeyframe(0, location)
+  element.ufoElement.sighting.observerTrack.addKeyframe(0, location)
   internal.lastSkyKey = undefined
   internal.applySceneAt(0)
   astronomySet.mockClear()
   // Edit the resolved geographic position without replacing the recording or resetting its cache.
   for (let i = 1; i <= 10; i++) {
     location.lat += 1e-8
-    element.ufoElement.sighting.witnessTrack.addKeyframe(0, location)
+    element.ufoElement.sighting.observerTrack.addKeyframe(0, location)
     internal.applySceneAt(0)
   }
   expect(astronomySet).not.toHaveBeenCalled()
   location.lat += 1
-  element.ufoElement.sighting.witnessTrack.addKeyframe(0, location)
+  element.ufoElement.sighting.observerTrack.addKeyframe(0, location)
   internal.applySceneAt(0)
   expect(astronomySet).toHaveBeenCalledOnce()
   element.remove()
@@ -247,7 +247,7 @@ describe("SceneElement weather follows the player", () => {
   })
 
   // A paused replay is one frozen instant of a sighting: rain still falling and still audible over
-  // it would be the reader's own room, not the witness's evening.
+  // it would be the reader's own room, not the observer's evening.
   it("runs the animations and the beds only while playing", async () => {
     const element = mount()
     element.ufoElement.togglePlayPause()
@@ -410,7 +410,7 @@ describe("which meteor gets offered", () => {
   })
 })
 
-describe("A testimony whose witness said what it was", () => {
+describe("A account whose observer said what it was", () => {
   const body = { id: "craft", model: { id: "sphere" }, track: [{ t: 0, eastM: 0, northM: 10, onGround: true }] }
   const recording = { version: 1 as const, place: [{ lat: 34, lng: -106.9 }], timeline: { keyframes: [] }, interpretation: { title: "Own", bodies: [body] } }
 
@@ -425,7 +425,7 @@ describe("A testimony whose witness said what it was", () => {
 
   it("is drawn as its angles where the scene is told to, as the editor's is", () => {
     const element = mount()
-    element.testimonyInTheRound = false
+    element.accountInTheRound = false
     element.sightingData = recording
     expect(element.interpretation).toBeUndefined()
   })

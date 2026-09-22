@@ -20,7 +20,7 @@ export type ReferenceKind = "photo" | "panorama"
  * the camera's own. Registering a picture on the rendered relief — lining its horizon up with the
  * rendered horizon, its landmarks with the rendered ones — is what MEASURES these, where a pose
  * typed by hand only states them. That is the point of the exercise: a heading a reader could only
- * take the witness's word for becomes one a reader can check against a picture.
+ * take the observer's word for becomes one a reader can check against a picture.
  */
 export interface ReferenceRegistration {
   /** Degrees clockwise from true north, the direction the picture's centre looks at. */
@@ -57,7 +57,7 @@ export interface PictureLandmark {
   label?: SaidText
   /** Where it is on the picture, 0..1 from the top-left corner. */
   picture: { u: number; v: number }
-  /** Where it is from the witness, in the scene. */
+  /** Where it is from the observer, in the scene. */
   scene: { azimuthDeg: number; altitudeDeg: number }
 }
 
@@ -69,9 +69,9 @@ export interface PictureLandmark {
  * way to tell a faithful reconstruction from a plausible one. A photograph of the same place does
  * that: laid over the render at an opacity a reader can vary, every tree the model does not know,
  * every ridge the thirty-metre relief smoothed away, and the phenomenon drawn over both of them,
- * is one picture. When the photograph carries the phenomenon itself — a witness's own picture, or
+ * is one picture. When the photograph carries the phenomenon itself — a observer's own picture, or
  * an investigator's sketch of the trajectory drawn on a view from the spot — the comparison is
- * the testimony against the reconstruction, which is the whole reason to reconstruct.
+ * the account against the reconstruction, which is the whole reason to reconstruct.
  *
  * Not decor, deliberately. A decor object is a thing in metres standing in the scene, tested
  * against the depth of everything else; a picture is a field of directions from one point, valid
@@ -104,7 +104,7 @@ export interface SceneReference {
   creditUrl?: string
   /**
    * The instant of the timeline it was taken at, milliseconds, for a picture made DURING the
-   * observation — by the witness, or by whoever was there. Absent for a picture of the place made
+   * observation — by the observer, or by whoever was there. Absent for a picture of the place made
    * at some other time, which is most of them: an investigator's, a passer-by's, a street-level
    * capture years later. The distinction is what the picture can be compared with: a picture of
    * the place is compared with the scene, a picture of the sighting also with the phenomenon, and
@@ -128,7 +128,7 @@ export interface SceneReference {
   landmarks?: PictureLandmark[]
 }
 
-/** What a picture starts as before anybody registers it: level, straight ahead of the witness,
+/** What a picture starts as before anybody registers it: level, straight ahead of the observer,
  * an ordinary lens's field. */
 export const DEFAULT_REFERENCE_OPACITY = 0.5
 export const DEFAULT_REFERENCE_FOV_DEG = 40

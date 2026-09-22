@@ -10,14 +10,14 @@ export const ufoMessages_en: UfoMessages = {
   switchToClockTime: "click to show the time of day",
   fullscreen: "Fullscreen",
   exitFullscreen: "Exit fullscreen",
-  showWitnessMap: "Show where the observer was",
-  hideWitnessMap: "Hide where the observer was",
+  showObserverMap: "Show where the observer was",
+  hideObserverMap: "Hide where the observer was",
   mapImageryUnavailable: "Aerial imagery unavailable",
   showReferences: "Show the pictures of the place",
   hideReferences: "Hide the pictures of the place",
   referenceOpacity: "Picture opacity",
   showMilestones: "Show the account's moments",
   hideMilestones: "Hide the account's moments",
-  witnessHere: "The observer, here",
+  observerHere: "The observer, here",
   decorHere: "Scenery"
 }

@@ -71,7 +71,7 @@ causes, in order of weight:
 - **The ground read from its grid** (`SceneRenderer.groundBlocks`): the flat disc answers as a
   plane, the relief is walked half a cell at a time over the same height grid the decor already
   stands on. Only the decor is still raycast. The ground under a footprint is read once per
-  resting place on the patch (the patch moves with the walking witness, so a still object keeps
+  resting place on the patch (the patch moves with the walking observer, so a still object keeps
   its answer).
 - **A long pose adds at most three instants of a Retina-size picture per frame** (thirty of a
   small card's): the main-thread budget let sixty through, each a full drawing queued for the

@@ -54,7 +54,7 @@ describe("WeatherInference", () => {
   it("can't ask without a place", async () => {
     const sighting = sightingAt()
     sighting.event.place = undefined
-    sighting.witnessTrack.clear()
+    sighting.observerTrack.clear()
 
     await expect(new WeatherInference(new HourStampingProvider()).infer(sighting)).resolves.toMatchObject({ status: "incomplete" })
   })
@@ -123,12 +123,12 @@ describe("WeatherInference", () => {
     expect(result.keyframes?.map(keyframe => keyframe.weather.cloudCover)).toEqual([0.04, 0.05, 0.06, 0.07])
   })
 
-  it("follows a witness who moves, asking about the air they are in at each instant", async () => {
+  it("follows a observer who moves, asking about the air they are in at each instant", async () => {
     // A DC-3 under observation for two hours: Montgomery at the start, Atlanta at the end.
     const sighting = sightingAt({ durationSeconds: 2 * 3600, recordedMs: 8000 })
-    sighting.witnessTrack.clear()
-    sighting.witnessTrack.addKeyframe(0, { lat: 32.379, lng: -86.308, elevationM: 1500, pitchDeg: 0, fovDeg: 60 })
-    sighting.witnessTrack.addKeyframe(8000, { lat: 33.749, lng: -84.388, elevationM: 1500, pitchDeg: 0, fovDeg: 60 })
+    sighting.observerTrack.clear()
+    sighting.observerTrack.addKeyframe(0, { lat: 32.379, lng: -86.308, elevationM: 1500, pitchDeg: 0, fovDeg: 60 })
+    sighting.observerTrack.addKeyframe(8000, { lat: 33.749, lng: -84.388, elevationM: 1500, pitchDeg: 0, fovDeg: 60 })
     const provider = new HourStampingProvider()
 
     await new WeatherInference(provider).infer(sighting)
@@ -142,11 +142,11 @@ describe("WeatherInference", () => {
   })
 
   it("holds the opening position for a track that only ever states a heading", async () => {
-    // How a witness turning to follow an object is normally recorded — Chiles-Whitted's own file
+    // How a observer turning to follow an object is normally recorded — Chiles-Whitted's own file
     // is nine keyframes of changing heading at one fixed pair of coordinates.
     const sighting = sightingAt({ durationSeconds: 600 })
-    sighting.witnessTrack.clear()
-    sighting.witnessTrack.addKeyframe(0, { lat: undefined, lng: undefined, elevationM: 1500, headingDeg: 40, pitchDeg: 0, fovDeg: 60 })
+    sighting.observerTrack.clear()
+    sighting.observerTrack.addKeyframe(0, { lat: undefined, lng: undefined, elevationM: 1500, headingDeg: 40, pitchDeg: 0, fovDeg: 60 })
     const provider = new HourStampingProvider()
 
     await new WeatherInference(provider).infer(sighting)
@@ -177,13 +177,13 @@ describe("WeatherInference", () => {
 
   it("changes nothing when there was no record to apply", async () => {
     const sighting = sightingAt()
-    const witnessSaid: Weather = { ...DEFAULT_WEATHER, cloudCover: 0.5 }
-    sighting.weatherTrack.addKeyframe(0, witnessSaid)
+    const observerSaid: Weather = { ...DEFAULT_WEATHER, cloudCover: 0.5 }
+    sighting.weatherTrack.addKeyframe(0, observerSaid)
     const inference = new WeatherInference({ getWeather: vi.fn().mockResolvedValue(undefined) })
 
     inference.applyTo(sighting, await inference.infer(sighting))
 
-    expect(sighting.weatherTrack.getLatestWeatherAt(0)).toEqual(witnessSaid)
+    expect(sighting.weatherTrack.getLatestWeatherAt(0)).toEqual(observerSaid)
     expect(sighting.weatherSource).toBeUndefined()
   })
 })

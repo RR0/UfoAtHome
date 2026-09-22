@@ -1,8 +1,8 @@
 /**
- * The one size a testimony actually contains — how much of the witness's field of view the thing
+ * The one size a account actually contains — how much of the observer's field of view the thing
  * filled — and the arithmetic relating it to a real size and a real distance.
  *
- * A witness never perceives meters. They perceive an angle: the object covered a thumbnail at
+ * A observer never perceives meters. They perceive an angle: the object covered a thumbnail at
  * arm's length, or a fifth of the windshield, or two full Moons. Everything else they say about
  * its size — "about 30 m long", "a hundred feet" — is an INFERENCE they made from a distance they
  * also could not perceive, and the two errors multiply. That is why nothing in a recording stores
@@ -10,7 +10,7 @@
  * the angle is the observation, the meters are a conclusion, and a format that stores conclusions
  * as if they were observations cannot later be told which was which.
  *
- * Apparent size is also the one quantity in a testimony that can be checked arithmetically, so it
+ * Apparent size is also the one quantity in a account that can be checked arithmetically, so it
  * is the one that should never be drawn by eye — eyes are wrong about it by a factor of five to
  * ten.
  *
@@ -24,7 +24,7 @@
  * that is a perception rather than a deduction.
  *
  * Both axes, not just a width: a cigar seen end-on and the same cigar seen broadside subtend very
- * different heights for the same width, and which one the witness saw is part of what they
+ * different heights for the same width, and which one the observer saw is part of what they
  * reported.
  */
 export interface AngularExtent {
@@ -40,19 +40,19 @@ export interface AngularExtent {
  *
  * Kept as a type because the arithmetic below still needs to name the pair: an authoring aid lets
  * a user try "suppose it was 30 m at 500 m" to size a drawing, and the estimator turns an
- * occlusion inequality back into meters. Neither of those is testimony, and neither is written to
+ * occlusion inequality back into meters. Neither of those is account, and neither is written to
  * a case file.
  */
 export interface PhysicalExtent {
-  /** The object's real width, in meters, along the axis the witness was looking across. */
+  /** The object's real width, in meters, along the axis the observer was looking across. */
   sizeM: number
-  /** How far the object was from the witness, in meters. */
+  /** How far the object was from the observer, in meters. */
   distanceM: number
 }
 
 export class ApparentSize {
-  /** The Moon's mean angular diameter — the reference every witness has actually seen, and the
-   * only unit of apparent size most testimonies come with ("gros comme la Lune"). */
+  /** The Moon's mean angular diameter — the reference every observer has actually seen, and the
+   * only unit of apparent size most accounts come with ("gros comme la Lune"). */
   static readonly MOON_ANGULAR_WIDTH_DEG = 0.5237
 
   /** The fixed drawing space every shape's `bounds` is expressed in — see UfoElement's own canvas,

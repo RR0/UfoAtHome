@@ -21,26 +21,26 @@ export interface SightingLabels {
   color: string
   transparency: string
   halo: string
-  /** How indistinct the witness said the object's edges were — see BaseShape.blur. */
+  /** How indistinct the observer said the object's edges were — see BaseShape.blur. */
   blur: string
-  /** How dazzling the witness said it was — see BaseShape.brightness. */
+  /** How dazzling the observer said it was — see BaseShape.brightness. */
   brightness: string
   shapeTitle: string
   /** objectSize/objectDistance's own placeholders — both say "as reported", the whole point
-   * being that these are the witness's numbers, not the drawing's. */
+   * being that these are the observer's numbers, not the drawing's. */
   /** The observation's own legal time zone — see SightingEvent.utcOffsetHours. */
   utcOffset: string
   /** Kept short: it shares its row with the Record button (see template's .record-row), and a
    * long label pushed that row's own width past what the toolbar could give it. */
   /** Height of the cloud layer's base above the ground — see Weather.cloudBaseM. */
   cloudBase: string
-  /** How high above the ground the witness was — see ObserverPose.elevationM. */
+  /** How high above the ground the observer was — see ObserverPose.elevationM. */
   elevation: string
   /** What the same pose field is called when the terrain's own height there isn't known, and the
    * altitude above sea level therefore can't be stated — see SummaryContext.groundElevationM. */
   heightAboveGround: string
   duration: string
-  /** Label of the place-NAME field the Location group now leads with — testimony names a place,
+  /** Label of the place-NAME field the Location group now leads with — account names a place,
    * it doesn't give coordinates (see engine/place/PlaceProvider.ts). */
   placeName: string
   latitude: string
@@ -51,14 +51,14 @@ export interface SightingLabels {
   roll: string
   observationTime: string
   observationEndTime: string
-  /** The witness as a WHOLE, naming the chip that holds everything said about them — not
-   * witnessTitle, which names one field of theirs. Shared because both components box those
+  /** The observer as a WHOLE, naming the chip that holds everything said about them — not
+   * observerTitle, which names one field of theirs. Shared because both components box those
    * chips inside it, and only the editor has a tab strip to read the name off. */
-  witnessGroup: string
-  witnessId: string
-  witnessTitle: string
-  witnessLastName: string
-  witnessFirstNames: string
+  observerGroup: string
+  observerId: string
+  observerTitle: string
+  observerLastName: string
+  observerFirstNames: string
   sightingId: string
   tags: string
   cloudCover: string
@@ -81,7 +81,7 @@ export interface SightingLabels {
   cloudsGroup: string
   precipitationGroup: string
   windGroup: string
-  /** Which timbre the witness described, and the five values SOUND_KINDS offers — "none" being a
+  /** Which timbre the observer described, and the five values SOUND_KINDS offers — "none" being a
    * reported silence, not "unknown" (see Sound.ts). */
   soundKind: string
   soundNone: string
@@ -89,7 +89,7 @@ export interface SightingLabels {
   soundWhistle: string
   soundRumble: string
   soundCrackle: string
-  /** How loud it was — relative to what the witness could describe, never a dB figure. */
+  /** How loud it was — relative to what the observer could describe, never a dB figure. */
   soundVolume: string
   /** How deep or how sharp, shown alongside its own value in Hz. */
   soundPitch: string
@@ -98,12 +98,12 @@ export interface SightingLabels {
   /** The decor kind added by the "+" button beside it — an aircraft crossing the sky is decor like
    * any other, just decor with a trajectory. */
   decorAircraft: string
-  /** A being the witness reported seeing. Not "creature" and not "alien": the account says one
+  /** A being the observer reported seeing. Not "creature" and not "alien": the account says one
    * was there and says nothing about what it was, which is the whole of what may be asserted. */
   decorEntity: string
   /** Which set of lamps the selected decor object carries — see LightRig.ts. */
   decorLights: string
-  /** How high above the witness the decor object sits. Zero for anything standing on the ground,
+  /** How high above the observer the decor object sits. Zero for anything standing on the ground,
    * which is all ordinary scenery; an aircraft is the reason it exists. Setting it on an object
    * that has no trajectory gives it one, of a single instant — see SightingEditorElement.updateDecor. */
   decorAltitude: string
@@ -111,7 +111,7 @@ export interface SightingLabels {
    * the device's lens does not zoom. */
   focalLength: string
   /** What the same control says for an EYE, which has no focal length: how much of their
-   * surroundings the witness took in, in degrees. */
+   * surroundings the observer took in, in degrees. */
   fieldOfView: string
   /** How far the lens was stopped down. Absent from the interface entirely for a device with no
    * diaphragm at all — an eye, a phone. */
@@ -130,10 +130,10 @@ export interface SightingLabels {
    * above: it changes the geometry of every shape, so it belongs in the file. */
   instrument: string
   /**
-   * The group of everything standing around the witness, and the dropdown listing it.
+   * The group of everything standing around the observer, and the dropdown listing it.
    *
    * "Environment", not "Decor": what goes in here is buildings, trees, streetlights, vehicles,
-   * aircraft and OTHER WITNESSES — the things that hid the object, that bound its distance by being
+   * aircraft and OTHER OBSERVERES — the things that hid the object, that bound its distance by being
    * crossed, and that a viewpoint can be moved to. "Decor" named it as scenery, as though it were
    * there to dress the picture, when it is the half of the reconstruction that can put a number on
    * a metre.
@@ -148,7 +148,7 @@ export interface SightingLabels {
   decorMound: string
   decorStreetlight: string
   decorVehicle: string
-  decorWitness: string
+  decorObserver: string
   decorEast: string
   decorNorth: string
   decorHeading: string
@@ -198,17 +198,17 @@ export interface SightingLabels {
   /** Number of upper stories a building decor object has (see DecorObject.floors) — shown only
    * for kind "building". */
   decorFloors: string
-  /** Which floor of a building the recording witness is on (see DecorObject.occupiedFloor) —
-   * shown only for kind "building" once decorWitnessSide is set. */
+  /** Which floor of a building the recording observer is on (see DecorObject.occupiedFloor) —
+   * shown only for kind "building" once decorObserverSide is set. */
   decorOccupiedFloor: string
-  /** Which side of the selected decor object the recording witness is positioned at, if inside it
-   * at all — the select field's own label (see DecorObject.witnessSide). */
-  decorWitnessSide: string
-  /** decorWitnessSide's own "not inside this object" option — the field's default/empty value. */
-  decorWitnessSideNone: string
+  /** Which side of the selected decor object the recording observer is positioned at, if inside it
+   * at all — the select field's own label (see DecorObject.observerSide). */
+  decorObserverSide: string
+  /** decorObserverSide's own "not inside this object" option — the field's default/empty value. */
+  decorObserverSideNone: string
   /** Heading above the 4 per-side window-opacity inputs (see DecorObject.windows). */
   decorWindows: string
-  /** Shared by the window-opacity input labels AND decorWitnessSide's own non-empty options —
+  /** Shared by the window-opacity input labels AND decorObserverSide's own non-empty options —
    * both are the same DecorSide concept (relative to the object's own heading, not a compass
    * direction), so one set of labels covers both. */
   decorSideFront: string

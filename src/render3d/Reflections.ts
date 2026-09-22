@@ -13,7 +13,7 @@ export interface Reflector {
 }
 
 /**
- * The reflections of the scene: one probe at the witness's eye for the decor, and one at the centre
+ * The reflections of the scene: one probe at the observer's eye for the decor, and one at the centre
  * of each body of the interpretation (see ReflectionProbe).
  *
  * EVERYTHING REFLECTS. A share of the light that meets any surface leaves at the mirror angle, by

@@ -12,7 +12,7 @@ import { SurfaceBrightness, type SkyBrightnessMap } from "./SurfaceBrightness.js
  * WHAT IS BEING COMPUTED is one line of sight walked out from the Earth through a cloud of dust
  * that thins with distance from the Sun and with height above the plane of the planets. Every grain
  * it passes is lit by a Sun that falls off as the inverse square, and throws its share toward the
- * witness according to how sharply it turns light — a real scattering law, forward-peaked the way
+ * observer according to how sharply it turns light — a real scattering law, forward-peaked the way
  * dust is. Add it up and you get: a bright cone leaning along the ecliptic near the Sun, a band
  * that thins to nothing at the ecliptic poles, and a faint oval brightening exactly opposite the
  * Sun. Those are the zodiacal light, the zodiacal band and the gegenschein, three named sights
@@ -25,7 +25,7 @@ import { SurfaceBrightness, type SkyBrightnessMap } from "./SurfaceBrightness.js
  *
  * Stated in the frame the measurements are published in — how far round the ecliptic from the Sun,
  * and how far above it — which is also the one frame in which the whole thing is CONSTANT. The
- * cloud does not care what date it is; only the Sun's own place in the witness's sky does, and that
+ * cloud does not care what date it is; only the Sun's own place in the observer's sky does, and that
  * is a rotation applied to a map computed once.
  */
 export class ZodiacalLight {
@@ -153,8 +153,8 @@ export class ZodiacalLight {
       const density =
         sunDistance ** -ZodiacalLight.RADIAL_FALLOFF *
         Math.exp(-ZodiacalLight.FAN_EXPONENT * Math.abs(heliocentricSine))
-      // How far the light had to turn to get from the Sun to the witness by way of this grain: none
-      // at all when the grain is between them, half a turn when the witness stands between it and
+      // How far the light had to turn to get from the Sun to the observer by way of this grain: none
+      // at all when the grain is between them, half a turn when the observer stands between it and
       // the Sun.
       const cosScattering = (cosElongation - at) / sunDistance
       collected += (density * this.scattering(cosScattering) * walked) / (sunDistance * sunDistance)

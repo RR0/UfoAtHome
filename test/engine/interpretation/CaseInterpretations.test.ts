@@ -9,7 +9,7 @@ const body: BodyJson = { id: "craft", explains: ["ufo"], model: { id: "ellipsoid
 const caseJson: CaseJson = {
   id: "Socorro",
   events: [
-    { type: "event", eventType: "sighting", url: "witness.json" },
+    { type: "event", eventType: "sighting", url: "observer.json" },
     { type: "event", eventType: "interpretation", sighting: "1964-04-24-ZamoraLonnie", title: "Inline", bodies: [body] } as never,
     { type: "event", eventType: "interpretation", sighting: "1964-04-24-ZamoraLonnie", url: "hypothesis.json" },
     { type: "event", eventType: "interpretation", sighting: "some-other-recording", url: "other.json" }
@@ -52,7 +52,7 @@ describe("A case's interpretations", () => {
   })
 })
 
-describe("The witness's own interpretation", () => {
+describe("The observer's own interpretation", () => {
   it("travels with the recording, unchanged", () => {
     const interpretation = { title: "On its legs", bodies: [body] }
     const json = { version: 1 as const, id: "x", timeline: { keyframes: [] }, interpretation }

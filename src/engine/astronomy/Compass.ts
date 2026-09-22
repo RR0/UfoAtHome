@@ -1,5 +1,5 @@
 /**
- * A bearing said the way a witness would say it.
+ * A bearing said the way a observer would say it.
  *
  * "206 degrees" is a number nobody pictures; "to the south-south-west" is where they were looking.
  * Sixteen points rather than eight, because a shower's radiant lands between the cardinals as often

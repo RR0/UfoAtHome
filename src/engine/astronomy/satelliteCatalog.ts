@@ -71,7 +71,7 @@ export const FIRST_TRACKED_MONTH = 23493
  *
  * The one number about satellites with complete historical coverage, and it carries more than it
  * looks: two the month Sputnik went up, a hundred and sixty-one the month of the Socorro landing,
- * two hundred and eighty-one for Valensole, and tens of thousands now. What a witness in 1964 could
+ * two hundred and eighty-one for Valensole, and tens of thousands now. What a observer in 1964 could
  * possibly have mistaken for something else is a different sky from the one overhead today.
  */
 export const TRACKED_OBJECTS_BY_MONTH: number[] = [

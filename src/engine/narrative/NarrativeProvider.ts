@@ -17,7 +17,7 @@ export interface NarrativeImage {
  * that cannot say where each of its numbers came from is indistinguishable from one that invented
  * them, and this format exists precisely so that the difference stays visible.
  *
- * What it does NOT mean is that only quotable values may be written. A witness saying "a few
+ * What it does NOT mean is that only quotable values may be written. A observer saying "a few
  * minutes" has given no duration and a timeline needs one; one saying the thing barred the road has
  * given no angle, though a carriageway's width and a plausible distance bound one within a few
  * degrees. Leaving those empty produced a recording that could not play, which is a worse answer
@@ -33,7 +33,7 @@ export interface NarrativeClaim {
   /** Why this value and why that basis: the account's own words for a stated one, the working for a
    * derived one ("a 5.5 m carriageway at 20-100 m spans 15 to 3 degrees; 8 taken"), what the guess
    * was chosen for in an assumed one. Quoted verbatim where it quotes: a paraphrase would defeat
-   * the point, since it is the witness's sentence that is the evidence. */
+   * the point, since it is the observer's sentence that is the evidence. */
   rationale: string
 }
 
@@ -42,7 +42,7 @@ export interface NarrativeClaim {
 export interface NarrativeDraft {
   /** The recording, filled in as far as the account and honest reasoning reach. Partial still: a
    * field nothing at all bears on is left out rather than invented, and every field that IS here
-   * has a claim saying whether the witness said it, it was worked out, or it was guessed. */
+   * has a claim saying whether the observer said it, it was worked out, or it was guessed. */
   recording: Partial<SightingRecordingJson>
   claims: NarrativeClaim[]
   /** What nothing could settle — not even a guess worth making. Narrower than it used to be, now
@@ -53,16 +53,16 @@ export interface NarrativeDraft {
 
 /** One ask: an account, read whole. */
 export interface NarrativeRequest {
-  /** The account in prose, in the witness's own words — the recording's own `description`, which
-   * is where a testimony has always belonged (see SightingEvent.description). There is no second
+  /** The account in prose, in the observer's own words — the recording's own `description`, which
+   * is where a account has always belonged (see SightingEvent.description). There is no second
    * kind of ask: reworking a draft means rewording the account and reading it again, because the
-   * account is the only thing here anybody actually witnessed. */
+   * account is the only thing here anybody actually observered. */
   ask: string
   images?: NarrativeImage[]
   /**
    * What the editor holds right now, so that a draft does not contradict what is already settled —
    * coordinates geocoded to the metre, an instrument chosen, decor placed. None of that is in a
-   * testimony and none of it is the account's to overrule. Providers send a digest rather than the
+   * account and none of it is the account's to overrule. Providers send a digest rather than the
    * file (see RecordingDigest: Socorro's own recording is 62 KB, 44 of them keyframes, and none of
    * those keyframes is something an account can be checked against).
    */
@@ -95,7 +95,7 @@ export interface NarrativeRequest {
  * Why this is a seam and not a function: what reads an account is the most obviously provisional
  * thing in the editor. Today it is a language model the reader pays for themselves; it could be a
  * local one, a parser for a report form some association publishes, or nothing at all. None of that
- * is allowed to reach the recording, which states what a witness said and must outlive every
+ * is allowed to reach the recording, which states what a observer said and must outlive every
  * fashion in how the saying got typed up.
  */
 export interface NarrativeProvider {

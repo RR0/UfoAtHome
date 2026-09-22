@@ -6,8 +6,8 @@
  * plenty for driving sky color/star visibility in an illustrative
  * reconstruction — not an ephemeris-grade implementation.
  *
- * `hour`/`minute`/`second` are treated as the witness's local clock time.
- * Since testimony rarely records a UTC offset and reconstructing the exact
+ * `hour`/`minute`/`second` are treated as the observer's local clock time.
+ * Since account rarely records a UTC offset and reconstructing the exact
  * historical timezone/DST rules for a given date is its own can of worms,
  * the local standard meridian is approximated from longitude
  * (round(lng / 15) hours) instead of a timezone database. This is a

@@ -5,7 +5,7 @@
  * A photograph is not a moment (see UfoElement.exposureInstants, which already draws the OBJECT
  * that way) and the sky is not a backdrop: the Earth turns under it at a fifteenth of a degree per
  * minute, so a pose long enough leaves every star as an ARC and not a point. That is the picture a
- * witness on a tripod comes back with, and one of the things a photograph of "lights that moved"
+ * observer on a tripod comes back with, and one of the things a photograph of "lights that moved"
  * most often turns out to be — the lights held still and the camera did not.
  *
  * Below a pixel of drift there is nothing to draw and no reason to pay for it: an eighth of a second

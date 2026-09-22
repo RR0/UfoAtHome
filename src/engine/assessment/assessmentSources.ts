@@ -7,7 +7,7 @@ import type { Sighting } from "../model/Sighting.js"
  *
  * One entry today, and the registry exists anyway for the reason DataSource's own doc comment
  * gives, with a second reason of its own: the published schemes disagree by construction. Hynek
- * classifies by what was seen, Vallée by what it did, Poher and Ballester-Guasp score the witness
+ * classifies by what was seen, Vallée by what it did, Poher and Ballester-Guasp score the observer
  * and the enquiry rather than the sighting. A registry says out loud that reading a recording is a
  * choice among those, where a single built-in function would quietly make this project take a side.
  *
@@ -23,7 +23,7 @@ export const ASSESSMENT_SOURCES: DataSource<Assessor>[] = [
     credit: "UFO@home",
     creditUrl: "https://ufoathome.org",
     create: () => ({
-      about: "witness",
+      about: "observer",
       assess: async (sighting: Sighting): Promise<Assessment> => {
         const { CoverageAssessor } = await import("./assessors/CoverageAssessor.js")
         return new CoverageAssessor().assess(sighting)

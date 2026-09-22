@@ -58,9 +58,9 @@ describe("Provenance", () => {
   })
 
   it("keeps a \"stated\" that carries a rationale, since that is not the default", () => {
-    const { provenance } = Provenance.strip({ id: { value: "x", rationale: "the witness named the hamlet" } })
+    const { provenance } = Provenance.strip({ id: { value: "x", rationale: "the observer named the hamlet" } })
 
-    expect(provenance.at("id")).toMatchObject({ basis: "stated", rationale: "the witness named the hamlet" })
+    expect(provenance.at("id")).toMatchObject({ basis: "stated", rationale: "the observer named the hamlet" })
   })
 
   it("forgets a guess whose value the author has taken over", () => {

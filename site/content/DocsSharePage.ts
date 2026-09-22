@@ -12,7 +12,7 @@ export class DocsSharePage extends DocsSection {
 
   /** A real recording on this site, absolute so that anything copied out of the page works when
    * pasted anywhere. */
-  private static readonly SAMPLE = "https://ufoathome.org/demo-data/witness-socorro.json"
+  private static readonly SAMPLE = "https://ufoathome.org/demo-data/observer-socorro.json"
 
   readonly meta: PageMeta = {
     slug: "docs/share",

@@ -8,7 +8,7 @@ import type { StellarOutburst } from "./novaCatalog.js"
  *
  * The third of the dated candidates, after the meteor showers and the comets, and the simplest of
  * them: a new star does not move. It stands at a fixed right ascension and declination, so where it
- * was in the witness's sky is the same arithmetic as for any star in the catalogue, precession
+ * was in the observer's sky is the same arithmetic as for any star in the catalogue, precession
  * included — which matters, since SN 1006 stood 14° from where its J2000 coordinates would put it
  * in that year's sky.
  *

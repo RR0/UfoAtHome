@@ -132,8 +132,8 @@ describe("lerpWeather windDirectionDeg", () => {
 })
 
 /**
- * A cloud base is what decides which side of the deck a witness is on — under it, as almost every
- * ground witness is, or above it, as a witness in an aircraft can be.
+ * A cloud base is what decides which side of the deck a observer is on — under it, as almost every
+ * ground observer is, or above it, as a observer in an aircraft can be.
  */
 describe("cloudBaseM", () => {
   const at = (cloudBaseM?: number): Weather => ({ ...DEFAULT_WEATHER, cloudCover: 0.5, cloudBaseM })

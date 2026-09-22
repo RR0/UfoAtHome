@@ -23,7 +23,7 @@ import { BufferAttribute, BufferGeometry, CanvasTexture, Color, Points, ShaderMa
  *    decoupled from real rain physics (an earlier version drove this directly from real terminal
  *    velocity and the result read as unmistakably too slow, especially for light rain).
  *  - UV squash in the fragment shader (`uv.x = 0.5 + (uv.x-0.5)*uUvSquash`), driven every frame by
- *    how much the camera is looking up/down — without it, a witness looking steeply up or down would
+ *    how much the camera is looking up/down — without it, a observer looking steeply up or down would
  *    see every streak's texture rendered at full un-squashed width, reading as fat vertical bars
  *    instead of thin rain.
  *
@@ -36,7 +36,7 @@ import { BufferAttribute, BufferGeometry, CanvasTexture, Color, Points, ShaderMa
  * Depth cues (near defocus + distance haze): without this, every particle at every distance rendered
  * equally sharp and equally saturated, which read as flat/artificial once actually compared side by
  * side — real vision has two distinct, physically different depth effects that both apply here:
- *  - A witness's eyes are very unlikely to be focused at arm's length on individual raindrops (they're
+ *  - A observer's eyes are very unlikely to be focused at arm's length on individual raindrops (they're
  *    watching a UFO, typically far away) — anything within a few meters of the camera should read as
  *    genuinely out-of-focus, the same real optical defocus that makes extreme foreground blur in any
  *    photo. `uNearFocusDistance` is the world-space distance at which this reaches zero.
@@ -177,7 +177,7 @@ void main() {
   gl_Position = projectionMatrix * mvPosition;
   float dist = max(1.0, -mvPosition.z);
   // Near-camera optical defocus: 1 right at the camera, fading to 0 by uNearFocusDistance — a
-  // witness's eyes aren't focused at arm's length on individual raindrops.
+  // observer's eyes aren't focused at arm's length on individual raindrops.
   vNearBlur = clamp(1.0 - dist / uNearFocusDistance, 0.0, 1.0);
   // Distance haze: 0 close in, ramping to 1 by uHazeDistance — real atmospheric haze, monotonic
   // (unlike defocus, there's no "in-focus band", it just keeps increasing with distance). Does NOT
@@ -196,7 +196,7 @@ void main() {
   // velocity: down from the fall, sideways from the wind.
   //
   // Projected rather than computed from the wind angle alone, because how slanted it LOOKS depends
-  // on where the witness is facing. Rain driven straight at them leans hardly at all; the same rain
+  // on where the observer is facing. Rain driven straight at them leans hardly at all; the same rain
   // seen from the side leans its full angle. Taking the difference between this drop and a point
   // one second along its own velocity, both through the projection, gets that for free — and the
   // aspect ratio converts the two clip-space axes into the pixels the angle is measured in.

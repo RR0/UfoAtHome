@@ -5,7 +5,7 @@ import { NightSkyBrightness } from "../engine/atmosphere/NightSkyBrightness.js"
 import { AtmosphereTables } from "./AtmosphereTables.js"
 
 export interface ScatteredSkyState {
-  /** The witness's eye above sea level. */
+  /** The observer's eye above sea level. */
   readonly altitudeM: number
   readonly sun: { readonly altitudeDeg: number; readonly azimuthDeg: number; readonly magnitude: number }
   readonly moon: { readonly altitudeDeg: number; readonly azimuthDeg: number; readonly magnitude: number; readonly phaseAngleDeg: number }
@@ -47,7 +47,7 @@ export interface SkyAmbient {
  *
  * The eye's adaptation is set by the sky itself: the log-average luminance of the upper hemisphere,
  * read back from the sky views after each redraw (asynchronously — a frame late costs nothing a
- * witness could see) and, until the first read-back, the zenith that NightSkyBrightness predicts.
+ * observer could see) and, until the first read-back, the zenith that NightSkyBrightness predicts.
  * The same read-back gives the scene its ambient colours, so fog, skylight and cloud shading take
  * their colour from the sky actually drawn.
  */

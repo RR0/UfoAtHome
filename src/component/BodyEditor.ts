@@ -23,7 +23,7 @@ export interface BodyEditorHost {
   /** Where a new body starts: the selected shape and the first keyframe that stands it where the
    * scene draws that shape at the playhead. Undefined when no shape is selected. */
   newBodyStart(): { sourceId?: string, label?: string, keyframe: BodyKeyframe } | undefined
-  /** Turns the witness towards a body, as the decor's own "Look at it" does. */
+  /** Turns the observer towards a body, as the decor's own "Look at it" does. */
   lookAt(body: BodyJson): void
   /** The playhead, ms. */
   currentTime(): number
@@ -34,7 +34,7 @@ export interface BodyEditorHost {
 }
 
 /**
- * The witness's own interpretation, edited: the bodies of `Sighting.interpretation`, each with the
+ * The observer's own interpretation, edited: the bodies of `Sighting.interpretation`, each with the
  * shapes it stands for and the model it is drawn as — a built-in shape, a catalogue entry, or a
  * glTF file at an address (absolute, or relative to the recording's own file: see
  * SceneRenderer.documentUrl).
@@ -132,12 +132,12 @@ export class BodyEditor {
     this.element("body-key-note").textContent = !reading ? m.notPlaced : here ? m.keyframeHere : m.keyframeAdded
     ;(this.element("body-key-delete") as HTMLButtonElement).disabled = here === undefined
     const active = (this.container.getRootNode() as Document | ShadowRoot).activeElement
-    const mode = base?.eastM !== undefined && base.northM !== undefined ? "world" : "witness"
+    const mode = base?.eastM !== undefined && base.northM !== undefined ? "world" : "observer"
     if (active !== this.select("body-key-mode")) this.select("body-key-mode").value = mode
     const shown = this.select("body-key-mode").value
     const onGround = base?.onGround === true
     this.input("body-key-ground").checked = onGround
-    for (const id of ["body-key-azimuth", "body-key-elevation", "body-key-distance"]) this.input(id).closest("label")!.hidden = shown !== "witness"
+    for (const id of ["body-key-azimuth", "body-key-elevation", "body-key-distance"]) this.input(id).closest("label")!.hidden = shown !== "observer"
     for (const id of ["body-key-east", "body-key-north"]) this.input(id).closest("label")!.hidden = shown !== "world"
     this.input("body-key-above").closest("label")!.hidden = shown !== "world" || onGround
     if (!reading) return
@@ -191,7 +191,7 @@ export class BodyEditor {
         <fieldset class="body-key">
           <legend id="body-key-legend"></legend>
           <p id="body-key-note" class="body-intro"></p>
-          <label><span>${m.placement}</span> <select id="body-key-mode"><option value="witness">${m.fromWitness}</option><option value="world">${m.inWorld}</option></select></label>
+          <label><span>${m.placement}</span> <select id="body-key-mode"><option value="observer">${m.fromObserver}</option><option value="world">${m.inWorld}</option></select></label>
           ${field("body-key-azimuth", m.azimuth, "number", "", "°", 'min="0" max="360" step="0.01"')}
           ${field("body-key-elevation", m.elevation, "number", "", "°", 'min="-90" max="90" step="0.01"')}
           ${field("body-key-distance", m.distance, "number", "", "m", 'min="0.1" max="30000" step="0.1"')}
@@ -345,9 +345,9 @@ export class BodyEditor {
   /**
    * A new body, standing for the selected shape where the scene draws it now (its direction, the
    * distance it is drawn at, and the real size its apparent width makes there), or, with no shape
-   * to stand for, where the witness is looking. A starting point
+   * to stand for, where the observer is looking. A starting point
    * for the interpretation, not a claim: an ellipsoid until a model is chosen, and a single
-   * keyframe, so it stays where it was put. The witness's interpretation is created with it when
+   * keyframe, so it stays where it was put. The observer's interpretation is created with it when
    * the recording has none.
    */
   private addBody(): void {
@@ -365,7 +365,7 @@ export class BodyEditor {
   /**
    * A catalogue model that knows how big the real thing is (see DecorModelEntry.sizeM) gives the
    * body that size, and moves it along its line of sight so that it keeps the angle it spans: an
-   * airliner is 36 m across whoever draws it, and what the witness saw was an angle, so a 36 m
+   * airliner is 36 m across whoever draws it, and what the observer saw was an angle, so a 36 m
    * airliner seen as wide as a 70 cm one five metres off is 250 m away. Only keyframes stating
    * their size and a distance along a direction move; a body placed in metres keeps its place.
    */
@@ -434,7 +434,7 @@ export class BodyEditor {
   }
 
   /**
-   * Moves the body on show to a direction from the witness, at the playhead — what dragging it on
+   * Moves the body on show to a direction from the observer, at the playhead — what dragging it on
    * the picture does, written through the same fields as typing (see updateKeyframe), which then
    * show where it went. On the ground it slides over the relief: its distance becomes where the
    * line of sight meets the ground, when it does. In the air it keeps its distance, and in the
@@ -470,7 +470,7 @@ export class BodyEditor {
   }
 
   /** Takes the body on show nearer or further along its line of sight, by `factor` — what the wheel
-   * over it does. Its direction from the witness stays. */
+   * over it does. Its direction from the observer stays. */
   scaleDistance(factor: number): void {
     const reading = this.readingNow()
     if (!reading) return

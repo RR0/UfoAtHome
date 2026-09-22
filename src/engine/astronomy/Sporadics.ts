@@ -103,7 +103,7 @@ export class Sporadics {
    * EACH APPEARS ABOVE THE HORIZON, and that is a correction rather than a convenience. The rate
    * these are drawn from is `observedRatePerHour`, which is already what an OBSERVER SEES, so
    * scattering radiants over the whole sphere and letting half the meteors land under the ground
-   * quietly halved it — and the control offering to show one aimed the witness sixty-six degrees
+   * quietly halved it — and the control offering to show one aimed the observer sixty-six degrees
    * into the earth. Meteors do fall on the other side of the world; they are simply not part of a
    * count of what somebody saw.
    *

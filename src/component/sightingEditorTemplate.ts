@@ -9,7 +9,7 @@ export const html = `
      parameter summary under the render. -->
 <div id="group-tabs" class="group-tabs">
   <button class="group-tab" type="button" aria-controls="group-observation" aria-expanded="false"><span id="label-observation-group">Observation</span></button>
-  <button class="group-tab" type="button" aria-controls="group-witness" aria-expanded="false"><span id="label-witness-group">Observer</span></button>
+  <button class="group-tab" type="button" aria-controls="group-observer" aria-expanded="false"><span id="label-observer-group">Observer</span></button>
   <button class="group-tab" type="button" aria-controls="group-location" aria-expanded="false"><span id="label-location-group">Location</span></button>
   <button class="group-tab" type="button" aria-controls="group-decor" aria-expanded="false"><span id="label-decor-group">Environment</span></button>
   <button class="group-tab" type="button" aria-controls="group-temporal" aria-expanded="false"><span id="label-temporal-group">Moment</span></button>
@@ -64,20 +64,20 @@ export const html = `
        so invisible) until there has been a draft. -->
   <div id="narrative-report" class="narrative-report" hidden></div>
 </section>
-<section class="group-panel" id="group-witness" aria-labelledby="label-witness-group" hidden>
+<section class="group-panel" id="group-observer" aria-labelledby="label-observer-group" hidden>
   <div class="toolbar">
-    <label><span id="label-witness-id">ID</span> <input id="witnessId" type="text"/></label>
-    <label><span id="label-witness-title">Title</span> <input id="witnessTitle" type="text"/></label>
-    <label><span id="label-witness-last-name">Last name</span> <input id="witnessLastName" type="text"/></label>
-    <label><span id="label-witness-first-names">First names</span> <input id="witnessFirstNames" type="text" placeholder="comma-separated"/></label>
-    <!-- Who this observer is and how their account travelled — see Testimony. None of it is about
+    <label><span id="label-observer-id">ID</span> <input id="observerId" type="text"/></label>
+    <label><span id="label-observer-title">Title</span> <input id="observerTitle" type="text"/></label>
+    <label><span id="label-observer-last-name">Last name</span> <input id="observerLastName" type="text"/></label>
+    <label><span id="label-observer-first-names">First names</span> <input id="observerFirstNames" type="text" placeholder="comma-separated"/></label>
+    <!-- Who this observer is and how their account travelled — see Account. None of it is about
          the phenomenon, which is why it sits here and not with the shape, and why it had to exist:
          Poher's credibility criteria read these and a recording could state none of them. How MANY
          people saw the thing is not here on purpose: a recording is one person's account, and the
          count belongs to the case that gathers them. Blank means unknown. -->
-    <label><span id="label-witness-age">Age then</span> <input id="witnessAge" type="number" min="0" max="120" step="1" size="4" placeholder="years"/></label>
-    <label><span id="label-witness-occupation">Occupation</span> <input id="witnessOccupation" type="text" placeholder="baker, airline pilot…"/></label>
-    <label><span id="label-testimony-source">Account obtained</span> <select id="testimonySource">
+    <label><span id="label-observer-age">Age then</span> <input id="observerAge" type="number" min="0" max="120" step="1" size="4" placeholder="years"/></label>
+    <label><span id="label-observer-occupation">Occupation</span> <input id="observerOccupation" type="text" placeholder="baker, airline pilot…"/></label>
+    <label><span id="label-account-source">Account obtained</span> <select id="accountSource">
       <option id="option-source-unknown" value="">unknown</option>
       <option id="option-source-on-site" value="on-site">on-site investigation</option>
       <option id="option-source-interview" value="interview">interview in person</option>
@@ -88,7 +88,7 @@ export const html = `
     </select></label>
     <!-- Three states and not a checkbox: a report that says nothing about follow-up is not a report
          that says none happened, and the methods reading this score the two differently. -->
-    <label><span id="label-testimony-followed-up">Followed up</span> <select id="testimonyFollowedUp">
+    <label><span id="label-account-followed-up">Followed up</span> <select id="accountFollowedUp">
       <option id="option-followed-unknown" value="">unknown</option>
       <option id="option-followed-yes" value="yes">yes</option>
       <option id="option-followed-no" value="no">no</option>
@@ -109,7 +109,7 @@ export const html = `
          was HELD — a camera askew, a head leaned over — which is why it belongs beside the focal
          length and the aperture whose own spikes it turns. -->
     <label><span id="label-roll">Roll</span> <input id="roll" type="number" min="-180" max="180" step="1" value="0" title="How far the instrument was tilted about its own line of sight — positive clockwise, as the observer saw it"/> &deg;</label>
-    <button id="add-decor-witness" type="button">Add observer</button>
+    <button id="add-decor-observer" type="button">Add observer</button>
     <label><span id="label-decor-sighting-url">Their own recording URL</span> <input id="decorSightingUrl" type="url" placeholder="https://…/sighting.json"/></label>
   </div>
 </section>
@@ -206,21 +206,21 @@ export const html = `
     <label><span id="label-decor-window-front-right">Front-right</span> <input id="decorWindowFrontRight" type="number" min="0" max="100" step="5" placeholder="none" autocomplete="off"/> %</label>
     <label><span id="label-decor-window-behind-left">Behind-left</span> <input id="decorWindowBehindLeft" type="number" min="0" max="100" step="5" placeholder="none" autocomplete="off"/> %</label>
     <label><span id="label-decor-window-behind-right">Behind-right</span> <input id="decorWindowBehindRight" type="number" min="0" max="100" step="5" placeholder="none" autocomplete="off"/> %</label>
-    <label><span id="label-decor-witness-side">Observer location</span>
-      <select id="decorWitnessSide">
-        <option id="option-witness-side-none" value="">Not present</option>
-        <option id="option-witness-side-front" value="front">Front</option>
-        <option id="option-witness-side-behind" value="behind">Behind</option>
-        <option id="option-witness-side-left" value="left">Left</option>
-        <option id="option-witness-side-right" value="right">Right</option>
+    <label><span id="label-decor-observer-side">Observer location</span>
+      <select id="decorObserverSide">
+        <option id="option-observer-side-none" value="">Not present</option>
+        <option id="option-observer-side-front" value="front">Front</option>
+        <option id="option-observer-side-behind" value="behind">Behind</option>
+        <option id="option-observer-side-left" value="left">Left</option>
+        <option id="option-observer-side-right" value="right">Right</option>
         <!-- Vehicle only — the 4 seat/door positions replace front/behind/left/right above for
-             that kind (see witnessSidesFor's own doc comment: you sit AT a door, never "at the
+             that kind (see observerSidesFor's own doc comment: you sit AT a door, never "at the
              windshield"). Hidden by default, same technique as decorKind's own hidden "observer"
              option — toggled per kind in syncDecorVisibility. -->
-        <option id="option-witness-side-front-left" value="front-left" hidden>Front-left</option>
-        <option id="option-witness-side-front-right" value="front-right" hidden>Front-right</option>
-        <option id="option-witness-side-behind-left" value="behind-left" hidden>Behind-left</option>
-        <option id="option-witness-side-behind-right" value="behind-right" hidden>Behind-right</option>
+        <option id="option-observer-side-front-left" value="front-left" hidden>Front-left</option>
+        <option id="option-observer-side-front-right" value="front-right" hidden>Front-right</option>
+        <option id="option-observer-side-behind-left" value="behind-left" hidden>Behind-left</option>
+        <option id="option-observer-side-behind-right" value="behind-right" hidden>Behind-right</option>
       </select>
     </label>
     <label><span id="label-decor-occupied-floor">Occupied floor</span> <input id="decorOccupiedFloor" type="number" min="0" max="20" step="1" value="0"/></label>
@@ -243,7 +243,7 @@ export const html = `
              "Add observer" — nothing else to configure beforehand) — hidden (not removed) so
              decorLabel() can still look up its translated kind name by id for the fallback
              "{kind} {n}" label, see SightingEditorElement.decorLabel. -->
-        <option id="option-decor-witness" value="observer" hidden>Other observer</option>
+        <option id="option-decor-observer" value="observer" hidden>Other observer</option>
       </select>
     </div>
   </div>
@@ -568,7 +568,7 @@ export const html = `
   <button id="context-delete" type="button" role="menuitem" class="context-delete">Delete</button>
 </div>
 <div id="decor-context-menu" class="context-menu" hidden role="menu">
-  <button id="context-view-testimony" type="button" role="menuitem">View account</button>
+  <button id="context-view-account" type="button" role="menuitem">View account</button>
   <div class="submenu-trigger">
     <span id="label-context-masks" class="submenu-label" role="menuitem" aria-haspopup="true">Masks &#9656;</span>
     <div id="context-masks-submenu" class="submenu" role="menu"></div>
@@ -632,7 +632,7 @@ button.preset[aria-pressed="true"] {
 #milestoneNote {
   min-width: 22em;
 }
-#witnessId, #witnessTitle, #witnessLastName, #witnessFirstNames, #sightingId, #tags, #shapeTitle, #decorTitle {
+#observerId, #observerTitle, #observerLastName, #observerFirstNames, #sightingId, #tags, #shapeTitle, #decorTitle {
   width: 10em;
 }
 /* The whole disclosure sits on its own line: five stacked rows inside a row of inline labels
@@ -682,7 +682,7 @@ input.invalid {
   }
 }
 /* Reads back what the Real size / Distance pair actually produces on screen — an apparent size in
-   degrees, and in full Moons, the only unit of apparent size most testimonies come with. Purely
+   degrees, and in full Moons, the only unit of apparent size most accounts come with. Purely
    informative (an output, never an input), so it stays visually quieter than the fields it
    comments on. */
 /* Never a backtick in here: this whole stylesheet is a template literal, and one would end it.

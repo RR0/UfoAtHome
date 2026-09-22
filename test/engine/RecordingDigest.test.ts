@@ -8,7 +8,7 @@ const recording = (): SightingRecordingJson => ({
   version: 1,
   time: { year: 1964, month: 4, day: 24, hour: 17, minute: 45 },
   id: "socorro",
-  witness: { id: "zamora", title: "Lonnie Zamora" },
+  observer: { id: "zamora", title: "Lonnie Zamora" },
   timeline: {
     keyframes: [
       {
@@ -41,7 +41,7 @@ describe("RecordingDigest", () => {
 
     expect(digest?.time).toEqual({ year: 1964, month: 4, day: 24, hour: 17, minute: 45 })
     expect(digest?.id).toBe("socorro")
-    expect(digest?.witness).toEqual({ id: "zamora", title: "Lonnie Zamora" })
+    expect(digest?.observer).toEqual({ id: "zamora", title: "Lonnie Zamora" })
   })
 
   it("reduces a shape to what was perceived, dropping how it is painted", () => {
@@ -54,7 +54,7 @@ describe("RecordingDigest", () => {
       angular: { widthDeg: 0.1603, heightDeg: 0.0827 },
       aim: { azimuthDeg: 200, altitudeDeg: -5.0083 }
     })
-    // The pixels, the colour, the transparency and the halo are not testimony: they are derived on
+    // The pixels, the colour, the transparency and the halo are not account: they are derived on
     // load from the two fields above (see SightingShapes), and sending them every round would pay
     // for the timeline again on every correction.
     expect(shape).not.toHaveProperty("bounds")
@@ -149,24 +149,24 @@ describe("DraftRecording", () => {
     expect(DraftRecording.loadable({ id: "valensole" })).toEqual({ id: "valensole" })
   })
 
-  it("leaves a vehicle the witness is inside at their own position", () => {
+  it("leaves a vehicle the observer is inside at their own position", () => {
     // 0,0 looks like a mistake and is not: DecorSystem.occupantView seats the camera within an
-    // object that carries witnessSide, so a car there is a car AROUND the witness. Nudging it clear
+    // object that carries observerSide, so a car there is a car AROUND the observer. Nudging it clear
     // would move the vehicle out from under its own driver.
     const inside = DraftRecording.loadable({
-      decor: [{ id: "car", kind: "vehicle", eastM: 0, northM: 0, witnessSide: "front-left" }]
+      decor: [{ id: "car", kind: "vehicle", eastM: 0, northM: 0, observerSide: "front-left" }]
     })
 
-    expect(inside.decor?.[0]).toMatchObject({ eastM: 0, northM: 0, witnessSide: "front-left" })
+    expect(inside.decor?.[0]).toMatchObject({ eastM: 0, northM: 0, observerSide: "front-left" })
   })
 
-  it("glazes a drafted vehicle, so a witness seated in it can see out", () => {
+  it("glazes a drafted vehicle, so a observer seated in it can see out", () => {
     // A side absent from `windows` has no opening there at all, so a vehicle drafted without the
     // field is a sealed box — and the first real draft rendered exactly that: grey where the sky
     // should have been. The editor's own Add never had the problem because it spreads
     // defaultWindows in.
     const drafted = DraftRecording.loadable({
-      decor: [{ id: "car", kind: "vehicle", eastM: 0, northM: 0, witnessSide: "front-left" }]
+      decor: [{ id: "car", kind: "vehicle", eastM: 0, northM: 0, observerSide: "front-left" }]
     })
 
     expect(Object.keys(drafted.decor?.[0].windows ?? {}).length).toBeGreaterThan(0)

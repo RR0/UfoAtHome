@@ -117,7 +117,7 @@ export class CanvasRenderer {
     this.ctx.globalAlpha = 1 - shape.transparency
     // Applied to the whole shape, halo included, and before either is painted: ctx.filter affects
     // what is drawn AFTER it. A blurred edge and a blurred glow are the same statement — the
-    // witness could not place the boundary — so blurring the fringe while leaving the body's own
+    // observer could not place the boundary — so blurring the fringe while leaving the body's own
     // outline crisp would draw a hard edge inside a soft one, which is nothing anybody saw.
     const blur = shape.blur ?? 0
     if (blur > 0) {
@@ -268,11 +268,11 @@ export class CanvasRenderer {
   }
 
   /**
-   * The witness's own outline and nothing else: a dashed line along the shape's edge, in its colour,
+   * The observer's own outline and nothing else: a dashed line along the shape's edge, in its colour,
    * with no fill, halo or glare.
    *
-   * What a shape becomes when the testimony is compared with an interpretation (see BodySystem and
-   * SceneElement.compareTestimony): the bodies are what is drawn, and the testimony stands beside
+   * What a shape becomes when the account is compared with an interpretation (see BodySystem and
+   * SceneElement.compareAccount): the bodies are what is drawn, and the account stands beside
    * them as the thing they are measured against, without covering them.
    */
   paintGhost(shape: Shape, lineWidthPx: number): void {

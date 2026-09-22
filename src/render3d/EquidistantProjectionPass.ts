@@ -27,7 +27,7 @@ import type { UnfinishedFrame } from "./colorSpace.js"
  * three.js's PerspectiveCamera can only do one projection, `r = f·tan θ`: the pinhole a camera
  * really is. It spreads everything away from the axis by `sec²θ` — 42% at 33 degrees off-centre,
  * 105% at the corner of a 16:9 frame with a 60 degree vertical field. That is right for a
- * photograph and wrong for a witness, who perceives an angle as an angle wherever it falls. See
+ * photograph and wrong for a observer, who perceives an angle as an angle wherever it falls. See
  * Instrument.ts.
  *
  * So the scene is rendered as usual into an offscreen target with a DELIBERATELY WIDER field, and
@@ -60,7 +60,7 @@ export class EquidistantProjectionPass {
    * How many samples an edge is drawn from in the offscreen render this resamples.
    *
    * The canvas is asked for `antialias: true`, and for a photograph — drawn straight onto it —
-   * that is the whole answer. A WITNESS is not: an eye perceives an angle as an angle, so the
+   * that is the whole answer. A OBSERVER is not: an eye perceives an angle as an angle, so the
    * scene goes into the target below and is resampled out of it, and a plain render target has one
    * sample per pixel however the canvas was asked for. The horizon a reader sees is then a
    * staircase, and the resampling can only smear it, never undo it — the steps are already in the
@@ -236,7 +236,7 @@ export class EquidistantProjectionPass {
    * widened camera, and would otherwise test the wrong part of the scene.
    *
    * @param overlays Draws what is laid over the scene rather than seen in it (the pictures of the
-   *   place, the witness's own phenomena), through the camera given, onto a cleared target of its own.
+   *   place, the observer's own phenomena), through the camera given, onto a cleared target of its own.
    */
   render(
     renderer: WebGLRenderer,
@@ -270,7 +270,7 @@ export class EquidistantProjectionPass {
     const originalTarget = renderer.getRenderTarget()
     renderer.setRenderTarget(this.target)
     renderer.render(scene, camera)
-    // What is laid over the picture — the witness's own phenomena, depth-tested against the decor
+    // What is laid over the picture — the observer's own phenomena, depth-tested against the decor
     // alone (see SceneRenderer.renderPhenomenaPass) — onto a target of its own, through the same
     // widened camera, so that it is resampled the same way and finished over the eye's response.
     if (overlays) {

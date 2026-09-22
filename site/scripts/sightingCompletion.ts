@@ -89,7 +89,7 @@ export class SightingCompletion {
       const before = text.slice(0, context.pos)
 
       // A key being typed: replace the whole token, quotes included, so completing over a
-      // half-written "wit" leaves "witness" and not "wit"witness".
+      // half-written "wit" leaves "observer" and not "wit"observer".
       if (node.name === "PropertyName") {
         return this.keys(this.pathTo(node.parent?.parent ?? null, text), node.from, node.to)
       }

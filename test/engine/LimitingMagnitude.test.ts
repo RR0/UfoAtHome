@@ -19,10 +19,10 @@ describe("LimitingMagnitude", () => {
     expect(visibleMagnitudeLimit(-18, LimitingMagnitude.gainOverEye(eye))).toBe(6.5)
   })
 
-  it("puts a snapshot camera BEHIND the witness holding it", () => {
+  it("puts a snapshot camera BEHIND the observer holding it", () => {
     // The result that matters most and reads as a surprise: an Instamatic at f/11 and a ninetieth
     // of a second collects a fraction of what a dark-adapted eye does, so its stars are FEWER than
-    // the ones the witness described. Half of "the sky was full of stars, and the photograph is
+    // the ones the observer described. Half of "the sky was full of stars, and the photograph is
     // black" is this, and nothing in the scene said so while every sighting was drawn at 6.5.
     const gain = LimitingMagnitude.gainOverEye(instamatic)
     expect(gain).toBeLessThan(-2)

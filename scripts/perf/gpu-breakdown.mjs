@@ -3,7 +3,7 @@
 // card's time per drawing (EXT_disjoint_timer_query_webgl2) is reported for the full scene and for
 // each part removed, so the difference is what that part costs.
 //
-//   node scripts/perf/gpu-breakdown.mjs witness-valensole witness-socorro
+//   node scripts/perf/gpu-breakdown.mjs observer-valensole observer-socorro
 //
 // Same requirements as page-scroll.mjs (headed Chrome outside the sandbox, PLAYWRIGHT_MODULE).
 // ORIGIN (default localhost:5182), W × H the stage in CSS pixels (1100 × 620), DPR the pinned
@@ -18,7 +18,7 @@ const origin = process.env.ORIGIN || "http://localhost:5182"
 const outDir = process.env.OUT_DIR || "perf-out"
 const width = Number(process.env.W || 1100), height = Number(process.env.H || 620)
 const dpr = Number(process.env.DPR || 2), draws = Number(process.env.DRAWS || 40)
-const demos = process.argv.slice(2).length ? process.argv.slice(2) : ["witness-valensole"]
+const demos = process.argv.slice(2).length ? process.argv.slice(2) : ["observer-valensole"]
 
 await mkdir(outDir, { recursive: true })
 const browser = await chromium.launch({ headless: false, args: ["--window-size=1300,900"] })

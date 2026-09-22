@@ -7,7 +7,7 @@ import { VisibleSpectrum } from "./Spectrum.js"
  * What comes back is a map of the sky in the source's own frame: how bright the sky is at every
  * altitude and every angle round from the Sun's bearing. That frame is the reason one map serves a
  * whole scene — the display depends on how high the source stands and on nothing else, so the
- * witness turning round, or the Sun crossing the sky, only turns the map rather than needing a new
+ * observer turning round, or the Sun crossing the sky, only turns the map rather than needing a new
  * one.
  *
  * NOTHING IN THIS FILE NAMES A HALO. It draws crystal orientations, traces rays (IceCrystal) and

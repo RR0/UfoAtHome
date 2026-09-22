@@ -98,7 +98,7 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
 beforeAll(() => {
   vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockImplementation(function (this: HTMLCanvasElement) {
     // mockImplementation, not mockReturnValue: a renderer that sizes itself from its own canvas
-    // (see WitnessMapRenderer) reads ctx.canvas, and one shared object makes every canvas claim to
+    // (see ObserverMapRenderer) reads ctx.canvas, and one shared object makes every canvas claim to
     // be the same one.
     return {
       canvas: this,
@@ -144,7 +144,7 @@ describe("the name this element had before 0.41.0", () => {
     document.body.innerHTML = ""
   })
 
-  // Pages were loading it as <rr0-eyewitness> before <rr0-sighting> existed — rr0.org's own case
+  // Pages were loading it as <rr0-eyeobserver> before <rr0-sighting> existed — rr0.org's own case
   // files among them — and a rename that breaks them punishes whoever used the thing early.
   it("still upgrades, and to the same element", () => {
     const legacy = document.createElement(LEGACY_ELEMENT_NAME)
@@ -187,12 +187,12 @@ async function waitFor(check: () => boolean, timeoutMs = 500): Promise<void> {
 
 const johnSighting = {
   version: 1 as const,
-  witness: { id: "john", title: "Clarence Chiles" },
+  observer: { id: "john", title: "Clarence Chiles" },
   timeline: { keyframes: [{ t: 0, shapes: [] }] }
 }
 const janeSighting = {
   version: 1 as const,
-  witness: { id: "jane", title: "John Whitted" },
+  observer: { id: "jane", title: "John Whitted" },
   timeline: { keyframes: [{ t: 100, shapes: [] }] }
 }
 
@@ -241,49 +241,49 @@ describe("SightingElement", () => {
     expect(toolbar.hidden).toBe(true)
   })
 
-  it("shows the toolbar with a plain-text witness name for a single witness, so the info button stays reachable", async () => {
+  it("shows the toolbar with a plain-text observer name for a single observer, so the info button stays reachable", async () => {
     const element = mount()
-    element.witnessUrls = ["john.json"]
+    element.observerUrls = ["john.json"]
     await new Promise(resolve => setTimeout(resolve, 0))
 
     const toolbar = element.shadowRoot!.getElementById("toolbar") as HTMLElement
-    const witnessText = element.shadowRoot!.getElementById("witness-text") as HTMLElement
-    const select = element.shadowRoot!.getElementById("witness") as HTMLSelectElement
+    const observerText = element.shadowRoot!.getElementById("observer-text") as HTMLElement
+    const select = element.shadowRoot!.getElementById("observer") as HTMLSelectElement
     expect(toolbar.hidden).toBe(false)
-    expect(witnessText.hidden).toBe(false)
-    expect(witnessText.textContent).toBe("Clarence Chiles")
+    expect(observerText.hidden).toBe(false)
+    expect(observerText.textContent).toBe("Clarence Chiles")
     expect(select.hidden).toBe(true)
   })
 
-  it("tells the page which recording is on show, on load and on every change of witness", async () => {
+  it("tells the page which recording is on show, on load and on every change of observer", async () => {
     stubFetch({ "chiles.json": johnSighting, "whitted.json": janeSighting })
     const element = mount()
     const seen: string[] = []
-    element.addEventListener("witnesschange", event => seen.push((event as CustomEvent<{ src: string }>).detail.src))
+    element.addEventListener("observerchange", event => seen.push((event as CustomEvent<{ src: string }>).detail.src))
 
-    element.witnessUrls = ["chiles.json", "whitted.json"]
+    element.observerUrls = ["chiles.json", "whitted.json"]
     await new Promise(resolve => setTimeout(resolve, 0))
     expect(seen).toEqual(["chiles.json"])
 
-    const select = element.shadowRoot!.getElementById("witness") as HTMLSelectElement
+    const select = element.shadowRoot!.getElementById("observer") as HTMLSelectElement
     select.value = "whitted.json"
     select.dispatchEvent(new Event("change"))
     expect(seen).toEqual(["chiles.json", "whitted.json"])
     expect(element.sightingData).toBe(janeSighting)
   })
 
-  it("shows the live select, not plain text, once there's more than one witness", async () => {
+  it("shows the live select, not plain text, once there's more than one observer", async () => {
     stubFetch({ "chiles.json": johnSighting, "whitted.json": janeSighting })
     const element = mount()
 
-    element.witnessUrls = ["chiles.json", "whitted.json"]
+    element.observerUrls = ["chiles.json", "whitted.json"]
     await new Promise(resolve => setTimeout(resolve, 0))
 
     const toolbar = element.shadowRoot!.getElementById("toolbar") as HTMLElement
-    const witnessText = element.shadowRoot!.getElementById("witness-text") as HTMLElement
-    const select = element.shadowRoot!.getElementById("witness") as HTMLSelectElement
+    const observerText = element.shadowRoot!.getElementById("observer-text") as HTMLElement
+    const select = element.shadowRoot!.getElementById("observer") as HTMLSelectElement
     expect(toolbar.hidden).toBe(false)
-    expect(witnessText.hidden).toBe(true)
+    expect(observerText.hidden).toBe(true)
     expect(select.hidden).toBe(false)
     expect([...select.options].map(o => ({ value: o.value, label: o.textContent }))).toEqual([
       { value: "chiles.json", label: "Clarence Chiles" },
@@ -291,92 +291,92 @@ describe("SightingElement", () => {
     ])
   })
 
-  it("always shows the testimony sentence, even for a single witness — just the witness, no date/location duplicated from the info panel", async () => {
+  it("always shows the account sentence, even for a single observer — just the observer, no date/location duplicated from the info panel", async () => {
     const element = mount()
-    element.witnessUrls = ["john.json"]
+    element.observerUrls = ["john.json"]
     await new Promise(resolve => setTimeout(resolve, 0))
 
-    const testimony = element.shadowRoot!.getElementById("testimony") as HTMLElement
-    expect(testimony.textContent).toContain("Account by")
-    expect(testimony.textContent).toContain("Clarence Chiles")
+    const account = element.shadowRoot!.getElementById("account") as HTMLElement
+    expect(account.textContent).toContain("Account by")
+    expect(account.textContent).toContain("Clarence Chiles")
   })
 
-  it("falls back to witness.id, and then to a place in the list — never to the URL", async () => {
+  it("falls back to observer.id, and then to a place in the list — never to the URL", async () => {
     // The URL used to be the last resort, and it was a bad one: several recordings this component
-    // is pointed at have no witness at all (a sky set up to show a halo is not testimony), and
+    // is pointed at have no observer at all (a sky set up to show a halo is not account), and
     // "Account by /demo-data/sky-test-halos.json" read as a fault rather than as a name.
-    const anonymousById = { version: 1 as const, witness: { id: "w2" }, timeline: { keyframes: [] } }
+    const anonymousById = { version: 1 as const, observer: { id: "w2" }, timeline: { keyframes: [] } }
     const anonymousNoId = { version: 1 as const, timeline: { keyframes: [] } }
     stubFetch({ "a.json": johnSighting, "b.json": anonymousById, "c.json": anonymousNoId })
     const element = mount()
 
-    element.witnessUrls = ["a.json", "b.json", "c.json"]
+    element.observerUrls = ["a.json", "b.json", "c.json"]
     await new Promise(resolve => setTimeout(resolve, 0))
 
-    const select = element.shadowRoot!.getElementById("witness") as HTMLSelectElement
+    const select = element.shadowRoot!.getElementById("observer") as HTMLSelectElement
     expect([...select.options].map(o => o.textContent)).toEqual(["Clarence Chiles", "w2", "Observer 3"])
   })
 
-  it("says nothing at all where a single recording names no witness", async () => {
+  it("says nothing at all where a single recording names no observer", async () => {
     // A sky with no observer is not an account, so the whole "Account by …" line goes — the ?
     // button that carries the observation's own metadata stays either way.
-    const noWitness = { version: 1 as const, id: "sky-test-halos", timeline: { keyframes: [] } }
-    stubFetch({ "sky.json": noWitness, "john.json": johnSighting })
+    const noObserver = { version: 1 as const, id: "sky-test-halos", timeline: { keyframes: [] } }
+    stubFetch({ "sky.json": noObserver, "john.json": johnSighting })
     const element = mount()
 
     element.setAttribute("src", "sky.json")
     await new Promise(resolve => setTimeout(resolve, 0))
 
-    const testimony = element.shadowRoot!.getElementById("testimony")!
-    expect(testimony.hidden).toBe(true)
+    const account = element.shadowRoot!.getElementById("account")!
+    expect(account.hidden).toBe(true)
     // And nothing stale left inside it for a screen reader to find.
-    expect(element.shadowRoot!.getElementById("witness-text")!.textContent).toBe("")
+    expect(element.shadowRoot!.getElementById("observer-text")!.textContent).toBe("")
 
     // A named one brings the line back.
     element.setAttribute("src", "john.json")
     await new Promise(resolve => setTimeout(resolve, 0))
-    expect(testimony.hidden).toBe(false)
-    expect(element.shadowRoot!.getElementById("witness-text")!.textContent).toBe("Clarence Chiles")
+    expect(account.hidden).toBe(false)
+    expect(element.shadowRoot!.getElementById("observer-text")!.textContent).toBe("Clarence Chiles")
   })
 
-  it("loads the first witness's sighting automatically once the list is set", async () => {
+  it("loads the first observer's sighting automatically once the list is set", async () => {
     stubFetch({ "john.json": johnSighting, "jane.json": janeSighting })
     const element = mount()
 
-    element.witnessUrls = ["john.json", "jane.json"]
+    element.observerUrls = ["john.json", "jane.json"]
     await new Promise(resolve => setTimeout(resolve, 0))
 
     const scene = nestedScene(element) as unknown as { sightingData: typeof johnSighting }
-    expect(scene.sightingData.witness?.id).toBe("john")
+    expect(scene.sightingData.observer?.id).toBe("john")
   })
 
-  it("switching the select loads the chosen witness's already-fetched sighting, without re-fetching", async () => {
+  it("switching the select loads the chosen observer's already-fetched sighting, without re-fetching", async () => {
     const fetchMock = stubFetch({ "john.json": johnSighting, "jane.json": janeSighting })
     const element = mount()
-    element.witnessUrls = ["john.json", "jane.json"]
+    element.observerUrls = ["john.json", "jane.json"]
     await new Promise(resolve => setTimeout(resolve, 0))
     const callsAfterLoad = fetchMock.mock.calls.length
 
-    const select = element.shadowRoot!.getElementById("witness") as HTMLSelectElement
+    const select = element.shadowRoot!.getElementById("observer") as HTMLSelectElement
     select.value = "jane.json"
     select.dispatchEvent(new Event("change"))
 
     const scene = nestedScene(element) as unknown as { sightingData: typeof janeSighting }
-    expect(scene.sightingData.witness?.id).toBe("jane")
+    expect(scene.sightingData.observer?.id).toBe("jane")
     expect(fetchMock.mock.calls.length).toBe(callsAfterLoad) // no new fetch on selection
   })
 
-  it("preserves the current selection when the witness list is refreshed, instead of resetting to the first", async () => {
+  it("preserves the current selection when the observer list is refreshed, instead of resetting to the first", async () => {
     stubFetch({ "john.json": johnSighting, "jane.json": janeSighting })
     const element = mount()
-    element.witnessUrls = ["john.json", "jane.json"]
+    element.observerUrls = ["john.json", "jane.json"]
     await new Promise(resolve => setTimeout(resolve, 0))
-    const select = element.shadowRoot!.getElementById("witness") as HTMLSelectElement
+    const select = element.shadowRoot!.getElementById("observer") as HTMLSelectElement
     select.value = "jane.json"
     select.dispatchEvent(new Event("change"))
 
-    // Same two witnesses, re-set (e.g. a manifest refresh) — "jane.json" should stay selected.
-    element.witnessUrls = ["john.json", "jane.json"]
+    // Same two observers, re-set (e.g. a manifest refresh) — "jane.json" should stay selected.
+    element.observerUrls = ["john.json", "jane.json"]
     await new Promise(resolve => setTimeout(resolve, 0))
 
     expect(select.value).toBe("jane.json")
@@ -393,16 +393,16 @@ describe("SightingElement", () => {
   }
   const sightingEvent = (url: string) => ({ type: "event", eventType: "sighting", url })
 
-  it("reads the witnesses of a case.json from its sighting events", async () => {
+  it("reads the observers of a case.json from its sighting events", async () => {
     const johnUrl = new URL("john.json", location.href).href
     stubFetch({ "case.json": { id: "Case", title: "A case", events: [sightingEvent("john.json")] }, [johnUrl]: johnSighting })
 
     const element = await connect("case.json")
 
-    expect(element.witnessUrls).toEqual([johnUrl])
+    expect(element.observerUrls).toEqual([johnUrl])
   })
 
-  it("offers the testimony, in the round when the witness said what it was, and the case's interpretations", async () => {
+  it("offers the account, in the round when the observer said what it was, and the case's interpretations", async () => {
     const body = { id: "craft", explains: ["ufo"], model: { id: "sphere" }, track: [{ t: 0, eastM: 0, northM: 10, onGround: true }] }
     const withId = { ...johnSighting, id: "1948-07-24-ChilesClarence", place: [{ lat: 32.4, lng: -86.3 }], interpretation: { title: "Own", bodies: [body] } }
     const johnUrl = new URL("john.json", location.href).href
@@ -414,10 +414,10 @@ describe("SightingElement", () => {
     const shadow = element.shadowRoot!
     const select = shadow.getElementById("interpretation") as HTMLSelectElement
     expect((shadow.getElementById("interpretation-choice") as HTMLElement).hidden).toBe(false)
-    // One testimony, not a raw one and the witness's own beside it: what they said it was is how
+    // One account, not a raw one and the observer's own beside it: what they said it was is how
     // their account is drawn, and what they saw is what it is compared with.
     expect([...select.options].map(option => option.textContent)).toEqual(["Account", "Balloon, by Josef Allen Hynek"])
-    expect(select.value).toBe("testimony")
+    expect(select.value).toBe("account")
     expect(element.scene.interpretation?.title).toBe("Own")
 
     select.value = "case-0"
@@ -425,34 +425,34 @@ describe("SightingElement", () => {
     await new Promise(resolve => setTimeout(resolve, 0))
     expect(element.scene.interpretation?.title).toBe("Balloon")
 
-    select.value = "testimony"
+    select.value = "account"
     select.dispatchEvent(new Event("change"))
     await new Promise(resolve => setTimeout(resolve, 0))
     expect(element.scene.interpretation?.title).toBe("Own")
   })
 
-  it("draws a testimony that says nothing in metres as the angles it states, with nothing to choose or compare", async () => {
+  it("draws a account that says nothing in metres as the angles it states, with nothing to choose or compare", async () => {
     const element = await connect("john.json")
     const shadow = element.shadowRoot!
     expect(element.scene.interpretation).toBeUndefined()
     expect((shadow.getElementById("interpretation-choice") as HTMLElement).hidden).toBe(true)
-    expect((shadow.getElementById("compare-testimony") as HTMLButtonElement).hidden).toBe(true)
+    expect((shadow.getElementById("compare-account") as HTMLButtonElement).hidden).toBe(true)
   })
 
-  it("shows the testimony in the round alone until the reader asks to compare it with what was seen", async () => {
+  it("shows the account in the round alone until the reader asks to compare it with what was seen", async () => {
     const body = { id: "craft", explains: ["ufo"], model: { id: "sphere" }, track: [{ t: 0, eastM: 0, northM: 10, onGround: true }] }
     stubFetch({ "john.json": { ...johnSighting, id: "x", place: [{ lat: 32.4, lng: -86.3 }], interpretation: { title: "Own", bodies: [body] } } })
     const element = await connect("john.json")
     const shadow = element.shadowRoot!
-    const compare = shadow.getElementById("compare-testimony") as HTMLButtonElement
+    const compare = shadow.getElementById("compare-account") as HTMLButtonElement
     const panel = shadow.getElementById("confrontation") as HTMLElement
     expect(compare.hidden).toBe(false)
     expect(compare.getAttribute("aria-pressed")).toBe("false")
-    expect(element.scene.compareTestimony).toBe(false)
+    expect(element.scene.compareAccount).toBe(false)
     expect(panel.hidden).toBe(true)
 
     compare.click()
-    expect(element.scene.compareTestimony).toBe(true)
+    expect(element.scene.compareAccount).toBe(true)
     expect(compare.getAttribute("aria-pressed")).toBe("true")
     expect(panel.hidden).toBe(false)
   })
@@ -468,25 +468,25 @@ describe("SightingElement", () => {
     french.lang = "fr"
     document.body.appendChild(french)
     french.appendChild(element)
-    const compare = shadow.getElementById("compare-testimony") as HTMLButtonElement
+    const compare = shadow.getElementById("compare-account") as HTMLButtonElement
     // The French messages arrive by a dynamic import, which takes what it takes under load.
     await waitFor(() => compare.title === "Comparer au compte rendu")
 
     // Put somewhere else, it reads its recording again: the choice and the scene say the same thing.
-    expect(select.value).toBe("testimony")
+    expect(select.value).toBe("account")
     expect(element.scene.interpretation?.title).toBe("Own")
   })
 
   it("starts comparing where the page asks, and lets the reader stop", async () => {
     const element = document.createElement(SIGHTING_ELEMENT_NAME) as SightingElement
-    element.setAttribute("compare-testimony", "")
+    element.setAttribute("compare-account", "")
     document.body.appendChild(element)
-    expect(element.scene.compareTestimony).toBe(true)
-    ;(element.shadowRoot!.getElementById("compare-testimony") as HTMLButtonElement).click()
-    expect(element.scene.compareTestimony).toBe(false)
+    expect(element.scene.compareAccount).toBe(true)
+    ;(element.shadowRoot!.getElementById("compare-account") as HTMLButtonElement).click()
+    expect(element.scene.compareAccount).toBe(false)
   })
 
-  it("shows no choice where the raw testimony is all there is", async () => {
+  it("shows no choice where the raw account is all there is", async () => {
     const element = await connect("john.json")
     expect((element.shadowRoot!.getElementById("interpretation-choice") as HTMLElement).hidden).toBe(true)
   })
@@ -512,13 +512,13 @@ describe("SightingElement", () => {
 
   it("reads a case's recordings as sitting BESIDE it, not beside the page — which is what lets one case file serve two hosts unchanged", async () => {
     // The same case is read from its rr0.org dossier's own page and from this site's player: resolved
-    // against the page, the second would look for /play/witness-chiles.json.
-    const chilesUrl = new URL("/dossier/ChilesWhitted/witness-chiles.json", location.href).href
-    stubFetch({ "/dossier/ChilesWhitted/case.json": { events: [sightingEvent("witness-chiles.json")] }, [chilesUrl]: johnSighting })
+    // against the page, the second would look for /play/observer-chiles.json.
+    const chilesUrl = new URL("/dossier/ChilesWhitted/observer-chiles.json", location.href).href
+    stubFetch({ "/dossier/ChilesWhitted/case.json": { events: [sightingEvent("observer-chiles.json")] }, [chilesUrl]: johnSighting })
 
     const element = await connect("/dossier/ChilesWhitted/case.json")
 
-    expect(element.witnessUrls).toEqual([chilesUrl])
+    expect(element.observerUrls).toEqual([chilesUrl])
   })
 
   it("replays only a case's sightings, not its other events — an analysis, a film, a confession", async () => {
@@ -534,23 +534,23 @@ describe("SightingElement", () => {
 
     const element = await connect("case.json")
 
-    expect(element.witnessUrls).toEqual([johnUrl])
+    expect(element.observerUrls).toEqual([johnUrl])
   })
 
   it("leaves an absolute sighting address alone, so a case can point at a recording on another host", async () => {
-    stubFetch({ "case.json": { events: [sightingEvent("https://elsewhere.test/witness.json")] }, "https://elsewhere.test/witness.json": johnSighting })
+    stubFetch({ "case.json": { events: [sightingEvent("https://elsewhere.test/observer.json")] }, "https://elsewhere.test/observer.json": johnSighting })
 
     const element = await connect("case.json")
 
-    expect(element.witnessUrls).toEqual(["https://elsewhere.test/witness.json"])
+    expect(element.observerUrls).toEqual(["https://elsewhere.test/observer.json"])
   })
 
-  it("refuses a bare list of recordings, the witness manifest of before cases, rather than misreading it", async () => {
-    stubFetch({ "witnesses.json": ["john.json"] })
+  it("refuses a bare list of recordings, the observer manifest of before cases, rather than misreading it", async () => {
+    stubFetch({ "observers.json": ["john.json"] })
     const element = document.createElement(SIGHTING_ELEMENT_NAME) as SightingElement
 
-    await expect(element.loadFromSrc("witnesses.json")).rejects.toThrow(/case\.json/)
-    expect(element.witnessUrls).toEqual([])
+    await expect(element.loadFromSrc("observers.json")).rejects.toThrow(/case\.json/)
+    expect(element.observerUrls).toEqual([])
   })
 
   it("accepts src pointing directly at a single sighting.json, with no manifest file needed", async () => {
@@ -562,19 +562,19 @@ describe("SightingElement", () => {
     await new Promise(resolve => setTimeout(resolve, 0))
     await new Promise(resolve => setTimeout(resolve, 0))
 
-    expect(element.witnessUrls).toEqual(["sighting.json"])
+    expect(element.observerUrls).toEqual(["sighting.json"])
     const scene = nestedScene(element) as unknown as { sightingData: typeof johnSighting }
-    expect(scene.sightingData.witness?.id).toBe("john")
+    expect(scene.sightingData.observer?.id).toBe("john")
     const toolbar = element.shadowRoot!.getElementById("toolbar") as HTMLElement
-    const select = element.shadowRoot!.getElementById("witness") as HTMLSelectElement
+    const select = element.shadowRoot!.getElementById("observer") as HTMLSelectElement
     expect(toolbar.hidden).toBe(false) // info button still reachable
     expect(select.hidden).toBe(true) // nothing to pick between, plain text instead
   })
 
-  it("opens the info panel on click, showing the app version link and the selected witness's observation metadata (date/location/case, not the witness name — already in the toolbar's testimony line)", async () => {
+  it("opens the info panel on click, showing the app version link and the selected observer's observation metadata (date/location/case, not the observer name — already in the toolbar's account line)", async () => {
     stubFetch({ "john.json": { ...johnSighting, time: { year: 1948, month: 7, day: 24, hour: 2, minute: 45 }, place: [{ lat: 32.4, lng: -86.3 }] } })
     const element = mount()
-    element.witnessUrls = ["john.json"]
+    element.observerUrls = ["john.json"]
     await new Promise(resolve => setTimeout(resolve, 0))
 
     const infoButton = element.shadowRoot!.getElementById("info-button") as HTMLButtonElement
@@ -594,7 +594,7 @@ describe("SightingElement", () => {
     expect(appLink.textContent).toMatch(/^UFO@home v\d+\.\d+\.\d+$/)
     const observationList = element.shadowRoot!.getElementById("info-observation-list") as HTMLElement
     expect(observationList.textContent).toContain("32.4000, -86.3000")
-    expect(observationList.textContent).not.toContain("Clarence Chiles") // already in the testimony line, not repeated here
+    expect(observationList.textContent).not.toContain("Clarence Chiles") // already in the account line, not repeated here
 
     infoButton.click()
     expect(infoPanel.hidden).toBe(true)
@@ -603,7 +603,7 @@ describe("SightingElement", () => {
   it("shows description and tags in the info panel when present, omits both when absent", async () => {
     stubFetch({ "john.json": { ...johnSighting, description: "Bright light hovering over the field.", tags: ["hovering", "night"] } })
     const element = mount()
-    element.witnessUrls = ["john.json"]
+    element.observerUrls = ["john.json"]
     await new Promise(resolve => setTimeout(resolve, 0))
 
     const infoButton = element.shadowRoot!.getElementById("info-button") as HTMLButtonElement
@@ -616,7 +616,7 @@ describe("SightingElement", () => {
 
   it("shows neither description nor tags rows when the sighting has none", async () => {
     const element = mount()
-    element.witnessUrls = ["john.json"]
+    element.observerUrls = ["john.json"]
     await new Promise(resolve => setTimeout(resolve, 0))
 
     const infoButton = element.shadowRoot!.getElementById("info-button") as HTMLButtonElement
@@ -629,7 +629,7 @@ describe("SightingElement", () => {
 
   it("closes the info panel on a click outside it, but not on a click inside it", async () => {
     const element = mount()
-    element.witnessUrls = ["john.json"]
+    element.observerUrls = ["john.json"]
     await new Promise(resolve => setTimeout(resolve, 0))
 
     const infoButton = element.shadowRoot!.getElementById("info-button") as HTMLButtonElement
@@ -651,7 +651,7 @@ describe("SightingElement", () => {
 
   it("keeps the credits list collapsed until the credits link is clicked, and re-collapses when the panel closes", async () => {
     const element = mount()
-    element.witnessUrls = ["john.json"]
+    element.observerUrls = ["john.json"]
     await new Promise(resolve => setTimeout(resolve, 0))
 
     const infoButton = element.shadowRoot!.getElementById("info-button") as HTMLButtonElement
@@ -670,7 +670,7 @@ describe("SightingElement", () => {
 
   it("always lists the thunder sound credit, regardless of weather", async () => {
     const element = mount()
-    element.witnessUrls = ["john.json"]
+    element.observerUrls = ["john.json"]
     await new Promise(resolve => setTimeout(resolve, 0))
 
     const infoButton = element.shadowRoot!.getElementById("info-button") as HTMLButtonElement
@@ -691,13 +691,13 @@ describe("SightingElement i18n", () => {
     const spy = vi.spyOn(navigator, "languages", "get").mockReturnValue(["fr-FR", "fr"])
     const element = mount()
 
-    await waitFor(() => element.shadowRoot!.getElementById("testimony-prefix")!.textContent === "Compte rendu de")
+    await waitFor(() => element.shadowRoot!.getElementById("account-prefix")!.textContent === "Compte rendu de")
 
     spy.mockRestore()
   })
 
   /** A recording's own texts are read in the language the interface is in — see
-   * SightingElement.loadLocaleMessages, and the "Celle du témoin : A craft standing on its legs"
+   * SightingElement.loadLocaleMessages, and the "Celle du observateur : A craft standing on its legs"
    * that told them apart. */
   const bilingual = {
     ...johnSighting,
@@ -717,7 +717,7 @@ describe("SightingElement i18n", () => {
     const spy = vi.spyOn(navigator, "languages", "get").mockReturnValue(["fr", "en"])
     stubFetch({ "john.json": bilingual })
     const element = mount()
-    element.witnessUrls = ["john.json"]
+    element.observerUrls = ["john.json"]
 
     await waitFor(() => description(element).includes("Un engin posé sur ses pieds"))
     expect(description(element)).not.toContain("A craft standing on its legs")
@@ -733,13 +733,13 @@ describe("SightingElement i18n", () => {
     // Created before being put anywhere: the constructor sees no [lang] and only the browser's list.
     const element = document.createElement(SIGHTING_ELEMENT_NAME) as SightingElement
     section.appendChild(element)
-    element.witnessUrls = ["john.json"]
+    element.observerUrls = ["john.json"]
 
     await waitFor(() => description(element).length > 0)
     // Long enough for a French decision taken at construction to have landed, had it survived.
     await new Promise(resolve => setTimeout(resolve, 20))
     expect(description(element)).toContain("A craft standing on its legs")
-    expect(element.shadowRoot!.getElementById("testimony-prefix")!.textContent).toBe("Account by")
+    expect(element.shadowRoot!.getElementById("account-prefix")!.textContent).toBe("Account by")
     spy.mockRestore()
   })
 
@@ -748,7 +748,7 @@ describe("SightingElement i18n", () => {
     const element = mount()
     await new Promise(resolve => setTimeout(resolve, 20))
 
-    expect(element.shadowRoot!.getElementById("testimony-prefix")!.textContent).toBe("Account by")
+    expect(element.shadowRoot!.getElementById("account-prefix")!.textContent).toBe("Account by")
     spy.mockRestore()
   })
 })
@@ -768,7 +768,7 @@ describe("SightingElement embed markup", () => {
 
   async function openInfoPanel(): Promise<HTMLElement> {
     const element = mount()
-    element.witnessUrls = ["john.json"]
+    element.observerUrls = ["john.json"]
     await new Promise(resolve => setTimeout(resolve, 0))
     ;(element.shadowRoot!.getElementById("info-button") as HTMLButtonElement).click()
     // The snippet is folded away behind its own footer toggle, like the credits.
@@ -798,7 +798,7 @@ describe("SightingElement embed markup", () => {
 })
 
 /**
- * A testimony's time is what the witness's own clock said, never what the reader's clock would
+ * A account's time is what the observer's own clock said, never what the reader's clock would
  * say for the same instant: Chiles and Whitted saw their object at 02:45 over Montgomery, and
  * that stays 02:45 whoever opens the page from wherever.
  */
@@ -812,21 +812,21 @@ describe("SightingElement observation time", () => {
       "x.json": { version: 1, time, place: [{ lat: 32.3792, lng: -86.3077 }], timeline: { keyframes: [] }, ...extra }
     })
     const element = mount()
-    element.witnessUrls = ["x.json"]
+    element.observerUrls = ["x.json"]
     await new Promise(resolve => setTimeout(resolve, 0))
     ;(element.shadowRoot!.getElementById("info-button") as HTMLButtonElement).click()
     const list = element.shadowRoot!.getElementById("info-observation-list")!
     return list.querySelector("dd")?.textContent ?? ""
   }
 
-  it("shows the witness's own wall-clock time, with an explicit time zone", async () => {
+  it("shows the observer's own wall-clock time, with an explicit time zone", async () => {
     const shown = await dateRowFor({ year: 1948, month: 7, day: 24, hour: 2, minute: 45 }, { utcOffsetHours: -6 })
-    expect(shown).toContain("2:45") // "July 24, 1948 at 2:45 AM" — the witness's clock, not the reader's
+    expect(shown).toContain("2:45") // "July 24, 1948 at 2:45 AM" — the observer's clock, not the reader's
   })
 
   it("shows it unchanged when the time zone is only approximated from the longitude", async () => {
     const shown = await dateRowFor({ year: 1948, month: 7, day: 24, hour: 2, minute: 45 })
-    expect(shown).toContain("2:45") // "July 24, 1948 at 2:45 AM" — the witness's clock, not the reader's
+    expect(shown).toContain("2:45") // "July 24, 1948 at 2:45 AM" — the observer's clock, not the reader's
   })
 })
 
@@ -916,7 +916,7 @@ describe("SightingElement parameter labels", () => {
     if (showLabels) {
       element.setAttribute("show-labels", "")
     }
-    element.witnessUrls = ["john.json"]
+    element.observerUrls = ["john.json"]
     await new Promise(resolve => setTimeout(resolve, 0))
     return element
   }
@@ -972,15 +972,15 @@ describe("SightingElement parameter labels", () => {
       element.shadowRoot!.querySelector("rr0-scene")!.shadowRoot!.querySelector("rr0-ufo")!
 
     const preset = mount()
-    preset.setAttribute("show-witness-map", "")
+    preset.setAttribute("show-observer-map", "")
     preset.setAttribute("hide-milestones", "")
-    preset.witnessUrls = ["john.json"]
+    preset.observerUrls = ["john.json"]
     await new Promise(resolve => setTimeout(resolve, 0))
-    expect(player(preset).hasAttribute("show-witness-map")).toBe(true)
+    expect(player(preset).hasAttribute("show-observer-map")).toBe(true)
     expect(player(preset).hasAttribute("hide-milestones")).toBe(true)
 
     const later = await mounted()
-    for (const attribute of ["show-witness-map", "hide-milestones"]) {
+    for (const attribute of ["show-observer-map", "hide-milestones"]) {
       expect(player(later).hasAttribute(attribute)).toBe(false)
       later.setAttribute(attribute, "")
       expect(player(later).hasAttribute(attribute)).toBe(true)
@@ -1100,7 +1100,7 @@ describe("SightingElement info panel fold-outs", () => {
 
   async function openPanel(): Promise<ShadowRoot> {
     const element = mount()
-    element.witnessUrls = ["john.json"]
+    element.observerUrls = ["john.json"]
     await new Promise(resolve => setTimeout(resolve, 0))
     ;(element.shadowRoot!.getElementById("info-button") as HTMLButtonElement).click()
     return element.shadowRoot!

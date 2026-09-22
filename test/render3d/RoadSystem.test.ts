@@ -71,7 +71,7 @@ describe("RoadSystem", () => {
   })
 
   it("draws a surveyed road faint, and one the case file states at full presence", () => {
-    // The two are not the same claim: one is the ground the witness was on, measured by the people
+    // The two are not the same claim: one is the ground the observer was on, measured by the people
     // who went there; the other is a survey taken sixty years later.
     const system = new RoadSystem()
     system.set([straight("a", "gravel", 4, 100)], LAT, LNG, () => 0, true)
@@ -90,7 +90,7 @@ describe("RoadSystem", () => {
     expect(stated(system)).toHaveLength(1)
   })
 
-  it("lays a stated road in the account's own metres, east and north of the witness's place", () => {
+  it("lays a stated road in the account's own metres, east and north of the observer's place", () => {
     const system = new RoadSystem()
     system.setStated([{ id: "plan", surface: "dirt", widthM: 4, path: [{ eastM: 0, northM: 0 }, { eastM: 0, northM: 100 }] }], () => 0)
     const position = stated(system)[0].geometry.getAttribute("position")
