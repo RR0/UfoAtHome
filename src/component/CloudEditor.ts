@@ -7,12 +7,15 @@ import { resolveObserverPoseAt, resolveWeatherAt } from "../engine/model/Sightin
 import { cloudDragDelta } from "../render3d/CloudManipulation.js"
 import type { CloudPoint } from "../render3d/CloudManipulation.js"
 import { cloudEditorTemplate } from "./cloudEditorTemplate.js"
+import { NumberFields } from "./NumberFields.js"
 import { DEFAULT_ICE_CRYSTAL_ALIGNMENT } from "../engine/model/Weather.js"
 
 /** Weather authoring shared with the editor's recording, projection and playback clock. */
 export function setupCloudEditor(controls: HTMLElement, scene: SceneElement, beforeEdit: (detachWeatherSource?: boolean) => void, pointAt: (headingDeg: number, pitchDeg: number) => void, language: string = "en") {
   const translate = (en: string, fr: string) => language === "fr" ? fr : en
   controls.innerHTML = cloudEditorTemplate(language)
+  // Each field as wide as what it takes, and held to it as it is typed — see NumberFields.
+  NumberFields.fit(controls)
   const input = (id: string) => controls.querySelector<HTMLElement>("#" + id) as HTMLInputElement
   const value = (id: string) => Number(input(id).value)
   const layerSelect = controls.querySelector<HTMLElement>("#cloud-layer") as HTMLSelectElement

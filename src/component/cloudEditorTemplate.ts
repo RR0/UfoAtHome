@@ -11,16 +11,16 @@ export function cloudEditorTemplate(language: string): string {
     <div class="cloud-actions"><button id="cloud-layer-add" type="button">${t("Add layer", "Ajouter une couche")}</button>
     <button id="cloud-layer-delete" type="button">${t("Delete layer", "Supprimer la couche")}</button></div>
     <label>${t("Cloud type", "Type de nuage")}<select id="cloud-type"><option value="cumulus">Cumulus</option><option value="stratus">Stratus</option><option value="stratocumulus">Stratocumulus</option><option value="cirrus">Cirrus</option><option value="unknown">${t("Unknown", "Inconnu")}</option></select></label>
-    ${number("cloud-base",t("Base (m)","Base (m)"),"0")}
-    ${number("cloud-thickness",t("Thickness (m)","Épaisseur (m)"),"10")}
+    ${number("cloud-base",t("Base (m)","Base (m)"),"0","20000")}
+    ${number("cloud-thickness",t("Thickness (m)","Épaisseur (m)"),"10","8000")}
     ${number("cloud-cover",t("Coverage (%)","Couverture (%)"),"0","100")}
-    ${number("cloud-size",t("Cloud size (m)","Taille des nuages (m)"),"50")}
+    ${number("cloud-size",t("Cloud size (m)","Taille des nuages (m)"),"50","20000")}
     ${number("cloud-density",t("Density","Densité"),"0","2")}
     ${number("cloud-darkness",t("Darkness","Obscurité"),"0","1")}
     ${number("cloud-crystal-alignment",t("Crystal alignment","Alignement des cristaux"),"0","1")}
     ${number("cloud-wind-direction",t("Layer wind direction (°)","Direction du vent de la couche (°)"),"0","360",t("General wind","Vent général"))}
-    ${number("cloud-wind-speed",t("Layer wind speed (m/s)","Vitesse du vent de la couche (m/s)"),"0","",t("General wind","Vent général"))}
-    ${number("cloud-seed",t("Pattern seed","Graine du motif"),"0")}
+    ${number("cloud-wind-speed",t("Layer wind speed (m/s)","Vitesse du vent de la couche (m/s)"),"0","120",t("General wind","Vent général"))}
+    ${number("cloud-seed",t("Pattern seed","Graine du motif"),"0","9999")}
     </div>
     <p>${t("Edits pause playback and save at the current weather time. Empty layer wind fields inherit the general wind. Whole observation applies the edited property to every weather keyframe.","L’édition met la lecture en pause et enregistre à l’instant météo courant. Un vent de couche vide reprend le vent général. Toute l’observation applique la propriété modifiée à chaque point de la timeline météo.")}</p>
     <details><summary>${t("Individual clouds","Nuages individuels")}</summary><div class="cloud-fields">
@@ -29,13 +29,13 @@ export function cloudEditorTemplate(language: string): string {
     <button id="cloud-instance-point" type="button">${t("Point at cloud","Pointer le nuage")}</button>
     <button id="cloud-instance-delete" type="button">${t("Delete cloud","Supprimer ce nuage")}</button></div>
     <label><input id="cloud-manipulate" type="checkbox">${t("Select and drag clouds in the sky","Sélectionner et déplacer les nuages dans le ciel")}</label>
-    ${number("instance-east",t("East position (m)","Position est (m)"))}
-    ${number("instance-north",t("North position (m)","Position nord (m)"))}
-    ${number("instance-base",t("Cloud base (m)","Base du nuage (m)"),"0")}
-    ${number("instance-thickness",t("Cloud thickness (m)","Épaisseur du nuage (m)"),"10")}
-    ${number("instance-width",t("Cloud width (m)","Largeur du nuage (m)"),"50")}
-    ${number("instance-depth",t("Cloud depth (m)","Profondeur du nuage (m)"),"50")}
-    ${number("instance-rotation",t("Cloud rotation (°)","Rotation du nuage (°)"))}
+    ${number("instance-east",t("East position (m)","Position est (m)"),"-30000","30000")}
+    ${number("instance-north",t("North position (m)","Position nord (m)"),"-30000","30000")}
+    ${number("instance-base",t("Cloud base (m)","Base du nuage (m)"),"0","20000")}
+    ${number("instance-thickness",t("Cloud thickness (m)","Épaisseur du nuage (m)"),"10","8000")}
+    ${number("instance-width",t("Cloud width (m)","Largeur du nuage (m)"),"50","20000")}
+    ${number("instance-depth",t("Cloud depth (m)","Profondeur du nuage (m)"),"50","20000")}
+    ${number("instance-rotation",t("Cloud rotation (°)","Rotation du nuage (°)"),"-360","360")}
     ${number("instance-density",t("Cloud density","Densité du nuage"),"0","2")}
     ${number("instance-darkness",t("Darkness","Obscurité"),"0","1",t("Layer darkness","Obscurité de la couche"))}
     </div><p>${t("Individual clouds remain present at 0% global coverage. Dragging changes position and altitude; numeric fields provide precise dimensions. Clouds follow their layer's wind.","Les nuages individuels restent présents à 0 % de couverture globale. Le glissement change la position et l’altitude ; les champs règlent précisément les dimensions. Les nuages suivent le vent de leur couche.")}</p></details>

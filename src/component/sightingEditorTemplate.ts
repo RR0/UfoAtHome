@@ -102,7 +102,7 @@ export const html = `
     <label><span id="label-focal-length">Focal length</span> <input id="focalLength" type="number" min="1" max="2000" step="0.1"/> <span id="unit-focal-length">mm</span></label>
     <label><span id="label-f-number">Aperture</span> f/<input id="fNumber" type="number" min="0.7" max="64" step="0.1"/></label>
     <label><span id="label-exposure">Exposure</span> <input id="exposureSeconds" type="text" inputmode="decimal" size="7" placeholder="1/250"/> s</label>
-    <label><span id="label-focus-distance">Focused at</span> <input id="focusDistance" type="number" min="0.1" step="0.1" placeholder="&#8734;"/> m</label>
+    <label><span id="label-focus-distance">Focused at</span> <input id="focusDistance" type="number" min="0.1" max="30000" step="0.1" placeholder="&#8734;"/> m</label>
     <!-- With the instrument and not with the place: latitude and heading say where the witness
          stood and which way they faced, and this says nothing about either. It is how the device
          was HELD — a camera askew, a head leaned over — which is why it belongs beside the focal
@@ -136,7 +136,7 @@ export const html = `
          location becomes the field's floor and its default the moment the location is known — see
          SightingEditorElement.applyGroundElevation. -->
     <label><span id="label-elevation">Altitude</span>
-      <input id="elevation" type="number" step="1" value="0"/> m</label>
+      <input id="elevation" type="number" min="-500" max="9000" step="1" value="0"/> m</label>
     <output id="ground-elevation" class="ground-elevation" for="lat lng"></output>
     <!-- Relief and imagery describe the ground at the location above, so they are chosen here
          rather than in a drawer of their own — same reasoning as the place picker's placement. -->
@@ -159,9 +159,9 @@ export const html = `
     <button id="look-at-decor" type="button" class="icon-btn" title="Look at it" aria-label="Look at it">🎯</button>
     <button id="delete-decor" type="button" class="icon-btn" title="Delete decor" aria-label="Delete decor">🗑</button>
     <label><span id="label-decor-title">Name</span> <input id="decorTitle" type="text"/></label>
-    <label><span id="label-decor-east">Distance east</span> <input id="decorEast" type="number" step="0.5" value="0"/> m</label>
-    <label><span id="label-decor-north">Distance north</span> <input id="decorNorth" type="number" step="0.5" value="0"/> m</label>
-    <label><span id="label-decor-altitude">Altitude</span> <input id="decorAltitude" type="number" step="1" value="0"/> m</label>
+    <label><span id="label-decor-east">Distance east</span> <input id="decorEast" type="number" min="-30000" max="30000" step="0.5" value="0"/> m</label>
+    <label><span id="label-decor-north">Distance north</span> <input id="decorNorth" type="number" min="-30000" max="30000" step="0.5" value="0"/> m</label>
+    <label><span id="label-decor-altitude">Altitude</span> <input id="decorAltitude" type="number" min="-1000" max="30000" step="1" value="0"/> m</label>
     <label><span id="label-decor-heading">Heading</span> <input id="decorHeading" type="number" min="0" max="360" step="1" value="0"/> &deg;</label>
     <label><span id="label-decor-color">Colour</span> <input id="decorColor" type="color" value="#808080"/></label>
     <!-- Left EMPTY when the recording states no size, with the built-in shape's own measurement as
@@ -169,9 +169,9 @@ export const html = `
          invented by the form, which is the one thing this project's data refuses to hold (see
          DecorSize). Filling any one of the three states all three — the other two then take the
          built-in shape's own value, which is what was being drawn anyway. -->
-    <label><span id="label-decor-width">Width</span> <input id="decorWidth" type="number" min="0.1" step="0.1" autocomplete="off"/> m</label>
-    <label><span id="label-decor-length">Length</span> <input id="decorLength" type="number" min="0.1" step="0.1" autocomplete="off"/> m</label>
-    <label><span id="label-decor-height">Height</span> <input id="decorHeight" type="number" min="0.1" step="0.1" autocomplete="off"/> m</label>
+    <label><span id="label-decor-width">Width</span> <input id="decorWidth" type="number" min="0.1" max="1000" step="0.1" autocomplete="off"/> m</label>
+    <label><span id="label-decor-length">Length</span> <input id="decorLength" type="number" min="0.1" max="1000" step="0.1" autocomplete="off"/> m</label>
+    <label><span id="label-decor-height">Height</span> <input id="decorHeight" type="number" min="0.1" max="1000" step="0.1" autocomplete="off"/> m</label>
     <label><span id="label-decor-model">3D model</span> <select id="decorModel"></select></label>
     <!-- Collapsed by default, on the user's own instruction: naming a file by hand is the rare
          case and would otherwise clutter every decor object with five fields it never uses. -->
@@ -222,7 +222,7 @@ export const html = `
         <option id="option-witness-side-behind-right" value="behind-right" hidden>Behind-right</option>
       </select>
     </label>
-    <label><span id="label-decor-occupied-floor">Occupied floor</span> <input id="decorOccupiedFloor" type="number" min="0" step="1" value="0"/></label>
+    <label><span id="label-decor-occupied-floor">Occupied floor</span> <input id="decorOccupiedFloor" type="number" min="0" max="20" step="1" value="0"/></label>
     <!-- flex-basis:100% (see the CSS rule below) forces this row onto its own line, after
          whatever decor properties are showing above — the only thing shown at all when there's
          no decor yet (see the block above's own comment). -->
@@ -278,7 +278,7 @@ export const html = `
          instant while the other is a bare year is a way to lose the duration without being told
          why. -->
     <button id="edtf-mode" type="button" aria-pressed="false">EDTF</button>
-    <label><span id="label-duration">Duration</span> <input id="durationSeconds" type="number" min="0" step="0.1" placeholder="observation length" aria-required="true"/> s</label>
+    <label><span id="label-duration">Duration</span> <input id="durationSeconds" type="number" min="0" max="86400" step="0.1" placeholder="observation length" aria-required="true"/> s</label>
     <!-- The zone is the RULE, the number is what that rule produced for this sighting's own date —
          summer time included, and as it was then (see engine/time/TimeZones.ts). Pick a zone and
          the number is derived and read-only; leave it on the manual entry and type the number
@@ -363,7 +363,7 @@ export const html = `
       <label hidden><span id="label-ice-alignment">Crystal alignment</span> <input id="iceCrystalAlignment" class="weather-field" type="range" min="0" max="1" step="0.05" value="0.65"/></label>
       <label hidden><span id="label-cloud-darkness">Cloud darkness</span> <input id="cloudDarkness" class="weather-field" type="range" min="0" max="1" step="0.05" value="0"/></label>
       <label hidden><span id="label-cloud-base">Cloud base</span>
-        <input id="cloudBase" class="weather-field" type="number" min="0" step="50" placeholder="1000" title="Height of the cloud layer's base above the ground — decides whether the witness is under the deck or above it"/> m</label>
+        <input id="cloudBase" class="weather-field" type="number" min="0" max="20000" step="50" placeholder="1000" title="Height of the cloud layer's base above the ground — decides whether the witness is under the deck or above it"/> m</label>
     </div>
   </section>
   <section class="subgroup-panel" id="weather-wind" aria-labelledby="label-wind-group" hidden>
@@ -410,7 +410,7 @@ export const html = `
       </select></label>
     <label><span id="label-reference-credit">Credit</span> <input id="referenceCredit" class="reference-field" type="text"/></label>
     <label><span id="label-reference-credit-url">Credit link</span> <input id="referenceCreditUrl" class="reference-field" type="url"/></label>
-    <label><span id="label-reference-t">Taken at</span> <input id="referenceT" class="reference-field" type="number" min="0" step="0.1" placeholder="—"/> s</label>
+    <label><span id="label-reference-t">Taken at</span> <input id="referenceT" class="reference-field" type="number" min="0" max="86400" step="0.1" placeholder="—"/> s</label>
     <label><span id="label-reference-drawing">Drawn on</span> <input id="referenceDrawing" class="reference-field" type="checkbox"/></label>
     <label><span id="label-reference-opacity">Opacity</span> <input id="referenceOpacity" class="reference-field" type="range" min="0" max="1" step="0.05" value="0.5"/></label>
     <label><span id="label-reference-heading">Heading</span> <input id="referenceHeading" class="reference-field" type="number" min="0" max="360" step="0.1"/> &deg;</label>
@@ -482,12 +482,12 @@ export const html = `
          looks, and a width edit changes the other width at the distance it stands (the shape is
          resized on the canvas, which is what "try a size at a distance" always did). -->
     <label><span id="label-apparent-width">Apparent width</span>
-      <input id="apparentWidth" type="number" min="0" step="0.1" title="How wide it looked, in degrees — the recording's own statement of size"/>°
+      <input id="apparentWidth" type="number" min="0" max="180" step="0.1" title="How wide it looked, in degrees — the recording's own statement of size"/>°
       <output id="apparent-size" class="apparent-size inline" for="apparentWidth"></output></label>
     <label><span id="label-real-width">Real width</span>
-      <input id="realWidth" type="number" min="0" step="0.1" title="What that angle is in metres at the distance beside it. Derived, never stored"/> m</label>
+      <input id="realWidth" type="number" min="0" max="30000" step="0.1" title="What that angle is in metres at the distance beside it. Derived, never stored"/> m</label>
     <label><span id="label-object-distance">Distance</span>
-      <input id="objectDistance" type="number" min="0" step="1" title="How far along its line of sight the shape is drawn — what decides what the decor hides of it. A hypothesis, never the witness's statement"/> m</label>
+      <input id="objectDistance" type="number" min="0" max="30000" step="1" title="How far along its line of sight the shape is drawn — what decides what the decor hides of it. A hypothesis, never the witness's statement"/> m</label>
     <label><span id="label-size-lock">Hold</span>
       <select id="sizeLock" title="Which of the three stays put while another is edited">
         <option id="option-lock-none" value="none">nothing</option>
@@ -507,7 +507,7 @@ export const html = `
     <output id="blur-bound" class="apparent-size" for="blur"></output>
     <div class="record-row">
       <button id="record" type="button" class="record-btn"></button>
-      <label><span id="label-sampling-rate">Sampling rate</span> <input id="samplingRate" type="number" min="16" step="16" value="100"/> ms</label>
+      <label><span id="label-sampling-rate">Sampling rate</span> <input id="samplingRate" type="number" min="16" max="1000" step="16" value="100"/> ms</label>
     </div>
   </div>
   </section>
