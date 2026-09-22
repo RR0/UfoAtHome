@@ -4,6 +4,7 @@ import type { DecorModelRef } from "../engine/model/Decor.js"
 import type { Sighting } from "../engine/model/Sighting.js"
 import type { SaidTexts } from "../engine/model/SaidText.js"
 import type { DecorModelProvider } from "../render3d/decor/DecorModelProvider.js"
+import type { BodyReading } from "./SceneElement.js"
 import type { BodyEditorMessages } from "./messages/BodyEditorMessages.js"
 import { BodyEditorTexts } from "./messages/BodyEditorMessages.js"
 
@@ -23,6 +24,10 @@ export interface BodyEditorHost {
   newBodyStart(): { sourceId?: string, label?: string, keyframe: BodyKeyframe } | undefined
   /** Turns the witness towards a body, as the decor's own "Look at it" does. */
   lookAt(body: BodyJson): void
+  /** The playhead, ms. */
+  currentTime(): number
+  /** The body as it stands at `t` — see SceneElement.bodyReading. */
+  readingOf(body: BodyJson, t: number): BodyReading | undefined
 }
 
 /**
@@ -88,6 +93,42 @@ export class BodyEditor {
     this.element("body-model-incomplete").hidden = model.url === undefined || (model.credit?.title !== undefined && model.credit.license !== undefined)
     this.input("body-outline-node").value = body.outlineNode ?? ""
     this.element("body-track").textContent = this.trackSummary(body)
+    this.syncKeyframe()
+  }
+
+  /** The fields of the playhead's instant: what the body is there (interpolated between its
+   * keyframes), in the form its own keyframes use. Called as the playhead moves; a field being
+   * typed in is left alone. */
+  syncKeyframe(): void {
+    const body = this.current
+    if (!body) return
+    const t = this.host.currentTime()
+    const m = this.messages
+    this.element("body-key-legend").textContent = m.atPlayhead.replace("{t}", BodyEditor.seconds(t))
+    const reading = this.host.readingOf(body, t)
+    const here = body.track.find(key => key.t === t)
+    const base = BodyEditor.keyframeBefore(body, t)
+    this.element("body-key-note").textContent = !reading ? m.notPlaced : here ? m.keyframeHere : m.keyframeAdded
+    ;(this.element("body-key-delete") as HTMLButtonElement).disabled = here === undefined
+    const active = (this.container.getRootNode() as Document | ShadowRoot).activeElement
+    const mode = base?.eastM !== undefined && base.northM !== undefined ? "world" : "witness"
+    if (active !== this.select("body-key-mode")) this.select("body-key-mode").value = mode
+    const shown = this.select("body-key-mode").value
+    const onGround = base?.onGround === true
+    this.input("body-key-ground").checked = onGround
+    for (const id of ["body-key-azimuth", "body-key-elevation", "body-key-distance"]) this.input(id).closest("label")!.hidden = shown !== "witness"
+    for (const id of ["body-key-east", "body-key-north"]) this.input(id).closest("label")!.hidden = shown !== "world"
+    this.input("body-key-above").closest("label")!.hidden = shown !== "world" || onGround
+    if (!reading) return
+    const values: Record<string, number> = {
+      "body-key-azimuth": reading.azimuthDeg, "body-key-elevation": reading.altitudeDeg, "body-key-distance": reading.distanceM,
+      "body-key-east": reading.eastM, "body-key-north": reading.northM, "body-key-above": reading.aboveGroundM,
+      "body-key-width": reading.sizeM.widthM, "body-key-length": reading.sizeM.lengthM, "body-key-height": reading.sizeM.heightM,
+      "body-key-heading": reading.attitude.headingDeg, "body-key-pitch": reading.attitude.pitchDeg, "body-key-roll": reading.attitude.rollDeg
+    }
+    for (const [id, value] of Object.entries(values)) {
+      if (this.input(id) !== active) this.input(id).value = String(Number(value.toFixed(2)))
+    }
   }
 
   private render(): void {
@@ -118,6 +159,25 @@ export class BodyEditor {
         </details>
         ${field("body-outline-node", m.outlineNode, "text", m.outlineNodeHint)}
         <p class="body-track"><span>${m.track}</span> <output id="body-track"></output></p>
+        <fieldset class="body-key">
+          <legend id="body-key-legend"></legend>
+          <p id="body-key-note" class="body-intro"></p>
+          <label><span>${m.placement}</span> <select id="body-key-mode"><option value="witness">${m.fromWitness}</option><option value="world">${m.inWorld}</option></select></label>
+          ${field("body-key-azimuth", m.azimuth, "number")}
+          ${field("body-key-elevation", m.elevation, "number")}
+          ${field("body-key-distance", m.distance, "number")}
+          ${field("body-key-east", m.east, "number")}
+          ${field("body-key-north", m.north, "number")}
+          <label><input id="body-key-ground" type="checkbox"/> <span>${m.onGround}</span></label>
+          ${field("body-key-above", m.aboveGround, "number")}
+          ${field("body-key-width", m.width, "number")}
+          ${field("body-key-length", m.length, "number")}
+          ${field("body-key-height", m.height, "number")}
+          ${field("body-key-heading", m.heading, "number")}
+          ${field("body-key-pitch", m.pitch, "number")}
+          ${field("body-key-roll", m.roll, "number")}
+          <button id="body-key-delete" type="button">${m.deleteKeyframe}</button>
+        </fieldset>
       </div>
     </div>`
     this.select("body-select").addEventListener("change", () => {
@@ -143,6 +203,9 @@ export class BodyEditor {
       if (id !== "") void this.adoptCatalogueSize(id)
     })
     this.element("body-explains").addEventListener("change", () => this.updateCurrent())
+    for (const id of BodyEditor.KEY_FIELDS) this.input(id).addEventListener("change", () => this.updateKeyframe())
+    this.select("body-key-mode").addEventListener("change", () => this.updateKeyframe())
+    this.element("body-key-delete").addEventListener("click", () => this.deleteKeyframe())
     this.sync()
   }
 
@@ -255,6 +318,65 @@ export class BodyEditor {
         : { ...key, sizeM }
     })
     this.write({ ...this.interpretation!, bodies: this.bodies.map(other => other === body ? { ...body, track } : other) }, true)
+  }
+
+  /** The fields of an instant, written as a keyframe at the playhead: position, size, attitude.
+   * Nothing else — a keyframe's colour, light, flame and movements hold from the one before, and a
+   * movement is only read from keyframes that state it (see BodyKeyframe.motions), so an added
+   * keyframe moves the body and changes nothing else. One already at this instant keeps the rest
+   * of what it states. */
+  private updateKeyframe(): void {
+    const body = this.current
+    if (!body) return
+    const t = this.host.currentTime()
+    const number = (id: string) => {
+      const value = Number(this.input(id).value)
+      return Number.isFinite(value) ? value : 0
+    }
+    const onGround = this.input("body-key-ground").checked
+    const position: BodyKeyframe = this.select("body-key-mode").value === "world"
+      ? { t, eastM: number("body-key-east"), northM: number("body-key-north"), ...(onGround ? { onGround: true } : { altitudeAboveGroundM: number("body-key-above") }) }
+      : { t, azimuthDeg: number("body-key-azimuth"), altitudeDeg: number("body-key-elevation"), distanceM: Math.max(0.1, number("body-key-distance")), ...(onGround ? { onGround: true } : {}) }
+    const size = (id: string) => Math.max(0.01, number(id))
+    const keyframe: BodyKeyframe = {
+      ...BodyEditor.withoutPlacement(body.track.find(key => key.t === t)),
+      ...position,
+      sizeM: { widthM: size("body-key-width"), lengthM: size("body-key-length"), heightM: size("body-key-height") },
+      attitude: { headingDeg: number("body-key-heading"), pitchDeg: number("body-key-pitch"), rollDeg: number("body-key-roll") }
+    }
+    const track = [...body.track.filter(key => key.t !== t), keyframe].sort((a, b) => a.t - b.t)
+    this.write({ ...this.interpretation!, bodies: this.bodies.map(other => other === body ? { ...body, track } : other) })
+    this.element("body-track").textContent = this.trackSummary({ ...body, track })
+    this.syncKeyframe()
+  }
+
+  private deleteKeyframe(): void {
+    const body = this.current
+    if (!body) return
+    const t = this.host.currentTime()
+    const track = body.track.filter(key => key.t !== t)
+    if (track.length === body.track.length) return
+    this.write({ ...this.interpretation!, bodies: this.bodies.map(other => other === body ? { ...body, track } : other) }, true)
+  }
+
+  private static readonly KEY_FIELDS = ["body-key-azimuth", "body-key-elevation", "body-key-distance", "body-key-east", "body-key-north",
+    "body-key-ground", "body-key-above", "body-key-width", "body-key-length", "body-key-height", "body-key-heading", "body-key-pitch", "body-key-roll"]
+
+  /** A keyframe's statements other than where it is, how big and how turned. */
+  private static withoutPlacement(key: BodyKeyframe | undefined): Partial<BodyKeyframe> {
+    if (!key) return {}
+    const { eastM, northM, azimuthDeg, altitudeDeg, distanceM, onGround, altitudeAboveGroundM, sizeM, attitude, ...rest } = key
+    return rest
+  }
+
+  /** The keyframe in force at `t` — the last at or before it, else the first. */
+  private static keyframeBefore(body: BodyJson, t: number): BodyKeyframe | undefined {
+    const sorted = [...body.track].sort((a, b) => a.t - b.t)
+    return [...sorted].reverse().find(key => key.t <= t) ?? sorted[0]
+  }
+
+  private static seconds(ms: number): string {
+    return `${Math.round(ms / 100) / 10} s`
   }
 
   private deleteCurrent(): void {

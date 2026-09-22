@@ -6372,7 +6372,7 @@ describe("SightingEditorElement bodies", () => {
     document.body.innerHTML = ""
   })
 
-  it("draws the witness's bodies, beside the shapes' outlines, while the Bodies part is open, and only then", () => {
+  it("draws the witness's bodies, beside the shapes' outlines, while the Bodies part is open, and only then", async () => {
     const element = mount()
     const interpretation = { title: "A craft", bodies: [{ id: "craft", explains: ["ufo-1"], model: { id: "ellipsoid" }, track: [{ t: 0, eastM: 0, northM: 50, onGround: true }] }] }
     element.sightingData = { version: 1, timeline: { keyframes: [] }, interpretation }
@@ -6385,6 +6385,8 @@ describe("SightingEditorElement bodies", () => {
     expect(scene.interpretation).toBeUndefined()
     tab("shape-bodies", ".subgroup-tab").click()
     expect(scene.interpretation).toEqual(interpretation)
+    // Its fields are a chunk of their own, fetched on this first opening.
+    await waitFor(() => shadow.getElementById("body-title") !== null, 2000)
     expect(scene.compareTestimony).toBe(true)
     // An edit of a body is drawn at once.
     const title = shadow.getElementById("body-title") as HTMLInputElement

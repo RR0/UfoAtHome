@@ -36,6 +36,28 @@ export interface BodyEditorMessages {
   trackSpan: string
   /** {at} in seconds. */
   trackSingle: string
+  /** {t} is the playhead, in seconds. */
+  atPlayhead: string
+  keyframeHere: string
+  keyframeAdded: string
+  placement: string
+  fromWitness: string
+  inWorld: string
+  azimuth: string
+  elevation: string
+  distance: string
+  east: string
+  north: string
+  onGround: string
+  aboveGround: string
+  width: string
+  length: string
+  height: string
+  heading: string
+  pitch: string
+  roll: string
+  deleteKeyframe: string
+  notPlaced: string
   primitive: Record<BodyPrimitive, string>
 }
 
@@ -71,6 +93,27 @@ export class BodyEditorTexts {
     trackEmpty: "No keyframe",
     trackSpan: "{n} keyframes, from {from} to {to}",
     trackSingle: "1 keyframe, at {at}",
+    atPlayhead: "At {t}",
+    keyframeHere: "A keyframe stands here: editing changes it",
+    keyframeAdded: "Editing adds a keyframe here",
+    placement: "Position",
+    fromWitness: "From the witness",
+    inWorld: "In the world",
+    azimuth: "Azimuth (°)",
+    elevation: "Elevation (°)",
+    distance: "Distance (m)",
+    east: "East (m)",
+    north: "North (m)",
+    onGround: "On the ground",
+    aboveGround: "Above the ground (m)",
+    width: "Width (m)",
+    length: "Length (m)",
+    height: "Height (m)",
+    heading: "Heading (°)",
+    pitch: "Pitch (°)",
+    roll: "Roll (°)",
+    deleteKeyframe: "Delete this keyframe",
+    notPlaced: "Not in the scene at this instant",
     primitive: {
       ellipsoid: "Ellipsoid", sphere: "Sphere", disc: "Disc", cylinder: "Cylinder", cone: "Cone",
       box: "Box", torus: "Torus", figure: "Human figure"
@@ -108,6 +151,27 @@ export class BodyEditorTexts {
     trackEmpty: "Aucune image clé",
     trackSpan: "{n} images clés, de {from} à {to}",
     trackSingle: "1 image clé, à {at}",
+    atPlayhead: "À {t}",
+    keyframeHere: "Une image clé est ici : l'éditer la modifie",
+    keyframeAdded: "Éditer ajoute une image clé ici",
+    placement: "Position",
+    fromWitness: "Depuis le témoin",
+    inWorld: "Dans le monde",
+    azimuth: "Azimut (°)",
+    elevation: "Hauteur (°)",
+    distance: "Distance (m)",
+    east: "Est (m)",
+    north: "Nord (m)",
+    onGround: "Au sol",
+    aboveGround: "Au-dessus du sol (m)",
+    width: "Largeur (m)",
+    length: "Longueur (m)",
+    height: "Hauteur (m)",
+    heading: "Cap (°)",
+    pitch: "Tangage (°)",
+    roll: "Roulis (°)",
+    deleteKeyframe: "Supprimer cette image clé",
+    notPlaced: "Pas dans la scène à cet instant",
     primitive: {
       ellipsoid: "Ellipsoïde", sphere: "Sphère", disc: "Disque", cylinder: "Cylindre", cone: "Cône",
       box: "Boîte", torus: "Tore", figure: "Silhouette humaine"

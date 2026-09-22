@@ -65,7 +65,7 @@ import { BodyPlacement } from "../engine/interpretation/BodyPlacement.js"
 import type { BodyState } from "../engine/interpretation/BodyPlacement.js"
 import { BodyConfrontation } from "../engine/interpretation/BodyConfrontation.js"
 import type { ConfrontationReading } from "../engine/interpretation/BodyConfrontation.js"
-import type { BodyJson, InterpretationJson } from "../engine/interpretation/Interpretation.js"
+import type { BodyAttitude, BodyJson, BodySize, InterpretationJson } from "../engine/interpretation/Interpretation.js"
 
 registerUfo()
 
@@ -187,6 +187,18 @@ const DEFAULT_ASTRONOMY: SceneAstronomy = {
  * witnessTrack and no place[0]) — leaves heading undefined so setObserverPose doesn't snap the
  * camera to a default compass direction. */
 const DEFAULT_OBSERVER_POSE: ObserverPose = { lat: 0, lng: 0, elevationM: 0, headingDeg: undefined, pitchDeg: 0, fovDeg: 60 }
+
+/** A body at one instant, as the editor shows it — see SceneElement.bodyReading. */
+export interface BodyReading {
+  azimuthDeg: number
+  altitudeDeg: number
+  distanceM: number
+  eastM: number
+  northM: number
+  aboveGroundM: number
+  sizeM: BodySize
+  attitude: Required<BodyAttitude>
+}
 
 /**
  * Vanilla Web Component rendering a 3D "decor" (sky/horizon/stars, see
@@ -1504,6 +1516,33 @@ export class SceneElement extends HTMLElement {
     const ground = this.sceneRenderer.bodyGround
     const eye = BodyPlacement.eyeOf(this.ufoElement.sighting, t, ground)
     return eye ? BodyPlacement.lineOfSightMeetsGround(eye, azimuthDeg, altitudeDeg, ground) : undefined
+  }
+
+  /**
+   * A body as it stands at `t`, in both of the forms a keyframe can state it (see BodyKeyframe):
+   * from the witness's eye (direction and distance to its middle) and in the world (east and north
+   * of where the witness started, and how high its base is over the ground there) — with its size
+   * and attitude. What the editor's fields show at the playhead. Undefined when it is not placed.
+   */
+  bodyReading(body: BodyJson, t: number): BodyReading | undefined {
+    const ground = this.sceneRenderer.bodyGround
+    const sighting = this.ufoElement.sighting
+    const eyeAt = (at: number) => BodyPlacement.eyeOf(sighting, at, ground)
+    const state = new BodyPlacement(body, ground, eyeAt).at(t)
+    const eye = eyeAt(t)
+    if (!state || !eye) return undefined
+    const eastM = state.eastM - eye.eastM, northM = state.northM - eye.northM, upM = state.upM - eye.upM
+    const horizontalM = Math.hypot(eastM, northM)
+    return {
+      azimuthDeg: ((Math.atan2(eastM, northM) * 180) / Math.PI + 360) % 360,
+      altitudeDeg: (Math.atan2(upM, horizontalM) * 180) / Math.PI,
+      distanceM: Math.hypot(horizontalM, upM),
+      eastM: state.eastM,
+      northM: state.northM,
+      aboveGroundM: state.upM - state.sizeM.heightM / 2 - ground.heightAt(state.eastM, state.northM),
+      sizeM: state.sizeM,
+      attitude: state.attitude
+    }
   }
 
   /**

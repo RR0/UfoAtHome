@@ -26,6 +26,7 @@ class Fixture {
   readonly sighting: Sighting
   changes = 0
   lookedAt?: string
+  time = 0
   start: ReturnType<BodyEditorHost["newBodyStart"]> = { sourceId: "flame", label: "Flame", keyframe: { t: 2000, azimuthDeg: 120, altitudeDeg: 5, distanceM: 100, sizeM: { widthM: 3, lengthM: 3, heightM: 1 } } }
   readonly editor: BodyEditor
 
@@ -40,7 +41,9 @@ class Fixture {
       shapes: () => [{ id: "ufo-1", label: "Object" }, { id: "flame", label: "Flame" }],
       changed: () => { this.changes++ },
       newBodyStart: () => this.start,
-      lookAt: body => { this.lookedAt = body.id }
+      lookAt: body => { this.lookedAt = body.id },
+      currentTime: () => this.time,
+      readingOf: () => ({ azimuthDeg: 10, altitudeDeg: 2, distanceM: 100, eastM: 17.36, northM: 98.48, aboveGroundM: 1.5, sizeM: { widthM: 4, lengthM: 5, heightM: 2 }, attitude: { headingDeg: 30, pitchDeg: 0, rollDeg: 0 } })
     }
     this.editor = new BodyEditor(this.container, host, "en")
   }
@@ -155,5 +158,48 @@ describe("The Bodies part of the editor", () => {
     fixture.type("body-model", "catalogue-airliner")
     await new Promise(resolve => setTimeout(resolve))
     expect(fixture.sighting.interpretation!.bodies[0].track).toEqual([{ t: 0, azimuthDeg: 90, altitudeDeg: 10, distanceM: 250, sizeM: { widthM: 35, lengthM: 37, heightM: 12 } }])
+  })
+
+  it("shows the body at the playhead in the form its keyframes use", () => {
+    const fixture = new Fixture()
+    fixture.time = 2500
+    fixture.editor.syncKeyframe()
+    expect(fixture.container.querySelector("#body-key-legend")!.textContent).toBe("At 2.5 s")
+    expect((fixture.container.querySelector("#body-key-mode") as HTMLSelectElement).value).toBe("world")
+    expect(fixture.field("body-key-east").value).toBe("17.36")
+    expect(fixture.field("body-key-width").value).toBe("4")
+    expect(fixture.field("body-key-heading").value).toBe("30")
+    expect(fixture.field("body-key-azimuth").closest("label")!.hidden).toBe(true)
+    expect((fixture.container.querySelector("#body-key-delete") as HTMLButtonElement).disabled).toBe(true)
+  })
+
+  it("writes an edit at the playhead as a keyframe of position, size and attitude only", () => {
+    const fixture = new Fixture()
+    fixture.sighting.interpretation!.bodies[0].track[1] = { t: 5000, eastM: 0, northM: 90, motions: { legs: 1 }, appearance: { color: "#fff" } }
+    fixture.time = 2500
+    fixture.editor.sync()
+    fixture.type("body-key-north", "95")
+    const track = fixture.sighting.interpretation!.bodies[0].track
+    expect(track.map(key => key.t)).toEqual([0, 2500, 5000])
+    expect(track[1]).toEqual({ t: 2500, eastM: 17.36, northM: 95, altitudeAboveGroundM: 1.5, sizeM: { widthM: 4, lengthM: 5, heightM: 2 }, attitude: { headingDeg: 30, pitchDeg: 0, rollDeg: 0 } })
+    // An existing keyframe keeps what it states besides its placement.
+    fixture.time = 5000
+    fixture.editor.syncKeyframe()
+    fixture.type("body-key-width", "6")
+    expect(track.length).toBe(3)
+    const last = fixture.sighting.interpretation!.bodies[0].track[2]
+    expect(last).toMatchObject({ t: 5000, motions: { legs: 1 }, appearance: { color: "#fff" }, sizeM: { widthM: 6 } })
+    ;(fixture.container.querySelector("#body-key-delete") as HTMLButtonElement).click()
+    expect(fixture.sighting.interpretation!.bodies[0].track.map(key => key.t)).toEqual([0, 2500])
+  })
+
+  it("states a position from the witness in the witness's terms", () => {
+    const fixture = new Fixture(null)
+    fixture.container.querySelector<HTMLButtonElement>("#body-add")!.click()
+    fixture.time = 2000
+    fixture.editor.syncKeyframe()
+    expect((fixture.container.querySelector("#body-key-mode") as HTMLSelectElement).value).toBe("witness")
+    fixture.type("body-key-distance", "250")
+    expect(fixture.sighting.interpretation!.bodies[0].track[0]).toEqual({ t: 2000, azimuthDeg: 10, altitudeDeg: 2, distanceM: 250, sizeM: { widthM: 4, lengthM: 5, heightM: 2 }, attitude: { headingDeg: 30, pitchDeg: 0, rollDeg: 0 } })
   })
 })

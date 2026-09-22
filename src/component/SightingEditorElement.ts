@@ -1,5 +1,5 @@
 import { setupCloudEditor } from "./CloudEditor.js"
-import { BodyEditor } from "./BodyEditor.js"
+import type { BodyEditor } from "./BodyEditor.js"
 import type { BodyJson, BodyKeyframe } from "../engine/interpretation/Interpretation.js"
 import { BLUR_RADIUS_UNIT } from "../render/CanvasRenderer.js"
 import { SightingFetch, SightingFetchError } from "../engine/net/SightingFetch.js"
@@ -399,7 +399,9 @@ export class SightingEditorElement extends HTMLElement {
   private readonly descriptionInput: HTMLTextAreaElement
   private readonly tagsInput: HTMLInputElement
   private readonly cloudEditor: ReturnType<typeof setupCloudEditor>
-  private readonly bodyEditor: BodyEditor
+  /** The Bodies part, loaded the first time it is opened — see loadBodyEditor. */
+  private bodyEditor?: BodyEditor
+  private bodyEditorLoading?: Promise<BodyEditor>
   private readonly cloudCoverInput: HTMLInputElement
   private readonly cloudDarknessInput: HTMLInputElement
   private readonly cloudBaseInput: HTMLInputElement
@@ -1620,20 +1622,6 @@ export class SightingEditorElement extends HTMLElement {
       this.pitchInput.value = String(this.rounded(pitchDeg))
       this.updateObserver()
     }, selectLocale(HostLocale.preferencesFor(this), UFO_SUPPORTED_LANGUAGES))
-    this.bodyEditor = new BodyEditor(this.shadow.getElementById("body-editor")!, {
-      sighting: () => this.ufoElement.sighting,
-      said: () => this.said,
-      writingLanguage: () => this.writingLanguage,
-      modelProvider: () => this.decorModelProvider,
-      shapes: () => this.ufoElement.sighting.timeline.sourceIds.map(id => ({ id, label: this.shapeLabel(id) })),
-      changed: () => {
-        this.ufoElement.refresh()
-        this.refreshParamSummary()
-        this.syncBodiesShown()
-      },
-      newBodyStart: () => this.newBodyStart(),
-      lookAt: body => this.lookAtBody(body)
-    }, this.language)
     this.currentMilestoneT = this.ufoElement.sighting.milestones[0]?.t
     this.refreshMilestoneList()
     this.onSelectionOrTimeChanged()
@@ -1706,7 +1694,7 @@ export class SightingEditorElement extends HTMLElement {
     // keep writing into the newly-loaded one
     this.ufoElement.sightingData = json
     this.cloudEditor.reset()
-    this.bodyEditor.sync()
+    this.bodyEditor?.sync()
     this.syncBodiesShown()
     // Resets to the first source actually present in the loaded data, not the hardcoded
     // default — a loaded recording using different source ids would otherwise have the next
@@ -4382,7 +4370,7 @@ export class SightingEditorElement extends HTMLElement {
       this.shadow.getElementById(candidate.getAttribute("aria-controls")!)!.hidden = !open
     }
     // The shapes it offers to stand for may have been renamed, added or deleted meanwhile.
-    if (tab.getAttribute("aria-controls") === "shape-bodies") this.bodyEditor.sync()
+    if (tab.getAttribute("aria-controls") === "shape-bodies") void this.loadBodyEditor().then(editor => editor.sync())
     this.syncBodiesShown()
   }
 
@@ -4737,6 +4725,7 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   private onSelectionOrTimeChanged(): void {
+    if (this.shadow.getElementById("shape-bodies")?.hidden === false) this.bodyEditor?.syncKeyframe()
     this.syncAppearanceFromTimeline()
     this.syncObserverFromTimeline()
     this.syncWeatherFromTimeline()
@@ -5408,6 +5397,33 @@ export class SightingEditorElement extends HTMLElement {
     return shape
       ? { sourceId, label: this.shapeLabel(sourceId), keyframe }
       : { keyframe }
+  }
+
+  /**
+   * The Bodies part of the Phenomenon group, fetched and built the first time it is opened: a
+   * chunk of its own, since most authors draw shapes and never open it (see BodyEditor).
+   */
+  private loadBodyEditor(): Promise<BodyEditor> {
+    this.bodyEditorLoading ??= import("./BodyEditor.js").then(({ BodyEditor }) => {
+      this.bodyEditor = new BodyEditor(this.shadow.getElementById("body-editor")!, {
+        sighting: () => this.ufoElement.sighting,
+        said: () => this.said,
+        writingLanguage: () => this.writingLanguage,
+        modelProvider: () => this.decorModelProvider,
+        shapes: () => this.ufoElement.sighting.timeline.sourceIds.map(id => ({ id, label: this.shapeLabel(id) })),
+        changed: () => {
+          this.ufoElement.refresh()
+          this.refreshParamSummary()
+          this.syncBodiesShown()
+        },
+        newBodyStart: () => this.newBodyStart(),
+        lookAt: body => this.lookAtBody(body),
+        currentTime: () => this.ufoElement.currentTime,
+        readingOf: (body, t) => this.sceneElement.bodyReading(body, t)
+      }, this.language)
+      return this.bodyEditor
+    })
+    return this.bodyEditorLoading
   }
 
   /** Turns the witness towards a body — see BodyEditorHost.lookAt, and lookAtDecor for the decor's. */

@@ -369,7 +369,11 @@ if (docs) {
         big as its apparent width makes it there, in a single keyframe at the playhead; on the ground
         at that distance when the line of sight goes into it first; with no shape, where the witness
         is looking. 🎯 turns the witness towards the body. A recording may hold only bodies: its
-        last shape can be deleted. A body's
+        last shape can be deleted. <strong>At</strong> the playhead, the body's position (from the
+        witness, or in the world), size and attitude are shown as they are at that instant; editing
+        one writes a keyframe there, which is how a body is given its movement: move the playhead,
+        edit again. Such a keyframe states nothing else, so the body's light, flame and moving parts
+        go on as before. A body's
         movement is stated in the file, and shown here. While this part is open the picture draws
         the bodies, with the shapes beside them as outlines to read them against; in the Shapes
         part, the shapes are drawn alone and in full.</p>
@@ -730,7 +734,12 @@ if (docs) {
         distance où la scène la dessine et à la taille que sa largeur apparente donne là, en une
         seule image clé à la tête de lecture ; posé au sol à cette distance quand la ligne de visée y
         entre avant ; sans forme, là où le témoin regarde. 🎯 tourne le témoin vers le corps. Un
-        enregistrement peut ne tenir que des corps : sa dernière forme se supprime. Le mouvement d'un corps est donné par le fichier, et
+        enregistrement peut ne tenir que des corps : sa dernière forme se supprime.
+        <strong>À</strong> la tête de lecture, la position du corps (depuis le témoin, ou dans le
+        monde), sa taille et son attitude sont affichées telles qu'elles sont à cet instant ; en
+        modifier une écrit une image clé là, et c'est ainsi qu'un corps reçoit son mouvement :
+        déplacer la tête de lecture, modifier de nouveau. Une telle image clé ne dit rien d'autre :
+        la lumière, la flamme et les parties mobiles du corps continuent comme avant. Le mouvement d'un corps est donné par le fichier, et
         affiché ici. Tant que cette partie est ouverte, l'image dessine les corps, avec les formes à
         côté en contours pour les confronter ; dans la partie Formes, les formes sont dessinées
         seules et en entier.</p>
