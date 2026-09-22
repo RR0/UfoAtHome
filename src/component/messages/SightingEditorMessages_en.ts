@@ -104,6 +104,8 @@ export const sightingEditorMessages_en: SightingEditorMessages = {
   tagsPlaceholder: "comma-separated",
   weather: "Weather",
   shapeGroup: "Phenomenon",
+  shapesSubgroup: "Shapes",
+  bodiesSubgroup: "Bodies",
   soundGroup: "Sound",
   temporalGroup: "Moment",
   timeQualifierExact: "Exact",

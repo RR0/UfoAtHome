@@ -444,6 +444,14 @@ export const html = `
   </div>
 </section>
 <section class="group-panel" id="group-shape" aria-labelledby="label-shape-group" hidden>
+  <!-- In two parts: the shapes the witness DREW (angles on their image, the testimony), and the
+       bodies the witness said those shapes WERE (the 3D interpretation, see BodyEditor). The shapes
+       come first and open on arrival: they are what the rest of this editor draws and records. -->
+  <div class="group-tabs" id="shape-tabs">
+    <button class="subgroup-tab" type="button" aria-controls="shape-shapes" aria-expanded="true"><span id="label-shapes-subgroup">Shapes</span></button>
+    <button class="subgroup-tab" type="button" aria-controls="shape-bodies" aria-expanded="false"><span id="label-bodies-subgroup">Bodies</span></button>
+  </div>
+  <section class="subgroup-panel" id="shape-shapes" aria-labelledby="label-shapes-subgroup">
   <div class="toolbar">
     <div class="presets" id="presets-group" role="group" aria-label="UFO shape">
       <button class="preset" id="preset-oval" type="button" data-preset="oval">Oval</button>
@@ -501,6 +509,12 @@ export const html = `
       <label><span id="label-sampling-rate">Sampling rate</span> <input id="samplingRate" type="number" min="16" step="16" value="100"/> ms</label>
     </div>
   </div>
+  </section>
+  <section class="subgroup-panel" id="shape-bodies" aria-labelledby="label-bodies-subgroup" hidden>
+    <div class="toolbar">
+      <style>#body-editor { flex-basis: 100%; min-width: 0; } #body-editor .body-editor, #body-editor .body-fields { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; } #body-editor .body-fields { flex-basis: 100%; min-width: 0; } #body-editor .body-fields[hidden], #body-editor [hidden] { display: none !important; } #body-editor select { min-width: 0; width: 100%; } #body-editor .body-intro { flex-basis: 100%; font-size: .85em; margin: 0; } #body-editor .body-explains { flex-basis: 100%; min-width: 0; box-sizing: border-box; margin: 0; } #body-editor #body-explains { display: flex; flex-wrap: wrap; gap: .3em 1em; } #body-editor #body-explains label { white-space: normal; } #body-editor .body-track { margin: 0; } #body-editor details { flex-basis: 100%; min-width: 0; } #body-editor details[open] { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; } #body-editor details > summary { flex-basis: 100%; } #body-editor input, #body-editor select { max-width: 100%; box-sizing: border-box; } #body-editor label { min-width: 0; max-width: 100%; }</style><div id="body-editor"></div>
+    </div>
+  </section>
 </section>
 
 <!-- The playback layer's own toggles, taken out of the picture — see UfoElement.hostControls. -->

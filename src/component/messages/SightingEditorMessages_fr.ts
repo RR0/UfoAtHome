@@ -104,6 +104,8 @@ export const sightingEditorMessages_fr: SightingEditorMessages = {
   tagsPlaceholder: "séparés par des virgules",
   weather: "Météo",
   shapeGroup: "Phénomène",
+  shapesSubgroup: "Formes",
+  bodiesSubgroup: "Corps",
   soundGroup: "Son",
   temporalGroup: "Moment",
   timeQualifierExact: "Exacte",

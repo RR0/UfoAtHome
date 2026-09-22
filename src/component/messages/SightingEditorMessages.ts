@@ -215,6 +215,9 @@ export interface SightingEditorMessages extends SightingLabels {
    * saw. The word inside it stays "shape", because that is what a drawn outline is.
    */
   shapeGroup: string
+  /** The Phenomenon group's two parts: the shapes drawn, and the bodies they were (see BodyEditor). */
+  shapesSubgroup: string
+  bodiesSubgroup: string
   /** Summary of the group holding what the sighting sounded like — see SoundTrack.ts. */
   soundGroup: string
   /**

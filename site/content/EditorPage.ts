@@ -358,6 +358,13 @@ if (docs) {
         across, not the 90 an author reaches for unaided. Getting this wrong is the single most
         common way a reconstruction ends up false.</p>
       <p><strong>Sampling rate</strong> is how often the pointer is read while recording.</p>
+      <p>Those are the group's <strong>Shapes</strong>: what the witness drew. Its
+        <strong>Bodies</strong> are what the witness said those shapes were, in 3D: each body names
+        the shapes it stands for and the model it is drawn as, a built-in shape, a model of the
+        catalogue, or a glTF file at an address. The address can be relative to the recording's own
+        file, so a <code>sighting.json</code> and the <code>craft.gltf</code> beside it work together
+        from any page; its credit (name and licence) is required before it is drawn. A body's
+        movement is stated in the file, and shown here.</p>
     </div>
     </div>
   </div>
@@ -704,6 +711,14 @@ if (docs) {
         tromper est la première cause de reconstitution fausse.</p>
       <p>La <strong>fréquence d'échantillonnage</strong> est la cadence à laquelle le curseur est lu
         pendant l'enregistrement.</p>
+      <p>Voilà pour les <strong>Formes</strong> du groupe : ce que le témoin a dessiné. Ses
+        <strong>Corps</strong> sont ce que le témoin a dit que ces formes étaient, en 3D : chaque
+        corps désigne les formes qu'il représente et le modèle qui le dessine, une forme de base, un
+        modèle du catalogue, ou un fichier glTF à une adresse. Cette adresse peut être relative au
+        fichier de l'enregistrement : un <code>sighting.json</code> et le <code>craft.gltf</code> posé
+        à côté fonctionnent ensemble depuis n'importe quelle page ; son crédit (nom et licence) est
+        exigé avant qu'il soit dessiné. Le mouvement d'un corps est donné par le fichier, et affiché
+        ici.</p>
     </div>
     </div>
   </div>

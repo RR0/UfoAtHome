@@ -1,4 +1,5 @@
 import { setupCloudEditor } from "./CloudEditor.js"
+import { BodyEditor } from "./BodyEditor.js"
 import { BLUR_RADIUS_UNIT } from "../render/CanvasRenderer.js"
 import { SightingFetch, SightingFetchError } from "../engine/net/SightingFetch.js"
 import { NARRATIVE_SOURCES } from "../engine/narrative/narrativeSources.js"
@@ -393,6 +394,7 @@ export class SightingEditorElement extends HTMLElement {
   private readonly descriptionInput: HTMLTextAreaElement
   private readonly tagsInput: HTMLInputElement
   private readonly cloudEditor: ReturnType<typeof setupCloudEditor>
+  private readonly bodyEditor: BodyEditor
   private readonly cloudCoverInput: HTMLInputElement
   private readonly cloudDarknessInput: HTMLInputElement
   private readonly cloudBaseInput: HTMLInputElement
@@ -534,6 +536,8 @@ export class SightingEditorElement extends HTMLElement {
   private readonly labelWindSpeed: HTMLElement
   private readonly labelStorm: HTMLElement
   private readonly labelCloudsGroup: HTMLElement
+  private readonly labelShapesSubgroup: HTMLElement
+  private readonly labelBodiesSubgroup: HTMLElement
   private readonly labelPrecipitationGroup: HTMLElement
   private readonly labelWindGroup: HTMLElement
   /** The handles of a group's own parts (the weather's clouds, precipitation and wind) — a strip
@@ -1119,6 +1123,8 @@ export class SightingEditorElement extends HTMLElement {
     this.labelWindSpeed = this.shadow.getElementById("label-wind-speed")!
     this.labelStorm = this.shadow.getElementById("label-storm")!
     this.labelCloudsGroup = this.shadow.getElementById("label-clouds-group")!
+    this.labelShapesSubgroup = this.shadow.getElementById("label-shapes-subgroup")!
+    this.labelBodiesSubgroup = this.shadow.getElementById("label-bodies-subgroup")!
     this.labelPrecipitationGroup = this.shadow.getElementById("label-precipitation-group")!
     this.labelWindGroup = this.shadow.getElementById("label-wind-group")!
     this.labelWeatherInferred = this.shadow.getElementById("label-weather-inferred")!
@@ -1615,6 +1621,17 @@ export class SightingEditorElement extends HTMLElement {
       this.pitchInput.value = String(this.rounded(pitchDeg))
       this.updateObserver()
     }, selectLocale(HostLocale.preferencesFor(this), UFO_SUPPORTED_LANGUAGES))
+    this.bodyEditor = new BodyEditor(this.shadow.getElementById("body-editor")!, {
+      sighting: () => this.ufoElement.sighting,
+      said: () => this.said,
+      writingLanguage: () => this.writingLanguage,
+      modelProvider: () => this.decorModelProvider,
+      shapes: () => this.ufoElement.sighting.timeline.sourceIds.map(id => ({ id, label: this.shapeLabel(id) })),
+      changed: () => {
+        this.ufoElement.refresh()
+        this.refreshParamSummary()
+      }
+    }, this.language)
     this.currentMilestoneT = this.ufoElement.sighting.milestones[0]?.t
     this.refreshMilestoneList()
     this.onSelectionOrTimeChanged()
@@ -1687,6 +1704,7 @@ export class SightingEditorElement extends HTMLElement {
     // keep writing into the newly-loaded one
     this.ufoElement.sightingData = json
     this.cloudEditor.reset()
+    this.bodyEditor.sync()
     // Resets to the first source actually present in the loaded data, not the hardcoded
     // default — a loaded recording using different source ids would otherwise have the next
     // appearance edit silently create a disconnected new "ufo-1" source instead of editing
@@ -4340,6 +4358,8 @@ export class SightingEditorElement extends HTMLElement {
       candidate.setAttribute("aria-expanded", String(open))
       this.shadow.getElementById(candidate.getAttribute("aria-controls")!)!.hidden = !open
     }
+    // The shapes it offers to stand for may have been renamed, added or deleted meanwhile.
+    if (tab.getAttribute("aria-controls") === "shape-bodies") this.bodyEditor.sync()
   }
 
   /** Opens the part of a group a control stands in, when it stands in one — so that a summary chip
@@ -7380,6 +7400,9 @@ export class SightingEditorElement extends HTMLElement {
     this.labelTags.textContent = messages.tags
     this.tagsInput.placeholder = messages.tagsPlaceholder
     this.labelShapeGroup.textContent = messages.shapeGroup
+    this.labelShapesSubgroup.textContent = messages.shapesSubgroup
+    this.labelBodiesSubgroup.textContent = messages.bodiesSubgroup
+    this.bodyEditor?.setLanguage(this.language)
     this.labelTemporalGroup.textContent = messages.temporalGroup
     this.labelLocationGroup.textContent = messages.locationGroup
     this.labelObservationGroup.textContent = messages.observationGroup
@@ -7586,6 +7609,9 @@ export class SightingEditorElement extends HTMLElement {
     if (tab) {
       this.toggleGroup(tab, true)
     }
+    // A shape is picked on the image: its fields are in the Shapes part, not under the bodies.
+    const shapes = this.subgroupTabs.find(candidate => candidate.getAttribute("aria-controls") === "shape-shapes")
+    if (shapes) this.openSubgroup(shapes)
   }
 
   /** Every currently-selected shape as it stands at the playhead, ready to hand to ShapeGroup —
