@@ -77,9 +77,24 @@ export class CaseFile {
   static async interpretationOf(event: InterpretationEventJson, caseUrl: string, fetchJson: (url: string) => Promise<unknown>): Promise<InterpretationJson> {
     // Any value may be written with its provenance beside it, as in a recording (see Provenance);
     // what the scene reads is the bare value.
-    if (event.bodies) return Provenance.strip({ title: event.title, bodies: event.bodies, smoke: event.smoke }).recording
+    if (event.bodies) {
+      return CaseFile.withModelsFrom(Provenance.strip({ title: event.title, bodies: event.bodies, smoke: event.smoke }).recording, caseUrl)
+    }
     if (!event.url) return { title: event.title, bodies: [] }
-    const file = await fetchJson(new URL(event.url, caseUrl).href) as InterpretationJson
-    return Provenance.strip({ title: event.title ?? file.title, bodies: file.bodies ?? [], smoke: file.smoke }).recording
+    const fileUrl = new URL(event.url, caseUrl).href
+    const file = await fetchJson(fileUrl) as InterpretationJson
+    return CaseFile.withModelsFrom(Provenance.strip({ title: event.title ?? file.title, bodies: file.bodies ?? [], smoke: file.smoke }).recording, fileUrl)
+  }
+
+  /** An interpretation with its bodies' model addresses made absolute against the file that states
+   * them: the case, or the interpretation's own file. The scene resolves the rest against the
+   * recording's address, which is not where these were written. */
+  private static withModelsFrom(interpretation: InterpretationJson, fileUrl: string): InterpretationJson {
+    return {
+      ...interpretation,
+      bodies: interpretation.bodies.map(body => body.model?.url
+        ? { ...body, model: { ...body.model, url: new URL(body.model.url, fileUrl).href } }
+        : body)
+    }
   }
 }

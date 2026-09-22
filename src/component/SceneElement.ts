@@ -735,7 +735,20 @@ export class SceneElement extends HTMLElement {
 
   /** Fetches a SightingRecordingJson from `url` and loads it — what the `src` attribute uses. */
   async loadFromSrc(url: string): Promise<void> {
-    this.sightingData = (await SightingFetch.json(url)) as SightingRecordingJson
+    const json = (await SightingFetch.json(url)) as SightingRecordingJson
+    this.documentUrl = new URL(url, location.href).href
+    this.sightingData = json
+  }
+
+  /** Where the recording on show was read from, which the addresses it states (a model's `url`) are
+   * relative to — see SceneRenderer.documentUrl. Set it BEFORE `sightingData` when loading from an
+   * address by any other way than `src`; loading a recording does not change it. */
+  get documentUrl(): string | undefined {
+    return this.sceneRenderer.documentUrl
+  }
+
+  set documentUrl(url: string | undefined) {
+    this.sceneRenderer.documentUrl = url
   }
 
   get sightingData(): SightingRecordingJson {

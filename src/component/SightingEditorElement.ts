@@ -1750,7 +1750,10 @@ export class SightingEditorElement extends HTMLElement {
         reader.onerror = () => reject(reader.error)
         reader.readAsText(file)
       })
-      this.sightingData = JSON.parse(text) as SightingRecordingJson
+      const json = JSON.parse(text) as SightingRecordingJson
+      // A picked file has no address of its own: its relative addresses can only mean the page's.
+      this.sceneElement.documentUrl = undefined
+      this.sightingData = json
       // The recording now open came from a file, not from the address still sitting in the field.
       this.importUrlInput.value = ""
     } catch {
@@ -1771,7 +1774,10 @@ export class SightingEditorElement extends HTMLElement {
   private async importFromUrl(url: string = this.importUrlInput.value.trim()): Promise<void> {
     if (!url) return
     try {
-      this.sightingData = (await SightingFetch.json(url)) as SightingRecordingJson
+      const json = (await SightingFetch.json(url)) as SightingRecordingJson
+      // What the models it names by `url` are relative to — see SceneElement.documentUrl.
+      this.sceneElement.documentUrl = new URL(url, location.href).href
+      this.sightingData = json
       // Says where the open recording came from, whichever way it was asked for: typed here, the
       // `src` attribute (a site's `?sighting=` link), or a witness's own file. Absolute, so the
       // address can be copied out of the field and still work, and so the field is a valid URL.

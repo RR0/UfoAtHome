@@ -34,6 +34,22 @@ describe("A case's interpretations", () => {
     expect(await CaseFile.interpretationOf(filed, "https://rr0.org/dossier/Socorro/case.json", fetchJson)).toEqual({ title: "From the file", bodies: [body] })
     expect(asked).toEqual(["https://rr0.org/dossier/Socorro/hypothesis.json"])
   })
+
+  it("read a model's url relative to the file that states it, not to the page", async () => {
+    const credit = { title: "Craft", license: "CC0 1.0" }
+    const withModel = (url: string): BodyJson => ({ ...body, model: { url, credit } })
+    const inline = { type: "event", eventType: "interpretation", title: "Inline", bodies: [withModel("craft.gltf")] } as never
+    const filed = { type: "event", eventType: "interpretation", url: "hypotheses/landing.json" } as never
+    const fetchJson = async () => ({ title: "From the file", bodies: [withModel("../models/craft.gltf"), withModel("https://example.org/a.glb")] })
+    const caseUrl = "https://example.org/dossier/Socorro/case.json"
+    expect((await CaseFile.interpretationOf(inline, caseUrl, fetchJson)).bodies[0].model.url)
+      .toBe("https://example.org/dossier/Socorro/craft.gltf")
+    const fromFile = await CaseFile.interpretationOf(filed, caseUrl, fetchJson)
+    expect(fromFile.bodies.map(b => b.model.url)).toEqual(["https://example.org/dossier/Socorro/models/craft.gltf", "https://example.org/a.glb"])
+    // A catalogue model has no address to resolve.
+    expect((await CaseFile.interpretationOf({ type: "event", eventType: "interpretation", bodies: [body] } as never, caseUrl, fetchJson)).bodies[0].model)
+      .toEqual({ id: "ellipsoid" })
+  })
 })
 
 describe("The witness's own interpretation", () => {

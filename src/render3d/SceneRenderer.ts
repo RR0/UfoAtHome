@@ -1775,11 +1775,28 @@ export class SceneRenderer {
     return this.bodySystem.outlineOf(id, node)
   }
 
+  /**
+   * The address of the recording being shown, when it was read from one: what a model's own `url`
+   * is relative to. Set before the recording, since its models are fetched as soon as it is.
+   * Undefined for a recording that lives nowhere (pasted, built by script), whose relative
+   * addresses can only mean the page's.
+   */
+  documentUrl?: string
+
+  /** A model's own `url`, read relative to the file that states it rather than to the page showing
+   * it: a sighting.json and the craft.gltf beside it then work together from any page, with no
+   * catalogue and no particular host. */
+  private modelUrl(ref: DecorModelRef): string | undefined {
+    if (!ref.url) return undefined
+    const base = this.documentUrl ?? (typeof location === "undefined" ? undefined : location.href)
+    return base ? new URL(ref.url, base).href : ref.url
+  }
+
   /** A body's model, the way a decor object's is fetched (see loadDecorModel): by catalogue entry
    * or by url, and refused without a credit. */
   private async loadBodyModel(ref: DecorModelRef): Promise<{ scene: Object3D, credit: DecorModelCredit, headingOffsetDeg?: number } | undefined> {
     const entry = ref.url ? undefined : ref.id ? await this.decorModelProvider.entry(ref.id) : undefined
-    const url = ref.url ?? entry?.url
+    const url = this.modelUrl(ref) ?? entry?.url
     const credit = ref.credit ?? entry?.credit
     if (!url || !credit) return undefined
     return { scene: await loadGltfScene(url), credit, headingOffsetDeg: ref.headingOffsetDeg ?? entry?.headingOffsetDeg }
@@ -1801,7 +1818,7 @@ export class SceneRenderer {
     if (!ref || !DecorSystem.usesModel(object)) return
     try {
       const entry = ref.url ? undefined : ref.id ? await this.decorModelProvider.entry(ref.id) : undefined
-      const url = ref.url ?? entry?.url
+      const url = this.modelUrl(ref) ?? entry?.url
       const credit = ref.credit ?? entry?.credit
       // A bare url with no credit is refused rather than drawn: an unattributed model is not a
       // model this project can show (see DecorModelRef.credit).

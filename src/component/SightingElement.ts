@@ -649,6 +649,9 @@ export class SightingElement extends HTMLElement {
     this.witnessSelect.value = src
     // Already fetched by loadWitnessUrls — no need to re-fetch on every selection change.
     // SceneElement's own setter updates astronomy/weather/terrain for the new sighting too.
+    // A recording read from an address states its models' addresses relative to it; one set in
+    // memory (src "") has none, and the page's own address is all its relative ones can mean.
+    this.sceneElement.documentUrl = entry.src ? new URL(entry.src, location.href).href : undefined
     this.sceneElement.sightingData = entry.sighting
     this.offerInterpretations(entry)
     this.updateTestimonyLine()
