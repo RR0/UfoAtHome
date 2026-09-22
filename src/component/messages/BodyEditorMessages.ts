@@ -28,6 +28,8 @@ export interface BodyEditorMessages {
   modelLicense: string
   modelSource: string
   modelIncomplete: string
+  /** Under the address block, when it shows a catalogue model. */
+  modelFromCatalogue: string
   outlineNode: string
   outlineNodeHint: string
   track: string
@@ -87,6 +89,7 @@ export class BodyEditorTexts {
     modelLicense: "Licence",
     modelSource: "Where it came from",
     modelIncomplete: "Not drawn until the model's name and licence are given",
+    modelFromCatalogue: "From the catalogue, which the recording names it by. Change a field and it becomes this recording's own address.",
     outlineNode: "Part drawn by the witness",
     outlineNodeHint: "Node of the model, e.g. hull",
     track: "Movement",
@@ -145,6 +148,7 @@ export class BodyEditorTexts {
     modelLicense: "Licence",
     modelSource: "Provenance",
     modelIncomplete: "Pas dessiné tant que le nom et la licence du modèle manquent",
+    modelFromCatalogue: "Du catalogue, par lequel l'enregistrement le nomme. Modifiez un champ et il devient l'adresse propre à cet enregistrement.",
     outlineNode: "Partie dessinée par le témoin",
     outlineNodeHint: "Nœud du modèle, par ex. hull",
     track: "Mouvement",

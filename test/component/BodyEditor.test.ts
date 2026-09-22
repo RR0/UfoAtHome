@@ -202,4 +202,25 @@ describe("The Bodies part of the editor", () => {
     fixture.type("body-key-distance", "250")
     expect(fixture.sighting.interpretation!.bodies[0].track[0]).toEqual({ t: 2000, azimuthDeg: 10, altitudeDeg: 2, distanceM: 250, sizeM: { widthM: 4, lengthM: 5, heightM: 2 }, attitude: { headingDeg: 30, pitchDeg: 0, rollDeg: 0 } })
   })
+
+  it("shows a picked catalogue model's address and credit, and keeps naming it by its id", async () => {
+    const fixture = new Fixture()
+    await new Promise(resolve => setTimeout(resolve))
+    fixture.type("body-model", "catalogue-airliner")
+    await new Promise(resolve => setTimeout(resolve))
+    expect(fixture.field("body-model-url").value).toBe("https://x/airliner.glb")
+    expect(fixture.field("body-model-title").value).toBe("Airliner")
+    expect(fixture.field("body-model-license").value).toBe("CC0 1.0")
+    expect((fixture.container.querySelector("#body-model-advanced") as HTMLDetailsElement).open).toBe(true)
+    // An unrelated edit leaves it a catalogue model.
+    fixture.type("body-title", "The airliner")
+    expect(fixture.sighting.interpretation!.bodies[0].model).toEqual({ id: "catalogue-airliner" })
+    // A changed field makes the address the recording's own.
+    fixture.type("body-model-url", "airliner-copy.glb")
+    expect(fixture.sighting.interpretation!.bodies[0].model).toMatchObject({ url: "airliner-copy.glb", credit: { title: "Airliner", license: "CC0 1.0" } })
+    // A built-in shape empties the block.
+    fixture.type("body-model", "sphere")
+    await new Promise(resolve => setTimeout(resolve))
+    expect(fixture.field("body-model-url").value).toBe("")
+  })
 })

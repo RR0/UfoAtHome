@@ -3,7 +3,7 @@ import { BODY_PRIMITIVES } from "../engine/interpretation/Interpretation.js"
 import type { DecorModelRef } from "../engine/model/Decor.js"
 import type { Sighting } from "../engine/model/Sighting.js"
 import type { SaidTexts } from "../engine/model/SaidText.js"
-import type { DecorModelProvider } from "../render3d/decor/DecorModelProvider.js"
+import type { DecorModelEntry, DecorModelProvider } from "../render3d/decor/DecorModelProvider.js"
 import type { BodyReading } from "./SceneElement.js"
 import type { BodyEditorMessages } from "./messages/BodyEditorMessages.js"
 import { BodyEditorTexts } from "./messages/BodyEditorMessages.js"
@@ -45,6 +45,10 @@ export class BodyEditor {
   private messages: BodyEditorMessages
   private currentId?: string
   private catalogueToken = 0
+  /** The catalogue model the address block is showing, if it is showing one — see showCatalogueModel. */
+  private shownEntry?: DecorModelEntry
+  /** The body the fields were last filled for. */
+  private syncedId?: string
 
   constructor(private readonly container: HTMLElement, private readonly host: BodyEditorHost, language: string) {
     this.messages = BodyEditorTexts.of(language)
@@ -89,7 +93,10 @@ export class BodyEditor {
     this.input("body-model-author").value = model.credit?.author ?? ""
     this.input("body-model-license").value = model.credit?.license ?? ""
     this.input("body-model-source").value = model.credit?.sourceUrl ?? ""
-    ;(this.element("body-model-advanced") as HTMLDetailsElement).open = model.url !== undefined
+    // Opened for an address; left as the author set it while the same body stays on show.
+    const details = this.element("body-model-advanced") as HTMLDetailsElement
+    details.open = model.url !== undefined || (details.open && body.id === this.syncedId)
+    this.syncedId = body.id
     this.element("body-model-incomplete").hidden = model.url === undefined || (model.credit?.title !== undefined && model.credit.license !== undefined)
     this.input("body-outline-node").value = body.outlineNode ?? ""
     this.element("body-track").textContent = this.trackSummary(body)
@@ -156,6 +163,7 @@ export class BodyEditor {
           ${field("body-model-license", m.modelLicense, "text", "CC0 1.0")}
           ${field("body-model-source", m.modelSource, "url", "https://…")}
           <p id="body-model-incomplete" class="body-intro" hidden>${m.modelIncomplete}</p>
+          <p id="body-model-catalogue" class="body-intro" hidden>${m.modelFromCatalogue}</p>
         </details>
         ${field("body-outline-node", m.outlineNode, "text", m.outlineNodeHint)}
         <p class="body-track"><span>${m.track}</span> <output id="body-track"></output></p>
@@ -201,6 +209,8 @@ export class BodyEditor {
       this.updateCurrent()
       void this.syncModelOptions(this.current!)
       if (id !== "") void this.adoptCatalogueSize(id)
+      // A catalogue model's address and credit are shown as soon as it is picked; a built-in shape has none.
+      ;(this.element("body-model-advanced") as HTMLDetailsElement).open = id !== "" && !(BODY_PRIMITIVES as readonly string[]).includes(id)
     })
     this.element("body-explains").addEventListener("change", () => this.updateCurrent())
     for (const id of BodyEditor.KEY_FIELDS) this.input(id).addEventListener("change", () => this.updateKeyframe())
@@ -247,6 +257,31 @@ export class BodyEditor {
     // An id neither list knows is kept on show, as itself, rather than read as another choice.
     if (id !== undefined && ![...select.options].some(option => option.value === id)) select.append(new Option(id, id))
     select.value = id ?? ""
+    this.showCatalogueModel(body.model.url === undefined ? entries.find(entry => entry.id === body.model.id) : undefined)
+  }
+
+  /**
+   * Fills the address block with what the catalogue says of the model picked — where the file is
+   * and whose it is — since that is what was fetched. The recording still names it by its id, so
+   * a catalogue re-hosting the file never touches it; only a changed field makes the address the
+   * recording's own (see statedModel). A built-in shape empties the block.
+   */
+  private showCatalogueModel(entry: DecorModelEntry | undefined): void {
+    const body = this.current
+    if (!body || body.model.url !== undefined) {
+      this.shownEntry = undefined
+      this.element("body-model-catalogue").hidden = true
+      return
+    }
+    this.shownEntry = entry
+    const active = (this.container.getRootNode() as Document | ShadowRoot).activeElement
+    const values: [string, string | undefined][] = [
+      ["body-model-url", entry?.url], ["body-model-title", entry?.credit.title], ["body-model-author", entry?.credit.author],
+      ["body-model-license", entry?.credit.license], ["body-model-source", entry?.credit.sourceUrl]
+    ]
+    for (const [id, value] of values) if (this.input(id) !== active) this.input(id).value = value ?? ""
+    this.element("body-model-catalogue").hidden = entry === undefined
+    this.element("body-model-incomplete").hidden = true
   }
 
   private updateInterpretationTitle(): void {
@@ -390,6 +425,13 @@ export class BodyEditor {
    * it, with whatever credit has been typed beside it. Kept as typed when incomplete. */
   private statedModel(previous: DecorModelRef): DecorModelRef {
     const url = this.stringOrUndefined(this.input("body-model-url").value)
+    // The block showing the catalogue's own entry, untouched, is still that entry.
+    const entry = this.shownEntry
+    const field = (id: string) => this.stringOrUndefined(this.input(id).value)
+    if (entry && url === entry.url && field("body-model-title") === entry.credit.title && field("body-model-author") === entry.credit.author
+      && field("body-model-license") === entry.credit.license && field("body-model-source") === entry.credit.sourceUrl) {
+      return { id: entry.id }
+    }
     if (url) {
       const title = this.stringOrUndefined(this.input("body-model-title").value)
       const license = this.stringOrUndefined(this.input("body-model-license").value)
