@@ -128,6 +128,9 @@ const DEFAULT_SHAPE_SIZE = { width: 48, height: 28 }
  * paused (see UfoElement.previewSound). */
 const SOUND_PREVIEW_MS = 2500
 
+/** The least a body's frame spans on the canvas, px, so its handles stay apart — see bodyCanvasBounds. */
+const MIN_BODY_FRAME_PX = 40
+
 /** Where a new body stands along its shape's line of sight when the scene draws that shape at no
  * particular distance: a guess to be moved, the same order as a nearby craft. */
 const DEFAULT_NEW_BODY_DISTANCE_M = 100
@@ -779,6 +782,8 @@ export class SightingEditorElement extends HTMLElement {
     | { kind: "resize" | "rotate"; sourceId: string; original: Shape; handle: HandleId; startPointer: { x: number; y: number } }
     | { kind: "vertex"; sourceId: string; original: PolygonShape; vertexIndex: number }
     | { kind: "body"; pointerAzimuthDeg: number; pointerAltitudeDeg: number; bodyAzimuthDeg: number; bodyAltitudeDeg: number }
+    | { kind: "body-resize"; handle: Exclude<HandleId, "rotate">; centre: { x: number; y: number }; startPointer: { x: number; y: number }; startSizeM: { widthM: number; lengthM: number; heightM: number } }
+    | { kind: "body-rotate"; startPointer: { x: number; y: number }; startHeadingDeg: number }
     | { kind: "group-resize"; group: ShapeGroup; handle: Exclude<HandleId, "rotate"> }
     | { kind: "group-rotate"; group: ShapeGroup; startPointer: { x: number; y: number } }
 
@@ -4332,7 +4337,7 @@ export class SightingEditorElement extends HTMLElement {
     // What is selected on the canvas is what the canvas edits: the shapes' handles in their own
     // group, the picture's frame and landmarks in its own, nothing elsewhere.
     this.ufoElement.selectionShown = mode === "shape"
-    this.ufoElement.overlayPainter = pictureNow ? this.paintPictureOverlay : undefined
+    this.ufoElement.overlayPainter = pictureNow ? this.paintPictureOverlay : mode === "body" ? this.paintBodyOverlay : undefined
     if (changed) this.ufoElement.refresh()
     // Click-to-play is off for the whole editor already (see the constructor): the canvas is for
     // editing here, whichever mode it is in.
@@ -7599,7 +7604,7 @@ export class SightingEditorElement extends HTMLElement {
     }
     if (mode === "body") {
       if (this.ufoElement.playbackState === "playing") return
-      if (!this.beginBodyDrag(event)) this.beginCameraDrag(point)
+      if (!this.beginBodyHandleDrag(point) && !this.beginBodyDrag(event)) this.beginCameraDrag(point)
       return
     }
     const timeline = this.ufoElement.sighting.timeline
@@ -8109,6 +8114,75 @@ export class SightingEditorElement extends HTMLElement {
     this.bodyEditor?.dragTo(drag.bodyAzimuthDeg + turn, drag.bodyAltitudeDeg + pointer.altitudeDeg - drag.pointerAltitudeDeg)
   }
 
+  /** The frame the body on show covers on the canvas, in canvas pixels — what its handles are
+   * drawn round (see paintBodyOverlay) and hit-tested against. */
+  private bodyCanvasBounds(): ShapeBounds | undefined {
+    const id = this.bodyEditor?.currentBodyId
+    const box = id === undefined ? undefined : this.sceneElement.bodyScreenBox(id)
+    if (!box) return undefined
+    const canvas = this.ufoElement.canvasElement
+    // Never smaller than a few handles across: a craft a hundred metres off is a few pixels, and
+    // its eight handles laid over each other grabbed the bottom one for a corner.
+    const width = Math.max(MIN_BODY_FRAME_PX, ((box.maxX - box.minX) / 2) * canvas.width)
+    const height = Math.max(MIN_BODY_FRAME_PX, ((box.maxY - box.minY) / 2) * canvas.height)
+    const centreX = ((box.minX + box.maxX) / 2 + 1) / 2 * canvas.width
+    const centreY = (1 - (box.minY + box.maxY) / 2) / 2 * canvas.height
+    return { x: centreX - width / 2, y: centreY - height / 2, width, height }
+  }
+
+  /** The body on show, framed with the shapes' own handles: corners to size it as a whole, sides to
+   * stretch it level, top and bottom to raise it, the stem to turn it. */
+  private readonly paintBodyOverlay = (renderer: CanvasRenderer): void => {
+    const bounds = this.bodyCanvasBounds()
+    if (bounds) renderer.paintGroupHandles(bounds)
+  }
+
+  /**
+   * Grabs a handle of the body on show, if the press is on one: a corner sizes it as a whole, a
+   * side stretches it level (width and length), the top or bottom raises it, each by how much
+   * further from its middle the pointer goes; the rotation handle turns it about the vertical as
+   * the pointer goes left or right, as the landscape turns under a drag (see beginCameraDrag).
+   */
+  private beginBodyHandleDrag(point: { x: number; y: number }): boolean {
+    const bounds = this.bodyCanvasBounds()
+    const reading = this.bodyEditor?.readingNow()
+    if (!bounds || !reading) return false
+    const handle = ShapeHandles.hitTestHandle({ bounds, angle: 0 }, point)
+    if (!handle) return false
+    if (handle === "rotate") {
+      this.dragState = { kind: "body-rotate", startPointer: point, startHeadingDeg: reading.attitude.headingDeg }
+    } else {
+      const centre = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 }
+      this.dragState = { kind: "body-resize", handle, centre, startPointer: point, startSizeM: { ...reading.sizeM } }
+    }
+    this.setCanvasCursor(this.cursorForHandle(handle, 0))
+    this.startDragListening()
+    return true
+  }
+
+  private onBodyHandleDragPointerMove(event: PointerEvent): void {
+    const drag = this.dragState
+    const point = this.canvasPointFromEvent(event)
+    if (!point || !drag) return
+    if (drag.kind === "body-rotate") {
+      this.bodyEditor?.turnTo(drag.startHeadingDeg + (point.x - drag.startPointer.x) * CAMERA_DRAG_DEG_PER_PX)
+      return
+    }
+    if (drag.kind !== "body-resize") return
+    const { centre, startPointer, startSizeM, handle } = drag
+    const ratio = (now: number, then: number) => Math.max(0.05, Math.abs(now) / Math.max(1, Math.abs(then)))
+    const horizontal = handle === "e" || handle === "w"
+    const vertical = handle === "n" || handle === "s"
+    const factor = horizontal ? ratio(point.x - centre.x, startPointer.x - centre.x)
+      : vertical ? ratio(point.y - centre.y, startPointer.y - centre.y)
+      : ratio(Math.hypot(point.x - centre.x, point.y - centre.y), Math.hypot(startPointer.x - centre.x, startPointer.y - centre.y))
+    this.bodyEditor?.resize({
+      widthM: vertical ? startSizeM.widthM : startSizeM.widthM * factor,
+      lengthM: vertical ? startSizeM.lengthM : startSizeM.lengthM * factor,
+      heightM: horizontal ? startSizeM.heightM : startSizeM.heightM * factor
+    })
+  }
+
   /** The wheel over a body takes it nearer or further, a tenth a notch; elsewhere it does what it
    * did (see onReferenceWheel). */
   private onBodyWheel(event: WheelEvent): void {
@@ -8179,6 +8253,10 @@ export class SightingEditorElement extends HTMLElement {
     }
     if (this.dragState?.kind === "body") {
       this.onBodyDragPointerMove(event)
+      return
+    }
+    if (this.dragState?.kind === "body-resize" || this.dragState?.kind === "body-rotate") {
+      this.onBodyHandleDragPointerMove(event)
       return
     }
     if (this.cameraDragState) {
@@ -8378,6 +8456,9 @@ export class SightingEditorElement extends HTMLElement {
     const editable = this.ufoElement.playbackState !== "playing"
     if (mode === "picture") return editable ? "pan" : undefined
     if (mode === "body") {
+      const bounds = editable ? this.bodyCanvasBounds() : undefined
+      const handle = bounds && ShapeHandles.hitTestHandle({ bounds, angle: 0 }, point)
+      if (handle) return this.cursorForHandle(handle, 0)
       const ndc = this.ndcOf(event)
       const over = ndc && this.bodyEditor ? this.sceneElement.pickPlacedBodyAt(ndc.x, ndc.y) : undefined
       return editable && over ? "move" : editable ? "pan" : undefined

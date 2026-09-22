@@ -67,6 +67,8 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     updateDecorAnchoring(): void {}
     setBodies(): void {}
     pickPlacedBodyAt(): undefined { return undefined }
+    /** Every body covers the middle of the picture, a fifth of it across. */
+    bodyScreenBox() { return { minX: -0.1, minY: -0.1, maxX: 0.1, maxY: 0.1 } }
     get bodyGround() { return { heightAt: () => 0 } }
     updateDecorLitState(): void {}
     pickBodyAt(): undefined {
@@ -6430,5 +6432,54 @@ describe("SightingEditorElement new recording", () => {
     expect(element.sightingData.timeline.keyframes.flatMap(k => k.shapes)).toEqual([])
     ;(shadow.getElementById("add-shape") as HTMLButtonElement).click()
     expect(element.sightingData.timeline.keyframes[0].shapes[0].shape.color).toBe("#ff0000")
+  })
+})
+
+describe("SightingEditorElement body handles", () => {
+  afterEach(() => {
+    document.body.innerHTML = ""
+  })
+
+  async function withBody(): Promise<{ element: SightingEditorElement, canvas: HTMLCanvasElement }> {
+    const element = mount()
+    element.sightingData = { version: 1, timeline: { keyframes: [] }, interpretation: { bodies: [{ id: "craft", model: { id: "ellipsoid" }, track: [{ t: 0, eastM: 0, northM: 50, onGround: true, sizeM: { widthM: 4, lengthM: 6, heightM: 2 } }] }] } }
+    const shadow = element.shadowRoot!
+    const tab = (id: string, selector: string) => [...shadow.querySelectorAll<HTMLButtonElement>(selector)].find(t => t.getAttribute("aria-controls") === id)!
+    if (shadow.getElementById("group-shape")!.hidden) tab("group-shape", ".group-tab").click()
+    tab("shape-bodies", ".subgroup-tab").click()
+    await waitFor(() => shadow.getElementById("body-title") !== null, 2000)
+    const canvas = nestedUfo(element)!.shadowRoot!.getElementById("canvas") as HTMLCanvasElement
+    vi.spyOn(canvas, "getBoundingClientRect").mockReturnValue({ left: 0, top: 0, width: 640, height: 360 } as DOMRect)
+    return { element, canvas }
+  }
+
+  function drag(canvas: HTMLCanvasElement, from: [number, number], to: [number, number]): void {
+    canvas.dispatchEvent(new MouseEvent("pointerdown", { clientX: from[0], clientY: from[1] }))
+    document.dispatchEvent(new MouseEvent("pointermove", { clientX: to[0], clientY: to[1] }))
+    document.dispatchEvent(new MouseEvent("pointerup", { clientX: to[0], clientY: to[1] }))
+  }
+
+  const keyOf = (element: SightingEditorElement) => element.sightingData.interpretation!.bodies[0].track[0]
+
+  it("sizes a body as a whole from a corner of its frame", async () => {
+    const { element, canvas } = await withBody()
+    // The frame runs from (288, 162) to (352, 198); its middle is (320, 180).
+    drag(canvas, [352, 198], [384, 216])
+    expect(keyOf(element).sizeM).toEqual({ widthM: 8, lengthM: 12, heightM: 4 })
+  })
+
+  it("stretches it level from a side, and raises it from the top", async () => {
+    const { element, canvas } = await withBody()
+    drag(canvas, [352, 180], [368, 180])
+    expect(keyOf(element).sizeM).toEqual({ widthM: 6, lengthM: 9, heightM: 2 })
+    drag(canvas, [320, 162], [320, 144])
+    expect(keyOf(element).sizeM).toEqual({ widthM: 6, lengthM: 9, heightM: 4 })
+  })
+
+  it("turns it about the vertical from the rotation handle, as the pointer goes right", async () => {
+    const { element, canvas } = await withBody()
+    drag(canvas, [320, 138], [360, 138])
+    expect(keyOf(element).attitude!.headingDeg).toBeGreaterThan(0)
+    expect(keyOf(element).sizeM).toEqual({ widthM: 4, lengthM: 6, heightM: 2 })
   })
 })

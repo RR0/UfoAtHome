@@ -3890,6 +3890,30 @@ export class SceneRenderer {
    * a tiny true-to-scale astronomical disc needing a more forgiving target) and walks back up from
    * whichever part was actually hit (e.g. a building's own wall mesh) to the top-level group
    * stored in decorGroups, since that's what carries the DecorObject's own id. */
+  /**
+   * The rectangle a body of the interpretation covers on the picture, in normalised device
+   * coordinates: its box's eight corners, each seen from the eye. Undefined when it is not on show,
+   * or when a corner is where the picture cannot put it (behind a pinhole).
+   */
+  bodyScreenBox(id: string): { minX: number, minY: number, maxX: number, maxY: number } | undefined {
+    const box = this.bodySystem.boxOf(id, this.bodyBoxScratch)
+    if (!box) return undefined
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity
+    for (let corner = 0; corner < 8; corner++) {
+      const point = this.bodyCornerScratch.set(
+        corner & 1 ? box.max.x : box.min.x, corner & 2 ? box.max.y : box.min.y, corner & 4 ? box.max.z : box.min.z)
+      const ndc = this.screenPointOf(point.sub(this.camera.position).normalize())
+      if (!ndc) return undefined
+      minX = Math.min(minX, ndc.ndcX)
+      maxX = Math.max(maxX, ndc.ndcX)
+      minY = Math.min(minY, ndc.ndcY)
+      maxY = Math.max(maxY, ndc.ndcY)
+    }
+    return { minX, minY, maxX, maxY }
+  }
+  private readonly bodyBoxScratch = new Box3()
+  private readonly bodyCornerScratch = new Vector3()
+
   /** Which of the interpretation's bodies stands under a point of the picture, by id — see
    * BodySystem.pick. */
   pickPlacedBodyAt(ndcX: number, ndcY: number): string | undefined {

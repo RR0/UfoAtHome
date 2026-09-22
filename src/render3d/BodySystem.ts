@@ -403,6 +403,13 @@ export class BodySystem {
   }
 
   /** How far the furthest body on show stands from `from` — what the camera's far plane must reach. */
+  /** Where a body on show stands, as the box round it in the world — what the editor frames it
+   * with on the picture. */
+  boxOf(id: string, into: Box3): Box3 | undefined {
+    const holder = this.built.get(id)?.holder
+    return holder?.visible ? into.setFromObject(holder) : undefined
+  }
+
   /** The body on show a ray meets first, by id — what a press on the editor's picture grabs. */
   pick(raycaster: Raycaster): string | undefined {
     const shown = [...this.built.entries()].filter(([, { holder }]) => holder.visible)

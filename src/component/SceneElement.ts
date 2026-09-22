@@ -738,6 +738,11 @@ export class SceneElement extends HTMLElement {
     return this.sceneRenderer.pickDecorAt(ndcX, ndcY)
   }
 
+  /** The rectangle a body covers on the picture — see SceneRenderer.bodyScreenBox. */
+  bodyScreenBox(id: string): { minX: number, minY: number, maxX: number, maxY: number } | undefined {
+    return this.sceneRenderer.bodyScreenBox(id)
+  }
+
   /** Which of the interpretation's bodies stands under a point of the picture — see
    * SceneRenderer.pickPlacedBodyAt. */
   pickPlacedBodyAt(ndcX: number, ndcY: number): string | undefined {

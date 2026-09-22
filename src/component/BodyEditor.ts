@@ -366,6 +366,26 @@ export class BodyEditor {
     this.write({ ...this.interpretation!, bodies: this.bodies.map(other => other === body ? { ...body, track } : other) }, true)
   }
 
+  /** The body on show in the fields — the one the picture frames with handles. */
+  get currentBodyId(): string | undefined {
+    return this.current?.id
+  }
+
+  /** Gives the body on show this size at the playhead — what its handles on the picture do. */
+  resize(sizeM: { widthM: number, lengthM: number, heightM: number }): void {
+    const set = (id: string, value: number) => { this.input(id).value = String(Number(Math.max(0.01, value).toFixed(2))) }
+    set("body-key-width", sizeM.widthM)
+    set("body-key-length", sizeM.lengthM)
+    set("body-key-height", sizeM.heightM)
+    this.updateKeyframe()
+  }
+
+  /** Turns the body on show to this heading at the playhead — what its rotation handle does. */
+  turnTo(headingDeg: number): void {
+    this.input("body-key-heading").value = String(Number((((headingDeg % 360) + 360) % 360).toFixed(1)))
+    this.updateKeyframe()
+  }
+
   /** Puts a body on show in the fields, as a press on it in the picture does. */
   show(id: string): void {
     if (!this.bodies.some(body => body.id === id) || id === this.currentId) return
