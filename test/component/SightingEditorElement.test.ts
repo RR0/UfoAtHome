@@ -1361,15 +1361,19 @@ describe("SightingEditorElement post-hoc appearance editing + multi-shape author
     expect(element.appearance).toEqual({ presetId: "oval", color: "#ff8800", transparency: 0.5, haloScale: 2, blur: 0, brightness: 0 })
   })
 
-  it("Delete shape is disabled for the only remaining shape — a recording always needs at least one", () => {
-    const element = mount() // just the construction default, "ufo-1" — nothing else to fall back to
+  it("Delete shape removes the last shape too — a recording may hold only bodies", () => {
+    const element = mount() // just the construction default, "ufo-1"
     const deleteShapeButton = element.shadowRoot!.getElementById("delete-shape") as HTMLButtonElement
-    expect(deleteShapeButton.disabled).toBe(true)
+    expect(deleteShapeButton.disabled).toBe(false)
 
-    deleteShapeButton.click() // a stray click/event must be a no-op, not empty the recording out
+    deleteShapeButton.click()
+    answerConfirm(element, true)
 
     const sourceIds = element.sightingData.timeline.keyframes.flatMap(k => k.shapes.map(s => s.sourceId))
-    expect(sourceIds).toEqual(["ufo-1"])
+    expect(sourceIds).toEqual([])
+    // Nothing real left to delete: the picker shows the not-yet-drawn default, as for a recording
+    // loaded without any shape.
+    expect(deleteShapeButton.disabled).toBe(true)
   })
 
   it("asks in its own overlay and never through window.confirm, so deleting works where a native dialog is suppressed", () => {
@@ -1424,7 +1428,7 @@ describe("SightingEditorElement post-hoc appearance editing + multi-shape author
     expect(sourceIds).toEqual(["ufo-1"])
   })
 
-  it("Delete shape re-disables itself once deletion brings the count back down to one", () => {
+  it("Delete shape stays available once deletion brings the count back down to one", () => {
     const element = mount()
     const addShapeButton = element.shadowRoot!.getElementById("add-shape") as HTMLButtonElement
     addShapeButton.click() // "ufo-1" + "ufo-2"
@@ -1434,7 +1438,7 @@ describe("SightingEditorElement post-hoc appearance editing + multi-shape author
     deleteShapeButton.click()
     answerConfirm(element, true) // back down to just "ufo-1"
 
-    expect(deleteShapeButton.disabled).toBe(true)
+    expect(deleteShapeButton.disabled).toBe(false)
     const sourceIds = element.sightingData.timeline.keyframes.flatMap(k => k.shapes.map(s => s.sourceId))
     expect(sourceIds).toEqual(["ufo-1"])
   })
@@ -1774,7 +1778,7 @@ describe("SightingEditorElement right-click context menu", () => {
     expect(menu.hidden).toBe(true)
   })
 
-  it("all three items are disabled for the only remaining shape, with a title explaining why", () => {
+  it("reordering is disabled for the only remaining shape, with a title explaining why, and deleting it is not", () => {
     const element = mount() // just "ufo-1"
     const canvas = nestedCanvas(element)
     const frontButton = element.shadowRoot!.getElementById("context-bring-to-front") as HTMLButtonElement
@@ -1785,10 +1789,9 @@ describe("SightingEditorElement right-click context menu", () => {
 
     expect(frontButton.disabled).toBe(true)
     expect(backButton.disabled).toBe(true)
-    expect(contextDelete.disabled).toBe(true)
+    expect(contextDelete.disabled).toBe(false)
     expect(frontButton.title).toBe("There is only one shape")
     expect(backButton.title).toBe("There is only one shape")
-    expect(contextDelete.title).toBe("There is only one shape")
   })
 
   it("Bring to front is disabled (with a title) for a shape that's already frontmost", () => {
@@ -3319,15 +3322,15 @@ describe("SightingEditorElement multi-select", () => {
     expect(selectedIdsOf(element)).toEqual(["ufo-1"]) // collapsed with no extra click needed
   })
 
-  it("bulk delete asks a pluralized confirmation and refuses to delete every shape", () => {
+  it("bulk delete asks a pluralized confirmation, and may delete every shape", () => {
     const element = mount()
     element.sightingData = twoShapesJson()
     const canvas = nestedCanvas(element)
     clickAt(canvas, 10, 10)
-    clickAt(canvas, 105, 105, { shiftKey: true }) // both selected — deleting both would empty the recording
+    clickAt(canvas, 105, 105, { shiftKey: true }) // both selected — deleting both empties the recording's shapes
 
     const deleteShapeButton = element.shadowRoot!.getElementById("delete-shape") as HTMLButtonElement
-    expect(deleteShapeButton.disabled).toBe(true) // refused before any confirm dialog
+    expect(deleteShapeButton.disabled).toBe(false)
 
     element.sightingData = threeShapesJson()
     clickAt(canvas, 10, 10)

@@ -65,7 +65,7 @@ import { BodyPlacement } from "../engine/interpretation/BodyPlacement.js"
 import type { BodyState } from "../engine/interpretation/BodyPlacement.js"
 import { BodyConfrontation } from "../engine/interpretation/BodyConfrontation.js"
 import type { ConfrontationReading } from "../engine/interpretation/BodyConfrontation.js"
-import type { InterpretationJson } from "../engine/interpretation/Interpretation.js"
+import type { BodyJson, InterpretationJson } from "../engine/interpretation/Interpretation.js"
 
 registerUfo()
 
@@ -1493,6 +1493,40 @@ export class SceneElement extends HTMLElement {
    * and while the testimony is not being compared with. */
   get confrontation(): ConfrontationReading[] {
     return this.confrontationReadings
+  }
+
+  /**
+   * How far along a line of sight from the witness's eye at `t` the ground is, on the relief the
+   * scene holds — undefined when the line clears it. What stands a body on the ground rather than
+   * under it (see SightingEditorElement.newBodyStart).
+   */
+  groundAlong(azimuthDeg: number, altitudeDeg: number, t: number): number | undefined {
+    const ground = this.sceneRenderer.bodyGround
+    const eye = BodyPlacement.eyeOf(this.ufoElement.sighting, t, ground)
+    return eye ? BodyPlacement.lineOfSightMeetsGround(eye, azimuthDeg, altitudeDeg, ground) : undefined
+  }
+
+  /**
+   * The direction from the witness's eye to the middle of a body at `t`, or at its first keyframe
+   * when it is not there at `t` — where to turn to look at it. Undefined for a body with no
+   * keyframe, or one the eye stands inside.
+   */
+  directionToBody(body: BodyJson, t: number): { azimuthDeg: number, altitudeDeg: number } | undefined {
+    const ground = this.sceneRenderer.bodyGround
+    const sighting = this.ufoElement.sighting
+    const eyeAt = (at: number) => BodyPlacement.eyeOf(sighting, at, ground)
+    const placement = new BodyPlacement(body, ground, eyeAt)
+    const at = placement.at(t) ? t : body.track[0]?.t
+    const state = at === undefined ? undefined : placement.at(at)
+    const eye = at === undefined ? undefined : eyeAt(at)
+    if (!state || !eye) return undefined
+    const eastM = state.eastM - eye.eastM, northM = state.northM - eye.northM, upM = state.upM - eye.upM
+    const horizontalM = Math.hypot(eastM, northM)
+    if (horizontalM === 0 && upM === 0) return undefined
+    return {
+      azimuthDeg: ((Math.atan2(eastM, northM) * 180) / Math.PI + 360) % 360,
+      altitudeDeg: (Math.atan2(upM, horizontalM) * 180) / Math.PI
+    }
   }
 
   /**

@@ -1,6 +1,6 @@
 import { setupCloudEditor } from "./CloudEditor.js"
 import { BodyEditor } from "./BodyEditor.js"
-import type { BodyKeyframe } from "../engine/interpretation/Interpretation.js"
+import type { BodyJson, BodyKeyframe } from "../engine/interpretation/Interpretation.js"
 import { BLUR_RADIUS_UNIT } from "../render/CanvasRenderer.js"
 import { SightingFetch, SightingFetchError } from "../engine/net/SightingFetch.js"
 import { NARRATIVE_SOURCES } from "../engine/narrative/narrativeSources.js"
@@ -1637,7 +1637,8 @@ export class SightingEditorElement extends HTMLElement {
         this.refreshParamSummary()
         this.syncBodiesShown()
       },
-      newBodyStart: () => this.newBodyStart()
+      newBodyStart: () => this.newBodyStart(),
+      lookAt: body => this.lookAtBody(body)
     }, this.language)
     this.currentMilestoneT = this.ufoElement.sighting.milestones[0]?.t
     this.refreshMilestoneList()
@@ -4782,8 +4783,7 @@ export class SightingEditorElement extends HTMLElement {
     this.deleteShapeButton.disabled =
       this.isRecording ||
       this.ufoElement.playbackState === "playing" ||
-      selectedKnownCount === 0 ||
-      sourceIds.length - selectedKnownCount < 1
+      selectedKnownCount === 0
     // Last, so it reads the fields every sync above has just rewritten rather than their previous
     // values. This is the one place worth hanging it from: every edit path in this toolbar ends in
     // a refresh() that comes back through here, including the ones that write fields the author
@@ -5380,31 +5380,46 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   /**
-   * Where a body standing for the selected shape starts (see BodyEditor.addBody): at the playhead,
-   * in the shape's direction — the one it states, else the one the witness faced — at the distance
-   * the scene draws it, and as big as its apparent width is there. A shape that states no size
-   * leaves the body its default one.
+   * Where a new body starts (see BodyEditor.addBody), at the playhead: standing for the selected
+   * shape, in its direction (the one it states, else the one the witness faced), at the distance
+   * the scene draws it and as big as its apparent width is there; or, with no shape drawn at this
+   * instant, where the witness is looking. When that line of sight goes into the ground before that
+   * distance, the body stands on the ground at that distance: placed in the air along it, it was
+   * under the relief and nothing of it showed (a craft in the hollow at Socorro).
    */
-  private newBodyStart(): { sourceId: string, label: string, keyframe: BodyKeyframe } | undefined {
+  private newBodyStart(): { sourceId?: string, label?: string, keyframe: BodyKeyframe } | undefined {
     const sourceId = this.currentSourceId
     const t = this.ufoElement.currentTime
-    const shape = this.ufoElement.sighting.timeline.getInterpolatedShapeAt(t, sourceId)
-    if (!shape) return undefined
+    const shape = sourceId === undefined ? undefined : this.ufoElement.sighting.timeline.getInterpolatedShapeAt(t, sourceId)
     // To the decimetre, the centimetre and the hundredth of a degree: a starting point typed into a
     // file, not a float's last bits.
     const round = (value: number, decimals: number) => Number(value.toFixed(decimals))
-    const distanceM = round(this.sceneElement.depthOf(sourceId)?.distanceM ?? DEFAULT_NEW_BODY_DISTANCE_M, 1)
-    const aim = shape.aim ?? { azimuthDeg: Number(this.headingInput.value) || 0, altitudeDeg: Number(this.pitchInput.value) || 0 }
-    const widthDeg = shape.angular?.widthDeg
-    const heightDeg = shape.angular?.heightDeg
+    const aim = shape?.aim ?? { azimuthDeg: Number(this.headingInput.value) || 0, altitudeDeg: Number(this.pitchInput.value) || 0 }
+    const drawnAtM = (shape ? this.sceneElement.depthOf(sourceId)?.distanceM : undefined) ?? DEFAULT_NEW_BODY_DISTANCE_M
+    const groundM = this.sceneElement.groundAlong(aim.azimuthDeg, aim.altitudeDeg, t)
+    const onGround = groundM !== undefined && groundM < drawnAtM
+    const distanceM = round(drawnAtM, 1)
+    const widthDeg = shape?.angular?.widthDeg
+    const heightDeg = shape?.angular?.heightDeg
     const sizeM = widthDeg !== undefined && heightDeg !== undefined && widthDeg > 0 && heightDeg > 0
       ? { widthM: round(ApparentSize.sizeMAt(distanceM, widthDeg), 2), lengthM: round(ApparentSize.sizeMAt(distanceM, widthDeg), 2), heightM: round(ApparentSize.sizeMAt(distanceM, heightDeg), 2) }
       : undefined
-    return {
-      sourceId,
-      label: this.shapeLabel(sourceId),
-      keyframe: { t, azimuthDeg: round(aim.azimuthDeg, 2), altitudeDeg: round(aim.altitudeDeg, 2), distanceM, ...(sizeM ? { sizeM } : {}) }
-    }
+    const direction = { azimuthDeg: round(aim.azimuthDeg, 2), altitudeDeg: round(aim.altitudeDeg, 2) }
+    // On the ground at that distance, not where the line first meets it: that can be the slope
+    // under the witness's own feet, fifteen metres off, which made an 11 cm body (see BodyKeyframe).
+    const keyframe: BodyKeyframe = { t, ...direction, distanceM, ...(onGround ? { onGround: true } : {}), ...(sizeM ? { sizeM } : {}) }
+    return shape
+      ? { sourceId, label: this.shapeLabel(sourceId), keyframe }
+      : { keyframe }
+  }
+
+  /** Turns the witness towards a body — see BodyEditorHost.lookAt, and lookAtDecor for the decor's. */
+  private lookAtBody(body: BodyJson): void {
+    const direction = this.sceneElement.directionToBody(body, this.ufoElement.currentTime)
+    if (!direction) return
+    this.headingInput.value = String(Math.round(direction.azimuthDeg * 10) / 10)
+    this.pitchInput.value = String(Math.round(direction.altitudeDeg * 10) / 10)
+    this.updateObserver()
   }
 
   /**
@@ -5539,11 +5554,9 @@ export class SightingEditorElement extends HTMLElement {
 
   /** Removes the selected shape/source entirely — every keyframe it appears in across the
    * whole recording, not just at the playhead — then falls back to the next remaining source
-   * (mirrors addShape()'s own "pick the next one" logic). Refuses to remove the last shape: a
-   * recording always needs at least one, and emptying it out would fall back to the same
-   * not-yet-drawn placeholder state as a brand-new recording, which nothing else in this element
-   * is built to re-enter once construction's own initial keyframe (see the constructor) has
-   * already been written. Disabled while recording (deleteShapeButton.disabled, set in
+   * (mirrors addShape()'s own "pick the next one" logic). The last one can go too: a recording
+   * may hold only bodies, and one with no shape left is in the state one loaded without any
+   * starts in (see removeShapes). Disabled while recording (deleteShapeButton.disabled, set in
    * toggleRecording()) for the same reason addShapeButton is: deleting the very source the
    * recorder is actively writing keyframes into would be pulling the rug out from under it.
    *
@@ -5555,7 +5568,6 @@ export class SightingEditorElement extends HTMLElement {
     const timeline = this.ufoElement.sighting.timeline
     const toDelete = timeline.sourceIds.filter(id => this.selectedSourceIds.has(id))
     if (toDelete.length === 0) return // nothing real to delete
-    if (timeline.sourceIds.length - toDelete.length < 1) return // always keep at least one shape
     const question =
       toDelete.length === 1
         ? this.messages.confirmDeleteShape.replace("{name}", this.shapeLabel(toDelete[0]))
@@ -5571,7 +5583,9 @@ export class SightingEditorElement extends HTMLElement {
   private removeShapes(toDelete: string[]): void {
     const timeline = this.ufoElement.sighting.timeline
     for (const sourceId of toDelete) timeline.removeSource(sourceId)
-    this.currentSourceId = timeline.sourceIds[0]
+    // With the last one gone, the recording is where one loaded without any shape starts: the
+    // default id, not yet drawn — a recording may hold only bodies (see BodyEditor).
+    this.currentSourceId = timeline.sourceIds[0] ?? DEFAULT_SOURCE_ID
     this.selectedSourceIds = new Set([this.currentSourceId])
     this.refreshSourceList()
     // Triggers a timeupdate on the nested ufo, which onSelectionOrTimeChanged() (its listener,
@@ -7817,7 +7831,8 @@ export class SightingEditorElement extends HTMLElement {
     this.contextUngroupButton.title = grouped ? "" : this.messages.notGrouped
 
     this.contextDeleteButton.disabled = this.deleteShapeButton.disabled
-    this.contextDeleteButton.title = this.contextDeleteButton.disabled ? this.messages.onlyOneShape : ""
+    // Disabled only while recording or playing now: the last shape may go (see deleteShape).
+    this.contextDeleteButton.title = ""
 
     // Add/delete vertex only ever make sense for a single polygon selection — an oval has no
     // points at all, and a multi-selection has no single outline to edit. Delete further needs

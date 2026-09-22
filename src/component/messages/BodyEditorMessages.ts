@@ -10,6 +10,9 @@ export interface BodyEditorMessages {
   addBody: string
   /** {shape} is the selected shape's name. */
   addBodyHint: string
+  /** A body added with no shape to stand for: where the witness is looking. */
+  addBodyHintView: string
+  lookAtBody: string
   id: string
   title: string
   explains: string
@@ -44,6 +47,8 @@ export class BodyEditorTexts {
     none: "No body yet: the witness said nothing of what it was, or it is still to be entered",
     deleteBody: "Delete body",
     addBody: "Add a body",
+    addBodyHintView: "Where the witness is looking now",
+    lookAtBody: "Look at it",
     addBodyHint: "Standing for the shape \"{shape}\", where the scene draws it now",
     id: "ID",
     title: "Name",
@@ -79,6 +84,8 @@ export class BodyEditorTexts {
     none: "Aucun corps pour l'instant : le témoin n'a rien dit de ce que c'était, ou c'est encore à saisir",
     deleteBody: "Supprimer le corps",
     addBody: "Ajouter un corps",
+    addBodyHintView: "Là où le témoin regarde à cet instant",
+    lookAtBody: "Le regarder",
     addBodyHint: "Représentant la forme « {shape} », là où la scène la dessine à cet instant",
     id: "Identifiant",
     title: "Nom",

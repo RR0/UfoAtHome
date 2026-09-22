@@ -20,7 +20,9 @@ export interface BodyEditorHost {
   changed(): void
   /** Where a new body starts: the selected shape and the first keyframe that stands it where the
    * scene draws that shape at the playhead. Undefined when no shape is selected. */
-  newBodyStart(): { sourceId: string, label: string, keyframe: BodyKeyframe } | undefined
+  newBodyStart(): { sourceId?: string, label?: string, keyframe: BodyKeyframe } | undefined
+  /** Turns the witness towards a body, as the decor's own "Look at it" does. */
+  lookAt(body: BodyJson): void
 }
 
 /**
@@ -63,7 +65,10 @@ export class BodyEditor {
     const start = this.host.newBodyStart()
     const add = this.element("body-add") as HTMLButtonElement
     add.disabled = start === undefined
-    add.title = start ? this.messages.addBodyHint.replace("{shape}", start.label) : this.messages.addBody
+    add.title = !start ? this.messages.addBody
+      : start.label !== undefined ? this.messages.addBodyHint.replace("{shape}", start.label) : this.messages.addBodyHintView
+    // Nothing to title before there is an interpretation: adding its first body creates it.
+    this.input("body-interpretation-title").closest("label")!.hidden = this.interpretation === undefined
     this.select("body-select").closest("label")!.hidden = bodies.length === 0
     const body = this.current
     this.element("body-none").hidden = bodies.length > 0
@@ -96,6 +101,7 @@ export class BodyEditor {
       <label><span>${m.body}</span> <select id="body-select"></select></label>
       <button id="body-add" type="button" class="icon-btn" title="${m.addBody}" aria-label="${m.addBody}">+</button>
       <div id="body-fields" class="body-fields">
+        <button id="body-look" type="button" class="icon-btn" title="${m.lookAtBody}" aria-label="${m.lookAtBody}">🎯</button>
         <button id="body-delete" type="button" class="icon-btn" title="${m.deleteBody}" aria-label="${m.deleteBody}">🗑</button>
         ${field("body-id", m.id)}
         ${field("body-title", m.title)}
@@ -121,6 +127,10 @@ export class BodyEditor {
     this.input("body-interpretation-title").addEventListener("change", () => this.updateInterpretationTitle())
     this.element("body-delete").addEventListener("click", () => this.deleteCurrent())
     this.element("body-add").addEventListener("click", () => this.addBody())
+    this.element("body-look").addEventListener("click", () => {
+      const body = this.current
+      if (body) this.host.lookAt(body)
+    })
     for (const id of ["body-id", "body-title", "body-outline-node", "body-model-url", "body-model-title", "body-model-author", "body-model-license", "body-model-source"]) {
       this.input(id).addEventListener("change", () => this.updateCurrent())
     }
@@ -201,8 +211,9 @@ export class BodyEditor {
   }
 
   /**
-   * A new body, standing for the selected shape where the scene draws it now: its direction, the
-   * distance it is drawn at, and the real size its apparent width makes there. A starting point
+   * A new body, standing for the selected shape where the scene draws it now (its direction, the
+   * distance it is drawn at, and the real size its apparent width makes there), or, with no shape
+   * to stand for, where the witness is looking. A starting point
    * for the interpretation, not a claim: an ellipsoid until a model is chosen, and a single
    * keyframe, so it stays where it was put. The witness's interpretation is created with it when
    * the recording has none.
@@ -213,7 +224,7 @@ export class BodyEditor {
     const ids = new Set(this.bodies.map(body => body.id))
     let n = ids.size + 1
     while (ids.has(`body-${n}`)) n++
-    const body: BodyJson = { id: `body-${n}`, explains: [start.sourceId], model: { id: "ellipsoid" }, track: [start.keyframe] }
+    const body: BodyJson = { id: `body-${n}`, explains: start.sourceId !== undefined ? [start.sourceId] : undefined, model: { id: "ellipsoid" }, track: [start.keyframe] }
     this.currentId = body.id
     const interpretation = this.interpretation ?? { bodies: [] }
     this.write({ ...interpretation, bodies: [...this.bodies, body] }, true)

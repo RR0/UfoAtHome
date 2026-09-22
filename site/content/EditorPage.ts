@@ -366,7 +366,10 @@ if (docs) {
         from any page; its credit (name and licence) is required before it is drawn.
         <strong>+</strong> adds a body (and the interpretation, when the recording has none): it
         stands for the selected shape, in its direction, at the distance the scene draws it and as
-        big as its apparent width makes it there, in a single keyframe at the playhead. A body's
+        big as its apparent width makes it there, in a single keyframe at the playhead; on the ground
+        at that distance when the line of sight goes into it first; with no shape, where the witness
+        is looking. 🎯 turns the witness towards the body. A recording may hold only bodies: its
+        last shape can be deleted. A body's
         movement is stated in the file, and shown here. While this part is open the picture draws
         the bodies, with the shapes beside them as outlines to read them against; in the Shapes
         part, the shapes are drawn alone and in full.</p>
@@ -725,7 +728,9 @@ if (docs) {
         exigé avant qu'il soit dessiné. <strong>+</strong> ajoute un corps (et l'interprétation, si
         l'enregistrement n'en a pas) : il représente la forme sélectionnée, dans sa direction, à la
         distance où la scène la dessine et à la taille que sa largeur apparente donne là, en une
-        seule image clé à la tête de lecture. Le mouvement d'un corps est donné par le fichier, et
+        seule image clé à la tête de lecture ; posé au sol à cette distance quand la ligne de visée y
+        entre avant ; sans forme, là où le témoin regarde. 🎯 tourne le témoin vers le corps. Un
+        enregistrement peut ne tenir que des corps : sa dernière forme se supprime. Le mouvement d'un corps est donné par le fichier, et
         affiché ici. Tant que cette partie est ouverte, l'image dessine les corps, avec les formes à
         côté en contours pour les confronter ; dans la partie Formes, les formes sont dessinées
         seules et en entier.</p>

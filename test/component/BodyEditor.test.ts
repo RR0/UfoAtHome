@@ -24,6 +24,8 @@ class Fixture {
   readonly container = document.createElement("div")
   readonly sighting: Sighting
   changes = 0
+  lookedAt?: string
+  start: ReturnType<BodyEditorHost["newBodyStart"]> = { sourceId: "flame", label: "Flame", keyframe: { t: 2000, azimuthDeg: 120, altitudeDeg: 5, distanceM: 100, sizeM: { widthM: 3, lengthM: 3, heightM: 1 } } }
   readonly editor: BodyEditor
 
   constructor(stated: InterpretationJson | null = interpretation) {
@@ -36,7 +38,8 @@ class Fixture {
       modelProvider: () => provider,
       shapes: () => [{ id: "ufo-1", label: "Object" }, { id: "flame", label: "Flame" }],
       changed: () => { this.changes++ },
-      newBodyStart: () => ({ sourceId: "flame", label: "Flame", keyframe: { t: 2000, azimuthDeg: 120, altitudeDeg: 5, distanceM: 100, sizeM: { widthM: 3, lengthM: 3, heightM: 1 } } })
+      newBodyStart: () => this.start,
+      lookAt: body => { this.lookedAt = body.id }
     }
     this.editor = new BodyEditor(this.container, host, "en")
   }
@@ -119,5 +122,27 @@ describe("The Bodies part of the editor", () => {
     const fixture = new Fixture({ bodies: [interpretation.bodies[0]] })
     fixture.container.querySelector<HTMLButtonElement>("#body-delete")!.click()
     expect(fixture.sighting.interpretation).toBeUndefined()
+  })
+
+  it("asks for no interpretation title before there is an interpretation", () => {
+    const fixture = new Fixture(null)
+    expect(fixture.field("body-interpretation-title").closest("label")!.hidden).toBe(true)
+    fixture.container.querySelector<HTMLButtonElement>("#body-add")!.click()
+    expect(fixture.field("body-interpretation-title").closest("label")!.hidden).toBe(false)
+  })
+
+  it("adds a body where the witness is looking when no shape is drawn", () => {
+    const fixture = new Fixture(null)
+    fixture.start = { keyframe: { t: 0, azimuthDeg: 90, altitudeDeg: -2, onGround: true } }
+    fixture.container.querySelector<HTMLButtonElement>("#body-add")!.click()
+    expect(fixture.sighting.interpretation!.bodies[0].explains).toBeUndefined()
+    expect(fixture.sighting.interpretation!.bodies[0].track).toEqual([{ t: 0, azimuthDeg: 90, altitudeDeg: -2, onGround: true }])
+  })
+
+  it("turns the witness towards the body on show", () => {
+    const fixture = new Fixture()
+    fixture.type("body-select", "figure-1")
+    fixture.container.querySelector<HTMLButtonElement>("#body-look")!.click()
+    expect(fixture.lookedAt).toBe("figure-1")
   })
 })
