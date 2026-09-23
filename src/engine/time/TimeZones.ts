@@ -11,7 +11,8 @@ import type { SightingTime } from "../model/Sighting.js"
  * The rules come from the platform's own IANA database, via Intl — no table shipped here, and no
  * table to go stale. What it cannot fix is a zone whose BOUNDARIES have moved: Montgomery, Alabama
  * is `America/Chicago`, which observed summer time in 1948 while Alabama did not. That is why the
- * zone is chosen by the observer rather than derived from the coordinates.
+ * editor, which fills the zone in from the coordinates, never replaces a zone the author chose, and
+ * why a plain offset can still be stated instead of a zone.
  */
 export class TimeZones {
   /** Every IANA zone the platform knows, sorted. Empty on a platform without

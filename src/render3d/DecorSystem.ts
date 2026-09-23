@@ -55,7 +55,7 @@ const LAMP_RADIUS_M = 0.25
  * distance and haze like everything else real in the scene (see AerialFog).
  *
  * The SAME size for every lamp, whatever it emits: this is the size of a bloom the optics make, not
- * of a bulb, and a brighter lamp is brighter rather than bigger (see LAMP_RADIANCE). It used to
+ * of a bulb, and a brighter lamp is brighter rather than bigger (see LAMP_CANDELA). It used to
  * grow with intensity, which put a strobe's whole difference into its area — and on a pose that
  * spread its light instead of concentrating it, so the dots a strobe is supposed to leave came out
  * fainter than the line the steady lamps draw, which is the opposite of every such photograph.

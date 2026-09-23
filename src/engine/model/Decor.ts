@@ -269,7 +269,9 @@ export interface DecorLight {
   /** CSS hex colour, as emitted — the regulated red/green/white of navigation lights, the amber of
    * a hazard flasher. */
   color: string
-  /** Relative brightness, 1 being an ordinary navigation light. */
+  /** Peak luminous intensity as a ratio to an ordinary navigation light's (1, about a hundred
+   * candela — see DecorSystem's LAMP_CANDELA); the airliner rig (LIGHT_RIGS) gives its beacon 1.5 and
+   * its wingtip strobes 20. */
   intensity?: number
   pattern: LightPattern
 }
