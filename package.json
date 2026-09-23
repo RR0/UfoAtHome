@@ -26,7 +26,9 @@
     "dist-embed-sighting-editor"
   ],
   "scripts": {
+    "predev": "npm run build:schema",
     "dev": "vite",
+    "prebuild": "npm run build:schema",
     "build": "tsc --noEmit && vite build",
     "build:embed-scene": "tsc --noEmit && vite build --config vite.embed-scene.config.ts",
     "build:embed-sighting": "tsc --noEmit && vite build --config vite.embed-sighting.config.ts",

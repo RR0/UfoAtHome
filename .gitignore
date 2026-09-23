@@ -4,6 +4,7 @@ dist-embed-scene/
 dist-embed-sighting/
 dist-embed-sighting-editor/
 *.log
+.DS_Store
 *.ipr
 *.iws
 *.iml

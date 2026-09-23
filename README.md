@@ -69,7 +69,7 @@ Each script's header comment says what it takes, what it deliberately leaves out
 | `npm run build:tle` | [Laurent Chabin's TLE archive](https://ufowaves.org/gp/my_tles/) | a local copy in `scripts/data/tle/<year>/`, plus `qs.mag` and Stellarium's `satellites.json` | `public/tle/` |
 | `npm run build:roads` | OpenStreetMap via Overpass (network) | one query per recording, cached in `scripts/data/roads/` | `public/roads/` |
 | `npm run build:sky-reference` | Monte Carlo (a few minutes) | none | `test/engine/atmosphere/sky-reference.json` |
-| `npm run build:schema` | the recording's TypeScript types | none | `src/generated/sightingSchema.json` (run automatically before tests and builds) |
+| `npm run build:schema` | the recording's TypeScript types | none | `src/generated/sightingSchema.json` (run automatically before `dev`, tests and builds) |
 
 `build:novae` and `build:tle` run on plain `node` (it strips the types), the others on `tsx`.
 
