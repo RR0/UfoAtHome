@@ -9,6 +9,7 @@ import { describe, expect, it } from "vitest"
  */
 declare const process: {
   cpuUsage(previous?: { user: number; system: number }): { user: number; system: number }
+  env: Record<string, string | undefined>
 }
 import { SkyGlowVisibility } from "../../../src/engine/astronomy/SkyGlowVisibility.js"
 import type { ObserverGeo } from "../../../src/engine/astronomy/CelestialPositions.js"
@@ -96,8 +97,10 @@ describe("the four things that take them away", () => {
 
 describe("what it costs", () => {
 
-  /** A whole sky, twice, in under a frame and a half. */
-  const BUDGET_MS = 40
+  /** A whole sky, twice, in under a frame and a half — on the machine this is developed on.
+   * PERF_BUDGET_SCALE widens it where the cores are known to be slower: the CI's shared runners
+   * measured 46 to 97 ms for the same work (see .github/workflows/ci.yml). Unset, it is 1. */
+  const BUDGET_MS = 40 * Number(process.env.PERF_BUDGET_SCALE ?? 1)
   const RUNS_PER_ATTEMPT = 5
   /** Enough that one of them lands without a collection in it — see the doc comment below. */
   const ATTEMPTS = 3

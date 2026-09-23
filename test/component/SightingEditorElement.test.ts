@@ -193,7 +193,9 @@ function nestedUfo(element: SightingEditorElement): Element {
   return element.shadowRoot!.querySelector("rr0-scene")!.shadowRoot!.querySelector("rr0-ufo")!
 }
 
-async function waitFor(check: () => boolean, timeoutMs = 500): Promise<void> {
+/** Generous on purpose: it only bounds how long a FAILING wait takes, and a shared CI runner with the
+ * other test workers on its two cores has taken close to three seconds over a FileReader load. */
+async function waitFor(check: () => boolean, timeoutMs = 5000): Promise<void> {
   const start = Date.now()
   while (!check()) {
     if (Date.now() - start > timeoutMs) throw new Error("waitFor timed out")
