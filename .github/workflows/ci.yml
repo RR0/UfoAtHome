@@ -21,6 +21,9 @@ jobs:
       # Shared runners are two to three times slower than the machine the CPU-time budgets were set
       # on (test/engine/astronomy/SkyGlowVisibility.test.ts measured 46 to 97 ms against 40).
       PERF_BUDGET_SCALE: 3
+      # macOS runners have 7 GB, which gives Node a heap of about 2 GB, and one jsdom test worker
+      # outgrew it there (heap out of memory on both Node versions) while Linux and Windows passed.
+      NODE_OPTIONS: --max-old-space-size=4096
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
