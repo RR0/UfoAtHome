@@ -72,6 +72,7 @@ Each script's header comment says what it takes, what it deliberately leaves out
 | `npm run build:schema` | the recording's TypeScript types | none | `src/generated/sightingSchema.json` (run automatically before `dev`, tests and builds) |
 
 `build:novae` and `build:tle` run on plain `node` (it strips the types), the others on `tsx`.
+`build:tle` calls `unzip` and `build:roads` calls `curl`: on Windows, run those two from Git Bash or WSL.
 
 The stand-in 3D models of the Socorro, Valensole and Chiles-Whitted crafts are also built from the accounts,
 by scripts with no npm alias:

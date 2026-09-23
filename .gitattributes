@@ -1,0 +1,3 @@
+# Checked out with LF everywhere, Windows included: scripts/build-nova-catalog.ts and others
+# split their committed inputs on "\n", which a CRLF checkout would leave a "\r" in.
+* text=auto eol=lf
