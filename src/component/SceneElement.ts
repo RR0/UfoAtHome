@@ -1254,10 +1254,13 @@ export class SceneElement extends HTMLElement {
       return
     }
     this.satelliteStatus = "loading"
+    // The answer is kept whatever happens, but announced only to an element still in a document:
+    // one removed while the archive was in flight has nobody listening, and a test environment torn
+    // down in the meantime has no events left to construct (CI caught exactly that).
     const settle = (status: SatelliteStatus) => {
       if (request !== this.satelliteRequest) return
       this.satelliteStatus = status
-      this.dispatchEvent(new CustomEvent(SATELLITES_CHANGE_EVENT))
+      if (this.isConnected) this.dispatchEvent(new CustomEvent(SATELLITES_CHANGE_EVENT))
     }
     const archive = SceneElement.tleArchive
     void (async () => {
@@ -1269,7 +1272,7 @@ export class SceneElement extends HTMLElement {
       if (!snapshot) return settle("unavailable")
       this.satellites = { snapshot, passes: new module.SatellitePasses(snapshot.objects) }
       settle("ready")
-      this.updateAstronomy(this.lastTimeMs)
+      if (this.isConnected) this.updateAstronomy(this.lastTimeMs)
     })().catch(() => settle("unavailable"))
   }
 

@@ -31,6 +31,8 @@ jobs:
           node-version: ${{ matrix.node }}
           cache: npm
       - run: npm ci
-      - run: npm test
+      # The editor's jsdom suite runs single tests of several seconds on these runners (macOS timed
+      # out at vitest's default 5 s) where the development machine takes a fraction of that.
+      - run: npm test -- --testTimeout=30000
       - run: npm run build
       - run: npm run build:site
