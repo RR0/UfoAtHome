@@ -50,7 +50,7 @@ browser.
 | `scripts/` | One-off data builds, case maintenance, GPU checks and performance harnesses. |
 | `test/` | Vitest suites mirroring `src/` (`engine`, `render`, `render3d`, `component`, `site`). |
 | `checks/` | Pages that must run on a real GPU (see [Debugging](#debugging)). |
-| `docs/` | Developer notes: [performance](docs/performance.md), past audits, and the [former README body](docs/readme-0.67-notes.md) awaiting migration to the site. |
+| `docs/` | Developer notes: [performance](docs/performance.md), past audits. |
 | `doc/web/` | The 2003 Java applet's documentation, kept for history. |
 
 ## Data

@@ -213,6 +213,9 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
     <p>That is a live element, not a picture — the same one those two lines would give you. Which of
       the three components to use instead, and everything they can be told, is on
       <a href="/docs/components/">the components page</a>.</p>
+    <p class="small">The script's address has no version in it, so your page follows each release
+      without being edited: browsers ask on every visit whether it changed, and the answer costs
+      nothing while it has not.</p>
   </div>
 </section>
 
@@ -293,6 +296,9 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
     <p>C'est un élément vivant, pas une image — celui-là même que ces deux lignes vous donneraient.
       Lequel des trois composants employer à la place, et tout ce qu'on peut leur dire, est sur
       <a href="/docs/components/">la page des composants</a>.</p>
+    <p class="small">L'adresse du script ne porte pas de version : votre page suit donc chaque
+      version sans être modifiée. Les navigateurs demandent à chaque visite s'il a changé, et la
+      réponse ne coûte rien tant qu'il n'a pas changé.</p>
   </div>
 </section>
 

@@ -147,6 +147,8 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       <tr><td><code>ufoElement</code></td><td>property (read)</td><td>The playback layer it composes — the timeline, the controls, the canvas the pointer works on — and through it every playback member below</td></tr>
       <tr><td><code>sceneRenderer</code></td><td>property (read)</td><td>The 3D renderer, for what nothing else exposes</td></tr>
       <tr><td><code>show-compass</code></td><td>attribute</td><td>N/NE/E/… labels around the horizon. Off by default: useful while authoring a heading, noise while watching</td></tr>
+      <tr><td><code>star-catalog-src</code> / <code>deep-star-catalog-src</code></td><td>attribute</td><td>Where to fetch the star catalogue from, when you host your own copy rather than the one beside the bundle: the base tier (to magnitude 7.5, fetched by every scene) and the deep tier (7.5 to 9, fetched only by a recording whose instrument reaches past 7.5)</td></tr>
+      <tr><td><code>max-pixel-ratio</code></td><td>attribute</td><td>The most device pixels per CSS pixel the scene may draw at; the display's own, up to 2, when absent. The scene lowers it by itself while frames are late</td></tr>
       <tr><td><code>show-observer-map</code> / <code>hide-milestones</code></td><td>attribute</td><td>Passed straight down to the playback layer below — write them on whichever tag your page actually contains</td></tr>
     </table>
     </div>
@@ -174,11 +176,11 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       <tr><td><code>currentTime</code></td><td>property</td><td>The playhead, in the timeline's own units — <em>not</em> real milliseconds, see <code>positionLabel</code></td></tr>
       <tr><td><code>seekableDuration</code></td><td>property (read)</td><td>The range <code>currentTime</code> can take</td></tr>
       <tr><td><code>autoReplayEnabled</code></td><td>property</td><td>Looping, off by default: a replay plays once, then fires <code>ended</code>. Turn it <strong>on</strong> for a loop</td></tr>
-      <tr><td><code>positionLabel</code> / <code>durationLabel</code></td><td>property (read)</td><td>The position and length already formatted by the element — real clock time when the observation states one</td></tr>
+      <tr><td><code>positionLabel</code> / <code>durationLabel</code></td><td>property (read)</td><td>The position and length already formatted by the element: clock time when the observation states a date and its length is known, elapsed time otherwise. Clicking either counter under the bar (or Enter on it) switches between the two, and fires <code>timedisplaychange</code></td></tr>
       <tr><td><code>refresh()</code></td><td>method</td><td>Re-reads the duration and repaints — call it after mutating <code>sighting.timeline</code> from outside</td></tr>
       <tr><td><code>canvasElement</code> / <code>renderer</code></td><td>property (read)</td><td>The <code>&lt;canvas&gt;</code>, and the renderer painting on it</td></tr>
-      <tr><td><code>enableClickToPlay</code></td><td>property</td><td>Whether a click toggles playback and a double-click toggles fullscreen (both, or neither). Set false where the canvas is yours for something else</td></tr>
-      <tr><td><code>fullscreenTarget</code></td><td>property</td><td>Which element the fullscreen button expands. <code>&lt;rr0-scene&gt;</code> sets it to its own stage, so the sky goes fullscreen and not just the overlay</td></tr>
+      <tr><td><code>enableClickToPlay</code></td><td>property</td><td>Whether a click toggles playback and a double-click toggles fullscreen (both, or neither). The double-click also puts playback back as it was before its first click. Set false where the canvas is yours for something else</td></tr>
+      <tr><td><code>fullscreenTarget</code></td><td>property</td><td>Which element the fullscreen button expands. <code>&lt;rr0-scene&gt;</code> sets it to its own stage, so the sky goes fullscreen and not just the overlay. Where the browser offers no fullscreen (an iPhone, an iframe without <code>allow="fullscreen"</code>), the element fills the window instead, and Escape leaves it all the same</td></tr>
       <tr><td><code>show-observer-map</code></td><td>attribute</td><td>Start with the map of where the observer stood already open. It decides the map's <em>starting state</em>, not whether it exists: the button is there for every recording that states a place, set or not</td></tr>
       <tr><td><code>toggleObserverMap()</code></td><td>method</td><td>What that button does</td></tr>
       <tr><td><code>hide-milestones</code></td><td>attribute</td><td>Take the account's named moments off — the ticks along the bar, the caption naming the one being played, and the lettered points on the map. They are on wherever a recording names any, so this is the only way to say otherwise</td></tr>
@@ -191,6 +193,9 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       opens, which is not a page's to spend on a reader's behalf without saying so. Either way the
       reader keeps both buttons, beside the fullscreen one — a page setting a default is not a page
       forbidding the opposite.</p>
+    <p>The toolbar and the corner buttons show only while the pointer is over the picture, playing
+      or paused, or when the keyboard moves the focus onto them. A touch screen, which has no
+      pointer to hover with, keeps them shown.</p>
   </div>
 </section>
 `,
@@ -210,6 +215,8 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       <tr><td><code>ufoElement</code></td><td>propriété (lecture)</td><td>La couche de lecture qu'il compose — la chronologie, les commandes, le canevas du pointeur — et par elle tous les membres de lecture ci-dessous</td></tr>
       <tr><td><code>sceneRenderer</code></td><td>propriété (lecture)</td><td>Le moteur de rendu 3D, pour ce que rien d'autre n'expose</td></tr>
       <tr><td><code>show-compass</code></td><td>attribut</td><td>Les repères N/NE/E/… sur l'horizon. Absent par défaut : utile pour régler un cap, du bruit pour regarder</td></tr>
+      <tr><td><code>star-catalog-src</code> / <code>deep-star-catalog-src</code></td><td>attribut</td><td>D'où charger le catalogue d'étoiles, quand vous en hébergez votre propre copie plutôt que celle posée à côté du bundle : le niveau de base (jusqu'à la magnitude 7,5, chargé par toute scène) et le niveau profond (de 7,5 à 9, chargé seulement par un enregistrement dont l'instrument va au-delà de 7,5)</td></tr>
+      <tr><td><code>max-pixel-ratio</code></td><td>attribut</td><td>Le nombre maximal de pixels de l'écran par pixel CSS auquel la scène peut dessiner ; celui de l'écran, jusqu'à 2, s'il est absent. La scène le baisse d'elle-même tant que ses images sont en retard</td></tr>
       <tr><td><code>show-observer-map</code> / <code>hide-milestones</code></td><td>attribut</td><td>Transmis tels quels à la couche de lecture ci-dessous — à écrire sur la balise que votre page contient réellement</td></tr>
     </table>
     </div>
@@ -237,11 +244,11 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       <tr><td><code>currentTime</code></td><td>propriété</td><td>La tête de lecture, dans les unités de la chronologie — <em>pas</em> des millisecondes réelles, voir <code>positionLabel</code></td></tr>
       <tr><td><code>seekableDuration</code></td><td>propriété (lecture)</td><td>L'étendue que <code>currentTime</code> peut prendre</td></tr>
       <tr><td><code>autoReplayEnabled</code></td><td>propriété</td><td>La lecture en boucle, désactivée par défaut : une lecture se joue une fois puis émet <code>ended</code>. À mettre à <strong>true</strong> pour boucler</td></tr>
-      <tr><td><code>positionLabel</code> / <code>durationLabel</code></td><td>propriété (lecture)</td><td>Position et durée déjà mises en forme — heure réelle quand l'observation en énonce une</td></tr>
+      <tr><td><code>positionLabel</code> / <code>durationLabel</code></td><td>propriété (lecture)</td><td>Position et durée déjà mises en forme : l'heure quand l'observation énonce une date et que sa durée est connue, le temps écoulé sinon. Un clic sur l'un des compteurs sous la barre (ou Entrée) bascule de l'un à l'autre, et émet <code>timedisplaychange</code></td></tr>
       <tr><td><code>refresh()</code></td><td>méthode</td><td>Relit la durée et repeint — à appeler après avoir modifié <code>sighting.timeline</code> de l'extérieur</td></tr>
       <tr><td><code>canvasElement</code> / <code>renderer</code></td><td>propriété (lecture)</td><td>Le <code>&lt;canvas&gt;</code>, et ce qui peint dessus</td></tr>
-      <tr><td><code>enableClickToPlay</code></td><td>propriété</td><td>Si un clic bascule la lecture et un double-clic le plein écran (les deux, ou aucun). À mettre à false là où le canevas vous sert à autre chose</td></tr>
-      <tr><td><code>fullscreenTarget</code></td><td>propriété</td><td>Quel élément le bouton plein écran agrandit. <code>&lt;rr0-scene&gt;</code> y met sa propre scène, pour que ce soit le ciel qui s'agrandisse et non la seule surcouche</td></tr>
+      <tr><td><code>enableClickToPlay</code></td><td>propriété</td><td>Si un clic bascule la lecture et un double-clic le plein écran (les deux, ou aucun). Le double-clic remet aussi la lecture dans l'état où elle était avant son premier clic. À mettre à false là où le canevas vous sert à autre chose</td></tr>
+      <tr><td><code>fullscreenTarget</code></td><td>propriété</td><td>Quel élément le bouton plein écran agrandit. <code>&lt;rr0-scene&gt;</code> y met sa propre scène, pour que ce soit le ciel qui s'agrandisse et non la seule surcouche. Là où le navigateur n'offre pas de plein écran (un iPhone, une iframe sans <code>allow="fullscreen"</code>), l'élément remplit la fenêtre à la place, et Échap en sort de même</td></tr>
       <tr><td><code>show-observer-map</code></td><td>attribut</td><td>Ouvrir d'emblée la carte d'où se tenait l'observateur. Il décide de l'état de <em>départ</em> de la carte, pas de son existence : le bouton est là pour tout enregistrement qui énonce un lieu, qu'on le pose ou non</td></tr>
       <tr><td><code>toggleObserverMap()</code></td><td>méthode</td><td>Ce que fait ce bouton</td></tr>
       <tr><td><code>hide-milestones</code></td><td>attribut</td><td>Retirer les moments nommés du récit — les repères sur la barre, la légende qui nomme celui qu'on joue, et les points lettrés sur la carte. Ils sont là partout où un enregistrement en nomme, donc c'est la seule façon de dire le contraire</td></tr>
@@ -254,6 +261,9 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       tuiles à un tiers dès la première ouverture, et ce n'est pas à une page de les dépenser au nom
       d'un lecteur sans le dire. Dans les deux cas le lecteur garde les deux boutons, à côté de celui
       du plein écran : une page qui pose un défaut n'interdit pas le contraire.</p>
+    <p>La barre d'outils et les boutons du coin n'apparaissent que tant que le pointeur survole
+      l'image, en lecture comme en pause, ou quand le clavier y amène le focus. Un écran tactile, qui
+      n'a pas de pointeur pour survoler, les garde affichés.</p>
   </div>
 </section>
 `
@@ -284,8 +294,8 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
     <div class="table-scroll">
     <table>
       <tr><th>Member</th><th>Kind</th><th>What it does</th></tr>
-      <tr><td><code>src</code></td><td>attribute</td><td>A single recording, or a <a href="/docs/format/#several-observers-the-case">case</a> whose sighting events list several — told apart by their shape</td></tr>
-      <tr><td><code>observerUrls</code></td><td>property</td><td>The recordings to show, as a plain array of URLs, instead of <code>src</code></td></tr>
+      <tr><td><code>src</code></td><td>attribute</td><td>A single recording, or a <a href="/docs/format/#several-observers-the-case">case</a> whose sighting events list several — told apart by their shape. A bare array of recordings is refused: list them as the sighting events of a case</td></tr>
+      <tr><td><code>observerUrls</code></td><td>property</td><td>The recordings to show, as a plain array of URLs, instead of <code>src</code>. Setting it again keeps the observer on show if the new list still has them</td></tr>
       <tr><td><code>sightingData</code></td><td>property</td><td>One recording, set directly — for a page holding one in memory rather than at a URL</td></tr>
       <tr><td><code>scene</code></td><td>property (read)</td><td>The composed <code>&lt;rr0-scene&gt;</code>, and through <code>scene.ufoElement</code> the playback members</td></tr>
       <tr><td><code>loadFromSrc(url)</code></td><td>method (async)</td><td>What the attribute triggers</td></tr>
@@ -295,6 +305,17 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
     </div>
     <p>A recording that names no observer gets no “account by” line at all, which is the accurate
       thing to say of a sky set up to show a halo.</p>
+    <p>Every observer's recording is fetched as soon as the list is known, so picking another one
+      is immediate. The list names each by its <code>title</code>, else first names and last name,
+      else <code>id</code>; one that names nobody is numbered by its place in the list.</p>
+    <p>The <q>?</q> panel opens as a popover, which Escape or a click outside closes (a click
+      outside only, on a browser without popovers). It states the case, the date, the place, the
+      account and the tags; date, place and tags leave it while the <code>show-labels</code> strip
+      already states them. The date is on the observer's own clock (<code>utcOffsetHours</code>, or
+      one approximated from the longitude), not the reader's. The version at its foot opens this
+      observation in the editor, and its embed lines load the element from wherever this copy of
+      it was itself loaded, so a snippet copied from a local or staging copy points back at that
+      copy.</p>
   </div>
 </section>
 `,
@@ -309,8 +330,8 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
     <div class="table-scroll">
     <table>
       <tr><th>Membre</th><th>Nature</th><th>Rôle</th></tr>
-      <tr><td><code>src</code></td><td>attribut</td><td>Un enregistrement, ou un <a href="/docs/format/#several-observers-the-case">dossier</a> dont les événements sighting en listent plusieurs — reconnus à leur forme</td></tr>
-      <tr><td><code>observerUrls</code></td><td>propriété</td><td>Les enregistrements à montrer, comme simple tableau d'URLs, au lieu de <code>src</code></td></tr>
+      <tr><td><code>src</code></td><td>attribut</td><td>Un enregistrement, ou un <a href="/docs/format/#several-observers-the-case">dossier</a> dont les événements sighting en listent plusieurs — reconnus à leur forme. Un simple tableau d'enregistrements est refusé : listez-les comme événements sighting d'un dossier</td></tr>
+      <tr><td><code>observerUrls</code></td><td>propriété</td><td>Les enregistrements à montrer, comme simple tableau d'URLs, au lieu de <code>src</code>. Le reposer garde l'observateur affiché si la nouvelle liste le contient encore</td></tr>
       <tr><td><code>sightingData</code></td><td>propriété</td><td>Un enregistrement posé directement — pour une page qui en tient un en mémoire plutôt qu'à une URL</td></tr>
       <tr><td><code>scene</code></td><td>propriété (lecture)</td><td>Le <code>&lt;rr0-scene&gt;</code> composé, et par <code>scene.ufoElement</code> les membres de lecture</td></tr>
       <tr><td><code>loadFromSrc(url)</code></td><td>méthode (async)</td><td>Ce que déclenche l'attribut</td></tr>
@@ -320,6 +341,18 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
     </div>
     <p>Un enregistrement qui ne nomme aucun observateur n'affiche aucune ligne « compte rendu de » — ce qui
       est exact pour un ciel réglé pour montrer un halo.</p>
+    <p>L'enregistrement de chaque observateur est chargé dès que la liste est connue : en choisir
+      un autre est immédiat. La liste nomme chacun par son <code>title</code>, sinon ses prénoms et
+      son nom, sinon son <code>id</code> ; celui qui ne nomme personne est numéroté selon sa place
+      dans la liste.</p>
+    <p>Le panneau <q>?</q> s'ouvre en <i lang="en">popover</i>, que ferment Échap ou un clic à
+      l'extérieur (seulement un clic à l'extérieur, sur un navigateur sans <i lang="en">popover</i>).
+      Il énonce le dossier, la date, le lieu, le compte rendu et les tags ; date, lieu et tags le
+      quittent tant que le bandeau <code>show-labels</code> les énonce déjà. La date est à l'heure de
+      l'observateur (<code>utcOffsetHours</code>, ou une heure approchée depuis la longitude), pas à
+      celle du lecteur. La version en pied de panneau ouvre cette observation dans l'éditeur, et ses
+      lignes d'intégration chargent l'élément depuis l'endroit d'où cette copie a elle-même été
+      chargée : un extrait copié depuis une copie locale ou de recette renvoie à cette copie.</p>
   </div>
 </section>
 `
@@ -328,13 +361,13 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       en: `<div class="table-scroll">
     <table>
       <tr><th>Event</th><th>Fires</th><th>Where to listen</th></tr>
-      <tr><td><code>observerchange</code></td><td>When the recording on show changes: loaded, set through <code>sightingData</code>, or another observer picked from the list. <code>detail.src</code> is its address, empty for a recording set by script</td><td>On this element. It does not bubble: listen on the <code>&lt;rr0-sighting&gt;</code> itself, then read <code>sightingData</code> back off it (its description, its case id)</td></tr>
+      <tr><td><code>observerchange</code></td><td>When the recording on show changes: loaded, set through <code>sightingData</code>, or another observer picked from the list. <code>detail.src</code> is its address, empty for a recording set by script</td><td>On this element. It does not bubble: listen on the <code>&lt;rr0-sighting&gt;</code> itself, then read <code>sightingData</code> back off it (its description, its id)</td></tr>
     </table>
     </div>`,
       fr: `<div class="table-scroll">
     <table>
       <tr><th>Événement</th><th>Quand</th><th>Où l'écouter</th></tr>
-      <tr><td><code>observerchange</code></td><td>Quand l'enregistrement affiché change : chargé, posé par <code>sightingData</code>, ou un autre observateur choisi dans la liste. <code>detail.src</code> est son adresse, vide pour un enregistrement posé par script</td><td>Sur cet élément. Il n'est pas <i lang="en">bubbling</i> : écoutez sur le <code>&lt;rr0-sighting&gt;</code> lui-même, puis relisez son <code>sightingData</code> (sa description, son identifiant de cas)</td></tr>
+      <tr><td><code>observerchange</code></td><td>Quand l'enregistrement affiché change : chargé, posé par <code>sightingData</code>, ou un autre observateur choisi dans la liste. <code>detail.src</code> est son adresse, vide pour un enregistrement posé par script</td><td>Sur cet élément. Il n'est pas <i lang="en">bubbling</i> : écoutez sur le <code>&lt;rr0-sighting&gt;</code> lui-même, puis relisez son <code>sightingData</code> (sa description, son identifiant)</td></tr>
     </table>
     </div>`
     }
@@ -381,6 +414,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
     <table>
       <tr><th>Member</th><th>Kind</th><th>What it does</th></tr>
       <tr><td><code>ufoElement</code></td><td>property (read)</td><td>Reaches through to the canvas, the timeline and the appearance work</td></tr>
+      <tr><td><code>appearance</code></td><td>property</td><td>What the next shape drawn will look like: <code>{ presetId, color, transparency, haloScale, blur, brightness }</code>, <code>presetId</code> being <code>"oval"</code> or <code>"polygon"</code> and the others the <a href="/docs/format/#what-was-seen">shape fields</a> of the same names. Setting it takes only the fields you give</td></tr>
       <tr><td><code>sightingchange</code></td><td>event</td><td>Fires after every edit — the single signal that the recording has changed</td></tr>
     </table>
     </div>
@@ -401,6 +435,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
     <table>
       <tr><th>Membre</th><th>Nature</th><th>Rôle</th></tr>
       <tr><td><code>ufoElement</code></td><td>propriété (lecture)</td><td>Donne accès au canevas, à la chronologie et au travail d'apparence</td></tr>
+      <tr><td><code>appearance</code></td><td>propriété</td><td>L'allure de la prochaine forme dessinée : <code>{ presetId, color, transparency, haloScale, blur, brightness }</code>, <code>presetId</code> valant <code>"oval"</code> ou <code>"polygon"</code> et les autres étant les <a href="/docs/format/#what-was-seen">champs de forme</a> de même nom. La poser ne prend que les champs donnés</td></tr>
       <tr><td><code>sightingchange</code></td><td>événement</td><td>Émis après chaque modification — le signal unique que l'enregistrement a changé</td></tr>
     </table>
     </div>

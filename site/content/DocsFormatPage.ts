@@ -99,6 +99,7 @@ if (excerpts.length > 0) {
       <tr><td><code>time</code>, <code>endTime</code></td><td><code>{ year, month, day, hour, minute, second, raw }</code>, every part optional — that is how the format states “1954” or “around 05:00”. <code>raw</code> is the date as written in <a href="https://www.loc.gov/standards/datetime/">EDTF</a>, and it is what the date means: <code>"1948-07-24T02:45~"</code> (approximate), <code>"2025-06?"</code> (uncertain), <code>"1965-07-01%"</code> (both), <code>"19XX"</code> (a masked year), or <code>"05:00"</code> alone for a time of day remembered without its date. The numbers are kept in step with it for what computes (the sky, the clock). It is a subset of EDTF (level 0, these qualifiers on the whole date, masked years); <a href="https://www.npmjs.com/package/@rr0/time"><code>@rr0/time</code></a> is RR0's full EDTF model, into which UFO@home's own tooling converts a recording's dates</td></tr>
       <tr><td><code>durationSeconds</code></td><td>An alternative to <code>endTime</code>, and it wins if both are given</td></tr>
       <tr><td><code>utcOffsetHours</code></td><td>The LEGAL time the observer's clock was on (+1 for France in 1965). Absent means it is approximated from the longitude, which cannot know legal time or a daylight-saving switch</td></tr>
+      <tr><td><code>timeZone</code></td><td>The IANA zone the offset was derived from (<code>"Europe/Paris"</code>): the rule, where <code>utcOffsetHours</code> is the number it gave at that date. Only the number is read to place the sky; the zone is what lets the offset be derived again when the date changes</td></tr>
       <tr><td><code>place</code></td><td><code>[{ lat, lng, name }]</code> — <code>name</code> is the fully qualified place name the coordinates were resolved from</td></tr>
       <tr><td><code>observer</code></td><td><code>{ id, title, lastName, firstNames }</code>, all optional; omit entirely for an anonymous observer. <code>id</code> is a reference to the person (on RR0, their directory: <code>"ZamoraLonnie"</code>); the other fields describe them when nobody has given them one</td></tr>
       <tr><td><code>description</code></td><td>The account in prose — one string, or one per language (see below)</td></tr>
@@ -183,6 +184,7 @@ if (excerpts.length > 0) {
     <table>
       <tr><th>Field</th><th>Meaning</th></tr>
       <tr><td><code>kind</code></td><td><code>oval</code>, or <code>polygon</code>, which then also takes <code>points</code></td></tr>
+      <tr><td><code>title</code></td><td>Its name, shown when the pointer is over it; one string, or one per language</td></tr>
       <tr><td><code>color</code></td><td>Any CSS colour</td></tr>
       <tr><td><code>angle</code></td><td>Radians</td></tr>
       <tr><td><code>transparency</code></td><td>0 opaque to 1 invisible</td></tr>
@@ -206,10 +208,22 @@ if (excerpts.length > 0) {
       <tr><td><code>observerTrack</code></td><td><code>{ keyframes: [{ t, pose }] }</code> — <code>pose</code> holds <code>lat</code>, <code>lng</code>, <code>elevationM</code> (above the local ground), <code>headingDeg</code>, <code>pitchDeg</code>, <code>rollDeg</code>, <code>fovDeg</code>, and for a camera <code>fNumber</code> and <code>focusDistanceM</code></td></tr>
       <tr><td><code>weatherTrack</code></td><td><code>{ keyframes: [{ t, weather }] }</code> — the sky's conditions along the recording: precipitation, wind, storm, and the clouds as layers with real heights, each able to hold individual clouds placed in metres. Every field of a <code>weather</code> is in the next section</td></tr>
       <tr><td><code>weatherSource</code></td><td><code>{ id, name, url }</code> of the record the weather was looked up from. Its presence means the recording is replayed exactly as authored and never looked up again. Absent means the observer's own account</td></tr>
-      <tr><td><code>soundTrack</code></td><td><code>{ keyframes: [{ t, sound }] }</code> — <code>kind</code> (none/hum/whistle/rumble/crackle), <code>volume</code>, <code>pitchHz</code>, optional <code>src</code> of a real recording</td></tr>
+      <tr><td><code>soundTrack</code></td><td><code>{ keyframes: [{ t, sound }] }</code> — <code>kind</code> (none/hum/whistle/rumble/crackle), <code>volume</code>, <code>pitchHz</code>, optional <code>src</code> of a real recording. <code>volume</code> and <code>pitchHz</code> glide between keyframes, <code>kind</code> and <code>src</code> change at the keyframe. A <code>src</code> on another site must be served to any origin (CORS)</td></tr>
       <tr><td><code>references</code></td><td>Pictures of the place laid over the scene: <code>src</code> (an address, or a <code>data:</code> URL for a picture added from a disk), <code>kind</code> (photo/panorama), <code>registration</code> (<code>headingDeg</code>, <code>pitchDeg</code>, <code>rollDeg</code>, <code>fovDeg</code>), <code>opacity</code>, <code>credit</code>/<code>creditUrl</code>, optional <code>t</code> and <code>drawing</code>, and the <code>landmarks</code> it was lined up on (<code>id</code>, <code>label</code>, <code>picture</code> as <code>{ u, v }</code> from the top-left corner, <code>scene</code> as <code>{ azimuthDeg, altitudeDeg }</code>)</td></tr>
-      <tr><td><code>instrument</code>, <code>exposureSeconds</code></td><td>What it was observed through, and how long the shutter was open. Absent means the naked eye</td></tr>
-      <tr><td><code>decor</code></td><td>Scenery at a real <code>eastM</code>/<code>northM</code> from the observer: buildings (with <code>floors</code>, <code>windows</code>), trees, streetlights, vehicles, other observers, aircraft — optionally with a <code>track</code> and <code>lights</code> whose <code>pattern</code> carries a real flash rate</td></tr>
+      <tr><td><code>instrument</code>, <code>exposureSeconds</code></td><td>What it was observed through, and how long the shutter was open. Absent means the naked eye. <code>instrument</code> is one of <code>eye</code>, <code>rectilinear-lens</code> (a camera of unknown make), <code>instamatic-126</code>, <code>slr-35mm-50</code>, <code>slr-35mm-zoom</code>, <code>phone-landscape</code>, <code>phone-portrait</code>; <code>exposureSeconds</code> is one value for the whole recording, held to that device's own range</td></tr>
+      <tr><td><code>decor</code></td><td>Scenery at a real <code>eastM</code>/<code>northM</code> from the observer: buildings (with <code>floors</code>, <code>windows</code>), trees, streetlights, vehicles, other observers, aircraft — optionally with a <code>track</code> and <code>lights</code> whose <code>pattern</code> carries a real flash rate. See below</td></tr>
+    </table>
+    </div>
+    <p>A <strong>decor object</strong> is stated in metres, like everything that is not the phenomenon:</p>
+    <div class="table-scroll">
+    <table>
+      <tr><th>Field</th><th>Meaning</th></tr>
+      <tr><td><code>eastM</code>, <code>northM</code>, <code>headingDeg</code></td><td>Where it stands from the observer, and which way its front faces, clockwise from true north</td></tr>
+      <tr><td><code>sizeM</code></td><td><code>{ widthM, lengthM, heightM }</code> along its own axes, length being the way it faces. Each axis is optional: one nobody measured keeps the built-in shape's own proportion</td></tr>
+      <tr><td><code>model</code></td><td>A real 3D model standing in for the built-in shape: a catalogue entry by <code>id</code>, or a glTF/GLB file at <code>url</code> (which wins, must be readable from any origin, and then needs its <code>credit</code>; a relative one is read from the file that states it). It never decides the size: it is scaled, keeping its proportions, to the first measured axis among length, height and width, or to the real size the catalogue gives it. Seen from inside, and whenever the model cannot be had, the built-in shape is drawn instead</td></tr>
+      <tr><td><code>track</code></td><td><code>[{ t, eastM, northM, altitudeM, headingDeg }]</code> when it moves, <code>altitudeM</code> above the observer. Position blends between keyframes; the heading is held from one to the next</td></tr>
+      <tr><td><code>lights</code></td><td>Its lamps: <code>id</code>, <code>offsetM</code> <code>{ x, y, z }</code> from its centre (right, up, front), <code>color</code>, <code>intensity</code> (1 is an ordinary navigation light) and a <code>pattern</code>: <code>{ "kind": "steady" }</code>, or <code>{ "kind": "flash", perMinute, dutyCycle, phase }</code>, the rate as regulations state it, the lit fraction of each cycle (about 0.5 for a filament flasher, 0.01 for a strobe) and an offset from 0 to 1 between lamps. The editor fills them from presets: airliner, helicopter, car headlights, car hazard flashers, emergency beacons, streetlamp</td></tr>
+      <tr><td><code>occludesSourceIds</code></td><td>The phenomena the observer said it stood in front of — see the rules below</td></tr>
     </table>
     </div>
 
@@ -380,9 +394,9 @@ if (excerpts.length > 0) {
         <code>kind: "none"</code> means the observer reported hearing nothing. The same distinction
         runs through the weather and the ice cloud.</li>
     </ul>
-    <p class="small">The <a href="https://github.com/RR0/UfoAtHome#data-format">README</a> carries the
-      full field-by-field reference, including the reasoning behind each choice, and is the canonical
-      source if this page and it ever disagree.</p>
+    <p class="small">This page is the reference for the format. The reasoning behind each field is in
+      the doc comments of its type, which the excerpts above complete with, and in the
+      <a href="https://github.com/RR0/UfoAtHome">source</a>.</p>
   </div>
 </section>
 `
@@ -410,6 +424,7 @@ if (excerpts.length > 0) {
       <tr><td><code>time</code>, <code>endTime</code></td><td><code>{ year, month, day, hour, minute, second, raw }</code>, chaque partie facultative — c'est ainsi que le format énonce « 1954 » ou « vers 05:00 ». <code>raw</code> est la date telle qu'écrite en <a href="https://www.loc.gov/standards/datetime/">EDTF</a>, et c'est elle qui fait foi : <code>"1948-07-24T02:45~"</code> (approximative), <code>"2025-06?"</code> (incertaine), <code>"1965-07-01%"</code> (les deux), <code>"19XX"</code> (une année masquée), ou <code>"05:00"</code> seul pour une heure dont on a oublié la date. Les nombres sont tenus en accord avec elle pour ce qui calcule (le ciel, l'horloge). C'est un sous-ensemble d'EDTF (niveau 0, ces qualificatifs sur la date entière, années masquées) ; <a href="https://www.npmjs.com/package/@rr0/time"><code>@rr0/time</code></a> est le modèle EDTF complet de RR0, dans lequel l'outillage d'UFO@home convertit les dates d'un enregistrement</td></tr>
       <tr><td><code>durationSeconds</code></td><td>Une alternative à <code>endTime</code>, et c'est elle qui l'emporte si les deux sont là</td></tr>
       <tr><td><code>utcOffsetHours</code></td><td>L'heure LÉGALE de la montre de l'observateur (+1 pour la France en 1965). Absent, elle est approchée depuis la longitude, qui ne peut connaître ni l'heure légale ni un changement d'heure</td></tr>
+      <tr><td><code>timeZone</code></td><td>Le fuseau IANA dont le décalage a été dérivé (<code>"Europe/Paris"</code>) : la règle, là où <code>utcOffsetHours</code> est le nombre qu'elle donnait à cette date. Seul le nombre sert à placer le ciel ; le fuseau permet de dériver à nouveau le décalage quand la date change</td></tr>
       <tr><td><code>place</code></td><td><code>[{ lat, lng, name }]</code> — <code>name</code> est le nom qualifié depuis lequel les coordonnées ont été résolues</td></tr>
       <tr><td><code>observer</code></td><td><code>{ id, title, lastName, firstNames }</code>, tous facultatifs ; à omettre entièrement pour un observateur anonyme. <code>id</code> est une référence à la personne (sur RR0, son répertoire : <code>"ZamoraLonnie"</code>) ; les autres champs la décrivent quand personne ne lui en a encore donné</td></tr>
       <tr><td><code>description</code></td><td>Le récit en prose — une chaîne, ou une par langue (voir plus bas)</td></tr>
@@ -495,6 +510,7 @@ if (excerpts.length > 0) {
     <table>
       <tr><th>Champ</th><th>Sens</th></tr>
       <tr><td><code>kind</code></td><td><code>oval</code>, ou <code>polygon</code>, qui prend alors aussi <code>points</code></td></tr>
+      <tr><td><code>title</code></td><td>Son nom, affiché au survol ; une chaîne, ou une par langue</td></tr>
       <tr><td><code>color</code></td><td>N'importe quelle couleur CSS</td></tr>
       <tr><td><code>angle</code></td><td>En radians</td></tr>
       <tr><td><code>transparency</code></td><td>De 0 opaque à 1 invisible</td></tr>
@@ -518,10 +534,22 @@ if (excerpts.length > 0) {
       <tr><td><code>observerTrack</code></td><td><code>{ keyframes: [{ t, pose }] }</code> — <code>pose</code> porte <code>lat</code>, <code>lng</code>, <code>elevationM</code> (au-dessus du sol local), <code>headingDeg</code>, <code>pitchDeg</code>, <code>rollDeg</code>, <code>fovDeg</code>, et pour un appareil <code>fNumber</code> et <code>focusDistanceM</code></td></tr>
       <tr><td><code>weatherTrack</code></td><td><code>{ keyframes: [{ t, weather }] }</code> — l'état du ciel le long de l'enregistrement : précipitation, vent, orage, et les nuages en couches à hauteur réelle, chacune pouvant porter des nuages individuels placés en mètres. Chaque champ d'un <code>weather</code> est dans la section suivante</td></tr>
       <tr><td><code>weatherSource</code></td><td><code>{ id, name, url }</code> du relevé d'où vient la météo. Sa présence signifie que l'enregistrement est rejoué tel qu'il a été composé et n'est jamais reconsulté. Absent : le récit de l'observateur lui-même</td></tr>
-      <tr><td><code>soundTrack</code></td><td><code>{ keyframes: [{ t, sound }] }</code> — <code>kind</code> (none/hum/whistle/rumble/crackle), <code>volume</code>, <code>pitchHz</code>, et un <code>src</code> facultatif vers un vrai enregistrement</td></tr>
+      <tr><td><code>soundTrack</code></td><td><code>{ keyframes: [{ t, sound }] }</code> — <code>kind</code> (none/hum/whistle/rumble/crackle), <code>volume</code>, <code>pitchHz</code>, et un <code>src</code> facultatif vers un vrai enregistrement. <code>volume</code> et <code>pitchHz</code> glissent d'une image clé à l'autre, <code>kind</code> et <code>src</code> changent à l'image clé. Un <code>src</code> sur un autre site doit être servi à toute origine (CORS)</td></tr>
       <tr><td><code>references</code></td><td>Photos des lieux posées sur la scène : <code>src</code> (une adresse, ou une URL <code>data:</code> pour une photo ajoutée depuis un disque), <code>kind</code> (photo/panorama), <code>registration</code> (<code>headingDeg</code>, <code>pitchDeg</code>, <code>rollDeg</code>, <code>fovDeg</code>), <code>opacity</code>, <code>credit</code>/<code>creditUrl</code>, <code>t</code> et <code>drawing</code> facultatifs, et les <code>landmarks</code> sur lesquels elle a été recalée (<code>id</code>, <code>label</code>, <code>picture</code> en <code>{ u, v }</code> depuis le coin haut gauche, <code>scene</code> en <code>{ azimuthDeg, altitudeDeg }</code>)</td></tr>
-      <tr><td><code>instrument</code>, <code>exposureSeconds</code></td><td>À travers quoi l'observation a été faite, et combien de temps l'obturateur est resté ouvert. Absent : l'œil nu</td></tr>
-      <tr><td><code>decor</code></td><td>Le décor, à une vraie distance <code>eastM</code>/<code>northM</code> de l'observateur : bâtiments (avec <code>floors</code>, <code>windows</code>), arbres, lampadaires, véhicules, autres observateurs, aéronefs — éventuellement avec une <code>track</code> et des <code>lights</code> dont le <code>pattern</code> porte une vraie cadence d'éclats</td></tr>
+      <tr><td><code>instrument</code>, <code>exposureSeconds</code></td><td>À travers quoi l'observation a été faite, et combien de temps l'obturateur est resté ouvert. Absent : l'œil nu. <code>instrument</code> vaut <code>eye</code>, <code>rectilinear-lens</code> (un appareil de modèle inconnu), <code>instamatic-126</code>, <code>slr-35mm-50</code>, <code>slr-35mm-zoom</code>, <code>phone-landscape</code>, <code>phone-portrait</code> ; <code>exposureSeconds</code> est une valeur pour tout l'enregistrement, tenue dans la plage de l'appareil</td></tr>
+      <tr><td><code>decor</code></td><td>Le décor, à une vraie distance <code>eastM</code>/<code>northM</code> de l'observateur : bâtiments (avec <code>floors</code>, <code>windows</code>), arbres, lampadaires, véhicules, autres observateurs, aéronefs — éventuellement avec une <code>track</code> et des <code>lights</code> dont le <code>pattern</code> porte une vraie cadence d'éclats. Voir ci-dessous</td></tr>
+    </table>
+    </div>
+    <p>Un <strong>objet du décor</strong> s'énonce en mètres, comme tout ce qui n'est pas le phénomène :</p>
+    <div class="table-scroll">
+    <table>
+      <tr><th>Champ</th><th>Sens</th></tr>
+      <tr><td><code>eastM</code>, <code>northM</code>, <code>headingDeg</code></td><td>Où il se tient par rapport à l'observateur, et vers où regarde son avant, en degrés depuis le nord vrai dans le sens horaire</td></tr>
+      <tr><td><code>sizeM</code></td><td><code>{ widthM, lengthM, heightM }</code> selon ses propres axes, la longueur étant le sens où il regarde. Chaque axe est facultatif : celui que personne n'a mesuré garde la proportion de la forme intégrée</td></tr>
+      <tr><td><code>model</code></td><td>Un vrai modèle 3D à la place de la forme intégrée : une entrée du catalogue par <code>id</code>, ou un fichier glTF/GLB à <code>url</code> (qui l'emporte, doit être lisible depuis toute origine, et exige alors son <code>credit</code> ; une adresse relative se lit depuis le fichier qui l'énonce). Il ne décide jamais de la taille : il est mis à l'échelle, proportions gardées, sur le premier axe mesuré parmi longueur, hauteur et largeur, ou sur la taille réelle que lui donne le catalogue. Vu de l'intérieur, et chaque fois que le modèle ne peut être obtenu, c'est la forme intégrée qui est dessinée</td></tr>
+      <tr><td><code>track</code></td><td><code>[{ t, eastM, northM, altitudeM, headingDeg }]</code> quand il se déplace, <code>altitudeM</code> au-dessus de l'observateur. La position est interpolée entre les images clés ; le cap est tenu de l'une à la suivante</td></tr>
+      <tr><td><code>lights</code></td><td>Ses feux : <code>id</code>, <code>offsetM</code> <code>{ x, y, z }</code> depuis son centre (droite, haut, avant), <code>color</code>, <code>intensity</code> (1 pour un feu de navigation ordinaire) et un <code>pattern</code> : <code>{ "kind": "steady" }</code>, ou <code>{ "kind": "flash", perMinute, dutyCycle, phase }</code>, la cadence telle que l'énoncent les règlements, la part allumée de chaque cycle (environ 0,5 pour un clignotant à filament, 0,01 pour un stroboscope) et un décalage de 0 à 1 entre feux. L'éditeur les remplit depuis des modèles : avion de ligne, hélicoptère, phares de voiture, feux de détresse, gyrophares, lampadaire</td></tr>
+      <tr><td><code>occludesSourceIds</code></td><td>Les phénomènes devant lesquels l'observateur a dit qu'il se tenait — voir les règles plus bas</td></tr>
     </table>
     </div>
 
@@ -695,9 +723,9 @@ if (excerpts.length > 0) {
         la question ; <code>kind: "none"</code> signifie que l'observateur a déclaré n'avoir rien
         entendu. La même distinction traverse la météo et les nuages de glace.</li>
     </ul>
-    <p class="small">Le <a href="https://github.com/RR0/UfoAtHome#data-format">README</a> porte la
-      référence complète, champ par champ, avec le raisonnement derrière chaque choix ; c'est lui qui
-      fait foi si cette page et lui venaient à diverger.</p>
+    <p class="small">Cette page est la référence du format. Le raisonnement derrière chaque champ est
+      dans les commentaires de documentation de son type, que les extraits ci-dessus proposent à la
+      complétion, et dans le <a href="https://github.com/RR0/UfoAtHome">code source</a>.</p>
   </div>
 </section>
 `

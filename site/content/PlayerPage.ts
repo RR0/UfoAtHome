@@ -347,7 +347,9 @@ ${this.form("en")}
       That is the link to hand someone when you want them to see an account rather than read it —
       in an email, a post, a forum that allows nothing but text.</p>
     <p>It is also what every published reconstruction's own <q>?</q> panel hands out, and what the
-      older <code>ufoathome.org/&lt;name&gt;</code> links resolve to.</p>
+      older <code>ufoathome.org/&lt;name&gt;</code> links resolve to. A name with no slash is looked
+      for among this site's demos first, then as an rr0.org case, read through its
+      <code>case.json</code> or else its <code>sighting.json</code>.</p>
     <p>To change what you are looking at rather than only watch it, <a href="/edit/">the
       editor</a> takes the same parameter. To put a reconstruction on a page of your own, see
       <a href="/docs/">the documentation</a>.</p>
@@ -388,7 +390,9 @@ ${this.form("fr")}
       C'est le lien à donner à quelqu'un quand on veut qu'il voie un récit plutôt qu'il le lise —
       dans un courriel, un message, un forum qui n'accepte que du texte.</p>
     <p>C'est aussi ce que distribue le panneau <q>?</q> de chaque reconstitution publiée, et ce vers
-      quoi aboutissent les anciens liens <code>ufoathome.org/&lt;nom&gt;</code>.</p>
+      quoi aboutissent les anciens liens <code>ufoathome.org/&lt;nom&gt;</code>. Un nom sans barre oblique est cherché
+      d'abord parmi les démos de ce site, puis comme dossier de rr0.org, lu par son
+      <code>case.json</code> ou à défaut son <code>sighting.json</code>.</p>
     <p>Pour modifier ce que vous regardez au lieu de seulement le regarder,
       <a href="/edit/">l'éditeur</a> prend le même paramètre. Pour poser une reconstitution
       sur une page à vous, voyez <a href="/docs/">la documentation</a>.</p>

@@ -111,7 +111,8 @@ if (docs) {
       <rr0-sighting-editor id="editor"></rr0-sighting-editor>
     </div>
     <p class="small">Opening it on an existing recording: add <code>?sighting=</code> and a URL, or
-      the name of one of <a href="/demos/">the demos</a> — for instance
+      the name of one of <a href="/demos/">the demos</a> (a name that is none of them is looked for as an
+      rr0.org case, by its <code>sighting.json</code>) — for instance
       <a href="/edit/?sighting=Socorro"><code>/edit/?sighting=Socorro</code></a>.</p>
   </div>
 </section>
@@ -157,11 +158,11 @@ if (docs) {
     <div class="group-docs">
       <div class="group-doc">
       <h3>Observation</h3>
-      <p>Load an existing recording (from a file or a URL), and state what this one is about: a
-        <strong>case ID</strong>, a <strong>description</strong>, <strong>tags</strong>. The case ID
-        is the case's, not the observer's: every observer's own recording of the same sighting carries
-        the same one, which is what lets a page group them into a single reconstruction with a
-        observer picker.</p>
+      <p>Load an existing recording (from a file or a URL), and state what this one is about: an
+        <strong>ID</strong>, a <strong>description</strong>, <strong>tags</strong>. The ID is this
+        account's own, the day and then who saw it (<code>1964-04-24-ZamoraLonnie</code>); a recording
+        does not name its case, it is <a href="/docs/format/#several-observers-the-case">the case</a>
+        that names its accounts and gives a page its observer picker.</p>
     </div>
 
     <div class="group-doc">
@@ -172,7 +173,15 @@ if (docs) {
         and its <strong>focal length</strong>, <strong>aperture</strong>, <strong>exposure</strong>
         and <strong>focus distance</strong> become available — each disabled where the device fixed
         it, because the owner of a fixed-focus snapshot camera had nothing to choose. Instruments
-        outside the observation's own date are flagged.</p>
+        outside the observation's own date are left out of the list, except the one the recording
+        already names, which is kept and flagged.</p>
+      <p>A camera's frame is letterboxed inside the element at its own proportions, and its field
+        becomes the default one; the eye, or a camera of unknown make, is drawn 16:9 with a 60°
+        vertical field. Changing the instrument re-projects the shapes: they keep their angles, so
+        they move as well as change size. The exposure stays within what the device allowed (1/1000
+        to 8 s for an unknown camera, 10 s for a phone); only the 35 mm SLRs have a B setting, up to
+        an hour. A long pose is drawn at once as the viewfinder showed it, then fills in into the
+        photograph as the scene settles.</p>
       <p><strong>Roll</strong> sits here rather than with the place, because it is how the device
         was <em>held</em> — a camera askew, a head leaned over — not where the observer stood.</p>
     </div>
@@ -183,12 +192,15 @@ if (docs) {
         <strong>Locate</strong>: latitude and longitude are filled from OpenStreetMap's own
         geocoder, every candidate stays listed, and picking another moves the observer. What is
         stored is the <em>qualified</em> name that was resolved, so a later reader lands on the same
-        spot. Move a coordinate by hand and the name is re-derived, or cleared — a name describing
-        somewhere the sighting is no longer at would be a written false statement.</p>
+        spot. Move a coordinate by hand and a name that came from a search is re-derived, or cleared — a
+        name describing somewhere the sighting is no longer at would be a written false statement. A
+        name you typed yourself is kept as typed and never replaced, even when no lookup finds it.</p>
       <p><strong>Heading</strong> is the direction faced, <strong>Tilt</strong> how far up or down,
         and <strong>Altitude</strong> is above sea level, floored by the ground's own height at that
         location: an observer in the Alps is not at 0 m. Relief and imagery sources are chosen right
         here, under the coordinates whose ground they describe.</p>
+      <p>Position, heading and tilt are written at the playhead, as a keyframe of the observer's
+        track: set them at another moment and the observer moves or turns between the two.</p>
     </div>
 
     <div class="group-doc">
@@ -222,6 +234,12 @@ if (docs) {
         number. Pick the observer's own zone and the offset is derived from that zone's rules
         <em>at the observation's date</em>: Valensole in July 1965 resolves to UTC+1, not today's
         UTC+2, because France only reintroduced summer time in 1976.</p>
+      <p>The zone is filled in from the coordinates, and never replaces one you chose. Zone
+        boundaries are coarse (Montgomery, Alabama falls in America/Chicago, which kept summer time
+        in 1948 when Alabama did not), so a plain offset can still be typed with the <em>manual</em> choice. An offset that
+        no clock at that longitude could have kept is flagged, the meridian's solar time in its
+        tooltip. Editing either date drops an explicit duration once the two dates give an exact
+        length of their own.</p>
       <p>The <strong>EDTF</strong> button switches both date fields to text, for everything a
         calendar picker cannot say: a bare year, a month, a time with no date, and the qualifiers
         <em>uncertain</em> (<code>?</code>) and <em>approximate</em> (<code>~</code>). Most archives
@@ -239,6 +257,9 @@ if (docs) {
         looked-up values stay as a starting point, the source is dropped, and no later lookup may
         overwrite them. A recording that names a source is replayed exactly as authored and never
         looked up again, so a published case file reads identically offline.</p>
+      <p>A lookup writes a weather keyframe at the start, at each whole hour and at the end of the
+        recording, each at wherever the observer stands at that moment; the track is laid out again
+        when the recording's length changes.</p>
       <p>The group has three handles of its own, one part open at a time like the groups
         themselves: <strong>Precipitation</strong> — its type and intensity, and the
         <strong>Storm</strong> box, which is where a weather code reports a thunderstorm, beside
@@ -303,7 +324,10 @@ if (docs) {
         From February 2021 it also names the satellites that really crossed that sky bright enough
         to be seen, the brightest with the time of its pass on the observer's clock, and says when
         some of them were a Starlink train; the 🛰 button moves the playhead to each pass in turn,
-        brightest first, and turns the observer towards it.
+        brightest first, and turns the observer towards it. 🌠 and ☄ do the same for the next meteor
+        and for the comet. Where the instrument reaches deeper than magnitude 9, the line says the
+        stars are drawn only as far as this project's catalogue goes; and a rainbow is mentioned only
+        when rain was reported.
         Whether any of it explains anything is the reader's conclusion, never the file's claim.</p>
     </div>
 
@@ -317,6 +341,9 @@ if (docs) {
         its own, at no cost in bundled audio. A recording that actually captured the sound can point
         at the audio file instead. Note the difference between the two silences: <em>none</em> means
         the observer reported hearing nothing; no sound track at all means nobody was asked.</p>
+      <p>Loudness and pitch glide from one keyframe to the next; the kind and the audio file change
+        at the keyframe. An audio file on another site must be served to any origin (CORS), and a
+        browser plays nothing until the reader has clicked the page once.</p>
     </div>
 
     <div class="group-doc">
@@ -357,6 +384,10 @@ if (docs) {
         is exactly 6 pixels and the full Moon about 3 — so an object 3.5 m wide at 90 m is 13 pixels
         across, not the 90 an author reaches for unaided. Getting this wrong is the single most
         common way a reconstruction ends up false.</p>
+      <p>That distance is never saved with the recording, and <strong>Withdraw the distance
+        hypothesis</strong> takes it back. A shape drawn inside a larger visible one
+        stands at that one's distance, just in front of it, so a light on a craft stays on the
+        craft.</p>
       <p><strong>Sampling rate</strong> is how often the pointer is read while recording.</p>
       <p>Those are the group's <strong>Shapes</strong>: what the observer drew. Its
         <strong>Bodies</strong> are what the observer said those shapes were, in 3D: each body names
@@ -460,7 +491,8 @@ if (docs) {
       <rr0-sighting-editor id="editor"></rr0-sighting-editor>
     </div>
     <p class="small">Pour l'ouvrir sur un enregistrement existant : ajoutez <code>?sighting=</code>
-      suivi d'une URL, ou du nom d'une <a href="/demos/">démo</a> — par exemple
+      suivi d'une URL, ou du nom d'une <a href="/demos/">démo</a> (un nom qui n'en est pas une est
+      cherché comme dossier de rr0.org, par son <code>sighting.json</code>) — par exemple
       <a href="/edit/?sighting=Socorro"><code>/edit/?sighting=Socorro</code></a>.</p>
   </div>
 </section>
@@ -507,10 +539,11 @@ if (docs) {
       <div class="group-doc">
       <h3>Observation</h3>
       <p>Charger un enregistrement existant (fichier ou URL), et énoncer ce dont il s'agit :
-        <strong>identifiant de dossier</strong>, <strong>description</strong>,
-        <strong>mots-clés</strong>. L'identifiant est celui du dossier, pas celui de l'observateur : chaque
-        observateur d'une même observation porte le même dans son propre fichier, et c'est ce qui permet
-        à une page de les réunir en une seule reconstitution avec un sélecteur d'observateur.</p>
+        <strong>identifiant</strong>, <strong>description</strong>, <strong>mots-clés</strong>.
+        L'identifiant est celui de ce compte rendu, le jour puis qui a vu
+        (<code>1964-04-24-ZamoraLonnie</code>) ; un enregistrement ne nomme pas son dossier, c'est
+        <a href="/docs/format/#several-observers-the-case">le dossier</a> qui nomme ses comptes rendus
+        et donne à une page son sélecteur d'observateur.</p>
     </div>
 
     <div class="group-doc">
@@ -521,8 +554,17 @@ if (docs) {
         différentes. Choisissez un appareil et sa <strong>focale</strong>, son
         <strong>diaphragme</strong>, son <strong>temps de pose</strong> et sa <strong>mise au
         point</strong> deviennent accessibles — chacun désactivé là où l'appareil le fixait, car le
-        propriétaire d'un appareil à mise au point fixe n'avait rien à choisir. Un instrument
-        étranger à la date de l'observation est signalé.</p>
+        propriétaire d'un appareil à mise au point fixe n'avait rien à choisir. Les instruments
+        étrangers à la date de l'observation ne sont pas proposés, sauf celui que l'enregistrement
+        nomme déjà, gardé et signalé.</p>
+      <p>Le cadre d'un appareil est inscrit dans l'élément à ses propres proportions, bandes noires
+        comprises, et son champ devient celui par défaut ; l'œil, ou un appareil de modèle inconnu,
+        est dessiné en 16:9 avec un champ vertical de 60°. Changer d'instrument reprojette les formes :
+        elles gardent leurs angles, donc se déplacent autant qu'elles changent de taille. Le temps de
+        pose reste dans ce que permettait l'appareil (de 1/1000 à 8 s pour un appareil inconnu, 10 s
+        pour un téléphone) ; seuls les reflex 24×36 ont une pose B, jusqu'à une heure. Une pose longue
+        est dessinée d'emblée telle que la montrait le viseur, puis s'accumule en photographie à
+        mesure que la scène se pose.</p>
       <p>Le <strong>roulis</strong> est ici et non avec le lieu, parce qu'il dit comment l'appareil
         était <em>tenu</em> — un appareil de travers, une tête penchée — et non où se tenait le
         observateur.</p>
@@ -534,14 +576,18 @@ if (docs) {
         sur <strong>Localiser</strong> : latitude et longitude sont remplies par le géocodeur
         d'OpenStreetMap, tous les candidats restent listés, et en choisir un autre déplace le
         observateur. Ce qui est stocké est le nom <em>qualifié</em> qui a été résolu, pour qu'un lecteur
-        ultérieur retombe au même endroit. Déplacez une coordonnée à la main et le nom est redérivé,
-        ou effacé — un nom décrivant un endroit où l'observation n'a plus lieu serait une fausse
-        déclaration écrite.</p>
+        ultérieur retombe au même endroit. Déplacez une coordonnée à la main et un nom venu d'une
+        recherche est redérivé, ou effacé — un nom décrivant un endroit où l'observation n'a plus
+        lieu serait une fausse déclaration écrite. Un nom que vous avez tapé vous-même est gardé tel
+        quel et jamais remplacé, même si aucune recherche ne le trouve.</p>
       <p><strong>Cap</strong> est la direction regardée, <strong>Inclinaison</strong> de combien
         vers le haut ou le bas, et <strong>Altitude</strong> s'entend au-dessus du niveau de la mer,
         plancher fixé par la hauteur du sol à cet endroit : un observateur dans les Alpes n'est pas à
         0 m. Les sources de relief et d'imagerie se choisissent ici même, sous les coordonnées dont
         elles décrivent le sol.</p>
+      <p>Position, cap et inclinaison s'écrivent à la tête de lecture, comme une image clé de la
+        trajectoire de l'observateur : réglez-les à un autre moment et l'observateur se déplace ou se
+        tourne entre les deux.</p>
     </div>
 
     <div class="group-doc">
@@ -577,6 +623,13 @@ if (docs) {
         non le nombre. Choisissez le fuseau de l'observateur et le décalage est dérivé des règles de ce
         fuseau <em>à la date de l'observation</em> : Valensole en juillet 1965 donne UTC+1, pas
         l'UTC+2 d'aujourd'hui, la France n'ayant rétabli l'heure d'été qu'en 1976.</p>
+      <p>Le fuseau est rempli d'après les coordonnées, et ne remplace jamais celui que vous avez
+        choisi. Les frontières de fuseaux sont grossières (Montgomery, en Alabama, tombe dans
+        America/Chicago, qui avait l'heure d'été en 1948 quand l'Alabama ne l'avait pas) : un décalage simple peut donc toujours
+        être saisi par le choix <em>manuel</em>. Un décalage qu'aucune horloge à cette longitude
+        n'aurait pu suivre est signalé, l'heure solaire du méridien dans son infobulle. Modifier l'une
+        des deux dates retire une durée explicite dès que les deux dates donnent une durée exacte à
+        elles seules.</p>
       <p>Le bouton <strong>EDTF</strong> bascule les deux champs de date en texte, pour tout ce
         qu'un sélecteur de calendrier ne sait pas dire : une année seule, un mois, une heure sans
         date, et les qualificatifs <em>incertain</em> (<code>?</code>) et <em>approximatif</em>
@@ -596,6 +649,9 @@ if (docs) {
         ultérieure ne peut les écraser. Un enregistrement qui nomme une source est rejoué tel qu'il
         a été composé et n'est jamais reconsulté : un dossier publié se lit à l'identique hors
         ligne.</p>
+      <p>Une consultation écrit un point météo au début, à chaque heure pleine et à la fin de
+        l'enregistrement, chacun là où se tient l'observateur à ce moment ; la piste est redisposée
+        quand la durée de l'enregistrement change.</p>
       <p>Le groupe a trois onglets à lui, une partie ouverte à la fois comme les groupes eux-mêmes :
         <strong>Précipitations</strong> — leur type et leur intensité, et la case
         <strong>Orage</strong>, qui est là où un code météo signale un orage, à côté de la pluie et
@@ -666,7 +722,10 @@ if (docs) {
         nomme aussi les satellites qui ont réellement traversé ce ciel assez brillants pour être vus,
         le plus brillant avec l'heure de son passage à la montre de l'observateur, et dit quand certains
         formaient un train de Starlink ; le bouton 🛰 amène la tête de lecture sur chaque passage tour
-        à tour, du plus brillant au plus faible, et tourne l'observateur vers lui.
+        à tour, du plus brillant au plus faible, et tourne l'observateur vers lui. 🌠 et ☄ font de
+        même pour le prochain météore et pour la comète. Quand l'instrument va plus loin que la
+        magnitude 9, la ligne précise que les étoiles ne sont dessinées que jusqu'où va le catalogue
+        de ce projet ; et un arc-en-ciel n'est mentionné que si de la pluie a été signalée.
         Que cela explique ou non quelque chose est la conclusion du lecteur, jamais l'affirmation du
         fichier.</p>
     </div>
@@ -683,6 +742,10 @@ if (docs) {
         réellement capté le son peut pointer vers le fichier audio. Notez la différence entre les
         deux silences : <em>aucun</em> signifie que l'observateur a déclaré n'avoir rien entendu ;
         l'absence totale de piste sonore signifie que personne ne le lui a demandé.</p>
+      <p>Intensité et hauteur glissent d'une image clé à l'autre ; le timbre et le fichier audio
+        changent à l'image clé. Un fichier audio sur un autre site doit être servi à toute origine
+        (CORS), et un navigateur ne joue rien tant que le lecteur n'a pas cliqué une fois dans la
+        page.</p>
     </div>
 
     <div class="group-doc">
@@ -727,6 +790,10 @@ if (docs) {
         360 pixels, un degré fait exactement 6 pixels et la pleine Lune environ 3 — un objet de
         3,5 m à 90 m fait donc 13 pixels de large, et non les 90 vers lesquels va la main. S'y
         tromper est la première cause de reconstitution fausse.</p>
+      <p>Cette distance n'est jamais enregistrée avec l'observation, et <strong>Retirer l'hypothèse
+        de distance</strong> la reprend. Une forme dessinée dans une forme
+        visible plus grande se tient à la distance de celle-ci, juste devant, pour qu'un feu sur un
+        engin reste sur l'engin.</p>
       <p>La <strong>fréquence d'échantillonnage</strong> est la cadence à laquelle le curseur est lu
         pendant l'enregistrement.</p>
       <p>Voilà pour les <strong>Formes</strong> du groupe : ce que l'observateur a dessiné. Ses

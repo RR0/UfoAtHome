@@ -119,13 +119,13 @@ npm run build:all    # ${fr ? "les trois bundles d'intégration" : "the three em
          orbital element archive (<a href="https://ufowaves.org/gp/my_tles/">ufowaves.org</a>) to the
          weekly files served under <code>/tle/</code>.`}</p>
     <p>${fr
-      ? `Le <a href="https://github.com/RR0/UfoAtHome#readme">README</a> porte la référence complète,
-         avec le raisonnement derrière chaque choix ; c'est lui qui fait foi si ces pages et lui
-         venaient à diverger. Tout est en MIT — voir <a href="/faq/">la FAQ</a> pour ce que cela vous
+      ? `Ces pages sont la référence. Le <a href="https://github.com/RR0/UfoAtHome#readme">README</a>
+         dit ce qu'il faut pour contribuer : installer, reconstruire les données, tester, déboguer,
+         publier ; le raisonnement derrière chaque choix est dans les commentaires du code. Tout est en MIT — voir <a href="/faq/">la FAQ</a> pour ce que cela vous
          autorise.`
-      : `The <a href="https://github.com/RR0/UfoAtHome#readme">README</a> carries the full reference,
-         including the reasoning behind each choice, and is the canonical source if these pages and it
-         ever disagree. Everything is MIT — see <a href="/faq/">the FAQ</a> for what that lets you do.`}</p>
+      : `These pages are the reference. The <a href="https://github.com/RR0/UfoAtHome#readme">README</a>
+         says what contributing takes: installing, rebuilding the data, testing, debugging, releasing;
+         the reasoning behind each choice is in the code comments. Everything is MIT — see <a href="/faq/">the FAQ</a> for what that lets you do.`}</p>
   </div>
 </section>
 `

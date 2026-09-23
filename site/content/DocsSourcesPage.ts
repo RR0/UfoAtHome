@@ -301,8 +301,8 @@ export class DocsSourcesPage extends DocsSection {
           name: "3D models (Kenney, Poly by Google)", url: "https://ufoathome.org/models/",
           provides: { en: "Cars, houses, trees, street lights, an airliner.", fr: "Voitures, maisons, arbres, lampadaires, un avion de ligne." },
           when: { en: "When a decor object names a model.", fr: "Quand un objet du décor nomme un modèle." },
-          hosting: { en: "Re-hosted on ufoathome.org, each with its licence file (CC0, CC BY 3.0).", fr: "Réhébergés sur ufoathome.org, chacun avec son fichier de licence (CC0, CC BY 3.0)." },
-          choices: { en: "Hosted here because free kits sit on mirrors of uncertain permanence. A model whose credit is unknown is not drawn; Google Earth models were refused for their licence.", fr: "Hébergés ici parce que les kits libres sont sur des miroirs à la pérennité incertaine. Un modèle au crédit inconnu n'est pas dessiné ; les modèles de Google Earth ont été écartés pour leur licence." }
+          hosting: { en: "Re-hosted on ufoathome.org, each with its licence file (CC0, CC BY 3.0). The catalogue is read from /models/index.json beside the page first, then from ufoathome.org, so a site can serve its own copy.", fr: "Réhébergés sur ufoathome.org, chacun avec son fichier de licence (CC0, CC BY 3.0). Le catalogue est lu d'abord dans /models/index.json à côté de la page, puis sur ufoathome.org : un site peut en servir sa propre copie." },
+          choices: { en: "Hosted here because free kits sit on mirrors of uncertain permanence. A model whose credit is unknown is not drawn; Google Earth models were refused for their licence. Whenever a model cannot be had, and when the observer stands inside the object, the built-in shape is drawn instead.", fr: "Hébergés ici parce que les kits libres sont sur des miroirs à la pérennité incertaine. Un modèle au crédit inconnu n'est pas dessiné ; les modèles de Google Earth ont été écartés pour leur licence. Chaque fois qu'un modèle ne peut être obtenu, et quand l'observateur se tient dans l'objet, c'est la forme intégrée qui est dessinée." }
         },
         {
           name: "Panoramax", url: "https://panoramax.fr/",
@@ -377,8 +377,8 @@ ${this.principles[language].map(principle => `      <li>${principle}</li>`).join
     <p>${toc}</p>
 ${sections}
     <p>${fr
-      ? "Le détail de chaque choix, avec les mesures qui l'ont décidé, est dans le <a href=\"https://github.com/RR0/UfoAtHome#readme\">README</a> et dans les commentaires du code de chaque source."
-      : "The detail of each choice, with the measurements that settled it, is in the <a href=\"https://github.com/RR0/UfoAtHome#readme\">README</a> and in the code comments of each source."}</p>
+      ? "Le détail de chaque choix, avec les mesures qui l'ont décidé, est dans les commentaires du <a href=\"https://github.com/RR0/UfoAtHome\">code</a> de chaque source, et le <a href=\"https://github.com/RR0/UfoAtHome#data\">README</a> dit comment reconstruire chaque catalogue."
+      : "The detail of each choice, with the measurements that settled it, is in the code comments of each source in the <a href=\"https://github.com/RR0/UfoAtHome\">repository</a>, and the <a href=\"https://github.com/RR0/UfoAtHome#data\">README</a> says how to rebuild each catalogue."}</p>
     <p>${fr
       ? "Ce qu'une valeur relevée devient dans le fichier (<code>weatherSource</code>, les couches <code>record-low</code>, <code>record-mid</code> et <code>record-high</code>) est décrit sur la page du <a href=\"/docs/format/\">fichier d'observation</a>."
       : "What a looked-up value becomes in the file (<code>weatherSource</code>, the <code>record-low</code>, <code>record-mid</code> and <code>record-high</code> layers) is described on <a href=\"/docs/format/\">the sighting file</a>'s page."}</p>
