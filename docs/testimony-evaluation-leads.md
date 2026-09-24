@@ -53,6 +53,41 @@ Chapters are on rr0.org under
   a month, within a year, beyond). Record the interview method: the cognitive interview recovers 25-35 % more
   correct content; leading or multiple-choice questions before a free account contaminate it (store the questions
   with the answers, Callahan I.2).
+- **Low-elevation lights are placed at the horizon** (Maugé II.8, Jimenez's GEPAN experiments): a light below
+  about 5° elevation is reported at the distance of the horizon or the nearest obstacle in that direction, even the
+  full Moon. When a reported distance roughly equals the terrain distance along the bearing (computable from the
+  DEM), treat it as uninformative and still test far candidates.
+- **The naming word predicts error** (Maugé II.8, 1,225 re-entry testimonies): on the scale light < phenomenon <
+  shape < object < machine < flying object < UFO, a stronger word goes with more precise and more wrong size,
+  distance, altitude, speed and "artificial details", while direction, time, colour, brightness and angular size
+  stay reliable. Classify the word and discount metric claims as it strengthens. Surprise raises identification
+  and error; an experimenter or a classmate saying "UFO" raised UFO labels from 18 % to 68 %.
+- **Size from a remembered object** (Keul I.5, Salzburg experiment, N=60): sizes shown by hand or said right away
+  were within +2 to +17 %, but a size recalled through a familiar object (a football) was ~30 % too large.
+  Duration of a stressful event is overestimated: re-enact it on site with a stopwatch ("say now / stop") and use
+  the gap as a per-witness correction.
+- **Confidence after feedback** (Kelley-Romano & Douglass IV.2): with no feedback both groups recalled ~6/10
+  certainty; after confirming feedback, contact claimants recalled 8.69 against 7.78 and claimed faster, more
+  "immediate" recognition. Keep the certainty stated before any feedback, log every feedback (investigator, media,
+  support group, checklists) with its date, and treat certainty that grew after it as contamination (Albright II.1).
+- **Hypnosis and age** (French II.5): 13 of 27 highly hypnotizable subjects accepted an implanted memory; over 70 %
+  of children accepted an implanted abduction memory without hypnosis; about two thirds "remembered" events before
+  age 2 under hypnosis. Record whether each detail first appeared under hypnosis or guided imagery, and compare the
+  event date with the witness's birth date. Record the interviewer and their beliefs: accounts cluster by hypnotist.
+
+## Dream and sleep states
+
+- **Raduga's checklist** (IV.5): a required gate (lying, sitting or reclining; waking, falling asleep, napping or
+  meditating, day or night) then eight markers detectable in `description`: paralysis or "vibrations",
+  levitation or passing through walls, out-of-body experience, events contradicting reality (absent or dead
+  relatives, impossible objects), jumps between unconnected places, fluctuating vividness or "hyperreality",
+  teleportation back to the starting place, a forgotten ending. The weights are untested: learn them, don't
+  assert them. Base rates: 114 of 152 practitioners (75 %) produced an alien or UFO encounter on purpose; sleep
+  paralysis with fear clustered in the most realistic accounts.
+- **Mavrakis' symptom table** (III.9): night, bed or long night drive with paralysis, sense of presence, buzzing,
+  a bright light rushing in, floating or missing time map to sleep paralysis (40-50 % lifetime prevalence with
+  hypnagogic hallucinations), the Isakower phenomenon or automatic behaviour; hypnotics (zolpidem, zopiclone)
+  favour them. Check claimed transport against distance and the day's timetables (Bahía Blanca: 575 km).
 
 ## Checks from date and place
 
@@ -83,6 +118,13 @@ Run these before scoring a testimony (Passot's GEIPAN remote check, Magin III.8,
   azimuths with the heading;
 - data-error sensitivity: perturb date, time and direction (±1 day, ±1 h, summer time, mirrored or 90° off) and
   see whether a candidate snaps into place (Borraz III.1);
+- lightning: for luminous balls in stormy weather, query lightning-location data within ~5 km and ±10 min; strong
+  positive cloud-to-ground strokes correlate with ball lightning, negative strokes near power lines or solar panels
+  with short-circuit arcs ("dazzling + metal contact + blue-white"); a curved track rules out a signal rocket, and
+  something in front of the clouds rules out a meteor (Keul I.5);
+- independent sensor channels (visual, radar, infrared, other witnesses), each with its own error rate: count the
+  truly independent ones; anything about the Sun, Moon or planets is checkable against their positions, the same
+  Sun being visible from half the planet (Albright II.1, Fatima);
 - small near objects (kite, drone, balloon) when a "huge distant craft" keeps its angular size
   (Martins VII.2: a 1.5 m kite 27 m up seen by everyone as a giant triangle hundreds of metres high).
 
@@ -120,6 +162,10 @@ it drop "just behind the trees"); the Canary Islands Poseidon launches 1974-1979
   artefacts for any fixed blob across frames. Young's 7-stage crashed-saucer model (event, local media,
   enthusiasts, extra witnesses, national media, new witnesses as old ones are refuted, stranger theories) is a
   checklist for how a story spreads; 100+ new Kecksburg "witnesses" appeared after a 1990 TV show.
+- **Residue as a function of time** (Ares de Blas VII.1): old cases get explained while new ones fill the pool;
+  label a case "not yet explained" with the pending checks, track time-to-explanation, and compare the parameter
+  distributions of unexplained and explained cases (the 1972 Madrid filters found the same profile). Flag account
+  words that look like ufology jargon given by an earlier interviewer rather than the witness's own.
 - **Deception cues** work only on samples (~70 % at best), never on one testimony (Martins).
 
 ## Indexes that could become assessors
