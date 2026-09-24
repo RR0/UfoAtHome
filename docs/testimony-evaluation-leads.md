@@ -42,6 +42,17 @@ Chapters are on rr0.org under
   contradictory (2 % in Rospars' sample).
 - **Colours and features of entries** (Rospars): main colour 77 % consistent, trail colour 80 %,
   fragmentation 63 %, trail reported by only 49 % although always physically present.
+- **Duration of a short stimulus** (Peiniger IV.4, fire balloon photo shown 10 s to four groups): individual
+  estimates from 1.5 to 30 s, group means 7.5-12 s; only a third to a half of descriptions and sketches were
+  "good", about 5 % completely wrong. Model one witness's duration as log-normal ×/÷3 and tighten it only by
+  averaging independent witnesses; events under ~30 min tend to be overestimated (Ickinger III.7, Tobin 2010).
+- **Retelling** (Sharps II.12): the ratio of correct to wrong details falls from 3.5 at the first questioning to
+  1.39 at the second and 0.91 at the third; in calm conditions witnesses average 1.88 distorted and 1.25 invented
+  details per scene. Confidence rises while accuracy falls.
+- **Report delay** (Ickinger III.7): rate a report by the time between sighting and interview (same day, within
+  a month, within a year, beyond). Record the interview method: the cognitive interview recovers 25-35 % more
+  correct content; leading or multiple-choice questions before a free account contaminate it (store the questions
+  with the answers, Callahan I.2).
 
 ## Checks from date and place
 
@@ -57,6 +68,21 @@ Run these before scoring a testimony (Passot's GEIPAN remote check, Magin III.8,
 - aircraft: nearby airfields, formation flights (lights with a dark body between them = contrast plus
   contour illusion, Bullard), and observer motion (Passot's Silly-le-Long case: a plane flying
   against a moving van looked stationary);
+- re-entries from decay catalogues (Space-Track, Aerospace CORDS) within ±2 h and within sight (fireballs at
+  60-90 km are visible several hundred km away); rocket stages launched hours or days before vent fuel and make
+  "searchlights" (Oberg I.10). Signature: many lights in formation, near-horizontal path, 1-2 min to cross,
+  silence, witnesses spread over hundreds of km. Meteors are ~15 km/s and last seconds, debris half as fast and
+  longer (Young I.17);
+- Earth's shadow height: a plume 100 km up can stay sunlit while the observer is in twilight (Campo Pérez III.3);
+  stars seen through the object point to a gaseous or transparent stimulus;
+- military flares: lights appearing and going out one by one, low over a range, setting behind the terrain
+  profile (Callahan I.2, Phoenix 22:00); split one night's reports by time and direction before matching;
+- "follower" objects: a moving witness (car, aircraft) who says the light paced them or stopped when they stopped:
+  test Venus, Jupiter, the Moon and bright stars within ~10° of the bearing (Borraz III.1); a planet near the
+  horizon, with a mirage warning under an inversion (da Silva III.4); pilots' clock positions converted to
+  azimuths with the heading;
+- data-error sensitivity: perturb date, time and direction (±1 day, ±1 h, summer time, mirrored or 90° off) and
+  see whether a candidate snaps into place (Borraz III.1);
 - small near objects (kite, drone, balloon) when a "huge distant craft" keeps its angular size
   (Martins VII.2: a 1.5 m kite 27 m up seen by everyone as a giant triangle hundreds of metres high).
 
@@ -64,6 +90,11 @@ Run these before scoring a testimony (Passot's GEIPAN remote check, Magin III.8,
 with rows of lit windows and flames at the rear, the very description of the Chiles-Whitted sighting
 (1948); Hartmann made the comparison in the Condon report (sections 6.2.3 and 6.2.6), and Campo Pérez
 recalls both in III.3. A "windows" or "structure" report must not rule out a fireball.
+
+More known-stimulus calibration sets, where each witness's distance, altitude and direction error can be measured:
+Hawaii re-entry 2020-10-24, Oregon 2021-03-25, France 1990-11-05, Kiev 1963, Yukon 1996 (Oberg I.10); the Great
+Lakes fireball 1965-12-09 (Young I.17: "almost everyone" placed it far too close, and edge-of-range observers saw
+it drop "just behind the trees"); the Canary Islands Poseidon launches 1974-1979 (Campo Pérez III.3).
 
 ## Scoring the account
 
@@ -84,6 +115,11 @@ recalls both in III.3. A "windows" or "structure" report must not rule out a fir
 - **Stereotype details** (Haines III.6): people who claim a sighting draw fewer stereotype features
   (domes, portholes, rim detail, legs, insignia) than non-witnesses; counting them flags content that
   may come from culture rather than from the sighting.
+- **Primed expectation** (Sharps II.12): being told a place is a "UFO hotspot" was enough to turn dust specks on a
+  camera mirror into "spacecraft"; check hotspot status, recent coverage and earlier waves, and test lens and dust
+  artefacts for any fixed blob across frames. Young's 7-stage crashed-saucer model (event, local media,
+  enthusiasts, extra witnesses, national media, new witnesses as old ones are refuted, stranger theories) is a
+  checklist for how a story spreads; 100+ new Kecksburg "witnesses" appeared after a 1990 TV show.
 - **Deception cues** work only on samples (~70 % at best), never on one testimony (Martins).
 
 ## Indexes that could become assessors
