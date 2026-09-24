@@ -118,6 +118,31 @@ Run these before scoring a testimony (Passot's GEIPAN remote check, Magin III.8,
   azimuths with the heading;
 - data-error sensitivity: perturb date, time and direction (±1 day, ±1 h, summer time, mirrored or 90° off) and
   see whether a candidate snaps into place (Borraz III.1);
+- date errors: when a low red or orange "ball" does not match the Moon or a planet on the stated date, recompute
+  for ±1 day, month and year and rank the dates where the body fits in azimuth, elevation and phase (van Utrecht
+  I.15: the Polish ambulance case was 1979-09-05, not 1980, and the "ball" vanished at the computed moonset,
+  04:13, behind a crest 870 m away). Compare a reported disappearance time with rise and set times against the
+  terrain horizon;
+- elevation overestimate, asymmetric (van Utrecht I.15, 196 identified astronomical cases): for estimates of
+  15-25°, 9 % of the true objects were below 4° and 38 % at 4-8°; for 25-40°, 42 % were at 10° or lower. Widen
+  the tolerance downward, not symmetrically; "at treetop level" beats a number given afterwards;
+- observer on a route: from the road geometry and timestamps, compute the candidate's bearing relative to the
+  vehicle's heading; "on the left", "dashed ahead", "stopped over the road" should follow the turns (parallax
+  pacing, van Utrecht I.15, Borraz III.1);
+- recurring lights: the same "brilliant light" at the same time and direction over several evenings or dawns is
+  a planet (Delaval III.5: Jupiter to the SE in the evening, Venus to the east at dawn, Varese 1985); an observer
+  within 10-20 km of a runway's extended centreline sees landing aircraft hover then leave fast (Malpensa);
+- sky conditions: compare "a dark, starry night" with the computed Moon phase and altitude and the terrain
+  horizon (Delaval III.5: 95 % Moon 10° up at Viggiù); daylight claims against the sun's altitude (Carlson I.3:
+  Echo Flight began at 08:45, two hours after sunrise, not "at night");
+- party balloons (Maillot & Abrassart I.6, the Amarante case): a low, silent, motionless object under light
+  wind, a clearing sky, rising temperature and falling pressure (an under-inflated Mylar balloon warming up),
+  resting on hidden supports: compare the claimed hovering height with nearby vegetation (hollyhocks ~1.7 m).
+  Sizes were overestimated ~1.6× in a small enclosed space; a vocabulary signature ("metallic", "filled",
+  "Plexiglas", blue-green, a flat rim seen edge-on) and a colour-chart pick can be scored against the stimulus;
+- camcorder artefacts: a point light filmed at full zoom or out of focus shows a disc with a central hole and
+  notches (iris and lens structure) (Delaval III.5); check every image's claimed date against its date stamp
+  (Maillot & Abrassart: the "gendarmerie, 22 Oct" photo is stamped 29 Oct);
 - lightning: for luminous balls in stormy weather, query lightning-location data within ~5 km and ±10 min; strong
   positive cloud-to-ground strokes correlate with ball lightning, negative strokes near power lines or solar panels
   with short-circuit arcs ("dazzling + metal contact + blue-white"); a curved track rules out a signal rocket, and
@@ -162,6 +187,18 @@ it drop "just behind the trees"); the Canary Islands Poseidon launches 1974-1979
   artefacts for any fixed blob across frames. Young's 7-stage crashed-saucer model (event, local media,
   enthusiasts, extra witnesses, national media, new witnesses as old ones are refuted, stranger theories) is a
   checklist for how a story spreads; 100+ new Kecksburg "witnesses" appeared after a 1990 TV show.
+- **Structured retelling diff** (Carlson I.3): store each dated version as fields (site, date, witness's role,
+  informant, count, time of day) and diff them: Salas moved Echo → November → Oscar, 16 → 24 March, 4 → 10
+  missiles. Flag a claimed date that migrates onto a date with publicised sightings, a claimed co-event with no
+  records when a comparable real one has many, and "X confirmed it" relayed by the claimant rather than obtained
+  from X. Documented assignment dates and procedures bound undated anecdotes.
+- **Data sufficiency and source independence** (Printy I.13): 423 of 1,305 cases (32 %) of the Weinstein pilot
+  catalogue have no date or time: score completeness (date, time, direction, elevation, angular size) and flag a
+  case below the minimum instead of counting it. Count independent sources by origin, not by citations (Stockton:
+  several sources, one news story). Pilot reports were explained 88 % of the time for one pilot and 76 % for
+  several (Hynek, Blue Book); several pilots made the same error on 1990-11-05. Printy's 55 explained pilot cases
+  (10 re-entries, 5 missile tests, ~15 fireballs, ~10 Venus/Jupiter/Altair, a moonrise, a subsun, balloons) are a
+  labelled test set.
 - **Residue as a function of time** (Ares de Blas VII.1): old cases get explained while new ones fill the pool;
   label a case "not yet explained" with the pending checks, track time-to-explanation, and compare the parameter
   distributions of unexplained and explained cases (the 1972 Madrid filters found the same profile). Flag account
