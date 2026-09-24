@@ -4415,13 +4415,18 @@ export class SightingEditorElement extends HTMLElement {
     "observation", "observer", "location", "decor", "temporal", "weather", "sound"
   ]
 
-  /** The tab strip's own order, which SUMMARY_GROUPS matches for its first seven and then stops:
-   * the phenomenon's own panel has no summary group (its chips are the shape's, under
-   * "observation"), and an assessment has no panel at all. Used to mark a tab holding an
+  /** The panel a group tab opens, read off the tab itself ("group-shape" → "shape") rather than
+   * kept in a list of its own. A hand-kept list fell behind when the Pictures tab came in before
+   * Phenomenon: every index from there on named the wrong panel, and the Phenomenon's unanswered
+   * questions were counted on Pictures, which asks for nothing. Used to mark a tab holding an
    * unanswered question — see QUESTION_FIELDS. */
-  private static readonly PANEL_ORDER: string[] = [
-    "observation", "observer", "location", "decor", "temporal", "weather", "sound", "shape"
-  ]
+  private panelOf(tab: HTMLButtonElement): string {
+    return (tab.getAttribute("aria-controls") ?? "").replace(/^group-/, "")
+  }
+
+  private panelIndex(panel: string): number {
+    return this.groupTabs.findIndex(tab => this.panelOf(tab) === panel)
+  }
 
   /**
    * Rebuilds the strip of what this recording states, under the render.
@@ -4572,7 +4577,7 @@ export class SightingEditorElement extends HTMLElement {
       ...entry,
       // The group this reading is about, so the chip leads somewhere: a figure a reader cannot act
       // on is a figure they stop reading. -1 for a reading about the recording as a whole.
-      panel: SightingEditorElement.PANEL_ORDER.indexOf(entry.about ?? "")
+      panel: this.panelIndex(entry.about ?? "")
     }))
     this.markUnansweredQuestions(reading.unanswered)
     this.renderParamSummary()
@@ -4663,8 +4668,8 @@ export class SightingEditorElement extends HTMLElement {
         markedPerPanel.set(question.panel, (markedPerPanel.get(question.panel) ?? 0) + 1)
       }
     }
-    for (const [index, tab] of this.groupTabs.entries()) {
-      const panel = SightingEditorElement.PANEL_ORDER[index]
+    for (const tab of this.groupTabs) {
+      const panel = this.panelOf(tab)
       const count = markedPerPanel.get(panel) ?? 0
       const required = panel === requiredPanel
       const badge = SightingEditorElement.badgeOn(tab)

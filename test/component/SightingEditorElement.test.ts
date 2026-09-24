@@ -6184,6 +6184,20 @@ describe("SightingEditorElement assessment", () => {
     }
   })
 
+  it("counts a panel's marks on that panel's own tab, whatever the tab order", async () => {
+    // The tabs were once matched to panels by a hand-kept list that the Pictures tab never made it
+    // into: from there on every index was one off, and an empty recording's unanswered appearance
+    // was counted on Pictures, which asks for nothing.
+    const element = mountEmpty()
+    const shadow = element.shadowRoot!
+    await waitFor(() => shadow.querySelector("#group-shape .wanted") !== null, 2000)
+
+    const badgeOf = (panel: string) => shadow.querySelector<HTMLElement>(`.group-tab[aria-controls="group-${panel}"] .tab-badge`)
+    expect(badgeOf("reference")?.hidden ?? true).toBe(true)
+    expect(badgeOf("shape")!.hidden).toBe(false)
+    expect(Number(badgeOf("shape")!.textContent)).toBe(shadow.querySelectorAll("#group-shape .wanted").length)
+  })
+
   it("puts no badge on a panel whose gaps are answered by drawing or already defaulted", async () => {
     // Phenomenon's apparent size and place in the sky are drawn; Weather's cloud cover and Sound's
     // kind already hold accepted values. Real gaps, counted in the coverage figure, with nothing in
