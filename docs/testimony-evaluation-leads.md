@@ -199,6 +199,30 @@ it drop "just behind the trees"); the Canary Islands Poseidon launches 1974-1979
   several (Hynek, Blue Book); several pilots made the same error on 1990-11-05. Printy's 55 explained pilot cases
   (10 re-entries, 5 missile tests, ~15 fireballs, ~10 Venus/Jupiter/Altair, a moonrise, a subsun, balloons) are a
   labelled test set.
+- **Context risk flags** (Introduction, "alien encounter disorder"): single or dominant witness, isolation,
+  outdoors or driving, night (~85 %), recalled without hypnosis, UFO press or TV items about the same kind of
+  event in the preceding weeks (countable from RR0's time pages), heavy reading of UFO literature, closeness to
+  active ufologists. Close-range landings with one witness and no trace sit between misinterpretation and
+  confabulation.
+- **Records against claims** (Nickell I.9, Posner I.12): check physical and medical claims against
+  contemporaneous records (an eye injury "lasting three days" contradicted by a hospital exam the day after;
+  radiation symptoms against dose-response thresholds: GI symptoms for days with normal blood counts is not a
+  survivable exposure). Log null physical tests (no residual radioactivity, no burnt road). Record which witness
+  first reported each feature, and search nearby reports for similar names before merging them (the
+  Culverson/Culberson mix-up).
+- **Co-witness who "remembered" later** (Nickell I.9, Ruesga I.14): a second witness who was unconscious, or who
+  appears only in later versions after publicity, is not independent, especially when dependent on the main
+  witness; estimate how many people should have seen the event (a busy highway) and treat silence as evidence.
+- **Reading before each version** (Ruesga I.14, Maugé I.7): date the witness's reading and media exposure against
+  each new version; features first appearing after a matching publication suggest contamination. Compare
+  editions of a witness's own books; a claim contradicting settled science sinks the account.
+- **Incentives** (Palmer I.11, Myers I.8): what happened just before (a closed business) and what followed (a
+  movement, a book deal, a candidacy); statements of relatives kept apart from corroborating witnesses.
+- **More candidates**: searchlights on low cloud (moving blobs converging toward a ground point, near a
+  commercial strip, with an overcast sky) and a tethered balloon or kite (looping light trails in long exposures)
+  (Myers I.8, Newman); proximity to military air bases and test ranges raises the aircraft candidate at night
+  (Gulf Breeze between Pensacola NAS and Eglin AFB); a witness reporting routine sightings is first tested against
+  aircraft lights on flight paths and bright planets (Huston I.4, Betty Hill).
 - **Residue as a function of time** (Ares de Blas VII.1): old cases get explained while new ones fill the pool;
   label a case "not yet explained" with the pending checks, track time-to-explanation, and compare the parameter
   distributions of unexplained and explained cases (the 1972 Madrid filters found the same profile). Flag account
