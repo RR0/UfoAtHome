@@ -24,7 +24,8 @@ export class HtmlPageTree {
     }
     const pages = [HtmlPage.of(slug, files, version, placement)]
     const subDirs = (await readdir(dir, { withFileTypes: true }))
-      .filter(entry => entry.isDirectory())
+      // A dot-directory is a tool's (an editor's, an agent's), never a page.
+      .filter(entry => entry.isDirectory() && !entry.name.startsWith("."))
       .map(entry => entry.name)
       .sort()
     for (const sub of subDirs) {
