@@ -223,6 +223,27 @@ it drop "just behind the trees"); the Canary Islands Poseidon launches 1974-1979
   (Myers I.8, Newman); proximity to military air bases and test ranges raises the aircraft candidate at night
   (Gulf Breeze between Pensacola NAS and Eglin AFB); a witness reporting routine sightings is first tested against
   aircraft lights on flight paths and bright planets (Huston I.4, Betty Hill).
+- **Sort reports before evaluating them** (Scribner & Wheeler II.11, Noll III.10, Conesa-Sevilla II.2): forensic
+  sighting reports, checkable against sky and weather data, apart from contact or abduction narratives; a
+  "private" experience (bedroom, alone, near sleep) apart from a "public" one; most abduction reports include no
+  sighting at all. Fix the evaluation criteria before a report is made (versioned rules). Hynek's minimum was two
+  independent observers.
+- **The Moon nobody mentioned** (Krippner II.6): for a stationary, Moon-sized light in a report that does not
+  mention the Moon, compute the Moon (Ouro Preto 1991: 62 % lit, 24-43° up to the north-west, hidden by haze,
+  against an object reported 45° up) and re-test the witnesses' own eliminations ("several lights, so not a
+  planet"; "it twinkled, so not the Moon"). Check movable local festivals (Carnival, Brazil's June lantern and
+  balloon festivals, light or searchlight shows: Lansley & Rabeyron II.7); a "very bright rectangle that suddenly
+  disappears" is a satellite flare or a satellite entering Earth's shadow. Were witnesses questioned separately,
+  and was there UFO talk just before?
+- **Media calendar** (Forrest II.4, Watson I.16): compare the date of a recall with broadcasts (The Outer Limits'
+  "The Bellero Shield" aired twelve days before Barney Hill's hypnosis session) and films; features appearing after
+  a broadcast suggest contamination. Traces tested only by the witness (Betty Hill's compass) weigh less than
+  third-party checks; radar echoes elsewhere or at another time count only within set limits.
+- **Medical and sleep history** (Forrest II.4, Dodier II.3, Perrotta II.10): a match with the medical-exam script
+  (restraint, bright overhead light, probing, figures with only the eyes visible) and a history of surgery under
+  anaesthesia; the local time against the witness's usual sleep window; a count of recurrent episodes (a chronic
+  pattern weighs less than an acute one); the reporting channel (a GEIPAN report and a counselling request bring
+  different profiles).
 - **Residue as a function of time** (Ares de Blas VII.1): old cases get explained while new ones fill the pool;
   label a case "not yet explained" with the pending checks, track time-to-explanation, and compare the parameter
   distributions of unexplained and explained cases (the 1972 Madrid filters found the same profile). Flag account
