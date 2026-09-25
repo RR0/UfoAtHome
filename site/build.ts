@@ -15,7 +15,7 @@ import { DocsSourcesPage } from "./content/DocsSourcesPage.js"
 import { DocsComponentsPage } from "./content/DocsComponentsPage.js"
 import { COMPONENT_DOCS, DocsComponentPage } from "./content/DocsComponentPage.js"
 import { FaqPage } from "./content/FaqPage.js"
-import { RoadmapPage } from "./content/RoadmapPage.js"
+import { HtmlPageTree } from "./HtmlPageTree.js"
 import { ContextPage } from "./content/ContextPage.js"
 
 /**
@@ -76,8 +76,8 @@ class SiteBuilder {
       for (const [said, printed] of html.matchAll(claim)) {
         if (printed !== version) {
           throw new Error(`${page} prints "${said.trim()}" where this build is ${version}. `
-            + `A version is never typed into a page: take it from package.json — the roadmap page `
-            + `takes it through its constructor, and the layout puts it in the footer.`)
+            + `A version is never typed into a page: take it from package.json — an HTML page `
+            + `writes <!--#echo var="version" -->, and the layout puts it in the footer.`)
         }
       }
     }
@@ -93,7 +93,9 @@ class SiteBuilder {
       new DocsCreatePage(), new DocsFormatPage(example.trim()), new DocsSharePage(), new DocsComponentsPage(), new DocsSourcesPage(),
       // One page per component, under that hub — see DocsComponentPage.
       ...COMPONENT_DOCS.map(doc => new DocsComponentPage(doc)),
-      new FaqPage(), new RoadmapPage(version),
+      new FaqPage(),
+      // Written as HTML, with its sub-pages as sub-directories — see HtmlPage and HtmlPageTree.
+      ...await HtmlPageTree.read(join(this.root, "site", "pages", "roadmap"), "roadmap", version, { asideFromNav: true }),
       // The long form of the home page's "Contextualise" cards.
       new ContextPage()
     ]

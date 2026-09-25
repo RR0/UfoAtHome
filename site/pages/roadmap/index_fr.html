@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>Futures évolutions</title>
+  <meta name="description" content="Ce qu'UFO@home reproduit déjà, ce qui vient ensuite, et ce que chaque élément restant attend — un jeu de données, un modèle physique, ou une décision.">
+  <meta name="nav-label" content="Évolutions">
+</head>
+<body>
+<section class="band hero">
+  <div class="wrap">
+    <p class="eyebrow">Évolutions · version <!--#echo var="version" --></p>
+    <h1>Futures évolutions.</h1>
+    <p class="lede">Une règle décide de l'ordre : <strong>reproduire tout ce qui a pu être visible
+      dans ce ciel à ce moment-là</strong> — par la donnée là où un relevé existe, par le calcul là
+      où il n'y en a pas, et jamais par l'invention. Ce qui suit est un plan, pas une promesse ;
+      l'ordre bouge quand un cas réel le fait bouger.</p>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap prose-wide">
+    <p>Ce que l'outil reconstitue déjà, et comment chaque partie en est calculée et vérifiée, est sur
+      <a href="/context/">la page de contexte</a> ; chaque source derrière est listée dans
+      <a href="/docs/sources/">sources et choix</a>.</p>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap prose-wide">
+    <h2>La suite</h2>
+
+    <div class="timeline-step is-next">
+      <h3>Rentrées atmosphériques <span class="status status-next">prochain</span></h3>
+      <p>Une méprise classique, et l'une des rares qui laisse un compte rendu que tout le monde
+        reconnaît : un train lent de fragments, puis « ça s'est éteint d'un coup ». Depuis 2000, la
+        base CORDS de l'Aerospace Corporation date chaque rentrée et signale celles qui ont été
+        vues ; son export CSV sera archivé à côté des éléments orbitaux, puisque le site ne se
+        laisse pas lire par un navigateur. Avant 2000, la rentrée reste un objet posé à la main.
+        Dans les deux cas, elle s'éteint au moment réel où elle entre dans l'ombre de la Terre,
+        ce qui est précisément ce qui fait coller le récit.</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>Anomalies de propagation radar <span class="status status-later">en attente de données</span></h3>
+      <p>Inversions de température et conduits — l'explication derrière toute une famille de cas
+        radar/visuels. Le critère est un gradient de réfractivité inférieur à −157 unités par
+        kilomètre, ce qui demande le profil de température et d'humidité avec l'altitude. Vérifié et
+        écarté : Open-Meteo ne sert pas les niveaux de pression en archive. La vraie source est
+        IGRA, l'archive des radiosondages, avec les sondages de l'université du Wyoming et les
+        données publiques de Météo-France comme autres portes d'entrée, et c'est ce que cet élément
+        attend.</p>
+    </div>
+
+
+    <div class="timeline-step">
+      <h3>Ballons-sondes <span class="status status-later">envisagé</span></h3>
+      <p>Un réseau de lâchers documenté depuis les années 1940 — et l'explication de Roswell.
+        Datable, situable, et une forme à laquelle personne ne s'attend.</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>Bolides enregistrés <span class="status status-later">planifié</span></h3>
+      <p>Les météores du ciel sont aujourd'hui calculés : radiants des essaims et taux sporadiques.
+        Un bolide qu'un réseau de caméras a réellement enregistré (FRIPON en France depuis 2016
+        environ, le Global Meteor Network, les signalements de l'IMO et de l'AMS) serait
+        l'événement réel, avec sa trajectoire, à apparier à un jour et une demi-heure près de
+        l'heure donnée.</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>Trafic aérien <span class="status status-later">en attente de données</span></h3>
+      <p>L'archive de Flightradar24 est payante et récente, et les cas plus anciens n'ont aucune
+        trace. Il leur reste les routes aériennes et procédures d'approche publiées (l'eAIP
+        français), le calendrier des zones militaires temporaires, et les aérodromes proches de
+        l'observateur. Pour un cas récent, une trace KML exportée d'un suivi de vols suffit à placer
+        l'avion.</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>Traînées de condensation <span class="status status-later">planifié</span></h3>
+      <p>Qu'un avion ait laissé une traînée ce jour-là se déduit de la température et de l'humidité
+        à son altitude (le diagramme d'Appleman), que fournit déjà la réanalyse en altitude
+        utilisée pour les nuages.</p>
+    </div>
+
+    <h2>Du côté de l'objet</h2>
+
+    <div class="timeline-step">
+      <h3>Une trajectoire tirée des directions <span class="status status-later">planifié</span></h3>
+      <p>Les directions sont ce que les observateurs donnent le mieux. Y ajuster un grand cercle,
+        pour un observateur ou plusieurs, donne le plan de la trajectoire et sa dispersion : le
+        COBEPS l'a fait au stéréonet pour le cas de Braine-le-Comte (2015) et trouvé une
+        trajectoire moyenne de N 7,7°. Le même ajustement s'applique à une trajectoire tracée sur
+        une photo recalée, qui sort alors en direction absolue, à comparer avec un météore, un
+        satellite ou un avion. Sur une photo de nuit, les étoiles elles-mêmes peuvent faire le
+        recalage (astrométrie).</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>Textures sur les formes <span class="status status-later">planifié</span></h3>
+      <p>Mêlées à la couleur plutôt que la remplaçant, keyframées et sérialisées comme tout autre
+        champ d'apparence. Les observateurs décrivent des surfaces — nervurée, mate, comme un miroir — et
+        le <a href="/docs/format/">format</a> ne sait pas encore le retenir.</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>Entités observées <span class="status status-later">conception ouverte</span></h3>
+      <p>Trois des quatre dossiers livrés en comportent une. La question ouverte est de savoir si une
+        entité est une forme 2D (un compte rendu, comme l'objet) ou un objet de décor 3D. Le modèle dit
+        « ce qui a atteint l'œil de l'observateur », ce qui plaide pour la forme.</p>
+    </div>
+
+    <h2>Du côté de l'environnement</h2>
+
+    <div class="timeline-step">
+      <h3>Observer depuis un avion <span class="status status-later">planifié</span></h3>
+      <p>Comme c'est déjà possible depuis un bâtiment ou une voiture. La moitié des comptes rendus
+        aéronautiques sont donnés depuis un cockpit, et un montant de hublot qui masque quinze degrés
+        de ciel fait partie du récit.</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>Modèles 3D téléchargés à la demande <span class="status status-later">planifié</span></h3>
+      <p>De vrais tableaux de bord, de vrais montants de pare-brise — pour voir exactement quelle
+        largeur angulaire un montant masquait. Et le cas inverse, qui compte davantage : de vrais
+        avions vus du sol et pris pour autre chose, sous l'angle et avec les reflets qu'ils donnent
+        réellement.</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>Une vidéo comme scène <span class="status status-later">planifié</span></h3>
+      <p>La photo des lieux est <a href="/context/#pictures">déjà là</a>. Une vidéo, c'est le même
+        recalage avec une image qui bouge : une texture verrouillée sur la timeline, les propres
+        images de l'observateur avec la reconstitution par-dessus, image par image. Et un horizon tracé sur
+        une photo qui tient cacherait ce qui est passé dessous — des mètres qui reviendraient d'une
+        photo comme ils reviennent d'un croisement de décor.</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>Reflets des lumières intérieures sur les vitrages <span class="status status-later">planifié</span></h3>
+      <p>Une lampe de pièce, une lumière de tableau de bord, sur une vitre ou un pare-brise. Le
+        dernier morceau manquant d'« être à l'intérieur » — et, à lui seul, l'explication d'un bon
+        nombre de récits.</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>Déclinaison magnétique <span class="status status-later">planifié</span></h3>
+      <p>Un cap pris à la boussole est magnétique, et l'écart avec le nord vrai dépend du lieu et de
+        l'année : plusieurs degrés en France dans les années 1950. L'enregistrement devrait dire à
+        quel nord se rapporte un cap, et l'outil le corriger d'après le modèle géomagnétique.</p>
+    </div>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap prose-wide">
+    <h2>Évaluer le compte rendu</h2>
+    <p>Reconstituer le ciel, c'est la moitié du travail ; l'autre moitié est de savoir quel crédit
+      accorder à chaque partie d'un compte rendu. <a href="https://rr0.org/time/2/0/2/3/05/Ballester-Olmos-Heiden_TheReliabilityOfUfoWitnessTestimony_UPIAR/index_fr.html"><cite lang="en">The Reliability of UFO
+      Witness Testimony</cite></a> (V.J. Ballester-Olmos et R.W. Heiden dir., 2023) le mesure, et ses chiffres
+      ont vocation à devenir des vérifications dans l'outil. La liste détaillée, chapitre par
+      chapitre, est
+      <a href="https://github.com/RR0/UfoAtHome/blob/master/docs/testimony-evaluation-leads.md">dans
+      le dépôt</a> (en anglais).</p>
+
+    <div class="timeline-step">
+      <h3>Chaque énoncé avec son erreur connue <span class="status status-later">planifié</span></h3>
+      <p>Le nombre, la disposition, le cap et l'heure sont la partie fiable ; les distances,
+        altitudes et vitesses ne le sont pas. Une taille angulaire énoncée est typiquement 3 à 30
+        fois trop grande, et demander à l'observateur de montrer la pleine Lune de la même façon
+        mesure son propre facteur. L'heure est juste à quelques minutes près pour neuf observateurs
+        sur dix, une durée peut être fausse d'un facteur trois, une hauteur est surestimée (plus
+        souvent que sous-estimée), et une lumière basse est placée à l'horizon quelle que soit sa
+        distance.</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>Les vérifications à distance, avant tout jugement <span class="status status-later">planifié</span></h3>
+      <p>La Lune, les planètes et les étoiles brillantes dans la direction donnée, les bolides et
+        rentrées enregistrés, les lancements, les lanternes qui dérivent avec le vent mesuré, les
+        fusées éclairantes, la foudre : autant de vérifications que la date et le lieu permettent
+        déjà. Et quand rien ne colle, les mêmes vérifications recommencent avec la date décalée
+        d'un jour, d'un mois ou d'un an, car une date fausse est une erreur fréquente.</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>Versions et influences <span class="status status-later">conception ouverte</span></h3>
+      <p>Chaque version datée d'un compte rendu, comparée champ par champ, la plus ancienne pesant
+        le plus ; ce que l'observateur avait lu ou vu avant chacune (presse, télévision, fiction) ;
+        les retours reçus ; si un détail est apparu d'abord sous hypnose ; si les observateurs ont
+        été interrogés séparément. N comptes rendus ne font N confirmations que s'ils sont
+        indépendants.</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>Les indices publiés <span class="status status-later">envisagé</span></h3>
+      <p>Une partie de l'indice SVP de Vallee (à quel point il faut tordre les données pour qu'une
+        explication colle) et de l'indice de subjectivité de Ballester-Olmos et Guasp se calcule à
+        partir d'un enregistrement ; le reste relève de champs d'enquêteur, avec un « inconnu »
+        explicite. Les cas expliqués servent de groupe témoin : un trait n'est anormal que s'il
+        diffère du même trait dans les cas expliqués.</p>
+    </div>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap prose-wide">
+    <h2>Comment l'ordre est décidé</h2>
+    <p>Par la méprise que l'élément permet réellement de tester, et par l'existence de la donnée ou
+      de la physique correspondante. Ce qui n'a aucun relevé derrière soi ne s'invente pas : ou bien
+      cela se calcule depuis les principes, ou bien cela reste un objet posé à la main que
+      l'interface reconnaît comme tel.</p>
+    <p>Si vous avez un cas qui a besoin de quelque chose sur cette liste — ou de quelque chose qui
+      n'y est pas — <a href="https://github.com/RR0/UfoAtHome/issues/new">dites-le</a>. Une
+      observation réelle, datée, située et sourcée fait remonter un élément de cette page plus vite
+      que tout le reste.</p>
+  </div>
+</section>
+</body>
+</html>

@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Future developments</title>
+  <meta name="description" content="What UFO@home already reproduces, what is being built next, and what each remaining item is waiting on — a dataset, a physical model, or a decision.">
+  <meta name="nav-label" content="Roadmap">
+</head>
+<body>
+<section class="band hero">
+  <div class="wrap">
+    <p class="eyebrow">Roadmap · version <!--#echo var="version" --></p>
+    <h1>Future developments.</h1>
+    <p class="lede">One rule decides the order: <strong>reproduce everything that could have been
+      visible in that sky at that moment</strong> — by data where a record exists, by calculation
+      where none does, and never by invention. What follows is a plan, not a promise; the order
+      moves when a real case makes it move.</p>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap prose-wide">
+    <p>What the tool already reconstructs, and how each part of it is computed and checked, is on
+      <a href="/context/">the context page</a>; every source behind it is listed under
+      <a href="/docs/sources/">sources and choices</a>.</p>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap prose-wide">
+    <h2>Next</h2>
+
+    <div class="timeline-step is-next">
+      <h3>Atmospheric re-entries <span class="status status-next">next</span></h3>
+      <p>A staple misidentification, and one of the few that leaves an account everybody
+        recognises: a slow train of fragments, then “it went out all at once”. Since 2000 the
+        Aerospace Corporation's CORDS database dates each re-entry and flags the ones that were
+        seen; its CSV export will be archived next to the orbital elements, since the site does not
+        let a browser read it. Before 2000 the re-entry stays an object placed by hand. Either way
+        it goes out at the real moment it enters the Earth's shadow, which is the part that makes
+        the account fit.</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>Radar propagation anomalies <span class="status status-later">blocked on data</span></h3>
+      <p>Temperature inversions and ducting — the explanation behind a whole family of radar/visual
+        cases. The criterion is a refractivity gradient below −157 units per kilometre, which needs
+        the temperature and humidity profile with height. Checked and ruled out: Open-Meteo does not
+        serve pressure levels in archive mode. The real source is IGRA, the radiosonde archive,
+        with the University of Wyoming soundings and Météo-France's public data as other entry
+        points, and that is what this is waiting on.</p>
+    </div>
+
+
+    <div class="timeline-step">
+      <h3>Weather balloons <span class="status status-later">considered</span></h3>
+      <p>A documented network of launches from the 1940s on — and the Roswell explanation. Datable,
+        placeable, and a shape nobody expects.</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>Recorded fireballs <span class="status status-later">planned</span></h3>
+      <p>Meteors in the sky today are computed: shower radiants and sporadic rates. A fireball that
+        a camera network actually recorded (FRIPON in France from about 2016, the Global Meteor
+        Network, the IMO and AMS reports) would be the real event, with its track, to be matched
+        within a day and half an hour of the stated time.</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>Air traffic <span class="status status-later">blocked on data</span></h3>
+      <p>Flightradar24's archive is paid and recent, and older cases have no track at all. What is
+        left for them: published airways and approach procedures (the French eAIP), the calendar of
+        temporary military areas, and the airfields near the observer. For recent cases, a KML
+        track exported from a flight tracker is enough to place the aircraft.</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>Contrails <span class="status status-later">planned</span></h3>
+      <p>Whether an aircraft that day left a trail follows from the temperature and humidity at its
+        altitude (the Appleman chart), which the upper-air reanalysis already used for the clouds
+        provides.</p>
+    </div>
+
+    <h2>On the object's side</h2>
+
+    <div class="timeline-step">
+      <h3>A trajectory from directions <span class="status status-later">planned</span></h3>
+      <p>Directions are what observers give best. Fitting a great circle through them, for one
+        observer or several, gives the plane of the track and its spread: the COBEPS did it with a
+        stereonet for the Braine-le-Comte case (2015) and found a mean track of N 7.7°. The same fit
+        applies to a track drawn on a registered photograph, which then comes out as an absolute
+        direction to compare with a meteor, a satellite or an aircraft. On a night photograph, the
+        stars themselves can do the registration (astrometry).</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>Textures on shapes <span class="status status-later">planned</span></h3>
+      <p>Blended with the colour rather than replacing it, keyframed and serialized like every other
+        appearance field. Observers describe surfaces — ribbed, matte, mirror-like — and today the
+        <a href="/docs/format/">format</a> cannot hold that.</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>Observed entities <span class="status status-later">design open</span></h3>
+      <p>Three of the four shipped case files involve one. The open question is whether an entity is
+        a 2D shape (account, like the object) or a 3D decor object. The model says “what reached
+        the observer's eye”, which argues for the shape.</p>
+    </div>
+
+    <h2>On the environment's side</h2>
+
+    <div class="timeline-step">
+      <h3>Observing from an aircraft <span class="status status-later">planned</span></h3>
+      <p>As already supported from a building or a car. Half of aviation account is given from a
+        cockpit, and a window frame that hides fifteen degrees of sky is part of the account.</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>Downloaded 3D models, on demand <span class="status status-later">planned</span></h3>
+      <p>Real dashboards, real windscreen pillars — to see exactly what angular width a pillar
+        masked. And the inverse case, which matters more: real aircraft seen from the ground and
+        taken for something else, at the angle and with the reflections they actually give.</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>A video as the scene <span class="status status-later">planned</span></h3>
+      <p>A photograph of the place is <a href="/context/#pictures">already there</a>. A video is the
+        same registration with a picture that moves: a texture locked to the timeline, the observer's
+        own footage with the reconstruction over it, frame by frame. And a horizon traced on a picture
+        that fits would hide what passed below it — metres coming back from a photograph the way they
+        come back from a decor crossing.</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>Reflections of interior lights on glazing <span class="status status-later">planned</span></h3>
+      <p>A room lamp, a dashboard light, on a window or a windscreen. The last missing piece of
+        “being inside” — and, on its own, the explanation of a good number of accounts.</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>Magnetic declination <span class="status status-later">planned</span></h3>
+      <p>A bearing taken with a compass is magnetic, and the difference with true north depends on
+        the place and the year: several degrees in France in the 1950s. The recording should say
+        which north a bearing refers to, and the tool correct it from the geomagnetic model.</p>
+    </div>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap prose-wide">
+    <h2>Evaluating the account</h2>
+    <p>Reconstructing the sky is half the work; the other half is knowing how much each part of an
+      account can be trusted. <a href="https://rr0.org/time/2/0/2/3/05/Ballester-Olmos-Heiden_TheReliabilityOfUfoWitnessTestimony_UPIAR/"><cite>The Reliability of UFO Witness Testimony</cite></a>
+      (V.J. Ballester-Olmos and R.W. Heiden eds., 2023) measures it, and its figures are meant to
+      become checks in the tool. The detailed list, chapter by chapter, is
+      <a href="https://github.com/RR0/UfoAtHome/blob/master/docs/testimony-evaluation-leads.md">in
+      the repository</a>.</p>
+
+    <div class="timeline-step">
+      <h3>Each statement with its known error <span class="status status-later">planned</span></h3>
+      <p>Counts, layout, heading and time are the reliable part; distances, altitudes and speeds are
+        not. A stated angular size is typically 3 to 30 times too large, and asking the observer to
+        show the full Moon the same way measures their own factor. The time is right within a few
+        minutes for nine observers out of ten, a duration can be off by a factor of three, an
+        elevation is overestimated (more often than underestimated), and a low light is placed at
+        the horizon whatever its distance.</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>Remote checks before any judgement <span class="status status-later">planned</span></h3>
+      <p>The Moon, the planets and bright stars along the bearing, recorded fireballs and
+        re-entries, launches, lanterns drifting with the measured wind, flares, lightning: each is a
+        check the date and place already allow. And when nothing fits, the same checks run again
+        with the date shifted by a day, a month or a year, since a wrong date is a common error.</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>Versions and influences <span class="status status-later">design open</span></h3>
+      <p>Every dated version of an account, compared field by field, with the earliest weighing
+        most; what the observer had read or watched before each one (press, television, fiction);
+        feedback received; whether a detail first appeared under hypnosis; whether the observers
+        were questioned separately. N accounts are N confirmations only if they are independent.</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>Published indexes <span class="status status-later">considered</span></h3>
+      <p>Part of Vallee's SVP index (how far the data must be bent to fit an explanation) and of the
+        Ballester-Olmos and Guasp subjectivity index can be computed from a recording; the rest are
+        investigator fields, with an explicit “unknown”. Explained cases serve as the control group:
+        a feature is anomalous only if it differs from the same feature in explained cases.</p>
+    </div>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap prose-wide">
+    <h2>How the order gets decided</h2>
+    <p>By which misperception the item lets someone actually test, and by whether the data or the
+      physics for it exists. Something with no record behind it does not get invented — it either
+      gets computed from first principles, or it stays a hand-placed object that the interface
+      admits is hand-placed.</p>
+    <p>If you have a case that needs something on this list — or something that is not on it —
+      <a href="https://github.com/RR0/UfoAtHome/issues/new">say so</a>. A real dated, placed, sourced
+      sighting moves an item up this page faster than anything else can.</p>
+  </div>
+</section>
+</body>
+</html>
