@@ -244,6 +244,24 @@ it drop "just behind the trees"); the Canary Islands Poseidon launches 1974-1979
   anaesthesia; the local time against the witness's usual sleep window; a count of recurrent episodes (a chronic
   pattern weighs less than an acute one); the reporting channel (a GEIPAN report and a counselling request bring
   different profiles).
+- **Fiction that came before** (Robé IV.6, Suenaga III.13, Reis V.3): look up the comics, films and TV broadcast
+  in the country in the months before a sighting and score shared descriptors against a catalogue of fictional
+  beings and craft (the Amarante case came 43 days after the FR3 TV film La soucoupe de solitude; Chabeuil five
+  months after a Capucine comic; Close Encounters in Argentina in 1978 for Banchs). Markers: miniature craft with
+  tiny visible pilots, paralysing rays or tubes, "sheet metal and bolts" saucers, era-typical technology (windows
+  in the late 1940s, diving suits in the 1950s, screens later).
+- **Omission, replacement, addition** (Suenaga III.13, Banchs' experiment): where the stimulus is known, score what
+  the witness left out, replaced (orange reported red) and added (towers, engine noise); this calibrates drift.
+- **Shared vocabulary and hearsay** (White III.14): compare a new account's words with a corpus of published
+  abduction narratives (strong overlap suggests a borrowed script); tag each statement first-hand or second-hand.
+- **Only one person perceived it** (Berché IV.1): compare each claimed phenomenon (tremor, noise, light) with what
+  the other people present report; check that a group led by one person is not a single source.
+- **Group expecting a contact** (Cabria V.1): a skywatch or appointment set in advance primes witnesses; an account
+  existing only as a narrative agreed later by the group weighs less than first-hour individual records; for the
+  Tenerife 1992 "spaceship", test thunderstorms and launches that night.
+- **Rumour shape** (Dumerchat V.2, big cats): the fixed sequence (sighting in an unnatural place, "escaped animal",
+  a name, tracks, blamed kills, official hunt, media, silence, cover-up belief) and belief falling with distance
+  from the first report; identifications made after being shown a reference photo or article are contaminated.
 - **Residue as a function of time** (Ares de Blas VII.1): old cases get explained while new ones fill the pool;
   label a case "not yet explained" with the pending checks, track time-to-explanation, and compare the parameter
   distributions of unexplained and explained cases (the 1972 Madrid filters found the same profile). Flag account
