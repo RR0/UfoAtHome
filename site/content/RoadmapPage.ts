@@ -379,7 +379,7 @@ export class RoadmapPage implements SitePage {
   <div class="wrap prose-wide">
     <h2>Évaluer le compte rendu</h2>
     <p>Reconstituer le ciel, c'est la moitié du travail ; l'autre moitié est de savoir quel crédit
-      accorder à chaque partie d'un compte rendu. <a href="https://rr0.org/time/2/0/2/3/05/Ballester-Olmos-Heiden_TheReliabilityOfUfoWitnessTestimony_UPIAR/"><cite lang="en">The Reliability of UFO
+      accorder à chaque partie d'un compte rendu. <a href="https://rr0.org/time/2/0/2/3/05/Ballester-Olmos-Heiden_TheReliabilityOfUfoWitnessTestimony_UPIAR/index_fr.html"><cite lang="en">The Reliability of UFO
       Witness Testimony</cite></a> (V.J. Ballester-Olmos et R.W. Heiden dir., 2023) le mesure, et ses chiffres
       ont vocation à devenir des vérifications dans l'outil. La liste détaillée, chapitre par
       chapitre, est
