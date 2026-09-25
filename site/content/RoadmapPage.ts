@@ -170,7 +170,7 @@ export class RoadmapPage implements SitePage {
   <div class="wrap prose-wide">
     <h2>Evaluating the account</h2>
     <p>Reconstructing the sky is half the work; the other half is knowing how much each part of an
-      account can be trusted. <cite>The Reliability of UFO Witness Testimony</cite>
+      account can be trusted. <a href="https://rr0.org/time/2/0/2/3/05/Ballester-Olmos-Heiden_TheReliabilityOfUfoWitnessTestimony_UPIAR/"><cite>The Reliability of UFO Witness Testimony</cite></a>
       (V.J. Ballester-Olmos and R.W. Heiden eds., 2023) measures it, and its figures are meant to
       become checks in the tool. The detailed list, chapter by chapter, is
       <a href="https://github.com/RR0/UfoAtHome/blob/master/docs/testimony-evaluation-leads.md">in
@@ -379,8 +379,8 @@ export class RoadmapPage implements SitePage {
   <div class="wrap prose-wide">
     <h2>Évaluer le compte rendu</h2>
     <p>Reconstituer le ciel, c'est la moitié du travail ; l'autre moitié est de savoir quel crédit
-      accorder à chaque partie d'un compte rendu. <cite lang="en">The Reliability of UFO Witness
-      Testimony</cite> (V.J. Ballester-Olmos et R.W. Heiden dir., 2023) le mesure, et ses chiffres
+      accorder à chaque partie d'un compte rendu. <a href="https://rr0.org/time/2/0/2/3/05/Ballester-Olmos-Heiden_TheReliabilityOfUfoWitnessTestimony_UPIAR/"><cite lang="en">The Reliability of UFO
+      Witness Testimony</cite></a> (V.J. Ballester-Olmos et R.W. Heiden dir., 2023) le mesure, et ses chiffres
       ont vocation à devenir des vérifications dans l'outil. La liste détaillée, chapitre par
       chapitre, est
       <a href="https://github.com/RR0/UfoAtHome/blob/master/docs/testimony-evaluation-leads.md">dans
