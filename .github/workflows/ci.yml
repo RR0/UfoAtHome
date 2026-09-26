@@ -33,6 +33,9 @@ jobs:
       - run: npm ci
       # The editor's jsdom suite runs single tests of several seconds on these runners (macOS timed
       # out at vitest's default 5 s) where the development machine takes a fraction of that.
-      - run: npm test -- --testTimeout=30000
+      # On Windows, a worker per core left the main process too busy to answer the workers' progress
+      # reports: every test passed and the run still failed on vitest's "Timeout calling
+      # onTaskUpdate" (Node 22, 2026-09-25 and 26). Two workers leave it room.
+      - run: npm test -- --testTimeout=30000 ${{ runner.os == 'Windows' && '--maxWorkers=2' || '' }}
       - run: npm run build
       - run: npm run build:site
