@@ -392,6 +392,55 @@ jumps between places, a forgotten ending...) are untested. Sort "private" experi
 near sleep) from "public" sightings checkable against sky and weather `[Scribner 2023]`,
 `[Noll 2023]`; exclude entity-only and voice-only close encounters `[Hendry 1979]`.
 
+## Hearing
+
+### Apparent silence is usually masking, distance or delay
+**Status: argued** (the acoustics is textbook; its application to accounts rests on cases).
+A familiar ambient noise masks any sound some 10 dB below it (a car with the fan and the radio on is
+about 75 dB inside; closed windows remove 15 to over 30 dB); the level drops about 6 dB per doubling
+of distance in free field, 1 to 10 dB in practice; the sound of an aircraft at 5,000 m arrives 15-22 s
+after its image, by which time it has flown more than 6 km; the high-pitched sound sent ahead of an
+approaching aircraft (Doppler) is absorbed fastest (50 dB/km at 4 kHz, 20 °C, 30 % RH); a supersonic
+aircraft is audible only inside its Mach cone; wind, fog, snow, terrain shadows and reflections change
+level, pitch and apparent direction `[Fedoce 2014]`. A worked case "inspired by a GEIPAN
+investigation": a driver passing under a wide-body aircraft 250 m up, 8 km after take-off, predicted
+78 dB outside against the ~90 dB needed to be heard in the car `[Fedoce 2014]`. Consistent with 91 %
+of low advertising planes not heard `[Hendry 1979]`.
+
+**Use**: an interpreted body (aircraft, helicopter, balloon) carries a reference source level and
+spectrum; propagate it to the observer (spherical spreading, ISO 9613-1 absorption from the ERA5
+temperature and humidity, delay at the local speed of sound, Doppler, Mach cone, terrain line of sight,
+wind and inversion from the archived upper-air profiles); compare the predicted level with a declared
+listening situation (outdoors, in a car with windows closed, radio on...) and the ~10 dB masking rule;
+an `Assessor` reports whether the stated silence, or the stated sound, fits the explanation. The
+account's `SightingSound.volume` stays relative: the decibels are the interpretation's prediction,
+never the witness's statement. Later: a binaural (HRTF) playback of the predicted sound from the
+observer's place; locating a source from arrival-time differences between several witnesses'
+recordings.
+
+### Sound localisation is coarse, and distance is underestimated
+**Status: argued** (figures from a synthesis; to be checked in the primary psychoacoustic literature).
+Azimuth uncertainty a few degrees ahead, about 10° on the sides, 5° behind; elevation about 10° ahead,
+15-20° overhead, 20-30° behind; distance underestimated by a factor of 2-3; sounds of interest are
+placed in front and ambient noise behind; a high-pitched source seems higher than a low one at the same
+height (around 8 kHz from above; 700 Hz-2 kHz and 10-15 kHz from behind); sounds below 2 kHz seem more
+distant `[Fedoce 2014]`, after `[Gabriel]`. The primary source to read is `[Blauert 1997]`.
+
+**Use**: give a stated sound direction and distance an uncertainty cone, wider in elevation and behind
+the head; do not treat a mismatch between heard and seen direction as a contradiction when the sound
+delay explains it.
+
+### The observer's hearing
+**Status: argued.** Presbycusis shows from 18 in high frequencies and takes the sibilants first; the
+cocktail-party effect weakens with age; sensitivity peaks around 4 kHz; hyperacusis about 2 % of the
+population; perceived loudness is lower for an expected loud sound `[Fedoce 2014]`. Typical threshold
+shift by age and frequency: `[ISO 7029]`; equal-loudness contours: `[ISO 226]`.
+
+**Use**: fields for age, known hearing problems, musical practice and usual noise surroundings; for the
+sound heard, apparent direction, loudness, pitch, duration and what it sounded like (a `SaidText`
+likeness: "like a transformer"), the list recommended to GEIPAN investigators `[Fedoce 2014]`; filter
+the predicted sound by the typical age-related loss before the audibility check.
+
 ## Candidate checks from date and place
 
 ### Base rates
@@ -499,6 +548,7 @@ On rr0.org means the text (or a translation) is there; *cited* means only a refe
 | RUWT 2023 | V.J. Ballester-Olmos & R.W. Heiden (eds.), *The Reliability of UFO Witness Testimony*, UPIAR | `time/2/0/2/3/05/Ballester-Olmos-Heiden_TheReliabilityOfUfoWitnessTestimony_UPIAR/` |
 | *Author* 2023 | a chapter of RUWT 2023: Rospars (06/07), Passot (05/11), Bullard (05/02), Maugé (04/08), Ickinger (05/07), Keul (03/05), Peiniger (06/03, 06/04), Kelley-Romano (06/02), French (04/05), Sharps (04/12), van Utrecht (03/15), Young (03/17), Oberg (03/10), Printy (03/13), Haines (05/06), Callahan (03/02), Carlson (03/03), Borraz (05/01), Magin (05/08), Maillot (03/06), Robé (06/06), Suenaga (05/13), Campo Pérez (05/03), Delaval (05/05), Martins (09/02), Leduc (08/02), Ares de Blas (09/01), Mavrakis (05/09), Nickell (03/09), Posner (03/12), Scribner (04/11), Noll (05/10) | chapter directories |
 | GEPAN NT17 1983 | GEPAN Technical Note 17 (Amarante) | `time/1/9/8/3/03/21/NT17_GEPAN/` |
+| Fedoce 2014 | G. Fedoce, "Prise en compte des composantes sonores dans l'analyse des témoignages de PAN", GEIPAN CAIPAN workshop, 2014-07-08 | `time/2/0/1/4/07/08/Fedoce_PriseEnCompteDesComposantesSonoresDansLAnalyseDesTemoignagesDePan_CAIPAN/` (French) |
 | COBEPS 2015 | COBEPS, "Boomerang survolant Braine-le-Comte 12/07/2015" (stereonet trajectory fit) | external: cobeps.org |
 
 ### Cited, text not on rr0.org (candidates for import)
@@ -528,3 +578,8 @@ On rr0.org means the text (or a translation) is there; *cited* means only a refe
 | Memon 2010, Tobin 2010, Bradfield 2005, Matsumoto 2015 | cognitive interview meta-analysis; duration judgement; feedback and confidence; deception detection | General witness psychology |
 | Rosenthal 1966, Sherif 1935, Guilford 1929, Bartlett 1932, Jones 1968, Walker 1968, McFarland 1957, Mackworth 1950, Clark 1957, Matheson 1998, Bullard 1989 | experimenter effects, group norms, autokinesis, remembering, bearings, witness medical protocol, isolation, vigilance, breakoff, hypnosis debate | Classic perception and memory work |
 | Magin 2011 | U. Magin, *Investigating the Impossible*, Anomalist Books | Version drift |
+| Blauert 1997 | J. Blauert, *Spatial Hearing: The Psychophysics of Human Sound Localization*, revised edition, MIT Press | Localisation accuracy figures behind `[Fedoce 2014]` |
+| Gabriel | C. Gabriel, course "Acoustique et psychoacoustique", Haute École Libre de Bruxelles Ilya Prigogine (claudegabriel.be, cited by `[Fedoce 2014]`) | Fedoce's source for localisation |
+| ISO 9613-1 | ISO 9613-1:1993, *Attenuation of sound during propagation outdoors, part 1: calculation of the absorption of sound by the atmosphere* | Absorption from temperature and humidity |
+| ISO 7029 | ISO 7029:2017, *Statistical distribution of hearing thresholds related to age and gender* | Age-related hearing loss |
+| ISO 226 | ISO 226:2023, *Normal equal-loudness-level contours* | Loudness by frequency |
