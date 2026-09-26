@@ -69,11 +69,18 @@ distance, triangulation between independent, distant witnesses, see
   Keul also analysed `[Peiniger 1998b]`: the German studies are not fully independent.
 - For aircraft, Hendry's size classes "3" and "4" were mostly the spread between the outermost lights
   of a formation, not a body; a star watched for 90 min "grew" to full-Moon size `[Hendry 1979]`.
+- The angle implied by a stated size and a stated distance is another matter: 20 subjects shown diffuse
+  lights of 1.65°, 1.65° and 4.35° gave sizes and distances implying 0.11° when they called it a UFO, and
+  0.23-1.89° otherwise (medians) `[GEPAN NT10 1981]` (experiment B, small sample). Stated size and
+  distance do not recombine into the angle seen.
 
 **Use**: ask each witness to show the full Moon the way they showed the object; the ratio is their own
 scale error. Otherwise treat an unanchored size as an upper bound with a wide, heavy-tailed error.
 Record whether the size was shown on the spot or recalled through an object. For a night shape, ask
-whether a body was seen or only lights.
+whether a body was seen or only lights. Ask for the angle directly, never derive it from a stated size
+and distance. GEPAN's own advice to witnesses: compare the apparent size with an object held at arm's
+length, and note whether the phenomenon passed in front of obstacles, which gives a maximum distance and
+an approximate size `[GEPAN NT10 1981]` (annex 1.B).
 
 ### Speed words are not speeds
 **Status: single study** `[Hendry 1979]`.
@@ -132,7 +139,9 @@ the terrain horizon.
 **Status: consolidated (laboratory); measured once for size.**
 With no visible landscape (sea, fog, a black background), a lone light is seen very near, 1-5 m
 (specific distance tendency, `[Gogel 1969]`); of two lights, the brighter looks nearer, and the
-smaller farther (65 % of 266 answers in a Jimenez experiment at the 1981 Le Bourget air show); a light
+smaller farther (65 % of 266 visitors at the 1981 Le Bourget air show `[GEPAN NT10 1981]`, experiment
+A, where 70 % also judged a light against a hill nearer than the same light against the sky, and a real
+light 100 m away above a parked car was often placed at the car); a light
 growing slightly is seen approaching; the same object is judged twice as far in fog as in clear air
 (Ross 1967); all via `[Jimenez 1994]` (ch. 4).
 
@@ -269,6 +278,14 @@ lights" `[Passot 2023]`); ask whether any body was actually seen between the lig
   said "UFO" in the instructions ("describe this UFO slide"), 77, 74 and 50 % of subjects used a UFO label
   (experiments C, D, E), against 11-20 % of those left free `[GEPAN NT10 1981]` (experiments C-F and
   general discussion).
+- The suggestion produces wrong details, not only the word: a lenticular cloud shown for 10 s was
+  described with details it did not have (colour, shape, movement, heat or flames) by 12 of 31 subjects
+  told "here is a UFO slide" before seeing it, and by 12 of 38 asked afterwards only to "describe the UFO
+  slide", against 1 of 18 in the neutral group; over 131 subjects, 26 of 66 who called it a UFO added a
+  false detail against 10 of 65 who did not (χ² p < .0025). With the slide left in view while writing,
+  the effect weakened but did not vanish `[GEPAN NT10 1981]` (experiments C, D, E; students). The false
+  details: blue-green for a black and orange cloud, spherical for an elliptical one, take-off or descent,
+  heat and flames.
 - A witness's first idea: among 39 witnesses of the 1980-11-11 re-entry questioned months later,
   those who first thought of something strange used stronger words and gave more precise details
   than those who thought of something known and dropped it (χ² p < .02), and specificity grew between
@@ -326,7 +343,9 @@ retellings `[Magin 2011]`; "almost disklike" became "silver disc" and the direct
 publications `[Oberg 1994]`; Exeter illustrated as grape-like lights, then a metal saucer with
 portholes, then a red disc `[Bullard 2014]`; site, date and number of missiles moving between versions
 `[Carlson 2023]`; secondary sources report fewer straight trajectories than the witnesses, who deny
-the zigzags the press gave them `[Besse 1980]`.
+the zigzags the press gave them `[Besse 1980]`; a duration grew from 1 min (gendarmerie) to 3 min (GEPAN
+interview) in an anxious witness, and private investigators showing "UFO" photos to another witness
+moved his words from "ball, mass" to "disc, craft" `[GEPAN NT10 1981]` (Saint-André-de-Corcy, 1979).
 
 ## Influences on the account
 
@@ -335,7 +354,8 @@ the zigzags the press gave them `[Besse 1980]`.
 Open questions distort less than closed or leading ones; interviewer bias `[Rosenthal 1966]`
 `[Wertheimer 1968]`; the cognitive interview recovers 25-35 % more correct content `[Memon 2010]`
 via `[Ickinger 2023]`; multiple-choice questions before a free account contaminate it
-`[Callahan 2023]`; questionnaire items that do not fit the stimulus ("edges fuzzy or sharp?" for a
+`[Callahan 2023]`; the word "UFO" in the recall question alone raised UFO labels to 74 % and false
+details as much as saying it before the observation `[GEPAN NT10 1981]` (experiment D); questionnaire items that do not fit the stimulus ("edges fuzzy or sharp?" for a
 point source) produce meaningless answers `[Hartmann 1968]`; investigators ask questions attuned to
 their own expectations `[Bullard 2014]`; error enters at the observation, the verbal relay and the
 write-up `[Hendry 1979]`.
@@ -404,6 +424,10 @@ against `[Bullard 1989]`).
   shared wording appeared only between relatives: being together, one calling the other or knowing
   each other did not raise it `[Askevis 1981]` via `[Jimenez 1994]` (p. 55).
 - Co-occurrence in time should outweigh an exact match of descriptions (rr0.org evaluation page).
+- A "light that followed the car", reported by a couple who had talked about it for four months, was
+  wrong; a "cable in flames" and "fireballs" reported by one anxious witness, weighted as highly
+  subjective, were right (a corona effect melting a line, confirmed by the utility) `[GEPAN NT10 1981]`
+  (Saint-André-de-Corcy, 1979). Weighting gives a probability, never a verdict.
 
 **Use**: record per witness whether they are related, were together, talked before reporting, saw each other's
 drawings, were interviewed separately, reported before or after media coverage, and who pointed the
@@ -520,6 +544,9 @@ aircraft 19 % (a quarter of them helicopters), meteors and re-entries 11 %, sate
 prank balloons, searchlights, balloons, launches. The Moon was 21 % of 138 French cases of 1976
 `[Maillot 2019]` (the Saros team; `[Magin 2023]`, `[Maillot 2023]` and `[Robé 2023]` rest on it).
 
+Left free, about one person in five calls an ambiguous light (a lenticular cloud) a UFO: 11-20 % across
+five groups `[GEPAN NT10 1981]`.
+
 **Use**: prior weights for ranking candidates, per region and period.
 
 ### Signatures
@@ -586,6 +613,13 @@ stimuli give the same report, so rank candidates and keep "unsolved" apart from 
 - **Reporting fraction** (measured order of magnitude): about 10 % of sightings reached the French
   authorities, and 87 % of observers told only family and friends `[Lee 1969]`, `[Besse 1980]` via
   `[Jimenez 1994]` (pp. 18-22).
+- **GEPAN's analysis model** `[GEPAN NT10 1981]` (ch. 2): a matrix of each witness's successive accounts
+  against each described element and phase; internal coherence first, then between co-present witnesses,
+  then between groups, against the physical environment (visibility, positions, triangulation); physical
+  traces are confronted only afterwards, so they cannot bias the reading of the accounts. Each element ends
+  with a "presumption of subjectivity". What to record: the witness's beliefs and knowledge about UFOs and
+  how they changed, the immediate and later interpretations, the emotions felt (anxiety goes with large
+  errors), the conversations since, and whether the account is worded as description or interpretation.
 - **Deception cues** work only on samples: 3 of 18 verbal cues discriminate (detail, coherence,
   admitting memory gaps), 78 % accuracy `[Porter 1996]`; about 70 % at best `[Matsumoto 2015]` via
   `[Martins 2023]`; mistaken witnesses pass any lie test `[Hendry 1979]`. Stated doubt and spontaneous
