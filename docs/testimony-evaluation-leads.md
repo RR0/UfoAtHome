@@ -33,11 +33,18 @@ same data), it is said.
 - Phoenix 1997 and Zond IV: 68 % agree on the number of lights, 87 % on the layout, 79 % on the
   heading; size, altitude and speed systematically too low, too big, too slow `[Bullard 2014]`
   (repeated in `[Bullard 2023]`: same author, not an independent confirmation).
-- Jimenez's re-entry corpus (1,225 testimonies of 18 re-entries 1974-1990) `[Jimenez 1994]`.
+- 1,225 gendarmerie testimonies of 18 re-entries 1974-1990: only 11 % give a distance in metres or
+  km, 24 % an altitude, 21 % a size, all for objects 50-100 km up; their error is inferred from the
+  stimulus height, not measured per testimony `[Jimenez 1994]` (pp. 220-238).
 - Hendry never asked a distance; all 33 of his "close encounters" that turned out to be identified
   (20 advertising planes, 6 stars...) exist only because witnesses volunteered distances under
-  500 ft `[Hendry 1979]`. Only 5 % of one French catalogue's observers gave a distance at all
-  `[Besse 1980]`.
+  500 ft `[Hendry 1979]`. How many give a distance at all depends on the file: 5 % of one French
+  catalogue `[Besse 1980]`, 39 % of identified and 68 % of unidentified gendarmerie reports
+  `[Besse 1981]`, `[Besse 1982]` via `[Jimenez 1994]` (pp. 45-57).
+- Nothing tells the eye how far a light is beyond about 20 m (convergence, accommodation), and
+  binocular disparity only to a few hundred metres for a sharp point `[Jimenez 1994]` (ch. 4,
+  reviewing Bourdon 1902, Graham 1962, Cutting): the distance a witness gives comes from the scene or
+  from what they took the light to be (Hastorf 1950), not from the light.
 - Mechanism: the retinal image fixes the angle, not size, distance or speed; the observer infers one
   from an assumed size `[Wertheimer 1968]`. Any distance to an unknown light beyond about 20 m is
   random (expert statement, not a study) `[Passot 2023]`.
@@ -89,19 +96,49 @@ against an aircraft.
 **Use**: widen the tolerance downward, not symmetrically; read "overhead" as 30° or more; "at treetop
 level" beats a number given afterwards.
 
-### Low lights are placed at the horizon or the nearest obstacle
+### Low lights are placed at the horizon, less and less as they rise
 **Status: consolidated.**
-- Jimenez's experiments: a light below about 5° is reported at the distance of the horizon it
-  overhangs, even the full Moon `[Jimenez 1994]`, `[GEPAN NT10 1981]` (summarised in
-  `[Maugé 2023]`).
+- Experiments `[Jimenez 1994]` (ch. 5): a 31′ light projected 1°, 6°, 13° or 35° above skylines 12,
+  100 and 400 m away (two groups of about 25 subjects) was placed near the skyline's distance when low
+  (1°: about 25, 80 and 570-670 m), and the skyline's pull decreased with elevation but stayed
+  significant at 35°; estimates converged toward 100-300 m as the light rose, a near skyline pushing
+  them beyond it and a far one pulling them in front. Fitted on his tables (not a formula he gives):
+  log D ≈ a + b·log H with b ≈ 0.9 at 1°, 0.65 at 6°, 0.4 at 13°, 0.25 at 35°. The real full Moon,
+  judged by 64 passers-by asked to see it as a mere light: median 1⅓ times the skyline distance when
+  low; the point where it would "fall" was placed beyond it.
+- There is no 5° threshold: that was a split of the Moon elevations sampled, made after the fact
+  (p. 111), and it is how `[Maugé 2023]` summarised the result.
+- Field data `[Jimenez 1994]` (pp. 195-201, 247 testimonies of stars, planets and two re-entries):
+  below 10° of true elevation, 51-62 % of witnesses gave the distance against the landscape, and 76 %
+  of those put it at or nearer than the horizon; at 10-30°, 16-20 % did.
+- Mechanism: a vague light takes the distance of what surrounds it (equidistance tendency,
+  `[Gogel 1965]`), and the sky is seen as a flattened vault, halved at about 30° of elevation
+  `[Jimenez 1994]` (ch. 4); the Moon illusion grows with the distance of the skyline
+  (`[Rock 1962]`).
 - A meteor "landed just behind the barn"; a Titan 3C-4 re-entry placed in front of mountains a few
   miles away; the 1913 procession "just above the hills" `[Hartmann 1968]`. The 1965 Great Lakes
   fireball "just behind the trees" `[Wetherill 1966]` via `[Young 2023]`.
 - A setting Moon "landed 1 or 2 miles away"; setting Venus "landed at the school" `[Hendry 1979]`.
 
-**Use**: when a reported distance roughly equals the terrain distance along the bearing (computable
-from the DEM), treat it as uninformative and still test far candidates. Compare a reported
-disappearance time with rise and set times against the terrain horizon.
+**Use**: compute the skyline distance H along the bearing from the DEM, and the light's elevation above
+that skyline (not above the astronomical horizon); predict the distance the witness would give and
+treat a reported distance inside that band (about ±50 %) as uninformative, still testing far
+candidates. A claimed landing point is not a position. Ask "was it farther or nearer than the
+buildings or trees behind it, and how many times?", and the witness's own estimate of the skyline
+distance, to calibrate them. Compare a reported disappearance time with rise and set times against
+the terrain horizon.
+
+### Other cues to a light's distance
+**Status: consolidated (laboratory); measured once for size.**
+With no visible landscape (sea, fog, a black background), a lone light is seen very near, 1-5 m
+(specific distance tendency, `[Gogel 1969]`); of two lights, the brighter looks nearer, and the
+smaller farther (65 % of 266 answers in a Jimenez experiment at the 1981 Le Bourget air show); a light
+growing slightly is seen approaching; the same object is judged twice as far in fog as in clear air
+(Ross 1967); all via `[Jimenez 1994]` (ch. 4).
+
+**Use**: flag scenes with no visible skyline, where "a few metres away" is a perceptual default;
+predict "it came towards us" when a candidate brightens or grows in the rendering; scale expected
+distances with the weather's visibility.
 
 ### Heading across the line of sight is reliable; the sense depends on where the witness stood
 **Status: consolidated.**
@@ -166,6 +203,8 @@ with it. With a moving observer, compute the candidate's bearing relative to the
 - Duration is the variable least distorted by how a catalogue was selected: independent French
   catalogues pass a χ² homogeneity test on it `[Besse 1980]`.
 - Events under ~30 min tend to be overestimated `[Tobin 2010]` via `[Ickinger 2023]` (not a UFO study).
+- Contested for re-entries: "generally overestimated" `[Jimenez 1994]` (p. 221, no figure) against
+  a lognormal centred on the true value `[Rospars 2023]` (measured).
 
 **Use**: store a time source (clock, anchored to an event, estimated); match candidates tightly on
 clock times and loosely on estimates (±30 min). Model one witness's duration as log-normal ×/÷3 and
@@ -208,21 +247,41 @@ identification `[Hendry 1979]`.
 **Use**: reduce interpretations to primitives before matching ("flying triangle" → "3 moving
 lights" `[Passot 2023]`); ask whether any body was actually seen between the lights.
 
-### The stronger the naming word, the more precise and the more wrong
-**Status: contested.**
-- For: on the scale light < phenomenon < shape < object < machine < flying object < UFO, a stronger
-  word goes with more precise and more wrong size, distance, speed and "artificial details", while
-  direction, time, colour and angular size stay reliable; an experimenter saying "UFO" raised UFO
-  labels from 18 % to 68 % `[Jimenez 1994]`, `[GEPAN NT10 1981]`. The same progression ("3 points",
-  "3 lights in formation", "3 craft", "cigar with windows") `[Hartmann 1968]`; "formation" wrongly
-  implies control `[Bullard 2014]`.
-- Against: the word-distance link was not reproduced on ~300 re-entry reports (P = 0.68)
-  `[Rospars 2023]`, who attributes the difference to one re-entry dominating Jimenez's sample.
+### The stronger the naming word, the more metric detail is volunteered
+**Status: consolidated for the detail; the error it implies is argued.**
+- On 1,225 gendarmerie testimonies of 18 re-entries, coded by the most specific free term (light <
+  phenomenon < shape < object < machine < flying object < UFO), a stronger word goes with more
+  metric distances (4 % to 19 %), altitudes (6 % to 42 %), sizes (7 % to 42 %), speeds, "artificial
+  details" (0 to about 25 %) and non-banal interpretations, all χ² p < .001; the link holds without the
+  1990-11-05 re-entry (38 % of the corpus) and within it alone, and does not depend on age, sex,
+  occupation or dependence between witnesses `[Jimenez 1994]` (pp. 217-241). Those values are wrong
+  because the objects were 50-100 km up; how wrong was not measured.
+- What was not found, by either study: a link between the word and the distance itself. With
+  elevation controlled, word and distance are unrelated (partial tau 0.005) `[Jimenez 1994]` (p. 241),
+  as on ~300 other re-entry reports (P = 0.68) `[Rospars 2023]`, whose explanation (one re-entry
+  dominating Jimenez's sample) his split analyses do not support. So the word predicts whether a value
+  is given, not how far off it is.
+- The same progression ("3 points", "3 lights in formation", "3 craft", "cigar with windows")
+  `[Hartmann 1968]`; "formation" wrongly implies control `[Bullard 2014]`. An experimenter saying
+  "UFO" raising such labels from 18 % to 68 % is attributed to `[GEPAN NT10 1981]` and is not in the
+  thesis: to check there.
+- A witness's first idea: among 39 witnesses of the 1980-11-11 re-entry questioned months later,
+  those who first thought of something strange used stronger words and gave more precise details
+  than those who thought of something known and dropped it (χ² p < .02), and specificity grew between
+  the gendarmerie report and the survey `[Jimenez 1994]` (pp. 243-250; small sample, the author's own
+  caveat).
+- Mechanism: an error appears and persists when a vague or brief stimulus meets a strong but wrong
+  schema under a pressing task; trying to identify gives precise and wrong detail, describing gives
+  less `[Jimenez 1994]` (ch. 6, after Bruner 1957).
 - The longest, most detailed unsolicited Zond IV reports were the most wrong (a cigar with windows);
   correct identifications were brief `[Hartmann 1968]` (qualitative).
 
-**Use**: classify the naming word and keep the first interpretation verbatim; do not weight detail as
-credibility.
+**Use**: code the witness's most specific free term on the seven-step scale, from their free account
+only, never from answers to questions; from "machine" up, treat volunteered metres, speeds and
+artificial details as coming from the schema. Ask what the witness first thought it was, whether they
+thought of something known and when they dropped it, and record what they were doing (driving,
+trying to identify, describing). Keep the first interpretation verbatim; do not weight detail as
+credibility. The implied size (stated distance × angular size) shows what the witness took it for.
 
 ### Colour
 **Status: contested.**
@@ -301,6 +360,10 @@ the free account; record pointed azimuth and elevation on site, calibrated on a 
   `[Hendry 1979]`; for it, cases shortly after a matching TV film or comic `[Robé 2023]`,
   `[Suenaga 2023]`.
 - Being told a place is a "UFO hotspot" turned dust specks into spacecraft `[Sharps 2020]`.
+- Measured: monthly gendarmerie reports against UFO articles in three national dailies, 1974-1980,
+  Spearman 0.44 for the same month and 0.26-0.27 for articles one and two months earlier; in 1954,
+  daily sightings against articles r = 0.76, most sightings of 4 October after the evening papers
+  (Gaudeau) `[Jimenez 1994]` (pp. 275-276).
 
 **Use**: date the witness's reading and media exposure against each version; check what was
 broadcast or published in the months before.
@@ -333,11 +396,12 @@ against `[Bullard 1989]`).
 - Phoenix: the "other" UFOs rest on single witnesses; no one saw the solid craft and the separate
   lights at the same moment, one source seen two ways `[Bullard 2014]`.
 - GEPAN rated cases on multiplicity and agreement, independence of observation conditions, and
-  beliefs strengthened or not (the PESM scale) `[GEPAN NT10 1981]`; a dedicated study of independence
-  indicators `[Askevis 1981]` is listed on rr0.org without its text.
+  beliefs strengthened or not (the PESM scale) `[GEPAN NT10 1981]`. On 431 gendarmerie testimonies,
+  shared wording appeared only between relatives: being together, one calling the other or knowing
+  each other did not raise it `[Askevis 1981]` via `[Jimenez 1994]` (p. 55).
 - Co-occurrence in time should outweigh an exact match of descriptions (rr0.org evaluation page).
 
-**Use**: record per witness whether they were together, talked before reporting, saw each other's
+**Use**: record per witness whether they are related, were together, talked before reporting, saw each other's
 drawings, were interviewed separately, reported before or after media coverage, and who pointed the
 phenomenon out to whom. Count a feature by its independent reporters. Keep one stimulus id apart from
 the report ids (Venus seen from Kansas and California is two reports, one stimulus `[Hendry 1979]`).
@@ -366,6 +430,8 @@ for its silence.
   33 % unknowns against 17 % for "poor" ones `[BBSR14 1955]` via `[Hendry 1979]`.
 - Expertise matters when it fits the stimulus: one amateur astronomer with a telescope saw aircraft at
   Phoenix `[Bullard 2014]`.
+- Sex, age and occupation relate neither to the naming word nor to precision on 1,225 testimonies
+  `[Jimenez 1994]` (p. 228), nor do they separate identified from unidentified reports `[Besse 1982]`.
 
 **Use**: record flying experience, stress, visibility, expectation and whether confirmation was
 sought, rather than a bonus for occupation.
@@ -456,7 +522,11 @@ prank balloons, searchlights, balloons, launches. The Moon was 21 % of 138 Frenc
 - **Aircraft and advertising planes** (consolidated): no sound for 91 % of low advertising planes,
   so silence never rules out an aircraft; slow circling over a town, apparent rotation, hovering,
   "sudden departure" when the sign switches off `[Hendry 1979]`; formation flights `[Bullard 2014]`;
-  airfields and extended runway centrelines `[Delaval 2023]`, `[Hendry 1979]`.
+  airfields and extended runway centrelines `[Delaval 2023]`, `[Hendry 1979]`. A witness's "it could
+  not be an aircraft" does not rule one out: of 62 aircraft and helicopter testimonies, those using
+  strong words gave distances, sizes and details that were mostly wrong, and 263 unidentified
+  gendarmerie reports sit next to aircraft and helicopters in a factor analysis (under 1 km, 2-10 m,
+  near the horizon, medium duration) `[Jimenez 1994]` (pp. 282-285).
 - **Meteors and re-entries** (consolidated): meteors ~15 km/s, seconds; debris half as fast and longer
   `[Young 2023]`; re-entries slower, flat, usually heading east, over 10 s `[Hendry 1979]`; many lights
   in formation, near-horizontal, silent, witnesses spread over hundreds of km `[Oberg 2023]`,
@@ -497,7 +567,9 @@ stimuli give the same report, so rank candidates and keep "unsolved" apart from 
   the sample (lone witnesses and women under-represented in Gendarmerie reports). Store expert review
   as a parameter, not a filter; record the channel.
 - **Explained cases as the control group** (consolidated): identified reports come from the same
-  people for the same reasons `[Hendry 1979]`; a feature is anomalous only if it differs from the same
+  people for the same reasons `[Hendry 1979]`, and do not differ from unidentified ones in witnesses,
+  conditions, or most described features (shape, size, brightness, colour, speed, noise)
+  `[Besse 1982]` via `[Jimenez 1994]` (p. 50); a feature is anomalous only if it differs from the same
   feature in explained cases `[Leduc 2023]`; time of day is not evidence (22:00 peak in every file)
   `[Besse 1980]`, `[Leduc 2023]`.
 - **Residue as a function of time** (argued): old cases get explained while new ones fill the pool
@@ -505,7 +577,11 @@ stimuli give the same report, so rank candidates and keep "unsolved" apart from 
 - **Indexes**: Hynek's strangeness and probability `[Hynek 1972]`; Vallee's SVP; the subjectivity
   index `[Ballester-Olmos 1984]` (weights are the authors' judgement, never calibrated); GEPAN's PESM
   scale `[GEPAN NT10 1981]`; a graded case status (explained as known, possible, probable, difficult)
-  `[Rospars 2007]`; Hendry's four grades of unexplained cases `[Hendry 1979]`.
+  `[Rospars 2007]`; Hendry's four grades of unexplained cases `[Hendry 1979]`; GEPAN's A (identified),
+  B (probably identified), C (too little detail or coherence), D (unidentified despite detail).
+- **Reporting fraction** (measured order of magnitude): about 10 % of sightings reached the French
+  authorities, and 87 % of observers told only family and friends `[Lee 1969]`, `[Besse 1980]` via
+  `[Jimenez 1994]` (pp. 18-22).
 - **Deception cues** work only on samples: 3 of 18 verbal cues discriminate (detail, coherence,
   admitting memory gaps), 78 % accuracy `[Porter 1996]`; about 70 % at best `[Matsumoto 2015]` via
   `[Martins 2023]`; mistaken witnesses pass any lie test `[Hendry 1979]`. Stated doubt and spontaneous
@@ -554,10 +630,14 @@ On rr0.org means the text (or a translation) is there; *cited* means only a refe
 ### Cited, text not on rr0.org (candidates for import)
 | Key | Reference | Why it matters |
 |---|---|---|
-| Jimenez 1994 | M. Jimenez, *Témoignage OVNI et psychologie de la perception*, PhD thesis, Montpellier 3 | Source of the horizon and naming-word leads; the rr0.org link to it is broken |
+| Jimenez 1994 | M. Jimenez, *Témoignage d'OVNI et psychologie de la perception*, doctorat d'État, Université Paul Valéry Montpellier III, February 1994 (dir. M. Blancheteau), 393 pp. | Read in full (not publishable): horizon experiments, naming word on 1,225 re-entry testimonies, error model; pages cited above. The rr0.org link to it is broken |
+| Besse 1981, 1982 | P. Besse, GEPAN statistical studies of the D and A+B gendarmerie reports | Distance tables; identified vs unidentified |
+| Lee 1969 | A. Lee, public-opinion survey in the Condon Report | Reporting behaviour |
+| Gogel 1965, 1969 | W.C. Gogel, equidistance and specific distance tendencies | Distance of an isolated light |
+| Rock 1962 | I. Rock & L. Kaufman, "The Moon illusion", *Science* 136 | Horizon distance and the Moon illusion |
 | GEPAN NT8 1981 | GEPAN Technical Note 8, annex 1 (Jimenez) and non-verbal measurement | Witness as a calibratable instrument |
 | GEPAN NT15 1983 | M. Jimenez & P. Besse, "Recherche de stéréotypes : dessine-moi un OVNI" | Independent test of drawing stereotypes |
-| Askevis 1981 | F. Askevis-Leherpeux & F. Cavé, "Elaboration d'indicateurs d'indépendance entre témoins", CNES/GEPAN | Witness independence; rr0.org page is an empty shell |
+| Askevis 1981 | F. Askevis-Leherpeux, F. Cavé & G. Durandin, "Elaboration d'indicateurs d'indépendance entre témoins", CNES/GEPAN | Witness independence (result known via Jimenez 1994); rr0.org page is an empty shell |
 | Haines 1979b | R.F. Haines, *What do UFO drawings by alleged eyewitnesses and non-eyewitnesses have in common?* / *UFO Phenomena and the Behavioral Scientist*, Scarecrow | Drawing stereotypes (the latter is on rr0.org as a PDF only) |
 | Haines 1980 | R.F. Haines, *Observing UFOs*, Nelson-Hall | Perception handbook; its rr0.org directory is empty |
 | Peiniger 1998a, 1998b | H.-W. Peiniger, "Es war so groß wie der Vollmond" and "Wie ein Heißluftballon zum UFO wird", in *Das Rätsel*, Moewig | Angular size and duration experiments |
