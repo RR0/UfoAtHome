@@ -162,17 +162,21 @@ float densityAt(vec3 p) {
   if (radius > 1.3) return 0.0;
   vec3 uv = (p + offsetM) / (sizeM * 4.0) + seedOffset;
   // Independent scales and an oblique domain break the small texture's visible tiling.
+  // Read at level 0 explicitly: the noise has no mipmaps, so this is what texture() returns, but
+  // texture() takes screen-space derivatives, which are undefined inside the ray march's
+  // early-exit loops. Direct3D (ANGLE, i.e. Chrome and Firefox on Windows) warns about it (X3595),
+  // on a Windows machine that showed no deck but the cirrus, the one drawn without this loop.
   vec3 warpUV = vec3(uv.x * 0.173, SLICE, uv.z * 0.173);
-  uv.x += (texture(noiseMap, warpUV + vec3(0.13, 0.27, 0.41)).r - 0.5) * 1.3;
-  uv.z += (texture(noiseMap, warpUV + vec3(0.67, 0.53, 0.19)).r - 0.5) * 1.3;
+  uv.x += (textureLod(noiseMap, warpUV + vec3(0.13, 0.27, 0.41), 0.0).r - 0.5) * 1.3;
+  uv.z += (textureLod(noiseMap, warpUV + vec3(0.67, 0.53, 0.19), 0.0).r - 0.5) * 1.3;
   vec2 oblique = vec2(uv.x * 0.731 + uv.z * 0.682, -uv.x * 0.682 + uv.z * 0.731) * 1.371;
   float weather = smoothstep(0.20, 0.80,
-    texture(noiseMap, vec3(uv.x, SLICE, uv.z)).r * 0.65 +
-    texture(noiseMap, vec3(oblique.x, SLICE + 0.37, oblique.y)).r * 0.35);
+    textureLod(noiseMap, vec3(uv.x, SLICE, uv.z), 0.0).r * 0.65 +
+    textureLod(noiseMap, vec3(oblique.x, SLICE + 0.37, oblique.y), 0.0).r * 0.35);
   // Subpixel distant masses converge to mean cover rather than aliasing into horizontal bands.
   float distant = smoothstep(8000.0, 40000.0, length(p));
-  float billow = mix(texture(noiseMap, uv * vec3(2.0, 3.0, 2.0)).r, 0.5, distant);
-  float detail = mix(texture(noiseMap, uv * 7.0).r, 0.5, distant);
+  float billow = mix(textureLod(noiseMap, uv * vec3(2.0, 3.0, 2.0), 0.0).r, 0.5, distant);
+  float detail = mix(textureLod(noiseMap, uv * 7.0, 0.0).r, 0.5, distant);
   float threshold = coverageThreshold(coverage);
   float carve = 1.0, core = 0.0;
   if (local) {
