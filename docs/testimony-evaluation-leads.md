@@ -262,9 +262,13 @@ lights" `[Passot 2023]`); ask whether any body was actually seen between the lig
   dominating Jimenez's sample) his split analyses do not support. So the word predicts whether a value
   is given, not how far off it is.
 - The same progression ("3 points", "3 lights in formation", "3 craft", "cigar with windows")
-  `[Hartmann 1968]`; "formation" wrongly implies control `[Bullard 2014]`. An experimenter saying
-  "UFO" raising such labels from 18 % to 68 % is attributed to `[GEPAN NT10 1981]` and is not in the
-  thesis: to check there.
+  `[Hartmann 1968]`; "formation" wrongly implies control `[Bullard 2014]`.
+- Influence between co-observers, measured: shown a slide of a lenticular cloud for 15 s, a class of 34
+  pupils in which one pupil spontaneously exclaimed "a UFO!" named it a UFO 68 % of the time (23 of 34),
+  against 18 % (6 of 33) in a class where nobody spoke (χ² p < .00001). When it was the experimenter who
+  said "UFO" in the instructions ("describe this UFO slide"), 77, 74 and 50 % of subjects used a UFO label
+  (experiments C, D, E), against 11-20 % of those left free `[GEPAN NT10 1981]` (experiments C-F and
+  general discussion).
 - A witness's first idea: among 39 witnesses of the 1980-11-11 re-entry questioned months later,
   those who first thought of something strange used stronger words and gave more precise details
   than those who thought of something known and dropped it (χ² p < .02), and specificity grew between
@@ -614,7 +618,7 @@ On rr0.org means the text (or a translation) is there; *cited* means only a refe
 | Rhine 1968 | M.W. Rhine, "Psychological aspects of UFO reports", Condon Report, section VI ch. 3 | `time/1/9/6/8/CondonReport/s6/c03/` |
 | Hendry 1979 | A. Hendry, *The UFO Handbook*, Doubleday | `time/1/9/7/9/08/Hendry_TheUfoHandbook/` (partial French translation) |
 | Besse 1980 | P. Besse, GEPAN Technical Note 2 (statistical comparison of catalogues) | `time/1/9/8/0/04/21/NT2_GEPAN/` (PDF for §3-4) |
-| GEPAN NT10 1981 | M. Jimenez, GEPAN Technical Note 10, *Les PAN et la psychologie de la perception* | local PDF `time/1/9/8/1/12/14/NT_n10_GEPAN.pdf`, not published (404) |
+| GEPAN NT10 1981 | M. Jimenez, *Les phénomènes aérospatiaux non-identifiés et la psychologie de la perception*, GEPAN Technical Note 10, n° 0294 CT/GEPAN, 1981-12-14 | `time/1/9/8/1/12/14/NT10_GEPAN/` (imported 2026-09-27; official PDF https://cnes-geipan.fr/sites/default/files/note_tech_10.pdf) |
 | Smith 1983 | M. Smith, *The UFO Enigma*, Congressional Research Service, section 2 | `time/1/9/8/3/06/20/SmithMarcia_UfoEnigma/s2/` |
 | Oberg 1985 | J. Oberg, "The black box approach to UFO perceptions" | `time/1/9/8/5/11/28/BlackBoxApproachToUfoPerceptions_Oberg/` |
 | Oberg 1994 | J. Oberg, "Case studies in pilot misperceptions of UFOs" | `time/1/9/9/4/05/15/Oberg_CaseStudiesInPilotMisperceptionsOfUfos/` |
