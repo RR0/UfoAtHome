@@ -1643,8 +1643,10 @@ export class SceneRenderer {
    * from setAstronomy) since it must keep reacting to sunrise/sunset independent of this.
    */
   setWeather(weather: Weather): void {
-    this.cloudTransmissionMemo.clear()
+    // Called every tick: the memo is forgotten only when the weather really changed, or it would
+    // never outlive a single frame.
     if (weatherEquals(this.weather, weather)) return
+    this.cloudTransmissionMemo.clear()
     const previous = this.weather
     this.weather = weather
     // Each part of the sky is restated only when what it is made from has changed. A weather

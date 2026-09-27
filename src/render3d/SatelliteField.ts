@@ -65,6 +65,10 @@ export class SatelliteField {
     const byTier: { x: number; y: number; z: number; r: number; g: number; b: number }[][] = this.tiers.map(() => [])
     this.drawn = []
     for (const satellite of satellites) {
+      // Cloud only ever dims: one already too faint for this sky with no cloud at all cannot be seen
+      // through any, and walking the cloud field for it was most of the frame — six hundred of them
+      // a frame, on a stormy night where hardly one is bright enough.
+      if (satellite.magnitude > magnitudeLimit) continue
       const through = transmission(satellite.position)
       if (through <= 0) continue
       const magnitude = satellite.magnitude - 2.5 * Math.log10(through)
