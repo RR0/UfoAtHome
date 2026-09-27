@@ -157,7 +157,7 @@ export class BodySystem {
       if (glowing) BodySystem.light(glowing, state, display)
       if (entry.motions) BodySystem.move(entry.motions, state.motions ?? {})
       this.shine(state, holder, glowing, display, frame.eye)
-      this.shineLights(state, holder, glowing, display, frame)
+      this.shineLights(state, holder, glowing, frame)
       this.throwFlame(state, holder, seconds, display, frame.eye)
     }
     const kept = new Set(ids)
@@ -237,6 +237,12 @@ export class BodySystem {
   private throughAir(rgb: readonly [number, number, number], at: Vector3): [number, number, number] {
     const transmittance = this.frame?.transmittance?.(at.x, at.y, at.z) ?? [1, 1, 1]
     return [rgb[0] * transmittance[0], rgb[1] * transmittance[1], rgb[2] * transmittance[2]]
+  }
+
+  /** A colour scaled to a luminance of one: its hue alone. */
+  private static unitLuminance(rgb: readonly [number, number, number]): [number, number, number] {
+    const luminance = Photometry.luminanceOf(rgb)
+    return luminance > 0 ? [rgb[0] / luminance, rgb[1] / luminance, rgb[2] / luminance] : [1, 1, 1]
   }
 
   private static rgbOf(css: string): [number, number, number] {
@@ -375,7 +381,7 @@ export class BodySystem {
    * body's own hull is hidden by it; one passing behind the edge of a bridge's deck goes out as the
    * edge covers it, not all at once.
    */
-  private shineLights(state: BodyState, holder: Group, glowing: Glow[] | undefined, display: LuminanceDisplay | undefined, frame: BodyFrame): void {
+  private shineLights(state: BodyState, holder: Group, glowing: Glow[] | undefined, frame: BodyFrame): void {
     const eye = frame.eye
     const named = state.lights
     if (!glowing || !named || !eye) {
@@ -414,8 +420,14 @@ export class BodySystem {
       }
       const angularRadius = Math.asin(Math.min(1, radiusM / distanceM))
       const solidAngle = 2 * Math.PI * (1 - Math.cos(angularRadius)) * clear
-      const light = this.throughAir(BodySystem.shown(glow.hue, luminanceCdM2, display), centre)
-      veil.shine(centre, [light[0] * solidAngle, light[1] * solidAngle, light[2] * solidAngle], (angularRadius * 180) / Math.PI)
+      // The illuminance it gives at the eye, in lux, in the scene's own units, as a star's is (see
+      // SceneRenderer.arrivingIlluminance) — never from its colour as shown: the screen's response
+      // is compressed, and a pure red, whose luminance is a fifth of its peak channel, came out
+      // with next to no glare at all beside a white of the same luminance.
+      const lux = luminanceCdM2 * solidAngle * this.sceneUnitsPerLux()
+      const hue = BodySystem.unitLuminance(glow.hue)
+      const light = this.throughAir([hue[0] * lux, hue[1] * lux, hue[2] * lux], centre)
+      veil.shine(centre, light, (angularRadius * 180) / Math.PI)
     }
   }
 
