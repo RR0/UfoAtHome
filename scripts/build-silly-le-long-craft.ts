@@ -12,24 +12,30 @@
  * red one flashing near the left one (CR p.4-6, drawing 004). Past the bridge he saw it close, from
  * the side and then from behind: the two branches of a flattened V, grey and smooth "comme du
  * béton", and at the rear two white rectangles flashing together, the front lights gone (CR p.4,
- * 8-9, drawing 005). A flat V flying towards him is that bar; the same V seen from behind and below
- * is drawing 005, its rear face a band over its darker underside and its point down.
+ * 8-9, drawing 005). A flat triangle pointing towards him is that bar; the same triangle seen from
+ * behind and below is drawing 005: its straight rear face a band, and under it its underside running
+ * away to the point, which is further and so lower — a V, point down.
  *
  * - The span: 34 m. T1 gave 30 m wide (CR p.4, PV p.10); held still where he placed it (PV p.7) at
  *   the sizes the GEIPAN's reconstitution fitted to his pointings (CR p.49-54), it measures 32 to
  *   35 m all along the approach, and 34 m is that.
- * - The branches: square in section (CR p.8), 5 m — the smaller of his "Epaisseur 5 à 8 mètres"
- *   (PV p.10), and the height of the bar from afar.
+ * - A FULL triangle, not a chevron: its rear face straight, so that the two rectangles on it are
+ *   parallel, alike, and square to him as he drew them (drawing 005). He spoke of two "branches"
+ *   (PV p.10), which is how a flat triangle's two sides look from below; the front, and so whether
+ *   anything is missing between them, he never saw (CR p.8).
+ * - Its thickness: 2.4 m, what both his drawings give, not the "Epaisseur 5 à 8 mètres" of his
+ *   questionnaire (PV p.10): the bar of drawing 004 is 7 % of the span high, and the rear
+ *   rectangles of drawing 005, which "take the full thickness" (CR p.4), are 9.5 % of the span wide
+ *   and 1.3 to 2 times as wide as high, so 1.6 to 2.5 m. The GEIPAN holds drawing 005 to be right.
  * - Front to back: 20 m, ASSUMED. He said both "plus large que longue, mais de très peu" (CR p.8) and
  *   "trois fois sa longueur" (CR p.4); 20 m lies between, and the front was never seen, its
  *   appearance assumed by T1 himself (CR p.8).
- * - The ends cut square, along the line of flight: drawing 005 shows them vertical.
  * - The front lights: 1 m across (ASSUMED; smaller than the rear rectangles, CR p.4), on the leading
  *   edges near each end, the red 11.5 % of the span in from the left one as T1 saw it from the front
  *   (drawing 004). Behind the hull they are hidden by it: "Dès après le passage sous le pont, les
  *   lumières à l'avant du PAN n'étaient plus visibles" (CR p.8).
- * - The rear rectangles: at each end of the rear face, its full thickness (CR p.4), 9.5 % of the span
- *   wide (drawing 005). Off, darker than the grey (CR p.8).
+ * - The rear rectangles: at each end of the straight rear face, its full thickness (CR p.4), 9.5 %
+ *   of the span wide (drawing 005). Off, darker than the grey (CR p.8).
  * - Each light has its own material, named, so that the recording switches it on its own (see
  *   BodyKeyframe.lights): the model says where and what colour, the track when and how bright.
  * - The hull is a node named "hull", which is what the drawn outlines are measured against.
@@ -50,7 +56,7 @@ type PlanPoint = [number, number]
 class SillyLeLongCraft {
   static readonly SPAN_M = 34
   static readonly LENGTH_M = 20
-  static readonly THICKNESS_M = 5
+  static readonly THICKNESS_M = 2.4
   static readonly FRONT_LIGHT_M = 1
   static readonly RED_IN_SHARE = 0.115
   static readonly REAR_LIGHT_SHARE = 0.095
@@ -66,34 +72,18 @@ class SillyLeLongCraft {
     ...["rear-left", "rear-right"].map(name => GltfWriter.material(name, "#0b0c0e", 0, 0.6, { emissiveFactor: [0.93, 0.96, 1] }))
   ]
 
-  /** Where the nose is, where each leading edge ends, and how deep a branch is along z. */
   private readonly apexZ = -SillyLeLongCraft.LENGTH_M / 2
   private readonly tailZ = SillyLeLongCraft.LENGTH_M / 2
-  /** A branch's depth along the line of flight, for THICKNESS_M across it: solved, since the
-   * branches' slant depends on it. */
-  private readonly depthZ: number
-
-  constructor() {
-    const half = SillyLeLongCraft.SPAN_M / 2
-    let depth = SillyLeLongCraft.THICKNESS_M
-    for (let i = 0; i < 20; i++) {
-      const slant = Math.atan((SillyLeLongCraft.LENGTH_M - depth) / half)
-      depth = SillyLeLongCraft.THICKNESS_M / Math.cos(slant)
-    }
-    this.depthZ = depth
-  }
 
   write(writer: GltfWriter): void {
     writer.addMesh({ name: "hull", geometry: this.hull(), material: 0 })
     for (const part of this.lights()) writer.addMesh(part)
   }
 
-  /** The plan: nose, right leading tip, right trailing tip, notch, and the left side mirrored. */
+  /** The plan: the nose, and the two ends of the straight rear edge. */
   private plan(): PlanPoint[] {
     const half = SillyLeLongCraft.SPAN_M / 2
-    const leadTipZ = this.tailZ - this.depthZ
-    const notchZ = this.apexZ + this.depthZ
-    return [[0, this.apexZ], [half, leadTipZ], [half, this.tailZ], [0, notchZ], [-half, this.tailZ], [-half, leadTipZ]]
+    return [[0, this.apexZ], [half, this.tailZ], [-half, this.tailZ]]
   }
 
   /** The plan raised to its thickness, centred on y = 0. */
@@ -110,11 +100,10 @@ class SillyLeLongCraft {
     return SillyLeLongCraft.indexed(geometry)
   }
 
-  /** The five lights, each a thin plate on the face it is on. */
+  /** The five lights, each a thin plate on the face it is on: three on the two front faces near the
+   * ends, two at the ends of the rear face. */
   private lights(): Part[] {
     const half = SillyLeLongCraft.SPAN_M / 2
-    const leadTipZ = this.tailZ - this.depthZ
-    const notchZ = this.apexZ + this.depthZ
     const parts: Part[] = []
     const front = SillyLeLongCraft.FRONT_LIGHT_M
     // Seen from the front, T1's left is the craft's right, +x.
@@ -122,16 +111,13 @@ class SillyLeLongCraft {
       ["front-white-left", 1, front], ["front-white-right", -1, front], ["front-red", 1, SillyLeLongCraft.RED_IN_SHARE * SillyLeLongCraft.SPAN_M]
     ] as const) {
       const x = side * (half - inset)
-      const z = this.apexZ + (leadTipZ - this.apexZ) * (Math.abs(x) / half)
-      parts.push({ name, geometry: this.plate([0, this.apexZ], [side * half, leadTipZ], [x, z], front, front, -1), material: this.materialOf(name) })
+      const z = this.apexZ + (this.tailZ - this.apexZ) * (Math.abs(x) / half)
+      parts.push({ name, geometry: this.plate([0, this.apexZ], [side * half, this.tailZ], [x, z], front, front, -1), material: this.materialOf(name) })
     }
     const width = SillyLeLongCraft.REAR_LIGHT_SHARE * SillyLeLongCraft.SPAN_M
     for (const [name, side] of [["rear-left", 1], ["rear-right", -1]] as const) {
-      // Along the rear face, from its end: the middle of a plate `width` long.
-      const along = (width / 2) / Math.hypot(half, this.tailZ - notchZ)
-      const x = side * half * (1 - along)
-      const z = this.tailZ - (this.tailZ - notchZ) * along
-      parts.push({ name, geometry: this.plate([0, notchZ], [side * half, this.tailZ], [x, z], width, SillyLeLongCraft.THICKNESS_M, 1), material: this.materialOf(name) })
+      const x = side * (half - width / 2)
+      parts.push({ name, geometry: this.plate([-half, this.tailZ], [half, this.tailZ], [x, this.tailZ], width, SillyLeLongCraft.THICKNESS_M, 1), material: this.materialOf(name) })
     }
     return parts
   }
