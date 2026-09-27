@@ -29,6 +29,30 @@ export class EditorPage implements SitePage {
   script(): string {
     return `const editor = document.getElementById("editor")
 const requested = new URLSearchParams(location.search).get("sighting")
+
+/* The example under the editor is the recording being edited, when it came from an address, and
+   the link that replays it beside it: the one a reader wants to hand on once they are done. Socorro
+   until then. It follows a recording loaded from the editor's own address field too, which sets
+   the same src; one read from a file has no address, and leaves the example as it was. */
+const showExample = value => {
+  for (const [id, path] of [["sighting-edit", "/edit/"], ["sighting-play", "/play/"]]) {
+    const link = document.getElementById(id)
+    if (!link) continue
+    link.href = path + "?sighting=" + encodeURIComponent(value)
+    link.querySelector("code").textContent = path + "?sighting=" + value
+  }
+}
+showExample(requested || "Socorro")
+if (editor) {
+  new MutationObserver(() => {
+    const src = editor.getAttribute("src")
+    if (!src) return
+    // A demo's own file is named back by its name, as it was asked for.
+    const prefix = "/demo-data/observer-"
+    const demo = src.startsWith(prefix) && src.endsWith(".json") ? src.slice(prefix.length, -".json".length) : undefined
+    showExample(demo && requested && requested.toLowerCase() === demo ? requested : src)
+  }).observe(editor, { attributes: true, attributeFilter: ["src"] })
+}
 if (editor && requested) {
   const url = requested.includes("/")
     ? requested
@@ -113,7 +137,8 @@ if (docs) {
     <p class="small">Opening it on an existing recording: add <code>?sighting=</code> and a URL, or
       the name of one of <a href="/demos/">the demos</a> (a name that is none of them is looked for as an
       rr0.org case, by its <code>sighting.json</code>) — for instance
-      <a href="/edit/?sighting=Socorro"><code>/edit/?sighting=Socorro</code></a>.</p>
+      <a id="sighting-edit" href="/edit/?sighting=Socorro"><code>/edit/?sighting=Socorro</code></a>,
+      which replays at <a id="sighting-play" href="/play/?sighting=Socorro"><code>/play/?sighting=Socorro</code></a>.</p>
   </div>
 </section>
 
@@ -493,7 +518,8 @@ if (docs) {
     <p class="small">Pour l'ouvrir sur un enregistrement existant : ajoutez <code>?sighting=</code>
       suivi d'une URL, ou du nom d'une <a href="/demos/">démo</a> (un nom qui n'en est pas une est
       cherché comme dossier de rr0.org, par son <code>sighting.json</code>) — par exemple
-      <a href="/edit/?sighting=Socorro"><code>/edit/?sighting=Socorro</code></a>.</p>
+      <a id="sighting-edit" href="/edit/?sighting=Socorro"><code>/edit/?sighting=Socorro</code></a>,
+      qui se rejoue à <a id="sighting-play" href="/play/?sighting=Socorro"><code>/play/?sighting=Socorro</code></a>.</p>
   </div>
 </section>
 
