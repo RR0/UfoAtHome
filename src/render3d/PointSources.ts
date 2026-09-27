@@ -20,6 +20,11 @@ import { RoundPoints } from "./RoundPoints.js"
  * sky, the screen's pixel being five times the eye's cell.
  *
  * Added to what is behind it, as light is: a star seen through the sky's own glow is both.
+ *
+ * Spread as a Gaussian of at least half a pixel, normalised to that same light (see patchFragment).
+ * The round disc it replaces, a pixel or two wide for most points, lit one pixel, then two, then
+ * four as a point crossed the grid: stars came out coarse, square and almost black and white, and
+ * anything moving — a satellite, the sky turning — flickered.
 
  */
 export class PointSources {
@@ -70,15 +75,17 @@ export class PointSources {
    */
   static material(size: number): PointsMaterial {
     const material = new PointsMaterial({ vertexColors: true, size, sizeAttenuation: false, fog: false })
-    RoundPoints.apply(material)
+    // Drawn with its own falloff (see patchFragment), not RoundPoints': same reasons to be round, and
+    // additive light must not write depth either.
+    material.transparent = true
+    material.depthWrite = false
     material.blending = AdditiveBlending
-    const round = material.onBeforeCompile
-    material.onBeforeCompile = (shader, renderer) => {
-      round.call(material, shader, renderer)
+    material.onBeforeCompile = shader => {
       shader.uniforms.uRodSolidAngle = PointSources.shared.uRodSolidAngle
       shader.uniforms.uConeThreshold = PointSources.shared.uConeThreshold
       shader.uniforms.uViewportHeight = PointSources.shared.uViewportHeight
       shader.vertexShader = PointSources.patch(shader.vertexShader)
+      shader.fragmentShader = PointSources.patchFragment(shader.fragmentShader)
     }
     material.customProgramCacheKey = () => "point-sources"
     return material
@@ -102,7 +109,7 @@ export class PointSources {
    */
   static patch(vertexShader: string): string {
     return vertexShader
-      .replace("void main() {", `uniform float uRodSolidAngle;\nuniform float uConeThreshold;\nuniform float uViewportHeight;\nvoid main() {`)
+      .replace("void main() {", `uniform float uRodSolidAngle;\nuniform float uConeThreshold;\nuniform float uViewportHeight;\nvarying float vSize;\nvarying float vRaster;\nvarying float vTotal;\nvoid main() {`)
       .replace(
         "gl_PointSize = size;",
         `gl_PointSize = size;
@@ -116,7 +123,46 @@ export class PointSources {
         // is there to show a brighter point as a larger one, not to add light to it.
         float pixels = max(1.0, ${PointSources.COVERAGE.toFixed(6)} * gl_PointSize * gl_PointSize);
         float pixel = pixelAngle * pixelAngle;
-        vColor.rgb /= pixel >= uAcuitySolidAngle ? uAcuitySolidAngle * pixels : max(drawn, uAcuitySolidAngle);`
+        vColor.rgb /= pixel >= uAcuitySolidAngle ? uAcuitySolidAngle * pixels : max(drawn, uAcuitySolidAngle);
+        // How many pixels' worth of that light the disc carries in all — see patchFragment, which
+        // spreads exactly this much, wherever the point falls between pixels.
+        vTotal = pixel >= uAcuitySolidAngle ? pixels : ${PointSources.COVERAGE.toFixed(6)} * gl_PointSize * gl_PointSize;
+        vSize = gl_PointSize;
+        // The square drawn wide enough to hold the whole of the falloff, whatever its tier.
+        gl_PointSize = max(gl_PointSize, 2.0 * ceil(${PointSources.EDGE_SIGMAS.toFixed(1)} * max(${PointSources.MIN_SIGMA_PX.toFixed(2)}, ${PointSources.SIGMA_PER_SIZE.toFixed(2)} * gl_PointSize)) + 1.0);
+        vRaster = gl_PointSize;`
+      )
+  }
+
+  /**
+   * The narrowest spread a point is drawn with, pixels (a Gaussian's standard deviation), and the
+   * share of its tier's size it widens to above that. Narrower than half a pixel, a point sampled at
+   * the pixels' centres gives more or less light depending on where it falls between them — one
+   * pixel lit, then two, then four — and a star moving across the sky, or a satellite, flickered from
+   * frame to frame as it crossed the grid. At half a pixel the sum over the pixels is the same to a
+   * few per cent wherever it falls.
+   */
+  static readonly MIN_SIGMA_PX = 0.5
+  static readonly SIGMA_PER_SIZE = 0.25
+  /** How far out the falloff is drawn before it is cut, in standard deviations. */
+  static readonly EDGE_SIGMAS = 2.5
+
+  /**
+   * The patched fragment shader: each pixel takes its share of the point's light from a Gaussian
+   * centred on the point's EXACT position, normalised so that the pixels together carry the disc's
+   * total (see patch). The same light as the round disc it replaces, spread smoothly enough that it
+   * does not depend on the pixel grid. Returns the source untouched when the anchor is absent.
+   */
+  static patchFragment(fragmentShader: string): string {
+    return fragmentShader
+      .replace("void main() {", "varying float vSize;\nvarying float vRaster;\nvarying float vTotal;\nvoid main() {")
+      .replace(
+        RoundPoints.ANCHOR,
+        `float sigma = max(${PointSources.MIN_SIGMA_PX.toFixed(2)}, ${PointSources.SIGMA_PER_SIZE.toFixed(2)} * vSize);
+         float fromCentre = length( gl_PointCoord - vec2( 0.5 ) ) * vRaster;
+         if ( fromCentre > ${PointSources.EDGE_SIGMAS.toFixed(1)} * sigma ) discard;
+         float share = exp( -0.5 * fromCentre * fromCentre / ( sigma * sigma ) ) * vTotal / ( 6.2831853 * sigma * sigma );
+         vec4 diffuseColor = vec4( diffuse, opacity * share );`
       )
   }
 
