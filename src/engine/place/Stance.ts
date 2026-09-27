@@ -11,10 +11,8 @@ import type { GaitOffset } from "./Gait.js"
  *
  * The movement is slow (a few tenths of a hertz, what postural sway and breathing are made of): about
  * a centimetre of the eye's PLACE, which is real parallax — the near ground and scenery shift a
- * little against the far — and whatever of its DIRECTION's drift the instrument lets through. An
- * eye lets almost none: it keeps what it looks at steady, so the sky and the stars do not move at
- * all (drawn turning, every star slid from pixel to pixel and the whole sky shimmered: 26,710 pixels
- * of 333,000 changed at every frame). A hand-held camera lets it all through. It is a sum
+ * little against the far — and whatever of its DIRECTION's drift the instrument lets through: an
+ * eye a third of it, the wandering of a held gaze (see GAZE_DRIFT_SHARE), a hand-held camera all. It is a sum
  * of unrelated slow waves rather than a noise, so that the same instant always looks the same:
  * a recording is played again and again, and must show the same thing at the same instant.
  *
@@ -35,6 +33,14 @@ export class Stance {
   private static readonly DRIFT_YAW_DEG = 0.5
   private static readonly DRIFT_PITCH_DEG = 0.4
   private static readonly DRIFT_ROLL_DEG = 0.3
+  /**
+   * The least of the head's turning that reaches an eye's image. Stabilisation is not perfect —
+   * the reflex's gain is short of one, and a fixation drifts by itself — so a gaze held on something
+   * wanders by a tenth of a degree or two. Cancelled entirely, the view of a standing observer showed
+   * no life at all; the star flicker the turn once caused came from how points were drawn, since
+   * fixed (see PointSources).
+   */
+  private static readonly GAZE_DRIFT_SHARE = 0.35
   /** Unrelated slow rates, hertz: sway, breath, drift. */
   private static readonly HZ = [0.11, 0.23, 0.17, 0.29, 0.37, 0.07] as const
 
@@ -47,7 +53,7 @@ export class Stance {
   static of(sighting: Sighting): Stance | undefined {
     const scale = sighting.sway ?? (sighting.event.tags?.includes("paralysis") ? 0 : 1)
     if (!(scale > 0)) return undefined
-    return new Stance(1 - (sighting.instrument.stabilization ?? 0), scale)
+    return new Stance(Math.max(1 - (sighting.instrument.stabilization ?? 0), Stance.GAZE_DRIFT_SHARE), scale)
   }
 
   offsetAt(tMs: number): GaitOffset {

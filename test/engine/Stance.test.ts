@@ -24,13 +24,14 @@ describe("Stance", () => {
     }
   })
 
-  it("keeps an eye's sky still — it holds what it looks at — and lets a hand-held camera's turn", () => {
+  it("lets an eye's gaze wander a little, and a hand-held camera's turn fully", () => {
     const eye = standing()
     const camera = standing()
     camera.instrumentId = "slr-35mm-50"
     const turn = (sighting: Sighting) => Math.max(...Array.from({ length: 200 }, (_, k) => Math.abs(Gait.bodyAt(sighting, k * 100).yawDeg)))
-    expect(turn(eye)).toBeLessThan(0.02)
-    expect(turn(camera)).toBeGreaterThan(0.2)
+    expect(turn(eye)).toBeGreaterThan(0.08)
+    expect(turn(eye)).toBeLessThan(0.25)
+    expect(turn(camera)).toBeGreaterThan(turn(eye) * 2)
   })
 
   it("leaves an observer the account says was paralysed perfectly still", () => {
