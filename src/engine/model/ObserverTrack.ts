@@ -154,6 +154,37 @@ export class HumanMotion {
       + (-2 * s3 + 3 * s2) * values[index + 1] + (s3 - s2) * h * m1
   }
 
+  /**
+   * How long a walker takes to stop from a walk, or to get into one: under a second. A movement
+   * that ends in a pause keeps its pace until then and brakes over this, whatever the time between
+   * the two keyframes — a curve spread over the whole stretch would have someone stopping dead
+   * spend ten seconds slowing down.
+   */
+  static readonly BRAKE_S = 0.8
+
+  /**
+   * The fraction of a stretch's distance covered at the fraction `s` of its time, for a move that
+   * starts from a pause (`fromRest`), ends in one (`toRest`), or both: steady pace, with the braking
+   * and the pick-up each lasting BRAKE_S (or half the stretch, if it is shorter than two of them).
+   */
+  static paced(s: number, durationS: number, fromRest: boolean, toRest: boolean): number {
+    if (!fromRest && !toRest) return s
+    const b = durationS > 0 ? Math.min(0.5, HumanMotion.BRAKE_S / durationS) : 0.5
+    if (fromRest && toRest) {
+      const v = 1 / (1 - b)
+      if (s <= b) return (v * s * s) / (2 * b)
+      if (s >= 1 - b) return 1 - (v * (1 - s) * (1 - s)) / (2 * b)
+      return v * (s - b / 2)
+    }
+    const stopping = (x: number) => {
+      const v = 1 / (1 - b / 2)
+      if (x <= 1 - b) return v * x
+      const u = x - (1 - b)
+      return v * (1 - b) + v * (u - (u * u) / (2 * b))
+    }
+    return toRest ? stopping(s) : 1 - stopping(1 - s)
+  }
+
   private static tangent(times: readonly number[], values: readonly number[], k: number, endsAtRest: boolean): number {
     const last = times.length - 1
     const secant = (a: number) => (values[a + 1] - values[a]) / (times[a + 1] - times[a] || 1)
@@ -264,11 +295,25 @@ export class ObserverTrack {
       }
       heading = ((HumanMotion.at(times, unwrapped, at, t, true) % 360) + 360) % 360
     }
+    // A move into or out of a pause: straight between the two places, at a walker's own pace and
+    // braking (see HumanMotion.paced). Anything else: the curve.
+    const a = this.keyframes[index]
+    const b = this.keyframes[index + 1]
+    const still = (p: ObserverPose, q: ObserverPose) => p.lat === q.lat && p.lng === q.lng && p.elevationM === q.elevationM
+    const moving = !still(a.pose, b.pose)
+    const fromRest = moving && index > 0 && still(this.keyframes[index - 1].pose, a.pose)
+    const toRest = moving && index + 2 < this.keyframes.length && still(b.pose, this.keyframes[index + 2].pose)
+    let place: Pick<ObserverPose, "lat" | "lng" | "elevationM"> | undefined
+    if (fromRest || toRest) {
+      const f = HumanMotion.paced((t - a.t) / (b.t - a.t), (b.t - a.t) / 1000, fromRest, toRest)
+      const blend = (p?: number, q?: number) => (p === undefined || q === undefined ? undefined : p + (q - p) * f)
+      place = { lat: blend(a.pose.lat, b.pose.lat), lng: blend(a.pose.lng, b.pose.lng), elevationM: blend(a.pose.elevationM, b.pose.elevationM)! }
+    }
     return {
       ...linear,
-      lat: channel(pose => pose.lat, false) ?? linear.lat,
-      lng: channel(pose => pose.lng, false) ?? linear.lng,
-      elevationM: channel(pose => pose.elevationM, false) ?? linear.elevationM,
+      lat: place ? place.lat : channel(pose => pose.lat, false) ?? linear.lat,
+      lng: place ? place.lng : channel(pose => pose.lng, false) ?? linear.lng,
+      elevationM: place ? place.elevationM : channel(pose => pose.elevationM, false) ?? linear.elevationM,
       headingDeg: heading ?? linear.headingDeg,
       pitchDeg: channel(pose => pose.pitchDeg, true) ?? linear.pitchDeg,
       rollDeg: channel(pose => pose.rollDeg ?? 0, true) ?? linear.rollDeg,

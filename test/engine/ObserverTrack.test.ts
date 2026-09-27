@@ -146,6 +146,21 @@ describe("ObserverTrack moves the way a person does", () => {
     for (let t = 2000; t <= 3000; t += 100) expect(track.getInterpolatedPoseAt(t)!.lat).toBeCloseTo(2, 9)
   })
 
+  it("stops dead in under a second, however far apart the keyframes around the stop are", () => {
+    const track = new ObserverTrack()
+    track.addKeyframe(0, at(0))
+    track.addKeyframe(45_000, at(45))
+    track.addKeyframe(55_000, at(55))
+    track.addKeyframe(120_000, at(55))
+    // Still at its walking pace a second and a half before the stop…
+    const pace = track.getInterpolatedPoseAt(53_600)!.lat! - track.getInterpolatedPoseAt(53_500)!.lat!
+    expect(pace).toBeGreaterThan(0.1)
+    // …and stopped when the recording says.
+    expect(track.getInterpolatedPoseAt(55_000)!.lat).toBe(55)
+    const lastTenth = track.getInterpolatedPoseAt(55_000)!.lat! - track.getInterpolatedPoseAt(54_900)!.lat!
+    expect(lastTenth).toBeLessThan(0.03)
+  })
+
   it("carries a steady movement through its keyframes at its own speed", () => {
     const track = new ObserverTrack()
     for (let k = 0; k <= 4; k++) track.addKeyframe(k * 1000, at(k))
