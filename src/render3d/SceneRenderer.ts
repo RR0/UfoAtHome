@@ -2235,7 +2235,26 @@ export class SceneRenderer {
    * rebuilding the group, and toggles a streetlight's own real PointLight (built once, up front,
    * in setDecor) visible/invisible to match — never disposed/recreated, since the light itself
    * doesn't change, only whether it's currently switched on. */
+  /** What a recording medium resolves, when the instrument has one — see lampBloomRadiusRad. */
+  private grain?: { detailUm: number, frameHeightMm: number }
+
+  /**
+   * The angular radius a lamp's glare is drawn at: an eye's (DecorSystem's default) or, through an
+   * instrument with a grain, the grain's own angle behind the lens now in use, never under half a
+   * pixel of the picture. A 35 mm frame's 20 micrometres behind a 50 mm lens are 0.023 degrees.
+   */
+  private lampBloomRadiusRad(): number | undefined {
+    if (!this.grain) return undefined
+    const fovRad = (this.camera.fov * Math.PI) / 180
+    const focalMm = this.grain.frameHeightMm / (2 * Math.tan(fovRad / 2))
+    const heightPx = Math.max(1, this.renderer.getDrawingBufferSize(this.bloomSize).y)
+    return Math.max((this.grain.detailUm * 1e-3) / focalMm, fovRad / heightPx / 2)
+  }
+
+  private readonly bloomSize = new Vector2()
+
   updateDecorLitState(t: number, stepMs = 0): void {
+    const bloomRadiusRad = this.lampBloomRadiusRad()
     for (const object of this.decorObjects) {
       const lampGroup = this.decorGroups.get(object.id)
       // Declared lamps first, and for every kind: an aircraft's strobes, a car's hazards, a
@@ -2250,7 +2269,8 @@ export class SceneRenderer {
           // Zero for an ordinary frame (a blink stays a blink); an instant of a pose passes its own
           // length, so the lamp is INTEGRATED over it — see DecorSystem.setLights.
           stepMs,
-          this.relativeScale
+          this.relativeScale,
+          bloomRadiusRad
         )
       }
       if (object.kind !== "streetlight" && object.kind !== "vehicle") continue
@@ -2793,6 +2813,9 @@ export class SceneRenderer {
    */
   setInstrument(instrument: Instrument): void {
     this.projectionKind = instrument.projection
+    this.grain = instrument.detailUm !== undefined && instrument.frame
+      ? { detailUm: instrument.detailUm, frameHeightMm: instrument.frame.heightMm }
+      : undefined
     // Both of the things a bright light does differently through glass, and both derived from the
     // device rather than dialled: the STAR from the aperture's blades (an even count gives that many
     // spikes, an odd one twice as many, a round opening none at all), and the GHOSTS from the lens

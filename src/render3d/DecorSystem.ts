@@ -1099,6 +1099,11 @@ export class DecorSystem {
    *
    * `distanceM` is measured to the object as a whole; a wingtip is not meaningfully further away
    * than a tail at any distance where this matters.
+   *
+   * `bloomRadiusRad` is that glare's own size, the eye's by default. A camera's is its grain's
+   * (see SceneRenderer.lampBloomRadiusRad), several times smaller: drawn with an eye's bloom, a
+   * lamp on a pose spread its light along a trail five times too wide, and the trail an aircraft
+   * leaves in a photograph came out fainter than the sky it crossed.
    */
   static setLights(
     group: Group,
@@ -1106,11 +1111,12 @@ export class DecorSystem {
     t: number,
     distanceM: number,
     stepMs = 0,
-    relativeScale = 1
+    relativeScale = 1,
+    bloomRadiusRad = LAMP_MIN_ANGULAR_RADIUS_RAD
   ): void {
     if (!lights || lights.length === 0) return
     const byId = new Map(lights.map(light => [light.id, light]))
-    const scale = Math.max(1, (distanceM * LAMP_MIN_ANGULAR_RADIUS_RAD) / LAMP_RADIUS_M)
+    const scale = Math.max(1, (distanceM * bloomRadiusRad) / LAMP_RADIUS_M)
     const radiusM = LAMP_RADIUS_M * scale
     const luminancePerCandela = relativeScale / (Math.PI * radiusM * radiusM)
     for (const child of group.children) {
