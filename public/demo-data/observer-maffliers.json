@@ -1302,6 +1302,40 @@
       }
     },
     {
+      "id": "bois-0-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -610.1,
+      "northM": 476.7,
+      "headingDeg": 180,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 26,
+        "lengthM": 26,
+        "heightM": 20.0
+      }
+    },
+    {
+      "id": "bois-0-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -622.7,
+      "northM": 486.5,
+      "headingDeg": 270,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 28,
+        "heightM": 19.0
+      }
+    },
+    {
       "id": "bois-1-0",
       "kind": "shrub",
       "title": {
@@ -1333,6 +1367,40 @@
         "widthM": 26,
         "lengthM": 24,
         "heightM": 19.2
+      }
+    },
+    {
+      "id": "bois-1-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -459.8,
+      "northM": 371.2,
+      "headingDeg": 227,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 26,
+        "heightM": 19.2
+      }
+    },
+    {
+      "id": "bois-1-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -472.2,
+      "northM": 381.3,
+      "headingDeg": 317,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 28,
+        "heightM": 18.2
       }
     },
     {
@@ -1370,6 +1438,40 @@
       }
     },
     {
+      "id": "bois-2-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -448.4,
+      "northM": 378.0,
+      "headingDeg": 274,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 26,
+        "heightM": 18.4
+      }
+    },
+    {
+      "id": "bois-2-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -460.7,
+      "northM": 388.3,
+      "headingDeg": 4,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 32,
+        "lengthM": 28,
+        "heightM": 17.4
+      }
+    },
+    {
       "id": "bois-3-0",
       "kind": "shrub",
       "title": {
@@ -1401,6 +1503,40 @@
         "widthM": 24,
         "lengthM": 24,
         "heightM": 17.6
+      }
+    },
+    {
+      "id": "bois-3-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -438.9,
+      "northM": 386.3,
+      "headingDeg": 321,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 26,
+        "lengthM": 26,
+        "heightM": 17.6
+      }
+    },
+    {
+      "id": "bois-3-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -450.9,
+      "northM": 396.8,
+      "headingDeg": 51,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 28,
+        "heightM": 16.6
       }
     },
     {
@@ -1438,6 +1574,40 @@
       }
     },
     {
+      "id": "bois-4-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -405.9,
+      "northM": 372.9,
+      "headingDeg": 8,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 26,
+        "heightM": 20.0
+      }
+    },
+    {
+      "id": "bois-4-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -417.6,
+      "northM": 383.7,
+      "headingDeg": 98,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 28,
+        "heightM": 19.0
+      }
+    },
+    {
       "id": "bois-5-0",
       "kind": "shrub",
       "title": {
@@ -1469,6 +1639,40 @@
         "widthM": 28,
         "lengthM": 24,
         "heightM": 19.2
+      }
+    },
+    {
+      "id": "bois-5-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -398.7,
+      "northM": 383.4,
+      "headingDeg": 55,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 26,
+        "heightM": 19.2
+      }
+    },
+    {
+      "id": "bois-5-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -410.2,
+      "northM": 394.5,
+      "headingDeg": 145,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 32,
+        "lengthM": 28,
+        "heightM": 18.2
       }
     },
     {
@@ -1506,6 +1710,40 @@
       }
     },
     {
+      "id": "bois-6-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -385.5,
+      "northM": 387.9,
+      "headingDeg": 102,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 26,
+        "lengthM": 26,
+        "heightM": 18.4
+      }
+    },
+    {
+      "id": "bois-6-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -396.8,
+      "northM": 399.3,
+      "headingDeg": 192,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 28,
+        "heightM": 17.4
+      }
+    },
+    {
       "id": "bois-7-0",
       "kind": "shrub",
       "title": {
@@ -1537,6 +1775,40 @@
         "widthM": 26,
         "lengthM": 24,
         "heightM": 17.6
+      }
+    },
+    {
+      "id": "bois-7-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -368.2,
+      "northM": 387.9,
+      "headingDeg": 149,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 26,
+        "heightM": 17.6
+      }
+    },
+    {
+      "id": "bois-7-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -379.2,
+      "northM": 399.5,
+      "headingDeg": 239,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 28,
+        "heightM": 16.6
       }
     },
     {
@@ -1574,6 +1846,40 @@
       }
     },
     {
+      "id": "bois-8-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -359.4,
+      "northM": 397.0,
+      "headingDeg": 196,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 26,
+        "heightM": 20.0
+      }
+    },
+    {
+      "id": "bois-8-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -370.2,
+      "northM": 408.8,
+      "headingDeg": 286,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 32,
+        "lengthM": 28,
+        "heightM": 19.0
+      }
+    },
+    {
       "id": "bois-9-0",
       "kind": "shrub",
       "title": {
@@ -1605,6 +1911,40 @@
         "widthM": 24,
         "lengthM": 24,
         "heightM": 19.2
+      }
+    },
+    {
+      "id": "bois-9-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -356.8,
+      "northM": 413.1,
+      "headingDeg": 243,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 26,
+        "lengthM": 26,
+        "heightM": 19.2
+      }
+    },
+    {
+      "id": "bois-9-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -367.2,
+      "northM": 425.3,
+      "headingDeg": 333,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 28,
+        "heightM": 18.2
       }
     },
     {
@@ -1642,6 +1982,40 @@
       }
     },
     {
+      "id": "bois-10-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -355.9,
+      "northM": 431.8,
+      "headingDeg": 290,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 26,
+        "heightM": 18.4
+      }
+    },
+    {
+      "id": "bois-10-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -366.1,
+      "northM": 444.1,
+      "headingDeg": 20,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 28,
+        "heightM": 17.4
+      }
+    },
+    {
       "id": "bois-11-0",
       "kind": "shrub",
       "title": {
@@ -1673,6 +2047,40 @@
         "widthM": 28,
         "lengthM": 24,
         "heightM": 17.6
+      }
+    },
+    {
+      "id": "bois-11-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -362.6,
+      "northM": 460.6,
+      "headingDeg": 337,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 26,
+        "heightM": 17.6
+      }
+    },
+    {
+      "id": "bois-11-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -372.5,
+      "northM": 473.2,
+      "headingDeg": 67,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 32,
+        "lengthM": 28,
+        "heightM": 16.6
       }
     },
     {
@@ -1710,6 +2118,40 @@
       }
     },
     {
+      "id": "bois-12-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -358.5,
+      "northM": 475.9,
+      "headingDeg": 24,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 26,
+        "lengthM": 26,
+        "heightM": 20.0
+      }
+    },
+    {
+      "id": "bois-12-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -368.1,
+      "northM": 488.7,
+      "headingDeg": 114,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 28,
+        "heightM": 19.0
+      }
+    },
+    {
       "id": "bois-13-0",
       "kind": "shrub",
       "title": {
@@ -1741,6 +2183,40 @@
         "widthM": 26,
         "lengthM": 24,
         "heightM": 19.2
+      }
+    },
+    {
+      "id": "bois-13-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -351.9,
+      "northM": 488.1,
+      "headingDeg": 71,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 26,
+        "heightM": 19.2
+      }
+    },
+    {
+      "id": "bois-13-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -361.2,
+      "northM": 501.1,
+      "headingDeg": 161,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 28,
+        "heightM": 18.2
       }
     },
     {
@@ -1778,6 +2254,40 @@
       }
     },
     {
+      "id": "bois-14-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -595.9,
+      "northM": 897.0,
+      "headingDeg": 118,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 26,
+        "heightM": 18.4
+      }
+    },
+    {
+      "id": "bois-14-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -604.7,
+      "northM": 910.3,
+      "headingDeg": 208,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 32,
+        "lengthM": 28,
+        "heightM": 17.4
+      }
+    },
+    {
       "id": "bois-15-0",
       "kind": "shrub",
       "title": {
@@ -1809,6 +2319,40 @@
         "widthM": 24,
         "lengthM": 24,
         "heightM": 17.6
+      }
+    },
+    {
+      "id": "bois-15-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -556.0,
+      "northM": 858.0,
+      "headingDeg": 165,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 26,
+        "lengthM": 26,
+        "heightM": 17.6
+      }
+    },
+    {
+      "id": "bois-15-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -564.7,
+      "northM": 871.4,
+      "headingDeg": 255,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 28,
+        "heightM": 16.6
       }
     },
     {
@@ -1846,6 +2390,40 @@
       }
     },
     {
+      "id": "bois-16-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -514.8,
+      "northM": 815.7,
+      "headingDeg": 212,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 26,
+        "heightM": 20.0
+      }
+    },
+    {
+      "id": "bois-16-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -523.3,
+      "northM": 829.3,
+      "headingDeg": 302,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 28,
+        "heightM": 19.0
+      }
+    },
+    {
       "id": "bois-17-0",
       "kind": "shrub",
       "title": {
@@ -1877,6 +2455,40 @@
         "widthM": 28,
         "lengthM": 24,
         "heightM": 19.2
+      }
+    },
+    {
+      "id": "bois-17-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -479.2,
+      "northM": 781.2,
+      "headingDeg": 259,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 26,
+        "heightM": 19.2
+      }
+    },
+    {
+      "id": "bois-17-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -487.5,
+      "northM": 794.8,
+      "headingDeg": 349,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 32,
+        "lengthM": 28,
+        "heightM": 18.2
       }
     },
     {
@@ -1914,6 +2526,40 @@
       }
     },
     {
+      "id": "bois-18-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -460.4,
+      "northM": 773.7,
+      "headingDeg": 306,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 26,
+        "lengthM": 26,
+        "heightM": 18.4
+      }
+    },
+    {
+      "id": "bois-18-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -468.6,
+      "northM": 787.5,
+      "headingDeg": 36,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 28,
+        "heightM": 17.4
+      }
+    },
+    {
       "id": "bois-19-0",
       "kind": "shrub",
       "title": {
@@ -1945,6 +2591,40 @@
         "widthM": 26,
         "lengthM": 24,
         "heightM": 17.6
+      }
+    },
+    {
+      "id": "bois-19-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -446.6,
+      "northM": 774.5,
+      "headingDeg": 353,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 26,
+        "heightM": 17.6
+      }
+    },
+    {
+      "id": "bois-19-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -454.6,
+      "northM": 788.3,
+      "headingDeg": 83,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 28,
+        "heightM": 16.6
       }
     },
     {
@@ -1982,6 +2662,40 @@
       }
     },
     {
+      "id": "bois-20-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -432.9,
+      "northM": 775.2,
+      "headingDeg": 40,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 26,
+        "heightM": 20.0
+      }
+    },
+    {
+      "id": "bois-20-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -440.7,
+      "northM": 789.2,
+      "headingDeg": 130,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 32,
+        "lengthM": 28,
+        "heightM": 19.0
+      }
+    },
+    {
       "id": "bois-21-0",
       "kind": "shrub",
       "title": {
@@ -2013,6 +2727,40 @@
         "widthM": 24,
         "lengthM": 24,
         "heightM": 19.2
+      }
+    },
+    {
+      "id": "bois-21-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -419.2,
+      "northM": 775.9,
+      "headingDeg": 87,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 26,
+        "lengthM": 26,
+        "heightM": 19.2
+      }
+    },
+    {
+      "id": "bois-21-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -426.8,
+      "northM": 790.0,
+      "headingDeg": 177,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 28,
+        "heightM": 18.2
       }
     },
     {
@@ -2050,6 +2798,40 @@
       }
     },
     {
+      "id": "bois-22-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -405.7,
+      "northM": 776.6,
+      "headingDeg": 134,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 26,
+        "heightM": 18.4
+      }
+    },
+    {
+      "id": "bois-22-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -413.1,
+      "northM": 790.8,
+      "headingDeg": 224,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 28,
+        "heightM": 17.4
+      }
+    },
+    {
       "id": "bois-23-0",
       "kind": "shrub",
       "title": {
@@ -2081,6 +2863,40 @@
         "widthM": 28,
         "lengthM": 24,
         "heightM": 17.6
+      }
+    },
+    {
+      "id": "bois-23-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -392.2,
+      "northM": 777.3,
+      "headingDeg": 181,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 26,
+        "heightM": 17.6
+      }
+    },
+    {
+      "id": "bois-23-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -399.4,
+      "northM": 791.6,
+      "headingDeg": 271,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 32,
+        "lengthM": 28,
+        "heightM": 16.6
       }
     },
     {
@@ -2118,6 +2934,40 @@
       }
     },
     {
+      "id": "bois-24-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -378.9,
+      "northM": 778.0,
+      "headingDeg": 228,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 26,
+        "lengthM": 26,
+        "heightM": 20.0
+      }
+    },
+    {
+      "id": "bois-24-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -385.9,
+      "northM": 792.4,
+      "headingDeg": 318,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 28,
+        "heightM": 19.0
+      }
+    },
+    {
       "id": "bois-25-0",
       "kind": "shrub",
       "title": {
@@ -2149,6 +2999,40 @@
         "widthM": 26,
         "lengthM": 24,
         "heightM": 19.2
+      }
+    },
+    {
+      "id": "bois-25-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -365.5,
+      "northM": 778.7,
+      "headingDeg": 275,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 26,
+        "heightM": 19.2
+      }
+    },
+    {
+      "id": "bois-25-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -372.3,
+      "northM": 793.2,
+      "headingDeg": 5,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 28,
+        "heightM": 18.2
       }
     },
     {
@@ -2186,6 +3070,40 @@
       }
     },
     {
+      "id": "bois-26-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -245.2,
+      "northM": 542.6,
+      "headingDeg": 322,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 26,
+        "heightM": 18.4
+      }
+    },
+    {
+      "id": "bois-26-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -251.8,
+      "northM": 557.1,
+      "headingDeg": 52,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 32,
+        "lengthM": 28,
+        "heightM": 17.4
+      }
+    },
+    {
       "id": "bois-27-0",
       "kind": "shrub",
       "title": {
@@ -2217,6 +3135,40 @@
         "widthM": 24,
         "lengthM": 24,
         "heightM": 17.6
+      }
+    },
+    {
+      "id": "bois-27-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -223.5,
+      "northM": 523.5,
+      "headingDeg": 9,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 26,
+        "lengthM": 26,
+        "heightM": 17.6
+      }
+    },
+    {
+      "id": "bois-27-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -229.8,
+      "northM": 538.3,
+      "headingDeg": 99,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 28,
+        "heightM": 16.6
       }
     },
     {
@@ -2254,6 +3206,40 @@
       }
     },
     {
+      "id": "bois-28-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -209.4,
+      "northM": 521.9,
+      "headingDeg": 56,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 26,
+        "heightM": 20.0
+      }
+    },
+    {
+      "id": "bois-28-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -215.3,
+      "northM": 536.7,
+      "headingDeg": 146,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 28,
+        "heightM": 19.0
+      }
+    },
+    {
       "id": "bois-29-0",
       "kind": "shrub",
       "title": {
@@ -2285,6 +3271,40 @@
         "widthM": 28,
         "lengthM": 24,
         "heightM": 19.2
+      }
+    },
+    {
+      "id": "bois-29-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -193.8,
+      "northM": 516.0,
+      "headingDeg": 103,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 26,
+        "heightM": 19.2
+      }
+    },
+    {
+      "id": "bois-29-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -199.4,
+      "northM": 531.0,
+      "headingDeg": 193,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 32,
+        "lengthM": 28,
+        "heightM": 18.2
       }
     },
     {
@@ -2322,6 +3342,40 @@
       }
     },
     {
+      "id": "bois-30-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -173.5,
+      "northM": 496.1,
+      "headingDeg": 150,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 26,
+        "lengthM": 26,
+        "heightM": 18.4
+      }
+    },
+    {
+      "id": "bois-30-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -178.8,
+      "northM": 511.2,
+      "headingDeg": 240,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 28,
+        "heightM": 17.4
+      }
+    },
+    {
       "id": "bois-31-0",
       "kind": "shrub",
       "title": {
@@ -2353,6 +3407,40 @@
         "widthM": 26,
         "lengthM": 24,
         "heightM": 17.6
+      }
+    },
+    {
+      "id": "bois-31-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -159.3,
+      "northM": 493.0,
+      "headingDeg": 197,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 26,
+        "heightM": 17.6
+      }
+    },
+    {
+      "id": "bois-31-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -164.2,
+      "northM": 508.2,
+      "headingDeg": 287,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 28,
+        "heightM": 16.6
       }
     },
     {
@@ -2390,6 +3478,40 @@
       }
     },
     {
+      "id": "bois-32-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -146.2,
+      "northM": 493.1,
+      "headingDeg": 244,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 26,
+        "heightM": 20.0
+      }
+    },
+    {
+      "id": "bois-32-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -150.8,
+      "northM": 508.5,
+      "headingDeg": 334,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 32,
+        "lengthM": 28,
+        "heightM": 19.0
+      }
+    },
+    {
       "id": "bois-33-0",
       "kind": "shrub",
       "title": {
@@ -2421,6 +3543,40 @@
         "widthM": 24,
         "lengthM": 24,
         "heightM": 19.2
+      }
+    },
+    {
+      "id": "bois-33-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -134.5,
+      "northM": 498.1,
+      "headingDeg": 291,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 26,
+        "lengthM": 26,
+        "heightM": 19.2
+      }
+    },
+    {
+      "id": "bois-33-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -138.7,
+      "northM": 513.5,
+      "headingDeg": 21,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 28,
+        "heightM": 18.2
       }
     },
     {
@@ -2458,6 +3614,40 @@
       }
     },
     {
+      "id": "bois-34-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -124.0,
+      "northM": 508.0,
+      "headingDeg": 338,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 26,
+        "heightM": 18.4
+      }
+    },
+    {
+      "id": "bois-34-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -127.8,
+      "northM": 523.5,
+      "headingDeg": 68,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 28,
+        "heightM": 17.4
+      }
+    },
+    {
       "id": "bois-35-0",
       "kind": "shrub",
       "title": {
@@ -2489,6 +3679,40 @@
         "widthM": 28,
         "lengthM": 24,
         "heightM": 17.6
+      }
+    },
+    {
+      "id": "bois-35-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -113.8,
+      "northM": 520.2,
+      "headingDeg": 25,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 26,
+        "heightM": 17.6
+      }
+    },
+    {
+      "id": "bois-35-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -117.2,
+      "northM": 535.9,
+      "headingDeg": 115,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 32,
+        "lengthM": 28,
+        "heightM": 16.6
       }
     },
     {
@@ -2526,6 +3750,40 @@
       }
     },
     {
+      "id": "bois-36-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -102.8,
+      "northM": 529.4,
+      "headingDeg": 72,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 26,
+        "lengthM": 26,
+        "heightM": 20.0
+      }
+    },
+    {
+      "id": "bois-36-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -105.8,
+      "northM": 545.1,
+      "headingDeg": 162,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 28,
+        "heightM": 19.0
+      }
+    },
+    {
       "id": "bois-37-0",
       "kind": "shrub",
       "title": {
@@ -2557,6 +3815,40 @@
         "widthM": 26,
         "lengthM": 24,
         "heightM": 19.2
+      }
+    },
+    {
+      "id": "bois-37-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -90.8,
+      "northM": 533.7,
+      "headingDeg": 119,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 26,
+        "heightM": 19.2
+      }
+    },
+    {
+      "id": "bois-37-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -93.4,
+      "northM": 549.4,
+      "headingDeg": 209,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 28,
+        "heightM": 18.2
       }
     },
     {
@@ -2594,6 +3886,40 @@
       }
     },
     {
+      "id": "bois-38-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -78.3,
+      "northM": 535.2,
+      "headingDeg": 166,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 26,
+        "heightM": 18.4
+      }
+    },
+    {
+      "id": "bois-38-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -80.6,
+      "northM": 551.0,
+      "headingDeg": 256,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 32,
+        "lengthM": 28,
+        "heightM": 17.4
+      }
+    },
+    {
       "id": "bois-39-0",
       "kind": "shrub",
       "title": {
@@ -2625,6 +3951,40 @@
         "widthM": 24,
         "lengthM": 24,
         "heightM": 17.6
+      }
+    },
+    {
+      "id": "bois-39-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -66.9,
+      "northM": 545.9,
+      "headingDeg": 213,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 26,
+        "lengthM": 26,
+        "heightM": 17.6
+      }
+    },
+    {
+      "id": "bois-39-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -68.9,
+      "northM": 561.7,
+      "headingDeg": 303,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 28,
+        "heightM": 16.6
       }
     },
     {
@@ -2662,6 +4022,40 @@
       }
     },
     {
+      "id": "bois-40-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -55.4,
+      "northM": 556.3,
+      "headingDeg": 260,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 26,
+        "heightM": 20.0
+      }
+    },
+    {
+      "id": "bois-40-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -57.0,
+      "northM": 572.2,
+      "headingDeg": 350,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 28,
+        "heightM": 19.0
+      }
+    },
+    {
       "id": "bois-41-0",
       "kind": "shrub",
       "title": {
@@ -2693,6 +4087,40 @@
         "widthM": 28,
         "lengthM": 24,
         "heightM": 19.2
+      }
+    },
+    {
+      "id": "bois-41-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -43.5,
+      "northM": 565.1,
+      "headingDeg": 307,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 26,
+        "heightM": 19.2
+      }
+    },
+    {
+      "id": "bois-41-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -44.7,
+      "northM": 581.1,
+      "headingDeg": 37,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 32,
+        "lengthM": 28,
+        "heightM": 18.2
       }
     },
     {
@@ -2730,6 +4158,40 @@
       }
     },
     {
+      "id": "bois-42-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -31.4,
+      "northM": 574.1,
+      "headingDeg": 354,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 26,
+        "lengthM": 26,
+        "heightM": 18.4
+      }
+    },
+    {
+      "id": "bois-42-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -32.3,
+      "northM": 590.0,
+      "headingDeg": 84,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 28,
+        "heightM": 17.4
+      }
+    },
+    {
       "id": "bois-43-0",
       "kind": "shrub",
       "title": {
@@ -2761,6 +4223,40 @@
         "widthM": 26,
         "lengthM": 24,
         "heightM": 17.6
+      }
+    },
+    {
+      "id": "bois-43-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -19.2,
+      "northM": 583.1,
+      "headingDeg": 41,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 26,
+        "heightM": 17.6
+      }
+    },
+    {
+      "id": "bois-43-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -19.7,
+      "northM": 599.1,
+      "headingDeg": 131,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 28,
+        "heightM": 16.6
       }
     },
     {
@@ -2798,6 +4294,40 @@
       }
     },
     {
+      "id": "bois-44-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -6.8,
+      "northM": 589.8,
+      "headingDeg": 88,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 26,
+        "heightM": 20.0
+      }
+    },
+    {
+      "id": "bois-44-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": -6.9,
+      "northM": 605.8,
+      "headingDeg": 178,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 32,
+        "lengthM": 28,
+        "heightM": 19.0
+      }
+    },
+    {
       "id": "bois-45-0",
       "kind": "shrub",
       "title": {
@@ -2829,6 +4359,40 @@
         "widthM": 24,
         "lengthM": 24,
         "heightM": 19.2
+      }
+    },
+    {
+      "id": "bois-45-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 5.8,
+      "northM": 596.1,
+      "headingDeg": 135,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 26,
+        "lengthM": 26,
+        "heightM": 19.2
+      }
+    },
+    {
+      "id": "bois-45-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 6.0,
+      "northM": 612.1,
+      "headingDeg": 225,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 28,
+        "heightM": 18.2
       }
     },
     {
@@ -2866,6 +4430,40 @@
       }
     },
     {
+      "id": "bois-46-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 18.5,
+      "northM": 600.6,
+      "headingDeg": 182,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 26,
+        "heightM": 18.4
+      }
+    },
+    {
+      "id": "bois-46-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 19.0,
+      "northM": 616.6,
+      "headingDeg": 272,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 28,
+        "heightM": 17.4
+      }
+    },
+    {
       "id": "bois-47-0",
       "kind": "shrub",
       "title": {
@@ -2897,6 +4495,40 @@
         "widthM": 28,
         "lengthM": 24,
         "heightM": 17.6
+      }
+    },
+    {
+      "id": "bois-47-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 31.1,
+      "northM": 602.9,
+      "headingDeg": 229,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 26,
+        "heightM": 17.6
+      }
+    },
+    {
+      "id": "bois-47-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 31.9,
+      "northM": 618.9,
+      "headingDeg": 319,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 32,
+        "lengthM": 28,
+        "heightM": 16.6
       }
     },
     {
@@ -2934,6 +4566,40 @@
       }
     },
     {
+      "id": "bois-48-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 43.8,
+      "northM": 605.3,
+      "headingDeg": 276,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 26,
+        "lengthM": 26,
+        "heightM": 20.0
+      }
+    },
+    {
+      "id": "bois-48-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 45.0,
+      "northM": 621.2,
+      "headingDeg": 6,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 28,
+        "heightM": 19.0
+      }
+    },
+    {
       "id": "bois-49-0",
       "kind": "shrub",
       "title": {
@@ -2965,6 +4631,40 @@
         "widthM": 26,
         "lengthM": 24,
         "heightM": 19.2
+      }
+    },
+    {
+      "id": "bois-49-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 56.6,
+      "northM": 607.7,
+      "headingDeg": 323,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 26,
+        "heightM": 19.2
+      }
+    },
+    {
+      "id": "bois-49-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 58.1,
+      "northM": 623.7,
+      "headingDeg": 53,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 28,
+        "heightM": 18.2
       }
     },
     {
@@ -3002,6 +4702,40 @@
       }
     },
     {
+      "id": "bois-50-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 70.1,
+      "northM": 615.8,
+      "headingDeg": 10,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 26,
+        "heightM": 18.4
+      }
+    },
+    {
+      "id": "bois-50-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 71.9,
+      "northM": 631.7,
+      "headingDeg": 100,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 32,
+        "lengthM": 28,
+        "heightM": 17.4
+      }
+    },
+    {
       "id": "bois-51-0",
       "kind": "shrub",
       "title": {
@@ -3033,6 +4767,40 @@
         "widthM": 24,
         "lengthM": 24,
         "heightM": 17.6
+      }
+    },
+    {
+      "id": "bois-51-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 83.8,
+      "northM": 624.6,
+      "headingDeg": 57,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 26,
+        "lengthM": 26,
+        "heightM": 17.6
+      }
+    },
+    {
+      "id": "bois-51-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 86.0,
+      "northM": 640.5,
+      "headingDeg": 147,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 28,
+        "heightM": 16.6
       }
     },
     {
@@ -3070,6 +4838,40 @@
       }
     },
     {
+      "id": "bois-52-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 98.5,
+      "northM": 638.0,
+      "headingDeg": 104,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 26,
+        "heightM": 20.0
+      }
+    },
+    {
+      "id": "bois-52-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 101.0,
+      "northM": 653.8,
+      "headingDeg": 194,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 28,
+        "heightM": 19.0
+      }
+    },
+    {
       "id": "bois-53-0",
       "kind": "shrub",
       "title": {
@@ -3101,6 +4903,40 @@
         "widthM": 28,
         "lengthM": 24,
         "heightM": 19.2
+      }
+    },
+    {
+      "id": "bois-53-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 115.5,
+      "northM": 662.9,
+      "headingDeg": 151,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 26,
+        "heightM": 19.2
+      }
+    },
+    {
+      "id": "bois-53-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 118.3,
+      "northM": 678.6,
+      "headingDeg": 241,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 32,
+        "lengthM": 28,
+        "heightM": 18.2
       }
     },
     {
@@ -3138,6 +4974,40 @@
       }
     },
     {
+      "id": "bois-54-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 130.3,
+      "northM": 673.9,
+      "headingDeg": 198,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 26,
+        "lengthM": 26,
+        "heightM": 18.4
+      }
+    },
+    {
+      "id": "bois-54-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 133.3,
+      "northM": 689.6,
+      "headingDeg": 288,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 28,
+        "heightM": 17.4
+      }
+    },
+    {
       "id": "bois-55-0",
       "kind": "shrub",
       "title": {
@@ -3169,6 +5039,40 @@
         "widthM": 26,
         "lengthM": 24,
         "heightM": 17.6
+      }
+    },
+    {
+      "id": "bois-55-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 132.4,
+      "northM": 623.8,
+      "headingDeg": 245,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 26,
+        "heightM": 17.6
+      }
+    },
+    {
+      "id": "bois-55-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 135.7,
+      "northM": 639.4,
+      "headingDeg": 335,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 28,
+        "heightM": 16.6
       }
     },
     {
@@ -3206,6 +5110,40 @@
       }
     },
     {
+      "id": "bois-56-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 142.8,
+      "northM": 613.3,
+      "headingDeg": 292,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 26,
+        "heightM": 20.0
+      }
+    },
+    {
+      "id": "bois-56-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 146.4,
+      "northM": 628.9,
+      "headingDeg": 22,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 32,
+        "lengthM": 28,
+        "heightM": 19.0
+      }
+    },
+    {
       "id": "bois-57-0",
       "kind": "shrub",
       "title": {
@@ -3237,6 +5175,40 @@
         "widthM": 24,
         "lengthM": 24,
         "heightM": 19.2
+      }
+    },
+    {
+      "id": "bois-57-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 156.9,
+      "northM": 618.2,
+      "headingDeg": 339,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 26,
+        "lengthM": 26,
+        "heightM": 19.2
+      }
+    },
+    {
+      "id": "bois-57-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 160.8,
+      "northM": 633.7,
+      "headingDeg": 69,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 28,
+        "heightM": 18.2
       }
     },
     {
@@ -3274,6 +5246,40 @@
       }
     },
     {
+      "id": "bois-58-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 170.3,
+      "northM": 620.1,
+      "headingDeg": 26,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 26,
+        "heightM": 18.4
+      }
+    },
+    {
+      "id": "bois-58-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 174.6,
+      "northM": 635.5,
+      "headingDeg": 116,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 28,
+        "heightM": 17.4
+      }
+    },
+    {
       "id": "bois-59-0",
       "kind": "shrub",
       "title": {
@@ -3305,6 +5311,40 @@
         "widthM": 28,
         "lengthM": 24,
         "heightM": 17.6
+      }
+    },
+    {
+      "id": "bois-59-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 311.7,
+      "northM": 1054.5,
+      "headingDeg": 73,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 26,
+        "heightM": 17.6
+      }
+    },
+    {
+      "id": "bois-59-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 316.3,
+      "northM": 1069.8,
+      "headingDeg": 163,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 32,
+        "lengthM": 28,
+        "heightM": 16.6
       }
     },
     {
@@ -3342,6 +5382,40 @@
       }
     },
     {
+      "id": "bois-60-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 332.3,
+      "northM": 1079.5,
+      "headingDeg": 120,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 26,
+        "lengthM": 26,
+        "heightM": 20.0
+      }
+    },
+    {
+      "id": "bois-60-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 337.0,
+      "northM": 1094.8,
+      "headingDeg": 210,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 28,
+        "heightM": 19.0
+      }
+    },
+    {
       "id": "bois-61-0",
       "kind": "shrub",
       "title": {
@@ -3373,6 +5447,40 @@
         "widthM": 26,
         "lengthM": 24,
         "heightM": 19.2
+      }
+    },
+    {
+      "id": "bois-61-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 353.4,
+      "northM": 1105.3,
+      "headingDeg": 167,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 26,
+        "heightM": 19.2
+      }
+    },
+    {
+      "id": "bois-61-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 358.3,
+      "northM": 1120.5,
+      "headingDeg": 257,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 28,
+        "heightM": 18.2
       }
     },
     {
@@ -3410,6 +5518,40 @@
       }
     },
     {
+      "id": "bois-62-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 375.1,
+      "northM": 1131.8,
+      "headingDeg": 214,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 26,
+        "heightM": 18.4
+      }
+    },
+    {
+      "id": "bois-62-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 380.1,
+      "northM": 1147.0,
+      "headingDeg": 304,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 32,
+        "lengthM": 28,
+        "heightM": 17.4
+      }
+    },
+    {
       "id": "bois-63-0",
       "kind": "shrub",
       "title": {
@@ -3441,6 +5583,40 @@
         "widthM": 24,
         "lengthM": 24,
         "heightM": 17.6
+      }
+    },
+    {
+      "id": "bois-63-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 397.4,
+      "northM": 1159.0,
+      "headingDeg": 261,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 26,
+        "lengthM": 26,
+        "heightM": 17.6
+      }
+    },
+    {
+      "id": "bois-63-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 402.6,
+      "northM": 1174.2,
+      "headingDeg": 351,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 28,
+        "heightM": 16.6
       }
     },
     {
@@ -3478,6 +5654,40 @@
       }
     },
     {
+      "id": "bois-64-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 420.3,
+      "northM": 1187.0,
+      "headingDeg": 308,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 26,
+        "heightM": 20.0
+      }
+    },
+    {
+      "id": "bois-64-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 425.6,
+      "northM": 1202.1,
+      "headingDeg": 38,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 28,
+        "heightM": 19.0
+      }
+    },
+    {
       "id": "bois-65-0",
       "kind": "shrub",
       "title": {
@@ -3509,6 +5719,40 @@
         "widthM": 28,
         "lengthM": 24,
         "heightM": 19.2
+      }
+    },
+    {
+      "id": "bois-65-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 436.7,
+      "northM": 1196.5,
+      "headingDeg": 355,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 26,
+        "heightM": 19.2
+      }
+    },
+    {
+      "id": "bois-65-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 442.2,
+      "northM": 1211.5,
+      "headingDeg": 85,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 32,
+        "lengthM": 28,
+        "heightM": 18.2
       }
     },
     {
@@ -3546,6 +5790,40 @@
       }
     },
     {
+      "id": "bois-66-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 449.9,
+      "northM": 1196.7,
+      "headingDeg": 42,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 26,
+        "lengthM": 26,
+        "heightM": 18.4
+      }
+    },
+    {
+      "id": "bois-66-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 455.5,
+      "northM": 1211.7,
+      "headingDeg": 132,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 28,
+        "heightM": 17.4
+      }
+    },
+    {
       "id": "bois-67-0",
       "kind": "shrub",
       "title": {
@@ -3577,6 +5855,40 @@
         "widthM": 26,
         "lengthM": 24,
         "heightM": 17.6
+      }
+    },
+    {
+      "id": "bois-67-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 463.1,
+      "northM": 1196.9,
+      "headingDeg": 89,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 26,
+        "heightM": 17.6
+      }
+    },
+    {
+      "id": "bois-67-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 468.9,
+      "northM": 1211.9,
+      "headingDeg": 179,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 28,
+        "heightM": 16.6
       }
     },
     {
@@ -3614,6 +5926,40 @@
       }
     },
     {
+      "id": "bois-68-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 476.3,
+      "northM": 1197.2,
+      "headingDeg": 136,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 26,
+        "heightM": 20.0
+      }
+    },
+    {
+      "id": "bois-68-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 482.2,
+      "northM": 1212.0,
+      "headingDeg": 226,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 32,
+        "lengthM": 28,
+        "heightM": 19.0
+      }
+    },
+    {
       "id": "bois-69-0",
       "kind": "shrub",
       "title": {
@@ -3645,6 +5991,40 @@
         "widthM": 24,
         "lengthM": 24,
         "heightM": 19.2
+      }
+    },
+    {
+      "id": "bois-69-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 489.6,
+      "northM": 1197.4,
+      "headingDeg": 183,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 26,
+        "lengthM": 26,
+        "heightM": 19.2
+      }
+    },
+    {
+      "id": "bois-69-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 495.7,
+      "northM": 1212.2,
+      "headingDeg": 273,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 28,
+        "heightM": 18.2
       }
     },
     {
@@ -3682,6 +6062,40 @@
       }
     },
     {
+      "id": "bois-70-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 503.0,
+      "northM": 1197.6,
+      "headingDeg": 230,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 26,
+        "heightM": 18.4
+      }
+    },
+    {
+      "id": "bois-70-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 509.2,
+      "northM": 1212.4,
+      "headingDeg": 320,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 28,
+        "heightM": 17.4
+      }
+    },
+    {
       "id": "bois-71-0",
       "kind": "shrub",
       "title": {
@@ -3713,6 +6127,40 @@
         "widthM": 28,
         "lengthM": 24,
         "heightM": 17.6
+      }
+    },
+    {
+      "id": "bois-71-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 727.1,
+      "northM": 1106.1,
+      "headingDeg": 277,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 26,
+        "heightM": 17.6
+      }
+    },
+    {
+      "id": "bois-71-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 735.9,
+      "northM": 1119.4,
+      "headingDeg": 7,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 32,
+        "lengthM": 28,
+        "heightM": 16.6
       }
     },
     {
@@ -3750,6 +6198,40 @@
       }
     },
     {
+      "id": "bois-72-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 592.9,
+      "northM": 685.6,
+      "headingDeg": 324,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 26,
+        "lengthM": 26,
+        "heightM": 20.0
+      }
+    },
+    {
+      "id": "bois-72-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 603.4,
+      "northM": 697.8,
+      "headingDeg": 54,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 28,
+        "heightM": 19.0
+      }
+    },
+    {
       "id": "bois-73-0",
       "kind": "shrub",
       "title": {
@@ -3781,6 +6263,40 @@
         "widthM": 26,
         "lengthM": 24,
         "heightM": 19.2
+      }
+    },
+    {
+      "id": "bois-73-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 579.3,
+      "northM": 651.8,
+      "headingDeg": 11,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 26,
+        "heightM": 19.2
+      }
+    },
+    {
+      "id": "bois-73-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 589.9,
+      "northM": 663.7,
+      "headingDeg": 101,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 28,
+        "heightM": 18.2
       }
     },
     {
@@ -3818,6 +6334,40 @@
       }
     },
     {
+      "id": "bois-74-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 577.8,
+      "northM": 631.9,
+      "headingDeg": 58,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 26,
+        "heightM": 18.4
+      }
+    },
+    {
+      "id": "bois-74-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 588.6,
+      "northM": 643.7,
+      "headingDeg": 148,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 32,
+        "lengthM": 28,
+        "heightM": 17.4
+      }
+    },
+    {
       "id": "bois-75-0",
       "kind": "shrub",
       "title": {
@@ -3849,6 +6399,40 @@
         "widthM": 24,
         "lengthM": 24,
         "heightM": 17.6
+      }
+    },
+    {
+      "id": "bois-75-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 576.4,
+      "northM": 612.3,
+      "headingDeg": 105,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 26,
+        "lengthM": 26,
+        "heightM": 17.6
+      }
+    },
+    {
+      "id": "bois-75-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 587.3,
+      "northM": 624.0,
+      "headingDeg": 195,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 28,
+        "heightM": 16.6
       }
     },
     {
@@ -3886,6 +6470,40 @@
       }
     },
     {
+      "id": "bois-76-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 574.9,
+      "northM": 593.1,
+      "headingDeg": 152,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 26,
+        "heightM": 20.0
+      }
+    },
+    {
+      "id": "bois-76-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 586.1,
+      "northM": 604.6,
+      "headingDeg": 242,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 28,
+        "heightM": 19.0
+      }
+    },
+    {
       "id": "bois-77-0",
       "kind": "shrub",
       "title": {
@@ -3917,6 +6535,40 @@
         "widthM": 28,
         "lengthM": 24,
         "heightM": 19.2
+      }
+    },
+    {
+      "id": "bois-77-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 311.2,
+      "northM": 311.6,
+      "headingDeg": 199,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 26,
+        "heightM": 19.2
+      }
+    },
+    {
+      "id": "bois-77-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 322.5,
+      "northM": 322.9,
+      "headingDeg": 289,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 32,
+        "lengthM": 28,
+        "heightM": 18.2
       }
     },
     {
@@ -3954,6 +6606,40 @@
       }
     },
     {
+      "id": "bois-78-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 312.6,
+      "northM": 295.5,
+      "headingDeg": 246,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 26,
+        "lengthM": 26,
+        "heightM": 18.4
+      }
+    },
+    {
+      "id": "bois-78-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 324.3,
+      "northM": 306.5,
+      "headingDeg": 336,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 28,
+        "heightM": 17.4
+      }
+    },
+    {
       "id": "bois-79-0",
       "kind": "shrub",
       "title": {
@@ -3985,6 +6671,40 @@
         "widthM": 26,
         "lengthM": 24,
         "heightM": 17.6
+      }
+    },
+    {
+      "id": "bois-79-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 334.7,
+      "northM": 298.1,
+      "headingDeg": 293,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 26,
+        "heightM": 17.6
+      }
+    },
+    {
+      "id": "bois-79-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 346.7,
+      "northM": 308.8,
+      "headingDeg": 23,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 28,
+        "heightM": 16.6
       }
     },
     {
@@ -4022,6 +6742,40 @@
       }
     },
     {
+      "id": "bois-80-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 347.5,
+      "northM": 292.3,
+      "headingDeg": 340,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 26,
+        "heightM": 20.0
+      }
+    },
+    {
+      "id": "bois-80-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 359.8,
+      "northM": 302.6,
+      "headingDeg": 70,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 32,
+        "lengthM": 28,
+        "heightM": 19.0
+      }
+    },
+    {
       "id": "bois-81-0",
       "kind": "shrub",
       "title": {
@@ -4053,6 +6807,40 @@
         "widthM": 24,
         "lengthM": 24,
         "heightM": 19.2
+      }
+    },
+    {
+      "id": "bois-81-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 358.1,
+      "northM": 284.6,
+      "headingDeg": 27,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 26,
+        "lengthM": 26,
+        "heightM": 19.2
+      }
+    },
+    {
+      "id": "bois-81-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 370.6,
+      "northM": 294.5,
+      "headingDeg": 117,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 28,
+        "heightM": 18.2
       }
     },
     {
@@ -4090,6 +6878,40 @@
       }
     },
     {
+      "id": "bois-82-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 369.1,
+      "northM": 277.0,
+      "headingDeg": 74,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 26,
+        "heightM": 18.4
+      }
+    },
+    {
+      "id": "bois-82-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 381.9,
+      "northM": 286.6,
+      "headingDeg": 164,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 28,
+        "heightM": 17.4
+      }
+    },
+    {
       "id": "bois-83-0",
       "kind": "shrub",
       "title": {
@@ -4121,6 +6943,40 @@
         "widthM": 28,
         "lengthM": 24,
         "heightM": 17.6
+      }
+    },
+    {
+      "id": "bois-83-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 571.5,
+      "northM": 404.8,
+      "headingDeg": 121,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 26,
+        "heightM": 17.6
+      }
+    },
+    {
+      "id": "bois-83-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 584.5,
+      "northM": 414.1,
+      "headingDeg": 211,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 32,
+        "lengthM": 28,
+        "heightM": 16.6
       }
     },
     {
@@ -4158,6 +7014,40 @@
       }
     },
     {
+      "id": "bois-84-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 574.9,
+      "northM": 392.2,
+      "headingDeg": 168,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 26,
+        "lengthM": 26,
+        "heightM": 20.0
+      }
+    },
+    {
+      "id": "bois-84-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 588.2,
+      "northM": 401.2,
+      "headingDeg": 258,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 28,
+        "heightM": 19.0
+      }
+    },
+    {
       "id": "bois-85-0",
       "kind": "shrub",
       "title": {
@@ -4189,6 +7079,40 @@
         "widthM": 26,
         "lengthM": 24,
         "heightM": 19.2
+      }
+    },
+    {
+      "id": "bois-85-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 578.4,
+      "northM": 379.6,
+      "headingDeg": 215,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 26,
+        "heightM": 19.2
+      }
+    },
+    {
+      "id": "bois-85-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 591.8,
+      "northM": 388.3,
+      "headingDeg": 305,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 28,
+        "heightM": 18.2
       }
     },
     {
@@ -4226,6 +7150,40 @@
       }
     },
     {
+      "id": "bois-86-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 581.8,
+      "northM": 367.0,
+      "headingDeg": 262,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 26,
+        "heightM": 18.4
+      }
+    },
+    {
+      "id": "bois-86-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 595.4,
+      "northM": 375.6,
+      "headingDeg": 352,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 32,
+        "lengthM": 28,
+        "heightM": 17.4
+      }
+    },
+    {
       "id": "bois-87-0",
       "kind": "shrub",
       "title": {
@@ -4257,6 +7215,40 @@
         "widthM": 24,
         "lengthM": 24,
         "heightM": 17.6
+      }
+    },
+    {
+      "id": "bois-87-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 585.2,
+      "northM": 354.5,
+      "headingDeg": 309,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 26,
+        "lengthM": 26,
+        "heightM": 17.6
+      }
+    },
+    {
+      "id": "bois-87-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 598.9,
+      "northM": 362.8,
+      "headingDeg": 39,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 28,
+        "heightM": 16.6
       }
     },
     {
@@ -4294,6 +7286,40 @@
       }
     },
     {
+      "id": "bois-88-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 588.6,
+      "northM": 342.1,
+      "headingDeg": 356,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 26,
+        "heightM": 20.0
+      }
+    },
+    {
+      "id": "bois-88-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 602.5,
+      "northM": 350.2,
+      "headingDeg": 86,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 28,
+        "heightM": 19.0
+      }
+    },
+    {
       "id": "bois-89-0",
       "kind": "shrub",
       "title": {
@@ -4325,6 +7351,40 @@
         "widthM": 28,
         "lengthM": 24,
         "heightM": 19.2
+      }
+    },
+    {
+      "id": "bois-89-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 582.8,
+      "northM": 324.6,
+      "headingDeg": 43,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 26,
+        "heightM": 19.2
+      }
+    },
+    {
+      "id": "bois-89-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 596.8,
+      "northM": 332.4,
+      "headingDeg": 133,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 32,
+        "lengthM": 28,
+        "heightM": 18.2
       }
     },
     {
@@ -4362,6 +7422,40 @@
       }
     },
     {
+      "id": "bois-90-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 575.1,
+      "northM": 306.5,
+      "headingDeg": 90,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 26,
+        "lengthM": 26,
+        "heightM": 18.4
+      }
+    },
+    {
+      "id": "bois-90-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 589.3,
+      "northM": 314.0,
+      "headingDeg": 180,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 28,
+        "heightM": 17.4
+      }
+    },
+    {
       "id": "bois-91-0",
       "kind": "shrub",
       "title": {
@@ -4393,6 +7487,40 @@
         "widthM": 26,
         "lengthM": 24,
         "heightM": 17.6
+      }
+    },
+    {
+      "id": "bois-91-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 567.7,
+      "northM": 288.7,
+      "headingDeg": 137,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 26,
+        "heightM": 17.6
+      }
+    },
+    {
+      "id": "bois-91-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 581.9,
+      "northM": 296.0,
+      "headingDeg": 227,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 28,
+        "heightM": 16.6
       }
     },
     {
@@ -4430,6 +7558,40 @@
       }
     },
     {
+      "id": "bois-92-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 560.4,
+      "northM": 271.3,
+      "headingDeg": 184,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 26,
+        "heightM": 20.0
+      }
+    },
+    {
+      "id": "bois-92-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 574.8,
+      "northM": 278.3,
+      "headingDeg": 274,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 32,
+        "lengthM": 28,
+        "heightM": 19.0
+      }
+    },
+    {
       "id": "bois-93-0",
       "kind": "shrub",
       "title": {
@@ -4461,6 +7623,40 @@
         "widthM": 24,
         "lengthM": 24,
         "heightM": 19.2
+      }
+    },
+    {
+      "id": "bois-93-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 552.9,
+      "northM": 254.1,
+      "headingDeg": 231,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 26,
+        "lengthM": 26,
+        "heightM": 19.2
+      }
+    },
+    {
+      "id": "bois-93-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 567.4,
+      "northM": 260.8,
+      "headingDeg": 321,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 28,
+        "heightM": 18.2
       }
     },
     {
@@ -4498,6 +7694,40 @@
       }
     },
     {
+      "id": "bois-94-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 542.5,
+      "northM": 236.0,
+      "headingDeg": 278,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 26,
+        "heightM": 18.4
+      }
+    },
+    {
+      "id": "bois-94-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 557.1,
+      "northM": 242.4,
+      "headingDeg": 8,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 28,
+        "heightM": 17.4
+      }
+    },
+    {
       "id": "bois-95-0",
       "kind": "shrub",
       "title": {
@@ -4529,6 +7759,40 @@
         "widthM": 28,
         "lengthM": 24,
         "heightM": 17.6
+      }
+    },
+    {
+      "id": "bois-95-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 532.3,
+      "northM": 218.3,
+      "headingDeg": 325,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 26,
+        "heightM": 17.6
+      }
+    },
+    {
+      "id": "bois-95-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 547.1,
+      "northM": 224.4,
+      "headingDeg": 55,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 32,
+        "lengthM": 28,
+        "heightM": 16.6
       }
     },
     {
@@ -4566,6 +7830,40 @@
       }
     },
     {
+      "id": "bois-96-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 522.5,
+      "northM": 201.1,
+      "headingDeg": 12,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 26,
+        "lengthM": 26,
+        "heightM": 20.0
+      }
+    },
+    {
+      "id": "bois-96-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 537.4,
+      "northM": 206.8,
+      "headingDeg": 102,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 28,
+        "heightM": 19.0
+      }
+    },
+    {
       "id": "bois-97-0",
       "kind": "shrub",
       "title": {
@@ -4597,6 +7895,40 @@
         "widthM": 26,
         "lengthM": 24,
         "heightM": 19.2
+      }
+    },
+    {
+      "id": "bois-97-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 521.6,
+      "northM": 187.5,
+      "headingDeg": 59,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 26,
+        "heightM": 19.2
+      }
+    },
+    {
+      "id": "bois-97-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 536.7,
+      "northM": 192.9,
+      "headingDeg": 149,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 28,
+        "heightM": 18.2
       }
     },
     {
@@ -4634,6 +7966,40 @@
       }
     },
     {
+      "id": "bois-98-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 531.3,
+      "northM": 177.5,
+      "headingDeg": 106,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 26,
+        "heightM": 18.4
+      }
+    },
+    {
+      "id": "bois-98-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 546.4,
+      "northM": 182.5,
+      "headingDeg": 196,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 32,
+        "lengthM": 28,
+        "heightM": 17.4
+      }
+    },
+    {
       "id": "bois-99-0",
       "kind": "shrub",
       "title": {
@@ -4665,6 +8031,40 @@
         "widthM": 24,
         "lengthM": 24,
         "heightM": 17.6
+      }
+    },
+    {
+      "id": "bois-99-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 539.3,
+      "northM": 166.8,
+      "headingDeg": 153,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 26,
+        "lengthM": 26,
+        "heightM": 17.6
+      }
+    },
+    {
+      "id": "bois-99-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 554.5,
+      "northM": 171.5,
+      "headingDeg": 243,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 28,
+        "heightM": 16.6
       }
     },
     {
@@ -4702,6 +8102,40 @@
       }
     },
     {
+      "id": "bois-100-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 528.9,
+      "northM": 150.8,
+      "headingDeg": 200,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 26,
+        "heightM": 20.0
+      }
+    },
+    {
+      "id": "bois-100-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 544.3,
+      "northM": 155.2,
+      "headingDeg": 290,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 28,
+        "heightM": 19.0
+      }
+    },
+    {
       "id": "bois-101-0",
       "kind": "shrub",
       "title": {
@@ -4733,6 +8167,40 @@
         "widthM": 28,
         "lengthM": 24,
         "heightM": 19.2
+      }
+    },
+    {
+      "id": "bois-101-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 518.8,
+      "northM": 135.2,
+      "headingDeg": 247,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 26,
+        "heightM": 19.2
+      }
+    },
+    {
+      "id": "bois-101-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 534.3,
+      "northM": 139.3,
+      "headingDeg": 337,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 32,
+        "lengthM": 28,
+        "heightM": 18.2
       }
     },
     {
@@ -4770,6 +8238,40 @@
       }
     },
     {
+      "id": "bois-102-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 508.9,
+      "northM": 120.0,
+      "headingDeg": 294,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 26,
+        "lengthM": 26,
+        "heightM": 18.4
+      }
+    },
+    {
+      "id": "bois-102-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 524.5,
+      "northM": 123.7,
+      "headingDeg": 24,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 28,
+        "heightM": 17.4
+      }
+    },
+    {
       "id": "bois-103-0",
       "kind": "shrub",
       "title": {
@@ -4804,6 +8306,40 @@
       }
     },
     {
+      "id": "bois-103-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 499.3,
+      "northM": 105.1,
+      "headingDeg": 341,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 28,
+        "lengthM": 26,
+        "heightM": 17.6
+      }
+    },
+    {
+      "id": "bois-103-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 515.0,
+      "northM": 108.4,
+      "headingDeg": 71,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 28,
+        "heightM": 16.6
+      }
+    },
+    {
       "id": "bois-104-0",
       "kind": "shrub",
       "title": {
@@ -4835,6 +8371,40 @@
         "widthM": 28,
         "lengthM": 24,
         "heightM": 20.0
+      }
+    },
+    {
+      "id": "bois-104-2",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 489.9,
+      "northM": 90.6,
+      "headingDeg": 28,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 30,
+        "lengthM": 26,
+        "heightM": 20.0
+      }
+    },
+    {
+      "id": "bois-104-3",
+      "kind": "shrub",
+      "title": {
+        "fr": "Bois",
+        "en": "Wood"
+      },
+      "eastM": 505.7,
+      "northM": 93.5,
+      "headingDeg": 118,
+      "color": "#35452a",
+      "sizeM": {
+        "widthM": 32,
+        "lengthM": 28,
+        "heightM": 19.0
       }
     }
   ],

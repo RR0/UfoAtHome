@@ -19,11 +19,12 @@
  * The check mode is what belongs in a release routine: it answers "is what rr0.org serves the same
  * reconstruction I just improved?" without needing rr0.org's build to have run.
  */
-import { readFileSync, existsSync, writeFileSync } from "node:fs"
+import { readFileSync, existsSync, mkdirSync, writeFileSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 import path from "node:path"
 
-/** One recording, and where each host keeps it. */
+/** One recording — or a file a recording points at by a relative address — and where each host
+ * keeps it. */
 interface CaseRecording {
   /** Under public/demo-data/ here. */
   published: string
@@ -48,7 +49,12 @@ const RECORDINGS: CaseRecording[] = [
   { published: "observer-wilcox.json", dossier: "Wilcox/sighting.json" },
   { published: "observer-cussac.json", dossier: "Cussac/sighting.json" },
   { published: "observer-chiles.json", dossier: "ChilesWhitted/observer-chiles.json" },
-  { published: "observer-whitted.json", dossier: "ChilesWhitted/observer-whitted.json" }
+  { published: "observer-whitted.json", dossier: "ChilesWhitted/observer-whitted.json" },
+  { published: "observer-maffliers.json", dossier: "Maffliers/observer-maffliers.json" },
+  // What that recording lays over the scene, at the address it states: relative to the file, so
+  // it has to sit at the same place beside it on both hosts.
+  { published: "maffliers/vue-p024-2012-09-09.jpg", dossier: "Maffliers/maffliers/vue-p024-2012-09-09.jpg" },
+  { published: "observer-silly-le-long.json", dossier: "SillyLeLong/observer-silly-le-long.json" }
 ]
 
 class CaseRecordingSync {
@@ -80,6 +86,7 @@ class CaseRecordingSync {
         console.error(`drifted: ${recording.dossier} ${served ? "differs from" : "is missing, against"} ${recording.published}`)
         continue
       }
+      mkdirSync(path.dirname(target), { recursive: true })
       writeFileSync(target, published)
       console.log(`updated: ${recording.dossier} <- ${recording.published}`)
     }
