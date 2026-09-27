@@ -4,6 +4,9 @@ export const html = `
     <canvas id="canvas" width="640" height="360"></canvas>
   </div>
   <div id="tooltip" class="tooltip" hidden></div>
+  <!-- What a play or pause just did, shown for a moment over the picture as on a video site (see
+       UfoElement.flashPlayback). Inert to the pointer: a click through it still reaches the canvas. -->
+  <div id="playback-flash" class="playback-flash" aria-hidden="true"></div>
   <!-- The corner's own row, rather than one absolutely-positioned button per corner: a second
        button placed by its own right offset would have to hardcode the first one's width, and
        every language names them differently the moment either grows a label. -->
@@ -291,6 +294,36 @@ canvas[data-cursor="rotate"] {
 }
 .milestone-mark:hover::before, .milestone-mark:focus-visible::before {
   width: 4px;
+}
+.playback-flash {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 64px;
+  height: 64px;
+  margin: -32px 0 0 -32px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 28px;
+  line-height: 64px;
+  text-align: center;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 3;
+}
+.playback-flash.flashing {
+  animation: playback-flash 0.6s ease-out;
+}
+@keyframes playback-flash {
+  from { opacity: 1; transform: scale(0.8); }
+  to { opacity: 0; transform: scale(1.5); }
+}
+@media (prefers-reduced-motion: reduce) {
+  @keyframes playback-flash {
+    from { opacity: 1; }
+    to { opacity: 0; }
+  }
 }
 .milestone-caption {
   padding: 0 0.8em 0.35em;

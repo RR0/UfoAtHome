@@ -122,6 +122,7 @@ export class UfoElement extends HTMLElement {
   private readonly observerMapCanvas: HTMLCanvasElement
   private readonly observerMapRenderer: ObserverMapRenderer
   private readonly seekInput: HTMLInputElement
+  private readonly playbackFlash: HTMLElement
   private readonly milestoneMarks: HTMLElement
   private readonly milestoneCaption: HTMLElement
   private readonly timeStartLabel: HTMLElement
@@ -391,6 +392,7 @@ export class UfoElement extends HTMLElement {
     this.observerMapCanvas = this.shadow.getElementById("observer-map-canvas") as HTMLCanvasElement
     this.observerMapRenderer = new ObserverMapRenderer(this.observerMapCanvas.getContext("2d")!)
     this.seekInput = this.shadow.getElementById("seek") as HTMLInputElement
+    this.playbackFlash = this.shadow.getElementById("playback-flash")!
     this.milestoneMarks = this.shadow.getElementById("milestone-marks")!
     this.milestoneCaption = this.shadow.getElementById("milestone-caption")!
     this.timeStartLabel = this.shadow.getElementById("time-start")!
@@ -424,6 +426,7 @@ export class UfoElement extends HTMLElement {
     this.seekInput.addEventListener("pointerup", () => { this.seekSnapArmed = false })
     this.seekInput.addEventListener("pointermove", event => this.nameMarkUnder(event))
     this.seekInput.addEventListener("pointerleave", () => this.seekInput.removeAttribute("title"))
+    this.seekInput.addEventListener("keydown", this.handleSeekKey)
     this.canvas.addEventListener("click", event => {
       if (!this.enableClickToPlay) return
       // Where playback stood before this click, in case it turns out to be the first half of a
@@ -1143,6 +1146,24 @@ export class UfoElement extends HTMLElement {
     return player
   }
 
+  /** How far the arrow keys move the seek bar, as on a video site. */
+  private static readonly SEEK_KEY_STEP_MS = 5000
+
+  /** The seek bar focused, the keys of a video player: left/right go back/forward 5 s, space plays
+   * or pauses. The range input's own arrows would move it by its 1 ms step, and its space nothing. */
+  private readonly handleSeekKey = (event: KeyboardEvent): void => {
+    if (event.altKey || event.ctrlKey || event.metaKey) return
+    const step = event.key === "ArrowLeft" ? -1 : event.key === "ArrowRight" ? 1 : 0
+    if (step) {
+      event.preventDefault()
+      const duration = this.player.seekableDuration
+      this.player.seek(Math.min(duration, Math.max(0, this.player.time + step * UfoElement.SEEK_KEY_STEP_MS)))
+    } else if (event.key === " ") {
+      event.preventDefault()
+      this.togglePlayPause()
+    }
+  }
+
   /** Public (not just used by this element's own overlay button) so a composing element's
    * external Play/Pause control — see SightingEditorElement/showToolbar — can trigger exactly this
    * same guarded behavior instead of reimplementing it. */
@@ -1168,6 +1189,19 @@ export class UfoElement extends HTMLElement {
       this.player.play()
     }
     this.updatePlayPauseButton()
+    this.flashPlayback()
+  }
+
+  /** Shows for a moment, over the picture, what the reader just did — ▶ when it now plays, ⏸ when it
+   * now pauses — as a video site does, since the toolbar that says so may well be hidden. */
+  private flashPlayback(): void {
+    const flash = this.playbackFlash
+    flash.textContent = this.player.playbackState === "playing" ? "▶" : "⏸"
+    // Restarted on every toggle, even one within the last: the class is taken off, a reflow read,
+    // and put back, or the browser would see no change and not replay the animation.
+    flash.classList.remove("flashing")
+    void flash.offsetWidth
+    flash.classList.add("flashing")
   }
 
   private updatePlayPauseButton(): void {

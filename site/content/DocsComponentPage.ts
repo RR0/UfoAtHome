@@ -196,6 +196,9 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
     <p>The toolbar and the corner buttons show only while the pointer is over the picture, playing
       or paused, or when the keyboard moves the focus onto them. A touch screen, which has no
       pointer to hover with, keeps them shown.</p>
+    <p>With the time bar focused, the keys work as on a video site: <kbd>←</kbd> goes back 5 s,
+      <kbd>→</kbd> forward 5 s, and <kbd>Space</kbd> plays or pauses. Playing or pausing, from a key, the button or a
+      click on the picture, shows its sign for a moment in the middle of the picture.</p>
   </div>
 </section>
 `,
@@ -264,6 +267,10 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
     <p>La barre d'outils et les boutons du coin n'apparaissent que tant que le pointeur survole
       l'image, en lecture comme en pause, ou quand le clavier y amène le focus. Un écran tactile, qui
       n'a pas de pointeur pour survoler, les garde affichés.</p>
+    <p>Quand la barre de temps a le focus, les touches font comme sur un site de vidéos :
+      <kbd>←</kbd> recule de 5 s, <kbd>→</kbd> avance de 5 s, et <kbd>Espace</kbd> lance ou met en
+      pause. Lancer ou mettre en pause, au clavier, au bouton ou d'un clic sur l'image, en montre
+      le signe un instant au milieu de l'image.</p>
   </div>
 </section>
 `
