@@ -21,7 +21,7 @@ import {
 } from "../engine/astronomy/CelestialPositions.js"
 import type { ObserverGeo } from "../engine/astronomy/CelestialPositions.js"
 import { geoToLocalMeters } from "../render3d/terrain/GeoProjection.js"
-import { resolveObserverPoseAt, resolveWeatherAt } from "../engine/model/Sighting.js"
+import { resolveActualWeatherAt, resolveObserverPoseAt, resolveWeatherAt } from "../engine/model/Sighting.js"
 import { Gait } from "../engine/place/Gait.js"
 import type { Sighting } from "../engine/model/Sighting.js"
 import type { ObserverPose } from "../engine/model/ObserverTrack.js"
@@ -459,7 +459,7 @@ export class SceneElement extends HTMLElement {
     this.removeEventListener("pointerdown", this.handleFirstInteraction, true)
     this.removeEventListener("keydown", this.handleFirstInteraction, true)
     this.weatherAudio.resume()
-    this.setWeather(resolveWeatherAt(this.ufoElement.sighting, this.lastTimeMs))
+    this.setWeather(resolveActualWeatherAt(this.ufoElement.sighting, this.lastTimeMs))
   }
 
   /** Reuses the nested <rr0-ufo>'s own playback clock (it already dispatches this on every
@@ -1062,7 +1062,7 @@ export class SceneElement extends HTMLElement {
     // edit) since weather is now itself keyframed over time — see Sighting.resolveWeatherAt. Cheap
     // even every tick: setWeather/SceneRenderer.setWeather both dedupe on actual field values, not
     // just call frequency (see SceneRenderer.setWeather's own doc comment).
-    this.setWeather(resolveWeatherAt(sighting, t))
+    this.setWeather(resolveActualWeatherAt(sighting, t))
     // Pushed every tick like the pose and the weather, and for the same reason: the recording it
     // describes can be swapped or edited under this element at any moment, and an instrument left
     // over from the previous one would render the whole scene through the wrong optics (see

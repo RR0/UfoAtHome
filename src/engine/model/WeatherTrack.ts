@@ -1,3 +1,4 @@
+import { PrecipitationRamp } from "../weather/PrecipitationRamp.js"
 import { resolveCloudLayers } from "./CloudLayer.js"
 import type { CloudInstance, CloudLayer } from "./CloudLayer.js"
 import type { Weather } from "./Weather.js"
@@ -125,8 +126,11 @@ export function lerpWeather(a: Weather, b: Weather, t: number): Weather {
  */
 export class WeatherTrack {
   private readonly keyframes: WeatherKeyframe[] = []
+  /** Built on first use and dropped whenever a keyframe changes — see PrecipitationRamp. */
+  private ramp?: PrecipitationRamp
 
   addKeyframe(t: number, weather: Weather): void {
+    this.ramp = undefined
     const index = this.findInsertIndex(t)
     if (this.keyframes[index]?.t === t) {
       this.keyframes[index] = { t, weather }
@@ -137,12 +141,14 @@ export class WeatherTrack {
 
   /** Removes every keyframe. */
   clear(): void {
+    this.ramp = undefined
     this.keyframes.length = 0
   }
 
   /** Removes the keyframe at exactly time t, if one exists — leaves keyframes at every other time
    * untouched, unlike clear(). */
   removeKeyframeAt(t: number): void {
+    this.ramp = undefined
     const index = this.findInsertIndex(t)
     if (this.keyframes[index]?.t === t) {
       this.keyframes.splice(index, 1)
@@ -173,7 +179,9 @@ export class WeatherTrack {
   }
 
   /** Like getLatestWeatherAt, but blends toward the next keyframe instead of holding the last one
-   * — falls back to hold-last-value at the ends of the recorded range. */
+   * — falls back to hold-last-value at the ends of the recorded range. What the RECORDING says:
+   * the editors read this one, since what they write back must be the statement and never a moment
+   * of a transition. */
   getInterpolatedWeatherAt(t: number): Weather | undefined {
     const index = this.findInsertIndex(t)
     const atOrBefore = this.keyframes[index]?.t === t ? this.keyframes[index] : this.keyframes[index - 1]
@@ -182,6 +190,17 @@ export class WeatherTrack {
     if (!atOrBefore) return after?.weather
     if (!after) return atOrBefore.weather
     return lerpWeather(atOrBefore.weather, after.weather, clamp((t - atOrBefore.t) / (after.t - atOrBefore.t), 0, 1))
+  }
+
+  /**
+   * The weather as it actually was at `t`: the recording's, except that rain starts and stops the
+   * way rain does — see PrecipitationRamp. What the scene draws and the ear hears.
+   */
+  getActualWeatherAt(t: number): Weather | undefined {
+    const weather = this.getInterpolatedWeatherAt(t)
+    if (!weather) return undefined
+    const precipitation = (this.ramp ??= new PrecipitationRamp(this.keyframes)).at(t)
+    return precipitation ? { ...weather, precipitationType: precipitation.type, precipitationIntensity: precipitation.intensity } : weather
   }
 
   get duration(): number {

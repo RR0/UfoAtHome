@@ -446,6 +446,13 @@ export function resolveWeatherAt(sighting: Sighting, t: number): Weather {
   return sighting.weatherTrack.getInterpolatedWeatherAt(t) ?? sighting.weather ?? DEFAULT_WEATHER
 }
 
+/** Resolves the weather as it actually was at t — the stated one, with rain that takes the time
+ * real rain takes to start and stop (see WeatherTrack.getActualWeatherAt). What a scene draws; an
+ * editor writing keyframes reads resolveWeatherAt instead. */
+export function resolveActualWeatherAt(sighting: Sighting, t: number): Weather {
+  return sighting.weatherTrack.getActualWeatherAt(t) ?? sighting.weather ?? DEFAULT_WEATHER
+}
+
 /** Resolves the sound at t (interpolated, see SoundTrack), falling back to DEFAULT_SOUND —
  * silence — for a recording whose track is empty, which is every recording made before the track
  * existed and every one whose observer was never asked. Silence is the only safe fallback: unlike
