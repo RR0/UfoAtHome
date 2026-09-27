@@ -1,3 +1,4 @@
+import type { DecorEngine } from "./Vehicle.js"
 import type { SaidText } from "./SaidText.js"
 
 /**
@@ -374,6 +375,9 @@ export interface DecorObject {
    */
   color?: string
   observerSide?: DecorSide
+  /** A vehicle heard running — see DecorEngine: its engine turning with its own `track`, heard less
+   * the further it is from the observer. Absent means silent (parked, or nobody said). */
+  engine?: DecorEngine
   /** Kind "bridge" only: how it is built, where that is known — see BridgeStructure. Absent means
    * the defaults, which are those of an ordinary French overpass. Ignored for every other kind. */
   bridge?: BridgeStructure

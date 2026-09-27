@@ -1,3 +1,4 @@
+import type { ObserverVehicle } from "../model/Vehicle.js"
 import { Sighting } from "../model/Sighting.js"
 import type { SightingLocation, SightingTime } from "../model/Sighting.js"
 import { Timeline } from "../model/Timeline.js"
@@ -55,6 +56,8 @@ export interface SightingRecordingJson {
   /** How much the observer's body sways the view at rest: 1 a person, 0 a tripod — see
    * Sighting.sway. Absent means 1 (0 for a paralysed observer). */
   sway?: number
+  /** The vehicle the observer was in, when the decor does not draw it — see Sighting.vehicle. */
+  vehicle?: ObserverVehicle
   /** See SightingEvent.description — a plain string, or one per language. */
   description?: SaidText
   /** See SightingEvent.tags. */
@@ -128,6 +131,7 @@ export function plainSightingJson(sighting: Sighting): SightingRecordingJson {
     observer: sighting.observer,
     account: sighting.account,
     sway: sighting.sway,
+    vehicle: sighting.vehicle,
     description: sighting.event.description,
     tags: sighting.event.tags,
     timeline: sighting.timeline.toJSON(),
@@ -204,6 +208,7 @@ function fromPlainSightingJson(json: SightingRecordingJson): Sighting {
   // the sighting, not on the timeline.
   sighting.account = json.account
   sighting.sway = json.sway
+  sighting.vehicle = json.vehicle
   sighting.interpretation = json.interpretation
   SightingShapes.toBounds(sighting)
   // Positions follow the stated directions the way sizes follow the stated angles — and this is the

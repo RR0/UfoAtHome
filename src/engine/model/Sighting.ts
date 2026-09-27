@@ -1,3 +1,4 @@
+import type { ObserverVehicle } from "./Vehicle.js"
 import { Timeline } from "./Timeline.js"
 import { ObserverTrack } from "./ObserverTrack.js"
 import type { ObserverPose } from "./ObserverTrack.js"
@@ -374,6 +375,13 @@ export class Sighting {
    * account above.
    */
   sway?: number
+
+  /**
+   * The vehicle the observer was in, when it is not drawn — see ObserverVehicle. Heard from inside,
+   * its engine turning with the observer's own journey (see VehicleDrive). Absent means on foot, or
+   * in a vehicle the decor draws. Not readonly, same reasoning as account above.
+   */
+  vehicle?: ObserverVehicle
 
   /**
    * How many people THIS observer's account puts at the scene, themselves included — counted off the

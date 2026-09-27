@@ -1,3 +1,5 @@
+import { VehicleAudio } from "../audio/VehicleAudio.js"
+import { VehicleHearing } from "../engine/place/VehicleHearing.js"
 import { resolveCloudLayers } from "../engine/model/CloudLayer.js"
 import type { CloudRendering } from "../render3d/LayeredCloudSystem.js"
 import { cloudOffsetAt } from "../render3d/CloudMotion.js"
@@ -319,6 +321,9 @@ export class SceneElement extends HTMLElement {
    * onLightningFlash callback param), this is the one place that already orchestrates a non-
    * rendering side effect alongside pure rendering (see the terrain-attribution label above). */
   private readonly weatherAudio = new WeatherAudio()
+  /** The vehicles the observer hears — see VehicleHearing and VehicleAudio. */
+  private readonly vehicleAudio = new VehicleAudio()
+  private readonly vehicleHearing = new VehicleHearing()
 
   /**
    * Keeps the scene's own weather moving while the recording is not playing — set by the editor
@@ -459,6 +464,7 @@ export class SceneElement extends HTMLElement {
     this.removeEventListener("pointerdown", this.handleFirstInteraction, true)
     this.removeEventListener("keydown", this.handleFirstInteraction, true)
     this.weatherAudio.resume()
+    this.vehicleAudio.resume()
     this.setWeather(resolveActualWeatherAt(this.ufoElement.sighting, this.lastTimeMs))
   }
 
@@ -501,6 +507,7 @@ export class SceneElement extends HTMLElement {
     // renderer runs no loop beside it.
     this.sceneRenderer.setAnimationsRunning(running, playing)
     this.weatherAudio.setPaused(!running)
+    this.vehicleAudio.setPaused(!running)
     // A thunderclap is deliberately delayed by the distance sound travels (see
     // handleLightningFlash); one still in flight belongs to a flash that is no longer happening.
     if (!running) clearTimeout(this.thunderTimeoutId)
@@ -616,6 +623,7 @@ export class SceneElement extends HTMLElement {
     this.sceneRenderer.stopTwinkle()
     clearTimeout(this.thunderTimeoutId)
     this.weatherAudio.dispose()
+    this.vehicleAudio.dispose()
     // The graphics context goes back to the browser once it is clear this element is not merely
     // being moved (a move is a disconnection and a reconnection in the same task) — see
     // SceneRenderer.releaseContext.
@@ -759,6 +767,7 @@ export class SceneElement extends HTMLElement {
    * (handleFirstInteraction covers the other case: a read-only embed with no editing UI at all). */
   resumeWeatherAudio(): void {
     this.weatherAudio.resume()
+    this.vehicleAudio.resume()
   }
 
   /** Fetches a SightingRecordingJson from `url` and loads it — what the `src` attribute uses. */
@@ -1071,6 +1080,8 @@ export class SceneElement extends HTMLElement {
     // over from the previous one would render the whole scene through the wrong optics (see
     // Instrument.ts). Cheap — SceneRenderer.setInstrument stores two numbers.
     this.sceneRenderer.setInstrument(sighting.instrument)
+    // Heard at the instant shown, not at each instant of a pose being developed.
+    if (!instant) this.vehicleAudio.setVoices(this.vehicleHearing.at(sighting, t))
     this.updateMeteorShower(sighting, t)
     this.updateLightning(sighting, t, instant !== undefined)
     this.sceneRenderer.setDecor(sighting.decor)
