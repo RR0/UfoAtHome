@@ -1793,9 +1793,15 @@ export class SceneRenderer {
    * it: a sighting.json and the craft.gltf beside it then work together from any page, with no
    * catalogue and no particular host. */
   private modelUrl(ref: DecorModelRef): string | undefined {
-    if (!ref.url) return undefined
+    return ref.url ? this.documentRelative(ref.url) : undefined
+  }
+
+  /** An address a recording states, read relative to the recording itself (see documentUrl) — a
+   * model's `url`, a picture's `src`. A `data:` URL or an absolute address comes back unchanged. */
+  private documentRelative(address: string): string {
+    if (address.startsWith("data:")) return address
     const base = this.documentUrl ?? (typeof location === "undefined" ? undefined : location.href)
-    return base ? new URL(ref.url, base).href : ref.url
+    return base ? new URL(address, base).href : address
   }
 
   /** A body's model, the way a decor object's is fetched (see loadDecorModel): by catalogue entry
@@ -3178,7 +3184,10 @@ export class SceneRenderer {
   /** The pictures of the place to lay over the scene — see ReferenceSystem.set. Cheap to call
    * every tick: a picture already standing at the same registration is left alone. */
   setReferences(references: SceneReference[]): void {
-    this.references.set(references)
+    this.references.set(references.map(reference => {
+      const src = this.documentRelative(reference.src)
+      return src === reference.src ? reference : { ...reference, src }
+    }))
   }
 
   /** A loaded picture's aspect — see ReferenceSystem.aspectOf. */
@@ -3194,7 +3203,7 @@ export class SceneRenderer {
 
   /** Whether a picture's bytes could not be had — see ReferenceSystem.failedToLoad. */
   referenceFailedToLoad(src: string): boolean {
-    return this.references.failedToLoad(src)
+    return this.references.failedToLoad(this.documentRelative(src))
   }
 
   /** Whether the reader has the pictures on at all — the player's own toggle. */
