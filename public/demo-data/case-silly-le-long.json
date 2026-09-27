@@ -31,9 +31,7 @@
       "en": "Cirrus SR20 F-HOBS"
      },
      "explains": [
-      "pan",
-      "blanc-g",
-      "blanc-d"
+      "pan"
      ],
      "model": {
       "id": "poly-google-airliner"

@@ -1460,7 +1460,10 @@ export class SceneElement extends HTMLElement {
         // With an interpretation on show, the account is not what is drawn: it is either absent,
         // or beside it as outlines to compare with — and then all of it, what no body claims to be
         // included (an insignia, a flame), since that too is what the interpretation must answer.
-        hidden: offScreen.has(sourceId) || (this.interpretationShown !== undefined && !this.comparing),
+        // But only what was SEEN at this instant: a shape the account makes invisible (Silly-le-Long's
+        // rear rectangles, not seen before the bridge) has no outline to answer, and drew one where
+        // nothing was.
+        hidden: offScreen.has(sourceId) || (this.interpretationShown !== undefined && (!this.comparing || shape.transparency >= 1)),
         ghost: this.interpretationShown !== undefined && this.comparing
       })
     }
