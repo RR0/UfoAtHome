@@ -147,8 +147,8 @@ export class PointSources {
    *
    * How much follows how much air the light crosses (Young's law, amplitude ∝ airmass^1.75 — the
    * air mass after Kasten and Young), scaled for an eye's 7 mm pupil and its tenth of a second of
-   * integration: a few per cent at the zenith, a strong twinkle towards the horizon, capped at half
-   * the light. How fast is a few hertz, irregular: three unrelated waves per point, from its own
+   * integration: two or three per cent at the zenith, a plain twinkle towards the horizon, capped at a
+   * third of the light (twice that was judged too strong, 2026-09-27). How fast is a few hertz, irregular: three unrelated waves per point, from its own
    * seed so that no two twinkle together. Low down the colours part too, the atmosphere's
    * dispersion sending the red and the blue through different turbulence: a low bright star flashes
    * red and blue.
@@ -160,7 +160,7 @@ export class PointSources {
         float sinAltitude = clamp(toPoint.y, 0.0, 1.0);
         float altitudeDeg = degrees(asin(sinAltitude));
         float airmass = 1.0 / (sinAltitude + 0.50572 * pow(altitudeDeg + 6.07995, -1.6364));
-        float amplitude = min(0.5, 0.05 * pow(airmass, 1.75));
+        float amplitude = min(0.35, 0.025 * pow(airmass, 1.75));
         float t = uScintillationTime;
         float s1 = fract(seed * 7.131 + 0.13);
         float s2 = fract(seed * 3.713 + 0.57);
