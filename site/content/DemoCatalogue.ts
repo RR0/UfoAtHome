@@ -61,8 +61,8 @@ export class DemoCatalogue {
     {
       heading: { en: "Real sightings", fr: "Des observations réelles" },
       intro: {
-        en: "Five documented cases, each replayed in the sky of its own reported date, time and place.",
-        fr: "Cinq dossiers documentés, chacun rejoué dans le ciel de sa propre date, heure et lieu déclarés."
+        en: "Six documented cases, each replayed in the sky of its own reported date, time and place.",
+        fr: "Six dossiers documentés, chacun rejoué dans le ciel de sa propre date, heure et lieu déclarés."
       },
       demos: [
         {
@@ -108,6 +108,16 @@ export class DemoCatalogue {
           blurb: {
             en: "Low sun, 17:50, New Mexico. The case people argue about the phenomenon's size in — and where the reconstruction refuses to state one.",
             fr: "Soleil bas, 17:50, Nouveau-Mexique. Le cas dont on discute la taille du phénomène — et où la reconstitution refuse d'en énoncer une."
+          }
+        },
+        {
+          id: "maffliers",
+          src: "/demo-data/observer-maffliers.json",
+          title: { en: "Maffliers, 2012", fr: "Maffliers, 2012" },
+          titleIsName: true,
+          blurb: {
+            en: "Dawn under a low grey sky, 06:06, Val-d'Oise. A silvery shape 8.5° wide before a wood's edge, then a shower, a tilt and a departure, each angle from the GEIPAN's calibrated photographs — and the rising Sun, hidden, 60° to the right.",
+            fr: "Petit matin sous un ciel bas et gris, 06:06, Val-d'Oise. Une forme argentée de 8,5° devant une lisière, puis une averse, une bascule et un départ, chaque angle tiré des photos calibrées du GEIPAN — et le Soleil levant, caché, à 60° sur la droite."
           }
         },
         {
