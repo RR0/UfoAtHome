@@ -1836,6 +1836,7 @@ export class SceneRenderer {
     this.bodySystem.set(states, {
       originX: x, originZ: z, originGroundY: this.groundYUnder(x, z), eye: this.camera.position,
       groundYAt: (px, pz) => this.groundYUnder(px, pz), wind, light: this.plumeLight(),
+      occluders: [...this.decorGroups.values()],
       transmittance: (px, py, pz) => this.transmittanceTo(px, py, pz)
     }, seconds, sky ? (rgb, luminance) => sky.relativeOfLuminance(rgb, luminance) : undefined, ids)
     this.bodySystem.setSmoke(smoke, seconds)

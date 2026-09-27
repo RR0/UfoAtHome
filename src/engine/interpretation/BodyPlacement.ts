@@ -40,6 +40,8 @@ export interface BodyState {
   /** How far along each of its model's movements it is — see BodyKeyframe.motions. None stated,
    * none played: the model stands as it was built. */
   motions?: Record<string, number>
+  /** The luminance of each of its model's lights the track names — see BodyKeyframe.lights. */
+  lights?: Record<string, number>
   /** Whether it throws one at any instant at all — what lets a renderer ready the light once rather
    * than add and remove it as the flame comes and goes (see FlameEffect). */
   throwsFlame: boolean
@@ -97,34 +99,51 @@ export class BodyPlacement {
     this.keys = this.place(track, eyeAt)
     // Each movement from the keyframes that state IT: one stated at 248 s and again at 262 s turns
     // all the way between, whatever keyframes moved the body in the meantime.
+    // The same for each light, from the keyframes that name it.
     for (const key of track) {
-      for (const [name, progress] of Object.entries(key.motions ?? {})) {
-        const stated = this.motionKeys.get(name) ?? []
-        stated.push({ t: key.t, progress })
-        this.motionKeys.set(name, stated)
-      }
+      BodyPlacement.collect(this.motionKeys, key.t, key.motions)
+      BodyPlacement.collect(this.lightKeys, key.t, key.lights)
     }
   }
 
-  private readonly motionKeys = new Map<string, { t: number, progress: number }[]>()
+  private readonly motionKeys = new Map<string, { t: number, value: number }[]>()
+  private readonly lightKeys = new Map<string, { t: number, value: number }[]>()
+
+  private static collect(channels: Map<string, { t: number, value: number }[]>, t: number, values: Record<string, number> | undefined): void {
+    for (const [name, value] of Object.entries(values ?? {})) {
+      const stated = channels.get(name) ?? []
+      stated.push({ t, value })
+      channels.set(name, stated)
+    }
+  }
 
   /** Every movement at `t`: blended between the keyframes that state it, held after the last,
    * nought before the first. */
   private motionsAt(t: number): Record<string, number> {
-    const motions: Record<string, number> = {}
-    for (const [name, stated] of this.motionKeys) {
+    return BodyPlacement.channelsAt(this.motionKeys, t, 0)
+  }
+
+  /** Every named light at `t`, the same way — but one not yet named is left out, so it glows at
+   * its share of the body's own luminance until the track takes it over. */
+  private lightsAt(t: number): Record<string, number> | undefined {
+    return this.lightKeys.size > 0 ? BodyPlacement.channelsAt(this.lightKeys, t, undefined) : undefined
+  }
+
+  private static channelsAt(channels: Map<string, { t: number, value: number }[]>, t: number, before: number | undefined): Record<string, number> {
+    const values: Record<string, number> = {}
+    for (const [name, stated] of channels) {
       let index = stated.length - 1
       while (index >= 0 && stated[index].t > t) index--
       if (index < 0) {
-        motions[name] = 0
+        if (before !== undefined) values[name] = before
         continue
       }
       const from = stated[index]
       const to = stated[Math.min(index + 1, stated.length - 1)]
       const fraction = to === from || to.t === from.t ? 0 : Math.min(1, (t - from.t) / (to.t - from.t))
-      motions[name] = BodyPlacement.lerp(from.progress, to.progress, fraction)
+      values[name] = BodyPlacement.lerp(from.value, to.value, fraction)
     }
-    return motions
+    return values
   }
 
   /**
@@ -238,6 +257,7 @@ export class BodyPlacement {
       },
       flame: BodyPlacement.flameBetween(from.flame, to.flame, fraction),
       motions: this.motionsAt(t),
+      lights: this.lightsAt(t),
       throwsFlame: this.body.track.some(key => key.flame !== undefined && key.flame.luminanceCdM2 > 0)
     }
   }

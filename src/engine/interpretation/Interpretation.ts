@@ -164,6 +164,15 @@ export interface BodyKeyframe {
    * it, held at the last one that did.
    */
   motions?: Record<string, number>
+  /**
+   * The luminance of each of its model's own lights, cd/m², by the name of the light's material in
+   * the model: what lets one body carry lights that behave each their own way — a steady white at
+   * each end, a red one flashing between. The model says where each light is, how big and of what
+   * colour; the track says how bright, and when. Blended between two keyframes that state it (two
+   * a millisecond apart switch it), held after the last; a light no keyframe names glows at its
+   * share of the body's own `appearance.luminanceCdM2`, as before this field existed.
+   */
+  lights?: Record<string, number>
 }
 
 /**

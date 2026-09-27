@@ -141,6 +141,20 @@
       }
     },
     {
+      "id": "ufoathome-silly-le-long-craft",
+      "kind": "aircraft",
+      "name": "Silly-le-Long phenomenon, after T1's account: a flat concrete-grey V with its lights (stand-in)",
+      "file": "ufoathome-silly-le-long-craft/craft.gltf",
+      "headingOffsetDeg": 0,
+      "sizeM": { "widthM": 34, "lengthM": 20.09, "heightM": 5 },
+      "credit": {
+        "title": "Silly-le-Long phenomenon, a stand-in after T1's account (GEIPAN 2015-05-09194)",
+        "author": "UFO@home",
+        "license": "CC0 1.0",
+        "sourceUrl": "https://github.com/RR0/UfoAtHome/blob/main/scripts/build-silly-le-long-craft.ts"
+      }
+    },
+    {
       "id": "ufoathome-chiles-craft",
       "kind": "aircraft",
       "name": "Chiles-Whitted object as Clarence Chiles drew it: a tapered cigar with no porthole (stand-in)",

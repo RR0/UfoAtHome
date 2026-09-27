@@ -35,6 +35,26 @@ describe("BodyPlacement", () => {
     expect(placement.at(247000)?.northM).toBe(90)
   })
 
+  it("switches each named light on its own, and leaves an unnamed one to the body's luminance", () => {
+    const placement = new BodyPlacement(craft([
+      { t: 0, eastM: 0, northM: 90, altitudeAboveGroundM: 20, lights: { steady: 2000, red: 3000 } },
+      { t: 499, lights: { red: 3000 } },
+      { t: 500, lights: { red: 0 } },
+      { t: 2000, lights: { rear: 0 } },
+      { t: 3000, lights: { rear: 1000 } }
+    ]), flat, eyeAtOrigin(flat))
+    // Before a light is first named it is left out, not put out.
+    expect(placement.at(100)?.lights).toEqual({ steady: 2000, red: 3000 })
+    // Two keyframes a millisecond apart switch it.
+    expect(placement.at(600)?.lights?.red).toBe(0)
+    expect(placement.at(2500)?.lights?.rear).toBeCloseTo(500, 9)
+    expect(placement.at(9000)?.lights).toEqual({ steady: 2000, red: 0, rear: 1000 })
+  })
+
+  it("names no lights when its track names none", () => {
+    expect(new BodyPlacement(craft([{ t: 0, eastM: 0, northM: 5, onGround: true }]), flat, eyeAtOrigin(flat)).at(0)?.lights).toBeUndefined()
+  })
+
   it("does not exist before its first keyframe, and stays as its last one left it", () => {
     const placement = new BodyPlacement(craft([{ t: 1000, eastM: 0, northM: 5, onGround: true }]), flat, eyeAtOrigin(flat))
     expect(placement.at(999)).toBeUndefined()

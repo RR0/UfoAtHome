@@ -38,6 +38,10 @@ interface Glow {
    * burns at its own fraction of it.
    */
   share: number
+  /** Its material's name in the model: what a track names a light by (see BodyKeyframe.lights). */
+  name: string
+  /** The meshes it is the material of: where the light is, and how big. */
+  meshes: Mesh[]
 }
 
 /** Where the frame bodies are placed in stands in the scene: its origin's position, and the ground
@@ -48,6 +52,9 @@ export interface BodyFrame {
   originGroundY: number
   /** Where the eye is, for what depends on how far away a body is (a flame's glare). */
   eye?: Vector3
+  /** What stands in the scene between the eye and a body's light and may hide it — the decor.
+   * The body's own hull hides its lights too, and is always counted. */
+  occluders?: readonly Object3D[]
   /** The ground's height at a point of the scene — where a flame's dust rises from. */
   groundYAt?: (x: number, z: number) => number
   /** The wind, m/s along the scene's x (east) and z (south) — what carries dust and smoke. */
@@ -88,6 +95,10 @@ export class BodySystem {
   private readonly flames = new Map<string, FlameEffect>()
   /** The bloom round each body that gives out light of its own — see BodyAppearance.luminanceCdM2. */
   private readonly glares = new Map<string, Veil>()
+  /** The veil round each of a body's named lights, by body id and light name — see shineLights. */
+  private readonly lightVeils = new Map<string, Veil>()
+  private readonly lightRay = new Raycaster()
+  private readonly boxHit = new Vector3()
   /** The dust each flame raises, by body id. */
   private readonly dust = new Map<string, GroundPlume>()
   /** The smoke of what burns on the ground, one plume per source. */
@@ -146,6 +157,7 @@ export class BodySystem {
       if (glowing) BodySystem.light(glowing, state, display)
       if (entry.motions) BodySystem.move(entry.motions, state.motions ?? {})
       this.shine(state, holder, glowing, display, frame.eye)
+      this.shineLights(state, holder, glowing, display, frame)
       this.throwFlame(state, holder, seconds, display, frame.eye)
     }
     const kept = new Set(ids)
@@ -155,6 +167,7 @@ export class BodySystem {
         holder.visible = false
         this.flames.get(id)?.putOut()
         this.glares.get(id)?.hide()
+        this.hideLights(id)
       } else {
         this.remove(id)
       }
@@ -350,6 +363,94 @@ export class BodySystem {
 
   /** Where a model says a flame comes out, unless the flame names another node. */
   static readonly EXHAUST_NODE = "exhaust"
+
+  /**
+   * The veiling glare round each light a track names (see BodyKeyframe.lights), from its own
+   * luminance and size: a light a metre wide a kilometre and a half away is far under a pixel, and
+   * what the eye sees of it is its glare, as of a star.
+   *
+   * The veil is drawn over everything (see Veil), since it is in the eye; so what stands in front of
+   * the light is looked for here, along the line from the eye to five points of it — its middle and
+   * the corners of its box — and the veil keeps the share of them that are clear. A light behind the
+   * body's own hull is hidden by it; one passing behind the edge of a bridge's deck goes out as the
+   * edge covers it, not all at once.
+   */
+  private shineLights(state: BodyState, holder: Group, glowing: Glow[] | undefined, display: LuminanceDisplay | undefined, frame: BodyFrame): void {
+    const eye = frame.eye
+    const named = state.lights
+    if (!glowing || !named || !eye) {
+      this.hideLights(state.id)
+      return
+    }
+    holder.updateMatrixWorld(true)
+    // Only what could stand between is looked through, mesh by mesh: most of the decor is nowhere
+    // near the line from the eye to the body (a wood, a road behind the observer), and testing its
+    // every mesh cost 7 ms an image at Silly-le-Long. The boxes are taken once per image.
+    let occluders: { object: Object3D, box: Box3 }[] | undefined
+    for (const glow of glowing) {
+      const key = `${state.id}\u0000${glow.name}`
+      const luminanceCdM2 = named[glow.name]
+      let veil = this.lightVeils.get(key)
+      if (!(luminanceCdM2 > 0) || glow.meshes.length === 0) {
+        veil?.hide()
+        continue
+      }
+      const box = new Box3()
+      for (const mesh of glow.meshes) box.expandByObject(mesh)
+      const centre = box.getCenter(new Vector3())
+      const size = box.getSize(new Vector3())
+      const radiusM = Math.max(size.x, size.y, size.z) / 2
+      const distanceM = Math.max(centre.distanceTo(eye), radiusM * 1.01, 1e-3)
+      occluders ??= [holder, ...(frame.occluders ?? [])].map(object => ({ object, box: new Box3().setFromObject(object) }))
+      const clear = this.clearShare(eye, box, centre, glow.meshes, occluders)
+      if (clear <= 0) {
+        veil?.hide()
+        continue
+      }
+      if (!veil) {
+        veil = new Veil(`body-light:${state.id}:${glow.name}`)
+        this.lightVeils.set(key, veil)
+        this.group.add(veil.mesh)
+      }
+      const angularRadius = Math.asin(Math.min(1, radiusM / distanceM))
+      const solidAngle = 2 * Math.PI * (1 - Math.cos(angularRadius)) * clear
+      const light = this.throughAir(BodySystem.shown(glow.hue, luminanceCdM2, display), centre)
+      veil.shine(centre, [light[0] * solidAngle, light[1] * solidAngle, light[2] * solidAngle], (angularRadius * 180) / Math.PI)
+    }
+  }
+
+  /** The share of five points of a light — its middle and its box's corners, drawn a little in —
+   * that the eye sees: nothing but the light itself between. */
+  private clearShare(eye: Vector3, box: Box3, centre: Vector3, own: readonly Mesh[], occluders: readonly { object: Object3D, box: Box3 }[]): number {
+    const points = [centre]
+    for (const [fx, fz] of [[0.2, 0.2], [0.8, 0.2], [0.2, 0.8], [0.8, 0.8]]) {
+      points.push(new Vector3(
+        box.min.x + (box.max.x - box.min.x) * fx,
+        centre.y + (fx < 0.5 ? -1 : 1) * (box.max.y - box.min.y) * 0.3,
+        box.min.z + (box.max.z - box.min.z) * fz))
+    }
+    const direction = new Vector3()
+    let clear = 0
+    for (const point of points) {
+      direction.subVectors(point, eye)
+      const far = direction.length()
+      this.lightRay.set(eye, direction.normalize())
+      this.lightRay.far = far
+      const crossed = occluders.filter(({ box: bounds }) => {
+        const hit = this.lightRay.ray.intersectBox(bounds, this.boxHit)
+        return hit !== null && hit.distanceTo(eye) < far
+      }).map(({ object }) => object)
+      const blocked = crossed.length > 0 && this.lightRay.intersectObjects(crossed, true)
+        .some(hit => hit.object instanceof Mesh && !own.includes(hit.object) && hit.distance < far - 0.05)
+      if (!blocked) clear++
+    }
+    return clear / points.length
+  }
+
+  private hideLights(id: string): void {
+    const prefix = `${id}\u0000`
+    for (const [key, veil] of this.lightVeils) if (key.startsWith(prefix)) veil.hide()
+  }
 
   /** Takes a body's bloom out of the scene — only when the body itself goes. */
   private dropGlare(id: string): void {
@@ -583,7 +684,9 @@ export class BodySystem {
 
   /** The brightness a body's stated luminance gives whatever its model already says glows. */
   private static light(glowing: Glow[], state: BodyState, display?: LuminanceDisplay): void {
-    for (const { material, hue, share } of glowing) BodySystem.glow(material, hue, state.appearance.luminanceCdM2 * share, display)
+    for (const { material, hue, share, name } of glowing) {
+      BodySystem.glow(material, hue, state.lights?.[name] ?? state.appearance.luminanceCdM2 * share, display)
+    }
   }
 
   /** Sets what a surface gives out: nothing at all below a candela, and otherwise its own colour at
@@ -652,12 +755,17 @@ export class BodySystem {
    */
   private static glowingOf(scene: Object3D): Glow[] {
     const materials: MeshStandardMaterial[] = []
-    const seen = new Set<MeshStandardMaterial>()
+    const meshesOf = new Map<MeshStandardMaterial, Mesh[]>()
     scene.traverse(child => {
       if (!(child instanceof Mesh)) return
       for (const material of Array.isArray(child.material) ? child.material : [child.material]) {
-        if (!(material instanceof MeshStandardMaterial) || seen.has(material)) continue
-        seen.add(material)
+        if (!(material instanceof MeshStandardMaterial)) continue
+        const meshes = meshesOf.get(material)
+        if (meshes) {
+          meshes.push(child)
+          continue
+        }
+        meshesOf.set(material, [child])
         if (Math.max(material.emissive.r, material.emissive.g, material.emissive.b) > 0) materials.push(material)
       }
     })
@@ -667,7 +775,9 @@ export class BodySystem {
     return materials.map(material => ({
       material,
       hue: [material.emissive.r, material.emissive.g, material.emissive.b] as const,
-      share: magnitude(material) / brightest
+      share: magnitude(material) / brightest,
+      name: material.name,
+      meshes: meshesOf.get(material) ?? []
     }))
   }
 
@@ -743,5 +853,12 @@ export class BodySystem {
     this.credits.delete(id)
     this.dropFlame(id)
     this.dropGlare(id)
+    const prefix = `${id}\u0000`
+    for (const [key, veil] of [...this.lightVeils]) {
+      if (!key.startsWith(prefix)) continue
+      this.group.remove(veil.mesh)
+      veil.dispose()
+      this.lightVeils.delete(key)
+    }
   }
 }
