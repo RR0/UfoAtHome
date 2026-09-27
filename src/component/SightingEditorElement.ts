@@ -361,6 +361,7 @@ export class SightingEditorElement extends HTMLElement {
   private readonly headingUnit: HTMLElement
   private readonly pitchInput: HTMLInputElement
   private readonly rollInput: HTMLInputElement
+  private readonly swayInput: HTMLInputElement
   private readonly elevationInput: HTMLInputElement
   private readonly groundElevationOutput: HTMLElement
   /** The ground's own height above sea level at the current location, once it is known — what the
@@ -497,6 +498,7 @@ export class SightingEditorElement extends HTMLElement {
   private readonly labelHeading: HTMLElement
   private readonly labelPitch: HTMLElement
   private readonly labelRoll: HTMLElement
+  private readonly labelSway: HTMLElement
   private readonly labelElevation: HTMLElement
   private readonly labelObservationTime: HTMLElement
   private readonly labelObservationEndTime: HTMLElement
@@ -993,6 +995,7 @@ export class SightingEditorElement extends HTMLElement {
     this.headingUnit = this.shadow.getElementById("heading-unit") as HTMLElement
     this.pitchInput = this.shadow.getElementById("pitch") as HTMLInputElement
     this.rollInput = this.shadow.getElementById("roll") as HTMLInputElement
+    this.swayInput = this.shadow.getElementById("sway") as HTMLInputElement
     this.elevationInput = this.shadow.getElementById("elevation") as HTMLInputElement
     this.groundElevationOutput = this.shadow.getElementById("ground-elevation")!
     this.obsTimeInput = this.shadow.getElementById("obs-time") as HTMLInputElement
@@ -1109,6 +1112,7 @@ export class SightingEditorElement extends HTMLElement {
     this.labelHeading = this.shadow.getElementById("label-heading")!
     this.labelPitch = this.shadow.getElementById("label-pitch")!
     this.labelRoll = this.shadow.getElementById("label-roll")!
+    this.labelSway = this.shadow.getElementById("label-sway")!
     this.labelElevation = this.shadow.getElementById("label-elevation")!
     this.labelObservationTime = this.shadow.getElementById("label-observation-time")!
     this.labelObservationEndTime = this.shadow.getElementById("label-observation-end-time")!
@@ -1336,6 +1340,11 @@ export class SightingEditorElement extends HTMLElement {
     this.importUrlButton.addEventListener("click", () => this.importFromUrl())
     this.accountSourceSelect.addEventListener("change", () => this.updateObserverMetadata())
     this.accountFollowedUpSelect.addEventListener("change", () => this.updateObserverMetadata())
+    // A value of the whole recording, not of a pose: a tripod stays a tripod. Blank is the default.
+    this.swayInput.addEventListener("input", () => {
+      this.ufoElement.sighting.sway = this.numberOrUndefined(this.swayInput.value)
+      this.ufoElement.refresh()
+    })
     this.narrativeDraftButton.addEventListener("click", () => this.draftFromDescription())
     this.narrativeStopButton.addEventListener("click", () => this.narrativeAbort?.abort())
     this.narrativeRememberInput.addEventListener("change", () => this.rememberNarrativeKey())
@@ -4127,6 +4136,7 @@ export class SightingEditorElement extends HTMLElement {
     this.descriptionInput.value = this.said.read(sighting.event.description) ?? ""
     this.showTags()
     this.instrumentSelect.value = sighting.instrument.id
+    this.swayInput.value = sighting.sway?.toString() ?? ""
   }
 
   /** Keeps the weather toolbar honest as the playhead moves or a different keyframe region is
@@ -7456,6 +7466,8 @@ export class SightingEditorElement extends HTMLElement {
     this.headingInput.placeholder = messages.headingPlaceholder
     this.labelPitch.textContent = messages.pitch
     this.labelRoll.textContent = messages.roll
+    this.labelSway.textContent = messages.sway
+    this.swayInput.title = messages.swayTitle
     this.labelElevation.textContent = messages.elevation
     this.labelObservationTime.textContent = messages.observationTime
     this.labelObservationEndTime.textContent = messages.observationEndTime

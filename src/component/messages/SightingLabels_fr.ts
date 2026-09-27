@@ -18,6 +18,8 @@ export const sightingLabels_fr: SightingLabels = {
   heading: "Orientation",
   pitch: "Inclinaison",
   roll: "Roulis",
+  sway: "Bougé au repos",
+  swayTitle: "Combien le corps qui tient l'instrument fait bouger la vue hors de la marche : 1 pour une personne debout, 0 pour un trépied. Vide : 1 (0 si le compte rendu dit l'observateur paralysé)",
   observationTime: "Début de l'observation",
   observationEndTime: "Fin de l'observation",
   assessmentGroup: "Évaluation",

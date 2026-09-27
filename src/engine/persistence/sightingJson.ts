@@ -52,6 +52,9 @@ export interface SightingRecordingJson {
   observer?: People
   /** Who saw it and how their account travelled — see Account, and Sighting.account. */
   account?: Account
+  /** How much the observer's body sways the view at rest: 1 a person, 0 a tripod — see
+   * Sighting.sway. Absent means 1 (0 for a paralysed observer). */
+  sway?: number
   /** See SightingEvent.description — a plain string, or one per language. */
   description?: SaidText
   /** See SightingEvent.tags. */
@@ -124,6 +127,7 @@ export function plainSightingJson(sighting: Sighting): SightingRecordingJson {
     place: sighting.event.place,
     observer: sighting.observer,
     account: sighting.account,
+    sway: sighting.sway,
     description: sighting.event.description,
     tags: sighting.event.tags,
     timeline: sighting.timeline.toJSON(),
@@ -199,6 +203,7 @@ function fromPlainSightingJson(json: SightingRecordingJson): Sighting {
   // Timeline.fromJSON because the projection needs the pose's own field of view, which lives on
   // the sighting, not on the timeline.
   sighting.account = json.account
+  sighting.sway = json.sway
   sighting.interpretation = json.interpretation
   SightingShapes.toBounds(sighting)
   // Positions follow the stated directions the way sizes follow the stated angles — and this is the

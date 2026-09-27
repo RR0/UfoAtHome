@@ -367,6 +367,15 @@ export class Sighting {
   interpretation?: InterpretationJson
 
   /**
+   * How much the observer's body moves the view when they are not walking — see Stance. 1 is a
+   * person standing or sitting, 0 an instrument on a tripod or anything else that does not move at
+   * all, and a value between or above scales that sway. Absent means 1, except for an observer the
+   * account says was paralysed, who does not move (tag "paralysis"). Not readonly, same reasoning as
+   * account above.
+   */
+  sway?: number
+
+  /**
    * How many people THIS observer's account puts at the scene, themselves included — counted off the
    * decor, never stored.
    *

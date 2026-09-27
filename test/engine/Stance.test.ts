@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 import { Gait } from "../../src/engine/place/Gait.js"
 import { Stance } from "../../src/engine/place/Stance.js"
 import { Sighting } from "../../src/engine/model/Sighting.js"
+import { fromSightingJson, toSightingJson } from "../../src/engine/persistence/sightingJson.js"
 
 function standing(tags?: string[]): Sighting {
   const sighting = Sighting.create(undefined, [{ lat: 49.0789, lng: 2.3273 }])
@@ -36,5 +37,22 @@ describe("Stance", () => {
     const sighting = standing(["RR3", "paralysis"])
     expect(Stance.of(sighting)).toBeUndefined()
     for (let t = 0; t < 20_000; t += 500) expect(Gait.bodyAt(sighting, t)).toEqual(Gait.STILL)
+  })
+
+  it("takes its size from the recording: 0 is a tripod, 2 twice a person's", () => {
+    const tripod = standing()
+    tripod.sway = 0
+    for (let t = 0; t < 20_000; t += 500) expect(Gait.bodyAt(tripod, t)).toEqual(Gait.STILL)
+    const person = standing()
+    const shaky = standing()
+    shaky.sway = 2
+    expect(Gait.bodyAt(shaky, 3_100).eastM).toBeCloseTo(2 * Gait.bodyAt(person, 3_100).eastM, 12)
+  })
+
+  it("lets a stated sway overrule the paralysis default, and keeps it through the file", () => {
+    const sighting = standing(["paralysis"])
+    sighting.sway = 0.5
+    expect(Stance.of(sighting)).toBeDefined()
+    expect(fromSightingJson(toSightingJson(sighting)).sway).toBe(0.5)
   })
 })

@@ -18,10 +18,13 @@ import type { GaitOffset } from "./Gait.js"
  * of unrelated slow waves rather than a noise, so that the same instant always looks the same:
  * a recording is played again and again, and must show the same thing at the same instant.
  *
- * NOT for an observer the account says was paralysed (tag "paralysis"): Masse at Valensole could
- * not move, and a sway would contradict the very thing he reported.
+ * Its size is the recording's own `sway` (see Sighting.sway): 1 for a person, 0 for an instrument
+ * on a tripod. Absent, it is 1 — except for an observer the account says was paralysed (tag
+ * "paralysis"): Masse at Valensole could not move, and a sway would contradict the very thing he
+ * reported.
  *
- * DERIVED, NEVER RECORDED, like the gait (see Gait): having a body is not a claim of the account.
+ * The movement itself is DERIVED, never recorded, like the gait (see Gait): having a body is not a
+ * claim of the account. Only its size can be stated, and only because an instrument can have none.
  */
 export class Stance {
   /** How far the eye's place wanders, metres, each way: a standing adult's head, not the ankles. */
@@ -37,25 +40,28 @@ export class Stance {
 
   /** @param rotationPassed The share of the head's turning that reaches the image — see
    * Instrument.stabilization, as the gait takes it. */
-  private constructor(private readonly rotationPassed: number) {}
+  private constructor(private readonly rotationPassed: number, private readonly scale: number) {}
 
-  /** Undefined for an observer the account says could not move. */
+  /** Undefined for an observer who does not move: a sway of 0, or a paralysed observer who states
+   * none. */
   static of(sighting: Sighting): Stance | undefined {
-    if (sighting.event.tags?.includes("paralysis")) return undefined
-    return new Stance(1 - (sighting.instrument.stabilization ?? 0))
+    const scale = sighting.sway ?? (sighting.event.tags?.includes("paralysis") ? 0 : 1)
+    if (!(scale > 0)) return undefined
+    return new Stance(1 - (sighting.instrument.stabilization ?? 0), scale)
   }
 
   offsetAt(tMs: number): GaitOffset {
     const s = tMs / 1000
+    const k = this.scale
     const wave = (hz: number, phase: number) => Math.sin(2 * Math.PI * hz * s + phase)
     const [a, b, c, d, e, f] = Stance.HZ
     return {
-      eastM: Stance.SWAY_M * (0.7 * wave(a, 0.3) + 0.3 * wave(d, 1.9)),
-      northM: Stance.SWAY_M * (0.6 * wave(c, 2.2) + 0.4 * wave(e, 0.8)),
-      upM: Stance.BREATH_M * wave(b, 0.0),
-      yawDeg: this.rotationPassed * Stance.DRIFT_YAW_DEG * (0.6 * wave(f, 1.1) + 0.4 * wave(d, 2.7)),
-      pitchDeg: this.rotationPassed * Stance.DRIFT_PITCH_DEG * (0.5 * wave(b, 1.6) + 0.5 * wave(c, 0.4)),
-      rollDeg: this.rotationPassed * Stance.DRIFT_ROLL_DEG * wave(a, 2.9)
+      eastM: k * Stance.SWAY_M * (0.7 * wave(a, 0.3) + 0.3 * wave(d, 1.9)),
+      northM: k * Stance.SWAY_M * (0.6 * wave(c, 2.2) + 0.4 * wave(e, 0.8)),
+      upM: k * Stance.BREATH_M * wave(b, 0.0),
+      yawDeg: k * this.rotationPassed * Stance.DRIFT_YAW_DEG * (0.6 * wave(f, 1.1) + 0.4 * wave(d, 2.7)),
+      pitchDeg: k * this.rotationPassed * Stance.DRIFT_PITCH_DEG * (0.5 * wave(b, 1.6) + 0.5 * wave(c, 0.4)),
+      rollDeg: k * this.rotationPassed * Stance.DRIFT_ROLL_DEG * wave(a, 2.9)
     }
   }
 }

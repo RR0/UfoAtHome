@@ -49,6 +49,9 @@ export interface SightingLabels {
   pitch: string
   /** How far the instrument was tilted about its own line of sight — see ObserverPose.rollDeg. */
   roll: string
+  /** How much the body holding the instrument moves the view at rest — see Sighting.sway. */
+  sway: string
+  swayTitle: string
   observationTime: string
   observationEndTime: string
   /** The observer as a WHOLE, naming the chip that holds everything said about them — not

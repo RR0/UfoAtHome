@@ -109,6 +109,9 @@ export const html = `
          was HELD — a camera askew, a head leaned over — which is why it belongs beside the focal
          length and the aperture whose own spikes it turns. -->
     <label><span id="label-roll">Roll</span> <input id="roll" type="number" min="-180" max="180" step="1" value="0" title="How far the instrument was tilted about its own line of sight — positive clockwise, as the observer saw it"/> &deg;</label>
+    <!-- How much the body holding it moves the view at rest — see Sighting.sway: 1 a person, 0 a
+         tripod. Blank is the default (1, or 0 for a paralysed observer). -->
+    <label><span id="label-sway">Sway</span> <input id="sway" type="number" min="0" max="3" step="0.1" placeholder="1"/></label>
     <button id="add-decor-observer" type="button">Add observer</button>
     <label><span id="label-decor-sighting-url">Their own recording URL</span> <input id="decorSightingUrl" type="url" placeholder="https://…/sighting.json"/></label>
   </div>
