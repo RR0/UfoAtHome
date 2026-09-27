@@ -239,12 +239,6 @@ export class BodySystem {
     return [rgb[0] * transmittance[0], rgb[1] * transmittance[1], rgb[2] * transmittance[2]]
   }
 
-  /** A colour scaled to a luminance of one: its hue alone. */
-  private static unitLuminance(rgb: readonly [number, number, number]): [number, number, number] {
-    const luminance = Photometry.luminanceOf(rgb)
-    return luminance > 0 ? [rgb[0] / luminance, rgb[1] / luminance, rgb[2] / luminance] : [1, 1, 1]
-  }
-
   private static rgbOf(css: string): [number, number, number] {
     const colour = new Color(css)
     return [colour.r, colour.g, colour.b]
@@ -424,8 +418,12 @@ export class BodySystem {
       // SceneRenderer.arrivingIlluminance) — never from its colour as shown: the screen's response
       // is compressed, and a pure red, whose luminance is a fifth of its peak channel, came out
       // with next to no glare at all beside a white of the same luminance.
+      // Its colour at its peak, so that a red's glare reaches as far as a white's of the same
+      // luminance: scaled to a luminance of one, a pure red was 3.7 times stronger at its peak and
+      // its glare swallowed the white light beside it.
       const lux = luminanceCdM2 * solidAngle * this.sceneUnitsPerLux()
-      const hue = BodySystem.unitLuminance(glow.hue)
+      const peak = Math.max(...glow.hue) || 1
+      const hue = [glow.hue[0] / peak, glow.hue[1] / peak, glow.hue[2] / peak]
       const light = this.throughAir([hue[0] * lux, hue[1] * lux, hue[2] * lux], centre)
       veil.shine(centre, light, (angularRadius * 180) / Math.PI)
     }
