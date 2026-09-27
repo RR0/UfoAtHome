@@ -2240,15 +2240,17 @@ export class SceneRenderer {
 
   /**
    * The angular radius a lamp's glare is drawn at: an eye's (DecorSystem's default) or, through an
-   * instrument with a grain, the grain's own angle behind the lens now in use, never under half a
-   * pixel of the picture. A 35 mm frame's 20 micrometres behind a 50 mm lens are 0.023 degrees.
+   * instrument with a grain, the grain's own angle behind the lens now in use, never under a pixel
+   * of the picture. A 35 mm frame's 20 micrometres behind a 50 mm lens are 0.023 degrees. Under a
+   * pixel, a lamp is hit or missed by the rasteriser, and on a pose, whose instants land two pixels
+   * apart (ExposureSampling.PIXELS_PER_INSTANT), its line broke into faint beads.
    */
   private lampBloomRadiusRad(): number | undefined {
     if (!this.grain) return undefined
     const fovRad = (this.camera.fov * Math.PI) / 180
     const focalMm = this.grain.frameHeightMm / (2 * Math.tan(fovRad / 2))
     const heightPx = Math.max(1, this.renderer.getDrawingBufferSize(this.bloomSize).y)
-    return Math.max((this.grain.detailUm * 1e-3) / focalMm, fovRad / heightPx / 2)
+    return Math.max((this.grain.detailUm * 1e-3) / focalMm, fovRad / heightPx)
   }
 
   private readonly bloomSize = new Vector2()
