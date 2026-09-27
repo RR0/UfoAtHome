@@ -720,7 +720,7 @@ export class SceneElement extends HTMLElement {
 
   setWeather(weather: Weather): void {
     this.sceneRenderer.setWeather(weather)
-    this.weatherAudio.setAmbient(weather.precipitationType, weather.precipitationIntensity, weather.windSpeed)
+    this.weatherAudio.setAmbient(weather.precipitationType, weather.precipitationIntensity * (weather.precipitationAmount ?? 1), weather.windSpeed)
   }
 
   /** Optional editing tools share the renderer's actual projection and cloud density. */

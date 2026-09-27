@@ -149,6 +149,7 @@ function weatherEquals(a: Weather, b: Weather): boolean {
     a.relativeHumidity === b.relativeHumidity &&
     a.precipitationType === b.precipitationType &&
     a.precipitationIntensity === b.precipitationIntensity &&
+    a.precipitationAmount === b.precipitationAmount &&
     a.windDirectionDeg === b.windDirectionDeg &&
     a.windSpeed === b.windSpeed &&
     a.storm === b.storm
@@ -571,8 +572,16 @@ const PRECIPITATION_HAZE_DISTANCE_RATIO = 0.85
  * IS selected — a few visible drops/flakes, not zero. Lowered twice (0.2->0.05->0.01) after user
  * feedback that intensity=0 still looked too dense for the lightest possible drizzle/flurry. */
 const PRECIPITATION_INTENSITY_COUNT_FLOOR = 0.01
-function precipitationVisibleCount(poolSize: number, intensity: number): number {
-  return Math.round(poolSize * (PRECIPITATION_INTENSITY_COUNT_FLOOR + (1 - PRECIPITATION_INTENSITY_COUNT_FLOOR) * intensity))
+function precipitationVisibleCount(poolSize: number, intensity: number, amount = 1): number {
+  return Math.round(poolSize * (PRECIPITATION_INTENSITY_COUNT_FLOOR + (1 - PRECIPITATION_INTENSITY_COUNT_FLOOR) * intensity) * amount)
+}
+
+/** Whether two weathers differ in how much falls and nothing else — the change a starting or
+ * stopping shower makes every frame, which must NOT rebuild the sky and the rain: a rebuild re-seeds
+ * the drops and restarts their clock, and at one rebuild a frame the drops never move at all. */
+function onlyAmountDiffers(a: Weather, b: Weather): boolean {
+  return a.precipitationType === b.precipitationType &&
+    weatherEquals({ ...a, precipitationIntensity: 0, precipitationAmount: undefined }, { ...b, precipitationIntensity: 0, precipitationAmount: undefined })
 }
 /** Numerator of `gl_PointSize = uPixelSize / -mvPosition.z` (see RainSystem.ts's vertex shader) —
  * tuned by eye against this project's own camera (60deg fov) and RAIN_RADIUS_M. Scaled down from an
@@ -1631,6 +1640,15 @@ export class SceneRenderer {
   setWeather(weather: Weather): void {
     this.cloudTransmissionMemo.clear()
     if (weatherEquals(this.weather, weather)) return
+    if (onlyAmountDiffers(this.weather, weather)) {
+      this.weather = weather
+      this.air = AerialPerspective.of(weather)
+      this.applyAir()
+      this.updatePrecipitationDensity()
+      if (this.lastAstronomy) this.buildRainbow(this.lastAstronomy.sun, this.lastAstronomy.moon)
+      this.render()
+      return
+    }
     this.weather = weather
     // The same humidity that makes the sky milky makes the distance pale, and what is falling
     // thins it further: one air for both.
@@ -4621,7 +4639,7 @@ export class SceneRenderer {
     }
     // Only water makes a bow. Snow and hail are ice, and irregular ice at that: they make the halo
     // family or they make nothing, and neither is this.
-    const rain = this.weather.precipitationType === "rain" ? this.weather.precipitationIntensity : 0
+    const rain = this.weather.precipitationType === "rain" ? this.weather.precipitationIntensity * (this.weather.precipitationAmount ?? 1) : 0
     const bySun = sun.altitudeDeg > 0
     const source = bySun ? sun : moon
     // The deck that stands between the source and the rain, which is what "the Sun broke through"
@@ -5135,6 +5153,24 @@ export class SceneRenderer {
    * disposes both first: switching type must tear down whichever one is currently live, not just
    * build the new one on top. No-ops (leaves both undefined) for "none", which is also what
    * needsAnimationLoop checks to know whether the shared RAF loop still needs to run at all. */
+  /** How many of a pool of drops are falling now: the kind of rain's own density, times how much
+   * of it has started (see Weather.precipitationAmount). */
+  private precipitationCount(poolSize: number): number {
+    return precipitationVisibleCount(poolSize, this.weather.precipitationIntensity, this.weather.precipitationAmount ?? 1)
+  }
+
+  /** Follows a shower starting or stopping without rebuilding anything: more or fewer of the same
+   * drops, still falling where they were — see onlyAmountDiffers. */
+  private updatePrecipitationDensity(): void {
+    const pools: [Points | undefined, number | undefined][] = [
+      [this.rainSystem?.points, RAIN_POOL_SIZE],
+      [this.rainSplashSystem?.points, RAIN_SPLASH_POOL_SIZE],
+      [this.precipitationPoints, this.weather.precipitationType === "none" || this.weather.precipitationType === "rain" ? undefined : PRECIPITATION_CONFIG[this.weather.precipitationType].poolSize]
+    ]
+    for (const [points, pool] of pools) if (points && pool !== undefined) points.geometry.setDrawRange(0, this.precipitationCount(pool))
+    if (this.rainSystem) this.rainSystem.uniforms.uSpeedStreak.value = speedStreakFactor(rainFallSpeedMPerS(this.weather.precipitationIntensity))
+  }
+
   private buildPrecipitation(): void {
     this.disposePrecipitationPoints()
     this.disposeRain()
@@ -5180,7 +5216,7 @@ export class SceneRenderer {
     // see PRECIPITATION_INTENSITY_COUNT_FLOOR's own comment. Positions/phase are still built and
     // updated for the full pool regardless (updatePrecipitation doesn't consult drawRange), so
     // raising intensity later just reveals more of an already-simulated pool, not newly-spawned ones.
-    geometry.setDrawRange(0, precipitationVisibleCount(poolSize, this.weather.precipitationIntensity))
+    geometry.setDrawRange(0, this.precipitationCount(poolSize))
     // uScale approximates PointsMaterial's own internal sizeAttenuation scale factor (tied to the
     // real render target's pixel height) — not required to be bit-exact, this material replaced
     // PointsMaterial for the depth-cue effect below, not to change the already-tuned base size.
@@ -5385,7 +5421,7 @@ export class SceneRenderer {
       overallSpeed: RAIN_OVERALL_SPEED,
       color: RAIN_COLOR.clone(),
       opacity: 0.85,
-      visibleCount: precipitationVisibleCount(RAIN_POOL_SIZE, this.weather.precipitationIntensity),
+      visibleCount: this.precipitationCount(RAIN_POOL_SIZE),
       speedStreak: speedStreakFactor(fallSpeedMPerS),
       pixelSize: RAIN_PIXEL_SIZE,
       seed: 9001,
@@ -5430,7 +5466,7 @@ export class SceneRenderer {
     geometry.setAttribute("aLife", lifeAttribute)
     // Same "density, not opacity, tracks intensity" convention as every other precipitation pool —
     // a downpour shows many concurrent splashes, a drizzle shows almost none.
-    geometry.setDrawRange(0, precipitationVisibleCount(RAIN_SPLASH_POOL_SIZE, this.weather.precipitationIntensity))
+    geometry.setDrawRange(0, this.precipitationCount(RAIN_SPLASH_POOL_SIZE))
     const material = new ShaderMaterial({
       uniforms: {
         uMaxSize: { value: RAIN_SPLASH_MAX_SIZE_M },

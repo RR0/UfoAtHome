@@ -147,6 +147,9 @@ export interface RainSystem {
 const MAX_BLUR_PIXELS = 18.0
 const HAZE_STRENGTH = 0.55
 const BLUR_OPACITY_FALLOFF = 0.5
+/** Nearer than this a drop is not seen at all; from NEAR_VISIBLE_M it is seen in full. */
+const NEAR_INVISIBLE_M = 0.4
+const NEAR_VISIBLE_M = 2.0
 
 const VERTEX_SHADER = `
 attribute float aSpeed;
@@ -162,23 +165,38 @@ uniform float uAspect;
 uniform float uNearFocusDistance;
 uniform float uHazeDistance;
 varying float vNearBlur;
+varying float vNearFade;
 varying float vHaze;
 varying float vSlant;
 
 void main() {
   // uOverallSpeed*aSpeed, not a real-world m/s value — see RainSystemConfig.overallSpeed's own
   // comment on why the recycle animation's own rate is deliberately unrelated to real rain physics.
-  float wrappedY = mod(position.y - uTime * uOverallSpeed * aSpeed, uHeight) + uBottomY;
+  float fallen = position.y - uTime * uOverallSpeed * aSpeed;
+  float wrappedY = mod(fallen, uHeight) + uBottomY;
+  // Each time a drop leaves the bottom of the volume it comes back at the top as ANOTHER drop, at
+  // another place: the lap it is on picks a new spot. Without this every drop fell down the same
+  // column for ever, and with the observer still and no wind the next drop down that column crossed
+  // the image at exactly the same place — one drop that seemed to stay put on the screen.
+  float lap = floor(fallen / uHeight);
+  vec2 respawn = vec2(
+    fract(sin(lap * 12.9898 + position.x * 78.233) * 43758.5453),
+    fract(sin(lap * 39.3468 + position.z * 11.135) * 24634.6345)
+  ) * uHalfWidth * 2.0;
   // Wraps horizontally too (a torus, not a bounded box) so a continuously-growing wind offset never
   // needs its own respawn/reset logic — any offset magnitude wraps back into [-uHalfWidth, uHalfWidth].
-  float driftedX = mod(position.x + uWindOffset.x + uHalfWidth, uHalfWidth * 2.0) - uHalfWidth;
-  float driftedZ = mod(position.z + uWindOffset.y + uHalfWidth, uHalfWidth * 2.0) - uHalfWidth;
+  float driftedX = mod(position.x + respawn.x + uWindOffset.x + uHalfWidth, uHalfWidth * 2.0) - uHalfWidth;
+  float driftedZ = mod(position.z + respawn.y + uWindOffset.y + uHalfWidth, uHalfWidth * 2.0) - uHalfWidth;
   vec4 mvPosition = modelViewMatrix * vec4(driftedX, wrappedY, driftedZ, 1.0);
   gl_Position = projectionMatrix * mvPosition;
   float dist = max(1.0, -mvPosition.z);
   // Near-camera optical defocus: 1 right at the camera, fading to 0 by uNearFocusDistance — a
   // observer's eyes aren't focused at arm's length on individual raindrops.
   vNearBlur = clamp(1.0 - dist / uNearFocusDistance, 0.0, 1.0);
+  // And a drop a hand's breadth from the eye is not seen at all: out of focus by metres, its light
+  // is spread over a disc so wide that nothing of it stands out. Drawn big and soft instead, it
+  // reads as a drop sitting on a lens, which is a camera's sight and not an eye's.
+  vNearFade = smoothstep(${NEAR_INVISIBLE_M.toFixed(2)}, ${NEAR_VISIBLE_M.toFixed(2)}, -mvPosition.z);
   // Distance haze: 0 close in, ramping to 1 by uHazeDistance — real atmospheric haze, monotonic
   // (unlike defocus, there's no "in-focus band", it just keeps increasing with distance). Does NOT
   // add to gl_PointSize below — real haze dims/desaturates a distant object, it doesn't enlarge it;
@@ -219,6 +237,7 @@ uniform float uUvSquash;
 uniform float uSpeedStreak;
 uniform vec3 uHazeColor;
 varying float vNearBlur;
+varying float vNearFade;
 varying float vHaze;
 varying float vSlant;
 
@@ -248,7 +267,7 @@ void main() {
   // one right in the middle distance.
   vec3 color = mix(uColor, uHazeColor, vHaze * ${HAZE_STRENGTH.toFixed(2)});
   float blur = max(vNearBlur, vHaze);
-  gl_FragColor = vec4(color, tex.a * uOpacity * (1.0 - blur * ${BLUR_OPACITY_FALLOFF.toFixed(2)}));
+  gl_FragColor = vec4(color, tex.a * uOpacity * vNearFade * (1.0 - blur * ${BLUR_OPACITY_FALLOFF.toFixed(2)}));
 }
 `
 

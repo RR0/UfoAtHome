@@ -200,7 +200,11 @@ export class WeatherTrack {
     const weather = this.getInterpolatedWeatherAt(t)
     if (!weather) return undefined
     const precipitation = (this.ramp ??= new PrecipitationRamp(this.keyframes)).at(t)
-    return precipitation ? { ...weather, precipitationType: precipitation.type, precipitationIntensity: precipitation.intensity } : weather
+    if (!precipitation) return weather
+    const { type, intensity, character } = precipitation
+    // The kind of rain stays the stated one; only how much of it falls follows the ramp.
+    const amount = character > 0 ? Math.min(1, intensity / character) : type === "none" ? 0 : 1
+    return { ...weather, precipitationType: type, precipitationIntensity: character, precipitationAmount: amount }
   }
 
   get duration(): number {

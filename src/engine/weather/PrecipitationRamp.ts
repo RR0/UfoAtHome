@@ -6,6 +6,8 @@ interface RampPoint {
   /** The last kind of precipitation stated at or before this keyframe: what is still falling
    * after a keyframe that says "none", until the rain has had time to stop. */
   lastFalling: PrecipitationType
+  /** And how heavy it was stated: the kind of rain still finishing. */
+  lastFallingIntensity: number
   /** 0 when nothing falls, whatever the stored intensity says (it is meaningless under "none"). */
   intensity: number
   type: PrecipitationType
@@ -40,11 +42,16 @@ export class PrecipitationRamp {
 
   constructor(keyframes: ReadonlyArray<{ t: number; weather: Weather }>) {
     let lastFalling: PrecipitationType = "none"
+    let lastFallingIntensity = 0
     this.points = keyframes.map(({ t, weather }) => {
-      if (weather.precipitationType !== "none") lastFalling = weather.precipitationType
+      if (weather.precipitationType !== "none") {
+        lastFalling = weather.precipitationType
+        lastFallingIntensity = weather.precipitationIntensity
+      }
       return {
         t,
         lastFalling,
+        lastFallingIntensity,
         intensity: weather.precipitationType === "none" ? 0 : weather.precipitationIntensity,
         type: weather.precipitationType
       }
@@ -63,7 +70,7 @@ export class PrecipitationRamp {
 
   /** The precipitation at `t`: its type and how hard. Undefined outside the keyframes' span, where
    * the caller holds the nearest keyframe as it always has. */
-  at(tMs: number): { type: PrecipitationType; intensity: number } | undefined {
+  at(tMs: number): { type: PrecipitationType; intensity: number; character: number } | undefined {
     if (this.points.length === 0 || tMs < this.points[0].t) return undefined
     let index = this.points.length - 1
     while (index > 0 && this.points[index].t > tMs) index--
@@ -72,7 +79,15 @@ export class PrecipitationRamp {
     const intensity = to
       ? PrecipitationRamp.follow(this.followed[index], from.intensity, to.intensity, (to.t - from.t) / 1000, (tMs - from.t) / 1000)
       : PrecipitationRamp.follow(this.followed[index], from.intensity, from.intensity, 1, (tMs - from.t) / 1000)
-    return { type: PrecipitationRamp.typeBetween(from, to, tMs, intensity), intensity }
+    return { type: PrecipitationRamp.typeBetween(from, to, tMs, intensity), intensity, character: PrecipitationRamp.characterBetween(from, to, tMs) }
+  }
+
+  /** What rain it is between two keyframes, as stated: the one starting, the one stopping, or the
+   * blend of two that both fall. */
+  private static characterBetween(from: RampPoint, to: RampPoint | undefined, tMs: number): number {
+    if (from.type === "none") return to && to.type !== "none" ? to.intensity : from.lastFallingIntensity
+    if (!to || to.type === "none") return from.intensity
+    return from.intensity + ((to.intensity - from.intensity) * (tMs - from.t)) / (to.t - from.t || 1)
   }
 
   /**

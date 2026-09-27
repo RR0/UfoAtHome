@@ -76,16 +76,17 @@ export class AerialPerspective {
   readonly precipitationPerM: number
 
   /** The air of a recording's weather at an instant: its humidity and what is falling. */
-  static of(weather: Pick<Weather, "relativeHumidity" | "precipitationType" | "precipitationIntensity">): AerialPerspective {
+  static of(weather: Pick<Weather, "relativeHumidity" | "precipitationType" | "precipitationIntensity" | "precipitationAmount">): AerialPerspective {
     const depth = weather.relativeHumidity === undefined ? undefined : HumidHaze.opticalDepth(weather.relativeHumidity)
     return new AerialPerspective(depth, AerialPerspective.precipitationExtinction(weather))
   }
 
   /** What is falling, as an extinction per metre at the ground. */
-  static precipitationExtinction(weather: Pick<Weather, "precipitationType" | "precipitationIntensity">): number {
-    if (weather.precipitationType === "none" || !(weather.precipitationIntensity > 0)) return 0
+  static precipitationExtinction(weather: Pick<Weather, "precipitationType" | "precipitationIntensity" | "precipitationAmount">): number {
+    const falling = weather.precipitationIntensity * (weather.precipitationAmount ?? 1)
+    if (weather.precipitationType === "none" || !(falling > 0)) return 0
     const law = AerialPerspective.PRECIPITATION_EXTINCTION_PER_KM[weather.precipitationType]
-    const rate = weather.precipitationIntensity * AerialPerspective.FULL_INTENSITY_MM_PER_H
+    const rate = falling * AerialPerspective.FULL_INTENSITY_MM_PER_H
     return (law.a * rate ** law.b) / 1000
   }
 

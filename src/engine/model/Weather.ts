@@ -67,8 +67,18 @@ export interface Weather {
    */
   relativeHumidity?: number
   precipitationType: PrecipitationType
-  /** 0-1; meaningless while precipitationType is "none". */
+  /** 0-1; meaningless while precipitationType is "none". What KIND of rain: its drops, their speed,
+   * their streaks. How much of it is falling at this moment is precipitationAmount. */
   precipitationIntensity: number
+  /**
+   * How much of that precipitation is actually falling yet, 0 to 1 — absent meaning all of it.
+   *
+   * Never stored: only the weather as it actually was carries it (see WeatherTrack.getActualWeatherAt),
+   * while a shower is starting or stopping. A shower that starts is a few drops of the shower, not a
+   * drizzle — the same big, fast drops, fewer of them — so the ramp is on this and not on the
+   * intensity.
+   */
+  precipitationAmount?: number
   /**
    * Degrees clockwise from true north — same convention as ObserverPose.headingDeg, and the
    * direction the wind blows *toward*, not the one it comes from: SceneRenderer drifts every
