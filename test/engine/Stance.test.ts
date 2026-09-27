@@ -40,6 +40,19 @@ describe("Stance", () => {
     for (let t = 0; t < 20_000; t += 500) expect(Gait.bodyAt(sighting, t)).toEqual(Gait.STILL)
   })
 
+  it("holds a long exposure still, as on a tripod, unless the recording says otherwise", () => {
+    const pose = standing()
+    pose.instrumentId = "slr-35mm-50"
+    pose.exposureSeconds = 20
+    expect(Stance.of(pose)).toBeUndefined()
+    const snapshot = standing()
+    snapshot.instrumentId = "slr-35mm-50"
+    snapshot.exposureSeconds = 1 / 60
+    expect(Stance.of(snapshot)).toBeDefined()
+    pose.sway = 1
+    expect(Stance.of(pose)).toBeDefined()
+  })
+
   it("takes its size from the recording: 0 is a tripod, 2 twice a person's", () => {
     const tripod = standing()
     tripod.sway = 0

@@ -372,8 +372,29 @@ export class ScatteredSky {
         airlight[c] += scattered[c] / 18
       }
     }
+    const previous = this.ambientColours
+    const previousAdaptation = this.announcedAdaptation
     this.ambientColours = { zenith: displayAt(90, 0), horizon, airlight, skyIrradiance: relative(irradiance), scale: this.relativeScale }
+    this.announcedAdaptation = this.adaptingLuminance
+    // Only a sky that reads differently is news. A read-back that finds what the last one found says
+    // nothing new, and announcing it anyway restarted a long pose: every instant of the pose redraws
+    // the sky, the read-back of each came back a moment later and asked for a new frame, and the
+    // photograph was developed again from its first instant, over and over, while nothing moved —
+    // the read-backs alternating between the sky of the pose's first instant and of its last.
+    if (previous && ScatteredSky.alike(previousAdaptation, this.adaptingLuminance)
+      && previous.zenith.every((value, c) => ScatteredSky.alike(value, this.ambientColours!.zenith[c]))
+      && previous.horizon.every((value, c) => ScatteredSky.alike(value, horizon[c]))) return
     this.onChange()
+  }
+
+  /** The adaptation last announced — see adaptFromViews. */
+  private announcedAdaptation = 0
+
+  /** Two readings that no eye would tell apart: within a hundredth of each other, under the one or
+   * two hundredths of a difference in brightness an eye can just see. The first and last instants of
+   * a 20-second pose read 0.3 % apart in adaptation and 0.7 % in colour, and alternated for ever. */
+  private static alike(a: number, b: number): boolean {
+    return a === b || Math.abs(a - b) <= 1e-2 * Math.max(Math.abs(a), Math.abs(b))
   }
 
 

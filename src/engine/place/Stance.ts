@@ -19,7 +19,9 @@ import type { GaitOffset } from "./Gait.js"
  * Its size is the recording's own `sway` (see Sighting.sway): 1 for a person, 0 for an instrument
  * on a tripod. Absent, it is 1 — except for an observer the account says was paralysed (tag
  * "paralysis"): Masse at Valensole could not move, and a sway would contradict the very thing he
- * reported.
+ * reported; and except for a shutter held open longer than a hand can hold a camera still
+ * (HAND_HELD_S): a 20-second exposure is made on a tripod, and a sway drew every star of it as a
+ * wavy line.
  *
  * The movement itself is DERIVED, never recorded, like the gait (see Gait): having a body is not a
  * claim of the account. Only its size can be stated, and only because an instrument can have none.
@@ -41,6 +43,8 @@ export class Stance {
    * fixed (see PointSources).
    */
   private static readonly GAZE_DRIFT_SHARE = 0.35
+  /** The longest exposure a hand holds a camera still for, seconds: beyond it, a tripod. */
+  static readonly HAND_HELD_S = 0.5
   /** Unrelated slow rates, hertz: sway, breath, drift. */
   private static readonly HZ = [0.11, 0.23, 0.17, 0.29, 0.37, 0.07] as const
 
@@ -51,7 +55,8 @@ export class Stance {
   /** Undefined for an observer who does not move: a sway of 0, or a paralysed observer who states
    * none. */
   static of(sighting: Sighting): Stance | undefined {
-    const scale = sighting.sway ?? (sighting.event.tags?.includes("paralysis") ? 0 : 1)
+    const still = sighting.event.tags?.includes("paralysis") || (sighting.exposure ?? 0) > Stance.HAND_HELD_S
+    const scale = sighting.sway ?? (still ? 0 : 1)
     if (!(scale > 0)) return undefined
     return new Stance(Math.max(1 - (sighting.instrument.stabilization ?? 0), Stance.GAZE_DRIFT_SHARE), scale)
   }
