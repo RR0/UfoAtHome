@@ -378,6 +378,13 @@ export class Sighting {
   sway?: number
 
   /**
+   * The speed of the film or sensor the picture was taken on, ISO — what a photographer loaded, as
+   * the shutter is what they set (see exposureSeconds). Absent means the device's own (see
+   * Instrument.medium); meaningless for an eye. Not readonly, same reasoning as account above.
+   */
+  iso?: number
+
+  /**
    * The vehicle the observer was in, when it is not drawn — see ObserverVehicle. Heard from inside,
    * its engine turning with the observer's own journey (see VehicleDrive). Absent means on foot, or
    * in a vehicle the decor draws. Not readonly, same reasoning as account above.

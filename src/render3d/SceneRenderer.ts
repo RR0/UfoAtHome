@@ -100,7 +100,7 @@ import { RainbowEffect } from "./RainbowEffect.js"
 import { MeteorSystem } from "./MeteorSystem.js"
 import type { Meteor } from "../engine/astronomy/MeteorFall.js"
 import { Instruments } from "../engine/instrument/Instrument.js"
-import type { Instrument, ProjectionKind } from "../engine/instrument/Instrument.js"
+import type { Instrument, ProjectionKind, RecordingMedium } from "../engine/instrument/Instrument.js"
 import type { LensFlareSystem } from "./LensFlareEffect.js"
 import { DecorSystem } from "./DecorSystem.js"
 import type { DecorObject } from "../engine/model/Decor.js"
@@ -2235,6 +2235,45 @@ export class SceneRenderer {
    * rebuilding the group, and toggles a streetlight's own real PointLight (built once, up front,
    * in setDecor) visible/invisible to match — never disposed/recreated, since the light itself
    * doesn't change, only whether it's currently switched on. */
+  /** What the picture is recorded on and how it was exposed — see setMedium. */
+  private medium?: { kind: RecordingMedium["kind"], iso: number, autoExposure: boolean, exposureSeconds: number, fNumber: number }
+
+  /**
+   * What the picture is recorded on, and the exposure it was given: the shutter, the f-number and
+   * the film's speed. Undefined for an eye, which answers light with its own response. A film's
+   * answer is the same whatever the sky (see RecordingMedium): the exposure a relative unit gives it
+   * is worked out from those three, in middle greys, when the picture is finished (applyMedium).
+   */
+  setMedium(medium: RecordingMedium | undefined, exposureSeconds: number | undefined, fNumber: number | undefined, iso?: number): void {
+    const next = medium && exposureSeconds !== undefined && exposureSeconds > 0 && fNumber !== undefined && fNumber > 0
+      ? { kind: medium.kind, iso: iso ?? medium.iso, autoExposure: medium.autoExposure === true, exposureSeconds, fNumber }
+      : undefined
+    if (JSON.stringify(next) === JSON.stringify(this.medium)) return
+    this.medium = next
+    this.render()
+  }
+
+  /**
+   * The finish's medium uniforms, for this scene (see EYE_UNIFORMS). The exposure at the film is
+   * ISO 12232's H = q L t / N², with q = 0.65 for the lens's transmission and its fall-off, and a
+   * middle grey needs 10 / ISO lux-seconds of it; the scene's luminance L is the relative value
+   * over this scene's relativeScale. A device that sets its own exposure puts its middle grey at the
+   * light the scene is adapted to instead.
+   */
+  private applyMedium(): void {
+    const medium = this.medium
+    const relativeScale = Math.max(this.relativeScale, 1e-30)
+    if (!medium) {
+      EYE_UNIFORMS.uMedium.value = 0
+      return
+    }
+    EYE_UNIFORMS.uMedium.value = medium.kind === "negative" ? 1 : medium.kind === "slide" ? 2 : 3
+    const metered = medium.autoExposure ? this.scatteredSky?.sceneAdaptation : undefined
+    EYE_UNIFORMS.uMediumExposure.value = metered !== undefined && metered > 0
+      ? 1 / (relativeScale * metered)
+      : (0.065 * medium.exposureSeconds * medium.iso) / (medium.fNumber * medium.fNumber * relativeScale)
+  }
+
   /** What a recording medium resolves, when the instrument has one — see lampBloomRadiusRad. */
   private grain?: { detailUm: number, frameHeightMm: number }
 
@@ -3207,6 +3246,7 @@ export class SceneRenderer {
     // This scene's eye, for the finish every picture of the page shares (see EYE_UNIFORMS).
     EYE_UNIFORMS.uRodShare.value = this.scatteredSky?.rodShare ?? 0
     EYE_UNIFORMS.uRelativeScale.value = this.relativeScale
+    this.applyMedium()
     const overlaid = this.references.any || this.phenomena.any || this.compassSprites.some(sprite => sprite.visible)
     EYE_UNIFORMS.uHasOverlay.value = overlaid ? 1 : 0
     const overlays = overlaid ? (camera?: PerspectiveCamera) => this.renderOverlayPasses(camera) : undefined
@@ -3448,6 +3488,7 @@ export class SceneRenderer {
     // The film's overlay layer was cleared and added up with the rest: it is always read.
     EYE_UNIFORMS.uHasOverlay.value = 1
     EYE_UNIFORMS.uRelativeScale.value = this.relativeScale
+    this.applyMedium()
     this.exposureAccumulation?.develop(this.renderer, this.exposureInstants / this.exposureInstantsDone)
     this.onMapSubjectBounds?.(this.exposureSubjectBounds)
     if (!this.compassSprites.some(sprite => sprite.visible)) return

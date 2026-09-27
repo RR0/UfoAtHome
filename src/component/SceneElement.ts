@@ -1108,6 +1108,9 @@ export class SceneElement extends HTMLElement {
       // ScatteredSky.setInstrument).
       sighting.instrument.detailUm !== undefined
     )
+    // And how the picture answers it: a film's own curve at the exposure it was given, not an
+    // eye's adapting response (see RecordingMedium).
+    this.sceneRenderer.setMedium(sighting.instrument.medium, sighting.exposure, pose?.fNumber ?? sighting.instrument.fNumber, sighting.iso)
     // What the observer's own legs are doing to their eye between two recorded positions — nothing
     // for a observer who stood still — the slow sway of a living body, see Stance — and a couple of
     // centimetres of rise and sway for one who walked. Rebuilt each tick rather than cached: the

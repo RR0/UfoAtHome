@@ -93,6 +93,9 @@ export interface SightingRecordingJson {
    * Sighting.exposureSeconds. Absent means the device's own. Recordings written while this lived on
    * each pose are read back through the first pose that stated one (see fromSightingJson). */
   exposureSeconds?: number
+  /** The speed of the film or sensor this picture was taken on — see Sighting.iso. Absent means the
+   * device's own (Instrument.medium). */
+  iso?: number
   /** The named moments of the account — see Milestone. Absent/omitted means none, which is what
    * every recording made before this field existed says. */
   milestones?: Milestone[]
@@ -146,6 +149,7 @@ export function plainSightingJson(sighting: Sighting): SightingRecordingJson {
     weatherSource: sighting.weatherSource,
     instrument: sighting.instrumentId,
     exposureSeconds: sighting.exposureSeconds,
+    iso: sighting.iso,
     interpretation: sighting.interpretation
   }
 }
@@ -208,6 +212,7 @@ function fromPlainSightingJson(json: SightingRecordingJson): Sighting {
   // the sighting, not on the timeline.
   sighting.account = json.account
   sighting.sway = json.sway
+  sighting.iso = json.iso
   sighting.vehicle = json.vehicle
   sighting.interpretation = json.interpretation
   SightingShapes.toBounds(sighting)

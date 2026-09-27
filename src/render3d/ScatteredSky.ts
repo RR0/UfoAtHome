@@ -69,6 +69,12 @@ export class ScatteredSky {
   get adaptation(): number {
     return this.adaptingLuminance * this.exposureScale
   }
+
+  /** The scene's own adapting luminance, cd/m², before any instrument's gain: what a device that
+   * sets its own exposure meters (see RecordingMedium.autoExposure). */
+  get sceneAdaptation(): number {
+    return this.adaptingLuminance
+  }
   private ambientColours?: SkyAmbient
   private reading = false
   /** How much more light the instrument gathers than an eye, as a factor (see setInstrument). */

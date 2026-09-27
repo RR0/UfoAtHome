@@ -80,17 +80,45 @@ vec3 purkinje(vec3 rgb) {
   return mix(rgb / y, tint, rods) * seen;
 }
 
+/** What records the picture: 0 an eye, 1 a printed negative, 2 a slide, 3 a sensor — see
+ * RecordingMedium and EYE_UNIFORMS. */
+uniform float uMedium;
+/** The exposure one relative unit gives the medium, in its middle greys. */
+uniform float uMediumExposure;
+/** Where a printed negative's and a slide's curve put a middle grey (0.18) at an exposure of one. */
+const float MEDIUM_MID_GREY = 0.18;
+
+/**
+ * How light a medium shows an exposure h, in middle greys (see RecordingMedium): a curve of its
+ * own and the same whatever the sky, since a film does not adapt. The negative's and the slide's
+ * are logistic in the logarithm of the exposure, which is what a film's characteristic curve is —
+ * a toe, a straight line, a shoulder — the slide's steeper; the sensor's is straight and then
+ * stops: past full it has nothing more to give.
+ */
+float recorded(float h) {
+  if (uMedium > 2.5) return min(1.0, MEDIUM_MID_GREY * h);
+  float power = pow(h, uMedium > 1.5 ? 1.8 : 1.2);
+  return power / (power + (1.0 / MEDIUM_MID_GREY - 1.0));
+}
+
 vec3 respond(vec3 relative) {
-  vec3 clamped = purkinje(clamp(relative, vec3(0.0), vec3(60000.0)));
+  // A medium has no rods: no Purkinje shift, its colours are its own.
+  vec3 clamped = clamp(relative, vec3(0.0), vec3(60000.0));
+  if (uMedium < 0.5) clamped = purkinje(clamped);
   float y = dot(clamped, vec3(0.2126, 0.7152, 0.0722));
   if (y <= 0.0) return vec3(0.0);
-  float power = pow(y, EYE_RESPONSE_EXPONENT);
-  float response = power / (power + 1.0);
-  // The response is how light the observer saw it. Shown as a luminance, the reader's own eye
-  // compressed it a second time and every scene came out pastel, a sunlit ground as pale as the
-  // sky; shown as the luminance that LOOKS that light (CIE L*), it is seen once. Chosen by the
-  // reader over four steeper responses on 2026-09-21, as the one right both by day and by night.
-  response = fromLightness(response);
+  float response;
+  if (uMedium > 0.5) {
+    response = recorded(y * uMediumExposure);
+  } else {
+    float power = pow(y, EYE_RESPONSE_EXPONENT);
+    response = power / (power + 1.0);
+    // The response is how light the observer saw it. Shown as a luminance, the reader's own eye
+    // compressed it a second time and every scene came out pastel, a sunlit ground as pale as the
+    // sky; shown as the luminance that LOOKS that light (CIE L*), it is seen once. Chosen by the
+    // reader over four steeper responses on 2026-09-21, as the one right both by day and by night.
+    response = fromLightness(response);
+  }
   vec3 shown = clamped / y * response;
   // A colour too saturated for its brightness to fit on the screen — a cloud lit orange by a Sun a
   // few degrees up — is taken towards the grey of its own brightness until its brightest channel
@@ -112,7 +140,10 @@ vec3 respond(vec3 relative) {
  * finishes a picture, set by the scene that is about to finish one (see SceneRenderer.renderOnce):
  * the pictures of a page are finished one at a time.
  */
-export const EYE_UNIFORMS = { uRodShare: { value: 0 }, uRelativeScale: { value: 1 }, uHasOverlay: { value: 1 } }
+export const EYE_UNIFORMS = {
+  uRodShare: { value: 0 }, uRelativeScale: { value: 1 }, uHasOverlay: { value: 1 },
+  uMedium: { value: 0 }, uMediumExposure: { value: 1 }
+}
 
 /**
  * The finished picture: the scene's luminance through the eye's response, and over it what is laid

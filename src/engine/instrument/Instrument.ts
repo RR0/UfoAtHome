@@ -69,6 +69,33 @@ export interface InstrumentYears {
   to?: number
 }
 
+/**
+ * What a picture is recorded ON — and so how it answers light, which an eye does not.
+ *
+ * An eye adapts: whatever the sky, it sets itself about it, and a faint line across a dark sky
+ * stands out only as far as its response lets it. A film does not adapt. It receives an EXPOSURE,
+ * the light that reached it times the time the shutter was open over the square of the f-number,
+ * and answers that with its own curve, the same whatever the sky: a night sky comes out as dark
+ * as it was, what was brief but bright on it stands out, and what is brighter than the film can
+ * hold comes out white. That is what gives a photograph of an aircraft at night its bright lines
+ * and dots, where an eye would have seen a moving point.
+ *
+ * - `negative`: a colour or black-and-white negative, printed — the snapshot of every decade; a
+ *   soft curve, a wide latitude, a shoulder that runs gently into white.
+ * - `slide`: a reversal film, projected — steeper, narrower: what is over or under is lost sooner.
+ * - `sensor`: a digital sensor — linear, then nothing past full: a hard white.
+ *
+ * `iso` is its speed, the exposure its middle grey needs (ten lux-seconds over it). Absent `medium`,
+ * the picture is answered as an eye answers it.
+ */
+export interface RecordingMedium {
+  kind: "negative" | "slide" | "sensor"
+  iso: number
+  /** A device that sets its own exposure from the scene, as a phone does: its speed then follows
+   * the light, like an eye's, and only its curve is its own. */
+  autoExposure?: boolean
+}
+
 export interface Instrument {
   /** Stable id — what a case file names, and what an unknown value falls back from. */
   id: string
@@ -177,6 +204,9 @@ export interface Instrument {
    * optical stabilisation would be stated here, and is not claimed by any entry below.
    */
   stabilization?: number
+  /** What it records on, and so how the picture answers light — see RecordingMedium. Absent for an
+   * eye, and for a lens stated without its camera. */
+  medium?: RecordingMedium
 }
 
 /** Every instrument a recording can declare having been made through. Deliberately two entries and
@@ -237,7 +267,9 @@ export const INSTRUMENTS: Instrument[] = [
     // Colour negative of the period, printed: about 25 line pairs a millimetre, so 20 µm of detail.
     // Behind this camera's own 43 mm lens that is 96 arcseconds — an arcminute and a half, coarser
     // than the eye, which is half of why its stars are so much poorer than the observer's.
-    detailUm: 20
+    detailUm: 20,
+    // Kodacolor-X, the colour negative the camera was sold with: ISO 64.
+    medium: { kind: "negative", iso: 64 }
   },
   {
     // The serious camera of the same decades: 36 x 24 mm behind the 50 mm lens that came on the
@@ -264,7 +296,10 @@ export const INSTRUMENTS: Instrument[] = [
     // The same 35 mm emulsion as the Instamatic's, but behind a 50 mm lens rather than a 43 mm one,
     // and — decisively — openable to f/2. That is what puts it three magnitudes past the eye on a
     // tripod where the box camera falls two behind it.
-    detailUm: 20
+    detailUm: 20,
+    // A colour negative of ISO 100, the film most of these were loaded with; a recording states its
+    // own when it knows it (Sighting.iso).
+    medium: { kind: "negative", iso: 100 }
   },
   {
     // The lens a photographed light is most often taken with, and the one entry here that ZOOMS: a
@@ -286,7 +321,8 @@ export const INSTRUMENTS: Instrument[] = [
     // Same film again. Its long end is the deepest thing on this list at a given aperture, since the
     // same grain then covers four times less sky — the star stays a point and the sky it stands on
     // is spread thinner.
-    detailUm: 20
+    detailUm: 20,
+    medium: { kind: "negative", iso: 100 }
   },
   {
     // A modern phone's main camera, landscape: about 7.6 x 5.7 mm of sensor behind a 5.7 mm lens —
@@ -313,7 +349,9 @@ export const INSTRUMENTS: Instrument[] = [
     // Sensor pixels, not film grain: about 1.4 µm. Finer than the little lens in front of them can
     // actually deliver — diffraction at 3.2 mm of opening is already 44 arcseconds against the
     // pixel's own 51 — which is the one place on this list where the two limits nearly meet.
-    detailUm: 1.4
+    detailUm: 1.4,
+    // A sensor, which the phone exposes itself from the scene it sees.
+    medium: { kind: "sensor", iso: 100, autoExposure: true }
   },
   {
     // The same silicon, held the way people actually hold a phone. The picture is TALLER than it is
@@ -336,7 +374,8 @@ export const INSTRUMENTS: Instrument[] = [
     years: { from: 2007 },
     apertureBlades: undefined,
     // The same silicon held the other way up: the same 1.4 µm pixels.
-    detailUm: 1.4
+    detailUm: 1.4,
+    medium: { kind: "sensor", iso: 100, autoExposure: true }
   }
 ]
 
