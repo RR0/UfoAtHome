@@ -61,8 +61,8 @@ export class DemoCatalogue {
     {
       heading: { en: "Real sightings", fr: "Des observations réelles" },
       intro: {
-        en: "Six documented cases, each replayed in the sky of its own reported date, time and place.",
-        fr: "Six dossiers documentés, chacun rejoué dans le ciel de sa propre date, heure et lieu déclarés."
+        en: "Seven documented cases, each replayed in the sky of its own reported date, time and place.",
+        fr: "Sept dossiers documentés, chacun rejoué dans le ciel de sa propre date, heure et lieu déclarés."
       },
       demos: [
         {
@@ -118,6 +118,19 @@ export class DemoCatalogue {
           blurb: {
             en: "Dawn under a low grey sky, 06:06, Val-d'Oise. A silvery shape 8.5° wide before a wood's edge, then a shower, a tilt and a departure, each angle from the GEIPAN's calibrated photographs — and the rising Sun, hidden, 60° to the right.",
             fr: "Petit matin sous un ciel bas et gris, 06:06, Val-d'Oise. Une forme argentée de 8,5° devant une lisière, puis une averse, une bascule et un départ, chaque angle tiré des photos calibrées du GEIPAN — et le Soleil levant, caché, à 60° sur la droite."
+          }
+        },
+        {
+          id: "silly-le-long",
+          src: "/demo-data/observer-silly-le-long.json",
+          // The case, for the player: it holds the GEIPAN's reading beside the account.
+          playSrc: "/demo-data/case-silly-le-long.json",
+          observerMap: true,
+          title: { en: "Silly-le-Long, 2015", fr: "Silly-le-Long, 2015" },
+          titleIsName: true,
+          blurb: {
+            en: "A gendarmerie van on the RN2 at 00:50, a Moon almost full behind it, and a light aircraft on final that stays pinned to one spot as both close in. Switch to the GEIPAN's reading to see it — and how far it stays from what the driver described.",
+            fr: "Un fourgon de gendarmerie sur la RN2 à 00:50, une Lune presque pleine dans son dos, et un avion de tourisme en finale qui reste accroché au même point pendant que tous deux se rapprochent. Passez à la lecture du GEIPAN pour le voir — et mesurer ce qui le sépare de ce que le conducteur a décrit."
           }
         },
         {
