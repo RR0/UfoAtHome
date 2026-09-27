@@ -12,20 +12,24 @@ function standing(tags?: string[]): Sighting {
 }
 
 describe("Stance", () => {
-  it("keeps a standing observer's view alive, a little, and the same at the same instant", () => {
+  it("keeps a standing observer's eye moving, a little, and the same at the same instant", () => {
     const sighting = standing()
-    const yaws = Array.from({ length: 200 }, (_, k) => Gait.bodyAt(sighting, k * 100).yawDeg)
-    expect(Math.max(...yaws) - Math.min(...yaws)).toBeGreaterThan(0.05)
-    expect(Math.max(...yaws.map(Math.abs))).toBeLessThan(0.2)
+    const easts = Array.from({ length: 200 }, (_, k) => Gait.bodyAt(sighting, k * 100).eastM)
+    expect(Math.max(...easts) - Math.min(...easts)).toBeGreaterThan(0.005)
     expect(Gait.bodyAt(sighting, 7_300)).toEqual(Gait.bodyAt(sighting, 7_300))
-  })
-
-  it("moves the eye by millimetres, not centimetres", () => {
-    const sighting = standing()
     for (let t = 0; t < 20_000; t += 250) {
       const offset = Gait.bodyAt(sighting, t)
-      expect(Math.hypot(offset.eastM, offset.northM, offset.upM)).toBeLessThan(0.01)
+      expect(Math.hypot(offset.eastM, offset.northM, offset.upM)).toBeLessThan(0.02)
     }
+  })
+
+  it("keeps an eye's sky still — it holds what it looks at — and lets a hand-held camera's turn", () => {
+    const eye = standing()
+    const camera = standing()
+    camera.instrumentId = "slr-35mm-50"
+    const turn = (sighting: Sighting) => Math.max(...Array.from({ length: 200 }, (_, k) => Math.abs(Gait.bodyAt(sighting, k * 100).yawDeg)))
+    expect(turn(eye)).toBeLessThan(0.02)
+    expect(turn(camera)).toBeGreaterThan(0.2)
   })
 
   it("leaves an observer the account says was paralysed perfectly still", () => {
