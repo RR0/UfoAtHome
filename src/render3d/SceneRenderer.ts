@@ -576,12 +576,17 @@ function precipitationVisibleCount(poolSize: number, intensity: number, amount =
   return Math.round(poolSize * (PRECIPITATION_INTENSITY_COUNT_FLOOR + (1 - PRECIPITATION_INTENSITY_COUNT_FLOOR) * intensity) * amount)
 }
 
-/** Whether two weathers differ in how much falls and nothing else — the change a starting or
- * stopping shower makes every frame, which must NOT rebuild the sky and the rain: a rebuild re-seeds
- * the drops and restarts their clock, and at one rebuild a frame the drops never move at all. */
-function onlyAmountDiffers(a: Weather, b: Weather): boolean {
-  return a.precipitationType === b.precipitationType &&
-    weatherEquals({ ...a, precipitationIntensity: 0, precipitationAmount: undefined }, { ...b, precipitationIntensity: 0, precipitationAmount: undefined })
+/** Whether two weathers have the same clouds — every field the decks, the cirrus, the haloes and
+ * the corona are built from. Anything added to Weather that clouds are made from has to be added
+ * here too, or a change to it alone leaves the previous sky standing. */
+function cloudsEqual(a: Weather, b: Weather): boolean {
+  return JSON.stringify(a.cloudLayers) === JSON.stringify(b.cloudLayers) &&
+    a.cloudCover === b.cloudCover &&
+    a.cloudDarkness === b.cloudDarkness &&
+    a.cloudBaseM === b.cloudBaseM &&
+    a.highCloudCover === b.highCloudCover &&
+    a.iceCrystalAlignment === b.iceCrystalAlignment &&
+    a.lowerCloudCover === b.lowerCloudCover
 }
 /** Numerator of `gl_PointSize = uPixelSize / -mvPosition.z` (see RainSystem.ts's vertex shader) —
  * tuned by eye against this project's own camera (60deg fov) and RAIN_RADIUS_M. Scaled down from an
@@ -1640,38 +1645,46 @@ export class SceneRenderer {
   setWeather(weather: Weather): void {
     this.cloudTransmissionMemo.clear()
     if (weatherEquals(this.weather, weather)) return
-    if (onlyAmountDiffers(this.weather, weather)) {
-      this.weather = weather
+    const previous = this.weather
+    this.weather = weather
+    // Each part of the sky is restated only when what it is made from has changed. A weather
+    // blending between two keyframes changes some field on every frame, and restating everything
+    // re-seeded the rain and restarted its clock each time: during any transition, of the clouds as
+    // much as of the rain, the drops stood still on the image — and halos and bows were rebuilt at
+    // every frame for nothing.
+    const clouds = !cloudsEqual(previous, weather)
+    const precipitationKind = previous.precipitationType !== weather.precipitationType
+    const precipitationAmount = previous.precipitationIntensity !== weather.precipitationIntensity
+      || previous.precipitationAmount !== weather.precipitationAmount
+    if (previous.relativeHumidity !== weather.relativeHumidity || precipitationKind || precipitationAmount) {
+      // The same humidity that makes the sky milky makes the distance pale, and what is falling
+      // thins it further: one air for both.
       this.air = AerialPerspective.of(weather)
       this.applyAir()
-      this.updatePrecipitationDensity()
-      if (this.lastAstronomy) this.buildRainbow(this.lastAstronomy.sun, this.lastAstronomy.moon)
-      this.render()
-      return
+      this.scatteredSky?.setConditions({
+        aerosolOpticalDepth:
+          weather.relativeHumidity === undefined ? undefined : HumidHaze.steppedOpticalDepth(weather.relativeHumidity)
+      })
+      this.pumpScatteredSky()
     }
-    this.weather = weather
-    // The same humidity that makes the sky milky makes the distance pale, and what is falling
-    // thins it further: one air for both.
-    this.air = AerialPerspective.of(weather)
-    this.applyAir()
-    this.scatteredSky?.setConditions({
-      aerosolOpticalDepth:
-        weather.relativeHumidity === undefined ? undefined : HumidHaze.steppedOpticalDepth(weather.relativeHumidity)
-    })
-    this.pumpScatteredSky()
-    this.buildClouds()
-    this.buildCirrus()
-    this.buildPrecipitation()
+    if (clouds) {
+      this.buildClouds()
+      this.buildCirrus()
+    }
+    if (precipitationKind) this.buildPrecipitation()
+    else if (precipitationAmount) this.updatePrecipitationDensity()
     // The ice display and the bows are the weather's as much as the clouds are — how much cirrus,
     // how its crystals fall, whether it rains — and they were only restated with the sky: a weather
     // track that tumbled the crystals over nine seconds reached the display at a single instant of
     // them, whenever the sky next happened to be restated.
     if (this.lastAstronomy) {
-      this.buildIceHalos(this.lastAstronomy.sun, this.lastAstronomy.moon)
-      this.buildRainbow(this.lastAstronomy.sun, this.lastAstronomy.moon)
-      // And the Moon's corona, which is the new cloud's as much as the Moon's: without this, a veil
-      // that arrived after the sky was last restated left the glow of the sky before it.
-      this.buildLunarDiffraction(this.lastAstronomy.moon)
+      if (clouds) {
+        this.buildIceHalos(this.lastAstronomy.sun, this.lastAstronomy.moon)
+        // And the Moon's corona, which is the new cloud's as much as the Moon's: without this, a
+        // veil that arrived after the sky was last restated left the glow of the sky before it.
+        this.buildLunarDiffraction(this.lastAstronomy.moon)
+      }
+      if (clouds || precipitationKind || precipitationAmount) this.buildRainbow(this.lastAstronomy.sun, this.lastAstronomy.moon)
     }
     this.lightningArmed = weather.storm && weather.cloudDarkness >= LIGHTNING_MIN_DARKNESS
     this.syncAnimationLoop()
@@ -5160,7 +5173,7 @@ export class SceneRenderer {
   }
 
   /** Follows a shower starting or stopping without rebuilding anything: more or fewer of the same
-   * drops, still falling where they were — see onlyAmountDiffers. */
+   * drops, still falling where they were — see setWeather. */
   private updatePrecipitationDensity(): void {
     const pools: [Points | undefined, number | undefined][] = [
       [this.rainSystem?.points, RAIN_POOL_SIZE],
