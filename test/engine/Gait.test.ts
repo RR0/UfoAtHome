@@ -176,3 +176,22 @@ describe("Gait", () => {
     expect(Gait.of(walking(1.52, 55))!.offsetAt(23_456)).toEqual(gait.offsetAt(23_456))
   })
 })
+
+describe("Gait: stopping and setting off", () => {
+  it("throws the head forward when the walk stops, and lets it settle within a second and a half", () => {
+    const gait = Gait.of(walking(1.52, 55, 20))!
+    const southwards = (t: number) => -gait.offsetAt(t).northM
+    const nod = Math.max(...Array.from({ length: 60 }, (_, k) => southwards(55_000 + k * 10)))
+    expect(nod).toBeGreaterThan(0.02)
+    expect(nod).toBeLessThan(0.05)
+    expect(Math.abs(southwards(57_000))).toBeLessThan(1e-9)
+  })
+
+  it("barely turns an eye's image as it does, and turns a camera's", () => {
+    const eye = Gait.of(walking(1.52, 55, 20))!
+    const camera = Gait.of(walking(1.52, 55, 20, "slr-35mm-50"))!
+    const pitch = (gait: Gait) => Math.max(...Array.from({ length: 60 }, (_, k) => Math.abs(gait.offsetAt(55_000 + k * 10).pitchDeg)))
+    expect(pitch(eye)).toBeLessThan(0.2)
+    expect(pitch(camera)).toBeGreaterThan(1)
+  })
+})

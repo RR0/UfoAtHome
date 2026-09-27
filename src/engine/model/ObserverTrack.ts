@@ -119,6 +119,58 @@ export function lerpObserverPose(a: ObserverPose, b: ObserverPose, t: number): O
 }
 
 /**
+ * How a person moves between two stated poses: not at a constant speed that starts and stops dead,
+ * the way a robot turns its head, but the way a body does — gathering speed, carrying it through a
+ * movement that goes on, and losing it before a pause.
+ *
+ * A monotone cubic Hermite curve per channel (Fritsch and Butland's tangents): it passes through
+ * every keyframe exactly, so what the recording states is still what it states at its instants; it
+ * never overshoots between them, so it never invents a look further round than the observer went;
+ * its speed is continuous through a series of keyframes that keep moving; and wherever the data
+ * pauses — two keyframes with the same heading, the same place — its speed there is zero, so the
+ * movement into the pause slows down and the one out of it picks up.
+ *
+ * At the two ends of the track the two kinds of channel part company. A place already changing at
+ * the first keyframe is a walk or a drive already under way (a van at 130 km/h did not start from
+ * rest when the recording did), so it carries on at its first speed. A look is a gesture: a head
+ * turn stated by two keyframes starts from still and ends still.
+ */
+export class HumanMotion {
+  /**
+   * The value at `t` of a channel sampled at `times`/`values` (at least two), for `t` between the
+   * keyframes `index` and `index + 1`. `endsAtRest` is whether the curve starts and ends still.
+   */
+  static at(times: readonly number[], values: readonly number[], index: number, t: number, endsAtRest: boolean): number {
+    const t0 = times[index]
+    const t1 = times[index + 1]
+    const h = t1 - t0
+    if (h <= 0) return values[index]
+    const m0 = HumanMotion.tangent(times, values, index, endsAtRest)
+    const m1 = HumanMotion.tangent(times, values, index + 1, endsAtRest)
+    const s = (t - t0) / h
+    const s2 = s * s
+    const s3 = s2 * s
+    return (2 * s3 - 3 * s2 + 1) * values[index] + (s3 - 2 * s2 + s) * h * m0
+      + (-2 * s3 + 3 * s2) * values[index + 1] + (s3 - s2) * h * m1
+  }
+
+  private static tangent(times: readonly number[], values: readonly number[], k: number, endsAtRest: boolean): number {
+    const last = times.length - 1
+    const secant = (a: number) => (values[a + 1] - values[a]) / (times[a + 1] - times[a] || 1)
+    if (k === 0) return endsAtRest ? 0 : secant(0)
+    if (k === last) return endsAtRest ? 0 : secant(last - 1)
+    const before = secant(k - 1)
+    const after = secant(k)
+    if (before * after <= 0) return 0
+    const hBefore = times[k] - times[k - 1]
+    const hAfter = times[k + 1] - times[k]
+    const w1 = 2 * hAfter + hBefore
+    const w2 = hAfter + 2 * hBefore
+    return (w1 + w2) / (w1 / before + w2 / after)
+  }
+}
+
+/**
  * A keyframe store for the observer's pose, sorted by time — same binary-search-insert/hold-
  * last-value/interpolate shape as Timeline, scoped to a single track instead of per-sourceId.
  */
@@ -182,7 +234,46 @@ export class ObserverTrack {
     const after = this.keyframes[index]?.t === t ? undefined : this.keyframes[index]
     if (!atOrBefore) return after?.pose
     if (!after) return atOrBefore.pose
-    return lerpObserverPose(atOrBefore.pose, after.pose, clamp((t - atOrBefore.t) / (after.t - atOrBefore.t), 0, 1))
+    const linear = lerpObserverPose(atOrBefore.pose, after.pose, clamp((t - atOrBefore.t) / (after.t - atOrBefore.t), 0, 1))
+    return this.humanly(index - 1, t, linear)
+  }
+
+  /**
+   * The pose at `t`, between keyframes `index` and `index + 1`, moved the way a person moves (see
+   * HumanMotion) over the keyframes either side. Channels a neighbouring keyframe leaves unstated
+   * (no place, no heading) keep the plain blend.
+   */
+  private humanly(index: number, t: number, linear: ObserverPose): ObserverPose {
+    const from = Math.max(0, index - 1)
+    const to = Math.min(this.keyframes.length - 1, index + 2)
+    const window = this.keyframes.slice(from, to + 1)
+    const at = index - from
+    const times = window.map(keyframe => keyframe.t)
+    const channel = (read: (pose: ObserverPose) => number | undefined, endsAtRest: boolean): number | undefined => {
+      const values = window.map(keyframe => read(keyframe.pose))
+      if (values.some(value => value === undefined)) return undefined
+      return HumanMotion.at(times, values as number[], at, t, endsAtRest)
+    }
+    // Headings unwrapped along the window, so that a turn through north is a turn and not a spin.
+    const headings = window.map(keyframe => keyframe.pose.headingDeg)
+    let heading: number | undefined
+    if (headings.every(value => value !== undefined)) {
+      const unwrapped = [headings[0]!]
+      for (let k = 1; k < headings.length; k++) {
+        unwrapped.push(unwrapped[k - 1] + ((((headings[k]! - headings[k - 1]!) % 360) + 540) % 360) - 180)
+      }
+      heading = ((HumanMotion.at(times, unwrapped, at, t, true) % 360) + 360) % 360
+    }
+    return {
+      ...linear,
+      lat: channel(pose => pose.lat, false) ?? linear.lat,
+      lng: channel(pose => pose.lng, false) ?? linear.lng,
+      elevationM: channel(pose => pose.elevationM, false) ?? linear.elevationM,
+      headingDeg: heading ?? linear.headingDeg,
+      pitchDeg: channel(pose => pose.pitchDeg, true) ?? linear.pitchDeg,
+      rollDeg: channel(pose => pose.rollDeg ?? 0, true) ?? linear.rollDeg,
+      fovDeg: channel(pose => pose.fovDeg, true) ?? linear.fovDeg
+    }
   }
 
   get duration(): number {

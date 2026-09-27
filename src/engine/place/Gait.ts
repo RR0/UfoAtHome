@@ -130,6 +130,24 @@ export class Gait {
   private static readonly HEAD_YAW_DEG = 1
 
   /** What a observer who is not walking is displaced by. Frozen: it is handed out repeatedly. */
+  /**
+   * The jolt of stopping and of setting off. A walker who stops does not stop at once: the legs
+   * brake, the trunk carries on, and the head goes forward a few centimetres and comes back in a
+   * damped nod that has died out within a second. Setting off does the opposite, more gently: the
+   * head lags as the body is pushed forward. The distances are an ordinary adult's on a firm stop
+   * from a normal walk, scaled with the speed walked at; the body's pitch goes through the
+   * instrument's stabilisation like every other rotation here, so an eye's image barely turns and a
+   * hand-held camera's does.
+   */
+  private static readonly STOP_LURCH_M = 0.035
+  private static readonly STOP_PITCH_DEG = 3
+  private static readonly START_LURCH_M = 0.015
+  private static readonly START_PITCH_DEG = 1.2
+  /** How fast the nod swings, and how fast it dies: about a second and a half of motion in all. */
+  private static readonly JOLT_HZ = 1.4
+  private static readonly JOLT_DECAY_S = 0.35
+  private static readonly JOLT_LASTS_MS = 1500
+
   static readonly STILL: GaitOffset = Object.freeze({
     eastM: 0,
     northM: 0,
@@ -215,6 +233,47 @@ export class Gait {
    * twice per stride and sways once, and the sway reaches its extreme over the foot being stood on.
    */
   offsetAt(tMs: number): GaitOffset {
+    return Gait.add(this.cycleAt(tMs), this.joltAt(tMs))
+  }
+
+  /** The jolt of the nearest stop or start still ringing at `tMs` — see STOP_LURCH_M. */
+  private joltAt(tMs: number): GaitOffset | undefined {
+    for (const stretch of this.stretches) {
+      if (stretch.stepHz === 0) continue
+      const pace = stretch.speedMPerS / Gait.REFERENCE_SPEED_M_PER_S
+      const jolt = (sinceMs: number, lurchM: number, pitchDeg: number, sign: number): GaitOffset | undefined => {
+        if (sinceMs < 0 || sinceMs > Gait.JOLT_LASTS_MS) return undefined
+        const seconds = sinceMs / 1000
+        const swing = Math.exp(-seconds / Gait.JOLT_DECAY_S) * Math.sin(2 * Math.PI * Gait.JOLT_HZ * seconds)
+        const forward = sign * lurchM * pace * swing
+        return {
+          eastM: forward * stretch.eastUnit,
+          northM: forward * stretch.northUnit,
+          upM: -Math.abs(forward) * 0.3,
+          rollDeg: 0,
+          // Leaning forward is looking down: a negative pitch.
+          pitchDeg: -sign * pitchDeg * pace * swing * this.rotationPassed,
+          yawDeg: 0
+        }
+      }
+      const stopping = stretch.rampsOut ? jolt(tMs - stretch.endMs, Gait.STOP_LURCH_M, Gait.STOP_PITCH_DEG, 1) : undefined
+      if (stopping) return stopping
+      const starting = stretch.rampsIn ? jolt(tMs - stretch.startMs, Gait.START_LURCH_M, Gait.START_PITCH_DEG, -1) : undefined
+      if (starting) return starting
+    }
+    return undefined
+  }
+
+  private static add(a: GaitOffset, b: GaitOffset | undefined): GaitOffset {
+    if (!b) return a
+    return {
+      eastM: a.eastM + b.eastM, northM: a.northM + b.northM, upM: a.upM + b.upM,
+      rollDeg: a.rollDeg + b.rollDeg, pitchDeg: a.pitchDeg + b.pitchDeg, yawDeg: a.yawDeg + b.yawDeg
+    }
+  }
+
+  /** The walking cycle itself at `tMs`: the rise, the sway, the residual turns. */
+  private cycleAt(tMs: number): GaitOffset {
     const stretch = this.stretches.find(candidate => tMs >= candidate.startMs && tMs <= candidate.endMs)
     if (!stretch || stretch.stepHz === 0) return Gait.STILL
     const steps = stretch.stepsBefore + (stretch.stepHz * (tMs - stretch.startMs)) / 1000

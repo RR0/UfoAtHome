@@ -110,3 +110,46 @@ describe("lerpObserverPose heading", () => {
     expect(result.headingDeg).toBeUndefined()
   })
 })
+
+describe("ObserverTrack moves the way a person does", () => {
+  const look = (headingDeg: number) => ({ lat: 48, lng: 2, elevationM: 0, headingDeg, pitchDeg: 0, fovDeg: 60 })
+  const at = (lat: number) => ({ lat, lng: 2, elevationM: 0, headingDeg: 0, pitchDeg: 0, fovDeg: 60 })
+
+  it("turns the head from still to still, not at a robot's constant speed", () => {
+    const track = new ObserverTrack()
+    track.addKeyframe(0, look(300))
+    track.addKeyframe(1000, look(350))
+    // A quarter of the way through the time, well under a quarter of the way round…
+    expect(track.getInterpolatedPoseAt(250)!.headingDeg!).toBeLessThan(300 + 50 * 0.2)
+    // …half-way at half-time, and exactly where the recording says at its instants.
+    expect(track.getInterpolatedPoseAt(500)!.headingDeg!).toBeCloseTo(325, 5)
+    expect(track.getInterpolatedPoseAt(1000)!.headingDeg!).toBe(350)
+  })
+
+  it("turns through north the short way", () => {
+    const track = new ObserverTrack()
+    track.addKeyframe(0, look(350))
+    track.addKeyframe(1000, look(10))
+    expect(track.getInterpolatedPoseAt(500)!.headingDeg!).toBeCloseTo(0, 5)
+  })
+
+  it("slows down into a stop the data states, and never overshoots it", () => {
+    const track = new ObserverTrack()
+    track.addKeyframe(0, at(0))
+    track.addKeyframe(1000, at(1))
+    track.addKeyframe(2000, at(2))
+    track.addKeyframe(3000, at(2))
+    const before = track.getInterpolatedPoseAt(1900)!.lat!
+    const last = track.getInterpolatedPoseAt(1999)!.lat!
+    // The last tenth of a second before the stop covers far less than a tenth of the stride.
+    expect(last - before).toBeLessThan(0.05)
+    for (let t = 2000; t <= 3000; t += 100) expect(track.getInterpolatedPoseAt(t)!.lat).toBeCloseTo(2, 9)
+  })
+
+  it("carries a steady movement through its keyframes at its own speed", () => {
+    const track = new ObserverTrack()
+    for (let k = 0; k <= 4; k++) track.addKeyframe(k * 1000, at(k))
+    expect(track.getInterpolatedPoseAt(1500)!.lat).toBeCloseTo(1.5, 9)
+    expect(track.getInterpolatedPoseAt(250)!.lat).toBeCloseTo(0.25, 9)
+  })
+})
