@@ -1,8 +1,9 @@
-import { BackSide, Box3, BoxGeometry, BufferGeometry, Color, ConeGeometry, CylinderGeometry, Float32BufferAttribute, Group, Matrix4, Mesh, MeshBasicMaterial, MeshLambertMaterial, SphereGeometry, Uint32BufferAttribute, Vector3 } from "three"
+import { BackSide, Box3, DoubleSide, BoxGeometry, BufferGeometry, Color, ConeGeometry, CylinderGeometry, Float32BufferAttribute, Group, Matrix4, Mesh, MeshBasicMaterial, MeshLambertMaterial, SphereGeometry, Uint32BufferAttribute, Vector3 } from "three"
 import type { Object3D } from "three"
 import type { DecorKind, DecorLight, DecorObject, DecorSide, DecorSize, MeasuredDecorSize } from "../engine/model/Decor.js"
 import { canHoldObserver, DEFAULT_BUILDING_FLOORS, isLightOnAt, lightOnFractionBetween } from "../engine/model/Decor.js"
 import type { RgbColor } from "./skyColors.js"
+import { BridgeGeometry } from "./BridgeGeometry.js"
 
 const DEG_TO_RAD = Math.PI / 180
 
@@ -368,6 +369,23 @@ function buildShrub(): Group {
     crown.translate(x, 0, z)
     addPart(group, crown, [0.26, 0.28, 0.17], y)
   }
+  return group
+}
+
+/**
+ * A road bridge at its own measurements (see BridgeGeometry): grey concrete deck and abutments,
+ * dark road, grassed embankments, galvanised railing. Never stretched afterwards — see scaleFor.
+ * The banks and the road on them are drawn from both sides: seen from under the span, the inside
+ * of a bank is what an observer driving through looks at.
+ */
+function buildBridge(object: DecorObject): Group {
+  const group = new Group()
+  const parts = new BridgeGeometry(DecorSystem.sizeOf(object), object.bridge).build()
+  addPart(group, parts.concrete, [0.6, 0.6, 0.58], 0)
+  const road = addPart(group, parts.road, [0.2, 0.2, 0.21], 0)
+  const earth = addPart(group, parts.earth, [0.3, 0.36, 0.22], 0)
+  for (const mesh of [road, earth]) (mesh.material as MeshLambertMaterial).side = DoubleSide
+  addPart(group, parts.railing, [0.5, 0.52, 0.55], 0)
   return group
 }
 
@@ -845,6 +863,8 @@ export class DecorSystem {
           ? buildTree()
           : object.kind === "shrub"
             ? buildShrub()
+          : object.kind === "bridge"
+            ? buildBridge(object)
           : object.kind === "crop"
             ? buildCrop()
             : object.kind === "mound"
@@ -889,7 +909,8 @@ export class DecorSystem {
    */
   private static scaleFor(object: DecorObject): Vector3 {
     const size = object.sizeM
-    if (!size) return new Vector3(1, 1, 1)
+    // A bridge is built at its own size already: stretching it would turn its posts into planks.
+    if (!size || object.kind === "bridge") return new Vector3(1, 1, 1)
     const natural = this.naturalSize(object.kind, object.floors)
     // Axis by axis, because a size is allowed to be partial: an axis nobody measured keeps the
     // built-in shape's own proportion rather than being invented to match the ones that were.
@@ -911,6 +932,8 @@ export class DecorSystem {
    */
   static naturalSize(kind: DecorKind, floors?: number): MeasuredDecorSize {
     const levels = kind === "building" ? Math.max(1, (floors ?? DEFAULT_BUILDING_FLOORS) + 1) : 0
+    // Stated rather than measured: a bridge has no stock shape, its geometry IS its size.
+    if (kind === "bridge") return BridgeGeometry.NATURAL_SIZE
     const key = `${kind}:${levels}`
     const cached = NATURAL_SIZES.get(key)
     if (cached) return cached

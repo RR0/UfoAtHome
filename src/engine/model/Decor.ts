@@ -28,6 +28,20 @@ export type DecorKind =
    * crowns on the ground, with no trunk. */
   | "shrub"
   /**
+   * A road bridge: a concrete deck over a span, the embankments that carry the road up to it on
+   * both sides, and a railing of posts and rails along both edges over the whole length.
+   *
+   * Built at its own measurements rather than stretched from a stock shape (see BridgeStructure):
+   * what makes a bridge worth drawing in a reconstruction is detail at a known size — a slab edge
+   * that is a hard grey rectangle, a railing whose openings are rectangles a light behind it would
+   * be cut into — and a stretched primitive would turn every post into a plank.
+   *
+   * `sizeM.lengthM` is the whole length along the road, embankments included; `widthM` the deck's
+   * width; `heightM` the height of the ROAD SURFACE on the deck above the ground under it, the
+   * railing standing above that.
+   */
+  | "bridge"
+  /**
    * A being the observer reported seeing — the two figures beside the craft at Valensole, the pair
    * at Socorro.
    *
@@ -360,6 +374,9 @@ export interface DecorObject {
    */
   color?: string
   observerSide?: DecorSide
+  /** Kind "bridge" only: how it is built, where that is known — see BridgeStructure. Absent means
+   * the defaults, which are those of an ordinary French overpass. Ignored for every other kind. */
+  bridge?: BridgeStructure
   /** Kind "building" only: number of upper stories above the ground floor, set when the building
    * is created (default 2, see SightingEditorElement.addDecor) and editable afterward. Drives the
    * window rows in the 3D model and the valid range for occupiedFloor (0 = ground floor, up to and
@@ -386,6 +403,25 @@ export interface DecorObject {
   /** The real 3D model that stands in for the primitive, if one does — see DecorModelRef. Absent
    * means the built-in primitive, which is also what a failed or unreachable model falls back to. */
   model?: DecorModelRef
+}
+
+/**
+ * How a bridge is built (see the "bridge" kind), every field optional.
+ *
+ * The span is what separates a bridge from an embankment: over the span there is a deck with open
+ * air under it; beyond it, on both sides, the road runs on a bank of earth sloping down to the
+ * ground at the ends of `sizeM.lengthM`. A span as long as the whole length is a bridge with no
+ * approach at all.
+ */
+export interface BridgeStructure {
+  /** Metres of open span under the deck, centred on the object. Default: the whole length. */
+  spanM?: number
+  /** Thickness of the deck slab, metres. Default 1.2, a prestressed-concrete overpass of this span. */
+  deckThicknessM?: number
+  /** The railing along both edges: its height above the road, the spacing of its posts, and how
+   * many horizontal rails it has — two rails make two rows of rectangular openings. Defaults 1.05 m,
+   * 1.5 m and 2, a French S8 railing. */
+  railing?: { heightM?: number; postSpacingM?: number; rails?: number }
 }
 
 /** Where a moving decor object is at one instant — see DecorObject.track. */

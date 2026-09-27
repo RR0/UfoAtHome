@@ -387,6 +387,7 @@ export class SightingSummary {
       case "building": return this.labels.decorBuilding
       case "tree": return this.labels.decorTree
       case "shrub": return this.labels.decorShrub
+      case "bridge": return this.labels.decorBridge
       case "crop": return this.labels.decorCrop
       case "mound": return this.labels.decorMound
       case "streetlight": return this.labels.decorStreetlight

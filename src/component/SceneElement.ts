@@ -149,6 +149,7 @@ const DECOR_KIND_NAMES: Record<DecorKind, { en: string; fr: string }> = {
   building: { en: "Building", fr: "Bâtiment" },
   tree: { en: "Tree", fr: "Arbre" },
   shrub: { en: "Shrub", fr: "Buisson" },
+  bridge: { en: "Bridge", fr: "Pont" },
   crop: { en: "Crop row", fr: "Rang de culture" },
   mound: { en: "Stone heap", fr: "Tas de pierres" },
   streetlight: { en: "Streetlight", fr: "Lampadaire" },

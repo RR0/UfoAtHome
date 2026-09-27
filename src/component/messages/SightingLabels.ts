@@ -142,6 +142,7 @@ export interface SightingLabels {
   decorBuilding: string
   decorTree: string
   decorShrub: string
+  decorBridge: string
   /** One row of a cultivated field — see DecorKind's own "crop". */
   decorCrop: string
   /** A heap of stones or earth — see DecorKind's own "mound". */
