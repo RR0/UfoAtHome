@@ -1376,7 +1376,21 @@ describe("the observer's own map", () => {
     }
   }
 
-  /** A player whose page has asked for the map — off by default, see OBSERVER_MAP_ATTRIBUTE. */
+  /** Someone who stayed where they were: two fixes three metres apart, the same spot. */
+  function stationaryObserver(): object {
+    return {
+      version: 1 as const,
+      timeline: { keyframes: [{ t: 0, shapes: [] }, { t: 20000, shapes: [] }] },
+      observerTrack: {
+        keyframes: [
+          { t: 0, pose: { lat: 49.07890, lng: 2.32730, elevationM: 0, headingDeg: 353, pitchDeg: 1, fovDeg: 40 } },
+          { t: 20000, pose: { lat: 49.07892, lng: 2.32733, elevationM: 0, headingDeg: 353, pitchDeg: 1, fovDeg: 40 } }
+        ]
+      }
+    }
+  }
+
+  /** A player whose page has asked for the map — see OBSERVER_MAP_ATTRIBUTE. */
   function mountWithMap(sighting: object): UfoElement {
     const element = mount()
     element.setAttribute("show-observer-map", "")
@@ -1401,15 +1415,34 @@ describe("the observer's own map", () => {
     // A reader wanting to know where this happened is not something a page can predict, so the
     // button is there whether or not any page thought to ask.
     const element = mount()
-    element.sightingData = movingObserver() as never
+    element.sightingData = stationaryObserver() as never
     const { button, panel } = mapParts(element)
     expect(button.hidden).toBe(false)
     expect(panel.hidden).toBe(true)
   })
 
+  it("starts open for an observer who went somewhere, closed for one who stayed put", () => {
+    const moving = mount()
+    moving.sightingData = movingObserver() as never
+    expect(mapParts(moving).panel.hidden).toBe(false)
+    document.body.innerHTML = ""
+    const standing = mount()
+    standing.sightingData = stationaryObserver() as never
+    expect(mapParts(standing).panel.hidden).toBe(true)
+  })
+
+  it("lets the page overrule that default either way", () => {
+    const element = mount()
+    element.setAttribute("show-observer-map", "false")
+    element.sightingData = movingObserver() as never
+    expect(mapParts(element).panel.hidden).toBe(true)
+    element.setAttribute("show-observer-map", "")
+    expect(mapParts(element).panel.hidden).toBe(false)
+  })
+
   it("starts open when the page says so, and shuts again when it takes that back", () => {
     const element = mount()
-    element.sightingData = movingObserver() as never
+    element.sightingData = stationaryObserver() as never
     expect(mapParts(element).panel.hidden).toBe(true)
 
     element.setAttribute("show-observer-map", "")
@@ -1425,7 +1458,7 @@ describe("the observer's own map", () => {
     // refresh() runs on every keystroke in the editor. A default re-applied there would slam shut
     // a map the author had just opened, and reopen one they had just closed.
     const element = mount()
-    element.sightingData = movingObserver() as never
+    element.sightingData = stationaryObserver() as never
     mapParts(element).button.click()
     expect(mapParts(element).panel.hidden).toBe(false)
 
@@ -1451,7 +1484,7 @@ describe("the observer's own map", () => {
     // them all on load for maps nobody opened.
     const fetchSpy = vi.spyOn(globalThis, "fetch")
     const element = mount()
-    element.sightingData = movingObserver() as never
+    element.sightingData = stationaryObserver() as never
     expect(mapParts(element).panel.hidden).toBe(true)
     expect(fetchSpy).not.toHaveBeenCalled()
     fetchSpy.mockRestore()
@@ -1565,7 +1598,7 @@ describe("the observer's own map", () => {
 
   it("opens and closes on the button, and says which it will do", () => {
     const element = mount()
-    element.sightingData = movingObserver() as never
+    element.sightingData = stationaryObserver() as never
     const { button, panel } = mapParts(element)
 
     button.click()

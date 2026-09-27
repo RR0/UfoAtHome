@@ -650,7 +650,10 @@ export class SceneElement extends HTMLElement {
    * heard of that player and writes the tag it actually wrote. Same for `<rr0-sighting>` above. */
   private forwardPlayerAttributes(): void {
     for (const attribute of [OBSERVER_MAP_ATTRIBUTE, MILESTONES_ATTRIBUTE]) {
-      this.ufoElement.toggleAttribute(attribute, this.hasAttribute(attribute))
+      // The value too, not only the presence: `show-observer-map="false"` says something.
+      const value = this.getAttribute(attribute)
+      if (value === null) this.ufoElement.removeAttribute(attribute)
+      else this.ufoElement.setAttribute(attribute, value)
     }
   }
 

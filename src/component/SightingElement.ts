@@ -358,7 +358,10 @@ export class SightingElement extends HTMLElement {
    * them. A page embedding `<rr0-sighting>` writes that tag and nothing else. */
   private forwardPlayerAttributes(): void {
     for (const attribute of [OBSERVER_MAP_ATTRIBUTE, MILESTONES_ATTRIBUTE]) {
-      this.sceneElement.toggleAttribute(attribute, this.hasAttribute(attribute))
+      // The value too, not only the presence: `show-observer-map="false"` says something.
+      const value = this.getAttribute(attribute)
+      if (value === null) this.sceneElement.removeAttribute(attribute)
+      else this.sceneElement.setAttribute(attribute, value)
     }
   }
 

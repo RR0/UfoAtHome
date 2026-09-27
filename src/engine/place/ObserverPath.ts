@@ -56,6 +56,15 @@ export class ObserverPath {
     return new ObserverPath(points)
   }
 
+  /** Under this, a map has nothing to show that the scene does not: a few steps on the spot. */
+  private static readonly TRAVEL_M = 50
+
+  /** Whether the observer went far enough for a map of it to be worth opening by default — a walk
+   * across a field, a drive, a flight; not a few steps and a stop (see OBSERVER_MAP_ATTRIBUTE). */
+  get travels(): boolean {
+    return this.spanM > ObserverPath.TRAVEL_M
+  }
+
   /** Whether the observer actually went anywhere — a path whose points all fall within a few metres
    * of each other is one place recorded repeatedly, not a journey, and the map says so by not
    * drawing a line through it. */

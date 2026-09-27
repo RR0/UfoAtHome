@@ -13,22 +13,6 @@ export interface Demo {
    * for. The editor still opens one recording (`editSrc`, or `src`).
    */
   readonly playSrc?: string
-  /**
-   * Whether to offer the map of where the observer stood — see the `show-observer-map` attribute,
-   * which is off everywhere by default.
-   *
-   * Per demo, not per page, because it is a fact about the RECONSTRUCTION and not about where it is
-   * being shown: a case whose observer never moved and whose heading nobody recorded has a map with
-   * one pin and no cone on it, which is worth less than the room it takes. The two that carry it are
-   * the two that went somewhere — Socorro's eleven hundred metres of road, and an airliner crossing
-   * Alabama at night.
-   *
-   * It decides the map's STARTING state, not whether it exists: every reconstruction that states a
-   * place has the button (see OBSERVER_MAP_ATTRIBUTE), and a reader can open one this list does not.
-   * Honoured by the front page's carousel and by the full-size player, not by the catalogue's cards:
-   * a map is a fixed 140 px square, and a card's sky is 181 px tall.
-   */
-  readonly observerMap?: boolean
   readonly title: Said<string>
   /**
    * Whether the title is a NAME — a place, people — whose capital stays wherever the title goes.
@@ -69,7 +53,6 @@ export class DemoCatalogue {
           id: "chiles-whitted",
           src: "/demo-data/observer-chiles.json",
           playSrc: "/demo-data/case-chiles-whitted.json",
-          observerMap: true,
           title: { en: "Chiles & Whitted, 1948", fr: "Chiles et Whitted, 1948" },
           titleIsName: true,
           blurb: {
@@ -102,7 +85,6 @@ export class DemoCatalogue {
           src: "/demo-data/observer-socorro.json",
           // The case, for the player: it holds an interpretation beside the account to choose from.
           playSrc: "/demo-data/case-socorro.json",
-          observerMap: true,
           title: { en: "Socorro, 1964", fr: "Socorro, 1964" },
           titleIsName: true,
           blurb: {
@@ -125,7 +107,6 @@ export class DemoCatalogue {
           src: "/demo-data/observer-silly-le-long.json",
           // The case, for the player: it holds the GEIPAN's reading beside the account.
           playSrc: "/demo-data/case-silly-le-long.json",
-          observerMap: true,
           title: { en: "Silly-le-Long, 2015", fr: "Silly-le-Long, 2015" },
           titleIsName: true,
           blurb: {

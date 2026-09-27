@@ -55,10 +55,11 @@ const mount = async card => {
     unmount(victim)
   }
   const scene = document.createElement("rr0-scene")
-  // No map open on a card, even for the reconstructions that have one worth opening (see
-  // Demo.observerMap): the map is 140 px square in a card 181 px tall, so it covered three quarters
-  // of the sky it was meant to sit in a corner of. The button stays, and the full-size View page
-  // opens the map on its own.
+  // No map open on a card, even for an observer who travelled (see OBSERVER_MAP_ATTRIBUTE, whose
+  // default would open it): the map is 140 px square in a card 181 px tall, so it covered three
+  // quarters of the sky it was meant to sit in a corner of. The button stays, and the full-size
+  // View page opens the map on its own.
+  scene.setAttribute("show-observer-map", "false")
   card.querySelector(".demo-mount").replaceChildren(scene)
   await customElements.whenDefined("rr0-scene")
   await scene.loadFromSrc(card.dataset.src)

@@ -57,17 +57,16 @@ import type { UfoMessages } from "./messages/UfoMessages.js"
 const EMPTY_SELECTION: ReadonlySet<string> = new Set()
 
 /**
- * The attribute a page sets to have the map of where the observer stood ALREADY OPEN.
+ * The attribute a page sets to say whether the map of where the observer stood starts OPEN:
+ * present (or any value but "false") opens it, "false" keeps it closed.
+ *
+ * Absent, the recording decides: the map starts open when the observer went somewhere — drove,
+ * walked, flew, far enough for a map to show it (see ObserverPath.travels) — and closed when they
+ * stayed where they were, where a map says nothing the scene does not (dictated rule). The page's
+ * own word always wins over that default.
  *
  * It decides the starting state, not whether the map exists: the button is there for every
- * recording that states a place, and a reader can always open one the page did not open for them.
- * That distinction is the whole design. A page knows which of its reconstructions are ABOUT where
- * they happened — a observer who drove eleven hundred metres of road, an airliner crossing a state —
- * and can have the map up from the first frame; every other embed stays a picture to be watched,
- * with the map one click away.
- *
- * Closed by default because opening it costs real tile requests to a third party, which is not a
- * page's to spend on a reader's behalf without saying so.
+ * recording that states a place, and a reader can always open or close it.
  *
  * Named the way `show-compass` and `show-labels` already are: a page deciding what its readers see.
  */
@@ -1330,7 +1329,9 @@ export class UfoElement extends HTMLElement {
    * an author does with the map afterwards is theirs until the page or the recording changes.
    */
   private applyObserverMapDefault(): void {
-    this.setObserverMapOpen(this.hasAttribute(OBSERVER_MAP_ATTRIBUTE) && this.observerPath !== undefined)
+    const stated = this.getAttribute(OBSERVER_MAP_ATTRIBUTE)
+    const open = stated === null ? this.observerPath?.travels === true : stated !== "false"
+    this.setObserverMapOpen(open && this.observerPath !== undefined)
   }
 
   private setObserverMapOpen(open: boolean): void {
