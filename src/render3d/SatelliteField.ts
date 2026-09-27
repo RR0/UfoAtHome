@@ -27,8 +27,9 @@ export interface SceneSatellite {
  * degree a second at the zenith, which is why this is its own field restated at every frame instead
  * of part of the star field, which is restated only when the sky has turned a fraction of a pixel.
  *
- * No twinkle. A satellite is a point too and does scintillate a little, but a steady moving light is
- * what observers describe, and the stars' twinkle amplitude was tuned on stars, not on these.
+ * It twinkles as a star does (see PointSources.SCINTILLATION_GLSL): a point source seen through the
+ * same air, so hardly at all high up and plainly low down. What it does not do here is FLARE, the
+ * glint of a panel turning the Sun towards the observer, which would need each satellite's attitude.
  */
 export class SatelliteField {
   readonly object = new Group()
@@ -62,7 +63,7 @@ export class SatelliteField {
    */
   set(satellites: ReadonlyArray<SceneSatellite>, magnitudeLimit: number, transmission: (position: HorizontalPosition) => number,
     light: (position: HorizontalPosition, magnitude: number) => readonly [number, number, number]): void {
-    const byTier: { x: number; y: number; z: number; r: number; g: number; b: number }[][] = this.tiers.map(() => [])
+    const byTier: { x: number; y: number; z: number; r: number; g: number; b: number; seed: number }[][] = this.tiers.map(() => [])
     this.drawn = []
     for (const satellite of satellites) {
       // Cloud only ever dims: one already too faint for this sky with no cloud at all cannot be seen
@@ -77,21 +78,25 @@ export class SatelliteField {
       const tier = starBrightnessTierIndex(brightness)
       const { x, y, z } = horizontalToCartesian(satellite.position.altitudeDeg, satellite.position.azimuthDeg, this.radius)
       const [r, g, b] = light(satellite.position, magnitude)
-      byTier[tier].push({ x, y, z, r, g, b })
+      // Its own scintillation, from its catalogue number: it keeps twinkling its own way as it moves.
+      byTier[tier].push({ x, y, z, r, g, b, seed: (satellite.norad * 0.6180339887) % 1 })
       this.drawn.push({ satellite, direction: new Vector3(x, y, z).normalize() })
     }
     this.tiers.forEach((points, index) => {
       const entries = byTier[index]
       const positions = new Float32Array(entries.length * 3)
       const colors = new Float32Array(entries.length * 3)
+      const seeds = new Float32Array(entries.length)
       entries.forEach((entry, i) => {
         positions.set([entry.x, entry.y, entry.z], i * 3)
         colors.set([entry.r, entry.g, entry.b], i * 3)
+        seeds[i] = entry.seed
       })
       points.geometry.dispose()
       const geometry = new BufferGeometry()
       geometry.setAttribute("position", new BufferAttribute(positions, 3))
       geometry.setAttribute("color", new BufferAttribute(colors, 3))
+      geometry.setAttribute("seed", new BufferAttribute(seeds, 1))
       points.geometry = geometry
     })
   }

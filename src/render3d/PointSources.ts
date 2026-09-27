@@ -46,7 +46,13 @@ export class PointSources {
   private static readonly shared = {
     uRodSolidAngle: { value: 1e-7 },
     uConeThreshold: { value: 0 },
-    uViewportHeight: { value: 1 }
+    uViewportHeight: { value: 1 },
+    uScintillationTime: { value: 0 }
+  }
+
+  /** The clock scintillation runs on, seconds — the scene's own animation clock. */
+  static setTime(seconds: number): void {
+    PointSources.shared.uScintillationTime.value = seconds
   }
   private static readonly viewport = new Vector4()
 
@@ -73,7 +79,7 @@ export class PointSources {
    * A points material whose vertex colours are ILLUMINANCES, relative like the rest of the scene
    * (see ScatteredSky.relativeScale), drawn round, added.
    */
-  static material(size: number): PointsMaterial {
+  static material(size: number, scintillates = true): PointsMaterial {
     const material = new PointsMaterial({ vertexColors: true, size, sizeAttenuation: false, fog: false })
     // Drawn with its own falloff (see patchFragment), not RoundPoints': same reasons to be round, and
     // additive light must not write depth either.
@@ -84,10 +90,11 @@ export class PointSources {
       shader.uniforms.uRodSolidAngle = PointSources.shared.uRodSolidAngle
       shader.uniforms.uConeThreshold = PointSources.shared.uConeThreshold
       shader.uniforms.uViewportHeight = PointSources.shared.uViewportHeight
-      shader.vertexShader = PointSources.patch(shader.vertexShader)
+      shader.uniforms.uScintillationTime = PointSources.shared.uScintillationTime
+      shader.vertexShader = PointSources.patch(shader.vertexShader, scintillates)
       shader.fragmentShader = PointSources.patchFragment(shader.fragmentShader)
     }
-    material.customProgramCacheKey = () => "point-sources"
+    material.customProgramCacheKey = () => (scintillates ? "point-sources" : "point-sources-steady")
     return material
   }
 
@@ -107,9 +114,9 @@ export class PointSources {
    * cell is the cones' for a point bright enough for the fovea and the dim-light eye's for one too
    * faint for it, from one to the other over the factor of four under the fovea's threshold.
    */
-  static patch(vertexShader: string): string {
+  static patch(vertexShader: string, scintillates = true): string {
     return vertexShader
-      .replace("void main() {", `uniform float uRodSolidAngle;\nuniform float uConeThreshold;\nuniform float uViewportHeight;\nvarying float vSize;\nvarying float vRaster;\nvarying float vTotal;\nvoid main() {`)
+      .replace("void main() {", `uniform float uRodSolidAngle;\nuniform float uConeThreshold;\nuniform float uViewportHeight;\nuniform float uScintillationTime;\nattribute float seed;\nvarying float vSize;\nvarying float vRaster;\nvarying float vTotal;\nvoid main() {`)
       .replace(
         "gl_PointSize = size;",
         `gl_PointSize = size;
@@ -130,9 +137,41 @@ export class PointSources {
         vSize = gl_PointSize;
         // The square drawn wide enough to hold the whole of the falloff, whatever its tier.
         gl_PointSize = max(gl_PointSize, 2.0 * ceil(${PointSources.EDGE_SIGMAS.toFixed(1)} * max(${PointSources.MIN_SIGMA_PX.toFixed(2)}, ${PointSources.SIGMA_PER_SIZE.toFixed(2)} * gl_PointSize)) + 1.0);
-        vRaster = gl_PointSize;`
+        vRaster = gl_PointSize;${scintillates ? PointSources.SCINTILLATION_GLSL : ""}`
       )
   }
+
+  /**
+   * Scintillation: the flickering of a point seen through a turbulent atmosphere, which is what
+   * makes a star twinkle — and a satellite too, a point source as much as a star.
+   *
+   * How much follows how much air the light crosses (Young's law, amplitude ∝ airmass^1.75 — the
+   * air mass after Kasten and Young), scaled for an eye's 7 mm pupil and its tenth of a second of
+   * integration: a few per cent at the zenith, a strong twinkle towards the horizon, capped at half
+   * the light. How fast is a few hertz, irregular: three unrelated waves per point, from its own
+   * seed so that no two twinkle together. Low down the colours part too, the atmosphere's
+   * dispersion sending the red and the blue through different turbulence: a low bright star flashes
+   * red and blue.
+   *
+   * On the GPU, from the point's own direction: nothing is rewritten per point on the CPU.
+   */
+  private static readonly SCINTILLATION_GLSL = `
+        vec3 toPoint = normalize((modelMatrix * vec4(position, 1.0)).xyz - cameraPosition);
+        float sinAltitude = clamp(toPoint.y, 0.0, 1.0);
+        float altitudeDeg = degrees(asin(sinAltitude));
+        float airmass = 1.0 / (sinAltitude + 0.50572 * pow(altitudeDeg + 6.07995, -1.6364));
+        float amplitude = min(0.5, 0.05 * pow(airmass, 1.75));
+        float t = uScintillationTime;
+        float s1 = fract(seed * 7.131 + 0.13);
+        float s2 = fract(seed * 3.713 + 0.57);
+        float wave = (sin(t * (18.0 + 9.0 * seed) + seed * 6.2832)
+          + 0.7 * sin(t * (31.0 + 13.0 * s1) + s1 * 17.0)
+          + 0.5 * sin(t * (47.0 + 19.0 * s2) + s2 * 29.0)) / 0.93;
+        float colourWave = sin(t * (23.0 + 11.0 * s2) + seed * 41.0);
+        float parting = 0.6 * (1.0 - smoothstep(5.0, 25.0, altitudeDeg));
+        vColor.r *= max(0.0, 1.0 + amplitude * (wave + parting * colourWave));
+        vColor.g *= max(0.0, 1.0 + amplitude * wave);
+        vColor.b *= max(0.0, 1.0 + amplitude * (wave - parting * colourWave));`
 
   /**
    * The narrowest spread a point is drawn with, pixels (a Gaussian's standard deviation), and the

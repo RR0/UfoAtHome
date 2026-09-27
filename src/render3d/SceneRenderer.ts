@@ -49,7 +49,6 @@ import {
   skyColorsForAltitude,
   starBrightnessTierIndex,
   starColorScale,
-  twinkleIntensity,
   visibleMagnitudeLimit,
   STAR_BRIGHTNESS_TIERS
 } from "./skyColors.js"
@@ -4334,7 +4333,9 @@ export class SceneRenderer {
         const geometry = new BufferGeometry()
         geometry.setAttribute("position", new BufferAttribute(new Float32Array(3), 3))
         geometry.setAttribute("color", new BufferAttribute(new Float32Array(3), 3))
-        mesh = new Points(geometry, PointSources.material(STAR_BRIGHTNESS_TIERS[STAR_BRIGHTNESS_TIERS.length - 1].size))
+        // A planet shows a disc of seconds of arc, which averages the turbulence out: planets do not
+        // twinkle, which is how an observer tells one from a star.
+        mesh = new Points(geometry, PointSources.material(STAR_BRIGHTNESS_TIERS[STAR_BRIGHTNESS_TIERS.length - 1].size, false))
         PointSources.track(mesh)
         this.celestialGroup.add(mesh)
         this.bodyMeshes.set(key, mesh)
@@ -4891,6 +4892,9 @@ export class SceneRenderer {
       })
       const geometry = new BufferGeometry()
       geometry.setAttribute("position", new BufferAttribute(positions, 3))
+      // Each star's own scintillation seed (see PointSources.SCINTILLATION_GLSL): its drawn phase,
+      // so that it keeps twinkling its own way across rebuilds.
+      geometry.setAttribute("seed", new BufferAttribute(phase.map(value => value / (2 * Math.PI)), 1))
       const colorAttribute = new BufferAttribute(new Float32Array(tierStars.length * 3), 3)
       geometry.setAttribute("color", colorAttribute)
       // The stars move and may change tier, but the tier's shader stays identical. Retain its
@@ -4909,7 +4913,8 @@ export class SceneRenderer {
     // Populates real initial colors synchronously (single source of truth for the color
     // formula — see updateTwinkle) before the very first render(), which setAstronomy() calls
     // right after buildStars() returns — otherwise that first frame would show default black.
-    this.updateTwinkle(0)
+    this.starColoursRelative = Number.NaN
+    this.updateTwinkle(this.twinkleSeconds)
     this.startTwinkle()
   }
 
@@ -4919,20 +4924,26 @@ export class SceneRenderer {
   /** Where the twinkle last was, so a change of adaptation redraws the stars at the same instant. */
   private twinkleSeconds = 0
 
+  /** The adaptation the stars' colours were last written for — see updateTwinkle. */
+  private starColoursRelative = Number.NaN
+
+  /**
+   * Moves the twinkle on, and rewrites the stars' light only when the eye's adaptation changed.
+   *
+   * The twinkle itself is the GPU's now (see PointSources.SCINTILLATION_GLSL), physical rather than
+   * one slow wave: this used to rewrite and upload every star's colour at every frame.
+   */
   private updateTwinkle(timeSeconds: number): void {
+    PointSources.setTime(timeSeconds)
     const relative = this.relativeScale
+    if (relative === this.starColoursRelative) return
+    this.starColoursRelative = relative
     for (const tier of this.starTiers) {
       const colors = tier.colorAttribute.array as Float32Array
       for (let i = 0; i < tier.brightness.length; i++) {
-        const intensity = twinkleIntensity(
-          tier.brightness[i],
-          { phase: tier.phase[i], speedFactor: tier.speedFactor[i] },
-          timeSeconds
-        )
-        const scale = relative * intensity
-        colors[i * 3] = tier.illuminance[i * 3] * scale
-        colors[i * 3 + 1] = tier.illuminance[i * 3 + 1] * scale
-        colors[i * 3 + 2] = tier.illuminance[i * 3 + 2] * scale
+        colors[i * 3] = tier.illuminance[i * 3] * relative
+        colors[i * 3 + 1] = tier.illuminance[i * 3 + 1] * relative
+        colors[i * 3 + 2] = tier.illuminance[i * 3 + 2] * relative
       }
       tier.colorAttribute.needsUpdate = true
     }
