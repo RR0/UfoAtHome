@@ -1354,6 +1354,7 @@ export class SceneRenderer {
    * setTerrainOrigin's own distance check), which for a stationary observer is never. Not readonly
    * for exactly this: the editor now lets the sources be chosen (see its Data sources group). */
   setTerrainProviders(providers: TerrainProviders): void {
+    this.stopTerrainFade()
     this.terrainProviders = providers
     this.disposeMesh(this.terrainMesh)
     this.terrainMesh = undefined
@@ -1416,7 +1417,9 @@ export class SceneRenderer {
         if (outgoing && centre && Math.hypot(centre.x, centre.z) <= previousRadius) {
           mesh.position.y = outgoing.position.y + this.groundYOfPatch(outgoing, centre.x, centre.z)
         }
-        this.disposeMesh(this.terrainMesh)
+        // Not taken down at once when the observer has only moved on: see crossfadeTerrain.
+        if (outgoing && centre && Math.hypot(centre.x, centre.z) <= previousRadius) this.crossfadeTerrain(mesh, outgoing)
+        else this.disposeMesh(this.terrainMesh)
         // Higher than groundMesh's default (0), lower than the compass labels' (see
         // COMPASS_RENDER_ORDER) — draws after the flat disc it is laid over, and still under the
         // compass HUD. The disc's own depth is what would otherwise decide that layering, and at
@@ -1449,6 +1452,62 @@ export class SceneRenderer {
         console.warn("Terrain build failed, keeping the flat ground fallback:", error)
         onSettled?.()
       })
+  }
+
+  /** How long a new patch of ground takes to replace the one the observer drove out of. */
+  private static readonly TERRAIN_CROSSFADE_MS = 1200
+  /** The patch being faded out, if one is. */
+  private fadingTerrain?: { mesh: Mesh, frameId: number }
+
+  /**
+   * Brings a new patch in over the one it replaces, instead of swapping them in one frame.
+   *
+   * A moving observer rebuilds the ground every hundred and fifty metres (see setTerrainOrigin),
+   * and the new patch is never quite the old one: its vertices stand on another grid, so the relief
+   * and its shading shift; its photograph is resampled; its edge, where the photograph gives way to
+   * the haze, has jumped forward. Swapped at once, all of it changed in a frame, at every rebuild —
+   * the ground's pattern and colour jumping under a car that was only driving along.
+   *
+   * The new patch is drawn over the old, pulled forward in depth so the two near-coincident
+   * surfaces do not fight, and faded in; the old one goes once it is covered.
+   */
+  private crossfadeTerrain(incoming: Mesh, outgoing: Mesh): void {
+    // A fade still running is overtaken: its outgoing patch goes now.
+    this.stopTerrainFade()
+    const material = incoming.material as MeshLambertMaterial
+    material.opacity = 0
+    material.polygonOffset = true
+    material.polygonOffsetFactor = -1
+    material.polygonOffsetUnits = -4
+    const start = performance.now()
+    const step = () => {
+      const f = Math.min(1, (performance.now() - start) / SceneRenderer.TERRAIN_CROSSFADE_MS)
+      material.opacity = f * f * (3 - 2 * f)
+      this.render()
+      if (f < 1 && this.fadingTerrain) {
+        this.fadingTerrain.frameId = requestAnimationFrame(step)
+        return
+      }
+      material.polygonOffset = false
+      material.opacity = 1
+      if (this.fadingTerrain) this.disposeMesh(this.fadingTerrain.mesh)
+      this.fadingTerrain = undefined
+      this.render()
+    }
+    this.fadingTerrain = { mesh: outgoing, frameId: requestAnimationFrame(step) }
+  }
+
+  /** Ends a fade at once, the patch it was fading out gone. */
+  private stopTerrainFade(): void {
+    if (!this.fadingTerrain) return
+    cancelAnimationFrame(this.fadingTerrain.frameId)
+    this.disposeMesh(this.fadingTerrain.mesh)
+    this.fadingTerrain = undefined
+    const material = this.terrainMesh?.material as MeshLambertMaterial | undefined
+    if (material) {
+      material.opacity = 1
+      material.polygonOffset = false
+    }
   }
 
   /**
@@ -3976,6 +4035,7 @@ export class SceneRenderer {
   }
 
   dispose(): void {
+    this.stopTerrainFade()
     this.stopTwinkle()
     this.cancelFlush()
     this.phenomena.clear()
