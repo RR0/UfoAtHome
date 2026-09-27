@@ -8,7 +8,7 @@
     "hour": 6,
     "minute": 6
   },
-  "durationSeconds": 20,
+  "durationSeconds": 25,
   "utcOffsetHours": 2,
   "timeZone": "Europe/Paris",
   "place": [
@@ -179,7 +179,7 @@
         ]
       },
       {
-        "t": 12000,
+        "t": 17000,
         "shapes": [
           {
             "sourceId": "ufo-1",
@@ -317,7 +317,7 @@
         ]
       },
       {
-        "t": 13000,
+        "t": 18000,
         "shapes": [
           {
             "sourceId": "ufo-1",
@@ -455,7 +455,7 @@
         ]
       },
       {
-        "t": 14000,
+        "t": 19000,
         "shapes": [
           {
             "sourceId": "ufo-1",
@@ -593,7 +593,7 @@
         ]
       },
       {
-        "t": 15000,
+        "t": 20000,
         "shapes": [
           {
             "sourceId": "ufo-1",
@@ -731,7 +731,7 @@
         ]
       },
       {
-        "t": 15250,
+        "t": 20250,
         "shapes": [
           {
             "sourceId": "ufo-1",
@@ -869,7 +869,7 @@
         ]
       },
       {
-        "t": 15500,
+        "t": 20500,
         "shapes": [
           {
             "sourceId": "ufo-1",
@@ -1017,6 +1017,61 @@
       {
         "t": 0,
         "pose": {
+          "lat": 49.0789012,
+          "lng": 2.3274002,
+          "elevationM": 0,
+          "headingDeg": 303,
+          "pitchDeg": -25,
+          "fovDeg": 40
+        }
+      },
+      {
+        "t": 3600,
+        "pose": {
+          "lat": 49.078924,
+          "lng": 2.3273462,
+          "elevationM": 0,
+          "headingDeg": 303,
+          "pitchDeg": -25,
+          "fovDeg": 40
+        }
+      },
+      {
+        "t": 4000,
+        "pose": {
+          "lat": 49.0789261,
+          "lng": 2.3273411,
+          "elevationM": 0,
+          "headingDeg": 303,
+          "pitchDeg": -22,
+          "fovDeg": 40
+        }
+      },
+      {
+        "t": 4600,
+        "pose": {
+          "lat": 49.078927,
+          "lng": 2.327339,
+          "elevationM": 0,
+          "headingDeg": 340,
+          "pitchDeg": -4,
+          "fovDeg": 40
+        }
+      },
+      {
+        "t": 4900,
+        "pose": {
+          "lat": 49.078927,
+          "lng": 2.327339,
+          "elevationM": 0,
+          "headingDeg": 353.68,
+          "pitchDeg": 2.19,
+          "fovDeg": 40
+        }
+      },
+      {
+        "t": 25000,
+        "pose": {
           "lat": 49.078927,
           "lng": 2.327339,
           "elevationM": 0,
@@ -1075,7 +1130,7 @@
         }
       },
       {
-        "t": 11900,
+        "t": 16900,
         "weather": {
           "cloudLayers": [
             {
@@ -1120,7 +1175,7 @@
         }
       },
       {
-        "t": 12000,
+        "t": 17000,
         "weather": {
           "cloudLayers": [
             {
@@ -1165,7 +1220,7 @@
         }
       },
       {
-        "t": 20000,
+        "t": 25000,
         "weather": {
           "cloudLayers": [
             {
@@ -4808,7 +4863,7 @@
   },
   "milestones": [
     {
-      "t": 0,
+      "t": 4000,
       "label": "A",
       "note": {
         "fr": "La chienne s'arrête net et revient apeurée ; il tourne la tête à droite et voit l'objet immobile devant le bois.",
@@ -4816,7 +4871,7 @@
       }
     },
     {
-      "t": 12000,
+      "t": 17000,
       "label": "B",
       "note": {
         "fr": "Une averse tombe d'un coup ; l'objet monte tout droit de quelques mètres.",
@@ -4824,7 +4879,7 @@
       }
     },
     {
-      "t": 14000,
+      "t": 19000,
       "label": "C",
       "note": {
         "fr": "Il s'incline, le bout gauche vers le haut, le droit faisant pivot.",
@@ -4832,7 +4887,7 @@
       }
     },
     {
-      "t": 15000,
+      "t": 20000,
       "label": "D",
       "note": {
         "fr": "Départ vers la gauche et le ciel, le long de sa longueur, trop vite pour être suivi.",
