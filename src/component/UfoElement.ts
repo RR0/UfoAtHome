@@ -205,6 +205,12 @@ export class UfoElement extends HTMLElement {
    */
   paintsShapes = true
   /**
+   * Whether the observer's body is held perfectly still when they are not walking, rather than
+   * swaying the way a living one does (see Stance). False for a replay; the editor sets it, since an
+   * author lining a shape up on the scene needs the scene to hold still under the pointer.
+   */
+  steadyObserver = false
+  /**
    * Whether the selected shapes' handles are drawn at all. Off when the canvas is not editing
    * the shapes (see SightingEditorElement.canvasMode): a handle is a promise that dragging it
    * does something, and a promise the canvas is not keeping is worse than no handle.
@@ -1711,7 +1717,7 @@ export class UfoElement extends HTMLElement {
    * stood still, which is most of them. Rebuilt on demand rather than cached, for the reason
    * Gait.of gives: an editor moves keyframes without the recording ever changing identity. */
   private gaitAt(t: number): GaitOffset {
-    return Gait.of(this.currentSighting)?.offsetAt(t) ?? Gait.STILL
+    return Gait.bodyAt(this.currentSighting, t, this.steadyObserver)
   }
 
   private updateFullscreenButton(): void {

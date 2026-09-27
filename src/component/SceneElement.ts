@@ -1095,10 +1095,11 @@ export class SceneElement extends HTMLElement {
       sighting.instrument.detailUm !== undefined
     )
     // What the observer's own legs are doing to their eye between two recorded positions — nothing
-    // for a observer who stood still, which is most of them, and a couple of centimetres of rise and
-    // sway for one who walked. Rebuilt each tick rather than cached: the editor moves keyframes
-    // under this element without the recording ever changing identity (see Gait.of).
-    this.sceneRenderer.setGait(Gait.of(sighting)?.offsetAt(t) ?? Gait.STILL)
+    // for a observer who stood still — the slow sway of a living body, see Stance — and a couple of
+    // centimetres of rise and sway for one who walked. Rebuilt each tick rather than cached: the
+    // editor moves keyframes under this element without the recording ever changing identity (see
+    // Gait.of).
+    this.sceneRenderer.setGait(Gait.bodyAt(sighting, t, this.ufoElement.steadyObserver))
     // Keeps decor anchored to its own real-world spot rather than sliding along with a moving
     // observer — see SceneRenderer.updateDecorAnchoring's own doc comment. The reference pose is
     // always the recording's own t=0, regardless of what t is being rendered right now.
@@ -1453,7 +1454,7 @@ export class SceneElement extends HTMLElement {
     // — the same numbers the overlay used, so a starburst turns with the camera here as it did
     // there (see CanvasRenderer.setRoll).
     const pose = resolveObserverPoseAt(sighting, t)
-    const rollDeg = (pose?.rollDeg ?? 0) + (Gait.of(sighting)?.offsetAt(t) ?? Gait.STILL).rollDeg
+    const rollDeg = (pose?.rollDeg ?? 0) + Gait.bodyAt(sighting, t, this.ufoElement.steadyObserver).rollDeg
     this.sceneRenderer.setPhenomena(placed, {
       projection,
       canvasWidthPx: canvas.width,

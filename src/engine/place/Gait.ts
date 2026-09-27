@@ -1,6 +1,7 @@
 import type { Sighting } from "../model/Sighting.js"
 import { geoToLocalMeters } from "../../render3d/terrain/GeoProjection.js"
 import { ObserverPath } from "./ObserverPath.js"
+import { Stance } from "./Stance.js"
 
 /**
  * Where the observer's eye is, relative to where the path alone would put it — metres, east/north
@@ -218,6 +219,17 @@ export class Gait {
    * How fast the observer is stepping at a given speed, or zero when what they are doing is not
    * walking — see SLOWEST_WALK_M_PER_S and FASTEST_WALK_M_PER_S for both refusals.
    */
+  /**
+   * Everything the observer's own body does to the instrument at `tMs`: the walk when there is one
+   * (see offsetAt), and the slow sway of a body that is never quite still (see Stance). The one
+   * place to ask, so that the scene, its roll and the overlay drawn above it move together.
+   * `steady` leaves the sway out: an editor, where an author lines shapes up on the scene.
+   */
+  static bodyAt(sighting: Sighting, tMs: number, steady = false): GaitOffset {
+    const walk = Gait.of(sighting)?.offsetAt(tMs) ?? Gait.STILL
+    return steady ? walk : Gait.add(walk, Stance.of(sighting)?.offsetAt(tMs))
+  }
+
   private static stepHzFor(speedMPerS: number): number {
     if (speedMPerS < Gait.SLOWEST_WALK_M_PER_S || speedMPerS > Gait.FASTEST_WALK_M_PER_S) return 0
     return Gait.REFERENCE_STEP_HZ * Math.pow(speedMPerS / Gait.REFERENCE_SPEED_M_PER_S, Gait.CADENCE_EXPONENT)

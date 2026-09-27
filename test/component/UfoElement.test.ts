@@ -702,6 +702,8 @@ describe("UfoElement", () => {
     // What a composing <rr0-scene> does: the shapes stand in its three.js scene, and this overlay
     // keeps only what edits them — see UfoElement.paintsShapes.
     element.paintsShapes = false
+    // Handles are an editor's, and an editor holds the observer still — see UfoElement.steadyObserver.
+    element.steadyObserver = true
     element.sightingData = {
       version: 1,
       timeline: {

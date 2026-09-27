@@ -905,6 +905,8 @@ export class SightingEditorElement extends HTMLElement {
     // SceneElement.accountInTheRound.
     this.sceneElement.accountInTheRound = false
     this.ufoElement = this.sceneElement.ufoElement
+    // A shape is lined up on the scene under the pointer: the scene holds still — see Stance.
+    this.ufoElement.steadyObserver = true
     // This canvas is used for drag-to-record shape placement instead — a plain click shouldn't
     // also toggle the nested player's playback (every recording drag ends in a native "click").
     this.ufoElement.enableClickToPlay = false
