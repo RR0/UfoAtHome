@@ -684,13 +684,23 @@ function buildAircraft(): Group {
  * a member list reused across a whole drag gesture — see [[rr0-code-style-no-free-functions]]).
  */
 export class DecorSystem {
-  /** Highest terrain height under an object's complete oriented footprint.
+  /** Highest terrain height under an object's complete oriented footprint — or the LOWEST, for
+   * what grows out of the ground (see GROWS_FROM_GROUND).
    *
    * Not for an object in the air: what the sweep buys is a wheel that is never in the ground, and
    * an airliner three hundred metres up has no wheel near it. It costs 441 ground reads for a 60 m
    * aircraft, and a twenty-second exposure restates the scene forty-odd times a frame — nearly
    * two million reads a second, which is what made the airliner demo stutter. An object higher
    * than it is tall stands on the ground under its centre, read once. */
+  /**
+   * The kinds that stand on the LOWEST ground under them rather than the highest: vegetation and
+   * banks of earth. A car on a slope must not have a wheel in the ground, so it stands on the
+   * highest point; a bush or a mound grows out of the slope, and its uphill side going into the
+   * ground is what one sees in any field, while its downhill side floating is what one never sees —
+   * at a wood's edge half a kilometre off, it was a band of sky under the whole edge.
+   */
+  private static readonly GROWS_FROM_GROUND: ReadonlySet<DecorKind> = new Set(["tree", "shrub", "crop", "mound"])
+
   static groundUnderFootprint(object: DecorObject, x: number, z: number, headingDeg: number | undefined,
     ground: (x: number, z: number) => number, altitudeM = 0): number {
     const size = DecorSystem.sizeOf(object)
@@ -698,14 +708,15 @@ export class DecorSystem {
     const heading = (headingDeg ?? 0) * Math.PI / 180
     const lengthSamples = Math.min(21, Math.max(2, Math.ceil(size.lengthM / 0.75) + 1))
     const widthSamples = Math.min(21, Math.max(2, Math.ceil(size.widthM / 0.75) + 1))
-    let highest = -Infinity
+    const grows = DecorSystem.GROWS_FROM_GROUND.has(object.kind)
+    let highest = grows ? Infinity : -Infinity
     for (let alongIndex = 0; alongIndex < lengthSamples; alongIndex++) {
       const along = (alongIndex / (lengthSamples - 1) - 0.5) * size.lengthM
       for (let acrossIndex = 0; acrossIndex < widthSamples; acrossIndex++) {
         const across = (acrossIndex / (widthSamples - 1) - 0.5) * size.widthM
         const px = x + Math.sin(heading) * along + Math.cos(heading) * across
         const pz = z - Math.cos(heading) * along + Math.sin(heading) * across
-        highest = Math.max(highest, ground(px, pz))
+        highest = grows ? Math.min(highest, ground(px, pz)) : Math.max(highest, ground(px, pz))
       }
     }
     return Number.isFinite(highest) ? highest : ground(x, z)
