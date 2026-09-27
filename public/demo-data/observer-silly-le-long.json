@@ -42172,6 +42172,31 @@
     "lengthM":12.4,
     "heightM":10
    }
+  },
+  {
+   "id":"pont-rd548",
+   "kind":"bridge",
+   "title":{
+    "fr":"Pont de la RD548 sur la RN2 (largeur, hauteur et garde-corps supposés)",
+    "en":"The RD548 bridge over the RN2 (width, height and railing assumed)"
+   },
+   "eastM":1377.5,
+   "northM":928.9,
+   "headingDeg":144.4,
+   "sizeM":{
+    "widthM":9,
+    "lengthM":241.6,
+    "heightM":6.5
+   },
+   "bridge":{
+    "spanM":41.6,
+    "deckThicknessM":1.2,
+    "railing":{
+     "heightM":1.05,
+     "postSpacingM":1.5,
+     "rails":2
+    }
+   }
   }
  ],
  "instrument":"eye",
