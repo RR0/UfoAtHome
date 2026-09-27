@@ -98,6 +98,9 @@ export class FaqPage implements SitePage {
 
     <div class="faq-item">
       <h3>Why build this at all?</h3>
+      <p>The idea came out of conversations with the sociologist
+        <a href="https://rr0.org/people/l/LagrangePierre/">Pierre Lagrange</a>, who would cite Roger
+        Shepard's work to its author.</p>
       <p>Because an account written down loses almost everything about it. In 1968, at the AAAS
         symposium, the psychologist <a href="https://rr0.org/people/s/ShepardRogerN/">Roger Shepard</a> argued, in
         <a href="https://rr0.org/time/1/9/6/8/07/29/Symposium/Shepard/index.html">the paper he gave there</a>, that a visual reconstruction of an account
@@ -358,6 +361,9 @@ export class FaqPage implements SitePage {
 
     <div class="faq-item">
       <h3>Pourquoi construire ça ?</h3>
+      <p>L'idée est née de discussions avec le sociologue
+        <a href="https://rr0.org/people/l/LagrangePierre/">Pierre Lagrange</a>, qui citait à son
+        auteur les travaux de Roger Shepard.</p>
       <p>Parce qu'un compte rendu mis par écrit en perd presque tout. En 1968, au symposium de l'AAAS,
         le psychologue <a href="https://rr0.org/people/s/ShepardRogerN/">Roger Shepard</a> a soutenu, dans
         <a href="https://rr0.org/time/1/9/6/8/07/29/Symposium/Shepard/index_fr.html">la communication qu'il y a donnée</a>, qu'une reconstitution visuelle
