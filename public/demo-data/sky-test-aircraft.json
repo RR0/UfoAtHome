@@ -2,8 +2,8 @@
   "version": 1,
   "id": "sky-test-aircraft",
   "description": {
-    "fr": "Une reproduction, pas un compte rendu : ce que donne un avion de ligne photographié en pose longue. Aucune forme d'ovni n'est dessinée ici — il n'y en a pas. Un appareil 24×36 au 50 mm chargé d'un film 400 ISO, vingt secondes de pose, un biréacteur à 6 000 m qui traverse le champ à 900 km/h : ses feux fixes tracent des lignes, ses feux à éclats posent des points à intervalles réguliers, et l'espacement de ces points est exactement la cadence d'éclats multipliée par la vitesse angulaire. C'est ce qui distingue la photo d'un avion de celle d'un objet qui ne clignote pas — et c'est la lecture qui manquait à la photographie de Gennevilliers du 5 novembre 1990, publiée comme un engin monumental.",
-    "en": "A reproduction, not an account: what an airliner gives when it is photographed on a long exposure. No UFO shape is drawn here — there is none. A 35 mm camera at 50 mm loaded with ISO 400 film, twenty seconds of exposure, a twin-jet at 6,000 m crossing the field at 900 km/h: its steady lights draw lines, its strobes lay down dots at regular intervals, and the spacing of those dots is exactly the flash rate times the angular speed. That is what separates the photograph of an aircraft from that of an object which does not blink — and it is the reading the Gennevilliers photograph of 5 November 1990 never got, published as a monumental craft."
+    "fr": "Une reproduction, pas un compte rendu : ce que donne un avion de ligne photographié en pose longue. Aucune forme d'ovni n'est dessinée ici, il n'y en a pas. Un appareil 24×36 au 50 mm chargé d'un film 400 ISO, vingt secondes de pose à f/2,8, tourné vers l'ouest-sud-ouest. Gennevilliers est exactement sous l'axe prolongé de la piste 07 du Bourget, à 10 km du seuil : un biréacteur en finale y passe vers 700 m, à 260 km/h, phares d'atterrissage allumés face à l'objectif. Les phares, trop vifs pour le film, tracent un trait blanc ; les feux de position, deux traits de couleur ; les feux à éclats posent des points à intervalles réguliers, et l'espacement de ces points est exactement la cadence d'éclats multipliée par la vitesse angulaire. C'est ce qui distingue la photo d'un avion de celle d'un objet qui ne clignote pas, et c'est la lecture qui manquait à la photographie de Gennevilliers du 5 novembre 1990, publiée comme un engin monumental. L'axe de la piste vient d'OpenStreetMap ; la pente de 3°, la vitesse et l'intensité des phares vus de face sont supposées.",
+    "en": "A reproduction, not an account: what an airliner gives when it is photographed on a long exposure. No UFO shape is drawn here, as there is none. A 35 mm camera at 50 mm loaded with ISO 400 film, twenty seconds at f/2.8, pointed west-south-west. Gennevilliers lies right under the extended centreline of Le Bourget's runway 07, 10 km from the threshold: a twin-jet on final passes there about 700 m up, at 260 km/h, landing lights on and facing the lens. The landing lights, too bright for the film, draw a white line; the position lights, two coloured ones; the strobes lay down dots at regular intervals, and the spacing of those dots is exactly the flash rate times the angular speed. That is what separates the photograph of an aircraft from that of an object which does not blink, and it is the reading the Gennevilliers photograph of 5 November 1990 never got, published as a monumental craft. The runway's axis is OpenStreetMap's; the 3° glide path, the speed and the landing lights' intensity seen head-on are assumed."
   },
   "time": {
     "year": 1990,
@@ -61,8 +61,8 @@
           "lat": 48.9339,
           "lng": 2.2986,
           "elevationM": 0,
-          "headingDeg": 90,
-          "pitchDeg": 33,
+          "headingDeg": 238,
+          "pitchDeg": 21,
           "fovDeg": 27,
           "fNumber": 2.8
         }
@@ -74,32 +74,58 @@
   },
   "decor": [
     {
-      "id": "airliner-1",
+      "id": "approach-1",
       "kind": "aircraft",
       "title": {
-        "fr": "Biréacteur en croisière, 6 000 m",
-        "en": "Twin-jet at cruise, 6,000 m"
+        "fr": "Biréacteur en finale piste 07 du Bourget, vers 700 m, phares d'atterrissage allumés",
+        "en": "Twin-jet on final to Le Bourget runway 07, about 700 m up, landing lights on"
       },
-      "eastM": 9000,
-      "northM": 2500,
-      "headingDeg": 180,
+      "eastM": -2304.4,
+      "northM": -1234.6,
+      "headingDeg": 67.8,
       "track": [
         {
           "t": 0,
-          "eastM": 9000,
-          "northM": 2500,
-          "altitudeM": 6000,
-          "headingDeg": 180
+          "eastM": -2304.4,
+          "northM": -1234.6,
+          "altitudeM": 694.2,
+          "headingDeg": 67.8
         },
         {
           "t": 20000,
-          "eastM": 9000,
-          "northM": -2500,
-          "altitudeM": 6000,
-          "headingDeg": 180
+          "eastM": -971.0,
+          "northM": -690.9,
+          "altitudeM": 618.7,
+          "headingDeg": 67.8
         }
       ],
       "lights": [
+        {
+          "id": "landing-right",
+          "offsetM": {
+            "x": 5,
+            "y": -1,
+            "z": 3
+          },
+          "color": "#fff1dc",
+          "intensity": 600,
+          "pattern": {
+            "kind": "steady"
+          }
+        },
+        {
+          "id": "landing-left",
+          "offsetM": {
+            "x": -5,
+            "y": -1,
+            "z": 3
+          },
+          "color": "#fff1dc",
+          "intensity": 600,
+          "pattern": {
+            "kind": "steady"
+          }
+        },
         {
           "id": "nav-port",
           "offsetM": {
