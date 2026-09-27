@@ -114,8 +114,9 @@ export class FaqPage implements SitePage {
     </div>
 
     <div class="faq-item">
-      <h3>Why is the object a flat shape rather than a 3D model?</h3>
-      <p>Because a 3D object placed in the scene is already a conclusion. It asserts a size, a
+      <h3>Why is an account drawn flat, and when does 3D come in?</h3>
+      <p>The account itself is drawn as it reached the observer's eye: a shape in their field of view,
+        this big, moving this way. Because a 3D object placed in the scene is already a conclusion. It asserts a size, a
         distance and a solidity that no observer could perceive — and, worse, it silently rules out
         every explanation in which there was no object there at all:
         <a href="https://rr0.org/science/crypto/ufo/enquete/meprise/optique/">a halo</a>,
@@ -130,6 +131,14 @@ export class FaqPage implements SitePage {
         what reached my eye, this big, moving this way. Everything else stays open — which is the
         only way a reconstruction can be used to <em>test</em> a misperception rather than to rule
         one out by construction.</p>
+      <p>3D comes in as an <em>interpretation</em>, kept apart from the account: what the observer
+        believes they saw (at Silly-le-Long, T1 describes one flat grey triangle, seen from the front
+        and then from behind), or an analyst's explanation stated in a case file (there, the GEIPAN's
+        light aircraft on final). Each is one choice of the player's <strong>Interpretation</strong>
+        selector, shown one at a time, with a model, a size and a track in metres. The
+        <strong>Compare with the account</strong> button then lays the account's own outlines over it
+        and states, instant by instant, how far apart they are in direction, width and height. The
+        account never changes to fit an interpretation: the interpretation answers to it.</p>
       <p>It also means the tool is honest about size. A recording stores an angle, never metres —
         but it does NOT mean distance is given up on. Where the observer saw the phenomenon cross
         something whose position is known, that crossing is stated in the recording (it passed
@@ -378,8 +387,10 @@ export class FaqPage implements SitePage {
     </div>
 
     <div class="faq-item">
-      <h3>Pourquoi l'objet est-il une forme plate plutôt qu'un modèle 3D ?</h3>
-      <p>Parce qu'un objet 3D placé dans la scène est déjà une conclusion. Il affirme une taille,
+      <h3>Pourquoi un compte rendu est-il dessiné à plat, et quand la 3D intervient-elle ?</h3>
+      <p>Le compte rendu lui-même est dessiné tel qu'il est parvenu à l'œil de l'observateur : une
+        forme dans son champ de vision, de cette taille, se déplaçant ainsi. Parce qu'un objet 3D placé
+        dans la scène est déjà une conclusion. Il affirme une taille,
         une distance et une solidité qu'aucun observateur ne pouvait percevoir — et, pire, il écarte en
         silence toutes les explications où il n'y avait aucun objet :
         <a href="https://rr0.org/science/crypto/ufo/enquete/meprise/optique/">un halo</a>,
@@ -394,6 +405,15 @@ export class FaqPage implements SitePage {
         voilà ce qui est parvenu à mon œil, de cette taille, se déplaçant ainsi. Tout le reste reste
         ouvert — c'est la seule façon qu'une reconstitution ait de <em>tester</em> une méprise au
         lieu de l'exclure par construction.</p>
+      <p>La 3D intervient comme <em>interprétation</em>, tenue à part du compte rendu : ce que
+        l'observateur croit avoir vu (à Silly-le-Long, T1 décrit un seul triangle plat et gris, vu de
+        face puis de derrière), ou l'explication d'un analyste énoncée dans un dossier (là, l'avion
+        léger en finale du GEIPAN). Chacune est un choix du sélecteur <strong>Interprétation</strong>
+        du lecteur, montrée une à la fois, avec un modèle, une taille et une trajectoire en mètres. Le
+        bouton <strong>Comparer au compte rendu</strong> superpose alors les contours du compte rendu
+        et chiffre, instant après instant, l'écart de direction, de largeur et de hauteur. Le compte
+        rendu ne change jamais pour coller à une interprétation : c'est l'interprétation qui doit lui
+        répondre.</p>
       <p>Cela rend aussi l'outil honnête sur la taille. Un enregistrement stocke un angle, jamais
         des mètres — mais on ne renonce pas pour autant à la distance. Là où l'observateur a vu le phénomène
         croiser quelque chose dont la position est connue, ce croisement est énoncé dans
