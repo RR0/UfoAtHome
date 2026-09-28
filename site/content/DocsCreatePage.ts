@@ -102,7 +102,7 @@ https://ufoathome.org/sighting.schema.json .
       <li><strong>Read the <code>assumed</code> values.</strong> They are the list of what nobody
         said. Each is a question for the observer, or a place where the reconstruction stands on a
         guess.</li>
-      <li><strong>Finish in the editor</strong> what is easier to do with a mouse than with a
+      <li><strong>Finish in <a href="/edit/">the editor</a></strong> what is easier to do with a mouse than with a
         sentence: moving a building by a few metres, nudging a direction until it sits on the
         photo.</li>
       <li><strong>Show it to the observer.</strong> The only test that counts is whether they
@@ -196,7 +196,7 @@ https://ufoathome.org/sighting.schema.json .
       <li><strong>Lisez les valeurs <code>assumed</code>.</strong> C'est la liste de ce que
         personne n'a dit. Chacune est une question pour l'observateur, ou un endroit où la
         reconstitution repose sur une supposition.</li>
-      <li><strong>Terminez dans l'éditeur</strong> ce qui se fait mieux à la souris qu'avec une
+      <li><strong>Terminez dans <a href="/edit/">l'éditeur</a></strong> ce qui se fait mieux à la souris qu'avec une
         phrase : déplacer un bâtiment de quelques mètres, ajuster une direction jusqu'à ce qu'elle
         tombe sur la photo.</li>
       <li><strong>Montrez-le à l'observateur.</strong> Le seul test qui compte est qu'il reconnaisse
