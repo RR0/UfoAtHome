@@ -130,6 +130,8 @@ pre {
   padding: 1rem 1.1rem; overflow-x: auto; font-size: 0.85rem; line-height: 1.55; margin: 0 0 1.2em;
 }
 pre code { background: none; border: 0; padding: 0; font-size: inherit; }
+/* A prompt to copy: wrapped, because a reader on a phone has to see all of it to copy it. */
+pre.doc-prompt { white-space: pre-wrap; }
 hr { border: 0; border-top: 1px solid var(--line); margin: 3rem 0; }
 
 /* ---------------------------------------------------------------- header */

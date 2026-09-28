@@ -223,6 +223,29 @@ export class FaqPage implements SitePage {
         do not, the working rule of this project is to go and find out how they do it.</p>
     </div>
 
+    <div class="faq-item">
+      <h3>Why not ask an AI to build the simulation from scratch?</h3>
+      <p>Because what it built would be an illustration. Asked for “a scene of what this witness
+        saw”, a model writes a 3D scene or paints a video that looks right: a sky, a field, a
+        light. Whether the Moon was really up, where the Sun really was, what the cloud cover was
+        that morning, how big the thing really looked from where the observer stood: each of those is
+        something it may have got right, and nothing in the result says which. It is also a one-off:
+        a thousand lines of code nobody has checked, written differently for the next case, which
+        cannot be laid beside the next case.</p>
+      <p>A UFO@home recording splits the work the other way. What the AI writes is only the
+        account: a date, a place, directions and apparent sizes over time, each value marked as
+        stated, worked out or assumed. The sky, the weather records, the ground, the optics of the
+        eye or the camera are computed from that by the same engine for every case, tested, and
+        public. The format's limits are part of the point: it has no field for a real size or a
+        distance, so an assistant cannot slip a conclusion in among the facts, and what it does write
+        is a short file anyone can read, replay, correct, and show the observer.</p>
+      <p>That is also why the two are not in competition. An AI assistant is a good way to
+        <a href="/docs/create/">write a recording</a> from a case file: on a GEIPAN case, one given
+        only the public file and these pages produced a recording whose phenomenon matched the one
+        made by hand to within a tenth of a degree. What it cannot do on its own is make the result
+        checkable, and that is the part this project is.</p>
+    </div>
+
     <h2>Using it, and changing it</h2>
 
     <div class="faq-item">
@@ -502,6 +525,32 @@ export class FaqPage implements SitePage {
         d'où un rift sombre qui sort d'un modèle de poussière au lieu de sortir d'une image. Et là où
         Stellarium rend quelque chose que nous ne rendons pas, la règle de travail de ce projet est
         d'aller chercher comment ils font.</p>
+    </div>
+
+    <div class="faq-item">
+      <h3>Pourquoi ne pas demander à une IA de construire la simulation de toutes pièces ?</h3>
+      <p>Parce que ce qu'elle construirait serait une illustration. À qui demande « une scène de ce
+        qu'a vu ce témoin », un modèle écrit une scène 3D ou peint une vidéo qui a l'air juste : un
+        ciel, un champ, une lumière. La Lune était-elle vraiment levée, où était vraiment le Soleil,
+        quelle était la couverture nuageuse ce matin-là, quelle taille la chose avait-elle vraiment
+        depuis l'endroit où se tenait l'observateur : chacun de ces points, il a pu le réussir, et
+        rien dans le résultat ne dit lesquels. C'est aussi un exemplaire unique : un millier de
+        lignes de code que personne n'a vérifiées, écrites autrement pour le cas suivant, et qu'on ne
+        peut pas mettre à côté du cas suivant.</p>
+      <p>Un enregistrement UFO@home répartit le travail dans l'autre sens. Ce que l'IA écrit n'est
+        que le compte rendu : une date, un lieu, des directions et des tailles apparentes au fil du
+        temps, chaque valeur marquée comme énoncée, calculée ou supposée. Le ciel, les relevés météo,
+        le sol, l'optique de l'œil ou de l'appareil en sont calculés par le même moteur pour tous les
+        cas, testé, et public. Les limites du format font partie du propos : il n'a pas de champ pour
+        une taille réelle ni une distance, si bien qu'un assistant ne peut pas glisser une conclusion
+        parmi les faits, et ce qu'il écrit est un fichier court que chacun peut lire, rejouer,
+        corriger, et montrer à l'observateur.</p>
+      <p>C'est aussi pourquoi les deux ne sont pas en concurrence. Un assistant IA est un bon moyen
+        d'<a href="/docs/create/">écrire un enregistrement</a> à partir d'un dossier : sur un cas du
+        GEIPAN, un assistant qui n'avait que le dossier public et ces pages a produit un
+        enregistrement dont le phénomène rejoignait celui fait à la main à un dixième de degré près.
+        Ce qu'il ne peut pas faire seul, c'est rendre le résultat vérifiable, et c'est cette partie
+        qu'est ce projet.</p>
     </div>
 
     <h2>S'en servir, et le faire évoluer</h2>
