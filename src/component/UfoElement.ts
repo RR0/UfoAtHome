@@ -423,6 +423,8 @@ export class UfoElement extends HTMLElement {
     this.observerMapCanvas.classList.remove("dragging")
     if (!drag.moved) return
     this.suppressObserverMapClick = true
+    // Dragged off the observer: the map takes them back in now that the hand has let go.
+    this.paintObserverMap(this.currentTime)
     if (this.observerMapCanvas.hasPointerCapture?.(event.pointerId)) this.observerMapCanvas.releasePointerCapture(event.pointerId)
   }
 
@@ -471,10 +473,19 @@ export class UfoElement extends HTMLElement {
     this.mapZoomInButton.disabled = this.observerMapView.zoomFactor >= ObserverMapView.MAX_ZOOM
     this.mapZoomOutButton.disabled = this.observerMapView.zoomFactor <= ObserverMapView.MIN_ZOOM
     this.paintObserverMap(this.currentTime)
-    // Not on every step of a drag or every notch of a wheel: one request once the reader settles.
+    this.scheduleObserverMapImagery()
+  }
+
+  /** Not on every step of a drag, every notch of a wheel or every frame of a followed walk: one
+   * request once the view settles. */
+  private scheduleObserverMapImagery(): void {
     clearTimeout(this.observerMapImageryTimer)
     this.observerMapImageryTimer = setTimeout(() => void this.loadObserverMapImagery(), UfoElement.OBSERVER_MAP_IMAGERY_DELAY_MS)
   }
+
+  /** How close to an edge of a zoomed map the observer may come before it follows them, as a
+   * fraction of its width: far enough in that the dot and its cone's first stretch stay readable. */
+  private static readonly OBSERVER_MAP_FOLLOW_MARGIN = 0.1
 
   private static readonly OBSERVER_MAP_IMAGERY_DELAY_MS = 300
 
@@ -1765,6 +1776,12 @@ export class UfoElement extends HTMLElement {
   private paintObserverMap(t: number): void {
     if (this.observerMapPanel.hidden || !this.observerPath || !this.observerMapBounds) return
     const pose = resolveObserverPoseAt(this.currentSighting, t)
+    // A zoomed map follows the observer rather than let them walk off it — but not while the reader
+    // is dragging it, which would fight their hand; the release brings them back.
+    if (pose?.lat !== undefined && pose.lng !== undefined && !this.observerMapDrag?.moved &&
+      this.observerMapView.keepInView(this.observerMapBounds, { lat: pose.lat, lng: pose.lng }, UfoElement.OBSERVER_MAP_FOLLOW_MARGIN)) {
+      this.scheduleObserverMapImagery()
+    }
     const instrument = this.currentSighting.instrument
     const markers: ObserverMapMarker[] = []
     const current = this.currentSighting.milestones.length > 0 ? resolveMilestoneAt(this.currentSighting.milestones, t) : undefined

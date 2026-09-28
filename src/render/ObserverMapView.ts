@@ -79,6 +79,25 @@ export class ObserverMapView {
     this.centerY = ((viewNorth + viewSouth) / 2 - toNorth) / (toSouth - toNorth)
   }
 
+  /**
+   * Moves the view just enough to keep `point` at least `margin` (a fraction of the view) inside
+   * its edges — how a zoomed map follows an observer who walks, drives or flies out of it. The
+   * fitted box needs none of this: it was fitted to the whole path. True when the view moved.
+   */
+  keepInView(fitted: GeoBounds, point: { lat: number; lng: number }, margin: number): boolean {
+    if (!this.changed) return false
+    const bounds = this.boundsWithin(fitted)
+    const north = ObserverMapView.mercatorY01(bounds.north)
+    const south = ObserverMapView.mercatorY01(bounds.south)
+    const x = (point.lng - bounds.west) / (bounds.east - bounds.west)
+    const y = (ObserverMapView.mercatorY01(point.lat) - north) / (south - north)
+    const dx = x < margin ? margin - x : x > 1 - margin ? 1 - margin - x : 0
+    const dy = y < margin ? margin - y : y > 1 - margin ? 1 - margin - y : 0
+    if (dx === 0 && dy === 0) return false
+    this.panBy(dx, dy)
+    return true
+  }
+
   /** The ground this view covers, inside the fitted box `fitted`. */
   boundsWithin(fitted: GeoBounds): GeoBounds {
     if (!this.changed) return fitted

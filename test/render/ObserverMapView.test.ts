@@ -54,6 +54,22 @@ describe("ObserverMapView", () => {
     for (const edge of ["north", "south", "west", "east"] as const) expect(after[edge]).toBeCloseTo(before[edge], 6)
   })
 
+  it("follows a point leaving a zoomed view, just enough to keep it inside the margin", () => {
+    const view = new ObserverMapView()
+    view.zoomAt(0.5, 0.5, 4)
+    const walker = ObserverMapView.pointAt(FITTED, 0.9, 0.5)
+    expect(view.keepInView(FITTED, walker, 0.1)).toBe(true)
+    const after = fractionWithinBounds(view.boundsWithin(FITTED), walker.lng, walker.lat)
+    expect(after.x).toBeCloseTo(0.9, 9)
+    expect(after.y).toBeCloseTo(0.5, 6)
+    expect(view.keepInView(FITTED, walker, 0.1)).toBe(false)
+  })
+
+  it("leaves the fitted box alone: it already holds the whole path", () => {
+    const view = new ObserverMapView()
+    expect(view.keepInView(FITTED, { lat: 0, lng: 0 }, 0.1)).toBe(false)
+  })
+
   it("turns a point of the map back into the coordinate drawn there", () => {
     const point = ObserverMapView.pointAt(FITTED, 0.2, 0.7)
     const fraction = fractionWithinBounds(FITTED, point.lng, point.lat)
