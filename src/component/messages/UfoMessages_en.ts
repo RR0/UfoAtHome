@@ -1,4 +1,5 @@
 import type { UfoMessages } from "./UfoMessages.js"
+import { RecordingIssues } from "../../engine/persistence/RecordingIssue.js"
 
 export const ufoMessages_en: UfoMessages = {
   play: "Play",
@@ -23,5 +24,7 @@ export const ufoMessages_en: UfoMessages = {
   showMilestones: "Show the account's moments",
   hideMilestones: "Hide the account's moments",
   observerHere: "The observer, here",
-  decorHere: "Scenery"
+  decorHere: "Scenery",
+  recordingIssues: "{count} problem(s) in this recording: it may not play as its author meant",
+  issueTemplates: RecordingIssues.EN
 }

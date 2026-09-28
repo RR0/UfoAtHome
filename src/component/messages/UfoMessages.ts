@@ -1,5 +1,7 @@
 /** Contract for `<rr0-ufo>`'s user-visible label strings — implemented per language under this
  * directory (`UfoMessages_en.ts`, `UfoMessages_fr.ts`) and loaded via `loadUfoMessages`. */
+import type { RecordingIssueTemplates } from "../../engine/persistence/RecordingIssue.js"
+
 export interface UfoMessages {
   play: string
   pause: string
@@ -37,4 +39,9 @@ export interface UfoMessages {
    * a piece of scenery with no title. A hover has to say something. */
   observerHere: string
   decorHere: string
+  /** The warning over a recording that was not played as written — see RecordingIssue. {count} is
+   * how many problems; the button shows the number alone. */
+  recordingIssues: string
+  /** One line per problem, {path} being where in the file. */
+  issueTemplates: RecordingIssueTemplates
 }

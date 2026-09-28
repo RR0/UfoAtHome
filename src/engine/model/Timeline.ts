@@ -2,6 +2,7 @@ import type { Keyframe, ShapeState } from "./Keyframe.js"
 import type { Shape } from "../shape/Shape.js"
 import { lerpShape, shapeContains } from "../shape/Shape.js"
 import { KeyframeCompletion } from "./KeyframeCompletion.js"
+import type { RecordingIssue } from "../persistence/RecordingIssue.js"
 
 export interface TimelineJson {
   keyframes: Keyframe[]
@@ -259,9 +260,10 @@ export class Timeline {
     return { keyframes: this.keyframes, order: this.order, groups: this.groups }
   }
 
-  static fromJSON(json: TimelineJson): Timeline {
+  /** `issues` receives what the file left out and had to be made up — see KeyframeCompletion. */
+  static fromJSON(json: TimelineJson, issues?: RecordingIssue[]): Timeline {
     const timeline = new Timeline()
-    for (const keyframe of KeyframeCompletion.complete(json.keyframes ?? [])) {
+    for (const keyframe of KeyframeCompletion.complete(json.keyframes ?? [], issues)) {
       timeline.addKeyframe(keyframe.t, keyframe.shapes)
     }
     if (json.order) {

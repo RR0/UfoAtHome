@@ -11,6 +11,10 @@ import { CanvasRenderer } from "../render/CanvasRenderer.js"
 import { SightingAudio } from "../audio/SightingAudio.js"
 import { fromSightingJson, toSightingJson } from "../engine/persistence/sightingJson.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
+import { RecordingIssues } from "../engine/persistence/RecordingIssue.js"
+import type { RecordingIssue } from "../engine/persistence/RecordingIssue.js"
+import { RecordingCheck } from "../engine/persistence/RecordingCheck.js"
+import type { FormatField } from "../engine/persistence/RecordingCheck.js"
 import { resolveMilestoneAt, sortedMilestones } from "../engine/model/Milestone.js"
 import { ExposureSampling } from "../engine/model/ExposureSampling.js"
 import type { Shape } from "../engine/shape/Shape.js"
@@ -97,6 +101,9 @@ export class UfoElement extends HTMLElement {
   private readonly canvasRenderer: CanvasRenderer
   private readonly tooltip: HTMLElement
   private readonly toolbar: HTMLElement
+  private readonly issuesBox: HTMLElement
+  private readonly issuesButton: HTMLButtonElement
+  private readonly issuesPanel: HTMLElement
   private readonly playPauseButton: HTMLButtonElement
   /** The smallest piece of ground the map will ever show, metres across. A observer who never moved
    * has a path of zero span, and this is what stands in for it — about two city blocks, enough to
@@ -201,6 +208,10 @@ export class UfoElement extends HTMLElement {
   private milestonesShown = true
 
   private currentSighting: Sighting = Sighting.create()
+  /** What the last recording loaded had wrong with it — see reportIssues. */
+  private issues: ReadonlyArray<RecordingIssue> = []
+  /** Counts loads, so a check that finishes after another recording was loaded is dropped. */
+  private issueCheck = 0
   /** The sighting's own sound (see SoundTrack), owned here rather than by SceneElement: it is part
    * of the recording, so it must be heard in the plain 2D embed too, not only in the 3D one that
    * happens to own the weather's audio. */
@@ -529,6 +540,15 @@ export class UfoElement extends HTMLElement {
     this.canvasRenderer = new CanvasRenderer(this.canvas.getContext("2d")!)
     this.tooltip = this.shadow.getElementById("tooltip")!
     this.toolbar = this.shadow.getElementById("toolbar")!
+    this.issuesBox = this.shadow.getElementById("issues")!
+    this.issuesButton = this.shadow.getElementById("issues-button") as HTMLButtonElement
+    this.issuesPanel = this.shadow.getElementById("issues-panel")!
+    this.issuesButton.addEventListener("click", event => {
+      // Not a click on the picture, which plays.
+      event.stopPropagation()
+      this.issuesPanel.hidden = !this.issuesPanel.hidden
+      this.issuesButton.setAttribute("aria-expanded", String(!this.issuesPanel.hidden))
+    })
     this.playPauseButton = this.shadow.getElementById("play-pause") as HTMLButtonElement
     this.fullscreenButton = this.shadow.getElementById("fullscreen") as HTMLButtonElement
     this.observerMapButton = this.shadow.getElementById("observer-map") as HTMLButtonElement
@@ -675,6 +695,9 @@ export class UfoElement extends HTMLElement {
     this.soundPreview = undefined
     this.sightingAudio.silence()
     this.currentSighting = fromSightingJson(json)
+    this.issuesPanel.hidden = true
+    this.issuesButton.setAttribute("aria-expanded", "false")
+    void this.reportIssues(json, this.currentSighting)
     // Another recording is another piece of ground: where a reader had zoomed on the last one says
     // nothing about this one.
     this.observerMapView.reset()
@@ -687,6 +710,53 @@ export class UfoElement extends HTMLElement {
     // After refresh, which is where the new recording's own path is worked out: a page's "start
     // with the map open" is about the recording being loaded, not the one just replaced.
     this.applyObserverMapDefault()
+  }
+
+  /** What the recording on show has wrong with it: keys nothing reads, values of the wrong kind,
+   * and what loading had to make up. Also sent as the `recordingissues` event once known. */
+  get recordingIssues(): ReadonlyArray<RecordingIssue> {
+    return this.issues
+  }
+
+  /**
+   * Says what in a recording was not played as written, instead of letting a file that loads pass
+   * for one that says what its author meant: to the console, and as the `recordingissues` event
+   * (bubbling out of every shadow root) that the player page and the editor show.
+   *
+   * Loading's own issues are known at once; the check against the format needs the format's
+   * description, fetched the first time and only then, which is why this is asynchronous.
+   */
+  private async reportIssues(json: SightingRecordingJson, sighting: Sighting): Promise<void> {
+    const turn = ++this.issueCheck
+    let checked: RecordingIssue[] = []
+    try {
+      const { default: format } = await import("../generated/sightingSchema.json")
+      checked = new RecordingCheck(format as unknown as Record<string, FormatField>).issues(json)
+    } catch {
+      // The description could not be had (offline, blocked): what loading itself saw still stands.
+    }
+    if (turn !== this.issueCheck) return
+    this.issues = [...checked, ...sighting.loadIssues]
+    RecordingIssues.warn(this.issues, sighting.id)
+    this.renderIssues()
+    this.dispatchEvent(new CustomEvent(RECORDING_ISSUES_EVENT, { detail: { issues: this.issues }, bubbles: true, composed: true }))
+  }
+
+  /** The ⚠ over the picture, in the reader's language, or nothing when the recording has nothing
+   * to say. A new recording starts with its list closed. */
+  private renderIssues(): void {
+    const count = this.issues.length
+    this.issuesBox.hidden = count === 0
+    this.shadow.getElementById("issues-count")!.textContent = String(count)
+    const title = this.messages.recordingIssues.replace("{count}", String(count))
+    this.issuesButton.title = title
+    this.issuesButton.setAttribute("aria-label", title)
+    this.shadow.getElementById("issues-title")!.textContent = title
+    this.shadow.getElementById("issues-list")!.replaceChildren(...this.issues.map(issue => {
+      const item = document.createElement("li")
+      item.textContent = RecordingIssues.text(issue, this.messages.issueTemplates)
+      return item
+    }))
   }
 
   /**
@@ -2043,6 +2113,7 @@ export class UfoElement extends HTMLElement {
     this.updateObserverMapButton()
     this.updateReferencesButton()
     this.updateMilestonesButton()
+    this.renderIssues()
   }
 
   /**
@@ -2149,3 +2220,7 @@ export function registerUfo(): void {
     customElements.define(UFO_ELEMENT_NAME, UfoElement)
   }
 }
+
+/** Fired by <rr0-ufo> (and so through every component that holds one) once a loaded recording has
+ * been checked: `detail.issues` is the list of RecordingIssue, empty when there is nothing to say. */
+export const RECORDING_ISSUES_EVENT = "recordingissues"

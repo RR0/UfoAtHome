@@ -23,5 +23,15 @@ export const ufoMessages_fr: UfoMessages = {
   showMilestones: "Voir les moments du récit",
   hideMilestones: "Masquer les moments du récit",
   observerHere: "L'observateur, ici",
-  decorHere: "Élément de décor"
+  decorHere: "Élément de décor",
+  recordingIssues: "{count} problème(s) dans cet enregistrement : il peut ne pas jouer ce que son auteur voulait",
+  issueTemplates: {
+    "unknown-key": "{path} : clé inconnue, ignorée",
+    "wrong-type": "{path} : {expected} attendu, {found} trouvé",
+    "not-in-list": "{path} : {found} ne fait pas partie de {expected}",
+    "defaulted": "{path} : absent, {expected} utilisé",
+    "unplaced": "{path} : ni aim ni bounds, dessiné au milieu de la vue",
+    "unsized": "{path} : ni taille angulaire ni bounds, dessiné large d'un pixel",
+    "pixels-over-angles": "{path} : bounds redonné sans aim ni angular, la forme suit les pixels"
+  }
 }

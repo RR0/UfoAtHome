@@ -17,6 +17,7 @@ import type { SceneReference } from "./Reference.js"
 import { Instruments } from "../instrument/Instrument.js"
 import type { Instrument } from "../instrument/Instrument.js"
 import { Provenance } from "../persistence/Provenance.js"
+import type { RecordingIssue } from "../persistence/RecordingIssue.js"
 import type { InterpretationJson } from "../interpretation/Interpretation.js"
 import type { Account } from "./Account.js"
 
@@ -350,6 +351,13 @@ export class Sighting {
    * "stated", and stated is what those files were.
    */
   provenance: Provenance = Provenance.empty()
+
+  /**
+   * What loading this sighting's file had to make up or set aside — see RecordingIssue. Only what
+   * the loader itself did; the check against the format runs apart (RecordingCheck), because it
+   * needs the format's description, which is not worth shipping to every reader up front.
+   */
+  loadIssues: RecordingIssue[] = []
 
   /**
    * Who saw it and how their account reached this file — see Account.

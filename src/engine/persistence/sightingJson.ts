@@ -1,3 +1,4 @@
+import type { RecordingIssue } from "./RecordingIssue.js"
 import type { ObserverVehicle } from "../model/Vehicle.js"
 import { Sighting } from "../model/Sighting.js"
 import type { SightingLocation, SightingTime } from "../model/Sighting.js"
@@ -164,6 +165,7 @@ export function fromSightingJson(json: SightingRecordingJson): Sighting {
 }
 
 function fromPlainSightingJson(json: SightingRecordingJson): Sighting {
+  const issues: RecordingIssue[] = []
   const sighting = new Sighting(
     {
       eventType: "sighting",
@@ -176,7 +178,7 @@ function fromPlainSightingJson(json: SightingRecordingJson): Sighting {
       description: json.description,
       tags: json.tags
     },
-    Timeline.fromJSON(json.timeline),
+    Timeline.fromJSON(json.timeline, issues),
     json.observerTrack ? ObserverTrack.fromJSON(json.observerTrack) : new ObserverTrack(),
     json.weatherTrack ? WeatherTrack.fromJSON(json.weatherTrack) : new WeatherTrack(),
     json.soundTrack ? SoundTrack.fromJSON(json.soundTrack) : new SoundTrack(),
@@ -215,6 +217,7 @@ function fromPlainSightingJson(json: SightingRecordingJson): Sighting {
   sighting.iso = json.iso
   sighting.vehicle = json.vehicle
   sighting.interpretation = json.interpretation
+  sighting.loadIssues = issues
   SightingShapes.toBounds(sighting)
   // Positions follow the stated directions the way sizes follow the stated angles — and this is the
   // step that lets a recording's observer turn their head without taking the sky with them.

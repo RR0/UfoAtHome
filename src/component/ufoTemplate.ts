@@ -21,6 +21,17 @@ export const html = `
     <button id="observer-map" type="button" title="Observer's position" aria-label="Observer's position" aria-pressed="false" hidden>🗺</button>
     <button id="fullscreen" type="button" title="Fullscreen" aria-label="Fullscreen">⛶</button>
   </div>
+  <!-- What in the recording was not played as written (see RecordingIssue): a key nothing reads, a
+       value made up because the file left it out. Hidden for a recording with nothing to say, which
+       is every recording made in the editor; for one written by hand, it is where a mistake shows
+       before it is taken for what the author meant. -->
+  <div class="issues auto-hide" id="issues" hidden>
+    <button id="issues-button" type="button" aria-expanded="false" aria-controls="issues-panel">⚠ <span id="issues-count"></span></button>
+    <div id="issues-panel" class="issues-panel" hidden>
+      <p id="issues-title"></p>
+      <ul id="issues-list"></ul>
+    </div>
+  </div>
   <!-- Where the observer stood and which way they faced, on real ground — see ObserverMapRenderer.
        Under the buttons that toggle it, and inert to the pointer: the canvas beneath it is the
        recording, and clicking it plays. -->
@@ -351,6 +362,50 @@ canvas[data-cursor="rotate"] {
 .stage:has(:focus-visible) .auto-hide {
   opacity: 1;
   pointer-events: auto;
+}
+.issues {
+  position: absolute;
+  top: 0.4em;
+  left: 0.4em;
+  max-width: calc(100% - 0.8em);
+  font-size: 0.85em;
+}
+/* Same trap as .corner-buttons button[hidden]: a class setting display outranks the UA [hidden]. */
+.issues[hidden], .issues-panel[hidden] {
+  display: none;
+}
+.issues button {
+  border: none;
+  border-radius: 3px;
+  padding: 0.25em 0.5em;
+  cursor: pointer;
+  font: inherit;
+  background: rgba(0, 0, 0, 0.6);
+  color: #ffc857;
+}
+.issues button:hover, .issues button:focus-visible {
+  background: rgba(0, 0, 0, 0.8);
+}
+.issues-panel {
+  margin-top: 0.3em;
+  padding: 0.5em 0.8em;
+  max-height: 14em;
+  overflow: auto;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.82);
+  color: #fff;
+}
+.issues-panel p {
+  margin: 0 0 0.4em;
+  color: #ffc857;
+}
+.issues-panel ul {
+  margin: 0;
+  padding-left: 1.1em;
+}
+.issues-panel li {
+  margin: 0.2em 0;
+  overflow-wrap: anywhere;
 }
 .corner-buttons {
   position: absolute;

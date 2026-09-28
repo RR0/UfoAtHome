@@ -390,7 +390,11 @@ if (excerpts.length > 0) {
       words a closed list accepts. A misspelt key or an unknown value fails it. It says nothing
       about what may be left out, which is a question of meaning this page answers. To see the
       result, open the file in <a href="/play/">the player</a>, from a link, by pasting it, or
-      from your disk with the pictures and models it names.</p>
+      from your disk with the pictures and models it names. The player checks it the same way on
+      loading, and says what it could not play as written behind a ⚠ over the picture: a key
+      nothing reads, a word outside its list, and what it had to make up because a shape's first
+      keyframe left it out (a field held from the keyframe before is the rule above, not a
+      problem).</p>
 
     <h2>A whole file</h2>
     <p>The smallest recording that still states something — one silent oval crossing the sky over
@@ -759,7 +763,11 @@ if (excerpts.length > 0) {
       contenir, et les mots qu'accepte une liste fermée. Une clé mal orthographiée ou une valeur
       inconnue y échoue. Il ne dit rien de ce qui peut être omis, question de sens à laquelle répond
       cette page. Pour voir le résultat, ouvrez le fichier dans <a href="/play/">le lecteur</a>,
-      depuis un lien, en le collant, ou depuis votre disque avec les images et modèles qu'il nomme.</p>
+      depuis un lien, en le collant, ou depuis votre disque avec les images et modèles qu'il nomme.
+      Le lecteur le vérifie de la même façon au chargement, et dit derrière un ⚠ sur l'image ce
+      qu'il n'a pas pu jouer comme écrit : une clé que rien ne lit, un mot hors de sa liste, et ce
+      qu'il a dû inventer parce que la première keyframe d'une forme l'omettait (un champ tenu
+      depuis la keyframe précédente relève de la règle ci-dessus, pas d'un problème).</p>
 
     <h2>Un fichier entier</h2>
     <p>Le plus petit enregistrement qui énonce encore quelque chose — un ovale silencieux traversant

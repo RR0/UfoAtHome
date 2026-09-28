@@ -371,12 +371,14 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
     <table>
       <tr><th>Event</th><th>Fires</th><th>Where to listen</th></tr>
       <tr><td><code>observerchange</code></td><td>When the recording on show changes: loaded, set through <code>sightingData</code>, or another observer picked from the list. <code>detail.src</code> is its address, empty for a recording set by script</td><td>On this element. It does not bubble: listen on the <code>&lt;rr0-sighting&gt;</code> itself, then read <code>sightingData</code> back off it (its description, its id)</td></tr>
+      <tr><td><code>recordingissues</code></td><td>Once a loaded recording has been checked against the format: <code>detail.issues</code> lists what was not played as written (a key nothing reads, a value of the wrong type or outside its list, a value made up because the file left it out), each with its <code>kind</code> and <code>path</code>. Empty when there is nothing to say. The same list is shown over the picture behind a ⚠, and written to the console</td><td>Anywhere above the element: it bubbles out of every shadow root</td></tr>
     </table>
     </div>`,
       fr: `<div class="table-scroll">
     <table>
       <tr><th>Événement</th><th>Quand</th><th>Où l'écouter</th></tr>
       <tr><td><code>observerchange</code></td><td>Quand l'enregistrement affiché change : chargé, posé par <code>sightingData</code>, ou un autre observateur choisi dans la liste. <code>detail.src</code> est son adresse, vide pour un enregistrement posé par script</td><td>Sur cet élément. Il n'est pas <i lang="en">bubbling</i> : écoutez sur le <code>&lt;rr0-sighting&gt;</code> lui-même, puis relisez son <code>sightingData</code> (sa description, son identifiant)</td></tr>
+      <tr><td><code>recordingissues</code></td><td>Une fois un enregistrement chargé vérifié contre le format : <code>detail.issues</code> liste ce qui n'a pas été joué comme écrit (une clé que rien ne lit, une valeur du mauvais type ou hors de sa liste, une valeur inventée parce que le fichier l'omettait), chacun avec son <code>kind</code> et son <code>path</code>. Vide quand il n'y a rien à dire. La même liste s'affiche sur l'image derrière un ⚠, et en console</td><td>N'importe où au-dessus de l'élément : il traverse toutes les racines fantômes</td></tr>
     </table>
     </div>`
     }
