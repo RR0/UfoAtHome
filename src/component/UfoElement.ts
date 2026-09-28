@@ -160,6 +160,12 @@ export class UfoElement extends HTMLElement {
   /** The ground the photograph was last asked for — the whole fitted box at first, then whatever
    * the reader zooms into once the one held is too coarse for it or does not reach that far. */
   private observerMapImageryBounds?: GeoBounds
+  /** How wide the VIEW was when that photograph was asked for — what "zoomed far enough into it
+   * that its pixels would show" is measured against, the ground asked for being wider than the view
+   * once the map is zoomed (see loadObserverMapImagery). */
+  private observerMapImageryViewWidth = 0
+  /** A photograph is on its way: a second request for the same ground would only race it. */
+  private observerMapImageryLoading = false
   /** The licence line the map has to carry — the provider's own while its tiles are shown, and what
    * says they are missing when they are not. */
   private observerMapImageryCredit?: string
@@ -476,15 +482,22 @@ export class UfoElement extends HTMLElement {
     this.scheduleObserverMapImagery()
   }
 
-  /** Not on every step of a drag, every notch of a wheel or every frame of a followed walk: one
-   * request once the view settles. */
+  /**
+   * Not on every step of a drag, every notch of a wheel or every frame of a followed walk: at most
+   * one look every few hundred milliseconds. Not restarted by each change either — a map that
+   * follows an observer changes on every frame, and a wait restarted every frame never ended: the
+   * photograph was only asked for once they stopped.
+   */
   private scheduleObserverMapImagery(): void {
-    clearTimeout(this.observerMapImageryTimer)
-    this.observerMapImageryTimer = setTimeout(() => void this.loadObserverMapImagery(), UfoElement.OBSERVER_MAP_IMAGERY_DELAY_MS)
+    if (this.observerMapImageryTimer !== undefined) return
+    this.observerMapImageryTimer = setTimeout(() => {
+      this.observerMapImageryTimer = undefined
+      void this.loadObserverMapImagery()
+    }, UfoElement.OBSERVER_MAP_IMAGERY_DELAY_MS)
   }
 
-  /** How close to an edge of a zoomed map the observer may come before it follows them, as a
-   * fraction of its width: far enough in that the dot and its cone's first stretch stay readable. */
+  /** How close to an edge of a zoomed map the observer may come before it recentres on them, as a
+   * fraction of its width: the dot and its cone's first stretch are still readable there. */
   private static readonly OBSERVER_MAP_FOLLOW_MARGIN = 0.1
 
   private static readonly OBSERVER_MAP_IMAGERY_DELAY_MS = 300
@@ -1594,6 +1607,7 @@ export class UfoElement extends HTMLElement {
       this.observerMapImageryCredit = undefined
       this.observerMapImageryFailed = false
       this.observerMapImageryBounds = undefined
+      this.observerMapImageryLoading = false
       if (!this.observerMapPanel.hidden) void this.loadObserverMapImagery()
     }
   }
@@ -1622,15 +1636,21 @@ export class UfoElement extends HTMLElement {
    * offline or blocked fetch leaves the map standing and says what is missing.
    */
   private async loadObserverMapImagery(): Promise<void> {
-    const bounds = this.observerMapViewBounds
-    if (!bounds || this.observerMapPanel.hidden || !this.observerMapImageryNeededFor(bounds)) return
+    const view = this.observerMapViewBounds
+    if (!view || this.observerMapPanel.hidden || this.observerMapImageryLoading || !this.observerMapImageryNeededFor(view)) return
+    // Zoomed, the map moves — the reader drags it, and it follows the observer — so it is asked for
+    // with half a view of ground on every side, at twice the pixels to keep the same sharpness:
+    // the next stretch is already there when the map slides onto it. The fitted box never moves
+    // and is asked for as it is.
+    const zoomed = this.observerMapView.changed
+    const bounds = zoomed ? ObserverMapView.expand(view, UfoElement.OBSERVER_MAP_IMAGERY_AHEAD) : view
+    const pixels = UfoElement.OBSERVER_MAP_IMAGERY_PX * (zoomed ? 1 + 2 * UfoElement.OBSERVER_MAP_IMAGERY_AHEAD : 1)
     this.observerMapImageryBounds = bounds
+    this.observerMapImageryViewWidth = view.east - view.west
+    this.observerMapImageryLoading = true
     const provider = defaultImageryProvider()
     try {
-      const imagery = await provider.getImageryTexture(bounds, {
-        width: UfoElement.OBSERVER_MAP_IMAGERY_PX,
-        height: UfoElement.OBSERVER_MAP_IMAGERY_PX
-      })
+      const imagery = await provider.getImageryTexture(bounds, { width: pixels, height: pixels })
       // The recording may have been swapped while this was in flight — a page playing several in
       // turn does exactly that — and painting one observer's ground under another's path is worse
       // than painting no ground at all.
@@ -1643,9 +1663,19 @@ export class UfoElement extends HTMLElement {
       // A coarser photograph already held is still the right ground: only say it is missing when
       // there is none.
       this.observerMapImageryFailed = this.observerMapImagery === undefined
+    } finally {
+      if (this.observerMapImageryBounds === bounds) this.observerMapImageryLoading = false
     }
     this.paintObserverMap(this.currentTime)
+    // The map may have moved on while this was in flight.
+    this.scheduleObserverMapImagery()
   }
+
+  /** How much ground a zoomed map asks for beyond its view, per side, as a fraction of the view. */
+  private static readonly OBSERVER_MAP_IMAGERY_AHEAD = 0.5
+  /** How much of that it keeps in hand: the next photograph is asked for while a quarter of a view
+   * is still covered ahead, not once the gap is on screen. */
+  private static readonly OBSERVER_MAP_IMAGERY_LOOKAHEAD = 0.25
 
   /**
    * Whether the ground now shown needs a photograph of its own — never asked for, not covered by the
@@ -1656,8 +1686,9 @@ export class UfoElement extends HTMLElement {
     const asked = this.observerMapImageryBounds
     if (!asked) return true
     const held = this.observerMapImagery?.bounds ?? asked
-    const covered = view.west >= held.west && view.east <= held.east && view.south >= held.south && view.north <= held.north
-    const sharp = view.east - view.west > (asked.east - asked.west) / 2
+    const ahead = this.observerMapView.changed ? ObserverMapView.expand(view, UfoElement.OBSERVER_MAP_IMAGERY_LOOKAHEAD) : view
+    const covered = ahead.west >= held.west && ahead.east <= held.east && ahead.south >= held.south && ahead.north <= held.north
+    const sharp = view.east - view.west > this.observerMapImageryViewWidth / 2
     return !covered || !sharp
   }
 
@@ -1776,7 +1807,7 @@ export class UfoElement extends HTMLElement {
   private paintObserverMap(t: number): void {
     if (this.observerMapPanel.hidden || !this.observerPath || !this.observerMapBounds) return
     const pose = resolveObserverPoseAt(this.currentSighting, t)
-    // A zoomed map follows the observer rather than let them walk off it — but not while the reader
+    // A zoomed map recentres on the observer rather than let them walk off it — but not while the reader
     // is dragging it, which would fight their hand; the release brings them back.
     if (pose?.lat !== undefined && pose.lng !== undefined && !this.observerMapDrag?.moved &&
       this.observerMapView.keepInView(this.observerMapBounds, { lat: pose.lat, lng: pose.lng }, UfoElement.OBSERVER_MAP_FOLLOW_MARGIN)) {

@@ -54,15 +54,23 @@ describe("ObserverMapView", () => {
     for (const edge of ["north", "south", "west", "east"] as const) expect(after[edge]).toBeCloseTo(before[edge], 6)
   })
 
-  it("follows a point leaving a zoomed view, just enough to keep it inside the margin", () => {
+  it("recentres a zoomed view on a point reaching its edge, and leaves it alone before", () => {
     const view = new ObserverMapView()
     view.zoomAt(0.5, 0.5, 4)
+    const inside = ObserverMapView.pointAt(FITTED, 0.55, 0.5)
+    expect(view.keepInView(FITTED, inside, 0.1)).toBe(false)
     const walker = ObserverMapView.pointAt(FITTED, 0.9, 0.5)
     expect(view.keepInView(FITTED, walker, 0.1)).toBe(true)
     const after = fractionWithinBounds(view.boundsWithin(FITTED), walker.lng, walker.lat)
-    expect(after.x).toBeCloseTo(0.9, 9)
+    expect(after.x).toBeCloseTo(0.5, 6)
     expect(after.y).toBeCloseTo(0.5, 6)
     expect(view.keepInView(FITTED, walker, 0.1)).toBe(false)
+  })
+
+  it("grows a box on every side by a share of its own size", () => {
+    const grown = ObserverMapView.expand(FITTED, 0.5)
+    expect(grown.east - grown.west).toBeCloseTo(2 * (FITTED.east - FITTED.west), 12)
+    expect(grown.north - grown.south).toBeCloseTo(2 * (FITTED.north - FITTED.south), 12)
   })
 
   it("leaves the fitted box alone: it already holds the whole path", () => {

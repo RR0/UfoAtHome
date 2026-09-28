@@ -80,9 +80,11 @@ export class ObserverMapView {
   }
 
   /**
-   * Moves the view just enough to keep `point` at least `margin` (a fraction of the view) inside
-   * its edges — how a zoomed map follows an observer who walks, drives or flies out of it. The
-   * fitted box needs none of this: it was fitted to the whole path. True when the view moved.
+   * Recentres the view on `point` once it comes within `margin` (a fraction of the view) of an
+   * edge — how a zoomed map follows an observer who walks, drives or flies out of it. Recentred
+   * rather than nudged: a map that only kept them at its edge would show where they had been and
+   * nothing of where they were going. The fitted box needs none of this: it was fitted to the whole
+   * path. True when the view moved.
    */
   keepInView(fitted: GeoBounds, point: { lat: number; lng: number }, margin: number): boolean {
     if (!this.changed) return false
@@ -91,10 +93,8 @@ export class ObserverMapView {
     const south = ObserverMapView.mercatorY01(bounds.south)
     const x = (point.lng - bounds.west) / (bounds.east - bounds.west)
     const y = (ObserverMapView.mercatorY01(point.lat) - north) / (south - north)
-    const dx = x < margin ? margin - x : x > 1 - margin ? 1 - margin - x : 0
-    const dy = y < margin ? margin - y : y > 1 - margin ? 1 - margin - y : 0
-    if (dx === 0 && dy === 0) return false
-    this.panBy(dx, dy)
+    if (x >= margin && x <= 1 - margin && y >= margin && y <= 1 - margin) return false
+    this.panBy(0.5 - x, 0.5 - y)
     return true
   }
 
@@ -110,6 +110,19 @@ export class ObserverMapView {
       east: fitted.west + (this.centerX + half) * width,
       north: ObserverMapView.latitudeAt(north + (this.centerY - half) * (south - north)),
       south: ObserverMapView.latitudeAt(north + (this.centerY + half) * (south - north))
+    }
+  }
+
+  /** `bounds` grown by `fraction` of its own width and height on every side — degrees, which over
+   * the few hundred metres a map spans is the same as metres to well under a pixel. */
+  static expand(bounds: GeoBounds, fraction: number): GeoBounds {
+    const width = bounds.east - bounds.west
+    const height = bounds.north - bounds.south
+    return {
+      west: bounds.west - width * fraction,
+      east: bounds.east + width * fraction,
+      south: bounds.south - height * fraction,
+      north: bounds.north + height * fraction
     }
   }
 
