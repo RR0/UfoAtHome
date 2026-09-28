@@ -3340,11 +3340,11 @@ export class SceneRenderer {
 
   /** The pictures of the place to lay over the scene — see ReferenceSystem.set. Cheap to call
    * every tick: a picture already standing at the same registration is left alone. */
-  setReferences(references: SceneReference[]): void {
+  setReferences(references: SceneReference[], observerAt?: { lat: number; lng: number }): void {
     this.references.set(references.map(reference => {
       const src = this.documentRelative(reference.src)
       return src === reference.src ? reference : { ...reference, src }
-    }))
+    }), undefined, observerAt)
   }
 
   /** A loaded picture's aspect — see ReferenceSystem.aspectOf. */

@@ -175,6 +175,7 @@ export interface SightingLabels {
   /** The "+" button that names the moment at the playhead, and the bin that unnames one. */
   addMilestone: string
   deleteMilestone: string
+  goToMilestone: string
   confirmAccept: string
   confirmDecline: string
   decorWidth: string

@@ -96,6 +96,7 @@ export const sightingLabels_fr: SightingLabels = {
   milestoneNote: "Ce qui se passe",
   addMilestone: "Nommer cet instant",
   deleteMilestone: "Supprimer le moment",
+  goToMilestone: "Aller à ce moment",
   confirmAccept: "Supprimer",
   confirmDecline: "Annuler",
   decorWidth: "Largeur",

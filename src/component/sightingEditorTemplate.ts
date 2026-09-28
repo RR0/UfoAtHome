@@ -33,6 +33,9 @@ export const html = `
     <span id="label-milestones">Moments</span>
     <button id="add-milestone" type="button" class="icon-btn" title="Add" aria-label="Add">+</button>
     <select id="milestone"></select>
+    <!-- A select says nothing when the moment already shown is picked again, which is the one to go
+         back to after playing on past it: this goes there whatever the list shows. -->
+    <button id="go-to-milestone" type="button" class="icon-btn" title="Go to this moment" aria-label="Go to this moment">🎯</button>
     <button id="delete-milestone" type="button" class="icon-btn" title="Delete moment" aria-label="Delete moment">🗑</button>
     <label><span id="label-milestone-label">Label</span> <input id="milestoneLabel" type="text" size="4"/></label>
     <label><span id="label-milestone-note">What happens</span> <input id="milestoneNote" type="text"/></label>
@@ -529,7 +532,13 @@ export const html = `
 <div class="toolbar playback-row">
   <button id="play-pause" type="button" class="icon-btn" title="Play" aria-label="Play">▶</button>
   <span id="time-start" class="time-label">0:00</span>
-  <input id="seek" type="range" min="0" max="0" value="0" step="1"/>
+  <button id="previous-mark" type="button" class="icon-btn" title="Previous keyframe" aria-label="Previous keyframe">◂◆</button>
+  <!-- The keyframes of what the open group edits, and the named moments — see TimelineMarks. -->
+  <div class="seek-track">
+    <input id="seek" type="range" min="0" max="0" value="0" step="1"/>
+    <div id="timeline-marks" class="timeline-marks"></div>
+  </div>
+  <button id="next-mark" type="button" class="icon-btn" title="Next keyframe" aria-label="Next keyframe">◆▸</button>
   <span id="time-end" class="time-label">0:00</span>
 </div>
 <!-- Everything this reconstruction actually asserts, on one wrapping strip: only fields that are
@@ -1208,8 +1217,40 @@ select.weather-field:disabled {
 /* Below the rendered scene, not overlaid on it (unlike <rr0-ufo>'s own internal toolbar, hidden
    here via showToolbar — see SightingEditorElement's constructor) — its seek bar needs the whole
    width for scrubbing, which would otherwise intercept shape drags near the bottom of the canvas. */
+.seek-track {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
 #seek {
   flex: 1;
+  min-width: 0;
+}
+/* Over the bar and transparent to the pointer: the bar itself snaps a press to the nearest mark. */
+.timeline-marks {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.timeline-mark {
+  position: absolute;
+  width: 2px;
+  transform: translateX(-50%);
+  background: currentColor;
+}
+/* Under the thumb's track, so the thumb still reads as the playhead. */
+.timeline-mark.keyframe {
+  bottom: 0;
+  height: 30%;
+  opacity: 0.6;
+}
+.timeline-mark.milestone {
+  top: 10%;
+  bottom: 10%;
+  /* The map's colour for a named moment, and not the bar's own blue, which it would vanish into. */
+  background: #ffd27a;
 }
 .time-label.switchable {
   cursor: pointer;

@@ -90,6 +90,15 @@ export interface SightingEditorMessages extends SightingLabels {
   play: string
   pause: string
   noDuration: string
+  /** The playback row's jumps between the marks under its bar — see TimelineMarks. */
+  previousKeyframe: string
+  nextKeyframe: string
+  /** A tick's name under the pointer, then which track it belongs to. */
+  keyframeMark: string
+  shapesTrack: string
+  observerTrack: string
+  weatherTrack: string
+  soundTrack: string
   group: string
   ungroup: string
   bringToFront: string

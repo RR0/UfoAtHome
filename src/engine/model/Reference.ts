@@ -112,6 +112,17 @@ export interface SceneReference {
    */
   t?: number
   /**
+   * Where it was taken from — the one point its registration holds for.
+   *
+   * The picture is stood at the observer's eye (see ReferenceSystem), which is right while the
+   * observer is where the camera was and wrong as soon as they walk away: its foreground slides off
+   * the scene's, then its landmarks do. Stating the point lets the player fade the picture out as
+   * the observer leaves it and back in as they return, rather than keep showing a comparison that no
+   * longer holds. Absent means nobody said, and then the picture is never faded — the behaviour a
+   * recording from before this field keeps.
+   */
+  from?: { lat: number; lng: number }
+  /**
    * Whether somebody drew on it — a trajectory, an outline, an arrow — so that what the picture
    * shows of the phenomenon is a statement made afterwards, not a thing the camera recorded.
    * Cussac's own is one: the sphere and its spiral drawn by hand on a 1968 view from the spot.

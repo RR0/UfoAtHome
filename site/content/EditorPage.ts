@@ -168,6 +168,12 @@ if (docs) {
           drag took.</p>
       </li>
     </ol>
+    <p class="small">Under the playback bar, a tick marks each keyframe of what the open group edits
+      (the selected shapes, the observer, the weather, the sound; all of them from the other groups),
+      and a taller amber one each named moment. A press within a few pixels of one lands on it
+      exactly, the bar names it under the pointer, and <strong>◂◆</strong> / <strong>◆▸</strong> go
+      to the previous or next one — so an existing keyframe is changed rather than a new one made a
+      few milliseconds beside it.</p>
     <p class="small">A row of chips under the render lists everything the recording actually
       asserts — and only that. Click one to jump to the field it came from. A value a data source
       supplied rather than you is marked as such.</p>
@@ -188,6 +194,9 @@ if (docs) {
         account's own, the day and then who saw it (<code>1964-04-24-ZamoraLonnie</code>); a recording
         does not name its case, it is <a href="/docs/format/#several-observers-the-case">the case</a>
         that names its accounts and gives a page its observer picker.</p>
+      <p><strong>Moments</strong> names the instant at the playhead (A, B, C… as case sketches do),
+        with a sentence of what happens then. Picking one in the list goes there; <strong>🎯</strong>
+        goes back to the one shown, which the list cannot do once playback has moved on past it.</p>
     </div>
 
     <div class="group-doc">
@@ -226,6 +235,11 @@ if (docs) {
         here, under the coordinates whose ground they describe.</p>
       <p>Position, heading and tilt are written at the playhead, as a keyframe of the observer's
         track: set them at another moment and the observer moves or turns between the two.</p>
+      <p>The <strong>map</strong> over the render does the same for the position: click bare ground
+        and the observer stands there at the playhead, exactly as if both coordinates had been typed.
+        The wheel zooms around the pointer, a drag moves the ground, and <strong>+</strong>,
+        <strong>−</strong> and <strong>⤢</strong> (back to the whole path) are there for whoever has
+        neither.</p>
     </div>
 
     <div class="group-doc">
@@ -391,6 +405,10 @@ if (docs) {
         the fitted heading, pitch and roll into the pose at the playhead as a measurement, with its
         provenance. <strong>Street-level pictures nearby</strong> asks Panoramax for pictures taken
         within 300 m of the observer's spot, each arriving already lined up in heading.</p>
+      <p>A picture holds from one point only, so lining it up also records <em>where</em> it was
+        lined up from: the observer's position at the playhead. Playing, it fades out as the observer
+        walks away from that point (fully shown within 2 m, gone beyond 20 m) and back in as they
+        return, rather than show a comparison that no longer holds.</p>
     </div>
 
     <div class="group-doc">
@@ -549,6 +567,12 @@ if (docs) {
           la seconde qu'a duré le geste.</p>
       </li>
     </ol>
+    <p class="small">Sous la barre de lecture, un trait marque chaque image clé de ce que le groupe
+      ouvert modifie (les formes sélectionnées, l'observateur, la météo, le son ; toutes depuis les
+      autres groupes), et un trait ambre plus haut chaque moment nommé. Un appui à quelques pixels de
+      l'un d'eux tombe exactement dessus, la barre le nomme sous le pointeur, et
+      <strong>◂◆</strong> / <strong>◆▸</strong> vont au précédent ou au suivant : on modifie ainsi
+      une image clé existante au lieu d'en créer une nouvelle à quelques millisecondes.</p>
     <p class="small">Une bande d'étiquettes sous le rendu énumère tout ce que l'enregistrement
       affirme réellement — et rien d'autre. Cliquez-en une pour aller au champ dont elle vient. Une
       valeur fournie par une source de données plutôt que par vous est signalée comme telle.</p>
@@ -570,6 +594,10 @@ if (docs) {
         (<code>1964-04-24-ZamoraLonnie</code>) ; un enregistrement ne nomme pas son dossier, c'est
         <a href="/docs/format/#several-observers-the-case">le dossier</a> qui nomme ses comptes rendus
         et donne à une page son sélecteur d'observateur.</p>
+      <p><strong>Moments</strong> nomme l'instant de la tête de lecture (A, B, C… comme les croquis
+        des enquêtes), avec une phrase de ce qui s'y passe. En choisir un dans la liste y va ;
+        <strong>🎯</strong> retourne à celui affiché, ce que la liste ne peut pas faire une fois la
+        lecture passée au-delà.</p>
     </div>
 
     <div class="group-doc">
@@ -614,6 +642,11 @@ if (docs) {
       <p>Position, cap et inclinaison s'écrivent à la tête de lecture, comme une image clé de la
         trajectoire de l'observateur : réglez-les à un autre moment et l'observateur se déplace ou se
         tourne entre les deux.</p>
+      <p>La <strong>carte</strong> posée sur le rendu fait de même pour la position : cliquez sur le
+        sol et l'observateur s'y tient à la tête de lecture, exactement comme si les deux coordonnées
+        avaient été saisies. La molette zoome autour du pointeur, un glisser déplace le terrain, et
+        <strong>+</strong>, <strong>−</strong> et <strong>⤢</strong> (retour au trajet entier) sont là
+        pour qui n'a ni l'un ni l'autre.</p>
     </div>
 
     <div class="group-doc">
@@ -796,6 +829,10 @@ if (docs) {
         la pose au point de lecture, comme une mesure, avec sa provenance. <strong>Photos de rue à
         proximité</strong> demande à Panoramax les photos prises à moins de 300 m de l'observateur, chacune
         arrivant déjà recalée en cap.</p>
+      <p>Une photo ne vaut que depuis un point : la recaler enregistre donc aussi <em>d'où</em> elle a
+        été recalée, la position de l'observateur à la tête de lecture. En lecture, elle s'efface en
+        fondu quand l'observateur s'éloigne de ce point (entière à moins de 2 m, disparue au-delà de
+        20 m) et revient quand il y retourne, plutôt que de montrer une comparaison qui ne tient plus.</p>
     </div>
 
     <div class="group-doc">

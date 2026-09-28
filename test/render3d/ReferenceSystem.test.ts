@@ -37,6 +37,30 @@ function aimOf(direction: Vector3): { azimuthDeg: number; altitudeDeg: number } 
 }
 
 describe("ReferenceSystem", () => {
+  it("fades a picture out as the observer walks away from where it was taken", async () => {
+    const scene = new Scene()
+    const system = new ReferenceSystem(scene, () => {}, loaded())
+    const from = { lat: 49.078927, lng: 2.327339 }
+    const reference = photo({}, { from })
+    system.set([reference], undefined, from)
+    await settled()
+    system.set([reference], undefined, from)
+    const material = () => (meshOf(scene, "vue-1968")!.material as { opacity: number }).opacity
+    expect(material()).toBeCloseTo(0.5, 6)
+    // About 11 m north: halfway through the fade.
+    system.set([reference], undefined, { lat: from.lat + 0.0001, lng: from.lng })
+    expect(material()).toBeGreaterThan(0.1)
+    expect(material()).toBeLessThan(0.4)
+    // 55 m north: gone, and not drawn at all.
+    system.set([reference], undefined, { lat: from.lat + 0.0005, lng: from.lng })
+    expect(meshOf(scene, "vue-1968")!.visible).toBe(false)
+  })
+
+  it("never fades a picture that does not say where it was taken", () => {
+    expect(ReferenceSystem.presenceAt(photo(), { lat: 10, lng: 10 })).toBe(1)
+    expect(ReferenceSystem.presenceAt(photo({}, { from: { lat: 0, lng: 0 } }), undefined)).toBe(1)
+  })
+
   it("stands a photo on its own layer, over everything, at the recording's opacity, once its bytes arrive", async () => {
     const scene = new Scene()
     let redraws = 0

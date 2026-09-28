@@ -1,6 +1,7 @@
 import { BackSide, LinearFilter, Mesh, MeshBasicMaterial, Object3D, PlaneGeometry, SphereGeometry, SRGBColorSpace, Texture } from "three"
 import type { Camera, Quaternion, Scene, Vector3 } from "three"
 import type { SceneReference } from "../engine/model/Reference.js"
+import { geoToLocalMeters } from "./terrain/GeoProjection.js"
 
 /**
  * The layer the pictures of the place are on, and the only one: the main pass never draws them.
@@ -43,9 +44,9 @@ export interface ReferenceView {
  *
  * Both are anchored to the eye: a picture is a field of directions from where it was taken, and
  * the reconstruction stands it at the observer's own eye, which is where a picture of "what the
- * observer saw" is worth comparing. A observer who walks away from the spot takes the picture with
- * them, which is right for the far landscape and wrong for the near — a limitation stated rather
- * than hidden, since a picture from one spot cannot say what another spot saw.
+ * observer saw" is worth comparing. A observer who walks away from the spot would take the picture
+ * with them, which is right for the far landscape and wrong for the near — so a picture that states
+ * where it was taken from (SceneReference.from) fades out as they leave that point: see presenceAt.
  */
 export class ReferenceSystem {
   private readonly meshes = new Map<string, Mesh<PlaneGeometry | SphereGeometry, MeshBasicMaterial>>()
@@ -59,6 +60,34 @@ export class ReferenceSystem {
   private references: SceneReference[] = []
   private views = new Map<string, ReferenceView>()
   private shown = true
+  /** Where the observer is, for the fade of a picture left behind — see presenceAt. */
+  private observerAt?: { lat: number; lng: number }
+
+  /**
+   * Within this many metres of where a picture was taken, it is shown as is: the precision an
+   * investigation can give a spot on the ground, and a step or two of the observer turning round.
+   */
+  static readonly PRESENT_WITHIN_M = 2
+  /**
+   * From this many metres away it is gone. A picture of a field and a wood a few hundred metres
+   * off is still roughly right twenty metres from its spot (a few degrees on its near landmarks),
+   * and plainly wrong beyond; anything in its foreground was wrong long before.
+   */
+  static readonly GONE_BEYOND_M = 20
+
+  /**
+   * How much of a picture's opacity still applies with the observer at `observer`: 1 on the spot it
+   * was taken from, 0 far enough from it, a smooth fade between — and 1 when either point is
+   * unknown, since fading a picture nobody placed would be guessing.
+   */
+  static presenceAt(reference: SceneReference, observer?: { lat: number; lng: number }): number {
+    if (!reference.from || !observer) return 1
+    const away = geoToLocalMeters(observer.lat, observer.lng, reference.from.lat, reference.from.lng)
+    const distanceM = Math.hypot(away.x, away.z)
+    const x = (distanceM - ReferenceSystem.PRESENT_WITHIN_M) / (ReferenceSystem.GONE_BEYOND_M - ReferenceSystem.PRESENT_WITHIN_M)
+    const clamped = Math.min(Math.max(x, 0), 1)
+    return 1 - clamped * clamped * (3 - 2 * clamped)
+  }
 
   constructor(
     private readonly scene: Scene,
@@ -70,8 +99,9 @@ export class ReferenceSystem {
   ) {}
 
   /** Replaces the set whole, so a picture that left the recording leaves the scene. */
-  set(references: SceneReference[], views: Map<string, ReferenceView> = this.views): void {
+  set(references: SceneReference[], views: Map<string, ReferenceView> = this.views, observerAt?: { lat: number; lng: number }): void {
     this.references = references
+    this.observerAt = observerAt
     this.views = views
     const wanted = new Set(references.map(reference => reference.id))
     for (const [id, mesh] of this.meshes) {
@@ -277,7 +307,8 @@ export class ReferenceSystem {
   private opacityOf(id: string): number {
     const reference = this.references.find(candidate => candidate.id === id)
     const view = this.views.get(id)
-    return view?.opacity ?? reference?.opacity ?? 0
+    const presence = reference ? ReferenceSystem.presenceAt(reference, this.observerAt) : 1
+    return (view?.opacity ?? reference?.opacity ?? 0) * presence
   }
 
   private applyOpacity(mesh: Mesh<PlaneGeometry | SphereGeometry, MeshBasicMaterial>, id: string): void {

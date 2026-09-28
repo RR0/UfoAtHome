@@ -1085,8 +1085,10 @@ export class SceneElement extends HTMLElement {
     this.updateMeteorShower(sighting, t)
     this.updateLightning(sighting, t, instant !== undefined)
     this.sceneRenderer.setDecor(sighting.decor)
-    this.sceneRenderer.setReferences(sighting.references)
     const pose = resolveObserverPoseAt(sighting, t)
+    // Where the observer is, so a picture taken from somewhere else fades — see SceneReference.from.
+    this.sceneRenderer.setReferences(sighting.references,
+      pose?.lat !== undefined && pose.lng !== undefined ? { lat: pose.lat, lng: pose.lng } : undefined)
     const cloudOrigin = resolveObserverPoseAt(sighting, 0)
     const initialWeather = resolveWeatherAt(sighting, 0)
     const layerOffsets = Object.fromEntries(resolveCloudLayers(resolveWeatherAt(sighting, t)).map(layer =>

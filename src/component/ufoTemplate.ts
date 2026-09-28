@@ -26,6 +26,12 @@ export const html = `
        recording, and clicking it plays. -->
   <div id="observer-map-panel" class="observer-map-panel" hidden>
     <canvas id="observer-map-canvas" width="240" height="240"></canvas>
+    <!-- Wheel and drag do the same on the canvas; these are for whoever has neither. -->
+    <div class="map-zoom">
+      <button id="map-zoom-in" type="button" title="Zoom in" aria-label="Zoom in">+</button>
+      <button id="map-zoom-out" type="button" title="Zoom out" aria-label="Zoom out">−</button>
+      <button id="map-fit" type="button" title="Back to the whole path" aria-label="Back to the whole path" hidden>⤢</button>
+    </div>
   </div>
   <!-- The account's own sentence and the controls, stacked from the bottom edge up. One box rather
        than two independently-anchored ones: the caption used to sit at a fixed 2.6em from the
@@ -433,6 +439,45 @@ canvas[data-cursor="rotate"] {
   display: block;
   width: 100%;
   height: 100%;
+  /* The wheel and a drag belong to the map, not to the page scrolling or the browser panning. */
+  touch-action: none;
+}
+.observer-map-panel canvas.dragging {
+  cursor: grabbing;
+}
+/* Top left, clear of the north arrow on the right and the scale along the bottom. Shown while the
+   map is hovered, like every other control laid over a picture. */
+.map-zoom {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.map-zoom button {
+  width: 1.5em;
+  height: 1.5em;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  font-size: 0.85em;
+  line-height: 1;
+  cursor: pointer;
+}
+.map-zoom button[hidden] {
+  display: none;
+}
+@media (hover: hover) {
+  .map-zoom {
+    opacity: 0;
+  }
+  .observer-map-panel:hover .map-zoom,
+  .observer-map-panel:has(:focus-visible) .map-zoom {
+    opacity: 1;
+  }
 }
 input[type=range] {
   flex: 1;

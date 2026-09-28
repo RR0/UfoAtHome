@@ -18,6 +18,12 @@ export interface UfoMessages {
   /** Shown on the map instead of the imagery when the tiles cannot be fetched — the path is still
    * drawn, so this says what is missing rather than that the map failed. */
   mapImageryUnavailable: string
+  /** The map's own zoom buttons, and the one that puts back the box fitted to the path. */
+  zoomMapIn: string
+  zoomMapOut: string
+  fitMap: string
+  /** What hovering bare ground says when a click there moves the observer — the editor's map only. */
+  placeObserverHere: string
   /** The account's own named moments (see Milestone) — the marks on the bar, the caption, and the
    * lettered points on the map, which go together. */
   /** The corner button that lays the recording's pictures of the place over the scene, and the

@@ -15,6 +15,8 @@ import { html, css } from "./sightingEditorTemplate.js"
 import { SightingSummary } from "./SightingSummary.js"
 import type { SummaryEntry, SummaryGroup } from "./SightingSummary.js"
 import { UfoElement, registerUfo, OBSERVER_MAP_ATTRIBUTE } from "./UfoElement.js"
+import { TimelineMarks } from "./TimelineMarks.js"
+import type { TimelineMark } from "./TimelineMarks.js"
 import { SceneElement, registerScene, SCENE_ELEMENT_NAME, SATELLITES_CHANGE_EVENT } from "./SceneElement.js"
 import type { SatellitePass } from "../engine/astronomy/SatellitePasses.js"
 import { Recorder } from "../engine/record/Recorder.js"
@@ -322,6 +324,9 @@ export class SightingEditorElement extends HTMLElement {
   // recorder drives its own controls instead of the nested ufo's overlaid ones.
   private readonly playPauseButton: HTMLButtonElement
   private readonly seekInput: HTMLInputElement
+  private readonly previousMarkButton: HTMLButtonElement
+  private readonly nextMarkButton: HTMLButtonElement
+  private readonly timelineMarks: TimelineMarks
   private readonly timeStartLabel: HTMLElement
   private readonly timeEndLabel: HTMLElement
   private readonly durationInput: HTMLInputElement
@@ -610,6 +615,7 @@ export class SightingEditorElement extends HTMLElement {
   private readonly milestoneNoteInput: HTMLInputElement
   private readonly addMilestoneButton: HTMLButtonElement
   private readonly deleteMilestoneButton: HTMLButtonElement
+  private readonly goToMilestoneButton: HTMLButtonElement
   /** Which named moment the two fields are editing, by its own time — the only thing that
    * identifies one, since two moments can share a label and neither has an id. Undefined when the
    * recording names none. */
@@ -909,6 +915,16 @@ export class SightingEditorElement extends HTMLElement {
     this.ufoElement = this.sceneElement.ufoElement
     // A shape is lined up on the scene under the pointer: the scene holds still — see Stance.
     this.ufoElement.steadyObserver = true
+    // A click on bare ground of the map puts the observer there, at the playhead — the same edit as
+    // typing the two coordinates, and through the same path (see updateObserver).
+    this.ufoElement.observerPlacing = true
+    this.ufoElement.addEventListener("observerplace", event => {
+      const { lat, lng } = (event as CustomEvent<{ lat: number; lng: number }>).detail
+      // Six decimals is a tenth of a metre: finer than any click on a map can mean.
+      this.latInput.value = String(Number(lat.toFixed(6)))
+      this.lngInput.value = String(Number(lng.toFixed(6)))
+      this.updateObserver()
+    })
     // This canvas is used for drag-to-record shape placement instead — a plain click shouldn't
     // also toggle the nested player's playback (every recording drag ends in a native "click").
     this.ufoElement.enableClickToPlay = false
@@ -961,6 +977,9 @@ export class SightingEditorElement extends HTMLElement {
     this.labelContextMasks = this.shadow.getElementById("label-context-masks")!
     this.playPauseButton = this.shadow.getElementById("play-pause") as HTMLButtonElement
     this.seekInput = this.shadow.getElementById("seek") as HTMLInputElement
+    this.previousMarkButton = this.shadow.getElementById("previous-mark") as HTMLButtonElement
+    this.nextMarkButton = this.shadow.getElementById("next-mark") as HTMLButtonElement
+    this.timelineMarks = new TimelineMarks(this.seekInput, this.shadow.getElementById("timeline-marks")!)
     this.timeStartLabel = this.shadow.getElementById("time-start")!
     this.timeEndLabel = this.shadow.getElementById("time-end")!
     for (const label of [this.timeStartLabel, this.timeEndLabel]) {
@@ -1217,6 +1236,7 @@ export class SightingEditorElement extends HTMLElement {
     this.milestoneNoteInput = this.shadow.getElementById("milestoneNote") as HTMLInputElement
     this.addMilestoneButton = this.shadow.getElementById("add-milestone") as HTMLButtonElement
     this.deleteMilestoneButton = this.shadow.getElementById("delete-milestone") as HTMLButtonElement
+    this.goToMilestoneButton = this.shadow.getElementById("go-to-milestone") as HTMLButtonElement
     this.decorWidthInput = this.shadow.getElementById("decorWidth") as HTMLInputElement
     this.decorLengthInput = this.shadow.getElementById("decorLength") as HTMLInputElement
     this.decorHeightInput = this.shadow.getElementById("decorHeight") as HTMLInputElement
@@ -1331,7 +1351,9 @@ export class SightingEditorElement extends HTMLElement {
       this.ufoElement.togglePlayPause()
       this.syncPlaybackControls()
     })
-    this.seekInput.addEventListener("input", () => (this.ufoElement.currentTime = Number(this.seekInput.value)))
+    this.seekInput.addEventListener("input", () => (this.ufoElement.currentTime = this.timelineMarks.snap(Number(this.seekInput.value))))
+    this.previousMarkButton.addEventListener("click", () => this.goToMark(this.timelineMarks.previous(this.ufoElement.currentTime)))
+    this.nextMarkButton.addEventListener("click", () => this.goToMark(this.timelineMarks.next(this.ufoElement.currentTime)))
     this.recordButton.addEventListener("click", () => this.toggleRecording())
     this.addShapeButton.addEventListener("click", () => this.addShape())
     this.deleteShapeButton.addEventListener("click", () => this.deleteShape())
@@ -1429,6 +1451,9 @@ export class SightingEditorElement extends HTMLElement {
     this.decorModelSelect.addEventListener("change", () => this.updateDecorModelChoice())
     this.addMilestoneButton.addEventListener("click", () => this.addMilestone())
     this.deleteMilestoneButton.addEventListener("click", () => this.deleteMilestone())
+    this.goToMilestoneButton.addEventListener("click", () => {
+      if (this.currentMilestoneT !== undefined) this.goToMark(this.currentMilestoneT)
+    })
     this.milestoneSelect.addEventListener("change", () => this.selectMilestone(Number(this.milestoneSelect.value)))
     for (const input of [this.milestoneLabelInput, this.milestoneNoteInput]) {
       input.addEventListener("input", () => this.updateMilestone())
@@ -2924,6 +2949,15 @@ export class SightingEditorElement extends HTMLElement {
     sighting.references = sighting.references.map(reference => {
       if (reference.id !== this.currentReferenceId) return reference
       const src = reference.src.startsWith("data:") ? reference.src : this.referenceSrcInput.value.trim()
+      const registration = {
+        headingDeg,
+        pitchDeg: Number(this.referencePitchInput.value) || 0,
+        rollDeg: Number(this.referenceRollInput.value) || undefined,
+        fovDeg: Math.min(179, Math.max(1, Number(this.referenceFovInput.value) || DEFAULT_REFERENCE_FOV_DEG))
+      }
+      const old = reference.registration
+      const registered = registration.headingDeg !== old.headingDeg || registration.pitchDeg !== old.pitchDeg ||
+        registration.rollDeg !== old.rollDeg || registration.fovDeg !== old.fovDeg
       return {
         ...reference,
         kind: this.referenceKindSelect.value as ReferenceKind,
@@ -2934,12 +2968,10 @@ export class SightingEditorElement extends HTMLElement {
         t: seconds === undefined || Number.isNaN(seconds) ? undefined : Math.round(seconds * 1000),
         drawing: this.referenceDrawingInput.checked || undefined,
         opacity: Number(this.referenceOpacityInput.value),
-        registration: {
-          headingDeg,
-          pitchDeg: Number(this.referencePitchInput.value) || 0,
-          rollDeg: Number(this.referenceRollInput.value) || undefined,
-          fovDeg: Math.min(179, Math.max(1, Number(this.referenceFovInput.value) || DEFAULT_REFERENCE_FOV_DEG))
-        }
+        registration,
+        // Lining a picture up is done from where the observer stands at the playhead, so that is the
+        // point it now holds for — see SceneReference.from. A title or a credit changes nothing.
+        from: registered ? this.observerPositionNow() ?? reference.from : reference.from
       }
     })
     const current = sighting.references.find(reference => reference.id === this.currentReferenceId)!
@@ -2960,6 +2992,12 @@ export class SightingEditorElement extends HTMLElement {
     this.updateReference()
   }
 
+  /** Where the observer stands at the playhead, when the recording says. */
+  private observerPositionNow(): { lat: number; lng: number } | undefined {
+    const pose = resolveObserverPoseAt(this.ufoElement.sighting, this.ufoElement.currentTime)
+    return pose?.lat !== undefined && pose.lng !== undefined ? { lat: pose.lat, lng: pose.lng } : undefined
+  }
+
   private addReference(src: string, title?: string, overrides: Partial<SceneReference> = {}): void {
     const sighting = this.ufoElement.sighting
     const pose = resolveObserverPoseAt(this.ufoElement.sighting, this.ufoElement.currentTime)
@@ -2972,6 +3010,7 @@ export class SightingEditorElement extends HTMLElement {
       opacity: DEFAULT_REFERENCE_OPACITY,
       // Where the observer looks at the playhead: the likeliest guess for a picture of what they saw.
       registration: { headingDeg: pose?.headingDeg ?? 0, pitchDeg: pose?.pitchDeg ?? 0, fovDeg: DEFAULT_REFERENCE_FOV_DEG },
+      from: this.observerPositionNow(),
       ...overrides
     }
     sighting.references = [...sighting.references, reference]
@@ -3810,6 +3849,11 @@ export class SightingEditorElement extends HTMLElement {
     this.timeStartLabel.textContent = this.ufoElement.positionLabel
     this.timeEndLabel.textContent = this.ufoElement.durationLabel
     this.syncTimeDisplaySwitch()
+    for (const [button, text] of [[this.previousMarkButton, this.messages.previousKeyframe], [this.nextMarkButton, this.messages.nextKeyframe]] as const) {
+      button.title = text
+      button.setAttribute("aria-label", text)
+    }
+    this.refreshTimelineMarks()
   }
 
   /**
@@ -4324,6 +4368,43 @@ export class SightingEditorElement extends HTMLElement {
       this.groupPanels[index].hidden = !nowOpen
     }
     this.syncCanvasMode()
+    this.refreshTimelineMarks()
+  }
+
+  /**
+   * The marks under the playback bar: the keyframes of what the open group edits — the selected
+   * shapes, the observer, the weather, the sound — or of all of them when the group edits none of
+   * these, and the named moments always.
+   *
+   * The open group's own and not every track's: an author in the Weather group going back to change
+   * a keyframe wants the weather's, and a bar ticked for every shape's every keyframe would bury them.
+   */
+  private refreshTimelineMarks(): void {
+    const sighting = this.ufoElement.sighting
+    const keyframes = (label: string, times: Iterable<number>): TimelineMark[] =>
+      [...times].map(t => ({ t, kind: "keyframe" as const, label: `${this.messages.keyframeMark} (${label})` }))
+    const shapes = (selectedOnly: boolean) => keyframes(this.messages.shapesTrack, sighting.timeline.allKeyframes
+      .filter(keyframe => !selectedOnly || keyframe.shapes.some(state => this.selectedSourceIds.has(state.sourceId)))
+      .map(keyframe => keyframe.t))
+    const observer = () => keyframes(this.messages.observerTrack, sighting.observerTrack.allKeyframes.map(keyframe => keyframe.t))
+    const weather = () => keyframes(this.messages.weatherTrack, sighting.weatherTrack.allKeyframes.map(keyframe => keyframe.t))
+    const sound = () => keyframes(this.messages.soundTrack, sighting.soundTrack.allKeyframes.map(keyframe => keyframe.t))
+    const marks: TimelineMark[] =
+      this.isGroupIdOpen("group-shape") ? shapes(true)
+      : this.isGroupIdOpen("group-observer") || this.isGroupIdOpen("group-location") ? observer()
+      : this.isGroupIdOpen("group-weather") ? weather()
+      : this.isGroupIdOpen("group-sound") ? sound()
+      : [...shapes(false), ...observer(), ...weather(), ...sound()]
+    for (const milestone of sighting.milestones) {
+      marks.push({ t: milestone.t, kind: "milestone", label: this.said.read(milestone.label) ?? "" })
+    }
+    this.timelineMarks.show(marks, this.ufoElement.seekableDuration)
+  }
+
+  private goToMark(t: number | undefined): void {
+    if (t === undefined) return
+    this.ufoElement.currentTime = t
+    this.syncPlaybackControls()
   }
 
   private isGroupIdOpen(id: string): boolean {
@@ -6138,7 +6219,7 @@ export class SightingEditorElement extends HTMLElement {
   private selectMilestone(t: number): void {
     this.currentMilestoneT = t
     this.syncMilestoneFields()
-    this.ufoElement.currentTime = t
+    this.goToMark(t)
   }
 
   private updateMilestone(): void {
@@ -6185,7 +6266,7 @@ export class SightingEditorElement extends HTMLElement {
   private syncMilestoneFields(): void {
     const current = this.ufoElement.sighting.milestones.find(milestone => milestone.t === this.currentMilestoneT)
     const has = current !== undefined
-    for (const control of [this.milestoneSelect, this.milestoneLabelInput, this.milestoneNoteInput, this.deleteMilestoneButton]) {
+    for (const control of [this.milestoneSelect, this.goToMilestoneButton, this.milestoneLabelInput, this.milestoneNoteInput, this.deleteMilestoneButton]) {
       control.disabled = !has
       this.setRowVisible(control, has)
     }
@@ -7526,7 +7607,7 @@ export class SightingEditorElement extends HTMLElement {
     this.labelMilestones.textContent = messages.milestones
     this.labelMilestoneLabel.textContent = messages.milestoneLabel
     this.labelMilestoneNote.textContent = messages.milestoneNote
-    for (const [button, text] of [[this.addMilestoneButton, messages.addMilestone], [this.deleteMilestoneButton, messages.deleteMilestone]] as const) {
+    for (const [button, text] of [[this.addMilestoneButton, messages.addMilestone], [this.goToMilestoneButton, messages.goToMilestone], [this.deleteMilestoneButton, messages.deleteMilestone]] as const) {
       button.title = text
       button.setAttribute("aria-label", text)
     }

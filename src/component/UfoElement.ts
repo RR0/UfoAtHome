@@ -25,6 +25,7 @@ import { ObserverPath } from "../engine/place/ObserverPath.js"
 import { resolveDecorPlacementAt } from "../engine/model/Decor.js"
 import { localMetersToGeo } from "../render3d/terrain/GeoProjection.js"
 import { ObserverMapRenderer } from "../render/ObserverMapRenderer.js"
+import { ObserverMapView } from "../render/ObserverMapView.js"
 import type { ObserverMapMarker, ObserverMapDecor, ObserverMapTarget } from "../render/ObserverMapRenderer.js"
 import { defaultImageryProvider } from "../render3d/terrain/defaultTerrainProviders.js"
 import type { ImageryTexture } from "../render3d/terrain/ImageryProvider.js"
@@ -121,6 +122,24 @@ export class UfoElement extends HTMLElement {
   private readonly observerMapPanel: HTMLElement
   private readonly observerMapCanvas: HTMLCanvasElement
   private readonly observerMapRenderer: ObserverMapRenderer
+  private readonly mapZoomInButton: HTMLButtonElement
+  private readonly mapZoomOutButton: HTMLButtonElement
+  private readonly mapFitButton: HTMLButtonElement
+  /** What part of the ground the reader has zoomed or dragged to — see ObserverMapView. */
+  private readonly observerMapView = new ObserverMapView()
+  /** A drag across the map, from the press that started it — undefined between drags. Only becomes
+   * a drag past a few pixels, so a click that wobbles still goes where it was aimed. */
+  private observerMapDrag?: { pointerId: number; startX: number; startY: number; lastX: number; lastY: number; moved: boolean }
+  /** The click a finished drag releases is not a click on whatever it ended over. */
+  private suppressObserverMapClick = false
+  private observerMapImageryTimer?: ReturnType<typeof setTimeout>
+  /**
+   * Whether a click on bare ground of the map moves the observer there — set by the editor, which
+   * is the only place the observer's position is the reader's to change. It hears it as an
+   * `observerplace` event with the coordinate; a reader's player never offers it, since where the
+   * observer stood is what the recording says, not something to be clicked elsewhere.
+   */
+  observerPlacing = false
   private readonly seekInput: HTMLInputElement
   private readonly playbackFlash: HTMLElement
   private readonly milestoneMarks: HTMLElement
@@ -138,7 +157,9 @@ export class UfoElement extends HTMLElement {
   /** The photograph, fetched at most once per recording and only once the reader asks for the map —
    * an embed nobody opens it on costs nothing. Stays undefined when the tiles cannot be had. */
   private observerMapImagery?: ImageryTexture
-  private observerMapImageryRequested = false
+  /** The ground the photograph was last asked for — the whole fitted box at first, then whatever
+   * the reader zooms into once the one held is too coarse for it or does not reach that far. */
+  private observerMapImageryBounds?: GeoBounds
   /** The licence line the map has to carry — the provider's own while its tiles are shown, and what
    * says they are missing when they are not. */
   private observerMapImageryCredit?: string
@@ -321,14 +342,24 @@ export class UfoElement extends HTMLElement {
    * thing. They are the same recording, seen twice.
    */
   private readonly handleObserverMapPointerMove = (event: PointerEvent): void => {
+    if (this.dragObserverMap(event)) return
     const target = this.observerMapTargetFrom(event)
     if (!target) {
-      this.tooltip.hidden = true
-      this.observerMapCanvas.style.cursor = "default"
+      if (!this.observerPlacing) {
+        this.tooltip.hidden = true
+        this.observerMapCanvas.style.cursor = "grab"
+        return
+      }
+      this.observerMapCanvas.style.cursor = "crosshair"
+      this.showObserverMapTooltip(event, this.messages.placeObserverHere)
       return
     }
     this.observerMapCanvas.style.cursor = "pointer"
-    this.tooltip.textContent = target.label
+    this.showObserverMapTooltip(event, target.label)
+  }
+
+  private showObserverMapTooltip(event: PointerEvent, label: string): void {
+    this.tooltip.textContent = label
     this.tooltip.hidden = false
     const stageRect = this.stageElement.getBoundingClientRect()
     this.tooltip.style.left = `${event.clientX - stageRect.left + 12}px`
@@ -344,8 +375,15 @@ export class UfoElement extends HTMLElement {
    * not an edit of what the observer said they faced.
    */
   private readonly handleObserverMapClick = (event: MouseEvent): void => {
+    if (this.suppressObserverMapClick) {
+      this.suppressObserverMapClick = false
+      return
+    }
     const target = this.observerMapTargetFrom(event)
-    if (!target) return
+    if (!target) {
+      if (this.observerPlacing) this.placeObserverFrom(event)
+      return
+    }
     if (target.kind === "milestone" && target.t !== undefined) {
       this.player.seek(target.t)
       return
@@ -370,6 +408,91 @@ export class UfoElement extends HTMLElement {
     this.tooltip.hidden = true
   }
 
+  private readonly handleObserverMapPointerDown = (event: PointerEvent): void => {
+    if (event.button !== 0) return
+    this.suppressObserverMapClick = false
+    this.observerMapDrag = {
+      pointerId: event.pointerId, startX: event.clientX, startY: event.clientY, lastX: event.clientX, lastY: event.clientY, moved: false
+    }
+  }
+
+  private readonly handleObserverMapPointerUp = (event: PointerEvent): void => {
+    const drag = this.observerMapDrag
+    if (!drag || drag.pointerId !== event.pointerId) return
+    this.observerMapDrag = undefined
+    this.observerMapCanvas.classList.remove("dragging")
+    if (!drag.moved) return
+    this.suppressObserverMapClick = true
+    if (this.observerMapCanvas.hasPointerCapture?.(event.pointerId)) this.observerMapCanvas.releasePointerCapture(event.pointerId)
+  }
+
+  /** Moves the ground under a pressed pointer. False when there is no drag to follow, so hovering
+   * goes on naming what is under the pointer. */
+  private dragObserverMap(event: PointerEvent): boolean {
+    const drag = this.observerMapDrag
+    if (!drag || drag.pointerId !== event.pointerId) return false
+    if (!drag.moved) {
+      if (Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY) < UfoElement.OBSERVER_MAP_DRAG_PX) return false
+      drag.moved = true
+      this.tooltip.hidden = true
+      this.observerMapCanvas.classList.add("dragging")
+      this.observerMapCanvas.setPointerCapture?.(event.pointerId)
+    }
+    const rect = this.observerMapCanvas.getBoundingClientRect()
+    if (rect.width > 0 && rect.height > 0) {
+      this.observerMapView.panBy((event.clientX - drag.lastX) / rect.width, (event.clientY - drag.lastY) / rect.height)
+      this.observerMapViewChanged()
+    }
+    drag.lastX = event.clientX
+    drag.lastY = event.clientY
+    return true
+  }
+
+  /** How far a press has to travel before it is a drag rather than a click. */
+  private static readonly OBSERVER_MAP_DRAG_PX = 4
+
+  /** The wheel zooms around the pointer, the way every map a reader has used does. */
+  private readonly handleObserverMapWheel = (event: WheelEvent): void => {
+    event.preventDefault()
+    const rect = this.observerMapCanvas.getBoundingClientRect()
+    if (rect.width === 0 || rect.height === 0) return
+    // Lines and pages are a mouse's notches; pixels are a trackpad's continuous stream.
+    const delta = event.deltaMode === 0 ? event.deltaY : event.deltaY * 40
+    this.zoomObserverMap((event.clientX - rect.left) / rect.width, (event.clientY - rect.top) / rect.height, Math.exp(-delta * 0.002))
+  }
+
+  private zoomObserverMap(x: number, y: number, factor: number): void {
+    this.observerMapView.zoomAt(x, y, factor)
+    this.observerMapViewChanged()
+  }
+
+  private observerMapViewChanged(): void {
+    this.mapFitButton.hidden = !this.observerMapView.changed
+    this.mapZoomInButton.disabled = this.observerMapView.zoomFactor >= ObserverMapView.MAX_ZOOM
+    this.mapZoomOutButton.disabled = this.observerMapView.zoomFactor <= ObserverMapView.MIN_ZOOM
+    this.paintObserverMap(this.currentTime)
+    // Not on every step of a drag or every notch of a wheel: one request once the reader settles.
+    clearTimeout(this.observerMapImageryTimer)
+    this.observerMapImageryTimer = setTimeout(() => void this.loadObserverMapImagery(), UfoElement.OBSERVER_MAP_IMAGERY_DELAY_MS)
+  }
+
+  private static readonly OBSERVER_MAP_IMAGERY_DELAY_MS = 300
+
+  /** The ground the map is showing now — the fitted box, zoomed and moved as the reader left it. */
+  private get observerMapViewBounds(): GeoBounds | undefined {
+    return this.observerMapBounds && this.observerMapView.boundsWithin(this.observerMapBounds)
+  }
+
+  /** Tells whoever lets the observer be moved (see observerPlacing) where on the ground the click
+   * landed. */
+  private placeObserverFrom(event: MouseEvent): void {
+    const bounds = this.observerMapViewBounds
+    const rect = this.observerMapCanvas.getBoundingClientRect()
+    if (!bounds || rect.width === 0 || rect.height === 0) return
+    const at = ObserverMapView.pointAt(bounds, (event.clientX - rect.left) / rect.width, (event.clientY - rect.top) / rect.height)
+    this.dispatchEvent(new CustomEvent("observerplace", { detail: at, bubbles: true, composed: true }))
+  }
+
   constructor() {
     super()
     this.shadow = this.attachShadow({ mode: "open" })
@@ -391,6 +514,9 @@ export class UfoElement extends HTMLElement {
     this.observerMapPanel = this.shadow.getElementById("observer-map-panel")!
     this.observerMapCanvas = this.shadow.getElementById("observer-map-canvas") as HTMLCanvasElement
     this.observerMapRenderer = new ObserverMapRenderer(this.observerMapCanvas.getContext("2d")!)
+    this.mapZoomInButton = this.shadow.getElementById("map-zoom-in") as HTMLButtonElement
+    this.mapZoomOutButton = this.shadow.getElementById("map-zoom-out") as HTMLButtonElement
+    this.mapFitButton = this.shadow.getElementById("map-fit") as HTMLButtonElement
     this.seekInput = this.shadow.getElementById("seek") as HTMLInputElement
     this.playbackFlash = this.shadow.getElementById("playback-flash")!
     this.milestoneMarks = this.shadow.getElementById("milestone-marks")!
@@ -421,6 +547,16 @@ export class UfoElement extends HTMLElement {
     this.observerMapCanvas.addEventListener("pointermove", this.handleObserverMapPointerMove)
     this.observerMapCanvas.addEventListener("pointerleave", this.handlePointerLeave)
     this.observerMapCanvas.addEventListener("click", this.handleObserverMapClick)
+    this.observerMapCanvas.addEventListener("pointerdown", this.handleObserverMapPointerDown)
+    this.observerMapCanvas.addEventListener("pointerup", this.handleObserverMapPointerUp)
+    this.observerMapCanvas.addEventListener("pointercancel", this.handleObserverMapPointerUp)
+    this.observerMapCanvas.addEventListener("wheel", this.handleObserverMapWheel, { passive: false })
+    this.mapZoomInButton.addEventListener("click", () => this.zoomObserverMap(0.5, 0.5, 2))
+    this.mapZoomOutButton.addEventListener("click", () => this.zoomObserverMap(0.5, 0.5, 0.5))
+    this.mapFitButton.addEventListener("click", () => {
+      this.observerMapView.reset()
+      this.observerMapViewChanged()
+    })
     this.seekInput.addEventListener("input", () => this.player.seek(this.snapSeekToMark(Number(this.seekInput.value))))
     this.seekInput.addEventListener("pointerdown", event => { this.seekSnapArmed = true; this.nameMarkUnder(event) })
     this.seekInput.addEventListener("pointerup", () => { this.seekSnapArmed = false })
@@ -515,6 +651,10 @@ export class UfoElement extends HTMLElement {
     this.soundPreview = undefined
     this.sightingAudio.silence()
     this.currentSighting = fromSightingJson(json)
+    // Another recording is another piece of ground: where a reader had zoomed on the last one says
+    // nothing about this one.
+    this.observerMapView.reset()
+    this.mapFitButton.hidden = true
     this.player = this.createPlayer()
     this.updateTimeLabels()
     this.updatePlayPauseButton()
@@ -1387,6 +1527,15 @@ export class UfoElement extends HTMLElement {
     const label = open ? this.messages.hideObserverMap : this.messages.showObserverMap
     this.observerMapButton.title = label
     this.observerMapButton.setAttribute("aria-label", label)
+    const zoomLabels: Array<[HTMLButtonElement, string]> = [
+      [this.mapZoomInButton, this.messages.zoomMapIn],
+      [this.mapZoomOutButton, this.messages.zoomMapOut],
+      [this.mapFitButton, this.messages.fitMap]
+    ]
+    for (const [button, text] of zoomLabels) {
+      button.title = text
+      button.setAttribute("aria-label", text)
+    }
   }
 
   /**
@@ -1419,11 +1568,12 @@ export class UfoElement extends HTMLElement {
     // these bounds by a metre on every keystroke, and refetching a tile grid for that would be one
     // request per keypress for an image indistinguishable from the one already held.
     if (!this.observerMapBounds || !this.sameGround(this.observerMapBounds, bounds)) {
+      if (this.observerMapBounds) this.observerMapView.refit(this.observerMapBounds, bounds)
       this.observerMapBounds = bounds
       this.observerMapImagery = undefined
       this.observerMapImageryCredit = undefined
       this.observerMapImageryFailed = false
-      this.observerMapImageryRequested = false
+      this.observerMapImageryBounds = undefined
       if (!this.observerMapPanel.hidden) void this.loadObserverMapImagery()
     }
   }
@@ -1452,10 +1602,10 @@ export class UfoElement extends HTMLElement {
    * offline or blocked fetch leaves the map standing and says what is missing.
    */
   private async loadObserverMapImagery(): Promise<void> {
-    if (this.observerMapImageryRequested || !this.observerMapBounds) return
-    this.observerMapImageryRequested = true
+    const bounds = this.observerMapViewBounds
+    if (!bounds || this.observerMapPanel.hidden || !this.observerMapImageryNeededFor(bounds)) return
+    this.observerMapImageryBounds = bounds
     const provider = defaultImageryProvider()
-    const bounds = this.observerMapBounds
     try {
       const imagery = await provider.getImageryTexture(bounds, {
         width: UfoElement.OBSERVER_MAP_IMAGERY_PX,
@@ -1464,13 +1614,31 @@ export class UfoElement extends HTMLElement {
       // The recording may have been swapped while this was in flight — a page playing several in
       // turn does exactly that — and painting one observer's ground under another's path is worse
       // than painting no ground at all.
-      if (this.observerMapBounds !== bounds) return
+      if (this.observerMapImageryBounds !== bounds) return
       this.observerMapImagery = imagery
       this.observerMapImageryCredit = provider.attribution
+      this.observerMapImageryFailed = false
     } catch {
-      this.observerMapImageryFailed = true
+      if (this.observerMapImageryBounds !== bounds) return
+      // A coarser photograph already held is still the right ground: only say it is missing when
+      // there is none.
+      this.observerMapImageryFailed = this.observerMapImagery === undefined
     }
     this.paintObserverMap(this.currentTime)
+  }
+
+  /**
+   * Whether the ground now shown needs a photograph of its own — never asked for, not covered by the
+   * one held, or zoomed far enough into it that its pixels would show. Asked once per piece of
+   * ground, failed or not: a refused request is not retried until the reader moves on.
+   */
+  private observerMapImageryNeededFor(view: GeoBounds): boolean {
+    const asked = this.observerMapImageryBounds
+    if (!asked) return true
+    const held = this.observerMapImagery?.bounds ?? asked
+    const covered = view.west >= held.west && view.east <= held.east && view.south >= held.south && view.north <= held.north
+    const sharp = view.east - view.west > (asked.east - asked.west) / 2
+    return !covered || !sharp
   }
 
   /**
@@ -1604,7 +1772,7 @@ export class UfoElement extends HTMLElement {
       })
     }
     this.observerMapRenderer.paint({
-      bounds: this.observerMapBounds,
+      bounds: this.observerMapViewBounds!,
       imagery: this.observerMapImagery,
       path: this.observerPath,
       position: pose?.lat !== undefined && pose.lng !== undefined ? { lat: pose.lat, lng: pose.lng } : undefined,
