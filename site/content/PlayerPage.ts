@@ -51,7 +51,13 @@ export class PlayerPage implements SitePage {
       playing: fr ? "Rejouer {title}" : "Playing {title}",
       pasted: fr ? "la reconstitution collée" : "the pasted reconstruction",
       pasteEmpty: fr ? "Ou coller une reconstitution" : "Or paste a reconstruction in",
-      pasteLoaded: fr ? "Voir ou modifier ce fichier" : "See or edit this file"
+      pasteLoaded: fr ? "Voir ou modifier ce fichier" : "See or edit this file",
+      noRecording: fr
+        ? "Aucun fichier .json parmi ceux choisis : choisissez l'enregistrement, et avec lui les images ou modèles qu'il nomme."
+        : "None of the chosen files is a .json: choose the recording, and with it the pictures or models it names.",
+      unresolved: fr
+        ? "Nommés par le fichier mais pas choisis avec lui : "
+        : "Named by the file but not chosen with it: "
     })
     return `const messages = ${messages}
 const demoTitles = ${demoTitles}
@@ -70,6 +76,7 @@ const heading = document.getElementById("player-heading")
 const lede = document.getElementById("player-lede")
 const editorPath = "/edit/"
 const pasteSummary = pastePanel.querySelector("summary")
+const filesField = document.getElementById("player-files")
 
 /* The recording currently on the stage, as text — what the editor below should be holding, so that
    opening that panel shows THIS observation rather than an empty shell. Pretty-printed from the
@@ -261,6 +268,60 @@ pasteButton.addEventListener("click", () => {
   }
 })
 
+/* Addresses made for the files last opened from disk, released when others are opened. */
+let localUrls = []
+
+/**
+ * Plays a recording from the reader's own disk, with the pictures, models and sounds it names.
+ *
+ * A recording names those by address, and one relative to the file ("maffliers/photo.jpg") means
+ * nothing once the text is in a page rather than at an address. So the files chosen with it are
+ * matched by name to every such string in it, and each match is replaced by a local address for
+ * that file: the whole reconstruction can then be checked before any of it is put online. Nothing
+ * is uploaded.
+ */
+const openFiles = async files => {
+  const recording = files.find(file => file.name.toLowerCase().endsWith(".json"))
+  if (!recording) return say(messages.noRecording, "error")
+  let sighting
+  try {
+    sighting = JSON.parse(await recording.text())
+  } catch (error) {
+    return say(messages.badJson + error.message, "error")
+  }
+  localUrls.forEach(url => URL.revokeObjectURL(url))
+  localUrls = []
+  const byName = new Map(files.filter(file => file !== recording).map(file => [file.name, file]))
+  const unresolved = new Set()
+  const relative = value => !/^[a-z][a-z0-9+.-]*:/i.test(value) && !value.startsWith("/")
+  const withLocalFiles = value => {
+    if (Array.isArray(value)) return value.map(withLocalFiles)
+    if (value && typeof value === "object") {
+      return Object.fromEntries(Object.entries(value).map(([key, inner]) => [key, withLocalFiles(inner)]))
+    }
+    if (typeof value !== "string" || !relative(value) || !/\\.[a-z0-9]{2,5}$/i.test(value)) return value
+    const file = byName.get(value.split("/").pop())
+    if (!file) {
+      if (/\\.(jpe?g|png|webp|gif|tiff?|glb|gltf|mp3|ogg|wav|m4a)$/i.test(value)) unresolved.add(value)
+      return value
+    }
+    const url = URL.createObjectURL(file)
+    localUrls.push(url)
+    return url
+  }
+  const played = withLocalFiles(sighting)
+  stage.sightingData = played
+  showInEditor(JSON.stringify(sighting, null, 2))
+  reveal(null, sighting, recording.name.replace(/\\.json$/i, ""))
+  say(unresolved.size > 0 ? messages.unresolved + [...unresolved].join(", ") : "", unresolved.size > 0 ? "error" : undefined)
+  stageBox.scrollIntoView({ block: "start", behavior: "smooth" })
+}
+
+filesField.addEventListener("change", () => {
+  const files = [...filesField.files]
+  if (files.length > 0) void openFiles(files)
+})
+
 const asked = new URLSearchParams(location.search).get("sighting")
 if (asked) {
   urlField.value = asked
@@ -290,6 +351,14 @@ if (asked) {
           ? "Une adresse complète, ou le nom d'une <a href=\"/demos/\">démo</a> — par exemple <code>Socorro</code>."
           : "A full address, or the name of one of <a href=\"/demos/\">the demos</a> — <code>Socorro</code>, for instance."}</p>
       </form>
+
+      <div class="player-form">
+        <label for="player-files">${fr ? "Depuis votre ordinateur" : "From your computer"}</label>
+        <input id="player-files" type="file" multiple accept=".json,application/json,image/*,.glb,.gltf,audio/*">
+        <p class="small">${fr
+          ? "Choisissez l'enregistrement (.json), et avec lui les photos, modèles ou sons qu'il nomme par un chemin relatif : ils sont retrouvés par leur nom. Rien n'est envoyé."
+          : "Choose the recording (.json), and with it the photos, models or sounds it names by a relative path: they are matched by name. Nothing is uploaded."}</p>
+      </div>
 
       <details class="player-paste" id="player-paste">
         <summary>${fr ? "Ou coller une reconstitution" : "Or paste a reconstruction in"}</summary>

@@ -1,4 +1,5 @@
 import { DocsSection } from "./DocsSection.js"
+import { tagNames_fr } from "../../src/component/messages/TagNames_fr.js"
 import type { PageMeta, Said, SiteLanguage } from "../SitePage.js"
 
 /**
@@ -73,6 +74,12 @@ if (excerpts.length > 0) {
 }`
   }
 
+  /** The tags a translation is known for, listed from the translations themselves so that the page
+   * cannot fall behind them. */
+  private tags(): string {
+    return Object.keys(tagNames_fr).map(tag => `<code>${tag}</code>`).join(", ")
+  }
+
   /** The example is quoted inside a `<pre>`, so its angle brackets and ampersands have to stop
    * being markup. */
   private escape(text: string): string {
@@ -103,7 +110,10 @@ if (excerpts.length > 0) {
       <tr><td><code>place</code></td><td><code>[{ lat, lng, name }]</code> — <code>name</code> is the fully qualified place name the coordinates were resolved from</td></tr>
       <tr><td><code>observer</code></td><td><code>{ id, title, lastName, firstNames }</code>, all optional; omit entirely for an anonymous observer. <code>id</code> is a reference to the person (on RR0, their directory: <code>"ZamoraLonnie"</code>); the other fields describe them when nobody has given them one</td></tr>
       <tr><td><code>description</code></td><td>The account in prose — one string, or one per language (see below)</td></tr>
-      <tr><td><code>tags</code></td><td>A list of strings, written in English: they are technical terms, and two recordings that share one have to match on it. Each reader is shown them in their own language where a translation is known</td></tr>
+      <tr><td><code>tags</code></td><td>A list of strings, written in English: they are technical terms, and two recordings that share one have to match on it. Each reader is shown them in their own language where a translation is known, which is the case today for ${this.tags()}. The list is not closed: anything else is shown as written, and classification codes (<code>"RR3"</code>, <code>"NL"</code>) or case references (<code>"Blue Book 8729"</code>) are written as they are. One changes the replay: <code>paralysis</code> keeps the observer's view still</td></tr>
+      <tr><td><code>account</code></td><td>Who saw it and how the account travelled: <code>observerAgeYears</code> (at the time), <code>observerOccupation</code>, <code>source</code> (how it reached whoever wrote the recording: <code>on-site</code>, <code>interview</code>, <code>telephone</code>, <code>questionnaire</code>, <code>letter</code>, <code>press</code>) and <code>followedUp</code> (whether the observer was gone back to afterwards)</td></tr>
+      <tr><td><code>milestones</code></td><td>The named moments of the account, shown on the seek bar: <code>[{ t, label, note }]</code>, <code>label</code> being the letter or number the account itself uses (<code>"A"</code>, <code>"B"</code>) or a couple of words, <code>note</code> what happened then, in the account's words where possible (one string, or one per language)</td></tr>
+      <tr><td><code>roads</code></td><td>The roads or paths the account's own plan draws, when the map does not have them: <code>[{ id, title, surface, widthM, path, source }]</code>, <code>surface</code> being <code>paved</code>, <code>gravel</code> or <code>dirt</code>, <code>path</code> the centre line as <code>[{ eastM, northM }]</code> from the observer's place at the start, and <code>source</code> the plan or survey it was read off</td></tr>
     </table>
     </div>
 
@@ -178,26 +188,31 @@ if (excerpts.length > 0) {
   "blur": 0,
   "selected": false,
   "title": "the phenomenon",
-  "angular": { "widthDeg": 1.2, "heightDeg": 0.4 }
+  "angular": { "widthDeg": 1.2, "heightDeg": 0.4 },
+  "aim": { "azimuthDeg": 353.6, "altitudeDeg": 0.6 }
 }</code></pre>
     <div class="table-scroll">
     <table>
       <tr><th>Field</th><th>Meaning</th></tr>
-      <tr><td><code>kind</code></td><td><code>oval</code>, or <code>polygon</code>, which then also takes <code>points</code></td></tr>
+      <tr><td><code>kind</code></td><td><code>oval</code>, or <code>polygon</code>, which then also takes <code>points</code>: <code>[{ x, y }]</code> in pixels from the top-left corner of <code>bounds</code>, spanning its width and height, so that the outline is stretched with it when the angle resizes the box</td></tr>
       <tr><td><code>title</code></td><td>Its name, shown when the pointer is over it; one string, or one per language</td></tr>
       <tr><td><code>color</code></td><td>Any CSS colour</td></tr>
-      <tr><td><code>angle</code></td><td>Radians</td></tr>
+      <tr><td><code>angle</code></td><td>Its tilt, in radians about its own centre, positive clockwise on screen</td></tr>
       <tr><td><code>transparency</code></td><td>0 opaque to 1 invisible</td></tr>
       <tr><td><code>haloScale</code></td><td>The glow around it; 0 is none</td></tr>
       <tr><td><code>brightness</code></td><td>How dazzling: a veil, aperture spikes, a core clipped to white</td></tr>
       <tr><td><code>blur</code></td><td>How indistinct the observer said the edges looked</td></tr>
       <tr><td><code>angular</code></td><td>Its apparent size in degrees — see below</td></tr>
+      <tr><td><code>aim</code></td><td>Where it was in the observer's sky: the direction of its centre, <code>azimuthDeg</code> clockwise from true north and <code>altitudeDeg</code> above the horizon. Not the way the observer was facing, which is the pose's <code>headingDeg</code> and <code>pitchDeg</code> — see below</td></tr>
     </table>
     </div>
-    <p><strong><code>angular</code> is the authority.</strong> <code>bounds</code> is that angle
-      projected onto the fixed 640×360 canvas at the pose's own field of view and through the
-      recording's own instrument; it is re-derived on load, so a file survives a change of canvas,
-      of field of view or of instrument. If the two ever disagree, the angle wins.</p>
+    <p><strong><code>aim</code> places it, <code>angular</code> sizes it.</strong> <code>bounds</code>
+      is those two projected onto the fixed 640×360 canvas at the pose's own heading and field of
+      view, through the recording's own instrument; it is re-derived on load, so a file survives a
+      change of canvas, of field of view, of instrument, or of where the observer was looking. If the
+      pixels and the angles ever disagree, the angles win: moving <code>bounds</code> in a file does
+      nothing while <code>aim</code> is there. A file written by hand can leave <code>bounds</code>
+      out entirely.</p>
     <p><code>timeline.order</code> is the back-to-front paint order, <code>timeline.groups</code> the
       grouped source ids. Both optional.</p>
 
@@ -267,7 +282,7 @@ if (excerpts.length > 0) {
       <tr><th>Field</th><th>Meaning</th></tr>
       <tr><td><code>explains</code></td><td>The <code>sourceId</code>s of the phenomena this body claims to be</td></tr>
       <tr><td><code>model</code></td><td>A shape built here (<code>ellipsoid</code>, <code>sphere</code>, <code>disc</code>, <code>cylinder</code>, <code>cone</code>, <code>box</code>, <code>torus</code>, <code>figure</code>), a model of the catalogue by <code>id</code>, or a glTF file at <code>url</code> with its <code>credit</code>; a relative <code>url</code> is read from the file that states it, not from the page. Stretched to <code>sizeM</code> whichever it is</td></tr>
-      <tr><td><code>track</code></td><td>Where it is and what it looks like at each <code>t</code>. A position is stated either in the world (<code>eastM</code>/<code>northM</code> from where the observer stood at the start, like the decor, with <code>onGround</code> or <code>altitudeAboveGroundM</code>) or from the observer at that instant (<code>azimuthDeg</code>, <code>altitudeDeg</code>, <code>distanceM</code>). A body <code>onGround</code> stands on the relief; a direction with no distance then meets the ground where that line does. <code>sizeM</code>, <code>attitude</code> (<code>headingDeg</code>, <code>pitchDeg</code>, <code>rollDeg</code>) and <code>appearance</code> (<code>color</code>, <code>albedo</code>) hold until a later keyframe restates them. A <code>flame</code> (<code>lengthM</code>, <code>widthM</code>, <code>color</code> at the nozzle, <code>tipColor</code>, <code>luminanceCdM2</code>) is lit at the keyframe that states it, comes out of the model's node named <code>exhaust</code> (or the one its <code>node</code> names), lights what is around it, raises dust where it meets the ground when <code>raisesDust</code> says so, and is put out by a <code>luminanceCdM2</code> of 0</td></tr>
+      <tr><td><code>track</code></td><td>Where it is and what it looks like at each <code>t</code>. A position is stated either in the world (<code>eastM</code>/<code>northM</code> from where the observer stood at the start, like the decor, with <code>onGround</code> or <code>altitudeAboveGroundM</code>) or from the observer at that instant (<code>azimuthDeg</code>, <code>altitudeDeg</code>, <code>distanceM</code>). A body <code>onGround</code> stands on the relief; a direction with no distance then meets the ground where that line does. <code>sizeM</code>, <code>attitude</code> (<code>headingDeg</code>, <code>pitchDeg</code>, <code>rollDeg</code>) and <code>appearance</code> (<code>color</code>, <code>albedo</code>) hold until a later keyframe restates them. <code>present: false</code> takes the body out of the scene from that keyframe on, and <code>present: true</code> brings it back. A <code>flame</code> (<code>lengthM</code>, <code>widthM</code>, <code>color</code> at the nozzle, <code>tipColor</code>, <code>luminanceCdM2</code>) is lit at the keyframe that states it, comes out of the model's node named <code>exhaust</code> (or the one its <code>node</code> names), lights what is around it, raises dust where it meets the ground when <code>raisesDust</code> says so, and is put out by a <code>luminanceCdM2</code> of 0</td></tr>
       <tr><td><code>motions</code></td><td>In a keyframe: how far along each of its model's own movements it is, by the movement's name — the glTF file's animations. <code>0</code> is a movement's start, <code>1</code> its end, and one that repeats goes on past 1: <code>{ "legs-turn": 7 }</code> is seven turns. The model says what moves and how; the track says when. Each movement blends between the keyframes that state it, whatever other keyframes move the body in between, holds after the last and stands at 0 before the first. Valensole's departure is written so: <code>{ "t": 246000, "motions": { "pivot-retract": 0 } }</code>, <code>{ "t": 248000, "motions": { "pivot-retract": 1, "legs-turn": 0 } }</code>, … <code>{ "t": 262000, "motions": { "legs-turn": 7 } }</code></td></tr>
       <tr><td><code>lights</code></td><td>In a keyframe: the luminance, cd/m², of each of its model's own lights, by the name of the light's material in the glTF file — so that one body carries lights that each do their own thing, a steady white at each end and a red one flashing between. The model says where each light is, how big and what colour; the track says how bright and when. Each light blends between the keyframes that name it and holds after the last, so a switch is two keyframes a millisecond apart; a light no keyframe names glows at its share of <code>appearance.luminanceCdM2</code>. A light too small to show is seen by its glare, and whatever stands between it and the eye — the body's own hull, a bridge — hides it. Silly-le-Long's red light: <code>{ "t": 499, "lights": { "front-red": 1500 } }</code>, <code>{ "t": 500, "lights": { "front-red": 0 } }</code></td></tr>
       <tr><td><code>outlineNode</code></td><td>The node of the model that is what the observer drew (<code>"hull"</code> for a craft whose legs are not in the drawing): what its outline is measured by</td></tr>
@@ -355,6 +370,28 @@ if (excerpts.length > 0) {
       the clouds looked like. Ask the record again from the editor and the layers are rewritten; edit
       a layer by hand and the recording becomes the author's, the source dropped.</p>
 
+    <h2>Where each value comes from</h2>
+    <p>Any value in a recording can be written bare, or wrapped with where it came from:</p>
+    <pre data-json="none"><code>"durationSeconds": {
+  "value": 15,
+  "basis": "derived",
+  "rationale": "13 to 18 s in the investigator's synthesis; the middle taken"
+}</code></pre>
+    <p><code>basis</code> is <code>stated</code> (the observer said it, and what a bare value
+      means), <code>derived</code> (worked out from what they said plus something checkable: a
+      road's width, a map, a measured drawing; <code>rationale</code> gives the working) or
+      <code>assumed</code> (chosen so the reconstruction has a value at all, on nothing the observer
+      said). The list of <code>assumed</code> values is the list of what to go back to the observer
+      or the file for, which is why it is worth writing even when nothing else is.</p>
+
+    <h2>Checking a file</h2>
+    <p>The format is also published as a <a href="/sighting.schema.json">JSON Schema</a>,
+      generated from the same types as the player: every key it knows, what each may hold, and the
+      words a closed list accepts. A misspelt key or an unknown value fails it. It says nothing
+      about what may be left out, which is a question of meaning this page answers. To see the
+      result, open the file in <a href="/play/">the player</a>, from a link, by pasting it, or
+      from your disk with the pictures and models it names.</p>
+
     <h2>A whole file</h2>
     <p>The smallest recording that still states something — one silent oval crossing the sky over
       twelve seconds, on a real date at a real place. Everything else in the format is optional, and
@@ -387,7 +424,10 @@ if (excerpts.length > 0) {
     <h2>Four rules that decide what a file means</h2>
     <ul class="plain">
       <li><strong>Discrete fields are held, continuous ones are blended.</strong> A shape left out of
-        a later keyframe stays as it was; one whose first keyframe is at five seconds is already
+        a later keyframe stays as it was, and so does any field a keyframe leaves out of a shape it
+        does restate: a keyframe that only gives a new <code>aim</code> moves the shape and keeps
+        everything else (restating <code>bounds</code> without <code>aim</code> or
+        <code>angular</code> is taken as moving it by its pixels); one whose first keyframe is at five seconds is already
         painted, in that state, from zero. To make something stop being visible, keyframe it at
         <code>transparency: 1</code>.</li>
       <li><strong>Angles only.</strong> No real size and no real distance is stored anywhere. Metres
@@ -434,7 +474,10 @@ if (excerpts.length > 0) {
       <tr><td><code>place</code></td><td><code>[{ lat, lng, name }]</code> — <code>name</code> est le nom qualifié depuis lequel les coordonnées ont été résolues</td></tr>
       <tr><td><code>observer</code></td><td><code>{ id, title, lastName, firstNames }</code>, tous facultatifs ; à omettre entièrement pour un observateur anonyme. <code>id</code> est une référence à la personne (sur RR0, son répertoire : <code>"ZamoraLonnie"</code>) ; les autres champs la décrivent quand personne ne lui en a encore donné</td></tr>
       <tr><td><code>description</code></td><td>Le récit en prose — une chaîne, ou une par langue (voir plus bas)</td></tr>
-      <tr><td><code>tags</code></td><td>Une liste de chaînes, écrites en anglais : ce sont des termes techniques, et deux enregistrements qui en partagent un doivent s'y égaler. Chaque lecteur les voit dans sa langue lorsqu'une traduction est connue</td></tr>
+      <tr><td><code>tags</code></td><td>Une liste de chaînes, écrites en anglais : ce sont des termes techniques, et deux enregistrements qui en partagent un doivent s'y égaler. Chaque lecteur les voit dans sa langue lorsqu'une traduction est connue, ce qui est le cas aujourd'hui de ${this.tags()}. La liste n'est pas fermée : tout autre tag est affiché tel qu'écrit, et les codes de classement (<code>"RR3"</code>, <code>"NL"</code>) ou les références de dossier (<code>"Blue Book 8729"</code>) s'écrivent tels quels. Un seul change le rejeu : <code>paralysis</code> immobilise la vue de l'observateur</td></tr>
+      <tr><td><code>account</code></td><td>Qui l'a vu et comment le récit a circulé : <code>observerAgeYears</code> (à l'époque), <code>observerOccupation</code>, <code>source</code> (comment il est parvenu à qui a écrit l'enregistrement : <code>on-site</code>, <code>interview</code>, <code>telephone</code>, <code>questionnaire</code>, <code>letter</code>, <code>press</code>) et <code>followedUp</code> (si l'observateur a été revu ensuite)</td></tr>
+      <tr><td><code>milestones</code></td><td>Les moments nommés du récit, affichés sur la barre de lecture : <code>[{ t, label, note }]</code>, <code>label</code> étant la lettre ou le numéro qu'utilise le récit lui-même (<code>"A"</code>, <code>"B"</code>) ou deux ou trois mots, <code>note</code> ce qui s'est passé alors, dans les mots du récit si possible (une chaîne, ou une par langue)</td></tr>
+      <tr><td><code>roads</code></td><td>Les routes ou chemins que dessine le plan du récit, quand la carte ne les a pas : <code>[{ id, title, surface, widthM, path, source }]</code>, <code>surface</code> valant <code>paved</code>, <code>gravel</code> ou <code>dirt</code>, <code>path</code> étant l'axe en <code>[{ eastM, northM }]</code> depuis le lieu de l'observateur au départ, et <code>source</code> le plan ou le relevé d'où il est tiré</td></tr>
     </table>
     </div>
 
@@ -510,26 +553,31 @@ if (excerpts.length > 0) {
   "blur": 0,
   "selected": false,
   "title": "le phénomène",
-  "angular": { "widthDeg": 1.2, "heightDeg": 0.4 }
+  "angular": { "widthDeg": 1.2, "heightDeg": 0.4 },
+  "aim": { "azimuthDeg": 353.6, "altitudeDeg": 0.6 }
 }</code></pre>
     <div class="table-scroll">
     <table>
       <tr><th>Champ</th><th>Sens</th></tr>
-      <tr><td><code>kind</code></td><td><code>oval</code>, ou <code>polygon</code>, qui prend alors aussi <code>points</code></td></tr>
+      <tr><td><code>kind</code></td><td><code>oval</code>, ou <code>polygon</code>, qui prend alors aussi <code>points</code> : <code>[{ x, y }]</code> en pixels depuis le coin haut gauche de <code>bounds</code>, couvrant sa largeur et sa hauteur, pour que le contour s'étire avec lui quand l'angle redimensionne la boîte</td></tr>
       <tr><td><code>title</code></td><td>Son nom, affiché au survol ; une chaîne, ou une par langue</td></tr>
       <tr><td><code>color</code></td><td>N'importe quelle couleur CSS</td></tr>
-      <tr><td><code>angle</code></td><td>En radians</td></tr>
+      <tr><td><code>angle</code></td><td>Son inclinaison, en radians autour de son propre centre, positive dans le sens horaire à l'écran</td></tr>
       <tr><td><code>transparency</code></td><td>De 0 opaque à 1 invisible</td></tr>
       <tr><td><code>haloScale</code></td><td>La lueur autour ; 0 pour aucune</td></tr>
       <tr><td><code>brightness</code></td><td>L'éblouissement : un voile, les aigrettes du diaphragme, un cœur saturé au blanc</td></tr>
       <tr><td><code>blur</code></td><td>À quel point l'observateur a dit les contours indistincts</td></tr>
       <tr><td><code>angular</code></td><td>Sa taille apparente en degrés — voir plus bas</td></tr>
+      <tr><td><code>aim</code></td><td>Où il était dans le ciel de l'observateur : la direction de son centre, <code>azimuthDeg</code> dans le sens horaire depuis le nord vrai et <code>altitudeDeg</code> au-dessus de l'horizon. Pas la direction où regardait l'observateur, qui est le <code>headingDeg</code> et le <code>pitchDeg</code> de la pose — voir plus bas</td></tr>
     </table>
     </div>
-    <p><strong>C'est <code>angular</code> qui fait foi.</strong> <code>bounds</code> est cet angle
-      projeté sur le canevas fixe de 640×360 au champ de la pose et à travers l'instrument de
-      l'enregistrement ; il est redérivé au chargement, si bien qu'un fichier survit à un changement
-      de canevas, de champ ou d'instrument. Si les deux divergent, c'est l'angle qui gagne.</p>
+    <p><strong><code>aim</code> le place, <code>angular</code> le dimensionne.</strong>
+      <code>bounds</code> est la projection des deux sur le canevas fixe de 640×360, au cap et au
+      champ de la pose, à travers l'instrument de l'enregistrement ; il est redérivé au chargement, si
+      bien qu'un fichier survit à un changement de canevas, de champ, d'instrument, ou de direction
+      du regard. Si les pixels et les angles divergent, les angles gagnent : déplacer
+      <code>bounds</code> dans un fichier ne fait rien tant que <code>aim</code> est là. Un fichier
+      écrit à la main peut omettre <code>bounds</code> entièrement.</p>
     <p><code>timeline.order</code> est l'ordre de tracé de l'arrière vers l'avant,
       <code>timeline.groups</code> les identifiants groupés. Les deux sont facultatifs.</p>
 
@@ -601,7 +649,7 @@ if (excerpts.length > 0) {
       <tr><th>Champ</th><th>Sens</th></tr>
       <tr><td><code>explains</code></td><td>Les <code>sourceId</code> des phénomènes que ce corps prétend être</td></tr>
       <tr><td><code>model</code></td><td>Une forme construite ici (<code>ellipsoid</code>, <code>sphere</code>, <code>disc</code>, <code>cylinder</code>, <code>cone</code>, <code>box</code>, <code>torus</code>, <code>figure</code>), un modèle du catalogue par son <code>id</code>, ou un fichier glTF à <code>url</code> avec son <code>credit</code> ; une <code>url</code> relative se lit depuis le fichier qui la donne, pas depuis la page. Étiré à <code>sizeM</code> dans tous les cas</td></tr>
-      <tr><td><code>track</code></td><td>Où il est et à quoi il ressemble à chaque <code>t</code>. Une position s'énonce soit dans le monde (<code>eastM</code>/<code>northM</code> depuis l'endroit où se tenait l'observateur au début, comme le décor, avec <code>onGround</code> ou <code>altitudeAboveGroundM</code>), soit depuis l'observateur à cet instant (<code>azimuthDeg</code>, <code>altitudeDeg</code>, <code>distanceM</code>). Un corps <code>onGround</code> est posé sur le relief ; une direction sans distance rencontre alors le sol là où cette ligne le rencontre. <code>sizeM</code>, <code>attitude</code> (<code>headingDeg</code>, <code>pitchDeg</code>, <code>rollDeg</code>) et <code>appearance</code> (<code>color</code>, <code>albedo</code>) valent jusqu'à ce qu'une keyframe suivante les énonce à nouveau. Une <code>flame</code> (<code>lengthM</code>, <code>widthM</code>, <code>color</code> à la sortie, <code>tipColor</code>, <code>luminanceCdM2</code>) s'allume à la keyframe qui l'énonce, sort du nœud du modèle nommé <code>exhaust</code> (ou de celui que nomme son <code>node</code>), éclaire ce qui l'entoure, soulève de la poussière là où elle touche le sol si <code>raisesDust</code> le dit, et s'éteint avec une <code>luminanceCdM2</code> de 0</td></tr>
+      <tr><td><code>track</code></td><td>Où il est et à quoi il ressemble à chaque <code>t</code>. Une position s'énonce soit dans le monde (<code>eastM</code>/<code>northM</code> depuis l'endroit où se tenait l'observateur au début, comme le décor, avec <code>onGround</code> ou <code>altitudeAboveGroundM</code>), soit depuis l'observateur à cet instant (<code>azimuthDeg</code>, <code>altitudeDeg</code>, <code>distanceM</code>). Un corps <code>onGround</code> est posé sur le relief ; une direction sans distance rencontre alors le sol là où cette ligne le rencontre. <code>sizeM</code>, <code>attitude</code> (<code>headingDeg</code>, <code>pitchDeg</code>, <code>rollDeg</code>) et <code>appearance</code> (<code>color</code>, <code>albedo</code>) valent jusqu'à ce qu'une keyframe suivante les énonce à nouveau. <code>present: false</code> retire le corps de la scène à partir de cette keyframe, et <code>present: true</code> l'y ramène. Une <code>flame</code> (<code>lengthM</code>, <code>widthM</code>, <code>color</code> à la sortie, <code>tipColor</code>, <code>luminanceCdM2</code>) s'allume à la keyframe qui l'énonce, sort du nœud du modèle nommé <code>exhaust</code> (ou de celui que nomme son <code>node</code>), éclaire ce qui l'entoure, soulève de la poussière là où elle touche le sol si <code>raisesDust</code> le dit, et s'éteint avec une <code>luminanceCdM2</code> de 0</td></tr>
       <tr><td><code>motions</code></td><td>Dans une keyframe : où en est chacun des mouvements propres de son modèle, par le nom du mouvement — les animations du fichier glTF. <code>0</code> est le début d'un mouvement, <code>1</code> sa fin, et un mouvement qui se répète continue au-delà de 1 : <code>{ "legs-turn": 7 }</code>, c'est sept tours. Le modèle dit ce qui bouge et comment ; la piste dit quand. Chaque mouvement se mélange entre les keyframes qui l'énoncent, quelles que soient les keyframes qui déplacent le corps entre-temps, se maintient après la dernière et vaut 0 avant la première. Le départ de Valensole s'écrit ainsi : <code>{ "t": 246000, "motions": { "pivot-retract": 0 } }</code>, <code>{ "t": 248000, "motions": { "pivot-retract": 1, "legs-turn": 0 } }</code>, … <code>{ "t": 262000, "motions": { "legs-turn": 7 } }</code></td></tr>
       <tr><td><code>lights</code></td><td>Dans une keyframe : la luminance, en cd/m², de chacun des feux propres de son modèle, par le nom du matériau du feu dans le fichier glTF, pour qu'un même corps porte des feux qui font chacun autre chose, un blanc fixe à chaque bout et un rouge qui clignote entre les deux. Le modèle dit où est chaque feu, sa taille et sa couleur ; la piste dit quelle luminance et quand. Chaque feu se mélange entre les keyframes qui le nomment et se maintient après la dernière : une bascule, ce sont donc deux keyframes à une milliseconde d'écart. Un feu qu'aucune keyframe ne nomme brille à sa part de <code>appearance.luminanceCdM2</code>. Un feu trop petit pour se voir se voit par son éblouissement, et ce qui se trouve entre lui et l'œil, la coque du corps lui-même ou un pont, le cache. Le feu rouge de Silly-le-Long : <code>{ "t": 499, "lights": { "front-red": 1500 } }</code>, <code>{ "t": 500, "lights": { "front-red": 0 } }</code></td></tr>
       <tr><td><code>outlineNode</code></td><td>Le nœud du modèle qui est ce que l'observateur a dessiné (<code>"hull"</code> pour un engin dont les pieds ne figurent pas dans le dessin) : ce sur quoi son contour est mesuré</td></tr>
@@ -690,6 +738,29 @@ if (excerpts.length > 0) {
       ressemblaient. Redemandez le relevé depuis l'éditeur et les couches sont réécrites ; modifiez
       une couche à la main et l'enregistrement devient celui de l'auteur, la source retirée.</p>
 
+    <h2>D'où vient chaque valeur</h2>
+    <p>Toute valeur d'un enregistrement peut s'écrire nue, ou enveloppée de sa provenance :</p>
+    <pre data-json="none"><code>"durationSeconds": {
+  "value": 15,
+  "basis": "derived",
+  "rationale": "13 à 18 s dans la synthèse de l'enquêteur ; le milieu retenu"
+}</code></pre>
+    <p><code>basis</code> vaut <code>stated</code> (l'observateur l'a dit, et c'est ce que signifie
+      une valeur nue), <code>derived</code> (déduit de ce qu'il a dit et de quelque chose de
+      vérifiable : la largeur d'une route, une carte, un dessin mesuré ; <code>rationale</code> donne
+      le calcul) ou <code>assumed</code> (choisi pour que la reconstitution ait une valeur, sur rien
+      que l'observateur ait dit). La liste des valeurs <code>assumed</code> est la liste de ce qu'il
+      faut retourner demander à l'observateur ou au dossier : c'est pourquoi elle vaut d'être écrite
+      même quand rien d'autre ne l'est.</p>
+
+    <h2>Vérifier un fichier</h2>
+    <p>Le format est aussi publié en <a href="/sighting.schema.json">JSON Schema</a>, engendré
+      depuis les mêmes types que le lecteur : toutes les clés qu'il connaît, ce que chacune peut
+      contenir, et les mots qu'accepte une liste fermée. Une clé mal orthographiée ou une valeur
+      inconnue y échoue. Il ne dit rien de ce qui peut être omis, question de sens à laquelle répond
+      cette page. Pour voir le résultat, ouvrez le fichier dans <a href="/play/">le lecteur</a>,
+      depuis un lien, en le collant, ou depuis votre disque avec les images et modèles qu'il nomme.</p>
+
     <h2>Un fichier entier</h2>
     <p>Le plus petit enregistrement qui énonce encore quelque chose — un ovale silencieux traversant
       le ciel en douze secondes, à une date réelle et en un lieu réel. Tout le reste du format est
@@ -722,7 +793,10 @@ if (excerpts.length > 0) {
     <h2>Quatre règles qui décident du sens d'un fichier</h2>
     <ul class="plain">
       <li><strong>Les champs discrets sont tenus, les continus sont interpolés.</strong> Une forme
-        absente d'un keyframe ultérieur reste dans son état ; une forme dont le premier keyframe est
+        absente d'un keyframe ultérieur reste dans son état, et de même tout champ qu'un keyframe
+        omet dans une forme qu'il énonce : un keyframe qui ne donne qu'un nouvel <code>aim</code>
+        déplace la forme et garde tout le reste (énoncer <code>bounds</code> sans <code>aim</code> ni
+        <code>angular</code> est lu comme la déplacer par ses pixels) ; une forme dont le premier keyframe est
         à cinq secondes est déjà peinte, dans cet état, dès zéro. Pour qu'une chose cesse d'être
         visible, posez-lui un keyframe à <code>transparency: 1</code>.</li>
       <li><strong>Des angles, rien d'autre.</strong> Aucune taille ni distance réelle n'est stockée

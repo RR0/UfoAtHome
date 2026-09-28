@@ -119,6 +119,10 @@ class SiteBuilder {
     await cp(join(this.root, "site", "style.css"), join(this.out, "style.css"))
     await cp(join(this.root, "site", "assets", "favicon.svg"), join(this.out, "favicon.svg"))
     await cp(join(this.root, "public", "demo-data"), join(this.out, "demo-data"), { recursive: true })
+    // The recording format as a JSON Schema, generated from the types by build:schema, so that a file
+    // written by hand or by a language model can be checked before it is played. Linked from the
+    // format page; its $id is this address.
+    await cp(join(this.root, "src", "generated", "sighting.schema.json"), join(this.out, "sighting.schema.json"))
     // The 3D models the decor can be drawn with, and the catalogue that says what each id means.
     // Published for the same reason the recordings are: they are fetched from other people's pages
     // — an rr0.org case dossier embedding <rr0-scene> resolves a model named in its recording
@@ -254,6 +258,10 @@ ${retired}
 
 /demo-data/*
   Access-Control-Allow-Origin: *
+
+/sighting.schema.json
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=0, must-revalidate
 
 # Same, for the 3D models: a case dossier on rr0.org fetches both the catalogue and the .glb files
 # it names from here. Cached hard because a model is content-addressed by its own id in practice —

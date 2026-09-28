@@ -1,6 +1,7 @@
 import type { Keyframe, ShapeState } from "./Keyframe.js"
 import type { Shape } from "../shape/Shape.js"
 import { lerpShape, shapeContains } from "../shape/Shape.js"
+import { KeyframeCompletion } from "./KeyframeCompletion.js"
 
 export interface TimelineJson {
   keyframes: Keyframe[]
@@ -260,7 +261,7 @@ export class Timeline {
 
   static fromJSON(json: TimelineJson): Timeline {
     const timeline = new Timeline()
-    for (const keyframe of json.keyframes) {
+    for (const keyframe of KeyframeCompletion.complete(json.keyframes ?? [])) {
       timeline.addKeyframe(keyframe.t, keyframe.shapes)
     }
     if (json.order) {

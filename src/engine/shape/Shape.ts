@@ -17,7 +17,7 @@ export interface BaseShape {
   bounds: ShapeBounds
   /** CSS color */
   color: string
-  /** Rotation in radians; 0 = no rotation */
+  /** Rotation in radians about the shape's centre, positive = clockwise on screen; 0 = no rotation */
   angle: number
   /** 0 = opaque, 1 = fully transparent */
   transparency: number
@@ -83,8 +83,9 @@ export interface BaseShape {
    */
   angular?: AngularExtent
   /**
-   * Which way the observer was actually looking when the thing was there — degrees of azimuth from
-   * true north and of altitude above the horizon, the same conventions as ObserverPose.
+   * Where the phenomenon itself was in the observer's sky (the direction of the shape's centre, not
+   * the way the observer was facing) — degrees of azimuth from true north and of altitude above the
+   * horizon, the same conventions as ObserverPose. This, not `bounds`, is what places the shape.
    *
    * Authoritative over `bounds.x/y` exactly as `angular` is over `bounds.width/height`, and for the
    * same reason: a pixel names a direction only once a projection is named, and the observer's own

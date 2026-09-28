@@ -28,6 +28,10 @@ interface SchemaField {
   values?: string[]
   /** The keys of the object this holds, or of an array's element when it holds objects. */
   fields?: Record<string, SchemaField>
+  /** Set when the type could not be told apart (a union of a string and an object, like a SaidText,
+   * or anything else not recognised below): `type` then only says what to offer, not what is
+   * allowed, and the JSON Schema says nothing about it. */
+  loose?: true
 }
 
 class SchemaBuilder {
@@ -100,7 +104,7 @@ class SchemaBuilder {
     }
     const single = parts.length === 1 ? parts[0] : undefined
     if (single === undefined) {
-      return field
+      return { ...field, loose: true }
     }
     if (single.flags & ts.TypeFlags.NumberLike) {
       return { ...field, type: "number" }
@@ -120,7 +124,11 @@ class SchemaBuilder {
     if (this.isObject(single)) {
       return { ...field, type: "object", fields: this.nestedFieldsOf(single) }
     }
-    return field
+    if (single.flags & ts.TypeFlags.Object) {
+      // A Record<string, …>: keys of its own choosing, so an object and nothing more.
+      return { ...field, type: "object" }
+    }
+    return { ...field, loose: true }
   }
 
   /** Whether a type has named keys of its own worth offering. An index-signature-only type
@@ -173,6 +181,78 @@ class SchemaBuilder {
   }
 }
 
+/**
+ * The same description, as a JSON Schema anybody can validate a recording against — the published
+ * one, at ufoathome.org/sighting.schema.json.
+ *
+ * Its first reader was somebody building a recording from the documentation alone, who had to dig
+ * the field list out of the Player page's minified bundle to check their file. It says what a key
+ * may hold and which keys exist (a misspelt one is an error, which is most of what a hand-written
+ * file gets wrong), and nothing about which are required: a keyframe that leaves fields out holds
+ * them from the one before (see KeyframeCompletion), and what the rest of a recording may omit is
+ * a question of meaning the page answers, not of shape.
+ *
+ * Any value may also be written wrapped with its provenance, `{ value, basis, rationale }` (see
+ * Provenance), so every property accepts that too.
+ */
+class JsonSchemaExport {
+
+  static readonly ID = "https://ufoathome.org/sighting.schema.json"
+
+  static of(fields: Record<string, SchemaField>): object {
+    return {
+      $schema: "https://json-schema.org/draft/2020-12/schema",
+      $id: JsonSchemaExport.ID,
+      title: "UFO@home recording",
+      description: "One observer's recording of a sighting. See https://ufoathome.org/docs/format/",
+      ...JsonSchemaExport.object(fields),
+      $defs: {
+        stated: {
+          description: "A value with its provenance beside it: what any field may be written as, in place of the bare value.",
+          type: "object",
+          required: ["value"],
+          properties: {
+            value: {},
+            basis: { enum: ["stated", "derived", "assumed"], description: "Absent means stated." },
+            rationale: { type: "string", description: "The working for a derivation, or what a guess was chosen for." }
+          },
+          additionalProperties: false
+        }
+      }
+    }
+  }
+
+  private static object(fields: Record<string, SchemaField>): object {
+    const properties: Record<string, object> = {}
+    for (const [name, field] of Object.entries(fields)) {
+      properties[name] = JsonSchemaExport.orStated(JsonSchemaExport.field(field))
+    }
+    return { type: "object", properties, additionalProperties: false }
+  }
+
+  /** `schema`, or the same value wrapped with its provenance — an array's element can be, too. */
+  private static orStated(schema: object): object {
+    return { anyOf: [schema, { $ref: "#/$defs/stated" }] }
+  }
+
+  private static field(field: SchemaField): object {
+    const description = field.doc === undefined ? {} : { description: field.doc }
+    if (field.loose) {
+      return description
+    }
+    switch (field.type) {
+      case "enum":
+        return { ...description, enum: field.values }
+      case "object":
+        return { ...description, ...(field.fields ? JsonSchemaExport.object(field.fields) : { type: "object" }) }
+      case "array":
+        return { ...description, type: "array", ...(field.fields ? { items: JsonSchemaExport.orStated(JsonSchemaExport.object(field.fields)) } : {}) }
+      default:
+        return { ...description, type: field.type }
+    }
+  }
+}
+
 const scriptDir = path.dirname(fileURLToPath(import.meta.url))
 const root = path.join(scriptDir, "..")
 const program = ts.createProgram([path.join(root, "src", "engine", "persistence", "sightingJson.ts")], {
@@ -193,6 +273,8 @@ const outDir = path.join(root, "src", "generated")
 mkdirSync(outDir, { recursive: true })
 const outPath = path.join(outDir, "sightingSchema.json")
 writeFileSync(outPath, `${JSON.stringify(schema, null, 2)}\n`)
+// Beside it, and copied to the site's root by site/build.ts.
+writeFileSync(path.join(outDir, "sighting.schema.json"), `${JSON.stringify(JsonSchemaExport.of(schema), null, 2)}\n`)
 
 const count = (fields: Record<string, SchemaField>): number =>
   Object.values(fields).reduce((total, field) => total + 1 + (field.fields ? count(field.fields) : 0), 0)
