@@ -3533,6 +3533,7 @@ export class SceneRenderer {
     const bounds: Array<{ x: number; y: number; width: number; height: number }> = []
     const box = new Box3()
     const direction = new Vector3()
+    const forward = this.camera.getWorldDirection(new Vector3())
     // What moves: a decor object on a track, an aircraft or a vehicle — and every body of the
     // interpretation, which is the phenomenon itself in 3D (Socorro's craft went behind the map
     // before it was hidden, the map knowing only of the decor).
@@ -3550,13 +3551,20 @@ export class SceneRenderer {
       let left = Infinity, right = -Infinity, top = Infinity, bottom = -Infinity
       for (const x of [box.min.x, box.max.x]) for (const y of [box.min.y, box.max.y]) for (const z of [box.min.z, box.max.z]) {
         direction.set(x, y, z).sub(this.camera.position).normalize()
+        // Only what is in front of the eye. An eye's projection places even what is behind it,
+        // far outside the picture and on every side at once: Masse's tractor, ninety metres behind
+        // him, made a box wider than the whole frame, and the map hid itself for most of Valensole.
+        if (direction.dot(forward) <= 0) continue
         const point = this.screenPointOf(direction)
         if (!point) continue
         const px = (point.ndcX + 1) / 2, py = (1 - point.ndcY) / 2
         left = Math.min(left, px); right = Math.max(right, px)
         top = Math.min(top, py); bottom = Math.max(bottom, py)
       }
-      if (Number.isFinite(left)) bounds.push({ x: left, y: top, width: right - left, height: bottom - top })
+      // What the picture shows of it: a subject beside the frame covers no corner of it.
+      left = Math.max(left, 0); right = Math.min(right, 1)
+      top = Math.max(top, 0); bottom = Math.min(bottom, 1)
+      if (right >= left && bottom >= top) bounds.push({ x: left, y: top, width: right - left, height: bottom - top })
     }
     return bounds
   }

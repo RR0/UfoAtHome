@@ -655,6 +655,7 @@ export class UfoElement extends HTMLElement {
     // nothing about this one.
     this.observerMapView.reset()
     this.mapFitButton.hidden = true
+    this.observerMapAsked = false
     this.player = this.createPlayer()
     this.updateTimeLabels()
     this.updatePlayPauseButton()
@@ -1491,8 +1492,16 @@ export class UfoElement extends HTMLElement {
    * shadow DOM.
    */
   toggleObserverMap(): void {
-    this.setObserverMapOpen(this.observerMapPanel.hidden)
+    const open = this.observerMapPanel.hidden
+    // Asked for, so shown: a map that stepped aside for the phenomenon would otherwise answer the
+    // reader's click with nothing at all — see keepObserverMapClear.
+    this.observerMapAsked = open
+    this.setObserverMapOpen(open)
+    this.keepObserverMapClear()
   }
+
+  /** Whether the reader opened the map themselves, which outranks its stepping aside. */
+  private observerMapAsked = false
 
   /**
    * Puts the map where the page said it should START — see OBSERVER_MAP_ATTRIBUTE.
@@ -1704,7 +1713,7 @@ export class UfoElement extends HTMLElement {
     const margin = UfoElement.OBSERVER_MAP_CLEARANCE_PX
     const rightCovered = covers(...rightCorner, 0)
     const leftCovered = covers(...leftCorner, 0)
-    this.observerMapPanel.classList.toggle("subject-overlap", rightCovered && leftCovered)
+    this.observerMapPanel.classList.toggle("subject-overlap", rightCovered && leftCovered && !this.observerMapAsked)
     if (this.observerMapPanel.classList.contains("on-the-left")) {
       // Back to the corner it prefers, but only once that corner is clear by the margin — the
       // asymmetry IS the anti-flicker: leaving costs nothing, returning has to be sure.

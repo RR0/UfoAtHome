@@ -62,6 +62,28 @@ describe("scene playback resource reuse", () => {
     expect(bounds).toHaveLength(1)
     expect(bounds[0].x + bounds[0].width).toBeLessThan(0.5)
   })
+  it("does not count what is behind the eye or beside the picture as covering it", () => {
+    const r = renderer()
+    const tractor = new Group()
+    tractor.add(new Mesh(new BoxGeometry(3.4, 2.4, 3.2)))
+    r.decorObjects = [{ id: "tractor", kind: "vehicle" }]
+    r.decorGroups.set("tractor", tractor)
+    r.bodySystem = { reflectors: [] }
+    // An eye's projection: every direction lands somewhere, the angle from the axis as the radius —
+    // what puts a thing behind the observer far outside the picture on every side at once.
+    r.screenPointOf = (direction: Vector3) => {
+      const angle = Math.acos(Math.max(-1, Math.min(1, -direction.z)))
+      const around = Math.atan2(direction.y, direction.x)
+      const radius = angle / (Math.PI / 6)
+      return { ndcX: radius * Math.cos(around), ndcY: radius * Math.sin(around) }
+    }
+    tractor.position.set(0, 0, 90)
+    expect(r.mapSubjectBounds()).toEqual([])
+    tractor.position.set(-40, 0, -10)
+    expect(r.mapSubjectBounds()).toEqual([])
+    tractor.position.set(0, 0, -30)
+    expect(r.mapSubjectBounds()).toHaveLength(1)
+  })
   it("keeps compass captions out of the accumulated exposure samples", () => {
     const r = renderer()
     const sprite = new Sprite()
