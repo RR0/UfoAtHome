@@ -88,6 +88,12 @@ https://ufoathome.org/sighting.schema.json .
   "interpretation", never in the shapes.
 - List the contradictions between the documents, and the questions to
   put back to the observer or the investigator.</code></pre>
+    <p>Or install the <strong>UFO@home skill</strong> in your assistant: the same instructions,
+      with the method, the format's rules, the schema, an example and a validator that needs only
+      Python, so you only have to hand it the documents.
+      <a href="/skill/ufoathome-recording.zip">Download the skill</a> (a zip to add to Claude's
+      skills, or to unpack in <code>~/.claude/skills/</code> for Claude Code), or
+      <a href="/skill/SKILL.md">read it first</a>.</p>
     <p>Then check what it wrote, the way you would check a colleague's work:</p>
     <ul>
       <li><strong>Play it.</strong> Open it in <a href="/play/">the player</a>, from your computer
@@ -175,6 +181,12 @@ https://ufoathome.org/sighting.schema.json .
   l'observateur vont dans "interpretation", jamais dans les formes.
 - Liste les contradictions entre les documents, et les questions à
   reposer à l'observateur ou à l'enquêteur.</code></pre>
+    <p>Ou installez le <strong>skill UFO@home</strong> dans votre assistant : les mêmes consignes,
+      avec la méthode, les règles du format, le schéma, un exemple et un validateur qui ne demande
+      que Python, si bien qu'il ne reste qu'à lui confier les documents.
+      <a href="/skill/ufoathome-recording.zip">Télécharger le skill</a> (un zip à ajouter aux
+      skills de Claude, ou à décompresser dans <code>~/.claude/skills/</code> pour Claude Code), ou
+      <a href="/skill/SKILL.md">le lire d'abord</a>.</p>
     <p>Puis vérifiez ce qu'il a écrit, comme vous vérifieriez le travail d'un collègue :</p>
     <ul>
       <li><strong>Jouez-le.</strong> Ouvrez-le dans <a href="/play/">le lecteur</a>, depuis votre

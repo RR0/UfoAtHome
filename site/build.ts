@@ -17,6 +17,7 @@ import { COMPONENT_DOCS, DocsComponentPage } from "./content/DocsComponentPage.j
 import { FaqPage } from "./content/FaqPage.js"
 import { HtmlPageTree } from "./HtmlPageTree.js"
 import { ContextPage } from "./content/ContextPage.js"
+import { SkillPackage } from "./SkillPackage.js"
 
 /**
  * Builds ufoathome.org into `dist-site/`.
@@ -123,6 +124,12 @@ class SiteBuilder {
     // written by hand or by a language model can be checked before it is played. Linked from the
     // format page; its $id is this address.
     await cp(join(this.root, "src", "generated", "sighting.schema.json"), join(this.out, "sighting.schema.json"))
+    // The skill that teaches an AI assistant to write a recording from a case file (see SkillPackage):
+    // the zip to install, and its SKILL.md alone for a reader who wants to see what it says first.
+    const skill = new SkillPackage(this.root, version)
+    await mkdir(join(this.out, "skill"), { recursive: true })
+    await writeFile(join(this.out, "skill", `${SkillPackage.NAME}.zip`), await skill.zip())
+    await writeFile(join(this.out, "skill", "SKILL.md"), (await skill.files())["SKILL.md"], "utf8")
     // The 3D models the decor can be drawn with, and the catalogue that says what each id means.
     // Published for the same reason the recordings are: they are fetched from other people's pages
     // — an rr0.org case dossier embedding <rr0-scene> resolves a model named in its recording

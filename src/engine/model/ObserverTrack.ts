@@ -16,6 +16,8 @@ export interface ObserverPose {
    */
   lat?: number
   lng?: number
+  /** Metres above the local ground under the observer, not above sea level: 0 for someone standing on
+   * it, the height of a window or a cliff top otherwise. The eye's own height is added on top. */
   elevationM: number
   /**
    * Degrees clockwise from true north. undefined means the heading is unknown — callers must
