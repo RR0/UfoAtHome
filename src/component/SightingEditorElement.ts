@@ -334,12 +334,13 @@ export class SightingEditorElement extends HTMLElement {
   private readonly importFileInput: HTMLInputElement
   private readonly importUrlInput: HTMLInputElement
   private readonly importUrlButton: HTMLButtonElement
-  private readonly narrativeKeyInput: HTMLInputElement
-  private readonly narrativeWorkspaceInput: HTMLInputElement
+  private readonly narrativeSourceRow: HTMLElement
+  private readonly narrativeSettingsBox: HTMLElement
+  /** The inputs the current provider's settings were rendered into, by setting id. */
+  private narrativeSettingInputs = new Map<string, HTMLInputElement | HTMLSelectElement>()
   private readonly narrativeRememberInput: HTMLInputElement
   private readonly narrativeDraftButton: HTMLButtonElement
   private readonly narrativeStopButton: HTMLButtonElement
-  private readonly narrativeCreditLink: HTMLAnchorElement
   private readonly narrativeStatus: HTMLElement
   private readonly narrativeReport: HTMLElement
   private readonly placeNameInput: HTMLInputElement
@@ -520,8 +521,7 @@ export class SightingEditorElement extends HTMLElement {
   private readonly labelTags: HTMLElement
   private readonly labelImportFile: HTMLElement
   private readonly labelImportUrl: HTMLElement
-  private readonly labelNarrativeKey: HTMLElement
-  private readonly labelNarrativeWorkspace: HTMLElement
+  private readonly labelNarrativeSource: HTMLElement
   private readonly labelNarrativeRemember: HTMLElement
   private readonly groupTabs: HTMLButtonElement[]
   private readonly groupPanels: HTMLElement[]
@@ -995,12 +995,11 @@ export class SightingEditorElement extends HTMLElement {
     this.importFileInput = this.shadow.getElementById("import-file") as HTMLInputElement
     this.importUrlInput = this.shadow.getElementById("import-url") as HTMLInputElement
     this.importUrlButton = this.shadow.getElementById("import-url-button") as HTMLButtonElement
-    this.narrativeKeyInput = this.shadow.getElementById("narrativeKey") as HTMLInputElement
-    this.narrativeWorkspaceInput = this.shadow.getElementById("narrativeWorkspace") as HTMLInputElement
+    this.narrativeSourceRow = this.shadow.getElementById("narrative-source-row")!
+    this.narrativeSettingsBox = this.shadow.getElementById("narrative-settings")!
     this.narrativeRememberInput = this.shadow.getElementById("narrativeRemember") as HTMLInputElement
     this.narrativeDraftButton = this.shadow.getElementById("narrative-draft") as HTMLButtonElement
     this.narrativeStopButton = this.shadow.getElementById("narrative-stop") as HTMLButtonElement
-    this.narrativeCreditLink = this.shadow.getElementById("narrative-credit") as HTMLAnchorElement
     this.narrativeStatus = this.shadow.getElementById("narrative-status")!
     this.narrativeReport = this.shadow.getElementById("narrative-report")!
     this.placeNameInput = this.shadow.getElementById("placeName") as HTMLInputElement
@@ -1148,8 +1147,7 @@ export class SightingEditorElement extends HTMLElement {
     this.labelTags = this.shadow.getElementById("label-tags")!
     this.labelImportFile = this.shadow.getElementById("label-import-file")!
     this.labelImportUrl = this.shadow.getElementById("label-import-url")!
-    this.labelNarrativeKey = this.shadow.getElementById("label-narrative-key")!
-    this.labelNarrativeWorkspace = this.shadow.getElementById("label-narrative-workspace")!
+    this.labelNarrativeSource = this.shadow.getElementById("label-narrative-source")!
     this.labelNarrativeRemember = this.shadow.getElementById("label-narrative-remember")!
     this.labelShapeGroup = this.shadow.getElementById("label-shape-group")!
     this.labelTemporalGroup = this.shadow.getElementById("label-temporal-group")!
@@ -1369,24 +1367,11 @@ export class SightingEditorElement extends HTMLElement {
     })
     this.narrativeDraftButton.addEventListener("click", () => this.draftFromDescription())
     this.narrativeStopButton.addEventListener("click", () => this.narrativeAbort?.abort())
-    this.narrativeRememberInput.addEventListener("change", () => this.rememberNarrativeKey())
-    this.narrativeWorkspaceInput.addEventListener("input", () => this.rememberNarrativeKey())
-    this.narrativeKeyInput.addEventListener("input", () => {
-      this.rememberNarrativeKey()
-      this.syncNarrativeEnabled()
-    })
-    // The source names itself and credits itself in one control, the way every other data source in
-    // this project does (see DataSource): a static attribution beside a field would hide that this
-    // is a choice, and a name with no attribution would credit nobody.
-    this.narrativeCreditLink.textContent = `${NARRATIVE_SOURCES[0].name} — ${NARRATIVE_SOURCES[0].credit}`
-    this.narrativeCreditLink.href = NARRATIVE_SOURCES[0].creditUrl
-    // Said here and not only in applyMessages, which never runs for an English reader (see
-    // loadLocaleMessages): the template's baked-in default cannot carry the source's name, because
-    // which source is registered is not a fact the template has.
-    this.labelNarrativeKey.textContent = this.messages.narrativeKey.replace("{source}", NARRATIVE_SOURCES[0].name)
-    this.narrativeWorkspaceInput.title = this.messages.narrativeWorkspaceHint
-    this.restoreNarrativeKey()
-    this.syncNarrativeEnabled()
+    this.narrativeRememberInput.addEventListener("change", () => this.rememberNarrativeSettings())
+    // The provider picker (with its credit) and its settings are built in script, from the registry
+    // and from the provider — see refreshSourceRows and renderNarrativeSettings. Done here and not
+    // only in applyMessages, which never runs for an English reader (see loadLocaleMessages).
+    this.renderNarrativeSettings()
     this.durationInput.addEventListener("input", () => {
       this.ufoElement.durationSeconds = this.durationInput.value === "" ? undefined : Number(this.durationInput.value)
       this.ufoElement.refresh() // otherwise the seek bar's max (seekableDuration) only updates on the next tick
@@ -1879,17 +1864,22 @@ export class SightingEditorElement extends HTMLElement {
   }
 
 
-  /** Where the reader's own API key is kept when they ask for it to be — see rememberNarrativeKey.
-   * Namespaced like everything else this element could ever store on a host page it shares. */
+  /** Where a Claude key was kept before settings were each provider's own — read once, so nobody
+   * retypes theirs, then cleared (see storedNarrativeSetting and rememberNarrativeSettings). */
   private static readonly NARRATIVE_KEY_STORAGE = "rr0-sighting-editor.narrative-key"
 
-  /** And the workspace it names, kept with it — see rememberNarrativeKey. */
+  /** And the workspace it named, the same way. */
   private static readonly NARRATIVE_SCOPE_STORAGE = "rr0-sighting-editor.narrative-workspace"
 
   /** Built once, up front: constructing one is free (its SDK and its client load on the first ask,
    * not here), and the panel has to know before any draft whether this reader needs a key at all —
    * see NarrativeProvider.needsCredential, and syncNarrativeEnabled. */
-  private readonly narrativeProvider: NarrativeProvider = NARRATIVE_SOURCES[0].create()
+  private narrativeProvider: NarrativeProvider = NARRATIVE_SOURCES[0].create()
+
+  /** Which registered provider drafts — what the stored settings are filed under. */
+  private get narrativeSourceId(): string {
+    return dataSourceById(NARRATIVE_SOURCES, this.chosenSourceId.get("narrative")).id
+  }
 
   private narrativeAbort?: AbortController
 
@@ -1916,8 +1906,7 @@ export class SightingEditorElement extends HTMLElement {
         ask,
         current: this.sightingData,
         language: this.showerLanguage() === "fr" ? "French" : "English",
-        credential: this.narrativeKeyInput.value.trim() || undefined,
-        credentialScope: this.narrativeWorkspaceInput.value.trim() || undefined
+        settings: this.narrativeSettingValues()
       }, abort.signal)
       this.applyNarrativeDraft(draft)
     } catch (error) {
@@ -2076,25 +2065,85 @@ export class SightingEditorElement extends HTMLElement {
    * is for, since "API key" alone leaves them to guess whose.
    */
   private syncNarrativeEnabled(): void {
-    const source = NARRATIVE_SOURCES[0].name
-    const missingKey = this.narrativeProvider.needsCredential && this.narrativeKeyInput.value.trim() === ""
+    const source = dataSourceById(NARRATIVE_SOURCES, this.chosenSourceId.get("narrative")).name
+    const missing = this.narrativeProvider.settings.find(setting =>
+      setting.required && (this.narrativeSettingInputs.get(setting.id)?.value.trim() ?? "") === "")
     const missingAsk = this.descriptionInput.value.trim() === ""
-    this.narrativeDraftButton.disabled = Boolean(this.narrativeAbort) || missingKey || missingAsk
-    this.narrativeDraftButton.title = missingKey
-      ? this.messages.narrativeNeedsKey.replace("{source}", source)
+    this.narrativeDraftButton.disabled = Boolean(this.narrativeAbort) || missing !== undefined || missingAsk
+    this.narrativeDraftButton.title = missing
+      ? this.messages.narrativeNeedsSetting
+        .replace("{setting}", this.said.read(missing.label) ?? missing.id)
+        .replace("{source}", source)
       : missingAsk ? this.messages.narrativeNeedsAsk : ""
-    // A reader with nothing to authenticate is not shown a field asking them to.
-    this.narrativeKeyInput.parentElement!.hidden = !this.narrativeProvider.needsCredential
-    this.narrativeRememberInput.parentElement!.hidden = !this.narrativeProvider.needsCredential
-    this.narrativeWorkspaceInput.parentElement!.hidden = !this.narrativeProvider.acceptsCredentialScope
-    // Marked, never blocked. A key that does not start with the prefix every Anthropic key has
-    // begun with is almost certainly a paste gone wrong, and saying so beats spending a round trip
-    // to be told the same by the API. But the button stays available: the day that prefix changes,
-    // a rule of ours refusing to send the new one would be the bug, and a red border would not.
-    const typed = this.narrativeKeyInput.value.trim()
-    const unlikely = typed !== "" && !typed.startsWith("sk-ant-")
-    this.narrativeKeyInput.classList.toggle("invalid", unlikely)
-    this.narrativeKeyInput.title = unlikely ? this.messages.narrativeKeyUnlikely : ""
+    // A reader with nothing to keep is not offered to keep it.
+    this.narrativeRememberInput.parentElement!.hidden =
+      !this.narrativeProvider.settings.some(setting => setting.remembered === "credential")
+    // Marked, never blocked: see NarrativeSetting.suspect.
+    for (const setting of this.narrativeProvider.settings) {
+      const input = this.narrativeSettingInputs.get(setting.id)
+      if (!input || !setting.suspect) continue
+      const typed = input.value.trim()
+      const warning = typed === "" ? undefined : setting.suspect(typed)
+      input.classList.toggle("invalid", warning !== undefined)
+      input.title = warning ? this.said.read(warning) ?? "" : this.said.read(setting.hint) ?? ""
+    }
+  }
+
+  /**
+   * Builds the fields the current provider declares (see NarrativeSetting), in the reader's
+   * language, with what was kept of them on this device. Rebuilt when the provider changes and on a
+   * language change; values typed in the fields being replaced are carried over.
+   */
+  private renderNarrativeSettings(): void {
+    const typed = this.narrativeSettingValues()
+    this.narrativeSettingInputs = new Map()
+    const fields = this.narrativeProvider.settings.map(setting => {
+      const label = document.createElement("label")
+      const text = document.createElement("span")
+      text.textContent = this.said.read(setting.label) ?? setting.id
+      let input: HTMLInputElement | HTMLSelectElement
+      if (setting.kind === "choice") {
+        input = document.createElement("select")
+        for (const choice of setting.choices ?? []) {
+          const option = document.createElement("option")
+          option.value = choice.value
+          option.textContent = this.said.read(choice.label) ?? choice.value
+          input.appendChild(option)
+        }
+      } else {
+        input = document.createElement("input")
+        input.type = setting.kind === "secret" ? "password" : "text"
+        input.autocomplete = "off"
+        input.spellcheck = false
+        input.placeholder = this.said.read(setting.placeholder) ?? ""
+      }
+      input.id = `narrative-${setting.id}`
+      input.title = this.said.read(setting.hint) ?? ""
+      const kept = typed[setting.id] ?? this.storedNarrativeSetting(setting.id)
+      if (kept !== undefined) input.value = kept
+      input.addEventListener(setting.kind === "choice" ? "change" : "input", () => {
+        this.rememberNarrativeSettings()
+        this.syncNarrativeEnabled()
+      })
+      this.narrativeSettingInputs.set(setting.id, input)
+      label.append(text, document.createTextNode(" "), input)
+      return label
+    })
+    this.narrativeSettingsBox.replaceChildren(...fields)
+    // The box is ticked when a credential of this provider was kept: it says where the value came from.
+    this.narrativeRememberInput.checked = this.narrativeProvider.settings.some(setting =>
+      setting.remembered === "credential" && this.storedNarrativeSetting(setting.id) !== undefined)
+    this.syncNarrativeEnabled()
+  }
+
+  /** What the reader gave each setting of the current provider, empty ones left out. */
+  private narrativeSettingValues(): Record<string, string> {
+    const values: Record<string, string> = {}
+    for (const [id, input] of this.narrativeSettingInputs) {
+      const value = input.value.trim()
+      if (value !== "") values[id] = value
+    }
+    return values
   }
 
   private narrativeErrorFor(error: unknown): string {
@@ -2117,43 +2166,56 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   /**
-   * Keeps the reader's key in this browser, or stops keeping it.
+   * Keeps the reader's settings in this browser, or stops keeping them.
    *
-   * Off by default and never turned on for them. A key is a credential, localStorage is readable by
-   * anything else that ever runs on the same origin, and the convenience of not retyping it is not
-   * ours to trade for that on somebody's behalf. Unticking it forgets the stored copy at once
-   * rather than merely stopping future writes, which is what a reader who just changed their mind
-   * about it means.
+   * A preference (a model picked) is kept like any choice. A credential (a key, and the workspace
+   * that is half of it) only when the reader ticks the box, which is off by default and never turned
+   * on for them: localStorage is readable by anything else that ever runs on the same origin, and
+   * the convenience of not retyping a key is not ours to trade for that on somebody's behalf.
+   * Unticking it forgets the stored copies at once, which is what a reader who just changed their
+   * mind about it means.
    */
-  private rememberNarrativeKey(): void {
+  private rememberNarrativeSettings(): void {
     try {
-      if (this.narrativeRememberInput.checked) {
-        localStorage.setItem(SightingEditorElement.NARRATIVE_KEY_STORAGE, this.narrativeKeyInput.value)
-        // With the key, because it is half of the same credential: a reader who has to retype the
-        // workspace every time has not been spared anything.
-        localStorage.setItem(SightingEditorElement.NARRATIVE_SCOPE_STORAGE, this.narrativeWorkspaceInput.value)
-      } else {
-        localStorage.removeItem(SightingEditorElement.NARRATIVE_KEY_STORAGE)
-        localStorage.removeItem(SightingEditorElement.NARRATIVE_SCOPE_STORAGE)
+      for (const setting of this.narrativeProvider.settings) {
+        const key = this.narrativeStorageKey(setting.id)
+        const value = this.narrativeSettingInputs.get(setting.id)?.value ?? ""
+        const keep = setting.remembered === "preference"
+          || (setting.remembered === "credential" && this.narrativeRememberInput.checked)
+        if (keep && value !== "") {
+          localStorage.setItem(key, value)
+        } else {
+          localStorage.removeItem(key)
+        }
       }
+      // Where a Claude key and workspace were kept before (see storedNarrativeSetting): what is
+      // still wanted has just been written under its new name, so the old copies only ever stood
+      // for a choice the reader may since have unmade.
+      localStorage.removeItem(SightingEditorElement.NARRATIVE_KEY_STORAGE)
+      localStorage.removeItem(SightingEditorElement.NARRATIVE_SCOPE_STORAGE)
     } catch {
-      // Private browsing, a blocked origin, a full quota. Nothing to tell the reader: the key still
-      // works for this session, which is all the checkbox was ever offering to extend.
+      // Private browsing, a blocked origin, a full quota. Nothing to tell the reader: the values
+      // still work for this session, which is all keeping them was ever offering to extend.
     }
   }
 
-  /** The stored key, when there is one — and the checkbox ticked to say where it came from. */
-  private restoreNarrativeKey(): void {
-    let stored: string | null = null
+  private narrativeStorageKey(settingId: string): string {
+    return `rr0-sighting-editor.narrative.${this.narrativeSourceId}.${settingId}`
+  }
+
+  /** A setting kept on this device, reading the two places a Claude key and workspace were kept
+   * before settings were the provider's own, so that nobody has to type theirs again. */
+  private storedNarrativeSetting(settingId: string): string | undefined {
     try {
-      stored = localStorage.getItem(SightingEditorElement.NARRATIVE_KEY_STORAGE)
+      const stored = localStorage.getItem(this.narrativeStorageKey(settingId))
+      if (stored !== null) return stored
+      if (this.narrativeSourceId !== "claude") return undefined
+      const legacy = settingId === "key" ? SightingEditorElement.NARRATIVE_KEY_STORAGE
+        : settingId === "workspace" ? SightingEditorElement.NARRATIVE_SCOPE_STORAGE : undefined
+      return (legacy && localStorage.getItem(legacy)) || undefined
     } catch {
-      return
+      return undefined
     }
-    if (stored === null) return
-    this.narrativeKeyInput.value = stored
-    this.narrativeWorkspaceInput.value = localStorage.getItem(SightingEditorElement.NARRATIVE_SCOPE_STORAGE) ?? ""
-    this.narrativeRememberInput.checked = true
   }
 
   private numberOrUndefined(value: string): number | undefined {
@@ -2200,6 +2262,12 @@ export class SightingEditorElement extends HTMLElement {
         this.weatherInference = new WeatherInference(source.create())
         // The values on screen came from the previous record — ask the new one for its own.
         this.scheduleWeatherLookup()
+      })
+    )
+    this.narrativeSourceRow.replaceChildren(
+      this.sourcePicker("narrative", NARRATIVE_SOURCES, source => {
+        this.narrativeProvider = source.create()
+        this.renderNarrativeSettings()
       })
     )
     this.terrainSourceRows.replaceChildren(
@@ -7524,10 +7592,8 @@ export class SightingEditorElement extends HTMLElement {
       const option = this.shadow.getElementById(id)
       if (option) option.textContent = text
     }
-    this.labelNarrativeKey.textContent = messages.narrativeKey.replace("{source}", NARRATIVE_SOURCES[0].name)
-    this.labelNarrativeWorkspace.textContent = messages.narrativeWorkspace
-    this.narrativeWorkspaceInput.placeholder = messages.narrativeWorkspacePlaceholder
-    this.narrativeWorkspaceInput.title = messages.narrativeWorkspaceHint
+    this.labelNarrativeSource.textContent = messages.narrativeSource
+    this.renderNarrativeSettings()
     this.labelNarrativeRemember.textContent = messages.narrativeRemember
     this.narrativeStopButton.textContent = messages.narrativeStop
     this.narrativeDraftButton.textContent = messages.narrativeDraft

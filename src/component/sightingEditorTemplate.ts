@@ -52,15 +52,13 @@ export const html = `
   <div class="toolbar narrative">
     <label class="wide"><span id="label-description">Description</span>
       <textarea id="description" rows="4" placeholder="What the observer reported, in their own words"></textarea></label>
-    <label><span id="label-narrative-key">API key</span> <input id="narrativeKey" type="password" autocomplete="off" spellcheck="false"/></label>
-    <!-- Only for a key that reaches several workspaces, which the API refuses outright unless the
-         request names one. Shown to everybody because there is no way to tell from a key which sort
-         it is, and empty for the keys that do not need it. -->
-    <label><span id="label-narrative-workspace">Workspace ID</span> <input id="narrativeWorkspace" type="text" autocomplete="off" spellcheck="false" placeholder="only if your key spans several"/></label>
+    <!-- Which provider drafts, and the settings it declares (a key, a model…), rendered from the
+         provider itself: see NarrativeSetting, and SightingEditorElement.renderNarrativeSettings. -->
+    <span class="narrative-source"><span id="label-narrative-source">Drafted by</span> <span id="narrative-source-row"></span></span>
+    <span id="narrative-settings" class="narrative-settings"></span>
     <label class="checkbox"><input id="narrativeRemember" type="checkbox"/> <span id="label-narrative-remember">Remember on this device</span></label>
     <button id="narrative-draft" type="button">Generate reconstruction</button>
     <button id="narrative-stop" type="button" hidden>Stop</button>
-    <a id="narrative-credit" class="inline-source" target="_blank" rel="noopener noreferrer"></a>
     <output id="narrative-status" for="description"></output>
   </div>
   <!-- What the draft claims and what it could not: the part that makes the rest usable. Empty (and
@@ -868,10 +866,6 @@ input.invalid {
    this is embedded, by construction. The underline is what still reads as a link. */
 .place-status a,
 .weather-source a,
-#narrative-credit {
-  color: inherit;
-  text-decoration: underline dotted;
-}
 /* Locked because they were looked up, not because they're unavailable — so they stay exactly as
    legible as the fields around them, and only the affordance goes away. The UA's own disabled
    styling (grey text over a translucent grey fill, which on a dark host page turns into grey on
@@ -968,11 +962,16 @@ select.weather-field:disabled {
   font: inherit;
   resize: vertical;
 }
-#narrativeKey {
+/* A provider's own settings sit in the row like any other field; a key is long, a workspace id
+   shorter, a model a list. */
+.narrative-settings {
+  display: contents;
+}
+#narrative-key {
   width: 12em;
   font: inherit;
 }
-#narrativeWorkspace {
+#narrative-workspace {
   width: 11em;
   font: inherit;
 }

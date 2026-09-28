@@ -1,5 +1,6 @@
 import type { SightingRecordingJson } from "../persistence/sightingJson.js"
 import type { Basis } from "../persistence/Provenance.js"
+import type { SaidText } from "../model/SaidText.js"
 
 /** One image the account came with — a photograph, or a frame pulled out of a film. */
 export interface NarrativeImage {
@@ -71,20 +72,40 @@ export interface NarrativeRequest {
    * the account's own language, which is usually right and occasionally is not. */
   language?: string
   /**
-   * Whose key pays for this call. The visitor's own, always: nothing in this project holds a
-   * credential for anybody else, and a provider that needed one hosted somewhere would be a
-   * different implementation with a different name. Ignored by providers that need none.
+   * The values the reader gave the provider's own settings (see NarrativeProvider.settings), by
+   * setting id: a key, a workspace, a model. Whose key pays for this call is always the visitor's
+   * own: nothing in this project holds a credential for anybody else.
    */
-  credential?: string
+  settings: Readonly<Record<string, string>>
+}
+
+/**
+ * One option a provider needs from the reader, described rather than built: the editor renders
+ * every provider's settings the same way, so that registering a second provider (a local model, a
+ * report-form parser) does not also mean adding its fields to the editor.
+ */
+export interface NarrativeSetting {
+  /** Stable id: the key in NarrativeRequest.settings, and in what is stored on the device. */
+  id: string
+  /** A password field, a plain one, or a list to pick from. */
+  kind: "secret" | "text" | "choice"
+  label: SaidText
+  placeholder?: SaidText
+  /** What the field is for, shown as its tooltip. */
+  hint?: SaidText
+  /** For a "choice": the values and how each is named. The first is the default. */
+  choices?: ReadonlyArray<{ value: string, label: SaidText }>
+  /** A draft cannot be asked for while this is empty; the button says which setting is missing. */
+  required?: boolean
   /**
-   * Which of a credential's several accounts the call belongs to, when the service needs telling.
-   *
-   * Anthropic's own case, and the reason this exists: a key that is not scoped to a single
-   * workspace is refused outright unless the request names one. It is a property of the reader's
-   * key rather than of anything they asked, so it sits beside the credential and not in the ask.
-   * Ignored by providers, and by keys, that need none.
+   * Whether the value may outlive the page. "credential": only when the reader ticks the box that
+   * says so, and forgotten the moment it is unticked. "preference": always, like any other choice
+   * of theirs (a model picked). Absent: never.
    */
-  credentialScope?: string
+  remembered?: "credential" | "preference"
+  /** A warning for a value that looks wrong (a key without its service's prefix): shown, never
+   * enforced, since the day the format changes a refusal would be the bug. */
+  suspect?(value: string): SaidText | undefined
 }
 
 /**
@@ -99,14 +120,8 @@ export interface NarrativeRequest {
  * fashion in how the saying got typed up.
  */
 export interface NarrativeProvider {
-  /** True when {@link NarrativeRequest.credential} has to be set for `draft` to work — what the
-   * editor asks the reader for a key on, rather than hardcoding that Claude in particular needs
-   * one. */
-  readonly needsCredential: boolean
-
-  /** True when {@link NarrativeRequest.credentialScope} is worth offering — what puts the field in
-   * front of a reader whose key might need it, rather than in front of everybody. */
-  readonly acceptsCredentialScope: boolean
+  /** What this provider needs from the reader before it can draft — see NarrativeSetting. */
+  readonly settings: ReadonlyArray<NarrativeSetting>
 
   /** Reads `request` and proposes a recording — never its `description`, which is the account it
    * was just handed. Rejects on refusal, on a bad credential, and on an answer that is not a draft;

@@ -28,7 +28,13 @@ vi.mock("../../src/engine/narrative/narrativeSources.js", () => ({
       credit: "test",
       creditUrl: "https://example.org",
       create: () => ({
-        needsCredential: true,
+        settings: [
+          { id: "key", kind: "secret", label: { en: "Test key", fr: "Clé de test" }, required: true, remembered: "credential" },
+          {
+            id: "model", kind: "choice", label: "Model", remembered: "preference",
+            choices: [{ value: "small", label: "Small" }, { value: "large", label: "Large" }]
+          }
+        ],
         draft: (request: NarrativeRequest) => {
           asked.push(request)
           return answer(request)
@@ -184,7 +190,7 @@ function type(element: SightingEditorElement, id: string, value: string): void {
  * without the other parts. */
 async function draft(element: SightingEditorElement, ask: string, key = "sk-test"): Promise<void> {
   type(element, "description", ask)
-  type(element, "narrativeKey", key)
+  type(element, "narrative-key", key)
   field<HTMLButtonElement>(element, "narrative-draft").click()
   await new Promise(resolve => setTimeout(resolve, 0))
 }
@@ -413,10 +419,10 @@ describe("SightingEditorElement drafting from an account", () => {
     const button = field<HTMLButtonElement>(element, "narrative-draft")
 
     expect(button.disabled).toBe(true)
-    expect(button.title).toBe(
-      sightingEditorMessages_en.narrativeNeedsKey.replace("{source}", "Test reader"))
+    expect(button.title).toBe(sightingEditorMessages_en.narrativeNeedsSetting
+      .replace("{setting}", "Test key").replace("{source}", "Test reader"))
 
-    type(element, "narrativeKey", "sk-test")
+    type(element, "narrative-key", "sk-test")
     expect(button.disabled).toBe(true)
     expect(button.title).toBe(sightingEditorMessages_en.narrativeNeedsAsk)
 
@@ -425,10 +431,27 @@ describe("SightingEditorElement drafting from an account", () => {
     expect(button.title).toBe("")
   })
 
-  it("names the source the key is for, rather than leaving the reader to guess whose", async () => {
+  it("renders the settings the provider declares, and sends what the reader gave them", async () => {
     const element = mount()
+    answer = () => Promise.resolve({ recording: { id: "a" }, claims: [], gaps: [] })
 
-    expect(field(element, "label-narrative-key").textContent).toBe("Test reader API key")
+    expect(field<HTMLSelectElement>(element, "narrative-model").value).toBe("small")
+    const model = field<HTMLSelectElement>(element, "narrative-model")
+    model.value = "large"
+    model.dispatchEvent(new Event("change"))
+    await draft(element, "The account.")
+
+    expect(asked.at(-1)?.settings).toEqual({ key: "sk-test", model: "large" })
+  })
+
+  it("keeps a preference without being asked, and restores it", async () => {
+    const element = mount()
+    const model = field<HTMLSelectElement>(element, "narrative-model")
+    model.value = "large"
+    model.dispatchEvent(new Event("change"))
+
+    expect(localStorage.getItem("rr0-sighting-editor.narrative.test-narrative.model")).toBe("large")
+    expect(field<HTMLSelectElement>(mount(), "narrative-model").value).toBe("large")
   })
 
   it("stays available after a draft, since the account is still there to be reworded", async () => {
@@ -443,27 +466,29 @@ describe("SightingEditorElement drafting from an account", () => {
   it("keeps the key only when asked to, and forgets it the moment that is unticked", async () => {
     // Storing somebody's credential is their decision, not a convenience to help them to.
     const element = mount()
-    const key = field<HTMLInputElement>(element, "narrativeKey")
-    key.value = "sk-test"
-    key.dispatchEvent(new Event("input"))
+    type(element, "narrative-key", "sk-test")
+    const stored = "rr0-sighting-editor.narrative.test-narrative.key"
 
-    expect(localStorage.getItem("rr0-sighting-editor.narrative-key")).toBeNull()
+    expect(localStorage.getItem(stored)).toBeNull()
 
     const remember = field<HTMLInputElement>(element, "narrativeRemember")
     remember.checked = true
     remember.dispatchEvent(new Event("change"))
-    expect(localStorage.getItem("rr0-sighting-editor.narrative-key")).toBe("sk-test")
+    expect(localStorage.getItem(stored)).toBe("sk-test")
+    expect(field<HTMLInputElement>(mount(), "narrative-key").value).toBe("sk-test")
 
     remember.checked = false
     remember.dispatchEvent(new Event("change"))
-    expect(localStorage.getItem("rr0-sighting-editor.narrative-key")).toBeNull()
+    expect(localStorage.getItem(stored)).toBeNull()
   })
 
-  it("credits the source it reads with, on the control that names it", async () => {
+  it("credits the provider it drafts with, on the picker that names it", async () => {
     const element = mount()
-    const credit = field<HTMLAnchorElement>(element, "narrative-credit")
+    const row = field(element, "narrative-source-row")
 
-    expect(credit.textContent).toContain("Test reader")
+    expect(row.querySelector("select")?.value).toBe("test-narrative")
+    const credit = row.querySelector<HTMLAnchorElement>(".source-credit")!
+    expect(credit.textContent).toBe("test")
     expect(credit.href).toBe("https://example.org/")
   })
 })

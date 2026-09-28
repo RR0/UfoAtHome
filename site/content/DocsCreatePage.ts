@@ -109,8 +109,9 @@ https://ufoathome.org/sighting.schema.json .
         recognise what they saw.</li>
     </ul>
     <p>An observer who has only their own account can do this inside the editor: type it in the
-      <em>Observation</em> tab, and with a key for Claude's API the editor drafts the rest of the
-      recording from it, sending nothing anywhere but to that model.</p>
+      <em>Observation</em> tab, choose what drafts it (Claude today: your own API key, and the
+      model), and the editor drafts the rest of the recording from it, sending nothing anywhere but
+      to that model.</p>
     <p class="small">An account is personal data. Before handing documents to an online assistant,
       remove what identifies the observer unless they agreed to it, and check what the service
       keeps. And an assistant can be wrong with confidence: the file is only as good as the
@@ -203,8 +204,9 @@ https://ufoathome.org/sighting.schema.json .
         ce qu'il a vu.</li>
     </ul>
     <p>Un observateur qui n'a que son propre récit peut le faire dans l'éditeur : il le tape dans
-      l'onglet <em>Observation</em>, et avec une clé d'API Claude l'éditeur rédige le reste de
-      l'enregistrement à partir de lui, sans rien envoyer ailleurs qu'à ce modèle.</p>
+      l'onglet <em>Observation</em>, choisit ce qui le rédige (Claude aujourd'hui : sa propre clé
+      d'API, et le modèle), et l'éditeur rédige le reste de l'enregistrement à partir de lui, sans
+      rien envoyer ailleurs qu'à ce modèle.</p>
     <p class="small">Un compte rendu est une donnée personnelle. Avant de confier des documents à un
       assistant en ligne, retirez ce qui identifie l'observateur s'il n'y a pas consenti, et
       vérifiez ce que le service conserve. Et un assistant peut se tromper avec assurance : le

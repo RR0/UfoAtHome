@@ -4,7 +4,7 @@ import { RecordingRules } from "../RecordingRules.js"
 import { RecordingDigest } from "../RecordingDigest.js"
 import type { Basis } from "../../persistence/Provenance.js"
 import type {
-  NarrativeDraft, NarrativeImage, NarrativeProvider, NarrativeRequest
+  NarrativeDraft, NarrativeImage, NarrativeProvider, NarrativeRequest, NarrativeSetting
 } from "../NarrativeProvider.js"
 
 /** The one tool the model is asked to answer through. Not a formality: a tool call comes back as
@@ -110,16 +110,56 @@ ${RecordingRules.text("draft")}`
  */
 export class ClaudeNarrativeProvider implements NarrativeProvider {
 
-  readonly needsCredential = true
+  /**
+   * The key, the workspace it may need, and the model. The key and workspace are half of one
+   * credential each and are kept together only when the reader asks; the model is a preference.
+   *
+   * The models are Anthropic's current ones, most capable first after the default: Opus 5.5 is the
+   * default because everything this feature is good for depends on the model leaving a field empty
+   * rather than filling it plausibly, which is worth what it costs; Fable 5.1 reasons further for
+   * more; Sonnet 5.5 and Haiku 4.5 are there for a reader who would rather pay less and check more.
+   */
+  static readonly DEFAULT_MODEL = "claude-opus-5-5"
 
-  /** A personal or service-account key can reach several workspaces, and the API refuses such a key
-   * outright unless the request names one — see NarrativeRequest.credentialScope. */
-  readonly acceptsCredentialScope = true
-
-  /** Anthropic's most capable model, and the one whose refusals to guess are worth paying for:
-   * everything this feature is good for depends on it leaving a field empty rather than filling it
-   * plausibly. */
-  private static readonly MODEL = "claude-opus-5"
+  readonly settings: ReadonlyArray<NarrativeSetting> = [
+    {
+      id: "key",
+      kind: "secret",
+      label: { en: "Claude API key", fr: "Clé d'API Claude" },
+      required: true,
+      remembered: "credential",
+      // Every Anthropic key has begun with this prefix. Marked, never blocked: see NarrativeSetting.
+      suspect: value => value.startsWith("sk-ant-") ? undefined : {
+        en: "This does not look like a Claude API key: they begin with sk-ant-",
+        fr: "Ceci ne ressemble pas à une clé d'API Claude : elles commencent par sk-ant-"
+      }
+    },
+    {
+      // A personal or service-account key can reach several workspaces, and the API refuses such a
+      // key outright unless the request names one.
+      id: "workspace",
+      kind: "text",
+      label: { en: "Workspace ID", fr: "ID d'espace de travail" },
+      placeholder: { en: "only if your key spans several", fr: "seulement si votre clé en couvre plusieurs" },
+      hint: {
+        en: "Only for a key whose scope is the whole organisation. Simpler: leave this empty and create a key scoped to one workspace instead.",
+        fr: "Seulement pour une clé couvrant toute l'organisation. Plus simple : laissez vide et créez une clé limitée à un espace de travail."
+      },
+      remembered: "credential"
+    },
+    {
+      id: "model",
+      kind: "choice",
+      label: { en: "Model", fr: "Modèle" },
+      choices: [
+        { value: ClaudeNarrativeProvider.DEFAULT_MODEL, label: "Claude Opus 5.5" },
+        { value: "claude-fable-5-1", label: { en: "Claude Fable 5.1 (most capable, dearer)", fr: "Claude Fable 5.1 (le plus capable, plus cher)" } },
+        { value: "claude-sonnet-5-5", label: { en: "Claude Sonnet 5.5 (cheaper)", fr: "Claude Sonnet 5.5 (moins cher)" } },
+        { value: "claude-haiku-4-5", label: { en: "Claude Haiku 4.5 (cheapest)", fr: "Claude Haiku 4.5 (le moins cher)" } }
+      ],
+      remembered: "preference"
+    }
+  ]
 
   /** Loaded the first time a draft is asked for, not when the editor starts: the SDK is a
    * substantial download and most readers never open this panel at all. Kept, so the second ask
@@ -135,10 +175,10 @@ export class ClaudeNarrativeProvider implements NarrativeProvider {
   private format?: string
 
   async draft(request: NarrativeRequest, signal?: AbortSignal): Promise<NarrativeDraft> {
-    const client = await this.clientFor(request.credential, request.credentialScope)
+    const client = await this.clientFor(request.settings.key, request.settings.workspace)
     const format = this.format ??= JSON.stringify((await import("../../../generated/sightingSchema.json")).default)
     const stream = client.messages.stream({
-      model: ClaudeNarrativeProvider.MODEL,
+      model: request.settings.model || ClaudeNarrativeProvider.DEFAULT_MODEL,
       max_tokens: 16000,
       system: [
         { type: "text", text: RULES },

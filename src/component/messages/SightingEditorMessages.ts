@@ -569,24 +569,13 @@ export interface SightingEditorMessages extends SightingLabels {
    * beside the button. */
   /** Placeholder in the Description textarea, which is the account a draft is read from. */
   narrativePlaceholder: string
-  /** The reader's own API key. Theirs, never the site's — see ClaudeNarrativeProvider. {source} is
-   * the reader it is a key FOR, taken from the registry rather than written in: a key field that
-   * says only "API key" leaves a reader to guess whose, and the answer is a property of whichever
-   * source is registered (see narrativeSources.ts). */
-  narrativeKey: string
-  /** Why the button is disabled with no key in the field. {source} as above. */
-  narrativeNeedsKey: string
-  /** Title on a key field holding something that cannot be one. A warning, not a refusal: see
-   * syncNarrativeEnabled on why the button stays available. */
-  narrativeKeyUnlikely: string
-  /** Which of a key's workspaces to bill — only needed by a key that reaches several. */
-  narrativeWorkspace: string
-  narrativeWorkspacePlaceholder: string
-  /** Title on that field. Names the way out rather than only the way through: a key scoped to one
-   * workspace needs no id at all, and the id of the Default Workspace is the hardest of the lot to
-   * come by — it is absent from List Workspaces and reads as null on keys and usage reports, so it
-   * takes a successful call to learn what is missing to make one. */
-  narrativeWorkspaceHint: string
+  /** The label before the picker of what drafts from the account — see NARRATIVE_SOURCES. */
+  narrativeSource: string
+  /** Why the button is disabled while a required setting of the provider is empty: {setting} is the
+   * setting's own label, {source} the provider's name, so a reader is not left to guess whose key.
+   * The settings themselves (a key, a workspace, a model) are described by each provider in both
+   * languages — see NarrativeSetting — so that a new provider needs no message here. */
+  narrativeNeedsSetting: string
   /** Why it is disabled with nothing to send — an empty account, or an empty correction. */
   narrativeNeedsAsk: string
   /** The checkbox that keeps that key in this browser. Off by default: storing somebody's key is
