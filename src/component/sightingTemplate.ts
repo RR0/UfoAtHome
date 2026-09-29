@@ -403,6 +403,29 @@ export const css = `
 .info-dl dd {
   margin: 0;
 }
+/* How a line is known (see SightingElement.basisOf): quiet when the observer said it, louder the
+   further it is from what they said. */
+.basis {
+  display: inline-block;
+  margin-left: 0.3em;
+  padding: 0 0.35em;
+  border-radius: 3px;
+  border: 1px solid currentColor;
+  font-size: 0.75em;
+  line-height: 1.4;
+  white-space: nowrap;
+  cursor: help;
+}
+.basis-stated {
+  color: #888;
+  border-color: #ccc;
+}
+.basis-derived {
+  color: #2a6fb0;
+}
+.basis-assumed {
+  color: #b06a00;
+}
 /* The smaller, secondary row below the observation details — app identity on the left, the
    credits reveal on the right, matching the reduced visual weight of "fine print" rather than
    competing with the sighting's own metadata for attention. */

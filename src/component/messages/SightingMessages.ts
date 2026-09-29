@@ -20,6 +20,8 @@ export interface SightingMessages extends SightingLabels {
   description: string
   /** The info panel's label for where the account can be read as given — see RecordingSource. */
   source: string
+  /** The tag after a line of the info panel saying how it is known — see Basis. */
+  basis: Record<"stated" | "derived" | "assumed", string>
   /** The title of the link beside the account to where it can be read: {source} is its title. */
   accountSource: string
   credits: string

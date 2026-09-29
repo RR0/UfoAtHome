@@ -663,6 +663,7 @@ describe("SightingElement", () => {
       "john.json": {
         ...johnSighting,
         description: "An orb.",
+        time: { year: 2026, month: 9, day: 28, hour: 19, minute: 45 },
         utcOffsetHours: { value: -7, basis: "derived", rationale: "PDT" },
         place: [{ value: { lat: 33.6, lng: -117.672 }, basis: "assumed", rationale: "city centre" }]
       }
@@ -676,6 +677,10 @@ describe("SightingElement", () => {
     const list = element.shadowRoot!.getElementById("info-observation-list") as HTMLElement
     expect(list.textContent).toContain("33.6000, -117.6720")
     expect(list.textContent).toContain("An orb.")
+    // Each line says how it is known: the date rests on a derived offset, the place on a guess.
+    const tags = [...list.querySelectorAll(".basis")] as HTMLElement[]
+    expect(tags.map(tag => tag.textContent)).toEqual(["derived", "assumed"])
+    expect(tags[1].title).toBe("city centre")
   })
 
   it("shows neither description nor tags rows when the sighting has none", async () => {

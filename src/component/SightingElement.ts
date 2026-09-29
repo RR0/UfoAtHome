@@ -13,6 +13,7 @@ import { SceneElement, registerScene, SCENE_ELEMENT_NAME, CONFRONTATION_EVENT } 
 import { OBSERVER_MAP_ATTRIBUTE, MILESTONES_ATTRIBUTE } from "./UfoElement.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
 import { Provenance } from "../engine/persistence/Provenance.js"
+import type { Basis } from "../engine/persistence/Provenance.js"
 import type { People } from "../engine/model/People.js"
 import { HostLocale, selectLocale } from "../i18n/locale.js"
 import { SaidTexts } from "../engine/model/SaidText.js"
@@ -766,7 +767,7 @@ export class SightingElement extends HTMLElement {
    * "09:45" in Paris, which is not a fact about the observation but about whoever is reading it.
    */
   /** Recordings already read without their provenance wrappers, by the file they came from. */
-  private readonly plainRecordings = new WeakMap<SightingRecordingJson, SightingRecordingJson>()
+  private readonly plainRecordings = new WeakMap<SightingRecordingJson, { recording: SightingRecordingJson, provenance: Provenance }>()
 
   /**
    * `entry`'s recording with every `{ value, basis, rationale }` replaced by its value — what this
@@ -777,12 +778,34 @@ export class SightingElement extends HTMLElement {
    * UTC offset reached the date formatter as an object and threw — leaving the info panel empty.
    */
   private plain(entry: ObserverEntry): SightingRecordingJson {
-    let plain = this.plainRecordings.get(entry.sighting)
-    if (!plain) {
-      plain = Provenance.strip(entry.sighting).recording
-      this.plainRecordings.set(entry.sighting, plain)
+    return this.stripped(entry).recording
+  }
+
+  private stripped(entry: ObserverEntry): { recording: SightingRecordingJson, provenance: Provenance } {
+    let stripped = this.plainRecordings.get(entry.sighting)
+    if (!stripped) {
+      stripped = Provenance.strip(entry.sighting)
+      this.plainRecordings.set(entry.sighting, stripped)
     }
-    return plain
+    return stripped
+  }
+
+  /**
+   * How far a line of the panel can be trusted: the WEAKEST basis among the fields it is made of
+   * (see Basis), with the reasons given for each. A date whose hour was stated but whose offset was
+   * worked out is a derived date; one resting on any guess is an assumed one. Nothing said about
+   * any of them means stated, as the format itself reads it.
+   */
+  private basisOf(entry: ObserverEntry, prefixes: readonly string[]): { basis: Basis, rationales: string[] } {
+    const provenance = this.stripped(entry).provenance
+    const rank: Record<Basis, number> = { stated: 0, derived: 1, assumed: 2 }
+    const known = provenance.paths()
+      .filter(path => prefixes.some(prefix => path === prefix || path.startsWith(`${prefix}.`)))
+      .map(path => provenance.at(path)!)
+    const basis = known.reduce<Basis>((weakest, entry) => rank[entry.basis] > rank[weakest] ? entry.basis : weakest, "stated")
+    // The reasons for the basis shown, not for the stronger ones beside it.
+    const rationales = known.filter(entry => entry.basis === basis && entry.rationale).map(entry => entry.rationale!)
+    return { basis, rationales }
   }
 
   private formatDate(sighting: SightingRecordingJson): string | undefined {
@@ -1076,11 +1099,13 @@ export class SightingElement extends HTMLElement {
       if (!this.labelsShown) {
         const date = this.formatDate(this.plain(entry))
         if (date) {
-          this.appendInfoRow(this.infoObservationList, this.messages.date, date)
+          this.appendInfoRow(this.infoObservationList, this.messages.date, date,
+            this.basisOf(entry, SightingElement.DATE_PATHS))
         }
         const location = this.formatLocation(this.plain(entry))
         if (location) {
-          this.appendInfoRow(this.infoObservationList, this.messages.location, location)
+          this.appendInfoRow(this.infoObservationList, this.messages.location, location,
+            this.basisOf(entry, SightingElement.PLACE_PATHS))
         }
       }
       const description = this.said.read(this.plain(entry).description)
@@ -1131,11 +1156,25 @@ export class SightingElement extends HTMLElement {
     list.append(dt, dd)
   }
 
-  private appendInfoRow(list: HTMLElement, label: string, value: string): void {
+  /** What the Date line is made of, for its basis — see basisOf. */
+  private static readonly DATE_PATHS = ["time", "utcOffsetHours", "timeZone"] as const
+  /** And the Location line: the first place, the one it shows. */
+  private static readonly PLACE_PATHS = ["place.0"] as const
+
+  private appendInfoRow(list: HTMLElement, label: string, value: string, qualified?: { basis: Basis, rationales: string[] }): void {
     const dt = document.createElement("dt")
     dt.textContent = label
     const dd = document.createElement("dd")
     dd.textContent = value
+    if (qualified) {
+      // Whether the observer said it, it was worked out, or it was chosen so the replay has a value
+      // at all — the question a reader of a reconstruction has to be able to ask of every line.
+      const tag = document.createElement("span")
+      tag.className = `basis basis-${qualified.basis}`
+      tag.textContent = this.messages.basis[qualified.basis]
+      if (qualified.rationales.length > 0) tag.title = qualified.rationales.join("\n")
+      dd.append(" ", tag)
+    }
     list.appendChild(dt)
     list.appendChild(dd)
   }

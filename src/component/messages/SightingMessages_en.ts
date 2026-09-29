@@ -13,6 +13,7 @@ export const sightingMessages_en: SightingMessages = {
   case: "Case",
   description: "Description",
   source: "Source",
+  basis: { stated: "stated", derived: "derived", assumed: "assumed" },
   accountSource: "Go to the source: {source}",
   credits: "Credits",
   editThisObservation: "Edit this observation",
