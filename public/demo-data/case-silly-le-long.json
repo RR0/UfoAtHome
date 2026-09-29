@@ -16,7 +16,9 @@
    "sighting": "2015-05-31-SillyLeLong-T1",
    "title": {
     "fr": "Méprise avec un avion : le Cirrus SR20 F-HOBS en finale, « effet pivot » (classé A)",
-    "en": "Misidentified aircraft: Cirrus SR20 F-HOBS on final, the \"pivot effect\" (class A)"
+    "en": "Misidentified aircraft: Cirrus SR20 F-HOBS on final, the \"pivot effect\" (class A)",
+    "es": "Confusión con un avión: el Cirrus SR20 F-HOBS en final, el \"efecto pivote\" (clase A)",
+    "it": "Aereo scambiato per altro: Cirrus SR20 F-HOBS in finale, l'\"effetto perno\" (classe A)"
    },
    "by": [
     {
@@ -28,7 +30,9 @@
      "id": "sr20",
      "title": {
       "fr": "Cirrus SR20 F-HOBS",
-      "en": "Cirrus SR20 F-HOBS"
+      "en": "Cirrus SR20 F-HOBS",
+      "es": "Cirrus SR20 F-HOBS",
+      "it": "Cirrus SR20 F-HOBS"
      },
      "explains": [
       "pan"

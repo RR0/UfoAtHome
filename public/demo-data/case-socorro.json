@@ -16,7 +16,9 @@
       "sighting": "1964-04-24-ZamoraLonnie",
       "title": {
         "fr": "Démonstration : trois fois plus grand, trois fois plus loin",
-        "en": "Demonstration: three times as large, three times as far"
+        "en": "Demonstration: three times as large, three times as far",
+        "es": "Demostración: tres veces más grande, tres veces más lejos",
+        "it": "Dimostrazione: tre volte più grande, tre volte più lontano"
       },
       "by": [
         {
@@ -157,7 +159,9 @@
       "sighting": "1964-04-24-ZamoraLonnie",
       "title": {
         "fr": "Le récit de Zamora, avec l'insigne que Ray Stanford tient pour le vrai",
-        "en": "Zamora's account, with the insignia Ray Stanford holds was the real one"
+        "en": "Zamora's account, with the insignia Ray Stanford holds was the real one",
+        "es": "El relato de Zamora, con la insignia que según Ray Stanford era la verdadera",
+        "it": "Il resoconto di Zamora, con l'insegna che secondo Ray Stanford era quella vera"
       },
       "by": [
         {
@@ -169,7 +173,9 @@
           "id": "craft",
           "title": {
             "fr": "L'engin",
-            "en": "The craft"
+            "en": "The craft",
+            "es": "La nave",
+            "it": "Il velivolo"
           },
           "explains": [
             "ufo-1"
@@ -359,7 +365,9 @@
           "id": "figure-1",
           "title": {
             "fr": "Personne en combinaison blanche (1)",
-            "en": "Person in white coveralls (1)"
+            "en": "Person in white coveralls (1)",
+            "es": "Persona con mono blanco (1)",
+            "it": "Persona in tuta bianca (1)"
           },
           "explains": [
             "silhouette-1"
@@ -396,7 +404,9 @@
           "id": "figure-2",
           "title": {
             "fr": "Personne en combinaison blanche (2)",
-            "en": "Person in white coveralls (2)"
+            "en": "Person in white coveralls (2)",
+            "es": "Persona con mono blanco (2)",
+            "it": "Persona in tuta bianca (2)"
           },
           "explains": [
             "silhouette-2"

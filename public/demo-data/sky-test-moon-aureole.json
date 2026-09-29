@@ -3,7 +3,9 @@
   "id": "sky-test-moon-aureole",
   "description": {
     "fr": "Ciel d'essai : l'auréole de la pleine Lune. Lune pleine à 21,6° de hauteur au sud, air très humide (90 %) et aucun nuage, observateur tourné vers elle. La lueur qui l'entoure sur une dizaine de degrés est sa lumière diffractée par les plus grosses particules de la brume, qui gonflent avec l'humidité : blanchâtre, sans anneau, parce que ces particules ont toutes les tailles.",
-    "en": "Test sky: the full Moon's aureole. A full Moon 21.6° up in the south, very humid air (90 %) and no cloud, the observer facing it. The glow round it over ten degrees or so is its light diffracted by the haze's largest particles, which swell with the humidity: whitish and without rings, because those particles come in every size."
+    "en": "Test sky: the full Moon's aureole. A full Moon 21.6° up in the south, very humid air (90 %) and no cloud, the observer facing it. The glow round it over ten degrees or so is its light diffracted by the haze's largest particles, which swell with the humidity: whitish and without rings, because those particles come in every size.",
+    "es": "Cielo de prueba: la aureola de la Luna llena. Una Luna llena a 21,6° de altura en el sur, aire muy húmedo (90 %) y sin nubes, el observador de cara a ella. El resplandor que la rodea en unos diez grados es su luz difractada por las partículas más grandes de la bruma, que se hinchan con la humedad: blanquecino y sin anillos, porque esas partículas tienen todos los tamaños.",
+    "it": "Cielo di prova: l'aureola della Luna piena. Una Luna piena a 21,6° di altezza a sud, aria molto umida (90 %) e nessuna nuvola, l'osservatore rivolto verso di essa. Il chiarore che la circonda per una decina di gradi è la sua luce diffratta dalle particelle più grandi della foschia, che si gonfiano con l'umidità: biancastro e senza anelli, perché quelle particelle hanno tutte le dimensioni."
   },
   "time": {
     "year": 2020,

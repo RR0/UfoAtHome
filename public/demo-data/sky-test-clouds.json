@@ -3,7 +3,9 @@
   "id": "sky-test-clouds",
   "description": {
     "fr": "Ciel synthétique : trois couches nuageuses en mètres, et un nuage du champ énoncé en mètres, à déplacer et redimensionner dans l'éditeur sans cesser d'être un nuage parmi les autres. Le vent et l'obscurité changent sur deux minutes pendant que le observateur parcourt 600 m. Aucun compte rendu.",
-    "en": "A synthetic sky: three metre-based cloud layers, and one cloud of the field stated in metres, to move and resize in the editor while staying one of its neighbours. Wind and darkness change over two minutes while the observer moves 600 m. No account."
+    "en": "A synthetic sky: three metre-based cloud layers, and one cloud of the field stated in metres, to move and resize in the editor while staying one of its neighbours. Wind and darkness change over two minutes while the observer moves 600 m. No account.",
+    "es": "Un cielo sintético: tres capas de nubes definidas en metros, y una nube del campo enunciada en metros, para mover y redimensionar en el editor sin que deje de ser una de sus vecinas. El viento y la oscuridad cambian a lo largo de dos minutos mientras el observador se desplaza 600 m. Sin relato.",
+    "it": "Un cielo sintetico: tre strati di nuvole definiti in metri, e una nuvola del campo indicata in metri, da spostare e ridimensionare nell'editor restando una delle sue vicine. Vento e oscurità cambiano nell'arco di due minuti mentre l'osservatore si sposta di 600 m. Nessun resoconto."
   },
   "time": {
     "year": 2020,

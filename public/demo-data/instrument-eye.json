@@ -18,7 +18,9 @@
   ],
   "description": {
     "fr": "La même observation, à l'œil nu. Un œil perçoit un angle comme un angle où qu'il tombe : l'image est équidistante, une règle posée sur l'écran y mesure quelque chose, et le champ est celui que ce projet donne à un observateur sans appareil — 60° de haut, à peu près la moitié centrale d'un vrai champ humain, là où se trouve l'acuité. Aucun cadre, aucun format : un œil n'a pas de rectangle.",
-    "en": "The same sighting, with the naked eye. An eye takes an angle as an angle wherever it falls: the image is equidistant, a ruler held against the screen measures something real on it, and the field is the one this project gives a observer with no device — 60° high, roughly the central half of a real human field, which is where the acuity is. No frame and no format: an eye has no rectangle."
+    "en": "The same sighting, with the naked eye. An eye takes an angle as an angle wherever it falls: the image is equidistant, a ruler held against the screen measures something real on it, and the field is the one this project gives a observer with no device — 60° high, roughly the central half of a real human field, which is where the acuity is. No frame and no format: an eye has no rectangle.",
+    "es": "El mismo avistamiento, a simple vista. Un ojo toma un ángulo como un ángulo dondequiera que caiga: la imagen es equidistante, una regla apoyada en la pantalla mide en ella algo real, y el campo es el que este proyecto da a un observador sin aparato — 60° de alto, aproximadamente la mitad central de un campo humano real, que es donde está la agudeza. Sin marco y sin formato: un ojo no tiene rectángulo.",
+    "it": "Lo stesso avvistamento, a occhio nudo. Un occhio prende un angolo per un angolo ovunque cada: l'immagine è equidistante, un righello appoggiato allo schermo vi misura qualcosa di reale, e il campo è quello che questo progetto dà a un osservatore senza strumento — 60° in altezza, circa la metà centrale di un vero campo visivo umano, che è dove sta l'acutezza. Nessuna cornice e nessun formato: un occhio non ha rettangolo."
   },
   "tags": [
     "RR3",
@@ -1153,7 +1155,9 @@
       "kind": "vehicle",
       "title": {
         "fr": "Voiture de patrouille de Zamora",
-        "en": "Zamora's patrol car"
+        "en": "Zamora's patrol car",
+        "es": "El coche patrulla de Zamora",
+        "it": "L'auto di pattuglia di Zamora"
       },
       "eastM": 0,
       "northM": 8,
@@ -1179,7 +1183,9 @@
       "kind": "building",
       "title": {
         "fr": "Abri à dynamite",
-        "en": "Dynamite shack"
+        "en": "Dynamite shack",
+        "es": "Caseta de la dinamita",
+        "it": "Baracca della dinamite"
       },
       "eastM": -73.7,
       "northM": -51.6,

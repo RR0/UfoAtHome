@@ -18,7 +18,9 @@
   ],
   "description": {
     "fr": "La même observation, au reflex 24×36 avec l'objectif de 50 mm livré avec le boîtier. Le champ tombe à 27° de haut — d'où le fait qu'une lumière photographiée n'a si souvent rien de reconnaissable à côté d'elle dans le cadre. Et un objectif projette en f·tan θ : ce qui s'éloigne de l'axe est étiré, de 42 % à 33° du centre. C'est juste pour une photographie, et faux pour un œil.",
-    "en": "The same sighting, on a 35 mm SLR with the 50 mm lens the body came with. The field drops to 27° high — which is why a photographed light so often has nothing recognisable beside it in the frame. And a lens projects in f·tan θ: whatever is off-axis is stretched, by 42% at 33° from the centre. That is right for a photograph, and wrong for an eye."
+    "en": "The same sighting, on a 35 mm SLR with the 50 mm lens the body came with. The field drops to 27° high — which is why a photographed light so often has nothing recognisable beside it in the frame. And a lens projects in f·tan θ: whatever is off-axis is stretched, by 42% at 33° from the centre. That is right for a photograph, and wrong for an eye.",
+    "es": "El mismo avistamiento, con una réflex de 35 mm y el objetivo de 50 mm que venía con el cuerpo. El campo baja a 27° de alto — por eso una luz fotografiada tan a menudo no tiene nada reconocible a su lado en el encuadre. Y un objetivo proyecta en f·tan θ: lo que está fuera del eje se estira, un 42% a 33° del centro. Eso es correcto para una fotografía, e incorrecto para un ojo.",
+    "it": "Lo stesso avvistamento, con una reflex 35 mm e l'obiettivo da 50 mm fornito con il corpo. Il campo scende a 27° in altezza — ecco perché una luce fotografata ha così spesso nulla di riconoscibile accanto a sé nell'inquadratura. E un obiettivo proietta in f·tan θ: ciò che è fuori asse viene stirato, del 42% a 33° dal centro. È corretto per una fotografia, e sbagliato per un occhio."
   },
   "tags": [
     "RR3",
@@ -1153,7 +1155,9 @@
       "kind": "vehicle",
       "title": {
         "fr": "Voiture de patrouille de Zamora",
-        "en": "Zamora's patrol car"
+        "en": "Zamora's patrol car",
+        "es": "El coche patrulla de Zamora",
+        "it": "L'auto di pattuglia di Zamora"
       },
       "eastM": 0,
       "northM": 8,
@@ -1179,7 +1183,9 @@
       "kind": "building",
       "title": {
         "fr": "Abri à dynamite",
-        "en": "Dynamite shack"
+        "en": "Dynamite shack",
+        "es": "Caseta de la dinamita",
+        "it": "Baracca della dinamite"
       },
       "eastM": -73.7,
       "northM": -51.6,

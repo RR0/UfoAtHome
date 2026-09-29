@@ -3,7 +3,9 @@
   "id": "sky-test-milkyway",
   "description": {
     "fr": "Un ciel d'essai pour la Voie lactée. Elle demande quatre choses à la fois : pas de Lune (nouvelle Lune du 20 juillet 2020), un Soleil à 65° sous l'horizon, un ciel sans nuages, et le centre de la Galaxie haut — ici à 81° de hauteur, au sud-ouest, vu du désert d'Atacama. Retirez-en une seule et il n'y a plus rien à voir : c'est exactement ce qui sépare « il n'y avait pas de Voie lactée » de « je n'aurais pas pu la voir ».",
-    "en": "A test sky for the Milky Way. It asks four things at once: no Moon (the new Moon of 20 July 2020), a Sun 65° below the horizon, a cloudless sky, and the Galactic centre high — here 81° up in the south-west, seen from the Atacama desert. Take away one of them and there is nothing left to see: which is exactly what separates “there was no Milky Way” from “I could not have seen it”."
+    "en": "A test sky for the Milky Way. It asks four things at once: no Moon (the new Moon of 20 July 2020), a Sun 65° below the horizon, a cloudless sky, and the Galactic centre high — here 81° up in the south-west, seen from the Atacama desert. Take away one of them and there is nothing left to see: which is exactly what separates “there was no Milky Way” from “I could not have seen it”.",
+    "es": "Un cielo de prueba para la Vía Láctea. Pide cuatro cosas a la vez: nada de Luna (la Luna nueva del 20 de julio de 2020), un Sol 65° bajo el horizonte, un cielo sin nubes y el centro galáctico alto — aquí a 81° de altura en el suroeste, visto desde el desierto de Atacama. Quita una de ellas y no queda nada que ver: que es exactamente lo que separa “no había Vía Láctea” de “no podría haberla visto”.",
+    "it": "Un cielo di prova per la Via Lattea. Richiede quattro cose contemporaneamente: niente Luna (la Luna nuova del 20 luglio 2020), un Sole 65° sotto l'orizzonte, un cielo senza nuvole e il centro galattico alto — qui a 81° di altezza a sud-ovest, visto dal deserto di Atacama. Togline una e non resta più nulla da vedere: ed è esattamente ciò che separa “non c'era la Via Lattea” da “non avrei potuto vederla”."
   },
   "time": {
     "year": 2020,

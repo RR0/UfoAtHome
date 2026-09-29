@@ -18,7 +18,9 @@
   ],
   "description": {
     "fr": "La même observation, photographiée sur un Instamatic à film 126. Le cadre est CARRÉ — ni le 16/9 de la scène ni le rectangle debout d'un téléphone — et il fait 36° de côté : 28 mm d'image derrière un objectif de 43 mm. Tout y est fixe : un diaphragme, une vitesse, une focale. Le observateur qui tenait cet appareil n'avait rien à régler, donc l'éditeur ne lui propose rien à régler non plus.",
-    "en": "The same sighting, photographed on an Instamatic loaded with 126 film. The frame is SQUARE — neither the scene's 16:9 nor a phone's upright rectangle — and 36° to a side: 28 mm of image behind a 43 mm lens. Everything about it is fixed: one aperture, one shutter speed, one focal length. The observer holding this camera had nothing to set, so the editor offers them nothing to set either."
+    "en": "The same sighting, photographed on an Instamatic loaded with 126 film. The frame is SQUARE — neither the scene's 16:9 nor a phone's upright rectangle — and 36° to a side: 28 mm of image behind a 43 mm lens. Everything about it is fixed: one aperture, one shutter speed, one focal length. The observer holding this camera had nothing to set, so the editor offers them nothing to set either.",
+    "es": "El mismo avistamiento, fotografiado con una Instamatic cargada con película 126. El encuadre es CUADRADO — ni el 16:9 de la escena ni el rectángulo vertical de un teléfono — y de 36° de lado: 28 mm de imagen tras un objetivo de 43 mm. Todo en ella es fijo: una sola apertura, una sola velocidad de obturación, una sola focal. El observador que sostenía esta cámara no tenía nada que ajustar, así que el editor tampoco le ofrece nada que ajustar.",
+    "it": "Lo stesso avvistamento, fotografato con una Instamatic caricata con pellicola 126. Il fotogramma è QUADRATO — né il 16:9 della scena né il rettangolo verticale di un telefono — e misura 36° di lato: 28 mm di immagine dietro un obiettivo da 43 mm. Tutto è fisso: un solo diaframma, un solo tempo di posa, una sola focale. L'osservatore che teneva questa fotocamera non aveva nulla da regolare, quindi nemmeno l'editor gli offre nulla da regolare."
   },
   "tags": [
     "RR3",
@@ -1153,7 +1155,9 @@
       "kind": "vehicle",
       "title": {
         "fr": "Voiture de patrouille de Zamora",
-        "en": "Zamora's patrol car"
+        "en": "Zamora's patrol car",
+        "es": "El coche patrulla de Zamora",
+        "it": "L'auto di pattuglia di Zamora"
       },
       "eastM": 0,
       "northM": 8,
@@ -1179,7 +1183,9 @@
       "kind": "building",
       "title": {
         "fr": "Abri à dynamite",
-        "en": "Dynamite shack"
+        "en": "Dynamite shack",
+        "es": "Caseta de la dinamita",
+        "it": "Baracca della dinamite"
       },
       "eastM": -73.7,
       "northM": -51.6,
