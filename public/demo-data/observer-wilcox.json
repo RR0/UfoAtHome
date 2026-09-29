@@ -31,6 +31,29 @@
     "landing",
     "contact"
   ],
+  "sources":[
+    {
+      "type":"book",
+      "title":"UFO Dynamics",
+      "authors":[
+        "Schwarz, Berthold E."
+      ],
+      "publication":{
+        "publisher":"Rainbow Books",
+        "time":"1983"
+      },
+      "index":"p. 76 (rapport de police)"
+    },
+    {
+      "type":"article",
+      "title":"A Newark Valley Farmer's Trip Into the Twilight Zone",
+      "url":"https://www.tier.net/nvhistory/articles/2004/Newark%20Valley%20UFO.htm",
+      "publication":{
+        "publisher":"Newark Valley Historical Society",
+        "time":"2004"
+      }
+    }
+  ],
   "timeline": {
     "keyframes": [
       {

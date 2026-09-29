@@ -32,6 +32,25 @@
     "trace",
     "Blue Book 8729"
   ],
+  "sources":[
+    {
+      "title":"Project Blue Book, dossier du cas de Socorro (8729)",
+      "url":"https://documents.theblackvault.com/bluebookdesk/pbb-socorro.pdf",
+      "publication":{
+        "publisher":"US Air Force, Project Blue Book",
+        "time":"1964"
+      }
+    },
+    {
+      "title":"Télétype urgent au directeur du FBI",
+      "url":"http://www.nicap.org/docs/640424zamora_fbi_docs.pdf",
+      "publication":{
+        "publisher":"FBI Albuquerque",
+        "time":"1964-04-25"
+      },
+      "index":"pp. 1-2"
+    }
+  ],
   "timeline": {
     "keyframes": [
       {

@@ -20,6 +20,8 @@ export interface SightingMessages extends SightingLabels {
   description: string
   /** The info panel's label for where the account can be read as given — see RecordingSource. */
   source: string
+  /** The title of the link beside the account to where it can be read: {source} is its title. */
+  accountSource: string
   credits: string
   /** Title of the info panel's app link, which opens the observation being shown in the editor. */
   editThisObservation: string

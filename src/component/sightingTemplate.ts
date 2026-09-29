@@ -4,6 +4,10 @@ export const html = `
     <span id="account-prefix">Account by</span>
     <span id="observer-text"></span><select id="observer" hidden></select>
   </span>
+  <!-- Where the account on show can be read as it was given: its first source with a web address
+       (see RecordingSource). Beside the account and not in the "?" panel only, because each
+       observer's account has its own, and it has to follow the one picked above. -->
+  <a id="account-source" class="account-source" target="_blank" rel="noopener noreferrer" hidden><svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path d="M9 2h5v5h-1.5V4.6L7.1 10 6 8.9l5.4-5.4H9V2ZM3 4h4v1.5H3.5v7h7V9H12v5H2V4h1Z" fill="currentColor"/></svg></a>
   <!-- What to replay the account with: the raw account, the observer's own reading of it, or an
        analyst's from the case (see InterpretationJson). Only there when there is a choice. -->
   <label id="interpretation-choice" class="interpretation-choice" hidden>
@@ -16,6 +20,11 @@ export const html = `
          measured against it — see SceneElement.compareAccount. Only while an interpretation is. -->
     <button id="compare-account" type="button" title="Compare with the account" aria-label="Compare with the account" aria-pressed="false" hidden>◌</button>
   </span>
+  <!-- The way into this very observation in the online editor, where what the recording does not
+       say shows as missing. Beside "?" rather than inside its panel, which is where it used to hide
+       behind the version link. Hidden for a recording with no address (set by script, pasted),
+       which the editor could not open. -->
+  <a id="edit-link" class="edit-link" target="_blank" rel="noopener" title="Edit this observation" aria-label="Edit this observation" hidden><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M11.3 1.3a1 1 0 0 1 1.4 0l2 2a1 1 0 0 1 0 1.4l-8.5 8.5-3.4.9.9-3.4 8.6-8.4Zm-7 9.2-.5 1.7 1.7-.5 6.9-6.9-1.2-1.2-6.9 6.9Z" fill="currentColor"/></svg></a>
   <button id="info-button" class="info-btn" type="button" title="About" aria-label="About" aria-expanded="false">?</button>
   <div id="info-panel" class="info-panel" hidden>
     <button id="info-close" class="info-close" type="button" aria-label="Close">×</button>
@@ -153,6 +162,38 @@ export const css = `
   width: 5.5em;
   margin: 0;
   accent-color: #39f;
+}
+.account-source {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  color: inherit;
+  opacity: 0.7;
+}
+.account-source:hover, .account-source:focus-visible {
+  opacity: 1;
+}
+.account-source[hidden] {
+  display: none;
+}
+.edit-link {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.6em;
+  height: 1.6em;
+  border-radius: 50%;
+  border: 1px solid #999;
+  background: #f0f0f0;
+  color: #333;
+}
+.edit-link:hover, .edit-link:focus-visible {
+  background: #e0e0e0;
+}
+/* Same trap as elsewhere: a rule setting display outranks the UA sheet's [hidden]. */
+.edit-link[hidden] {
+  display: none;
 }
 .info-btn {
   /* Named so the info panel can anchor itself to this button from the top layer — see

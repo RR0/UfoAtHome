@@ -32,6 +32,26 @@
     "aerial observation",
     "Project Sign"
   ],
+  "sources":[
+    {
+      "type":"article",
+      "title":"Cas 5 (numéros de série 0565.00 à 0565.03), in \"The 'Flying Saucer' model\"",
+      "url":"https://rr0.org/time/1/9/5/5/05/05/PBBSR14/analysis/study/saucer/index.html#cas5",
+      "publication":{
+        "publisher":"US Air Force, Project Blue Book Special Report n° 14",
+        "time":"1955"
+      }
+    },
+    {
+      "type":"article",
+      "title":"Do We Have Visitors From Space?",
+      "url":"https://www.project1947.com/shg/csi/life52.html",
+      "publication":{
+        "publisher":"Life",
+        "time":"1952-04-07"
+      }
+    }
+  ],
   "timeline": {
     "keyframes": [
       {

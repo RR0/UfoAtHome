@@ -36,6 +36,17 @@
   "trace",
   "paralysis"
  ],
+ "sources":[
+  {
+   "type":"article",
+   "title":"Les gendarmes ont relevé d'étranges traces à l'endroit où un cultivateur de Valensole affirme l'avoir vue",
+   "url":"https://rr0.org/time/1/9/6/5/07/04/Valensole_DauphineLibere/",
+   "publication":{
+    "publisher":"Le Dauphiné Libéré",
+    "time":"1965-07-04"
+   }
+  }
+ ],
  "timeline": {
   "keyframes": [
    {

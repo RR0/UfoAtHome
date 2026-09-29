@@ -47,6 +47,23 @@
  "tags":[
   "NL"
  ],
+ "sources":[
+  {
+   "title":"SILLY-LE-LONG (60) 31.05.2015",
+   "url":"https://www.cnes-geipan.fr/fr/cas/2015-05-09194",
+   "publication":{
+    "publisher":"GEIPAN"
+   }
+  },
+  {
+   "title":"Procès-verbal n° 00516/01064/2015",
+   "publication":{
+    "publisher":"Gendarmerie nationale",
+    "time":"2015"
+   },
+   "index":"pp. 2, 10-11"
+  }
+ ],
  "timeline":{
   "keyframes":[
    {

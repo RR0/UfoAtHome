@@ -257,6 +257,25 @@ describe("SightingElement", () => {
     expect(select.hidden).toBe(true)
   })
 
+  it("links each account to its own source, beside the account picked", async () => {
+    stubFetch({
+      "chiles.json": { ...johnSighting, sources: [{ title: "Chiles's report", url: "https://example.org/chiles" }] },
+      "whitted.json": { ...janeSighting, sources: [{ title: "Book only" }] }
+    })
+    const element = mount()
+    element.observerUrls = ["chiles.json", "whitted.json"]
+    await new Promise(resolve => setTimeout(resolve, 0))
+    const link = element.shadowRoot!.getElementById("account-source") as HTMLAnchorElement
+    expect(link.hidden).toBe(false)
+    expect(link.href).toBe("https://example.org/chiles")
+    expect(link.title).toContain("Chiles's report")
+
+    const select = element.shadowRoot!.getElementById("observer") as HTMLSelectElement
+    select.value = "whitted.json"
+    select.dispatchEvent(new Event("change"))
+    expect(link.hidden).toBe(true)
+  })
+
   it("tells the page which recording is on show, on load and on every change of observer", async () => {
     stubFetch({ "chiles.json": johnSighting, "whitted.json": janeSighting })
     const element = mount()
@@ -586,13 +605,16 @@ describe("SightingElement", () => {
     infoButton.click()
 
     expect(infoPanel.hidden).toBe(false)
-    // The app link opens THIS observation in the editor, not the application's bare home page —
-    // and it NAMES the recording rather than shortening a same-origin one to a bare path: that
-    // shortening relied on ufoathome.org redirecting any unknown path into the editor, which
-    // stopped being true once that domain became a site with files of its own.
-    const appLink = element.shadowRoot!.getElementById("info-app-link") as HTMLAnchorElement
-    expect(appLink.href).toBe(
+    // The pen opens THIS observation in the editor — and it NAMES the recording rather than
+    // shortening a same-origin one to a bare path: that shortening relied on ufoathome.org
+    // redirecting any unknown path into the editor, which stopped being true once that domain
+    // became a site with files of its own. The version link is now the application's home.
+    const editLink = element.shadowRoot!.getElementById("edit-link") as HTMLAnchorElement
+    expect(editLink.hidden).toBe(false)
+    expect(editLink.href).toBe(
       `https://ufoathome.org/edit/?sighting=${encodeURIComponent(new URL("john.json", location.href).href)}`)
+    const appLink = element.shadowRoot!.getElementById("info-app-link") as HTMLAnchorElement
+    expect(appLink.href).toBe("https://ufoathome.org/")
     expect(appLink.textContent).toMatch(/^UFO@home v\d+\.\d+\.\d+$/)
     const observationList = element.shadowRoot!.getElementById("info-observation-list") as HTMLElement
     expect(observationList.textContent).toContain("32.4000, -86.3000")
