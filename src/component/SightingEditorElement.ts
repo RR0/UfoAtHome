@@ -170,6 +170,9 @@ const MAX_LEGAL_SOLAR_OFFSET_GAP_HOURS = 3
  * across the canvas's own 640px internal width is ~130deg, a reasonable full sweep without being
  * so twitchy that fine-tuning a heading/pitch by hand becomes fiddly. */
 const CAMERA_DRAG_DEG_PER_PX = 0.2
+/** How far, in canvas pixels, a press may wander and still be a click rather than the start of a
+ * drag of the view — a click on a decor object selects it, a drag turns the view. */
+const CAMERA_DRAG_CLICK_TOLERANCE_PX = 3
 /** How close two fields have to be to count as the same one, degrees. Only ever used to tell a
  * field NOBODY STATED — one this recorder wrote from an instrument's own optics — from one somebody
  * meant, so that changing the instrument may retune the first and must never touch the second. */
@@ -821,6 +824,11 @@ export class SightingEditorElement extends HTMLElement {
      * comment) — checked once at drag-start rather than every pointermove so a drag that happens
      * to cross the moment observerSide gets cleared mid-drag doesn't switch targets partway. */
     insideDecor: boolean
+    /** The decor object the press landed on, if any: a press that is released without moving is a
+     * click on it and selects it; one that moves turns the view, as it does over bare sky or ground. */
+    pressedDecorId?: string
+    /** Whether the pointer has left the press point by more than a click's jitter. */
+    moved?: boolean
   }
 
   /** Whatever the pointer was last hovering over the canvas (see updateHoverCursor) — remembered
@@ -881,7 +889,13 @@ export class SightingEditorElement extends HTMLElement {
     }
   }
   private readonly handleDragPointerMove = (event: PointerEvent) => this.onDragPointerMove(event)
-  private readonly handleDragPointerUp = () => this.endDrag()
+  /** Ends the drag; a press on a decor object that never moved was a click on it, and selects it —
+   * here and not in endDrag, which also runs when a recording is loaded mid-press. */
+  private readonly handleDragPointerUp = () => {
+    const clicked = this.cameraDragState && !this.cameraDragState.moved ? this.cameraDragState.pressedDecorId : undefined
+    this.endDrag()
+    if (clicked !== undefined) this.selectDecor(clicked)
+  }
 
   constructor() {
     super()
@@ -7936,7 +7950,11 @@ export class SightingEditorElement extends HTMLElement {
       // should win a click there too).
       const decorId = this.pickDecorAt(event)
       if (decorId !== undefined) {
-        this.selectDecor(decorId)
+        // A tree line or a building fills much of the lower view, and the view has to turn from over
+        // it too: the press starts the same drag as over bare ground, and only a press released
+        // without moving is taken as the click that selects it (see endDrag).
+        if (playing) this.selectDecor(decorId)
+        else this.beginCameraDrag(point, decorId)
         return
       }
       // Nothing at all under the pointer to select/move — the "landscape" itself becomes the drag
@@ -8475,9 +8493,11 @@ export class SightingEditorElement extends HTMLElement {
     editor.scaleDistance(Math.exp(Math.sign(event.deltaY) * 0.1))
   }
 
-  private beginCameraDrag(startPointer: { x: number; y: number }): void {
+  private beginCameraDrag(startPointer: { x: number; y: number }, pressedDecorId?: string): void {
     const insideDecor = this.isObserverInsideDecor()
     this.cameraDragState = {
+      pressedDecorId,
+      moved: false,
       startPointer,
       startHeadingDeg: insideDecor ? this.indoorLookYawDeg : (this.numberOrUndefined(this.headingInput.value) ?? 0),
       startPitchDeg: insideDecor ? this.indoorLookPitchDeg : (this.numberOrUndefined(this.pitchInput.value) ?? 0),
@@ -8581,6 +8601,11 @@ export class SightingEditorElement extends HTMLElement {
     const point = this.canvasPointFromEvent(event)
     if (!point) return
     const { startPointer, startHeadingDeg, startPitchDeg, insideDecor } = this.cameraDragState
+    // A click's own jitter must not turn the view, or clicking a building would nudge the heading.
+    if (!this.cameraDragState.moved) {
+      if (Math.hypot(point.x - startPointer.x, point.y - startPointer.y) < CAMERA_DRAG_CLICK_TOLERANCE_PX) return
+      this.cameraDragState.moved = true
+    }
     // Computed from the fixed drag-start reference every time, not incrementally frame-to-frame —
     // see cameraDragState's own doc comment on why (avoids drift and misbehaving at the 360->0
     // heading wrap). Left/right drags the view right/left (a "grab the sky and pan it" feel);
@@ -8757,7 +8782,9 @@ export class SightingEditorElement extends HTMLElement {
       }
     }
     if (timeline.hitTest(t, point.x, point.y)) return editable && shapeMode ? "move" : "select"
-    if (this.pickDecorAt(event) !== undefined) return "select"
+    // Over decor the view still turns by dragging (see the canvas's pointerdown), and a click still
+    // selects it: the hand says the first, as it does over bare ground.
+    if (this.pickDecorAt(event) !== undefined) return editable ? "pan" : "select"
     return editable ? "pan" : undefined
   }
 

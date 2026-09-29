@@ -4140,6 +4140,7 @@ describe("SightingEditorElement decor click-to-select", () => {
     const canvas = nestedUfo(element).shadowRoot!.querySelector("canvas")!
     canvas.getBoundingClientRect = () => ({ left: 0, top: 0, width: 800, height: 600 }) as DOMRect
     canvas.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true, composed: true, clientX: 400, clientY: 300 }))
+    document.dispatchEvent(new MouseEvent("pointerup", { clientX: 400, clientY: 300 }))
   }
 
   it("selects a decor object clicked in the 3D scene — the picker/property fields sync to it", () => {
@@ -4160,6 +4161,30 @@ describe("SightingEditorElement decor click-to-select", () => {
     const shadow = element.shadowRoot!
     expect((shadow.getElementById("decor") as HTMLSelectElement).value).toBe("decor-2")
     expect((shadow.getElementById("decorTitle") as HTMLInputElement).value).toBe("Chêne")
+  })
+
+  it("turns the view when dragged from over a decor object, and does not select it", () => {
+    const element = mount()
+    element.sightingData = {
+      version: 1,
+      observerTrack: { keyframes: [{ t: 0, pose: { lat: undefined, lng: undefined, elevationM: 0, headingDeg: 180, pitchDeg: 0, fovDeg: 60 } }] },
+      timeline: { keyframes: [] },
+      decor: [
+        { id: "decor-1", kind: "building", eastM: 0, northM: 10, title: "Maison" },
+        { id: "decor-2", kind: "tree", eastM: 0, northM: -50, title: "Lisière" }
+      ]
+    }
+    const sceneEl = element.shadowRoot!.querySelector("rr0-scene") as unknown as { pickDecorAt: () => string }
+    sceneEl.pickDecorAt = () => "decor-2"
+    const canvas = nestedUfo(element).shadowRoot!.querySelector("canvas")!
+    canvas.getBoundingClientRect = () => ({ left: 0, top: 0, width: 800, height: 600 }) as DOMRect
+
+    canvas.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true, composed: true, clientX: 400, clientY: 300 }))
+    document.dispatchEvent(new MouseEvent("pointermove", { clientX: 500, clientY: 300 }))
+    document.dispatchEvent(new MouseEvent("pointerup", { clientX: 500, clientY: 300 }))
+
+    expect(element.sightingData.observerTrack?.keyframes[0].pose.headingDeg).not.toBe(180)
+    expect((element.shadowRoot!.getElementById("decor") as HTMLSelectElement).value).toBe("decor-1")
   })
 
   it("a shape under the pointer wins over decor beneath it — decor is never even picked at that point", () => {
