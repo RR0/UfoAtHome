@@ -658,6 +658,26 @@ describe("SightingElement", () => {
     expect((element.shadowRoot!.getElementById("info-observation-list") as HTMLElement).querySelector("a")).toBeNull()
   })
 
+  it("reads a recording whose values carry their provenance, instead of opening an empty panel", async () => {
+    stubFetch({
+      "john.json": {
+        ...johnSighting,
+        description: "An orb.",
+        utcOffsetHours: { value: -7, basis: "derived", rationale: "PDT" },
+        place: [{ value: { lat: 33.6, lng: -117.672 }, basis: "assumed", rationale: "city centre" }]
+      }
+    })
+    const element = mount()
+    element.observerUrls = ["john.json"]
+    await new Promise(resolve => setTimeout(resolve, 0))
+
+    ;(element.shadowRoot!.getElementById("info-button") as HTMLButtonElement).click()
+
+    const list = element.shadowRoot!.getElementById("info-observation-list") as HTMLElement
+    expect(list.textContent).toContain("33.6000, -117.6720")
+    expect(list.textContent).toContain("An orb.")
+  })
+
   it("shows neither description nor tags rows when the sighting has none", async () => {
     const element = mount()
     element.observerUrls = ["john.json"]

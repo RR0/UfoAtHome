@@ -12,6 +12,7 @@ import type { SummaryEntry } from "./SightingSummary.js"
 import { SceneElement, registerScene, SCENE_ELEMENT_NAME, CONFRONTATION_EVENT } from "./SceneElement.js"
 import { OBSERVER_MAP_ATTRIBUTE, MILESTONES_ATTRIBUTE } from "./UfoElement.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
+import { Provenance } from "../engine/persistence/Provenance.js"
 import type { People } from "../engine/model/People.js"
 import { HostLocale, selectLocale } from "../i18n/locale.js"
 import { SaidTexts } from "../engine/model/SaidText.js"
@@ -446,7 +447,7 @@ export class SightingElement extends HTMLElement {
       // Never the URL: a recording that names nobody is listed by its place in the list, which at
       // least says what it is. `/demo-data/sky-test-halos.json` as a observer's name said nothing
       // and looked like a fault.
-      option.textContent = this.observerDisplayName(entry.sighting.observer)
+      option.textContent = this.observerDisplayName(this.plain(entry).observer)
         ?? this.messages.unnamedObserver.replace("{n}", String(entries.indexOf(entry) + 1))
       this.observerSelect.appendChild(option)
     }
@@ -548,7 +549,7 @@ export class SightingElement extends HTMLElement {
     offer(ACCOUNT_OPTION, this.messages.account, () => Promise.resolve(own))
     const source = this.caseSource
     if (source) {
-      CaseFile.interpretationEvents(source.json, entry.sighting.id).forEach((event, index) => {
+      CaseFile.interpretationEvents(source.json, this.plain(entry).id).forEach((event, index) => {
         const title = this.said.read(event.title) ?? `#${index + 1}`
         const by = (event.by ?? []).map(agent => this.agentName(agent)).filter(Boolean).join(", ")
         offer(`case-${index}`, by ? this.messages.interpretationBy.replace("{title}", title).replace("{by}", by) : title,
@@ -721,7 +722,7 @@ export class SightingElement extends HTMLElement {
    */
   private updateAccountLine(): void {
     const entry = this.entries.find(e => e.src === this.currentSrc)
-    const name = entry ? this.observerDisplayName(entry.sighting.observer) : undefined
+    const name = entry ? this.observerDisplayName(this.plain(entry).observer) : undefined
     // With several listed, the picker is the point even where one of them is unnamed.
     const named = name !== undefined || this.entries.length > 1
     this.accountElement.hidden = !named
@@ -730,7 +731,7 @@ export class SightingElement extends HTMLElement {
     // permission to reach it.
     this.observerText.textContent = name ?? ""
     // Only a web address becomes a link: a recording is somebody else's file.
-    const source = entry?.sighting.sources?.find(candidate => /^https?:\/\//i.test(candidate.url ?? ""))
+    const source = entry && this.plain(entry).sources?.find(candidate => /^https?:\/\//i.test(candidate.url ?? ""))
     this.accountSourceLink.hidden = !source
     if (source) {
       this.accountSourceLink.href = source.url!
@@ -764,11 +765,33 @@ export class SightingElement extends HTMLElement {
    * rendered through the reader's zone instead, Chiles and Whitted's 02:45 sighting reads
    * "09:45" in Paris, which is not a fact about the observation but about whoever is reading it.
    */
+  /** Recordings already read without their provenance wrappers, by the file they came from. */
+  private readonly plainRecordings = new WeakMap<SightingRecordingJson, SightingRecordingJson>()
+
+  /**
+   * `entry`'s recording with every `{ value, basis, rationale }` replaced by its value — what this
+   * element reads names, dates, places and sources from.
+   *
+   * Any value of a file may carry its provenance (see Provenance), and the scene unwraps it on load;
+   * this element reads the same file for its own lines and used to take it as it came, so a derived
+   * UTC offset reached the date formatter as an object and threw — leaving the info panel empty.
+   */
+  private plain(entry: ObserverEntry): SightingRecordingJson {
+    let plain = this.plainRecordings.get(entry.sighting)
+    if (!plain) {
+      plain = Provenance.strip(entry.sighting).recording
+      this.plainRecordings.set(entry.sighting, plain)
+    }
+    return plain
+  }
+
   private formatDate(sighting: SightingRecordingJson): string | undefined {
     const place = sighting.place?.[0]
     const date = sightingTimeToDate(sighting.time ?? {}, place?.lng ?? 0, sighting.utcOffsetHours)
     if (!date) return undefined
     const localMs = date.getTime() + this.utcOffsetHoursOf(sighting, place?.lng ?? 0) * 3_600_000
+    // A date the file states wrongly is one missing line, not an empty panel: formatting throws on it.
+    if (!Number.isFinite(localMs)) return undefined
     return new Intl.DateTimeFormat(SightingElement.DATE_LOCALES[this.language], {
       dateStyle: "long",
       timeStyle: "short",
@@ -1051,26 +1074,27 @@ export class SightingElement extends HTMLElement {
       // see toggleLabels. The description is never dropped: it is the one thing the strip refuses
       // to carry, because prose doesn't fit on a chip.
       if (!this.labelsShown) {
-        const date = this.formatDate(entry.sighting)
+        const date = this.formatDate(this.plain(entry))
         if (date) {
           this.appendInfoRow(this.infoObservationList, this.messages.date, date)
         }
-        const location = this.formatLocation(entry.sighting)
+        const location = this.formatLocation(this.plain(entry))
         if (location) {
           this.appendInfoRow(this.infoObservationList, this.messages.location, location)
         }
       }
-      const description = this.said.read(entry.sighting.description)
+      const description = this.said.read(this.plain(entry).description)
       if (description) {
         this.appendInfoRow(this.infoObservationList, this.messages.description, description)
       }
       // Where the words above can be read as they were given (see RecordingSource).
-      for (const source of entry.sighting.sources ?? []) {
+      for (const source of this.plain(entry).sources ?? []) {
         this.appendInfoSource(this.infoObservationList, this.messages.source, source)
       }
-      if (!this.labelsShown && entry.sighting.tags && entry.sighting.tags.length > 0) {
+      const tags = this.plain(entry).tags
+      if (!this.labelsShown && tags && tags.length > 0) {
         this.appendInfoRow(this.infoObservationList, this.messages.tags,
-          entry.sighting.tags.map(tag => this.tags.name(tag)).join(", "))
+          tags.map(tag => this.tags.name(tag)).join(", "))
       }
     }
 
