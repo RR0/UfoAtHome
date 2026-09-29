@@ -2718,20 +2718,34 @@ export class SightingEditorElement extends HTMLElement {
    * scene moves with it. */
   /** Fills the zone picker: a manual entry first (type the number yourself, what a recording could
    * always do), then every IANA zone the platform knows. Built in script — there are some four
-   * hundred of them, and they are the platform's list, not ours. */
+   * hundred of them, and they are the platform's list, not ours.
+   *
+   * Built once: a zone's name is the same in every language, so a new recording or a new language
+   * only renames the manual entry and selects again. Rebuilding four hundred options each time was
+   * a third of what opening an editor cost. */
   private refreshTimeZoneOptions(): void {
-    const manual = document.createElement("option")
-    manual.value = ""
+    let manual = this.timeZoneSelect.options[0]
+    if (!manual) {
+      manual = document.createElement("option")
+      manual.value = ""
+      // Filled while out of the page: each option inserted into a shadow tree has the whole tree
+      // searched for slots (jsdom does so literally), so four hundred of them cost four hundred
+      // walks where a single re-insertion costs one.
+      const parent = this.timeZoneSelect.parentNode
+      const next = this.timeZoneSelect.nextSibling
+      this.timeZoneSelect.remove()
+      this.timeZoneSelect.replaceChildren(
+        manual,
+        ...this.timeZones.available().map(zone => {
+          const option = document.createElement("option")
+          option.value = zone
+          option.textContent = zone
+          return option
+        })
+      )
+      parent?.insertBefore(this.timeZoneSelect, next)
+    }
     manual.textContent = this.messages.timeZoneManual
-    this.timeZoneSelect.replaceChildren(
-      manual,
-      ...this.timeZones.available().map(zone => {
-        const option = document.createElement("option")
-        option.value = zone
-        option.textContent = zone
-        return option
-      })
-    )
     this.timeZoneSelect.value = this.ufoElement.sighting.event.timeZone ?? ""
   }
 

@@ -18,6 +18,9 @@ export default defineConfig({
   },
   test: {
     environment: "jsdom",
-    include: ["test/**/*.test.ts"]
+    include: ["test/**/*.test.ts"],
+    // Only bounds how long a FAILING test takes. The suite runs every file at once, and under that
+    // load an editor test that takes one second alone has taken more than five, the default.
+    testTimeout: 30_000
   }
 })

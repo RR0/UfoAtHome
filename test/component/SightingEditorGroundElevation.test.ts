@@ -220,7 +220,7 @@ describe("SightingEditorElement ground elevation", () => {
     expect(element.shadowRoot!.getElementById("ground-elevation")!.textContent).toContain("585")
     // The same loop re-asked the weather record every turn; one place and one date is one question.
     expect(weatherLookups).toBeLessThanOrEqual(2)
-  }, 10_000)
+  })
 
   it("asks again when the observer is somewhere else", async () => {
     const element = mount()
@@ -233,5 +233,5 @@ describe("SightingEditorElement ground elevation", () => {
     await settle(1600)
 
     expect(elevationLookups).toBe(2)
-  }, 10_000)
+  })
 })

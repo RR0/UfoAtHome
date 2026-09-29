@@ -4658,7 +4658,7 @@ describe("SightingEditorElement inferred weather", () => {
     const element = mount(recordProvider())
     stateDateAndPlace(element)
 
-    await waitFor(() => element.sightingData.weatherSource !== undefined, 2000)
+    await waitFor(() => element.sightingData.weatherSource !== undefined)
     expect(element.sightingData.weatherSource).toEqual(SOURCE)
     expect(element.sightingData.weatherTrack?.keyframes[0].weather.cloudCover).toBe(0.1)
   })
@@ -4666,7 +4666,7 @@ describe("SightingEditorElement inferred weather", () => {
   it("shows the looked-up values, read-only, with the record and the instant they describe", async () => {
     const element = mount(recordProvider())
     stateDateAndPlace(element)
-    await waitFor(() => sourceLink(element).hidden === false, 2000)
+    await waitFor(() => sourceLink(element).hidden === false)
 
     expect((weatherField(element, "cloudCover") as HTMLInputElement).value).toBe("0.1")
     expect((weatherField(element, "windSpeed") as HTMLInputElement).value).toBe("1.5")
@@ -4690,7 +4690,7 @@ describe("SightingEditorElement inferred weather", () => {
     // about its provenance (see SightingSummary's second rule).
     const element = mount(recordProvider({ ...ON_RECORD, highCloudCover: 0.4 }))
     stateDateAndPlace(element)
-    await waitFor(() => sourceLink(element).hidden === false, 2000)
+    await waitFor(() => sourceLink(element).hidden === false)
 
     const alignment = weatherField(element, "iceCrystalAlignment") as HTMLInputElement
     alignment.value = "0.2"
@@ -4710,7 +4710,7 @@ describe("SightingEditorElement inferred weather", () => {
     // thing that decides whether the sky showed a bare ring or a display of six forms.
     const element = mount(recordProvider())
     stateDateAndPlace(element)
-    await waitFor(() => sourceLink(element).hidden === false, 2000)
+    await waitFor(() => sourceLink(element).hidden === false)
 
     expect(weatherField(element, "cloudCover").disabled).toBe(true)
     expect(weatherField(element, "iceCrystalAlignment").disabled).toBe(false)
@@ -4721,7 +4721,7 @@ describe("SightingEditorElement inferred weather", () => {
     // discards the record. This one contradicts no record, so it must not.
     const element = mount(recordProvider())
     stateDateAndPlace(element)
-    await waitFor(() => sourceLink(element).hidden === false, 2000)
+    await waitFor(() => sourceLink(element).hidden === false)
 
     const alignment = weatherField(element, "iceCrystalAlignment") as HTMLInputElement
     alignment.value = "0.2"
@@ -4736,7 +4736,7 @@ describe("SightingEditorElement inferred weather", () => {
     const element = mount()
     stateDateAndPlace(element)
 
-    await waitFor(() => sourceText(element).textContent!.includes("No record"), 2000)
+    await waitFor(() => sourceText(element).textContent!.includes("No record"))
     // Nothing is being claimed, so nothing is locked: a pre-1940 case is filled in by hand.
     expect(weatherField(element, "cloudCover").disabled).toBe(false)
     expect(element.sightingData.weatherSource).toBeUndefined()
@@ -4746,7 +4746,7 @@ describe("SightingEditorElement inferred weather", () => {
     const element = mount({ getWeather: () => Promise.reject(new Error("offline")) })
     stateDateAndPlace(element)
 
-    await waitFor(() => sourceText(element).textContent!.includes("unreachable"), 2000)
+    await waitFor(() => sourceText(element).textContent!.includes("unreachable"))
     expect(weatherField(element, "cloudCover").disabled).toBe(false)
   })
 
@@ -4769,7 +4769,7 @@ describe("SightingEditorElement inferred weather", () => {
     expect(shadow.getElementById("weather-source-row")!.hidden).toBe(true)
 
     stateDateAndPlace(element)
-    await waitFor(() => element.sightingData.weatherSource !== undefined, 2000)
+    await waitFor(() => element.sightingData.weatherSource !== undefined)
 
     expect(checkbox.disabled).toBe(false)
     // And ticked by itself: asking the record is what this editor does by default.
@@ -4783,7 +4783,7 @@ describe("SightingEditorElement inferred weather", () => {
     const shadow = element.shadowRoot!
     const checkbox = shadow.getElementById("weatherInferred") as HTMLInputElement
     stateDateAndPlace(element)
-    await waitFor(() => checkbox.checked, 2000)
+    await waitFor(() => checkbox.checked)
 
     setInput(shadow, "lat", "")
     setInput(shadow, "lng", "")
@@ -4806,7 +4806,7 @@ describe("SightingEditorElement inferred weather", () => {
     setInput(shadow, "precipitationType", "rain")
     setInput(shadow, "precipitationIntensity", "0.9")
     stateDateAndPlace(element)
-    await waitFor(() => !checkbox.disabled, 2000)
+    await waitFor(() => !checkbox.disabled)
     // Long enough for a lookup to have landed, had one been allowed to run.
     await new Promise(resolve => setTimeout(resolve, 900))
 
@@ -4821,7 +4821,7 @@ describe("SightingEditorElement inferred weather", () => {
     const shadow = element.shadowRoot!
     const checkbox = shadow.getElementById("weatherInferred") as HTMLInputElement
     stateDateAndPlace(element)
-    await waitFor(() => element.sightingData.weatherSource !== undefined, 2000)
+    await waitFor(() => element.sightingData.weatherSource !== undefined)
 
     checkbox.checked = false
     checkbox.dispatchEvent(new Event("change"))
@@ -4830,7 +4830,7 @@ describe("SightingEditorElement inferred weather", () => {
     setInput(shadow, "lng", "")
     setInput(shadow, "lat", "43.837")
     setInput(shadow, "lng", "5.983")
-    await waitFor(() => !checkbox.disabled, 2000)
+    await waitFor(() => !checkbox.disabled)
 
     expect(checkbox.checked).toBe(false)
     expect(element.sightingData.weatherSource).toBeUndefined()
@@ -4848,7 +4848,7 @@ describe("SightingEditorElement inferred weather", () => {
   it("hands the fields back to the observer on demand, keeping the record's values as a start", async () => {
     const element = mount(recordProvider())
     stateDateAndPlace(element)
-    await waitFor(() => element.sightingData.weatherSource !== undefined, 2000)
+    await waitFor(() => element.sightingData.weatherSource !== undefined)
 
     const inferredCheckbox = element.shadowRoot!.getElementById("weatherInferred") as HTMLInputElement
     inferredCheckbox.checked = false
@@ -4946,7 +4946,7 @@ describe("SightingEditorElement place search", () => {
     input.value = name
     input.dispatchEvent(new Event("input"))
     ;(element.shadowRoot!.getElementById("search-place") as HTMLButtonElement).click()
-    await waitFor(() => statusText(element) !== "" && !statusText(element).includes("Looking up"), 1000)
+    await waitFor(() => statusText(element) !== "" && !statusText(element).includes("Looking up"))
   }
 
   it("fills latitude and longitude from a searched name", async () => {
@@ -5063,7 +5063,7 @@ describe("SightingEditorElement place search", () => {
     input.value = "Valensole"
     input.dispatchEvent(new Event("input"))
     input.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }))
-    await waitFor(() => search.mock.calls.length > 0, 1000)
+    await waitFor(() => search.mock.calls.length > 0)
 
     expect(search).toHaveBeenCalledWith("Valensole", expect.anything())
   })
@@ -5412,7 +5412,7 @@ describe("SightingEditorElement data sources", () => {
     input.value = "Valensole"
     input.dispatchEvent(new Event("input"))
     ;(element.shadowRoot!.getElementById("search-place") as HTMLButtonElement).click()
-    await waitFor(() => !row.hidden, 1000)
+    await waitFor(() => !row.hidden)
 
     expect(element.shadowRoot!.getElementById("place-status-text")!.textContent).toContain("1")
     expect(row.textContent).toContain("according to")
@@ -5559,7 +5559,7 @@ describe("SightingEditorElement location coherence", () => {
     input.value = "Valensole"
     input.dispatchEvent(new Event("input"))
     ;(element.shadowRoot!.getElementById("search-place") as HTMLButtonElement).click()
-    await waitFor(() => input.value === VALENSOLE.name, 1000)
+    await waitFor(() => input.value === VALENSOLE.name)
   }
 
   it("re-derives the shown name when the coordinates are moved by hand", async () => {
@@ -5568,7 +5568,7 @@ describe("SightingEditorElement location coherence", () => {
 
     setInput(element, "lat", "43.817")
     setInput(element, "lng", "6.093")
-    await waitFor(() => placeName(element).value === RIEZ.name, 3000)
+    await waitFor(() => placeName(element).value === RIEZ.name)
 
     expect(element.sightingData.place?.[0].name).toBe(RIEZ.name)
   })
@@ -5579,7 +5579,7 @@ describe("SightingEditorElement location coherence", () => {
 
     setInput(element, "lat", "0")
     setInput(element, "lng", "-30")
-    await waitFor(() => placeName(element).value === "", 3000)
+    await waitFor(() => placeName(element).value === "")
 
     // A name left describing somewhere the sighting is not at would be worse than none.
     expect(element.sightingData.place?.[0].name).toBeUndefined()
@@ -6117,7 +6117,7 @@ describe("SightingEditorElement assessment", () => {
     // was made OF it. Same containment the observer and the decor already use.
     const element = mount()
 
-    await waitFor(() => nest(element) !== null, 2000)
+    await waitFor(() => nest(element) !== null)
 
     expect(nest(element)!.querySelector(".param-nest-label")!.textContent)
       .toBe(sightingEditorMessages_en.assessmentGroup)
@@ -6132,7 +6132,7 @@ describe("SightingEditorElement assessment", () => {
     // questions went unanswered — is said by the marks on the fields that would answer them.
     const element = mount()
 
-    await waitFor(() => nest(element) !== null, 2000)
+    await waitFor(() => nest(element) !== null)
     const chip = nest(element)!.querySelector(".param-chip")!
 
     expect(chip.querySelector(".param-chip-label")!.textContent!.trim())
@@ -6142,7 +6142,7 @@ describe("SightingEditorElement assessment", () => {
 
   it("leads to the group the reading is about, so the figure can be acted on", async () => {
     const element = mount()
-    await waitFor(() => nest(element) !== null, 2000)
+    await waitFor(() => nest(element) !== null)
 
     ;(nest(element)!.querySelector(".param-chip") as HTMLButtonElement).click()
 
@@ -6154,7 +6154,7 @@ describe("SightingEditorElement assessment", () => {
     // said nothing.
     const element = mount()
 
-    await waitFor(() => element.shadowRoot!.querySelectorAll(".wanted").length > 0, 2000)
+    await waitFor(() => element.shadowRoot!.querySelectorAll(".wanted").length > 0)
 
     const wanted = [...element.shadowRoot!.querySelectorAll(".wanted")].map(e => e.id).filter(id => id !== "")
     expect(wanted).toContain("lat")
@@ -6175,7 +6175,7 @@ describe("SightingEditorElement assessment", () => {
     // the number is the number of MARKS, so a badge is never a panel where nothing is highlighted.
     const element = mount()
 
-    await waitFor(() => element.shadowRoot!.querySelectorAll(".tab-badge:not([hidden])").length > 0, 2000)
+    await waitFor(() => element.shadowRoot!.querySelectorAll(".tab-badge:not([hidden])").length > 0)
 
     const shadow = element.shadowRoot!
     for (const tab of shadow.querySelectorAll<HTMLElement>(".group-tab")) {
@@ -6192,7 +6192,7 @@ describe("SightingEditorElement assessment", () => {
     // was counted on Pictures, which asks for nothing.
     const element = mountEmpty()
     const shadow = element.shadowRoot!
-    await waitFor(() => shadow.querySelector("#group-shape .wanted") !== null, 2000)
+    await waitFor(() => shadow.querySelector("#group-shape .wanted") !== null)
 
     const badgeOf = (panel: string) => shadow.querySelector<HTMLElement>(`.group-tab[aria-controls="group-${panel}"] .tab-badge`)
     expect(badgeOf("reference")?.hidden ?? true).toBe(true)
@@ -6205,7 +6205,7 @@ describe("SightingEditorElement assessment", () => {
     // kind already hold accepted values. Real gaps, counted in the coverage figure, with nothing in
     // the panel to point at — so no badge promising something to find.
     const element = mount()
-    await waitFor(() => element.shadowRoot!.querySelectorAll(".tab-badge:not([hidden])").length > 0, 2000)
+    await waitFor(() => element.shadowRoot!.querySelectorAll(".tab-badge:not([hidden])").length > 0)
 
     const badgeOf = (name: string) => [...element.shadowRoot!.querySelectorAll<HTMLElement>(".group-tab")]
       .find(t => t.querySelector("span")!.textContent === name)!.querySelector<HTMLElement>(".tab-badge")!
@@ -6216,7 +6216,7 @@ describe("SightingEditorElement assessment", () => {
 
   it("unmarks a field once the recording answers its question", async () => {
     const element = mount()
-    await waitFor(() => element.shadowRoot!.getElementById("lat")!.classList.contains("wanted"), 2000)
+    await waitFor(() => element.shadowRoot!.getElementById("lat")!.classList.contains("wanted"))
 
     const shadow = element.shadowRoot!
     for (const [id, value] of [["lat", "48.288"], ["lng", "-4.29"]] as const) {
@@ -6225,7 +6225,7 @@ describe("SightingEditorElement assessment", () => {
       input.dispatchEvent(new Event("input"))
     }
 
-    await waitFor(() => !element.shadowRoot!.getElementById("lat")!.classList.contains("wanted"), 2000)
+    await waitFor(() => !element.shadowRoot!.getElementById("lat")!.classList.contains("wanted"))
     expect(element.shadowRoot!.getElementById("lat")!.title).toBe("")
   })
 
@@ -6246,7 +6246,7 @@ describe("SightingEditorElement missing-value marks", () => {
     // the account simply never said. Neither is input.invalid's red box, which means a value was
     // typed wrongly — here nothing was typed at all.
     const element = mount()
-    await waitFor(() => element.shadowRoot!.querySelectorAll(".wanted").length > 0, 2000)
+    await waitFor(() => element.shadowRoot!.querySelectorAll(".wanted").length > 0)
 
     expect(field(element, "durationSeconds").classList.contains("missing-required")).toBe(true)
     expect(field(element, "durationSeconds").classList.contains("wanted")).toBe(false)
@@ -6258,7 +6258,7 @@ describe("SightingEditorElement missing-value marks", () => {
     // Opacity rather than a second colour: the two are the same statement at two strengths, and a
     // reader should not have to learn a palette.
     const element = mount()
-    await waitFor(() => element.shadowRoot!.querySelectorAll(".tab-badge:not([hidden])").length > 0, 2000)
+    await waitFor(() => element.shadowRoot!.querySelectorAll(".tab-badge:not([hidden])").length > 0)
 
     expect(badge(element, "Moment").classList.contains("optional")).toBe(false)
     expect(badge(element, "Location").classList.contains("optional")).toBe(true)
@@ -6269,7 +6269,7 @@ describe("SightingEditorElement missing-value marks", () => {
     // For the ASSESSMENT to have landed, not merely for the duration to be empty: the strength of
     // the badge is read off the duration and is right from the first frame, while its number needs
     // the assessment, and waiting on the wrong one of the two reads a count of zero.
-    await waitFor(() => badge(element, "Moment").textContent === "2", 2000)
+    await waitFor(() => badge(element, "Moment").textContent === "2")
 
     const duration = field(element, "durationSeconds") as HTMLInputElement
     duration.value = "270"
@@ -6280,7 +6280,7 @@ describe("SightingEditorElement missing-value marks", () => {
     // assessment comes back and drops "how long" from it, which is the honest thing for it to say:
     // nothing has re-counted yet.
     expect(badge(element, "Moment").classList.contains("optional")).toBe(true)
-    await waitFor(() => badge(element, "Moment").textContent === "1", 2000)
+    await waitFor(() => badge(element, "Moment").textContent === "1")
   })
 })
 
@@ -6294,7 +6294,7 @@ describe("SightingEditorElement missing-value marks, in detail", () => {
     const element = mount()
     // Waited on the ASSESSMENT and not on the solid mark: the latter is true from the first frame,
     // read straight off the empty field, while the dashes need the questions to have been counted.
-    await waitFor(() => field(element, "obs-time-native").classList.contains("wanted"), 2000)
+    await waitFor(() => field(element, "obs-time-native").classList.contains("wanted"))
 
     expect(field(element, "durationSeconds").classList.contains("missing-required")).toBe(true)
     expect(field(element, "obs-end-time-native").classList.contains("wanted")).toBe(false)
@@ -6302,7 +6302,7 @@ describe("SightingEditorElement missing-value marks, in detail", () => {
 
   it("leaves a field alone once it holds an accepted value", async () => {
     const element = mount()
-    await waitFor(() => element.shadowRoot!.querySelectorAll(".wanted").length > 0, 2000)
+    await waitFor(() => element.shadowRoot!.querySelectorAll(".wanted").length > 0)
 
     expect(field(element, "cloudCover").value).toBe("0")
     expect(field(element, "cloudCover").classList.contains("wanted")).toBe(false)
@@ -6407,7 +6407,7 @@ describe("SightingEditorElement bodies", () => {
     tab("shape-bodies", ".subgroup-tab").click()
     expect(scene.interpretation).toEqual(interpretation)
     // Its fields are a chunk of their own, fetched on this first opening.
-    await waitFor(() => shadow.getElementById("body-title") !== null, 2000)
+    await waitFor(() => shadow.getElementById("body-title") !== null)
     expect(scene.compareAccount).toBe(true)
     // An edit of a body is drawn at once.
     const title = shadow.getElementById("body-title") as HTMLInputElement
@@ -6465,7 +6465,7 @@ describe("SightingEditorElement body handles", () => {
     const tab = (id: string, selector: string) => [...shadow.querySelectorAll<HTMLButtonElement>(selector)].find(t => t.getAttribute("aria-controls") === id)!
     if (shadow.getElementById("group-shape")!.hidden) tab("group-shape", ".group-tab").click()
     tab("shape-bodies", ".subgroup-tab").click()
-    await waitFor(() => shadow.getElementById("body-title") !== null, 2000)
+    await waitFor(() => shadow.getElementById("body-title") !== null)
     const canvas = nestedUfo(element)!.shadowRoot!.getElementById("canvas") as HTMLCanvasElement
     vi.spyOn(canvas, "getBoundingClientRect").mockReturnValue({ left: 0, top: 0, width: 640, height: 360 } as DOMRect)
     return { element, canvas }
