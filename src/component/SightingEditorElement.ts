@@ -7613,6 +7613,7 @@ export class SightingEditorElement extends HTMLElement {
       ["option-source-telephone", messages.accountSourceTelephone],
       ["option-source-questionnaire", messages.accountSourceQuestionnaire],
       ["option-source-letter", messages.accountSourceLetter],
+      ["option-source-social-media", messages.accountSourceSocialMedia],
       ["option-source-press", messages.accountSourcePress],
       ["option-followed-unknown", messages.accountUnknown],
       ["option-followed-yes", messages.accountYes],

@@ -85,6 +85,7 @@ export const html = `
       <option id="option-source-telephone" value="telephone">by telephone</option>
       <option id="option-source-questionnaire" value="questionnaire">questionnaire</option>
       <option id="option-source-letter" value="letter">the observer wrote it</option>
+      <option id="option-source-social-media" value="social-media">the observer posted it online</option>
       <option id="option-source-press" value="press">press or broadcast</option>
     </select></label>
     <!-- Three states and not a checkbox: a report that says nothing about follow-up is not a report

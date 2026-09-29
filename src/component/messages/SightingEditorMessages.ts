@@ -635,6 +635,8 @@ export interface SightingEditorMessages extends SightingLabels {
   accountSourceTelephone: string
   accountSourceQuestionnaire: string
   accountSourceLetter: string
+  /** Posted by the observer themselves on a social network or a forum. */
+  accountSourceSocialMedia: string
   accountSourcePress: string
   /** Whether the observer was gone back to after the first account. Three states: a report silent
    * about follow-up is not a report saying none happened. */

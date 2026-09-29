@@ -50,6 +50,10 @@ describe("recording issues", () => {
     ])
   })
 
+  it("accepts an account the observer posted online themselves", () => {
+    expect(check.issues(recording({ account: { source: "social-media", followedUp: false } }))).toEqual([])
+  })
+
   it("checks the value inside a provenance wrapper", () => {
     expect(check.issues(recording({ durationSeconds: { value: 15, basis: "derived" } }))).toEqual([])
     expect(check.issues(recording({ durationSeconds: { value: "15", basis: "derived" } }))[0].kind).toBe("wrong-type")

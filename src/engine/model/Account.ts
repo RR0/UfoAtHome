@@ -23,6 +23,10 @@ export type AccountSource =
   | "questionnaire"
   /** The observer wrote it down themselves, unprompted. */
   | "letter"
+  /** The observer published it themselves on a social network or a forum: written unprompted like a
+   * letter, but addressed to everybody and nobody, usually short, and with no question asked of them
+   * yet. Distinct from "press", where the account has passed through somebody else's hands. */
+  | "social-media"
   /** Taken from a newspaper or a broadcast, with no contact with the observer at all. */
   | "press"
 

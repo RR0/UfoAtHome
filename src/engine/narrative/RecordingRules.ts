@@ -176,7 +176,7 @@ export class RecordingRules {
    investigator came, or that it is a press cutting.`,
       file: `\`account\` is about the observer and how the account travelled: \`observerAgeYears\` (at the
    time), \`observerOccupation\` (in their words), \`source\` (how it reached whoever wrote the
-   recording: on-site, interview, telephone, questionnaire, letter, press) and \`followedUp\`
+   recording: on-site, interview, telephone, questionnaire, letter, social-media, press) and \`followedUp\`
    (whether they were gone back to). Each other person present is a \`decor\` object of kind
    "observer".`
     },

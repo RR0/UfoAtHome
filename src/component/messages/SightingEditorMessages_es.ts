@@ -276,6 +276,7 @@ export const sightingEditorMessages_es: SightingEditorMessages = {
   accountSourceTelephone: "por teléfono",
   accountSourceQuestionnaire: "cuestionario",
   accountSourceLetter: "lo escribió el observador",
+  accountSourceSocialMedia: "lo publicó el observador en internet",
   accountSourcePress: "prensa o radiodifusión",
   accountFollowedUp: "Recontactado",
   accountUnknown: "desconocido",
