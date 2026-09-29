@@ -106,6 +106,14 @@ export const sceneNames_es: SceneNames = {
     geminids: "Gemínidas",
     ursids: "Úrsidas"
   },
+  lightRigs: {
+    "airliner": "Avión de pasajeros",
+    "helicopter": "Helicóptero",
+    "car-headlights": "Coche, faros encendidos",
+    "car-hazards": "Coche, luces de emergencia",
+    "emergency-beacons": "Rotativos de vehículo de emergencia",
+    "streetlamp": "Farola"
+  },
   instruments: {
     eye: "A simple vista",
     "rectilinear-lens": "Cámara, modelo desconocido",

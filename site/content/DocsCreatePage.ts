@@ -266,7 +266,7 @@ https://ufoathome.org/sighting.schema.json .
       <a class="btn btn-primary" href="/edit/">Abrir el editor</a>
       <a class="btn" href="/edit/#manual">Leer el manual</a>
     </p>
-    <p>Termina con <strong>Export</strong>, que te entrega un archivo. Ese archivo es la grabación
+    <p>Termina con <strong>Exportar</strong>, que te entrega un archivo. Ese archivo es la grabación
       completa: no hay cuenta y aquí no se guarda nada. Ponlo en algún lugar con una dirección
       pública y estará listo para <a href="/docs/share/">compartir</a>.</p>
     <p>¿Ya tienes una y quieres cambiarla? El editor se abre con una grabación existente — el panel
@@ -320,7 +320,7 @@ https://ufoathome.org/sighting.schema.json .
         vio.</li>
     </ul>
     <p>Un observador que solo tiene su propio relato puede hacerlo dentro del editor: lo escribe en
-      la pestaña <em>Observation</em>, elige qué lo redacta (hoy Claude: su propia clave de API, y el
+      la pestaña <em>Observación</em>, elige qué lo redacta (hoy Claude: su propia clave de API, y el
       modelo), y el editor redacta el resto de la grabación a partir de él, sin enviar nada a ningún
       sitio salvo a ese modelo.</p>
     <p class="small">Un relato es un dato personal. Antes de dar documentos a un asistente en línea,
@@ -360,7 +360,7 @@ https://ufoathome.org/sighting.schema.json .
       <a class="btn btn-primary" href="/edit/">Apri l'editor</a>
       <a class="btn" href="/edit/#manual">Leggi il manuale</a>
     </p>
-    <p>Si conclude con <strong>Export</strong>, che ti consegna un file. Quel file è l'intera
+    <p>Si conclude con <strong>Esporta</strong>, che ti consegna un file. Quel file è l'intera
       registrazione: non c'è alcun account e qui non si conserva nulla. Mettilo da qualche parte con
       un indirizzo pubblico ed è pronto da <a href="/docs/share/">condividere</a>.</p>
     <p>Ne hai già una e vuoi modificarla? L'editor si apre su una registrazione esistente — il
@@ -413,7 +413,7 @@ https://ufoathome.org/sighting.schema.json .
         ha visto.</li>
     </ul>
     <p>Un osservatore che ha solo il proprio resoconto può farlo dentro l'editor: lo scrive nella
-      scheda <em>Observation</em>, sceglie che cosa lo redige (oggi Claude: la propria chiave API, e
+      scheda <em>Osservazione</em>, sceglie che cosa lo redige (oggi Claude: la propria chiave API, e
       il modello), e l'editor redige il resto della registrazione a partire da esso, senza inviare
       nulla da nessuna parte se non a quel modello.</p>
     <p class="small">Un resoconto è un dato personale. Prima di affidare documenti a un assistente

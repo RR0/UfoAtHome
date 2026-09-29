@@ -30,6 +30,8 @@ export interface SceneNames {
   readonly showers: Readonly<Record<string, string>>
   /** Instruments by id. */
   readonly instruments: Readonly<Record<string, string>>
+  /** The light rigs a decor object can be given, by id (see LightRigs). */
+  readonly lightRigs: Readonly<Record<string, string>>
   /** What an untitled decor object is, by its kind. */
   readonly decorKinds: Readonly<Record<DecorKind, string>>
   /** The sixteen points of the compass, clockwise from north (see Compass). */
@@ -80,6 +82,10 @@ export class SceneNaming {
 
   shower(shower: { id: string, name: string }): string {
     return this.names?.showers[shower.id] ?? shower.name
+  }
+
+  lightRig(rig: { id: string, name: string }): string {
+    return this.names?.lightRigs[rig.id] ?? rig.name
   }
 
   instrument(instrument: { id: string, name: string }): string {

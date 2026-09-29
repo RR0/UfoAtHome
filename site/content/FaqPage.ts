@@ -301,8 +301,8 @@ export class FaqPage implements SitePage {
 
     <div class="faq-item">
       <h3>What languages does it speak?</h3>
-      <p>The components are in English and French, and this site in English, French, Spanish and
-        Italian, picked from your browser's own preferences with English as the fallback. Adding a
+      <p>The components and this site are in English, French, Spanish and Italian, picked from
+        your browser's own preferences with English as the fallback. Adding a
         language to the components means adding one typed messages
         module per component — no markup changes, no build configuration. It is one of the easiest
         contributions to make.</p>
@@ -611,8 +611,8 @@ export class FaqPage implements SitePage {
 
     <div class="faq-item">
       <h3>Quelles langues parle-t-il ?</h3>
-      <p>Les composants sont en anglais et en français, et ce site en anglais, français, espagnol et
-        italien, choisis d'après les préférences de votre navigateur, avec l'anglais en repli. Ajouter
+      <p>Les composants et ce site sont en anglais, français, espagnol et italien, choisis
+        d'après les préférences de votre navigateur, avec l'anglais en repli. Ajouter
         une langue aux composants consiste à ajouter un module de
         messages typé par composant — sans toucher au balisage ni à la configuration de compilation.
         C'est l'une des contributions les plus faciles à apporter.</p>
@@ -676,13 +676,13 @@ export class FaqPage implements SitePage {
     <div class="faq-item">
       <h3>¿Qué envía por la red?</h3>
       <p>Las grabaciones se quedan en tu navegador: no hay cuenta ni almacenamiento en el servidor.
-        <strong>Export</strong> escribe un archivo en tu disco, y ese archivo es la grabación completa.</p>
+        <strong>Exportar</strong> escribe un archivo en tu disco, y ese archivo es la grabación completa.</p>
       <p>Todo lo que se descarga — de dónde, cuándo y bajo qué licencia — figura fuente por fuente en
         <a href="/docs/sources/">Fuentes y decisiones</a>, la única lista que existe, para que esta
         respuesta no tenga que mantener una segunda copia. En resumen:</p>
       <ul>
         <li><strong>Mientras redactas</strong>, el editor te busca las cosas: las coordenadas de un
-          lugar cuando pulsas <strong>Locate</strong>, el registro meteorológico en cuanto se conocen una
+          lugar cuando pulsas <strong>Localizar</strong>, el registro meteorológico en cuanto se conocen una
           fecha completa y un lugar, el relieve y las imágenes aéreas alrededor del observador. Cada
           consulta es un selector de la interfaz, donde se indica su dato, con la atribución que exige
           su licencia. Redactar una grabación a partir de su descripción envía ese texto al modelo que
@@ -749,9 +749,9 @@ export class FaqPage implements SitePage {
       <p>El 3D entra como <em>interpretación</em>, separada del relato: lo que el observador
         cree haber visto (en Silly-le-Long, T1 describe un único triángulo plano y gris, visto de frente
         y luego por detrás), o la explicación de un analista expuesta en un expediente (allí, la avioneta
-        en final del GEIPAN). Cada una es una opción del selector <strong>Interpretation</strong> del
+        en final del GEIPAN). Cada una es una opción del selector <strong>Interpretación</strong> del
         reproductor, mostrada de una en una, con un modelo, un tamaño y una trayectoria en metros. El
-        botón <strong>Compare with the account</strong> superpone entonces los contornos del propio relato
+        botón <strong>Comparar con el relato</strong> superpone entonces los contornos del propio relato
         y cifra, instante a instante, cuánto se separan en dirección, anchura y altura. El
         relato nunca cambia para ajustarse a una interpretación: es la interpretación la que debe responderle.</p>
       <p>También hace que la herramienta sea honesta con el tamaño. Una grabación guarda un ángulo, nunca metros —
@@ -903,8 +903,8 @@ export class FaqPage implements SitePage {
 
     <div class="faq-item">
       <h3>¿Qué idiomas habla?</h3>
-      <p>Los componentes están en inglés y en francés, y este sitio en inglés, francés, español e
-        italiano, elegidos según las preferencias de tu navegador, con el inglés como respaldo. Añadir un
+      <p>Los componentes y este sitio están en inglés, francés, español e italiano, elegidos
+        según las preferencias de tu navegador, con el inglés como respaldo. Añadir un
         idioma a los componentes consiste en añadir un módulo de mensajes
         tipado por componente — sin cambios en el marcado ni en la configuración de compilación. Es una de las
         contribuciones más fáciles de hacer.</p>
@@ -966,13 +966,13 @@ export class FaqPage implements SitePage {
     <div class="faq-item">
       <h3>Che cosa invia in rete?</h3>
       <p>Le registrazioni restano nel tuo browser: non c'è alcun account né alcuna archiviazione lato server.
-        <strong>Export</strong> scrive un file sul tuo disco, e quel file è l'intera registrazione.</p>
+        <strong>Esporta</strong> scrive un file sul tuo disco, e quel file è l'intera registrazione.</p>
       <p>Tutto ciò che viene scaricato — da dove, quando e con quale licenza — è elencato fonte per
         fonte in <a href="/docs/sources/">Fonti e scelte</a>, l'unico elenco che esista, perché
         questa risposta non debba tenerne una seconda copia. In breve:</p>
       <ul>
         <li><strong>Mentre compili</strong>, l'editor cerca le cose per te: le coordinate di un
-          luogo quando premi <strong>Locate</strong>, il dato meteorologico non appena sono noti una data completa e
+          luogo quando premi <strong>Localizza</strong>, il dato meteorologico non appena sono noti una data completa e
           un luogo, il rilievo e le immagini aeree intorno all'osservatore. Ogni consultazione è un selettore
           nell'interfaccia, dove il suo dato è riportato, con l'attribuzione richiesta dalla sua licenza.
           Redigere una registrazione a partire dalla sua descrizione invia quel testo al modello che hai scelto, con la tua
@@ -1039,9 +1039,9 @@ export class FaqPage implements SitePage {
       <p>Il 3D entra in gioco come <em>interpretazione</em>, tenuta separata dal resoconto: ciò che l'osservatore
         crede di aver visto (a Silly-le-Long, T1 descrive un unico triangolo piatto e grigio, visto di fronte
         e poi da dietro), o la spiegazione di un analista esposta in un dossier (lì, l'aereo leggero
-        in finale del GEIPAN). Ciascuna è una scelta del selettore <strong>Interpretation</strong> del
+        in finale del GEIPAN). Ciascuna è una scelta del selettore <strong>Interpretazione</strong> del
         lettore, mostrata una alla volta, con un modello, una grandezza e una traiettoria in metri. Il
-        pulsante <strong>Compare with the account</strong> sovrappone allora i contorni del resoconto stesso
+        pulsante <strong>Confronta con il resoconto</strong> sovrappone allora i contorni del resoconto stesso
         e indica, istante per istante, quanto distano in direzione, larghezza e altezza. Il
         resoconto non cambia mai per adattarsi a un'interpretazione: è l'interpretazione che deve rispondergli.</p>
       <p>Rende anche lo strumento onesto sulla grandezza. Una registrazione memorizza un angolo, mai metri —
@@ -1193,8 +1193,8 @@ export class FaqPage implements SitePage {
 
     <div class="faq-item">
       <h3>Quali lingue parla?</h3>
-      <p>I componenti sono in inglese e in francese, e questo sito in inglese, francese, spagnolo e
-        italiano, scelti in base alle preferenze del tuo browser, con l'inglese come ripiego. Aggiungere
+      <p>I componenti e questo sito sono in inglese, francese, spagnolo e italiano, scelti in
+        base alle preferenze del tuo browser, con l'inglese come ripiego. Aggiungere
         una lingua ai componenti significa aggiungere un modulo di messaggi
         tipizzato per componente — nessuna modifica al markup, nessuna configurazione di build. È uno dei
         contributi più facili da dare.</p>

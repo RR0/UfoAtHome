@@ -7348,7 +7348,7 @@ export class SightingEditorElement extends HTMLElement {
       ...rigs.map(rig => {
         const option = document.createElement("option")
         option.value = rig.id
-        option.textContent = rig.name
+        option.textContent = this.naming.lightRig(rig)
         return option
       })
     )

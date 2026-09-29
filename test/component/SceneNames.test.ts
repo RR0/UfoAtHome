@@ -11,6 +11,7 @@ import { STELLAR_OUTBURSTS } from "../../src/engine/astronomy/novaCatalog.js"
 import { SATELLITE_CLASSES } from "../../src/engine/astronomy/satelliteCatalog.js"
 import { METEOR_SHOWERS } from "../../src/engine/astronomy/MeteorShowers.js"
 import { INSTRUMENTS } from "../../src/engine/instrument/Instrument.js"
+import { LIGHT_RIGS } from "../../src/engine/model/LightRig.js"
 
 const languages: Record<string, SceneNames> = { fr: sceneNames_fr, es: sceneNames_es, it: sceneNames_it }
 
@@ -28,7 +29,8 @@ describe("SceneNames", () => {
           ["novae", STELLAR_OUTBURSTS.map(entry => entry.id)],
           ["satelliteClasses", SATELLITE_CLASSES.map(entry => entry.id)],
           ["showers", METEOR_SHOWERS.map(entry => entry.id)],
-          ["instruments", INSTRUMENTS.map(entry => entry.id)]
+          ["instruments", INSTRUMENTS.map(entry => entry.id)],
+          ["lightRigs", LIGHT_RIGS.map(entry => entry.id)]
         ] as const) {
           for (const id of ids) expect(names[table][id], `${table}.${id}`).toBeTruthy()
         }
@@ -41,6 +43,7 @@ describe("SceneNames", () => {
           satelliteClasses: SATELLITE_CLASSES.map(entry => entry.id),
           showers: METEOR_SHOWERS.map(entry => entry.id),
           instruments: INSTRUMENTS.map(entry => entry.id),
+          lightRigs: LIGHT_RIGS.map(entry => entry.id),
           stars: BRIGHT_STARS.map(star => star.name),
           bodies: ["sun", "moon", "Venus", "Mars", "Jupiter", "Saturn"]
         }
