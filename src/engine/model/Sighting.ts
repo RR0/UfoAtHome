@@ -393,6 +393,24 @@ export class Sighting {
   sway?: number
 
   /**
+   * How bright the night sky is at this place, towns and all: the zenith of a moonless night, in
+   * magnitudes per square arcsecond — what a Sky Quality Meter pointed up reads, and the "SQM" figure
+   * the World Atlas of the artificial night sky brightness gives for a place (Falchi et al. 2016).
+   * 22.0 is a natural sky; a suburb is about 19, a city centre 17.
+   *
+   * THE WHOLE SKY and not the towns' share alone, because that is the figure both sources give; the
+   * towns' share is what is left once the natural 22.0 is taken out (see
+   * NightSkyBrightness.artificialZenithNanolamberts). It brightens the sky, more toward the horizon,
+   * hides the Milky Way and takes stars off the faintest an eye could see.
+   *
+   * Absent means a natural sky, which is what every recording made before this existed gets: the
+   * sky they were drawn with is the one they keep. Its provenance says where the figure came from —
+   * "derived" from the atlas for the place, or "stated" when the observer measured it. Not readonly,
+   * same reasoning as account above.
+   */
+  lightPollution?: number
+
+  /**
    * The speed of the film or sensor the picture was taken on, ISO — what a photographer loaded, as
    * the shutter is what they set (see exposureSeconds). Absent means the device's own (see
    * Instrument.medium); meaningless for an eye. Not readonly, same reasoning as account above.

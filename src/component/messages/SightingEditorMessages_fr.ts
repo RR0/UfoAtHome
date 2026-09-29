@@ -226,6 +226,7 @@ export const sightingEditorMessages_fr: SightingEditorMessages = {
   skyGlowZodiacalBand: "la bande zodiacale à {contrast}× le fond du ciel, à {altitude}° de hauteur {bearing} — toute l'écliptique faiblement allumée, ce qui n'est pas ce que les gens rapportent",
   skyGlowMoon: "ni Voie lactée ni lumière zodiacale : une Lune éclairée à {lit} % tenait le ciel à {sky} magnitudes par seconde d'arc, là où il leur en faut 22",
   skyGlowTwilight: "ni Voie lactée ni lumière zodiacale : le crépuscule tenait encore le ciel à {sky} magnitudes par seconde d'arc, là où il leur en faut 22",
+  skyGlowTowns: "ni Voie lactée ni lumière zodiacale : la lueur des villes tenait le ciel à {sky} magnitudes par seconde d'arc, là où il leur en faut 22",
   skyGlowNothingUp: "ciel assez noir ({sky} magnitudes par seconde d'arc), mais ni le plan de la Galaxie ni l'écliptique ne s'y tenaient assez haut",
   skyBowPrimary: "un arc de {radius}° de rayon, dont le sommet montait à {top}°",
   skyBowSecondary: "un second, plus pâle, à {radius}°, aux couleurs inversées",

@@ -113,6 +113,7 @@ export class SkyGlowEffect {
         uSunDirection: { value: new Vector3(0, -1, 0) },
         uTwilightOutput: { value: 0 },
         uAirglowNanolamberts: { value: NightSkyBrightness.toNanolamberts(NightSkyBrightness.AIRGLOW_MAG_PER_ARCSEC2) },
+        uArtificialNanolamberts: { value: 0 },
         uSkyColor: { value: new Vector3(0, 0, 0) },
         uMilkyWayTint: { value: new Vector3(...SkyGlowEffect.MILKY_WAY_TINT) },
         uZodiacalTint: { value: new Vector3(...SkyGlowEffect.ZODIACAL_TINT) },
@@ -140,6 +141,7 @@ export class SkyGlowEffect {
         uniform vec3 uSunDirection;
         uniform float uTwilightOutput;
         uniform float uAirglowNanolamberts;
+        uniform float uArtificialNanolamberts;
         uniform vec3 uSkyColor;
         uniform vec3 uMilkyWayTint;
         uniform vec3 uZodiacalTint;
@@ -151,6 +153,8 @@ export class SkyGlowEffect {
          * NightSkyBrightness. One system for the sky's brightness and for what the air takes out
          * of the glow standing in it, rather than two constants that would have to be told apart. */
         const float EXTINCTION = 0.172;
+        /** NightSkyBrightness.scatteredFraction(90): the towns' glow is stated at the zenith. */
+        const float ZENITH_SCATTERED = ${NightSkyBrightness.scatteredFraction(90).toFixed(6)};
 
         /** How much brighter this line of sight is for standing that far round from a source of
          * glow — the twin of NightSkyBrightness.scatteringAt, and the one formula this shader has
@@ -188,7 +192,9 @@ export class SkyGlowEffect {
           float sky =
             uAirglowNanolamberts +
             (scatteringAt(dir, uSunDirection) * uTwilightOutput +
-             scatteringAt(dir, uMoonDirection) * uMoonOutput) * scatteredHere;
+             scatteringAt(dir, uMoonDirection) * uMoonOutput) * scatteredHere +
+            // The towns' lamps, scattered back by the same air (NightSkyBrightness.artificialNanolamberts).
+            uArtificialNanolamberts * scatteredHere / ZENITH_SCATTERED;
 
           // The Galaxy, in its own coordinates.
           vec3 galactic = uGalactic * dir;
@@ -281,6 +287,8 @@ export class SkyGlowEffect {
     sunDirection: Vector3
     sunAltitudeDeg: number
     moon: { direction: Vector3; altitudeDeg: number; phaseAngleDeg: number }
+    /** See Sighting.lightPollution; undefined for a natural sky. */
+    lightPollution?: number
     skyColor: Vector3
   }): void {
     const moonlessMag = NightSkyBrightness.moonlessMagPerArcsec2(sky.sunAltitudeDeg)
@@ -301,6 +309,7 @@ export class SkyGlowEffect {
     // still lands exactly on the photometry.
     uniforms.uMoonOutput.value = NightSkyBrightness.moonOutput(sky.moon.phaseAngleDeg, sky.moon.altitudeDeg)
     uniforms.uTwilightOutput.value = NightSkyBrightness.twilightOutput(sky.sunAltitudeDeg)
+    uniforms.uArtificialNanolamberts.value = NightSkyBrightness.artificialZenithNanolamberts(sky.lightPollution)
     uniforms.uSkyColor.value.copy(sky.skyColor)
     this.object.visible = true
     // Walked only once a sky has turned up that could actually show them — most sightings are

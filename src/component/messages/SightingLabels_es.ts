@@ -20,6 +20,8 @@ export const sightingLabels_es: SightingLabels = {
   roll: "Alabeo",
   sway: "Vaivén en reposo",
   swayTitle: "Cuánto mueve la vista el cuerpo que sostiene el instrumento cuando no camina: 1 para una persona de pie, 0 para un trípode. Vacío: 1 (0 si el relato dice que el observador estaba paralizado)",
+  lightPollution: "Cielo nocturno",
+  lightPollutionTitle: "El cenit de una noche sin Luna en este lugar, en magnitudes por segundo de arco cuadrado, tal como lo lee un Sky Quality Meter o lo da el atlas mundial del brillo artificial del cielo (Falchi et al. 2016, lightpollutionmap.info, «SQM»). 22 es un cielo natural; un suburbio ronda 19, el centro de una ciudad 17. Vacío: un cielo natural",
   observationTime: "Inicio de la observación",
   observationEndTime: "Fin de la observación",
   assessmentGroup: "Evaluación",

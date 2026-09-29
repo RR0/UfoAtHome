@@ -226,6 +226,7 @@ export const sightingEditorMessages_en: SightingEditorMessages = {
   skyGlowZodiacalBand: "the zodiacal band {contrast}× the sky behind it, {altitude}° up {bearing} — the whole ecliptic faintly alight, which is not the sight people report",
   skyGlowMoon: "no Milky Way and no zodiacal light: a Moon {lit}% lit held the sky at {sky} magnitudes a square arcsecond, where they need 22",
   skyGlowTwilight: "no Milky Way and no zodiacal light: twilight still held the sky at {sky} magnitudes a square arcsecond, where they need 22",
+  skyGlowTowns: "no Milky Way and no zodiacal light: the towns' glow held the sky at {sky} magnitudes a square arcsecond, where they need 22",
   skyGlowNothingUp: "sky dark enough ({sky} magnitudes a square arcsecond) but neither the galactic plane nor the ecliptic stood high enough in it",
   skyBowPrimary: "a bow {radius}° across, its top {top}° up",
   skyBowSecondary: "a second, fainter one at {radius}° with its colours reversed",

@@ -145,6 +145,9 @@ export const html = `
     <label><span id="label-elevation">Altitude</span>
       <input id="elevation" type="number" min="-500" max="9000" step="1" value="0"/> m</label>
     <output id="ground-elevation" class="ground-elevation" for="lat lng"></output>
+    <!-- The night sky of the place, towns and all — see Sighting.lightPollution. Blank is a natural
+         sky, which is what every recording that says nothing gets. -->
+    <label><span id="label-light-pollution">Night sky</span> <input id="lightPollution" type="number" min="15" max="22" step="0.01" placeholder="22"/> mag/arcsec&sup2;</label>
     <!-- Relief and imagery describe the ground at the location above, so they are chosen here
          rather than in a drawer of their own — same reasoning as the place picker's placement. -->
     <div id="terrain-source-rows" class="terrain-source-rows"></div>

@@ -20,6 +20,8 @@ export const sightingLabels_it: SightingLabels = {
   roll: "Rollio",
   sway: "Oscillazione a riposo",
   swayTitle: "Quanto il corpo che regge lo strumento muove la vista quando non cammina: 1 per una persona in piedi, 0 per un treppiede. Vuoto: 1 (0 se il resoconto dice che l'osservatore era paralizzato)",
+  lightPollution: "Cielo notturno",
+  lightPollutionTitle: "Lo zenit di una notte senza Luna in questo luogo, in magnitudini per secondo d'arco quadrato, come lo legge uno Sky Quality Meter o lo dà l'atlante mondiale della brillanza artificiale del cielo (Falchi et al. 2016, lightpollutionmap.info, «SQM»). 22 è un cielo naturale; una periferia è intorno a 19, un centro città a 17. Vuoto: un cielo naturale",
   observationTime: "Inizio dell'osservazione",
   observationEndTime: "Fine dell'osservazione",
   assessmentGroup: "Valutazione",

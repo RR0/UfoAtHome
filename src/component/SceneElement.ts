@@ -1119,6 +1119,9 @@ export class SceneElement extends HTMLElement {
     // over from the previous one would render the whole scene through the wrong optics (see
     // Instrument.ts). Cheap — SceneRenderer.setInstrument stores two numbers.
     this.sceneRenderer.setInstrument(sighting.instrument)
+    // The towns' glow at this place, if the recording states one: the sky it brightens is restated
+    // by the setAstronomy below, and the stars with it.
+    this.sceneRenderer.setLightPollution(sighting.lightPollution)
     // Heard at the instant shown, not at each instant of a pose being developed.
     if (!instant) this.vehicleAudio.setVoices(this.vehicleHearing.at(sighting, t))
     this.updateMeteorShower(sighting, t)

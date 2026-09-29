@@ -122,3 +122,41 @@ describe("the twilight arch", () => {
     expect(night(20)).toBeCloseTo(NightSkyBrightness.AIRGLOW_MAG_PER_ARCSEC2, 6)
   })
 })
+
+describe("NightSkyBrightness light pollution", () => {
+  const dark = { altitudeDeg: -30, separationDeg: 120 }
+  const noMoon = { phaseAngleDeg: 180, altitudeDeg: -20, separationDeg: 90 }
+
+  it("puts the zenith exactly on the stated figure, the natural sky included", () => {
+    expect(NightSkyBrightness.magPerArcsec2(dark, noMoon, 90, 18.79)).toBeCloseTo(18.79, 6)
+  })
+
+  it("adds nothing when absent, or when the figure is no brighter than a natural sky", () => {
+    const natural = NightSkyBrightness.magPerArcsec2(dark, noMoon, 30)
+    expect(NightSkyBrightness.magPerArcsec2(dark, noMoon, 30, 22)).toBeCloseTo(natural, 9)
+    expect(NightSkyBrightness.magPerArcsec2(dark, noMoon, 30, 23)).toBeCloseTo(natural, 9)
+    expect(NightSkyBrightness.starLossMagnitudes(-30, noMoon)).toBe(0)
+  })
+
+  it("is brighter toward the horizon than overhead", () => {
+    expect(NightSkyBrightness.artificialShape(90)).toBeCloseTo(1, 9)
+    const low = NightSkyBrightness.magPerArcsec2(dark, noMoon, 5, 18.79)
+    expect(low).toBeLessThan(18.79 - 1)
+  })
+
+  it("follows Crumey's threshold: 6.6 under a natural sky, 4.8 under a suburban 19, 4.0 under 18", () => {
+    expect(NightSkyBrightness.nakedEyeLimit(22)).toBeCloseTo(6.62, 2)
+    expect(NightSkyBrightness.nakedEyeLimit(19)).toBeCloseTo(4.77, 2)
+    expect(NightSkyBrightness.nakedEyeLimit(18)).toBeCloseTo(3.97, 2)
+  })
+
+  it("takes about two magnitudes off the stars under Mission Viejo's sky, and the full Moon takes some too", () => {
+    expect(NightSkyBrightness.starLossMagnitudes(-30, noMoon, 18.79)).toBeCloseTo(2.0, 1)
+    expect(NightSkyBrightness.starLossMagnitudes(-30, { phaseAngleDeg: 0, altitudeDeg: 40 })).toBeGreaterThan(1.5)
+  })
+
+  it("matters less in twilight, when the sky is already bright", () => {
+    const night = NightSkyBrightness.starLossMagnitudes(-30, noMoon, 18.79)
+    expect(NightSkyBrightness.starLossMagnitudes(-8, noMoon, 18.79)).toBeLessThan(night / 4)
+  })
+})

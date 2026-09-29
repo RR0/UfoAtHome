@@ -92,7 +92,7 @@ export class SkyGlowVisibility {
    * far the brightest thing either model puts in the sky, and it stands in the brightest part of a
    * twilit sky, so it is often not the part a observer would have picked out.
    */
-  assess(date: Date, observer: ObserverGeo): {
+  assess(date: Date, observer: ObserverGeo, lightPollution?: number): {
     milkyWay?: GlowSighting
     zodiacal?: GlowSighting
     /** The faintest the sky got anywhere the sweep looked — what a observer had to work against at
@@ -128,7 +128,8 @@ export class SkyGlowVisibility {
       const skyMag = NightSkyBrightness.magPerArcsec2(
         { altitudeDeg: sun.altitudeDeg, separationDeg: fromSun },
         { ...moon, separationDeg: SkyGlowVisibility.between(look, moonDirection) },
-        altitudeDeg
+        altitudeDeg,
+        lightPollution
       )
       if (skyMag > darkestSkyMagPerArcsec2) darkestSkyMagPerArcsec2 = skyMag
       const skyS10 = SurfaceBrightness.fromMagPerArcsec2(skyMag)

@@ -20,6 +20,8 @@ export const sightingLabels_en: SightingLabels = {
   roll: "Roll",
   sway: "Sway at rest",
   swayTitle: "How much the body holding the instrument moves the view when not walking: 1 for a person standing, 0 for a tripod. Blank: 1 (0 if the account says the observer was paralysed)",
+  lightPollution: "Night sky",
+  lightPollutionTitle: "The zenith of a moonless night at this place, in magnitudes per square arcsecond, as a Sky Quality Meter reads it or as the World Atlas of artificial sky brightness (Falchi et al. 2016, lightpollutionmap.info, \"SQM\") gives it. 22 is a natural sky; a suburb is about 19, a city centre 17. Blank: a natural sky",
   observationTime: "Observation start",
   observationEndTime: "Observation end",
   assessmentGroup: "Assessment",

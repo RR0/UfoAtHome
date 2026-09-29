@@ -98,6 +98,10 @@ export interface SightingRecordingJson {
   /** The speed of the film or sensor this picture was taken on — see Sighting.iso. Absent means the
    * device's own (Instrument.medium). */
   iso?: number
+  /** How bright the night sky is at the place, towns and all: the zenith of a moonless night in
+   * magnitudes per square arcsecond, a Sky Quality Meter's reading or the World Atlas's "SQM" figure
+   * (Falchi et al. 2016) — see Sighting.lightPollution. 22.0 is a natural sky. Absent means a natural sky. */
+  lightPollution?: number
   /** The named moments of the account — see Milestone. Absent/omitted means none, which is what
    * every recording made before this field existed says. */
   milestones?: Milestone[]
@@ -156,6 +160,7 @@ export function plainSightingJson(sighting: Sighting): SightingRecordingJson {
     instrument: sighting.instrumentId,
     exposureSeconds: sighting.exposureSeconds,
     iso: sighting.iso,
+    lightPollution: sighting.lightPollution,
     interpretation: sighting.interpretation
   }
 }
@@ -221,6 +226,7 @@ function fromPlainSightingJson(json: SightingRecordingJson): Sighting {
   sighting.sources = json.sources
   sighting.sway = json.sway
   sighting.iso = json.iso
+  sighting.lightPollution = json.lightPollution
   sighting.vehicle = json.vehicle
   sighting.interpretation = json.interpretation
   sighting.loadIssues = issues

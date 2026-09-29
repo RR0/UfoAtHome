@@ -20,6 +20,8 @@ export const sightingLabels_fr: SightingLabels = {
   roll: "Roulis",
   sway: "Bougé au repos",
   swayTitle: "Combien le corps qui tient l'instrument fait bouger la vue hors de la marche : 1 pour une personne debout, 0 pour un trépied. Vide : 1 (0 si le compte rendu dit l'observateur paralysé)",
+  lightPollution: "Ciel nocturne",
+  lightPollutionTitle: "Le zénith d'une nuit sans Lune en ce lieu, en magnitudes par seconde d'arc carrée, tel qu'un Sky Quality Meter le lit ou que l'atlas mondial de la brillance artificielle du ciel (Falchi et al. 2016, lightpollutionmap.info, « SQM ») le donne. 22 est un ciel naturel ; une banlieue est vers 19, un centre-ville vers 17. Vide : un ciel naturel",
   observationTime: "Début de l'observation",
   observationEndTime: "Fin de l'observation",
   assessmentGroup: "Évaluation",

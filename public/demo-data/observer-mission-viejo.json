@@ -63,6 +63,11 @@
   "en": "I just saw a glowing orb UFO zip across the sky. It caught my eye, I looked up, saw it for just over 2 seconds before it disappeared behind tree line.\n\nIt was very bright, light yellow in the middle with orange border (like a fire ember), seemed perfectly round, had no \"tail\" like a meteor usually does, had the speed of a meteor and was very bright like a meteor fireball would be but again there was no tail or trail.\n\nEst 7:45pm PT, Mission Viejo, CA, southern sky, object moved west to east."
  },
  "instrument": "eye",
+ "lightPollution": {
+  "value": 18.79,
+  "basis": "derived",
+  "rationale": "World Atlas of the artificial night sky brightness (Falchi et al. 2016, doi:10.1126/sciadv.1600377), SQM at 33.6016, -117.6720 as lightpollutionmap.info gives it on 2026-09-29: 3120 µcd/m² artificial, 18.3 times the natural sky, Bortle 7. The observer's own words agree without giving a figure: \"far less star visible due to surrounding light pollution\" (reply on X, 2026-09-29)"
+ },
  "observerTrack": {
   "keyframes": [
    {

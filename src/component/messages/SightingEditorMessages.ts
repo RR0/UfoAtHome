@@ -467,6 +467,8 @@ export interface SightingEditorMessages extends SightingLabels {
   skyGlowZodiacalBand: string
   skyGlowMoon: string
   skyGlowTwilight: string
+  /** The towns' glow held the sky up — see Sighting.lightPollution. */
+  skyGlowTowns: string
   skyGlowNothingUp: string
   /** One name per bow, with the radius it stands at and how high its top reached — the height being
    * the number an account can be checked against, since it fixes how low the source was. */

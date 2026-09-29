@@ -1113,6 +1113,8 @@ export class SceneRenderer {
    * setInstrumentGain. Zero until told otherwise, which is an eye, which is what a recording that
    * says nothing was made with. */
   private instrumentMagnitudeGain = 0
+  /** See setLightPollution. */
+  private lightPollution?: number
   /** The shower falling in this sky, if any — see MeteorSystem. Built once and kept: an empty
    * shower draws nothing, so there is no reason to tear it down between recordings. */
   private meteorSystem?: MeteorSystem
@@ -2384,7 +2386,7 @@ export class SceneRenderer {
     // out, and the device standing in for that eye moves it (see setInstrumentGain). Computed once
     // here and handed down, rather than each builder asking again, so that a star, a planet and the
     // comet beside them can never be drawn against three different thresholds.
-    const magnitudeLimit = visibleMagnitudeLimit(astronomy.sun.altitudeDeg, this.instrumentMagnitudeGain)
+    const magnitudeLimit = this.magnitudeLimitOf(astronomy)
     this.buildStars(astronomy.stars, magnitudeLimit)
     this.placeBodies(astronomy, magnitudeLimit)
     this.buildIceHalos(astronomy.sun, astronomy.moon)
@@ -2437,7 +2439,7 @@ export class SceneRenderer {
   private applySkyColours(astronomy: SceneAstronomy): void {
     this.skyColoursStale = false
     if (this.bodiesScale !== this.relativeScale) {
-      this.placeBodies(astronomy, visibleMagnitudeLimit(astronomy.sun.altitudeDeg, this.instrumentMagnitudeGain))
+      this.placeBodies(astronomy, this.magnitudeLimitOf(astronomy))
       this.applyDazzleStrength()
       // The halos and the bows are the bodies' light too (see bentLight): drawn at a stale scale,
       // a halo worked out before the sky was first read back came out four thousand times too
@@ -2582,6 +2584,7 @@ export class SceneRenderer {
   private scatteredSkyState(astronomy: SceneAstronomy) {
     return {
       altitudeM: this.siteElevationM + this.observerElevationM + 1.6,
+      lightPollution: this.lightPollution,
       sun: { altitudeDeg: astronomy.sun.altitudeDeg, azimuthDeg: astronomy.sun.azimuthDeg, magnitude: astronomy.sun.magnitude },
       moon: {
         altitudeDeg: astronomy.moon.altitudeDeg,
@@ -2630,7 +2633,9 @@ export class SceneRenderer {
       // shows no parallax against a observer's few metres of eye height.
       this.celestialGroup.add(this.satelliteField.object)
     }
-    const magnitudeLimit = visibleMagnitudeLimit(this.lastSunPosition?.altitudeDeg ?? -90, this.instrumentMagnitudeGain)
+    const magnitudeLimit = this.lastAstronomy
+      ? this.magnitudeLimitOf(this.lastAstronomy)
+      : visibleMagnitudeLimit(-90, this.instrumentMagnitudeGain)
     this.satelliteField.set(satellites, magnitudeLimit, position => this.cloudTransmission(position),
       (position, magnitude) => this.arrivingIlluminance(position, magnitude, 1))
     this.render()
@@ -2893,6 +2898,31 @@ export class SceneRenderer {
    * LimitingMagnitude.gainFor). Stored rather than acted on: the sky is restated on the very next
    * setAstronomy tick, which is where every threshold in it is decided.
    */
+  /**
+   * The faintest thing this sky let be seen, through this instrument: the twilight, less what the
+   * Moon and the towns took off it (see NightSkyBrightness.starLossMagnitudes), plus the instrument's
+   * gain. The one threshold every star, planet, comet and satellite is drawn against.
+   */
+  private magnitudeLimitOf(astronomy: SceneAstronomy): number {
+    const skyLoss = NightSkyBrightness.starLossMagnitudes(astronomy.sun.altitudeDeg, {
+      phaseAngleDeg: NightSkyBrightness.phaseAngleOf(astronomy.moon.phase.illuminatedFraction),
+      altitudeDeg: astronomy.moon.altitudeDeg
+    }, this.lightPollution)
+    return visibleMagnitudeLimit(astronomy.sun.altitudeDeg, this.instrumentMagnitudeGain, skyLoss)
+  }
+
+  /**
+   * The zenith of a moonless night at this place, in magnitudes per square arcsecond, as the
+   * recording states it (see Sighting.lightPollution) — undefined for a natural sky. Stored like the
+   * instrument's gain and acted on at the next setAstronomy, except that the dome is told at once,
+   * so that a change in the editor shows without waiting for the Sun to move.
+   */
+  setLightPollution(lightPollution: number | undefined): void {
+    if (lightPollution === this.lightPollution) return
+    this.lightPollution = lightPollution
+    if (this.lastAstronomy) this.scatteredSky?.update(this.scatteredSkyState(this.lastAstronomy))
+  }
+
   setInstrumentGain(gain: number, recordsOnMedium = false): void {
     this.instrumentMagnitudeGain = Number.isFinite(gain) ? gain : 0
     this.scatteredSky?.setInstrument(recordsOnMedium, this.instrumentMagnitudeGain)
@@ -4880,6 +4910,7 @@ export class SceneRenderer {
         altitudeDeg: astronomy.moon.altitudeDeg,
         phaseAngleDeg: NightSkyBrightness.phaseAngleOf(astronomy.moon.phase.illuminatedFraction)
       },
+      lightPollution: this.lightPollution,
       // What this renderer is ACTUALLY painting the sky with right now, which is the reference the
       // glows are stated against: they are added as a fraction of its brightness, so a band stays
       // exactly as many times brighter than its background as the physics says, whatever the colour

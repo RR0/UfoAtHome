@@ -11,8 +11,8 @@
  * behind it rose past it.
  *
  * So this file is the denominator. It answers "what was the sky worth, in the same unit", from the
- * two things that actually raise it for a observer standing outside at night: the Sun still being not
- * far enough down, and the Moon being up.
+ * three things that actually raise it for a observer standing outside at night: the Sun still being
+ * not far enough down, the Moon being up, and the towns around them (see artificialNanolamberts).
  *
  * MOONLIGHT IS THE PART THAT SURPRISES PEOPLE, and it is why it is modelled properly here rather
  * than as a flat penalty. A full Moon puts the sky at about eighteenth magnitude a square
@@ -257,7 +257,8 @@ export class NightSkyBrightness {
   static magPerArcsec2(
     sun: { altitudeDeg: number; separationDeg: number },
     moon: { phaseAngleDeg: number; altitudeDeg: number; separationDeg: number },
-    altitudeDeg: number
+    altitudeDeg: number,
+    lightPollution?: number
   ): number {
     const scattered = NightSkyBrightness.scatteredFraction(altitudeDeg)
     const twilight =
@@ -267,7 +268,93 @@ export class NightSkyBrightness {
       NightSkyBrightness.moonOutput(moon.phaseAngleDeg, moon.altitudeDeg) *
       scattered
     return NightSkyBrightness.fromNanolamberts(
-      NightSkyBrightness.toNanolamberts(NightSkyBrightness.AIRGLOW_MAG_PER_ARCSEC2) + twilight + lunar
+      NightSkyBrightness.toNanolamberts(NightSkyBrightness.AIRGLOW_MAG_PER_ARCSEC2) + twilight + lunar +
+        NightSkyBrightness.artificialNanolamberts(lightPollution, altitudeDeg)
     )
+  }
+
+  /**
+   * The towns' share of the sky at the zenith, in nanolamberts, from what the recording states (see
+   * Sighting.lightPollution): the zenith of a moonless night at that place, in magnitudes per square
+   * arcsecond — the "SQM" figure of Falchi et al. (2016)'s World Atlas of the artificial night sky
+   * brightness, and what a Sky Quality Meter pointed up reads.
+   *
+   * THAT FIGURE IS THE WHOLE SKY and not the towns alone: the atlas adds its natural 22.0 (174 µcd/m²)
+   * to the artificial brightness it models, and a meter cannot tell the two apart. So what the towns
+   * add is the difference, taken as light, against the same 22.0 this file's own floor is — and a
+   * figure at or past that floor adds nothing, rather than a negative glow: a sky cannot be made
+   * darker than a natural one by writing a big number.
+   */
+  static artificialZenithNanolamberts(lightPollution: number | undefined): number {
+    if (lightPollution === undefined || !Number.isFinite(lightPollution)) return 0
+    return Math.max(
+      0,
+      NightSkyBrightness.toNanolamberts(lightPollution) -
+        NightSkyBrightness.toNanolamberts(NightSkyBrightness.AIRGLOW_MAG_PER_ARCSEC2)
+    )
+  }
+
+  /**
+   * The towns' share of the sky at that altitude, in nanolamberts: the zenith figure, made brighter
+   * toward the horizon the way any light scattered in the low air is.
+   *
+   * The lamps of a town all round the observer are a source of light BELOW the air, spread in every
+   * direction, and a line of sight sends back to the eye whatever of it the air along it scatters.
+   * The shape is therefore the scattered fraction this file already uses for the Moon and the Sun
+   * (a seventh of the light at the zenith, more than half at the horizon), divided by its zenith
+   * value so that the zenith stays exactly on the stated figure: 3.7 times brighter at the horizon
+   * than overhead. An approximation of Garstang's (1986) integration over the towns' actual
+   * distances, which the recording does not carry either. It says nothing of WHICH way the town lies: a light dome over one city on
+   * one side is a map the recording does not carry, and the brightest part of the sky is then drawn
+   * everywhere along the horizon rather than guessed at somewhere.
+   */
+  static artificialNanolamberts(lightPollution: number | undefined, altitudeDeg: number): number {
+    const zenith = NightSkyBrightness.artificialZenithNanolamberts(lightPollution)
+    return zenith > 0 ? zenith * NightSkyBrightness.artificialShape(altitudeDeg) : 0
+  }
+
+  /** How much brighter than at the zenith the towns' glow is at that altitude — see artificialNanolamberts. */
+  static artificialShape(altitudeDeg: number): number {
+    return NightSkyBrightness.scatteredFraction(altitudeDeg) / NightSkyBrightness.scatteredFraction(90)
+  }
+
+  /**
+   * The faintest star an eye picks out against a sky of that brightness, in magnitudes.
+   *
+   * Crumey (2014), "Human contrast threshold and astronomical visibility", MNRAS 442, 2600: his fit
+   * of the point-source threshold over the whole range of night skies, 7.93 − 5 log₁₀(10^(4.316 − b/5)
+   * + 1), b in magnitudes per square arcsecond. 6.6 under a natural 22.0, 4.8 under a suburban 19,
+   * 4.0 under a full Moon's 18 — a threshold that loses about a magnitude for every magnitude the
+   * sky brightens once the sky dominates, and hardly anything while it does not.
+   */
+  static nakedEyeLimit(magPerArcsec2: number): number {
+    return 7.93 - 5 * Math.log10(10 ** (4.316 - magPerArcsec2 / 5) + 1)
+  }
+
+  /**
+   * How many magnitudes the Moon and the towns take off the faintest star an eye could otherwise
+   * have seen, with the Sun where it is.
+   *
+   * A DIFFERENCE of two thresholds and not a threshold of its own, which is what keeps every sky
+   * that has neither exactly as it was: the twilight curve the star field was always drawn by (see
+   * visibleMagnitudeLimit) stays the reference, and what is taken off it is what Crumey's fit says
+   * between the natural sky of that twilight and the same sky with the moonlight and the towns
+   * added. Asked at the zenith, where both the atlas and the twilight photometry are stated; a star
+   * low down is dimmed by the air it shines through, which the drawing already does.
+   */
+  static starLossMagnitudes(
+    sunAltitudeDeg: number,
+    moon: { phaseAngleDeg: number; altitudeDeg: number },
+    lightPollution?: number
+  ): number {
+    const natural = NightSkyBrightness.moonlessMagPerArcsec2(sunAltitudeDeg)
+    const total = NightSkyBrightness.fromNanolamberts(
+      NightSkyBrightness.toNanolamberts(natural) +
+        NightSkyBrightness.scatteringAt(90 - moon.altitudeDeg) *
+          NightSkyBrightness.moonOutput(moon.phaseAngleDeg, moon.altitudeDeg) *
+          NightSkyBrightness.scatteredFraction(90) +
+        NightSkyBrightness.artificialZenithNanolamberts(lightPollution)
+    )
+    return Math.max(0, NightSkyBrightness.nakedEyeLimit(natural) - NightSkyBrightness.nakedEyeLimit(total))
   }
 }

@@ -104,14 +104,18 @@ const TWILIGHT_FALLOFF = 1.8
  * tripod at f/2 for twenty seconds, -2.3 for an Instamatic. It shifts the curve rather than
  * reshaping it, because the twilight it describes is the SKY's and the sky does not care what is
  * pointed at it.
+ *
+ * THE SUN IS NOT THE ONLY THING THAT BRIGHTENS A SKY, and `skyLoss` is the rest: what the Moon and
+ * the towns take off the same threshold (see NightSkyBrightness.starLossMagnitudes). Zero for a
+ * moonless night with no light pollution stated, which is the curve above exactly.
  */
-export function visibleMagnitudeLimit(sunAltitudeDeg: number, instrumentGain = 0): number {
-  if (sunAltitudeDeg <= ASTRONOMICAL_TWILIGHT_DEG) return NAKED_EYE_MAG_LIMIT + instrumentGain
-  if (sunAltitudeDeg >= 0) return DAYLIGHT_MAG_LIMIT + instrumentGain
+export function visibleMagnitudeLimit(sunAltitudeDeg: number, instrumentGain = 0, skyLoss = 0): number {
+  if (sunAltitudeDeg <= ASTRONOMICAL_TWILIGHT_DEG) return NAKED_EYE_MAG_LIMIT + instrumentGain - skyLoss
+  if (sunAltitudeDeg >= 0) return DAYLIGHT_MAG_LIMIT + instrumentGain - skyLoss
   // 0 at sunset, 1 at the end of astronomical twilight.
   const darkness = sunAltitudeDeg / ASTRONOMICAL_TWILIGHT_DEG
   return (
-    NAKED_EYE_MAG_LIMIT - (NAKED_EYE_MAG_LIMIT - DAYLIGHT_MAG_LIMIT) * (1 - darkness) ** TWILIGHT_FALLOFF + instrumentGain
+    NAKED_EYE_MAG_LIMIT - (NAKED_EYE_MAG_LIMIT - DAYLIGHT_MAG_LIMIT) * (1 - darkness) ** TWILIGHT_FALLOFF + instrumentGain - skyLoss
   )
 }
 

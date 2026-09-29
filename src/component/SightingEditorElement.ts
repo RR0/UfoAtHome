@@ -38,6 +38,7 @@ import { Rainbows } from "../engine/atmosphere/Rainbows.js"
 import type { BowForm } from "../engine/atmosphere/Rainbows.js"
 import type { HaloForm } from "../engine/atmosphere/IceHalos.js"
 import { computeBodyPosition, computeMoonPhase } from "../engine/astronomy/CelestialPositions.js"
+import { NightSkyBrightness } from "../engine/atmosphere/NightSkyBrightness.js"
 import { LimitingMagnitude } from "../engine/instrument/LimitingMagnitude.js"
 import { DEEP_STAR_CATALOG_MAGNITUDE_LIMIT } from "../render3d/StarCatalog.js"
 import { visibleMagnitudeLimit } from "../render3d/skyColors.js"
@@ -371,6 +372,7 @@ export class SightingEditorElement extends HTMLElement {
   private readonly pitchInput: HTMLInputElement
   private readonly rollInput: HTMLInputElement
   private readonly swayInput: HTMLInputElement
+  private readonly lightPollutionInput: HTMLInputElement
   private readonly elevationInput: HTMLInputElement
   private readonly groundElevationOutput: HTMLElement
   /** The ground's own height above sea level at the current location, once it is known — what the
@@ -510,6 +512,7 @@ export class SightingEditorElement extends HTMLElement {
   private readonly labelPitch: HTMLElement
   private readonly labelRoll: HTMLElement
   private readonly labelSway: HTMLElement
+  private readonly labelLightPollution: HTMLElement
   private readonly labelElevation: HTMLElement
   private readonly labelObservationTime: HTMLElement
   private readonly labelObservationEndTime: HTMLElement
@@ -1030,6 +1033,7 @@ export class SightingEditorElement extends HTMLElement {
     this.pitchInput = this.shadow.getElementById("pitch") as HTMLInputElement
     this.rollInput = this.shadow.getElementById("roll") as HTMLInputElement
     this.swayInput = this.shadow.getElementById("sway") as HTMLInputElement
+    this.lightPollutionInput = this.shadow.getElementById("lightPollution") as HTMLInputElement
     this.elevationInput = this.shadow.getElementById("elevation") as HTMLInputElement
     this.groundElevationOutput = this.shadow.getElementById("ground-elevation")!
     this.obsTimeInput = this.shadow.getElementById("obs-time") as HTMLInputElement
@@ -1149,6 +1153,7 @@ export class SightingEditorElement extends HTMLElement {
     this.labelPitch = this.shadow.getElementById("label-pitch")!
     this.labelRoll = this.shadow.getElementById("label-roll")!
     this.labelSway = this.shadow.getElementById("label-sway")!
+    this.labelLightPollution = this.shadow.getElementById("label-light-pollution")!
     this.labelElevation = this.shadow.getElementById("label-elevation")!
     this.labelObservationTime = this.shadow.getElementById("label-observation-time")!
     this.labelObservationEndTime = this.shadow.getElementById("label-observation-end-time")!
@@ -1382,6 +1387,12 @@ export class SightingEditorElement extends HTMLElement {
     // A value of the whole recording, not of a pose: a tripod stays a tripod. Blank is the default.
     this.swayInput.addEventListener("input", () => {
       this.ufoElement.sighting.sway = this.numberOrUndefined(this.swayInput.value)
+      this.ufoElement.refresh()
+    })
+    // A value of the place, not of a pose: the towns do not move during an observation. Blank is a
+    // natural sky.
+    this.lightPollutionInput.addEventListener("input", () => {
+      this.ufoElement.sighting.lightPollution = this.numberOrUndefined(this.lightPollutionInput.value)
       this.ufoElement.refresh()
     })
     this.narrativeDraftButton.addEventListener("click", () => this.draftFromDescription())
@@ -4302,6 +4313,7 @@ export class SightingEditorElement extends HTMLElement {
     this.showTags()
     this.instrumentSelect.value = sighting.instrument.id
     this.swayInput.value = sighting.sway?.toString() ?? ""
+    this.lightPollutionInput.value = sighting.lightPollution?.toString() ?? ""
   }
 
   /** Keeps the weather toolbar honest as the playhead moves or a different keyframe region is
@@ -6774,7 +6786,7 @@ export class SightingEditorElement extends HTMLElement {
     // of every frame of a three-hour observation, and the answer never changed. Restated only when
     // one of its inputs does.
     const key = JSON.stringify([
-      date?.getTime(), place?.lat, place?.lng, this.groundElevationM, sighting.instrumentId, sighting.exposureSeconds,
+      date?.getTime(), place?.lat, place?.lng, this.groundElevationM, sighting.instrumentId, sighting.exposureSeconds, sighting.lightPollution,
       resolveWeatherAt(sighting, 0), this.messages.skyLine, this.meteorRankFor,
       this.sceneElement.satelliteState.status, this.satelliteSpanMs()
     ])
@@ -6836,7 +6848,8 @@ export class SightingEditorElement extends HTMLElement {
   private starsClause(date: Date, observer: { lat: number; lng: number; elevationM: number }): string | undefined {
     const sunAltitudeDeg = computeBodyPosition("Sun", date, observer).altitudeDeg
     const gain = this.instrumentGain()
-    const limit = visibleMagnitudeLimit(sunAltitudeDeg, gain)
+    const skyLoss = this.skyLossAt(date, observer)
+    const limit = visibleMagnitudeLimit(sunAltitudeDeg, gain, skyLoss)
     const magnitude = (value: number): string => value.toLocaleString(undefined, { maximumFractionDigits: 1 })
     // Below the brightest star there is no star left to promise, and "down to magnitude -3" says
     // the opposite of what it means to a reader.
@@ -6849,7 +6862,7 @@ export class SightingEditorElement extends HTMLElement {
             .replace("{limit}", magnitude(limit))
             .replace("{device}", this.naming.instrument(instrument))
             .replace("{gain}", magnitude(Math.abs(gain)))
-            .replace("{eye}", magnitude(visibleMagnitudeLimit(sunAltitudeDeg)))
+            .replace("{eye}", magnitude(visibleMagnitudeLimit(sunAltitudeDeg, 0, skyLoss)))
     // Said only when it bites, and then always: past this the scene is drawing every star it has and
     // the photograph held more.
     return limit <= DEEP_STAR_CATALOG_MAGNITUDE_LIMIT
@@ -6969,7 +6982,7 @@ export class SightingEditorElement extends HTMLElement {
       // Only worth saying against a sky somebody could have seen anything in at all.
       return sky.sunAltitudeDeg < 0 ? this.messages.skySatellitesNotYet : undefined
     }
-    const magnitudeLimit = visibleMagnitudeLimit(sky.sunAltitudeDeg, this.instrumentGain())
+    const magnitudeLimit = visibleMagnitudeLimit(sky.sunAltitudeDeg, this.instrumentGain(), this.skyLossAt(date, observer))
     const bright = sky.classes.filter(entry => entry.peakMagnitude <= magnitudeLimit)
     const named = this.listed(bright.map(entry => this.naming.satelliteClass(entry)))
     if (sky.sunAltitudeDeg >= 0) {
@@ -7037,7 +7050,7 @@ export class SightingEditorElement extends HTMLElement {
         const magnitude = pass.peak.magnitude
         if (magnitude === undefined) return false
         const sun = computeBodyPosition("Sun", pass.peak.date, observer)
-        return magnitude <= visibleMagnitudeLimit(sun.altitudeDeg, gain)
+        return magnitude <= visibleMagnitudeLimit(sun.altitudeDeg, gain, this.skyLossAt(pass.peak.date, observer))
       })
       .sort((a, b) => a.peak.magnitude! - b.peak.magnitude!)
   }
@@ -7205,7 +7218,7 @@ export class SightingEditorElement extends HTMLElement {
     // Civil twilight not yet over: there is no sky here to have a glow in, and saying so on every
     // daylight sighting in the archive would be noise.
     if (sun.altitudeDeg > GLOW_QUESTION_LIVE_BELOW_DEG) return undefined
-    const seen = this.glows.assess(date, observer)
+    const seen = this.glows.assess(date, observer, this.ufoElement.sighting.lightPollution)
     const stated: string[] = []
     if (seen.milkyWay) {
       stated.push(
@@ -7234,12 +7247,39 @@ export class SightingEditorElement extends HTMLElement {
     // that would have been dark enough otherwise, and that is the more useful thing to know.
     const moon = computeBodyPosition("Moon", date, observer)
     const skyIsTheProblem = seen.darkestSkyMagPerArcsec2 < GLOW_NEEDS_SKY_MAG_PER_ARCSEC2
-    if (skyIsTheProblem && moon.altitudeDeg > 0) {
+    // The towns and the Moon both hold a sky up; the one named is the one that put more light in it,
+    // at the zenith where both are known. A Moon just risen under a city's glow is not the reason.
+    const lightPollution = this.ufoElement.sighting.lightPollution
+    const moonlight = NightSkyBrightness.scatteringAt(90 - moon.altitudeDeg) *
+      NightSkyBrightness.moonOutput(NightSkyBrightness.phaseAngleOf(computeMoonPhase(date).illuminatedFraction), moon.altitudeDeg) *
+      NightSkyBrightness.scatteredFraction(90)
+    const townsOutshineMoon = NightSkyBrightness.artificialZenithNanolamberts(lightPollution) > moonlight
+    if (skyIsTheProblem && moon.altitudeDeg > 0 && !townsOutshineMoon) {
       const lit = Math.round(computeMoonPhase(date).illuminatedFraction * 100)
       return this.messages.skyGlowMoon.replace("{lit}", String(lit)).replace("{sky}", sky)
     }
+    // The same question asked of the twilight: the towns are named when they put more light in the
+    // sky than what is left of the Sun's (see Sighting.lightPollution).
+    const townsOutshineTwilight =
+      NightSkyBrightness.artificialZenithNanolamberts(lightPollution) > NightSkyBrightness.twilightExcessNanolamberts(sun.altitudeDeg)
+    if (skyIsTheProblem && townsOutshineMoon && townsOutshineTwilight) {
+      return this.messages.skyGlowTowns.replace("{sky}", sky)
+    }
     if (skyIsTheProblem) return this.messages.skyGlowTwilight.replace("{sky}", sky)
     return this.messages.skyGlowNothingUp.replace("{sky}", sky)
+  }
+
+  /**
+   * What the Moon and the towns took off the faintest star an eye could see then and there — see
+   * NightSkyBrightness.starLossMagnitudes. The same figure the scene draws its stars by.
+   */
+  private skyLossAt(date: Date, observer: { lat: number; lng: number; elevationM: number }): number {
+    const sun = computeBodyPosition("Sun", date, observer)
+    const moon = computeBodyPosition("Moon", date, observer)
+    return NightSkyBrightness.starLossMagnitudes(sun.altitudeDeg, {
+      phaseAngleDeg: NightSkyBrightness.phaseAngleOf(computeMoonPhase(date).illuminatedFraction),
+      altitudeDeg: moon.altitudeDeg
+    }, this.ufoElement.sighting.lightPollution)
   }
 
   /** One sweep of the sky, kept between restatements: it holds nothing about a date or a place, and
@@ -7680,6 +7720,8 @@ export class SightingEditorElement extends HTMLElement {
     this.labelRoll.textContent = messages.roll
     this.labelSway.textContent = messages.sway
     this.swayInput.title = messages.swayTitle
+    this.labelLightPollution.textContent = messages.lightPollution
+    this.lightPollutionInput.title = messages.lightPollutionTitle
     this.labelElevation.textContent = messages.elevation
     this.labelObservationTime.textContent = messages.observationTime
     this.labelObservationEndTime.textContent = messages.observationEndTime

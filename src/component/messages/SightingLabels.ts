@@ -52,6 +52,9 @@ export interface SightingLabels {
   /** How much the body holding the instrument moves the view at rest — see Sighting.sway. */
   sway: string
   swayTitle: string
+  /** The zenith of a moonless night at the place, mag/arcsec² — see Sighting.lightPollution. */
+  lightPollution: string
+  lightPollutionTitle: string
   observationTime: string
   observationEndTime: string
   /** The observer as a WHOLE, naming the chip that holds everything said about them — not

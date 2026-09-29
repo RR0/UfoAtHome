@@ -226,6 +226,7 @@ export const sightingEditorMessages_es: SightingEditorMessages = {
   skyGlowZodiacalBand: "la banda zodiacal a {contrast}× el fondo del cielo, a {altitude}° de altura {bearing} — toda la eclíptica débilmente encendida, que no es lo que la gente cuenta",
   skyGlowMoon: "ni Vía Láctea ni luz zodiacal: una Luna iluminada al {lit} % mantenía el cielo en {sky} magnitudes por segundo de arco cuadrado, cuando necesitan 22",
   skyGlowTwilight: "ni Vía Láctea ni luz zodiacal: el crepúsculo aún mantenía el cielo en {sky} magnitudes por segundo de arco cuadrado, cuando necesitan 22",
+  skyGlowTowns: "ni Vía Láctea ni luz zodiacal: el resplandor de las ciudades mantenía el cielo en {sky} magnitudes por segundo de arco cuadrado, cuando necesitan 22",
   skyGlowNothingUp: "cielo bastante oscuro ({sky} magnitudes por segundo de arco cuadrado), pero ni el plano galáctico ni la eclíptica estaban lo bastante altos en él",
   skyBowPrimary: "un arco de {radius}° de radio, con la cima a {top}° de altura",
   skyBowSecondary: "un segundo, más tenue, a {radius}°, con los colores invertidos",

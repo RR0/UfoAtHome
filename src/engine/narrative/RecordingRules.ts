@@ -192,6 +192,20 @@ export class RecordingRules {
    wind); when it comes from a record (ERA5, a METAR, a station), \`weatherSource\` names it.`
     },
     {
+      draft: `\`lightPollution\` is how bright the night sky of the place is, towns and all: the zenith of a
+   moonless night in magnitudes per square arcsecond (22 a natural sky, about 19 a suburb, 17 a city
+   centre). Write it only from a figure: a Sky Quality Meter reading the observer gives ("stated"),
+   or the World Atlas's "SQM" value for the place (Falchi et al. 2016), marked "derived" with the
+   atlas named in the rationale. An observer who says the town's glow hid the stars has not given a
+   figure: leave the field out, and say in your report that it should be looked up.`,
+      file: `\`lightPollution\` (a number) is how bright the night sky of the place is, towns and all: the
+   zenith of a moonless night in magnitudes per square arcsecond, as a Sky Quality Meter reads it or
+   as the World Atlas of artificial sky brightness gives it ("SQM", Falchi et al. 2016). 22 is a
+   natural sky, and absent means one. "derived" when looked up in the atlas (name it in the
+   rationale), "stated" when the observer measured it. It brightens the sky, hides the Milky Way
+   and takes stars away; never write a brighter sky than the source gives.`
+    },
+    {
       file: `The observer's own estimate in metres ("60 m long, 175 m away, 10 m up") is not an observation
    but a conclusion: it goes in \`interpretation\` (bodies in metres, see the format page), never in
    the shapes. When it contradicts the angles the observer measured, keep it anyway and say so in

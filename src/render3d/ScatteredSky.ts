@@ -7,6 +7,9 @@ import { AtmosphereTables } from "./AtmosphereTables.js"
 export interface ScatteredSkyState {
   /** The observer's eye above sea level. */
   readonly altitudeM: number
+  /** The zenith of a moonless night at this place, mag/arcsec², when the recording states one (see
+   * Sighting.lightPollution); undefined for a natural sky. */
+  readonly lightPollution?: number
   readonly sun: { readonly altitudeDeg: number; readonly azimuthDeg: number; readonly magnitude: number }
   readonly moon: { readonly altitudeDeg: number; readonly azimuthDeg: number; readonly magnitude: number; readonly phaseAngleDeg: number }
 }
@@ -42,7 +45,10 @@ export interface SkyAmbient {
  * (the same scattering, each laid out round its own source), and the airglow — the upper atmosphere
  * glowing on its own, the floor of every moonless night (NightSkyBrightness.AIRGLOW_MAG_PER_ARCSEC2),
  * brighter toward the horizon because a low line of sight crosses more of the glowing layer (van
- * Rhijn's factor for a layer ninety kilometres up) and dimmed by the air in front of it. What an eye
+ * Rhijn's factor for a layer ninety kilometres up) and dimmed by the air in front of it. And a fourth
+ * when the recording states one: the towns' lamps scattered back by the low air (see
+ * NightSkyBrightness.artificialNanolamberts), which unlike the airglow is also the AIR's light, and so
+ * part of the airlight laid over the distance. What an eye
  * adapted to that sky makes of the sum is EyeAdaptation's business, done here per pixel.
  *
  * The eye's adaptation is set by the sky itself: the log-average luminance of the upper hemisphere,
@@ -99,6 +105,7 @@ export class ScatteredSky {
         uMoonScale: { value: 0 },
         uObserverRadius: { value: AtmosphereProfile.GROUND_RADIUS_M + 2 },
         uAirglow: { value: new Vector4(...ScatteredSky.airglowXyzs()) },
+        uArtificial: { value: new Vector4(0, 0, 0, 0) },
         uRodShare: { value: 0 },
         uInverseSemiSaturation: { value: 1 },
         uExposureScale: { value: 1 }
@@ -123,6 +130,7 @@ export class ScatteredSky {
         uniform float uMoonScale;
         uniform float uObserverRadius;
         uniform vec4 uAirglow;
+        uniform vec4 uArtificial;
         uniform float uRodShare;
         uniform float uInverseSemiSaturation;
         uniform float uExposureScale;
@@ -130,6 +138,7 @@ export class ScatteredSky {
         const float GROUND = ${AtmosphereProfile.GROUND_RADIUS_M.toFixed(1)};
         const float AIRGLOW_RATIO = ${(AtmosphereProfile.GROUND_RADIUS_M / (AtmosphereProfile.GROUND_RADIUS_M + ScatteredSky.AIRGLOW_LAYER_ALTITUDE_M)).toFixed(6)};
         const float EXTINCTION = ${NightSkyBrightness.EXTINCTION_PER_AIR_MASS.toFixed(4)};
+        const float ARTIFICIAL_ZENITH_FRACTION = ${NightSkyBrightness.scatteredFraction(90).toFixed(6)};
         const vec2 VIEW_SIZE = vec2(${AtmosphereTables.SKY_VIEW_WIDTH}.0, ${AtmosphereTables.SKY_VIEW_HEIGHT}.0);
         const vec3 SCOTOPIC_TINT = vec3(${EyeAdaptation.SCOTOPIC_TINT.map(value => value.toFixed(4)).join(", ")});
 
@@ -179,6 +188,8 @@ export class ScatteredSky {
             float vanRhijn = inversesqrt(max(1.0 - AIRGLOW_RATIO * AIRGLOW_RATIO * sinZenith2, 1e-4));
             float airMass = inversesqrt(max(1.0 - 0.96 * sinZenith2, 1e-3));
             light += uAirglow * vanRhijn * pow(10.0, -0.4 * EXTINCTION * (airMass - 1.0));
+            // NightSkyBrightness.artificialShape: the scattered fraction here over the zenith's.
+            light += uArtificial * (1.0 - pow(10.0, -0.4 * EXTINCTION * airMass)) / ARTIFICIAL_ZENITH_FRACTION;
           }
           light *= uExposureScale;
           gl_FragColor = vec4(relativeOf(light.xyz, light.w), 1.0);
@@ -257,8 +268,9 @@ export class ScatteredSky {
   }
 
   private draw(state: ScatteredSkyState): void {
-    const key = [state.altitudeM.toFixed(0), state.sun.altitudeDeg.toFixed(3), state.moon.altitudeDeg.toFixed(3)].join(":")
+    const key = [state.altitudeM.toFixed(0), state.sun.altitudeDeg.toFixed(3), state.moon.altitudeDeg.toFixed(3), state.lightPollution ?? ""].join(":")
     const uniforms = this.material.uniforms
+    uniforms.uArtificial.value.set(...ScatteredSky.artificialXyzs(state.lightPollution))
     uniforms.uSunAzimuth.value.copy(ScatteredSky.azimuthVector(state.sun.azimuthDeg))
     uniforms.uMoonAzimuth.value.copy(ScatteredSky.azimuthVector(state.moon.azimuthDeg))
     uniforms.uMoonScale.value = 10 ** (-0.4 * (state.moon.magnitude - ScatteredSky.SUN_MAGNITUDE))
@@ -327,6 +339,7 @@ export class ScatteredSky {
     this.views = { sun, moon }
     const moonScale = 10 ** (-0.4 * (state.moon.magnitude - ScatteredSky.SUN_MAGNITUDE))
     const airglow = ScatteredSky.airglowXyzs()
+    const artificial = ScatteredSky.artificialXyzs(state.lightPollution)
     const lightAt = (altitudeDeg: number, azimuthDeg: number, withAirglow = true): [number, number, number, number] => {
       const zenith = ((90 - altitudeDeg) * Math.PI) / 180
       const sunUv = AtmosphereTables.skyViewUv(state.altitudeM, zenith, ScatteredSky.azimuthBetween(azimuthDeg, state.sun.azimuthDeg))
@@ -334,7 +347,8 @@ export class ScatteredSky {
       const s = ScatteredSky.bilinear(sun, sunUv.u, sunUv.v)
       const m = ScatteredSky.bilinear(moon, moonUv.u, moonUv.v)
       const glow = withAirglow && altitudeDeg > 0 ? ScatteredSky.airglowFactor(altitudeDeg) : 0
-      return [0, 1, 2, 3].map(c => s[c] + moonScale * m[c] + airglow[c] * glow) as [number, number, number, number]
+      const towns = altitudeDeg > 0 ? NightSkyBrightness.artificialShape(altitudeDeg) : 0
+      return [0, 1, 2, 3].map(c => s[c] + moonScale * m[c] + airglow[c] * glow + artificial[c] * towns) as [number, number, number, number]
     }
     // The eye adapts to the upper hemisphere, weighted by solid angle, in log.
     let logSum = 0
@@ -456,7 +470,8 @@ export class ScatteredSky {
     const mag = NightSkyBrightness.magPerArcsec2(
       { altitudeDeg: state.sun.altitudeDeg, separationDeg: separation(state.sun) },
       { phaseAngleDeg: state.moon.phaseAngleDeg, altitudeDeg: state.moon.altitudeDeg, separationDeg: separation(state.moon) },
-      90
+      90,
+      state.lightPollution
     )
     return NightSkyBrightness.toNanolamberts(mag) * ScatteredSky.CANDELAS_PER_NANOLAMBERT
   }
@@ -470,6 +485,23 @@ export class ScatteredSky {
     const y = NightSkyBrightness.toNanolamberts(NightSkyBrightness.AIRGLOW_MAG_PER_ARCSEC2) * ScatteredSky.CANDELAS_PER_NANOLAMBERT
     // D65 white: x 0.3127, y 0.3290.
     return [(y * 0.3127) / 0.329, y, (y * (1 - 0.3127 - 0.329)) / 0.329, y]
+  }
+
+  /**
+   * The towns' glow at the zenith as light: XYZ in cd/m² and scotopic luminance, zero for a natural
+   * sky (see NightSkyBrightness.artificialZenithNanolamberts).
+   *
+   * Given the colour of a 3000 K lamp, a warm-white LED streetlight, rather than the orange of the
+   * sodium lamps before them: a colour has to be claimed to draw one and the recording does not state
+   * it, so this is a CHOICE, not a measurement. For an account from the sodium years it is too white,
+   * which a reader sees as a sky a little less orange than the one remembered, not as a brighter one:
+   * the brightness is the stated figure whatever the colour. Its scotopic luminance is taken equal to its photopic one,
+   * as the airglow's is.
+   */
+  static artificialXyzs(lightPollution: number | undefined): [number, number, number, number] {
+    const y = NightSkyBrightness.artificialZenithNanolamberts(lightPollution) * ScatteredSky.CANDELAS_PER_NANOLAMBERT
+    // Planckian locus at 3000 K: x 0.4369, y 0.4041.
+    return [(y * 0.4369) / 0.4041, y, (y * (1 - 0.4369 - 0.4041)) / 0.4041, y]
   }
 
   /** The zenith is where the airglow floor was measured, so it is 1 there. */
