@@ -1,4 +1,4 @@
-import { type PageMeta, type Said, SITE_LANGUAGES, type SiteLanguage, type SitePage } from "./SitePage.js"
+import { type ExtraCopy, type ExtraLanguage, type PageMeta, type Said, SITE_LANGUAGES, type SiteLanguage, type SitePage } from "./SitePage.js"
 
 /** How a page read from HTML files sits in the site's navigation. */
 export interface HtmlPagePlacement {
@@ -23,7 +23,8 @@ export class HtmlPage implements SitePage {
 
   private static readonly VERSION = /<!--#echo var="version"\s*-->/g
 
-  private constructor(readonly meta: PageMeta, private readonly bodies: Said<string>) {
+  private constructor(readonly meta: PageMeta, private readonly bodies: Said<string>,
+                      readonly extra: Partial<Record<ExtraLanguage, ExtraCopy>>) {
   }
 
   /**
@@ -31,7 +32,8 @@ export class HtmlPage implements SitePage {
    *
    * @param files Each language's file name (for error messages) and content.
    */
-  static of(slug: string, files: Said<{ name: string, html: string }>, version: string, placement: HtmlPagePlacement = {}): HtmlPage {
+  static of(slug: string, files: Said<{ name: string, html: string }>, version: string, placement: HtmlPagePlacement = {},
+            extraFiles: Partial<Record<ExtraLanguage, { name: string, html: string }>> = {}): HtmlPage {
     const parsed = Object.fromEntries(SITE_LANGUAGES.map(language =>
       [language, HtmlPage.parse(files[language].html, files[language].name, version)])) as Record<SiteLanguage, ReturnType<typeof HtmlPage.parse>>
     const said = (key: "title" | "description" | "navLabel" | "body"): Said<string> =>
@@ -39,7 +41,9 @@ export class HtmlPage implements SitePage {
     const meta: PageMeta = {
       slug, title: said("title"), description: said("description"), navLabel: said("navLabel"), ...placement
     }
-    return new HtmlPage(meta, said("body"))
+    const extra = Object.fromEntries(Object.entries(extraFiles).map(([language, file]) =>
+      [language, HtmlPage.parse(file.html, file.name, version)])) as Partial<Record<ExtraLanguage, ExtraCopy>>
+    return new HtmlPage(meta, said("body"), extra)
   }
 
   /** Reads one language's file. Throws on a missing part, naming the file: a page without a title

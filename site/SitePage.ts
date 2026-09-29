@@ -17,6 +17,28 @@ export type SiteLanguage = (typeof SITE_LANGUAGES)[number]
 /** A value said in every supported language. */
 export type Said<T> = Record<SiteLanguage, T>
 
+/**
+ * Languages only SOME pages are translated into, for the readers a given page matters to (the
+ * witness roadmap for the Spanish and Italian readers of the book it draws on). A reader whose
+ * browser prefers one of them gets that copy where it exists and the site's languages elsewhere;
+ * the site's own shell (navigation, footer) is translated, the other pages' labels stay in the
+ * fallback language.
+ */
+export const EXTRA_LANGUAGES = ["es", "it"] as const
+
+export type ExtraLanguage = (typeof EXTRA_LANGUAGES)[number]
+
+/** Any language a page can be written out in. */
+export type PageLanguage = SiteLanguage | ExtraLanguage
+
+/** A page's copy in one of the extra languages. */
+export interface ExtraCopy {
+  readonly title: string
+  readonly description: string
+  readonly navLabel: string
+  readonly body: string
+}
+
 export interface PageMeta {
   /**
    * Directory name under the site root; the empty string is the home page.
@@ -46,4 +68,6 @@ export interface SitePage {
   render(language: SiteLanguage): string
   /** Page-specific script, appended as a module at the end of `<body>`. */
   script?(language: SiteLanguage): string
+  /** The page's copies in the extra languages it is translated into, if any. */
+  readonly extra?: Partial<Record<ExtraLanguage, ExtraCopy>>
 }
