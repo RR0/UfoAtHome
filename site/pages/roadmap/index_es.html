@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Desarrollos futuros</title>
+  <meta name="description" content="Lo que UFO@home ya reproduce, lo que se construye a continuación, y lo que espera cada elemento pendiente — un conjunto de datos, un modelo físico o una decisión.">
+  <meta name="nav-label" content="Hoja de ruta">
+</head>
+<body>
+<section class="band hero">
+  <div class="wrap">
+    <p class="eyebrow">Hoja de ruta · versión <!--#echo var="version" --></p>
+    <h1>Desarrollos futuros.</h1>
+    <p class="lede">Una regla decide el orden: <strong>reproducir todo lo que pudo ser visible en ese
+      cielo en ese momento</strong> — con datos donde existe un registro, con cálculo donde no lo hay,
+      y nunca con invención. Lo que sigue es un plan, no una promesa; el orden cambia cuando un caso
+      real lo hace cambiar.</p>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap prose-wide">
+    <p>Lo que la herramienta ya reconstruye, y cómo se calcula y se comprueba cada parte, está en
+      <a href="/context/">la página de contexto</a>; todas las fuentes en que se basa se enumeran en
+      <a href="/docs/sources/">fuentes y decisiones</a>.</p>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap prose-wide">
+    <h2>A continuación</h2>
+
+    <div class="timeline-step is-next">
+      <h3>Reentradas atmosféricas <span class="status status-next">próximo</span></h3>
+      <p>Una confusión clásica, y una de las pocas que dejan un relato que todo el mundo reconoce: un
+        lento cortejo de fragmentos, y luego «se apagó de golpe». Desde 2000, la base de datos CORDS
+        de la Aerospace Corporation fecha cada reentrada y señala las que fueron vistas; su
+        exportación CSV se archivará junto a los elementos orbitales, ya que el sitio no permite que
+        un navegador la lea. Antes de 2000, la reentrada sigue siendo un objeto colocado a mano. En
+        ambos casos se apaga en el momento real en que entra en la sombra de la Tierra, que es lo que
+        hace que el relato encaje.</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>Anomalías de propagación radar <span class="status status-later">a la espera de datos</span></h3>
+      <p>Inversiones de temperatura y conductos — la explicación de toda una familia de casos
+        radar/visuales. El criterio es un gradiente de refractividad inferior a −157 unidades por
+        kilómetro, lo que requiere el perfil de temperatura y humedad en altura. Comprobado y
+        descartado: Open-Meteo no sirve niveles de presión en modo archivo. La fuente real es IGRA, el
+        archivo de radiosondeos, con los sondeos de la Universidad de Wyoming y los datos públicos de
+        Météo-France como otras vías de acceso, y eso es lo que esto espera.</p>
+    </div>
+
+
+    <div class="timeline-step">
+      <h3>Globos meteorológicos <span class="status status-later">considerado</span></h3>
+      <p>Una red documentada de lanzamientos desde los años cuarenta — y la explicación de Roswell.
+        Fechables, situables, y con una forma que nadie espera.</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>Bólidos registrados <span class="status status-later">planificado</span></h3>
+      <p>Los meteoros del cielo se calculan hoy: radiantes de lluvias y tasas esporádicas. Un bólido
+        que una red de cámaras registró de verdad (FRIPON en Francia desde 2016 aproximadamente, la
+        Global Meteor Network, los informes de la IMO y la AMS) sería el suceso real, con su
+        trayectoria, que habría que emparejar dentro de un día y media hora de la hora indicada.</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>Tráfico aéreo <span class="status status-later">a la espera de datos</span></h3>
+      <p>El archivo de Flightradar24 es de pago y reciente, y los casos más antiguos no tienen
+        trayectoria alguna. Lo que queda para ellos: las aerovías y los procedimientos de aproximación
+        publicados (el eAIP francés), el calendario de las zonas militares temporales y los
+        aeródromos cercanos al observador. Para los casos recientes, una trayectoria KML exportada de
+        un rastreador de vuelos basta para situar la aeronave.</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>Estelas de condensación <span class="status status-later">planificado</span></h3>
+      <p>Si una aeronave dejó ese día una estela se deduce de la temperatura y la humedad a su
+        altitud (el diagrama de Appleman), que ya proporciona el reanálisis en altura usado para las
+        nubes.</p>
+    </div>
+
+    <h2>Del lado del objeto</h2>
+
+    <div class="timeline-step">
+      <h3>Una trayectoria a partir de direcciones <span class="status status-later">planificado</span></h3>
+      <p>Las direcciones son lo que mejor dan los observadores. Ajustar un círculo máximo a ellas, para
+        uno o varios observadores, da el plano de la trayectoria y su dispersión: el COBEPS lo hizo
+        con una falsilla estereográfica para el caso de Braine-le-Comte (2015) y halló una trayectoria
+        media de N 7,7°. El mismo ajuste se aplica a una trayectoria dibujada sobre una fotografía
+        registrada, que resulta entonces en una dirección absoluta que comparar con un meteoro, un
+        satélite o una aeronave. En una fotografía nocturna, las propias estrellas pueden hacer el
+        registro (astrometría).</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>Texturas en las formas <span class="status status-later">planificado</span></h3>
+      <p>Mezcladas con el color en lugar de sustituirlo, con fotogramas clave y serializadas como
+        cualquier otro campo de apariencia. Los observadores describen superficies — estriadas, mates,
+        especulares — y hoy el <a href="/docs/format/">formato</a> no puede recogerlo.</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>Entidades observadas <span class="status status-later">diseño abierto</span></h3>
+      <p>Tres de los cuatro expedientes publicados incluyen una. La cuestión abierta es si una entidad
+        es una forma 2D (relato, como el objeto) o un objeto de decorado 3D. El modelo dice «lo que
+        llegó al ojo del observador», lo que aboga por la forma.</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>El sonido que habría hecho la explicación <span class="status status-later">planificado</span></h3>
+      <p>Un avión, un helicóptero o un globo colocado por una interpretación emitiría un sonido de
+        referencia (para un avión, unos 100 dB a 20 m), que la herramienta llevaría hasta el
+        observador para decir lo que debería haber oído, y compararlo con lo que dice haber oído. El
+        relato conserva su volumen relativo: nadie indica decibelios. El sonido llega con retraso
+        respecto a la imagen (de 15 a 22 s para un avión a 5000 m, que entretanto ha recorrido más de
+        6 km) y puede venir de otro lugar que lo que se ve; es más agudo, y por tanto se absorbe
+        antes, delante de un avión que se acerca; un avión supersónico solo es audible dentro de su
+        cono de Mach. Reproducido en binaural con auriculares, con el retraso, el efecto Doppler y el
+        filtrado del aire, se convertiría en lo que el observador habría oído desde donde estaba, y
+        una comprobación diría si el silencio indicado es compatible con la explicación propuesta (<a
+        href="https://rr0.org/time/2/0/1/4/07/08/Fedoce_PriseEnCompteDesComposantesSonoresDansLAnalyseDesTemoignagesDePan_CAIPAN/index.html">Fedoce, 2014</a>).</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>Localizar una fuente a partir de varias grabaciones <span class="status status-later">considerado</span></h3>
+      <p>Cuando varios observadores filmaron, la diferencia en el tiempo de llegada de un mismo sonido
+        entre sus grabaciones sitúa la fuente: la imagen acústica lo hace desde hace tiempo, y una
+        grabación ya reúne a varios observadores. Hacen falta suficientes grabaciones, relojes que se
+        puedan sincronizar y un cálculo que tenga en cuenta el relieve y el viento (<a
+        href="https://rr0.org/time/2/0/1/4/07/08/Fedoce_PriseEnCompteDesComposantesSonoresDansLAnalyseDesTemoignagesDePan_CAIPAN/03/index.html">Fedoce, 2014</a>).</p>
+    </div>
+
+    <h2>Del lado del entorno</h2>
+
+    <div class="timeline-step">
+      <h3>Observar desde una aeronave <span class="status status-later">planificado</span></h3>
+      <p>Como ya se admite desde un edificio o un coche. La mitad de los relatos aeronáuticos se dan
+        desde una cabina, y un marco de ventanilla que oculta quince grados de cielo forma parte del
+        relato.</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>Modelos 3D descargados a demanda <span class="status status-later">planificado</span></h3>
+      <p>Salpicaderos reales, montantes de parabrisas reales — para ver exactamente qué anchura
+        angular ocultaba un montante. Y el caso inverso, que importa más: aeronaves reales vistas
+        desde el suelo y tomadas por otra cosa, con el ángulo y los reflejos que dan realmente.</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>Un vídeo como escena <span class="status status-later">planificado</span></h3>
+      <p>Una fotografía del lugar <a href="/context/#pictures">ya está disponible</a>. Un vídeo es el
+        mismo registro con una imagen que se mueve: una textura sujeta a la línea de tiempo, las
+        propias imágenes del observador con la reconstrucción encima, fotograma a fotograma. Y un
+        horizonte trazado sobre una imagen que encaja ocultaría lo que pasó por debajo — metros que
+        vuelven de una fotografía igual que vuelven del cruce de un decorado.</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>Reflejos de las luces interiores en los cristales <span class="status status-later">planificado</span></h3>
+      <p>Una lámpara de la habitación, una luz del salpicadero, en una ventana o un parabrisas. La
+        última pieza que falta del «estar dentro» — y, por sí sola, la explicación de buen número de
+        relatos.</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>Declinación magnética <span class="status status-later">planificado</span></h3>
+      <p>Un rumbo tomado con una brújula es magnético, y la diferencia con el norte geográfico depende
+        del lugar y del año: varios grados en Francia en los años cincuenta. La grabación debería
+        decir a qué norte se refiere un rumbo, y la herramienta corregirlo con el modelo
+        geomagnético.</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>El sonido en su camino hasta el observador <span class="status status-later">planificado</span></h3>
+      <p>Entre la fuente y el oído, el aire absorbe más cuanto más agudo es el sonido, según la
+        temperatura y la humedad que ya dan los registros (50 dB por kilómetro a 4000 Hz, a 20 °C y
+        30 % de humedad); el viento curva el sonido hacia abajo a favor del viento y hacia arriba en
+        contra; una inversión de temperatura puede canalizarlo o aislarlo del suelo, lo que dirían los
+        perfiles en altura ya archivados. El terreno cargado da las zonas de sombra detrás de una
+        cresta o un terraplén, y los ecos en un acantilado. Sobre todo, hace falta el ruido a través
+        del cual escuchaba el observador: un coche con la ventilación y la radio encendidas ronda los
+        75 dB en el interior, las ventanillas cerradas quitan de 15 a más de 30 dB, y un sonido unos
+        diez decibelios por debajo de ese ruido ambiente no se oye. En un ejemplo sacado de una
+        investigación del GEIPAN, un conductor pasa así bajo un avión de fuselaje ancho que despega
+        sin oírlo (<a href="https://rr0.org/time/2/0/1/4/07/08/Fedoce_PriseEnCompteDesComposantesSonoresDansLAnalyseDesTemoignagesDePan_CAIPAN/04/index.html">Fedoce, 2014</a>).</p>
+    </div>
+
+    <h2>Del lado del testigo</h2>
+    <p>Reconstruir el cielo es la mitad del trabajo; la otra mitad es saber cuánto crédito merece cada
+      parte de un relato. La percepción y la memoria de los testigos se miden desde hace décadas, en
+      sucesos cuya verdad se conoce: reentradas, bólidos, lanzamientos, aeronaves. Aquello en lo que
+      coinciden esos estudios está destinado a convertirse en comprobaciones de la herramienta. <a
+      href="/roadmap/witness/">Cada pista, sus fuentes y su grado de solidez</a>.</p>
+
+    <div class="timeline-step">
+      <h3>Reconocer antes de describir <span class="status status-later">planificado</span></h3>
+      <p>La idea de la que procede esta herramienta: Roger Shepard propuso en 1968 reconstruir una
+        avistamiento haciendo que el observador lo reconociera entre imágenes, tras un relato libre y
+        antes de cualquier dibujo, porque reconocemos mucho mejor de lo que describimos. La
+        reconstrucción existe; lo que falta es el protocolo: primero un relato libre, luego un
+        conjunto fijo de vistas renderizadas con señuelos, y la elección registrada.</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>Cada afirmación con su error conocido <span class="status status-later">planificado</span></h3>
+      <p>Las direcciones, los recuentos, la disposición y la hora son la parte fiable; las distancias,
+        las altitudes y las velocidades no lo son. En reentradas vistas por cientos de personas, desde
+        el análisis de Zond IV (1968) del informe Condon hasta los atestados policiales estudiados por
+        el GEIPAN, las distancias indicadas se equivocan por factores de diez o más sea cual sea la
+        verdad, mientras que la hora es correcta a pocos minutos. Una luz baja se sitúa en el
+        horizonte, una elevación se sobrestima, y un tamaño indicado suele ser demasiado grande,
+        aunque todavía se discute cuánto.</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>Candidatos ponderados por lo que suelen ser <span class="status status-later">planificado</span></h3>
+      <p>De las más de mil luces nocturnas que identificó Allan Hendry en 1976-1977, un tercio eran
+        estrellas y planetas, un quinto aviones publicitarios, un quinto aeronaves. Cada causa
+        frecuente tiene una firma (un avión silencioso, una luz que «se fue» cuando se apagó, un
+        «estacionario» que era una aeronave que venía de frente), y cada una debe probarse antes de
+        declarar inexplicado un avistamiento, incluso con la fecha desplazada, ya que una fecha
+        errónea es un error frecuente.</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>La matriz de fenómenos conocidos de Poher, actualizada <span class="status status-later">planificado</span></h3>
+      <p>En 1977, mientras se creaba el GEPAN, Claude Poher elaboró una ayuda de memoria para los
+        investigadores: 33 fenómenos conocidos frente a 55 rasgos de un avistamiento, cada par
+        calificado de «muy posible» a «imposible», y las explicaciones con menos imposibilidades en
+        primer lugar. La mayoría de esos rasgos una grabación ya los contiene o los calcula (hora del
+        día, tiempo, elevación, tamaño y velocidad aparentes, recorrido, duración), así que la matriz,
+        <a href="https://rr0.org/time/1/9/7/7/Poher_Matrice/app/dist/">ya una aplicación en rr0.org</a>,
+        puede funcionar sola y dar a la escena una primera lista de candidatos que probar. Sus
+        calificaciones son, sin embargo, el juicio de un experto de 1977, y las confusiones han
+        cambiado desde entonces: los aviones publicitarios se han vuelto raros, mientras que han
+        aparecido drones, láseres, farolillos chinos y trenes de satélites. El trabajo consiste en
+        añadir los nuevos, comprobar cada calificación con casos cuya explicación se conoce, y dar
+        el menor peso a los rasgos que peor estiman los observadores, empezando por la distancia.</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>Lo que el observador podía oír <span class="status status-later">planificado</span></h3>
+      <p>No hay dos oídos iguales: los agudos se pierden con la edad, hasta no percibir la parte
+        delantera de un avión que se acerca, y la práctica musical ayuda a reconocer un sonido. Un
+        sonido se localiza con unos pocos grados de precisión justo delante, mucho peor en elevación o
+        detrás, y su distancia se subestima. La grabación debería conservar lo que Gaelle Fedoce
+        recomendó al GEIPAN: la edad y la audición del observador, su entorno sonoro habitual y, para
+        el sonido oído, su dirección, intensidad, tono, duración y a qué sonaba, ya que un sonido que
+        recuerda a otro dice más que un timbre elegido de una lista. <a href="/roadmap/witness/">Las
+        pistas y sus fuentes</a>.</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>Observadores independientes, y las versiones de un relato <span class="status status-later">diseño abierto</span></h3>
+      <p>Varios observadores se confirman mutuamente solo si no hablaron entre ellos, fueron
+        interrogados por separado e informaron antes que la prensa; un grupo que mira una misma luz
+        converge en una sola historia. Las versiones fechadas de un relato, lo que el observador había
+        leído o visto antes de cada una, y si un detalle apareció por primera vez bajo hipnosis, forman
+        parte de lo que la grabación debería contener.</p>
+    </div>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap prose-wide">
+    <h2>Cómo se decide el orden</h2>
+    <p>Según qué percepción errónea permite el elemento poner realmente a prueba, y según si existen
+      los datos o la física necesarios. Lo que no tiene ningún registro detrás no se inventa — o se
+      calcula a partir de principios fundamentales, o sigue siendo un objeto colocado a mano que la
+      interfaz reconoce como colocado a mano.</p>
+    <p>Si tienes un caso que necesita algo de esta lista — o algo que no está en ella —
+      <a href="https://github.com/RR0/UfoAtHome/issues/new">dilo</a>. Un avistamiento real,
+      fechado, situado y documentado con fuentes hace subir un elemento en esta página más rápido que
+      cualquier otra cosa.</p>
+  </div>
+</section>
+</body>
+</html>

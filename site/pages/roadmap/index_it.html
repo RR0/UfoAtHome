@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <title>Sviluppi futuri</title>
+  <meta name="description" content="Che cosa UFO@home riproduce già, che cosa si costruisce ora, e che cosa attende ogni elemento rimanente — un insieme di dati, un modello fisico o una decisione.">
+  <meta name="nav-label" content="Tabella di marcia">
+</head>
+<body>
+<section class="band hero">
+  <div class="wrap">
+    <p class="eyebrow">Tabella di marcia · versione <!--#echo var="version" --></p>
+    <h1>Sviluppi futuri.</h1>
+    <p class="lede">Una regola decide l'ordine: <strong>riprodurre tutto ciò che poteva essere visibile
+      in quel cielo in quel momento</strong> — con i dati dove esiste una registrazione, con il calcolo
+      dove non esiste, e mai con l'invenzione. Ciò che segue è un piano, non una promessa; l'ordine
+      cambia quando un caso reale lo fa cambiare.</p>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap prose-wide">
+    <p>Che cosa lo strumento ricostruisce già, e come ogni sua parte viene calcolata e verificata, è
+      nella <a href="/context/">pagina del contesto</a>; tutte le fonti su cui si basa sono elencate in
+      <a href="/docs/sources/">fonti e scelte</a>.</p>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap prose-wide">
+    <h2>Prossimamente</h2>
+
+    <div class="timeline-step is-next">
+      <h3>Rientri atmosferici <span class="status status-next">prossimo</span></h3>
+      <p>Un classico errore di identificazione, e uno dei pochi che lasciano un resoconto che tutti
+        riconoscono: un lento corteo di frammenti, poi «si è spento di colpo». Dal 2000 il database
+        CORDS della Aerospace Corporation data ogni rientro e segnala quelli che sono stati visti; la
+        sua esportazione CSV sarà archiviata accanto agli elementi orbitali, poiché il sito non
+        permette a un browser di leggerla. Prima del 2000 il rientro resta un oggetto posizionato a
+        mano. In entrambi i casi si spegne nel momento reale in cui entra nell'ombra della Terra, che è
+        ciò che fa quadrare il resoconto.</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>Anomalie di propagazione radar <span class="status status-later">in attesa di dati</span></h3>
+      <p>Inversioni termiche e condotti — la spiegazione di un'intera famiglia di casi radar/visivi. Il
+        criterio è un gradiente di rifrattività inferiore a −157 unità per chilometro, il che richiede
+        il profilo di temperatura e umidità in quota. Verificato ed escluso: Open-Meteo non fornisce i
+        livelli di pressione in modalità archivio. La fonte vera è IGRA, l'archivio dei radiosondaggi,
+        con i sondaggi dell'Università del Wyoming e i dati pubblici di Météo-France come altri punti
+        di accesso, ed è questo che si sta aspettando.</p>
+    </div>
+
+
+    <div class="timeline-step">
+      <h3>Palloni meteorologici <span class="status status-later">preso in considerazione</span></h3>
+      <p>Una rete documentata di lanci dagli anni Quaranta in poi — e la spiegazione di Roswell.
+        Databili, collocabili, e con una forma che nessuno si aspetta.</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>Bolidi registrati <span class="status status-later">pianificato</span></h3>
+      <p>Le meteore nel cielo oggi sono calcolate: radianti degli sciami e tassi sporadici. Un bolide
+        che una rete di telecamere ha davvero registrato (FRIPON in Francia dal 2016 circa, la Global
+        Meteor Network, i rapporti dell'IMO e dell'AMS) sarebbe l'evento reale, con la sua traiettoria,
+        da abbinare entro un giorno e mezz'ora dall'ora indicata.</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>Traffico aereo <span class="status status-later">in attesa di dati</span></h3>
+      <p>L'archivio di Flightradar24 è a pagamento e recente, e i casi più vecchi non hanno alcuna
+        traccia. Ciò che resta per loro: le aerovie e le procedure di avvicinamento pubblicate (l'eAIP
+        francese), il calendario delle zone militari temporanee e gli aerodromi vicini
+        all'osservatore. Per i casi recenti, una traccia KML esportata da un servizio di tracciamento
+        dei voli basta a collocare l'aereo.</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>Scie di condensazione <span class="status status-later">pianificato</span></h3>
+      <p>Se un aereo quel giorno ha lasciato una scia dipende dalla temperatura e dall'umidità alla sua
+        quota (il diagramma di Appleman), che la rianalisi in quota già usata per le nuvole
+        fornisce.</p>
+    </div>
+
+    <h2>Dalla parte dell'oggetto</h2>
+
+    <div class="timeline-step">
+      <h3>Una traiettoria dalle direzioni <span class="status status-later">pianificato</span></h3>
+      <p>Le direzioni sono ciò che gli osservatori forniscono meglio. Adattarvi un cerchio massimo, per
+        uno o più osservatori, dà il piano della traiettoria e la sua dispersione: il COBEPS lo ha fatto
+        con un reticolo stereografico per il caso di Braine-le-Comte (2015) e ha trovato una traiettoria
+        media di N 7,7°. Lo stesso adattamento si applica a una traiettoria disegnata su una fotografia
+        registrata, che risulta allora in una direzione assoluta da confrontare con una meteora, un
+        satellite o un aereo. Su una fotografia notturna, le stelle stesse possono fare la
+        registrazione (astrometria).</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>Texture sulle forme <span class="status status-later">pianificato</span></h3>
+      <p>Miscelate con il colore invece di sostituirlo, con fotogrammi chiave e serializzate come ogni
+        altro campo dell'aspetto. Gli osservatori descrivono superfici — nervate, opache, speculari — e
+        oggi il <a href="/docs/format/">formato</a> non può contenerlo.</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>Entità osservate <span class="status status-later">progettazione aperta</span></h3>
+      <p>Tre dei quattro fascicoli pubblicati ne includono una. La questione aperta è se un'entità sia
+        una forma 2D (resoconto, come l'oggetto) o un oggetto 3D dello scenario. Il modello dice «ciò
+        che ha raggiunto l'occhio dell'osservatore», il che depone a favore della forma.</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>Il suono che avrebbe prodotto la spiegazione <span class="status status-later">pianificato</span></h3>
+      <p>Un aereo, un elicottero o un pallone posizionato da un'interpretazione emetterebbe un suono di
+        riferimento (per un aereo, circa 100 dB a 20 m), che lo strumento porterebbe fino
+        all'osservatore per dire che cosa avrebbe dovuto sentire, da confrontare con ciò che dice di
+        aver sentito. Il resoconto mantiene il suo volume relativo: nessuno indica decibel. Il suono
+        arriva in ritardo rispetto all'immagine (da 15 a 22 s per un aereo a 5000 m, che nel frattempo
+        ha percorso più di 6 km) e può provenire da un punto diverso da ciò che si vede; è più acuto,
+        quindi assorbito più in fretta, davanti a un aereo che si avvicina; un aereo supersonico è
+        udibile solo all'interno del suo cono di Mach. Riprodotto in binaurale in cuffia, con il
+        ritardo, l'effetto Doppler e il filtraggio dell'aria, diventerebbe ciò che l'osservatore
+        avrebbe sentito da dove si trovava, e una verifica direbbe se il silenzio dichiarato è
+        compatibile con la spiegazione proposta (<a
+        href="https://rr0.org/time/2/0/1/4/07/08/Fedoce_PriseEnCompteDesComposantesSonoresDansLAnalyseDesTemoignagesDePan_CAIPAN/index.html">Fedoce, 2014</a>).</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>Localizzare una sorgente da più registrazioni <span class="status status-later">preso in considerazione</span></h3>
+      <p>Quando più osservatori hanno filmato, la differenza nel tempo di arrivo di uno stesso suono tra
+        le loro registrazioni localizza la sorgente: l'imaging acustico lo fa da tempo, e una
+        registrazione riunisce già più osservatori. Servono registrazioni sufficienti, orologi che si
+        possano sincronizzare e un calcolo che tenga conto del rilievo e del vento (<a
+        href="https://rr0.org/time/2/0/1/4/07/08/Fedoce_PriseEnCompteDesComposantesSonoresDansLAnalyseDesTemoignagesDePan_CAIPAN/03/index.html">Fedoce, 2014</a>).</p>
+    </div>
+
+    <h2>Dalla parte dell'ambiente</h2>
+
+    <div class="timeline-step">
+      <h3>Osservare da un aereo <span class="status status-later">pianificato</span></h3>
+      <p>Come già è possibile da un edificio o da un'auto. Metà dei resoconti aeronautici sono resi da
+        una cabina di pilotaggio, e il telaio di un finestrino che nasconde quindici gradi di cielo fa
+        parte del resoconto.</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>Modelli 3D scaricati su richiesta <span class="status status-later">pianificato</span></h3>
+      <p>Cruscotti veri, montanti del parabrezza veri — per vedere esattamente quale larghezza angolare
+        un montante nascondeva. E il caso inverso, che conta di più: aerei veri visti da terra e
+        scambiati per qualcos'altro, con l'angolo e i riflessi che producono davvero.</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>Un video come scena <span class="status status-later">pianificato</span></h3>
+      <p>Una fotografia del luogo <a href="/context/#pictures">c'è già</a>. Un video è la stessa
+        registrazione con un'immagine che si muove: una texture agganciata alla linea temporale, le
+        riprese dell'osservatore stesso con la ricostruzione sovrapposta, fotogramma per fotogramma. E
+        un orizzonte tracciato su un'immagine che combacia nasconderebbe ciò che è passato al di sotto
+        — metri che tornano da una fotografia come tornano dall'attraversamento di uno scenario.</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>Riflessi delle luci interne sui vetri <span class="status status-later">pianificato</span></h3>
+      <p>Una lampada della stanza, una spia del cruscotto, su una finestra o un parabrezza. L'ultimo
+        pezzo mancante dell'«essere dentro» — e, da solo, la spiegazione di un buon numero di
+        resoconti.</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>Declinazione magnetica <span class="status status-later">pianificato</span></h3>
+      <p>Un rilevamento preso con una bussola è magnetico, e la differenza rispetto al nord geografico
+        dipende dal luogo e dall'anno: diversi gradi in Francia negli anni Cinquanta. La registrazione
+        dovrebbe dire a quale nord si riferisce un rilevamento, e lo strumento correggerlo con il
+        modello geomagnetico.</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>Il suono nel suo percorso fino all'osservatore <span class="status status-later">pianificato</span></h3>
+      <p>Tra la sorgente e l'orecchio, l'aria assorbe di più quanto più il suono è acuto, a seconda
+        della temperatura e dell'umidità che le registrazioni già forniscono (50 dB per chilometro a
+        4000 Hz, a 20 °C e 30 % di umidità); il vento piega il suono verso il basso sottovento e verso
+        l'alto controvento; un'inversione termica può incanalarlo o isolarlo dal suolo, cosa che i
+        profili in quota già archiviati direbbero. Il terreno caricato dà le zone d'ombra dietro una
+        cresta o un terrapieno, e gli echi su una scogliera. Soprattutto, serve il rumore attraverso
+        cui l'osservatore ascoltava: un'auto con la ventilazione e la radio accese è intorno ai 75 dB
+        all'interno, i finestrini chiusi tolgono da 15 a oltre 30 dB, e un suono una decina di decibel
+        sotto quel rumore ambientale non si sente. In un esempio tratto da un'indagine del GEIPAN, un
+        automobilista passa così sotto un aereo a fusoliera larga in decollo senza sentirlo (<a href="https://rr0.org/time/2/0/1/4/07/08/Fedoce_PriseEnCompteDesComposantesSonoresDansLAnalyseDesTemoignagesDePan_CAIPAN/04/index.html">Fedoce, 2014</a>).</p>
+    </div>
+
+    <h2>Dalla parte del testimone</h2>
+    <p>Ricostruire il cielo è metà del lavoro; l'altra metà è sapere quanto ci si può fidare di ogni
+      parte di un resoconto. La percezione e la memoria dei testimoni sono misurate da decenni, su
+      eventi di cui si conosce la verità: rientri, bolidi, lanci, aerei. Ciò su cui questi studi
+      concordano è destinato a diventare verifiche nello strumento. <a href="/roadmap/witness/">Ogni
+      pista, le sue fonti e il suo grado di accertamento</a>.</p>
+
+    <div class="timeline-step">
+      <h3>Riconoscere prima di descrivere <span class="status status-later">pianificato</span></h3>
+      <p>L'idea da cui nasce questo strumento: Roger Shepard propose nel 1968 di ricostruire un
+        avvistamento facendolo riconoscere all'osservatore tra delle immagini, dopo un resoconto libero
+        e prima di qualsiasi disegno, perché si riconosce molto meglio di quanto si descriva. La
+        ricostruzione esiste; ciò che manca è il protocollo: prima un resoconto libero, poi un insieme
+        fisso di viste renderizzate con esche, e la scelta registrata.</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>Ogni affermazione con il suo errore noto <span class="status status-later">pianificato</span></h3>
+      <p>Direzioni, conteggi, disposizione e ora sono la parte affidabile; distanze, altitudini e
+        velocità no. Sui rientri visti da centinaia di persone, dall'analisi di Zond IV (1968) del
+        rapporto Condon ai verbali di polizia studiati dal GEIPAN, le distanze dichiarate sbagliano di
+        fattori dieci o più qualunque sia la verità, mentre l'ora è giusta a pochi minuti. Una luce
+        bassa viene collocata all'orizzonte, un'elevazione viene sovrastimata, e una dimensione
+        dichiarata è di solito troppo grande, anche se di quanto è ancora discusso.</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>Candidati pesati per ciò che sono di solito <span class="status status-later">pianificato</span></h3>
+      <p>Delle oltre mille luci notturne che Allan Hendry identificò nel 1976-1977, un terzo erano
+        stelle e pianeti, un quinto aerei pubblicitari, un quinto aerei. Ogni causa frequente ha una
+        firma (un aereo silenzioso, una luce che «se n'è andata» quando si è spenta, uno «stazionamento»
+        che era un aereo che arrivava di fronte), e ognuna va verificata prima di dichiarare
+        inspiegato un avvistamento, anche con la data spostata, perché una data sbagliata è un errore
+        frequente.</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>La matrice dei fenomeni noti di Poher, aggiornata <span class="status status-later">pianificato</span></h3>
+      <p>Nel 1977, mentre veniva istituito il GEPAN, Claude Poher redasse un promemoria per gli
+        investigatori: 33 fenomeni noti a fronte di 55 caratteristiche di un avvistamento, ogni coppia
+        valutata da «molto possibile» a «impossibile», e le spiegazioni con meno impossibilità in
+        testa. La maggior parte di quelle caratteristiche una registrazione già le contiene o le calcola
+        (ora del giorno, meteo, elevazione, dimensione e velocità apparenti, percorso, durata), quindi
+        la matrice, <a href="https://rr0.org/time/1/9/7/7/Poher_Matrice/app/dist/">già un'applicazione su rr0.org</a>,
+        può funzionare da sola e fornire alla scena un primo elenco di candidati da verificare. Le sue
+        valutazioni sono però il giudizio di un esperto del 1977, e gli errori di identificazione sono
+        cambiati da allora: gli aerei pubblicitari sono diventati rari mentre sono comparsi droni,
+        laser, lanterne volanti e treni di satelliti. Il lavoro consiste nell'aggiungere i nuovi,
+        verificare ogni valutazione su casi di cui si conosce la spiegazione, e dare il peso minore
+        alle caratteristiche che gli osservatori stimano peggio, a cominciare dalla distanza.</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>Ciò che l'osservatore poteva sentire <span class="status status-later">pianificato</span></h3>
+      <p>Non ci sono due orecchie uguali: gli acuti si perdono con l'età, fino a non percepire la parte
+        anteriore di un aereo che si avvicina, e la pratica musicale aiuta a riconoscere un suono. Un
+        suono si localizza entro pochi gradi proprio davanti, molto peggio in elevazione o alle spalle,
+        e la sua distanza viene sottostimata. La registrazione dovrebbe conservare ciò che Gaelle
+        Fedoce raccomandò al GEIPAN: l'età e l'udito dell'osservatore, il suo ambiente sonoro abituale
+        e, per il suono sentito, direzione, intensità, altezza, durata e a che cosa somigliava, perché
+        un suono che ne ricorda un altro dice più di un timbro scelto da un elenco. <a
+        href="/roadmap/witness/">Le piste e le loro fonti</a>.</p>
+    </div>
+
+    <div class="timeline-step">
+      <h3>Osservatori indipendenti, e le versioni di un resoconto <span class="status status-later">progettazione aperta</span></h3>
+      <p>Più osservatori si confermano a vicenda solo se non si sono parlati, sono stati interrogati
+        separatamente e hanno riferito prima della stampa; un gruppo che guarda una stessa luce
+        converge su un'unica storia. Le versioni datate di un resoconto, ciò che l'osservatore aveva
+        letto o visto prima di ciascuna, e se un dettaglio è comparso per la prima volta sotto ipnosi,
+        fanno tutti parte di ciò che la registrazione dovrebbe contenere.</p>
+    </div>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap prose-wide">
+    <h2>Come si decide l'ordine</h2>
+    <p>In base a quale percezione errata l'elemento permette davvero di mettere alla prova, e in base
+      al fatto che ne esistano i dati o la fisica. Ciò che non ha alcuna registrazione alle spalle non
+      viene inventato — o viene calcolato a partire dai principi primi, o resta un oggetto posizionato
+      a mano che l'interfaccia ammette essere posizionato a mano.</p>
+    <p>Se hai un caso che richiede qualcosa di questo elenco — o qualcosa che non c'è —
+      <a href="https://github.com/RR0/UfoAtHome/issues/new">dillo</a>. Un avvistamento reale, datato,
+      localizzato e documentato con fonti fa salire un elemento in questa pagina più rapidamente di
+      qualsiasi altra cosa.</p>
+  </div>
+</section>
+</body>
+</html>

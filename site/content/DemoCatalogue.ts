@@ -43,41 +43,49 @@ export class DemoCatalogue {
 
   readonly groups: readonly DemoGroup[] = [
     {
-      heading: { en: "Real sightings", fr: "Des observations réelles" },
+      heading: { en: "Real sightings", fr: "Des observations réelles", es: "Avistamientos reales", it: "Avvistamenti reali" },
       intro: {
         en: "Seven documented cases, each replayed in the sky of its own reported date, time and place.",
-        fr: "Sept dossiers documentés, chacun rejoué dans le ciel de sa propre date, heure et lieu déclarés."
+        fr: "Sept dossiers documentés, chacun rejoué dans le ciel de sa propre date, heure et lieu déclarés.",
+        es: "Siete casos documentados, cada uno reproducido en el cielo de su propia fecha, hora y lugar declarados.",
+        it: "Sette casi documentati, ciascuno riprodotto nel cielo della propria data, ora e luogo dichiarati."
       },
       demos: [
         {
           id: "chiles-whitted",
           src: "/demo-data/observer-chiles.json",
           playSrc: "/demo-data/case-chiles-whitted.json",
-          title: { en: "Chiles & Whitted, 1948", fr: "Chiles et Whitted, 1948" },
+          title: { en: "Chiles & Whitted, 1948", fr: "Chiles et Whitted, 1948", es: "Chiles y Whitted, 1948", it: "Chiles e Whitted, 1948" },
           titleIsName: true,
           blurb: {
             en: "Night over Alabama, 02:45. Two airline pilots described the same phenomenon differently — open it full size to switch observer.",
-            fr: "Nuit au-dessus de l'Alabama, 02:45. Deux pilotes de ligne ont décrit le même phénomène différemment — ouvrez-le en grand pour changer d'observateur."
+            fr: "Nuit au-dessus de l'Alabama, 02:45. Deux pilotes de ligne ont décrit le même phénomène différemment — ouvrez-le en grand pour changer d'observateur.",
+            es: "Noche sobre Alabama, 02:45. Dos pilotos de línea describieron el mismo fenómeno de forma distinta — ábrelo a tamaño completo para cambiar de observador.",
+            it: "Notte sull'Alabama, 02:45. Due piloti di linea descrissero lo stesso fenomeno in modo diverso — aprilo a schermo intero per cambiare osservatore."
           }
         },
         {
           id: "valensole",
           src: "/demo-data/observer-valensole.json",
-          title: { en: "Valensole, 1965", fr: "Valensole, 1965" },
+          title: { en: "Valensole, 1965", fr: "Valensole, 1965", es: "Valensole, 1965", it: "Valensole, 1965" },
           titleIsName: true,
           blurb: {
             en: "Early morning on the plateau, 05:45, the Sun forty minutes up and 7° high in the north-east — and the real relief of that field under the observer's feet.",
-            fr: "Petit matin sur le plateau, 05:45, le Soleil levé depuis quarante minutes, à 7° de hauteur au nord-est — et le relief réel de ce champ sous les pieds de l'observateur."
+            fr: "Petit matin sur le plateau, 05:45, le Soleil levé depuis quarante minutes, à 7° de hauteur au nord-est — et le relief réel de ce champ sous les pieds de l'observateur.",
+            es: "Primera hora de la mañana en la meseta, 05:45, el Sol salido hace cuarenta minutos y a 7° de altura al nordeste — y el relieve real de ese campo bajo los pies del observador.",
+            it: "Primo mattino sull'altopiano, 05:45, il Sole sorto da quaranta minuti e alto 7° a nord-est — e il rilievo reale di quel campo sotto i piedi dell'osservatore."
           }
         },
         {
           id: "cussac",
           src: "/demo-data/observer-cussac.json",
-          title: { en: "Cussac, 1967", fr: "Cussac, 1967" },
+          title: { en: "Cussac, 1967", fr: "Cussac, 1967", es: "Cussac, 1967", it: "Cussac, 1967" },
           titleIsName: true,
           blurb: {
             en: "Mid-morning on a Cantal plateau, 10:30. A sphere 82 m off behind a hedge, four small black beings diving into it, a widening helix — every angle from the GEPAN's 1978 theodolite survey.",
-            fr: "Milieu de matinée sur un plateau du Cantal, 10:30. Une sphère à 82 m derrière une haie, quatre petits êtres noirs qui y plongent, une hélice qui s'élargit — chaque angle vient du relevé au théodolite du GEPAN en 1978."
+            fr: "Milieu de matinée sur un plateau du Cantal, 10:30. Une sphère à 82 m derrière une haie, quatre petits êtres noirs qui y plongent, une hélice qui s'élargit — chaque angle vient du relevé au théodolite du GEPAN en 1978.",
+            es: "Media mañana en una meseta del Cantal, 10:30. Una esfera a 82 m tras un seto, cuatro pequeños seres negros que se zambullen en ella, una hélice que se ensancha — cada ángulo procede del levantamiento con teodolito del GEPAN en 1978.",
+            it: "Metà mattina su un altopiano del Cantal, 10:30. Una sfera a 82 m dietro una siepe, quattro piccoli esseri neri che vi si tuffano dentro, un'elica che si allarga — ogni angolo viene dal rilievo al teodolite del GEPAN del 1978."
           }
         },
         {
@@ -85,21 +93,25 @@ export class DemoCatalogue {
           src: "/demo-data/observer-socorro.json",
           // The case, for the player: it holds an interpretation beside the account to choose from.
           playSrc: "/demo-data/case-socorro.json",
-          title: { en: "Socorro, 1964", fr: "Socorro, 1964" },
+          title: { en: "Socorro, 1964", fr: "Socorro, 1964", es: "Socorro, 1964", it: "Socorro, 1964" },
           titleIsName: true,
           blurb: {
             en: "Low sun, 17:50, New Mexico. The case people argue about the phenomenon's size in — and where the reconstruction refuses to state one.",
-            fr: "Soleil bas, 17:50, Nouveau-Mexique. Le cas dont on discute la taille du phénomène — et où la reconstitution refuse d'en énoncer une."
+            fr: "Soleil bas, 17:50, Nouveau-Mexique. Le cas dont on discute la taille du phénomène — et où la reconstitution refuse d'en énoncer une.",
+            es: "Sol bajo, 17:50, Nuevo México. El caso en el que se discute el tamaño del fenómeno — y donde la reconstrucción se niega a afirmar uno.",
+            it: "Sole basso, 17:50, Nuovo Messico. Il caso in cui si discute delle dimensioni del fenomeno — e in cui la ricostruzione si rifiuta di indicarne una."
           }
         },
         {
           id: "maffliers",
           src: "/demo-data/observer-maffliers.json",
-          title: { en: "Maffliers, 2012", fr: "Maffliers, 2012" },
+          title: { en: "Maffliers, 2012", fr: "Maffliers, 2012", es: "Maffliers, 2012", it: "Maffliers, 2012" },
           titleIsName: true,
           blurb: {
             en: "Dawn under a low grey sky, 06:06, Val-d'Oise. A silvery shape 8.5° wide before a wood's edge, then a shower, a tilt and a departure, each angle from the GEIPAN's calibrated photographs — and the rising Sun, hidden, 60° to the right.",
-            fr: "Petit matin sous un ciel bas et gris, 06:06, Val-d'Oise. Une forme argentée de 8,5° devant une lisière, puis une averse, une bascule et un départ, chaque angle tiré des photos calibrées du GEIPAN — et le Soleil levant, caché, à 60° sur la droite."
+            fr: "Petit matin sous un ciel bas et gris, 06:06, Val-d'Oise. Une forme argentée de 8,5° devant une lisière, puis une averse, une bascule et un départ, chaque angle tiré des photos calibrées du GEIPAN — et le Soleil levant, caché, à 60° sur la droite.",
+            es: "Amanecer bajo un cielo gris y bajo, 06:06, Val-d'Oise. Una forma plateada de 8,5° de ancho ante el lindero de un bosque, luego un chaparrón, una inclinación y una partida, cada ángulo sacado de las fotografías calibradas del GEIPAN — y el Sol naciente, oculto, 60° a la derecha.",
+            it: "Alba sotto un cielo grigio e basso, 06:06, Val-d'Oise. Una forma argentea larga 8,5° davanti al margine di un bosco, poi un rovescio, un'inclinazione e una partenza, ogni angolo tratto dalle fotografie calibrate del GEIPAN — e il Sole nascente, nascosto, 60° sulla destra."
           }
         },
         {
@@ -107,27 +119,31 @@ export class DemoCatalogue {
           src: "/demo-data/observer-silly-le-long.json",
           // The case, for the player: it holds the GEIPAN's reading beside the account.
           playSrc: "/demo-data/case-silly-le-long.json",
-          title: { en: "Silly-le-Long, 2015", fr: "Silly-le-Long, 2015" },
+          title: { en: "Silly-le-Long, 2015", fr: "Silly-le-Long, 2015", es: "Silly-le-Long, 2015", it: "Silly-le-Long, 2015" },
           titleIsName: true,
           blurb: {
             en: "A gendarmerie van on the RN2 at 00:50, a Moon almost full behind it, and a light aircraft on final that stays pinned to one spot as both close in. Switch to the GEIPAN's reading to see it — and how far it stays from what the driver described.",
-            fr: "Un fourgon de gendarmerie sur la RN2 à 00:50, une Lune presque pleine dans son dos, et un avion de tourisme en finale qui reste accroché au même point pendant que tous deux se rapprochent. Passez à la lecture du GEIPAN pour le voir — et mesurer ce qui le sépare de ce que le conducteur a décrit."
+            fr: "Un fourgon de gendarmerie sur la RN2 à 00:50, une Lune presque pleine dans son dos, et un avion de tourisme en finale qui reste accroché au même point pendant que tous deux se rapprochent. Passez à la lecture du GEIPAN pour le voir — et mesurer ce qui le sépare de ce que le conducteur a décrit.",
+            es: "Una furgoneta de la gendarmería en la RN2 a las 00:50, una Luna casi llena a su espalda, y una avioneta en final que permanece clavada en un mismo punto mientras ambos se acercan. Pasa a la lectura del GEIPAN para verla — y cuánto se aleja de lo que describió el conductor.",
+            it: "Un furgone della gendarmeria sulla RN2 alle 00:50, una Luna quasi piena alle spalle, e un aereo da turismo in finale che resta fermo nello stesso punto mentre entrambi si avvicinano. Passa alla lettura del GEIPAN per vederlo — e quanto resta lontano da ciò che il conducente descrisse."
           }
         },
         {
           id: "wilcox",
           src: "/demo-data/observer-wilcox.json",
-          title: { en: "Wilcox, 1964", fr: "Wilcox, 1964" },
+          title: { en: "Wilcox, 1964", fr: "Wilcox, 1964", es: "Wilcox, 1964", it: "Wilcox, 1964" },
           titleIsName: true,
           blurb: {
             en: "Broad daylight, 10:00, New York State, with a cloud deck lifting from 800 m to 913 m across the two hours the record covers.",
-            fr: "Plein jour, 10:00, État de New York, avec une base de nuages qui monte de 800 m à 913 m sur les deux heures que couvre le relevé."
+            fr: "Plein jour, 10:00, État de New York, avec une base de nuages qui monte de 800 m à 913 m sur les deux heures que couvre le relevé.",
+            es: "Pleno día, 10:00, estado de Nueva York, con una capa de nubes que sube de 800 m a 913 m durante las dos horas que abarca el registro.",
+            it: "Pieno giorno, 10:00, Stato di New York, con uno strato di nubi che sale da 800 m a 913 m nelle due ore coperte dalla registrazione."
           }
         }
       ]
     },
     {
-      heading: { en: "What the sky can hold", fr: "Ce que le ciel peut contenir" },
+      heading: { en: "What the sky can hold", fr: "Ce que le ciel peut contenir", es: "Lo que puede contener el cielo", it: "Ciò che il cielo può contenere" },
       intro: {
         en: "These hold no recorded phenomenon at all. They are skies set up with the conditions one "
           + "sight needs, for looking at that sight — because most of them need three or four "
@@ -136,97 +152,125 @@ export class DemoCatalogue {
         fr: "Ceux-ci ne contiennent aucun phénomène enregistré. Ce sont des ciels réglés avec les "
           + "conditions qu'exige un phénomène, pour regarder ce phénomène — car la plupart en "
           + "demandent trois ou quatre à la fois, et savoir lesquelles est exactement ce qui sépare "
-          + "« il n'y avait pas de Voie lactée » de « je n'aurais pas pu la voir »."
+          + "« il n'y avait pas de Voie lactée » de « je n'aurais pas pu la voir ».",
+        es: "Estos no contienen ningún fenómeno registrado. Son cielos preparados con las condiciones que "
+          + "exige una visión, para contemplar esa visión — porque la mayoría necesitan tres o cuatro "
+          + "condiciones a la vez, y saber cuáles es exactamente lo que separa “no había Vía Láctea” de "
+          + "“no habría podido verla”.",
+        it: "Questi non contengono alcun fenomeno registrato. Sono cieli impostati con le condizioni che "
+          + "una visione richiede, per osservare quella visione — perché la maggior parte ne richiede tre o "
+          + "quattro insieme, e sapere quali è esattamente ciò che separa “non c'era la Via Lattea” da "
+          + "“non avrei potuto vederla”."
       },
       demos: [
         {
           id: "clouds",
           src: "/demo-data/sky-test-clouds.json",
-          title: { en: "Cloud layers in motion", fr: "Couches nuageuses en mouvement" },
+          title: { en: "Cloud layers in motion", fr: "Couches nuageuses en mouvement", es: "Capas de nubes en movimiento", it: "Strati di nubi in movimento" },
           blurb: {
             en: "Cloud layers you can set — altitude, thickness, coverage, size, density, wind — down to individual clouds driven one by one.",
-            fr: "Des couches nuageuses paramétrables — altitude, épaisseur, couverture, taille, densité, vent — jusqu'à des nuages individuels pilotés un par un."
+            fr: "Des couches nuageuses paramétrables — altitude, épaisseur, couverture, taille, densité, vent — jusqu'à des nuages individuels pilotés un par un.",
+            es: "Capas de nubes configurables — altitud, espesor, cobertura, tamaño, densidad, viento — hasta nubes individuales dirigidas una a una.",
+            it: "Strati di nubi regolabili — quota, spessore, copertura, dimensione, densità, vento — fino a singole nubi guidate una per una."
           }
         },
         {
           id: "halos",
           src: "/demo-data/sky-test-halos.json",
-          title: { en: "Ice haloes and sundogs", fr: "Halos de glace et parhélies" },
+          title: { en: "Ice haloes and sundogs", fr: "Halos de glace et parhélies", es: "Halos de hielo y parhelios", it: "Aloni di ghiaccio e pareli" },
           blurb: {
             en: "A cirrus veil, a Sun 20° up, crystals falling level: a hexagonal ice prism and Snell's law give every angle. Then the crystals tumble, the veil thins, a cumulus deck passes under it, and the display changes with each.",
-            fr: "Un voile de cirrus, un Soleil à 20°, des cristaux tombant à plat : un prisme hexagonal de glace et la loi de Snell donnent chaque angle. Puis les cristaux tourbillonnent, le voile s'amincit, des cumulus passent dessous, et le halo change avec chacun."
+            fr: "Un voile de cirrus, un Soleil à 20°, des cristaux tombant à plat : un prisme hexagonal de glace et la loi de Snell donnent chaque angle. Puis les cristaux tourbillonnent, le voile s'amincit, des cumulus passent dessous, et le halo change avec chacun.",
+            es: "Un velo de cirros, un Sol a 20° de altura, cristales que caen planos: un prisma hexagonal de hielo y la ley de Snell dan cada ángulo. Luego los cristales dan vueltas, el velo se adelgaza, una capa de cúmulos pasa por debajo, y el halo cambia con cada uno.",
+            it: "Un velo di cirri, un Sole alto 20°, cristalli che cadono orizzontali: un prisma esagonale di ghiaccio e la legge di Snell danno ogni angolo. Poi i cristalli ruotano, il velo si assottiglia, uno strato di cumuli gli passa sotto, e l'alone cambia con ciascuno."
           }
         },
         {
           id: "rainbow",
           src: "/demo-data/sky-test-rainbow.json",
-          title: { en: "Rainbow", fr: "Arc-en-ciel" },
+          title: { en: "Rainbow", fr: "Arc-en-ciel", es: "Arcoíris", it: "Arcobaleno" },
           blurb: {
             en: "Rain, a Sun 9° up, a gap in the cloud, an observer facing away from it — all four, or nothing. Primary, secondary reversed, Alexander's band between.",
-            fr: "De la pluie, un Soleil à 9°, une trouée dans les nuages, un observateur tournant le dos — les quatre, ou rien. Primaire, secondaire inversé, bande d'Alexandre entre les deux."
+            fr: "De la pluie, un Soleil à 9°, une trouée dans les nuages, un observateur tournant le dos — les quatre, ou rien. Primaire, secondaire inversé, bande d'Alexandre entre les deux.",
+            es: "Lluvia, un Sol a 9° de altura, un claro en las nubes, un observador de espaldas a él — los cuatro, o nada. Primario, secundario invertido, banda de Alejandro entre ambos.",
+            it: "Pioggia, un Sole alto 9°, uno squarcio tra le nubi, un osservatore che gli volta le spalle — tutti e quattro, o niente. Primario, secondario invertito, banda di Alessandro in mezzo."
           }
         },
         {
           id: "moonbow",
           src: "/demo-data/sky-test-moonbow.json",
-          title: { en: "Moonbow", fr: "Arc lunaire" },
+          title: { en: "Moonbow", fr: "Arc lunaire", es: "Arcoíris lunar", it: "Arcobaleno lunare" },
           blurb: {
             en: "The same geometry under a full Moon 22° up. Too faint for colour vision, so the eye sees a white arc — which is what observers describe.",
-            fr: "La même géométrie sous une pleine Lune à 22°. Trop faible pour la vision des couleurs : l'œil voit un arc blanc — c'est ce que décrivent les observateurs."
+            fr: "La même géométrie sous une pleine Lune à 22°. Trop faible pour la vision des couleurs : l'œil voit un arc blanc — c'est ce que décrivent les observateurs.",
+            es: "La misma geometría bajo una Luna llena a 22° de altura. Demasiado débil para la visión de los colores, así que el ojo ve un arco blanco — que es lo que describen los observadores.",
+            it: "La stessa geometria sotto una Luna piena alta 22°. Troppo debole per la visione dei colori, così l'occhio vede un arco bianco — che è ciò che descrivono gli osservatori."
           }
         },
         {
           id: "milkyway",
           src: "/demo-data/sky-test-milkyway.json",
-          title: { en: "The Milky Way", fr: "La Voie lactée" },
+          title: { en: "The Milky Way", fr: "La Voie lactée", es: "La Vía Láctea", it: "La Via Lattea" },
           blurb: {
             en: "New Moon, Sun 65° down, galactic centre 81° up over the Atacama. Integrated through a real dust model, so the dark rift falls out of the calculation.",
-            fr: "Nouvelle Lune, Soleil à 65° sous l'horizon, centre galactique à 81° au-dessus de l'Atacama. Intégrée dans un vrai modèle de poussière : le rift sombre sort du calcul."
+            fr: "Nouvelle Lune, Soleil à 65° sous l'horizon, centre galactique à 81° au-dessus de l'Atacama. Intégrée dans un vrai modèle de poussière : le rift sombre sort du calcul.",
+            es: "Luna nueva, Sol a 65° bajo el horizonte, centro galáctico a 81° de altura sobre Atacama. Integrada a través de un modelo real de polvo, así que la grieta oscura sale del propio cálculo.",
+            it: "Luna nuova, Sole 65° sotto l'orizzonte, centro galattico alto 81° sopra l'Atacama. Integrata attraverso un vero modello di polvere, così la fenditura oscura emerge dal calcolo stesso."
           }
         },
         {
           id: "zodiacal",
           src: "/demo-data/sky-test-zodiacal.json",
-          title: { en: "Zodiacal light", fr: "Lumière zodiacale" },
+          title: { en: "Zodiacal light", fr: "Lumière zodiacale", es: "Luz zodiacal", it: "Luce zodiacale" },
           blurb: {
             en: "Sun 16° below the horizon, no Moon, the Sun's path standing steep over the west: a faint tilted cone of light with blurred edges, gone within the hour.",
-            fr: "Soleil à 16° sous l'horizon, pas de Lune, la route du Soleil presque dressée au couchant : une faible lueur en cône incliné, aux contours flous, disparue en moins d'une heure."
+            fr: "Soleil à 16° sous l'horizon, pas de Lune, la route du Soleil presque dressée au couchant : une faible lueur en cône incliné, aux contours flous, disparue en moins d'une heure.",
+            es: "Sol a 16° bajo el horizonte, sin Luna, la trayectoria del Sol casi vertical sobre el oeste: un débil cono de luz inclinado, de bordes difusos, desaparecido antes de una hora.",
+            it: "Sole 16° sotto l'orizzonte, niente Luna, il percorso del Sole quasi verticale sull'ovest: un debole cono di luce inclinato, dai contorni sfumati, scomparso entro l'ora."
           }
         },
         {
           id: "comet",
           src: "/demo-data/sky-test-comet.json",
-          title: { en: "A comet", fr: "Une comète" },
+          title: { en: "A comet", fr: "Une comète", es: "Un cometa", it: "Una cometa" },
           blurb: {
             en: "Hale-Bopp at dusk on 1 April 1997, magnitude −0.8, 30° up to the north-west with a 20° tail. The orbit is propagated from that apparition's own elements.",
-            fr: "Hale-Bopp au crépuscule du 1ᵉʳ avril 1997, magnitude −0,8, à 30° de hauteur au nord-ouest, queue de 20°. L'orbite est propagée depuis les éléments de cette apparition."
+            fr: "Hale-Bopp au crépuscule du 1ᵉʳ avril 1997, magnitude −0,8, à 30° de hauteur au nord-ouest, queue de 20°. L'orbite est propagée depuis les éléments de cette apparition.",
+            es: "Hale-Bopp al anochecer del 1 de abril de 1997, magnitud −0,8, a 30° de altura al noroeste con una cola de 20°. La órbita se propaga a partir de los elementos de esa misma aparición.",
+            it: "Hale-Bopp al crepuscolo del 1º aprile 1997, magnitudine −0,8, alta 30° a nord-ovest con una coda di 20°. L'orbita è propagata dagli elementi di quella stessa apparizione."
           }
         },
         {
           id: "nova",
           src: "/demo-data/sky-test-nova.json",
-          title: { en: "A new star", fr: "Une étoile nouvelle" },
+          title: { en: "A new star", fr: "Une étoile nouvelle", es: "Una estrella nueva", it: "Una stella nuova" },
           blurb: {
             en: "Nova Aquilae over Paris, 10 June 1918, 23:30, magnitude 0.2 where nothing shone the night before. Its brightness is interpolated between the AAVSO's own observations.",
-            fr: "La nova de l'Aigle au-dessus de Paris, 10 juin 1918, 23 h 30, magnitude 0,2 là où rien ne brillait la veille. Son éclat est interpolé entre les observations de l'AAVSO."
+            fr: "La nova de l'Aigle au-dessus de Paris, 10 juin 1918, 23 h 30, magnitude 0,2 là où rien ne brillait la veille. Son éclat est interpolé entre les observations de l'AAVSO.",
+            es: "Nova Aquilae sobre París, 10 de junio de 1918, 23:30, magnitud 0,2 donde la noche anterior no brillaba nada. Su brillo se interpola entre las observaciones de la propia AAVSO.",
+            it: "Nova Aquilae sopra Parigi, 10 giugno 1918, 23:30, magnitudine 0,2 dove la notte prima non brillava nulla. La sua luminosità è interpolata tra le osservazioni dell'AAVSO."
           }
         },
         {
           id: "meteors",
           src: "/demo-data/sky-test-meteors.json",
-          title: { en: "A meteor shower", fr: "Une pluie de météores" },
+          title: { en: "A meteor shower", fr: "Une pluie de météores", es: "Una lluvia de meteoros", it: "Uno sciame meteorico" },
           blurb: {
             en: "Perseids, 13 August 2018, 04:05, radiant high and no Moon — over the sporadic background that falls every night of the year.",
-            fr: "Perséides, 13 août 2018, 04:05, radiant haut et pas de Lune — au-dessus du fond sporadique qui tombe toutes les nuits de l'année."
+            fr: "Perséides, 13 août 2018, 04:05, radiant haut et pas de Lune — au-dessus du fond sporadique qui tombe toutes les nuits de l'année.",
+            es: "Perseidas, 13 de agosto de 2018, 04:05, radiante alto y sin Luna — sobre el fondo esporádico que cae todas las noches del año.",
+            it: "Perseidi, 13 agosto 2018, 04:05, radiante alto e niente Luna — sopra il fondo sporadico che cade ogni notte dell'anno."
           }
         },
         {
           id: "satellites",
           src: "/demo-data/sky-test-satellites.json",
-          title: { en: "A Starlink train", fr: "Un train de Starlink" },
+          title: { en: "A Starlink train", fr: "Un train de Starlink", es: "Un tren de Starlink", it: "Un treno di Starlink" },
           blurb: {
             en: "Paris, 29 July 2025 at 11 pm, two days after a launch: the new satellites cross in a line, each propagated from the orbital elements archived that day.",
-            fr: "Paris, 29 juillet 2025 à 23 h, deux jours après un lancement : les nouveaux satellites passent en file, chacun propagé depuis les éléments orbitaux archivés ce jour-là."
+            fr: "Paris, 29 juillet 2025 à 23 h, deux jours après un lancement : les nouveaux satellites passent en file, chacun propagé depuis les éléments orbitaux archivés ce jour-là.",
+            es: "París, 29 de julio de 2025 a las 23:00, dos días después de un lanzamiento: los nuevos satélites cruzan en fila, cada uno propagado a partir de los elementos orbitales archivados ese día.",
+            it: "Parigi, 29 luglio 2025 alle 23, due giorni dopo un lancio: i nuovi satelliti passano in fila, ciascuno propagato dagli elementi orbitali archiviati quel giorno."
           }
         }
       ]
@@ -234,7 +278,9 @@ export class DemoCatalogue {
     {
       heading: {
         en: "One sighting, three instruments",
-        fr: "Une observation, trois instruments"
+        fr: "Une observation, trois instruments",
+        es: "Un avistamiento, tres instrumentos",
+        it: "Un avvistamento, tre strumenti"
       },
       intro: {
         en: "The same account, the same second, the same sky — changed in one field. What an "
@@ -247,61 +293,85 @@ export class DemoCatalogue {
           + "ci-dessous ne diffèrent en rien d'autre. Regardez aussi ce que chacun laisse régler : le "
           + "propriétaire d'un Instamatic avait un diaphragme et une vitesse, donc l'éditeur ne lui "
           + "propose rien à choisir. Une reconstitution ne peut être rationnelle que dans la mesure "
-          + "où les réglages qu'elle autorise l'étaient."
+          + "où les réglages qu'elle autorise l'étaient.",
+        es: "El mismo relato, el mismo segundo, el mismo cielo — cambiado en un solo campo. Aquello A "
+          + "TRAVÉS de lo cual se hizo una observación decide la geometría de cada imagen, y las tres "
+          + "de abajo no difieren en nada más. Fíjate también en lo que cada una deja ajustar: el dueño de "
+          + "una Instamatic tenía una sola apertura y una sola velocidad de obturación, así que el editor "
+          + "no le ofrece nada que elegir. Una reconstrucción solo puede ser tan racional como los ajustes "
+          + "que permite.",
+        it: "Lo stesso resoconto, lo stesso secondo, lo stesso cielo — cambiato in un solo campo. Ciò "
+          + "ATTRAVERSO cui un'osservazione è stata fatta decide la geometria di ogni fotogramma, e i tre "
+          + "qui sotto non differiscono in nient'altro. Nota anche ciò che ciascuno lascia regolare: il "
+          + "proprietario di una Instamatic aveva un solo diaframma e un solo tempo di posa, quindi "
+          + "l'editor non gli offre nulla da scegliere. Una ricostruzione può essere razionale solo quanto "
+          + "le impostazioni che consente."
       },
       demos: [
         {
           id: "instrument-eye",
           src: "/demo-data/instrument-eye.json",
-          title: { en: "Seen with the naked eye", fr: "Vue à l'œil nu" },
+          title: { en: "Seen with the naked eye", fr: "Vue à l'œil nu", es: "Visto a simple vista", it: "Visto a occhio nudo" },
           blurb: {
             en: "An eye perceives an angle as an angle wherever it falls, so the image is equidistant and a ruler held to the screen means something. 60° tall, and no frame at all: an eye has no rectangle.",
-            fr: "Un œil perçoit un angle comme un angle où qu'il tombe : l'image est équidistante et une règle posée sur l'écran y mesure quelque chose. 60° de haut, et aucun cadre : un œil n'a pas de rectangle."
+            fr: "Un œil perçoit un angle comme un angle où qu'il tombe : l'image est équidistante et une règle posée sur l'écran y mesure quelque chose. 60° de haut, et aucun cadre : un œil n'a pas de rectangle.",
+            es: "Un ojo percibe un ángulo como un ángulo dondequiera que caiga, así que la imagen es equidistante y una regla puesta sobre la pantalla mide algo. 60° de alto, y ningún marco: un ojo no tiene rectángulo.",
+            it: "Un occhio percepisce un angolo come un angolo ovunque cada, quindi l'immagine è equidistante e un righello appoggiato sullo schermo misura qualcosa. 60° di altezza, e nessuna cornice: un occhio non ha rettangolo."
           }
         },
         {
           id: "instrument-instamatic",
           src: "/demo-data/instrument-instamatic.json",
-          title: { en: "On 126 film, 1964", fr: "Sur film 126, en 1964" },
+          title: { en: "On 126 film, 1964", fr: "Sur film 126, en 1964", es: "En película 126, 1964", it: "Su pellicola 126, 1964" },
           blurb: {
             en: "A SQUARE frame 36° on a side — 28 mm of image behind a 43 mm lens. One aperture, one shutter speed, one focal length, all fixed: nothing to set, and nothing offered.",
-            fr: "Un cadre CARRÉ de 36° de côté — 28 mm d'image derrière un objectif de 43 mm. Un diaphragme, une vitesse, une focale, tous fixes : rien à régler, et rien de proposé."
+            fr: "Un cadre CARRÉ de 36° de côté — 28 mm d'image derrière un objectif de 43 mm. Un diaphragme, une vitesse, une focale, tous fixes : rien à régler, et rien de proposé.",
+            es: "Un encuadre CUADRADO de 36° de lado — 28 mm de imagen tras un objetivo de 43 mm. Una apertura, una velocidad de obturación, una distancia focal, todas fijas: nada que ajustar, y nada ofrecido.",
+            it: "Un fotogramma QUADRATO di 36° di lato — 28 mm di immagine dietro un obiettivo da 43 mm. Un diaframma, un tempo di posa, una focale, tutti fissi: niente da regolare, e niente proposto."
           }
         },
         {
           id: "instrument-slr",
           src: "/demo-data/instrument-slr.json",
-          title: { en: "Through a 50\u00a0mm lens", fr: "Au 50\u00a0mm" },
+          title: { en: "Through a 50\u00a0mm lens", fr: "Au 50\u00a0mm", es: "Con un objetivo de 50\u00a0mm", it: "Con un obiettivo da 50\u00a0mm" },
           blurb: {
             en: "27° tall, which is why a photographed light so often has nothing recognisable beside it. A lens maps f·tan θ: everything off-axis is stretched, 42% at 33° from the centre.",
-            fr: "27° de haut — d'où le fait qu'une lumière photographiée n'a si souvent rien de reconnaissable à côté d'elle. Un objectif projette en f·tan θ : hors axe tout est étiré, de 42 % à 33° du centre."
+            fr: "27° de haut — d'où le fait qu'une lumière photographiée n'a si souvent rien de reconnaissable à côté d'elle. Un objectif projette en f·tan θ : hors axe tout est étiré, de 42 % à 33° du centre.",
+            es: "27° de alto, y por eso una luz fotografiada tan a menudo no tiene nada reconocible a su lado. Un objetivo proyecta según f·tan θ: todo lo que está fuera del eje se estira, un 42 % a 33° del centro.",
+            it: "27° di altezza, ed è per questo che una luce fotografata così spesso non ha nulla di riconoscibile accanto. Un obiettivo proietta secondo f·tan θ: tutto ciò che è fuori asse viene stirato, del 42% a 33° dal centro."
           }
         }
       ]
     },
     {
-      heading: { en: "Weather, and the instrument", fr: "La météo, et l'instrument" },
+      heading: { en: "Weather, and the instrument", fr: "La météo, et l'instrument", es: "El tiempo, y el instrumento", it: "Il meteo, e lo strumento" },
       intro: {
         en: "The two things that most often turn an ordinary object into an extraordinary account.",
-        fr: "Les deux choses qui transforment le plus souvent un objet ordinaire en récit extraordinaire."
+        fr: "Les deux choses qui transforment le plus souvent un objet ordinaire en récit extraordinaire.",
+        es: "Las dos cosas que con más frecuencia convierten un objeto corriente en un relato extraordinario.",
+        it: "Le due cose che più spesso trasformano un oggetto ordinario in un resoconto straordinario."
       },
       demos: [
         {
           id: "storm",
           src: "/demo-data/sky-test-storm.json",
-          title: { en: "A thunderstorm", fr: "Un orage" },
+          title: { en: "A thunderstorm", fr: "Un orage", es: "Una tormenta", it: "Un temporale" },
           blurb: {
             en: "Cloud base at 600 m, heavy rain drifting on a 5 m/s wind, lightning lighting the clouds and the whole scene, thunder arriving as late as its distance makes it. Pause it: all of it stops.",
-            fr: "Base des nuages à 600 m, pluie forte dérivant sur un vent de 5 m/s, éclairs illuminant les nuages et toute la scène, tonnerre en retard selon la distance. Mettez en pause : tout s'arrête."
+            fr: "Base des nuages à 600 m, pluie forte dérivant sur un vent de 5 m/s, éclairs illuminant les nuages et toute la scène, tonnerre en retard selon la distance. Mettez en pause : tout s'arrête.",
+            es: "Base de las nubes a 600 m, lluvia intensa que deriva con un viento de 5 m/s, relámpagos que iluminan las nubes y toda la escena, truenos que llegan con el retraso que impone su distancia. Ponlo en pausa: todo se detiene.",
+            it: "Base delle nubi a 600 m, pioggia forte che deriva con un vento di 5 m/s, lampi che illuminano le nubi e l'intera scena, tuoni che arrivano con il ritardo dovuto alla loro distanza. Mettilo in pausa: tutto si ferma."
           }
         },
         {
           id: "aircraft",
           src: "/demo-data/sky-test-aircraft.json",
-          title: { en: "An airliner on a 20-second exposure", fr: "Un avion de ligne sur une pose de 20\u00a0s" },
+          title: { en: "An airliner on a 20-second exposure", fr: "Un avion de ligne sur une pose de 20\u00a0s", es: "Un avión de pasajeros en una exposición de 20\u00a0s", it: "Un aereo di linea in una posa di 20\u00a0s" },
           blurb: {
             en: "No phenomenon is drawn here — there isn't one. Steady lamps draw lines, flashing ones drop dots, and their spacing is the flash rate times the angular speed.",
-            fr: "Aucun phénomène n'est dessiné ici — il n'y en a pas. Les feux fixes tracent des lignes, les clignotants posent des points, et leur espacement est la cadence multipliée par la vitesse angulaire."
+            fr: "Aucun phénomène n'est dessiné ici — il n'y en a pas. Les feux fixes tracent des lignes, les clignotants posent des points, et leur espacement est la cadence multipliée par la vitesse angulaire.",
+            es: "Aquí no se dibuja ningún fenómeno — no lo hay. Las luces fijas trazan líneas, las intermitentes dejan puntos, y su separación es la frecuencia de destello multiplicada por la velocidad angular.",
+            it: "Qui non è disegnato alcun fenomeno — non ce n'è uno. Le luci fisse tracciano linee, quelle lampeggianti lasciano punti, e la loro spaziatura è la frequenza dei lampi moltiplicata per la velocità angolare."
           }
         }
       ]

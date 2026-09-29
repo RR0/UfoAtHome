@@ -5,13 +5,22 @@ export class EditorPage implements SitePage {
 
   readonly meta: PageMeta = {
     slug: "edit",
-    navLabel: { en: "Editor", fr: "Éditeur" },
-    title: { en: "The editor, and how to use it", fr: "L'éditeur, et comment s'en servir" },
+    navLabel: { en: "Editor", fr: "Éditeur", es: "Editor", it: "Editor" },
+    title: {
+      en: "The editor, and how to use it",
+      fr: "L'éditeur, et comment s'en servir",
+      es: "El editor, y cómo usarlo",
+      it: "L'editor, e come usarlo"
+    },
     description: {
       en: "Record a sighting: draw the shape, state the date, the place and the instrument, and let "
         + "the sky, the weather and the ground be looked up. The full manual of the UFO@home editor.",
       fr: "Enregistrer une observation : dessiner la forme, énoncer la date, le lieu et l'instrument, "
-        + "et laisser le ciel, la météo et le sol être relevés. Le manuel complet de l'éditeur UFO@home."
+        + "et laisser le ciel, la météo et le sol être relevés. Le manuel complet de l'éditeur UFO@home.",
+      es: "Registrar un avistamiento: dibujar la forma, indicar la fecha, el lugar y el instrumento, y "
+        + "dejar que se consulten el cielo, el tiempo y el terreno. El manual completo del editor de UFO@home.",
+      it: "Registrare un avvistamento: disegnare la forma, indicare la data, il luogo e lo strumento, e "
+        + "lasciare che il cielo, il meteo e il terreno vengano ricavati. Il manuale completo dell'editor di UFO@home."
     },
     modules: ["/lib/rr0-sighting-editor.mjs"]
   }
@@ -114,7 +123,16 @@ if (docs) {
   }
 
   render(language: SiteLanguage): string {
-    return language === "fr" ? this.fr() : this.en()
+    switch (language) {
+      case "fr":
+        return this.fr()
+      case "es":
+        return this.es()
+      case "it":
+        return this.it()
+      default:
+        return this.en()
+    }
   }
 
   private en(): string {
@@ -941,6 +959,850 @@ if (docs) {
         copier : <a href="/docs/share/">partager une observation</a>, c'est-à-dire un lien à envoyer
         ou deux lignes de HTML dans votre page, et <a href="/docs/components/">les composants</a>,
         si vous voulez choisir celui que cette page charge.</p>
+    </div>
+  </div>
+  </section>
+`
+  }
+
+  private es(): string {
+    return `
+<section class="band hero">
+  <div class="wrap">
+    <p class="eyebrow">El editor</p>
+    <h1>Registrar un avistamiento.</h1>
+    <p class="lede">Todo lo que sigue funciona de verdad. Nada de lo que hagas aquí se envía a ningún
+      sitio: el registro existe en tu navegador hasta que pulses <strong>Export</strong>, que te entrega
+      un archivo JSON que es tuyo.</p>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap">
+    <div class="stage stage-padded">
+      <rr0-sighting-editor id="editor"></rr0-sighting-editor>
+    </div>
+    <p class="small">Para abrirlo sobre un registro existente: añade <code>?sighting=</code> y una URL, o
+      el nombre de una de <a href="/demos/">las demos</a> (un nombre que no sea ninguna de ellas se busca
+      como caso de rr0.org, por su <code>sighting.json</code>); por ejemplo
+      <a id="sighting-edit" href="/edit/?sighting=Socorro"><code>/edit/?sighting=Socorro</code></a>,
+      que se reproduce en <a id="sighting-play" href="/play/?sighting=Socorro"><code>/play/?sighting=Socorro</code></a>.</p>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap">
+    <h2 id="manual">Tres gestos para un primer registro</h2>
+    <ol class="steps">
+      <li>
+        <h3>Decir cuándo y dónde</h3>
+        <p>Rellena <strong>Moment</strong> y <strong>Location</strong>. En ese momento aparece el
+          cielo: el Sol, la Luna y su fase, los planetas, las estrellas de aquella noche; y el
+          registro meteorológico de esa hora se obtiene por sí solo. Empezar por ahí significa dibujar
+          sobre el cielo real y no sobre un lienzo vacío.</p>
+      </li>
+      <li>
+        <h3>Dibujarlo</h3>
+        <p>Abre el grupo <strong>Phenomenon</strong>. Elige <em>Oval</em> o <em>Polygon</em>, ajusta su
+          color, su transparencia, su halo, lo deslumbrante que era y lo difuminados que parecían sus
+          bordes. Arrastra sus tiradores sobre el lienzo para darle tamaño; los vértices de un polígono
+          pueden añadirse, moverse y eliminarse uno a uno.</p>
+      </li>
+      <li>
+        <h3>Grabar el movimiento</h3>
+        <p>Pulsa <strong>Record</strong> y mueve el puntero sobre el lienzo siguiendo la trayectoria
+          del objeto, y luego <strong>Stop</strong>. La reproducción lo repite a lo largo de la
+          duración <em>real</em> de la observación: un avistamiento de cinco minutos dura cinco minutos,
+          no el segundo que duró el gesto.</p>
+      </li>
+    </ol>
+    <p class="small">Bajo la barra de reproducción, una marca señala cada fotograma clave de lo que
+      edita el grupo abierto (las formas seleccionadas, el observador, el tiempo, el sonido; todos ellos
+      desde los demás grupos), y una marca ámbar más alta cada momento con nombre. Una pulsación a pocos
+      píxeles de una de ellas cae exactamente sobre ella, la barra la nombra bajo el puntero, y
+      <strong>◂◆</strong> / <strong>◆▸</strong> van a la anterior o a la siguiente: así se modifica un
+      fotograma clave existente en lugar de crear uno nuevo a pocos milisegundos de él.</p>
+    <p class="small">Una fila de etiquetas bajo el render enumera todo lo que el registro afirma
+      realmente, y solo eso. Haz clic en una para ir al campo del que procede. Un valor aportado por
+      una fuente de datos y no por ti aparece marcado como tal.</p>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap">
+    <h2>Los nueve grupos</h2>
+    <p class="lede prose-wide">Se abre un solo panel a la vez, para que el render siga en pantalla
+      mientras editas.</p>
+
+    <div class="group-docs">
+      <div class="group-doc">
+      <h3>Observation</h3>
+      <p>Carga un registro existente (desde un archivo o una URL) e indica de qué trata este: un
+        <strong>ID</strong>, una <strong>Description</strong>, unas <strong>Tags</strong>. El ID es
+        el propio de este relato, el día y luego quién lo vio (<code>1964-04-24-ZamoraLonnie</code>); un
+        registro no nombra su caso, es <a href="/docs/format/#several-observers-the-case">el caso</a>
+        el que nombra sus relatos y da a una página su selector de observador.</p>
+      <p><strong>Moments</strong> nombra el instante del cabezal de reproducción (A, B, C…, como hacen
+        los croquis de los casos), con una frase sobre lo que ocurre entonces. Elegir uno en la lista
+        lleva hasta él; <strong>🎯</strong> vuelve al que se muestra, cosa que la lista no puede hacer
+        una vez que la reproducción lo ha dejado atrás.</p>
+    </div>
+
+    <div class="group-doc">
+      <h3>Observer</h3>
+      <p>Quién dio el relato y, no menos importante, <strong>a través de qué lo
+        observó</strong>. Un ojo no es un objetivo: la visión a simple vista transforma un ángulo en un
+        ángulo, una cámara lo transforma en <code>f·tan θ</code>, y ambos dibujan encuadres realmente
+        distintos. Elige una cámara y quedan disponibles su <strong>Focal length</strong>, su
+        <strong>Aperture</strong>, su <strong>Exposure</strong> y su <strong>Focused at</strong>, cada una desactivada donde el aparato la fijaba, porque el dueño de una
+        cámara compacta de foco fijo no tenía nada que elegir. Los instrumentos ajenos a la fecha de la
+        observación quedan fuera de la lista, salvo el que el registro ya nombra, que se conserva y se
+        señala.</p>
+      <p>El encuadre de una cámara se inscribe en el elemento con sus propias proporciones, con bandas
+        negras, y su campo pasa a ser el predeterminado; el ojo, o una cámara de modelo desconocido, se
+        dibuja en 16:9 con un campo vertical de 60°. Cambiar de instrumento reproyecta las formas:
+        conservan sus ángulos, así que se desplazan además de cambiar de tamaño. La exposición se
+        mantiene dentro de lo que permitía el aparato (de 1/1000 a 8 s para una cámara desconocida,
+        10 s para un teléfono); solo las réflex de 35 mm tienen posición B, hasta una hora. Una pose
+        larga se dibuja de inmediato tal como la mostraba el visor, y luego se va completando en
+        fotografía a medida que la escena se asienta.</p>
+      <p>El <strong>Roll</strong> está aquí y no con el lugar, porque indica cómo se
+        <em>sostenía</em> el aparato (una cámara torcida, una cabeza inclinada), no dónde estaba el
+        observador.</p>
+    </div>
+
+    <div class="group-doc">
+      <h3>Location</h3>
+      <p>Un relato nombra un lugar, no da coordenadas. Así que escribe el nombre y pulsa
+        <strong>Locate</strong>: la latitud y la longitud se rellenan con el geocodificador de
+        OpenStreetMap, todos los candidatos siguen en la lista, y elegir otro desplaza al observador. Lo
+        que se guarda es el nombre <em>completo</em> que se resolvió, para que un lector posterior
+        llegue al mismo punto. Mueve una coordenada a mano y un nombre procedente de una búsqueda se
+        vuelve a derivar, o se borra: un nombre que describiera un sitio donde el avistamiento ya no
+        está sería una afirmación falsa por escrito. Un nombre que tú mismo hayas escrito se conserva
+        tal cual y nunca se sustituye, aunque ninguna búsqueda lo encuentre.</p>
+      <p><strong>Heading</strong> es la dirección hacia la que se mira, <strong>Tilt</strong>
+        cuánto hacia arriba o hacia abajo, y <strong>Altitude</strong> se mide sobre el nivel del mar,
+        con el suelo de ese lugar como mínimo: un observador en los Alpes no está a 0 m. Las fuentes de
+        relieve y de imágenes se eligen aquí mismo, bajo las coordenadas cuyo terreno describen.</p>
+      <p>Posición, rumbo e inclinación se escriben en el cabezal de reproducción, como un fotograma
+        clave de la trayectoria del observador: ajústalos en otro momento y el observador se desplaza o
+        gira entre ambos.</p>
+      <p>El <strong>mapa</strong> sobre el render hace lo mismo con la posición: haz clic en el
+        terreno y el observador se sitúa allí en el cabezal de reproducción, exactamente como si se
+        hubieran escrito ambas coordenadas. La rueda hace zoom alrededor del puntero, un arrastre mueve
+        el terreno, y <strong>+</strong>, <strong>−</strong> y <strong>⤢</strong> (volver a la
+        trayectoria completa) están ahí para quien no tenga ni lo uno ni lo otro.</p>
+    </div>
+
+    <div class="group-doc">
+      <h3>Environment</h3>
+      <p>Lo que había alrededor del observador, a una distancia real hacia el este y el norte:
+        edificios con sus plantas y ventanas, árboles, farolas, vehículos, aeronaves y <strong>otros
+        observadores</strong>. Es lo único que puede poner una cifra a una distancia: si el objeto pasó
+        <em>por detrás</em> de ese hangar, estaba al menos así de lejos; si pasó <em>por delante</em>
+        de ese árbol, como mucho. Cada cruce acota por un lado la anchura real del objeto para todo el
+        registro; el resultado aparece bajo el tamaño aparente, y dice «desconocida» cuando nada cruza
+        su línea de visión, que es la respuesta honesta para la mayoría de los avistamientos.</p>
+      <p><strong>Varios observadores y sus puntos de vista.</strong> Un observador colocado aquí puede
+        llevar la URL de su <em>propio</em> registro, y un clic derecho sobre él en la escena ofrece
+        verlo: eso carga su relato y te sitúa donde él estaba, mirando hacia donde él miraba.
+        Dos personas a cien metros una de otra no vieron lo mismo, y poder pasar de una a otra es lo que
+        hace que eso deje de ser una afirmación y se convierta en algo que comprobar. El botón
+        <strong>🎯</strong> hace la versión reducida de lo mismo: gira al observador actual hacia lo
+        que esté seleccionado.</p>
+      <p>Publicados juntos, esos registros se convierten en el selector de observador que recibe un
+        lector: véase <a href="/docs/format/#several-observers-the-case">el caso</a> que los enumera.</p>
+      <p>El decorado también puede <strong>moverse</strong> (un avión que cruza el cielo, un coche que
+        pasa) y llevar <strong>luces</strong> con cadencias de destello reales y reglamentarias: balizas
+        anticolisión de 40 a 100 por minuto, luces de emergencia de 60 a 120. En una exposición larga
+        esa cadencia se dibuja: las lámparas fijas dejan líneas, las intermitentes dejan puntos a
+        intervalos regulares, y así es exactamente como se distingue la fotografía de un avión de línea
+        de la de algo que no parpadea.</p>
+    </div>
+
+    <div class="group-doc">
+      <h3>Moment</h3>
+      <p>Un inicio, un final, una duración y una <strong>Time zone</strong>, que es la regla y no
+        la cifra. Elige la zona propia del observador y el desfase se deriva de las reglas de esa zona
+        <em>en la fecha de la observación</em>: Valensole en julio de 1965 da UTC+1, no el UTC+2 de hoy,
+        porque Francia no reintrodujo el horario de verano hasta 1976.</p>
+      <p>La zona se rellena a partir de las coordenadas, y nunca sustituye a una que tú hayas
+        elegido. Los límites de las zonas son toscos (Montgomery, Alabama, cae en America/Chicago, que
+        tenía horario de verano en 1948 cuando Alabama no lo tenía), así que aún puede escribirse un
+        simple desfase con la opción <em>manual</em>. Un desfase que ningún reloj a esa longitud habría
+        podido llevar se señala, con la hora solar del meridiano en su información emergente. Editar
+        cualquiera de las dos fechas elimina una duración explícita en cuanto ambas fechas dan por sí
+        solas una duración exacta.</p>
+      <p>El botón <strong>EDTF</strong> cambia ambos campos de fecha a texto, para todo lo que un
+        selector de calendario no sabe decir: un año solo, un mes, una hora sin fecha, y los
+        calificativos <em>incierto</em> (<code>?</code>) y <em>aproximado</em> (<code>~</code>). La
+        mayoría de los archivos lo necesitan: de 241 casos de rr0.org, el 43 % indica solo un año y
+        apenas el 17 % una fecha con hora.</p>
+    </div>
+
+    <div class="group-doc">
+      <h3>Weather</h3>
+      <p>El único grupo que no es relato. El tiempo atmosférico es un hecho medible en un lugar y un
+        instante, y los dos grupos anteriores ya indican ambos; por eso se consulta en ERA5, el
+        reanálisis del ECMWF, y se muestra <em>en solo lectura</em> sobre una línea que nombra el
+        conjunto de datos y el instante UTC exacto descrito. Una zona horaria equivocada se nota ahí
+        antes de notarse en el cielo.</p>
+      <p>Desmarcar <strong>From weather records</strong> devuelve los campos al
+        observador: los valores consultados se quedan como punto de partida, la fuente se retira, y
+        ninguna consulta posterior puede sobrescribirlos. Un registro que nombra una fuente se reproduce
+        exactamente como se compuso y nunca se vuelve a consultar, así que un caso publicado se lee
+        igual sin conexión.</p>
+      <p>Una consulta escribe un fotograma clave meteorológico al inicio, en cada hora en punto y al
+        final del registro, cada uno allí donde está el observador en ese momento; la pista se vuelve a
+        disponer cuando cambia la duración del registro.</p>
+      <p>El grupo tiene tres pestañas propias, con una parte abierta a la vez como los propios grupos:
+        <strong>Precipitation</strong> (su tipo y su intensidad, y la casilla
+        <strong>Storm</strong>, que es donde un código meteorológico indica una tormenta eléctrica,
+        junto a la lluvia y el granizo, y que activa los rayos y el trueno con su retardo real),
+        <strong>Clouds</strong>, y <strong>Wind</strong>, la dirección hacia la que sopla y su
+        velocidad, que es lo que arrastra toda nube que no tenga viento propio.</p>
+      <p>Las nubes son la parte <strong>Clouds</strong> de este grupo. Un cielo consultado llega como
+        tres capas, las bandas baja, media y alta del registro; un cielo descrito por el observador
+        tiene tantas como vio. Cada número del panel se escribe en el registro en cuanto es válido, y la
+        primera edición pone en pausa la reproducción, de modo que nada se consigna con el cabezal en
+        movimiento.</p>
+      <p><strong>Edit scope</strong> decide a qué se refiere una edición. <em>Current time</em> escribe un fotograma clave meteorológico en el cabezal de reproducción, o actualiza
+        el que ya está ahí: así cambia un cielo durante la observación (ajustar la capa al inicio,
+        avanzar, volver a ajustarla). <em>Whole observation</em> aplica la única propiedad que
+        cambias a todos los fotogramas clave existentes, dejando los demás como estaban, que es lo que se
+        quiere para «era cúmulo, no estrato».</p>
+      <p><strong>Layer</strong> las enumera por rango, tipo y base. <strong>Add layer</strong> coloca
+        una capa de cúmulos a medio cubrir a 1 500 m para que la remodeles; <strong>Delete layer</strong> quita la seleccionada. Una capa conserva su identidad de un fotograma clave a
+        otro, así que añadir una a los 40 segundos la hace aparecer en fundido desde el fotograma clave
+        anterior en lugar de surgir de golpe.</p>
+      <p>Luego vienen los campos propios de la capa: <strong>Cloud type</strong> (cúmulo, estrato,
+        estratocúmulo, cirro, desconocido; da forma a las cimas, y un cirro es la capa que produce
+        halos), <strong>Base</strong> y <strong>Thickness</strong> en metros sobre el terreno de
+        referencia, <strong>Coverage</strong> como el porcentaje de cielo que realmente cubre,
+        <strong>Cloud size</strong> como la anchura de una nube en metros (independiente de la
+        cobertura, de modo que un mismo porcentaje puede ser muchas nubes pequeñas o unas pocas
+        grandes), <strong>Density</strong> (de 0, transparente, a 2) y <strong>Darkness</strong> (de
+        0, blanca, a 1). <strong>Layer wind direction</strong> y <strong>Layer wind speed</strong>
+        sirven para una capa que se mueve de forma distinta al viento en superficie, como suele hacer
+        la alta; vacías, significan el viento general. <strong>Pattern seed</strong> elige otra
+        disposición de los mismos números, cuando la dibujada pone una nube donde el relato dice que no
+        la había.</p>
+      <p><strong>Individual clouds</strong> sirve para la que el relato sitúa: aquella tras la que
+        pasó el fenómeno, la que estaba allí y en ningún otro sitio. <strong>Add individual cloud</strong> coloca una en la capa, delante de donde miras, a la base de la capa.
+        Se dibuja como una más de la capa (la misma textura, los mismos bordes) y solo se diferencia de
+        sus vecinas en que está exactamente donde tú dices, incluso con la cobertura de la capa al
+        0 %. <strong>Point at cloud</strong> gira al observador hacia ella. <strong>Delete cloud</strong> la quita.</p>
+      <p>Marca <strong>Select and drag clouds in the sky</strong> y la propia imagen se
+        convierte en el control: haz clic en una nube para seleccionarla, arrástrala para moverla (en
+        el plano que tienes enfrente, de modo que conserva su distancia mientras su rumbo y su altitud
+        siguen al puntero, y nunca baja por debajo del suelo). Desmárcalo y los clics vuelven a ser del
+        reproductor. Los campos numéricos hacen el resto, y lo hacen con exactitud: <strong>East position</strong> y <strong>North position</strong> en metros desde donde empezó el observador, su propia
+        <strong>Cloud base</strong>, su <strong>Cloud thickness</strong>, su <strong>Cloud width</strong>, su
+        <strong>Cloud depth</strong> y su <strong>Cloud rotation</strong>, su <strong>Cloud density</strong> y una
+        <strong>Darkness</strong> que, vacía, es la de la capa. Ponle dos fotogramas clave y deriva,
+        crece o se oscurece entre ambos; además, se deja llevar por el viento de la capa como cualquier
+        otra nube.</p>
+      <p>Cualquier edición de nubes aparta el tiempo del registro meteorológico: la fuente se retira y
+        ninguna consulta posterior puede sobrescribir lo que has ajustado. Vuelve a marcar
+        <strong>From weather records</strong> y regresan las tres capas del registro, en
+        lugar de las tuyas. La única excepción es <strong>Crystal alignment</strong>, que
+        solo se ofrece en una capa de cirros: ningún registro meteorológico la mide, así que sigue siendo
+        editable con ERA5 seleccionado. Los cristales que dan tumbos producen un anillo desnudo; las
+        placas horizontales y las columnas que ruedan producen parhelios, arcos y un pilar.</p>
+      <p>Debajo está la línea <strong>«Sky:»</strong> («Cielo:»), en solo lectura, y que ni siquiera es una
+        consulta. Una lluvia de meteoros es una posición en la órbita terrestre y la órbita de un cometa
+        es un problema resuelto, así que la fecha y el lugar bastan para decidir ambas cosas. Indica qué
+        más había en ese trozo de cielo: la lluvia y su tasa sobre el fondo esporádico, el cometa y su
+        magnitud, cualquier nova o supernova cuya curva de luz registrada cubra esa noche (el botón 🌟
+        gira al observador hacia ella), si la órbita baja
+        seguía iluminada por el Sol, si la Vía Láctea o la luz zodiacal podían siquiera verse.
+        A partir de febrero de 2021 también nombra los satélites que realmente cruzaron ese cielo con
+        brillo suficiente para ser vistos, el más brillante con la hora de su paso en el reloj del
+        observador, y dice cuándo algunos formaban un tren de Starlink; el botón 🛰 lleva el cabezal a
+        cada paso por turno, del más brillante al más débil, y gira al observador hacia él. 🌠 y ☄
+        hacen lo mismo con el siguiente meteoro y con el cometa. Cuando el instrumento alcanza más allá
+        de la magnitud 9, la línea indica que las estrellas solo se dibujan hasta donde llega el
+        catálogo de este proyecto; y un arcoíris solo se menciona si se registró lluvia.
+        Que algo de ello explique algo es la conclusión del lector, nunca la afirmación del archivo.</p>
+    </div>
+
+    <div class="group-doc">
+      <h3>Sound</h3>
+      <p>La mitad de lo que hace extraños estos relatos es el sonido, y muy a menudo su ausencia. Un
+        <strong>tipo</strong> (zumbido, silbido, retumbo, crepitación o ninguno), una
+        <strong>Loudness</strong> y un <strong>Pitch</strong>, con fotogramas clave en el mismo reloj
+        que la forma: un aparato posado en silencio en el suelo y que solo se oye al despegar son dos
+        fotogramas clave.</p>
+      <p>El sonido se <em>sintetiza</em> a partir de esa descripción, exactamente como la forma se
+        dibuja a partir de la suya, sin coste alguno de audio incluido. Un registro que realmente captó
+        el sonido puede apuntar en su lugar al archivo de audio. Observa la diferencia entre los dos
+        silencios: <em>ninguno</em> significa que el observador declaró no haber oído nada; la ausencia
+        total de pista sonora significa que nadie se lo preguntó.</p>
+      <p>La intensidad y el tono se deslizan de un fotograma clave al siguiente; el tipo y el archivo
+        de audio cambian en el fotograma clave. Un archivo de audio alojado en otro sitio debe servirse
+        a cualquier origen (CORS), y un navegador no reproduce nada hasta que el lector ha hecho clic
+        una vez en la página.</p>
+    </div>
+
+    <div class="group-doc">
+      <h3>Pictures</h3>
+      <p>Fotografías del lugar, superpuestas a la escena para poder comparar ambas. <strong>Add from an address</strong> toma una imagen servida a cualquier origen (las de los casos de
+        rr0.org lo están); <strong>Add a file</strong> incrusta una de tu disco en el registro,
+        con un aviso sobre su peso. Dale un <strong>Name</strong>, un <strong>Credit</strong> y su
+        enlace, indica si fue tomada en un instante (<strong>Taken at</strong>) de la observación y si alguien dibujó encima
+        (<strong>Drawn on</strong>), y ajusta su <strong>Opacity</strong> inicial: el lector la
+        deslizará después.</p>
+      <p>Mientras este grupo está abierto, el lienzo pertenece a la foto seleccionada, con su marco en
+        azul discontinuo: <strong>arrastra</strong> sobre ella para girarla (un arrastre fuera de ella
+        sigue girando al observador), usa la <strong>rueda</strong> para cambiar su campo, o escribe
+        <strong>Heading</strong>, <strong>Pitch</strong>, <strong>Roll</strong> y <strong>Vertical field</strong>, o pulsa <strong>Use the observer's pose</strong> para partir de ella. Para
+        medir en lugar de calcular a ojo, <strong>Add a landmark</strong> prepara dos
+        clics: un detalle en la foto y luego el mismo detalle en el render. Dos puntos de referencia
+        giran la foto para ajustarla a ellos, tres o más ajustan también su campo; cada uno tiene un
+        nombre y un residuo, verde hasta un grado, naranja hasta tres, rojo por encima, y cualquiera de
+        sus extremos puede arrastrarse. <strong>Adopt as the observer's pose</strong> escribe
+        entonces el rumbo, el cabeceo y el alabeo ajustados en la pose del cabezal de reproducción, como
+        una medición, con su procedencia. <strong>Street-level pictures nearby</strong> pide a
+        Panoramax las imágenes tomadas a menos de 300 m del punto del observador, cada una ya alineada en
+        rumbo.</p>
+      <p>Una foto solo vale desde un punto, así que alinearla registra también <em>desde dónde</em> se
+        alineó: la posición del observador en el cabezal de reproducción. Durante la reproducción se
+        desvanece cuando el observador se aleja de ese punto (visible del todo a menos de 2 m,
+        desaparecida más allá de 20 m) y vuelve cuando regresa, en lugar de mostrar una comparación que
+        ya no se sostiene.</p>
+    </div>
+
+    <div class="group-doc">
+      <h3>Phenomenon</h3>
+      <p>El objeto en sí. Óvalo o polígono, color, transparencia, halo, <strong>Brilliance</strong> (lo
+        deslumbrante que era: una luz que no se puede mirar lava el campo que la rodea, proyecta las
+        puntas que produce su apertura y satura en blanco, cosa que ningún halo hace) y
+        <strong>Blur</strong> (lo difusos que parecían sus bordes). Varias formas pueden compartir
+        una misma línea de tiempo (un aparato, una llama que lo sigue, un segundo objeto), cada una con
+        su propio nombre, y agruparse, reordenarse o eliminarse desde el menú contextual del propio
+        lienzo.</p>
+      <p><strong>Apparent width</strong>, <strong>Real width</strong> y <strong>Distance</strong>
+        son tres lecturas de una misma relación, que se mantienen acordes: edita una cualquiera y una de
+        las otras dos la sigue; la que fija <strong>Hold</strong> nunca se mueve. Solo el ángulo
+        pertenece al registro; la anchura real se deriva, y la distancia es aquella a la que la escena
+        dibuja la forma, una hipótesis que probar y no una afirmación. A través de un ojo con 60° sobre
+        un lienzo de 360 píxeles, un grado son exactamente 6 píxeles y la Luna llena unos 3; así, un
+        objeto de 3,5 m de ancho a 90 m mide 13 píxeles, no los 90 que un autor dibujaría sin ayuda.
+        Equivocarse en esto es la causa más común de que una reconstrucción acabe siendo falsa.</p>
+      <p>Esa distancia nunca se guarda con el registro, y <strong>Withdraw the distance hypothesis</strong> la anula. Una forma dibujada dentro de otra visible más grande
+        se sitúa a la distancia de esta, justo delante, para que una luz de un aparato siga sobre el
+        aparato.</p>
+      <p><strong>Sampling rate</strong> es la frecuencia con que se lee el puntero durante la
+        grabación.</p>
+      <p>Esas son las <strong>Shapes</strong> del grupo: lo que dibujó el observador. Sus
+        <strong>Bodies</strong> son lo que el observador dijo que eran esas formas, en 3D: cada cuerpo
+        nombra las formas que representa y el modelo con que se dibuja, una forma integrada, un modelo
+        del catálogo o un archivo glTF en una dirección. La dirección puede ser relativa al propio
+        archivo del registro, de modo que un <code>sighting.json</code> y el <code>craft.gltf</code>
+        situado a su lado funcionan juntos desde cualquier página; su crédito (nombre y licencia) es
+        obligatorio antes de que se dibuje.
+        <strong>+</strong> añade un cuerpo (y la interpretación, si el registro no tiene ninguna):
+        representa la forma seleccionada, en su dirección, a la distancia a la que la escena la dibuja
+        y tan grande como allí la hace su anchura aparente, en un único fotograma clave en el cabezal de
+        reproducción; sobre el suelo a esa distancia cuando la línea de visión entra antes en él; sin
+        forma, allí donde mira el observador. 🎯 gira al observador hacia el cuerpo. Un registro puede
+        contener solo cuerpos: su última forma puede eliminarse. <strong>At</strong>: en el cabezal de
+        reproducción, la posición del cuerpo (desde el observador, o en el mundo), su tamaño y su
+        actitud se muestran tal como son en ese instante; editar una escribe allí un fotograma clave, y
+        así es como un cuerpo recibe su movimiento: mover el cabezal, editar de nuevo. Un fotograma clave
+        así no indica nada más, de modo que la luz, la llama y las partes móviles del cuerpo siguen como
+        antes. Con esta parte abierta, un cuerpo también puede tomarse en la propia imagen: arrastrarlo
+        lo desplaza tanto como gira el puntero (sobre el relieve cuando está en el suelo, a la misma
+        distancia cuando vuela), y la rueda sobre él lo acerca o lo aleja. El
+        cuerpo mostrado queda enmarcado con tiradores: una esquina lo dimensiona entero, un lado lo
+        estira en horizontal, la parte superior o inferior lo eleva, y el vástago de arriba lo gira
+        cuando el puntero va a izquierda o derecha, y con Mayús pulsada lo cabecea
+        cuando el puntero sube o baja y lo alabea cuando va de lado.
+        Todo esto escribe el mismo fotograma clave que los campos, que muestran adónde fue. El
+        movimiento de un cuerpo se indica en el archivo, y se muestra aquí. La imagen dibuja los
+        cuerpos, con las formas a su lado como contornos para leerlos frente a ellas, sea cual sea el
+        grupo abierto, salvo en la parte Formas, donde las formas se dibujan solas y enteras.</p>
+    </div>
+    </div>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap prose-wide">
+    <h2>Señala cualquier cosa y dirá su nombre</h2>
+    <p>Pasar el puntero por la escena nombra lo que hay debajo. Una estrella da su nombre, su magnitud
+      y a qué altura estaba: «Venus, mag −4, 8° sobre el horizonte» responde por sí sola a un informe
+      de una luz brillante cerca del horizonte, donde un nombre a secas no lo haría. El Sol, la Luna,
+      los planetas y cualquier cometa visible aquella noche responden igual, y también todo lo del
+      entorno: un edificio, un árbol, otro observador.</p>
+    <p>Lo que oculta el terreno no responde. Una estrella tras una colina es tan imposible de ver como
+      una bajo el horizonte, así que no se ofrece ninguna de las dos: una reconstrucción no es una lista
+      de lo que hay en el cielo, es lo que podía verse desde donde estaba el observador.</p>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap">
+    <h2>Reglas que conviene conocer</h2>
+    <div class="prose-wide">
+      <ul class="plain">
+        <li><strong>Un fotograma clave se mantiene, no se funde.</strong> Una forma ausente de un
+          fotograma clave posterior sigue como estaba; una cuyo primer fotograma clave está a los cinco
+          segundos ya aparece pintada, en ese estado, desde cero. Para que algo deje de verse, ponle un
+          fotograma clave con transparencia 1.</li>
+        <li><strong>Lo declarado prevalece sobre lo deducido.</strong> «Entró en una nube» lo afirma el
+          observador, nunca lo calcula la geometría: este formato describe una apariencia en un campo de
+          visión, no una posición en el espacio, así que nada en él <em>puede</em> saber si una nube se
+          interpuso entre ambos.</li>
+        <li><strong>En pausa es en pausa.</strong> La lluvia que cae, el centelleo de las estrellas, los
+          rayos, los destellos del objetivo, el sonido ambiente: todo se detiene con el reproductor. Una
+          reproducción en pausa es un instante de un avistamiento; un tiempo que siguiera corriendo
+          encima sería tu propia habitación, no la tarde del observador.</li>
+        <li><strong>Nada se inventa.</strong> Donde no existe registro (antes de 1940 para el tiempo,
+          antes de 1957 para los satélites, antes de 2021 para los elementos orbitales), el campo
+          sigue siendo editable y la interfaz dice cuál de los dos casos es.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap">
+    <h2>Lo que te entrega Exportar</h2>
+    <div class="prose-wide">
+      <p><strong>Export</strong> te entrega un archivo JSON. Ese archivo <em>es</em> el registro
+        completo: no hay cuenta, ni base de datos, ni copia guardada aquí. Alójalo donde quieras. Lo que
+        contiene, campo por campo, está en la página del <a href="/docs/format/">archivo de
+        avistamiento</a>.</p>
+      <p>Qué hacer después con él tiene sus propias páginas, con ejemplos que puedes ejecutar y copiar:
+        <a href="/docs/share/">compartir una observación</a>, que es un enlace que enviar o dos líneas
+        de HTML en una página tuya, y <a href="/docs/components/">los componentes</a>, si quieres
+        elegir cuál carga esa página.</p>
+    </div>
+  </div>
+  </section>
+`
+  }
+
+  private it(): string {
+    return `
+<section class="band hero">
+  <div class="wrap">
+    <p class="eyebrow">L'editor</p>
+    <h1>Registrare un avvistamento.</h1>
+    <p class="lede">Tutto ciò che segue funziona davvero. Niente di ciò che fai qui viene inviato da
+      nessuna parte: la registrazione esiste nel tuo browser finché non premi
+      <strong>Export</strong>, che ti consegna un file JSON che è tuo.</p>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap">
+    <div class="stage stage-padded">
+      <rr0-sighting-editor id="editor"></rr0-sighting-editor>
+    </div>
+    <p class="small">Per aprirlo su una registrazione esistente: aggiungi <code>?sighting=</code> e un
+      URL, oppure il nome di una delle <a href="/demos/">demo</a> (un nome che non corrisponde a nessuna
+      di esse viene cercato come caso di rr0.org, tramite il suo <code>sighting.json</code>); per esempio
+      <a id="sighting-edit" href="/edit/?sighting=Socorro"><code>/edit/?sighting=Socorro</code></a>,
+      che si riproduce in <a id="sighting-play" href="/play/?sighting=Socorro"><code>/play/?sighting=Socorro</code></a>.</p>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap">
+    <h2 id="manual">Tre gesti per una prima registrazione</h2>
+    <ol class="steps">
+      <li>
+        <h3>Dire quando e dove</h3>
+        <p>Compila <strong>Moment</strong> e <strong>Location</strong>. È in quel momento che compare
+          il cielo: il Sole, la Luna e la sua fase, i pianeti, le stelle di quella notte; e i dati
+          meteorologici di quell'ora vengono recuperati da soli. Cominciare da qui significa disegnare
+          sul cielo reale invece che su una tela vuota.</p>
+      </li>
+      <li>
+        <h3>Disegnarlo</h3>
+        <p>Apri il gruppo <strong>Phenomenon</strong>. Scegli <em>Oval</em> o <em>Polygon</em>,
+          impostane il colore, la trasparenza, l'alone, quanto era abbagliante e quanto apparivano
+          sfumati i contorni. Trascina le maniglie sulla tela per dargli le dimensioni; i vertici di
+          un poligono si possono aggiungere, spostare ed eliminare uno per uno.</p>
+      </li>
+      <li>
+        <h3>Registrare il movimento</h3>
+        <p>Premi <strong>Record</strong> e muovi il puntatore sulla tela lungo il percorso
+          seguito dall'oggetto, poi <strong>Stop</strong>. La riproduzione lo ripete sulla durata
+          <em>reale</em> dell'osservazione: un avvistamento di cinque minuti dura cinque minuti, non il
+          secondo che è durato il trascinamento.</p>
+      </li>
+    </ol>
+    <p class="small">Sotto la barra di riproduzione, una tacca segna ogni fotogramma chiave di ciò che
+      il gruppo aperto modifica (le forme selezionate, l'osservatore, il meteo, il suono; tutti dagli
+      altri gruppi), e una tacca ambra più alta ogni momento con un nome. Un clic a pochi pixel da una di
+      esse cade esattamente su di essa, la barra la nomina sotto il puntatore, e
+      <strong>◂◆</strong> / <strong>◆▸</strong> vanno alla precedente o alla successiva: così si modifica
+      un fotogramma chiave esistente invece di crearne uno nuovo a pochi millisecondi di distanza.</p>
+    <p class="small">Una fila di etichette sotto il rendering elenca tutto ciò che la registrazione
+      afferma davvero, e solo quello. Fai clic su una per andare al campo da cui proviene. Un valore
+      fornito da una fonte di dati anziché da te è indicato come tale.</p>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap">
+    <h2>I nove gruppi</h2>
+    <p class="lede prose-wide">Si apre un solo pannello alla volta, così il rendering resta sullo
+      schermo mentre modifichi.</p>
+
+    <div class="group-docs">
+      <div class="group-doc">
+      <h3>Observation</h3>
+      <p>Carica una registrazione esistente (da un file o da un URL) e indica di cosa tratta questa:
+        un <strong>ID</strong>, una <strong>Description</strong>, dei <strong>Tags</strong>. L'ID è quello
+        proprio di questo resoconto, il giorno e poi chi ha visto (<code>1964-04-24-ZamoraLonnie</code>);
+        una registrazione non nomina il suo caso, è <a href="/docs/format/#several-observers-the-case">il
+        caso</a> a nominare i suoi resoconti e a dare a una pagina il suo selettore di osservatore.</p>
+      <p><strong>Moments</strong> dà un nome all'istante della testina di riproduzione (A, B, C…, come
+        fanno gli schizzi dei casi), con una frase su ciò che accade in quel momento. Sceglierne uno
+        nell'elenco porta lì; <strong>🎯</strong> torna a quello mostrato, cosa che l'elenco non può fare
+        una volta che la riproduzione l'ha superato.</p>
+    </div>
+
+    <div class="group-doc">
+      <h3>Observer</h3>
+      <p>Chi ha fornito il resoconto e, altrettanto importante, <strong>attraverso che cosa ha
+        osservato</strong>. Un occhio non è un obiettivo: la visione a occhio nudo trasforma un angolo in
+        un angolo, una fotocamera lo trasforma in <code>f·tan θ</code>, e i due disegnano inquadrature
+        davvero diverse. Scegli una fotocamera e diventano disponibili la sua <strong>Focal length</strong>, il <strong>Aperture</strong>, l'<strong>Exposure</strong> e la
+        <strong>Focused at</strong>, ciascuna disattivata dove l'apparecchio la fissava,
+        perché il proprietario di una compatta a fuoco fisso non aveva nulla da scegliere. Gli strumenti
+        estranei alla data dell'osservazione sono esclusi dall'elenco, tranne quello che la
+        registrazione nomina già, che viene mantenuto e segnalato.</p>
+      <p>L'inquadratura di una fotocamera è inscritta nell'elemento con le sue proporzioni, bande nere
+        comprese, e il suo campo diventa quello predefinito; l'occhio, o una fotocamera di modello
+        sconosciuto, è disegnato in 16:9 con un campo verticale di 60°. Cambiare strumento riproietta le
+        forme: mantengono i loro angoli, quindi si spostano oltre a cambiare dimensione. L'esposizione
+        resta entro ciò che l'apparecchio consentiva (da 1/1000 a 8 s per una fotocamera sconosciuta,
+        10 s per un telefono); solo le reflex 35 mm hanno la posa B, fino a un'ora. Una posa lunga viene
+        disegnata subito come la mostrava il mirino, poi si riempie fino a diventare la fotografia man
+        mano che la scena si assesta.</p>
+      <p>Il <strong>Roll</strong> sta qui e non con il luogo, perché dice come era
+        <em>tenuto</em> l'apparecchio (una fotocamera storta, una testa inclinata), non dove si trovava
+        l'osservatore.</p>
+    </div>
+
+    <div class="group-doc">
+      <h3>Location</h3>
+      <p>Un resoconto nomina un luogo, non fornisce coordinate. Quindi scrivi il nome e premi
+        <strong>Locate</strong>: latitudine e longitudine vengono compilate dal geocodificatore di
+        OpenStreetMap, tutti i candidati restano in elenco, e sceglierne un altro sposta l'osservatore.
+        Ciò che viene salvato è il nome <em>completo</em> che è stato risolto, così che un lettore
+        successivo arrivi nello stesso punto. Sposta una coordinata a mano e un nome venuto da una
+        ricerca viene ricavato di nuovo, o cancellato: un nome che descrivesse un posto in cui
+        l'avvistamento non si trova più sarebbe una dichiarazione falsa messa per iscritto. Un nome che
+        hai scritto tu viene mantenuto così com'è e mai sostituito, anche quando nessuna ricerca lo
+        trova.</p>
+      <p><strong>Heading</strong> è la direzione verso cui si guarda, <strong>Tilt</strong>
+        quanto in alto o in basso, e <strong>Altitude</strong> è sul livello del mare, con l'altezza
+        del terreno in quel punto come minimo: un osservatore sulle Alpi non sta a 0 m. Le fonti del
+        rilievo e delle immagini si scelgono proprio qui, sotto le coordinate di cui descrivono il
+        terreno.</p>
+      <p>Posizione, direzione e inclinazione vengono scritte alla testina di riproduzione, come un
+        fotogramma chiave della traccia dell'osservatore: impostale in un altro momento e
+        l'osservatore si sposta o si gira tra i due.</p>
+      <p>La <strong>mappa</strong> sopra il rendering fa lo stesso per la posizione: fai clic sul
+        terreno e l'osservatore si mette lì alla testina di riproduzione, esattamente come se entrambe le
+        coordinate fossero state digitate. La rotellina zooma attorno al puntatore, un trascinamento
+        sposta il terreno, e <strong>+</strong>, <strong>−</strong> e <strong>⤢</strong> (di nuovo
+        all'intero percorso) ci sono per chi non ha né l'una né l'altro.</p>
+    </div>
+
+    <div class="group-doc">
+      <h3>Environment</h3>
+      <p>Ciò che c'era intorno all'osservatore, a una distanza reale verso est e verso nord: edifici con
+        i loro piani e le loro finestre, alberi, lampioni, veicoli, aeromobili e <strong>altri
+        osservatori</strong>. È l'unica cosa che possa dare un numero a una distanza: se l'oggetto è
+        passato <em>dietro</em> quell'hangar era almeno così lontano, se <em>davanti</em> a
+        quell'albero, al massimo. Ogni incrocio restringe da un lato la larghezza reale dell'oggetto per
+        tutta la registrazione; il risultato compare sotto la dimensione apparente, e dice «sconosciuta»
+        quando nulla attraversa la sua linea di vista, che è la risposta onesta per la maggior parte
+        degli avvistamenti.</p>
+      <p><strong>Più osservatori, e i loro punti di vista.</strong> Un osservatore posizionato qui può
+        portare l'URL della sua <em>propria</em> registrazione, e un clic destro su di lui nella scena
+        propone di vederla: questo carica il suo resoconto e ti mette dove si trovava lui, guardando
+        dove guardava lui. Due persone a cento metri l'una dall'altra non hanno visto la stessa cosa, e
+        poter passare dall'una all'altra è ciò che trasforma un'affermazione in qualcosa da verificare.
+        Il pulsante <strong>🎯</strong> fa la versione ridotta della stessa cosa: gira l'osservatore
+        corrente verso ciò che è selezionato.</p>
+      <p>Pubblicate insieme, quelle registrazioni diventano il selettore di osservatore che riceve un
+        lettore: vedere <a href="/docs/format/#several-observers-the-case">il caso</a> che le elenca.</p>
+      <p>Anche il decoro può <strong>muoversi</strong> (un aereo che attraversa il cielo, un'auto che
+        passa) e portare <strong>luci</strong> con frequenze di lampeggio reali e regolamentari: luci
+        anticollisione da 40 a 100 al minuto, luci di emergenza da 60 a 120. In una posa lunga quella
+        frequenza viene disegnata: le lampade fisse lasciano linee, quelle lampeggianti punti a
+        intervalli regolari, ed è esattamente così che la fotografia di un aereo di linea si distingue
+        da quella di qualcosa che non lampeggia.</p>
+    </div>
+
+    <div class="group-doc">
+      <h3>Moment</h3>
+      <p>Un inizio, una fine, una durata e un <strong>Time zone</strong>, che è la regola e non il
+        numero. Scegli il fuso dell'osservatore e lo scarto viene ricavato dalle regole di quel fuso
+        <em>alla data dell'osservazione</em>: Valensole nel luglio 1965 dà UTC+1, non l'UTC+2 di oggi,
+        perché la Francia ha reintrodotto l'ora legale solo nel 1976.</p>
+      <p>Il fuso viene compilato a partire dalle coordinate, e non sostituisce mai quello che hai
+        scelto tu. I confini dei fusi sono approssimativi (Montgomery, in Alabama, ricade in
+        America/Chicago, che nel 1948 aveva l'ora legale quando l'Alabama non l'aveva), quindi si può
+        ancora digitare un semplice scarto con la scelta <em>manuale</em>. Uno scarto che nessun
+        orologio a quella longitudine avrebbe potuto tenere viene segnalato, con l'ora solare del
+        meridiano nel suo suggerimento. Modificare una delle due date elimina una durata esplicita non
+        appena le due date danno da sole una durata esatta.</p>
+      <p>Il pulsante <strong>EDTF</strong> trasforma entrambi i campi data in testo, per tutto ciò che
+        un selettore di calendario non sa esprimere: un anno da solo, un mese, un'ora senza data, e i
+        qualificatori <em>incerto</em> (<code>?</code>) e <em>approssimativo</em> (<code>~</code>). La
+        maggior parte degli archivi ne ha bisogno: su 241 casi di rr0.org, il 43 % indica solo un anno e
+        appena il 17 % una data con un'ora.</p>
+    </div>
+
+    <div class="group-doc">
+      <h3>Weather</h3>
+      <p>L'unico gruppo che non è resoconto. Il meteo è un fatto misurabile in un luogo a un istante, e
+        i due gruppi precedenti indicano già entrambi; per questo viene ricavato da ERA5, la rianalisi
+        dell'ECMWF, e mostrato <em>in sola lettura</em> sopra una riga che nomina il set di dati e
+        l'istante UTC esatto descritto. Un fuso orario sbagliato si vede lì prima di vedersi nel
+        cielo.</p>
+      <p>Togliere la spunta a <strong>From weather records</strong> restituisce i campi
+        all'osservatore: i valori ricavati restano come punto di partenza, la fonte viene tolta, e
+        nessuna consultazione successiva può sovrascriverli. Una registrazione che nomina una fonte viene
+        riprodotta esattamente come è stata composta e mai più consultata, così un caso pubblicato si
+        legge identico anche offline.</p>
+      <p>Una consultazione scrive un fotogramma chiave meteorologico all'inizio, a ogni ora esatta e alla
+        fine della registrazione, ciascuno dove si trova l'osservatore in quel momento; la traccia viene
+        ridisposta quando la durata della registrazione cambia.</p>
+      <p>Il gruppo ha tre schede proprie, con una parte aperta alla volta come i gruppi stessi:
+        <strong>Precipitation</strong> (il loro tipo e la loro intensità, e la casella
+        <strong>Storm</strong>, che è dove un codice meteorologico segnala un temporale, accanto
+        alla pioggia e alla grandine, e che accende i fulmini e il tuono con il loro ritardo reale),
+        <strong>Clouds</strong>, e <strong>Wind</strong>, la direzione verso cui soffia e la sua
+        velocità, che è ciò che trasporta ogni nuvola che non ha un vento proprio.</p>
+      <p>Le nuvole sono la parte <strong>Clouds</strong> di questo gruppo. Un cielo ricavato arriva
+        come tre strati, le fasce bassa, media e alta dei dati; un cielo descritto dall'osservatore ne
+        ha quanti lui ne ha visti. Ogni numero del pannello viene scritto nella registrazione non appena
+        è valido, e la prima modifica mette in pausa la riproduzione, così nulla viene salvato con la
+        testina in movimento.</p>
+      <p><strong>Edit scope</strong> decide a cosa si riferisce una modifica. <em>Current time</em> scrive un fotogramma chiave meteorologico alla testina di riproduzione, o aggiorna
+        quello che c'è già: è così che un cielo cambia durante l'osservazione (impostare lo strato
+        all'inizio, spostarsi, impostarlo di nuovo). <em>Whole observation</em> applica l'unica
+        proprietà che cambi a tutti i fotogrammi chiave esistenti, lasciando le altre come erano, che
+        è ciò che serve per «erano cumuli, non strati».</p>
+      <p><strong>Layer</strong> li elenca per rango, tipo e base. <strong>Add layer</strong>
+        mette uno strato di cumuli a metà copertura a 1 500 m da rimodellare; <strong>Delete layer</strong> rimuove quello selezionato. Uno strato mantiene la sua identità da un fotogramma
+        chiave all'altro, quindi aggiungerne uno a 40 secondi lo fa comparire in dissolvenza dal
+        fotogramma chiave precedente invece che di colpo.</p>
+      <p>Poi i campi propri dello strato: <strong>Cloud type</strong> (cumulo, strato,
+        stratocumulo, cirro, sconosciuto; dà forma alle sommità, e un cirro è lo strato che produce gli
+        aloni), <strong>Base</strong> e <strong>Thickness</strong> in metri sopra il terreno di
+        riferimento, <strong>Coverage</strong> come percentuale di cielo realmente coperta,
+        <strong>Cloud size</strong> come larghezza di una nuvola in metri (indipendente
+        dalla copertura, così la stessa percentuale può essere molte nuvole piccole o poche grandi),
+        <strong>Density</strong> (da 0, trasparente, a 2) e <strong>Darkness</strong> (da 0, bianca, a
+        1). <strong>Layer wind direction</strong> e <strong>Layer wind speed</strong> servono per
+        uno strato che si muove diversamente dal vento al suolo, come di solito fa quello alto; lasciate
+        vuote indicano il vento generale. <strong>Pattern seed</strong> sceglie un'altra
+        disposizione degli stessi numeri, quando quella disegnata mette una nuvola dove il resoconto dice
+        che non ce n'erano.</p>
+      <p><strong>Individual clouds</strong> serve per quella che il resoconto colloca: quella dietro cui è
+        passato il fenomeno, quella che era lì e da nessun'altra parte. <strong>Add individual cloud</strong> ne mette una nello strato, davanti a dove stai guardando, alla base dello
+        strato. È disegnata come una delle nuvole dello strato (la stessa texture, gli stessi bordi) e si
+        distingue dalle vicine solo perché sta esattamente dove dici tu, anche con la copertura dello
+        strato allo 0 %. <strong>Point at cloud</strong> gira l'osservatore verso di essa.
+        <strong>Delete cloud</strong> la rimuove.</p>
+      <p>Spunta <strong>Select and drag clouds in the sky</strong> e l'immagine stessa diventa
+        il comando: fai clic su una nuvola per selezionarla, trascinala per spostarla (nel piano che
+        ti sta di fronte, così mantiene la sua distanza mentre la sua direzione e la sua altitudine
+        seguono il puntatore, e non scende mai sotto il suolo). Togli la spunta e i clic tornano al
+        lettore. I campi numerici fanno il resto, e lo fanno con esattezza: <strong>East position</strong> e <strong>North position</strong> in metri dal punto di partenza dell'osservatore, la sua
+        <strong>Cloud base</strong>, il suo <strong>Cloud thickness</strong>, la sua <strong>Cloud width</strong>, la
+        sua <strong>Cloud depth</strong> e la sua <strong>Cloud rotation</strong>, la sua
+        <strong>Cloud density</strong> e una <strong>Darkness</strong> che, lasciata vuota, è quella dello
+        strato. Assegnale due fotogrammi chiave e deriva, cresce o si scurisce tra i due; in più, segue il
+        vento dello strato come ogni altra nuvola.</p>
+      <p>Qualsiasi modifica delle nuvole sottrae il meteo ai dati: la fonte viene tolta e nessuna
+        consultazione successiva può sovrascrivere ciò che hai impostato. Rimetti la spunta a
+        <strong>From weather records</strong> e i tre strati dei dati tornano, al posto dei tuoi.
+        L'unica eccezione è <strong>Crystal alignment</strong>, proposto solo su uno strato
+        di cirri: nessun dato meteorologico lo misura, quindi resta modificabile con ERA5 selezionato. I
+        cristalli che ruotano in modo casuale danno un anello semplice; le piastrine orizzontali e le
+        colonne che rotolano danno pareli, archi e una colonna di luce.</p>
+      <p>Sotto c'è la riga <strong>«Sky:»</strong> («Cielo:»), in sola lettura, e che non è nemmeno una
+        consultazione. Uno sciame meteorico è una posizione sull'orbita terrestre e l'orbita di una
+        cometa è un problema risolto, quindi la data e il luogo bastano a decidere entrambe. Indica
+        cos'altro c'era in quella porzione di cielo: lo sciame e il suo tasso sopra il fondo sporadico,
+        la cometa e la sua magnitudine, qualsiasi nova o supernova la cui curva di luce registrata copra
+        quella notte (il pulsante 🌟 gira l'osservatore verso di essa), se l'orbita bassa
+        era ancora illuminata dal Sole, se la Via Lattea o la luce zodiacale potevano essere viste.
+        Da febbraio 2021 nomina anche i satelliti che hanno davvero attraversato quel cielo abbastanza
+        luminosi da essere visti, il più luminoso con l'ora del suo passaggio sull'orologio
+        dell'osservatore, e dice quando alcuni formavano un treno di Starlink; il pulsante 🛰 porta la
+        testina a ogni passaggio a turno, dal più luminoso, e gira l'osservatore verso di esso. 🌠 e ☄
+        fanno lo stesso per la meteora successiva e per la cometa. Quando lo strumento arriva oltre la
+        magnitudine 9, la riga precisa che le stelle sono disegnate solo fin dove arriva il catalogo di
+        questo progetto; e un arcobaleno viene citato solo se è stata segnalata pioggia.
+        Che qualcosa di tutto ciò spieghi qualcosa è la conclusione del lettore, mai l'affermazione del
+        file.</p>
+    </div>
+
+    <div class="group-doc">
+      <h3>Sound</h3>
+      <p>Metà di ciò che rende strani questi resoconti è il suono, il più delle volte la sua assenza.
+        Un <strong>tipo</strong> (ronzio, fischio, rombo, crepitio, o nessuno), un
+        <strong>Loudness</strong> e un <strong>Pitch</strong>, con fotogrammi chiave sullo stesso
+        orologio della forma: un velivolo posato in silenzio al suolo e udito solo al decollo sono due
+        fotogrammi chiave.</p>
+      <p>Il suono è <em>sintetizzato</em> a partire da quella descrizione, esattamente come la forma è
+        disegnata a partire dalla sua, senza alcun costo di audio incluso. Una registrazione che ha
+        davvero catturato il suono può invece puntare al file audio. Nota la differenza tra i due
+        silenzi: <em>nessuno</em> significa che l'osservatore ha dichiarato di non aver sentito nulla;
+        nessuna traccia sonora significa che nessuno gliel'ha chiesto.</p>
+      <p>Volume e altezza scorrono da un fotogramma chiave al successivo; il tipo e il file audio
+        cambiano al fotogramma chiave. Un file audio su un altro sito deve essere servito a qualsiasi
+        origine (CORS), e un browser non riproduce nulla finché il lettore non ha fatto clic una volta
+        sulla pagina.</p>
+    </div>
+
+    <div class="group-doc">
+      <h3>Pictures</h3>
+      <p>Fotografie del luogo, sovrapposte alla scena per poterle confrontare. <strong>Add from an address</strong> prende un'immagine servita a qualsiasi origine (lo sono quelle dei casi di
+        rr0.org); <strong>Add a file</strong> ne incorpora una dal tuo disco nella
+        registrazione, con un'indicazione sul suo peso. Assegnale un <strong>Name</strong>, un
+        <strong>Credit</strong> e il suo link, di' se è stata scattata in un istante (<strong>Taken at</strong>)
+        dell'osservazione e se qualcuno ci ha disegnato sopra (<strong>Drawn on</strong>), e impostane
+        l'<strong>Opacity</strong> iniziale: il lettore la farà scorrere in seguito.</p>
+      <p>Finché questo gruppo è aperto, la tela appartiene alla foto selezionata, con la cornice
+        tratteggiata in blu: <strong>trascina</strong> su di essa per girarla (un trascinamento fuori
+        da essa gira ancora l'osservatore), usa la <strong>rotellina</strong> per cambiarne il campo,
+        oppure digita <strong>Heading</strong>, <strong>Pitch</strong>, <strong>Roll</strong>
+        e <strong>Vertical field</strong>, oppure premi <strong>Use the observer's pose</strong> per
+        partire da quella. Per misurare invece di andare a occhio, <strong>Add a landmark</strong> prepara due clic: un dettaglio sulla foto, poi lo stesso dettaglio nel
+        rendering. Due punti di riferimento girano la foto per farli coincidere, tre o più ne adattano
+        anche il campo; ciascuno ha un nome e un residuo, verde entro un grado, arancione entro tre,
+        rosso oltre, e ciascuna delle sue estremità si può trascinare. <strong>Adopt as the observer's pose</strong> scrive allora direzione, beccheggio e rollio adattati nella posa alla
+        testina di riproduzione, come una misura, con la sua provenienza. <strong>Street-level pictures nearby</strong> chiede a Panoramax le immagini scattate entro 300 m dal punto dell'osservatore,
+        ciascuna già allineata in direzione.</p>
+      <p>Una foto vale da un solo punto, quindi allinearla registra anche <em>da dove</em> è stata
+        allineata: la posizione dell'osservatore alla testina di riproduzione. Durante la riproduzione
+        svanisce in dissolvenza quando l'osservatore si allontana da quel punto (piena entro 2 m,
+        scomparsa oltre 20 m) e ricompare quando lui ritorna, invece di mostrare un confronto che non
+        regge più.</p>
+    </div>
+
+    <div class="group-doc">
+      <h3>Phenomenon</h3>
+      <p>L'oggetto stesso. Ovale o poligono, colore, trasparenza, alone, <strong>Brilliance</strong>
+        (quanto era abbagliante: una luce che non si riesce a guardare sbiadisce il campo intorno a sé,
+        proietta le punte create dal diaframma e satura al bianco, cosa che nessun alone fa) e
+        <strong>Blur</strong> (quanto indistinti apparivano i contorni). Più forme possono
+        condividere una stessa linea temporale (un velivolo, una fiamma che lo segue, un secondo
+        oggetto), ciascuna con il proprio nome, e possono essere raggruppate, riordinate o eliminate dal
+        menu contestuale della tela stessa.</p>
+      <p><strong>Apparent width</strong>, <strong>Real width</strong> e
+        <strong>Distance</strong> sono tre letture di una stessa relazione, tenute in accordo:
+        modificane una qualsiasi e una delle altre due la segue; quella fissata da
+        <strong>Hold</strong> non si muove mai. Solo l'angolo appartiene alla registrazione; la
+        larghezza reale ne deriva, e la distanza è quella a cui la scena disegna la forma, un'ipotesi da
+        provare e non un'affermazione. Attraverso un occhio con 60° su una tela di 360 pixel, un grado
+        corrisponde esattamente a 6 pixel e la Luna piena a circa 3; così un oggetto largo 3,5 m a 90 m
+        misura 13 pixel, non i 90 che un autore disegnerebbe senza aiuto. Sbagliare su questo è il modo
+        più comune in cui una ricostruzione finisce per essere falsa.</p>
+      <p>Quella distanza non viene mai salvata con la registrazione, e <strong>Withdraw the distance hypothesis</strong> la annulla. Una forma disegnata dentro una forma visibile più grande
+        sta alla distanza di quest'ultima, appena davanti, così una luce su un velivolo resta sul
+        velivolo.</p>
+      <p><strong>Sampling rate</strong> è quanto spesso viene letto il puntatore durante la
+        registrazione.</p>
+      <p>Queste sono le <strong>Shapes</strong> del gruppo: ciò che l'osservatore ha disegnato. I suoi
+        <strong>Bodies</strong> sono ciò che l'osservatore ha detto che quelle forme erano, in 3D: ogni
+        corpo nomina le forme che rappresenta e il modello con cui è disegnato, una forma predefinita, un
+        modello del catalogo o un file glTF a un indirizzo. L'indirizzo può essere relativo al file della
+        registrazione stessa, così un <code>sighting.json</code> e il <code>craft.gltf</code> accanto a
+        esso funzionano insieme da qualsiasi pagina; il suo credito (nome e licenza) è obbligatorio
+        prima che venga disegnato.
+        <strong>+</strong> aggiunge un corpo (e l'interpretazione, quando la registrazione non ne ha):
+        rappresenta la forma selezionata, nella sua direzione, alla distanza a cui la scena la disegna e
+        grande quanto la rende lì la sua larghezza apparente, in un unico fotogramma chiave alla testina
+        di riproduzione; sul terreno a quella distanza quando la linea di vista vi entra prima; senza
+        forma, dove l'osservatore sta guardando. 🎯 gira l'osservatore verso il corpo. Una registrazione
+        può contenere solo corpi: la sua ultima forma si può eliminare. <strong>At</strong>: alla testina di
+        riproduzione, la posizione del corpo (dall'osservatore, o nel mondo), la dimensione e l'assetto
+        sono mostrati come sono in quell'istante; modificarne uno scrive lì un fotogramma chiave, ed è
+        così che un corpo riceve il suo movimento: spostare la testina, modificare di nuovo. Un tale
+        fotogramma chiave non indica nient'altro, quindi la luce, la fiamma e le parti mobili del corpo
+        proseguono come prima. Con questa parte aperta, un corpo si può anche prendere sull'immagine
+        stessa: trascinarlo lo sposta di quanto gira il puntatore (sul rilievo quando sta al suolo, alla
+        stessa distanza quando vola), e la rotellina sopra di esso lo avvicina o lo allontana. Il
+        corpo mostrato è incorniciato da maniglie: un angolo lo ridimensiona nel suo insieme, un lato lo
+        allunga in orizzontale, la parte superiore o inferiore lo alza, e lo stelo in alto lo gira quando
+        il puntatore va a sinistra o a destra, e con Maiusc premuto lo fa beccheggiare
+        quando il puntatore sale o scende e rollare quando va di lato.
+        Tutto ciò scrive lo stesso fotogramma chiave dei campi, che mostrano dove è andato. Il movimento
+        di un corpo è indicato nel file, e mostrato qui. L'immagine disegna i corpi, con le forme
+        accanto come contorni con cui confrontarli, qualunque sia il gruppo aperto, tranne nella parte
+        Forme, dove le forme sono disegnate da sole e per intero.</p>
+    </div>
+    </div>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap prose-wide">
+    <h2>Indica qualsiasi cosa e dirà il suo nome</h2>
+    <p>Passare sopra la scena nomina ciò che sta sotto il puntatore. Una stella dà il suo nome, la sua
+      magnitudine e quanto era alta: «Venere, mag −4, 8° sopra l'orizzonte» risponde da sola a una
+      segnalazione di una luce brillante vicino all'orizzonte, dove un semplice nome non lo farebbe. Il
+      Sole, la Luna, i pianeti e qualsiasi cometa visibile quella notte rispondono allo stesso modo, e
+      così tutto ciò che è nell'ambiente: un edificio, un albero, un altro osservatore.</p>
+    <p>Ciò che il terreno nasconde non risponde. Una stella dietro una collina è invisibile quanto una
+      sotto l'orizzonte, quindi nessuna delle due viene proposta: una ricostruzione non è un elenco di
+      ciò che c'è nel cielo, è ciò che poteva essere visto da dove si trovava l'osservatore.</p>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap">
+    <h2>Regole da conoscere</h2>
+    <div class="prose-wide">
+      <ul class="plain">
+        <li><strong>Un fotogramma chiave si mantiene, non sfuma.</strong> Una forma assente da un
+          fotogramma chiave successivo resta com'era; una il cui primo fotogramma chiave è a cinque
+          secondi è già dipinta, in quello stato, da zero. Per far smettere di vedere qualcosa, dagli
+          un fotogramma chiave con trasparenza 1.</li>
+        <li><strong>Il dichiarato prevale sul dedotto.</strong> «È entrato in una nuvola» è affermato
+          dall'osservatore, mai calcolato dalla geometria: questo formato descrive un'apparenza in un
+          campo visivo, non una posizione nello spazio, quindi nulla in esso <em>può</em> sapere se una
+          nuvola si è frapposta.</li>
+        <li><strong>In pausa è in pausa.</strong> La pioggia che cade, lo scintillio delle stelle, i
+          fulmini, i riflessi dell'obiettivo, il suono ambientale: tutto si ferma con il lettore. Una
+          riproduzione in pausa è un istante di un avvistamento; un meteo che continuasse sopra di esso
+          sarebbe la tua stanza, non la serata dell'osservatore.</li>
+        <li><strong>Nulla è inventato.</strong> Dove i dati non esistono (prima del 1940 per il meteo,
+          prima del 1957 per i satelliti, prima del 2021 per gli elementi orbitali), il campo
+          resta modificabile e l'interfaccia dice quale dei due casi si applica.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap">
+    <h2>Che cosa ti consegna Esporta</h2>
+    <div class="prose-wide">
+      <p><strong>Export</strong> ti consegna un file JSON. Quel file <em>è</em> l'intera
+        registrazione: non c'è nessun account, nessun database e nessuna copia conservata qui. Ospitalo
+        dove vuoi. Ciò che contiene, campo per campo, è sulla pagina del <a href="/docs/format/">file
+        di avvistamento</a>.</p>
+      <p>Cosa farne dopo ha le sue pagine, con esempi che puoi eseguire e copiare:
+        <a href="/docs/share/">condividere un'osservazione</a>, cioè un link da inviare o due righe di
+        HTML in una tua pagina, e <a href="/docs/components/">i componenti</a>, se vuoi scegliere
+        quale carica quella pagina.</p>
     </div>
   </div>
   </section>

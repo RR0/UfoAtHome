@@ -13,13 +13,17 @@ export class DocsFormatPage extends DocsSection {
 
   readonly meta: PageMeta = {
     slug: "docs/format",
-    navLabel: { en: "The sighting file", fr: "Le fichier d'observation" },
-    title: { en: "The sighting file", fr: "Le fichier d'observation" },
+    navLabel: { en: "The sighting file", fr: "Le fichier d'observation", es: "El archivo de avistamiento", it: "Il file di avvistamento" },
+    title: { en: "The sighting file", fr: "Le fichier d'observation", es: "El archivo de avistamiento", it: "Il file di avvistamento" },
     description: {
       en: "What a recording file holds, field by field: the observation, what was seen, the weather "
         + "and its clouds, the case that lists several observers, and a whole working example to type in.",
       fr: "Ce que contient un fichier d'enregistrement, champ par champ : l'observation, ce qui a été "
-        + "vu, la météo et ses nuages, le dossier qui liste plusieurs observateurs, et un exemple entier à taper."
+        + "vu, la météo et ses nuages, le dossier qui liste plusieurs observateurs, et un exemple entier à taper.",
+      es: "Lo que contiene un archivo de grabación, campo por campo: la observación, lo que se vio, el tiempo "
+        + "y sus nubes, el caso que reúne a varios observadores, y un ejemplo completo y funcional para escribir.",
+      it: "Che cosa contiene un file di registrazione, campo per campo: l'osservazione, ciò che è stato visto, il meteo "
+        + "e le sue nuvole, il caso che elenca più osservatori, e un esempio completo e funzionante da digitare."
     },
     asideFromNav: true
   }
@@ -28,7 +32,11 @@ export class DocsFormatPage extends DocsSection {
     en: "One recording is one JSON file, whether the editor wrote it or you did. This is what it can "
       + "hold, and what each field means.",
     fr: "Un enregistrement est un fichier JSON, que l'éditeur l'ait écrit ou vous. Voici ce qu'il peut "
-      + "contenir, et ce que veut dire chaque champ."
+      + "contenir, et ce que veut dire chaque champ.",
+    es: "Una grabación es un archivo JSON, la haya escrito el editor o tú. Esto es lo que puede "
+      + "contener, y lo que significa cada campo.",
+    it: "Una registrazione è un file JSON, che l'abbia scritta l'editor o tu. Ecco che cosa può "
+      + "contenere, e che cosa significa ogni campo."
   }
 
   /** The whole of `public/demo-data/example-minimal.json`, read at build time and quoted verbatim
@@ -38,7 +46,20 @@ export class DocsFormatPage extends DocsSection {
   }
 
   render(language: SiteLanguage): string {
-    return this.hero(language, this.meta.title, this.lede) + (language === "fr" ? this.fr() : this.en())
+    return this.hero(language, this.meta.title, this.lede) + this.body(language)
+  }
+
+  private body(language: SiteLanguage): string {
+    switch (language) {
+      case "fr":
+        return this.fr()
+      case "es":
+        return this.es()
+      case "it":
+        return this.it()
+      default:
+        return this.en()
+    }
   }
 
   /**
@@ -820,6 +841,738 @@ if (excerpts.length > 0) {
     <p class="small">Cette page est la référence du format. Le raisonnement derrière chaque champ est
       dans les commentaires de documentation de son type, que les extraits ci-dessus proposent à la
       complétion, et dans le <a href="https://github.com/RR0/UfoAtHome">code source</a>.</p>
+  </div>
+</section>
+`
+  }
+
+  private es(): string {
+    return `
+<section class="band">
+  <div class="wrap prose-wide">
+    <p>Una grabación es un simple archivo JSON. Nada en ella es un blob binario, un identificador de
+      una base de datos ni una referencia a este sitio — puedes escribir una a mano, generarla desde tu
+      propio archivo, o comparar dos en una revisión de código.</p>
+    <p class="small">Cada extracto de abajo es de solo lectura, y cada uno conoce el formato: sitúa el
+      cursor dentro de un objeto y pulsa <kbd>Ctrl</kbd>+<kbd>Espacio</kbd> (<kbd>⌥</kbd>+<kbd>I</kbd> en un Mac) para
+      listar todas las claves que podrían ir allí, con lo que el modelo dice de cada una.</p>
+
+    <h2>La observación</h2>
+    <div class="table-scroll">
+    <table>
+      <tr><th>Campo</th><th>Significado</th></tr>
+      <tr><td><code>version</code></td><td>Siempre <code>1</code></td></tr>
+      <tr><td><code>id</code></td><td>Qué relato es este, único entre todas las grabaciones de cualquier parte: el día, y luego quién lo vio (<code>"1964-04-24-ZamoraLonnie"</code>), o dónde para un observador anónimo (<code>"1964-04-24-Socorro"</code>). Aquello por lo que un caso lo nombra</td></tr>
+      <tr><td><code>time</code>, <code>endTime</code></td><td><code>{ year, month, day, hour, minute, second, raw }</code>, cada parte opcional — así es como el formato expresa “1954” o “hacia las 05:00”. <code>raw</code> es la fecha tal como se escribe en <a href="https://www.loc.gov/standards/datetime/">EDTF</a>, y es lo que la fecha significa: <code>"1948-07-24T02:45~"</code> (aproximada), <code>"2025-06?"</code> (incierta), <code>"1965-07-01%"</code> (ambas cosas), <code>"19XX"</code> (un año enmascarado), o <code>"05:00"</code> solo, para una hora del día recordada sin su fecha. Los números se mantienen de acuerdo con ella para lo que se calcula (el cielo, el reloj). Es un subconjunto de EDTF (nivel 0, estos calificadores sobre la fecha entera, años enmascarados); <a href="https://www.npmjs.com/package/@rr0/time"><code>@rr0/time</code></a> es el modelo EDTF completo de RR0, al que las herramientas propias de UFO@home convierten las fechas de una grabación</td></tr>
+      <tr><td><code>durationSeconds</code></td><td>Una alternativa a <code>endTime</code>, y prevalece si se dan las dos</td></tr>
+      <tr><td><code>utcOffsetHours</code></td><td>La hora LEGAL que marcaba el reloj del observador (+1 para Francia en 1965). Si falta, se aproxima a partir de la longitud, que no puede conocer la hora legal ni un cambio de horario de verano</td></tr>
+      <tr><td><code>timeZone</code></td><td>La zona IANA de la que se derivó el desfase (<code>"Europe/Paris"</code>): la regla, mientras que <code>utcOffsetHours</code> es el número que daba en esa fecha. Solo se lee el número para situar el cielo; la zona es lo que permite derivar de nuevo el desfase cuando cambia la fecha</td></tr>
+      <tr><td><code>place</code></td><td><code>[{ lat, lng, name }]</code> — <code>name</code> es el nombre completo del lugar a partir del cual se resolvieron las coordenadas</td></tr>
+      <tr><td><code>observer</code></td><td><code>{ id, title, lastName, firstNames }</code>, todos opcionales; se omite por completo para un observador anónimo. <code>id</code> es una referencia a la persona (en RR0, su directorio: <code>"ZamoraLonnie"</code>); los demás campos la describen cuando nadie le ha dado uno</td></tr>
+      <tr><td><code>description</code></td><td>El relato en prosa — una cadena, o una por idioma (véase más abajo)</td></tr>
+      <tr><td><code>tags</code></td><td>Una lista de cadenas, escritas en inglés: son términos técnicos, y dos grabaciones que comparten uno tienen que coincidir en él. A cada lector se le muestran en su propio idioma cuando se conoce una traducción, que hoy es el caso de ${this.tags()}. La lista no está cerrada: cualquier otra se muestra tal como está escrita, y los códigos de clasificación (<code>"RR3"</code>, <code>"NL"</code>) o las referencias de caso (<code>"Blue Book 8729"</code>) se escriben tal cual. Una cambia la reproducción: <code>paralysis</code> mantiene inmóvil la vista del observador</td></tr>
+      <tr><td><code>account</code></td><td>Quién lo vio y cómo viajó el relato: <code>observerAgeYears</code> (en aquel momento), <code>observerOccupation</code>, <code>source</code> (cómo llegó a quien escribió la grabación: <code>on-site</code>, <code>interview</code>, <code>telephone</code>, <code>questionnaire</code>, <code>letter</code>, <code>press</code>) y <code>followedUp</code> (si se volvió a contactar al observador después)</td></tr>
+      <tr><td><code>milestones</code></td><td>Los momentos con nombre del relato, mostrados en la barra de reproducción: <code>[{ t, label, note }]</code>, siendo <code>label</code> la letra o el número que usa el propio relato (<code>"A"</code>, <code>"B"</code>) o un par de palabras, y <code>note</code> lo que ocurrió entonces, con las palabras del relato cuando sea posible (una cadena, o una por idioma)</td></tr>
+      <tr><td><code>roads</code></td><td>Las carreteras o caminos que dibuja el propio plano del relato, cuando el mapa no los tiene: <code>[{ id, title, surface, widthM, path, source }]</code>, siendo <code>surface</code> <code>paved</code>, <code>gravel</code> o <code>dirt</code>, <code>path</code> el eje como <code>[{ eastM, northM }]</code> desde el lugar del observador al inicio, y <code>source</code> el plano o levantamiento del que se tomó</td></tr>
+    </table>
+    </div>
+
+    <h2>Varios observadores: el caso</h2>
+    <p>Cada observador tiene su propia grabación, y una grabación no dice a qué caso
+      pertenece: un relato se sostiene por sí solo. Lo que los muestra juntos es el
+      <strong>caso</strong>, que los nombra: el
+      <code>case.json</code> de un expediente de <a href="https://rr0.org">RR0</a>, que indica el
+      título, la fecha y la clasificación del caso, y enumera todo lo que ocurrió en él como
+      <code>events</code>. Sus eventos de tipo <code>sighting</code> son sus relatos, cada uno apuntando
+      a la grabación de un observador:</p>
+    <pre data-json="none"><code>{
+  "id": "ChilesWhitted",
+  "title": "Chiles et Whitted",
+  "time": "1948-07-24 02:45",
+  "events": [
+    { "type": "event", "eventType": "sighting", "url": "observer-chiles.json" },
+    { "type": "event", "eventType": "sighting", "url": "observer-whitted.json" }
+  ]
+}</code></pre>
+    <div class="table-scroll">
+    <table>
+      <tr><th>Campo</th><th>Significado</th></tr>
+      <tr><td><code>id</code></td><td>El identificador propio del caso. En rr0.org es el directorio del expediente y puede omitirse; un archivo de caso independiente lo indica</td></tr>
+      <tr><td><code>title</code>, <code>time</code></td><td>El nombre del caso, y cuándo ocurrió tal como RR0 escribe una hora (<code>"1948-07-24 02:45"</code>, <code>"1954"</code>). El reproductor nombra un caso que abre por su título</td></tr>
+      <tr><td><code>events</code></td><td>La cronología del caso. Solo se reproducen los <code>sighting</code>, cada uno por su <code>url</code>, leída respecto a la dirección del propio archivo de caso (de modo que el mismo caso funciona desde la página de su expediente y desde cualquier otro lugar); los demás (un análisis, un artículo, una película, una confesión) son de RR0</td></tr>
+    </table>
+    </div>
+    <p>Dáselo a <code>&lt;rr0-sighting src&gt;</code> o al reproductor, y cada observador podrá
+      elegirse de una lista. Una grabación puede darse directamente, sin caso, pero un caso con un solo
+      avistamiento funciona igual y nombra lo que muestra. Pruébalo con
+      <a href="/demo-data/case-chiles-whitted.json"><code>case-chiles-whitted.json</code></a>
+      (<a href="/play/?sighting=/demo-data/case-chiles-whitted.json">reproducirlo</a>).</p>
+
+    <h2>Decirlo en más de un idioma</h2>
+    <p>Una grabación pasa de un lector a otro, así que cada campo que escribe un autor puede contener
+      una cadena por idioma en lugar de una sola: <code>description</code>, el <code>title</code> de
+      una forma o de un elemento del decorado, y el <code>label</code> y la <code>note</code> de un hito.</p>
+    <pre data-json=""><code>{
+  "description": {
+    "fr": "Tout le compte rendu de Lonnie Zamora, d'un seul tenant…",
+    "en": "Lonnie Zamora's whole account, of a piece…"
+  }
+}</code></pre>
+    <p>Las claves son etiquetas de idioma tal como las da un navegador (<code>fr</code>, <code>en</code>,
+      <code>pt-BR</code>), y ninguna es obligatoria. Una cadena simple sigue siendo perfectamente válida y
+      significa “en el idioma en que se escribiera” — lo que es toda grabación hecha antes de esto.
+      Un lector cuyos idiomas no son ninguno de los presentes recibe lo que el archivo SÍ tiene en
+      lugar de un campo vacío: una traducción que falta nunca debe convertir algo que el observador
+      dijo en algo que no dijo.</p>
+    <p>El idioma que recibe un lector es el de su navegador, salvo que la página diga otra cosa: un
+      <code>lang</code> en el propio elemento, o en cualquier cosa a su alrededor, se toma primero — un
+      artículo que declara su propio idioma ya ha dicho en qué idioma lo está leyendo su lector. La
+      lista del navegador viene después, así que declarar uno fuerza una elección sin descartar los
+      demás.</p>
+    <p>El editor muestra un idioma, el del lector, y al escribir solo toca ese —
+      así que abrir un archivo en el otro idioma y escribir es como se añade una traducción, y un
+      autor no puede borrar la de otro.</p>
+
+    <h2>Lo que se vio</h2>
+    <p><code>timeline.keyframes</code> es una lista de <code>{ t, shapes }</code>, con <code>t</code> en
+      milisegundos desde el inicio. Cada forma lleva un <code>sourceId</code> — varias formas pueden
+      compartir una línea de tiempo (el fenómeno, una llama que lo sigue, una segunda luz) — y una <code>shape</code>:</p>
+    <pre data-json="timeline.keyframes.shapes.shape"><code>{
+  "kind": "oval",
+  "bounds": { "x": 0, "y": 0, "width": 0, "height": 0 },
+  "color": "#39ff14",
+  "angle": 0,
+  "transparency": 0,
+  "haloScale": 1.5,
+  "brightness": 0,
+  "blur": 0,
+  "selected": false,
+  "title": "el fenómeno",
+  "angular": { "widthDeg": 1.2, "heightDeg": 0.4 },
+  "aim": { "azimuthDeg": 353.6, "altitudeDeg": 0.6 }
+}</code></pre>
+    <div class="table-scroll">
+    <table>
+      <tr><th>Campo</th><th>Significado</th></tr>
+      <tr><td><code>kind</code></td><td><code>oval</code>, o <code>polygon</code>, que entonces también toma <code>points</code>: <code>[{ x, y }]</code> en píxeles desde la esquina superior izquierda de <code>bounds</code>, abarcando su anchura y su altura, para que el contorno se estire con ella cuando el ángulo redimensiona la caja</td></tr>
+      <tr><td><code>title</code></td><td>Su nombre, mostrado al pasar el puntero por encima; una cadena, o una por idioma</td></tr>
+      <tr><td><code>color</code></td><td>Cualquier color CSS</td></tr>
+      <tr><td><code>angle</code></td><td>Su inclinación, en radianes alrededor de su propio centro, positiva en sentido horario en pantalla</td></tr>
+      <tr><td><code>transparency</code></td><td>De 0 opaco a 1 invisible</td></tr>
+      <tr><td><code>haloScale</code></td><td>El resplandor a su alrededor; 0 es ninguno</td></tr>
+      <tr><td><code>brightness</code></td><td>Cuánto deslumbra: un velo, las puntas del diafragma, un núcleo saturado a blanco</td></tr>
+      <tr><td><code>blur</code></td><td>Lo difusos que el observador dijo que se veían los bordes</td></tr>
+      <tr><td><code>angular</code></td><td>Su tamaño aparente en grados — véase más abajo</td></tr>
+      <tr><td><code>aim</code></td><td>Dónde estaba en el cielo del observador: la dirección de su centro, <code>azimuthDeg</code> en sentido horario desde el norte verdadero y <code>altitudeDeg</code> sobre el horizonte. No hacia dónde miraba el observador, que es el <code>headingDeg</code> y el <code>pitchDeg</code> de la pose — véase más abajo</td></tr>
+    </table>
+    </div>
+    <p><strong><code>aim</code> lo sitúa, <code>angular</code> lo dimensiona.</strong> <code>bounds</code>
+      es la proyección de ambos sobre el lienzo fijo de 640×360 con el rumbo y el campo de visión de
+      la pose, a través del propio instrumento de la grabación; se vuelve a derivar al cargar, así que
+      un archivo sobrevive a un cambio de lienzo, de campo de visión, de instrumento, o de hacia dónde
+      miraba el observador. Si los píxeles y los ángulos llegan a discrepar, ganan los ángulos: mover
+      <code>bounds</code> en un archivo no hace nada mientras <code>aim</code> esté ahí. Un archivo
+      escrito a mano puede omitir <code>bounds</code> por completo.</p>
+    <p><code>timeline.order</code> es el orden de pintado de atrás hacia delante, <code>timeline.groups</code> los
+      identificadores de fuente agrupados. Ambos opcionales.</p>
+
+    <h2>Todo lo que lo rodea</h2>
+    <div class="table-scroll">
+    <table>
+      <tr><th>Campo</th><th>Significado</th></tr>
+      <tr><td><code>observerTrack</code></td><td><code>{ keyframes: [{ t, pose }] }</code> — <code>pose</code> contiene <code>lat</code>, <code>lng</code>, <code>elevationM</code> (sobre el suelo local), <code>headingDeg</code>, <code>pitchDeg</code>, <code>rollDeg</code>, <code>fovDeg</code>, y para una cámara <code>fNumber</code> y <code>focusDistanceM</code>. Se reproduce como se mueve una persona: exactamente la pose indicada en cada fotograma clave, y entre ellos un movimiento que gana velocidad, la mantiene a través de los fotogramas clave que siguen moviéndose, y frena hasta una pausa — dos fotogramas clave con el mismo lugar, o el mismo rumbo. Una mirada empieza y acaba inmóvil; una marcha a pie o en coche ya en curso en el primer fotograma clave continúa. Detenerse y echar a andar añaden su propia sacudida, un cabeceo que se extingue en un segundo y medio, trasladado a la imagen tanto como el instrumento lo permite (apenas un ojo, del todo una cámara sostenida a mano). Y un cuerpo en reposo nunca está del todo quieto: de pie o esperando, la vista oscila unos milímetros y deriva una décima de grado, despacio, del mismo modo en el mismo instante — salvo para un observador que el relato dice que quedó paralizado (etiqueta <code>paralysis</code>)</td></tr>
+      <tr><td><code>weatherTrack</code></td><td><code>{ keyframes: [{ t, weather }] }</code> — las condiciones del cielo a lo largo de la grabación: precipitación, viento, tormenta, y las nubes como capas con alturas reales, cada una capaz de contener nubes individuales situadas en metros. Todos los campos de un <code>weather</code> están en la sección siguiente</td></tr>
+      <tr><td><code>weatherSource</code></td><td><code>{ id, name, url }</code> del registro del que se consultó el tiempo. Su presencia significa que la grabación se reproduce exactamente como se compuso y no se vuelve a consultar nunca. Si falta, es el propio relato del observador</td></tr>
+      <tr><td><code>soundTrack</code></td><td><code>{ keyframes: [{ t, sound }] }</code> — <code>kind</code> (none/hum/whistle/rumble/crackle), <code>volume</code>, <code>pitchHz</code>, y un <code>src</code> opcional de una grabación real. <code>volume</code> y <code>pitchHz</code> se deslizan entre fotogramas clave, <code>kind</code> y <code>src</code> cambian en el fotograma clave. Un <code>src</code> en otro sitio debe servirse a cualquier origen (CORS)</td></tr>
+      <tr><td><code>references</code></td><td>Imágenes del lugar superpuestas a la escena: <code>src</code> (una dirección, o una URL <code>data:</code> para una imagen añadida desde un disco), <code>kind</code> (photo/panorama), <code>registration</code> (<code>headingDeg</code>, <code>pitchDeg</code>, <code>rollDeg</code>, <code>fovDeg</code>), <code>opacity</code>, <code>credit</code>/<code>creditUrl</code>, <code>t</code> y <code>drawing</code> opcionales, <code>from</code> (<code>{ lat, lng }</code>, desde dónde se tomó: el reproductor la desvanece a medida que el observador se aleja de ese punto; si falta, nunca se desvanece), y los <code>landmarks</code> con los que se alineó (<code>id</code>, <code>label</code>, <code>picture</code> como <code>{ u, v }</code> desde la esquina superior izquierda, <code>scene</code> como <code>{ azimuthDeg, altitudeDeg }</code>)</td></tr>
+      <tr><td><code>instrument</code>, <code>exposureSeconds</code></td><td>A través de qué se observó, y cuánto tiempo estuvo abierto el obturador. Si falta, el ojo desnudo. <code>instrument</code> es uno de <code>eye</code>, <code>rectilinear-lens</code> (una cámara de marca desconocida), <code>instamatic-126</code>, <code>slr-35mm-50</code>, <code>slr-35mm-zoom</code>, <code>phone-landscape</code>, <code>phone-portrait</code>; <code>exposureSeconds</code> es un valor para toda la grabación, limitado al rango propio de ese aparato</td></tr>
+      <tr><td><code>iso</code></td><td>La sensibilidad de la película o del sensor con que se tomó la imagen, cuando se conoce: <code>400</code> para una película de 400 ISO. Si falta, la del propio aparato (el negativo en color de una réflex es 100, el de una Instamatic 64). La imagen de una cámara no responde como la de un ojo: una película no se adapta al cielo, recibe una exposición — la luz, por el tiempo de obturación, dividida por el cuadrado del número f — y responde a ella con su propia curva (la suave de un negativo, la más abrupta de una diapositiva, la línea recta de un sensor que se detiene en el blanco). Así, una pose nocturna sale con un cielo negro y lo que brillaba en él destacando</td></tr>
+      <tr><td><code>sway</code></td><td>Cuánto mueve la vista el cuerpo que sostiene el instrumento cuando no camina: <code>1</code> para una persona de pie o sentada, <code>0</code> para una cámara sobre trípode, cualquier valor intermedio o superior para menos o más. Si falta, <code>1</code> — salvo para un observador que el relato dice que quedó paralizado (etiqueta <code>paralysis</code>), para quien es <code>0</code>, y para una exposición de más de medio segundo, que ninguna mano sostiene inmóvil: eso es un trípode, y también <code>0</code></td></tr>
+      <tr><td><code>vehicle</code></td><td>El vehículo en el que iba el observador, cuando el decorado no lo dibuja: <code>{ kind, windowsOpen, noise }</code>, siendo <code>kind</code> <code>car</code>, <code>van</code>, <code>truck</code>, <code>motorcycle</code> o <code>generic</code>. Oído desde dentro: su motor sigue el propio trayecto del observador — la marcha según la velocidad, las revoluciones según la marcha, el esfuerzo según acelere o frene — con la rodadura y el viento, amortiguados por un habitáculo cerrado, dejados entrar por ventanillas abiertas; <code>noise</code> es su sonoridad frente a uno corriente de su tipo (1 por defecto)</td></tr>
+      <tr><td><code>decor</code></td><td>Decorado a unos <code>eastM</code>/<code>northM</code> reales del observador: edificios (con <code>floors</code>, <code>windows</code>), árboles, arbustos, farolas, vehículos, puentes, otros observadores, aeronaves — opcionalmente con una <code>track</code> y <code>lights</code> cuyo <code>pattern</code> lleva una cadencia de destellos real. Véase más abajo</td></tr>
+    </table>
+    </div>
+    <p>Un <strong>elemento del decorado</strong> se expresa en metros, como todo lo que no es el fenómeno:</p>
+    <div class="table-scroll">
+    <table>
+      <tr><th>Campo</th><th>Significado</th></tr>
+      <tr><td><code>eastM</code>, <code>northM</code>, <code>headingDeg</code></td><td>Dónde está respecto al observador, y hacia dónde mira su frente, en sentido horario desde el norte verdadero</td></tr>
+      <tr><td><code>sizeM</code></td><td><code>{ widthM, lengthM, heightM }</code> a lo largo de sus propios ejes, siendo la longitud el sentido hacia el que mira. Cada eje es opcional: uno que nadie midió conserva la proporción propia de la forma integrada</td></tr>
+      <tr><td><code>model</code></td><td>Un modelo 3D real en lugar de la forma integrada: una entrada del catálogo por <code>id</code>, o un archivo glTF/GLB en <code>url</code> (que prevalece, debe poder leerse desde cualquier origen, y entonces necesita su <code>credit</code>; una relativa se lee desde el archivo que la indica). Nunca decide el tamaño: se escala, conservando sus proporciones, al primer eje medido entre longitud, altura y anchura, o al tamaño real que le da el catálogo. Visto desde dentro, y siempre que no se pueda obtener el modelo, se dibuja en su lugar la forma integrada</td></tr>
+      <tr><td><code>bridge</code></td><td>Para un <code>"bridge"</code>: cómo está construido. <code>sizeM.lengthM</code> es toda su longitud a lo largo de la carretera, terraplenes incluidos, <code>widthM</code> la anchura del tablero y <code>heightM</code> la altura de la calzada sobre el tablero por encima del suelo; <code>spanM</code> es la luz libre bajo el tablero, discurriendo la carretera sobre un terraplén de tierra que desciende hasta el suelo a cada lado; <code>deckThicknessM</code> el espesor de la losa (1,2 por defecto); <code>railing</code> <code>{ heightM, postSpacingM, rails }</code> la barandilla de ambos bordes, postes y barras cuyas aberturas son rectángulos (1,05 m, 1,5 m y 2 barras por defecto). Dibujado con esas medidas, nunca estirado</td></tr>
+      <tr><td><code>track</code></td><td><code>[{ t, eastM, northM, altitudeM, headingDeg }]</code> cuando se mueve, <code>altitudeM</code> por encima del observador. La posición se interpola entre fotogramas clave; el rumbo se mantiene de uno al siguiente</td></tr>
+      <tr><td><code>lights</code></td><td>Sus luces: <code>id</code>, <code>offsetM</code> <code>{ x, y, z }</code> desde su centro (derecha, arriba, delante), <code>color</code>, <code>intensity</code> (1 es una luz de navegación corriente) y un <code>pattern</code>: <code>{ "kind": "steady" }</code>, o <code>{ "kind": "flash", perMinute, dutyCycle, phase }</code>, la cadencia tal como la establecen los reglamentos, la fracción encendida de cada ciclo (cerca de 0,5 para un intermitente de filamento, 0,01 para un estroboscopio) y un desfase de 0 a 1 entre luces. El editor las rellena a partir de ajustes predefinidos: “Airliner”, “Helicopter”, “Car, headlights on”, “Car, hazard flashers”, “Emergency vehicle beacons”, “Streetlamp”</td></tr>
+      <tr><td><code>engine</code></td><td>Un vehículo que se oye en marcha: <code>{ kind, noise }</code>, como <code>vehicle</code> más arriba. Su motor sigue su propia <code>track</code>, oído desde donde está el observador, más débil y apagado con la distancia</td></tr>
+      <tr><td><code>occludesSourceIds</code></td><td>Los fenómenos delante de los cuales el observador dijo que estaba — véanse las reglas más abajo</td></tr>
+    </table>
+    </div>
+
+    <h2>Lo que era: interpretaciones</h2>
+    <p>Una grabación expresa ángulos, y un cuerpo en metros nunca forma parte de lo que se vio. Es una
+      afirmación sobre ello, y se pone a prueba colocándola en la escena y mirándola desde donde
+      estaba el observador: proyecta su sombra, el suelo puede ocultarla, y su contorno se mide
+      en cada instante frente a lo que dijo el observador. Una interpretación se muestra sola, como el
+      mundo que afirma; si se pide comparar (el botón ◌, o <code>compare-account</code> en
+      <code>&lt;rr0-sighting&gt;</code>), el reproductor dibuja a su lado todo lo que vio el observador como
+      contornos discontinuos e indica cuánto se desvía la dirección y cuántas veces más ancho y más alto
+      parece cada cuerpo, en rojo cuando un observador no podría haberse equivocado tanto.</p>
+    <p>La lectura del propio observador va en la grabación, como <code>interpretation</code>. La de un
+      analista va en el caso, como un evento de tipo <code>interpretation</code> que nombra la
+      grabación por su <code>id</code>, con quién la sostiene en <code>by</code>
+      (<code>{ "people": id }</code>, <code>{ "org": id }</code>, o una persona descrita en el valor)
+      y sus cuerpos en línea o en un archivo en <code>url</code>. Un relato cuyo observador dijo lo que
+      era se dibuja en volumen, como lo dijo; uno que no dice nada en metros se dibuja como los
+      ángulos que expresa. El reproductor lo ofrece, junto con la interpretación de cada analista, una cada vez.</p>
+    <pre data-json="none"><code>"interpretation": {
+  "title": "Una nave posada sobre sus patas",
+  "bodies": [{
+    "id": "craft",
+    "explains": ["ufo-1"],
+    "model": { "id": "ellipsoid" },
+    "track": [
+      { "t": 52000, "eastM": -571.6, "northM": -965.5, "onGround": true,
+        "sizeM": { "widthM": 3.36, "lengthM": 3.36, "heightM": 1.73 },
+        "appearance": { "color": "#e8e6df", "albedo": 0.7 } },
+      { "t": 83000, "azimuthDeg": 195.9, "altitudeDeg": 4.1, "distanceM": 44 }
+    ]
+  }]
+}</code></pre>
+    <div class="table-scroll">
+    <table>
+      <tr><th>Campo</th><th>Significado</th></tr>
+      <tr><td><code>explains</code></td><td>Los <code>sourceId</code> de los fenómenos que este cuerpo afirma ser</td></tr>
+      <tr><td><code>model</code></td><td>Una forma construida aquí (<code>ellipsoid</code>, <code>sphere</code>, <code>disc</code>, <code>cylinder</code>, <code>cone</code>, <code>box</code>, <code>torus</code>, <code>figure</code>), un modelo del catálogo por <code>id</code>, o un archivo glTF en <code>url</code> con su <code>credit</code>; una <code>url</code> relativa se lee desde el archivo que la indica, no desde la página. Estirado a <code>sizeM</code> sea cual sea</td></tr>
+      <tr><td><code>track</code></td><td>Dónde está y qué aspecto tiene en cada <code>t</code>. Una posición se expresa o bien en el mundo (<code>eastM</code>/<code>northM</code> desde donde estaba el observador al inicio, como el decorado, con <code>onGround</code> o <code>altitudeAboveGroundM</code>) o bien desde el observador en ese instante (<code>azimuthDeg</code>, <code>altitudeDeg</code>, <code>distanceM</code>). Un cuerpo <code>onGround</code> se apoya en el relieve; una dirección sin distancia se encuentra entonces con el suelo donde lo hace esa línea. <code>sizeM</code>, <code>attitude</code> (<code>headingDeg</code>, <code>pitchDeg</code>, <code>rollDeg</code>) y <code>appearance</code> (<code>color</code>, <code>albedo</code>) se mantienen hasta que un fotograma clave posterior los vuelve a indicar. <code>present: false</code> saca el cuerpo de la escena a partir de ese fotograma clave, y <code>present: true</code> lo devuelve. Una <code>flame</code> (<code>lengthM</code>, <code>widthM</code>, <code>color</code> en la tobera, <code>tipColor</code>, <code>luminanceCdM2</code>) se enciende en el fotograma clave que la indica, sale del nodo del modelo llamado <code>exhaust</code> (o del que nombre su <code>node</code>), ilumina lo que la rodea, levanta polvo donde toca el suelo cuando <code>raisesDust</code> lo indica, y se apaga con una <code>luminanceCdM2</code> de 0</td></tr>
+      <tr><td><code>motions</code></td><td>En un fotograma clave: cuánto ha avanzado cada uno de los movimientos propios de su modelo, por el nombre del movimiento — las animaciones del archivo glTF. <code>0</code> es el inicio de un movimiento, <code>1</code> su final, y uno que se repite sigue más allá de 1: <code>{ "legs-turn": 7 }</code> son siete vueltas. El modelo dice qué se mueve y cómo; la pista dice cuándo. Cada movimiento se interpola entre los fotogramas clave que lo indican, sean cuales sean los demás fotogramas clave que muevan el cuerpo entretanto, se mantiene tras el último y vale 0 antes del primero. La partida de Valensole se escribe así: <code>{ "t": 246000, "motions": { "pivot-retract": 0 } }</code>, <code>{ "t": 248000, "motions": { "pivot-retract": 1, "legs-turn": 0 } }</code>, … <code>{ "t": 262000, "motions": { "legs-turn": 7 } }</code></td></tr>
+      <tr><td><code>lights</code></td><td>En un fotograma clave: la luminancia, en cd/m², de cada una de las luces propias de su modelo, por el nombre del material de la luz en el archivo glTF — para que un mismo cuerpo lleve luces que hacen cada una lo suyo, una blanca fija en cada extremo y una roja que destella entre ambas. El modelo dice dónde está cada luz, su tamaño y su color; la pista dice cuánto brilla y cuándo. Cada luz se interpola entre los fotogramas clave que la nombran y se mantiene tras el último, así que un encendido o apagado son dos fotogramas clave separados por un milisegundo; una luz que ningún fotograma clave nombra brilla con su parte de <code>appearance.luminanceCdM2</code>. Una luz demasiado pequeña para verse se ve por su deslumbramiento, y lo que se interponga entre ella y el ojo — el propio casco del cuerpo, un puente — la oculta. La luz roja de Silly-le-Long: <code>{ "t": 499, "lights": { "front-red": 1500 } }</code>, <code>{ "t": 500, "lights": { "front-red": 0 } }</code></td></tr>
+      <tr><td><code>outlineNode</code></td><td>El nodo del modelo que es lo que dibujó el observador (<code>"hull"</code> para una nave cuyas patas no están en el dibujo): aquello por lo que se mide su contorno</td></tr>
+      <tr><td><code>smoke</code></td><td>En la propia interpretación: lo que hace arder en el suelo, como <code>{ eastM, northM, fromT, untilT? }</code>, visto por su humo arrastrado por el viento de la grabación</td></tr>
+    </table>
+    </div>
+
+    <h2>El tiempo, y sus nubes</h2>
+    <p>Un fotograma clave <code>weather</code> expresa las condiciones del cielo en un momento del reloj
+      de la grabación; entre dos fotogramas clave cada número se interpola, y el tipo de precipitación y la
+      tormenta se mantienen. Contiene:</p>
+    <div class="table-scroll">
+    <table>
+      <tr><th>Campo</th><th>Significado</th></tr>
+      <tr><td><code>cloudLayers</code></td><td>Las nubes, como una lista de capas — véase más abajo. <strong>Si falta</strong>, las describen los campos antiguos de las filas vecinas, adaptados a una capa de agua y un velo de cirros; <strong>una lista vacía</strong> significa un cielo despejado que alguien miró</td></tr>
+      <tr><td><code>cloudCover</code>, <code>lowerCloudCover</code>, <code>highCloudCover</code></td><td>Fracciones de cielo (0–1): el total, solo las capas de agua, y solo el velo helado. Escritas por grabaciones hechas antes de que hubiera capas, y que el editor sigue manteniendo al día como resumen de ellas</td></tr>
+      <tr><td><code>cloudBaseM</code>, <code>cloudDarkness</code></td><td>La base única de esa misma época, en metros sobre el suelo de referencia, y un tono único (0 blanco, 1 muy oscuro)</td></tr>
+      <tr><td><code>iceCrystalAlignment</code></td><td>0–1, con qué regularidad caían los cristales de hielo — lo que convierte un simple anillo en parhelios, arcos y un pilar. Ningún registro lo mide; una capa de cirros lleva el suyo</td></tr>
+      <tr><td><code>relativeHumidity</code></td><td>0–1, cerca del suelo. Decide lo lechoso que es el cielo despejado: la bruma se hincha de agua a medida que el aire se acerca a la saturación. Un registro consultado la trae (a partir de la temperatura y el punto de rocío de ERA5); si falta, una bruma típica</td></tr>
+      <tr><td><code>precipitationType</code>, <code>precipitationIntensity</code></td><td>none/rain/snow/hail, y 0–1. Indicada en un fotograma clave, reproducida como cae: un chubasco empieza en el fotograma clave que lo inicia con sus primeras gotas, y no alcanza la intensidad indicada más deprisa que una lluvia real (de nada a lo más fuerte en veinte segundos); se detiene del mismo modo. Un cambio que los fotogramas clave reparten en más tiempo se sigue tal cual</td></tr>
+      <tr><td><code>windDirectionDeg</code>, <code>windSpeed</code></td><td>El viento general: el rumbo HACIA el que sopla, en sentido horario desde el norte, y metros por segundo. Es lo que arrastra las nubes — desde el instante cero, de modo que buscar y volver a reproducir dan el mismo cielo</td></tr>
+      <tr><td><code>storm</code></td><td>Relámpagos y truenos, con el retraso correcto</td></tr>
+    </table>
+    </div>
+    <p>Cada <strong>capa</strong> de <code>cloudLayers</code> es un manto de nubes a una altura real,
+      y sigue siendo ella misma de un fotograma clave al siguiente:</p>
+    <div class="table-scroll">
+    <table>
+      <tr><th>Campo</th><th>Significado</th></tr>
+      <tr><td><code>id</code></td><td>Estable entre fotogramas clave — las capas se emparejan por él, nunca por su posición en la lista. Una capa presente en un fotograma clave y ausente del siguiente se desvanece; reordenarlas no cambia nada</td></tr>
+      <tr><td><code>type</code></td><td><code>cumulus</code>, <code>stratus</code>, <code>stratocumulus</code>, <code>cirrus</code> o <code>unknown</code>. Decide la forma de las cimas y lo fino que es el velo; un cirro es además el que refracta los halos. Cambia en el fotograma clave, no se interpola</td></tr>
+      <tr><td><code>baseM</code>, <code>thicknessM</code></td><td>Metros. La base está sobre el suelo de REFERENCIA de la grabación, no sobre un observador que sube; un observador por encima de la base está dentro del manto o sobre él, y el cielo se dibuja en consecuencia</td></tr>
+      <tr><td><code>coverage</code></td><td>0–1, y significa lo que dice: la fracción del cielo que cubre esta capa, sea cual sea el tamaño de sus nubes</td></tr>
+      <tr><td><code>sizeM</code></td><td>La anchura característica de una nube, en metros. Independiente de la cobertura: la misma fracción de cielo puede ser muchas nubes pequeñas o unas pocas grandes</td></tr>
+      <tr><td><code>density</code></td><td>0–2, lo opaca que es la materia de la nube; 0 es transparente. También independiente de la cobertura</td></tr>
+      <tr><td><code>darkness</code></td><td>De 0 blanco a 1 muy oscuro. Si falta, el <code>cloudDarkness</code> del fotograma clave</td></tr>
+      <tr><td><code>seed</code></td><td>Qué patrón, de entre los infinitos que los mismos números pueden dibujar. Si falta, uno derivado del id, y por eso el id no debe cambiar</td></tr>
+      <tr><td><code>windDirectionDeg</code>, <code>windSpeed</code></td><td>El viento propio de esta capa, cuando difiere del general — la capa alta suele hacerlo. Si falta, el viento general</td></tr>
+      <tr><td><code>iceCrystalAlignment</code></td><td>Solo para un cirro</td></tr>
+      <tr><td><code>instances</code></td><td>Nubes individuales dentro de esta capa — véase más abajo</td></tr>
+    </table>
+    </div>
+    <p>Una <strong>nube individual</strong> en <code>instances</code> es una nube de su capa que el
+      archivo sitúa con exactitud, porque el relato lo hizo: aquella tras la que pasó el fenómeno, la que
+      estaba allí y en ningún otro sitio. Se dibuja como una más de su capa — la misma textura, el mismo
+      umbral —, sin distinguirse de sus vecinas más que por dónde está y lo grande que es,
+      y está ahí incluso cuando la <code>coverage</code> de la capa es nula. Se desplaza con el viento de
+      la capa como las demás, y oculta un fenómeno ante el que pasa.</p>
+    <div class="table-scroll">
+    <table>
+      <tr><th>Campo</th><th>Significado</th></tr>
+      <tr><td><code>id</code></td><td>Estable entre fotogramas clave, misma regla que para una capa</td></tr>
+      <tr><td><code>eastM</code>, <code>northM</code></td><td>Dónde estaba su centro en el instante cero, en metros desde el punto de partida del observador. El viento la arrastra desde allí</td></tr>
+      <tr><td><code>baseM</code>, <code>thicknessM</code></td><td>Su propia base y su propia altura, en metros — una nube puede estar más baja o alzarse más que su manto</td></tr>
+      <tr><td><code>widthM</code>, <code>depthM</code>, <code>rotationDeg</code></td><td>Su huella, en metros, y el rumbo hacia el que está girada esa huella</td></tr>
+      <tr><td><code>density</code>, <code>darkness</code></td><td>Las suyas propias; si falta la oscuridad, la de la capa</td></tr>
+    </table>
+    </div>
+    <pre data-json="weatherTrack.keyframes"><code>{
+  "weather": {
+    "cloudLayers": [
+      {
+        "id": "low", "type": "cumulus",
+        "baseM": 1500, "thicknessM": 800,
+        "coverage": 0.55, "sizeM": 1400, "density": 1, "darkness": 0.15,
+        "instances": [
+          { "id": "the-one", "eastM": 0, "northM": 4200,
+            "baseM": 1500, "thicknessM": 800,
+            "widthM": 1900, "depthM": 1300, "rotationDeg": 12, "density": 1 }
+        ]
+      },
+      { "id": "high", "type": "cirrus", "baseM": 8000, "thicknessM": 400,
+        "coverage": 0.2, "sizeM": 2200, "density": 0.35, "iceCrystalAlignment": 0.65 }
+    ],
+    "precipitationType": "none", "precipitationIntensity": 0,
+    "windDirectionDeg": 90, "windSpeed": 5, "storm": false
+  }
+}</code></pre>
+    <p>Una grabación cuyo tiempo fue <strong>consultado</strong> (tiene un <code>weatherSource</code>)
+      guarda la respuesta del registro, no un enlace a él: ERA5 da las bandas baja, media y alta como tres
+      capas llamadas <code>record-low</code>, <code>record-mid</code> y <code>record-high</code>, la
+      base baja estimada a partir de la diferencia entre temperatura y punto de rocío, las otras dos a 3 500 m
+      y 8 000 m. Su tipo es <code>unknown</code> (cirro para la alta), su tamaño y su densidad
+      son supuestos de dibujo: un reanálisis sabe qué parte de cada banda estaba cubierta, no qué aspecto
+      tenían las nubes. Vuelve a pedir el registro desde el editor y las capas se reescriben; edita
+      una capa a mano y la grabación pasa a ser del autor, y la fuente se elimina.</p>
+
+    <h2>De dónde viene cada valor</h2>
+    <p>Cualquier valor de una grabación puede escribirse tal cual, o envuelto con su procedencia:</p>
+    <pre data-json="none"><code>"durationSeconds": {
+  "value": 15,
+  "basis": "derived",
+  "rationale": "De 13 a 18 s en la síntesis del investigador; se toma el punto medio"
+}</code></pre>
+    <p><code>basis</code> es <code>stated</code> (lo dijo el observador, y es lo que significa un valor
+      sin envolver), <code>derived</code> (deducido de lo que dijo más algo comprobable: la anchura de una
+      carretera, un mapa, un dibujo medido; <code>rationale</code> da el razonamiento) o
+      <code>assumed</code> (elegido para que la reconstrucción tenga un valor, sin base en nada de lo que
+      dijo el observador). La lista de valores <code>assumed</code> es la lista de lo que hay que volver a
+      preguntar al observador o buscar en el expediente, y por eso vale la pena escribirla incluso cuando no se escribe nada más.</p>
+
+    <h2>Comprobar un archivo</h2>
+    <p>El formato se publica también como <a href="/sighting.schema.json">JSON Schema</a>,
+      generado a partir de los mismos tipos que el reproductor: todas las claves que conoce, lo que puede
+      contener cada una, y las palabras que acepta una lista cerrada. Una clave mal escrita o un valor
+      desconocido no lo superan. No dice nada de lo que puede omitirse, que es una cuestión de sentido que
+      responde esta página. Para ver el resultado, abre el archivo en <a href="/play/">el reproductor</a>,
+      desde un enlace, pegándolo, o desde tu disco con las imágenes y los modelos que nombra. El reproductor
+      lo comprueba del mismo modo al cargar, e indica tras un ⚠ sobre la imagen lo que no pudo reproducir
+      tal como está escrito: una clave que nada lee, una palabra fuera de su lista, y lo que tuvo que
+      inventar porque el primer fotograma clave de una forma lo omitía (un campo mantenido desde el
+      fotograma clave anterior es la regla de arriba, no un problema).</p>
+
+    <h2>Un archivo completo</h2>
+    <p>La grabación más pequeña que aún expresa algo — un óvalo silencioso que cruza el cielo en
+      doce segundos, en una fecha real y en un lugar real. Todo lo demás del formato es opcional, y
+      todo lo que sigue cumple una función:</p>
+    <pre data-json=""><code>${this.escape(this.example)}</code></pre>
+    <p class="small">Para modificarlo y verlo reproducirse, pégalo en <a href="/play/">el reproductor</a>,
+      cuyo editor completa cada clave que tiene el formato, ofrece las palabras que acepta cada una, y
+      dice lo que el modelo dice de ella.</p>
+    <p>Es <a href="/demo-data/example-minimal.json"><code>/demo-data/example-minimal.json</code></a>
+      en este sitio, así que puedes descargarlo, y
+      <a href="/play/?sighting=/demo-data/example-minimal.json">reproducirlo</a> antes de cambiar
+      nada. Observa que aparecen tanto <code>angular</code> como <code>bounds</code>: el ángulo es lo que
+      el archivo SIGNIFICA, y los píxeles se vuelven a derivar de él al cargar — escribe el ángulo, y deja
+      que se te corrija una estimación errónea de los píxeles.</p>
+
+    <h2>Otros más grandes para leer</h2>
+    <p>Cada demo de este sitio es un simple archivo que puedes abrir. Estos cuatro son los que vale la
+      pena leer para ver cómo se construye una grabación real:</p>
+    <div class="table-scroll">
+    <table>
+      <tr><th>Archivo</th><th>Qué mirar en él</th></tr>
+      <tr><td><a href="/demo-data/observer-chiles.json"><code>observer-chiles.json</code></a></td><td>Un caso real: un observador, un id de caso compartido con una segunda grabación, diez fotogramas clave, un <code>weatherTrack</code> consultado con su <code>weatherSource</code></td></tr>
+      <tr><td><a href="/demo-data/sky-test-halos.json"><code>sky-test-halos.json</code></a></td><td>Ningún fenómeno — un cielo preparado por un <code>weatherTrack</code> cuyos fotogramas clave cambian la alineación de los cristales, la cobertura de cirros y un manto de cúmulos, contemplado a través de un <code>observerTrack</code> que recorre el conjunto y luego se detiene</td></tr>
+      <tr><td><a href="/demo-data/sky-test-clouds.json"><code>sky-test-clouds.json</code></a></td><td>Tres capas de nubes con altitud, espesor, tamaño, densidad y viento en metros, evolucionando en la línea de tiempo meteorológica — y en la primera una entrada <code>instances</code>: una nube del campo, situada y dimensionada en metros, que crece y se oscurece a lo largo de los dos minutos</td></tr>
+      <tr><td><a href="/demo-data/sky-test-aircraft.json"><code>sky-test-aircraft.json</code></a></td><td>Un <code>instrument</code>, un <code>exposureSeconds</code> y un <code>iso</code>, y una aeronave de <code>decor</code> con una <code>track</code> y nueve <code>lights</code> a sus cadencias de destello reales, luces de aterrizaje incluidas</td></tr>
+      <tr><td><a href="/demo-data/instrument-instamatic.json"><code>instrument-instamatic.json</code></a></td><td>El mismo avistamiento que <code>observer-socorro.json</code>, cambiado en un solo campo. Compara los dos</td></tr>
+    </table>
+    </div>
+
+    <h2>Cuatro reglas que deciden lo que significa un archivo</h2>
+    <ul class="plain">
+      <li><strong>Los campos discretos se mantienen, los continuos se interpolan.</strong> Una forma omitida en
+        un fotograma clave posterior se queda como estaba, y lo mismo cualquier campo que un fotograma clave omita en una forma
+        que sí vuelve a indicar: un fotograma clave que solo da un nuevo <code>aim</code> mueve la forma y conserva
+        todo lo demás (volver a indicar <code>bounds</code> sin <code>aim</code> ni
+        <code>angular</code> se entiende como moverla por sus píxeles); una cuyo primer fotograma clave está a los cinco segundos ya está
+        pintada, en ese estado, desde cero. Para que algo deje de ser visible, ponle un fotograma clave con
+        <code>transparency: 1</code>.</li>
+      <li><strong>Solo ángulos.</strong> No se guarda en ninguna parte ningún tamaño real ni ninguna distancia real. Los metros
+        se deducen, como desigualdades, de aquello por detrás o por delante de lo cual se dijo que pasó el fenómeno
+        (<code>decor[].occludesSourceIds</code>).</li>
+      <li><strong>Lo declarado prevalece sobre lo deducido.</strong> <code>occludesSourceIds</code> registra afirmaciones del observador. Nada en este formato
+        <em>puede</em> deducirlas: describe una apariencia en un campo de visión, no una posición en
+        el espacio.</li>
+      <li><strong>Ausente no es cero.</strong> Que no haya pista de sonido significa que nadie preguntó;
+        <code>kind: "none"</code> significa que el observador declaró no haber oído nada. La misma distinción
+        recorre el tiempo y la nube de hielo.</li>
+    </ul>
+    <p class="small">Esta página es la referencia del formato. El razonamiento detrás de cada campo está en
+      los comentarios de documentación de su tipo, con los que completan los extractos de arriba, y en el
+      <a href="https://github.com/RR0/UfoAtHome">código fuente</a>.</p>
+  </div>
+</section>
+`
+  }
+
+  private it(): string {
+    return `
+<section class="band">
+  <div class="wrap prose-wide">
+    <p>Una registrazione è un semplice file JSON. Niente al suo interno è un blob binario, un
+      identificativo in un database o un riferimento a questo sito — puoi scriverne una a mano,
+      generarla dal tuo archivio, o confrontarne due in una revisione del codice.</p>
+    <p class="small">Ogni estratto qui sotto è in sola lettura, e ognuno conosce il formato: metti il
+      cursore dentro un oggetto e premi <kbd>Ctrl</kbd>+<kbd>Spazio</kbd> (<kbd>⌥</kbd>+<kbd>I</kbd> su Mac) per
+      elencare tutte le chiavi che potrebbero stare lì, con ciò che il modello dice di ciascuna.</p>
+
+    <h2>L'osservazione</h2>
+    <div class="table-scroll">
+    <table>
+      <tr><th>Campo</th><th>Significato</th></tr>
+      <tr><td><code>version</code></td><td>Sempre <code>1</code></td></tr>
+      <tr><td><code>id</code></td><td>Quale resoconto è, unico fra tutte le registrazioni ovunque: il giorno, poi chi l'ha visto (<code>"1964-04-24-ZamoraLonnie"</code>), o il luogo per un osservatore anonimo (<code>"1964-04-24-Socorro"</code>). Ciò con cui un caso lo designa</td></tr>
+      <tr><td><code>time</code>, <code>endTime</code></td><td><code>{ year, month, day, hour, minute, second, raw }</code>, ogni parte facoltativa — è così che il formato esprime “1954” o “verso le 05:00”. <code>raw</code> è la data come scritta in <a href="https://www.loc.gov/standards/datetime/">EDTF</a>, ed è ciò che la data significa: <code>"1948-07-24T02:45~"</code> (approssimativa), <code>"2025-06?"</code> (incerta), <code>"1965-07-01%"</code> (entrambe le cose), <code>"19XX"</code> (un anno mascherato), oppure <code>"05:00"</code> da solo per un'ora del giorno ricordata senza la sua data. I numeri sono tenuti in accordo con essa per ciò che si calcola (il cielo, l'orologio). È un sottoinsieme di EDTF (livello 0, questi qualificatori sull'intera data, anni mascherati); <a href="https://www.npmjs.com/package/@rr0/time"><code>@rr0/time</code></a> è il modello EDTF completo di RR0, in cui gli strumenti propri di UFO@home convertono le date di una registrazione</td></tr>
+      <tr><td><code>durationSeconds</code></td><td>Un'alternativa a <code>endTime</code>, e prevale se sono date entrambe</td></tr>
+      <tr><td><code>utcOffsetHours</code></td><td>L'ora LEGALE su cui era regolato l'orologio dell'osservatore (+1 per la Francia nel 1965). Se manca, viene approssimata dalla longitudine, che non può conoscere l'ora legale né un passaggio all'ora estiva</td></tr>
+      <tr><td><code>timeZone</code></td><td>Il fuso IANA da cui è stato ricavato lo scarto (<code>"Europe/Paris"</code>): la regola, mentre <code>utcOffsetHours</code> è il numero che dava a quella data. Per collocare il cielo si legge solo il numero; il fuso è ciò che permette di ricavare di nuovo lo scarto quando la data cambia</td></tr>
+      <tr><td><code>place</code></td><td><code>[{ lat, lng, name }]</code> — <code>name</code> è il nome completo del luogo da cui sono state risolte le coordinate</td></tr>
+      <tr><td><code>observer</code></td><td><code>{ id, title, lastName, firstNames }</code>, tutti facoltativi; da omettere del tutto per un osservatore anonimo. <code>id</code> è un riferimento alla persona (su RR0, la sua directory: <code>"ZamoraLonnie"</code>); gli altri campi la descrivono quando nessuno gliene ha ancora dato uno</td></tr>
+      <tr><td><code>description</code></td><td>Il resoconto in prosa — una stringa, o una per lingua (vedi sotto)</td></tr>
+      <tr><td><code>tags</code></td><td>Un elenco di stringhe, scritte in inglese: sono termini tecnici, e due registrazioni che ne condividono uno devono coincidere su di esso. A ogni lettore vengono mostrati nella sua lingua quando se ne conosce una traduzione, come avviene oggi per ${this.tags()}. L'elenco non è chiuso: qualsiasi altro viene mostrato come è scritto, e i codici di classificazione (<code>"RR3"</code>, <code>"NL"</code>) o i riferimenti di caso (<code>"Blue Book 8729"</code>) si scrivono così come sono. Uno cambia la riproduzione: <code>paralysis</code> tiene immobile la vista dell'osservatore</td></tr>
+      <tr><td><code>account</code></td><td>Chi l'ha visto e come ha viaggiato il resoconto: <code>observerAgeYears</code> (all'epoca), <code>observerOccupation</code>, <code>source</code> (come è arrivato a chi ha scritto la registrazione: <code>on-site</code>, <code>interview</code>, <code>telephone</code>, <code>questionnaire</code>, <code>letter</code>, <code>press</code>) e <code>followedUp</code> (se l'osservatore è stato ricontattato in seguito)</td></tr>
+      <tr><td><code>milestones</code></td><td>I momenti con un nome del resoconto, mostrati sulla barra di riproduzione: <code>[{ t, label, note }]</code>, dove <code>label</code> è la lettera o il numero che usa il resoconto stesso (<code>"A"</code>, <code>"B"</code>) o un paio di parole, e <code>note</code> ciò che è accaduto allora, con le parole del resoconto quando possibile (una stringa, o una per lingua)</td></tr>
+      <tr><td><code>roads</code></td><td>Le strade o i sentieri che disegna la pianta del resoconto stesso, quando la mappa non li ha: <code>[{ id, title, surface, widthM, path, source }]</code>, dove <code>surface</code> è <code>paved</code>, <code>gravel</code> o <code>dirt</code>, <code>path</code> la linea mediana come <code>[{ eastM, northM }]</code> dal luogo dell'osservatore all'inizio, e <code>source</code> la pianta o il rilievo da cui è stata ricavata</td></tr>
+    </table>
+    </div>
+
+    <h2>Più osservatori: il caso</h2>
+    <p>Ogni osservatore ha una registrazione propria, e una registrazione non dice a quale caso
+      appartiene: un resoconto sta in piedi da solo. Ciò che li mostra insieme è il
+      <strong>caso</strong>, che li nomina: il
+      <code>case.json</code> di un fascicolo <a href="https://rr0.org">RR0</a>, che indica il
+      titolo, la data e la classificazione del caso, ed elenca tutto ciò che vi è accaduto come
+      <code>events</code>. I suoi eventi di tipo <code>sighting</code> sono i suoi resoconti, ciascuno dei quali
+      punta alla registrazione di un osservatore:</p>
+    <pre data-json="none"><code>{
+  "id": "ChilesWhitted",
+  "title": "Chiles et Whitted",
+  "time": "1948-07-24 02:45",
+  "events": [
+    { "type": "event", "eventType": "sighting", "url": "observer-chiles.json" },
+    { "type": "event", "eventType": "sighting", "url": "observer-whitted.json" }
+  ]
+}</code></pre>
+    <div class="table-scroll">
+    <table>
+      <tr><th>Campo</th><th>Significato</th></tr>
+      <tr><td><code>id</code></td><td>L'identificativo proprio del caso. Su rr0.org è la directory del fascicolo e può essere omesso; un file di caso a sé stante lo indica</td></tr>
+      <tr><td><code>title</code>, <code>time</code></td><td>Il nome del caso, e quando è avvenuto come RR0 scrive un'ora (<code>"1948-07-24 02:45"</code>, <code>"1954"</code>). Il lettore designa un caso che apre con il suo titolo</td></tr>
+      <tr><td><code>events</code></td><td>La cronologia del caso. Vengono riprodotti solo i <code>sighting</code>, ciascuno tramite il suo <code>url</code>, letto rispetto all'indirizzo del file di caso stesso (così lo stesso caso funziona dalla pagina del suo fascicolo e da qualsiasi altro luogo); gli altri (un'analisi, un articolo, un filmato, una confessione) sono di RR0</td></tr>
+    </table>
+    </div>
+    <p>Dallo a <code>&lt;rr0-sighting src&gt;</code> o al lettore, e ogni osservatore potrà essere
+      scelto da un elenco. Una registrazione può essere data direttamente, senza caso, ma un caso con un solo
+      avvistamento funziona allo stesso modo e nomina ciò che mostra. Provalo con
+      <a href="/demo-data/case-chiles-whitted.json"><code>case-chiles-whitted.json</code></a>
+      (<a href="/play/?sighting=/demo-data/case-chiles-whitted.json">riproducilo</a>).</p>
+
+    <h2>Dirlo in più di una lingua</h2>
+    <p>Una registrazione passa da un lettore all'altro, quindi ogni campo scritto da un autore può contenere
+      una stringa per lingua invece di una sola: <code>description</code>, il <code>title</code> di una forma
+      o di un elemento dello scenario, e il <code>label</code> e la <code>note</code> di una tappa.</p>
+    <pre data-json=""><code>{
+  "description": {
+    "fr": "Tout le compte rendu de Lonnie Zamora, d'un seul tenant…",
+    "en": "Lonnie Zamora's whole account, of a piece…"
+  }
+}</code></pre>
+    <p>Le chiavi sono etichette di lingua come le fornisce un browser (<code>fr</code>, <code>en</code>,
+      <code>pt-BR</code>), e nessuna è obbligatoria. Una stringa semplice resta perfettamente valida e
+      significa “nella lingua in cui è stata scritta” — come ogni registrazione fatta prima di questo.
+      Un lettore le cui lingue non sono nessuna di quelle presenti riceve ciò che il file HA invece
+      di un campo vuoto: una traduzione mancante non deve mai trasformare qualcosa che l'osservatore
+      ha detto in qualcosa che non ha detto.</p>
+    <p>La lingua che riceve un lettore è quella del suo browser, a meno che la pagina non dica altrimenti: un
+      <code>lang</code> sull'elemento stesso, o su qualsiasi cosa intorno a esso, viene preso per primo — un
+      articolo che dichiara la propria lingua ha già detto in quale lingua il suo lettore lo sta leggendo.
+      L'elenco del browser viene dopo, quindi dichiararne una impone una scelta senza scartare le
+      altre.</p>
+    <p>L'editor mostra una sola lingua, quella del lettore, e scrivendo tocca solo quella —
+      quindi aprire un file nell'altra lingua e scrivere è il modo in cui si aggiunge una traduzione, e un
+      autore non può cancellare quella di un altro.</p>
+
+    <h2>Ciò che è stato visto</h2>
+    <p><code>timeline.keyframes</code> è un elenco di <code>{ t, shapes }</code>, con <code>t</code> in
+      millisecondi dall'inizio. Ogni forma porta un <code>sourceId</code> — più forme possono
+      condividere una linea temporale (il fenomeno, una fiamma che lo segue, una seconda luce) — e una <code>shape</code>:</p>
+    <pre data-json="timeline.keyframes.shapes.shape"><code>{
+  "kind": "oval",
+  "bounds": { "x": 0, "y": 0, "width": 0, "height": 0 },
+  "color": "#39ff14",
+  "angle": 0,
+  "transparency": 0,
+  "haloScale": 1.5,
+  "brightness": 0,
+  "blur": 0,
+  "selected": false,
+  "title": "il fenomeno",
+  "angular": { "widthDeg": 1.2, "heightDeg": 0.4 },
+  "aim": { "azimuthDeg": 353.6, "altitudeDeg": 0.6 }
+}</code></pre>
+    <div class="table-scroll">
+    <table>
+      <tr><th>Campo</th><th>Significato</th></tr>
+      <tr><td><code>kind</code></td><td><code>oval</code>, oppure <code>polygon</code>, che allora prende anche <code>points</code>: <code>[{ x, y }]</code> in pixel dall'angolo in alto a sinistra di <code>bounds</code>, estesi sulla sua larghezza e altezza, così che il contorno si allunghi con esso quando l'angolo ridimensiona il riquadro</td></tr>
+      <tr><td><code>title</code></td><td>Il suo nome, mostrato quando il puntatore ci passa sopra; una stringa, o una per lingua</td></tr>
+      <tr><td><code>color</code></td><td>Qualsiasi colore CSS</td></tr>
+      <tr><td><code>angle</code></td><td>La sua inclinazione, in radianti attorno al proprio centro, positiva in senso orario sullo schermo</td></tr>
+      <tr><td><code>transparency</code></td><td>Da 0 opaco a 1 invisibile</td></tr>
+      <tr><td><code>haloScale</code></td><td>Il bagliore intorno; 0 per nessuno</td></tr>
+      <tr><td><code>brightness</code></td><td>Quanto abbaglia: un velo, le punte del diaframma, un nucleo saturato al bianco</td></tr>
+      <tr><td><code>blur</code></td><td>Quanto indistinti l'osservatore ha detto che apparivano i bordi</td></tr>
+      <tr><td><code>angular</code></td><td>La sua dimensione apparente in gradi — vedi sotto</td></tr>
+      <tr><td><code>aim</code></td><td>Dove si trovava nel cielo dell'osservatore: la direzione del suo centro, <code>azimuthDeg</code> in senso orario dal nord vero e <code>altitudeDeg</code> sopra l'orizzonte. Non la direzione in cui guardava l'osservatore, che è l'<code>headingDeg</code> e il <code>pitchDeg</code> della posa — vedi sotto</td></tr>
+    </table>
+    </div>
+    <p><strong><code>aim</code> lo colloca, <code>angular</code> lo dimensiona.</strong> <code>bounds</code>
+      è la proiezione di entrambi sulla tela fissa di 640×360 con la direzione e il campo visivo della
+      posa, attraverso lo strumento della registrazione stessa; viene ricavato di nuovo al caricamento, così
+      un file sopravvive a un cambiamento di tela, di campo visivo, di strumento, o di dove guardava
+      l'osservatore. Se i pixel e gli angoli dovessero divergere, vincono gli angoli: spostare
+      <code>bounds</code> in un file non ha effetto finché c'è <code>aim</code>. Un file scritto a mano
+      può omettere <code>bounds</code> del tutto.</p>
+    <p><code>timeline.order</code> è l'ordine di disegno da dietro in avanti, <code>timeline.groups</code> gli
+      identificativi di sorgente raggruppati. Entrambi facoltativi.</p>
+
+    <h2>Tutto ciò che c'è intorno</h2>
+    <div class="table-scroll">
+    <table>
+      <tr><th>Campo</th><th>Significato</th></tr>
+      <tr><td><code>observerTrack</code></td><td><code>{ keyframes: [{ t, pose }] }</code> — <code>pose</code> contiene <code>lat</code>, <code>lng</code>, <code>elevationM</code> (sopra il suolo locale), <code>headingDeg</code>, <code>pitchDeg</code>, <code>rollDeg</code>, <code>fovDeg</code>, e per una fotocamera <code>fNumber</code> e <code>focusDistanceM</code>. Riprodotto come si muove una persona: esattamente la posa indicata a ogni fotogramma chiave, e fra l'uno e l'altro un movimento che prende velocità, la mantiene attraverso i fotogrammi chiave che continuano a muoversi, e rallenta fino a una pausa — due fotogrammi chiave con lo stesso luogo, o la stessa direzione. Uno sguardo inizia e finisce fermo; una camminata o un tragitto in auto già in corso al primo fotogramma chiave prosegue. Fermarsi e ripartire a piedi aggiungono il loro sobbalzo, un cenno del capo che si spegne in un secondo e mezzo, trasferito nell'immagine quanto lo strumento lo lascia passare (appena per un occhio, del tutto per una fotocamera tenuta in mano). E un corpo a riposo non è mai del tutto immobile: in piedi o in attesa, la vista oscilla di qualche millimetro e deriva di un decimo di grado, lentamente, allo stesso modo nello stesso istante — tranne per un osservatore che il resoconto dice paralizzato (tag <code>paralysis</code>)</td></tr>
+      <tr><td><code>weatherTrack</code></td><td><code>{ keyframes: [{ t, weather }] }</code> — le condizioni del cielo lungo la registrazione: precipitazioni, vento, temporale, e le nuvole come strati ad altezze reali, ognuno in grado di contenere nuvole singole collocate in metri. Ogni campo di un <code>weather</code> è nella sezione seguente</td></tr>
+      <tr><td><code>weatherSource</code></td><td><code>{ id, name, url }</code> del dato da cui è stato ricavato il meteo. La sua presenza significa che la registrazione viene riprodotta esattamente come è stata composta e non viene mai più consultata. Se manca, è il resoconto dell'osservatore stesso</td></tr>
+      <tr><td><code>soundTrack</code></td><td><code>{ keyframes: [{ t, sound }] }</code> — <code>kind</code> (none/hum/whistle/rumble/crackle), <code>volume</code>, <code>pitchHz</code>, e un <code>src</code> facoltativo di una registrazione reale. <code>volume</code> e <code>pitchHz</code> scorrono fra i fotogrammi chiave, <code>kind</code> e <code>src</code> cambiano al fotogramma chiave. Un <code>src</code> su un altro sito deve essere servito a qualsiasi origine (CORS)</td></tr>
+      <tr><td><code>references</code></td><td>Immagini del luogo sovrapposte alla scena: <code>src</code> (un indirizzo, o un URL <code>data:</code> per un'immagine aggiunta da un disco), <code>kind</code> (photo/panorama), <code>registration</code> (<code>headingDeg</code>, <code>pitchDeg</code>, <code>rollDeg</code>, <code>fovDeg</code>), <code>opacity</code>, <code>credit</code>/<code>creditUrl</code>, <code>t</code> e <code>drawing</code> facoltativi, <code>from</code> (<code>{ lat, lng }</code>, dove è stata scattata: il lettore la dissolve man mano che l'osservatore si allontana da quel punto; se manca, non si dissolve mai), e i <code>landmarks</code> su cui è stata allineata (<code>id</code>, <code>label</code>, <code>picture</code> come <code>{ u, v }</code> dall'angolo in alto a sinistra, <code>scene</code> come <code>{ azimuthDeg, altitudeDeg }</code>)</td></tr>
+      <tr><td><code>instrument</code>, <code>exposureSeconds</code></td><td>Attraverso che cosa è stato osservato, e per quanto tempo è rimasto aperto l'otturatore. Se manca, l'occhio nudo. <code>instrument</code> è uno fra <code>eye</code>, <code>rectilinear-lens</code> (una fotocamera di marca sconosciuta), <code>instamatic-126</code>, <code>slr-35mm-50</code>, <code>slr-35mm-zoom</code>, <code>phone-landscape</code>, <code>phone-portrait</code>; <code>exposureSeconds</code> è un unico valore per tutta la registrazione, contenuto nell'intervallo proprio di quel dispositivo</td></tr>
+      <tr><td><code>iso</code></td><td>La sensibilità della pellicola o del sensore su cui è stata scattata l'immagine, quando è nota: <code>400</code> per una pellicola da 400 ISO. Se manca, quella del dispositivo stesso (il negativo a colori di una reflex è 100, quello di una Instamatic 64). L'immagine di una fotocamera non risponde come quella di un occhio: una pellicola non si adatta al cielo, riceve un'esposizione — la luce, per il tempo di otturazione, divisa per il quadrato del numero f — e vi risponde con la propria curva (quella morbida di un negativo, quella più ripida di una diapositiva, la linea retta di un sensore che si ferma al bianco). Così una posa notturna esce con un cielo nero e ciò che vi brillava in risalto</td></tr>
+      <tr><td><code>sway</code></td><td>Quanto il corpo che tiene lo strumento muove la vista quando non cammina: <code>1</code> per una persona in piedi o seduta, <code>0</code> per una fotocamera su treppiede, qualsiasi valore intermedio o superiore per meno o per più. Se manca, <code>1</code> — tranne per un osservatore che il resoconto dice paralizzato (tag <code>paralysis</code>), per cui è <code>0</code>, e per un'esposizione più lunga di mezzo secondo, che nessuna mano tiene ferma: quello è un treppiede, e anche <code>0</code></td></tr>
+      <tr><td><code>vehicle</code></td><td>Il veicolo in cui si trovava l'osservatore, quando lo scenario non lo disegna: <code>{ kind, windowsOpen, noise }</code>, dove <code>kind</code> è <code>car</code>, <code>van</code>, <code>truck</code>, <code>motorcycle</code> o <code>generic</code>. Sentito dall'interno: il suo motore segue il tragitto dell'osservatore stesso — la marcia dalla velocità, i giri dalla marcia, lo sforzo dall'accelerare o dal rallentare — con il rotolamento e il vento, attutiti da un abitacolo chiuso, lasciati entrare da finestrini aperti; <code>noise</code> è il suo livello sonoro rispetto a uno ordinario del suo tipo (1 per impostazione predefinita)</td></tr>
+      <tr><td><code>decor</code></td><td>Scenario a <code>eastM</code>/<code>northM</code> reali dall'osservatore: edifici (con <code>floors</code>, <code>windows</code>), alberi, arbusti, lampioni, veicoli, ponti, altri osservatori, aeromobili — facoltativamente con una <code>track</code> e delle <code>lights</code> il cui <code>pattern</code> porta una cadenza di lampeggio reale. Vedi sotto</td></tr>
+    </table>
+    </div>
+    <p>Un <strong>elemento dello scenario</strong> si esprime in metri, come tutto ciò che non è il fenomeno:</p>
+    <div class="table-scroll">
+    <table>
+      <tr><th>Campo</th><th>Significato</th></tr>
+      <tr><td><code>eastM</code>, <code>northM</code>, <code>headingDeg</code></td><td>Dove si trova rispetto all'osservatore, e verso dove è rivolta la sua parte anteriore, in senso orario dal nord vero</td></tr>
+      <tr><td><code>sizeM</code></td><td><code>{ widthM, lengthM, heightM }</code> lungo i suoi assi, la lunghezza essendo la direzione verso cui è rivolto. Ogni asse è facoltativo: uno che nessuno ha misurato mantiene la proporzione propria della forma integrata</td></tr>
+      <tr><td><code>model</code></td><td>Un vero modello 3D al posto della forma integrata: una voce del catalogo tramite <code>id</code>, o un file glTF/GLB a <code>url</code> (che prevale, deve essere leggibile da qualsiasi origine, e allora richiede il suo <code>credit</code>; uno relativo si legge dal file che lo indica). Non decide mai la dimensione: viene scalato, mantenendo le proporzioni, sul primo asse misurato fra lunghezza, altezza e larghezza, o sulla dimensione reale che gli dà il catalogo. Visto dall'interno, e ogni volta che il modello non si può ottenere, viene disegnata invece la forma integrata</td></tr>
+      <tr><td><code>bridge</code></td><td>Per un <code>"bridge"</code>: come è costruito. <code>sizeM.lengthM</code> è tutta la sua lunghezza lungo la strada, rilevati compresi, <code>widthM</code> la larghezza dell'impalcato e <code>heightM</code> l'altezza della carreggiata sull'impalcato sopra il suolo; <code>spanM</code> è la luce libera sotto l'impalcato, con la strada che corre su un rilevato di terra digradante fino al suolo su ciascun lato; <code>deckThicknessM</code> lo spessore della soletta (1,2 per impostazione predefinita); <code>railing</code> <code>{ heightM, postSpacingM, rails }</code> il parapetto lungo entrambi i bordi, montanti e correnti le cui aperture sono rettangoli (1,05 m, 1,5 m e 2 correnti per impostazione predefinita). Disegnato con quelle misure, mai stirato</td></tr>
+      <tr><td><code>track</code></td><td><code>[{ t, eastM, northM, altitudeM, headingDeg }]</code> quando si muove, <code>altitudeM</code> sopra l'osservatore. La posizione è interpolata fra i fotogrammi chiave; la direzione è mantenuta dall'uno al successivo</td></tr>
+      <tr><td><code>lights</code></td><td>Le sue luci: <code>id</code>, <code>offsetM</code> <code>{ x, y, z }</code> dal suo centro (destra, alto, davanti), <code>color</code>, <code>intensity</code> (1 è una normale luce di navigazione) e un <code>pattern</code>: <code>{ "kind": "steady" }</code>, oppure <code>{ "kind": "flash", perMinute, dutyCycle, phase }</code>, la cadenza come la stabiliscono i regolamenti, la frazione accesa di ogni ciclo (circa 0,5 per un lampeggiatore a filamento, 0,01 per uno stroboscopio) e uno sfasamento da 0 a 1 fra le luci. L'editor le compila da preimpostazioni: “Airliner”, “Helicopter”, “Car, headlights on”, “Car, hazard flashers”, “Emergency vehicle beacons”, “Streetlamp”</td></tr>
+      <tr><td><code>engine</code></td><td>Un veicolo che si sente in moto: <code>{ kind, noise }</code>, come <code>vehicle</code> sopra. Il suo motore segue la sua <code>track</code>, sentito da dove si trova l'osservatore, più debole e più sordo con la distanza</td></tr>
+      <tr><td><code>occludesSourceIds</code></td><td>I fenomeni davanti ai quali l'osservatore ha detto che si trovava — vedi le regole sotto</td></tr>
+    </table>
+    </div>
+
+    <h2>Che cos'era: le interpretazioni</h2>
+    <p>Una registrazione esprime angoli, e un corpo in metri non fa mai parte di ciò che è stato visto. È
+      un'affermazione su di esso, e la si mette alla prova collocandola nella scena e guardandola da dove
+      si trovava l'osservatore: proietta la sua ombra, il suolo può nasconderla, e il suo contorno viene misurato
+      in ogni istante rispetto a ciò che l'osservatore ha detto. Un'interpretazione viene mostrata da sola, come il
+      mondo che afferma; se si chiede il confronto (il pulsante ◌, o <code>compare-account</code> su
+      <code>&lt;rr0-sighting&gt;</code>), il lettore disegna accanto tutto ciò che l'osservatore ha visto come
+      contorni tratteggiati e indica di quanto si discosta la direzione e quante volte più largo e più alto
+      appare ciascun corpo, in rosso quando un osservatore non avrebbe potuto sbagliarsi di tanto.</p>
+    <p>La lettura dell'osservatore stesso va nella registrazione, come <code>interpretation</code>. Quella di un
+      analista va nel caso, come evento di tipo <code>interpretation</code> che designa la
+      registrazione con il suo <code>id</code>, con chi la sostiene in <code>by</code>
+      (<code>{ "people": id }</code>, <code>{ "org": id }</code>, o una persona descritta nel valore)
+      e i suoi corpi in linea o in un file a <code>url</code>. Un resoconto il cui osservatore ha detto che cosa
+      fosse viene disegnato a tutto tondo, come l'ha detto; uno che non dice nulla in metri viene disegnato come gli
+      angoli che esprime. Il lettore lo propone, insieme all'interpretazione di ciascun analista, una alla volta.</p>
+    <pre data-json="none"><code>"interpretation": {
+  "title": "Un velivolo posato sulle sue zampe",
+  "bodies": [{
+    "id": "craft",
+    "explains": ["ufo-1"],
+    "model": { "id": "ellipsoid" },
+    "track": [
+      { "t": 52000, "eastM": -571.6, "northM": -965.5, "onGround": true,
+        "sizeM": { "widthM": 3.36, "lengthM": 3.36, "heightM": 1.73 },
+        "appearance": { "color": "#e8e6df", "albedo": 0.7 } },
+      { "t": 83000, "azimuthDeg": 195.9, "altitudeDeg": 4.1, "distanceM": 44 }
+    ]
+  }]
+}</code></pre>
+    <div class="table-scroll">
+    <table>
+      <tr><th>Campo</th><th>Significato</th></tr>
+      <tr><td><code>explains</code></td><td>I <code>sourceId</code> dei fenomeni che questo corpo afferma di essere</td></tr>
+      <tr><td><code>model</code></td><td>Una forma costruita qui (<code>ellipsoid</code>, <code>sphere</code>, <code>disc</code>, <code>cylinder</code>, <code>cone</code>, <code>box</code>, <code>torus</code>, <code>figure</code>), un modello del catalogo tramite <code>id</code>, o un file glTF a <code>url</code> con il suo <code>credit</code>; un <code>url</code> relativo si legge dal file che lo indica, non dalla pagina. Stirato a <code>sizeM</code> in ogni caso</td></tr>
+      <tr><td><code>track</code></td><td>Dove si trova e che aspetto ha a ogni <code>t</code>. Una posizione si esprime o nel mondo (<code>eastM</code>/<code>northM</code> da dove si trovava l'osservatore all'inizio, come lo scenario, con <code>onGround</code> o <code>altitudeAboveGroundM</code>) o dall'osservatore in quell'istante (<code>azimuthDeg</code>, <code>altitudeDeg</code>, <code>distanceM</code>). Un corpo <code>onGround</code> poggia sul rilievo; una direzione senza distanza incontra allora il suolo dove lo incontra quella linea. <code>sizeM</code>, <code>attitude</code> (<code>headingDeg</code>, <code>pitchDeg</code>, <code>rollDeg</code>) e <code>appearance</code> (<code>color</code>, <code>albedo</code>) valgono finché un fotogramma chiave successivo non li indica di nuovo. <code>present: false</code> toglie il corpo dalla scena a partire da quel fotogramma chiave, e <code>present: true</code> lo riporta. Una <code>flame</code> (<code>lengthM</code>, <code>widthM</code>, <code>color</code> all'ugello, <code>tipColor</code>, <code>luminanceCdM2</code>) si accende al fotogramma chiave che la indica, esce dal nodo del modello chiamato <code>exhaust</code> (o da quello che nomina il suo <code>node</code>), illumina ciò che la circonda, solleva polvere dove tocca il suolo quando <code>raisesDust</code> lo dice, e si spegne con una <code>luminanceCdM2</code> pari a 0</td></tr>
+      <tr><td><code>motions</code></td><td>In un fotogramma chiave: a che punto è ciascuno dei movimenti propri del suo modello, con il nome del movimento — le animazioni del file glTF. <code>0</code> è l'inizio di un movimento, <code>1</code> la sua fine, e uno che si ripete prosegue oltre 1: <code>{ "legs-turn": 7 }</code> sono sette giri. Il modello dice che cosa si muove e come; la traccia dice quando. Ogni movimento si interpola fra i fotogrammi chiave che lo indicano, qualunque altro fotogramma chiave sposti il corpo nel frattempo, si mantiene dopo l'ultimo e vale 0 prima del primo. La partenza di Valensole si scrive così: <code>{ "t": 246000, "motions": { "pivot-retract": 0 } }</code>, <code>{ "t": 248000, "motions": { "pivot-retract": 1, "legs-turn": 0 } }</code>, … <code>{ "t": 262000, "motions": { "legs-turn": 7 } }</code></td></tr>
+      <tr><td><code>lights</code></td><td>In un fotogramma chiave: la luminanza, in cd/m², di ciascuna delle luci proprie del suo modello, con il nome del materiale della luce nel file glTF — così che uno stesso corpo porti luci che fanno ciascuna la propria cosa, una bianca fissa a ogni estremità e una rossa che lampeggia fra le due. Il modello dice dove si trova ogni luce, quanto è grande e di che colore; la traccia dice quanto brilla e quando. Ogni luce si interpola fra i fotogrammi chiave che la nominano e si mantiene dopo l'ultimo, quindi un'accensione o uno spegnimento sono due fotogrammi chiave a un millisecondo di distanza; una luce che nessun fotogramma chiave nomina brilla con la sua parte di <code>appearance.luminanceCdM2</code>. Una luce troppo piccola per vedersi si vede dal suo abbagliamento, e ciò che si trova fra essa e l'occhio — lo scafo del corpo stesso, un ponte — la nasconde. La luce rossa di Silly-le-Long: <code>{ "t": 499, "lights": { "front-red": 1500 } }</code>, <code>{ "t": 500, "lights": { "front-red": 0 } }</code></td></tr>
+      <tr><td><code>outlineNode</code></td><td>Il nodo del modello che è ciò che l'osservatore ha disegnato (<code>"hull"</code> per un velivolo le cui zampe non sono nel disegno): ciò su cui si misura il suo contorno</td></tr>
+      <tr><td><code>smoke</code></td><td>Sull'interpretazione stessa: ciò che fa bruciare al suolo, come <code>{ eastM, northM, fromT, untilT? }</code>, visto dal suo fumo portato via dal vento della registrazione</td></tr>
+    </table>
+    </div>
+
+    <h2>Il meteo, e le sue nuvole</h2>
+    <p>Un fotogramma chiave <code>weather</code> esprime le condizioni del cielo in un momento dell'orologio
+      della registrazione; fra due fotogrammi chiave ogni numero viene interpolato, mentre il tipo di precipitazione e il
+      temporale vengono mantenuti. Contiene:</p>
+    <div class="table-scroll">
+    <table>
+      <tr><th>Campo</th><th>Significato</th></tr>
+      <tr><td><code>cloudLayers</code></td><td>Le nuvole, come elenco di strati — vedi sotto. <strong>Se manca</strong>, le descrivono i campi più vecchi delle righe vicine, adattati in uno strato d'acqua e un velo di cirri; <strong>un elenco vuoto</strong> significa un cielo sereno che qualcuno ha guardato</td></tr>
+      <tr><td><code>cloudCover</code>, <code>lowerCloudCover</code>, <code>highCloudCover</code></td><td>Frazioni di cielo (0–1): il totale, solo gli strati d'acqua, e solo il velo ghiacciato. Scritte dalle registrazioni fatte prima che esistessero gli strati, e ancora tenute aggiornate dall'editor come riassunto di questi</td></tr>
+      <tr><td><code>cloudBaseM</code>, <code>cloudDarkness</code></td><td>L'unica base della stessa epoca, in metri sopra il suolo di riferimento, e un'unica tonalità (0 bianco, 1 molto scuro)</td></tr>
+      <tr><td><code>iceCrystalAlignment</code></td><td>0–1, con quanta regolarità cadevano i cristalli di ghiaccio — ciò che trasforma un semplice anello in pareli, archi e una colonna. Nessun dato lo misura; uno strato di cirri porta il proprio</td></tr>
+      <tr><td><code>relativeHumidity</code></td><td>0–1, vicino al suolo. Decide quanto è lattiginoso il cielo sereno: la foschia si gonfia d'acqua man mano che l'aria si avvicina alla saturazione. Un dato consultato la contiene (dalla temperatura e dal punto di rugiada di ERA5); se manca, una foschia tipica</td></tr>
+      <tr><td><code>precipitationType</code>, <code>precipitationIntensity</code></td><td>none/rain/snow/hail, e 0–1. Indicata a un fotogramma chiave, riprodotta come cade: un rovescio inizia al fotogramma chiave che lo avvia con le sue prime gocce, e non raggiunge l'intensità indicata più in fretta di una pioggia reale (da niente al massimo in venti secondi); smette allo stesso modo. Un cambiamento che i fotogrammi chiave distribuiscono su un tempo più lungo viene seguito esattamente</td></tr>
+      <tr><td><code>windDirectionDeg</code>, <code>windSpeed</code></td><td>Il vento generale: la direzione VERSO cui soffia, in senso orario dal nord, e metri al secondo. È ciò che trasporta le nuvole — dall'istante zero, così che cercare e riprodurre di nuovo diano lo stesso cielo</td></tr>
+      <tr><td><code>storm</code></td><td>Fulmini e tuoni, con il giusto ritardo</td></tr>
+    </table>
+    </div>
+    <p>Ogni <strong>strato</strong> di <code>cloudLayers</code> è una coltre di nuvole a un'altezza
+      reale, e resta sé stesso da un fotogramma chiave al successivo:</p>
+    <div class="table-scroll">
+    <table>
+      <tr><th>Campo</th><th>Significato</th></tr>
+      <tr><td><code>id</code></td><td>Stabile fra i fotogrammi chiave — gli strati vengono abbinati tramite esso, mai per posizione nell'elenco. Uno strato presente in un fotogramma chiave e assente dal successivo svanisce; riordinarli non cambia nulla</td></tr>
+      <tr><td><code>type</code></td><td><code>cumulus</code>, <code>stratus</code>, <code>stratocumulus</code>, <code>cirrus</code> o <code>unknown</code>. Decide la forma delle sommità e quanto è sottile il velo; un cirro è anche quello che rifrange gli aloni. Cambia al fotogramma chiave, non viene interpolato</td></tr>
+      <tr><td><code>baseM</code>, <code>thicknessM</code></td><td>Metri. La base è sopra il suolo di RIFERIMENTO della registrazione, non sopra un osservatore che sale; un osservatore sopra la base è dentro la coltre o al di sopra, e il cielo viene disegnato di conseguenza</td></tr>
+      <tr><td><code>coverage</code></td><td>0–1, e significa ciò che dice: la frazione di cielo che questo strato copre, qualunque sia la dimensione delle sue nuvole</td></tr>
+      <tr><td><code>sizeM</code></td><td>La larghezza caratteristica di una nuvola, in metri. Indipendente dalla copertura: la stessa frazione di cielo può essere molte nuvole piccole o poche grandi</td></tr>
+      <tr><td><code>density</code></td><td>0–2, quanto è opaca la materia della nuvola; 0 è trasparente. Anch'essa indipendente dalla copertura</td></tr>
+      <tr><td><code>darkness</code></td><td>Da 0 bianco a 1 molto scuro. Se manca, il <code>cloudDarkness</code> del fotogramma chiave</td></tr>
+      <tr><td><code>seed</code></td><td>Quale motivo, fra gli infiniti che gli stessi numeri possono disegnare. Se manca, uno ricavato dall'id, ed è per questo che l'id non deve cambiare</td></tr>
+      <tr><td><code>windDirectionDeg</code>, <code>windSpeed</code></td><td>Il vento proprio di questo strato, quando differisce da quello generale — di solito è il caso dello strato alto. Se manca, il vento generale</td></tr>
+      <tr><td><code>iceCrystalAlignment</code></td><td>Solo per un cirro</td></tr>
+      <tr><td><code>instances</code></td><td>Nuvole singole all'interno di questo strato — vedi sotto</td></tr>
+    </table>
+    </div>
+    <p>Una <strong>nuvola singola</strong> in <code>instances</code> è una nuvola del suo strato che il
+      file colloca con esattezza, perché il resoconto lo ha fatto: quella dietro cui è passato il fenomeno, quella che
+      era lì e da nessun'altra parte. Viene disegnata come una delle altre del suo strato — la stessa texture, la stessa
+      soglia —, distinta dalle vicine soltanto da dove si trova e da quanto è grande,
+      ed è presente anche quando la <code>coverage</code> dello strato è nulla. Segue il vento dello strato
+      come le altre, e nasconde un fenomeno davanti al quale passa.</p>
+    <div class="table-scroll">
+    <table>
+      <tr><th>Campo</th><th>Significato</th></tr>
+      <tr><td><code>id</code></td><td>Stabile fra i fotogrammi chiave, stessa regola di uno strato</td></tr>
+      <tr><td><code>eastM</code>, <code>northM</code></td><td>Dove si trovava il suo centro all'istante zero, in metri dal punto di partenza dell'osservatore. Il vento la trasporta da lì</td></tr>
+      <tr><td><code>baseM</code>, <code>thicknessM</code></td><td>La sua base e la sua altezza, in metri — una nuvola può stare più in basso o elevarsi più della sua coltre</td></tr>
+      <tr><td><code>widthM</code>, <code>depthM</code>, <code>rotationDeg</code></td><td>La sua impronta, in metri, e la direzione verso cui quell'impronta è ruotata</td></tr>
+      <tr><td><code>density</code>, <code>darkness</code></td><td>Le proprie; se manca l'oscurità, quella dello strato</td></tr>
+    </table>
+    </div>
+    <pre data-json="weatherTrack.keyframes"><code>{
+  "weather": {
+    "cloudLayers": [
+      {
+        "id": "low", "type": "cumulus",
+        "baseM": 1500, "thicknessM": 800,
+        "coverage": 0.55, "sizeM": 1400, "density": 1, "darkness": 0.15,
+        "instances": [
+          { "id": "the-one", "eastM": 0, "northM": 4200,
+            "baseM": 1500, "thicknessM": 800,
+            "widthM": 1900, "depthM": 1300, "rotationDeg": 12, "density": 1 }
+        ]
+      },
+      { "id": "high", "type": "cirrus", "baseM": 8000, "thicknessM": 400,
+        "coverage": 0.2, "sizeM": 2200, "density": 0.35, "iceCrystalAlignment": 0.65 }
+    ],
+    "precipitationType": "none", "precipitationIntensity": 0,
+    "windDirectionDeg": 90, "windSpeed": 5, "storm": false
+  }
+}</code></pre>
+    <p>Una registrazione il cui meteo è stato <strong>consultato</strong> (ha un <code>weatherSource</code>)
+      contiene la risposta del dato, non un link a esso: ERA5 fornisce le fasce bassa, media e alta come tre
+      strati chiamati <code>record-low</code>, <code>record-mid</code> e <code>record-high</code>, la
+      base bassa stimata dallo scarto fra temperatura e punto di rugiada, le altre due a 3 500 m
+      e 8 000 m. Il loro tipo è <code>unknown</code> (cirro per quello alto), la loro dimensione e la loro
+      densità sono ipotesi di disegno: una rianalisi sa quanta parte di ogni fascia era coperta, non che aspetto
+      avessero le nuvole. Richiedi il dato dall'editor e gli strati vengono riscritti; modifica
+      uno strato a mano e la registrazione diventa dell'autore, con la fonte rimossa.</p>
+
+    <h2>Da dove viene ogni valore</h2>
+    <p>Qualsiasi valore di una registrazione può essere scritto così com'è, o avvolto con la sua provenienza:</p>
+    <pre data-json="none"><code>"durationSeconds": {
+  "value": 15,
+  "basis": "derived",
+  "rationale": "Da 13 a 18 s nella sintesi dell'inquirente; preso il valore medio"
+}</code></pre>
+    <p><code>basis</code> è <code>stated</code> (l'ha detto l'osservatore, ed è ciò che significa un valore
+      semplice), <code>derived</code> (ricavato da ciò che ha detto più qualcosa di verificabile: la larghezza di una
+      strada, una mappa, un disegno misurato; <code>rationale</code> dà il ragionamento) o
+      <code>assumed</code> (scelto perché la ricostruzione abbia comunque un valore, senza basarsi su nulla di ciò che
+      l'osservatore ha detto). L'elenco dei valori <code>assumed</code> è l'elenco di ciò per cui tornare dall'osservatore
+      o al fascicolo, ed è per questo che vale la pena scriverlo anche quando non si scrive nient'altro.</p>
+
+    <h2>Verificare un file</h2>
+    <p>Il formato è pubblicato anche come <a href="/sighting.schema.json">JSON Schema</a>,
+      generato dagli stessi tipi del lettore: ogni chiave che conosce, ciò che ciascuna può
+      contenere, e le parole che accetta un elenco chiuso. Una chiave scritta male o un valore
+      sconosciuto non lo superano. Non dice nulla di ciò che si può omettere, che è una questione di senso a cui
+      risponde questa pagina. Per vedere il risultato, apri il file nel <a href="/play/">lettore</a>,
+      da un link, incollandolo, o dal tuo disco con le immagini e i modelli che nomina. Il lettore
+      lo verifica allo stesso modo al caricamento, e indica dietro un ⚠ sull'immagine ciò che non ha potuto riprodurre
+      così come è scritto: una chiave che nulla legge, una parola fuori dal suo elenco, e ciò che ha dovuto
+      inventare perché il primo fotogramma chiave di una forma lo ometteva (un campo mantenuto dal
+      fotogramma chiave precedente è la regola di cui sopra, non un problema).</p>
+
+    <h2>Un file completo</h2>
+    <p>La registrazione più piccola che esprima ancora qualcosa — un ovale silenzioso che attraversa il cielo in
+      dodici secondi, in una data reale e in un luogo reale. Tutto il resto del formato è facoltativo, e
+      tutto ciò che segue ha una funzione:</p>
+    <pre data-json=""><code>${this.escape(this.example)}</code></pre>
+    <p class="small">Per modificarlo e vederlo riprodotto, incollalo nel <a href="/play/">lettore</a>,
+      il cui editor completa ogni chiave del formato, propone le parole che ciascuna accetta, e
+      dice ciò che il modello ne dice.</p>
+    <p>È <a href="/demo-data/example-minimal.json"><code>/demo-data/example-minimal.json</code></a>
+      su questo sito, quindi puoi scaricarlo, e
+      <a href="/play/?sighting=/demo-data/example-minimal.json">riprodurlo</a> prima di cambiare
+      qualsiasi cosa. Nota che compaiono sia <code>angular</code> sia <code>bounds</code>: l'angolo è ciò che
+      il file SIGNIFICA, e i pixel ne vengono ricavati di nuovo al caricamento — scrivi l'angolo, e lascia
+      che una stima errata dei pixel venga corretta per te.</p>
+
+    <h2>Altri più grandi da leggere</h2>
+    <p>Ogni demo di questo sito è un semplice file che puoi aprire. Questi quattro sono quelli che vale la pena
+      leggere per vedere come è costruita una registrazione reale:</p>
+    <div class="table-scroll">
+    <table>
+      <tr><th>File</th><th>Che cosa guardarci</th></tr>
+      <tr><td><a href="/demo-data/observer-chiles.json"><code>observer-chiles.json</code></a></td><td>Un caso reale: un osservatore, un id di caso condiviso con una seconda registrazione, dieci fotogrammi chiave, un <code>weatherTrack</code> consultato con il suo <code>weatherSource</code></td></tr>
+      <tr><td><a href="/demo-data/sky-test-halos.json"><code>sky-test-halos.json</code></a></td><td>Nessun fenomeno — un cielo preparato da un <code>weatherTrack</code> i cui fotogrammi chiave cambiano l'allineamento dei cristalli, la copertura di cirri e una coltre di cumuli, osservato attraverso un <code>observerTrack</code> che percorre lo spettacolo e poi si ferma</td></tr>
+      <tr><td><a href="/demo-data/sky-test-clouds.json"><code>sky-test-clouds.json</code></a></td><td>Tre strati di nuvole con altitudine, spessore, dimensione, densità e vento in metri, che evolvono sulla linea temporale del meteo — e nel primo una voce <code>instances</code>: una nuvola del campo, collocata e dimensionata in metri, che cresce e si scurisce nel corso dei due minuti</td></tr>
+      <tr><td><a href="/demo-data/sky-test-aircraft.json"><code>sky-test-aircraft.json</code></a></td><td>Un <code>instrument</code>, un <code>exposureSeconds</code> e un <code>iso</code>, e un aeromobile di <code>decor</code> con una <code>track</code> e nove <code>lights</code> alle loro cadenze di lampeggio reali, fari di atterraggio compresi</td></tr>
+      <tr><td><a href="/demo-data/instrument-instamatic.json"><code>instrument-instamatic.json</code></a></td><td>Lo stesso avvistamento di <code>observer-socorro.json</code>, cambiato in un solo campo. Confronta i due</td></tr>
+    </table>
+    </div>
+
+    <h2>Quattro regole che decidono che cosa significa un file</h2>
+    <ul class="plain">
+      <li><strong>I campi discreti vengono mantenuti, quelli continui interpolati.</strong> Una forma omessa in
+        un fotogramma chiave successivo resta com'era, e così qualsiasi campo che un fotogramma chiave omette in una forma
+        che invece indica di nuovo: un fotogramma chiave che dà solo un nuovo <code>aim</code> sposta la forma e mantiene
+        tutto il resto (indicare di nuovo <code>bounds</code> senza <code>aim</code> né
+        <code>angular</code> viene inteso come spostarla tramite i suoi pixel); una il cui primo fotogramma chiave è a cinque secondi è già
+        dipinta, in quello stato, da zero. Per fare in modo che qualcosa smetta di essere visibile, dagli un fotogramma chiave con
+        <code>transparency: 1</code>.</li>
+      <li><strong>Solo angoli.</strong> Nessuna dimensione reale e nessuna distanza reale sono memorizzate da nessuna parte. I metri
+        vengono ricavati, come disuguaglianze, da ciò dietro o davanti a cui si è detto che il fenomeno passava
+        (<code>decor[].occludesSourceIds</code>).</li>
+      <li><strong>Il dichiarato prevale sul dedotto.</strong> <code>occludesSourceIds</code> registra affermazioni dell'osservatore. Niente in questo formato
+        <em>può</em> dedurle: descrive un aspetto in un campo visivo, non una posizione nello
+        spazio.</li>
+      <li><strong>Assente non è zero.</strong> Nessuna traccia sonora significa che nessuno l'ha chiesto;
+        <code>kind: "none"</code> significa che l'osservatore ha riferito di non aver sentito nulla. La stessa distinzione
+        attraversa il meteo e la nube di ghiaccio.</li>
+    </ul>
+    <p class="small">Questa pagina è il riferimento del formato. Il ragionamento dietro ogni campo si trova nei
+      commenti di documentazione del suo tipo, con cui si completano gli estratti qui sopra, e nel
+      <a href="https://github.com/RR0/UfoAtHome">codice sorgente</a>.</p>
   </div>
 </section>
 `

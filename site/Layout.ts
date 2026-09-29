@@ -1,7 +1,6 @@
 import { Headings } from "./Headings.js"
 import {
-  EXTRA_LANGUAGES, type ExtraLanguage, FALLBACK_LANGUAGE, type PageLanguage, type PageMeta, SITE_LANGUAGES,
-  type SiteLanguage, type SitePage
+  FALLBACK_LANGUAGE, type PageMeta, SITE_LANGUAGES, type SiteLanguage, type SitePage
 } from "./SitePage.js"
 
 /** The site shell's own words, in every language a page can be written out in. */
@@ -42,7 +41,7 @@ export class Layout {
 
   static readonly ORIGIN = "https://ufoathome.org"
 
-  private static readonly SHELL: Record<PageLanguage, ShellWords> = {
+  private static readonly SHELL: Record<SiteLanguage, ShellWords> = {
     en: {
       locale: "en_US", mainNavigation: "Main navigation", sectionLink: "Link to this section",
       licensed: version => `UFO@home v${version} — MIT licensed`,
@@ -82,13 +81,13 @@ export class Layout {
   /** Where a given language's file actually sits — the canonical path for the fallback, a
    * `_<lang>` sibling for the rest. Used for the files written, for `hreflang`, and by the
    * redirect. */
-  fileUrl(meta: PageMeta, language: PageLanguage): string {
+  fileUrl(meta: PageMeta, language: SiteLanguage): string {
     const path = this.path(meta)
     return language === FALLBACK_LANGUAGE ? path : `${path}index_${language}.html`
   }
 
   /** Where the built file goes, relative to the output root. */
-  fileName(meta: PageMeta, language: PageLanguage): string {
+  fileName(meta: PageMeta, language: SiteLanguage): string {
     const name = language === FALLBACK_LANGUAGE ? "index.html" : `index_${language}.html`
     return `${this.path(meta)}${name}`.replace(/^\//, "")
   }
@@ -102,12 +101,12 @@ export class Layout {
    * counts are compared here — the page is named in the message, because that is the one thing the
    * text of a heading cannot tell you.
    */
-  private anchors(page: SitePage, language: PageLanguage): readonly string[] | undefined {
+  private anchors(page: SitePage, language: SiteLanguage): readonly string[] | undefined {
     if (language === FALLBACK_LANGUAGE) {
       return undefined
     }
     const reference = this.headings.ids(page.render(FALLBACK_LANGUAGE))
-    const own = this.headings.ids(this.body(page, language))
+    const own = this.headings.ids(page.render(language))
     if (own.length !== reference.length) {
       throw new Error(`${this.fileUrl(page.meta, language)} has ${own.length} headings where `
         + `${this.fileUrl(page.meta, FALLBACK_LANGUAGE)} has ${reference.length}: they are `
@@ -139,60 +138,32 @@ export class Layout {
     return url.replace(/^\/lib(?=\/|$)/, `/lib/${this.version}`)
   }
 
-  /** The languages a page is written out in: the site's, then the extra ones it has a copy in. */
-  languagesOf(page: SitePage): PageLanguage[] {
-    return [...SITE_LANGUAGES, ...EXTRA_LANGUAGES.filter(language => page.extra?.[language])]
-  }
-
-  private isExtra(language: PageLanguage): language is ExtraLanguage {
-    return (EXTRA_LANGUAGES as readonly string[]).includes(language)
-  }
-
-  private body(page: SitePage, language: PageLanguage): string {
-    return this.isExtra(language) ? page.extra![language]!.body : page.render(language)
-  }
-
-  private title(page: SitePage, language: PageLanguage): string {
-    return this.isExtra(language) ? page.extra![language]!.title : page.meta.title[language]
-  }
-
-  private description(page: SitePage, language: PageLanguage): string {
-    return this.isExtra(language) ? page.extra![language]!.description : page.meta.description[language]
-  }
-
-  /** A page's label in the navigation: its own translation where it has one, else the fallback's. */
-  private navLabel(page: SitePage, language: PageLanguage): string {
-    return this.isExtra(language)
-      ? page.extra?.[language]?.navLabel ?? page.meta.navLabel[FALLBACK_LANGUAGE]
-      : page.meta.navLabel[language]
-  }
-
-  render(page: SitePage, language: PageLanguage): string {
+  render(page: SitePage, language: SiteLanguage): string {
     const meta = page.meta
     const words = Layout.SHELL[language]
     const self = this.fileUrl(meta, language)
-    const alternates = this.languagesOf(page)
+    const alternates = SITE_LANGUAGES
       .map(other => `<link rel="alternate" hreflang="${other}" href="${Layout.ORIGIN}${this.fileUrl(meta, other)}">`)
       .concat(`<link rel="alternate" hreflang="x-default" href="${Layout.ORIGIN}${this.path(meta)}">`)
       .join("\n  ")
     const modules = (meta.modules ?? [])
       .map(src => `<script type="module" src="${this.versioned(src)}"></script>`)
       .join("\n  ")
-    const script = this.isExtra(language) ? undefined : page.script?.(language)
+    const script = page.script?.(language)
     return `<!doctype html>
 <html lang="${language}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 ${this.languageRedirect(page, language)}
-  <title>${this.text(this.title(page, language))} — UFO@home</title>
-  <meta name="description" content="${this.attribute(this.description(page, language))}">
+  <title>${this.text(meta.title[language])} — UFO@home</title>
+  <meta name="description" content="${this.attribute(meta.description[language])}">
   <link rel="canonical" href="${Layout.ORIGIN}${self}">
   ${alternates}
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="UFO@home">
-  <meta property="og:title" content="${this.attribute(this.title(page, language))} — UFO@home">
-  <meta property="og:description" content="${this.attribute(this.description(page, language))}">
+  <meta property="og:title" content="${this.attribute(meta.title[language])} — UFO@home">
+  <meta property="og:description" content="${this.attribute(meta.description[language])}">
   <meta property="og:url" content="${Layout.ORIGIN}${self}">
   <meta property="og:locale" content="${words.locale}">
   <meta name="twitter:card" content="summary_large_image">
@@ -203,7 +174,7 @@ ${this.languageRedirect(page, language)}
 <body>
 ${this.header(page, language)}
 <main>
-${this.headings.withAnchors(this.body(page, language), words.sectionLink, this.anchors(page, language))}
+${this.headings.withAnchors(page.render(language), words.sectionLink, this.anchors(page, language))}
 </main>
 ${this.siteFooter(language)}
 ${script ? `<script type="module">\n// Where this site's own pages load their modules from — see Layout.versioned.\nconst SITE_LIB = ${JSON.stringify(this.versioned("/lib"))}\n${script}\n</script>` : ""}
@@ -227,10 +198,8 @@ ${script ? `<script type="module">\n// Where this site's own pages load their mo
    * There is no picker, here or anywhere — same rule the components follow. And no server-side
    * `Language=` rule either: one mechanism, in one place, that a reader can see the effect of.
    */
-  private languageRedirect(page: SitePage, pageLanguage: PageLanguage): string {
-    // Only the languages THIS page has: a Spanish reader of a page with no Spanish copy stays on
-    // (or goes to) the next language they read that the page does have.
-    const supported = JSON.stringify(this.languagesOf(page))
+  private languageRedirect(page: SitePage, pageLanguage: SiteLanguage): string {
+    const supported = JSON.stringify([...SITE_LANGUAGES])
     const path = this.path(page.meta)
     return `  <script>
     (function () {
@@ -249,10 +218,10 @@ ${script ? `<script type="module">\n// Where this site's own pages load their mo
   </script>`
   }
 
-  private header(current: SitePage, language: PageLanguage): string {
+  private header(current: SitePage, language: SiteLanguage): string {
     const links = this.pages.filter(page => !page.meta.asideFromNav).map(page => {
       const currentAttr = page === current ? ` aria-current="page"` : ""
-      return `<a href="${this.path(page.meta)}"${currentAttr}>${this.text(this.navLabel(page, language))}</a>`
+      return `<a href="${this.path(page.meta)}"${currentAttr}>${this.text(page.meta.navLabel[language])}</a>`
     }).join("\n    ")
     return `<header class="site-header">
   <a class="brand" href="/">UFO<span class="at">@</span>home</a>
@@ -262,11 +231,11 @@ ${script ? `<script type="module">\n// Where this site's own pages load their mo
 </header>`
   }
 
-  private siteFooter(language: PageLanguage): string {
+  private siteFooter(language: SiteLanguage): string {
     const words = Layout.SHELL[language]
     const nav = this.pages
       .filter(page => !page.meta.asideFromFooter)
-      .map(page => `<li><a href="${this.path(page.meta)}">${this.text(this.navLabel(page, language))}</a></li>`)
+      .map(page => `<li><a href="${this.path(page.meta)}">${this.text(page.meta.navLabel[language])}</a></li>`)
       .join("\n      ")
     return `<footer class="site-footer">
   <div class="wrap">

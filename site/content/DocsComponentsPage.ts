@@ -6,13 +6,17 @@ export class DocsComponentsPage extends DocsSection {
 
   readonly meta: PageMeta = {
     slug: "docs/components",
-    navLabel: { en: "The components", fr: "Les composants" },
-    title: { en: "The components", fr: "Les composants" },
+    navLabel: { en: "The components", fr: "Les composants", es: "Los componentes", it: "I componenti" },
+    title: { en: "The components", fr: "Les composants", es: "Los componentes", it: "I componenti" },
     description: {
       en: "Three standard elements, one page each: which one you want, what it draws, the markup it "
         + "takes, and everything it answers to.",
       fr: "Trois éléments standards, une page chacun : lequel vous voulez, ce qu'il dessine, le "
-        + "balisage qu'il accepte, et tout ce à quoi il répond."
+        + "balisage qu'il accepte, et tout ce à quoi il répond.",
+      es: "Tres elementos estándar, una página cada uno: cuál necesitas, qué dibuja, el marcado que "
+        + "acepta y todo aquello a lo que responde.",
+      it: "Tre elementi standard, una pagina ciascuno: quale ti serve, cosa disegna, il markup che "
+        + "accetta e tutto ciò a cui risponde."
     },
     asideFromNav: true
   }
@@ -23,7 +27,13 @@ export class DocsComponentsPage extends DocsSection {
       + "composes the one before it.",
     fr: "Trois composants web standards — ceux du navigateur, pas ceux d'un framework. Chacun "
       + "s'enregistre à l'import, chacun prend en entrée la même description d'observation, et "
-      + "chacun compose le précédent."
+      + "chacun compose le précédent.",
+    es: "Tres Web Components estándar — los del propio navegador, no los de un framework. Cada uno se "
+      + "registra al importarlo, cada uno toma como entrada la misma descripción de una observación, y "
+      + "cada uno compone el anterior.",
+    it: "Tre Web Component standard — quelli del browser stesso, non quelli di un framework. Ognuno si "
+      + "registra all'importazione, ognuno prende in ingresso la stessa descrizione di un'osservazione, "
+      + "e ognuno compone il precedente."
   }
 
   /** Where each tag's own page is, by the tag itself. */
@@ -35,7 +45,7 @@ export class DocsComponentsPage extends DocsSection {
 
   render(language: SiteLanguage): string {
     return this.hero(language, this.meta.title, this.lede)
-      + this.linked(language === "fr" ? this.fr() : this.en())
+      + this.linked({ en: () => this.en(), fr: () => this.fr(), es: () => this.es(), it: () => this.it() }[language]())
   }
 
   /**
@@ -299,6 +309,239 @@ import "@rr0/ufoathome/editor"   // enregistre &lt;rr0-sighting-editor&gt;</code
       d'abord — l'attribut <code>lang</code> le plus proche, donc <code>&lt;html lang="fr"&gt;</code>
       donne des libellés français — puis les préférences du navigateur, puis l'anglais. Une page qui
       ne déclare rien retombe sur le navigateur, exactement comme avant.</p>
+  </div>
+</section>
+`
+  }
+
+  private es(): string {
+    return `
+<section class="band">
+  <div class="wrap prose-wide">
+    <h2>Estándar, y ese es todo el diseño</h2>
+    <p>Son tres <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_components">Web Components</a> — el estándar del propio navegador para un
+      elemento personalizado, no un componente del <i lang="en">framework</i> de nadie. Lo que de
+      ello se deriva merece explicarse, porque es lo que permite ponerte la herramienta en las manos:</p>
+    <ul class="plain">
+      <li><strong>Funcionan en cualquier página.</strong> Un sitio estático, WordPress, una aplicación
+        React o Vue, una wiki, un archivo HTML escrito a mano. Son elementos: una página que puede
+        contener un <code>&lt;video&gt;</code> puede contener estos.</li>
+      <li><strong>Nada que compilar.</strong> Ni <i lang="en">bundler</i>, ni paso de compilación, ni
+        configuración en tu proyecto. El módulo registra su elemento al importarlo y el navegador
+        hace el resto.</li>
+      <li><strong>Nada que mantener al día.</strong> No hay versión de <i lang="en">framework</i> con
+        la que coincidir, así que la nueva versión mayor de otro no puede dejarlos obsoletos.</li>
+      <li><strong>Su interior es suyo.</strong> Cada uno lleva su marcado y sus estilos en un
+        <i lang="en">shadow root</i>, así que el CSS de tu página no puede romperlos y ellos no
+        pueden romper tu página.</li>
+    </ul>
+    <p>Se componen en una línea: tanto <code>&lt;rr0-sighting&gt;</code> como
+      <code>&lt;rr0-sighting-editor&gt;</code> contienen un <code>&lt;rr0-scene&gt;</code>, y la escena
+      contiene la capa de reproducción — la línea de tiempo, los controles, el lienzo del puntero. Así
+      que todo aquello a lo que responde la escena está disponible en los tres — mediante
+      <code>.scene</code> y <code>.scene.ufoElement</code> desde el más externo, ya que la composición
+      vive en un <i lang="en">shadow root</i>.</p>
+
+    <h2>Para qué sirve cada uno</h2>
+    <ul class="plain">
+      <li><strong><code>&lt;rr0-scene&gt;</code> — el fenómeno en el mundo que lo rodea.</strong> La
+        forma que dibujó un observador, su color, su halo y su movimiento, situada en el cielo, el
+        horizonte, el tiempo y el suelo reales de una fecha, una hora y un lugar declarados — oculta
+        por lo que había delante. Útil también por sí solo, para un cielo en el que no hay nada.</li>
+      <li><strong><code>&lt;rr0-sighting&gt;</code> — el relato, para verlo.</strong>
+        Una escena más quién testifica, los metadatos de la observación, sus créditos y las líneas
+        que permiten a un lector llevarlo a otra parte. Así es como se ve un avistamiento publicado.</li>
+      <li><strong><code>&lt;rr0-sighting-editor&gt;</code> — el relato, para reconstruirlo.</strong>
+        Todo lo anterior más la barra de herramientas de edición: describir una observación, o
+        corregir una.</li>
+    </ul>
+
+    <h2>Cómo encajan entre sí</h2>
+    <p>Nunca escribes el anidamiento. Cada elemento construye el de debajo dentro de su propio
+      <i lang="en">shadow root</i>, así que lo que contiene tu página es una sola etiqueta:</p>
+    <pre><code>&lt;rr0-sighting&gt;           quién testifica, el panel de metadatos, las líneas de inserción
+└─ &lt;rr0-scene&gt;           el cielo, el horizonte, el tiempo y el decorado reales, el fenómeno, la reproducción
+
+&lt;rr0-sighting-editor&gt;    los ocho paneles de edición
+└─ &lt;rr0-scene&gt;           una escena, no un avistamiento: un editor tiene su propia barra de herramientas</code></pre>
+    <p>Por eso una sola etiqueta de script trae consigo los de debajo:</p>
+    <div class="table-scroll">
+    <table>
+      <tr><th>Cargar esto</th><th>registra</th></tr>
+      <tr><td><code>/lib/rr0-scene.mjs</code></td><td><code>&lt;rr0-scene&gt;</code></td></tr>
+      <tr><td><code>/lib/rr0-sighting.mjs</code></td><td><code>&lt;rr0-sighting&gt;</code>, <code>&lt;rr0-scene&gt;</code></td></tr>
+      <tr><td><code>/lib/rr0-sighting-editor.mjs</code></td><td><code>&lt;rr0-sighting-editor&gt;</code>, <code>&lt;rr0-scene&gt;</code></td></tr>
+    </table>
+    </div>
+    <p>Así, una página que muestra un avistamiento y, más abajo, un cielo propio sin nada necesita un
+      solo script y dos etiquetas — el segundo elemento ya está registrado.</p>
+    <p>Se puede entrar en una composición, una propiedad cada vez:</p>
+    <pre><code>const sighting = document.querySelector("rr0-sighting")
+sighting.scene                    // el &lt;rr0-scene&gt; que compone
+sighting.scene.ufoElement         // y la capa de reproducción debajo
+sighting.scene.ufoElement.play()  // así que la reproducción está a dos propiedades</code></pre>
+    <p><code>&lt;rr0-sighting-editor&gt;</code> se guarda su composición para sí: lo que ofrece a una
+      página es el registro — <code>sightingData</code> — y el evento que avisa de que ha cambiado.</p>
+
+    <h2>Cuál necesitas</h2>
+    <p>No son variantes de un mismo <i lang="en">bundle</i>: cada uno es autónomo, así que carga solo
+      el que necesites. Los tres incluyen Three.js y un catálogo de estrellas, que es lo que cuesta un
+      cielo real.</p>
+    <div class="table-scroll">
+    <table>
+      <tr><th>Lo que estás haciendo</th><th>Componente</th><th>Módulo</th><th>gzip</th></tr>
+      <tr><td><strong>Mostrar un avistamiento ovni</strong> — un expediente, un artículo, un informe</td><td><code>&lt;rr0-sighting&gt;</code></td><td><code>/lib/rr0-sighting.mjs</code></td><td>249 KB</td></tr>
+      <tr><td><strong>Dejar que alguien describa o corrija uno</strong></td><td><code>&lt;rr0-sighting-editor&gt;</code></td><td><code>/lib/rr0-sighting-editor.mjs</code></td><td>293 KB</td></tr>
+      <tr><td><strong>Mostrar un cielo sin nada</strong> — cómo se veían esa noche un halo, un cometa o el paso de un satélite</td><td><code>&lt;rr0-scene&gt;</code></td><td><code>/lib/rr0-scene.mjs</code></td><td>238 KB</td></tr>
+      <tr><td><strong>Mostrar un avistamiento dentro de una escena propia</strong>, sin barra de herramientas encima</td><td><code>&lt;rr0-scene&gt;</code></td><td><code>/lib/rr0-scene.mjs</code></td><td>238 KB</td></tr>
+      <tr><td><strong>No estás seguro</strong></td><td><code>&lt;rr0-sighting&gt;</code></td><td><code>/lib/rr0-sighting.mjs</code></td><td>249 KB</td></tr>
+    </table>
+    </div>
+    <p>Ponerlo en una página son <a href="/docs/share/">dos líneas</a>.</p>
+
+    <h2>Documentación detallada</h2>
+    <p>Qué acepta cada uno, a qué responde y qué dibuja — una página por componente, porque lo que
+      necesitas de uno de ellos nunca es lo que necesitas de los otros dos en el mismo
+      momento.</p>
+    <div class="uses">
+      <a class="use" href="/docs/components/scene/"><h3><code>&lt;rr0-scene&gt;</code></h3><p>La forma y su reproducción, en el cielo y el horizonte reales de la fecha y el lugar del registro.</p><p class="use-more">Leer →</p></a>
+      <a class="use" href="/docs/components/sighting/"><h3><code>&lt;rr0-sighting&gt;</code></h3><p>La vista estándar de un relato real: uno o varios observadores, con su barra de herramientas.</p><p class="use-more">Leer →</p></a>
+      <a class="use" href="/docs/components/edit/"><h3><code>&lt;rr0-sighting-editor&gt;</code></h3><p>Toda la barra de herramientas de edición, para describir una observación o corregir una.</p><p class="use-more">Leer →</p></a>
+    </div>
+
+    <h2>Integrarlo en tu aplicación</h2>
+    <p>Tras <code>npm install @rr0/ufoathome</code>:</p>
+    <pre><code>import "@rr0/ufoathome/scene"    // registra &lt;rr0-scene&gt;
+import "@rr0/ufoathome/sighting" // registra &lt;rr0-sighting&gt;
+import "@rr0/ufoathome/editor"   // registra &lt;rr0-sighting-editor&gt;</code></pre>
+    <p>O copia el contenido de los directorios <code>dist-embed*</code> del paquete en tu propio
+      servidor y apunta allí el <code>&lt;script src&gt;</code>. Cada módulo referencia sus propios
+      recursos — el catálogo de estrellas, el audio meteorológico — <em>de forma relativa a sí mismo</em>,
+      así que sigue funcionando desde cualquier ruta; basta con mantener juntos los archivos de cada
+      <i lang="en">bundle</i>. Nada depende entonces de este sitio.</p>
+
+    <h2>Idioma</h2>
+    <p>Cada etiqueta se traduce por detección, sin selector: primero el idioma declarado por la propia
+      página — el atributo <code>lang</code> más cercano, así que <code>&lt;html lang="fr"&gt;</code>
+      obtiene etiquetas en francés —, luego las preferencias del navegador y, por último, el inglés.
+      Una página que no declara nada recurre al navegador exactamente como antes.</p>
+  </div>
+</section>
+`
+  }
+
+  private it(): string {
+    return `
+<section class="band">
+  <div class="wrap prose-wide">
+    <h2>Standard, ed è questo tutto il progetto</h2>
+    <p>Sono tre <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_components">Web Component</a> — lo standard del browser stesso per un
+      elemento personalizzato, non un componente del <i lang="en">framework</i> di qualcuno. Ciò che
+      ne consegue merita di essere detto, perché è ciò che permette di metterti in mano lo strumento:</p>
+    <ul class="plain">
+      <li><strong>Funzionano in qualsiasi pagina.</strong> Un sito statico, WordPress, un'applicazione
+        React o Vue, un wiki, un file HTML scritto a mano. Sono elementi: una pagina che può
+        contenere un <code>&lt;video&gt;</code> può contenere anche questi.</li>
+      <li><strong>Niente da compilare.</strong> Nessun <i lang="en">bundler</i>, nessuna fase di
+        compilazione, nessuna configurazione nel tuo progetto. Il modulo registra il suo elemento
+        all'importazione e il browser fa il resto.</li>
+      <li><strong>Niente da inseguire.</strong> Non c'è una versione di <i lang="en">framework</i> a
+        cui adeguarsi, quindi la nuova major release di qualcun altro non può renderli obsoleti.</li>
+      <li><strong>Il loro interno è affar loro.</strong> Ognuno porta il proprio markup e i propri stili
+        in uno <i lang="en">shadow root</i>, quindi il CSS della tua pagina non può romperli e loro
+        non possono rompere la tua pagina.</li>
+    </ul>
+    <p>Si compongono in una riga: sia <code>&lt;rr0-sighting&gt;</code> sia
+      <code>&lt;rr0-sighting-editor&gt;</code> contengono un <code>&lt;rr0-scene&gt;</code>, e la scena
+      contiene lo strato di riproduzione — la linea temporale, i controlli, il canvas del puntatore.
+      Quindi tutto ciò a cui risponde la scena è disponibile in tutti e tre — tramite
+      <code>.scene</code> e <code>.scene.ufoElement</code> dal più esterno, poiché la composizione
+      vive in uno <i lang="en">shadow root</i>.</p>
+
+    <h2>A cosa serve ciascuno</h2>
+    <ul class="plain">
+      <li><strong><code>&lt;rr0-scene&gt;</code> — il fenomeno nel mondo che lo circonda.</strong> La
+        forma disegnata da un osservatore, il suo colore, il suo alone e il suo movimento, collocata nel
+        cielo, nell'orizzonte, nel meteo e nel suolo reali di una data, un'ora e un luogo dichiarati —
+        nascosta da ciò che stava davanti. Utile anche da sola, per un cielo in cui non c'è niente.</li>
+      <li><strong><code>&lt;rr0-sighting&gt;</code> — il resoconto, da guardare.</strong>
+        Una scena più chi testimonia, i metadati dell'osservazione, i suoi crediti e le righe che
+        permettono a un lettore di portarlo altrove. È così che appare un avvistamento pubblicato.</li>
+      <li><strong><code>&lt;rr0-sighting-editor&gt;</code> — il resoconto, da ricostruire.</strong>
+        Tutto quanto sopra più la barra degli strumenti di redazione: descrivere un'osservazione, o
+        correggerne una.</li>
+    </ul>
+
+    <h2>Come si incastrano</h2>
+    <p>Non scrivi mai l'annidamento. Ogni elemento costruisce quello sottostante dentro il proprio
+      <i lang="en">shadow root</i>, quindi ciò che la tua pagina contiene è un solo tag:</p>
+    <pre><code>&lt;rr0-sighting&gt;           chi testimonia, il pannello dei metadati, le righe di incorporamento
+└─ &lt;rr0-scene&gt;           il cielo, l'orizzonte, il meteo e lo scenario reali, il fenomeno, la riproduzione
+
+&lt;rr0-sighting-editor&gt;    gli otto pannelli di redazione
+└─ &lt;rr0-scene&gt;           una scena, non un avvistamento: un editor ha la propria barra degli strumenti</code></pre>
+    <p>Ecco perché un solo tag script si porta dietro quelli sottostanti:</p>
+    <div class="table-scroll">
+    <table>
+      <tr><th>Caricando questo</th><th>si registra</th></tr>
+      <tr><td><code>/lib/rr0-scene.mjs</code></td><td><code>&lt;rr0-scene&gt;</code></td></tr>
+      <tr><td><code>/lib/rr0-sighting.mjs</code></td><td><code>&lt;rr0-sighting&gt;</code>, <code>&lt;rr0-scene&gt;</code></td></tr>
+      <tr><td><code>/lib/rr0-sighting-editor.mjs</code></td><td><code>&lt;rr0-sighting-editor&gt;</code>, <code>&lt;rr0-scene&gt;</code></td></tr>
+    </table>
+    </div>
+    <p>Così una pagina che mostra un avvistamento e, più in basso, un cielo tutto suo ha bisogno di un
+      solo script e di due tag — il secondo elemento è già registrato.</p>
+    <p>Si può entrare in una composizione, una proprietà alla volta:</p>
+    <pre><code>const sighting = document.querySelector("rr0-sighting")
+sighting.scene                    // il &lt;rr0-scene&gt; che compone
+sighting.scene.ufoElement         // e lo strato di riproduzione sotto di esso
+sighting.scene.ufoElement.play()  // quindi la riproduzione è a due proprietà di distanza</code></pre>
+    <p><code>&lt;rr0-sighting-editor&gt;</code> tiene per sé la propria composizione: ciò che offre a
+      una pagina è la registrazione — <code>sightingData</code> — e l'evento che segnala che è
+      cambiata.</p>
+
+    <h2>Quale ti serve</h2>
+    <p>Non sono varianti di un unico <i lang="en">bundle</i>: ognuno è autonomo, quindi carica solo
+      quello che ti serve. Tutti e tre includono Three.js e un catalogo stellare, che è il prezzo di
+      un cielo reale.</p>
+    <div class="table-scroll">
+    <table>
+      <tr><th>Cosa stai facendo</th><th>Componente</th><th>Modulo</th><th>gzip</th></tr>
+      <tr><td><strong>Mostrare un avvistamento UFO</strong> — un fascicolo, un articolo, un rapporto</td><td><code>&lt;rr0-sighting&gt;</code></td><td><code>/lib/rr0-sighting.mjs</code></td><td>249 KB</td></tr>
+      <tr><td><strong>Permettere a qualcuno di descriverne o correggerne uno</strong></td><td><code>&lt;rr0-sighting-editor&gt;</code></td><td><code>/lib/rr0-sighting-editor.mjs</code></td><td>293 KB</td></tr>
+      <tr><td><strong>Mostrare un cielo senza niente</strong> — che aspetto avevano quella notte un alone, una cometa o il passaggio di un satellite</td><td><code>&lt;rr0-scene&gt;</code></td><td><code>/lib/rr0-scene.mjs</code></td><td>238 KB</td></tr>
+      <tr><td><strong>Mostrare un avvistamento dentro una scena tua</strong>, senza barra degli strumenti sopra</td><td><code>&lt;rr0-scene&gt;</code></td><td><code>/lib/rr0-scene.mjs</code></td><td>238 KB</td></tr>
+      <tr><td><strong>Non sei sicuro</strong></td><td><code>&lt;rr0-sighting&gt;</code></td><td><code>/lib/rr0-sighting.mjs</code></td><td>249 KB</td></tr>
+    </table>
+    </div>
+    <p>Metterne uno in una pagina richiede <a href="/docs/share/">due righe</a>.</p>
+
+    <h2>Documentazione dettagliata</h2>
+    <p>Cosa accetta ciascuno, a cosa risponde e cosa disegna — una pagina per componente, perché ciò
+      che ti serve da uno di loro non è mai ciò che ti serve dagli altri due nello stesso
+      momento.</p>
+    <div class="uses">
+      <a class="use" href="/docs/components/scene/"><h3><code>&lt;rr0-scene&gt;</code></h3><p>La forma e la sua riproduzione, nel cielo e nell'orizzonte reali della data e del luogo della registrazione.</p><p class="use-more">Leggi →</p></a>
+      <a class="use" href="/docs/components/sighting/"><h3><code>&lt;rr0-sighting&gt;</code></h3><p>La vista standard di un resoconto reale: uno o più osservatori, con la loro barra degli strumenti.</p><p class="use-more">Leggi →</p></a>
+      <a class="use" href="/docs/components/edit/"><h3><code>&lt;rr0-sighting-editor&gt;</code></h3><p>L'intera barra degli strumenti di redazione, per descrivere un'osservazione o correggerne una.</p><p class="use-more">Leggi →</p></a>
+    </div>
+
+    <h2>Integrarlo nella tua applicazione</h2>
+    <p>Dopo <code>npm install @rr0/ufoathome</code>:</p>
+    <pre><code>import "@rr0/ufoathome/scene"    // registra &lt;rr0-scene&gt;
+import "@rr0/ufoathome/sighting" // registra &lt;rr0-sighting&gt;
+import "@rr0/ufoathome/editor"   // registra &lt;rr0-sighting-editor&gt;</code></pre>
+    <p>Oppure copia il contenuto delle cartelle <code>dist-embed*</code> del pacchetto sul tuo
+      server e punta lì il <code>&lt;script src&gt;</code>. Ogni modulo fa riferimento alle proprie
+      risorse — il catalogo stellare, l'audio meteorologico — <em>in modo relativo a se stesso</em>,
+      quindi continua a funzionare da qualsiasi percorso; basta tenere insieme i file di ogni
+      <i lang="en">bundle</i>. A quel punto nulla dipende più da questo sito.</p>
+
+    <h2>Lingua</h2>
+    <p>Ogni etichetta è tradotta per rilevamento, senza selettore: prima la lingua dichiarata dalla
+      pagina stessa — l'attributo <code>lang</code> più vicino, quindi <code>&lt;html lang="fr"&gt;</code>
+      ottiene etichette in francese — poi le preferenze del browser, poi l'inglese. Una pagina che non
+      dichiara nulla ricade sul browser esattamente come prima.</p>
   </div>
 </section>
 `

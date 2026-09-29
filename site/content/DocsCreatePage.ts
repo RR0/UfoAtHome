@@ -19,14 +19,30 @@ export class DocsCreatePage extends DocsSection {
 
   readonly meta: PageMeta = {
     slug: "docs/create",
-    navLabel: { en: "Creating an observation", fr: "Créer une observation" },
-    title: { en: "Create an observation", fr: "Créer une observation" },
+    navLabel: {
+      en: "Creating an observation",
+      fr: "Créer une observation",
+      es: "Crear una observación",
+      it: "Creare un'osservazione"
+    },
+    title: {
+      en: "Create an observation",
+      fr: "Créer une observation",
+      es: "Crear una observación",
+      it: "Creare un'osservazione"
+    },
     description: {
       en: "Three ways to make a recording: in the editor, with an AI assistant working from the "
         + "case documents, or by writing the file yourself, whose format has its own page.",
       fr: "Trois façons de faire un enregistrement : dans l'éditeur, avec un assistant IA qui "
         + "travaille sur les documents du cas, ou en écrivant le fichier vous-même, dont le format "
-        + "a sa propre page."
+        + "a sa propre page.",
+      es: "Tres maneras de hacer una grabación: en el editor, con un asistente de IA que trabaja a "
+        + "partir de los documentos del caso, o escribiendo tú mismo el archivo, cuyo formato "
+        + "tiene su propia página.",
+      it: "Tre modi per fare una registrazione: nell'editor, con un assistente IA che lavora sui "
+        + "documenti del caso, o scrivendo tu stesso il file, il cui formato ha una pagina "
+        + "a sé."
     },
     asideFromNav: true
   }
@@ -37,11 +53,17 @@ export class DocsCreatePage extends DocsSection {
       + "can replay.",
     fr: "Dessinez-la dans l'éditeur, faites-la écrire par un assistant IA à partir du dossier, ou "
       + "écrivez-la vous-même. Les trois produisent la même chose : un fichier JSON qui est le "
-      + "vôtre, et que n'importe qui peut rejouer."
+      + "vôtre, et que n'importe qui peut rejouer.",
+    es: "Dibújala en el editor, haz que un asistente de IA la escriba a partir del expediente, o "
+      + "escríbela tú mismo. Las tres dan lo mismo: un archivo JSON que es tuyo, y que cualquiera "
+      + "puede volver a reproducir.",
+    it: "Disegnala nell'editor, falla scrivere a un assistente IA a partire dal fascicolo, o "
+      + "scrivila tu stesso. Tutti e tre producono la stessa cosa: un file JSON che è tuo, e "
+      + "che chiunque può riprodurre."
   }
 
   render(language: SiteLanguage): string {
-    return this.hero(language, this.meta.title, this.lede) + (language === "fr" ? this.fr() : this.en())
+    return this.hero(language, this.meta.title, this.lede) + ({ en: () => this.en(), fr: () => this.fr(), es: () => this.es(), it: () => this.it() })[language]()
   }
 
   private en(): string {
@@ -227,6 +249,193 @@ https://ufoathome.org/sighting.schema.json .
     <p>Tout ce que l'éditeur écrit, champ par champ, avec un fichier entier à taper et les démos qui
       valent la lecture, est sur sa propre page : <a href="/docs/format/">le fichier d'observation</a>.</p>
     <p class="doc-try-actions"><a class="btn btn-primary" href="/docs/format/">Lire le format</a></p>
+  </div>
+</section>
+`
+  }
+
+  private es(): string {
+    return `
+<section class="band">
+  <div class="wrap prose-wide">
+    <h2>1. En el editor</h2>
+    <p>La vía habitual, y la que conviene usar salvo que tengas una razón para no hacerlo. Dibuja lo
+      que se vio, di cuándo y dónde, registra cómo se movió — y el cielo, el tiempo y el terreno se
+      consultan por ti en lugar de recordarse.</p>
+    <p class="doc-try-actions">
+      <a class="btn btn-primary" href="/edit/">Abrir el editor</a>
+      <a class="btn" href="/edit/#manual">Leer el manual</a>
+    </p>
+    <p>Termina con <strong>Export</strong>, que te entrega un archivo. Ese archivo es la grabación
+      completa: no hay cuenta y aquí no se guarda nada. Ponlo en algún lugar con una dirección
+      pública y estará listo para <a href="/docs/share/">compartir</a>.</p>
+    <p>¿Ya tienes una y quieres cambiarla? El editor se abre con una grabación existente — el panel
+      <q>?</q> de cada reconstrucción publicada lleva el enlace que lo hace.</p>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap prose-wide">
+    <h2>2. Con un asistente de IA, a partir del expediente</h2>
+    <p>Cuando un caso ya tiene sus documentos (un informe, un cuestionario, una declaración, bocetos,
+      fotos del lugar, un mapa), lo más rápido suele ser dárselos a un asistente de IA capaz de leer
+      PDF e imágenes y de ejecutar un poco de código, indicarle esta documentación y hacer que escriba
+      el archivo. Lee el relato, mide los dibujos, calcula direcciones sobre el mapa, consulta lo que
+      se puede consultar y escribe lo que encontró en el formato. Después tú miras el resultado y le
+      dices lo que está mal.</p>
+    <p>El asistente no sabe del caso más que lo que tú le das, ni del formato más que lo que dicen
+      estas páginas. Así que pídele la disciplina que mantendría un investigador:</p>
+    <pre class="doc-prompt"><code>Aquí están los documentos de un caso de avistamiento. Construye una
+grabación UFO@home de lo que vio el observador: el archivo JSON descrito
+en https://ufoathome.org/docs/format/ , verificado con
+https://ufoathome.org/sighting.schema.json .
+
+- Indica solo lo que los documentos respaldan. Escribe cada valor que
+  hayas calculado como {"value": ..., "basis": "derived", "rationale":
+  "..."} y cada valor que hayas tenido que elegir con "basis": "assumed".
+- El fenómeno son solo ángulos: su dirección (aim) y su tamaño aparente
+  (angular) en cada momento. Los metros que dio el observador van en
+  "interpretation", nunca en las formas.
+- Enumera las contradicciones entre los documentos, y las preguntas que
+  hay que volver a plantear al observador o al investigador.</code></pre>
+    <p>O instala la <strong>skill de UFO@home</strong> en tu asistente: las mismas instrucciones,
+      con el método, las reglas del formato, el esquema, un ejemplo y un validador que solo necesita
+      Python, de modo que solo tengas que darle los documentos.
+      <a href="/skill/ufoathome-recording.zip">Descargar la skill</a> (un zip que añadir a las
+      skills de Claude, o que descomprimir en <code>~/.claude/skills/</code> para Claude Code), o
+      <a href="/skill/SKILL.md">leerla primero</a>.</p>
+    <p>Después comprueba lo que escribió, como comprobarías el trabajo de un colega:</p>
+    <ul>
+      <li><strong>Reprodúcela.</strong> Ábrela en <a href="/play/">el reproductor</a>, desde tu
+        ordenador con las fotos que nombra. ¿Está el fenómeno donde lo sitúan los dibujos, delante de
+        los árboles correctos, a la altura correcta sobre el horizonte? Di lo que no encaja, y haz
+        que lo corrija.</li>
+      <li><strong>Lee los valores <code>assumed</code>.</strong> Son la lista de lo que nadie dijo.
+        Cada uno es una pregunta para el observador, o un punto donde la reconstrucción se apoya en
+        una suposición.</li>
+      <li><strong>Termina en <a href="/edit/">el editor</a></strong> lo que es más fácil hacer con un ratón que con una
+        frase: desplazar un edificio unos metros, ajustar una dirección hasta que quede sobre la
+        foto.</li>
+      <li><strong>Enséñasela al observador.</strong> La única prueba que cuenta es si reconoce lo que
+        vio.</li>
+    </ul>
+    <p>Un observador que solo tiene su propio relato puede hacerlo dentro del editor: lo escribe en
+      la pestaña <em>Observation</em>, elige qué lo redacta (hoy Claude: su propia clave de API, y el
+      modelo), y el editor redacta el resto de la grabación a partir de él, sin enviar nada a ningún
+      sitio salvo a ese modelo.</p>
+    <p class="small">Un relato es un dato personal. Antes de dar documentos a un asistente en línea,
+      quita lo que identifica al observador salvo que haya dado su consentimiento, y comprueba qué
+      conserva el servicio. Y un asistente puede equivocarse con aplomo: el archivo solo vale lo que
+      valen los documentos en que se basa y la comprobación posterior.</p>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap prose-wide">
+    <h2>3. A mano, o desde tu propio archivo</h2>
+    <p>Una grabación es un archivo de forma documentada, así que nada te impide escribir una en un
+      editor de texto, o generar mil desde una base de datos que ya tengas: es exactamente lo que
+      escribe el propio editor.</p>
+  </div>
+</section>
+<section class="band">
+  <div class="wrap prose-wide">
+    <p>Todo lo que escribe el editor, campo por campo, con un archivo completo para escribir y las
+      demos que vale la pena leer, está en su propia página: <a href="/docs/format/">el archivo de avistamiento</a>.</p>
+    <p class="doc-try-actions"><a class="btn btn-primary" href="/docs/format/">Leer el formato</a></p>
+  </div>
+</section>
+`
+  }
+
+  private it(): string {
+    return `
+<section class="band">
+  <div class="wrap prose-wide">
+    <h2>1. Nell'editor</h2>
+    <p>La via ordinaria, e quella da usare a meno di avere un motivo per non farlo. Disegna ciò che è
+      stato visto, di' quando e dove, registra come si è mosso — e il cielo, il meteo e il terreno
+      vengono ricavati per te invece che ricordati.</p>
+    <p class="doc-try-actions">
+      <a class="btn btn-primary" href="/edit/">Apri l'editor</a>
+      <a class="btn" href="/edit/#manual">Leggi il manuale</a>
+    </p>
+    <p>Si conclude con <strong>Export</strong>, che ti consegna un file. Quel file è l'intera
+      registrazione: non c'è alcun account e qui non si conserva nulla. Mettilo da qualche parte con
+      un indirizzo pubblico ed è pronto da <a href="/docs/share/">condividere</a>.</p>
+    <p>Ne hai già una e vuoi modificarla? L'editor si apre su una registrazione esistente — il
+      pannello <q>?</q> di ogni ricostruzione pubblicata contiene il link che lo fa.</p>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap prose-wide">
+    <h2>2. Con un assistente IA, a partire dal fascicolo</h2>
+    <p>Quando un caso ha già i suoi documenti (un rapporto, un questionario, una dichiarazione,
+      schizzi, foto del luogo, una mappa), la via più rapida è spesso affidarli a un assistente IA in
+      grado di leggere PDF e immagini e di eseguire un po' di codice, indicargli questa
+      documentazione e fargli scrivere il file. Legge il resoconto, misura i disegni, calcola le
+      direzioni dalla mappa, ricava ciò che si può ricavare e scrive ciò che ha trovato nel formato.
+      Poi tu guardi il risultato, e gli dici che cosa non va.</p>
+    <p>L'assistente non sa del caso se non ciò che gli dai, né del formato se non ciò che dicono
+      queste pagine. Chiedigli quindi la disciplina che manterrebbe un investigatore:</p>
+    <pre class="doc-prompt"><code>Ecco i documenti di un caso di avvistamento. Costruisci una
+registrazione UFO@home di ciò che l'osservatore ha visto: il file JSON
+descritto su https://ufoathome.org/docs/format/ , verificato con
+https://ufoathome.org/sighting.schema.json .
+
+- Indica solo ciò che i documenti sostengono. Scrivi ogni valore che hai
+  calcolato come {"value": ..., "basis": "derived", "rationale": "..."}
+  e ogni valore che hai dovuto scegliere con "basis": "assumed".
+- Il fenomeno è fatto solo di angoli: la sua direzione (aim) e la sua
+  dimensione apparente (angular) in ogni istante. I metri indicati
+  dall'osservatore vanno in "interpretation", mai nelle forme.
+- Elenca le contraddizioni tra i documenti, e le domande da riproporre
+  all'osservatore o all'investigatore.</code></pre>
+    <p>Oppure installa la <strong>skill di UFO@home</strong> nel tuo assistente: le stesse
+      istruzioni, con il metodo, le regole del formato, lo schema, un esempio e un validatore che
+      richiede solo Python, così che non resti che affidargli i documenti.
+      <a href="/skill/ufoathome-recording.zip">Scarica la skill</a> (uno zip da aggiungere alle
+      skill di Claude, o da decomprimere in <code>~/.claude/skills/</code> per Claude Code), oppure
+      <a href="/skill/SKILL.md">leggila prima</a>.</p>
+    <p>Poi controlla ciò che ha scritto, come controlleresti il lavoro di un collega:</p>
+    <ul>
+      <li><strong>Riproducila.</strong> Aprila nel <a href="/play/">lettore</a>, dal tuo computer
+        con le foto che nomina. Il fenomeno è dove lo mettono i disegni, davanti agli alberi giusti,
+        alla giusta altezza sopra l'orizzonte? Di' che cosa non torna, e fallo correggere.</li>
+      <li><strong>Leggi i valori <code>assumed</code>.</strong> Sono l'elenco di ciò che nessuno ha
+        detto. Ognuno è una domanda per l'osservatore, o un punto in cui la ricostruzione poggia su
+        un'ipotesi.</li>
+      <li><strong>Completa nell'<a href="/edit/">editor</a></strong> ciò che è più facile fare con il mouse che con una
+        frase: spostare un edificio di qualche metro, ritoccare una direzione finché non cade sulla
+        foto.</li>
+      <li><strong>Mostrala all'osservatore.</strong> L'unica prova che conta è se riconosce ciò che
+        ha visto.</li>
+    </ul>
+    <p>Un osservatore che ha solo il proprio resoconto può farlo dentro l'editor: lo scrive nella
+      scheda <em>Observation</em>, sceglie che cosa lo redige (oggi Claude: la propria chiave API, e
+      il modello), e l'editor redige il resto della registrazione a partire da esso, senza inviare
+      nulla da nessuna parte se non a quel modello.</p>
+    <p class="small">Un resoconto è un dato personale. Prima di affidare documenti a un assistente
+      online, togli ciò che identifica l'osservatore a meno che non abbia acconsentito, e verifica
+      che cosa conserva il servizio. E un assistente può sbagliare con sicurezza: il file vale quanto
+      i documenti su cui si basa e la verifica che lo segue.</p>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap prose-wide">
+    <h2>3. A mano, o dal tuo archivio</h2>
+    <p>Una registrazione è un file dalla forma documentata, quindi nulla ti impedisce di scriverne una
+      in un editor di testo, o di generarne mille da un database che hai già: è esattamente ciò che
+      scrive l'editor stesso.</p>
+  </div>
+</section>
+<section class="band">
+  <div class="wrap prose-wide">
+    <p>Tutto ciò che l'editor scrive, campo per campo, con un file completo da digitare e le demo che
+      vale la pena leggere, è nella sua pagina: <a href="/docs/format/">il file di avvistamento</a>.</p>
+    <p class="doc-try-actions"><a class="btn btn-primary" href="/docs/format/">Leggi il formato</a></p>
   </div>
 </section>
 `

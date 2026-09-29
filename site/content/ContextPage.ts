@@ -19,22 +19,33 @@ export class ContextPage implements SitePage {
 
   readonly meta: PageMeta = {
     slug: "context",
-    navLabel: { en: "Context", fr: "Contexte" },
+    navLabel: { en: "Context", fr: "Contexte", es: "Contexto", it: "Contesto" },
     title: {
       en: "Check what the scene claims",
-      fr: "Vérifier ce que la scène affirme"
+      fr: "Vérifier ce que la scène affirme",
+      es: "Comprobar lo que afirma la escena",
+      it: "Verificare ciò che la scena afferma"
     },
     asideFromNav: true,
     description: {
       en: "Every part of a reconstruction that is not the observer's own account: where its data "
         + "comes from, how it is computed, and the point at which it stops and says so.",
       fr: "Chaque partie d'une reconstitution qui n'est pas le compte rendu lui-même : d'où vient sa "
-        + "donnée, comment elle est calculée, et le point où elle s'arrête et le dit."
+        + "donnée, comment elle est calculée, et le point où elle s'arrête et le dit.",
+      es: "Cada parte de una reconstrucción que no es el propio relato del observador: de dónde proceden sus "
+        + "datos, cómo se calcula y el punto en el que se detiene y lo dice.",
+      it: "Ogni parte di una ricostruzione che non è il resoconto dell'osservatore stesso: da dove vengono i suoi "
+        + "dati, come viene calcolata e il punto in cui si ferma e lo dice."
     }
   }
 
   render(language: SiteLanguage): string {
-    return language === "fr" ? this.fr() : this.en()
+    switch (language) {
+      case "fr": return this.fr()
+      case "es": return this.es()
+      case "it": return this.it()
+      default: return this.en()
+    }
   }
 
   private en(): string {
@@ -386,6 +397,372 @@ export class ContextPage implements SitePage {
       qu'exige sa licence — et peut être remplacée par une autre. Le sélecteur <em>est</em> le
       crédit. Ce qui manque encore, et ce que chaque élément attend, est sur
       <a href="/roadmap/">la page des futures évolutions</a>.</p>
+  </div>
+</section>
+`
+  }
+
+  private es(): string {
+    return `
+<section class="band hero">
+  <div class="wrap">
+    <p class="eyebrow"><a class="crumb" href="/">← Inicio</a></p>
+    <h1>Comprobar lo que afirma la escena.</h1>
+    <p class="lede">El observador aporta el fenómeno. Todo lo demás se consulta en un registro con
+      nombre o se calcula a partir de la física — y allí donde ni lo uno ni lo otro puede responder,
+      la herramienta lo dice en lugar de dibujar algo verosímil. Esto es eso, parte por parte, con
+      los números que realmente aplica.</p>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap prose-wide">
+    <h2 id="sky">El cielo</h2>
+    <p>El Sol, la Luna y su fase, los planetas y las estrellas se sitúan por efemérides para ese
+      instante, esa latitud y esa longitud. Nada es una imagen de un cielo: señala cualquier cosa y
+      se nombra a sí misma — «Venus, mag −4, 8° sobre el horizonte».</p>
+    <p>Lo que se dibuja del catálogo se detiene en la magnitud 6,5, y ese número es un hecho sobre un
+      <em>observador</em> y no sobre el cielo: es hasta dónde llega un ojo humano adaptado a la
+      oscuridad. Pon otra cosa delante de la misma noche y el umbral se desplaza con ella — mira
+      <a href="#instrument">el instrumento</a>.</p>
+    <p>El catálogo sigue el mismo umbral. Un cielo a simple vista cuesta 400 kB, hasta la magnitud
+      7,5; otras 57 688 estrellas, hasta la magnitud 9, solo se descargan para una grabación cuya
+      propia óptica llega tan lejos. Más allá de la magnitud 9 son los datos los que se detienen, y la
+      herramienta indica el límite en lugar de dibujar un cielo más vacío que el que mostraba la
+      fotografía.</p>
+    <p>El catálogo está escrito para el año 2000, y el eje en torno al cual gira el cielo se ha
+      desplazado desde entonces. Cada estrella se lleva a la fecha de la observación: un grado en
+      1918, catorce en 1006, que es la diferencia entre dos constelaciones.</p>
+    <p>La Vía Láctea y la luz zodiacal se integran a lo largo de la línea de visión en lugar de
+      pintarse como una textura — por eso se mueven correctamente con la estación, la hora y la
+      latitud del observador en vez de estar simplemente en el lugar correcto una vez.</p>
+
+    <h2 id="light">La luz del cielo</h2>
+    <p>El cielo en sí no es un degradado de color. La luz del Sol y de la Luna se sigue a través de
+      una atmósfera esférica en quince longitudes de onda que cubren lo que ve un ojo, tal como la
+      luz llega realmente a un observador: dispersada una vez por el aire en su camino, luego una y
+      otra vez, atenuada por lo que se interpone. Tres cosas componen ese aire. Las moléculas del
+      propio aire, que dispersan el azul mucho más que el rojo y hacen azul el cielo. La bruma, que
+      blanquea el horizonte y pone una aureola brillante alrededor del Sol, y que es más espesa en un
+      día húmedo que en uno seco: su cantidad sigue la humedad relativa del registro meteorológico. Y
+      la capa de ozono, que absorbe un poco de naranja, invisible a mediodía y la única razón de que
+      un cenit crepuscular sea de un azul profundo y no de un amarillo grisáceo.</p>
+    <p>Todo lo que hace un cielo despejado se deduce entonces sin pintarlo: el enrojecimiento y la
+      franja más brillante a lo largo del horizonte al ponerse el Sol, la sombra de la Tierra que
+      sube frente al Sol con la franja rosada encima, el lento oscurecimiento del crepúsculo primero
+      hacia el este, el azul más profundo visto desde un avión, el aire más fino sobre un lugar
+      elevado, y el cielo iluminado por la Luna, que es la misma dispersión de una fuente mucho más
+      débil. La luminiscencia de la alta atmósfera queda como el suelo de toda noche sin Luna, más
+      brillante cerca del horizonte, donde una línea de visión atraviesa más de su capa.</p>
+    <p>El modelo se comprueba en lugar de darse por bueno. Un lento cálculo de Monte Carlo de la
+      misma atmósfera, sin más aproximación que el ruido, sitúa el cielo que dibuja la escena a menos
+      de un cuarto de magnitud y una centésima de color, desde un mediodía brumoso hasta un Sol
+      dieciséis grados bajo el horizonte, desde el suelo y desde un avión. Se sabe que un lugar es
+      demasiado oscuro, en dos tercios de magnitud: la sombra de la Tierra baja en el cielo durante
+      el crepúsculo náutico. Y el cenit coincide a media magnitud con la fotometría del crepúsculo
+      medida en el observatorio de Paranal, sin haber sido nunca ajustado a ella.</p>
+    <p>Lo que llega a la pantalla es lo que hace de ese cielo un ojo adaptado a él: para un
+      observador que está en él, un cielo nocturno no es diez millones de veces más oscuro que un
+      cielo diurno, y el color cede el paso a un gris azulado tenue a medida que los bastones toman
+      el relevo de los conos. Una cámara no hace nada de esto, así que una grabación hecha a través
+      de una conserva el azul que muestra realmente una exposición larga. El brillo con que se
+      muestran un día y una noche sin Luna son las dos elecciones de esa cadena, y se declaran como
+      elecciones.</p>
+    <p>Lo que no hace: ni contaminación lumínica, ni bruma volcánica, ni refracción del Sol bajo el
+      horizonte, y las nubes se dibujan aparte en lugar de atenuar la luz del cielo a su alrededor.
+      Cuánta bruma ponía en el aire una ciudad dada no puede saberse a partir de un registro de 1948;
+      solo se modela cuánto la hinchaba la humedad. Las fuentes, y las decisiones detrás de cada una,
+      se enumeran en <a href="/docs/sources/#air">el aire</a>.</p>
+
+    <h2 id="space">Qué más había allá arriba</h2>
+    <p>Cada uno de estos es una explicación candidata, así que cada uno debe responder a la misma
+      pregunta antes de ser dibujado: ¿podía ser visible <em>desde allí, en ese momento</em>?</p>
+    <p><strong>Los cometas</strong> aparecen en su propia aparición y en ninguna otra. El catálogo se
+      genera a partir de JPL Horizons y la órbita se propaga, así que un cometa está ahí en esa fecha
+      o no lo está.</p>
+    <p><strong>Las novas y supernovas</strong> brillan solo las noches que cubre su curva de luz
+      registrada, y nunca fuera de ella: antes del primer registro la estrella quizá ya estaba
+      subiendo, y nadie puede decir con qué brillo. Treinta y tres erupciones fueron visibles a simple
+      vista, desde la supernova de 1006 hasta RS Ophiuchi en 2021. Su brillo está medido por la AAVSO
+      para cada nova hasta 2006, reconstruido a partir de las propias comparaciones de Tycho y de
+      Kepler para 1572 y 1604, y ceñido a unas pocas fechas de las crónicas para 1054 y 1181; cada
+      una dice cuál es su caso.</p>
+    <p><strong>Las lluvias de meteoros</strong> llegan con su radiante y su tasa horaria de esa noche,
+      sobre el fondo esporádico que nunca se detiene.</p>
+    <p><strong>Los satélites</strong> reciben la pregunta más difícil, porque estar iluminado no es lo
+      mismo que ser visto: la sombra de la Tierra se calcula para la fecha y la hora para decir si
+      alguno podía siquiera recibir el Sol, y cuántos objetos había en órbita en esa fecha se sabe, y
+      se indica. Desde febrero de 2021 la herramienta va más allá: los elementos orbitales guardados
+      una o dos veces al día por Laurent Chabin (SCEAU) dan el paso real de cada satélite, iluminado a
+      través de la sombra de la Tierra y tan brillante como se midió, trenes de Starlink incluidos.
+      Antes de esa fecha no se dibuja ningún paso individual, porque ninguno podría dibujarse con
+      veracidad.</p>
+
+    <h2 id="ice">Hielo y agua</h2>
+    <p>Halos de 22° y 46°, parhelios, el círculo parhélico, arcos tangentes, circuncenital y
+      circunhorizontal: ninguno de esos ángulos está almacenado. Cada uno se deriva del índice de
+      refracción del hielo y de la geometría del cristal, que es lo que hace que todo el conjunto se
+      mueva a la vez y siga siendo coherente con la altura del propio Sol.</p>
+    <p>Los arcoíris y los arcos lunares se trazan con rayos a través de una gota esférica por la misma
+      razón — el orden de los colores, el hueco entre los dos arcos y la luz dentro del primario
+      salen del trazado en lugar de dibujarse.</p>
+
+    <h2 id="weather">El tiempo de aquel día</h2>
+    <p>La nubosidad, la base de las nubes, la lluvia, la nieve, el granizo, las tormentas y sus
+      truenos, y el viento se leen de ERA5, el reanálisis del ECMWF: horario, mundial, desde 1940. Se
+      interpolan por fotogramas clave a lo largo de la observación, así que un cielo que se despejó
+      durante esos cuatro minutos se despeja en la reconstrucción.</p>
+    <p>Las nubes atenúan cada cuerpo celeste en lugar de limitarse a taparlo, que es lo que hace que
+      una Luna tras nubes finas se lea como una Luna tras nubes finas.</p>
+    <p>La consulta exacta se guarda en la grabación. Esa es la parte que importa: la afirmación sigue
+      siendo comprobable décadas después, por alguien que no confía en esta herramienta.</p>
+
+    <h2 id="ground">El terreno</h2>
+    <p>El relieve real y las imágenes aéreas se descargan alrededor del observador, junto con el
+      decorado que se interpuso: edificios, árboles, farolas, vehículos, ventanas y otros observadores
+      — con sus luces, sus frecuencias de destello y sus trayectorias.</p>
+    <p>A qué altura estaba el observador se consulta a partir de dónde estaba. El suelo bajo esas
+      coordenadas procede de un modelo de elevación real, así que la altitud del formulario es una
+      altura sobre el nivel del mar cuyo suelo es el propio terreno: nadie puede quedar por debajo. Y
+      no es un detalle — a 1500 m el horizonte está realmente 1,2° más bajo que al nivel del mar, lo
+      que basta para decidir si algo estaba por encima de él.</p>
+
+    <h2 id="instrument">El instrumento</h2>
+    <p>Un ojo no es un objetivo. A simple vista, un ángulo se corresponde con un ángulo; una cámara lo
+      proyecta en <code>f·tan θ</code>, con un sensor, una distancia focal, una apertura y una
+      exposición que dibuja trazos de estrellas y convierte en puntos una luz intermitente. Cambia de
+      aparato y todo el encuadre cambia —
+      <a href="/demos/#instrument-eye">el mismo avistamiento a través de tres de ellos</a>.</p>
+    <p>Solo se ofrece lo que ese aparato podía tener realmente: una Instamatic tenía una apertura y
+      una velocidad de obturación, así que no hay nada que elegir, y una cámara que aún no existía
+      queda señalada frente a la fecha de la propia observación.</p>
+    <p>Y el instrumento decide lo débil que podía llegar a registrarse algo. Esa misma Instamatic se
+      detiene en la magnitud 4,2 — dos menos que el observador que la sostiene, lo que explica la
+      mitad de por qué tantos relatos de «el cielo estaba lleno de estrellas» vienen con una
+      fotografía negra y vacía. Un 50 mm a f/2 durante veinte segundos llega a 9,7, tres magnitudes
+      <em>más allá</em> de ese observador. La apertura, la obturación y la focal lo deciden frente al
+      propio brillo del cielo.</p>
+    <p>Una exposición más larga deja de ayudar en cuanto el cielo se ha desplazado más de lo que el
+      objetivo puede resolver, y por eso una hora sobre un trípode no llega más hondo que cinco
+      segundos — solo da trazos más largos.</p>
+
+    <h2 id="pictures">Una foto del lugar</h2>
+    <p>Todo lo anterior está calculado, y un lector que mira el resultado no tiene forma de
+      distinguir una reconstrucción fiel de una verosímil. Una fotografía del mismo lugar sí la tiene.
+      Una grabación puede llevar fotos del lugar donde ocurrió — la del propio observador, la de un
+      investigador, el escaneo de una revista, una captura a pie de calle — cada una superpuesta al
+      render con una opacidad que el lector desliza entre todo foto y todo render, con el fenómeno
+      dibujado sobre ambos. Cada árbol que el relieve de treinta metros había alisado, cada cresta,
+      el seto real, forman entonces una sola imagen con la reconstrucción.
+      <a href="/demos/#cussac">Cussac</a> lleva la primera: la vista de 1968 desde el lugar, con la
+      esfera y su ascenso dibujados a mano.</p>
+    <p>Una foto es un campo de direcciones desde un punto, y se alinea como tal: rumbo, cabeceo,
+      alabeo y el campo del objetivo, ángulos y nada más. Se sitúa en la escena tridimensional como
+      un panel plano con ese campo — que es lo que produce un objetivo — y se dibuja a través de lo
+      que declara el instrumento, así que la misma foto es correcta bajo la vista equidistante de un
+      ojo y bajo la rectilínea de un 50 mm, y se queda en su sitio cuando el lector gira. Nada en la
+      escena la oculta y ella no oculta nada.</p>
+    <p>Alinearla es una medida, no una impresión. Nombra un punto de referencia en la foto y el mismo
+      en el render — un campanario, el extremo de un seto, el horizonte bajo un árbol — y dos de ellos
+      giran la foto para que encaje; tres o más ajustan también su campo. El residuo dice lo bien que
+      encaja, punto por punto, en verde, naranja o rojo: uno que no baja de un grado te está diciendo
+      que la foto no se tomó desde ese lugar, o que el relieve está mal ahí. Y una foto que encaja
+      devuelve el rumbo al que el observador miraba realmente — adoptado en su pose con su procedencia
+      anotada, donde un rumbo tecleado era solo su palabra. Las fotos a pie de calle tomadas cerca
+      (Panoramax, imágenes abiertas) llegan ya alineadas en rumbo, y una vuelta completa llega como
+      panorama.</p>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap prose-wide">
+    <p class="small">Cada fuente se nombra allí donde se presentan sus datos, con la atribución que
+      exige su licencia — y puede sustituirse por otra. El selector <em>es</em> el crédito. Lo que aún
+      falta, y lo que espera cada elemento, está en <a href="/roadmap/">la hoja de ruta</a>.</p>
+  </div>
+</section>
+`
+  }
+
+  private it(): string {
+    return `
+<section class="band hero">
+  <div class="wrap">
+    <p class="eyebrow"><a class="crumb" href="/">← Home</a></p>
+    <h1>Verificare ciò che la scena afferma.</h1>
+    <p class="lede">L'osservatore fornisce il fenomeno. Tutto il resto è ricavato da una fonte
+      nominata o calcolato dalla fisica — e dove né l'una né l'altra sanno rispondere, lo strumento
+      lo dice invece di disegnare qualcosa di plausibile. Eccolo, parte per parte, con i numeri che
+      applica davvero.</p>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap prose-wide">
+    <h2 id="sky">Il cielo</h2>
+    <p>Sole, Luna e la sua fase, pianeti e stelle sono collocati per effemeridi per quell'istante,
+      quella latitudine e quella longitudine. Niente è un'immagine di cielo: punta qualunque cosa e
+      si nomina da sé — «Venere, mag −4, 8° sopra l'orizzonte».</p>
+    <p>Ciò che viene disegnato dal catalogo si ferma alla magnitudine 6,5, e quel numero è un fatto
+      che riguarda un <em>osservatore</em> e non il cielo: è fin dove arriva un occhio umano adattato
+      al buio. Metti qualcos'altro davanti alla stessa notte e la soglia si sposta con esso — vedi
+      <a href="#instrument">lo strumento</a>.</p>
+    <p>Il catalogo segue la stessa soglia. Un cielo a occhio nudo costa 400 kB, fino alla magnitudine
+      7,5; altre 57 688 stelle, fino alla magnitudine 9, vengono scaricate solo da una registrazione
+      la cui ottica arriva fin lì. Oltre la magnitudine 9 sono i dati a fermarsi, e lo strumento
+      segnala il limite invece di disegnare un cielo più vuoto di quello che mostrava la
+      fotografia.</p>
+    <p>Il catalogo è scritto per l'anno 2000, e l'asse attorno a cui gira il cielo si è spostato da
+      allora. Ogni stella è riportata alla data dell'osservazione: un grado nel 1918, quattordici nel
+      1006, cioè la differenza fra due costellazioni.</p>
+    <p>La Via Lattea e la luce zodiacale sono integrate lungo la linea di vista invece di essere
+      dipinte come una texture — ed è per questo che si muovono correttamente con la stagione, l'ora
+      e la latitudine dell'osservatore invece di trovarsi al posto giusto una volta sola.</p>
+
+    <h2 id="light">La luce del cielo</h2>
+    <p>Il cielo stesso non è una sfumatura di colore. La luce del Sole e della Luna è seguita
+      attraverso un'atmosfera sferica a quindici lunghezze d'onda che coprono ciò che vede un occhio,
+      nel modo in cui la luce raggiunge davvero un osservatore: diffusa una volta dall'aria lungo il
+      cammino, poi ancora e ancora, attenuata da ciò che le sta davanti. Tre cose compongono
+      quell'aria. Le molecole dell'aria stessa, che diffondono il blu molto più del rosso e rendono
+      blu il cielo. La foschia, che sbianca l'orizzonte e mette un'aureola luminosa attorno al Sole,
+      e che è più spessa in una giornata umida che in una secca: la sua quantità segue l'umidità
+      relativa del dato meteorologico. E lo strato di ozono, che assorbe un po' di arancione,
+      invisibile a mezzogiorno e unica ragione per cui uno zenit crepuscolare è di un blu profondo
+      anziché di un giallo grigiastro.</p>
+    <p>Tutto ciò che fa un cielo sereno ne segue allora senza essere dipinto: l'arrossamento e la
+      fascia più luminosa lungo l'orizzonte al tramonto, l'ombra della Terra che sale opposta al Sole
+      con la fascia rosa sopra, il lento oscurarsi del crepuscolo prima verso est, il blu più profondo
+      visto da un aereo, l'aria più sottile sopra un sito elevato, e il cielo al chiaro di luna, che è
+      la stessa diffusione di una sorgente molto più debole. La luminescenza dell'alta atmosfera resta
+      come pavimento di ogni notte senza Luna, più luminosa vicino all'orizzonte dove una linea di
+      vista attraversa più del suo strato.</p>
+    <p>Il modello è verificato anziché creduto. Un lento calcolo Monte Carlo della stessa atmosfera,
+      senza altra approssimazione che il rumore, colloca il cielo disegnato dalla scena entro un
+      quarto di magnitudine e un centesimo di colore, da un mezzogiorno nebbioso a un Sole sedici
+      gradi sotto l'orizzonte, da terra e da un aereo. Un punto è noto per essere troppo scuro, di due
+      terzi di magnitudine: l'ombra della Terra bassa nel cielo durante il crepuscolo nautico. E lo
+      zenit concorda entro mezza magnitudine con la fotometria del crepuscolo misurata
+      all'osservatorio del Paranal, senza esservi mai stato adattato.</p>
+    <p>Ciò che arriva sullo schermo è ciò che ne fa un occhio adattato a quel cielo: per un
+      osservatore che vi si trova, un cielo notturno non è dieci milioni di volte più scuro di un cielo
+      diurno, e il colore cede il posto a un grigio-azzurro tenue man mano che i bastoncelli prendono
+      il posto dei coni. Una fotocamera non fa nulla di tutto questo, quindi una registrazione fatta
+      attraverso di essa conserva il blu che una posa lunga mostra davvero. Quanto luminosi vengono
+      mostrati un giorno e una notte senza Luna sono le due scelte di quella catena, e sono dichiarate
+      come scelte.</p>
+    <p>Ciò che non fa: niente inquinamento luminoso, niente foschia vulcanica, niente rifrazione del
+      Sole sotto l'orizzonte, e le nuvole sono disegnate a parte invece di attenuare la luce del cielo
+      attorno a loro. Quanta foschia mettesse nell'aria una data città non si può sapere da un dato
+      del 1948; è modellato solo quanto l'umidità la gonfiasse. Le fonti, e le scelte dietro ciascuna,
+      sono elencate sotto <a href="/docs/sources/#air">l'aria</a>.</p>
+
+    <h2 id="space">Cos'altro c'era lassù</h2>
+    <p>Ciascuno di questi è una spiegazione candidata, quindi ciascuno deve rispondere alla stessa
+      domanda prima di essere disegnato: poteva essere visibile <em>da lì, in quel momento</em>?</p>
+    <p><strong>Le comete</strong> compaiono al loro passaggio e in nessun altro. Il catalogo è
+      generato da JPL Horizons e l'orbita è propagata, quindi una cometa c'è in quella data oppure
+      non c'è.</p>
+    <p><strong>Novae e supernovae</strong> brillano solo nelle notti coperte dalla loro curva di luce
+      registrata, e mai al di fuori: prima della prima registrazione la stella poteva già essere in
+      salita, e nessuno può dire con quale luminosità. Trentatré eruzioni hanno raggiunto l'occhio
+      nudo, dalla supernova del 1006 a RS Ophiuchi nel 2021. La loro luminosità è misurata dall'AAVSO
+      per ogni nova fino al 2006, ricostruita dai confronti di Tycho e di Keplero stessi per il 1572 e
+      il 1604, e ancorata a poche date delle cronache per il 1054 e il 1181; ciascuna dice quale sia il
+      suo caso.</p>
+    <p><strong>Gli sciami meteorici</strong> arrivano con il loro radiante e il loro tasso orario per
+      quella notte, sopra il fondo sporadico che non si ferma mai.</p>
+    <p><strong>I satelliti</strong> ricevono la domanda più difficile, perché essere illuminati non è
+      la stessa cosa che essere visti: l'ombra della Terra è calcolata per la data e l'ora per dire se
+      uno di essi poteva anche solo ricevere il Sole, e quanti oggetti fossero in orbita in quella
+      data è noto, e dichiarato. Da febbraio 2021 lo strumento va oltre: gli elementi orbitali salvati
+      una o due volte al giorno da Laurent Chabin (SCEAU) danno il passaggio reale di ogni satellite,
+      illuminato attraverso l'ombra della Terra e luminoso quanto è stato misurato, treni di Starlink
+      compresi. Prima di quella data non viene disegnato alcun passaggio individuale, perché nessuno
+      potrebbe esserlo in modo veritiero.</p>
+
+    <h2 id="ice">Ghiaccio e acqua</h2>
+    <p>Aloni di 22° e 46°, pareli, il cerchio parelico, archi tangenti, circumzenitale e
+      circumorizzontale: nessuno di quegli angoli è memorizzato. Ciascuno è derivato dall'indice di
+      rifrazione del ghiaccio e dalla geometria del cristallo, ed è questo che fa muovere insieme
+      l'intero fenomeno e lo mantiene coerente con l'altezza del Sole stesso.</p>
+    <p>Arcobaleni e arcobaleni lunari sono tracciati con raggi attraverso una goccia sferica per la
+      stessa ragione — l'ordine dei colori, lo spazio fra i due archi e la luce all'interno del
+      primario escono dal tracciamento invece di essere disegnati.</p>
+
+    <h2 id="weather">Il meteo di quel giorno</h2>
+    <p>Copertura nuvolosa, base delle nubi, pioggia, neve, grandine, temporali e i loro tuoni, e vento
+      sono letti da ERA5, la rianalisi dell'ECMWF: oraria, mondiale, dal 1940. Sono interpolati per
+      fotogrammi chiave lungo l'osservazione, così che un cielo che si è rasserenato durante quei
+      quattro minuti si rasserena nella ricostruzione.</p>
+    <p>Le nuvole attenuano ogni corpo celeste invece di coprirlo soltanto, ed è ciò che fa sì che una
+      Luna dietro nubi sottili si legga come una Luna dietro nubi sottili.</p>
+    <p>La richiesta esatta è conservata nella registrazione. È la parte che conta: l'affermazione
+      resta verificabile decenni dopo, da qualcuno che non si fida di questo strumento.</p>
+
+    <h2 id="ground">Il terreno</h2>
+    <p>Il rilievo reale e le immagini aeree vengono scaricati attorno all'osservatore, insieme
+      all'arredo che si è frapposto: edifici, alberi, lampioni, veicoli, finestre e altri osservatori
+      — con le loro luci, le loro frequenze di lampeggio e le loro traiettorie.</p>
+    <p>A che altezza si trovasse l'osservatore si ricava da dove si trovava. Il suolo sotto quelle
+      coordinate viene da un modello di elevazione reale, quindi l'altitudine del modulo è un'altezza
+      sul livello del mare il cui pavimento è il terreno stesso: nessuno può esservi collocato sotto.
+      E non è un dettaglio — a 1500 m l'orizzonte è davvero 1,2° più basso che al livello del mare, il
+      che basta a decidere se qualcosa gli stava sopra.</p>
+
+    <h2 id="instrument">Lo strumento</h2>
+    <p>Un occhio non è un obiettivo. A occhio nudo un angolo corrisponde a un angolo; una fotocamera
+      lo proietta in <code>f·tan θ</code>, con un sensore, una lunghezza focale, un diaframma e una
+      posa che disegna le scie delle stelle e trasforma in puntini una luce lampeggiante. Cambia
+      apparecchio e tutta l'inquadratura cambia —
+      <a href="/demos/#instrument-eye">lo stesso avvistamento attraverso tre di essi</a>.</p>
+    <p>Viene offerto solo ciò su cui quell'apparecchio poteva davvero essere impostato: una Instamatic
+      aveva un solo diaframma e un solo tempo di posa, quindi non c'è nulla da scegliere, e una
+      fotocamera che non esisteva ancora viene segnalata rispetto alla data dell'osservazione
+      stessa.</p>
+    <p>Ed è lo strumento a decidere quanto debole potesse essere una cosa per essere registrata. Quella
+      stessa Instamatic si ferma alla magnitudine 4,2 — due in meno dell'osservatore che la tiene, il
+      che spiega metà del perché tanti resoconti di «il cielo era pieno di stelle» arrivino con una
+      fotografia nera e vuota. Un 50 mm a f/2 per venti secondi arriva a 9,7, tre magnitudini
+      <em>oltre</em> quell'osservatore. Diaframma, otturatore e focale lo stabiliscono rispetto alla
+      luminosità del cielo stesso.</p>
+    <p>Una posa più lunga smette di aiutare appena il cielo è scivolato più di quanto l'obiettivo
+      possa risolvere, ed è per questo che un'ora su un treppiede non va più in profondità di cinque
+      secondi — dà solo scie più lunghe.</p>
+
+    <h2 id="pictures">Una foto del luogo</h2>
+    <p>Tutto ciò che precede è calcolato, e un lettore che guarda il risultato non ha modo di
+      distinguere una ricostruzione fedele da una plausibile. Una fotografia dello stesso luogo sì.
+      Una registrazione può portare foto del luogo in cui è accaduto — quella dell'osservatore stesso,
+      quella di un investigatore, la scansione di una rivista, una ripresa a livello strada — ciascuna
+      sovrapposta al rendering con un'opacità che il lettore fa scorrere fra tutta foto e tutto
+      rendering, con il fenomeno disegnato sopra entrambi. Ogni albero che il rilievo a trenta metri
+      aveva spianato, ogni cresta, la vera siepe, diventano allora un'unica immagine con la
+      ricostruzione. <a href="/demos/#cussac">Cussac</a> porta la prima: la vista del 1968 dal luogo,
+      con la sfera e la sua salita disegnate a mano.</p>
+    <p>Una foto è un campo di direzioni da un punto, e si allinea come tale: rotta, beccheggio, rollio
+      e il campo dell'obiettivo, angoli e nient'altro. Sta nella scena tridimensionale come un
+      pannello piano con quel campo — che è ciò che produce un obiettivo — ed è disegnata attraverso
+      ciò che lo strumento dichiara, quindi la stessa foto è corretta sotto la vista equidistante di un
+      occhio e sotto quella rettilinea di un 50 mm, e resta al suo posto quando il lettore si gira.
+      Niente nella scena la nasconde ed essa non nasconde niente.</p>
+    <p>Allinearla è una misura, non un'impressione. Nomina un punto di riferimento sulla foto e lo
+      stesso nel rendering — un campanile, la fine di una siepe, l'orizzonte sotto un albero — e due di
+      essi ruotano la foto perché combaci; tre o più ne adattano anche il campo. Il residuo dice quanto
+      bene combacia, punto per punto, in verde, arancione o rosso: uno che non scende sotto un grado ti
+      sta dicendo che la foto non è stata scattata da quel punto, o che lì il rilievo è sbagliato. E una
+      foto che combacia restituisce la rotta verso cui l'osservatore era davvero rivolto — adottata
+      nella sua posa con la provenienza annotata, là dove una rotta digitata era solo la sua parola. Le
+      foto a livello strada scattate nei dintorni (Panoramax, immagini aperte) arrivano già allineate in
+      rotta, e un giro completo arriva come panorama.</p>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap prose-wide">
+    <p class="small">Ogni fonte è nominata là dove i suoi dati sono riportati, con l'attribuzione che la
+      sua licenza richiede — e può essere sostituita con un'altra. Il selettore <em>è</em> il credito.
+      Ciò che manca ancora, e ciò che ogni elemento aspetta, è nella <a href="/roadmap/">tabella di marcia</a>.</p>
   </div>
 </section>
 `

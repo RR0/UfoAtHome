@@ -16,13 +16,27 @@ export class DocsSharePage extends DocsSection {
 
   readonly meta: PageMeta = {
     slug: "docs/share",
-    navLabel: { en: "Sharing an observation", fr: "Partager une observation" },
-    title: { en: "Share an observation", fr: "Partager une observation" },
+    navLabel: {
+      en: "Sharing an observation",
+      fr: "Partager une observation",
+      es: "Compartir una observación",
+      it: "Condividere un'osservazione"
+    },
+    title: {
+      en: "Share an observation",
+      fr: "Partager une observation",
+      es: "Compartir una observación",
+      it: "Condividere un'osservazione"
+    },
     description: {
       en: "Two ways to let somebody see a reconstruction: a link, or two lines on your own page. "
         + "Both with a working example you can try and copy.",
       fr: "Deux façons de faire voir une reconstitution : un lien, ou deux lignes sur votre propre "
-        + "page. Les deux avec un exemple qui marche, à essayer et à copier."
+        + "page. Les deux avec un exemple qui marche, à essayer et à copier.",
+      es: "Dos maneras de mostrar una reconstrucción a alguien: un enlace, o dos líneas en tu propia "
+        + "página. Ambas con un ejemplo que funciona, para probar y copiar.",
+      it: "Due modi per far vedere una ricostruzione a qualcuno: un link, o due righe sulla tua "
+        + "pagina. Entrambi con un esempio funzionante, da provare e copiare."
     },
     modules: ["/lib/rr0-sighting.mjs"],
     asideFromNav: true
@@ -32,22 +46,47 @@ export class DocsSharePage extends DocsSection {
     en: "Both start from the same thing: a recording, at a URL. Nothing is uploaded here and there "
       + "is no account — the file stays yours, wherever you keep it.",
     fr: "Les deux partent de la même chose : un enregistrement, à une URL. Rien n'est téléversé ici "
-      + "et il n'y a pas de compte — le fichier reste le vôtre, où que vous le gardiez."
+      + "et il n'y a pas de compte — le fichier reste le vôtre, où que vous le gardiez.",
+    es: "Las dos parten de lo mismo: una grabación, en una URL. Aquí no se sube nada y no hay "
+      + "cuenta — el archivo sigue siendo tuyo, dondequiera que lo guardes.",
+    it: "Entrambi partono dalla stessa cosa: una registrazione, a un URL. Qui non si carica nulla e "
+      + "non c'è alcun account — il file resta tuo, ovunque tu lo tenga."
   }
 
   script(language: SiteLanguage): string {
-    const fr = language === "fr"
-    const messages = JSON.stringify({
-      copy: fr ? "Copier" : "Copy",
-      copied: fr ? "Copié" : "Copied",
-      copyLink: fr ? "Copier le lien" : "Copy the link",
-      copyCode: fr ? "Copier le code" : "Copy the code",
-      notAnAddress: fr
-        ? "Ce n'est pas une adresse valide — il en faut une complète, commençant par https://"
-        : "That is not a valid address — it needs a full one, starting with https://"
-    })
+    const said: Said<Record<string, string>> = {
+      en: {
+        copy: "Copy",
+        copied: "Copied",
+        copyLink: "Copy the link",
+        copyCode: "Copy the code",
+        notAnAddress: "That is not a valid address — it needs a full one, starting with https://"
+      },
+      fr: {
+        copy: "Copier",
+        copied: "Copié",
+        copyLink: "Copier le lien",
+        copyCode: "Copier le code",
+        notAnAddress: "Ce n'est pas une adresse valide — il en faut une complète, commençant par https://"
+      },
+      es: {
+        copy: "Copiar",
+        copied: "Copiado",
+        copyLink: "Copiar el enlace",
+        copyCode: "Copiar el código",
+        notAnAddress: "Esa no es una dirección válida — hace falta una completa, que empiece por https://"
+      },
+      it: {
+        copy: "Copia",
+        copied: "Copiato",
+        copyLink: "Copia il link",
+        copyCode: "Copia il codice",
+        notAnAddress: "Questo non è un indirizzo valido — ne serve uno completo, che inizi con https://"
+      }
+    }
+    const messages = JSON.stringify(said[language])
     return `const messages = ${messages}
-const player = ${JSON.stringify(fr ? "/play/" : "/play/")}
+const player = ${JSON.stringify("/play/")}
 
 const linkField = document.getElementById("share-link-url")
 const linkOut = document.getElementById("share-link-out")
@@ -156,7 +195,7 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
   }
 
   render(language: SiteLanguage): string {
-    return this.hero(language, this.meta.title, this.lede) + (language === "fr" ? this.fr() : this.en())
+    return this.hero(language, this.meta.title, this.lede) + ({ en: () => this.en(), fr: () => this.fr(), es: () => this.es(), it: () => this.it() })[language]()
   }
 
   private en(): string {
@@ -322,6 +361,175 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
       enregistrement collé ne se partage évidemment pas par lien.</p>
     <p>Pas d'enregistrement du tout ? <a href="/docs/create/">Créez-en un</a> ; ce que contient le
       fichier est décrit sur la page du <a href="/docs/format/">fichier d'observation</a>.</p>
+  </div>
+</section>
+`
+  }
+
+  private es(): string {
+    const sample = DocsSharePage.SAMPLE
+    return `
+<section class="band">
+  <div class="wrap prose-wide">
+    <h2>1. Un enlace al reproductor de ufoathome</h2>
+    <p>La más sencilla de las dos, y la única que no exige nada del lugar al que lo envías. Quien lo
+      siga verá la observación reproducida bajo el cielo real de la fecha y el lugar que indica, en
+      su propio idioma.</p>
+
+    <div class="doc-try">
+      <label for="share-link-url">La dirección de tu grabación</label>
+      <input id="share-link-url" type="url" spellcheck="false" value="${sample}"
+             placeholder="https://tusitio.org/mi-caso/sighting.json">
+      <p class="doc-try-out"><code id="share-link-out"></code></p>
+      <p class="doc-try-actions">
+        <a class="btn btn-primary" id="share-link-open" href="/play/" target="_blank" rel="noopener">Probar</a>
+        <button class="btn" type="button" id="share-link-copy">Copiar el enlace</button>
+      </p>
+    </div>
+
+    <p>Sirve para un correo, un mensaje, un comentario, un foro que solo admite texto — en cualquier
+      sitio donde se pueda poner una URL. El campo de arriba empieza con una de las grabaciones de
+      este sitio para que el botón haga algo; la dirección que pongas ahí es la tuya, en tu propio
+      alojamiento, y este sitio nunca necesita una copia.</p>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap prose-wide">
+    <h2>2. En tu propia página</h2>
+    <p>Dos líneas de HTML ponen la reconstrucción misma en tu página, igual que se pone un vídeo.
+      Sin <i lang="en">framework</i>, y nada que construir para tu sitio.</p>
+
+    <div class="doc-try">
+      <label for="share-embed-url">La dirección de tu grabación</label>
+      <input id="share-embed-url" type="url" spellcheck="false" value="${sample}"
+             placeholder="https://tusitio.org/mi-caso/sighting.json">
+      <pre id="share-embed-pre"><code id="share-embed-code"></code></pre>
+      <div id="share-embed-view" class="code-view"></div>
+      <p class="doc-try-actions">
+        <button class="btn btn-primary" type="button" id="share-embed-copy">Copiar el código</button>
+        <button class="btn" type="button" id="share-embed-try">Ver el resultado</button>
+      </p>
+    </div>
+
+    <p class="doc-try-label">El resultado:</p>
+    <div class="stage stage-padded">
+      <rr0-sighting id="share-preview"></rr0-sighting>
+    </div>
+
+    <p>Es un elemento vivo, no una imagen — el mismo que te darían esas dos líneas. Cuál de los tres
+      componentes usar en su lugar, y todo lo que se les puede indicar, está en
+      <a href="/docs/components/">la página de los componentes</a>.</p>
+    <p class="small">La dirección del script no lleva versión, así que tu página sigue cada versión
+      sin que haya que editarla: los navegadores preguntan en cada visita si ha cambiado, y la
+      respuesta no cuesta nada mientras no haya cambiado.</p>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap prose-wide">
+    <h2>Lo que necesita una grabación para poder compartirse</h2>
+    <p><strong>Una cosa: una dirección pública.</strong> Cualquier lugar desde el que un navegador
+      pueda obtenerla — un sitio estático, un alojamiento de archivos, las páginas de un repositorio.
+      Un archivo en tu propio disco no tiene una URL que otra persona pueda seguir, y ese es el único
+      requisito real.</p>
+    <p class="small">Si la dirección es pública, se abre bien en tu propio navegador, y aun así el
+      reproductor dice que no pudo leerla, la causa es casi siempre la misma: el servidor no les dice
+      a los navegadores que otros sitios pueden leer el archivo. El remedio es una cabecera de
+      respuesta, <code>Access-Control-Allow-Origin: *</code>, en el JSON. La mayoría de los
+      alojamientos estáticos — GitHub Pages, Netlify, S3 — ya la envían o permiten añadirla con una
+      línea de configuración; si el servidor no es tuyo, eso es lo único que hay que pedirle a su
+      administrador. El reproductor y el editor lo indican cuando lo detectan, así que no deberías
+      tener que adivinarlo.</p>
+    <p>¿Todavía no tienes dónde ponerla? <a href="/play/">El reproductor</a> también acepta una
+      grabación pegada directamente, lo que basta para comprobarla antes de publicarla — aunque una
+      grabación pegada, claro está, no se puede compartir por enlace.</p>
+    <p>¿No tienes ninguna grabación? <a href="/docs/create/">Crea una</a>; lo que contiene el archivo
+      se describe en la página del <a href="/docs/format/">archivo de avistamiento</a>.</p>
+  </div>
+</section>
+`
+  }
+
+  private it(): string {
+    const sample = DocsSharePage.SAMPLE
+    return `
+<section class="band">
+  <div class="wrap prose-wide">
+    <h2>1. Un link al lettore di ufoathome</h2>
+    <p>Il più semplice dei due, e l'unico che non richiede nulla al luogo in cui lo invii. Chi lo
+      segue vede l'osservazione riprodotta sotto il cielo reale della data e del luogo che indica,
+      nella propria lingua.</p>
+
+    <div class="doc-try">
+      <label for="share-link-url">L'indirizzo della tua registrazione</label>
+      <input id="share-link-url" type="url" spellcheck="false" value="${sample}"
+             placeholder="https://tuosito.org/mio-caso/sighting.json">
+      <p class="doc-try-out"><code id="share-link-out"></code></p>
+      <p class="doc-try-actions">
+        <a class="btn btn-primary" id="share-link-open" href="/play/" target="_blank" rel="noopener">Provalo</a>
+        <button class="btn" type="button" id="share-link-copy">Copia il link</button>
+      </p>
+    </div>
+
+    <p>Va bene per un'email, un messaggio, un commento, un forum che accetta solo testo — ovunque si
+      possa mettere un URL. Il campo qui sopra parte da una delle registrazioni di questo sito perché
+      il pulsante faccia qualcosa; l'indirizzo che ci metti è il tuo, sul tuo hosting, e a
+      questo sito non serve mai una copia.</p>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap prose-wide">
+    <h2>2. Nella tua pagina</h2>
+    <p>Due righe di HTML mettono la ricostruzione stessa nella tua pagina, come si mette un video.
+      Nessun <i lang="en">framework</i>, e niente da compilare per il tuo sito.</p>
+
+    <div class="doc-try">
+      <label for="share-embed-url">L'indirizzo della tua registrazione</label>
+      <input id="share-embed-url" type="url" spellcheck="false" value="${sample}"
+             placeholder="https://tuosito.org/mio-caso/sighting.json">
+      <pre id="share-embed-pre"><code id="share-embed-code"></code></pre>
+      <div id="share-embed-view" class="code-view"></div>
+      <p class="doc-try-actions">
+        <button class="btn btn-primary" type="button" id="share-embed-copy">Copia il codice</button>
+        <button class="btn" type="button" id="share-embed-try">Mostra il risultato</button>
+      </p>
+    </div>
+
+    <p class="doc-try-label">Il risultato:</p>
+    <div class="stage stage-padded">
+      <rr0-sighting id="share-preview"></rr0-sighting>
+    </div>
+
+    <p>È un elemento vivo, non un'immagine — lo stesso che ti darebbero quelle due righe. Quale dei
+      tre componenti usare invece, e tutto ciò che si può indicare loro, è nella
+      <a href="/docs/components/">pagina dei componenti</a>.</p>
+    <p class="small">L'indirizzo dello script non contiene una versione, quindi la tua pagina
+      segue ogni rilascio senza essere modificata: i browser chiedono a ogni visita se è cambiato, e
+      la risposta non costa nulla finché non è cambiato.</p>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap prose-wide">
+    <h2>Che cosa serve a una registrazione per essere condivisibile</h2>
+    <p><strong>Una cosa: un indirizzo pubblico.</strong> Qualunque posto da cui un browser possa
+      prenderla — un sito statico, un servizio di hosting di file, le pagine di un repository. Un file
+      sul tuo disco non ha un URL che qualcun altro possa seguire, ed è questo l'unico vero
+      requisito.</p>
+    <p class="small">Se l'indirizzo è pubblico, si apre bene nel tuo browser, e il lettore dice
+      comunque di non essere riuscito a leggerlo, la causa è quasi sempre la stessa: il server non
+      dice ai browser che altri siti possono leggere il file. Il rimedio è un'intestazione di
+      risposta, <code>Access-Control-Allow-Origin: *</code>, sul JSON. La maggior parte degli hosting
+      statici — GitHub Pages, Netlify, S3 — la inviano già o permettono di aggiungerla con una riga di
+      configurazione; se il server non è tuo, è l'unica cosa da chiedere al suo amministratore. Il
+      lettore e l'editor lo segnalano quando lo rilevano, quindi non dovresti doverlo indovinare.</p>
+    <p>Non hai ancora dove metterla? <a href="/play/">Il lettore</a> accetta anche una
+      registrazione incollata direttamente, il che basta per verificarla prima di pubblicarla — anche
+      se una registrazione incollata, ovviamente, non si può condividere tramite link.</p>
+    <p>Non hai nessuna registrazione? <a href="/docs/create/">Creane una</a>; che cosa contiene
+      il file è descritto nella pagina del <a href="/docs/format/">file di avvistamento</a>.</p>
   </div>
 </section>
 `

@@ -5,18 +5,31 @@ export class FaqPage implements SitePage {
 
   readonly meta: PageMeta = {
     slug: "faq",
-    navLabel: { en: "FAQ", fr: "FAQ" },
-    title: { en: "Frequently asked", fr: "Questions fréquentes" },
+    navLabel: { en: "FAQ", fr: "FAQ", es: "FAQ", it: "FAQ" },
+    title: { en: "Frequently asked", fr: "Questions fréquentes", es: "Preguntas frecuentes", it: "Domande frequenti" },
     description: {
       en: "Who made UFO@home, what you are allowed to do with it, what it sends over the network, "
         + "how it compares with Sitrec, SIMOVNI and Stellarium, and how to ask for a change.",
       fr: "Qui a fait UFO@home, ce que vous avez le droit d'en faire, ce qu'il envoie sur le réseau, "
-        + "ce qui le distingue de Sitrec, SIMOVNI et Stellarium, et comment demander une évolution."
+        + "ce qui le distingue de Sitrec, SIMOVNI et Stellarium, et comment demander une évolution.",
+      es: "Quién hizo UFO@home, qué se le permite hacer con él, qué envía por la red, "
+        + "en qué se diferencia de Sitrec, SIMOVNI y Stellarium, y cómo pedir un cambio.",
+      it: "Chi ha realizzato UFO@home, che cosa vi è permesso farne, che cosa invia in rete, "
+        + "in che cosa si distingue da Sitrec, SIMOVNI e Stellarium, e come chiedere una modifica."
     }
   }
 
   render(language: SiteLanguage): string {
-    return language === "fr" ? this.fr() : this.en()
+    switch (language) {
+      case "fr":
+        return this.fr()
+      case "es":
+        return this.es()
+      case "it":
+        return this.it()
+      default:
+        return this.en()
+    }
   }
 
   private en(): string {
@@ -185,7 +198,7 @@ export class FaqPage implements SitePage {
         elements — and reconstructs the geometry that could have produced that footage. It is the
         right tool when there is footage.</p>
       <p>UFO@home starts where there is none: a person, an account, and a date. It reconstructs what
-        a <em>observer</em> described, and it is built around what an account can and cannot say —
+        an <em>observer</em> described, and it is built around what an account can and cannot say —
         angles rather than metres, a stated appearance rather than a placed object, and an explicit
         record of who supplied every non-testimonial fact.</p>
       <p>Their licences differ too. Sitrec was MIT-licensed; it was archived in March 2026 in
@@ -288,8 +301,9 @@ export class FaqPage implements SitePage {
 
     <div class="faq-item">
       <h3>What languages does it speak?</h3>
-      <p>The components and this site are in English and French, picked from your browser's own
-        preferences with English as the fallback. Adding a language means adding one typed messages
+      <p>The components are in English and French, and this site in English, French, Spanish and
+        Italian, picked from your browser's own preferences with English as the fallback. Adding a
+        language to the components means adding one typed messages
         module per component — no markup changes, no build configuration. It is one of the easiest
         contributions to make.</p>
       <p>There is no language picker, and that is the point: an address carries no language, so a
@@ -597,8 +611,9 @@ export class FaqPage implements SitePage {
 
     <div class="faq-item">
       <h3>Quelles langues parle-t-il ?</h3>
-      <p>Les composants et ce site sont en anglais et en français, choisis d'après les préférences de
-        votre navigateur, avec l'anglais en repli. Ajouter une langue consiste à ajouter un module de
+      <p>Les composants sont en anglais et en français, et ce site en anglais, français, espagnol et
+        italien, choisis d'après les préférences de votre navigateur, avec l'anglais en repli. Ajouter
+        une langue aux composants consiste à ajouter un module de
         messages typé par composant — sans toucher au balisage ni à la configuration de compilation.
         C'est l'une des contributions les plus faciles à apporter.</p>
       <p>Il n'y a pas de sélecteur de langue, et c'est tout l'intérêt : une adresse ne porte aucune
@@ -613,6 +628,586 @@ export class FaqPage implements SitePage {
         externes utilisés pendant la saisie sont des services publics dont l'outil respecte les
         conditions d'usage — c'est pourquoi la recherche de lieu ne part que lorsque vous la
         demandez.</p>
+    </div>
+  </div>
+</section>
+`
+  }
+
+  private es(): string {
+    return `
+<section class="band hero">
+  <div class="wrap">
+    <p class="eyebrow">FAQ</p>
+    <h1>Preguntas frecuentes.</h1>
+    <p class="lede">Qué es la herramienta, qué permite y en qué se diferencia de las demás.</p>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap prose-wide">
+    <h2>Quién la hizo, y qué permite</h2>
+
+    <div class="faq-item">
+      <h3>¿Quién escribió UFO@home?</h3>
+      <p>La desarrolla <a href="https://github.com/RR0">RR0</a>, que entre otras cosas
+        construyó <a href="https://rr0.org">rr0.org</a>, una enciclopedia francesa de fenómenos
+        inexplicados. Ese sitio usa UFO@home para ilustrar sus propios expedientes — y RR0 se ha
+        preocupado de que la herramienta siga siendo utilizable por cualquiera.</p>
+    </div>
+
+    <div class="faq-item">
+      <h3>¿Qué permite la licencia?</h3>
+      <p>UFO@home está bajo la <a href="https://github.com/RR0/UfoAtHome/blob/master/LICENSE">licencia
+        MIT</a>. Esta te permite:</p>
+      <ul class="plain">
+        <li>usarla en cualquier sitio, incluido uno comercial;</li>
+        <li>modificarla, y mantener tus modificaciones en privado;</li>
+        <li>redistribuirla, integrarla en tu propio producto y cobrar por ese producto;</li>
+        <li>hacer un fork, y continuarla en tu propia dirección.</li>
+      </ul>
+      <p>La única obligación es conservar el aviso de copyright y el texto de la licencia con las
+        copias que distribuyas. No hay <i lang="en">contributor licence agreement</i> ni registro.</p>
+      <p>El código fuente está en <a href="https://github.com/RR0/UfoAtHome">GitHub</a>, incluidos los
+        scripts que generan sus catálogos de estrellas, cometas, novas y satélites a partir de fuentes
+        públicas — así que los datos son reproducibles además de legibles.</p>
+    </div>
+
+    <div class="faq-item">
+      <h3>¿Qué envía por la red?</h3>
+      <p>Las grabaciones se quedan en tu navegador: no hay cuenta ni almacenamiento en el servidor.
+        <strong>Export</strong> escribe un archivo en tu disco, y ese archivo es la grabación completa.</p>
+      <p>Todo lo que se descarga — de dónde, cuándo y bajo qué licencia — figura fuente por fuente en
+        <a href="/docs/sources/">Fuentes y decisiones</a>, la única lista que existe, para que esta
+        respuesta no tenga que mantener una segunda copia. En resumen:</p>
+      <ul>
+        <li><strong>Mientras redactas</strong>, el editor te busca las cosas: las coordenadas de un
+          lugar cuando pulsas <strong>Locate</strong>, el registro meteorológico en cuanto se conocen una
+          fecha completa y un lugar, el relieve y las imágenes aéreas alrededor del observador. Cada
+          consulta es un selector de la interfaz, donde se indica su dato, con la atribución que exige
+          su licencia. Redactar una grabación a partir de su descripción envía ese texto al modelo que
+          elegiste, con tu propia clave, y solo cuando lo pides.</li>
+        <li><strong>Una página que solo reproduce</strong> una grabación terminada (<code>&lt;rr0-scene&gt;</code>,
+          <code>&lt;rr0-sighting&gt;</code>) pide las teselas de relieve e imágenes, lo que este sitio sirve
+          por sí mismo (elementos orbitales de los satélites, modelos 3D) y aquello a lo que apunta la propia
+          grabación (una foto del lugar, un sonido). Una grabación publicada lleva su propia meteorología y
+          nunca se vuelve a consultar, que es también por lo que se lee igual años después.</li>
+      </ul>
+    </div>
+
+    <div class="faq-item">
+      <h3>¿Puedo alojarla yo mismo por completo, sin ningún servicio externo?</h3>
+      <p>Sí, y nada de ello depende de RR0. Los componentes están publicados en npm como
+        <code>@rr0/ufoathome</code> y se sirven desde este dominio; instálalos o copia los <i lang="en">bundles</i>
+        <code>.mjs</code> compilados en tu propio servidor y las reconstrucciones se reproducirán, sin
+        ninguna dependencia de ejecución de rr0.org. Las grabaciones son tus propios archivos, en tu
+        propio alojamiento, y una reconstrucción afirma lo que su grabación declara y nada más — ninguna
+        conclusión, ninguna marca, ningún número de expediente salvo el que tú mismo pongas.</p>
+      <p>Copia los <i lang="en">bundles</i> <code>.mjs</code> en tu servidor y las reconstrucciones se reproducirán.
+        Prescinde de los proveedores de relieve e imágenes (o apúntalos a tu propio servidor de teselas)
+        y la escena recurre a un horizonte liso. Las consultas existen para la <em>redacción</em>; la
+        reproducción de una grabación terminada no las necesita.</p>
+    </div>
+
+    <h2>Por qué existe</h2>
+
+    <div class="faq-item">
+      <h3>¿Para qué construir esto?</h3>
+      <p>La idea surgió de conversaciones con el sociólogo
+        <a href="https://rr0.org/people/l/LagrangePierre/">Pierre Lagrange</a>, que citaba a su autor la
+        obra de Roger Shepard.</p>
+      <p>Porque un relato puesto por escrito lo pierde casi todo. En 1968, en el simposio de la AAAS,
+        el psicólogo <a href="https://rr0.org/people/s/ShepardRogerN/">Roger Shepard</a> sostuvo, en
+        <a href="https://rr0.org/time/1/9/6/8/07/29/Symposium/Shepard/index.html">la ponencia que presentó allí</a>, que una reconstrucción visual de un relato
+        es más fiel que una escrita u oral — los observadores son mucho mejores reconociendo y
+        ajustando una imagen que generando una descripción. UFO@home es esa idea, hecha
+        software: dibújalo, muévelo, y deja que el observador lo corrija hasta que coincida.</p>
+      <p>El proyecto empezó en 2003 como un applet Java. Se reescribió desde cero en TypeScript en
+        2026, como componentes web, porque el applet se había vuelto imposible de ejecutar y porque la
+        mitad que faltaba siempre había sido el cielo: una reconstrucción sin el cielo real de aquella
+        noche no puede contrastarse con nada.</p>
+    </div>
+
+    <div class="faq-item">
+      <h3>¿Por qué un relato se dibuja plano, y cuándo entra el 3D?</h3>
+      <p>El relato en sí se dibuja tal como llegó al ojo del observador: una forma en su campo de visión,
+        de este tamaño, moviéndose de esta manera. Porque un objeto 3D colocado en la escena ya es una conclusión. Afirma un tamaño, una
+        distancia y una solidez que ningún observador podía percibir — y, peor aún, descarta en silencio
+        toda explicación en la que no hubiera ningún objeto allí:
+        <a href="https://rr0.org/science/crypto/ufo/enquete/meprise/optique/">un halo</a>,
+        <a href="https://rr0.org/place/systeme/solaire/planete/venus/">un planeta</a>,
+        <a href="https://rr0.org/science/crypto/ufo/enquete/meprise/Satellites.html">un satélite</a>,
+        <a href="https://rr0.org/science/crypto/ufo/enquete/meprise/aeronef/avion/">el faro de aterrizaje de un avión</a>,
+        <a href="https://rr0.org/science/crypto/ufo/enquete/meprise/nuage/">una nube lenticular</a>,
+        <a href="https://rr0.org/science/crypto/ufo/enquete/meprise/optique/lens/">un reflejo en un parabrisas</a>. Esos enlaces llevan al propio
+        <a href="https://rr0.org/science/crypto/ufo/enquete/meprise/">catálogo de confusiones</a> de rr0.org, que es la razón por la que esta herramienta está construida
+        como está.</p>
+      <p>Una forma plana en el propio campo de visión del observador afirma exactamente lo que este declaró:
+        esto es lo que llegó a mi ojo, de este tamaño, moviéndose de esta manera. Todo lo demás queda
+        abierto — que es la única forma de que una reconstrucción sirva para <em>poner a prueba</em> una
+        confusión en lugar de descartarla por construcción.</p>
+      <p>El 3D entra como <em>interpretación</em>, separada del relato: lo que el observador
+        cree haber visto (en Silly-le-Long, T1 describe un único triángulo plano y gris, visto de frente
+        y luego por detrás), o la explicación de un analista expuesta en un expediente (allí, la avioneta
+        en final del GEIPAN). Cada una es una opción del selector <strong>Interpretation</strong> del
+        reproductor, mostrada de una en una, con un modelo, un tamaño y una trayectoria en metros. El
+        botón <strong>Compare with the account</strong> superpone entonces los contornos del propio relato
+        y cifra, instante a instante, cuánto se separan en dirección, anchura y altura. El
+        relato nunca cambia para ajustarse a una interpretación: es la interpretación la que debe responderle.</p>
+      <p>También hace que la herramienta sea honesta con el tamaño. Una grabación guarda un ángulo, nunca metros —
+        pero eso NO significa renunciar a la distancia. Donde el observador vio el fenómeno cruzar
+        algo cuya posición se conoce, ese cruce se declara en la grabación (pasó
+        <em>detrás</em> de aquel hangar, <em>delante</em> de aquel árbol) y la escena lanza un rayo por la línea
+        de visión exacta para medirlo. Cada cruce acota su anchura real por un lado; un
+        ángulo más una distancia dan un tamaño, y un tamaño no cambia mientras se mueve — así que cada
+        otro instante de la grabación se lee también como una distancia. El editor muestra el intervalo
+        bajo el tamaño aparente, señala una contradicción cuando los cruces declarados no pueden ser todos
+        ciertos, y dice «desconocida» donde nada cruza la línea de visión, que es la respuesta honesta
+        para una luz en un cielo vacío.</p>
+    </div>
+
+    <div class="faq-item">
+      <h3>¿Es una reconstrucción una prueba?</h3>
+      <p>No. Es una manera de exponer un relato con la precisión suficiente para poder ponerlo junto a los
+        registros — y son los registros los que hacen el trabajo: la fase de la Luna aquella noche, si el cielo
+        estaba cubierto, si había un cometa sobre el horizonte, si la órbita baja estaba siquiera iluminada.</p>
+      <p><strong>Lo que una reconstrucción intenta es ponerse de acuerdo con el observador.</strong> No
+        ilustrar su relato, ni corregirlo: converger hacia él, corrección tras corrección, hasta que diga
+        que eso es lo que vio. Cada paso de esa convergencia añade algo que puede comprobarse, así que
+        cuanto más se acerca, más hay con lo que explicar el avistamiento
+        — o con lo que no lograrlo.</p>
+      <p>Y ahí es donde demuestra su valor. Supongamos que la reconstrucción puede situar un fenómeno
+        conocido — <a href="https://rr0.org/place/systeme/solaire/planete/venus/">un planeta</a>,
+        <a href="https://rr0.org/science/crypto/ufo/enquete/meprise/optique/">un halo</a>,
+        <a href="https://rr0.org/science/crypto/ufo/enquete/meprise/aeronef/avion/">un avión</a> —
+        en el lugar exacto donde el observador vio algo, con el tamaño correcto, a la hora correcta. Muéstraselo
+        y hazle la única pregunta que importa: <em>¿se parece a lo que viste?</em>
+        Si la respuesta es sí, investigador y observador han convergido en los hechos en lugar de
+        discutir la conclusión, y la explicación se apoya en algo más firme que la opinión que
+        cada uno tiene del otro.</p>
+      <p>Si la respuesta es no, eso también es un resultado, y mejor que una nota escrita diciendo que el
+        observador no estaba de acuerdo — porque lo que rechaza está en pantalla, en el lugar correcto
+        y con el tamaño correcto, y la siguiente persona puede mirarlo.</p>
+    </div>
+
+    <h2>Frente a otras herramientas</h2>
+
+    <div class="faq-item">
+      <h3>¿En qué se diferencia de Sitrec?</h3>
+      <p><a href="https://github.com/MickWest/sitrec">Sitrec</a> («<i lang="en">situation recreation</i>», Mick West,
+        desde 2022) es una herramienta excelente y hace otro trabajo. Parte de
+        <em>datos de instrumentos</em> — un vídeo, una traza ADS-B, los metadatos de un sensor, elementos
+        orbitales — y reconstruye la geometría que pudo producir esas imágenes. Es la
+        herramienta adecuada cuando hay imágenes.</p>
+      <p>UFO@home empieza donde no las hay: una persona, un relato y una fecha. Reconstruye lo que
+        un <em>observador</em> describió, y está construida en torno a lo que un relato puede y no puede decir —
+        ángulos en lugar de metros, una apariencia declarada en lugar de un objeto colocado, y un registro
+        explícito de quién aportó cada hecho no testimonial.</p>
+      <p>Sus licencias también difieren. Sitrec tenía licencia MIT; se archivó en marzo de 2026 en
+        favor de <a href="https://github.com/MickWest/Sitrec2">Sitrec2</a>, cuya licencia solo permite
+        el uso personal o académico no comercial, y ni la redistribución ni la modificación.
+        UFO@home es MIT.</p>
+    </div>
+
+    <div class="faq-item">
+      <h3>¿No es esto lo que hacía SIMOVNI?</h3>
+      <p>Es la misma idea, cincuenta años antes y en hardware. <strong>SIMOVNI</strong> fue un
+        simulador óptico construido en 1976 en el GEPAN francés (el grupo de estudio de ovnis del propio CNES) por
+        Jean-Jacques Velasco: el observador miraba por un visor el paisaje real con un
+        ovni virtual superpuesto, cuya forma (en diapositivas), color, brillo y tamaño podían
+        ajustarse hasta que coincidiera. Es, hasta donde sabemos, el primer intento serio de relato visual
+        en lugar de escrito. También era un único banco físico en Toulouse, solo se utilizó
+        en una o dos ocasiones, y Dominique Caudron — que había construido sus propios simuladores
+        antes — consideraba poco fiables sus resultados.</p>
+      <p><strong>SimOvni 2</strong>, presentado por Laurent Chabin en el CAIPAN 2 en 2022, recupera la
+        idea con un visor de realidad virtual y un verdadero trabajo de calibración detrás.</p>
+      <p>Lo que añade UFO@home no es un banco óptico mejor: es que una reconstrucción se convierte en un
+        pequeño archivo que cualquiera puede abrir, reproducir, incrustar, comprobar y rebatir — en lugar de una sesión
+        que tuvo lugar una vez en una sala, ante un solo investigador, y dejó un resumen escrito.</p>
+    </div>
+
+    <div class="faq-item">
+      <h3>¿Por qué no usar simplemente Stellarium?</h3>
+      <p>Stellarium es un planetario, y muy bueno — hemos leído su código fuente para aprender cómo
+        hace las cosas. Pero responde a «¿qué había en el cielo?», no a «¿qué vio esta persona, y podría
+        el cielo explicarlo?». No tiene formato de relato, ni fenómeno observado, ni meteorología, ni
+        decorado alrededor del observador, ni instrumento de exposición larga, ni nada que incrustar en una página.</p>
+      <p>Donde ambos se solapan, UFO@home toma a veces el camino más difícil a propósito: la Vía Láctea
+        es una textura en Stellarium y una integral a lo largo de la línea de visión aquí, por eso su grieta oscura
+        sale de un modelo de polvo y no de una imagen. Donde Stellarium representa algo que nosotros
+        no, la regla de trabajo de este proyecto es ir a averiguar cómo lo hacen.</p>
+    </div>
+
+    <div class="faq-item">
+      <h3>¿Por qué no pedir a una IA que construya la simulación desde cero?</h3>
+      <p>Porque lo que construiría sería una ilustración. Si se le pide «una escena de lo que vio este
+        testigo», un modelo escribe una escena 3D o pinta un vídeo que parece correcto: un cielo, un campo, una
+        luz. Si la Luna estaba realmente sobre el horizonte, dónde estaba realmente el Sol, cómo era la nubosidad
+        aquella mañana, de qué tamaño se veía realmente la cosa desde donde estaba el observador: cada una de esas cosas
+        puede haberla acertado, y nada en el resultado dice cuáles. Además es un ejemplar único:
+        mil líneas de código que nadie ha comprobado, escritas de otra manera para el siguiente caso, que
+        no pueden ponerse junto al siguiente caso.</p>
+      <p>Una grabación de UFO@home reparte el trabajo al revés. Lo que escribe la IA es solo el
+        relato: una fecha, un lugar, direcciones y tamaños aparentes a lo largo del tiempo, cada valor marcado como
+        declarado, calculado o supuesto. El cielo, los registros meteorológicos, el suelo, la óptica del
+        ojo o de la cámara se calculan a partir de ello con el mismo motor para todos los casos, probado y
+        público. Los límites del formato son parte de la cuestión: no tiene campo para un tamaño real ni una
+        distancia, así que un asistente no puede colar una conclusión entre los hechos, y lo que sí escribe
+        es un archivo corto que cualquiera puede leer, reproducir, corregir y mostrar al observador.</p>
+      <p>Por eso tampoco compiten. Un asistente de IA es una buena manera de
+        <a href="/docs/create/">escribir una grabación</a> a partir de un expediente: en un caso del GEIPAN, uno al que
+        solo se le dio el expediente público y estas páginas produjo una grabación cuyo fenómeno coincidía con el
+        hecho a mano con una precisión de una décima de grado. Lo que no puede hacer por sí solo es hacer el resultado
+        comprobable, y esa es la parte que es este proyecto.</p>
+    </div>
+
+    <h2>Usarla, y cambiarla</h2>
+
+    <div class="faq-item">
+      <h3>¿Cómo pido una funcionalidad, o informo de algo que está mal?</h3>
+      <p>Abre una incidencia: <a href="https://github.com/RR0/UfoAtHome/issues/new">github.com/RR0/UfoAtHome/issues</a>.
+        Una cuenta de GitHub es gratuita y se crea en un minuto.</p>
+      <p>Lo que hace que una petición sea fácil de atender:</p>
+      <ul class="plain">
+        <li><strong>Un caso real, si lo hay.</strong> «Los observadores dicen a menudo que estaba detrás de una
+          colina» es una funcionalidad; «aquí hay un avistamiento donde eso importa, fechado, situado y con fuentes» es
+          una funcionalidad que se construye bien.</li>
+        <li><strong>Lo que dicen los registros.</strong> Si lo que quieres ver reconstruido está medido
+          en alguna parte — un conjunto de datos, un catálogo, una medición publicada — di dónde. La
+          regla de este proyecto es que nada se inventa: algo reproducible necesita datos o física detrás,
+          y saber cuál de los dos es resuelve la mayor parte del diseño.</li>
+        <li><strong>Lo que concluirías a partir de ello.</strong> Una funcionalidad que no puede cambiar la
+          lectura de ningún caso es decoración.</li>
+      </ul>
+      <p>Las <i lang="en">pull requests</i> son bienvenidas en las mismas condiciones que en cualquier proyecto MIT. Si prefieres no usar
+        GitHub, el contacto del mantenedor está en <a href="https://rr0.org/Contact.html">rr0.org</a>.</p>
+    </div>
+
+    <div class="faq-item">
+      <h3>¿Puedo poner una reconstrucción en un mensaje de un foro?</h3>
+      <p>Si el foro admite HTML sin procesar y un script de módulo, sí — las dos líneas están en
+        <a href="/edit/">la página del editor</a>, y cada reconstrucción publicada las proporciona
+        ella misma. La mayoría de los foros no lo admiten, por buenas razones. Dos cosas que suelen funcionar
+        en su lugar: un <code>&lt;iframe&gt;</code> que apunte a una página tuya que contenga el
+        componente, o simplemente un enlace a <code>ufoathome.org/edit/?sighting=</code> seguido de la
+        URL de tu grabación, que la abre aquí para cualquiera.</p>
+    </div>
+
+    <div class="faq-item">
+      <h3>¿Y si no sé la fecha exacta, o la hora exacta?</h3>
+      <p>Dilo, y la herramienta también lo dirá. Las fechas se guardan en EDTF, así que «1954», «junio de 2025»,
+        «hacia las 05:00» e «incierta» son cosas que <a href="/docs/format/">el formato</a> puede declarar. Lo que se pierde es solo
+        lo que depende de verdad de la parte que falta: sin fecha completa ni lugar no hay cielo que
+        calcular, y la interfaz lo dice en lugar de dibujar uno verosímil.</p>
+    </div>
+
+    <div class="faq-item">
+      <h3>¿Qué idiomas habla?</h3>
+      <p>Los componentes están en inglés y en francés, y este sitio en inglés, francés, español e
+        italiano, elegidos según las preferencias de tu navegador, con el inglés como respaldo. Añadir un
+        idioma a los componentes consiste en añadir un módulo de mensajes
+        tipado por componente — sin cambios en el marcado ni en la configuración de compilación. Es una de las
+        contribuciones más fáciles de hacer.</p>
+      <p>No hay selector de idioma, y esa es la idea: una dirección no lleva idioma, así que un
+        enlace que envías lo lee quien lo abre en el <em>suyo</em>. Envía a alguien en Lyon una sección
+        de esta página y llegará a esa misma sección, en francés.</p>
+    </div>
+
+    <div class="faq-item">
+      <h3>¿Cuánto cuesta?</h3>
+      <p>Nada: ni precio, ni cuenta, ni cuota, ni nivel de pago. Los servicios externos que usa
+        durante la redacción son servicios públicos cuyas políticas de uso respeta — por eso la búsqueda de lugares
+        solo se lanza cuando la pides.</p>
+    </div>
+  </div>
+</section>
+`
+  }
+
+  private it(): string {
+    return `
+<section class="band hero">
+  <div class="wrap">
+    <p class="eyebrow">FAQ</p>
+    <h1>Domande frequenti.</h1>
+    <p class="lede">Che cos'è lo strumento, che cosa permette e in che cosa si distingue dagli altri.</p>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap prose-wide">
+    <h2>Chi l'ha fatto, e che cosa permette</h2>
+
+    <div class="faq-item">
+      <h3>Chi ha scritto UFO@home?</h3>
+      <p>È sviluppato da <a href="https://github.com/RR0">RR0</a>, che tra l'altro ha
+        realizzato <a href="https://rr0.org">rr0.org</a>, un'enciclopedia francese dei fenomeni
+        inspiegati. Quel sito usa UFO@home per illustrare i propri dossier — e RR0 ha avuto cura
+        di mantenere lo strumento utilizzabile da chiunque.</p>
+    </div>
+
+    <div class="faq-item">
+      <h3>Che cosa permette la licenza?</h3>
+      <p>UFO@home è sotto <a href="https://github.com/RR0/UfoAtHome/blob/master/LICENSE">licenza
+        MIT</a>. Questa ti permette di:</p>
+      <ul class="plain">
+        <li>usarlo su qualsiasi sito, anche commerciale;</li>
+        <li>modificarlo, e tenere private le tue modifiche;</li>
+        <li>ridistribuirlo, integrarlo nel tuo prodotto e far pagare quel prodotto;</li>
+        <li>farne un fork, e portarlo avanti nella tua direzione.</li>
+      </ul>
+      <p>L'unico obbligo è conservare l'avviso di copyright e il testo della licenza con le copie che
+        distribuisci. Non c'è alcun <i lang="en">contributor licence agreement</i> né alcuna registrazione.</p>
+      <p>Il codice sorgente è su <a href="https://github.com/RR0/UfoAtHome">GitHub</a>, compresi gli
+        script che generano i suoi cataloghi di stelle, comete, novae e satelliti a partire da fonti pubbliche — così i
+        dati sono riproducibili oltre che leggibili.</p>
+    </div>
+
+    <div class="faq-item">
+      <h3>Che cosa invia in rete?</h3>
+      <p>Le registrazioni restano nel tuo browser: non c'è alcun account né alcuna archiviazione lato server.
+        <strong>Export</strong> scrive un file sul tuo disco, e quel file è l'intera registrazione.</p>
+      <p>Tutto ciò che viene scaricato — da dove, quando e con quale licenza — è elencato fonte per
+        fonte in <a href="/docs/sources/">Fonti e scelte</a>, l'unico elenco che esista, perché
+        questa risposta non debba tenerne una seconda copia. In breve:</p>
+      <ul>
+        <li><strong>Mentre compili</strong>, l'editor cerca le cose per te: le coordinate di un
+          luogo quando premi <strong>Locate</strong>, il dato meteorologico non appena sono noti una data completa e
+          un luogo, il rilievo e le immagini aeree intorno all'osservatore. Ogni consultazione è un selettore
+          nell'interfaccia, dove il suo dato è riportato, con l'attribuzione richiesta dalla sua licenza.
+          Redigere una registrazione a partire dalla sua descrizione invia quel testo al modello che hai scelto, con la tua
+          chiave, e solo quando lo chiedi.</li>
+        <li><strong>Una pagina che si limita a riprodurre</strong> una registrazione finita (<code>&lt;rr0-scene&gt;</code>,
+          <code>&lt;rr0-sighting&gt;</code>) richiede le tessere di rilievo e di immagini, ciò che questo sito serve
+          da sé (elementi orbitali dei satelliti, modelli 3D) e ciò a cui punta la registrazione stessa (una foto del
+          luogo, un suono). Una registrazione pubblicata porta con sé il proprio meteo e non viene mai più consultata,
+          ed è anche per questo che si legge identica anni dopo.</li>
+      </ul>
+    </div>
+
+    <div class="faq-item">
+      <h3>Posso ospitarlo interamente da solo, senza alcun servizio esterno?</h3>
+      <p>Sì, e niente di tutto ciò dipende da RR0. I componenti sono pubblicati su npm come
+        <code>@rr0/ufoathome</code> e serviti da questo dominio; installali o copia i <i lang="en">bundle</i>
+        <code>.mjs</code> compilati sul tuo server e le ricostruzioni si riprodurranno, senza alcuna
+        dipendenza di esecuzione da rr0.org. Le registrazioni sono file tuoi, sul tuo hosting, e una
+        ricostruzione afferma ciò che la sua registrazione dichiara e nient'altro — nessuna conclusione, nessun
+        marchio, nessun numero di dossier se non quello che ci metti tu.</p>
+      <p>Copia i <i lang="en">bundle</i> <code>.mjs</code> sul tuo server e le ricostruzioni si riprodurranno.
+        Fai a meno dei fornitori di rilievo e di immagini (o puntali al tuo server di tessere) e la scena
+        ripiega su un orizzonte spoglio. Le consultazioni esistono per la <em>compilazione</em>; la riproduzione di una
+        registrazione finita non ne ha bisogno.</p>
+    </div>
+
+    <h2>Perché esiste</h2>
+
+    <div class="faq-item">
+      <h3>Perché costruire tutto questo?</h3>
+      <p>L'idea è nata da conversazioni con il sociologo
+        <a href="https://rr0.org/people/l/LagrangePierre/">Pierre Lagrange</a>, che citava al suo autore
+        il lavoro di Roger Shepard.</p>
+      <p>Perché un resoconto messo per iscritto perde quasi tutto. Nel 1968, al simposio dell'AAAS,
+        lo psicologo <a href="https://rr0.org/people/s/ShepardRogerN/">Roger Shepard</a> sostenne, nella
+        <a href="https://rr0.org/time/1/9/6/8/07/29/Symposium/Shepard/index.html">relazione che vi presentò</a>, che una ricostruzione visiva di un resoconto
+        è più fedele di una scritta o orale — gli osservatori sono molto più bravi a riconoscere e
+        correggere un'immagine che a generare una descrizione. UFO@home è quell'idea, fatta
+        software: disegnalo, muovilo, e lascia che l'osservatore lo corregga finché non corrisponde.</p>
+      <p>Il progetto è nato nel 2003 come applet Java. È stato riscritto da zero in TypeScript nel
+        2026, come componenti web, perché l'applet era diventata impossibile da eseguire e perché la metà
+        mancante era sempre stata il cielo: una ricostruzione senza il cielo reale di quella notte non può
+        essere confrontata con nulla.</p>
+    </div>
+
+    <div class="faq-item">
+      <h3>Perché un resoconto è disegnato piatto, e quando entra in gioco il 3D?</h3>
+      <p>Il resoconto stesso è disegnato così come è giunto all'occhio dell'osservatore: una forma nel suo campo visivo,
+        di questa grandezza, che si muove in questo modo. Perché un oggetto 3D collocato nella scena è già una conclusione. Afferma una grandezza, una
+        distanza e una solidità che nessun osservatore poteva percepire — e, peggio, esclude in silenzio
+        ogni spiegazione in cui lì non ci fosse alcun oggetto:
+        <a href="https://rr0.org/science/crypto/ufo/enquete/meprise/optique/">un alone</a>,
+        <a href="https://rr0.org/place/systeme/solaire/planete/venus/">un pianeta</a>,
+        <a href="https://rr0.org/science/crypto/ufo/enquete/meprise/Satellites.html">un satellite</a>,
+        <a href="https://rr0.org/science/crypto/ufo/enquete/meprise/aeronef/avion/">il faro di atterraggio di un aereo</a>,
+        <a href="https://rr0.org/science/crypto/ufo/enquete/meprise/nuage/">una nube lenticolare</a>,
+        <a href="https://rr0.org/science/crypto/ufo/enquete/meprise/optique/lens/">un riflesso su un parabrezza</a>. Quei link portano al
+        <a href="https://rr0.org/science/crypto/ufo/enquete/meprise/">catalogo degli equivoci</a> di rr0.org, che è il motivo per cui questo strumento è costruito
+        così.</p>
+      <p>Una forma piatta nel campo visivo dell'osservatore stesso afferma esattamente ciò che ha dichiarato:
+        questo è ciò che è giunto al mio occhio, di questa grandezza, che si muove in questo modo. Tutto il resto rimane
+        aperto — ed è l'unico modo in cui una ricostruzione possa servire a <em>mettere alla prova</em> un equivoco anziché
+        escluderlo per costruzione.</p>
+      <p>Il 3D entra in gioco come <em>interpretazione</em>, tenuta separata dal resoconto: ciò che l'osservatore
+        crede di aver visto (a Silly-le-Long, T1 descrive un unico triangolo piatto e grigio, visto di fronte
+        e poi da dietro), o la spiegazione di un analista esposta in un dossier (lì, l'aereo leggero
+        in finale del GEIPAN). Ciascuna è una scelta del selettore <strong>Interpretation</strong> del
+        lettore, mostrata una alla volta, con un modello, una grandezza e una traiettoria in metri. Il
+        pulsante <strong>Compare with the account</strong> sovrappone allora i contorni del resoconto stesso
+        e indica, istante per istante, quanto distano in direzione, larghezza e altezza. Il
+        resoconto non cambia mai per adattarsi a un'interpretazione: è l'interpretazione che deve rispondergli.</p>
+      <p>Rende anche lo strumento onesto sulla grandezza. Una registrazione memorizza un angolo, mai metri —
+        ma questo NON significa rinunciare alla distanza. Dove l'osservatore ha visto il fenomeno attraversare
+        qualcosa la cui posizione è nota, quell'attraversamento è dichiarato nella registrazione (è passato
+        <em>dietro</em> quell'hangar, <em>davanti</em> a quell'albero) e la scena lancia un raggio lungo l'esatta
+        linea di vista per misurarlo. Ogni attraversamento limita da un lato la sua larghezza reale; un
+        angolo più una distanza danno una grandezza, e una grandezza non cambia mentre si muove — così ogni
+        altro istante della registrazione si rilegge anch'esso come una distanza. L'editor mostra l'intervallo
+        sotto la grandezza apparente, segnala una contraddizione quando gli attraversamenti dichiarati non possono essere
+        tutti veri, e dice «sconosciuta» dove nulla attraversa la linea di vista, che è la risposta onesta
+        per una luce in un cielo vuoto.</p>
+    </div>
+
+    <div class="faq-item">
+      <h3>Una ricostruzione è una prova?</h3>
+      <p>No. È un modo di esporre un resoconto con precisione sufficiente da poterlo mettere accanto ai
+        dati registrati — e sono i dati a fare il lavoro: la fase della Luna quella notte, se il cielo
+        era coperto, se una cometa era sopra l'orizzonte, se l'orbita bassa era anche solo illuminata.</p>
+      <p><strong>Ciò che una ricostruzione cerca di fare è trovarsi d'accordo con l'osservatore.</strong> Non
+        illustrare il suo resoconto, né correggerlo: convergere verso di esso, una correzione alla volta,
+        finché non dice che è proprio ciò che ha visto. Ogni passo di questa convergenza aggiunge qualcosa
+        di verificabile, così più ci si avvicina, più c'è con cui spiegare l'avvistamento
+        — o con cui non riuscirci.</p>
+      <p>Ed è lì che dimostra il suo valore. Supponiamo che la ricostruzione possa collocare un fenomeno
+        noto — <a href="https://rr0.org/place/systeme/solaire/planete/venus/">un pianeta</a>,
+        <a href="https://rr0.org/science/crypto/ufo/enquete/meprise/optique/">un alone</a>,
+        <a href="https://rr0.org/science/crypto/ufo/enquete/meprise/aeronef/avion/">un aereo</a> —
+        nel punto esatto in cui l'osservatore ha visto qualcosa, della giusta grandezza, all'ora giusta. Mostraglielo
+        e poni l'unica domanda che conta: <em>somiglia a ciò che hai visto?</em>
+        Se la risposta è sì, investigatore e osservatore sono convenuti sui fatti anziché
+        discutere della conclusione, e la spiegazione poggia su qualcosa di più solido dell'opinione
+        che l'uno ha dell'altro.</p>
+      <p>Se la risposta è no, anche questo è un risultato, e migliore di una nota scritta che dice che
+        l'osservatore non era d'accordo — perché ciò che rifiuta è sullo schermo, nel punto giusto
+        e della giusta grandezza, e chi viene dopo può guardarlo.</p>
+    </div>
+
+    <h2>A confronto con altri strumenti</h2>
+
+    <div class="faq-item">
+      <h3>In che cosa è diverso da Sitrec?</h3>
+      <p><a href="https://github.com/MickWest/sitrec">Sitrec</a> («<i lang="en">situation recreation</i>», Mick West,
+        dal 2022) è uno strumento eccellente e fa un lavoro diverso. Parte da
+        <em>dati strumentali</em> — un video, una traccia ADS-B, i metadati di un sensore, elementi
+        orbitali — e ricostruisce la geometria che potrebbe aver prodotto quelle riprese. È lo
+        strumento giusto quando ci sono delle riprese.</p>
+      <p>UFO@home comincia dove non ce ne sono: una persona, un resoconto e una data. Ricostruisce ciò che
+        un <em>osservatore</em> ha descritto, ed è costruito attorno a ciò che un resoconto può e non può dire —
+        angoli anziché metri, un aspetto dichiarato anziché un oggetto collocato, e una traccia
+        esplicita di chi ha fornito ogni fatto non testimoniale.</p>
+      <p>Anche le loro licenze differiscono. Sitrec era sotto licenza MIT; è stato archiviato nel marzo 2026 a
+        favore di <a href="https://github.com/MickWest/Sitrec2">Sitrec2</a>, la cui licenza consente
+        solo un uso personale o accademico non commerciale, e né la ridistribuzione né la modifica.
+        UFO@home è MIT.</p>
+    </div>
+
+    <div class="faq-item">
+      <h3>Non è quello che faceva SIMOVNI?</h3>
+      <p>È la stessa idea, cinquant'anni prima e in hardware. <strong>SIMOVNI</strong> era un
+        simulatore ottico costruito nel 1976 all'interno del GEPAN francese (il gruppo di studio sugli UFO del CNES) da
+        Jean-Jacques Velasco: l'osservatore guardava attraverso un mirino il paesaggio reale con un
+        UFO virtuale sovrapposto, di cui si potevano regolare la forma (su diapositive), il colore, la luminosità e la grandezza
+        finché non corrispondeva. È, per quanto ne sappiamo, il primo tentativo serio di resoconto visivo
+        anziché scritto. Era anche un unico banco fisico a Tolosa, fu usato
+        solo in una o due occasioni, e Dominique Caudron — che in precedenza aveva costruito i propri simulatori
+        — ne riteneva inaffidabili i risultati.</p>
+      <p><strong>SimOvni 2</strong>, presentato da Laurent Chabin al CAIPAN 2 nel 2022, riprende
+        l'idea con un visore di realtà virtuale e un vero lavoro di calibrazione alle spalle.</p>
+      <p>Ciò che UFO@home aggiunge non è un banco ottico migliore: è che una ricostruzione diventa un
+        piccolo file che chiunque può aprire, riprodurre, incorporare, verificare e contestare — invece di una sessione
+        avvenuta una volta in una stanza, davanti a un solo investigatore, che ha lasciato un riassunto scritto.</p>
+    </div>
+
+    <div class="faq-item">
+      <h3>Perché non usare semplicemente Stellarium?</h3>
+      <p>Stellarium è un planetario, e molto buono — ne abbiamo letto il codice sorgente per imparare come
+        fa le cose. Ma risponde a «che cosa c'era nel cielo?», non a «che cosa ha visto questa persona, e il cielo
+        potrebbe spiegarlo?». Non ha un formato di resoconto, né un fenomeno osservato, né meteo, né
+        scenario intorno all'osservatore, né strumento a lunga esposizione, né nulla da incorporare in una pagina.</p>
+      <p>Dove i due si sovrappongono, UFO@home a volte prende di proposito la strada più difficile: la Via Lattea
+        è una texture in Stellarium e un integrale lungo la linea di vista qui, ed è per questo che la sua fenditura scura
+        esce da un modello di polvere anziché da un'immagine. Dove Stellarium rappresenta qualcosa che noi
+        non rappresentiamo, la regola di lavoro di questo progetto è andare a scoprire come fanno.</p>
+    </div>
+
+    <div class="faq-item">
+      <h3>Perché non chiedere a un'IA di costruire la simulazione da zero?</h3>
+      <p>Perché ciò che costruirebbe sarebbe un'illustrazione. Se gli si chiede «una scena di ciò che ha visto questo
+        testimone», un modello scrive una scena 3D o dipinge un video che sembra giusto: un cielo, un campo, una
+        luce. Se la Luna era davvero sopra l'orizzonte, dove si trovava davvero il Sole, com'era la copertura nuvolosa
+        quella mattina, quanto grande appariva davvero la cosa dal punto in cui si trovava l'osservatore: ciascuna di queste cose
+        potrebbe averla azzeccata, e niente nel risultato dice quali. È anche un pezzo unico:
+        mille righe di codice che nessuno ha verificato, scritte in modo diverso per il caso successivo, che
+        non possono essere messe accanto al caso successivo.</p>
+      <p>Una registrazione UFO@home divide il lavoro nell'altro senso. Ciò che l'IA scrive è solo il
+        resoconto: una data, un luogo, direzioni e grandezze apparenti nel tempo, ogni valore contrassegnato come
+        dichiarato, calcolato o supposto. Il cielo, i dati meteorologici, il suolo, l'ottica dell'occhio o
+        della fotocamera ne vengono calcolati dallo stesso motore per ogni caso, testato e
+        pubblico. I limiti del formato fanno parte del senso: non ha alcun campo per una grandezza reale o una
+        distanza, così un assistente non può far passare una conclusione tra i fatti, e ciò che scrive
+        è un file breve che chiunque può leggere, riprodurre, correggere e mostrare all'osservatore.</p>
+      <p>È anche per questo che i due non sono in concorrenza. Un assistente IA è un buon modo per
+        <a href="/docs/create/">scrivere una registrazione</a> a partire da un dossier: su un caso del GEIPAN, uno a cui erano stati dati
+        solo il dossier pubblico e queste pagine ha prodotto una registrazione il cui fenomeno coincideva con quello
+        fatto a mano entro un decimo di grado. Ciò che non può fare da solo è rendere il risultato
+        verificabile, ed è quella la parte che questo progetto è.</p>
+    </div>
+
+    <h2>Usarlo, e cambiarlo</h2>
+
+    <div class="faq-item">
+      <h3>Come chiedo una funzionalità, o segnalo qualcosa che non va?</h3>
+      <p>Apri una issue: <a href="https://github.com/RR0/UfoAtHome/issues/new">github.com/RR0/UfoAtHome/issues</a>.
+        Un account GitHub è gratuito e richiede un minuto.</p>
+      <p>Che cosa rende una richiesta facile da soddisfare:</p>
+      <ul class="plain">
+        <li><strong>Un caso reale, se c'è.</strong> «Gli osservatori dicono spesso che era dietro una
+          collina» è una funzionalità; «ecco un avvistamento in cui questo conta, datato, localizzato e documentato» è
+          una funzionalità che viene costruita bene.</li>
+        <li><strong>Che cosa dicono i dati.</strong> Se ciò che vuoi ricostruito è misurato
+          da qualche parte — un insieme di dati, un catalogo, una misura pubblicata — di' dove. La regola
+          di questo progetto è che nulla viene inventato: qualcosa di riproducibile ha bisogno di dati o di fisica alle spalle,
+          e sapere quale dei due risolve la maggior parte della progettazione.</li>
+        <li><strong>Che cosa ne concluderesti.</strong> Una funzionalità che non può cambiare la
+          lettura di nessun caso è decorazione.</li>
+      </ul>
+      <p>Le <i lang="en">pull request</i> sono benvenute alle stesse condizioni di qualsiasi progetto MIT. Se preferisci non usare
+        GitHub, il contatto del manutentore è su <a href="https://rr0.org/Contact.html">rr0.org</a>.</p>
+    </div>
+
+    <div class="faq-item">
+      <h3>Posso mettere una ricostruzione in un messaggio su un forum?</h3>
+      <p>Se il forum accetta HTML grezzo e uno script di modulo, sì — le due righe sono nella
+        <a href="/edit/">pagina dell'editor</a>, e ogni ricostruzione pubblicata le fornisce
+        da sé. La maggior parte dei forum non lo consente, per buone ragioni. Due cose che di solito funzionano
+        al loro posto: un <code>&lt;iframe&gt;</code> che punta a una tua pagina contenente il
+        componente, o semplicemente un link a <code>ufoathome.org/edit/?sighting=</code> seguito
+        dall'URL della tua registrazione, che la apre qui per chiunque.</p>
+    </div>
+
+    <div class="faq-item">
+      <h3>E se non conosco la data esatta, o l'ora esatta?</h3>
+      <p>Dillo, e lo strumento lo dirà a sua volta. Le date sono memorizzate in EDTF, quindi «1954», «giugno 2025»,
+        «verso le 05:00» e «incerta» sono tutte cose che <a href="/docs/format/">il formato</a> sa dichiarare. Ciò che si perde è solo
+        ciò che dipende davvero dalla parte mancante: senza data completa e luogo non c'è alcun cielo da
+        calcolare, e l'interfaccia lo dice invece di disegnarne uno plausibile.</p>
+    </div>
+
+    <div class="faq-item">
+      <h3>Quali lingue parla?</h3>
+      <p>I componenti sono in inglese e in francese, e questo sito in inglese, francese, spagnolo e
+        italiano, scelti in base alle preferenze del tuo browser, con l'inglese come ripiego. Aggiungere
+        una lingua ai componenti significa aggiungere un modulo di messaggi
+        tipizzato per componente — nessuna modifica al markup, nessuna configurazione di build. È uno dei
+        contributi più facili da dare.</p>
+      <p>Non c'è alcun selettore di lingua, ed è proprio questo il punto: un indirizzo non porta con sé alcuna lingua, così un
+        link che invii viene letto da chi lo apre nella <em>sua</em>. Invia una sezione di questa pagina a qualcuno
+        a Lione e arriverà a quella stessa sezione, in francese.</p>
+    </div>
+
+    <div class="faq-item">
+      <h3>Quanto costa?</h3>
+      <p>Niente: nessun prezzo, nessun account, nessuna quota e nessun livello a pagamento. I servizi esterni che usa
+        durante la compilazione sono servizi pubblici di cui rispetta le condizioni d'uso — ed è per questo che la ricerca
+        dei luoghi parte solo quando la chiedi.</p>
     </div>
   </div>
 </section>

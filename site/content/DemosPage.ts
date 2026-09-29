@@ -1,5 +1,5 @@
 import { DemoCatalogue } from "./DemoCatalogue.js"
-import type { PageMeta, SiteLanguage, SitePage } from "../SitePage.js"
+import type { PageMeta, Said, SiteLanguage, SitePage } from "../SitePage.js"
 
 /**
  * The catalogue, and it really is one: every entry has its own live player, all of them on the
@@ -15,13 +15,17 @@ export class DemosPage implements SitePage {
 
   readonly meta: PageMeta = {
     slug: "demos",
-    navLabel: { en: "Demos", fr: "Démos" },
-    title: { en: "What it can do", fr: "Ce qu'il sait faire" },
+    navLabel: { en: "Demos", fr: "Démos", es: "Demos", it: "Demo" },
+    title: { en: "What it can do", fr: "Ce qu'il sait faire", es: "Lo que sabe hacer", it: "Cosa sa fare" },
     description: {
       en: "Real sightings reconstructed, and skies set up for one sight at a time: haloes, rainbows, "
         + "the Milky Way, a comet, a new star, a meteor shower, a Starlink train, a storm, an airliner on a long exposure.",
       fr: "Des observations réelles reconstituées, et des ciels réglés pour un phénomène à la fois : "
-        + "halos, arcs-en-ciel, Voie lactée, comète, étoile nouvelle, pluie de météores, train de Starlink, orage, avion en pose longue."
+        + "halos, arcs-en-ciel, Voie lactée, comète, étoile nouvelle, pluie de météores, train de Starlink, orage, avion en pose longue.",
+      es: "Avistamientos reales reconstruidos, y cielos preparados para un fenómeno cada vez: halos, arcoíris, "
+        + "la Vía Láctea, un cometa, una estrella nueva, una lluvia de meteoros, un tren de Starlink, una tormenta, un avión de línea en exposición larga.",
+      it: "Avvistamenti reali ricostruiti, e cieli preparati per un fenomeno alla volta: aloni, arcobaleni, "
+        + "la Via Lattea, una cometa, una stella nuova, uno sciame meteorico, un treno di Starlink, un temporale, un aereo di linea in posa lunga."
     },
     modules: ["/lib/rr0-scene.mjs"]
   }
@@ -33,7 +37,7 @@ export class DemosPage implements SitePage {
    * takes the oldest ones down once too many are alive at once.
    */
   script(language: SiteLanguage): string {
-    const loading = language === "fr" ? "Chargement du ciel…" : "Loading the sky…"
+    const loading = DemosPage.LOADING[language]
     return `// A browser hands out about sixteen WebGL contexts and silently loses the oldest past that,
 // which on a page of seventeen skies blanks the ones already scrolled through. A card taken down
 // now gives its context back at once (see SceneElement's disconnection), so twelve alive stay
@@ -110,16 +114,23 @@ for (const card of cards) {
 }`
   }
 
+  /** The placeholder a card shows while its scene is not mounted. */
+  private static readonly LOADING: Said<string> = {
+    en: "Loading the sky…",
+    fr: "Chargement du ciel…",
+    es: "Cargando el cielo…",
+    it: "Caricamento del cielo…"
+  }
+
   render(language: SiteLanguage): string {
-    const fr = language === "fr"
     const playerPath = "/play/"
     const editorPath = "/edit/"
     // Two verbs of one word, so the pair reads as one choice: look at it, or work on it. "Open
     // full size" said how it would be shown rather than what you were about to do, and stood
     // beside a plain "Edit" like a caption beside a button.
-    const openLabel = fr ? "Voir" : "View"
-    const editLabel = fr ? "Éditer" : "Edit"
-    const loading = fr ? "Chargement du ciel…" : "Loading the sky…"
+    const openLabel = ({ en: "View", fr: "Voir", es: "Ver", it: "Guarda" })[language]
+    const editLabel = ({ en: "Edit", fr: "Éditer", es: "Editar", it: "Modifica" })[language]
+    const loading = DemosPage.LOADING[language]
 
     const groups = this.catalogue.groups.map(group => `
     <section class="demo-group">
@@ -148,14 +159,19 @@ for (const card of cards) {
     return `
 <section class="band hero">
   <div class="wrap">
-    <p class="eyebrow">${fr ? "Catalogue" : "Catalogue"}</p>
-    <h1>${fr ? "Ce qu'il sait faire." : "What it can do."}</h1>
-    <p class="lede">${fr
-      ? "Dix-sept reconstitutions. Aucune n'est une vidéo : chacune est calculée pendant que vous la "
+    <p class="eyebrow">${({ en: "Catalogue", fr: "Catalogue", es: "Catálogo", it: "Catalogo" })[language]}</p>
+    <h1>${({ en: "What it can do.", fr: "Ce qu'il sait faire.", es: "Lo que sabe hacer.", it: "Cosa sa fare." })[language]}</h1>
+    <p class="lede">${({
+      en: "Seventeen reconstructions. None of them is a video: each is computed while you watch it, from "
+        + "a real date, a real hour and a real place — press play on whichever interests you.",
+      fr: "Dix-sept reconstitutions. Aucune n'est une vidéo : chacune est calculée pendant que vous la "
         + "regardez, à partir d'une date, d'une heure et d'un lieu réels — appuyez sur lecture là où "
-        + "cela vous intéresse."
-      : "Seventeen reconstructions. None of them is a video: each is computed while you watch it, from "
-        + "a real date, a real hour and a real place — press play on whichever interests you."}</p>
+        + "cela vous intéresse.",
+      es: "Diecisiete reconstrucciones. Ninguna es un vídeo: cada una se calcula mientras la miras, a partir "
+        + "de una fecha real, una hora real y un lugar real — pulsa reproducir en la que te interese.",
+      it: "Diciassette ricostruzioni. Nessuna è un video: ognuna viene calcolata mentre la guardi, a partire "
+        + "da una data reale, un'ora reale e un luogo reale — premi play su quella che ti interessa."
+    })[language]}</p>
   </div>
 </section>
 
@@ -167,12 +183,22 @@ ${groups}
 
 <section class="band">
   <div class="wrap prose-wide">
-    <h2>${fr ? "Ce qui n'est pas encore là" : "What is not here yet"}</h2>
-    <p>${fr
-      ? `Les rentrées atmosphériques, l'observation depuis un avion, les anomalies de propagation radar.
-         Le détail, et ce que chacun attend, est sur <a href="/roadmap/">la page des futures évolutions</a>.`
-      : `Atmospheric re-entries, observing from an aircraft, radar propagation anomalies. What each one is waiting
-         on is on <a href="/roadmap/">the roadmap</a>.`}</p>
+    <h2>${({
+      en: "What is not here yet",
+      fr: "Ce qui n'est pas encore là",
+      es: "Lo que aún no está",
+      it: "Ciò che non c'è ancora"
+    })[language]}</h2>
+    <p>${({
+      en: `Atmospheric re-entries, observing from an aircraft, radar propagation anomalies. What each one is waiting
+         on is on <a href="/roadmap/">the roadmap</a>.`,
+      fr: `Les rentrées atmosphériques, l'observation depuis un avion, les anomalies de propagation radar.
+         Le détail, et ce que chacun attend, est sur <a href="/roadmap/">la page des futures évolutions</a>.`,
+      es: `Las reentradas atmosféricas, la observación desde un avión, las anomalías de propagación del radar. Lo que
+         espera cada una está en <a href="/roadmap/">la hoja de ruta</a>.`,
+      it: `I rientri atmosferici, l'osservazione da un aereo, le anomalie di propagazione radar. Ciò che ciascuna
+         aspetta è nella <a href="/roadmap/">tabella di marcia</a>.`
+    })[language]}</p>
   </div>
 </section>
 `

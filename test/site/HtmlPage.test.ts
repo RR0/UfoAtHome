@@ -39,11 +39,14 @@ ${body}
   it("holds each language's content under one address", () => {
     const page = HtmlPage.of("roadmap/evaluation", {
       en: { name: "index.html", html: doc("Evaluation", "<h1>Evaluation</h1>") },
-      fr: { name: "index_fr.html", html: doc("Évaluation", "<h1>Évaluation</h1>") }
+      fr: { name: "index_fr.html", html: doc("Évaluation", "<h1>Évaluation</h1>") },
+      es: { name: "index_es.html", html: doc("Evaluación", "<h1>Evaluación</h1>") },
+      it: { name: "index_it.html", html: doc("Valutazione", "<h1>Valutazione</h1>") }
     }, "1.2.3", { asideFromNav: true, asideFromFooter: true })
     expect(page.meta).toMatchObject({
       slug: "roadmap/evaluation", title: { en: "Evaluation", fr: "Évaluation" }, asideFromNav: true, asideFromFooter: true
     })
     expect(page.render("fr")).toBe("<h1>Évaluation</h1>")
+    expect(page.render("it")).toBe("<h1>Valutazione</h1>")
   })
 })

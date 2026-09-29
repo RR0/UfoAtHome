@@ -2,7 +2,7 @@ import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises"
 import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
 import { Layout } from "./Layout.js"
-import { type PageLanguage, type SitePage } from "./SitePage.js"
+import { SITE_LANGUAGES, type SiteLanguage, type SitePage } from "./SitePage.js"
 import { HomePage } from "./content/HomePage.js"
 import { PlayerPage } from "./content/PlayerPage.js"
 import { EditorPage } from "./content/EditorPage.js"
@@ -107,7 +107,7 @@ class SiteBuilder {
 
     const written: string[] = []
     for (const page of this.pages) {
-      for (const language of layout.languagesOf(page)) {
+      for (const language of SITE_LANGUAGES) {
         const file = join(this.out, layout.fileName(page.meta, language))
         const html = layout.render(page, language)
         this.checkPrintedVersions(html, layout.fileUrl(page.meta, language), version)
@@ -360,8 +360,8 @@ if (path && !path.includes("..")) {
 
   private async writeSitemap(layout: Layout): Promise<void> {
     const urls = this.pages.map(page => {
-      const alternates = layout.languagesOf(page)
-        .map((language: PageLanguage) =>
+      const alternates = SITE_LANGUAGES
+        .map((language: SiteLanguage) =>
           `    <xhtml:link rel="alternate" hreflang="${language}" href="${Layout.ORIGIN}${layout.fileUrl(page.meta, language)}"/>`)
         .join("\n")
       return `  <url>\n    <loc>${Layout.ORIGIN}${layout.path(page.meta)}</loc>\n${alternates}\n  </url>`

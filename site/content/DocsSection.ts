@@ -23,7 +23,7 @@ export abstract class DocsSection implements SitePage {
    * documentation hub, so without this a reader has nothing but the browser's own Back. */
   protected hero(
     language: SiteLanguage, title: Said<string>, lede: Said<string>,
-    crumb: { href: string, label: Said<string> } = { href: "/docs/", label: { en: "Documentation", fr: "Documentation" } }
+    crumb: { href: string, label: Said<string> } = { href: "/docs/", label: { en: "Documentation", fr: "Documentation", es: "Documentación", it: "Documentazione" } }
   ): string {
     // Escaped: a component's page is titled `<rr0-scene>`, which a browser reads as a tag if it is
     // put in the heading raw — see Layout.text.

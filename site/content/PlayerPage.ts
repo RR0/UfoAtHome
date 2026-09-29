@@ -11,13 +11,22 @@ export class PlayerPage implements SitePage {
 
   readonly meta: PageMeta = {
     slug: "play",
-    navLabel: { en: "Player", fr: "Lecteur" },
-    title: { en: "Play any reconstruction", fr: "Rejouer n'importe quelle reconstitution" },
+    navLabel: { en: "Player", fr: "Lecteur", es: "Reproductor", it: "Lettore" },
+    title: {
+      en: "Play any reconstruction",
+      fr: "Rejouer n'importe quelle reconstitution",
+      es: "Reproducir cualquier reconstrucción",
+      it: "Riprodurre qualsiasi ricostruzione"
+    },
     description: {
       en: "Open a reconstruction from a link, or paste one in. Nothing is uploaded — it is replayed "
         + "in your own browser, in the real sky of the date and place it states.",
       fr: "Ouvrez une reconstitution depuis un lien, ou collez-en une. Rien n'est téléversé : elle est "
-        + "rejouée dans votre navigateur, sous le ciel réel de la date et du lieu qu'elle énonce."
+        + "rejouée dans votre navigateur, sous le ciel réel de la date et du lieu qu'elle énonce.",
+      es: "Abre una reconstrucción desde un enlace, o pega una. No se sube nada: se reproduce "
+        + "en tu propio navegador, bajo el cielo real de la fecha y el lugar que indica.",
+      it: "Apri una ricostruzione da un link, oppure incollane una. Non viene caricato nulla: viene riprodotta "
+        + "nel tuo browser, sotto il cielo reale della data e del luogo che indica."
     },
     modules: ["/lib/rr0-sighting.mjs"]
   }
@@ -25,7 +34,6 @@ export class PlayerPage implements SitePage {
   private readonly catalogue = new DemoCatalogue()
 
   script(language: SiteLanguage): string {
-    const fr = language === "fr"
     // This site knows what its own demos are called; a case id like `sky-test-halos` does not.
     // Only for these — anything else is named from what the recording itself carries.
     // As they read inside the heading's sentence: a title that is not a name loses the capital it
@@ -39,25 +47,62 @@ export class PlayerPage implements SitePage {
         return [demo.src, ...(demo.playSrc ? [demo.playSrc] : [])].map(src => [src, said])
       })))
     const messages = JSON.stringify({
-      loading: fr ? "Chargement…" : "Loading…",
-      notFound: fr
-        ? "Rien n'a pu être chargé depuis ce lien. Vérifiez l'adresse, et que vous êtes connecté."
-        : "Nothing could be loaded from that link. Check the address, and that you are online.",
-      cors: fr
-        ? "Cette adresse répond, mais le navigateur n'a pas le droit de la lire depuis cette page. Le fichier est bon : c'est son serveur qui doit envoyer l'en-tête « Access-Control-Allow-Origin: * » avec."
-        : "That address answers, but the browser is not allowed to read it from this page. The file is fine — its server needs to send the header \"Access-Control-Allow-Origin: *\" with it.",
-      badJson: fr ? "Ce texte n'est pas une reconstitution valide : " : "That text is not a valid reconstruction: ",
-      empty: fr ? "Rien à jouer — collez une reconstitution d'abord." : "Nothing to play — paste a reconstruction first.",
-      playing: fr ? "Rejouer {title}" : "Playing {title}",
-      pasted: fr ? "la reconstitution collée" : "the pasted reconstruction",
-      pasteEmpty: fr ? "Ou coller une reconstitution" : "Or paste a reconstruction in",
-      pasteLoaded: fr ? "Voir ou modifier ce fichier" : "See or edit this file",
-      noRecording: fr
-        ? "Aucun fichier .json parmi ceux choisis : choisissez l'enregistrement, et avec lui les images ou modèles qu'il nomme."
-        : "None of the chosen files is a .json: choose the recording, and with it the pictures or models it names.",
-      unresolved: fr
-        ? "Nommés par le fichier mais pas choisis avec lui : "
-        : "Named by the file but not chosen with it: "
+      loading: ({ en: "Loading…", fr: "Chargement…", es: "Cargando…", it: "Caricamento…" })[language],
+      notFound: ({
+        en: "Nothing could be loaded from that link. Check the address, and that you are online.",
+        fr: "Rien n'a pu être chargé depuis ce lien. Vérifiez l'adresse, et que vous êtes connecté.",
+        es: "No se ha podido cargar nada desde ese enlace. Comprueba la dirección, y que tienes conexión.",
+        it: "Non è stato possibile caricare nulla da quel link. Controlla l'indirizzo, e di essere connesso."
+      })[language],
+      cors: ({
+        en: "That address answers, but the browser is not allowed to read it from this page. The file is fine — its server needs to send the header \"Access-Control-Allow-Origin: *\" with it.",
+        fr: "Cette adresse répond, mais le navigateur n'a pas le droit de la lire depuis cette page. Le fichier est bon : c'est son serveur qui doit envoyer l'en-tête « Access-Control-Allow-Origin: * » avec.",
+        es: "Esa dirección responde, pero el navegador no tiene permiso para leerla desde esta página. El archivo está bien — es su servidor el que debe enviar con él la cabecera «Access-Control-Allow-Origin: *».",
+        it: "Quell'indirizzo risponde, ma il browser non è autorizzato a leggerlo da questa pagina. Il file va bene — è il suo server che deve inviare insieme a esso l'intestazione «Access-Control-Allow-Origin: *»."
+      })[language],
+      badJson: ({
+        en: "That text is not a valid reconstruction: ",
+        fr: "Ce texte n'est pas une reconstitution valide : ",
+        es: "Ese texto no es una reconstrucción válida: ",
+        it: "Questo testo non è una ricostruzione valida: "
+      })[language],
+      empty: ({
+        en: "Nothing to play — paste a reconstruction first.",
+        fr: "Rien à jouer — collez une reconstitution d'abord.",
+        es: "Nada que reproducir — pega primero una reconstrucción.",
+        it: "Niente da riprodurre — incolla prima una ricostruzione."
+      })[language],
+      playing: ({ en: "Playing {title}", fr: "Rejouer {title}", es: "Reproduciendo {title}", it: "In riproduzione: {title}" })[language],
+      pasted: ({
+        en: "the pasted reconstruction",
+        fr: "la reconstitution collée",
+        es: "la reconstrucción pegada",
+        it: "la ricostruzione incollata"
+      })[language],
+      pasteEmpty: ({
+        en: "Or paste a reconstruction in",
+        fr: "Ou coller une reconstitution",
+        es: "O pega una reconstrucción",
+        it: "Oppure incolla una ricostruzione"
+      })[language],
+      pasteLoaded: ({
+        en: "See or edit this file",
+        fr: "Voir ou modifier ce fichier",
+        es: "Ver o editar este archivo",
+        it: "Vedi o modifica questo file"
+      })[language],
+      noRecording: ({
+        en: "None of the chosen files is a .json: choose the recording, and with it the pictures or models it names.",
+        fr: "Aucun fichier .json parmi ceux choisis : choisissez l'enregistrement, et avec lui les images ou modèles qu'il nomme.",
+        es: "Ninguno de los archivos elegidos es un .json: elige la grabación, y con ella las imágenes o modelos que nombra.",
+        it: "Nessuno dei file scelti è un .json: scegli la registrazione, e insieme a essa le immagini o i modelli che nomina."
+      })[language],
+      unresolved: ({
+        en: "Named by the file but not chosen with it: ",
+        fr: "Nommés par le fichier mais pas choisis avec lui : ",
+        es: "Nombrados por el archivo pero no elegidos con él: ",
+        it: "Nominati dal file ma non scelti insieme a esso: "
+      })[language]
     })
     return `const messages = ${messages}
 const demoTitles = ${demoTitles}
@@ -333,41 +378,54 @@ if (asked) {
   }
 
   render(language: SiteLanguage): string {
-    return language === "fr" ? this.fr() : this.en()
+    switch (language) {
+      case "fr": return this.fr()
+      case "es": return this.es()
+      case "it": return this.it()
+      default: return this.en()
+    }
   }
 
   private form(language: SiteLanguage): string {
-    const fr = language === "fr"
     return `
     <div class="player-inputs">
       <form class="player-form" id="player-url-form">
-        <label for="player-url">${fr ? "Depuis un lien" : "From a link"}</label>
+        <label for="player-url">${({ en: "From a link", fr: "Depuis un lien", es: "Desde un enlace", it: "Da un link" })[language]}</label>
         <div class="player-row">
           <input id="player-url" type="text" inputmode="url" spellcheck="false"
                  placeholder="https://…/sighting.json">
-          <button class="btn btn-primary" type="submit">${fr ? "Jouer" : "Play"}</button>
+          <button class="btn btn-primary" type="submit">${({ en: "Play", fr: "Jouer", es: "Reproducir", it: "Riproduci" })[language]}</button>
         </div>
-        <p class="small">${fr
-          ? "Une adresse complète, ou le nom d'une <a href=\"/demos/\">démo</a> — par exemple <code>Socorro</code>."
-          : "A full address, or the name of one of <a href=\"/demos/\">the demos</a> — <code>Socorro</code>, for instance."}</p>
+        <p class="small">${({
+          en: "A full address, or the name of one of <a href=\"/demos/\">the demos</a> — <code>Socorro</code>, for instance.",
+          fr: "Une adresse complète, ou le nom d'une <a href=\"/demos/\">démo</a> — par exemple <code>Socorro</code>.",
+          es: "Una dirección completa, o el nombre de una de <a href=\"/demos/\">las demos</a> — <code>Socorro</code>, por ejemplo.",
+          it: "Un indirizzo completo, o il nome di una delle <a href=\"/demos/\">demo</a> — <code>Socorro</code>, per esempio."
+        })[language]}</p>
       </form>
 
       <div class="player-form">
-        <label for="player-files">${fr ? "Depuis votre ordinateur" : "From your computer"}</label>
+        <label for="player-files">${({ en: "From your computer", fr: "Depuis votre ordinateur", es: "Desde tu ordenador", it: "Dal tuo computer" })[language]}</label>
         <input id="player-files" type="file" multiple accept=".json,application/json,image/*,.glb,.gltf,audio/*">
-        <p class="small">${fr
-          ? "Choisissez l'enregistrement (.json), et avec lui les photos, modèles ou sons qu'il nomme par un chemin relatif : ils sont retrouvés par leur nom. Rien n'est envoyé."
-          : "Choose the recording (.json), and with it the photos, models or sounds it names by a relative path: they are matched by name. Nothing is uploaded."}</p>
+        <p class="small">${({
+          en: "Choose the recording (.json), and with it the photos, models or sounds it names by a relative path: they are matched by name. Nothing is uploaded.",
+          fr: "Choisissez l'enregistrement (.json), et avec lui les photos, modèles ou sons qu'il nomme par un chemin relatif : ils sont retrouvés par leur nom. Rien n'est envoyé.",
+          es: "Elige la grabación (.json), y con ella las fotos, modelos o sonidos que nombra mediante una ruta relativa: se localizan por su nombre. No se sube nada.",
+          it: "Scegli la registrazione (.json), e insieme a essa le foto, i modelli o i suoni che nomina con un percorso relativo: vengono ritrovati in base al nome. Non viene caricato nulla."
+        })[language]}</p>
       </div>
 
       <details class="player-paste" id="player-paste">
-        <summary>${fr ? "Ou coller une reconstitution" : "Or paste a reconstruction in"}</summary>
+        <summary>${({ en: "Or paste a reconstruction in", fr: "Ou coller une reconstitution", es: "O pega una reconstrucción", it: "Oppure incolla una ricostruzione" })[language]}</summary>
         <div class="player-paste-body">
           <div id="player-paste-mount" class="player-paste-mount" data-sample='{"version": 1, "timeline": {"keyframes": []}}'></div>
-          <button class="btn" type="button" id="player-paste-play">${fr ? "Jouer ce texte" : "Play this"}</button>
-          <p class="small">${fr
-            ? "Rien ne quitte votre navigateur. Le format est décrit dans <a href=\"/docs/format/\">la page du fichier d'observation</a>."
-            : "Nothing leaves your browser. The format is described in <a href=\"/docs/format/\">the sighting file's page</a>."}</p>
+          <button class="btn" type="button" id="player-paste-play">${({ en: "Play this", fr: "Jouer ce texte", es: "Reproducir esto", it: "Riproduci questo testo" })[language]}</button>
+          <p class="small">${({
+            en: "Nothing leaves your browser. The format is described in <a href=\"/docs/format/\">the sighting file's page</a>.",
+            fr: "Rien ne quitte votre navigateur. Le format est décrit dans <a href=\"/docs/format/\">la page du fichier d'observation</a>.",
+            es: "Nada sale de tu navegador. El formato se describe en <a href=\"/docs/format/\">la página del archivo de avistamiento</a>.",
+            it: "Nulla lascia il tuo browser. Il formato è descritto nella <a href=\"/docs/format/\">pagina del file di avvistamento</a>."
+          })[language]}</p>
         </div>
       </details>
     </div>
@@ -455,6 +513,92 @@ ${this.form("fr")}
     <p>Pour modifier ce que vous regardez au lieu de seulement le regarder,
       <a href="/edit/">l'éditeur</a> prend le même paramètre. Pour poser une reconstitution
       sur une page à vous, voyez <a href="/docs/">la documentation</a>.</p>
+  </div>
+</section>
+`
+  }
+
+  private es(): string {
+    return `
+<section class="band hero">
+  <div class="wrap">
+    <p class="eyebrow">Reproductor</p>
+    <h1 id="player-heading">Reproducir cualquier reconstrucción.</h1>
+    <p class="lede" id="player-lede">Apúntalo a una reconstrucción que alguien haya publicado, o pega
+      una. Se reproduce bajo el cielo real de la fecha y el lugar que indica.</p>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap">
+    <div class="stage" id="player-stage-box" hidden>
+      <rr0-sighting id="player-stage"></rr0-sighting>
+      <div class="stage-caption">
+        <div class="player-description" id="player-description" hidden></div>
+        <a class="btn" id="player-edit" href="/edit/" hidden>Editar este avistamiento</a>
+      </div>
+    </div>
+${this.form("es")}
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap prose-wide">
+    <h2>Un enlace que abre un avistamiento</h2>
+    <p>Todo lo que hay en esta página se puede alcanzar directamente:
+      <code>ufoathome.org/play/?sighting=</code> seguido de la dirección de una reconstrucción.
+      Ese es el enlace que hay que dar a alguien cuando quieres que vea un relato en lugar de leerlo —
+      en un correo, una publicación, un foro que no admite más que texto.</p>
+    <p>Es también lo que reparte el panel <q>?</q> de cada reconstrucción publicada, y a lo que
+      llevan los antiguos enlaces <code>ufoathome.org/&lt;nombre&gt;</code>. Un nombre sin barra se
+      busca primero entre las demos de este sitio, y después como caso de rr0.org, leído a través de
+      su <code>case.json</code> o, en su defecto, de su <code>sighting.json</code>.</p>
+    <p>Para cambiar lo que estás viendo en lugar de solo mirarlo, <a href="/edit/">el
+      editor</a> admite el mismo parámetro. Para poner una reconstrucción en una página propia,
+      consulta <a href="/docs/">la documentación</a>.</p>
+  </div>
+</section>
+`
+  }
+
+  private it(): string {
+    return `
+<section class="band hero">
+  <div class="wrap">
+    <p class="eyebrow">Lettore</p>
+    <h1 id="player-heading">Riprodurre qualsiasi ricostruzione.</h1>
+    <p class="lede" id="player-lede">Puntalo su una ricostruzione pubblicata da qualcuno, oppure
+      incollane una. Viene riprodotta sotto il cielo reale della data e del luogo che indica.</p>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap">
+    <div class="stage" id="player-stage-box" hidden>
+      <rr0-sighting id="player-stage"></rr0-sighting>
+      <div class="stage-caption">
+        <div class="player-description" id="player-description" hidden></div>
+        <a class="btn" id="player-edit" href="/edit/" hidden>Modifica questo avvistamento</a>
+      </div>
+    </div>
+${this.form("it")}
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap prose-wide">
+    <h2>Un link che apre un avvistamento</h2>
+    <p>Tutto ciò che c'è in questa pagina è raggiungibile direttamente:
+      <code>ufoathome.org/play/?sighting=</code> seguito dall'indirizzo di una ricostruzione.
+      È il link da dare a qualcuno quando vuoi che veda un resoconto invece di leggerlo —
+      in un'email, un post, un forum che accetta solo testo.</p>
+    <p>È anche ciò che distribuisce il pannello <q>?</q> di ogni ricostruzione pubblicata, e ciò a
+      cui rimandano i vecchi link <code>ufoathome.org/&lt;nome&gt;</code>. Un nome senza barra viene
+      cercato prima tra le demo di questo sito, poi come caso di rr0.org, letto tramite il suo
+      <code>case.json</code> o, in mancanza, il suo <code>sighting.json</code>.</p>
+    <p>Per modificare ciò che stai guardando invece di limitarti a guardarlo, <a href="/edit/">l'editor</a>
+      accetta lo stesso parametro. Per mettere una ricostruzione su una tua pagina, consulta
+      <a href="/docs/">la documentazione</a>.</p>
   </div>
 </section>
 `
