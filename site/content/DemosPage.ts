@@ -146,20 +146,22 @@ for (const card of cards) {
       </div>
     </section>`).join("\n")
 
+    // Counted, not written: the lede said "seventeen" long after the catalogue had grown past it.
+    const count = this.catalogue.groups.reduce((total, group) => total + group.demos.length, 0)
     return `
 <section class="band hero">
   <div class="wrap">
     <p class="eyebrow">${({ en: "Catalogue", fr: "Catalogue", es: "Catálogo", it: "Catalogo" })[language]}</p>
     <h1>${({ en: "What it can do.", fr: "Ce qu'il sait faire.", es: "Lo que sabe hacer.", it: "Cosa sa fare." })[language]}</h1>
     <p class="lede">${({
-      en: "Seventeen reconstructions. None of them is a video: each is computed while you watch it, from "
+      en: `${count} reconstructions. None of them is a video: each is computed while you watch it, from `
         + "a real date, a real hour and a real place — press play on whichever interests you.",
-      fr: "Dix-sept reconstitutions. Aucune n'est une vidéo : chacune est calculée pendant que vous la "
+      fr: `${count} reconstitutions. Aucune n'est une vidéo : chacune est calculée pendant que vous la `
         + "regardez, à partir d'une date, d'une heure et d'un lieu réels — appuyez sur lecture là où "
         + "cela vous intéresse.",
-      es: "Diecisiete reconstrucciones. Ninguna es un vídeo: cada una se calcula mientras la miras, a partir "
+      es: `${count} reconstrucciones. Ninguna es un vídeo: cada una se calcula mientras la miras, a partir `
         + "de una fecha real, una hora real y un lugar real — pulsa reproducir en la que te interese.",
-      it: "Diciassette ricostruzioni. Nessuna è un video: ognuna viene calcolata mentre la guardi, a partire "
+      it: `${count} ricostruzioni. Nessuna è un video: ognuna viene calcolata mentre la guardi, a partire `
         + "da una data reale, un'ora reale e un luogo reale — premi play su quella che ti interessa."
     })[language]}</p>
   </div>

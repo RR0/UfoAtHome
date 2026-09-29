@@ -45,10 +45,10 @@ export class DemoCatalogue {
     {
       heading: { en: "Real sightings", fr: "Des observations réelles", es: "Avistamientos reales", it: "Avvistamenti reali" },
       intro: {
-        en: "Seven documented cases, each replayed in the sky of its own reported date, time and place.",
-        fr: "Sept dossiers documentés, chacun rejoué dans le ciel de sa propre date, heure et lieu déclarés.",
-        es: "Siete casos documentados, cada uno reproducido en el cielo de su propia fecha, hora y lugar declarados.",
-        it: "Sette casi documentati, ciascuno riprodotto nel cielo della propria data, ora e luogo dichiarati."
+        en: "Eight documented cases, each replayed in the sky of its own reported date, time and place.",
+        fr: "Huit dossiers documentés, chacun rejoué dans le ciel de sa propre date, heure et lieu déclarés.",
+        es: "Ocho casos documentados, cada uno reproducido en el cielo de su propia fecha, hora y lugar declarados.",
+        it: "Otto casi documentati, ciascuno riprodotto nel cielo della propria data, ora e luogo dichiarati."
       },
       demos: [
         {
@@ -138,6 +138,18 @@ export class DemoCatalogue {
             fr: "Plein jour, 10:00, État de New York, avec une base de nuages qui monte de 800 m à 913 m sur les deux heures que couvre le relevé.",
             es: "Pleno día, 10:00, estado de Nueva York, con una capa de nubes que sube de 800 m a 913 m durante las dos horas que abarca el registro.",
             it: "Pieno giorno, 10:00, Stato di New York, con uno strato di nubi che sale da 800 m a 913 m nelle due ore coperte dalla registrazione."
+          }
+        },
+        {
+          id: "mission-viejo",
+          src: "/demo-data/observer-mission-viejo.json",
+          title: { en: "Mission Viejo, 2026", fr: "Mission Viejo, 2026", es: "Mission Viejo, 2026", it: "Mission Viejo, 2026" },
+          titleIsName: true,
+          blurb: {
+            en: "Dusk in Orange County, 19:45. A yellow orb with an orange rim crosses the southern sky in two seconds and drops behind a tree line. Built from a single post on X and the witness's own sketch, with every guess marked as one.",
+            fr: "Crépuscule dans le comté d'Orange, 19:45. Une boule jaune cerclée d'orange traverse le ciel sud en deux secondes et plonge derrière une lisière. Reconstituée à partir d'un seul post sur X et du croquis du témoin, chaque supposition marquée comme telle.",
+            es: "Anochecer en el condado de Orange, 19:45. Un orbe amarillo con borde naranja cruza el cielo sur en dos segundos y cae tras una hilera de árboles. Reconstruido a partir de una sola publicación en X y del boceto del testigo, cada suposición marcada como tal.",
+            it: "Crepuscolo nella contea di Orange, 19:45. Una sfera gialla bordata d'arancio attraversa il cielo a sud in due secondi e scende dietro una fila d'alberi. Ricostruita da un solo post su X e dallo schizzo del testimone, ogni supposizione segnata come tale."
           }
         }
       ]
