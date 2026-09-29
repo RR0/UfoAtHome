@@ -124,12 +124,8 @@ for (const card of cards) {
 
   render(language: SiteLanguage): string {
     const playerPath = "/play/"
-    const editorPath = "/edit/"
-    // Two verbs of one word, so the pair reads as one choice: look at it, or work on it. "Open
-    // full size" said how it would be shown rather than what you were about to do, and stood
-    // beside a plain "Edit" like a caption beside a button.
-    const openLabel = ({ en: "View", fr: "Voir", es: "Ver", it: "Guarda" })[language]
-    const editLabel = ({ en: "Edit", fr: "Éditer", es: "Editar", it: "Modifica" })[language]
+    // The title is the way to watch a demo in full, and editing is one button away from there:
+    // a "View · Edit" pair under each card repeated both.
     const loading = DemosPage.LOADING[language]
 
     const groups = this.catalogue.groups.map(group => `
@@ -138,18 +134,12 @@ for (const card of cards) {
       <p class="prose-wide">${group.intro[language]}</p>
       <div class="demo-grid">
         ${group.demos.map(demo => {
-          const target = encodeURIComponent(demo.editSrc ?? demo.src)
           const played = encodeURIComponent(demo.playSrc ?? demo.editSrc ?? demo.src)
           return `<figure class="demo-card" id="${demo.id}" data-src="${demo.src}">
           <div class="demo-mount"><p class="loading">${loading}</p></div>
           <figcaption>
-            <h3>${demo.title[language]}</h3>
+            <h3><a href="${playerPath}?sighting=${played}">${demo.title[language]}</a></h3>
             <p>${demo.blurb[language]}</p>
-            <p class="demo-links">
-              <a href="${playerPath}?sighting=${played}">${openLabel}</a>
-              <span aria-hidden="true">·</span>
-              <a href="${editorPath}?sighting=${target}">${editLabel}</a>
-            </p>
           </figcaption>
         </figure>`
         }).join("\n        ")}

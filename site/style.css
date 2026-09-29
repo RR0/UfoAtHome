@@ -371,9 +371,6 @@ section.band:first-of-type { border-top: 0; }
    orphaned word — "Un avion de ligne sur une pose de 20" over "s". */
 .demo-card h3 { margin: 0 0 0.3rem; font-size: 1.02rem; text-wrap: balance; }
 .demo-card figcaption p { margin: 0; font-size: 0.88rem; color: var(--ink-dim); line-height: 1.5; }
-.demo-links { margin-top: 0.6rem !important; font-size: 0.85rem; }
-.demo-links a { font-weight: 600; }
-.demo-links span { color: var(--ink-faint); margin: 0 0.35rem; }
 
 /* ---------------------------------------------------------------- section anchors */
 
