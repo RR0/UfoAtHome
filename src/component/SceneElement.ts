@@ -811,9 +811,20 @@ export class SceneElement extends HTMLElement {
 
   /** Fetches a SightingRecordingJson from `url` and loads it — what the `src` attribute uses. */
   async loadFromSrc(url: string): Promise<void> {
-    const json = (await SightingFetch.json(url)) as SightingRecordingJson
+    const fetching = SightingFetch.json(url)
+    this.holdForNewScene(fetching)
+    const json = (await fetching) as SightingRecordingJson
     this.documentUrl = new URL(url, location.href).href
     this.sightingData = json
+  }
+
+  /**
+   * Shows the loader, and keeps the frame on screen, until the recording about to be set is drawn
+   * whole — see SceneRenderer.holdForNewScene. For loading a new recording, never for an edit of
+   * the one on show: an edit is seen as it is made.
+   */
+  holdForNewScene(arrival?: Promise<unknown>): void {
+    this.sceneRenderer.holdForNewScene(arrival)
   }
 
   /** Where the recording on show was read from, which the addresses it states (a model's `url`) are

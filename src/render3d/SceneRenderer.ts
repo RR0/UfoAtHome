@@ -291,11 +291,14 @@ const SCATTERED_SKY_DRAWS_PER_FRAME = 2
  * being drawn then, so the tables may take the whole of it. */
 const SCATTERED_SKY_DRAWS_WHILE_HELD = 16
 /**
- * How long a scene's first frame may wait for its scattered sky before the old gradient is shown
- * instead. A reader saw Chiles-Whitted come up with an airless gradient and the scattered sky replace
- * it half a second later; holding the first frame turns that jump into the sky simply arriving.
+ * How long a scene's first frame may wait for everything it is made of before what is there is shown
+ * anyway. A reader saw Chiles-Whitted come up with an airless gradient and the scattered sky replace
+ * it half a second later; holding the first frame turns that jump into the sky simply arriving. The
+ * same held for what came after the sky: Mission Viejo was seen building itself in the second after
+ * it appeared (a dusk sky, then a black one over pale trees, then green ones, then the night), as
+ * the relief, the models and the eye's adaptation arrived one by one. See SceneRenderer.sceneSettled.
  */
-const SKY_HOLD_MS = 2500
+const SKY_HOLD_MS = 4000
 
 const COMPASS_PLACEMENT_RADIUS = 880 // just inside the sky dome, reading as "on the horizon"
 /** How big a compass label is drawn, in world units at COMPASS_PLACEMENT_RADIUS — sized for the
@@ -779,7 +782,7 @@ export class SceneRenderer {
   private skyHoldUntilMs: number | null | undefined = undefined
 
   /**
-   * Told when the scene's first frame starts and stops waiting for its sky — see skyHoldUntilMs —
+   * Told when the scene's first frame starts and stops waiting to be whole — see sceneSettled —
    * so the element around it can say something is being computed rather than show an empty frame.
    */
   onFirstFrameHold?: (holding: boolean) => void
@@ -792,6 +795,100 @@ export class SceneRenderer {
    */
   private firstFrameReady(): boolean {
     return (!this.scatteredSky || this.scatteredSky.ambient !== undefined) && !this.iceHalos?.awaitingFirstDisplay
+  }
+
+  /**
+   * Whether the held first frame can be shown as it will stay: its sky (see firstFrameReady), the
+   * ground, roads and models it was waiting for (see awaitArrival), and an eye adapted to all of it
+   * — the eye's probe photographed since the last of them arrived, and measuring nothing new on it
+   * (see measureSurroundings). Until then the eye's probe is photographed behind the loader, where
+   * it used to be photographed on screen, one visible step at a time.
+   *
+   * Not "photographed at the scene as it now is": a scene loaded playing (the front page's carousel)
+   * is a new version at every tick, and would never be.
+   */
+  private sceneSettled(): boolean {
+    return this.firstFrameReady() && this.arrivalsPending === 0 && this.eyeSettledVersion >= this.lastArrivalVersion
+  }
+
+  /** How many of the things a held first frame waits for are still on their way — see awaitArrival. */
+  private arrivalsPending = 0
+  /** The scene version at which the eye last measured its surroundings and found nothing to adapt
+   * to, -1 when its last measure moved it — see sceneSettled. */
+  private eyeSettledVersion = -1
+  /** The scene version when the hold started or the last thing it waited for arrived: the eye has to
+   * have seen the scene since. */
+  private lastArrivalVersion = 0
+
+  /**
+   * Has the first frame wait for `arrival` (a relief patch, the roads, a model), which then shows
+   * with the scene instead of appearing in it a moment later. A frame already shown waits for
+   * nothing: what arrives after it arrives in view, as it always did.
+   *
+   * @param patienceMs How long the frame waits for this one, if less than the whole hold: the roads
+   *   of a place nobody archived come from a live service that answers in tens of seconds (see
+   *   ArchivedRoadProvider), and a scene is not held that long for its streets.
+   */
+  private awaitArrival<T>(arrival: Promise<T>, patienceMs?: number): Promise<T> {
+    if (this.skyHoldUntilMs === null) return arrival
+    this.arrivalsPending++
+    let counted = true
+    const stopWaiting = () => {
+      if (!counted) return
+      counted = false
+      this.arrivalsPending--
+      // Whatever the arrival changed has been render()ed by now (the relief's build, loadDecorModel),
+      // so a photograph at this version or after has it in.
+      this.lastArrivalVersion = this.sceneVersion
+      if (this.skyHoldUntilMs) this.redrawHeld()
+    }
+    const timer = patienceMs === undefined ? undefined : setTimeout(stopWaiting, patienceMs)
+    return arrival.finally(() => {
+      clearTimeout(timer)
+      stopWaiting()
+    })
+  }
+
+  /** How long a held frame waits for its roads — see awaitArrival. An archived square of ground is
+   * two small files away; the live survey is not. */
+  private static readonly ROADS_PATIENCE_MS = 1500
+
+  /** Asks the held frame to look again at whether it can be shown, WITHOUT counting as a change of
+   * the scene (see render): what it was waiting for may have come to nothing, or to no change. */
+  private redrawHeld(): void {
+    this.frameDirty = true
+    if (this.animationFrameId !== null || this.framesDriven || this.flushFrameId !== null) return
+    this.flushFrameId = requestAnimationFrame(() => {
+      this.flushFrameId = null
+      this.drawIfDirty()
+    })
+  }
+
+  /**
+   * Holds the frames of a scene about to be loaded until it is whole, behind the loader — what the
+   * element's very first scene does on its own (see setAstronomy), for the next one loaded into the
+   * same element: the front page's carousel, a player switching observers. Until it is whole, the
+   * last frame of the scene before stays on screen.
+   *
+   * @param arrival The recording itself when it is still being fetched: until it is here, the scene
+   *   on show is the one before, however settled it looks.
+   */
+  holdForNewScene(arrival?: Promise<unknown>): void {
+    this.surroundings = undefined
+    this.scatteredSky?.resetSurroundings()
+    this.startHold()
+    if (arrival) void this.awaitArrival(arrival).catch(() => undefined)
+  }
+
+  private startHold(): void {
+    this.skyHoldUntilMs = performance.now() + SKY_HOLD_MS
+    this.eyeSettledVersion = -1
+    this.lastArrivalVersion = this.sceneVersion + 1
+    this.iceHalos?.setUrgent(true)
+    this.onFirstFrameHold?.(true)
+    // The hold ends on its own even if the scene never settles (a context lost mid-build, a tile
+    // server that does not answer).
+    setTimeout(() => this.render(), SKY_HOLD_MS + 20)
   }
   private groundMesh?: Mesh
   /** Location-accurate relief+imagery patch built by setTerrainOrigin(), layered on top of the
@@ -824,7 +921,7 @@ export class SceneRenderer {
    * appear as models land and disappear with the objects that named them. */
   private readonly decorModelCredits = new Map<string, DecorModelCredit>()
   /** The bodies of the interpretation being replayed, if one is — see setBodies. */
-  private readonly bodySystem = new BodySystem(ref => this.loadBodyModel(ref), () => this.render(), () => this.relativeScale)
+  private readonly bodySystem = new BodySystem(ref => this.awaitArrival(this.loadBodyModel(ref)), () => this.render(), () => this.relativeScale)
   /** Where the frame bodies (and the decor) are placed in stands in the world this tick — the t=0
    * reference as seen from the observer, set by updateDecorAnchoring. */
   private bodyOrigin = { x: 0, z: 0 }
@@ -1393,7 +1490,7 @@ export class SceneRenderer {
     this.terrainOrigin = { lat, lng }
     this.terrainRadius = radiusM
     const token = ++this.terrainBuildToken
-    buildTerrainMesh(lat, lng, this.terrainProviders, radiusM)
+    this.awaitArrival(buildTerrainMesh(lat, lng, this.terrainProviders, radiusM))
       .then(({ mesh, attribution, originElevationM }) => {
         if (token !== this.terrainBuildToken) return // superseded by a newer call while this was in flight
         this.setSiteElevation(originElevationM ?? 0)
@@ -1538,7 +1635,7 @@ export class SceneRenderer {
       this.drapeRoads(held.ways, lat, lng, provider.contemporary)
       return
     }
-    provider.getRoads(boundsAroundObserver(lat, lng, radiusM))
+    this.awaitArrival(provider.getRoads(boundsAroundObserver(lat, lng, radiusM)), SceneRenderer.ROADS_PATIENCE_MS)
       .then(ways => {
         // Against the PLACE, not against the build token. A patch is rebuilt for reasons that have
         // nothing to do with where it is — a change of source, a observer walking a hundred and
@@ -1796,7 +1893,7 @@ export class SceneRenderer {
       // Fired and forgotten on purpose: the primitive is already in the scene and is a complete,
       // correct answer on its own, so a model that takes a second to arrive (or never arrives)
       // costs the viewer nothing but detail. See loadDecorModel.
-      void this.loadDecorModel(object, this.decorModelToken)
+      void this.awaitArrival(this.loadDecorModel(object, this.decorModelToken))
     }
     // Toggled here too (not just in updateCelestialLight, which only runs on the next
     // setAstronomy tick): adding the sighting's first-ever decor object shouldn't have to wait an
@@ -2367,12 +2464,7 @@ export class SceneRenderer {
     }
     this.lastAstronomy = astronomy
     this.scatteredSky?.update(this.scatteredSkyState(astronomy))
-    if (this.skyHoldUntilMs === undefined) {
-      this.skyHoldUntilMs = performance.now() + SKY_HOLD_MS
-      this.onFirstFrameHold?.(true)
-      // The hold ends on its own even if the sky never comes (a context lost mid-build).
-      setTimeout(() => this.render(), SKY_HOLD_MS + 20)
-    }
+    if (this.skyHoldUntilMs === undefined) this.startHold()
     this.pumpScatteredSky()
     this.lastSunPosition = astronomy.sun
     this.buildSky(astronomy.sun)
@@ -2963,12 +3055,6 @@ export class SceneRenderer {
    * outside an exposure. */
   private drawIfDirty(): void {
     if (!this.frameDirty || this.contextReleased) return
-    if (this.skyHoldUntilMs) {
-      if (!this.firstFrameReady() && performance.now() < this.skyHoldUntilMs) return
-      this.skyHoldUntilMs = null
-      this.iceHalos?.setUrgent(false)
-      this.onFirstFrameHold?.(false)
-    }
     if (this.skyColoursStale && this.lastAstronomy) this.applySkyColours(this.lastAstronomy)
     if (this.compileBeforeNextDraw) {
       // See compileNextFrameOffThread: the frame stays dirty and is drawn once the programs exist.
@@ -2982,6 +3068,18 @@ export class SceneRenderer {
       return
     }
     if (this.compiling) return
+    if (this.skyHoldUntilMs) {
+      if (!this.sceneSettled() && performance.now() < this.skyHoldUntilMs) {
+        // The eye adapts behind the loader: its probe is photographed and measured with no frame
+        // drawn, and measureSurroundings asks for the next pass until nothing moves.
+        if (this.firstFrameReady()) this.refreshReflections(true)
+        return
+      }
+      this.skyHoldUntilMs = null
+      this.iceHalos?.setUrgent(false)
+      this.onFirstFrameHold?.(false)
+      if (this.skyColoursStale && this.lastAstronomy) this.applySkyColours(this.lastAstronomy)
+    }
     this.frameDirty = false
     this.refreshReflections()
     this.resolution.beginDrawing()
@@ -3110,7 +3208,7 @@ export class SceneRenderer {
    * and, while others are still waiting their turn on a scene that has stopped changing, asks for
    * the frames that give it to them. A still scene whose probes have all seen it asks for nothing.
    */
-  private refreshReflections(): void {
+  private refreshReflections(holding = false): void {
     this.reflections ??= new Reflections(this.renderer)
     // The veils are in the eye, not in the world: nothing mirrors them.
     const screenOnly: Object3D[] = [...this.compassSprites, ...(this.lensFlare ? [this.lensFlare.mesh] : []),
@@ -3124,8 +3222,12 @@ export class SceneRenderer {
       ...[...this.bodyMeshes.values()].filter(mesh => mesh instanceof Points),
       ...[this.rainSystem?.points, this.precipitationPoints, this.rainSplashSystem?.points].filter((object): object is Points => object !== undefined)]
     const scale = this.relativeScale
+    const version = this.sceneVersion
+    // Behind the loader nothing is on screen to spare the GPU for: the eye's probe is taken as soon
+    // as the scene has changed, rather than a quarter of a second later.
     const waiting = this.reflections.refresh(this.renderer, this.scene, this.camera.position, this.bodySystem.reflectors,
-      screenOnly, [...this.decorGroups.values()], this.sceneVersion, eyeHidden, photograph => this.measureSurroundings(photograph, scale))
+      screenOnly, [...this.decorGroups.values()], version, eyeHidden, photograph => this.measureSurroundings(photograph, scale, version),
+      holding ? 0 : Reflections.REFRESH_MS)
     if (waiting === undefined || this.reflectionTimer) return
     this.reflectionTimer = setTimeout(() => {
       this.reflectionTimer = undefined
@@ -3143,7 +3245,7 @@ export class SceneRenderer {
    * hemisphere light takes it, and the eye adapts to it. Kept in candela, lux — the photograph was
    * taken at `scale` — so that it stays right however the eye adapts after.
    */
-  private measureSurroundings(photograph: Texture, scale: number): void {
+  private measureSurroundings(photograph: Texture, scale: number, version: number): void {
     const astronomy = this.lastAstronomy
     if (!astronomy) return
     this.probeIrradiance ??= new ProbeIrradiance()
@@ -3160,8 +3262,15 @@ export class SceneRenderer {
         a.some((value, c) => Math.abs(value - b[c]) > 0.03 * Math.max(Math.abs(value), Math.abs(b[c]), 1e-12))
       const lit = !before || moved(before.up, next.up) || moved(before.down, next.down)
       if (lit) this.surroundings = next
+      this.eyeSettledVersion = -1
       const adapted = this.scatteredSky?.adaptToSurroundings(Math.exp(light.logAverage) / scale) ?? false
-      if (!lit && !adapted) return
+      if (!lit && !adapted) {
+        this.eyeSettledVersion = version
+        // A held frame may have been waiting for exactly this answer; and one photographed at a
+        // version that has moved on since is photographed again (see sceneSettled).
+        if (this.skyHoldUntilMs) this.redrawHeld()
+        return
+      }
       this.skyColoursStale = true
       this.render()
     })

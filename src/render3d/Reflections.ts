@@ -59,12 +59,15 @@ export class Reflections {
    * @param eyeHidden What is also kept out of the eye's own probe: what is drawn for the eye alone
    *   and would be counted as light round it if photographed (see ProbeIrradiance).
    * @param onEye Called with the eye's photograph each time it is taken.
+   * @param refreshMs How long a probe's photograph is good for: REFRESH_MS while the scene is on
+   *   screen, none while it is held behind the loader and nothing else needs the GPU.
    * @returns In how many ms another probe will be due, if one is still waiting for this version of
    *   the scene — the caller asks for a frame then, since a still scene asks for none — or
    *   undefined once every probe has seen it.
    */
   refresh(renderer: WebGLRenderer, scene: Scene, eye: Vector3, reflectors: readonly Reflector[], screenOnly: readonly Object3D[],
-    decor: readonly Object3D[], version: number, eyeHidden: readonly Object3D[] = [], onEye?: (photograph: Texture) => void): number | undefined {
+    decor: readonly Object3D[], version: number, eyeHidden: readonly Object3D[] = [], onEye?: (photograph: Texture) => void,
+    refreshMs = Reflections.REFRESH_MS): number | undefined {
     for (const id of [...this.probes.keys()]) {
       if (reflectors.some(reflector => reflector.id === id && reflector.shiny)) continue
       this.probes.get(id)!.dispose()
@@ -82,7 +85,7 @@ export class Reflections {
     }
     const now = performance.now()
     const behind = () => all.filter(({ probe }) => probe.capturedVersion !== version)
-    const ready = behind().filter(({ probe }) => now - probe.capturedAtMs >= Reflections.REFRESH_MS)
+    const ready = behind().filter(({ probe }) => now - probe.capturedAtMs >= refreshMs)
     if (ready.length > 0) {
       const stalest = ready.reduce((a, b) => (b.probe.capturedAtMs < a.probe.capturedAtMs ? b : a))
       if (stalest.reflector) {
@@ -100,7 +103,7 @@ export class Reflections {
     }
     const waiting = behind()
     if (waiting.length === 0) return undefined
-    return Math.max(16, Math.min(...waiting.map(({ probe }) => Reflections.REFRESH_MS - (now - probe.capturedAtMs))))
+    return Math.max(16, Math.min(...waiting.map(({ probe }) => refreshMs - (now - probe.capturedAtMs))))
   }
 
   private readonly scratch = new Vector3()

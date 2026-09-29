@@ -383,7 +383,10 @@ export class SightingElement extends HTMLElement {
    * apart by shape (see CaseFile.isCase). A bare JSON array, the observer list this element read
    * before cases, is refused by name rather than misread. */
   async loadFromSrc(url: string): Promise<void> {
-    const json = await SightingFetch.json(url)
+    const fetching = SightingFetch.json(url)
+    // The loader from the moment a recording is asked for — see SceneElement.holdForNewScene.
+    this.sceneElement.holdForNewScene(fetching)
+    const json = await fetching
     if (Array.isArray(json)) {
       throw new Error(`${url} is a bare list of recordings, which is no longer read: list them as the sighting events of a case.json`)
     }
@@ -672,6 +675,8 @@ export class SightingElement extends HTMLElement {
     // A recording read from an address states its models' addresses relative to it; one set in
     // memory (src "") has none, and the page's own address is all its relative ones can mean.
     this.sceneElement.documentUrl = entry.src ? new URL(entry.src, location.href).href : undefined
+    // Another recording: shown once it is whole, not built in view — see SceneElement.holdForNewScene.
+    this.sceneElement.holdForNewScene()
     this.sceneElement.sightingData = entry.sighting
     this.offerInterpretations(entry)
     this.updateAccountLine()
