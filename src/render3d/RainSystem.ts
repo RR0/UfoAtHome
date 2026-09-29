@@ -291,9 +291,10 @@ const STREAK_CAP_FRACTION = 0.14
  * The width of the blur every image of a point has, in texture pixels. Sets how wide the streak
  * reads: it is a hairline, and the reference project's own drop is a 2-3 px line on a 512 px
  * canvas — an early version of this texture ramped its opacity across nearly half the canvas and
- * rendered as a fat blurry column instead.
+ * rendered as a fat blurry column instead. At 4.5 the streak was still read as too thick: a drop two
+ * metres away came out some ten pixels wide.
  */
-const STREAK_SIGMA_PX = 4.5
+const STREAK_SIGMA_PX = 2.25
 
 let sharedRainStreakTexture: CanvasTexture | undefined
 
