@@ -370,6 +370,13 @@ export class EquidistantProjectionPass {
     const cube = this.cubeCamera
     camera.updateMatrixWorld()
     cube.position.setFromMatrixPosition(camera.matrixWorld)
+    // Turned with the eye rather than squared on the world's axes. Squared, a picture looking up and
+    // to one side fell across five or six faces, each drawn nearly whole — the rainbow test sky at an
+    // 85° field paid five times the GPU of its 60° one. Turned, the front face holds the whole
+    // picture up to a 90° field and its sides need only the two lateral faces, in bands (see
+    // faceRegions); the rest are not drawn at all.
+    const rotation = camera.getWorldQuaternion(this.quaternionScratch)
+    cube.quaternion.copy(rotation)
     cube.updateMatrixWorld()
     if (cube.coordinateSystem !== renderer.coordinateSystem) {
       cube.coordinateSystem = renderer.coordinateSystem
@@ -377,17 +384,26 @@ export class EquidistantProjectionPass {
     }
     const originalTarget = renderer.getRenderTarget()
     const shadows = renderer.shadowMap.autoUpdate
-    const forward = this.forwardScratch.set(0, 0, -1).applyQuaternion(camera.getWorldQuaternion(this.quaternionScratch))
-    const reach = EquidistantProjectionPass.cornerHalfAngleDeg(fovDeg, this.width / this.height)
-    cube.children.forEach((child, index) => {
-      const faceCamera = child as PerspectiveCamera
+    const faceCameras = cube.children as PerspectiveCamera[]
+    const regions = EquidistantProjectionPass.faceRegions(faceCameras, rotation, fovDeg, this.width / this.height, face)
+    faceCameras.forEach((faceCamera, index) => {
       // A face no pixel of the picture looks into — behind the eye, for any field under 135° from
       // the axis to the corner — is left as it was: nothing samples it.
-      if (!EquidistantProjectionPass.faceSeen(faceCamera, forward, reach)) return
+      const region = regions[index]
+      if (!region) return
       if (faceCamera.near !== camera.near || faceCamera.far !== camera.far) {
         faceCamera.near = camera.near
         faceCamera.far = camera.far
         faceCamera.updateProjectionMatrix()
+      }
+      // And of a face it does look into, only the part it samples is drawn. The side faces of an
+      // 85° field are each needed over a band, the top and bottom ones only near the picture's
+      // corners — drawing all five whole cost three times the pixels of the picture itself, every one
+      // of them paying for the clouds, and the rainbow test sky dropped from 120 frames a second to
+      // 50 for as long as its field was that wide.
+      for (const target of [this.cubeTarget!, this.overlayCubeTarget!]) {
+        target.scissor.set(region.x, region.y, region.width, region.height)
+        target.scissorTest = true
       }
       renderer.setRenderTarget(this.cubeTarget!, index)
       renderer.render(scene, faceCamera)
@@ -397,12 +413,15 @@ export class EquidistantProjectionPass {
       }
       renderer.shadowMap.autoUpdate = false
     })
+    this.cubeTarget.scissorTest = false
+    this.overlayCubeTarget!.scissorTest = false
     renderer.shadowMap.autoUpdate = shadows
 
     const uniforms = this.cubeMaterial.uniforms
     uniforms.uHalfFovRad.value = fovRad / 2
     uniforms.uAspect.value = this.width / this.height
-    uniforms.uCameraRotation.value.setFromMatrix4(camera.matrixWorld)
+    // The cube already looks where the camera does: its own directions are the picture's.
+    uniforms.uCameraRotation.value.identity()
     const quad = this.quadScene.children[0] as Mesh
     // Resampled into the targets first, not onto the canvas: what belongs on the FINISHED picture
     // rather than in the scene — the Sun's own dazzle, a screen-wide quad that cannot be drawn on six
@@ -446,8 +465,90 @@ export class EquidistantProjectionPass {
     return this.copy
   }
 
-  private readonly forwardScratch = new Vector3()
   private readonly quaternionScratch = new Quaternion()
+
+  /** Samples across the picture, per side, from which the part of each face it looks into is found. */
+  static readonly REGION_SAMPLES = 32
+
+  /**
+   * The part of each cube face the picture samples, in the face's own pixels (origin bottom left,
+   * as a scissor wants it) — undefined for a face it does not look into at all.
+   *
+   * Found by sending a grid of the picture's own directions (directionFor's mapping, turned by the
+   * camera) through each face camera: whichever face a direction lands on grows by that point. Two
+   * neighbouring samples can leave a sliver of the footprint between them, or between the last of
+   * them and the face's edge, so each region is widened by the largest step seen between neighbours
+   * on that face, plus a texel for the bilinear filter.
+   */
+  static faceRegions(
+    faceCameras: PerspectiveCamera[],
+    rotation: Quaternion,
+    fovDeg: number,
+    aspect: number,
+    faceSize: number
+  ): ({ x: number; y: number; width: number; height: number } | undefined)[] {
+    const inverses = faceCameras.map(faceCamera => {
+      faceCamera.updateMatrixWorld()
+      return faceCamera.matrixWorldInverse
+    })
+    const n = EquidistantProjectionPass.REGION_SAMPLES
+    const halfFovRad = ((fovDeg / 2) * Math.PI) / 180
+    const direction = EquidistantProjectionPass.faceScratch
+    const hits: ({ face: number; x: number; y: number } | undefined)[] = []
+    for (let j = 0; j <= n; j++) {
+      for (let i = 0; i <= n; i++) {
+        const ax = (-1 + (2 * i) / n) * aspect * halfFovRad
+        const ay = (-1 + (2 * j) / n) * halfFovRad
+        const theta = Math.hypot(ax, ay)
+        const sin = Math.sin(theta)
+        if (theta < 1e-6) direction.set(0, 0, -1)
+        else direction.set((ax / theta) * sin, (ay / theta) * sin, -Math.cos(theta))
+        direction.applyQuaternion(rotation)
+        let hit: { face: number; x: number; y: number } | undefined
+        for (let face = 0; face < inverses.length && !hit; face++) {
+          const local = EquidistantProjectionPass.localScratch.copy(direction).transformDirection(inverses[face])
+          if (local.z >= 0) continue
+          // Through the face camera's own projection rather than an assumed one: three gives its cube
+          // cameras a NEGATIVE field (-90°), which turns every face's picture upside down and left to
+          // right — assuming +90° put each band on the wrong side of its face.
+          const ndc = local.applyMatrix4(faceCameras[face].projectionMatrix)
+          if (Math.abs(ndc.x) <= 1 && Math.abs(ndc.y) <= 1) hit = { face, x: ((ndc.x + 1) / 2) * faceSize, y: ((ndc.y + 1) / 2) * faceSize }
+        }
+        hits.push(hit)
+      }
+    }
+    const bounds = faceCameras.map(() => ({ minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity, step: 0 }))
+    const neighbour = (a: typeof hits[number], b: typeof hits[number]) => {
+      if (a && b && a.face === b.face) bounds[a.face].step = Math.max(bounds[a.face].step, Math.abs(a.x - b.x), Math.abs(a.y - b.y))
+    }
+    hits.forEach((hit, index) => {
+      if (!hit) return
+      const bound = bounds[hit.face]
+      bound.minX = Math.min(bound.minX, hit.x)
+      bound.minY = Math.min(bound.minY, hit.y)
+      bound.maxX = Math.max(bound.maxX, hit.x)
+      bound.maxY = Math.max(bound.maxY, hit.y)
+      if (index % (n + 1) < n) neighbour(hit, hits[index + 1])
+      if (index + n + 1 < hits.length) neighbour(hit, hits[index + n + 1])
+    })
+    const forward = EquidistantProjectionPass.forwardScratch.set(0, 0, -1).applyQuaternion(rotation)
+    const reach = EquidistantProjectionPass.cornerHalfAngleDeg(fovDeg, aspect)
+    return bounds.map((bound, face) => {
+      // A face the grid missed entirely may still hold a sliver of the picture between two samples:
+      // drawn whole when any of it is within reach of the axis, as before regions existed.
+      if (bound.minX > bound.maxX) {
+        return EquidistantProjectionPass.faceSeen(faceCameras[face], forward, reach) ? { x: 0, y: 0, width: faceSize, height: faceSize } : undefined
+      }
+      // A face reached by a single sample has no neighbour to measure a step against: the whole
+      // face then, rather than a guess.
+      const margin = bound.step > 0 ? bound.step + 2 : faceSize
+      const x = Math.max(0, Math.floor(bound.minX - margin))
+      const y = Math.max(0, Math.floor(bound.minY - margin))
+      const right = Math.min(faceSize, Math.ceil(bound.maxX + margin))
+      const top = Math.min(faceSize, Math.ceil(bound.maxY + margin))
+      return { x, y, width: right - x, height: top - y }
+    })
+  }
 
   /**
    * Whether any direction of a cube face lies within `reachDeg` of `forward`. The face camera looks
@@ -469,6 +570,8 @@ export class EquidistantProjectionPass {
   }
 
   private static readonly faceScratch = new Vector3()
+  private static readonly localScratch = new Vector3()
+  private static readonly forwardScratch = new Vector3()
 
   private buildCubeMaterial(target: WebGLCubeRenderTarget, overlay: WebGLCubeRenderTarget): ShaderMaterial {
     return new ShaderMaterial({
