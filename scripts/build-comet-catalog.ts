@@ -44,10 +44,11 @@ interface ApparitionInput {
   /** The Horizons target designation, without the `DES=` and the trailing semicolon. */
   query: string
   designation: string
-  /** WITHOUT a leading article in French: the readout supplies "La " itself, since a clause opening
-   * with the comet reads as an apposition and one stating that it was there does not. English needs
-   * no such care and keeps the article where the name has one. */
-  name: { en: string; fr: string }
+  /** The English name, which keeps its article where it has one. The other languages' names are in
+   * their own SceneNames (src/component/messages), keyed by `id` and WITHOUT a leading article: the
+   * readout supplies it, since a clause opening with the comet reads as an apposition and one stating
+   * that it was there does not. */
+  name: string
   /** Roughly when perihelion fell — only used to ask Horizons for elements near the right date. The
    * exact time of perihelion comes back in the answer. */
   perihelionQueryDate: string
@@ -91,113 +92,113 @@ interface ApparitionInput {
  */
 const APPARITIONS: ApparitionInput[] = [
   {
-    id: "halley-1910", query: "1P", designation: "1P/Halley", name: { en: "Halley's Comet", fr: "comète de Halley" },
+    id: "halley-1910", query: "1P", designation: "1P/Halley", name: "Halley's Comet",
     perihelionQueryDate: "1910-04-20", peakMagnitude: 0, peakOn: "1910-05-20", tailLengthDeg: 100,
     note: "Passed 0.15 au from Earth on 20 May 1910, and the Earth crossed the outer tail the day before — the apparition that produced a genuine public panic."
   },
   {
-    id: "brooks-1911", query: "C/1911 O1", designation: "C/1911 O1", name: { en: "Comet Brooks", fr: "comète Brooks" },
+    id: "brooks-1911", query: "C/1911 O1", designation: "C/1911 O1", name: "Comet Brooks",
     perihelionQueryDate: "1911-10-28", peakMagnitude: 2, peakOn: "1911-10-25"
   },
   {
-    id: "skjellerup-maristany-1927", query: "C/1927 X1", designation: "C/1927 X1", name: { en: "Comet Skjellerup-Maristany", fr: "comète Skjellerup-Maristany" },
+    id: "skjellerup-maristany-1927", query: "C/1927 X1", designation: "C/1927 X1", name: "Comet Skjellerup-Maristany",
     perihelionQueryDate: "1927-12-18", peakMagnitude: -6, peakOn: "1927-12-15",
     note: "One of the few comets of the century seen in full daylight."
   },
   {
-    id: "de-kock-paraskevopoulos-1941", query: "C/1941 B2", designation: "C/1941 B2", name: { en: "Comet de Kock-Paraskevopoulos", fr: "comète de Kock-Paraskevopoulos" },
+    id: "de-kock-paraskevopoulos-1941", query: "C/1941 B2", designation: "C/1941 B2", name: "Comet de Kock-Paraskevopoulos",
     perihelionQueryDate: "1941-01-27", peakMagnitude: 2, peakOn: "1941-02-05"
   },
   {
-    id: "southern-1947", query: "C/1947 X1-A", designation: "C/1947 X1", name: { en: "the Southern Comet", fr: "comète australe" },
+    id: "southern-1947", query: "C/1947 X1-A", designation: "C/1947 X1", name: "the Southern Comet",
     perihelionQueryDate: "1947-12-02", peakMagnitude: -3, peakOn: "1947-12-08",
     note: "A bright southern-hemisphere comet of December 1947, the month the American sighting wave of that year was still being argued over."
   },
   {
-    id: "eclipse-1948", query: "C/1948 V1", designation: "C/1948 V1", name: { en: "the Eclipse Comet", fr: "comète de l'éclipse" },
+    id: "eclipse-1948", query: "C/1948 V1", designation: "C/1948 V1", name: "the Eclipse Comet",
     perihelionQueryDate: "1948-10-27", peakMagnitude: -2, peakOn: "1948-11-01",
     note: "Found during the total solar eclipse of 1 November 1948, which is how a comet that bright had gone unnoticed: it had been hidden in the Sun's glare."
   },
   {
-    id: "arend-roland-1957", query: "C/1956 R1", designation: "C/1956 R1", name: { en: "Comet Arend-Roland", fr: "comète Arend-Roland" },
+    id: "arend-roland-1957", query: "C/1956 R1", designation: "C/1956 R1", name: "Comet Arend-Roland",
     perihelionQueryDate: "1957-04-08", peakMagnitude: 0.5, peakOn: "1957-04-25",
     note: "Showed a spike pointing back TOWARD the Sun in late April 1957 — a real anti-tail, and much reported at the time."
   },
   {
-    id: "mrkos-1957", query: "C/1957 P1", designation: "C/1957 P1", name: { en: "Comet Mrkos", fr: "comète Mrkos" },
+    id: "mrkos-1957", query: "C/1957 P1", designation: "C/1957 P1", name: "Comet Mrkos",
     perihelionQueryDate: "1957-08-01", peakMagnitude: 1, peakOn: "1957-08-05",
     note: "The second bright naked-eye comet of 1957, four months after Arend-Roland."
   },
   {
-    id: "seki-lines-1962", query: "C/1962 C1", designation: "C/1962 C1", name: { en: "Comet Seki-Lines", fr: "comète Seki-Lines" },
+    id: "seki-lines-1962", query: "C/1962 C1", designation: "C/1962 C1", name: "Comet Seki-Lines",
     perihelionQueryDate: "1962-04-01", peakMagnitude: -2.5, peakOn: "1962-04-01"
   },
   {
-    id: "ikeya-seki-1965", query: "C/1965 S1-A", designation: "C/1965 S1", name: { en: "Comet Ikeya-Seki", fr: "comète Ikeya-Seki" },
+    id: "ikeya-seki-1965", query: "C/1965 S1-A", designation: "C/1965 S1", name: "Comet Ikeya-Seki",
     perihelionQueryDate: "1965-10-21", peakMagnitude: -10, peakOn: "1965-10-21",
     alsoRecorded: { magnitude: 2, on: "1965-10-30" }, tailLengthDeg: 25,
     note: "A sungrazer that passed 450 000 km above the Sun's surface and was seen beside it in broad daylight — the brightest comet of the twentieth century. It then stood in the dawn sky for a fortnight with a tail some 25 degrees long, which is the second magnitude recorded here."
   },
   {
-    id: "bennett-1970", query: "C/1969 Y1", designation: "C/1969 Y1", name: { en: "Comet Bennett", fr: "comète Bennett" },
+    id: "bennett-1970", query: "C/1969 Y1", designation: "C/1969 Y1", name: "Comet Bennett",
     perihelionQueryDate: "1970-03-20", peakMagnitude: 0, peakOn: "1970-03-26"
   },
   {
-    id: "white-ortiz-bolelli-1970", query: "C/1970 K1", designation: "C/1970 K1", name: { en: "Comet White-Ortiz-Bolelli", fr: "comète White-Ortiz-Bolelli" },
+    id: "white-ortiz-bolelli-1970", query: "C/1970 K1", designation: "C/1970 K1", name: "Comet White-Ortiz-Bolelli",
     perihelionQueryDate: "1970-05-14", peakMagnitude: 1, peakOn: "1970-05-22"
   },
   {
-    id: "kohoutek-1973", query: "C/1973 E1", designation: "C/1973 E1", name: { en: "Comet Kohoutek", fr: "comète Kohoutek" },
+    id: "kohoutek-1973", query: "C/1973 E1", designation: "C/1973 E1", name: "Comet Kohoutek",
     perihelionQueryDate: "1973-12-28", peakMagnitude: 0, peakOn: "1974-01-05",
     note: "Announced in advance as the comet of the century and remembered for disappointing: it was an ordinary naked-eye object, not the spectacle the press had promised."
   },
   {
-    id: "west-1976", query: "C/1975 V1-A", designation: "C/1975 V1", name: { en: "Comet West", fr: "comète West" },
+    id: "west-1976", query: "C/1975 V1-A", designation: "C/1975 V1", name: "Comet West",
     perihelionQueryDate: "1976-02-25", peakMagnitude: -3, peakOn: "1976-02-25", tailLengthDeg: 30,
     note: "Broke into four pieces at perihelion. Barely reported at the time — the press had been burned by Kohoutek two years earlier."
   },
   {
-    id: "iras-araki-alcock-1983", query: "C/1983 H1", designation: "C/1983 H1", name: { en: "Comet IRAS-Araki-Alcock", fr: "comète IRAS-Araki-Alcock" },
+    id: "iras-araki-alcock-1983", query: "C/1983 H1", designation: "C/1983 H1", name: "Comet IRAS-Araki-Alcock",
     perihelionQueryDate: "1983-05-21", peakMagnitude: 1.7, peakOn: "1983-05-11",
     note: "Passed 0.031 au from Earth on 11 May 1983, one of the closest cometary approaches on record: it crossed a quarter of the sky in a night, which no other comet in this list did."
   },
   {
-    id: "halley-1986", query: "1P", designation: "1P/Halley", name: { en: "Halley's Comet", fr: "comète de Halley" },
+    id: "halley-1986", query: "1P", designation: "1P/Halley", name: "Halley's Comet",
     perihelionQueryDate: "1986-02-09", peakMagnitude: 2.1, peakOn: "1986-03-10",
     note: "The worst-placed return in two thousand years — famous, expected, and for most observers a faint smudge."
   },
   {
-    id: "hyakutake-1996", query: "C/1996 B2", designation: "C/1996 B2", name: { en: "Comet Hyakutake", fr: "comète Hyakutake" },
+    id: "hyakutake-1996", query: "C/1996 B2", designation: "C/1996 B2", name: "Comet Hyakutake",
     perihelionQueryDate: "1996-05-01", peakMagnitude: 0, peakOn: "1996-03-25", tailLengthDeg: 80,
     note: "Passed 0.10 au from Earth in March 1996, five weeks BEFORE perihelion, with a tail measured at some 80 degrees — the longest of the modern era."
   },
   {
-    id: "hale-bopp-1997", query: "C/1995 O1", designation: "C/1995 O1", name: { en: "Comet Hale-Bopp", fr: "comète Hale-Bopp" },
+    id: "hale-bopp-1997", query: "C/1995 O1", designation: "C/1995 O1", name: "Comet Hale-Bopp",
     perihelionQueryDate: "1997-04-01", peakMagnitude: -0.8, peakOn: "1997-04-01", tailLengthDeg: 20,
     note: "Visible to the naked eye for about eighteen months, longer than any comet on record."
   },
   {
-    id: "mcnaught-2007", query: "C/2006 P1", designation: "C/2006 P1", name: { en: "Comet McNaught", fr: "comète McNaught" },
+    id: "mcnaught-2007", query: "C/2006 P1", designation: "C/2006 P1", name: "Comet McNaught",
     perihelionQueryDate: "2007-01-12", peakMagnitude: -5.5, peakOn: "2007-01-13", tailLengthDeg: 35,
     note: "The brightest comet since Ikeya-Seki, seen in daylight beside the Sun in January 2007."
   },
   {
-    id: "lovejoy-2011", query: "C/2011 W3", designation: "C/2011 W3", name: { en: "Comet Lovejoy", fr: "comète Lovejoy" },
+    id: "lovejoy-2011", query: "C/2011 W3", designation: "C/2011 W3", name: "Comet Lovejoy",
     perihelionQueryDate: "2011-12-16", peakMagnitude: -3, peakOn: "2011-12-16",
     alsoRecorded: { magnitude: 1.5, on: "2011-12-22" },
     note: "A sungrazer that was expected to be destroyed at perihelion and came out the other side, to stand in the southern dawn sky for the rest of December — which is the second magnitude recorded here."
   },
   {
-    id: "panstarrs-2013", query: "C/2011 L4", designation: "C/2011 L4", name: { en: "Comet PANSTARRS", fr: "comète PANSTARRS" },
+    id: "panstarrs-2013", query: "C/2011 L4", designation: "C/2011 L4", name: "Comet PANSTARRS",
     perihelionQueryDate: "2013-03-10", peakMagnitude: 1, peakOn: "2013-03-10"
   },
   {
-    id: "neowise-2020", query: "C/2020 F3", designation: "C/2020 F3", name: { en: "Comet NEOWISE", fr: "comète NEOWISE" },
+    id: "neowise-2020", query: "C/2020 F3", designation: "C/2020 F3", name: "Comet NEOWISE",
     perihelionQueryDate: "2020-07-03", peakMagnitude: 0.9, peakOn: "2020-07-08", tailLengthDeg: 10,
     note: "The first comet since Hale-Bopp that ordinary observers in the northern hemisphere saw without being told where to look."
   },
   {
-    id: "tsuchinshan-atlas-2024", query: "C/2023 A3", designation: "C/2023 A3", name: { en: "Comet Tsuchinshan-ATLAS", fr: "comète Tsuchinshan-ATLAS" },
+    id: "tsuchinshan-atlas-2024", query: "C/2023 A3", designation: "C/2023 A3", name: "Comet Tsuchinshan-ATLAS",
     perihelionQueryDate: "2024-09-27", peakMagnitude: 0, peakOn: "2024-10-14", tailLengthDeg: 20,
     note: "Briefly reported far brighter around 9 October 2024, when it stood almost between the observer and the Sun and forward-scattered the light through its own dust — a geometry this catalog's brightness model does not attempt, so what is stored is the ordinary evening-sky peak a few days later."
   }
@@ -426,7 +427,7 @@ class CometCatalogBuilder {
         `  {\n` +
           `    id: ${this.quote(apparition.id)},\n` +
           `    designation: ${this.quote(apparition.designation)},\n` +
-          `    name: { en: ${this.quote(apparition.name.en)}, fr: ${this.quote(apparition.name.fr)} },\n` +
+          `    name: ${this.quote(apparition.name)},\n` +
           `    orbit: {\n` +
           `      eccentricity: ${elements.eccentricity},\n` +
           `      perihelionAu: ${elements.perihelionAu},\n` +
@@ -469,10 +470,11 @@ export interface CometApparition {
   id: string
   /** The IAU designation. Two apparitions of the same comet share it and differ by \`id\`. */
   designation: string
-  /** The comet's name in each language a page can be read in — the same "translate the label, keep
-   * the identifier" rule the meteor showers and the decor kinds follow. Most comets are named after
-   * whoever found them and read the same in both; the descriptive ones do not. */
-  name: { en: string; fr: string }
+  /** The comet's English name. The other languages' are in their own SceneNames
+   * (src/component/messages), keyed by \`id\` — the same "translate the label, keep the identifier"
+   * rule the meteor showers and the decor kinds follow. Most comets are named after whoever found
+   * them and read the same everywhere; the descriptive ones do not. */
+  name: string
   orbit: OrbitalElements
   /** The brightest visual magnitude on record for this apparition, and the date it was recorded.
    * An OBSERVATION — everything else about the brightness is worked out from it. */

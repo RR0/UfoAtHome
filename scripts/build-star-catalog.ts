@@ -127,23 +127,6 @@ const CONSTELLATION_GENITIVES: Record<string, string> = {
   UMa: "Ursae Majoris", Vel: "Velorum", Vir: "Virginis", Vol: "Volantis"
 }
 
-/**
- * The proper names French writes differently, and only those.
- *
- * Short on purpose: most of these names are Arabic-derived and are written identically in both
- * languages (Sirius, Rigel, Procyon, Aldebaran's neighbours…), so only the accented forms differ.
- * Everything absent from this table keeps its international form, which is the form French
- * astronomy uses too — an invented translation would be worse than none.
- */
-const FRENCH_STAR_NAMES: Record<string, string> = {
-  Betelgeuse: "B\u00e9telgeuse",
-  Vega: "V\u00e9ga",
-  Altair: "Alta\u00efr",
-  Aldebaran: "Ald\u00e9baran",
-  Regulus: "R\u00e9gulus",
-  Antares: "Antar\u00e8s"
-}
-
 const SUPERSCRIPTS = ["\u2070", "\u00b9", "\u00b2", "\u00b3", "\u2074", "\u2075", "\u2076", "\u2077", "\u2078", "\u2079"]
 
 /**
@@ -189,7 +172,7 @@ function main(): void {
   }
 
   const stars: { ra: number; dec: number; mag: number; ci: number }[] = []
-  const named: { name: string; french: string; raHours: number; decDeg: number; mag: number }[] = []
+  const named: { name: string; raHours: number; decDeg: number; mag: number }[] = []
 
   for (let i = 1; i < lines.length; i++) {
     const fields = parseCsvLine(lines[i])
@@ -215,7 +198,7 @@ function main(): void {
         fields[properIndex].trim(), fields[bayerIndex].trim(), fields[flamIndex].trim(), fields[conIndex].trim()
       )
       if (name !== undefined) {
-        named.push({ name, french: FRENCH_STAR_NAMES[name] ?? name, raHours: raValue, decDeg: decValue, mag: magValue })
+        named.push({ name, raHours: raValue, decDeg: decValue, mag: magValue })
       }
     }
   }
@@ -278,15 +261,17 @@ function main(): void {
  * HYG Database v4.1, CC BY-SA (https://github.com/astronexus/HYG-Database).
  */
 export interface BrightStar {
-  /** Its proper name where it has one, else the designation a star chart prints ("\u03b1 Orionis"). */
-  name: { en: string; fr: string }
+  /** Its proper name where it has one, else the designation a star chart prints ("\u03b1 Orionis") —
+   * the international form, which is also the English one. A language that writes a name its own
+   * way ("B\u00e9telgeuse") says so in its own SceneNames (src/component/messages), keyed by this. */
+  name: string
   raHours: number
   decDeg: number
   mag: number
 }
 
 export const BRIGHT_STARS: BrightStar[] = [
-${named.map(star => `  { name: { en: ${JSON.stringify(star.name)}, fr: ${JSON.stringify(star.french)} }, raHours: ${star.raHours.toFixed(4)}, decDeg: ${star.decDeg.toFixed(4)}, mag: ${star.mag} }`).join(",\n")}
+${named.map(star => `  { name: ${JSON.stringify(star.name)}, raHours: ${star.raHours.toFixed(4)}, decDeg: ${star.decDeg.toFixed(4)}, mag: ${star.mag} }`).join(",\n")}
 ]
 `
   writeFileSync(namedPath, namedSource)

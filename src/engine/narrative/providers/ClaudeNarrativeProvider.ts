@@ -2,6 +2,7 @@ import type Anthropic from "@anthropic-ai/sdk"
 import { NarrativeError } from "../NarrativeError.js"
 import { RecordingRules } from "../RecordingRules.js"
 import { RecordingDigest } from "../RecordingDigest.js"
+import type { ClaudeNarrativeTexts } from "./ClaudeNarrativeTexts.js"
 import type { Basis } from "../../persistence/Provenance.js"
 import type {
   NarrativeDraft, NarrativeImage, NarrativeProvider, NarrativeRequest, NarrativeSetting
@@ -121,45 +122,68 @@ export class ClaudeNarrativeProvider implements NarrativeProvider {
    */
   static readonly DEFAULT_MODEL = "claude-opus-5-5"
 
-  readonly settings: ReadonlyArray<NarrativeSetting> = [
-    {
-      id: "key",
-      kind: "secret",
-      label: { en: "Claude API key", fr: "Clé d'API Claude" },
-      required: true,
-      remembered: "credential",
-      // Every Anthropic key has begun with this prefix. Marked, never blocked: see NarrativeSetting.
-      suspect: value => value.startsWith("sk-ant-") ? undefined : {
-        en: "This does not look like a Claude API key: they begin with sk-ant-",
-        fr: "Ceci ne ressemble pas à une clé d'API Claude : elles commencent par sk-ant-"
-      }
-    },
-    {
-      // A personal or service-account key can reach several workspaces, and the API refuses such a
-      // key outright unless the request names one.
-      id: "workspace",
-      kind: "text",
-      label: { en: "Workspace ID", fr: "ID d'espace de travail" },
-      placeholder: { en: "only if your key spans several", fr: "seulement si votre clé en couvre plusieurs" },
-      hint: {
-        en: "Only for a key whose scope is the whole organisation. Simpler: leave this empty and create a key scoped to one workspace instead.",
-        fr: "Seulement pour une clé couvrant toute l'organisation. Plus simple : laissez vide et créez une clé limitée à un espace de travail."
-      },
-      remembered: "credential"
-    },
-    {
-      id: "model",
-      kind: "choice",
-      label: { en: "Model", fr: "Modèle" },
-      choices: [
-        { value: ClaudeNarrativeProvider.DEFAULT_MODEL, label: "Claude Opus 5.5" },
-        { value: "claude-fable-5-1", label: { en: "Claude Fable 5.1 (most capable, dearer)", fr: "Claude Fable 5.1 (le plus capable, plus cher)" } },
-        { value: "claude-sonnet-5-5", label: { en: "Claude Sonnet 5.5 (cheaper)", fr: "Claude Sonnet 5.5 (moins cher)" } },
-        { value: "claude-haiku-4-5", label: { en: "Claude Haiku 4.5 (cheapest)", fr: "Claude Haiku 4.5 (le moins cher)" } }
-      ],
-      remembered: "preference"
+  /** The settings, in English until localize has put them in the reader's language. */
+  get settings(): ReadonlyArray<NarrativeSetting> {
+    return this.localizedSettings
+  }
+
+  private localizedSettings = ClaudeNarrativeProvider.settingsIn()
+
+  /**
+   * Puts the settings in `language`. Only that language's texts are downloaded, and none for
+   * English, which is this class's own; a language it has no texts for keeps English.
+   */
+  async localize(language: string): Promise<void> {
+    const texts = await ClaudeNarrativeProvider.textsIn(language)
+    this.localizedSettings = ClaudeNarrativeProvider.settingsIn(texts)
+  }
+
+  private static textsIn(language: string): Promise<ClaudeNarrativeTexts | undefined> {
+    switch (language) {
+      case "fr": return import("./ClaudeNarrativeTexts_fr.js").then(m => m.claudeNarrativeTexts_fr)
+      case "es": return import("./ClaudeNarrativeTexts_es.js").then(m => m.claudeNarrativeTexts_es)
+      case "it": return import("./ClaudeNarrativeTexts_it.js").then(m => m.claudeNarrativeTexts_it)
+      default: return Promise.resolve(undefined)
     }
-  ]
+  }
+
+  private static settingsIn(texts?: ClaudeNarrativeTexts): ReadonlyArray<NarrativeSetting> {
+    return [
+      {
+        id: "key",
+        kind: "secret",
+        label: texts?.keyLabel ?? "Claude API key",
+        required: true,
+        remembered: "credential",
+        // Every Anthropic key has begun with this prefix. Marked, never blocked: see NarrativeSetting.
+        suspect: value => value.startsWith("sk-ant-") ? undefined
+          : texts?.keySuspect ?? "This does not look like a Claude API key: they begin with sk-ant-"
+      },
+      {
+        // A personal or service-account key can reach several workspaces, and the API refuses such a
+        // key outright unless the request names one.
+        id: "workspace",
+        kind: "text",
+        label: texts?.workspaceLabel ?? "Workspace ID",
+        placeholder: texts?.workspacePlaceholder ?? "only if your key spans several",
+        hint: texts?.workspaceHint
+          ?? "Only for a key whose scope is the whole organisation. Simpler: leave this empty and create a key scoped to one workspace instead.",
+        remembered: "credential"
+      },
+      {
+        id: "model",
+        kind: "choice",
+        label: texts?.modelLabel ?? "Model",
+        choices: [
+          { value: ClaudeNarrativeProvider.DEFAULT_MODEL, label: "Claude Opus 5.5" },
+          { value: "claude-fable-5-1", label: texts?.fableChoice ?? "Claude Fable 5.1 (most capable, dearer)" },
+          { value: "claude-sonnet-5-5", label: texts?.sonnetChoice ?? "Claude Sonnet 5.5 (cheaper)" },
+          { value: "claude-haiku-4-5", label: texts?.haikuChoice ?? "Claude Haiku 4.5 (cheapest)" }
+        ],
+        remembered: "preference"
+      }
+    ]
+  }
 
   /** Loaded the first time a draft is asked for, not when the editor starts: the SDK is a
    * substantial download and most readers never open this panel at all. Kept, so the second ask

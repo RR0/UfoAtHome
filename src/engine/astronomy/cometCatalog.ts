@@ -13,10 +13,11 @@ export interface CometApparition {
   id: string
   /** The IAU designation. Two apparitions of the same comet share it and differ by `id`. */
   designation: string
-  /** The comet's name in each language a page can be read in — the same "translate the label, keep
-   * the identifier" rule the meteor showers and the decor kinds follow. Most comets are named after
-   * whoever found them and read the same in both; the descriptive ones do not. */
-  name: { en: string; fr: string }
+  /** The comet's English name. The other languages' are in their own SceneNames
+   * (src/component/messages), keyed by `id` — the same "translate the label, keep the identifier"
+   * rule the meteor showers and the decor kinds follow. Most comets are named after whoever found
+   * them and read the same everywhere; the descriptive ones do not. */
+  name: string
   orbit: OrbitalElements
   /** The brightest visual magnitude on record for this apparition, and the date it was recorded.
    * An OBSERVATION — everything else about the brightness is worked out from it. */
@@ -43,7 +44,7 @@ export const BRIGHT_COMETS: CometApparition[] = [
   {
     id: "halley-1910",
     designation: "1P/Halley",
-    name: { en: "Halley's Comet", fr: "comète de Halley" },
+    name: "Halley's Comet",
     orbit: {
       eccentricity: 0.9672960498922706,
       perihelionAu: 0.5872100477652511,
@@ -63,7 +64,7 @@ export const BRIGHT_COMETS: CometApparition[] = [
   {
     id: "brooks-1911",
     designation: "C/1911 O1",
-    name: { en: "Comet Brooks", fr: "comète Brooks" },
+    name: "Comet Brooks",
     orbit: {
       eccentricity: 0.9876404970138669,
       perihelionAu: 0.4898172916113738,
@@ -80,7 +81,7 @@ export const BRIGHT_COMETS: CometApparition[] = [
   {
     id: "skjellerup-maristany-1927",
     designation: "C/1927 X1",
-    name: { en: "Comet Skjellerup-Maristany", fr: "comète Skjellerup-Maristany" },
+    name: "Comet Skjellerup-Maristany",
     orbit: {
       eccentricity: 0.999839726885059,
       perihelionAu: 0.1761569619628186,
@@ -98,7 +99,7 @@ export const BRIGHT_COMETS: CometApparition[] = [
   {
     id: "de-kock-paraskevopoulos-1941",
     designation: "C/1941 B2",
-    name: { en: "Comet de Kock-Paraskevopoulos", fr: "comète de Kock-Paraskevopoulos" },
+    name: "Comet de Kock-Paraskevopoulos",
     orbit: {
       eccentricity: 0.9991026715181549,
       perihelionAu: 0.7900329662827822,
@@ -115,7 +116,7 @@ export const BRIGHT_COMETS: CometApparition[] = [
   {
     id: "southern-1947",
     designation: "C/1947 X1",
-    name: { en: "the Southern Comet", fr: "comète australe" },
+    name: "the Southern Comet",
     orbit: {
       eccentricity: 0.9998424430916737,
       perihelionAu: 0.1100045955093761,
@@ -133,7 +134,7 @@ export const BRIGHT_COMETS: CometApparition[] = [
   {
     id: "eclipse-1948",
     designation: "C/1948 V1",
-    name: { en: "the Eclipse Comet", fr: "comète de l'éclipse" },
+    name: "the Eclipse Comet",
     orbit: {
       eccentricity: 0.9999130678247334,
       perihelionAu: 0.1354437057263306,
@@ -151,7 +152,7 @@ export const BRIGHT_COMETS: CometApparition[] = [
   {
     id: "arend-roland-1957",
     designation: "C/1956 R1",
-    name: { en: "Comet Arend-Roland", fr: "comète Arend-Roland" },
+    name: "Comet Arend-Roland",
     orbit: {
       eccentricity: 1.0002570255357,
       perihelionAu: 0.3160532361485914,
@@ -169,7 +170,7 @@ export const BRIGHT_COMETS: CometApparition[] = [
   {
     id: "mrkos-1957",
     designation: "C/1957 P1",
-    name: { en: "Comet Mrkos", fr: "comète Mrkos" },
+    name: "Comet Mrkos",
     orbit: {
       eccentricity: 0.9993521583504134,
       perihelionAu: 0.3549238508212375,
@@ -187,7 +188,7 @@ export const BRIGHT_COMETS: CometApparition[] = [
   {
     id: "seki-lines-1962",
     designation: "C/1962 C1",
-    name: { en: "Comet Seki-Lines", fr: "comète Seki-Lines" },
+    name: "Comet Seki-Lines",
     orbit: {
       eccentricity: 1.000003791331562,
       perihelionAu: 0.03139689112215131,
@@ -204,7 +205,7 @@ export const BRIGHT_COMETS: CometApparition[] = [
   {
     id: "ikeya-seki-1965",
     designation: "C/1965 S1",
-    name: { en: "Comet Ikeya-Seki", fr: "comète Ikeya-Seki" },
+    name: "Comet Ikeya-Seki",
     orbit: {
       eccentricity: 0.9999141178248997,
       perihelionAu: 0.007785966366889336,
@@ -226,7 +227,7 @@ export const BRIGHT_COMETS: CometApparition[] = [
   {
     id: "bennett-1970",
     designation: "C/1969 Y1",
-    name: { en: "Comet Bennett", fr: "comète Bennett" },
+    name: "Comet Bennett",
     orbit: {
       eccentricity: 0.9962979048768408,
       perihelionAu: 0.5376209981502136,
@@ -243,7 +244,7 @@ export const BRIGHT_COMETS: CometApparition[] = [
   {
     id: "white-ortiz-bolelli-1970",
     designation: "C/1970 K1",
-    name: { en: "Comet White-Ortiz-Bolelli", fr: "comète White-Ortiz-Bolelli" },
+    name: "Comet White-Ortiz-Bolelli",
     orbit: {
       eccentricity: 0.9999488875801225,
       perihelionAu: 0.00884411465256722,
@@ -260,7 +261,7 @@ export const BRIGHT_COMETS: CometApparition[] = [
   {
     id: "kohoutek-1973",
     designation: "C/1973 E1",
-    name: { en: "Comet Kohoutek", fr: "comète Kohoutek" },
+    name: "Comet Kohoutek",
     orbit: {
       eccentricity: 1.000007152175185,
       perihelionAu: 0.1424250377812859,
@@ -278,7 +279,7 @@ export const BRIGHT_COMETS: CometApparition[] = [
   {
     id: "west-1976",
     designation: "C/1975 V1",
-    name: { en: "Comet West", fr: "comète West" },
+    name: "Comet West",
     orbit: {
       eccentricity: 1.000017859625611,
       perihelionAu: 0.1966006188461085,
@@ -298,7 +299,7 @@ export const BRIGHT_COMETS: CometApparition[] = [
   {
     id: "iras-araki-alcock-1983",
     designation: "C/1983 H1",
-    name: { en: "Comet IRAS-Araki-Alcock", fr: "comète IRAS-Araki-Alcock" },
+    name: "Comet IRAS-Araki-Alcock",
     orbit: {
       eccentricity: 0.9898409731606003,
       perihelionAu: 0.9913412593828502,
@@ -316,7 +317,7 @@ export const BRIGHT_COMETS: CometApparition[] = [
   {
     id: "halley-1986",
     designation: "1P/Halley",
-    name: { en: "Halley's Comet", fr: "comète de Halley" },
+    name: "Halley's Comet",
     orbit: {
       eccentricity: 0.9672792271749998,
       perihelionAu: 0.5871034488173393,
@@ -334,7 +335,7 @@ export const BRIGHT_COMETS: CometApparition[] = [
   {
     id: "hyakutake-1996",
     designation: "C/1996 B2",
-    name: { en: "Comet Hyakutake", fr: "comète Hyakutake" },
+    name: "Comet Hyakutake",
     orbit: {
       eccentricity: 0.9997295133739305,
       perihelionAu: 0.2302272039470452,
@@ -354,7 +355,7 @@ export const BRIGHT_COMETS: CometApparition[] = [
   {
     id: "hale-bopp-1997",
     designation: "C/1995 O1",
-    name: { en: "Comet Hale-Bopp", fr: "comète Hale-Bopp" },
+    name: "Comet Hale-Bopp",
     orbit: {
       eccentricity: 0.9951314746156615,
       perihelionAu: 0.9141695067003724,
@@ -374,7 +375,7 @@ export const BRIGHT_COMETS: CometApparition[] = [
   {
     id: "mcnaught-2007",
     designation: "C/2006 P1",
-    name: { en: "Comet McNaught", fr: "comète McNaught" },
+    name: "Comet McNaught",
     orbit: {
       eccentricity: 1.00001811603225,
       perihelionAu: 0.1707325614080681,
@@ -394,7 +395,7 @@ export const BRIGHT_COMETS: CometApparition[] = [
   {
     id: "lovejoy-2011",
     designation: "C/2011 W3",
-    name: { en: "Comet Lovejoy", fr: "comète Lovejoy" },
+    name: "Comet Lovejoy",
     orbit: {
       eccentricity: 0.999915056276912,
       perihelionAu: 0.005553783989325053,
@@ -414,7 +415,7 @@ export const BRIGHT_COMETS: CometApparition[] = [
   {
     id: "panstarrs-2013",
     designation: "C/2011 L4",
-    name: { en: "Comet PANSTARRS", fr: "comète PANSTARRS" },
+    name: "Comet PANSTARRS",
     orbit: {
       eccentricity: 1.000032542889696,
       perihelionAu: 0.301544229714915,
@@ -431,7 +432,7 @@ export const BRIGHT_COMETS: CometApparition[] = [
   {
     id: "neowise-2020",
     designation: "C/2020 F3",
-    name: { en: "Comet NEOWISE", fr: "comète NEOWISE" },
+    name: "Comet NEOWISE",
     orbit: {
       eccentricity: 0.9991782081129224,
       perihelionAu: 0.2946512466331692,
@@ -451,7 +452,7 @@ export const BRIGHT_COMETS: CometApparition[] = [
   {
     id: "tsuchinshan-atlas-2024",
     designation: "C/2023 A3",
-    name: { en: "Comet Tsuchinshan-ATLAS", fr: "comète Tsuchinshan-ATLAS" },
+    name: "Comet Tsuchinshan-ATLAS",
     orbit: {
       eccentricity: 1.000020192843226,
       perihelionAu: 0.3914228969475176,

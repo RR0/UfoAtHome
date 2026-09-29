@@ -6,14 +6,19 @@ import { cloudOffsetAt } from "../render3d/CloudMotion.js"
 import { resolveObserverPoseAt, resolveWeatherAt } from "../engine/model/Sighting.js"
 import { cloudDragDelta } from "../render3d/CloudManipulation.js"
 import type { CloudPoint } from "../render3d/CloudManipulation.js"
-import { cloudEditorTemplate } from "./cloudEditorTemplate.js"
+import { CloudEditorTemplate, cloudEditorMessages_en } from "./cloudEditorTemplate.js"
+import { loadCloudEditorMessages } from "./messages/index.js"
+import type { UfoLanguage } from "./messages/index.js"
 import { NumberFields } from "./NumberFields.js"
 import { DEFAULT_ICE_CRYSTAL_ALIGNMENT } from "../engine/model/Weather.js"
 
-/** Weather authoring shared with the editor's recording, projection and playback clock. */
-export function setupCloudEditor(controls: HTMLElement, scene: SceneElement, beforeEdit: (detachWeatherSource?: boolean) => void, pointAt: (headingDeg: number, pitchDeg: number) => void, language: string = "en") {
-  const translate = (en: string, fr: string) => language === "fr" ? fr : en
-  controls.innerHTML = cloudEditorTemplate(language)
+/** Weather authoring shared with the editor's recording, projection and playback clock.
+ *
+ * Built in English, and put in the reader's `language` once its messages have arrived: only that
+ * language's module is ever downloaded, and none at all for English (see CloudEditorMessages). */
+export function setupCloudEditor(controls: HTMLElement, scene: SceneElement, beforeEdit: (detachWeatherSource?: boolean) => void, pointAt: (headingDeg: number, pitchDeg: number) => void, language: UfoLanguage = "en") {
+  let messages = cloudEditorMessages_en
+  controls.innerHTML = CloudEditorTemplate.html(messages)
   // Each field as wide as what it takes, and held to it as it is typed — see NumberFields.
   NumberFields.fit(controls)
   const input = (id: string) => controls.querySelector<HTMLElement>("#" + id) as HTMLInputElement
@@ -69,7 +74,7 @@ export function setupCloudEditor(controls: HTMLElement, scene: SceneElement, bef
     input("cloud-wind-speed").value = layer.windSpeed === undefined ? "" : String(Math.round(layer.windSpeed * 100) / 100)
     input("cloud-seed").value = layer.seed === undefined ? "" : String(layer.seed)
     const selected = instances.value
-    instances.replaceChildren(new Option(translate("None", "Aucun"), ""), ...(layer.instances ?? []).map((i, index) => new Option(`${translate("Cloud", "Nuage")} ${index + 1}`, i.id)))
+    instances.replaceChildren(new Option(messages.none, ""), ...(layer.instances ?? []).map((i, index) => new Option(`${messages.cloud} ${index + 1}`, i.id)))
     instances.value = layer.instances?.some(i => i.id === selected) ? selected : ""
     syncInstance()
   }
@@ -80,8 +85,8 @@ export function setupCloudEditor(controls: HTMLElement, scene: SceneElement, bef
     const time = scene.ufoElement.currentTime, sighting = scene.ufoElement.sighting
     editCloudLayer(sighting.weatherTrack, resolveWeatherAt(sighting, time), time, currentLayer().id, change, scope())
     scene.ufoElement.refresh()
-    status.textContent = scope() === "observation" ? translate("Saved across the observation; winds preserved.", "Modifications enregistrées sur toute l’observation, vents conservés.")
-      : `${(time / 1000).toFixed(1)} s · ${language === "fr" ? "Météo enregistrée à cet instant." : "Weather saved at this time."}`
+    status.textContent = scope() === "observation" ? messages.savedAcrossObservation
+      : `${(time / 1000).toFixed(1)} s · ${messages.savedAtThisTime}`
   }
   // Pause before any field is edited, so a user's values cannot be committed at a moving playhead.
   controls.addEventListener("focusin", () => scene.ufoElement.pause())
@@ -125,7 +130,7 @@ export function setupCloudEditor(controls: HTMLElement, scene: SceneElement, bef
     event.preventDefault(); event.stopImmediatePropagation()
     scene.ufoElement.pause()
     const point = ndc(event), picked = scene.pickCloudAt(point.x, point.y)
-    if (!picked) { status.textContent = translate("No individual cloud here.", "Aucun nuage individuel à cet endroit."); return }
+    if (!picked) { status.textContent = messages.noCloudHere; return }
     const layers = resolveCloudLayers(resolveWeatherAt(scene.ufoElement.sighting, scene.ufoElement.currentTime))
     layerSelect.value = String(layers.findIndex(layer => layer.id === picked.layerId))
     sync()
@@ -138,7 +143,7 @@ export function setupCloudEditor(controls: HTMLElement, scene: SceneElement, bef
       ray: scene.cloudDirectionAt(point.x, point.y), delta: { x: 0, y: 0, z: 0 } }
     canvas.setPointerCapture(event.pointerId)
     canvas.style.cursor = "grabbing"
-    status.textContent = translate("Cloud selected. Drag to move it.", "Nuage sélectionné. Faire glisser pour le déplacer.")
+    status.textContent = messages.cloudSelected
   }, true)
   canvas.addEventListener("pointermove", event => {
     if (!drag || event.pointerId !== drag.pointerId) return
@@ -196,7 +201,7 @@ export function setupCloudEditor(controls: HTMLElement, scene: SceneElement, bef
     sync()
     instances.value = id
     syncInstance()
-    status.textContent += translate(" Individual cloud added, independent of global coverage.", " Nuage individuel ajouté : sa présence est indépendante de la couverture globale.")
+    status.textContent += messages.cloudAdded
   })
   controls.querySelector<HTMLElement>("#cloud-instance-delete")!.addEventListener("click", () => {
     const id = instances.value
@@ -218,6 +223,16 @@ export function setupCloudEditor(controls: HTMLElement, scene: SceneElement, bef
     if (horizontal === 0 && up === 0) return
     pointAt((Math.atan2(east, north) * 180 / Math.PI + 360) % 360, Math.atan2(up, horizontal) * 180 / Math.PI)
   })
+  if (language !== "en") {
+    void loadCloudEditorMessages(language).then(loaded => {
+      if (!loaded) return
+      messages = loaded
+      CloudEditorTemplate.localize(controls, messages)
+      // The instance picker's own options are written from the messages, not the template.
+      lastTime = -1
+      sync()
+    })
+  }
   const instanceProperties: (keyof CloudInstance)[] = ["eastM", "northM", "baseM", "thicknessM", "widthM", "depthM", "rotationDeg", "density", "darkness"]
   instanceFields.forEach((field, index) => input(`instance-${field}`).addEventListener("input", () => {
     const id = instances.value, control = input(`instance-${field}`)

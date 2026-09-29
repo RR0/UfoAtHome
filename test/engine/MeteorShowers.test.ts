@@ -100,10 +100,8 @@ describe("MeteorShowers", () => {
       expect(shower.velocityKmS).toBeLessThanOrEqual(72)
       expect(shower.populationIndex).toBeGreaterThan(1.5)
       expect(shower.code).toMatch(/^[A-Z]{3}$/)
-      // Named in both languages a page can be read in, and never the same string in both by
-      // accident — a French page saying "Perseids" is the wart this guards against.
-      expect(shower.name.en.length).toBeGreaterThan(3)
-      expect(shower.name.fr.length).toBeGreaterThan(3)
+      // Named in English here; every other language names it in its SceneNames (see its test).
+      expect(shower.name.length).toBeGreaterThan(3)
     }
   })
 })

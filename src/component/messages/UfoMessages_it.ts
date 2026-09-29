@@ -1,0 +1,37 @@
+import type { UfoMessages } from "./UfoMessages.js"
+
+export const ufoMessages_it: UfoMessages = {
+  play: "Riproduci",
+  pause: "Pausa",
+  noDuration: "Nessuna durata di osservazione",
+  currentPosition: "Posizione attuale",
+  duration: "Durata",
+  switchToElapsed: "fai clic per mostrare il tempo trascorso",
+  switchToClockTime: "fai clic per mostrare l'ora del giorno",
+  fullscreen: "Schermo intero",
+  exitFullscreen: "Esci dallo schermo intero",
+  showObserverMap: "Mostra dove si trovava l'osservatore",
+  hideObserverMap: "Nascondi dove si trovava l'osservatore",
+  mapImageryUnavailable: "Vista aerea non disponibile",
+  zoomMapIn: "Ingrandisci",
+  zoomMapOut: "Riduci",
+  fitMap: "Torna all'intero percorso",
+  placeObserverHere: "Metti qui l'osservatore",
+  showReferences: "Mostra le foto del luogo",
+  hideReferences: "Nascondi le foto del luogo",
+  referenceOpacity: "Opacità delle foto",
+  showMilestones: "Mostra i momenti del resoconto",
+  hideMilestones: "Nascondi i momenti del resoconto",
+  observerHere: "L'osservatore, qui",
+  decorHere: "Elemento della scenografia",
+  recordingIssues: "{count} problema/i in questa registrazione: potrebbe non essere riprodotta come voleva il suo autore",
+  issueTemplates: {
+    "unknown-key": "{path}: chiave sconosciuta, ignorata",
+    "wrong-type": "{path}: atteso {expected}, trovato {found}",
+    "not-in-list": "{path}: {found} non è tra {expected}",
+    "defaulted": "{path}: assente, usato {expected}",
+    "unplaced": "{path}: nessun aim (né bounds), disegnato al centro della vista",
+    "unsized": "{path}: nessuna dimensione angolare (né bounds), disegnato largo un pixel",
+    "pixels-over-angles": "{path}: bounds ripetuto senza aim né angular, quindi la forma segue i pixel"
+  }
+}

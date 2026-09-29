@@ -1,0 +1,136 @@
+import type { SceneNames } from "./SceneNames.js"
+
+/**
+ * The Italian names of the things a scene and its catalogues hold — see SceneNames.
+ */
+export const sceneNames_it: SceneNames = {
+  bodies: {
+    sun: "Sole",
+    moon: "Luna",
+    Venus: "Venere",
+    Mars: "Marte",
+    Jupiter: "Giove",
+    Saturn: "Saturno"
+  },
+  // Only the names Italian really writes its own way; every other star keeps its international form.
+  stars: {
+    Sirius: "Sirio",
+    Canopus: "Canopo",
+    Arcturus: "Arturo",
+    Procyon: "Procione",
+    Pollux: "Polluce",
+    Castor: "Castore",
+    Regulus: "Regolo"
+  },
+  comets: {
+    "halley-1910": "cometa di Halley",
+    "brooks-1911": "cometa Brooks",
+    "skjellerup-maristany-1927": "cometa Skjellerup-Maristany",
+    "de-kock-paraskevopoulos-1941": "cometa de Kock-Paraskevopoulos",
+    "southern-1947": "cometa australe",
+    "eclipse-1948": "cometa dell'eclisse",
+    "arend-roland-1957": "cometa Arend-Roland",
+    "mrkos-1957": "cometa Mrkos",
+    "seki-lines-1962": "cometa Seki-Lines",
+    "ikeya-seki-1965": "cometa Ikeya-Seki",
+    "bennett-1970": "cometa Bennett",
+    "white-ortiz-bolelli-1970": "cometa White-Ortiz-Bolelli",
+    "kohoutek-1973": "cometa Kohoutek",
+    "west-1976": "cometa West",
+    "iras-araki-alcock-1983": "cometa IRAS-Araki-Alcock",
+    "halley-1986": "cometa di Halley",
+    "hyakutake-1996": "cometa Hyakutake",
+    "hale-bopp-1997": "cometa Hale-Bopp",
+    "mcnaught-2007": "cometa McNaught",
+    "lovejoy-2011": "cometa Lovejoy",
+    "panstarrs-2013": "cometa PANSTARRS",
+    "neowise-2020": "cometa NEOWISE",
+    "tsuchinshan-atlas-2024": "cometa Tsuchinshan-ATLAS"
+  },
+  novae: {
+    "sn-1006": "supernova del 1006",
+    "sn-1054": "supernova del 1054",
+    "sn-1181": "supernova del 1181",
+    "sn-1572": "supernova di Tycho",
+    "sn-1604": "supernova di Keplero",
+    "t-crb-1866": "nova della Corona Boreale 1866",
+    "t-aur-1891": "nova dell'Auriga 1891",
+    "gk-per-1901": "nova di Perseo 1901",
+    "dn-gem-1912": "nova dei Gemelli 1912",
+    "v603-aql-1918": "nova dell'Aquila 1918",
+    "v476-cyg-1920": "nova del Cigno 1920",
+    "rr-pic-1925": "nova del Pittore 1925",
+    "dq-her-1934": "nova di Ercole 1934",
+    "cp-lac-1936": "nova della Lucertola 1936",
+    "cp-pup-1942": "nova della Poppa 1942",
+    "t-crb-1946": "nova della Corona Boreale 1946",
+    "v446-her-1960": "nova di Ercole 1960",
+    "v533-her-1963": "nova di Ercole 1963",
+    "hr-del-1967": "nova del Delfino 1967",
+    "lv-vul-1968": "nova della Volpetta 1968",
+    "fh-ser-1970": "nova del Serpente 1970",
+    "v1500-cyg-1975": "nova del Cigno 1975",
+    "v842-cen-1986": "nova del Centauro 1986",
+    "sn-1987a": "supernova 1987A",
+    "v1974-cyg-1992": "nova del Cigno 1992",
+    "v382-vel-1999": "nova delle Vele 1999",
+    "v1494-aql-1999": "nova dell'Aquila 1999",
+    "v4743-sgr-2002": "nova del Sagittario 2002",
+    "rs-oph-2006": "nova di Ofiuco 2006",
+    "v1280-sco-2007": "nova dello Scorpione 2007",
+    "v339-del-2013": "nova del Delfino 2013",
+    "v1369-cen-2013": "nova del Centauro 2013",
+    "rs-oph-2021": "nova di Ofiuco 2021"
+  },
+  satelliteClasses: {
+    echo: "i palloni Echo",
+    "iridium-flares": "i lampi degli Iridium",
+    iss: "la Stazione Spaziale Internazionale",
+    "starlink-trains": "i treni di Starlink"
+  },
+  showers: {
+    quadrantids: "Quadrantidi",
+    lyrids: "Liridi di aprile",
+    "eta-aquariids": "Eta Aquaridi",
+    "alpha-capricornids": "Alfa Capricornidi",
+    "southern-delta-aquariids": "Delta Aquaridi australi",
+    perseids: "Perseidi",
+    "southern-taurids": "Tauridi australi",
+    draconids: "Draconidi di ottobre",
+    orionids: "Orionidi",
+    "northern-taurids": "Tauridi boreali",
+    leonids: "Leonidi",
+    geminids: "Geminidi",
+    ursids: "Ursidi"
+  },
+  instruments: {
+    eye: "Occhio nudo",
+    "rectilinear-lens": "Fotocamera, modello sconosciuto",
+    "instamatic-126": "Instamatic, pellicola 126",
+    "slr-35mm-50": "Reflex 35 mm, obiettivo 50 mm",
+    "slr-35mm-zoom": "Reflex 35 mm, zoom 70-210 mm",
+    "phone-landscape": "Telefono, in orizzontale",
+    "phone-portrait": "Telefono, in verticale"
+  },
+  decorKinds: {
+    building: "Edificio",
+    tree: "Albero",
+    shrub: "Arbusto",
+    bridge: "Ponte",
+    crop: "Filare di coltura",
+    mound: "Mucchio di pietre",
+    streetlight: "Lampione",
+    vehicle: "Veicolo",
+    observer: "Osservatore",
+    aircraft: "Aeromobile",
+    entity: "Essere"
+  },
+  // O for ovest, as on an Italian compass.
+  compassPoints: ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSO", "SO", "OSO", "O", "ONO", "NO", "NNO"],
+  // "verso" rather than "a": it reads the same before every point, E and O included.
+  towards: point => `verso ${point}`,
+  starTooltip: "{name} — mag {mag}, {alt}° sopra l'orizzonte",
+  starTooltipBelow: "{name} — mag {mag}, {alt}° sotto l'orizzontale",
+  satelliteTooltip: "{name} — satellite, mag {mag}, a {height} km di quota",
+  credits: "Crediti"
+}

@@ -123,6 +123,11 @@ export interface NarrativeProvider {
   /** What this provider needs from the reader before it can draft — see NarrativeSetting. */
   readonly settings: ReadonlyArray<NarrativeSetting>
 
+  /** Puts the settings' texts in `language` (a tag such as "fr"), when the provider speaks it —
+   * downloading that language's texts alone. Until then, and without this method, they are in
+   * whatever the provider declared them in. */
+  localize?(language: string): Promise<void>
+
   /** Reads `request` and proposes a recording — never its `description`, which is the account it
    * was just handed. Rejects on refusal, on a bad credential, and on an answer that is not a draft;
    * `signal` aborts a call in flight. */

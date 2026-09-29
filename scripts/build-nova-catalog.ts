@@ -81,8 +81,9 @@ interface OutburstInput extends Coordinates {
   id: string
   kind: Kind
   designation: string
-  /** WITHOUT a leading article, the comets' rule: the readout supplies it. */
-  name: { en: string; fr: string }
+  /** The English name. The other languages' are in their own SceneNames (src/component/messages),
+   * keyed by `id` and WITHOUT a leading article, the comets' rule: the readout supplies it. */
+  name: string
   curve: CurveInput
   /** Where the numbers come from, short enough to show a reader. */
   source: string
@@ -141,27 +142,27 @@ const STROPE_NOVAE: { nova: string; year: number; ra: string; dec: string; const
 
 type Constellation = "Aql" | "Aur" | "Cen" | "CrB" | "Cyg" | "Del" | "Gem" | "Her" | "Lac" | "Oph" | "Per" | "Pic" | "Pup" | "Sco" | "Ser" | "Sgr" | "Vel" | "Vul"
 
-/** How a nova is named by its constellation: the Latin genitive in English ("Nova Aquilae 1918"),
- * and in French the constellation with its own article ("nova de l'Aigle 1918"). */
-const CONSTELLATIONS: Record<Constellation, { en: string; fr: string }> = {
-  Aql: { en: "Aquilae", fr: "de l'Aigle" },
-  Aur: { en: "Aurigae", fr: "du Cocher" },
-  Cen: { en: "Centauri", fr: "du Centaure" },
-  CrB: { en: "Coronae Borealis", fr: "de la Couronne boréale" },
-  Cyg: { en: "Cygni", fr: "du Cygne" },
-  Del: { en: "Delphini", fr: "du Dauphin" },
-  Gem: { en: "Geminorum", fr: "des Gémeaux" },
-  Her: { en: "Herculis", fr: "d'Hercule" },
-  Lac: { en: "Lacertae", fr: "du Lézard" },
-  Oph: { en: "Ophiuchi", fr: "d'Ophiuchus" },
-  Per: { en: "Persei", fr: "de Persée" },
-  Pic: { en: "Pictoris", fr: "du Peintre" },
-  Pup: { en: "Puppis", fr: "de la Poupe" },
-  Sco: { en: "Scorpii", fr: "du Scorpion" },
-  Ser: { en: "Serpentis", fr: "du Serpent" },
-  Sgr: { en: "Sagittarii", fr: "du Sagittaire" },
-  Vel: { en: "Velorum", fr: "des Voiles" },
-  Vul: { en: "Vulpeculae", fr: "du Petit Renard" }
+/** How a nova is named by its constellation: the Latin genitive in English ("Nova Aquilae 1918").
+ * Other languages name it their own way ("nova de l'Aigle 1918"), in their own SceneNames. */
+const CONSTELLATIONS: Record<Constellation, string> = {
+  Aql: "Aquilae",
+  Aur: "Aurigae",
+  Cen: "Centauri",
+  CrB: "Coronae Borealis",
+  Cyg: "Cygni",
+  Del: "Delphini",
+  Gem: "Geminorum",
+  Her: "Herculis",
+  Lac: "Lacertae",
+  Oph: "Ophiuchi",
+  Per: "Persei",
+  Pic: "Pictoris",
+  Pup: "Puppis",
+  Sco: "Scorpii",
+  Ser: "Serpentis",
+  Sgr: "Sagittarii",
+  Vel: "Velorum",
+  Vul: "Vulpeculae"
 }
 
 const NOVA_NOTES: Record<string, string> = {
@@ -181,7 +182,7 @@ const OUTBURSTS: OutburstInput[] = [
     id: "sn-1006",
     kind: "supernova",
     designation: "SN 1006",
-    name: { en: "Supernova of 1006", fr: "supernova de 1006" },
+    name: "Supernova of 1006",
     ra: "15 02 22.1",
     dec: "-42 05 49",
     // Peak from Winkler, Gupta & Long (2003), from the remnant's distance and the chronicles. The
@@ -195,7 +196,7 @@ const OUTBURSTS: OutburstInput[] = [
     id: "sn-1054",
     kind: "supernova",
     designation: "SN 1054",
-    name: { en: "Supernova of 1054", fr: "supernova de 1054" },
+    name: "Supernova of 1054",
     ra: "05 34 31.8",
     dec: "+22 01 03",
     curve: {
@@ -217,7 +218,7 @@ const OUTBURSTS: OutburstInput[] = [
     id: "sn-1181",
     kind: "supernova",
     designation: "SN 1181",
-    name: { en: "Supernova of 1181", fr: "supernova de 1181" },
+    name: "Supernova of 1181",
     // Pa 30, now the accepted remnant (Ritter et al. 2021), rather than 3C 58.
     ra: "00 53 11.21",
     dec: "+67 30 02.4",
@@ -236,7 +237,7 @@ const OUTBURSTS: OutburstInput[] = [
     id: "sn-1572",
     kind: "supernova",
     designation: "SN 1572",
-    name: { en: "Tycho's Supernova", fr: "supernova de Tycho" },
+    name: "Tycho's Supernova",
     ra: "00 25 21.5",
     dec: "+64 08 27",
     curve: {
@@ -266,7 +267,7 @@ const OUTBURSTS: OutburstInput[] = [
     id: "sn-1604",
     kind: "supernova",
     designation: "SN 1604",
-    name: { en: "Kepler's Supernova", fr: "supernova de Kepler" },
+    name: "Kepler's Supernova",
     ra: "17 30 40.51",
     dec: "-21 29 14.4",
     curve: {
@@ -315,7 +316,7 @@ const OUTBURSTS: OutburstInput[] = [
     id: "sn-1987a",
     kind: "supernova",
     designation: "SN 1987A",
-    name: { en: "Supernova 1987A", fr: "supernova 1987A" },
+    name: "Supernova 1987A",
     ra: "05 35 27.99",
     dec: "-69 16 11.1",
     curve: { from: "recorded", points: [] },
@@ -326,7 +327,7 @@ const OUTBURSTS: OutburstInput[] = [
     id: "t-crb-1866",
     kind: "nova",
     designation: "T CrB",
-    name: { en: "Nova Coronae Borealis 1866", fr: "nova de la Couronne boréale 1866" },
+    name: "Nova Coronae Borealis 1866",
     ra: "15 59 30.16",
     dec: "+25 55 12.6",
     // Discovered by John Birmingham on 12 May 1866 at magnitude 2.
@@ -338,7 +339,7 @@ const OUTBURSTS: OutburstInput[] = [
     id: "rs-oph-2021",
     kind: "nova",
     designation: "RS Oph",
-    name: { en: "Nova Ophiuchi 2021", fr: "nova d'Ophiuchus 2021" },
+    name: "Nova Ophiuchi 2021",
     ra: "17 50 13.16",
     dec: "-06 42 28.5",
     curve: {
@@ -355,7 +356,7 @@ const OUTBURSTS: OutburstInput[] = [
     id: "v1280-sco-2007",
     kind: "nova",
     designation: "V1280 Sco",
-    name: { en: "Nova Scorpii 2007", fr: "nova du Scorpion 2007" },
+    name: "Nova Scorpii 2007",
     ra: "16 57 41.22",
     dec: "-32 20 35.7",
     curve: {
@@ -375,7 +376,7 @@ const OUTBURSTS: OutburstInput[] = [
     id: "v1369-cen-2013",
     kind: "nova",
     designation: "V1369 Cen",
-    name: { en: "Nova Centauri 2013", fr: "nova du Centaure 2013" },
+    name: "Nova Centauri 2013",
     ra: "13 54 45.35",
     dec: "-59 09 04.1",
     curve: { from: "figure", file: "v1369cen-izzo2017-fig1.json", dayZero: "2013-12-02T00:00:00Z", lastShownDay: 55 },
@@ -386,7 +387,7 @@ const OUTBURSTS: OutburstInput[] = [
     id: "v339-del-2013",
     kind: "nova",
     designation: "V339 Del",
-    name: { en: "Nova Delphini 2013", fr: "nova du Dauphin 2013" },
+    name: "Nova Delphini 2013",
     ra: "20 23 30.69",
     dec: "+20 46 03.8",
     curve: {
@@ -440,7 +441,7 @@ class NovaCatalogBuilder {
       id: `${nova.toLowerCase().replace(/\s+/g, "-")}-${year}`,
       kind: "nova" as const,
       designation: nova,
-      name: { en: `Nova ${CONSTELLATIONS[constellation].en} ${year}`, fr: `nova ${CONSTELLATIONS[constellation].fr} ${year}` },
+      name: `Nova ${CONSTELLATIONS[constellation]} ${year}`,
       ra,
       dec,
       curve: { from: "strope" as const, nova },
@@ -648,7 +649,7 @@ class NovaCatalogBuilder {
           `    id: ${JSON.stringify(entry.id)},`,
           `    kind: ${JSON.stringify(entry.kind)},`,
           `    designation: ${JSON.stringify(entry.designation)},`,
-          `    name: { en: ${JSON.stringify(entry.name.en)}, fr: ${JSON.stringify(entry.name.fr)} },`,
+          `    name: ${JSON.stringify(entry.name)},`,
           `    raHours: ${entry.raHours},`,
           `    decDeg: ${entry.decDeg},`,
           `    peakMagnitude: ${entry.peakMagnitude},`,
@@ -675,8 +676,9 @@ export interface StellarOutburst {
   kind: "nova" | "supernova"
   /** The variable-star or supernova designation. A recurrent nova's eruptions share it. */
   designation: string
-  /** WITHOUT a leading article; the readout supplies it. */
-  name: { en: string; fr: string }
+  /** The English name. The other languages' are in their own SceneNames (src/component/messages),
+   * keyed by \`id\` and WITHOUT a leading article: the readout supplies it. */
+  name: string
   /** J2000, like the star catalogue — see HorizontalFrame for the precession to the date. */
   raHours: number
   decDeg: number

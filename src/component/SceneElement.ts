@@ -31,6 +31,9 @@ import type { Weather } from "../engine/model/Weather.js"
 import type { DecorKind } from "../engine/model/Decor.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
 import { HostLocale, selectLocale } from "../i18n/locale.js"
+import { loadSceneNames, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
+import type { UfoLanguage } from "./messages/index.js"
+import { SceneNaming } from "./messages/SceneNames.js"
 import { SceneCredits } from "./SceneCredits.js"
 import { SaidTexts } from "../engine/model/SaidText.js"
 import { WeatherAudio } from "../render3d/WeatherAudio.js"
@@ -74,16 +77,16 @@ registerUfo()
 /** Display names for pickBodyAt's return keys — note "sun"/"moon" are lowercase (SceneRenderer's
  * own internal keys for those two) while planets are capitalized (CelestialBody values, used
  * verbatim as their own key) — deliberately not unified, since unifying casing would mean
- * SceneRenderer inventing a display-string convention it otherwise has no reason to know about. */
-const BODY_NAMES: Record<string, { en: string; fr: string }> = {
-  sun: { en: "Sun", fr: "Soleil" },
-  moon: { en: "Moon", fr: "Lune" },
-  Venus: { en: "Venus", fr: "Vénus" },
-  Mars: { en: "Mars", fr: "Mars" },
-  Jupiter: { en: "Jupiter", fr: "Jupiter" },
-  Saturn: { en: "Saturn", fr: "Saturne" }
+ * SceneRenderer inventing a display-string convention it otherwise has no reason to know about.
+ * English: every other language's are in its SceneNames (see loadSceneNames). */
+const BODY_NAMES: Record<string, string> = {
+  sun: "Sun",
+  moon: "Moon",
+  Venus: "Venus",
+  Mars: "Mars",
+  Jupiter: "Jupiter",
+  Saturn: "Saturn"
 }
-const BODY_TOOLTIP_SUPPORTED_LANGUAGES = ["en", "fr"]
 
 /**
  * What a star's tooltip says, and why it says three things rather than one.
@@ -93,10 +96,7 @@ const BODY_TOOLTIP_SUPPORTED_LANGUAGES = ["en", "fr"]
  * the horizon has been answered the moment they read "Venus, magnitude -4, 8 degrees up", and not
  * at all by a bare name.
  */
-const STAR_TOOLTIP: Record<string, string> = {
-  en: "{name} — mag {mag}, {alt}° above the horizon",
-  fr: "{name} — mag {mag}, {alt}° au-dessus de l'horizon"
-}
+const STAR_TOOLTIP = "{name} — mag {mag}, {alt}° above the horizon"
 
 /**
  * The same sentence for a star standing BELOW the horizontal, which is not the contradiction it
@@ -114,10 +114,7 @@ const STAR_TOOLTIP: Record<string, string> = {
 /** A satellite under the pointer: its catalogue name, how bright, how high. The height in
  * kilometres, not the altitude in degrees, because the height is what tells a Starlink still
  * raising its orbit from one on station. */
-const SATELLITE_TOOLTIP: Record<string, string> = {
-  en: "{name} — satellite, mag {mag}, {height} km up",
-  fr: "{name} — satellite, mag {mag}, à {height} km d'altitude"
-}
+const SATELLITE_TOOLTIP = "{name} — satellite, mag {mag}, {height} km up"
 
 /** Fired by a scene when the element sets of its recording have arrived, or turned out not to exist. */
 export const SATELLITES_CHANGE_EVENT = "satellites-change"
@@ -127,10 +124,10 @@ export const CONFRONTATION_EVENT = "rr0-confrontation"
 
 export type SatelliteStatus = "none" | "loading" | "outside" | "unavailable" | "ready"
 
-const STAR_TOOLTIP_BELOW: Record<string, string> = {
-  en: "{name} — mag {mag}, {alt}° below the horizontal",
-  fr: "{name} — mag {mag}, {alt}° sous l'horizontale"
-}
+const STAR_TOOLTIP_BELOW = "{name} — mag {mag}, {alt}° below the horizontal"
+
+/** The credits button's label — English, like BODY_NAMES. */
+const CREDITS_LABEL = "Credits"
 
 /** How SceneRenderer keys a comet's own body mesh — see its buildComet. Kept here beside the names
  * it is used with rather than exported from the renderer, which has no interest in what the rest of
@@ -146,21 +143,21 @@ const NOVA_KEY_PREFIX = "nova:"
  * not an authoring-only implementation detail. decor.title wins when given (same precedence as
  * SightingEditorElement's own decorLabel, which additionally numbers same-kind objects for its
  * editing dropdown — this tooltip has no such numbering need, standalone `<rr0-scene>` has no
- * dropdown to number against anyway). */
-const DECOR_KIND_NAMES: Record<DecorKind, { en: string; fr: string }> = {
-  building: { en: "Building", fr: "Bâtiment" },
-  tree: { en: "Tree", fr: "Arbre" },
-  shrub: { en: "Shrub", fr: "Buisson" },
-  bridge: { en: "Bridge", fr: "Pont" },
-  crop: { en: "Crop row", fr: "Rang de culture" },
-  mound: { en: "Stone heap", fr: "Tas de pierres" },
-  streetlight: { en: "Streetlight", fr: "Lampadaire" },
-  vehicle: { en: "Vehicle", fr: "Véhicule" },
-  observer: { en: "Observer", fr: "Observateur" },
-  aircraft: { en: "Aircraft", fr: "Aéronef" },
+ * dropdown to number against anyway). English, like BODY_NAMES. */
+const DECOR_KIND_NAMES: Record<DecorKind, string> = {
+  building: "Building",
+  tree: "Tree",
+  shrub: "Shrub",
+  bridge: "Bridge",
+  crop: "Crop row",
+  mound: "Stone heap",
+  streetlight: "Streetlight",
+  vehicle: "Vehicle",
+  observer: "Observer",
+  aircraft: "Aircraft",
   // Not "creature" and not "alien": the account says a being was there and says nothing about what
   // it was, which is the whole of what this project is willing to assert.
-  entity: { en: "Being", fr: "Être" }
+  entity: "Being"
 }
 
 /** Where the star catalog asset (see scripts/build-star-catalog.ts) is fetched from by default —
@@ -373,16 +370,17 @@ export class SceneElement extends HTMLElement {
     }
     const ndcX = ((event.clientX - rect.left) / rect.width) * 2 - 1
     const ndcY = -(((event.clientY - rect.top) / rect.height) * 2 - 1)
-    const language = selectLocale(HostLocale.preferencesFor(this), BODY_TOOLTIP_SUPPORTED_LANGUAGES) as "en" | "fr"
+    const naming = this.naming
+    const names = naming.names
     const bodyKey = this.sceneRenderer.pickBodyAt(ndcX, ndcY)
     if (bodyKey) {
-      this.showHoverTooltip(event, this.bodyName(bodyKey, language))
+      this.showHoverTooltip(event, this.bodyName(bodyKey))
       return
     }
     const decorId = this.sceneRenderer.pickDecorAt(ndcX, ndcY)
     const decor = decorId ? this.ufoElement.sighting.decor.find(d => d.id === decorId) : undefined
     if (decor) {
-      this.showHoverTooltip(event, this.said.read(decor.title) || DECOR_KIND_NAMES[decor.kind][language])
+      this.showHoverTooltip(event, this.said.read(decor.title) || naming.decorKind(decor.kind, DECOR_KIND_NAMES[decor.kind]))
       return
     }
     // Last of the four, and deliberately: a shape is painted over everything, a planet is a better
@@ -392,7 +390,7 @@ export class SceneElement extends HTMLElement {
     // most likely pointing at.
     const satellite = this.sceneRenderer.pickSatelliteAt(ndcX, ndcY)
     if (satellite) {
-      this.showHoverTooltip(event, SATELLITE_TOOLTIP[language]!
+      this.showHoverTooltip(event, (names?.satelliteTooltip ?? SATELLITE_TOOLTIP)
         .replace("{name}", satellite.name)
         .replace("{mag}", satellite.magnitude.toLocaleString(undefined, { maximumFractionDigits: 1 }))
         .replace("{height}", Math.round(satellite.heightKm).toLocaleString()))
@@ -408,9 +406,11 @@ export class SceneElement extends HTMLElement {
       // originally anchored on.
       const magnitude = star.star.mag
       const altitudeDeg = star.altitudeDeg
-      const template = (altitudeDeg < 0 ? STAR_TOOLTIP_BELOW : STAR_TOOLTIP)[language]!
+      const template = altitudeDeg < 0
+        ? names?.starTooltipBelow ?? STAR_TOOLTIP_BELOW
+        : names?.starTooltip ?? STAR_TOOLTIP
       this.showHoverTooltip(event, template
-        .replace("{name}", star.star.name[language])
+        .replace("{name}", naming.star(star.star))
         .replace("{mag}", magnitude.toLocaleString(undefined, { maximumFractionDigits: Math.abs(magnitude) < 1 ? 2 : 1 }))
         .replace("{alt}", String(Math.round(Math.abs(altitudeDeg)))))
       return
@@ -421,11 +421,49 @@ export class SceneElement extends HTMLElement {
   /** What to call the thing under the pointer. The comets are not in BODY_NAMES because there are
    * two dozen of them and they carry their own names in the catalog — a comet is a dated event
    * rather than a fixed body, which is also why the key names the apparition. */
-  private bodyName(bodyKey: string, language: "en" | "fr"): string {
+  private bodyName(bodyKey: string): string {
     const cometId = bodyKey.startsWith(COMET_KEY_PREFIX) ? bodyKey.slice(COMET_KEY_PREFIX.length) : undefined
     const comet = cometId ? BRIGHT_COMETS.find(apparition => apparition.id === cometId) : undefined
+    if (comet) return this.naming.comet(comet)
     const nova = bodyKey.startsWith(NOVA_KEY_PREFIX) ? Novae.byId(bodyKey.slice(NOVA_KEY_PREFIX.length)) : undefined
-    return comet?.name[language] ?? nova?.name[language] ?? BODY_NAMES[bodyKey]?.[language] ?? bodyKey
+    if (nova) return this.naming.nova(nova)
+    const english = BODY_NAMES[bodyKey]
+    return english === undefined ? bodyKey : this.naming.body(bodyKey, english)
+  }
+
+  /**
+   * What this reader calls the things in the scene — English (the catalogues' own names, and the
+   * code's) until their language's names have arrived, and for good when they read English.
+   *
+   * The lookups it serves are synchronous (a hover tooltip, a compass label drawn into a frame), so
+   * the names are asked for as soon as the language is known (see loadSceneNames, on connection) and
+   * kept; whatever showed English meanwhile is redone when they land.
+   */
+  get naming(): SceneNaming {
+    return this.sceneNaming
+  }
+
+  private sceneNaming = new SceneNaming()
+
+  /** The language sceneNaming was last asked for — so that a reconnection deciding the same one does
+   * not fetch again, and a decision overtaken by a later one is dropped. */
+  private namesLanguage: UfoLanguage = "en"
+
+  private async loadSceneNames(): Promise<void> {
+    const language = selectLocale(HostLocale.preferencesFor(this), UFO_SUPPORTED_LANGUAGES) as UfoLanguage
+    if (language === this.namesLanguage) return
+    this.namesLanguage = language
+    const names = await loadSceneNames(language)
+    if (language !== this.namesLanguage) return
+    this.applySceneNaming(new SceneNaming(names))
+  }
+
+  private applySceneNaming(naming: SceneNaming): void {
+    this.sceneNaming = naming
+    const creditsLabel = naming.names?.credits ?? CREDITS_LABEL
+    this.creditsButton.title = creditsLabel
+    this.creditsButton.setAttribute("aria-label", creditsLabel)
+    this.sceneRenderer.setCompassPoints(naming.names?.compassPoints)
   }
 
   private showHoverTooltip(event: PointerEvent, text: string): void {
@@ -561,9 +599,9 @@ export class SceneElement extends HTMLElement {
     creditsPanel.addEventListener("beforetoggle", event => {
       if ((event as ToggleEvent).newState === "open") SceneCredits.fill(creditsList, this)
     })
-    const creditsLabel = selectLocale(HostLocale.preferencesFor(this), ["en", "fr"]) === "fr" ? "Crédits" : "Credits"
-    this.creditsButton.title = creditsLabel
-    this.creditsButton.setAttribute("aria-label", creditsLabel)
+    // English until the reader's names arrive — see naming.
+    this.creditsButton.title = CREDITS_LABEL
+    this.creditsButton.setAttribute("aria-label", CREDITS_LABEL)
     this.sceneRenderer.onMapSubjectBounds = bounds => this.ufoElement.setMapSubjectBounds(bounds)
     this.ufoElement.addEventListener("timeupdate", this.handleTimeUpdate)
     this.ufoElement.addEventListener("referenceview", event => this.applyReferenceView((event as CustomEvent<{ shown: boolean; opacity: number }>).detail))
@@ -592,6 +630,7 @@ export class SceneElement extends HTMLElement {
 
   connectedCallback(): void {
     this.saidTexts = undefined
+    void this.loadSceneNames()
     this.sceneRenderer.restoreContext()
     this.resizeToStage()
     this.updateAstronomy(this.lastTimeMs)

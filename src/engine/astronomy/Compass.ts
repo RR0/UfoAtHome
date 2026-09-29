@@ -5,11 +5,14 @@
  * Sixteen points rather than eight, because a shower's radiant lands between the cardinals as often
  * as on them, and rounding 206 to "south-west" moves it by a fifth of a right angle.
  */
-const POINTS: Record<"en" | "fr", readonly string[]> = {
-  en: ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"],
-  // O for ouest, not W — the compass sprites in the scene already use it (see SceneRenderer's own
-  // COMPASS_LABELS), and a French page mixing the two would be worse than either.
-  fr: ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSO", "SO", "OSO", "O", "ONO", "NO", "NNO"]
+const POINTS: readonly string[] = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"]
+
+/** What a language other than English needs to say a bearing — see SceneNames, which holds it. */
+export interface CompassWording {
+  /** The sixteen points, clockwise from north. */
+  readonly compassPoints: readonly string[]
+  /** A point with its preposition already on it. */
+  towards(point: string): string
 }
 
 export class Compass {
@@ -18,12 +21,17 @@ export class Compass {
 
   /** The point `azimuthDeg` falls in, degrees clockwise from true north — the same convention as
    * ObserverPose.headingDeg and every other bearing in this project. Any angle is accepted,
-   * negative or past a full turn, so a caller never has to normalise first. */
-  static point(azimuthDeg: number, language: "en" | "fr"): string {
+   * negative or past a full turn, so a caller never has to normalise first. `points` are the
+   * reader's (O for ouest in French, since the compass sprites in the scene use it too, and a page
+   * mixing the two would be worse than either), English when not given. */
+  static point(azimuthDeg: number, points: readonly string[] = POINTS): string {
     const normalised = ((azimuthDeg % 360) + 360) % 360
     const index = Math.round(normalised / Compass.POINT_DEG) % 16
-    return POINTS[language][index]
+    return points[index]
   }
+
+  /** The English points, clockwise from north. */
+  static readonly POINTS = POINTS
 
   /**
    * "to the NW", "au NO", "à l'OSO" — the point with the preposition already on it.
@@ -35,16 +43,11 @@ export class Compass {
    * and "au ESE" — the kind of wart that makes a page read as machine output.
    *
    * The rule is the first word of what the letters stand for, so it is the leading letter that
-   * decides: est and ouest elide, nord and sud do not. English has no such worry.
+   * decides: est and ouest elide, nord and sud do not (see SceneNames_fr). English has no such
+   * worry, and is what is said without a `wording`.
    */
-  static towards(azimuthDeg: number, language: "en" | "fr"): string {
-    const point = Compass.point(azimuthDeg, language)
-    if (language === "en") return `to the ${point}`
-    return ELIDING_POINTS.test(point) ? `à l'${point}` : `au ${point}`
+  static towards(azimuthDeg: number, wording?: CompassWording): string {
+    if (!wording) return `to the ${Compass.point(azimuthDeg)}`
+    return wording.towards(Compass.point(azimuthDeg, wording.compassPoints))
   }
 }
-
-/** The French points whose spelled-out name begins with a vowel — those starting with E (est) or
- * O (ouest). Deliberately not a list of the four: it is the first letter that carries the rule, and
- * writing it that way keeps ENE and OSO right for the same reason E and O are. */
-const ELIDING_POINTS = /^[EO]/

@@ -49,7 +49,9 @@ const VISIBLE_OBJECT_TYPES = new Set(["PAY", "R/B"])
  */
 interface SatelliteClassInput {
   id: string
-  name: { en: string; fr: string }
+  /** The English name, with its article. The other languages' are in their own SceneNames
+   * (src/component/messages), keyed by `id`. */
+  name: string
   /** Brightest recorded apparent visual magnitude for this class — an observation, not a lookup. */
   peakMagnitude: number
   /** Which SATCAT rows belong to the class: explicit NORAD ids, or a test on the object's name. */
@@ -71,14 +73,14 @@ interface SatelliteClassInput {
 const SATELLITE_CLASSES: SatelliteClassInput[] = [
   {
     id: "echo",
-    name: { en: "the Echo balloons", fr: "les ballons Echo" },
+    name: "the Echo balloons",
     peakMagnitude: -1,
     noradIds: ["49", "740"],
     note: "Echo 1 and 2 were 30- and 40-metre reflective balloons, as bright as the brightest stars and moving slowly enough to be watched — deliberately visible, widely announced in newspapers, and the first objects most people ever saw crossing the night sky. They fall squarely inside the sighting waves this project reconstructs."
   },
   {
     id: "iridium-flares",
-    name: { en: "the Iridium flares", fr: "les flashes d'Iridium" },
+    name: "the Iridium flares",
     peakMagnitude: -8,
     // The original block only. The replacement Iridium NEXT satellites are numbered from 100 up and
     // carry no mirror panels, so including them would extend a phenomenon that had ended.
@@ -88,14 +90,14 @@ const SATELLITE_CLASSES: SatelliteClassInput[] = [
   },
   {
     id: "iss",
-    name: { en: "the International Space Station", fr: "la Station spatiale internationale" },
+    name: "the International Space Station",
     peakMagnitude: -5.9,
     noradIds: ["25544"],
     note: "Since its first module, and much brighter as it grew: at its best it outshines everything in the sky but the Sun and the Moon, crossing in a straight silent line in about four minutes."
   },
   {
     id: "starlink-trains",
-    name: { en: "the Starlink trains", fr: "les trains de Starlink" },
+    name: "the Starlink trains",
     peakMagnitude: 1,
     matches: name => name.startsWith("STARLINK"),
     note: "In the days after a launch, satellites still bunched in their deployment string cross as an evenly spaced line of lights — the most reported 'formation of UFOs' of the era. They spread out within weeks, so a train is a fact about the days after a launch rather than about the year."
@@ -215,7 +217,7 @@ class SatelliteCatalogBuilder {
     const entries = classes.map(({ input, window }) =>
       `  {\n` +
       `    id: ${JSON.stringify(input.id)},\n` +
-      `    name: { en: ${JSON.stringify(input.name.en)}, fr: ${JSON.stringify(input.name.fr)} },\n` +
+      `    name: ${JSON.stringify(input.name)},\n` +
       `    from: ${JSON.stringify(window.from)},\n` +
       (window.to === undefined ? "" : `    to: ${JSON.stringify(window.to)},\n`) +
       `    peakMagnitude: ${input.peakMagnitude},\n` +
@@ -239,8 +241,9 @@ class SatelliteCatalogBuilder {
 
 export interface SatelliteClass {
   id: string
-  /** The class's name in each language a page can be read in. */
-  name: { en: string; fr: string }
+  /** The class's English name. The other languages' are in their own SceneNames
+   * (src/component/messages), keyed by \`id\`. */
+  name: string
   /** From the first launch of the class, to when it ended — absent while it is still up there. */
   from: string
   to?: string

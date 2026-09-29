@@ -16,7 +16,8 @@ import { HostLocale, selectLocale } from "../i18n/locale.js"
 import { SaidTexts } from "../engine/model/SaidText.js"
 import { SightingTags } from "./messages/TagNames.js"
 import { sightingTimeToDate } from "../engine/astronomy/CelestialPositions.js"
-import { loadSightingMessages, loadTagNames, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
+import { loadSceneNames, loadSightingMessages, loadTagNames, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
+import { SceneNaming } from "./messages/SceneNames.js"
 import type { UfoLanguage } from "./messages/index.js"
 import { sightingMessages_en } from "./messages/SightingMessages_en.js"
 import type { SightingMessages } from "./messages/SightingMessages.js"
@@ -98,7 +99,7 @@ export class SightingElement extends HTMLElement {
   private readonly embedCopyButton: HTMLButtonElement
   private readonly labelsToggle: HTMLButtonElement
   private readonly paramSummary: HTMLElement
-  private summaryBuilder = new SightingSummary(sightingMessages_en, "en", new SaidTexts(["en"]), new SightingTags({}))
+  private summaryBuilder = new SightingSummary(sightingMessages_en, new SceneNaming(), new SaidTexts(["en"]), new SightingTags({}))
   /** What the strip last rendered. It refreshes on every playback tick (see the timeupdate
    * listener), and replacing forty elements sixty times a second — under a reader's own text
    * selection, at that — for values that changed in none of them is not free. */
@@ -239,7 +240,10 @@ export class SightingElement extends HTMLElement {
     }
     this.embedCopyButton.addEventListener("click", () => void this.copyEmbedMarkup())
 
-    void this.loadLocaleMessages()
+    // Only when already in the page (an element upgraded in place): a detached one has no
+    // ancestor to read the page's language from, and would fetch the browser's language before
+    // connectedCallback fetches the right one.
+    if (this.isConnected) void this.loadLocaleMessages()
   }
 
   /** The scene this view composes, and through it (`.ufoElement`) the playback controls — what a
@@ -267,9 +271,9 @@ export class SightingElement extends HTMLElement {
     const preferences = HostLocale.preferencesFor(this)
     this.preferences = preferences
     const language = selectLocale(preferences, UFO_SUPPORTED_LANGUAGES) as UfoLanguage
-    const [messages, tagNames] = language === "en"
-      ? [sightingMessages_en, {}]
-      : await Promise.all([loadSightingMessages(language), loadTagNames(language)])
+    const [messages, tagNames, sceneNames] = language === "en"
+      ? [sightingMessages_en, {}, undefined]
+      : await Promise.all([loadSightingMessages(language), loadTagNames(language), loadSceneNames(language)])
     // Superseded by a later decision (the element was connected while this one was loading).
     if (token !== this.localeToken) return
     const changed = language !== this.language
@@ -277,7 +281,7 @@ export class SightingElement extends HTMLElement {
     this.messages = messages
     this.tags = new SightingTags(tagNames)
     this.said = new SaidTexts(preferences)
-    this.summaryBuilder = new SightingSummary(this.messages, this.language === "fr" ? "fr" : "en", this.said, this.tags)
+    this.summaryBuilder = new SightingSummary(this.messages, new SceneNaming(sceneNames), this.said, this.tags)
     this.accountPrefix.textContent = this.messages.accountBy
     this.interpretationLabel.textContent = this.messages.interpretation
     this.confrontationHeading.textContent = this.messages.confrontation
@@ -581,7 +585,11 @@ export class SightingElement extends HTMLElement {
     this.compareButton.setAttribute("aria-label", label)
   }
 
-  /** A colon as the reader's language writes one: French puts a no-break space before it. */
+  /** The locale a date is written in, for each interface language. */
+  private static readonly DATE_LOCALES: Record<UfoLanguage, string> = { en: "en-US", fr: "fr-FR", es: "es-ES", it: "it-IT" }
+
+  /** A colon as the reader's language writes one: French puts a no-break space before it, and
+   * Spanish and Italian write it as English does. */
   private get colon(): string {
     return this.language === "fr" ? "\u00a0: " : ": "
   }
@@ -741,7 +749,7 @@ export class SightingElement extends HTMLElement {
     const date = sightingTimeToDate(sighting.time ?? {}, place?.lng ?? 0, sighting.utcOffsetHours)
     if (!date) return undefined
     const localMs = date.getTime() + this.utcOffsetHoursOf(sighting, place?.lng ?? 0) * 3_600_000
-    return new Intl.DateTimeFormat(this.language === "fr" ? "fr-FR" : "en-US", {
+    return new Intl.DateTimeFormat(SightingElement.DATE_LOCALES[this.language], {
       dateStyle: "long",
       timeStyle: "short",
       timeZone: "UTC"

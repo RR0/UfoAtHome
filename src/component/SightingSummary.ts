@@ -1,5 +1,4 @@
 import type { Sighting } from "../engine/model/Sighting.js"
-import { Compass } from "../engine/astronomy/Compass.js"
 import { formatEdtfTime, resolveObserverPoseAt, resolveSoundAt, resolveWeatherAt, sightingDurationMs } from "../engine/model/Sighting.js"
 import type { DecorKind, DecorObject, DecorSide } from "../engine/model/Decor.js"
 import { resolveDecorLitAt, resolveDecorPlacementAt } from "../engine/model/Decor.js"
@@ -10,6 +9,7 @@ import { Instruments } from "../engine/instrument/Instrument.js"
 import type { SightingLabels } from "./messages/SightingLabels.js"
 import type { SaidTexts } from "../engine/model/SaidText.js"
 import { SightingTags } from "./messages/TagNames.js"
+import type { SceneNaming } from "./messages/SceneNames.js"
 
 /** Which group of the editor's own tab strip a summary entry belongs to. The player ignores
  * these; the editor maps them onto its panels, so that clicking a chip opens the one holding
@@ -104,14 +104,14 @@ export interface SummaryContext {
  * latitude, heading, pitch, a decor object's distance east, the UTC offset.
  */
 export class SightingSummary {
-  /** `language` is needed for the catalogue entries alone — an instrument's name is data, and data
-   * carries every language it speaks rather than only English (see Instrument.name). Everything
-   * else here is named from `labels`. */
+  /** `naming` is needed for the catalogue entries alone — an instrument's name is data, named in
+   * English by its catalogue and in the reader's language by their SceneNames — and for the compass
+   * point of a heading. Everything else here is named from `labels`. */
   constructor(
-    private readonly labels: SightingLabels, private readonly language: "en" | "fr",
+    private readonly labels: SightingLabels, private readonly naming: SceneNaming,
     /** Reads the text the AUTHOR wrote — a decor object's own name, and every other field a
      * recording can carry in several languages (see SaidText). Distinct from `labels` and
-     * `language` above, which name the fields rather than say what is in them. */
+     * `naming` above, which name the fields rather than say what is in them. */
     private readonly said: SaidTexts,
     /** Names the recording's tags for this reader — they are stored in English, see TagNames. */
     private readonly tags: SightingTags = new SightingTags({})
@@ -212,7 +212,7 @@ export class SightingSummary {
       firstNames && firstNames.length > 0 ? firstNames.join(", ") : undefined)
 
     const instrument = sighting.instrument
-    this.push(entries, "observer", "instrument", this.labels.instrument, instrument.name[this.language])
+    this.push(entries, "observer", "instrument", this.labels.instrument, this.naming.instrument(instrument))
     // The recording's own, not the instant's: one observation was photographed one way (see
     // Sighting.exposureSeconds), so this stands whether or not there is a pose to read.
     const exposure = sighting.exposure
@@ -250,7 +250,7 @@ export class SightingSummary {
     // In the unit, not the value, so the value stays the number the field holds.
     const heading = this.rounded(pose.headingDeg)
     this.push(entries, "location", "heading", this.labels.heading, heading,
-      pose.headingDeg === undefined ? "°" : `° (${Compass.point(pose.headingDeg, this.language)})`)
+      pose.headingDeg === undefined ? "°" : `° (${this.naming.point(pose.headingDeg)})`)
     this.push(entries, "location", "pitch", this.labels.pitch, this.rounded(pose.pitchDeg), "°")
     // Told apart rather than guessed at: with the terrain's height known this is an altitude above
     // sea level, which is what "Altitude" means in both components; without it, the only true

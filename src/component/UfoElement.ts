@@ -640,11 +640,14 @@ export class UfoElement extends HTMLElement {
     this.updateReferencesButton()
     this.updateMilestonesButton()
     this.refresh()
-    void this.loadLocaleMessages()
   }
 
   connectedCallback(): void {
     this.saidTexts = undefined
+    // Here and not in the constructor: the page's declared language is read off the ancestors, and
+    // an element being constructed has none yet — it fell back to the browser's languages, so the
+    // phenomenon inside a Spanish page's editor spoke the browser's French.
+    void this.loadLocaleMessages()
     const src = this.getAttribute("src")
     if (src) {
       void this.loadFromSrc(src)
@@ -2076,9 +2079,17 @@ export class UfoElement extends HTMLElement {
 
   private async loadLocaleMessages(): Promise<void> {
     const language = selectLocale(HostLocale.preferencesFor(this), UFO_SUPPORTED_LANGUAGES) as UfoLanguage
-    if (language === "en") return
-    this.applyMessages(await loadUfoMessages(language))
+    // Connected again in the same language (moved within one page): nothing to fetch. English is
+    // baked into the template, so it needs a module only to replace another language shown before.
+    if (language === this.messagesLanguage || (language === "en" && this.messagesLanguage === undefined)) return
+    this.messagesLanguage = language
+    const messages = await loadUfoMessages(language)
+    if (this.messagesLanguage === language) {
+      this.applyMessages(messages)
+    }
   }
+
+  private messagesLanguage?: UfoLanguage
 
   /**
    * Both counters' titles: what the value is, and — when there is a second reading to switch to —

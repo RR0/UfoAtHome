@@ -19,10 +19,11 @@ export interface MeteorShower {
   id: string
   /** The IAU three-letter designation. */
   code: string
-  /** The shower's name in each language a page can be read in — the same "translate the label, keep
-   * the identifier" rule the decor kinds follow (see SceneElement's DECOR_KIND_NAMES). A French
-   * page saying "Perseids" in the middle of a French sentence is the wart this avoids. */
-  name: { en: string; fr: string }
+  /** The shower's English name. The other languages' are in their own SceneNames
+   * (src/component/messages), keyed by `id` — the same "translate the label, keep the identifier"
+   * rule the decor kinds follow. A French page saying "Perseids" in the middle of a French sentence
+   * is the wart this avoids. */
+  name: string
   /** The radiant's position at the shower's peak, J2000 — right ascension in HOURS (the unit
    * HorizontalFrame.ofJ2000 takes) and declination in degrees. The radiant drifts by roughly a
    * degree a day across the activity period; storing its peak position is a simplification worth
@@ -71,19 +72,19 @@ export interface ActiveShower {
  * many years, not a prediction for one night.
  */
 export const METEOR_SHOWERS: MeteorShower[] = [
-  { id: "quadrantids", code: "QUA", name: { en: "Quadrantids", fr: "Quadrantides" }, radiantRaHours: 15.33, radiantDecDeg: 49.7, start: { month: 12, day: 28 }, peak: { month: 1, day: 3 }, end: { month: 1, day: 12 }, peakZhr: 110, velocityKmS: 41, populationIndex: 2.1 },
-  { id: "lyrids", code: "LYR", name: { en: "April Lyrids", fr: "Lyrides d'avril" }, radiantRaHours: 18.13, radiantDecDeg: 33.3, start: { month: 4, day: 16 }, peak: { month: 4, day: 22 }, end: { month: 4, day: 25 }, peakZhr: 18, velocityKmS: 49, populationIndex: 2.1 },
-  { id: "eta-aquariids", code: "ETA", name: { en: "eta Aquariids", fr: "Êta Aquarides" }, radiantRaHours: 22.53, radiantDecDeg: -1, start: { month: 4, day: 19 }, peak: { month: 5, day: 6 }, end: { month: 5, day: 28 }, peakZhr: 50, velocityKmS: 66, populationIndex: 2.4 },
-  { id: "alpha-capricornids", code: "CAP", name: { en: "alpha Capricornids", fr: "Alpha Capricornides" }, radiantRaHours: 20.47, radiantDecDeg: -9.2, start: { month: 7, day: 3 }, peak: { month: 7, day: 30 }, end: { month: 8, day: 15 }, peakZhr: 5, velocityKmS: 23, populationIndex: 2.5 },
-  { id: "southern-delta-aquariids", code: "SDA", name: { en: "Southern delta Aquariids", fr: "Delta Aquarides du Sud" }, radiantRaHours: 22.67, radiantDecDeg: -16.4, start: { month: 7, day: 12 }, peak: { month: 7, day: 30 }, end: { month: 8, day: 23 }, peakZhr: 25, velocityKmS: 41, populationIndex: 3.2 },
-  { id: "perseids", code: "PER", name: { en: "Perseids", fr: "Perséides" }, radiantRaHours: 3.22, radiantDecDeg: 58, start: { month: 7, day: 17 }, peak: { month: 8, day: 12 }, end: { month: 8, day: 24 }, peakZhr: 100, velocityKmS: 59, populationIndex: 2.2 },
-  { id: "southern-taurids", code: "STA", name: { en: "Southern Taurids", fr: "Taurides du Sud" }, radiantRaHours: 3.47, radiantDecDeg: 13, start: { month: 9, day: 10 }, peak: { month: 10, day: 10 }, end: { month: 11, day: 20 }, peakZhr: 5, velocityKmS: 27, populationIndex: 2.3 },
-  { id: "draconids", code: "DRA", name: { en: "October Draconids", fr: "Draconides d'octobre" }, radiantRaHours: 17.47, radiantDecDeg: 54, start: { month: 10, day: 6 }, peak: { month: 10, day: 8 }, end: { month: 10, day: 10 }, peakZhr: 10, velocityKmS: 20, populationIndex: 2.6 },
-  { id: "orionids", code: "ORI", name: { en: "Orionids", fr: "Orionides" }, radiantRaHours: 6.35, radiantDecDeg: 15.6, start: { month: 10, day: 2 }, peak: { month: 10, day: 21 }, end: { month: 11, day: 7 }, peakZhr: 20, velocityKmS: 66, populationIndex: 2.5 },
-  { id: "northern-taurids", code: "NTA", name: { en: "Northern Taurids", fr: "Taurides du Nord" }, radiantRaHours: 3.87, radiantDecDeg: 22, start: { month: 10, day: 20 }, peak: { month: 11, day: 12 }, end: { month: 12, day: 10 }, peakZhr: 5, velocityKmS: 29, populationIndex: 2.3 },
-  { id: "leonids", code: "LEO", name: { en: "Leonids", fr: "Léonides" }, radiantRaHours: 10.13, radiantDecDeg: 21.6, start: { month: 11, day: 6 }, peak: { month: 11, day: 17 }, end: { month: 11, day: 30 }, peakZhr: 15, velocityKmS: 71, populationIndex: 2.5 },
-  { id: "geminids", code: "GEM", name: { en: "Geminids", fr: "Géminides" }, radiantRaHours: 7.47, radiantDecDeg: 32.3, start: { month: 12, day: 4 }, peak: { month: 12, day: 14 }, end: { month: 12, day: 17 }, peakZhr: 150, velocityKmS: 35, populationIndex: 2.6 },
-  { id: "ursids", code: "URS", name: { en: "Ursids", fr: "Ursides" }, radiantRaHours: 14.47, radiantDecDeg: 75.3, start: { month: 12, day: 17 }, peak: { month: 12, day: 22 }, end: { month: 12, day: 26 }, peakZhr: 10, velocityKmS: 33, populationIndex: 3 }
+  { id: "quadrantids", code: "QUA", name: "Quadrantids", radiantRaHours: 15.33, radiantDecDeg: 49.7, start: { month: 12, day: 28 }, peak: { month: 1, day: 3 }, end: { month: 1, day: 12 }, peakZhr: 110, velocityKmS: 41, populationIndex: 2.1 },
+  { id: "lyrids", code: "LYR", name: "April Lyrids", radiantRaHours: 18.13, radiantDecDeg: 33.3, start: { month: 4, day: 16 }, peak: { month: 4, day: 22 }, end: { month: 4, day: 25 }, peakZhr: 18, velocityKmS: 49, populationIndex: 2.1 },
+  { id: "eta-aquariids", code: "ETA", name: "eta Aquariids", radiantRaHours: 22.53, radiantDecDeg: -1, start: { month: 4, day: 19 }, peak: { month: 5, day: 6 }, end: { month: 5, day: 28 }, peakZhr: 50, velocityKmS: 66, populationIndex: 2.4 },
+  { id: "alpha-capricornids", code: "CAP", name: "alpha Capricornids", radiantRaHours: 20.47, radiantDecDeg: -9.2, start: { month: 7, day: 3 }, peak: { month: 7, day: 30 }, end: { month: 8, day: 15 }, peakZhr: 5, velocityKmS: 23, populationIndex: 2.5 },
+  { id: "southern-delta-aquariids", code: "SDA", name: "Southern delta Aquariids", radiantRaHours: 22.67, radiantDecDeg: -16.4, start: { month: 7, day: 12 }, peak: { month: 7, day: 30 }, end: { month: 8, day: 23 }, peakZhr: 25, velocityKmS: 41, populationIndex: 3.2 },
+  { id: "perseids", code: "PER", name: "Perseids", radiantRaHours: 3.22, radiantDecDeg: 58, start: { month: 7, day: 17 }, peak: { month: 8, day: 12 }, end: { month: 8, day: 24 }, peakZhr: 100, velocityKmS: 59, populationIndex: 2.2 },
+  { id: "southern-taurids", code: "STA", name: "Southern Taurids", radiantRaHours: 3.47, radiantDecDeg: 13, start: { month: 9, day: 10 }, peak: { month: 10, day: 10 }, end: { month: 11, day: 20 }, peakZhr: 5, velocityKmS: 27, populationIndex: 2.3 },
+  { id: "draconids", code: "DRA", name: "October Draconids", radiantRaHours: 17.47, radiantDecDeg: 54, start: { month: 10, day: 6 }, peak: { month: 10, day: 8 }, end: { month: 10, day: 10 }, peakZhr: 10, velocityKmS: 20, populationIndex: 2.6 },
+  { id: "orionids", code: "ORI", name: "Orionids", radiantRaHours: 6.35, radiantDecDeg: 15.6, start: { month: 10, day: 2 }, peak: { month: 10, day: 21 }, end: { month: 11, day: 7 }, peakZhr: 20, velocityKmS: 66, populationIndex: 2.5 },
+  { id: "northern-taurids", code: "NTA", name: "Northern Taurids", radiantRaHours: 3.87, radiantDecDeg: 22, start: { month: 10, day: 20 }, peak: { month: 11, day: 12 }, end: { month: 12, day: 10 }, peakZhr: 5, velocityKmS: 29, populationIndex: 2.3 },
+  { id: "leonids", code: "LEO", name: "Leonids", radiantRaHours: 10.13, radiantDecDeg: 21.6, start: { month: 11, day: 6 }, peak: { month: 11, day: 17 }, end: { month: 11, day: 30 }, peakZhr: 15, velocityKmS: 71, populationIndex: 2.5 },
+  { id: "geminids", code: "GEM", name: "Geminids", radiantRaHours: 7.47, radiantDecDeg: 32.3, start: { month: 12, day: 4 }, peak: { month: 12, day: 14 }, end: { month: 12, day: 17 }, peakZhr: 150, velocityKmS: 35, populationIndex: 2.6 },
+  { id: "ursids", code: "URS", name: "Ursids", radiantRaHours: 14.47, radiantDecDeg: 75.3, start: { month: 12, day: 17 }, peak: { month: 12, day: 22 }, end: { month: 12, day: 26 }, peakZhr: 10, velocityKmS: 33, populationIndex: 3 }
 ]
 
 /** A naked-eye limiting magnitude for a genuinely dark, moonless country sky — the reference the

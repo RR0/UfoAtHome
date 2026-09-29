@@ -7,7 +7,9 @@ import type { DecorModelEntry, DecorModelProvider } from "../render3d/decor/Deco
 import type { BodyReading } from "./SceneElement.js"
 import { NumberFields } from "./NumberFields.js"
 import type { BodyEditorMessages } from "./messages/BodyEditorMessages.js"
-import { BodyEditorTexts } from "./messages/BodyEditorMessages.js"
+import { bodyEditorMessages_en } from "./messages/BodyEditorMessages_en.js"
+import type { UfoLanguage } from "./messages/index.js"
+import { loadBodyEditorMessages, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
 
 /** What the Bodies part needs of the editor it stands in, read at every use: the recording, its
  * texts reader and its model catalogue are all replaced over an editor's life. */
@@ -45,7 +47,10 @@ export interface BodyEditorHost {
  * A body's movement (its track) is shown, not edited: it is stated in the file.
  */
 export class BodyEditor {
-  private messages: BodyEditorMessages
+  /** English, the fallback baked in, until the chosen language's module has loaded. */
+  private messages: BodyEditorMessages = bodyEditorMessages_en
+  /** The language last asked for, so a slower load cannot overwrite a later choice. */
+  private languageToken = 0
   private currentId?: string
   private catalogueToken = 0
   /** The catalogue model the address block is showing, if it is showing one — see showCatalogueModel. */
@@ -65,13 +70,18 @@ export class BodyEditor {
   }
 
   constructor(private readonly container: HTMLElement, private readonly host: BodyEditorHost, language: string) {
-    this.messages = BodyEditorTexts.of(language)
     this.render()
+    void this.setLanguage(language)
   }
 
-  /** Rebuilds the part in another language, keeping the body on show. */
-  setLanguage(language: string): void {
-    const messages = BodyEditorTexts.of(language)
+  /** Rebuilds the part in another language, keeping the body on show. Only that language's
+   * messages are fetched; English is shown meanwhile. */
+  async setLanguage(language: string): Promise<void> {
+    const token = ++this.languageToken
+    const supported = (UFO_SUPPORTED_LANGUAGES as readonly string[]).includes(language) ? language as UfoLanguage : "en"
+    const messages = supported === "en" ? bodyEditorMessages_en : await loadBodyEditorMessages(supported)
+    // Superseded by a later choice made while this one was loading.
+    if (token !== this.languageToken) return
     if (messages === this.messages) return
     this.messages = messages
     this.render()

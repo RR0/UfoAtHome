@@ -12,8 +12,9 @@
 
 export interface SatelliteClass {
   id: string
-  /** The class's name in each language a page can be read in. */
-  name: { en: string; fr: string }
+  /** The class's English name. The other languages' are in their own SceneNames
+   * (src/component/messages), keyed by `id`. */
+  name: string
   /** From the first launch of the class, to when it ended — absent while it is still up there. */
   from: string
   to?: string
@@ -32,7 +33,7 @@ export interface SatelliteClass {
 export const SATELLITE_CLASSES: SatelliteClass[] = [
   {
     id: "echo",
-    name: { en: "the Echo balloons", fr: "les ballons Echo" },
+    name: "the Echo balloons",
     from: "1960-08-12",
     to: "1969-06-07",
     peakMagnitude: -1,
@@ -40,7 +41,7 @@ export const SATELLITE_CLASSES: SatelliteClass[] = [
   },
   {
     id: "iridium-flares",
-    name: { en: "the Iridium flares", fr: "les flashes d'Iridium" },
+    name: "the Iridium flares",
     from: "1997-05-05",
     to: "2019-12-27",
     peakMagnitude: -8,
@@ -48,14 +49,14 @@ export const SATELLITE_CLASSES: SatelliteClass[] = [
   },
   {
     id: "iss",
-    name: { en: "the International Space Station", fr: "la Station spatiale internationale" },
+    name: "the International Space Station",
     from: "1998-11-20",
     peakMagnitude: -5.9,
     note: "Since its first module, and much brighter as it grew: at its best it outshines everything in the sky but the Sun and the Moon, crossing in a straight silent line in about four minutes."
   },
   {
     id: "starlink-trains",
-    name: { en: "the Starlink trains", fr: "les trains de Starlink" },
+    name: "the Starlink trains",
     from: "2019-05-24",
     peakMagnitude: 1,
     note: "In the days after a launch, satellites still bunched in their deployment string cross as an evenly spaced line of lights — the most reported 'formation of UFOs' of the era. They spread out within weeks, so a train is a fact about the days after a launch rather than about the year."

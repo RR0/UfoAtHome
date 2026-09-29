@@ -5,6 +5,8 @@ import { Sighting } from "../../src/engine/model/Sighting.js"
 import type { Weather } from "../../src/engine/model/Weather.js"
 import { DEFAULT_WEATHER } from "../../src/engine/model/Weather.js"
 import { SaidTexts } from "../../src/engine/model/SaidText.js"
+import { SceneNaming } from "../../src/component/messages/SceneNames.js"
+import { sceneNames_fr } from "../../src/component/messages/SceneNames_fr.js"
 
 /**
  * What the strip of chips under both components is allowed to say.
@@ -16,7 +18,7 @@ import { SaidTexts } from "../../src/engine/model/SaidText.js"
  * handful that name the case, the observer and the instrument.
  */
 describe("SightingSummary", () => {
-  const summary = new SightingSummary(sightingLabels_en, "en", new SaidTexts(["en"]))
+  const summary = new SightingSummary(sightingLabels_en, new SceneNaming(), new SaidTexts(["en"]))
 
   const withWeather = (weather: Partial<Weather>): Sighting => {
     const sighting = Sighting.create(undefined, [{ lat: 32.4, lng: -86.3 }])
@@ -106,10 +108,10 @@ describe("SightingSummary", () => {
       sighting.observerTrack.addKeyframe(0, { lat: 48.85, lng: 2.35, elevationM: 0, headingDeg: 157, pitchDeg: 0, fovDeg: 60 })
       const unitOf = (reader: SightingSummary) => reader.entriesFor(sighting, 0).find(entry => entry.field === "heading")?.unit
       expect(unitOf(summary)).toBe("° (SSE)")
-      expect(unitOf(new SightingSummary(sightingLabels_en, "fr", new SaidTexts(["fr"])))).toBe("° (SSE)")
+      expect(unitOf(new SightingSummary(sightingLabels_en, new SceneNaming(sceneNames_fr), new SaidTexts(["fr"])))).toBe("° (SSE)")
       sighting.observerTrack.addKeyframe(0, { lat: 48.85, lng: 2.35, elevationM: 0, headingDeg: 250, pitchDeg: 0, fovDeg: 60 })
       expect(unitOf(summary)).toBe("° (WSW)")
-      expect(unitOf(new SightingSummary(sightingLabels_en, "fr", new SaidTexts(["fr"])))).toBe("° (OSO)")
+      expect(unitOf(new SightingSummary(sightingLabels_en, new SceneNaming(sceneNames_fr), new SaidTexts(["fr"])))).toBe("° (OSO)")
     })
 
     it("keeps Greenwich's own offset", () => {

@@ -54,7 +54,7 @@ import {
 } from "./skyColors.js"
 import type { RgbColor } from "./skyColors.js"
 import { HorizontalFrame } from "../engine/astronomy/CelestialPositions.js"
-import { selectLocale } from "../i18n/locale.js"
+import { Compass } from "../engine/astronomy/Compass.js"
 import type { CelestialBody, HorizontalPosition, MoonPhase, ObserverGeo } from "../engine/astronomy/CelestialPositions.js"
 import type { ObserverPose } from "../engine/model/ObserverTrack.js"
 import type { GaitOffset } from "../engine/place/Gait.js"
@@ -277,14 +277,9 @@ const STREETLIGHT_LIGHT_DISTANCE = 400
 /** Clockwise from north, matching this project's own azimuth convention (0deg = north, increasing
  * clockwise). Shown on the horizon in "edit mode" (see SceneElement's show-compass attribute, set
  * by SightingEditorElement) so a observer's heading can be set/checked against a real compass
- * reference instead of a bare number. Localized the same way as SceneElement's own body-name
- * tooltip (small inline en/fr dict via selectLocale, not a full Messages file — too few strings). */
+ * reference instead of a bare number. Labelled with every other one of the sixteen points the
+ * reader's language names (see setCompassPoints), English until told otherwise. */
 const COMPASS_AZIMUTHS: readonly number[] = [0, 45, 90, 135, 180, 225, 270, 315]
-const COMPASS_LABELS: Record<"en" | "fr", readonly string[]> = {
-  en: ["N", "NE", "E", "SE", "S", "SW", "W", "NW"],
-  fr: ["N", "NE", "E", "SE", "S", "SO", "O", "NO"]
-}
-const COMPASS_SUPPORTED_LANGUAGES = ["en", "fr"]
 /**
  * Blocks of the scattered sky's multiple-scattering table drawn per frame while it is being built:
  * four milliseconds of GPU apiece on an M3 Pro, measured, so eight a frame and about two seconds for
@@ -1602,6 +1597,20 @@ export class SceneRenderer {
     if (show) this.buildCompassLabels()
     this.render()
   }
+
+  /** The sixteen points of the compass as the reader's language names them (see Compass), or
+   * undefined for English — what the horizon labels are drawn with. Relabels them when they are
+   * already built: the names arrive after the scene is up (see SceneElement.naming). */
+  setCompassPoints(points: readonly string[] | undefined): void {
+    if (this.compassPoints === points) return
+    this.compassPoints = points
+    if (!this.showCompass) return
+    this.disposeCompassLabels()
+    this.buildCompassLabels()
+    this.render()
+  }
+
+  private compassPoints?: readonly string[]
 
   /** Retints the lens flare's uColorGain from a real atmospheric tint (see atmosphericTint's own
    * doc comment) — called from setBodyMesh's "sun" branch every time the Sun's altitude, and so its
@@ -5840,10 +5849,8 @@ export class SceneRenderer {
   }
 
   private buildCompassLabels(): void {
-    const language = selectLocale(navigator.languages, COMPASS_SUPPORTED_LANGUAGES) as "en" | "fr"
-    const labels = COMPASS_LABELS[language]
-    this.compassSprites = COMPASS_AZIMUTHS.map((azimuthDeg, index) => {
-      const label = labels[index]
+    this.compassSprites = COMPASS_AZIMUTHS.map(azimuthDeg => {
+      const label = Compass.point(azimuthDeg, this.compassPoints)
       // depthTest/fog off: these are a fixed HUD-like reference, not part of the astronomically
       // positioned scene — they should read clearly against the sky/fog regardless of altitude.
       const material = new SpriteMaterial({ map: createCompassLabelTexture(label), depthTest: false, fog: false })

@@ -31,6 +31,7 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     }
     setAstronomy(): void {}
     setShowCompass(): void {}
+    setCompassPoints(): void {}
     setCompassHovered(): void {}
     setCompassForced(): void {}
     setIndoorLook(): void {}
@@ -156,7 +157,7 @@ describe("SceneElement star tooltip", () => {
    * question this whole tooltip exists to answer.
    */
   it("names the star, and says how bright it was and how high it stood", () => {
-    hit.star = { name: { en: "Capella", fr: "Capella" }, raHours: 5.27815, decDeg: 45.997991, mag: 0.08 }
+    hit.star = { name: "Capella", raHours: 5.27815, decDeg: 45.997991, mag: 0.08 }
     hit.altitudeDeg = 21.4
     const element = mount()
 
@@ -169,11 +170,31 @@ describe("SceneElement star tooltip", () => {
    * and Rigil Kentaurus -0.01, and a reader has no way to tell that from a field that failed.
    */
   it("keeps the near-zero magnitudes legible instead of rounding them to nothing", () => {
-    hit.star = { name: { en: "Rigil Kentaurus", fr: "Rigil Kentaurus" }, raHours: 14.6608, decDeg: -60.834, mag: -0.01 }
+    hit.star = { name: "Rigil Kentaurus", raHours: 14.6608, decDeg: -60.834, mag: -0.01 }
     hit.altitudeDeg = 3
     const element = mount()
 
     expect(hover(element)).toBe("Rigil Kentaurus — mag -0.01, 3° above the horizon")
+  })
+
+  /*
+   * In the page's own language, once that language's names have arrived — and in English until
+   * then, since only that one language's module is ever downloaded (see SceneNames).
+   */
+  it("names the star and words the tooltip in the page's language", async () => {
+    hit.star = { name: "Vega", raHours: 18.6156, decDeg: 38.7837, mag: 0.03 }
+    hit.altitudeDeg = 40
+    const section = document.createElement("section")
+    section.lang = "es"
+    document.body.appendChild(section)
+    const element = document.createElement(SCENE_ELEMENT_NAME) as SceneElement
+    section.appendChild(element)
+    await vi.waitFor(() => expect(element.naming.names).toBeDefined())
+
+    expect(hover(element)).toMatch(/^Vega — mag 0[.,]03, 40° sobre el horizonte$/)
+    hit.star = { name: "Sirius", raHours: 6.7525, decDeg: -16.7161, mag: -1.44 }
+    hit.altitudeDeg = -1
+    expect(hover(element)).toMatch(/^Sirio — mag -1[.,]4, 1° bajo la horizontal$/)
   })
 
   it("says nothing when nothing named is under the pointer", () => {
@@ -183,7 +204,7 @@ describe("SceneElement star tooltip", () => {
 
   // 33 of the 178 stars in the table have no proper name, and carry what a star chart prints.
   it("shows a designation as readily as a proper name", () => {
-    hit.star = { name: { en: "η Orionis", fr: "η Orionis" }, raHours: 5.407949, decDeg: -2.397146, mag: 3.35 }
+    hit.star = { name: "η Orionis", raHours: 5.407949, decDeg: -2.397146, mag: 3.35 }
     hit.altitudeDeg = 8
     const element = mount()
 

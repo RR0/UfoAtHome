@@ -1,0 +1,33 @@
+import type { SightingMessages } from "./SightingMessages.js"
+import { sightingLabels_es } from "./SightingLabels_es.js"
+
+export const sightingMessages_es: SightingMessages = {
+  ...sightingLabels_es,
+  accountBy: "Relato de",
+  unnamedObserver: "Observador {n}",
+  about: "Acerca de",
+  close: "Cerrar",
+  observation: "Observación",
+  date: "Fecha",
+  location: "Lugar",
+  case: "Caso",
+  description: "Descripción",
+  credits: "Créditos",
+  editThisObservation: "Editar esta observación",
+  embed: "Insertar",
+  embedReplay: "Reproducción",
+  embedEdit: "Editor",
+  embedCopy: "Copiar",
+  embedCopied: "Copiado",
+  showLabels: "Mostrar lo que indica",
+  interpretation: "Interpretación",
+  account: "Relato",
+  interpretationBy: "{title}, por {by}",
+  confrontation: "Frente al relato",
+  confrontationDirection: "desvío de {deg}°",
+  confrontationWidth: "anchura ×{ratio}",
+  confrontationHeight: "altura ×{ratio}",
+  showComparison: "Comparar con el relato",
+  hideComparison: "Dejar de comparar con el relato",
+  hideLabels: "Ocultar lo que indica"
+}

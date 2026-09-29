@@ -90,10 +90,9 @@ describe("Satellites", () => {
       expect(Satellites.classesAt(new Date("2019-05-25T21:00:00Z")).map(entry => entry.id)).toContain("starlink-trains")
     })
 
-    it("gives every class a name in both languages and a window that makes sense", () => {
+    it("gives every class a name and a window that makes sense", () => {
       for (const entry of SATELLITE_CLASSES) {
-        expect(entry.name.en.length).toBeGreaterThan(0)
-        expect(entry.name.fr.length).toBeGreaterThan(0)
+        expect(entry.name.length).toBeGreaterThan(0)
         expect(Date.parse(entry.from)).not.toBeNaN()
         expect(Date.parse(entry.from)).toBeGreaterThanOrEqual(Date.parse(Satellites.FIRST_ORBIT))
         if (entry.to !== undefined) expect(Date.parse(entry.to)).toBeGreaterThan(Date.parse(entry.from))

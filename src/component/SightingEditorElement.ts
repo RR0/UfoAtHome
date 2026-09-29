@@ -42,7 +42,6 @@ import { LimitingMagnitude } from "../engine/instrument/LimitingMagnitude.js"
 import { DEEP_STAR_CATALOG_MAGNITUDE_LIMIT } from "../render3d/StarCatalog.js"
 import { visibleMagnitudeLimit } from "../render3d/skyColors.js"
 import type { CometAppearance } from "../engine/astronomy/Comets.js"
-import { Compass } from "../engine/astronomy/Compass.js"
 import { SkyGlowVisibility } from "../engine/astronomy/SkyGlowVisibility.js"
 import { resolveDecorPlacementAt } from "../engine/model/Decor.js"
 import { SightingShapes } from "../engine/persistence/SightingShapes.js"
@@ -112,7 +111,8 @@ import { SaidTexts } from "../engine/model/SaidText.js"
 import { SightingTags } from "./messages/TagNames.js"
 import { TIME_ZONE_SOURCES } from "../engine/time/timeZoneSources.js"
 import type { TimeZoneProvider } from "../engine/time/TimeZoneProvider.js"
-import { loadSightingEditorMessages, loadTagNames, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
+import { loadSceneNames, loadSightingEditorMessages, loadTagNames, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
+import { SceneNaming } from "./messages/SceneNames.js"
 import type { UfoLanguage } from "./messages/index.js"
 import { sightingEditorMessages_en } from "./messages/SightingEditorMessages_en.js"
 import type { SightingEditorMessages } from "./messages/SightingEditorMessages.js"
@@ -1630,7 +1630,7 @@ export class SightingEditorElement extends HTMLElement {
     // Every number field as wide as the values it takes, from its own bounds — see NumberFields.
     NumberFields.fit(this.shadow)
     this.paramSummary = this.shadow.getElementById("param-summary")!
-    this.paramSummaryBuilder = new SightingSummary(this.messages, this.showerLanguage(), this.said, this.tagNames)
+    this.paramSummaryBuilder = new SightingSummary(this.messages, this.naming, this.said, this.tagNames)
     // One listener on the strip rather than one per chip: the chips are rebuilt from scratch on
     // every refresh, and re-binding 37 handlers each time is how a summary meant to be cheap stops
     // being cheap.
@@ -1660,7 +1660,7 @@ export class SightingEditorElement extends HTMLElement {
       this.headingInput.value = String(this.rounded(headingDeg))
       this.pitchInput.value = String(this.rounded(pitchDeg))
       this.updateObserver()
-    }, selectLocale(HostLocale.preferencesFor(this), UFO_SUPPORTED_LANGUAGES))
+    }, selectLocale(HostLocale.preferencesFor(this), UFO_SUPPORTED_LANGUAGES) as UfoLanguage)
     this.currentMilestoneT = this.ufoElement.sighting.milestones[0]?.t
     this.refreshMilestoneList()
     this.onSelectionOrTimeChanged()
@@ -1677,7 +1677,8 @@ export class SightingEditorElement extends HTMLElement {
     // An empty editor has no date or place yet, so this only states what's missing — the lookup
     // itself starts the moment those fields say enough (see scheduleWeatherLookup's callers).
     this.syncWeatherSourceState()
-    void this.loadLocaleMessages()
+    // Only when already in the page — see SightingElement's constructor for why.
+    if (this.isConnected) void this.loadLocaleMessages()
   }
 
   /** `src` loads an existing recording straight into the editor, the same attribute every other
@@ -1905,7 +1906,7 @@ export class SightingEditorElement extends HTMLElement {
       const draft = await this.narrativeProvider.draft({
         ask,
         current: this.sightingData,
-        language: this.showerLanguage() === "fr" ? "French" : "English",
+        language: SightingEditorElement.LANGUAGE_NAMES[this.showerLanguage()],
         settings: this.narrativeSettingValues()
       }, abort.signal)
       this.applyNarrativeDraft(draft)
@@ -2266,8 +2267,12 @@ export class SightingEditorElement extends HTMLElement {
     )
     this.narrativeSourceRow.replaceChildren(
       this.sourcePicker("narrative", NARRATIVE_SOURCES, source => {
-        this.narrativeProvider = source.create()
+        const provider = this.narrativeProvider = source.create()
         this.renderNarrativeSettings()
+        // Created in its own language: put it in the reader's, then show it again if still chosen.
+        void provider.localize?.(this.language).then(() => {
+          if (provider === this.narrativeProvider) this.renderNarrativeSettings()
+        })
       })
     )
     this.terrainSourceRows.replaceChildren(
@@ -5201,7 +5206,7 @@ export class SightingEditorElement extends HTMLElement {
     for (const instrument of offered) {
       const option = document.createElement("option")
       option.value = instrument.id
-      const name = instrument.name[this.showerLanguage()]
+      const name = this.naming.instrument(instrument)
       option.textContent = available.includes(instrument)
         ? name
         : this.messages.instrumentOutOfPeriod.replace("{name}", name)
@@ -6654,11 +6659,18 @@ export class SightingEditorElement extends HTMLElement {
    * rank seven of a shower that is no longer running. */
   private meteorRank = 0
 
-  /** Which of a shower's own names to use — the reader's, the one every other label in this element
-   * is in (see loadLocaleMessages). */
-  private showerLanguage(): "en" | "fr" {
+  /** The language every label in this element is in (see loadLocaleMessages) — what dates, lists
+   * and the recording's own texts are written in. */
+  private showerLanguage(): UfoLanguage {
     return this.language
   }
+
+  /** What the catalogues' entries (a shower, a comet, an instrument…) and the compass points are
+   * called in that language — English until its names have arrived with its messages. */
+  private naming = new SceneNaming()
+
+  /** The language a draft's gaps are to be written in, as a language model is asked for it. */
+  private static readonly LANGUAGE_NAMES: Record<UfoLanguage, string> = { en: "English", fr: "French", es: "Spanish", it: "Italian" }
 
   /**
    * Reads the text an author wrote into the recording — see SaidText.
@@ -6787,7 +6799,7 @@ export class SightingEditorElement extends HTMLElement {
         ? this.messages.skyStarsEye.replace("{limit}", magnitude(limit))
         : (gain > 0 ? this.messages.skyStarsDeeper : this.messages.skyStarsShallower)
             .replace("{limit}", magnitude(limit))
-            .replace("{device}", instrument.name[this.showerLanguage()])
+            .replace("{device}", this.naming.instrument(instrument))
             .replace("{gain}", magnitude(Math.abs(gain)))
             .replace("{eye}", magnitude(visibleMagnitudeLimit(sunAltitudeDeg)))
     // Said only when it bites, and then always: past this the scene is drawing every star it has and
@@ -6824,14 +6836,14 @@ export class SightingEditorElement extends HTMLElement {
       // The shower produced nothing, but the sky is not empty — the background is still falling, and
       // the button still has something to show.
       this.showMeteorButton.hidden = !this.sceneElement.meteorByRank(0)
-      return this.messages.skyShowerBelowHorizon.replace("{name}", best.entry.shower.name[this.showerLanguage()])
+      return this.messages.skyShowerBelowHorizon.replace("{name}", this.naming.shower(best.entry.shower))
     }
     // Only offered when there is genuinely one to show.
     this.showMeteorButton.hidden = !this.sceneElement.meteorByRank(0)
     return this.messages.skyShowerActive
-      .replace("{name}", best.entry.shower.name[this.showerLanguage()])
+      .replace("{name}", this.naming.shower(best.entry.shower))
       .replace("{altitude}", String(Math.round(best.position.altitudeDeg)))
-      .replace("{bearing}", Compass.towards(best.position.azimuthDeg, this.showerLanguage()))
+      .replace("{bearing}", this.naming.towards(best.position.azimuthDeg))
       .replace("{rate}", best.rate.toLocaleString(undefined, { maximumFractionDigits: best.rate < 10 ? 1 : 0 }))
       .replace("{sporadic}", sporadic)
   }
@@ -6877,10 +6889,10 @@ export class SightingEditorElement extends HTMLElement {
   private novaText(nova: OutburstAppearance): string {
     const template = nova.position.altitudeDeg <= 0 ? this.messages.skyNovaBelowHorizon : this.messages.skyNova
     return template
-      .replace("{name}", nova.outburst.name[this.showerLanguage()])
+      .replace("{name}", this.naming.nova(nova.outburst))
       .replace("{magnitude}", nova.magnitude.toLocaleString(undefined, { maximumFractionDigits: 1 }))
       .replace("{altitude}", String(Math.round(nova.position.altitudeDeg)))
-      .replace("{bearing}", Compass.towards(nova.position.azimuthDeg, this.showerLanguage()))
+      .replace("{bearing}", this.naming.towards(nova.position.azimuthDeg))
   }
 
   /**
@@ -6911,7 +6923,7 @@ export class SightingEditorElement extends HTMLElement {
     }
     const magnitudeLimit = visibleMagnitudeLimit(sky.sunAltitudeDeg, this.instrumentGain())
     const bright = sky.classes.filter(entry => entry.peakMagnitude <= magnitudeLimit)
-    const named = this.listed(bright.map(entry => entry.name[this.showerLanguage()]))
+    const named = this.listed(bright.map(entry => this.naming.satelliteClass(entry)))
     if (sky.sunAltitudeDeg >= 0) {
       // By day the geometry is never the limit — the sky is. Silent unless something up there beat
       // it, since "a satellite was lit and invisible" describes every daylit hour ever recorded.
@@ -6959,7 +6971,7 @@ export class SightingEditorElement extends HTMLElement {
       .replace("{name}", peak.object.name)
       .replace("{magnitude}", peak.magnitude!.toLocaleString(undefined, { maximumFractionDigits: 1 }))
       .replace("{altitude}", String(Math.round(peak.altitudeDeg)))
-      .replace("{bearing}", Compass.towards(peak.azimuthDeg, this.showerLanguage()))
+      .replace("{bearing}", this.naming.towards(peak.azimuthDeg))
       .replace("{time}", this.observerClock(peak.date))
     const train = this.starlinkTrain(visible)
     return train ? `${sentence}, ${train}` : sentence
@@ -7146,14 +7158,13 @@ export class SightingEditorElement extends HTMLElement {
     // daylight sighting in the archive would be noise.
     if (sun.altitudeDeg > GLOW_QUESTION_LIVE_BELOW_DEG) return undefined
     const seen = this.glows.assess(date, observer)
-    const language = this.showerLanguage()
     const stated: string[] = []
     if (seen.milkyWay) {
       stated.push(
         this.messages.skyGlowBand
           .replace("{contrast}", this.decimal(seen.milkyWay.contrast, 1))
           .replace("{altitude}", String(Math.round(seen.milkyWay.altitudeDeg)))
-          .replace("{bearing}", Compass.towards(seen.milkyWay.azimuthDeg, language))
+          .replace("{bearing}", this.naming.towards(seen.milkyWay.azimuthDeg))
       )
     }
     if (seen.zodiacal) {
@@ -7165,7 +7176,7 @@ export class SightingEditorElement extends HTMLElement {
         (isCone ? this.messages.skyGlowCone : this.messages.skyGlowZodiacalBand)
           .replace("{contrast}", this.decimal(seen.zodiacal.contrast, 1))
           .replace("{altitude}", String(Math.round(seen.zodiacal.altitudeDeg)))
-          .replace("{bearing}", Compass.towards(seen.zodiacal.azimuthDeg, language))
+          .replace("{bearing}", this.naming.towards(seen.zodiacal.azimuthDeg))
           .replace("{elongation}", String(Math.round(seen.zodiacal.sunSeparationDeg)))
       )
     }
@@ -7239,7 +7250,7 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   private cometText(comet: CometAppearance): string {
-    const name = comet.apparition.name[this.showerLanguage()]
+    const name = this.naming.comet(comet.apparition)
     const magnitude = comet.magnitude.toLocaleString(undefined, { maximumFractionDigits: 1 })
     if (comet.position.altitudeDeg <= 0) {
       return this.messages.skyCometBelowHorizon.replace("{name}", name).replace("{magnitude}", magnitude)
@@ -7254,7 +7265,7 @@ export class SightingEditorElement extends HTMLElement {
       .replace("{name}", name)
       .replace("{magnitude}", magnitude)
       .replace("{altitude}", String(Math.round(comet.position.altitudeDeg)))
-      .replace("{bearing}", Compass.towards(comet.position.azimuthDeg, this.showerLanguage()))
+      .replace("{bearing}", this.naming.towards(comet.position.azimuthDeg))
       .replace("{tail}", String(Math.round(comet.tailLengthDeg ?? 0)))
       .replace("{elongation}", String(Math.round(comet.elongationDeg)))
   }
@@ -7300,7 +7311,7 @@ export class SightingEditorElement extends HTMLElement {
    * made-up north. */
   private refreshHeadingPoint(): void {
     const headingDeg = this.numberOrUndefined(this.headingInput.value)
-    this.headingUnit.textContent = headingDeg === undefined ? "°" : `° (${Compass.point(headingDeg, this.showerLanguage())})`
+    this.headingUnit.textContent = headingDeg === undefined ? "°" : `° (${this.naming.point(headingDeg)})`
   }
 
   /** One decimal, so a placement or a gaze read back from an interpolated trajectory — or written
@@ -7456,13 +7467,17 @@ export class SightingEditorElement extends HTMLElement {
     const preferences = HostLocale.preferencesFor(this)
     this.preferences = preferences
     const language = selectLocale(preferences, UFO_SUPPORTED_LANGUAGES) as UfoLanguage
-    const [messages, tagNames] = language === "en"
-      ? [sightingEditorMessages_en, {}]
-      : await Promise.all([loadSightingEditorMessages(language), loadTagNames(language)])
+    // The provider's own settings too, alongside: applyMessages renders them.
+    const localizing = this.narrativeProvider.localize?.(language)
+    const [messages, tagNames, sceneNames] = language === "en"
+      ? [sightingEditorMessages_en, {}, undefined]
+      : await Promise.all([loadSightingEditorMessages(language), loadTagNames(language), loadSceneNames(language)])
+    await localizing
     // Superseded by a later decision (the editor was connected while this one was loading).
     if (token !== this.localeToken) return
     const changed = language !== this.language
     this.language = language
+    this.naming = new SceneNaming(sceneNames)
     this.said = new SaidTexts(preferences)
     // Before the messages, because applyMessages rebuilds the summary with it — see TagNames.
     this.tagNames = new SightingTags(tagNames)
@@ -7471,7 +7486,7 @@ export class SightingEditorElement extends HTMLElement {
     } else {
       // Same interface language, but perhaps a longer list behind it ("en", then "es"): the
       // summary reads the recording's texts through the new one.
-      this.paramSummaryBuilder = new SightingSummary(messages, this.language, this.said, this.tagNames)
+      this.paramSummaryBuilder = new SightingSummary(messages, this.naming, this.said, this.tagNames)
       this.refreshParamSummary()
     }
     // Every field and list showing the recording's own texts showed them through the previous
@@ -7734,7 +7749,7 @@ export class SightingEditorElement extends HTMLElement {
     this.edtfModeButton.setAttribute("aria-label", messages.edtfModeTitle)
     // The chips hold translated labels, so they are rebuilt with the new ones — and the signature
     // check lets that happen without a diff, since every label changed.
-    this.paramSummaryBuilder = new SightingSummary(messages, this.showerLanguage(), this.said, this.tagNames)
+    this.paramSummaryBuilder = new SightingSummary(messages, this.naming, this.said, this.tagNames)
     this.refreshParamSummary()
     const skyExpanded = this.skyDetailsButton.getAttribute("aria-expanded") === "true"
     this.skyDetailsButton.title = skyExpanded ? messages.skyDetailsHide : messages.skyDetails

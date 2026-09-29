@@ -100,10 +100,11 @@ export interface Instrument {
   /** Stable id — what a case file names, and what an unknown value falls back from. */
   id: string
   /** Short name for the picker, and what a page shows to say how the sighting was recorded — in
-   * every language this project speaks, exactly as the satellite classes and the meteor showers
-   * are named (see satelliteCatalog.ts). A catalogue entry is DATA, and data that only exists in
-   * English puts English into a French page. */
-  name: { en: string; fr: string }
+   * English here, and in every other language this project speaks in that language's SceneNames
+   * (src/component/messages), keyed by `id`, exactly as the satellite classes and the meteor
+   * showers are named. A catalogue entry is DATA, and data that only exists in English puts
+   * English into a French page. */
+  name: string
   /** How this instrument maps a direction onto its image. */
   projection: ProjectionKind
   /**
@@ -215,7 +216,7 @@ export interface Instrument {
 export const INSTRUMENTS: Instrument[] = [
   {
     id: "eye",
-    name: { en: "Naked eye", fr: "Œil nu" },
+    name: "Naked eye",
     flare: 0,
     projection: "equidistant",
     // Not quite 1: the reflex is very good and is not perfect, and the residue it leaves is the
@@ -233,7 +234,7 @@ export const INSTRUMENTS: Instrument[] = [
   },
   {
     id: "rectilinear-lens",
-    name: { en: "Camera, unknown device", fr: "Appareil, modèle inconnu" },
+    name: "Camera, unknown device",
     projection: "rectilinear",
     // An ordinary daylight snapshot's settings, and adjustable, since nothing about an unnamed
     // camera says they were not.
@@ -253,7 +254,7 @@ export const INSTRUMENTS: Instrument[] = [
     // that is neither the scene's 16:9 nor a phone's tall rectangle. 28 x 28 mm of image behind a
     // 43 mm lens (the Instamatic 100's own), so 36 degrees of field each way.
     id: "instamatic-126",
-    name: { en: "Instamatic, 126 film", fr: "Instamatic, film 126" },
+    name: "Instamatic, 126 film",
     projection: "rectilinear",
     frame: { widthMm: 28, heightMm: 28, focalLengthMm: 43 },
     // Everything about this camera is fixed, which is the point of it: one aperture, one shutter
@@ -276,7 +277,7 @@ export const INSTRUMENTS: Instrument[] = [
     // body, giving the narrow 27-degree vertical field that is why a photographed light so often
     // has nothing recognisable beside it in the frame.
     id: "slr-35mm-50",
-    name: { en: "35 mm SLR, 50 mm lens", fr: "Reflex 35 mm, objectif 50 mm" },
+    name: "35 mm SLR, 50 mm lens",
     projection: "rectilinear",
     frame: { widthMm: 36, heightMm: 24, focalLengthMm: 50 },
     // The one device here where a observer chose: a fast normal lens stopping down to f/16, and a
@@ -307,7 +308,7 @@ export const INSTRUMENTS: Instrument[] = [
     // the reason a distant aircraft can fill a frame — and the reason a hand-held shot at 210 mm
     // shakes.
     id: "slr-35mm-zoom",
-    name: { en: "35 mm SLR, 70-210 mm zoom", fr: "Reflex 35 mm, zoom 70-210 mm" },
+    name: "35 mm SLR, 70-210 mm zoom",
     projection: "rectilinear",
     frame: { widthMm: 36, heightMm: 24, focalLengthMm: 135, focalRangeMm: { minMm: 70, maxMm: 210 } },
     fNumber: 8,
@@ -328,7 +329,7 @@ export const INSTRUMENTS: Instrument[] = [
     // A modern phone's main camera, landscape: about 7.6 x 5.7 mm of sensor behind a 5.7 mm lens —
     // the "26 mm equivalent" everybody quotes, which is 67 degrees across.
     id: "phone-landscape",
-    name: { en: "Phone, held sideways", fr: "Téléphone, tenu couché" },
+    name: "Phone, held sideways",
     projection: "rectilinear",
     frame: { widthMm: 7.6, heightMm: 5.7, focalLengthMm: 5.7 },
     // No diaphragm at all — but an opening all the same, and the difference matters twice over. It
@@ -358,7 +359,7 @@ export const INSTRUMENTS: Instrument[] = [
     // wide — 67 degrees up and down against 53 across — and a observer who filmed a light rising had
     // rather more sky above it and rather less horizon than the landscape entry would draw.
     id: "phone-portrait",
-    name: { en: "Phone, held upright", fr: "Téléphone, tenu debout" },
+    name: "Phone, held upright",
     projection: "rectilinear",
     frame: { widthMm: 5.7, heightMm: 7.6, focalLengthMm: 5.7 },
     // No diaphragm at all — but an opening all the same, and the difference matters twice over. It

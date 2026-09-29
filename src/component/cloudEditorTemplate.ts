@@ -1,43 +1,115 @@
-/** Cloud controls live inside the weather panel; all numbers are recording data. */
-export function cloudEditorTemplate(language: string): string {
-  const t = (en: string, fr: string) => language === "fr" ? fr : en
-  const number = (id: string, label: string, min = "", max = "", placeholder = "") =>
-    `<label>${label}<input id="${id}" type="number" step="any" ${min ? `min="${min}"` : ""} ${max ? `max="${max}"` : ""} placeholder="${placeholder}"></label>`
-  return `<div class="cloud-panel">
-    <p>${t("Weather records supply coverage and wind when available. Cloud shape, thickness and size are visual estimates; they are not measured individual clouds.","Les relevés fournissent la couverture et le vent lorsqu’ils sont disponibles. La forme, l’épaisseur et la taille des nuages sont des estimations visuelles, pas des nuages individuels mesurés.")}</p>
+import type { CloudEditorMessages } from "./messages/CloudEditorMessages.js"
+
+/** The cloud editor's texts in English: the template's own, and what every reader sees until their
+ * language's CloudEditorMessages have arrived (see CloudEditorTemplate.localize). */
+export const cloudEditorMessages_en: CloudEditorMessages = {
+  intro: "Weather records supply coverage and wind when available. Cloud shape, thickness and size are visual estimates; they are not measured individual clouds.",
+  editScope: "Edit scope",
+  scopeInstant: "Current time",
+  scopeObservation: "Whole observation",
+  layer: "Layer",
+  addLayer: "Add layer",
+  deleteLayer: "Delete layer",
+  cloudType: "Cloud type",
+  unknownType: "Unknown",
+  base: "Base (m)",
+  thickness: "Thickness (m)",
+  coverage: "Coverage (%)",
+  cloudSize: "Cloud size (m)",
+  density: "Density",
+  darkness: "Darkness",
+  crystalAlignment: "Crystal alignment",
+  layerWindDirection: "Layer wind direction (°)",
+  layerWindSpeed: "Layer wind speed (m/s)",
+  generalWind: "General wind",
+  patternSeed: "Pattern seed",
+  editHelp: "Edits pause playback and save at the current weather time. Empty layer wind fields inherit the general wind. Whole observation applies the edited property to every weather keyframe.",
+  individualClouds: "Individual clouds",
+  individualCloud: "Individual cloud",
+  addIndividualCloud: "Add individual cloud",
+  pointAtCloud: "Point at cloud",
+  deleteCloud: "Delete cloud",
+  manipulate: "Select and drag clouds in the sky",
+  instanceEast: "East position (m)",
+  instanceNorth: "North position (m)",
+  instanceBase: "Cloud base (m)",
+  instanceThickness: "Cloud thickness (m)",
+  instanceWidth: "Cloud width (m)",
+  instanceDepth: "Cloud depth (m)",
+  instanceRotation: "Cloud rotation (°)",
+  instanceDensity: "Cloud density",
+  layerDarkness: "Layer darkness",
+  individualHelp: "Individual clouds remain present at 0% global coverage. Dragging changes position and altitude; numeric fields provide precise dimensions. Clouds follow their layer's wind.",
+  none: "None",
+  cloud: "Cloud",
+  savedAcrossObservation: "Saved across the observation; winds preserved.",
+  savedAtThisTime: "Weather saved at this time.",
+  noCloudHere: "No individual cloud here.",
+  cloudSelected: "Cloud selected. Drag to move it.",
+  cloudAdded: " Individual cloud added, independent of global coverage."
+}
+
+type Key = keyof CloudEditorMessages
+
+/**
+ * Cloud controls live inside the weather panel; all numbers are recording data.
+ *
+ * Every text carries the key it was written from (`data-text`, `data-placeholder`), so that the
+ * reader's own language, which arrives after the controls are up and wired, can be put in place
+ * without rebuilding them (see localize).
+ */
+export class CloudEditorTemplate {
+
+  static html(m: CloudEditorMessages = cloudEditorMessages_en): string {
+    const t = (key: Key) => `<span data-text="${key}">${m[key]}</span>`
+    const number = (id: string, label: Key, min = "", max = "", placeholder?: Key) =>
+      `<label>${t(label)}<input id="${id}" type="number" step="any" ${min ? `min="${min}"` : ""} ${max ? `max="${max}"` : ""} placeholder="${placeholder ? m[placeholder] : ""}"${placeholder ? ` data-placeholder="${placeholder}"` : ""}></label>`
+    return `<div class="cloud-panel">
+    <p data-text="intro">${m.intro}</p>
     <div class="cloud-fields">
-    <label>${t("Edit scope", "Portée des modifications")}<select id="cloud-scope"><option value="instant">${t("Current time", "Instant courant")}</option><option value="observation">${t("Whole observation", "Toute l’observation")}</option></select></label>
-    <label>${t("Layer", "Couche")}<select id="cloud-layer"></select></label>
-    <div class="cloud-actions"><button id="cloud-layer-add" type="button">${t("Add layer", "Ajouter une couche")}</button>
-    <button id="cloud-layer-delete" type="button">${t("Delete layer", "Supprimer la couche")}</button></div>
-    <label>${t("Cloud type", "Type de nuage")}<select id="cloud-type"><option value="cumulus">Cumulus</option><option value="stratus">Stratus</option><option value="stratocumulus">Stratocumulus</option><option value="cirrus">Cirrus</option><option value="unknown">${t("Unknown", "Inconnu")}</option></select></label>
-    ${number("cloud-base",t("Base (m)","Base (m)"),"0","20000")}
-    ${number("cloud-thickness",t("Thickness (m)","Épaisseur (m)"),"10","8000")}
-    ${number("cloud-cover",t("Coverage (%)","Couverture (%)"),"0","100")}
-    ${number("cloud-size",t("Cloud size (m)","Taille des nuages (m)"),"50","20000")}
-    ${number("cloud-density",t("Density","Densité"),"0","2")}
-    ${number("cloud-darkness",t("Darkness","Obscurité"),"0","1")}
-    ${number("cloud-crystal-alignment",t("Crystal alignment","Alignement des cristaux"),"0","1")}
-    ${number("cloud-wind-direction",t("Layer wind direction (°)","Direction du vent de la couche (°)"),"0","360",t("General wind","Vent général"))}
-    ${number("cloud-wind-speed",t("Layer wind speed (m/s)","Vitesse du vent de la couche (m/s)"),"0","120",t("General wind","Vent général"))}
-    ${number("cloud-seed",t("Pattern seed","Graine du motif"),"0","9999")}
+    <label>${t("editScope")}<select id="cloud-scope"><option value="instant" data-text="scopeInstant">${m.scopeInstant}</option><option value="observation" data-text="scopeObservation">${m.scopeObservation}</option></select></label>
+    <label>${t("layer")}<select id="cloud-layer"></select></label>
+    <div class="cloud-actions"><button id="cloud-layer-add" type="button" data-text="addLayer">${m.addLayer}</button>
+    <button id="cloud-layer-delete" type="button" data-text="deleteLayer">${m.deleteLayer}</button></div>
+    <label>${t("cloudType")}<select id="cloud-type"><option value="cumulus">Cumulus</option><option value="stratus">Stratus</option><option value="stratocumulus">Stratocumulus</option><option value="cirrus">Cirrus</option><option value="unknown" data-text="unknownType">${m.unknownType}</option></select></label>
+    ${number("cloud-base", "base", "0", "20000")}
+    ${number("cloud-thickness", "thickness", "10", "8000")}
+    ${number("cloud-cover", "coverage", "0", "100")}
+    ${number("cloud-size", "cloudSize", "50", "20000")}
+    ${number("cloud-density", "density", "0", "2")}
+    ${number("cloud-darkness", "darkness", "0", "1")}
+    ${number("cloud-crystal-alignment", "crystalAlignment", "0", "1")}
+    ${number("cloud-wind-direction", "layerWindDirection", "0", "360", "generalWind")}
+    ${number("cloud-wind-speed", "layerWindSpeed", "0", "120", "generalWind")}
+    ${number("cloud-seed", "patternSeed", "0", "9999")}
     </div>
-    <p>${t("Edits pause playback and save at the current weather time. Empty layer wind fields inherit the general wind. Whole observation applies the edited property to every weather keyframe.","L’édition met la lecture en pause et enregistre à l’instant météo courant. Un vent de couche vide reprend le vent général. Toute l’observation applique la propriété modifiée à chaque point de la timeline météo.")}</p>
-    <details><summary>${t("Individual clouds","Nuages individuels")}</summary><div class="cloud-fields">
-    <label>${t("Individual cloud","Nuage individuel")}<select id="cloud-instance"></select></label>
-    <div class="cloud-actions"><button id="cloud-instance-add" type="button">${t("Add individual cloud","Ajouter un nuage individuel")}</button>
-    <button id="cloud-instance-point" type="button">${t("Point at cloud","Pointer le nuage")}</button>
-    <button id="cloud-instance-delete" type="button">${t("Delete cloud","Supprimer ce nuage")}</button></div>
-    <label><input id="cloud-manipulate" type="checkbox">${t("Select and drag clouds in the sky","Sélectionner et déplacer les nuages dans le ciel")}</label>
-    ${number("instance-east",t("East position (m)","Position est (m)"),"-30000","30000")}
-    ${number("instance-north",t("North position (m)","Position nord (m)"),"-30000","30000")}
-    ${number("instance-base",t("Cloud base (m)","Base du nuage (m)"),"0","20000")}
-    ${number("instance-thickness",t("Cloud thickness (m)","Épaisseur du nuage (m)"),"10","8000")}
-    ${number("instance-width",t("Cloud width (m)","Largeur du nuage (m)"),"50","20000")}
-    ${number("instance-depth",t("Cloud depth (m)","Profondeur du nuage (m)"),"50","20000")}
-    ${number("instance-rotation",t("Cloud rotation (°)","Rotation du nuage (°)"),"-360","360")}
-    ${number("instance-density",t("Cloud density","Densité du nuage"),"0","2")}
-    ${number("instance-darkness",t("Darkness","Obscurité"),"0","1",t("Layer darkness","Obscurité de la couche"))}
-    </div><p>${t("Individual clouds remain present at 0% global coverage. Dragging changes position and altitude; numeric fields provide precise dimensions. Clouds follow their layer's wind.","Les nuages individuels restent présents à 0 % de couverture globale. Le glissement change la position et l’altitude ; les champs règlent précisément les dimensions. Les nuages suivent le vent de leur couche.")}</p></details>
+    <p data-text="editHelp">${m.editHelp}</p>
+    <details><summary data-text="individualClouds">${m.individualClouds}</summary><div class="cloud-fields">
+    <label>${t("individualCloud")}<select id="cloud-instance"></select></label>
+    <div class="cloud-actions"><button id="cloud-instance-add" type="button" data-text="addIndividualCloud">${m.addIndividualCloud}</button>
+    <button id="cloud-instance-point" type="button" data-text="pointAtCloud">${m.pointAtCloud}</button>
+    <button id="cloud-instance-delete" type="button" data-text="deleteCloud">${m.deleteCloud}</button></div>
+    <label><input id="cloud-manipulate" type="checkbox">${t("manipulate")}</label>
+    ${number("instance-east", "instanceEast", "-30000", "30000")}
+    ${number("instance-north", "instanceNorth", "-30000", "30000")}
+    ${number("instance-base", "instanceBase", "0", "20000")}
+    ${number("instance-thickness", "instanceThickness", "10", "8000")}
+    ${number("instance-width", "instanceWidth", "50", "20000")}
+    ${number("instance-depth", "instanceDepth", "50", "20000")}
+    ${number("instance-rotation", "instanceRotation", "-360", "360")}
+    ${number("instance-density", "instanceDensity", "0", "2")}
+    ${number("instance-darkness", "darkness", "0", "1", "layerDarkness")}
+    </div><p data-text="individualHelp">${m.individualHelp}</p></details>
     <p id="cloud-status" role="status"></p></div>`
+  }
+
+  /** Puts `messages` in place of the texts the controls under `root` were built with. */
+  static localize(root: ParentNode, messages: CloudEditorMessages): void {
+    for (const element of root.querySelectorAll<HTMLElement>("[data-text]")) {
+      element.textContent = messages[element.dataset.text as Key]
+    }
+    for (const input of root.querySelectorAll<HTMLInputElement>("[data-placeholder]")) {
+      input.placeholder = messages[input.dataset.placeholder as Key]
+    }
+  }
 }

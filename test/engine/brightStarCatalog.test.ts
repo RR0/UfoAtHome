@@ -14,33 +14,27 @@ describe("bright star catalog", () => {
     expect(BRIGHT_STARS.every(star => star.mag <= 3)).toBe(true)
   })
 
-  it("names them in both languages, and differs only where French really does", () => {
-    expect(BRIGHT_STARS.every(star => star.name.en !== "" && star.name.fr !== "")).toBe(true)
-    const byName = (en: string) => BRIGHT_STARS.find(star => star.name.en === en)!
-    // Arabic-derived and written identically in both — an invented translation would be worse
-    // than none, so most entries carry the same string twice on purpose.
-    expect(byName("Sirius").name.fr).toBe("Sirius")
-    expect(byName("Rigel").name.fr).toBe("Rigel")
-    // The handful that do differ, and they differ by accents.
-    expect(byName("Betelgeuse").name.fr).toBe("Bételgeuse")
-    expect(byName("Vega").name.fr).toBe("Véga")
-    expect(byName("Antares").name.fr).toBe("Antarès")
+  it("names them once, in the international form — the other languages' own forms are theirs", () => {
+    // See SceneNames: a page read in English must not download "Bételgeuse".
+    expect(BRIGHT_STARS.every(star => typeof star.name === "string" && star.name !== "")).toBe(true)
+    expect(BRIGHT_STARS.some(star => star.name === "Betelgeuse")).toBe(true)
+    expect(BRIGHT_STARS.some(star => star.name === "Vega")).toBe(true)
   })
 
   it("falls back to the designation a star chart prints when there is no proper name", () => {
-    const designated = BRIGHT_STARS.filter(star => /^[α-ω]|^\d/.test(star.name.en))
+    const designated = BRIGHT_STARS.filter(star => /^[α-ω]|^\d/.test(star.name))
     // A minority at this cut, unlike at magnitude 4: 145 of the 178 brightest have a proper name.
     expect(designated.length).toBe(33)
     // Greek letter plus the IAU genitive, not HYG's own "Alp"/"Ori" abbreviations.
-    expect(BRIGHT_STARS.some(star => star.name.en === "ε Centauri")).toBe(true)
-    expect(BRIGHT_STARS.some(star => star.name.en.includes("Alp "))).toBe(false)
+    expect(BRIGHT_STARS.some(star => star.name === "ε Centauri")).toBe(true)
+    expect(BRIGHT_STARS.some(star => star.name.includes("Alp "))).toBe(false)
   })
 
   it("is sorted brightest first, so the nearest-match scan meets the likeliest answer soonest", () => {
     for (let i = 1; i < BRIGHT_STARS.length; i++) {
       expect(BRIGHT_STARS[i].mag).toBeGreaterThanOrEqual(BRIGHT_STARS[i - 1].mag)
     }
-    expect(BRIGHT_STARS[0].name.en).toBe("Sirius")
+    expect(BRIGHT_STARS[0].name).toBe("Sirius")
   })
 
   it("states positions in the same frame and units as the binary catalog", () => {
