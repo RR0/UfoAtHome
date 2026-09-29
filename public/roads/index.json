@@ -120,6 +120,22 @@
    "east": 2.8039814305750115,
    "west": 2.7407839694249887,
    "about": "2015-05-31-SillyLeLong-T1"
+  },
+  {
+   "file": "2026-09-28-GreenstreetSteven.json",
+   "north": 33.608489040603665,
+   "south": 33.59151095939634,
+   "east": -117.661808111273,
+   "west": -117.68219188872699,
+   "about": "2026-09-28-GreenstreetSteven"
+  },
+  {
+   "file": "sky-test-moon-aureole.json",
+   "north": 45.00848904060366,
+   "south": 44.99151095939634,
+   "east": 5.012005316353239,
+   "west": 4.987994683646761,
+   "about": "sky-test-moon-aureole"
   }
  ]
 }
