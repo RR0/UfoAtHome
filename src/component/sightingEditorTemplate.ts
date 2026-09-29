@@ -148,6 +148,9 @@ export const html = `
     <!-- The night sky of the place, towns and all — see Sighting.lightPollution. Blank is a natural
          sky, which is what every recording that says nothing gets. -->
     <label><span id="label-light-pollution">Night sky</span> <input id="lightPollution" type="number" min="15" max="22" step="0.01" placeholder="22"/> mag/arcsec&sup2;</label>
+    <!-- Where that figure came from: "18.79 according to [World Atlas 2015]" while the atlas owns it,
+         nothing once the author has typed their own (see SightingEditorElement.lookUpLightPollution). -->
+    <output id="light-pollution-status" class="place-status" for="lightPollution"><span id="light-pollution-status-text"></span><span id="light-pollution-source-row" class="inline-source" hidden></span></output>
     <!-- Relief and imagery describe the ground at the location above, so they are chosen here
          rather than in a drawer of their own — same reasoning as the place picker's placement. -->
     <div id="terrain-source-rows" class="terrain-source-rows"></div>

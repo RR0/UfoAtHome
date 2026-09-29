@@ -51,7 +51,8 @@
     "pretest": "npm run build:schema",
     "build:embed-sighting-editor": "npm run build:schema && tsc --noEmit && vite build --config vite.embed-sighting-editor.config.ts",
     "build:tle": "node scripts/build-tle-archive.ts",
-    "build:roads": "tsx scripts/build-road-archive.ts"
+    "build:roads": "tsx scripts/build-road-archive.ts",
+    "build:light-pollution": "node --import tsx scripts/build-light-pollution-tiles.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.124.0",
@@ -71,6 +72,7 @@
     "ajv": "^8.20.0",
     "codemirror": "^6.0.2",
     "fflate": "^0.8.3",
+    "geotiff": "^3.0.5",
     "jsdom": "^25.0.0",
     "tsx": "^4.23.5",
     "typescript": "^5.9.2",

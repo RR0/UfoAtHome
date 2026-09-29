@@ -144,6 +144,9 @@ class SiteBuilder {
     // script has been run at least once, which is not a failure: a scene then draws no roads.
     await cp(join(this.root, "public", "roads"), join(this.out, "roads"), { recursive: true })
       .catch(() => undefined)
+    // The World Atlas of the artificial night sky brightness, cut into tiles the editor reads a
+    // place's night sky from (see AtlasLightPollutionProvider, and `npm run build:light-pollution`).
+    await cp(join(this.root, "public", "light-pollution"), join(this.out, "light-pollution"), { recursive: true })
 
     await mkdir(join(this.out, "lib"), { recursive: true })
     for (const dir of this.bundleDirs) {
@@ -301,6 +304,16 @@ ${retired}
 # Its index is the exception, as it is for the models: the name never changes and the contents gain
 # an entry every time a case is published.
 /roads/index.json
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=0, must-revalidate
+
+# The night sky atlas tiles: one survey (2015), cut once. Cached hard; the index is revalidated in
+# case the tiles are ever cut again at another resolution.
+/light-pollution/*
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=604800
+
+/light-pollution/index.json
   Access-Control-Allow-Origin: *
   Cache-Control: public, max-age=0, must-revalidate
 `, "utf8")

@@ -39,6 +39,8 @@ import type { BowForm } from "../engine/atmosphere/Rainbows.js"
 import type { HaloForm } from "../engine/atmosphere/IceHalos.js"
 import { computeBodyPosition, computeMoonPhase } from "../engine/astronomy/CelestialPositions.js"
 import { NightSkyBrightness } from "../engine/atmosphere/NightSkyBrightness.js"
+import { LIGHT_POLLUTION_SOURCES } from "../engine/atmosphere/lightPollutionSources.js"
+import type { LightPollutionLookup, LightPollutionProvider } from "../engine/atmosphere/LightPollutionProvider.js"
 import { LimitingMagnitude } from "../engine/instrument/LimitingMagnitude.js"
 import { DEEP_STAR_CATALOG_MAGNITUDE_LIMIT } from "../render3d/StarCatalog.js"
 import { visibleMagnitudeLimit } from "../render3d/skyColors.js"
@@ -373,6 +375,8 @@ export class SightingEditorElement extends HTMLElement {
   private readonly rollInput: HTMLInputElement
   private readonly swayInput: HTMLInputElement
   private readonly lightPollutionInput: HTMLInputElement
+  private readonly lightPollutionStatusText: HTMLElement
+  private readonly lightPollutionSourceRow: HTMLElement
   private readonly elevationInput: HTMLInputElement
   private readonly groundElevationOutput: HTMLElement
   /** The ground's own height above sea level at the current location, once it is known — what the
@@ -1034,6 +1038,8 @@ export class SightingEditorElement extends HTMLElement {
     this.rollInput = this.shadow.getElementById("roll") as HTMLInputElement
     this.swayInput = this.shadow.getElementById("sway") as HTMLInputElement
     this.lightPollutionInput = this.shadow.getElementById("lightPollution") as HTMLInputElement
+    this.lightPollutionStatusText = this.shadow.getElementById("light-pollution-status-text")!
+    this.lightPollutionSourceRow = this.shadow.getElementById("light-pollution-source-row")!
     this.elevationInput = this.shadow.getElementById("elevation") as HTMLInputElement
     this.groundElevationOutput = this.shadow.getElementById("ground-elevation")!
     this.obsTimeInput = this.shadow.getElementById("obs-time") as HTMLInputElement
@@ -1391,9 +1397,15 @@ export class SightingEditorElement extends HTMLElement {
     })
     // A value of the place, not of a pose: the towns do not move during an observation. Blank is a
     // natural sky.
+    // Typed, it is the author's and no record replaces it; emptied, it is the atlas's to answer again.
     this.lightPollutionInput.addEventListener("input", () => {
-      this.ufoElement.sighting.lightPollution = this.numberOrUndefined(this.lightPollutionInput.value)
+      const sighting = this.ufoElement.sighting
+      sighting.lightPollution = this.numberOrUndefined(this.lightPollutionInput.value)
+      sighting.provenance.clear("lightPollution")
+      this.lightPollutionLookup = undefined
       this.ufoElement.refresh()
+      if (sighting.lightPollution === undefined) this.scheduleLightPollutionLookup()
+      else this.syncLightPollutionStatus()
     })
     this.narrativeDraftButton.addEventListener("click", () => this.draftFromDescription())
     this.narrativeStopButton.addEventListener("click", () => this.narrativeAbort?.abort())
@@ -2295,6 +2307,13 @@ export class SightingEditorElement extends HTMLElement {
         this.scheduleWeatherLookup()
       })
     )
+    this.lightPollutionSourceRow.replaceChildren(
+      document.createTextNode(`${this.messages.according} `),
+      this.sourcePicker("light-pollution", LIGHT_POLLUTION_SOURCES, source => {
+        this.lightPollutionProvider = source.create()
+        this.scheduleLightPollutionLookup()
+      })
+    )
     this.narrativeSourceRow.replaceChildren(
       this.sourcePicker("narrative", NARRATIVE_SOURCES, source => {
         const provider = this.narrativeProvider = source.create()
@@ -2664,6 +2683,8 @@ export class SightingEditorElement extends HTMLElement {
     this.ufoElement.refresh()
     // Moving the observer moves which weather record describes them — see scheduleWeatherLookup.
     this.scheduleWeatherLookup()
+    // ...and under a different sky — see lookUpLightPollution.
+    this.scheduleLightPollutionLookup()
     // ...and moves them out of the place whose name is on display — see schedulePlaceReverse.
     this.schedulePlaceReverse()
     // ...and into a different country's clocks, which is what the observation's own hour is read
@@ -2702,6 +2723,8 @@ export class SightingEditorElement extends HTMLElement {
     this.ufoElement.refresh() // see updateObserver()'s comment — this is what surfaces the edit as a timeupdate
     this.syncDurationField()
     this.scheduleWeatherLookup()
+    // The year decides whether the atlas's sky is the observation's at all.
+    this.scheduleLightPollutionLookup()
   }
 
   /**
@@ -3914,6 +3937,133 @@ export class SightingEditorElement extends HTMLElement {
     if (this.weatherFromRecords && sighting.weatherSource === undefined) {
       this.scheduleWeatherLookup()
     }
+    // The night sky's figure the same way: whatever was asked about the previous recording is
+    // forgotten, and this one's is asked for if the atlas may give it.
+    this.lightPollutionToken++
+    this.lightPollutionLookup = undefined
+    this.scheduleLightPollutionLookup()
+  }
+
+  /** The record the night sky's figure is read from — see LIGHT_POLLUTION_SOURCES. */
+  private lightPollutionProvider: LightPollutionProvider = LIGHT_POLLUTION_SOURCES[0].create()
+  private lightPollutionTimer?: ReturnType<typeof setTimeout>
+  /** Disowns an answer about a place or a recording that is no longer the one on display. */
+  private lightPollutionToken = 0
+  /** What the atlas last answered, or "pending" while it is being asked, or "too-early" when it was
+   * not asked because the observation predates it; undefined when the figure is the author's. */
+  private lightPollutionLookup?: LightPollutionLookup | { status: "pending" } | { status: "too-early"; year: number }
+
+  /**
+   * Whether the figure on display is one the atlas may replace: none at all, or one it gave. A figure
+   * the author typed, or one a file states without saying it was derived, is theirs and never
+   * re-derived behind their back — the same rule as the weather (see Sighting.weatherSource).
+   */
+  private lightPollutionFromRecord(): boolean {
+    const sighting = this.ufoElement.sighting
+    if (sighting.lightPollution === undefined) return true
+    const entry = sighting.provenance.at("lightPollution")
+    return entry?.basis === "derived" && (entry.of === undefined || entry.of === sighting.lightPollution)
+  }
+
+  /** Coalesces the burst of edits one move of the observer produces into one lookup. */
+  private scheduleLightPollutionLookup(): void {
+    clearTimeout(this.lightPollutionTimer)
+    if (!this.lightPollutionFromRecord()) {
+      this.lightPollutionLookup = undefined
+      this.syncLightPollutionStatus()
+      return
+    }
+    this.lightPollutionTimer = setTimeout(() => void this.lookUpLightPollution(), WEATHER_LOOKUP_DEBOUNCE_MS)
+  }
+
+  /**
+   * Reads the night sky of the observer's place from the atlas, and writes it into the recording as
+   * a DERIVED value with the atlas named in its rationale — so that a saved file carries the figure
+   * and its source, and replays the same years later without asking anyone (Sighting.lightPollution).
+   *
+   * NOT for an observation older than the atlas. Artificial light has only grown, so the atlas's sky
+   * over a sighting of 1964 is a sky brighter than the one seen, and a reconstruction must never make
+   * a sky brighter than it was: the figure is left to the author, and the line says why.
+   */
+  private async lookUpLightPollution(): Promise<void> {
+    if (!this.lightPollutionFromRecord()) return
+    const sighting = this.ufoElement.sighting
+    const place = sighting.event.place?.[0]
+    const token = ++this.lightPollutionToken
+    const provider = this.lightPollutionProvider
+    const year = sighting.event.time?.year
+    const forget = (): void => {
+      if (sighting.lightPollution !== undefined) {
+        sighting.lightPollution = undefined
+        sighting.provenance.clear("lightPollution")
+        this.lightPollutionInput.value = ""
+        this.ufoElement.refresh()
+      }
+    }
+    // No year, no era: the atlas's sky may be decades too bright for it, so nothing is asked yet.
+    if (!place || place.lat === undefined || place.lng === undefined || year === undefined) {
+      this.lightPollutionLookup = undefined
+      this.syncLightPollutionStatus()
+      return
+    }
+    if (year < provider.year) {
+      forget()
+      this.lightPollutionLookup = { status: "too-early", year }
+      this.syncLightPollutionStatus()
+      return
+    }
+    this.lightPollutionLookup = { status: "pending" }
+    this.syncLightPollutionStatus()
+    const lookup = await provider.lookUp(place.lat, place.lng)
+    if (token !== this.lightPollutionToken || !this.lightPollutionFromRecord()) return
+    this.lightPollutionLookup = lookup
+    if (lookup.status === "found") {
+      sighting.lightPollution = lookup.lightPollution
+      sighting.provenance.set("lightPollution", {
+        basis: "derived",
+        rationale: `${provider.citation}, at ${lookup.lat.toFixed(4)}, ${lookup.lng.toFixed(4)}: ` +
+          `${Math.round(lookup.artificialMcdPerM2 * 1000)} µcd/m² artificial over the natural 171`,
+        of: lookup.lightPollution
+      })
+      this.lightPollutionInput.value = String(lookup.lightPollution)
+      this.ufoElement.refresh()
+    } else if (lookup.status === "natural") {
+      forget()
+    }
+    // "outside" and "failed" leave whatever was there: nothing new is known.
+    this.syncLightPollutionStatus()
+  }
+
+  /** The line beside the figure: where it came from while the atlas owns it, nothing once it is the author's. */
+  private syncLightPollutionStatus(): void {
+    const lookup = this.lightPollutionLookup
+    const messages = this.messages
+    let text = ""
+    switch (lookup?.status) {
+      case "pending":
+        text = messages.lightPollutionLookingUp
+        break
+      case "found":
+        text = messages.lightPollutionFound.replace("{artificial}", Math.round(lookup.artificialMcdPerM2 * 1000).toLocaleString(this.language))
+        break
+      case "natural":
+        text = messages.lightPollutionNatural
+        break
+      case "outside":
+        text = messages.lightPollutionOutside
+        break
+      case "failed":
+        text = messages.lightPollutionFailed
+        break
+      case "too-early":
+        text = messages.lightPollutionTooEarly
+          .replace("{atlasYear}", String(this.lightPollutionProvider.year))
+          .replace("{year}", String(lookup.year))
+        break
+    }
+    this.lightPollutionStatusText.textContent = text === "" ? "" : `${text} `
+    // The picker is the credit, so it stands only beside something the atlas actually answered.
+    this.lightPollutionSourceRow.hidden = !(lookup?.status === "found" || lookup?.status === "natural" || lookup?.status === "outside")
   }
 
   /** Auto-fills Duration from the observation's start/end dates when no explicit duration has
@@ -7722,6 +7872,7 @@ export class SightingEditorElement extends HTMLElement {
     this.swayInput.title = messages.swayTitle
     this.labelLightPollution.textContent = messages.lightPollution
     this.lightPollutionInput.title = messages.lightPollutionTitle
+    this.syncLightPollutionStatus()
     this.labelElevation.textContent = messages.elevation
     this.labelObservationTime.textContent = messages.observationTime
     this.labelObservationEndTime.textContent = messages.observationEndTime

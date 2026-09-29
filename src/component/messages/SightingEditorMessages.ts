@@ -266,6 +266,15 @@ export interface SightingEditorMessages extends SightingLabels {
   /** The lookup itself couldn't be made (offline, HTTP error) — deliberately distinct from
    * weatherNoRecord: one is a fact about the sighting, the other isn't. */
   weatherLookupFailed: string
+  /** The night sky's figure read from the atlas, and the three ways that can fail to happen — see
+   * SightingEditorElement.lookUpLightPollution. {artificial} is the towns' share in µcd/m². */
+  lightPollutionLookingUp: string
+  lightPollutionFound: string
+  lightPollutionNatural: string
+  lightPollutionOutside: string
+  lightPollutionFailed: string
+  /** The observation predates the atlas: {year} is the observation's, {atlasYear} the atlas's. */
+  lightPollutionTooEarly: string
   soundSrcPlaceholder: string
   /** The Pictures group — pictures of the place laid over the scene, see SceneReference. */
   referenceGroup: string
