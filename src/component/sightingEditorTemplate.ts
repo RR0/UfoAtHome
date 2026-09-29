@@ -88,6 +88,7 @@ export const html = `
       <option id="option-source-social-media" value="social-media">the observer posted it online</option>
       <option id="option-source-press" value="press">press or broadcast</option>
     </select></label>
+    <label><span id="label-account-url">Source (URL)</span> <input id="accountUrl" type="url" placeholder="https://…"/></label>
     <!-- Three states and not a checkbox: a report that says nothing about follow-up is not a report
          that says none happened, and the methods reading this score the two differently. -->
     <label><span id="label-account-followed-up">Followed up</span> <select id="accountFollowedUp">

@@ -40,6 +40,15 @@ describe("sightingJson", () => {
     expect(fromSightingJson({ version: 1, timeline: { keyframes: [] } }).milestones).toEqual([])
   })
 
+  it("round-trips the account's sources as RR0 states them, and writes none when there are none", () => {
+    const sighting = Sighting.create({ year: 2026 })
+    expect(toSightingJson(sighting).sources).toBeUndefined()
+    const post = { title: "I just saw a glowing orb", authors: ["@MiddleOfMayhem"], url: "https://x.com/MiddleOfMayhem/status/2104770278081360031", publication: { publisher: "X", time: "2026-09-29" } }
+    sighting.sources = [post]
+
+    expect(fromSightingJson(toSightingJson(sighting)).sources).toEqual([post])
+  })
+
   it("round-trips the shutter as one setting for the whole observation", () => {
     const sighting = Sighting.create({ year: 1975 })
     sighting.instrumentId = "slr-35mm-50"

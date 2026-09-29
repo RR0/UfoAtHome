@@ -12,6 +12,7 @@ export const sightingMessages_fr: SightingMessages = {
   location: "Lieu",
   case: "Dossier",
   description: "Description",
+  source: "Source",
   credits: "Crédits",
   editThisObservation: "Éditer cette observation",
   embed: "Intégrer",

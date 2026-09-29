@@ -1,3 +1,4 @@
+import type { RecordingSource } from "../engine/model/RecordingSource.js"
 import { html, css } from "./sightingTemplate.js"
 import { SightingFetch } from "../engine/net/SightingFetch.js"
 import { CaseFile } from "../engine/persistence/caseJson.js"
@@ -1044,6 +1045,10 @@ export class SightingElement extends HTMLElement {
       if (description) {
         this.appendInfoRow(this.infoObservationList, this.messages.description, description)
       }
+      // Where the words above can be read as they were given (see RecordingSource).
+      for (const source of entry.sighting.sources ?? []) {
+        this.appendInfoSource(this.infoObservationList, this.messages.source, source)
+      }
       if (!this.labelsShown && entry.sighting.tags && entry.sighting.tags.length > 0) {
         this.appendInfoRow(this.infoObservationList, this.messages.tags,
           entry.sighting.tags.map(tag => this.tags.name(tag)).join(", "))
@@ -1057,6 +1062,31 @@ export class SightingElement extends HTMLElement {
     this.infoAppLink.setAttribute("aria-label", this.messages.editThisObservation)
 
     SceneCredits.fill(this.infoCreditsList, this.sceneElement)
+  }
+
+  /** A source as RR0 cites one: title (a link when it has a web address), authors, publisher and
+   * date. Only an http(s) address is made a link: a recording is somebody else's file, and a
+   * javascript: URL in it must not become a click. */
+  private appendInfoSource(list: HTMLElement, label: string, source: RecordingSource): void {
+    const dt = document.createElement("dt")
+    dt.textContent = label
+    const dd = document.createElement("dd")
+    const name = source.title ?? source.url ?? ""
+    if (source.url && /^https?:\/\//i.test(source.url)) {
+      const link = document.createElement("a")
+      link.href = source.url
+      link.target = "_blank"
+      link.rel = "noopener noreferrer"
+      link.textContent = name
+      dd.appendChild(link)
+    } else {
+      dd.append(name)
+    }
+    const details = [
+      source.authors?.join(", "), source.publication?.publisher, source.publication?.time, source.index
+    ].filter(Boolean)
+    if (details.length > 0) dd.append(`, ${details.join(", ")}`)
+    list.append(dt, dd)
   }
 
   private appendInfoRow(list: HTMLElement, label: string, value: string): void {

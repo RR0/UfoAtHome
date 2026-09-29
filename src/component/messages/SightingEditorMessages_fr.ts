@@ -270,6 +270,7 @@ export const sightingEditorMessages_fr: SightingEditorMessages = {
   observerAge: "Âge alors",
   observerOccupation: "Profession",
   accountSource: "Récit recueilli",
+  accountUrl: "Source (URL)",
   accountSourceUnknown: "on ne sait pas",
   accountSourceOnSite: "enquête sur site",
   accountSourceInterview: "entretien en personne",

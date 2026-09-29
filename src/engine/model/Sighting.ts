@@ -13,6 +13,7 @@ import type { DecorObject } from "./Decor.js"
 import type { Milestone } from "./Milestone.js"
 import type { StatedRoad } from "./Road.js"
 import type { SaidText } from "./SaidText.js"
+import type { RecordingSource } from "./RecordingSource.js"
 import type { SceneReference } from "./Reference.js"
 import { Instruments } from "../instrument/Instrument.js"
 import type { Instrument } from "../instrument/Instrument.js"
@@ -367,6 +368,12 @@ export class Sighting {
    * "reassigned wholesale on edit" reasoning as id and observer above.
    */
   account?: Account
+
+  /**
+   * Where the account can be read as it was given — see RecordingSource. A recording restates an
+   * account; these let a reader go back to the words it restates, and see whether they have changed.
+   */
+  sources?: RecordingSource[]
 
   /**
    * What the observer took it to be, in metres — see InterpretationJson. The observer's own claim

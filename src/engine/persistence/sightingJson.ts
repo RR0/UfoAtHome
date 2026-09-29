@@ -1,3 +1,4 @@
+import type { RecordingSource } from "../model/RecordingSource.js"
 import type { RecordingIssue } from "./RecordingIssue.js"
 import type { ObserverVehicle } from "../model/Vehicle.js"
 import { Sighting } from "../model/Sighting.js"
@@ -103,6 +104,9 @@ export interface SightingRecordingJson {
   /** Pictures of the place, laid over the reconstruction at the direction each was registered in —
    * see SceneReference. Absent/omitted means none. */
   references?: SceneReference[]
+  /** Where the account can be read as it was given, in the shape of an RR0 source — see
+   * RecordingSource. Absent means the recording does not say. */
+  sources?: RecordingSource[]
   /** What the observer took it to be, in metres — see InterpretationJson. Absent means they said
    * nothing a body could be made of, which is most of them. */
   interpretation?: InterpretationJson
@@ -134,6 +138,7 @@ export function plainSightingJson(sighting: Sighting): SightingRecordingJson {
     place: sighting.event.place,
     observer: sighting.observer,
     account: sighting.account,
+    sources: sighting.sources?.length ? sighting.sources : undefined,
     sway: sighting.sway,
     vehicle: sighting.vehicle,
     description: sighting.event.description,
@@ -213,6 +218,7 @@ function fromPlainSightingJson(json: SightingRecordingJson): Sighting {
   // Timeline.fromJSON because the projection needs the pose's own field of view, which lives on
   // the sighting, not on the timeline.
   sighting.account = json.account
+  sighting.sources = json.sources
   sighting.sway = json.sway
   sighting.iso = json.iso
   sighting.vehicle = json.vehicle

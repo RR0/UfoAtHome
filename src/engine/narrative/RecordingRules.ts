@@ -177,7 +177,9 @@ export class RecordingRules {
       file: `\`account\` is about the observer and how the account travelled: \`observerAgeYears\` (at the
    time), \`observerOccupation\` (in their words), \`source\` (how it reached whoever wrote the
    recording: on-site, interview, telephone, questionnaire, letter, social-media, press) and \`followedUp\`
-   (whether they were gone back to). Each other person present is a \`decor\` object of kind
+   (whether they were gone back to). Where the account can be read goes in \`sources\`, in the
+   shape of an RR0 source: [{type ("book" | "article", none for a web page or a post), title,
+   authors, url, publication: {publisher, time}, index}]. Always give the documents you worked from. Each other person present is a \`decor\` object of kind
    "observer".`
     },
     {

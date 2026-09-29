@@ -406,6 +406,8 @@ export class SightingEditorElement extends HTMLElement {
   private readonly observerAgeInput: HTMLInputElement
   private readonly observerOccupationInput: HTMLInputElement
   private readonly accountSourceSelect: HTMLSelectElement
+  private readonly accountUrlInput: HTMLInputElement
+  private readonly labelAccountUrl: HTMLElement
   private readonly accountFollowedUpSelect: HTMLSelectElement
   private readonly sightingIdInput: HTMLInputElement
   private readonly descriptionInput: HTMLTextAreaElement
@@ -1030,6 +1032,8 @@ export class SightingEditorElement extends HTMLElement {
     this.observerAgeInput = this.shadow.getElementById("observerAge") as HTMLInputElement
     this.observerOccupationInput = this.shadow.getElementById("observerOccupation") as HTMLInputElement
     this.accountSourceSelect = this.shadow.getElementById("accountSource") as HTMLSelectElement
+    this.accountUrlInput = this.shadow.getElementById("accountUrl") as HTMLInputElement
+    this.labelAccountUrl = this.shadow.getElementById("label-account-url")!
     this.accountFollowedUpSelect = this.shadow.getElementById("accountFollowedUp") as HTMLSelectElement
     this.sightingIdInput = this.shadow.getElementById("sightingId") as HTMLInputElement
     this.descriptionInput = this.shadow.getElementById("description") as HTMLTextAreaElement
@@ -1359,6 +1363,7 @@ export class SightingEditorElement extends HTMLElement {
     this.importFileInput.addEventListener("change", () => this.importFromFile())
     this.importUrlButton.addEventListener("click", () => this.importFromUrl())
     this.accountSourceSelect.addEventListener("change", () => this.updateObserverMetadata())
+    this.accountUrlInput.addEventListener("input", () => this.updateSourceUrl())
     this.accountFollowedUpSelect.addEventListener("change", () => this.updateObserverMetadata())
     // A value of the whole recording, not of a pose: a tripod stays a tripod. Blank is the default.
     this.swayInput.addEventListener("input", () => {
@@ -2847,6 +2852,20 @@ export class SightingEditorElement extends HTMLElement {
     sighting.account = Object.values(account).some(value => value !== undefined) ? account : undefined
   }
 
+  /** The address of the recording's first source (see RecordingSource): what a post, an article or a
+   * report page is found at. Its other fields (title, authors, publication) are kept as they are,
+   * and a source left with nothing but an emptied address is dropped. */
+  private updateSourceUrl(): void {
+    const sighting = this.ufoElement.sighting
+    const url = this.accountUrlInput.value.trim()
+    const [first, ...others] = sighting.sources ?? []
+    const { url: _previous, ...rest } = first ?? {}
+    void _previous
+    const updated = url === "" ? rest : { ...rest, url }
+    const sources = Object.keys(updated).length > 0 ? [updated, ...others] : others
+    sighting.sources = sources.length > 0 ? sources : undefined
+  }
+
   private updateDescription(): void {
     this.ufoElement.sighting.event.description =
       this.said.write(this.ufoElement.sighting.event.description, this.descriptionInput.value, this.writingLanguage)
@@ -4262,6 +4281,7 @@ export class SightingEditorElement extends HTMLElement {
     this.observerAgeInput.value = sighting.account?.observerAgeYears?.toString() ?? ""
     this.observerOccupationInput.value = this.said.read(sighting.account?.observerOccupation) ?? ""
     this.accountSourceSelect.value = sighting.account?.source ?? ""
+    this.accountUrlInput.value = sighting.sources?.[0]?.url ?? ""
     this.accountFollowedUpSelect.value =
       sighting.account?.followedUp === undefined ? "" : sighting.account.followedUp ? "yes" : "no"
     this.descriptionInput.value = this.said.read(sighting.event.description) ?? ""
@@ -7605,6 +7625,7 @@ export class SightingEditorElement extends HTMLElement {
     this.labelObserverAge.textContent = messages.observerAge
     this.labelObserverOccupation.textContent = messages.observerOccupation
     this.labelAccountSource.textContent = messages.accountSource
+    this.labelAccountUrl.textContent = messages.accountUrl
     this.labelAccountFollowedUp.textContent = messages.accountFollowedUp
     for (const [id, text] of [
       ["option-source-unknown", messages.accountSourceUnknown],

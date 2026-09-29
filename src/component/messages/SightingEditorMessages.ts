@@ -629,6 +629,8 @@ export interface SightingEditorMessages extends SightingLabels {
   /** How the account reached whoever wrote the recording — Ballester-Guasp's information-quality
    * scale grades a report by that, not by what it says. */
   accountSource: string
+  /** The address of the recording's first source: where the account can be read as given. */
+  accountUrl: string
   accountSourceUnknown: string
   accountSourceOnSite: string
   accountSourceInterview: string

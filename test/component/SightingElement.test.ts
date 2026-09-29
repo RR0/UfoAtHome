@@ -616,6 +616,25 @@ describe("SightingElement", () => {
     expect(observationList.textContent).toContain("hovering, night")
   })
 
+  it("cites the account's sources, linked only when the address is a web one", async () => {
+    stubFetch({
+      "john.json": { ...johnSighting, sources: [{ title: "The post", authors: ["@someone"], url: "https://example.org/post/1" }] },
+      "jane.json": { ...johnSighting, sources: [{ title: "Not a link", url: "javascript:alert(1)" }] }
+    })
+    const element = mount()
+    element.observerUrls = ["john.json"]
+    await new Promise(resolve => setTimeout(resolve, 0))
+    ;(element.shadowRoot!.getElementById("info-button") as HTMLButtonElement).click()
+    const list = element.shadowRoot!.getElementById("info-observation-list") as HTMLElement
+    expect(list.querySelector("a")?.getAttribute("href")).toBe("https://example.org/post/1")
+    expect(list.textContent).toContain("The post, @someone")
+
+    element.observerUrls = ["jane.json"]
+    await new Promise(resolve => setTimeout(resolve, 0))
+    ;(element.shadowRoot!.getElementById("info-button") as HTMLButtonElement).click()
+    expect((element.shadowRoot!.getElementById("info-observation-list") as HTMLElement).querySelector("a")).toBeNull()
+  })
+
   it("shows neither description nor tags rows when the sighting has none", async () => {
     const element = mount()
     element.observerUrls = ["john.json"]
