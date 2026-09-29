@@ -25,7 +25,7 @@ export const html = `
        behind the version link. Hidden for a recording with no address (set by script, pasted),
        which the editor could not open. -->
   <a id="edit-link" class="edit-link" target="_blank" rel="noopener" title="Edit this observation" aria-label="Edit this observation" hidden><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M11.3 1.3a1 1 0 0 1 1.4 0l2 2a1 1 0 0 1 0 1.4l-8.5 8.5-3.4.9.9-3.4 8.6-8.4Zm-7 9.2-.5 1.7 1.7-.5 6.9-6.9-1.2-1.2-6.9 6.9Z" fill="currentColor"/></svg></a>
-  <button id="info-button" class="info-btn" type="button" title="About" aria-label="About" aria-expanded="false">?</button>
+  <button id="info-button" class="info-btn" type="button" title="About" aria-label="About" aria-expanded="false"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><circle cx="8" cy="3.6" r="1.4" fill="currentColor"/><path d="M6 6.5h3v6h1.5V14h-4.5v-1.5H7.5V8H6Z" fill="currentColor"/></svg></button>
   <div id="info-panel" class="info-panel" hidden>
     <button id="info-close" class="info-close" type="button" aria-label="Close">×</button>
     <section>
@@ -155,7 +155,8 @@ export const css = `
   background: #f0f0f0;
   color: #333;
 }
-.scene-controls button[aria-pressed="true"] {
+.scene-controls button[aria-pressed="true"],
+.info-btn[aria-expanded="true"] {
   outline: 2px solid #39f;
 }
 .scene-controls input[type="range"] {
@@ -176,19 +177,24 @@ export const css = `
 .account-source[hidden] {
   display: none;
 }
+/* The pen and the "i" wear the same square as the toggles the playback layer lends this row (see
+   .scene-controls button), so the row reads as one set of buttons. */
 .edit-link {
   flex-shrink: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.6em;
-  height: 1.6em;
-  border-radius: 50%;
+  width: 1.8em;
+  height: 1.8em;
+  box-sizing: border-box;
+  border-radius: 3px;
   border: 1px solid #999;
   background: #f0f0f0;
   color: #333;
 }
-.edit-link:hover, .edit-link:focus-visible {
+.edit-link:hover, .edit-link:focus-visible,
+.info-btn:hover, .info-btn:focus-visible,
+.scene-controls button:hover, .scene-controls button:focus-visible {
   background: #e0e0e0;
 }
 /* Same trap as elsewhere: a rule setting display outranks the UA sheet's [hidden]. */
@@ -200,9 +206,13 @@ export const css = `
      .info-panel:popover-open below. */
   anchor-name: --info-button;
   flex-shrink: 0;
-  width: 1.6em;
-  height: 1.6em;
-  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.8em;
+  height: 1.8em;
+  box-sizing: border-box;
+  border-radius: 3px;
   border: 1px solid #999;
   background: #f0f0f0;
   color: #333;
