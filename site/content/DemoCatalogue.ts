@@ -368,10 +368,10 @@ export class DemoCatalogue {
           src: "/demo-data/sky-test-aircraft.json",
           title: { en: "An airliner on a 20-second exposure", fr: "Un avion de ligne sur une pose de 20\u00a0s", es: "Un avión de pasajeros en una exposición de 20\u00a0s", it: "Un aereo di linea in una posa di 20\u00a0s" },
           blurb: {
-            en: "No phenomenon is drawn here — there isn't one. Steady lamps draw lines, flashing ones drop dots, and their spacing is the flash rate times the angular speed.",
-            fr: "Aucun phénomène n'est dessiné ici — il n'y en a pas. Les feux fixes tracent des lignes, les clignotants posent des points, et leur espacement est la cadence multipliée par la vitesse angulaire.",
-            es: "Aquí no se dibuja ningún fenómeno — no lo hay. Las luces fijas trazan líneas, las intermitentes dejan puntos, y su separación es la frecuencia de destello multiplicada por la velocidad angular.",
-            it: "Qui non è disegnato alcun fenomeno — non ce n'è uno. Le luci fisse tracciano linee, quelle lampeggianti lasciano punti, e la loro spaziatura è la frequenza dei lampi moltiplicata per la velocità angolare."
+            en: "No phenomenon is drawn here — there isn't one. Steady lamps draw lines, flashing ones drop dots, and their spacing is the angular speed divided by the flash rate.",
+            fr: "Aucun phénomène n'est dessiné ici — il n'y en a pas. Les feux fixes tracent des lignes, les clignotants posent des points, et leur espacement est la vitesse angulaire divisée par la cadence.",
+            es: "Aquí no se dibuja ningún fenómeno — no lo hay. Las luces fijas trazan líneas, las intermitentes dejan puntos, y su separación es la velocidad angular dividida por la frecuencia de destello.",
+            it: "Qui non è disegnato alcun fenomeno — non ce n'è uno. Le luci fisse tracciano linee, quelle lampeggianti lasciano punti, e la loro spaziatura è la velocità angolare divisa per la frequenza dei lampi."
           }
         }
       ]

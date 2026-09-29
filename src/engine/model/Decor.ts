@@ -254,7 +254,7 @@ export interface DecorLitKeyframe {
  *
  * A square wave, never a fade: a beacon is on or it is off, and the sharpness is the whole point.
  * It is what puts distinct DOTS along a long-exposure streak instead of a soft gradient, and the
- * spacing of those dots — flash rate times angular speed — is how a photograph of an aircraft can
+ * spacing of those dots — angular speed divided by flash rate — is how a photograph of an aircraft can
  * be told from a photograph of something else. A blink stated as keyframes of an interpolated
  * value could never produce it.
  */
