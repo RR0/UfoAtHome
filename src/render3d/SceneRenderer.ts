@@ -4240,12 +4240,17 @@ export class SceneRenderer {
     }
     // A still is drawn once and can afford every pixel: with no loop left to raise the ratio, the
     // one the last motion had lowered it to would otherwise stay on it for good.
-    if (!running && this.renderer.getPixelRatio() !== this.resolution.maximum) this.applyPixelRatio(this.resolution.maximum)
+    const resized = !running && this.renderer.getPixelRatio() !== this.resolution.maximum
+    if (resized) this.applyPixelRatio(this.resolution.maximum)
     this.syncAnimationLoop()
     // The loop is what normally repaints; with it stopped, this is what leaves a coherent still —
     // and a frame asked for while a loop or a driver was expected to draw it must not wait forever
     // now that neither will.
     if (!running || this.frameDirty) this.render()
+    // Resizing the drawing buffer cleared it, and render() only asks for the next animation frame:
+    // until then the page showed through the empty canvas, a white flash at the end of every replay
+    // on a light page. The still is drawn now, in the same task that cleared it.
+    if (resized) this.drawIfDirty()
   }
 
   stopTwinkle(): void {
