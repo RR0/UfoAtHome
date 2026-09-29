@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-import { deflateRawSync } from "node:zlib"
 import { AtlasLightPollutionProvider } from "../../../../src/engine/atmosphere/providers/AtlasLightPollutionProvider.js"
 
 /** A two-degree world with one lit tile, N33W118 (33°N to 35°N), whose cells all say `code`. */
@@ -22,10 +21,12 @@ class FakeAtlas {
         const present = new Uint8Array(Math.ceil((columns * 73) / 8))
         const bit = band * columns + (-118 + 180) / 2
         present[bit >> 3] |= 1 << (bit & 7)
-        return new Response(JSON.stringify({ ...FakeAtlas.INDEX, present: Buffer.from(present).toString("base64") }))
+        return new Response(JSON.stringify({ ...FakeAtlas.INDEX, present: btoa(String.fromCharCode(...present)) }))
       }
       if (this.failTiles) return new Response(null, { status: 500 })
-      if (url.endsWith("N33W118.bin")) return new Response(deflateRawSync(new Uint8Array(16).fill(this.code)))
+      if (url.endsWith("N33W118.bin")) // The standard stream, as the provider's own DecompressionStream reads it: node:zlib and Buffer
+        // are not in the types this project compiles its tests against.
+        return new Response(new Response(new Uint8Array(16).fill(this.code)).body!.pipeThrough(new CompressionStream("deflate-raw")))
       return new Response(null, { status: 404 })
     }) as typeof fetch
   }
