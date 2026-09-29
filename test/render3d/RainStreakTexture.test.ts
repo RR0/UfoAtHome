@@ -32,8 +32,10 @@ describe("rain streak texture", () => {
   it("falls off smoothly across its width, with no plateau and no shoulder", async () => {
     const { size, at } = await streakAlpha()
     const middle = Math.floor(size / 2)
+    // Followed out until it is gone, however thin the streak is drawn: past that the zeros are
+    // the empty canvas, not the profile.
     const across: number[] = []
-    for (let x = middle; x < middle + 12; x++) across.push(at(x, middle))
+    for (let x = middle; x < size && at(x, middle) > 0; x++) across.push(at(x, middle))
 
     // Strictly decreasing from the axis outward: a tent profile with a flat top and a corner —
     // which is what this used to be, five gradient stops wide — reads as a bar, not a drop.
