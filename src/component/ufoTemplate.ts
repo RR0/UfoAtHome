@@ -914,9 +914,18 @@ canvas[data-cursor="rotate"] {
 #time-start {
   font-weight: 600;
 }
+/* The dark shape is the component's, not the button's: it is what grows when the slider unfolds, so
+   the slider is on it instead of hanging out of the button's circle over the picture. */
 .volume {
   display: flex;
   align-items: center;
+  border-radius: 1.3em;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
+}
+.controls .volume .round {
+  background: transparent;
+  backdrop-filter: none;
 }
 /* Folded until the pointer is over the button or the slider, or the keyboard is on either. */
 .volume input[type="range"] {
