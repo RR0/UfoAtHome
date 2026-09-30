@@ -46,6 +46,8 @@ export interface SceneNames {
   readonly satelliteTooltip: string
   /** The scene's credits button. */
   readonly credits: string
+  /** Said over the picture while it loads: what it shows is not a video. */
+  readonly notAVideo: string
 }
 
 /**

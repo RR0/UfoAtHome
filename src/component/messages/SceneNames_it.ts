@@ -140,5 +140,6 @@ export const sceneNames_it: SceneNames = {
   starTooltip: "{name} — mag {mag}, {alt}° sopra l'orizzonte",
   starTooltipBelow: "{name} — mag {mag}, {alt}° sotto l'orizzontale",
   satelliteTooltip: "{name} — satellite, mag {mag}, a {height} km di quota",
-  credits: "Crediti"
+  credits: "Crediti",
+  notAVideo: "Questo non è un video: è una simulazione calcolata in tempo reale nel tuo browser."
 }

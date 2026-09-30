@@ -2,7 +2,12 @@ export const html = `
 <div class="stage" id="stage">
   <div class="frame" id="frame">
     <canvas id="scene-canvas"></canvas>
-    <div id="scene-loader" class="scene-loader" role="progressbar" hidden></div>
+    <!-- The spinner, and under it what a reader waiting on a picture may take this for: a video. It is
+         not one — see SceneNames.notAVideo. Both live and die with the hold on the first frame. -->
+    <div id="scene-loader" class="scene-loader" role="progressbar" hidden>
+      <div class="scene-loader-spinner"></div>
+      <p id="scene-loader-note" class="scene-loader-note">This is not a video: it is a simulation, computed in real time in your browser.</p>
+    </div>
   </div>
   <div id="ufo-slot"></div>
   <div id="hover-tooltip" class="hover-tooltip" hidden></div>
@@ -144,17 +149,42 @@ export const css = `
    a moment, so a sky that is ready at once never flashes a spinner. */
 .scene-loader {
   position: absolute;
-  top: 50%;
-  left: 50%;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1em;
+  animation: scene-loader-appear 0.2s ease-out 0.25s both;
+  pointer-events: none;
+  z-index: 1;
+}
+.scene-loader[hidden] {
+  display: none;
+}
+.scene-loader-spinner {
   width: 36px;
   height: 36px;
-  margin: -18px 0 0 -18px;
   border-radius: 50%;
   border: 3px solid rgba(255, 255, 255, 0.25);
   border-top-color: rgba(255, 255, 255, 0.9);
-  animation: scene-loader-spin 0.9s linear infinite, scene-loader-appear 0.2s ease-out 0.25s both;
-  pointer-events: none;
-  z-index: 1;
+  animation: scene-loader-spin 0.9s linear infinite;
+}
+/* What the waiting picture is NOT: a video. Said only while it waits, and only where there is room
+   for a sentence — a catalogue card's picture is too small for one. */
+.scene-loader-note {
+  max-width: 24em;
+  margin: 0;
+  padding: 0 1.5em;
+  color: #fff;
+  font: 0.9em/1.4 sans-serif;
+  text-align: center;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
+}
+@container (max-width: 360px) {
+  .scene-loader-note {
+    display: none;
+  }
 }
 @keyframes scene-loader-spin {
   to { transform: rotate(360deg); }
