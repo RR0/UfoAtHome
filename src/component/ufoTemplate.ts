@@ -266,6 +266,10 @@ canvas[data-cursor="rotate"] {
   pointer-events: auto;
   display: grid;
   grid-template-rows: 1fr;
+  /* The one column may not grow to its content: an "auto" one did, so a row of buttons wider than
+     the player was never narrower than itself — it simply ran out of the picture, and the fit that
+     folds the buttons (see UfoElement.fitControls) never saw an overflow to fold. */
+  grid-template-columns: minmax(0, 1fr);
   padding: 0 0.7em 0.5em;
   transition: opacity 0.15s ease, grid-template-rows 0.15s ease;
   color: #fff;
