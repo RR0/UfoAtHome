@@ -693,6 +693,7 @@ export class UfoElement extends HTMLElement {
     })
     this.seekInput.addEventListener("input", () => this.player.seek(this.snapSeekToMark(Number(this.seekInput.value))))
     this.seekInput.addEventListener("pointerdown", event => {
+      this.suspendForScrub()
       this.seekSnapArmed = true
       this.nameMarkUnder(event)
       this.beginTouchScrub(event)
@@ -1767,7 +1768,39 @@ export class UfoElement extends HTMLElement {
     this.pointerHeld = true
   }
 
+  /** Whether the recording was playing when the bar was grabbed, and is to play on from where it is
+   * let go — see suspendForScrub. */
+  private resumeAfterScrub = false
+
+  /**
+   * Holds playback while the bar is held. A playhead that keeps moving under the finger fights it:
+   * every tick pulls it back to where the recording has got to. So the recording stops when the bar
+   * is grabbed and goes on from wherever it is let go, as on the video sites.
+   */
+  private suspendForScrub(): void {
+    if (this.player.playbackState !== "playing") return
+    this.resumeAfterScrub = true
+    this.player.pause()
+    this.soundPreview = undefined
+    this.sightingAudio.silence()
+    this.refresh()
+    this.updatePlayPauseButton()
+  }
+
+  private resumeFromScrub(): void {
+    if (!this.resumeAfterScrub) return
+    this.resumeAfterScrub = false
+    // A real gesture, the release: what the sound needs to start again.
+    this.sightingAudio.resume()
+    this.player.play()
+    this.updatePlayPauseButton()
+  }
+
   private readonly handlePointerRelease = (): void => {
+    if (this.resumeAfterScrub) {
+      // After the release's own handlers, which seek to where the finger was let go.
+      window.setTimeout(() => this.resumeFromScrub(), 0)
+    }
     if (!this.pointerHeld) return
     this.pointerHeld = false
     if (this.hoverless && this.stageElement.classList.contains("touched")) this.revealControls()

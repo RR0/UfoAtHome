@@ -1709,6 +1709,29 @@ describe("the account's named moments", () => {
     expect(element.currentTime).toBe(900)
   })
 
+  it("holds playback while the bar is held, and goes on from where it is let go", async () => {
+    const element = mount()
+    element.sightingData = withMilestones() as never
+    const seek = element.shadowRoot!.getElementById("seek")!
+    element.togglePlayPause()
+    expect(element.playbackState).toBe("playing")
+    seek.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true }))
+    expect(element.playbackState).toBe("paused") // the playhead is not to fight the finger
+    document.dispatchEvent(new MouseEvent("pointerup", { bubbles: true }))
+    await new Promise(resolve => setTimeout(resolve, 10))
+    expect(element.playbackState).toBe("playing")
+  })
+
+  it("leaves a paused recording paused when the bar is let go", async () => {
+    const element = mount()
+    element.sightingData = withMilestones() as never
+    const seek = element.shadowRoot!.getElementById("seek")!
+    seek.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true }))
+    document.dispatchEvent(new MouseEvent("pointerup", { bubbles: true }))
+    await new Promise(resolve => setTimeout(resolve, 10))
+    expect(element.playbackState).not.toBe("playing")
+  })
+
   it("mutes and unmutes from the button beside play, and says so", () => {
     const element = mount()
     element.sightingData = withMilestones() as never
