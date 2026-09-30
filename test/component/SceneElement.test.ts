@@ -273,6 +273,17 @@ describe("SceneElement weather follows the player", () => {
     expect(audioPaused.every(paused => paused)).toBe(true)
   })
 
+  // An editor keeps the PICTURE moving while paused (there may be no way to play a recording still
+  // being written), but paused is paused for the sound: nothing is heard over a stopped clock.
+  it("keeps the sound stopped while an editor animates the paused picture", () => {
+    const element = mount()
+    element.animateWhilePaused = true
+    element.ufoElement.currentTime = 2000
+    expect(animationsRunning.at(-1)).toBe(true)
+    expect(audioPaused.length).toBeGreaterThan(0)
+    expect(audioPaused.every(paused => paused)).toBe(true)
+  })
+
   // The clap is deliberately delayed by the distance sound travels (see handleLightningFlash), so
   // one can outlive the flash that caused it.
   it("drops a thunderclap still in flight when the replay is paused", () => {

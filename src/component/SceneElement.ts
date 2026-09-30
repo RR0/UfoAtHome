@@ -577,19 +577,21 @@ export class SceneElement extends HTMLElement {
     // still going on would be the reader's own room. It says nothing about an author who is at
     // that moment STATING the weather — for them a frozen sky is a preview of nothing, and there
     // is often no way out of it either, since a recording with no duration yet cannot be played at
-    // all. So the editor asks for the scene to keep moving (see animateWhilePaused), and the
-    // sound follows the picture rather than diverging from it: what turned this up was hearing
-    // rain fall over a still image.
+    // all. So the editor asks for the scene to keep moving (see animateWhilePaused).
+    //
+    // The PICTURE follows that, the SOUND does not: paused is paused, in the editor as anywhere, and
+    // rain or wind or an engine going on while nothing plays is noise over a stopped clock (the
+    // author said so). Sound is heard only while the recording actually plays.
     const playing = this.ufoElement.playbackState === "playing"
     const running = playing || this.animateWhilePaused
     // While playing, the player's own tick is the frame clock (see handleTimeUpdate) and the
     // renderer runs no loop beside it.
     this.sceneRenderer.setAnimationsRunning(running, playing)
-    this.weatherAudio.setPaused(!running)
-    this.vehicleAudio.setPaused(!running)
+    this.weatherAudio.setPaused(!playing)
+    this.vehicleAudio.setPaused(!playing)
     // A thunderclap is deliberately delayed by the distance sound travels (see
     // handleLightningFlash); one still in flight belongs to a flash that is no longer happening.
-    if (!running) clearTimeout(this.thunderTimeoutId)
+    if (!playing) clearTimeout(this.thunderTimeoutId)
   }
 
   constructor() {
