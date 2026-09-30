@@ -699,7 +699,7 @@ export class UfoElement extends HTMLElement {
     this.seekInput.addEventListener("keydown", this.handleSeekKey)
     // A touch screen has no hover to show the controls by, nor to take them away by: they show on a
     // touch and go after a few seconds of playing — see revealControls.
-    this.stageElement.addEventListener("pointerdown", () => this.touchedStage(), true)
+    this.stageElement.addEventListener("pointerdown", () => { this.handlePointerDown(); this.touchedStage() }, true)
     this.stageElement.addEventListener("pointermove", () => this.touchedStage())
     this.canvas.addEventListener("click", event => {
       if (!this.enableClickToPlay) return
@@ -727,6 +727,8 @@ export class UfoElement extends HTMLElement {
     this.canvas.addEventListener("pointermove", this.handlePointerMove)
     this.canvas.addEventListener("pointerleave", this.handlePointerLeave)
     document.addEventListener("fullscreenchange", this.handleFullscreenChange)
+    document.addEventListener("pointerup", this.handlePointerRelease, true)
+    document.addEventListener("pointercancel", this.handlePointerRelease, true)
     this.observerMapResizeObserver?.observe(this.observerMapPanel)
     this.controlsFitObserver?.observe(this.controlsRow)
     // The time grows when the recording's length arrives (a clock reads "10:30 / 10:30:27"), which
@@ -764,6 +766,9 @@ export class UfoElement extends HTMLElement {
 
   disconnectedCallback(): void {
     document.removeEventListener("fullscreenchange", this.handleFullscreenChange)
+    document.removeEventListener("pointerup", this.handlePointerRelease, true)
+    document.removeEventListener("pointercancel", this.handlePointerRelease, true)
+    window.clearTimeout(this.controlsIdleTimer)
     this.observerMapResizeObserver?.disconnect()
     this.controlsFitObserver?.disconnect()
     this.controlsMutations?.disconnect()
@@ -1710,12 +1715,28 @@ export class UfoElement extends HTMLElement {
     this.revealControls()
   }
 
+  /** Whether a finger is down on the stage — a drag of the seek bar, above all. Controls being used
+   * are never taken away: only a touch that has ended starts the few seconds. */
+  private pointerHeld = false
+
+  private readonly handlePointerDown = (): void => {
+    this.pointerHeld = true
+  }
+
+  private readonly handlePointerRelease = (): void => {
+    if (!this.pointerHeld) return
+    this.pointerHeld = false
+    if (this.hoverless && this.stageElement.classList.contains("touched")) this.revealControls()
+  }
+
   /** Shows the controls, and takes them away again after CONTROLS_IDLE_MS if the recording is
    * playing. Paused, they stay: there is nothing behind them to see. */
   private revealControls(): void {
     this.stageElement.classList.add("touched")
     window.clearTimeout(this.controlsIdleTimer)
     if (this.player.playbackState !== "playing") return
+    // Held down, they are in use: released, and only then, the few seconds begin (see handlePointerRelease).
+    if (this.pointerHeld) return
     this.controlsIdleTimer = window.setTimeout(() => {
       this.stageElement.classList.remove("touched")
       this.tapRevealedOnly = false
