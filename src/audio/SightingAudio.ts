@@ -1,4 +1,5 @@
 import type { SightingSound } from "../engine/model/Sound.js"
+import { AudioUnlock } from "./AudioUnlock.js"
 
 /**
  * Plays what a sighting sounded like, from its SoundTrack — the audio counterpart of what
@@ -103,7 +104,7 @@ export class SightingAudio {
         return
       }
     }
-    if (this.context.state === "suspended") void this.context.resume()
+    AudioUnlock.unlock(this.context)
   }
 
   /**

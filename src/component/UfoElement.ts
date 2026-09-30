@@ -706,6 +706,8 @@ export class UfoElement extends HTMLElement {
     // A touch screen has no hover to show the controls by, nor to take them away by: they show on a
     // touch and go after a few seconds of playing — see revealControls.
     this.stageElement.addEventListener("pointerdown", () => { this.handlePointerDown(); this.touchedStage() }, true)
+    // A touch's end and a click are the gestures a phone lets sound start from (see AudioUnlock).
+    for (const type of ["touchend", "click"]) this.stageElement.addEventListener(type, () => this.sightingAudio.resume(), true)
     this.stageElement.addEventListener("pointermove", () => this.touchedStage())
     this.canvas.addEventListener("click", event => {
       if (!this.enableClickToPlay) return

@@ -1,5 +1,6 @@
 import type { VehicleProfile } from "../engine/model/Vehicle.js"
 import type { DriveState } from "../engine/place/VehicleDrive.js"
+import { AudioUnlock } from "./AudioUnlock.js"
 
 /** One vehicle to be heard at this instant. */
 export interface VehicleVoice {
@@ -65,7 +66,7 @@ export class VehicleAudio {
         return
       }
     }
-    if (this.context.state === "suspended") void this.context.resume()
+    AudioUnlock.unlock(this.context)
     this.apply()
   }
 

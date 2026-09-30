@@ -504,12 +504,14 @@ export class SceneElement extends HTMLElement {
    * scene loaded with rain already set would render visible rain but never actually start the
    * sound until weather changed again, which it might never do. */
   private readonly handleFirstInteraction = () => {
-    this.removeEventListener("pointerdown", this.handleFirstInteraction, true)
-    this.removeEventListener("keydown", this.handleFirstInteraction, true)
     this.weatherAudio.resume()
     this.vehicleAudio.resume()
+    if (this.interacted) return
+    this.interacted = true
     this.setWeather(resolveActualWeatherAt(this.ufoElement.sighting, this.lastTimeMs))
   }
+
+  private interacted = false
 
   /** Reuses the nested <rr0-ufo>'s own playback clock (it already dispatches this on every
    * Player tick and every seek, mirroring <video>'s timeupdate) instead of running a second,
@@ -620,8 +622,11 @@ export class SceneElement extends HTMLElement {
     // of the playback bar above all, which is how a reader starts a replay, and which a listener on
     // the canvas alone never heard. A storm replayed from its own button was silent. Events from the
     // shadow trees inside are composed and reach this element retargeted.
-    this.addEventListener("pointerdown", this.handleFirstInteraction, true)
-    this.addEventListener("keydown", this.handleFirstInteraction, true)
+    // Kept, not removed after the first: a phone counts only a touch's END (or a click) as the gesture
+    // that unlocks sound, and unlocks it again after an interruption — see AudioUnlock.
+    for (const type of ["pointerdown", "pointerup", "touchend", "click", "keydown"]) {
+      this.addEventListener(type, this.handleFirstInteraction, true)
+    }
   }
 
   /**

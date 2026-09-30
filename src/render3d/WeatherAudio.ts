@@ -1,4 +1,5 @@
 import type { PrecipitationType } from "../engine/model/Weather.js"
+import { AudioUnlock } from "../audio/AudioUnlock.js"
 
 /**
  * Real, sourced royalty-free ambient/one-shot sound effects for weather — the audio counterpart to
@@ -114,7 +115,7 @@ export class WeatherAudio {
         return
       }
     }
-    if (this.context.state === "suspended") void this.context.resume()
+    AudioUnlock.unlock(this.context)
   }
 
   /**
