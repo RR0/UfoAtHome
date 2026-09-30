@@ -326,23 +326,30 @@ export class UfoElement extends HTMLElement {
   private controlsMutations?: MutationObserver
 
   /**
-   * Folds the right-hand buttons behind a chevron when the row cannot hold them all beside the
-   * play button, the sound and the time. Measured with everything showing — a folded button has no
-   * width to measure — and only the row's own resize triggers it, so it costs nothing per frame.
+   * Makes the row of buttons fit, by degrees, stopping at the first that does:
+   * 1. everything showing;
+   * 2. the right-hand buttons folded behind a chevron (the fullscreen button staying in sight);
+   * 3. and the time reduced to the position, its length dropped — a clock reads "00:50:34 / 00:53:58",
+   *    and that alone is wider than a small player;
+   * 4. and the sound gone: last, since it is the one control nobody is stranded without.
+   * Measured on the row itself (does its content overflow it?) rather than estimated from the
+   * buttons' widths, which a folded button no longer has. Only a resize or a button coming or going
+   * triggers it, so it costs nothing per frame.
    */
   private fitControls(): void {
     const row = this.controlsRow
     const wasOpen = row.classList.contains("more-open")
-    row.classList.remove("narrow", "more-open")
-    const left = row.querySelector(".controls-left") as HTMLElement
-    const right = this.controlsRight
-    // The chevron is not one of the buttons that had to fit.
-    const others = [...right.children].filter(child => child !== this.moreButton && getComputedStyle(child).display !== "none")
-    const rightWidth = others.reduce((sum, child) => sum + (child as HTMLElement).offsetWidth, 0) + Math.max(others.length - 1, 0) * 6 + 12
-    const narrow = row.clientWidth > 0 && left.offsetWidth + rightWidth + 16 > row.clientWidth
-    row.classList.toggle("narrow", narrow)
-    // What the reader unfolded stays unfolded through a resize, for as long as it is still needed.
-    row.classList.toggle("more-open", narrow && wasOpen)
+    const overflows = () => row.scrollWidth > row.clientWidth + 1
+    row.classList.remove("narrow", "more-open", "compact", "tiny")
+    if (row.clientWidth > 0 && overflows()) {
+      row.classList.add("narrow")
+      for (const step of ["compact", "tiny"]) {
+        if (!overflows()) break
+        row.classList.add(step)
+      }
+      // What the reader unfolded stays unfolded through a resize, for as long as it is still needed.
+      if (wasOpen) row.classList.add("more-open")
+    }
     this.updateMoreButton()
   }
 

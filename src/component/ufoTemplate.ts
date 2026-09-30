@@ -804,6 +804,14 @@ canvas[data-cursor="rotate"] {
 .controls.narrow.more-open .controls-left {
   display: none;
 }
+/* Further steps of the same fit: the length of the recording goes from the time, then the sound. */
+.controls.compact .time-separator,
+.controls.compact #time-end {
+  display: none;
+}
+.controls.tiny .volume {
+  display: none;
+}
 /* A toggle that is on says so by its glyph, solid where it was an outline — see PlayerIcons. */
 .controls button svg {
   display: block;
