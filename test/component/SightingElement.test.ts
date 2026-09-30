@@ -1,6 +1,7 @@
 import { describe, expect, it, afterEach, beforeAll, beforeEach, vi } from "vitest"
 import { registerSighting, SIGHTING_ELEMENT_NAME, LEGACY_ELEMENT_NAME } from "../../src/component/SightingElement.js"
 import { sightingLabels_en } from "../../src/component/messages/SightingLabels_en.js"
+import { loadSceneNames, loadSightingMessages, loadTagNames } from "../../src/component/messages/index.js"
 import type { SightingElement } from "../../src/component/SightingElement.js"
 
 registerSighting()
@@ -99,6 +100,15 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
 
 // jsdom's <canvas> has no real 2D context — stub it, same as test/component/UfoElement.test.ts's mock (the
 // nested <rr0-ufo> needs this to paint its initial frame without throwing).
+// The French modules an element loads when it finds itself in a French page, imported once here
+// rather than for the first time inside a test: that first import is a cold transform by Vite,
+// which on a loaded runner (windows-latest, two workers) outlasted waitFor's 500 ms. Warmed, the
+// element's own dynamic import still runs, but resolves from the module cache in a few ticks, so
+// what the tests wait for is the element's work and not the toolchain's.
+beforeAll(async () => {
+  await Promise.all([loadSightingMessages("fr"), loadTagNames("fr"), loadSceneNames("fr")])
+})
+
 beforeAll(() => {
   vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockImplementation(function (this: HTMLCanvasElement) {
     // mockImplementation, not mockReturnValue: a renderer that sizes itself from its own canvas
