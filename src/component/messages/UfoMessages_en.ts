@@ -11,6 +11,8 @@ export const ufoMessages_en: UfoMessages = {
   switchToClockTime: "click to show the time of day",
   fullscreen: "Fullscreen",
   exitFullscreen: "Exit fullscreen",
+  mute: "Mute",
+  unmute: "Unmute",
   showObserverMap: "Show where the observer was",
   hideObserverMap: "Hide where the observer was",
   mapImageryUnavailable: "Aerial imagery unavailable",

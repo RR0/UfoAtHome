@@ -7,6 +7,8 @@ import { html, css } from "./sceneTemplate.js"
 import { SightingFetch } from "../engine/net/SightingFetch.js"
 import { UfoElement, registerUfo, UFO_ELEMENT_NAME, OBSERVER_MAP_ATTRIBUTE, MILESTONES_ATTRIBUTE } from "./UfoElement.js"
 import { SceneRenderer } from "../render3d/SceneRenderer.js"
+import { SeekPreview } from "./SeekPreview.js"
+import type { PreviewableScene } from "./SeekPreview.js"
 import type { TerrainProviders } from "../render3d/terrain/defaultTerrainProviders.js"
 import type { DecorModelProvider } from "../render3d/decor/DecorModelProvider.js"
 import type { DecorModelCredit } from "../engine/model/Decor.js"
@@ -604,6 +606,9 @@ export class SceneElement extends HTMLElement {
     this.creditsButton.setAttribute("aria-label", CREDITS_LABEL)
     this.sceneRenderer.onMapSubjectBounds = bounds => this.ufoElement.setMapSubjectBounds(bounds)
     this.ufoElement.addEventListener("timeupdate", this.handleTimeUpdate)
+    this.ufoElement.seekPreviewPainter = (t, canvas) => this.seekPreviewOf(canvas).paint(t, canvas)
+    // The weather is heard through this element, the button that silences it is the player's.
+    this.ufoElement.addEventListener("mutedchange", event => this.weatherAudio.setMuted((event as CustomEvent<{ muted: boolean }>).detail.muted))
     this.ufoElement.addEventListener("referenceview", event => this.applyReferenceView((event as CustomEvent<{ shown: boolean; opacity: number }>).detail))
     this.ufoElement.canvasElement.addEventListener("pointermove", this.handlePointerMove)
     this.ufoElement.canvasElement.addEventListener("pointerleave", this.handlePointerLeave)
@@ -663,6 +668,8 @@ export class SceneElement extends HTMLElement {
     clearTimeout(this.thunderTimeoutId)
     this.weatherAudio.dispose()
     this.vehicleAudio.dispose()
+    this.seekPreview?.dispose()
+    this.seekPreview = undefined
     // The graphics context goes back to the browser once it is clear this element is not merely
     // being moved (a move is a disconnection and a reconnection in the same task) — see
     // SceneRenderer.releaseContext.
@@ -844,6 +851,7 @@ export class SceneElement extends HTMLElement {
 
   set sightingData(json: SightingRecordingJson) {
     this.ufoElement.sightingData = json
+    this.seekPreview?.recordingChanged(json)
     // An interpretation is OF one recording: another one's bodies have nothing to stand for here.
     // What the new one starts as is its observer's own account of what it was, if they gave one.
     this.interpretationShown = this.inTheRound ? this.ufoElement.sighting.interpretation : undefined
@@ -856,6 +864,38 @@ export class SceneElement extends HTMLElement {
     this.sceneRenderer.compileNextFrameOffThread()
     // Also resolves+applies weather at t=0 — see updateAstronomy's own doc comment.
     this.updateAstronomy(0)
+  }
+
+  /** The picture over the seek bar's pointer, drawn by a second scene — see SeekPreview. Built the
+   * first time it is asked for. */
+  private seekPreview?: SeekPreview
+
+  private seekPreviewOf(canvas: HTMLCanvasElement): SeekPreview {
+    // The preview has the picture's own proportions, whatever the recording's format is.
+    const aspect = this.sceneCanvas.width > 0 && this.sceneCanvas.height > 0 ? this.sceneCanvas.width / this.sceneCanvas.height : 16 / 9
+    const height = Math.round(canvas.width / aspect)
+    if (canvas.height !== height) canvas.height = height
+    return this.seekPreview ??= new SeekPreview(this as unknown as PreviewableScene, () => document.createElement(SCENE_ELEMENT_NAME) as unknown as PreviewableScene)
+  }
+
+  /** Puts the scene at an instant of the recording, for whoever draws it from a second scene — see
+   * SeekPreview. The frame itself is asked for by snapshotTo. */
+  showAt(t: number): void {
+    this.ufoElement.currentTime = t
+    this.framesAtAsk = this.sceneRenderer.framesDrawn
+  }
+
+  private framesAtAsk = 0
+
+  /** Draws the scene into `target` if a frame has been drawn since showAt, and says whether it was.
+   * Copied in the very task the frame is drawn in: the drawing buffer is not kept past it. */
+  snapshotTo(target: HTMLCanvasElement): boolean {
+    this.sceneRenderer.frame(performance.now())
+    if (this.sceneRenderer.framesDrawn === this.framesAtAsk) return false
+    const context = target.getContext("2d")
+    if (!context) return false
+    context.drawImage(this.sceneCanvas, 0, 0, target.width, target.height)
+    return true
   }
 
   /** A loaded picture's width over its height, undefined until it has arrived — see

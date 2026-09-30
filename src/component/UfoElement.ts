@@ -9,6 +9,7 @@ import { Player } from "../engine/playback/Player.js"
 import type { PlaybackState } from "../engine/playback/Player.js"
 import { CanvasRenderer } from "../render/CanvasRenderer.js"
 import { SightingAudio } from "../audio/SightingAudio.js"
+import { PlayerIcons } from "./PlayerIcons.js"
 import { fromSightingJson, toSightingJson } from "../engine/persistence/sightingJson.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
 import { RecordingIssues } from "../engine/persistence/RecordingIssue.js"
@@ -155,6 +156,16 @@ export class UfoElement extends HTMLElement {
   private readonly milestoneCaption: HTMLElement
   private readonly timeStartLabel: HTMLElement
   private readonly timeEndLabel: HTMLElement
+  /** The one shape the position and the length share, and the one thing to click to switch them. */
+  private readonly timePill: HTMLElement
+  private readonly muteButton: HTMLButtonElement
+  private readonly controlsRight: HTMLElement
+  private readonly seekSegments: HTMLElement
+  private readonly seekDot: HTMLElement
+  private readonly seekPreview: HTMLElement
+  private readonly seekPreviewCanvas: HTMLCanvasElement
+  private readonly seekPreviewTitle: HTMLElement
+  private readonly seekPreviewTime: HTMLElement
 
   /** The observer's own path, rebuilt whenever the recording changes — undefined for a recording
    * that states no coordinates, which is what hides the map button entirely. */
@@ -298,6 +309,7 @@ export class UfoElement extends HTMLElement {
   /** Bound once so document.removeEventListener (disconnectedCallback) can actually find it. */
   private readonly handleFullscreenChange = () => {
     this.updateFullscreenButton()
+    this.updateMuteButton()
     // Entering or leaving fullscreen resizes the stage under the map, and a canvas whose backing
     // store stays at the old size comes back as a blurred enlargement of itself.
     this.resizeObserverMap()
@@ -570,16 +582,24 @@ export class UfoElement extends HTMLElement {
     this.milestoneCaption = this.shadow.getElementById("milestone-caption")!
     this.timeStartLabel = this.shadow.getElementById("time-start")!
     this.timeEndLabel = this.shadow.getElementById("time-end")!
-    for (const label of [this.timeStartLabel, this.timeEndLabel]) {
-      label.addEventListener("click", () => this.toggleTimeDisplay())
-      // Reachable from the keyboard too, since role="button" promises as much. Space is guarded
-      // against its own default, which would scroll the page out from under the toolbar.
-      label.addEventListener("keydown", event => {
-        if (event.key !== "Enter" && event.key !== " ") return
-        event.preventDefault()
-        this.toggleTimeDisplay()
-      })
-    }
+    this.timePill = this.shadow.getElementById("time")!
+    this.muteButton = this.shadow.getElementById("mute") as HTMLButtonElement
+    this.controlsRight = this.shadow.getElementById("controls-right")!
+    this.seekSegments = this.shadow.getElementById("seek-segments")!
+    this.seekDot = this.shadow.getElementById("seek-dot")!
+    this.seekPreview = this.shadow.getElementById("seek-preview")!
+    this.seekPreviewCanvas = this.shadow.getElementById("seek-preview-canvas") as HTMLCanvasElement
+    this.seekPreviewTitle = this.shadow.getElementById("seek-preview-title")!
+    this.seekPreviewTime = this.shadow.getElementById("seek-preview-time")!
+    this.timePill.addEventListener("click", () => this.toggleTimeDisplay())
+    // Reachable from the keyboard too, since role="button" promises as much. Space is guarded
+    // against its own default, which would scroll the page out from under the toolbar.
+    this.timePill.addEventListener("keydown", event => {
+      if (event.key !== "Enter" && event.key !== " ") return
+      event.preventDefault()
+      this.toggleTimeDisplay()
+    })
+    this.muteButton.addEventListener("click", () => this.toggleMuted())
     this.fullscreenTarget = this.stageElement
 
     this.playPauseButton.addEventListener("click", () => this.togglePlayPause())
@@ -607,8 +627,8 @@ export class UfoElement extends HTMLElement {
     this.seekInput.addEventListener("input", () => this.player.seek(this.snapSeekToMark(Number(this.seekInput.value))))
     this.seekInput.addEventListener("pointerdown", event => { this.seekSnapArmed = true; this.nameMarkUnder(event) })
     this.seekInput.addEventListener("pointerup", () => { this.seekSnapArmed = false })
-    this.seekInput.addEventListener("pointermove", event => this.nameMarkUnder(event))
-    this.seekInput.addEventListener("pointerleave", () => this.seekInput.removeAttribute("title"))
+    this.seekInput.addEventListener("pointermove", event => { this.nameMarkUnder(event); this.hoverSeek(event) })
+    this.seekInput.addEventListener("pointerleave", () => { this.seekInput.removeAttribute("title"); this.leaveSeek() })
     this.seekInput.addEventListener("keydown", this.handleSeekKey)
     this.canvas.addEventListener("click", event => {
       if (!this.enableClickToPlay) return
@@ -639,6 +659,7 @@ export class UfoElement extends HTMLElement {
     this.updateTimeLabels()
     this.updatePlayPauseButton()
     this.updateFullscreenButton()
+    this.updateMuteButton()
     this.updateObserverMapButton()
     this.updateReferencesButton()
     this.updateMilestonesButton()
@@ -919,7 +940,7 @@ export class UfoElement extends HTMLElement {
   set showToolbar(show: boolean) {
     this.toolbar.classList.toggle("hidden", !show)
     if (show) {
-      this.toolbar.appendChild(this.fullscreenButton)
+      this.controlsRight.appendChild(this.fullscreenButton)
     } else {
       this.cornerButtons.appendChild(this.fullscreenButton)
     }
@@ -1018,8 +1039,8 @@ export class UfoElement extends HTMLElement {
     if (host) {
       for (const control of controls) host.appendChild(control)
     } else {
-      const end = this.fullscreenButton.parentElement === this.toolbar ? this.fullscreenButton : null
-      for (const control of controls) this.toolbar.insertBefore(control, end)
+      const end = this.fullscreenButton.parentElement === this.controlsRight ? this.fullscreenButton : null
+      for (const control of controls) this.controlsRight.insertBefore(control, end)
     }
   }
 
@@ -1094,6 +1115,102 @@ export class UfoElement extends HTMLElement {
         return mark
       })
     )
+    this.refreshSeekSegments(duration, milestones.map(milestone => milestone.t))
+  }
+
+  /** The bar's segments, one per stretch between two moments (or the one whole bar, without any),
+   * and what each is filled with — see paintSeekProgress. */
+  private seekSegmentList: Array<{ start: number; end: number; element: HTMLElement; played: HTMLElement; hover: HTMLElement }> = []
+
+  /**
+   * Cuts the bar where the moments begin. A moment at the very start, or past the end, cuts nothing:
+   * an empty first segment would be a bar that begins with a gap. Turned off with the moments
+   * themselves (see setMilestonesShown), which leaves the bar whole.
+   */
+  private refreshSeekSegments(duration: number, moments: readonly number[]): void {
+    const cuts = this.milestonesShown && duration > 0
+      ? [...new Set(moments.filter(t => t > 0 && t < duration))].sort((a, b) => a - b)
+      : []
+    const bounds = [0, ...cuts, Math.max(duration, 0)]
+    this.seekSegmentList = []
+    const segments: HTMLElement[] = []
+    for (let i = 0; i < bounds.length - 1; i++) {
+      const segment = document.createElement("div")
+      segment.className = "seek-segment"
+      segment.style.flexGrow = String(Math.max(bounds[i + 1]! - bounds[i]!, 1))
+      const hover = document.createElement("i")
+      hover.className = "seek-hover"
+      const played = document.createElement("i")
+      played.className = "seek-played"
+      segment.append(hover, played)
+      segments.push(segment)
+      this.seekSegmentList.push({ start: bounds[i]!, end: bounds[i + 1]!, element: segment, played, hover })
+    }
+    this.seekSegments.replaceChildren(...segments)
+    this.paintSeekProgress(this.player.time)
+  }
+
+  /** How much of a segment a position has reached, as a CSS percentage. */
+  private static fillOf(segment: { start: number; end: number }, t: number): string {
+    const span = segment.end - segment.start
+    const share = span > 0 ? (t - segment.start) / span : t >= segment.end ? 1 : 0
+    return `${Math.min(Math.max(share, 0), 1) * 100}%`
+  }
+
+  /** Fills the segments up to the playhead and moves the dot to it. Cheap enough for every frame:
+   * a handful of style writes, no layout read. */
+  private paintSeekProgress(t: number): void {
+    for (const segment of this.seekSegmentList) segment.played.style.width = UfoElement.fillOf(segment, t)
+    const duration = this.player.seekableDuration
+    this.seekDot.style.left = `${duration > 0 ? Math.min(Math.max(t / duration, 0), 1) * 100 : 0}%`
+  }
+
+  /**
+   * What the pointer is over on the bar: the bar lit up to it, and the preview above — the moment's
+   * name and time, and the picture when whoever composes this element can draw one.
+   */
+  private hoverSeek(event: PointerEvent): void {
+    const rect = this.seekInput.getBoundingClientRect()
+    const duration = this.player.seekableDuration
+    if (rect.width <= 0 || duration <= 0) return
+    const share = Math.min(Math.max((event.clientX - rect.left) / rect.width, 0), 1)
+    const t = share * duration
+    const last = this.seekSegmentList.length - 1
+    this.seekSegmentList.forEach((segment, index) => {
+      segment.hover.style.width = UfoElement.fillOf(segment, t)
+      segment.element.classList.toggle("hovered", t >= segment.start && (t < segment.end || index === last))
+    })
+    const milestones = this.milestonesShown ? this.sighting.milestones : []
+    const moment = milestones.length > 0 ? resolveMilestoneAt(milestones, t) : undefined
+    const title = moment ? this.said.read(moment.label) ?? "" : ""
+    this.seekPreviewTitle.textContent = title
+    this.seekPreviewTitle.hidden = title === ""
+    this.seekPreviewTime.textContent = this.formatPosition(t)
+    this.seekPreview.hidden = false
+    const width = this.seekPreview.offsetWidth
+    this.seekPreview.style.left = `${Math.min(Math.max(share * rect.width - width / 2, 0), Math.max(rect.width - width, 0))}px`
+    this.paintSeekPreview(t)
+  }
+
+  private leaveSeek(): void {
+    for (const segment of this.seekSegmentList) {
+      segment.hover.style.width = "0"
+      segment.element.classList.remove("hovered")
+    }
+    this.seekPreview.hidden = true
+  }
+
+  /**
+   * Draws what the picture is at `t` into the given canvas, or nothing — set by a composing element
+   * that can (see SceneElement). Without one, the preview is the moment's name and time alone.
+   * Called on every move of the pointer over the bar, so it answers for itself how much it draws.
+   */
+  seekPreviewPainter?: (t: number, canvas: HTMLCanvasElement) => void
+
+  private paintSeekPreview(t: number): void {
+    const painter = this.seekPreviewPainter
+    this.seekPreviewCanvas.hidden = painter === undefined
+    painter?.(t, this.seekPreviewCanvas)
   }
 
   /** Whether the next seek from the bar may snap to a mark: only the first one of a press, so that
@@ -1350,6 +1467,7 @@ export class UfoElement extends HTMLElement {
       .filter(shape => shape.transparency < 1).map(shape => this.shifted(shape, shift).bounds))
     this.keepObserverMapClear()
     this.seekInput.value = String(t)
+    this.paintSeekProgress(t)
     this.timeStartLabel.textContent = this.formatPosition(t)
     this.showMilestoneAt(t)
     this.paintObserverMap(t)
@@ -1455,7 +1573,7 @@ export class UfoElement extends HTMLElement {
 
   private updatePlayPauseButton(): void {
     const isPlaying = this.player.playbackState === "playing"
-    this.playPauseButton.textContent = isPlaying ? "⏸" : "▶"
+    this.playPauseButton.innerHTML = isPlaying ? PlayerIcons.PAUSE : PlayerIcons.PLAY
     // Nothing to play with zero observation duration (no declared duration and nothing recorded
     // yet) — disabled rather than silently doing nothing on click, which otherwise briefly
     // flickers into "playing" and straight back out again every time (see Player.play()'s
@@ -1576,6 +1694,7 @@ export class UfoElement extends HTMLElement {
     this.simulatedFullscreen = true
     document.addEventListener("keydown", this.handleSimulatedFullscreenKey)
     this.updateFullscreenButton()
+    this.updateMuteButton()
   }
 
   private exitSimulatedFullscreen(): void {
@@ -1589,6 +1708,7 @@ export class UfoElement extends HTMLElement {
     this.simulatedFullscreen = false
     document.removeEventListener("keydown", this.handleSimulatedFullscreenKey)
     this.updateFullscreenButton()
+    this.updateMuteButton()
   }
 
   /**
@@ -1946,6 +2066,7 @@ export class UfoElement extends HTMLElement {
   private setMilestonesShown(shown: boolean): void {
     this.milestonesShown = shown
     this.milestoneMarks.hidden = !shown
+    this.refreshSeekSegments(this.player.seekableDuration, sortedMilestones(this.sighting.milestones).map(milestone => milestone.t))
     this.milestonesButton.setAttribute("aria-pressed", String(shown))
     this.updateMilestonesButton()
     // The caption is driven by the playhead, not by this — asking it again is what makes it appear
@@ -2064,8 +2185,37 @@ export class UfoElement extends HTMLElement {
     return Gait.bodyAt(this.currentSighting, t, this.steadyObserver)
   }
 
+  /** Whether the recording's sound is silenced — by the reader, with the button beside play. Kept
+   * here and told to whoever else makes sound over it (see SceneElement's weather) by an event. */
+  private mutedState = false
+
+  get muted(): boolean {
+    return this.mutedState
+  }
+
+  set muted(muted: boolean) {
+    if (muted === this.mutedState) return
+    this.mutedState = muted
+    this.sightingAudio.setMuted(muted)
+    this.updateMuteButton()
+    this.dispatchEvent(new CustomEvent("mutedchange", { bubbles: true, composed: true, detail: { muted } }))
+  }
+
+  toggleMuted(): void {
+    this.muted = !this.mutedState
+  }
+
+  private updateMuteButton(): void {
+    this.muteButton.innerHTML = this.mutedState ? PlayerIcons.MUTED : PlayerIcons.VOLUME
+    const label = this.mutedState ? this.messages.unmute : this.messages.mute
+    this.muteButton.title = label
+    this.muteButton.setAttribute("aria-label", label)
+    this.muteButton.setAttribute("aria-pressed", String(this.mutedState))
+  }
+
   private updateFullscreenButton(): void {
     const isFullscreen = this.simulatedFullscreen || document.fullscreenElement === this.fullscreenTarget
+    this.fullscreenButton.innerHTML = isFullscreen ? PlayerIcons.EXIT_FULLSCREEN : PlayerIcons.ENTER_FULLSCREEN
     this.fullscreenButton.title = isFullscreen ? this.messages.exitFullscreen : this.messages.fullscreen
     this.fullscreenButton.setAttribute("aria-label", this.fullscreenButton.title)
   }
@@ -2115,15 +2265,13 @@ export class UfoElement extends HTMLElement {
     const suffix = this.canSwitchTimeDisplay ? ` — ${hint}` : ""
     this.timeStartLabel.title = this.messages.currentPosition + suffix
     this.timeEndLabel.title = this.messages.duration + suffix
-    for (const label of [this.timeStartLabel, this.timeEndLabel]) {
-      label.classList.toggle("switchable", this.canSwitchTimeDisplay)
-      if (this.canSwitchTimeDisplay) {
-        label.setAttribute("role", "button")
-        label.setAttribute("tabindex", "0")
-      } else {
-        label.removeAttribute("role")
-        label.removeAttribute("tabindex")
-      }
+    this.timePill.classList.toggle("switchable", this.canSwitchTimeDisplay)
+    if (this.canSwitchTimeDisplay) {
+      this.timePill.setAttribute("role", "button")
+      this.timePill.setAttribute("tabindex", "0")
+    } else {
+      this.timePill.removeAttribute("role")
+      this.timePill.removeAttribute("tabindex")
     }
   }
 
@@ -2132,6 +2280,7 @@ export class UfoElement extends HTMLElement {
     this.updateTimeLabelTitles()
     this.updatePlayPauseButton()
     this.updateFullscreenButton()
+    this.updateMuteButton()
     this.updateObserverMapButton()
     this.updateReferencesButton()
     this.updateMilestonesButton()

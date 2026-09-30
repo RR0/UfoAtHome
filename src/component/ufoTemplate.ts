@@ -56,20 +56,45 @@ export const html = `
        than inside them, because it is a sentence and the toolbar is a row of buttons. Empty and
        hidden for the recordings that name no moment, which is most of them. -->
   <div id="milestone-caption" class="milestone-caption" hidden></div>
+  <!-- Laid out as the video sites lay theirs out, so that a reader's habits carry over: the bar over
+       the picture with no panel behind it, and under it the buttons, each on a translucent dark
+       shape of its own. -->
   <div class="toolbar auto-hide" id="toolbar">
-    <button id="play-pause" type="button" title="Play" aria-label="Play">▶</button>
-    <span id="time-start" class="time-label" title="Current position">0:00</span>
-    <!-- The bar and the marks over it share one box so a mark can be placed by percentage of the
-         track. The input keeps its own full width inside it; the marks sit on top and only the
-         marks themselves take a click. -->
+    <!-- The moments cut the bar into segments (see refreshMilestoneMarks); what has played, and what
+         the pointer is over, fill them. The range input on top keeps the pointer, the keyboard and
+         the accessibility of a slider, and draws nothing itself. The marks stay real buttons over
+         it, for whoever reaches a moment by keyboard. -->
     <div id="seek-track" class="seek-track">
+      <div id="seek-segments" class="seek-segments" aria-hidden="true"></div>
+      <div id="seek-dot" class="seek-dot" aria-hidden="true"></div>
       <input id="seek" type="range" min="0" max="0" value="0" step="1"/>
       <div id="milestone-marks" class="milestone-marks"></div>
+      <!-- What is under the pointer: the moment's name and time, and the picture itself when the
+           element composing this one can draw it (see UfoElement.seekPreviewPainter). -->
+      <div id="seek-preview" class="seek-preview" hidden>
+        <canvas id="seek-preview-canvas" class="seek-preview-canvas" width="160" height="90" hidden></canvas>
+        <div id="seek-preview-title" class="seek-preview-title" hidden></div>
+        <div id="seek-preview-time" class="seek-preview-time"></div>
+      </div>
     </div>
-    <span id="time-end" class="time-label" title="Duration">0:00</span>
-    <!-- At the far right of the timeline, as on a video site: the picture's top-right corner is the map's. -->
-    <button id="fullscreen" type="button" title="Fullscreen" aria-label="Fullscreen">⛶</button>
-  </div>
+    <div class="controls">
+      <div class="controls-left">
+        <button id="play-pause" type="button" class="round" title="Play" aria-label="Play"></button>
+        <button id="mute" type="button" class="round" title="Mute" aria-label="Mute" aria-pressed="false"></button>
+        <!-- The position and the length in one place, and one click for both: they switch together
+             between the time of day and the time elapsed. -->
+        <span id="time" class="time-pill">
+          <span id="time-start" class="time-label" title="Current position">0:00</span>
+          <span class="time-separator" aria-hidden="true">/</span>
+          <span id="time-end" class="time-label" title="Duration">0:00</span>
+        </span>
+      </div>
+      <!-- Everything else, on one shape: the toggles parsed above land here, then the fullscreen
+           button that closes the row. -->
+      <div class="controls-right" id="controls-right">
+        <button id="fullscreen" type="button" title="Fullscreen" aria-label="Fullscreen"></button>
+      </div>
+    </div>
   </div>
 </div>
 `
@@ -231,11 +256,11 @@ canvas[data-cursor="rotate"] {
 .toolbar {
   pointer-events: auto;
   display: flex;
-  align-items: center;
-  gap: 0.5em;
-  padding: 0.4em 0.6em;
-  background: rgba(0, 0, 0, 0.55);
+  flex-direction: column;
+  gap: 0.1em;
+  padding: 0 0.7em 0.5em;
   transition: opacity 0.15s ease;
+  color: #fff;
 }
 /* The toolbar and the corner buttons show only while the pointer is over the picture, playing or
    paused. Not :focus-within: a clicked button or range keeps focus after the pointer leaves, and
@@ -256,19 +281,107 @@ canvas[data-cursor="rotate"] {
 .toolbar.hidden {
   display: none;
 }
-/* Takes the width the bare <input id="seek"> used to take, so nothing else in the row moves. */
+/* The bar itself: no panel behind it, only the segments' own light lines over the picture. Its box
+   is taller than the line it draws, so that it can be found and grabbed with a finger. */
 .seek-track {
   position: relative;
-  flex: 1;
+  height: 1.3em;
   display: flex;
   align-items: center;
+  cursor: pointer;
 }
-.seek-track #seek {
-  flex: 1;
+/* The moments' segments, cut apart by a thin gap — see UfoElement.refreshMilestoneMarks. Each is as
+   long as the time it covers (flex-grow set from script), so a segment's width says how long that
+   part of the account lasts. */
+.seek-segments {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  gap: 2px;
+  align-items: center;
+  pointer-events: none;
+}
+.seek-segment {
+  position: relative;
+  flex: 1 1 0;
   min-width: 0;
+  height: 3px;
+  border-radius: 2px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.35);
+  transition: height 0.1s ease;
 }
-/* Over the bar, and transparent to the pointer except on a mark itself — dragging the bar between
-   two moments has to keep working. */
+/* Only the segment under the pointer grows, as on the video sites: it is the one that would be
+   jumped to. Reaching the bar by keyboard grows them all, since none is pointed at. */
+.seek-segment.hovered,
+.seek-track:has(:focus-visible) .seek-segment {
+  height: 5px;
+}
+/* Filled up to the pointer while it is over the bar, lighter than what has played. */
+.seek-hover,
+.seek-played {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 0;
+}
+.seek-hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+.seek-played {
+  background: #f03;
+}
+/* The playhead is drawn here rather than left to the input's own thumb, which stands a half-thumb in
+   from each end and so never sits over the fill it ends. Seen only while the bar is being
+   reached for, as on the video sites. */
+.seek-dot {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 13px;
+  height: 13px;
+  margin: -6.5px 0 0 -6.5px;
+  border-radius: 50%;
+  background: #f03;
+  transform: scale(0);
+  transition: transform 0.1s ease;
+  pointer-events: none;
+}
+.seek-track:hover .seek-dot,
+.seek-track:has(:focus-visible) .seek-dot {
+  transform: scale(1);
+}
+/* The input takes the whole bar and every gesture on it, and draws nothing: a zero-width thumb, so
+   that a position along the input is the same position along the segments. */
+.seek-track #seek {
+  position: relative;
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  opacity: 0;
+  appearance: none;
+  cursor: pointer;
+}
+.seek-track #seek::-webkit-slider-thumb {
+  appearance: none;
+  width: 0;
+  height: 100%;
+}
+.seek-track #seek::-moz-range-thumb {
+  width: 0;
+  height: 100%;
+  border: 0;
+}
+/* Over the bar, and transparent to the pointer: the marks are for the keyboard and for the
+   accessibility tree; the segments are what shows. */
 .milestone-marks[hidden] {
   display: none;
 }
@@ -280,10 +393,6 @@ canvas[data-cursor="rotate"] {
   bottom: 0;
   pointer-events: none;
 }
-/* Seen, never grabbed: a mark standing over the bar took the pointer away from the thumb under it
-   — at 0 s the thumb sits under "A" and could not be dragged at all. The bar keeps the pointer and
-   snaps to a mark clicked within a few pixels (see UfoElement.snapSeekToMark); the mark stays a
-   button for the keyboard. */
 .milestone-mark {
   position: absolute;
   top: 0;
@@ -293,27 +402,58 @@ canvas[data-cursor="rotate"] {
   transform: translateX(-50%);
   border: none;
   background: none;
-  cursor: pointer;
   pointer-events: none;
   color: inherit;
   font: inherit;
-  line-height: 0;
+  opacity: 0;
 }
-/* The mark itself is the thin line inside that hit area: a 2 px tick is impossible to hit with a
-   finger, and a 10 px tick would hide the bar under it. */
-.milestone-mark::before {
-  content: "";
+.milestone-mark:focus-visible {
+  opacity: 1;
+  outline: 2px solid #fff;
+}
+/* What the pointer is over: the moment's picture, its name, its time — above the bar, following
+   the pointer and kept inside the picture. */
+.seek-preview {
   position: absolute;
-  left: 50%;
-  top: 15%;
-  bottom: 15%;
-  width: 2px;
-  transform: translateX(-50%);
-  background: #fff;
-  box-shadow: 0 0 2px rgba(0, 0, 0, 0.8);
+  bottom: 100%;
+  left: 0;
+  margin-bottom: 0.6em;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2em;
+  max-width: 100%;
+  color: #fff;
+  font-size: 0.85em;
+  text-align: center;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+  pointer-events: none;
 }
-.milestone-mark:hover::before, .milestone-mark:focus-visible::before {
-  width: 4px;
+.seek-preview[hidden],
+.seek-preview-canvas[hidden],
+.seek-preview-title[hidden] {
+  display: none;
+}
+.seek-preview-canvas {
+  width: 160px;
+  height: auto;
+  border: 2px solid #fff;
+  border-radius: 6px;
+  background: #000;
+}
+/* Until the first picture has been drawn there is nothing to show: its frame stays, so that the
+   preview does not jump when the picture arrives. */
+.seek-preview-canvas:not([data-ready]) {
+  visibility: hidden;
+}
+.seek-preview-title {
+  font-weight: 700;
+}
+.seek-preview-time {
+  padding: 0.1em 0.5em;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.55);
+  font-variant-numeric: tabular-nums;
 }
 .playback-flash {
   position: absolute;
@@ -542,54 +682,108 @@ canvas[data-cursor="rotate"] {
     opacity: 1;
   }
 }
-input[type=range] {
-  flex: 1;
+/* The buttons under the bar, each on a translucent dark shape — over the picture, never a panel of
+   their own — and the fewer of the picture they cover the better. */
+.controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5em;
 }
-.toolbar button {
+.controls-left,
+.controls-right {
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  min-width: 0;
+}
+.controls-right {
+  padding: 0 0.3em;
+  border-radius: 1.3em;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
+}
+.controls button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.8em;
-  height: 1.8em;
-  padding: 0;
-  border-radius: 3px;
+  flex: 0 0 auto;
+  min-width: 2.4em;
+  height: 2.6em;
+  padding: 0 0.3em;
+  border: none;
+  border-radius: 50%;
   cursor: pointer;
   font-size: 1em;
   line-height: 1;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.92);
+  transition: background-color 0.15s ease;
 }
-.toolbar button[aria-pressed="true"] {
-  outline: 2px solid #39f;
+.controls .round {
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
+}
+.controls button:hover,
+.controls button:focus-visible {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+/* A toggle that is on says so with a line under it, not with a frame around it. */
+.controls button[aria-pressed="true"] {
+  box-shadow: inset 0 -3px 0 #f03;
+  border-radius: 0.3em;
+}
+.controls .round[aria-pressed="true"] {
+  box-shadow: none;
+}
+.controls button svg {
+  display: block;
 }
 /* Same trap as .corner-buttons: a display of its own outranks the UA sheet's [hidden]. */
-.toolbar button[hidden],
-.toolbar input[hidden] {
+.controls button[hidden],
+.controls input[hidden] {
   display: none;
 }
 /* The pictures' opacity slider, beside its button: a thumb's width, no more, and never the seek
    bar's own stretch. */
-.toolbar #reference-opacity {
+.controls #reference-opacity {
   flex: 0 0 auto;
   width: 5.5em;
   margin: 0;
-  accent-color: #39f;
+  accent-color: #f03;
 }
-.toolbar button:disabled {
+.controls button:disabled {
   cursor: default;
   opacity: 0.4;
 }
-.time-label.switchable {
-  cursor: pointer;
-}
-.time-label.switchable:hover,
-.time-label.switchable:focus-visible {
-  text-decoration: underline;
-}
-.time-label {
+.time-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  padding: 0 0.9em;
+  height: 2.6em;
+  border-radius: 1.3em;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
   color: #fff;
   font-variant-numeric: tabular-nums;
-  font-size: 0.85em;
-  min-width: 3em;
+  font-size: 0.9em;
+  white-space: nowrap;
+}
+.time-pill.switchable {
+  cursor: pointer;
+}
+.time-pill.switchable:hover,
+.time-pill.switchable:focus-visible {
+  background: rgba(0, 0, 0, 0.65);
+}
+.time-label {
   text-align: center;
+}
+.time-separator {
+  opacity: 0.75;
 }
 /* A small picture — a catalogue card, a sidebar embed. The map is not offered there: at this size
    it would be too small to read and would cover most of the sky it is meant to explain, and its
@@ -602,22 +796,18 @@ input[type=range] {
     display: none !important;
   }
   .toolbar {
-    gap: 0.25em;
-    padding: 0.3em 0.35em;
+    padding: 0 0.35em 0.3em;
   }
-  .time-label {
-    min-width: 0;
-    flex-shrink: 0;
+  .controls-left,
+  .controls-right {
+    gap: 0.15em;
+  }
+  .time-pill {
+    padding: 0 0.6em;
   }
   /* The picture's opacity slider too: its on/off button stays, and the full-size player has both. */
-  .toolbar #reference-opacity {
+  .controls #reference-opacity {
     display: none !important;
-  }
-  /* The seek bar gives up its width first: a range input keeps an intrinsic 130 px otherwise, and
-     that is what pushed a card's last buttons out of it. */
-  .seek-track,
-  .seek-track #seek {
-    min-width: 0;
   }
 }
 .tooltip {

@@ -171,8 +171,8 @@ export class SightingElement extends HTMLElement {
     this.sceneElement.ufoElement.creditShownExternally = true
     // Listed in this element's own info panel: the scene's own credits button would say it twice.
     this.sceneElement.ownCredits = false
-    // The toggles stand beside the info button rather than in the picture — see UfoElement.hostControls.
-    this.sceneElement.ufoElement.hostControls(this.shadow.getElementById("scene-controls")!)
+    // The playback layer's toggles stay under the timeline, among the player's own buttons (see
+    // UfoElement.hostControls): this row keeps what belongs to the account, not to the playback.
     this.shadow.getElementById("ufo-slot")!.replaceWith(this.sceneElement)
 
     this.toolbarElement = this.shadow.getElementById("toolbar")!

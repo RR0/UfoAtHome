@@ -70,6 +70,26 @@ export class SightingAudio {
    * for now rather than the one captured when loading began. */
   private requested?: SightingSound
 
+  private muted = false
+  private master?: GainNode
+
+  /** Where every voice is sent, so that one gain silences them all at once, whatever is playing. */
+  private output(context: AudioContext): GainNode {
+    if (!this.master) {
+      this.master = context.createGain()
+      this.master.gain.value = this.muted ? 0 : 1
+      this.master.connect(context.destination)
+    }
+    return this.master
+  }
+
+  /** Silences or restores the whole sound, without touching what it is doing — a track heard again
+   * is where it would have got to, not where it was left. */
+  setMuted(muted: boolean): void {
+    this.muted = muted
+    if (this.master) this.master.gain.value = muted ? 0 : 1
+  }
+
   /** Unlocks the AudioContext — must be called from a real user gesture. Safe to call repeatedly.
    * Never throws: a browser with no Web Audio (jsdom, a locked-down policy) just means the
    * sighting stays silent, the same degrade-quietly rule as WeatherAudio.resume. */
@@ -126,6 +146,7 @@ export class SightingAudio {
     this.silence()
     void this.context?.close()
     this.context = undefined
+    this.master = undefined
     this.buffers.clear()
     this.noiseBuffer = undefined
     this.crackleBuffer = undefined
@@ -183,7 +204,7 @@ export class SightingAudio {
     gain.gain.value = 0
     first.connect(filter)
     second.connect(filter)
-    filter.connect(gain).connect(context.destination)
+    filter.connect(gain).connect(this.output(context))
     first.start()
     second.start()
     return {
@@ -212,7 +233,7 @@ export class SightingAudio {
     const gain = context.createGain()
     gain.gain.value = 0
     vibrato.connect(vibratoDepth).connect(oscillator.frequency)
-    oscillator.connect(gain).connect(context.destination)
+    oscillator.connect(gain).connect(this.output(context))
     oscillator.start()
     vibrato.start()
     return {
@@ -240,7 +261,7 @@ export class SightingAudio {
     filter.Q.value = 0.8
     const gain = context.createGain()
     gain.gain.value = 0
-    source.connect(filter).connect(gain).connect(context.destination)
+    source.connect(filter).connect(gain).connect(this.output(context))
     source.start()
     return {
       key,
@@ -276,7 +297,7 @@ export class SightingAudio {
     const depth = context.createGain()
     depth.gain.value = 0
     envelope.connect(depth).connect(gate.gain)
-    noise.connect(filter).connect(gate).connect(context.destination)
+    noise.connect(filter).connect(gate).connect(this.output(context))
     noise.start()
     envelope.start()
     return {
@@ -308,7 +329,7 @@ export class SightingAudio {
     source.loop = true
     const gain = context.createGain()
     gain.gain.value = 0
-    source.connect(gain).connect(context.destination)
+    source.connect(gain).connect(this.output(context))
     source.start()
     this.voice = { key, nodes: [gain], sources: [source], volumeParam: gain.gain, gainScale: 1, pitch: [] }
     // The requested volume may well have moved during the fetch+decode — apply the current one,

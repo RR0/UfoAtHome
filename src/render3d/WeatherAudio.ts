@@ -75,6 +75,25 @@ export class WeatherAudio {
     windSpeed: 0
   }
 
+  private muted = false
+  private master?: GainNode
+
+  /** Where every bed and every thunderclap is sent, so that one gain silences them all at once. */
+  private output(context: AudioContext): GainNode {
+    if (!this.master) {
+      this.master = context.createGain()
+      this.master.gain.value = this.muted ? 0 : 1
+      this.master.connect(context.destination)
+    }
+    return this.master
+  }
+
+  /** Silences or restores the whole weather, without touching what it is doing. */
+  setMuted(muted: boolean): void {
+    this.muted = muted
+    if (this.master) this.master.gain.value = muted ? 0 : 1
+  }
+
   /** Unlocks the AudioContext — must be called from a real user gesture (browsers start it
    * suspended otherwise). Safe to call repeatedly; a no-op once already running. Never throws to
    * the caller — a browser/environment with no Web Audio support (or a security policy blocking
@@ -214,6 +233,7 @@ export class WeatherAudio {
     this.windGain = undefined
     void this.context?.close()
     this.context = undefined
+    this.master = undefined
     this.buffers.clear()
   }
 
@@ -240,7 +260,7 @@ export class WeatherAudio {
       source.loop = true
       const gain = context.createGain()
       gain.gain.value = volume
-      source.connect(gain).connect(context.destination)
+      source.connect(gain).connect(this.output(context))
       source.start()
       return { source, gain }
     } catch (error) {
@@ -258,7 +278,7 @@ export class WeatherAudio {
       source.buffer = buffer
       const gain = context.createGain()
       gain.gain.value = volume
-      source.connect(gain).connect(context.destination)
+      source.connect(gain).connect(this.output(context))
       source.start()
     } catch (error) {
       console.warn("Thunder sound failed to load:", error)

@@ -1151,7 +1151,8 @@ describe("switching the counters between clock time and elapsed time", () => {
     const { time: _omitted, ...noTime } = sampleJson
     const element = mountUfo({ ...noTime, durationSeconds: 20 })
     const { start } = counters(element)
-    expect(start.getAttribute("role")).toBe(null)
+    const pill = element.shadowRoot!.getElementById("time")!
+    expect(pill.getAttribute("role")).toBe(null)
     expect(start.title).not.toContain("click")
     const before = start.textContent
     start.click()
@@ -1161,9 +1162,10 @@ describe("switching the counters between clock time and elapsed time", () => {
   it("is reachable from the keyboard, as its role promises", () => {
     const element = mountUfo(timedSighting)
     const { start } = counters(element)
-    expect(start.getAttribute("role")).toBe("button")
-    expect(start.getAttribute("tabindex")).toBe("0")
-    start.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }))
+    const pill = element.shadowRoot!.getElementById("time")!
+    expect(pill.getAttribute("role")).toBe("button")
+    expect(pill.getAttribute("tabindex")).toBe("0")
+    pill.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }))
     expect(start.textContent).toBe("0:00")
   })
 })
@@ -1653,6 +1655,38 @@ describe("the account's named moments", () => {
 
   afterEach(() => {
     document.body.innerHTML = ""
+  })
+
+  it("cuts the bar into segments where the moments begin, and leaves it whole without them", () => {
+    // A moment at the very start cuts nothing: the bar would begin with a gap.
+    const element = mount()
+    element.sightingData = withMilestones() as never
+    const segments = () => element.shadowRoot!.querySelectorAll(".seek-segment").length
+    expect(segments()).toBe(2)
+    parts(element).button.click() // moments off
+    expect(segments()).toBe(1)
+  })
+
+  it("ends the timeline with the fullscreen button, and puts the moments' toggle before it", () => {
+    const element = mount()
+    element.sightingData = withMilestones() as never
+    const right = [...element.shadowRoot!.getElementById("controls-right")!.children].map(child => child.id)
+    expect(right[right.length - 1]).toBe("fullscreen")
+    expect(right).toContain("milestones")
+  })
+
+  it("mutes and unmutes from the button beside play, and says so", () => {
+    const element = mount()
+    element.sightingData = withMilestones() as never
+    const mute = element.shadowRoot!.getElementById("mute") as HTMLButtonElement
+    const events: boolean[] = []
+    element.addEventListener("mutedchange", event => events.push((event as CustomEvent<{ muted: boolean }>).detail.muted))
+    mute.click()
+    expect(element.muted).toBe(true)
+    expect(mute.getAttribute("aria-pressed")).toBe("true")
+    mute.click()
+    expect(element.muted).toBe(false)
+    expect(events).toEqual([true, false])
   })
 
   it("stacks the caption on the controls instead of guessing their height", () => {

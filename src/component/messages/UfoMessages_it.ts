@@ -10,6 +10,8 @@ export const ufoMessages_it: UfoMessages = {
   switchToClockTime: "fai clic per mostrare l'ora del giorno",
   fullscreen: "Schermo intero",
   exitFullscreen: "Esci dallo schermo intero",
+  mute: "Disattiva audio",
+  unmute: "Attiva audio",
   showObserverMap: "Mostra dove si trovava l'osservatore",
   hideObserverMap: "Nascondi dove si trovava l'osservatore",
   mapImageryUnavailable: "Vista aerea non disponibile",

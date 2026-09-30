@@ -14,6 +14,9 @@ export interface UfoMessages {
   switchToClockTime: string
   fullscreen: string
   exitFullscreen: string
+  /** The button beside play, for the recording's sound (the reader's gesture, so a verb). */
+  mute: string
+  unmute: string
   /** Names the reader's own gesture, not the feature — see the project's wording rules. */
   showObserverMap: string
   hideObserverMap: string

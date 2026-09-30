@@ -3085,10 +3085,18 @@ export class SceneRenderer {
     this.resolution.beginDrawing()
     try {
       this.renderOnce()
+      this.drawn++
     } finally {
       this.resolution.endDrawing()
     }
     if (this.developingExposure) this.startExposure()
+  }
+
+  private drawn = 0
+
+  /** How many frames have been drawn — what a caller that needs "a frame since I asked" compares. */
+  get framesDrawn(): number {
+    return this.drawn
   }
 
   private compileBeforeNextDraw = false
