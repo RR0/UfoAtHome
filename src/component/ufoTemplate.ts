@@ -804,6 +804,20 @@ canvas[data-cursor="rotate"] {
 .controls.narrow.more-open .controls-left {
   display: none;
 }
+/* The picture's opacity slider is the widest thing in the row, and a narrow player has none to spare. */
+.controls.narrow #reference-opacity {
+  display: none !important;
+}
+/* Unfolded, the buttons still may not all fit a very small player: the pill then scrolls sideways,
+   its scrollbar out of sight, rather than run out of the picture. */
+.controls.narrow.more-open .controls-right {
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.controls.narrow.more-open .controls-right::-webkit-scrollbar {
+  display: none;
+}
 /* Further steps of the same fit: the length of the recording goes from the time, then the sound. */
 .controls.compact .time-separator,
 .controls.compact #time-end {

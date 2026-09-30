@@ -720,6 +720,9 @@ export class UfoElement extends HTMLElement {
     document.addEventListener("fullscreenchange", this.handleFullscreenChange)
     this.observerMapResizeObserver?.observe(this.observerMapPanel)
     this.controlsFitObserver?.observe(this.controlsRow)
+    // The time grows when the recording's length arrives (a clock reads "10:30 / 10:30:27"), which
+    // resizes neither the row nor the buttons.
+    this.controlsFitObserver?.observe(this.controlsRow.querySelector(".controls-left")!)
     if (typeof MutationObserver !== "undefined") {
       this.controlsMutations = new MutationObserver(() => this.fitControls())
       this.controlsMutations.observe(this.controlsRight, { attributes: true, attributeFilter: ["hidden"], childList: true, subtree: true })
