@@ -248,6 +248,8 @@ export class SceneElement extends HTMLElement {
   private readonly sceneCanvas: HTMLCanvasElement
   /** The sentence under the loader's spinner — English until the reader's names arrive. */
   private readonly loaderNote: HTMLElement
+  /** The one above the spinner: what the picture is not. */
+  private readonly loaderNotVideo: HTMLElement
   /** Exposed (not private) so a composing wrapper — e.g. SightingEditorElement, which nests a
    * `<rr0-scene>` instead of a bare `<rr0-ufo>` so the sky renders live behind the shape being
    * authored — can reach through to the same UfoElement instance this element already drives,
@@ -467,7 +469,10 @@ export class SceneElement extends HTMLElement {
     const creditsLabel = naming.names?.credits ?? CREDITS_LABEL
     this.creditsButton.title = creditsLabel
     this.creditsButton.setAttribute("aria-label", creditsLabel)
-    if (naming.names) this.loaderNote.textContent = naming.names.notAVideo
+    if (naming.names) {
+      this.loaderNotVideo.textContent = naming.names.notAVideo
+      this.loaderNote.textContent = naming.names.isASimulation
+    }
     this.sceneRenderer.setCompassPoints(naming.names?.compassPoints)
   }
 
@@ -575,6 +580,7 @@ export class SceneElement extends HTMLElement {
     this.sceneRenderer = new SceneRenderer(this.sceneCanvas)
     const loader = this.shadow.getElementById("scene-loader")!
     this.loaderNote = this.shadow.getElementById("scene-loader-note")!
+    this.loaderNotVideo = this.shadow.getElementById("scene-loader-not-video")!
     this.sceneRenderer.onFirstFrameHold = holding => {
       loader.hidden = !holding
       // The sentence saying what this is not (a video) has the picture to itself while it waits: the

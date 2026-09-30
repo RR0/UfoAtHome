@@ -2,11 +2,13 @@ export const html = `
 <div class="stage" id="stage">
   <div class="frame" id="frame">
     <canvas id="scene-canvas"></canvas>
-    <!-- The spinner, and under it what a reader waiting on a picture may take this for: a video. It is
-         not one — see SceneNames.notAVideo. Both live and die with the hold on the first frame. -->
+    <!-- The spinner in the middle, with above it what a reader waiting on a picture may take this for — a
+         video, which it is not — and below it what it is: a simulation (see SceneNames.notAVideo and
+         isASimulation). All three live and die with the hold on the first frame. -->
     <div id="scene-loader" class="scene-loader" role="progressbar" hidden>
+      <p id="scene-loader-not-video" class="scene-loader-note scene-loader-not-video">This is not a video</p>
       <div class="scene-loader-spinner"></div>
-      <p id="scene-loader-note" class="scene-loader-note">This is not a video: it is a simulation, computed in real time in your browser.</p>
+      <p id="scene-loader-note" class="scene-loader-note scene-loader-is-simulation">It is a simulation, computed in real time in your browser.</p>
     </div>
   </div>
   <div id="ufo-slot"></div>
@@ -150,10 +152,10 @@ export const css = `
 .scene-loader {
   position: absolute;
   inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  /* The spinner stays in the middle whatever the two sentences weigh: each takes one of two equal rows. */
+  display: grid;
+  grid-template-rows: 1fr auto 1fr;
+  justify-items: center;
   gap: 1em;
   animation: scene-loader-appear 0.2s ease-out 0.25s both;
   pointer-events: none;
@@ -170,8 +172,9 @@ export const css = `
   border-top-color: rgba(255, 255, 255, 0.9);
   animation: scene-loader-spin 0.9s linear infinite;
 }
-/* What the waiting picture is NOT: a video. Said only while it waits, and only where there is room
-   for a sentence — a catalogue card's picture is too small for one. */
+/* What the waiting picture is NOT (a video) above the spinner, and what it IS (a simulation) below it.
+   Said only while it waits, and only where there is room for a sentence — a catalogue card's picture
+   is too small for one. */
 .scene-loader-note {
   max-width: 24em;
   margin: 0;
@@ -180,6 +183,12 @@ export const css = `
   font: 0.9em/1.4 sans-serif;
   text-align: center;
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
+}
+.scene-loader-not-video {
+  align-self: end;
+}
+.scene-loader-is-simulation {
+  align-self: start;
 }
 @container (max-width: 360px) {
   .scene-loader-note {
