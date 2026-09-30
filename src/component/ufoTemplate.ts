@@ -552,18 +552,50 @@ canvas[data-cursor="rotate"] {
 .milestone-caption b {
   font-weight: 700;
 }
-.stage:hover .auto-hide,
-.stage:has(:focus-visible) .auto-hide {
-  opacity: 1;
-  pointer-events: auto;
+/* Only where there is a hover to speak of: a touch screen keeps ":hover" on whatever was touched last,
+   and a focus ring on the button just tapped — either would keep the controls over the picture for
+   ever after a tap, where they are meant to go after a few seconds (see UfoElement.revealControls). */
+@media (hover: hover) {
+  .stage:hover .auto-hide,
+  .stage:has(:focus-visible) .auto-hide {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .stage:hover .toolbar.auto-hide,
+  .stage:has(:focus-visible) .toolbar.auto-hide {
+    grid-template-rows: 1fr;
+  }
+  .stage:hover .toolbar.auto-hide .toolbar-inner,
+  .stage:has(:focus-visible) .toolbar.auto-hide .toolbar-inner {
+    overflow: visible;
+  }
 }
-.stage:hover .toolbar.auto-hide,
-.stage:has(:focus-visible) .toolbar.auto-hide {
-  grid-template-rows: 1fr;
-}
-.stage:hover .toolbar.auto-hide .toolbar-inner,
-.stage:has(:focus-visible) .toolbar.auto-hide .toolbar-inner {
-  overflow: visible;
+/* No hover on a touch screen: the controls are there while paused, and after a touch while playing
+   (see UfoElement.revealControls); playing untouched, the picture is all there is. */
+@media (hover: none) {
+  .auto-hide {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .toolbar.auto-hide {
+    grid-template-rows: 0fr;
+  }
+  .toolbar.auto-hide .toolbar-inner {
+    overflow: hidden;
+  }
+  .stage.paused .auto-hide,
+  .stage.touched .auto-hide {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .stage.paused .toolbar.auto-hide,
+  .stage.touched .toolbar.auto-hide {
+    grid-template-rows: 1fr;
+  }
+  .stage.paused .toolbar.auto-hide .toolbar-inner,
+  .stage.touched .toolbar.auto-hide .toolbar-inner {
+    overflow: visible;
+  }
 }
 .issues {
   position: absolute;

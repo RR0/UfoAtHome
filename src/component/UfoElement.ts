@@ -697,8 +697,17 @@ export class UfoElement extends HTMLElement {
     this.seekInput.addEventListener("pointermove", event => { this.nameMarkUnder(event); this.hoverSeek(event) })
     this.seekInput.addEventListener("pointerleave", () => { this.seekInput.removeAttribute("title"); this.leaveSeek() })
     this.seekInput.addEventListener("keydown", this.handleSeekKey)
+    // A touch screen has no hover to show the controls by, nor to take them away by: they show on a
+    // touch and go after a few seconds of playing — see revealControls.
+    this.stageElement.addEventListener("pointerdown", () => this.touchedStage(), true)
+    this.stageElement.addEventListener("pointermove", () => this.touchedStage())
     this.canvas.addEventListener("click", event => {
       if (!this.enableClickToPlay) return
+      // The touch that brought the controls back is not also a request to pause what is playing.
+      if (this.tapRevealedOnly) {
+        this.tapRevealedOnly = false
+        return
+      }
       // Where playback stood before this click, in case it turns out to be the first half of a
       // double-click — see the dblclick handler below. `detail` is the click count, so this
       // records the state once per pair rather than overwriting it with the halfway state.
@@ -1681,8 +1690,45 @@ export class UfoElement extends HTMLElement {
     button.innerHTML = icon
   }
 
+  /** How long the controls stay after the last touch, while playing, on a screen with no hover. */
+  private static readonly CONTROLS_IDLE_MS = 3000
+
+  private controlsIdleTimer?: number
+  private wasPlaying = false
+  /** Set by a touch that found the controls hidden over a playing recording: it shows them and does
+   * nothing else — the click that follows it must not pause. */
+  private tapRevealedOnly = false
+
+  private get hoverless(): boolean {
+    return typeof matchMedia === "function" && matchMedia("(hover: none)").matches
+  }
+
+  private touchedStage(): void {
+    if (!this.hoverless) return
+    const isPlaying = this.player.playbackState === "playing"
+    if (isPlaying && !this.stageElement.classList.contains("touched")) this.tapRevealedOnly = true
+    this.revealControls()
+  }
+
+  /** Shows the controls, and takes them away again after CONTROLS_IDLE_MS if the recording is
+   * playing. Paused, they stay: there is nothing behind them to see. */
+  private revealControls(): void {
+    this.stageElement.classList.add("touched")
+    window.clearTimeout(this.controlsIdleTimer)
+    if (this.player.playbackState !== "playing") return
+    this.controlsIdleTimer = window.setTimeout(() => {
+      this.stageElement.classList.remove("touched")
+      this.tapRevealedOnly = false
+    }, UfoElement.CONTROLS_IDLE_MS)
+  }
+
   private updatePlayPauseButton(): void {
     const isPlaying = this.player.playbackState === "playing"
+    this.stageElement.classList.toggle("paused", !isPlaying)
+    // Playing begins with the controls in sight, and their few seconds start there. Only when it
+    // begins: this runs on every tick, and would keep them there for ever.
+    if (isPlaying !== this.wasPlaying && isPlaying && this.hoverless) this.revealControls()
+    this.wasPlaying = isPlaying
     UfoElement.setIcon(this.playPauseButton, isPlaying ? PlayerIcons.PAUSE : PlayerIcons.PLAY)
     // Nothing to play with zero observation duration (no declared duration and nothing recorded
     // yet) — disabled rather than silently doing nothing on click, which otherwise briefly
