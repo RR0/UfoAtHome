@@ -34,6 +34,11 @@ export class PlayerIcons {
 
   /** The triangle sits a little left of where its box would centre it: its mass is at the wide
    * end, and a triangle centred by its box looks pushed to the right. */
+  static readonly SHARE = PlayerIcons.outline("M14 4l7 7-7 7v-4.2C8.6 13.8 5.4 15.6 3.5 19c.6-5.6 3.4-9.6 10.5-10.8V4z")
+  /** The chevrons of the fold-out that holds the buttons a narrow player has no room for. */
+  static readonly FOLDED = PlayerIcons.svg("M15.4 7.4 14 6l-6 6 6 6 1.4-1.4L10.8 12z")
+  static readonly UNFOLDED = PlayerIcons.svg("M8.6 16.6 10 18l6-6-6-6-1.4 1.4 4.6 4.6z")
+
   static readonly PLAY = PlayerIcons.svg("M7.4 5v14l11-7z")
   static readonly PAUSE = PlayerIcons.svg("M6 5h4v14H6zM14 5h4v14h-4z")
   static readonly VOLUME = PlayerIcons.svg("M2 9.5v5h3.5l4.5 4.5V5L5.5 9.5H2zm12.5 2.5A4 4 0 0 0 12.5 8.5v7A4 4 0 0 0 14.5 12zM12.5 4.2v2.1a6.5 6.5 0 0 1 0 11.4v2.1a8.6 8.6 0 0 0 0-15.6z")

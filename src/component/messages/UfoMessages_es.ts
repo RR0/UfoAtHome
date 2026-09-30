@@ -12,6 +12,8 @@ export const ufoMessages_es: UfoMessages = {
   exitFullscreen: "Salir de pantalla completa",
   mute: "Silenciar",
   unmute: "Activar el sonido",
+  moreControls: "Más controles",
+  fewerControls: "Menos controles",
   showObserverMap: "Ver dónde estaba el observador",
   hideObserverMap: "Ocultar dónde estaba el observador",
   mapImageryUnavailable: "Vista aérea no disponible",

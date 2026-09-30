@@ -17,6 +17,9 @@ export interface UfoMessages {
   /** The button beside play, for the recording's sound (the reader's gesture, so a verb). */
   mute: string
   unmute: string
+  /** The chevron that folds and unfolds the buttons a narrow player has no room for. */
+  moreControls: string
+  fewerControls: string
   /** Names the reader's own gesture, not the feature — see the project's wording rules. */
   showObserverMap: string
   hideObserverMap: string

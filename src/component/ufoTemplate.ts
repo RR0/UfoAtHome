@@ -96,6 +96,9 @@ export const html = `
       <!-- Everything else, on one shape: the toggles parsed above land here, then the fullscreen
            button that closes the row. -->
       <div class="controls-right" id="controls-right">
+        <!-- Only in a player too narrow for everything: it folds the buttons below away, and unfolds
+             them over the ones on the left (see UfoElement.fitControls). -->
+        <button id="controls-more" type="button" class="controls-more" title="More" aria-label="More" aria-expanded="false"></button>
         <button id="fullscreen" type="button" title="Fullscreen" aria-label="Fullscreen"></button>
       </div>
     </div>
@@ -745,6 +748,7 @@ canvas[data-cursor="rotate"] {
   min-width: 0;
 }
 .controls-right {
+  margin-left: auto;
   padding: 0.25em 0.3em;
   border-radius: 1.3em;
   background: rgba(0, 0, 0, 0.45);
@@ -784,6 +788,21 @@ canvas[data-cursor="rotate"] {
 .corner-buttons button:focus-visible {
   background-image: linear-gradient(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.2));
   color: #fff;
+}
+/* A player with no room for everything (see UfoElement.fitControls): the buttons fold behind a
+   chevron, the fullscreen button staying in sight; unfolded, they take the row over from the play
+   button, the sound and the time, which come back when it is folded again. */
+.controls-more {
+  display: none !important;
+}
+.controls.narrow .controls-more {
+  display: inline-flex !important;
+}
+.controls.narrow:not(.more-open) .controls-right > :not(.controls-more):not(#fullscreen) {
+  display: none !important;
+}
+.controls.narrow.more-open .controls-left {
+  display: none;
 }
 /* A toggle that is on says so by its glyph, solid where it was an outline — see PlayerIcons. */
 .controls button svg {

@@ -1,3 +1,4 @@
+import { PlayerIcons } from "./PlayerIcons.js"
 import type { RecordingSource } from "../engine/model/RecordingSource.js"
 import { html, css } from "./sightingTemplate.js"
 import { SightingFetch } from "../engine/net/SightingFetch.js"
@@ -201,7 +202,15 @@ export class SightingElement extends HTMLElement {
     this.labelsToggle = this.shadow.getElementById("info-labels-toggle") as HTMLButtonElement
     this.paramSummary = this.shadow.getElementById("param-summary")!
     this.labelsToggle.addEventListener("click", () => { this.showLabels = !this.showLabels })
-    this.shareButton = this.shadow.getElementById("share-button") as HTMLButtonElement
+    // Among the player's own buttons under the picture, as on the video sites — not in this header.
+    // Created here and lent to the player's row (see UfoElement.addControl); the dialog it opens is
+    // this element's own.
+    this.shareButton = document.createElement("button")
+    this.shareButton.type = "button"
+    this.shareButton.id = "share-button"
+    this.shareButton.setAttribute("aria-haspopup", "dialog")
+    this.shareButton.innerHTML = PlayerIcons.SHARE
+    this.sceneElement.ufoElement.addControl(this.shareButton)
     this.shareDialog = this.shadow.getElementById("share-dialog") as HTMLDialogElement
     this.shareTitle = this.shadow.getElementById("share-title")!
     this.shareMain = this.shadow.getElementById("share-main")!

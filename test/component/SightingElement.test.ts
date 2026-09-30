@@ -837,6 +837,19 @@ describe("SightingElement i18n", () => {
  * The info panel hands the reader the two lines it takes to put this very observation on their
  * own page — either as a replay or as the editor, both taking the same absolute `src`.
  */
+/** The share button stands among the player's own, in a shadow tree of its own: found by walking down. */
+function findDeep(root: ShadowRoot, id: string): HTMLElement | null {
+  const direct = root.getElementById(id)
+  if (direct) return direct
+  for (const el of root.querySelectorAll("*")) {
+    if (el.shadowRoot) {
+      const found = findDeep(el.shadowRoot, id)
+      if (found) return found
+    }
+  }
+  return null
+}
+
 describe("SightingElement sharing", () => {
   beforeEach(() => {
     stubFetch({ "john.json": johnSighting })
@@ -855,7 +868,7 @@ describe("SightingElement sharing", () => {
 
   it("offers the link that replays this very recording on the site's player", async () => {
     const shadow = await mounted()
-    ;(shadow.getElementById("share-button") as HTMLButtonElement).click()
+    ;(findDeep(shadow, "share-button") as HTMLButtonElement).click()
     expect((shadow.getElementById("share-link") as HTMLInputElement).value)
       .toBe("https://ufoathome.org/play/?sighting=" + encodeURIComponent("http://localhost:3000/john.json"))
     expect(shadow.getElementById("share-dialog")!.hasAttribute("open")).toBe(true)
@@ -863,7 +876,7 @@ describe("SightingElement sharing", () => {
 
   it("keeps the embed markup behind the Embed option, and comes back from it", async () => {
     const shadow = await mounted()
-    ;(shadow.getElementById("share-button") as HTMLButtonElement).click()
+    ;(findDeep(shadow, "share-button") as HTMLButtonElement).click()
     expect(shadow.getElementById("share-embed")!.hidden).toBe(true)
     ;(shadow.getElementById("share-embed-option") as HTMLButtonElement).click()
     expect(shadow.getElementById("share-embed")!.hidden).toBe(false)
@@ -892,7 +905,7 @@ describe("SightingElement embed markup", () => {
     element.observerUrls = ["john.json"]
     await new Promise(resolve => setTimeout(resolve, 0))
     // The markup is one of the ways of sharing the observation: share, then embed.
-    ;(element.shadowRoot!.getElementById("share-button") as HTMLButtonElement).click()
+    ;(findDeep(element.shadowRoot!, "share-button") as HTMLButtonElement).click()
     ;(element.shadowRoot!.getElementById("share-embed-option") as HTMLButtonElement).click()
     return element.shadowRoot as unknown as HTMLElement
   }

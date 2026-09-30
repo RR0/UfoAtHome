@@ -25,10 +25,6 @@ export const html = `
        behind the version link. Hidden for a recording with no address (set by script, pasted),
        which the editor could not open. -->
   <a id="edit-link" class="edit-link" target="_blank" rel="noopener" title="Edit this observation" aria-label="Edit this observation" hidden><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M11.3 1.3a1 1 0 0 1 1.4 0l2 2a1 1 0 0 1 0 1.4l-8.5 8.5-3.4.9.9-3.4 8.6-8.4Zm-7 9.2-.5 1.7 1.7-.5 6.9-6.9-1.2-1.2-6.9 6.9Z" fill="currentColor"/></svg></a>
-  <!-- Hands the observation on: a link to copy, and the markup to put it on another page. As on the
-       video sites, one button in the row and one small dialog, rather than options scattered
-       through the info panel. -->
-  <button id="share-button" class="info-btn" type="button" title="Share" aria-label="Share" aria-haspopup="dialog"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M14 4l7 7-7 7v-4.2C8.6 13.8 5.4 15.6 3.5 19c.6-5.6 3.4-9.6 10.5-10.8V4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></button>
   <button id="info-button" class="info-btn" type="button" title="About" aria-label="About" aria-expanded="false"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><circle cx="8" cy="3.6" r="1.4" fill="currentColor"/><path d="M6 6.5h3v6h1.5V14h-4.5v-1.5H7.5V8H6Z" fill="currentColor"/></svg></button>
   <div id="info-panel" class="info-panel" hidden>
     <button id="info-close" class="info-close" type="button" aria-label="Close">×</button>

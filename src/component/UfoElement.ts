@@ -160,6 +160,8 @@ export class UfoElement extends HTMLElement {
   private readonly timePill: HTMLElement
   private readonly muteButton: HTMLButtonElement
   private readonly volumeInput: HTMLInputElement
+  private readonly controlsRow: HTMLElement
+  private readonly moreButton: HTMLButtonElement
   private readonly controlsRight: HTMLElement
   private readonly seekSegments: HTMLElement
   private readonly seekDot: HTMLElement
@@ -318,6 +320,53 @@ export class UfoElement extends HTMLElement {
 
   /** Kept so the map follows any change of the stage's size, not only the two this element causes
    * itself: a responsive page column, a rotated phone, a sidebar opening beside the embed. */
+  /** Keeps the row of buttons what fits: refitted when the player is resized, or when a button comes
+   * or goes (a recording with no map has no map button). */
+  private readonly controlsFitObserver = typeof ResizeObserver === "undefined" ? undefined : new ResizeObserver(() => this.fitControls())
+  private controlsMutations?: MutationObserver
+
+  /**
+   * Folds the right-hand buttons behind a chevron when the row cannot hold them all beside the
+   * play button, the sound and the time. Measured with everything showing — a folded button has no
+   * width to measure — and only the row's own resize triggers it, so it costs nothing per frame.
+   */
+  private fitControls(): void {
+    const row = this.controlsRow
+    const wasOpen = row.classList.contains("more-open")
+    row.classList.remove("narrow", "more-open")
+    const left = row.querySelector(".controls-left") as HTMLElement
+    const right = this.controlsRight
+    // The chevron is not one of the buttons that had to fit.
+    const others = [...right.children].filter(child => child !== this.moreButton && getComputedStyle(child).display !== "none")
+    const rightWidth = others.reduce((sum, child) => sum + (child as HTMLElement).offsetWidth, 0) + Math.max(others.length - 1, 0) * 6 + 12
+    const narrow = row.clientWidth > 0 && left.offsetWidth + rightWidth + 16 > row.clientWidth
+    row.classList.toggle("narrow", narrow)
+    // What the reader unfolded stays unfolded through a resize, for as long as it is still needed.
+    row.classList.toggle("more-open", narrow && wasOpen)
+    this.updateMoreButton()
+  }
+
+  private setControlsFolded(folded: boolean): void {
+    this.controlsRow.classList.toggle("more-open", !folded)
+    this.updateMoreButton()
+  }
+
+  private updateMoreButton(): void {
+    const open = this.controlsRow.classList.contains("more-open")
+    UfoElement.setIcon(this.moreButton, open ? PlayerIcons.UNFOLDED : PlayerIcons.FOLDED)
+    const label = open ? this.messages.fewerControls : this.messages.moreControls
+    this.moreButton.title = label
+    this.moreButton.setAttribute("aria-label", label)
+    this.moreButton.setAttribute("aria-expanded", String(open))
+  }
+
+  /** Puts a button of the composing element among the player's own, before the fullscreen button
+   * that closes the row — as SightingElement does with its share button. */
+  addControl(button: HTMLButtonElement): void {
+    this.controlsRight.insertBefore(button, this.fullscreenButton.parentElement === this.controlsRight ? this.fullscreenButton : null)
+    this.fitControls()
+  }
+
   private readonly observerMapResizeObserver =
     typeof ResizeObserver === "undefined" ? undefined : new ResizeObserver(() => this.resizeObserverMap())
 
@@ -601,6 +650,9 @@ export class UfoElement extends HTMLElement {
       this.toggleTimeDisplay()
     })
     this.volumeInput = this.shadow.getElementById("volume") as HTMLInputElement
+    this.controlsRow = this.shadow.querySelector(".controls") as HTMLElement
+    this.moreButton = this.shadow.getElementById("controls-more") as HTMLButtonElement
+    this.moreButton.addEventListener("click", () => this.setControlsFolded(this.controlsRow.classList.contains("more-open")))
     this.muteButton.addEventListener("click", () => this.toggleMuted())
     this.volumeInput.addEventListener("input", () => {
       // Dragging down to nothing is muting, and dragging up from it is not: as on the video sites.
@@ -660,6 +712,11 @@ export class UfoElement extends HTMLElement {
     this.canvas.addEventListener("pointerleave", this.handlePointerLeave)
     document.addEventListener("fullscreenchange", this.handleFullscreenChange)
     this.observerMapResizeObserver?.observe(this.observerMapPanel)
+    this.controlsFitObserver?.observe(this.controlsRow)
+    if (typeof MutationObserver !== "undefined") {
+      this.controlsMutations = new MutationObserver(() => this.fitControls())
+      this.controlsMutations.observe(this.controlsRight, { attributes: true, attributeFilter: ["hidden"], childList: true, subtree: true })
+    }
 
     // Out of the picture from the start — see hostControls.
     this.hostControls(undefined)
@@ -689,6 +746,8 @@ export class UfoElement extends HTMLElement {
   disconnectedCallback(): void {
     document.removeEventListener("fullscreenchange", this.handleFullscreenChange)
     this.observerMapResizeObserver?.disconnect()
+    this.controlsFitObserver?.disconnect()
+    this.controlsMutations?.disconnect()
     // Leaves the page as it was found: the stand-in holds document.body's own overflow, and an
     // element removed while it is on would otherwise leave the page unable to scroll.
     this.exitSimulatedFullscreen()
