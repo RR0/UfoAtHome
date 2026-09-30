@@ -94,8 +94,17 @@ export class SightingElement extends HTMLElement {
   private readonly infoCreditsToggle: HTMLButtonElement
   private readonly infoCreditsList: HTMLElement
   private readonly infoCloseButton: HTMLButtonElement
-  private readonly infoEmbedToggle: HTMLButtonElement
-  private readonly infoEmbedPanel: HTMLElement
+  private readonly shareButton: HTMLButtonElement
+  private readonly shareDialog: HTMLDialogElement
+  private readonly shareTitle: HTMLElement
+  private readonly shareMain: HTMLElement
+  private readonly shareEmbed: HTMLElement
+  private readonly shareBack: HTMLButtonElement
+  private readonly shareClose: HTMLButtonElement
+  private readonly shareEmbedOption: HTMLButtonElement
+  private readonly shareEmbedLabel: HTMLElement
+  private readonly shareLink: HTMLInputElement
+  private readonly shareCopy: HTMLButtonElement
   private readonly embedReplayRadio: HTMLInputElement
   private readonly embedEditRadio: HTMLInputElement
   private readonly labelEmbedReplay: HTMLElement
@@ -144,7 +153,6 @@ export class SightingElement extends HTMLElement {
   private currentSrc?: string
   private infoOpen = false
   private creditsOpen = false
-  private embedOpen = false
   /** Whether the parameter strip under the render is showing. Off by default: a player dropped
    * into an article is there to be watched. Turned on by the `show-labels` attribute (a page
    * deciding for its readers) or by the info panel's own toggle (a reader deciding for
@@ -193,8 +201,17 @@ export class SightingElement extends HTMLElement {
     this.labelsToggle = this.shadow.getElementById("info-labels-toggle") as HTMLButtonElement
     this.paramSummary = this.shadow.getElementById("param-summary")!
     this.labelsToggle.addEventListener("click", () => { this.showLabels = !this.showLabels })
-    this.infoEmbedToggle = this.shadow.getElementById("info-embed-toggle") as HTMLButtonElement
-    this.infoEmbedPanel = this.shadow.getElementById("info-embed")!
+    this.shareButton = this.shadow.getElementById("share-button") as HTMLButtonElement
+    this.shareDialog = this.shadow.getElementById("share-dialog") as HTMLDialogElement
+    this.shareTitle = this.shadow.getElementById("share-title")!
+    this.shareMain = this.shadow.getElementById("share-main")!
+    this.shareEmbed = this.shadow.getElementById("share-embed")!
+    this.shareBack = this.shadow.getElementById("share-back") as HTMLButtonElement
+    this.shareClose = this.shadow.getElementById("share-close") as HTMLButtonElement
+    this.shareEmbedOption = this.shadow.getElementById("share-embed-option") as HTMLButtonElement
+    this.shareEmbedLabel = this.shadow.getElementById("share-embed-label")!
+    this.shareLink = this.shadow.getElementById("share-link") as HTMLInputElement
+    this.shareCopy = this.shadow.getElementById("share-copy") as HTMLButtonElement
     this.embedReplayRadio = this.shadow.getElementById("embed-kind-replay") as HTMLInputElement
     this.embedEditRadio = this.shadow.getElementById("embed-kind-edit") as HTMLInputElement
     this.labelEmbedReplay = this.shadow.getElementById("label-embed-replay")!
@@ -241,7 +258,15 @@ export class SightingElement extends HTMLElement {
     }
     this.infoCloseButton.addEventListener("click", () => this.toggleInfoPanel())
     this.infoCreditsToggle.addEventListener("click", () => this.toggleCredits())
-    this.infoEmbedToggle.addEventListener("click", () => this.toggleEmbed())
+    this.shareButton.addEventListener("click", () => this.openShare())
+    this.shareClose.addEventListener("click", () => this.closeShare())
+    this.shareBack.addEventListener("click", () => this.showShareView("main"))
+    this.shareEmbedOption.addEventListener("click", () => this.showShareView("embed"))
+    this.shareCopy.addEventListener("click", () => void this.copyText(this.shareLink.value, this.shareLink, this.shareCopy))
+    // A press on the dimmed page around the card, which the dialog itself receives, closes it.
+    this.shareDialog.addEventListener("click", event => {
+      if (event.target === this.shareDialog) this.closeShare()
+    })
     for (const radio of [this.embedReplayRadio, this.embedEditRadio]) {
       radio.addEventListener("change", () => this.refreshEmbedMarkup())
     }
@@ -307,7 +332,13 @@ export class SightingElement extends HTMLElement {
     // An assessment names ids ("coverage", "ce3") through these same messages, so a reading taken
     // before they arrived is in the wrong language — read it again rather than translating chips.
     if (changed && this.currentSrc) void this.runAssessments()
-    this.infoEmbedToggle.textContent = this.messages.embed
+    this.shareButton.title = this.messages.share
+    this.shareButton.setAttribute("aria-label", this.messages.share)
+    this.shareClose.setAttribute("aria-label", this.messages.close)
+    this.shareBack.setAttribute("aria-label", this.messages.back)
+    this.shareCopy.textContent = this.messages.embedCopy
+    this.shareEmbedLabel.textContent = this.messages.embed
+    this.syncShareTitle()
     this.labelEmbedReplay.textContent = this.messages.embedReplay
     this.labelEmbedEdit.textContent = this.messages.embedEdit
     this.embedCopyButton.textContent = this.messages.embedCopy
@@ -509,14 +540,57 @@ export class SightingElement extends HTMLElement {
 
   /** Clipboard write can be refused (permissions, insecure context) — falls back to selecting the
    * text so the reader can copy it themselves, rather than failing silently. */
-  private async copyEmbedMarkup(): Promise<void> {
+  private async copyText(text: string, field: HTMLInputElement | HTMLTextAreaElement, button: HTMLButtonElement): Promise<void> {
     try {
-      await navigator.clipboard.writeText(this.embedMarkup.value)
-      this.embedCopyButton.textContent = this.messages.embedCopied
-      window.setTimeout(() => (this.embedCopyButton.textContent = this.messages.embedCopy), 1500)
+      await navigator.clipboard.writeText(text)
+      button.textContent = this.messages.embedCopied
+      window.setTimeout(() => (button.textContent = this.messages.embedCopy), 1500)
     } catch {
-      this.embedMarkup.select()
+      field.select()
     }
+  }
+
+  private async copyEmbedMarkup(): Promise<void> {
+    await this.copyText(this.embedMarkup.value, this.embedMarkup, this.embedCopyButton)
+  }
+
+  /**
+   * The address that replays THIS observation for whoever is given it: the site's own player with the
+   * recording's absolute address in it (the `?sighting=` convention every "open it" link on the site
+   * already follows). A recording with no address (set by script, pasted) has none to give, and the
+   * link is the player's own page.
+   */
+  private playUrl(): string {
+    if (!this.currentSrc) return `${APP_HOME_URL}/play/`
+    return `${APP_HOME_URL}/play/?sighting=${encodeURIComponent(new URL(this.currentSrc, location.href).href)}`
+  }
+
+  private shareView: "main" | "embed" = "main"
+
+  private openShare(): void {
+    this.shareLink.value = this.playUrl()
+    this.refreshEmbedMarkup()
+    this.showShareView("main")
+    if (typeof this.shareDialog.showModal === "function") this.shareDialog.showModal()
+    else this.shareDialog.setAttribute("open", "")
+    this.shareLink.select()
+  }
+
+  private closeShare(): void {
+    if (typeof this.shareDialog.close === "function") this.shareDialog.close()
+    else this.shareDialog.removeAttribute("open")
+  }
+
+  private showShareView(view: "main" | "embed"): void {
+    this.shareView = view
+    this.shareMain.hidden = view !== "main"
+    this.shareEmbed.hidden = view !== "embed"
+    this.shareBack.hidden = view === "main"
+    this.syncShareTitle()
+  }
+
+  private syncShareTitle(): void {
+    this.shareTitle.textContent = this.shareView === "embed" ? this.messages.embedObservation : this.messages.share
   }
 
   /**
@@ -904,9 +978,6 @@ export class SightingElement extends HTMLElement {
       this.creditsOpen = false
       this.infoCreditsList.hidden = true
       this.infoCreditsToggle.setAttribute("aria-expanded", "false")
-      this.embedOpen = false
-      this.infoEmbedPanel.hidden = true
-      this.infoEmbedToggle.setAttribute("aria-expanded", "false")
     }
   }
 
@@ -926,18 +997,6 @@ export class SightingElement extends HTMLElement {
     this.infoCreditsList.hidden = !this.creditsOpen
     this.infoCreditsToggle.setAttribute("aria-expanded", String(this.creditsOpen))
     if (this.creditsOpen) this.revealInPanel(this.infoCreditsList)
-  }
-
-  /** The embed snippet is folded away like the credits are: what the panel is for is the
-   * observation's own metadata, and a block of markup sitting open above it competes with that. */
-  private toggleEmbed(): void {
-    this.embedOpen = !this.embedOpen
-    this.infoEmbedPanel.hidden = !this.embedOpen
-    this.infoEmbedToggle.setAttribute("aria-expanded", String(this.embedOpen))
-    if (this.embedOpen) {
-      this.refreshEmbedMarkup()
-      this.revealInPanel(this.infoEmbedPanel)
-    }
   }
 
   /** Scrolls a just-revealed block into the panel's own visible area. The panel is sized to

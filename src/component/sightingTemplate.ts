@@ -25,6 +25,10 @@ export const html = `
        behind the version link. Hidden for a recording with no address (set by script, pasted),
        which the editor could not open. -->
   <a id="edit-link" class="edit-link" target="_blank" rel="noopener" title="Edit this observation" aria-label="Edit this observation" hidden><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M11.3 1.3a1 1 0 0 1 1.4 0l2 2a1 1 0 0 1 0 1.4l-8.5 8.5-3.4.9.9-3.4 8.6-8.4Zm-7 9.2-.5 1.7 1.7-.5 6.9-6.9-1.2-1.2-6.9 6.9Z" fill="currentColor"/></svg></a>
+  <!-- Hands the observation on: a link to copy, and the markup to put it on another page. As on the
+       video sites, one button in the row and one small dialog, rather than options scattered
+       through the info panel. -->
+  <button id="share-button" class="info-btn" type="button" title="Share" aria-label="Share" aria-haspopup="dialog"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M14 4l7 7-7 7v-4.2C8.6 13.8 5.4 15.6 3.5 19c.6-5.6 3.4-9.6 10.5-10.8V4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></button>
   <button id="info-button" class="info-btn" type="button" title="About" aria-label="About" aria-expanded="false"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><circle cx="8" cy="3.6" r="1.4" fill="currentColor"/><path d="M6 6.5h3v6h1.5V14h-4.5v-1.5H7.5V8H6Z" fill="currentColor"/></svg></button>
   <div id="info-panel" class="info-panel" hidden>
     <button id="info-close" class="info-close" type="button" aria-label="Close">×</button>
@@ -35,14 +39,6 @@ export const html = `
     <!-- Both fold-out blocks sit ABOVE the footer, never after it: the footer is sticky to the
          panel's bottom edge, so anything following it in the flow opens underneath it — which is
          exactly how clicking Credits came to reveal a list nobody could see. -->
-    <div id="info-embed" class="info-embed" hidden>
-      <div class="embed-row">
-        <label><input type="radio" name="embed-kind" id="embed-kind-replay" value="replay" checked/> <span id="label-embed-replay">Replay</span></label>
-        <label><input type="radio" name="embed-kind" id="embed-kind-edit" value="edit"/> <span id="label-embed-edit">Editor</span></label>
-        <button id="embed-copy" class="embed-copy" type="button">Copy</button>
-      </div>
-      <textarea id="embed-markup" class="embed-markup" rows="3" readonly spellcheck="false"></textarea>
-    </div>
     <ul id="info-credits-list" class="info-ul" hidden></ul>
     <div class="info-footer">
       <a id="info-app-link" href="https://ufoathome.org" target="_blank" rel="noopener"></a>
@@ -52,12 +48,39 @@ export const html = `
              an action on the observation — and because the panel is what it takes over from: with
              the strip showing, the rows above become a second, poorer copy of it. -->
         <button id="info-labels-toggle" class="info-credits-toggle" type="button" aria-pressed="false">Labels</button>
-        <button id="info-embed-toggle" class="info-credits-toggle" type="button" aria-expanded="false">Embed</button>
         <button id="info-credits-toggle" class="info-credits-toggle" type="button" aria-expanded="false">Credits</button>
       </span>
     </div>
   </div>
 </div>
+<dialog id="share-dialog" class="share-dialog" aria-labelledby="share-title">
+  <div class="share-head">
+    <button id="share-back" class="share-icon-button" type="button" aria-label="Back" hidden>‹</button>
+    <h3 id="share-title" class="share-title">Share</h3>
+    <button id="share-close" class="share-icon-button" type="button" aria-label="Close">×</button>
+  </div>
+  <div id="share-main">
+    <div class="share-options">
+      <button id="share-embed-option" class="share-option" type="button">
+        <span class="share-option-icon"><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M9 7l-5 5 5 5M15 7l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <span id="share-embed-label">Embed</span>
+      </button>
+    </div>
+    <div class="share-link">
+      <input id="share-link" class="share-link-input" type="text" readonly spellcheck="false" aria-label="Link"/>
+      <button id="share-copy" class="share-copy" type="button">Copy</button>
+    </div>
+  </div>
+  <!-- The markup to put this observation on another page: a replay of it, or the editor opened on it. -->
+  <div id="share-embed" class="share-embed" hidden>
+    <textarea id="embed-markup" class="embed-markup" rows="4" readonly spellcheck="false"></textarea>
+    <div class="embed-row">
+      <label><input type="radio" name="embed-kind" id="embed-kind-replay" value="replay" checked/> <span id="label-embed-replay">Replay</span></label>
+      <label><input type="radio" name="embed-kind" id="embed-kind-edit" value="edit"/> <span id="label-embed-edit">Editor</span></label>
+      <button id="embed-copy" class="share-copy" type="button">Copy</button>
+    </div>
+  </div>
+</dialog>
 <div id="ufo-slot"></div>
 <!-- The interpretation's bodies against what the observer said, at the instant on show — see
      BodyConfrontation. Only while an interpretation is. -->
@@ -434,13 +457,124 @@ export const css = `
    toggle like the credits are: what the panel is FOR is the observation's own metadata, and a
    block of markup sitting open above it competes with that for no one's benefit. Read-only: it is
    generated, never typed into, and selecting it wholesale is the only interaction it needs. */
+/* The share dialog, as the video sites draw theirs: a white card centred over a dimmed page, its
+   title and a close button on one line, the ways of sharing as round buttons, and the link to copy
+   in a field with its button inside. Native <dialog>, so the page behind is inert and Escape closes. */
+.share-dialog {
+  width: min(28em, calc(100vw - 2em));
+  padding: 1em 1.2em 1.2em;
+  border: none;
+  border-radius: 1.2em;
+  background: #fff;
+  color: #111;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.35);
+  font-size: 0.95em;
+}
+.share-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.55);
+}
+.share-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5em;
+  margin-bottom: 0.9em;
+}
+.share-title {
+  flex: 1;
+  margin: 0;
+  font-size: 1.15em;
+  font-weight: 500;
+  text-align: center;
+}
+.share-icon-button {
+  width: 2em;
+  height: 2em;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  font-size: 1.5em;
+  line-height: 1;
+  cursor: pointer;
+  color: inherit;
+}
+.share-icon-button[hidden] {
+  display: none;
+}
+.share-icon-button:hover, .share-icon-button:focus-visible {
+  background: #eee;
+}
+.share-options {
+  display: flex;
+  gap: 1em;
+  margin-bottom: 1em;
+}
+.share-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4em;
+  padding: 0.3em;
+  border: none;
+  border-radius: 0.6em;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.share-option-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.6em;
+  height: 3.6em;
+  border: 1px solid #ddd;
+  border-radius: 50%;
+  background: #f2f2f2;
+}
+.share-option:hover .share-option-icon, .share-option:focus-visible .share-option-icon {
+  background: #e4e4e4;
+}
+.share-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.5em 0.6em 0.5em 1em;
+  border: 1px solid #ccc;
+  border-radius: 0.9em;
+}
+.share-link-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-overflow: ellipsis;
+}
+.share-copy {
+  flex: 0 0 auto;
+  padding: 0.5em 1.1em;
+  border: 1px solid #ccc;
+  border-radius: 1.2em;
+  background: #fff;
+  color: inherit;
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+}
+.share-copy:hover, .share-copy:focus-visible {
+  background: #eee;
+}
+.share-embed[hidden], #share-main[hidden] {
+  display: none;
+}
 .info-footer-actions {
   display: flex;
   align-items: center;
   gap: 0.8em;
-}
-.info-embed {
-  margin-top: 0.4em;
 }
 .embed-row {
   display: flex;
@@ -458,7 +592,7 @@ export const css = `
   resize: vertical;
   white-space: pre;
 }
-.embed-copy {
+.embed-row .share-copy {
   margin-left: auto;
 }
 .info-footer {

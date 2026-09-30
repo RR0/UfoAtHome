@@ -837,6 +837,47 @@ describe("SightingElement i18n", () => {
  * The info panel hands the reader the two lines it takes to put this very observation on their
  * own page — either as a replay or as the editor, both taking the same absolute `src`.
  */
+describe("SightingElement sharing", () => {
+  beforeEach(() => {
+    stubFetch({ "john.json": johnSighting })
+  })
+
+  afterEach(() => {
+    document.body.innerHTML = ""
+  })
+
+  async function mounted(): Promise<ShadowRoot> {
+    const element = mount()
+    element.observerUrls = ["john.json"]
+    await new Promise(resolve => setTimeout(resolve, 0))
+    return element.shadowRoot!
+  }
+
+  it("offers the link that replays this very recording on the site's player", async () => {
+    const shadow = await mounted()
+    ;(shadow.getElementById("share-button") as HTMLButtonElement).click()
+    expect((shadow.getElementById("share-link") as HTMLInputElement).value)
+      .toBe("https://ufoathome.org/play/?sighting=" + encodeURIComponent("http://localhost:3000/john.json"))
+    expect(shadow.getElementById("share-dialog")!.hasAttribute("open")).toBe(true)
+  })
+
+  it("keeps the embed markup behind the Embed option, and comes back from it", async () => {
+    const shadow = await mounted()
+    ;(shadow.getElementById("share-button") as HTMLButtonElement).click()
+    expect(shadow.getElementById("share-embed")!.hidden).toBe(true)
+    ;(shadow.getElementById("share-embed-option") as HTMLButtonElement).click()
+    expect(shadow.getElementById("share-embed")!.hidden).toBe(false)
+    expect(shadow.getElementById("share-main")!.hidden).toBe(true)
+    ;(shadow.getElementById("share-back") as HTMLButtonElement).click()
+    expect(shadow.getElementById("share-main")!.hidden).toBe(false)
+  })
+
+  it("no longer has the embed in the info panel", async () => {
+    const shadow = await mounted()
+    expect(shadow.getElementById("info-embed-toggle")).toBeNull()
+  })
+})
+
 describe("SightingElement embed markup", () => {
   beforeEach(() => {
     stubFetch({ "john.json": johnSighting })
@@ -850,9 +891,9 @@ describe("SightingElement embed markup", () => {
     const element = mount()
     element.observerUrls = ["john.json"]
     await new Promise(resolve => setTimeout(resolve, 0))
-    ;(element.shadowRoot!.getElementById("info-button") as HTMLButtonElement).click()
-    // The snippet is folded away behind its own footer toggle, like the credits.
-    ;(element.shadowRoot!.getElementById("info-embed-toggle") as HTMLButtonElement).click()
+    // The markup is one of the ways of sharing the observation: share, then embed.
+    ;(element.shadowRoot!.getElementById("share-button") as HTMLButtonElement).click()
+    ;(element.shadowRoot!.getElementById("share-embed-option") as HTMLButtonElement).click()
     return element.shadowRoot as unknown as HTMLElement
   }
 
@@ -1186,40 +1227,21 @@ describe("SightingElement info panel fold-outs", () => {
     return element.shadowRoot!
   }
 
-  it("keeps the embed snippet folded away until asked for, like the credits", async () => {
-    const shadow = await openPanel()
-    const embed = shadow.getElementById("info-embed")!
-    const toggle = shadow.getElementById("info-embed-toggle") as HTMLButtonElement
-
-    expect(embed.hidden).toBe(true)
-    expect(toggle.getAttribute("aria-expanded")).toBe("false")
-
-    toggle.click()
-    expect(embed.hidden).toBe(false)
-    expect(toggle.getAttribute("aria-expanded")).toBe("true")
-
-    toggle.click()
-    expect(embed.hidden).toBe(true)
-  })
-
-  it("puts both fold-outs before the footer, so neither opens underneath it", async () => {
+  it("puts the fold-out before the footer, so it does not open underneath it", async () => {
     const shadow = await openPanel()
     const children = [...shadow.getElementById("info-panel")!.children]
     const footer = children.findIndex(el => el.classList.contains("info-footer"))
 
-    expect(children.findIndex(el => el.id === "info-embed")).toBeLessThan(footer)
     expect(children.findIndex(el => el.id === "info-credits-list")).toBeLessThan(footer)
   })
 
-  it("folds both back when the panel is closed, so it reopens on the metadata", async () => {
+  it("folds the credits back when the panel is closed, so it reopens on the metadata", async () => {
     const shadow = await openPanel()
-    ;(shadow.getElementById("info-embed-toggle") as HTMLButtonElement).click()
     ;(shadow.getElementById("info-credits-toggle") as HTMLButtonElement).click()
 
     ;(shadow.getElementById("info-button") as HTMLButtonElement).click() // close the panel
     ;(shadow.getElementById("info-button") as HTMLButtonElement).click() // and reopen it
 
-    expect(shadow.getElementById("info-embed")!.hidden).toBe(true)
     expect(shadow.getElementById("info-credits-list")!.hidden).toBe(true)
   })
 })

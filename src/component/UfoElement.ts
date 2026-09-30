@@ -610,6 +610,8 @@ export class UfoElement extends HTMLElement {
 
     this.playPauseButton.addEventListener("click", () => this.togglePlayPause())
     this.fullscreenButton.addEventListener("click", () => this.toggleFullscreen())
+    // F, as on the video sites — from wherever the focus is within the player.
+    this.addEventListener("keydown", this.handleFullscreenKey)
     this.observerMapButton.addEventListener("click", () => this.toggleObserverMap())
     this.referencesButton.addEventListener("click", () => this.toggleReferences())
     this.referenceOpacityInput.addEventListener("input", () => {
@@ -1527,6 +1529,22 @@ export class UfoElement extends HTMLElement {
 
   /** The seek bar focused, the keys of a video player: left/right go back/forward 5 s, space plays
    * or pauses. The range input's own arrows would move it by its 1 ms step, and its space nothing. */
+  /**
+   * F toggles fullscreen while the focus is anywhere in the player. Not while typing: a field, a
+   * select or an editable area keeps its letters — the editor is full of them, and it is not a
+   * player anyway (it takes the canvas for drawing, see enableClickToPlay).
+   */
+  private readonly handleFullscreenKey = (event: KeyboardEvent): void => {
+    if (event.key.toLowerCase() !== "f" || event.altKey || event.ctrlKey || event.metaKey) return
+    if (!this.enableClickToPlay) return
+    const typing = event.composedPath().some(node =>
+      node instanceof HTMLElement && (node.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(node.tagName)
+        && (node as HTMLInputElement).type !== "range"))
+    if (typing) return
+    event.preventDefault()
+    this.toggleFullscreen()
+  }
+
   private readonly handleSeekKey = (event: KeyboardEvent): void => {
     if (event.altKey || event.ctrlKey || event.metaKey) return
     const step = event.key === "ArrowLeft" ? -1 : event.key === "ArrowRight" ? 1 : 0

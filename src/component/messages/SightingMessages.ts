@@ -33,6 +33,10 @@ export interface SightingMessages extends SightingLabels {
   embedReplay: string
   embedEdit: string
   /** The copy button, and what it says once the markup is on the clipboard. */
+  /** The button that opens the share dialog, its title, its embed view's title, and its way back. */
+  share: string
+  embedObservation: string
+  back: string
   embedCopy: string
   embedCopied: string
   /** The info panel's toggle for the parameter strip under the render — what the recording states,

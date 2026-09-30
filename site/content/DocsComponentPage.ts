@@ -480,7 +480,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
   <div class="wrap prose-wide">
     <p>The default for a real sighting, one observer or several. It composes an
       <code>&lt;rr0-scene&gt;</code> and adds the toolbar: who is testifying, and the <q>?</q> panel
-      with the observation's own metadata, its credits and its embed lines.</p>
+      with the observation's own metadata and its credits, and a share button: the link that replays it, and its embed lines.</p>
     <pre><code>&lt;rr0-sighting src="sighting.json"&gt;&lt;/rr0-sighting&gt;
 &lt;rr0-sighting src="case.json"&gt;&lt;/rr0-sighting&gt;  &lt;!-- a case, and all its observers --&gt;</code></pre>
     <div class="table-scroll">
@@ -516,7 +516,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
   <div class="wrap prose-wide">
     <p>Le choix par défaut pour une observation réelle, à un observateur ou plusieurs. Il compose un
       <code>&lt;rr0-scene&gt;</code> et ajoute la barre d'outils : qui témoigne, et le panneau
-      <q>?</q> avec les métadonnées de l'observation, ses crédits et ses lignes d'intégration.</p>
+      <q>?</q> avec les métadonnées de l'observation et ses crédits, et un bouton de partage : le lien qui la rejoue, et ses lignes d'intégration.</p>
     <pre><code>&lt;rr0-sighting src="sighting.json"&gt;&lt;/rr0-sighting&gt;
 &lt;rr0-sighting src="case.json"&gt;&lt;/rr0-sighting&gt;  &lt;!-- un dossier, et tous ses observateurs --&gt;</code></pre>
     <div class="table-scroll">
@@ -553,7 +553,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
   <div class="wrap prose-wide">
     <p>La opción por defecto para un avistamiento real, con uno o varios observadores. Compone un
       <code>&lt;rr0-scene&gt;</code> y añade la barra de herramientas: quién da su relato, y el panel <q>?</q>
-      con los metadatos propios de la observación, sus créditos y sus líneas de inserción.</p>
+      con los metadatos propios de la observación y sus créditos, y un botón de compartir: el enlace que la reproduce, y sus líneas de inserción.</p>
     <pre><code>&lt;rr0-sighting src="sighting.json"&gt;&lt;/rr0-sighting&gt;
 &lt;rr0-sighting src="case.json"&gt;&lt;/rr0-sighting&gt;  &lt;!-- un caso, y todos sus observadores --&gt;</code></pre>
     <div class="table-scroll">
@@ -589,7 +589,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
   <div class="wrap prose-wide">
     <p>La scelta predefinita per un avvistamento reale, con uno o più osservatori. Compone un
       <code>&lt;rr0-scene&gt;</code> e aggiunge la barra degli strumenti: chi rende il resoconto, e il pannello <q>?</q>
-      con i metadati propri dell'osservazione, i suoi crediti e le sue righe di incorporamento.</p>
+      con i metadati propri dell'osservazione e i suoi crediti, e un pulsante di condivisione: il link che la riproduce, e le sue righe di incorporamento.</p>
     <pre><code>&lt;rr0-sighting src="sighting.json"&gt;&lt;/rr0-sighting&gt;
 &lt;rr0-sighting src="case.json"&gt;&lt;/rr0-sighting&gt;  &lt;!-- un caso, e tutti i suoi osservatori --&gt;</code></pre>
     <div class="table-scroll">

@@ -1675,6 +1675,22 @@ describe("the account's named moments", () => {
     expect(right).toContain("milestones")
   })
 
+  it("toggles fullscreen on F from anywhere in the player, but not while typing", () => {
+    const element = mount()
+    element.sightingData = withMilestones() as never
+    let toggles = 0
+    ;(element as unknown as { toggleFullscreen: () => void }).toggleFullscreen = () => { toggles++ }
+    const seek = element.shadowRoot!.getElementById("seek")!
+    seek.dispatchEvent(new KeyboardEvent("keydown", { key: "f", bubbles: true, composed: true }))
+    expect(toggles).toBe(1) // a slider is not a text field: it keeps no letters
+    const field = document.createElement("input")
+    element.shadowRoot!.appendChild(field)
+    field.dispatchEvent(new KeyboardEvent("keydown", { key: "F", bubbles: true, composed: true }))
+    expect(toggles).toBe(1)
+    seek.dispatchEvent(new KeyboardEvent("keydown", { key: "f", ctrlKey: true, bubbles: true, composed: true }))
+    expect(toggles).toBe(1)
+  })
+
   it("mutes and unmutes from the button beside play, and says so", () => {
     const element = mount()
     element.sightingData = withMilestones() as never
