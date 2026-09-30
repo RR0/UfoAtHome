@@ -2,13 +2,15 @@ export const html = `
 <div class="stage" id="stage">
   <div class="frame" id="frame">
     <canvas id="scene-canvas"></canvas>
-    <!-- The spinner in the middle, with above it what a reader waiting on a picture may take this for — a
-         video, which it is not — and below it what it is: a simulation (see SceneNames.notAVideo and
-         isASimulation). All three live and die with the hold on the first frame. -->
+    <!-- What a reader waiting on a picture may take this for — a video, which it is not — and under it what
+         it is: a simulation (see SceneNames.notAVideo and isASimulation). Their letters light up one
+         after the other, left to right, while the picture waits (SceneElement.renderLoaderText). Where
+         the picture is too small for a sentence, a spinner stands in. All of it lives and dies with the
+         hold on the first frame. -->
     <div id="scene-loader" class="scene-loader" role="progressbar" hidden>
-      <p id="scene-loader-not-video" class="scene-loader-note scene-loader-not-video">This is not a video</p>
+      <p id="scene-loader-not-video" class="scene-loader-note scene-loader-not-video"></p>
+      <p id="scene-loader-note" class="scene-loader-note scene-loader-is-simulation"></p>
       <div class="scene-loader-spinner"></div>
-      <p id="scene-loader-note" class="scene-loader-note scene-loader-is-simulation">It is a real-time simulation.</p>
     </div>
   </div>
   <div id="ufo-slot"></div>
@@ -152,11 +154,11 @@ export const css = `
 .scene-loader {
   position: absolute;
   inset: 0;
-  /* The spinner stays in the middle whatever the two sentences weigh: each takes one of two equal rows. */
-  display: grid;
-  grid-template-rows: 1fr auto 1fr;
-  justify-items: center;
-  gap: 1em;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
   animation: scene-loader-appear 0.2s ease-out 0.25s both;
   pointer-events: none;
   z-index: 1;
@@ -164,17 +166,9 @@ export const css = `
 .scene-loader[hidden] {
   display: none;
 }
-.scene-loader-spinner {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: 3px solid rgba(255, 255, 255, 0.25);
-  border-top-color: rgba(255, 255, 255, 0.9);
-  animation: scene-loader-spin 0.9s linear infinite;
-}
-/* What the waiting picture is NOT (a video) above the spinner, and what it IS (a simulation) below it.
-   Said only while it waits, and only where there is room for a sentence — a catalogue card's picture
-   is too small for one. */
+/* What the waiting picture is NOT (a video), and under it what it IS (a simulation). Said only while it
+   waits, and only where there is room for a sentence: a catalogue card's picture is too small for one
+   and gets a spinner instead. */
 .scene-loader-note {
   max-width: 24em;
   margin: 0;
@@ -185,18 +179,48 @@ export const css = `
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
 }
 .scene-loader-not-video {
-  align-self: end;
   font-weight: bold;
   font-variant: small-caps;
   letter-spacing: 0.04em;
 }
-.scene-loader-is-simulation {
-  align-self: start;
+/* Each letter is dim, lights up when its turn comes (--i, in letters from the start of the first
+   sentence) and stays lit for the rest of the sweep, then all go dim again. */
+.scene-loader-word {
+  display: inline-block;
+}
+.scene-loader-letter {
+  opacity: 0.25;
+  animation: scene-loader-light 4.5s ease-in-out infinite;
+  animation-delay: calc(var(--i) * 45ms);
+}
+@media (prefers-reduced-motion: reduce) {
+  .scene-loader-letter {
+    animation: none;
+    opacity: 1;
+  }
+}
+.scene-loader-spinner {
+  display: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.25);
+  border-top-color: rgba(255, 255, 255, 0.9);
+  animation: scene-loader-spin 0.9s linear infinite;
 }
 @container (max-width: 360px) {
   .scene-loader-note {
     display: none;
   }
+  .scene-loader-spinner {
+    display: block;
+  }
+}
+@keyframes scene-loader-light {
+  0% { opacity: 0.25; }
+  6% { opacity: 1; }
+  78% { opacity: 1; }
+  100% { opacity: 0.25; }
 }
 @keyframes scene-loader-spin {
   to { transform: rotate(360deg); }

@@ -464,15 +464,44 @@ export class SceneElement extends HTMLElement {
     this.applySceneNaming(new SceneNaming(names))
   }
 
+  /**
+   * The two sentences of the loader, each letter in a span of its own so that they light up one after
+   * the other, left to right, the second sentence picking up where the first ends. Words stay whole
+   * (an inline block each) so that a narrow picture wraps between them, and the sentence is read out
+   * once, as a label, rather than letter by letter.
+   */
+  private renderLoaderText(notAVideo: string, simulation: string): void {
+    let index = 0
+    const fill = (element: HTMLElement, text: string): void => {
+      element.setAttribute("aria-label", text)
+      element.replaceChildren()
+      text.split(" ").forEach((word, position) => {
+        if (position > 0) element.append(" ")
+        const wordElement = document.createElement("span")
+        wordElement.className = "scene-loader-word"
+        wordElement.setAttribute("aria-hidden", "true")
+        for (const letter of word) {
+          const span = document.createElement("span")
+          span.className = "scene-loader-letter"
+          span.style.setProperty("--i", String(index++))
+          span.textContent = letter
+          wordElement.append(span)
+        }
+        element.append(wordElement)
+        index++
+      })
+    }
+    fill(this.loaderNotVideo, notAVideo)
+    index += 6
+    fill(this.loaderNote, simulation)
+  }
+
   private applySceneNaming(naming: SceneNaming): void {
     this.sceneNaming = naming
     const creditsLabel = naming.names?.credits ?? CREDITS_LABEL
     this.creditsButton.title = creditsLabel
     this.creditsButton.setAttribute("aria-label", creditsLabel)
-    if (naming.names) {
-      this.loaderNotVideo.textContent = naming.names.notAVideo
-      this.loaderNote.textContent = naming.names.isASimulation
-    }
+    if (naming.names) this.renderLoaderText(naming.names.notAVideo, naming.names.isASimulation)
     this.sceneRenderer.setCompassPoints(naming.names?.compassPoints)
   }
 
@@ -581,6 +610,7 @@ export class SceneElement extends HTMLElement {
     const loader = this.shadow.getElementById("scene-loader")!
     this.loaderNote = this.shadow.getElementById("scene-loader-note")!
     this.loaderNotVideo = this.shadow.getElementById("scene-loader-not-video")!
+    this.renderLoaderText("This is not a video", "It is a real-time simulation.")
     this.sceneRenderer.onFirstFrameHold = holding => {
       loader.hidden = !holding
       // The sentence saying what this is not (a video) has the picture to itself while it waits: the
