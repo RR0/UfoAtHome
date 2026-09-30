@@ -18,8 +18,8 @@ export const html = `
          fullscreen button, or wherever a composing element hosts them (see UfoElement.hostControls).
          The pictures of the place (see SceneReference)
          have a slider for how much of them shows, then a button for whether they show at all. -->
-    <input id="reference-opacity" type="range" min="0" max="1" step="0.05" value="0.5" title="Picture opacity" aria-label="Picture opacity" hidden/>
     <button id="references" type="button" title="Pictures of the place" aria-label="Pictures of the place" aria-pressed="true" hidden></button>
+    <input id="reference-opacity" type="range" min="0" max="1" step="0.05" value="0.5" title="Picture opacity" aria-label="Picture opacity" hidden/>
     <button id="observer-map" type="button" title="Observer's position" aria-label="Observer's position" aria-pressed="false" hidden></button>
   </div>
   <!-- What in the recording was not played as written (see RecordingIssue): a key nothing reads, a

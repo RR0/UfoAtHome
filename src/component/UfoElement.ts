@@ -735,6 +735,8 @@ export class UfoElement extends HTMLElement {
     this.canvas.addEventListener("pointermove", this.handlePointerMove)
     this.canvas.addEventListener("pointerleave", this.handlePointerLeave)
     document.addEventListener("fullscreenchange", this.handleFullscreenChange)
+    document.addEventListener("visibilitychange", this.handleVisibility)
+    window.addEventListener("pagehide", this.handleHidden)
     document.addEventListener("pointerup", this.handlePointerRelease, true)
     document.addEventListener("pointercancel", this.handlePointerRelease, true)
     this.observerMapResizeObserver?.observe(this.observerMapPanel)
@@ -774,6 +776,8 @@ export class UfoElement extends HTMLElement {
 
   disconnectedCallback(): void {
     document.removeEventListener("fullscreenchange", this.handleFullscreenChange)
+    document.removeEventListener("visibilitychange", this.handleVisibility)
+    window.removeEventListener("pagehide", this.handleHidden)
     document.removeEventListener("pointerup", this.handlePointerRelease, true)
     document.removeEventListener("pointercancel", this.handlePointerRelease, true)
     window.clearTimeout(this.controlsIdleTimer)
@@ -1134,7 +1138,8 @@ export class UfoElement extends HTMLElement {
    * a host styles them, the playback bar already does.
    */
   hostControls(host: HTMLElement | undefined): void {
-    const controls = [this.milestonesButton, this.referenceOpacityInput, this.referencesButton, this.observerMapButton]
+    // The slider after the button it is the slider of, as the volume's is after the sound's.
+    const controls = [this.milestonesButton, this.referencesButton, this.referenceOpacityInput, this.observerMapButton]
     if (host) {
       for (const control of controls) host.appendChild(control)
     } else {
@@ -1788,6 +1793,11 @@ export class UfoElement extends HTMLElement {
   private suspendForScrub(): void {
     if (this.player.playbackState !== "playing") return
     this.resumeAfterScrub = true
+    this.stopPlaying()
+  }
+
+  /** Stops what is playing and every sound with it, without the flash a reader's own pause makes. */
+  private stopPlaying(): void {
     this.player.pause()
     this.soundPreview = undefined
     this.sightingAudio.silence()
@@ -1802,6 +1812,21 @@ export class UfoElement extends HTMLElement {
     this.sightingAudio.resume()
     this.player.play()
     this.updatePlayPauseButton()
+  }
+
+  /**
+   * Playback ends with the page's being seen. A recording that goes on playing behind another tab,
+   * a locked phone or another app is a sound nobody can stop but by finding the page again — on a
+   * phone the sound outlived the page in the background. It stays stopped when the page is back, as
+   * a video's does: the reader is the one who starts it.
+   */
+  private readonly handleHidden = (): void => {
+    if (this.player.playbackState === "playing") this.stopPlaying()
+    this.resumeAfterScrub = false
+  }
+
+  private readonly handleVisibility = (): void => {
+    if (document.visibilityState === "hidden") this.handleHidden()
   }
 
   private readonly handlePointerRelease = (): void => {

@@ -1732,6 +1732,30 @@ describe("the account's named moments", () => {
     expect(element.playbackState).not.toBe("playing")
   })
 
+  it("stops playing when the page is hidden, and stays stopped when it is back", () => {
+    const element = mount()
+    element.sightingData = withMilestones() as never
+    element.togglePlayPause()
+    expect(element.playbackState).toBe("playing")
+    const visibility = Object.getOwnPropertyDescriptor(Document.prototype, "visibilityState")
+    Object.defineProperty(document, "visibilityState", { configurable: true, get: () => "hidden" })
+    try {
+      document.dispatchEvent(new Event("visibilitychange"))
+      expect(element.playbackState).toBe("paused")
+    } finally {
+      if (visibility) Object.defineProperty(document, "visibilityState", visibility)
+      else delete (document as unknown as Record<string, unknown>).visibilityState
+    }
+    document.dispatchEvent(new Event("visibilitychange"))
+    expect(element.playbackState).toBe("paused") // the reader starts it again
+  })
+
+  it("puts the picture opacity slider after the pictures button, as the volume's follows the sound's", () => {
+    const element = mount()
+    const ids = [...element.shadowRoot!.getElementById("controls-right")!.children].map(child => child.id)
+    expect(ids.indexOf("reference-opacity")).toBe(ids.indexOf("references") + 1)
+  })
+
   it("mutes and unmutes from the button beside play, and says so", () => {
     const element = mount()
     element.sightingData = withMilestones() as never
