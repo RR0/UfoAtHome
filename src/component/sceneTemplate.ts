@@ -187,6 +187,8 @@ export const css = `
 .scene-loader-not-video {
   align-self: end;
   font-weight: bold;
+  font-variant: small-caps;
+  letter-spacing: 0.04em;
 }
 .scene-loader-is-simulation {
   align-self: start;
