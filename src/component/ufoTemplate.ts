@@ -551,6 +551,9 @@ canvas[data-cursor="rotate"] {
 .milestone-caption[hidden] {
   display: none;
 }
+.stage.caption-held .milestone-caption {
+  visibility: hidden;
+}
 .milestone-caption b {
   font-weight: 700;
 }

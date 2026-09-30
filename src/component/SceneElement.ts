@@ -577,6 +577,9 @@ export class SceneElement extends HTMLElement {
     this.loaderNote = this.shadow.getElementById("scene-loader-note")!
     this.sceneRenderer.onFirstFrameHold = holding => {
       loader.hidden = !holding
+      // The sentence saying what this is not (a video) has the picture to itself while it waits: the
+      // account's first moment would be printed over it, both centred, and neither could be read.
+      this.ufoElement.captionHeld = holding
     }
     this.hoverTooltip = this.shadow.getElementById("hover-tooltip")!
 

@@ -1742,6 +1742,12 @@ export class UfoElement extends HTMLElement {
     button.innerHTML = icon
   }
 
+  /** Holds the account's caption back, as a composing element that has something else to say over the
+   * picture asks for (see SceneElement's loader). It comes when released. */
+  set captionHeld(held: boolean) {
+    this.stageElement.classList.toggle("caption-held", held)
+  }
+
   /** How long the controls stay after the last touch, while playing, on a screen with no hover. */
   private static readonly CONTROLS_IDLE_MS = 3000
 

@@ -108,6 +108,17 @@ export class PlayerPage implements SitePage {
 const demoTitles = ${demoTitles}
 const stage = document.getElementById("player-stage")
 const stageBox = document.getElementById("player-stage-box")
+
+/* Brings the simulation into view UNDER the sticky header, not behind it: scrolling it to the very top
+   of the window left its first rows covered by the header — 88 px of it on a phone, where the header
+   wraps onto two lines — so a link to a recording arrived on the text below with the top of the picture
+   hidden. The header's real height is read, since it is not the same on every screen. */
+const showStage = smooth => {
+  const header = document.querySelector(".site-header")
+  const covered = header && getComputedStyle(header).position === "sticky" ? header.offsetHeight : 0
+  stageBox.style.scrollMarginTop = (covered + 8) + "px"
+  stageBox.scrollIntoView({ block: "start", behavior: smooth ? "smooth" : "auto" })
+}
 const status = document.getElementById("player-status")
 const editLink = document.getElementById("player-edit")
 const description = document.getElementById("player-description")
@@ -307,7 +318,7 @@ pasteButton.addEventListener("click", () => {
     stage.sightingData = sighting
     reveal(null, sighting, messages.pasted)
     say("")
-    stageBox.scrollIntoView({ block: "start", behavior: "smooth" })
+    showStage(true)
   } catch (error) {
     say(messages.badJson + error.message, "error")
   }
@@ -359,7 +370,7 @@ const openFiles = async files => {
   showInEditor(JSON.stringify(sighting, null, 2))
   reveal(null, sighting, recording.name.replace(/\\.json$/i, ""))
   say(unresolved.size > 0 ? messages.unresolved + [...unresolved].join(", ") : "", unresolved.size > 0 ? "error" : undefined)
-  stageBox.scrollIntoView({ block: "start", behavior: "smooth" })
+  showStage(true)
 }
 
 filesField.addEventListener("change", () => {
@@ -373,7 +384,7 @@ if (asked) {
   // Arriving with a recording named in the URL means being shown it, not being shown a form: the
   // stage already sits above that form, and this puts it in view straight away rather than leaving
   // the reader to guess that the thing they followed a link for is further down.
-  void openUrl(asked).then(() => stageBox.scrollIntoView({ block: "start" }))
+  void openUrl(asked).then(() => showStage(false))
 }`
   }
 
