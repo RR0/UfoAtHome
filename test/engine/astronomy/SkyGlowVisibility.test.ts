@@ -102,8 +102,10 @@ describe("what it costs", () => {
    * measured 46 to 97 ms for the same work (see .github/workflows/ci.yml). Unset, it is 1. */
   const BUDGET_MS = 40 * Number(process.env.PERF_BUDGET_SCALE ?? 1)
   const RUNS_PER_ATTEMPT = 5
-  /** Enough that one of them lands without a collection in it — see the doc comment below. */
-  const ATTEMPTS = 3
+  /** Enough that one of them lands without a collection in it, or without another worker's cache
+   * traffic and shared core in it — see the doc comment below. They stop at the first one that
+   * fits, so a quiet machine pays for one and only a noisy one pays for more. */
+  const ATTEMPTS = 12
 
   /**
    * How long `assess` actually costs, in milliseconds of CPU this process spent on it.
@@ -125,12 +127,15 @@ describe("what it costs", () => {
   }
 
   it("answers fast enough to sit on a line that is restated as somebody types", () => {
-    // The best of a few attempts, because the one thing CPU time does NOT filter out is a garbage
-    // collection that happens to fall inside the window: it is this process's own CPU, and it is
-    // charged here. The fastest attempt is the one that ran without a collection in it, and so the
+    // The best of several attempts, because what CPU time does NOT filter out is the noise that is
+    // charged to this process itself: a garbage collection that falls inside the window, and the
+    // cost of sharing a core (SMT) and a cache with the other workers, which the full suite runs
+    // in parallel. Both inflate the reading and neither lasts, so the fastest attempt is the
     // closest to what the work really costs. An implementation that had genuinely got slower would
-    // fail every attempt, so nothing is being waved through.
-    const attempts = Array.from({ length: ATTEMPTS }, cpuMillisPerCall)
+    // fail every attempt, so nothing is being waved through: the budget is the same, only the
+    // luck of a single window is no longer part of the verdict.
+    const attempts: number[] = []
+    while (attempts.length < ATTEMPTS && !(Math.min(...attempts) < BUDGET_MS)) attempts.push(cpuMillisPerCall())
     const best = Math.min(...attempts)
 
     expect(best).toBeLessThan(BUDGET_MS)
