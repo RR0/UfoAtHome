@@ -45,10 +45,10 @@ export class DemoCatalogue {
     {
       heading: { en: "Real sightings", fr: "Des observations réelles", es: "Avistamientos reales", it: "Avvistamenti reali" },
       intro: {
-        en: "Eight documented cases, each replayed in the sky of its own reported date, time and place.",
-        fr: "Huit dossiers documentés, chacun rejoué dans le ciel de sa propre date, heure et lieu déclarés.",
-        es: "Ocho casos documentados, cada uno reproducido en el cielo de su propia fecha, hora y lugar declarados.",
-        it: "Otto casi documentati, ciascuno riprodotto nel cielo della propria data, ora e luogo dichiarati."
+        en: "Nine documented cases, each replayed in the sky of its own reported date, time and place.",
+        fr: "Neuf dossiers documentés, chacun rejoué dans le ciel de sa propre date, heure et lieu déclarés.",
+        es: "Nueve casos documentados, cada uno reproducido en el cielo de su propia fecha, hora y lugar declarados.",
+        it: "Nove casi documentati, ciascuno riprodotto nel cielo della propria data, ora e luogo dichiarati."
       },
       demos: [
         {
@@ -126,6 +126,20 @@ export class DemoCatalogue {
             fr: "Un fourgon de gendarmerie sur la RN2 à 00:50, une Lune presque pleine dans son dos, et un avion de tourisme en finale qui reste accroché au même point pendant que tous deux se rapprochent. Passez à la lecture du GEIPAN pour le voir — et mesurer ce qui le sépare de ce que le conducteur a décrit.",
             es: "Una furgoneta de la gendarmería en la RN2 a las 00:50, una Luna casi llena a su espalda, y una avioneta en final que permanece clavada en un mismo punto mientras ambos se acercan. Pasa a la lectura del GEIPAN para verla — y cuánto se aleja de lo que describió el conductor.",
             it: "Un furgone della gendarmeria sulla RN2 alle 00:50, una Luna quasi piena alle spalle, e un aereo da turismo in finale che resta fermo nello stesso punto mentre entrambi si avvicinano. Passa alla lettura del GEIPAN per vederlo — e quanto resta lontano da ciò che il conducente descrisse."
+          }
+        },
+        {
+          id: "braine-le-comte",
+          src: "/demo-data/observer-braine-le-comte-akh.json",
+          // The case, for the player: three observers, each with a different account of the same ten seconds.
+          playSrc: "/demo-data/case-braine-le-comte.json",
+          title: { en: "Braine-le-Comte, 2015", fr: "Braine-le-Comte, 2015", es: "Braine-le-Comte, 2015", it: "Braine-le-Comte, 2015" },
+          titleIsName: true,
+          blurb: {
+            en: "A July night in Hainaut, 00:45, no Moon. Three observers on a lawn, each watching a different part of the sky, see a dark boomerang cross it in ten seconds — with orange lights for one, red lights for another, and none for the third. Open it full size to switch observer.",
+            fr: "Une nuit de juillet dans le Hainaut, 00:45, sans Lune. Trois observateurs sur une pelouse, chacun regardant une partie différente du ciel, voient un boomerang sombre le traverser en dix secondes — avec des lumières orange pour l'un, des lumières rouges pour un autre, et aucune pour le troisième. Ouvrez-le en grand pour changer d'observateur.",
+            es: "Una noche de julio en el Hainaut, 00:45, sin Luna. Tres observadores en un césped, cada uno mirando una parte distinta del cielo, ven cruzarlo un bumerán oscuro en diez segundos — con luces naranjas para uno, luces rojas para otro, y ninguna para el tercero. Ábrelo a tamaño completo para cambiar de observador.",
+            it: "Una notte di luglio nell'Hainaut, 00:45, senza Luna. Tre osservatori su un prato, ciascuno rivolto a una parte diversa del cielo, vedono attraversarlo un boomerang scuro in dieci secondi — con luci arancioni per uno, luci rosse per un altro, e nessuna per il terzo. Aprilo a schermo intero per cambiare osservatore."
           }
         },
         {

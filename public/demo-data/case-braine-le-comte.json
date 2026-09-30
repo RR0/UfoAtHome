@@ -1,0 +1,28 @@
+{
+ "id": "BraineLeComte2015",
+ "title": "Braine-le-Comte",
+ "time": "2015-07-12 00:45",
+ "events": [
+  {
+   "type": "event",
+   "eventType": "sighting",
+   "time": "2015-07-12 00:45",
+   "title": "AKH",
+   "url": "observer-braine-le-comte-akh.json"
+  },
+  {
+   "type": "event",
+   "eventType": "sighting",
+   "time": "2015-07-12 00:45",
+   "title": "BJN",
+   "url": "observer-braine-le-comte-bjn.json"
+  },
+  {
+   "type": "event",
+   "eventType": "sighting",
+   "time": "2015-07-12 00:45",
+   "title": "FWY",
+   "url": "observer-braine-le-comte-fwy.json"
+  }
+ ]
+}
