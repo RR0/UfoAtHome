@@ -269,25 +269,6 @@ describe("SightingElement", () => {
     expect(select.hidden).toBe(true)
   })
 
-  it("links each account to its own source, beside the account picked", async () => {
-    stubFetch({
-      "chiles.json": { ...johnSighting, sources: [{ title: "Chiles's report", url: "https://example.org/chiles" }] },
-      "whitted.json": { ...janeSighting, sources: [{ title: "Book only" }] }
-    })
-    const element = mount()
-    element.observerUrls = ["chiles.json", "whitted.json"]
-    await new Promise(resolve => setTimeout(resolve, 0))
-    const link = element.shadowRoot!.getElementById("account-source") as HTMLAnchorElement
-    expect(link.hidden).toBe(false)
-    expect(link.href).toBe("https://example.org/chiles")
-    expect(link.title).toContain("Chiles's report")
-
-    const select = element.shadowRoot!.getElementById("observer") as HTMLSelectElement
-    select.value = "whitted.json"
-    select.dispatchEvent(new Event("change"))
-    expect(link.hidden).toBe(true)
-  })
-
   it("tells the page which recording is on show, on load and on every change of observer", async () => {
     stubFetch({ "chiles.json": johnSighting, "whitted.json": janeSighting })
     const element = mount()

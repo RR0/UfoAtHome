@@ -4,10 +4,6 @@ export const html = `
     <span id="account-prefix">Account by</span>
     <span id="observer-text"></span><select id="observer" hidden></select>
   </span>
-  <!-- Where the account on show can be read as it was given: its first source with a web address
-       (see RecordingSource). Beside the account and not in the "?" panel only, because each
-       observer's account has its own, and it has to follow the one picked above. -->
-  <a id="account-source" class="account-source" target="_blank" rel="noopener noreferrer" hidden><svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path d="M9 2h5v5h-1.5V4.6L7.1 10 6 8.9l5.4-5.4H9V2ZM3 4h4v1.5H3.5v7h7V9H12v5H2V4h1Z" fill="currentColor"/></svg></a>
   <!-- What to replay the account with: the raw account, the observer's own reading of it, or an
        analyst's from the case (see InterpretationJson). Only there when there is a choice. -->
   <label id="interpretation-choice" class="interpretation-choice" hidden>
@@ -182,19 +178,6 @@ export const css = `
   width: 5.5em;
   margin: 0;
   accent-color: #39f;
-}
-.account-source {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  color: inherit;
-  opacity: 0.7;
-}
-.account-source:hover, .account-source:focus-visible {
-  opacity: 1;
-}
-.account-source[hidden] {
-  display: none;
 }
 /* The pen and the "i" wear the same square as the toggles the playback layer lends this row (see
    .scene-controls button), so the row reads as one set of buttons. */

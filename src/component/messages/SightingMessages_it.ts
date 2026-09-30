@@ -14,7 +14,6 @@ export const sightingMessages_it: SightingMessages = {
   description: "Descrizione",
   source: "Fonte",
   basis: { stated: "dichiarato", derived: "dedotto", assumed: "supposto" },
-  accountSource: "Vedi la fonte: {source}",
   credits: "Crediti",
   editThisObservation: "Modifica questa osservazione",
   embed: "Incorpora",

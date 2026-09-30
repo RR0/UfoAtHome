@@ -89,7 +89,6 @@ export class SightingElement extends HTMLElement {
   private readonly infoPanel: HTMLElement
   private readonly infoAppLink: HTMLAnchorElement
   private readonly editLink: HTMLAnchorElement
-  private readonly accountSourceLink: HTMLAnchorElement
   private readonly infoObservationHeading: HTMLElement
   private readonly infoObservationList: HTMLElement
   private readonly infoCreditsToggle: HTMLButtonElement
@@ -193,7 +192,6 @@ export class SightingElement extends HTMLElement {
     this.infoPanel = this.shadow.getElementById("info-panel")!
     this.infoAppLink = this.shadow.getElementById("info-app-link") as HTMLAnchorElement
     this.editLink = this.shadow.getElementById("edit-link") as HTMLAnchorElement
-    this.accountSourceLink = this.shadow.getElementById("account-source") as HTMLAnchorElement
     this.infoObservationHeading = this.shadow.getElementById("info-observation-heading")!
     this.infoObservationList = this.shadow.getElementById("info-observation-list")!
     this.infoCreditsToggle = this.shadow.getElementById("info-credits-toggle") as HTMLButtonElement
@@ -819,15 +817,6 @@ export class SightingElement extends HTMLElement {
     // stylesheet away from being read out, and a screen reader does not need the stylesheet's
     // permission to reach it.
     this.observerText.textContent = name ?? ""
-    // Only a web address becomes a link: a recording is somebody else's file.
-    const source = entry && this.plain(entry).sources?.find(candidate => /^https?:\/\//i.test(candidate.url ?? ""))
-    this.accountSourceLink.hidden = !source
-    if (source) {
-      this.accountSourceLink.href = source.url!
-      const said = this.messages.accountSource.replace("{source}", source.title ?? source.url!)
-      this.accountSourceLink.title = said
-      this.accountSourceLink.setAttribute("aria-label", said)
-    }
     this.editLink.hidden = !this.currentSrc
     this.editLink.href = this.editorUrl()
     this.editLink.title = this.messages.editThisObservation

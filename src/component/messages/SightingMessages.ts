@@ -22,8 +22,6 @@ export interface SightingMessages extends SightingLabels {
   source: string
   /** The tag after a line of the info panel saying how it is known — see Basis. */
   basis: Record<"stated" | "derived" | "assumed", string>
-  /** The title of the link beside the account to where it can be read: {source} is its title. */
-  accountSource: string
   credits: string
   /** Title of the info panel's app link, which opens the observation being shown in the editor. */
   editThisObservation: string
