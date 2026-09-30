@@ -65,10 +65,18 @@ class RoadArchiveBuilder {
   private static saidCurl = false
 
   async build(): Promise<void> {
-    const places = await this.places()
+    // ONLY=<text>: freeze just the recordings whose id contains it, and keep every other entry of the
+    // index as it is. A new demo needs its own ground archived, not a second query (and a new
+    // `takenOn`) for every place already frozen.
+    const only = process.env.ONLY
+    const places = (await this.places()).filter(place => !only || place.id.includes(only))
     const out = join(this.root, "public", "roads")
     await mkdir(out, { recursive: true })
     const entries: { file: string; north: number; south: number; east: number; west: number; about: string }[] = []
+    if (only) {
+      const kept = JSON.parse(await readFile(join(out, "index.json"), "utf8")) as { entries: typeof entries }
+      entries.push(...kept.entries.filter(entry => !entry.about.includes(only)))
+    }
     const seen = new Set<string>()
     for (const place of places) {
       const bounds = place.bounds

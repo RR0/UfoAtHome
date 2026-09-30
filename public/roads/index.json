@@ -34,6 +34,38 @@
    "about": "1967-08-29-DelpeuchFrancois"
   },
   {
+   "file": "2012-06-29-Maffliers.json",
+   "north": 49.087416040603664,
+   "south": 49.07043795939634,
+   "east": 2.3402989960009006,
+   "west": 2.314379003999099,
+   "about": "2012-06-29-Maffliers"
+  },
+  {
+   "file": "2015-05-31-SillyLeLong-T1.json",
+   "north": 49.136118940603666,
+   "south": 49.09703675939634,
+   "east": 2.8039814305750115,
+   "west": 2.7407839694249887,
+   "about": "2015-05-31-SillyLeLong-T1"
+  },
+  {
+   "file": "2015-07-12-BraineLeComte-AKH.json",
+   "north": 50.608489040603665,
+   "south": 50.59151095939634,
+   "east": 4.113374243757145,
+   "west": 4.086625756242854,
+   "about": "2015-07-12-BraineLeComte-AKH"
+  },
+  {
+   "file": "2026-09-28-GreenstreetSteven.json",
+   "north": 33.608489040603665,
+   "south": 33.59151095939634,
+   "east": -117.661808111273,
+   "west": -117.68219188872699,
+   "about": "2026-09-28-GreenstreetSteven"
+  },
+  {
    "file": "example-minimal.json",
    "north": 45.19848904060366,
    "south": 45.181510959396334,
@@ -98,44 +130,20 @@
    "about": "sky-test-milkyway"
   },
   {
-   "file": "sky-test-zodiacal.json",
-   "north": 28.308489040603664,
-   "south": 28.291510959396337,
-   "east": -16.490358592904368,
-   "west": -16.509641407095632,
-   "about": "sky-test-zodiacal"
-  },
-  {
-   "file": "2012-06-29-Maffliers.json",
-   "north": 49.087416040603664,
-   "south": 49.07043795939634,
-   "east": 2.3402989960009006,
-   "west": 2.314379003999099,
-   "about": "2012-06-29-Maffliers"
-  },
-  {
-   "file": "2015-05-31-SillyLeLong-T1.json",
-   "north": 49.136118940603666,
-   "south": 49.09703675939634,
-   "east": 2.8039814305750115,
-   "west": 2.7407839694249887,
-   "about": "2015-05-31-SillyLeLong-T1"
-  },
-  {
-   "file": "2026-09-28-GreenstreetSteven.json",
-   "north": 33.608489040603665,
-   "south": 33.59151095939634,
-   "east": -117.661808111273,
-   "west": -117.68219188872699,
-   "about": "2026-09-28-GreenstreetSteven"
-  },
-  {
    "file": "sky-test-moon-aureole.json",
    "north": 45.00848904060366,
    "south": 44.99151095939634,
    "east": 5.012005316353239,
    "west": 4.987994683646761,
    "about": "sky-test-moon-aureole"
+  },
+  {
+   "file": "sky-test-zodiacal.json",
+   "north": 28.308489040603664,
+   "south": 28.291510959396337,
+   "east": -16.490358592904368,
+   "west": -16.509641407095632,
+   "about": "sky-test-zodiacal"
   }
  ]
 }

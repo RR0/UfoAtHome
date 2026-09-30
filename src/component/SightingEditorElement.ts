@@ -1375,6 +1375,10 @@ export class SightingEditorElement extends HTMLElement {
     // own icon/aria-pressed would lag a frame behind what just happened. Mirrors how UfoElement's
     // own (hidden, here) internal toolbar already updates itself synchronously on click.
     this.playPauseButton.addEventListener("click", () => {
+      // The play button is the editor's own, outside the scene, so the scene never sees this gesture:
+      // its weather and engine sound have to be unlocked here (see SceneElement.resumeWeatherAudio),
+      // or playing would be silent until some weather edit happened to do it.
+      this.sceneElement.resumeWeatherAudio()
       this.ufoElement.togglePlayPause()
       this.syncPlaybackControls()
     })

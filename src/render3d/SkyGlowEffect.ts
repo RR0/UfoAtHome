@@ -456,9 +456,15 @@ export class SkyGlowMaps {
     for (const ready of listeners) ready()
   }
 
+  /** The largest finite half float. The brightest texels of the Milky Way map come out above it in
+   * nanolamberts, and DataUtils.toHalfFloat clamps them itself — after a console warning per texel,
+   * which is what a reader's console filled with on every night sky. Clamped here, to the same value,
+   * silently. */
+  private static readonly HALF_FLOAT_MAX = 65504
+
   private static fill(texels: Uint16Array, map: SkyBrightnessMap): void {
     for (let at = 0; at < map.data.length; at++) {
-      texels[at * 4] = DataUtils.toHalfFloat(NightSkyBrightness.nanolambertsOfS10(map.data[at]))
+      texels[at * 4] = DataUtils.toHalfFloat(Math.min(SkyGlowMaps.HALF_FLOAT_MAX, NightSkyBrightness.nanolambertsOfS10(map.data[at])))
       texels[at * 4 + 3] = DataUtils.toHalfFloat(1)
     }
   }
